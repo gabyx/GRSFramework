@@ -1,0 +1,158 @@
+﻿#ifndef STATE_RECORDER_HPP
+#define STATE_RECORDER_HPP
+
+#include <string>
+#include <Eigen/Dense>
+#include <OGRE/Ogre.h>
+
+#include "FileManager.hpp"
+#include "TypeDefs.hpp"
+#include "CommonFunctions.hpp"
+#include "DynamicsState.hpp"
+#include "LogDefines.hpp"
+#include "MultiBodySimFile.hpp"
+
+
+/**
+* @ingroup StatesAndBuffers
+* @brief This is the StateRecorder class which records states to a MultiBodySimFile.
+* @{
+*/
+template <typename TLayoutConfig>
+class StateRecorder
+{
+public:
+  DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  StateRecorder(const unsigned int nSimBodies);
+  StateRecorder(const DynamicsState<TLayoutConfig> * state);
+
+  ~StateRecorder();
+  bool createSimFile(boost::filesystem::path file_path);
+  bool createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path);
+  void closeSimFile();
+
+  //void addState(const DynamicsState<TLayoutConfig> * state);
+  /*void writeAllStates();*/
+  
+  void write(const DynamicsState<TLayoutConfig>* value);
+
+  StateRecorder<TLayoutConfig> & operator << (const DynamicsState<TLayoutConfig>* value);
+  
+protected:
+
+  Ogre::Log * m_pAppLog;
+
+  //void scanAllSimDataFiles(boost::filesystem::path path_name, bool with_SubDirs = false);
+  // All files created have the name "<m_fileNamePrefix>_<m_fileIdCounter>.sim"
+  // If files already exist in the folder m_fileIdCounter is set to the actual number which does not exist already!
+  //std::vector<boost::filesystem::path> m_SimFilePaths;
+  //Ogre::StringVector m_SimFileNames;
+
+
+  MultiBodySimFile<TLayoutConfig>    m_BinarySimFile;
+
+  std::vector< DynamicsState<TLayoutConfig> >	m_states;
+
+  unsigned int m_nSimBodies;
+};
+
+/** @} */
+
+
+
+template<typename TLayoutConfig>
+StateRecorder<TLayoutConfig>::StateRecorder(const unsigned int nSimBodies)
+{
+   m_nSimBodies = nSimBodies;
+   m_pAppLog = RenderContext::getSingletonPtr()->m_pAppLog;
+}
+
+
+template<typename TLayoutConfig>
+StateRecorder<TLayoutConfig>::StateRecorder(const DynamicsState<TLayoutConfig> * state)
+{
+  addState(state);
+}
+
+template<typename TLayoutConfig>
+StateRecorder<TLayoutConfig>::~StateRecorder()
+{
+  DECONSTRUCTOR_MESSAGE
+  closeSimFile();
+}
+
+
+template<typename TLayoutConfig>
+bool StateRecorder<TLayoutConfig>::createSimFile(boost::filesystem::path file_path)
+{
+  m_pAppLog->logMessage("Record to Sim file at: " + file_path.string());
+  if(m_BinarySimFile.openSimFileWrite(file_path,m_nSimBodies)){
+    return true;
+  }
+  return false;
+}
+
+template<typename TLayoutConfig>
+bool StateRecorder<TLayoutConfig>::createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path)
+{
+
+   MultiBodySimFile<TLayoutConfig> tmpFile;
+   bool fileOK = tmpFile.openSimFileRead(ref_file_path,m_nSimBodies,false); //Open file to see if this file fits our simulation!!
+   tmpFile.closeSimFile();
+
+   if(fileOK){
+      m_pAppLog->logMessage("Copy file:" + ref_file_path.string() + " to: " + new_file_path.string());
+      FileManager::getSingletonPtr()->copyFile(ref_file_path,new_file_path,true);
+
+      m_pAppLog->logMessage("Record and append to Sim file at: " + new_file_path.string());
+      if(m_BinarySimFile.openSimFileWrite(new_file_path,m_nSimBodies,false)){ //APPEND!
+         return true;
+      }
+   }
+   
+  return false;
+}
+
+template<typename TLayoutConfig>
+StateRecorder<TLayoutConfig> & StateRecorder<TLayoutConfig>::operator << (const DynamicsState<TLayoutConfig>* value)
+{
+  m_BinarySimFile << (value);
+}
+
+
+template<typename TLayoutConfig>
+void StateRecorder<TLayoutConfig>::closeSimFile()
+{
+  m_BinarySimFile.closeSimFile();
+}
+
+//template<typename TLayoutConfig>
+//void StateRecorder<TLayoutConfig>::addState(const DynamicsState<TLayoutConfig> * state)
+//{
+//  m_states.push_back(*state);
+//  return;
+//}
+
+
+//template <typename TLayoutConfig>
+//void StateRecorder<TLayoutConfig>::writeAllStates()
+//{
+//
+//  if(createSimFile()){
+//    for(std::vector<double>::iterator it = m_states.begin(); it != m_states.end(); it++)
+//    {
+//      m_BinarySimFile << (*it);
+//    }
+//  }
+//}
+
+
+template <typename TLayoutConfig>
+void StateRecorder<TLayoutConfig>::write( const DynamicsState<TLayoutConfig>* value )
+{
+  m_BinarySimFile << value;
+}
+
+#endif

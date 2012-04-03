@@ -1,0 +1,31 @@
+# Find Goto Blas Library
+#
+# GotoBLAS_FOUND
+# GotoBLAS_INCLUDE_DIR      where to find the include files
+# GotoBLAS_LIB_DIR
+# GotoBLAS_LIBRARY
+
+
+SET(GotoBLAS_SEARCH "C:/Develop/GotoBLAS2x64")
+
+
+FIND_PATH(GotoBLAS_INCLUDE_DIR "myblas.h" PATHS ${GotoBLAS_SEARCH} PATH_SUFFIXES "include" ) 
+FIND_PATH(GotoBLAS_LIB_DIR "libgoto2.lib" PATHS ${GotoBLAS_SEARCH} PATH_SUFFIXES "lib" "exports")
+FIND_LIBRARY(GotoBLAS_LIBRARY "libgoto2.lib" PATHS ${GotoBLAS_SEARCH} PATH_SUFFIXES "lib" "exports")
+
+message(STATUS "Goto BLAS Include Dir: " ${GotoBLAS_INCLUDE_DIR})
+
+STRING(COMPARE NOTEQUAL ${GotoBLAS_INCLUDE_DIR}  "GotoBLAS_INCLUDE_DIR-NOTFOUND" GotoBLAS_FOUND)
+
+IF(NOT GotoBLAS_FOUND)
+	IF(GotoBLAS_FIND_REQUIRED)
+		message( FATAL_ERROR "Goto BLAS was not found!")
+	ELSE(GotoBLAS_FIND_REQUIRED)
+		message( STATUS "Goto BLAS  was not found!")
+	ENDIF(GotoBLAS_FIND_REQUIRED)
+ELSE(NOT GotoBLAS_FOUND)
+	message(STATUS "Goto BLAS  directory found!")
+ENDIF(NOT GotoBLAS_FOUND)
+
+MARK_AS_ADVANCED( GotoBLAS_INCLUDE_DIR )
+

@@ -1,0 +1,15 @@
+SetX OGRE_HOME_X64_MSVC9 C:\Develop\OGRE\x64\msvc9
+SetX /m OGRE_HOME_X64_MSVC9 C:\Develop\OGRE\x64\msvc9
+SetX OGRE_HOME_X64_MSVC10 C:\Develop\OGRE\x64\msvc10
+SetX /m OGRE_HOME_X64_MSVC10 C:\Develop\OGRE\x64\msvc10
+
+
+SetX OIS_HOME_X64_MSVC9 C:\Develop\OGRE\x64\msvc9
+SetX /m OIS_HOME_X64_MSVC9 C:\Develop\OGRE\x64\msvc9
+SetX OIS_HOME_X64_MSVC10 C:\Develop\OGRE\x64\msvc10
+SetX /m OIS_HOME_X64_MSVC10 C:\Develop\OGRE\x64\msvc10
+
+
+
+SetX OGRE_HOME C:\Develop\OGRE\x64\msvc10
+SetX OIS_HOME C:\Develop\OGRE\x64\msvc10

@@ -1,0 +1,92 @@
+<html>
+	<head>
+		<title>SRUtil.Event documentation</title><link href="style.css" type="text/css" rel="stylesheet"></head>
+	<body>
+		<h1>Introduction</h1>
+		<p>The SRUtil.Event library is an implementation of an event propagation system. An 
+			event provider emits event (such as 'the mouse position has 
+			been changed' in GUI applications) and event consumers react to it.</p>
+		<p>An event producer provides an <code>event_source</code> object. Event consumer 
+			provides an <code>event_sink</code> (it can be a callback interface, 
+			various kinds of delegates, etc). An event sink may be 
+			connected to <code>event_source</code> by <code>event_binder</code>. When an 
+			event provider emits an event, each of the bound event sinks gets a 
+			control.</p>
+		<h1>Features</h1>
+		<p>An <code>event_source</code> and an according <code>event_binder</code> are 
+			parametrized by a <code>sink_type</code> type, which must satisfy the following 
+			conditions:
+			<ul>
+				<li>
+					The expression <code>sink_type()</code>
+				produces an empty value.
+				<li>
+					The <code>sink_type</code> has implicit conversation to the <code>bool</code> type. 
+					The expression <code>
+						<span class="keyword">if</span>
+						(sink) {<span class="comment">/*...*/</span>}</code> allows to execute the 
+					code if and only if the <code>sink</code> isn't an empty value. A sink which is 
+					bound to something mustn't be converted to <code>
+						<span class="keyword">true</span></code>.
+				</li>
+			</ul>
+		</p>
+		<p>Following entities satisfies these conditions: pointers (to an object and to a 
+			code), <code>boost::function</code> and <A href="delegate.html"><code>srutil::delegate</code></A>.</p>
+		<p>A connection between an event producer and an event consumer exists since they 
+			are bound by the method <code>event_binder::bind</code> until 
+			an invokation of the method <code>event_binder::unbind</code> or 
+			destroying of the <code>event_binder</code> or the <code>event_source</code>.</p>
+		<p>An <code>event_binder</code> may be safely disconnected even during 
+			event emiting (the binder may be destroyed or unbound), but the <code>event_source</code>
+			mustn't (in the current implementation).</p>
+		<h1>Syntax</h1>
+		<code>
+			<pre><span class=keyword>template</span> &lt;<span class=keyword>typename</span> TSink&gt; <span class=keyword>class</span> event_source
+{
+<span class=keyword>public</span>:
+	<span class=keyword>typedef</span> TSink sink_type;
+	<span class=keyword>typedef</span> event_binder&lt;sink_type&gt; binder_type;
+
+	<span class=keyword>template</span> &lt;<span class=keyword>class</span> TInvoker&gt;
+	<span class=keyword>void</span> emit(TInvoker <span class=keyword>const</span>&amp; invoker);
+};
+			
+<span class=keyword>template</span> &lt;<span class=keyword>typename</span> TSink&gt; <span class=keyword>class</span> event_binder
+{
+<span class=keyword>public</span>:
+	<span class=keyword>typedef</span> TSink sink_type;
+	<span class=keyword>typedef</span> event_source&lt;sink_type&gt; source_type;
+
+	<span class=keyword>void</span> bind(event_source<sink_type> <span class=keyword>const</span>&amp; source, sink_type sink);
+	<span class=keyword>void</span> unbind();
+};
+</pre>
+		</code>
+		<h1>Example</h1>
+		<code>
+			<pre>
+<span class=keyword>class</span> EventListener
+{
+<span class=keyword>public</span>:
+	<span class=keyword>virtual</span> <span class=keyword>void</span> someMethod(<span class=keyword>int</span>, <span class=keyword>int</span>) = 0;
+};
+
+<span class=keyword>typedef</span> srutil::delegate&lt;<span class=keyword>void</span> (<span class=keyword>int</span>, <span class=keyword>int</span>)&gt; Delegate;
+
+<span class=keyword>typedef</span> srutil::event_source&lt;EventListener*&gt; EventSource1;
+<span class=keyword>typedef</span> srutil::event_source&lt;Delegate&gt; EventSource2;
+
+EventSource1 e1;
+EventSource2 e2;
+
+e1.emit(boost::bind(&amp;EventListener::someMethod, _1, 5, 10));
+e2.emit(Delegate::invoker_type(5, 10));
+</pre>
+		</code>
+		<div align="right">
+			<hr>
+			Copyright &copy; 2005 <a href="http://home.onego.ru/~ryazanov/">Sergey Ryazanov</a>
+		</div>
+	</body>
+</html>

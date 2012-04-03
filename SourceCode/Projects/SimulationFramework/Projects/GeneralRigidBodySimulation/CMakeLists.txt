@@ -1,0 +1,393 @@
+PROJECT(GeneralRigidBodySimulation)
+
+message(STATUS "==============================Project: Spheres==================================")
+include(PrintListMacro)
+## EXTREMLY IMPORTANT ISSUES ############################################################################################################################################
+# In MSVC 64bit mode, there is no problem with vectorization at all, because everything is aligned nicely!,
+# If we move this code to UNIX 64bit it is not anymore like that, the Code of me, is not thoroughly supported for Vectorization in EIGEN
+# TODO: To make it fully work with EIGEN_VECTORIZE as PREPROCESSOR MACRO (standart, set see App Log, have made an output!
+# in 32bit on Windows and Unix, we need the EIGEN_MAKE_ALLOCATOR_NEW always defined, (almost done) and all std::vector and stuff we need special allocators! not done!
+# TO make it still work on UNIX 64bit, turn EIGEN_DONT_ALIGN, for disabling completetly, and  EIGEN_DONT_ALIGN_STATICALLY for partly which still works... (or should)
+# http://eigen.tuxfamily.org/dox-devel/TopicPreprocessorDirectives.html
+#########################################################################################################################################################################
+
+
+INCLUDE(IncludeModulesCUDA)
+
+# Configure File for the BUILD!
+string(REPLACE "." "" CUDA_VERSION_INTEGER ${CUDA_VERSION})
+configure_file (
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/ConfigFiles/ConfigureFile.hpp.in
+  ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
+)
+
+
+#Set Source Code
+
+SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
+
+SET( APP_INC
+	${PROJECT_SOURCE_DIR}/include/App/App.hpp
+	${PROJECT_SOURCE_DIR}/include/App/MenuMouse.hpp
+        #${PROJECT_SOURCE_DIR}/include/App/TinyOgre.hpp
+        #${PROJECT_SOURCE_DIR}/include/App/MinimalOgre.hpp
+	${PROJECT_SOURCE_DIR}/include/App/OrbitCamera.hpp
+)
+SET( APP_SRC
+	${PROJECT_SOURCE_DIR}/src/App/App.cpp
+        #${PROJECT_SOURCE_DIR}/src/App/TinyOgre.cpp
+        #${PROJECT_SOURCE_DIR}/src/App/MinimalOgre.cpp
+	${PROJECT_SOURCE_DIR}/src/App/MenuMouse.cpp
+	${PROJECT_SOURCE_DIR}/src/App/OrbitCamera.cpp
+	${PROJECT_SOURCE_DIR}/src/App/main.cpp
+
+)
+
+SET(SINGELTON_INC
+	${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts/GuiContext.hpp
+	${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts/InputContext.hpp
+	${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts/RenderContext.hpp
+	${PROJECT_SOURCE_DIR}/include/Singeltons/FileManager.hpp
+)
+
+SET( SINGELTON_SRC
+	${PROJECT_SOURCE_DIR}/src/Singeltons/Contexts/GuiContext.cpp
+	${PROJECT_SOURCE_DIR}/src/Singeltons/Contexts/InputContext.cpp
+	${PROJECT_SOURCE_DIR}/src/Singeltons/Contexts/RenderContext.cpp
+	${PROJECT_SOURCE_DIR}/src/Singeltons/FileManager.cpp
+)
+
+SET( STATES_INC
+	${PROJECT_SOURCE_DIR}/include/States/AppState.hpp
+	${PROJECT_SOURCE_DIR}/include/States/AppStateManager.hpp
+	${PROJECT_SOURCE_DIR}/include/States/SimulationState.hpp
+   ${PROJECT_SOURCE_DIR}/include/States/PlaybackState.hpp
+   ${PROJECT_SOURCE_DIR}/include/States/VideoDropper.hpp
+	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManagerBase.hpp
+	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManager.hpp
+	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManager.icc
+	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackManagerBase.hpp
+	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackManager.hpp
+	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackManager.icc
+	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackLoader.hpp
+)
+SET(STATES_SRC
+	${PROJECT_SOURCE_DIR}/src/States/AppStateManager.cpp
+	${PROJECT_SOURCE_DIR}/src/States/SimulationState.cpp
+   ${PROJECT_SOURCE_DIR}/src/States/PlaybackState.cpp
+	${PROJECT_SOURCE_DIR}/src/States/SimulationManager/SimulationManagerBase.cpp
+	${PROJECT_SOURCE_DIR}/src/States/SimulationManager/PlaybackManagerBase.cpp
+)
+
+SET(COMMON_INC
+	${PROJECT_SOURCE_DIR}/include/Common/foreach_macro.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/AssertionDebug.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/PlatformDefines.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/CommonFunctions.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/MeshData.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/OgreMeshExtraction.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/MakeCoordinateSystem.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/VectorToSkewMatrix.hpp
+   ${PROJECT_SOURCE_DIR}/include/Common/MatrixHelpers.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/QuaternionHelpers.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
+   ${PROJECT_SOURCE_DIR}/include/Common/TypenameComparision.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/MultiBodySimFile.hpp
+   ${PROJECT_SOURCE_DIR}/include/Common/BinaryFile.hpp
+)
+SET(COMMON_SRC
+	${PROJECT_SOURCE_DIR}/src/Common/OgreMeshExtraction.cpp
+	${PROJECT_SOURCE_DIR}/src/Common/CommonFunctions.cpp
+	${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
+)
+
+SET(DYNAMICS_INC
+   ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/General/MoreauTimeStepper.hpp
+   ${PROJECT_SOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/CollisionSolver.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/ContactParams.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/ContactParameterMap.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/SphereGeometry.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/PlaneGeometry.hpp
+   ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
+      ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
+   ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
+   ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
+   ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettings.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/FrontBackBuffer.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/StatePool.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/StatePoolVisBackFront.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/SharedBufferPlayback.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/StateRecorder.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
+)
+SET(DYNAMICS_SRC
+	${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
+	${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
+)
+
+
+
+SET(SYSTEMS_INC
+	${PROJECT_SOURCE_DIR}/include/Systems/SceneParser.hpp
+	${PROJECT_SOURCE_DIR}/include/Systems/SharedBufferDynSys.hpp
+)
+
+SET(SYSTEMS_SRC
+)
+
+# CUDA SOURCE INCLUDES ====================================================================
+INCLUDE_PROX_CUDA(ProxGPU_SRC ProxGPU_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
+INCLUDE_VECTOR_ADD_CUDA(VectorAddGPU_SRC VectorAddGPU_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
+INCLUDE_MATRIX_VECTOR_MULT_CUDA(MatrixVectorMultGPU_SRC MatrixVectorMultGPU_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
+INCLUDE_GENERAL_EXTERN_CUDA(GeneralCommonFiles_SRC GeneralCommonFiles_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
+
+
+SET(CUDA_SRC
+   ${ProxGPU_SRC} ${VectorAddGPU_SRC} ${MatrixVectorMultGPU_SRC} ${GeneralCommonFiles_SRC}
+)
+SET(CUDA_INC
+   ${ProxGPU_INC} ${VectorAddGPU_INC} ${MatrixVectorMultGPU_INC} ${GeneralCommonFiles_INC}
+)
+# ===========================================================================================
+
+
+SET(SOURCE_FILES
+	${COMMON_SOURCE_SRC}
+	${APP_SRC}
+	${SINGELTON_SRC}
+	${STATES_SRC}
+	${COMMON_SRC}
+	${DYNAMICS_INC}
+	${SYSTEMS_INC}
+    ${CUDA_SRC}
+)
+
+SET(INCLUDE_FILES
+   ${CONFIG_INC}
+	${COMMON_SOURCE_INC}
+	${APP_INC}
+	${SINGELTON_INC}
+	${STATES_INC}
+	${COMMON_INC}
+	${DYNAMICS_SRC}
+	${SYSTEMS_SRC}
+    ${CUDA_INC}
+)
+
+
+
+
+# MESSAGE("OGRE_INCLUDE_DIRS: ${OGRE_INCLUDE_DIRS}")
+# MESSAGE("OGRE_INCLUDE_DIR: ${OGRE_INCLUDE_DIR}")
+# MESSAGE("OGRE_LIBRARIES: ${OGRE_LIBRARIES}")
+# MESSAGE("OIS_INCLUDE_DIR: ${OGRE_INCLUDE_DIRS}")
+
+#Set CEGUI Libraries
+#SET(CEGUI_LIBS CEGUIBase CEGUIOgreRenderer)
+
+SET(CMAKE_DEBUG_POSTFIX "_d")
+
+#include directories
+set(INCLUDE_DIRS
+   ${PROJECT_BINARY_DIR}/ConfigFiles/
+	#${NVIDIA_SDK_DIR}/common/inc
+	#${NVIDIA_SDK_DIR}/../shared/inc
+	${Boost_INCLUDE_DIR}
+	${EIGEN_INCLUDE_DIR}
+	${TOON_INCLUDE_DIR}
+	${OGRE_INCLUDE_DIRS}
+	${OIS_INCLUDE_DIRS}
+	#${CEGUI_INCLUDE_DIR}
+   ${STLSOFT_INCLUDE_DIR}
+   ${TINYXML_INCLUDE_DIR}
+   ${COLLISIONLIB_INCLUDE_DIR}
+   ${ASSIMP_INCLUDE_DIR}
+	${PROJECT_SOURCE_DIR}/include
+	${PROJECT_SOURCE_DIR}/include/App
+	${PROJECT_SOURCE_DIR}/include/Common
+   ${PROJECT_SOURCE_DIR}/include/Common/SRDelegates/include/
+	${PROJECT_SOURCE_DIR}/include/Dynamics
+   ${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers
+   ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision
+   ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry
+   ${PROJECT_SOURCE_DIR}/include/Dynamics/General
+   ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion
+	${PROJECT_SOURCE_DIR}/include/Systems
+	${PROJECT_SOURCE_DIR}/include/Singeltons
+	${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts
+	${PROJECT_SOURCE_DIR}/include/States
+   ${PROJECT_SOURCE_DIR}/include/States/SimulationManager
+   ${CUDA_COMMON_INCLUDE_DIR}
+   ${COMMON_SOURCE_INCLUDE_DIR}
+	)
+
+include_directories(${INCLUDE_DIRS})
+PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
+
+
+
+#link directories
+set(LINK_DIRS
+	#"${NVIDIA_SDK_DIR}/common/lib"
+	#"${NVIDIA_SDK_DIR}../shared/lib"
+	#"${CEGUI_LIBRARY_DIR}"
+	${Boost_LIBRARY_DIRS}
+)
+link_directories(${LINK_DIRS})
+PRINTLIST( "Link directories are:" "${LINK_DIRS}")
+
+set(LINK_LIBS ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${Boost_LIBRARIES} ${CUDA_cublas_LIBRARY} ${TINYXML_LIBRARIES} ${COLLISIONLIB_LIBRARIES} ${ASSIMP_LIBRARIES})
+PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
+
+
+source_group("Source Files\\App" FILES ${APP_SRC})
+source_group("Source Files\\Singeltons" FILES ${SINGELTON_SRC})
+source_group("Source Files\\States" FILES ${STATES_SRC})
+source_group("Source Files\\Common" FILES ${COMMON_SRC})
+source_group("Source Files\\Dynamics" FILES ${DYNAMICS_SRC})
+source_group("Source Files\\Dynamics\\Cuda\\Prox" FILES ${ProxGPU_SRC})
+source_group("Source Files\\Dynamics\\Cuda\\VectorAdd" FILES ${VectorAddGPU_SRC})
+source_group("Source Files\\Dynamics\\Cuda\\MatrixVectorMult" FILES ${MatrixVectorMultGPU_SRC})
+source_group("Source Files\\Dynamics\\Cuda\\General" FILES ${GeneralCommonFiles_SRC})
+source_group("Source Files\\Systems" FILES ${SYSTEMS_SRC})
+
+source_group("Header Files\\ConfigFiles" FILES ${CONFIG_INC})
+source_group("Header Files\\App" FILES ${APP_INC})
+source_group("Header Files\\Singeltons" FILES ${SINGELTON_INC})
+source_group("Header Files\\States" FILES ${STATES_INC})
+source_group("Header Files\\Common" FILES ${COMMON_INC})
+source_group("Header Files\\Dynamics" FILES ${DYNAMICS_INC})
+source_group("Header Files\\Dynamics\\Cuda\\Prox" FILES ${ProxGPU_INC})
+source_group("Header Files\\Dynamics\\Cuda\\VectorAdd" FILES ${VectorAddGPU_INC})
+source_group("Header Files\\Dynamics\\Cuda\\MatrixVectorMult" FILES ${MatrixVectorMultGPU_INC})
+source_group("Header Files\\Dynamics\\Cuda\\General" FILES ${GeneralCommonFiles_INC})
+source_group("Header Files\\Systems" FILES ${SYSTEMS_INC})
+
+source_group("Common Source" FILES ${COMMON_FILES_SRC})
+source_group("Common Header" FILES ${COMMON_FILES_INC})
+
+
+message(STATUS "Add executable:...")
+IF(MSVC)
+CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} ${COMMON_FILES_SRC} ${COMMON_FILES_INC})
+ELSE(MSVC)
+CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} ${COMMON_FILES_SRC} ${COMMON_FILES_INC})
+ENDIF(MSVC)
+
+target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
+
+
+
+SET(INSTALL_DIR_PROJECT ${PROJECT_BINARY_DIR}/bin/)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+RUNTIME_OUTPUT_DIRECTORY_DEBUG ${INSTALL_DIR_PROJECT}/Debug
+RUNTIME_OUTPUT_DIRECTORY_RELEASE ${INSTALL_DIR_PROJECT}/Release
+)
+
+
+# Install all files
+if(WIN32)
+
+	#install(TARGETS ${PROJECT_NAME}
+		#RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
+		#CONFIGURATIONS Debug)
+	#install(TARGETS ${PROJECT_NAME}
+		#RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
+		#CONFIGURATIONS Release)
+
+
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/plugins.cfg
+		${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
+		${CMAKE_CURRENT_SOURCE_DIR}/resources/release/ogre.cfg
+		DESTINATION ${INSTALL_DIR_PROJECT}/Release
+		CONFIGURATIONS Release
+	)
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/plugins.cfg
+		${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
+		${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/ogre.cfg
+		DESTINATION ${INSTALL_DIR_PROJECT}/Debug
+		CONFIGURATIONS Debug
+	)
+
+	install(FILES ${OGRE_BINARY_REL}
+		${OGRE_RenderSystem_Direct3D11_REL}
+		${OGRE_RenderSystem_Direct3D10_REL}
+		${OGRE_RenderSystem_Direct3D9_REL}
+		${OGRE_RenderSystem_GL_REL}
+		${OIS_BINARY_REL}
+		${OPCODE_REL}
+		${ASSIMP_REL}
+		DESTINATION ${INSTALL_DIR_PROJECT}/Release
+		CONFIGURATIONS Release
+	)
+
+	install(FILES ${OGRE_BINARY_DBG}
+		${OGRE_RenderSystem_Direct3D11_DBG}
+		${OGRE_RenderSystem_Direct3D10_DBG}
+		${OGRE_RenderSystem_Direct3D9_DBG}
+		${OGRE_RenderSystem_GL_DBG}
+		${OIS_BINARY_DBG}
+		${OPCODE_DBG}
+		${ASSIMP_DBG}
+		DESTINATION ${INSTALL_DIR_PROJECT}/Debug
+		CONFIGURATIONS Debug
+	)
+
+   # as of sdk 1.7.2 we need to copy the boost dll's as well
+   # because they're not linked statically (it worked with 1.7.1 though)
+   install(FILES ${Boost_DATE_TIME_LIBRARY_RELEASE}
+      ${Boost_THREAD_LIBRARY_RELEASE}
+      DESTINATION ${INSTALL_DIR_PROJECT}/Release
+      CONFIGURATIONS Release
+   )
+   install(FILES ${Boost_DATE_TIME_LIBRARY_DEBUG}
+      ${Boost_THREAD_LIBRARY_DEBUG}
+      DESTINATION ${INSTALL_DIR_PROJECT}/Debug
+      CONFIGURATIONS Debug
+   )
+
+endif(WIN32)
+
+if(UNIX)
+
+	#install(TARGETS ${PROJECT_NAME}
+	#	RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
+	#	CONFIGURATIONS Debug)
+	#install(TARGETS ${PROJECT_NAME}
+	#	RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
+	#	CONFIGURATIONS Release)
+
+
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/unix/plugins.cfg
+		${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
+		${CMAKE_CURRENT_SOURCE_DIR}/resources/release/ogre.cfg
+		DESTINATION ${INSTALL_DIR_PROJECT}/Release
+		CONFIGURATIONS Release
+	)
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/unix/plugins.cfg
+		${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
+		${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/ogre.cfg
+		DESTINATION ${INSTALL_DIR_PROJECT}/Debug
+		CONFIGURATIONS Debug
+	)
+
+endif(UNIX)
+
+message(STATUS "=========================================================================")

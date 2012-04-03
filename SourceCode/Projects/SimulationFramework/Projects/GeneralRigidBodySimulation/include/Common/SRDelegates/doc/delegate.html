@@ -1,0 +1,136 @@
+<html>
+	<head>
+		<title>SRUtil.Delegate documentation</title><LINK href="style.css" type="text/css" rel="stylesheet"></head>
+	<body>
+		<h1>Introduction</h1>
+		<p>The SRUtil.Delegate library contains yet another C++ delegates implementation 
+			and delegate invokers. Delegate is an object oriented analogue of a function 
+			pointer. Unlike a function pointer it can refer to both an object and its 
+			method with an appropriate signature. A delegate is more flexible than a 
+			virtual method and a pointer to method because invocation code doesn't depend 
+			on type of the object.</p>
+		<p>A delegate is particular case of boost::function, but essentially more 
+			efficient.</p>
+		<p>Invoker allows to bind arguments and invoke any functor (including a delegate) 
+			with them.</p>
+		<h1>Delegates</h1>
+		<h2>Features</h2>
+		<p>This implementation achieves the following goals:
+			<ol>
+				<li>
+				Compatibility with the C++ Standard.
+				<li>
+				Efficient invocation.
+				<li>
+					Efficient copying.
+				</li>
+			</ol>
+			<h2>Syntax</h2>
+		<p>SRUtil.Delegate has two syntaxical forms: the preferred form and the portable 
+			form. Preferred form is more readable, but is not supported on all platforms 
+			due to compiler bugs.</p>
+		<p>A delegate is defined by instantiating the delegate class template with the 
+			return type and argument types. The following declares a delegate which takes 
+			two integer parameters and retuns a float:</p>
+		<p>
+			<table width="100%">
+				<tr>
+					<th>
+						Preferred syntax</th>
+					<th>
+						Portable syntax</th></tr>
+				<tr>
+					<td><code>srutil::delegate&lt;<span class="keyword">float</span>
+							(<span class="keyword">int</span>,
+							<span class="keyword">int</span>)&gt; d;</code></td>
+					<td><code>srutil::delegate2&lt;<span class="keyword">float</span>,
+							<span class="keyword">int</span>,
+							<span class="keyword">int</span>&gt; d;</code></td>
+				</tr>
+			</table>
+		</p>
+		<p>By default, a delegates is empty. Invocation of such delegate usually leads to 
+			access violation. You can test a state of the delegate by implicit casting to 
+			boolean type or using operator '<code>!</code>', for example: <code>
+				<pre>
+<span class=keyword>if</span> (d)
+    std::cout
+    &lt;&lt;  "the delegate is empty\n";
+
+<span class=keyword>if</span> (!d)
+    std::cout &lt;&lt; "the delegate is not empty\n";
+</pre>
+			</code>
+		<p>To construct a nonempty delegate you should use one of following methods: <code>
+				<pre><span class=keyword>void</span> f(<span class=keyword>int, <span class=keyword>int</span></span>);
+<span class=keyword>class</span> SomeClass
+{
+<span class=keyword>public</span>:
+	<span class=keyword>void</span> m1(<span class=keyword>int, <span class=keyword>int</span></span>);
+	<span class=keyword>void</span> m2(<span class=keyword>int</span>) <span class=keyword>const</span>;
+	<span class=keyword>static</span> <span class=keyword>void</span> m3(<span class=keyword>int, <span class=keyword>int</span></span>);
+};
+
+<span class=keyword>typedef</span> srutil::delegate&lt;<span class=keyword>void</span> (<span class=keyword>int, <span class=keyword>int</span></span> )&gt; Delegate;
+
+d = Delegate::from_function&lt;&amp;f&gt;();
+d = Delegate::from_method&lt;SomeClass, &amp;SomeClass::m1&gt;();
+d = Delegate::from_const_method&lt;SomeClass, &amp;SomeClass::m2&gt;();
+d = Delegate::from_function&lt;&amp;SomeClass::m3&gt;();</pre>
+			</code>
+		<p>
+			To invoke you should use function call operator:
+		</p>
+		<code>
+			<pre>
+d(10, 20);
+</pre>
+		</code>
+		<p>Also you can get an appropriate type of invoker: <code>
+				<pre>
+Delegate::invoker_type i(10, 20);
+i(d);
+</pre>
+			</code>
+			<h2>Restrictions</h2>
+		<p>In current implementation you can't bind delegates with function which has 
+			nonstandard modificators.</p>
+		<p>The delegate binds with a target method at compile time. You can't bind the 
+			delegate with method if its address is known only at runtime.</p>
+		<p>Delegates may not be compared. It means you can't use C# style like for events 
+			subscribing and unsubscribing. Instead you can use <a href="event.html">SRUtil.Event</a>
+			library.</p>
+		<h1>Invokers</h1>
+		<p>Invokers are designed to simplify using the delegates, but may be used with any 
+			functor.</p>
+		<h2>Syntax</h2>
+		<p>As well as delegates invokers have two syntaxes:
+			<table width="100%">
+				<tr>
+					<th>
+						Preferred syntax</th><th>Portable syntax</th></tr>
+				<tr>
+					<td><code>srutil::invoker&lt;<span class="keyword">float</span>
+							(<span class="keyword">int</span>,
+							<span class="keyword">int</span>)&gt; d;</code></td>
+					<td><code>srutil::invoker2&lt;<span class="keyword">float</span>,
+							<span class="keyword">int</span>,
+							<span class="keyword">int</span>&gt; d;</code></td>
+				</tr>
+			</table>
+		</p>
+		<p>Invokers bind arguments in constructor and pass it into a functor:<code>
+				<pre>
+<span class=keyword>void</span> functor(<span class=keyword>int, <span class=keyword>int</span></span>);
+
+srutil::invoker&lt;<span class=keyword>void</span> (<span class=keyword>int, <span class=keyword>int</span></span>)&gt; i(10, 20);
+
+i(&amp;functor); <span class="comment">// equal to functor(10, 20);</span>
+</pre>
+			</code>
+			<div align="right">
+				<hr>
+				Copyright &copy; 2005 <a href="http://home.onego.ru/~ryazanov/">Sergey Ryazanov</a>
+			</div>
+	</body>
+</html>
