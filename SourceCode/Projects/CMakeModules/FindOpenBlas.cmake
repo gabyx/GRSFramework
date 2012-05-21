@@ -20,7 +20,7 @@ getenv_path(OPENBLAS_HOME)
 set(OPENBLAS_PREFIX_PATH ${OPENBLAS_HOME} ${ENV_OPENBLAS_HOME} /usr/local /usr/local/include /usr/local/lib /usr/include /usr/lib /usr/local/include/openblas /usr/include/openblas /usr/lib/openblasusr/local/lib/openblas)
 
 create_search_paths(OPENBLAS)
-PRINTLIST("Search path:" "${OPENBLAS_INC_SEARCH_PATH}")
+#PRINTLIST("Search path:" "${OPENBLAS_INC_SEARCH_PATH}")
 
 # redo search if prefix path changed
 clear_if_changed(OPENBLAS_PREFIX_PATH

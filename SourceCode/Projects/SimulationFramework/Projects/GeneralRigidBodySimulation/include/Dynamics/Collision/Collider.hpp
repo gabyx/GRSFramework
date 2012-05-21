@@ -28,8 +28,8 @@ template<typename TLayoutConfig> class CollisionSolver;
 /**
 * @ingroup Collision
 * @brief This is the Collider class, this functor class handles the collision of different RigidBodies.
-	It initializes two RigidBody pointers and then the collider class is used as a functor with boost::apply_visitor(...)
-	Which then matches the corresponding operator() which then further calls the corresponding collision routine!
+    It initializes two RigidBody pointers and then the collider class is used as a functor with boost::apply_visitor(...)
+    Which then matches the corresponding operator() which then further calls the corresponding collision routine!
 */
 /** @{ */
 template<typename TLayoutConfig, typename TCollisionSolver>
@@ -105,7 +105,7 @@ private:
   void collide( boost::shared_ptr< RigidBody<TLayoutConfig> > & sphere,
                 boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom,
                 boost::shared_ptr<RigidBody<TLayoutConfig> > & mesh,
-                boost::shared_ptr<const MeshGeometry<PREC> >  & meshGeom); ///< Box/Box collision.
+                boost::shared_ptr<const MeshGeometry<PREC> >  & meshGeom); ///< Sphere/Mesh collision.
 
   template <typename O1, typename O2>
   void collide( boost::shared_ptr< RigidBody<TLayoutConfig> > & b1,
@@ -301,89 +301,89 @@ void Collider<TLayoutConfig,TCollisionSolver>::collide(   boost::shared_ptr< Rig
 {
    using namespace MatrixHelpers;
    
-   // Collision detection with opcode!
-   Opcode::SphereCollider sphereCollider;
-   sphereCollider.SetFirstContact(false);
-   sphereCollider.SetTemporalCoherence(false);
-	sphereCollider.SetPrimitiveTests(true);
-
-   static Opcode::SphereCache sphereCache;
-
-   IceMaths::Sphere sphereTemp(IceMaths::Point(sphere->m_r_S(0),sphere->m_r_S(1),sphere->m_r_S(2)),sphereGeom->m_radius);
-   
-   static MyMatrix<OPCODE_PRECISION>::Matrix44 H_IK; // worldMeshMatrix is H_IM= [A_IM | I_r_IM] if M is mesh in glocker Notation!
-   setHomogeneousTransform<PREC,MeshPREC>(mesh->m_A_IK, mesh->m_r_S,H_IK);
-
-   // Take care! Direct X Compliant stupid fucking matrices!!
-   IceMaths::Matrix4x4 * mat = (IceMaths::Matrix4x4 *)(H_IK.data());
-   if(!sphereCollider.Collide(sphereCache,sphereTemp,*(meshGeom->m_pOpcodeModel),NULL, mat )){ //(const IceMaths::Matrix4x4 *)(H_IK.data()) 
-      ASSERTMSG(false,"Collision Sphere Mesh failed!");
-   }
-  /*
-   float max = 0;
-   for(int i = 0 ; i< meshGeom->m_pMeshData->m_Vertices.size();i++){
-      if(meshGeom->m_pMeshData->m_Vertices[i](2) > max){
-         max = meshGeom->m_pMeshData->m_Vertices[i](2);
-      }
-   }*/
-
-   //cout << sphere->m_r_S(2) - sphereGeom->m_radius << " of "<< max<< endl;
-   if(sphereCollider.GetContactStatus()){
-      //cout << "Collision withe Mesh" <<endl;
-      unsigned int nTouchedPrims = sphereCollider.GetNbTouchedPrimitives();
-      const unsigned int * touchedPrims = sphereCollider.GetTouchedPrimitives();
-
-      // Post process to get the contact set!
-      static Vector3 r_S1C1;
-      static std::vector< boost::tuple<double,Vector3,unsigned int,unsigned int> > temporarySet; //[ overlap, and normal from sphere center!, type, id] (see makeContactTag())
-      static boost::tuple<double,Vector3,unsigned int,unsigned int> tempColEntry;
-
-      temporarySet.reserve(3);
-      temporarySet.clear();
-
-      for(unsigned int i=0;i<nTouchedPrims;i++){
-         
-         r_S1C1 = CollisionFunctions::getClosestPoint_PointTriangle<TLayoutConfig>(sphere->m_r_S, *meshGeom->m_pMeshData, mesh->m_r_S, mesh->m_A_IK, touchedPrims[i],  tempColEntry.get<2>(), tempColEntry.get<3>() ) - sphere->m_r_S; // r_S1C1
-         tempColEntry.get<0>() = sphereGeom->m_radius - r_S1C1.norm(); // Overlap
-         tempColEntry.get<1>() = r_S1C1.normalized();
-         if(tempColEntry.get<0>() >= 0){
-            // We are completely sure we have a collision!
-            // Move into temporary collision set only if there is no similar contact which is close enough, tolerance = angle between normals!
-            for(int j=0;j<temporarySet.size();j++){
-               if( acos( temporarySet[j].get<1>().dot( tempColEntry.get<1>() )) < (5/180*M_PI)){
-                  //cout << "Detected both times the same contact" <<endl;
-                  continue;
-               }
-            }
-            // Otherwise Push into set and continue!
-            temporarySet.push_back(tempColEntry);
-         }
-      }
-
-
-      // Signal all remaining contacts int the temporary set!
-      for(int j=0;j<temporarySet.size();j++){
-            CollisionData<TLayoutConfig>*  pColData = new CollisionData<TLayoutConfig>();
-
-            pColData->m_overlap = temporarySet[j].get<0>();
-            // Coordinate system belongs to first body!
-            pColData->m_e_z = temporarySet[j].get<1>();
-            makeCoordinateSystem<>(pColData->m_e_z,pColData->m_e_x,pColData->m_e_y);
-
-            pColData->m_r_S1C1 = ( sphereGeom->m_radius - pColData->m_overlap/2) * pColData->m_e_z ;
-            pColData->m_r_S2C2 = ( sphere->m_r_S + pColData->m_r_S1C1 ) - mesh->m_r_S;
-
-            // Set pointers
-            pColData->m_pBody1 = sphere;
-            pColData->m_pBody2 = mesh;
-
-            // set Contact Tag
-            pColData->m_ContactTag = makeContactTag<TLayoutConfig>(sphere.get(),0,0,mesh.get(),temporarySet[j].get<2>(),temporarySet[j].get<3>());
-
-             m_pCollisionSolver->signalContactAdd(pColData);
-      }
-
-   }
+   //~ // Collision detection with opcode!
+   //~ Opcode::SphereCollider sphereCollider;
+   //~ sphereCollider.SetFirstContact(false);
+   //~ sphereCollider.SetTemporalCoherence(false);
+    //~ sphereCollider.SetPrimitiveTests(true);
+//~ 
+   //~ static Opcode::SphereCache sphereCache;
+//~ 
+   //~ IceMaths::Sphere sphereTemp(IceMaths::Point(sphere->m_r_S(0),sphere->m_r_S(1),sphere->m_r_S(2)),sphereGeom->m_radius);
+   //~ 
+   //~ static MyMatrix<OPCODE_PRECISION>::Matrix44 H_IK; // worldMeshMatrix is H_IM= [A_IM | I_r_IM] if M is mesh in glocker Notation!
+   //~ setHomogeneousTransform<PREC,MeshPREC>(mesh->m_A_IK, mesh->m_r_S,H_IK);
+//~ 
+   //~ // Take care! Direct X Compliant stupid fucking matrices!!
+   //~ IceMaths::Matrix4x4 * mat = (IceMaths::Matrix4x4 *)(H_IK.data());
+   //~ if(!sphereCollider.Collide(sphereCache,sphereTemp,*(meshGeom->m_pOpcodeModel),NULL, mat )){ //(const IceMaths::Matrix4x4 *)(H_IK.data()) 
+      //~ ASSERTMSG(false,"Collision Sphere Mesh failed!");
+   //~ }
+  //~ /*
+   //~ float max = 0;
+   //~ for(int i = 0 ; i< meshGeom->m_pMeshData->m_Vertices.size();i++){
+      //~ if(meshGeom->m_pMeshData->m_Vertices[i](2) > max){
+         //~ max = meshGeom->m_pMeshData->m_Vertices[i](2);
+      //~ }
+   //~ }*/
+//~ 
+   //~ //cout << sphere->m_r_S(2) - sphereGeom->m_radius << " of "<< max<< endl;
+   //~ if(sphereCollider.GetContactStatus()){
+      //~ //cout << "Collision withe Mesh" <<endl;
+      //~ unsigned int nTouchedPrims = sphereCollider.GetNbTouchedPrimitives();
+      //~ const unsigned int * touchedPrims = sphereCollider.GetTouchedPrimitives();
+//~ 
+      //~ // Post process to get the contact set!
+      //~ static Vector3 r_S1C1;
+      //~ static std::vector< boost::tuple<double,Vector3,unsigned int,unsigned int> > temporarySet; //[ overlap, and normal from sphere center!, type, id] (see makeContactTag())
+      //~ static boost::tuple<double,Vector3,unsigned int,unsigned int> tempColEntry;
+//~ 
+      //~ temporarySet.reserve(3);
+      //~ temporarySet.clear();
+//~ 
+      //~ for(unsigned int i=0;i<nTouchedPrims;i++){
+         //~ 
+         //~ r_S1C1 = CollisionFunctions::getClosestPoint_PointTriangle<TLayoutConfig>(sphere->m_r_S, *meshGeom->m_pMeshData, mesh->m_r_S, mesh->m_A_IK, touchedPrims[i],  tempColEntry.get<2>(), tempColEntry.get<3>() ) - sphere->m_r_S; // r_S1C1
+         //~ tempColEntry.get<0>() = sphereGeom->m_radius - r_S1C1.norm(); // Overlap
+         //~ tempColEntry.get<1>() = r_S1C1.normalized();
+         //~ if(tempColEntry.get<0>() >= 0){
+            //~ // We are completely sure we have a collision!
+            //~ // Move into temporary collision set only if there is no similar contact which is close enough, tolerance = angle between normals!
+            //~ for(int j=0;j<temporarySet.size();j++){
+               //~ if( acos( temporarySet[j].get<1>().dot( tempColEntry.get<1>() )) < (5/180*M_PI)){
+                  //~ //cout << "Detected both times the same contact" <<endl;
+                  //~ continue;
+               //~ }
+            //~ }
+            //~ // Otherwise Push into set and continue!
+            //~ temporarySet.push_back(tempColEntry);
+         //~ }
+      //~ }
+//~ 
+//~ 
+      //~ // Signal all remaining contacts int the temporary set!
+      //~ for(int j=0;j<temporarySet.size();j++){
+            //~ CollisionData<TLayoutConfig>*  pColData = new CollisionData<TLayoutConfig>();
+//~ 
+            //~ pColData->m_overlap = temporarySet[j].get<0>();
+            //~ // Coordinate system belongs to first body!
+            //~ pColData->m_e_z = temporarySet[j].get<1>();
+            //~ makeCoordinateSystem<>(pColData->m_e_z,pColData->m_e_x,pColData->m_e_y);
+//~ 
+            //~ pColData->m_r_S1C1 = ( sphereGeom->m_radius - pColData->m_overlap/2) * pColData->m_e_z ;
+            //~ pColData->m_r_S2C2 = ( sphere->m_r_S + pColData->m_r_S1C1 ) - mesh->m_r_S;
+//~ 
+            //~ // Set pointers
+            //~ pColData->m_pBody1 = sphere;
+            //~ pColData->m_pBody2 = mesh;
+//~ 
+            //~ // set Contact Tag
+            //~ pColData->m_ContactTag = makeContactTag<TLayoutConfig>(sphere.get(),0,0,mesh.get(),temporarySet[j].get<2>(),temporarySet[j].get<3>());
+//~ 
+             //~ m_pCollisionSolver->signalContactAdd(pColData);
+      //~ }
+//~ 
+   //~ }
   
 }
 

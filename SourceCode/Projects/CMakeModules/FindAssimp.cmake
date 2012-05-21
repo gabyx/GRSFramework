@@ -1,38 +1,58 @@
-# Find Collision Library Opcode
+#-------------------------------------------------------------------
 #
-# ASSIMP_FOUND
-# ASSIMP_INCLUDE_DIR      where to find the include files
-# ASSIMP_LIB_REL
-# ASSIMP_LIB_DBG
-# ASSIMP_REL
-# ASSIMP_DBG
-# ASSIMP_LIBRARIES
+#-------------------------------------------------------------------
+
+# - Try to find Assimp
+# Once done, this will define
+#
+# ASSIMP_FOUND - system has Assimp
+# ASSIMP_INCLUDE_DIRS - the Assimp include directories
+# ASSIMP_LIBRARIES - link these to use Assimp
+
+include(MyFindPkgMacros)
+include(PrintListMacro)
+findpkg_begin(ASSIMP)
+
+# Get path, convert backslashes as ${ENV_${var}}
+getenv_path(ASSIMP_HOME)
+
+# construct search paths
+set(ASSIMP_PREFIX_PATH ${ASSIMP_HOME} ${ENV_ASSIMP_HOME} /usr/local /usr/local/include /usr/local/lib /usr/include /usr/lib /usr/local/include/assimp /usr/include/assimp /usr/lib/assimp /usr/local/lib/assimp)
+
+create_search_paths(ASSIMP)
+# PRINTLIST("Search path:" "${ASSIMP_INC_SEARCH_PATH}")
+
+# redo search if prefix path changed
+clear_if_changed(ASSIMP_PREFIX_PATH
+ASSIMP_LIBRARY_REL
+ASSIMP_LIBRARY_DBG
+ASSIMP_INCLUDE_DIR
+)
+
+set(ASSIMP_LIBRARY_NAMES assimp)
+get_release_debug_names(ASSIMP_LIBRARY_NAMES)
+
+use_pkgconfig(ASSIMP_PKGC ASSIMP)
+
+findpkg_framework(ASSIMP)
+
+find_path(ASSIMP_INCLUDE_DIR NAMES assimp.h HINTS ${ASSIMP_INC_SEARCH_PATH} ${ASSIMP_PKGC_INCLUDE_DIRS} PATH_SUFFIXES assimp)
+find_library(ASSIMP_LIBRARY_REL NAMES ${ASSIMP_LIBRARY_NAMES_REL} HINTS ${ASSIMP_LIB_SEARCH_PATH} ${ASSIMP_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" release relwithdebinfo minsizerel)
+find_library(ASSIMP_LIBRARY_DBG NAMES ${ASSIMP_LIBRARY_NAMES_DBG} HINTS ${ASSIMP_LIB_SEARCH_PATH} ${ASSIMP_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" debug)
+
+#Find the DLL's for the Runtime under Windows
+IF(WIN32)
+        set(ASSIMP_DLL_NAMES assimp)
+        get_release_debug_filenames_dll(ASSIMP_DLL_NAMES)
+        create_search_paths_dll(ASSIMP)
+        FIND_FILE(ASSIMP_DLL_DBG ${ASSIMP_DLL_NAMES_REL} HINTS ${ASSIMP_DLL_SEARCH_PATH} ) 
+        FIND_FILE(ASSIMP_DLL_REL ${ASSIMP_DLL_NAMES_DEL} HINTS ${ASSIMP_DLL_SEARCH_PATH} )
+ENDIF(WIN32)
 
 
-SET(ASSIMP_SEARCH "C:/Develop/Assimp" "C:/Develop/ASSIMP")
+make_library_set(ASSIMP_LIBRARY)
 
+findpkg_finish(ASSIMP)
 
-FIND_PATH(ASSIMP_INCLUDE_DIR "assimp.hpp" HINTS ${ASSIMP_SEARCH} PATH_SUFFIXES "include" "include/assimp" ) 
-
-FIND_LIBRARY(ASSIMP_LIB_REL "assimp.lib" HINTS ${ASSIMP_SEARCH} PATH_SUFFIXES "lib/Release" "lib/release" ) 
-FIND_LIBRARY(ASSIMP_LIB_DBG "assimp.lib" HINTS ${ASSIMP_SEARCH} PATH_SUFFIXES "lib/Debug" "lib/debug" ) 
-FIND_FILE(ASSIMP_REL "assimp.dll" HINTS ${ASSIMP_SEARCH} PATH_SUFFIXES "bin/Debug" "bin/debug"  "lib/Debug" "lib/debug" ) 
-FIND_FILE(ASSIMP_DBG "assimp.dll" HINTS ${ASSIMP_SEARCH} PATH_SUFFIXES "bin/Debug" "bin/debug"  "lib/Debug" "lib/debug" ) 
-
-SET(ASSIMP_LIBRARIES "optimized" ${ASSIMP_LIB_REL} "debug" ${ASSIMP_LIB_DBG})
-
-message(STATUS "ASSIMP Include Dir: " ${ASSIMP_INCLUDE_DIR})
-STRING(COMPARE NOTEQUAL ${ASSIMP_INCLUDE_DIR}  "ASSIMP_INCLUDE_DIR-NOTFOUND" ASSIMP_FOUND)
-
-IF(NOT ASSIMP_FOUND)
-	IF(ASSIMP_FIND_REQUIRED)
-		message( FATAL_ERROR "ASSIMP  Include directory was not found!")
-	ELSE(ASSIMP_FIND_REQUIRED)
-		message( STATUS "ASSIMP  Include directory was not found!")
-	ENDIF(ASSIMP_FIND_REQUIRED)
-ELSE(NOT ASSIMP_FOUND)
-	message(STATUS "ASSIMP  Include directory found!")
-ENDIF(NOT ASSIMP_FOUND)
-
-MARK_AS_ADVANCED( ASSIMP_INCLUDE_DIR )
+add_parent_dir(ASSIMP_INCLUDE_DIRS ASSIMP_INCLUDE_DIR)
 

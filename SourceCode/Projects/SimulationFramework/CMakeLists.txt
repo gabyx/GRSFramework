@@ -168,11 +168,12 @@ FIND_PACKAGE(Assimp REQUIRED)
 
 
 # Searching OZCollide or OPCODE (COLLISION LIBRARY) ==================================
-SET(MYPROJECT_COLLISION_LIBRARY "opcode" CACHE STRING "Choose between 'ozcollide' and 'opcode' for the collision detection...")
+SET(MYPROJECT_COLLISION_LIBRARY "ozcollide" CACHE STRING "Choose between 'ozcollide' and 'opcode' for the collision detection...")
 MARK_AS_ADVANCED(MYPROJECT_COLLISION_LIBRARY)
-FIND_PACKAGE(Opcode REQUIRED)
+
 STRING(COMPARE EQUAL ${MYPROJECT_COLLISION_LIBRARY}  "opcode" USE_OPCODE)
 if(USE_OPCODE)
+FIND_PACKAGE(Opcode REQUIRED)
 SET(COLLISIONLIB_INCLUDE_DIR ${OPCODE_INCLUDE_DIR})
 SET(COLLISIONLIB_LIB_REL ${OPCODE_LIB_REL})
 SET(COLLISIONLIB_LIB_DBG ${OPCODE_LIB_DBG})
@@ -187,9 +188,7 @@ endif()
 
 STRING(COMPARE EQUAL ${MYPROJECT_COLLISION_LIBRARY}  "ozcollide" USE_OZCOLLIDE)
 if(USE_OZCOLLIDE)
-# Searching Opcode ==================================
-MESSAGE(FATAL_ERROR "OZCOLIDE has not been really used!")
-# ===================================================
+#MESSAGE(FATAL_ERROR "OZCOLIDE has not been really used!")
 # Searching OZCollide ==================================
 FIND_PACKAGE(OZCollide REQUIRED)
 # ===================================================
