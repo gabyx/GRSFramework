@@ -27,7 +27,7 @@
 * The layout of the document is as follows:
 * - The first #SIM_FILE_SIGNATURE_LENGTH bytes are for the signature of the file.
 * - 3 doubles: nSimBodies, nDOFqObj, nDofuObj.
-* - DynamicsState: 
+* - DynamicsState:
 *     - double --> Time in [seconds]
 *     - nSimBodies*nDOFqObj doubles --> generalized coordinates of all bodies.
 *     - nSimBodies*nDOFuObj doubles --> generalized velocities of all bodies.
@@ -57,7 +57,7 @@ public:
   bool openSimFileWrite( const boost::filesystem::path & file_path,   const unsigned int nSimBodies,  bool truncate = true);
 
   /**
-  * @brief Closes the .sim file which was opened by an openSimFileWrite or openSimFileRead command.                                                                     
+  * @brief Closes the .sim file which was opened by an openSimFileWrite or openSimFileRead command.
   */
   void closeSimFile();
 
@@ -75,38 +75,38 @@ public:
   MultiBodySimFile<TLayoutConfig> & operator << (const DynamicsState<TLayoutConfig>* state);
   /**
 
-  * @brief Operator to read a state from a file, only reads position!                                                                    
+  * @brief Operator to read a state from a file, only reads position!
   */
   MultiBodySimFile<TLayoutConfig> & operator >> (DynamicsState<TLayoutConfig>* state);
   /**
-  * @brief Operator to read a state from a file, reads position and velocity!                                                                    
+  * @brief Operator to read a state from a file, reads position and velocity!
   */
   MultiBodySimFile<TLayoutConfig> & operator >> (DynamicsState<TLayoutConfig>& state);
 
   /**
-  * @brief Operator to read a state from a file, reads position and velocity!                                                                    
+  * @brief Operator to read a state from a file, reads position and velocity!
   */
   MultiBodySimFile<TLayoutConfig> & operator >> (boost::shared_ptr<DynamicsState<TLayoutConfig> > &state);
 
 
   /**
-  * @brief Gets the state at the time t.                                                                    
+  * @brief Gets the state at the time t.
   */
   //bool getStateAt(DynamicsState<TLayoutConfig>& state, PREC t);
   void getEndState(DynamicsState<TLayoutConfig>& state);
 
   unsigned int getNStates(); ///< Gets the number of states in a read only .sim file.
- 
+
   std::string getErrorString(){ return m_errorString.str();}
 
 private:
    /**
-   * @brief Operator to write a generic value to the file as binary data.                                                                     
+   * @brief Operator to write a generic value to the file as binary data.
    */
   template<typename T>
   MultiBodySimFile<TLayoutConfig> & operator << (const T &value);
    /**
-   * @brief Operator to read a generic value from a .sim file as binary data.                                                                     
+   * @brief Operator to read a generic value from a .sim file as binary data.
    */
   template<typename T>
   MultiBodySimFile<TLayoutConfig> & operator >> (T &value);
@@ -213,7 +213,7 @@ template<typename TLayoutConfig>
  {
    if(m_file_stream.good())
    {
-      if( (m_nBytes - m_file_stream.tellg().seekpos() ) >= ( m_nBytesPerState )  ){
+      if( (m_nBytes - m_file_stream.tellg() ) >= ( m_nBytesPerState )  ){
        return true;
      }
    }
@@ -269,7 +269,7 @@ bool  MultiBodySimFile<TLayoutConfig>::openSimFileWrite(const boost::filesystem:
   setByteLengths(nSimBodies);
 
   if(truncate){
-     
+
       m_file_stream.open(file_path.string().c_str(), std::ios_base::trunc | std::ios_base::binary | std::ios_base::out);
       m_file_stream.rdbuf()->pubsetbuf(m_Buffer, BUF_SIZE);
       if(m_file_stream.good())
@@ -298,7 +298,7 @@ bool  MultiBodySimFile<TLayoutConfig>::openSimFileWrite(const boost::filesystem:
             return true;
          }
      }
-     
+
      m_errorString << "Could not open sim file: " << file_path.string() <<" for appending data"<<endl;
   }
 
@@ -362,7 +362,7 @@ template<typename TLayoutConfig>
         m_file_stream.seekg(m_nBytesPerUObj,ios_base::cur);
     }
 
-  
+
   }
   return *this;
 }
@@ -390,7 +390,7 @@ bool  MultiBodySimFile<TLayoutConfig>::openSimFileRead(const boost::filesystem::
   closeSimFile();
 
   setByteLengths(nSimBodies);
-  
+
   m_file_stream.open(file_path.string().c_str(), std::ios_base::binary | std::ios_base::in);
   m_file_stream.rdbuf()->pubsetbuf(m_Buffer, BUF_SIZE);
   m_file_stream.sync();
@@ -399,14 +399,14 @@ bool  MultiBodySimFile<TLayoutConfig>::openSimFileRead(const boost::filesystem::
     // Read length
     if(readLength()){
       if(readHeader()){
-        
+
         //Set the get pointer!
         m_file_stream.seekg(m_beginOfStates);
         m_filePath = file_path;
         return true;
       }
     }
-    
+
   }
 
   m_errorString << "Could not open sim file: " << file_path.string()<<endl;
@@ -441,7 +441,7 @@ template<typename TLayoutConfig>
 bool  MultiBodySimFile<TLayoutConfig>::readLength()
 {
   m_file_stream.seekg(0, ios::end);
-  m_nBytes = (std::streamoff)m_file_stream.tellg().seekpos();
+  m_nBytes = (std::streamoff)m_file_stream.tellg();
   m_file_stream.seekg(0, ios::beg);
 
   cout << m_nBytes << "," << m_headerLength<<","<<m_nBytesPerState<<endl;
@@ -469,10 +469,10 @@ bool  MultiBodySimFile<TLayoutConfig>::readHeader()
     *this >> nBodies >> nDofqObj >> nDofuObj;
 
     if(nBodies == m_nSimBodies && nDofuObj == NDOFuObj && nDofqObj == NDOFqObj){
-       m_beginOfStates = m_file_stream.tellg().seekpos();
+       m_beginOfStates = m_file_stream.tellg();
       return true;
     }else{
-       m_errorString << "Binary file does not correspond to the number of bodies which should be simulated: "<< endl 
+       m_errorString << "Binary file does not correspond to the number of bodies which should be simulated: "<< endl
           <<" Binary File describes: \tnSimBodies = "<<nBodies<< "\tnDofqObj = "<<nDofqObj<<"\tnDofuObj = " << nDofuObj << endl
           <<" Simulation requests: \t\tnSimBodies = "<<m_nSimBodies<< "\tnDofqObj = "<<NDOFqObj<<"\tnDofuObj = " << NDOFuObj<<endl;
     }
@@ -486,7 +486,7 @@ bool  MultiBodySimFile<TLayoutConfig>::readHeader()
 
 //template<typename TLayoutConfig>
 //bool MultiBodySimFile<TLayoutConfig>::getStateAt(DynamicsState<TLayoutConfig>& state, PREC t){
-//   
+//
 //}
 
 template<typename TLayoutConfig>

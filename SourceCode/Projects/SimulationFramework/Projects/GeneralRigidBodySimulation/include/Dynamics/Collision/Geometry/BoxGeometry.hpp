@@ -7,7 +7,7 @@
 #include "TypeDefs.hpp"
 
 
-template<class PREC> 
+template<class PREC>
 class BoxGeometry{
 public:
 
@@ -19,7 +19,7 @@ public:
   {};
 
   Vector3 m_extent; ///< Vector of the extend of the box in all directions.
-  //Vector3 m_center; ///< Vector to the center of the box in body frame! (mostly zero).
+  Vector3 m_center; ///< Vector to the center of the box in body frame! (mostly zero).
 };
 
 

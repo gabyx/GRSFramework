@@ -78,7 +78,7 @@ protected:
 
 template<typename TLayoutConfig>
 StateRingPoolVisBackFront<TLayoutConfig>::StateRingPoolVisBackFront(const unsigned int nSimBodies):
-StateRingPoolVisBackFront<TLayoutConfig>::StatePool(3),
+StatePool<TLayoutConfig>(3),
 m_state_init(nSimBodies),
 m_nSimBodies(nSimBodies),
 m_nDofqObj(NDOFqObj),
@@ -132,10 +132,10 @@ void StateRingPoolVisBackFront<TLayoutConfig>::initializeStateRingPool(const std
 
   boost::mutex::scoped_lock l1(m_mutexStateInit);
   boost::mutex::scoped_lock l2(m_change_pointer_mutex);
-  
+
   unsigned int index = 0;
   for(int i=0; i< state_initList.size(); i++){
-     
+
      for(int k = 0; k < state_initList[i].m_SimBodyStates.size(); k++){
        m_state_init.m_SimBodyStates[index + k] = state_initList[i].m_SimBodyStates[k];
        //cout <<"State1: q:" << m_state_init.m_SimBodyStates[index + k].m_q.transpose()  <<endl<<" u: "<< m_state_init.m_SimBodyStates[index + k].m_u.transpose() <<endl;

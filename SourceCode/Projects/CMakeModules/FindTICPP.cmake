@@ -39,6 +39,7 @@ findpkg_framework(TICPP)
 find_path(TICPP_INCLUDE_DIR NAMES "ticpp.h" HINTS ${TICPP_INC_SEARCH_PATH} ${TICPP_PKGC_INCLUDE_DIRS} PATH_SUFFIXES ticpp)
 find_library(TICPP_LIBRARY_REL NAMES ${TICPP_LIBRARY_NAMES_REL} HINTS ${TICPP_LIB_SEARCH_PATH} ${TICPP_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" release relwithdebinfo minsizerel)
 find_library(TICPP_LIBRARY_DBG NAMES ${TICPP_LIBRARY_NAMES_DBG} HINTS ${TICPP_LIB_SEARCH_PATH} ${TICPP_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" debug)
+make_library_set(TICPP_LIBRARY)
 
 #Find the DLL's for the Runtime under Windows
 IF(WIN32)
@@ -50,9 +51,8 @@ IF(WIN32)
 ENDIF(WIN32)
 
 
-make_library_set(TICPP_LIBRARY)
+findpkg_finish(TICPP)
 
-findpkg_finish(TICPP TRUE)
 
 add_parent_dir(TICPP_INCLUDE_DIRS TICPP_INCLUDE_DIR)
 

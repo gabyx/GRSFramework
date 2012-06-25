@@ -23,7 +23,7 @@ public:
    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
 
    StateRecorderResampler(const unsigned nSimBodies):
-      StateRecorder(nSimBodies)
+      StateRecorder<TLayoutConfig>(nSimBodies)
    {
       m_pStateArray.push_back(new DynamicsState<TLayoutConfig>(nSimBodies));
       m_pStateArray.push_back(new DynamicsState<TLayoutConfig>(nSimBodies));
@@ -42,7 +42,7 @@ public:
    };
 
    void tryToWrite( const DynamicsState<TLayoutConfig>* state, bool bInterpolate){
-     
+
 
       std::stringstream logstream;
 
@@ -60,15 +60,15 @@ public:
                double factor = (m_currentResampleTime - m_pPrevState->m_t)/(diffTime);
                Interpolate::lerp(*m_pPrevState, *m_pNextState, *m_pLerpState,factor);
                logstream << ", Interpolate Factor: " <<factor;
-               write(m_pLerpState);
+               this->write(m_pLerpState);
                logstream << "StateRecorderResampler:: Writen interpolated State: " << m_pLerpState->m_t << " / " << "currentTime: "<< m_currentResampleTime;
             }else{
-               write(m_pNextState);
+               this->write(m_pNextState);
                logstream << "StateRecorderResampler:: Writen State: " << m_pNextState->m_t << " / " << "currentTime: "<< m_currentResampleTime;
             }
 
             m_currentResampleTime += 1.0/m_fps; //Move resample time ahead! for next drop!
-            LOG(m_pAppLog) 
+            LOG(this->m_pAppLog)
          }
          std::swap(m_pPrevState, m_pNextState);
       }

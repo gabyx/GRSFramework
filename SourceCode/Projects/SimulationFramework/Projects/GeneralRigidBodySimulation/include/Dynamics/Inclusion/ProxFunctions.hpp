@@ -239,9 +239,9 @@ namespace Prox{
          using std::max;
          y_ref(0) = max(y_ref(0),0.0);
          // Prox tangential
-         absvalue = (y_ref.segment<2>(1)).norm();
+         absvalue = (y_ref.template segment<2>(1)).norm();
          if (absvalue > scale_factor*y_ref(0)){
-            y_ref.segment<2>(1) =  y_ref.segment<2>(1) / absvalue * scale_factor*y_ref(0);
+            y_ref.template segment<2>(1) =  y_ref.template segment<2>(1) / absvalue * scale_factor*y_ref(0);
          }
       }
 
@@ -264,9 +264,9 @@ namespace Prox{
          using std::max;
          y_ref(0) = max(x(0),0.0);
          // Prox tangential
-         absvalue = (x.segment<2>(1)).norm();
+         absvalue = (x.template segment<2>(1)).norm();
          if (absvalue > scale_factor*y_ref(0)){
-            y_ref.segment<2>(1) =  x.segment<2>(1) / absvalue * scale_factor*y_ref(0);
+            y_ref.template segment<2>(1) =  x.template segment<2>(1) / absvalue * scale_factor*y_ref(0);
          }
       }
 

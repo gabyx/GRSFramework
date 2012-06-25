@@ -63,7 +63,6 @@ public:
       return *this;
    }
 
-   template<typename TLayoutConfig>
    friend void Interpolate::lerp( const RigidBodyState<TLayoutConfig> & A, const RigidBodyState<TLayoutConfig> & B, RigidBodyState<TLayoutConfig> & X, typename TLayoutConfig::PREC factor);
 
    Eigen::Matrix<PREC,NDOFuObj,1>	m_u; ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
@@ -86,7 +85,6 @@ public:
 
    DynamicsState<TLayoutConfig> & operator =(const DynamicsState<TLayoutConfig>& state);
 
-   template<typename TLayoutConfig>
    friend void Interpolate::lerp( const DynamicsState<TLayoutConfig> & A, const DynamicsState<TLayoutConfig> & B, DynamicsState<TLayoutConfig> & X, typename TLayoutConfig::PREC factor);
 
    PREC	m_t; ///< The time in \f$[s]\f$

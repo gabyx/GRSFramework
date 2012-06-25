@@ -36,7 +36,7 @@ private:
    using namespace std;
 template< typename TLayoutConfig>
 SharedBufferPlayback<TLayoutConfig>::SharedBufferPlayback(unsigned int nSimBodies):
-SharedBufferPlayback<TLayoutConfig>::StateRingPoolVisBackFront(nSimBodies)
+StateRingPoolVisBackFront<TLayoutConfig>(nSimBodies)
 {
 	reset();
 }

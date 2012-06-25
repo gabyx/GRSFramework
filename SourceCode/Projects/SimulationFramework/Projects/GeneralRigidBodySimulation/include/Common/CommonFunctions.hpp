@@ -235,7 +235,7 @@ template <class PREC> bool stringToVector4(typename MyMatrix<PREC>::Vector4 & ve
 				break;
 			}
 		}
-		if (!stringToType<NumberType>(number,s.substr(i,j-i))) {
+		if (!stringToType<PREC>(number,s.substr(i,j-i))) {
 			return false;
 		}
 		vector4(0) = number;////////////////////////x
@@ -258,7 +258,7 @@ template <class PREC> bool stringToVector4(typename MyMatrix<PREC>::Vector4 & ve
 					break;
 				}
 			}
-			if (!stringToType<NumberType>(number,s.substr(i,j-i))){
+			if (!stringToType<PREC>(number,s.substr(i,j-i))){
 				return false;
 			}
 			vector4(1) = number;////////////////////////y
@@ -281,7 +281,7 @@ template <class PREC> bool stringToVector4(typename MyMatrix<PREC>::Vector4 & ve
 						break;
 					}
 				}
-				if (!stringToType<NumberType>(number,s.substr(i,j-i))) {
+				if (!stringToType<PREC>(number,s.substr(i,j-i))) {
 					return false;
 				}
 				vector4(2) = number;////////////////////////z
@@ -305,7 +305,7 @@ template <class PREC> bool stringToVector4(typename MyMatrix<PREC>::Vector4 & ve
 							break;
 						}
 					}
-					if (!stringToType<NumberType>(number,s.substr(i,j-i))) {
+					if (!stringToType<PREC>(number,s.substr(i,j-i))) {
 						return false;
 					}
 					vector4(3) = number;////////////////////////w

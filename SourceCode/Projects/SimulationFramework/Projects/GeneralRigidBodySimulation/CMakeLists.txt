@@ -1,6 +1,8 @@
+
+
 PROJECT(GeneralRigidBodySimulation)
 
-message(STATUS "==============================Project: Spheres==================================")
+message(STATUS "==============================Project: ${PROJECT_NAME} ==================================")
 include(PrintListMacro)
 ## EXTREMLY IMPORTANT ISSUES ############################################################################################################################################
 # In MSVC 64bit mode, there is no problem with vectorization at all, because everything is aligned nicely!,
@@ -103,10 +105,12 @@ SET(COMMON_SRC
 )
 
 SET(DYNAMICS_INC
-   ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
+        ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/General/MoreauTimeStepper.hpp
-   ${PROJECT_SOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
+        ${PROJECT_SOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
+        ${PROJECT_SOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
+        ${PROJECT_SOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/CollisionSolver.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
@@ -116,17 +120,17 @@ SET(DYNAMICS_INC
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/ContactParameterMap.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/SphereGeometry.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/PlaneGeometry.hpp
-   ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
-      ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
+        ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
+        ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
-   ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
-   ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
+        ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
+        ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
-   ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
+        ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettings.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/FrontBackBuffer.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/StatePool.hpp
@@ -216,7 +220,7 @@ set(INCLUDE_DIRS
 	${OIS_INCLUDE_DIRS}
 	#${CEGUI_INCLUDE_DIR}
    ${STLSOFT_INCLUDE_DIR}
-   ${TINYXML_INCLUDE_DIR}
+   ${TICPP_INCLUDE_DIR}
    ${COLLISIONLIB_INCLUDE_DIR}
    ${ASSIMP_INCLUDE_DIR}
 	${PROJECT_SOURCE_DIR}/include
@@ -253,7 +257,9 @@ set(LINK_DIRS
 link_directories(${LINK_DIRS})
 PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
-set(LINK_LIBS ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${Boost_LIBRARIES} ${CUDA_cublas_LIBRARY} ${TINYXML_LIBRARIES} ${COLLISIONLIB_LIBRARIES} ${ASSIMP_LIBRARIES})
+
+
+set(LINK_LIBS ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${Boost_LIBRARIES} ${CUDA_cublas_LIBRARY} ${TICPP_LIBRARIES} ${COLLISIONLIB_LIBRARIES} ${ASSIMP_LIBRARIES})
 PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
@@ -285,42 +291,38 @@ source_group("Common Header" FILES ${COMMON_FILES_INC})
 
 
 message(STATUS "Add executable:...")
-IF(MSVC)
 CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} ${COMMON_FILES_SRC} ${COMMON_FILES_INC})
-ELSE(MSVC)
-CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} ${COMMON_FILES_SRC} ${COMMON_FILES_INC})
-ENDIF(MSVC)
-
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
-
 
 
 SET(INSTALL_DIR_PROJECT ${PROJECT_BINARY_DIR}/bin/)
 set_target_properties(${PROJECT_NAME} PROPERTIES
-RUNTIME_OUTPUT_DIRECTORY_DEBUG ${INSTALL_DIR_PROJECT}/Debug
-RUNTIME_OUTPUT_DIRECTORY_RELEASE ${INSTALL_DIR_PROJECT}/Release
+RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/build/debug
+RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/build/release
 )
 
 
 # Install all files
 if(WIN32)
 
-	#install(TARGETS ${PROJECT_NAME}
-		#RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-		#CONFIGURATIONS Debug)
-	#install(TARGETS ${PROJECT_NAME}
-		#RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
-		#CONFIGURATIONS Release)
+	install(TARGETS ${PROJECT_NAME}
+		RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
+		CONFIGURATIONS Debug)
+	install(TARGETS ${PROJECT_NAME}
+		RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
+		CONFIGURATIONS Release)
 
 
 	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/plugins.cfg
 		${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
+                ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
 		${CMAKE_CURRENT_SOURCE_DIR}/resources/release/ogre.cfg
 		DESTINATION ${INSTALL_DIR_PROJECT}/Release
 		CONFIGURATIONS Release
 	)
 	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/plugins.cfg
 		${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
+                ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
 		${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/ogre.cfg
 		DESTINATION ${INSTALL_DIR_PROJECT}/Debug
 		CONFIGURATIONS Debug
@@ -367,23 +369,25 @@ endif(WIN32)
 
 if(UNIX)
 
-	#install(TARGETS ${PROJECT_NAME}
-	#	RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-	#	CONFIGURATIONS Debug)
-	#install(TARGETS ${PROJECT_NAME}
-	#	RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
-	#	CONFIGURATIONS Release)
+	install(TARGETS ${PROJECT_NAME}
+		RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
+		CONFIGURATIONS Debug)
+	install(TARGETS ${PROJECT_NAME}
+		RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
+		CONFIGURATIONS Release)
 
 
 	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/unix/plugins.cfg
 		${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
-		${CMAKE_CURRENT_SOURCE_DIR}/resources/release/ogre.cfg
+                ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
+		${CMAKE_CURRENT_SOURCE_DIR}/resources/release/unix/ogre.cfg
 		DESTINATION ${INSTALL_DIR_PROJECT}/Release
 		CONFIGURATIONS Release
 	)
 	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/unix/plugins.cfg
 		${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
-		${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/ogre.cfg
+                ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
+		${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/unix/ogre.cfg
 		DESTINATION ${INSTALL_DIR_PROJECT}/Debug
 		CONFIGURATIONS Debug
 	)

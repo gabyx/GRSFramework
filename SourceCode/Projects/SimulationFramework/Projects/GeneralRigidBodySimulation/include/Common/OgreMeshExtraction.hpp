@@ -13,10 +13,10 @@
 #include <Ogre.h>
 #include <MeshData.hpp>
 
-/** 
+/**
 * @ingroup Common
-* @defgroup MeshExtraction Mesh Exctraction from Ogre 
-*/ 
+* @defgroup MeshExtraction Mesh Exctraction from Ogre
+*/
 /* @{ */
 
 
@@ -71,6 +71,9 @@ void extractMesh(MeshData<PREC> &myMeshInfo, std::vector<Ogre::Entity *> &Collis
     size_t index_count;
     Ogre::Vector3 *vertices;
     unsigned long *indices;
+
+    using std::endl;
+    using std::cout;
 
     for(int i=0;i<CollisionEntities.size();i++){
         cout <<"Adding mesh in MeshInfo for:" << CollisionEntities[i]->getName()<<endl;

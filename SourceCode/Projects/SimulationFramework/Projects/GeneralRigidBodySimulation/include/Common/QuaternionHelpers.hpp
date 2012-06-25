@@ -15,14 +15,14 @@
 
 /**
 * @ingroup Common
-* @defgroup QuaternionHelpers Quaternion To Matrix Transformation 
-*/ 
+* @defgroup QuaternionHelpers Quaternion To Matrix Transformation
+*/
 /* @{ */
 
 /**
 * @brief This returns a 3x3 rotation matrix from a 4x1 quaternion.
 * @param quat The input quaternion.
-* @return 3x3 rotation matrix. 
+* @return 3x3 rotation matrix.
 */
 template<class Derived>
 Eigen::Matrix<double,3,3> getRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat)
@@ -39,7 +39,7 @@ Eigen::Matrix<double,3,3> getRotFromQuaternion(const Eigen::MatrixBase<Derived>&
 /**
 * @brief This sets the values of a 3x3 rotation matrix from a 4x1 quaternion.
 * @param quat The input quaternion.
-* @param A The output 3x3 rotation matrix. 
+* @param A The output 3x3 rotation matrix.
 */
 template<class Derived, class DerivedOther>
 void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , Eigen::MatrixBase<DerivedOther> &A)
@@ -75,16 +75,19 @@ void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , Eigen::Matrix
 }
 
 template<class Derived, class DerivedOther>
-void setQuaternion(Eigen::MatrixBase<Derived>& quat , Eigen::MatrixBase<DerivedOther> & n, const typename Derived::Scalar angleRadian)
+void setQuaternion(const Eigen::MatrixBase<Derived>& nc_quat , const Eigen::MatrixBase<DerivedOther> & nc_n, const typename Derived::Scalar angleRadian)
 {
    typedef typename Derived::Scalar PREC;
    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(DerivedOther,3);
 
+   Eigen::MatrixBase<Derived>& quat = const_cast<Eigen::MatrixBase<Derived>& >( nc_quat);
+   Eigen::MatrixBase<DerivedOther>& n = const_cast<Eigen::MatrixBase<DerivedOther>& >( nc_n);
+
    n.normalize();
 
    quat(0) = cos(angleRadian/2);
-   quat.tail<3>() = n * sin(angleRadian/2);
+   quat.template tail<3>() = n * sin(angleRadian/2);
 
 }
 
@@ -106,13 +109,13 @@ Eigen::Matrix<typename Derived::Scalar,4,1> quatMult(const Eigen::MatrixBase<Der
    typedef typename Derived::Scalar PREC;
    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
 
-   Eigen::Matrix<Derived::Scalar,4,1> ret;
+   Eigen::Matrix< PREC ,4,1> ret;
 
       ret(0) =      quat1(0) * quat2(0) - quat1(1) * quat2(1) - quat1(2) * quat2(2) - quat1(3) * quat2(3);
       ret(1) =      quat1(0) * quat2(1) + quat1(1) * quat2(0) + quat1(2) * quat2(3) - quat1(3) * quat2(2);
       ret(2) =      quat1(0) * quat2(2) + quat1(2) * quat2(0) + quat1(3) * quat2(1) - quat1(1) * quat2(3);
       ret(3) =      quat1(0) * quat2(3) + quat1(3) * quat2(0) + quat1(1) * quat2(2) - quat1(2) * quat2(1);
-  
+
    return ret;
 }
 

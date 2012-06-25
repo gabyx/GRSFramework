@@ -10,7 +10,7 @@
 #include <boost/shared_ptr.hpp>
 
 //#define SRUTIL_DELEGATE_PREFERRED_SYNTAX
-#include <srutil/delegate/delegate.hpp> // Use fast SR delegates 
+#include <srutil/delegate/delegate.hpp> // Use fast SR delegates
 
 #include "AssertionDebug.hpp"
 
@@ -43,10 +43,10 @@ public:
 
       /** Adds a new ContactDelegate which will be invoked during the solveCollision() part.*/
    void addContactDelegate(const ContactDelegate & cD){
-      m_ContactDelegateList.push_back(cD);  
+      m_ContactDelegateList.push_back(cD);
    }
    void invokeAll(CollisionData<TLayoutConfig> *pCollData) const{
-      std::vector<ContactDelegate>::const_iterator it;
+      typename std::vector<ContactDelegate>::const_iterator it;
       for(it = m_ContactDelegateList.begin(); it != m_ContactDelegateList.end(); it++){
          (*it)(pCollData);
       }
@@ -87,8 +87,8 @@ public:
   typedef typename std::vector< CollisionData<TLayoutConfig> * > CollisionSet;
   inline void clearCollisionSet();
   ContactDelegateList<TLayoutConfig> m_ContactDelegateList;
-  
-  
+
+
 
 protected:
   //Inclusion Solver needs access to everything!
@@ -107,7 +107,7 @@ protected:
   std::stringstream logstream;
 
   inline void signalContactAdd(CollisionData<TLayoutConfig> * pColData); ///< Adds the contact either sends it to the delegate functions or it adds it in the set m_CollisionSet if no delegate has been added.
-  
+
   void updateAllObjects(const DynamicsState<TLayoutConfig> * state);       ///< General function which does some updateing of all objects. Currently not used.
 
 };
@@ -145,7 +145,7 @@ void CollisionSolver<TLayoutConfig>::reset()
 {
   // Do a Debug check if sizes match!
   ASSERTMSG( m_SimBodies.size() != 0, "CollisionSolver:: No Bodies added to the system!");
-  
+
   clearCollisionSet();
 
   reserveCollisionSetSpace(m_nSimBodies * 3);
@@ -155,7 +155,7 @@ void CollisionSolver<TLayoutConfig>::reset()
 template< typename TLayoutConfig >
 void CollisionSolver<TLayoutConfig>::clearCollisionSet()
 {
-   for(CollisionSet::iterator it = m_CollisionSet.begin(); it != m_CollisionSet.end(); it++){
+   for( typename CollisionSet::iterator it = m_CollisionSet.begin(); it != m_CollisionSet.end(); it++){
         delete (*it);
    }
    m_CollisionSet.clear();
@@ -171,7 +171,7 @@ void CollisionSolver<TLayoutConfig>::reserveCollisionSetSpace(unsigned int nCont
 template< typename TLayoutConfig >
 void CollisionSolver<TLayoutConfig>::solveCollision(const DynamicsState<TLayoutConfig> * state){
 
-   
+
   clearCollisionSet();
 
    #if CoutLevelSolver>0

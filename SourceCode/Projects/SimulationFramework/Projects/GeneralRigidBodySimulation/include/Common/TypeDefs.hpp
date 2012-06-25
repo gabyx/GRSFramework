@@ -84,7 +84,7 @@ struct LayoutConfig{
    typedef Eigen::Matrix<PREC, Layout::NDOFu, Layout::NDOFu>           MatrixUU;
    typedef Eigen::DiagonalMatrix<PREC, Layout::NDOFq>                  MatrixDiagQQ;
    typedef Eigen::DiagonalMatrix<PREC, Layout::NDOFu>                  MatrixDiagUU;
-   
+
    typedef Eigen::Matrix<PREC, Layout::NDOFq, Layout::NDOFu>           MatrixQU;
    typedef Eigen::Matrix<PREC, Layout::NDOFu, Layout::NDOFq>           MatrixUQ;
    typedef Eigen::Matrix<PREC, Layout::NDOFu, Eigen::Dynamic >         MatrixUDyn;
@@ -101,15 +101,15 @@ struct LayoutConfig{
    typedef Eigen::Matrix<PREC, Layout::NDOFFriction + 1, 1>            VectorPContact;
    typedef Eigen::Matrix<PREC, Layout::NDOFFriction, 1>                VectorPFriction;
 
-   typedef typename MyMatrix< PREC >::Matrix44 Matrix44; 
-   typedef typename MyMatrix< PREC >::Matrix33 Matrix33; 
-   typedef typename MyMatrix< PREC >::Vector3 Vector3;   
-   typedef typename MyMatrix< PREC >::Vector4 Vector4;   
-   typedef typename MyMatrix< PREC >::Quaternion Quaternion; 
-   typedef typename MyMatrix< PREC >::VectorDyn VectorDyn; 
-   typedef typename MyMatrix< PREC >::MatrixDyn MatrixDyn; 
-   typedef typename MyMatrix< PREC >::MatrixDiagDyn MatrixDiagDyn; 
-   typedef typename MyMatrix< PREC >::MatrixDynRow MatrixDynRow; 
+   typedef typename MyMatrix< PREC >::Matrix44 Matrix44;
+   typedef typename MyMatrix< PREC >::Matrix33 Matrix33;
+   typedef typename MyMatrix< PREC >::Vector3 Vector3;
+   typedef typename MyMatrix< PREC >::Vector4 Vector4;
+   typedef typename MyMatrix< PREC >::Quaternion Quaternion;
+   typedef typename MyMatrix< PREC >::VectorDyn VectorDyn;
+   typedef typename MyMatrix< PREC >::MatrixDyn MatrixDyn;
+   typedef typename MyMatrix< PREC >::MatrixDiagDyn MatrixDiagDyn;
+   typedef typename MyMatrix< PREC >::MatrixDynRow MatrixDynRow;
 
 };
 
@@ -222,8 +222,8 @@ typedef SolverConfig
       InclusionSolverCO<
          DoubleDynamicLayout,
          DynamicsSystem<DoubleDynamicLayout>,
-         CollisionSolver<DoubleDynamicLayout>, 
-         ContactGraph<DoubleDynamicLayout> 
+         CollisionSolver<DoubleDynamicLayout>,
+         ContactGraph<DoubleDynamicLayout>
       >
    > GeneralSolverConfigOrdered;
 
@@ -245,7 +245,7 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    typedef typename MyMatrix< PREC >::VectorDyn VectorDyn; \
    typedef typename MyMatrix< PREC >::MatrixDyn MatrixDyn; \
    typedef typename MyMatrix< PREC >::MatrixDiagDyn MatrixDiagDyn; \
-   typedef typename MyMatrix< PREC >::MatrixDynRow MatrixDynRow; 
+   typedef typename MyMatrix< PREC >::MatrixDynRow MatrixDynRow;
 
 /**
 * @brief This macro is used to typedef all template arguments in a class with e.g template argurment <typename Config>
@@ -287,7 +287,7 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    typedef typename _ConfigName_::TLayoutConfig::VectorDyn VectorDyn;   \
    typedef typename _ConfigName_::TLayoutConfig::MatrixDyn MatrixDyn;   \
    typedef typename _ConfigName_::TLayoutConfig::MatrixDiagDyn MatrixDiagDyn;   \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixDynRow MatrixDynRow; 
+   typedef typename _ConfigName_::TLayoutConfig::MatrixDynRow MatrixDynRow;
 
 /**
 * @brief This macro is used to typedef all template arguments in a class with e.g template argument typename â€œLayoutConfigâ€
@@ -314,7 +314,7 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    typedef typename _LayoutConfigName_::MatrixQObjUObj MatrixQObjUObj; \
    typedef typename _LayoutConfigName_::VectorPContact VectorPContact; \
    typedef typename _LayoutConfigName_::VectorPFriction VectorPFriction; \
-    typedef typename _LayoutConfigName_::Matrix44 Matrix44; \
+   typedef typename _LayoutConfigName_::Matrix44 Matrix44; \
    typedef typename _LayoutConfigName_::Matrix33 Matrix33; \
    typedef typename _LayoutConfigName_::Vector3 Vector3;   \
    typedef typename _LayoutConfigName_::Vector4 Vector4;   \
@@ -322,7 +322,7 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    typedef typename _LayoutConfigName_::VectorDyn VectorDyn;   \
    typedef typename _LayoutConfigName_::MatrixDyn MatrixDyn;   \
    typedef typename _LayoutConfigName_::MatrixDiagDyn MatrixDiagDyn;   \
-   typedef typename _LayoutConfigName_::MatrixDynRow MatrixDynRow; 
+   typedef typename _LayoutConfigName_::MatrixDynRow MatrixDynRow;
 
 /**
 * @brief This macro is used to typedef all template arguments outside of a class for a specific LayoutConfig.
@@ -357,7 +357,7 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    typedef  _LayoutConfigName_::VectorDyn VectorDyn;   \
    typedef  _LayoutConfigName_::MatrixDyn MatrixDyn;   \
    typedef  _LayoutConfigName_::MatrixDiagDyn MatrixDiagDyn;   \
-   typedef  _LayoutConfigName_::MatrixDynRow MatrixDynRow; 
+   typedef  _LayoutConfigName_::MatrixDynRow MatrixDynRow;
 
 /**
 * @brief This is the format for the output of matrices.

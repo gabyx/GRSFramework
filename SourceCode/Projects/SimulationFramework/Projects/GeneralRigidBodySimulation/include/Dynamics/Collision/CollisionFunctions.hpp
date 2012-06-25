@@ -23,19 +23,19 @@ namespace CollisionFunctions{
 
 
    template<typename TLayoutConfig>
-   typename TLayoutConfig::Vector3 getClosestPoint_PointTriangle(   const typename TLayoutConfig::Vector3 & I_r_S,  
+   typename TLayoutConfig::Vector3 getClosestPoint_PointTriangle(   const typename TLayoutConfig::Vector3 & I_r_S,
                                                                      const MeshData<MeshPREC> & mesh,
                                                                      const typename TLayoutConfig::Vector3 & I_r_M,
                                                                      const typename TLayoutConfig::Matrix33 & A_IM,
                                                                      const unsigned int & indexFace,
                                                                      unsigned int & type,unsigned int & id)
    {
-      DEFINE_LAYOUT_CONFIG_TYPES_OF_OUTSIDE_TEMPLATE(TLayoutConfig);
+      DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
 
       // Assumes everything in the same frame!
       // Search the closest point to the sphere on the triangle A,B,C with vertex0,1,2 -->
       // This code only tests the closest point to the sphere center m_r_S
-      // To understand this -> draw a triangle on the paper, and imagina a point in above the paper 
+      // To understand this -> draw a triangle on the paper, and imagina a point in above the paper
       // somewhere in the space, this point is the center of the sphere...
       static MeshData<MeshPREC>::TMeshIndices indices;
       static typename TLayoutConfig::Vector3 vertex0,vertex1,vertex2;
@@ -50,21 +50,21 @@ namespace CollisionFunctions{
 
       // =============================================
       type = 3;
-      double snom = (I_r_S - vertex0).dot(ab); 
+      double snom = (I_r_S - vertex0).dot(ab);
       double tnom = (I_r_S - vertex0).dot(ac);
 
       // Check if point lies in normal cone behind A
        id = indices(0);
       if (snom <= 0.0 && tnom <= 0.0) return vertex0;
 
-      
+
       double sdenom = (I_r_S - vertex1).dot(-ab);
       double unom = (I_r_S - vertex1).dot(bc);
       // Checks if point lies in normal cone behind B
       id = indices(1);
       if (sdenom <= 0.0f && unom <= 0.0f) return vertex1;
-       
-    
+
+
       double tdenom = (I_r_S - vertex2).dot(-ac);
       double udenom = (I_r_S - vertex2).dot(-bc);
       // Checks if point lies in normal cone behind C
@@ -72,7 +72,7 @@ namespace CollisionFunctions{
       if (tdenom <= 0.0f && udenom <= 0.0f) return vertex2;
 
       // ==============================================
-      type = 2; 
+      type = 2;
       Vector3 n = ab.cross(ac);
       double vc = n.dot((vertex0 - I_r_S).cross(vertex1 - I_r_S));
 
@@ -93,8 +93,8 @@ namespace CollisionFunctions{
       if (vb <= 0.0 && tnom >= 0.0 && tdenom >= 0.0)
          return vertex0 + (tnom / (tnom + tdenom)) * ac;
 
- 
-      //Otherwise we know that the point closest is the projection onto the 
+
+      //Otherwise we know that the point closest is the projection onto the
       type = 1;
       id = indexFace;
       double u = va / (va + vb + vc);

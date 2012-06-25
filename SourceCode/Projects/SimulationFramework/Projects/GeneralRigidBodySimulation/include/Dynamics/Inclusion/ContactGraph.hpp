@@ -38,11 +38,11 @@ public:
    Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> m_W_body1;
    Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> m_W_body2;
    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_xi;
-   
+
    Eigen::Matrix<PREC,Eigen::Dynamic,1>  m_I_plus_eps;
    Eigen::Matrix<PREC,Eigen::Dynamic,1>  m_mu;
 
-   unsigned int m_nLambdas; 
+   unsigned int m_nLambdas;
 
    const CollisionData<TLayoutConfig> * m_pCollData;
 
@@ -73,13 +73,20 @@ class ContactGraph : public Graph::GeneralGraph< ContactGraphNodeData<TLayoutCon
 public:
 
 
-
    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
 
-   typedef typename ContactGraphNodeData<TLayoutConfig> NodeDataType;
-   typedef typename ContactGraphEdgeData<TLayoutConfig> EdgeDataType;
+   typedef ContactGraphNodeData<TLayoutConfig> NodeDataType;
+   typedef ContactGraphEdgeData<TLayoutConfig> EdgeDataType;
    typedef typename Graph::Node< NodeDataType, EdgeDataType> Node;
    typedef typename Graph::Edge< NodeDataType, EdgeDataType> Edge;
+
+   typedef typename Graph::GeneralGraph< ContactGraphNodeData<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> >::NodeList NodeList;
+   typedef typename Graph::GeneralGraph< ContactGraphNodeData<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> >::EdgeList EdgeList;
+   typedef typename Graph::GeneralGraph< ContactGraphNodeData<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> >::NodeListIterator NodeListIterator;
+   typedef typename Graph::GeneralGraph< ContactGraphNodeData<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> >::EdgeListIterator EdgeListIterator;
+
+    using Graph::GeneralGraph< ContactGraphNodeData<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> >::m_edges;
+    using Graph::GeneralGraph< ContactGraphNodeData<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> >::m_nodes;
 
    ContactGraph(): m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0){}
 
@@ -186,12 +193,12 @@ private:
    inline void computeParams(NodeDataType & nodeData){
       if( nodeData.m_eContactModel == ContactModels::NCFContactModel ){
             // Get Contact Parameters
-         
-         
+
+
             //Set matrix size!
             nodeData.m_I_plus_eps.setZero(ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
             nodeData.m_mu.setZero(ContactModels::NormalAndCoulombFrictionContactModel::nFrictionParams);
-            
+
             ContactParams<TLayoutConfig> & params  = m_ContactParameterMap.getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
             nodeData.m_mu(0)         = params.m_mu;
             nodeData.m_I_plus_eps(0)    = 1 + params.m_epsilon_N;
@@ -201,13 +208,13 @@ private:
         else{
            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
         }
-      
+
    }
 
    template<int bodyNr>
    inline void computeW(NodeDataType & nodeData){
-   
-      
+
+
 
       if(nodeData.m_eContactModel == ContactModels::NCFContactModel){
 
@@ -217,42 +224,42 @@ private:
        static const CollisionData<TLayoutConfig> * pCollData;
 
         pCollData = nodeData.m_pCollData;
-        
-        
+
+
 
         if(bodyNr == 1){
            nodeData.m_W_body1.setZero(NDOFuObj, ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
-          
+
            updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
            I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
            // N direction =================================================
            nodeData.m_W_body1.col(0).template head<3>() = - pCollData->m_e_z; // I frame
            nodeData.m_W_body1.col(0).template tail<3>() = - I_Jacobi_2 * pCollData->m_e_z;
-       
+
            // T1 direction =================================================
            nodeData.m_W_body1.col(1).template head<3>() = - pCollData->m_e_x; // I frame
            nodeData.m_W_body1.col(1).template tail<3>() = - I_Jacobi_2 * pCollData->m_e_x;
-       
+
            // T2 direction =================================================
            nodeData.m_W_body1.col(2).template head<3>() = - pCollData->m_e_y; // I frame
            nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_e_y;
         }
         else{
            nodeData.m_W_body2.setZero(NDOFuObj, ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
-           
+
            updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
            I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
            // N direction =================================================
            nodeData.m_W_body2.col(0).template head<3>() =  pCollData->m_e_z; // I frame
            nodeData.m_W_body2.col(0).template tail<3>() =  I_Jacobi_2 * pCollData->m_e_z;
-       
+
            // T1 direction =================================================
            nodeData.m_W_body2.col(1).template head<3>() =  pCollData->m_e_x; // I frame
            nodeData.m_W_body2.col(1).template tail<3>() =  I_Jacobi_2 * pCollData->m_e_x;
-       
+
            // T2 direction =================================================
            nodeData.m_W_body2.col(2).template head<3>() =  pCollData->m_e_y; // I frame
-           nodeData.m_W_body2.col(2).template tail<3>() =  I_Jacobi_2 * pCollData->m_e_y; 
+           nodeData.m_W_body2.col(2).template tail<3>() =  I_Jacobi_2 * pCollData->m_e_y;
         }
       }else{
         ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
@@ -269,7 +276,7 @@ private:
       // Add self edge! ===========================================================
       m_edges.push_back(new Edge(m_edgeCounter)); addedEdge = m_edges.back();
       addedEdge->m_edgeData.m_pBody = pBody;
-      
+
       // add links
       addedEdge->m_startNode = pNode;
       addedEdge->m_endNode = pNode;
@@ -283,7 +290,7 @@ private:
       // Get all contacts on this body and connect to them =========================
       NodeList & nodeList = m_BodyToContactsList[pBody];
       //iterate over the nodeList and add edges!
-      NodeList::iterator it;
+      typename NodeList::iterator it;
       // if no contacts are already on the body we skip this
       for(it = nodeList.begin(); it != nodeList.end(); it++){
 
@@ -309,7 +316,7 @@ private:
 
    unsigned int m_nodeCounter; ///< An node counter, starting at 0.
    unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
-  
+
 };
 
 

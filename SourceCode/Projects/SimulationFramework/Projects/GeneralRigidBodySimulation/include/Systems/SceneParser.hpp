@@ -16,7 +16,7 @@
 #include <boost/serialization/variant.hpp>
 #include <boost/filesystem.hpp>
 #include "boost/random.hpp"
-#include "boost/generator_iterator.hpp" 
+#include "boost/generator_iterator.hpp"
 
 #include "Ogre.h"
 
@@ -34,7 +34,7 @@
 #include <aiScene.h>       // Output data structure
 #include <aiPostProcess.h> // Post processing flags
 
-#include <Opcode.h>
+//#include <Opcode.h>
 
 //#include "OgreMeshExtraction.hpp"
 
@@ -44,7 +44,7 @@
 
 /*
 * @Does not work yet, to implement a scene parser, implement everything starting from SimulationState, enter(), we exit the State, delete all Objects, and reinitialize with another system in XML format.
-* 
+*
 */
 template<typename TConfig>
 class SceneParser{
@@ -52,9 +52,9 @@ public:
 
    DEFINE_CONFIG_TYPES_OF(TConfig)
 
-      SceneParser( 
-      Ogre::SceneNode * baseFrame, 
-      boost::shared_ptr<Ogre::SceneManager> pSceneMgr, 
+      SceneParser(
+      Ogre::SceneNode * baseFrame,
+      boost::shared_ptr<Ogre::SceneManager> pSceneMgr,
       std::vector<Ogre::SceneNode*> &nodesSimBodies,
       std::vector<Ogre::SceneNode*> &nodesBodies,
       boost::shared_ptr<TSystem> pDynSys
@@ -68,9 +68,9 @@ public:
       m_SimBodies = 0;
    }
 
-   SceneParser( 
-      Ogre::SceneNode * baseFrame, 
-      boost::shared_ptr<Ogre::SceneManager> pSceneMgr, 
+   SceneParser(
+      Ogre::SceneNode * baseFrame,
+      boost::shared_ptr<Ogre::SceneManager> pSceneMgr,
       std::vector<Ogre::SceneNode*> &nodesSimBodies,
       std::vector<Ogre::SceneNode*> &nodesBodies
       )
@@ -93,7 +93,7 @@ public:
       m_pAppLog->logMessage("Parsing Scene...");
 
       CLEARLOG;
-      logstream <<"Scene Input file: "  << file.string() <<endl; 
+      logstream <<"Scene Input file: "  << file.string() <<endl;
       LOG(m_pAppLog);
 
 
@@ -132,7 +132,7 @@ public:
       }
       catch(ticpp::Exception& ex){
          CLEARLOG;
-         logstream <<"Scene XML error: "  << ex.what() <<endl; 
+         logstream <<"Scene XML error: "  << ex.what() <<endl;
          LOG(m_pAppLog);
          exit(-1);
       }
@@ -154,11 +154,11 @@ public:
    unsigned int getNumberOfSimBodies(){ return m_SimBodies;}
 
 
-private:  
+private:
 
    void processSceneSettings( ticpp::Node *sceneSettings ){
       if(m_bParseDynamics){
-         
+
          ticpp::Element *gravityElement = sceneSettings->FirstChild("Gravity",true)->ToElement();
          m_pDynSys->m_gravity = gravityElement->GetAttribute<double>("value");
 
@@ -167,7 +167,7 @@ private:
          }
 
          ticpp::Element *timestepElement = sceneSettings->FirstChild("TimeStepperSettings",true)->ToElement();
-         
+
             TimeStepperSettings<TLayoutConfig> timestepperSettings;
             InclusionSolverSettings<TLayoutConfig> inclusionSettings;
 
@@ -197,7 +197,7 @@ private:
                  }else if(type == "continue"){
                      timestepperSettings.m_eSimulateFromReference = TimeStepperSettings<TLayoutConfig>::CONTINUE;
                  }else{
-                    throw ticpp::Exception("String conversion in SimulateFromReference: type. The type '" + type + std::string("' has no implementation in the parser")); 
+                    throw ticpp::Exception("String conversion in SimulateFromReference: type. The type '" + type + std::string("' has no implementation in the parser"));
                  }
                  timestepperSettings.m_stateReferenceFile = simFromRef->GetAttribute("file");
                  checkFileExists(timestepperSettings.m_stateReferenceFile);
@@ -262,7 +262,7 @@ private:
             //Write all values back
            m_pDynSys->setSettings(timestepperSettings,inclusionSettings);
 
-          
+
 
       }
 
@@ -305,21 +305,21 @@ private:
          m_bodyListScales.push_back(scale);
       }
 
-      
+
       ticpp::Node * geometryNode = rigidbodies->FirstChild("Geometry");
       processGeometry(geometryNode);
-  
+
 
       ticpp::Node * dynPropNode = rigidbodies->FirstChild("DynamicProperties");
       processDynamicProperties(dynPropNode);
 
-      
+
          //Copy the pointers!
          if(m_eBodiesState == RigidBody<TLayoutConfig>::SIMULATED){
             if(m_bParseDynamics){
                for(int i=0; i < m_bodyList.size(); i++){
                   m_pDynSys->m_SimBodies.push_back(m_bodyList[i]);
-               } 
+               }
             }
             m_SimBodies += instances;
          }
@@ -333,7 +333,7 @@ private:
          else{
             throw ticpp::Exception("Adding only simulated and not simulated objects supported!");
          }
-      
+
 
 
 
@@ -370,13 +370,13 @@ private:
 
          double radius = sphere->GetAttribute<double>("radius");
          Vector3 scale; scale(0)=radius; scale(1)=radius; scale(2)=radius;
-         
+
          boost::shared_ptr<SphereGeometry<PREC> > pSphereGeom = boost::shared_ptr<SphereGeometry<PREC> >(new SphereGeometry<PREC>(radius));
 
          for(int i=0; i < m_bodyList.size(); i++){
             m_bodyListScales[i] = scale;
             m_bodyList[i]->m_geometry = pSphereGeom;
-         } 
+         }
       }
       else if(type == "random"){
          double minRadius;
@@ -403,15 +403,15 @@ private:
          typedef boost::mt19937  RNG;
          RNG generator(seed);
          boost::uniform_real<PREC> uniform(minRadius,maxRadius);
-         boost::variate_generator< boost::mt19937 & , boost::uniform_real<PREC> > randomNumber(generator, uniform); 
-         
+         boost::variate_generator< boost::mt19937 & , boost::uniform_real<PREC> > randomNumber(generator, uniform);
+
          for(int i=0; i < m_bodyList.size(); i++){
             double radius = randomNumber();
             Vector3 scale; scale(0)=radius; scale(1)=radius; scale(2)=radius;
             m_bodyListScales[i] = scale;
             boost::shared_ptr<SphereGeometry<PREC> > pSphereGeom = boost::shared_ptr<SphereGeometry<PREC> >(new SphereGeometry<PREC>(radius));
             m_bodyList[i]->m_geometry = pSphereGeom;
-         } 
+         }
       }
       else{
          throw ticpp::Exception("The attribute 'distribute' '" + type + std::string("' of 'Sphere' has no implementation in the parser"));
@@ -436,7 +436,7 @@ private:
 
          for(int i=0; i < m_bodyList.size(); i++){
             m_bodyList[i]->m_geometry = pHalfspaceGeom;
-         } 
+         }
 
       }else{
          throw ticpp::Exception("The attribute 'type' '" + type + std::string("' of 'Sphere' has no implementation in the parser"));
@@ -463,8 +463,8 @@ private:
 
          boost::filesystem::path fileName =  mesh->GetAttribute<std::string>("file");
          checkFileExists(fileName);
-         // if this file has already been added--> skip it and reference the 
-         ContainerSceneMeshs::iterator it = m_SceneMeshs.find(meshName);
+         // if this file has already been added--> skip it and reference the
+         typename ContainerSceneMeshs::iterator it = m_SceneMeshs.find(meshName);
 
          if( bInstantiate == false){
 
@@ -515,7 +515,7 @@ private:
             importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
             importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_NORMALS | aiComponent_MESHES);
             // And have it read the given file with some example postprocessing
-            // Usually - if speed is not the most important aspect for you - you'll 
+            // Usually - if speed is not the most important aspect for you - you'll
             // propably to request more postprocessing than we do in this example.
             const aiScene* scene = importer.ReadFile( fileName.string(),
                aiProcess_JoinIdenticalVertices  |
@@ -536,7 +536,7 @@ private:
             pMeshGeom = boost::shared_ptr<MeshGeometry<PREC> >(new MeshGeometry<PREC>(meshData));
 
             // Add geometry into the cache
-            m_SceneMeshs.insert(ContainerSceneMeshs::value_type(meshName,pMeshGeom));
+            m_SceneMeshs.insert(typename ContainerSceneMeshs::value_type(meshName,pMeshGeom));
 
          }
          else{
@@ -551,7 +551,7 @@ private:
          // Assign Geometry
          for(int i=0; i < m_bodyList.size(); i++){
             m_bodyList[i]->m_geometry = pMeshGeom;
-         } 
+         }
 
       }else{
          throw ticpp::Exception("The attribute 'type' '" + type + std::string("' of 'Mesh' has no implementation in the parser"));
@@ -586,7 +586,7 @@ private:
                vertice.y = temp(1);
                vertice.z = temp(2);
 
-               meshInfo.m_Vertices.push_back(temp.cast<MeshPREC>());
+               meshInfo.m_Vertices.push_back(temp.template cast<MeshPREC>());
             }
 
 
@@ -611,7 +611,7 @@ private:
                if(n.norm()==0){
                   n(0) = 1; n(1)=0; n(2)=0;
                }
-               meshInfo.m_Normals.push_back(n.cast<MeshPREC>());
+               meshInfo.m_Normals.push_back(n.template cast<MeshPREC>());
 
 
             }
@@ -660,7 +660,7 @@ private:
 
       for(int i=0; i < m_bodyList.size(); i++){
          m_bodyList[i]->m_eState = m_eBodiesState;
-      } 
+      }
 
    }
 
@@ -677,7 +677,7 @@ private:
 
          for(int i=0; i < m_bodyList.size(); i++){
             m_bodyList[i]->m_mass = mass;
-         } 
+         }
 
 
       }else{
@@ -690,7 +690,7 @@ private:
       if(type == "homogen"){
          for(int i=0; i < m_bodyList.size(); i++){
             InertiaTensor::calculateInertiaTensor(m_bodyList[i]);
-         } 
+         }
       }
       else{
          throw ticpp::Exception("The attribute 'type' '" + type + std::string("' of 'InertiaTensor' has no implementation in the parser"));
@@ -699,7 +699,7 @@ private:
       element = dynProp->FirstChild("Material")->ToElement();
       distribute = element->GetAttribute("distribute");
       if(distribute == "uniform"){
-         RigidBody<TLayoutConfig>::BodyMaterial eMaterial;
+         typename RigidBody<TLayoutConfig>::BodyMaterial eMaterial;
          type = element->GetAttribute("type");
          if(type == "standart"){
             eMaterial = RigidBody<TLayoutConfig>::STD_MATERIAL;
@@ -711,13 +711,13 @@ private:
             eMaterial = RigidBody<TLayoutConfig>::METAL;
          }
          else if( type == "glas"){
-            eMaterial = RigidBody<TLayoutConfig>::GLAS;  
+            eMaterial = RigidBody<TLayoutConfig>::GLAS;
          }else{
-            eMaterial = RigidBody<TLayoutConfig>::STD_MATERIAL;  
+            eMaterial = RigidBody<TLayoutConfig>::STD_MATERIAL;
          }
          for(int i=0; i < m_bodyList.size(); i++){
             m_bodyList[i]->m_eMaterial = eMaterial;
-         } 
+         }
       }
       else{
          throw ticpp::Exception("The attribute 'distribute' '" + distribute + std::string("' of 'Material' has no implementation in the parser"));
@@ -897,7 +897,7 @@ private:
     template<typename  TLayoutConfig>
    void processInitialConditionTransforms(DynamicsState<TLayoutConfig> & state, ticpp::Element * initCond){
 
-     
+
 
       int bodyCounter = 0;
       // Iterate over all values in the list
@@ -946,16 +946,16 @@ private:
                K_r_KB = trans;
                Rot_KI = getRotFromQuaternion(q_KI);
                I_r_IK += Rot_KI * K_r_KB; // Transforms like A_IK * A_r_AB;
-               q_KI = quatMult(q_KI,q_BK); // Sequential (aktiv) rotation 
-               
+               q_KI = quatMult(q_KI,q_BK); // Sequential (aktiv) rotation
+
           }
 
           if(bodyCounter >= state.m_SimBodyStates.size()){
               throw ticpp::Exception("To many intial condition specified!");
           }
           // Apply overall transformation!
-          state.m_SimBodyStates[bodyCounter].m_q.head<3>() = I_r_IK;
-          state.m_SimBodyStates[bodyCounter].m_q.tail<4>() = q_KI;
+          state.m_SimBodyStates[bodyCounter].m_q.template head<3>() = I_r_IK;
+          state.m_SimBodyStates[bodyCounter].m_q.template tail<4>() = q_KI;
 
          bodyCounter++;
       }
@@ -982,7 +982,7 @@ private:
       static int entityCounter = 0;
 
       boost::filesystem::path meshName = meshNode->ToElement()->GetAttribute<std::string>("file");
-      
+
       bool scaleLikeGeometry = false;
       Vector3 scale;
       if(meshNode->ToElement()->HasAttribute("scaleLikeGeometry")){
@@ -990,7 +990,7 @@ private:
             throw ticpp::Exception("String conversion of scale in processMesh: scaleWithGeometry failed");
          }
       }else{
-         
+
          if(!stringToVector3<PREC>(scale, meshNode->ToElement()->GetAttribute("scale"))){
             throw ticpp::Exception("String conversion of scale in processMesh: scale failed");
          }
@@ -1016,7 +1016,7 @@ private:
             }
          }
 
-         
+
          if(rendering->HasAttribute("shadowsEnabled")){
               if(!stringToType<bool>(shadowsEnabled, rendering->GetAttribute("shadowsEnabled"))){
                   throw ticpp::Exception("String conversion of in processMesh: shadowsEnabled failed");
@@ -1038,11 +1038,11 @@ private:
             throw ticpp::Exception("No Material Node found in Mesh!");
          }
 
-         
+
 
          std::stringstream entity_name,node_name;
 
-         for(int i=0; i<m_bodyList.size();i++){ 
+         for(int i=0; i<m_bodyList.size();i++){
             entity_name.str(""); node_name.str("");
             entity_name << meshName.filename().string() << std::string("Entity");
             node_name << meshName.filename().string() << std::string("Node");
@@ -1051,10 +1051,10 @@ private:
             //cout << entity_name.str() <<endl;
             Ogre::Entity* ent = m_pSceneMgr->createEntity(entity_name.str(), meshName.string() );
             ent->setCastShadows(shadowsEnabled);
-            SceneNode* sceneNode = m_BaseFrame->createChildSceneNode(node_name.str());
-            SceneNode* sceneNodeScale = sceneNode->createChildSceneNode();
+            Ogre::SceneNode* sceneNode = m_BaseFrame->createChildSceneNode(node_name.str());
+            Ogre::SceneNode* sceneNodeScale = sceneNode->createChildSceneNode();
             if(scaleLikeGeometry){
-               sceneNodeScale->setScale(m_bodyListScales[i](0),m_bodyListScales[i](1),m_bodyListScales[i](2));   
+               sceneNodeScale->setScale(m_bodyListScales[i](0),m_bodyListScales[i](1),m_bodyListScales[i](2));
             }
             else{
                sceneNodeScale->setScale(scale(0),scale(1),scale(2));
@@ -1062,7 +1062,7 @@ private:
             sceneNodeScale->attachObject(ent);
 
             if(attachAxis){
-                SceneNode* sceneNodeAxes = sceneNode->createChildSceneNode(entity_name.str() + "Axes");
+               Ogre::SceneNode* sceneNodeAxes = sceneNode->createChildSceneNode(entity_name.str() + "Axes");
                Ogre::Entity* axisEnt = m_pSceneMgr->createEntity(entity_name.str() + "AxesEnt","axes.mesh" );
                sceneNodeAxes->setScale(axesSize,axesSize,axesSize);
                sceneNodeAxes->attachObject(axisEnt);
@@ -1072,7 +1072,7 @@ private:
 
             ent->setMaterialName(m_materialList[matIdx]);
 
-            //Set initial condition 
+            //Set initial condition
             sceneNode->setPosition(m_bodyList[i]->m_r_S(0),m_bodyList[i]->m_r_S(1),m_bodyList[i]->m_r_S(2));
             sceneNode->setOrientation(m_bodyList[i]->m_q_KI(0),m_bodyList[i]->m_q_KI(1),m_bodyList[i]->m_q_KI(2),m_bodyList[i]->m_q_KI(3));
 

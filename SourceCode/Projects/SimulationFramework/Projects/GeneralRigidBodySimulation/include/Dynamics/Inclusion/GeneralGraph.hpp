@@ -78,7 +78,7 @@ public:
 	friend class Graph::GeneralGraph<NodeDataType, EdgeDataType>;
 	friend class Graph::Node<NodeDataType, EdgeDataType>;
 public:
-   Edge() : m_startNode(NULL), m_endNode(NULL), m_twinEdge(NULL), edgeNumber(eN) {};
+    Edge() : m_startNode(NULL), m_endNode(NULL), m_twinEdge(NULL), m_edgeNumber(0) {};
 	Edge(unsigned int eN) : m_startNode(NULL), m_endNode(NULL), m_twinEdge(NULL), m_edgeNumber(eN){};
 
   /* Node<NodeDataType, EdgeDataType> * getStartNode(){return m_startNode;}
@@ -112,15 +112,15 @@ protected:
 	std::vector<Edge<NodeDataType, EdgeDataType> *> m_edges;
 
 public:
-	
-   typedef typename std::vector<Node<NodeDataType, EdgeDataType>* > NodeList;
-   typedef typename std::vector<Edge<NodeDataType, EdgeDataType>* > EdgeList;
+
+   typedef std::vector<Node<NodeDataType, EdgeDataType>* > NodeList;
+   typedef std::vector<Edge<NodeDataType, EdgeDataType>* > EdgeList;
    typedef typename std::vector<Node<NodeDataType, EdgeDataType>* >::iterator NodeListIterator;
    typedef typename std::vector<Edge<NodeDataType, EdgeDataType>* >::iterator EdgeListIterator;
 
 
    GeneralGraph(){};
-	
+
    ~GeneralGraph() {
 		// cleanup allocated memory
 		for(typename std::vector<Node<NodeDataType, EdgeDataType>* >::iterator n_it = m_nodes.begin(); n_it != m_nodes.end(); n_it++)
@@ -135,13 +135,13 @@ public:
 
    NodeList & getNodeListRef(){ return m_nodes; };
    EdgeList & getEdgeListRef(){ return m_edges; };
-	
+
 	void visitNodes(NodeVisitor<NodeDataType, EdgeDataType>& vv) {
-		for(typename vector<Node<NodeDataType, FaceDataType, EdgeDataType>* >::iterator curr_node = vertices.begin(); curr_node != vertices.end(); curr_node++)
+		for(typename vector<Node<NodeDataType, EdgeDataType>* >::iterator curr_node = m_nodes.begin(); curr_node != m_nodes.end(); curr_node++)
 			(*curr_node)->acceptVisitor(vv);
 	}
 	void visitEdges(EdgeVisitor<NodeDataType, EdgeDataType>& hev) {
-		for(typename vector<Edge<NodeDataType, EdgeDataType>* >::iterator curr_he = edges.begin(); curr_he != edges.end(); curr_he++)
+		for(typename vector<Edge<NodeDataType, EdgeDataType>* >::iterator curr_he = m_edges.begin(); curr_he != m_edges.end(); curr_he++)
 			(*curr_he)->acceptVisitor(hev);
 	}
 };

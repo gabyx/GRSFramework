@@ -22,7 +22,7 @@
 
 ///==========================================
 
-template<typename PREC> 
+template<typename PREC>
 class MeshData
 {
 public:
@@ -32,23 +32,23 @@ public:
 
     MeshData(){};
    ~MeshData(){};
-   
+
    typedef Eigen::Matrix<unsigned int,3,1> TMeshIndices;
 
    //Mesh Information in 3D Coordinates in [m] --> scaled!
    std::vector< Vector3 > m_Vertices;
    std::vector< TMeshIndices > m_Faces;
-   std::vector< Vector3 > m_Normals; 
+   std::vector< Vector3 > m_Normals;
 
 
    void print(){
-      cout << "MeshData:: " <<endl<<"Vertices : "<<endl;
+      std::cout << "MeshData:: " <<std::endl<<"Vertices : "<<std::endl;
       for (int i=0;i<m_Vertices.size();i++){
-         cout <<i<<": "<<m_Vertices[i] <<endl;
+         std::cout <<i<<": "<<m_Vertices[i] <<std::endl;
       }
-      cout << "Indices & Normals : "<<endl;
+      std::cout << "Indices & Normals : "<<std::endl;
       for (int i=0;i<m_Faces.size();i++){
-         cout <<i<<": "<<m_Faces[i] <<  "\t n:"<<m_Normals[i] <<endl;
+         std::cout <<i<<": "<<m_Faces[i] <<  "\t n:"<<m_Normals[i] <<std::endl;
       }
    };
 
@@ -81,13 +81,17 @@ public:
 
    void writeToLog(Ogre::Log * plog){
       std::stringstream logmessage;
-      logmessage << "MeshData:: " <<endl<<"Vertices : "<<endl;
+
+      using std::endl;
+      using std::cout;
+
+      logmessage << "MeshData:: " <<std::endl<<"Vertices : "<<std::endl;
       for (int i=0;i<m_Vertices.size();i++){
          logmessage <<i<<": "<<m_Vertices[i] <<endl;
       }
       logmessage << "Indices & Normals : "<<endl;
       for (int i=0;i<m_Faces.size();i++){
-         logmessage <<i<<": "<<m_Faces[i] <<  "\t n:"<<m_Normals[i] <<endl;
+         logmessage <<i<<": "<<m_Faces[i] <<  "\t n:"<<m_Normals[i] <<std::endl;
       }
       plog->logMessage(logmessage.str().c_str());
    };

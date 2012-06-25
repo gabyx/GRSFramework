@@ -32,7 +32,7 @@ private:
 };
 template< typename TLayoutConfig>
 SharedBufferDynSys<TLayoutConfig>::SharedBufferDynSys(unsigned int nSimBodies):
-SharedBufferDynSys<TLayoutConfig>::StatePoolVisBackFront(nSimBodies)
+StatePoolVisBackFront<TLayoutConfig>(nSimBodies)
 {
 	reset();
 }

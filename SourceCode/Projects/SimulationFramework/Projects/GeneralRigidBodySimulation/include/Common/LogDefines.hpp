@@ -31,11 +31,11 @@
 */
 /* @{ */
 
-#define VIDEO_FOLDER_DIRECTORY ".//Videos"                       ///< Directory where new simulation folders are place during record.
+#define VIDEO_FOLDER_DIRECTORY "./Videos"                       ///< Directory where new simulation folders are place during record.
 #define VIDEO_FOLDER_PREFIX "Video_"                       ///< Directory where the video frames are place during record.
 #define SIM_VIDEO_PREFIX "VideoFrame_"                       ///< File prefix for the video frames;
 
-#define SIMULATION_FOLDER_DIRECTORY ".//Simfiles"                       ///< Directory where new simulation folders are place during record.
+#define SIMULATION_FOLDER_DIRECTORY "./SimFiles"                       ///< Directory where new simulation folders are place during record.
 #define SIM_FOLDER_PREFIX_RESAMPLE "SimDataRESAMPLE_"                       ///< Directory where the video frames are place during record.
 #define SIM_FILE_EXTENSION ".sim"                                       ///< File extension for .sim file.
 #define SIM_SCENE_FILE_NAME "SceneFile"                                 ///< File name for the Scene xml file which describes the scene

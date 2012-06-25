@@ -1,15 +1,33 @@
 # Set the makefile build type (only for make file based generators)
 MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )
+
 set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
 
 
 
 #The name of the project ====================================================================
-PROJECT(SimulationFramework)
+
+
+if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
+        set(SimulationFrameworkName "SimulationFramework${CMAKE_BUILD_TYPE}")
+else()
+        set(SimulationFrameworkName "SimulationFramework")
+endif()
+
+PROJECT(${SimulationFrameworkName})
 
 #The CMake Minimum version that is required. The FindCUDA script
 #is distributed since version 2.8
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+
+# If GNU C Compiler set warning lenght to one line for eclipse
+IF(CMAKE_COMPILER_IS_GNUCC)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
+ENDIF(CMAKE_COMPILER_IS_GNUCC)
+IF(CMAKE_COMPILER_IS_GNUCXX)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/;${CMAKE_MODULE_PATH}")
@@ -26,7 +44,7 @@ MARK_AS_ADVANCED(MULTITHREADED_BUILD)
 set(MULTITHREADED_BUILD 12 CACHE STRING "How many threads are used to build the project")
 if(MULTITHREADED_BUILD)
     if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
-            set(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM_INTERNAL} -j${MULTITHREADED_BUILD}")
+#           set(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM_INTERNAL} -j${MULTITHREADED_BUILD}")
             message(STATUS "Added arguments to CMAKE_BUILD_TOOL: ${CMAKE_MAKE_PROGRAM}")
     elseif(MSVC)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
@@ -41,7 +59,14 @@ FIND_PACKAGE(Doxygen)
 
 # Find CUDA! =============================================================================================================================
 # Set the flags
-SET(MYPROJECT_CUDA_PROPAGATE_HOST_FLAGS ON CACHE BOOL "Propagate C/CXX Flags and friends to the host compiler in NVCC via -Xompile")
+
+IF(WIN32)
+        SET(MYPROJECT_CUDA_PROPAGATE_HOST_FLAGS ON CACHE BOOL "Propagate C/CXX Flags and friends to the host compiler in NVCC via -Xompile")
+ENDIF()
+IF(UNIX)
+        SET(MYPROJECT_CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "Propagate C/CXX Flags and friends to the host compiler in NVCC via -Xompile")
+ENDIF()
+
 # Set the architecture for the grafics card!
 SET(MYPROJECT_CUDA_NVCC_FLAGS
 "-gencode=arch=compute_20,code=\\\"sm_20,compute_20\\\""
@@ -157,8 +182,10 @@ if(CUDA_FOUND)
 endif(CUDA_FOUND)
 # ===============================================================================================================================================================
 
-# Searching STLSoft =============================================================================================================================================
-FIND_PACKAGE(TinyXML REQUIRED)
+# Searching TICPP =============================================================================================================================================
+FIND_PACKAGE(TICPP REQUIRED)
+PRINTLIST( "TICPP_LIBRARY:" "${TICPP_LIBRARY}")
+PRINTLIST( "TICPP_LIBRARIES:" "${TICPP_LIBRARIES}")
 # ===============================================================================================================================================================
 
 # Searching Assimp ==================================
@@ -211,8 +238,10 @@ endif()
 #
 
 
-
-
+SET(MYPROJECT_CXX_FLAGS "-std=c++0x" CACHE STRING "The project's own compiler flags")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MYPROJECT_CXX_FLAGS}")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MYPROJECT_CXX_FLAGS}")
+MESSAGE(STATUS "Added ${MYPROJECT_CXX_FLAGS} to CMAKE_CXX and CMAKE_C_FLAGS: ${CMAKE_CXX_FLAGS} and ${CMAKE_C_FLAGS}")
 
 
 #set common includes for all projects which need them
@@ -232,3 +261,4 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Projects/media
 		DESTINATION ${CMAKE_BINARY_DIR}/Projects/
 		CONFIGURATIONS Debug Release
 )
+

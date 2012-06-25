@@ -118,21 +118,36 @@ macro(add_parent_dir VAR DIR)
   set(${VAR} ${${VAR}} ${${DIR}_TEMP})
 endmacro(add_parent_dir)
 
+#macro(foo in1)
+#  message("FIRST" ${in1})
+#  message("OPtional1:" ${ARGV1})
+#message("OPtional2:" ${ARGV2})
+#message("OPtional3:" ${ARGV3})
+#if( NOT "${ARGV1}" AND "${ARGV2}" )
+#message("OPtional1:" ${ARGV1} "TRUE")
+#message("OPtional2:" ${ARGV2} "TRUE") 
+#else()
+#message("OPtional1:" ${ARGV1} "false")  
+#endif()
+#endmacro()
+
 # Do the final processing for the package find.
-function(findpkg_finish PREFIX)
+# ARGV1 is TRUE if we only have headers!
+
+macro(findpkg_finish PREFIX)
   # skip if already processed during this run
   if (NOT ${PREFIX}_FOUND)
-    if ( (NOT ARGV1) AND ${PREFIX}_INCLUDE_DIR AND ${PREFIX}_LIBRARY)
-      set(${PREFIX}_FOUND TRUE)
+    if ( (NOT "${ARGV1}") AND ${PREFIX}_INCLUDE_DIR AND ${PREFIX}_LIBRARY)
+      set(${PREFIX}_FOUND TRUE )
       set(${PREFIX}_INCLUDE_DIRS ${${PREFIX}_INCLUDE_DIR})
-      set(${PREFIX}_LIBRARIES ${${PREFIX}_LIBRARY})
+      set(${PREFIX}_LIBRARIES ${${PREFIX}_LIBRARY}  )
       if (NOT ${PREFIX}_FIND_QUIETLY)
-        message(STATUS "Found ${PREFIX}: ${${PREFIX}_LIBRARIES}")
+        message(STATUS "Found ${PREFIX}")
       endif ()
-   elseif ( ARGV1 AND ${PREFIX}_INCLUDE_DIR)
+   elseif ( "${ARGV1}" AND ${PREFIX}_INCLUDE_DIR)
       set(${PREFIX}_FOUND TRUE)
-      set(${PREFIX}_INCLUDE_DIRS ${${PREFIX}_INCLUDE_DIR})
-      set(${PREFIX}_LIBRARIES ${${PREFIX}_LIBRARY})
+      set(${PREFIX}_INCLUDE_DIRS ${${PREFIX}_INCLUDE_DIR} )
+      set(${PREFIX}_LIBRARIES ${${PREFIX}_LIBRARY} )
       if (NOT ${PREFIX}_FIND_QUIETLY)
         message(STATUS "Found ${PREFIX}: No Library, only Headers")
       endif ()
@@ -147,7 +162,7 @@ function(findpkg_finish PREFIX)
 
     mark_as_advanced(${PREFIX}_INCLUDE_DIR ${PREFIX}_LIBRARY ${PREFIX}_LIBRARY_REL ${PREFIX}_LIBRARY_DBG ${PREFIX}_LIBRARY_FWK)
   endif ()
-endfunction(findpkg_finish)
+endmacro(findpkg_finish)
 
 
 # Slightly customised framework finder
