@@ -36,9 +36,9 @@
 * @brief The Moreau time stepper.
 */
 template< typename TLayoutConfig ,
-          typename TDynamicsSystem, 
-          typename TCollisionSolver, 
-          typename TInclusionSolver,  
+          typename TDynamicsSystem,
+          typename TCollisionSolver,
+          typename TInclusionSolver,
           typename TStatePool>
 class MoreauTimeStepper {
 public:
@@ -48,14 +48,14 @@ public:
 
   MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<TDynamicsSystem> pDynSys,  boost::shared_ptr<TStatePool>	pSysState);
   ~MoreauTimeStepper();
-  
+
   // The Core Objects ==================================
   boost::shared_ptr<TCollisionSolver>  m_pCollisionSolver;
   boost::shared_ptr<TInclusionSolver>  m_pInclusionSolver;
   boost::shared_ptr<TDynamicsSystem>	m_pDynSys;
   boost::shared_ptr<TStatePool>		   m_pStatePool;
   // ===================================================
-  
+
   void initLogs(const boost::filesystem::path &folder_path);
   void closeAllFiles();
   void initialize( boost::shared_ptr<TDynamicsSystem> pDynSys, boost::shared_ptr<TStatePool>	pSysState);
@@ -63,7 +63,7 @@ public:
   void doOneIteration();
 
   double getTimeCurrent();
-  
+
   // Solver Parameters
   TimeStepperSettings<TLayoutConfig> m_Settings;
 
@@ -147,7 +147,7 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
 
   m_pCollisionSolver = boost::shared_ptr<TCollisionSolver>(new TCollisionSolver(nSimBodies, m_pDynSys->m_SimBodies, m_pDynSys->m_Bodies));
   m_pInclusionSolver = boost::shared_ptr<TInclusionSolver>(new TInclusionSolver(m_pCollisionSolver,m_pDynSys));
-  
+
 };
 
 
@@ -187,7 +187,7 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
    m_CollisionDataFilePath = m_SimFolderPath;
    filename = COLLISION_DATA_FILE_PREFIX;
    filename += ".dat";
-   m_CollisionDataFilePath /= filename;  
+   m_CollisionDataFilePath /= filename;
 
   // Set new SolverFile path
    m_SolverLogFilePath = m_SimFolderPath;
@@ -202,7 +202,7 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
   }
   m_pSolverLog = NULL;
 
-#if LogToFileSolver == 1 
+#if LogToFileSolver == 1
   m_pSolverLog = Ogre::LogManager::getSingleton().createLog(m_SolverLogFilePath.string(),false,true,false);
   // If not sucessfull in writing the log to the Sim folder, take default log!
   if(m_pSolverLog == NULL){
@@ -216,7 +216,7 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
     m_pSolverLog = Ogre::LogManager::getSingleton().createLog("SolverLogFile.log",false,true,true);
   }
 #endif
-#if LogToConsoleSolver == 1 
+#if LogToConsoleSolver == 1
   m_pSolverLog->setDebugOutputEnabled(true);
 #else
   m_pSolverLog->setDebugOutputEnabled(false);
@@ -263,15 +263,15 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
   if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<TLayoutConfig>::NONE){
      if(!m_ReferenceSimFile.openSimFileRead(m_Settings.m_stateReferenceFile,m_nSimBodies,true)){
         std::stringstream error;
-        error << "Could not open file: " << m_Settings.m_stateReferenceFile.string()<<endl;
-        error << "File errors: " <<endl<< m_ReferenceSimFile.getErrorString();
+        error << "Could not open file: " << m_Settings.m_stateReferenceFile.string()<<std::endl;
+        error << "File errors: " <<std::endl<< m_ReferenceSimFile.getErrorString();
          m_pSolverLog->logMessage( error.str());
          ERRORMSG(error);
      }
 
      //m_ReferenceSimFile.writeOutAllStateTimes();
 
-     //Inject the end state into the front buffer 
+     //Inject the end state into the front buffer
      m_ReferenceSimFile.getEndState(*m_StateBuffers.m_pFront);
   }
 
@@ -307,7 +307,7 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
 
 #if CoutLevelSolver>0
   CLEARLOG;
-  logstream << "% Do one time-step =================================" <<endl; LOG(m_pSolverLog);
+  logstream << "% Do one time-step =================================" <<std::endl; LOG(m_pSolverLog);
 #endif
 
   m_PerformanceTimer.reset();
@@ -367,7 +367,7 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
   	CLEARLOG;
       logstream << "m_pFront->m_t: " << m_StateBuffers.m_pFront->m_t<<endl;
       logstream << "m_pFront->m_q: " << m_StateBuffers.m_pFront->m_q.transpose()<<endl;
-      logstream << "m_pFront->m_u: " << m_StateBuffers.m_pFront->m_u.transpose()<<endl; 
+      logstream << "m_pFront->m_u: " << m_StateBuffers.m_pFront->m_u.transpose()<<endl;
       LOG(m_pSolverLog);
   #endif
 
@@ -388,8 +388,8 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
 
 #if CoutLevelSolver>0
   CLEARLOG;
-  logstream << "% Iteration Time: "<<setprecision(5)<<(double)(m_endTime-m_startTime)<<endl;
-  logstream << "% End time-step ====================================" <<endl<<endl; LOG(m_pSolverLog);
+  logstream << "% Iteration Time: "<<std::setprecision(5)<<(double)(m_endTime-m_startTime)<<std::endl;
+  logstream << "% End time-step ====================================" <<std::endl<<std::endl; LOG(m_pSolverLog);
 #endif
 
    // Check if we can finish the timestepping!
@@ -408,9 +408,9 @@ bool MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
 template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
 void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::writeIterationToSystemDataFile(double globalTime){
    #if OUTPUT_SYSTEMDATA_FILE == 1
-         m_SystemDataFile 
+         m_SystemDataFile
         << globalTime << "\t"
-        << m_StateBuffers.m_pBack->m_t <<"\t" 
+        << m_StateBuffers.m_pBack->m_t <<"\t"
         << (double)(m_endTime-m_startTime) <<"\t"
         << (double)(m_endTimeCollisionSolver-m_startTimeCollisionSolver) <<"\t"
         << (double)(m_endTimeInclusionSolver-m_startTimeInclusionSolver) <<"\t"
@@ -425,7 +425,7 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
         << m_pDynSys->m_CurrentStateEnergy <<"\t"
         << m_pInclusionSolver->m_G_conditionNumber<<"\t"
         << m_pInclusionSolver->m_G_notDiagDominant<<"\t"
-        << m_pInclusionSolver->m_PercussionPool.getPoolSize()<<endl;
+        << m_pInclusionSolver->m_PercussionPool.getPoolSize()<<std::endl;
 
    #endif
 }

@@ -10,7 +10,6 @@
 #include <iostream>
 #include <typeinfo>
 
-using namespace std;
 
 #if defined(__APPLE__) || defined(__linux__) || defined(UNIX)
 
@@ -21,7 +20,7 @@ namespace debug {
 	inline bool isInf(T const& x) {
     return x == std::numeric_limits<T>::infinity() ||  x == -std::numeric_limits<T>::infinity();
 	}
-	
+
 	template<typename T>
 	inline bool isNan(T value)
 	{
@@ -56,15 +55,15 @@ namespace debug {
 	* @param condition The condition which needs to be truem otherwise an assertion is thrown!
 	* @param message The message in form of cout out expression like: ÒVariable:Ó<<i<< Òhas failedÓ
 	*/
-	 #define ASSERTMSG(condition,message) { if(!(condition)){ std::cerr << "ASSERT FAILED: " << #condition << " @ " <<endl<< message << endl << __FILE__ << " (" << __LINE__ << ")" << std::endl; abort();} }
-    #define WARNINGMSG(condition,message) { if(!(condition)){ std::cerr << "WARNING : " << #condition << " @ " <<endl<< message << endl << __FILE__ << " (" << __LINE__ << ")" << std::endl;} }
-    
+	 #define ASSERTMSG(condition,message) { if(!(condition)){ std::cerr << "ASSERT FAILED: " << #condition << " @ " <<std::endl<< message << std::endl << __FILE__ << " (" << __LINE__ << ")" << std::endl; abort();} }
+    #define WARNINGMSG(condition,message) { if(!(condition)){ std::cerr << "WARNING : " << #condition << " @ " <<std::endl<< message << std::endl << __FILE__ << " (" << __LINE__ << ")" << std::endl;} }
+
 #else
 	#define ASSERTMSG(condition,message) (void)0
    #define WARNINGMSG(condition,message) (void)0
 #endif
 
-   #define ERRORMSG(message) { std::cerr << "ERROR :  @ " <<endl<< message << endl << __FILE__ << " (" << __LINE__ << ")" << std::endl; abort(); }
+   #define ERRORMSG(message) { std::cerr << "ERROR :  @ " <<std::endl<< message << std::endl << __FILE__ << " (" << __LINE__ << ")" << std::endl; abort(); }
 
 	/**
 	* @brief An Assert Macro to use within C++ code. Checks if an variable is either INF or NaN.

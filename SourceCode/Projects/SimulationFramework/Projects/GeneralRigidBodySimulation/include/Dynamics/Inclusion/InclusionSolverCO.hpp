@@ -198,7 +198,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContac
 
 #if HAVE_CUDA_SUPPORT == 1
    CLEARLOG;
-   logstream << "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << endl;
+   logstream << "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;
    LOG(m_pSolverLog);
 
    CHECK_CUDA(cudaSetDevice(m_Settings.m_UseGPUDeviceId));
@@ -206,7 +206,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContac
    CHECK_CUDA(cudaGetDeviceProperties(&props,m_Settings.m_UseGPUDeviceId));
 
    CLEARLOG;
-   logstream << "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << endl;
+   logstream << "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;
    LOG(m_pSolverLog);
 #endif
 
@@ -258,7 +258,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContac
 
 #if CoutLevelSolver>0
    CLEARLOG;
-   logstream << " % -> solveInclusionProblem(): "<< endl;
+   logstream << " % -> solveInclusionProblem(): "<< std::endl;
    LOG(m_pSolverLog);
 #endif
 
@@ -278,7 +278,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContac
 
       #if CoutLevelSolver>0
          CLEARLOG;
-         logstream << " % nContacts = "<< m_nContacts<< endl;
+         logstream << " % nContacts = "<< m_nContacts<< std::endl;
          LOG(m_pSolverLog);
       #endif
 
@@ -467,7 +467,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContac
          }
          #if CoutLevelSolverWhenContact>0
                   CLEARLOG;
-                  logstream << " % Solution of Prox Iteration is finite: "<< m_isFinite <<endl;
+                  logstream << " % Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;
                   LOG(m_pSolverLog);
          #endif
       }
@@ -479,7 +479,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContac
 
 #if CoutLevelSolverWhenContact>0
       CLEARLOG;
-      logstream << " % Prox Iterations needed: "<< m_iterationsNeeded <<endl;
+      logstream << " % Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;
       LOG(m_pSolverLog);
 #endif
 

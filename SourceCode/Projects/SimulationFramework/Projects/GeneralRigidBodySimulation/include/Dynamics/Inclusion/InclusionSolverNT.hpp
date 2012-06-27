@@ -243,7 +243,7 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
 
 #if CoutLevelSolver>0
   CLEARLOG;
-  logstream << "---> solveInclusionProblem(): "<< endl;
+  logstream << "---> solveInclusionProblem(): "<< std::endl;
   LOG(m_pSolverLog);
 #endif
 
@@ -474,7 +474,7 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
 #endif
 #endif
 
-   
+
 
 
 

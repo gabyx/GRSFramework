@@ -61,6 +61,7 @@ InputContext::~InputContext( void ) {
 }
 
 bool InputContext::initialise() {
+    using namespace std;
     if( !mInputSystem ) {
         // Setup basic variables
         OIS::ParamList paramList;
@@ -77,9 +78,9 @@ bool InputContext::initialise() {
         // Set  the mouse/keyboard exclusivity
         #if defined __unix__  || defined __unix
             //mouse
-            paramList.insert( make_pair("x11_mouse_grab", "false") );
+            paramList.insert( std::make_pair("x11_mouse_grab", "false") );
             //keyboard
-            paramList.insert( make_pair("x11_keyboard_grab", "false") );
+            paramList.insert( std::make_pair("x11_keyboard_grab", "false") );
         #elif defined _WIN32 || defined _WIN64
             //mouse
 //            paramList.insert( make_pair("w32_mouse", "DISCL_FOREGROUND") );

@@ -176,7 +176,7 @@ void CollisionSolver<TLayoutConfig>::solveCollision(const DynamicsState<TLayoutC
 
    #if CoutLevelSolver>0
       CLEARLOG;
-      logstream <<" % -> solveCollision(): "<< endl;
+      logstream <<" % -> solveCollision(): "<<std::endl;
       LOG(m_pSolverLog);
    #endif
 

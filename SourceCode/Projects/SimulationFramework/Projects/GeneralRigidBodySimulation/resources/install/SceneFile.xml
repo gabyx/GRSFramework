@@ -4,7 +4,7 @@
 <SceneSettings>
 	<Gravity value="9.81" direction="0 0 -1" />
 	<TimeStepperSettings deltaT ="0.001" endTime="10">
-		<InclusionSolverSettings method="SOR" useGPU ="true" useGPUID="1" alphaJORProx="0.35" alphaSORProx="1.2" maxIter="3000" absTol="1e-7" relTol="1e-7" isFiniteCheck = "false"/>
+		<InclusionSolverSettings method="SOR" useGPU ="true" useGPUID="0" alphaJORProx="0.35" alphaSORProx="1.2" maxIter="3000" absTol="1e-7" relTol="1e-7" isFiniteCheck = "false"/>
 		<SimulateFromReference enabled="false" type="continue" file="./SimFiles/Continue3/StateData.sim" />
 		<!--SimulateFromReference type="continue" file="./SimFiles/8ResampeldReference2500RandomBalls/StateData.sim" enabled="true" /-->
 	</TimeStepperSettings>
@@ -14,7 +14,7 @@
 
 <SceneObjects>
 
-	<RigidBodies name="balls" instances="3500">
+	<RigidBodies name="balls" instances="1">
 		<Geometry>
 			<Sphere distribute="random" radius="0.0125" seed="5" minRadius="0.008" maxRadius="0.018" />
 		</Geometry>

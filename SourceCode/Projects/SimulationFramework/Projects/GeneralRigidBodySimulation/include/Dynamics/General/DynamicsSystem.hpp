@@ -154,7 +154,7 @@ template<typename TLayoutConfig>
 void DynamicsSystem<TLayoutConfig>::doFirstHalfTimeStep(const DynamicsState<TLayoutConfig> * state_s,
                                        DynamicsState<TLayoutConfig> * state_m,
                                        PREC timestep){
-
+  using namespace std;
   static MatrixQObjUObj F_i = MatrixQObjUObj::Identity();
 
   // Do timestep for every object
@@ -202,6 +202,8 @@ void DynamicsSystem<TLayoutConfig>::doFirstHalfTimeStep(const DynamicsState<TLay
 
 template<typename TLayoutConfig>
 void DynamicsSystem<TLayoutConfig>::doSecondHalfTimeStep(const DynamicsState<TLayoutConfig> * state_m,  DynamicsState<TLayoutConfig> * state_e, PREC timestep){
+
+    using namespace std;
 
   static MatrixQObjUObj F_i = MatrixQObjUObj::Identity();
   // Do timestep for every object

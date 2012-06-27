@@ -33,7 +33,6 @@ private:
 };
 
 
-   using namespace std;
 template< typename TLayoutConfig>
 SharedBufferPlayback<TLayoutConfig>::SharedBufferPlayback(unsigned int nSimBodies):
 StateRingPoolVisBackFront<TLayoutConfig>(nSimBodies)

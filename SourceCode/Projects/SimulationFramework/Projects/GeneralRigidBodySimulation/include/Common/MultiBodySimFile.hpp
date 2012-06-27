@@ -223,6 +223,7 @@ template<typename TLayoutConfig>
 template<typename TLayoutConfig>
 bool MultiBodySimFile<TLayoutConfig>::writeOutAllStateTimes()
 {
+   using namespace std;
    m_errorString.str("");
 
    std::fstream file;
@@ -292,14 +293,14 @@ bool  MultiBodySimFile<TLayoutConfig>::openSimFileWrite(const boost::filesystem:
          {
             //Set the put pointer!
             m_file_stream.seekp(m_beginOfStates);
-            m_file_stream.seekp( m_nStates*m_nBytesPerState ,ios_base::cur);
+            m_file_stream.seekp( m_nStates*m_nBytesPerState ,std::ios_base::cur);
             m_filePath = file_path;
 
             return true;
          }
      }
 
-     m_errorString << "Could not open sim file: " << file_path.string() <<" for appending data"<<endl;
+     m_errorString << "Could not open sim file: " << file_path.string() <<" for appending data"<<std::endl;
   }
 
   closeSimFile();
@@ -359,7 +360,7 @@ template<typename TLayoutConfig>
        }
     }else{
         //Dont read in velocities, its not needed!
-        m_file_stream.seekg(m_nBytesPerUObj,ios_base::cur);
+        m_file_stream.seekg(m_nBytesPerUObj,std::ios_base::cur);
     }
 
 
@@ -409,7 +410,7 @@ bool  MultiBodySimFile<TLayoutConfig>::openSimFileRead(const boost::filesystem::
 
   }
 
-  m_errorString << "Could not open sim file: " << file_path.string()<<endl;
+  m_errorString << "Could not open sim file: " << file_path.string()<<std::endl;
 
   closeSimFile();
   return false;
@@ -440,11 +441,12 @@ void MultiBodySimFile<TLayoutConfig>::closeSimFile()
 template<typename TLayoutConfig>
 bool  MultiBodySimFile<TLayoutConfig>::readLength()
 {
+using namespace std;
   m_file_stream.seekg(0, ios::end);
   m_nBytes = (std::streamoff)m_file_stream.tellg();
   m_file_stream.seekg(0, ios::beg);
 
-  cout << m_nBytes << "," << m_headerLength<<","<<m_nBytesPerState<<endl;
+  std::cout << m_nBytes << "," << m_headerLength<<","<<m_nBytesPerState<<std::endl;
   if(m_nBytes > m_headerLength){
      long long int nStates = (m_nBytes - m_headerLength) / ( m_nBytesPerState );
      cout << "States:" << (unsigned int) nStates;
@@ -452,10 +454,10 @@ bool  MultiBodySimFile<TLayoutConfig>::readLength()
        m_nStates = nStates;
        return true;
      }else{
-        m_errorString << "Number of states: " << nStates<<" , binary file is corrupt!" <<endl;
+        m_errorString << "Number of states: " << nStates<<" , binary file is corrupt!" <<std::endl;
      }
   }else{
-      m_errorString << "Binary file contains no data, probably only header!" <<endl;
+      m_errorString << "Binary file contains no data, probably only header!" <<std::endl;
   }
   return false;
 }
@@ -472,12 +474,12 @@ bool  MultiBodySimFile<TLayoutConfig>::readHeader()
        m_beginOfStates = m_file_stream.tellg();
       return true;
     }else{
-       m_errorString << "Binary file does not correspond to the number of bodies which should be simulated: "<< endl
-          <<" Binary File describes: \tnSimBodies = "<<nBodies<< "\tnDofqObj = "<<nDofqObj<<"\tnDofuObj = " << nDofuObj << endl
-          <<" Simulation requests: \t\tnSimBodies = "<<m_nSimBodies<< "\tnDofqObj = "<<NDOFqObj<<"\tnDofuObj = " << NDOFuObj<<endl;
+       m_errorString << "Binary file does not correspond to the number of bodies which should be simulated: "<< std::endl
+          <<" Binary File describes: \tnSimBodies = "<<nBodies<< "\tnDofqObj = "<<nDofqObj<<"\tnDofuObj = " << nDofuObj << std::endl
+          <<" Simulation requests: \t\tnSimBodies = "<<m_nSimBodies<< "\tnDofqObj = "<<NDOFqObj<<"\tnDofuObj = " << NDOFuObj<<std::endl;
     }
   }else{
-      m_errorString << "Binary file contains a wrong header and is not equal to: '" << m_simHeader<<"'"<<endl;
+      m_errorString << "Binary file contains a wrong header and is not equal to: '" << m_simHeader<<"'"<<std::endl;
   }
 
   return false;
@@ -492,7 +494,7 @@ bool  MultiBodySimFile<TLayoutConfig>::readHeader()
 template<typename TLayoutConfig>
 void MultiBodySimFile<TLayoutConfig>::getEndState(DynamicsState<TLayoutConfig>& state){
       m_file_stream.seekg(m_beginOfStates);
-      m_file_stream.seekg( (m_nStates-1)*m_nBytesPerState ,ios_base::cur);
+      m_file_stream.seekg( (m_nStates-1)*m_nBytesPerState ,std::ios_base::cur);
       this->operator>>(&state);
       m_file_stream.seekg(m_beginOfStates);
 }
