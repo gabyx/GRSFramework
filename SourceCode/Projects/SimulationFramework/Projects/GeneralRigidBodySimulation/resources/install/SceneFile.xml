@@ -14,7 +14,7 @@
 
 <SceneObjects>
 
-	<RigidBodies name="balls" instances="1">
+	<RigidBodies name="balls" instances="1000">
 		<Geometry>
 			<Sphere distribute="random" radius="0.0125" seed="5" minRadius="0.008" maxRadius="0.018" />
 		</Geometry>
@@ -33,6 +33,26 @@
 				</Mesh>
 		</Visualization>
 	</RigidBodies>
+
+<!--<RigidBodies name="bricksdown" instances="1">-->-->
+<!--		<Geometry>-->
+<!--			<Mesh name="bricksdown" distribute="uniform" file="../../../media/models/Cube.obj"  useInstance = "false"-->
+<!--			scale="0.5 0.5 0.5"  rotationAxis="1 0 0" angleDegree="0" translation="0 0 0.0"/>-->
+<!--		</Geometry>-->
+<!--		<DynamicProperties>-->
+<!--			<DynamicState type="not simulated" />-->
+<!--			<InitialCondition distribute="transforms" >-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="0" translation="0 0.0 0.0" />-->
+<!--				</Value>-->
+<!--			</InitialCondition>-->
+<!--		</DynamicProperties>-->
+<!--		<Visualization>-->
+<!--				<Mesh file="Cube.mesh" scale="0.5 0.5 0.5" type="uniform" attachAxis="false" axesSize="0.001">-->
+<!--					<Material name="PlaneBlue2" />-->
+<!--				</Mesh>-->
+<!--		</Visualization>-->
+<!--</RigidBodies>-->
 
 	<RigidBodies name="floor" instances="1">
 		<Geometry>

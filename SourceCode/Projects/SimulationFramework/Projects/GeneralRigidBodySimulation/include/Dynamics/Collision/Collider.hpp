@@ -399,9 +399,10 @@ void Collider<TLayoutConfig,TCollisionSolver>::collide(   boost::shared_ptr< Rig
                                                                      temporarySet);
 #endif
 
-    for(int i=0; i< temporarySet.size();i++){
-        std::cout << temporarySet[i].template get<0>() <<std::endl;
-    }
+//        if( temporarySet.size() == 2){
+//            std::cout << "Contacts:" << temporarySet.size() <<std::endl;
+//            std::cout << "Normal:" << temporarySet[0].template get<1>()<<std::endl;
+//        }
 
     // Signal all remaining contacts int the temporary set!
     for(unsigned int j=0; j<temporarySet.size(); j++) {

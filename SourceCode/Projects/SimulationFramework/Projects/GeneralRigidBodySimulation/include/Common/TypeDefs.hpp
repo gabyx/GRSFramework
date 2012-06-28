@@ -188,14 +188,14 @@ struct SolverConfig{
 class SpheresSystem;
 template< typename TLayoutConfig > class StatePoolVisBackFront;
 template< typename TLayoutConfig > class CollisionSolver;
-template< typename TLayoutConfig > class ContactGraph;
 template< typename TLayoutConfig > class DynamicsSystem;
 template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver> class InclusionSolverNT;
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TContactGraph > class InclusionSolverCO;
+template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver> class InclusionSolverCO;
 template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool> class MoreauTimeStepper;
 
 typedef DoubleDynamicLayout DoubleDynamicLayout;
 
+// Just defintion to save it!
 typedef SolverConfig
    <
    MoreauTimeStepper<
@@ -209,21 +209,21 @@ typedef SolverConfig
       InclusionSolverNT<DoubleDynamicLayout,SpheresSystem,CollisionSolver<DoubleDynamicLayout> >
    > GeneralSolverConfigNotOrdered;
 
+// This one is used!!
 typedef SolverConfig
    <
       MoreauTimeStepper<
          DoubleDynamicLayout,
          DynamicsSystem<DoubleDynamicLayout>,
          CollisionSolver<DoubleDynamicLayout>,
-         InclusionSolverCO<DoubleDynamicLayout,DynamicsSystem<DoubleDynamicLayout>,CollisionSolver<DoubleDynamicLayout>, ContactGraph<DoubleDynamicLayout> >,
+         InclusionSolverCO<DoubleDynamicLayout,DynamicsSystem<DoubleDynamicLayout>,CollisionSolver<DoubleDynamicLayout> >,
          StatePoolVisBackFront<DoubleDynamicLayout>
       >,
       CollisionSolver<DoubleDynamicLayout>,
       InclusionSolverCO<
          DoubleDynamicLayout,
          DynamicsSystem<DoubleDynamicLayout>,
-         CollisionSolver<DoubleDynamicLayout>,
-         ContactGraph<DoubleDynamicLayout>
+         CollisionSolver<DoubleDynamicLayout>
       >
    > GeneralSolverConfigOrdered;
 

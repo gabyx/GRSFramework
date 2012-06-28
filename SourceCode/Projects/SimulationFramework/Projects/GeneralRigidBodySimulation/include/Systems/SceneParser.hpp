@@ -669,7 +669,7 @@ private:
       else if(distribute == "posaxisangle"){
          processInitialConditionPositionAxisAngle(m_SimBodyInitStates.back(),element);
       }
-      else if(distribute == "transform"){
+      else if(distribute == "transforms"){
          processInitialConditionTransforms(m_SimBodyInitStates.back(),element);
       }
       else if(distribute == "none"){

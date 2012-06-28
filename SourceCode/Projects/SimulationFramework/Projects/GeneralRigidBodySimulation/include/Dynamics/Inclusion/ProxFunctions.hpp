@@ -291,8 +291,8 @@ namespace Prox{
             y_ref(3*i) = max(y_ref(3*i),(PREC)0.0);
             // Disk
             absvalue = (y_ref.template segment<2>(3*i+1)).norm();
-            if (absvalue > scale_factor(i,0)*y_ref(3*i)){
-               y_ref.template segment<2>(3*i+1) =  y_ref.template segment<2>(3*i+1) / absvalue * scale_factor(i,0)*y_ref(3*i);
+            if (absvalue > scale_factor(i)*y_ref(3*i)){
+               y_ref.template segment<2>(3*i+1) =  y_ref.template segment<2>(3*i+1) / absvalue * scale_factor(i)*y_ref(3*i);
             }
          }
       }
@@ -366,6 +366,10 @@ namespace Prox{
       EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
       typedef typename Derived::Scalar PREC;
 
+        using std::abs;
+        using std::pow;
+        using std::sqrt;
+
       PREC NormP =0;
       PREC RelNormP=0;
       for(int i=0;i<P_N_old.size();i++){
@@ -386,9 +390,9 @@ namespace Prox{
       }
 
 #if CoutLevelSolverWhenContact>2
-      CLEARLOG;
-      logstream << "Cancel Criterion :" << RelNormP << " < " << NormP * m_Settings.m_RelTol + m_Settings.m_AbsTol;
-      LOG(m_pSolverLog);
+//      CLEARLOG;
+//      logstream << "Cancel Criterion :" << RelNormP << " < " << NormP * m_Settings.m_RelTol + m_Settings.m_AbsTol;
+//      LOG(m_pSolverLog);
 #endif
 
       return false;
@@ -429,6 +433,8 @@ namespace Prox{
       EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
       typedef typename Derived::Scalar PREC;
 
+      using std::abs;
+
       for(int i=0;i<P_old.size();i++){
          if ( abs(P_new[i]-P_old[i]) > abs(P_old[i]) * RelTol + AbsTol){
             return  false;
@@ -446,6 +452,7 @@ namespace Prox{
       EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
 
       typedef typename Derived::Scalar PREC;
+        using std::abs;
 
       for(int i=0;i<P_old.size();i++){
          if ( abs(P_new[i]-P_old[i]) > abs(P_old[i]) * RelTol + AbsTol){

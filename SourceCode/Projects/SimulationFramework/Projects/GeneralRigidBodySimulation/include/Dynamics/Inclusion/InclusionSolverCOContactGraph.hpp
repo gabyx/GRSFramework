@@ -1,4 +1,4 @@
-﻿#ifndef InclusionSolverNTContactOrdered_hpp
+#ifndef InclusionSolverNTContactOrdered_hpp
 #define InclusionSolverNTContactOrdered_hpp
 
 #include <fstream>
@@ -16,7 +16,7 @@
 #include "VectorToSkewMatrix.hpp"
 #include "ProxFunctions.hpp"
 #include "InclusionSolverSettings.hpp"
-#include "ContactGraph.hpp"
+
 
 #include "LogDefines.hpp"
 #include "ConfigureFile.hpp"
@@ -35,7 +35,7 @@
 * @ingroup Inclusion
 * @brief The inclusion solver for an ordered problem.
 */
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
 class InclusionSolverCO{
 public:
    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
@@ -79,7 +79,6 @@ protected:
    std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_SimBodies;
    std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_Bodies;
 
-   typedef ContactGraph<TLayoutConfig,ContactGraphNodeData, ContactGraphEdgeData> TContactGraph;
    TContactGraph m_ContactGraph;
 
    // Matrices for solving the inclusion ===========================
@@ -125,8 +124,8 @@ protected:
 
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::InclusionSolverCO(boost::shared_ptr< TCollisionSolver >  pCollisionSolver,  boost::shared_ptr<TDynamicsSystem> pDynSys):
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::InclusionSolverCO(boost::shared_ptr< TCollisionSolver >  pCollisionSolver,  boost::shared_ptr<TDynamicsSystem> pDynSys):
 m_SimBodies(pCollisionSolver->m_SimBodies),
    m_Bodies(pCollisionSolver->m_Bodies)
 {
@@ -142,7 +141,6 @@ m_SimBodies(pCollisionSolver->m_SimBodies),
    resetPercussionBuffer();
 
    m_pCollisionSolver = pCollisionSolver;
-
    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
    m_pCollisionSolver->m_ContactDelegateList.addContactDelegate(
       ContactDelegateList<TLayoutConfig>::ContactDelegate::template from_method< TContactGraph,  &TContactGraph::addNode>(&m_ContactGraph)
@@ -163,8 +161,8 @@ m_SimBodies(pCollisionSolver->m_SimBodies),
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::initializeLog( Ogre::Log* pSolverLog,  boost::filesystem::path folder_path )
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::initializeLog( Ogre::Log* pSolverLog,  boost::filesystem::path folder_path )
 {
    m_pSolverLog = pSolverLog;
 
@@ -175,14 +173,14 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::initia
 }
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-unsigned int InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::getNObjects()
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+unsigned int InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::getNObjects()
 {
    return m_nSimBodies;
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::reset()
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::reset()
 {
    // Do a Debug check if sizes match!
    ASSERTMSG( m_SimBodies.size() * NDOFuObj == m_nDofu, "InclusionSolverCO:: Error in Dimension of System!");
@@ -215,8 +213,8 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::reset(
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::resetForNextIter()
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::resetForNextIter()
 {
    m_nContacts = 0;
    m_nLambdas = 0;
@@ -230,14 +228,14 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::resetF
 }
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::swapPercussionBuffer()
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::swapPercussionBuffer()
 {
    std::swap(m_P_back,m_P_front);
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::resetPercussionBuffer()
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::resetPercussionBuffer()
 {
    m_P_back = &m_P_1;
    m_P_front = &m_P_2;
@@ -245,15 +243,15 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::resetP
 
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::reservePercussionPoolSpace( unsigned int nExpectedContacts )
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::reservePercussionPoolSpace( unsigned int nExpectedContacts )
 {
    m_nExpectedContacts = nExpectedContacts;
    m_PercussionPool.rehashPercussionPool(m_nExpectedContacts);
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveInclusionProblem(const DynamicsState<TLayoutConfig> * state_s,
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::solveInclusionProblem(const DynamicsState<TLayoutConfig> * state_s,
    const DynamicsState<TLayoutConfig> * state_m,
    DynamicsState<TLayoutConfig> * state_e)
 {
@@ -513,8 +511,8 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::setupRMatrix(PREC alpha){
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::setupRMatrix(PREC alpha){
    PREC r_T_i;
    for(unsigned int i=0;i<m_nContacts;i++){
       m_R((NDOFFriction+1)*i) =  alpha / m_T((NDOFFriction+1)*i,(NDOFFriction+1)*i);
@@ -532,8 +530,8 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::setupR
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::doJorProx(){
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::doJorProx(){
 
    // This JOR Prox is worse then JOR prox of InclusionSolverNT which uses P_Front_N already for tangential directions.
 
@@ -609,8 +607,8 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::doJorP
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::doSorProx(){
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::doSorProx(){
 
    static VectorPContact PContact_back;
    static unsigned int counterConverged;
@@ -695,8 +693,8 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::doSorP
 #endif
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::updatePercussionPool(const VectorDyn & P_old )
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::updatePercussionPool(const VectorDyn & P_old )
 {
    static VectorPContact P_contact;
    for(unsigned int i = 0; i< m_nContacts; i++){
@@ -711,8 +709,8 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::update
 }
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void  InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::readFromPercussionPool(unsigned int index, const CollisionData<TLayoutConfig> * pCollData, VectorDyn & P_old)
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
+void  InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::readFromPercussionPool(unsigned int index, const CollisionData<TLayoutConfig> * pCollData, VectorDyn & P_old)
 {
    static VectorPContact P_contact;
    m_PercussionPool.getPercussion(pCollData->m_ContactTag,P_contact);

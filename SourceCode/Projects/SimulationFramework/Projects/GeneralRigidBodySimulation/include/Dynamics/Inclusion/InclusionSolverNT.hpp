@@ -255,9 +255,9 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
   m_Minv_h_dt = m_Minv_diag.asDiagonal() * m_h * m_Settings.m_deltaT;
 #if CoutLevelSolverWhenContact>2
   CLEARLOG;
-  logstream << "h= "<< m_h.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
-  logstream << "Minv_diag= "<< "diag(" <<m_Minv_diag.transpose().format(MyIOFormat::Matlab) <<");"<<endl;
-  logstream << "Minv_h_dt= "<< m_Minv_h_dt.transpose().format(MyIOFormat::Matlab) <<"';"<<endl;
+  logstream << "h= "<< m_h.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
+  logstream << "Minv_diag= "<< "diag(" <<m_Minv_diag.transpose().format(MyIOFormat::Matlab) <<");"<<std::endl;
+  logstream << "Minv_h_dt= "<< m_Minv_h_dt.transpose().format(MyIOFormat::Matlab) <<"';"<<std::endl;
   LOG(m_pSolverLog);
 #endif
 
@@ -324,11 +324,11 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
 
 #if CoutLevelSolverWhenContact>2
       CLEARLOG;
-      logstream << "e_x= "<< collSet[contactIdx].m_e_x.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
-      logstream << "e_y= "<< collSet[contactIdx].m_e_y.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
-      logstream << "e_z= "<< collSet[contactIdx].m_e_z.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
-      logstream << collSet[contactIdx].m_e_x.dot(collSet[contactIdx].m_e_y) << collSet[contactIdx].m_e_y.dot(collSet[contactIdx].m_e_z) <<endl;
-      logstream << "r_s1c1="<< collSet[contactIdx].m_r_S1C1.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
+      logstream << "e_x= "<< collSet[contactIdx].m_e_x.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
+      logstream << "e_y= "<< collSet[contactIdx].m_e_y.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
+      logstream << "e_z= "<< collSet[contactIdx].m_e_z.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
+      logstream << collSet[contactIdx].m_e_x.dot(collSet[contactIdx].m_e_y) << collSet[contactIdx].m_e_y.dot(collSet[contactIdx].m_e_z) <<std::endl;
+      logstream << "r_s1c1="<< collSet[contactIdx].m_r_S1C1.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
       LOG(m_pSolverLog);
 #endif
       ASSERTMSG( std::abs(collSet[contactIdx].m_e_x.dot(collSet[contactIdx].m_e_y)) < 1e-3 && std::abs(collSet[contactIdx].m_e_y.dot(collSet[contactIdx].m_e_z))< 1e-3, "Vectors not parallel");
@@ -436,15 +436,15 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
 
 #if CoutLevelSolverWhenContact>2
     CLEARLOG;
-    logstream << "W_N= ..."<< endl << m_W_N.format(MyIOFormat::Matlab)<<";"<<endl;
-    logstream << "W_T= ..."<< endl << m_W_T.format(MyIOFormat::Matlab)<<";"<<endl;
-    logstream << "mu= "<<"diag("<< m_mu.transpose().format(MyIOFormat::Matlab)<<");"<<endl;
-    logstream << "I_epsilon_N= " << "diag("<< m_I_epsilon_N.transpose().format(MyIOFormat::Matlab)<<");"<<endl;
-    logstream << "I_epsilon_T= " << "diag("<< m_I_epsilon_T.transpose().format(MyIOFormat::Matlab)<<");"<<endl;
-    logstream << "WT_uS= "<< m_WN_uS.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
-    logstream << "WN_uS= "<< m_WT_uS.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
-    logstream << "WN_Minv_h_dt= "<< m_WN_Minv_h_dt.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
-    logstream << "WT_Minv_h_dt= "<< m_WT_Minv_h_dt.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
+    logstream << "W_N= ..."<< std::endl << m_W_N.format(MyIOFormat::Matlab)<<";"<<std::endl;
+    logstream << "W_T= ..."<< std::endl << m_W_T.format(MyIOFormat::Matlab)<<";"<<std::endl;
+    logstream << "mu= "<<"diag("<< m_mu.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl;
+    logstream << "I_epsilon_N= " << "diag("<< m_I_epsilon_N.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl;
+    logstream << "I_epsilon_T= " << "diag("<< m_I_epsilon_T.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl;
+    logstream << "WT_uS= "<< m_WN_uS.transpose().format(MyIOFormat::Matlab)<<std::endl;
+    logstream << "WN_uS= "<< m_WT_uS.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
+    logstream << "WN_Minv_h_dt= "<< m_WN_Minv_h_dt.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
+    logstream << "WT_Minv_h_dt= "<< m_WT_Minv_h_dt.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
     LOG(m_pSolverLog);
 #endif
 
@@ -469,7 +469,7 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
 #endif
 #if CoutLevelSolverWhenContact>2
     CLEARLOG;
-    logstream << "G= ..."<<endl<< G.format(MyIOFormat::Matlab)<<";"<<endl;
+    logstream << "G= ..."<<std::endl<< G.format(MyIOFormat::Matlab)<<";"<<std::endl;
     LOG(m_pSolverLog);
 #endif
 #endif
@@ -480,9 +480,9 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
 
 #if CoutLevelSolverWhenContact>2
     CLEARLOG;
-    logstream << "G_NN= ..."<< endl << m_G_NN.format(MyIOFormat::Matlab)<<";"<<endl;
-    logstream << "G_NT= ..."<< endl << m_G_NT.format(MyIOFormat::Matlab)<<";"<<endl;
-    logstream << "G_TT= ..."<< endl << m_G_TT.format(MyIOFormat::Matlab)<<";"<<endl;
+    logstream << "G_NN= ..."<< std::endl << m_G_NN.format(MyIOFormat::Matlab)<<";"<<std::endl;
+    logstream << "G_NT= ..."<< std::endl << m_G_NT.format(MyIOFormat::Matlab)<<";"<<std::endl;
+    logstream << "G_TT= ..."<< std::endl << m_G_TT.format(MyIOFormat::Matlab)<<";"<<std::endl;
     LOG(m_pSolverLog);
 #endif
 
@@ -491,8 +491,8 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
 
 #if CoutLevelSolverWhenContact>2
     CLEARLOG;
-    logstream << "c_N= " << m_c_N.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
-    logstream << "c_T= " << m_c_T.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
+    logstream << "c_N= " << m_c_N.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
+    logstream << "c_T= " << m_c_T.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
     LOG(m_pSolverLog);
 #endif
 
@@ -500,8 +500,8 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
 
 #if CoutLevelSolverWhenContact>2
     CLEARLOG;
-    logstream << "P_N_back= "<<P_N_back.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
-    logstream << "P_T_back= "<<P_T_back.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
+    logstream << "P_N_back= "<<P_N_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
+    logstream << "P_T_back= "<<P_T_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
     LOG(m_pSolverLog);
 #endif
 
@@ -516,7 +516,7 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
 
 #if CoutLevelSolverWhenContact>2
     CLEARLOG;
-    logstream << "% Prox Iterations needed: "<< m_iterationsNeeded <<endl;
+    logstream << "% Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;
     LOG(m_pSolverLog);
 #endif
 
@@ -554,8 +554,8 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::setupRM
 
 #if CoutLevelSolverWhenContact>2
     CLEARLOG;
-    logstream << "R_N= "<< "diag(" << m_R_N.transpose().format(MyIOFormat::Matlab)<<"');"<<endl;
-    logstream << "R_T= "<< "diag(" << m_R_T.transpose().format(MyIOFormat::Matlab)<<"');"<<endl;
+    logstream << "R_N= "<< "diag(" << m_R_N.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl;
+    logstream << "R_T= "<< "diag(" << m_R_T.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl;
     LOG(m_pSolverLog);
 #endif
 
@@ -582,8 +582,8 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::doJorPr
 
    #if CoutLevelSolverWhenContact>2
       CLEARLOG;
-      logstream << "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
-      logstream << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
+      logstream << "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
+      logstream << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
       LOG(m_pSolverLog);
    #endif
 
@@ -637,8 +637,8 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::doSorPr
 
 #if CoutLevelSolverWhenContact>2
       CLEARLOG;
-      logstream << "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
-      logstream << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<endl;
+      logstream << "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
+      logstream << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
       LOG(m_pSolverLog);
 #endif
 

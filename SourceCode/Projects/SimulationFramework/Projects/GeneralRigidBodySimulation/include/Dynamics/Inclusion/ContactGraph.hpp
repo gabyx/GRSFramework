@@ -34,7 +34,6 @@ public:
 
    ContactGraphNodeData(CollisionData<TLayoutConfig> * collDataPtr): m_pCollData(collDataPtr){}
 
-
    Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> m_W_body1;
    Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> m_W_body2;
    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_xi;
@@ -68,8 +67,8 @@ public:
 };
 
 
-template < typename TLayoutConfig >
-class ContactGraph : public Graph::GeneralGraph< ContactGraphNodeData<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> > {
+template < typename TLayoutConfig, template<class> class TNodeData, template<class> class TEdgeData >
+class ContactGraph : public Graph::GeneralGraph< TNodeData<TLayoutConfig>,TEdgeData<TLayoutConfig> > {
 public:
 
 

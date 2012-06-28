@@ -69,7 +69,7 @@ public:
         // Iterate over all faces
         MeshData<MeshPREC>::Faces::const_iterator faceIt;
 
-        static Vector3 vertex0,vertex1,vertex2,M_r_MS, I_r_SC;
+        static Vector3 vertex0,vertex1,vertex2, M_r_MS, I_r_SC;
         unsigned int type; unsigned int id;
         bool validContact;
         int faceNr=0;
@@ -79,27 +79,34 @@ public:
             vertex0 = mesh.m_Vertices[(*faceIt)(0)];
             vertex1 = mesh.m_Vertices[(*faceIt)(1)];
             vertex2 = mesh.m_Vertices[(*faceIt)(2)];
+
+//            std::cout <<faceNr <<":" << vertex0.transpose() <<std::endl
+//            << vertex1.transpose() <<std::endl<< vertex2.transpose() << std::endl;
+
             M_r_MS = A_IM.transpose() * (I_r_S - I_r_M);
-            I_r_SC = A_IM*getClosestPoint_PointTriangle(M_r_MS,vertex0,vertex1,vertex2,(*faceIt),faceNr,type,id);
+            I_r_SC = A_IM*(getClosestPoint_PointTriangle(M_r_MS,vertex0,vertex1,vertex2,(*faceIt),faceNr,type,id) - M_r_MS);
             double overlap = radius - I_r_SC.norm();
 
             I_r_SC.normalize();
             //If closest point is in sphere, then add this to the set
             if(overlap >= 0){
                 validContact = true;
-//                for(unsigned int j=0; j<pointSet.size(); j++) {
-//                    if( acos( pointSet[j].template get<1>().dot( I_r_SC )) < (5/180*M_PI)) {
-//                        validContact=false;
-//                        break;
-//                    }
-//                }
+                for(unsigned int j=0; j<pointSet.size(); j++) {
+                    //std::cout <<"Cos : "<< acos( pointSet[j].template get<1>().dot( I_r_SC )) << "<" << (5.0/180.0*M_PI)<<std::endl;
+
+                    if( acos( pointSet[j].template get<1>().dot( I_r_SC )) < (5.0/180.0*M_PI)) {
+
+                        validContact=false;
+                        break;
+                    }
+                }
                 if(validContact){
                     pointSet.push_back(ClosestPoint(overlap,I_r_SC,type,id));
                 }
             }
             faceNr++;
         }
-
+        //std::cout <<"Coll: ==========" <<  std::endl;
     };
 
     inline static Vector3 getClosestPoint_PointTriangle(    const Vector3 & I_r_S,

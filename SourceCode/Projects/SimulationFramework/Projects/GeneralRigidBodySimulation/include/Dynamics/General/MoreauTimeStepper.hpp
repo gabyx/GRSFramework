@@ -365,10 +365,10 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
 
   #if CoutLevelSolver>1
   	CLEARLOG;
-      logstream << "m_pFront->m_t: " << m_StateBuffers.m_pFront->m_t<<endl;
-      logstream << "m_pFront->m_q: " << m_StateBuffers.m_pFront->m_q.transpose()<<endl;
-      logstream << "m_pFront->m_u: " << m_StateBuffers.m_pFront->m_u.transpose()<<endl;
-      LOG(m_pSolverLog);
+//      logstream << "m_pFront->m_t: " << m_StateBuffers.m_pFront->m_t<<std::endl;
+//      logstream << "m_pFront->m_q: " << m_StateBuffers.m_pFront->m_q.transpose()<<std::endl;
+//      logstream << "m_pFront->m_u: " << m_StateBuffers.m_pFront->m_u.transpose()<<std::endl;
+//      LOG(m_pSolverLog);
   #endif
 
   //Force switch
