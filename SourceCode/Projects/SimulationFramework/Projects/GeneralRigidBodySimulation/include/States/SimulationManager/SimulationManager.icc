@@ -63,38 +63,38 @@ void SimulationManager<TConfig>::setup()
   logstream << "---> SimulationManager::setup(): "<< endl;
   LOG(m_pAppLog);
 
-   
+
    m_lengthScale = 100;  // 1m = 100 Ogre units , 1cm -> 1 Ogre Unit
   m_pBaseNode = m_pSceneMgr->getSceneNode("BaseFrame")->createChildSceneNode("BaseFrameScene");
   m_pBaseNode->setScale(Ogre::Vector3(1.0,1.0,1.0)*m_lengthScale);
 
 
-  m_pDynSys = boost::shared_ptr< TSystem >( new TSystem());
+  m_pDynSys = boost::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
 
   // Parse the Scene from XML! ==========================
   m_pSceneParser = boost::shared_ptr< SceneParser<TConfig> >( new SceneParser<TConfig>( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies, m_pDynSys) );
   m_pSceneParser->parseScene("SceneFile.xml");
-  
+
   m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
   // =====================================================
 
 
-  m_pSharedBuffer = boost::shared_ptr<SharedBufferDynSys<TLayoutConfig> >(new SharedBufferDynSys<TLayoutConfig>(m_nSimBodies));
-  m_pTimestepper = boost::shared_ptr< TTimeStepper >( new TTimeStepper(m_nSimBodies, m_pDynSys, m_pSharedBuffer) );
-  
+  m_pSharedBuffer = boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >(new SharedBufferDynSys<LayoutConfigType>(m_nSimBodies));
+  m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys, m_pSharedBuffer) );
+
   m_pVisBuffer = m_pSharedBuffer->updateVisBuffer();
 
-  m_pStateRecorder = boost::shared_ptr<StateRecorder<TLayoutConfig> >(new StateRecorder<TLayoutConfig>(m_nSimBodies));
+  m_pStateRecorder = boost::shared_ptr<StateRecorder<LayoutConfigType> >(new StateRecorder<LayoutConfigType>(m_nSimBodies));
 
 
   m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());
   m_pVisBuffer = m_pSharedBuffer->updateVisBuffer();
 
-  // Update all Sim Bodies 
+  // Update all Sim Bodies
   updateSimBodies();
 
   enableInput(true);
- 
+
 
   CLEARLOG;
   logstream << "---> added all objects(): "<< endl;
@@ -104,7 +104,7 @@ void SimulationManager<TConfig>::setup()
 
 template<typename TConfig>
 bool SimulationManager<TConfig>::writeInitialState(){
-   MultiBodySimFile<TLayoutConfig> simFile;
+   MultiBodySimFile<LayoutConfigType> simFile;
    // Request new file Paths for all logs from FileManager
    // Get new folder path
    boost::filesystem::path file = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_DIRECTORY,SIM_FOLDER_PREFIX_INIT);
@@ -263,7 +263,7 @@ void SimulationManager<TConfig>::cleanUpSimThread(){
 template<typename TConfig>
 void SimulationManager<TConfig>::threadRunRecord()
 {
-  
+
   static double timelineSimulation;
 
   m_pAppLog->logMessage(" SimulationManager: RecordThread entering...");
@@ -275,8 +275,8 @@ void SimulationManager<TConfig>::threadRunRecord()
    m_pTimestepper->reset();
 
   //Open File
-  bool fileOK = false; 
-  if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<TLayoutConfig>::CONTINUE){
+  bool fileOK = false;
+  if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::CONTINUE){
       fileOK = m_pStateRecorder->createSimFileCopyFromReference(m_SimFilePath,m_pTimestepper->m_Settings.m_stateReferenceFile);
   }else{
       fileOK = m_pStateRecorder->createSimFile(m_SimFilePath);
@@ -286,7 +286,7 @@ void SimulationManager<TConfig>::threadRunRecord()
   {
 
     // Write first initial value out!
-    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<TLayoutConfig>::NONE){
+    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE){
       m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
     }
 
@@ -296,7 +296,7 @@ void SimulationManager<TConfig>::threadRunRecord()
 
     while(!isSimThreadToBeStopped())
     {
-      
+
 
       // Read all inputs
       readSharedBuffer();
@@ -333,7 +333,7 @@ void SimulationManager<TConfig>::initRecordThread()
 {
   // Get new folder path
   m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_DIRECTORY,SIM_FOLDER_PREFIX_RECORD);
-   
+
    // Sim file path
      m_SimFilePath = m_SimFolderPath;
      std::string filename = SIM_FILE_PREFIX;

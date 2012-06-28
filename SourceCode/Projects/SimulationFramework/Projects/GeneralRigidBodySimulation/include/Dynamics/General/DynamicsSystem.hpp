@@ -22,6 +22,7 @@ class DynamicsSystem
 public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+   typedef TLayoutConfig LayoutConfig;
    DEFINE_LAYOUT_CONFIG_TYPES_OF( TLayoutConfig )
 
 	DynamicsSystem();

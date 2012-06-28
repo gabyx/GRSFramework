@@ -35,41 +35,41 @@
 * @ingroup DynamicsGeneral
 * @brief The Moreau time stepper.
 */
-template< typename TLayoutConfig ,
-          typename TDynamicsSystem,
-          typename TCollisionSolver,
-          typename TInclusionSolver,
-          typename TStatePool>
+template< typename TConfigTimeStepper>
 class MoreauTimeStepper {
 public:
-  DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+
+
+   DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( TConfigTimeStepper )
+
+
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
-  MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<TDynamicsSystem> pDynSys,  boost::shared_ptr<TStatePool>	pSysState);
+  MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState);
   ~MoreauTimeStepper();
 
   // The Core Objects ==================================
-  boost::shared_ptr<TCollisionSolver>  m_pCollisionSolver;
-  boost::shared_ptr<TInclusionSolver>  m_pInclusionSolver;
-  boost::shared_ptr<TDynamicsSystem>	m_pDynSys;
-  boost::shared_ptr<TStatePool>		   m_pStatePool;
+  boost::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
+  boost::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
+  boost::shared_ptr<DynamicsSystemType>	m_pDynSys;
+  boost::shared_ptr<StatePoolType>		   m_pStatePool;
   // ===================================================
 
   void initLogs(const boost::filesystem::path &folder_path);
   void closeAllFiles();
-  void initialize( boost::shared_ptr<TDynamicsSystem> pDynSys, boost::shared_ptr<TStatePool>	pSysState);
+  void initialize( boost::shared_ptr<DynamicsSystemType> pDynSys, boost::shared_ptr<StatePoolType>	pSysState);
   void reset();
   void doOneIteration();
 
   double getTimeCurrent();
 
   // Solver Parameters
-  TimeStepperSettings<TLayoutConfig> m_Settings;
+  TimeStepperSettings<LayoutConfigType> m_Settings;
 
   //Accessed only by Simulation manager, after doOneIteration();
-  boost::shared_ptr<const DynamicsState<TLayoutConfig> > getBackStateBuffer();
-  boost::shared_ptr<const DynamicsState<TLayoutConfig> > getFrontStateBuffer();
+  boost::shared_ptr<const DynamicsState<LayoutConfigType> > getBackStateBuffer();
+  boost::shared_ptr<const DynamicsState<LayoutConfigType> > getFrontStateBuffer();
 
   // General Log file
   Ogre::Log*	m_pSolverLog;
@@ -102,13 +102,13 @@ protected:
   std::ofstream m_SystemDataFile;
 
   // Reference Sim File for Simulation
-  MultiBodySimFile<TLayoutConfig> m_ReferenceSimFile;
+  MultiBodySimFile<LayoutConfigType> m_ReferenceSimFile;
 
   //Solver state pool front and back buffer
   void swapStateBuffers();
-  FrontBackBuffer<TLayoutConfig> m_StateBuffers;
+  FrontBackBuffer<LayoutConfigType> m_StateBuffers;
 
-  DynamicsState<TLayoutConfig> m_state_m;  // end state of iteration
+  DynamicsState<LayoutConfigType> m_state_m;  // end state of iteration
 
   // Logs
    boost::filesystem::path m_SimFolderPath;
@@ -127,8 +127,8 @@ _________________________________________________________*/
 
 #include "LogDefines.hpp"
 
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-MoreauTimeStepper<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<TDynamicsSystem> pDynSys,  boost::shared_ptr<TStatePool>	pSysState):
+template< typename TConfigTimeStepper>
+MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState):
 m_state_m(nSimBodies),
 m_nSimBodies(nSimBodies),
 m_nDofqObj(NDOFqObj),
@@ -145,23 +145,23 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
   m_pDynSys = pDynSys;
   m_pDynSys->init();
 
-  m_pCollisionSolver = boost::shared_ptr<TCollisionSolver>(new TCollisionSolver(nSimBodies, m_pDynSys->m_SimBodies, m_pDynSys->m_Bodies));
-  m_pInclusionSolver = boost::shared_ptr<TInclusionSolver>(new TInclusionSolver(m_pCollisionSolver,m_pDynSys));
+  m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(nSimBodies, m_pDynSys->m_SimBodies, m_pDynSys->m_Bodies));
+  m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys));
 
 };
 
 
 
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::~MoreauTimeStepper()
+template< typename TConfigTimeStepper>
+MoreauTimeStepper<  TConfigTimeStepper>::~MoreauTimeStepper()
 {
    m_CollisionDataFile.close();
    m_SystemDataFile.close();
   DECONSTRUCTOR_MESSAGE
 };
 
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::closeAllFiles(){
+template< typename TConfigTimeStepper>
+void MoreauTimeStepper<  TConfigTimeStepper>::closeAllFiles(){
    if(m_pSolverLog != NULL){
     Ogre::LogManager::getSingletonPtr()->destroyLog(m_pSolverLog);
    }
@@ -171,8 +171,8 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
    m_SystemDataFile.close();
 }
 
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::initLogs(  const boost::filesystem::path &folder_path ){
+template< typename TConfigTimeStepper>
+void MoreauTimeStepper<  TConfigTimeStepper>::initLogs(  const boost::filesystem::path &folder_path ){
 
   // Set new Simfile Path
   m_SimFolderPath = folder_path;
@@ -244,8 +244,8 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
 }
 
 
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::reset()
+template< typename TConfigTimeStepper>
+void MoreauTimeStepper<  TConfigTimeStepper>::reset()
 {
   //set standart values for parameters
   m_IterationCounter = 0;
@@ -260,7 +260,7 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
   m_pInclusionSolver->reset();
 
 
-  if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<TLayoutConfig>::NONE){
+  if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::NONE){
      if(!m_ReferenceSimFile.openSimFileRead(m_Settings.m_stateReferenceFile,m_nSimBodies,true)){
         std::stringstream error;
         error << "Could not open file: " << m_Settings.m_stateReferenceFile.string()<<std::endl;
@@ -282,24 +282,24 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
   m_bFinished = false;
 };
 
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-double MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::getTimeCurrent()
+template< typename TConfigTimeStepper>
+double MoreauTimeStepper<  TConfigTimeStepper>::getTimeCurrent()
 {
   return m_StateBuffers.m_pBack->m_t;
 }
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-boost::shared_ptr<const DynamicsState<TLayoutConfig> > MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::getBackStateBuffer()
+template< typename TConfigTimeStepper>
+boost::shared_ptr<const DynamicsState<typename TConfigTimeStepper::LayoutConfigType> > MoreauTimeStepper<  TConfigTimeStepper>::getBackStateBuffer()
 {
   return m_StateBuffers.m_pBack;
 }
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-boost::shared_ptr<const DynamicsState<TLayoutConfig> > MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::getFrontStateBuffer()
+template< typename TConfigTimeStepper>
+boost::shared_ptr<const DynamicsState< typename TConfigTimeStepper::LayoutConfigType> > MoreauTimeStepper<  TConfigTimeStepper>::getFrontStateBuffer()
 {
   return m_StateBuffers.m_pFront;
 }
 
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::doOneIteration()
+template< typename TConfigTimeStepper>
+void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration()
 {
   static std::stringstream logstream;
 
@@ -320,7 +320,7 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
   //boost::thread::yield();
 
   // If we should load the state from a reference file! Do this here!
-  if(m_Settings.m_eSimulateFromReference == TimeStepperSettings<TLayoutConfig>::USE_STATES && !m_bFinished){
+  if(m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::USE_STATES && !m_bFinished){
      m_ReferenceSimFile >> m_StateBuffers.m_pFront;
   }
 
@@ -393,20 +393,20 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
 #endif
 
    // Check if we can finish the timestepping!
-   if(m_Settings.m_eSimulateFromReference == TimeStepperSettings<TLayoutConfig>::USE_STATES ){
+   if(m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::USE_STATES ){
       m_bFinished =  !m_ReferenceSimFile.isGood();
    }else{
       m_bFinished =  m_StateBuffers.m_pFront->m_t >= m_Settings.m_endTime;
    }
 }
 
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-bool MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::finished(){
+template< typename TConfigTimeStepper>
+bool MoreauTimeStepper<  TConfigTimeStepper>::finished(){
    return m_bFinished;
 }
 
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::writeIterationToSystemDataFile(double globalTime){
+template< typename TConfigTimeStepper>
+void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToSystemDataFile(double globalTime){
    #if OUTPUT_SYSTEMDATA_FILE == 1
          m_SystemDataFile
         << globalTime << "\t"
@@ -429,8 +429,8 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
 
    #endif
 }
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::writeIterationToCollisionDataFile(){
+template< typename TConfigTimeStepper>
+void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToCollisionDataFile(){
    #if OUTPUT_COLLISIONDATA_FILE == 1
 
    double averageOverlap = 0;
@@ -447,8 +447,8 @@ void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusi
    #endif
 }
 
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool>
-void MoreauTimeStepper<TLayoutConfig,TDynamicsSystem, TCollisionSolver, TInclusionSolver, TStatePool>::swapStateBuffers(){
+template< typename TConfigTimeStepper>
+void MoreauTimeStepper<  TConfigTimeStepper>::swapStateBuffers(){
   m_StateBuffers = m_pStatePool->swapFrontBackBuffer();
 }
 

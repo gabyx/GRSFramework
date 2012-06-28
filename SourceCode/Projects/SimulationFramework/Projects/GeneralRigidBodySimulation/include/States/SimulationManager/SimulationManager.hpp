@@ -33,12 +33,12 @@ public:
    ~SimulationManager();
 
 
-   boost::shared_ptr<SharedBufferDynSys<TLayoutConfig> >	    m_pSharedBuffer;
-   boost::shared_ptr<StateRecorder<TLayoutConfig> >		    m_pStateRecorder;
+   boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >	    m_pSharedBuffer;
+   boost::shared_ptr<StateRecorder<LayoutConfigType> >		    m_pStateRecorder;
 
    std::vector<Ogre::SceneNode*>	m_SceneNodeSimBodies;
    std::vector<Ogre::SceneNode*>	m_SceneNodeBodies;
-   
+
    void setup();
 
    boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
@@ -61,7 +61,7 @@ private:
 
    void setShadowTechniques();
 
-   boost::shared_ptr<const DynamicsState<TLayoutConfig> > m_pVisBuffer;
+   boost::shared_ptr<const DynamicsState<LayoutConfigType> > m_pVisBuffer;
 
    // Accessed only by thread ===================
    void threadRunSimulation();
@@ -81,9 +81,9 @@ private:
 
    Ogre::Log* m_pSolverLog;
 
-   boost::shared_ptr< TTimeStepper >	m_pTimestepper;
+   boost::shared_ptr< TimeStepperType >	m_pTimestepper;
 
-   boost::shared_ptr< TSystem >		   m_pDynSys;
+   boost::shared_ptr< DynamicsSystemType >		   m_pDynSys;
    // ===========================================
 
    int m_nSimBodies;

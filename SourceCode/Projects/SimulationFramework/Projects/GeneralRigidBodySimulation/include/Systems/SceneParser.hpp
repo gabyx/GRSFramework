@@ -55,7 +55,7 @@ public:
       boost::shared_ptr<Ogre::SceneManager> pSceneMgr,
       std::vector<Ogre::SceneNode*> &nodesSimBodies,
       std::vector<Ogre::SceneNode*> &nodesBodies,
-      boost::shared_ptr<TSystem> pDynSys
+      boost::shared_ptr<DynamicsSystemType> pDynSys
       )
       : m_pSceneMgr(pSceneMgr),  m_rSceneNodeSimBodies(nodesSimBodies), m_rSceneNodeBodies(nodesBodies) , m_pDynSys(pDynSys)
    {
@@ -145,7 +145,7 @@ public:
       return m_currentParseFilePath;
    }
 
-   const std::vector< DynamicsState<TLayoutConfig> > & getInitialConditionSimBodies(){
+   const std::vector< DynamicsState<LayoutConfigType> > & getInitialConditionSimBodies(){
       return m_SimBodyInitStates;
    }
 
@@ -166,8 +166,8 @@ private:
 
          ticpp::Element *timestepElement = sceneSettings->FirstChild("TimeStepperSettings",true)->ToElement();
 
-            TimeStepperSettings<TLayoutConfig> timestepperSettings;
-            InclusionSolverSettings<TLayoutConfig> inclusionSettings;
+            TimeStepperSettings<LayoutConfigType> timestepperSettings;
+            InclusionSolverSettings<LayoutConfigType> inclusionSettings;
 
             // Get standart values!
             m_pDynSys->getSettings(timestepperSettings,inclusionSettings);
@@ -191,16 +191,16 @@ private:
               if(enabled){
                  std::string type = simFromRef->GetAttribute("type");
                  if(type == "useStates"){
-                     timestepperSettings.m_eSimulateFromReference = TimeStepperSettings<TLayoutConfig>::USE_STATES;
+                     timestepperSettings.m_eSimulateFromReference = TimeStepperSettings<LayoutConfigType>::USE_STATES;
                  }else if(type == "continue"){
-                     timestepperSettings.m_eSimulateFromReference = TimeStepperSettings<TLayoutConfig>::CONTINUE;
+                     timestepperSettings.m_eSimulateFromReference = TimeStepperSettings<LayoutConfigType>::CONTINUE;
                  }else{
                     throw ticpp::Exception("String conversion in SimulateFromReference: type. The type '" + type + std::string("' has no implementation in the parser"));
                  }
                  timestepperSettings.m_stateReferenceFile = simFromRef->GetAttribute("file");
                  checkFileExists(timestepperSettings.m_stateReferenceFile);
               }else{
-                  timestepperSettings.m_eSimulateFromReference = TimeStepperSettings<TLayoutConfig>::NONE;
+                  timestepperSettings.m_eSimulateFromReference = TimeStepperSettings<LayoutConfigType>::NONE;
               }
            }
 
@@ -233,10 +233,10 @@ private:
 
                std::string method = inclusionElement->GetAttribute("method");
                if(method == "JOR"){
-                  inclusionSettings.m_eMethod = InclusionSolverSettings<TLayoutConfig>::JOR;
+                  inclusionSettings.m_eMethod = InclusionSolverSettings<LayoutConfigType>::JOR;
                }
                else if (method == "SOR"){
-                  inclusionSettings.m_eMethod = InclusionSolverSettings<TLayoutConfig>::SOR;
+                  inclusionSettings.m_eMethod = InclusionSolverSettings<LayoutConfigType>::SOR;
                }
                else{
                      throw ticpp::Exception("String conversion in SceneSettings: relTol failed");
@@ -295,7 +295,7 @@ private:
 
 
       for(int i=0; i<instances;i++){
-         boost::shared_ptr< RigidBody<TLayoutConfig> > temp_ptr(new RigidBody<TLayoutConfig>());
+         boost::shared_ptr< RigidBody<LayoutConfigType> > temp_ptr(new RigidBody<LayoutConfigType>());
          temp_ptr->m_id = i;
          m_bodyList.push_back(temp_ptr);
 
@@ -313,7 +313,7 @@ private:
 
 
          //Copy the pointers!
-         if(m_eBodiesState == RigidBody<TLayoutConfig>::SIMULATED){
+         if(m_eBodiesState == RigidBody<LayoutConfigType>::SIMULATED){
             if(m_bParseDynamics){
                for(int i=0; i < m_bodyList.size(); i++){
                   m_pDynSys->m_SimBodies.push_back(m_bodyList[i]);
@@ -321,7 +321,7 @@ private:
             }
             m_SimBodies += instances;
          }
-         else if(m_eBodiesState == RigidBody<TLayoutConfig>::NOT_SIMULATED){
+         else if(m_eBodiesState == RigidBody<LayoutConfigType>::NOT_SIMULATED){
             if(m_bParseDynamics){
                for(int i=0; i < m_bodyList.size(); i++){
                   m_pDynSys->m_Bodies.push_back(m_bodyList[i]);
@@ -576,15 +576,15 @@ private:
 
       std::string type = element->GetAttribute("type");
       if(type == "simulated"){
-         m_eBodiesState =  RigidBody<TLayoutConfig>::SIMULATED;
+         m_eBodiesState =  RigidBody<LayoutConfigType>::SIMULATED;
          processDynamicPropertiesSimulated(dynProp);
       }
       else if(type == "not simulated"){
-         m_eBodiesState =  RigidBody<TLayoutConfig>::NOT_SIMULATED;
+         m_eBodiesState =  RigidBody<LayoutConfigType>::NOT_SIMULATED;
          processDynamicPropertiesNotSimulated(dynProp);
       }
       else if(type == "animated"){
-         m_eBodiesState =  RigidBody<TLayoutConfig>::ANIMATED;
+         m_eBodiesState =  RigidBody<LayoutConfigType>::ANIMATED;
          throw ticpp::Exception("The attribute 'type' '" + type + std::string("' of 'DynamicState' has no implementation in the parser"));
       }
       else{
@@ -632,21 +632,21 @@ private:
       element = dynProp->FirstChild("Material")->ToElement();
       distribute = element->GetAttribute("distribute");
       if(distribute == "uniform"){
-         typename RigidBody<TLayoutConfig>::BodyMaterial eMaterial;
+         typename RigidBody<LayoutConfigType>::BodyMaterial eMaterial;
          type = element->GetAttribute("type");
          if(type == "standart"){
-            eMaterial = RigidBody<TLayoutConfig>::STD_MATERIAL;
+            eMaterial = RigidBody<LayoutConfigType>::STD_MATERIAL;
          }
          else if( type == "wood" ){
-            eMaterial = RigidBody<TLayoutConfig>::WOOD;
+            eMaterial = RigidBody<LayoutConfigType>::WOOD;
          }
          else if( type == "metal"){
-            eMaterial = RigidBody<TLayoutConfig>::METAL;
+            eMaterial = RigidBody<LayoutConfigType>::METAL;
          }
          else if( type == "glas"){
-            eMaterial = RigidBody<TLayoutConfig>::GLAS;
+            eMaterial = RigidBody<LayoutConfigType>::GLAS;
          }else{
-            eMaterial = RigidBody<TLayoutConfig>::STD_MATERIAL;
+            eMaterial = RigidBody<LayoutConfigType>::STD_MATERIAL;
          }
          for(int i=0; i < m_bodyList.size(); i++){
             m_bodyList[i]->m_eMaterial = eMaterial;
@@ -659,7 +659,7 @@ private:
       // InitialCondition ============================================================
       element = dynProp->FirstChild("InitialCondition")->ToElement();
       distribute = element->GetAttribute("distribute");
-      m_SimBodyInitStates.push_back(DynamicsState<TLayoutConfig>((unsigned int)m_bodyList.size()));
+      m_SimBodyInitStates.push_back(DynamicsState<LayoutConfigType>((unsigned int)m_bodyList.size()));
       if(distribute == "linear"){
          processInitialConditionLinear(m_SimBodyInitStates.back(),element);
       }
@@ -689,7 +689,7 @@ private:
       ticpp::Element *element = dynProp->FirstChild("InitialCondition")->ToElement();
       std::string distribute = element->GetAttribute("distribute");
 
-      DynamicsState<TLayoutConfig> state((unsigned int)m_bodyList.size());
+      DynamicsState<LayoutConfigType> state((unsigned int)m_bodyList.size());
       if(distribute == "linear"){
          processInitialConditionLinear(state,element);
       }
@@ -706,7 +706,7 @@ private:
          processInitialConditionTransforms(state,element);
       }
       else if(distribute == "none"){
-         m_SimBodyInitStates.push_back(DynamicsState<TLayoutConfig>((unsigned int)m_bodyList.size())); // Adds a zero DynamicState
+         m_SimBodyInitStates.push_back(DynamicsState<LayoutConfigType>((unsigned int)m_bodyList.size())); // Adds a zero DynamicState
       }else{
          throw ticpp::Exception("The attribute 'distribute' '" + distribute + std::string("' of 'InitialCondition' has no implementation in the parser"));
       }
@@ -1010,10 +1010,10 @@ private:
             sceneNode->setOrientation(m_bodyList[i]->m_q_KI(0),m_bodyList[i]->m_q_KI(1),m_bodyList[i]->m_q_KI(2),m_bodyList[i]->m_q_KI(3));
 
 
-            if( m_eBodiesState == RigidBody<TLayoutConfig>::SIMULATED){
+            if( m_eBodiesState == RigidBody<LayoutConfigType>::SIMULATED){
                m_rSceneNodeSimBodies.push_back(sceneNode);
             }
-            else if( m_eBodiesState == RigidBody<TLayoutConfig>::NOT_SIMULATED){
+            else if( m_eBodiesState == RigidBody<LayoutConfigType>::NOT_SIMULATED){
                m_rSceneNodeBodies.push_back(sceneNode);
             }
 
@@ -1032,7 +1032,7 @@ private:
 
    bool m_bParseDynamics; ///< Parse Dynamics stuff or do not. Playback Manager also has this SceneParser but does not need DynamicsStuff.
 
-   boost::shared_ptr<TSystem> m_pDynSys;
+   boost::shared_ptr<DynamicsSystemType> m_pDynSys;
 
    boost::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
    Ogre::SceneNode * m_BaseFrame;
@@ -1052,10 +1052,10 @@ private:
    unsigned int m_SimBodies;
 
    // Temprary structures
-   typename RigidBody<TLayoutConfig>::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
-   std::vector<boost::shared_ptr<RigidBody<TLayoutConfig> > > m_bodyList; ///< Used to process a RigidBody Node
+   typename RigidBody<LayoutConfigType>::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
+   std::vector<boost::shared_ptr<RigidBody<LayoutConfigType> > > m_bodyList; ///< Used to process a RigidBody Node
    std::vector<Vector3> m_bodyListScales;
-   std::vector< DynamicsState<TLayoutConfig> > m_SimBodyInitStates;
+   std::vector< DynamicsState<LayoutConfigType> > m_SimBodyInitStates;
 
    typedef std::map<std::string, boost::shared_ptr<MeshGeometry<PREC> > > ContainerSceneMeshs;
    ContainerSceneMeshs m_SceneMeshs; // Cache all added meshs geometries, we do not want to add same meshs twice!

@@ -26,18 +26,18 @@ PlaybackManagerBase(),
 m_nDofqObj(NDOFqObj),
 m_nDofuObj(NDOFuObj),
 m_bSetupSuccessful(false)
-{	
+{
 
   m_pAppLog = RenderContext::getSingletonPtr()->m_pAppLog;
   m_pAppLog->logMessage("Creating PlaybackManager...");
 
   // Set the Log Output =========================================================================
-#if LogToFilePlayback == 1 
+#if LogToFilePlayback == 1
   m_pThreadLog = Ogre::LogManager::getSingleton().createLog("PlaybackLogfile.log",false,true,false);
 #else
   m_pThreadLog = Ogre::LogManager::getSingleton().createLog("PlaybackLogfile.log",false,true,true);
 #endif
-#if LogToConsolePlayback == 1 
+#if LogToConsolePlayback == 1
   m_pThreadLog->setDebugOutputEnabled(true);
 #else
   m_pThreadLog->setDebugOutputEnabled(false);
@@ -62,7 +62,7 @@ template<typename TConfig>
 bool PlaybackManager<TConfig>::setup()
 {
 
-  
+
   m_lengthScale = 100;  // 1m = 100 Ogre units , 1cm -> 1 Ogre Unit
   m_pBaseNode = m_pSceneMgr->getSceneNode("BaseFrame")->createChildSceneNode("BaseFrameScene");
   m_pBaseNode->setScale(Ogre::Vector3(1.0,1.0,1.0)*m_lengthScale);
@@ -75,14 +75,14 @@ bool PlaybackManager<TConfig>::setup()
   // =====================================================
 
    //init shared buffer
-  m_pSharedBuffer = boost::shared_ptr<SharedBufferPlayback<TLayoutConfig> >(
-    new SharedBufferPlayback<TLayoutConfig>(m_nSimBodies)
+  m_pSharedBuffer = boost::shared_ptr<SharedBufferPlayback<LayoutConfigType> >(
+    new SharedBufferPlayback<LayoutConfigType>(m_nSimBodies)
     );
   m_pSharedBuffer->initializeStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
 
 
-  m_pFileLoader = boost::shared_ptr< PlaybackLoader<TLayoutConfig, StateRingPoolVisBackFront<TLayoutConfig> > >(
-    new PlaybackLoader<TLayoutConfig, StateRingPoolVisBackFront<TLayoutConfig> >(m_nSimBodies, m_pSharedBuffer, m_pThreadLog)
+  m_pFileLoader = boost::shared_ptr< PlaybackLoader<LayoutConfigType, StateRingPoolVisBackFront<LayoutConfigType> > >(
+    new PlaybackLoader<LayoutConfigType, StateRingPoolVisBackFront<LayoutConfigType> >(m_nSimBodies, m_pSharedBuffer, m_pThreadLog)
   );
 
   //Make a videodropper
@@ -90,7 +90,7 @@ bool PlaybackManager<TConfig>::setup()
   m_pVideoDropper->reset();
 
   //Make a Sim File Resampler
-  m_pStateRecorderResampler = boost::shared_ptr<StateRecorderResampler<TLayoutConfig> >(new StateRecorderResampler<TLayoutConfig>(m_nSimBodies));
+  m_pStateRecorderResampler = boost::shared_ptr<StateRecorderResampler<LayoutConfigType> >(new StateRecorderResampler<LayoutConfigType>(m_nSimBodies));
   m_pStateRecorderResampler->reset();
 
   m_pVisBuffer = m_pSharedBuffer->getVisBuffer();
@@ -112,9 +112,9 @@ bool PlaybackManager<TConfig>::parseScene(){
 
      m_pSceneParser = boost::shared_ptr< SceneParser<TConfig> >( new SceneParser<TConfig>( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies) );
      m_pSceneParser->parseScene(sceneFilePath);
-  
+
      m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
- 
+
      return true;
 }
 
@@ -124,7 +124,7 @@ void PlaybackManager<TConfig>::updateScene(double timeSinceLastFrame)
   static bool bStateChanged;
   static double state_time;
   std::stringstream logstream;
- 
+
   if (isSimThreadRunning() && m_bSetupSuccessful){
     if(!m_SettingsVisThread.m_bFirstPass)
     {
@@ -143,7 +143,7 @@ void PlaybackManager<TConfig>::updateScene(double timeSinceLastFrame)
 
     }
     else // Only do at the beginning
-    { 
+    {
 
       m_SettingsVisThread.m_bFirstPass = false;
       // Wait for sim thread! to synchronize
@@ -151,7 +151,7 @@ void PlaybackManager<TConfig>::updateScene(double timeSinceLastFrame)
     }
   }
 
-  
+
 }
 
 template<typename TConfig>
@@ -159,12 +159,12 @@ void PlaybackManager<TConfig>::updateSimBodies()
 {
   //update objects...
   for(int i=0; i<m_pVisBuffer->m_SimBodyStates.size();i++){
-    m_SceneNodeSimBodies[i]->setPosition( 
+    m_SceneNodeSimBodies[i]->setPosition(
       (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(0),
       (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(1),
       (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(2)
       );
-    m_SceneNodeSimBodies[i]->setOrientation( 
+    m_SceneNodeSimBodies[i]->setOrientation(
       (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(3),
       (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(4),
       (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(5),
@@ -214,7 +214,7 @@ void PlaybackManager<TConfig>::initBeforeThreads()
   }
 
   LOG(m_pThreadLog)
-  
+
 }
 template<typename TConfig>
 void PlaybackManager<TConfig>::threadRunSimulation()
@@ -226,7 +226,7 @@ void PlaybackManager<TConfig>::threadRunSimulation()
   setSimThreadRunning(true);
 
   std::stringstream logstream;
-  
+
   initSimThread();
 
   // Starts file reader thread which reads in all values and pushes ahead the front buffer
@@ -237,7 +237,7 @@ void PlaybackManager<TConfig>::threadRunSimulation()
   // Wait for vis thread
   m_barrier_start.wait();
 
-  DynamicsState<TLayoutConfig> * currentState = m_pSharedBuffer->getSimBuffer().get();
+  DynamicsState<LayoutConfigType> * currentState = m_pSharedBuffer->getSimBuffer().get();
 
   state_time = 0;
   old_state_time =0;
@@ -247,17 +247,17 @@ void PlaybackManager<TConfig>::threadRunSimulation()
   while(!isSimThreadToBeStopped())
   {
     timelineSimulation = getTimelineSimulation();
-    
+
 
     if(m_SettingsSimThread.m_bVideoDrop){
        // Dont sync with timeline,
-       
+
        //Make one step!
        currentState = m_pSharedBuffer->advanceSimBuffer(bchangedState).get(); // Will move to the initial state at the beginning!
        if(bchangedState){
           state_time = currentState->m_t;
-          deltaT = state_time - old_state_time; // Will be zero at the beginning 
-       
+          deltaT = state_time - old_state_time; // Will be zero at the beginning
+
           m_pVideoDropper->addToCurrentTime(deltaT); // if deltaT==0 or if more than one frames fits into deltaT, toggle dropping!
 
           m_pVideoDropper->tryToWaitForFrameDrop(); // if toggled frame drop, wait for the drop, which happens in the vis thread!!
@@ -266,7 +266,7 @@ void PlaybackManager<TConfig>::threadRunSimulation()
     }else{
        // Sync with timeline!
        state_time = currentState->m_t;
-       
+
        if ( state_time <= timelineSimulation)
        {
          currentState = m_pSharedBuffer->advanceSimBuffer(bchangedState).get();
@@ -283,7 +283,7 @@ void PlaybackManager<TConfig>::threadRunSimulation()
        }
 
 
-       if(currentState->m_StateType == DynamicsState<TLayoutConfig>::ENDSTATE){
+       if(currentState->m_StateType == DynamicsState<LayoutConfigType>::ENDSTATE){
          CLEARLOG(logstream);
           logstream << " PlaybackManager: Detected end state at " << currentState->m_t <<" --> leaving...";
           LOG(m_pThreadLog);
@@ -298,7 +298,7 @@ void PlaybackManager<TConfig>::threadRunSimulation()
     }
 
     old_state_time = state_time;
-    
+
   }
 
   m_pFileLoader->stopLoaderThread();

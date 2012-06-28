@@ -30,14 +30,14 @@ public:
 	PlaybackManager(boost::shared_ptr<Ogre::SceneManager> pSceneMgr);
 	~PlaybackManager();
 
-  boost::shared_ptr<SharedBufferPlayback<TLayoutConfig> >	m_pSharedBuffer;
+  boost::shared_ptr<SharedBufferPlayback<LayoutConfigType> >	m_pSharedBuffer;
 
   boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
 
   boost::shared_ptr< VideoDropper > m_pVideoDropper;
   struct VideoDropSettings{ bool m_bVideoDrop; double m_FPS;} m_VideoDropSettings;
 
-  boost::shared_ptr< StateRecorderResampler<TLayoutConfig> > m_pStateRecorderResampler;
+  boost::shared_ptr< StateRecorderResampler<LayoutConfigType> > m_pStateRecorderResampler;
   struct SimFileDropSettings{ bool m_bSimFileDrop; double m_FPS; bool m_bSimFileDropInterpolate; double m_startTime; double m_endTime;} m_SimFileDropSettings;
 
   bool setup();
@@ -58,11 +58,11 @@ public:
 
 private:
 
-  
+
   bool parseScene();
   bool m_bSetupSuccessful;
 
-  boost::shared_ptr<const DynamicsState<TLayoutConfig> > m_pVisBuffer;
+  boost::shared_ptr<const DynamicsState<LayoutConfigType> > m_pVisBuffer;
 
   //Accessed only by Graphic thread ==========
    void updateSimBodies();
@@ -89,7 +89,7 @@ private:
    // =========================================
 
   // Accessed only by Loader Thread
-  boost::shared_ptr< PlaybackLoader<TLayoutConfig, StateRingPoolVisBackFront<TLayoutConfig> > > m_pFileLoader;
+  boost::shared_ptr< PlaybackLoader<LayoutConfigType, StateRingPoolVisBackFront<LayoutConfigType> > > m_pFileLoader;
 
 
   const unsigned int m_nDofuObj, m_nDofqObj; // These are the dimensions for one Obj
@@ -97,7 +97,7 @@ private:
   double m_lengthScale;
   Ogre::SceneNode * m_pBaseNode;
 
- 
+
 };
 
 
