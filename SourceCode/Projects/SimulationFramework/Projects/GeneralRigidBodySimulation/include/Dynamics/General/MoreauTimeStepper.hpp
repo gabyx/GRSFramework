@@ -52,8 +52,8 @@ public:
   // The Core Objects ==================================
   boost::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
   boost::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
-  boost::shared_ptr<DynamicsSystemType>	m_pDynSys;
-  boost::shared_ptr<StatePoolType>		   m_pStatePool;
+  boost::shared_ptr<DynamicsSystemType>	  m_pDynSys;
+  boost::shared_ptr<StatePoolType>		  m_pStatePool;
   // ===================================================
 
   void initLogs(const boost::filesystem::path &folder_path);

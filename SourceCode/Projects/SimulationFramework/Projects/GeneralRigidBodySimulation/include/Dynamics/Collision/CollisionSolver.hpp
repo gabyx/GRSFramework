@@ -36,19 +36,19 @@ public:
    }
 
     #ifdef SRUTIL_DELEGATE_PREFERRED_SYNTAX
-      typedef srutil::delegate<void, (const boost::shared_ptr< <CollisionData<TLayoutConfig> > & pCollData) > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
+      typedef srutil::delegate<void, (const DynamicsState<TLayoutConfig> *, CollisionData<TLayoutConfig>*) > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
    #else
-      typedef srutil::delegate1<void, CollisionData<TLayoutConfig>*  > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
+      typedef srutil::delegate2<void, const DynamicsState<TLayoutConfig> *, CollisionData<TLayoutConfig>*  > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
    #endif
 
       /** Adds a new ContactDelegate which will be invoked during the solveCollision() part.*/
    void addContactDelegate(const ContactDelegate & cD){
       m_ContactDelegateList.push_back(cD);
    }
-   void invokeAll(CollisionData<TLayoutConfig> *pCollData) const{
+   void invokeAll(const DynamicsState<TLayoutConfig> * state, CollisionData<TLayoutConfig> *pCollData) const{
       typename std::vector<ContactDelegate>::const_iterator it;
       for(it = m_ContactDelegateList.begin(); it != m_ContactDelegateList.end(); it++){
-         (*it)(pCollData);
+         (*it)(state, pCollData);
       }
    }
 
@@ -97,8 +97,10 @@ protected:
 
   const unsigned int m_nDofqObj, m_nDofuObj, m_nSimBodies;
   unsigned int m_expectedNContacts;                                                 ///< Expected number of Contacts.
-  std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_SimBodies;       ///< List of all simulated bodies.
+  std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
   std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_Bodies;          ///< List of all fixed not simulated bodies.
+
+  const DynamicsState<TLayoutConfig> * m_state;
 
   Collider<TLayoutConfig, CollisionSolver<TLayoutConfig> > m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
   friend class Collider<TLayoutConfig, CollisionSolver<TLayoutConfig> >;
@@ -119,7 +121,7 @@ CollisionSolver<TLayoutConfig>::CollisionSolver(const unsigned int nSimBodies,
                                          std::vector< boost::shared_ptr<RigidBody<TLayoutConfig> > > & SimBodies,
                                          std::vector< boost::shared_ptr<RigidBody<TLayoutConfig> > > & Bodies):
 m_SimBodies(SimBodies), m_Bodies(Bodies),
-m_nSimBodies(nSimBodies),m_nDofqObj(NDOFqObj),m_nDofuObj(NDOFuObj)
+m_nSimBodies(nSimBodies),m_nDofqObj(NDOFqObj),m_nDofuObj(NDOFuObj),m_state(NULL)
 {
    m_Collider.init(this);
     m_expectedNContacts = 10;
@@ -181,6 +183,9 @@ void CollisionSolver<TLayoutConfig>::solveCollision(const DynamicsState<TLayoutC
    #endif
 
 
+    // Save internal state, this will be given to all signalContactAdd
+    m_state  =  state;
+
     // All objects have been updated...
 
     //// Do simple collision detection (SimBodies to SimBodies)
@@ -216,7 +221,7 @@ template<typename TLayoutConfig>
      m_CollisionSet.push_back(pColData); // Copy it to the owning list! colData gets deleted!
 
       if(!m_ContactDelegateList.isEmpty()){
-         m_ContactDelegateList.invokeAll(m_CollisionSet.back()); // Propagate pointers! they will not be deleted!
+         m_ContactDelegateList.invokeAll(m_state, m_CollisionSet.back()); // Propagate pointers! they will not be deleted!
       }
   }
 

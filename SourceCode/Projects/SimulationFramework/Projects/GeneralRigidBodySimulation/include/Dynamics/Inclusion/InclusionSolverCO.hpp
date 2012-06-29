@@ -79,7 +79,7 @@ protected:
    std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_SimBodies;
    std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_Bodies;
 
-   typedef ContactGraph<TLayoutConfig,ContactGraphNodeData, ContactGraphEdgeData> TContactGraph;
+   typedef ContactGraph<TLayoutConfig,ContactGraphMode::NoItaration> TContactGraph;
    TContactGraph m_ContactGraph;
 
    // Matrices for solving the inclusion ===========================
@@ -147,6 +147,7 @@ m_SimBodies(pCollisionSolver->m_SimBodies),
    m_pCollisionSolver->m_ContactDelegateList.addContactDelegate(
       ContactDelegateList<TLayoutConfig>::ContactDelegate::template from_method< TContactGraph,  &TContactGraph::addNode>(&m_ContactGraph)
      );
+
 
    m_nContacts = 0;
    m_nLambdas = 0;

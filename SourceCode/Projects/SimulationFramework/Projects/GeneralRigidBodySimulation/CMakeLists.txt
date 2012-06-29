@@ -129,6 +129,7 @@ SET(DYNAMICS_INC
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
+        ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCOContactGraph.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
         ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
 	${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettings.hpp

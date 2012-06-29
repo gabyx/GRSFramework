@@ -91,6 +91,8 @@ public:
   Quaternion m_q_KI; ///< Quaternion which represents a rotation from I to the K frame, \f$ \tilde{\mathbf{a}}_{KI} \f$.
   /** @} */
 
+
+
   unsigned int m_id; ///< This is the id of the body.
 
   BodyState m_eState; ///< The state of the body.
