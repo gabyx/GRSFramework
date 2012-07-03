@@ -14,6 +14,8 @@
 #include "MoreauTimeStepper.hpp"
 #include "InclusionSolverNT.hpp"
 #include "InclusionSolverCO.hpp"
+#include "InclusionSolverCONoG.hpp"
+
 #include "DynamicsSystem.hpp"
 
 #include "CommonFunctions.hpp"

@@ -28,7 +28,8 @@
 
 #include <platformstl/performance/performance_counter.hpp>
 
-#define USE_PERCUSSION_POOL 0
+
+
 
 
 /**
@@ -39,7 +40,11 @@ template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollision
 class InclusionSolverCO{
 public:
    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+
+   static const int NDOFFriction = ContactModels::NormalAndCoulombFrictionContactModel::nDOFFriction;
+   static const int ContactDim = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
 
    InclusionSolverCO(boost::shared_ptr<TCollisionSolver >  pCollisionSolver, boost::shared_ptr<TDynamicsSystem> pDynSys);
 
@@ -70,7 +75,8 @@ public:
    unsigned int getNObjects();
 
 protected:
-   unsigned int m_nDofq, m_nDofu, m_nDofqObj, m_nDofuObj, m_nDofFriction, m_nSimBodies;
+   unsigned int m_nDofq, m_nDofu, m_nDofqObj, m_nDofuObj, m_nSimBodies;
+
 
    unsigned int m_nExpectedContacts;
 
@@ -136,7 +142,6 @@ m_SimBodies(pCollisionSolver->m_SimBodies),
    m_nDofuObj = NDOFuObj;
    m_nDofq = m_nSimBodies * m_nDofqObj;
    m_nDofu = m_nSimBodies * m_nDofuObj;
-   m_nDofFriction = NDOFFriction;
 
 
    resetPercussionBuffer();
@@ -267,7 +272,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
 
    // Iterate over all nodes set and assemble the matrices...
   typename TContactGraph::NodeList & nodes = m_ContactGraph.getNodeListRef();
-  typename TContactGraph::Node * currentContactNode;
+  typename TContactGraph::NodeType * currentContactNode;
    m_nContacts = (unsigned int)nodes.size();
 
    m_iterationsNeeded = 0;
@@ -329,11 +334,9 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
                cout << "4 contacts"<<endl;
          }*/
 
-#if _DEBUG
-         if(currentContactNode->m_nodeData.m_eContactModel != ContactModels::NCFContactModel){
-            ASSERTMSG(false,"You use InclusionSolverCO which only supports NCFContactModel Contacts so far!");
-         }
-#endif
+
+        ASSERTMSG(currentContactNode->m_nodeData.m_eContactModel == ContactModels::NCFContactModel
+                      ,"You use InclusionSolverCO which only supports NCFContactModel Contacts so far!");
 
          // Write mu parameters to m_mu
          m_mu(i) = currentContactNode->m_nodeData.m_mu(0);
@@ -367,21 +370,21 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
 
             if(i == j){ // We are on a self referencing edge! Thats good build diagonal of G and parts of c
                W_i_bodyT_M_body = (*W_i_body).transpose() * edgesBody->m_MassMatrixInv_diag.asDiagonal();
-               m_T.template block<(NDOFFriction+1),(NDOFFriction+1)>((NDOFFriction+1)*i,(NDOFFriction+1)*j).noalias()  += W_i_bodyT_M_body * (*W_i_body);
-               m_d.template segment<NDOFFriction+1>((NDOFFriction+1)*i).noalias() +=  W_i_bodyT_M_body * edgesBody->m_h_term * m_Settings.m_deltaT +
+               m_T.template block<(ContactDim),(ContactDim)>((ContactDim)*i,(ContactDim)*j).noalias()  += W_i_bodyT_M_body * (*W_i_body);
+               m_d.template segment<ContactDim>((ContactDim)*i).noalias() +=  W_i_bodyT_M_body * edgesBody->m_h_term * m_Settings.m_deltaT +
                                                                              currentContactNode->m_nodeData.m_I_plus_eps.asDiagonal()*( (*W_i_body).transpose() * state_s->m_SimBodyStates[bodyId].m_u );
             }
             else{
               W_j_body = TContactGraph::getW_body((*it)->m_endNode->m_nodeData, edgesBody);
               G_part = (*W_i_body).transpose() * edgesBody->m_MassMatrixInv_diag.asDiagonal() * (*W_j_body);
-              m_T.template block<(NDOFFriction+1),(NDOFFriction+1)>((NDOFFriction+1)*i,(NDOFFriction+1)*j).noalias() = G_part;
-              m_T.template block<(NDOFFriction+1),(NDOFFriction+1)>((NDOFFriction+1)*j,(NDOFFriction+1)*i).noalias() = G_part.transpose();
+              m_T.template block<(ContactDim),(ContactDim)>((ContactDim)*i,(ContactDim)*j).noalias() = G_part;
+              m_T.template block<(ContactDim),(ContactDim)>((ContactDim)*j,(ContactDim)*i).noalias() = G_part.transpose();
             }
 
          }
 
          // add once xi to c (d is used will be later completed to d)
-         m_d.template segment<NDOFFriction+1>((NDOFFriction+1)*i).noalias() +=  currentContactNode->m_nodeData.m_I_plus_eps.asDiagonal() * currentContactNode->m_nodeData.m_xi;
+         m_d.template segment<ContactDim>((ContactDim)*i).noalias() +=  currentContactNode->m_nodeData.m_I_plus_eps.asDiagonal() * currentContactNode->m_nodeData.m_xi;
 
 
          // Fill in Percussions
@@ -461,6 +464,13 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
 #endif
       }
 
+ #if CoutLevelSolverWhenContact>2
+      CLEARLOG;
+      logstream << " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
+      LOG(m_pSolverLog);
+#endif
+
+
       if(m_Settings.m_bIsFiniteCheck){
          if(!MatrixHelpers::isfinite(P_front)){
             m_isFinite = 0;
@@ -489,26 +499,29 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
       // Calculate u_E for each body in the state...
 
       static Eigen::Matrix<PREC,NDOFuObj,1> delta_u_E;
+      static RigidBody<TLayoutConfig> * pBody;
       for(unsigned int i=0; i < m_nSimBodies; i++){
-         delta_u_E = m_SimBodies[i]->m_h_term * m_Settings.m_deltaT;
+         pBody = m_SimBodies[i].get();
+         delta_u_E = pBody->m_h_term * m_Settings.m_deltaT;
 
-         typename TContactGraph::BodyToContactsListIterator itList  = m_ContactGraph.m_BodyToContactsList.find(m_SimBodies[i].get());
+         typename TContactGraph::BodyToContactsListIterator itList  = m_ContactGraph.m_BodyToContactsList.find(pBody);
          // itList->second is the NodeList!
          if(itList != m_ContactGraph.m_BodyToContactsList.end()){
             for( typename TContactGraph::NodeListIterator it = itList->second.begin(); it != itList->second.end(); it++){
-               delta_u_E.noalias() += *(TContactGraph::getW_body((*it)->m_nodeData,m_SimBodies[i].get())) * P_front.template segment<NDOFFriction+1>( (*it)->m_nodeNumber * (NDOFFriction+1));
+               delta_u_E.noalias() += *(TContactGraph::getW_body((*it)->m_nodeData,pBody)) * P_front.template segment<ContactDim>( (*it)->m_nodeNumber * (ContactDim));
             }
          }
 
-         state_e->m_SimBodyStates[i].m_u = state_s->m_SimBodyStates[i].m_u + m_SimBodies[i]->m_MassMatrixInv_diag.asDiagonal()*(delta_u_E);
+         state_e->m_SimBodyStates[i].m_u = state_s->m_SimBodyStates[i].m_u + pBody->m_MassMatrixInv_diag.asDiagonal()*(delta_u_E);
 
       }
    }
    else{
       // Do simple timestep to u_E for each body in the state...
-
+      static RigidBody<TLayoutConfig> * pBody;
       for(unsigned int i=0; i < m_nSimBodies; i++){
-         state_e->m_SimBodyStates[i].m_u = state_s->m_SimBodyStates[i].m_u + m_SimBodies[i]->m_MassMatrixInv_diag.asDiagonal()*m_SimBodies[i]->m_h_term * m_Settings.m_deltaT;;
+         pBody = m_SimBodies[i].get();
+         state_e->m_SimBodyStates[i].m_u = state_s->m_SimBodyStates[i].m_u + pBody->m_MassMatrixInv_diag.asDiagonal()*pBody->m_h_term * m_Settings.m_deltaT;;
       }
    }
 
@@ -518,10 +531,10 @@ template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollision
 void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::setupRMatrix(PREC alpha){
    PREC r_T_i;
    for(unsigned int i=0;i<m_nContacts;i++){
-      m_R((NDOFFriction+1)*i) =  alpha / m_T((NDOFFriction+1)*i,(NDOFFriction+1)*i);
-      r_T_i = alpha / (m_T.diagonal().template segment<NDOFFriction>((NDOFFriction+1)*i+1)).maxCoeff();
-      m_R((NDOFFriction+1)*i+1) = r_T_i;
-      m_R((NDOFFriction+1)*i+2) = r_T_i;
+      m_R((ContactDim)*i) =  alpha / m_T((ContactDim)*i,(ContactDim)*i);
+      r_T_i = alpha / (m_T.diagonal().template segment<NDOFFriction>((ContactDim)*i+1)).maxCoeff();
+      m_R((ContactDim)*i+1) = r_T_i;
+      m_R((ContactDim)*i+2) = r_T_i;
    }
 
 
@@ -613,7 +626,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::doJorP
 template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
 void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::doSorProx(){
 
-   static VectorPContact PContact_back;
+   static VectorDyn PContact_back(NDOFFriction);
    static unsigned int counterConverged;
 
 
@@ -666,14 +679,14 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::doSorP
       for(unsigned int i=0; i < m_nContacts; i++){
 
          // Prox the contact
-         PContact_back.noalias() = P_front.template segment<NDOFFriction+1>((NDOFFriction+1)*i) ; // Save last values
+         PContact_back.noalias() = P_front.template segment<ContactDim>((ContactDim)*i) ; // Save last values
 
          // This statement looks like aliasing but it does not! All Matrices*Matrices or MAtrices*Vector get evaluated into temporary by default
          // TODO Check if there is a Aliasing effect
-         P_front.template segment<NDOFFriction+1>((NDOFFriction+1)*i) = m_T.block((NDOFFriction+1)*i,0,NDOFFriction+1,m_nLambdas) * P_front + m_d.template segment<NDOFFriction+1>((NDOFFriction+1)*i);
+         P_front.template segment<ContactDim>((ContactDim)*i) = m_T.block((ContactDim)*i,0,ContactDim,m_nLambdas) * P_front + m_d.template segment<ContactDim>((ContactDim)*i);
 
-         Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle(m_mu(i),P_front.template segment<NDOFFriction+1>((NDOFFriction+1)*i));
-         Numerics::cancelCriteriaValue(PContact_back, P_front.template segment<NDOFFriction+1>((NDOFFriction+1)*i), m_Settings.m_AbsTol, m_Settings.m_RelTol, counterConverged);
+         Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle(m_mu(i),P_front.template segment<ContactDim>((ContactDim)*i));
+         Numerics::cancelCriteriaValue(PContact_back, P_front.template segment<ContactDim>((ContactDim)*i), m_Settings.m_AbsTol, m_Settings.m_RelTol, counterConverged);
 
       }
 
@@ -699,11 +712,11 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::doSorP
 template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
 void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::updatePercussionPool(const VectorDyn & P_old )
 {
-   static VectorPContact P_contact;
+   static VectorDyn P_contact(ContactDim);
    for(unsigned int i = 0; i< m_nContacts; i++){
-      P_contact(0) = P_old(i);
-      P_contact(1) = P_old(NDOFFriction*i);
-      P_contact(2) = P_old(NDOFFriction*i+1);
+      P_contact(0) = P_old((ContactDim)*i);
+      P_contact(1) = P_old((ContactDim)*i+1);
+      P_contact(2) = P_old((ContactDim)*i+2);
       m_PercussionPool.setPercussion(i,P_contact);
    }
 
@@ -715,11 +728,19 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::update
 template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
 void  InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::readFromPercussionPool(unsigned int index, const CollisionData<TLayoutConfig> * pCollData, VectorDyn & P_old)
 {
-   static VectorPContact P_contact;
+   static VectorDyn P_contact(ContactDim);
+//
+//   std::cout << pCollData->m_ContactTag.m_ContactTagTuple.template get<0>()
+//   << "\t" << pCollData->m_ContactTag.m_ContactTagTuple.template get<1>()
+//   << "\t" << pCollData->m_ContactTag.m_ContactTagTuple.template get<2>()
+//   << "\t" << pCollData->m_ContactTag.m_ContactTagTuple.template get<3>()
+//   << "\t" << pCollData->m_ContactTag.m_ContactTagTuple.template get<4>()
+//   << "\t" << pCollData->m_ContactTag.m_ContactTagTuple.template get<5>() << std::endl;
+
    m_PercussionPool.getPercussion(pCollData->m_ContactTag,P_contact);
-   P_old(NDOFFriction*index) = P_contact(0);
-   P_old(NDOFFriction*index+1) =   P_contact(1);
-   P_old(NDOFFriction*index+2) = P_contact(2);
+   P_old((ContactDim)*index) = P_contact(0);
+   P_old((ContactDim)*index+1) =   P_contact(1);
+   P_old((ContactDim)*index+2) = P_contact(2);
 }
 
 

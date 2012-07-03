@@ -14,12 +14,12 @@ public:
    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-   ContactPercussion(){
-      m_P.setZero();
+   ContactPercussion(unsigned int dim){
+      m_P.setZero(dim);
       m_bUsed = false;
    }
 
-   VectorPContact m_P; ///< The contact percussion, e.g \f$[\lambda_N,\lambda_{T1},\lambda_{T2}]\f$
+   VectorDyn m_P; ///< The contact percussion, e.g \f$[\lambda_N,\lambda_{T1},\lambda_{T2}]\f$
 
    unsigned int m_bUsed; ///< A flag which defines if this Percussion has been used in the current timestep.
 };

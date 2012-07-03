@@ -135,11 +135,11 @@ public:
    NodeList & getNodeListRef(){ return m_nodes; };
    EdgeList & getEdgeListRef(){ return m_edges; };
 
-	void visitNodes(NodeVisitor<NodeDataType, EdgeDataType>& vv) {
+	void applyNodeVisitor(NodeVisitor<NodeDataType, EdgeDataType>& vv) {
 		for(typename std::vector<Node<NodeDataType, EdgeDataType>* >::iterator curr_node = m_nodes.begin(); curr_node != m_nodes.end(); curr_node++)
 			(*curr_node)->acceptVisitor(vv);
 	}
-	void visitEdges(EdgeVisitor<NodeDataType, EdgeDataType>& hev) {
+	void applyEdgeVisitor(EdgeVisitor<NodeDataType, EdgeDataType>& hev) {
 		for(typename std::vector<Edge<NodeDataType, EdgeDataType>* >::iterator curr_he = m_edges.begin(); curr_he != m_edges.end(); curr_he++)
 			(*curr_he)->acceptVisitor(hev);
 	}

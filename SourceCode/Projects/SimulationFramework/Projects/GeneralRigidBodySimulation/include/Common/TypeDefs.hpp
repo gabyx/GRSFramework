@@ -98,9 +98,6 @@ struct LayoutConfig{
    typedef Eigen::Matrix<PREC, LayoutType::NDOFqObj, 1>                    VectorQObj;
    typedef Eigen::Matrix<PREC, LayoutType::NDOFuObj, 1>                    VectorUObj;
 
-   typedef Eigen::Matrix<PREC, LayoutType::NDOFFriction + 1, 1>            VectorPContact;
-   typedef Eigen::Matrix<PREC, LayoutType::NDOFFriction, 1>                VectorPFriction;
-
    typedef typename MyMatrix< PREC >::Matrix44 Matrix44;
    typedef typename MyMatrix< PREC >::Matrix33 Matrix33;
    typedef typename MyMatrix< PREC >::Vector3 Vector3;
@@ -116,26 +113,23 @@ struct LayoutConfig{
 /**
 * @brief A dynamic layout specialization.
 */
-template <int nDOFqObj, int nDOFuObj, int nDOFFriction>
+template <int nDOFqObj, int nDOFuObj>
 struct DynamicLayout {
    static int const NDOFq = -1;
    static int const NDOFu = -1;
    static int const NDOFqObj = nDOFqObj;
    static int const NDOFuObj = nDOFuObj;
-   static int const NDOFFriction = nDOFFriction;
-
 };
 
 /**
 * @brief A static layout specialization.
 */
-template <int NObjects, int nDOFqObj, int nDOFuObj, int nDOFFriction>
+template <int NObjects, int nDOFqObj, int nDOFuObj>
 struct StaticLayout {
    static int const NDOFqObj = nDOFqObj;
    static int const NDOFuObj = nDOFuObj;
    static int const NDOFq = NObjects*NDOFqObj;
    static int const NDOFu = NObjects*NDOFuObj;
-   static int const NDOFFriction = nDOFFriction;
 };
 
 /**
@@ -143,7 +137,7 @@ struct StaticLayout {
 */
 typedef LayoutConfig<
    double,
-   DynamicLayout<7,6,2>
+   DynamicLayout<7,6>
 > DoubleDynamicLayout;
 
 
@@ -197,6 +191,7 @@ template< typename TLayoutConfig > class CollisionSolver;
 template< typename TLayoutConfig > class DynamicsSystem;
 template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver> class InclusionSolverNT;
 template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver> class InclusionSolverCO;
+template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver> class InclusionSolverCONoG;
 template< typename TConfigTimeStepper > class MoreauTimeStepper;
 
 typedef DoubleDynamicLayout DoubleDynamicLayout;
@@ -227,6 +222,7 @@ typedef SolverConfig
              DynamicsSystem<DoubleDynamicLayout>,
              CollisionSolver<DoubleDynamicLayout>,
              InclusionSolverCO<DoubleDynamicLayout,DynamicsSystem<DoubleDynamicLayout>,CollisionSolver<DoubleDynamicLayout> >,
+             //InclusionSolverCONoG<DoubleDynamicLayout,DynamicsSystem<DoubleDynamicLayout>,CollisionSolver<DoubleDynamicLayout> >,
              StatePoolVisBackFront<DoubleDynamicLayout>
           >
       >
@@ -266,7 +262,6 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    static int const NDOFu = _ConfigName_::LayoutConfigType::LayoutType::NDOFu; \
    static int const NDOFqObj = _ConfigName_::LayoutConfigType::LayoutType::NDOFqObj; \
    static int const NDOFuObj = _ConfigName_::LayoutConfigType::LayoutType::NDOFuObj; \
-   static int const NDOFFriction = _ConfigName_::LayoutConfigType::LayoutType::NDOFFriction; \
    typedef typename _ConfigName_::LayoutConfigType::MatrixQU MatrixQU;     \
    typedef typename _ConfigName_::LayoutConfigType::MatrixQQ MatrixQQ;     \
    typedef typename _ConfigName_::LayoutConfigType::MatrixUU MatrixUU;     \
@@ -280,8 +275,6 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    typedef typename _ConfigName_::LayoutConfigType::VectorQObj VectorQObj;       \
    typedef typename _ConfigName_::LayoutConfigType::VectorUObj VectorUObj;       \
    typedef typename _ConfigName_::LayoutConfigType::MatrixQObjUObj MatrixQObjUObj; \
-   typedef typename _ConfigName_::LayoutConfigType::VectorPContact VectorPContact; \
-   typedef typename _ConfigName_::LayoutConfigType::VectorPFriction VectorPFriction; \
    typedef typename _ConfigName_::LayoutConfigType::Matrix44 Matrix44; \
    typedef typename _ConfigName_::LayoutConfigType::Matrix33 Matrix33; \
    typedef typename _ConfigName_::LayoutConfigType::Vector3 Vector3;   \
@@ -310,7 +303,6 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    static int const NDOFu = _LayoutConfigName_::LayoutType::NDOFu; \
    static int const NDOFqObj = _LayoutConfigName_::LayoutType::NDOFqObj; \
    static int const NDOFuObj = _LayoutConfigName_::LayoutType::NDOFuObj; \
-   static int const NDOFFriction = _LayoutConfigName_::LayoutType::NDOFFriction; \
    typedef typename _LayoutConfigName_::MatrixQU MatrixQU;     \
    typedef typename _LayoutConfigName_::MatrixQQ MatrixQQ;     \
    typedef typename _LayoutConfigName_::MatrixUU MatrixUU;     \
@@ -324,8 +316,6 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    typedef typename _LayoutConfigName_::VectorQObj VectorQObj;       \
    typedef typename _LayoutConfigName_::VectorUObj VectorUObj;       \
    typedef typename _LayoutConfigName_::MatrixQObjUObj MatrixQObjUObj; \
-   typedef typename _LayoutConfigName_::VectorPContact VectorPContact; \
-   typedef typename _LayoutConfigName_::VectorPFriction VectorPFriction; \
    typedef typename _LayoutConfigName_::Matrix44 Matrix44; \
    typedef typename _LayoutConfigName_::Matrix33 Matrix33; \
    typedef typename _LayoutConfigName_::Vector3 Vector3;   \
@@ -345,7 +335,6 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    static int const NDOFu = _LayoutConfigName_::LayoutType::NDOFu; \
    static int const NDOFqObj = _LayoutConfigName_::LayoutType::NDOFqObj; \
    static int const NDOFuObj = _LayoutConfigName_::LayoutType::NDOFuObj; \
-   static int const NDOFFriction = _LayoutConfigName_::LayoutType::NDOFFriction; \
    typedef  _LayoutConfigName_::MatrixQU MatrixQU;     \
    typedef  _LayoutConfigName_::MatrixQQ MatrixQQ;     \
    typedef  _LayoutConfigName_::MatrixUU MatrixUU;     \
@@ -359,8 +348,6 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    typedef  _LayoutConfigName_::VectorQObj VectorQObj;       \
    typedef  _LayoutConfigName_::VectorUObj VectorUObj;       \
    typedef  _LayoutConfigName_::MatrixQObjUObj MatrixQObjUObj; \
-   typedef  _LayoutConfigName_::VectorPContact VectorPContact; \
-   typedef  _LayoutConfigName_::VectorPFriction VectorPFriction; \
    typedef  _LayoutConfigName_::Matrix44 Matrix44; \
    typedef  _LayoutConfigName_::Matrix33 Matrix33; \
    typedef  _LayoutConfigName_::Vector3 Vector3;   \

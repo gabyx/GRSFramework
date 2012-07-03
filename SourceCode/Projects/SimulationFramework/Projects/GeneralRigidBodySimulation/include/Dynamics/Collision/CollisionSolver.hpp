@@ -94,6 +94,8 @@ protected:
   //Inclusion Solver needs access to everything!
   template< typename _TLayoutConfig, typename _TDynamicsSystem, typename _TCollisionSolver> friend class InclusionSolverNT;
   template< typename _TLayoutConfig, typename _TDynamicsSystem, typename _TCollisionSolver> friend class InclusionSolverCO;
+  template< typename _TLayoutConfig, typename _TDynamicsSystem, typename _TCollisionSolver> friend class InclusionSolverCONoG;
+
 
   const unsigned int m_nDofqObj, m_nDofuObj, m_nSimBodies;
   unsigned int m_expectedNContacts;                                                 ///< Expected number of Contacts.

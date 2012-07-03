@@ -40,7 +40,7 @@ void FileManager::copyFile(boost::filesystem::path from, boost::filesystem::path
 boost::filesystem::path FileManager::getNewSimFolderPath(boost::filesystem::path directory,  std::string folder_prefix)
 {
   boost::mutex::scoped_lock l(m_busy_mutex);
- 
+
   scanAllSimFolders(directory,folder_prefix,false);
   std::stringstream new_foldername;
   new_foldername << folder_prefix << m_fileIdCounter;
@@ -95,7 +95,7 @@ void FileManager::updateAllSimDataFiles(const boost::filesystem::path &directory
       else
       {
         // Check for filename
-        path prefix = iter->path().extension(); 
+        path prefix = iter->path().extension();
         if(prefix.string() == SIM_FILE_EXTENSION){
 
           // add file to the list
@@ -125,7 +125,7 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, co
 
          //// Get the number of the folder if name matches "<folder_prefix><number>"
          std::string name = iter->path().filename().string();
-         std::string suffix = iter->path().extension().string(); 
+         std::string suffix = iter->path().extension().string();
          std::size_t found = name.find(folder_prefix);
          if(found!=string::npos){
            found += folder_prefix.length();
@@ -151,7 +151,7 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, co
       {
         //cout << iter->path().string() << " (file)\n" ;
         // Check for all .sim files and add to the list
-        path suffix = iter->path().extension(); 
+        path suffix = iter->path().extension();
         if(suffix.string() == SIM_FILE_EXTENSION){
           // add file to the list
           std::map<boost::filesystem::path,boost::filesystem::path>::iterator it;
@@ -168,7 +168,7 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, co
     }
   }
 
-  // Execute CallBack to notify 
+  // Execute CallBack to notify
 
 }
 

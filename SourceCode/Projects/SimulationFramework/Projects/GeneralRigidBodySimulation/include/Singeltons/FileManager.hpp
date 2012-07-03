@@ -1,12 +1,13 @@
 ﻿#ifndef FILE_MANAGER_HPP
 #define FILE_MANAGER_HPP
 
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string>
 #include <map>
 #include <fstream>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/fstream.hpp>
+
+#include <boost/filesystem.hpp>
+
 #include <boost/thread.hpp>
 #include <OGRE/Ogre.h>
 
@@ -22,15 +23,15 @@ public:
 
   FileManager();
   ~FileManager();
-  
+
   boost::filesystem::path getPathSimFileSelected();
   boost::filesystem::path getPathSceneFileSelected();
   void setPathSelectedSimFile(std::string file_name);
-  
+
   boost::filesystem::path getSimFilePath(std::string file_name);
 
   Ogre::StringVector getSimFileNameList();
-  
+
   boost::filesystem::path getNewSimFolderPath(boost::filesystem::path directory, std::string folder_prefix);
   void updateFileList(boost::filesystem::path directory, bool with_SubDirs);
 
@@ -39,7 +40,7 @@ public:
 private:
   void scanAllSimFolders(const boost::filesystem::path &directory, const std::string &prefix, const bool &with_SubDirs);
   void updateAllSimDataFiles(const boost::filesystem::path &directory, const bool &with_SubDirs);
-  
+
   std::map< boost::filesystem::path, boost::filesystem::path > m_SimFilePaths;
   Ogre::StringVector m_SimFileNames;
 

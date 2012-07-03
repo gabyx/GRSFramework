@@ -22,7 +22,7 @@
 
 #include "LogDefines.hpp"
 
-//#define USE_PERCUSSION_POOL 1
+
 
 /**
 * @ingroup Inclusion
@@ -33,6 +33,8 @@ class InclusionSolverNT{
 public:
   DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  static const int NDOFFriction = 3;
 
   InclusionSolverNT(boost::shared_ptr<TCollisionSolver >  pCollisionSolver, boost::shared_ptr<TDynamicsSystem> pDynSys);
 
@@ -655,7 +657,8 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::doSorPr
 template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
 void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::updatePercussionPool(const VectorDyn & P_Nold, const VectorDyn & P_Told )
 {
-   static VectorPContact P_contact;
+   static VectorDyn P_contact(NDOFFriction+1);
+
     for(unsigned int i = 0; i< m_nContacts; i++){
        P_contact(0) = P_Nold(i);
        P_contact(1) = P_Told(NDOFFriction*i);
@@ -671,7 +674,7 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::updateP
 template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
 void  InclusionSolverNT<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::readFromPercussionPool(unsigned int index, VectorDyn & P_Nold, VectorDyn & P_Told)
 {
-   static VectorPContact P_contact;
+   static VectorDyn P_contact(NDOFFriction+1);
    m_PercussionPool.getPercussion(m_pCollisionSolver->m_CollisionSet[index].m_ContactTag,P_contact);
    P_Nold(index) = P_contact(0);
    P_Told(NDOFFriction*index) =   P_contact(1);
