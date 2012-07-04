@@ -88,7 +88,9 @@ public:
    friend void Interpolate::lerp<TLayoutConfig>( const DynamicsState<TLayoutConfig> & A, const DynamicsState<TLayoutConfig> & B, DynamicsState<TLayoutConfig> & X, typename TLayoutConfig::PREC factor);
 
    PREC	m_t; ///< The time in \f$[s]\f$
-   std::vector< RigidBodyState<TLayoutConfig> >  m_SimBodyStates; ///< A vector comprising of all rigid body states of the system.
+
+   typedef std::vector< RigidBodyState<TLayoutConfig> > RigidBodyStateListType;
+   RigidBodyStateListType  m_SimBodyStates; ///< A vector comprising of all rigid body states of the system.
 
    const unsigned int m_nSimBodies;
 

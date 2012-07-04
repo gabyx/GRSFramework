@@ -83,8 +83,8 @@ public:
     Eigen::Matrix<PREC,Eigen::Dynamic,1> m_LambdaBack;
     Eigen::Matrix<PREC,Eigen::Dynamic,1> m_LambdaFront;
 
-    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_R_i_diag; // Build over G_ii
-    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_G_ii; // just for R_ii, and maybee later for better solvers!
+    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_R_i_inv_diag; // Build over G_ii
+    Eigen::Matrix<PREC,Eigen::Dynamic,Eigen::Dynamic> m_G_ii; // just for R_ii, and maybee later for better solvers!
 
     Eigen::Matrix<PREC,Eigen::Dynamic,1> m_b;
 
@@ -143,8 +143,8 @@ public:
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIterator NodeListIterator;
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIterator EdgeListIterator;
 
-    using Graph::GeneralGraph< ContactGraphNodeData<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> >::m_edges;
-    using Graph::GeneralGraph< ContactGraphNodeData<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> >::m_nodes;
+    using Graph::GeneralGraph< NodeDataType,EdgeDataType >::m_edges;
+    using Graph::GeneralGraph< NodeDataType,EdgeDataType >::m_nodes;
 
     ContactGraph(): m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0) {}
 
@@ -386,12 +386,12 @@ public:
     typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
     typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
 
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeList NodeList;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeList EdgeList;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIterator NodeListIterator;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIterator EdgeListIterator;
+    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType NodeListType;
+    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType EdgeListType;
+    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
+    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
 
-    typedef typename Graph::NodeVisitor<NodeDataType,EdgeDataType> NodeVisitor;
+    typedef typename Graph::NodeVisitor<NodeDataType,EdgeDataType> NodeVisitorType;
 
     using Graph::GeneralGraph< NodeDataType,EdgeDataType >::m_edges;
     using Graph::GeneralGraph< NodeDataType,EdgeDataType >::m_nodes;
@@ -405,9 +405,9 @@ public:
     void clearGraph() {
         // This deletes all nodes, edges, and decrements the reference counts for the nodedata and edgedata
         // cleanup allocated memory
-        for(NodeListIterator n_it = m_nodes.begin(); n_it != m_nodes.end(); n_it++)
+        for(NodeListIteratorType n_it = m_nodes.begin(); n_it != m_nodes.end(); n_it++)
             delete (*n_it);
-        for(EdgeListIterator e_it = m_edges.begin(); e_it != m_edges.end(); e_it++)
+        for(EdgeListIteratorType e_it = m_edges.begin(); e_it != m_edges.end(); e_it++)
             delete (*e_it);
         //cout << "clear graph"<<endl;
         m_nodes.clear();
@@ -447,7 +447,7 @@ public:
         addedNode->m_nodeData.m_b.setZero(dimSet);
         addedNode->m_nodeData.m_LambdaBack.setZero(dimSet);
         addedNode->m_nodeData.m_LambdaFront.setZero(dimSet);
-        addedNode->m_nodeData.m_R_i_diag.setZero(dimSet);
+        addedNode->m_nodeData.m_R_i_inv_diag.setZero(dimSet);
         addedNode->m_nodeData.m_G_ii.setZero(dimSet,dimSet);
         addedNode->m_nodeData.m_nLambdas = dimSet;
         // =========================================================================================================
@@ -485,54 +485,6 @@ public:
         m_nodeCounter++;
     }
 
-    void initNodesForIteration(const DynamicsState<TLayoutConfig> * state_s, PREC deltaT , PREC alpha){
-
-        // Calculates b vector for all nodes, u_0, R_ii, ...
-        for(NodeListIterator contactIt = m_nodes.begin(); contactIt != m_nodes.end(); contactIt++){
-
-            // Assert ContactModel
-            ASSERTMSG(contactIt->m_nodeData.m_eContactModel != ContactModels::NCFContactModel
-                      ,"You use InclusionSolverCONoG which only supports NCFContactModel Contacts so far!");
-
-            NodeDataType & nodeData = contactIt->m_nodeData;
-
-            // Get lambda from percussion pool otherwise set to zero
-            // TODO
-            nodeData.m_LambdaBack.setZero();
-
-            // (1+e)*xi -> b
-            nodeData.m_b = nodeData.m_I_plus_eps.asDiagonal() * nodeData.m_xi;
-
-            // u_0 (assuming P_init = 0!), calculate const b
-            int bodyNr ;
-            // First Body
-            if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBody<TLayoutConfig>::SIMULATED) {
-                bodyNr = nodeData.m_pCollData->m_pBody1->m_id;
-                nodeData.m_u1Back = state_s->m_SimBodyStates[bodyNr].m_u +  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_pCollData->m_pBody1->m_h_term * deltaT + nodeData.m_W_body1 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
-                nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body1.transpose() * state_s->m_SimBodyStates[bodyNr].m_u;
-                nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
-            }
-            // SECOND BODY!
-            if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBody<TLayoutConfig>::SIMULATED ) {
-                bodyNr = nodeData.m_pCollData->m_pBody2->m_id;
-                nodeData.m_u2Back = state_s->m_SimBodyStates[bodyNr].m_u +  nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_pCollData->m_pBody2->m_h_term * deltaT + nodeData.m_W_body2 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
-                nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() * state_s->m_SimBodyStates[bodyNr].m_u;
-                nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
-            }
-
-
-            // Calculate R_ii
-            nodeData.m_R_i_diag(0) = alpha / nodeData.m_G_ii(0,0);
-            PREC r_T = alpha / (nodeData.m_G_ii.diagonal().template tail<2>()).maxCoeff();
-            nodeData.m_R_i_diag(1) = r_T;
-            nodeData.m_R_i_diag(2) = r_T;
-
-
-        }
-    }
-
-
-
 
     static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBody<TLayoutConfig> * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1.get()  == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
@@ -545,8 +497,8 @@ public:
     }
 
 
-    std::map<const RigidBody<TLayoutConfig> *, NodeList > m_BodyToContactsList;
-    typedef typename std::map<const RigidBody<TLayoutConfig> *, NodeList >::iterator  BodyToContactsListIterator;
+    std::map<const RigidBody<TLayoutConfig> *, NodeListType > m_BodyToContactsList;
+    typedef typename std::map<const RigidBody<TLayoutConfig> *, NodeListType >::iterator  BodyToContactsListIteratorType;
 
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
@@ -660,9 +612,9 @@ private:
         // ===========================================================================
 
         // Get all contacts on this body and connect to them =========================
-        NodeList & nodeList = m_BodyToContactsList[pBody];
+        NodeListType & nodeList = m_BodyToContactsList[pBody];
         //iterate over the nodeList and add edges!
-        typename NodeList::iterator it;
+        typename NodeListType::iterator it;
         // if no contacts are already on the body we skip this
         for(it = nodeList.begin(); it != nodeList.end(); it++) {
 

@@ -1,6 +1,7 @@
 ﻿#ifndef InclusionSolverNT_hpp
 #define InclusionSolverNT_hpp
 
+#include <iostream>
 #include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Dense>
@@ -51,6 +52,7 @@ public:
   VectorU m_h_const;    // constant terms (gravity)
   VectorU m_delta_u_E;  // the delta which adds to the final u_E
 
+  std::string getIterationStats();
   PREC m_G_conditionNumber;
   PREC m_G_notDiagDominant;
   unsigned int m_iterationsNeeded;
@@ -681,6 +683,22 @@ void  InclusionSolverNT<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::readF
    P_Told(NDOFFriction*index+1) = P_contact(2);
 }
 
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
+std::string InclusionSolverNT<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::getIterationStats() {
+    std::stringstream s;
 
+    s   << -1<<"\t"// NO GPU
+        << m_nContacts<<"\t"
+        << m_iterationsNeeded<<"\t"
+        << m_bConverged<<"\t"
+        << -1<<"\t" // No is Finite
+        << -1<<"\t" // No time prox
+        << -1<<"\t" // No proxIterationtime
+        << m_pDynSys->m_CurrentStateEnergy <<"\t"
+        << m_G_conditionNumber<<"\t" //No m_G_conditionNumber
+        << m_G_notDiagDominant<<"\t" //No m_G_notDiagDominant
+        << -1<<std::endl;
+        return s.str();
+}
 
 #endif

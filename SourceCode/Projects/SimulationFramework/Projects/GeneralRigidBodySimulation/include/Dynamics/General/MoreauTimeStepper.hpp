@@ -404,10 +404,10 @@ template< typename TConfigTimeStepper>
 bool MoreauTimeStepper<  TConfigTimeStepper>::finished(){
    return m_bFinished;
 }
-
 template< typename TConfigTimeStepper>
 void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToSystemDataFile(double globalTime){
    #if OUTPUT_SYSTEMDATA_FILE == 1
+
          m_SystemDataFile
         << globalTime << "\t"
         << m_StateBuffers.m_pBack->m_t <<"\t"
@@ -415,18 +415,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToSystemDataFile(dou
         << (double)(m_endTimeCollisionSolver-m_startTimeCollisionSolver) <<"\t"
         << (double)(m_endTimeInclusionSolver-m_startTimeInclusionSolver) <<"\t"
         << m_AvgTimeForOneIteration <<"\t"
-        << m_pInclusionSolver->m_bUsedGPU<<"\t"
-        << m_pInclusionSolver->m_nContacts<<"\t"
-        << m_pInclusionSolver->m_iterationsNeeded<<"\t"
-        << m_pInclusionSolver->m_bConverged<<"\t"
-        << m_pInclusionSolver->m_isFinite<<"\t"
-        << m_pInclusionSolver->m_timeProx<<"\t"
-        << m_pInclusionSolver->m_proxIterationTime<<"\t"
-        << m_pDynSys->m_CurrentStateEnergy <<"\t"
-        << m_pInclusionSolver->m_G_conditionNumber<<"\t"
-        << m_pInclusionSolver->m_G_notDiagDominant<<"\t"
-        << m_pInclusionSolver->m_PercussionPool.getPoolSize()<<std::endl;
-
+        << m_pInclusionSolver->getIterationStats() << std::endl;
    #endif
 }
 template< typename TConfigTimeStepper>

@@ -112,10 +112,10 @@ protected:
 
 public:
 
-   typedef std::vector<Node<NodeDataType, EdgeDataType>* > NodeList;
-   typedef std::vector<Edge<NodeDataType, EdgeDataType>* > EdgeList;
-   typedef typename std::vector<Node<NodeDataType, EdgeDataType>* >::iterator NodeListIterator;
-   typedef typename std::vector<Edge<NodeDataType, EdgeDataType>* >::iterator EdgeListIterator;
+   typedef std::vector<Node<NodeDataType, EdgeDataType>* > NodeListType;
+   typedef std::vector<Edge<NodeDataType, EdgeDataType>* > EdgeListType;
+   typedef typename std::vector<Node<NodeDataType, EdgeDataType>* >::iterator NodeListIteratorType;
+   typedef typename std::vector<Edge<NodeDataType, EdgeDataType>* >::iterator EdgeListIteratorType;
 
 
    GeneralGraph(){};
@@ -132,8 +132,8 @@ public:
 	unsigned int getNumEdges(){return m_edges.size();};
 
 
-   NodeList & getNodeListRef(){ return m_nodes; };
-   EdgeList & getEdgeListRef(){ return m_edges; };
+   NodeListType & getNodeListRef(){ return m_nodes; };
+   EdgeListType & getEdgeListRef(){ return m_edges; };
 
 	void applyNodeVisitor(NodeVisitor<NodeDataType, EdgeDataType>& vv) {
 		for(typename std::vector<Node<NodeDataType, EdgeDataType>* >::iterator curr_node = m_nodes.begin(); curr_node != m_nodes.end(); curr_node++)

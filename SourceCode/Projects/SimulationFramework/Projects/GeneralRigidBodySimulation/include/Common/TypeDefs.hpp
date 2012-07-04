@@ -221,8 +221,8 @@ typedef SolverConfig
              DoubleDynamicLayout,
              DynamicsSystem<DoubleDynamicLayout>,
              CollisionSolver<DoubleDynamicLayout>,
-             InclusionSolverCO<DoubleDynamicLayout,DynamicsSystem<DoubleDynamicLayout>,CollisionSolver<DoubleDynamicLayout> >,
-             //InclusionSolverCONoG<DoubleDynamicLayout,DynamicsSystem<DoubleDynamicLayout>,CollisionSolver<DoubleDynamicLayout> >,
+             //InclusionSolverCO<DoubleDynamicLayout,DynamicsSystem<DoubleDynamicLayout>,CollisionSolver<DoubleDynamicLayout> >,
+             InclusionSolverCONoG<DoubleDynamicLayout,DynamicsSystem<DoubleDynamicLayout>,CollisionSolver<DoubleDynamicLayout> >,
              StatePoolVisBackFront<DoubleDynamicLayout>
           >
       >

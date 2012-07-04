@@ -1,6 +1,7 @@
 ﻿#ifndef InclusionSolverNTContactOrdered_hpp
 #define InclusionSolverNTContactOrdered_hpp
 
+#include <iostream>
 #include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Dense>
@@ -53,6 +54,7 @@ public:
    void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
    void solveInclusionProblem( const DynamicsState<TLayoutConfig> * state_s, const DynamicsState<TLayoutConfig> * state_m, DynamicsState<TLayoutConfig> * state_e);
 
+   std::string getIterationStats();
    PREC m_G_conditionNumber;
    PREC m_G_notDiagDominant;
    unsigned int m_iterationsNeeded;
@@ -743,6 +745,22 @@ void  InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::readF
    P_old((ContactDim)*index+2) = P_contact(2);
 }
 
+template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
+std::string InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::getIterationStats() {
+    std::stringstream s;
 
+    s   << m_bUsedGPU<<"\t"
+        << m_nContacts<<"\t"
+        << m_iterationsNeeded<<"\t"
+        << m_bConverged<<"\t"
+        << m_isFinite<<"\t"
+        << m_timeProx<<"\t"
+        << m_proxIterationTime<<"\t"
+        << m_pDynSys->m_CurrentStateEnergy <<"\t"
+        << m_G_conditionNumber<<"\t" //No m_G_conditionNumber
+        << m_G_notDiagDominant<<"\t" //No m_G_notDiagDominant
+        << m_PercussionPool.getPoolSize()<<std::endl;
+        return s.str();
+}
 
 #endif
