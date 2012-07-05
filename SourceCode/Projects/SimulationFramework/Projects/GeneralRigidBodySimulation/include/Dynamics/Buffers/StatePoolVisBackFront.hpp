@@ -28,8 +28,10 @@ public:
   /** @name Only accessed by Simulation Thread.
   * @{
   */
-  FrontBackBuffer<TLayoutConfig> getFrontBackBuffer();
-  FrontBackBuffer<TLayoutConfig> swapFrontBackBuffer();
+  typedef FrontBackBuffer<DynamicsState<TLayoutConfig>, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
+
+  FrontBackBufferType getFrontBackBuffer();
+  FrontBackBufferType swapFrontBackBuffer();
   /** @} */
 
   /** @name Only accessed by Visualization Thread.
@@ -212,14 +214,14 @@ void StatePoolVisBackFront<TLayoutConfig>::resetStatePool()
 
 // ONLY USED IN SIM THREAD
 template<typename TLayoutConfig>
-FrontBackBuffer<TLayoutConfig>
+typename StatePoolVisBackFront<TLayoutConfig>::FrontBackBufferType
 StatePoolVisBackFront<TLayoutConfig>::getFrontBackBuffer() {
-  return FrontBackBuffer<TLayoutConfig>(m_pool[m_idx[0]], m_pool[m_idx[1]]);
+  return FrontBackBufferType(m_pool[m_idx[0]], m_pool[m_idx[1]]);
 }
 
 // ONLY USED IN SIM THREAD
 template<typename TLayoutConfig>
-FrontBackBuffer<TLayoutConfig>
+typename StatePoolVisBackFront<TLayoutConfig>::FrontBackBufferType
 StatePoolVisBackFront<TLayoutConfig>::swapFrontBackBuffer()
 {
   boost::mutex::scoped_lock l(m_change_pointer_mutex);
@@ -229,7 +231,7 @@ StatePoolVisBackFront<TLayoutConfig>::swapFrontBackBuffer()
     m_logfile << "swapFrontBackBuffer()"<<endl;
     m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
 #endif
-    return FrontBackBuffer<TLayoutConfig>(m_pool[m_idx[0]], m_pool[m_idx[1]]);
+    return FrontBackBufferType(m_pool[m_idx[0]], m_pool[m_idx[1]]);
   }
   int new_front = 3 - m_idx[0] - m_idx[1]; //select the buffer which is currently unused
   m_idx[1] = m_idx[0];
@@ -240,7 +242,7 @@ StatePoolVisBackFront<TLayoutConfig>::swapFrontBackBuffer()
   m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
 #endif
 
-  return FrontBackBuffer<TLayoutConfig>(m_pool[m_idx[0]], m_pool[m_idx[1]]);
+  return FrontBackBufferType(m_pool[m_idx[0]], m_pool[m_idx[1]]);
 }
 
 // ONLY USED IN VISUALIZATION THREAD

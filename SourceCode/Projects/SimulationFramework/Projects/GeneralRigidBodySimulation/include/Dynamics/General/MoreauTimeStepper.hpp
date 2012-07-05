@@ -104,9 +104,13 @@ protected:
   // Reference Sim File for Simulation
   MultiBodySimFile<LayoutConfigType> m_ReferenceSimFile;
 
+
+
+  typedef FrontBackBuffer<DynamicsState<LayoutConfigType>, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
+  FrontBackBufferType m_StateBuffers;
   //Solver state pool front and back buffer
   void swapStateBuffers();
-  FrontBackBuffer<LayoutConfigType> m_StateBuffers;
+
 
   DynamicsState<LayoutConfigType> m_state_m;  // end state of iteration
 

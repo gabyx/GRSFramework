@@ -219,7 +219,7 @@ typedef SolverConfig
       MoreauTimeStepper<
           ConfigTimeStepper<
              DoubleDynamicLayout,
-             DynamicsSystem<DoubleDynamicLayout>,
+             DynamicsSystem<DoubleDynamicLayout, RigidBodySolverDataCONoG >,
              CollisionSolver<DoubleDynamicLayout>,
              //InclusionSolverCO<DoubleDynamicLayout,DynamicsSystem<DoubleDynamicLayout>,CollisionSolver<DoubleDynamicLayout> >,
              InclusionSolverCONoG<DoubleDynamicLayout,DynamicsSystem<DoubleDynamicLayout>,CollisionSolver<DoubleDynamicLayout> >,

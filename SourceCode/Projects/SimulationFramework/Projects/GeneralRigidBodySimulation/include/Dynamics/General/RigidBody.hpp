@@ -55,6 +55,7 @@ public:
     m_id = -1;
     m_r_S.setZero();
     setQuaternionZero(m_q_KI);
+    m_u.setZero();
     m_h_term_const.setZero();
     m_h_term.setZero();
     m_eState = NOT_SIMULATED;
@@ -84,11 +85,15 @@ public:
   Matrix33 m_A_IK; ///< The transformation matrix \f$ \mathbf{A}_{IK} \f$ from K frame to the I frame which is updated at each timestep.
 
   /**
-  * These values are updated from TimeStepper, used to faster compute certain stuff in assembler
+  * These values are updated from TimeStepper, used to faster compute certain stuff during the collision solving and inclusion solving.
   * @{
   */
   Vector3 m_r_S;     ///< Vector resolved in the I frame from origin to the center of gravity, \f$ \mathbf{r}_S \f$, at time t_s + deltaT/2.
   Quaternion m_q_KI; ///< Quaternion which represents a rotation from I to the K frame, \f$ \tilde{\mathbf{a}}_{KI} \f$,  at time t_s + deltaT/2.
+
+  VectorQObj m_u;     /**< This velocity maybe or maybee not needed in the inclusion solver!, it's value is u_e = u_s + M^⁻1 *h*deltaT (without M^1 * W * lambda)
+                          For Bodies which are used in the contact solving this value may change during the inclusion solving (for example: the start value will be
+                          u_e = u_s + M^⁻1 *h*deltaT + M^1 * W * lambda). For bodies which have no contact this value stays the above value. */
 
   /** @} */
 

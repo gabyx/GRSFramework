@@ -63,7 +63,7 @@ ContactParams<TLayoutConfig> & ContactParameterMap<TLayoutConfig>::getContactPar
 
   unsigned int mat1 = (int)material1;
   unsigned int mat2 = (int)material2;
-  
+
   int offset;
   // if in lower triangular part of matrix , swap
   if( mat1 > mat2 ){

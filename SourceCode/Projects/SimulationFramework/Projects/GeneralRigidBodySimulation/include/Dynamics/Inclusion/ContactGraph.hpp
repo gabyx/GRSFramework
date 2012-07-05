@@ -76,8 +76,8 @@ public:
         m_bConverged = 0;
     }
 
-    VectorUObj  m_u1Back, m_u2Back;
-    VectorUObj  m_u1Front, m_u2Front;
+    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> *m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for the object
+    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> *m_u2BufferPtr;
 
 
     Eigen::Matrix<PREC,Eigen::Dynamic,1> m_LambdaBack;
@@ -127,7 +127,7 @@ struct ContactGraphMode{
 };
 
 template < typename TLayoutConfig>
-class ContactGraph<TLayoutConfig,ContactGraphMode::NoItaration> : public Graph::GeneralGraph< ContactGraphNodeData<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> > {
+class ContactGraph<TLayoutConfig, ContactGraphMode::NoItaration> : public Graph::GeneralGraph< ContactGraphNodeData<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> > {
 public:
 
 
@@ -138,10 +138,10 @@ public:
     typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
     typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
 
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeList NodeList;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeList EdgeList;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIterator NodeListIterator;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIterator EdgeListIterator;
+    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType NodeListType;
+    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType EdgeListType;
+    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
+    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
 
     using Graph::GeneralGraph< NodeDataType,EdgeDataType >::m_edges;
     using Graph::GeneralGraph< NodeDataType,EdgeDataType >::m_nodes;
@@ -155,9 +155,9 @@ public:
     void clearGraph() {
         // This deletes all nodes, edges, and decrements the reference counts for the nodedata and edgedata
         // cleanup allocated memory
-        for(NodeListIterator n_it = m_nodes.begin(); n_it != m_nodes.end(); n_it++)
+        for(NodeListIteratorType n_it = m_nodes.begin(); n_it != m_nodes.end(); n_it++)
             delete (*n_it);
-        for(EdgeListIterator e_it = m_edges.begin(); e_it != m_edges.end(); e_it++)
+        for(EdgeListIteratorType e_it = m_edges.begin(); e_it != m_edges.end(); e_it++)
             delete (*e_it);
         //cout << "clear graph"<<endl;
         m_nodes.clear();
@@ -239,8 +239,8 @@ public:
     }
 
 
-    std::map<const RigidBody<TLayoutConfig> *, NodeList > m_BodyToContactsList;
-    typedef typename std::map<const RigidBody<TLayoutConfig> *, NodeList >::iterator  BodyToContactsListIterator;
+    std::map<const RigidBody<TLayoutConfig> *, NodeListType > m_BodyToContactsList;
+    typedef typename std::map<const RigidBody<TLayoutConfig> *, NodeListType >::iterator  BodyToContactsListIterator;
 
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
@@ -342,9 +342,9 @@ private:
         // ===========================================================================
 
         // Get all contacts on this body and connect to them =========================
-        NodeList & nodeList = m_BodyToContactsList[pBody];
+        NodeListType & nodeList = m_BodyToContactsList[pBody];
         //iterate over the nodeList and add edges!
-        typename NodeList::iterator it;
+        typename NodeListType::iterator it;
         // if no contacts are already on the body we skip this
         for(it = nodeList.begin(); it != nodeList.end(); it++) {
 

@@ -90,7 +90,9 @@ public:
    PREC	m_t; ///< The time in \f$[s]\f$
 
    typedef std::vector< RigidBodyState<TLayoutConfig> > RigidBodyStateListType;
-   RigidBodyStateListType  m_SimBodyStates; ///< A vector comprising of all rigid body states of the system.
+
+   RigidBodyStateListType  m_SimBodyStates; ///< A vector comprising of all rigid body states of the system for simulated objects.
+   RigidBodyStateListType  m_AniBodyStates; ///< A vector comprising of all rigid body states of the system for animated objects.
 
    const unsigned int m_nSimBodies;
 
