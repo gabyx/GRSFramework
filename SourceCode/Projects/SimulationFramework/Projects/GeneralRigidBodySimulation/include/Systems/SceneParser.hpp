@@ -294,12 +294,23 @@ private:
       int instances = rigidbodies->ToElement()->GetAttribute<int>("instances");
 
 
-      ticpp::Node * dynPropNode = rigidbodies->FirstChild("DynamicProperties");
-      processDynamicProperties(dynPropNode, instances);
+      for(int i=0; i<instances;i++){
+             boost::shared_ptr< RigidBodyType > temp_ptr(new RigidBodyType());
+             temp_ptr->m_id = i;
+             m_bodyList.push_back(temp_ptr);
+
+             Vector3 scale; scale.setOnes();
+             m_bodyListScales.push_back(scale);
+      }
 
 
       ticpp::Node * geometryNode = rigidbodies->FirstChild("Geometry");
       processGeometry(geometryNode);
+
+
+      ticpp::Node * dynPropNode = rigidbodies->FirstChild("DynamicProperties");
+      processDynamicProperties(dynPropNode);
+
 
 
 
@@ -563,7 +574,7 @@ private:
       }
    }
 
-   void processDynamicProperties( ticpp::Node * dynProp, unsigned int instances){
+   void processDynamicProperties( ticpp::Node * dynProp){
 
       ticpp::Element * element = dynProp->FirstChild("DynamicState")->ToElement();
 
@@ -571,28 +582,10 @@ private:
       if(type == "simulated"){
          m_eBodiesState =  RigidBodyType::SIMULATED;
 
-         for(int i=0; i<instances;i++){
-             boost::shared_ptr< RigidBodyType > temp_ptr(new RigidBodyType());
-             temp_ptr->m_id = i;
-             m_bodyList.push_back(temp_ptr);
-
-             Vector3 scale; scale.setOnes();
-             m_bodyListScales.push_back(scale);
-         }
-
          processDynamicPropertiesSimulated(dynProp);
       }
       else if(type == "not simulated"){
          m_eBodiesState =  RigidBodyType::NOT_SIMULATED;
-
-         for(int i=0; i<instances;i++){
-             boost::shared_ptr< RigidBodyType > temp_ptr(new RigidBodyType());
-             temp_ptr->m_id = i;
-             m_bodyList.push_back(temp_ptr);
-
-             Vector3 scale; scale.setOnes();
-             m_bodyListScales.push_back(scale);
-         }
 
          processDynamicPropertiesNotSimulated(dynProp);
       }
@@ -612,6 +605,11 @@ private:
 
 
    void processDynamicPropertiesSimulated( ticpp::Node * dynProp){
+
+      // First allocate a new SolverDate structure
+      for(int i=0; i < m_bodyList.size(); i++){
+            m_bodyList[i]->m_pSolverData = new RigidBodySolverDataType();
+      }
 
 
       // Mass ============================================================
