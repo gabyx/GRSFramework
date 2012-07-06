@@ -64,12 +64,12 @@ public:
    bool m_bUsedGPU;
    double m_timeProx, m_proxIterationTime;
 
-   ContactParameterMap<LayoutConfigType> m_ContactParameterMap;
+   ContactParameterMap<RigidBodyType> m_ContactParameterMap;
 
    PercussionPool<LayoutConfigType> m_PercussionPool;
 
    void reservePercussionPoolSpace(unsigned int nExpectedContacts);
-   void readFromPercussionPool(unsigned int index, const CollisionData<LayoutConfigType> * pCollData, VectorDyn & P_old);
+   void readFromPercussionPool(unsigned int index, const CollisionData<RigidBodyType> * pCollData, VectorDyn & P_old);
    void updatePercussionPool(const VectorDyn & P_old ) ;
 
 
@@ -85,10 +85,10 @@ protected:
 
    boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
    boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
-   std::vector< boost::shared_ptr< RigidBodySimType > > & m_SimBodies;
-   std::vector< boost::shared_ptr< RigidBodyNotAniType> > & m_Bodies;
+   std::vector< boost::shared_ptr< RigidBodyType > > & m_SimBodies;
+   std::vector< boost::shared_ptr< RigidBodyType> > & m_Bodies;
 
-   typedef ContactGraph<LayoutConfigType,ContactGraphMode::NoItaration> ContactGraphType;
+   typedef ContactGraph<RigidBodyType,ContactGraphMode::NoItaration> ContactGraphType;
    ContactGraphType m_ContactGraph;
 
    // Matrices for solving the inclusion ===========================
@@ -153,7 +153,7 @@ m_SimBodies(pCollisionSolver->m_SimBodies),
 
    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
    m_pCollisionSolver->m_ContactDelegateList.addContactDelegate(
-      ContactDelegateList<LayoutConfigType>::ContactDelegate::template from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
+      ContactDelegateList<RigidBodyType>::ContactDelegate::template from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
      );
 
 
@@ -313,7 +313,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 
 
       // Assemble W_N and W_T and xi_N and xi_T =====================================================
-      static const CollisionData<LayoutConfigType> * pCollData;
+      static const CollisionData<RigidBodyType> * pCollData;
 
       static Eigen::Matrix<PREC,Eigen::Dynamic,Eigen::Dynamic> G_part;
       static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic>* W_j_body;
@@ -347,7 +347,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 
          // iterate over all edges in current contact to build up G;
          typename ContactGraphType::EdgeListIteratorType it;
-         RigidBodyBase<LayoutConfigType> * edgesBody;
+         RigidBodyType * edgesBody;
 
          for(it = currentContactNode->m_edgeList.begin(); it != currentContactNode->m_edgeList.end(); it++){
 
@@ -502,7 +502,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
       // Calculate u_E for each body in the state...
 
       static Eigen::Matrix<PREC,NDOFuObj,1> delta_u_E;
-      static RigidBodySimType * pBody;
+      static RigidBodyType * pBody;
       for(unsigned int i=0; i < m_nSimBodies; i++){
          pBody = m_SimBodies[i].get();
          delta_u_E = pBody->m_h_term * m_Settings.m_deltaT;
@@ -521,7 +521,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
    }
    else{
       // Do simple timestep to u_E for each body in the state...
-      static RigidBodySimType * pBody;
+      static RigidBodyType * pBody;
       for(unsigned int i=0; i < m_nSimBodies; i++){
          pBody = m_SimBodies[i].get();
          state_e->m_SimBodyStates[i].m_u = state_s->m_SimBodyStates[i].m_u + pBody->m_MassMatrixInv_diag.asDiagonal()*pBody->m_h_term * m_Settings.m_deltaT;;
@@ -729,7 +729,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::updatePercussionPool(const Vecto
 
 
 template< typename TInclusionSolverConfig>
-void  InclusionSolverCO<TInclusionSolverConfig>::readFromPercussionPool(unsigned int index, const CollisionData<LayoutConfigType> * pCollData, VectorDyn & P_old)
+void  InclusionSolverCO<TInclusionSolverConfig>::readFromPercussionPool(unsigned int index, const CollisionData<RigidBodyType> * pCollData, VectorDyn & P_old)
 {
    static VectorDyn P_contact(ContactDim);
 //

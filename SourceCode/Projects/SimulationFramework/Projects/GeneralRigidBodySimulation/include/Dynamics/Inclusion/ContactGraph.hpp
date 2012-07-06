@@ -19,11 +19,12 @@
 
 
 
-template<typename TLayoutConfig>
+template<typename TRigidBody>
 class ContactGraphNodeData {
 public:
 
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+    typedef TRigidBody RigidBodyType;
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     ContactGraphNodeData(): m_pCollData(NULL) {
@@ -36,7 +37,7 @@ public:
         m_nLambdas = 0;
     }
 
-    ContactGraphNodeData(CollisionData<TLayoutConfig> * collDataPtr): m_pCollData(collDataPtr) {}
+    ContactGraphNodeData(CollisionData<RigidBodyType> * collDataPtr): m_pCollData(collDataPtr) {}
 
     Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> m_W_body1;
     Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> m_W_body2;
@@ -48,16 +49,17 @@ public:
 
     unsigned int m_nLambdas;
 
-    const CollisionData<TLayoutConfig> * m_pCollData;
+    const CollisionData<RigidBodyType> * m_pCollData;
 
     ContactModels::ContactModelEnum m_eContactModel;                  ///< This is a generic type which is used to distinguish between the different models!. See namespace ContactModels.
 };
 
-template<typename TLayoutConfig>
-class ContactGraphNodeDataIteration : public ContactGraphNodeData<TLayoutConfig> {
+template<typename TRigidBody>
+class ContactGraphNodeDataIteration : public ContactGraphNodeData<TRigidBody> {
 public:
 
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+    typedef TRigidBody RigidBodyType;
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     ContactGraphNodeDataIteration()
@@ -104,37 +106,41 @@ public:
 /*
 * The EdgeData class for the Contact Graph, nothing is deleted in this class, this is plain old data!
 */
-template<typename TLayoutConfig>
+template<typename TRigidBody>
 class ContactGraphEdgeData {
 public:
 
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+    typedef TRigidBody RigidBodyType;
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     ContactGraphEdgeData(): m_pBody(NULL) {};
 
-    RigidBodyBase<TLayoutConfig> * m_pBody; // Tells to which body this edges belongs!
+    RigidBodyType * m_pBody; // Tells to which body this edges belongs!
 
     //Eigen::Matrix<PREC,NDOFFriction+1,NDOFFriction+1> m_G_SE; // Start Node 1 to End Node 3 = G_13
 
 };
 
-template<typename TLayoutConfig, typename ContactGraphMode > class ContactGraph;
+template<typename TRigidBody, typename ContactGraphMode > class ContactGraph;
 
 struct ContactGraphMode{
     struct NoItaration{};
     struct ForIteration{};
 };
 
-template < typename TLayoutConfig>
-class ContactGraph<TLayoutConfig, ContactGraphMode::NoItaration> : public Graph::GeneralGraph< ContactGraphNodeData<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> > {
+template < typename TRigidBody>
+class ContactGraph<TRigidBody, ContactGraphMode::NoItaration> : public Graph::GeneralGraph< ContactGraphNodeData<TRigidBody>,ContactGraphEdgeData<TRigidBody> > {
 public:
 
 
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+    typedef TRigidBody RigidBodyType;
+    typedef typename RigidBodyType::LayoutConfigType LayoutConfigType;
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
 
-    typedef ContactGraphNodeData<TLayoutConfig> NodeDataType;
-    typedef ContactGraphEdgeData<TLayoutConfig> EdgeDataType;
+    typedef ContactGraphNodeData<RigidBodyType> NodeDataType;
+    typedef ContactGraphEdgeData<RigidBodyType> EdgeDataType;
     typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
     typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
 
@@ -170,7 +176,7 @@ public:
 
     }
 
-    void addNode(const DynamicsState<TLayoutConfig> * state, CollisionData<TLayoutConfig> * pCollData) {
+    void addNode(const DynamicsState<LayoutConfigType> * state, CollisionData<RigidBodyType> * pCollData) {
 
         ASSERTMSG(pCollData->m_pBody1.get() != NULL && pCollData->m_pBody2.get() != NULL, " Bodys are null pointers?");
         //cout << "add node : "<<m_nodeCounter<< " body id:" << pCollData->m_pBody1->m_id <<" and "<< pCollData->m_pBody2->m_id <<endl;
@@ -197,24 +203,24 @@ public:
         computeParams(addedNode->m_nodeData);
 
         // FIRST BODY!
-        if( pCollData->m_pBody1->m_eState == RigidBodyBase<TLayoutConfig>::SIMULATED ) {
+        if( pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
 
             computeW<1>( addedNode->m_nodeData);
             connectNode<1>( addedNode);
 
-        } else if( pCollData->m_pBody1->m_eState == RigidBodyBase<TLayoutConfig>::ANIMATED ) {
+        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
 
 
         // SECOND BODY!
-        if( pCollData->m_pBody2->m_eState == RigidBodyBase<TLayoutConfig>::SIMULATED ) {
+        if( pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
 
             computeW<2>( addedNode->m_nodeData);
             connectNode<2>( addedNode);
 
-        } else if( pCollData->m_pBody2->m_eState == RigidBodyBase<TLayoutConfig>::ANIMATED ) {
+        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
@@ -228,19 +234,19 @@ public:
     }
 
 
-    static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyBase<TLayoutConfig> * pBody) {
+    static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1.get()  == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1.get() == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
     }
 
-    static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyBase<TLayoutConfig> * pBody) {
+    static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1.get() == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1.get() == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
 
 
-    std::map<const RigidBodyBase<TLayoutConfig> *, NodeListType > m_BodyToContactsList;
-    typedef typename std::map<const RigidBodyBase<TLayoutConfig> *, NodeListType >::iterator  BodyToContactsListIterator;
+    std::map<const RigidBodyType *, NodeListType > m_BodyToContactsList;
+    typedef typename std::map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIterator;
 
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
@@ -254,7 +260,7 @@ private:
             nodeData.m_I_plus_eps.setZero(ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
             nodeData.m_mu.setZero(ContactModels::NormalAndCoulombFrictionContactModel::nFrictionParams);
 
-            ContactParams<TLayoutConfig> & params  = m_ContactParameterMap.getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
+            ContactParams<LayoutConfigType> & params  = m_ContactParameterMap.getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
             nodeData.m_mu(0)         = params.m_mu;
             nodeData.m_I_plus_eps(0)    = 1 + params.m_epsilon_N;
             nodeData.m_I_plus_eps(1)    = 1 + params.m_epsilon_T;
@@ -275,7 +281,7 @@ private:
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
             static Matrix33 I_Jacobi_2; // this is the second part of the Jacobi;
-            static const CollisionData<TLayoutConfig> * pCollData;
+            static const CollisionData<RigidBodyType> * pCollData;
 
             pCollData = nodeData.m_pCollData;
 
@@ -324,7 +330,7 @@ private:
     inline void connectNode(NodeType * pNode) {
 
         EdgeType * addedEdge;
-        RigidBodyBase<TLayoutConfig> * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1.get() : pNode->m_nodeData.m_pCollData->m_pBody2.get();
+        RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1.get() : pNode->m_nodeData.m_pCollData->m_pBody2.get();
 
         // Add self edge! ===========================================================
         m_edges.push_back(new EdgeType(m_edgeCounter));
@@ -367,22 +373,24 @@ private:
 
     }
 
-    ContactParameterMap<TLayoutConfig> m_ContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
+    ContactParameterMap<RigidBodyType> m_ContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 
     unsigned int m_nodeCounter; ///< An node counter, starting at 0.
     unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
 
 };
 
-template < typename TLayoutConfig>
-class ContactGraph<TLayoutConfig,ContactGraphMode::ForIteration> : public Graph::GeneralGraph< ContactGraphNodeDataIteration<TLayoutConfig>,ContactGraphEdgeData<TLayoutConfig> > {
+template < typename TRigidBody>
+class ContactGraph<TRigidBody,ContactGraphMode::ForIteration> : public Graph::GeneralGraph< ContactGraphNodeDataIteration<TRigidBody>,ContactGraphEdgeData<TRigidBody> > {
 public:
 
 
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+    typedef TRigidBody RigidBodyType;
+    typedef typename RigidBodyType::LayoutConfigType LayoutConfigType;
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
 
-    typedef ContactGraphNodeDataIteration<TLayoutConfig> NodeDataType;
-    typedef ContactGraphEdgeData<TLayoutConfig> EdgeDataType;
+    typedef ContactGraphNodeDataIteration<LayoutConfigType> NodeDataType;
+    typedef ContactGraphEdgeData<LayoutConfigType> EdgeDataType;
     typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
     typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
 
@@ -420,7 +428,7 @@ public:
 
     }
 
-    void addNode(const DynamicsState<TLayoutConfig> * state, CollisionData<TLayoutConfig> * pCollData) {
+    void addNode(const DynamicsState<LayoutConfigType> * state, CollisionData<RigidBodyType> * pCollData) {
 
         //Take care state, is only q = q_m, u is not set and is zero!
 
@@ -456,24 +464,24 @@ public:
         computeParams(addedNode->m_nodeData);
 
         // FIRST BODY!
-        if( pCollData->m_pBody1->m_eState == RigidBodyBase<TLayoutConfig>::SIMULATED ) {
+        if( pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
 
             computeW<1>( addedNode->m_nodeData);
             connectNode<1>( addedNode);
 
-        } else if( pCollData->m_pBody1->m_eState == RigidBodyBase<TLayoutConfig>::ANIMATED ) {
+        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
 
 
         // SECOND BODY!
-        if( pCollData->m_pBody2->m_eState == RigidBodyBase<TLayoutConfig>::SIMULATED ) {
+        if( pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
 
             computeW<2>( addedNode->m_nodeData);
             connectNode<2>( addedNode);
 
-        } else if( pCollData->m_pBody2->m_eState == RigidBodyBase<TLayoutConfig>::ANIMATED ) {
+        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
@@ -486,19 +494,19 @@ public:
     }
 
 
-    static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyBase<TLayoutConfig> * pBody) {
+    static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1.get()  == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1.get() == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
     }
 
-    static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyBase<TLayoutConfig> * pBody) {
+    static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1.get() == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1.get() == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
 
 
-    std::map<const RigidBodyBase<TLayoutConfig> *, NodeListType > m_BodyToContactsList;
-    typedef typename std::map<const RigidBodyBase<TLayoutConfig> *, NodeListType >::iterator  BodyToContactsListIteratorType;
+    std::map<const RigidBodyType *, NodeListType > m_BodyToContactsList;
+    typedef typename std::map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIteratorType;
 
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
@@ -516,7 +524,7 @@ private:
 
 
 
-            ContactParams<TLayoutConfig> & params  = m_ContactParameterMap.getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
+            ContactParams<LayoutConfigType> & params  = m_ContactParameterMap.getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
             nodeData.m_mu(0)     = params.m_mu;
             nodeData.m_eps(0)    = params.m_epsilon_N;
             nodeData.m_eps(1)    = params.m_epsilon_T;
@@ -542,7 +550,7 @@ private:
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
             static Matrix33 I_Jacobi_2; // this is the second part of the Jacobi;
-            static const CollisionData<TLayoutConfig> * pCollData;
+            static const CollisionData<RigidBodyType> * pCollData;
 
             pCollData = nodeData.m_pCollData;
 
@@ -594,7 +602,7 @@ private:
     inline void connectNode(NodeType * pNode) {
 
         EdgeType * addedEdge;
-        RigidBodyBase<TLayoutConfig> * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1.get() : pNode->m_nodeData.m_pCollData->m_pBody2.get();
+        RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1.get() : pNode->m_nodeData.m_pCollData->m_pBody2.get();
 
         // Add self edge! ===========================================================
         m_edges.push_back(new EdgeType(m_edgeCounter));
@@ -637,7 +645,7 @@ private:
 
     }
 
-    ContactParameterMap<TLayoutConfig> m_ContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
+    ContactParameterMap<RigidBodyType> m_ContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 
     unsigned int m_nodeCounter; ///< An node counter, starting at 0.
     unsigned int m_edgeCounter; ///< An edge counter, starting at 0.

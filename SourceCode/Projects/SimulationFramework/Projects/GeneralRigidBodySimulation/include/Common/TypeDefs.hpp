@@ -159,30 +159,28 @@ struct ConfigTimeStepper{
     typedef _TStatePool StatePoolType;
 };
 
-template < typename _TRigidBodyConfig>
+template < typename _TRigidBody>
 struct ConfigDynamicsSystem{
-    typedef _TRigidBodyConfig RigidBodyConfigType;
+    typedef _TRigidBody RigidBodyType;
 };
 
-template < typename _TRigidBodyConfig>
+template < typename _TRigidBody>
 struct ConfigCollisionSolver{
-    typedef _TRigidBodyConfig RigidBodyConfigType;
+    typedef _TRigidBody RigidBodyType;
 };
 
-template <typename _TDynamicsSystem, typename _TCollisionSolver,  typename _TRigidBodyConfig>
+template <typename _TDynamicsSystem, typename _TCollisionSolver,  typename _TRigidBody>
 struct ConfigInclusionSolver{
-    typedef _TRigidBodyConfig RigidBodyConfigType;
+    typedef _TRigidBody       RigidBodyType;
     typedef _TDynamicsSystem  DynamicsSystemType;
     typedef _TCollisionSolver CollisionSolverType;
 };
 
 
-template < typename _TLayoutConfigType, typename _TRigidBodySimulated,  typename _TRigidBodyAnimated, typename _TRigidBodyNotAnimated >
+template < typename _TLayoutConfig, typename _TRigidBodySolverData>
 struct ConfigRigidBody{
-    typedef _TLayoutConfigType LayoutConfigType;
-    typedef _TRigidBodySimulated RigidBodySimType;
-    typedef _TRigidBodyAnimated RigidBodyAniType;
-    typedef _TRigidBodyNotAnimated RigidBodyNotAniType;
+    typedef _TLayoutConfig LayoutConfigType;
+    typedef _TRigidBodySolverData   RigidBodySolverDataType;
 };
 
 // ================================================================================================
@@ -221,7 +219,7 @@ template< typename TDynamicsSystemConfig  > class DynamicsSystem;
 template< typename TInclusionSolverConfig > class InclusionSolverCO;
 template< typename TInclusionSolverConfig > class InclusionSolverCONoG;
 
-template< typename TLayoutConfig, typename TSolverData> class RigidBody;
+template< typename TRigidBodyConfig> class RigidBodyBase;
 template< typename TLayoutConfig > class RigidBodySolverDataCONoG;
 template< typename TLayoutConfig > class RigidBodySolverDataNone;
 
@@ -244,20 +242,20 @@ template< typename TConfigTimeStepper > class MoreauTimeStepper;
 
 // This one is used!!
 
-typedef ConfigRigidBody<DoubleDynamicLayout,
-        RigidBody<DoubleDynamicLayout, RigidBodySolverDataCONoG<DoubleDynamicLayout> > ,
-        RigidBody<DoubleDynamicLayout,RigidBodySolverDataNone<DoubleDynamicLayout> >,
-        RigidBody<DoubleDynamicLayout,RigidBodySolverDataNone<DoubleDynamicLayout> >
-        > MyRigidBodyConfig;
 
-typedef ConfigDynamicsSystem< MyRigidBodyConfig> MyConfigDynamicsSystem;
-typedef DynamicsSystem<MyConfigDynamicsSystem> MyDynamicsSystem;
+typedef ConfigRigidBody< DoubleDynamicLayout, RigidBodySolverDataCONoG<DoubleDynamicLayout> > MyRigidBodyConfig;
 
-typedef ConfigCollisionSolver< MyRigidBodyConfig> MyConfigCollisionSolver;
-typedef CollisionSolver<MyConfigCollisionSolver> MyCollisionSolver;
+typedef RigidBodyBase< MyRigidBodyConfig > MyRigidBody; //Define the Class
 
-typedef ConfigInclusionSolver<MyDynamicsSystem, MyCollisionSolver, MyRigidBodyConfig>  MyConfigInclusionSolver;
-typedef InclusionSolverCO< MyConfigInclusionSolver >  MyInclusionSolver;
+typedef ConfigDynamicsSystem< MyRigidBody> MyConfigDynamicsSystem;
+
+typedef DynamicsSystem<MyConfigDynamicsSystem> MyDynamicsSystem; //Define the Class
+
+typedef ConfigCollisionSolver< MyRigidBody> MyConfigCollisionSolver;
+typedef CollisionSolver<MyConfigCollisionSolver> MyCollisionSolver; //Define the Class
+
+typedef ConfigInclusionSolver<MyDynamicsSystem, MyCollisionSolver, MyRigidBody>  MyConfigInclusionSolver;
+typedef InclusionSolverCO< MyConfigInclusionSolver >  MyInclusionSolver; //Define the Class
 
 typedef ConfigTimeStepper<
              MyDynamicsSystem,
@@ -266,7 +264,7 @@ typedef ConfigTimeStepper<
              StatePoolVisBackFront<DoubleDynamicLayout>
           > MyConfigTimeStepper;
 
-typedef MoreauTimeStepper< MyConfigTimeStepper > MyMoreauTimeStepper;
+typedef MoreauTimeStepper< MyConfigTimeStepper > MyMoreauTimeStepper; //Define the Class
 
 
 typedef SolverConfig<MyMoreauTimeStepper> MySolverConfig;
@@ -301,34 +299,33 @@ typedef Config< MySolverConfig > GeneralConfig;
 
 #define DEFINE_SOLVER_CONFIG_TYPES_OF( _SolverConfigName_ ) \
    typedef typename _SolverConfigName_::TimeStepperType TimeStepperType; \
-   DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( TimeStepperType::TimeStepperConfigType ) \
+   DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( _SolverConfigName_::TimeStepperType::TimeStepperConfigType ) \
 
 #define DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( _TimeStepperConfigName_ ) \
-    typedef typename _TimeStepperConfigName_::StatePoolType          StatePoolType;                 \
-    typedef typename _TimeStepperConfigName_::DynamicsSystemType     DynamicsSystemType;                 \
+   typedef typename _TimeStepperConfigName_::StatePoolType          StatePoolType;                 \
+   typedef typename _TimeStepperConfigName_::DynamicsSystemType     DynamicsSystemType;                 \
    typedef typename _TimeStepperConfigName_::InclusionSolverType     InclusionSolverType;                 \
    typedef typename _TimeStepperConfigName_::CollisionSolverType     CollisionSolverType;                 \
-   DEFINE_RIGIDBODY_CONFIG_TYPES_OF ( DynamicsSystemType::RigidBodyConfigType ) \
+   DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF ( _TimeStepperConfigName_::DynamicsSystemType ) \
 
 #define DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES_OF( _InclusionSolverConfigName_ ) \
     typedef typename _InclusionSolverConfigName_::DynamicsSystemType     DynamicsSystemType;                 \
-   typedef typename _InclusionSolverConfigName_::CollisionSolverType     CollisionSolverType;                 \
+    typedef typename _InclusionSolverConfigName_::CollisionSolverType     CollisionSolverType;                 \
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF( DynamicsSystemType::DynamicsSystemConfig ) \
 
 #define DEFINE_COLLISION_SOLVER_CONFIG_TYPES_OF( _CollisionSolverConfigName_ ) \
-    DEFINE_RIGIDBODY_CONFIG_TYPES_OF( _CollisionSolverConfigName_::RigidBodyConfigType )\
+    typedef typename _CollisionSolverConfigName_::RigidBodyType RigidBodyType; \
+    DEFINE_RIGIDBODY_CONFIG_TYPES_OF( _CollisionSolverConfigName_::RigidBodyType::RigidBodyConfigType )\
 
 #define DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF( _DynamicsSystemConfigName_ ) \
-    typedef typename _DynamicsSystemConfigName_::RigidBodyConfigType     RigidBodyConfigType; \
-    DEFINE_RIGIDBODY_CONFIG_TYPES_OF( _DynamicsSystemConfigName_::RigidBodyConfigType ) \
+    typedef typename _DynamicsSystemConfigName_::RigidBodyType RigidBodyType; \
+    DEFINE_RIGIDBODY_CONFIG_TYPES_OF( _DynamicsSystemConfigName_::RigidBodyType::RigidBodyConfigType ) \
 
 
 #define DEFINE_RIGIDBODY_CONFIG_TYPES_OF( _RigidBodyConfigName_ ) \
-    typedef typename _RigidBodyConfigName_::LayoutConfigType     LayoutConfigType; \
+    typedef typename _RigidBodyConfigName_::LayoutConfigType LayoutConfigType; \
+    typedef typename _RigidBodyConfigName_::RigidBodySolverDataType RigidBodySolverDataType; \
     DEFINE_LAYOUT_CONFIG_TYPES_OF( _RigidBodyConfigName_::LayoutConfigType ) \
-    typedef typename _RigidBodyConfigName_::RigidBodySimType     RigidBodySimType; \
-    typedef typename _RigidBodyConfigName_::RigidBodyAniType     RigidBodyAniType; \
-    typedef typename _RigidBodyConfigName_::RigidBodyNotAniType  RigidBodyNotAniType; \
 
 /**
 * @brief This macro is used to typedef all template arguments in a class with e.g template argument typename â€œLayoutConfigâ€

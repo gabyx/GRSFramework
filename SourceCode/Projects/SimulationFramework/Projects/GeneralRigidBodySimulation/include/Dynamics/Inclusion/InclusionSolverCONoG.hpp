@@ -61,7 +61,7 @@ public:
     bool m_bUsedGPU;
     double m_timeProx, m_proxIterationTime;
 
-    ContactParameterMap<LayoutConfigType> m_ContactParameterMap;
+    ContactParameterMap<RigidBodyType> m_ContactParameterMap;
 
     PercussionPool<LayoutConfigType> m_PercussionPool;
 
@@ -82,12 +82,12 @@ protected:
     boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
 
-    typedef std::vector< boost::shared_ptr< RigidBodyBase<LayoutConfigType> > > RigidBodySimPtrListType;
+    typedef std::vector< boost::shared_ptr< RigidBodyType > > RigidBodySimPtrListType;
     RigidBodySimPtrListType & m_SimBodies;
-    typedef std::vector< boost::shared_ptr< RigidBodyBase<LayoutConfigType> > > RigidBodyNotAniPtrListType;
+    typedef std::vector< boost::shared_ptr< RigidBodyType > > RigidBodyNotAniPtrListType;
     RigidBodyNotAniPtrListType & m_Bodies;
 
-    typedef ContactGraph<LayoutConfigType,ContactGraphMode::ForIteration> ContactGraphType;
+    typedef ContactGraph<RigidBodyType,ContactGraphMode::ForIteration> ContactGraphType;
     ContactGraphType m_ContactGraph;
 
     void integrateAllBodyVelocities(const DynamicsState<LayoutConfigType> * state_s , DynamicsState<LayoutConfigType> * state_e);
@@ -121,7 +121,7 @@ InclusionSolverCONoG<TInclusionSolverConfig>::InclusionSolverCONoG(boost::shared
 
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     m_pCollisionSolver->m_ContactDelegateList.addContactDelegate(
-        ContactDelegateList<LayoutConfigType>::ContactDelegate::template from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
+        ContactDelegateList<RigidBodyType>::ContactDelegate::template from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
     );
 
     m_nContacts = 0;
@@ -340,7 +340,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
         // u_0 , calculate const b
         int bodyNr ;
         // First Body
-        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyBase<LayoutConfigType>::SIMULATED) {
+        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED) {
             bodyNr = nodeData.m_pCollData->m_pBody1->m_id;
 
             //nodeData.m_u1Back = state_e->m_SimBodyStates[bodyNr].m_u +  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
@@ -355,7 +355,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
             nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
         }
         // SECOND BODY!
-        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyBase<LayoutConfigType>::SIMULATED ) {
+        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
             bodyNr = nodeData.m_pCollData->m_pBody2->m_id;
 
             //nodeData.m_u2Back = state_e->m_SimBodyStates[bodyNr].m_u +  nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
@@ -433,12 +433,12 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes(DynamicsS
             nodeData.m_LambdaFront = nodeData.m_b;
 
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyBase<LayoutConfigType>::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body1.transpose() * nodeData.m_u1Back;
             }
 
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyBase<LayoutConfigType>::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2Back;
             }
 
@@ -459,11 +459,11 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes(DynamicsS
 #endif
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyBase<LayoutConfigType>::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
                 //nodeData.m_u1Front = nodeData.m_u1Back + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
                 state_e->m_SimBodyStates[nodeData.m_pCollData->m_pBody1->m_id].m_u = nodeData.m_u1Front;
             }
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyBase<LayoutConfigType>::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
                 //nodeData.m_u2Front = nodeData.m_u2Back + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
                 state_e->m_SimBodyStates[nodeData.m_pCollData->m_pBody2->m_id].m_u = nodeData.m_u2Front;
             }

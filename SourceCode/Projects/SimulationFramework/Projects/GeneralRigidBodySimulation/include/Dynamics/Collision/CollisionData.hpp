@@ -33,11 +33,14 @@
 * @brief This is the CollisionData class which describes one collision contact.
 */
 /** @{ */
-template<typename TLayoutConfig>
+template<typename TRigidBody>
 class CollisionData
 {
 public:
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+
+    typedef TRigidBody RigidBodyType;
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(TRigidBody::LayoutConfigType)
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     CollisionData(){
@@ -51,7 +54,7 @@ public:
 
     ~CollisionData(){};
 
-  boost::shared_ptr<RigidBodyBase<TLayoutConfig> >  m_pBody1, m_pBody2; ///< Two RigidBody pointers of the first and second RigidBody at this contact point.
+  boost::shared_ptr< RigidBodyType >  m_pBody1, m_pBody2; ///< Two RigidBody pointers of the first and second RigidBody at this contact point.
   PREC m_overlap; ///< The overlap distance in the normal direction.
 
   /**

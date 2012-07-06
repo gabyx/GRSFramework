@@ -149,7 +149,7 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
   m_pDynSys = pDynSys;
   m_pDynSys->init();
 
-  m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(nSimBodies, m_pDynSys->m_SimBodies, m_pDynSys->m_Bodies));
+  m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys->m_SimBodies, m_pDynSys->m_Bodies));
   m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys));
 
 };
@@ -291,20 +291,23 @@ double MoreauTimeStepper<  TConfigTimeStepper>::getTimeCurrent()
 {
   return m_StateBuffers.m_pBack->m_t;
 }
+
 template< typename TConfigTimeStepper>
 boost::shared_ptr<
     const DynamicsState<
-        typename TConfigTimeStepper::DynamicsSystemType::RigidBodyConfigType::LayoutConfigType
+        typename TConfigTimeStepper::DynamicsSystemType::RigidBodyType::RigidBodyConfigType::LayoutConfigType
     >
 >
 MoreauTimeStepper<  TConfigTimeStepper>::getBackStateBuffer()
 {
   return m_StateBuffers.m_pBack;
 }
+
+
 template< typename TConfigTimeStepper>
 boost::shared_ptr<
     const DynamicsState<
-        typename TConfigTimeStepper::DynamicsSystemType::RigidBodyConfigType::LayoutConfigType
+        typename TConfigTimeStepper::DynamicsSystemType::RigidBodyType::RigidBodyConfigType::LayoutConfigType
     >
 >
 MoreauTimeStepper<  TConfigTimeStepper>::getFrontStateBuffer()

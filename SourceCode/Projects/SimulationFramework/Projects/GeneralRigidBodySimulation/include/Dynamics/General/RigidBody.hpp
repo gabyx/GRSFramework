@@ -44,11 +44,12 @@ class RigidBodySolverDataNone{};
 
 
 
-template<typename TLayoutConfig>
+template<typename TRigidBodyConfig >
 class RigidBodyBase{
 public:
 
-  DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+  typedef TRigidBodyConfig RigidBodyConfigType;
+  DEFINE_RIGIDBODY_CONFIG_TYPES_OF(TRigidBodyConfig);
 
 
   enum BodyState{
@@ -82,6 +83,7 @@ public:
 
   ~RigidBodyBase(){
     //DECONSTRUCTOR_MESSAGE
+    delete m_solverData;
   };
 
     boost::variant<
@@ -116,17 +118,9 @@ public:
   BodyState m_eState; ///< The state of the body.
 
   BodyMaterial m_eMaterial; ///< The material.
-};
 
 
-
-template<typename TLayoutConfig, typename TSolverData >
-class RigidBody : public RigidBodyBase<TLayoutConfig> {
-public:
-  DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  TSolverData m_solverData;
+  RigidBodySolverDataType * m_solverData; /// Simulated bodies have a solverData. For all others, animated and not simulated this pointer is zero!
 
 };
 
