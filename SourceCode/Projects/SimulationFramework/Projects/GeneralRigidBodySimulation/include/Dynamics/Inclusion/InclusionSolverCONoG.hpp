@@ -309,6 +309,9 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::integrateAllBodyVelocities(co
         for(; stateItE != state_e->m_SimBodyStates.end(); ) {
             stateItE->m_u = stateItS->m_u + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
 
+            // TODO Write to Buffer
+            (*bodyIt)->m_pSolverData->m_uBuffer.m_Back = stateItE->m_u;
+
             // Move iterators
             bodyIt++;
             stateItS++;
@@ -343,13 +346,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
         if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED) {
             bodyNr = nodeData.m_pCollData->m_pBody1->m_id;
 
-            //nodeData.m_u1Back = state_e->m_SimBodyStates[bodyNr].m_u +  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
-
-#if CoutLevelSolverWhenContact>0
-        CLEARLOG;
-        logstream << " nodeData.m_b first"<< nodeData.m_eps <<std::endl;
-        LOG(m_pSolverLog);
-#endif
+            // m_Back contains u_s + M^⁻1*h*deltaT already!
+            nodeData.m_u1BufferPtr->m_Back +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
 
             nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body1.transpose() * state_s->m_SimBodyStates[bodyNr].m_u;
             nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
@@ -358,7 +356,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
         if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
             bodyNr = nodeData.m_pCollData->m_pBody2->m_id;
 
-            //nodeData.m_u2Back = state_e->m_SimBodyStates[bodyNr].m_u +  nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
+            // m_Back contains u_s + M^⁻1*h*deltaT already!
+            nodeData.m_u2BufferPtr->m_Back +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
 
             nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() * state_s->m_SimBodyStates[bodyNr].m_u;
             nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
@@ -372,7 +371,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
         nodeData.m_R_i_inv_diag(1) = r_T;
         nodeData.m_R_i_inv_diag(2) = r_T;
 
-#if CoutLevelSolverWhenContact>0
+#if CoutLevelSolverWhenContact>2
         CLEARLOG;
         logstream << " nodeData.m_b"<< nodeData.m_b <<std::endl;
         logstream << " nodeData.m_G_ii"<< nodeData.m_G_ii <<std::endl;
@@ -380,7 +379,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
         LOG(m_pSolverLog);
 #endif
 
-#if CoutLevelSolverWhenContact>0
+#if CoutLevelSolverWhenContact>2
         CLEARLOG;
         logstream << " nodeData.m_b"<< nodeData.m_b <<std::endl;
         LOG(m_pSolverLog);
@@ -403,7 +402,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx(DynamicsState<Layou
 
         m_iterationsNeeded++;
 
-        if (/*m_bConverged == true ||*/ m_iterationsNeeded >= m_Settings.m_MaxIter) {
+        if (m_bConverged == true || m_iterationsNeeded >= m_Settings.m_MaxIter) {
 
 #if CoutLevelSolverWhenContact>2
             CLEARLOG;
@@ -434,12 +433,12 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes(DynamicsS
 
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
-                nodeData.m_LambdaFront += nodeData.m_W_body1.transpose() * nodeData.m_u1Back;
+                nodeData.m_LambdaFront += nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_Back ;
             }
 
             // SECOND BODY!
             if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
-                nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2Back;
+                nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_Back;
             }
 
             nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
@@ -452,30 +451,34 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes(DynamicsS
                 nodeData.m_LambdaFront.template head<ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension>()
             );
 
-#if CoutLevelSolverWhenContact>0
-            CLEARLOG;
-            logstream << " lambda: " <<nodeData.m_LambdaFront.transpose()<< std::endl;
-            LOG(m_pSolverLog);
-#endif
+
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
+            bool converged = false;
             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
-                //nodeData.m_u1Front = nodeData.m_u1Back + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
-                state_e->m_SimBodyStates[nodeData.m_pCollData->m_pBody1->m_id].m_u = nodeData.m_u1Front;
+                nodeData.m_u1BufferPtr->m_Front = nodeData.m_u1BufferPtr->m_Back + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
+
+                // Write directly to global
+                state_e->m_SimBodyStates[nodeData.m_pCollData->m_pBody1->m_id].m_u = nodeData.m_u1BufferPtr->m_Front;
+
+                //Check first
+                converged = Numerics::cancelCriteriaValue(nodeData.m_u1BufferPtr->m_Back, nodeData.m_u1BufferPtr->m_Front, m_Settings.m_AbsTol, m_Settings.m_RelTol);
             }
+
+            // SECOND BONDY
             if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
-                //nodeData.m_u2Front = nodeData.m_u2Back + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
-                state_e->m_SimBodyStates[nodeData.m_pCollData->m_pBody2->m_id].m_u = nodeData.m_u2Front;
+                nodeData.m_u2BufferPtr->m_Front = nodeData.m_u2BufferPtr->m_Back  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
+
+                state_e->m_SimBodyStates[nodeData.m_pCollData->m_pBody2->m_id].m_u = nodeData.m_u2BufferPtr->m_Front;
+
+                // If first not converged dont check second
+                if(converged) {
+                    //Check second
+                    converged = Numerics::cancelCriteriaValue(nodeData.m_u2BufferPtr->m_Back, nodeData.m_u2BufferPtr->m_Front, m_Settings.m_AbsTol, m_Settings.m_RelTol);
+                }
             }
 
             // Check abortion criteria in u
-            bool converged;
-            //Check first
-            converged = Numerics::cancelCriteriaValue(nodeData.m_u1Back, nodeData.m_u1Front, m_Settings.m_AbsTol, m_Settings.m_RelTol);
-            if(converged) {
-                //Check second
-                converged = Numerics::cancelCriteriaValue(nodeData.m_u2Back, nodeData.m_u2Front, m_Settings.m_AbsTol, m_Settings.m_RelTol);
-            }
 
 
             if(!converged) {

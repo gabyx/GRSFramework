@@ -69,17 +69,14 @@ public:
 
         m_b.setZero();
 
-//        m_u1Back.setZero();
-//        m_u1Front.setZero();
-//
-//        m_u2Back.setZero();
-//        m_u2Front.setZero();
+        m_u1BufferPtr = NULL;
+        m_u2BufferPtr = NULL;
 
         m_bConverged = 0;
     }
 
-    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> *m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for the object
-    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> *m_u2BufferPtr;
+    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
+    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u2BufferPtr; /// Only valid for Simulated Objects
 
 
     Eigen::Matrix<PREC,Eigen::Dynamic,1> m_LambdaBack;
@@ -93,8 +90,10 @@ public:
     bool m_bConverged;
 
     inline void swapVelocities() {
-//        m_u1Back.swap(m_u1Front);
-//        m_u2Back.swap(m_u2Front);
+
+        if(m_u1BufferPtr){ m_u1BufferPtr->m_Back.swap(m_u1BufferPtr->m_Front); }
+
+        if(m_u2BufferPtr){m_u2BufferPtr->m_Back.swap(m_u2BufferPtr->m_Front); }
     };
 
     inline void swapLambdas() {
@@ -389,8 +388,8 @@ public:
     typedef typename RigidBodyType::LayoutConfigType LayoutConfigType;
     DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
 
-    typedef ContactGraphNodeDataIteration<LayoutConfigType> NodeDataType;
-    typedef ContactGraphEdgeData<LayoutConfigType> EdgeDataType;
+    typedef ContactGraphNodeDataIteration<RigidBodyType> NodeDataType;
+    typedef ContactGraphEdgeData<RigidBodyType> EdgeDataType;
     typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
     typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
 
@@ -466,6 +465,9 @@ public:
         // FIRST BODY!
         if( pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
 
+            //Link to FrontBackBuffer
+            addedNode->m_nodeData.m_u1BufferPtr = & pCollData->m_pBody1->m_pSolverData->m_uBuffer;
+
             computeW<1>( addedNode->m_nodeData);
             connectNode<1>( addedNode);
 
@@ -477,6 +479,9 @@ public:
 
         // SECOND BODY!
         if( pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
+
+            //Link to FrontBackBuffer
+            addedNode->m_nodeData.m_u2BufferPtr = & pCollData->m_pBody2->m_pSolverData->m_uBuffer;
 
             computeW<2>( addedNode->m_nodeData);
             connectNode<2>( addedNode);

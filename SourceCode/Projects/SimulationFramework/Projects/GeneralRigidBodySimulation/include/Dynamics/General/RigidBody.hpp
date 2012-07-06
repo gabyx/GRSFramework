@@ -19,6 +19,8 @@
 #include "BoxGeometry.hpp"
 #include "MeshGeometry.hpp"
 
+#include "FrontBackBuffer.hpp"
+
 #include "QuaternionHelpers.hpp"
 
 /**
@@ -33,15 +35,15 @@
 /** Class with  Data Structure for the Solver! */
 template< typename TLayoutConfig >
 class RigidBodySolverDataCONoG{
+
     DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+
     public:
-    //TODO
+
+    ///< Pointers into the right Front BackBuffer for the velocity which get iteratet in the InclusionSolverCONoG
+    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> m_uBuffer;
+
 };
-
-/** Class with no Data Structure for the Solver! */
-template< typename TLayoutConfig >
-class RigidBodySolverDataNone{};
-
 
 
 template<typename TRigidBodyConfig >
@@ -79,11 +81,12 @@ public:
     m_h_term.setZero();
     m_eState = NOT_SIMULATED;
     m_eMaterial = STD_MATERIAL;
+    m_pSolverData = NULL;
   }; ///< Constructor which sets standart values.
 
   ~RigidBodyBase(){
     //DECONSTRUCTOR_MESSAGE
-    delete m_solverData;
+    if(m_pSolverData){delete m_pSolverData; m_pSolverData = NULL;};
   };
 
     boost::variant<
@@ -120,7 +123,7 @@ public:
   BodyMaterial m_eMaterial; ///< The material.
 
 
-  RigidBodySolverDataType * m_solverData; /// Simulated bodies have a solverData. For all others, animated and not simulated this pointer is zero!
+  RigidBodySolverDataType * m_pSolverData; /// Simulated bodies have a solverData. For all others, animated and not simulated this pointer is zero!
 
 };
 

@@ -2,6 +2,8 @@
 #define FrontBackBuffer_hpp
 
 #include <boost/shared_ptr.hpp>
+#include <boost/type_traits.hpp>
+
 #include "TypeDefs.hpp"
 
 #include "DynamicsState.hpp"
@@ -108,6 +110,7 @@ public:
   {
 
   };
+
 
   TBufferType  m_Front;       ///< The front buffer which is readable and writable.
   TBufferType  m_Back;        ///< The back buffer which is only readable and writable.
