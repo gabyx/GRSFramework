@@ -65,7 +65,7 @@ private:
 * @param id2 The id of the contact type2.
 */
 template<typename TLayoutConfig>
-ContactTag makeContactTag(RigidBody<TLayoutConfig>* b1, unsigned char type1, unsigned int id1, RigidBody<TLayoutConfig>* b2 , unsigned char type2 , unsigned int id2)
+ContactTag makeContactTag(RigidBodyBase<TLayoutConfig>* b1, unsigned char type1, unsigned int id1, RigidBodyBase<TLayoutConfig>* b2 , unsigned char type2 , unsigned int id2)
 {
    // Make sure we always construct the same Tag!
    if(b1->m_id < b2->m_id){

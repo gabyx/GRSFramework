@@ -39,7 +39,7 @@ template<typename TLayoutConfig> class CollisionSolver;
 /**
 * @ingroup Collision
 * @brief This is the Collider class, this functor class handles the collision of different RigidBodies.
-    It initializes two RigidBody pointers and then the collider class is used as a functor with boost::apply_visitor(...)
+    It initializes two RigidBodyBase pointers and then the collider class is used as a functor with boost::apply_visitor(...)
     Which then matches the corresponding operator() which then further calls the corresponding collision routine!
 */
 /** @{ */
@@ -54,14 +54,14 @@ public:
     Collider();
     void init(TCollisionSolver * pCollisionSolver);
     /**
-    * @brief The initializer before this functor class should be used. This initializer is used to have two pointers to the RigidBody classes
+    * @brief The initializer before this functor class should be used. This initializer is used to have two pointers to the RigidBodyBase classes
     * which are tested against each other.
     */
-    void initializeBodies(boost::shared_ptr< RigidBody<TLayoutConfig> > &pBody1, boost::shared_ptr< RigidBody<TLayoutConfig> > &pBody2);
+    void initializeBodies(boost::shared_ptr< RigidBodyBase<TLayoutConfig> > &pBody1, boost::shared_ptr< RigidBodyBase<TLayoutConfig> > &pBody2);
 
     /**
     * @name Dispatch operators
-    * @brief Dispatch operators for the different boost::variant types defined in @ref RigidBody.
+    * @brief Dispatch operators for the different boost::variant types defined in @ref RigidBodyBase.
     */
     /** @{ */
 
@@ -87,8 +87,8 @@ public:
 
 
 private:
-    boost::shared_ptr< RigidBody<TLayoutConfig> > m_pBody1; ///< Shared pointer to the first RigidBody class instance.
-    boost::shared_ptr< RigidBody<TLayoutConfig> > m_pBody2; ///< Shared pointer to the second RigidBody class instance.
+    boost::shared_ptr< RigidBodyBase<TLayoutConfig> > m_pBody1; ///< Shared pointer to the first RigidBodyBase class instance.
+    boost::shared_ptr< RigidBodyBase<TLayoutConfig> > m_pBody2; ///< Shared pointer to the second RigidBodyBase class instance.
     bool m_bObjectsSwapped; ///< Boolean indicating if the bodies are swapped.
 
     TCollisionSolver * m_pCollisionSolver;
@@ -97,30 +97,30 @@ private:
     * @{
     */
     //Collision Functions ===============================================================================
-    void collide( boost::shared_ptr< RigidBody<TLayoutConfig> > & b1,
+    void collide( boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & b1,
                   boost::shared_ptr< const SphereGeometry<PREC> >  & sphereGeom1,
-                  boost::shared_ptr< RigidBody<TLayoutConfig> > & b2,
+                  boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & b2,
                   boost::shared_ptr< const SphereGeometry<PREC> >  & sphereGeom2); ///< Sphere/Sphere collision.
 
-    void collide( boost::shared_ptr< RigidBody<TLayoutConfig> > & b1,
+    void collide( boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & b1,
                   boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom,
-                  boost::shared_ptr<RigidBody<TLayoutConfig> > & b2,
+                  boost::shared_ptr<RigidBodyBase<TLayoutConfig> > & b2,
                   boost::shared_ptr<const HalfspaceGeometry<PREC> >  & halfspaceGeom); ///< Sphere/Halfspace collision.
 
-    void collide( boost::shared_ptr< RigidBody<TLayoutConfig> > & a,
+    void collide( boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & a,
                   boost::shared_ptr<const BoxGeometry<PREC> >  & boxA,
-                  boost::shared_ptr<RigidBody<TLayoutConfig> > & b,
+                  boost::shared_ptr<RigidBodyBase<TLayoutConfig> > & b,
                   boost::shared_ptr<const BoxGeometry<PREC> >  & boxB); ///< Box/Box collision.
 
-    void collide( boost::shared_ptr< RigidBody<TLayoutConfig> > & sphere,
+    void collide( boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & sphere,
                   boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom,
-                  boost::shared_ptr<RigidBody<TLayoutConfig> > & mesh,
+                  boost::shared_ptr<RigidBodyBase<TLayoutConfig> > & mesh,
                   boost::shared_ptr<const MeshGeometry<PREC> >  & meshGeom); ///< Sphere/Mesh collision.
 
     template <typename O1, typename O2>
-    void collide( boost::shared_ptr< RigidBody<TLayoutConfig> > & b1,
+    void collide( boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & b1,
                   boost::shared_ptr<const O1> & o1,
-                  boost::shared_ptr< RigidBody<TLayoutConfig> > & b2,
+                  boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & b2,
                   boost::shared_ptr<const O2>  & o2); ///< Exception, to indicate that no collision function could be matched, because its not implemented.
 
     /** @} */
@@ -143,7 +143,7 @@ void Collider<TLayoutConfig,TCollisionSolver>::init(TCollisionSolver * pCollisio
 
 
 template<typename TLayoutConfig, typename TCollisionSolver>
-void Collider<TLayoutConfig,TCollisionSolver>::initializeBodies(boost::shared_ptr< RigidBody<TLayoutConfig> > &pBody1, boost::shared_ptr< RigidBody<TLayoutConfig> > &pBody2) {
+void Collider<TLayoutConfig,TCollisionSolver>::initializeBodies(boost::shared_ptr< RigidBodyBase<TLayoutConfig> > &pBody1, boost::shared_ptr< RigidBodyBase<TLayoutConfig> > &pBody2) {
     m_pBody1 = pBody1;
     m_pBody2 = pBody2;
     m_bObjectsSwapped = false;
@@ -193,9 +193,9 @@ void Collider<TLayoutConfig,TCollisionSolver>::operator()(boost::shared_ptr<Geom
 
 // Collision Functions ==============================================================================
 template<typename TLayoutConfig, typename TCollisionSolver>
-void Collider<TLayoutConfig,TCollisionSolver>::collide( boost::shared_ptr< RigidBody<TLayoutConfig> > & b1,
+void Collider<TLayoutConfig,TCollisionSolver>::collide( boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & b1,
         boost::shared_ptr< const SphereGeometry<PREC> >  & sphereGeom1,
-        boost::shared_ptr<RigidBody<TLayoutConfig> > & b2,
+        boost::shared_ptr<RigidBodyBase<TLayoutConfig> > & b2,
         boost::shared_ptr< const SphereGeometry<PREC> >  & sphereGeom2) {
     // Do Collision for sphere to sphere
 
@@ -245,9 +245,9 @@ void Collider<TLayoutConfig,TCollisionSolver>::collide( boost::shared_ptr< Rigid
 }
 
 template<typename TLayoutConfig, typename TCollisionSolver>
-void Collider<TLayoutConfig,TCollisionSolver>::collide( boost::shared_ptr< RigidBody<TLayoutConfig> > & b1,
+void Collider<TLayoutConfig,TCollisionSolver>::collide( boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & b1,
         boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom,
-        boost::shared_ptr<RigidBody<TLayoutConfig> > & b2,
+        boost::shared_ptr<RigidBodyBase<TLayoutConfig> > & b2,
         boost::shared_ptr<const HalfspaceGeometry<PREC> >  & halfspaceGeom) {
 
 
@@ -282,18 +282,18 @@ void Collider<TLayoutConfig,TCollisionSolver>::collide( boost::shared_ptr< Rigid
 }
 
 template<typename TLayoutConfig, typename TCollisionSolver>
-void Collider<TLayoutConfig,TCollisionSolver>::collide(   boost::shared_ptr< RigidBody<TLayoutConfig> > & a,
+void Collider<TLayoutConfig,TCollisionSolver>::collide(   boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & a,
         boost::shared_ptr<const BoxGeometry<PREC> >  & boxA,
-        boost::shared_ptr<RigidBody<TLayoutConfig> > & b,
+        boost::shared_ptr<RigidBodyBase<TLayoutConfig> > & b,
         boost::shared_ptr<const BoxGeometry<PREC> >  & boxB) {
     // Not implemented yet!
 }
 
 
 template<typename TLayoutConfig, typename TCollisionSolver>
-void Collider<TLayoutConfig,TCollisionSolver>::collide(   boost::shared_ptr< RigidBody<TLayoutConfig> > & sphere,
+void Collider<TLayoutConfig,TCollisionSolver>::collide(   boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & sphere,
         boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom,
-        boost::shared_ptr<RigidBody<TLayoutConfig> > & mesh,
+        boost::shared_ptr<RigidBodyBase<TLayoutConfig> > & mesh,
         boost::shared_ptr<const MeshGeometry<PREC> >  & meshGeom) {
     using namespace MatrixHelpers;
 
@@ -431,9 +431,9 @@ void Collider<TLayoutConfig,TCollisionSolver>::collide(   boost::shared_ptr< Rig
 
 template<typename TLayoutConfig, typename TCollisionSolver>
 template <typename O1, typename O2>
-void Collider<TLayoutConfig,TCollisionSolver>::collide( boost::shared_ptr< RigidBody<TLayoutConfig> > & b1,
+void Collider<TLayoutConfig,TCollisionSolver>::collide( boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & b1,
         boost::shared_ptr<const O1> & o1,
-        boost::shared_ptr< RigidBody<TLayoutConfig> > & b2,
+        boost::shared_ptr< RigidBodyBase<TLayoutConfig> > & b2,
         boost::shared_ptr<const O2>  & o2) {
     ASSERTMSG(false,"Collider:: collision detection for object-combination not supported!");
 }

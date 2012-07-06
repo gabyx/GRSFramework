@@ -26,7 +26,7 @@ public:
   * @param material2 The second material.
   * @return The reference to the ContactParams which corresponds to this kind of contact meterial pair.
   */
-  ContactParams<TLayoutConfig> & getContactParams(typename RigidBody<TLayoutConfig>::BodyMaterial material1, typename RigidBody<TLayoutConfig>::BodyMaterial  material2);
+  ContactParams<TLayoutConfig> & getContactParams(typename RigidBodyBase<TLayoutConfig>::BodyMaterial material1, typename RigidBodyBase<TLayoutConfig>::BodyMaterial  material2);
   std::vector<ContactParams<TLayoutConfig> > & getContactParamsVector();
 
 private:
@@ -42,7 +42,7 @@ private:
 template< typename TLayoutConfig>
 ContactParameterMap<TLayoutConfig>::ContactParameterMap()
 {
-   m_nMaterials = (int)RigidBody<TLayoutConfig>::END-(int)RigidBody<TLayoutConfig>::STD_MATERIAL;
+   m_nMaterials = (int)RigidBodyBase<TLayoutConfig>::END-(int)RigidBodyBase<TLayoutConfig>::STD_MATERIAL;
   m_std_values.m_epsilon_N = 0.2;
   m_std_values.m_epsilon_T = 0.0;
   m_std_values.m_mu = 0.3;
@@ -58,7 +58,7 @@ ContactParameterMap<TLayoutConfig>::ContactParameterMap()
 
 
 template< typename TLayoutConfig>
-ContactParams<TLayoutConfig> & ContactParameterMap<TLayoutConfig>::getContactParams(typename RigidBody<TLayoutConfig>::BodyMaterial material1, typename RigidBody<TLayoutConfig>::BodyMaterial material2)
+ContactParams<TLayoutConfig> & ContactParameterMap<TLayoutConfig>::getContactParams(typename RigidBodyBase<TLayoutConfig>::BodyMaterial material1, typename RigidBodyBase<TLayoutConfig>::BodyMaterial material2)
 {
 
   unsigned int mat1 = (int)material1;

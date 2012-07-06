@@ -11,8 +11,8 @@ namespace InertiaTensor{
 
 
 
-   template<typename TLayoutConfig>
-   void calculateInertiaTensor( const boost::shared_ptr<RigidBody<TLayoutConfig> > & rigidBody)
+   template<typename TLayoutConfig, typename TRigidBody>
+   void calculateInertiaTensor( const boost::shared_ptr<TRigidBody > & rigidBody)
    {
       typedef typename TLayoutConfig::PREC PREC;
 

@@ -37,22 +37,23 @@
 * @ingroup Inclusion
 * @brief The inclusion solver for an ordered problem.
 */
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
+template< typename TInclusionSolverConfig>
 class InclusionSolverCO{
 public:
-   DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+
+   DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES_OF(TInclusionSolverConfig)
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
    static const int NDOFFriction = ContactModels::NormalAndCoulombFrictionContactModel::nDOFFriction;
    static const int ContactDim = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
 
-   InclusionSolverCO(boost::shared_ptr<TCollisionSolver >  pCollisionSolver, boost::shared_ptr<TDynamicsSystem> pDynSys);
+   InclusionSolverCO(boost::shared_ptr<CollisionSolverType >  pCollisionSolver, boost::shared_ptr<DynamicsSystemType> pDynSys);
 
    void initializeLog( Ogre::Log* pSolverLog, boost::filesystem::path folder_path );
    void reset();
    void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
-   void solveInclusionProblem( const DynamicsState<TLayoutConfig> * state_s, const DynamicsState<TLayoutConfig> * state_m, DynamicsState<TLayoutConfig> * state_e);
+   void solveInclusionProblem( const DynamicsState<LayoutConfigType> * state_s, const DynamicsState<LayoutConfigType> * state_m, DynamicsState<LayoutConfigType> * state_e);
 
    std::string getIterationStats();
    PREC m_G_conditionNumber;
@@ -63,16 +64,16 @@ public:
    bool m_bUsedGPU;
    double m_timeProx, m_proxIterationTime;
 
-   ContactParameterMap<TLayoutConfig> m_ContactParameterMap;
+   ContactParameterMap<LayoutConfigType> m_ContactParameterMap;
 
-   PercussionPool<TLayoutConfig> m_PercussionPool;
+   PercussionPool<LayoutConfigType> m_PercussionPool;
 
    void reservePercussionPoolSpace(unsigned int nExpectedContacts);
-   void readFromPercussionPool(unsigned int index, const CollisionData<TLayoutConfig> * pCollData, VectorDyn & P_old);
+   void readFromPercussionPool(unsigned int index, const CollisionData<LayoutConfigType> * pCollData, VectorDyn & P_old);
    void updatePercussionPool(const VectorDyn & P_old ) ;
 
 
-   InclusionSolverSettings<TLayoutConfig> m_Settings;
+   InclusionSolverSettings<LayoutConfigType> m_Settings;
 
    unsigned int getNObjects();
 
@@ -82,12 +83,12 @@ protected:
 
    unsigned int m_nExpectedContacts;
 
-   boost::shared_ptr<TCollisionSolver> m_pCollisionSolver;
-   boost::shared_ptr<TDynamicsSystem>  m_pDynSys;
-   std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_SimBodies;
-   std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_Bodies;
+   boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
+   boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
+   std::vector< boost::shared_ptr< RigidBodySimType > > & m_SimBodies;
+   std::vector< boost::shared_ptr< RigidBodyNotAniType> > & m_Bodies;
 
-   typedef ContactGraph<TLayoutConfig,ContactGraphMode::NoItaration> ContactGraphType;
+   typedef ContactGraph<LayoutConfigType,ContactGraphMode::NoItaration> ContactGraphType;
    ContactGraphType m_ContactGraph;
 
    // Matrices for solving the inclusion ===========================
@@ -133,8 +134,8 @@ protected:
 
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::InclusionSolverCO(boost::shared_ptr< TCollisionSolver >  pCollisionSolver,  boost::shared_ptr<TDynamicsSystem> pDynSys):
+template< typename TInclusionSolverConfig>
+InclusionSolverCO<TInclusionSolverConfig>::InclusionSolverCO(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,  boost::shared_ptr<DynamicsSystemType> pDynSys):
 m_SimBodies(pCollisionSolver->m_SimBodies),
    m_Bodies(pCollisionSolver->m_Bodies)
 {
@@ -152,7 +153,7 @@ m_SimBodies(pCollisionSolver->m_SimBodies),
 
    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
    m_pCollisionSolver->m_ContactDelegateList.addContactDelegate(
-      ContactDelegateList<TLayoutConfig>::ContactDelegate::template from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
+      ContactDelegateList<LayoutConfigType>::ContactDelegate::template from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
      );
 
 
@@ -171,8 +172,8 @@ m_SimBodies(pCollisionSolver->m_SimBodies),
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::initializeLog( Ogre::Log* pSolverLog,  boost::filesystem::path folder_path )
+template< typename TInclusionSolverConfig>
+void InclusionSolverCO<TInclusionSolverConfig>::initializeLog( Ogre::Log* pSolverLog,  boost::filesystem::path folder_path )
 {
    m_pSolverLog = pSolverLog;
 
@@ -183,14 +184,14 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::initia
 }
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-unsigned int InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::getNObjects()
+template< typename TInclusionSolverConfig>
+unsigned int InclusionSolverCO<TInclusionSolverConfig>::getNObjects()
 {
    return m_nSimBodies;
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::reset()
+template< typename TInclusionSolverConfig>
+void InclusionSolverCO<TInclusionSolverConfig>::reset()
 {
    // Do a Debug check if sizes match!
    ASSERTMSG( m_SimBodies.size() * NDOFuObj == m_nDofu, "InclusionSolverCO:: Error in Dimension of System!");
@@ -223,8 +224,8 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::reset(
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::resetForNextIter()
+template< typename TInclusionSolverConfig>
+void InclusionSolverCO<TInclusionSolverConfig>::resetForNextIter()
 {
    m_nContacts = 0;
    m_nLambdas = 0;
@@ -238,14 +239,14 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::resetF
 }
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::swapPercussionBuffer()
+template< typename TInclusionSolverConfig>
+void InclusionSolverCO<TInclusionSolverConfig>::swapPercussionBuffer()
 {
    std::swap(m_P_back,m_P_front);
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::resetPercussionBuffer()
+template< typename TInclusionSolverConfig>
+void InclusionSolverCO<TInclusionSolverConfig>::resetPercussionBuffer()
 {
    m_P_back = &m_P_1;
    m_P_front = &m_P_2;
@@ -253,17 +254,17 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::resetP
 
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::reservePercussionPoolSpace( unsigned int nExpectedContacts )
+template< typename TInclusionSolverConfig>
+void InclusionSolverCO<TInclusionSolverConfig>::reservePercussionPoolSpace( unsigned int nExpectedContacts )
 {
    m_nExpectedContacts = nExpectedContacts;
    m_PercussionPool.rehashPercussionPool(m_nExpectedContacts);
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveInclusionProblem(const DynamicsState<TLayoutConfig> * state_s,
-   const DynamicsState<TLayoutConfig> * state_m,
-   DynamicsState<TLayoutConfig> * state_e)
+template< typename TInclusionSolverConfig>
+void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const DynamicsState<LayoutConfigType> * state_s,
+   const DynamicsState<LayoutConfigType> * state_m,
+   DynamicsState<LayoutConfigType> * state_e)
 {
 
 #if CoutLevelSolver>0
@@ -312,7 +313,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
 
 
       // Assemble W_N and W_T and xi_N and xi_T =====================================================
-      static const CollisionData<TLayoutConfig> * pCollData;
+      static const CollisionData<LayoutConfigType> * pCollData;
 
       static Eigen::Matrix<PREC,Eigen::Dynamic,Eigen::Dynamic> G_part;
       static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic>* W_j_body;
@@ -346,7 +347,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
 
          // iterate over all edges in current contact to build up G;
          typename ContactGraphType::EdgeListIteratorType it;
-         RigidBody<TLayoutConfig> * edgesBody;
+         RigidBodyBase<LayoutConfigType> * edgesBody;
 
          for(it = currentContactNode->m_edgeList.begin(); it != currentContactNode->m_edgeList.end(); it++){
 
@@ -427,7 +428,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
 #endif
 
 
-      if( m_Settings.m_eMethod == InclusionSolverSettings<TLayoutConfig>::SOR){
+      if( m_Settings.m_eMethod == InclusionSolverSettings<LayoutConfigType>::SOR){
          // Calculate  R_N, R_T,
          setupRMatrix(m_Settings.m_alphaSORProx);
          m_T = (-m_R).asDiagonal()*m_T;
@@ -446,7 +447,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
          m_timeProx = counter.get_microseconds()*1.0e-6;
 #endif
       }
-      else if(m_Settings.m_eMethod == InclusionSolverSettings<TLayoutConfig>::JOR){
+      else if(m_Settings.m_eMethod == InclusionSolverSettings<LayoutConfigType>::JOR){
          // Calculate  R_N, R_T,
          setupRMatrix(m_Settings.m_alphaJORProx);
          m_T = (-m_R).asDiagonal()*m_T;
@@ -501,7 +502,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
       // Calculate u_E for each body in the state...
 
       static Eigen::Matrix<PREC,NDOFuObj,1> delta_u_E;
-      static RigidBody<TLayoutConfig> * pBody;
+      static RigidBodySimType * pBody;
       for(unsigned int i=0; i < m_nSimBodies; i++){
          pBody = m_SimBodies[i].get();
          delta_u_E = pBody->m_h_term * m_Settings.m_deltaT;
@@ -520,7 +521,7 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
    }
    else{
       // Do simple timestep to u_E for each body in the state...
-      static RigidBody<TLayoutConfig> * pBody;
+      static RigidBodySimType * pBody;
       for(unsigned int i=0; i < m_nSimBodies; i++){
          pBody = m_SimBodies[i].get();
          state_e->m_SimBodyStates[i].m_u = state_s->m_SimBodyStates[i].m_u + pBody->m_MassMatrixInv_diag.asDiagonal()*pBody->m_h_term * m_Settings.m_deltaT;;
@@ -529,8 +530,8 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::solveI
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::setupRMatrix(PREC alpha){
+template< typename TInclusionSolverConfig>
+void InclusionSolverCO<TInclusionSolverConfig>::setupRMatrix(PREC alpha){
    PREC r_T_i;
    for(unsigned int i=0;i<m_nContacts;i++){
       m_R((ContactDim)*i) =  alpha / m_T((ContactDim)*i,(ContactDim)*i);
@@ -548,8 +549,8 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::setupR
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::doJorProx(){
+template< typename TInclusionSolverConfig>
+void InclusionSolverCO<TInclusionSolverConfig>::doJorProx(){
 
    // This JOR Prox is worse then JOR prox of InclusionSolverNT which uses P_Front_N already for tangential directions.
 
@@ -625,8 +626,8 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::doJorP
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::doSorProx(){
+template< typename TInclusionSolverConfig>
+void InclusionSolverCO<TInclusionSolverConfig>::doSorProx(){
 
    static VectorDyn PContact_back(NDOFFriction);
    static unsigned int counterConverged;
@@ -711,8 +712,8 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::doSorP
 #endif
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::updatePercussionPool(const VectorDyn & P_old )
+template< typename TInclusionSolverConfig>
+void InclusionSolverCO<TInclusionSolverConfig>::updatePercussionPool(const VectorDyn & P_old )
 {
    static VectorDyn P_contact(ContactDim);
    for(unsigned int i = 0; i< m_nContacts; i++){
@@ -727,8 +728,8 @@ void InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::update
 }
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-void  InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::readFromPercussionPool(unsigned int index, const CollisionData<TLayoutConfig> * pCollData, VectorDyn & P_old)
+template< typename TInclusionSolverConfig>
+void  InclusionSolverCO<TInclusionSolverConfig>::readFromPercussionPool(unsigned int index, const CollisionData<LayoutConfigType> * pCollData, VectorDyn & P_old)
 {
    static VectorDyn P_contact(ContactDim);
 //
@@ -745,8 +746,8 @@ void  InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::readF
    P_old((ContactDim)*index+2) = P_contact(2);
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver>
-std::string InclusionSolverCO<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::getIterationStats() {
+template< typename TInclusionSolverConfig>
+std::string InclusionSolverCO<TInclusionSolverConfig>::getIterationStats() {
     std::stringstream s;
 
     s   << m_bUsedGPU<<"\t"

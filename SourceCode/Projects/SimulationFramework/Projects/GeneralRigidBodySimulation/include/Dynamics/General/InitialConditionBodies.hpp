@@ -94,8 +94,8 @@ void setupBodyPositionAxisAngle(RigidBodyState<TLayoutConfig> & rigibodyState, c
 }
 
 
-template<typename TLayoutConfig>
-void applyDynamicsStateToBodies(const DynamicsState<TLayoutConfig> & state, std::vector<boost::shared_ptr<RigidBody<TLayoutConfig> > > & bodies){
+template<typename TLayoutConfig, typename TRigidBody>
+void applyDynamicsStateToBodies(const DynamicsState<TLayoutConfig> & state, std::vector<boost::shared_ptr<TRigidBody > > & bodies){
     ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
 
     for(int i=0; i < bodies.size(); i++){

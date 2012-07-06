@@ -39,7 +39,7 @@ template< typename TConfigTimeStepper>
 class MoreauTimeStepper {
 public:
 
-
+   typedef TConfigTimeStepper TimeStepperConfigType;
    DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( TConfigTimeStepper )
 
 
@@ -292,12 +292,22 @@ double MoreauTimeStepper<  TConfigTimeStepper>::getTimeCurrent()
   return m_StateBuffers.m_pBack->m_t;
 }
 template< typename TConfigTimeStepper>
-boost::shared_ptr<const DynamicsState<typename TConfigTimeStepper::LayoutConfigType> > MoreauTimeStepper<  TConfigTimeStepper>::getBackStateBuffer()
+boost::shared_ptr<
+    const DynamicsState<
+        typename TConfigTimeStepper::DynamicsSystemType::RigidBodyConfigType::LayoutConfigType
+    >
+>
+MoreauTimeStepper<  TConfigTimeStepper>::getBackStateBuffer()
 {
   return m_StateBuffers.m_pBack;
 }
 template< typename TConfigTimeStepper>
-boost::shared_ptr<const DynamicsState< typename TConfigTimeStepper::LayoutConfigType> > MoreauTimeStepper<  TConfigTimeStepper>::getFrontStateBuffer()
+boost::shared_ptr<
+    const DynamicsState<
+        typename TConfigTimeStepper::DynamicsSystemType::RigidBodyConfigType::LayoutConfigType
+    >
+>
+MoreauTimeStepper<  TConfigTimeStepper>::getFrontStateBuffer()
 {
   return m_StateBuffers.m_pFront;
 }

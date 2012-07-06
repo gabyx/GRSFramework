@@ -294,26 +294,19 @@ private:
       int instances = rigidbodies->ToElement()->GetAttribute<int>("instances");
 
 
-      for(int i=0; i<instances;i++){
-         boost::shared_ptr< RigidBody<LayoutConfigType> > temp_ptr(new RigidBody<LayoutConfigType>());
-         temp_ptr->m_id = i;
-         m_bodyList.push_back(temp_ptr);
-
-         Vector3 scale; scale.setOnes();
-         m_bodyListScales.push_back(scale);
-      }
+      ticpp::Node * dynPropNode = rigidbodies->FirstChild("DynamicProperties");
+      processDynamicProperties(dynPropNode, instances);
 
 
       ticpp::Node * geometryNode = rigidbodies->FirstChild("Geometry");
       processGeometry(geometryNode);
 
 
-      ticpp::Node * dynPropNode = rigidbodies->FirstChild("DynamicProperties");
-      processDynamicProperties(dynPropNode);
+
 
 
          //Copy the pointers!
-         if(m_eBodiesState == RigidBody<LayoutConfigType>::SIMULATED){
+         if(m_eBodiesState == RigidBodyBase<LayoutConfigType>::SIMULATED){
             if(m_bParseDynamics){
                for(int i=0; i < m_bodyList.size(); i++){
                   m_pDynSys->m_SimBodies.push_back(m_bodyList[i]);
@@ -321,7 +314,7 @@ private:
             }
             m_SimBodies += instances;
          }
-         else if(m_eBodiesState == RigidBody<LayoutConfigType>::NOT_SIMULATED){
+         else if(m_eBodiesState == RigidBodyBase<LayoutConfigType>::NOT_SIMULATED){
             if(m_bParseDynamics){
                for(int i=0; i < m_bodyList.size(); i++){
                   m_pDynSys->m_Bodies.push_back(m_bodyList[i]);
@@ -570,21 +563,41 @@ private:
       }
    }
 
-   void processDynamicProperties( ticpp::Node * dynProp){
+   void processDynamicProperties( ticpp::Node * dynProp, unsigned int instances){
 
       ticpp::Element * element = dynProp->FirstChild("DynamicState")->ToElement();
 
       std::string type = element->GetAttribute("type");
       if(type == "simulated"){
-         m_eBodiesState =  RigidBody<LayoutConfigType>::SIMULATED;
+         m_eBodiesState =  RigidBodyBase<LayoutConfigType>::SIMULATED;
+
+         for(int i=0; i<instances;i++){
+             boost::shared_ptr< RigidBodySimType > temp_ptr(new RigidBodySimType());
+             temp_ptr->m_id = i;
+             m_bodyList.push_back(temp_ptr);
+
+             Vector3 scale; scale.setOnes();
+             m_bodyListScales.push_back(scale);
+         }
+
          processDynamicPropertiesSimulated(dynProp);
       }
       else if(type == "not simulated"){
-         m_eBodiesState =  RigidBody<LayoutConfigType>::NOT_SIMULATED;
+         m_eBodiesState =  RigidBodyBase<LayoutConfigType>::NOT_SIMULATED;
+
+         for(int i=0; i<instances;i++){
+             boost::shared_ptr< RigidBodyNotAniType > temp_ptr(new RigidBodyNotAniType());
+             temp_ptr->m_id = i;
+             m_bodyList.push_back(temp_ptr);
+
+             Vector3 scale; scale.setOnes();
+             m_bodyListScales.push_back(scale);
+         }
+
          processDynamicPropertiesNotSimulated(dynProp);
       }
       else if(type == "animated"){
-         m_eBodiesState =  RigidBody<LayoutConfigType>::ANIMATED;
+         m_eBodiesState =  RigidBodyBase<LayoutConfigType>::ANIMATED;
          throw ticpp::Exception("The attribute 'type' '" + type + std::string("' of 'DynamicState' has no implementation in the parser"));
       }
       else{
@@ -632,21 +645,21 @@ private:
       element = dynProp->FirstChild("Material")->ToElement();
       distribute = element->GetAttribute("distribute");
       if(distribute == "uniform"){
-         typename RigidBody<LayoutConfigType>::BodyMaterial eMaterial;
+         typename RigidBodyBase<LayoutConfigType>::BodyMaterial eMaterial;
          type = element->GetAttribute("type");
          if(type == "standart"){
-            eMaterial = RigidBody<LayoutConfigType>::STD_MATERIAL;
+            eMaterial = RigidBodyBase<LayoutConfigType>::STD_MATERIAL;
          }
          else if( type == "wood" ){
-            eMaterial = RigidBody<LayoutConfigType>::WOOD;
+            eMaterial = RigidBodyBase<LayoutConfigType>::WOOD;
          }
          else if( type == "metal"){
-            eMaterial = RigidBody<LayoutConfigType>::METAL;
+            eMaterial = RigidBodyBase<LayoutConfigType>::METAL;
          }
          else if( type == "glas"){
-            eMaterial = RigidBody<LayoutConfigType>::GLAS;
+            eMaterial = RigidBodyBase<LayoutConfigType>::GLAS;
          }else{
-            eMaterial = RigidBody<LayoutConfigType>::STD_MATERIAL;
+            eMaterial = RigidBodyBase<LayoutConfigType>::STD_MATERIAL;
          }
          for(int i=0; i < m_bodyList.size(); i++){
             m_bodyList[i]->m_eMaterial = eMaterial;
@@ -1010,10 +1023,10 @@ private:
             sceneNode->setOrientation(m_bodyList[i]->m_q_KI(0),m_bodyList[i]->m_q_KI(1),m_bodyList[i]->m_q_KI(2),m_bodyList[i]->m_q_KI(3));
 
 
-            if( m_eBodiesState == RigidBody<LayoutConfigType>::SIMULATED){
+            if( m_eBodiesState == RigidBodyBase<LayoutConfigType>::SIMULATED){
                m_rSceneNodeSimBodies.push_back(sceneNode);
             }
-            else if( m_eBodiesState == RigidBody<LayoutConfigType>::NOT_SIMULATED){
+            else if( m_eBodiesState == RigidBodyBase<LayoutConfigType>::NOT_SIMULATED){
                m_rSceneNodeBodies.push_back(sceneNode);
             }
 
@@ -1050,10 +1063,9 @@ private:
    std::stringstream logstream;
 
    unsigned int m_SimBodies;
-
    // Temprary structures
-   typename RigidBody<LayoutConfigType>::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
-   std::vector<boost::shared_ptr<RigidBody<LayoutConfigType> > > m_bodyList; ///< Used to process a RigidBody Node
+   typename RigidBodyBase<LayoutConfigType>::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
+   std::vector<boost::shared_ptr< RigidBodyBase<LayoutConfigType> > > m_bodyList; ///< Used to process a RigidBody Node
    std::vector<Vector3> m_bodyListScales;
    std::vector< DynamicsState<LayoutConfigType> > m_SimBodyInitStates;
 
