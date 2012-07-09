@@ -30,7 +30,7 @@
 #include "SorProxGPUVariant.hpp"
 #endif
 
-#include <platformstl/performance/performance_counter.hpp>
+#include <boost/timer/timer.hpp>
 
 
 
@@ -236,7 +236,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem(const D
         if( m_Settings.m_eMethod == InclusionSolverSettings<LayoutConfigType>::SOR) {
 
 #if MEASURE_TIME_PROX == 1
-            platformstl::performance_counter counter;
+            boost::timer::cpu_timer counter;
             counter.start();
 #endif
 
@@ -245,13 +245,13 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem(const D
 
 #if MEASURE_TIME_PROX == 1
             counter.stop();
-            m_timeProx = counter.get_microseconds()*1.0e-6;
+            m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
 #endif
 
         } else if(m_Settings.m_eMethod == InclusionSolverSettings<LayoutConfigType>::JOR) {
 
 #if MEASURE_TIME_PROX == 1
-            platformstl::performance_counter counter;
+            boost::timer::cpu_timer counter;
             counter.start();
 #endif
 
@@ -260,7 +260,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem(const D
 
 #if MEASURE_TIME_PROX == 1
             counter.stop();
-            m_timeProx = counter.get_microseconds()*1.0e-6;
+            m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
 #endif
         }
 

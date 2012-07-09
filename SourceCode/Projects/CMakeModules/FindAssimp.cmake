@@ -6,8 +6,8 @@
 # Once done, this will define
 #
 # ASSIMP_FOUND - system has Assimp
-# ASSIMP_INCLUDE_DIRS - the Assimp include directories
-# ASSIMP_LIBRARIES - link these to use Assimp
+# ASSIMP_INCLUDE_DIR - the Assimp include directories
+# ASSIMP_LIBRARY - link these to use Assimp
 
 include(MyFindPkgMacros)
 include(PrintListMacro)

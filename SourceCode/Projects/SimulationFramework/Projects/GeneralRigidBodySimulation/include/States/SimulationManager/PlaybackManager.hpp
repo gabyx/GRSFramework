@@ -22,7 +22,7 @@ template< typename TLayoutConfig , typename TStatePool> class PlaybackLoader;
 template< typename TLayoutConfig> class SharedBufferPlayback;
 
 template<typename TConfig>
-class PlaybackManager : public PlaybackManagerBase
+class PlaybackManager : public PlaybackManagerBase , public OIS::KeyListener
 {
 public:
   DEFINE_CONFIG_TYPES_OF(TConfig);
@@ -55,9 +55,11 @@ public:
 	// Key Mouse Listener
 	bool keyPressed(const OIS::KeyEvent &keyEventRef);
 	bool keyReleased(const OIS::KeyEvent &keyEventRef);
+    void enableInput(bool value);
 
 private:
 
+  std::string m_KeyListenerName;
 
   bool parseScene();
   bool m_bSetupSuccessful;

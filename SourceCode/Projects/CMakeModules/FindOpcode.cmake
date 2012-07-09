@@ -6,8 +6,8 @@
 # Once done, this will define
 #
 # OPCODE_FOUND - system has OPCODE
-# OPCODE_INCLUDE_DIRS - the OPCODE include directories
-# OPCODE_LIBRARIES - link these to use OPCODE
+# OPCODE_INCLUDE_DIR - the OPCODE include directories
+# OPCODE_LIBRARY - link these to use OPCODE
 
 include(MyFindPkgMacros)
 include(PrintListMacro)

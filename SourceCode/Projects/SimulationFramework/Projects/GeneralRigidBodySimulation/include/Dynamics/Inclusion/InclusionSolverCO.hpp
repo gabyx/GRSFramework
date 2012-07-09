@@ -27,7 +27,7 @@
 #include "SorProxGPUVariant.hpp"
 #endif
 
-#include <platformstl/performance/performance_counter.hpp>
+#include <boost/timer/timer.hpp>
 
 
 
@@ -436,7 +436,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
          m_d.noalias() = (-m_R).asDiagonal()*m_d;
 
 #if MEASURE_TIME_PROX == 1
-         platformstl::performance_counter counter;
+         boost::timer::cpu_timer counter;
          counter.start();
 #endif
 
@@ -444,7 +444,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 
 #if MEASURE_TIME_PROX == 1
          counter.stop();
-         m_timeProx = counter.get_microseconds()*1.0e-6;
+         m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
 #endif
       }
       else if(m_Settings.m_eMethod == InclusionSolverSettings<LayoutConfigType>::JOR){
@@ -455,7 +455,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
          m_d.noalias() = (-m_R).asDiagonal()*m_d;
 
 #if MEASURE_TIME_PROX == 1
-         platformstl::performance_counter counter;
+         boost::timer::cpu_timer counter;
          counter.start();
 #endif
 
@@ -463,7 +463,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 
 #if MEASURE_TIME_PROX == 1
          counter.stop();
-         m_timeProx = counter.get_microseconds()*1.0e-6;
+         m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
 #endif
       }
 

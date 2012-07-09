@@ -451,3 +451,15 @@ template<typename TConfig>
 void PlaybackManager<TConfig>::cancelAllWaits(){
    m_pVideoDropper->cancelWait();
 }
+
+template<typename TConfig>
+void PlaybackManager<TConfig>::enableInput(bool value){
+   if(value){
+      // add some key,mouse listener to change the input
+      InputContext::getSingletonPtr()->addKeyListener(this,m_KeyListenerName);
+   }else{
+      // add some key,mouse listener to change the input
+      InputContext::getSingletonPtr()->removeKeyListener(this);
+   }
+}
+

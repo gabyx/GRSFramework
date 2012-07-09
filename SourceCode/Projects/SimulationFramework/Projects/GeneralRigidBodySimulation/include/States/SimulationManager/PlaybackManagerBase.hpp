@@ -12,9 +12,9 @@
 
 #include "AssertionDebug.hpp"
 
-#include <platformstl/performance/performance_counter.hpp>
+#include <boost/timer/timer.hpp>
 
-class PlaybackManagerBase: public OIS::KeyListener
+class PlaybackManagerBase
 {
 public:
    PlaybackManagerBase();
@@ -42,9 +42,6 @@ public:
    virtual void startPlaybackThread()=0;
    virtual void stopPlaybackThread(bool force_stop)=0;
 
-   void enableInput(bool value);
-   virtual bool keyPressed(const OIS::KeyEvent &keyEventRef)=0;
-   virtual bool keyReleased(const OIS::KeyEvent &keyEventRef)=0;
 
 protected:
 
@@ -63,7 +60,7 @@ protected:
       }
    };
 
-   std::string m_KeyListenerName;
+
 
    boost::mutex m_mutexIterationtime;
    double m_averageIterationTime;
@@ -86,7 +83,7 @@ protected:
    void setSimThreadRunning(bool value);   /**	\brief Sets the variable which is used in the vis thread to check if the thread is still alive. */
 
    boost::mutex		m_mutexTimelineSimulation;
-   boost::shared_ptr<platformstl::performance_counter>		m_pTimelineSimulation;
+   boost::shared_ptr<boost::timer::cpu_timer>		m_pTimelineSimulation;
    double m_lastTime; // This is used to stop the timer, set m_lastTime, increase/decrease timeScale, startTimer again
 
    double	m_timeScale;

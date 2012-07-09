@@ -23,7 +23,7 @@ template <typename TLayoutConfig> class StateRecorder;
 template< typename TLayoutConfig> class SharedBufferDynSys;
 
 template<typename TConfig>
-class SimulationManager : public SimulationManagerBase
+class SimulationManager : public SimulationManagerBase , public OIS::KeyListener
 {
 public:
 
@@ -54,10 +54,14 @@ public:
    void stopSimThread(Threads threadToStop, bool force_stop);
 
    // Key Mouse Listener
+
    bool keyPressed(const OIS::KeyEvent &keyEventRef);
    bool keyReleased(const OIS::KeyEvent &keyEventRef);
+   void enableInput(bool value);
 
 private:
+
+   boost::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
 
    void setShadowTechniques();
 
@@ -78,6 +82,7 @@ private:
    void readSharedBuffer();
    void writeSharedBuffer();
 
+   std::string m_KeyListenerName;
 
    Ogre::Log* m_pSolverLog;
 

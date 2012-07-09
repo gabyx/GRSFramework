@@ -18,7 +18,7 @@ m_bThreadToBeStopped(false),
 m_barrier_start(2)
 {
   m_lastTime = 0;
-  m_pTimelineSimulation = boost::shared_ptr<platformstl::performance_counter>(new platformstl::performance_counter());
+  m_pTimelineSimulation = boost::shared_ptr<boost::timer::cpu_timer>(new boost::timer::cpu_timer);
   m_pTimelineSimulation->start();
 
   // Setup timeScale List;
@@ -65,8 +65,7 @@ double SimulationManagerBase::getTimelineSimulation()
 {
   double x;
   m_mutexTimelineSimulation.lock();
-  m_pTimelineSimulation->stop();
-  x = m_pTimelineSimulation->get_microseconds() * 1e-6 * m_timeScale + m_lastTime;
+  x = ((double)m_pTimelineSimulation->elapsed().wall) * 1e-9 * m_timeScale + m_lastTime;
   m_mutexTimelineSimulation.unlock();
   return x;
 };
@@ -74,7 +73,7 @@ double SimulationManagerBase::getTimelineSimulation()
 void  SimulationManagerBase::resetTimelineSimulation()
 {
   m_mutexTimelineSimulation.lock();
-  m_pTimelineSimulation->restart();
+  m_pTimelineSimulation->stop(); m_pTimelineSimulation->start();
   m_lastTime = 0;
   m_mutexTimelineSimulation.unlock();
 };
@@ -102,8 +101,8 @@ void SimulationManagerBase::addToTimeScale(double step)
     m_mutexTimelineSimulation.lock();
     // Reset the Timer
     m_pTimelineSimulation->stop();
-    m_lastTime = m_pTimelineSimulation->get_microseconds() * 1e-6 * m_timeScale + m_lastTime;
-    m_pTimelineSimulation->restart();
+    m_lastTime = ((double)m_pTimelineSimulation->elapsed().wall) * 1e-9 * m_timeScale + m_lastTime;
+    m_pTimelineSimulation->start();
     m_mutexTimelineSimulation.unlock();
 
     //Set mGlobalTimeFactor
@@ -116,7 +115,7 @@ void SimulationManagerBase::addToTimeScale(double step)
         m_timeScaleListIdx--;
       }
     }
-   
+
     m_timeScale = m_timeScaleList[m_timeScaleListIdx];
 
     std::stringstream logstream;
@@ -143,12 +142,3 @@ unsigned int SimulationManagerBase::getNumberOfContacts( )
    return m_nCurrentContacts;
 }
 
-void SimulationManagerBase::enableInput(bool value){
-   if(value){
-      // add some key,mouse listener to change the input
-      InputContext::getSingletonPtr()->addKeyListener(this,m_KeyListenerName);
-   }else{
-      // add some key,mouse listener to change the input
-      InputContext::getSingletonPtr()->removeKeyListener(this);
-   }
-}
