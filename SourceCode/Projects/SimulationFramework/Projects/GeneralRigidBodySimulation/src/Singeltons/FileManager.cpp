@@ -5,7 +5,7 @@
 #include "LogDefines.hpp"
 
 //=========================================================
-template<> FileManager* Ogre::Singleton<FileManager>::ms_Singleton = 0;
+
 
 //=========================================================
 
@@ -14,7 +14,6 @@ using namespace std;
 FileManager::FileManager(){
   m_fileIdCounter = 0;
 
-  m_pAppLog = RenderContext::getSingletonPtr()->m_pAppLog;
 
 }
 FileManager::~FileManager()
@@ -34,7 +33,7 @@ void FileManager::copyFile(boost::filesystem::path from, boost::filesystem::path
    }else{
       boost::filesystem::copy_file(from,to,boost::filesystem::copy_option::overwrite_if_exists,err);
    }
-   m_pAppLog->logMessage(err.message());
+   //m_pAppLog->logMessage(err.message());
 }
 
 boost::filesystem::path FileManager::getNewSimFolderPath(boost::filesystem::path directory,  std::string folder_prefix)
@@ -59,7 +58,7 @@ void FileManager::updateFileList(boost::filesystem::path directory, bool with_Su
   updateAllSimDataFiles(directory,with_SubDirs);
 }
 
-Ogre::StringVector FileManager::getSimFileNameList()
+std::vector<std::string> FileManager::getSimFileNameList()
 {
   boost::mutex::scoped_lock l(m_busy_mutex);
   return m_SimFileNames;
@@ -133,7 +132,7 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, co
            if( number_length >0){
              std::string number_string = name.substr(found, number_length);
              unsigned int numberId;
-             if( stringToType<unsigned int>(numberId,number_string, std::dec)){
+             if( Utilities::stringToType<unsigned int>(numberId,number_string, std::dec)){
                // Conversion worked
                if( m_fileIdCounter <= numberId){
                  m_fileIdCounter = numberId+1;
@@ -162,7 +161,7 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, co
           }
 
           std::string name = iter->path().filename().string();
-          m_pAppLog->logMessage("Found file " + name);
+          //m_pAppLog->logMessage("Found file " + name);
         }
       }
     }

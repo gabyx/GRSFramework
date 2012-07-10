@@ -88,7 +88,10 @@ SET(COMMON_INC
 	${PROJECT_SOURCE_DIR}/include/Common/PlatformDefines.hpp
 	${PROJECT_SOURCE_DIR}/include/Common/CommonFunctions.hpp
 	${PROJECT_SOURCE_DIR}/include/Common/MeshData.hpp
+        ${PROJECT_SOURCE_DIR}/include/Common/Singleton.hpp
+        ${PROJECT_SOURCE_DIR}/include/Common/SimpleLogger.hpp
 	${PROJECT_SOURCE_DIR}/include/Common/OgreMeshExtraction.hpp
+        ${PROJECT_SOURCE_DIR}/include/Common/CommonFunctionsOgre.hpp
 	${PROJECT_SOURCE_DIR}/include/Common/MakeCoordinateSystem.hpp
 	${PROJECT_SOURCE_DIR}/include/Common/VectorToSkewMatrix.hpp
    ${PROJECT_SOURCE_DIR}/include/Common/MatrixHelpers.hpp
@@ -101,6 +104,7 @@ SET(COMMON_INC
 SET(COMMON_SRC
 	${PROJECT_SOURCE_DIR}/src/Common/OgreMeshExtraction.cpp
 	${PROJECT_SOURCE_DIR}/src/Common/CommonFunctions.cpp
+        ${PROJECT_SOURCE_DIR}/src/Common/CommonFunctionsOgre.cpp
 	${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
 )
 

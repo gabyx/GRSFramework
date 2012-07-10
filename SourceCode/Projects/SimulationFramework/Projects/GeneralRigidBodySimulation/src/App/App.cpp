@@ -15,7 +15,7 @@ App::~App()
 
   m_pAppStateManager.reset();
 
-  delete FileManager::getSingletonPtr();
+    delete FileManager::getSingletonPtr();
 	delete GuiContext::getSingletonPtr();
 	delete InputContext::getSingletonPtr();
 	delete RenderContext::getSingletonPtr();
@@ -49,6 +49,7 @@ void App::startApp()
 
 
   new FileManager();
+
 
 	SimulationState::create(m_pAppStateManager, "SimulationState");
    PlaybackState::create(m_pAppStateManager, "PlaybackState");

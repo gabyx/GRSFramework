@@ -85,6 +85,7 @@ private:
    std::string m_KeyListenerName;
 
    Ogre::Log* m_pSolverLog;
+   Ogre::Log*  m_pAppLog;
 
    boost::shared_ptr< TimeStepperType >	m_pTimestepper;
 
@@ -112,6 +113,7 @@ private:
    double m_diffUpdateAndChangedTime;
    int m_passCounter;
    // =========================================
+
 
 
    // File Paths for one Simulation, always reset ==============================

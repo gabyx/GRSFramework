@@ -46,15 +46,13 @@ public:
 
 protected:
 
-  Ogre::Log*	m_pThreadLog;
-  Ogre::Log*  m_pAppLog;
 
   boost::thread*	m_pThread;
 
-   virtual void initBeforeThreads(){};
+  virtual void initBeforeThreads(){};
 
-   virtual void initSimThread(){};
-	virtual void threadRunSimulation()=0;
+  virtual void initSimThread(){};
+  virtual void threadRunSimulation()=0;
   virtual void initRecordThread(){};
   virtual void threadRunRecord()=0;
 

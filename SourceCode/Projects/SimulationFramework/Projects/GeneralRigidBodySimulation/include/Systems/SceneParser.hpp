@@ -160,7 +160,7 @@ private:
          ticpp::Element *gravityElement = sceneSettings->FirstChild("Gravity",true)->ToElement();
          m_pDynSys->m_gravity = gravityElement->GetAttribute<double>("value");
 
-         if(!stringToVector3<PREC>(m_pDynSys->m_gravityDir , gravityElement->GetAttribute("direction"))){
+         if(!Utilities::stringToVector3<PREC>(m_pDynSys->m_gravityDir , gravityElement->GetAttribute("direction"))){
             throw ticpp::Exception("String conversion in SceneSettings: gravity failed");
          }
 
@@ -172,12 +172,12 @@ private:
             // Get standart values!
             m_pDynSys->getSettings(timestepperSettings,inclusionSettings);
 
-            if(!stringToType<PREC>(timestepperSettings.m_deltaT, timestepElement->GetAttribute("deltaT"))){
+            if(!Utilities::stringToType<PREC>(timestepperSettings.m_deltaT, timestepElement->GetAttribute("deltaT"))){
                   throw ticpp::Exception("String conversion in SceneSettings: deltaT failed");
             }
             inclusionSettings.m_deltaT = timestepperSettings.m_deltaT;
 
-            if(!stringToType<PREC>(timestepperSettings.m_endTime, timestepElement->GetAttribute("endTime"))){
+            if(!Utilities::stringToType<PREC>(timestepperSettings.m_endTime, timestepElement->GetAttribute("endTime"))){
                   throw ticpp::Exception("String conversion in SceneSettings: endTime failed");
             }
 
@@ -185,7 +185,7 @@ private:
            if(simFromRef){
 
               bool enabled = false;
-              if(!stringToType<bool>(enabled, simFromRef->GetAttribute("enabled"))){
+              if(!Utilities::stringToType<bool>(enabled, simFromRef->GetAttribute("enabled"))){
                   throw ticpp::Exception("String conversion in SimulateFromReference: enable failed");
               }
               if(enabled){
@@ -208,25 +208,25 @@ private:
            ticpp::Element *inclusionElement = timestepElement->FirstChild("InclusionSolverSettings",false)->ToElement();
            if(inclusionElement){
 
-               if(!stringToType<PREC>(inclusionSettings.m_alphaJORProx, inclusionElement->GetAttribute("alphaJORProx"))){
+               if(!Utilities::stringToType<PREC>(inclusionSettings.m_alphaJORProx, inclusionElement->GetAttribute("alphaJORProx"))){
                      throw ticpp::Exception("String conversion in SceneSettings: alphaJORProx failed");
                }
-               if(!stringToType<PREC>(inclusionSettings.m_alphaSORProx, inclusionElement->GetAttribute("alphaSORProx"))){
+               if(!Utilities::stringToType<PREC>(inclusionSettings.m_alphaSORProx, inclusionElement->GetAttribute("alphaSORProx"))){
                      throw ticpp::Exception("String conversion in SceneSettings: alphaJORProx failed");
                }
-               if(!stringToType<unsigned int>(inclusionSettings.m_MaxIter, inclusionElement->GetAttribute("maxIter"))){
+               if(!Utilities::stringToType<unsigned int>(inclusionSettings.m_MaxIter, inclusionElement->GetAttribute("maxIter"))){
                      throw ticpp::Exception("String conversion in SceneSettings: maxIter failed");
                }
 
-               if(!stringToType<PREC>(inclusionSettings.m_AbsTol, inclusionElement->GetAttribute("absTol"))){
+               if(!Utilities::stringToType<PREC>(inclusionSettings.m_AbsTol, inclusionElement->GetAttribute("absTol"))){
                      throw ticpp::Exception("String conversion in SceneSettings: absTol failed");
                }
-               if(!stringToType<PREC>(inclusionSettings.m_RelTol, inclusionElement->GetAttribute("relTol"))){
+               if(!Utilities::stringToType<PREC>(inclusionSettings.m_RelTol, inclusionElement->GetAttribute("relTol"))){
                      throw ticpp::Exception("String conversion in SceneSettings: relTol failed");
                }
 
                if(inclusionElement->HasAttribute("isFiniteCheck")){
-                  if(!stringToType<bool>(inclusionSettings.m_bIsFiniteCheck, inclusionElement->GetAttribute("isFiniteCheck"))){
+                  if(!Utilities::stringToType<bool>(inclusionSettings.m_bIsFiniteCheck, inclusionElement->GetAttribute("isFiniteCheck"))){
                      throw ticpp::Exception("String conversion in SceneSettings: isFiniteCheck failed");
                   }
                }
@@ -243,12 +243,12 @@ private:
                }
 
 
-               if(!stringToType<bool>(inclusionSettings.m_bUseGPU, inclusionElement->GetAttribute("useGPU"))){
+               if(!Utilities::stringToType<bool>(inclusionSettings.m_bUseGPU, inclusionElement->GetAttribute("useGPU"))){
                      throw ticpp::Exception("String conversion in SceneSettings: useGPU failed");
                }
 
                if(inclusionElement->HasAttribute("useGPUID")){
-                  if(!stringToType<int>(inclusionSettings.m_UseGPUDeviceId, inclusionElement->GetAttribute("useGPUID"))){
+                  if(!Utilities::stringToType<int>(inclusionSettings.m_UseGPUDeviceId, inclusionElement->GetAttribute("useGPUID"))){
                         throw ticpp::Exception("String conversion in SceneSettings: useGPU failed");
                   }
                   if(inclusionSettings.m_UseGPUDeviceId <0){
@@ -382,7 +382,7 @@ private:
       }
       else if(type == "random"){
          double minRadius;
-         if(!stringToType<double>(minRadius,sphere->GetAttribute("minRadius"))){
+         if(!Utilities::stringToType<double>(minRadius,sphere->GetAttribute("minRadius"))){
             throw ticpp::Exception("String conversion in processSphereGeometry: minRadius failed");
          }
          if( minRadius <= 0){
@@ -390,7 +390,7 @@ private:
          }
 
          double maxRadius;
-         if(!stringToType<double>(maxRadius,sphere->GetAttribute("maxRadius"))){
+         if(!Utilities::stringToType<double>(maxRadius,sphere->GetAttribute("maxRadius"))){
             throw ticpp::Exception("String conversion in processSphereGeometry: minRadius failed");
          }
          if( maxRadius <= minRadius){
@@ -398,7 +398,7 @@ private:
          }
 
          unsigned int seed;
-         if(!stringToType<unsigned int>(seed,sphere->GetAttribute("seed"))){
+         if(!Utilities::stringToType<unsigned int>(seed,sphere->GetAttribute("seed"))){
             throw ticpp::Exception("String conversion in processSphereGeometry: seed failed");
          }
 
@@ -425,12 +425,12 @@ private:
       if(type == "uniform"){
 
          Vector3 n;
-         if(!stringToVector3<PREC>(n, halfspace->GetAttribute("normal"))){
+         if(!Utilities::stringToVector3<PREC>(n, halfspace->GetAttribute("normal"))){
             throw ticpp::Exception("String conversion in HalfsphereGeometry: normal failed");
          }
 
          Vector3 p;
-         if(!stringToVector3<PREC>(p, halfspace->GetAttribute("position"))){
+         if(!Utilities::stringToVector3<PREC>(p, halfspace->GetAttribute("position"))){
             throw ticpp::Exception("String conversion in HalfsphereGeometry: position failed");
          }
 
@@ -453,7 +453,7 @@ private:
       std::string meshName = mesh->GetAttribute<std::string>("name");
 
       bool bInstantiate;
-      if(!stringToType<bool>(bInstantiate,mesh->GetAttribute("useInstance"))){
+      if(!Utilities::stringToType<bool>(bInstantiate,mesh->GetAttribute("useInstance"))){
          throw ticpp::Exception("String conversion in processMeshGeometry: useInstance failed");
       }
 
@@ -475,7 +475,7 @@ private:
             }
 
             Vector3 scale_factor;
-            if(!stringToVector3<PREC>(scale_factor, mesh->GetAttribute("scale"))){
+            if(!Utilities::stringToVector3<PREC>(scale_factor, mesh->GetAttribute("scale"))){
                throw ticpp::Exception("String conversion in processMeshGeometry failed: scale");
             }
             if(scale_factor.norm()==0){
@@ -483,24 +483,24 @@ private:
             }
 
             Vector3 trans;
-            if(!stringToVector3<PREC>(trans, mesh->GetAttribute("translation"))){
+            if(!Utilities::stringToVector3<PREC>(trans, mesh->GetAttribute("translation"))){
                throw ticpp::Exception("String conversion in processMeshGeometry: translation failed: ");
             }
 
             Vector3 axis;
-            if(!stringToVector3<PREC>(axis, mesh->GetAttribute("rotationAxis"))){
+            if(!Utilities::stringToVector3<PREC>(axis, mesh->GetAttribute("rotationAxis"))){
                throw ticpp::Exception("String conversion in processMeshGeometry: rotationAxis failed");
             }
 
             PREC angle;
 
             if(mesh->HasAttribute("angleDegree")){
-               if(!stringToType<PREC>(angle, mesh->GetAttribute("angleDegree"))){
+               if(!Utilities::stringToType<PREC>(angle, mesh->GetAttribute("angleDegree"))){
                   throw ticpp::Exception("String conversion in processMeshGeometry: angleDegree failed");
                }
                angle = angle / 180 * M_PI;
             }else if(mesh->HasAttribute("angleRadian")){
-               if(!stringToType<PREC>(angle, mesh->GetAttribute("angleRadian"))){
+               if(!Utilities::stringToType<PREC>(angle, mesh->GetAttribute("angleRadian"))){
                   throw ticpp::Exception("String conversion in processMeshGeometry: angleRadian  failed");
                }
             }else{
@@ -730,23 +730,23 @@ private:
    void processInitialConditionLinear(DynamicsState<TLayoutConfig> & state, ticpp::Element * initCond){
 
       Vector3 pos;
-      if(!stringToVector3<PREC>(pos, initCond->GetAttribute("position"))){
+      if(!Utilities::stringToVector3<PREC>(pos, initCond->GetAttribute("position"))){
          throw ticpp::Exception("String conversion in InitialCondition: position Linear failed");
       }
       Vector3 dir;
-      if(!stringToVector3<PREC>(dir, initCond->GetAttribute("direction"))){
+      if(!Utilities::stringToVector3<PREC>(dir, initCond->GetAttribute("direction"))){
          throw ticpp::Exception("String conversion in InitialCondition: direction Linear failed");
       }
       PREC dist;
-      if(!stringToType<PREC>(dist, initCond->GetAttribute("distance"))){
+      if(!Utilities::stringToType<PREC>(dist, initCond->GetAttribute("distance"))){
          throw ticpp::Exception("String conversion in InitialCondition: distance  Linear failed");
       }
       bool jitter;
-      if(!stringToType(jitter, initCond->GetAttribute("jitter"))){
+      if(!Utilities::stringToType(jitter, initCond->GetAttribute("jitter"))){
          throw ticpp::Exception("String conversion in InitialCondition: jitter Linear failed");
       }
       PREC delta;
-      if(!stringToType<PREC>(delta, initCond->GetAttribute("delta"))){
+      if(!Utilities::stringToType<PREC>(delta, initCond->GetAttribute("delta"))){
          throw ticpp::Exception("String conversion in InitialCondition: delta Linear failed");
       }
 
@@ -757,27 +757,27 @@ private:
    void processInitialConditionGrid(DynamicsState<TLayoutConfig> & state, ticpp::Element * initCond){
 
       Vector3 trans;
-      if(!stringToVector3<PREC>(trans, initCond->GetAttribute("translation"))){
+      if(!Utilities::stringToVector3<PREC>(trans, initCond->GetAttribute("translation"))){
          throw ticpp::Exception("String conversion in InitialConditionGrid: translation failed");
       }
       int gridX;
-      if(!stringToType<int>(gridX, initCond->GetAttribute("gridSizeX"))){
+      if(!Utilities::stringToType<int>(gridX, initCond->GetAttribute("gridSizeX"))){
          throw ticpp::Exception("String conversion in InitialConditionGrid: gridSizeX failed");
       }
       int gridY;
-      if(!stringToType<int>(gridY, initCond->GetAttribute("gridSizeY"))){
+      if(!Utilities::stringToType<int>(gridY, initCond->GetAttribute("gridSizeY"))){
          throw ticpp::Exception("String conversion in InitialConditionGrid: gridSizeY failed");
       }
       PREC dist;
-      if(!stringToType<PREC>(dist, initCond->GetAttribute("distance"))){
+      if(!Utilities::stringToType<PREC>(dist, initCond->GetAttribute("distance"))){
          throw ticpp::Exception("String conversion in InitialConditionGrid: distance failed");
       }
       bool jitter;
-      if(!stringToType(jitter, initCond->GetAttribute("jitter"))){
+      if(!Utilities::stringToType(jitter, initCond->GetAttribute("jitter"))){
          throw ticpp::Exception("String conversion in InitialConditionGrid: jitter failed");
       }
       double delta;
-      if(!stringToType<double>(delta, initCond->GetAttribute("delta"))){
+      if(!Utilities::stringToType<double>(delta, initCond->GetAttribute("delta"))){
          throw ticpp::Exception("String conversion in InitialConditionGrid: delta failed");
       }
 
@@ -801,11 +801,11 @@ private:
       for ( valueElem = valueElem.begin( initCond ); valueElem != valueElem.end(); valueElem++){
 
          Vector3 pos;
-         if(!stringToVector3<PREC>(pos, valueElem->GetAttribute("position"))){
+         if(!Utilities::stringToVector3<PREC>(pos, valueElem->GetAttribute("position"))){
             throw ticpp::Exception("String conversion in InitialConditionPositionAxisAngle: position failed");
          }
          Vector3 axis;
-         if(!stringToVector3<PREC>(axis, valueElem->GetAttribute("axis"))){
+         if(!Utilities::stringToVector3<PREC>(axis, valueElem->GetAttribute("axis"))){
             throw ticpp::Exception("String conversion in InitialConditionPositionAxisAngle: axis failed");
          }
 
@@ -816,12 +816,12 @@ private:
          PREC angle;
 
          if(valueElem->HasAttribute("angleDegree")){
-            if(!stringToType<PREC>(angle, valueElem->GetAttribute("angleDegree"))){
+            if(!Utilities::stringToType<PREC>(angle, valueElem->GetAttribute("angleDegree"))){
                throw ticpp::Exception("String conversion in InitialConditionPositionAxisAngle: angleDegree failed");
             }
             angle = angle / 180 * M_PI;
          }else if(valueElem->HasAttribute("angleRadian")){
-            if(!stringToType<PREC>(angle, valueElem->GetAttribute("angleRadian"))){
+            if(!Utilities::stringToType<PREC>(angle, valueElem->GetAttribute("angleRadian"))){
                throw ticpp::Exception("String conversion in InitialConditionPositionAxisAngle: angleRadian failed");
             }
          }else{
@@ -860,11 +860,11 @@ private:
           for ( transformElem = transformElem.begin( &(*valueElem) ); transformElem != transformElem.end(); transformElem++){
 
                Vector3 trans;
-               if(!stringToVector3<PREC>(trans, transformElem->GetAttribute("translation"))){
+               if(!Utilities::stringToVector3<PREC>(trans, transformElem->GetAttribute("translation"))){
                   throw ticpp::Exception("String conversion in InitialConditionTransforms: translation failed");
                }
                Vector3 axis;
-               if(!stringToVector3<PREC>(axis, transformElem->GetAttribute("rotationAxis"))){
+               if(!Utilities::stringToVector3<PREC>(axis, transformElem->GetAttribute("rotationAxis"))){
                   throw ticpp::Exception("String conversion in InitialConditionTransforms: rotationAxis failed");
                }
 
@@ -874,12 +874,12 @@ private:
 
                PREC angle;
                if(transformElem->HasAttribute("angleDegree")){
-                  if(!stringToType<PREC>(angle, transformElem->GetAttribute("angleDegree"))){
+                  if(!Utilities::stringToType<PREC>(angle, transformElem->GetAttribute("angleDegree"))){
                      throw ticpp::Exception("String conversion in InitialConditionTransforms: angleDegree failed");
                   }
                   angle = angle / 180 * M_PI;
                }else if(transformElem->HasAttribute("angleRadian")){
-                  if(!stringToType<PREC>(angle, transformElem->GetAttribute("angleRadian"))){
+                  if(!Utilities::stringToType<PREC>(angle, transformElem->GetAttribute("angleRadian"))){
                      throw ticpp::Exception("String conversion in InitialConditionTransforms: angleRadian failed");
                   }
                }else{
@@ -930,12 +930,12 @@ private:
       bool scaleLikeGeometry = false;
       Vector3 scale;
       if(meshNode->ToElement()->HasAttribute("scaleLikeGeometry")){
-         if(!stringToType<bool>(scaleLikeGeometry, meshNode->ToElement()->GetAttribute("scaleLikeGeometry"))){
+         if(!Utilities::stringToType<bool>(scaleLikeGeometry, meshNode->ToElement()->GetAttribute("scaleLikeGeometry"))){
             throw ticpp::Exception("String conversion of scale in processMesh: scaleWithGeometry failed");
          }
       }else{
 
-         if(!stringToVector3<PREC>(scale, meshNode->ToElement()->GetAttribute("scale"))){
+         if(!Utilities::stringToVector3<PREC>(scale, meshNode->ToElement()->GetAttribute("scale"))){
             throw ticpp::Exception("String conversion of scale in processMesh: scale failed");
          }
       }
@@ -948,21 +948,21 @@ private:
       if(rendering){
           bool attachAxis = false;
          if(rendering->HasAttribute("attachAxis")){
-            if(!stringToType<bool>(attachAxis, rendering->GetAttribute("attachAxis"))){
+            if(!Utilities::stringToType<bool>(attachAxis, rendering->GetAttribute("attachAxis"))){
                throw ticpp::Exception("String conversion of in processMesh: attachAxis failed");
             }
          }
 
          double axesSize = 1;
          if(rendering->HasAttribute("axesSize")){
-            if(!stringToType<double>(axesSize, rendering->GetAttribute("axesSize"))){
+            if(!Utilities::stringToType<double>(axesSize, rendering->GetAttribute("axesSize"))){
                throw ticpp::Exception("String conversion of in processMesh: axesSize failed");
             }
          }
 
 
          if(rendering->HasAttribute("shadowsEnabled")){
-              if(!stringToType<bool>(shadowsEnabled, rendering->GetAttribute("shadowsEnabled"))){
+              if(!Utilities::stringToType<bool>(shadowsEnabled, rendering->GetAttribute("shadowsEnabled"))){
                   throw ticpp::Exception("String conversion of in processMesh: shadowsEnabled failed");
               }
          }

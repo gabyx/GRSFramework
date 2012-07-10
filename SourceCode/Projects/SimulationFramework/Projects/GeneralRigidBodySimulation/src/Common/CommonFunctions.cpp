@@ -15,17 +15,16 @@
 
 using namespace std;
 using namespace Eigen;
-using namespace Ogre;
 
 
-double randd(double low, double high)
+double Utilities::randd(double low, double high)
 {
     return ((double)rand() / (double)RAND_MAX)  * (high-low) + low;
 };
 
 
 template<>
-bool stringToType<bool>(bool & t, const std::string& s)
+bool Utilities::stringToType<bool>(bool & t, const std::string& s)
 {
    int a;
    if(stringToType<int>(a, s)){

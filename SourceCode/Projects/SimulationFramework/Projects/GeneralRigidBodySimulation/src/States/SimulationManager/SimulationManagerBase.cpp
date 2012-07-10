@@ -118,9 +118,9 @@ void SimulationManagerBase::addToTimeScale(double step)
 
     m_timeScale = m_timeScaleList[m_timeScaleListIdx];
 
-    std::stringstream logstream;
-    logstream << "TimeScale set to " << m_timeScale;
-    LOG(m_pAppLog);
+//    std::stringstream logstream;
+//    logstream << "TimeScale set to " << m_timeScale;
+//    LOG(m_pAppLog);
 
 
 }
