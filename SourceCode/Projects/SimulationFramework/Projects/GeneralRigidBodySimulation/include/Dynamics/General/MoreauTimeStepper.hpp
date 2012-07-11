@@ -26,6 +26,7 @@
 
 #include "TimeStepperSettings.hpp"
 
+#include "SimpleLogger.hpp"
 //===========================================
 
 
@@ -72,7 +73,7 @@ public:
   boost::shared_ptr<const DynamicsState<LayoutConfigType> > getFrontStateBuffer();
 
   // General Log file
-  Ogre::Log*	m_pSolverLog;
+  Logging::Log*	m_pSolverLog;
 
   //Performance Time of one Iteration (averaged)
   double m_AvgTimeForOneIteration;
@@ -166,10 +167,8 @@ MoreauTimeStepper<  TConfigTimeStepper>::~MoreauTimeStepper()
 
 template< typename TConfigTimeStepper>
 void MoreauTimeStepper<  TConfigTimeStepper>::closeAllFiles(){
-   if(m_pSolverLog != NULL){
-    Ogre::LogManager::getSingletonPtr()->destroyLog(m_pSolverLog);
-   }
-   m_pSolverLog = NULL;
+
+   Logging::LogManager::getSingletonPtr()->destroyLog("SolverLog");
 
    m_CollisionDataFile.close();
    m_SystemDataFile.close();
@@ -201,32 +200,16 @@ void MoreauTimeStepper<  TConfigTimeStepper>::initLogs(  const boost::filesystem
 
 
   // Set up all Logs;
-  if(m_pSolverLog != NULL){
-    Ogre::LogManager::getSingletonPtr()->destroyLog(m_pSolverLog);
-  }
-  m_pSolverLog = NULL;
+
+  m_pSolverLog = new Logging::Log("SolverLog");
+  Logging::LogManager::getSingletonPtr()->registerLog(m_pSolverLog);
 
 #if LogToFileSolver == 1
-  m_pSolverLog = Ogre::LogManager::getSingleton().createLog(m_SolverLogFilePath.string(),false,true,false);
-  // If not sucessfull in writing the log to the Sim folder, take default log!
-  if(m_pSolverLog == NULL){
-    m_pSolverLog = Ogre::LogManager::getSingleton().createLog("SolverLogFile.log",false,true,false);
-  }
-
-#else
-  m_pSolverLog = Ogre::LogManager::getSingleton().createLog(m_SolverLogFilePath.string(),false,true,true);
-  // If not sucessfull in writing the log to the Sim folder, take default log!
-  if(m_pSolverLog == NULL){
-    m_pSolverLog = Ogre::LogManager::getSingleton().createLog("SolverLogFile.log",false,true,true);
-  }
+  m_pSolverLog->addSink(new Logging::LogSinkFile("SolverLog-File",m_SolverLogFilePath));
 #endif
 #if LogToConsoleSolver == 1
-  m_pSolverLog->setDebugOutputEnabled(true);
-#else
-  m_pSolverLog->setDebugOutputEnabled(false);
+  m_pSolverLog->addSink(new Logging::LogSinkCout("SolverLog-Cout"));
 #endif
-  m_pSolverLog->setTimeStampEnabled(false);
-
 
   m_pDynSys->initializeLog(m_pSolverLog);
   m_pInclusionSolver->initializeLog(m_pSolverLog,m_SolverLogFilePath);

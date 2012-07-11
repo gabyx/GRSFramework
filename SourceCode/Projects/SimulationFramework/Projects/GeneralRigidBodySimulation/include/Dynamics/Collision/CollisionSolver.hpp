@@ -23,6 +23,8 @@
 
 #include "QuaternionHelpers.hpp"
 
+#include "SimpleLogger.hpp"
+
 /**
 * @ingroup Collision
 * @brief Contact Delegate List which is used to store all callbacks which are invoked when a new contact has been found!
@@ -85,7 +87,7 @@ public:
 
    ~CollisionSolver();
 
-  void initializeLog(Ogre::Log* pSolverLog);                          ///< Initializes an Ogre::Log.
+  void initializeLog(Logging::Log* pSolverLog);                          ///< Initializes an Ogre::Log.
   void reset();                                                       ///< Resets the whole Solver. This function is called at the start of the simulation.
   void reserveCollisionSetSpace(unsigned int nContacts);              ///< Reserves some space for the collision set.
   void solveCollision(const DynamicsState<LayoutConfigType> * state);    ///< Main routine which solves the collision for all bodies.
@@ -114,7 +116,7 @@ protected:
   Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> > m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
   friend class Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> >;
 
-  Ogre::Log*  m_pSolverLog;  ///< Ogre::Log
+  Logging::Log *  m_pSolverLog;  ///< Ogre::Log
   std::stringstream logstream;
 
   inline void signalContactAdd(CollisionData<RigidBodyType> * pColData); ///< Adds the contact either sends it to the delegate functions or it adds it in the set m_CollisionSet if no delegate has been added.
@@ -144,10 +146,10 @@ CollisionSolver<TCollisionSolverConfig>::~CollisionSolver()
 
 
 template< typename TCollisionSolverConfig >
-void CollisionSolver<TCollisionSolverConfig>::initializeLog( Ogre::Log* pSolverLog )
+void CollisionSolver<TCollisionSolverConfig>::initializeLog( Logging::Log* pSolverLog )
 {
   m_pSolverLog = pSolverLog;
-  ASSERTMSG(m_pSolverLog != NULL, "Ogre::Log: NULL!");
+  ASSERTMSG(m_pSolverLog != NULL, "Logging::Log: NULL!");
 }
 
 

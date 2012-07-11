@@ -13,9 +13,11 @@ App::~App()
 {
   DECONSTRUCTOR_MESSAGE
 
-  m_pAppStateManager.reset();
+    m_pAppStateManager.reset();
 
     delete FileManager::getSingletonPtr();
+    delete Logging::LogManager::getSingletonPtr();
+
 	delete GuiContext::getSingletonPtr();
 	delete InputContext::getSingletonPtr();
 	delete RenderContext::getSingletonPtr();
@@ -49,6 +51,7 @@ void App::startApp()
 
 
   new FileManager();
+  new Logging::LogManager();
 
 
 	SimulationState::create(m_pAppStateManager, "SimulationState");

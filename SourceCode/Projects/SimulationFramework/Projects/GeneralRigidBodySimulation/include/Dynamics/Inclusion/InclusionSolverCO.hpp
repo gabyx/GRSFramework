@@ -22,6 +22,8 @@
 #include "LogDefines.hpp"
 #include "ConfigureFile.hpp"
 
+#include "SimpleLogger.hpp"
+
 #if HAVE_CUDA_SUPPORT == 1
 #include "JorProxGPUVariant.hpp"
 #include "SorProxGPUVariant.hpp"
@@ -50,7 +52,7 @@ public:
 
    InclusionSolverCO(boost::shared_ptr<CollisionSolverType >  pCollisionSolver, boost::shared_ptr<DynamicsSystemType> pDynSys);
 
-   void initializeLog( Ogre::Log* pSolverLog, boost::filesystem::path folder_path );
+   void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
    void reset();
    void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
    void solveInclusionProblem( const DynamicsState<LayoutConfigType> * state_s, const DynamicsState<LayoutConfigType> * state_m, DynamicsState<LayoutConfigType> * state_e);
@@ -128,7 +130,7 @@ protected:
    inline void doSorProx();
 
    // Log
-   Ogre::Log*	m_pSolverLog;
+   Logging::Log*	m_pSolverLog;
    std::stringstream logstream;
 };
 
@@ -173,7 +175,7 @@ m_SimBodies(pCollisionSolver->m_SimBodies),
 }
 
 template< typename TInclusionSolverConfig>
-void InclusionSolverCO<TInclusionSolverConfig>::initializeLog( Ogre::Log* pSolverLog,  boost::filesystem::path folder_path )
+void InclusionSolverCO<TInclusionSolverConfig>::initializeLog( Logging::Log* pSolverLog,  boost::filesystem::path folder_path )
 {
    m_pSolverLog = pSolverLog;
 

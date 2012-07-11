@@ -15,6 +15,8 @@
 
 #include "TimeStepperSettings.hpp"
 
+#include "SimpleLogger.hpp"
+
 
 template<typename TDynamicsSystemConfig>
 class DynamicsSystem
@@ -36,7 +38,7 @@ public:
   std::vector< boost::shared_ptr<RigidBodyType > > m_Bodies;    // all not simulated objects
 
   void init(); // Only call if Timestepper has been created
-  void initializeLog(Ogre::Log* pLog);
+  void initializeLog(Logging::Log* pLog);
 
 
   void init_MassMatrix(); // MassMatrix is const
@@ -71,7 +73,7 @@ protected:
 
 
   // Log
-	Ogre::Log*	m_pSolverLog;
+	Logging::Log*	m_pSolverLog;
 	std::stringstream logstream;
 
 };
@@ -141,10 +143,10 @@ void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const TimeStepperSetting
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::initializeLog(Ogre::Log* pLog)
+void DynamicsSystem<TDynamicsSystemConfig>::initializeLog(Logging::Log* pLog)
 {
   m_pSolverLog = pLog;
-  ASSERTMSG(m_pSolverLog != NULL, "Ogre::Log: NULL!");
+  ASSERTMSG(m_pSolverLog != NULL, "Logging::Log: NULL!");
 }
 
 template<typename TDynamicsSystemConfig>
