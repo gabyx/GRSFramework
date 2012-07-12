@@ -255,7 +255,7 @@ typedef ConfigCollisionSolver< MyRigidBody> MyConfigCollisionSolver;
 typedef CollisionSolver<MyConfigCollisionSolver> MyCollisionSolver; //Define the Class
 
 typedef ConfigInclusionSolver<MyDynamicsSystem, MyCollisionSolver, MyRigidBody>  MyConfigInclusionSolver;
-typedef InclusionSolverCO< MyConfigInclusionSolver >  MyInclusionSolver; //Define the Class
+typedef InclusionSolverCONoG< MyConfigInclusionSolver >  MyInclusionSolver; //Define the Class
 
 typedef ConfigTimeStepper<
              MyDynamicsSystem,

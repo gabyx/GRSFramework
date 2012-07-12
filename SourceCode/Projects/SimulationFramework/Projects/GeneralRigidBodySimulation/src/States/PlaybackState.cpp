@@ -3,12 +3,12 @@
 
 #include <Eigen/Dense>
 
-#include "SimulationManager.hpp"
+#include "SimulationManagerGUI.hpp"
 #include "PlaybackManager.hpp"
 
 #include "FileManager.hpp"
 #include "OgreSceneManagerDeleter.hpp"
-#include "SimulationManager.hpp"
+#include "SimulationManagerGUI.hpp"
 
 
 using namespace Ogre;

@@ -28,24 +28,22 @@ m_nDofuObj(NDOFuObj),
 m_bSetupSuccessful(false)
 {
 
-  m_pAppLog = RenderContext::getSingletonPtr()->m_pAppLog;
-  m_pAppLog->logMessage("Creating PlaybackManager...");
+        m_pSimulationLog = NULL;
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+        ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
 
-  // Set the Log Output =========================================================================
-#if LogToFilePlayback == 1
-  m_pThreadLog = Ogre::LogManager::getSingleton().createLog("PlaybackLogfile.log",false,true,false);
-#else
-  m_pThreadLog = Ogre::LogManager::getSingleton().createLog("PlaybackLogfile.log",false,true,true);
-#endif
-#if LogToConsolePlayback == 1
-  m_pThreadLog->setDebugOutputEnabled(true);
-#else
-  m_pThreadLog->setDebugOutputEnabled(false);
-#endif
+      // Set the Log Output =========================================================================
+     m_pThreadLog = new Logging::Log("PlaybackManagerThreadLog");
+      Logging::LogManager::getSingletonPtr()->registerLog(m_pThreadLog);
 
-  m_pThreadLog->setTimeStampEnabled(false);
+    #if LogToFilePlayback == 1
+      m_pThreadLog->addSink(new Logging::LogSinkFile("PlaybackManager-File","PlaybackManagerThread.log"));
+    #endif
+    #if LogToConsolePlayback == 1
+      m_pThreadLog->addSink(new Logging::LogSinkCout("PlaybackManager-Cout"));
+    #endif
 
-   m_pSceneMgr = pSceneMgr;
+    m_pSceneMgr = pSceneMgr;
 }
 
 template<typename TConfig>
@@ -82,7 +80,7 @@ bool PlaybackManager<TConfig>::setup()
 
 
   m_pFileLoader = boost::shared_ptr< PlaybackLoader<LayoutConfigType, StateRingPoolVisBackFront<LayoutConfigType> > >(
-    new PlaybackLoader<LayoutConfigType, StateRingPoolVisBackFront<LayoutConfigType> >(m_nSimBodies, m_pSharedBuffer, m_pThreadLog)
+    new PlaybackLoader<LayoutConfigType, StateRingPoolVisBackFront<LayoutConfigType> >(m_nSimBodies, m_pSharedBuffer)
   );
 
   //Make a videodropper
@@ -110,7 +108,7 @@ bool PlaybackManager<TConfig>::parseScene(){
       return false;
   }
 
-     m_pSceneParser = boost::shared_ptr< SceneParser<TConfig> >( new SceneParser<TConfig>( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies) );
+     m_pSceneParser = boost::shared_ptr< SceneParserOgre<TConfig> >( new SceneParserOgre<TConfig>( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies) );
      m_pSceneParser->parseScene(sceneFilePath);
 
      m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
@@ -186,7 +184,6 @@ template<typename TConfig>
 void PlaybackManager<TConfig>::initBeforeThreads()
 {
   std::stringstream logstream;
-  CLEARLOG(logstream);
 
   m_SettingsVisThread.m_bFirstPass = true;
 
@@ -213,7 +210,7 @@ void PlaybackManager<TConfig>::initBeforeThreads()
    logstream <<"PlaybackManager: Drop Sim File: "<< "false" << endl;
   }
 
-  LOG(m_pThreadLog)
+  m_pThreadLog->logMessage(logstream);
 
 }
 template<typename TConfig>
@@ -276,23 +273,17 @@ void PlaybackManager<TConfig>::threadRunSimulation()
     if(bchangedState){
        if(m_SettingsSimThread.m_bSimFileDrop){ // When the sim buffer has been moved, then ... At the biginning, this moves to the initial state basically!
          //Do a resampling of the states!
-          CLEARLOG(logstream);
-          logstream << " PlaybackManager: Try to resample state time: " << currentState->m_t;
-          LOG(m_pThreadLog);
+          LOG(m_pThreadLog, << " PlaybackManager: Try to resample state time: " << currentState->m_t<<std::endl;);
          m_pStateRecorderResampler->tryToWrite(currentState,m_SettingsSimThread.m_bSimFileDropInterpolate);
        }
 
 
        if(currentState->m_StateType == DynamicsState<LayoutConfigType>::ENDSTATE){
-         CLEARLOG(logstream);
-          logstream << " PlaybackManager: Detected end state at " << currentState->m_t <<" --> leaving...";
-          LOG(m_pThreadLog);
-            break;
+         LOG(m_pThreadLog, << " PlaybackManager: Detected end state at " << currentState->m_t <<" --> leaving..."<<std::endl;);
+         break;
        }
 
-       /*CLEARLOG(logstream);
-           logstream << "m_t:" << currentState->m_t <<endl;
-          LOG(m_pThreadLog)*/
+       /* LOG(m_pThreadLog, << "m_t:" << currentState->m_t <<std::endl;); */
 
        bchangedState = false;
     }
@@ -338,7 +329,7 @@ void PlaybackManager<TConfig>::initSimThread()
      filename += SIM_FILE_EXTENSION;
      file_path /= filename;
      if(!m_pStateRecorderResampler->createSimFile(file_path)){
-        m_pAppLog->logMessage("Could not create sim file!");
+        m_pSimulationLog->logMessage("Could not create sim file!");
         ASSERTMSG(false,"Could not create sim file!");
      };
      FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getCurrentSceneFilePath(),resampleFolderPath,true);
@@ -416,12 +407,12 @@ void PlaybackManager<TConfig>::startPlaybackThread()
     initBeforeThreads();
     m_pThread = new boost::thread( boost::bind(&PlaybackManager<TConfig>::threadRunSimulation, &*this) );
 
-    m_pAppLog->logMessage(" PlaybackManager:: Start Thread: PlaybackThread started ...");
+    m_pSimulationLog->logMessage(" PlaybackManager:: Start Thread: PlaybackThread started ...");
   }else{
-    m_pAppLog->logMessage(" PlaybackManager:: A PlaybackThread is already running!");
+    m_pSimulationLog->logMessage(" PlaybackManager:: A PlaybackThread is already running!");
   }
    }else{
-    m_pAppLog->logMessage(" PlaybackManager:: No scene is loaded! No thread can be started!");
+    m_pSimulationLog->logMessage(" PlaybackManager:: No scene is loaded! No thread can be started!");
   }
 
 }
@@ -436,13 +427,13 @@ void PlaybackManager<TConfig>::stopPlaybackThread(bool force_stop)
       cancelAllWaits();
 
       m_pThread->join();
-      m_pAppLog->logMessage("PlaybackManager:: Stop Thread: PlaybackThread has been stopped!");
+      m_pSimulationLog->logMessage("PlaybackManager:: Stop Thread: PlaybackThread has been stopped!");
   }
   else{
-    m_pAppLog->logMessage("PlaybackManager:: Stop Thread: PlaybackThread is not running!");
+    m_pSimulationLog->logMessage("PlaybackManager:: Stop Thread: PlaybackThread is not running!");
   }
   }else{
-    m_pAppLog->logMessage(" PlaybackManager:: No scene is loaded!, No thread running!");
+    m_pSimulationLog->logMessage(" PlaybackManager:: No scene is loaded!, No thread running!");
   }
 }
 

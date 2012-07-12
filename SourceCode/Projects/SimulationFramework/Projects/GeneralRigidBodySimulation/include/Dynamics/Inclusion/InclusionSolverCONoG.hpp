@@ -167,17 +167,13 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::reset() {
     resetForNextIter();
 
 #if HAVE_CUDA_SUPPORT == 1
-    CLEARLOG;
-    logstream << "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog, << "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
 
     CHECK_CUDA(cudaSetDevice(m_Settings.m_UseGPUDeviceId));
     cudaDeviceProp props;
     CHECK_CUDA(cudaGetDeviceProperties(&props,m_Settings.m_UseGPUDeviceId));
 
-    CLEARLOG;
-    logstream << "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog, <<  "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
 #endif
 
 
@@ -201,9 +197,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem(const D
         DynamicsState<LayoutConfigType> * state_e) {
 
 #if CoutLevelSolver>0
-    CLEARLOG;
-    logstream << " % -> solveInclusionProblem(): "<< std::endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog, <<  " % -> solveInclusionProblem(): "<< std::endl;);
 #endif
 
     // Iterate over all nodes set and assemble the matrices...
@@ -272,9 +266,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem(const D
             // TODO CHECK IF finite!
 
 #if CoutLevelSolverWhenContact>0
-            CLEARLOG;
-            logstream << " % Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;
-            LOG(m_pSolverLog);
+            LOG(m_pSolverLog, <<  " % Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
 #endif
         }
 
@@ -284,9 +276,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem(const D
 #endif
 
 #if CoutLevelSolverWhenContact>0
-        CLEARLOG;
-        logstream << " % Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;
-        LOG(m_pSolverLog);
+        LOG(m_pSolverLog, <<  " % Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
 #endif
     }
 
@@ -375,17 +365,13 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
         nodeData.m_R_i_inv_diag(2) = r_T;
 
 #if CoutLevelSolverWhenContact>2
-        CLEARLOG;
-        logstream << " nodeData.m_b"<< nodeData.m_b <<std::endl;
-        logstream << " nodeData.m_G_ii"<< nodeData.m_G_ii <<std::endl;
-        logstream << " nodeData.m_R_i_inv_diag"<< nodeData.m_R_i_inv_diag <<std::endl;
-        LOG(m_pSolverLog);
+        LOG(m_pSolverLog,   <<  " nodeData.m_b"<< nodeData.m_b <<std::endl
+                            << " nodeData.m_G_ii"<< nodeData.m_G_ii <<std::endl
+                            << " nodeData.m_R_i_inv_diag"<< nodeData.m_R_i_inv_diag <<std::endl;);
 #endif
 
 #if CoutLevelSolverWhenContact>2
-        CLEARLOG;
-        logstream << " nodeData.m_b"<< nodeData.m_b <<std::endl;
-        LOG(m_pSolverLog);
+        LOG(m_pSolverLog, <<  " nodeData.m_b"<< nodeData.m_b <<std::endl;);
 #endif
 
 
@@ -408,9 +394,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx(DynamicsState<Layou
         if (m_bConverged == true || m_iterationsNeeded >= m_Settings.m_MaxIter) {
 
 #if CoutLevelSolverWhenContact>2
-            CLEARLOG;
-            logstream << " converged = "<<m_bConverged<< "\t"<< "iterations:" <<m_iterationsNeeded <<"/"<<  m_Settings.m_MaxIter<< std::endl;
-            LOG(m_pSolverLog);
+            LOG(m_pSolverLog, << " converged = "<<m_bConverged<< "\t"<< "iterations:" <<m_iterationsNeeded <<"/"<<  m_Settings.m_MaxIter<< std::endl;);
 #endif
             break;
         }

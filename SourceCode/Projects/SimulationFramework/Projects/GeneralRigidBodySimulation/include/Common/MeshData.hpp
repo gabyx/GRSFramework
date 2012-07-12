@@ -15,14 +15,16 @@
 #include <assert.h>
 #include <vector>
 #include <Eigen/Dense>
-#include <OGRE/Ogre.h>
-#include <OgreMath.h>
+
+
 
 #include <assimp.hpp>      // C++ importer interface
 #include <aiScene.h>       // Output data structure
 #include <aiPostProcess.h> // Post processing flags
 
 #include "TypeDefs.hpp"
+
+#include "SimpleLogger.hpp"
 
 ///==========================================
 
@@ -167,7 +169,7 @@ public:
    }
 
 
-   void writeToLog(Ogre::Log * plog){
+   void writeToLog(Logging::Log * plog){
       std::stringstream logmessage;
 
       using std::endl;
@@ -181,7 +183,7 @@ public:
       for (int i=0;i<m_Faces.size();i++){
          logmessage <<i<<": "<<m_Faces[i] <<  "\t n:"<<m_Normals[i] <<std::endl;
       }
-      plog->logMessage(logmessage.str().c_str());
+      plog->logMessage(logmessage.str());
    };
 
    /* inline Vector3 getPointofTriangle(int IndicesIndex, int PointIndex){

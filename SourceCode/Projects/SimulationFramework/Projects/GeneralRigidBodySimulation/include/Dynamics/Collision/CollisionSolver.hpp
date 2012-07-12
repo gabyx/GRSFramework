@@ -188,9 +188,7 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision(const DynamicsState
   clearCollisionSet();
 
    #if CoutLevelSolver>0
-      CLEARLOG;
-      logstream <<" % -> solveCollision(): "<<std::endl;
-      LOG(m_pSolverLog);
+      LOG(m_pSolverLog, << " % -> solveCollision(): "<<std::endl;)
    #endif
 
 

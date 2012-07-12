@@ -21,8 +21,9 @@
 * @brief
 */
 /* @{ */
-#define CLEARLOG { logstream.str("");}                                  ///< Macro to easily write into a Ogre::Log.
-#define LOG(_logptr_) {_logptr_->logMessage(logstream.str().c_str());}  ///< Macro to easily write into a Ogre::Log.
+#define CLEARLOG logstream.str("");                        ///< Macro to easily write into a Ogre::Log.
+#define LOG( _logptr_ , _message_ )  ( * (_logptr_) ) _message_ ;  ///< Macro to easily write into a Ogre::Log.
+#define OGRE_LOG( _logptr_ ) (_logptr_)->logMessage(logstream.str());  ///< Macro to easily write into a Ogre::Log.
 /* @} */
 
 
@@ -55,7 +56,8 @@
 * @brief All these defines are used in the solver thread. The output goes into the solver log with filename #SOLVER_LOG_FILE_PREFIX
 */
 /* @{ */
-#ifdef _DEBUG
+#ifndef NDEBUG
+  // DEBUG!
   #define CoutLevelSolver 1            ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
   #define CoutLevelSolverWhenContact 1 ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
   #define LogToFileSolver 1            ///< {0,1} Determines if logstream is saved into a file.
@@ -64,7 +66,7 @@
 #else
   #define CoutLevelSolver 1
   #define CoutLevelSolverWhenContact 1
-  #define LogToFileSolver 0
+  #define LogToFileSolver 1
   #define LogToConsoleSolver 1
   #define AllCoutToLogSolver 0
 #endif

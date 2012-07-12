@@ -13,7 +13,8 @@
 #include <fstream>
 #include <cmath>
 #include <Eigen/Dense>
-#include <OGRE/Ogre.h>
+
+#include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
 
 #include "TypeDefs.hpp"
@@ -93,7 +94,7 @@ protected:
   bool m_bFinished;
 
   // Timer for the Performance
-  Ogre::Timer m_PerformanceTimer;
+  boost::timer::cpu_timer m_PerformanceTimer;
   double m_startTime, m_endTime, m_startTimeCollisionSolver, m_endTimeCollisionSolver, m_startTimeInclusionSolver, m_endTimeInclusionSolver;
 
    // Collision Data file
@@ -169,6 +170,7 @@ template< typename TConfigTimeStepper>
 void MoreauTimeStepper<  TConfigTimeStepper>::closeAllFiles(){
 
    Logging::LogManager::getSingletonPtr()->destroyLog("SolverLog");
+   m_pSolverLog = NULL;
 
    m_CollisionDataFile.close();
    m_SystemDataFile.close();
@@ -262,7 +264,6 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset()
      m_ReferenceSimFile.getEndState(*m_StateBuffers.m_pFront);
   }
 
-  m_PerformanceTimer.reset();
   m_AvgTimeForOneIteration = 0;
   m_MaxTimeForOneIteration = 0;
 
@@ -306,12 +307,10 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration()
   static int iterations=0; // Average is reset after 1000 Iterations
 
 #if CoutLevelSolver>0
-  CLEARLOG;
-  logstream << "% Do one time-step =================================" <<std::endl; LOG(m_pSolverLog);
+  LOG(m_pSolverLog, << "% Do one time-step =================================" <<std::endl;);
 #endif
 
-  m_PerformanceTimer.reset();
-  m_startTime = (double)m_PerformanceTimer.getMicroseconds() * 1.0e-6;
+  m_PerformanceTimer.stop(); m_PerformanceTimer.start();
 
   iterations++;
   m_IterationCounter++;
@@ -339,15 +338,15 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration()
   m_pInclusionSolver->resetForNextIter(); // Clears the contact graph!
 
   // Solve Collision
-  m_startTimeCollisionSolver = (double)m_PerformanceTimer.getMicroseconds() * 1.0e-6;
+  m_startTimeCollisionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
   m_pCollisionSolver->solveCollision(&m_state_m);
-  m_endTimeCollisionSolver = (double)m_PerformanceTimer.getMicroseconds() * 1.0e-6;
+  m_endTimeCollisionSolver =   ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
 
   //Solve Contact Problem
   //boost::thread::yield();
-  m_startTimeInclusionSolver = (double)m_PerformanceTimer.getMicroseconds() * 1.0e-6;
+  m_startTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
   m_pInclusionSolver->solveInclusionProblem(m_StateBuffers.m_pBack.get(), &m_state_m, m_StateBuffers.m_pFront.get());
-  m_endTimeInclusionSolver = (double)m_PerformanceTimer.getMicroseconds() * 1.0e-6;
+  m_endTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
 
   //boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
   //boost::thread::yield();
@@ -364,11 +363,9 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration()
   // ====================================================================================
 
   #if CoutLevelSolver>1
-  	CLEARLOG;
-//      logstream << "m_pFront->m_t: " << m_StateBuffers.m_pFront->m_t<<std::endl;
-//      logstream << "m_pFront->m_q: " << m_StateBuffers.m_pFront->m_q.transpose()<<std::endl;
-//      logstream << "m_pFront->m_u: " << m_StateBuffers.m_pFront->m_u.transpose()<<std::endl;
-//      LOG(m_pSolverLog);
+//      LOG(m_pSolverLog,   << "m_pFront->m_t: " << m_StateBuffers.m_pFront->m_t<<std::endl
+//                          << "m_pFront->m_q: " << m_StateBuffers.m_pFront->m_q.transpose()<<std::endl
+//                          << "m_pFront->m_u: " << m_StateBuffers.m_pFront->m_u.transpose()<<std::endl;);
   #endif
 
   //Force switch
@@ -376,20 +373,18 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration()
 
 
   // Measure Time again
-  m_endTime = (double) m_PerformanceTimer.getMicroseconds() * 1.0e-6;
   if (m_IterationCounter%100==0){
     m_AvgTimeForOneIteration=0;
     iterations = 1;
   }
-  m_AvgTimeForOneIteration = ((m_endTime-m_startTime) + m_AvgTimeForOneIteration*(iterations-1)) / iterations;
+  m_AvgTimeForOneIteration = ( ((double)m_PerformanceTimer.elapsed().wall)*1e-9  + m_AvgTimeForOneIteration*(iterations-1)) / iterations;
   if (m_AvgTimeForOneIteration > m_MaxTimeForOneIteration){
     m_MaxTimeForOneIteration = m_AvgTimeForOneIteration;
   }
 
 #if CoutLevelSolver>0
-  CLEARLOG;
-  logstream << "% Iteration Time: "<<std::setprecision(5)<<(double)(m_endTime-m_startTime)<<std::endl;
-  logstream << "% End time-step ====================================" <<std::endl<<std::endl; LOG(m_pSolverLog);
+  //LOG( m_pSolverLog, <<  "% Iteration Time: "<<std::setprecision(5)<<(double)(m_endTime-m_startTime)<<std::endl
+                    // <<  "% End time-step ====================================" <<std::endl<<std::endl; );
 #endif
 
    // Check if we can finish the timestepping!

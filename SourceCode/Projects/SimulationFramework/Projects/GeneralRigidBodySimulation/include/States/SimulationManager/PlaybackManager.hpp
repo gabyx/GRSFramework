@@ -32,7 +32,7 @@ public:
 
   boost::shared_ptr<SharedBufferPlayback<LayoutConfigType> >	m_pSharedBuffer;
 
-  boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
+  boost::shared_ptr< SceneParserOgre<TConfig> > m_pSceneParser;
 
   boost::shared_ptr< VideoDropper > m_pVideoDropper;
   struct VideoDropSettings{ bool m_bVideoDrop; double m_FPS;} m_VideoDropSettings;
@@ -58,6 +58,11 @@ public:
     void enableInput(bool value);
 
 private:
+
+   Logging::Log*	m_pSimulationLog;
+   Logging::Log*	m_pThreadLog;
+
+   boost::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
 
   std::string m_KeyListenerName;
 

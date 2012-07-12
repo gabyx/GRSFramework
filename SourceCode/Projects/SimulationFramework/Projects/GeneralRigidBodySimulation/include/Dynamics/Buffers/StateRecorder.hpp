@@ -3,7 +3,6 @@
 
 #include <string>
 #include <Eigen/Dense>
-#include <OGRE/Ogre.h>
 
 #include "FileManager.hpp"
 #include "TypeDefs.hpp"
@@ -11,7 +10,7 @@
 #include "DynamicsState.hpp"
 #include "LogDefines.hpp"
 #include "MultiBodySimFile.hpp"
-
+#include "SimpleLogger.hpp"
 
 /**
 * @ingroup StatesAndBuffers
@@ -35,14 +34,14 @@ public:
 
   //void addState(const DynamicsState<TLayoutConfig> * state);
   /*void writeAllStates();*/
-  
+
   void write(const DynamicsState<TLayoutConfig>* value);
 
   StateRecorder<TLayoutConfig> & operator << (const DynamicsState<TLayoutConfig>* value);
-  
+
 protected:
 
-  Ogre::Log * m_pAppLog;
+  Logging::Log * m_pSimulationLog;
 
   //void scanAllSimDataFiles(boost::filesystem::path path_name, bool with_SubDirs = false);
   // All files created have the name "<m_fileNamePrefix>_<m_fileIdCounter>.sim"
@@ -66,7 +65,15 @@ template<typename TLayoutConfig>
 StateRecorder<TLayoutConfig>::StateRecorder(const unsigned int nSimBodies)
 {
    m_nSimBodies = nSimBodies;
-   m_pAppLog = RenderContext::getSingletonPtr()->m_pAppLog;
+
+   //Check if LogManager is available
+   Logging::LogManager * manager = Logging::LogManager::getSingletonPtr();
+   m_pSimulationLog = manager->getLog("SimulationLog");
+    if(!m_pSimulationLog){
+        // Log does not exist make a new standart log!
+        m_pSimulationLog = manager->createLog("StateRecorderLog",true,true,"StateRecorderLog.log");
+    }
+
 }
 
 
@@ -87,7 +94,7 @@ StateRecorder<TLayoutConfig>::~StateRecorder()
 template<typename TLayoutConfig>
 bool StateRecorder<TLayoutConfig>::createSimFile(boost::filesystem::path file_path)
 {
-  m_pAppLog->logMessage("Record to Sim file at: " + file_path.string());
+  m_pSimulationLog->logMessage("Record to Sim file at: " + file_path.string());
   if(m_BinarySimFile.openSimFileWrite(file_path,m_nSimBodies)){
     return true;
   }
@@ -103,15 +110,15 @@ bool StateRecorder<TLayoutConfig>::createSimFileCopyFromReference(boost::filesys
    tmpFile.closeSimFile();
 
    if(fileOK){
-      m_pAppLog->logMessage("Copy file:" + ref_file_path.string() + " to: " + new_file_path.string());
+      m_pSimulationLog->logMessage("Copy file:" + ref_file_path.string() + " to: " + new_file_path.string());
       FileManager::getSingletonPtr()->copyFile(ref_file_path,new_file_path,true);
 
-      m_pAppLog->logMessage("Record and append to Sim file at: " + new_file_path.string());
+      m_pSimulationLog->logMessage("Record and append to Sim file at: " + new_file_path.string());
       if(m_BinarySimFile.openSimFileWrite(new_file_path,m_nSimBodies,false)){ //APPEND!
          return true;
       }
    }
-   
+
   return false;
 }
 

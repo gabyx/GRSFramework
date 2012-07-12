@@ -19,7 +19,7 @@ _________________________________________________________*/
 
 #include "AppState.hpp"
 #include "AppStateManager.hpp"
-#include "SimulationManager.hpp"
+#include "SimulationManagerGUI.hpp"
 #include "PlaybackManager.hpp"
 #include "InputContext.hpp"
 #include "GuiContext.hpp"
@@ -77,7 +77,7 @@ private:
   enum MouseMode{ CAMERA = 0, MENU } m_eMouseMode;
   void setMouseMode(bool switchMode);
 
-  
+
   void setupGUI(); // Setups the playback file list...
   void updatePlaybackPanel();// Updates the panel
   enum ActiveMode{PLAYBACK} m_eSimulationActiveMode;

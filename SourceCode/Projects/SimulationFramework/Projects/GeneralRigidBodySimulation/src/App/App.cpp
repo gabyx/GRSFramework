@@ -27,11 +27,10 @@ App::~App()
 void App::startApp()
 {
 
-
 	new RenderContext();
-	if(!RenderContext::getSingletonPtr()->initOgre("App v1.0"))
+	if(!RenderContext::getSingletonPtr()->initOgre("RigidBodySimulation v1.0"))
 		return;
-	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("App(RenderContext) initialized!");
+	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("RigidBodySimulation(RenderContext) initialized!");
 
 	m_bShutdown = false;
 

@@ -19,7 +19,7 @@ _________________________________________________________*/
 
 #include "AppState.hpp"
 #include "AppStateManager.hpp"
-#include "SimulationManager.hpp"
+#include "SimulationManagerGUI.hpp"
 #include "InputContext.hpp"
 #include "GuiContext.hpp"
 #include "OrbitCamera.hpp"
@@ -65,7 +65,7 @@ public:
   boost::function<void (double)> updateSceneFunction; // this function binds to updateScenePlayback() or  updateSceneRealtime()
   void updateSceneRealtime(double timeSinceLastFrame);
 
-   boost::shared_ptr<SimulationManager<GeneralConfig> >	m_pSimMgr;
+   boost::shared_ptr<SimulationManagerGUI<GeneralConfig> >	m_pSimMgr;
 
 private:
 

@@ -1,24 +1,22 @@
+#The CMake Minimum version that is required. The FindCUDA script
+#is distributed since version 2.8
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
 # Set the makefile build type (only for make file based generators)
 MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )
 
 set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
 
 
-
 #The name of the project ====================================================================
-
-
 if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
         set(SimulationFrameworkName "SimulationFramework${CMAKE_BUILD_TYPE}")
 else()
         set(SimulationFrameworkName "SimulationFramework")
 endif()
-
 PROJECT(${SimulationFrameworkName})
 
-#The CMake Minimum version that is required. The FindCUDA script
-#is distributed since version 2.8
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
 
 
 # If GNU C Compiler set warning lenght to one line for eclipse
@@ -35,11 +33,9 @@ message(STATUS "Module path is now set to: " ${CMAKE_MODULE_PATH} )
 
 include(PrintListMacro)
 
-set(CMAKE_MAKE_PROGRAM_INTERNAL ${CMAKE_MAKE_PROGRAM} CACHE STRING "internal")
-
-
 
 #Add some multithreaded build support =====================================================================================================
+set(CMAKE_MAKE_PROGRAM_INTERNAL ${CMAKE_MAKE_PROGRAM} CACHE STRING "internal")
 MARK_AS_ADVANCED(MULTITHREADED_BUILD)
 set(MULTITHREADED_BUILD 12 CACHE STRING "How many threads are used to build the project")
 if(MULTITHREADED_BUILD)
@@ -100,42 +96,6 @@ endif(CUDA_FOUND)
 
 # ===============================================================================================================================================================
 
-#Find Ogre ======================================================================================================================================================
-
-if(WIN32)
-	set(CMAKE_MODULE_PATH "$ENV{OGRE_HOME}/CMake/;${CMAKE_MODULE_PATH}")
-endif(WIN32)
-
-if(UNIX)
-	set(CMAKE_MODULE_PATH "/usr/local/lib/OGRE/cmake/;${CMAKE_MODULE_PATH}")
-endif(UNIX)
-
-if(MSVC10)
-   string(REGEX MATCH ".*(msvc10).*" MATCH_MSV10 $ENV{OGRE_HOME})
-   if(NOT MATCH_MSV10)
-     message(FATAL_ERROR "You need strictly to define the environmenet variable OGRE_HOME=$ENV{OGRE_HOME} to set to the msvc10 directory, to be able to build with MSVC10")
-   else(NOT MATCH_MSV10)
-      message(STATUS "Ogre envrionement variable set to OGRE_HOME=$ENV{OGRE_HOME}")
-   endif(NOT MATCH_MSV10)
-endif(MSVC10)
-
-if(MSVC90)
-   string(REGEX MATCH ".*(msvc9).*" MATCH_MSV90 $ENV{OGRE_HOME})
-   if(NOT MATCH_MSV90)
-     message(FATAL_ERROR "You need strictly to define the environmenet variable OGRE_HOME=$ENV{OGRE_HOME} to set to the msvc9 directory, to be able to build with MSVC90")
-   else(NOT MATCH_MSV90)
-     message(STATUS "Ogre envrionement variable set to OGRE_HOME=$ENV{OGRE_HOME}")
-   endif(NOT MATCH_MSV90)
-endif(MSVC90)
-
-find_package(OIS REQUIRED)
-find_package(OGRE REQUIRED)
-#find_package(CEGUI REQUIRED)
-# ===============================================================================================================================================================
-
-#Define TooN ====================================================================================================================================================
-#find_package(TOON REQUIRED)
-# ===============================================================================================================================================================
 
 #Define Eigen ===================================================================================================================================================
 find_package(Eigen3 REQUIRED)
@@ -250,13 +210,14 @@ MESSAGE(STATUS "Added ${MYPROJECT_CXX_FLAGS} to CMAKE_CXX and CMAKE_C_FLAGS: ${C
 
 
 #set common includes for all projects which need them
-add_subdirectory(CommonSource)
+
 PRINTLIST("Common File Includes are:" "${COMMON_FILES_INC}")
 PRINTLIST("Common File Sources are:" "${COMMON_FILES_SRC}")
 set(COMMON_SOURCE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CommonSource/include")
 
 
 add_subdirectory(Projects/GeneralRigidBodySimulation)
+add_subdirectory(Projects/GeneralRigidBodySimulationNoGUI)
 
 # Copy Media Files to Project folder
 # message(STATUS "Copying Media Content to " ${CMAKE_BINARY_DIR}/Projects/)

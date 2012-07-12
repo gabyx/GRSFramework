@@ -4,7 +4,6 @@
 
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
-#include <OGRE/Ogre.h>
 
 #include "AssertionDebug.hpp"
 
@@ -36,12 +35,11 @@ public:
   void setNumberOfContacts(unsigned int & nContacts);
 
   virtual void setup() = 0;
-  virtual void updateScene(double timeSinceLastFrame) = 0;
 
   virtual double getSimulationTime(){return 0;};
 
-  virtual void startSimThread(Threads threadToStart)=0;
-  virtual void stopSimThread(Threads threadToStop, bool force_stop)=0;
+  virtual void startSimThread(Threads threadToStart){};
+  virtual void stopSimThread(Threads threadToStop, bool force_stop){};
 
 
 protected:
@@ -52,9 +50,9 @@ protected:
   virtual void initBeforeThreads(){};
 
   virtual void initSimThread(){};
-  virtual void threadRunSimulation()=0;
+  virtual void threadRunSimulation(){};
   virtual void initRecordThread(){};
-  virtual void threadRunRecord()=0;
+  virtual void threadRunRecord(){};
 
 
 

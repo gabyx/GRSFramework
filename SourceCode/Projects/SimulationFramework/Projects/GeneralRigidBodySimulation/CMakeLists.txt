@@ -13,13 +13,52 @@ include(PrintListMacro)
 # http://eigen.tuxfamily.org/dox-devel/TopicPreprocessorDirectives.html
 #########################################################################################################################################################################
 
+#Find Ogre ======================================================================================================================================================
+if(WIN32)
+	set(CMAKE_MODULE_PATH "$ENV{OGRE_HOME}/CMake/;${CMAKE_MODULE_PATH}")
+endif(WIN32)
+
+if(UNIX)
+	set(CMAKE_MODULE_PATH "/usr/local/lib/OGRE/cmake/;${CMAKE_MODULE_PATH}")
+endif(UNIX)
+
+if(MSVC10)
+   string(REGEX MATCH ".*(msvc10).*" MATCH_MSV10 $ENV{OGRE_HOME})
+   if(NOT MATCH_MSV10)
+     message(FATAL_ERROR "You need strictly to define the environmenet variable OGRE_HOME=$ENV{OGRE_HOME} to set to the msvc10 directory, to be able to build with MSVC10")
+   else(NOT MATCH_MSV10)
+      message(STATUS "Ogre envrionement variable set to OGRE_HOME=$ENV{OGRE_HOME}")
+   endif(NOT MATCH_MSV10)
+endif(MSVC10)
+
+if(MSVC90)
+   string(REGEX MATCH ".*(msvc9).*" MATCH_MSV90 $ENV{OGRE_HOME})
+   if(NOT MATCH_MSV90)
+     message(FATAL_ERROR "You need strictly to define the environmenet variable OGRE_HOME=$ENV{OGRE_HOME} to set to the msvc9 directory, to be able to build with MSVC90")
+   else(NOT MATCH_MSV90)
+     message(STATUS "Ogre envrionement variable set to OGRE_HOME=$ENV{OGRE_HOME}")
+   endif(NOT MATCH_MSV90)
+endif(MSVC90)
+
+find_package(OIS)
+find_package(OGRE)
+#find_package(CEGUI REQUIRED)
+# ===============================================================================================================================================================
+
+
+# Check if OGRE and OIS has been found!!
+if(NOT OGRE_FOUND OR NOT OIS_FOUND)
+   MESSAGE(ERROR "For this project to build, OGRE and OIS library need to be found!")
+else()
+   MESSAGE(STATUS "OGRE and OIS Library have been found!")
+endif()
 
 INCLUDE(IncludeModulesCUDA)
 
 # Configure File for the BUILD!
 string(REPLACE "." "" CUDA_VERSION_INTEGER ${CUDA_VERSION})
 configure_file (
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/ConfigFiles/ConfigureFile.hpp.in
+  ${PROJECT_SOURCE_DIR}/include/ConfigFiles/ConfigureFile.hpp.in
   ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
 )
 
@@ -31,14 +70,10 @@ SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
 SET( APP_INC
 	${PROJECT_SOURCE_DIR}/include/App/App.hpp
 	${PROJECT_SOURCE_DIR}/include/App/MenuMouse.hpp
-        #${PROJECT_SOURCE_DIR}/include/App/TinyOgre.hpp
-        #${PROJECT_SOURCE_DIR}/include/App/MinimalOgre.hpp
 	${PROJECT_SOURCE_DIR}/include/App/OrbitCamera.hpp
 )
 SET( APP_SRC
 	${PROJECT_SOURCE_DIR}/src/App/App.cpp
-        #${PROJECT_SOURCE_DIR}/src/App/TinyOgre.cpp
-        #${PROJECT_SOURCE_DIR}/src/App/MinimalOgre.cpp
 	${PROJECT_SOURCE_DIR}/src/App/MenuMouse.cpp
 	${PROJECT_SOURCE_DIR}/src/App/OrbitCamera.cpp
 	${PROJECT_SOURCE_DIR}/src/App/main.cpp
@@ -66,8 +101,8 @@ SET( STATES_INC
    ${PROJECT_SOURCE_DIR}/include/States/PlaybackState.hpp
    ${PROJECT_SOURCE_DIR}/include/States/VideoDropper.hpp
 	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManagerBase.hpp
-	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManager.hpp
-	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManager.icc
+	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManagerGUI.hpp
+	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManagerGUI.icc
 	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackManagerBase.hpp
 	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackManager.hpp
 	${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackManager.icc
@@ -94,17 +129,18 @@ SET(COMMON_INC
         ${PROJECT_SOURCE_DIR}/include/Common/CommonFunctionsOgre.hpp
 	${PROJECT_SOURCE_DIR}/include/Common/MakeCoordinateSystem.hpp
 	${PROJECT_SOURCE_DIR}/include/Common/VectorToSkewMatrix.hpp
-   ${PROJECT_SOURCE_DIR}/include/Common/MatrixHelpers.hpp
+        ${PROJECT_SOURCE_DIR}/include/Common/MatrixHelpers.hpp
 	${PROJECT_SOURCE_DIR}/include/Common/QuaternionHelpers.hpp
 	${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
-   ${PROJECT_SOURCE_DIR}/include/Common/TypenameComparision.hpp
+        ${PROJECT_SOURCE_DIR}/include/Common/TypenameComparision.hpp
 	${PROJECT_SOURCE_DIR}/include/Common/MultiBodySimFile.hpp
-   ${PROJECT_SOURCE_DIR}/include/Common/BinaryFile.hpp
+        ${PROJECT_SOURCE_DIR}/include/Common/BinaryFile.hpp
 )
 SET(COMMON_SRC
 	${PROJECT_SOURCE_DIR}/src/Common/OgreMeshExtraction.cpp
 	${PROJECT_SOURCE_DIR}/src/Common/CommonFunctions.cpp
         ${PROJECT_SOURCE_DIR}/src/Common/CommonFunctionsOgre.cpp
+        ${PROJECT_SOURCE_DIR}/src/Common/SimpleLogger.cpp
 	${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
 )
 
@@ -155,6 +191,7 @@ SET(DYNAMICS_SRC
 
 SET(SYSTEMS_INC
 	${PROJECT_SOURCE_DIR}/include/Systems/SceneParser.hpp
+        ${PROJECT_SOURCE_DIR}/include/Systems/SceneParserOgre.hpp
 	${PROJECT_SOURCE_DIR}/include/Systems/SharedBufferDynSys.hpp
 )
 

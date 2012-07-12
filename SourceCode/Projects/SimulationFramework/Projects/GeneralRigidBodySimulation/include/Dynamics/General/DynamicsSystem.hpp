@@ -165,10 +165,8 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(const DynamicsSt
   state_m->m_t =  state_s->m_t + timestep;
 
 #if CoutLevelSolver>0
-  CLEARLOG;
-  logstream <<"m_t_s= "  <<state_s->m_t<<endl;
-  logstream <<"m_t_m= "  <<state_m->m_t<<endl;
-  LOG(m_pSolverLog);
+  LOG(m_pSolverLog, << "m_t_s= "  <<state_s->m_t<<endl
+                    << "m_t_m= "  <<state_m->m_t<<endl;)
 #endif
 
   for(int i=0;i< state_s->m_SimBodyStates.size();i++){
@@ -195,10 +193,8 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(const DynamicsSt
     // =================
 
 #if CoutLevelSolver>2
-    CLEARLOG;
-    logstream  <<i<<" : m_q_M= "  <<state_m->m_SimBodyStates[i].m_q.transpose()<<endl;
-    logstream  <<i<<" : m_u_S= "  <<state_s->m_SimBodyStates[i].m_u.transpose()<<endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog,   << i <<" : m_q_M= "  <<state_m->m_SimBodyStates[i].m_q.transpose()<<std::endl
+                        << i <<" : m_u_S= "  <<state_s->m_SimBodyStates[i].m_u.transpose()<<std::endl;)
 #endif
   }
 }
@@ -214,9 +210,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(const DynamicsS
 
   state_e->m_t =  state_m->m_t + timestep;
 #if CoutLevelSolver>0
-  CLEARLOG;
-  logstream <<"m_t_e= "  <<state_e->m_t<<endl;
-  LOG(m_pSolverLog);
+  LOG(m_pSolverLog, << "m_t_e= "  <<state_e->m_t<<endl)
 #endif
   m_CurrentStateEnergy = 0;
   for(int i=0;i< state_m->m_SimBodyStates.size();i++){
@@ -237,10 +231,8 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(const DynamicsS
 #endif
 
 #if CoutLevelSolver>2
-    CLEARLOG;
-    logstream  <<i<<" : m_q_E= "  <<state_e->m_SimBodyStates[i].m_q.transpose()<<endl;
-    logstream  <<i<<" : m_u_E= "  <<state_e->m_SimBodyStates[i].m_u.transpose()<<endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog,   << i<<" : m_q_E= "  <<state_e->m_SimBodyStates[i].m_q.transpose()<<endl
+                        << i<<" : m_u_E= "  <<state_e->m_SimBodyStates[i].m_u.transpose()<<endl)
 #endif
   }
 

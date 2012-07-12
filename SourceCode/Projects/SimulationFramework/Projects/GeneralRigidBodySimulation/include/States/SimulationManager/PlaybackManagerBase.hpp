@@ -45,11 +45,6 @@ public:
 
 protected:
 
-   Ogre::Log*	m_pThreadLog;
-   Ogre::Log*  m_pAppLog;
-
-   boost::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
-
    virtual void initBeforeThreads(){};
 
    virtual void initSimThread(){};

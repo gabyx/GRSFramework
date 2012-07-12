@@ -117,11 +117,7 @@ void PlaybackManagerBase::addToTimeScale(double step)
 
     m_timeScale = m_timeScaleList[m_timeScaleListIdx];
 
-    std::stringstream logstream;
-    logstream << "TimeScale set to " << m_timeScale;
-    LOG(m_pAppLog);
-
-
+    //LOG(m_pSimluationLog, << "TimeScale set to " << m_timeScale <<std::endl;);
 }
 
 double PlaybackManagerBase::getTimeScale()
