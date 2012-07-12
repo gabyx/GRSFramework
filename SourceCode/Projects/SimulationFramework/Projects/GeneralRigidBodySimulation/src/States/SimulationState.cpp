@@ -3,12 +3,11 @@
 
 #include <Eigen/Dense>
 
-#include "SimulationManager.hpp"
+#include "SimulationManagerGUI.hpp"
 #include "PlaybackManager.hpp"
 
 #include "FileManager.hpp"
 #include "OgreSceneManagerDeleter.hpp"
-#include "SimulationManager.hpp"
 
 
 using namespace Ogre;
@@ -60,7 +59,7 @@ void SimulationState::enter()
 
   // Setup the Simulation Manager with the loaded system;
 
-  m_pSimMgr  = boost::shared_ptr<SimulationManager<GeneralConfig> > (new SimulationManager<GeneralConfig>(m_pSceneMgr));
+  m_pSimMgr  = boost::shared_ptr<SimulationManagerGUI<GeneralConfig> > (new SimulationManagerGUI<GeneralConfig>(m_pSceneMgr));
   m_pSimMgr->setup();
 
   m_eSimulationActiveMode = REALTIME;
@@ -147,13 +146,13 @@ void SimulationState::setupActiveModeSelection(){
   items.push_back("Realtime");
   items.push_back("Record");
   m_pActiveModeSelectMenu = (m_pTrayMgr->createThickSelectMenu(TL_TOPRIGHT,"ActiveModeSelectionSimulation","Simulations Mode",200,3,items));
-  
+
 }
 
 
 void SimulationState::itemSelected(OgreBites::SelectMenu * menu)
 {
-  
+
   if( menu == m_pActiveModeSelectMenu)
   {
     Ogre::DisplayString str = menu->getSelectedItem();
@@ -190,7 +189,7 @@ void SimulationState::switchSimulationMode()
 
 void SimulationState::setupScene()
 {
-   
+
 
   //World Axes
   Entity* ent = m_pSceneMgr->createEntity("WorldAxes", "axes.mesh");
@@ -202,7 +201,7 @@ void SimulationState::setupScene()
   // Push attachable objects for Orbit camera to list
   m_pOrbitCamera->m_OrbitNodeList.push_back(WorldAxes);
 
-  m_pBaseNode =  m_pSceneMgr->getRootSceneNode()->createChildSceneNode("BaseFrame"); 
+  m_pBaseNode =  m_pSceneMgr->getRootSceneNode()->createChildSceneNode("BaseFrame");
 
   Ogre::Light* pLight = m_pSceneMgr->createLight("Light");
   pLight->setType(Ogre::Light::LT_POINT);
@@ -283,10 +282,10 @@ bool SimulationState::keyPressed(const OIS::KeyEvent &keyEventRef)
   case OIS::KC_K:
     {
        if(m_eSimulationActiveMode == REALTIME){
-          m_pSimMgr->stopSimThread(SimulationManager<GeneralConfig>::REALTIME,false);
+          m_pSimMgr->stopSimThread(SimulationManagerGUI<GeneralConfig>::REALTIME,false);
        }
        else if(m_eSimulationActiveMode == RECORD){
-          m_pSimMgr->stopSimThread(SimulationManager<GeneralConfig>::RECORD,false);
+          m_pSimMgr->stopSimThread(SimulationManagerGUI<GeneralConfig>::RECORD,false);
        }
       break;
     }
@@ -296,7 +295,7 @@ bool SimulationState::keyPressed(const OIS::KeyEvent &keyEventRef)
     }
   case  OIS::KC_I:
     {
-     
+
       break;
     }
   default:
@@ -337,12 +336,12 @@ void SimulationState::setMouseMode(bool switchMode = false){
       if(m_eMouseMode == MENU){
         m_pOrbitCamera->disableInput();
         m_pMenuMouse->setActive();
-       
+
       }
       else{
         m_pOrbitCamera->enableInput();
         m_pMenuMouse->setInactive();
-      }  
+      }
    }
 }
 

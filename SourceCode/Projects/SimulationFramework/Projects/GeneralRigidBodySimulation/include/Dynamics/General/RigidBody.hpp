@@ -19,6 +19,8 @@
 #include "BoxGeometry.hpp"
 #include "MeshGeometry.hpp"
 
+#include "FrontBackBuffer.hpp"
+
 #include "QuaternionHelpers.hpp"
 
 /**
@@ -26,11 +28,30 @@
 * @brief This is the RigidBody class, which describes a rigid body.
 */
 /** @{ */
-template<typename TLayoutConfig>
-class RigidBody{
+
+
+
+
+/** Class with  Data Structure for the Solver! */
+template< typename TLayoutConfig >
+class RigidBodySolverDataCONoG{
+
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+
+    public:
+
+    ///< Pointers into the right Front BackBuffer for the velocity which get iteratet in the InclusionSolverCONoG
+    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> m_uBuffer;
+
+};
+
+
+template<typename TRigidBodyConfig >
+class RigidBodyBase{
 public:
-  DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef TRigidBodyConfig RigidBodyConfigType;
+  DEFINE_RIGIDBODY_CONFIG_TYPES_OF(TRigidBodyConfig);
 
 
   enum BodyState{
@@ -46,7 +67,8 @@ public:
      END = 4
   }; ///< Enumeration describing the Material.
 
-  RigidBody(){
+
+  RigidBodyBase(){
     m_mass = 1;
     m_MassMatrixInv_diag.setZero();
     m_MassMatrix_diag.setZero();
@@ -59,10 +81,12 @@ public:
     m_h_term.setZero();
     m_eState = NOT_SIMULATED;
     m_eMaterial = STD_MATERIAL;
+    m_pSolverData = NULL;
   }; ///< Constructor which sets standart values.
 
-  ~RigidBody(){
+  ~RigidBodyBase(){
     //DECONSTRUCTOR_MESSAGE
+    if(m_pSolverData){delete m_pSolverData; m_pSolverData = NULL;};
   };
 
     boost::variant<
@@ -84,19 +108,28 @@ public:
   Matrix33 m_A_IK; ///< The transformation matrix \f$ \mathbf{A}_{IK} \f$ from K frame to the I frame which is updated at each timestep.
 
   /**
-  * These values are updated from TimeStepper, used to faster compute certain stuff in assembler
+  * These values are updated from TimeStepper, used to faster compute certain stuff during the collision solving and inclusion solving.
   * @{
   */
-  Vector3 m_r_S;     ///< Vector resolved in the I frame from origin to the center of gravity, \f$ \mathbf{r}_S \f$.
-  Quaternion m_q_KI; ///< Quaternion which represents a rotation from I to the K frame, \f$ \tilde{\mathbf{a}}_{KI} \f$.
-  /** @} */
+  Vector3 m_r_S;     ///< Vector resolved in the I frame from origin to the center of gravity, \f$ \mathbf{r}_S \f$, at time t_s + deltaT/2.
+  Quaternion m_q_KI; ///< Quaternion which represents a rotation from I to the K frame, \f$ \tilde{\mathbf{a}}_{KI} \f$,  at time t_s + deltaT/2.
+
+
 
   unsigned int m_id; ///< This is the id of the body.
 
   BodyState m_eState; ///< The state of the body.
 
   BodyMaterial m_eMaterial; ///< The material.
+
+
+  RigidBodySolverDataType * m_pSolverData; /// Simulated bodies have a solverData. For all others, animated and not simulated this pointer is zero!
+
 };
+
+  /** @} */
+
+
 
 /** @} */
 

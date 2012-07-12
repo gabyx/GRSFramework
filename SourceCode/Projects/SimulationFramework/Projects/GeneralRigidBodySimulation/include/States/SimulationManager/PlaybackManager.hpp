@@ -22,7 +22,7 @@ template< typename TLayoutConfig , typename TStatePool> class PlaybackLoader;
 template< typename TLayoutConfig> class SharedBufferPlayback;
 
 template<typename TConfig>
-class PlaybackManager : public PlaybackManagerBase
+class PlaybackManager : public PlaybackManagerBase , public OIS::KeyListener
 {
 public:
   DEFINE_CONFIG_TYPES_OF(TConfig);
@@ -30,14 +30,14 @@ public:
 	PlaybackManager(boost::shared_ptr<Ogre::SceneManager> pSceneMgr);
 	~PlaybackManager();
 
-  boost::shared_ptr<SharedBufferPlayback<TLayoutConfig> >	m_pSharedBuffer;
+  boost::shared_ptr<SharedBufferPlayback<LayoutConfigType> >	m_pSharedBuffer;
 
-  boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
+  boost::shared_ptr< SceneParserOgre<TConfig> > m_pSceneParser;
 
   boost::shared_ptr< VideoDropper > m_pVideoDropper;
   struct VideoDropSettings{ bool m_bVideoDrop; double m_FPS;} m_VideoDropSettings;
 
-  boost::shared_ptr< StateRecorderResampler<TLayoutConfig> > m_pStateRecorderResampler;
+  boost::shared_ptr< StateRecorderResampler<LayoutConfigType> > m_pStateRecorderResampler;
   struct SimFileDropSettings{ bool m_bSimFileDrop; double m_FPS; bool m_bSimFileDropInterpolate; double m_startTime; double m_endTime;} m_SimFileDropSettings;
 
   bool setup();
@@ -55,14 +55,21 @@ public:
 	// Key Mouse Listener
 	bool keyPressed(const OIS::KeyEvent &keyEventRef);
 	bool keyReleased(const OIS::KeyEvent &keyEventRef);
+    void enableInput(bool value);
 
 private:
 
-  
+   Logging::Log*	m_pSimulationLog;
+   Logging::Log*	m_pThreadLog;
+
+   boost::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
+
+  std::string m_KeyListenerName;
+
   bool parseScene();
   bool m_bSetupSuccessful;
 
-  boost::shared_ptr<const DynamicsState<TLayoutConfig> > m_pVisBuffer;
+  boost::shared_ptr<const DynamicsState<LayoutConfigType> > m_pVisBuffer;
 
   //Accessed only by Graphic thread ==========
    void updateSimBodies();
@@ -89,7 +96,7 @@ private:
    // =========================================
 
   // Accessed only by Loader Thread
-  boost::shared_ptr< PlaybackLoader<TLayoutConfig, StateRingPoolVisBackFront<TLayoutConfig> > > m_pFileLoader;
+  boost::shared_ptr< PlaybackLoader<LayoutConfigType, StateRingPoolVisBackFront<LayoutConfigType> > > m_pFileLoader;
 
 
   const unsigned int m_nDofuObj, m_nDofqObj; // These are the dimensions for one Obj
@@ -97,7 +104,7 @@ private:
   double m_lengthScale;
   Ogre::SceneNode * m_pBaseNode;
 
- 
+
 };
 
 

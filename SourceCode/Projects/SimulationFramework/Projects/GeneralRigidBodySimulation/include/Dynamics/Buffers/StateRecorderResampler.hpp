@@ -46,14 +46,13 @@ public:
 
       std::stringstream logstream;
 
-       /*CLEARLOG(logstream);
-       logstream << "Current resample time: " << m_currentResampleTime << "/ "<< m_startTime << " /" << m_endTime  ;
-       LOG(m_pAppLog)*/
+       /*
+       LOG(m_pStateRecorderLog, << "Current resample time: " << m_currentResampleTime << "/ "<< m_startTime << " /" << m_endTime;);
+       */
 
       if(m_currentResampleTime <= m_endTime){
          *m_pNextState = *state;
          if(state->m_t >= m_currentResampleTime){
-             CLEARLOG(logstream);
             // Check to interpolate...
             double diffTime = m_pNextState->m_t - m_pPrevState->m_t;
             if(diffTime != 0 && bInterpolate){
@@ -68,7 +67,7 @@ public:
             }
 
             m_currentResampleTime += 1.0/m_fps; //Move resample time ahead! for next drop!
-            LOG(this->m_pAppLog)
+            this->m_pSimulationLog->logMessage(logstream);
          }
          std::swap(m_pPrevState, m_pNextState);
       }

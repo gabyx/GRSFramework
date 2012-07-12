@@ -5,7 +5,7 @@
 #include "LogDefines.hpp"
 
 //=========================================================
-template<> FileManager* Ogre::Singleton<FileManager>::ms_Singleton = 0;
+
 
 //=========================================================
 
@@ -14,7 +14,6 @@ using namespace std;
 FileManager::FileManager(){
   m_fileIdCounter = 0;
 
-  m_pAppLog = RenderContext::getSingletonPtr()->m_pAppLog;
 
 }
 FileManager::~FileManager()
@@ -34,13 +33,13 @@ void FileManager::copyFile(boost::filesystem::path from, boost::filesystem::path
    }else{
       boost::filesystem::copy_file(from,to,boost::filesystem::copy_option::overwrite_if_exists,err);
    }
-   m_pAppLog->logMessage(err.message());
+   //m_pAppLog->logMessage(err.message());
 }
 
 boost::filesystem::path FileManager::getNewSimFolderPath(boost::filesystem::path directory,  std::string folder_prefix)
 {
   boost::mutex::scoped_lock l(m_busy_mutex);
- 
+
   scanAllSimFolders(directory,folder_prefix,false);
   std::stringstream new_foldername;
   new_foldername << folder_prefix << m_fileIdCounter;
@@ -59,7 +58,7 @@ void FileManager::updateFileList(boost::filesystem::path directory, bool with_Su
   updateAllSimDataFiles(directory,with_SubDirs);
 }
 
-Ogre::StringVector FileManager::getSimFileNameList()
+std::vector<std::string> FileManager::getSimFileNameList()
 {
   boost::mutex::scoped_lock l(m_busy_mutex);
   return m_SimFileNames;
@@ -95,7 +94,7 @@ void FileManager::updateAllSimDataFiles(const boost::filesystem::path &directory
       else
       {
         // Check for filename
-        path prefix = iter->path().extension(); 
+        path prefix = iter->path().extension();
         if(prefix.string() == SIM_FILE_EXTENSION){
 
           // add file to the list
@@ -125,7 +124,7 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, co
 
          //// Get the number of the folder if name matches "<folder_prefix><number>"
          std::string name = iter->path().filename().string();
-         std::string suffix = iter->path().extension().string(); 
+         std::string suffix = iter->path().extension().string();
          std::size_t found = name.find(folder_prefix);
          if(found!=string::npos){
            found += folder_prefix.length();
@@ -133,7 +132,7 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, co
            if( number_length >0){
              std::string number_string = name.substr(found, number_length);
              unsigned int numberId;
-             if( stringToType<unsigned int>(numberId,number_string, std::dec)){
+             if( Utilities::stringToType<unsigned int>(numberId,number_string, std::dec)){
                // Conversion worked
                if( m_fileIdCounter <= numberId){
                  m_fileIdCounter = numberId+1;
@@ -151,7 +150,7 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, co
       {
         //cout << iter->path().string() << " (file)\n" ;
         // Check for all .sim files and add to the list
-        path suffix = iter->path().extension(); 
+        path suffix = iter->path().extension();
         if(suffix.string() == SIM_FILE_EXTENSION){
           // add file to the list
           std::map<boost::filesystem::path,boost::filesystem::path>::iterator it;
@@ -162,13 +161,13 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, co
           }
 
           std::string name = iter->path().filename().string();
-          m_pAppLog->logMessage("Found file " + name);
+          //m_pAppLog->logMessage("Found file " + name);
         }
       }
     }
   }
 
-  // Execute CallBack to notify 
+  // Execute CallBack to notify
 
 }
 

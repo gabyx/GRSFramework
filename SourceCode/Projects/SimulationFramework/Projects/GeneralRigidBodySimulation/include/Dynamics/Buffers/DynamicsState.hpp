@@ -63,7 +63,7 @@ public:
       return *this;
    }
 
-   friend void Interpolate::lerp( const RigidBodyState<TLayoutConfig> & A, const RigidBodyState<TLayoutConfig> & B, RigidBodyState<TLayoutConfig> & X, typename TLayoutConfig::PREC factor);
+   friend void Interpolate::lerp<TLayoutConfig>( const RigidBodyState<TLayoutConfig> & A, const RigidBodyState<TLayoutConfig> & B, RigidBodyState<TLayoutConfig> & X, typename TLayoutConfig::PREC factor);
 
    Eigen::Matrix<PREC,NDOFuObj,1>	m_u; ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
    Eigen::Matrix<PREC,NDOFqObj,1>	m_q; ///< These are the generalized coordinates \f$\mathbf{q}\f$ of a rigid body.
@@ -85,10 +85,14 @@ public:
 
    DynamicsState<TLayoutConfig> & operator =(const DynamicsState<TLayoutConfig>& state);
 
-   friend void Interpolate::lerp( const DynamicsState<TLayoutConfig> & A, const DynamicsState<TLayoutConfig> & B, DynamicsState<TLayoutConfig> & X, typename TLayoutConfig::PREC factor);
+   friend void Interpolate::lerp<TLayoutConfig>( const DynamicsState<TLayoutConfig> & A, const DynamicsState<TLayoutConfig> & B, DynamicsState<TLayoutConfig> & X, typename TLayoutConfig::PREC factor);
 
    PREC	m_t; ///< The time in \f$[s]\f$
-   std::vector< RigidBodyState<TLayoutConfig> >  m_SimBodyStates; ///< A vector comprising of all rigid body states of the system.
+
+   typedef std::vector< RigidBodyState<TLayoutConfig> > RigidBodyStateListType;
+
+   RigidBodyStateListType  m_SimBodyStates; ///< A vector comprising of all rigid body states of the system for simulated objects.
+   RigidBodyStateListType  m_AniBodyStates; ///< A vector comprising of all rigid body states of the system for animated objects.
 
    const unsigned int m_nSimBodies;
 

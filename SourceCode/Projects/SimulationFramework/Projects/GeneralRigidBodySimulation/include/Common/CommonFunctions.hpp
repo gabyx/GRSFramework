@@ -18,7 +18,6 @@
 #include <limits>
 #include <vector>
 #include <Eigen/Dense>
-#include <OGRE/Ogre.h>
 
 
 #include "TypeDefs.hpp"
@@ -27,6 +26,8 @@
 //using namespace std;
 //using namespace Eigen;
 //using namespace Ogre;
+
+namespace Utilities{
 
 /**
 * @ingroup Common
@@ -43,8 +44,8 @@
 * @return true if conversion worked, false if not.
 */
 template <class T>
-bool stringToType(T& t, 
-                 const std::string& s, 
+bool stringToType(T& t,
+                 const std::string& s,
                  std::ios_base& (*f)(std::ios_base&))
 {
   std::istringstream iss(s);
@@ -77,32 +78,6 @@ bool stringToType<bool>(bool & t, const std::string& s);
 */
 double randd(double low, double high);
 
-/**
-* @brief Converts a vector 3x1 from Ogre to an Eigen 3x1 Vector.
-*/
-template<typename PREC>
-Eigen::Matrix<PREC,3,1> vectorFromOgre(const Ogre::Vector3& v)
-{
-	Eigen::Matrix<double,3,1> vec;
-	vec(0) = v.x;
-	vec(1) = v.y;
-	vec(2) = v.z;
-	return vec;
-}
-
-
-/**
-* @brief Converts a quaternion 4x1 from Ogre to an Eigen 4x1 Vector.
-*/
-template<typename PREC>
-Eigen::Matrix<PREC,4,1> vectorFromOgre(const Ogre::Quaternion & v){
-  Eigen::Matrix<PREC,4,1> vec;
-	vec(0) = v.w;
-	vec(1) = v.x;
-	vec(2) = v.y;
-  vec(3) = v.z;
-	return vec;
-}
 
 /**
 * @brief Converts a std::vector with column vectors from Eigen into a Eigen Matrix.
@@ -201,7 +176,7 @@ template <typename PREC> bool stringToVector3( typename MyMatrix<PREC>::Vector3 
 					return false;
 				}
 				vector3(2) = number;////////////////////////z
-				
+
 			}
 		}
 	}
@@ -298,7 +273,7 @@ template <class PREC> bool stringToVector4(typename MyMatrix<PREC>::Vector4 & ve
 				}
 				else {
 					j=i;
-					
+
 					while(s[j]!=' ') {
 						j++;
 						if(j > s.length()-1){
@@ -317,6 +292,7 @@ template <class PREC> bool stringToVector4(typename MyMatrix<PREC>::Vector4 & ve
 	return true;
 }
 
+};
 
 /** @} */
 

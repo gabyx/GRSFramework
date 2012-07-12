@@ -390,9 +390,7 @@ namespace Prox{
       }
 
 #if CoutLevelSolverWhenContact>2
-//      CLEARLOG;
-//      logstream << "Cancel Criterion :" << RelNormP << " < " << NormP * m_Settings.m_RelTol + m_Settings.m_AbsTol;
-//      LOG(m_pSolverLog);
+      //LOG(m_pSolverLog, << "Cancel Criterion :" << RelNormP << " < " << NormP * m_Settings.m_RelTol + m_Settings.m_AbsTol << std::endl;);
 #endif
 
       return false;

@@ -34,7 +34,7 @@ namespace InitialConditionBodies{
        init_state.m_SimBodyStates[i].m_q.template tail<4>() = typename TLayoutConfig::Quaternion(1,0,0,0);
 
        if(jitter){
-         random_vec = Vector3(randd(-1,1),randd(-1,1),randd(-1,1)); // No uniform distribution!, but does not matter
+         random_vec = Vector3(Utilities::randd(-1,1),Utilities::randd(-1,1),Utilities::randd(-1,1)); // No uniform distribution!, but does not matter
          random_vec.normalize();
          random_vec = random_vec.cross(dir);
          random_vec.normalize();
@@ -63,7 +63,7 @@ void setupBodiesGrid(DynamicsState<TLayoutConfig> & init_state, unsigned int gDi
 
 
     if(jitter){
-      random_vec = Vector3(randd(-1,1),randd(-1,1),randd(-1,1)); // No uniform distribution!, but does not matter
+      random_vec = Vector3(Utilities::randd(-1,1),Utilities::randd(-1,1),Utilities::randd(-1,1)); // No uniform distribution!, but does not matter
       jitter_vec = random_vec * delta;
     }
 
@@ -94,8 +94,8 @@ void setupBodyPositionAxisAngle(RigidBodyState<TLayoutConfig> & rigibodyState, c
 }
 
 
-template<typename TLayoutConfig>
-void applyDynamicsStateToBodies(const DynamicsState<TLayoutConfig> & state, std::vector<boost::shared_ptr<RigidBody<TLayoutConfig> > > & bodies){
+template<typename TLayoutConfig, typename TRigidBody>
+void applyDynamicsStateToBodies(const DynamicsState<TLayoutConfig> & state, std::vector<boost::shared_ptr<TRigidBody > > & bodies){
     ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
 
     for(int i=0; i < bodies.size(); i++){

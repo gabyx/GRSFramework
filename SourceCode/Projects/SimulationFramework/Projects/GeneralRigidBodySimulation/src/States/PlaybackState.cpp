@@ -3,12 +3,12 @@
 
 #include <Eigen/Dense>
 
-#include "SimulationManager.hpp"
+#include "SimulationManagerGUI.hpp"
 #include "PlaybackManager.hpp"
 
 #include "FileManager.hpp"
 #include "OgreSceneManagerDeleter.hpp"
-#include "SimulationManager.hpp"
+#include "SimulationManagerGUI.hpp"
 
 
 using namespace Ogre;
@@ -35,7 +35,7 @@ PlaybackState::~PlaybackState(){
 
 void PlaybackState::enter()
 {
-  
+
   m_pAppLog->logMessage("Entering PlaybackState...");
 
   m_pSceneMgr = boost::shared_ptr<Ogre::SceneManager>( RenderContext::getSingletonPtr()->m_pRoot->createSceneManager(ST_GENERIC, "PlaybackStateSceneMgr"), OgreSceneManagerDeleter());
@@ -54,7 +54,7 @@ void PlaybackState::enter()
   m_pMenuMouse->setInactive();
 
 
- 
+
 
   // Setup the Playback Panel and the Playback Manager with the loaded system;
   setupGUI();
@@ -145,7 +145,7 @@ void PlaybackState::setupActiveModeSelection(){
   Ogre::StringVector items;
   items.push_back("Playback");
   m_pActiveModeSelectMenu = (m_pTrayMgr->createThickSelectMenu(TL_TOPRIGHT,"ActiveModeSelectionPlayback","Simulations Mode",200,3,items));
-  
+
 }
 
 void PlaybackState::setupGUI()
@@ -155,11 +155,18 @@ void PlaybackState::setupGUI()
   setupActiveModeSelection();
 
   FileManager::getSingletonPtr()->updateFileList(SIMULATION_FOLDER_DIRECTORY,true);
-  Ogre::StringVector strings = FileManager::getSingletonPtr()->getSimFileNameList();
+  std::vector<std::string> strings = FileManager::getSingletonPtr()->getSimFileNameList();
+
+  //Convert String to ogre String
+  Ogre::StringVector vec;
+  for(int i=0;i<strings.size();i++){
+    vec.push_back(strings[i]);
+  }
+
   m_pTrayMgr->hideBackdrop();
   m_pPlaybackFiles = (m_pTrayMgr->createThickSelectMenu(
-    TL_TOP,"PlaybackFiles","Playback Files",600,10, 
-   strings
+    TL_TOP,"PlaybackFiles","Playback Files",600,10,
+   vec
     ));
 
   // Setup reload button
@@ -192,8 +199,14 @@ void PlaybackState::setupGUI()
 }
 void PlaybackState::updatePlaybackPanel(){
   FileManager::getSingletonPtr()->updateFileList(SIMULATION_FOLDER_DIRECTORY,true);
-  Ogre::StringVector strings = FileManager::getSingletonPtr()->getSimFileNameList();
-  m_pPlaybackFiles->setItems(strings);
+  std::vector<std::string> strings = FileManager::getSingletonPtr()->getSimFileNameList();
+
+  Ogre::StringVector vec;
+  for(int i=0;i<strings.size();i++){
+    vec.push_back(strings[i]);
+  }
+
+  m_pPlaybackFiles->setItems(vec);
 }
 
 void PlaybackState::checkBoxToggled(OgreBites::CheckBox * box){
@@ -310,7 +323,7 @@ void PlaybackState::setupScene()
   SceneNode* WorldAxes = m_pSceneMgr->getRootSceneNode()->createChildSceneNode("WorldAxes");
   WorldAxes->attachObject(ent);
 
-  m_pBaseNode =  m_pSceneMgr->getRootSceneNode()->createChildSceneNode("BaseFrame"); 
+  m_pBaseNode =  m_pSceneMgr->getRootSceneNode()->createChildSceneNode("BaseFrame");
 
   m_pOrbitCamera = boost::shared_ptr<OrbitCamera>(new OrbitCamera(m_pSceneMgr.get(),"PlaybackState::OrbitCam", 0.13, 150, 200, 0, M_PI/4));
   m_pOrbitCamera->enableInput();
@@ -386,7 +399,7 @@ bool PlaybackState::keyPressed(const OIS::KeyEvent &keyEventRef)
     }
   case OIS::KC_I:
     {
-     
+
       break;
     }
   default:
@@ -422,13 +435,13 @@ void PlaybackState::setMouseMode(bool switchMode = false){
         m_pOrbitCamera->setActive();
         m_pOrbitCamera->disableInput();
         m_pMenuMouse->setActive();
-       
+
       }
       else{
         m_pOrbitCamera->setActive();
         m_pOrbitCamera->enableInput();
         m_pMenuMouse->setInactive();
-      }  
+      }
    }
 }
 

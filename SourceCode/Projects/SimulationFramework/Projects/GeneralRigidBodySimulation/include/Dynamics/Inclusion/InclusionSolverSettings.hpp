@@ -3,6 +3,9 @@
 
 #include "TypeDefs.hpp"
 
+
+#define USE_PERCUSSION_POOL 1
+
 /**
 * @ingroup Inclusion
 * @brief The inclusion solver settings.
@@ -21,7 +24,7 @@ struct InclusionSolverSettings
     bool  m_bUseGPU;
     int m_UseGPUDeviceId;
     bool m_bIsFiniteCheck;
-    
+
 };
 
 

@@ -6,8 +6,8 @@
 # Once done, this will define
 #
 # OZCOLLIDE_FOUND - system has OzCollide
-# OZCOLLIDE_INCLUDE_DIRS - the OzCollide include directories
-# OZCOLLIDE_LIBRARIES - link these to use OzCollide
+# OZCOLLIDE_INCLUDE_DIR - the OzCollide include directories
+# OZCOLLIDE_LIBRARY - link these to use OzCollide
 
 include(MyFindPkgMacros)
 include(PrintListMacro)
@@ -51,8 +51,6 @@ IF(WIN32)
         FIND_FILE(OZCOLLIDE_DLL_REL ${OZCOLLIDE_DLL_NAMES_DEL} HINTS ${OZCOLLIDE_DLL_SEARCH_PATH} )
 ENDIF(WIN32)
 
-
-make_library_set(OZCOLLIDE_LIBRARY)
 
 findpkg_finish(OZCOLLIDE)
 

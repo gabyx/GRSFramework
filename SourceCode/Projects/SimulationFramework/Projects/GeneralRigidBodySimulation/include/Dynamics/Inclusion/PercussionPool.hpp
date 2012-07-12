@@ -40,6 +40,7 @@ public:
    }
 
    void removeUnusedPercussions(){
+//       unsigned int size1 = m_PercussionMap.size();
       //cout << "Removing percussion...: " << m_PercussionMap.size() <<endl ;
       typename PercussionMap::iterator it;
       it = m_PercussionMap.begin();
@@ -51,23 +52,25 @@ public:
             it++;
          }
       }
-      //cout << "Removed percussion: "<< m_PercussionMap.size() <<endl ;
+//      std::cout << "Removed percussion: "<< size1 - m_PercussionMap.size()  <<std::endl;
    }
 
    void clearUsedPercussionList(){
       m_usedPercussionList.clear();
    }
 
-   void getPercussion(const ContactTag & tag, VectorPContact & P_old) {
-      static typename std::pair<ContactTag, ContactPercussion<TLayoutConfig> > new_value;  // Standart constructor, Percussion = zero
+   void getPercussion(const ContactTag & tag, VectorDyn & P_old) {
+      static typename std::pair<ContactTag, ContactPercussion<TLayoutConfig> > new_value(ContactTag(), ContactPercussion<TLayoutConfig>(P_old.rows()) );  // Standart constructor, Percussion = zero
       new_value.first = tag;
+
       // try to insert a new one!
       std::pair<typename PercussionMap::iterator, bool> result =  m_PercussionMap.insert(new_value);
-      /*if(result.second == false){
-      cout << "Took Precussion with" << tag.m_ContactTagTuple.get<0>()<<"/"<<tag.m_ContactTagTuple.get<3>()<<endl;
-      }*/
+//      if(result.second == false){
+//        std::cout << "Took Precussion with" << result.first->second.m_P <<std::endl;
+//      }
       // If inserted the new values are set to zero!
       // If not inserted the new values are the found ones in the map!
+      ASSERTMSG(result.first->second.m_P.rows() == P_old.rows(), "Something went wrong you found a contact which has not the same dimension as the one you want to initialize!");
       P_old = result.first->second.m_P;
 
       // Set  used flag
@@ -76,9 +79,16 @@ public:
       m_usedPercussionList.push_back(result.first);
    }
 
-   void setPercussion(unsigned int index, const VectorPContact & P_new) {
+   void setPercussion(unsigned int index, const VectorDyn & P_new) {
       ASSERTMSG(index < m_usedPercussionList.size(),"Error: False index!");
-      m_usedPercussionList[index]->second.m_P = P_new;
+
+      typename PercussionMap::iterator it = m_usedPercussionList[index];
+
+      ASSERTMSG(it->second.m_P.rows() == P_new.rows(), "Something went wrong you want to set a contact which has not the same dimension as the one you want to initialize!");
+      it->second.m_P = P_new;
+
+//       std::cout << "Set Precussion with" << P_new.transpose() <<std::endl;
+
    }
 
    unsigned int getPoolSize(){

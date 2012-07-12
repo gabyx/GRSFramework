@@ -1,8 +1,10 @@
 ﻿#ifndef InclusionSolverNT_hpp
 #define InclusionSolverNT_hpp
 
+#include <iostream>
 #include <fstream>
 #include <boost/shared_ptr.hpp>
+
 #include <Eigen/Dense>
 #include <Eigen/SVD>
 #include "AssertionDebug.hpp"
@@ -22,26 +24,30 @@
 
 #include "LogDefines.hpp"
 
-//#define USE_PERCUSSION_POOL 1
+
 
 /**
 * @ingroup Inclusion
 * @brief The inclusion solver for an NT ordered problem.
 */
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
+template< typename TInclusionSolverConfig >
 class InclusionSolverNT{
 public:
-  DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+
+  DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES_OF(TInclusionSolverConfig)
+
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  InclusionSolverNT(boost::shared_ptr<TCollisionSolver >  pCollisionSolver, boost::shared_ptr<TDynamicsSystem> pDynSys);
+  static const int NDOFFriction = 3;
 
-  void initializeLog(Ogre::Log* pSolverLog);
+  InclusionSolverNT(boost::shared_ptr<CollisionSolverType >  pCollisionSolver, boost::shared_ptr<DynamicsSystemType> pDynSys);
+
+  void initializeLog(Logging::Log* pSolverLog);
   void reset();
   void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
-  void solveInclusionProblem( const DynamicsState<TLayoutConfig> * state_s,
-    const DynamicsState<TLayoutConfig> * state_m,
-    DynamicsState<TLayoutConfig> * state_e);
+  void solveInclusionProblem( const DynamicsState<LayoutConfigType> * state_s,
+    const DynamicsState<LayoutConfigType> * state_m,
+    DynamicsState<LayoutConfigType> * state_e);
 
   // These are updated from the System, over Inclusion Solver;
   VectorU m_Minv_diag;
@@ -49,22 +55,23 @@ public:
   VectorU m_h_const;    // constant terms (gravity)
   VectorU m_delta_u_E;  // the delta which adds to the final u_E
 
+  std::string getIterationStats();
   PREC m_G_conditionNumber;
   PREC m_G_notDiagDominant;
   unsigned int m_iterationsNeeded;
   bool m_bConverged;
   unsigned int m_nContacts;
 
-  ContactParameterMap<TLayoutConfig> m_ContactParameterMap;
+  ContactParameterMap<RigidBodyType> m_ContactParameterMap;
 
-  PercussionPool<TLayoutConfig> m_PercussionPool;
+  PercussionPool<LayoutConfigType> m_PercussionPool;
 
   void reservePercussionPoolSpace(unsigned int nExpectedContacts);
   void readFromPercussionPool(unsigned int index, VectorDyn & P_Nold, VectorDyn & P_Told);
   void updatePercussionPool(const VectorDyn & P_Nold, const VectorDyn & P_Told ) ;
 
 
-  InclusionSolverSettings<TLayoutConfig> m_Settings;
+  InclusionSolverSettings<LayoutConfigType> m_Settings;
 
   unsigned int getNObjects();
 
@@ -73,10 +80,10 @@ protected:
 
   unsigned int m_nExpectedContacts;
 
-  boost::shared_ptr<TCollisionSolver> m_pCollisionSolver;
-  boost::shared_ptr<TDynamicsSystem>  m_pDynSys;
-  std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_SimBodies;
-  std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_Bodies;
+  boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
+  boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
+  std::vector< boost::shared_ptr< RigidBodyType > > & m_SimBodies;
+  std::vector< boost::shared_ptr< RigidBodyType > > & m_Bodies;
 
 
 
@@ -134,14 +141,14 @@ protected:
 
 
   // Log
-  Ogre::Log*	m_pSolverLog;
+  Logging::Log *	m_pSolverLog;
   std::stringstream logstream;
 };
 
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-InclusionSolverNT<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::InclusionSolverNT(boost::shared_ptr< TCollisionSolver >  pCollisionSolver,  boost::shared_ptr<TDynamicsSystem> pDynSys):
+template< typename TInclusionSolverConfig >
+InclusionSolverNT<TInclusionSolverConfig>::InclusionSolverNT( boost::shared_ptr<CollisionSolverType > pCollisionSolver,  boost::shared_ptr<DynamicsSystemType> pDynSys):
 m_SimBodies(pCollisionSolver->m_SimBodies),
 m_Bodies(pCollisionSolver->m_Bodies)
 {
@@ -171,21 +178,21 @@ m_Bodies(pCollisionSolver->m_Bodies)
   m_pDynSys = pDynSys;
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-void InclusionSolverNT<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::initializeLog( Ogre::Log* pSolverLog )
+template< typename TInclusionSolverConfig >
+void InclusionSolverNT<TInclusionSolverConfig>::initializeLog( Logging::Log* pSolverLog )
 {
   m_pSolverLog = pSolverLog;
 }
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-unsigned int InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::getNObjects()
+template< typename TInclusionSolverConfig >
+unsigned int InclusionSolverNT<TInclusionSolverConfig>::getNObjects()
 {
   return m_nSimBodies;
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::reset()
+template< typename TInclusionSolverConfig >
+void InclusionSolverNT<TInclusionSolverConfig>::reset()
 {
   // Do a Debug check if sizes match!
   ASSERTMSG( m_SimBodies.size() * NDOFuObj == m_nDofu, "InclusionSolverNT:: Error in Dimension of System!");
@@ -197,8 +204,8 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::reset()
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::resetForNextIter()
+template< typename TInclusionSolverConfig >
+void InclusionSolverNT<TInclusionSolverConfig>::resetForNextIter()
 {
   m_h.setZero();
   m_nContacts = 0;
@@ -210,15 +217,15 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::resetFo
 }
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::swapPercussionBuffer()
+template< typename TInclusionSolverConfig >
+void InclusionSolverNT<TInclusionSolverConfig>::swapPercussionBuffer()
 {
   std::swap(m_P_N_back,m_P_N_front);
   std::swap(m_P_T_back,m_P_T_front);
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::resetPercussionBuffer()
+template< typename TInclusionSolverConfig >
+void InclusionSolverNT<TInclusionSolverConfig>::resetPercussionBuffer()
 {
   m_P_N_back = &m_P_N_1;
   m_P_T_back = &m_P_T_1;
@@ -228,23 +235,21 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::resetPe
 
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-void InclusionSolverNT<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::reservePercussionPoolSpace( unsigned int nExpectedContacts )
+template< typename TInclusionSolverConfig >
+void InclusionSolverNT<TInclusionSolverConfig>::reservePercussionPoolSpace( unsigned int nExpectedContacts )
 {
    m_nExpectedContacts = nExpectedContacts;
    m_PercussionPool.rehashPercussionPool(m_nExpectedContacts);
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveInclusionProblem(const DynamicsState<TLayoutConfig> * state_s,
-                                                                                        const DynamicsState<TLayoutConfig> * state_m,
-                                                                                        DynamicsState<TLayoutConfig> * state_e)
+template< typename TInclusionSolverConfig >
+void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const DynamicsState<LayoutConfigType> * state_s,
+                                                                                        const DynamicsState<LayoutConfigType> * state_m,
+                                                                                        DynamicsState<LayoutConfigType> * state_e)
 {
 
 #if CoutLevelSolver>0
-  CLEARLOG;
-  logstream << "---> solveInclusionProblem(): "<< std::endl;
-  LOG(m_pSolverLog);
+  LOG(m_pSolverLog, << "---> solveInclusionProblem(): "<< std::endl;);
 #endif
 
 
@@ -254,15 +259,13 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
   // Update m_Minv_h_dt
   m_Minv_h_dt = m_Minv_diag.asDiagonal() * m_h * m_Settings.m_deltaT;
 #if CoutLevelSolverWhenContact>2
-  CLEARLOG;
-  logstream << "h= "<< m_h.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-  logstream << "Minv_diag= "<< "diag(" <<m_Minv_diag.transpose().format(MyIOFormat::Matlab) <<");"<<std::endl;
-  logstream << "Minv_h_dt= "<< m_Minv_h_dt.transpose().format(MyIOFormat::Matlab) <<"';"<<std::endl;
-  LOG(m_pSolverLog);
+  LOG(m_pSolverLog, << "h= "<< m_h.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+  << "Minv_diag= "<< "diag(" <<m_Minv_diag.transpose().format(MyIOFormat::Matlab) <<");"<<std::endl
+  << "Minv_h_dt= "<< m_Minv_h_dt.transpose().format(MyIOFormat::Matlab) <<"';"<<std::endl;);
 #endif
 
   // Iterate over Collision set and assemble the matrices...
-  std::vector<CollisionData<TLayoutConfig> > & collSet = m_pCollisionSolver->m_CollisionSet;
+  std::vector<CollisionData<RigidBodyType> > & collSet = m_pCollisionSolver->m_CollisionSet;
   m_nContacts = (unsigned int)collSet.size();
   m_iterationsNeeded = 0;
   m_bConverged = false;
@@ -323,13 +326,11 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
     {
 
 #if CoutLevelSolverWhenContact>2
-      CLEARLOG;
-      logstream << "e_x= "<< collSet[contactIdx].m_e_x.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-      logstream << "e_y= "<< collSet[contactIdx].m_e_y.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-      logstream << "e_z= "<< collSet[contactIdx].m_e_z.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-      logstream << collSet[contactIdx].m_e_x.dot(collSet[contactIdx].m_e_y) << collSet[contactIdx].m_e_y.dot(collSet[contactIdx].m_e_z) <<std::endl;
-      logstream << "r_s1c1="<< collSet[contactIdx].m_r_S1C1.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-      LOG(m_pSolverLog);
+      LOG(m_pSolverLog,    << "e_x= "<< collSet[contactIdx].m_e_x.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+                           << "e_y= "<< collSet[contactIdx].m_e_y.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+                           << "e_z= "<< collSet[contactIdx].m_e_z.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+                           << collSet[contactIdx].m_e_x.dot(collSet[contactIdx].m_e_y) << collSet[contactIdx].m_e_y.dot(collSet[contactIdx].m_e_z) <<std::endl
+                           << "r_s1c1="<< collSet[contactIdx].m_r_S1C1.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
       ASSERTMSG( std::abs(collSet[contactIdx].m_e_x.dot(collSet[contactIdx].m_e_y)) < 1e-3 && std::abs(collSet[contactIdx].m_e_y.dot(collSet[contactIdx].m_e_z))< 1e-3, "Vectors not parallel");
 
@@ -339,7 +340,7 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
       int id2 = collSet[contactIdx].m_pBody2->m_id;
 
       // Fill the entries for Body 1 =================================================
-      if( collSet[contactIdx].m_pBody1->m_eState == RigidBody<TLayoutConfig>::SIMULATED ){
+      if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::SIMULATED ){
 
         // Contact goes into W_N, W_T
         updateSkewSymmetricMatrix<>( collSet[contactIdx].m_r_S1C1, I_r_SiCi_hat);
@@ -374,14 +375,14 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
         m_WT_Minv_h_dt(m_nDofFriction*contactIdx +1)  += w_T_part.dot( m_Minv_h_dt.template segment<NDOFuObj>( id1 * NDOFuObj ) );
 
       }
-      else if( collSet[contactIdx].m_pBody1->m_eState == RigidBody<TLayoutConfig>::ANIMATED ){
+      else if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::ANIMATED ){
         // Contact goes into xi_N, xi_T
 
       }
 
 
       // Fill the entries for Body 2 =================================================
-      if( collSet[contactIdx].m_pBody2->m_eState == RigidBody<TLayoutConfig>::SIMULATED ){
+      if( collSet[contactIdx].m_pBody2->m_eState == RigidBodyType::SIMULATED ){
 
         // Contact goes into W_N, W_T
         updateSkewSymmetricMatrix<>( collSet[contactIdx].m_r_S2C2, I_r_SiCi_hat);
@@ -415,12 +416,12 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
         m_WT_Minv_h_dt(m_nDofFriction*contactIdx + 1) += w_T_part.dot( m_Minv_h_dt.template segment<NDOFuObj>( id2 * NDOFuObj ));
 
       }
-      else if( collSet[contactIdx].m_pBody1->m_eState == RigidBody<TLayoutConfig>::ANIMATED ){
+      else if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::ANIMATED ){
         // Contact goes into xi_N, xi_T
       }
 
       // Get the ContactParams and fill the parameters
-      ContactParams<TLayoutConfig> & params  = m_ContactParameterMap.getContactParams(collSet[contactIdx].m_pBody1->m_eMaterial,collSet[contactIdx].m_pBody2->m_eMaterial);
+      ContactParams<LayoutConfigType> & params  = m_ContactParameterMap.getContactParams(collSet[contactIdx].m_pBody1->m_eMaterial,collSet[contactIdx].m_pBody2->m_eMaterial);
       m_mu(contactIdx)                              = params.m_mu;
       m_I_epsilon_N(contactIdx)                     = 1 + params.m_epsilon_N;
       m_I_epsilon_T(m_nDofFriction*contactIdx)      = 1 + params.m_epsilon_T;
@@ -435,17 +436,15 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
     // =============================================================================================================
 
 #if CoutLevelSolverWhenContact>2
-    CLEARLOG;
-    logstream << "W_N= ..."<< std::endl << m_W_N.format(MyIOFormat::Matlab)<<";"<<std::endl;
-    logstream << "W_T= ..."<< std::endl << m_W_T.format(MyIOFormat::Matlab)<<";"<<std::endl;
-    logstream << "mu= "<<"diag("<< m_mu.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl;
-    logstream << "I_epsilon_N= " << "diag("<< m_I_epsilon_N.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl;
-    logstream << "I_epsilon_T= " << "diag("<< m_I_epsilon_T.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl;
-    logstream << "WT_uS= "<< m_WN_uS.transpose().format(MyIOFormat::Matlab)<<std::endl;
-    logstream << "WN_uS= "<< m_WT_uS.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-    logstream << "WN_Minv_h_dt= "<< m_WN_Minv_h_dt.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-    logstream << "WT_Minv_h_dt= "<< m_WT_Minv_h_dt.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog,   << "W_N= ..."<< std::endl << m_W_N.format(MyIOFormat::Matlab)<<";"<<std::endl
+                        << "W_T= ..."<< std::endl << m_W_T.format(MyIOFormat::Matlab)<<";"<<std::endl
+                        << "mu= "<<"diag("<< m_mu.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl
+                        << "I_epsilon_N= " << "diag("<< m_I_epsilon_N.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl
+                        << "I_epsilon_T= " << "diag("<< m_I_epsilon_T.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl
+                        << "WT_uS= "<< m_WN_uS.transpose().format(MyIOFormat::Matlab)<<std::endl
+                        << "WN_uS= "<< m_WT_uS.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+                        << "WN_Minv_h_dt= "<< m_WN_Minv_h_dt.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+                        << "WT_Minv_h_dt= "<< m_WT_Minv_h_dt.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
     m_G_NN.noalias() = m_W_N.transpose() * m_Minv_diag.asDiagonal() * m_W_N;
@@ -468,9 +467,7 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
       m_G_notDiagDominant = (G.diagonal().array() < (G.rowwise().sum()-G.diagonal()).array()).sum();
 #endif
 #if CoutLevelSolverWhenContact>2
-    CLEARLOG;
-    logstream << "G= ..."<<std::endl<< G.format(MyIOFormat::Matlab)<<";"<<std::endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog, << "G= ..."<<std::endl<< G.format(MyIOFormat::Matlab)<<";"<<std::endl;);
 #endif
 #endif
 
@@ -479,30 +476,24 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
 
 
 #if CoutLevelSolverWhenContact>2
-    CLEARLOG;
-    logstream << "G_NN= ..."<< std::endl << m_G_NN.format(MyIOFormat::Matlab)<<";"<<std::endl;
-    logstream << "G_NT= ..."<< std::endl << m_G_NT.format(MyIOFormat::Matlab)<<";"<<std::endl;
-    logstream << "G_TT= ..."<< std::endl << m_G_TT.format(MyIOFormat::Matlab)<<";"<<std::endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog, << "G_NN= ..."<< std::endl << m_G_NN.format(MyIOFormat::Matlab)<<";"<<std::endl
+     << "G_NT= ..."<< std::endl << m_G_NT.format(MyIOFormat::Matlab)<<";"<<std::endl
+     << "G_TT= ..."<< std::endl << m_G_TT.format(MyIOFormat::Matlab)<<";"<<std::endl;);
 #endif
 
     m_c_N.noalias() = m_WN_Minv_h_dt + m_I_epsilon_N.asDiagonal() * ( m_WN_uS  + m_xi_N);
     m_c_T.noalias() = m_WT_Minv_h_dt + m_I_epsilon_T.asDiagonal() * ( m_WT_uS  + m_xi_T);
 
 #if CoutLevelSolverWhenContact>2
-    CLEARLOG;
-    logstream << "c_N= " << m_c_N.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-    logstream << "c_T= " << m_c_T.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog, << "c_N= " << m_c_N.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+                      << "c_T= " << m_c_T.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
 
 
 #if CoutLevelSolverWhenContact>2
-    CLEARLOG;
-    logstream << "P_N_back= "<<P_N_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-    logstream << "P_T_back= "<<P_T_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog, << "P_N_back= "<<P_N_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+                      << "P_T_back= "<<P_T_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
 
@@ -515,9 +506,7 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
 #endif
 
 #if CoutLevelSolverWhenContact>2
-    CLEARLOG;
-    logstream << "% Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog, << "% Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
 #endif
 
     // Calculate u_E for each body in the state...
@@ -540,8 +529,8 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::solveIn
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::setupRMatrix(PREC alpha){
+template< typename TInclusionSolverConfig >
+void InclusionSolverNT<TInclusionSolverConfig>::setupRMatrix(PREC alpha){
  // Calculate  R_N, R_T,
    PREC r_T_i ;
    m_R_N.noalias() =  m_G_NN.diagonal().array().inverse().matrix() * m_Settings.m_alphaSORProx;
@@ -553,16 +542,14 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::setupRM
 
 
 #if CoutLevelSolverWhenContact>2
-    CLEARLOG;
-    logstream << "R_N= "<< "diag(" << m_R_N.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl;
-    logstream << "R_T= "<< "diag(" << m_R_T.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog,   << "R_N= "<< "diag(" << m_R_N.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl
+                        << "R_T= "<< "diag(" << m_R_T.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl);
 #endif
 
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::doJorProx(){
+template< typename TInclusionSolverConfig >
+void InclusionSolverNT<TInclusionSolverConfig>::doJorProx(){
 
    // Calculate  R_N, R_T,
    setupRMatrix(m_Settings.m_alphaJORProx);
@@ -581,10 +568,8 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::doJorPr
       m_bConverged = Numerics::cancelCriteriaValue(P_N_back,P_N_front,P_T_back,P_T_front, m_Settings.m_AbsTol, m_Settings.m_RelTol);
 
    #if CoutLevelSolverWhenContact>2
-      CLEARLOG;
-      logstream << "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-      logstream << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-      LOG(m_pSolverLog);
+      LOG(m_pSolverLog, << "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+                        << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;)
    #endif
 
       m_iterationsNeeded++;
@@ -599,8 +584,8 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::doJorPr
 }
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::doSorProx(){
+template< typename TInclusionSolverConfig >
+void InclusionSolverNT<TInclusionSolverConfig>::doSorProx(){
 
    setupRMatrix(m_Settings.m_alphaSORProx);
 
@@ -636,10 +621,8 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::doSorPr
       m_bConverged = Numerics::cancelCriteriaValue(P_N_back,P_N_front,P_T_back,P_T_front, m_Settings.m_AbsTol, m_Settings.m_RelTol);
 
 #if CoutLevelSolverWhenContact>2
-      CLEARLOG;
-      logstream << "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-      logstream << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;
-      LOG(m_pSolverLog);
+      LOG(m_pSolverLog, << "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+                        << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
       m_iterationsNeeded++;
@@ -652,10 +635,11 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::doSorPr
    }
 }
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::updatePercussionPool(const VectorDyn & P_Nold, const VectorDyn & P_Told )
+template< typename TInclusionSolverConfig >
+void InclusionSolverNT<TInclusionSolverConfig>::updatePercussionPool(const VectorDyn & P_Nold, const VectorDyn & P_Told )
 {
-   static VectorPContact P_contact;
+   static VectorDyn P_contact(NDOFFriction+1);
+
     for(unsigned int i = 0; i< m_nContacts; i++){
        P_contact(0) = P_Nold(i);
        P_contact(1) = P_Told(NDOFFriction*i);
@@ -668,16 +652,32 @@ void InclusionSolverNT<TLayoutConfig,TDynamicsSystem, TCollisionSolver>::updateP
 }
 
 
-template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver >
-void  InclusionSolverNT<TLayoutConfig, TDynamicsSystem, TCollisionSolver>::readFromPercussionPool(unsigned int index, VectorDyn & P_Nold, VectorDyn & P_Told)
+template< typename TInclusionSolverConfig >
+void  InclusionSolverNT<TInclusionSolverConfig>::readFromPercussionPool(unsigned int index, VectorDyn & P_Nold, VectorDyn & P_Told)
 {
-   static VectorPContact P_contact;
+   static VectorDyn P_contact(NDOFFriction+1);
    m_PercussionPool.getPercussion(m_pCollisionSolver->m_CollisionSet[index].m_ContactTag,P_contact);
    P_Nold(index) = P_contact(0);
    P_Told(NDOFFriction*index) =   P_contact(1);
    P_Told(NDOFFriction*index+1) = P_contact(2);
 }
 
+template< typename TInclusionSolverConfig >
+std::string InclusionSolverNT<TInclusionSolverConfig>::getIterationStats() {
+    std::stringstream s;
 
+    s   << -1<<"\t"// NO GPU
+        << m_nContacts<<"\t"
+        << m_iterationsNeeded<<"\t"
+        << m_bConverged<<"\t"
+        << -1<<"\t" // No is Finite
+        << -1<<"\t" // No time prox
+        << -1<<"\t" // No proxIterationtime
+        << m_pDynSys->m_CurrentStateEnergy <<"\t"
+        << m_G_conditionNumber<<"\t" //No m_G_conditionNumber
+        << m_G_notDiagDominant<<"\t" //No m_G_notDiagDominant
+        << -1<<std::endl;
+        return s.str();
+}
 
 #endif

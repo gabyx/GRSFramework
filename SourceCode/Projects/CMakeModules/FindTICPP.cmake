@@ -6,8 +6,8 @@
 # Once done, this will define
 #
 # TICPP_FOUND - system has TinyXML++
-# TICPP_INCLUDE_DIRS - the TinyXML++ include directories
-# TICPP_LIBRARIES - link these to use TinyXML++
+# TICPP_INCLUDE_DIR - the TinyXML++ include directories
+# TICPP_LIBRARY - link these to use TinyXML++
 
 include(MyFindPkgMacros)
 include(PrintListMacro)

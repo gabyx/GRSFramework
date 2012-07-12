@@ -17,7 +17,7 @@ m_bThreadToBeStopped(false),
 m_barrier_start(2)
 {
   m_lastTime = 0;
-  m_pTimelineSimulation = boost::shared_ptr<platformstl::performance_counter>(new platformstl::performance_counter());
+  m_pTimelineSimulation = boost::shared_ptr<boost::timer::cpu_timer>(new boost::timer::cpu_timer);
   m_pTimelineSimulation->start();
 
   // Setup timeScale List;
@@ -64,8 +64,7 @@ double PlaybackManagerBase::getTimelineSimulation()
 {
   double x;
   m_mutexTimelineSimulation.lock();
-  m_pTimelineSimulation->stop();
-  x = m_pTimelineSimulation->get_microseconds() * 1e-6 * m_timeScale + m_lastTime;
+  x = ((double)m_pTimelineSimulation->elapsed().wall) * 1e-9 * m_timeScale + m_lastTime;
   m_mutexTimelineSimulation.unlock();
   return x;
 };
@@ -73,7 +72,7 @@ double PlaybackManagerBase::getTimelineSimulation()
 void  PlaybackManagerBase::resetTimelineSimulation()
 {
   m_mutexTimelineSimulation.lock();
-  m_pTimelineSimulation->restart();
+  m_pTimelineSimulation->stop();m_pTimelineSimulation->start();
   m_lastTime = 0;
   m_mutexTimelineSimulation.unlock();
 };
@@ -101,8 +100,8 @@ void PlaybackManagerBase::addToTimeScale(double step)
     m_mutexTimelineSimulation.lock();
     // Reset the Timer
     m_pTimelineSimulation->stop();
-    m_lastTime = m_pTimelineSimulation->get_microseconds() * 1e-6 * m_timeScale + m_lastTime;
-    m_pTimelineSimulation->restart();
+    m_lastTime = ((double)m_pTimelineSimulation->elapsed().wall) * 1e-9 * m_timeScale + m_lastTime;
+    m_pTimelineSimulation->start();
     m_mutexTimelineSimulation.unlock();
 
     //Set mGlobalTimeFactor
@@ -115,14 +114,10 @@ void PlaybackManagerBase::addToTimeScale(double step)
         m_timeScaleListIdx--;
       }
     }
-   
+
     m_timeScale = m_timeScaleList[m_timeScaleListIdx];
 
-    std::stringstream logstream;
-    logstream << "TimeScale set to " << m_timeScale;
-    LOG(m_pAppLog);
-
-
+    //LOG(m_pSimluationLog, << "TimeScale set to " << m_timeScale <<std::endl;);
 }
 
 double PlaybackManagerBase::getTimeScale()
@@ -142,12 +137,3 @@ unsigned int PlaybackManagerBase::getNumberOfContacts( )
    return m_nCurrentContacts;
 }
 
-void PlaybackManagerBase::enableInput(bool value){
-   if(value){
-      // add some key,mouse listener to change the input
-      InputContext::getSingletonPtr()->addKeyListener(this,m_KeyListenerName);
-   }else{
-      // add some key,mouse listener to change the input
-      InputContext::getSingletonPtr()->removeKeyListener(this);
-   }
-}

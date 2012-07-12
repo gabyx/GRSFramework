@@ -10,6 +10,8 @@
 #include "DynamicsState.hpp"
 #include "MultiBodySimFile.hpp"
 
+#include "SimpleLogger.hpp"
+
 /**
 * @ingroup SimulationManager
 * @brief Playback Loader which reads a MultiBodySimFile in a thread and load it into a buffer.
@@ -19,36 +21,36 @@ class PlaybackLoader{
 public:
   DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
 
-  PlaybackLoader(const unsigned int nSimBodies, boost::shared_ptr<TStatePool>	pStatePool, Ogre::Log * pLog );
+  PlaybackLoader(const unsigned int nSimBodies, boost::shared_ptr<TStatePool>	pStatePool);
   ~PlaybackLoader();
 
 
   void setThreadToBeStopped(bool stop);
   bool isLoaderThreadRunning();
-  
+
   void setReadFullState(bool value);
 
   void startLoaderThread();
-  void stopLoaderThread();  
-  
+  void stopLoaderThread();
+
   boost::barrier m_barrier_start;
 
   const unsigned int m_nDofu, m_nDofq; // These are the global dimensions of q and u
   const unsigned int m_nDofuObj, m_nDofqObj, m_nSimBodies; // These are the dimensions for one Obj
-  
+
   MultiBodySimFile<TLayoutConfig> m_BinarySimFile;
 
 private:
-  Ogre::Log * m_pThreadLog; /**< This log is set to the thread log which calls this loader thread.  */  
+  Logging::Log * m_pThreadLog; /**< This log is set to the thread log which calls this loader thread.  */
 
   boost::thread*	m_pThreadDynamics;
   void initLoaderThread();
   void runLoaderThread();
 
-  void reset();     
-  bool loadFile(); 
+  void reset();
+  bool loadFile();
   void unloadFile();
-  
+
   boost::mutex m_bLoaderThreadRunning_mutex;
   bool m_bLoaderThreadRunning;
   void setLoaderThreadRunning(bool value);
@@ -74,7 +76,7 @@ PlaybackLoader<TLayoutConfig, TStatePool>::~PlaybackLoader()
 
 }
 template< typename TLayoutConfig , typename TStatePool>
-PlaybackLoader<TLayoutConfig, TStatePool>::PlaybackLoader( const unsigned int nSimBodies, boost::shared_ptr<TStatePool> pStatePool, Ogre::Log * pLog ):
+PlaybackLoader<TLayoutConfig, TStatePool>::PlaybackLoader( const unsigned int nSimBodies, boost::shared_ptr<TStatePool> pStatePool):
 m_barrier_start(2),
 m_nSimBodies(nSimBodies),
 m_nDofqObj(NDOFqObj),
@@ -82,18 +84,16 @@ m_nDofuObj(NDOFuObj),
 m_nDofq(m_nSimBodies * m_nDofqObj),
 m_nDofu(m_nSimBodies * m_nDofuObj)
 {
-  //ï¿½Set the Log Output =========================================================================
-#if LogToFileLoader == 1 
-  m_pThreadLog = Ogre::LogManager::getSingleton().createLog("LoaderLogfile.log",false,true,false);
-#else
-  m_pThreadLog = Ogre::LogManager::getSingleton().createLog("LoaderLogfile.log",false,true,true);
+  //Set the Log Output =========================================================================
+  m_pThreadLog = new Logging::Log("PlacbackLoaderThreadLog");
+  Logging::LogManager::getSingletonPtr()->registerLog(m_pThreadLog);
+
+#if LogToFileLoader == 1
+  m_pThreadLog->addSink(new Logging::LogSinkFile("PlacbackLoader-File","PlacbackLoaderThread.log"));
 #endif
-#if LogToConsoleLoader == 1 
-  m_pThreadLog->setDebugOutputEnabled(true);
-#else
-  m_pThreadLog->setDebugOutputEnabled(false);
+#if LogToConsoleLoader == 1
+  m_pThreadLog->addSink(new Logging::LogSinkCout("PlacbackLoader-Cout"));
 #endif
-  m_pThreadLog->setTimeStampEnabled(false);
 
   m_bLoaderThreadRunning = false;
   m_bReadFullState = false;
@@ -116,7 +116,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::stopLoaderThread()
       m_pThreadDynamics->join();
       m_pThreadLog->logMessage("PlaybackLoader:: Stop Thread: Loader Thread has been stopped!");
       m_bLoaderThreadRunning = false;
-  
+
   }else{
     m_pThreadLog->logMessage("PlaybackLoader:: Stop Thread: Loader Thread is not running!");
   }
@@ -125,7 +125,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::stopLoaderThread()
 template< typename TLayoutConfig , typename TStatePool>
 void PlaybackLoader<TLayoutConfig, TStatePool>::startLoaderThread()
 {
-  
+
   if (!isLoaderThreadRunning())
   {
 
@@ -144,7 +144,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::startLoaderThread()
 template< typename TLayoutConfig , typename TStatePool>
 void PlaybackLoader<TLayoutConfig, TStatePool>::initLoaderThread()
 {
-  
+
 }
 
 template< typename TLayoutConfig , typename TStatePool>
@@ -158,15 +158,13 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
     setLoaderThreadRunning(true);
 
     if(loadFile()){
-      
-      CLEARLOG;
-      logstream << " File loaded: Number of States = " << m_BinarySimFile.getNStates();
-      LOG(m_pThreadLog);
+
+      LOG(m_pThreadLog, << " File loaded: Number of States = " << m_BinarySimFile.getNStates(););
 
       reset();
 
       // Fill buffering =====================================================================
-      
+
 
       bMovedBuffer = true;
       unsigned int i=0;
@@ -197,9 +195,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
            i++;
            m_BinarySimFile >> m_state.get();
             if(i % 20==0){
-               CLEARLOG;
-               logstream << "File loader buffering state: " << m_state->m_t <<"...";
-               LOG(m_pThreadLog);
+               LOG(m_pThreadLog, <<  "File loader buffering state: " << m_state->m_t <<"...";);
            }
            current_state = FILE_CHECK;
          }
@@ -211,10 +207,10 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
       }
       // =========================================================================================
 
-          
+
       // wait for caller thread;
       m_barrier_start.wait();
-      
+
       while(!isLoaderThreadToBeStopped() && current_state != EXIT)
       {
 
@@ -223,9 +219,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
                current_state = MOVE_POINTER;
             }else{
                // Write end flag to state!
-               CLEARLOG(logstream);
-                logstream << "Write endstate to m_state m_t:" << m_state->m_t <<endl;
-                LOG(m_pThreadLog)
+               LOG(m_pThreadLog, <<  "Write endstate to m_state m_t:" << m_state->m_t <<endl;);
                m_state->m_StateType = DynamicsState<TLayoutConfig>::ENDSTATE;
                current_state = FINALIZE_AND_BREAK;
             }
@@ -237,9 +231,9 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
             }
          }else if(current_state== READ_IN){
            m_BinarySimFile >> m_state.get();
-               /* CLEARLOG(logstream);
-                logstream << "Loaded m_t:" << m_state->m_t <<endl;
-                LOG(m_pThreadLog)*/
+               /*
+               LOG(m_pThreadLog, <<  "Loaded m_t:" << m_state->m_t <<endl;);
+                */
            current_state = FILE_CHECK;
          }else if(current_state== FINALIZE_AND_BREAK){
             //Move pointer once more! To make this state avalibale to the vis pointer!
@@ -258,7 +252,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
 
     }else{
       m_barrier_start.wait();
-      m_pThreadLog->logMessage(" PlaybackLoader: There was a file error! ");  
+      m_pThreadLog->logMessage(" PlaybackLoader: There was a file error! ");
     }
 
 
@@ -306,7 +300,7 @@ template< typename TLayoutConfig , typename TStatePool>
 bool PlaybackLoader<TLayoutConfig, TStatePool>::loadFile()
 {
   using namespace boost::filesystem;
-  
+
   path file_path = FileManager::getSingletonPtr()->getPathSimFileSelected();
   if(file_path.empty()){
     m_pThreadLog->logMessage("PlaybackLoader:: You have no file selected, please rescan the directory...");
@@ -316,7 +310,7 @@ bool PlaybackLoader<TLayoutConfig, TStatePool>::loadFile()
   if(boost::filesystem::exists(file_path)){
     if(is_regular_file(file_path)){
       if(!boost::filesystem::is_empty(file_path)){
-        
+
         // Try to load the file
         if(m_BinarySimFile.openSimFileRead(file_path,m_nSimBodies,m_bReadFullState))
         {
@@ -325,7 +319,7 @@ bool PlaybackLoader<TLayoutConfig, TStatePool>::loadFile()
            std::stringstream error;
            error << "PlaybackLoader:: Could not open file: " << file_path.string();
            error << "File errors: " <<endl<< m_BinarySimFile.getErrorString();
-           m_pThreadLog->logMessage(error.str()); 
+           m_pThreadLog->logMessage(error.str());
         }
       }
       else{
@@ -348,7 +342,7 @@ template< typename TLayoutConfig , typename TStatePool>
 void PlaybackLoader<TLayoutConfig, TStatePool>::unloadFile()
 {
   m_BinarySimFile.closeSimFile();
-  m_pThreadLog->logMessage("PlaybackLoader:: File closed..."); 
+  m_pThreadLog->logMessage("PlaybackLoader:: File closed...");
 }
 
 #endif

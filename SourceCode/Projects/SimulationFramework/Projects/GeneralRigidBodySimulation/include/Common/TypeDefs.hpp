@@ -12,6 +12,67 @@
 
 #include <Eigen/Dense>
 
+// ================================================================================================
+/** @brief This
+*	These are some small matrix definitions.
+*/
+template<typename TPREC>
+struct MyMatrix{
+   typedef TPREC PREC;
+   //Static assigned Matrices
+   typedef Eigen::Matrix<PREC, 4, 4> Matrix44;
+   typedef Eigen::Matrix<PREC, 3, 3> Matrix33;
+   typedef Eigen::Matrix<PREC, 3, 1> Vector3;
+   typedef Eigen::Matrix<PREC, 4, 1> Quaternion;
+   typedef Eigen::Matrix<PREC, 4, 1> Vector4;
+   typedef Eigen::Matrix<PREC, Eigen::Dynamic , 1 >                    VectorDyn;
+   typedef Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic >       MatrixDyn;
+   typedef Eigen::DiagonalMatrix<PREC, Eigen::Dynamic >                MatrixDiagDyn;
+   typedef Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor> MatrixDynRow;
+};
+// ================================================================================================
+/**
+* @brief This is the LayoutConfig which specifies the layout of the system.
+*/
+template <typename TPREC, typename TLayout>
+struct LayoutConfig{
+   typedef TPREC PREC;
+   typedef TLayout LayoutType;
+
+   // Dynamic or Static Vectors/Matrices
+   typedef Eigen::Matrix<PREC, LayoutType::NDOFq, LayoutType::NDOFq>           MatrixQQ;
+   typedef Eigen::Matrix<PREC, LayoutType::NDOFu, LayoutType::NDOFu>           MatrixUU;
+   typedef Eigen::DiagonalMatrix<PREC, LayoutType::NDOFq>                  MatrixDiagQQ;
+   typedef Eigen::DiagonalMatrix<PREC, LayoutType::NDOFu>                  MatrixDiagUU;
+
+   typedef Eigen::Matrix<PREC, LayoutType::NDOFq, LayoutType::NDOFu>           MatrixQU;
+   typedef Eigen::Matrix<PREC, LayoutType::NDOFu, LayoutType::NDOFq>           MatrixUQ;
+   typedef Eigen::Matrix<PREC, LayoutType::NDOFu, Eigen::Dynamic >         MatrixUDyn;
+   typedef Eigen::Matrix<PREC, LayoutType::NDOFq, Eigen::Dynamic >         MatrixQDyn;
+
+   // Dynamic or Static  Vectors/Matrices
+   typedef Eigen::Matrix<PREC, LayoutType::NDOFq, 1>                       VectorQ;
+   typedef Eigen::Matrix<PREC, LayoutType::NDOFu, 1>                       VectorU;
+
+   // Static  Vectors/Matrices
+   typedef Eigen::Matrix<PREC, LayoutType::NDOFqObj, LayoutType::NDOFuObj>     MatrixQObjUObj;
+   typedef Eigen::Matrix<PREC, LayoutType::NDOFqObj, 1>                    VectorQObj;
+   typedef Eigen::Matrix<PREC, LayoutType::NDOFuObj, 1>                    VectorUObj;
+
+   // Static Vectors/Matrices
+   typedef typename MyMatrix< PREC >::Matrix44 Matrix44;
+   typedef typename MyMatrix< PREC >::Matrix33 Matrix33;
+   typedef typename MyMatrix< PREC >::Vector3 Vector3;
+   typedef typename MyMatrix< PREC >::Vector4 Vector4;
+   typedef typename MyMatrix< PREC >::Quaternion Quaternion;
+   typedef typename MyMatrix< PREC >::VectorDyn VectorDyn;
+   typedef typename MyMatrix< PREC >::MatrixDyn MatrixDyn;
+   typedef typename MyMatrix< PREC >::MatrixDiagDyn MatrixDiagDyn;
+   typedef typename MyMatrix< PREC >::MatrixDynRow MatrixDynRow;
+
+};
+
+
 /**
 * @ingroup Common
 * @defgroup TypeDefs Type Definitions for Templates
@@ -45,97 +106,31 @@
 /**
 * @brief This is the Config (base) which includes a Layout, a Solver, and a System
 */
-template< typename _TLayoutConfig, typename _TSolverConfig, typename _TSystem >
+template< typename _TSolverConfig >
 struct Config{
-   typedef _TLayoutConfig TLayoutConfig;
-   typedef _TSolverConfig TSolverConfig;
-   typedef _TSystem TSystem;
-};
-
-// ================================================================================================
-/** @brief This
-*	These are some small matrix definitions.
-*/
-template<typename TPREC>
-struct MyMatrix{
-   typedef TPREC PREC;
-   //Static assigned Matrices
-   typedef Eigen::Matrix<PREC, 4, 4> Matrix44;
-   typedef Eigen::Matrix<PREC, 3, 3> Matrix33;
-   typedef Eigen::Matrix<PREC, 3, 1> Vector3;
-   typedef Eigen::Matrix<PREC, 4, 1> Quaternion;
-   typedef Eigen::Matrix<PREC, 4, 1> Vector4;
-   typedef Eigen::Matrix<PREC, Eigen::Dynamic , 1 >                    VectorDyn;
-   typedef Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic >       MatrixDyn;
-   typedef Eigen::DiagonalMatrix<PREC, Eigen::Dynamic >                MatrixDiagDyn;
-   typedef Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor> MatrixDynRow;
-};
-// ================================================================================================
-/**
-* @brief This is the LayoutConfig which specifies the layout of the system.
-*/
-template <typename TPREC, typename TLayout>
-struct LayoutConfig{
-   typedef TPREC PREC;
-   typedef TLayout Layout;
-
-   // Dynamic or Static assigned Matrices
-   typedef Eigen::Matrix<PREC, Layout::NDOFq, Layout::NDOFq>           MatrixQQ;
-   typedef Eigen::Matrix<PREC, Layout::NDOFu, Layout::NDOFu>           MatrixUU;
-   typedef Eigen::DiagonalMatrix<PREC, Layout::NDOFq>                  MatrixDiagQQ;
-   typedef Eigen::DiagonalMatrix<PREC, Layout::NDOFu>                  MatrixDiagUU;
-
-   typedef Eigen::Matrix<PREC, Layout::NDOFq, Layout::NDOFu>           MatrixQU;
-   typedef Eigen::Matrix<PREC, Layout::NDOFu, Layout::NDOFq>           MatrixUQ;
-   typedef Eigen::Matrix<PREC, Layout::NDOFu, Eigen::Dynamic >         MatrixUDyn;
-   typedef Eigen::Matrix<PREC, Layout::NDOFq, Eigen::Dynamic >         MatrixQDyn;
-
-   // Dynamic assigned Vectors
-   typedef Eigen::Matrix<PREC, Layout::NDOFq, 1>                       VectorQ;
-   typedef Eigen::Matrix<PREC, Layout::NDOFu, 1>                       VectorU;
-   // Static assigned Vectors/Matrices
-   typedef Eigen::Matrix<PREC, Layout::NDOFqObj, Layout::NDOFuObj>     MatrixQObjUObj;
-   typedef Eigen::Matrix<PREC, Layout::NDOFqObj, 1>                    VectorQObj;
-   typedef Eigen::Matrix<PREC, Layout::NDOFuObj, 1>                    VectorUObj;
-
-   typedef Eigen::Matrix<PREC, Layout::NDOFFriction + 1, 1>            VectorPContact;
-   typedef Eigen::Matrix<PREC, Layout::NDOFFriction, 1>                VectorPFriction;
-
-   typedef typename MyMatrix< PREC >::Matrix44 Matrix44;
-   typedef typename MyMatrix< PREC >::Matrix33 Matrix33;
-   typedef typename MyMatrix< PREC >::Vector3 Vector3;
-   typedef typename MyMatrix< PREC >::Vector4 Vector4;
-   typedef typename MyMatrix< PREC >::Quaternion Quaternion;
-   typedef typename MyMatrix< PREC >::VectorDyn VectorDyn;
-   typedef typename MyMatrix< PREC >::MatrixDyn MatrixDyn;
-   typedef typename MyMatrix< PREC >::MatrixDiagDyn MatrixDiagDyn;
-   typedef typename MyMatrix< PREC >::MatrixDynRow MatrixDynRow;
-
+   typedef _TSolverConfig SolverConfigType;
 };
 
 /**
 * @brief A dynamic layout specialization.
 */
-template <int nDOFqObj, int nDOFuObj, int nDOFFriction>
+template <int nDOFqObj, int nDOFuObj>
 struct DynamicLayout {
    static int const NDOFq = -1;
    static int const NDOFu = -1;
    static int const NDOFqObj = nDOFqObj;
    static int const NDOFuObj = nDOFuObj;
-   static int const NDOFFriction = nDOFFriction;
-
 };
 
 /**
 * @brief A static layout specialization.
 */
-template <int NObjects, int nDOFqObj, int nDOFuObj, int nDOFFriction>
+template <int NObjects, int nDOFqObj, int nDOFuObj>
 struct StaticLayout {
    static int const NDOFqObj = nDOFqObj;
    static int const NDOFuObj = nDOFuObj;
    static int const NDOFq = NObjects*NDOFqObj;
    static int const NDOFu = NObjects*NDOFuObj;
-   static int const NDOFFriction = nDOFFriction;
 };
 
 /**
@@ -143,7 +138,7 @@ struct StaticLayout {
 */
 typedef LayoutConfig<
    double,
-   DynamicLayout<7,6,2>
+   DynamicLayout<7,6>
 > DoubleDynamicLayout;
 
 
@@ -151,14 +146,42 @@ typedef LayoutConfig<
 /**
 * @brief The solver config with TimeStepper, CollisionSolver and InclusionSolver
 */
-template < typename _TTimeStepper,  typename _TCollisionSolver, typename _TInclusionSolver>
+template < typename _TTimeStepper>
 struct SolverConfig{
-   typedef _TTimeStepper TTimeStepper;
-   typedef _TCollisionSolver TCollisionSolver;
-   typedef _TInclusionSolver TInclusionSolver;
+   typedef _TTimeStepper TimeStepperType;
+};
+
+template < typename _TDynamicsSystem, typename _TCollisionSolver, typename _TInclusionSolver, typename _TStatePool>
+struct ConfigTimeStepper{
+    typedef _TDynamicsSystem DynamicsSystemType;
+    typedef _TCollisionSolver CollisionSolverType;
+    typedef _TInclusionSolver InclusionSolverType;
+    typedef _TStatePool StatePoolType;
+};
+
+template < typename _TRigidBody>
+struct ConfigDynamicsSystem{
+    typedef _TRigidBody RigidBodyType;
+};
+
+template < typename _TRigidBody>
+struct ConfigCollisionSolver{
+    typedef _TRigidBody RigidBodyType;
+};
+
+template <typename _TDynamicsSystem, typename _TCollisionSolver,  typename _TRigidBody>
+struct ConfigInclusionSolver{
+    typedef _TRigidBody       RigidBodyType;
+    typedef _TDynamicsSystem  DynamicsSystemType;
+    typedef _TCollisionSolver CollisionSolverType;
 };
 
 
+template < typename _TLayoutConfig, typename _TRigidBodySolverData>
+struct ConfigRigidBody{
+    typedef _TLayoutConfig LayoutConfigType;
+    typedef _TRigidBodySolverData   RigidBodySolverDataType;
+};
 
 // ================================================================================================
 /**
@@ -185,49 +208,69 @@ struct SolverConfig{
 *		- \b TSystem: SpheresSystem
 */
 /* @{ */
-class SpheresSystem;
-template< typename TLayoutConfig > class StatePoolVisBackFront;
-template< typename TLayoutConfig > class CollisionSolver;
-template< typename TLayoutConfig > class DynamicsSystem;
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver> class InclusionSolverNT;
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver> class InclusionSolverCO;
-template< typename TLayoutConfig ,typename TDynamicsSystem, typename TCollisionSolver, typename TInclusionSolver,  typename TStatePool> class MoreauTimeStepper;
 
-typedef DoubleDynamicLayout DoubleDynamicLayout;
+
+
+template< typename TLayoutConfig > class StatePoolVisBackFront;
+
+template< typename TCollisionSolverConfig > class CollisionSolver;
+template< typename TDynamicsSystemConfig  > class DynamicsSystem;
+
+template< typename TInclusionSolverConfig > class InclusionSolverCO;
+template< typename TInclusionSolverConfig > class InclusionSolverCONoG;
+
+template< typename TRigidBodyConfig> class RigidBodyBase;
+template< typename TLayoutConfig > class RigidBodySolverDataCONoG;
+template< typename TLayoutConfig > class RigidBodySolverDataNone;
+
+template< typename TConfigTimeStepper > class MoreauTimeStepper;
+
 
 // Just defintion to save it!
-typedef SolverConfig
-   <
-   MoreauTimeStepper<
-      DoubleDynamicLayout,
-      SpheresSystem,
-      CollisionSolver<DoubleDynamicLayout>,
-      InclusionSolverNT<DoubleDynamicLayout,SpheresSystem,CollisionSolver<DoubleDynamicLayout>>,
-      StatePoolVisBackFront<DoubleDynamicLayout>
-      >,
-      CollisionSolver<DoubleDynamicLayout>,
-      InclusionSolverNT<DoubleDynamicLayout,SpheresSystem,CollisionSolver<DoubleDynamicLayout> >
-   > GeneralSolverConfigNotOrdered;
+//typedef SolverConfig
+//   <
+//   MoreauTimeStepper<
+//      DoubleDynamicLayout,
+//      SpheresSystem,
+//      CollisionSolver<DoubleDynamicLayout>,
+//      InclusionSolverNT<DoubleDynamicLayout,SpheresSystem,CollisionSolver<DoubleDynamicLayout>>,
+//      StatePoolVisBackFront<DoubleDynamicLayout>
+//      >,
+//      CollisionSolver<DoubleDynamicLayout>,
+//      InclusionSolverNT<DoubleDynamicLayout,SpheresSystem,CollisionSolver<DoubleDynamicLayout> >
+//   > GeneralSolverConfigNotOrdered;
 
 // This one is used!!
-typedef SolverConfig
-   <
-      MoreauTimeStepper<
-         DoubleDynamicLayout,
-         DynamicsSystem<DoubleDynamicLayout>,
-         CollisionSolver<DoubleDynamicLayout>,
-         InclusionSolverCO<DoubleDynamicLayout,DynamicsSystem<DoubleDynamicLayout>,CollisionSolver<DoubleDynamicLayout> >,
-         StatePoolVisBackFront<DoubleDynamicLayout>
-      >,
-      CollisionSolver<DoubleDynamicLayout>,
-      InclusionSolverCO<
-         DoubleDynamicLayout,
-         DynamicsSystem<DoubleDynamicLayout>,
-         CollisionSolver<DoubleDynamicLayout>
-      >
-   > GeneralSolverConfigOrdered;
 
-typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<DoubleDynamicLayout> > GeneralConfig;
+
+typedef ConfigRigidBody< DoubleDynamicLayout, RigidBodySolverDataCONoG<DoubleDynamicLayout> > MyRigidBodyConfig;
+
+typedef RigidBodyBase< MyRigidBodyConfig > MyRigidBody; //Define the Class
+
+typedef ConfigDynamicsSystem< MyRigidBody> MyConfigDynamicsSystem;
+
+typedef DynamicsSystem<MyConfigDynamicsSystem> MyDynamicsSystem; //Define the Class
+
+typedef ConfigCollisionSolver< MyRigidBody> MyConfigCollisionSolver;
+typedef CollisionSolver<MyConfigCollisionSolver> MyCollisionSolver; //Define the Class
+
+typedef ConfigInclusionSolver<MyDynamicsSystem, MyCollisionSolver, MyRigidBody>  MyConfigInclusionSolver;
+typedef InclusionSolverCONoG< MyConfigInclusionSolver >  MyInclusionSolver; //Define the Class
+
+typedef ConfigTimeStepper<
+             MyDynamicsSystem,
+             MyCollisionSolver,
+             MyInclusionSolver,
+             StatePoolVisBackFront<DoubleDynamicLayout>
+          > MyConfigTimeStepper;
+
+typedef MoreauTimeStepper< MyConfigTimeStepper > MyMoreauTimeStepper; //Define the Class
+
+
+typedef SolverConfig<MyMoreauTimeStepper> MySolverConfig;
+
+typedef Config< MySolverConfig > GeneralConfig;
+
 /* @} */
 
 
@@ -252,53 +295,47 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
 * It is used to access all typedefs very easy and gives neat code!
 */
 #define DEFINE_CONFIG_TYPES_OF( _ConfigName_ ) \
-   typedef typename _ConfigName_::TSystem TSystem; \
-   typedef typename _ConfigName_::TLayoutConfig TLayoutConfig; \
-   typedef typename _ConfigName_::TSolverConfig TSolverConfig; \
-   typedef typename _ConfigName_::TSolverConfig::TTimeStepper TTimeStepper;                 \
-   typedef typename _ConfigName_::TSolverConfig::TInclusionSolver TInclusionSolver;                 \
-   typedef typename _ConfigName_::TSolverConfig::TCollisionSolver TCollisionSolver;                 \
-   typedef typename _ConfigName_::TLayoutConfig::PREC PREC;             \
-   static int const NDOFq = _ConfigName_::TLayoutConfig::Layout::NDOFq; \
-   static int const NDOFu = _ConfigName_::TLayoutConfig::Layout::NDOFu; \
-   static int const NDOFqObj = _ConfigName_::TLayoutConfig::Layout::NDOFqObj; \
-   static int const NDOFuObj = _ConfigName_::TLayoutConfig::Layout::NDOFuObj; \
-   static int const NDOFFriction = _ConfigName_::TLayoutConfig::Layout::NDOFFriction; \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixQU MatrixQU;     \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixQQ MatrixQQ;     \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixUU MatrixUU;     \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixUQ MatrixUQ;     \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixDiagUU MatrixDiagUU;     \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixDiagQQ MatrixDiagQQ;     \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixQDyn MatrixQDyn; \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixUDyn MatrixUDyn; \
-   typedef typename _ConfigName_::TLayoutConfig::VectorQ VectorQ;       \
-   typedef typename _ConfigName_::TLayoutConfig::VectorU VectorU;             \
-   typedef typename _ConfigName_::TLayoutConfig::VectorQObj VectorQObj;       \
-   typedef typename _ConfigName_::TLayoutConfig::VectorUObj VectorUObj;       \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixQObjUObj MatrixQObjUObj; \
-   typedef typename _ConfigName_::TLayoutConfig::VectorPContact VectorPContact; \
-   typedef typename _ConfigName_::TLayoutConfig::VectorPFriction VectorPFriction; \
-   typedef typename _ConfigName_::TLayoutConfig::Matrix44 Matrix44; \
-   typedef typename _ConfigName_::TLayoutConfig::Matrix33 Matrix33; \
-   typedef typename _ConfigName_::TLayoutConfig::Vector3 Vector3;   \
-   typedef typename _ConfigName_::TLayoutConfig::Vector4 Vector4;   \
-   typedef typename _ConfigName_::TLayoutConfig::Quaternion Quaternion; \
-   typedef typename _ConfigName_::TLayoutConfig::VectorDyn VectorDyn;   \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixDyn MatrixDyn;   \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixDiagDyn MatrixDiagDyn;   \
-   typedef typename _ConfigName_::TLayoutConfig::MatrixDynRow MatrixDynRow;
+   DEFINE_SOLVER_CONFIG_TYPES_OF( _ConfigName_::SolverConfigType ) \
+
+#define DEFINE_SOLVER_CONFIG_TYPES_OF( _SolverConfigName_ ) \
+   typedef typename _SolverConfigName_::TimeStepperType TimeStepperType; \
+   DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( _SolverConfigName_::TimeStepperType::TimeStepperConfigType ) \
+
+#define DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( _TimeStepperConfigName_ ) \
+   typedef typename _TimeStepperConfigName_::StatePoolType          StatePoolType;                 \
+   typedef typename _TimeStepperConfigName_::DynamicsSystemType     DynamicsSystemType;                 \
+   typedef typename _TimeStepperConfigName_::InclusionSolverType     InclusionSolverType;                 \
+   typedef typename _TimeStepperConfigName_::CollisionSolverType     CollisionSolverType;                 \
+   DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF ( _TimeStepperConfigName_::DynamicsSystemType ) \
+
+#define DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES_OF( _InclusionSolverConfigName_ ) \
+    typedef typename _InclusionSolverConfigName_::DynamicsSystemType     DynamicsSystemType;                 \
+    typedef typename _InclusionSolverConfigName_::CollisionSolverType     CollisionSolverType;                 \
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF( DynamicsSystemType::DynamicsSystemConfig ) \
+
+#define DEFINE_COLLISION_SOLVER_CONFIG_TYPES_OF( _CollisionSolverConfigName_ ) \
+    typedef typename _CollisionSolverConfigName_::RigidBodyType RigidBodyType; \
+    DEFINE_RIGIDBODY_CONFIG_TYPES_OF( _CollisionSolverConfigName_::RigidBodyType::RigidBodyConfigType )\
+
+#define DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF( _DynamicsSystemConfigName_ ) \
+    typedef typename _DynamicsSystemConfigName_::RigidBodyType RigidBodyType; \
+    DEFINE_RIGIDBODY_CONFIG_TYPES_OF( _DynamicsSystemConfigName_::RigidBodyType::RigidBodyConfigType ) \
+
+
+#define DEFINE_RIGIDBODY_CONFIG_TYPES_OF( _RigidBodyConfigName_ ) \
+    typedef typename _RigidBodyConfigName_::LayoutConfigType LayoutConfigType; \
+    typedef typename _RigidBodyConfigName_::RigidBodySolverDataType RigidBodySolverDataType; \
+    DEFINE_LAYOUT_CONFIG_TYPES_OF( _RigidBodyConfigName_::LayoutConfigType ) \
 
 /**
 * @brief This macro is used to typedef all template arguments in a class with e.g template argument typename â€œLayoutConfigâ€
 */
 #define DEFINE_LAYOUT_CONFIG_TYPES_OF( _LayoutConfigName_ ) \
    typedef typename _LayoutConfigName_::PREC PREC;             \
-   static int const NDOFq = _LayoutConfigName_::Layout::NDOFq; \
-   static int const NDOFu = _LayoutConfigName_::Layout::NDOFu; \
-   static int const NDOFqObj = _LayoutConfigName_::Layout::NDOFqObj; \
-   static int const NDOFuObj = _LayoutConfigName_::Layout::NDOFuObj; \
-   static int const NDOFFriction = _LayoutConfigName_::Layout::NDOFFriction; \
+   static int const NDOFq = _LayoutConfigName_::LayoutType::NDOFq; \
+   static int const NDOFu = _LayoutConfigName_::LayoutType::NDOFu; \
+   static int const NDOFqObj = _LayoutConfigName_::LayoutType::NDOFqObj; \
+   static int const NDOFuObj = _LayoutConfigName_::LayoutType::NDOFuObj; \
    typedef typename _LayoutConfigName_::MatrixQU MatrixQU;     \
    typedef typename _LayoutConfigName_::MatrixQQ MatrixQQ;     \
    typedef typename _LayoutConfigName_::MatrixUU MatrixUU;     \
@@ -312,8 +349,6 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    typedef typename _LayoutConfigName_::VectorQObj VectorQObj;       \
    typedef typename _LayoutConfigName_::VectorUObj VectorUObj;       \
    typedef typename _LayoutConfigName_::MatrixQObjUObj MatrixQObjUObj; \
-   typedef typename _LayoutConfigName_::VectorPContact VectorPContact; \
-   typedef typename _LayoutConfigName_::VectorPFriction VectorPFriction; \
    typedef typename _LayoutConfigName_::Matrix44 Matrix44; \
    typedef typename _LayoutConfigName_::Matrix33 Matrix33; \
    typedef typename _LayoutConfigName_::Vector3 Vector3;   \
@@ -329,11 +364,10 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
 */
 #define DEFINE_LAYOUT_CONFIG_TYPES_OF_OUTSIDE_TEMPLATE( _LayoutConfigName_ ) \
    typedef  _LayoutConfigName_::PREC PREC;             \
-   static int const NDOFq = _LayoutConfigName_::Layout::NDOFq; \
-   static int const NDOFu = _LayoutConfigName_::Layout::NDOFu; \
-   static int const NDOFqObj = _LayoutConfigName_::Layout::NDOFqObj; \
-   static int const NDOFuObj = _LayoutConfigName_::Layout::NDOFuObj; \
-   static int const NDOFFriction = _LayoutConfigName_::Layout::NDOFFriction; \
+   static int const NDOFq = _LayoutConfigName_::LayoutType::NDOFq; \
+   static int const NDOFu = _LayoutConfigName_::LayoutType::NDOFu; \
+   static int const NDOFqObj = _LayoutConfigName_::LayoutType::NDOFqObj; \
+   static int const NDOFuObj = _LayoutConfigName_::LayoutType::NDOFuObj; \
    typedef  _LayoutConfigName_::MatrixQU MatrixQU;     \
    typedef  _LayoutConfigName_::MatrixQQ MatrixQQ;     \
    typedef  _LayoutConfigName_::MatrixUU MatrixUU;     \
@@ -347,8 +381,6 @@ typedef Config<DoubleDynamicLayout, GeneralSolverConfigOrdered, DynamicsSystem<D
    typedef  _LayoutConfigName_::VectorQObj VectorQObj;       \
    typedef  _LayoutConfigName_::VectorUObj VectorUObj;       \
    typedef  _LayoutConfigName_::MatrixQObjUObj MatrixQObjUObj; \
-   typedef  _LayoutConfigName_::VectorPContact VectorPContact; \
-   typedef  _LayoutConfigName_::VectorPFriction VectorPFriction; \
    typedef  _LayoutConfigName_::Matrix44 Matrix44; \
    typedef  _LayoutConfigName_::Matrix33 Matrix33; \
    typedef  _LayoutConfigName_::Vector3 Vector3;   \

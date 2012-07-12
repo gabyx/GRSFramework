@@ -15,14 +15,17 @@
 
 #include "TimeStepperSettings.hpp"
 
+#include "SimpleLogger.hpp"
 
-template<typename TLayoutConfig>
+
+template<typename TDynamicsSystemConfig>
 class DynamicsSystem
 {
 public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-   DEFINE_LAYOUT_CONFIG_TYPES_OF( TLayoutConfig )
+   typedef TDynamicsSystemConfig DynamicsSystemConfig;
+   DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemConfig)
 
 	DynamicsSystem();
 	~DynamicsSystem();
@@ -31,11 +34,11 @@ public:
   double m_gravity;
   Vector3 m_gravityDir;
 
-  std::vector< boost::shared_ptr<RigidBody<TLayoutConfig> > > m_SimBodies; // Simulated Objects
-  std::vector< boost::shared_ptr<RigidBody<TLayoutConfig> > > m_Bodies;    // all not simulated objects
+  std::vector< boost::shared_ptr<RigidBodyType > > m_SimBodies; // Simulated Objects
+  std::vector< boost::shared_ptr<RigidBodyType > > m_Bodies;    // all not simulated objects
 
   void init(); // Only call if Timestepper has been created
-  void initializeLog(Ogre::Log* pLog);
+  void initializeLog(Logging::Log* pLog);
 
 
   void init_MassMatrix(); // MassMatrix is const
@@ -43,23 +46,23 @@ public:
   void init_const_hTerm(); // Initializes constant terms in h
 
 	//Virtuals
-  void doFirstHalfTimeStep( const DynamicsState<TLayoutConfig> * state_s,  DynamicsState<TLayoutConfig> * state_m, PREC timestep);
-  void doSecondHalfTimeStep(const DynamicsState<TLayoutConfig> * state_m,  DynamicsState<TLayoutConfig> * state_e, PREC timestep);
+  void doFirstHalfTimeStep( const DynamicsState<LayoutConfigType> * state_s,  DynamicsState<LayoutConfigType> * state_m, PREC timestep);
+  void doSecondHalfTimeStep(const DynamicsState<LayoutConfigType> * state_m,  DynamicsState<LayoutConfigType> * state_e, PREC timestep);
 
-  void getSettings(TimeStepperSettings<TLayoutConfig> &SettingsTimestepper, InclusionSolverSettings<TLayoutConfig> &SettingsInclusionSolver);
-  void setSettings(const TimeStepperSettings<TLayoutConfig> &SettingsTimestepper, const InclusionSolverSettings<TLayoutConfig> &SettingsInclusionSolver);
+  void getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver);
+  void setSettings(const TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, const InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver);
 
 	void reset();
-	inline  void afterFirstTimeStep(const DynamicsState<TLayoutConfig> * state_s){};
-	inline  void afterSecondTimeStep(const DynamicsState<TLayoutConfig> * state_s){};
+	inline  void afterFirstTimeStep(const DynamicsState<LayoutConfigType> * state_s){};
+	inline  void afterSecondTimeStep(const DynamicsState<LayoutConfigType> * state_s){};
 	void doInputTimeStep(PREC T){};
 
   double m_CurrentStateEnergy;
 
 protected:
 
-  TimeStepperSettings<TLayoutConfig> m_SettingsTimestepper;
-  InclusionSolverSettings<TLayoutConfig> m_SettingsInclusionSolver;
+  TimeStepperSettings<LayoutConfigType> m_SettingsTimestepper;
+  InclusionSolverSettings<LayoutConfigType> m_SettingsInclusionSolver;
 
    //Inits
 	void initializeGlobalParameters();
@@ -70,7 +73,7 @@ protected:
 
 
   // Log
-	Ogre::Log*	m_pSolverLog;
+	Logging::Log*	m_pSolverLog;
 	std::stringstream logstream;
 
 };
@@ -81,15 +84,15 @@ protected:
 #include "VectorToSkewMatrix.hpp"
 
 
-template<typename TLayoutConfig>
-DynamicsSystem<TLayoutConfig>::DynamicsSystem()
+template<typename TDynamicsSystemConfig>
+DynamicsSystem<TDynamicsSystemConfig>::DynamicsSystem()
 {
 
   // Set standart values for settings
   m_SettingsTimestepper.m_deltaT = 0.001;
   m_SettingsTimestepper.m_endTime = 10;
   m_SettingsTimestepper.m_stateReferenceFile = boost::filesystem::path();
-  m_SettingsTimestepper.m_eSimulateFromReference = TimeStepperSettings<TLayoutConfig>::NONE;
+  m_SettingsTimestepper.m_eSimulateFromReference = TimeStepperSettings<LayoutConfigType>::NONE;
 
   m_SettingsInclusionSolver.m_deltaT = 0.001;
   m_SettingsInclusionSolver.m_alphaJORProx = 0.5;
@@ -97,25 +100,25 @@ DynamicsSystem<TLayoutConfig>::DynamicsSystem()
   m_SettingsInclusionSolver.m_MaxIter = 5000;
   m_SettingsInclusionSolver.m_AbsTol = 1E-7;
   m_SettingsInclusionSolver.m_RelTol = 1E-7;
-  m_SettingsInclusionSolver.m_eMethod = InclusionSolverSettings<TLayoutConfig>::SOR;
+  m_SettingsInclusionSolver.m_eMethod = InclusionSolverSettings<LayoutConfigType>::SOR;
   m_SettingsInclusionSolver.m_bUseGPU = false;
   m_SettingsInclusionSolver.m_UseGPUDeviceId = 0;
   m_SettingsInclusionSolver.m_bIsFiniteCheck = false;
 };
-template<typename TLayoutConfig>
-DynamicsSystem<TLayoutConfig>::~DynamicsSystem()
+template<typename TDynamicsSystemConfig>
+DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem()
 {
   DECONSTRUCTOR_MESSAGE
 };
 
-template<typename TLayoutConfig>
-void DynamicsSystem<TLayoutConfig>::init()
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::init()
 {
   initializeGlobalParameters();
 }
 
-template<typename TLayoutConfig>
-void DynamicsSystem<TLayoutConfig>::initializeGlobalParameters()
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::initializeGlobalParameters()
 {
   //m_mass = 0.050;
   m_gravity = 9.81;
@@ -125,34 +128,34 @@ void DynamicsSystem<TLayoutConfig>::initializeGlobalParameters()
   m_ThetaS_C = 2.0/5.0 * m_mass * (m_R*m_R);*/
 }
 
-template<typename TLayoutConfig>
-void DynamicsSystem<TLayoutConfig>::getSettings(TimeStepperSettings<TLayoutConfig> &SettingsTimestepper, InclusionSolverSettings<TLayoutConfig> &SettingsInclusionSolver)
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver)
 {
   SettingsTimestepper = m_SettingsTimestepper;
   SettingsInclusionSolver = m_SettingsInclusionSolver;
 }
 
-template<typename TLayoutConfig>
-void DynamicsSystem<TLayoutConfig>::setSettings(const TimeStepperSettings<TLayoutConfig> &SettingsTimestepper, const InclusionSolverSettings<TLayoutConfig> &SettingsInclusionSolver)
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, const InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver)
 {
   m_SettingsTimestepper = SettingsTimestepper;
   m_SettingsInclusionSolver = SettingsInclusionSolver;
 }
 
-template<typename TLayoutConfig>
-void DynamicsSystem<TLayoutConfig>::initializeLog(Ogre::Log* pLog)
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::initializeLog(Logging::Log* pLog)
 {
   m_pSolverLog = pLog;
-  ASSERTMSG(m_pSolverLog != NULL, "Ogre::Log: NULL!");
+  ASSERTMSG(m_pSolverLog != NULL, "Logging::Log: NULL!");
 }
 
-template<typename TLayoutConfig>
-void DynamicsSystem<TLayoutConfig>::reset(){
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::reset(){
 
 }
-template<typename TLayoutConfig>
-void DynamicsSystem<TLayoutConfig>::doFirstHalfTimeStep(const DynamicsState<TLayoutConfig> * state_s,
-                                       DynamicsState<TLayoutConfig> * state_m,
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(const DynamicsState<LayoutConfigType> * state_s,
+                                       DynamicsState<LayoutConfigType> * state_m,
                                        PREC timestep){
   using namespace std;
   static MatrixQObjUObj F_i = MatrixQObjUObj::Identity();
@@ -162,10 +165,8 @@ void DynamicsSystem<TLayoutConfig>::doFirstHalfTimeStep(const DynamicsState<TLay
   state_m->m_t =  state_s->m_t + timestep;
 
 #if CoutLevelSolver>0
-  CLEARLOG;
-  logstream <<"m_t_s= "  <<state_s->m_t<<endl;
-  logstream <<"m_t_m= "  <<state_m->m_t<<endl;
-  LOG(m_pSolverLog);
+  LOG(m_pSolverLog, << "m_t_s= "  <<state_s->m_t<<endl
+                    << "m_t_m= "  <<state_m->m_t<<endl;)
 #endif
 
   for(int i=0;i< state_s->m_SimBodyStates.size();i++){
@@ -192,16 +193,14 @@ void DynamicsSystem<TLayoutConfig>::doFirstHalfTimeStep(const DynamicsState<TLay
     // =================
 
 #if CoutLevelSolver>2
-    CLEARLOG;
-    logstream  <<i<<" : m_q_M= "  <<state_m->m_SimBodyStates[i].m_q.transpose()<<endl;
-    logstream  <<i<<" : m_u_S= "  <<state_s->m_SimBodyStates[i].m_u.transpose()<<endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog,   << i <<" : m_q_M= "  <<state_m->m_SimBodyStates[i].m_q.transpose()<<std::endl
+                        << i <<" : m_u_S= "  <<state_s->m_SimBodyStates[i].m_u.transpose()<<std::endl;)
 #endif
   }
 }
 
-template<typename TLayoutConfig>
-void DynamicsSystem<TLayoutConfig>::doSecondHalfTimeStep(const DynamicsState<TLayoutConfig> * state_m,  DynamicsState<TLayoutConfig> * state_e, PREC timestep){
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(const DynamicsState<LayoutConfigType> * state_m,  DynamicsState<LayoutConfigType> * state_e, PREC timestep){
 
     using namespace std;
 
@@ -211,9 +210,7 @@ void DynamicsSystem<TLayoutConfig>::doSecondHalfTimeStep(const DynamicsState<TLa
 
   state_e->m_t =  state_m->m_t + timestep;
 #if CoutLevelSolver>0
-  CLEARLOG;
-  logstream <<"m_t_e= "  <<state_e->m_t<<endl;
-  LOG(m_pSolverLog);
+  LOG(m_pSolverLog, << "m_t_e= "  <<state_e->m_t<<endl)
 #endif
   m_CurrentStateEnergy = 0;
   for(int i=0;i< state_m->m_SimBodyStates.size();i++){
@@ -234,16 +231,14 @@ void DynamicsSystem<TLayoutConfig>::doSecondHalfTimeStep(const DynamicsState<TLa
 #endif
 
 #if CoutLevelSolver>2
-    CLEARLOG;
-    logstream  <<i<<" : m_q_E= "  <<state_e->m_SimBodyStates[i].m_q.transpose()<<endl;
-    logstream  <<i<<" : m_u_E= "  <<state_e->m_SimBodyStates[i].m_u.transpose()<<endl;
-    LOG(m_pSolverLog);
+    LOG(m_pSolverLog,   << i<<" : m_q_E= "  <<state_e->m_SimBodyStates[i].m_q.transpose()<<endl
+                        << i<<" : m_u_E= "  <<state_e->m_SimBodyStates[i].m_u.transpose()<<endl)
 #endif
   }
 
 }
-template<typename TLayoutConfig>
-void DynamicsSystem<TLayoutConfig>::updateFMatrix(const VectorQObj & q, MatrixQObjUObj & F_i)
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::updateFMatrix(const VectorQObj & q, MatrixQObjUObj & F_i)
 {
   static Matrix33 a_tilde = Matrix33::Zero();
 
@@ -252,8 +247,8 @@ void DynamicsSystem<TLayoutConfig>::updateFMatrix(const VectorQObj & q, MatrixQO
   F_i.template block<3,3>(4,3) = 0.5 * ( Matrix33::Identity() * q(3) + a_tilde );
 }
 
-template<typename TLayoutConfig>
-void DynamicsSystem<TLayoutConfig>::init_MassMatrix(){
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrix(){
   // iterate over all objects and assemble matrix M
   for(int i=0; i < m_SimBodies.size();i++){
      m_SimBodies[i]->m_MassMatrix_diag.template head<3>().setConstant(m_SimBodies[i]->m_mass);
@@ -261,15 +256,15 @@ void DynamicsSystem<TLayoutConfig>::init_MassMatrix(){
   }
 }
 
-template<typename TLayoutConfig>
-void DynamicsSystem<TLayoutConfig>::init_MassMatrixInv(){
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrixInv(){
   // iterate over all objects and assemble matrix M inverse
   for(int i=0; i < m_SimBodies.size();i++){
      m_SimBodies[i]->m_MassMatrixInv_diag = m_SimBodies[i]->m_MassMatrix_diag.array().inverse().matrix();
   }
 }
-template<typename TLayoutConfig>
-void DynamicsSystem<TLayoutConfig>::init_const_hTerm()
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::init_const_hTerm()
 {
    // Fill in constant terms of h-Term
    for(int i=0; i < m_SimBodies.size();i++){

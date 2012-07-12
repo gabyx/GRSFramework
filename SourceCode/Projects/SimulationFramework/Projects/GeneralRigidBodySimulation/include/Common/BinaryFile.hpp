@@ -21,7 +21,7 @@ public:
       m_file_stream.open(file_path.string().c_str(),Mode);
       m_file_stream.clear();
       m_file_stream.rdbuf()->pubsetbuf(m_Buffer, BUF_SIZE);
-      
+
    }
    /**
    * @brief Close the binary file.
@@ -31,7 +31,7 @@ public:
    }
 
    /**
-   * @brief Operator to write a generic value to the file as binary data.                                                                     
+   * @brief Operator to write a generic value to the file as binary data.
    */
   template<typename T>
   BinaryFile & operator << (const T &value){
@@ -42,7 +42,7 @@ public:
      return *this;
   }
    /**
-   * @brief Operator to read a generic value from file as binary data.                                                                     
+   * @brief Operator to read a generic value from file as binary data.
    */
   template<typename T>
   BinaryFile & operator >> (T &value){

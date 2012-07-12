@@ -33,13 +33,16 @@
 * @brief This is the CollisionData class which describes one collision contact.
 */
 /** @{ */
-template<typename TLayoutConfig>
+template<typename TRigidBody>
 class CollisionData
 {
 public:
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+
+    typedef TRigidBody RigidBodyType;
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(TRigidBody::LayoutConfigType)
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    
+
     CollisionData(){
 		  m_e_x.setZero();
 		  m_e_y.setZero();
@@ -51,23 +54,23 @@ public:
 
     ~CollisionData(){};
 
-  boost::shared_ptr<RigidBody<TLayoutConfig> >  m_pBody1, m_pBody2; ///< Two RigidBody pointers of the first and second RigidBody at this contact point.
+  boost::shared_ptr< RigidBodyType >  m_pBody1, m_pBody2; ///< Two RigidBody pointers of the first and second RigidBody at this contact point.
   PREC m_overlap; ///< The overlap distance in the normal direction.
-  
+
   /**
   * The contact frame which is always located at the contact point of the first body. The coordinate frame vectors are resolved in the I Frame!
   * @{
   */
-  Vector3 m_e_x, m_e_y, m_e_z;  
+  Vector3 m_e_x, m_e_y, m_e_z;
   /** @} */
-  
+
   /**
   * The distance vector from center of gravity S1 of the first body to the contact point and the same for the second body. The vectors are resolved in the I Frame!
   * @{
   */
-  Vector3 m_r_S1C1, m_r_S2C2;  
+  Vector3 m_r_S1C1, m_r_S2C2;
   /** @} */
-  
+
   ContactTag m_ContactTag; ///< A tag classifying this contact pair. This is used to identify the contact for Percussion Caching.
 
 };

@@ -4,17 +4,12 @@
 
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
-#include <OGRE/Ogre.h>
-#include <OIS/OISEvents.h>
-#include <OIS/OISKeyboard.h>
-#include <OIS/OISJoyStick.h>
-#include <OIS/OISMouse.h>
 
 #include "AssertionDebug.hpp"
 
-#include <platformstl/performance/performance_counter.hpp>
+#include <boost/timer/timer.hpp>
 
-class SimulationManagerBase: public OIS::KeyListener
+class SimulationManagerBase
 {
 public:
 	SimulationManagerBase();
@@ -40,34 +35,27 @@ public:
   void setNumberOfContacts(unsigned int & nContacts);
 
   virtual void setup() = 0;
-  virtual void updateScene(double timeSinceLastFrame) = 0;
 
   virtual double getSimulationTime(){return 0;};
 
-  virtual void startSimThread(Threads threadToStart)=0;
-  virtual void stopSimThread(Threads threadToStop, bool force_stop)=0;
- 
-   void enableInput(bool value);
-   virtual bool keyPressed(const OIS::KeyEvent &keyEventRef)=0;
-   virtual bool keyReleased(const OIS::KeyEvent &keyEventRef)=0;
+  virtual void startSimThread(Threads threadToStart){};
+  virtual void stopSimThread(Threads threadToStop, bool force_stop){};
+
 
 protected:
 
-  Ogre::Log*	m_pThreadLog;
-  Ogre::Log*  m_pAppLog;
 
   boost::thread*	m_pThread;
 
-   virtual void initBeforeThreads(){};
+  virtual void initBeforeThreads(){};
 
-   virtual void initSimThread(){};
-	virtual void threadRunSimulation()=0;
+  virtual void initSimThread(){};
+  virtual void threadRunSimulation(){};
   virtual void initRecordThread(){};
-  virtual void threadRunRecord()=0;
+  virtual void threadRunRecord(){};
 
-   std::string m_KeyListenerName;
 
-  boost::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
+
 
   boost::mutex m_mutexIterationtime;
 	double m_averageIterationTime;
@@ -88,7 +76,7 @@ protected:
   void setSimThreadRunning(bool value);   /**	\brief Sets the variable which is used in the vis thread to check if the thread is still alive. */
 
   boost::mutex		m_mutexTimelineSimulation;
-  boost::shared_ptr<platformstl::performance_counter>		m_pTimelineSimulation;
+  boost::shared_ptr<boost::timer::cpu_timer>		m_pTimelineSimulation;
   double m_lastTime; // This is used to stop the timer, set m_lastTime, increase/decrease timeScale, startTimer again
 
   double	m_timeScale;

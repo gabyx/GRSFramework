@@ -6,8 +6,8 @@
 # Once done, this will define
 #
 # STLSOFT_FOUND - system has STLSOFT
-# STLSOFT_INCLUDE_DIRS - the STLSOFT include directories
-# STLSOFT_LIBRARIES - link these to use STLSOFT
+# STLSOFT_INCLUDE_DIR - the STLSOFT include directories
+# STLSOFT_LIBRARY - link these to use STLSOFT
 
 include(MyFindPkgMacros)
 include(PrintListMacro)

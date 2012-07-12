@@ -11,10 +11,10 @@ namespace InertiaTensor{
 
 
 
-   template<typename TLayoutConfig>
-   void calculateInertiaTensor( const boost::shared_ptr<RigidBody<TLayoutConfig> > & rigidBody)
+   template<typename TRigidBody>
+   void calculateInertiaTensor( const boost::shared_ptr<TRigidBody > & rigidBody)
    {
-      typedef typename TLayoutConfig::PREC PREC;
+      typedef typename TRigidBody::LayoutConfigType::PREC PREC;
 
       if( boost::shared_ptr<SphereGeometry<PREC> > sphereGeom = boost::get<boost::shared_ptr<SphereGeometry<PREC> > >(rigidBody->m_geometry)){
          rigidBody->m_K_Theta_S(0) = 2.0/5.0 * rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);

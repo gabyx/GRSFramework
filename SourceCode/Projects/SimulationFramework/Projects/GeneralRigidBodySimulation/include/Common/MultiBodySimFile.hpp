@@ -316,7 +316,7 @@ void  MultiBodySimFile<TLayoutConfig>::writeHeader()
     *this << m_simHeader[i];
   }
 
-  *this << (unsigned int)m_nSimBodies << (unsigned int)TLayoutConfig::Layout::NDOFqObj << (unsigned int)TLayoutConfig::Layout::NDOFuObj; // Precision output is always double!
+  *this << (unsigned int)m_nSimBodies << (unsigned int)NDOFqObj << (unsigned int)NDOFuObj; // Precision output is always double!
 
 
   m_beginOfStates = m_file_stream.tellp();
@@ -330,10 +330,10 @@ template<typename TLayoutConfig>
   *this << (double)state->m_t;
   // write states
   for(unsigned int i=0 ; i< state->m_nSimBodies; i++){
-    for(int k=0; k < TLayoutConfig::Layout::NDOFqObj; k++){
+    for(int k=0; k < NDOFqObj; k++){
       *this << (double)(state->m_SimBodyStates[i].m_q(k));
     }
-    for(int k=0; k < TLayoutConfig::Layout::NDOFuObj; k++){
+    for(int k=0; k < NDOFuObj; k++){
       *this << (double)(state->m_SimBodyStates[i].m_u(k));
     }
   }
@@ -351,11 +351,11 @@ template<typename TLayoutConfig>
   state->m_StateType = DynamicsState<TLayoutConfig>::NONE;
   // write states
   for(unsigned int i=0 ; i< state->m_nSimBodies; i++){
-    for(int k=0; k < TLayoutConfig::Layout::NDOFqObj; k++){
+    for(int k=0; k < NDOFqObj; k++){
       *this >> (double &)(state->m_SimBodyStates[i].m_q(k));
     }
     if(m_bReadFullState){
-       for(int k=0; k < TLayoutConfig::Layout::NDOFuObj; k++){
+       for(int k=0; k < NDOFuObj; k++){
          *this >> (double &)(state->m_SimBodyStates[i].m_u(k));
        }
     }else{
