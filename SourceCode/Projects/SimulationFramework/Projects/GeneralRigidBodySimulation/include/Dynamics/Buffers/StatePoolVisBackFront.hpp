@@ -97,7 +97,9 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
 
 
   // Init Log
-  m_logfile.open("StatePoolVisSimLog.log");
+  boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+  filePath /= "StatePoolVisSimLog.log";
+  m_logfile.open(filePath.string());
   m_logfile.clear();
   m_logfile << "This is the State pool log file: each line describes the actual mode in which the state pool is\n";
 }

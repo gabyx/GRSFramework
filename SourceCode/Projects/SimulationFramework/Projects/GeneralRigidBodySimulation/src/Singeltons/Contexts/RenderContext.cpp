@@ -1,5 +1,7 @@
 ﻿#include "Contexts/RenderContext.hpp"
 
+#include <boost/filesystem.hpp>
+
 #include "LogDefines.hpp"
 
 //=========================================================
@@ -23,10 +25,16 @@ bool RenderContext::initOgre(Ogre::String wndTitle)
     Ogre::LogManager* logMgr = new Ogre::LogManager();
 
 // OGRE LOG
+  boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+  if(!boost::filesystem::exists(filePath)){
+        boost::filesystem::create_directories(filePath);
+  }
+  filePath /= "OgreLogfile.log";
+
 #if LogToFileOgre == 1
-    m_pOgreLog = Ogre::LogManager::getSingleton().createLog("OgreLogfile.log", true, true, false);
+    m_pOgreLog = Ogre::LogManager::getSingleton().createLog(filePath.string(), true, true, false);
 #else
-    m_pOgreLog = Ogre::LogManager::getSingleton().createLog("OgreLogfile.log", true, true, true);
+    m_pOgreLog = Ogre::LogManager::getSingleton().createLog(filePath.string(), true, true, true);
 #endif
 #if LogToConsoleOgre == 1
     m_pOgreLog->setDebugOutputEnabled(true);
@@ -36,10 +44,12 @@ bool RenderContext::initOgre(Ogre::String wndTitle)
 
 
 // APP LOG
+  filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+  filePath /= "AppLogfile.log";
 #if LogToFileApp == 1
-  m_pAppLog = Ogre::LogManager::getSingleton().createLog("AppLogfile.log",false,true,false);
+  m_pAppLog = Ogre::LogManager::getSingleton().createLog(filePath.string(),false,true,false);
 #else
-  m_pAppLog = Ogre::LogManager::getSingleton().createLog("AppLogfile.log",false,true,true);
+  m_pAppLog = Ogre::LogManager::getSingleton().createLog(filePath.string(),false,true,true);
 #endif
 #if LogToConsoleApp == 1
   m_pAppLog->setDebugOutputEnabled(true);

@@ -1,4 +1,6 @@
 #include "SimpleLogger.hpp"
+#include "LogDefines.hpp"
+
 
 using namespace Logging;
 
@@ -35,10 +37,22 @@ LogSink::~LogSink() {
 
 
 // LogSinkFile =================================================
-LogSinkFile::LogSinkFile(const std::string & sink_name, const boost::filesystem::path &filePath, const boost::filesystem::path & standartFilePath): LogSink(sink_name) {
+LogSinkFile::LogSinkFile(const std::string & sink_name, boost::filesystem::path filePath): LogSink(sink_name) {
+
+
+
+    if(filePath.empty()){
+            filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+            filePath /= this->getName() + "fileSink.log";
+    }
+
+    if(!boost::filesystem::exists(filePath.parent_path())){
+        boost::filesystem::create_directories(filePath.parent_path());
+    }
+
     m_fileStream.open(filePath,std::ios_base::trunc);
     if(!m_fileStream.is_open()) {
-        m_fileStream.open(standartFilePath,std::ios_base::trunc);
+        ASSERTMSG(false,"LogSinkFile: " << this->getName() << " could not be opened at location: " << filePath.string());
     }
     m_pOutStream = &m_fileStream;
 };

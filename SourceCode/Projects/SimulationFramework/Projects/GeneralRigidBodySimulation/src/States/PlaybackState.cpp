@@ -154,7 +154,7 @@ void PlaybackState::setupGUI()
   setupParamsPanel();
   setupActiveModeSelection();
 
-  FileManager::getSingletonPtr()->updateFileList(SIMULATION_FOLDER_DIRECTORY,true);
+  FileManager::getSingletonPtr()->updateFileList(SIMULATION_FOLDER_PATH,true);
   std::vector<std::string> strings = FileManager::getSingletonPtr()->getSimFileNameList();
 
   //Convert String to ogre String
@@ -198,7 +198,7 @@ void PlaybackState::setupGUI()
 
 }
 void PlaybackState::updatePlaybackPanel(){
-  FileManager::getSingletonPtr()->updateFileList(SIMULATION_FOLDER_DIRECTORY,true);
+  FileManager::getSingletonPtr()->updateFileList(SIMULATION_FOLDER_PATH,true);
   std::vector<std::string> strings = FileManager::getSingletonPtr()->getSimFileNameList();
 
   Ogre::StringVector vec;

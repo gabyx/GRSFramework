@@ -34,7 +34,9 @@ SimulationManager<TConfig>::SimulationManager():
 SimulationManagerBase()
 {
 
-  m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,"SimulationLog.log");
+  boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+  filePath /= "SimulationLog.log";
+  m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
   m_pSimulationLog->logMessage("Creating SimulationManager...");
 
 
@@ -86,7 +88,7 @@ bool SimulationManager<TConfig>::writeInitialState(){
    MultiBodySimFile<LayoutConfigType> simFile;
    // Request new file Paths for all logs from FileManager
    // Get new folder path
-   boost::filesystem::path file = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_DIRECTORY,SIM_FOLDER_PREFIX_INIT);
+   boost::filesystem::path file = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_INIT);
 
    std::string filename = SIM_INIT_FILE_PREFIX;
    filename += SIM_INIT_FILE_EXTENSION;
@@ -183,7 +185,7 @@ template<typename TConfig>
 void SimulationManager<TConfig>::initRecordThread()
 {
   // Get new folder path
-  m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_DIRECTORY,SIM_FOLDER_PREFIX_RECORD);
+  m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
 
    // Sim file path
      m_SimFilePath = m_SimFolderPath;

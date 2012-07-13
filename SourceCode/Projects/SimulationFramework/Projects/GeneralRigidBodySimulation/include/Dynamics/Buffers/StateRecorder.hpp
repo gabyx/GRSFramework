@@ -71,7 +71,9 @@ StateRecorder<TLayoutConfig>::StateRecorder(const unsigned int nSimBodies)
    m_pSimulationLog = manager->getLog("SimulationLog");
     if(!m_pSimulationLog){
         // Log does not exist make a new standart log!
-        m_pSimulationLog = manager->createLog("StateRecorderLog",true,true,"StateRecorderLog.log");
+        boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+        filePath /= "StateRecorderLog.log";
+        m_pSimulationLog = manager->createLog("StateRecorderLog",true,true,filePath);
     }
 
 }

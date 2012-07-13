@@ -37,7 +37,9 @@ m_bSetupSuccessful(false)
       Logging::LogManager::getSingletonPtr()->registerLog(m_pThreadLog);
 
     #if LogToFilePlayback == 1
-      m_pThreadLog->addSink(new Logging::LogSinkFile("PlaybackManager-File","PlaybackManagerThread.log"));
+      boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+      filePath /= "PlaybackManagerThread.log";
+      m_pThreadLog->addSink(new Logging::LogSinkFile("PlaybackManager-File",filePath));
     #endif
     #if LogToConsolePlayback == 1
       m_pThreadLog->addSink(new Logging::LogSinkCout("PlaybackManager-Cout"));
@@ -312,7 +314,7 @@ void PlaybackManager<TConfig>::initSimThread()
 
      // Request new file Paths for all logs from FileManager
      // Get new folder path
-     boost::filesystem::path videoFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(VIDEO_FOLDER_DIRECTORY,VIDEO_FOLDER_PREFIX);
+     boost::filesystem::path videoFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(VIDEO_FOLDER_PATH,VIDEO_FOLDER_PREFIX);
 
      m_pVideoDropper->setFolderPath(videoFolderPath);
   }
@@ -323,7 +325,7 @@ void PlaybackManager<TConfig>::initSimThread()
      m_pFileLoader->setReadFullState(true);
      m_pStateRecorderResampler->reset();
 
-     boost::filesystem::path resampleFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_DIRECTORY,SIM_FOLDER_PREFIX_RESAMPLE);
+     boost::filesystem::path resampleFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RESAMPLE);
      boost::filesystem::path file_path = resampleFolderPath;
      std::string filename = SIM_FILE_PREFIX;
      filename += SIM_FILE_EXTENSION;

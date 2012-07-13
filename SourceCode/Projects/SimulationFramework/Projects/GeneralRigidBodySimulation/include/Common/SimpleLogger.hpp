@@ -40,8 +40,7 @@ class LogSinkFile : public LogSink {
 private:
     boost::filesystem::ofstream m_fileStream;
 public:
-    LogSinkFile(const std::string & sink_name, const boost::filesystem::path &filePath,
-                const boost::filesystem::path & standartFilePath = "fileSink.log");
+    LogSinkFile(const std::string & sink_name, boost::filesystem::path filePath = "" );
     ~LogSinkFile();
 };
 

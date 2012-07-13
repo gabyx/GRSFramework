@@ -89,7 +89,9 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
   Logging::LogManager::getSingletonPtr()->registerLog(m_pThreadLog);
 
 #if LogToFileLoader == 1
-  m_pThreadLog->addSink(new Logging::LogSinkFile("PlacbackLoader-File","PlacbackLoaderThread.log"));
+  boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+  filePath /= "PlacbackLoaderThread.log";
+  m_pThreadLog->addSink(new Logging::LogSinkFile("PlacbackLoader-File",filePath));
 #endif
 #if LogToConsoleLoader == 1
   m_pThreadLog->addSink(new Logging::LogSinkCout("PlacbackLoader-Cout"));

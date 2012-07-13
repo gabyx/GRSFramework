@@ -31,24 +31,25 @@
 * @brief
 */
 /* @{ */
+#define GLOBAL_LOG_FOLDER_DIRECTORY "./Logs"
 
-#define VIDEO_FOLDER_DIRECTORY "./Videos"                       ///< Directory where new simulation folders are place during record.
+#define VIDEO_FOLDER_PATH "./Videos"                       ///< Directory where new simulation folders are place during record.
 #define VIDEO_FOLDER_PREFIX "Video_"                       ///< Directory where the video frames are place during record.
 #define SIM_VIDEO_PREFIX "VideoFrame_"                       ///< File prefix for the video frames;
 
-#define SIMULATION_FOLDER_DIRECTORY "./SimFiles"                       ///< Directory where new simulation folders are place during record.
+#define SIMULATION_FOLDER_PATH "./SimFiles"                       ///< Directory where new simulation folders are place during record.
 #define SIM_FOLDER_PREFIX_RESAMPLE "SimDataRESAMPLE_"                       ///< Directory where the video frames are place during record.
 #define SIM_FILE_EXTENSION ".sim"                                       ///< File extension for .sim file.
 #define SIM_SCENE_FILE_NAME "SceneFile"                                 ///< File name for the Scene xml file which describes the scene
 #define SIM_FOLDER_PREFIX_REALTIME "SimDataREALTIME_"            ///< Prefix for the simulation folder during realtime simulation.
 #define SIM_FOLDER_PREFIX_RECORD "SimDataRECORD_"                ///< Prefix for the simulation folder during record.
 #define SIM_FOLDER_PREFIX_INIT "SimDataInitialState_"             ///< Prefix for the folder where the inital states are written, press Key I!
-#define SIM_INIT_FILE_EXTENSION ".siminit"                              ///< File extension for .siminit file.
+#define SIM_INIT_FILE_EXTENSION ".sim"                              ///< File extension for .siminit file.
 #define SIM_INIT_FILE_PREFIX "InitialState"                      ///< The name for the Initial state file!
-#define SIM_FILE_PREFIX "StateData"                              ///< Prefix for the .sim file.
+#define SIM_FILE_PREFIX "SimulationState"                              ///< Prefix for the .sim file.
 #define SOLVER_LOG_FILE_PREFIX "SolverLog"                       ///< Prefix for the solver log file.
 #define COLLISION_DATA_FILE_PREFIX "CollisionData"               ///< Prefix for the collision data file.
-#define SYSTEM_DATA_FILE_PREFIX "SystemData"                     ///< Prefix for the system data file.
+#define SYSTEM_DATA_FILE_PREFIX "SimulationData"                     ///< Prefix for the system data file.
 /* @} */
 
 
