@@ -73,7 +73,7 @@ private:
 template< typename TLayoutConfig , typename TStatePool>
 PlaybackLoader<TLayoutConfig, TStatePool>::~PlaybackLoader()
 {
-
+  delete m_pThreadLog;
 }
 template< typename TLayoutConfig , typename TStatePool>
 PlaybackLoader<TLayoutConfig, TStatePool>::PlaybackLoader( const unsigned int nSimBodies, boost::shared_ptr<TStatePool> pStatePool):
@@ -85,16 +85,17 @@ m_nDofq(m_nSimBodies * m_nDofqObj),
 m_nDofu(m_nSimBodies * m_nDofuObj)
 {
   //Set the Log Output =========================================================================
-  m_pThreadLog = new Logging::Log("PlacbackLoaderThreadLog");
-  Logging::LogManager::getSingletonPtr()->registerLog(m_pThreadLog);
+  m_pThreadLog = new Logging::Log("PlaybackLoaderThreadLog");
 
-#if LogToFileLoader == 1
+
   boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
-  filePath /= "PlacbackLoaderThread.log";
-  m_pThreadLog->addSink(new Logging::LogSinkFile("PlacbackLoader-File",filePath));
+  filePath /= "PlaybackLoaderThread.log";
+#if LogToFileLoader == 1
+
+  m_pThreadLog->addSink(new Logging::LogSinkFile("PlaybackLoader-File",filePath));
 #endif
 #if LogToConsoleLoader == 1
-  m_pThreadLog->addSink(new Logging::LogSinkCout("PlacbackLoader-Cout"));
+  m_pThreadLog->addSink(new Logging::LogSinkCout("PlaybackLoader-Cout"));
 #endif
 
   m_bLoaderThreadRunning = false;

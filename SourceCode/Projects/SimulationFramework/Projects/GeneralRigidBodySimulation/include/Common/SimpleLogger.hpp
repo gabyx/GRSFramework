@@ -105,6 +105,13 @@ public:
         return Log::expression(*this, s);
     };
 
+    Log::expression operator<<(std::ostream&(*f)(std::ostream&) ) {
+        // makes a chain of temporarys and writes all into a string stream and then writes all out!
+        std::stringstream * s=new std::stringstream();
+        *s << f; // Push first value into stream;
+        return Log::expression(*this, s);
+    };
+
     // Expression to write all " myLogSink << a << b << c " first into a stringstream and the flush!
     class expression {
     public:
@@ -149,6 +156,7 @@ public:
      Log* createLog(const std::string & name, bool toConsole, bool toFile, boost::filesystem::path filePath);
 
     void destroyLog(const std::string &name);
+    void destroyLog(const Log * log);
 
     void registerLog(Log * log);
 

@@ -45,7 +45,7 @@ LogSinkFile::LogSinkFile(const std::string & sink_name, boost::filesystem::path 
             filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
             filePath /= this->getName() + "fileSink.log";
     }
-
+    std::cout << filePath.parent_path() <<std::endl;
     if(!boost::filesystem::exists(filePath.parent_path())){
         boost::filesystem::create_directories(filePath.parent_path());
     }
@@ -173,11 +173,25 @@ void LogManager::destroyLog(const std::string &name) {
     }
 };
 
+void LogManager::destroyLog(const Log * log) {
+    boost::mutex::scoped_lock l(m_busy_mutex);
+    LogListIteratorType it;
+    for(it = m_logList.begin(); it != m_logList.end(); it++){
+            if(it->second && it->second == log) {
+                delete it->second; // Delete Log
+            }
+            // Remove from list;
+            m_logList.erase(it);
+            return;
+    }
+    ASSERTMSG(it != m_logList.end(),"This Log does not exist!");
+};
+
 void LogManager::registerLog(Log * log) {
     ASSERTMSG(log != NULL,"This Log has Null Pointer!");
     boost::mutex::scoped_lock l(m_busy_mutex);
     std::pair<LogListIteratorType, bool> res =  m_logList.insert(std::pair<std::string, Log* >(log->getName(), log));
-    ASSERTMSG(res.second,"LogSink has already been added!");
+    ASSERTMSG(res.second,"LogSink has already been added! :" << log->getName());
 };
 
 Log * LogManager::getLog(const std::string & name) {

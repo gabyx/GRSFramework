@@ -40,8 +40,19 @@ class RigidBodySolverDataCONoG{
 
     public:
 
+    RigidBodySolverDataCONoG(): m_bInContactGraph(false){};
+
+    ///< Flag which determines if this body is in the contact graph!
+    bool m_bInContactGraph;
+
     ///< Pointers into the right Front BackBuffer for the velocity which get iteratet in the InclusionSolverCONoG
+    ///< The back buffer is the velocity before the prox iteration (over all nodes)
+    ///< The front buffer is the velocity which is used to during ONE prox iteration
     FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> m_uBuffer;
+
+    inline void reset(){
+        m_bInContactGraph = false;
+    };
 
 };
 

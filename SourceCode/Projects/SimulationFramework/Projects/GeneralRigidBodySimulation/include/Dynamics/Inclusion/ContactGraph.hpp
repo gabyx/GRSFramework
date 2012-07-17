@@ -75,6 +75,10 @@ public:
         m_bConverged = 0;
     }
 
+
+    ~ContactGraphNodeDataIteration(){
+    }
+
     FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
     FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u2BufferPtr; /// Only valid for Simulated Objects
 
@@ -148,8 +152,7 @@ public:
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
 
-    using Graph::GeneralGraph< NodeDataType,EdgeDataType >::m_edges;
-    using Graph::GeneralGraph< NodeDataType,EdgeDataType >::m_nodes;
+public:
 
     ContactGraph(): m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0) {}
 
@@ -160,18 +163,18 @@ public:
     void clearGraph() {
         // This deletes all nodes, edges, and decrements the reference counts for the nodedata and edgedata
         // cleanup allocated memory
-        for(NodeListIteratorType n_it = m_nodes.begin(); n_it != m_nodes.end(); n_it++)
+        for(NodeListIteratorType n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
             delete (*n_it);
-        for(EdgeListIteratorType e_it = m_edges.begin(); e_it != m_edges.end(); e_it++)
+        for(EdgeListIteratorType e_it = this->m_edges.begin(); e_it != this->m_edges.end(); e_it++)
             delete (*e_it);
         //cout << "clear graph"<<endl;
-        m_nodes.clear();
+        this->m_nodes.clear();
         m_nodeCounter = 0;
-        m_edges.clear();
+        this->m_edges.clear();
         m_edgeCounter = 0;
         m_nLambdas =0;
         m_nFrictionParams=0;
-        m_BodyToContactsList.clear();
+        m_SimBodyToContactsList.clear();
 
     }
 
@@ -185,8 +188,8 @@ public:
         // all nodes (contacts) which are in the BodyContactList (maps bodies -> contacts)
 
         // add the pNodeData to the node list
-        m_nodes.push_back( new NodeType(m_nodeCounter));
-        NodeType * addedNode = m_nodes.back();
+        this->m_nodes.push_back( new NodeType(m_nodeCounter));
+        NodeType * addedNode = this->m_nodes.back();
         addedNode->m_nodeData.m_pCollData = pCollData;
 
 
@@ -244,7 +247,7 @@ public:
     }
 
 
-    std::map<const RigidBodyType *, NodeListType > m_BodyToContactsList;
+    std::map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;
     typedef typename std::map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIterator;
 
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
@@ -332,14 +335,14 @@ private:
         RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1.get() : pNode->m_nodeData.m_pCollData->m_pBody2.get();
 
         // Add self edge! ===========================================================
-        m_edges.push_back(new EdgeType(m_edgeCounter));
-        addedEdge = m_edges.back();
+        this->m_edges.push_back(new EdgeType(m_edgeCounter));
+        addedEdge = this->m_edges.back();
         addedEdge->m_edgeData.m_pBody = pBody;
 
         // add links
         addedEdge->m_startNode = pNode;
         addedEdge->m_endNode = pNode;
-        addedEdge->m_twinEdge = m_edges.back(); // Current we dont need a twin edge, self referencing!
+        addedEdge->m_twinEdge = this->m_edges.back(); // Current we dont need a twin edge, self referencing!
         // Add the edge to the nodes edge list!
         pNode->m_edgeList.push_back( addedEdge );
         m_edgeCounter++;
@@ -347,14 +350,14 @@ private:
         // ===========================================================================
 
         // Get all contacts on this body and connect to them =========================
-        NodeListType & nodeList = m_BodyToContactsList[pBody];
+        NodeListType & nodeList = m_SimBodyToContactsList[pBody];
         //iterate over the nodeList and add edges!
         typename NodeListType::iterator it;
         // if no contacts are already on the body we skip this
         for(it = nodeList.begin(); it != nodeList.end(); it++) {
 
-            m_edges.push_back(new EdgeType(m_edgeCounter));
-            addedEdge = m_edges.back();
+            this->m_edges.push_back(new EdgeType(m_edgeCounter));
+            addedEdge = this->m_edges.back();
             addedEdge->m_edgeData.m_pBody = pBody;
             // add link
             addedEdge->m_startNode = pNode;
@@ -400,9 +403,6 @@ public:
 
     typedef typename Graph::NodeVisitor<NodeDataType,EdgeDataType> NodeVisitorType;
 
-    using Graph::GeneralGraph< NodeDataType,EdgeDataType >::m_edges;
-    using Graph::GeneralGraph< NodeDataType,EdgeDataType >::m_nodes;
-
     ContactGraph(): m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0) {}
 
     ~ContactGraph() {
@@ -412,18 +412,18 @@ public:
     void clearGraph() {
         // This deletes all nodes, edges, and decrements the reference counts for the nodedata and edgedata
         // cleanup allocated memory
-        for(NodeListIteratorType n_it = m_nodes.begin(); n_it != m_nodes.end(); n_it++)
+        for(NodeListIteratorType n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
             delete (*n_it);
-        for(EdgeListIteratorType e_it = m_edges.begin(); e_it != m_edges.end(); e_it++)
+        for(EdgeListIteratorType e_it = this->m_edges.begin(); e_it != this->m_edges.end(); e_it++)
             delete (*e_it);
         //cout << "clear graph"<<endl;
-        m_nodes.clear();
+        this->m_nodes.clear();
         m_nodeCounter = 0;
-        m_edges.clear();
+        this->m_edges.clear();
         m_edgeCounter = 0;
         m_nLambdas =0;
         m_nFrictionParams=0;
-        m_BodyToContactsList.clear();
+        m_SimBodyToContactsList.clear();
 
     }
 
@@ -439,8 +439,8 @@ public:
         // all nodes (contacts) which are in the BodyContactList (maps bodies -> contacts)
 
         // add the pNodeData to the node list
-        m_nodes.push_back( new NodeType(m_nodeCounter));
-        NodeType * addedNode = m_nodes.back();
+        this->m_nodes.push_back( new NodeType(m_nodeCounter));
+        NodeType * addedNode = this->m_nodes.back();
         addedNode->m_nodeData.m_pCollData = pCollData;
 
 
@@ -465,6 +465,10 @@ public:
         // FIRST BODY!
         if( pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
 
+            //Set Flag that this Body in ContactGraph
+            pCollData->m_pBody1->m_pSolverData->m_bInContactGraph = true;
+            // Unset the flag when this Node is removed;
+
             //Link to FrontBackBuffer
             addedNode->m_nodeData.m_u1BufferPtr = & pCollData->m_pBody1->m_pSolverData->m_uBuffer;
 
@@ -479,6 +483,10 @@ public:
 
         // SECOND BODY!
         if( pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
+
+            //Set Flag that this Body in ContactGraph
+            pCollData->m_pBody2->m_pSolverData->m_bInContactGraph = true;
+            // Unset the flag when this Node is removed;
 
             //Link to FrontBackBuffer
             addedNode->m_nodeData.m_u2BufferPtr = & pCollData->m_pBody2->m_pSolverData->m_uBuffer;
@@ -510,7 +518,7 @@ public:
     }
 
 
-    std::map<const RigidBodyType *, NodeListType > m_BodyToContactsList;
+    std::map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;
     typedef typename std::map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIteratorType;
 
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
@@ -610,14 +618,14 @@ private:
         RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1.get() : pNode->m_nodeData.m_pCollData->m_pBody2.get();
 
         // Add self edge! ===========================================================
-        m_edges.push_back(new EdgeType(m_edgeCounter));
-        addedEdge = m_edges.back();
+        this->m_edges.push_back(new EdgeType(m_edgeCounter));
+        addedEdge = this->m_edges.back();
         addedEdge->m_edgeData.m_pBody = pBody;
 
         // add links
         addedEdge->m_startNode = pNode;
         addedEdge->m_endNode = pNode;
-        addedEdge->m_twinEdge = m_edges.back(); // Current we dont need a twin edge, self referencing!
+        addedEdge->m_twinEdge = this->m_edges.back(); // Current we dont need a twin edge, self referencing!
         // Add the edge to the nodes edge list!
         pNode->m_edgeList.push_back( addedEdge );
         m_edgeCounter++;
@@ -625,14 +633,14 @@ private:
         // ===========================================================================
 
         // Get all contacts on this body and connect to them =========================
-        NodeListType & nodeList = m_BodyToContactsList[pBody];
+        NodeListType & nodeList = m_SimBodyToContactsList[pBody];
         //iterate over the nodeList and add edges!
         typename NodeListType::iterator it;
         // if no contacts are already on the body we skip this
         for(it = nodeList.begin(); it != nodeList.end(); it++) {
 
-            m_edges.push_back(new EdgeType(m_edgeCounter));
-            addedEdge = m_edges.back();
+            this->m_edges.push_back(new EdgeType(m_edgeCounter));
+            addedEdge = this->m_edges.back();
             addedEdge->m_edgeData.m_pBody = pBody;
             // add link
             addedEdge->m_startNode = pNode;

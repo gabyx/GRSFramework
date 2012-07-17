@@ -9,6 +9,9 @@
 #ifndef ProxFunctions_hpp
 #define ProxFunctions_hpp
 
+#include <iostream>
+#include <iomanip>
+
 #include <Eigen/Dense>
 #include "TypeDefs.hpp"
 
@@ -423,21 +426,31 @@ namespace Prox{
       return true;
    }
 
-   template<typename Derived>
+   template<typename Derived, typename DerivedOther>
    INLINE_PROX_KEYWORD bool cancelCriteriaValue(   const Eigen::MatrixBase<Derived>& P_old,
-                                                   const Eigen::MatrixBase<Derived>& P_new,
+                                                   const Eigen::MatrixBase<DerivedOther>& P_new,
                                                    double AbsTol, double RelTol)
    {
       EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
+      EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
+      ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
+
       typedef typename Derived::Scalar PREC;
 
       using std::abs;
-
+      //std::cout << "====== Cancel =====" <<std::endl;
       for(int i=0;i<P_old.size();i++){
+
+         //std::cout <<std::setprecision(13) << abs(P_new[i]-P_old[i]) << "\t >  \t" << abs(P_old[i]) * RelTol + AbsTol <<std::endl;
          if ( abs(P_new[i]-P_old[i]) > abs(P_old[i]) * RelTol + AbsTol){
+             //std::cout << "====== ====== ====="<<std::endl;
+             std::cout << i << ". value: " << std::endl;
+             std::cout <<std::setprecision(13) << abs(P_new[i]-P_old[i]) << "\t >  \t" << abs(P_old[i]) * RelTol + AbsTol <<std::endl;
+             std::cout << "====== ====== ====="<<std::endl;
             return  false;
          }
       }
+      //std::cout << "====== ====== ====="<<std::endl;
       return true;
    }
    template<typename Derived, typename DerivedOther>
@@ -448,6 +461,7 @@ namespace Prox{
    {
       EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
       EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
+      ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
 
       typedef typename Derived::Scalar PREC;
         using std::abs;

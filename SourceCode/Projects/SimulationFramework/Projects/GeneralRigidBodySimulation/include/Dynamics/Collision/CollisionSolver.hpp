@@ -159,6 +159,7 @@ void CollisionSolver<TCollisionSolverConfig>::reset()
   // Do a Debug check if sizes match!
   ASSERTMSG( m_SimBodies.size() != 0, "CollisionSolver:: No Bodies added to the system!");
 
+
   clearCollisionSet();
 
   reserveCollisionSetSpace(m_nSimBodies * 3);

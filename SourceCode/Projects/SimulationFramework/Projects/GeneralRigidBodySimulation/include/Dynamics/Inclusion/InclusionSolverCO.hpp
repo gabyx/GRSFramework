@@ -411,7 +411,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
       LOG(m_pSolverLog, << " c= " << m_d.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;)
 #endif
 
-#if CoutLevelSolverWhenContact>2
+#if CoutLevelSolverWhenContact>1
       LOG(m_pSolverLog, <<  " P_back= "<<P_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
@@ -455,7 +455,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 #endif
       }
 
- #if CoutLevelSolverWhenContact>2
+ #if CoutLevelSolverWhenContact>1
       LOG(m_pSolverLog, <<  " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
@@ -489,9 +489,9 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
          pBody = m_SimBodies[i].get();
          delta_u_E = pBody->m_h_term * m_Settings.m_deltaT;
 
-         typename ContactGraphType::BodyToContactsListIterator itList  = m_ContactGraph.m_BodyToContactsList.find(pBody);
+         typename ContactGraphType::BodyToContactsListIterator itList  = m_ContactGraph.m_SimBodyToContactsList.find(pBody);
          // itList->second is the NodeList!
-         if(itList != m_ContactGraph.m_BodyToContactsList.end()){
+         if(itList != m_ContactGraph.m_SimBodyToContactsList.end()){
             for( typename ContactGraphType::NodeListIteratorType it = itList->second.begin(); it != itList->second.end(); it++){
                delta_u_E.noalias() += *(ContactGraphType::getW_body((*it)->m_nodeData,pBody)) * P_front.template segment<ContactDim>( (*it)->m_nodeNumber * (ContactDim));
             }
@@ -580,7 +580,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::doJorProx(){
          //Calculate CancelCriteria
          m_bConverged = Numerics::cancelCriteriaValue(P_back,P_front, m_Settings.m_AbsTol, m_Settings.m_RelTol);
 
-   #if CoutLevelSolverWhenContact>2
+   #if CoutLevelSolverWhenContact>1
          LOG(m_pSolverLog, << " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
    #endif
 
@@ -610,7 +610,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::doSorProx(){
 
 
 
-#if HAVE_CUDA_SUPPORT == 1
+#if HAVE_CUDA_SUPPORT == 1 && false
     bool gpuSuccess = true;
     bool goOnGPU = m_nContacts >= m_sorGPUVariant.getTradeoff();
 
@@ -669,7 +669,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::doSorProx(){
 
       }
 
-#if CoutLevelSolverWhenContact>2
+#if CoutLevelSolverWhenContact>1
       LOG(m_pSolverLog, << " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 

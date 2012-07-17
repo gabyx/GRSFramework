@@ -202,6 +202,30 @@ protected:
                     throw ticpp::Exception("String conversion in SceneSettings: maxIter failed");
                 }
 
+                if(inclusionElement->HasAttribute("minIter")){
+                    if(!Utilities::stringToType<unsigned int>(inclusionSettings.m_MinIter, inclusionElement->GetAttribute("minIter"))) {
+                        throw ticpp::Exception("String conversion in SceneSettings: minIter failed");
+                    }
+                }else{
+                    inclusionSettings.m_MinIter = 0;
+                }
+
+                if(inclusionElement->HasAttribute("convergenceMethod")){
+                    std::string method = inclusionElement->GetAttribute("convergenceMethod");
+                    if(method == "InLambda") {
+                    inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InLambda;
+                    } else if (method == "InVelocity") {
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InVelocity;
+                    }
+                    else if (method == "InVelocityLocal") {
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InVelocityLocal;
+                    } else {
+                        throw ticpp::Exception("String conversion in SceneSettings: convergenceMethod failed: not a valid setting");
+                    }
+                }else{
+                    inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InLambda;
+                }
+
                 if(!Utilities::stringToType<PREC>(inclusionSettings.m_AbsTol, inclusionElement->GetAttribute("absTol"))) {
                     throw ticpp::Exception("String conversion in SceneSettings: absTol failed");
                 }
@@ -221,7 +245,7 @@ protected:
                 } else if (method == "SOR") {
                     inclusionSettings.m_eMethod = InclusionSolverSettings<LayoutConfigType>::SOR;
                 } else {
-                    throw ticpp::Exception("String conversion in SceneSettings: relTol failed");
+                    throw ticpp::Exception("String conversion in SceneSettings: method failed: not a valid setting");
                 }
 
 
@@ -797,9 +821,14 @@ protected:
                 throw ticpp::Exception("To many intial condition specified!");
             }
 
+
             InitialConditionBodies::setupBodyPositionAxisAngle(state.m_SimBodyStates[bodyCounter], pos, axis, angle);
 
             bodyCounter++;
+        }
+
+        if(state.m_SimBodyStates.size() != bodyCounter){
+            throw ticpp::Exception("To little intial condition specified!");
         }
     }
 

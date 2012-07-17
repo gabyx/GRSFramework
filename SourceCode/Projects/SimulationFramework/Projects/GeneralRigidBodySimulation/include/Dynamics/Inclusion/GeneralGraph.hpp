@@ -129,7 +129,7 @@ public:
 	}
 
    unsigned int getNumNodes(){return m_nodes.size();};
-	unsigned int getNumEdges(){return m_edges.size();};
+   unsigned int getNumEdges(){return m_edges.size();};
 
 
    NodeListType & getNodeListRef(){ return m_nodes; };
