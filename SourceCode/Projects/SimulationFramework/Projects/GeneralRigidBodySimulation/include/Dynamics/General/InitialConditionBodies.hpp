@@ -11,6 +11,9 @@
 #include "DynamicsState.hpp"
 #include "MultiBodySimFile.hpp"
 
+#include "boost/random.hpp"
+#include "boost/generator_iterator.hpp"
+
 namespace InitialConditionBodies{
 
   template<typename TLayoutConfig>
@@ -18,7 +21,7 @@ namespace InitialConditionBodies{
      DynamicsState<TLayoutConfig> & init_state,
      typename TLayoutConfig::Vector3 pos,
      typename TLayoutConfig::Vector3 dir,
-     double dist, bool jitter, double delta)
+     double dist, bool jitter, double delta, unsigned int seed)
    {
 
      DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
@@ -33,8 +36,13 @@ namespace InitialConditionBodies{
      for(unsigned int i=0;i< init_state.m_nSimBodies;i++){
        init_state.m_SimBodyStates[i].m_q.template tail<4>() = typename TLayoutConfig::Quaternion(1,0,0,0);
 
+         typedef boost::mt19937  RNG;
+            RNG generator(seed);
+            boost::uniform_real<PREC> uniform(-1.0,1.0);
+            boost::variate_generator< boost::mt19937 & , boost::uniform_real<PREC> > randomNumber(generator, uniform);
+
        if(jitter){
-         random_vec = Vector3(Utilities::randd(-1,1),Utilities::randd(-1,1),Utilities::randd(-1,1)); // No uniform distribution!, but does not matter
+         random_vec = Vector3(randomNumber(),randomNumber(),randomNumber()); // No uniform distribution!, but does not matter
          random_vec.normalize();
          random_vec = random_vec.cross(dir);
          random_vec.normalize();
@@ -46,11 +54,18 @@ namespace InitialConditionBodies{
    }
 
 template<typename TLayoutConfig>
-void setupBodiesGrid(DynamicsState<TLayoutConfig> & init_state, unsigned int gDim_x, unsigned int gDim_y, double d, typename TLayoutConfig::Vector3 vec_trans, bool jitter, double delta)
+void setupBodiesGrid(DynamicsState<TLayoutConfig> & init_state,
+                     unsigned int gDim_x,
+                     unsigned int gDim_y,
+                     double d,
+                     typename TLayoutConfig::Vector3 vec_trans,
+                     bool jitter,
+                     double delta,
+                     unsigned int seed)
 {
   DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
 
-  Vector3 jitter_vec, random_vec;
+  Vector3 jitter_vec;
   jitter_vec.setZero();
 
   for(unsigned int i=0;i< init_state.m_nSimBodies;i++){
@@ -61,10 +76,13 @@ void setupBodiesGrid(DynamicsState<TLayoutConfig> & init_state, unsigned int gDi
     //cout << index_x<<","<< index_y<<","<< index_z<<endl;
     double x = -d/2 + d/(double)(init_state.m_nSimBodies) * i;
 
+     typedef boost::mt19937  RNG;
+    static RNG generator(seed);
+    static boost::uniform_real<PREC> uniform(-delta,delta);
+    static boost::variate_generator< boost::mt19937 & , boost::uniform_real<PREC> > randomNumber(generator, uniform);
 
     if(jitter){
-      random_vec = Vector3(Utilities::randd(-1,1),Utilities::randd(-1,1),Utilities::randd(-1,1)); // No uniform distribution!, but does not matter
-      jitter_vec = random_vec * delta;
+      jitter_vec = Vector3(randomNumber(),randomNumber(),randomNumber()); // No uniform distribution!, but does not matter
     }
 
     init_state.m_SimBodyStates[i].m_q.template head<3>() = Vector3(index_x * d - 0.5*(gDim_x-1)*d, index_y*d - 0.5*(gDim_y-1)*d , index_z*d) + vec_trans + jitter_vec;

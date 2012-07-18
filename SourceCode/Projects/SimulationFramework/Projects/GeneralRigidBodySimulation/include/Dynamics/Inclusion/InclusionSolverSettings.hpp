@@ -23,7 +23,7 @@ struct InclusionSolverSettings
     PREC m_AbsTol;
     PREC m_RelTol;
     enum Method{ SOR, JOR} m_eMethod;
-    enum Convergence {InLambda,InVelocity, InVelocityLocal} m_eConvergenceMethod;
+    enum Convergence {InLambda,InVelocity, InVelocityLocal, InEnergyVelocity,InEnergyLocalMix} m_eConvergenceMethod;
     bool  m_bUseGPU;
     int m_UseGPUDeviceId;
     bool m_bIsFiniteCheck;

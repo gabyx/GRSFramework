@@ -141,7 +141,7 @@ InclusionSolverCONoG<TInclusionSolverConfig>::InclusionSolverCONoG(boost::shared
 
 template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::initializeLog( Logging::Log
-                                                                 * pSolverLog,  boost::filesystem::path folder_path ) {
+        * pSolverLog,  boost::filesystem::path folder_path ) {
     m_pSolverLog = pSolverLog;
 
 
@@ -258,7 +258,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem(const D
 #endif
 
             initContactGraphForIteration(state_s,state_e, m_Settings.m_alphaJORProx);
-            ASSERTMSG(false,"Jor Algorithm has not been implemented yet")
+            ASSERTMSG(false,"Jor Algorithm has not been implemented yet");
 //            doJorProx();
 
 #if MEASURE_TIME_PROX == 1
@@ -295,31 +295,31 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doJorProx() {
 }
 
 template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::integrateAllBodyVelocities(const DynamicsState<LayoutConfigType> * state_s , DynamicsState<LayoutConfigType> * state_e){
+void InclusionSolverCONoG<TInclusionSolverConfig>::integrateAllBodyVelocities(const DynamicsState<LayoutConfigType> * state_s , DynamicsState<LayoutConfigType> * state_e) {
 
-        typename DynamicsState<LayoutConfigType>::RigidBodyStateListType::iterator stateItE;
-        typename DynamicsState<LayoutConfigType>::RigidBodyStateListType::const_iterator stateItS;
-        typename RigidBodySimPtrListType::iterator bodyIt;
+    typename DynamicsState<LayoutConfigType>::RigidBodyStateListType::iterator stateItE;
+    typename DynamicsState<LayoutConfigType>::RigidBodyStateListType::const_iterator stateItS;
+    typename RigidBodySimPtrListType::iterator bodyIt;
 
-        bodyIt = m_SimBodies.begin();
-        stateItS = state_s->m_SimBodyStates.begin();
-        stateItE = state_e->m_SimBodyStates.begin();
+    bodyIt = m_SimBodies.begin();
+    stateItS = state_s->m_SimBodyStates.begin();
+    stateItE = state_e->m_SimBodyStates.begin();
 
-        for(; stateItE != state_e->m_SimBodyStates.end(); ) {
-            stateItE->m_u = stateItS->m_u + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
+    for(; stateItE != state_e->m_SimBodyStates.end(); ) {
+        stateItE->m_u = stateItS->m_u + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
 
-            // Initialize the buffer correctly
-            if((*bodyIt)->m_pSolverData->m_bInContactGraph){
-                std::cout << "body in graph"<<std::endl;
-                (*bodyIt)->m_pSolverData->m_uBuffer.m_Back = stateItE->m_u; // This stays the same during the SorProxOverAllNodes
-                (*bodyIt)->m_pSolverData->m_uBuffer.m_Front = stateItE->m_u; // This is the initial value, which is used during iteration
-            }
-
-            // Move iterators
-            bodyIt++;
-            stateItS++;
-            stateItE++;
+        // Initialize the buffer correctly
+        if((*bodyIt)->m_pSolverData->m_bInContactGraph) {
+            //std::cout << "body in graph"<<std::endl;
+            (*bodyIt)->m_pSolverData->m_uBuffer.m_Back = stateItE->m_u; // This stays the same during the SorProxOverAllNodes
+            (*bodyIt)->m_pSolverData->m_uBuffer.m_Front = stateItE->m_u; // This is the initial value, which is used during iteration
         }
+
+        // Move iterators
+        bodyIt++;
+        stateItS++;
+        stateItE++;
+    }
 
 }
 
@@ -380,8 +380,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
 
 #if CoutLevelSolverWhenContact>2
         LOG(m_pSolverLog,   << " nodeData.m_b"<< nodeData.m_b <<std::endl
-                            << " nodeData.m_G_ii"<< nodeData.m_G_ii <<std::endl
-                            << " nodeData.m_R_i_inv_diag"<< nodeData.m_R_i_inv_diag <<std::endl;);
+            << " nodeData.m_G_ii"<< nodeData.m_G_ii <<std::endl
+            << " nodeData.m_R_i_inv_diag"<< nodeData.m_R_i_inv_diag <<std::endl;);
 #endif
 
 #if CoutLevelSolverWhenContact>2
@@ -396,14 +396,14 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
 template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx(DynamicsState<LayoutConfigType> * state_e) {
 
-#if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog, << " u_e = [ ");
+#if CoutLevelSolverWhenContact>2
+    LOG(m_pSolverLog, << " u_e = [ ");
 
-        for(int i=0;i< m_SimBodies.size();i++){
-            LOG(m_pSolverLog, << "Back: \t" << m_SimBodies[i]->m_pSolverData->m_uBuffer.m_Back.transpose() <<std::endl);
-            LOG(m_pSolverLog, << "Front: \t" <<m_SimBodies[i]->m_pSolverData->m_uBuffer.m_Front.transpose()<<std::endl);
-        }
-        LOG(m_pSolverLog, << " ]" << std::endl);
+    for(int i=0; i< m_SimBodies.size(); i++) {
+        LOG(m_pSolverLog, << "Back: \t" << m_SimBodies[i]->m_pSolverData->m_uBuffer.m_Back.transpose() <<std::endl);
+        LOG(m_pSolverLog, << "Front: \t" <<m_SimBodies[i]->m_pSolverData->m_uBuffer.m_Front.transpose()<<std::endl);
+    }
+    LOG(m_pSolverLog, << " ]" << std::endl);
 #endif
 
     // General stupid Prox- Iteration
@@ -413,21 +413,21 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx(DynamicsState<Layou
 
         sorProxOverAllNodes(); // Do one Sor Prox Iteration
 
-        #if CoutLevelSolverWhenContact>0
+#if CoutLevelSolverWhenContact>2
         LOG(m_pSolverLog, << std::endl<< "Next iteration: "<< m_iterationsNeeded <<"=========================" << std::endl<< std::endl<<" u_e: \t");
-        for(int i=0;i< m_SimBodies.size();i++){
+        for(int i=0; i< m_SimBodies.size(); i++) {
             LOG(m_pSolverLog, << m_SimBodies[i]->m_pSolverData->m_uBuffer.m_Front.transpose());
         }
         LOG(m_pSolverLog, <<""<< std::endl);
-        #endif
+#endif
 
         m_iterationsNeeded++;
 
         if ( (m_bConverged == true || m_iterationsNeeded >= m_Settings.m_MaxIter) && m_iterationsNeeded >= m_Settings.m_MinIter) {
 
-            #if CoutLevelSolverWhenContact>0
+#if CoutLevelSolverWhenContact>0
             LOG(m_pSolverLog, << " converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_iterationsNeeded <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
-            #endif
+#endif
 
             sorProxOverAllNodesLast(state_e);
             break;
@@ -442,22 +442,24 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
 
     typename ContactGraphType::NodeListIteratorType nodeIt;
 
-    int i=0;
+    int nodeCounter = 0;
 
-    //unsigned int convergedLambdas = 0;
+    bool converged = true;
 
-    //bool converged = true;
     VectorDyn uCache1,uCache2;
     typename ContactGraphType::NodeListType &nodes = m_ContactGraph.getNodeListRef();
     for(nodeIt = nodes.begin(); nodeIt != nodes.end(); nodeIt++) {
-        i++;
-        //converged = true;
+
+        nodeCounter++;
+        converged = true;
+
         typename ContactGraphType::NodeDataType & nodeData = (*nodeIt)->m_nodeData;
 
         if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {
 
-            *m_pSolverLog << "Node: " << i <<"====================="<<  std::endl;
-
+#if CoutLevelSolverWhenContact>2
+            *m_pSolverLog, << "Node: " << nodeCounter <<"====================="<<  std::endl;
+#endif
             // Init the prox value
             nodeData.m_LambdaFront = nodeData.m_b;
 
@@ -470,9 +472,9 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_Front;
             }
 
-            #if CoutLevelSolverWhenContact>2
+#if CoutLevelSolverWhenContact>2
             LOG(m_pSolverLog, <<"chi: " << nodeData.m_LambdaFront.transpose() << std::endl);
-            #endif
+#endif
 
             nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
             nodeData.m_LambdaFront += nodeData.m_LambdaBack;
@@ -483,38 +485,52 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
                 nodeData.m_LambdaFront.template head<ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension>()
             );
 
-            *m_pSolverLog <<"Lambda Back: " << nodeData.m_LambdaBack.transpose() << std::endl;
+#if CoutLevelSolverWhenContact>2
+            *m_pSolverLog <<"Lambda Back: "  << nodeData.m_LambdaBack.transpose() << std::endl;
             *m_pSolverLog <<"Lambda Front: " << nodeData.m_LambdaFront.transpose() << std::endl;
             if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol)){
               *m_pSolverLog <<"Lambda converged"<<std::endl;
             }
-
-            #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, <<"Lambda Prox: " << nodeData.m_LambdaFront.transpose() << std::endl);
-            #endif
+#endif
 
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_Front;
                 nodeData.m_u1BufferPtr->m_Front = nodeData.m_u1BufferPtr->m_Front + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
-//            #if CoutLevelSolverWhenContact>2
-//            LOG(m_pSolverLog, <<"Node: " << nodeData.m_u1BufferPtr->m_Front.transpose() << std::endl);
-//            #endif
-                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal){
-                    if(m_iterationsNeeded >= m_Settings.m_MinIter){
-                        *m_pSolverLog << "old:"<< uCache1.transpose()<<std::endl;
-                        *m_pSolverLog << "new:"<< nodeData.m_u1BufferPtr->m_Front.transpose()<<std::endl;
 
-                        bool converged = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_Front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
+           #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, <<"Node: " << nodeData.m_u1BufferPtr->m_Front.transpose() << std::endl);
+           #endif
 
-                        if(!converged){
+
+                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal) {
+                    if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
+                        converged = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_Front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
+                        if(!converged) {
                             //converged stays false;
                             // Set global Converged = false;
                             m_bConverged = false;
                             *m_pSolverLog << "m_bConverged = false;"<<std::endl;
                         }
-                    }else{
+                    } else {
+                        m_bConverged=false;
+                    }
+                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InEnergyLocalMix){
+                    if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
+                        converged = Numerics::cancelCriteriaMatrixNorm(   uCache1,
+                                                                          nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
+                                                                          nodeData.m_LambdaBack,
+                                                                          nodeData.m_LambdaFront,
+                                                                          nodeData.m_G_ii,
+                                                                          m_Settings.m_AbsTol,
+                                                                          m_Settings.m_RelTol);
+                        if(!converged) {
+                            //converged stays false;
+                            // Set global Converged = false;
+                            m_bConverged = false;
+                        }
+                    } else {
                         m_bConverged=false;
                     }
                 }
@@ -525,41 +541,53 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
                 uCache2 = nodeData.m_u2BufferPtr->m_Front;
                 nodeData.m_u2BufferPtr->m_Front = nodeData.m_u2BufferPtr->m_Front  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
-                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal){
-                    if(m_iterationsNeeded >= m_Settings.m_MinIter){
-                    *m_pSolverLog << "cache:"<< uCache2.transpose()<<std::endl;
-                    *m_pSolverLog << "cache:"<< nodeData.m_u2BufferPtr->m_Front.transpose()<<std::endl;
-                    bool converged = Numerics::cancelCriteriaValue(uCache2,nodeData.m_u2BufferPtr->m_Front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
-
-                        if(!converged){
+                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal) {
+                    if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
+                        converged = Numerics::cancelCriteriaValue(uCache2,
+                                                                  nodeData.m_u2BufferPtr->m_Front,
+                                                                  m_Settings.m_AbsTol,
+                                                                  m_Settings.m_RelTol);
+                        if(!converged) {
                             //converged stays false;
                             // Set global Converged = false;
                             m_bConverged = false;
-                            *m_pSolverLog << "m_bConverged = false;"<<std::endl;
                         }
-                    }else{
+                    } else {
                         m_bConverged=false;
                     }
 
+                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InEnergyLocalMix){
+                    if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
+                        converged = Numerics::cancelCriteriaMatrixNorm(   uCache2,
+                                                                          nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
+                                                                          nodeData.m_LambdaBack,
+                                                                          nodeData.m_LambdaFront,
+                                                                          nodeData.m_G_ii,
+                                                                          m_Settings.m_AbsTol,
+                                                                          m_Settings.m_RelTol);
+                        if(!converged) {
+                            //converged stays false;
+                            // Set global Converged = false;
+                            m_bConverged = false;
+                        }
+                    } else {
+                        m_bConverged=false;
+                    }
                 }
             }
 
-//            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InLambda){
-//                if(m_iterationsNeeded >= m_Settings.m_MinIter && converged){
-//                //std::cout <<"old "<< nodeData.m_LambdaBack.transpose()<< std::endl;
-//                //std::cout <<"new "<< nodeData.m_LambdaFront.transpose() << std::endl;
-//                converged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol);
-//
-//                    if(!converged){
-//                        //converged stays false;
-//                        // Set global Converged = false;
-//                        m_bConverged = false;
-//                    }
-//                }
-//                else{
-//                    m_bConverged=false;
-//                }
-//            }
+            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InLambda) {
+                if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
+                    converged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol);
+                    if(!converged) {
+                        //converged stays false;
+                        // Set global Converged = false;
+                        m_bConverged = false;
+                    }
+                } else {
+                    m_bConverged=false;
+                }
+            }
 
             // Swap Lambdas, but dont swap Velocities...
             // Swap velocities when we finished ONE Sor Prox Iteration! (very important!)
@@ -574,39 +602,62 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
 
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
-//    if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocity){
-//        typename ContactGraphType::BodyToContactsListIteratorType it;
-//        //std::cout << "Bodies: " << m_ContactGraph.m_SimBodyToContactsList.size() << std::endl;
-//        for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++){
-//            if(m_iterationsNeeded >= m_Settings.m_MinIter && converged){
-//                //std::cout << "before Criteria"<<std::endl;
-//                //std::cout <<"new "<< it->first->m_pSolverData->m_uBuffer.m_Front.transpose() << std::endl;
-//                //std::cout <<"old "<< it->first->m_pSolverData->m_uBuffer.m_Back.transpose() << std::endl;
-//                converged = Numerics::cancelCriteriaValue(it->first->m_pSolverData->m_uBuffer.m_Back, // these are the old values (got switched)
-//                                                          it->first->m_pSolverData->m_uBuffer.m_Front, // these are the new values (got switched)
-//                                                          m_Settings.m_AbsTol,
-//                                                          m_Settings.m_RelTol);
-//               //std::cout << "after Criteria"<<std::endl;
-//                if(!converged){
-//                    m_bConverged=false;
-//                }
-//
-//            }else{
-//                m_bConverged=false;
-//            }
-//            // Do not switch Velocities (for next Sor Prox Iteration)
-//            // Just fill back buffer with new values!
-//            it->first->m_pSolverData->m_uBuffer.m_Back = it->first->m_pSolverData->m_uBuffer.m_Front;
-//        }
-//    }
+    if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocity) {
+        typename ContactGraphType::BodyToContactsListIteratorType it;
+        //std::cout << "Bodies: " << m_ContactGraph.m_SimBodyToContactsList.size() << std::endl;
+        for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
+            if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
+                //std::cout << "before Criteria"<<std::endl;
+                //std::cout <<"new "<< it->first->m_pSolverData->m_uBuffer.m_Front.transpose() << std::endl;
+                //std::cout <<"old "<< it->first->m_pSolverData->m_uBuffer.m_Back.transpose() << std::endl;
+                converged = Numerics::cancelCriteriaValue(it->first->m_pSolverData->m_uBuffer.m_Back, // these are the old values (got switched)
+                            it->first->m_pSolverData->m_uBuffer.m_Front, // these are the new values (got switched)
+                            m_Settings.m_AbsTol,
+                            m_Settings.m_RelTol);
+                //std::cout << "after Criteria"<<std::endl;
+                if(!converged) {
+                    m_bConverged=false;
+                }
+
+            } else {
+                m_bConverged=false;
+            }
+            // Do not switch Velocities (for next Sor Prox Iteration)
+            // Just fill back buffer with new values!
+            it->first->m_pSolverData->m_uBuffer.m_Back = it->first->m_pSolverData->m_uBuffer.m_Front;
+        }
+    }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InEnergyVelocity){
+        typename ContactGraphType::BodyToContactsListIteratorType it;
+        for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
+            if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
+
+                converged = Numerics::cancelCriteriaMatrixNorm( it->first->m_pSolverData->m_uBuffer.m_Back, // these are the old values (got switched)
+                                                                it->first->m_pSolverData->m_uBuffer.m_Front, // these are the new values (got switched)
+                                                                it->first->m_MassMatrix_diag,
+                                                                m_Settings.m_AbsTol,
+                                                                m_Settings.m_RelTol);
+                if(!converged) {
+                    m_bConverged=false;
+                }
+
+            } else {
+                m_bConverged=false;
+            }
+            // Do not switch Velocities (for next Sor Prox Iteration)
+            // Just fill back buffer with new values! for next global iteration
+            it->first->m_pSolverData->m_uBuffer.m_Back = it->first->m_pSolverData->m_uBuffer.m_Front;
+        }
+    }
+
+
 }
 
 template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodesLast(DynamicsState<LayoutConfigType> * state_e){
+void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodesLast(DynamicsState<LayoutConfigType> * state_e) {
     // Apply converged u_e to global u_e simulated bodies!
     // Reset all flags!
     typename ContactGraphType::BodyToContactsListIteratorType it;
-    for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++){
+    for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
         state_e->m_SimBodyStates[it->first->m_id].m_u = it->first->m_pSolverData->m_uBuffer.m_Front;
         it->first->m_pSolverData->reset();
     }

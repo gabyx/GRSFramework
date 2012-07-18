@@ -50,8 +50,14 @@ SimulationManager<TConfig>::~SimulationManager()
   DECONSTRUCTOR_MESSAGE
 
 }
+
 template<typename TConfig>
-void SimulationManager<TConfig>::setup()
+void SimulationManager<TConfig>::setup(){
+    setup("SceneFile.xml");
+}
+
+template<typename TConfig>
+void SimulationManager<TConfig>::setup(boost::filesystem::path sceneFilePath)
 {
 
 
@@ -62,7 +68,7 @@ void SimulationManager<TConfig>::setup()
 
   // Parse the Scene from XML! ==========================
   m_pSceneParser = boost::shared_ptr< SceneParser<TConfig> >( new SceneParser<TConfig>( m_pDynSys) );
-  m_pSceneParser->parseScene("SceneFile.xml");
+  m_pSceneParser->parseScene(sceneFilePath);
 
   m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
   // =====================================================

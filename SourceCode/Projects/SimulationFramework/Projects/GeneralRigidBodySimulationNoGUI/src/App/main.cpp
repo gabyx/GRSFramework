@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <string>
 #include "TypeDefs.hpp"
 #include "FileManager.hpp"
 #include "SimpleLogger.hpp"
@@ -9,13 +9,30 @@
 
 int main(int argc, char **argv)
 {
+    // Parsing ===================================
+    char * sceneFileName;
+    for (int i = 1; i < argc; i++) {
+        std::cout << argv[i] << std::endl;
+        if (std::string(argv[i]) == "-s") {
+            // We know the next argument *should* be the filename:
+            sceneFileName = argv[i + 1];
+            i++;
+        }else{
+          std::cout << "Wrong arguments specified!:" << std::endl <<"Options:" <<std::endl
+          << " \t -s <SceneFilePath>"  <<std::endl;
+          exit(-1);
+        }
+    }
 
-    new Logging::LogManager();
-    new FileManager();
+   // End Parsing =================================
+
+
+   new Logging::LogManager();
+   new FileManager();
 
    SimulationManager<GeneralConfig> mgr;
 
-   mgr.setup();
+   mgr.setup(boost::filesystem::path(sceneFileName));
    mgr.startSimThread();
    mgr.waitForSimThread();
    system("pause");

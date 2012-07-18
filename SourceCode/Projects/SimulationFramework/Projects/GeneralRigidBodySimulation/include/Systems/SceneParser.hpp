@@ -219,7 +219,14 @@ protected:
                     }
                     else if (method == "InVelocityLocal") {
                         inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InVelocityLocal;
-                    } else {
+                    }
+                    else if (method == "InEnergyVelocity") {
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InEnergyVelocity;
+                    }
+                    else if (method == "InEnergyLocalMix") {
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InEnergyLocalMix;
+                    }
+                    else {
                         throw ticpp::Exception("String conversion in SceneSettings: convergenceMethod failed: not a valid setting");
                     }
                 }else{
@@ -734,12 +741,20 @@ protected:
         if(!Utilities::stringToType(jitter, initCond->GetAttribute("jitter"))) {
             throw ticpp::Exception("String conversion in InitialCondition: jitter Linear failed");
         }
+
         PREC delta;
         if(!Utilities::stringToType<PREC>(delta, initCond->GetAttribute("delta"))) {
             throw ticpp::Exception("String conversion in InitialCondition: delta Linear failed");
         }
 
-        InitialConditionBodies::setupBodiesLinear<TLayoutConfig>(state,pos,dir,dist,jitter,delta);
+        unsigned int seed = 5;
+        if(initCond->HasAttribute("seed")){
+            if(!Utilities::stringToType(seed, initCond->GetAttribute("seed"))) {
+                throw ticpp::Exception("String conversion in InitialConditionGrid: jitter seed failed");
+            }
+        }
+
+        InitialConditionBodies::setupBodiesLinear<TLayoutConfig>(state,pos,dir,dist,jitter,delta,seed);
 
     }
     template<typename TLayoutConfig>
@@ -765,12 +780,18 @@ protected:
         if(!Utilities::stringToType(jitter, initCond->GetAttribute("jitter"))) {
             throw ticpp::Exception("String conversion in InitialConditionGrid: jitter failed");
         }
+        int seed = 5;
+        if(initCond->HasAttribute("seed")){
+            if(!Utilities::stringToType(seed, initCond->GetAttribute("seed"))) {
+                throw ticpp::Exception("String conversion in InitialConditionGrid: jitter seed failed");
+            }
+        }
         double delta;
         if(!Utilities::stringToType<double>(delta, initCond->GetAttribute("delta"))) {
             throw ticpp::Exception("String conversion in InitialConditionGrid: delta failed");
         }
 
-        InitialConditionBodies::setupBodiesGrid(state,gridX,gridY,dist,trans,jitter,delta);
+        InitialConditionBodies::setupBodiesGrid(state,gridX,gridY,dist,trans,jitter,delta, seed);
     }
     template<typename  TLayoutConfig>
     void processInitialConditionFile(DynamicsState<TLayoutConfig> & state, ticpp::Element * initCond) {

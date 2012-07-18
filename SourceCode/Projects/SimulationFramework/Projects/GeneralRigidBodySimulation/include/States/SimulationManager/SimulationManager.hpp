@@ -30,6 +30,7 @@ public:
    boost::shared_ptr<StateRecorder<LayoutConfigType> >		    m_pStateRecorder;
 
    void setup();
+   void setup(boost::filesystem::path sceneFilePath);
 
    boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
 
