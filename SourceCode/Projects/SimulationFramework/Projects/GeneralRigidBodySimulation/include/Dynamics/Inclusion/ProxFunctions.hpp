@@ -472,7 +472,7 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNorm(  const Eigen::MatrixBase<Deri
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
-    ASSERTMSG(P_old.rows()==P_new.rows()==NormMatrix1_diag.rows()==NormMatrix2.rows()==u_old==NormMatrix2.cols(),"Vectors are not equal lenght!");
+    ASSERTMSG(P_old.rows()==P_new.rows()==NormMatrix1_diag.rows()==NormMatrix2.rows()==u_old.rows()==NormMatrix2.cols(),"Vectors are not equal lenght!");
 
     typedef typename Derived::Scalar PREC;
     //std::cout << " Convergence ENERGY" << std::endl;

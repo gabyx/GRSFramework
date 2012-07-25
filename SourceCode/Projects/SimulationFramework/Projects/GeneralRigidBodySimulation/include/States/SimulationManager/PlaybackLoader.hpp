@@ -162,7 +162,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
 
     if(loadFile()){
 
-      LOG(m_pThreadLog, << " File loaded: Number of States = " << m_BinarySimFile.getNStates(););
+      LOG(m_pThreadLog, << " File loaded: Number of States = " << m_BinarySimFile.getNStates() << std::endl;);
 
       reset();
 
@@ -198,7 +198,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
            i++;
            m_BinarySimFile >> m_state.get();
             if(i % 20==0){
-               LOG(m_pThreadLog, <<  "File loader buffering state: " << m_state->m_t <<"...";);
+               LOG(m_pThreadLog, <<  "File loader buffering state: " << m_state->m_t <<"..."<<std::endl);
            }
            current_state = FILE_CHECK;
          }

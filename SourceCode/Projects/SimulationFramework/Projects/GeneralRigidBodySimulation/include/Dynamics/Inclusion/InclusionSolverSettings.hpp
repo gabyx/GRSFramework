@@ -15,6 +15,22 @@ struct InclusionSolverSettings
 {
     DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
 
+    InclusionSolverSettings()
+    {
+      //Standard values
+      m_deltaT = 0.001;
+      m_alphaJORProx = 0.5;
+      m_alphaSORProx = 1.2;
+      m_MaxIter = 5000;
+      m_AbsTol = 1E-7;
+      m_RelTol = 1E-7;
+      m_eMethod = SOR;
+      m_bUseGPU = false;
+      m_UseGPUDeviceId = 0;
+      m_bIsFiniteCheck = false;
+    }
+
+
     PREC m_deltaT;
     PREC m_alphaJORProx;
     PREC m_alphaSORProx;

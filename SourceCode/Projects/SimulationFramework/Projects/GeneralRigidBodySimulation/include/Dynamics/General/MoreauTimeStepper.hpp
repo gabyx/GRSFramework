@@ -16,6 +16,7 @@
 
 #include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
@@ -58,7 +59,7 @@ public:
   boost::shared_ptr<StatePoolType>		  m_pStatePool;
   // ===================================================
 
-  void initLogs(const boost::filesystem::path &folder_path);
+  void initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile="");
   void closeAllFiles();
   void initialize( boost::shared_ptr<DynamicsSystemType> pDynSys, boost::shared_ptr<StatePoolType>	pSysState);
   void reset();
@@ -101,7 +102,7 @@ protected:
   BinaryFile m_CollisionDataFile;
 
   // System Data file
-  std::ofstream m_SystemDataFile;
+  boost::filesystem::ofstream m_SystemDataFile;
 
   // Reference Sim File for Simulation
   MultiBodySimFile<LayoutConfigType> m_ReferenceSimFile;
@@ -177,16 +178,19 @@ void MoreauTimeStepper<  TConfigTimeStepper>::closeAllFiles(){
 }
 
 template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::initLogs(  const boost::filesystem::path &folder_path ){
+void MoreauTimeStepper<  TConfigTimeStepper>::initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ){
 
   // Set new Simfile Path
   m_SimFolderPath = folder_path;
+  std::string filename;
 
-  // Set new SystemDataFile path
-  m_SystemDataFilePath = m_SimFolderPath;
-  std::string filename = SYSTEM_DATA_FILE_PREFIX;
-  filename += ".dat";
-  m_SystemDataFilePath /= filename;
+  // Set new SystemDataFile path (construct new if string is empty)
+  if(simDataFile.empty()){
+      m_SystemDataFilePath = m_SimFolderPath;
+      filename = SYSTEM_DATA_FILE_PREFIX;
+      filename += ".dat";
+      m_SystemDataFilePath /= filename;
+  }
 
   // Set new CollisionDataFile path
    m_CollisionDataFilePath = m_SimFolderPath;
@@ -220,7 +224,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::initLogs(  const boost::filesystem
   // SystemDataFile
 #if OUTPUT_SYSTEMDATA_FILE == 1
   m_SystemDataFile.close();
-  m_SystemDataFile.open(m_SystemDataFilePath.string().c_str());
+  m_SystemDataFile.open(m_SystemDataFilePath, std::ios_base::app | std::ios_base::out);
   m_SystemDataFile.clear();
 #endif
 
@@ -250,19 +254,24 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset()
 
 
   if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::NONE){
-     if(!m_ReferenceSimFile.openSimFileRead(m_Settings.m_stateReferenceFile,m_nSimBodies,true)){
+
+     if(!m_ReferenceSimFile.openSimFileRead(m_Settings.m_simStateReferenceFile,m_nSimBodies,true)){
         std::stringstream error;
-        error << "Could not open file: " << m_Settings.m_stateReferenceFile.string()<<std::endl;
+        error << "Could not open file: " << m_Settings.m_simStateReferenceFile.string()<<std::endl;
         error << "File errors: " <<std::endl<< m_ReferenceSimFile.getErrorString();
          m_pSolverLog->logMessage( error.str());
          ERRORMSG(error);
      }
 
+    if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::CONTINUE){
+         //Inject the end state into the front buffer
+         m_ReferenceSimFile.getEndState(*m_StateBuffers.m_pFront);
+    }
+
+  }
      //m_ReferenceSimFile.writeOutAllStateTimes();
 
-     //Inject the end state into the front buffer
-     m_ReferenceSimFile.getEndState(*m_StateBuffers.m_pFront);
-  }
+
 
   m_AvgTimeForOneIteration = 0;
   m_MaxTimeForOneIteration = 0;

@@ -37,7 +37,7 @@ public:
   boost::filesystem::path getNewSimFolderPath(boost::filesystem::path directory, std::string folder_prefix);
   void updateFileList(boost::filesystem::path directory, bool with_SubDirs);
 
-  void copyFile(boost::filesystem::path from, boost::filesystem::path to, bool overwrite = false);
+  boost::filesystem::path copyFile(boost::filesystem::path from, boost::filesystem::path to, bool overwrite = false);
 
 private:
   void scanAllSimFolders(const boost::filesystem::path &directory, const std::string &prefix, const bool &with_SubDirs);

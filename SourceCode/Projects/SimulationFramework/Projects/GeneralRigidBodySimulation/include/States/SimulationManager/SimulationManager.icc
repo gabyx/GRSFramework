@@ -34,11 +34,16 @@ SimulationManager<TConfig>::SimulationManager():
 SimulationManagerBase()
 {
 
-  boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
-  filePath /= "SimulationLog.log";
-  m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
-  m_pSimulationLog->logMessage("Creating SimulationManager...");
+    m_pSimulationLog = NULL;
 
+    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    } else {
+        boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+        filePath /= "SimulationLog.log";
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
+        m_pSimulationLog->logMessage("Creating SimulationManager...");
+    }
 
 
   m_KeyListenerName = "SimulationManager::KeyListener";
@@ -77,43 +82,12 @@ void SimulationManager<TConfig>::setup(boost::filesystem::path sceneFilePath)
   m_pSharedBuffer = boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >(new SharedBufferDynSys<LayoutConfigType>(m_nSimBodies));
   m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys, m_pSharedBuffer) );
 
-  m_pVisBuffer = m_pSharedBuffer->updateVisBuffer();
 
   m_pStateRecorder = boost::shared_ptr<StateRecorder<LayoutConfigType> >(new StateRecorder<LayoutConfigType>(m_nSimBodies));
 
-
   m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());
-  m_pVisBuffer = m_pSharedBuffer->updateVisBuffer();
 
   m_pSimulationLog->logMessage("---> added all objects(): ");
-}
-
-
-template<typename TConfig>
-bool SimulationManager<TConfig>::writeInitialState(){
-   MultiBodySimFile<LayoutConfigType> simFile;
-   // Request new file Paths for all logs from FileManager
-   // Get new folder path
-   boost::filesystem::path file = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_INIT);
-
-   std::string filename = SIM_INIT_FILE_PREFIX;
-   filename += SIM_INIT_FILE_EXTENSION;
-   file /= filename;
-   if(simFile.openSimFileWrite(file,m_nSimBodies)){
-      simFile << m_pVisBuffer.get();
-      simFile.closeSimFile();
-      m_pSimulationLog->logMessage(std::string("Successfully written initial state file to:") + file.string() );
-      return true;
-   }
-    m_pSimulationLog->logMessage(std::string("Error while trying to open and write initial state file to:") + file.string() );
-   return false;
-}
-
-
-template<typename TConfig>
-void SimulationManager<TConfig>::initBeforeThreads()
-{
-
 }
 
 
@@ -135,11 +109,10 @@ void SimulationManager<TConfig>::threadRunRecord()
   //Open File
   bool fileOK = false;
   if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::CONTINUE){
-      fileOK = m_pStateRecorder->createSimFileCopyFromReference(m_SimFilePath,m_pTimestepper->m_Settings.m_stateReferenceFile);
+      fileOK = m_pStateRecorder->createSimFileCopyFromReference(m_SimFilePath,m_pTimestepper->m_Settings.m_simStateReferenceFile);
   }else{
       fileOK = m_pStateRecorder->createSimFile(m_SimFilePath);
   }
-  m_pSimulationLog->logMessage("after file");
 
   if(fileOK)
   {
@@ -148,7 +121,6 @@ void SimulationManager<TConfig>::threadRunRecord()
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE){
       m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
     }
-    m_pSimulationLog->logMessage("after");
     // wait for vis thread! (which does some loops before)
 
     resetTimelineSimulation();
@@ -204,7 +176,7 @@ void SimulationManager<TConfig>::initRecordThread()
    filename += ".xml";
    m_SceneFilePath /= filename;
 
-   FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getCurrentSceneFilePath(),m_SceneFilePath,true);
+   FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getCurrentSceneFileDirectory(),m_SceneFilePath,true);
 
   m_pTimestepper->initLogs(m_SimFolderPath);
 
@@ -246,7 +218,6 @@ void SimulationManager<TConfig>::startSimThread()
     setThreadToBeStopped(false);
 
     //Start Dynamics Thread===========================================
-      initBeforeThreads();
       m_pThread = new boost::thread( boost::bind(&SimulationManager<TConfig>::threadRunRecord, &*this) );
       m_eSimThreadRunning = SimulationManagerBase::RECORD;
       m_pSimulationLog->logMessage(" SimulationManager:: Start Thread: SimThread in RECORD mode started ...");

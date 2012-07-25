@@ -88,22 +88,7 @@ template<typename TDynamicsSystemConfig>
 DynamicsSystem<TDynamicsSystemConfig>::DynamicsSystem()
 {
 
-  // Set standart values for settings
-  m_SettingsTimestepper.m_deltaT = 0.001;
-  m_SettingsTimestepper.m_endTime = 10;
-  m_SettingsTimestepper.m_stateReferenceFile = boost::filesystem::path();
-  m_SettingsTimestepper.m_eSimulateFromReference = TimeStepperSettings<LayoutConfigType>::NONE;
 
-  m_SettingsInclusionSolver.m_deltaT = 0.001;
-  m_SettingsInclusionSolver.m_alphaJORProx = 0.5;
-  m_SettingsInclusionSolver.m_alphaSORProx = 1.2;
-  m_SettingsInclusionSolver.m_MaxIter = 5000;
-  m_SettingsInclusionSolver.m_AbsTol = 1E-7;
-  m_SettingsInclusionSolver.m_RelTol = 1E-7;
-  m_SettingsInclusionSolver.m_eMethod = InclusionSolverSettings<LayoutConfigType>::SOR;
-  m_SettingsInclusionSolver.m_bUseGPU = false;
-  m_SettingsInclusionSolver.m_UseGPUDeviceId = 0;
-  m_SettingsInclusionSolver.m_bIsFiniteCheck = false;
 };
 template<typename TDynamicsSystemConfig>
 DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem()

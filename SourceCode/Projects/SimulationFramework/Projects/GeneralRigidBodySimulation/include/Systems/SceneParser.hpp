@@ -61,8 +61,8 @@ public:
 
     bool parseScene( boost::filesystem::path file ) {
         using namespace std;
-        m_currentParseFilePath = file;
-        m_currentParseFileDir = m_currentParseFilePath.parent_path();
+        m_currentParseFileDirectory = file;
+        m_currentParseFileDir = m_currentParseFileDirectory.parent_path();
 
         m_pSimulationLog->logMessage("Parsing Scene...");
 
@@ -77,7 +77,7 @@ public:
         m_SceneMeshs.clear();
 
         try {
-            m_xmlDoc.LoadFile(m_currentParseFilePath.string());
+            m_xmlDoc.LoadFile(m_currentParseFileDirectory.string());
 
             m_pSimulationLog->logMessage("File successfully loaded ...");
 
@@ -113,8 +113,8 @@ public:
         return true;
     }
 
-    boost::filesystem::path getCurrentSceneFilePath() {
-        return m_currentParseFilePath;
+    boost::filesystem::path getCurrentSceneFileDirectory() {
+        return m_currentParseFileDirectory;
     }
 
     const std::vector< DynamicsState<LayoutConfigType> > & getInitialConditionSimBodies() {
@@ -181,8 +181,8 @@ protected:
                     } else {
                         throw ticpp::Exception("String conversion in SimulateFromReference: type. The type '" + type + std::string("' has no implementation in the parser"));
                     }
-                    timestepperSettings.m_stateReferenceFile = simFromRef->GetAttribute("file");
-                    checkFileExists(timestepperSettings.m_stateReferenceFile);
+                    timestepperSettings.m_simStateReferenceFile = simFromRef->GetAttribute("file");
+                    checkFileExists(timestepperSettings.m_simStateReferenceFile);
                 } else {
                     timestepperSettings.m_eSimulateFromReference = TimeStepperSettings<LayoutConfigType>::NONE;
                 }
@@ -1008,7 +1008,7 @@ protected:
 
 
 
-    boost::filesystem::path m_currentParseFilePath;
+    boost::filesystem::path m_currentParseFileDirectory;
     boost::filesystem::path m_currentParseFileDir;
     ticpp::Document m_xmlDoc;
     const ticpp::Node * m_xmlRootNode;

@@ -17,8 +17,8 @@ public:
 	~SimulationManagerBase();
 
 
-	double getTimelineSimulation();
-	void resetTimelineSimulation();
+	double  getTimelineSimulation();
+	void    resetTimelineSimulation();
 
   // Used by vis thread
   void setThreadToBeStopped(bool stop);   /**	\brief Sets the variable in the vis thread to make the sim thread cancel. */
@@ -31,31 +31,16 @@ public:
   // Information to visualize by GUI
   void getIterationTime(double & averageIterationTime, double & maxIterationTime);
   void setIterationTime(double averageIterationTime,   double maxIterationTime);
+
   unsigned int getNumberOfContacts();
-  void setNumberOfContacts(unsigned int & nContacts);
+  void          setNumberOfContacts(unsigned int & nContacts);
 
   virtual void setup() = 0;
-
-  virtual double getSimulationTime(){return 0;};
-
-  virtual void startSimThread(Threads threadToStart){};
-  virtual void stopSimThread(Threads threadToStop, bool force_stop){};
-
 
 protected:
 
 
   boost::thread*	m_pThread;
-
-  virtual void initBeforeThreads(){};
-
-  virtual void initSimThread(){};
-  virtual void threadRunSimulation(){};
-  virtual void initRecordThread(){};
-  virtual void threadRunRecord(){};
-
-
-
 
   boost::mutex m_mutexIterationtime;
 	double m_averageIterationTime;

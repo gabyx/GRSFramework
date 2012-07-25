@@ -73,7 +73,7 @@ private:
    void cleanUpSimThread();
 
    void threadRunRecord();
-   void initRecordThread();
+   bool initRecordThread();
    void cleanUpRecordThread();
    struct SettingsSimThread{
          double m_EndTime;

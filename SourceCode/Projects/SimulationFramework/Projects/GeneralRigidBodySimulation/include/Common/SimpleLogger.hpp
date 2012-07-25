@@ -161,6 +161,7 @@ public:
     void registerLog(Log * log);
 
     Log * getLog(const std::string & name);
+    bool  existsLog(const std::string & name);
 };
 
 };

@@ -103,7 +103,7 @@ public:
 
 
             std::stringstream entity_name,node_name;
-
+            LOG(this->m_pSimulationLog, << " --> Add all Ogre Objects"<<std::endl);
             for(int i=0; i<this->m_bodyList.size(); i++) {
                 entity_name.str("");
                 node_name.str("");
@@ -111,7 +111,7 @@ public:
                 node_name << meshName.filename().string() << std::string("Node");
                 entity_name << entityCounter;
                 node_name<< nodeCounter;
-                //cout << entity_name.str() <<endl;
+
                 Ogre::Entity* ent = m_pSceneMgr->createEntity(entity_name.str(), meshName.string() );
                 ent->setCastShadows(shadowsEnabled);
                 Ogre::SceneNode* sceneNode = m_BaseFrame->createChildSceneNode(node_name.str());

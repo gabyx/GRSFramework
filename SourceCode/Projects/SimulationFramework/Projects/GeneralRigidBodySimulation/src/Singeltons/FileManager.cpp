@@ -21,7 +21,7 @@ FileManager::~FileManager()
   DECONSTRUCTOR_MESSAGE
 }
 
-void FileManager::copyFile(boost::filesystem::path from, boost::filesystem::path to, bool overwrite){
+boost::filesystem::path FileManager::copyFile(boost::filesystem::path from, boost::filesystem::path to, bool overwrite){
    boost::mutex::scoped_lock l(m_busy_mutex);
 
    if(boost::filesystem::is_directory(to)){
@@ -34,6 +34,7 @@ void FileManager::copyFile(boost::filesystem::path from, boost::filesystem::path
       boost::filesystem::copy_file(from,to,boost::filesystem::copy_option::overwrite_if_exists,err);
    }
    //m_pAppLog->logMessage(err.message());
+   return to;
 }
 
 boost::filesystem::path FileManager::getNewSimFolderPath(boost::filesystem::path directory,  std::string folder_prefix)

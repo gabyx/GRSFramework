@@ -34,8 +34,6 @@ public:
 
    boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
 
-   void initBeforeThreads();
-
    void startSimThread();
    void waitForSimThread();
 
@@ -43,14 +41,11 @@ public:
 
 private:
 
-
-   boost::shared_ptr<const DynamicsState<LayoutConfigType> > m_pVisBuffer;
-
    // Accessed only by thread ===================
-
    void threadRunRecord();
    void initRecordThread();
    void cleanUpRecordThread();
+
    struct SettingsSimThread{
          double m_EndTime;
    } m_SettingsSimThread;
@@ -68,8 +63,6 @@ private:
    // ===========================================
 
    int m_nSimBodies;
-
-   bool writeInitialState();
 
    // File Paths for one Simulation, always reset ==============================
    boost::filesystem::path m_SimFolderPath;

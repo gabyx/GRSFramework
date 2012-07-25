@@ -69,7 +69,7 @@ public:
 
 
 	// graph structure
-   Node<NodeDataType, EdgeDataType> *m_startNode;
+    Node<NodeDataType, EdgeDataType> *m_startNode;
 	Node<NodeDataType, EdgeDataType> *m_endNode;
 	Edge<NodeDataType, EdgeDataType> *m_twinEdge;
 
@@ -107,7 +107,7 @@ template <typename NodeDataType, typename EdgeDataType>
 class GeneralGraph{
 
 protected:
-	std::vector<Node<NodeDataType, EdgeDataType>* > m_nodes;
+	std::vector<Node<NodeDataType, EdgeDataType> *> m_nodes;
 	std::vector<Edge<NodeDataType, EdgeDataType> *> m_edges;
 
 public:

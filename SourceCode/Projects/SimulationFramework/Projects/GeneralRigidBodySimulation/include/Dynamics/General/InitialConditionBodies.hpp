@@ -37,9 +37,9 @@ namespace InitialConditionBodies{
        init_state.m_SimBodyStates[i].m_q.template tail<4>() = typename TLayoutConfig::Quaternion(1,0,0,0);
 
          typedef boost::mt19937  RNG;
-            RNG generator(seed);
-            boost::uniform_real<PREC> uniform(-1.0,1.0);
-            boost::variate_generator< boost::mt19937 & , boost::uniform_real<PREC> > randomNumber(generator, uniform);
+         static  RNG generator(seed);
+         static  boost::uniform_real<PREC> uniform(-1.0,1.0);
+         static  boost::variate_generator< boost::mt19937 & , boost::uniform_real<PREC> > randomNumber(generator, uniform);
 
        if(jitter){
          random_vec = Vector3(randomNumber(),randomNumber(),randomNumber()); // No uniform distribution!, but does not matter

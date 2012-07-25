@@ -197,10 +197,20 @@ void LogManager::registerLog(Log * log) {
 Log * LogManager::getLog(const std::string & name) {
     boost::mutex::scoped_lock l(m_busy_mutex);
     LogListIteratorType it = m_logList.find(name);
-    ASSERTMSG(it != m_logList.end(),"This Log does not exist!");
-    ASSERTMSG(it->second != NULL,"This Log has Null Pointer!");
+    ASSERTMSG(it != m_logList.end(),"This Log does not exist!: "<<name);
+    ASSERTMSG(it->second != NULL,"This Log has Null Pointer!: "<<name);
     if(it == m_logList.end()) {
         return NULL;
     }
     return it->second;
 };
+
+bool LogManager::existsLog(const std::string & name) {
+    boost::mutex::scoped_lock l(m_busy_mutex);
+    LogListIteratorType it = m_logList.find(name);
+    if(it == m_logList.end()){
+        return false;
+    }
+    return true;
+};
+

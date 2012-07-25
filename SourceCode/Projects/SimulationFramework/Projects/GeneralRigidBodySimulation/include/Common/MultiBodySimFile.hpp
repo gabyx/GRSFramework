@@ -348,16 +348,23 @@ template<typename TLayoutConfig>
 {
   // write time
   *this >> (double &)state->m_t;
+  //std::cout << "m_t:"<< state->m_t <<std::endl;
+
   state->m_StateType = DynamicsState<TLayoutConfig>::NONE;
   // write states
   for(unsigned int i=0 ; i< state->m_nSimBodies; i++){
+    //std::cout << "q_"<<i<<": ";
     for(int k=0; k < NDOFqObj; k++){
       *this >> (double &)(state->m_SimBodyStates[i].m_q(k));
-    }
+      //std::cout << "q"<<i <<state->m_SimBodyStates[i].m_q(k)  << std::endl;
+      }
+      //std::cout<< state->m_SimBodyStates[i].m_q.transpose()  << std::endl;
     if(m_bReadFullState){
+        //std::cout << "u_"<<i<<": ";
        for(int k=0; k < NDOFuObj; k++){
          *this >> (double &)(state->m_SimBodyStates[i].m_u(k));
        }
+       //std::cout<< state->m_SimBodyStates[i].m_u.transpose()  << std::endl;
     }else{
         //Dont read in velocities, its not needed!
         m_file_stream.seekg(m_nBytesPerUObj,std::ios_base::cur);
@@ -446,10 +453,11 @@ using namespace std;
   m_nBytes = (std::streamoff)m_file_stream.tellg();
   m_file_stream.seekg(0, ios::beg);
 
+  //TODO
   std::cout << m_nBytes << "," << m_headerLength<<","<<m_nBytesPerState<<std::endl;
   if(m_nBytes > m_headerLength){
      long long int nStates = (m_nBytes - m_headerLength) / ( m_nBytesPerState );
-     cout << "States:" << (unsigned int) nStates;
+     //cout << "States:" << (unsigned int) nStates << std::endl;
      if(nStates > 0){
        m_nStates = nStates;
        return true;
@@ -470,14 +478,22 @@ bool  MultiBodySimFile<TLayoutConfig>::readHeader()
     unsigned int nBodies, nDofqObj, nDofuObj;
     *this >> nBodies >> nDofqObj >> nDofuObj;
 
-    if(nBodies == m_nSimBodies && nDofuObj == NDOFuObj && nDofqObj == NDOFqObj){
-       m_beginOfStates = m_file_stream.tellg();
-      return true;
-    }else{
-       m_errorString << "Binary file does not correspond to the number of bodies which should be simulated: "<< std::endl
-          <<" Binary File describes: \tnSimBodies = "<<nBodies<< "\tnDofqObj = "<<nDofqObj<<"\tnDofuObj = " << nDofuObj << std::endl
-          <<" Simulation requests: \t\tnSimBodies = "<<m_nSimBodies<< "\tnDofqObj = "<<NDOFqObj<<"\tnDofuObj = " << NDOFuObj<<std::endl;
-    }
+        bool abort;
+        if(m_bReadFullState){
+            abort = nBodies == m_nSimBodies && nDofuObj == NDOFuObj && nDofqObj == NDOFqObj;
+        }else{
+            abort = nBodies == m_nSimBodies && nDofqObj == NDOFqObj;
+        }
+
+        if(abort){
+           m_beginOfStates = m_file_stream.tellg();
+          return true;
+        }else{
+           m_errorString << "Binary file does not correspond to the number of bodies which should be simulated: "<< std::endl
+              <<" Binary File describes: \tnSimBodies = "<<nBodies<< "\tnDofqObj = "<<nDofqObj<<"\tnDofuObj = " << nDofuObj << std::endl
+              <<" Simulation requests: \t\tnSimBodies = "<<m_nSimBodies<< "\tnDofqObj = "<<NDOFqObj<<"\tnDofuObj = " << NDOFuObj<<std::endl;
+        }
+
   }else{
       m_errorString << "Binary file contains a wrong header and is not equal to: '" << m_simHeader<<"'"<<std::endl;
   }
