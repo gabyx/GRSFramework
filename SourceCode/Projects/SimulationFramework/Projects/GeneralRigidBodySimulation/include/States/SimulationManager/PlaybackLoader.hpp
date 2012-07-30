@@ -88,7 +88,8 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
   m_pThreadLog = new Logging::Log("PlaybackLoaderThreadLog");
 
 
-  boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+  boost::filesystem::path filePath = FileManager::getSingletonPtr()->getGlobalPath();
+        filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
   filePath /= "PlaybackLoaderThread.log";
 #if LogToFileLoader == 1
 

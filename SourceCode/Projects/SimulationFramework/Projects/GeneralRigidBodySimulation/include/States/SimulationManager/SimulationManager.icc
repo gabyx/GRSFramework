@@ -39,14 +39,13 @@ SimulationManagerBase()
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
     } else {
-        boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
+        filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
         m_pSimulationLog->logMessage("Creating SimulationManager...");
     }
 
-
-  m_KeyListenerName = "SimulationManager::KeyListener";
 
 }
 template<typename TConfig>

@@ -97,7 +97,8 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
 
 
   // Init Log
-  boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+    boost::filesystem::path filePath = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
+    filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
     if(!boost::filesystem::exists(filePath)){
             boost::filesystem::create_directories(filePath);
     }

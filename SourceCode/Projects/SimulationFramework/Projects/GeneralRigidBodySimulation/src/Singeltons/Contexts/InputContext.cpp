@@ -12,7 +12,7 @@ using namespace Ogre;
 
 //=========================================================
 
-template<> InputContext* Ogre::Singleton<InputContext>::ms_Singleton = 0;
+template<> InputContext* Ogre::Singleton<InputContext>::msSingleton = 0;
 
 //=========================================================
 

@@ -11,14 +11,24 @@
 
 using namespace std;
 
-FileManager::FileManager(){
+FileManager::FileManager(boost::filesystem::path globalDirPath){
   m_fileIdCounter = 0;
+  m_globalDirPath = globalDirPath;
 
-
+  if(!m_globalDirPath.empty()){
+      if(!create_directories(m_globalDirPath)){
+        ERRORMSG("Global Path in FileManager could not be created!");
+      }
+  }
 }
+
 FileManager::~FileManager()
 {
   DECONSTRUCTOR_MESSAGE
+}
+
+boost::filesystem::path FileManager::getGlobalDirectoryPath(){
+    return m_globalDirPath;
 }
 
 boost::filesystem::path FileManager::copyFile(boost::filesystem::path from, boost::filesystem::path to, bool overwrite){
@@ -37,23 +47,31 @@ boost::filesystem::path FileManager::copyFile(boost::filesystem::path from, boos
    return to;
 }
 
-boost::filesystem::path FileManager::getNewSimFolderPath(boost::filesystem::path directory,  std::string folder_prefix)
+boost::filesystem::path FileManager::getNewSimFolderPath(boost::filesystem::path relDirectoryPath,  std::string folder_prefix)
 {
   boost::mutex::scoped_lock l(m_busy_mutex);
+
+  boost::filesystem::path directory = m_globalDirPath;
+  directory /= relDirectoryPath;
 
   scanAllSimFolders(directory,folder_prefix,false);
   std::stringstream new_foldername;
   new_foldername << folder_prefix << m_fileIdCounter;
   directory /= new_foldername.str();
+
   if(!create_directories(directory)){
     return "";
   }
   return directory;
 }
 
-void FileManager::updateFileList(boost::filesystem::path directory, bool with_SubDirs = false)
+void FileManager::updateFileList(boost::filesystem::path relDirectoryPath, bool with_SubDirs = false)
 {
   boost::mutex::scoped_lock l(m_busy_mutex);
+
+  boost::filesystem::path directory = m_globalDirPath;
+  directory /= relDirectoryPath;
+
   m_SimFilePaths.clear();
   m_SimFileNames.clear();
   updateAllSimDataFiles(directory,with_SubDirs);
@@ -78,8 +96,12 @@ boost::filesystem::path FileManager::getSimFilePath(std::string file_name)
   return "";
 }
 
-void FileManager::updateAllSimDataFiles(const boost::filesystem::path &directory, const bool &with_SubDirs = false)
+void FileManager::updateAllSimDataFiles(const boost::filesystem::path &relDirectoryPath, const bool &with_SubDirs = false)
 {
+
+  boost::filesystem::path directory = m_globalDirPath;
+  directory /= relDirectoryPath;
+
     m_fileIdCounter = 0;
   // Scan path for files and add them...
   using namespace boost::filesystem;
@@ -108,8 +130,11 @@ void FileManager::updateAllSimDataFiles(const boost::filesystem::path &directory
 }
 
 
-void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, const std::string & folder_prefix, const bool &with_SubDirs)
+void FileManager::scanAllSimFolders(const boost::filesystem::path &relDirectoryPath, const std::string & folder_prefix, const bool &with_SubDirs)
 {
+
+  boost::filesystem::path directory = m_globalDirPath;
+  directory /= relDirectoryPath;
 
   m_fileIdCounter = 0;
   // Scan path for files and add them...

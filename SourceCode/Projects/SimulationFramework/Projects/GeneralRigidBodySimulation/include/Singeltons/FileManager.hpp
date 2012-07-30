@@ -23,8 +23,10 @@
 class FileManager : public Utilities::Singleton<FileManager>{
 public:
 
-  FileManager();
+  FileManager(boost::filesystem::path globalPath="");
   ~FileManager();
+
+  boost::filesystem::path getGlobalDirectoryPath();
 
   boost::filesystem::path getPathSimFileSelected();
   boost::filesystem::path getPathSceneFileSelected();
@@ -50,6 +52,8 @@ private:
   boost::mutex m_busy_mutex;
 
   boost::filesystem::path m_selectedFilePath;
+
+  boost::filesystem::path m_globalDirPath;
 
 };
 

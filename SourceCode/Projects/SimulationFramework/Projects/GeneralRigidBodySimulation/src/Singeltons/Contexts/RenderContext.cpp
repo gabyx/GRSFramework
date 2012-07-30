@@ -10,26 +10,25 @@ using namespace Ogre;
 
 //=========================================================
 
-template<> RenderContext* Ogre::Singleton<RenderContext>::ms_Singleton = 0;
+template<> RenderContext* Ogre::Singleton<RenderContext>::msSingleton = 0;
 
-RenderContext::RenderContext()
-{
+RenderContext::RenderContext() {
     m_bShutDownOgre		= false;
     m_iNumScreenShots	= 0;
 
 }
 
 
-bool RenderContext::initOgre(Ogre::String wndTitle)
-{
+bool RenderContext::initOgre(Ogre::String wndTitle) {
     Ogre::LogManager* logMgr = new Ogre::LogManager();
 
 // OGRE LOG
-  boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
-  if(!boost::filesystem::exists(filePath)){
+    boost::filesystem::path filePath = FileManager::getSingletonPtr()->getGlobalPath();
+    filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
+    if(!boost::filesystem::exists(filePath)) {
         boost::filesystem::create_directories(filePath);
-  }
-  filePath /= "OgreLogfile.log";
+    }
+    filePath /= "OgreLogfile.log";
 
 #if LogToFileOgre == 1
     m_pOgreLog = Ogre::LogManager::getSingleton().createLog(filePath.string(), true, true, false);
@@ -39,58 +38,54 @@ bool RenderContext::initOgre(Ogre::String wndTitle)
 #if LogToConsoleOgre == 1
     m_pOgreLog->setDebugOutputEnabled(true);
 #else
-	m_pOgreLog->setDebugOutputEnabled(false);
+    m_pOgreLog->setDebugOutputEnabled(false);
 #endif
 
 
 // APP LOG
-  filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
-  filePath /= "AppLogfile.log";
+    boost::filesystem::path filePath = FileManager::getSingletonPtr()->getGlobalPath();
+    filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
+    filePath /= "AppLogfile.log";
 #if LogToFileApp == 1
-  m_pAppLog = Ogre::LogManager::getSingleton().createLog(filePath.string(),false,true,false);
+    m_pAppLog = Ogre::LogManager::getSingleton().createLog(filePath.string(),false,true,false);
 #else
-  m_pAppLog = Ogre::LogManager::getSingleton().createLog(filePath.string(),false,true,true);
+    m_pAppLog = Ogre::LogManager::getSingleton().createLog(filePath.string(),false,true,true);
 #endif
 #if LogToConsoleApp == 1
-  m_pAppLog->setDebugOutputEnabled(true);
+    m_pAppLog->setDebugOutputEnabled(true);
 #else
-  m_pAppLog->setDebugOutputEnabled(false);
+    m_pAppLog->setDebugOutputEnabled(false);
 #endif
-  m_pAppLog->setTimeStampEnabled(false);
+    m_pAppLog->setTimeStampEnabled(false);
 
 
-	m_pAppLog->logMessage("RenderContext::Render Window initializing...");
-	// Render Window ==========================================================================
-	m_pRoot = boost::shared_ptr<Ogre::Root>(new Ogre::Root());
+    m_pAppLog->logMessage("RenderContext::Render Window initializing...");
+    // Render Window ==========================================================================
+    m_pRoot = boost::shared_ptr<Ogre::Root>(new Ogre::Root());
 
-	if(m_pRoot->restoreConfig())
-	{
-	}
-	else if(!m_pRoot->showConfigDialog())
-	{
-		return false;
-	};
+    if(m_pRoot->restoreConfig()) {
+    } else if(!m_pRoot->showConfigDialog()) {
+        return false;
+    };
 
-	m_pRenderWnd = m_pRoot->initialise(true, wndTitle);
+    m_pRenderWnd = m_pRoot->initialise(true, wndTitle);
 
-	m_pViewport = m_pRenderWnd->addViewport(0);
-	m_pAppLog->logMessage("RenderContext::Render Window initialized!");
+    m_pViewport = m_pRenderWnd->addViewport(0);
+    m_pAppLog->logMessage("RenderContext::Render Window initialized!");
 
 
-	m_pAppLog->logMessage("RenderContext::Resources initializing...");
-	// Resources initializing ==================================================================
+    m_pAppLog->logMessage("RenderContext::Resources initializing...");
+    // Resources initializing ==================================================================
     Ogre::String secName, typeName, archName;
     Ogre::ConfigFile cf;
     cf.load("resources.cfg");
 
     Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
-    while (seci.hasMoreElements())
-    {
+    while (seci.hasMoreElements()) {
         secName = seci.peekNextKey();
         Ogre::ConfigFile::SettingsMultiMap *settings = seci.getNext();
         Ogre::ConfigFile::SettingsMultiMap::iterator i;
-        for (i = settings->begin(); i != settings->end(); ++i)
-        {
+        for (i = settings->begin(); i != settings->end(); ++i) {
             typeName = i->first;
             archName = i->second;
             Ogre::ResourceGroupManager::getSingleton().addResourceLocation(archName, typeName, secName);
@@ -98,10 +93,10 @@ bool RenderContext::initOgre(Ogre::String wndTitle)
     }
     Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(5);
     Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-	m_pAppLog->logMessage("RenderContext::Resources initialized...");
+    m_pAppLog->logMessage("RenderContext::Resources initialized...");
 
-	// Timer =====================================================================================
-	m_pTimer = boost::shared_ptr<Ogre::Timer>(new Ogre::Timer());
+    // Timer =====================================================================================
+    m_pTimer = boost::shared_ptr<Ogre::Timer>(new Ogre::Timer());
     m_pTimer->reset();
 
 
@@ -111,12 +106,10 @@ bool RenderContext::initOgre(Ogre::String wndTitle)
 }
 
 
-RenderContext::~RenderContext()
-{
-  DECONSTRUCTOR_MESSAGE
+RenderContext::~RenderContext() {
+    DECONSTRUCTOR_MESSAGE
 }
 
 
-void RenderContext::updateOgre(double timeSinceLastFrame)
-{
+void RenderContext::updateOgre(double timeSinceLastFrame) {
 }

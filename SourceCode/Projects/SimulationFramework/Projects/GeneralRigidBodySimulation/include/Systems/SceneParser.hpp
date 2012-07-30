@@ -61,8 +61,8 @@ public:
 
     bool parseScene( boost::filesystem::path file ) {
         using namespace std;
-        m_currentParseFileDirectory = file;
-        m_currentParseFileDir = m_currentParseFileDirectory.parent_path();
+        m_currentParseFilePath = file;
+        m_currentParseFileDir = m_currentParseFilePath.parent_path();
 
         m_pSimulationLog->logMessage("Parsing Scene...");
 
@@ -77,7 +77,7 @@ public:
         m_SceneMeshs.clear();
 
         try {
-            m_xmlDoc.LoadFile(m_currentParseFileDirectory.string());
+            m_xmlDoc.LoadFile(m_currentParseFilePath.string());
 
             m_pSimulationLog->logMessage("File successfully loaded ...");
 
@@ -114,7 +114,7 @@ public:
     }
 
     boost::filesystem::path getCurrentSceneFileDirectory() {
-        return m_currentParseFileDirectory;
+        return m_currentParseFilePath;
     }
 
     const std::vector< DynamicsState<LayoutConfigType> > & getInitialConditionSimBodies() {
@@ -1008,7 +1008,7 @@ protected:
 
 
 
-    boost::filesystem::path m_currentParseFileDirectory;
+    boost::filesystem::path m_currentParseFilePath;
     boost::filesystem::path m_currentParseFileDir;
     ticpp::Document m_xmlDoc;
     const ticpp::Node * m_xmlRootNode;

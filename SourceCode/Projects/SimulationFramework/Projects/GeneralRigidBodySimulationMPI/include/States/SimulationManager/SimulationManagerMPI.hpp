@@ -1,5 +1,7 @@
-﻿#ifndef SimulationManager_hpp
-#define SimulationManager_hpp
+﻿#ifndef SimulationManagerMPI_hpp
+#define SimulationManagerMPI_hpp
+
+#include <mpi.h>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
@@ -7,23 +9,23 @@
 #include "LogDefines.hpp"
 #include "TypeDefs.hpp"
 
-#include "SimulationManagerBase.hpp"
-
 #include "SceneParser.hpp"
 
 template <typename TLayoutConfig> class DynamicsState;
 template <typename TLayoutConfig> class StateRecorder;
 template< typename TLayoutConfig> class SharedBufferDynSys;
 
+
+
 template<typename TConfig>
-class SimulationManager : public SimulationManagerBase
+class SimulationManagerMPI
 {
 public:
 
    DEFINE_CONFIG_TYPES_OF(TConfig)
 
-    SimulationManager();
-   ~SimulationManager();
+    SimulationManagerMPI();
+   ~SimulationManagerMPI();
 
    boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >	    m_pSharedBuffer;
    boost::shared_ptr<StateRecorder<LayoutConfigType> >		    m_pStateRecorder;
@@ -33,24 +35,16 @@ public:
 
    boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
 
-   void startSimThread();
-   void waitForSimThread();
-
-   void stopSimThread();
-
 private:
 
+    unsigned int m_nSimBodies;
+
    // Accessed only by thread ===================
-   void threadRunRecord();
-   void initRecordThread();
-   void cleanUpRecordThread();
 
    struct SettingsSimThread{
          double m_EndTime;
    } m_SettingsSimThread;
 
-   void readSharedBuffer();
-   void writeSharedBuffer();
 
    Logging::Log *  m_pSimulationLog;
 
@@ -59,8 +53,6 @@ private:
    boost::shared_ptr< DynamicsSystemType > m_pDynSys;
    // ===========================================
 
-   int m_nSimBodies;
-
    // File Paths for one Simulation, always reset ==============================
    boost::filesystem::path m_SimFolderPath;
    boost::filesystem::path m_SimFilePath;
@@ -68,7 +60,7 @@ private:
 
 
 // Implementation
-#include "SimulationManager.icc"
+#include "SimulationManagerMPI.icc"
 
 
-#endif // SIMULATIONMANAGERMAZE_HPP
+#endif // SimulationManagerMPIMAZE_HPP

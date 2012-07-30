@@ -1,0 +1,17 @@
+﻿#ifndef ConfigureFile_hpp
+#define ConfigureFile_hpp
+
+
+
+
+#define CUDA_VERSION @CUDA_VERSION_INTEGER@
+#define HAVE_CUDA_SUPPORT @CUDA_SUPPORT@
+
+
+#define USE_OZCOLLIDE @USE_OZCOLLIDE@
+#define USE_OPCODE @USE_OPCODE@
+#define USE_OWN_COLLISION_CODE @USE_OWN_COLLISION_CODE@
+
+#define OPCODE_PRECISION @OPCODE_PRECISION@
+
+#endif

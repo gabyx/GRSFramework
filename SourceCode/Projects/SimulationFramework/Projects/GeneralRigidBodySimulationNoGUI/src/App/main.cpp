@@ -10,7 +10,7 @@
 int main(int argc, char **argv)
 {
     // Parsing ===================================
-    char * sceneFileName;
+    char * sceneFileName = NULL;
     for (int i = 1; i < argc; i++) {
         std::cout << argv[i] << std::endl;
         if (std::string(argv[i]) == "-s") {
@@ -22,6 +22,10 @@ int main(int argc, char **argv)
           << " \t -s <SceneFilePath>"  <<std::endl;
           exit(-1);
         }
+    }
+
+    if(!sceneFileName){
+        ERRORMSG("No scene file (.xml) supplied as argument: -s <SceneFilePath>");
     }
 
    // End Parsing =================================
