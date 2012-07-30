@@ -16,8 +16,10 @@ FileManager::FileManager(boost::filesystem::path globalDirPath){
   m_globalDirPath = globalDirPath;
 
   if(!m_globalDirPath.empty()){
-      if(!create_directories(m_globalDirPath)){
-        ERRORMSG("Global Path in FileManager could not be created!");
+      if(!exists(m_globalDirPath)){
+          if(!create_directories(m_globalDirPath)){
+            ERRORMSG("Global Path in FileManager could not be created!");
+          }
       }
   }
 }
