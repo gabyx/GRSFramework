@@ -178,7 +178,7 @@ public:
 
     }
 
-    void addNode(const DynamicsState<LayoutConfigType> * state, CollisionData<RigidBodyType> * pCollData) {
+    void addNode(CollisionData<RigidBodyType> * pCollData) {
 
         ASSERTMSG(pCollData->m_pBody1.get() != NULL && pCollData->m_pBody2.get() != NULL, " Bodys are null pointers?");
         //cout << "add node : "<<m_nodeCounter<< " body id:" << pCollData->m_pBody1->m_id <<" and "<< pCollData->m_pBody2->m_id <<endl;
@@ -427,7 +427,7 @@ public:
 
     }
 
-    void addNode(const DynamicsState<LayoutConfigType> * state, CollisionData<RigidBodyType> * pCollData) {
+    void addNode(CollisionData<RigidBodyType> * pCollData) {
 
         //Take care state, is only q = q_m, u is not set and is zero!
 

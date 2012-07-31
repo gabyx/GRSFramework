@@ -126,13 +126,9 @@ public:
   Quaternion m_q_KI; ///< Quaternion which represents a rotation from I to the K frame, \f$ \tilde{\mathbf{a}}_{KI} \f$,  at time t_s + deltaT/2.
 
 
-
   unsigned int m_id; ///< This is the id of the body.
-
   BodyState m_eState; ///< The state of the body.
-
   BodyMaterial m_eMaterial; ///< The material.
-
 
   RigidBodySolverDataType * m_pSolverData; /// Simulated bodies have a solverData. For all others, animated and not simulated this pointer is zero!
 

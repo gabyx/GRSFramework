@@ -68,7 +68,6 @@ int main(int argc, char **argv) {
 
 
 
-
     SimulationManagerMPI<GeneralConfig> mgr;
 
     mgr.setup(boost::filesystem::path(sceneFilePath));

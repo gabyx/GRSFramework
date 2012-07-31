@@ -42,19 +42,19 @@ public:
    }
 
     #ifdef SRUTIL_DELEGATE_PREFERRED_SYNTAX
-      typedef srutil::delegate<void, (const DynamicsState<LayoutConfigType> *, CollisionData<RigidBodyType>*) > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
+      typedef srutil::delegate<void, (CollisionData<RigidBodyType>*) > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
    #else
-      typedef srutil::delegate2<void, const DynamicsState<LayoutConfigType> *, CollisionData<RigidBodyType>*  > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
+      typedef srutil::delegate1<void, CollisionData<RigidBodyType>*  > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
    #endif
 
       /** Adds a new ContactDelegate which will be invoked during the solveCollision() part.*/
    void addContactDelegate(const ContactDelegate & cD){
       m_ContactDelegateList.push_back(cD);
    }
-   void invokeAll(const DynamicsState<LayoutConfigType> * state, CollisionData<RigidBodyType> *pCollData) const{
+   void invokeAll(CollisionData<RigidBodyType> *pCollData) const{
       typename std::vector<ContactDelegate>::const_iterator it;
       for(it = m_ContactDelegateList.begin(); it != m_ContactDelegateList.end(); it++){
-         (*it)(state, pCollData);
+         (*it)(pCollData);
       }
    }
 
@@ -90,7 +90,7 @@ public:
   void initializeLog(Logging::Log* pSolverLog);                          ///< Initializes an Ogre::Log.
   void reset();                                                       ///< Resets the whole Solver. This function is called at the start of the simulation.
   void reserveCollisionSetSpace(unsigned int nContacts);              ///< Reserves some space for the collision set.
-  void solveCollision(const DynamicsState<LayoutConfigType> * state);    ///< Main routine which solves the collision for all bodies.
+  void solveCollision();    ///< Main routine which solves the collision for all bodies.
 
   std::vector< CollisionData<RigidBodyType> * > m_CollisionSet;       ///< This list is only used if no  ContactDelegate is in m_ContactDelegateList, then the contacts are simply added here.
   typedef typename std::vector< CollisionData<RigidBodyType> * > CollisionSet;
@@ -111,8 +111,6 @@ protected:
   std::vector< boost::shared_ptr< RigidBodyType > > & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
   std::vector< boost::shared_ptr< RigidBodyType > > & m_Bodies;          ///< List of all fixed not simulated bodies.
 
-  const DynamicsState<LayoutConfigType> * m_state;
-
   Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> > m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
   friend class Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> >;
 
@@ -120,8 +118,6 @@ protected:
   std::stringstream logstream;
 
   inline void signalContactAdd(CollisionData<RigidBodyType> * pColData); ///< Adds the contact either sends it to the delegate functions or it adds it in the set m_CollisionSet if no delegate has been added.
-
-  void updateAllObjects(const DynamicsState<LayoutConfigType> * state);       ///< General function which does some updateing of all objects. Currently not used.
 
 };
 /** @} */
@@ -132,7 +128,7 @@ CollisionSolver<TCollisionSolverConfig>::CollisionSolver(
                                          std::vector< boost::shared_ptr<RigidBodyType > > & SimBodies,
                                          std::vector< boost::shared_ptr<RigidBodyType > > & Bodies):
 m_SimBodies(SimBodies), m_Bodies(Bodies),
-m_nSimBodies(SimBodies.size()),m_nDofqObj(NDOFqObj),m_nDofuObj(NDOFuObj),m_state(NULL)
+m_nSimBodies(SimBodies.size()),m_nDofqObj(NDOFqObj),m_nDofuObj(NDOFuObj)
 {
    m_Collider.init(this);
     m_expectedNContacts = 10;
@@ -183,7 +179,7 @@ void CollisionSolver<TCollisionSolverConfig>::reserveCollisionSetSpace(unsigned 
 
 
 template< typename TCollisionSolverConfig >
-void CollisionSolver<TCollisionSolverConfig>::solveCollision(const DynamicsState<LayoutConfigType> * state){
+void CollisionSolver<TCollisionSolverConfig>::solveCollision(){
 
 
   clearCollisionSet();
@@ -193,8 +189,6 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision(const DynamicsState
    #endif
 
 
-    // Save internal state, this will be given to all signalContactAdd
-    m_state  =  state;
 
     // All objects have been updated...
 
@@ -231,14 +225,8 @@ template<typename TCollisionSolverConfig>
      m_CollisionSet.push_back(pColData); // Copy it to the owning list! colData gets deleted!
 
       if(!m_ContactDelegateList.isEmpty()){
-         m_ContactDelegateList.invokeAll(m_state, m_CollisionSet.back()); // Propagate pointers! they will not be deleted!
+         m_ContactDelegateList.invokeAll(m_CollisionSet.back()); // Propagate pointers! they will not be deleted!
       }
   }
-
-template< typename TCollisionSolverConfig >
-void CollisionSolver<TCollisionSolverConfig>::updateAllObjects(const DynamicsState<LayoutConfigType> * state)
-{
-
-}
 
 #endif

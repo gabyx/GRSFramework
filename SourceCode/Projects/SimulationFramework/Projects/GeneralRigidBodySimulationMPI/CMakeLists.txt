@@ -90,7 +90,7 @@ SET(STATES_SRC
 SET(COMMON_INC
 	${SOURCE_DIR}/include/Common/foreach_macro.hpp
 	${SOURCE_DIR}/include/Common/AssertionDebug.hpp
-	${SOURCE_DIR}/include/Common/TypeDefs.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
 	${SOURCE_DIR}/include/Common/PlatformDefines.hpp
 	${SOURCE_DIR}/include/Common/CommonFunctions.hpp
 	${SOURCE_DIR}/include/Common/MeshData.hpp
@@ -102,7 +102,7 @@ SET(COMMON_INC
 	${SOURCE_DIR}/include/Common/VectorToSkewMatrix.hpp
         ${SOURCE_DIR}/include/Common/MatrixHelpers.hpp
 	${SOURCE_DIR}/include/Common/QuaternionHelpers.hpp
-	${SOURCE_DIR}/include/Common/LogDefines.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
         ${SOURCE_DIR}/include/Common/TypenameComparision.hpp
 	${SOURCE_DIR}/include/Common/MultiBodySimFile.hpp
         ${SOURCE_DIR}/include/Common/BinaryFile.hpp

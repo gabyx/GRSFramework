@@ -115,7 +115,7 @@ protected:
   void swapStateBuffers();
 
 
-  DynamicsState<LayoutConfigType> m_state_m;  // end state of iteration
+  DynamicsState<LayoutConfigType> m_state_m;  // middle state of iteration
 
   // Logs
    boost::filesystem::path m_SimFolderPath;
@@ -348,7 +348,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration()
 
   // Solve Collision
   m_startTimeCollisionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
-  m_pCollisionSolver->solveCollision(&m_state_m);
+  m_pCollisionSolver->solveCollision();
   m_endTimeCollisionSolver =   ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
 
   //Solve Contact Problem
