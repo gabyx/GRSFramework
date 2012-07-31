@@ -52,7 +52,7 @@ public:
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
     void reset();
     void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
-    void solveInclusionProblem( const DynamicsState<LayoutConfigType> * state_s, const DynamicsState<LayoutConfigType> * state_m, DynamicsState<LayoutConfigType> * state_e);
+    void solveInclusionProblem();
 
 
     std::string getIterationStats();
@@ -92,15 +92,15 @@ protected:
     typedef ContactGraph<RigidBodyType,ContactGraphMode::ForIteration> ContactGraphType;
     ContactGraphType m_ContactGraph;
 
-    void integrateAllBodyVelocities(const DynamicsState<LayoutConfigType> * state_s , DynamicsState<LayoutConfigType> * state_e);
-    void initContactGraphForIteration(const DynamicsState<LayoutConfigType> * state_s , DynamicsState<LayoutConfigType> * state_e, PREC alpha);
+    void integrateAllBodyVelocities();
+    void initContactGraphForIteration(PREC alpha);
 
     inline void doJorProx();
 
-    inline void doSorProx(DynamicsState<LayoutConfigType> * state_e);
+    inline void doSorProx();
     inline void sorProxOverAllNodes();
     //inline void sorProxOverAllBodies(bool checkConvergence);
-    inline void sorProxOverAllNodesLast(DynamicsState<LayoutConfigType> * state_e);
+    inline void sorProxOverAllNodesLast();
     // Log
     Logging::Log*	m_pSolverLog;
     std::stringstream logstream;
@@ -195,9 +195,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::resetForNextIter() {
 
 
 template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem(const DynamicsState<LayoutConfigType> * state_s,
-        const DynamicsState<LayoutConfigType> * state_m,
-        DynamicsState<LayoutConfigType> * state_e) {
+void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
 
 #if CoutLevelSolver>0
     LOG(m_pSolverLog, <<  " % -> solveInclusionProblem(): "<< std::endl;);
@@ -218,11 +216,13 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem(const D
 
     // Integrate all bodies to u_e
     // u_E = u_S + M^⁻1 * h * deltaT
-    integrateAllBodyVelocities(state_s,state_e);
-
+    if(m_nContacts == 0){
+        integrateAllBodyVelocities();
+    }
+    else{
 
     // Solve Inclusion
-    if(m_nContacts > 0) {
+
         // Fill in Percussions
 #if USE_PERCUSSION_POOL == 1
         //readFromPercussionPool(contactIdx,pCollData,P_back);
@@ -242,8 +242,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem(const D
             counter.start();
 #endif
 
-            initContactGraphForIteration(state_s,state_e, m_Settings.m_alphaSORProx);
-            doSorProx(state_e);
+            initContactGraphForIteration(m_Settings.m_alphaSORProx);
+            doSorProx();
 
 #if MEASURE_TIME_PROX == 1
             counter.stop();
@@ -257,7 +257,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem(const D
             counter.start();
 #endif
 
-            initContactGraphForIteration(state_s,state_e, m_Settings.m_alphaJORProx);
+            initContactGraphForIteration(m_Settings.m_alphaJORProx);
             ASSERTMSG(false,"Jor Algorithm has not been implemented yet");
 //            doJorProx();
 
@@ -295,39 +295,19 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doJorProx() {
 }
 
 template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::integrateAllBodyVelocities(const DynamicsState<LayoutConfigType> * state_s , DynamicsState<LayoutConfigType> * state_e) {
+void InclusionSolverCONoG<TInclusionSolverConfig>::integrateAllBodyVelocities() {
 
-    typename DynamicsState<LayoutConfigType>::RigidBodyStateListType::iterator stateItE;
-    typename DynamicsState<LayoutConfigType>::RigidBodyStateListType::const_iterator stateItS;
     typename RigidBodySimPtrListType::iterator bodyIt;
 
-    bodyIt = m_SimBodies.begin();
-    stateItS = state_s->m_SimBodyStates.begin();
-    stateItE = state_e->m_SimBodyStates.begin();
-
-    for(; stateItE != state_e->m_SimBodyStates.end(); ) {
-        stateItE->m_u = stateItS->m_u + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
-
-        // Initialize the buffer correctly
-        if((*bodyIt)->m_pSolverData->m_bInContactGraph) {
-            //std::cout << "body in graph"<<std::endl;
-            (*bodyIt)->m_pSolverData->m_uBuffer.m_Back = stateItE->m_u; // This stays the same during the SorProxOverAllNodes
-            (*bodyIt)->m_pSolverData->m_uBuffer.m_Front = stateItE->m_u; // This is the initial value, which is used during iteration
-        }
-
-        // Move iterators
-        bodyIt++;
-        stateItS++;
-        stateItE++;
+    for( bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
+        // All bodies also the ones not in the contact graph...
+        (*bodyIt)->m_pSolverData->m_uBuffer.m_Front += (*bodyIt)->m_pSolverData->m_uBuffer.m_Back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
     }
-
 }
 
 
 template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(const DynamicsState<LayoutConfigType> * state_s, DynamicsState<LayoutConfigType> * state_e,  PREC alpha) {
-
-    // Copy Back to Front and iterate oon Front!
+void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(PREC alpha) {
 
 
     // Calculates b vector for all nodes, u_0, R_ii, ...
@@ -348,25 +328,22 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
         nodeData.m_b = nodeData.m_I_plus_eps.asDiagonal() * nodeData.m_xi;
 
         // u_0 , calculate const b
-        int bodyNr ;
         // First Body
         if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED) {
-            bodyNr = nodeData.m_pCollData->m_pBody1->m_id;
 
             // m_Back contains u_s + M^⁻1*h*deltaT already!
             nodeData.m_u1BufferPtr->m_Front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
 
-            nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body1.transpose() * state_s->m_SimBodyStates[bodyNr].m_u;
+            nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_Back /* m_u_s */ ;
             nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
         }
         // SECOND BODY!
         if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
-            bodyNr = nodeData.m_pCollData->m_pBody2->m_id;
 
             // m_Back contains u_s + M^⁻1*h*deltaT already!
             nodeData.m_u2BufferPtr->m_Front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
 
-            nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() * state_s->m_SimBodyStates[bodyNr].m_u;
+            nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() *  nodeData.m_u1BufferPtr->m_Back;
             nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
         }
 
@@ -388,13 +365,20 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
         LOG(m_pSolverLog, <<  " nodeData.m_mu"<< nodeData.m_mu <<std::endl;);
 #endif
 
+    }
 
+    // Integrate all bodies!
+    typename RigidBodySimPtrListType::iterator bodyIt;
 
+    for( bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
+        // All bodies also the ones not in the contact graph...
+        (*bodyIt)->m_pSolverData->m_uBuffer.m_Front += (*bodyIt)->m_pSolverData->m_uBuffer.m_Back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
+        (*bodyIt)->m_pSolverData->m_uBuffer.m_Back = (*bodyIt)->m_pSolverData->m_uBuffer.m_Front; // Used for cancel criteria
     }
 }
 
 template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx(DynamicsState<LayoutConfigType> * state_e) {
+void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx() {
 
 #if CoutLevelSolverWhenContact>2
     LOG(m_pSolverLog, << " u_e = [ ");
@@ -428,8 +412,6 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx(DynamicsState<Layou
 #if CoutLevelSolverWhenContact>0
             LOG(m_pSolverLog, << " converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_iterationsNeeded <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
 #endif
-
-            sorProxOverAllNodesLast(state_e);
             break;
         }
     }
@@ -652,16 +634,16 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
 
 }
 
-template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodesLast(DynamicsState<LayoutConfigType> * state_e) {
-    // Apply converged u_e to global u_e simulated bodies!
-    // Reset all flags!
-    typename ContactGraphType::BodyToContactsListIteratorType it;
-    for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
-        state_e->m_SimBodyStates[it->first->m_id].m_u = it->first->m_pSolverData->m_uBuffer.m_Front;
-        it->first->m_pSolverData->reset();
-    }
-}
+//template< typename TInclusionSolverConfig >
+//void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodesLast(DynamicsState<LayoutConfigType> * state_e) {
+//    // Apply converged u_e to global u_e simulated bodies!
+//    // Reset all flags!
+//    typename ContactGraphType::BodyToContactsListIteratorType it;
+//    for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
+//        state_e->m_SimBodyStates[it->first->m_id].m_u = it->first->m_pSolverData->m_uBuffer.m_Front;
+//        it->first->m_pSolverData->reset();
+//    }
+//}
 
 
 

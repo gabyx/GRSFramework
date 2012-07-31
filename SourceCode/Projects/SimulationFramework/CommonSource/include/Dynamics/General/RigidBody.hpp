@@ -29,18 +29,32 @@
 */
 /** @{ */
 
+template< typename TLayoutConfig >
+class RigidBodySolverData{
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+
+    public:
+
+    RigidBodySolverData(): m_t(0){};
+
+    ///< The actual time, which belongs to FrontBuffer and m_r_S and I_q_IK
+    PREC m_t;
+};
 
 
 
 /** Class with  Data Structure for the Solver! */
 template< typename TLayoutConfig >
-class RigidBodySolverDataCONoG{
+class RigidBodySolverDataCONoG : public RigidBodySolverData<TLayoutConfig> {
 
     DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
 
     public:
 
-    RigidBodySolverDataCONoG(): m_bInContactGraph(false){};
+    RigidBodySolverDataCONoG(): m_bInContactGraph(false){
+        m_uBuffer.m_Front.setZero();
+        m_uBuffer.m_Back.setZero();
+    };
 
     ///< Flag which determines if this body is in the contact graph!
     bool m_bInContactGraph;
@@ -50,7 +64,12 @@ class RigidBodySolverDataCONoG{
     ///< The front buffer is the velocity which is used to during ONE prox iteration
     FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> m_uBuffer;
 
+    inline void swapBuffer(){
+        m_uBuffer.m_Front.swap(m_uBuffer.m_Back);
+    }
+
     inline void reset(){
+        m_uBuffer.m_Front.setZero();
         m_bInContactGraph = false;
     };
 

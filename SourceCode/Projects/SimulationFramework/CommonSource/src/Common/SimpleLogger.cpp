@@ -45,7 +45,7 @@ LogSinkFile::LogSinkFile(const std::string & sink_name, boost::filesystem::path 
             boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
             filePath /= this->getName() + "fileSink.log";
     }
-    std::cout << filePath.parent_path() <<std::endl;
+    //std::cout << filePath.parent_path() <<std::endl;
     if(!boost::filesystem::exists(filePath.parent_path())){
         boost::filesystem::create_directories(filePath.parent_path());
     }

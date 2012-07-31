@@ -6,8 +6,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 
-#include "LogDefines.hpp"
-#include "TypeDefs.hpp"
+#include "MPI/LogDefines.hpp"
+#include "MPI/TypeDefs.hpp"
 
 #include "SceneParser.hpp"
 

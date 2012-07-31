@@ -37,8 +37,9 @@ int main(int argc, char **argv)
    SimulationManager<GeneralConfig> mgr;
 
    mgr.setup(boost::filesystem::path(sceneFileName));
-   mgr.startSimThread();
-   mgr.waitForSimThread();
+   mgr.startSim();
+
+
    system("pause");
   return 0;
 }

@@ -11,12 +11,11 @@
 #include "DynamicsState.hpp"
 #include "SharedBufferDynSys.hpp"
 #include "StateRecorder.hpp"
-#include "MoreauTimeStepper.hpp"
-#include "InclusionSolverNT.hpp"
-#include "InclusionSolverCO.hpp"
-#include "InclusionSolverCONoG.hpp"
 
-#include "DynamicsSystem.hpp"
+#include "MPI/MoreauTimeStepper.hpp"
+#include "MPI/InclusionSolverCONoG.hpp"
+
+#include "MPI/DynamicsSystem.hpp"
 
 #include "CommonFunctions.hpp"
 #include "QuaternionHelpers.hpp"
@@ -74,13 +73,10 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     // =====================================================
 
 
-    m_pSharedBuffer = boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >(new SharedBufferDynSys<LayoutConfigType>(m_nSimBodies));
-    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys, m_pSharedBuffer) );
+    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys) );
 
 
     m_pStateRecorder = boost::shared_ptr<StateRecorder<LayoutConfigType> >(new StateRecorder<LayoutConfigType>(m_nSimBodies));
-
-    m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());
 
     m_pSimulationLog->logMessage("---> added all objects(): ");
 }

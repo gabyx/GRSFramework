@@ -673,7 +673,7 @@ protected:
         }
 
         // InitialCondition ============================================================
-        element = dynProp->FirstChild("InitialCondition")->ToElement();
+        element = dynProp->FirstChild("InitialPosition")->ToElement();
         distribute = element->GetAttribute("distribute");
         m_SimBodyInitStates.push_back(DynamicsState<LayoutConfigType>((unsigned int)m_bodyList.size()));
         if(distribute == "linear") {
@@ -687,7 +687,7 @@ protected:
         } else if(distribute == "none") {
             // does nothing leaves the zero state pushed!
         } else {
-            throw ticpp::Exception("The attribute 'distribute' '" + distribute + std::string("' of 'InitialCondition' has no implementation in the parser"));
+            throw ticpp::Exception("The attribute 'distribute' '" + distribute + std::string("' of 'InitialPosition' has no implementation in the parser"));
         }
 
         InitialConditionBodies::applyDynamicsStateToBodies(m_SimBodyInitStates.back(), m_bodyList);
@@ -698,7 +698,7 @@ protected:
     void processDynamicPropertiesNotSimulated( ticpp::Node * dynProp) {
 
         // InitialCondition ============================================================
-        ticpp::Element *element = dynProp->FirstChild("InitialCondition")->ToElement();
+        ticpp::Element *element = dynProp->FirstChild("InitialPosition")->ToElement();
         std::string distribute = element->GetAttribute("distribute");
 
         DynamicsState<LayoutConfigType> state((unsigned int)m_bodyList.size());

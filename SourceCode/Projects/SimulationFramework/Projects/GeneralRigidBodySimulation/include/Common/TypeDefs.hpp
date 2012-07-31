@@ -21,6 +21,8 @@ struct MyMatrix{
    typedef TPREC PREC;
    //Static assigned Matrices
    typedef Eigen::Matrix<PREC, 4, 4> Matrix44;
+   typedef Eigen::Matrix<PREC, 4, 3> Matrix43;
+   typedef Eigen::Matrix<PREC, 3, 4> Matrix34;
    typedef Eigen::Matrix<PREC, 3, 3> Matrix33;
    typedef Eigen::Matrix<PREC, 3, 1> Vector3;
    typedef Eigen::Matrix<PREC, 4, 1> Quaternion;
@@ -62,6 +64,8 @@ struct LayoutConfig{
    // Static Vectors/Matrices
    typedef typename MyMatrix< PREC >::Matrix44 Matrix44;
    typedef typename MyMatrix< PREC >::Matrix33 Matrix33;
+   typedef typename MyMatrix< PREC >::Matrix43 Matrix43;
+   typedef typename MyMatrix< PREC >::Matrix34 Matrix34;
    typedef typename MyMatrix< PREC >::Vector3 Vector3;
    typedef typename MyMatrix< PREC >::Vector4 Vector4;
    typedef typename MyMatrix< PREC >::Quaternion Quaternion;
@@ -282,6 +286,8 @@ typedef Config< MySolverConfig > GeneralConfig;
 #define DEFINE_MATRIX_TYPES \
    typedef typename MyMatrix< PREC >::Matrix44 Matrix44; \
    typedef typename MyMatrix< PREC >::Matrix33 Matrix33; \
+   typedef typename MyMatrix< PREC >::Matrix43 Matrix43; \
+   typedef typename MyMatrix< PREC >::Matrix34 Matrix34; \
    typedef typename MyMatrix< PREC >::Vector3 Vector3;   \
    typedef typename MyMatrix< PREC >::Vector4 Vector4;   \
    typedef typename MyMatrix< PREC >::Quaternion Quaternion; \
@@ -351,6 +357,8 @@ typedef Config< MySolverConfig > GeneralConfig;
    typedef typename _LayoutConfigName_::MatrixQObjUObj MatrixQObjUObj; \
    typedef typename _LayoutConfigName_::Matrix44 Matrix44; \
    typedef typename _LayoutConfigName_::Matrix33 Matrix33; \
+   typedef typename _LayoutConfigName_::Matrix43 Matrix43; \
+   typedef typename _LayoutConfigName_::Matrix34 Matrix34; \
    typedef typename _LayoutConfigName_::Vector3 Vector3;   \
    typedef typename _LayoutConfigName_::Vector4 Vector4;   \
    typedef typename _LayoutConfigName_::Quaternion Quaternion; \
@@ -383,6 +391,8 @@ typedef Config< MySolverConfig > GeneralConfig;
    typedef  _LayoutConfigName_::MatrixQObjUObj MatrixQObjUObj; \
    typedef  _LayoutConfigName_::Matrix44 Matrix44; \
    typedef  _LayoutConfigName_::Matrix33 Matrix33; \
+   typedef  _LayoutConfigName_::Matrix43 Matrix43; \
+   typedef  _LayoutConfigName_::Matrix34 Matrix34; \
    typedef  _LayoutConfigName_::Vector3 Vector3;   \
    typedef  _LayoutConfigName_::Vector4 Vector4;   \
    typedef  _LayoutConfigName_::Quaternion Quaternion; \

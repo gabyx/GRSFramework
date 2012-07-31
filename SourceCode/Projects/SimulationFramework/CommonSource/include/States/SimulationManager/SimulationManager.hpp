@@ -16,7 +16,7 @@ template <typename TLayoutConfig> class StateRecorder;
 template< typename TLayoutConfig> class SharedBufferDynSys;
 
 template<typename TConfig>
-class SimulationManager : public SimulationManagerBase
+class SimulationManager
 {
 public:
 
@@ -33,10 +33,7 @@ public:
 
    boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
 
-   void startSimThread();
-   void waitForSimThread();
-
-   void stopSimThread();
+   void startSim();
 
 private:
 
@@ -49,8 +46,6 @@ private:
          double m_EndTime;
    } m_SettingsSimThread;
 
-   void readSharedBuffer();
-   void writeSharedBuffer();
 
    Logging::Log *  m_pSimulationLog;
 

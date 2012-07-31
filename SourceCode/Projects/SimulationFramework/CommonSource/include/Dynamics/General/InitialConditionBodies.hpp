@@ -119,9 +119,38 @@ void applyDynamicsStateToBodies(const DynamicsState<TLayoutConfig> & state, std:
     for(int i=0; i < bodies.size(); i++){
       bodies[i]->m_r_S = state.m_SimBodyStates[i].m_q.template head<3>();
       bodies[i]->m_q_KI= state.m_SimBodyStates[i].m_q.template tail<4>();
+
+      if(bodies[i]->m_eState == TRigidBody::SIMULATED){
+         bodies[i]->m_pSolverData->m_uBuffer.m_Back = state.m_SimBodyStates[i].m_u;
+         bodies[i]->m_pSolverData->m_t = state.m_t;
+      }
+
       bodies[i]->m_A_IK= getRotFromQuaternion<>(bodies[i]->m_q_KI);
     }
 }
+
+template<typename TLayoutConfig, typename TRigidBody>
+void applyBodiesToDynamicsState(const std::vector<boost::shared_ptr<TRigidBody > > & bodies, DynamicsState<TLayoutConfig> & state ){
+    ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
+
+    typename std::vector<boost::shared_ptr<TRigidBody > >::const_iterator bodyIt;
+    typename  DynamicsState<TLayoutConfig>::RigidBodyStateListType::iterator stateBodyIt = state.m_SimBodyStates.begin();
+    TRigidBody * pBody;
+
+    for(bodyIt = bodies.begin(); bodyIt != bodies.end() ; bodyIt++){
+      pBody = (*bodyIt).get();
+
+       stateBodyIt->m_q.template head<3>() = pBody->m_r_S;
+       stateBodyIt->m_q.template tail<4>() = pBody->m_q_KI;
+
+      if(pBody->m_pSolverData){
+         stateBodyIt->m_u = pBody->m_pSolverData->m_uBuffer.m_Back;
+      }
+
+      stateBodyIt++;
+    }
+}
+
 
 
 };

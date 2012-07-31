@@ -27,6 +27,9 @@ App::~App()
 void App::startApp()
 {
 
+      new FileManager();
+      new Logging::LogManager();
+
 	new RenderContext();
 	if(!RenderContext::getSingletonPtr()->initOgre("RigidBodySimulation v1.0"))
 		return;
@@ -49,8 +52,7 @@ void App::startApp()
 	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("GuiContext initialized!");
 
 
-  new FileManager();
-  new Logging::LogManager();
+
 
 
    SimulationState::create(m_pAppStateManager, "SimulationState");

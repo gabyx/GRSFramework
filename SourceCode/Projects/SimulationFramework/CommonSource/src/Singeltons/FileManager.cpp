@@ -1,6 +1,5 @@
 ﻿#include "FileManager.hpp"
 
-#include "RenderContext.hpp"
 
 #include "LogDefines.hpp"
 

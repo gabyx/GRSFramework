@@ -24,20 +24,20 @@ protected:
 
 public:
     Singleton( void ) {
-        WARNINGMSG( ms_Singleton == 0 , "ms_Singleton == 0 : " << typeid(*ms_Singleton).name());
+        WARNINGMSG( ms_Singleton == 0 , "ms_Singleton != 0 : " << typeid(*ms_Singleton).name());
         ms_Singleton = static_cast< T* >( this );
     }
     ~Singleton( void ) {
-        WARNINGMSG( ms_Singleton ,"ms_Singleton != 0 : " << typeid(*ms_Singleton).name());
+        WARNINGMSG( ms_Singleton ,"ms_Singleton == 0 : " << typeid(*ms_Singleton).name());
         ms_Singleton = 0;
     }
 
     static T& getSingleton( void ) {
-        WARNINGMSG( ms_Singleton ,"ms_Singleton != 0 : " << typeid(*ms_Singleton).name());
+        WARNINGMSG( ms_Singleton ,"ms_Singleton == 0 : " << typeid(*ms_Singleton).name());
         return ( *ms_Singleton );
     }
     static T* getSingletonPtr( void ) {
-        WARNINGMSG( ms_Singleton ,"ms_Singleton != 0 : " << typeid(*ms_Singleton).name());
+        WARNINGMSG( ms_Singleton ,"ms_Singleton == 0 : " << typeid(*ms_Singleton).name());
         return ms_Singleton;
     }
 };

@@ -109,28 +109,28 @@ set(EIGEN_INCLUDE_DIR ${EIGEN3_INCLUDE_DIR})
 # Find Boost ====================================================================================================================================================
 message(STATUS "BOOST_ROOT is set to: $ENV{BOOST_ROOT}")
 if (WIN32 OR APPLE)
-	set(Boost_USE_STATIC_LIBS TRUE)
+    set(Boost_USE_STATIC_LIBS TRUE)
 else ()
-	# Statically linking boost to a dynamic Ogre build doesn't work on Linux 64bit
-	set(Boost_USE_STATIC_LIBS ${OGRE_STATIC})
+    # Statically linking boost to a dynamic Ogre build doesn't work on Linux 64bit
+    set(Boost_USE_STATIC_LIBS ${OGRE_STATIC})
 endif ()
 if (APPLE)
-	if(OGRE_BUILD_PLATFORM_IPHONE)
-		set(Boost_COMPILER "-xgcc42")
-	endif()
+    if(OGRE_BUILD_PLATFORM_IPHONE)
+        set(Boost_COMPILER "-xgcc42")
+    endif()
 endif()
 set(Boost_ADDITIONAL_VERSIONS "1.46" "1.46.0" "1.46.1" "1.45" "1.45.0" "1.44" "1.44.0" "1.42" "1.42.0" "1.41.0" "1.41" "1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37" )
 # Components that need linking (NB does not include header-only components like bind)
 set(OGRE_BOOST_COMPONENTS thread date_time system filesystem timer chrono)
 find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} QUIET)
 if (NOT Boost_FOUND)
-	# Try again with the other type of libs
-	if(Boost_USE_STATIC_LIBS)
-		set(Boost_USE_STATIC_LIBS)
-	else()
-		set(Boost_USE_STATIC_LIBS ON)
-	endif()
-	find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} QUIET)
+    # Try again with the other type of libs
+    if(Boost_USE_STATIC_LIBS)
+        set(Boost_USE_STATIC_LIBS)
+    else()
+        set(Boost_USE_STATIC_LIBS ON)
+    endif()
+    find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} QUIET)
 endif()
 find_package(Boost QUIET)
 # ===============================================================================================================================================================
@@ -211,21 +211,18 @@ MESSAGE(STATUS "Added ${MYPROJECT_CXX_FLAGS} to CMAKE_CXX and CMAKE_C_FLAGS: ${C
 
 #set common includes for all projects which need them
 
-PRINTLIST("Common File Includes are:" "${COMMON_FILES_INC}")
-PRINTLIST("Common File Sources are:" "${COMMON_FILES_SRC}")
-set(COMMON_SOURCE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CommonSource/include")
-
+set(COMMONSOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CommonSource")
 
 add_subdirectory(Projects/GeneralRigidBodySimulation)
 add_subdirectory(Projects/GeneralRigidBodySimulationNoGUI)
-add_subdirectory(Projects/GeneralRigidBodySimulationMPI)
+#add_subdirectory(Projects/GeneralRigidBodySimulationMPI)
 
 # Copy Media Files to Project folder
 # message(STATUS "Copying Media Content to " ${CMAKE_BINARY_DIR}/Projects/)
 # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Projects/media DESTINATION ${CMAKE_BINARY_DIR}/Projects/)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Projects/media
-		DESTINATION ${CMAKE_BINARY_DIR}/Projects/
-		CONFIGURATIONS Debug Release
+        DESTINATION ${CMAKE_BINARY_DIR}/Projects/
+        CONFIGURATIONS Debug Release
 )
 

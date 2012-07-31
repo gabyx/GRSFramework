@@ -1,9 +1,13 @@
 ﻿#ifndef StatePoolVisBackFront_hpp
 #define StatePoolVisBackFront_hpp
 
+
+#include "LogDefines.hpp"
+
 #include "StatePool.hpp"
 #include "FrontBackBuffer.hpp"
-#include "LogDefines.hpp"
+
+#include "FileManager.hpp"
 
 
 /**

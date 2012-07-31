@@ -90,7 +90,7 @@ SET(STATES_SRC
 SET(COMMON_INC
 	${SOURCE_DIR}/include/Common/foreach_macro.hpp
 	${SOURCE_DIR}/include/Common/AssertionDebug.hpp
-	${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/MPI/TypeDefs.hpp
 	${SOURCE_DIR}/include/Common/PlatformDefines.hpp
 	${SOURCE_DIR}/include/Common/CommonFunctions.hpp
 	${SOURCE_DIR}/include/Common/MeshData.hpp
@@ -102,7 +102,7 @@ SET(COMMON_INC
 	${SOURCE_DIR}/include/Common/VectorToSkewMatrix.hpp
         ${SOURCE_DIR}/include/Common/MatrixHelpers.hpp
 	${SOURCE_DIR}/include/Common/QuaternionHelpers.hpp
-	${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
+	${PROJECT_SOURCE_DIR}/include/Common/MPI/LogDefines.hpp
         ${SOURCE_DIR}/include/Common/TypenameComparision.hpp
 	${SOURCE_DIR}/include/Common/MultiBodySimFile.hpp
         ${SOURCE_DIR}/include/Common/BinaryFile.hpp
@@ -118,9 +118,9 @@ SET(COMMON_SRC
 )
 
 SET(DYNAMICS_INC
-        ${SOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
+        ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPI/DynamicsSystem.hpp
 	${SOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
-	${SOURCE_DIR}/include/Dynamics/General/MoreauTimeStepper.hpp
+	${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPI/MoreauTimeStepper.hpp
         ${SOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
         ${SOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
         ${SOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
@@ -140,9 +140,9 @@ SET(DYNAMICS_INC
         ${SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
         ${SOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
 	${SOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
-	${SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
-	${SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
-        ${SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCONoG.hpp
+#	${SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
+#	${SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
+        ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/MPI/InclusionSolverCONoG.hpp
 	${SOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
         ${SOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
 	${SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettings.hpp
@@ -223,23 +223,23 @@ set(INCLUDE_DIRS
         ${ASSIMP_INCLUDE_DIR}
         ${MPI_CXX_INCLUDE_PATH}
 
-#       ${PROJECT_SOURCE_DIR}/include
+       ${PROJECT_SOURCE_DIR}/include
 #	${PROJECT_SOURCE_DIR}/include/App
 	${PROJECT_SOURCE_DIR}/include/Common
-#	${PROJECT_SOURCE_DIR}/include/Dynamics
-#       ${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers
-#       ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision
-#       ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry
-#       ${PROJECT_SOURCE_DIR}/include/Dynamics/General
-#       ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion
-#	${PROJECT_SOURCE_DIR}/include/Systems
-#	${PROJECT_SOURCE_DIR}/include/Singeltons
-#	${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts
-#	${PROJECT_SOURCE_DIR}/include/States
+	${PROJECT_SOURCE_DIR}/include/Dynamics
+       ${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers
+       ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision
+       ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry
+       ${PROJECT_SOURCE_DIR}/include/Dynamics/General
+       ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion
+	${PROJECT_SOURCE_DIR}/include/Systems
+	${PROJECT_SOURCE_DIR}/include/Singeltons
+	${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts
+	${PROJECT_SOURCE_DIR}/include/States
         ${PROJECT_SOURCE_DIR}/include/States/SimulationManager
 
 	${SOURCE_DIR}/include
-	${SOURCE_DIR}/include/App
+#	${SOURCE_DIR}/include/App
 	${SOURCE_DIR}/include/Common
         ${SOURCE_DIR}/include/Common/SRDelegates/include/
 	${SOURCE_DIR}/include/Dynamics

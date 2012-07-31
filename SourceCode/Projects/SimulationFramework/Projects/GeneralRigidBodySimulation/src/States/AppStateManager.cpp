@@ -1,4 +1,4 @@
-﻿#include "States/AppStateManager.hpp"
+﻿#include "AppStateManager.hpp"
 
 #include "LogDefines.hpp"
 #include "PlatformDefines.hpp"
@@ -138,7 +138,7 @@ void AppStateManager::start(boost::shared_ptr<AppState> state)
          if(!m_ActiveStateStack.empty()){
 			   m_ActiveStateStack.back()->update(timeSinceLastFrame);
          }
-         
+
 
 			RenderContext::getSingletonPtr()->updateOgre(timeSinceLastFrame);
 

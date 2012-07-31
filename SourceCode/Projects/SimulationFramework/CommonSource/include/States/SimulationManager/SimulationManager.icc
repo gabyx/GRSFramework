@@ -4,6 +4,9 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include <boost/timer/timer.hpp>
+
+
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
@@ -30,8 +33,7 @@ using namespace std;
 
 
 template<typename TConfig>
-SimulationManager<TConfig>::SimulationManager():
-SimulationManagerBase()
+SimulationManager<TConfig>::SimulationManager()
 {
 
     m_pSimulationLog = NULL;
@@ -96,8 +98,7 @@ void SimulationManager<TConfig>::threadRunRecord()
 
   static double timelineSimulation;
 
-  m_pSimulationLog->logMessage(" SimulationManager: RecordThread entering...");
-  setSimThreadRunning(true);
+  m_pSimulationLog->logMessage(" SimulationManager: Simulation entering...");
 
 
   initRecordThread();
@@ -121,22 +122,19 @@ void SimulationManager<TConfig>::threadRunRecord()
       m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
     }
     // wait for vis thread! (which does some loops before)
+    boost::timer::cpu_timer global_time;
+    global_time.start();
 
-    resetTimelineSimulation();
-
-    while(!isSimThreadToBeStopped())
+    while(1)
     {
 
 
-      // Read all inputs
-      readSharedBuffer();
+
       // Do one iteration
       m_pTimestepper->doOneIteration();
-      // Write outputs
-      writeSharedBuffer();
 
       // get global time for logging!
-      timelineSimulation = getTimelineSimulation();
+      timelineSimulation = ((double)global_time.elapsed().wall)*1e-9;
       // Write Data to SystemDataFile (maps all data to back buffer!)
       m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
       // Write Data to CollisionDataFile
@@ -154,8 +152,7 @@ void SimulationManager<TConfig>::threadRunRecord()
     cleanUpRecordThread();
   }
 
-  setSimThreadRunning(false);
-  m_pSimulationLog->logMessage(" SimulationManager: RecordThread leaving...");
+  m_pSimulationLog->logMessage(" SimulationManager: Simulation leaving...");
   return;
 }
 template<typename TConfig>
@@ -186,65 +183,10 @@ void SimulationManager<TConfig>::cleanUpRecordThread(){
    m_pStateRecorder->closeSimFile();
 }
 
-
 template<typename TConfig>
-void SimulationManager<TConfig>::readSharedBuffer(){
-
-}
-
-template<typename TConfig>
-void SimulationManager<TConfig>::writeSharedBuffer(){
-  static int iterations = 0;
-  iterations++;
-
-  //if(iterations%100==0){
-    setIterationTime(m_pTimestepper->m_AvgTimeForOneIteration, m_pTimestepper->m_MaxTimeForOneIteration);
-    setNumberOfContacts(m_pTimestepper->m_pInclusionSolver->m_nContacts);
-
-  //}
-
-}
-
-template<typename TConfig>
-void SimulationManager<TConfig>::startSimThread()
+void SimulationManager<TConfig>::startSim()
 {
-
-  // TODO Switch Update function to the SimThread update!
-
-  if (!isSimThreadRunning())
-  {
-
-    setThreadToBeStopped(false);
-
-    //Start Dynamics Thread===========================================
-      m_pThread = new boost::thread( boost::bind(&SimulationManager<TConfig>::threadRunRecord, &*this) );
-      m_eSimThreadRunning = SimulationManagerBase::RECORD;
-      m_pSimulationLog->logMessage(" SimulationManager:: Start Thread: SimThread in RECORD mode started ...");
-
-  }else{
-    m_pSimulationLog->logMessage("SimulationManager:: A SimThread is already running!");
-  }
+  threadRunRecord();
 }
 
 
-template<typename TConfig>
-void SimulationManager<TConfig>::waitForSimThread(){
-    m_pThread->join();
-    m_eSimThreadRunning = SimulationManagerBase::NONE;
-}
-
-template<typename TConfig>
-void SimulationManager<TConfig>::stopSimThread()
-{
-
-  if (isSimThreadRunning())
-  {
-    setThreadToBeStopped(true);
-    m_pThread->join();
-    m_pSimulationLog->logMessage("SimulationManager:: Stop Thread: SimThread has been stopped!");
-
-    m_eSimThreadRunning = SimulationManagerBase::NONE;
-  }else{
-    m_pSimulationLog->logMessage("SimulationManager:: Stop Thread: SimThread is not running!");
-  }
-}
