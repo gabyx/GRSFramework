@@ -84,6 +84,10 @@ public:
         return *this;
     };
 
+    Vector3 extent() const{
+        return m_maxPoint - m_minPoint;
+    };
+
     AABB & transform(const Matrix44 & M) {
 
         AABB ret(M * (Vector3( m_minPoint(0), m_minPoint(1), m_minPoint(2))));

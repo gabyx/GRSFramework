@@ -42,7 +42,7 @@ public:
     const MyMatrix<unsigned int>::Vector3 getCellIndex(const Vector3 & point) const {
         ASSERTMSG(m_Box.inside(point),"Point is not inside the Grid!");
         MyMatrix<unsigned int>::Vector3 v;
-        v.array() =  ((point - m_Box.m_minPoint).array()) / m_Box.extent().array();
+        v.array() =  (((point - m_Box.m_minPoint).array()) / m_Box.extent().array()).template cast<unsigned int>();
         return v;
     };
 
