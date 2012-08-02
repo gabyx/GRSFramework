@@ -1,7 +1,8 @@
-﻿#ifndef DynamicsSystem_hpp
-#define DynamicsSystem_hpp
+﻿#ifndef DynamicsSystemMPI_hpp
+#define DynamicsSystemMPI_hpp
 
 #include <vector>
+#include <list>
 #include <Eigen/Core>
 #include <Eigen/LU>
 
@@ -34,14 +35,13 @@ public:
     double m_gravity;
     Vector3 m_gravityDir;
 
-    std::vector< boost::shared_ptr<RigidBodyType > > m_SimBodies; // Simulated Objects
-    std::vector< boost::shared_ptr<RigidBodyType > > m_Bodies;    // all not simulated objects
+    typedef std::list< boost::shared_ptr< RigidBodyType > > RigidBodySimPtrListType;
+    RigidBodySimPtrListType m_SimBodies; // Simulated Objects
+    typedef std::list< boost::shared_ptr< RigidBodyType > > RigidBodyNotAniPtrListType;
+    RigidBodyNotAniPtrListType m_Bodies;    // all not simulated objects
 
     void init(); // Only call if Timestepper has been created
     void initializeLog(Logging::Log* pLog);
-
-    inline void applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state);
-    inline void applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state);
 
     void init_MassMatrix(); // MassMatrix is const
     void init_MassMatrixInv(); // MassMatrix is const
@@ -132,15 +132,6 @@ void DynamicsSystem<TDynamicsSystemConfig>::initializeLog(Logging::Log* pLog) {
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::reset(){
 
-}
-
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state){
-    InitialConditionBodies::applyBodiesToDynamicsState(m_SimBodies,state);
-}
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state){
-    InitialConditionBodies::applyDynamicsStateToBodies(state,m_SimBodies);
 }
 
 template<typename TDynamicsSystemConfig>

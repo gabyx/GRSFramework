@@ -62,31 +62,31 @@ public:
    };
 
 
-   void setup(size_t &vertex_count,
-      Ogre::Vector3* vertices,
-      size_t &index_count,
-      unsigned long* indices, double scale)
-   {
-      // If we add more Objects we need an Offset for the Indices
-      std::size_t indices_offset = m_Vertices.size();
-
-      Vector3 temp;
-      for (int i=0;i<vertex_count;i++){
-         temp << vertices[i].x/(Ogre::Real)scale, vertices[i].y/(Ogre::Real)scale, vertices[i].z/(Ogre::Real)scale;
-         m_Vertices.push_back(temp);
-      }
-
-      for (int i=0;i<index_count;i+=3){
-         Eigen::Matrix<unsigned long,3,1> temp;
-         temp << (unsigned long)(indices[i]+indices_offset), (unsigned long)(indices[i+1]+indices_offset), (unsigned long)(indices[i+2]+indices_offset);
-         m_Faces.push_back(temp);
-         //Calculate the normal to each triangle:
-         //m_Normals.push_back(Ogre::Math::calculateBasicFaceNormal(m_Vertices[indices[i]],m_Vertices[indices[i+1]],m_Vertices[indices[i+2]]));
-      }
-
-
-
-   };
+//   void setup(size_t &vertex_count,
+//      Ogre::Vector3* vertices,
+//      size_t &index_count,
+//      unsigned long* indices, double scale)
+//   {
+//      // If we add more Objects we need an Offset for the Indices
+//      std::size_t indices_offset = m_Vertices.size();
+//
+//      Vector3 temp;
+//      for (int i=0;i<vertex_count;i++){
+//         temp << vertices[i].x/(Ogre::Real)scale, vertices[i].y/(Ogre::Real)scale, vertices[i].z/(Ogre::Real)scale;
+//         m_Vertices.push_back(temp);
+//      }
+//
+//      for (int i=0;i<index_count;i+=3){
+//         Eigen::Matrix<unsigned long,3,1> temp;
+//         temp << (unsigned long)(indices[i]+indices_offset), (unsigned long)(indices[i+1]+indices_offset), (unsigned long)(indices[i+2]+indices_offset);
+//         m_Faces.push_back(temp);
+//         //Calculate the normal to each triangle:
+//         //m_Normals.push_back(Ogre::Math::calculateBasicFaceNormal(m_Vertices[indices[i]],m_Vertices[indices[i+1]],m_Vertices[indices[i+2]]));
+//      }
+//
+//
+//
+//   };
 
    bool setup( Assimp::Importer & importer, const aiScene* scene, Vector3 scale_factor, Quaternion quat, Vector3 trans){
     Matrix33 Rot_KI = getRotFromQuaternion(quat);

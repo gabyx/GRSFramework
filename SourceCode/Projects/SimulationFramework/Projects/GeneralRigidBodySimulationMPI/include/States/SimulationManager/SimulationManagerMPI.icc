@@ -3,19 +3,19 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
-#include <RenderContext.hpp>
 
 #include "DynamicsState.hpp"
 #include "SharedBufferDynSys.hpp"
 #include "StateRecorder.hpp"
 
-#include "MPI/MoreauTimeStepper.hpp"
-#include "MPI/InclusionSolverCONoG.hpp"
+#include "MoreauTimeStepperMPI.hpp"
+#include "InclusionSolverCONoGMPI.hpp"
 
-#include "MPI/DynamicsSystem.hpp"
+#include "DynamicsSystemMPI.hpp"
 
 #include "CommonFunctions.hpp"
 #include "QuaternionHelpers.hpp"
@@ -61,15 +61,17 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
         m_pSimulationLog->logMessage("Creating SimulationManager...");
     }
 
+    m_pSimulationLog->logMessage("---> SimulationManager::setup(): ");
 
     m_pDynSys = boost::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
 
     // Parse the Scene from XML! ==========================
-    m_pSceneParser = boost::shared_ptr< SceneParser<TConfig> >( new SceneParser<TConfig>( m_pDynSys) );
+    m_pSceneParser = boost::shared_ptr< SceneParser<TConfig> >( new SceneParser<TConfig>( m_pDynSys, m_MPIProcInfo) );
 
     m_pSceneParser->parseScene(sceneFilePathNew);
 
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
+    LOG(m_pSimulationLog, << "---> Scene parsing finshed: Added "<< m_nSimBodies << " Bodies!");
     // =====================================================
 
 
@@ -78,7 +80,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     m_pStateRecorder = boost::shared_ptr<StateRecorder<LayoutConfigType> >(new StateRecorder<LayoutConfigType>(m_nSimBodies));
 
-    m_pSimulationLog->logMessage("---> added all objects(): ");
+    m_pSimulationLog->logMessage("---> setup finished! ");
 }
 
 

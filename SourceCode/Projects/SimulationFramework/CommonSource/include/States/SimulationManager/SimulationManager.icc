@@ -10,8 +10,6 @@
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
-#include <RenderContext.hpp>
-
 #include "DynamicsState.hpp"
 #include "SharedBufferDynSys.hpp"
 #include "StateRecorder.hpp"
@@ -127,8 +125,6 @@ void SimulationManager<TConfig>::threadRunRecord()
 
     while(1)
     {
-
-
 
       // Do one iteration
       m_pTimestepper->doOneIteration();

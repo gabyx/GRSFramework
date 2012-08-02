@@ -47,9 +47,9 @@ class RigidBodySolverData{
 template< typename TLayoutConfig >
 class RigidBodySolverDataCONoG : public RigidBodySolverData<TLayoutConfig> {
 
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
-
     public:
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
     RigidBodySolverDataCONoG(): m_bInContactGraph(false){
         m_uBuffer.m_Front.setZero();
@@ -82,7 +82,7 @@ public:
 
   typedef TRigidBodyConfig RigidBodyConfigType;
   DEFINE_RIGIDBODY_CONFIG_TYPES_OF(TRigidBodyConfig);
-
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   enum BodyState{
      SIMULATED,

@@ -6,15 +6,15 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 
-#include "MPI/LogDefines.hpp"
-#include "MPI/TypeDefs.hpp"
+#include "LogDefines.hpp"
+#include "TypeDefs.hpp"
 
-#include "SceneParser.hpp"
+#include "SceneParserMPI.hpp"
+
+#include "MPIInformation.hpp"
 
 template <typename TLayoutConfig> class DynamicsState;
 template <typename TLayoutConfig> class StateRecorder;
-template< typename TLayoutConfig> class SharedBufferDynSys;
-
 
 
 template<typename TConfig>
@@ -27,7 +27,6 @@ public:
     SimulationManagerMPI();
    ~SimulationManagerMPI();
 
-   boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >	    m_pSharedBuffer;
    boost::shared_ptr<StateRecorder<LayoutConfigType> >		    m_pStateRecorder;
 
    void setup();
@@ -56,6 +55,8 @@ private:
    // File Paths for one Simulation, always reset ==============================
    boost::filesystem::path m_SimFolderPath;
    boost::filesystem::path m_SimFilePath;
+
+   MPILayer::ProcessInformation<LayoutConfigType> m_MPIProcInfo;
 };
 
 

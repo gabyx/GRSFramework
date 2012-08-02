@@ -225,13 +225,13 @@ set(INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/include/App
     
     #Linked Source
-    ${SOURCE_DIR}/include/App
+    #${SOURCE_DIR}/include/App
     ${SOURCE_DIR}/include/Common
-    ${SOURCE_DIR}/include/Singeltons/Contexts
-    ${SOURCE_DIR}/include/Singeltons/
-    ${SOURCE_DIR}/include/States
-    ${SOURCE_DIR}/include/States/SimulationManager
-    ${SOURCE_DIR}/include/Systems
+    #${SOURCE_DIR}/include/Singeltons/Contexts
+    #${SOURCE_DIR}/include/Singeltons/
+    #${SOURCE_DIR}/include/States
+    #${SOURCE_DIR}/include/States/SimulationManager
+    #${SOURCE_DIR}/include/Systems
     
     ${COMMONSOURCE_DIR}/include/Common
     ${COMMONSOURCE_DIR}/include/Common/SRDelegates/include/

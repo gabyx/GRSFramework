@@ -49,14 +49,13 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
-    MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState);
+    MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys);
     ~MoreauTimeStepper();
 
     // The Core Objects ==================================
     boost::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
     boost::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
     boost::shared_ptr<DynamicsSystemType>	  m_pDynSys;
-    boost::shared_ptr<StatePoolType>		  m_pStatePool;
     // ===================================================
 
     void initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile="");
@@ -129,12 +128,12 @@ protected:
 definitions of template class MoreauTimeStepper
 _________________________________________________________*/
 #include <iostream>
-#include "DynamicsSystem.hpp"
+#include "DynamicsSystemMPI.hpp"
 
 #include "LogDefines.hpp"
 
 template< typename TConfigTimeStepper>
-MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState):
+MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys):
     m_state_m(nSimBodies),
     m_nSimBodies(nSimBodies),
     m_nDofqObj(NDOFqObj),
@@ -143,9 +142,6 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nS
     m_nDofu(m_nSimBodies * m_nDofuObj) {
 
     m_pSolverLog = NULL;
-
-    // Instanciate all Core Objects
-    m_pStatePool = pSysState;
 
     m_pDynSys = pDynSys;
     m_pDynSys->init();
@@ -239,37 +235,12 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
     //set standart values for parameters
     m_IterationCounter = 0;
 
-    m_pStatePool->resetStatePool(); // Sets initial values to front and back;
-
-    m_StateBuffers = m_pStatePool->getFrontBackBuffer();
-
     m_pDynSys->reset();
     m_pDynSys->getSettings(m_Settings, m_pInclusionSolver->m_Settings);
 
     m_pCollisionSolver->reset();
     m_pInclusionSolver->reset();
 
-
-    if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::NONE) {
-
-        if(!m_ReferenceSimFile.openSimFileRead(m_Settings.m_simStateReferenceFile,m_nSimBodies,true)) {
-            std::stringstream error;
-            error << "Could not open file: " << m_Settings.m_simStateReferenceFile.string()<<std::endl;
-            error << "File errors: " <<std::endl<< m_ReferenceSimFile.getErrorString();
-            m_pSolverLog->logMessage( error.str());
-            ERRORMSG(error);
-        }
-
-        if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::CONTINUE) {
-            //Inject the end state into the front buffer
-            m_ReferenceSimFile.getEndState(*m_StateBuffers.m_pFront);
-        }
-
-    }
-    //m_ReferenceSimFile.writeOutAllStateTimes();
-
-    //Write the Front buffer which contains the initial values to all bodies!
-    m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
 
     m_AvgTimeForOneIteration = 0;
     m_MaxTimeForOneIteration = 0;
@@ -322,15 +293,6 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     //Force switch
     //boost::thread::yield();
 
-    // If we should load the state from a reference file! Do this here!
-    if(m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::USE_STATES && !m_bFinished) {
-        m_ReferenceSimFile >> m_StateBuffers.m_pFront.get();
-        m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
-    }
-
-
-    // Swap front and back buffers!
-    swapStateBuffers();
 
 
     //Calculate Midpoint Rule ============================================================
@@ -369,10 +331,6 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     m_pDynSys->afterSecondTimeStep();
     // ====================================================================================
 
-
-    // Apply all rigid body local states to the Front buffer and set the time!
-    m_StateBuffers.m_pFront->m_t= m_StateBuffers.m_pBack->m_t + m_Settings.m_deltaT;
-    m_pDynSys->applySimBodiesToDynamicsState(*m_StateBuffers.m_pFront);
 
 
 #if CoutLevelSolver>1
@@ -442,11 +400,6 @@ void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToCollisionDataFile(
     averageOverlap /= nContacts;
     m_CollisionDataFile<< (double)averageOverlap;
 #endif
-}
-
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::swapStateBuffers() {
-    m_StateBuffers = m_pStatePool->swapFrontBackBuffer();
 }
 
 #endif

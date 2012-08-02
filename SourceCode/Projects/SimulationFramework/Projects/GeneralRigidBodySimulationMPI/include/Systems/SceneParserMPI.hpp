@@ -1,5 +1,5 @@
-#ifndef SceneParser_hpp
-#define SceneParser_hpp
+#ifndef SceneParserMPI_hpp
+#define SceneParserMPI_hpp
 
 #include <fstream>
 
@@ -21,7 +21,9 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
-#include "DynamicsSystem.hpp"
+#include "MPIInformation.hpp"
+
+#include "DynamicsSystemMPI.hpp"
 
 #include "CommonFunctions.hpp"
 #include "QuaternionHelpers.hpp"
@@ -48,14 +50,13 @@ public:
 
     DEFINE_CONFIG_TYPES_OF(TConfig)
 
-    SceneParser(boost::shared_ptr<DynamicsSystemType> pDynSys)
-        : m_pDynSys(pDynSys) {
+    SceneParser(boost::shared_ptr<DynamicsSystemType> pDynSys, MPILayer::ProcessInformation<LayoutConfigType> & procInfo)
+        : m_pDynSys(pDynSys), m_procInfo(procInfo) {
 
         m_pSimulationLog = NULL;
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
         ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
 
-        m_bParseDynamics = true;
         m_SimBodies = 0;
     }
 
@@ -87,6 +88,9 @@ public:
             m_xmlRootNode = m_xmlDoc.FirstChild("DynamicsSystem");
             if(m_xmlRootNode) {
                 ticpp::Node *node = NULL;
+
+                node = m_xmlRootNode->FirstChild("MPISettings");
+                processMPISettings(node);
 
                 node = m_xmlRootNode->FirstChild("SceneSettings");
                 processSceneSettings(node);
@@ -132,14 +136,43 @@ protected:
         m_pSimulationLog = NULL;
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
         ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
-        m_bParseDynamics = false;
         m_SimBodies = 0;
     }
 
+    void processMPISettings( ticpp::Node *mpiSettings ) {
+            ticpp::Element *topo = mpiSettings->FirstChild("ProcessTopology",true)->ToElement();
 
+            std::string type = topo->GetAttribute("type");
+            if(type=="Grid"){
+
+                Vector3 minPoint, maxPoint;
+                if(!Utilities::stringToVector3<PREC>(minPoint,  topo->GetAttribute("minPoint"))) {
+                    throw ticpp::Exception("String conversion in processMPISettings: minPoint failed");
+                }
+                if(!Utilities::stringToVector3<PREC>(maxPoint,  topo->GetAttribute("maxPoint"))) {
+                    throw ticpp::Exception("String conversion in processMPISettings: maxPoint failed");
+                }
+                MyMatrix<unsigned int>::Vector3 dim;
+                if(!Utilities::stringToVector3<unsigned int>(dim,  topo->GetAttribute("dimension"))) {
+                    throw ticpp::Exception("String conversion in processMPISettings: dimension failed");
+                }
+
+                // saftey check
+                if(dim(0)*dim(1)*dim(2) != m_procInfo.getNProcesses()){
+                    LOG(m_pSimulationLog,<< "You have launched to many processes for the grid: ("<< dim << ")"<< "with: " << m_procInfo.getNProcesses() <<"Processes"<<std::endl; );
+                    throw ticpp::Exception("You have launched to many processes for the grid!");
+                }
+
+                m_procInfo.m_ProcTopo = MPILayer::ProcessTopologyGrid<LayoutConfigType>(minPoint,maxPoint,dim,m_procInfo.getRank());
+
+            }else{
+                throw ticpp::Exception("String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
+            }
+
+    }
 
     void processSceneSettings( ticpp::Node *sceneSettings ) {
-        if(m_bParseDynamics) {
+
 
             ticpp::Element *gravityElement = sceneSettings->FirstChild("Gravity",true)->ToElement();
             m_pDynSys->m_gravity = gravityElement->GetAttribute<double>("value");
@@ -273,10 +306,6 @@ protected:
             //Write all values back
             m_pDynSys->setSettings(timestepperSettings,inclusionSettings);
 
-
-
-        }
-
     }
 
 
@@ -332,18 +361,23 @@ protected:
 
         //Copy the pointers!
         if(m_eBodiesState == RigidBodyType::SIMULATED) {
-            if(m_bParseDynamics) {
-                for(int i=0; i < m_bodyList.size(); i++) {
-                    m_pDynSys->m_SimBodies.push_back(m_bodyList[i]);
+
+                typename std::vector<boost::shared_ptr< RigidBodyType > >::iterator bodyIt;
+
+                for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
+                    // Check if Body belongs to the topology! // Check CoG!
+                    if(m_procInfo.m_ProcTopo.belongsPointToProcess((*bodyIt)->m_r_S)){
+                        m_pDynSys->m_SimBodies.push_back((*bodyIt));
+                        m_SimBodies++;
+                    }
                 }
-            }
-            m_SimBodies += instances;
+
+
         } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
-            if(m_bParseDynamics) {
+
                 for(int i=0; i < m_bodyList.size(); i++) {
                     m_pDynSys->m_Bodies.push_back(m_bodyList[i]);
                 }
-            }
         } else {
             throw ticpp::Exception("Adding only simulated and not simulated objects supported!");
         }
@@ -357,8 +391,8 @@ protected:
 
 
 
-
-
+        m_bodyList.clear();
+        m_bodyListScales.clear();
     }
 
     void processGeometry( ticpp::Node * geometryNode) {
@@ -672,7 +706,12 @@ protected:
             throw ticpp::Exception("The attribute 'distribute' '" + distribute + std::string("' of 'Material' has no implementation in the parser"));
         }
 
-         // InitialCondition ============================================================
+        // InitialCondition ============================================================
+        element = dynProp->FirstChild("InitialPosition")->ToElement();
+
+
+
+        // InitialCondition ============================================================
         element = dynProp->FirstChild("InitialPosition")->ToElement();
         distribute = element->GetAttribute("distribute");
 
@@ -688,12 +727,13 @@ protected:
         } else if(distribute == "transforms") {
             processInitialConditionTransforms(state,element);
         } else if(distribute == "none") {
-            // does nothing leaves the zero state pushed!
+            // leave zero state
         } else {
             throw ticpp::Exception("The attribute 'distribute' '" + distribute + std::string("' of 'InitialCondition' has no implementation in the parser"));
         }
 
         InitialConditionBodies::applyDynamicsStateToBodies(state, m_bodyList);
+
     }
 
 
@@ -715,7 +755,7 @@ protected:
         } else if(distribute == "transforms") {
             processInitialConditionTransforms(state,element);
         } else if(distribute == "none") {
-            // does nothing leaves the zero state pushed!
+            m_SimBodyInitStates.push_back(DynamicsState<LayoutConfigType>((unsigned int)m_bodyList.size())); // Adds a zero DynamicState
         } else {
             throw ticpp::Exception("The attribute 'distribute' '" + distribute + std::string("' of 'InitialCondition' has no implementation in the parser"));
         }
@@ -1004,10 +1044,8 @@ protected:
     }
 
 
-    bool m_bParseDynamics; ///< Parse Dynamics stuff or do not. Playback Manager also has this SceneParser but does not need DynamicsStuff.
-
     boost::shared_ptr<DynamicsSystemType> m_pDynSys;
-
+    MPILayer::ProcessInformation<LayoutConfigType> & m_procInfo;
 
 
     boost::filesystem::path m_currentParseFilePath;

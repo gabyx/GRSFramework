@@ -215,7 +215,7 @@ set(COMMONSOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CommonSource")
 
 add_subdirectory(Projects/GeneralRigidBodySimulation)
 add_subdirectory(Projects/GeneralRigidBodySimulationNoGUI)
-#add_subdirectory(Projects/GeneralRigidBodySimulationMPI)
+add_subdirectory(Projects/GeneralRigidBodySimulationMPI)
 
 # Copy Media Files to Project folder
 # message(STATUS "Copying Media Content to " ${CMAKE_BINARY_DIR}/Projects/)

@@ -7,7 +7,6 @@
 #include "LogDefines.hpp"
 #include "TypeDefs.hpp"
 
-#include "SimulationManagerBase.hpp"
 
 #include "SceneParser.hpp"
 
