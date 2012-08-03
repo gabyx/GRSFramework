@@ -6,7 +6,7 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
-
+#include "AssertionDebugMPI.hpp"
 
 #include "DynamicsState.hpp"
 #include "SharedBufferDynSys.hpp"
@@ -71,7 +71,15 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     m_pSceneParser->parseScene(sceneFilePathNew);
 
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
+
+    m_nGlobalSimBodies = m_pSceneParser->getNumberOfGlobalSimBodies();
+
     LOG(m_pSimulationLog, << "---> Scene parsing finshed: Added "<< m_nSimBodies << " Bodies!");
+
+    // Do Safty Check
+    // Do a Reduction of all Simbodies, to count if no bodies are missing!
+    checkNumberOfBodiesInProcess();
+
     // =====================================================
 
 
@@ -83,6 +91,35 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     m_pSimulationLog->logMessage("---> setup finished! ");
 }
 
+
+template<typename TConfig>
+bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess(){
+
+   int numberOfBodiesInSimulation = 0;
+   int nSimBodies = m_nSimBodies;
+
+   boost::timer::cpu_timer timer;
+
+   timer.start();
+      MPI_Reduce(&nSimBodies,&numberOfBodiesInSimulation, 1, MPI_INT, MPI_SUM, ProcessInfoType::MASTER, MPI_COMM_WORLD);
+   timer.stop();
+   double elapsed = ((double)timer.elapsed().wall)*1e-9;
+
+   if(ProcessInfoType::MASTER == m_MPIProcInfo.getRank()){
+        LOG(m_pSimulationLog, << " Allreduce needed: " << elapsed <<"sec."<<std::endl; );
+
+       if(numberOfBodiesInSimulation != m_nGlobalSimBodies){
+            LOG(m_pSimulationLog, << "---> Body check NOT successful! : "<< numberOfBodiesInSimulation <<"!="<< m_nGlobalSimBodies<< std::endl;);
+            ERRORMSGMPI("Body check Not successfull");
+       }
+
+
+        LOG(m_pSimulationLog, << "---> Body check successfull !" << std::endl;);
+    }else{
+        LOG(m_pSimulationLog, << "---> Body check ... (sent bodies) !"<< std::endl);
+    }
+
+}
 
 //template<typename TConfig>
 //void SimulationManagerMPI<TConfig>::threadRunRecord() {

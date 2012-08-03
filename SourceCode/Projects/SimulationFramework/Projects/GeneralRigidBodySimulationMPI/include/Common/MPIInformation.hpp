@@ -133,6 +133,19 @@ private:
     CartesianGrid<TLayoutConfig,NoCellData> m_grid;
 };
 
+
+    /**
+        Important struct to define all MPI message tags used in this framework!
+    */
+    struct MPIMessageTags{
+        enum {
+            RIGIDBODY_NUMBER_CHECK,
+            RIGIDBODY_UPDATE_MESSAGE,
+            RIGIDBODY_MESSAGE,
+            CONTACT_UPDATE_MESSAGE
+        };
+    };
+
 };
 
 #endif

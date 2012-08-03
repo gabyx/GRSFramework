@@ -96,6 +96,8 @@ public:
                 /*ticpp::Node * initialConditionAll = m_xmlRootNode->FirstChild("InitialCondition");
                 processinitialConditionAll(initialConditionAll);*/
 
+                processOtherOptions(m_xmlRootNode);
+
             } else {
                 m_pSimulationLog->logMessage("No DynamicsSystem Node found in XML ...");
                 return false;
@@ -145,9 +147,14 @@ protected:
         m_SimBodies = 0;
     }
 
-
+    void virtual processOtherOptions(const ticpp::Node *rootNode){
+        /* Do nothing, here for derived classes! */
+    }
 
     void processSceneSettings( ticpp::Node *sceneSettings ) {
+
+        LOG(m_pSimulationLog,<<"Process SceneSettings..."<<std::endl;);
+
         if(m_bParseDynamics) {
 
             ticpp::Element *gravityElement = sceneSettings->FirstChild("Gravity",true)->ToElement();
@@ -291,6 +298,8 @@ protected:
 
     void processSceneObjects( ticpp::Node *sceneObjects ) {
 
+        LOG(m_pSimulationLog,<<"Process SceneObjects ..."<<std::endl;);
+
         ticpp::Iterator< ticpp::Node > child;
 
         for ( child = child.begin( sceneObjects ); child != child.end(); child++ ) {
@@ -309,6 +318,8 @@ protected:
 
     void processRigidBodies( ticpp::Node * rigidbodies ) {
 
+        LOG(m_pSimulationLog,<<"Process RigidBodies ..."<<std::endl;);
+
         //Clear current body list;
         m_bodyList.clear();
         m_bodyListScales.clear();
@@ -325,6 +336,7 @@ protected:
             scale.setOnes();
             m_bodyListScales.push_back(scale);
         }
+        LOG(m_pSimulationLog,<<"Added "<<instances<<" RigidBody Instances..."<<std::endl;);
 
 
         ticpp::Node * geometryNode = rigidbodies->FirstChild("Geometry");
@@ -340,6 +352,7 @@ protected:
 
 
         //Copy the pointers!
+        LOG(m_pSimulationLog,<<"Copy RigidBody References to DynamicSystem ..."<<std::endl;);
         if(m_eBodiesState == RigidBodyType::SIMULATED) {
             if(m_bParseDynamics) {
                 for(int i=0; i < m_bodyList.size(); i++) {
@@ -371,6 +384,7 @@ protected:
     }
 
     void processGeometry( ticpp::Node * geometryNode) {
+        LOG(m_pSimulationLog,<<"Process Geometry ..."<<std::endl;);
         if(geometryNode->FirstChild()->Value() == "Sphere") {
 
             processSphereGeometry( geometryNode->FirstChild()->ToElement());
@@ -597,7 +611,7 @@ protected:
     }
 
     void processDynamicProperties( ticpp::Node * dynProp) {
-
+        LOG(m_pSimulationLog,<<"Process DynamicProperties ..."<<std::endl;);
         ticpp::Element * element = dynProp->FirstChild("DynamicState")->ToElement();
 
         std::string type = element->GetAttribute("type");

@@ -18,45 +18,49 @@ template <typename TLayoutConfig> class StateRecorder;
 
 
 template<typename TConfig>
-class SimulationManagerMPI
-{
+class SimulationManagerMPI {
 public:
 
-   DEFINE_CONFIG_TYPES_OF(TConfig)
+    DEFINE_CONFIG_TYPES_OF(TConfig)
 
     SimulationManagerMPI();
-   ~SimulationManagerMPI();
+    ~SimulationManagerMPI();
 
-   boost::shared_ptr<StateRecorder<LayoutConfigType> >		    m_pStateRecorder;
+    boost::shared_ptr<StateRecorder<LayoutConfigType> >		    m_pStateRecorder;
 
-   void setup();
-   void setup(boost::filesystem::path sceneFilePath);
+    void setup();
+    void setup(boost::filesystem::path sceneFilePath);
 
-   boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
+    boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
 
 private:
 
-    unsigned int m_nSimBodies;
+    unsigned int m_nSimBodies, m_nGlobalSimBodies;
 
-   // Accessed only by thread ===================
+    // Accessed only by thread ===================
 
-   struct SettingsSimThread{
-         double m_EndTime;
-   } m_SettingsSimThread;
+    struct SettingsSimThread {
+        double m_EndTime;
+    } m_SettingsSimThread;
 
 
-   Logging::Log *  m_pSimulationLog;
+    Logging::Log *  m_pSimulationLog;
 
-   boost::shared_ptr< TimeStepperType >	m_pTimestepper;
+    boost::shared_ptr< TimeStepperType >	m_pTimestepper;
 
-   boost::shared_ptr< DynamicsSystemType > m_pDynSys;
-   // ===========================================
+    boost::shared_ptr< DynamicsSystemType > m_pDynSys;
+    // ===========================================
 
-   // File Paths for one Simulation, always reset ==============================
-   boost::filesystem::path m_SimFolderPath;
-   boost::filesystem::path m_SimFilePath;
+    // File Paths for one Simulation, always reset ==============================
+    boost::filesystem::path m_SimFolderPath;
+    boost::filesystem::path m_SimFilePath;
 
-   MPILayer::ProcessInformation<LayoutConfigType> m_MPIProcInfo;
+    typedef MPILayer::ProcessInformation<LayoutConfigType> ProcessInfoType;
+    ProcessInfoType m_MPIProcInfo;
+
+
+    bool checkNumberOfBodiesInProcess();
+
 };
 
 

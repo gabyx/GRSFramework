@@ -131,7 +131,7 @@ bool SimulationManagerGUI<TConfig>::writeInitialState() {
 
 
 template<typename TConfig>
-void SimulationManagerGUI<TConfig>::updateScene(double timeSinceLastFrame) {
+void SimulationManagerGUI<TConfig>::updateScene(double timeSinsfceLastFrame) {
     static bool bStateChanged;
 
     if (isSimThreadRunning()) {

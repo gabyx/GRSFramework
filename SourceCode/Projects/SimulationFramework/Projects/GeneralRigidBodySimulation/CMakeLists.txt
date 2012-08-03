@@ -361,14 +361,14 @@ if(WIN32)
 
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/plugins.cfg
         ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
-                ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
+                #${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
         ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/ogre.cfg
         DESTINATION ${INSTALL_DIR_PROJECT}/Release
         CONFIGURATIONS Release
     )
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/plugins.cfg
         ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
-                ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
+               # ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
         ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/ogre.cfg
         DESTINATION ${INSTALL_DIR_PROJECT}/Debug
         CONFIGURATIONS Debug
@@ -425,14 +425,14 @@ if(UNIX)
 
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/unix/plugins.cfg
         ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
-                ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
+              #  ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
         ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/unix/ogre.cfg
         DESTINATION ${INSTALL_DIR_PROJECT}/Release
         CONFIGURATIONS Release
     )
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/unix/plugins.cfg
         ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
-                ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
+              #  ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
         ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/unix/ogre.cfg
         DESTINATION ${INSTALL_DIR_PROJECT}/Debug
         CONFIGURATIONS Debug

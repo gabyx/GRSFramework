@@ -316,16 +316,16 @@ if(WIN32)
 #       CONFIGURATIONS Release)
 
 
-    install(FILES
-                ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        CONFIGURATIONS Release
-    )
-    install(FILES
-                ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        CONFIGURATIONS Debug
-    )
+    #install(FILES
+                #${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
+        #DESTINATION ${INSTALL_DIR_PROJECT}/Release
+        #CONFIGURATIONS Release
+    #)
+    #install(FILES
+                #${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
+        #DESTINATION ${INSTALL_DIR_PROJECT}/Debug
+        #CONFIGURATIONS Debug
+    #)
 
     install(FILES
         ${COLLISIONLIB_REL}
@@ -366,14 +366,14 @@ if(UNIX)
 #       CONFIGURATIONS Release)
 
 
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        CONFIGURATIONS Release
-    )
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        CONFIGURATIONS Debug
-    )
+    #install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
+        #DESTINATION ${INSTALL_DIR_PROJECT}/Release
+        #CONFIGURATIONS Release
+    #)
+    #install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
+        #DESTINATION ${INSTALL_DIR_PROJECT}/Debug
+        #CONFIGURATIONS Debug
+    #)
 
 endif(UNIX)
 

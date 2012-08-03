@@ -76,13 +76,13 @@ void setupBodiesGrid(DynamicsState<TLayoutConfig> & init_state,
     //cout << index_x<<","<< index_y<<","<< index_z<<endl;
     double x = -d/2 + d/(double)(init_state.m_nSimBodies) * i;
 
-     typedef boost::mt19937  RNG;
+    typedef boost::mt19937  RNG;
     static RNG generator(seed);
-    static boost::uniform_real<PREC> uniform(-delta,delta);
+    static boost::uniform_real<PREC> uniform(-1.0,1.0);
     static boost::variate_generator< boost::mt19937 & , boost::uniform_real<PREC> > randomNumber(generator, uniform);
 
     if(jitter){
-      jitter_vec = Vector3(randomNumber(),randomNumber(),randomNumber()); // No uniform distribution!, but does not matter
+      jitter_vec = Vector3(randomNumber(),randomNumber(),randomNumber()) * delta; // No uniform distribution!, but does not matter
     }
 
     init_state.m_SimBodyStates[i].m_q.template head<3>() = Vector3(index_x * d - 0.5*(gDim_x-1)*d, index_y*d - 0.5*(gDim_y-1)*d , index_z*d) + vec_trans + jitter_vec;

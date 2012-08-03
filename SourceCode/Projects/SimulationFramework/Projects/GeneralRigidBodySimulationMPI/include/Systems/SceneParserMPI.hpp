@@ -57,7 +57,7 @@ public:
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
         ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
 
-        m_SimBodies = 0;
+        m_nSimBodies = 0;
     }
 
     bool parseScene( boost::filesystem::path file ) {
@@ -72,10 +72,13 @@ public:
 
 
         //Reset all variables
-        m_SimBodies = 0;
+        m_nSimBodies = 0;
+        m_nGlobalSimBodies = 0;
+
         m_bodyList.clear();
         m_SimBodyInitStates.clear();
         m_SceneMeshs.clear();
+
 
         try {
             m_xmlDoc.LoadFile(m_currentParseFilePath.string());
@@ -129,7 +132,11 @@ public:
     }
 
     unsigned int getNumberOfSimBodies() {
-        return m_SimBodies;
+        return m_nSimBodies;
+    }
+
+    unsigned int getNumberOfGlobalSimBodies() {
+        return m_nGlobalSimBodies;
     }
 
 
@@ -139,7 +146,7 @@ protected:
         m_pSimulationLog = NULL;
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
         ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
-        m_SimBodies = 0;
+        m_nSimBodies = 0;
     }
 
     void processMPISettings( ticpp::Node *mpiSettings ) {
@@ -329,6 +336,7 @@ protected:
     void processRigidBodies( ticpp::Node * rigidbodies ) {
 
         //Clear current body list;
+
         m_bodyList.clear();
         m_bodyListScales.clear();
 
@@ -364,9 +372,10 @@ protected:
                     // Check if Body belongs to the topology! // Check CoG!
                     if(m_procInfo.getProcTopo().belongsPointToProcess((*bodyIt)->m_r_S)){
                         m_pDynSys->m_SimBodies.push_back((*bodyIt));
-                        m_SimBodies++;
+                        m_nSimBodies++;
                     }
                 }
+                m_nGlobalSimBodies += m_bodyList.size();
 
 
         } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
@@ -377,9 +386,6 @@ protected:
         } else {
             throw ticpp::Exception("Adding only simulated and not simulated objects supported!");
         }
-
-
-
 
 
         ticpp::Node * visualizationNode = rigidbodies->FirstChild("Visualization");
@@ -990,7 +996,7 @@ protected:
     Logging::Log * m_pSimulationLog;
     std::stringstream logstream;
 
-    unsigned int m_SimBodies;
+    unsigned int m_nSimBodies, m_nGlobalSimBodies;
     // Temprary structures
     typename RigidBodyType::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
     std::vector<boost::shared_ptr< RigidBodyType > > m_bodyList; ///< Used to process a RigidBody Node
