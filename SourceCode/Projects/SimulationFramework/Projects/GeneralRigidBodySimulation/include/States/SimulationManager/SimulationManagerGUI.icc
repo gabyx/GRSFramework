@@ -68,17 +68,18 @@ void SimulationManagerGUI<TConfig>::setup() {
 
     m_pSimulationLog->logMessage("---> SimulationManagerGUI::setup(): ");
 
-
-
     m_lengthScale = 100;  // 1m = 100 Ogre units , 1cm -> 1 Ogre Unit
     m_pBaseNode = m_pSceneMgr->getSceneNode("BaseFrame")->createChildSceneNode("BaseFrameScene");
     m_pBaseNode->setScale(Ogre::Vector3(1.0,1.0,1.0)*m_lengthScale);
 
 
     m_pDynSys = boost::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
+    m_pSimulationLog->logMessage("SimulationManagerGUI:: Added DynamicsSystemType... ");
 
     // Parse the Scene from XML! ==========================
+
     m_pSceneParser = boost::shared_ptr< SceneParserOgre<TConfig> >( new SceneParserOgre<TConfig>( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies, m_pDynSys) );
+    m_pSimulationLog->logMessage("SimulationManagerGUI:: Added SceneParserOgre... ");
     m_pSceneParser->parseScene("SceneFile.xml");
 
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
@@ -86,14 +87,16 @@ void SimulationManagerGUI<TConfig>::setup() {
 
 
     m_pSharedBuffer = boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >(new SharedBufferDynSys<LayoutConfigType>(m_nSimBodies));
+    m_pSimulationLog->logMessage("SimulationManagerGUI:: Added SharedBufferDynSys... ");
     m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys, m_pSharedBuffer) );
-
-    m_pVisBuffer = m_pSharedBuffer->updateVisBuffer();
+    m_pSimulationLog->logMessage("SimulationManagerGUI:: Added TimeStepperType... ");
 
     m_pStateRecorder = boost::shared_ptr<StateRecorder<LayoutConfigType> >(new StateRecorder<LayoutConfigType>(m_nSimBodies));
-
+    m_pSimulationLog->logMessage("SimulationManagerGUI:: Added StateRecorder... ");
 
     m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());
+    m_pSceneParser->cleanUp(); // Take care this cleans all stuff
+
     m_pVisBuffer = m_pSharedBuffer->updateVisBuffer();
 
     // Update all Sim Bodies
@@ -102,7 +105,7 @@ void SimulationManagerGUI<TConfig>::setup() {
     enableInput(true);
 
 
-    m_pSimulationLog->logMessage("---> added all objects(): ");
+    m_pSimulationLog->logMessage("---> setup finished: ");
 }
 
 
@@ -130,11 +133,11 @@ bool SimulationManagerGUI<TConfig>::writeInitialState() {
 template<typename TConfig>
 void SimulationManagerGUI<TConfig>::updateScene(double timeSinceLastFrame) {
     static bool bStateChanged;
-    if (isSimThreadRunning()) {
 
+    if (isSimThreadRunning()) {
+        //std::cout << "Simthread running"<<std::endl;
         if(!m_bFirstPass) {
-            // liasdliasud
-            //if (m_passCounter == 0){
+
             m_pVisBuffer = m_pSharedBuffer->updateVisBuffer(bStateChanged);
 
             if(bStateChanged) {
@@ -163,7 +166,7 @@ void SimulationManagerGUI<TConfig>::updateSimBodies() {
     //update objects...
     for(int i=0; i<m_pVisBuffer->m_SimBodyStates.size(); i++) {
         // Check for Nan or Inf
-        //cout << m_pVisBuffer->m_SimBodyStates[i].m_q <<endl;
+//        cout << m_pVisBuffer->m_SimBodyStates[i].m_q <<endl;
         m_SceneNodeSimBodies[i]->setPosition(
             (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(0),
             (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(1),

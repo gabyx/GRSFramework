@@ -31,10 +31,7 @@ public:
         m_Box.m_maxPoint = maxPoint;
         m_dim = dim;
 
-        m_dxyz(0) = m_Box.extent()(0) / dim(0);
-        m_dxyz(1) = m_Box.extent()(1) / dim(1);
-        m_dxyz(2) = m_Box.extent()(2) / dim(2);
-
+        m_dxyz.array() = m_Box.extent().array() / dim.array().template cast<PREC>();
 
         m_cellNumberingStart = cellNumberingStart;
     };
@@ -42,7 +39,7 @@ public:
     const MyMatrix<unsigned int>::Vector3 getCellIndex(const Vector3 & point) const {
         ASSERTMSG(m_Box.inside(point),"Point is not inside the Grid!");
         MyMatrix<unsigned int>::Vector3 v;
-        v.array() =  (((point - m_Box.m_minPoint).array()) / m_Box.extent().array()).template cast<unsigned int>();
+        v.array() =  (((point - m_Box.m_minPoint).array()) / m_dxyz.array()).template cast<unsigned int>();
         return v;
     };
 
@@ -56,7 +53,7 @@ public:
     std::vector<unsigned int> getCellNeigbours(unsigned int cellNumber) const {
         std::vector<unsigned int> v;
         // cellNumber zero indexed
-        ASSERTMSG(cellNumber < m_dim(0)*m_dim(1)*m_dim(2) && cellNumber <= 0,"cellNumber: " << cellNumber <<" not in Dimension: "<<m_dim(0)<<","<<m_dim(1)<<","<<m_dim(2)<<std::endl );
+        ASSERTMSG(cellNumber < m_dim(0)*m_dim(1)*m_dim(2) && cellNumber >= 0,"cellNumber: " << cellNumber <<" not in Dimension: "<<m_dim(0)<<","<<m_dim(1)<<","<<m_dim(2)<<std::endl );
 
         unsigned int neigbourCell;
         unsigned z_index,y_index,x_index, cellNumberTemp;

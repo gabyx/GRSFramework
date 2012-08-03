@@ -91,12 +91,15 @@ public:
 
                 node = m_xmlRootNode->FirstChild("MPISettings");
                 processMPISettings(node);
+                m_pSimulationLog->logMessage("Parsed MPISettings...");
 
                 node = m_xmlRootNode->FirstChild("SceneSettings");
                 processSceneSettings(node);
+                m_pSimulationLog->logMessage("Parsed SceneSettings...");
 
                 node = m_xmlRootNode->FirstChild("SceneObjects");
                 processSceneObjects(node);
+                m_pSimulationLog->logMessage("Parsed SceneObjects...");
 
                 /*ticpp::Node * initialConditionAll = m_xmlRootNode->FirstChild("InitialCondition");
                 processinitialConditionAll(initialConditionAll);*/
@@ -143,7 +146,7 @@ protected:
             ticpp::Element *topo = mpiSettings->FirstChild("ProcessTopology",true)->ToElement();
 
             std::string type = topo->GetAttribute("type");
-            if(type=="Grid"){
+            if(type=="grid"){
 
                 Vector3 minPoint, maxPoint;
                 if(!Utilities::stringToVector3<PREC>(minPoint,  topo->GetAttribute("minPoint"))) {
@@ -152,18 +155,18 @@ protected:
                 if(!Utilities::stringToVector3<PREC>(maxPoint,  topo->GetAttribute("maxPoint"))) {
                     throw ticpp::Exception("String conversion in processMPISettings: maxPoint failed");
                 }
+
                 MyMatrix<unsigned int>::Vector3 dim;
                 if(!Utilities::stringToVector3<unsigned int>(dim,  topo->GetAttribute("dimension"))) {
                     throw ticpp::Exception("String conversion in processMPISettings: dimension failed");
                 }
-
                 // saftey check
                 if(dim(0)*dim(1)*dim(2) != m_procInfo.getNProcesses()){
-                    LOG(m_pSimulationLog,<< "You have launched to many processes for the grid: ("<< dim << ")"<< "with: " << m_procInfo.getNProcesses() <<"Processes"<<std::endl; );
+                    LOG(m_pSimulationLog,<< "Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_procInfo.getNProcesses() <<" Processes"<<std::endl; );
                     throw ticpp::Exception("You have launched to many processes for the grid!");
                 }
 
-                m_procInfo.m_ProcTopo = MPILayer::ProcessTopologyGrid<LayoutConfigType>(minPoint,maxPoint,dim,m_procInfo.getRank());
+                m_procInfo.setProcTopo( new MPILayer::ProcessTopologyGrid<LayoutConfigType>(minPoint,maxPoint,dim,m_procInfo.getRank()) );
 
             }else{
                 throw ticpp::Exception("String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
@@ -321,10 +324,6 @@ protected:
 
         }
 
-        if( m_SimBodies == 0) {
-            throw ticpp::Exception("The scene in the XML contains no simulating bodies!");
-        }
-
     }
 
     void processRigidBodies( ticpp::Node * rigidbodies ) {
@@ -356,9 +355,6 @@ protected:
 
 
 
-
-
-
         //Copy the pointers!
         if(m_eBodiesState == RigidBodyType::SIMULATED) {
 
@@ -366,7 +362,7 @@ protected:
 
                 for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
                     // Check if Body belongs to the topology! // Check CoG!
-                    if(m_procInfo.m_ProcTopo.belongsPointToProcess((*bodyIt)->m_r_S)){
+                    if(m_procInfo.getProcTopo().belongsPointToProcess((*bodyIt)->m_r_S)){
                         m_pDynSys->m_SimBodies.push_back((*bodyIt));
                         m_SimBodies++;
                     }
@@ -978,69 +974,7 @@ protected:
     }
 
     virtual void processMesh( ticpp::Node * meshNode ) {
-
-        static int nodeCounter = 0;
-        static int entityCounter = 0;
-
-        boost::filesystem::path meshName = meshNode->ToElement()->GetAttribute<std::string>("file");
-
-        bool scaleLikeGeometry = false;
-        Vector3 scale;
-        if(meshNode->ToElement()->HasAttribute("scaleLikeGeometry")) {
-            if(!Utilities::stringToType<bool>(scaleLikeGeometry, meshNode->ToElement()->GetAttribute("scaleLikeGeometry"))) {
-                throw ticpp::Exception("String conversion of scale in processMesh: scaleWithGeometry failed");
-            }
-        } else {
-
-            if(!Utilities::stringToVector3<PREC>(scale, meshNode->ToElement()->GetAttribute("scale"))) {
-                throw ticpp::Exception("String conversion of scale in processMesh: scale failed");
-            }
-        }
-
-
-        ticpp::Element * rendering =  meshNode->FirstChildElement("Rendering", false);
-        bool attachAxis = false;
-        double axesSize = 1;
-        bool shadowsEnabled = true;
-        if(rendering) {
-            bool attachAxis = false;
-            if(rendering->HasAttribute("attachAxis")) {
-                if(!Utilities::stringToType<bool>(attachAxis, rendering->GetAttribute("attachAxis"))) {
-                    throw ticpp::Exception("String conversion of in processMesh: attachAxis failed");
-                }
-            }
-
-            double axesSize = 1;
-            if(rendering->HasAttribute("axesSize")) {
-                if(!Utilities::stringToType<double>(axesSize, rendering->GetAttribute("axesSize"))) {
-                    throw ticpp::Exception("String conversion of in processMesh: axesSize failed");
-                }
-            }
-
-
-            if(rendering->HasAttribute("shadowsEnabled")) {
-                if(!Utilities::stringToType<bool>(shadowsEnabled, rendering->GetAttribute("shadowsEnabled"))) {
-                    throw ticpp::Exception("String conversion of in processMesh: shadowsEnabled failed");
-                }
-            }
-        };
-
-        std::string type = meshNode->ToElement()->GetAttribute("type");
-
-        if( type == "permutate" || type == "uniform") {
-            std::vector<std::string> m_materialList;
-            // Iterate over all material, save in list!
-            ticpp::Iterator< ticpp::Element > material("Material");
-            for ( material = material.begin( meshNode ); material != material.end(); material++ ) {
-                m_materialList.push_back(material->GetAttribute<std::string>("name"));
-            }
-            if(m_materialList.empty()) {
-                throw ticpp::Exception("No Material Node found in Mesh!");
-            }
-
-        } else {
-            throw ticpp::Exception("The attribute 'type' '" + type + std::string("' of 'processMesh' has no implementation in the parser"));
-        }
+        /* Do nothing here: A derived version of this parser may process the visualization if needed*/
     }
 
 

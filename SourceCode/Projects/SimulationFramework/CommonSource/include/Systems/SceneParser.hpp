@@ -67,7 +67,6 @@ public:
         m_pSimulationLog->logMessage("Parsing Scene...");
 
         LOG( m_pSimulationLog, <<"Scene Input file: "  << file.string() <<std::endl; );
-        m_pSimulationLog->logMessage("Parsing Scene...");
 
 
         //Reset all variables
@@ -113,11 +112,21 @@ public:
         return true;
     }
 
+    void cleanUp(){
+
+     m_bodyList.clear();
+     m_bodyListScales.clear();
+     m_SimBodyInitStates.clear();
+     m_SceneMeshs.clear();
+
+    }
+
     boost::filesystem::path getCurrentSceneFileDirectory() {
         return m_currentParseFilePath;
     }
 
     const std::vector< DynamicsState<LayoutConfigType> > & getInitialConditionSimBodies() {
+        ASSERTMSG(m_SimBodyInitStates.size(), "m_SimBodyInitStates.size() contains no initial states!")
         return m_SimBodyInitStates;
     }
 
@@ -676,24 +685,25 @@ protected:
         element = dynProp->FirstChild("InitialPosition")->ToElement();
         distribute = element->GetAttribute("distribute");
 
-        DynamicsState<LayoutConfigType> state((unsigned int)m_bodyList.size());
+        m_SimBodyInitStates.push_back( DynamicsState<LayoutConfigType>((unsigned int)m_bodyList.size()));
+
         if(distribute == "linear") {
-            processInitialConditionLinear(state,element);
+            processInitialConditionLinear(m_SimBodyInitStates.back(),element);
         } else if(distribute == "grid") {
-            processInitialConditionGrid(state,element);
+            processInitialConditionGrid(m_SimBodyInitStates.back(),element);
         } else if(distribute == "file") {
-            processInitialConditionFile(state,element);
+            processInitialConditionFile(m_SimBodyInitStates.back(),element);
         } else if(distribute == "posaxisangle") {
-            processInitialConditionPositionAxisAngle(state,element);
+            processInitialConditionPositionAxisAngle(m_SimBodyInitStates.back(),element);
         } else if(distribute == "transforms") {
-            processInitialConditionTransforms(state,element);
+            processInitialConditionTransforms(m_SimBodyInitStates.back(),element);
         } else if(distribute == "none") {
             // does nothing leaves the zero state pushed!
         } else {
             throw ticpp::Exception("The attribute 'distribute' '" + distribute + std::string("' of 'InitialCondition' has no implementation in the parser"));
         }
 
-        InitialConditionBodies::applyDynamicsStateToBodies(state, m_bodyList);
+        InitialConditionBodies::applyDynamicsStateToBodies(m_SimBodyInitStates.back(), m_bodyList);
     }
 
 
@@ -938,77 +948,14 @@ protected:
     }
 
     virtual void processMesh( ticpp::Node * meshNode ) {
-
-        static int nodeCounter = 0;
-        static int entityCounter = 0;
-
-        boost::filesystem::path meshName = meshNode->ToElement()->GetAttribute<std::string>("file");
-
-        bool scaleLikeGeometry = false;
-        Vector3 scale;
-        if(meshNode->ToElement()->HasAttribute("scaleLikeGeometry")) {
-            if(!Utilities::stringToType<bool>(scaleLikeGeometry, meshNode->ToElement()->GetAttribute("scaleLikeGeometry"))) {
-                throw ticpp::Exception("String conversion of scale in processMesh: scaleWithGeometry failed");
-            }
-        } else {
-
-            if(!Utilities::stringToVector3<PREC>(scale, meshNode->ToElement()->GetAttribute("scale"))) {
-                throw ticpp::Exception("String conversion of scale in processMesh: scale failed");
-            }
-        }
-
-
-        ticpp::Element * rendering =  meshNode->FirstChildElement("Rendering", false);
-        bool attachAxis = false;
-        double axesSize = 1;
-        bool shadowsEnabled = true;
-        if(rendering) {
-            bool attachAxis = false;
-            if(rendering->HasAttribute("attachAxis")) {
-                if(!Utilities::stringToType<bool>(attachAxis, rendering->GetAttribute("attachAxis"))) {
-                    throw ticpp::Exception("String conversion of in processMesh: attachAxis failed");
-                }
-            }
-
-            double axesSize = 1;
-            if(rendering->HasAttribute("axesSize")) {
-                if(!Utilities::stringToType<double>(axesSize, rendering->GetAttribute("axesSize"))) {
-                    throw ticpp::Exception("String conversion of in processMesh: axesSize failed");
-                }
-            }
-
-
-            if(rendering->HasAttribute("shadowsEnabled")) {
-                if(!Utilities::stringToType<bool>(shadowsEnabled, rendering->GetAttribute("shadowsEnabled"))) {
-                    throw ticpp::Exception("String conversion of in processMesh: shadowsEnabled failed");
-                }
-            }
-        };
-
-        std::string type = meshNode->ToElement()->GetAttribute("type");
-
-        if( type == "permutate" || type == "uniform") {
-            std::vector<std::string> m_materialList;
-            // Iterate over all material, save in list!
-            ticpp::Iterator< ticpp::Element > material("Material");
-            for ( material = material.begin( meshNode ); material != material.end(); material++ ) {
-                m_materialList.push_back(material->GetAttribute<std::string>("name"));
-            }
-            if(m_materialList.empty()) {
-                throw ticpp::Exception("No Material Node found in Mesh!");
-            }
-
-        } else {
-            throw ticpp::Exception("The attribute 'type' '" + type + std::string("' of 'processMesh' has no implementation in the parser"));
-        }
+        /* Do nothing here: A derived version of this parser may process the visualization if needed*/
     }
+
 
 
     bool m_bParseDynamics; ///< Parse Dynamics stuff or do not. Playback Manager also has this SceneParser but does not need DynamicsStuff.
 
     boost::shared_ptr<DynamicsSystemType> m_pDynSys;
-
-
 
     boost::filesystem::path m_currentParseFilePath;
     boost::filesystem::path m_currentParseFileDir;

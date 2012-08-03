@@ -146,6 +146,7 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nS
     // Instanciate all Core Objects
     m_pStatePool = pSysState;
 
+
     m_pDynSys = pDynSys;
     m_pDynSys->init();
 

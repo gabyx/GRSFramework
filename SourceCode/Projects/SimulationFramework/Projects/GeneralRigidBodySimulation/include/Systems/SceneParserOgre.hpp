@@ -38,6 +38,7 @@ public:
         this->m_SimBodies = 0;
     }
 
+protected:
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
     void processMesh( ticpp::Node * meshNode ) {
 

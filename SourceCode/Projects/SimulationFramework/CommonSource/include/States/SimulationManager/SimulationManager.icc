@@ -75,6 +75,7 @@ void SimulationManager<TConfig>::setup(boost::filesystem::path sceneFilePath)
   m_pSceneParser->parseScene(sceneFilePath);
 
   m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
+  LOG(m_pSimulationLog, << "---> Scene parsing finshed: Added "<< m_nSimBodies << " Bodies!");
   // =====================================================
 
 
@@ -86,7 +87,9 @@ void SimulationManager<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
   m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());
 
-  m_pSimulationLog->logMessage("---> added all objects(): ");
+  m_pSceneParser->cleanUp();
+
+  m_pSimulationLog->logMessage("---> setup finished! ");
 }
 
 
