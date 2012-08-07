@@ -17,8 +17,7 @@ public:
         std::vector<Ogre::SceneNode*> &nodesSimBodies,
         std::vector<Ogre::SceneNode*> &nodesBodies,
         boost::shared_ptr<DynamicsSystemType> pDynSys
-    ) : m_pSceneMgr(pSceneMgr),  m_rSceneNodeSimBodies(nodesSimBodies), m_rSceneNodeBodies(nodesBodies) , SceneParser<TConfig>(pDynSys)
-    {
+    ) : m_pSceneMgr(pSceneMgr),  m_rSceneNodeSimBodies(nodesSimBodies), m_rSceneNodeBodies(nodesBodies) , SceneParser<TConfig>(pDynSys) {
         ASSERTMSG(baseFrame != NULL, "Pointer is NULL");
         m_BaseFrame = baseFrame;
         this->m_bParseDynamics = true;
@@ -41,8 +40,8 @@ public:
 protected:
 
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
-    void processOtherOptions(const ticpp::Node * rootNode){
-        LOG(this->m_pSimulationLog,<<"Process MPISettings..."<<std::endl;);
+    void processOtherOptions(const ticpp::Node * rootNode) {
+        LOG(this->m_pSimulationLog,"Process MPISettings..."<<std::endl;);
         processMPISettings(rootNode);
     }
 
@@ -111,7 +110,7 @@ protected:
 
 
             std::stringstream entity_name,node_name;
-            LOG(this->m_pSimulationLog, << " --> Add all Ogre Objects"<<std::endl);
+            LOG(this->m_pSimulationLog, " --> Add all Ogre Objects"<<std::endl);
             for(int i=0; i<this->m_bodyList.size(); i++) {
                 entity_name.str("");
                 node_name.str("");
@@ -119,6 +118,9 @@ protected:
                 node_name << meshName.filename().string() << std::string("Node");
                 entity_name << entityCounter;
                 node_name<< nodeCounter;
+
+                //TODO m_pSceneMgr->createInstancedGeometry();
+
 
                 Ogre::Entity* ent = m_pSceneMgr->createEntity(entity_name.str(), meshName.string() );
                 ent->setCastShadows(shadowsEnabled);
@@ -164,86 +166,125 @@ protected:
         }
     }
 
-    void processMPISettings(const ticpp::Node * rootNode){
+    void processMPISettings(const ticpp::Node * rootNode) {
 
-         ticpp::Node * mpiSettings = rootNode->FirstChild("MPISettings",false);
-         if(mpiSettings){
+        ticpp::Node * mpiSettings = rootNode->FirstChild("MPISettings",false);
+        if(mpiSettings) {
 
-             ticpp::Node *topo = mpiSettings->FirstChild("ProcessTopology",true);
-             ticpp::Element *topoEl = topo->ToElement();
+            ticpp::Node *topo = mpiSettings->FirstChild("ProcessTopology",true);
+            ticpp::Element *topoEl = topo->ToElement();
 
-                std::string type = topoEl->GetAttribute("type");
-                if(type=="grid"){
-
-                    Vector3 minPoint, maxPoint;
-                    if(!Utilities::stringToVector3<PREC>(minPoint,  topoEl->GetAttribute("minPoint"))) {
-                        throw ticpp::Exception("String conversion in processMPISettings: minPoint failed");
-                    }
-                    if(!Utilities::stringToVector3<PREC>(maxPoint,  topoEl->GetAttribute("maxPoint"))) {
-                        throw ticpp::Exception("String conversion in processMPISettings: maxPoint failed");
-                    }
-
-                    MyMatrix<unsigned int>::Vector3 dim;
-                    if(!Utilities::stringToVector3<unsigned int>(dim,  topoEl->GetAttribute("dimension"))) {
-                        throw ticpp::Exception("String conversion in processMPISettings: dimension failed");
-                    }
-
-                    Vector3 extent; extent.array() = (maxPoint - minPoint);
-                    Vector3 center = 0.5*extent + minPoint;
-                    Vector3 dxyz; dxyz.array() = extent.array() / dim.array().template cast<PREC>();
-
-                    // Add MPI Visulaization
-                    ticpp::Element *mat =  topo->FirstChild("Visualization",true)->FirstChild("Material")->ToElement();
-                    std::string materialName = mat->GetAttribute("name");
-
-
-
-                    Ogre::SceneNode* mpiTopoRoot = m_BaseFrame->createChildSceneNode("MPIProcTopo");
-                    Ogre::SceneNode* mpiTopoBase = mpiTopoRoot->createChildSceneNode("MPIProcTopoBase");
-                    Ogre::Entity *ent = m_pSceneMgr->createEntity("MPITopoBaseGrid", "Cube.mesh");
-                    ent->setMaterialName(materialName);
-                    mpiTopoBase->attachObject(ent);
-                    mpiTopoBase->setPosition(center(0),center(1),center(2));
-                    mpiTopoBase->setScale(0.5*extent(0),0.5*extent(1),0.5*extent(2));
-
-                    //Add subdivision in each direction
-                    Matrix33 I = Matrix33::Zero();
-                    I(1,0)=1; I(0,1)=1; I(2,2)=1;
-
-                    std::stringstream ent_name;
-                    for(int i=0;i<3;i++){
-                        Vector3 centerDivs = center;
-                        centerDivs(i) -=  0.5*extent(i);
-                        for(int k=1;k<dim(i);k++){
-                            ent_name.str(""); ent_name << "MPITopoSubGridNode-" << i<<"-"<<k;
-                            Ogre::SceneNode* mpiTopoSubdivs = mpiTopoRoot->createChildSceneNode(ent_name.str());
-                            ent_name.str(""); ent_name << "MPITopoSubGridEnt-" << i<<"-"<<k;
-                            Ogre::Entity *ent = m_pSceneMgr->createEntity(ent_name.str(), "Plane.mesh");
-                            ent->setMaterialName(materialName);
-                            mpiTopoSubdivs->attachObject(ent);
-
-
-                            mpiTopoSubdivs->rotate(Ogre::Vector3(I(0,i),I(1,i),I(2,i)),Ogre::Degree(90));
-                            if(i==0){
-                                mpiTopoSubdivs->scale(0.5*extent(2),0.5*extent(1),1);
-                            }else if(i==1){
-                                mpiTopoSubdivs->scale(0.5*extent(1),0.5*extent(2),1);
-                            }else{
-                                mpiTopoSubdivs->scale(0.5*extent(0),0.5*extent(1),1);
-                            }
-                            centerDivs(i) += dxyz(i);
-                            mpiTopoSubdivs->setPosition(centerDivs(0),centerDivs(1),centerDivs(2));
-
-                        }
-
-                    }
-
-
-
-                }else{
-                    throw ticpp::Exception("String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
+            std::string type = topoEl->GetAttribute("type");
+            if(type=="grid") {
+                Vector3 minPoint, maxPoint;
+                if(!Utilities::stringToVector3<PREC>(minPoint,  topoEl->GetAttribute("minPoint"))) {
+                    throw ticpp::Exception("String conversion in processMPISettings: minPoint failed");
                 }
-         }
+                if(!Utilities::stringToVector3<PREC>(maxPoint,  topoEl->GetAttribute("maxPoint"))) {
+                    throw ticpp::Exception("String conversion in processMPISettings: maxPoint failed");
+                }
+
+                MyMatrix<unsigned int>::Vector3 dim;
+                if(!Utilities::stringToVector3<unsigned int>(dim,  topoEl->GetAttribute("dimension"))) {
+                    throw ticpp::Exception("String conversion in processMPISettings: dimension failed");
+                }
+
+                Vector3 extent;
+                extent.array() = (maxPoint - minPoint);
+                Vector3 center = 0.5*extent + minPoint;
+                Vector3 dxyz;
+                dxyz.array() = extent.array() / dim.array().template cast<PREC>();
+
+                // Add MPI Visulaization
+                ticpp::Element *mat =  topo->FirstChild("Visualization",true)->FirstChild("Material")->ToElement();
+                std::string materialName = mat->GetAttribute("name");
+
+                Ogre::SceneNode* mpiTopoRoot = m_BaseFrame->createChildSceneNode("MPIProcTopo");
+
+
+                //Add subdivision in each direction
+                Matrix33 I = Matrix33::Zero();
+                I(1,0)=1;
+                I(0,1)=1;
+                I(2,2)=1;
+
+                std::stringstream name;
+                name.str("");
+                name << "MPITopoSubGridManual-";
+                Ogre::ManualObject *manual = m_pSceneMgr->createManualObject(name.str());
+
+                manual->begin(materialName, Ogre::RenderOperation::OT_LINE_LIST);
+                for(int k=0; k<dim(1)+1; k++) {
+                    for(int l=0; l<dim(1)+1; l++) {
+                        manual->position(minPoint(0),minPoint(1)+k*dxyz(1),minPoint(2)+l*dxyz(2));
+                        manual->position(maxPoint(0),minPoint(1)+k*dxyz(1),minPoint(2)+l*dxyz(2));
+                    }
+                }
+
+                for(int k=0; k<dim(0)+1; k++) {
+                    for(int l=0; l<dim(0)+1; l++) {
+                        manual->position(minPoint(0)+k*dxyz(0),minPoint(1)+l*dxyz(1),minPoint(2));
+                        manual->position(minPoint(0)+k*dxyz(0),minPoint(1)+l*dxyz(1),maxPoint(2));
+                    }
+                }
+                for(int k=0; k<dim(2)+1; k++) {
+                    for(int l=0; l<dim(2)+1; l++) {
+                        manual->position(minPoint(0)+l*dxyz(0),minPoint(1),minPoint(2)+k*dxyz(2));
+                        manual->position(minPoint(0)+l*dxyz(0),maxPoint(1),minPoint(2)+k*dxyz(2));
+                    }
+                }
+                manual->end();
+
+                mpiTopoRoot->attachObject(manual);
+
+
+
+//                    Ogre::SceneNode* mpiTopoRoot = m_BaseFrame->createChildSceneNode("MPIProcTopo");
+//                    Ogre::SceneNode* mpiTopoBase = mpiTopoRoot->createChildSceneNode("MPIProcTopoBase");
+//                    Ogre::Entity *ent = m_pSceneMgr->createEntity("MPITopoBaseGrid", "Cube.mesh");
+//                    ent->setMaterialName(materialName);
+//                    mpiTopoBase->attachObject(ent);
+//                    mpiTopoBase->setPosition(center(0),center(1),center(2));
+//                    mpiTopoBase->setScale(0.5*extent(0),0.5*extent(1),0.5*extent(2));
+//
+//                    //Add subdivision in each direction
+//                    Matrix33 I = Matrix33::Zero();
+//                    I(1,0)=1; I(0,1)=1; I(2,2)=1;
+//
+//                    std::stringstream ent_name;
+//                    for(int i=0;i<3;i++){
+//                        Vector3 centerDivs = center;
+//                        centerDivs(i) -=  0.5*extent(i);
+//                        for(int k=1;k<dim(i);k++){
+//                            ent_name.str(""); ent_name << "MPITopoSubGridNode-" << i<<"-"<<k;
+//                            Ogre::SceneNode* mpiTopoSubdivs = mpiTopoRoot->createChildSceneNode(ent_name.str());
+//                            ent_name.str(""); ent_name << "MPITopoSubGridEnt-" << i<<"-"<<k;
+//                            Ogre::Entity *ent = m_pSceneMgr->createEntity(ent_name.str(), "Plane.mesh");
+//                            ent->setMaterialName(materialName);
+//                            mpiTopoSubdivs->attachObject(ent);
+//
+//
+//                            mpiTopoSubdivs->rotate(Ogre::Vector3(I(0,i),I(1,i),I(2,i)),Ogre::Degree(90));
+//                            if(i==0){
+//                                mpiTopoSubdivs->scale(0.5*extent(2),0.5*extent(1),1);
+//                            }else if(i==1){
+//                                mpiTopoSubdivs->scale(0.5*extent(1),0.5*extent(2),1);
+//                            }else{
+//                                mpiTopoSubdivs->scale(0.5*extent(0),0.5*extent(1),1);
+//                            }
+//                            centerDivs(i) += dxyz(i);
+//                            mpiTopoSubdivs->setPosition(centerDivs(0),centerDivs(1),centerDivs(2));
+//
+//                        }
+//
+//                    }
+
+
+
+            } else {
+                throw ticpp::Exception("String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
+            }
+        }
 
     }
 
@@ -257,3 +298,4 @@ protected:
 
 
 #endif
+

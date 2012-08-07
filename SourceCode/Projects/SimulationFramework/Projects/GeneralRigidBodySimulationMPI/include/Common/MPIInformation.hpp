@@ -53,6 +53,16 @@ public:
         m_name = s.str();
     };
 
+     unsigned int getMasterRank() const {
+        return MASTER;
+    };
+
+    bool hasMasterRank(){
+        if(m_rank == MASTER){
+            return true;
+        }
+        return false;
+    }
 
     unsigned int getRank() const {
         return m_rank;
@@ -91,6 +101,7 @@ private:
     int m_rank;
     int m_nProcesses;
     std::string m_name;
+
 
 
 };
@@ -134,17 +145,6 @@ private:
 };
 
 
-    /**
-        Important struct to define all MPI message tags used in this framework!
-    */
-    struct MPIMessageTags{
-        enum {
-            RIGIDBODY_NUMBER_CHECK,
-            RIGIDBODY_UPDATE_MESSAGE,
-            RIGIDBODY_MESSAGE,
-            CONTACT_UPDATE_MESSAGE
-        };
-    };
 
 };
 

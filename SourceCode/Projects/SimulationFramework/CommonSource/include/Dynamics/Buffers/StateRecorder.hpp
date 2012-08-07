@@ -25,7 +25,6 @@ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   StateRecorder(const unsigned int nSimBodies);
-  StateRecorder(const DynamicsState<TLayoutConfig> * state);
 
   ~StateRecorder();
   bool createSimFile(boost::filesystem::path file_path);
@@ -71,19 +70,12 @@ StateRecorder<TLayoutConfig>::StateRecorder(const unsigned int nSimBodies)
    m_pSimulationLog = manager->getLog("SimulationLog");
     if(!m_pSimulationLog){
         // Log does not exist make a new standart log!
-        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
+        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "StateRecorderLog.log";
         m_pSimulationLog = manager->createLog("StateRecorderLog",true,true,filePath);
     }
 
-}
-
-
-template<typename TLayoutConfig>
-StateRecorder<TLayoutConfig>::StateRecorder(const DynamicsState<TLayoutConfig> * state)
-{
-  addState(state);
 }
 
 template<typename TLayoutConfig>

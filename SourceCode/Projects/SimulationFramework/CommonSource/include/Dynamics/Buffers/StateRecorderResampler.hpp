@@ -47,7 +47,7 @@ public:
       std::stringstream logstream;
 
        /*
-       LOG(m_pStateRecorderLog, << "Current resample time: " << m_currentResampleTime << "/ "<< m_startTime << " /" << m_endTime;);
+       LOG(m_pStateRecorderLog, "Current resample time: " << m_currentResampleTime << "/ "<< m_startTime << " /" << m_endTime;);
        */
 
       if(m_currentResampleTime <= m_endTime){

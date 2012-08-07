@@ -155,6 +155,11 @@ private:
   bool m_bReadFullState;
 
   std::stringstream m_errorString;
+
+  // Copy constructor is private, we should ne copy the file, because fstream is not copiable
+  MultiBodySimFile<TLayoutConfig> & operator =(const MultiBodySimFile<TLayoutConfig> & file);
+
+
 };
 /** @} */
 
@@ -205,6 +210,7 @@ template<typename TLayoutConfig>
 template<typename TLayoutConfig>
  MultiBodySimFile<TLayoutConfig>::~MultiBodySimFile()
 {
+   closeSimFile();
    delete[] m_Buffer;
 }
 
@@ -288,6 +294,7 @@ bool  MultiBodySimFile<TLayoutConfig>::openSimFileWrite(const boost::filesystem:
          // Reopen only in write mode!
          m_file_stream.close();
          m_file_stream.clear();
+         //TODO Why here ::in mode?? Reason?
          m_file_stream.open(file_path.string().c_str() , (std::ios_base::binary | std::ios_base::out  | std::ios_base::in ) );
          if(m_file_stream.good())
          {

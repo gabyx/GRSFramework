@@ -24,7 +24,7 @@ bool RenderContext::initOgre(Ogre::String wndTitle) {
     Ogre::LogManager* logMgr = new Ogre::LogManager();
 
 // OGRE LOG
-    boost::filesystem::path filePath = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
+    boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
     filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
     if(!boost::filesystem::exists(filePath)) {
         boost::filesystem::create_directories(filePath);
@@ -44,7 +44,7 @@ bool RenderContext::initOgre(Ogre::String wndTitle) {
 
 
 // APP LOG
-    filePath = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
+    filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
     filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
     filePath /= "AppLogfile.log";
 #if LogToFileApp == 1

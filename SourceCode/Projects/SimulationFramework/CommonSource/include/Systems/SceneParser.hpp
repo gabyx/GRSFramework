@@ -66,7 +66,7 @@ public:
 
         m_pSimulationLog->logMessage("Parsing Scene...");
 
-        LOG( m_pSimulationLog, <<"Scene Input file: "  << file.string() <<std::endl; );
+        LOG( m_pSimulationLog, "Scene Input file: "  << file.string() <<std::endl; );
 
 
         //Reset all variables
@@ -104,7 +104,7 @@ public:
             }
 
         } catch(ticpp::Exception& ex) {
-            LOG(m_pSimulationLog, << "Scene XML error: "  << ex.what() <<std::endl;);
+            LOG(m_pSimulationLog,  "Scene XML error: "  << ex.what() <<std::endl;);
             exit(-1);
         }
 
@@ -123,7 +123,7 @@ public:
 
     }
 
-    boost::filesystem::path getCurrentSceneFileDirectory() {
+    boost::filesystem::path getParsedSceneFile() {
         return m_currentParseFilePath;
     }
 
@@ -153,7 +153,7 @@ protected:
 
     void processSceneSettings( ticpp::Node *sceneSettings ) {
 
-        LOG(m_pSimulationLog,<<"Process SceneSettings..."<<std::endl;);
+        LOG(m_pSimulationLog,"Process SceneSettings..."<<std::endl;);
 
         if(m_bParseDynamics) {
 
@@ -298,7 +298,7 @@ protected:
 
     void processSceneObjects( ticpp::Node *sceneObjects ) {
 
-        LOG(m_pSimulationLog,<<"Process SceneObjects ..."<<std::endl;);
+        LOG(m_pSimulationLog,"Process SceneObjects ..."<<std::endl;);
 
         ticpp::Iterator< ticpp::Node > child;
 
@@ -318,7 +318,7 @@ protected:
 
     void processRigidBodies( ticpp::Node * rigidbodies ) {
 
-        LOG(m_pSimulationLog,<<"Process RigidBodies ..."<<std::endl;);
+        LOG(m_pSimulationLog,"Process RigidBodies ..."<<std::endl;);
 
         //Clear current body list;
         m_bodyList.clear();
@@ -336,7 +336,7 @@ protected:
             scale.setOnes();
             m_bodyListScales.push_back(scale);
         }
-        LOG(m_pSimulationLog,<<"Added "<<instances<<" RigidBody Instances..."<<std::endl;);
+        LOG(m_pSimulationLog,"Added "<<instances<<" RigidBody Instances..."<<std::endl;);
 
 
         ticpp::Node * geometryNode = rigidbodies->FirstChild("Geometry");
@@ -352,7 +352,7 @@ protected:
 
 
         //Copy the pointers!
-        LOG(m_pSimulationLog,<<"Copy RigidBody References to DynamicSystem ..."<<std::endl;);
+        LOG(m_pSimulationLog,"Copy RigidBody References to DynamicSystem ..."<<std::endl;);
         if(m_eBodiesState == RigidBodyType::SIMULATED) {
             if(m_bParseDynamics) {
                 for(int i=0; i < m_bodyList.size(); i++) {
@@ -384,7 +384,7 @@ protected:
     }
 
     void processGeometry( ticpp::Node * geometryNode) {
-        LOG(m_pSimulationLog,<<"Process Geometry ..."<<std::endl;);
+        LOG(m_pSimulationLog,"Process Geometry ..."<<std::endl;);
         if(geometryNode->FirstChild()->Value() == "Sphere") {
 
             processSphereGeometry( geometryNode->FirstChild()->ToElement());
@@ -611,7 +611,7 @@ protected:
     }
 
     void processDynamicProperties( ticpp::Node * dynProp) {
-        LOG(m_pSimulationLog,<<"Process DynamicProperties ..."<<std::endl;);
+        LOG(m_pSimulationLog,"Process DynamicProperties ..."<<std::endl;);
         ticpp::Element * element = dynProp->FirstChild("DynamicState")->ToElement();
 
         std::string type = element->GetAttribute("type");

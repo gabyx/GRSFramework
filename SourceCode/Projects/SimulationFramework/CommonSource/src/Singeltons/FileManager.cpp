@@ -10,17 +10,27 @@
 
 using namespace std;
 
-FileManager::FileManager(boost::filesystem::path globalDirPath){
+FileManager::FileManager(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath){
   m_fileIdCounter = 0;
   m_globalDirPath = globalDirPath;
+  m_localDirPath = localDirPath;
 
   if(!m_globalDirPath.empty()){
       if(!exists(m_globalDirPath)){
           if(!create_directories(m_globalDirPath)){
-            ERRORMSG("Global Path in FileManager could not be created!");
+            ERRORMSG("Global Directory Path in FileManager could not be created!");
           }
       }
   }
+
+  if(!m_localDirPath.empty()){
+      if(!exists(m_localDirPath)){
+          if(!create_directories(m_localDirPath)){
+            ERRORMSG("Local Directory Path in FileManager could not be created!");
+          }
+      }
+  }
+
 }
 
 FileManager::~FileManager()
@@ -30,6 +40,10 @@ FileManager::~FileManager()
 
 boost::filesystem::path FileManager::getGlobalDirectoryPath(){
     return m_globalDirPath;
+}
+
+boost::filesystem::path FileManager::getLocalDirectoryPath(){
+    return m_localDirPath;
 }
 
 boost::filesystem::path FileManager::copyFile(boost::filesystem::path from, boost::filesystem::path to, bool overwrite){
@@ -56,6 +70,7 @@ boost::filesystem::path FileManager::getNewSimFolderPath(boost::filesystem::path
   directory /= relDirectoryPath;
 
   scanAllSimFolders(directory,folder_prefix,false);
+
   std::stringstream new_foldername;
   new_foldername << folder_prefix << m_fileIdCounter;
   directory /= new_foldername.str();

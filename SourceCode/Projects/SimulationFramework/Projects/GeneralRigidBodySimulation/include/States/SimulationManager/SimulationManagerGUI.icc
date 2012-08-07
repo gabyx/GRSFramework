@@ -38,7 +38,7 @@ SimulationManagerGUI<TConfig>::SimulationManagerGUI(boost::shared_ptr<Ogre::Scen
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
     } else {
-        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
+        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
@@ -244,11 +244,6 @@ void SimulationManagerGUI<TConfig>::initSimThread() {
     // Get new folder path
     m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_REALTIME);
 
-    // Sim file path
-    m_SimFilePath = m_SimFolderPath;
-    std::string filename = SIM_FILE_PREFIX;
-    filename += SIM_FILE_EXTENSION;
-    m_SimFilePath /= filename;
 
     m_pTimestepper->initLogs(m_SimFolderPath);
 
@@ -328,7 +323,7 @@ bool SimulationManagerGUI<TConfig>::initRecordThread() {
     m_SceneFilePath /= filename;
 
     // Copy Scene File
-    FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getCurrentSceneFileDirectory(),m_SceneFilePath,true);
+    FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),m_SceneFilePath,true);
 
     //Copy SimeState file, if necessary
      //Open SimState File
@@ -346,7 +341,7 @@ bool SimulationManagerGUI<TConfig>::initRecordThread() {
     // Copy File: StateData
     boost::filesystem::path simDataFile;
     if(!m_pTimestepper->m_Settings.m_simDataReferenceFile.empty()){
-         simDataFile = FileManager::getSingletonPtr()->copyFile( m_pSceneParser->getCurrentSceneFileDirectory(), m_pTimestepper->m_Settings.m_simDataReferenceFile,true);
+         simDataFile = FileManager::getSingletonPtr()->copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_Settings.m_simDataReferenceFile,true);
 
     }
     m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);

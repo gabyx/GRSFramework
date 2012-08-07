@@ -281,7 +281,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     static int iterations=0; // Average is reset after 1000 Iterations
 
 #if CoutLevelSolver>0
-    LOG(m_pSolverLog, << "% Do one time-step =================================" <<std::endl;);
+    LOG(m_pSolverLog, "% Do one time-step =================================" <<std::endl;);
 #endif
 
     m_PerformanceTimer.stop();
@@ -354,7 +354,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     }
 
 #if CoutLevelSolver>0
-    //LOG( m_pSolverLog, <<  "% Iteration Time: "<<std::setprecision(5)<<(double)(m_endTime-m_startTime)<<std::endl
+    //LOG( m_pSolverLog,  "% Iteration Time: "<<std::setprecision(5)<<(double)(m_endTime-m_startTime)<<std::endl
     // <<  "% End time-step ====================================" <<std::endl<<std::endl; );
 #endif
 

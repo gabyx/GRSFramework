@@ -9,11 +9,12 @@
 #include "LogDefines.hpp"
 #include "TypeDefs.hpp"
 
+#include "StateRecorderBody.hpp"
 #include "SceneParserMPI.hpp"
 
 #include "MPIInformation.hpp"
 
-template <typename TLayoutConfig> class DynamicsState;
+
 template <typename TLayoutConfig> class StateRecorder;
 
 
@@ -26,14 +27,19 @@ public:
     SimulationManagerMPI();
     ~SimulationManagerMPI();
 
-    boost::shared_ptr<StateRecorder<LayoutConfigType> >		    m_pStateRecorder;
+    boost::shared_ptr<StateRecorderBody<DynamicsSystemType> >		    m_pStateRecorder;
 
     void setup();
     void setup(boost::filesystem::path sceneFilePath);
 
+
+    void startSim();
+
     boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
 
 private:
+
+    void initSim();
 
     unsigned int m_nSimBodies, m_nGlobalSimBodies;
 
@@ -53,7 +59,6 @@ private:
 
     // File Paths for one Simulation, always reset ==============================
     boost::filesystem::path m_SimFolderPath;
-    boost::filesystem::path m_SimFilePath;
 
     typedef MPILayer::ProcessInformation<LayoutConfigType> ProcessInfoType;
     ProcessInfoType m_MPIProcInfo;
@@ -68,4 +73,4 @@ private:
 #include "SimulationManagerMPI.icc"
 
 
-#endif // SimulationManagerMPIMAZE_HPP
+#endif // SimulationManagerMPI_HPP

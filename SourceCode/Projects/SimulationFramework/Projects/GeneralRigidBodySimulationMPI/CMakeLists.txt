@@ -82,6 +82,7 @@ SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/AABB.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/MPICommunicationFunctions.hpp
 )
 SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
@@ -123,7 +124,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePoolVisBackFront.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/SharedBufferPlayback.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorder.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderBody.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
 )

@@ -169,13 +169,13 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::reset() {
     resetForNextIter();
 
 #if HAVE_CUDA_SUPPORT == 1
-    LOG(m_pSolverLog, << "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
+    LOG(m_pSolverLog, "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
 
     CHECK_CUDA(cudaSetDevice(m_Settings.m_UseGPUDeviceId));
     cudaDeviceProp props;
     CHECK_CUDA(cudaGetDeviceProperties(&props,m_Settings.m_UseGPUDeviceId));
 
-    LOG(m_pSolverLog, <<  "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
+    LOG(m_pSolverLog,  "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
 #endif
 
 
@@ -198,7 +198,7 @@ template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
 
 #if CoutLevelSolver>0
-    LOG(m_pSolverLog, <<  " % -> solveInclusionProblem(): "<< std::endl;);
+    LOG(m_pSolverLog,  " % -> solveInclusionProblem(): "<< std::endl;);
 #endif
 
     // Iterate over all nodes set and assemble the matrices...
@@ -229,7 +229,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
 #endif
 
 #if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog, <<  " % nContacts: "<< m_nContacts <<std::endl;);
+        LOG(m_pSolverLog,  " % nContacts: "<< m_nContacts <<std::endl;);
 #endif
 
 
@@ -272,7 +272,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
             // TODO CHECK IF finite!
 
 #if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog, <<  " % Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
+            LOG(m_pSolverLog,  " % Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
 #endif
         }
 
@@ -282,7 +282,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
 #endif
 
 #if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog, <<  " % Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
+        LOG(m_pSolverLog,  " % Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
 #endif
     }
 
@@ -362,7 +362,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
 #endif
 
 #if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog, <<  " nodeData.m_mu"<< nodeData.m_mu <<std::endl;);
+        LOG(m_pSolverLog,  " nodeData.m_mu"<< nodeData.m_mu <<std::endl;);
 #endif
 
     }
@@ -381,13 +381,13 @@ template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx() {
 
 #if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, << " u_e = [ ");
+    LOG(m_pSolverLog, " u_e = [ ");
 
     for(int i=0; i< m_SimBodies.size(); i++) {
-        LOG(m_pSolverLog, << "Back: \t" << m_SimBodies[i]->m_pSolverData->m_uBuffer.m_Back.transpose() <<std::endl);
-        LOG(m_pSolverLog, << "Front: \t" <<m_SimBodies[i]->m_pSolverData->m_uBuffer.m_Front.transpose()<<std::endl);
+        LOG(m_pSolverLog, "Back: \t" << m_SimBodies[i]->m_pSolverData->m_uBuffer.m_Back.transpose() <<std::endl);
+        LOG(m_pSolverLog, "Front: \t" <<m_SimBodies[i]->m_pSolverData->m_uBuffer.m_Front.transpose()<<std::endl);
     }
-    LOG(m_pSolverLog, << " ]" << std::endl);
+    LOG(m_pSolverLog, " ]" << std::endl);
 #endif
 
     // General stupid Prox- Iteration
@@ -398,11 +398,11 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx() {
         sorProxOverAllNodes(); // Do one Sor Prox Iteration
 
 #if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog, << std::endl<< "Next iteration: "<< m_iterationsNeeded <<"=========================" << std::endl<< std::endl<<" u_e: \t");
+        LOG(m_pSolverLog, std::endl<< "Next iteration: "<< m_iterationsNeeded <<"=========================" << std::endl<< std::endl<<" u_e: \t");
         for(int i=0; i< m_SimBodies.size(); i++) {
-            LOG(m_pSolverLog, << m_SimBodies[i]->m_pSolverData->m_uBuffer.m_Front.transpose());
+            LOG(m_pSolverLog, m_SimBodies[i]->m_pSolverData->m_uBuffer.m_Front.transpose());
         }
-        LOG(m_pSolverLog, <<""<< std::endl);
+        LOG(m_pSolverLog,""<< std::endl);
 #endif
 
         m_iterationsNeeded++;
@@ -410,7 +410,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx() {
         if ( (m_bConverged == true || m_iterationsNeeded >= m_Settings.m_MaxIter) && m_iterationsNeeded >= m_Settings.m_MinIter) {
 
 #if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog, << " converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_iterationsNeeded <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
+            LOG(m_pSolverLog, " converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_iterationsNeeded <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
 #endif
             break;
         }
@@ -440,7 +440,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
         if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {
 
 #if CoutLevelSolverWhenContact>2
-            *m_pSolverLog, << "Node: " << nodeCounter <<"====================="<<  std::endl;
+            *m_pSolverLog, "Node: " << nodeCounter <<"====================="<<  std::endl;
 #endif
             // Init the prox value
             nodeData.m_LambdaFront = nodeData.m_b;
@@ -455,7 +455,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
             }
 
 #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, <<"chi: " << nodeData.m_LambdaFront.transpose() << std::endl);
+            LOG(m_pSolverLog,"chi: " << nodeData.m_LambdaFront.transpose() << std::endl);
 #endif
 
             nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
@@ -482,7 +482,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
                 nodeData.m_u1BufferPtr->m_Front = nodeData.m_u1BufferPtr->m_Front + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
            #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, <<"Node: " << nodeData.m_u1BufferPtr->m_Front.transpose() << std::endl);
+            LOG(m_pSolverLog,"Node: " << nodeData.m_u1BufferPtr->m_Front.transpose() << std::endl);
            #endif
 
 

@@ -249,7 +249,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 {
 
 #if CoutLevelSolver>0
-  LOG(m_pSolverLog, << "---> solveInclusionProblem(): "<< std::endl;);
+  LOG(m_pSolverLog, "---> solveInclusionProblem(): "<< std::endl;);
 #endif
 
 
@@ -259,7 +259,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
   // Update m_Minv_h_dt
   m_Minv_h_dt = m_Minv_diag.asDiagonal() * m_h * m_Settings.m_deltaT;
 #if CoutLevelSolverWhenContact>2
-  LOG(m_pSolverLog, << "h= "<< m_h.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+  LOG(m_pSolverLog, "h= "<< m_h.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
   << "Minv_diag= "<< "diag(" <<m_Minv_diag.transpose().format(MyIOFormat::Matlab) <<");"<<std::endl
   << "Minv_h_dt= "<< m_Minv_h_dt.transpose().format(MyIOFormat::Matlab) <<"';"<<std::endl;);
 #endif
@@ -467,7 +467,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
       m_G_notDiagDominant = (G.diagonal().array() < (G.rowwise().sum()-G.diagonal()).array()).sum();
 #endif
 #if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, << "G= ..."<<std::endl<< G.format(MyIOFormat::Matlab)<<";"<<std::endl;);
+    LOG(m_pSolverLog, "G= ..."<<std::endl<< G.format(MyIOFormat::Matlab)<<";"<<std::endl;);
 #endif
 #endif
 
@@ -476,7 +476,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 
 
 #if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, << "G_NN= ..."<< std::endl << m_G_NN.format(MyIOFormat::Matlab)<<";"<<std::endl
+    LOG(m_pSolverLog, "G_NN= ..."<< std::endl << m_G_NN.format(MyIOFormat::Matlab)<<";"<<std::endl
      << "G_NT= ..."<< std::endl << m_G_NT.format(MyIOFormat::Matlab)<<";"<<std::endl
      << "G_TT= ..."<< std::endl << m_G_TT.format(MyIOFormat::Matlab)<<";"<<std::endl;);
 #endif
@@ -485,14 +485,14 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
     m_c_T.noalias() = m_WT_Minv_h_dt + m_I_epsilon_T.asDiagonal() * ( m_WT_uS  + m_xi_T);
 
 #if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, << "c_N= " << m_c_N.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+    LOG(m_pSolverLog, "c_N= " << m_c_N.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                       << "c_T= " << m_c_T.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
 
 
 #if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, << "P_N_back= "<<P_N_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+    LOG(m_pSolverLog, "P_N_back= "<<P_N_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                       << "P_T_back= "<<P_T_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
@@ -506,7 +506,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 #endif
 
 #if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, << "% Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
+    LOG(m_pSolverLog, "% Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
 #endif
 
     // Calculate u_E for each body in the state...
@@ -568,7 +568,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::doJorProx(){
       m_bConverged = Numerics::cancelCriteriaValue(P_N_back,P_N_front,P_T_back,P_T_front, m_Settings.m_AbsTol, m_Settings.m_RelTol);
 
    #if CoutLevelSolverWhenContact>2
-      LOG(m_pSolverLog, << "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+      LOG(m_pSolverLog, "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                         << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;)
    #endif
 
@@ -621,7 +621,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::doSorProx(){
       m_bConverged = Numerics::cancelCriteriaValue(P_N_back,P_N_front,P_T_back,P_T_front, m_Settings.m_AbsTol, m_Settings.m_RelTol);
 
 #if CoutLevelSolverWhenContact>2
-      LOG(m_pSolverLog, << "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+      LOG(m_pSolverLog, "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                         << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 

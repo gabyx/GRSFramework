@@ -67,7 +67,7 @@ public:
 
         m_pSimulationLog->logMessage("Parsing Scene...");
 
-        LOG( m_pSimulationLog, <<"Scene Input file: "  << file.string() <<std::endl; );
+        LOG( m_pSimulationLog,"Scene Input file: "  << file.string() <<std::endl; );
         m_pSimulationLog->logMessage("Parsing Scene...");
 
 
@@ -113,7 +113,7 @@ public:
             }
 
         } catch(ticpp::Exception& ex) {
-            LOG(m_pSimulationLog, << "Scene XML error: "  << ex.what() <<std::endl;);
+            LOG(m_pSimulationLog,"Scene XML error: "  << ex.what() << std::endl;);
             exit(-1);
         }
 
@@ -123,7 +123,7 @@ public:
         return true;
     }
 
-    boost::filesystem::path getCurrentSceneFileDirectory() {
+    boost::filesystem::path getParsedSceneFile() {
         return m_currentParseFilePath;
     }
 
@@ -169,7 +169,7 @@ protected:
                 }
                 // saftey check
                 if(dim(0)*dim(1)*dim(2) != m_procInfo.getNProcesses()){
-                    LOG(m_pSimulationLog,<< "Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_procInfo.getNProcesses() <<" Processes"<<std::endl; );
+                    LOG(m_pSimulationLog, "Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_procInfo.getNProcesses() <<" Processes"<<std::endl; );
                     throw ticpp::Exception("You have launched to many processes for the grid!");
                 }
 

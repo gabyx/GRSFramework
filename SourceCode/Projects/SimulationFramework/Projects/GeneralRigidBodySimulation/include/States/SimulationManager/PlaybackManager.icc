@@ -31,7 +31,7 @@ PlaybackManager<TConfig>::PlaybackManager(boost::shared_ptr<Ogre::SceneManager> 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
     } else {
-        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
+        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
@@ -42,7 +42,7 @@ PlaybackManager<TConfig>::PlaybackManager(boost::shared_ptr<Ogre::SceneManager> 
     m_pThreadLog = new Logging::Log("PlaybackManagerThreadLog");
 
 #if LogToFilePlayback == 1
-    boost::filesystem::path filePath = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
+    boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
     filePath /= "PlaybackManagerThread.log";
     m_pThreadLog->addSink(new Logging::LogSinkFile("PlaybackManager-File",filePath));
@@ -271,17 +271,17 @@ void PlaybackManager<TConfig>::threadRunSimulation() {
         if(bchangedState) {
             if(m_SettingsSimThread.m_bSimFileDrop) { // When the sim buffer has been moved, then ... At the biginning, this moves to the initial state basically!
                 //Do a resampling of the states!
-                LOG(m_pThreadLog, << " PlaybackManager: Try to resample state time: " << currentState->m_t<<std::endl;);
+                LOG(m_pThreadLog, " PlaybackManager: Try to resample state time: " << currentState->m_t<<std::endl;);
                 m_pStateRecorderResampler->tryToWrite(currentState,m_SettingsSimThread.m_bSimFileDropInterpolate);
             }
 
 
             if(currentState->m_StateType == DynamicsState<LayoutConfigType>::ENDSTATE) {
-                LOG(m_pThreadLog, << " PlaybackManager: Detected end state at " << currentState->m_t <<" --> leaving..."<<std::endl;);
+                LOG(m_pThreadLog, " PlaybackManager: Detected end state at " << currentState->m_t <<" --> leaving..."<<std::endl;);
                 break;
             }
 
-            /* LOG(m_pThreadLog, << "m_t:" << currentState->m_t <<std::endl;); */
+            /* LOG(m_pThreadLog, "m_t:" << currentState->m_t <<std::endl;); */
 
             bchangedState = false;
         }
@@ -329,7 +329,7 @@ void PlaybackManager<TConfig>::initSimThread() {
             m_pSimulationLog->logMessage("Could not create sim file!");
             ASSERTMSG(false,"Could not create sim file!");
         };
-        FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getCurrentSceneFileDirectory(),resampleFolderPath,true);
+        FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),resampleFolderPath,true);
     } else {
         //Make Fileloader load only q!
         m_pFileLoader->setReadFullState(true); // This makes things faster, because of buffering i think, first thought "false" would give better results which does not!

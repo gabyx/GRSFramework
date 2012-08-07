@@ -156,7 +156,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
         RigidBodyType * pBody = (*bodyIt).get();
 
 #if CoutLevelSolver>2
-        LOG(m_pSolverLog, << "Body: "<< pBody->m_id <<"-----"<< std::endl
+        LOG(m_pSolverLog, "Body: "<< pBody->m_id <<"-----"<< std::endl
             << "m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
             << "m_q_s= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
 #endif
@@ -183,7 +183,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
         // =================
 
 #if CoutLevelSolver>2
-        LOG(m_pSolverLog, << "Body: "<< pBody->m_id <<"-----" std::endl
+        LOG(m_pSolverLog, "Body: "<< pBody->m_id <<"-----" std::endl
             << "m_t= "  << pBody->m_pSolverData->m_t<<std::endl
             << "m_q_m= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
 #endif
@@ -202,7 +202,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
 
         RigidBodyType * pBody = (*bodyIt).get();
 #if CoutLevelSolver>2
-        LOG(m_pSolverLog, << "Body: "<< pBody->m_id <<"-----"<< std::endl
+        LOG(m_pSolverLog, "Body: "<< pBody->m_id <<"-----"<< std::endl
             << "m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
             << "m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
 #endif

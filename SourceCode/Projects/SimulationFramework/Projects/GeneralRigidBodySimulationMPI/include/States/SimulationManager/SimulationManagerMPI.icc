@@ -22,6 +22,8 @@
 
 #include "FileManager.hpp"
 
+#include "MPICommunicationFunctions.hpp"
+
 
 using namespace std;
 
@@ -47,14 +49,14 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     //Each Process copies its SceneFile.xml to the folders, that each Process can read its own file (better)
     boost::filesystem::path sceneFilePathNew = FileManager::getSingletonPtr()->copyFile(sceneFilePath,
-            FileManager::getSingletonPtr()->getGlobalDirectoryPath());
+            FileManager::getSingletonPtr()->getLocalDirectoryPath());
 
     //Make log!
     m_pSimulationLog = NULL;
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
     } else {
-        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
+        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
@@ -74,7 +76,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     m_nGlobalSimBodies = m_pSceneParser->getNumberOfGlobalSimBodies();
 
-    LOG(m_pSimulationLog, << "---> Scene parsing finshed: Added "<< m_nSimBodies << " Bodies!");
+    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_nSimBodies << " Bodies!" << std::endl;);
 
     // Do Safty Check
     // Do a Reduction of all Simbodies, to count if no bodies are missing!
@@ -85,8 +87,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys) );
 
-
-    m_pStateRecorder = boost::shared_ptr<StateRecorder<LayoutConfigType> >(new StateRecorder<LayoutConfigType>(m_nSimBodies));
+    m_pStateRecorder = boost::shared_ptr<StateRecorderBody<DynamicsSystemType> >(new StateRecorderBody<DynamicsSystemType>());
 
     m_pSimulationLog->logMessage("---> setup finished! ");
 }
@@ -105,169 +106,106 @@ bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess(){
    timer.stop();
    double elapsed = ((double)timer.elapsed().wall)*1e-9;
 
-   if(ProcessInfoType::MASTER == m_MPIProcInfo.getRank()){
-        LOG(m_pSimulationLog, << " Allreduce needed: " << elapsed <<"sec."<<std::endl; );
+   if(m_MPIProcInfo.hasMasterRank()){
+        LOG(m_pSimulationLog,  " Allreduce needed: " << elapsed <<"sec."<<std::endl; );
 
        if(numberOfBodiesInSimulation != m_nGlobalSimBodies){
-            LOG(m_pSimulationLog, << "---> Body check NOT successful! : "<< numberOfBodiesInSimulation <<"!="<< m_nGlobalSimBodies<< std::endl;);
+            LOG(m_pSimulationLog,  "ERROR: ---> Body check NOT successful! : "<< numberOfBodiesInSimulation <<"!="<< m_nGlobalSimBodies<< std::endl;);
             ERRORMSGMPI("Body check Not successfull");
        }
 
-
-        LOG(m_pSimulationLog, << "---> Body check successfull !" << std::endl;);
+        LOG(m_pSimulationLog,  "---> Body check successfull !" << std::endl;);
     }else{
-        LOG(m_pSimulationLog, << "---> Body check ... (sent bodies) !"<< std::endl);
+        LOG(m_pSimulationLog,  "---> Body check ... (sent bodies) !"<< std::endl;);
     }
 
 }
 
-//template<typename TConfig>
-//void SimulationManagerMPI<TConfig>::threadRunRecord() {
-//
-//    static double timelineSimulation;
-//
-//    m_pSimulationLog->logMessage(" SimulationManagerMPI: RecordThread entering...");
-//    setSimThreadRunning(true);
-//
-//
-//    initRecordThread();
-//
-//    //Reset Timestepper!
-//    m_pTimestepper->reset();
-//
-//    //Open File
-//    bool fileOK = false;
-//    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::CONTINUE) {
-//        fileOK = m_pStateRecorder->createSimFileCopyFromReference(m_SimFilePath,m_pTimestepper->m_Settings.m_simStateReferenceFile);
-//    } else {
-//        fileOK = m_pStateRecorder->createSimFile(m_SimFilePath);
-//    }
-//
-//    if(fileOK) {
-//
-//        // Write first initial value out!
-//        if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
-//            m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
-//        }
-//        // wait for vis thread! (which does some loops before)
-//
-//        resetTimelineSimulation();
-//
-//        while(!isSimThreadToBeStopped()) {
-//
-//
-//            // Read all inputs
-//            readSharedBuffer();
-//            // Do one iteration
-//            m_pTimestepper->doOneIteration();
-//            // Write outputs
-//            writeSharedBuffer();
-//
-//            // get global time for logging!
-//            timelineSimulation = getTimelineSimulation();
-//            // Write Data to SystemDataFile (maps all data to back buffer!)
-//            m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
-//            // Write Data to CollisionDataFile
-//            m_pTimestepper->writeIterationToCollisionDataFile();
-//            // Write  State to Sim File
-//            m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
-//
-//            // Check if simulation can be aborted!
-//            if(m_pTimestepper->finished()) {
-//                m_pSimulationLog->logMessage(" SimulationManagerMPI: Timestepper finished, exit...");
-//                break;
-//            }
-//        }
-//
-//        cleanUpRecordThread();
-//    }
-//
-//    setSimThreadRunning(false);
-//    m_pSimulationLog->logMessage(" SimulationManagerMPI: RecordThread leaving...");
-//    return;
-//}
-//template<typename TConfig>
-//void SimulationManagerMPI<TConfig>::initRecordThread() {
-//    // Get new folder path
-//    m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
-//
-//    // Sim file path
-//    m_SimFilePath = m_SimFolderPath;
-//    std::string filename = SIM_FILE_PREFIX;
-//    filename += SIM_FILE_EXTENSION;
-//    m_SimFilePath /= filename;
-//
-//    boost::filesystem::path m_SceneFilePath = m_SimFolderPath;
-//    filename = SIM_SCENE_FILE_NAME;
-//    filename += ".xml";
-//    m_SceneFilePath /= filename;
-//
-//    FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getCurrentSceneFileDirectory(),m_SceneFilePath,true);
-//
-//    m_pTimestepper->initLogs(m_SimFolderPath);
-//
-//}
-//template<typename TConfig>
-//void SimulationManagerMPI<TConfig>::cleanUpRecordThread() {
-//    m_pTimestepper->closeAllFiles();
-//    m_pStateRecorder->closeSimFile();
-//}
+template<typename TConfig>
+void SimulationManagerMPI<TConfig>::startSim()
+{
 
+  static double timelineSimulation;
+
+  m_pSimulationLog->logMessage(" SimulationManager: Simulation entering...");
+
+  initSim();
+
+
+//  if(fileOK)
+//  {
 //
-//template<typename TConfig>
-//void SimulationManagerMPI<TConfig>::readSharedBuffer() {
-//
-//}
-//
-//template<typename TConfig>
-//void SimulationManagerMPI<TConfig>::writeSharedBuffer() {
-//    static int iterations = 0;
-//    iterations++;
-//
-//    //if(iterations%100==0){
-//    setIterationTime(m_pTimestepper->m_AvgTimeForOneIteration, m_pTimestepper->m_MaxTimeForOneIteration);
-//    setNumberOfContacts(m_pTimestepper->m_pInclusionSolver->m_nContacts);
-//
-//    //}
-//
-//}
-//
-//template<typename TConfig>
-//void SimulationManagerMPI<TConfig>::startSimThread() {
-//
-//    // TODO Switch Update function to the SimThread update!
-//
-//    if (!isSimThreadRunning()) {
-//
-//        setThreadToBeStopped(false);
-//
-//        //Start Dynamics Thread===========================================
-//        m_pThread = new boost::thread( boost::bind(&SimulationManagerMPI<TConfig>::threadRunRecord, &*this) );
-//        m_eSimThreadRunning = SimulationManagerMPIBase::RECORD;
-//        m_pSimulationLog->logMessage(" SimulationManagerMPI:: Start Thread: SimThread in RECORD mode started ...");
-//
-//    } else {
-//        m_pSimulationLog->logMessage("SimulationManagerMPI:: A SimThread is already running!");
+//    // Write first initial value out!
+//    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE){
+//      m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
 //    }
-//}
+//    // wait for vis thread! (which does some loops before)
+//    boost::timer::cpu_timer global_time;
+//    global_time.start();
 //
+//    while(1)
+//    {
 //
-//template<typename TConfig>
-//void SimulationManagerMPI<TConfig>::waitForSimThread() {
-//    m_pThread->join();
-//    m_eSimThreadRunning = SimulationManagerMPIBase::NONE;
-//}
+//      // Do one iteration
+//      m_pTimestepper->doOneIteration();
 //
-//template<typename TConfig>
-//void SimulationManagerMPI<TConfig>::stopSimThread() {
+//      // get global time for logging!
+//      timelineSimulation = ((double)global_time.elapsed().wall)*1e-9;
+//      // Write Data to SystemDataFile (maps all data to back buffer!)
+//      m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
+//      // Write Data to CollisionDataFile
+//      m_pTimestepper->writeIterationToCollisionDataFile();
+//      // Write  State to Sim File
+//      m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
 //
-//    if (isSimThreadRunning()) {
-//        setThreadToBeStopped(true);
-//        m_pThread->join();
-//        m_pSimulationLog->logMessage("SimulationManagerMPI:: Stop Thread: SimThread has been stopped!");
-//
-//        m_eSimThreadRunning = SimulationManagerMPIBase::NONE;
-//    } else {
-//        m_pSimulationLog->logMessage("SimulationManagerMPI:: Stop Thread: SimThread is not running!");
+//      // Check if simulation can be aborted!
+//      if(m_pTimestepper->finished()){
+//         m_pSimulationLog->logMessage(" SimulationManager: Timestepper finished, exit...");
+//         break;
+//      }
 //    }
-//}
+//
+//    cleanUpRecordThread();
+//  }
+//
+//  m_pSimulationLog->logMessage(" SimulationManager: Simulation leaving...");
+//  return;
+}
+
+template<typename TConfig>
+void SimulationManagerMPI<TConfig>::initSim()
+{
+
+
+    std::string folderName;
+    if(m_MPIProcInfo.hasMasterRank()){ // Only master process
+       // Get new sim folder path relative to global directory
+
+       m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
+
+       boost::filesystem::path m_SceneFilePath = m_SimFolderPath;
+       std::string filename = SIM_SCENE_FILE_NAME;
+       filename += ".xml";
+       m_SceneFilePath /= filename;
+
+        FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),m_SceneFilePath,true);
+
+        // Need to broadcast the filename of the actual folder
+        folderName = m_SimFolderPath.filename().string();
+
+        MPILayer::MPISendBroadcast(folderName, m_MPIProcInfo.getRank(), MPI_COMM_WORLD);
+    }else{ // All other processes
+        MPILayer::MPIReceiveBroadcast(folderName, m_MPIProcInfo.getMasterRank(), MPI_COMM_WORLD);
+    }
+
+    // Create same folder name in Local Process Directory, to save all data...
+    boost::filesystem::path localSimFolderPath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+    localSimFolderPath /= folderName;
+    if(!boost::filesystem::create_directories(localSimFolderPath)){
+       LOG(m_pSimulationLog,  "ERROR: ---> Could not create directory: " << localSimFolderPath.string() << std::endl;);
+       ERRORMSGMPI("ERROR: ---> Could not create directory: " << localSimFolderPath.string() << std::endl )
+    }
+
+    //m_pTimestepper->initLogs(localSimFolderPath);
+
+}

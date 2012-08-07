@@ -210,13 +210,13 @@ void InclusionSolverCO<TInclusionSolverConfig>::reset()
 #endif
 
 #if HAVE_CUDA_SUPPORT == 1
-   LOG(m_pSolverLog, << "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
+   LOG(m_pSolverLog, "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
 
    CHECK_CUDA(cudaSetDevice(m_Settings.m_UseGPUDeviceId));
    cudaDeviceProp props;
    CHECK_CUDA(cudaGetDeviceProperties(&props,m_Settings.m_UseGPUDeviceId));
 
-   LOG(m_pSolverLog, <<  "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
+   LOG(m_pSolverLog,  "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
 #endif
 
 
@@ -266,7 +266,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 {
 
 #if CoutLevelSolver>0
-   LOG(m_pSolverLog, << " % -> solveInclusionProblem(): "<< std::endl;);
+   LOG(m_pSolverLog, " % -> solveInclusionProblem(): "<< std::endl;);
 #endif
 
    // Iterate over all nodes set and assemble the matrices...
@@ -284,7 +284,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
    if(m_nContacts > 0){
 
       #if CoutLevelSolver>0
-         LOG(m_pSolverLog, << " % nContacts = "<< m_nContacts<< std::endl;);
+         LOG(m_pSolverLog, " % nContacts = "<< m_nContacts<< std::endl;);
       #endif
 
       m_nLambdas = m_ContactGraph.m_nLambdas;
@@ -404,15 +404,15 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 
 
 #if CoutLevelSolverWhenContact>2
-      LOG(m_pSolverLog, <<  " G= ..."<< std::endl << m_T.format(MyIOFormat::Matlab)<<";"<<std::endl;);
+      LOG(m_pSolverLog,  " G= ..."<< std::endl << m_T.format(MyIOFormat::Matlab)<<";"<<std::endl;);
 #endif
 
 #if CoutLevelSolverWhenContact>2
-      LOG(m_pSolverLog, << " c= " << m_d.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;)
+      LOG(m_pSolverLog, " c= " << m_d.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;)
 #endif
 
 #if CoutLevelSolverWhenContact>1
-      LOG(m_pSolverLog, <<  " P_back= "<<P_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+      LOG(m_pSolverLog,  " P_back= "<<P_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
 
@@ -456,7 +456,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
       }
 
  #if CoutLevelSolverWhenContact>1
-      LOG(m_pSolverLog, <<  " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+      LOG(m_pSolverLog,  " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
 
@@ -468,7 +468,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
             m_isFinite = 1;
          }
          #if CoutLevelSolverWhenContact>0
-                  LOG(m_pSolverLog, <<  " % Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
+                  LOG(m_pSolverLog,  " % Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
          #endif
       }
 
@@ -478,7 +478,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 #endif
 
 #if CoutLevelSolverWhenContact>0
-      LOG(m_pSolverLog, <<  " % Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
+      LOG(m_pSolverLog,  " % Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
 #endif
 
       // Calculate u_E for each body in the state...
@@ -524,7 +524,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::setupRMatrix(PREC alpha){
 
 
    #if CoutLevelSolverWhenContact>2
-      LOG(m_pSolverLog, << " R= "<< "diag(" << m_R.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl;);
+      LOG(m_pSolverLog, " R= "<< "diag(" << m_R.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl;);
    #endif
 
 }
@@ -581,7 +581,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::doJorProx(){
          m_bConverged = Numerics::cancelCriteriaValue(P_back,P_front, m_Settings.m_AbsTol, m_Settings.m_RelTol);
 
    #if CoutLevelSolverWhenContact>1
-         LOG(m_pSolverLog, << " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+         LOG(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
    #endif
 
          m_iterationsNeeded++;
@@ -590,7 +590,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::doJorProx(){
          {
 
 #if CoutLevelSolverWhenContact>0
-         LOG(m_pSolverLog, <<  " converged = "<<m_bConverged<< "\t"<< "iterations:" <<m_iterationsNeeded <<"/"<<  m_Settings.m_MaxIter<< std::endl;);
+         LOG(m_pSolverLog,  " converged = "<<m_bConverged<< "\t"<< "iterations:" <<m_iterationsNeeded <<"/"<<  m_Settings.m_MaxIter<< std::endl;);
 #endif
 
             break;
@@ -670,7 +670,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::doSorProx(){
       }
 
 #if CoutLevelSolverWhenContact>1
-      LOG(m_pSolverLog, << " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+      LOG(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
       m_iterationsNeeded++;
