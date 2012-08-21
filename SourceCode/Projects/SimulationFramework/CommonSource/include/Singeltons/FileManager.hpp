@@ -26,7 +26,7 @@ public:
     /**
       globalDirPath = first simulation directory, localDirPath = process specific simulation directory
     */
-    FileManager(){FileManager("","");};
+    FileManager();
     FileManager(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath);
     ~FileManager();
 
@@ -47,6 +47,8 @@ public:
     boost::filesystem::path copyFile(boost::filesystem::path from, boost::filesystem::path to, bool overwrite = false);
 
 private:
+    void init(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath);
+
     void scanAllSimFolders(const boost::filesystem::path &directory, const std::string &prefix, const bool &with_SubDirs);
     void updateAllSimDataFiles(const boost::filesystem::path &directory, const bool &with_SubDirs);
 

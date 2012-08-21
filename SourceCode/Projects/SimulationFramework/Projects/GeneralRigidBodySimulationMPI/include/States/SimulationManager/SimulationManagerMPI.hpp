@@ -35,7 +35,7 @@ public:
 
     void startSim();
 
-    boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
+    boost::shared_ptr< SceneParserMPI<TConfig> > m_pSceneParser;
 
 private:
 

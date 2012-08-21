@@ -171,7 +171,7 @@ void SimulationManager<TConfig>::initRecordThread()
    filename += ".xml";
    m_SceneFilePath /= filename;
 
-   FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getCurrentSceneFileDirectory(),m_SceneFilePath,true);
+   FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),m_SceneFilePath,true);
 
   m_pTimestepper->initLogs(m_SimFolderPath);
 

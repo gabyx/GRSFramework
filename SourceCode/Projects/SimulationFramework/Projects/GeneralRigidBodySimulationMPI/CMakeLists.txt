@@ -137,6 +137,7 @@ SET(DYNAMICS_SRC
 
 SET(SYSTEMS_INC
     ${PROJECT_SOURCE_DIR}/include/Systems/SceneParserMPI.hpp
+    ${COMMONSOURCE_DIR}/include/Systems/SceneParser.hpp
     ${COMMONSOURCE_DIR}/include/Systems/SharedBufferDynSys.hpp
 )
 
@@ -185,7 +186,7 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 
 #include directories
 set(INCLUDE_DIRS
-    
+
     #${NVIDIA_SDK_DIR}/common/inc
     #${NVIDIA_SDK_DIR}/../shared/inc
     ${Boost_INCLUDE_DIR}
@@ -199,10 +200,10 @@ set(INCLUDE_DIRS
     ${COLLISIONLIB_INCLUDE_DIR}
     ${ASSIMP_INCLUDE_DIR}
     ${MPI_CXX_INCLUDE_PATH}
-    
-    
+
+
     ${PROJECT_BINARY_DIR}/ConfigFiles/
-    
+
     ${PROJECT_SOURCE_DIR}/include/App
     ${PROJECT_SOURCE_DIR}/include/Common
     ${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts
@@ -215,7 +216,7 @@ set(INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/include/States
     ${PROJECT_SOURCE_DIR}/include/States/SimulationManager
     ${PROJECT_SOURCE_DIR}/include/Systems
-    
+
     ${COMMONSOURCE_DIR}/include/Common
     ${COMMONSOURCE_DIR}/include/Common/SRDelegates/include/
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers

@@ -2,6 +2,8 @@
 #define  StateRecorderBody_HPP
 
 #include <string>
+#include <sstream>
+
 #include <Eigen/Dense>
 #include <boost/unordered_map.hpp>
 
@@ -14,6 +16,8 @@
 
 #include "MultiBodySimFile.hpp"
 #include "SimpleLogger.hpp"
+
+#include "RigidBody.hpp"
 
 /**
 * @ingroup StatesAndBuffers
@@ -36,8 +40,10 @@ public:
 
 protected:
 
+    void getSimBodyFileName(typename TDynamicsSystemType::RigidBodyType *body, std::stringstream & s);
+
     Logging::Log * m_pSimulationLog;
-    typedef boost::unordered_map<unsigned int, MultiBodySimFile<LayoutConfigType>* > FileMap;
+    typedef boost::unordered_map< typename RigidBodyType::RigidBodyIdType, MultiBodySimFile<LayoutConfigType>* > FileMap;
     FileMap m_BinarySimFiles;
 
     unsigned int m_nSimBodies;
@@ -78,35 +84,46 @@ bool StateRecorderBody<TDynamicsSystemType>::addFiles(boost::filesystem::path di
     std::stringstream s;
 
     // For everybody add a Sim File!
-    typename TDynamicsSystemType::RigidBodySimPtrListType::iterator it;
+    typename TDynamicsSystemType::RigidBodySimPtrListType::const_iterator it;
     for(it = body_list.begin();it != body_list.end();it++){
 
         file = dir_path;
-        s.str(""); s <<"SimData_Body_" <<(*it)->m_id<<SIM_FILE_EXTENSION;
+
+        getSimBodyFileName(it->get(),s);
+
         file /= s.str();
 
 
         MultiBodySimFile<LayoutConfigType>* pBodyFile = new MultiBodySimFile<LayoutConfigType>();
         std::pair<typename FileMap::iterator, bool> res = m_BinarySimFiles.insert(typename FileMap::value_type((*it)->m_id,pBodyFile));
-        if(!res){
+        if(!res.second){
             m_pSimulationLog->logMessage("StateRecorderBody:: Sim file : " + file.string() + "already exists!");
             delete pBodyFile;
         }else{ //if insert took place
 
-            // Do not truncate
-            if(!pBodyFile->openSimFileWrite(file,1,false)){
+            // Do truncate
+            if(!pBodyFile->openSimFileWrite(file,1,true)){
                 m_pSimulationLog->logMessage("StateRecorderBody:: Could not open Sim file: " + file.string());
+                m_pSimulationLog->logMessage(pBodyFile->getErrorString());
                 delete pBodyFile;
                 m_BinarySimFiles.erase(res.first);
                 return false;
             }
+             m_pSimulationLog->logMessage("StateRecorderBody:: Added Sim file: " + file.string());
         }
 
-        m_pSimulationLog->logMessage("StateRecorderBody:: Added Sim file: " + file.string());
+
     }
     m_pSimulationLog->logMessage("StateRecorderBody:: Added and opened all Sim files");
 
     return true;
+}
+
+template<typename TDynamicsSystemType>
+void StateRecorderBody<TDynamicsSystemType>::getSimBodyFileName(typename TDynamicsSystemType::RigidBodyType *body,
+                                                                std::stringstream & s){
+    s.str("");
+    s <<"SimData_Body_" <<"-"<<RigidBodyId::getProcessNr(body)<<"-"<< RigidBodyId::getBodyNr(body)<<SIM_FILE_EXTENSION;
 }
 
 

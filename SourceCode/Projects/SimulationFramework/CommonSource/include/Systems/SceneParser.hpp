@@ -21,7 +21,8 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
-#include "DynamicsSystem.hpp"
+#include "InclusionSolverSettings.hpp"
+#include "TimeStepperSettings.hpp"
 
 #include "CommonFunctions.hpp"
 #include "QuaternionHelpers.hpp"
@@ -56,10 +57,10 @@ public:
         ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
 
         m_bParseDynamics = true;
-        m_SimBodies = 0;
+        m_nSimBodies = 0;
     }
 
-    bool parseScene( boost::filesystem::path file ) {
+    virtual bool parseScene( boost::filesystem::path file ) {
         using namespace std;
         m_currentParseFilePath = file;
         m_currentParseFileDir = m_currentParseFilePath.parent_path();
@@ -70,7 +71,8 @@ public:
 
 
         //Reset all variables
-        m_SimBodies = 0;
+        m_nSimBodies = 0;
+        m_nBodies = 0;
         m_bodyList.clear();
         m_SimBodyInitStates.clear();
         m_SceneMeshs.clear();
@@ -114,7 +116,7 @@ public:
         return true;
     }
 
-    void cleanUp(){
+    virtual void cleanUp(){
 
      m_bodyList.clear();
      m_bodyListScales.clear();
@@ -123,17 +125,17 @@ public:
 
     }
 
-    boost::filesystem::path getParsedSceneFile() {
+    virtual boost::filesystem::path getParsedSceneFile() {
         return m_currentParseFilePath;
     }
 
-    const std::vector< DynamicsState<LayoutConfigType> > & getInitialConditionSimBodies() {
+    virtual const std::vector< DynamicsState<LayoutConfigType> > & getInitialConditionSimBodies() {
         ASSERTMSG(m_SimBodyInitStates.size(), "m_SimBodyInitStates.size() contains no initial states!")
         return m_SimBodyInitStates;
     }
 
-    unsigned int getNumberOfSimBodies() {
-        return m_SimBodies;
+    virtual unsigned int getNumberOfSimBodies() {
+        return m_nSimBodies;
     }
 
 
@@ -144,14 +146,15 @@ protected:
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
         ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
         m_bParseDynamics = false;
-        m_SimBodies = 0;
+        m_nSimBodies = 0;
+        m_nBodies = 0;
     }
 
-    void virtual processOtherOptions(const ticpp::Node *rootNode){
+    virtual void processOtherOptions(const ticpp::Node *rootNode){
         /* Do nothing, here for derived classes! */
     }
 
-    void processSceneSettings( ticpp::Node *sceneSettings ) {
+    virtual void processSceneSettings( ticpp::Node *sceneSettings ) {
 
         LOG(m_pSimulationLog,"Process SceneSettings..."<<std::endl;);
 
@@ -296,7 +299,7 @@ protected:
     }
 
 
-    void processSceneObjects( ticpp::Node *sceneObjects ) {
+    virtual void processSceneObjects( ticpp::Node *sceneObjects) {
 
         LOG(m_pSimulationLog,"Process SceneObjects ..."<<std::endl;);
 
@@ -310,13 +313,13 @@ protected:
 
         }
 
-        if( m_SimBodies == 0) {
+        if( m_nSimBodies == 0) {
             throw ticpp::Exception("The scene in the XML contains no simulating bodies!");
         }
 
     }
 
-    void processRigidBodies( ticpp::Node * rigidbodies ) {
+    virtual void processRigidBodies( ticpp::Node * rigidbodies ) {
 
         LOG(m_pSimulationLog,"Process RigidBodies ..."<<std::endl;);
 
@@ -359,13 +362,15 @@ protected:
                     m_pDynSys->m_SimBodies.push_back(m_bodyList[i]);
                 }
             }
-            m_SimBodies += instances;
+            m_nSimBodies += instances;
+            m_nBodies += instances;
         } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
             if(m_bParseDynamics) {
                 for(int i=0; i < m_bodyList.size(); i++) {
                     m_pDynSys->m_Bodies.push_back(m_bodyList[i]);
                 }
             }
+            m_nBodies += instances;
         } else {
             throw ticpp::Exception("Adding only simulated and not simulated objects supported!");
         }
@@ -383,7 +388,7 @@ protected:
 
     }
 
-    void processGeometry( ticpp::Node * geometryNode) {
+    virtual void processGeometry( ticpp::Node * geometryNode) {
         LOG(m_pSimulationLog,"Process Geometry ..."<<std::endl;);
         if(geometryNode->FirstChild()->Value() == "Sphere") {
 
@@ -400,7 +405,7 @@ protected:
         }
     }
 
-    void processSphereGeometry( ticpp::Element * sphere) {
+    virtual void processSphereGeometry( ticpp::Element * sphere) {
         std::string type = sphere->GetAttribute("distribute");
         if(type == "uniform") {
 
@@ -458,7 +463,7 @@ protected:
         }
     }
 
-    void processHalfspaceGeometry( ticpp::Element * halfspace) {
+    virtual void processHalfspaceGeometry( ticpp::Element * halfspace) {
         std::string type = halfspace->GetAttribute("distribute");
         if(type == "uniform") {
 
@@ -484,7 +489,7 @@ protected:
     }
 
 
-    void processMeshGeometry( ticpp::Element * mesh) {
+    virtual void processMeshGeometry( ticpp::Element * mesh) {
 
         boost::shared_ptr<MeshGeometry<PREC> > pMeshGeom;
 
@@ -598,19 +603,19 @@ protected:
         }
     }
 
-    void fillMeshInfo( Assimp::Importer & importer, const aiScene* scene, MeshData<MeshPREC> & meshInfo, Vector3 scale_factor, Quaternion quat, Vector3 trans) {
+    virtual void fillMeshInfo( Assimp::Importer & importer, const aiScene* scene, MeshData<MeshPREC> & meshInfo, Vector3 scale_factor, Quaternion quat, Vector3 trans) {
 
 
 
     }
 
-    void checkFileExists(boost::filesystem::path file) {
+    virtual void checkFileExists(boost::filesystem::path file) {
         if( !boost::filesystem::exists(file) ) {
             throw ticpp::Exception("The file ' " + file.string() + "' does not exist!");
         }
     }
 
-    void processDynamicProperties( ticpp::Node * dynProp) {
+    virtual void processDynamicProperties( ticpp::Node * dynProp) {
         LOG(m_pSimulationLog,"Process DynamicProperties ..."<<std::endl;);
         ticpp::Element * element = dynProp->FirstChild("DynamicState")->ToElement();
 
@@ -637,7 +642,7 @@ protected:
     }
 
 
-    void processDynamicPropertiesSimulated( ticpp::Node * dynProp) {
+    virtual void processDynamicPropertiesSimulated( ticpp::Node * dynProp) {
 
         // First allocate a new SolverDate structure
         for(int i=0; i < m_bodyList.size(); i++) {
@@ -721,7 +726,7 @@ protected:
     }
 
 
-    void processDynamicPropertiesNotSimulated( ticpp::Node * dynProp) {
+    virtual void processDynamicPropertiesNotSimulated( ticpp::Node * dynProp) {
 
         // InitialCondition ============================================================
         ticpp::Element *element = dynProp->FirstChild("InitialPosition")->ToElement();
@@ -748,8 +753,8 @@ protected:
 
     }
 
-    template<typename TLayoutConfig>
-    void processInitialConditionLinear(DynamicsState<TLayoutConfig> & state, ticpp::Element * initCond) {
+
+    virtual void processInitialConditionLinear(DynamicsState<LayoutConfigType> & state, ticpp::Element * initCond) {
 
         Vector3 pos;
         if(!Utilities::stringToVector3<PREC>(pos, initCond->GetAttribute("position"))) {
@@ -780,11 +785,11 @@ protected:
             }
         }
 
-        InitialConditionBodies::setupBodiesLinear<TLayoutConfig>(state,pos,dir,dist,jitter,delta,seed);
+        InitialConditionBodies::setupBodiesLinear(state,pos,dir,dist,jitter,delta,seed);
 
     }
-    template<typename TLayoutConfig>
-    void processInitialConditionGrid(DynamicsState<TLayoutConfig> & state, ticpp::Element * initCond) {
+
+    virtual void processInitialConditionGrid(DynamicsState<LayoutConfigType> & state, ticpp::Element * initCond) {
 
         Vector3 trans;
         if(!Utilities::stringToVector3<PREC>(trans, initCond->GetAttribute("translation"))) {
@@ -819,17 +824,17 @@ protected:
 
         InitialConditionBodies::setupBodiesGrid(state,gridX,gridY,dist,trans,jitter,delta, seed);
     }
-    template<typename  TLayoutConfig>
-    void processInitialConditionFile(DynamicsState<TLayoutConfig> & state, ticpp::Element * initCond) {
-        m_SimBodyInitStates.push_back(DynamicsState<TLayoutConfig>((unsigned int)m_bodyList.size()));
+
+    virtual void processInitialConditionFile(DynamicsState<LayoutConfigType> & state, ticpp::Element * initCond) {
+        m_SimBodyInitStates.push_back(DynamicsState<LayoutConfigType>((unsigned int)m_bodyList.size()));
 
         boost::filesystem::path name =  initCond->GetAttribute<std::string>("name");
 
         boost::filesystem::path filePath = m_currentParseFileDir / name;
         InitialConditionBodies::setupBodiesFromFile(state,filePath);
     }
-    template<typename  TLayoutConfig>
-    void processInitialConditionPositionAxisAngle(DynamicsState<TLayoutConfig> & state, ticpp::Element * initCond) {
+
+    virtual void processInitialConditionPositionAxisAngle(DynamicsState<LayoutConfigType> & state, ticpp::Element * initCond) {
 
         int bodyCounter = 0;
         // Iterate over all values in the list
@@ -879,8 +884,7 @@ protected:
         }
     }
 
-    template<typename  TLayoutConfig>
-    void processInitialConditionTransforms(DynamicsState<TLayoutConfig> & state, ticpp::Element * initCond) {
+    virtual void processInitialConditionTransforms(DynamicsState<LayoutConfigType> & state, ticpp::Element * initCond) {
 
 
 
@@ -953,7 +957,7 @@ protected:
 
 
 
-    void processVisualization( ticpp::Node * visualizationNode) {
+    virtual void processVisualization( ticpp::Node * visualizationNode) {
 
         ticpp::Node * meshNode = visualizationNode->FirstChild("Mesh");
 
@@ -979,7 +983,7 @@ protected:
     Logging::Log * m_pSimulationLog;
     std::stringstream logstream;
 
-    unsigned int m_SimBodies;
+    unsigned int m_nSimBodies, m_nBodies;
     // Temprary structures
     typename RigidBodyType::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
     std::vector<boost::shared_ptr< RigidBodyType > > m_bodyList; ///< Used to process a RigidBody Node

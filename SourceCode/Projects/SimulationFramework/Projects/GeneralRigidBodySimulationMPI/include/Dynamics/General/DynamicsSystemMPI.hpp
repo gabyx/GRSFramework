@@ -12,10 +12,11 @@
 #include "RigidBody.hpp"
 #include "DynamicsState.hpp"
 #include "InitialConditionBodies.hpp"
-#include "InclusionSolverSettings.hpp"
 #include "CommonFunctions.hpp"
 
+#include "InclusionSolverSettings.hpp"
 #include "TimeStepperSettings.hpp"
+
 
 #include "SimpleLogger.hpp"
 

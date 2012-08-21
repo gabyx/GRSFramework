@@ -11,25 +11,33 @@
 using namespace std;
 
 FileManager::FileManager(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath){
-  m_fileIdCounter = 0;
-  m_globalDirPath = globalDirPath;
-  m_localDirPath = localDirPath;
+   init(globalDirPath,localDirPath);
+}
 
-  if(!m_globalDirPath.empty()){
-      if(!exists(m_globalDirPath)){
-          if(!create_directories(m_globalDirPath)){
-            ERRORMSG("Global Directory Path in FileManager could not be created!");
+FileManager::FileManager(){
+    init("","");
+}
+
+void FileManager::init(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath){
+      m_fileIdCounter = 0;
+      m_globalDirPath = globalDirPath;
+      m_localDirPath = localDirPath;
+
+      if(!m_globalDirPath.empty()){
+          if(!exists(m_globalDirPath)){
+              if(!create_directories(m_globalDirPath)){
+                ERRORMSG("Global Directory Path in FileManager could not be created!");
+              }
           }
       }
-  }
 
-  if(!m_localDirPath.empty()){
-      if(!exists(m_localDirPath)){
-          if(!create_directories(m_localDirPath)){
-            ERRORMSG("Local Directory Path in FileManager could not be created!");
+      if(!m_localDirPath.empty()){
+          if(!exists(m_localDirPath)){
+              if(!create_directories(m_localDirPath)){
+                ERRORMSG("Local Directory Path in FileManager could not be created!");
+              }
           }
       }
-  }
 
 }
 

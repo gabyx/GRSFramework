@@ -350,8 +350,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
 
 
         // Calculate R_ii
-        nodeData.m_R_i_inv_diag(0) = alpha / nodeData.m_G_ii(0,0);
-        PREC r_T = alpha / (nodeData.m_G_ii.diagonal().template tail<2>()).maxCoeff();
+        nodeData.m_R_i_inv_diag(0) = alpha / (nodeData.m_G_ii(0,0)+0.5);
+        PREC r_T = alpha / ((nodeData.m_G_ii.diagonal().template tail<2>()).maxCoeff()+0.5);
         nodeData.m_R_i_inv_diag(1) = r_T;
         nodeData.m_R_i_inv_diag(2) = r_T;
 

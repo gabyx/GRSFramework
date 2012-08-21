@@ -26,11 +26,13 @@ App::~App()
 
 void App::startApp()
 {
+      std::cout <<"Pointer: "<< FileManager::getSingletonPtr() << std::endl;
 
       new FileManager();
       new Logging::LogManager();
 
 	new RenderContext();
+	  std::cout <<"Pointer: "<< FileManager::getSingletonPtr() << std::endl;
 	if(!RenderContext::getSingletonPtr()->initOgre("RigidBodySimulation v1.0"))
 		return;
 	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("RigidBodySimulation(RenderContext) initialized!");

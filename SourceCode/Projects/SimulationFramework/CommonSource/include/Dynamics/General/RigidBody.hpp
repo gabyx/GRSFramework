@@ -75,6 +75,34 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData<TLayoutConfig> {
 
 };
 
+template<typename TRigidBodyConfig > class RigidBodyBase;
+
+namespace RigidBodyId{
+
+    typedef uint64_t Type;
+
+    template<typename TRigidBodyConfig >
+    static unsigned int getProcessNr(const RigidBodyBase<TRigidBodyConfig> * body){
+        Type id = body->m_id;
+        id >>= 32;
+        return *(reinterpret_cast<unsigned int *>(&(id)));
+    };
+
+    template<typename TRigidBodyConfig >
+    static unsigned int getBodyNr(const RigidBodyBase<TRigidBodyConfig> * body){
+        return *(reinterpret_cast<const unsigned int *>(&(body->m_id)));
+    };
+
+    template<typename TRigidBodyConfig >
+    static void setId(RigidBodyBase<TRigidBodyConfig> * body, unsigned int bodyNr, unsigned int processNr){
+        body->m_id = 0;
+        body->m_id |= (uint64_t)processNr;
+        body->m_id <<= 32;
+        body->m_id |= (uint64_t)bodyNr;
+    };
+
+};
+
 
 template<typename TRigidBodyConfig >
 class RigidBodyBase{
@@ -144,8 +172,9 @@ public:
   Vector3 m_r_S;     ///< Vector resolved in the I frame from origin to the center of gravity, \f$ \mathbf{r}_S \f$, at time t_s + deltaT/2.
   Quaternion m_q_KI; ///< Quaternion which represents a rotation from I to the K frame, \f$ \tilde{\mathbf{a}}_{KI} \f$,  at time t_s + deltaT/2.
 
+  typedef RigidBodyId::Type RigidBodyIdType;
+  RigidBodyIdType m_id; ///< This is the id of the body.
 
-  unsigned int m_id; ///< This is the id of the body.
   BodyState m_eState; ///< The state of the body.
   BodyMaterial m_eMaterial; ///< The material.
 

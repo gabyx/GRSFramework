@@ -21,7 +21,7 @@ public:
         ASSERTMSG(baseFrame != NULL, "Pointer is NULL");
         m_BaseFrame = baseFrame;
         this->m_bParseDynamics = true;
-        this->m_SimBodies = 0;
+        this->m_nSimBodies = 0;
     }
 
     SceneParserOgre(
@@ -34,7 +34,7 @@ public:
         ASSERTMSG(baseFrame != NULL, "Pointer is NULL");
         m_BaseFrame = baseFrame;
         this->m_bParseDynamics = false;
-        this->m_SimBodies = 0;
+        this->m_nSimBodies = 0;
     }
 
 protected:

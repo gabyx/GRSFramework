@@ -22,6 +22,7 @@
 
 #include "FileManager.hpp"
 
+#include "MPIMessages.hpp"
 #include "MPICommunicationFunctions.hpp"
 
 
@@ -68,7 +69,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     m_pDynSys = boost::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
 
     // Parse the Scene from XML! ==========================
-    m_pSceneParser = boost::shared_ptr< SceneParser<TConfig> >( new SceneParser<TConfig>( m_pDynSys, m_MPIProcInfo) );
+    m_pSceneParser = boost::shared_ptr< SceneParserMPI<TConfig> >( new SceneParserMPI<TConfig>( m_pDynSys, m_MPIProcInfo) );
 
     m_pSceneParser->parseScene(sceneFilePathNew);
 
@@ -114,9 +115,9 @@ bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess(){
             ERRORMSGMPI("Body check Not successfull");
        }
 
-        LOG(m_pSimulationLog,  "---> Body check successfull !" << std::endl;);
+        LOG(m_pSimulationLog,  "---> Body check successfull!: "<<numberOfBodiesInSimulation<<" SimBodies in Simulation" << std::endl;);
     }else{
-        LOG(m_pSimulationLog,  "---> Body check ... (sent bodies) !"<< std::endl;);
+        LOG(m_pSimulationLog,  "---> Body check ... (sent # of bodies) !"<< std::endl;);
     }
 
 }
@@ -177,35 +178,43 @@ void SimulationManagerMPI<TConfig>::initSim()
 {
 
 
-    std::string folderName;
+    MPILayer::GenericMessage1<boost::filesystem::path> message;
+
     if(m_MPIProcInfo.hasMasterRank()){ // Only master process
        // Get new sim folder path relative to global directory
 
        m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
 
-       boost::filesystem::path m_SceneFilePath = m_SimFolderPath;
+       boost::filesystem::path sceneFilePath = m_SimFolderPath;
        std::string filename = SIM_SCENE_FILE_NAME;
        filename += ".xml";
-       m_SceneFilePath /= filename;
+       sceneFilePath /= filename;
 
-        FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),m_SceneFilePath,true);
+        FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),sceneFilePath,true);
 
         // Need to broadcast the filename of the actual folder
-        folderName = m_SimFolderPath.filename().string();
+        // Broadcast: m_SimFolderPath
 
-        MPILayer::MPISendBroadcast(folderName, m_MPIProcInfo.getRank(), MPI_COMM_WORLD);
+        message.m_data.get<0>() = m_SimFolderPath;
+
+        MPILayer::MPISendBroadcast(message, m_MPIProcInfo.getRank(), MPI_COMM_WORLD);
     }else{ // All other processes
-        MPILayer::MPIReceiveBroadcast(folderName, m_MPIProcInfo.getMasterRank(), MPI_COMM_WORLD);
+        MPILayer::MPIReceiveBroadcast(message, m_MPIProcInfo.getMasterRank(), MPI_COMM_WORLD);
+
+        m_SimFolderPath = message.m_data.get<0>();
     }
 
     // Create same folder name in Local Process Directory, to save all data...
     boost::filesystem::path localSimFolderPath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
-    localSimFolderPath /= folderName;
+    localSimFolderPath /= m_SimFolderPath.filename();
     if(!boost::filesystem::create_directories(localSimFolderPath)){
        LOG(m_pSimulationLog,  "ERROR: ---> Could not create directory: " << localSimFolderPath.string() << std::endl;);
        ERRORMSGMPI("ERROR: ---> Could not create directory: " << localSimFolderPath.string() << std::endl )
     }
 
-    //m_pTimestepper->initLogs(localSimFolderPath);
+
+    m_pStateRecorder->addFiles(m_SimFolderPath, m_pDynSys->m_SimBodies);
+
+    m_pTimestepper->initLogs(localSimFolderPath);
 
 }
