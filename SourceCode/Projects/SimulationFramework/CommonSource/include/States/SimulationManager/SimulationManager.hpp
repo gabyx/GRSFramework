@@ -25,7 +25,7 @@ public:
    ~SimulationManager();
 
    boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >	    m_pSharedBuffer;
-   boost::shared_ptr<StateRecorder<LayoutConfigType> >		    m_pStateRecorder;
+   boost::shared_ptr<StateRecorder<DynamicsSystemType> >		m_pStateRecorder;
 
    void setup();
    void setup(boost::filesystem::path sceneFilePath);

@@ -83,7 +83,7 @@ void SimulationManager<TConfig>::setup(boost::filesystem::path sceneFilePath)
   m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys, m_pSharedBuffer) );
 
 
-  m_pStateRecorder = boost::shared_ptr<StateRecorder<LayoutConfigType> >(new StateRecorder<LayoutConfigType>(m_nSimBodies));
+  m_pStateRecorder = boost::shared_ptr<StateRecorder<DynamicsSystemType> >(new StateRecorder<DynamicsSystemType>(m_nSimBodies));
 
   m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());
 

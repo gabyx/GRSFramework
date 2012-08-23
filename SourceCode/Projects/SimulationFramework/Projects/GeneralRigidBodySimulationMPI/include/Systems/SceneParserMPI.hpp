@@ -233,8 +233,7 @@ protected:
                     //Assign a unique id
                     RigidBodyId::setId(bodyIt->get(),m_nBodies, m_procInfo.getRank());
 
-                    unsigned int n = *(reinterpret_cast<unsigned int *>(&(*bodyIt)->m_id));
-                    LOG(m_pSimulationLog, "Added Body with ID (uint64): " << std::hex<< n << std::endl );
+                    LOG(m_pSimulationLog, "Added Body with ID: (" << RigidBodyId::getProcessNr(bodyIt->get())<<","<<RigidBodyId::getBodyNr(bodyIt->get())<<")"<< std::endl);
 
                     m_pDynSys->m_SimBodies.push_back((*bodyIt));
 

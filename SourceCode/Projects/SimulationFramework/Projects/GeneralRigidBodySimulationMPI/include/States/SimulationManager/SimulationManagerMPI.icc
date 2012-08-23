@@ -95,54 +95,49 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
 
 template<typename TConfig>
-bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess(){
+bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
 
-   int numberOfBodiesInSimulation = 0;
-   int nSimBodies = m_nSimBodies;
+    int numberOfBodiesInSimulation = 0;
+    int nSimBodies = m_nSimBodies;
 
-   boost::timer::cpu_timer timer;
+    boost::timer::cpu_timer timer;
 
-   timer.start();
-      MPI_Reduce(&nSimBodies,&numberOfBodiesInSimulation, 1, MPI_INT, MPI_SUM, ProcessInfoType::MASTER, MPI_COMM_WORLD);
-   timer.stop();
-   double elapsed = ((double)timer.elapsed().wall)*1e-9;
+    timer.start();
+    MPI_Reduce(&nSimBodies,&numberOfBodiesInSimulation, 1, MPI_INT, MPI_SUM, ProcessInfoType::MASTER, MPI_COMM_WORLD);
+    timer.stop();
+    double elapsed = ((double)timer.elapsed().wall)*1e-9;
 
-   if(m_MPIProcInfo.hasMasterRank()){
+    if(m_MPIProcInfo.hasMasterRank()) {
         LOG(m_pSimulationLog,  " Allreduce needed: " << elapsed <<"sec."<<std::endl; );
 
-       if(numberOfBodiesInSimulation != m_nGlobalSimBodies){
+        if(numberOfBodiesInSimulation != m_nGlobalSimBodies) {
             LOG(m_pSimulationLog,  "ERROR: ---> Body check NOT successful! : "<< numberOfBodiesInSimulation <<"!="<< m_nGlobalSimBodies<< std::endl;);
             ERRORMSGMPI("Body check Not successfull");
-       }
+        }
 
         LOG(m_pSimulationLog,  "---> Body check successfull!: "<<numberOfBodiesInSimulation<<" SimBodies in Simulation" << std::endl;);
-    }else{
+    } else {
         LOG(m_pSimulationLog,  "---> Body check ... (sent # of bodies) !"<< std::endl;);
     }
 
 }
 
 template<typename TConfig>
-void SimulationManagerMPI<TConfig>::startSim()
-{
+void SimulationManagerMPI<TConfig>::startSim() {
 
-  static double timelineSimulation;
+    static double timelineSimulation;
 
-  m_pSimulationLog->logMessage(" SimulationManager: Simulation entering...");
+    m_pSimulationLog->logMessage(" SimulationManager: Simulation entering...");
 
-  initSim();
+    initSim();
 
 
-//  if(fileOK)
-//  {
-//
-//    // Write first initial value out!
-//    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE){
-//      m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
-//    }
-//    // wait for vis thread! (which does some loops before)
-//    boost::timer::cpu_timer global_time;
-//    global_time.start();
+    // Write first initial value out!
+    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
+        m_pStateRecorder->writeStates();
+    }
+
+
 //
 //    while(1)
 //    {
@@ -174,21 +169,20 @@ void SimulationManagerMPI<TConfig>::startSim()
 }
 
 template<typename TConfig>
-void SimulationManagerMPI<TConfig>::initSim()
-{
+void SimulationManagerMPI<TConfig>::initSim() {
 
 
     MPILayer::GenericMessage1<boost::filesystem::path> message;
 
-    if(m_MPIProcInfo.hasMasterRank()){ // Only master process
-       // Get new sim folder path relative to global directory
+    if(m_MPIProcInfo.hasMasterRank()) { // Only master process
+        // Get new sim folder path relative to global directory
 
-       m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
+        m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
 
-       boost::filesystem::path sceneFilePath = m_SimFolderPath;
-       std::string filename = SIM_SCENE_FILE_NAME;
-       filename += ".xml";
-       sceneFilePath /= filename;
+        boost::filesystem::path sceneFilePath = m_SimFolderPath;
+        std::string filename = SIM_SCENE_FILE_NAME;
+        filename += ".xml";
+        sceneFilePath /= filename;
 
         FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),sceneFilePath,true);
 
@@ -198,7 +192,7 @@ void SimulationManagerMPI<TConfig>::initSim()
         message.m_data.get<0>() = m_SimFolderPath;
 
         MPILayer::MPISendBroadcast(message, m_MPIProcInfo.getRank(), MPI_COMM_WORLD);
-    }else{ // All other processes
+    } else { // All other processes
         MPILayer::MPIReceiveBroadcast(message, m_MPIProcInfo.getMasterRank(), MPI_COMM_WORLD);
 
         m_SimFolderPath = message.m_data.get<0>();
@@ -207,13 +201,16 @@ void SimulationManagerMPI<TConfig>::initSim()
     // Create same folder name in Local Process Directory, to save all data...
     boost::filesystem::path localSimFolderPath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
     localSimFolderPath /= m_SimFolderPath.filename();
-    if(!boost::filesystem::create_directories(localSimFolderPath)){
-       LOG(m_pSimulationLog,  "ERROR: ---> Could not create directory: " << localSimFolderPath.string() << std::endl;);
-       ERRORMSGMPI("ERROR: ---> Could not create directory: " << localSimFolderPath.string() << std::endl )
+    if(!boost::filesystem::create_directories(localSimFolderPath)) {
+        LOG(m_pSimulationLog,  "ERROR: ---> Could not create directory: " << localSimFolderPath.string() << std::endl;);
+        ERRORMSGMPI("ERROR: ---> Could not create directory: " << localSimFolderPath.string() << std::endl )
     }
 
 
-    m_pStateRecorder->addFiles(m_SimFolderPath, m_pDynSys->m_SimBodies);
+    if(!m_pStateRecorder->openFiles(m_SimFolderPath, m_pDynSys->m_SimBodies)){
+        LOG(m_pSimulationLog,  "ERROR: ---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl;);
+        ERRORMSGMPI("ERROR: ---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
+    }
 
     m_pTimestepper->initLogs(localSimFolderPath);
 

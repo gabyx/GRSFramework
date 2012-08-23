@@ -33,10 +33,12 @@ public:
     StateRecorderBody();
     ~StateRecorderBody();
 
-    bool addFiles(boost::filesystem::path dir_path, const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list);
-    bool removeFiles(unsigned int bodyId);
+    void writeStates(const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list);
 
-    void removeAllSimFiles();
+    bool openFiles(boost::filesystem::path dir_path, const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list);
+    bool closeFiles(unsigned int bodyId);
+
+    void closeAllSimFiles();
 
 protected:
 
@@ -72,12 +74,12 @@ StateRecorderBody<TDynamicsSystemType>::StateRecorderBody() {
 template<typename TDynamicsSystemType>
 StateRecorderBody<TDynamicsSystemType>::~StateRecorderBody() {
     DECONSTRUCTOR_MESSAGE
-    removeAllSimFiles();
+    closeAllSimFiles();
 }
 
 
 template<typename TDynamicsSystemType>
-bool StateRecorderBody<TDynamicsSystemType>::addFiles(boost::filesystem::path dir_path, const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list)
+bool StateRecorderBody<TDynamicsSystemType>::openFiles(boost::filesystem::path dir_path, const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list)
 {
 
     boost::filesystem::path file;
@@ -126,9 +128,13 @@ void StateRecorderBody<TDynamicsSystemType>::getSimBodyFileName(typename TDynami
     s <<"SimData_Body_" <<"-"<<RigidBodyId::getProcessNr(body)<<"-"<< RigidBodyId::getBodyNr(body)<<SIM_FILE_EXTENSION;
 }
 
+void writeStates(const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list){
+
+}
+
 
 template<typename TDynamicsSystemType>
-bool StateRecorderBody<TDynamicsSystemType>::removeFiles(unsigned int bodyId){
+bool StateRecorderBody<TDynamicsSystemType>::closeFiles(unsigned int bodyId){
 
     typename FileMap::iterator it = m_BinarySimFiles.find(bodyId);
 
@@ -145,7 +151,7 @@ bool StateRecorderBody<TDynamicsSystemType>::removeFiles(unsigned int bodyId){
 
 
 template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::removeAllSimFiles() {
+void StateRecorderBody<TDynamicsSystemType>::closeAllSimFiles() {
 
     typename FileMap::iterator it;
 

@@ -144,7 +144,7 @@ struct StaticLayout {
 typedef LayoutConfig<
    double,
    DynamicLayout<7,6>
-> DoubleDynamicLayout;
+> MyLayoutConfigType;
 
 
 // ================================================================================================
@@ -247,7 +247,7 @@ template< typename TConfigTimeStepper > class MoreauTimeStepper;
 // This one is used!!
 
 
-typedef ConfigRigidBody< DoubleDynamicLayout, RigidBodySolverDataCONoG<DoubleDynamicLayout> > MyRigidBodyConfig;
+typedef ConfigRigidBody< MyLayoutConfigType, RigidBodySolverDataCONoG<MyLayoutConfigType> > MyRigidBodyConfig;
 
 typedef RigidBodyBase< MyRigidBodyConfig > MyRigidBody; //Define the Class
 
