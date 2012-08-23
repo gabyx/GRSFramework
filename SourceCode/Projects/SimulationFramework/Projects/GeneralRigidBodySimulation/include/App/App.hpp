@@ -15,12 +15,12 @@
 
 #include "SimulationState.hpp"
 #include "PlaybackState.hpp"
-#include "Singeltons/FileManager.hpp"
-#include "Singeltons/Contexts/InputContext.hpp"
-#include "Singeltons/Contexts/GuiContext.hpp"
-#include "Singeltons/Contexts/RenderContext.hpp"
+#include "FileManager.hpp"
+#include "Contexts/InputContext.hpp"
+#include "Contexts/GuiContext.hpp"
+#include "Contexts/RenderContext.hpp"
 
-#include "States/AppStateManager.hpp"
+#include "AppStateManager.hpp"
 
 #include "LogDefines.hpp"
 // ===========================================
@@ -48,9 +48,9 @@ public:
 	void startApp(); ///< Starts the Application.
 
 private:
-	
+
 	boost::shared_ptr<AppStateManager>	m_pAppStateManager; ///< The AppStateManager which handles all AppStates in a queue.
-	
+
 	bool						m_bShutdown; 				///< Bool to indicate that the App should be shutdown.
 };
 //=========================================================

@@ -22,7 +22,7 @@
 */
 /* @{ */
 #define CLEARLOG logstream.str("");                        ///< Macro to easily write into a Ogre::Log.
-#define LOG( _logptr_ , _message_ )  ( * (_logptr_) ) _message_ ;  ///< Macro to easily write into a Ogre::Log.
+#define LOG( _logptr_ , _message_ )  ( * (_logptr_) ) <<  _message_  ;  ///< Macro to easily write into a Ogre::Log.
 #define OGRE_LOG( _logptr_ ) (_logptr_)->logMessage(logstream.str());  ///< Macro to easily write into a Ogre::Log.
 /* @} */
 
@@ -128,23 +128,15 @@
 
 
 
-#include <sstream>
-#include "RenderContext.hpp"
-
 /** @name  Deconstructor and Constructor Macros
 * @brief Deconstructor and Constructor Macros to Debug correct dealloction of objects.
 */
 /* @{ */
 #ifdef _DEBUG
-#define DECONSTRUCTOR_MESSAGE \
-  std::stringstream logstream; \
-  logstream << "Deconstructor: "<< typeid(*this).name()  <<" , at : "<< this; \
-  RenderContext::getSingletonPtr()->m_pAppLog->logMessage(logstream.str().c_str());
-
+#define DESTRUCTOR_MESSAGE \
+ LOG(m_pSimulationLog, "Destructor: "<< typeid(*this).name()  <<" , @ : "<< this;);
 #define CONSTRUCTOR_MESSAGE \
-  std::stringstream logstream; \
-  logstream << "Constructor: "<< typeid(*this).name()  <<" , at : "<< this; \
-  RenderContext::getSingletonPtr()->m_pAppLog->logMessage(logstream.str().c_str());
+  LOG(m_pSimulationLog, "Constructor: "<< typeid(*this).name()  <<" , @ : "<< this;);
 #else
   #define DECONSTRUCTOR_MESSAGE
   #define CONSTRUCTOR_MESSAGE

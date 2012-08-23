@@ -5,7 +5,7 @@
 	implemenation specific includes
 _________________________________________________________*/
 
-#include "States/AppState.hpp"
+#include "AppState.hpp"
 #include "Contexts/InputContext.hpp"
 #include "Contexts/GuiContext.hpp"
 #include <OgreWindowEventUtilities.h>

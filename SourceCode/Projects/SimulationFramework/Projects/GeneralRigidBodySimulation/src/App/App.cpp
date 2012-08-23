@@ -26,8 +26,13 @@ App::~App()
 
 void App::startApp()
 {
+      std::cout <<"Pointer: "<< FileManager::getSingletonPtr() << std::endl;
+
+      new FileManager();
+      new Logging::LogManager();
 
 	new RenderContext();
+	  std::cout <<"Pointer: "<< FileManager::getSingletonPtr() << std::endl;
 	if(!RenderContext::getSingletonPtr()->initOgre("RigidBodySimulation v1.0"))
 		return;
 	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("RigidBodySimulation(RenderContext) initialized!");
@@ -49,8 +54,7 @@ void App::startApp()
 	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("GuiContext initialized!");
 
 
-  new FileManager();
-  new Logging::LogManager();
+
 
 
    SimulationState::create(m_pAppStateManager, "SimulationState");
@@ -59,9 +63,9 @@ void App::startApp()
    boost::shared_ptr<AppState> appSim = boost::dynamic_pointer_cast<AppState>(m_pAppStateManager->findAppStateByName("SimulationState"));
    boost::shared_ptr<AppState> appPlayback = boost::dynamic_pointer_cast<AppState>(m_pAppStateManager->findAppStateByName("PlaybackState"));
 
-   //m_pAppStateManager->pushAppState(appSim);
+   m_pAppStateManager->pushAppState(appSim);
    m_pAppStateManager->pushAppState(appPlayback);
 
-   m_pAppStateManager->start(appPlayback);
+   m_pAppStateManager->start(appSim);
 
 }

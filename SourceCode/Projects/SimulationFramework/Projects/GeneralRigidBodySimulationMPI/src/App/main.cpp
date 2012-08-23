@@ -54,16 +54,19 @@ int main(int argc, char **argv) {
     MPI_Comm_size(MPI_COMM_WORLD,&nProcesses);
 
     std::stringstream processFolder;
-    processFolder << "Process_" << my_rank << std::endl;
-    boost::filesystem::path globalFilePath;
+    processFolder << "Process_" << my_rank;
+    boost::filesystem::path globalDirPath, localDirPath;
+
     if(globalFilePathChar){
-        globalFilePath = boost::filesystem::path(globalFilePathChar);
+        globalDirPath = boost::filesystem::path(globalFilePathChar);
     }
-    globalFilePath /= processFolder.str();
+
+    localDirPath = globalDirPath;
+    localDirPath /= processFolder.str();
 
 
     // Process static global members! (Singletons)
-    new FileManager(globalFilePath); //Creates path if it does not exist
+    new FileManager(globalDirPath, localDirPath); //Creates path if it does not exist
     new Logging::LogManager();
 
 
@@ -72,7 +75,7 @@ int main(int argc, char **argv) {
 
     mgr.setup(boost::filesystem::path(sceneFilePath));
 
-
+    mgr.startSim();
 
     // Finalize MPI =================================
     MPI_Finalize();

@@ -88,7 +88,7 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
   m_pThreadLog = new Logging::Log("PlaybackLoaderThreadLog");
 
 
-  boost::filesystem::path filePath = FileManager::getSingletonPtr()->getGlobalPath();
+  boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
   filePath /= "PlaybackLoaderThread.log";
 #if LogToFileLoader == 1
@@ -163,7 +163,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
 
     if(loadFile()){
 
-      LOG(m_pThreadLog, << " File loaded: Number of States = " << m_BinarySimFile.getNStates() << std::endl;);
+      LOG(m_pThreadLog, " File loaded: Number of States = " << m_BinarySimFile.getNStates() << std::endl;);
 
       reset();
 
@@ -199,7 +199,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
            i++;
            m_BinarySimFile >> m_state.get();
             if(i % 20==0){
-               LOG(m_pThreadLog, <<  "File loader buffering state: " << m_state->m_t <<"..."<<std::endl);
+               LOG(m_pThreadLog,  "File loader buffering state: " << m_state->m_t <<"..."<<std::endl);
            }
            current_state = FILE_CHECK;
          }
@@ -223,7 +223,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
                current_state = MOVE_POINTER;
             }else{
                // Write end flag to state!
-               LOG(m_pThreadLog, <<  "Write endstate to m_state m_t:" << m_state->m_t <<endl;);
+               LOG(m_pThreadLog,  "Write endstate to m_state m_t:" << m_state->m_t <<endl;);
                m_state->m_StateType = DynamicsState<TLayoutConfig>::ENDSTATE;
                current_state = FINALIZE_AND_BREAK;
             }
@@ -236,7 +236,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
          }else if(current_state== READ_IN){
            m_BinarySimFile >> m_state.get();
                /*
-               LOG(m_pThreadLog, <<  "Loaded m_t:" << m_state->m_t <<endl;);
+               LOG(m_pThreadLog,  "Loaded m_t:" << m_state->m_t <<endl;);
                 */
            current_state = FILE_CHECK;
          }else if(current_state== FINALIZE_AND_BREAK){

@@ -15,12 +15,12 @@ public:
 
     AABB() {
         // Violating the constraint min<max for making a completey empty box!
-        m_minPoint.x = std::numeric_limits<double>::max();
-        m_maxPoint.x = std::numeric_limits<double>::min();
-        m_minPoint.y = std::numeric_limits<double>::max();
-        m_maxPoint.y = std::numeric_limits<double>::min();
-        m_minPoint.z = std::numeric_limits<double>::max();
-        m_maxPoint.z = std::numeric_limits<double>::min();
+        m_minPoint(0) = std::numeric_limits<double>::max();
+        m_maxPoint(0) = std::numeric_limits<double>::min();
+        m_minPoint(1) = std::numeric_limits<double>::max();
+        m_maxPoint(1) = std::numeric_limits<double>::min();
+        m_minPoint(2) = std::numeric_limits<double>::max();
+        m_maxPoint(2) = std::numeric_limits<double>::min();
 
     };
     AABB( const Vector3 &p) {
@@ -28,88 +28,92 @@ public:
         m_maxPoint = p;
     };
     AABB( const Vector3 &l, const Vector3 &u) {
-        m_minPoint = Vector3(std::min(l.x,u.x),std::min(l.y,u.y),std::min(l.z,u.z));
-        m_maxPoint = Vector3(std::max(l.x,u.x),std::max(l.y,u.y),std::max(l.z,u.z));
+        m_minPoint = Vector3(std::min(l(0),u(0)),std::min(l(1),u(1)),std::min(l(2),u(2)));
+        m_maxPoint = Vector3(std::max(l(0),u(0)),std::max(l(1),u(1)),std::max(l(2),u(2)));
     };
 
     AABB& unite(const Vector3 &p) {
-        m_maxPoint.x = std::max(m_maxPoint.x,p.x);
-        m_maxPoint.y = std::max(m_maxPoint.y,p.y);
-        m_maxPoint.z = std::max(m_maxPoint.z,p.z);
-        m_minPoint.x = std::min( m_minPoint.x,p.x);
-        m_minPoint.y = std::min( m_minPoint.y,p.y);
-        m_minPoint.z = std::min( m_minPoint.z,p.z);
+        m_maxPoint(0) = std::max(m_maxPoint(0),p(0));
+        m_maxPoint(1) = std::max(m_maxPoint(1),p(1));
+        m_maxPoint(2) = std::max(m_maxPoint(2),p(2));
+        m_minPoint(0) = std::min( m_minPoint(0),p(0));
+        m_minPoint(1) = std::min( m_minPoint(1),p(1));
+        m_minPoint(2) = std::min( m_minPoint(2),p(2));
         return *this;
     };
 
     AABB& unite(const AABB & box) {
-        m_maxPoint.x = std::max(m_maxPoint.x,box.m_maxPoint.x);
-        m_maxPoint.y = std::max(m_maxPoint.y,box.m_maxPoint.y);
-        m_maxPoint.z = std::max(m_maxPoint.z,box.m_maxPoint.z);
-        m_minPoint.x = std::min( m_minPoint.x,box. m_minPoint.x);
-        m_minPoint.y = std::min( m_minPoint.y,box. m_minPoint.y);
-        m_minPoint.z = std::min( m_minPoint.z,box. m_minPoint.z);
+        m_maxPoint(0) = std::max(m_maxPoint(0),box.m_maxPoint(0));
+        m_maxPoint(1) = std::max(m_maxPoint(1),box.m_maxPoint(1));
+        m_maxPoint(2) = std::max(m_maxPoint(2),box.m_maxPoint(2));
+        m_minPoint(0) = std::min( m_minPoint(0),box. m_minPoint(0));
+        m_minPoint(1) = std::min( m_minPoint(1),box. m_minPoint(1));
+        m_minPoint(2) = std::min( m_minPoint(2),box. m_minPoint(2));
         return *this;
     };
 
     AABB operator+ (const Vector3 &p) {
         AABB a;
-        a.m_maxPoint.x = std::max(m_maxPoint.x,p.x);
-        a.m_maxPoint.y = std::max(m_maxPoint.y,p.y);
-        a.m_maxPoint.z = std::max(m_maxPoint.z,p.z);
-        a. m_minPoint.x = std::min( m_minPoint.x,p.x);
-        a. m_minPoint.y = std::min( m_minPoint.y,p.y);
-        a. m_minPoint.z = std::min( m_minPoint.z,p.z);
+        a.m_maxPoint(0) = std::max(m_maxPoint(0),p(0));
+        a.m_maxPoint(1) = std::max(m_maxPoint(1),p(1));
+        a.m_maxPoint(2) = std::max(m_maxPoint(2),p(2));
+        a. m_minPoint(0) = std::min( m_minPoint(0),p(0));
+        a. m_minPoint(1) = std::min( m_minPoint(1),p(1));
+        a. m_minPoint(2) = std::min( m_minPoint(2),p(2));
         return a;
     };
 
     AABB operator+ (const AABB & box) {
         AABB a;
-        a.m_maxPoint.x = std::max(m_maxPoint.x,box.m_maxPoint.x);
-        a.m_maxPoint.y = std::max(m_maxPoint.y,box.m_maxPoint.y);
-        a.m_maxPoint.z = std::max(m_maxPoint.z,box.m_maxPoint.z);
-        a. m_minPoint.x = std::min( m_minPoint.x,box. m_minPoint.x);
-        a. m_minPoint.y = std::min( m_minPoint.y,box. m_minPoint.y);
-        a. m_minPoint.z = std::min( m_minPoint.z,box. m_minPoint.z);
+        a.m_maxPoint(0) = std::max(m_maxPoint(0),box.m_maxPoint(0));
+        a.m_maxPoint(1) = std::max(m_maxPoint(1),box.m_maxPoint(1));
+        a.m_maxPoint(2) = std::max(m_maxPoint(2),box.m_maxPoint(2));
+        a. m_minPoint(0) = std::min( m_minPoint(0),box. m_minPoint(0));
+        a. m_minPoint(1) = std::min( m_minPoint(1),box. m_minPoint(1));
+        a. m_minPoint(2) = std::min( m_minPoint(2),box. m_minPoint(2));
         return a;
     };
 
     AABB& operator+= (const AABB & box) {
-        m_maxPoint.x = std::max(m_maxPoint.x,box.m_maxPoint.x);
-        m_maxPoint.y = std::max(m_maxPoint.y,box.m_maxPoint.y);
-        m_maxPoint.z = std::max(m_maxPoint.z,box.m_maxPoint.z);
-        m_minPoint.x = std::min( m_minPoint.x,box. m_minPoint.x);
-        m_minPoint.y = std::min( m_minPoint.y,box. m_minPoint.y);
-        m_minPoint.z = std::min( m_minPoint.z,box. m_minPoint.z);
+        m_maxPoint(0) = std::max(m_maxPoint(0),box.m_maxPoint(0));
+        m_maxPoint(1) = std::max(m_maxPoint(1),box.m_maxPoint(1));
+        m_maxPoint(2) = std::max(m_maxPoint(2),box.m_maxPoint(2));
+        m_minPoint(0) = std::min( m_minPoint(0),box. m_minPoint(0));
+        m_minPoint(1) = std::min( m_minPoint(1),box. m_minPoint(1));
+        m_minPoint(2) = std::min( m_minPoint(2),box. m_minPoint(2));
         return *this;
+    };
+
+    Vector3 extent() const{
+        return m_maxPoint - m_minPoint;
     };
 
     AABB & transform(const Matrix44 & M) {
 
-        AABB ret(M * (Vector3( m_minPoint.x, m_minPoint.y, m_minPoint.z)));
-        ret.unite(M* (Vector3(m_maxPoint.x, m_minPoint.y, m_minPoint.z)));
-        ret.unite(M*(Vector3( m_minPoint.x, m_maxPoint.y, m_minPoint.z)));
-        ret.unite(M*(Vector3( m_minPoint.x, m_minPoint.y, m_maxPoint.z)));
-        ret.unite(M*(Vector3( m_minPoint.x, m_maxPoint.y, m_maxPoint.z)));
-        ret.unite(M*(Vector3(m_maxPoint.x, m_maxPoint.y, m_minPoint.z)));
-        ret.unite(M*(Vector3(m_maxPoint.x, m_minPoint.y, m_maxPoint.z)));
-        ret.unite(M*(Vector3(m_maxPoint.x, m_maxPoint.y, m_maxPoint.z)));
+        AABB ret(M * (Vector3( m_minPoint(0), m_minPoint(1), m_minPoint(2))));
+        ret.unite(M* (Vector3(m_maxPoint(0), m_minPoint(1), m_minPoint(2))));
+        ret.unite(M*(Vector3( m_minPoint(0), m_maxPoint(1), m_minPoint(2))));
+        ret.unite(M*(Vector3( m_minPoint(0), m_minPoint(1), m_maxPoint(2))));
+        ret.unite(M*(Vector3( m_minPoint(0), m_maxPoint(1), m_maxPoint(2))));
+        ret.unite(M*(Vector3(m_maxPoint(0), m_maxPoint(1), m_minPoint(2))));
+        ret.unite(M*(Vector3(m_maxPoint(0), m_minPoint(1), m_maxPoint(2))));
+        ret.unite(M*(Vector3(m_maxPoint(0), m_maxPoint(1), m_maxPoint(2))));
         *this = ret;
         return *this;
     };
 
     bool overlaps(const AABB & box) const {
-        bool x = (m_maxPoint.x >= box. m_minPoint.x) && ( m_minPoint.x <= box.m_maxPoint.x);
-        bool y = (m_maxPoint.y >= box. m_minPoint.y) && ( m_minPoint.y <= box.m_maxPoint.y);
-        bool z = (m_maxPoint.z >= box. m_minPoint.z) && ( m_minPoint.z <= box.m_maxPoint.z);
+        bool x = (m_maxPoint(0) >= box. m_minPoint(0)) && ( m_minPoint(0) <= box.m_maxPoint(0));
+        bool y = (m_maxPoint(1) >= box. m_minPoint(1)) && ( m_minPoint(1) <= box.m_maxPoint(1));
+        bool z = (m_maxPoint(2) >= box. m_minPoint(2)) && ( m_minPoint(2) <= box.m_maxPoint(2));
         return (x && y && z);
     };
 
     bool inside(const Vector3 &p) const {
         return (
-                   p.x >= m_minPoint.x && p.x <= m_maxPoint.x &&
-                   p.y >= m_minPoint.y && p.y <= m_maxPoint.y &&
-                   p.z >= m_minPoint.z && p.z <= m_maxPoint.z);
+                   p(0) >= m_minPoint(0) && p(0) <= m_maxPoint(0) &&
+                   p(1) >= m_minPoint(1) && p(1) <= m_maxPoint(1) &&
+                   p(2) >= m_minPoint(2) && p(2) <= m_maxPoint(2));
     };
 
 
@@ -120,14 +124,14 @@ public:
 
     PREC volume() const {
         Vector3 d = m_maxPoint- m_minPoint;
-        return d.x * d.y * d.z;
+        return d(0) * d(1) * d(2);
     };
 
     PREC maxExtend() const {
         Vector3 d = m_maxPoint- m_minPoint;
-        if (d.x > d.y && d.x > d.z) {
+        if (d(0) > d(1) && d(0) > d(2)) {
             return 0;
-        } else if (d.y > d.z) {
+        } else if (d(1) > d(2)) {
             return 1;
         } else {
             return 2;

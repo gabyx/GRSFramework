@@ -9,53 +9,63 @@
 #include "LogDefines.hpp"
 #include "TypeDefs.hpp"
 
-#include "SceneParser.hpp"
+#include "StateRecorderBody.hpp"
+#include "SceneParserMPI.hpp"
 
-template <typename TLayoutConfig> class DynamicsState;
+#include "MPIInformation.hpp"
+
+
 template <typename TLayoutConfig> class StateRecorder;
-template< typename TLayoutConfig> class SharedBufferDynSys;
-
 
 
 template<typename TConfig>
-class SimulationManagerMPI
-{
+class SimulationManagerMPI {
 public:
 
-   DEFINE_CONFIG_TYPES_OF(TConfig)
+    DEFINE_CONFIG_TYPES_OF(TConfig)
 
     SimulationManagerMPI();
-   ~SimulationManagerMPI();
+    ~SimulationManagerMPI();
 
-   boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >	    m_pSharedBuffer;
-   boost::shared_ptr<StateRecorder<LayoutConfigType> >		    m_pStateRecorder;
+    boost::shared_ptr<StateRecorderBody<DynamicsSystemType> >		    m_pStateRecorder;
 
-   void setup();
-   void setup(boost::filesystem::path sceneFilePath);
+    void setup();
+    void setup(boost::filesystem::path sceneFilePath);
 
-   boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
+
+    void startSim();
+
+    boost::shared_ptr< SceneParserMPI<TConfig> > m_pSceneParser;
 
 private:
 
-    unsigned int m_nSimBodies;
+    void initSim();
 
-   // Accessed only by thread ===================
+    unsigned int m_nSimBodies, m_nGlobalSimBodies;
 
-   struct SettingsSimThread{
-         double m_EndTime;
-   } m_SettingsSimThread;
+    // Accessed only by thread ===================
+
+    struct SettingsSimThread {
+        double m_EndTime;
+    } m_SettingsSimThread;
 
 
-   Logging::Log *  m_pSimulationLog;
+    Logging::Log *  m_pSimulationLog;
 
-   boost::shared_ptr< TimeStepperType >	m_pTimestepper;
+    boost::shared_ptr< TimeStepperType >	m_pTimestepper;
 
-   boost::shared_ptr< DynamicsSystemType > m_pDynSys;
-   // ===========================================
+    boost::shared_ptr< DynamicsSystemType > m_pDynSys;
+    // ===========================================
 
-   // File Paths for one Simulation, always reset ==============================
-   boost::filesystem::path m_SimFolderPath;
-   boost::filesystem::path m_SimFilePath;
+    // File Paths for one Simulation, always reset ==============================
+    boost::filesystem::path m_SimFolderPath;
+
+    typedef MPILayer::ProcessInformation<LayoutConfigType> ProcessInfoType;
+    ProcessInfoType m_MPIProcInfo;
+
+
+    bool checkNumberOfBodiesInProcess();
+
 };
 
 
@@ -63,4 +73,4 @@ private:
 #include "SimulationManagerMPI.icc"
 
 
-#endif // SimulationManagerMPIMAZE_HPP
+#endif // SimulationManagerMPI_HPP

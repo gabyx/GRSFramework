@@ -10,6 +10,7 @@
 #define TypeDefs_hpp
 
 
+
 #include <Eigen/Dense>
 
 // ================================================================================================
@@ -21,6 +22,8 @@ struct MyMatrix{
    typedef TPREC PREC;
    //Static assigned Matrices
    typedef Eigen::Matrix<PREC, 4, 4> Matrix44;
+   typedef Eigen::Matrix<PREC, 4, 3> Matrix43;
+   typedef Eigen::Matrix<PREC, 3, 4> Matrix34;
    typedef Eigen::Matrix<PREC, 3, 3> Matrix33;
    typedef Eigen::Matrix<PREC, 3, 1> Vector3;
    typedef Eigen::Matrix<PREC, 4, 1> Quaternion;
@@ -62,6 +65,8 @@ struct LayoutConfig{
    // Static Vectors/Matrices
    typedef typename MyMatrix< PREC >::Matrix44 Matrix44;
    typedef typename MyMatrix< PREC >::Matrix33 Matrix33;
+   typedef typename MyMatrix< PREC >::Matrix43 Matrix43;
+   typedef typename MyMatrix< PREC >::Matrix34 Matrix34;
    typedef typename MyMatrix< PREC >::Vector3 Vector3;
    typedef typename MyMatrix< PREC >::Vector4 Vector4;
    typedef typename MyMatrix< PREC >::Quaternion Quaternion;
@@ -139,7 +144,7 @@ struct StaticLayout {
 typedef LayoutConfig<
    double,
    DynamicLayout<7,6>
-> DoubleDynamicLayout;
+> MyLayoutConfigType;
 
 
 // ================================================================================================
@@ -164,14 +169,13 @@ struct ConfigDynamicsSystem{
     typedef _TRigidBody RigidBodyType;
 };
 
-template < typename _TRigidBody>
+template <typename _TDynamicsSystem>
 struct ConfigCollisionSolver{
-    typedef _TRigidBody RigidBodyType;
+    typedef _TDynamicsSystem  DynamicsSystemType;
 };
 
-template <typename _TDynamicsSystem, typename _TCollisionSolver,  typename _TRigidBody>
+template <typename _TDynamicsSystem, typename _TCollisionSolver>
 struct ConfigInclusionSolver{
-    typedef _TRigidBody       RigidBodyType;
     typedef _TDynamicsSystem  DynamicsSystemType;
     typedef _TCollisionSolver CollisionSolverType;
 };
@@ -243,7 +247,7 @@ template< typename TConfigTimeStepper > class MoreauTimeStepper;
 // This one is used!!
 
 
-typedef ConfigRigidBody< DoubleDynamicLayout, RigidBodySolverDataCONoG<DoubleDynamicLayout> > MyRigidBodyConfig;
+typedef ConfigRigidBody< MyLayoutConfigType, RigidBodySolverDataCONoG<MyLayoutConfigType> > MyRigidBodyConfig;
 
 typedef RigidBodyBase< MyRigidBodyConfig > MyRigidBody; //Define the Class
 
@@ -251,10 +255,10 @@ typedef ConfigDynamicsSystem< MyRigidBody> MyConfigDynamicsSystem;
 
 typedef DynamicsSystem<MyConfigDynamicsSystem> MyDynamicsSystem; //Define the Class
 
-typedef ConfigCollisionSolver< MyRigidBody> MyConfigCollisionSolver;
+typedef ConfigCollisionSolver< MyDynamicsSystem> MyConfigCollisionSolver;
 typedef CollisionSolver<MyConfigCollisionSolver> MyCollisionSolver; //Define the Class
 
-typedef ConfigInclusionSolver<MyDynamicsSystem, MyCollisionSolver, MyRigidBody>  MyConfigInclusionSolver;
+typedef ConfigInclusionSolver<MyDynamicsSystem, MyCollisionSolver>  MyConfigInclusionSolver;
 typedef InclusionSolverCONoG< MyConfigInclusionSolver >  MyInclusionSolver; //Define the Class
 
 typedef ConfigTimeStepper<
@@ -282,6 +286,8 @@ typedef Config< MySolverConfig > GeneralConfig;
 #define DEFINE_MATRIX_TYPES \
    typedef typename MyMatrix< PREC >::Matrix44 Matrix44; \
    typedef typename MyMatrix< PREC >::Matrix33 Matrix33; \
+   typedef typename MyMatrix< PREC >::Matrix43 Matrix43; \
+   typedef typename MyMatrix< PREC >::Matrix34 Matrix34; \
    typedef typename MyMatrix< PREC >::Vector3 Vector3;   \
    typedef typename MyMatrix< PREC >::Vector4 Vector4;   \
    typedef typename MyMatrix< PREC >::Quaternion Quaternion; \
@@ -314,8 +320,8 @@ typedef Config< MySolverConfig > GeneralConfig;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF( DynamicsSystemType::DynamicsSystemConfig ) \
 
 #define DEFINE_COLLISION_SOLVER_CONFIG_TYPES_OF( _CollisionSolverConfigName_ ) \
-    typedef typename _CollisionSolverConfigName_::RigidBodyType RigidBodyType; \
-    DEFINE_RIGIDBODY_CONFIG_TYPES_OF( _CollisionSolverConfigName_::RigidBodyType::RigidBodyConfigType )\
+    typedef typename _CollisionSolverConfigName_::DynamicsSystemType     DynamicsSystemType;                 \
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF( DynamicsSystemType::DynamicsSystemConfig ) \
 
 #define DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF( _DynamicsSystemConfigName_ ) \
     typedef typename _DynamicsSystemConfigName_::RigidBodyType RigidBodyType; \
@@ -351,6 +357,8 @@ typedef Config< MySolverConfig > GeneralConfig;
    typedef typename _LayoutConfigName_::MatrixQObjUObj MatrixQObjUObj; \
    typedef typename _LayoutConfigName_::Matrix44 Matrix44; \
    typedef typename _LayoutConfigName_::Matrix33 Matrix33; \
+   typedef typename _LayoutConfigName_::Matrix43 Matrix43; \
+   typedef typename _LayoutConfigName_::Matrix34 Matrix34; \
    typedef typename _LayoutConfigName_::Vector3 Vector3;   \
    typedef typename _LayoutConfigName_::Vector4 Vector4;   \
    typedef typename _LayoutConfigName_::Quaternion Quaternion; \
@@ -383,6 +391,8 @@ typedef Config< MySolverConfig > GeneralConfig;
    typedef  _LayoutConfigName_::MatrixQObjUObj MatrixQObjUObj; \
    typedef  _LayoutConfigName_::Matrix44 Matrix44; \
    typedef  _LayoutConfigName_::Matrix33 Matrix33; \
+   typedef  _LayoutConfigName_::Matrix43 Matrix43; \
+   typedef  _LayoutConfigName_::Matrix34 Matrix34; \
    typedef  _LayoutConfigName_::Vector3 Vector3;   \
    typedef  _LayoutConfigName_::Vector4 Vector4;   \
    typedef  _LayoutConfigName_::Quaternion Quaternion; \
