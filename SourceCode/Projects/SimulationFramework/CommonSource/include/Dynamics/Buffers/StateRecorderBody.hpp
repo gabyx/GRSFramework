@@ -17,7 +17,6 @@
 #include "MultiBodySimFile.hpp"
 #include "SimpleLogger.hpp"
 
-#include "RigidBody.hpp"
 
 /**
 * @ingroup StatesAndBuffers

@@ -6,9 +6,6 @@
 #include <boost/cstdint.hpp>
 
 #include "AssertionDebug.hpp"
-#include "RigidBody.hpp"
-
-
 
 class ContactTag;
 

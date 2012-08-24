@@ -1,23 +1,14 @@
-#ifndef InteriaTensorCalculations_hpp
-#define InteriaTensorCalculations_hpp
 
-
-#include <boost/variant.hpp>
+#include "InertiaTensorCalculations.hpp"
 
 #include "AssertionDebug.hpp"
-
-#include "SphereGeometry.hpp"
-#include "BoxGeometry.hpp"
-#include "HalfspaceGeometry.hpp"
 
 namespace InertiaTensor{
 
 
-
-   template<typename TRigidBody>
-   void calculateInertiaTensor( const boost::shared_ptr<TRigidBody > & rigidBody)
+   void calculateInertiaTensor( const boost::shared_ptr<MyRigidBodyType > & rigidBody)
    {
-      typedef typename TRigidBody::LayoutConfigType::PREC PREC;
+      typedef MyLayoutConfigType::PREC PREC;
 
       if( boost::shared_ptr<SphereGeometry<PREC> > sphereGeom = boost::get<boost::shared_ptr<SphereGeometry<PREC> > >(rigidBody->m_geometry)){
          rigidBody->m_K_Theta_S(0) = 2.0/5.0 * rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
@@ -35,14 +26,4 @@ namespace InertiaTensor{
 
    }
 
-
-
-
-
-
-
-
 };
-
-
-#endif

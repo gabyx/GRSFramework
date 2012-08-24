@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 
 #include "FileManager.hpp"
+
 #include "TypeDefs.hpp"
 #include "CommonFunctions.hpp"
 #include "DynamicsState.hpp"
@@ -49,7 +50,7 @@ protected:
   //Ogre::StringVector m_SimFileNames;
 
 
-  MultiBodySimFile<TLayoutConfig>    m_BinarySimFile;
+  MultiBodySimFile    m_BinarySimFile;
 
   std::vector< DynamicsState<TLayoutConfig> >	m_states;
 
@@ -61,7 +62,8 @@ protected:
 
 
 template<typename TLayoutConfig>
-StateRecorder<TLayoutConfig>::StateRecorder(const unsigned int nSimBodies)
+StateRecorder<TLayoutConfig>::StateRecorder(const unsigned int nSimBodies):
+m_BinarySimFile(typename TLayoutConfig::LayoutType::NDOFqObj, typename TLayoutConfig::LayoutType::NDOFuObj)
 {
    m_nSimBodies = nSimBodies;
 
@@ -100,7 +102,7 @@ template<typename TLayoutConfig>
 bool StateRecorder<TLayoutConfig>::createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path)
 {
 
-   MultiBodySimFile<TLayoutConfig> tmpFile;
+   MultiBodySimFile tmpFile(NDOFqObj,NDOFuObj);
    bool fileOK = tmpFile.openSimFileRead(ref_file_path,m_nSimBodies,false); //Open file to see if this file fits our simulation!!
    tmpFile.closeSimFile();
 

@@ -24,6 +24,8 @@
 #include "InclusionSolverSettings.hpp"
 #include "TimeStepperSettings.hpp"
 
+#include "MeshGeometry.hpp"
+
 #include "CommonFunctions.hpp"
 #include "QuaternionHelpers.hpp"
 #include "InertiaTensorCalculations.hpp"

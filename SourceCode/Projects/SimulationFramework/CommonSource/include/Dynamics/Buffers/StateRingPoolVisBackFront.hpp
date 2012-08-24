@@ -3,6 +3,7 @@
 
 #include "StatePool.hpp"
 #include "FrontBackBuffer.hpp"
+
 #include "LogDefines.hpp"
 
 

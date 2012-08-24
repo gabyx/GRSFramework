@@ -9,13 +9,12 @@
 #include "LogDefines.hpp"
 #include "TypeDefs.hpp"
 
-#include "StateRecorderBody.hpp"
 #include "SceneParserMPI.hpp"
 
 #include "MPIInformation.hpp"
 
-
 template <typename TLayoutConfig> class StateRecorder;
+template <typename TLayoutConfig> class StateRecorderBody;
 
 
 template<typename TConfig>

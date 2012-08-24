@@ -21,8 +21,6 @@
 
 #include "TypeDefs.hpp"
 
-#include "RigidBody.hpp"
-
 #include "ContactModels.hpp"
 #include "ContactTag.hpp"
 

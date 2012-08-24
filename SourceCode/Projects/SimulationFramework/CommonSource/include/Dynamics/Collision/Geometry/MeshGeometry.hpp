@@ -3,7 +3,6 @@
 #define MeshGeometry_hpp
 
 #include <boost/shared_ptr.hpp>
-#include <Eigen/Dense>
 
 #include "ConfigureFile.hpp"
 #include "AssertionDebug.hpp"
@@ -18,6 +17,9 @@
 #endif
 
 #include "TypeDefs.hpp"
+
+#include "MeshData.hpp"
+
 
 template<class PREC>
 class MeshGeometry{

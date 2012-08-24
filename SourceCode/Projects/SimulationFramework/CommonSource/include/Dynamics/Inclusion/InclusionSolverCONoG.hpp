@@ -14,7 +14,6 @@
 #include "TypeDefs.hpp"
 
 #include "CollisionSolver.hpp"
-#include "RigidBody.hpp"
 #include "PercussionPool.hpp"
 #include "MatrixHelpers.hpp"
 #include "VectorToSkewMatrix.hpp"
@@ -74,10 +73,7 @@ public:
 
     InclusionSolverSettings<LayoutConfigType> m_Settings;
 
-    unsigned int getNObjects();
-
 protected:
-    unsigned int m_nDofq, m_nDofu, m_nDofqObj, m_nDofuObj, m_nDofFriction, m_nSimBodies;
 
     unsigned int m_nExpectedContacts;
 
@@ -114,13 +110,6 @@ InclusionSolverCONoG<TInclusionSolverConfig>::InclusionSolverCONoG(boost::shared
     m_SimBodies(pCollisionSolver->m_SimBodies),
     m_Bodies(pCollisionSolver->m_Bodies) {
 
-    m_nSimBodies = pCollisionSolver->m_nSimBodies;
-    m_nDofqObj = NDOFqObj;
-    m_nDofuObj = NDOFuObj;
-    m_nDofq = m_nSimBodies * m_nDofqObj;
-    m_nDofu = m_nSimBodies * m_nDofuObj;
-
-
     m_pCollisionSolver = pCollisionSolver;
 
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
@@ -152,15 +141,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initializeLog( Logging::Log
 
 
 template< typename TInclusionSolverConfig >
-unsigned int InclusionSolverCONoG<TInclusionSolverConfig>::getNObjects() {
-    return m_nSimBodies;
-}
-
-template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::reset() {
-    // Do a Debug check if sizes match!
-    ASSERTMSG( m_SimBodies.size() * NDOFuObj == m_nDofu, "InclusionSolverCONoG:: Error in Dimension of System!");
-    ASSERTMSG( m_SimBodies.size() * NDOFqObj == m_nDofq, "InclusionSolverCONoG:: Error in Dimension of System!");
 
     m_pDynSys->init_const_hTerm();
     m_pDynSys->init_MassMatrix();

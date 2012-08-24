@@ -16,7 +16,6 @@
 
 #include "TypeDefs.hpp"
 
-#include "RigidBody.hpp"
 #include "CollisionData.hpp"
 #include "Collider.hpp"
 #include "LogDefines.hpp"

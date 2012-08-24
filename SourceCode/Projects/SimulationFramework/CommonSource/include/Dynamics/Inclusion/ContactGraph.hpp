@@ -10,9 +10,6 @@
 
 #include "GeneralGraph.hpp"
 
-#include "RigidBody.hpp"
-#include "DynamicsState.hpp"
-
 #include "ContactModels.hpp"
 #include "ContactParameterMap.hpp"
 #include "CollisionData.hpp"

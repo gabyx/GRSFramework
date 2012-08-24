@@ -104,7 +104,7 @@ protected:
     boost::filesystem::ofstream m_SystemDataFile;
 
     // Reference Sim File for Simulation
-    MultiBodySimFile<LayoutConfigType> m_ReferenceSimFile;
+    MultiBodySimFile m_ReferenceSimFile;
 
 
 

@@ -11,7 +11,7 @@
 #include "TypeDefs.hpp"
 
 #include "CollisionSolver.hpp"
-#include "RigidBody.hpp"
+
 #include "PercussionPool.hpp"
 #include "MatrixHelpers.hpp"
 #include "VectorToSkewMatrix.hpp"

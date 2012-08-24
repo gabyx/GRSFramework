@@ -1,8 +1,6 @@
 ﻿#ifndef ContactPercussion_hpp
 #define ContactPercussion_hpp
 
-#include <Eigen/Dense>
-
 /**
 * @ingroup Contact
 * @brief This is the ContactPercussion class, which stores the percussions for one contact.

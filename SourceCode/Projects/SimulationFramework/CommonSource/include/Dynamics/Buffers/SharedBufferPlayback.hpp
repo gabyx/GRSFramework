@@ -8,6 +8,7 @@
 
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
+
 #include "StateRingPoolVisBackFront.hpp"
 
 

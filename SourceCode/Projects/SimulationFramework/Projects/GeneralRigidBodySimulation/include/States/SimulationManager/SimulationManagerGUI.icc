@@ -111,7 +111,7 @@ void SimulationManagerGUI<TConfig>::setup() {
 
 template<typename TConfig>
 bool SimulationManagerGUI<TConfig>::writeInitialState() {
-    MultiBodySimFile<LayoutConfigType> simFile;
+    MultiBodySimFile simFile(NDOFqObj,NDOFuObj);
     // Request new file Paths for all logs from FileManager
     // Get new folder path
     boost::filesystem::path file = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_INIT);

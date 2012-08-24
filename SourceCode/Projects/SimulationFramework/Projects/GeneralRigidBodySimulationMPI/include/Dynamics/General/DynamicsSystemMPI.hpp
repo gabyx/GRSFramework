@@ -9,7 +9,6 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
-#include "RigidBody.hpp"
 #include "DynamicsState.hpp"
 #include "InitialConditionBodies.hpp"
 #include "CommonFunctions.hpp"

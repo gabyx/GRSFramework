@@ -13,8 +13,7 @@
 
 #include "TypeDefs.hpp"
 
-#include "CollisionSolverMPI.hpp"
-#include "RigidBody.hpp"
+#include "CollisionSolver.hpp"
 #include "PercussionPool.hpp"
 #include "MatrixHelpers.hpp"
 #include "VectorToSkewMatrix.hpp"
@@ -77,7 +76,6 @@ public:
     unsigned int getNObjects();
 
 protected:
-    unsigned int m_nDofq, m_nDofu, m_nDofqObj, m_nDofuObj, m_nDofFriction, m_nSimBodies;
 
     unsigned int m_nExpectedContacts;
 
@@ -113,12 +111,6 @@ template< typename TInclusionSolverConfig >
 InclusionSolverCONoG<TInclusionSolverConfig>::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,  boost::shared_ptr<DynamicsSystemType > pDynSys):
     m_SimBodies(pCollisionSolver->m_SimBodies),
     m_Bodies(pCollisionSolver->m_Bodies) {
-
-    m_nSimBodies = pCollisionSolver->m_nSimBodies;
-    m_nDofqObj = NDOFqObj;
-    m_nDofuObj = NDOFuObj;
-    m_nDofq = m_nSimBodies * m_nDofqObj;
-    m_nDofu = m_nSimBodies * m_nDofuObj;
 
 
     m_pCollisionSolver = pCollisionSolver;

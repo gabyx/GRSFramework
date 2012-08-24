@@ -10,9 +10,11 @@
 
 #include "SceneParser.hpp"
 
+
 template <typename TLayoutConfig> class DynamicsState;
 template <typename TLayoutConfig> class StateRecorder;
 template< typename TLayoutConfig> class SharedBufferDynSys;
+
 
 template<typename TConfig>
 class SimulationManager

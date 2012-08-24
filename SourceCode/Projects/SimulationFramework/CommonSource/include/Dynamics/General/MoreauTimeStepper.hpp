@@ -86,8 +86,7 @@ public:
 
 protected:
 
-    const unsigned int m_nDofu, m_nDofq; // These are the global dimensions of q and u
-    const unsigned int m_nDofuObj, m_nDofqObj, m_nSimBodies; // These are the dimensions for one Obj
+    const unsigned int m_nSimBodies; // These are the dimensions for one Obj
 
     int m_IterationCounter;
 
@@ -104,7 +103,7 @@ protected:
     boost::filesystem::ofstream m_SystemDataFile;
 
     // Reference Sim File for Simulation
-    MultiBodySimFile<LayoutConfigType> m_ReferenceSimFile;
+    MultiBodySimFile m_ReferenceSimFile;
 
 
 
@@ -136,10 +135,8 @@ template< typename TConfigTimeStepper>
 MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState):
     m_state_m(nSimBodies),
     m_nSimBodies(nSimBodies),
-    m_nDofqObj(NDOFqObj),
-    m_nDofuObj(NDOFuObj),
-    m_nDofq(m_nSimBodies * m_nDofqObj),
-    m_nDofu(m_nSimBodies * m_nDofuObj) {
+    m_ReferenceSimFile(NDOFqObj,NDOFuObj)
+{
 
     m_pSolverLog = NULL;
 

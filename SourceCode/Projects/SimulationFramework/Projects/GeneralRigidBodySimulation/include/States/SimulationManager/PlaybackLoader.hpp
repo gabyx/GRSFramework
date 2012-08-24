@@ -35,10 +35,9 @@ public:
 
   boost::barrier m_barrier_start;
 
-  const unsigned int m_nDofu, m_nDofq; // These are the global dimensions of q and u
-  const unsigned int m_nDofuObj, m_nDofqObj, m_nSimBodies; // These are the dimensions for one Obj
+  const unsigned int m_nSimBodies; // These are the dimensions for one Obj
 
-  MultiBodySimFile<TLayoutConfig> m_BinarySimFile;
+  MultiBodySimFile m_BinarySimFile;
 
 private:
   Logging::Log * m_pThreadLog; /**< This log is set to the thread log which calls this loader thread.  */
@@ -79,10 +78,7 @@ template< typename TLayoutConfig , typename TStatePool>
 PlaybackLoader<TLayoutConfig, TStatePool>::PlaybackLoader( const unsigned int nSimBodies, boost::shared_ptr<TStatePool> pStatePool):
 m_barrier_start(2),
 m_nSimBodies(nSimBodies),
-m_nDofqObj(NDOFqObj),
-m_nDofuObj(NDOFuObj),
-m_nDofq(m_nSimBodies * m_nDofqObj),
-m_nDofu(m_nSimBodies * m_nDofuObj)
+m_BinarySimFile(NDOFqObj,NDOFuObj)
 {
   //Set the Log Output =========================================================================
   m_pThreadLog = new Logging::Log("PlaybackLoaderThreadLog");

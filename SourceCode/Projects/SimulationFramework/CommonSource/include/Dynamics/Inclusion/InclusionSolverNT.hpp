@@ -11,8 +11,8 @@
 
 #include "TypeDefs.hpp"
 
-#include "CollisionSolver.hpp"
-#include "RigidBody.hpp"
+#include "CollisionData.hpp"
+
 #include "ContactParameterMap.hpp"
 #include "PercussionPool.hpp"
 

@@ -7,7 +7,7 @@
 #include <cmath>
 
 #include "AssertionDebug.hpp"
-#include "RigidBody.hpp"
+
 #include "DynamicsState.hpp"
 #include "MultiBodySimFile.hpp"
 
@@ -93,7 +93,7 @@ void setupBodiesGrid(DynamicsState<TLayoutConfig> & init_state,
 template<typename TLayoutConfig>
 bool setupBodiesFromFile(DynamicsState<TLayoutConfig> & init_state, boost::filesystem::path file_path){
 
-   MultiBodySimFile<TLayoutConfig> simFile;
+   MultiBodySimFile simFile(typename TLayoutConfig::LayoutType::NDOFqObj, typename TLayoutConfig::LayoutType::NDOFuObj);
 
    if(simFile.openSimFileRead(file_path,init_state.m_nSimBodies)){;
       simFile >> init_state ;

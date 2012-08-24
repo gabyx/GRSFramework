@@ -12,8 +12,6 @@
 
 #include "TypeDefs.hpp"
 
-#include "RigidBody.hpp"
-
 #include "ContactGraph.hpp"
 #include "CollisionData.hpp"
 
@@ -26,7 +24,6 @@
 #include <ozcollide/ozcollide.h>
 #endif
 #endif
-
 
 #include "QuaternionHelpers.hpp"
 #include "MatrixHelpers.hpp"

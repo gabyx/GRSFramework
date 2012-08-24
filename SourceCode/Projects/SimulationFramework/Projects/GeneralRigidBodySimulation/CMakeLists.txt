@@ -142,6 +142,7 @@ SET(COMMON_SRC
     ${PROJECT_SOURCE_DIR}/src/Common/CommonFunctionsOgre.cpp
     ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
     ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
+    ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFile.cpp
 )
 
 SET(DYNAMICS_INC
@@ -250,7 +251,7 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 
 #include directories
 set(INCLUDE_DIRS
-    
+
     #${NVIDIA_SDK_DIR}/common/inc
     #${NVIDIA_SDK_DIR}/../shared/inc
     ${Boost_INCLUDE_DIR}
@@ -263,7 +264,7 @@ set(INCLUDE_DIRS
     ${TICPP_INCLUDE_DIR}
     ${COLLISIONLIB_INCLUDE_DIR}
     ${ASSIMP_INCLUDE_DIR}
-    
+
     ${PROJECT_BINARY_DIR}/ConfigFiles/
     ${PROJECT_SOURCE_DIR}/include/App
     ${PROJECT_SOURCE_DIR}/include/Common
@@ -272,7 +273,7 @@ set(INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/include/States
     ${PROJECT_SOURCE_DIR}/include/States/SimulationManager
     ${PROJECT_SOURCE_DIR}/include/Systems
-    
+
     ${COMMONSOURCE_DIR}/include/Common
     ${COMMONSOURCE_DIR}/include/Common/SRDelegates/include/
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
@@ -283,7 +284,7 @@ set(INCLUDE_DIRS
     ${COMMONSOURCE_DIR}/include/Systems
     ${COMMONSOURCE_DIR}/include/Singeltons
     ${COMMONSOURCE_DIR}/include/States
-    
+
 
     ${CUDA_COMMON_INCLUDE_DIR}
 )
