@@ -4,6 +4,9 @@
 #include <utility>
 #include <boost/unordered_map.hpp>
 #include <vector>
+
+#include "TypeDefs.hpp"
+
 #include "ContactTag.hpp"
 #include "ContactPercussion.hpp"
 

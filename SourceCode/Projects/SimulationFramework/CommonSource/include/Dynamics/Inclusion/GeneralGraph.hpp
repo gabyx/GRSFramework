@@ -11,8 +11,6 @@
 #include <memory>
 #include <utility>
 
-#include "TypeDefs.hpp"
-
 #include <boost/shared_ptr.hpp>
 
 namespace Graph{

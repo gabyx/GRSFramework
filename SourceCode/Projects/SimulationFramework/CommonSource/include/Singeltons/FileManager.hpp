@@ -11,7 +11,6 @@
 #include <boost/thread.hpp>
 #include "Singleton.hpp"
 
-#include "TypeDefs.hpp"
 #include "CommonFunctions.hpp"
 
 

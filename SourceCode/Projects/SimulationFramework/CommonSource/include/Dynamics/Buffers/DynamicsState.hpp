@@ -2,12 +2,12 @@
 #define DYNAMICS_STATE_HPP
 
 #include <vector>
-#include <Eigen/StdVector>
-#include <Eigen/Core>
+
 #include <boost/thread.hpp>
 
 #include "AssertionDebug.hpp"
 #include "LogDefines.hpp"
+
 #include "TypeDefs.hpp"
 
 #include "QuaternionHelpers.hpp"

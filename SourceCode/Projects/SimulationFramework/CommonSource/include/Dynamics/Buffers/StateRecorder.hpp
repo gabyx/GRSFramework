@@ -7,6 +7,7 @@
 #include "FileManager.hpp"
 
 #include "TypeDefs.hpp"
+
 #include "CommonFunctions.hpp"
 #include "DynamicsState.hpp"
 #include "LogDefines.hpp"
@@ -18,11 +19,11 @@
 * @brief This is the StateRecorder class which records states to a MultiBodySimFile.
 * @{
 */
-template <typename TLayoutConfig>
+template <typename TDynamicsSystemType>
 class StateRecorder
 {
 public:
-  DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+  DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   StateRecorder(const unsigned int nSimBodies);
@@ -35,9 +36,9 @@ public:
   //void addState(const DynamicsState<TLayoutConfig> * state);
   /*void writeAllStates();*/
 
-  void write(const DynamicsState<TLayoutConfig>* value);
+  void write(const DynamicsState<LayoutConfigType>* value);
 
-  StateRecorder<TLayoutConfig> & operator << (const DynamicsState<TLayoutConfig>* value);
+  StateRecorder<TDynamicsSystemType> & operator << (const DynamicsState<LayoutConfigType>* value);
 
 protected:
 
@@ -52,7 +53,7 @@ protected:
 
   MultiBodySimFile    m_BinarySimFile;
 
-  std::vector< DynamicsState<TLayoutConfig> >	m_states;
+  std::vector< DynamicsState<LayoutConfigType> >	m_states;
 
   unsigned int m_nSimBodies;
 };
@@ -61,9 +62,9 @@ protected:
 
 
 
-template<typename TLayoutConfig>
-StateRecorder<TLayoutConfig>::StateRecorder(const unsigned int nSimBodies):
-m_BinarySimFile(TLayoutConfig::LayoutType::NDOFqObj, TLayoutConfig::LayoutType::NDOFuObj)
+template<typename TDynamicsSystemType>
+StateRecorder<TDynamicsSystemType>::StateRecorder(const unsigned int nSimBodies):
+m_BinarySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj)
 {
    m_nSimBodies = nSimBodies;
 
@@ -80,16 +81,16 @@ m_BinarySimFile(TLayoutConfig::LayoutType::NDOFqObj, TLayoutConfig::LayoutType::
 
 }
 
-template<typename TLayoutConfig>
-StateRecorder<TLayoutConfig>::~StateRecorder()
+template<typename TDynamicsSystemType>
+StateRecorder<TDynamicsSystemType>::~StateRecorder()
 {
   DECONSTRUCTOR_MESSAGE
   closeSimFile();
 }
 
 
-template<typename TLayoutConfig>
-bool StateRecorder<TLayoutConfig>::createSimFile(boost::filesystem::path file_path)
+template<typename TDynamicsSystemType>
+bool StateRecorder<TDynamicsSystemType>::createSimFile(boost::filesystem::path file_path)
 {
   m_pSimulationLog->logMessage("Record to Sim file at: " + file_path.string());
   if(m_BinarySimFile.openSimFileWrite(file_path,m_nSimBodies)){
@@ -98,8 +99,8 @@ bool StateRecorder<TLayoutConfig>::createSimFile(boost::filesystem::path file_pa
   return false;
 }
 
-template<typename TLayoutConfig>
-bool StateRecorder<TLayoutConfig>::createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path)
+template<typename TDynamicsSystemType>
+bool StateRecorder<TDynamicsSystemType>::createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path)
 {
 
    MultiBodySimFile tmpFile(NDOFqObj,NDOFuObj);
@@ -119,15 +120,15 @@ bool StateRecorder<TLayoutConfig>::createSimFileCopyFromReference(boost::filesys
   return false;
 }
 
-template<typename TLayoutConfig>
-StateRecorder<TLayoutConfig> & StateRecorder<TLayoutConfig>::operator << (const DynamicsState<TLayoutConfig>* value)
+template<typename TDynamicsSystemType>
+StateRecorder<TDynamicsSystemType> & StateRecorder<TDynamicsSystemType>::operator << (const DynamicsState<LayoutConfigType>* value)
 {
   m_BinarySimFile << (value);
 }
 
 
-template<typename TLayoutConfig>
-void StateRecorder<TLayoutConfig>::closeSimFile()
+template<typename TDynamicsSystemType>
+void StateRecorder<TDynamicsSystemType>::closeSimFile()
 {
   m_BinarySimFile.closeSimFile();
 }
@@ -153,8 +154,8 @@ void StateRecorder<TLayoutConfig>::closeSimFile()
 //}
 
 
-template <typename TLayoutConfig>
-void StateRecorder<TLayoutConfig>::write( const DynamicsState<TLayoutConfig>* value )
+template <typename TDynamicsSystemType>
+void StateRecorder<TDynamicsSystemType>::write( const DynamicsState<LayoutConfigType>* value )
 {
   m_BinarySimFile << value;
 }

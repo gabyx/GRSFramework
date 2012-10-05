@@ -13,11 +13,14 @@
 #include "DynamicsState.hpp"
 #include "SharedBufferDynSys.hpp"
 #include "StateRecorder.hpp"
+
+// HIER ALL Includes welche man für diesen Manager braucht, welche getemplatet sind mit einem
+// Config, unterhalb in den Subclassen müssen diese nicht mehr hinzugefügt werden?
+//
 #include "MoreauTimeStepper.hpp"
 #include "InclusionSolverNT.hpp"
 #include "InclusionSolverCO.hpp"
 #include "InclusionSolverCONoG.hpp"
-
 #include "DynamicsSystem.hpp"
 
 #include "CommonFunctions.hpp"

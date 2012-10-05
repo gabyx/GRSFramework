@@ -19,7 +19,7 @@
 #include "SceneParserOgre.hpp"
 
 template <typename TLayoutConfig> class DynamicsState;
-template <typename TLayoutConfig> class StateRecorder;
+template <typename DynamicsSystemType> class StateRecorder;
 template< typename TLayoutConfig> class SharedBufferDynSys;
 
 template<typename TConfig>
@@ -34,7 +34,7 @@ public:
 
 
    boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >	    m_pSharedBuffer;
-   boost::shared_ptr<StateRecorder<LayoutConfigType> >		    m_pStateRecorder;
+   boost::shared_ptr<StateRecorder<DynamicsSystemType> >		    m_pStateRecorder;
 
    std::vector<Ogre::SceneNode*>	m_SceneNodeSimBodies;
    std::vector<Ogre::SceneNode*>	m_SceneNodeBodies;

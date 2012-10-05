@@ -15,13 +15,12 @@
 #include <vector>
 #include <map>
 #include <utility>
-//EXCLUDEHEADER#include <OGRE/Ogre.h>
+
 #include <Eigen/Dense>
 //==========================================
 
 #include "TypeDefs.hpp"
 
-//EXCLUDEHEADER#include "ContactModels.hpp"
 #include "ContactTag.hpp"
 
 #include <boost/any.hpp>

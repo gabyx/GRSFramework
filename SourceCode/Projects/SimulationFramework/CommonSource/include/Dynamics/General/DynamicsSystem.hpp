@@ -2,8 +2,8 @@
 #define DynamicsSystem_hpp
 
 #include <vector>
-#include <Eigen/Core>
-#include <Eigen/LU>
+
+#include <Eigen/Dense>
 
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"

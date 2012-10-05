@@ -265,7 +265,7 @@ typedef ConfigTimeStepper<
              MyDynamicsSystem,
              MyCollisionSolver,
              MyInclusionSolver,
-             StatePoolVisBackFront<DoubleDynamicLayout>
+             StatePoolVisBackFront<MyLayoutConfigType>
           > MyConfigTimeStepper;
 
 typedef MoreauTimeStepper< MyConfigTimeStepper > MyMoreauTimeStepper; //Define the Class

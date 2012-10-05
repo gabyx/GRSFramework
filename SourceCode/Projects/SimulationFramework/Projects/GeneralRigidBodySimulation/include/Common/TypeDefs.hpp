@@ -223,6 +223,7 @@ template< typename TDynamicsSystemConfig  > class DynamicsSystem;
 template< typename TInclusionSolverConfig > class InclusionSolverCO;
 template< typename TInclusionSolverConfig > class InclusionSolverCONoG;
 
+
 template< typename TRigidBodyConfig> class RigidBodyBase;
 template< typename TLayoutConfig > class RigidBodySolverDataCONoG;
 template< typename TLayoutConfig > class RigidBodySolverDataNone;
@@ -276,6 +277,7 @@ typedef SolverConfig<MyMoreauTimeStepper> MySolverConfig;
 typedef Config< MySolverConfig > GeneralConfig;
 
 /* @} */
+
 
 
 
@@ -400,6 +402,8 @@ typedef Config< MySolverConfig > GeneralConfig;
    typedef  _LayoutConfigName_::MatrixDyn MatrixDyn;   \
    typedef  _LayoutConfigName_::MatrixDiagDyn MatrixDiagDyn;   \
    typedef  _LayoutConfigName_::MatrixDynRow MatrixDynRow;
+
+
 
 /**
 * @brief This is the format for the output of matrices.

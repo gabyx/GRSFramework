@@ -17,6 +17,7 @@
 #endif
 
 #include "TypeDefs.hpp"
+#include "TypeDefs.hpp"
 
 #include "MeshData.hpp"
 

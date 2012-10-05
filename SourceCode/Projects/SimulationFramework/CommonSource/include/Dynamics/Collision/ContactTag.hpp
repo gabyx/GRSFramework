@@ -1,5 +1,6 @@
 ﻿#ifndef ContactTag_hpp
 #define ContactTag_hpp
+
 #include <boost/tuple/tuple.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>

@@ -150,9 +150,6 @@ unsigned int InclusionSolverCONoG<TInclusionSolverConfig>::getNObjects() {
 
 template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::reset() {
-    // Do a Debug check if sizes match!
-    ASSERTMSG( m_SimBodies.size() * NDOFuObj == m_nDofu, "InclusionSolverCONoG:: Error in Dimension of System!");
-    ASSERTMSG( m_SimBodies.size() * NDOFqObj == m_nDofq, "InclusionSolverCONoG:: Error in Dimension of System!");
 
     m_pDynSys->init_const_hTerm();
     m_pDynSys->init_MassMatrix();

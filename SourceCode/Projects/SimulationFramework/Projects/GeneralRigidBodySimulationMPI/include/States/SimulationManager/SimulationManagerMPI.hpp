@@ -13,8 +13,8 @@
 
 #include "MPIInformation.hpp"
 
-template <typename TLayoutConfig> class StateRecorder;
-template <typename TLayoutConfig> class StateRecorderBody;
+template <typename TDynamicsSystemType> class StateRecorder;
+template <typename TDynamicsSystemType> class StateRecorderBody;
 
 
 template<typename TConfig>
