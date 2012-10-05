@@ -93,7 +93,8 @@ void setupBodiesGrid(DynamicsState<TLayoutConfig> & init_state,
 template<typename TLayoutConfig>
 bool setupBodiesFromFile(DynamicsState<TLayoutConfig> & init_state, boost::filesystem::path file_path){
 
-   MultiBodySimFile simFile(typename TLayoutConfig::LayoutType::NDOFqObj, typename TLayoutConfig::LayoutType::NDOFuObj);
+   MultiBodySimFile simFile( TLayoutConfig::LayoutType::NDOFqObj,
+                             TLayoutConfig::LayoutType::NDOFuObj);
 
    if(simFile.openSimFileRead(file_path,init_state.m_nSimBodies)){;
       simFile >> init_state ;

@@ -63,7 +63,7 @@ protected:
 
 template<typename TLayoutConfig>
 StateRecorder<TLayoutConfig>::StateRecorder(const unsigned int nSimBodies):
-m_BinarySimFile(typename TLayoutConfig::LayoutType::NDOFqObj, typename TLayoutConfig::LayoutType::NDOFuObj)
+m_BinarySimFile(TLayoutConfig::LayoutType::NDOFqObj, TLayoutConfig::LayoutType::NDOFuObj)
 {
    m_nSimBodies = nSimBodies;
 
