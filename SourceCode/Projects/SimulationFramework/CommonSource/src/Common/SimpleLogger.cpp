@@ -16,6 +16,7 @@ void LogSink::operator<<(std::stringstream & s) {
         ASSERTMSG(false,"m_pOutStream has fail()!");
         m_pOutStream->clear();
     }
+    //m_pOutStream->flush();
 }
 
 void LogSink::operator<<(const std::string & s) {

@@ -33,7 +33,8 @@ int main(int argc, char **argv) {
           std::cout << " GlobalFilePath Arg: " << globalFilePathChar <<std::endl;
         } else {
             std::cout << "Wrong arguments specified!:" << std::endl <<"Options:" <<std::endl
-                      << " \t -s <SceneFilePath>"  <<std::endl;
+                      << " \t -s <SceneFilePath>"  <<std::endl
+                      << " \t -p <GlobalFilePath>"  <<std::endl;
             exit(-1);
         }
     }

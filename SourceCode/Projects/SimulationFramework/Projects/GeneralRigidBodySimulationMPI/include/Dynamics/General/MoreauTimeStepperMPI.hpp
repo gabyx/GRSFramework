@@ -139,7 +139,8 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nS
     m_nDofqObj(NDOFqObj),
     m_nDofuObj(NDOFuObj),
     m_nDofq(m_nSimBodies * m_nDofqObj),
-    m_nDofu(m_nSimBodies * m_nDofuObj) {
+    m_nDofu(m_nSimBodies * m_nDofuObj),
+    m_ReferenceSimFile(NDOFqObj,NDOFuObj) {
 
     m_pSolverLog = NULL;
 

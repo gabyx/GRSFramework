@@ -35,7 +35,7 @@ MPI_Abort(MPI_COMM_WORLD, -1); \
 #ifndef NDEBUG
 	/**
 	* @brief An Assert Macro to use within C++ code.
-	* @param condition The condition which needs to be truem otherwise an assertion is thrown!
+	* @param condition The condition which needs to be true otherwise an assertion is thrown!
 	* @param message The message in form of cout out expression like: ÒVariable:Ó<<i<< Òhas failedÓ
 	*/
     #define ASSERTMPIERROR( error_code , message ) { \

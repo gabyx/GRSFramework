@@ -21,6 +21,8 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
+#include "RigidBody.hpp"
+
 #include "InclusionSolverSettings.hpp"
 #include "TimeStepperSettings.hpp"
 
@@ -73,6 +75,7 @@ public:
 
 
         //Reset all variables
+        m_globalMaxGroupId = 0;
         m_nSimBodies = 0;
         m_nBodies = 0;
         m_bodyList.clear();
@@ -324,17 +327,30 @@ protected:
     virtual void processRigidBodies( ticpp::Node * rigidbodies ) {
 
         LOG(m_pSimulationLog,"Process RigidBodies ..."<<std::endl;);
+        ticpp::Element* rigidBodiesEl = rigidbodies->ToElement();
 
         //Clear current body list;
         m_bodyList.clear();
         m_bodyListScales.clear();
 
-        int instances = rigidbodies->ToElement()->GetAttribute<int>("instances");
+        unsigned int instances = rigidbodies->ToElement()->GetAttribute<unsigned int>("instances");
+
+        unsigned int groupId;
+        if(rigidBodiesEl->HasAttribute("groupId")){
+            groupId = rigidBodiesEl->GetAttribute<unsigned int>("groupId");
+            m_globalMaxGroupId = std::max(m_globalMaxGroupId,groupId);
+        }else{
+            m_globalMaxGroupId++;
+            groupId = m_globalMaxGroupId;
+        }
 
 
         for(int i=0; i<instances; i++) {
             boost::shared_ptr< RigidBodyType > temp_ptr(new RigidBodyType());
-            temp_ptr->m_id = i;
+
+            //Assign a unique id
+            RigidBodyId::setId(temp_ptr.get(),groupId, i);
+
             m_bodyList.push_back(temp_ptr);
 
             Vector3 scale;
@@ -986,6 +1002,7 @@ protected:
     std::stringstream logstream;
 
     unsigned int m_nSimBodies, m_nBodies;
+    unsigned int m_globalMaxGroupId; // Group Id used to build a unique id!
     // Temprary structures
     typename RigidBodyType::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
     std::vector<boost::shared_ptr< RigidBodyType > > m_bodyList; ///< Used to process a RigidBody Node

@@ -11,6 +11,7 @@
 #include "DynamicsState.hpp"
 #include "SharedBufferDynSys.hpp"
 #include "StateRecorder.hpp"
+#include "StateRecorderBody.hpp"
 
 #include "MoreauTimeStepperMPI.hpp"
 #include "InclusionSolverCONoGMPI.hpp"
@@ -132,9 +133,9 @@ void SimulationManagerMPI<TConfig>::startSim() {
     initSim();
 
 
-    // Write first initial value out!
+    //  Write first initial value out!
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
-        m_pStateRecorder->writeStates();
+       m_pStateRecorder->writeStates(m_pDynSys->m_SimBodies);
     }
 
 

@@ -53,7 +53,7 @@ protected:
 
   MultiBodySimFile    m_BinarySimFile;
 
-  std::vector< DynamicsState<LayoutConfigType> >	m_states;
+  //std::vector< DynamicsState<LayoutConfigType> >	m_states;
 
   unsigned int m_nSimBodies;
 };

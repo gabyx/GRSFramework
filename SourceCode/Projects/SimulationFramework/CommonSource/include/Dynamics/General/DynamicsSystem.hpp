@@ -34,8 +34,11 @@ public:
     double m_gravity;
     Vector3 m_gravityDir;
 
-    std::vector< boost::shared_ptr<RigidBodyType > > m_SimBodies; // Simulated Objects
-    std::vector< boost::shared_ptr<RigidBodyType > > m_Bodies;    // all not simulated objects
+    typedef std::vector< boost::shared_ptr< RigidBodyType > > RigidBodySimPtrListType;
+    RigidBodySimPtrListType m_SimBodies; // Simulated Objects
+    typedef std::vector< boost::shared_ptr< RigidBodyType > > RigidBodyNotAniPtrListType;
+    RigidBodyNotAniPtrListType m_Bodies;    // all not simulated objects
+
 
     void init(); // Only call if Timestepper has been created
     void initializeLog(Logging::Log* pLog);

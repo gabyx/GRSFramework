@@ -77,12 +77,13 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData<TLayoutConfig> {
 
 template<typename TRigidBodyConfig > class RigidBodyBase;
 
-namespace RigidBodyId{
+class RigidBodyId{
 
+public:
     typedef uint64_t Type;
 
     template<typename TRigidBodyConfig >
-    static unsigned int getProcessNr(const RigidBodyBase<TRigidBodyConfig> * body){
+    static unsigned int getGroupNr(const RigidBodyBase<TRigidBodyConfig> * body){
         Type id = body->m_id;
         id >>= 32;
         return *(reinterpret_cast<unsigned int *>(&(id)));

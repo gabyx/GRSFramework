@@ -72,6 +72,7 @@ public:
         m_nSimBodies = 0;
         m_nBodies = 0;
         m_nGlobalSimBodies = 0;
+        m_globalMaxGroupId = 0;
 
         m_bodyList.clear();
         m_SimBodyInitStates.clear();
@@ -179,6 +180,7 @@ protected:
             // saftey check
             if(dim(0)*dim(1)*dim(2) != m_procInfo.getNProcesses()) {
                 LOG(m_pSimulationLog, "Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_procInfo.getNProcesses() <<" Processes"<<std::endl; );
+                sleep(2);
                 throw ticpp::Exception("You have launched to many processes for the grid!");
             }
 
@@ -193,16 +195,27 @@ protected:
     void processRigidBodies( ticpp::Node * rigidbodies ) {
 
         //Clear current body list;
-
+        ticpp::Element* rigidBodiesEl = rigidbodies->ToElement();
         m_bodyList.clear();
         m_bodyListScales.clear();
 
-        int instances = rigidbodies->ToElement()->GetAttribute<int>("instances");
+         unsigned int instances = rigidbodies->ToElement()->GetAttribute<unsigned int>("instances");
 
+        unsigned int groupId;
+        if(rigidBodiesEl->HasAttribute("groupId")){
+            groupId = rigidBodiesEl->GetAttribute<unsigned int>("groupId");
+            m_globalMaxGroupId = std::max(m_globalMaxGroupId,groupId);
+        }else{
+            m_globalMaxGroupId++;
+            groupId = m_globalMaxGroupId;
+        }
 
         for(int i=0; i<instances; i++) {
             boost::shared_ptr< RigidBodyType > temp_ptr(new RigidBodyType());
-            temp_ptr->m_id = i;
+
+            //Assign a unique id
+            RigidBodyId::setId(temp_ptr.get(),groupId, i);
+
             m_bodyList.push_back(temp_ptr);
 
             Vector3 scale;
@@ -230,10 +243,7 @@ protected:
                 // Check if Body belongs to the topology! // Check CoG!
                 if(m_procInfo.getProcTopo().belongsPointToProcess((*bodyIt)->m_r_S)) {
 
-                    //Assign a unique id
-                    RigidBodyId::setId(bodyIt->get(),m_nBodies, m_procInfo.getRank());
-
-                    LOG(m_pSimulationLog, "Added Body with ID: (" << RigidBodyId::getProcessNr(bodyIt->get())<<","<<RigidBodyId::getBodyNr(bodyIt->get())<<")"<< std::endl);
+                    LOG(m_pSimulationLog, "Added Body with ID: (" << RigidBodyId::getGroupNr(bodyIt->get())<<","<<RigidBodyId::getBodyNr(bodyIt->get())<<")"<< std::endl);
 
                     m_pDynSys->m_SimBodies.push_back((*bodyIt));
 
@@ -250,8 +260,7 @@ protected:
            typename std::vector<boost::shared_ptr< RigidBodyType > >::iterator bodyIt;
 
             for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
-                //Assign a unique id
-                RigidBodyId::setId(bodyIt->get(),m_nBodies, m_procInfo.getRank());
+
                 m_pDynSys->m_Bodies.push_back((*bodyIt));
 
                 m_nBodies++;
@@ -277,6 +286,7 @@ protected:
     unsigned int m_nGlobalSimBodies;
 
     //using declerations
+    using SceneParser<TConfig>::m_globalMaxGroupId;
     using SceneParser<TConfig>::m_nSimBodies;
     using SceneParser<TConfig>::m_nBodies;
     using SceneParser<TConfig>::m_bParseDynamics;

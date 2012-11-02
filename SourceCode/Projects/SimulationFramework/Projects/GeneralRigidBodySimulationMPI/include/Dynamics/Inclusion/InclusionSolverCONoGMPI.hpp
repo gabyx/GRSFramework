@@ -73,8 +73,6 @@ public:
 
     InclusionSolverSettings<LayoutConfigType> m_Settings;
 
-    unsigned int getNObjects();
-
 protected:
 
     unsigned int m_nExpectedContacts;
@@ -142,11 +140,6 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initializeLog( Logging::Log
 #endif
 }
 
-
-template< typename TInclusionSolverConfig >
-unsigned int InclusionSolverCONoG<TInclusionSolverConfig>::getNObjects() {
-    return m_nSimBodies;
-}
 
 template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::reset() {

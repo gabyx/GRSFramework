@@ -81,8 +81,8 @@ public:
   * @param SimBodies A reference to the list of all simulated bodies.
   * @param Bodies A reference to the list all not simulated bodies.
   */
-  CollisionSolver(std::vector< boost::shared_ptr<RigidBodyType > > & SimBodies,
-                  std::vector< boost::shared_ptr<RigidBodyType > > & Bodies);
+  CollisionSolver(typename DynamicsSystemType::RigidBodySimPtrListType & SimBodies,
+                  typename DynamicsSystemType::RigidBodyNotAniPtrListType & Bodies);
 
    ~CollisionSolver();
 
@@ -107,8 +107,8 @@ protected:
 
   const unsigned int m_nDofqObj, m_nDofuObj, m_nSimBodies;
   unsigned int m_expectedNContacts;                                                 ///< Expected number of Contacts.
-  std::vector< boost::shared_ptr< RigidBodyType > > & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
-  std::vector< boost::shared_ptr< RigidBodyType > > & m_Bodies;          ///< List of all fixed not simulated bodies.
+  typename DynamicsSystemType::RigidBodySimPtrListType & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
+  typename DynamicsSystemType::RigidBodyNotAniPtrListType & m_Bodies;          ///< List of all fixed not simulated bodies.
 
   Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> > m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
   friend class Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> >;
@@ -124,8 +124,8 @@ protected:
 
 template< typename TCollisionSolverConfig >
 CollisionSolver<TCollisionSolverConfig>::CollisionSolver(
-                                         std::vector< boost::shared_ptr<RigidBodyType > > & SimBodies,
-                                         std::vector< boost::shared_ptr<RigidBodyType > > & Bodies):
+                                         typename DynamicsSystemType::RigidBodySimPtrListType & SimBodies,
+                                         typename DynamicsSystemType::RigidBodyNotAniPtrListType & Bodies):
 m_SimBodies(SimBodies), m_Bodies(Bodies),
 m_nSimBodies(SimBodies.size()),m_nDofqObj(NDOFqObj),m_nDofuObj(NDOFuObj)
 {
