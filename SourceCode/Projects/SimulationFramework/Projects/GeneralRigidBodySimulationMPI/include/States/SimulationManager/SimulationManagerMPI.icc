@@ -139,13 +139,13 @@ void SimulationManagerMPI<TConfig>::startSim() {
     }
 
 
-//
-//    while(1)
-//    {
-//
-//      // Do one iteration
-//      m_pTimestepper->doOneIteration();
-//
+
+    while(1)
+    {
+
+      // Do one iteration
+      m_pTimestepper->doOneIteration();
+
 //      // get global time for logging!
 //      timelineSimulation = ((double)global_time.elapsed().wall)*1e-9;
 //      // Write Data to SystemDataFile (maps all data to back buffer!)
@@ -153,20 +153,20 @@ void SimulationManagerMPI<TConfig>::startSim() {
 //      // Write Data to CollisionDataFile
 //      m_pTimestepper->writeIterationToCollisionDataFile();
 //      // Write  State to Sim File
-//      m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
-//
-//      // Check if simulation can be aborted!
-//      if(m_pTimestepper->finished()){
-//         m_pSimulationLog->logMessage(" SimulationManager: Timestepper finished, exit...");
-//         break;
-//      }
-//    }
-//
-//    cleanUpRecordThread();
-//  }
-//
-//  m_pSimulationLog->logMessage(" SimulationManager: Simulation leaving...");
-//  return;
+        m_pStateRecorder->write(m_pDynSys->m_SimBodies);
+
+      // Check if simulation can be aborted!
+      if(m_pTimestepper->finished()){
+         m_pSimulationLog->logMessage(" SimulationManager: Timestepper finished, exit...");
+         break;
+      }
+    }
+
+    cleanUpRecordThread();
+  }
+
+  m_pSimulationLog->logMessage(" SimulationManager: Simulation leaving...");
+  return;
 }
 
 template<typename TConfig>
