@@ -37,7 +37,7 @@ public:
   boost::shared_ptr< VideoDropper > m_pVideoDropper;
   struct VideoDropSettings{ bool m_bVideoDrop; double m_FPS;} m_VideoDropSettings;
 
-  boost::shared_ptr< StateRecorderResampler<LayoutConfigType> > m_pStateRecorderResampler;
+  boost::shared_ptr< StateRecorderResampler<DynamicsSystemType> > m_pStateRecorderResampler;
   struct SimFileDropSettings{ bool m_bSimFileDrop; double m_FPS; bool m_bSimFileDropInterpolate; double m_startTime; double m_endTime;} m_SimFileDropSettings;
 
   bool setup();

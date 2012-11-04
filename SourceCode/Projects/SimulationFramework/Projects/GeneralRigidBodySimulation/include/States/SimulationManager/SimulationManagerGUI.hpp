@@ -34,7 +34,7 @@ public:
 
 
    boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >	    m_pSharedBuffer;
-   boost::shared_ptr<StateRecorder<DynamicsSystemType> >		    m_pStateRecorder;
+   boost::shared_ptr<StateRecorder<DynamicsSystemType> >		m_pStateRecorder;
 
    std::vector<Ogre::SceneNode*>	m_SceneNodeSimBodies;
    std::vector<Ogre::SceneNode*>	m_SceneNodeBodies;

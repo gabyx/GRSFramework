@@ -93,7 +93,7 @@ void SimulationManagerGUI<TConfig>::setup() {
     m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys, m_pSharedBuffer) );
     m_pSimulationLog->logMessage("SimulationManagerGUI:: Added TimeStepperType... ");
 
-    m_pStateRecorder = boost::shared_ptr<StateRecorder<LayoutConfigType> >(new StateRecorder<LayoutConfigType>(m_nSimBodies));
+    m_pStateRecorder = boost::shared_ptr<StateRecorder<DynamicsSystemType> >(new StateRecorder<DynamicsSystemType>(m_nSimBodies));
     m_pSimulationLog->logMessage("SimulationManagerGUI:: Added StateRecorder... ");
 
     m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());

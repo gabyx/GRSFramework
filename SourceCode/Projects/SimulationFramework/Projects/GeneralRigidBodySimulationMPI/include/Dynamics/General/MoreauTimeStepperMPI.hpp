@@ -295,15 +295,53 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     //boost::thread::yield();
 
 
-
     //Calculate Midpoint Rule ============================================================
-    // Middle Time Step ==================================================================
+    // Middle Time Step for all LOCAL Bodies==============================================
+    // Remote bodies belong to other processes which are timestepped
     m_pDynSys->doFirstHalfTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs
     m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Calculations after first timestep
     m_pDynSys->afterFirstTimeStep();
     // ====================================================================================
+
+
+    /* Communicate all bodies which are in the overlap zone or are out of the processes topology!
+
+     Sending
+     Get for each LOCAL Body (overlapping region) where the body is overlapping and the according neighbour process rank
+            Get the corresponding topology for the body -> correspondingProcess
+            Get all sendNeighbours to the correspondingProcess where the body is in the overlap zone!
+
+                for each neighbour in sendNeighbours
+                    if already communicated ( in list bodyToCommunicatedNeigbours, make flag that it is used!) -> send update to neighbour
+                    if is not communicated (not in list  bodyToCommunicatedNeigbours, add to list, make flag that it is used)
+                        if body is in our process topology = correspondingProcess:
+                            -> send whole body to neighbour, send it as remote to neighbour
+                        if If body is no more in our process topology != correspondingProcess
+                            -> send whole body to neighbour, send it as local to neighbour
+                            -> remove body from our local list, it is no more used!
+
+                for each entry which is not flaged in bodyToCommunicatedNeigbours
+                    -> remove process index and send removal (or send nothing ) to this process index for this body
+
+
+     For each sendNeighbour entry make one message with:
+          Each information depending on flag (update,whole, removal)
+
+     Receiving
+     Receive all updates or new local bodies from neighbours:
+     Process all neighbour messages (also if empty):
+
+         (if we receive a removal, remove it from our remote list)
+         all remotes which have not been updated are no longer remotes, so remove them! :-)
+
+         if we receive update , search for the remote body and update it
+         if we receive a new (local or remote) body, add it either to the remote or local list depending on what it is, check if the body belongs to our topology
+    */
+
+
+
 
     m_pInclusionSolver->resetForNextIter(); // Clears the contact graph!
 

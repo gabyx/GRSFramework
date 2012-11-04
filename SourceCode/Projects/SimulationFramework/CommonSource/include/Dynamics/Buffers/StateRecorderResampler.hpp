@@ -16,18 +16,19 @@
 /**
 * @brief only used in sim thread to resample and drop a new sim file if the option is selected in playback! Not mutex locks or something else!
 */
-template<typename TLayoutConfig>
-class StateRecorderResampler: public StateRecorder<TLayoutConfig> {
+template<typename TDynamicsSystemType>
+class StateRecorderResampler: public StateRecorder<TDynamicsSystemType> {
 public:
 
-   DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+   DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    StateRecorderResampler(const unsigned nSimBodies):
-      StateRecorder<TLayoutConfig>(nSimBodies)
+      StateRecorder<TDynamicsSystemType>(nSimBodies)
    {
-      m_pStateArray.push_back(new DynamicsState<TLayoutConfig>(nSimBodies));
-      m_pStateArray.push_back(new DynamicsState<TLayoutConfig>(nSimBodies));
-      m_pStateArray.push_back(new DynamicsState<TLayoutConfig>(nSimBodies));
+      m_pStateArray.push_back(new DynamicsState<LayoutConfigType>(nSimBodies));
+      m_pStateArray.push_back(new DynamicsState<LayoutConfigType>(nSimBodies));
+      m_pStateArray.push_back(new DynamicsState<LayoutConfigType>(nSimBodies));
 
       reset();
       m_fps = 25; // Standart value
@@ -41,7 +42,7 @@ public:
       }
    };
 
-   void tryToWrite( const DynamicsState<TLayoutConfig>* state, bool bInterpolate){
+   void tryToWrite( const DynamicsState<LayoutConfigType>* state, bool bInterpolate){
 
 
       std::stringstream logstream;
@@ -98,10 +99,10 @@ public:
    }
 
 private:
-   std::vector< DynamicsState<TLayoutConfig> *> m_pStateArray;
-   DynamicsState<TLayoutConfig> * m_pPrevState;
-   DynamicsState<TLayoutConfig> * m_pNextState;
-   DynamicsState<TLayoutConfig> * m_pLerpState;
+   std::vector< DynamicsState<LayoutConfigType> *> m_pStateArray;
+   DynamicsState<LayoutConfigType> * m_pPrevState;
+   DynamicsState<LayoutConfigType> * m_pNextState;
+   DynamicsState<LayoutConfigType> * m_pLerpState;
    bool m_bFirstInsert;
 
    boost::filesystem::path m_folderPath;

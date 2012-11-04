@@ -209,7 +209,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_Front.template head<3>();
         pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_Front.template tail<3>();
 
-        // Swap uuffer and reset Front
+        // Swap uBuffer and reset Front
         pBody->m_pSolverData->swapBuffer();
         pBody->m_pSolverData->reset();
 

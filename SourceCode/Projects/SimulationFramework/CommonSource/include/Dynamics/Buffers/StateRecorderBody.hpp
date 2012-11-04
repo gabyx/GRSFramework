@@ -132,9 +132,8 @@ void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamic
 
     typename TDynamicsSystemType::RigidBodySimPtrListType::const_iterator it;
 
-    static DynamicsState<LayoutConfigType> state(1); // State for one Body only
-
-    // Iterate over all bodies
+    static DynamicsState<LayoutConfigType> dynState(1); // State for one Body only
+        // Iterate over all bodies
     for(it = body_list.begin(); it != body_list.end(); it++){
         //Find Sim file in list
         typename FileMap::iterator fileIt = m_BinarySimFiles.find((*it)->m_id);
@@ -143,9 +142,8 @@ void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamic
             LOG(m_pSimulationLog, "StateRecorderBody:: Did not found SimFile for Body Id:" << (*it)->m_id<< ". There is no SimFile corresponding to this body!" ;);
         }else{
 
-            //state.
-
-            *(fileIt->second) << (const DynamicsState<LayoutConfigType>*)&state;
+            InitialConditionBodies::applyBodyToRigidBodyState( *(it->get()) , dynState.m_SimBodyStates[0]);
+            *(fileIt->second) << dynState;
 
         }
     }

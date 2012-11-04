@@ -56,6 +56,8 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData<TLayoutConfig> {
         m_uBuffer.m_Back.setZero();
     };
 
+    ///< Get the actual velocity
+
     ///< Flag which determines if this body is in the contact graph!
     bool m_bInContactGraph;
 

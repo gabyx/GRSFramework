@@ -97,7 +97,7 @@ bool PlaybackManager<TConfig>::setup() {
     m_pVideoDropper->reset();
 
     //Make a Sim File Resampler
-    m_pStateRecorderResampler = boost::shared_ptr<StateRecorderResampler<LayoutConfigType> >(new StateRecorderResampler<LayoutConfigType>(m_nSimBodies));
+    m_pStateRecorderResampler = boost::shared_ptr<StateRecorderResampler<DynamicsSystemType> >(new StateRecorderResampler<DynamicsSystemType>(m_nSimBodies));
     m_pStateRecorderResampler->reset();
 
     m_pVisBuffer = m_pSharedBuffer->getVisBuffer();
