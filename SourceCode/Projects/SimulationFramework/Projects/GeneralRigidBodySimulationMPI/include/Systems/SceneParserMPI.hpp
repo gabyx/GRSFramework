@@ -23,7 +23,7 @@
 
 #include "SceneParser.hpp"
 
-#include "MPIInformation.hpp"
+#include "MPICommunication.hpp"
 
 #include "DynamicsSystemMPI.hpp"
 
@@ -52,8 +52,9 @@ public:
 
     DEFINE_CONFIG_TYPES_OF(TConfig)
 
-    SceneParserMPI(boost::shared_ptr<DynamicsSystemType> pDynSys, MPILayer::ProcessInformation<LayoutConfigType> & procInfo)
-        : SceneParser<TConfig>(pDynSys), m_procInfo(procInfo) {
+    SceneParserMPI(boost::shared_ptr<DynamicsSystemType> pDynSys,
+                   boost::shared_ptr<MPILayer::ProcessCommunicator<LayoutConfigType> > procComm)
+        : SceneParser<TConfig>(pDynSys), m_pProcComm(procComm) {
         m_nGlobalSimBodies = 0;
     }
 
@@ -178,13 +179,13 @@ protected:
                 throw ticpp::Exception("String conversion in processMPISettings: dimension failed");
             }
             // saftey check
-            if(dim(0)*dim(1)*dim(2) != m_procInfo.getNProcesses()) {
-                LOG(m_pSimulationLog, "Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_procInfo.getNProcesses() <<" Processes"<<std::endl; );
+            if(dim(0)*dim(1)*dim(2) != m_pProcComm->m_pProcessInfo->getNProcesses()) {
+                LOG(m_pSimulationLog, "Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcComm->m_pProcessInfo->getNProcesses() <<" Processes"<<std::endl; );
                 sleep(2);
                 throw ticpp::Exception("You have launched to many processes for the grid!");
             }
 
-            m_procInfo.setProcTopo( new MPILayer::ProcessTopologyGrid<LayoutConfigType>(minPoint,maxPoint,dim,m_procInfo.getRank()) );
+            m_pProcComm->m_pProcessInfo->createProcTopoGrid(minPoint,maxPoint, dim, m_pProcComm->m_pProcessInfo->getRank() );
 
         } else {
             throw ticpp::Exception("String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
@@ -241,7 +242,7 @@ protected:
 
             for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
                 // Check if Body belongs to the topology! // Check CoG!
-                if(m_procInfo.getProcTopo().belongsPointToProcess((*bodyIt)->m_r_S)) {
+                if(m_pProcComm->m_pProcessInfo->getProcTopo().belongsPointToProcess((*bodyIt)->m_r_S)) {
 
                     LOG(m_pSimulationLog, "Added Body with ID: (" << RigidBodyId::getGroupNr(bodyIt->get())<<","<<RigidBodyId::getBodyNr(bodyIt->get())<<")"<< std::endl);
 
@@ -281,7 +282,7 @@ protected:
 
 
 
-    MPILayer::ProcessInformation<LayoutConfigType> & m_procInfo;
+    boost::shared_ptr< MPILayer::ProcessCommunicator<LayoutConfigType> > m_pProcComm;
 
     unsigned int m_nGlobalSimBodies;
 

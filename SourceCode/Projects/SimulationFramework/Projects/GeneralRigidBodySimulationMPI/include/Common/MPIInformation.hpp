@@ -23,89 +23,8 @@ public:
     };
 };
 
-
-template<typename TLayoutConfig>
-class ProcessInformation {
-
-public:
-
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
-
-    static const int MASTER = 0;
-
-    ProcessInformation() {
-        m_pProcTopo = NULL;
-        initialize();
-    }
-
-    ~ProcessInformation() {
-        if(m_pProcTopo) {
-            delete m_pProcTopo;
-        }
-    }
-
-    void initialize() {
-        MPI_Comm_rank(MPI_COMM_WORLD,&this->m_rank);
-        MPI_Comm_size(MPI_COMM_WORLD,&this->m_nProcesses);
-
-        std::stringstream s;
-        s << "Process_"<<m_rank;
-        m_name = s.str();
-    };
-
-     unsigned int getMasterRank() const {
-        return MASTER;
-    };
-
-    bool hasMasterRank(){
-        if(m_rank == MASTER){
-            return true;
-        }
-        return false;
-    }
-
-    unsigned int getRank() const {
-        return m_rank;
-    };
-    void setRank(unsigned int rank) {
-        m_rank = rank;
-    };
-
-    unsigned int getNProcesses() const {
-        return m_nProcesses;
-    };
-
-    std::string getName() const {
-        return m_name;
-    };
-    void setName(std::string name) {
-        m_name = name;
-    };
-
-    void setProcTopo( ProcessTopology<TLayoutConfig>* pProcTopo ){
-        if(m_pProcTopo){
-            delete m_pProcTopo;
-        }
-        m_pProcTopo = pProcTopo;
-    };
-
-    inline const ProcessTopology<TLayoutConfig> & getProcTopo() const{
-        ASSERTMSG(m_pProcTopo,"m_pProcTopo == NULL");
-        return *m_pProcTopo;
-    };
-
-private:
-
-    ProcessTopology<TLayoutConfig> * m_pProcTopo;
-
-    int m_rank;
-    int m_nProcesses;
-    std::string m_name;
-
-
-
-};
-
+// Prototype
+template<typename TLayoutConfig> class ProcessInformation;
 
 template<typename TLayoutConfig>
 class ProcessTopologyGrid : public ProcessTopology<TLayoutConfig> {
@@ -134,7 +53,6 @@ public:
         if(neighbourProcessRank == m_rank) {
             return true;
         }
-        neighbourProcessRank = -1;
         return false;
     };
 
@@ -143,6 +61,93 @@ private:
     std::vector<unsigned int> m_nbRanks; ///< Neighbour ranks
     CartesianGrid<TLayoutConfig,NoCellData> m_grid;
 };
+
+
+
+template<typename TLayoutConfig>
+class ProcessInformation {
+
+public:
+
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+
+    static const int MASTER = 0;
+
+    ProcessInformation() {
+        m_pProcTopo = NULL;
+        initialize();
+    }
+
+    ~ProcessInformation() {
+        if(m_pProcTopo) {
+            delete m_pProcTopo;
+        }
+    }
+
+
+
+     unsigned int getMasterRank() const {
+        return MASTER;
+    };
+
+    bool hasMasterRank() const{
+        if(m_rank == MASTER){
+            return true;
+        }
+        return false;
+    }
+
+    unsigned int getRank() const {
+        return m_rank;
+    };
+    void setRank(unsigned int rank) {
+        m_rank = rank;
+    };
+
+    unsigned int getNProcesses() const {
+        return m_nProcesses;
+    };
+
+    std::string getName() const {
+        return m_name;
+    };
+    void setName(std::string name) {
+        m_name = name;
+    };
+
+    void createProcTopoGrid(const Vector3 & minPoint,
+                            const Vector3 & maxPoint,
+                            const MyMatrix<unsigned int>::Vector3 & dim,
+                            unsigned int processRank){
+        if(m_pProcTopo){
+            delete m_pProcTopo;
+        }
+        m_pProcTopo = new MPILayer::ProcessTopologyGrid<TLayoutConfig>(minPoint,maxPoint,dim, getRank() );
+    }
+
+    inline const ProcessTopology<TLayoutConfig> & getProcTopo() const{
+        ASSERTMSG(m_pProcTopo,"m_pProcTopo == NULL");
+        return *m_pProcTopo;
+    };
+
+private:
+
+    void initialize() {
+        MPI_Comm_rank(MPI_COMM_WORLD,&this->m_rank);
+        MPI_Comm_size(MPI_COMM_WORLD,&this->m_nProcesses);
+
+        std::stringstream s;
+        s << "Process_"<<m_rank;
+        m_name = s.str();
+    };
+
+    ProcessTopology<TLayoutConfig> * m_pProcTopo;
+
+    int m_rank;
+    int m_nProcesses;
+    std::string m_name;
+};
+
 
 
 

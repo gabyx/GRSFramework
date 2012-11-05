@@ -82,7 +82,7 @@ SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/AABB.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/MPICommunicationFunctions.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/MPICommunication.hpp
 )
 SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp

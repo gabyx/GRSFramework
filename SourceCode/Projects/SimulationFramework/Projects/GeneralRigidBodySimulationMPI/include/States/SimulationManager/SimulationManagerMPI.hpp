@@ -12,6 +12,7 @@
 #include "SceneParserMPI.hpp"
 
 #include "MPIInformation.hpp"
+#include "MPICommunication.hpp"
 
 template <typename TDynamicsSystemType> class StateRecorder;
 template <typename TDynamicsSystemType> class StateRecorderBody;
@@ -59,8 +60,9 @@ private:
     // File Paths for one Simulation, always reset ==============================
     boost::filesystem::path m_SimFolderPath;
 
-    typedef MPILayer::ProcessInformation<LayoutConfigType> ProcessInfoType;
-    ProcessInfoType m_MPIProcInfo;
+
+    typedef typename MPILayer::ProcessCommunicator<LayoutConfigType>::ProcessInfoType ProcessInfoType;
+    boost::shared_ptr< MPILayer::ProcessCommunicator<LayoutConfigType>> m_pProcComm;
 
 
     bool checkNumberOfBodiesInProcess();

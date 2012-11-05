@@ -10,6 +10,7 @@
 #define MoreauTimeStepper_hpp
 
 // Includes =================================
+#include <iostream>
 #include <fstream>
 #include <cmath>
 #include <Eigen/Dense>
@@ -29,6 +30,12 @@
 #include "TimeStepperSettings.hpp"
 
 #include "SimpleLogger.hpp"
+
+#include "InclusionSolverCONoGMPI.hpp"
+#include "CollisionSolverMPI.hpp"
+#include "DynamicsSystemMPI.hpp"
+
+
 //===========================================
 
 
@@ -127,10 +134,6 @@ protected:
 /*=========================================================
 definitions of template class MoreauTimeStepper
 _________________________________________________________*/
-#include <iostream>
-#include "DynamicsSystemMPI.hpp"
-
-#include "LogDefines.hpp"
 
 template< typename TConfigTimeStepper>
 MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys):
@@ -304,6 +307,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     // Custom Calculations after first timestep
     m_pDynSys->afterFirstTimeStep();
     // ====================================================================================
+
 
 
     /* Communicate all bodies which are in the overlap zone or are out of the processes topology!

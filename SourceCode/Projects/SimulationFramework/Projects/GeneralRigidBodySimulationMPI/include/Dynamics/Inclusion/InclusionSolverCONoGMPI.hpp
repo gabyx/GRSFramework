@@ -13,7 +13,7 @@
 
 #include "TypeDefs.hpp"
 
-#include "CollisionSolver.hpp"
+#include "CollisionSolverMPI.hpp"
 #include "PercussionPool.hpp"
 #include "MatrixHelpers.hpp"
 #include "VectorToSkewMatrix.hpp"

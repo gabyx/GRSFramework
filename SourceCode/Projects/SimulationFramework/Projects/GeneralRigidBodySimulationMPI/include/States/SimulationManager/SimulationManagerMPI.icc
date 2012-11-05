@@ -14,8 +14,6 @@
 #include "StateRecorderBody.hpp"
 
 #include "MoreauTimeStepperMPI.hpp"
-#include "InclusionSolverCONoGMPI.hpp"
-
 #include "DynamicsSystemMPI.hpp"
 
 #include "CommonFunctions.hpp"
@@ -24,7 +22,7 @@
 #include "FileManager.hpp"
 
 #include "MPIMessages.hpp"
-#include "MPICommunicationFunctions.hpp"
+#include "MPICommunication.hpp"
 
 
 using namespace std;
@@ -67,10 +65,14 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     m_pSimulationLog->logMessage("---> SimulationManager::setup(): ");
 
+    // MPI Process Commnunicator
+    m_pProcComm = boost::shared_ptr<MPILayer::ProcessCommunicator<LayoutConfigType> >(new MPILayer::ProcessCommunicator<LayoutConfigType>());
+
+
     m_pDynSys = boost::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
 
     // Parse the Scene from XML! ==========================
-    m_pSceneParser = boost::shared_ptr< SceneParserMPI<TConfig> >( new SceneParserMPI<TConfig>( m_pDynSys, m_MPIProcInfo) );
+    m_pSceneParser = boost::shared_ptr< SceneParserMPI<TConfig> >( new SceneParserMPI<TConfig>( m_pDynSys, m_pProcComm ) );
 
     m_pSceneParser->parseScene(sceneFilePathNew);
 
@@ -108,7 +110,7 @@ bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
     timer.stop();
     double elapsed = ((double)timer.elapsed().wall)*1e-9;
 
-    if(m_MPIProcInfo.hasMasterRank()) {
+    if(m_pProcComm->m_pProcessInfo->hasMasterRank()) {
         LOG(m_pSimulationLog,  " Allreduce needed: " << elapsed <<"sec."<<std::endl; );
 
         if(numberOfBodiesInSimulation != m_nGlobalSimBodies) {
@@ -140,11 +142,11 @@ void SimulationManagerMPI<TConfig>::startSim() {
 
 
 
-    while(1)
-    {
+//    while(1)
+//    {
 
       // Do one iteration
-      m_pTimestepper->doOneIteration();
+      //m_pTimestepper->doOneIteration();
 
 //      // get global time for logging!
 //      timelineSimulation = ((double)global_time.elapsed().wall)*1e-9;
@@ -153,17 +155,15 @@ void SimulationManagerMPI<TConfig>::startSim() {
 //      // Write Data to CollisionDataFile
 //      m_pTimestepper->writeIterationToCollisionDataFile();
 //      // Write  State to Sim File
-        m_pStateRecorder->write(m_pDynSys->m_SimBodies);
+        //m_pStateRecorder->writeStates(m_pDynSys->m_SimBodies);
 
       // Check if simulation can be aborted!
-      if(m_pTimestepper->finished()){
-         m_pSimulationLog->logMessage(" SimulationManager: Timestepper finished, exit...");
-         break;
-      }
-    }
+//      if(m_pTimestepper->finished()){
+//         m_pSimulationLog->logMessage(" SimulationManager: Timestepper finished, exit...");
+//         break;
+//      }
+//    }
 
-    cleanUpRecordThread();
-  }
 
   m_pSimulationLog->logMessage(" SimulationManager: Simulation leaving...");
   return;
@@ -175,7 +175,7 @@ void SimulationManagerMPI<TConfig>::initSim() {
 
     MPILayer::GenericMessage1<boost::filesystem::path> message;
 
-    if(m_MPIProcInfo.hasMasterRank()) { // Only master process
+    if(m_pProcComm->m_pProcessInfo->hasMasterRank()) { // Only master process
         // Get new sim folder path relative to global directory
 
         m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
@@ -192,9 +192,9 @@ void SimulationManagerMPI<TConfig>::initSim() {
 
         message.m_data.get<0>() = m_SimFolderPath;
 
-        MPILayer::MPISendBroadcast(message, m_MPIProcInfo.getRank(), MPI_COMM_WORLD);
+        m_pProcComm->sendBroadcast(message, MPI_COMM_WORLD);
     } else { // All other processes
-        MPILayer::MPIReceiveBroadcast(message, m_MPIProcInfo.getMasterRank(), MPI_COMM_WORLD);
+        m_pProcComm->receiveBroadcast(message, m_pProcComm->m_pProcessInfo->getMasterRank(), MPI_COMM_WORLD);
 
         m_SimFolderPath = message.m_data.get<0>();
     }
