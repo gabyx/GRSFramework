@@ -192,25 +192,29 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision(){
     // All objects have been updated...
 
     //// Do simple collision detection (SimBodies to SimBodies)
-    for(int i=0; i < m_SimBodies.size() - 1; i++){
-      for(int j=i+1; j< m_SimBodies.size();j++){
+    typename DynamicsSystemType::RigidBodySimPtrListType::iterator bodyIti;
+    for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++){
+      typename DynamicsSystemType::RigidBodySimPtrListType::iterator bodyItj = bodyIti;
+      bodyItj++;
+      for(; bodyItj != m_SimBodies.end(); bodyItj++ ){
 
-        //set the objects in the collider
-        m_Collider.initializeBodies(m_SimBodies[i], m_SimBodies[j]);
-         // apply visitor
-        boost::apply_visitor(m_Collider, m_SimBodies[i]->m_geometry, m_SimBodies[j]->m_geometry);
+        //check for a collision
+        m_Collider.checkCollision((*bodyIti), (*bodyItj));
+
 
       }
     }
 
+
     // Do simple collision detection (SimBodies to Bodies)
-    for(int i=0; i < m_SimBodies.size(); i++){
-      for(int j=0; j< m_Bodies.size();j++){
-        m_Collider.initializeBodies(m_SimBodies[i], m_Bodies[j]);
+    typename DynamicsSystemType::RigidBodyNotAniPtrListType::iterator bodyItk;
+    for(bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++){
+        for(bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++){
 
-        boost::apply_visitor(m_Collider, m_SimBodies[i]->m_geometry, m_Bodies[j]->m_geometry);
+            //check for a collision
+            m_Collider.checkCollision((*bodyIti), (*bodyItk));
 
-      }
+        }
     }
 }
 

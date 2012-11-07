@@ -198,7 +198,9 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
 
     // Integrate all bodies to u_e
     // u_E = u_S + M^⁻1 * h * deltaT
+
     if(m_nContacts == 0){
+
         integrateAllBodyVelocities();
     }
     else{
@@ -213,7 +215,6 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
 #if CoutLevelSolverWhenContact>0
         LOG(m_pSolverLog,  " % nContacts: "<< m_nContacts <<std::endl;);
 #endif
-
 
 
         // =============================================================================================================
@@ -278,9 +279,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doJorProx() {
 
 template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::integrateAllBodyVelocities() {
-
     typename DynamicsSystemType::RigidBodySimPtrListType::iterator bodyIt;
-
     for( bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
         (*bodyIt)->m_pSolverData->m_uBuffer.m_Front += (*bodyIt)->m_pSolverData->m_uBuffer.m_Back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;

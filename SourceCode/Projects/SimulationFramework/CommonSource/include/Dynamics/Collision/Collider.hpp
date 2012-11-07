@@ -55,7 +55,7 @@ public:
     * @brief The initializer before this functor class should be used. This initializer is used to have two pointers to the RigidBodyBase classes
     * which are tested against each other.
     */
-    void initializeBodies(boost::shared_ptr< RigidBodyType > &pBody1, boost::shared_ptr< RigidBodyType > &pBody2);
+    void checkCollision(boost::shared_ptr< RigidBodyType > &pBody1, boost::shared_ptr< RigidBodyType > &pBody2);
 
     /**
     * @name Dispatch operators
@@ -141,10 +141,15 @@ void Collider<TLayoutConfig,TCollisionSolver>::init(TCollisionSolver * pCollisio
 
 
 template<typename TLayoutConfig, typename TCollisionSolver>
-void Collider<TLayoutConfig,TCollisionSolver>::initializeBodies(boost::shared_ptr< RigidBodyType > &pBody1, boost::shared_ptr< RigidBodyType > &pBody2) {
+void Collider<TLayoutConfig,TCollisionSolver>::checkCollision(boost::shared_ptr< RigidBodyType > &pBody1, boost::shared_ptr< RigidBodyType > &pBody2) {
     m_pBody1 = pBody1;
     m_pBody2 = pBody2;
+
+    ASSERTMSG(m_pBody1 != m_pBody2, "Are you sure you want to checkCollision between the same objects?");
     m_bObjectsSwapped = false;
+
+    boost::apply_visitor(*this, m_pBody1->m_geometry, m_pBody2->m_geometry);
+
 }
 
 // Dispatch =======================================================================================

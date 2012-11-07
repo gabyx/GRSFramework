@@ -142,11 +142,11 @@ void SimulationManagerMPI<TConfig>::startSim() {
 
 
 
-//    while(1)
-//    {
+    //while(1)
+    //{
 
       // Do one iteration
-      //m_pTimestepper->doOneIteration();
+      m_pTimestepper->doOneIteration();
 
 //      // get global time for logging!
 //      timelineSimulation = ((double)global_time.elapsed().wall)*1e-9;
@@ -161,8 +161,8 @@ void SimulationManagerMPI<TConfig>::startSim() {
 //      if(m_pTimestepper->finished()){
 //         m_pSimulationLog->logMessage(" SimulationManager: Timestepper finished, exit...");
 //         break;
-//      }
-//    }
+      //}
+    //}
 
 
   m_pSimulationLog->logMessage(" SimulationManager: Simulation leaving...");

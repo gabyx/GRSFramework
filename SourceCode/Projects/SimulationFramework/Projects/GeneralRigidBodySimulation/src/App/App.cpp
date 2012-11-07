@@ -61,10 +61,10 @@ void App::startApp()
    PlaybackState::create(m_pAppStateManager, "PlaybackState");
 
    boost::shared_ptr<AppState> appSim = boost::dynamic_pointer_cast<AppState>(m_pAppStateManager->findAppStateByName("SimulationState"));
-   boost::shared_ptr<AppState> appPlayback = boost::dynamic_pointer_cast<AppState>(m_pAppStateManager->findAppStateByName("PlaybackState"));
+   //boost::shared_ptr<AppState> appPlayback = boost::dynamic_pointer_cast<AppState>(m_pAppStateManager->findAppStateByName("PlaybackState"));
 
    m_pAppStateManager->pushAppState(appSim);
-   m_pAppStateManager->pushAppState(appPlayback);
+   //m_pAppStateManager->pushAppState(appPlayback);
 
    m_pAppStateManager->start(appSim);
 

@@ -215,7 +215,7 @@ protected:
             boost::shared_ptr< RigidBodyType > temp_ptr(new RigidBodyType());
 
             //Assign a unique id
-            RigidBodyId::setId(temp_ptr.get(),groupId, i);
+            RigidBodyId::setId(temp_ptr.get(),i, groupId);
 
             m_bodyList.push_back(temp_ptr);
 

@@ -6,7 +6,7 @@ ContactTag::ContactTag(){
 
 ContactTag::ContactTag( boost::uint64_t b1, unsigned char type1, unsigned int id1, boost::uint64_t b2 , unsigned char type2 , unsigned int id2)
 {
-   ASSERTMSG(b1 != b2, "Error: uint64_t have the same value, something is wrong!");
+   ASSERTMSG(b1 != b2, "Error: uint64_t have the same value: "<<b1<<" , something is wrong!");
       if(b1>b2){
          std::swap(b1,b2);
          std::swap(type1,type2);
@@ -24,7 +24,7 @@ bool ContactTag::operator==(ContactTag const& c2) const
       m_ContactTagTuple.get<4>() == c2.m_ContactTagTuple.get<4>() &&
       m_ContactTagTuple.get<5>() == c2.m_ContactTagTuple.get<5>()
       )
-   { 
+   {
       return true;
    }
    return false;

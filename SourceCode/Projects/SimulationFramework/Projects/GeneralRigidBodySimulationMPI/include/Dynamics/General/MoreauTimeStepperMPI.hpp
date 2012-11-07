@@ -62,7 +62,7 @@ public:
     // The Core Objects ==================================
     boost::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
     boost::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
-    boost::shared_ptr<DynamicsSystemType>	  m_pDynSys;
+    boost::shared_ptr<DynamicsSystemType>	m_pDynSys;
     // ===================================================
 
     void initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile="");
@@ -365,7 +365,6 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
 
 
     // ===================================================================================
-
     // Middle Time Step ==================================================================
     m_pDynSys->doSecondHalfTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs

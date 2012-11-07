@@ -190,7 +190,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
     static Matrix43 F_i = Matrix43::Zero();
 
     // Do timestep for every object
-    typename std::vector<boost::shared_ptr<RigidBodyType> >::iterator bodyIt;
+    typename RigidBodySimPtrListType::iterator  bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt).get();

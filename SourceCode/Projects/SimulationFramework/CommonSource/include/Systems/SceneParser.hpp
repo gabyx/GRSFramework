@@ -337,8 +337,9 @@ protected:
 
         unsigned int groupId;
         if(rigidBodiesEl->HasAttribute("groupId")){
+            m_globalMaxGroupId++; // Goes one up!
             groupId = rigidBodiesEl->GetAttribute<unsigned int>("groupId");
-            m_globalMaxGroupId = std::max(m_globalMaxGroupId,groupId);
+            m_globalMaxGroupId = groupId = std::max(m_globalMaxGroupId,groupId);
         }else{
             m_globalMaxGroupId++;
             groupId = m_globalMaxGroupId;
@@ -349,8 +350,8 @@ protected:
             boost::shared_ptr< RigidBodyType > temp_ptr(new RigidBodyType());
 
             //Assign a unique id
-            RigidBodyId::setId(temp_ptr.get(),groupId, i);
-
+            RigidBodyId::setId(temp_ptr.get(),i, groupId);
+            LOG(m_pSimulationLog,"Added RigidBody Instance: "<<temp_ptr->m_id<<std::endl);
             m_bodyList.push_back(temp_ptr);
 
             Vector3 scale;
