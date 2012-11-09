@@ -418,6 +418,9 @@ protected:
         } else if(geometryNode->FirstChild()->Value() == "Mesh") {
 
             processMeshGeometry( geometryNode->FirstChild()->ToElement());
+        } else if(geometryNode->FirstChild()->Value() == "Box") {
+
+            processBoxGeometry( geometryNode->FirstChild()->ToElement());
 
         } else {
             throw ticpp::Exception("The geometry '" + std::string(geometryNode->FirstChild()->Value()) + std::string("' has no implementation in the parser"));
@@ -504,6 +507,32 @@ protected:
 
         } else {
             throw ticpp::Exception("The attribute 'type' '" + type + std::string("' of 'Sphere' has no implementation in the parser"));
+        }
+    }
+
+    virtual void processBoxGeometry( ticpp::Element * halfspace) {
+        std::string type = halfspace->GetAttribute("distribute");
+        if(type == "uniform") {
+
+            Vector3 extent;
+            if(!Utilities::stringToVector3<PREC>(extent, halfspace->GetAttribute("extent"))) {
+                throw ticpp::Exception("String conversion in BoxGeometry: extent failed");
+            }
+
+            Vector3 center;
+            if(!Utilities::stringToVector3<PREC>(center, halfspace->GetAttribute("center"))) {
+                throw ticpp::Exception("String conversion in BoxGeometry: position failed");
+            }
+
+            boost::shared_ptr<BoxGeometry<PREC> > pBoxGeom = boost::shared_ptr<BoxGeometry<PREC> >(new BoxGeometry<PREC>(center,extent));
+
+            for(int i=0; i < m_bodyList.size(); i++) {
+                m_bodyList[i]->m_geometry = pBoxGeom;
+            }
+
+
+        } else {
+            throw ticpp::Exception("The attribute 'type' '" + type + std::string("' of 'Box' has no implementation in the parser"));
         }
     }
 

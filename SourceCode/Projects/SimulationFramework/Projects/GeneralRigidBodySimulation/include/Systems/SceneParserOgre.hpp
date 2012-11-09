@@ -43,6 +43,10 @@ protected:
     void processOtherOptions(const ticpp::Node * rootNode) {
         LOG(this->m_pSimulationLog,"Process MPISettings..."<<std::endl;);
         processMPISettings(rootNode);
+
+
+        processSceneVisualizationSettings(rootNode);
+
     }
 
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
@@ -286,6 +290,18 @@ protected:
             }
         }
 
+    }
+    void processSceneVisualizationSettings(const ticpp::Node * rootNode) {
+
+        ticpp::Node * sceneVisSettings = rootNode->FirstChild("SceneSettings",false)->FirstChild("Visualization",false);
+        if(sceneVisSettings) {
+
+            ticpp::Element *scaleNode = sceneVisSettings->FirstChild("SceneScale",false)->ToElement();
+            if(scaleNode){
+                double sceneScale = scaleNode->GetAttribute<double>("value");
+                m_BaseFrame->setScale(Ogre::Vector3(1,1,1)*sceneScale);
+            }
+        }
     }
 
 protected:
