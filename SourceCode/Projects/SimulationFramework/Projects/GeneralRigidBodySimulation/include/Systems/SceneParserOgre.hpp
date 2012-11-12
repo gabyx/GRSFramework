@@ -63,8 +63,9 @@ protected:
             if(!Utilities::stringToType<bool>(scaleLikeGeometry, meshNode->ToElement()->GetAttribute("scaleLikeGeometry"))) {
                 throw ticpp::Exception("String conversion of scale in processMesh: scaleWithGeometry failed");
             }
-        } else {
+        }
 
+        if(!scaleLikeGeometry){
             if(!Utilities::stringToVector3<PREC>(scale, meshNode->ToElement()->GetAttribute("scale"))) {
                 throw ticpp::Exception("String conversion of scale in processMesh: scale failed");
             }
@@ -76,14 +77,12 @@ protected:
         double axesSize = 1;
         bool shadowsEnabled = true;
         if(rendering) {
-            bool attachAxis = false;
+
             if(rendering->HasAttribute("attachAxis")) {
                 if(!Utilities::stringToType<bool>(attachAxis, rendering->GetAttribute("attachAxis"))) {
                     throw ticpp::Exception("String conversion of in processMesh: attachAxis failed");
                 }
             }
-
-            double axesSize = 1;
             if(rendering->HasAttribute("axesSize")) {
                 if(!Utilities::stringToType<double>(axesSize, rendering->GetAttribute("axesSize"))) {
                     throw ticpp::Exception("String conversion of in processMesh: axesSize failed");

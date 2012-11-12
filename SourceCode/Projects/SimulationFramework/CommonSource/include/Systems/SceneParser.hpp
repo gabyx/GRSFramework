@@ -526,7 +526,13 @@ protected:
 
             boost::shared_ptr<BoxGeometry<PREC> > pBoxGeom = boost::shared_ptr<BoxGeometry<PREC> >(new BoxGeometry<PREC>(center,extent));
 
+            Vector3 scale;
+            scale(0)=extent(0);
+            scale(1)=extent(1);
+            scale(2)=extent(2);
+
             for(int i=0; i < m_bodyList.size(); i++) {
+                m_bodyListScales[i] = scale;
                 m_bodyList[i]->m_geometry = pBoxGeom;
             }
 

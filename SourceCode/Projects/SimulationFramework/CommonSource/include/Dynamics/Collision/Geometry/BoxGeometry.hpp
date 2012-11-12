@@ -16,7 +16,7 @@ public:
     Vector3 m_extent; ///< Vector of the extend of the box in all directions.
     Vector3 m_center; ///< Vector to the center of the box in body frame! (mostly zero).
 
-    /** Returns K_r_SP */
+    /** Returns K_r_CenterP */
     Vector3 getPoint(unsigned int i) const{
         Vector3 point;
         point(0) = 0.5 * BoxGeometry<PREC>::m_pointIdx[3*i]*m_extent(0);

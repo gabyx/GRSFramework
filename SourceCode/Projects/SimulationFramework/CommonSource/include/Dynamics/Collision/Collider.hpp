@@ -317,21 +317,21 @@ void Collider<TLayoutConfig,TCollisionSolver>::collide( boost::shared_ptr< Rigid
 
             // Check all 8 corners against the plane
 
-            Vector3 I_n_plane = box->m_A_IK*halfspaceGeom->m_normal;
+            Vector3 I_n_plane = halfspace->m_A_IK*halfspaceGeom->m_normal;
 
             Vector3 r_SC1,r_SC2, temp1,temp2;
             temp1 = box->m_A_IK*(boxGeom->m_center);
-            temp2 = (halfspace->m_r_S) - (box->m_r_S);
+            temp2 = (box->m_r_S) - (halfspace->m_r_S);
 
             double d = halfspaceGeom->m_normal.dot(halfspaceGeom->m_pos);
-
+//            std::cout << "d:" << d << std::endl;
+//            std::cout << "temp1:" << temp1  << std::endl;
             for(int i=0;i<8;i++){
-
+//                std::cout << boxGeom->getPoint(i) <<std::endl;
                 r_SC1 = temp1 + box->m_A_IK*(boxGeom->getPoint(i));
-                r_SC2 = temp2 - r_SC1;
+                r_SC2 = r_SC1+temp2;
 
                 double overlap = d - ( r_SC2 ).dot( I_n_plane ) ;
-               ;
                 if(overlap >=0) {
                     //We have a collision
                     CollisionData<RigidBodyType>*  pColData = new CollisionData<RigidBodyType>();
