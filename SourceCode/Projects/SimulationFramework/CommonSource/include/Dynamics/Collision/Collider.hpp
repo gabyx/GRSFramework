@@ -69,6 +69,9 @@ public:
     void operator()(  boost::shared_ptr<SphereGeometry<PREC> >  & sphereGeom ,
                       boost::shared_ptr<HalfspaceGeometry<PREC> >  & halfspaceGeom); ///< Calls Sphere/Halfspace collision detection
 
+    void operator()( boost::shared_ptr<BoxGeometry<PREC> >  & box,
+                      boost::shared_ptr<HalfspaceGeometry<PREC> >  & halfspaceGeom); ///< Calls Box/Halfsphere collision detection
+
     void operator()(  boost::shared_ptr<BoxGeometry<PREC> >  & box1,
                       boost::shared_ptr<BoxGeometry<PREC> >  & box2); ///< Calls Box/Box collision detection.
 
@@ -109,6 +112,11 @@ private:
                   boost::shared_ptr<const BoxGeometry<PREC> >  & boxA,
                   boost::shared_ptr<RigidBodyType > & b,
                   boost::shared_ptr<const BoxGeometry<PREC> >  & boxB); ///< Box/Box collision.
+
+    void collide( boost::shared_ptr< RigidBodyType > & box,
+                  boost::shared_ptr<const BoxGeometry<PREC> >  & boxGeom,
+                  boost::shared_ptr<RigidBodyType > & halfspace,
+                  boost::shared_ptr<const HalfspaceGeometry<PREC> >  &halfspaceGeom); ///< Box/Halfspace collision.
 
     void collide( boost::shared_ptr< RigidBodyType > & sphere,
                   boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom,
@@ -174,6 +182,14 @@ void Collider<TLayoutConfig,TCollisionSolver>::operator()(  boost::shared_ptr<Bo
     ASSERTMSG(false,"No collision detection implemented for Box Box Collision!");
     collide(m_pBody1, (boost::shared_ptr<const BoxGeometry<PREC> > &)box1,
             m_pBody2, (boost::shared_ptr<const BoxGeometry<PREC> > &)box2);
+}
+
+template<typename TLayoutConfig, typename TCollisionSolver>
+void Collider<TLayoutConfig,TCollisionSolver>::operator()(  boost::shared_ptr<BoxGeometry<PREC> >  & box ,
+        boost::shared_ptr<HalfspaceGeometry<PREC> >  & halfspaceGeom) {
+    //ASSERTMSG(false,"No collision detection implemented for Box Box Collision!");
+    collide(m_pBody1, (boost::shared_ptr<const BoxGeometry<PREC> > &)box,
+            m_pBody2, (boost::shared_ptr<const HalfspaceGeometry<PREC> > &)halfspaceGeom);
 }
 
 template<typename TLayoutConfig, typename TCollisionSolver>
@@ -290,6 +306,54 @@ void Collider<TLayoutConfig,TCollisionSolver>::collide(   boost::shared_ptr< Rig
         boost::shared_ptr<RigidBodyType > & b,
         boost::shared_ptr<const BoxGeometry<PREC> >  & boxB) {
     // Not implemented yet!
+}
+
+template<typename TLayoutConfig, typename TCollisionSolver>
+void Collider<TLayoutConfig,TCollisionSolver>::collide( boost::shared_ptr< RigidBodyType > & box,
+                  boost::shared_ptr<const BoxGeometry<PREC> >  & boxGeom,
+                  boost::shared_ptr<RigidBodyType > & halfspace,
+                  boost::shared_ptr<const HalfspaceGeometry<PREC> >  &halfspaceGeom){
+
+
+            // Check all 8 corners against the plane
+
+            Vector3 I_n_plane = halfspace->m_A_IK*halfspaceGeom->m_normal;
+
+            Vector3 r_SC1,r_SC2, temp1,temp2;
+            temp1 = box->m_A_IK*(boxGeom->m_center);
+            temp2 = (box->m_r_S) - (halfspace->m_r_S);
+
+            double d = halfspaceGeom->m_normal.dot(halfspaceGeom->m_pos);
+//            std::cout << "d:" << d << std::endl;
+//            std::cout << "temp1:" << temp1  << std::endl;
+            for(int i=0;i<8;i++){
+//                std::cout << boxGeom->getPoint(i) <<std::endl;
+                r_SC1 = temp1 + box->m_A_IK*(boxGeom->getPoint(i));
+                r_SC2 = r_SC1+temp2;
+
+                double overlap = d - ( r_SC2 ).dot( I_n_plane ) ;
+                if(overlap >=0) {
+                    //We have a collision
+                    CollisionData<RigidBodyType>*  pColData = new CollisionData<RigidBodyType>();
+
+                    pColData->m_overlap = overlap;
+                    // Coordinate system belongs to first body!
+                    pColData->m_e_z = - I_n_plane ;
+                    makeCoordinateSystem<>(pColData->m_e_z,pColData->m_e_x,pColData->m_e_y);
+
+                    pColData->m_r_S1C1 = r_SC1;
+                    pColData->m_r_S2C2 = r_SC2;
+
+                    // Set pointers
+                    pColData->m_pBody1 = box;
+                    pColData->m_pBody2 = halfspace;
+
+                    // set Contact Tag
+                    pColData->m_ContactTag = makeContactTag<RigidBodyType>(box.get(),0,0,halfspace.get(),0,0);
+
+                    m_pCollisionSolver->signalContactAdd(pColData);
+                }
+            }
 }
 
 
@@ -438,7 +502,7 @@ void Collider<TLayoutConfig,TCollisionSolver>::collide( boost::shared_ptr< Rigid
         boost::shared_ptr<const O1> & o1,
         boost::shared_ptr< RigidBodyType > & b2,
         boost::shared_ptr<const O2>  & o2) {
-    ASSERTMSG(false,"Collider:: collision detection for object-combination not supported!");
+    ASSERTMSG(false,"Collider:: collision detection for object-combination "<< typeid(O1).name()<<" and "<<typeid(O2).name()<<" not supported!");
 }
 
 

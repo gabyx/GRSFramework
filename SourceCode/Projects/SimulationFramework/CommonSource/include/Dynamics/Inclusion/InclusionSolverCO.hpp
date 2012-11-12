@@ -66,7 +66,7 @@ public:
    bool m_bUsedGPU;
    double m_timeProx, m_proxIterationTime;
 
-   ContactParameterMap<RigidBodyType> m_ContactParameterMap;
+
 
    PercussionPool<LayoutConfigType> m_PercussionPool;
 
@@ -90,7 +90,7 @@ protected:
    std::vector< boost::shared_ptr< RigidBodyType > > & m_SimBodies;
    std::vector< boost::shared_ptr< RigidBodyType> > & m_Bodies;
 
-   typedef ContactGraph<RigidBodyType,ContactGraphMode::NoItaration> ContactGraphType;
+   typedef ContactGraph<RigidBodyType,ContactGraphMode::NoIteration> ContactGraphType;
    ContactGraphType m_ContactGraph;
 
    // Matrices for solving the inclusion ===========================
@@ -707,12 +707,12 @@ void  InclusionSolverCO<TInclusionSolverConfig>::readFromPercussionPool(unsigned
 {
    static VectorDyn P_contact(ContactDim);
 //
-//   std::cout << pCollData->m_ContactTag.m_ContactTagTuple.template get<0>()
-//   << "\t" << pCollData->m_ContactTag.m_ContactTagTuple.template get<1>()
-//   << "\t" << pCollData->m_ContactTag.m_ContactTagTuple.template get<2>()
-//   << "\t" << pCollData->m_ContactTag.m_ContactTagTuple.template get<3>()
-//   << "\t" << pCollData->m_ContactTag.m_ContactTagTuple.template get<4>()
-//   << "\t" << pCollData->m_ContactTag.m_ContactTagTuple.template get<5>() << std::endl;
+//   std::cout << pCollData->m_ContactTag.m_tag.template get<0>()
+//   << "\t" << pCollData->m_ContactTag.m_tag.template get<1>()
+//   << "\t" << pCollData->m_ContactTag.m_tag.template get<2>()
+//   << "\t" << pCollData->m_ContactTag.m_tag.template get<3>()
+//   << "\t" << pCollData->m_ContactTag.m_tag.template get<4>()
+//   << "\t" << pCollData->m_ContactTag.m_tag.template get<5>() << std::endl;
 
    m_PercussionPool.getPercussion(pCollData->m_ContactTag,P_contact);
    P_old((ContactDim)*index) = P_contact(0);

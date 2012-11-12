@@ -12,7 +12,7 @@ class ContactTag;
 
 /**
 * @ingroup Contact
-* @brief This is the ContactTag has functor which hashs a ContactTag!
+* @brief This is the ContactTag functor which hashs a ContactTag!
 */
 class ContactTagHash : std::unary_function<ContactTag, std::size_t>{
   public:
@@ -46,7 +46,7 @@ public:
 * - unsigned char: Type2: None = 0, Face = 1, Edge = 2, Vertex = 3
 * - unsigned int: Id of the geomTypeId2
 */
-   ContactTagTuple m_ContactTagTuple;
+   ContactTagTuple m_tag;
 private:
 
 };

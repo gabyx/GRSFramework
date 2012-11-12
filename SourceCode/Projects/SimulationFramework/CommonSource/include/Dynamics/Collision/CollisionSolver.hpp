@@ -227,6 +227,7 @@ template<typename TCollisionSolverConfig>
 
      m_CollisionSet.push_back(pColData); // Copy it to the owning list! colData gets deleted!
 
+
       if(!m_ContactDelegateList.isEmpty()){
          m_ContactDelegateList.invokeAll(m_CollisionSet.back()); // Propagate pointers! they will not be deleted!
       }

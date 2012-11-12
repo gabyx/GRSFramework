@@ -46,7 +46,7 @@ SimulationManager<TConfig>::SimulationManager()
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
-        m_pSimulationLog->logMessage("Creating SimulationManager...");
+        m_pSimulationLog->logMessage("--->Creating SimulationManager...");
     }
 
 
@@ -102,7 +102,7 @@ void SimulationManager<TConfig>::threadRunRecord()
 
   static double timelineSimulation;
 
-  m_pSimulationLog->logMessage(" SimulationManager: Simulation entering...");
+  m_pSimulationLog->logMessage("---> SimulationManager: Simulation entering...");
 
 
   initRecordThread();
@@ -146,7 +146,7 @@ void SimulationManager<TConfig>::threadRunRecord()
 
       // Check if simulation can be aborted!
       if(m_pTimestepper->finished()){
-         m_pSimulationLog->logMessage(" SimulationManager: Timestepper finished, exit...");
+         m_pSimulationLog->logMessage("---> SimulationManager: Timestepper finished, exit...");
          break;
       }
     }
@@ -154,7 +154,7 @@ void SimulationManager<TConfig>::threadRunRecord()
     cleanUpRecordThread();
   }
 
-  m_pSimulationLog->logMessage(" SimulationManager: Simulation leaving...");
+  m_pSimulationLog->logMessage("---> SimulationManager: Simulation leaving...");
   return;
 }
 template<typename TConfig>

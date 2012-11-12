@@ -98,24 +98,24 @@ bool StateRecorderBody<TDynamicsSystemType>::openFiles(boost::filesystem::path d
         MultiBodySimFile* pBodyFile = new MultiBodySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj);
         std::pair<typename FileMap::iterator, bool> res = m_BinarySimFiles.insert(typename FileMap::value_type((*it)->m_id,pBodyFile));
         if(!res.second){
-            m_pSimulationLog->logMessage("StateRecorderBody:: Sim file : " + file.string() + "already exists!");
+            m_pSimulationLog->logMessage("--->StateRecorderBody:: Sim file : " + file.string() + "already exists!");
             delete pBodyFile;
         }else{ //if insert took place
 
             // Do truncate
             if(!pBodyFile->openSimFileWrite(file,1,true)){
-                m_pSimulationLog->logMessage("StateRecorderBody:: Could not open Sim file: " + file.string());
+                m_pSimulationLog->logMessage("--->StateRecorderBody:: Could not open Sim file: " + file.string());
                 m_pSimulationLog->logMessage(pBodyFile->getErrorString());
                 delete pBodyFile;
                 m_BinarySimFiles.erase(res.first);
                 return false;
             }
-             m_pSimulationLog->logMessage("StateRecorderBody:: Added Sim file: " + file.string());
+             m_pSimulationLog->logMessage("--->StateRecorderBody:: Added Sim file: " + file.string());
         }
 
 
     }
-    m_pSimulationLog->logMessage("StateRecorderBody:: Added and opened all Sim files");
+    m_pSimulationLog->logMessage("--->StateRecorderBody:: Added and opened all Sim files");
 
     return true;
 }
@@ -158,9 +158,9 @@ bool StateRecorderBody<TDynamicsSystemType>::closeFiles(typename RigidBodyType::
 
 
     if(it != m_BinarySimFiles.end()){
-        LOG(m_pSimulationLog, "StateRecorderBody:: Removed Sim file";);
+        LOG(m_pSimulationLog, "--->StateRecorderBody:: Removed Sim file";);
     }else{
-        LOG(m_pSimulationLog,"StateRecorderBody:: No Sim file to remove for Body Id: "<<bodyId);
+        LOG(m_pSimulationLog,"--->StateRecorderBody:: No Sim file to remove for Body Id: "<<bodyId);
         return false;
     }
 

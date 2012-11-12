@@ -126,12 +126,12 @@ public:
 template<typename TRigidBody, typename ContactGraphMode > class ContactGraph;
 
 struct ContactGraphMode{
-    struct NoItaration{};
+    struct NoIteration{};
     struct ForIteration{};
 };
 
 template < typename TRigidBody>
-class ContactGraph<TRigidBody, ContactGraphMode::NoItaration> : public Graph::GeneralGraph< ContactGraphNodeData<TRigidBody>,ContactGraphEdgeData<TRigidBody> > {
+class ContactGraph<TRigidBody, ContactGraphMode::NoIteration> : public Graph::GeneralGraph< ContactGraphNodeData<TRigidBody>,ContactGraphEdgeData<TRigidBody> > {
 public:
 
 
@@ -151,8 +151,11 @@ public:
 
 public:
 
-    ContactGraph(): m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0) {}
-
+    ContactGraph(const ContactParameterMap<RigidBodyType> * contactParameterMap):
+    m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0)
+    {
+        m_pContactParameterMap = contactParameterMap;
+    }
     ~ContactGraph() {
         clearGraph();
     }
@@ -259,7 +262,7 @@ private:
             nodeData.m_I_plus_eps.setZero(ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
             nodeData.m_mu.setZero(ContactModels::NormalAndCoulombFrictionContactModel::nFrictionParams);
 
-            ContactParams<LayoutConfigType> & params  = m_ContactParameterMap.getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
+            ContactParams<LayoutConfigType> & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
             nodeData.m_mu(0)         = params.m_mu;
             nodeData.m_I_plus_eps(0)    = 1 + params.m_epsilon_N;
             nodeData.m_I_plus_eps(1)    = 1 + params.m_epsilon_T;
@@ -372,7 +375,7 @@ private:
 
     }
 
-    ContactParameterMap<RigidBodyType> m_ContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
+    ContactParameterMap<RigidBodyType>* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 
     unsigned int m_nodeCounter; ///< An node counter, starting at 0.
     unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
@@ -400,7 +403,11 @@ public:
 
     typedef typename Graph::NodeVisitor<NodeDataType,EdgeDataType> NodeVisitorType;
 
-    ContactGraph(): m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0) {}
+    ContactGraph(ContactParameterMap<RigidBodyType> * contactParameterMap):
+    m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0)
+    {
+        m_pContactParameterMap = contactParameterMap;
+    }
 
     ~ContactGraph() {
         clearGraph();
@@ -534,7 +541,7 @@ private:
 
 
 
-            ContactParams<LayoutConfigType> & params  = m_ContactParameterMap.getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
+            ContactParams<LayoutConfigType> & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
             nodeData.m_mu(0)     = params.m_mu;
             nodeData.m_eps(0)    = params.m_epsilon_N;
             nodeData.m_eps(1)    = params.m_epsilon_T;
@@ -655,7 +662,7 @@ private:
 
     }
 
-    ContactParameterMap<RigidBodyType> m_ContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
+    ContactParameterMap<RigidBodyType>* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 
     unsigned int m_nodeCounter; ///< An node counter, starting at 0.
     unsigned int m_edgeCounter; ///< An edge counter, starting at 0.

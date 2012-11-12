@@ -41,8 +41,12 @@ protected:
 
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
     void processOtherOptions(const ticpp::Node * rootNode) {
-        LOG(this->m_pSimulationLog,"Process MPISettings..."<<std::endl;);
+        LOG(this->m_pSimulationLog,"--->Process MPISettings..."<<std::endl;);
         processMPISettings(rootNode);
+
+
+        processSceneVisualizationSettings(rootNode);
+
     }
 
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
@@ -57,12 +61,13 @@ protected:
         Vector3 scale;
         if(meshNode->ToElement()->HasAttribute("scaleLikeGeometry")) {
             if(!Utilities::stringToType<bool>(scaleLikeGeometry, meshNode->ToElement()->GetAttribute("scaleLikeGeometry"))) {
-                throw ticpp::Exception("String conversion of scale in processMesh: scaleWithGeometry failed");
+                throw ticpp::Exception("--->String conversion of scale in processMesh: scaleWithGeometry failed");
             }
-        } else {
+        }
 
+        if(!scaleLikeGeometry){
             if(!Utilities::stringToVector3<PREC>(scale, meshNode->ToElement()->GetAttribute("scale"))) {
-                throw ticpp::Exception("String conversion of scale in processMesh: scale failed");
+                throw ticpp::Exception("--->String conversion of scale in processMesh: scale failed");
             }
         }
 
@@ -72,24 +77,22 @@ protected:
         double axesSize = 1;
         bool shadowsEnabled = true;
         if(rendering) {
-            bool attachAxis = false;
+
             if(rendering->HasAttribute("attachAxis")) {
                 if(!Utilities::stringToType<bool>(attachAxis, rendering->GetAttribute("attachAxis"))) {
-                    throw ticpp::Exception("String conversion of in processMesh: attachAxis failed");
+                    throw ticpp::Exception("--->String conversion of in processMesh: attachAxis failed");
                 }
             }
-
-            double axesSize = 1;
             if(rendering->HasAttribute("axesSize")) {
                 if(!Utilities::stringToType<double>(axesSize, rendering->GetAttribute("axesSize"))) {
-                    throw ticpp::Exception("String conversion of in processMesh: axesSize failed");
+                    throw ticpp::Exception("--->String conversion of in processMesh: axesSize failed");
                 }
             }
 
 
             if(rendering->HasAttribute("shadowsEnabled")) {
                 if(!Utilities::stringToType<bool>(shadowsEnabled, rendering->GetAttribute("shadowsEnabled"))) {
-                    throw ticpp::Exception("String conversion of in processMesh: shadowsEnabled failed");
+                    throw ticpp::Exception("--->String conversion of in processMesh: shadowsEnabled failed");
                 }
             }
         };
@@ -104,13 +107,13 @@ protected:
                 m_materialList.push_back(material->GetAttribute<std::string>("name"));
             }
             if(m_materialList.empty()) {
-                throw ticpp::Exception("No Material Node found in Mesh!");
+                throw ticpp::Exception("--->No Material Node found in Mesh!");
             }
 
 
 
             std::stringstream entity_name,node_name;
-            LOG(this->m_pSimulationLog, " --> Add all Ogre Objects"<<std::endl);
+            LOG(this->m_pSimulationLog, "---> Add all Ogre Objects"<<std::endl);
             for(int i=0; i<this->m_bodyList.size(); i++) {
                 entity_name.str("");
                 node_name.str("");
@@ -162,7 +165,7 @@ protected:
 
 
         } else {
-            throw ticpp::Exception("The attribute 'type' '" + type + std::string("' of 'processMesh' has no implementation in the parser"));
+            throw ticpp::Exception("--->The attribute 'type' '" + type + std::string("' of 'processMesh' has no implementation in the parser"));
         }
     }
 
@@ -178,15 +181,15 @@ protected:
             if(type=="grid") {
                 Vector3 minPoint, maxPoint;
                 if(!Utilities::stringToVector3<PREC>(minPoint,  topoEl->GetAttribute("minPoint"))) {
-                    throw ticpp::Exception("String conversion in processMPISettings: minPoint failed");
+                    throw ticpp::Exception("--->String conversion in processMPISettings: minPoint failed");
                 }
                 if(!Utilities::stringToVector3<PREC>(maxPoint,  topoEl->GetAttribute("maxPoint"))) {
-                    throw ticpp::Exception("String conversion in processMPISettings: maxPoint failed");
+                    throw ticpp::Exception("--->String conversion in processMPISettings: maxPoint failed");
                 }
 
                 MyMatrix<unsigned int>::Vector3 dim;
                 if(!Utilities::stringToVector3<unsigned int>(dim,  topoEl->GetAttribute("dimension"))) {
-                    throw ticpp::Exception("String conversion in processMPISettings: dimension failed");
+                    throw ticpp::Exception("--->String conversion in processMPISettings: dimension failed");
                 }
 
                 Vector3 extent;
@@ -282,10 +285,22 @@ protected:
 
 
             } else {
-                throw ticpp::Exception("String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
+                throw ticpp::Exception("--->String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
             }
         }
 
+    }
+    void processSceneVisualizationSettings(const ticpp::Node * rootNode) {
+
+        ticpp::Node * sceneVisSettings = rootNode->FirstChild("SceneSettings",false)->FirstChild("Visualization",false);
+        if(sceneVisSettings) {
+
+            ticpp::Element *scaleNode = sceneVisSettings->FirstChild("SceneScale",false)->ToElement();
+            if(scaleNode){
+                double sceneScale = scaleNode->GetAttribute<double>("value");
+                m_BaseFrame->setScale(Ogre::Vector3(1,1,1)*sceneScale);
+            }
+        }
     }
 
 protected:

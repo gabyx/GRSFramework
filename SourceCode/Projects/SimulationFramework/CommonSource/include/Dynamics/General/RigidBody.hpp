@@ -121,13 +121,7 @@ public:
      NOT_SIMULATED
   }; ///< Emuration which defines if the object is simulated, animated or not simulated (which means fixed, and does not take part in the dynamics).
 
-  enum BodyMaterial{  STD_MATERIAL = 0,
-     WOOD = 1,
-     METAL = 2,
-     GLAS = 3,
-     END = 4
-  }; ///< Enumeration describing the Material.
-
+  typedef unsigned int BodyMaterial;
 
   RigidBodyBase(){
     m_mass = 1;
@@ -141,7 +135,7 @@ public:
     m_h_term_const.setZero();
     m_h_term.setZero();
     m_eState = NOT_SIMULATED;
-    m_eMaterial = STD_MATERIAL;
+    m_eMaterial = 0;
     m_pSolverData = NULL;
   }; ///< Constructor which sets standart values.
 
@@ -179,7 +173,7 @@ public:
   RigidBodyIdType m_id; ///< This is the id of the body.
 
   BodyState m_eState; ///< The state of the body.
-  BodyMaterial m_eMaterial; ///< The material.
+  BodyMaterial m_eMaterial; ///< The material id.
 
   RigidBodySolverDataType * m_pSolverData; /// Simulated bodies have a solverData. For all others, animated and not simulated this pointer is zero!
 
