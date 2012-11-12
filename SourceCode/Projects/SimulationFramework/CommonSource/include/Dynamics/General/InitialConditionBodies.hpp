@@ -17,7 +17,7 @@
 namespace InitialConditionBodies {
 
 template<typename TLayoutConfig>
-void setupBodiesLinear(
+void setupPositionBodiesLinear(
     DynamicsState<TLayoutConfig> & init_state,
     typename TLayoutConfig::Vector3 pos,
     typename TLayoutConfig::Vector3 dir,
@@ -53,7 +53,7 @@ void setupBodiesLinear(
 }
 
 template<typename TLayoutConfig>
-void setupBodiesGrid(DynamicsState<TLayoutConfig> & init_state,
+void setupPositionBodiesGrid(DynamicsState<TLayoutConfig> & init_state,
                      unsigned int gDim_x,
                      unsigned int gDim_y,
                      double d,
@@ -89,13 +89,12 @@ void setupBodiesGrid(DynamicsState<TLayoutConfig> & init_state,
 }
 
 template<typename TLayoutConfig>
-bool setupBodiesFromFile(DynamicsState<TLayoutConfig> & init_state, boost::filesystem::path file_path) {
+bool setupPositionBodiesFromFile(DynamicsState<TLayoutConfig> & init_state, boost::filesystem::path file_path) {
 
     MultiBodySimFile simFile( TLayoutConfig::LayoutType::NDOFqObj,
                               TLayoutConfig::LayoutType::NDOFuObj);
 
     if(simFile.openSimFileRead(file_path,init_state.m_nSimBodies)) {
-        ;
         simFile >> init_state ;
         simFile.closeSimFile();
         return true;
@@ -105,7 +104,7 @@ bool setupBodiesFromFile(DynamicsState<TLayoutConfig> & init_state, boost::files
 }
 
 template<typename TLayoutConfig>
-void setupBodyPositionAxisAngle(RigidBodyState<TLayoutConfig> & rigibodyState, const typename TLayoutConfig::Vector3 & pos, typename TLayoutConfig::Vector3 & axis, typename TLayoutConfig::PREC angleRadian) {
+void setupPositionBodyPosAxisAngle(RigidBodyState<TLayoutConfig> & rigibodyState, const typename TLayoutConfig::Vector3 & pos, typename TLayoutConfig::Vector3 & axis, typename TLayoutConfig::PREC angleRadian) {
 
     rigibodyState.m_q.template head<3>() = pos;
     setQuaternion(rigibodyState.m_q.template tail<4>(),axis,angleRadian);

@@ -35,7 +35,7 @@ PlaybackManager<TConfig>::PlaybackManager(boost::shared_ptr<Ogre::SceneManager> 
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
-        m_pSimulationLog->logMessage("Creating SimulationManager...");
+        m_pSimulationLog->logMessage("--->Creating SimulationManager...");
     }
 
     // Set the Log Output =========================================================================
@@ -326,7 +326,7 @@ void PlaybackManager<TConfig>::initSimThread() {
         filename += SIM_FILE_EXTENSION;
         file_path /= filename;
         if(!m_pStateRecorderResampler->createSimFile(file_path)) {
-            m_pSimulationLog->logMessage("Could not create sim file!");
+            m_pSimulationLog->logMessage("--->Could not create sim file!");
             ASSERTMSG(false,"Could not create sim file!");
         };
         FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),resampleFolderPath,true);
@@ -399,12 +399,12 @@ void PlaybackManager<TConfig>::startPlaybackThread() {
             initBeforeThreads();
             m_pThread = new boost::thread( boost::bind(&PlaybackManager<TConfig>::threadRunSimulation, &*this) );
 
-            m_pSimulationLog->logMessage(" PlaybackManager:: Start Thread: PlaybackThread started ...");
+            m_pSimulationLog->logMessage("---> PlaybackManager:: Start Thread: PlaybackThread started ...");
         } else {
-            m_pSimulationLog->logMessage(" PlaybackManager:: A PlaybackThread is already running!");
+            m_pSimulationLog->logMessage("---> PlaybackManager:: A PlaybackThread is already running!");
         }
     } else {
-        m_pSimulationLog->logMessage(" PlaybackManager:: No scene is loaded! No thread can be started!");
+        m_pSimulationLog->logMessage("---> PlaybackManager:: No scene is loaded! No thread can be started!");
     }
 
 }
@@ -417,12 +417,12 @@ void PlaybackManager<TConfig>::stopPlaybackThread(bool force_stop) {
             cancelAllWaits();
 
             m_pThread->join();
-            m_pSimulationLog->logMessage("PlaybackManager:: Stop Thread: PlaybackThread has been stopped!");
+            m_pSimulationLog->logMessage("--->PlaybackManager:: Stop Thread: PlaybackThread has been stopped!");
         } else {
-            m_pSimulationLog->logMessage("PlaybackManager:: Stop Thread: PlaybackThread is not running!");
+            m_pSimulationLog->logMessage("--->PlaybackManager:: Stop Thread: PlaybackThread is not running!");
         }
     } else {
-        m_pSimulationLog->logMessage(" PlaybackManager:: No scene is loaded!, No thread running!");
+        m_pSimulationLog->logMessage("---> PlaybackManager:: No scene is loaded!, No thread running!");
     }
 }
 

@@ -147,7 +147,9 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nS
     m_pDynSys = pDynSys;
     m_pDynSys->init();
 
+
     m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys->m_SimBodies, m_pDynSys->m_Bodies));
+
     m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys));
 
 };

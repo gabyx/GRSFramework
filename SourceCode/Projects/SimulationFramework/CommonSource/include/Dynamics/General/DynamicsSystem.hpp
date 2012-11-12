@@ -10,6 +10,8 @@
 
 #include "RigidBody.hpp"
 #include "DynamicsState.hpp"
+#include "ContactParameterMap.hpp"
+
 #include "InitialConditionBodies.hpp"
 #include "InclusionSolverSettings.hpp"
 #include "CommonFunctions.hpp"
@@ -33,6 +35,8 @@ public:
     // General related variables
     double m_gravity;
     Vector3 m_gravityDir;
+
+    ContactParameterMap<RigidBodyType> m_ContactParameterMap;
 
     typedef std::vector< boost::shared_ptr< RigidBodyType > > RigidBodySimPtrListType;
     RigidBodySimPtrListType m_SimBodies; // Simulated Objects

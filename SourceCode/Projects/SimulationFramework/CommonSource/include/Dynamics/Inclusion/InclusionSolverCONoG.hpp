@@ -62,7 +62,7 @@ public:
     bool m_bUsedGPU;
     double m_timeProx, m_proxIterationTime;
 
-    ContactParameterMap<RigidBodyType> m_ContactParameterMap;
+
 
     PercussionPool<LayoutConfigType> m_PercussionPool;
 
@@ -108,7 +108,8 @@ protected:
 template< typename TInclusionSolverConfig >
 InclusionSolverCONoG<TInclusionSolverConfig>::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,  boost::shared_ptr<DynamicsSystemType > pDynSys):
     m_SimBodies(pCollisionSolver->m_SimBodies),
-    m_Bodies(pCollisionSolver->m_Bodies) {
+    m_Bodies(pCollisionSolver->m_Bodies),
+    m_ContactGraph(&(pDynSys->m_ContactParameterMap)){
 
     m_pCollisionSolver = pCollisionSolver;
 

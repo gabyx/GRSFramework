@@ -63,10 +63,10 @@ public:
         m_currentParseFilePath = file;
         m_currentParseFileDir = m_currentParseFilePath.parent_path();
 
-        m_pSimulationLog->logMessage("Parsing Scene...");
+        m_pSimulationLog->logMessage("--->Parsing Scene...");
 
         LOG( m_pSimulationLog,"Scene Input file: "  << file.string() <<std::endl; );
-        m_pSimulationLog->logMessage("Parsing Scene...");
+        m_pSimulationLog->logMessage("--->Parsing Scene...");
 
 
         //Reset all variables
@@ -83,9 +83,9 @@ public:
         try {
             m_xmlDoc.LoadFile(m_currentParseFilePath.string());
 
-            m_pSimulationLog->logMessage("File successfully loaded ...");
+            m_pSimulationLog->logMessage("--->File successfully loaded ...");
 
-            m_pSimulationLog->logMessage("Try to parse the scene ...");
+            m_pSimulationLog->logMessage("--->Try to parse the scene ...");
 
             // Start off with the gravity!
             m_xmlRootNode = m_xmlDoc.FirstChild("DynamicsSystem");
@@ -94,26 +94,26 @@ public:
 
                 node = node = m_xmlRootNode->FirstChild("MPISettings");
                 processMPISettings(node);
-                m_pSimulationLog->logMessage("Parsed MPISettings...");
+                m_pSimulationLog->logMessage("--->Parsed MPISettings...");
 
                 node = m_xmlRootNode->FirstChild("SceneSettings");
                 this->processSceneSettings(node);
-                m_pSimulationLog->logMessage("Parsed SceneSettings...");
+                m_pSimulationLog->logMessage("--->Parsed SceneSettings...");
 
                 node = m_xmlRootNode->FirstChild("SceneObjects");
                 this->processSceneObjects(node);
-                m_pSimulationLog->logMessage("Parsed SceneObjects...");
+                m_pSimulationLog->logMessage("--->Parsed SceneObjects...");
 
                 /*ticpp::Node * initialConditionAll = m_xmlRootNode->FirstChild("InitialCondition");
                 processinitialConditionAll(initialConditionAll);*/
 
             } else {
-                m_pSimulationLog->logMessage("No DynamicsSystem Node found in XML ...");
+                m_pSimulationLog->logMessage("--->No DynamicsSystem Node found in XML ...");
                 return false;
             }
 
         } catch(ticpp::Exception& ex) {
-            LOG(m_pSimulationLog,"Scene XML error: "  << ex.what() << std::endl;);
+            LOG(m_pSimulationLog,"--->Scene XML error: "  << ex.what() << std::endl;);
             exit(-1);
         }
 
@@ -147,7 +147,7 @@ protected:
 
     void processSceneObjects( ticpp::Node *sceneObjects) {
 
-        LOG(m_pSimulationLog,"Process SceneObjects ..."<<std::endl;);
+        LOG(m_pSimulationLog,"--->Process SceneObjects ..."<<std::endl;);
 
         ticpp::Iterator< ticpp::Node > child;
 
@@ -168,27 +168,27 @@ protected:
 
             Vector3 minPoint, maxPoint;
             if(!Utilities::stringToVector3<PREC>(minPoint,  topo->GetAttribute("minPoint"))) {
-                throw ticpp::Exception("String conversion in processMPISettings: minPoint failed");
+                throw ticpp::Exception("--->String conversion in processMPISettings: minPoint failed");
             }
             if(!Utilities::stringToVector3<PREC>(maxPoint,  topo->GetAttribute("maxPoint"))) {
-                throw ticpp::Exception("String conversion in processMPISettings: maxPoint failed");
+                throw ticpp::Exception("--->String conversion in processMPISettings: maxPoint failed");
             }
 
             MyMatrix<unsigned int>::Vector3 dim;
             if(!Utilities::stringToVector3<unsigned int>(dim,  topo->GetAttribute("dimension"))) {
-                throw ticpp::Exception("String conversion in processMPISettings: dimension failed");
+                throw ticpp::Exception("--->String conversion in processMPISettings: dimension failed");
             }
             // saftey check
             if(dim(0)*dim(1)*dim(2) != m_pProcComm->m_pProcessInfo->getNProcesses()) {
                 LOG(m_pSimulationLog, "Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcComm->m_pProcessInfo->getNProcesses() <<" Processes"<<std::endl; );
                 sleep(2);
-                throw ticpp::Exception("You have launched to many processes for the grid!");
+                throw ticpp::Exception("--->You have launched to many processes for the grid!");
             }
 
             m_pProcComm->m_pProcessInfo->createProcTopoGrid(minPoint,maxPoint, dim, m_pProcComm->m_pProcessInfo->getRank() );
 
         } else {
-            throw ticpp::Exception("String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
+            throw ticpp::Exception("--->String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
         }
 
     }
@@ -267,7 +267,7 @@ protected:
                 m_nBodies++;
             }
         } else {
-            throw ticpp::Exception("Adding only simulated and not simulated objects supported!");
+            throw ticpp::Exception("--->Adding only simulated and not simulated objects supported!");
         }
 
 

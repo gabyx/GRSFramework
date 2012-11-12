@@ -92,7 +92,7 @@ StateRecorder<TDynamicsSystemType>::~StateRecorder()
 template<typename TDynamicsSystemType>
 bool StateRecorder<TDynamicsSystemType>::createSimFile(boost::filesystem::path file_path)
 {
-  m_pSimulationLog->logMessage("Record to Sim file at: " + file_path.string());
+  m_pSimulationLog->logMessage("--->Record to Sim file at: " + file_path.string());
   if(m_BinarySimFile.openSimFileWrite(file_path,m_nSimBodies)){
     return true;
   }
@@ -108,10 +108,10 @@ bool StateRecorder<TDynamicsSystemType>::createSimFileCopyFromReference(boost::f
    tmpFile.closeSimFile();
 
    if(fileOK){
-      m_pSimulationLog->logMessage("Copy file:" + ref_file_path.string() + " to: " + new_file_path.string());
+      m_pSimulationLog->logMessage("--->Copy file:" + ref_file_path.string() + " to: " + new_file_path.string());
       FileManager::getSingletonPtr()->copyFile(ref_file_path,new_file_path,true);
 
-      m_pSimulationLog->logMessage("Record and append to Sim file at: " + new_file_path.string());
+      m_pSimulationLog->logMessage("--->Record and append to Sim file at: " + new_file_path.string());
       if(m_BinarySimFile.openSimFileWrite(new_file_path,m_nSimBodies,false)){ //APPEND!
          return true;
       }
