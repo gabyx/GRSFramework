@@ -181,7 +181,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::resetForNextIter() {
 template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
 
-#if CoutLevelSolver>0
+#if CoutLevelSolver>1
     LOG(m_pSolverLog,  " % -> solveInclusionProblem(): "<< std::endl;);
 #endif
 

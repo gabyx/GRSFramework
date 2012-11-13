@@ -178,7 +178,7 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
 
     clearCollisionSet();
 
-#if CoutLevelSolver>0
+#if CoutLevelSolver>1
     LOG(m_pSolverLog, " % -> solveCollision(): "<<std::endl;)
 #endif
 

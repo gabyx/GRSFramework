@@ -75,6 +75,10 @@ public:
 
         LOG( m_pSimulationLog, "Scene Input file: "  << file.string() <<std::endl; );
 
+        if(!boost::filesystem::exists(m_currentParseFilePath)){
+            ERRORMSG("Scene Input file does not exist!");
+        }
+
 
         //Reset all variables
         m_globalMaxGroupId = 0;

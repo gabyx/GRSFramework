@@ -40,7 +40,7 @@ private:
 
    // Accessed only by thread ===================
    void threadRunRecord();
-   void initRecordThread();
+   bool initRecordThread();
    void cleanUpRecordThread();
 
    struct SettingsSimThread{

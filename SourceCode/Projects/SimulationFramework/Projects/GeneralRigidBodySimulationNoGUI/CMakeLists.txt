@@ -153,6 +153,7 @@ SET(DYNAMICS_INC
 SET(DYNAMICS_SRC
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactParameterMap.cpp
 )
 
 

@@ -199,15 +199,15 @@ void SimulationState::setupScene() {
     Ogre::Light* pLight = m_pSceneMgr->createLight("Light");
     pLight->setType(Ogre::Light::LT_POINT);
     pLight->setDirection(Ogre::Vector3(-1,-1,-1));
-    pLight->setDiffuseColour((Ogre::Real)0.9,(Ogre::Real) 0.9,(Ogre::Real) 0.9);
+    pLight->setDiffuseColour((Ogre::Real)0.6,(Ogre::Real) 0.6,(Ogre::Real) 0.6);
     pLight->setPosition( 75, 75, 150 );
     //pLight->setAttenuation(5000000,0,0.1,0);
-    pLight->setCastShadows(false);
+    pLight->setCastShadows(true);
 
     pLight = m_pSceneMgr->createLight("Light2");
     pLight->setType(Ogre::Light::LT_POINT);
     pLight->setDirection(Ogre::Vector3(-1,-1,-1));
-    pLight->setDiffuseColour((Ogre::Real)0.9,(Ogre::Real) 0.9,(Ogre::Real) 0.9);
+    pLight->setDiffuseColour((Ogre::Real)0.8,(Ogre::Real) 0.8,(Ogre::Real) 0.8);
     pLight->setPosition( -75, -75, 150 );
     pLight->setCastShadows(false);
 // pLight->setAttenuation(5000000,0,0.1,0);

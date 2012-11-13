@@ -265,7 +265,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
    DynamicsState<LayoutConfigType> * state_e)
 {
 
-#if CoutLevelSolver>0
+#if CoutLevelSolver>1
    LOG(m_pSolverLog, " % -> solveInclusionProblem(): "<< std::endl;);
 #endif
 
