@@ -16,7 +16,6 @@
 #include <map>
 #include <utility>
 
-#include <Eigen/Dense>
 //==========================================
 
 #include "TypeDefs.hpp"

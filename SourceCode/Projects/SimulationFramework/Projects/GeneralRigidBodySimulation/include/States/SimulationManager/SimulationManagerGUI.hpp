@@ -3,13 +3,11 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
-#include <Eigen/Dense>
+
 #include <OIS/OISEvents.h>
 #include <OIS/OISKeyboard.h>
 #include <OIS/OISJoyStick.h>
 #include <OIS/OISMouse.h>
-
-
 
 #include "TypeDefs.hpp"
 
@@ -23,101 +21,105 @@ template <typename DynamicsSystemType> class StateRecorder;
 template< typename TLayoutConfig> class SharedBufferDynSys;
 
 template<typename TConfig>
-class SimulationManagerGUI : public SimulationManagerBase , public OIS::KeyListener
-{
+class SimulationManagerGUI : public SimulationManagerBase , public OIS::KeyListener {
 public:
 
-   DEFINE_CONFIG_TYPES_OF(TConfig)
+    DEFINE_CONFIG_TYPES_OF(TConfig)
 
     SimulationManagerGUI(boost::shared_ptr<Ogre::SceneManager> pSceneMgr);
-   ~SimulationManagerGUI();
+    ~SimulationManagerGUI();
 
 
-   boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >	    m_pSharedBuffer;
-   boost::shared_ptr<StateRecorder<DynamicsSystemType> >		m_pStateRecorder;
+    boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >	    m_pSharedBuffer;
+    boost::shared_ptr<StateRecorder<DynamicsSystemType> >		m_pStateRecorder;
 
-   std::vector<Ogre::SceneNode*>	m_SceneNodeSimBodies;
-   std::vector<Ogre::SceneNode*>	m_SceneNodeBodies;
+    std::vector<Ogre::SceneNode*>	m_SceneNodeSimBodies;
+    std::vector<Ogre::SceneNode*>	m_SceneNodeBodies;
 
-   void setup();
+    void setup();
 
-   boost::shared_ptr< SceneParserOgre<TConfig> > m_pSceneParser;
+    boost::shared_ptr< SceneParserOgre<TConfig> > m_pSceneParser;
 
 
-   void updateScene(double timeSinceLastFrame);
-   void updateSimBodies();
-   void initBeforeThreads();
+    void updateScene(double timeSinceLastFrame);
+    void updateSimBodies();
+    void initBeforeThreads();
 
-   double getSimulationTime(); // used to access the current simulation state time, from the AppState
+    double getSimulationTime(); // used to access the current simulation state time, from the AppState
 
-   void startSimThread(Threads threadToStop);
-   void stopSimThread(Threads threadToStop, bool force_stop);
+    void startSimThread(Threads threadToStop);
+    void stopSimThread(Threads threadToStop, bool force_stop);
 
-   // Key Mouse Listener
+    // Key Mouse Listener
 
-   bool keyPressed(const OIS::KeyEvent &keyEventRef);
-   bool keyReleased(const OIS::KeyEvent &keyEventRef);
-   void enableInput(bool value);
+    bool keyPressed(const OIS::KeyEvent &keyEventRef);
+    bool keyReleased(const OIS::KeyEvent &keyEventRef);
+    void enableInput(bool value);
 
 private:
 
-   boost::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
+    boost::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
 
-   void setShadowTechniques();
+    void setShadowTechniques();
 
-   boost::shared_ptr<const DynamicsState<LayoutConfigType> > m_pVisBuffer;
+    boost::shared_ptr<const DynamicsState<LayoutConfigType> > m_pVisBuffer;
 
-   // Accessed only by thread ===================
-   void threadRunSimulation();
-   void initSimThread();
-   void cleanUpSimThread();
+    // Accessed only by thread ===================
+    void threadRunSimulation();
+    void initSimThread();
+    void cleanUpSimThread();
 
-   void threadRunRecord();
-   bool initRecordThread();
-   void cleanUpRecordThread();
-   struct SettingsSimThread{
-         double m_EndTime;
-   } m_SettingsSimThread;
+    boost::timer::cpu_timer m_global_time;
 
-   void readSharedBuffer();
-   void writeSharedBuffer();
+    void writeAllOutput();
+    RecorderSettings<LayoutConfigType> m_RecorderSettings;
 
-   std::string m_KeyListenerName;
+    void threadRunRecord();
+    bool initRecordThread();
+    void cleanUpRecordThread();
+    struct SettingsSimThread {
+        double m_EndTime;
+    } m_SettingsSimThread;
 
-   Logging::Log *  m_pSimulationLog;
+    void readSharedBuffer();
+    void writeSharedBuffer();
 
-   boost::shared_ptr< TimeStepperType >	m_pTimestepper;
+    std::string m_KeyListenerName;
 
-   boost::shared_ptr< DynamicsSystemType >		   m_pDynSys;
-   // ===========================================
+    Logging::Log *  m_pSimulationLog;
 
-   int m_nSimBodies;
-   double m_lengthScale;
-   Ogre::SceneNode * m_pBaseNode;
+    boost::shared_ptr< TimeStepperType >	m_pTimestepper;
 
-   bool writeInitialState();
+    boost::shared_ptr< DynamicsSystemType >		   m_pDynSys;
+    // ===========================================
 
-   // Timming Variables for updateScene =====
-   bool m_bFirstPass;
+    int m_nSimBodies;
+    double m_lengthScale;
+    Ogre::SceneNode * m_pBaseNode;
 
-   double m_timeFrameToFrameAvgNoWorkload;
-   unsigned int m_counterNoWorkload;
+    bool writeInitialState();
 
-   double m_lastTimeWhenChanged;
-   double m_newTimeWhenChanged;
-   double m_deltaTimeWhenChanged;
+    // Timming Variables for updateScene =====
+    bool m_bFirstPass;
 
-   double m_stopTimeAfterUpdate;
+    double m_timeFrameToFrameAvgNoWorkload;
+    unsigned int m_counterNoWorkload;
 
-   double m_diffUpdateAndChangedTime;
-   int m_passCounter;
-   // =========================================
+    double m_lastTimeWhenChanged;
+    double m_newTimeWhenChanged;
+    double m_deltaTimeWhenChanged;
+
+    double m_stopTimeAfterUpdate;
+
+    double m_diffUpdateAndChangedTime;
+    int m_passCounter;
+    // =========================================
 
 
 
-   // File Paths for one Simulation, always reset ==============================
-   boost::filesystem::path m_SimFolderPath;
-   boost::filesystem::path m_SimFilePath;
+    // File Paths for one Simulation, always reset ==============================
+    boost::filesystem::path m_SimFolderPath;
+    boost::filesystem::path m_SimFilePath;
 };
 
 

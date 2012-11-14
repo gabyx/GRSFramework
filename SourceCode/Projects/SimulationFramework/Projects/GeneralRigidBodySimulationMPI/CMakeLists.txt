@@ -98,6 +98,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/AddGyroTermVisitor.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/CollisionSolverMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
@@ -128,6 +129,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderBody.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
 )
 SET(DYNAMICS_SRC
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp

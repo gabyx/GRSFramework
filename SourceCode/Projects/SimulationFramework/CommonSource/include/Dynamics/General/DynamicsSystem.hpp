@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include <Eigen/Dense>
-
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
@@ -12,10 +10,12 @@
 #include "DynamicsState.hpp"
 #include "ContactParameterMap.hpp"
 
+#include "AddGyroTermVisitor.hpp"
 #include "InitialConditionBodies.hpp"
 #include "InclusionSolverSettings.hpp"
 #include "CommonFunctions.hpp"
 
+#include "RecorderSettings.hpp"
 #include "TimeStepperSettings.hpp"
 
 #include "SimpleLogger.hpp"
@@ -58,7 +58,9 @@ public:
     void doFirstHalfTimeStep( PREC timestep);
     void doSecondHalfTimeStep( PREC timestep);
 
-    void getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver);
+    void getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const;
+    void setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder);
+    void getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) const;
     void setSettings(const TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, const InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver);
 
     void reset();
@@ -70,6 +72,7 @@ public:
 
 protected:
 
+    RecorderSettings<LayoutConfigType> m_SettingsRecorder;
     TimeStepperSettings<LayoutConfigType> m_SettingsTimestepper;
     InclusionSolverSettings<LayoutConfigType> m_SettingsInclusionSolver;
 
@@ -84,7 +87,6 @@ protected:
     // Log
     Logging::Log*	m_pSolverLog;
     std::stringstream logstream;
-
 };
 
 
@@ -119,7 +121,17 @@ void DynamicsSystem<TDynamicsSystemConfig>::initializeGlobalParameters() {
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) {
+void DynamicsSystem<TDynamicsSystemConfig>::getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const{
+    SettingsRecorder = m_SettingsRecorder;
+}
+
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder){
+    m_SettingsRecorder = SettingsRecorder;
+}
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper,
+                                                        InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) const{
     SettingsTimestepper = m_SettingsTimestepper;
     SettingsInclusionSolver = m_SettingsInclusionSolver;
 }
@@ -182,7 +194,10 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
 
         // Add in to h-Term ==========
         pBody->m_h_term = pBody->m_h_term_const;
-        // Term omega x Theta * omega = 0, because theta is diagonal
+
+        // Term omega x Theta * omega = if Theta is diagonal : for a Spehere for example!
+        AddGyroTermVisitor<RigidBodyType> vis(pBody);
+
         // =========================
 
         // Add in to Mass Matrix

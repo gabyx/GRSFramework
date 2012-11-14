@@ -5,10 +5,8 @@
 #include <iostream>
 #include <fstream>
 
-
 #include <boost/shared_ptr.hpp>
-#include <Eigen/Dense>
-#include <Eigen/SVD>
+
 #include "AssertionDebug.hpp"
 
 #include "TypeDefs.hpp"

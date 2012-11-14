@@ -2,7 +2,6 @@
 #define PLAYBACK_MANAGER_HPP
 
 #include <boost/shared_ptr.hpp>
-#include <Eigen/Dense>
 #include <OIS/OISEvents.h>
 #include <OIS/OISKeyboard.h>
 #include <OIS/OISJoyStick.h>

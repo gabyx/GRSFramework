@@ -8,9 +8,6 @@
 
 #include "AssertionDebug.hpp"
 
-
-#include <Eigen/Dense>
-
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 #include <boost/serialization/variant.hpp>

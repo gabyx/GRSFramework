@@ -5,8 +5,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
-#include <OGRE/Ogre.h>
-#include <Eigen/Dense>
+
 #include <boost/shared_ptr.hpp>
 
 //#define SRUTIL_DELEGATE_PREFERRED_SYNTAX

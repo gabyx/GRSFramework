@@ -94,38 +94,23 @@ void SimulationManager<TConfig>::setup(boost::filesystem::path sceneFilePath) {
 
 template<typename TConfig>
 void SimulationManager<TConfig>::threadRunRecord() {
-
-    static double timelineSimulation;
-
     m_pSimulationLog->logMessage("---> SimulationManager: Simulation entering...");
 
 
     if(initRecordThread()) {
 
         // wait for vis thread! (which does some loops before)
-        boost::timer::cpu_timer global_time;
-        global_time.start();
+
+        m_global_time.start();
+
+        outputTime = 0;
 
         while(1) {
 
             // Do one iteration
             m_pTimestepper->doOneIteration();
 
-            // get global time for logging!
-            timelineSimulation = ((double)global_time.elapsed().wall)*1e-9;
-
-
-            //TODO
-            bool outputData = (m_pTimestepper->getIterationCount()) % m_skipIterations == 0)
-            if(outputData){
-                // Write Data to SystemDataFile (maps all data to back buffer!)
-                m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
-                // Write Data to CollisionDataFile
-                m_pTimestepper->writeIterationToCollisionDataFile();
-                // Write  State to Sim File
-                m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
-            }
-
+            writeAllOutput();
 
             // Check if simulation can be aborted!
             if(m_pTimestepper->finished()) {
@@ -140,6 +125,24 @@ void SimulationManager<TConfig>::threadRunRecord() {
     m_pSimulationLog->logMessage("---> SimulationManager: Simulation leaving...");
     return;
 }
+
+template<typename TConfig>
+void SimulationManager<TConfig>::writeAllOutput() {
+
+            //TODO
+            if(m_RecoderSettings.outputCheck(m_pTimestepper->getIterationCount())){
+                 // get global time for logging!
+                double timelineSimulation = ((double)m_global_time.elapsed().wall)*1e-9;
+                // Write Data to SystemDataFile (maps all data to back buffer!)
+                m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
+                // Write Data to CollisionDataFile
+                m_pTimestepper->writeIterationToCollisionDataFile();
+                // Write  State to Sim File
+                m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
+            }
+}
+
+
 template<typename TConfig>
 bool SimulationManager<TConfig>::initRecordThread() {
     // Get new folder path
@@ -159,7 +162,8 @@ bool SimulationManager<TConfig>::initRecordThread() {
     FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),m_SceneFilePath,true);
 
 
-
+    // Get the actual RecorderSettings
+    m_pDynSys->getSettings(m_RecorderSettings);
 
     //Reset Timestepper!
     m_pTimestepper->reset();
@@ -188,8 +192,6 @@ bool SimulationManager<TConfig>::initRecordThread() {
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
         m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
     }
-
-    // Setup the number m_skipIterations fro the OutputSettings!
 
     return true;
 }

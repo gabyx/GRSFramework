@@ -13,7 +13,6 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
-#include <Eigen/Dense>
 
 #include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
@@ -240,6 +239,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
     m_IterationCounter = 0;
 
     m_pDynSys->reset();
+
+    // Get the TimestepperSettings and the InclusionSolverSettings
     m_pDynSys->getSettings(m_Settings, m_pInclusionSolver->m_Settings);
 
     m_pCollisionSolver->reset();
@@ -254,8 +255,19 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
 
 template< typename TConfigTimeStepper>
 double MoreauTimeStepper<  TConfigTimeStepper>::getTimeCurrent() {
-    return m_StateBuffers.m_pBack->m_t;
+    if(!m_bIterationFinished){
+        return m_StateBuffers.m_pBack->m_t;
+    }
+    else{
+        return m_StateBuffers.m_pFront->m_t;
+    }
 }
+
+template< typename TConfigTimeStepper>
+unsigned int MoreauTimeStepper<  TConfigTimeStepper>::getIterationCount() {
+    return m_IterationCounter;
+}
+
 
 template< typename TConfigTimeStepper>
 boost::shared_ptr<

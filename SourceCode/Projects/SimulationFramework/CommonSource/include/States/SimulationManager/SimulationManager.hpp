@@ -38,6 +38,11 @@ public:
 
 private:
 
+   boost::timer::cpu_timer m_global_time;
+
+   void writeAllOutput();
+   RecorderSettings<LayoutConfigType> m_RecorderSettings;
+
    // Accessed only by thread ===================
    void threadRunRecord();
    bool initRecordThread();

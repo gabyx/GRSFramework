@@ -3,7 +3,6 @@
 
 
 /** Contact Graph */
-#include <Eigen/Dense>
 #include <TypeDefs.hpp>
 
 #include "AssertionDebug.hpp"

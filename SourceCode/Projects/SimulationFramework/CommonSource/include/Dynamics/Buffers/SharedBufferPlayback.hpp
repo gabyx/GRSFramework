@@ -2,7 +2,6 @@
 #ifndef SharedBufferPlayback_hpp
 #define SharedBufferPlayback_hpp
 
-#include <Eigen/Dense>
 #include <boost/thread.hpp>
 #include "AssertionDebug.hpp"
 

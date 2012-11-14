@@ -8,9 +8,6 @@
 
 #include "AssertionDebug.hpp"
 
-
-#include <Eigen/Dense>
-
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 #include <boost/serialization/variant.hpp>
@@ -27,6 +24,7 @@
 
 #include "InclusionSolverSettings.hpp"
 #include "TimeStepperSettings.hpp"
+#include "RecorderSettings.hpp"
 
 #include "MeshGeometry.hpp"
 
@@ -303,7 +301,30 @@ protected:
             //Write all values back
             m_pDynSys->setSettings(timestepperSettings,inclusionSettings);
 
+            // OutputParameters
+            RecorderSettings<LayoutConfigType> recorderSettings; // Fills in standart values
+            ticpp::Node *node = sceneSettings->FirstChild("RecorderSettings",false);
+            if(node){
+                ticpp::Element *elem = node->ToElement();
+                std::string method = elem->GetAttribute("recorderMode");
+                if(method == "everyTimeStep") {
+                    recorderSettings.setMode(RecorderSettings<LayoutConfigType>::RECORD_EVERY_STEP);
+                } else if (method == "everyXTimeStep") {
+                    recorderSettings.setMode(RecorderSettings<LayoutConfigType>::RECORD_EVERY_STEP);
+                    PREC fps;
+                    if(!Utilities::stringToType<double>(fps, elem->GetAttribute("statesPerSecond"))) {
+                        throw ticpp::Exception("--->String conversion in RecorderSettings: statesPerSecond failed");
+                    }
+                    recorderSettings.setEveryXTimestep(fps,timestepperSettings.m_deltaT);
+                } else if (method == "noOutput" || method=="none" || method=="nothing") {
+                    recorderSettings.setMode(RecorderSettings<LayoutConfigType>::RECORD_NOTHING);
+                }
+                else {
+                    throw ticpp::Exception("--->String conversion in RecorderSettings: recorderMode failed: not a valid setting");
+                }
+            }
 
+            m_pDynSys->setSettings(recorderSettings);
 
             // Parse ContactParameter Map
             processContactParameterMap(sceneSettings);

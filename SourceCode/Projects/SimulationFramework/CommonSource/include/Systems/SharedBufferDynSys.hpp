@@ -2,7 +2,6 @@
 #ifndef SharedBufferDynSys_hpp
 #define SharedBufferDynSys_hpp
 
-#include <Eigen/Dense>
 #include <boost/thread.hpp>
 #include "AssertionDebug.hpp"
 

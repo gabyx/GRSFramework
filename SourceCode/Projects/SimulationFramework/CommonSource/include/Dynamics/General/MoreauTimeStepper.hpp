@@ -12,7 +12,6 @@
 // Includes =================================
 #include <fstream>
 #include <cmath>
-#include <Eigen/Dense>
 
 #include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
@@ -65,6 +64,7 @@ public:
     void doOneIteration();
 
     double getTimeCurrent();
+    unsigned int getIterationCount();
 
     // Solver Parameters
     TimeStepperSettings<LayoutConfigType> m_Settings;
@@ -89,6 +89,7 @@ protected:
     const unsigned int m_nSimBodies; // These are the dimensions for one Obj
 
     int m_IterationCounter;
+    bool m_bIterationFinished;
 
     bool m_bFinished;
 
@@ -238,18 +239,19 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
     //set standart values for parameters
     m_IterationCounter = 0;
     m_bIterationFinished = false;
-
+    std::cout << " 1...";
     m_pStatePool->resetStatePool(); // Sets initial values to front and back;
-
+    std::cout << " 2...";
     m_StateBuffers = m_pStatePool->getFrontBackBuffer();
-
+    std::cout << " 3...";
     m_pDynSys->reset();
     m_pDynSys->getSettings(m_Settings, m_pInclusionSolver->m_Settings);
-
+    std::cout << " 4...";
     m_pCollisionSolver->reset();
+    std::cout << " 5...";
     m_pInclusionSolver->reset();
 
-
+    std::cout << " 6...";
     if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::NONE) {
 
         if(!m_ReferenceSimFile.openSimFileRead(m_Settings.m_simStateReferenceFile,m_nSimBodies,true)) {
@@ -266,6 +268,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
         }
 
     }
+    std::cout << " 6...";
     //m_ReferenceSimFile.writeOutAllStateTimes();
 
     //Write the Front buffer which contains the initial values to all bodies!
@@ -285,8 +288,13 @@ double MoreauTimeStepper<  TConfigTimeStepper>::getTimeCurrent() {
     else{
         return m_StateBuffers.m_pFront->m_t;
     }
-
 }
+
+template< typename TConfigTimeStepper>
+unsigned int MoreauTimeStepper<  TConfigTimeStepper>::getIterationCount() {
+    return m_IterationCounter;
+}
+
 
 template< typename TConfigTimeStepper>
 boost::shared_ptr<

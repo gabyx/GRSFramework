@@ -1,8 +1,5 @@
 ﻿#include "SimulationState.hpp"
 
-
-#include <Eigen/Dense>
-
 #include "SimulationManagerGUI.hpp"
 #include "PlaybackManager.hpp"
 
