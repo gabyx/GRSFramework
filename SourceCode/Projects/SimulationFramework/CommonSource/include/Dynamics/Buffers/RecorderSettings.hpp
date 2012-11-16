@@ -23,10 +23,12 @@ public:
     };
 
     bool outputCheck(unsigned int iterationCount){
-        if(m_eMode == RECORD_EVERY_X_STEP)
-         if (iterationCount % m_recordEveryXTimestep == 0){
-            return true;
-         }
+        if(m_eMode == RECORD_EVERY_X_STEP){
+        //std:: cout << iterationCount <<","<<m_recordEveryXTimestep<<std::endl;
+             if (iterationCount % m_recordEveryXTimestep == 0){
+                return true;
+             }
+        }
         else if(m_eMode == RECORD_EVERY_STEP){
             return true;
         }

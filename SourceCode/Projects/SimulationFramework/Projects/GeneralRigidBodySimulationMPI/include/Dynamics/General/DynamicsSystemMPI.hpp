@@ -109,12 +109,9 @@ void DynamicsSystem<TDynamicsSystemConfig>::init() {
 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::initializeGlobalParameters() {
-    //m_mass = 0.050;
     m_gravity = 9.81;
     m_gravityDir = Vector3(0,0,-1);
-    /* m_ThetaS_A = 2.0/5.0 * m_mass * (m_R*m_R);
-     m_ThetaS_B = 2.0/5.0 * m_mass * (m_R*m_R);
-     m_ThetaS_C = 2.0/5.0 * m_mass * (m_R*m_R);*/
+
 }
 
 template<typename TDynamicsSystemConfig>
@@ -193,6 +190,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
 
     static Matrix43 F_i = Matrix43::Zero();
 
+    m_CurrentStateEnergy = 0;
     // Do timestep for every object
     typename RigidBodySimPtrListType::iterator  bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
@@ -213,10 +211,6 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_Front.template head<3>();
         pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_Front.template tail<3>();
 
-        // Swap uBuffer and reset Front
-        pBody->m_pSolverData->swapBuffer();
-        pBody->m_pSolverData->reset();
-
         //Normalize Quaternion
         pBody->m_q_KI.normalize();
 
@@ -226,6 +220,11 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
         m_CurrentStateEnergy += 0.5* pBody->m_pSolverData->m_uBuffer.m_Front.transpose() * pBody->m_MassMatrix_diag.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_Front;
         m_CurrentStateEnergy -= +  pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir ;
 #endif
+
+        // Swap uBuffer and reset Front
+        pBody->m_pSolverData->swapBuffer();
+        pBody->m_pSolverData->reset();
+
 
     }
 

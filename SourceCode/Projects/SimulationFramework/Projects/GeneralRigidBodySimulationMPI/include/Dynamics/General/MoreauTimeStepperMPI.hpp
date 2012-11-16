@@ -80,7 +80,7 @@ public:
     boost::shared_ptr<const DynamicsState<LayoutConfigType> > getFrontStateBuffer();
 
     // General Log file
-    Logging::Log*	m_pSolverLog;
+    Logging::Log *m_pSolverLog, *m_pSimulationLog;
 
     //Performance Time of one Iteration (averaged)
     double m_AvgTimeForOneIteration;
@@ -92,8 +92,7 @@ public:
 
 protected:
 
-    const unsigned int m_nDofu, m_nDofq; // These are the global dimensions of q and u
-    const unsigned int m_nDofuObj, m_nDofqObj, m_nSimBodies; // These are the dimensions for one Obj
+    const unsigned int m_nSimBodies;
 
     int m_IterationCounter;
 
@@ -138,11 +137,14 @@ template< typename TConfigTimeStepper>
 MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys):
     m_state_m(nSimBodies),
     m_nSimBodies(nSimBodies),
-    m_nDofqObj(NDOFqObj),
-    m_nDofuObj(NDOFuObj),
-    m_nDofq(m_nSimBodies * m_nDofqObj),
-    m_nDofu(m_nSimBodies * m_nDofuObj),
     m_ReferenceSimFile(NDOFqObj,NDOFuObj) {
+
+
+    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    } else {
+        ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
+    }
 
     m_pSolverLog = NULL;
 

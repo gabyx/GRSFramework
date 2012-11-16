@@ -73,8 +73,6 @@ public:
     boost::shared_ptr<const DynamicsState<LayoutConfigType> > getBackStateBuffer();
     boost::shared_ptr<const DynamicsState<LayoutConfigType> > getFrontStateBuffer();
 
-    // General Log file
-    Logging::Log*	m_pSolverLog;
 
     //Performance Time of one Iteration (averaged)
     double m_AvgTimeForOneIteration;
@@ -106,7 +104,8 @@ protected:
     // Reference Sim File for Simulation
     MultiBodySimFile m_ReferenceSimFile;
 
-
+    // General Log file
+    Logging::Log *m_pSolverLog, *m_pSimulationLog;
 
     typedef FrontBackBuffer<DynamicsState<LayoutConfigType>, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
     FrontBackBufferType m_StateBuffers;
@@ -139,6 +138,13 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nS
     m_ReferenceSimFile(NDOFqObj,NDOFuObj)
 {
 
+    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    } else {
+        ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
+    }
+
+
     m_pSolverLog = NULL;
 
     // Instanciate all Core Objects
@@ -153,6 +159,7 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nS
 
     m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys));
 
+    reset();
 };
 
 
@@ -239,19 +246,23 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
     //set standart values for parameters
     m_IterationCounter = 0;
     m_bIterationFinished = false;
-    std::cout << " 1...";
+
+    m_pSimulationLog->logMessage("---> Reset StatePool...");
     m_pStatePool->resetStatePool(); // Sets initial values to front and back;
-    std::cout << " 2...";
     m_StateBuffers = m_pStatePool->getFrontBackBuffer();
-    std::cout << " 3...";
+
+    m_pSimulationLog->logMessage("---> Reset DynamicsSystem...");
     m_pDynSys->reset();
     m_pDynSys->getSettings(m_Settings, m_pInclusionSolver->m_Settings);
-    std::cout << " 4...";
+
+    m_pSimulationLog->logMessage("---> Reset CollisionSolver...");
     m_pCollisionSolver->reset();
-    std::cout << " 5...";
+
+    m_pSimulationLog->logMessage("---> Reset InclusionSolver...");
     m_pInclusionSolver->reset();
 
-    std::cout << " 6...";
+
+
     if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::NONE) {
 
         if(!m_ReferenceSimFile.openSimFileRead(m_Settings.m_simStateReferenceFile,m_nSimBodies,true)) {
@@ -261,14 +272,16 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
             m_pSolverLog->logMessage( error.str());
             ERRORMSG(error);
         }
+        LOG(m_pSimulationLog,"---> Opened Reference SimFile: m_Settings.m_simStateReferenceFile"<<std::endl);
 
         if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::CONTINUE) {
             //Inject the end state into the front buffer
             m_ReferenceSimFile.getEndState(*m_StateBuffers.m_pFront);
+            LOG(m_pSimulationLog,"---> Injected first state of Reference SimFile into StateBuffer"<<std::endl);
         }
 
     }
-    std::cout << " 6...";
+
     //m_ReferenceSimFile.writeOutAllStateTimes();
 
     //Write the Front buffer which contains the initial values to all bodies!

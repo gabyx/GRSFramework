@@ -308,9 +308,10 @@ protected:
                 ticpp::Element *elem = node->ToElement();
                 std::string method = elem->GetAttribute("recorderMode");
                 if(method == "everyTimeStep") {
+                    std::cout <<"EVERY STEPPPPPPPPP"<<std::endl;
                     recorderSettings.setMode(RecorderSettings<LayoutConfigType>::RECORD_EVERY_STEP);
                 } else if (method == "everyXTimeStep") {
-                    recorderSettings.setMode(RecorderSettings<LayoutConfigType>::RECORD_EVERY_STEP);
+                    recorderSettings.setMode(RecorderSettings<LayoutConfigType>::RECORD_EVERY_X_STEP);
                     PREC fps;
                     if(!Utilities::stringToType<double>(fps, elem->GetAttribute("statesPerSecond"))) {
                         throw ticpp::Exception("--->String conversion in RecorderSettings: statesPerSecond failed");

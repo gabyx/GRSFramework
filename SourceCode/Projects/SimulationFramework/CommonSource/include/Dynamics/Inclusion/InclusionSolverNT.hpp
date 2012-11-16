@@ -139,7 +139,7 @@ protected:
 
 
   // Log
-  Logging::Log *	m_pSolverLog;
+  Logging::Log *m_pSolverLog, *m_pSimulationLog;
   std::stringstream logstream;
 };
 
@@ -150,6 +150,12 @@ InclusionSolverNT<TInclusionSolverConfig>::InclusionSolverNT( boost::shared_ptr<
 m_SimBodies(pCollisionSolver->m_SimBodies),
 m_Bodies(pCollisionSolver->m_Bodies)
 {
+
+    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    } else {
+        ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
+    }
 
   m_nSimBodies = pCollisionSolver->m_nSimBodies;
   m_nDofqObj = NDOFqObj;

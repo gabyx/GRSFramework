@@ -44,7 +44,7 @@ SimulationManagerGUI<TConfig>::SimulationManagerGUI(boost::shared_ptr<Ogre::Scen
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
-        m_pSimulationLog->logMessage("--->Creating SimulationManager...");
+        m_pSimulationLog->logMessage("--->Creating SimulationManagerGUI...");
     }
 
 
@@ -263,11 +263,11 @@ void SimulationManagerGUI<TConfig>::threadRunRecord() {
 
     static double timelineSimulation;
 
-    m_pSimulationLog->logMessage("---> SimulationManagerGUI:1 RecordThread entering...");
+    m_pSimulationLog->logMessage("---> SimulationManagerGUI: RecordThread entering...");
     setSimThreadRunning(true);
-    m_pSimulationLog->logMessage("---> SimulationManagerGUI:2 RecordThread entering...");
+
     if(initRecordThread()) {
-    m_pSimulationLog->logMessage("---> SimulationManagerGUI:3 RecordThread entering...");
+
 
         // wait for vis thread! (which does some loops before)
         m_barrier_start.wait();
@@ -307,6 +307,7 @@ template<typename TConfig>
 void SimulationManagerGUI<TConfig>::writeAllOutput() {
 
             if(m_RecorderSettings.outputCheck(m_pTimestepper->getIterationCount())){
+                //m_pSimulationLog->logMessage("---> Output: now");
                 // get global time for logging!
                 double timelineSimulation = ((double)m_global_time.elapsed().wall)*1e-9;
                 // Write Data to SystemDataFile (maps all data to back buffer!)
@@ -336,16 +337,21 @@ bool SimulationManagerGUI<TConfig>::initRecordThread() {
     filename += ".xml";
     m_SceneFilePath /= filename;
 
-    // Copy Scene File
-    FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),m_SceneFilePath,true);
-
     // Get the actual RecorderSettings
     m_pDynSys->getSettings(m_RecorderSettings);
 
+    //Reset Timestepper!
+    m_pSimulationLog->logMessage("---> Reset Timestepper...");
+    m_pTimestepper->reset();
+    m_pSimulationLog->logMessage("---> Reset done...");
 
+    // Copy Scene File
+    m_pSimulationLog->logMessage("---> Copy SceneFile to right place...");
+    FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),m_SceneFilePath,true);
 
     //Copy SimeState file, if necessary
      //Open SimState File
+    m_pSimulationLog->logMessage("---> Copy SimulationState.sim to right place...");
     bool fileOK = false;
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::CONTINUE) {
         fileOK = m_pStateRecorder->createSimFileCopyFromReference(m_SimFilePath,m_pTimestepper->m_Settings.m_simStateReferenceFile);
@@ -358,24 +364,21 @@ bool SimulationManagerGUI<TConfig>::initRecordThread() {
     }
 
     // Copy File: SimulationData
+    m_pSimulationLog->logMessage("---> Copy SimulationData.dat to right place...");
     boost::filesystem::path simDataFile;
     if(!m_pTimestepper->m_Settings.m_simDataReferenceFile.empty()){
          ASSERTMSG(false,"HERE IS CODE ZU VERFOLSTÄNDIGEN! FALSCH!")
          simDataFile = FileManager::getSingletonPtr()->copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_Settings.m_simDataReferenceFile,true);
     }
-    m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);
 
+    m_pSimulationLog->logMessage("---> Init Timestepper Logs...");
+    m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);
 
    // Write first initial value
    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
             m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
+            m_pSimulationLog->logMessage("---> Wrote first initial value to file...");
    }
-
-    //Reset Timestepper!
-    m_pSimulationLog->logMessage("---> Reset Timestepper...");
-    m_pTimestepper->reset();
-    m_pSimulationLog->logMessage("---> Reset done...");
-
 
     return true;
 }

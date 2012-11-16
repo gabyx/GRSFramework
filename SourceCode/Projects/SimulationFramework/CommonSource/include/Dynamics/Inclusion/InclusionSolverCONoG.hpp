@@ -97,7 +97,7 @@ protected:
     //inline void sorProxOverAllBodies(bool checkConvergence);
     inline void sorProxOverAllNodesLast();
     // Log
-    Logging::Log*	m_pSolverLog;
+    Logging::Log *m_pSolverLog, *m_pSimulationLog;
     std::stringstream logstream;
 };
 
@@ -109,6 +109,12 @@ InclusionSolverCONoG<TInclusionSolverConfig>::InclusionSolverCONoG(boost::shared
     m_SimBodies(pCollisionSolver->m_SimBodies),
     m_Bodies(pCollisionSolver->m_Bodies),
     m_ContactGraph(&(pDynSys->m_ContactParameterMap)){
+
+    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    } else {
+        ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
+    }
 
     m_pCollisionSolver = pCollisionSolver;
 
@@ -150,13 +156,13 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::reset() {
     resetForNextIter();
 
 #if HAVE_CUDA_SUPPORT == 1
-    LOG(m_pSolverLog, "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
+    LOG(m_pSimulationLog, "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
 
     CHECK_CUDA(cudaSetDevice(m_Settings.m_UseGPUDeviceId));
     cudaDeviceProp props;
     CHECK_CUDA(cudaGetDeviceProperties(&props,m_Settings.m_UseGPUDeviceId));
 
-    LOG(m_pSolverLog,  "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
+    LOG(m_pSimulationLog,  "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
 #endif
 
 
@@ -642,7 +648,7 @@ std::string  InclusionSolverCONoG<TInclusionSolverConfig>::getIterationStats() {
     << m_pDynSys->m_CurrentStateEnergy <<"\t"
     << -1<<"\t" //No m_G_conditionNumber
     << -1<<"\t" //No m_G_notDiagDominant
-    << m_PercussionPool.getPoolSize()<<std::endl;
+    << m_PercussionPool.getPoolSize();
     return s.str();
 }
 #endif
