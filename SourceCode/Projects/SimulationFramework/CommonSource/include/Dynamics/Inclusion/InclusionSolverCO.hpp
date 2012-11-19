@@ -4,7 +4,6 @@
 #include <iostream>
 #include <fstream>
 #include <boost/shared_ptr.hpp>
-#include <Eigen/Dense>
 
 #include "AssertionDebug.hpp"
 
@@ -130,7 +129,7 @@ protected:
    inline void doSorProx();
 
    // Log
-   Logging::Log*	m_pSolverLog;
+   Logging::Log *m_pSolverLog, *m_pSimulationLog;
    std::stringstream logstream;
 };
 
@@ -141,6 +140,12 @@ InclusionSolverCO<TInclusionSolverConfig>::InclusionSolverCO(boost::shared_ptr< 
 m_SimBodies(pCollisionSolver->m_SimBodies),
    m_Bodies(pCollisionSolver->m_Bodies)
 {
+
+    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    } else {
+        ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
+    }
 
    m_nSimBodies = pCollisionSolver->m_nSimBodies;
    m_nDofqObj = NDOFqObj;
@@ -210,13 +215,13 @@ void InclusionSolverCO<TInclusionSolverConfig>::reset()
 #endif
 
 #if HAVE_CUDA_SUPPORT == 1
-   LOG(m_pSolverLog, "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
+   LOG(m_pSimulationLog, "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
 
    CHECK_CUDA(cudaSetDevice(m_Settings.m_UseGPUDeviceId));
    cudaDeviceProp props;
    CHECK_CUDA(cudaGetDeviceProperties(&props,m_Settings.m_UseGPUDeviceId));
 
-   LOG(m_pSolverLog,  "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
+   LOG(m_pSimulationLog,  "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
 #endif
 
 
@@ -265,7 +270,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
    DynamicsState<LayoutConfigType> * state_e)
 {
 
-#if CoutLevelSolver>0
+#if CoutLevelSolver>1
    LOG(m_pSolverLog, " % -> solveInclusionProblem(): "<< std::endl;);
 #endif
 
@@ -734,7 +739,7 @@ std::string InclusionSolverCO<TInclusionSolverConfig>::getIterationStats() {
         << m_pDynSys->m_CurrentStateEnergy <<"\t"
         << m_G_conditionNumber<<"\t" //No m_G_conditionNumber
         << m_G_notDiagDominant<<"\t" //No m_G_notDiagDominant
-        << m_PercussionPool.getPoolSize()<<std::endl;
+        << m_PercussionPool.getPoolSize();
         return s.str();
 }
 

@@ -5,8 +5,6 @@
 #include "boost/variant.hpp"
 #include <boost/shared_ptr.hpp>
 
-#include <Eigen/Dense>
-
 #include "ConfigureFile.hpp"
 #include "AssertionDebug.hpp"
 

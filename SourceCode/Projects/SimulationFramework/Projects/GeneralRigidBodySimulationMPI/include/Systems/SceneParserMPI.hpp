@@ -8,9 +8,6 @@
 
 #include "AssertionDebug.hpp"
 
-
-#include <Eigen/Dense>
-
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 #include <boost/serialization/variant.hpp>
@@ -180,7 +177,7 @@ protected:
             }
             // saftey check
             if(dim(0)*dim(1)*dim(2) != m_pProcComm->m_pProcessInfo->getNProcesses()) {
-                LOG(m_pSimulationLog, "Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcComm->m_pProcessInfo->getNProcesses() <<" Processes"<<std::endl; );
+                LOG(m_pSimulationLog,"--->Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcComm->m_pProcessInfo->getNProcesses() <<" Processes"<<std::endl; );
                 sleep(2);
                 throw ticpp::Exception("--->You have launched to many processes for the grid!");
             }
@@ -244,7 +241,7 @@ protected:
                 // Check if Body belongs to the topology! // Check CoG!
                 if(m_pProcComm->m_pProcessInfo->getProcTopo().belongsPointToProcess((*bodyIt)->m_r_S)) {
 
-                    LOG(m_pSimulationLog, "Added Body with ID: (" << RigidBodyId::getGroupNr(bodyIt->get())<<","<<RigidBodyId::getBodyNr(bodyIt->get())<<")"<< std::endl);
+                    LOG(m_pSimulationLog, "--->Added Body with ID: (" << RigidBodyId::getGroupNr(bodyIt->get())<<","<<RigidBodyId::getBodyNr(bodyIt->get())<<")"<< std::endl);
 
                     m_pDynSys->m_SimBodies.push_back((*bodyIt));
 

@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include <Eigen/Dense>
-
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
@@ -12,10 +10,12 @@
 #include "DynamicsState.hpp"
 #include "ContactParameterMap.hpp"
 
+#include "AddGyroTermVisitor.hpp"
 #include "InitialConditionBodies.hpp"
 #include "InclusionSolverSettings.hpp"
 #include "CommonFunctions.hpp"
 
+#include "RecorderSettings.hpp"
 #include "TimeStepperSettings.hpp"
 
 #include "SimpleLogger.hpp"
@@ -58,7 +58,9 @@ public:
     void doFirstHalfTimeStep( PREC timestep);
     void doSecondHalfTimeStep( PREC timestep);
 
-    void getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver);
+    void getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const;
+    void setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder);
+    void getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) const;
     void setSettings(const TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, const InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver);
 
     void reset();
@@ -70,6 +72,7 @@ public:
 
 protected:
 
+    RecorderSettings<LayoutConfigType> m_SettingsRecorder;
     TimeStepperSettings<LayoutConfigType> m_SettingsTimestepper;
     InclusionSolverSettings<LayoutConfigType> m_SettingsInclusionSolver;
 
@@ -84,7 +87,6 @@ protected:
     // Log
     Logging::Log*	m_pSolverLog;
     std::stringstream logstream;
-
 };
 
 
@@ -110,16 +112,22 @@ void DynamicsSystem<TDynamicsSystemConfig>::init() {
 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::initializeGlobalParameters() {
-    //m_mass = 0.050;
     m_gravity = 9.81;
     m_gravityDir = Vector3(0,0,-1);
-    /* m_ThetaS_A = 2.0/5.0 * m_mass * (m_R*m_R);
-     m_ThetaS_B = 2.0/5.0 * m_mass * (m_R*m_R);
-     m_ThetaS_C = 2.0/5.0 * m_mass * (m_R*m_R);*/
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) {
+void DynamicsSystem<TDynamicsSystemConfig>::getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const{
+    SettingsRecorder = m_SettingsRecorder;
+}
+
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder){
+    m_SettingsRecorder = SettingsRecorder;
+}
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper,
+                                                        InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) const{
     SettingsTimestepper = m_SettingsTimestepper;
     SettingsInclusionSolver = m_SettingsInclusionSolver;
 }
@@ -182,7 +190,10 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
 
         // Add in to h-Term ==========
         pBody->m_h_term = pBody->m_h_term_const;
-        // Term omega x Theta * omega = 0, because theta is diagonal
+
+        // Term omega x Theta * omega = if Theta is diagonal : for a Spehere for example!
+        AddGyroTermVisitor<RigidBodyType> vis(pBody);
+
         // =========================
 
         // Add in to Mass Matrix
@@ -202,6 +213,8 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
     using namespace std;
 
     static Matrix43 F_i = Matrix43::Zero();
+
+    m_CurrentStateEnergy = 0;
 
     // Do timestep for every object
     typename RigidBodySimPtrListType::iterator bodyIt;
@@ -223,13 +236,8 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_Front.template head<3>();
         pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_Front.template tail<3>();
 
-        // Swap uuffer and reset Front
-        pBody->m_pSolverData->swapBuffer();
-        pBody->m_pSolverData->reset();
-
         //Normalize Quaternion
         pBody->m_q_KI.normalize();
-
 
 #if OUTPUT_SYSTEMDATA_FILE == 1
         // Calculate Energy
@@ -237,6 +245,10 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
         m_CurrentStateEnergy -= +  pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir ;
 #endif
 
+
+        // Swap uuffer and reset Front
+        pBody->m_pSolverData->swapBuffer();
+        pBody->m_pSolverData->reset();
     }
 
 }

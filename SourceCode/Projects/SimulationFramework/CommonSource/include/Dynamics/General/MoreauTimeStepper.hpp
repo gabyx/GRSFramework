@@ -12,7 +12,6 @@
 // Includes =================================
 #include <fstream>
 #include <cmath>
-#include <Eigen/Dense>
 
 #include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
@@ -65,6 +64,7 @@ public:
     void doOneIteration();
 
     double getTimeCurrent();
+    unsigned int getIterationCount();
 
     // Solver Parameters
     TimeStepperSettings<LayoutConfigType> m_Settings;
@@ -73,8 +73,6 @@ public:
     boost::shared_ptr<const DynamicsState<LayoutConfigType> > getBackStateBuffer();
     boost::shared_ptr<const DynamicsState<LayoutConfigType> > getFrontStateBuffer();
 
-    // General Log file
-    Logging::Log*	m_pSolverLog;
 
     //Performance Time of one Iteration (averaged)
     double m_AvgTimeForOneIteration;
@@ -89,6 +87,7 @@ protected:
     const unsigned int m_nSimBodies; // These are the dimensions for one Obj
 
     int m_IterationCounter;
+    bool m_bIterationFinished;
 
     bool m_bFinished;
 
@@ -105,7 +104,8 @@ protected:
     // Reference Sim File for Simulation
     MultiBodySimFile m_ReferenceSimFile;
 
-
+    // General Log file
+    Logging::Log *m_pSolverLog, *m_pSimulationLog;
 
     typedef FrontBackBuffer<DynamicsState<LayoutConfigType>, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
     FrontBackBufferType m_StateBuffers;
@@ -138,6 +138,13 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nS
     m_ReferenceSimFile(NDOFqObj,NDOFuObj)
 {
 
+    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    } else {
+        ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
+    }
+
+
     m_pSolverLog = NULL;
 
     // Instanciate all Core Objects
@@ -152,6 +159,7 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nS
 
     m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys));
 
+    reset();
 };
 
 
@@ -237,16 +245,22 @@ template< typename TConfigTimeStepper>
 void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
     //set standart values for parameters
     m_IterationCounter = 0;
+    m_bIterationFinished = false;
 
+    m_pSimulationLog->logMessage("---> Reset StatePool...");
     m_pStatePool->resetStatePool(); // Sets initial values to front and back;
-
     m_StateBuffers = m_pStatePool->getFrontBackBuffer();
 
+    m_pSimulationLog->logMessage("---> Reset DynamicsSystem...");
     m_pDynSys->reset();
     m_pDynSys->getSettings(m_Settings, m_pInclusionSolver->m_Settings);
 
+    m_pSimulationLog->logMessage("---> Reset CollisionSolver...");
     m_pCollisionSolver->reset();
+
+    m_pSimulationLog->logMessage("---> Reset InclusionSolver...");
     m_pInclusionSolver->reset();
+
 
 
     if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::NONE) {
@@ -258,13 +272,16 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
             m_pSolverLog->logMessage( error.str());
             ERRORMSG(error);
         }
+        LOG(m_pSimulationLog,"---> Opened Reference SimFile: m_Settings.m_simStateReferenceFile"<<std::endl);
 
         if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::CONTINUE) {
             //Inject the end state into the front buffer
             m_ReferenceSimFile.getEndState(*m_StateBuffers.m_pFront);
+            LOG(m_pSimulationLog,"---> Injected first state of Reference SimFile into StateBuffer"<<std::endl);
         }
 
     }
+
     //m_ReferenceSimFile.writeOutAllStateTimes();
 
     //Write the Front buffer which contains the initial values to all bodies!
@@ -278,8 +295,19 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
 
 template< typename TConfigTimeStepper>
 double MoreauTimeStepper<  TConfigTimeStepper>::getTimeCurrent() {
-    return m_StateBuffers.m_pBack->m_t;
+    if(!m_bIterationFinished){
+        return m_StateBuffers.m_pBack->m_t;
+    }
+    else{
+        return m_StateBuffers.m_pFront->m_t;
+    }
 }
+
+template< typename TConfigTimeStepper>
+unsigned int MoreauTimeStepper<  TConfigTimeStepper>::getIterationCount() {
+    return m_IterationCounter;
+}
+
 
 template< typename TConfigTimeStepper>
 boost::shared_ptr<
@@ -308,9 +336,11 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
 
     static int iterations=0; // Average is reset after 1000 Iterations
 
-#if CoutLevelSolver>0
+#if CoutLevelSolver>1
     LOG(m_pSolverLog, "% Do one time-step =================================" <<std::endl;);
 #endif
+
+    m_bIterationFinished = false;
 
     m_PerformanceTimer.stop();
     m_PerformanceTimer.start();
@@ -330,6 +360,16 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
 
     // Swap front and back buffers!
     swapStateBuffers();
+
+#if CoutLevelSolver==1
+      if(m_IterationCounter % 10000 == 1){
+            LOG(m_pSolverLog,"% m_t: " << m_StateBuffers.m_pBack->m_t<<std::endl; );
+      }
+#endif
+
+#if CoutLevelSolver>2
+      LOG(m_pSolverLog,"m_t Begin: " << m_StateBuffers.m_pBack->m_t<<std::endl; );
+#endif
 
 
     //Calculate Midpoint Rule ============================================================
@@ -374,10 +414,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     m_pDynSys->applySimBodiesToDynamicsState(*m_StateBuffers.m_pFront);
 
 
-#if CoutLevelSolver>1
-//      LOG(m_pSolverLog,   << "m_pFront->m_t: " << m_StateBuffers.m_pFront->m_t<<std::endl
-//                          << "m_pFront->m_q: " << m_StateBuffers.m_pFront->m_q.transpose()<<std::endl
-//                          << "m_pFront->m_u: " << m_StateBuffers.m_pFront->m_u.transpose()<<std::endl;);
+#if CoutLevelSolver>2
+      LOG(m_pSolverLog,"m_t End: " << m_StateBuffers.m_pFront->m_t<<std::endl );
 #endif
 
     //Force switch
@@ -405,6 +443,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     } else {
         m_bFinished =  m_StateBuffers.m_pFront->m_t >= m_Settings.m_endTime;
     }
+
+    m_bIterationFinished = true;
 }
 
 template< typename TConfigTimeStepper>

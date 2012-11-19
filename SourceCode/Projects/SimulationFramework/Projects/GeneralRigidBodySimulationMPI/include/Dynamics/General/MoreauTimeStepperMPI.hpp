@@ -13,7 +13,6 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
-#include <Eigen/Dense>
 
 #include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
@@ -81,7 +80,7 @@ public:
     boost::shared_ptr<const DynamicsState<LayoutConfigType> > getFrontStateBuffer();
 
     // General Log file
-    Logging::Log*	m_pSolverLog;
+    Logging::Log *m_pSolverLog, *m_pSimulationLog;
 
     //Performance Time of one Iteration (averaged)
     double m_AvgTimeForOneIteration;
@@ -93,8 +92,7 @@ public:
 
 protected:
 
-    const unsigned int m_nDofu, m_nDofq; // These are the global dimensions of q and u
-    const unsigned int m_nDofuObj, m_nDofqObj, m_nSimBodies; // These are the dimensions for one Obj
+    const unsigned int m_nSimBodies;
 
     int m_IterationCounter;
 
@@ -139,11 +137,14 @@ template< typename TConfigTimeStepper>
 MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys):
     m_state_m(nSimBodies),
     m_nSimBodies(nSimBodies),
-    m_nDofqObj(NDOFqObj),
-    m_nDofuObj(NDOFuObj),
-    m_nDofq(m_nSimBodies * m_nDofqObj),
-    m_nDofu(m_nSimBodies * m_nDofuObj),
     m_ReferenceSimFile(NDOFqObj,NDOFuObj) {
+
+
+    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    } else {
+        ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
+    }
 
     m_pSolverLog = NULL;
 
@@ -240,6 +241,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
     m_IterationCounter = 0;
 
     m_pDynSys->reset();
+
+    // Get the TimestepperSettings and the InclusionSolverSettings
     m_pDynSys->getSettings(m_Settings, m_pInclusionSolver->m_Settings);
 
     m_pCollisionSolver->reset();
@@ -254,8 +257,19 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
 
 template< typename TConfigTimeStepper>
 double MoreauTimeStepper<  TConfigTimeStepper>::getTimeCurrent() {
-    return m_StateBuffers.m_pBack->m_t;
+    if(!m_bIterationFinished){
+        return m_StateBuffers.m_pBack->m_t;
+    }
+    else{
+        return m_StateBuffers.m_pFront->m_t;
+    }
 }
+
+template< typename TConfigTimeStepper>
+unsigned int MoreauTimeStepper<  TConfigTimeStepper>::getIterationCount() {
+    return m_IterationCounter;
+}
+
 
 template< typename TConfigTimeStepper>
 boost::shared_ptr<

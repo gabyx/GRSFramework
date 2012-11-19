@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 
-#include <Eigen/Dense>
+
 #include <boost/unordered_map.hpp>
 
 #include "LogDefines.hpp"

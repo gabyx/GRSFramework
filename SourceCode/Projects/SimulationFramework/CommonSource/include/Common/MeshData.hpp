@@ -14,9 +14,6 @@
 #include <fstream>
 #include <assert.h>
 #include <vector>
-#include <Eigen/Dense>
-
-
 
 #include <assimp.hpp>      // C++ importer interface
 #include <aiScene.h>       // Output data structure

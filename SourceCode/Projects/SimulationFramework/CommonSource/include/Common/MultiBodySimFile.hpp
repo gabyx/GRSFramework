@@ -189,7 +189,7 @@ private:
 
     std::stringstream m_errorString;
 
-    // Copy constructor is private, we should ne copy the file, because fstream is not copiable
+    // Copy constructor is private, we should never copy the file, because fstream is not copiable
     MultiBodySimFile & operator =(const MultiBodySimFile & file);
 
 

@@ -9,7 +9,6 @@
 #ifndef QuternionHelpers_hpp
 #define QuternionHelpers_hpp
 
-#include <Eigen/Dense>
 
 #include "TypeDefs.hpp"
 

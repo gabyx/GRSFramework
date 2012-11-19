@@ -2,7 +2,6 @@
 #define STATE_RECORDER_HPP
 
 #include <string>
-#include <Eigen/Dense>
 
 #include "FileManager.hpp"
 

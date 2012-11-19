@@ -118,6 +118,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/General/MoreauTimeStepper.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/AddGyroTermVisitor.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionSolver.hpp
@@ -149,10 +150,12 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorder.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
 )
 SET(DYNAMICS_SRC
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactParameterMap.cpp
 )
 
 
