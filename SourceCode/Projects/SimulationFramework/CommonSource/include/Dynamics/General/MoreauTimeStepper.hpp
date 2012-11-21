@@ -462,6 +462,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToSystemDataFile(dou
     << (double)(m_endTimeCollisionSolver-m_startTimeCollisionSolver) <<"\t"
     << (double)(m_endTimeInclusionSolver-m_startTimeInclusionSolver) <<"\t"
     << m_AvgTimeForOneIteration <<"\t"
+    << m_pCollisionSolver->getIterationStats() << "\t"
     << m_pInclusionSolver->getIterationStats() << std::endl;
 #endif
 }

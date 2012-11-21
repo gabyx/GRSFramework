@@ -52,20 +52,20 @@ void SimulationState::enter() {
 
     m_pTrayMgr->hideBackdrop();
     setupParamsPanel();
-    setupActiveModeSelection();
 
+    setSimulationMode(1);
+    setupActiveModeSelection();
 
     // Setup the Simulation Manager with the loaded system;
     m_pAppLog->logMessage("Adding SimulationManagerGUI...");
     m_pSimMgr  = boost::shared_ptr<SimulationManagerGUI<GeneralConfig> > (new SimulationManagerGUI<GeneralConfig>(m_pSceneMgr));
     m_pSimMgr->setup();
 
-    m_eSimulationActiveMode = REALTIME;
     updateSceneFunction = boost::bind(&SimulationState::updateSceneRealtime,this,_1);
 
     m_pTimelineRendering = boost::shared_ptr<Ogre::Timer>(new Ogre::Timer());
 
-    setSimulationMode(0);
+
 }
 
 
@@ -142,7 +142,8 @@ void SimulationState::setupActiveModeSelection() {
     items.push_back("Realtime");
     items.push_back("Record");
     m_pActiveModeSelectMenu = (m_pTrayMgr->createThickSelectMenu(TL_TOPRIGHT,"ActiveModeSelectionSimulation","Simulations Mode",200,3,items));
-
+    // Set active in Menu
+    m_pActiveModeSelectMenu->selectItem((int)m_eSimulationActiveMode);
 }
 
 

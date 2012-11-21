@@ -89,8 +89,8 @@ public:
 
     ~CollisionSolver();
 
-    void initializeLog(Logging::Log* pSolverLog);                          ///< Initializes an Ogre::Log.
-    void reset();                                                       ///< Resets the whole Solver. This function is called at the start of the simulation.
+    void initializeLog(Logging::Log* pSolverLog);                        ///< Initializes an Ogre::Log.
+    void reset();                                                        ///< Resets the whole Solver. This function is called at the start of the simulation.
     void reserveCollisionSetSpace(unsigned int nContacts);              ///< Reserves some space for the collision set.
     void solveCollision();    ///< Main routine which solves the collision for all bodies.
 
@@ -99,7 +99,7 @@ public:
     inline void clearCollisionSet();
     ContactDelegateList<RigidBodyType> m_ContactDelegateList;
 
-
+    std::string getIterationStats();
 
 protected:
     //Inclusion Solver needs access to everything!
@@ -118,6 +118,8 @@ protected:
     std::stringstream logstream;
 
     inline void signalContactAdd(CollisionData<RigidBodyType> * pColData); ///< Adds the contact either sends it to the delegate functions or it adds it in the set m_CollisionSet if no delegate has been added.
+
+    PREC m_maxOverlap;
 
 };
 /** @} */
@@ -156,6 +158,7 @@ void CollisionSolver<TCollisionSolverConfig>::reset() {
 
     reserveCollisionSetSpace(m_nSimBodies * 3);
 
+     m_maxOverlap = 0;
 }
 
 template< typename TCollisionSolverConfig >
@@ -213,6 +216,13 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
 }
 
 template<typename TCollisionSolverConfig>
+std::string CollisionSolver<TCollisionSolverConfig>::getIterationStats(){
+    std::stringstream s;
+    s << m_maxOverlap;
+    return s.str();
+}
+
+template<typename TCollisionSolverConfig>
 inline void CollisionSolver<TCollisionSolverConfig>::signalContactAdd(CollisionData<RigidBodyType> * pColData) {
 
     // Before we send, determine what kind of contactmodel we have!
@@ -220,6 +230,9 @@ inline void CollisionSolver<TCollisionSolverConfig>::signalContactAdd(CollisionD
     ASSERTMSG( std::abs(pColData->m_e_x.dot(pColData->m_e_y)) < 1e-3 && std::abs(pColData->m_e_y.dot(pColData->m_e_z))< 1e-3, "Vectors not parallel");
 
     m_CollisionSet.push_back(pColData); // Copy it to the owning list! colData gets deleted!
+
+    // Calculate some Statistics
+    m_maxOverlap = std::max(m_maxOverlap,pColData->m_overlap);
 
     if(!m_ContactDelegateList.isEmpty()) {
         m_ContactDelegateList.invokeAll(m_CollisionSet.back()); // Propagate pointers! they will not be deleted!
