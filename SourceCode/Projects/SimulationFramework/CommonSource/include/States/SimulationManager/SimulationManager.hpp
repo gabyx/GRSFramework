@@ -2,6 +2,7 @@
 #define SimulationManager_hpp
 
 #include <boost/shared_ptr.hpp>
+#include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
 
 #include "LogDefines.hpp"

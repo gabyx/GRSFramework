@@ -103,7 +103,6 @@ void SimulationManager<TConfig>::threadRunRecord() {
 
         m_global_time.start();
 
-        outputTime = 0;
 
         while(1) {
 
@@ -130,7 +129,7 @@ template<typename TConfig>
 void SimulationManager<TConfig>::writeAllOutput() {
 
             //TODO
-            if(m_RecoderSettings.outputCheck(m_pTimestepper->getIterationCount())){
+            if(m_RecorderSettings.outputCheck(m_pTimestepper->getIterationCount())){
                  // get global time for logging!
                 double timelineSimulation = ((double)m_global_time.elapsed().wall)*1e-9;
                 // Write Data to SystemDataFile (maps all data to back buffer!)

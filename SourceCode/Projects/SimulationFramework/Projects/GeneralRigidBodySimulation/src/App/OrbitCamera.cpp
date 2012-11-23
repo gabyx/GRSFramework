@@ -25,9 +25,9 @@ OrbitCamera::OrbitCamera(SceneManager * pSceneMgr, Ogre::String name, double rot
 
    // RenderContext::getSingletonPtr()->m_pViewport->setBackgroundColour(ColourValue(0.8f, 0.7f, 0.6f, 1.0f));
 
-	m_pCamera->setAspectRatio(Real(RenderContext::getSingletonPtr()->m_pViewport->getActualWidth()) / 
+	m_pCamera->setAspectRatio(Real(RenderContext::getSingletonPtr()->m_pViewport->getActualWidth()) /
 							  Real(RenderContext::getSingletonPtr()->m_pViewport->getActualHeight()));
-	m_pCamera->setNearClipDistance((Ogre::Real)0.01);
+	m_pCamera->setNearClipDistance((Ogre::Real)1);
 	RenderContext::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
 
     m_Rotate = (Ogre::Real)rotate_speed;
@@ -38,7 +38,7 @@ OrbitCamera::OrbitCamera(SceneManager * pSceneMgr, Ogre::String name, double rot
 	m_theta_init = theta_init;
 
     m_OrbitNodeIndex = 0;
-	
+
 	enableInput();
 
 	createScene();

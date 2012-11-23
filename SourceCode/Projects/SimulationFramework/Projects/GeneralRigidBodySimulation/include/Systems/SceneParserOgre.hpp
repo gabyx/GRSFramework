@@ -100,7 +100,7 @@ protected:
 
         std::string type = meshNode->ToElement()->GetAttribute("type");
         if( type == "permutate" || type == "uniform") {
-            std::vector<std::string> m_materialList;
+            m_materialList.clear();
             // Iterate over all material, save in list!
             ticpp::Iterator< ticpp::Element > material("Material");
             for ( material = material.begin( meshNode ); material != material.end(); material++ ) {
@@ -188,29 +188,29 @@ protected:
 
         Vector2 subDivs = Vector2::Ones();
         if(planeNode->ToElement()->HasAttribute("subDivisions")) {
-            if(!Utilities::stringToType<Vector2>(subDivs, planeNode->ToElement()->GetAttribute("subDivisions"))) {
+            if(!Utilities::stringToVector2<PREC>(subDivs, planeNode->ToElement()->GetAttribute("subDivisions"))) {
                 throw ticpp::Exception("--->String conversion in processPlane: subDivisions failed");
             }
         }
 
         Vector3 normal; normal(0)=0; normal(1)=0; normal(2)=1;
         if(planeNode->ToElement()->HasAttribute("normal")) {
-            if(!Utilities::stringToType<Vector3>(normal, planeNode->ToElement()->GetAttribute("normal"))) {
+            if(!Utilities::stringToVector3<PREC>(normal, planeNode->ToElement()->GetAttribute("normal"))) {
                 throw ticpp::Exception("--->String conversion in processPlane: normal failed");
             }
         }
 
-        Vector3 d; d(0)=0; d(1)=0; d(2)=0;
+        PREC dist=0;
         if(planeNode->ToElement()->HasAttribute("distance")) {
-            if(!Utilities::stringToType<Vector3>(d, planeNode->ToElement()->GetAttribute("distance"))) {
+            if(!Utilities::stringToType<PREC>(dist, planeNode->ToElement()->GetAttribute("distance"))) {
                 throw ticpp::Exception("--->String conversion in processPlane: distance failed");
             }
         }
 
         Vector2 tile; tile(0)=1; tile(1)=1;
         if(planeNode->ToElement()->HasAttribute("tileTexture")) {
-            if(!Utilities::stringToType<Vector3>(tile, planeNode->ToElement()->GetAttribute("tileTexture"))) {
-                throw ticpp::Exception("--->String conversion in processPlane: distance failed");
+            if(!Utilities::stringToVector2<PREC>(tile, planeNode->ToElement()->GetAttribute("tileTexture"))) {
+                throw ticpp::Exception("--->String conversion in processPlane: tileTexture failed");
             }
         }
 
@@ -223,7 +223,7 @@ protected:
         //Distribution Type
         std::string type = planeNode->ToElement()->GetAttribute("type");
         if( type == "permutate" || type == "uniform") {
-            std::vector<std::string> m_materialList;
+            m_materialList.clear();
             // Iterate over all material, save in list!
             ticpp::Iterator< ticpp::Element > material("Material");
             for ( material = material.begin( planeNode ); material != material.end(); material++ ) {
@@ -254,11 +254,15 @@ protected:
 
             Ogre::Plane plane;
             plane.normal = Ogre::Vector3(normal(0),normal(1),normal(2));
-            plane.d = Ogre::Vector3(d(0),d(1),d(2));
+            plane.d = dist;
+
+            // Do some calculation becaus eOgre nees a correct UpVector ...
+            Vector3 v1,v2;
+            makeCoordinateSystem(normal,v1,v2);
 
             Ogre::MeshManager::getSingleton().createPlane(plane_name.str(),
             Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane,
-            scale(0),scale(1),subDivs(0),subDivs(1),true,1,tile(0),tile(1),Vector3::UNIT_Z);
+            scale(0),scale(1),subDivs(0),subDivs(1),true,1,tile(0),tile(1),Ogre::Vector3(v1(0),v1(1),v1(2)));
 
             Ogre::Entity* ent = m_pSceneMgr->createEntity(entity_name.str(),plane_name.str() );
             ent->setCastShadows(renderSettings.shadowsEnabled);
@@ -467,6 +471,7 @@ protected:
 
 protected:
 
+     std::vector<std::string> m_materialList;
 
     boost::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
     Ogre::SceneNode * m_BaseFrame;

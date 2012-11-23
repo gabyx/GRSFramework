@@ -71,6 +71,7 @@ public:
     void doOneIteration();
 
     double getTimeCurrent();
+    unsigned int getIterationCount();
 
     // Solver Parameters
     TimeStepperSettings<LayoutConfigType> m_Settings;
@@ -95,6 +96,7 @@ protected:
     const unsigned int m_nSimBodies;
 
     int m_IterationCounter;
+     bool m_bIterationFinished;
 
     bool m_bFinished;
 
@@ -305,8 +307,11 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     m_PerformanceTimer.stop();
     m_PerformanceTimer.start();
 
+    m_bIterationFinished = false;
+
     iterations++;
     m_IterationCounter++;
+
 
     //Force switch
     //boost::thread::yield();
@@ -420,6 +425,9 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     } else {
         m_bFinished =  m_StateBuffers.m_pFront->m_t >= m_Settings.m_endTime;
     }
+
+
+    m_bIterationFinished = true;
 }
 
 template< typename TConfigTimeStepper>

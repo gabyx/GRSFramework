@@ -57,6 +57,8 @@ public:
     void doFirstHalfTimeStep( PREC timestep);
     void doSecondHalfTimeStep( PREC timestep);
 
+    void getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const;
+    void setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder);
     void getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver);
     void setSettings(const TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, const InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver);
 
@@ -69,6 +71,7 @@ public:
 
 protected:
 
+    RecorderSettings<LayoutConfigType> m_SettingsRecorder;
     TimeStepperSettings<LayoutConfigType> m_SettingsTimestepper;
     InclusionSolverSettings<LayoutConfigType> m_SettingsInclusionSolver;
 
@@ -112,6 +115,16 @@ void DynamicsSystem<TDynamicsSystemConfig>::initializeGlobalParameters() {
     m_gravity = 9.81;
     m_gravityDir = Vector3(0,0,-1);
 
+}
+
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const{
+    SettingsRecorder = m_SettingsRecorder;
+}
+
+template<typename TDynamicsSystemConfig>
+void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder){
+    m_SettingsRecorder = SettingsRecorder;
 }
 
 template<typename TDynamicsSystemConfig>

@@ -99,6 +99,66 @@ void vec2Vec(const std::vector<PREC> &vec, Eigen::Matrix<PREC,M,1> &V){
     }
 };
 
+/**
+* @brief Helper to convert a string with three whitespace-seperated numbers into a Vector3.
+*/
+template <typename PREC> bool stringToVector2( typename MyMatrix<PREC>::Vector2 & vector2, std::string s){
+	unsigned int i=0, j;
+	PREC number;
+
+   if( s.empty()){ return false;}
+
+	while(s[i]==' ') {
+		i++;
+		if(i > s.length()-1){
+			break;
+		}
+	}
+	if (i==s.length()) {
+		return false;
+	}
+	else {
+		j=i;
+		while(s[j]!=' ') {
+			j++;
+			if(j > s.length()-1){
+				break;
+			}
+		}
+		if (!stringToType<PREC>(number,s.substr(i,j-i))) {
+			return false;
+		}
+		vector2(0) = number;////////////////////////x
+		i = j;
+
+		while(s[i]==' ') {
+			i++;
+			if(i > s.length()-1){
+				break;
+			}
+		}
+		if (i==s.length()) {
+			return false;
+		}
+		else {
+			j=i;
+			while(s[j]!=' ') {
+				j++;
+				if(j > s.length()-1){
+					break;
+				}
+			}
+			if (!stringToType<PREC>(number,s.substr(i,j-i))){
+				return false;
+			}
+			vector2(1) = number;////////////////////////y
+		}
+	}
+	return true;
+}
+
+
+
 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector3.
