@@ -119,6 +119,7 @@ SET(STATES_SRC
 SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/OgreMeshExtraction.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/AxisObject.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/CommonFunctionsOgre.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
@@ -138,6 +139,7 @@ SET(COMMON_INC
 )
 SET(COMMON_SRC
     ${PROJECT_SOURCE_DIR}/src/Common/OgreMeshExtraction.cpp
+    ${PROJECT_SOURCE_DIR}/src/Common/AxisObject.cpp
     ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
     ${PROJECT_SOURCE_DIR}/src/Common/CommonFunctionsOgre.cpp
     ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp

@@ -200,7 +200,7 @@ void SimulationState::setupScene() {
     pLight->setDiffuseColour((Ogre::Real)0.6,(Ogre::Real) 0.6,(Ogre::Real) 0.6);
     pLight->setPosition( 75, 75, 150 );
     //pLight->setAttenuation(5000000,0,0.1,0);
-    pLight->setCastShadows(true);
+    //pLight->setCastShadows(true);
 
     pLight = m_pSceneMgr->createLight("Light2");
     pLight->setType(Ogre::Light::LT_POINT);
@@ -210,8 +210,8 @@ void SimulationState::setupScene() {
     pLight->setCastShadows(false);
 // pLight->setAttenuation(5000000,0,0.1,0);
     // Set Shadow Technique
-    m_pSceneMgr->setAmbientLight(Ogre::ColourValue((Ogre::Real)0.2, (Ogre::Real)0.2, (Ogre::Real)0.2));
-    m_pSceneMgr->setShadowTechnique(SHADOWTYPE_STENCIL_ADDITIVE);
+    //m_pSceneMgr->setAmbientLight(Ogre::ColourValue((Ogre::Real)0.2, (Ogre::Real)0.2, (Ogre::Real)0.2));
+    //m_pSceneMgr->setShadowTechnique(SHADOWTYPE_STENCIL_ADDITIVE);
 //  m_pSceneMgr->setShadowTextureSelfShadow(true);
 //  m_pSceneMgr->setShadowTextureSettings(512, 2);
 //  m_pSceneMgr->setShadowTextureSize(512);
