@@ -40,6 +40,28 @@ public:
 
 protected:
 
+    struct RenderSettings{
+        bool attachAxis;
+        double axesSize;
+        bool shadowsEnabled;
+    };
+
+    void processVisualization( ticpp::Node * visualizationNode) {
+
+
+        ticpp::Node * meshNode = visualizationNode->FirstChild("Mesh",false);
+        if(meshNode){
+            processMesh(meshNode);
+        }
+        else{
+            ticpp::Node * planeNode = visualizationNode->FirstChild("Plane",false);
+            processPlane(planeNode);
+        }
+
+
+    };
+
+
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
     void processOtherOptions(const ticpp::Node * rootNode) {
         LOG(this->m_pSimulationLog,"--->Process MPISettings..."<<std::endl;);
@@ -62,17 +84,17 @@ protected:
         Vector3 scale;
         if(meshNode->ToElement()->HasAttribute("scaleLikeGeometry")) {
             if(!Utilities::stringToType<bool>(scaleLikeGeometry, meshNode->ToElement()->GetAttribute("scaleLikeGeometry"))) {
-                throw ticpp::Exception("--->String conversion of scale in processMesh: scaleWithGeometry failed");
+                throw ticpp::Exception("--->String conversion in processMesh: scaleWithGeometry failed");
             }
         }
         if(!scaleLikeGeometry){
             if(!Utilities::stringToVector3<PREC>(scale, meshNode->ToElement()->GetAttribute("scale"))) {
-                throw ticpp::Exception("--->String conversion of scale in processMesh: scale failed");
+                throw ticpp::Exception("--->String conversion in processMesh: scale failed");
             }
         }
 
 
-        ticpp::Node * rendering =  meshNode->FirstChildNode("Rendering", false);
+        ticpp::Node * rendering =  meshNode->FirstChild("Rendering", false);
         RenderSettings renderSettings;
         processRenderSettings(rendering, renderSettings);
 
@@ -93,7 +115,7 @@ protected:
 
 
         std::stringstream entity_name,node_name;
-        LOG(this->m_pSimulationLog, "---> Add all Ogre Objects"<<std::endl);
+        LOG(this->m_pSimulationLog, "---> Add all Ogre: Mesh Objects"<<std::endl);
         for(int i=0; i<this->m_bodyList.size(); i++) {
             entity_name.str("");
             node_name.str("");
@@ -106,7 +128,7 @@ protected:
 
 
             Ogre::Entity* ent = m_pSceneMgr->createEntity(entity_name.str(), meshName.string() );
-            ent->setCastShadows(shadowsEnabled);
+            ent->setCastShadows(renderSettings.shadowsEnabled);
             Ogre::SceneNode* sceneNode = m_BaseFrame->createChildSceneNode(node_name.str());
             Ogre::SceneNode* sceneNodeScale = sceneNode->createChildSceneNode();
             if(scaleLikeGeometry) {
@@ -116,11 +138,11 @@ protected:
             }
             sceneNodeScale->attachObject(ent);
 
-            if(attachAxis) {
+            if(renderSettings.attachAxis) {
                 Ogre::SceneNode* sceneNodeAxes = sceneNode->createChildSceneNode(entity_name.str() + "Axes");
                 Ogre::Entity* axisEnt = m_pSceneMgr->createEntity(entity_name.str() + "AxesEnt","axes.mesh" );
                 //Ogre::MovableObject * axisEnt= AxisObject().createAxis(m_pSceneMgr.get(),entity_name.str() + "Axes",100);
-                sceneNodeAxes->setScale(axesSize,axesSize,axesSize);
+                sceneNodeAxes->setScale(renderSettings.axesSize,renderSettings.axesSize,renderSettings.axesSize);
                 sceneNodeAxes->attachObject(axisEnt);
             }
 
@@ -145,76 +167,116 @@ protected:
 
     }
 
-     void processPlane(ticpp::Node * meshNode ) {
+     void processPlane(ticpp::Node * planeNode ) {
 
         static int nodeCounter = 0;
         static int entityCounter = 0;
 
-        boost::filesystem::path meshName = meshNode->ToElement()->GetAttribute<std::string>("file");
-
         bool scaleLikeGeometry = false;
         Vector3 scale;
-        if(meshNode->ToElement()->HasAttribute("scaleLikeGeometry")) {
-            if(!Utilities::stringToType<bool>(scaleLikeGeometry, meshNode->ToElement()->GetAttribute("scaleLikeGeometry"))) {
-                throw ticpp::Exception("--->String conversion of scale in processMesh: scaleWithGeometry failed");
+        if(planeNode->ToElement()->HasAttribute("scaleLikeGeometry")) {
+            if(!Utilities::stringToType<bool>(scaleLikeGeometry, planeNode->ToElement()->GetAttribute("scaleLikeGeometry"))) {
+                throw ticpp::Exception("--->String conversion in processPlane: scaleWithGeometry failed");
             }
         }
         if(!scaleLikeGeometry){
-            if(!Utilities::stringToVector3<PREC>(scale, meshNode->ToElement()->GetAttribute("scale"))) {
-                throw ticpp::Exception("--->String conversion of scale in processMesh: scale failed");
+            if(!Utilities::stringToVector3<PREC>(scale, planeNode->ToElement()->GetAttribute("scale"))) {
+                throw ticpp::Exception("--->String conversion  in processPlane: scale failed");
             }
         }
 
 
-        ticpp::Node * rendering =  meshNode->FirstChildNode("Rendering", false);
+        Vector2 subDivs = Vector2::Ones();
+        if(planeNode->ToElement()->HasAttribute("subDivisions")) {
+            if(!Utilities::stringToType<Vector2>(subDivs, planeNode->ToElement()->GetAttribute("subDivisions"))) {
+                throw ticpp::Exception("--->String conversion in processPlane: subDivisions failed");
+            }
+        }
+
+        Vector3 normal; normal(0)=0; normal(1)=0; normal(2)=1;
+        if(planeNode->ToElement()->HasAttribute("normal")) {
+            if(!Utilities::stringToType<Vector3>(normal, planeNode->ToElement()->GetAttribute("normal"))) {
+                throw ticpp::Exception("--->String conversion in processPlane: normal failed");
+            }
+        }
+
+        Vector3 d; d(0)=0; d(1)=0; d(2)=0;
+        if(planeNode->ToElement()->HasAttribute("distance")) {
+            if(!Utilities::stringToType<Vector3>(d, planeNode->ToElement()->GetAttribute("distance"))) {
+                throw ticpp::Exception("--->String conversion in processPlane: distance failed");
+            }
+        }
+
+        Vector2 tile; tile(0)=1; tile(1)=1;
+        if(planeNode->ToElement()->HasAttribute("tileTexture")) {
+            if(!Utilities::stringToType<Vector3>(tile, planeNode->ToElement()->GetAttribute("tileTexture"))) {
+                throw ticpp::Exception("--->String conversion in processPlane: distance failed");
+            }
+        }
+
+
+
+        ticpp::Node * rendering =  planeNode->FirstChild("Rendering", false);
         RenderSettings renderSettings;
         processRenderSettings(rendering, renderSettings);
 
-        std::string type = meshNode->ToElement()->GetAttribute("type");
+        //Distribution Type
+        std::string type = planeNode->ToElement()->GetAttribute("type");
         if( type == "permutate" || type == "uniform") {
             std::vector<std::string> m_materialList;
             // Iterate over all material, save in list!
             ticpp::Iterator< ticpp::Element > material("Material");
-            for ( material = material.begin( meshNode ); material != material.end(); material++ ) {
+            for ( material = material.begin( planeNode ); material != material.end(); material++ ) {
                 m_materialList.push_back(material->GetAttribute<std::string>("name"));
             }
             if(m_materialList.empty()) {
-                throw ticpp::Exception("--->No Material Node found in Mesh!");
+                throw ticpp::Exception("--->No Material Node found in Plane!");
             }
         } else {
-            throw ticpp::Exception("--->The attribute 'type' '" + type + std::string("' of 'processMesh' has no implementation in the parser"));
+            throw ticpp::Exception("--->The attribute 'type' '" + type + std::string("' of 'processPlane' has no implementation in the parser"));
         }
 
 
-        std::stringstream entity_name,node_name;
-        LOG(this->m_pSimulationLog, "---> Add all Ogre Objects"<<std::endl);
+        std::stringstream entity_name,node_name,plane_name;
+        LOG(this->m_pSimulationLog, "---> Add all Ogre: Plane Objects"<<std::endl);
         for(int i=0; i<this->m_bodyList.size(); i++) {
             entity_name.str("");
             node_name.str("");
-            entity_name << meshName.filename().string() << std::string("Entity");
-            node_name << meshName.filename().string() << std::string("Node");
+            entity_name << "OgrePlane" << std::string("Entity");
+            node_name << "OgrePlane" << std::string("Node");
+            plane_name <<  "OgrePlane";
             entity_name << entityCounter;
             node_name<< nodeCounter;
-
+            plane_name << nodeCounter;
             //TODO m_pSceneMgr->createInstancedGeometry();
 
+            //Make mesh
 
-            Ogre::Entity* ent = m_pSceneMgr->createEntity(entity_name.str(), meshName.string() );
-            ent->setCastShadows(shadowsEnabled);
-            Ogre::SceneNode* sceneNode = m_BaseFrame->createChildSceneNode(node_name.str());
+            Ogre::Plane plane;
+            plane.normal = Ogre::Vector3(normal(0),normal(1),normal(2));
+            plane.d = Ogre::Vector3(d(0),d(1),d(2));
+
+            Ogre::MeshManager::getSingleton().createPlane(plane_name.str(),
+            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane,
+            scale(0),scale(1),subDivs(0),subDivs(1),true,1,tile(0),tile(1),Vector3::UNIT_Z);
+
+            Ogre::Entity* ent = m_pSceneMgr->createEntity(entity_name.str(),plane_name.str() );
+            ent->setCastShadows(renderSettings.shadowsEnabled);
+
+             Ogre::SceneNode* sceneNode = m_BaseFrame->createChildSceneNode(node_name.str());
             Ogre::SceneNode* sceneNodeScale = sceneNode->createChildSceneNode();
-            if(scaleLikeGeometry) {
+             if(scaleLikeGeometry) {
                 sceneNodeScale->setScale(this->m_bodyListScales[i](0),this->m_bodyListScales[i](1),this->m_bodyListScales[i](2));
             } else {
                 sceneNodeScale->setScale(scale(0),scale(1),scale(2));
             }
             sceneNodeScale->attachObject(ent);
 
-            if(attachAxis) {
+            if(renderSettings.attachAxis) {
                 Ogre::SceneNode* sceneNodeAxes = sceneNode->createChildSceneNode(entity_name.str() + "Axes");
                 Ogre::Entity* axisEnt = m_pSceneMgr->createEntity(entity_name.str() + "AxesEnt","axes.mesh" );
                 //Ogre::MovableObject * axisEnt= AxisObject().createAxis(m_pSceneMgr.get(),entity_name.str() + "Axes",100);
-                sceneNodeAxes->setScale(axesSize,axesSize,axesSize);
+                sceneNodeAxes->setScale(renderSettings.axesSize,renderSettings.axesSize,renderSettings.axesSize);
                 sceneNodeAxes->attachObject(axisEnt);
             }
 
@@ -241,27 +303,27 @@ protected:
 
 
 
-    void processRenderSettings(ticpp::Node * renderNode, RenderSettings & settings){
+    void processRenderSettings(ticpp::Node * rendering, RenderSettings & settings){
 
         settings.attachAxis = false;
         settings.axesSize = 1;
         settings.shadowsEnabled = true;
         if(rendering) {
-
-            if(rendering->HasAttribute("attachAxis")) {
-                if(!Utilities::stringToType<bool>(settings.attachAxis, rendering->GetAttribute("attachAxis"))) {
+            ticpp::Element* renderEl = rendering->ToElement();
+            if(renderEl->HasAttribute("attachAxis")) {
+                if(!Utilities::stringToType<bool>(settings.attachAxis, renderEl->GetAttribute("attachAxis"))) {
                     throw ticpp::Exception("--->String conversion of in processMesh: attachAxis failed");
                 }
             }
-            if(rendering->HasAttribute("axesSize")) {
-                if(!Utilities::stringToType<double>(settings.axesSize, rendering->GetAttribute("axesSize"))) {
+            if(renderEl->HasAttribute("axesSize")) {
+                if(!Utilities::stringToType<double>(settings.axesSize, renderEl->GetAttribute("axesSize"))) {
                     throw ticpp::Exception("--->String conversion of in processMesh: axesSize failed");
                 }
             }
 
 
-            if(rendering->HasAttribute("shadowsEnabled")) {
-                if(!Utilities::stringToType<bool>(settings.shadowsEnabled, rendering->GetAttribute("shadowsEnabled"))) {
+            if(renderEl->HasAttribute("shadowsEnabled")) {
+                if(!Utilities::stringToType<bool>(settings.shadowsEnabled, renderEl->GetAttribute("shadowsEnabled"))) {
                     throw ticpp::Exception("--->String conversion of in processMesh: shadowsEnabled failed");
                 }
             }
@@ -405,11 +467,6 @@ protected:
 
 protected:
 
-    struct RenderSettings{
-        bool attachAxis;
-        double axesSize;
-        bool shadowsEnabled;
-    };
 
     boost::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
     Ogre::SceneNode * m_BaseFrame;

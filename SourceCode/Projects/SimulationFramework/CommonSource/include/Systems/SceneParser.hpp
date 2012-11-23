@@ -308,7 +308,6 @@ protected:
                 ticpp::Element *elem = node->ToElement();
                 std::string method = elem->GetAttribute("recorderMode");
                 if(method == "everyTimeStep") {
-                    std::cout <<"EVERY STEPPPPPPPPP"<<std::endl;
                     recorderSettings.setMode(RecorderSettings<LayoutConfigType>::RECORD_EVERY_STEP);
                 } else if (method == "everyXTimeStep") {
                     recorderSettings.setMode(RecorderSettings<LayoutConfigType>::RECORD_EVERY_X_STEP);
@@ -1199,16 +1198,7 @@ protected:
 
     virtual void processVisualization( ticpp::Node * visualizationNode) {
 
-        ticpp::Node * meshNode = visualizationNode->FirstChild("Mesh");
-
-        processMesh(meshNode);
-
     }
-
-    virtual void processMesh( ticpp::Node * meshNode ) {
-        /* Do nothing here: A derived version of this parser may process the visualization if needed*/
-    }
-
 
 
     bool m_bParseDynamics; ///< Parse Dynamics stuff or do not. Playback Manager also has this SceneParser but does not need DynamicsStuff.
