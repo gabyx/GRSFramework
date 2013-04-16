@@ -53,14 +53,6 @@ else()
    MESSAGE(STATUS "OGRE and OIS Library have been found!")
 endif()
 
-INCLUDE(IncludeModulesCUDA)
-
-# Configure File for the BUILD!
-string(REPLACE "." "" CUDA_VERSION_INTEGER ${CUDA_VERSION})
-configure_file (
-  ${PROJECT_SOURCE_DIR}/include/ConfigFiles/ConfigureFile.hpp.in
-  ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
-)
 
 
 #Set Source Code
@@ -205,6 +197,13 @@ SET(SYSTEMS_SRC
 )
 
 # CUDA SOURCE INCLUDES ====================================================================
+if(SIMULATIONFRAMEWORK_USE_CUDA)
+
+INCLUDE(IncludeModulesCUDA)
+
+# Configure File for the BUILD!
+string(REPLACE "." "" CUDA_VERSION_INTEGER ${CUDA_VERSION})
+
 INCLUDE_PROX_CUDA(ProxGPU_SRC ProxGPU_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
 INCLUDE_VECTOR_ADD_CUDA(VectorAddGPU_SRC VectorAddGPU_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
 INCLUDE_MATRIX_VECTOR_MULT_CUDA(MatrixVectorMultGPU_SRC MatrixVectorMultGPU_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
@@ -217,7 +216,21 @@ SET(CUDA_SRC
 SET(CUDA_INC
    ${ProxGPU_INC} ${VectorAddGPU_INC} ${MatrixVectorMultGPU_INC} ${GeneralCommonFiles_INC}
 )
+else()
+INCLUDE(IncludeModulesCUDA)
+INCLUDE_GENERAL_EXTERN_CUDA(GeneralCommonFiles_SRC GeneralCommonFiles_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
+SET(CUDA_SRC ${GeneralCommonFiles_SRC})
+SET(CUDA_INC ${GeneralCommonFiles_INC})
+endif()
 # ===========================================================================================
+
+
+# WRITE CONFIGURATION FILE
+configure_file (
+  ${PROJECT_SOURCE_DIR}/include/ConfigFiles/ConfigureFile.hpp.in
+  ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
+)
+#=========================
 
 
 SET(SOURCE_FILES
@@ -241,13 +254,6 @@ SET(INCLUDE_FILES
     ${CUDA_INC}
 )
 
-
-
-
-# MESSAGE("OGRE_INCLUDE_DIRS: ${OGRE_INCLUDE_DIRS}")
-# MESSAGE("OGRE_INCLUDE_DIR: ${OGRE_INCLUDE_DIR}")
-# MESSAGE("OGRE_LIBRARIES: ${OGRE_LIBRARIES}")
-# MESSAGE("OIS_INCLUDE_DIR: ${OGRE_INCLUDE_DIRS}")
 
 #Set CEGUI Libraries
 #SET(CEGUI_LIBS CEGUIBase CEGUIOgreRenderer)
@@ -343,7 +349,11 @@ source_group("Common Header" FILES ${COMMON_FILES_INC})
 
 
 message(STATUS "Add executable:...")
+if(SIMULATIONFRAMEWORK_USE_CUDA)
 CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} ${COMMON_FILES_SRC} ${COMMON_FILES_INC})
+else()
+ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} ${COMMON_FILES_SRC} ${COMMON_FILES_INC})
+endif()
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 
 

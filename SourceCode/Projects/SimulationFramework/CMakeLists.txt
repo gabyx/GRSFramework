@@ -2,6 +2,18 @@
 #is distributed since version 2.8
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+
+MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_GUI )
+set(SIMULATIONFRAMEWORK_BUILD_GUI OFF CACHE BOOL "Build the GUI version of SimulationFramework")
+
+MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_NOGUI )
+set(SIMULATIONFRAMEWORK_BUILD_NOGUI ON CACHE BOOL "Build the NOGUI version of SimulationFramework")
+
+MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_MPI )
+set(SIMULATIONFRAMEWORK_BUILD_MPI OFF CACHE BOOL "Build the MPI version of SimulationFramework")
+
+
+
 # Set the makefile build type (only for make file based generators)
 MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )
 
@@ -53,45 +65,52 @@ endif()
 #Find Doxygen
 FIND_PACKAGE(Doxygen)
 
-# Find CUDA! =============================================================================================================================
-# Set the flags
+MARK_AS_ADVANCED( SIMULATIONFRAMEWORK_USE_CUDA )
+SET(SIMULATIONFRAMEWORK_USE_CUDA OFF CACHE BOOL "USE CUDA Support for the SimulationFramework")
 
-IF(WIN32)
-        SET(MYPROJECT_CUDA_PROPAGATE_HOST_FLAGS ON CACHE BOOL "Propagate C/CXX Flags and friends to the host compiler in NVCC via -Xompile")
-ENDIF()
-IF(UNIX)
-        SET(MYPROJECT_CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "Propagate C/CXX Flags and friends to the host compiler in NVCC via -Xompile")
-ENDIF()
+if(SIMULATIONFRAMEWORK_USE_CUDA)
+# Find CUDA (if available)! =============================================================================================================================
+	# Set the flags
 
-# Set the architecture for the grafics card!
-SET(MYPROJECT_CUDA_NVCC_FLAGS
-"-gencode=arch=compute_20,code=\\\"sm_20,compute_20\\\""
-"--ptxas-options=-v"
-CACHE VALUE "Semicolon delimited several arguments for the NVCC compiler")
-SET(MYPROJECT_CUDA_NVCC_FLAGS_DEBUG
-"-g"
-"-G"
-CACHE VALUE "Semicolon delimited several arguments for the NVCC compiler")
-SET(MYPROJECT_CUDA_NVCC_FLAGS_RELEASE "-O2"
-CACHE VALUE "Semicolon delimited several arguments for the NVCC compiler")
+	IF(WIN32)
+			SET(MYPROJECT_CUDA_PROPAGATE_HOST_FLAGS ON CACHE BOOL "Propagate C/CXX Flags and friends to the host compiler in NVCC via -Xompile")
+	ENDIF()
+	IF(UNIX)
+			SET(MYPROJECT_CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "Propagate C/CXX Flags and friends to the host compiler in NVCC via -Xompile")
+	ENDIF()
 
-FIND_PACKAGE(CUDA)
+	# Set the architecture for the grafics card!
+	SET(MYPROJECT_CUDA_NVCC_FLAGS
+	"-gencode=arch=compute_20,code=\\\"sm_20,compute_20\\\""
+	"--ptxas-options=-v"
+	CACHE VALUE "Semicolon delimited several arguments for the NVCC compiler")
+	SET(MYPROJECT_CUDA_NVCC_FLAGS_DEBUG
+	"-g"
+	"-G"
+	CACHE VALUE "Semicolon delimited several arguments for the NVCC compiler")
+	SET(MYPROJECT_CUDA_NVCC_FLAGS_RELEASE "-O2"
+	CACHE VALUE "Semicolon delimited several arguments for the NVCC compiler")
 
-if(CUDA_FOUND)
-   set(CUDA_SUPPORT 1) #Gets written to the config file!
+	FIND_PACKAGE(CUDA REQUIRED)
 
-   SET(CUDA_VERBOSE_BUILD ON)
-   SET(CUDA_NVCC_FLAGS           "${MYPROJECT_CUDA_NVCC_FLAGS}"            CACHE INTERNAL "Internal flags do not edit" FORCE)
-   SET(CUDA_NVCC_FLAGS_DEBUG     "${MYPROJECT_CUDA_NVCC_FLAGS_DEBUG}"      CACHE INTERNAL "Internal flags do not edit" FORCE)
-   SET(CUDA_NVCC_FLAGS_RELEASE   "${MYPROJECT_CUDA_NVCC_FLAGS_RELEASE}"    CACHE INTERNAL "Internal flags do not edit" FORCE)
-   SET(CUDA_PROPAGATE_HOST_FLAGS "${MYPROJECT_CUDA_PROPAGATE_HOST_FLAGS}"  CACHE INTERNAL "Internal flags do not edit" FORCE)
+	   set(CUDA_SUPPORT 1) #Gets written to the config file!
 
-   set(CUDA_COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../CudaFramework/CommonSource CACHE PATH "Path to the cuda common source directory!")
-   MARK_AS_ADVANCED(CUDA_COMMON_SOURCE_DIR)
+	   SET(CUDA_VERBOSE_BUILD ON)
+	   SET(CUDA_NVCC_FLAGS           "${MYPROJECT_CUDA_NVCC_FLAGS}"            CACHE INTERNAL "Internal flags do not edit" FORCE)
+	   SET(CUDA_NVCC_FLAGS_DEBUG     "${MYPROJECT_CUDA_NVCC_FLAGS_DEBUG}"      CACHE INTERNAL "Internal flags do not edit" FORCE)
+	   SET(CUDA_NVCC_FLAGS_RELEASE   "${MYPROJECT_CUDA_NVCC_FLAGS_RELEASE}"    CACHE INTERNAL "Internal flags do not edit" FORCE)
+	   SET(CUDA_PROPAGATE_HOST_FLAGS "${MYPROJECT_CUDA_PROPAGATE_HOST_FLAGS}"  CACHE INTERNAL "Internal flags do not edit" FORCE)
 
-else(CUDA_FOUND)
-   set(CUDA_SUPPORT 0) #Gets written to the config file!
-endif(CUDA_FOUND)
+	   set(CUDA_COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../CudaFramework/CommonSource CACHE PATH "Path to the cuda common source directory!")
+	   MARK_AS_ADVANCED(CUDA_COMMON_SOURCE_DIR)
+
+else()
+
+	set(CUDA_COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../CudaFramework/CommonSource CACHE PATH "Path to the cuda common source directory!")
+	MARK_AS_ADVANCED(CUDA_COMMON_SOURCE_DIR)
+
+	set(CUDA_SUPPORT 0) #Gets written to the config file!
+endif()
 
 
 # ===============================================================================================================================================================
@@ -200,7 +219,6 @@ endif()
 
 
 # DEFINE if we should use the GPU for the simulation or not!
-#
 
 
 SET(MYPROJECT_CXX_FLAGS "-std=c++0x" CACHE STRING "The project's own compiler flags")
@@ -208,14 +226,22 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MYPROJECT_CXX_FLAGS}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MYPROJECT_CXX_FLAGS}")
 MESSAGE(STATUS "Added ${MYPROJECT_CXX_FLAGS} to CMAKE_CXX and CMAKE_C_FLAGS: ${CMAKE_CXX_FLAGS} and ${CMAKE_C_FLAGS}")
 
-
 #set common includes for all projects which need them
+
 
 set(COMMONSOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CommonSource")
 
+if(SIMULATIONFRAMEWORK_BUILD_GUI)
 add_subdirectory(Projects/GeneralRigidBodySimulation)
+endif()
+
+if(SIMULATIONFRAMEWORK_BUILD_NOGUI)
 add_subdirectory(Projects/GeneralRigidBodySimulationNoGUI)
+endif()
+
+if(SIMULATIONFRAMEWORK_BUILD_MPI)
 add_subdirectory(Projects/GeneralRigidBodySimulationMPI)
+endif()
 
 # Copy Media Files to Project folder
 # message(STATUS "Copying Media Content to " ${CMAKE_BINARY_DIR}/Projects/)

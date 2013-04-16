@@ -40,7 +40,7 @@ int main(int argc, char **argv)
    mgr.startSim();
 
 
-   system("pause");
+  system("pause");
   return 0;
 }
 
