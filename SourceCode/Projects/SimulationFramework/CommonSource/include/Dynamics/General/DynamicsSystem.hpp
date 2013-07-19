@@ -38,9 +38,9 @@ public:
 
     ContactParameterMap<RigidBodyType> m_ContactParameterMap;
 
-    typedef std::vector< boost::shared_ptr< RigidBodyType > > RigidBodySimPtrListType;
+    typedef std::vector<  RigidBodyType *  > RigidBodySimPtrListType;
     RigidBodySimPtrListType m_SimBodies; // Simulated Objects
-    typedef std::vector< boost::shared_ptr< RigidBodyType > > RigidBodyNotAniPtrListType;
+    typedef std::vector<  RigidBodyType *  > RigidBodyNotAniPtrListType;
     RigidBodyNotAniPtrListType m_Bodies;    // all not simulated objects
 
 
@@ -168,7 +168,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
     typename RigidBodySimPtrListType::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
-        RigidBodyType * pBody = (*bodyIt).get();
+        RigidBodyType * pBody = (*bodyIt);
 
 #if CoutLevelSolver>2
         LOG(m_pSolverLog, "Body: "<< pBody->m_id <<"-----"<< std::endl
@@ -220,7 +220,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
     typename RigidBodySimPtrListType::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
-        RigidBodyType * pBody = (*bodyIt).get();
+        RigidBodyType * pBody = (*bodyIt);
 #if CoutLevelSolver>2
         LOG(m_pSolverLog, "Body: "<< pBody->m_id <<"-----"<< std::endl
             << "m_t= "  <<pBody->m_pSolverData->m_t<<std::endl

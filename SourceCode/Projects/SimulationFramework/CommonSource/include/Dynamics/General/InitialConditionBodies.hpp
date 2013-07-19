@@ -112,7 +112,7 @@ void setupPositionBodyPosAxisAngle(RigidBodyState<TLayoutConfig> & rigibodyState
 
 
 template<typename TLayoutConfig,  template<class,class> class TVec, typename TRigidBody, typename TAllocator>
-void applyDynamicsStateToBodies(const DynamicsState<TLayoutConfig> & state, TVec<boost::shared_ptr<TRigidBody>,TAllocator> & bodies) {
+void applyDynamicsStateToBodies(const DynamicsState<TLayoutConfig> & state, TVec<TRigidBody*,TAllocator> & bodies) {
     ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
 
     for(int i=0; i < bodies.size(); i++) {
@@ -130,15 +130,15 @@ void applyDynamicsStateToBodies(const DynamicsState<TLayoutConfig> & state, TVec
 
 
 template<typename TLayoutConfig, template<class,class> class TVec, typename TRigidBody, typename TAllocator>
-void applyBodiesToDynamicsState(const TVec<boost::shared_ptr<TRigidBody>,TAllocator> & bodies,
+void applyBodiesToDynamicsState(const TVec<TRigidBody*,TAllocator> & bodies,
                                 DynamicsState<TLayoutConfig> & state ) {
     ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
 
-    typename  TVec<boost::shared_ptr<TRigidBody>,TAllocator>::const_iterator bodyIt;
+    typename  TVec<TRigidBody*,TAllocator>::const_iterator bodyIt;
     typename  DynamicsState<TLayoutConfig>::RigidBodyStateListType::iterator stateBodyIt = state.m_SimBodyStates.begin();
 
     for(bodyIt = bodies.begin(); bodyIt != bodies.end() ; bodyIt++) {
-        applyBodyToRigidBodyState( *(bodyIt->get()), (*stateBodyIt) );
+        applyBodyToRigidBodyState( *(*bodyIt), (*stateBodyIt) );
         stateBodyIt++;
     }
 }

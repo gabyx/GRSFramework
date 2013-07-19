@@ -79,10 +79,8 @@ protected:
     boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
 
-    typedef std::vector< boost::shared_ptr< RigidBodyType > > RigidBodySimPtrListType;
-    RigidBodySimPtrListType & m_SimBodies;
-    typedef std::vector< boost::shared_ptr< RigidBodyType > > RigidBodyNotAniPtrListType;
-    RigidBodyNotAniPtrListType & m_Bodies;
+    typename DynamicsSystemType::RigidBodySimPtrListType & m_SimBodies;
+    typename DynamicsSystemType::RigidBodyNotAniPtrListType & m_Bodies;
 
     typedef ContactGraph<RigidBodyType,ContactGraphMode::ForIteration> ContactGraphType;
     ContactGraphType m_ContactGraph;
@@ -284,7 +282,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doJorProx() {
 template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::integrateAllBodyVelocities() {
 
-    typename RigidBodySimPtrListType::iterator bodyIt;
+    typename DynamicsSystemType::RigidBodySimPtrListType::iterator bodyIt;
 
     for( bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
@@ -355,7 +353,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
     }
 
     // Integrate all bodies!
-    typename RigidBodySimPtrListType::iterator bodyIt;
+    typename DynamicsSystemType::RigidBodySimPtrListType::iterator bodyIt;
 
     for( bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...

@@ -438,10 +438,10 @@ protected:
 
 
         for(int i=0; i<instances; i++) {
-            boost::shared_ptr< RigidBodyType > temp_ptr(new RigidBodyType());
+            RigidBodyType * temp_ptr = new RigidBodyType();
 
             //Assign a unique id
-            RigidBodyId::setId(temp_ptr.get(),i, groupId);
+            RigidBodyId::setId(temp_ptr,i, groupId);
             LOG(m_pSimulationLog,"--->Added RigidBody Instance: "<<temp_ptr->m_id<<std::endl);
             m_bodyList.push_back(temp_ptr);
 
@@ -1217,7 +1217,7 @@ protected:
     unsigned int m_globalMaxGroupId; // Group Id used to build a unique id!
     // Temprary structures
     typename RigidBodyType::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
-    std::vector<boost::shared_ptr< RigidBodyType > > m_bodyList; ///< Used to process a RigidBody Node
+    typename DynamicsSystemType::RigidBodySimPtrListType m_bodyList; ///< Used to process a RigidBody Node
     std::vector<Vector3> m_bodyListScales;
     std::vector< DynamicsState<LayoutConfigType> > m_SimBodyInitStates;
 
