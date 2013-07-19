@@ -34,8 +34,8 @@ public:
 
     void writeStates(const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list);
 
-    bool openFiles(boost::filesystem::path dir_path, const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list);
-    bool closeFiles(typename RigidBodyType::RigidBodyIdType);
+    bool openFiles(boost::filesystem::path dir_path, const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list, bool truncate = false);
+    bool closeFile(typename RigidBodyType::RigidBodyIdType);
 
     void closeAllSimFiles();
 
@@ -78,13 +78,15 @@ StateRecorderBody<TDynamicsSystemType>::~StateRecorderBody() {
 
 
 template<typename TDynamicsSystemType>
-bool StateRecorderBody<TDynamicsSystemType>::openFiles(boost::filesystem::path dir_path, const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list)
+bool StateRecorderBody<TDynamicsSystemType>::openFiles(boost::filesystem::path dir_path,
+                                                       const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list,
+                                                       bool truncate)
 {
 
     boost::filesystem::path file;
     std::stringstream s;
 
-    // For everybody add a Sim File!
+    // For every body add a Sim File!
     typename TDynamicsSystemType::RigidBodySimPtrListType::const_iterator it;
     for(it = body_list.begin();it != body_list.end();it++){
 
@@ -103,19 +105,25 @@ bool StateRecorderBody<TDynamicsSystemType>::openFiles(boost::filesystem::path d
         }else{ //if insert took place
 
             // Do truncate
-            if(!pBodyFile->openSimFileWrite(file,1,true)){
+            if(!pBodyFile->openSimFileWrite(file,1,truncate)){
                 m_pSimulationLog->logMessage("--->StateRecorderBody:: Could not open Sim file: " + file.string());
                 m_pSimulationLog->logMessage(pBodyFile->getErrorString());
                 delete pBodyFile;
                 m_BinarySimFiles.erase(res.first);
                 return false;
             }
-             m_pSimulationLog->logMessage("--->StateRecorderBody:: Added Sim file: " + file.string());
+            if(truncate){
+                m_pSimulationLog->logMessage("--->StateRecorderBody:: Added Sim file (truncated):" + file.string() );
+            }
+            else{
+                m_pSimulationLog->logMessage("--->StateRecorderBody:: Added Sim file: " + file.string() );
+
+            }
         }
 
 
     }
-    m_pSimulationLog->logMessage("--->StateRecorderBody:: Added and opened all Sim files");
+    m_pSimulationLog->logMessage("--->StateRecorderBody:: Opened all Sim files");
 
     return true;
 }
@@ -124,7 +132,7 @@ template<typename TDynamicsSystemType>
 void StateRecorderBody<TDynamicsSystemType>::getSimBodyFileName(typename TDynamicsSystemType::RigidBodyType *body,
                                                                 std::stringstream & s){
     s.str("");
-    s <<"SimData_Body_" <<"-"<<RigidBodyId::getGroupNr(body)<<"-"<< RigidBodyId::getBodyNr(body)<<SIM_FILE_EXTENSION;
+    s <<"SimData_Body_" <<"-"<<RigidBodyId::getProcessNr(body)<<"-"<< RigidBodyId::getBodyNr(body)<<SIM_FILE_EXTENSION;
 }
 
 template<typename TDynamicsSystemType>
@@ -152,13 +160,16 @@ void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamic
 
 
 template<typename TDynamicsSystemType>
-bool StateRecorderBody<TDynamicsSystemType>::closeFiles(typename RigidBodyType::RigidBodyIdType bodyId){
+bool StateRecorderBody<TDynamicsSystemType>::closeFile(typename RigidBodyType::RigidBodyIdType bodyId){
 
     typename FileMap::iterator it = m_BinarySimFiles.find(bodyId);
 
 
     if(it != m_BinarySimFiles.end()){
-        LOG(m_pSimulationLog, "--->StateRecorderBody:: Removed Sim file";);
+        it->second->closeSimFile();
+        delete it->second;
+        m_BinarySimFiles.erase(it);
+        LOG(m_pSimulationLog, "--->StateRecorderBody:: Closed and removed Sim file";);
     }else{
         LOG(m_pSimulationLog,"--->StateRecorderBody:: No Sim file to remove for Body Id: "<<bodyId);
         return false;

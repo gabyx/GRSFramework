@@ -106,12 +106,13 @@ bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
     boost::timer::cpu_timer timer;
 
     timer.start();
+    LOG(m_pSimulationLog,  "MPI> Body check,  MPI_Reduce... "<< std::endl;);
     MPI_Reduce(&nSimBodies,&numberOfBodiesInSimulation, 1, MPI_INT, MPI_SUM, ProcessInfoType::MASTER, MPI_COMM_WORLD);
     timer.stop();
     double elapsed = ((double)timer.elapsed().wall)*1e-9;
 
     if(m_pProcComm->m_pProcessInfo->hasMasterRank()) {
-        LOG(m_pSimulationLog,  " Allreduce needed: " << elapsed <<"sec."<<std::endl; );
+        LOG(m_pSimulationLog,  "MPI> Allreduce needed: " << elapsed <<"sec."<<std::endl; );
 
         if(numberOfBodiesInSimulation != m_nGlobalSimBodies) {
             LOG(m_pSimulationLog,  "ERROR: ---> Body check NOT successful! : "<< numberOfBodiesInSimulation <<"!="<< m_nGlobalSimBodies<< std::endl;);
@@ -135,15 +136,15 @@ void SimulationManagerMPI<TConfig>::startSim() {
     initSim();
 
 
-    //  Write first initial value out!
+    //Write first initial value out!
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
        m_pStateRecorder->writeStates(m_pDynSys->m_SimBodies);
     }
 
 
-
-    //while(1)
-    //{
+//
+//    while(1)
+//    {
 
       // Do one iteration
       m_pTimestepper->doOneIteration();
@@ -162,7 +163,7 @@ void SimulationManagerMPI<TConfig>::startSim() {
 //         m_pSimulationLog->logMessage("---> SimulationManager: Timestepper finished, exit...");
 //         break;
       //}
-    //}
+//  }
 
 
   m_pSimulationLog->logMessage("---> SimulationManager: Simulation leaving...");
@@ -208,7 +209,7 @@ void SimulationManagerMPI<TConfig>::initSim() {
     }
 
 
-    if(!m_pStateRecorder->openFiles(m_SimFolderPath, m_pDynSys->m_SimBodies)){
+    if(!m_pStateRecorder->openFiles(m_SimFolderPath, m_pDynSys->m_SimBodies,true)){ // Truncate the files, important!
         LOG(m_pSimulationLog,  "ERROR: ---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl;);
         ERRORMSGMPI("ERROR: ---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
     }

@@ -190,11 +190,12 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
         // =================
 
 #if CoutLevelSolver>2
-        LOG(m_pSolverLog, "Body: "<< pBody->m_id <<"-----" std::endl
+        LOG(m_pSolverLog, "Body: "<< pBody->m_id <<"-----"<< std::endl
             << "m_t= "  << pBody->m_pSolverData->m_t<<std::endl
             << "m_q_m= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
 #endif
     }
+
 }
 
 template<typename TDynamicsSystemConfig>

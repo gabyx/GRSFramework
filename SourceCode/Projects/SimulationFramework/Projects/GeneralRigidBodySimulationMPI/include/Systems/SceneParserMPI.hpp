@@ -241,7 +241,7 @@ protected:
                 // Check if Body belongs to the topology! // Check CoG!
                 if(m_pProcComm->m_pProcessInfo->getProcTopo().belongsPointToProcess((*bodyIt)->m_r_S)) {
 
-                    LOG(m_pSimulationLog, "--->Added Body with ID: (" << RigidBodyId::getGroupNr(bodyIt->get())<<","<<RigidBodyId::getBodyNr(bodyIt->get())<<")"<< std::endl);
+                    LOG(m_pSimulationLog, "--->Added Body with ID: (" << RigidBodyId::getProcessNr(bodyIt->get())<<","<<RigidBodyId::getBodyNr(bodyIt->get())<<")"<< std::endl);
 
                     m_pDynSys->m_SimBodies.push_back((*bodyIt));
 
@@ -272,7 +272,7 @@ protected:
         this->processVisualization( visualizationNode);
 
 
-
+        //Remove all bodies from the sceneparsers intern list!
         m_bodyList.clear();
         m_bodyListScales.clear();
     }

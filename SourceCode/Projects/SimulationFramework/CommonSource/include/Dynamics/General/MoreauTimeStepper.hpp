@@ -247,10 +247,6 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
     m_IterationCounter = 0;
     m_bIterationFinished = false;
 
-    m_pSimulationLog->logMessage("---> Reset StatePool...");
-    m_pStatePool->resetStatePool(); // Sets initial values to front and back;
-    m_StateBuffers = m_pStatePool->getFrontBackBuffer();
-
     m_pSimulationLog->logMessage("---> Reset DynamicsSystem...");
     m_pDynSys->reset();
     m_pDynSys->getSettings(m_Settings, m_pInclusionSolver->m_Settings);
@@ -265,19 +261,12 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
 
     if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::NONE) {
 
-        if(!m_ReferenceSimFile.openSimFileRead(m_Settings.m_simStateReferenceFile,m_nSimBodies,true)) {
-            std::stringstream error;
-            error << "Could not open file: " << m_Settings.m_simStateReferenceFile.string()<<std::endl;
-            error << "File errors: " <<std::endl<< m_ReferenceSimFile.getErrorString();
-            m_pSolverLog->logMessage( error.str());
-            ERRORMSG(error);
-        }
-        LOG(m_pSimulationLog,"---> Opened Reference SimFile: m_Settings.m_simStateReferenceFile"<<std::endl);
+        //TODO Open all simfiles references for the bodies
+        //LOG(m_pSimulationLog,"---> Opened Reference SimFile: m_Settings.m_simStateReferenceFile"<<std::endl);
 
         if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::CONTINUE) {
             //Inject the end state into the front buffer
-            m_ReferenceSimFile.getEndState(*m_StateBuffers.m_pFront);
-            LOG(m_pSimulationLog,"---> Injected first state of Reference SimFile into StateBuffer"<<std::endl);
+            //TODO
         }
 
     }

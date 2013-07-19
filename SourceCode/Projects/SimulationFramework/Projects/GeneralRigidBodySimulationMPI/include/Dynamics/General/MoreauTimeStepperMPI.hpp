@@ -76,10 +76,6 @@ public:
     // Solver Parameters
     TimeStepperSettings<LayoutConfigType> m_Settings;
 
-    //Accessed only by Simulation manager, after doOneIteration();
-    boost::shared_ptr<const DynamicsState<LayoutConfigType> > getBackStateBuffer();
-    boost::shared_ptr<const DynamicsState<LayoutConfigType> > getFrontStateBuffer();
-
     // General Log file
     Logging::Log *m_pSolverLog, *m_pSimulationLog;
 
@@ -95,9 +91,10 @@ protected:
 
     const unsigned int m_nSimBodies;
 
-    int m_IterationCounter;
-     bool m_bIterationFinished;
+    PREC m_currentSimulationTime;
 
+    int m_IterationCounter;
+    bool m_bIterationFinished;
     bool m_bFinished;
 
     // Timer for the Performance
@@ -114,14 +111,6 @@ protected:
     MultiBodySimFile m_ReferenceSimFile;
 
 
-
-    typedef FrontBackBuffer<DynamicsState<LayoutConfigType>, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
-    FrontBackBufferType m_StateBuffers;
-    //Solver state pool front and back buffer
-    void swapStateBuffers();
-
-    DynamicsState<LayoutConfigType> m_state_m;  // middle state of iteration
-
     // Logs
     boost::filesystem::path m_SimFolderPath;
     boost::filesystem::path m_SystemDataFilePath;
@@ -137,7 +126,6 @@ _________________________________________________________*/
 
 template< typename TConfigTimeStepper>
 MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys):
-    m_state_m(nSimBodies),
     m_nSimBodies(nSimBodies),
     m_ReferenceSimFile(NDOFqObj,NDOFuObj) {
 
@@ -254,17 +242,14 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
     m_AvgTimeForOneIteration = 0;
     m_MaxTimeForOneIteration = 0;
 
+    m_currentSimulationTime = 0;
+
     m_bFinished = false;
 };
 
 template< typename TConfigTimeStepper>
 double MoreauTimeStepper<  TConfigTimeStepper>::getTimeCurrent() {
-    if(!m_bIterationFinished){
-        return m_StateBuffers.m_pBack->m_t;
-    }
-    else{
-        return m_StateBuffers.m_pFront->m_t;
-    }
+    return m_currentSimulationTime;
 }
 
 template< typename TConfigTimeStepper>
@@ -272,27 +257,6 @@ unsigned int MoreauTimeStepper<  TConfigTimeStepper>::getIterationCount() {
     return m_IterationCounter;
 }
 
-
-template< typename TConfigTimeStepper>
-boost::shared_ptr<
-const DynamicsState<
-typename TConfigTimeStepper::DynamicsSystemType::RigidBodyType::RigidBodyConfigType::LayoutConfigType
->
->
-MoreauTimeStepper<  TConfigTimeStepper>::getBackStateBuffer() {
-    return m_StateBuffers.m_pBack;
-}
-
-
-template< typename TConfigTimeStepper>
-boost::shared_ptr<
-const DynamicsState<
-typename TConfigTimeStepper::DynamicsSystemType::RigidBodyType::RigidBodyConfigType::LayoutConfigType
->
->
-MoreauTimeStepper<  TConfigTimeStepper>::getFrontStateBuffer() {
-    return m_StateBuffers.m_pFront;
-}
 
 template< typename TConfigTimeStepper>
 void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
@@ -316,10 +280,20 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     //Force switch
     //boost::thread::yield();
 
+#if CoutLevelSolver==1
+      if(m_IterationCounter % 10000 == 1){
+            LOG(m_pSolverLog,"% m_t: " << m_currentSimulationTime <<std::endl; );
+      }
+#endif
+
+#if CoutLevelSolver>2
+      LOG(m_pSolverLog,"m_t Begin: " << m_currentSimulationTime <<std::endl; );
+#endif
 
     //Calculate Midpoint Rule ============================================================
     // Middle Time Step for all LOCAL Bodies==============================================
     // Remote bodies belong to other processes which are timestepped
+    m_currentSimulationTime += m_Settings.m_deltaT/2.0;
     m_pDynSys->doFirstHalfTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs
     m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
@@ -365,26 +339,27 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
 
 
 
-
-    m_pInclusionSolver->resetForNextIter(); // Clears the contact graph!
-
-    // Solve Collision
-    m_startTimeCollisionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
-    m_pCollisionSolver->solveCollision();
-    m_endTimeCollisionSolver =   ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
-
-    //Solve Contact Problem
-    //boost::thread::yield();
-    m_startTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
-    m_pInclusionSolver->solveInclusionProblem();
-    m_endTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
-
-    //boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
-    //boost::thread::yield();
+//
+//    m_pInclusionSolver->resetForNextIter(); // Clears the contact graph!
+//
+//    // Solve Collision
+//    m_startTimeCollisionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+//    m_pCollisionSolver->solveCollision();
+//    m_endTimeCollisionSolver =   ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+//
+//    //Solve Contact Problem
+//    //boost::thread::yield();
+//    m_startTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+//    m_pInclusionSolver->solveInclusionProblem();
+//    m_endTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+//
+//    //boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+//    //boost::thread::yield();
 
 
     // ===================================================================================
     // Middle Time Step ==================================================================
+    m_currentSimulationTime += m_Settings.m_deltaT/2.0;
     m_pDynSys->doSecondHalfTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs
     m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
@@ -394,10 +369,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
 
 
 
-#if CoutLevelSolver>1
-//      LOG(m_pSolverLog,   << "m_pFront->m_t: " << m_StateBuffers.m_pFront->m_t<<std::endl
-//                          << "m_pFront->m_q: " << m_StateBuffers.m_pFront->m_q.transpose()<<std::endl
-//                          << "m_pFront->m_u: " << m_StateBuffers.m_pFront->m_u.transpose()<<std::endl;);
+#if CoutLevelSolver>2
+      LOG(m_pSolverLog,"m_t End: " << m_currentSimulationTime <<std::endl );
 #endif
 
     //Force switch
@@ -423,9 +396,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     if(m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::USE_STATES ) {
         m_bFinished =  !m_ReferenceSimFile.isGood();
     } else {
-        m_bFinished =  m_StateBuffers.m_pFront->m_t >= m_Settings.m_endTime;
+        m_bFinished =  m_currentSimulationTime >= m_Settings.m_endTime;
     }
-
 
     m_bIterationFinished = true;
 }
@@ -440,7 +412,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToSystemDataFile(dou
 
     m_SystemDataFile
     << globalTime << "\t"
-    << m_StateBuffers.m_pBack->m_t <<"\t"
+    << m_currentSimulationTime <<"\t"
     << (double)(m_endTime-m_startTime) <<"\t"
     << (double)(m_endTimeCollisionSolver-m_startTimeCollisionSolver) <<"\t"
     << (double)(m_endTimeInclusionSolver-m_startTimeInclusionSolver) <<"\t"
