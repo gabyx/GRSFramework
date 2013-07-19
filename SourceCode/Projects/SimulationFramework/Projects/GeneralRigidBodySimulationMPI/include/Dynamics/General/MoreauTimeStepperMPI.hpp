@@ -227,15 +227,18 @@ void MoreauTimeStepper<  TConfigTimeStepper>::initLogs(  const boost::filesystem
 
 template< typename TConfigTimeStepper>
 void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
-    //set standart values for parameters
+     //set standart values for parameters
     m_IterationCounter = 0;
+    m_bIterationFinished = false;
 
+    m_pSimulationLog->logMessage("---> Reset DynamicsSystem...");
     m_pDynSys->reset();
-
-    // Get the TimestepperSettings and the InclusionSolverSettings
     m_pDynSys->getSettings(m_Settings, m_pInclusionSolver->m_Settings);
 
+    m_pSimulationLog->logMessage("---> Reset CollisionSolver...");
     m_pCollisionSolver->reset();
+
+    m_pSimulationLog->logMessage("---> Reset InclusionSolver...");
     m_pInclusionSolver->reset();
 
 
@@ -243,6 +246,20 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
     m_MaxTimeForOneIteration = 0;
 
     m_currentSimulationTime = 0;
+
+
+
+    if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::NONE) {
+
+        //TODO Open all simfiles references for the bodies
+        //LOG(m_pSimulationLog,"---> Opened Reference SimFile: m_Settings.m_simStateReferenceFile"<<std::endl);
+
+        if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::CONTINUE) {
+            //Inject the end state into the front buffer
+            //TODO
+        }
+
+    }
 
     m_bFinished = false;
 };
