@@ -38,6 +38,7 @@ public:
 
     ContactParameterMap<RigidBodyType> m_ContactParameterMap;
 
+     // All RigidBodies which are owned by this class!
     typedef std::vector<  RigidBodyType *  > RigidBodySimPtrListType;
     RigidBodySimPtrListType m_SimBodies; // Simulated Objects
     typedef std::vector<  RigidBodyType *  > RigidBodyNotAniPtrListType;
@@ -97,7 +98,23 @@ protected:
 
 template<typename TDynamicsSystemConfig>
 DynamicsSystem<TDynamicsSystemConfig>::DynamicsSystem() {
+  // Delete all RigidBodys
+    {
+        typename RigidBodySimPtrListType::iterator it;
+        for(it = m_SimBodies.begin(); it != m_SimBodies.end(); it++){
+            delete (*it);
+        }
+    }
 
+    {
+        typename RigidBodyNotAniPtrListType::iterator it;
+        for(it = m_Bodies.begin(); it != m_Bodies.end(); it++){
+            delete (*it);
+        }
+    }
+
+    m_SimBodies.clear();
+    m_Bodies.clear();
 
 };
 template<typename TDynamicsSystemConfig>

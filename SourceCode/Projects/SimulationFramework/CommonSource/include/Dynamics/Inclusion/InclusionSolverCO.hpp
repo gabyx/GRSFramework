@@ -86,8 +86,8 @@ protected:
 
    boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
    boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
-   std::vector< boost::shared_ptr< RigidBodyType > > & m_SimBodies;
-   std::vector< boost::shared_ptr< RigidBodyType> > & m_Bodies;
+   std::vector< RigidBodyType* > & m_SimBodies;
+   std::vector< RigidBodyType* > & m_Bodies;
 
    typedef ContactGraph<RigidBodyType,ContactGraphMode::NoIteration> ContactGraphType;
    ContactGraphType m_ContactGraph;

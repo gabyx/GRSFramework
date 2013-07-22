@@ -41,9 +41,10 @@ public:
 
     ContactParameterMap<RigidBodyType> m_ContactParameterMap;
 
-    typedef std::list< boost::shared_ptr< RigidBodyType > > RigidBodySimPtrListType;
-    RigidBodySimPtrListType m_SimBodies; // Simulated Objects
-    typedef std::list< boost::shared_ptr< RigidBodyType > > RigidBodyNotAniPtrListType;
+    // All RigidBodies which are owned by this class!
+    typedef std::list<  RigidBodyType*  > RigidBodySimPtrListType;
+    RigidBodySimPtrListType m_SimBodies; // simulated objects
+    typedef std::list<  RigidBodyType*  > RigidBodyNotAniPtrListType;
     RigidBodyNotAniPtrListType m_Bodies;    // all not simulated objects
 
     void init(); // Only call if Timestepper has been created
@@ -98,6 +99,19 @@ protected:
 template<typename TDynamicsSystemConfig>
 DynamicsSystem<TDynamicsSystemConfig>::DynamicsSystem() {
 
+    // Delete all RigidBodys
+    RigidBodySimPtrListType::iterator it;
+    for(it = m_SimBodies.begin(); it != m_SimBodies.end(); it++){
+        delete (*it);
+    }
+
+    RigidBodyNotAniPtrListType::iterator it;
+    for(it = m_Bodies.begin(); it != m_Bodies.end(); it++){
+        delete (*it);
+    }
+
+    m_SimBodies.clear();
+    m_Bodies.clear();
 
 };
 template<typename TDynamicsSystemConfig>
