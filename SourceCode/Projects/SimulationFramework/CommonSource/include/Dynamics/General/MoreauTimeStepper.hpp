@@ -247,6 +247,10 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
     m_IterationCounter = 0;
     m_bIterationFinished = false;
 
+    m_pSimulationLog->logMessage("---> Reset StatePool...");
+    m_pStatePool->resetStatePool(); // Sets initial values to front and back;
+    m_StateBuffers = m_pStatePool->getFrontBackBuffer();
+
     m_pSimulationLog->logMessage("---> Reset DynamicsSystem...");
     m_pDynSys->reset();
     m_pDynSys->getSettings(m_Settings, m_pInclusionSolver->m_Settings);
