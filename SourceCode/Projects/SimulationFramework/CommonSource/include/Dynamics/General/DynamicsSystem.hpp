@@ -38,7 +38,11 @@ public:
 
     ContactParameterMap<RigidBodyType> m_ContactParameterMap;
 
-     // All RigidBodies which are owned by this class!
+    //All Global Geometries used in the System
+    typedef std::map< unsigned int /* id */, typename RigidBodyType::GeometryType> GlobalGeometryMapType;
+    GlobalGeometryMapType m_globalGeoms;
+
+    // All RigidBodies which are owned by this class!
     typedef std::vector<  RigidBodyType *  > RigidBodySimPtrListType;
     RigidBodySimPtrListType m_SimBodies; // Simulated Objects
     typedef std::vector<  RigidBodyType *  > RigidBodyNotAniPtrListType;

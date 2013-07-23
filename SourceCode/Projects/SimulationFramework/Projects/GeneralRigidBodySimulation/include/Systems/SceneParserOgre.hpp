@@ -115,7 +115,7 @@ protected:
 
 
         std::stringstream entity_name,node_name;
-        LOG(this->m_pSimulationLog, "---> Add all Ogre: Mesh Objects"<<std::endl);
+        LOG(this->m_pSimulationLog, "--->Add all Ogre Mesh Objects"<<std::endl);
         for(int i=0; i<this->m_bodyList.size(); i++) {
             entity_name.str("");
             node_name.str("");

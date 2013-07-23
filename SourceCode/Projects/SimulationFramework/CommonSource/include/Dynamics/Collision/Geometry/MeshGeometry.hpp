@@ -135,6 +135,8 @@ public:
 #endif
   }
 
+    //TODO Vielleicht noch Transoformation
+
   boost::shared_ptr<MeshData<MeshPREC> > m_pMeshData;
 
 #if USE_OPCODE == 1

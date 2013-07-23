@@ -43,10 +43,29 @@
 #include "ticpp.h"
 //#include "tinyxml.h"
 
-/*
-* @Does not work yet, to implement a scene parser, implement everything starting from SimulationState, enter(), we exit the State, delete all Objects, and reinitialize with another system in XML format.
-*
-*/
+
+template<typename TDynamicsSystemConfig>
+class GetScaleOfGeomVisitor : public boost::static_visitor<>{
+    public:
+    typedef TDynamicsSystemConfig DynamicsSystemConfig;
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemConfig)
+
+    GetScaleOfGeomVisitor(Vector3 & scale): m_scale(scale){};
+
+    void operator()(  boost::shared_ptr<SphereGeometry<PREC> >  & sphereGeom ){
+        m_scale.setConstant(sphereGeom->m_radius);
+    }
+    void operator()(  boost::shared_ptr<BoxGeometry<PREC> >  & boxGeom){
+        m_scale = boxGeom->m_extent;
+    }
+
+    template<typename T>
+    void operator()(  boost::shared_ptr<T>  & ptr){
+    }
+
+    Vector3 & m_scale;
+};
+
 template<typename TConfig>
 class SceneParser {
 public:
@@ -71,7 +90,7 @@ public:
 
         m_pSimulationLog->logMessage("--->Parsing Scene...");
 
-        LOG( m_pSimulationLog, "Scene Input file: "  << file.string() <<std::endl; );
+        LOG( m_pSimulationLog, "--->Scene Input file: "  << file.string() <<std::endl; );
 
         if(!boost::filesystem::exists(m_currentParseFilePath)){
             ERRORMSG("Scene Input file does not exist!");
@@ -329,6 +348,8 @@ protected:
             // Parse ContactParameter Map
             processContactParameterMap(sceneSettings);
 
+            // Parse Global Geometries
+            processGlobalGeometries(sceneSettings);
         }
 
     }
@@ -393,6 +414,22 @@ protected:
         }
 
 
+    }
+
+    virtual void processGlobalGeometries(ticpp::Node *sceneSettings){
+
+
+        ticpp::Node *globalGeom = sceneSettings->FirstChild("GlobalGeometries");
+        if(globalGeom){
+            ticpp::Iterator< ticpp::Node > child;
+            for ( child = child.begin( globalGeom ); child != child.end(); child++ ) {
+
+                if( child->Value() == "Geometry") {
+                    processGeometry( &(*child) , true);
+                }
+
+            }
+        }
     }
 
     virtual void processSceneObjects( ticpp::Node *sceneObjects) {
@@ -498,27 +535,24 @@ protected:
 
     }
 
-    virtual void processGeometry( ticpp::Node * geometryNode) {
+    virtual void processGeometry( ticpp::Node * geometryNode, bool addToGlobalGeoms = false) {
         LOG(m_pSimulationLog,"--->Process Geometry ..."<<std::endl;);
         if(geometryNode->FirstChild()->Value() == "Sphere") {
-
-            processSphereGeometry( geometryNode->FirstChild()->ToElement());
+            processSphereGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
         } else if(geometryNode->FirstChild()->Value() == "Halfspace") {
-
-            processHalfspaceGeometry( geometryNode->FirstChild()->ToElement());
+            processHalfspaceGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
         } else if(geometryNode->FirstChild()->Value() == "Mesh") {
-
-            processMeshGeometry( geometryNode->FirstChild()->ToElement());
+            processMeshGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
         } else if(geometryNode->FirstChild()->Value() == "Box") {
-
-            processBoxGeometry( geometryNode->FirstChild()->ToElement());
-
+            processBoxGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
+        }else if(geometryNode->FirstChild()->Value() == "GlobalGeomId"){
+            processGlobalGeomId(geometryNode->FirstChild()->ToElement());
         } else {
             throw ticpp::Exception("--->The geometry '" + std::string(geometryNode->FirstChild()->Value()) + std::string("' has no implementation in the parser"));
         }
     }
 
-    virtual void processSphereGeometry( ticpp::Element * sphere) {
+    virtual void processSphereGeometry( ticpp::Element * sphere, bool addToGlobalGeoms = false) {
         std::string type = sphere->GetAttribute("distribute");
         if(type == "uniform") {
 
@@ -530,9 +564,21 @@ protected:
 
             boost::shared_ptr<SphereGeometry<PREC> > pSphereGeom = boost::shared_ptr<SphereGeometry<PREC> >(new SphereGeometry<PREC>(radius));
 
-            for(int i=0; i < m_bodyList.size(); i++) {
-                m_bodyListScales[i] = scale;
-                m_bodyList[i]->m_geometry = pSphereGeom;
+            if(addToGlobalGeoms){
+                unsigned int id;
+                if(!Utilities::stringToType<unsigned int>(id,sphere->GetAttribute("id"))) {
+                    throw ticpp::Exception("--->String conversion in addToGlobalGeomList: id failed");
+                }
+                if(id == 0){
+                    throw ticpp::Exception("--->addToGlobalGeomList: a global geometry id: 0 is not allowed!");
+                    // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
+                }
+                addToGlobalGeomList(id,pSphereGeom);
+            }else{
+                for(int i=0; i < m_bodyList.size(); i++) {
+                    m_bodyListScales[i] = scale;
+                    m_bodyList[i]->m_geometry = pSphereGeom;
+                }
             }
         } else if(type == "random") {
             double minRadius;
@@ -561,22 +607,54 @@ protected:
             boost::uniform_real<PREC> uniform(minRadius,maxRadius);
             boost::variate_generator< boost::mt19937 & , boost::uniform_real<PREC> > randomNumber(generator, uniform);
 
-            for(int i=0; i < m_bodyList.size(); i++) {
-                double radius = randomNumber();
-                Vector3 scale;
-                scale(0)=radius;
-                scale(1)=radius;
-                scale(2)=radius;
-                m_bodyListScales[i] = scale;
-                boost::shared_ptr<SphereGeometry<PREC> > pSphereGeom = boost::shared_ptr<SphereGeometry<PREC> >(new SphereGeometry<PREC>(radius));
-                m_bodyList[i]->m_geometry = pSphereGeom;
+
+            if(addToGlobalGeoms){
+
+                    unsigned int id;
+                    if(!Utilities::stringToType<unsigned int>(id,sphere->GetAttribute("id"))) {
+                        throw ticpp::Exception("--->String conversion in addToGlobalGeomList: id failed");
+                    }
+                    if(id == 0){
+                        throw ticpp::Exception("--->addToGlobalGeomList: a global geometry id: 0 is not allowed!");
+                        // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
+                    }
+
+                    unsigned int instances = 1;
+                    if(sphere->HasAttribute("instances")){
+
+                        if(!Utilities::stringToType<unsigned int>(instances,sphere->GetAttribute("instances"))) {
+                            throw ticpp::Exception("--->String conversion in addToGlobalGeomList: instances failed");
+                        }
+                    }
+
+                    for(int i = id; i < id + instances;i++){
+                        double radius = randomNumber();
+                        boost::shared_ptr<SphereGeometry<PREC> > pSphereGeom = boost::shared_ptr<SphereGeometry<PREC> >(new SphereGeometry<PREC>(radius));
+                        addToGlobalGeomList(i, pSphereGeom);
+                    }
+            }else{
+
+                for(int i=0; i < m_bodyList.size(); i++) {
+                    double radius = randomNumber();
+                    Vector3 scale;
+                    scale(0)=radius;
+                    scale(1)=radius;
+                    scale(2)=radius;
+                    m_bodyListScales[i] = scale;
+                    boost::shared_ptr<SphereGeometry<PREC> > pSphereGeom = boost::shared_ptr<SphereGeometry<PREC> >(new SphereGeometry<PREC>(radius));
+                    m_bodyList[i]->m_geometry = pSphereGeom;
+
+                }
             }
+
+
+
         } else {
             throw ticpp::Exception("--->The attribute 'distribute' '" + type + std::string("' of 'Sphere' has no implementation in the parser"));
         }
     }
 
-    virtual void processHalfspaceGeometry( ticpp::Element * halfspace) {
+    virtual void processHalfspaceGeometry( ticpp::Element * halfspace, bool addToGlobalGeoms = false) {
         std::string type = halfspace->GetAttribute("distribute");
         if(type == "uniform") {
 
@@ -592,8 +670,20 @@ protected:
 
             boost::shared_ptr<HalfspaceGeometry<PREC> > pHalfspaceGeom = boost::shared_ptr<HalfspaceGeometry<PREC> >(new HalfspaceGeometry<PREC>(n,p));
 
-            for(int i=0; i < m_bodyList.size(); i++) {
-                m_bodyList[i]->m_geometry = pHalfspaceGeom;
+            if(addToGlobalGeoms){
+                unsigned int id;
+                if(!Utilities::stringToType<unsigned int>(id,halfspace->GetAttribute("id"))) {
+                    throw ticpp::Exception("--->String conversion in addToGlobalGeomList: id failed");
+                }
+                if(id == 0){
+                    throw ticpp::Exception("--->addToGlobalGeomList: a global geometry id: 0 is not allowed!");
+                    // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
+                }
+                addToGlobalGeomList(id, pHalfspaceGeom);
+            }else{
+                for(int i=0; i < m_bodyList.size(); i++) {
+                    m_bodyList[i]->m_geometry = pHalfspaceGeom;
+                }
             }
 
         } else {
@@ -601,17 +691,17 @@ protected:
         }
     }
 
-    virtual void processBoxGeometry( ticpp::Element * halfspace) {
-        std::string type = halfspace->GetAttribute("distribute");
+    virtual void processBoxGeometry( ticpp::Element * box, bool addToGlobalGeoms = false) {
+        std::string type = box->GetAttribute("distribute");
         if(type == "uniform") {
 
             Vector3 extent;
-            if(!Utilities::stringToVector3<PREC>(extent, halfspace->GetAttribute("extent"))) {
+            if(!Utilities::stringToVector3<PREC>(extent, box->GetAttribute("extent"))) {
                 throw ticpp::Exception("--->String conversion in BoxGeometry: extent failed");
             }
 
             Vector3 center;
-            if(!Utilities::stringToVector3<PREC>(center, halfspace->GetAttribute("center"))) {
+            if(!Utilities::stringToVector3<PREC>(center, box->GetAttribute("center"))) {
                 throw ticpp::Exception("--->String conversion in BoxGeometry: position failed");
             }
 
@@ -622,11 +712,22 @@ protected:
             scale(1)=extent(1);
             scale(2)=extent(2);
 
-            for(int i=0; i < m_bodyList.size(); i++) {
-                m_bodyListScales[i] = scale;
-                m_bodyList[i]->m_geometry = pBoxGeom;
+            if(addToGlobalGeoms){
+                    unsigned int id;
+                    if(!Utilities::stringToType<unsigned int>(id,box->GetAttribute("id"))) {
+                        throw ticpp::Exception("--->String conversion in addToGlobalGeomList: id failed");
+                    }
+                    if(id == 0){
+                        throw ticpp::Exception("--->addToGlobalGeomList: a global geometry id: 0 is not allowed!");
+                        // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
+                    }
+                    addToGlobalGeomList(id, pBoxGeom);
+            }else{
+                for(int i=0; i < m_bodyList.size(); i++) {
+                    m_bodyListScales[i] = scale;
+                    m_bodyList[i]->m_geometry = pBoxGeom;
+                }
             }
-
 
         } else {
             throw ticpp::Exception("--->The attribute 'type' '" + type + std::string("' of 'Box' has no implementation in the parser"));
@@ -634,7 +735,7 @@ protected:
     }
 
 
-    virtual void processMeshGeometry( ticpp::Element * mesh) {
+    virtual void processMeshGeometry( ticpp::Element * mesh, bool addToGlobalGeoms = false) {
 
         boost::shared_ptr<MeshGeometry<PREC> > pMeshGeom;
 
@@ -739,13 +840,150 @@ protected:
 
 
             // Assign Geometry
-            for(int i=0; i < m_bodyList.size(); i++) {
-                m_bodyList[i]->m_geometry = pMeshGeom;
+            if(addToGlobalGeoms){
+                    unsigned int id;
+                    if(!Utilities::stringToType<unsigned int>(id,mesh->GetAttribute("id"))) {
+                        throw ticpp::Exception("--->String conversion in addToGlobalGeomList: id failed");
+                    }
+                    if(id == 0){
+                        throw ticpp::Exception("--->addToGlobalGeomList: a global geometry id: 0 is not allowed!");
+                        // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
+                    }
+                    addToGlobalGeomList(id, pMeshGeom);
+            }else{
+                for(int i=0; i < m_bodyList.size(); i++) {
+                    m_bodyList[i]->m_geometry = pMeshGeom;
+                }
             }
 
         } else {
             throw ticpp::Exception("--->The attribute 'type' '" + type + std::string("' of 'Mesh' has no implementation in the parser"));
         }
+    }
+
+    virtual void processGlobalGeomId( ticpp::Element * globalGeomId ){
+
+        std::string distribute = globalGeomId->GetAttribute("distribute");
+
+        if(distribute == "uniform") {
+
+            unsigned int id;
+            if(!Utilities::stringToType<unsigned int>(id,globalGeomId->GetAttribute("id"))) {
+                throw ticpp::Exception("--->String conversion in processGlobalGeomId: id failed");
+            }
+
+            typename DynamicsSystemType::GlobalGeometryMapType::iterator it = m_pDynSys->m_globalGeoms.find(id);
+            // it->second is the GeometryType in RigidBody
+            if(it == m_pDynSys->m_globalGeoms.end()){
+               LOG(m_pSimulationLog,"--->Geometry with id: " << id << " not found in global geometry list!" <<std::endl;);
+               throw ticpp::Exception("--->Geometry search in processGlobalGeomId: failed!");
+            }
+
+            for(int i=0; i < m_bodyList.size(); i++){
+                GetScaleOfGeomVisitor<DynamicsSystemType> vis(m_bodyListScales[i]);
+                boost::apply_visitor(vis, it->second);
+                m_bodyList[i]->m_geometry = it->second;
+            }
+
+        }
+        else if(distribute == "linear"){
+
+            unsigned int startId;
+            if(!Utilities::stringToType<unsigned int>(startId,globalGeomId->GetAttribute("startId"))) {
+                throw ticpp::Exception("--->String conversion in processGlobalGeomId: startId failed");
+            }
+
+            if(startId == 0){
+                throw ticpp::Exception("--->processGlobalGeomId: a global geometry startId: 0 is not allowed!");
+                // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
+            }
+
+            for(int i=0; i < m_bodyList.size(); i++){
+
+                typename DynamicsSystemType::GlobalGeometryMapType::iterator it = m_pDynSys->m_globalGeoms.find(startId+i);
+                // it->second is the GeometryType in RigidBody
+                if(it == m_pDynSys->m_globalGeoms.end()){
+                   LOG(m_pSimulationLog,"--->processGlobalGeomId: Geometry with id: " << startId+i << " not found in global geometry list!" <<std::endl;);
+                   throw ticpp::Exception("--->processGlobalGeomId: Geometry search failed!");
+                }
+
+                GetScaleOfGeomVisitor<DynamicsSystemType> vis(m_bodyListScales[i]);
+                boost::apply_visitor(vis, it->second);
+                m_bodyList[i]->m_geometry = it->second;
+            }
+
+
+        }
+        else if(distribute == "random"){
+
+            unsigned int startId;
+            if(!Utilities::stringToType<unsigned int>(startId,globalGeomId->GetAttribute("startId"))) {
+                throw ticpp::Exception("--->String conversion in processGlobalGeomId: startId failed");
+            }
+
+            if(startId == 0){
+                throw ticpp::Exception("--->processGlobalGeomId: a global geometry startId: 0 is not allowed!");
+                // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
+            }
+
+            unsigned int endId;
+            if(!Utilities::stringToType<unsigned int>(endId,globalGeomId->GetAttribute("endId"))) {
+                throw ticpp::Exception("--->String conversion in processGlobalGeomId: endId failed");
+            }
+            if(startId > endId){
+                throw ticpp::Exception("--->addToGlobalGeomList:  startId > endId  is not allowed!");
+                // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
+            }
+            unsigned int seed;
+            if(!Utilities::stringToType<unsigned int>(seed,globalGeomId->GetAttribute("seed"))) {
+                throw ticpp::Exception("--->String conversion in processGlobalGeomId: seed failed");
+            }
+
+            typedef boost::mt19937  RNG;
+            RNG generator(seed);
+            boost::uniform_int<unsigned int> uniform(startId,endId);
+            boost::variate_generator< boost::mt19937 & , boost::uniform_int<unsigned int> > randomNumber(generator, uniform);
+
+            for(int i=0; i < m_bodyList.size(); i++){
+
+                unsigned int id = randomNumber();
+                std::cout << id << std::endl;
+                typename DynamicsSystemType::GlobalGeometryMapType::iterator it = m_pDynSys->m_globalGeoms.find(id);
+                // it->second is the GeometryType in RigidBody
+                if(it == m_pDynSys->m_globalGeoms.end()){
+                   LOG(m_pSimulationLog,"--->Geometry with id: " << id << " not found in global geometry list!" <<std::endl;);
+                   throw ticpp::Exception("--->Geometry search in processGlobalGeomId: failed!");
+                }
+
+                GetScaleOfGeomVisitor<DynamicsSystemType> vis(m_bodyListScales[i]);
+                boost::apply_visitor(vis, it->second);
+                m_bodyList[i]->m_geometry = it->second;
+            }
+
+            for(int i = 0; i < m_bodyListScales.size(); i++){
+                std::cout<<m_bodyListScales[i] << std::endl;
+            }
+
+        }
+        else {
+            throw ticpp::Exception("--->The attribute 'distribute' '" + distribute + std::string("' of 'GlobalGeomId' has no implementation in the parser"));
+        }
+
+
+
+    }
+
+    template<typename T>
+    void addToGlobalGeomList(unsigned int id,  boost::shared_ptr<T> ptr){
+
+            std::pair<typename DynamicsSystemType::GlobalGeometryMapType::iterator, bool> ret =
+            m_pDynSys->m_globalGeoms.insert(typename DynamicsSystemType::GlobalGeometryMapType::value_type( id, ptr) );
+            if(ret.second == false){
+                std::stringstream ss;
+                ss << "--->addToGlobalGeomList: geometry with id: " <<  id<< " exists already!";
+                throw ticpp::Exception(ss.str());
+            }
+            LOG(m_pSimulationLog,"--->Added geometry with id: " <<  id << "to global geometry list" <<std::endl;);
     }
 
     virtual void fillMeshInfo( Assimp::Importer & importer, const aiScene* scene, MeshData<MeshPREC> & meshInfo, Vector3 scale_factor, Quaternion quat, Vector3 trans) {
