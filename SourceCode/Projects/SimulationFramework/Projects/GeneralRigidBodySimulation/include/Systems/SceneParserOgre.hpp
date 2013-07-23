@@ -64,7 +64,7 @@ protected:
 
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
     void processOtherOptions(const ticpp::Node * rootNode) {
-        LOG(this->m_pSimulationLog,"--->Process MPISettings..."<<std::endl;);
+        LOG(this->m_pSimulationLog,"---> Process MPISettings..."<<std::endl;);
         processMPISettings(rootNode);
 
 
@@ -84,12 +84,12 @@ protected:
         Vector3 scale;
         if(meshNode->ToElement()->HasAttribute("scaleLikeGeometry")) {
             if(!Utilities::stringToType<bool>(scaleLikeGeometry, meshNode->ToElement()->GetAttribute("scaleLikeGeometry"))) {
-                throw ticpp::Exception("--->String conversion in processMesh: scaleWithGeometry failed");
+                throw ticpp::Exception("---> String conversion in processMesh: scaleWithGeometry failed");
             }
         }
         if(!scaleLikeGeometry){
             if(!Utilities::stringToVector3<PREC>(scale, meshNode->ToElement()->GetAttribute("scale"))) {
-                throw ticpp::Exception("--->String conversion in processMesh: scale failed");
+                throw ticpp::Exception("---> String conversion in processMesh: scale failed");
             }
         }
 
@@ -107,15 +107,15 @@ protected:
                 m_materialList.push_back(material->GetAttribute<std::string>("name"));
             }
             if(m_materialList.empty()) {
-                throw ticpp::Exception("--->No Material Node found in Mesh!");
+                throw ticpp::Exception("---> No Material Node found in Mesh!");
             }
         } else {
-            throw ticpp::Exception("--->The attribute 'type' '" + type + std::string("' of 'processMesh' has no implementation in the parser"));
+            throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'processMesh' has no implementation in the parser"));
         }
 
 
         std::stringstream entity_name,node_name;
-        LOG(this->m_pSimulationLog, "--->Add all Ogre Mesh Objects"<<std::endl);
+        LOG(this->m_pSimulationLog, "---> Add all Ogre Mesh Objects"<<std::endl);
         for(int i=0; i<this->m_bodyList.size(); i++) {
             entity_name.str("");
             node_name.str("");
@@ -176,12 +176,12 @@ protected:
         Vector3 scale;
         if(planeNode->ToElement()->HasAttribute("scaleLikeGeometry")) {
             if(!Utilities::stringToType<bool>(scaleLikeGeometry, planeNode->ToElement()->GetAttribute("scaleLikeGeometry"))) {
-                throw ticpp::Exception("--->String conversion in processPlane: scaleWithGeometry failed");
+                throw ticpp::Exception("---> String conversion in processPlane: scaleWithGeometry failed");
             }
         }
         if(!scaleLikeGeometry){
             if(!Utilities::stringToVector3<PREC>(scale, planeNode->ToElement()->GetAttribute("scale"))) {
-                throw ticpp::Exception("--->String conversion  in processPlane: scale failed");
+                throw ticpp::Exception("---> String conversion  in processPlane: scale failed");
             }
         }
 
@@ -189,28 +189,28 @@ protected:
         Vector2 subDivs = Vector2::Ones();
         if(planeNode->ToElement()->HasAttribute("subDivisions")) {
             if(!Utilities::stringToVector2<PREC>(subDivs, planeNode->ToElement()->GetAttribute("subDivisions"))) {
-                throw ticpp::Exception("--->String conversion in processPlane: subDivisions failed");
+                throw ticpp::Exception("---> String conversion in processPlane: subDivisions failed");
             }
         }
 
         Vector3 normal; normal(0)=0; normal(1)=0; normal(2)=1;
         if(planeNode->ToElement()->HasAttribute("normal")) {
             if(!Utilities::stringToVector3<PREC>(normal, planeNode->ToElement()->GetAttribute("normal"))) {
-                throw ticpp::Exception("--->String conversion in processPlane: normal failed");
+                throw ticpp::Exception("---> String conversion in processPlane: normal failed");
             }
         }
 
         PREC dist=0;
         if(planeNode->ToElement()->HasAttribute("distance")) {
             if(!Utilities::stringToType<PREC>(dist, planeNode->ToElement()->GetAttribute("distance"))) {
-                throw ticpp::Exception("--->String conversion in processPlane: distance failed");
+                throw ticpp::Exception("---> String conversion in processPlane: distance failed");
             }
         }
 
         Vector2 tile; tile(0)=1; tile(1)=1;
         if(planeNode->ToElement()->HasAttribute("tileTexture")) {
             if(!Utilities::stringToVector2<PREC>(tile, planeNode->ToElement()->GetAttribute("tileTexture"))) {
-                throw ticpp::Exception("--->String conversion in processPlane: tileTexture failed");
+                throw ticpp::Exception("---> String conversion in processPlane: tileTexture failed");
             }
         }
 
@@ -230,10 +230,10 @@ protected:
                 m_materialList.push_back(material->GetAttribute<std::string>("name"));
             }
             if(m_materialList.empty()) {
-                throw ticpp::Exception("--->No Material Node found in Plane!");
+                throw ticpp::Exception("---> No Material Node found in Plane!");
             }
         } else {
-            throw ticpp::Exception("--->The attribute 'type' '" + type + std::string("' of 'processPlane' has no implementation in the parser"));
+            throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'processPlane' has no implementation in the parser"));
         }
 
 
@@ -316,19 +316,19 @@ protected:
             ticpp::Element* renderEl = rendering->ToElement();
             if(renderEl->HasAttribute("attachAxis")) {
                 if(!Utilities::stringToType<bool>(settings.attachAxis, renderEl->GetAttribute("attachAxis"))) {
-                    throw ticpp::Exception("--->String conversion of in processMesh: attachAxis failed");
+                    throw ticpp::Exception("---> String conversion of in processMesh: attachAxis failed");
                 }
             }
             if(renderEl->HasAttribute("axesSize")) {
                 if(!Utilities::stringToType<double>(settings.axesSize, renderEl->GetAttribute("axesSize"))) {
-                    throw ticpp::Exception("--->String conversion of in processMesh: axesSize failed");
+                    throw ticpp::Exception("---> String conversion of in processMesh: axesSize failed");
                 }
             }
 
 
             if(renderEl->HasAttribute("shadowsEnabled")) {
                 if(!Utilities::stringToType<bool>(settings.shadowsEnabled, renderEl->GetAttribute("shadowsEnabled"))) {
-                    throw ticpp::Exception("--->String conversion of in processMesh: shadowsEnabled failed");
+                    throw ticpp::Exception("---> String conversion of in processMesh: shadowsEnabled failed");
                 }
             }
         }
@@ -347,15 +347,15 @@ protected:
             if(type=="grid") {
                 Vector3 minPoint, maxPoint;
                 if(!Utilities::stringToVector3<PREC>(minPoint,  topoEl->GetAttribute("minPoint"))) {
-                    throw ticpp::Exception("--->String conversion in processMPISettings: minPoint failed");
+                    throw ticpp::Exception("---> String conversion in processMPISettings: minPoint failed");
                 }
                 if(!Utilities::stringToVector3<PREC>(maxPoint,  topoEl->GetAttribute("maxPoint"))) {
-                    throw ticpp::Exception("--->String conversion in processMPISettings: maxPoint failed");
+                    throw ticpp::Exception("---> String conversion in processMPISettings: maxPoint failed");
                 }
 
                 MyMatrix<unsigned int>::Vector3 dim;
                 if(!Utilities::stringToVector3<unsigned int>(dim,  topoEl->GetAttribute("dimension"))) {
-                    throw ticpp::Exception("--->String conversion in processMPISettings: dimension failed");
+                    throw ticpp::Exception("---> String conversion in processMPISettings: dimension failed");
                 }
 
                 Vector3 extent;
@@ -451,7 +451,7 @@ protected:
 
 
             } else {
-                throw ticpp::Exception("--->String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
+                throw ticpp::Exception("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
             }
         }
 

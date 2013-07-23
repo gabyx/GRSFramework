@@ -412,7 +412,7 @@ void Collider<TLayoutConfig,TCollisionSolver>::collide(   RigidBodyType * sphere
 //    meshGeom->m_pTreePoly->collideWithSphere(ozSphere,ozResult);
 //    if(ozResult.polys_.size()>0){
 //        std::cout << " Collision with " << ozResult.polys_.size() << "polygons..."<<std::endl;
-//        std::cout << " ---> Users:" << ozResult.users_[0] << "polygons..."<<std::endl;
+//        std::cout << "---> Users:" << ozResult.users_[0] << "polygons..."<<std::endl;
 //        const Vec3f* points = meshGeom->m_pTreePoly->getPointsList();
 //        Vec3f point0 = points[ozResult.polys_[0]->getIndex(0)];
 //        std::cout << "Point"<<point0.x << ","<<point0.y<<","<<point0.z<<","<<std::endl;

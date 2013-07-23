@@ -60,7 +60,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
-        m_pSimulationLog->logMessage("--->Creating SimulationManager...");
+        m_pSimulationLog->logMessage("---> Creating SimulationManager...");
     }
 
     m_pSimulationLog->logMessage("---> SimulationManager::setup(): ");
@@ -115,7 +115,7 @@ bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
         LOG(m_pSimulationLog,  "MPI> Allreduce needed: " << elapsed <<"sec."<<std::endl; );
 
         if(numberOfBodiesInSimulation != m_nGlobalSimBodies) {
-            LOG(m_pSimulationLog,  "ERROR: ---> Body check NOT successful! : "<< numberOfBodiesInSimulation <<"!="<< m_nGlobalSimBodies<< std::endl;);
+            LOG(m_pSimulationLog,  "ERROR:---> Body check NOT successful! : "<< numberOfBodiesInSimulation <<"!="<< m_nGlobalSimBodies<< std::endl;);
             ERRORMSGMPI("Body check Not successfull");
         }
 
@@ -204,14 +204,14 @@ void SimulationManagerMPI<TConfig>::initSim() {
     boost::filesystem::path localSimFolderPath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
     localSimFolderPath /= m_SimFolderPath.filename();
     if(!boost::filesystem::create_directories(localSimFolderPath)) {
-        LOG(m_pSimulationLog,  "ERROR: ---> Could not create directory: " << localSimFolderPath.string() << std::endl;);
-        ERRORMSGMPI("ERROR: ---> Could not create directory: " << localSimFolderPath.string() << std::endl )
+        LOG(m_pSimulationLog,  "ERROR:---> Could not create directory: " << localSimFolderPath.string() << std::endl;);
+        ERRORMSGMPI("ERROR:---> Could not create directory: " << localSimFolderPath.string() << std::endl )
     }
 
 
     if(!m_pStateRecorder->openFiles(m_SimFolderPath, m_pDynSys->m_SimBodies,true)){ // Truncate the files, important!
-        LOG(m_pSimulationLog,  "ERROR: ---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl;);
-        ERRORMSGMPI("ERROR: ---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
+        LOG(m_pSimulationLog,  "ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl;);
+        ERRORMSGMPI("ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
     }
 
     m_pTimestepper->initLogs(localSimFolderPath);

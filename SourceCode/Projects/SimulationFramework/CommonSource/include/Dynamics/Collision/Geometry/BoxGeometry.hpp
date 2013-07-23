@@ -11,6 +11,10 @@ public:
     DEFINE_MATRIX_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+    BoxGeometry() {
+        m_extent.setZero();
+        m_center.setZero();
+    };
     BoxGeometry(Vector3 center, Vector3 extent): m_extent(extent), m_center(center) {};
 
     Vector3 m_extent; ///< Vector of the extend of the box in all directions.
@@ -28,12 +32,6 @@ public:
 private:
     friend class boost::serialization::access;
     static char m_pointIdx[8*3];
-
-    BoxGeometry() {
-        m_extent.setZero();
-        m_center.setZero();
-    };
-
 };
 
 
