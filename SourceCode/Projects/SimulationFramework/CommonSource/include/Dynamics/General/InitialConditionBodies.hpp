@@ -111,8 +111,8 @@ void setupPositionBodyPosAxisAngle(RigidBodyState<TLayoutConfig> & rigibodyState
 }
 
 
-template<typename TLayoutConfig,  template<class,class> class TVec, typename TRigidBody, typename TAllocator>
-void applyDynamicsStateToBodies(const DynamicsState<TLayoutConfig> & state, TVec<TRigidBody*,TAllocator> & bodies) {
+template<typename TLayoutConfig,  template TRigidBodyList>
+void applyDynamicsStateToBodies(const DynamicsState<TLayoutConfig> & state, TRigidBodyList & bodies) {
     ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
 
     for(int i=0; i < bodies.size(); i++) {
@@ -145,7 +145,7 @@ void applyBodiesToDynamicsState(const TVec<TRigidBody*,TAllocator> & bodies,
 
 
 template<typename TRigidBody, typename TRigidBodyState>
-inline void applyBodyToRigidBodyState( const TRigidBody & body, TRigidBodyState & rigidBodyState ) {
+inline void applyBodyToRigidBodyState( const TRigidBody  body, TRigidBodyState & rigidBodyState ) {
 
     rigidBodyState.m_q.template head<3>() = body.m_r_S;
     rigidBodyState.m_q.template tail<4>() = body.m_q_KI;

@@ -92,7 +92,7 @@ bool StateRecorderBody<TDynamicsSystemType>::openFiles(boost::filesystem::path d
 
         file = dir_path;
 
-        getSimBodyFileName(it->get(),s);
+        getSimBodyFileName(*it,s);
 
         file /= s.str();
 
@@ -150,7 +150,7 @@ void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamic
             LOG(m_pSimulationLog, "StateRecorderBody:: Did not found SimFile for Body Id:" << (*it)->m_id<< ". There is no SimFile corresponding to this body!" ;);
         }else{
 
-            InitialConditionBodies::applyBodyToRigidBodyState( *(it->get()) , dynState.m_SimBodyStates[0]);
+            InitialConditionBodies::applyBodyToRigidBodyState( *(*it) , dynState.m_SimBodyStates[0]);
             *(fileIt->second) << dynState;
 
         }

@@ -74,7 +74,6 @@ public:
 
         m_bodyList.clear();
         m_SimBodyInitStates.clear();
-        m_SceneMeshs.clear();
 
 
         try {
@@ -182,7 +181,7 @@ protected:
                 throw ticpp::Exception("---> You have launched to many processes for the grid!");
             }
 
-            m_pProcComm->m_pProcessInfo->createProcTopoGrid(minPoint,maxPoint, dim, m_pProcComm->m_pProcessInfo->getRank() );
+            m_pProcComm->m_pProcessInfo->createProcTopoGrid(minPoint,maxPoint, dim);
 
         } else {
             throw ticpp::Exception("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
@@ -212,7 +211,7 @@ protected:
             RigidBodyType * temp_ptr = new RigidBodyType();
 
             //Assign a unique id
-            RigidBodyId::setId(temp_ptr.get(),i, groupId);
+            RigidBodyId::setId(temp_ptr,i, groupId);
 
             m_bodyList.push_back(temp_ptr);
 
@@ -235,13 +234,13 @@ protected:
 
         if(m_eBodiesState == RigidBodyType::SIMULATED) {
 
-            typename std::vector<boost::shared_ptr< RigidBodyType > >::iterator bodyIt;
+            typename std::vector<RigidBodyType*>::iterator bodyIt;
 
             for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
                 // Check if Body belongs to the topology! // Check CoG!
                 if(m_pProcComm->m_pProcessInfo->getProcTopo().belongsPointToProcess((*bodyIt)->m_r_S)) {
 
-                    LOG(m_pSimulationLog, "---> Added Body with ID: (" << RigidBodyId::getProcessNr(bodyIt->get())<<","<<RigidBodyId::getBodyNr(bodyIt->get())<<")"<< std::endl);
+                    LOG(m_pSimulationLog, "---> Added Body with ID: (" << RigidBodyId::getProcessNr(*bodyIt)<<","<<RigidBodyId::getBodyNr(*bodyIt)<<")"<< std::endl);
 
                     m_pDynSys->m_SimBodies.push_back((*bodyIt));
 
@@ -255,7 +254,7 @@ protected:
 
         } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
 
-           typename std::vector<boost::shared_ptr< RigidBodyType > >::iterator bodyIt;
+           typename std::vector<RigidBodyType*>::iterator bodyIt;
 
             for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
 
@@ -301,8 +300,6 @@ protected:
     using SceneParser<TConfig>::m_bodyListScales;
     using SceneParser<TConfig>::m_SimBodyInitStates;
 
-
-    using SceneParser<TConfig>::m_SceneMeshs;
 
 };
 

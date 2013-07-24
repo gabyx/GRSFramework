@@ -34,7 +34,7 @@ public:
     ProcessTopologyGrid(  const Vector3 & minPoint,
                           const Vector3 & maxPoint,
                           const MyMatrix<unsigned int>::Vector3 & dim,
-                          unsigned int processRank): m_grid(minPoint,maxPoint, dim, ProcessInformation<TLayoutConfig>::MASTER ) {
+                          unsigned int processRank): m_grid(minPoint,maxPoint, dim, ProcessInformation<TLayoutConfig>::MASTER_RANK ) {
         m_rank = processRank;
         //Initialize neighbours
         m_nbRanks = m_grid.getCellNeigbours(m_rank);
@@ -71,7 +71,7 @@ public:
 
     DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
 
-    static const int MASTER = 0;
+    static const int MASTER_RANK = 0;
 
     ProcessInformation() {
         m_pProcTopo = NULL;
@@ -87,11 +87,11 @@ public:
 
 
      unsigned int getMasterRank() const {
-        return MASTER;
+        return MASTER_RANK;
     };
 
     bool hasMasterRank() const{
-        if(m_rank == MASTER){
+        if(m_rank == MASTER_RANK){
             return true;
         }
         return false;
@@ -117,8 +117,7 @@ public:
 
     void createProcTopoGrid(const Vector3 & minPoint,
                             const Vector3 & maxPoint,
-                            const MyMatrix<unsigned int>::Vector3 & dim,
-                            unsigned int processRank){
+                            const MyMatrix<unsigned int>::Vector3 & dim){
         if(m_pProcTopo){
             delete m_pProcTopo;
         }

@@ -41,11 +41,24 @@ public:
 
     ContactParameterMap<RigidBodyType> m_ContactParameterMap;
 
-    // All RigidBodies which are owned by this class!
-    typedef std::list<  RigidBodyType*  > RigidBodySimPtrListType;
-    RigidBodySimPtrListType m_SimBodies; // simulated objects
-    typedef std::list<  RigidBodyType*  > RigidBodyNotAniPtrListType;
-    RigidBodyNotAniPtrListType m_Bodies;    // all not simulated objects
+    //All Global Geometries used in the System
+    typedef std::map< unsigned int /* id */, typename RigidBodyType::GeometryType> GlobalGeometryMapType;
+    GlobalGeometryMapType m_globalGeoms;
+
+    // All RigidBodies which are owned by this class!"============================
+    typedef std::map< typename RigidBodyType::RigidBodyIdType,  RigidBodyType*  > RigidBodySimPtrListType;
+    RigidBodySimPtrListType m_SimBodies;        // simulated objects
+    RigidBodySimPtrListType m_RemoteSimBodies;  // all remote bodies
+
+    typedef std::map<typename RigidBodyType::RigidBodyIdType,  RigidBodyType*  > RigidBodyNotAniPtrListType;
+    RigidBodyNotAniPtrListType m_Bodies;        // all not simulated objects
+    // ============================================================================
+
+
+    //NeighbourDataListType m_neighbourDataList;
+
+    inline void addSimBodyPtr(RigidBodyType * ptr ) { m_SimBodies.insert(ptr); }
+    inline void addBodyPtr(RigidBodyType * ptr ) { m_Bodies.push_back(ptr); }
 
     void init(); // Only call if Timestepper has been created
     void initializeLog(Logging::Log* pLog);
@@ -98,16 +111,19 @@ protected:
 
 template<typename TDynamicsSystemConfig>
 DynamicsSystem<TDynamicsSystemConfig>::DynamicsSystem() {
-
-    // Delete all RigidBodys
-    RigidBodySimPtrListType::iterator it;
-    for(it = m_SimBodies.begin(); it != m_SimBodies.end(); it++){
-        delete (*it);
+// Delete all RigidBodys
+    {
+        typename RigidBodySimPtrListType::iterator it;
+        for(it = m_SimBodies.begin(); it != m_SimBodies.end(); it++){
+            delete (*it).second;
+        }
     }
 
-    RigidBodyNotAniPtrListType::iterator it;
-    for(it = m_Bodies.begin(); it != m_Bodies.end(); it++){
-        delete (*it);
+    {
+        typename RigidBodySimPtrListType::iterator it;
+        for(it = m_Bodies.begin(); it != m_Bodies.end(); it++){
+            delete (*it).second;
+        }
     }
 
     m_SimBodies.clear();
@@ -174,7 +190,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
     typename RigidBodySimPtrListType::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
-        RigidBodyType * pBody = (*bodyIt).get();
+        RigidBodyType * pBody = (*bodyIt);
 
 #if CoutLevelSolver>2
         LOG(m_pSolverLog, "Body: "<< pBody->m_id <<"-----"<< std::endl
@@ -223,7 +239,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
     typename RigidBodySimPtrListType::iterator  bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
-        RigidBodyType * pBody = (*bodyIt).get();
+        RigidBodyType * pBody = (*bodyIt);
 #if CoutLevelSolver>2
         LOG(m_pSolverLog, "Body: "<< pBody->m_id <<"-----"<< std::endl
             << "m_t= "  <<pBody->m_pSolverData->m_t<<std::endl

@@ -7,6 +7,7 @@
 #include "LogDefines.hpp"
 
 #include "RigidBody.hpp"
+#include "RigidBodyList.hpp"
 #include "DynamicsState.hpp"
 #include "ContactParameterMap.hpp"
 
@@ -19,6 +20,7 @@
 #include "TimeStepperSettings.hpp"
 
 #include "SimpleLogger.hpp"
+
 
 
 template<typename TDynamicsSystemConfig>
@@ -43,14 +45,15 @@ public:
     GlobalGeometryMapType m_globalGeoms;
 
     // All RigidBodies which are owned by this class!
-    typedef std::vector<  RigidBodyType *  > RigidBodySimPtrListType;
+    typedef RigidBodyList<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimPtrListType;
     RigidBodySimPtrListType m_SimBodies; // Simulated Objects
-    typedef std::vector<  RigidBodyType *  > RigidBodyNotAniPtrListType;
+    typedef RigidBodyList<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodyNotAniPtrListType;
     RigidBodyNotAniPtrListType m_Bodies;    // all not simulated objects
 
 
     void init(); // Only call if Timestepper has been created
     void initializeLog(Logging::Log* pLog);
+
 
     inline void applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state);
     inline void applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state);
@@ -285,24 +288,27 @@ void DynamicsSystem<TDynamicsSystemConfig>::updateFMatrix(const Quaternion & q, 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrix() {
     // iterate over all objects and assemble matrix M
-    for(int i=0; i < m_SimBodies.size(); i++) {
-        m_SimBodies[i]->m_MassMatrix_diag.template head<3>().setConstant(m_SimBodies[i]->m_mass);
-        m_SimBodies[i]->m_MassMatrix_diag.template tail<3>() = m_SimBodies[i]->m_K_Theta_S;
+    typename RigidBodySimPtrListType::iterator bodyIt;
+    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++){
+        (*bodyIt)->m_MassMatrix_diag.template head<3>().setConstant((*bodyIt)->m_mass);
+         (*bodyIt)->m_MassMatrix_diag.template tail<3>() = (*bodyIt)->m_K_Theta_S;
     }
 }
 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrixInv() {
     // iterate over all objects and assemble matrix M inverse
-    for(int i=0; i < m_SimBodies.size(); i++) {
-        m_SimBodies[i]->m_MassMatrixInv_diag = m_SimBodies[i]->m_MassMatrix_diag.array().inverse().matrix();
+    typename RigidBodySimPtrListType::iterator bodyIt;
+    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++){
+        (*bodyIt)->m_MassMatrixInv_diag = (*bodyIt)->m_MassMatrix_diag.array().inverse().matrix();
     }
 }
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::init_const_hTerm() {
     // Fill in constant terms of h-Term
-    for(int i=0; i < m_SimBodies.size(); i++) {
-        m_SimBodies[i]->m_h_term_const.template head<3>() =  m_SimBodies[i]->m_mass * m_gravity * m_gravityDir;
+    typename RigidBodySimPtrListType::iterator bodyIt;
+    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++){
+         (*bodyIt)->m_h_term_const.template head<3>() =  (*bodyIt)->m_mass * m_gravity * m_gravityDir;
     }
 }
 

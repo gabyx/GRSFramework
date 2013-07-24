@@ -505,7 +505,7 @@ protected:
         if(m_eBodiesState == RigidBodyType::SIMULATED) {
             if(m_bParseDynamics) {
                 for(int i=0; i < m_bodyList.size(); i++) {
-                    m_pDynSys->m_SimBodies.push_back(m_bodyList[i]);
+                    m_pDynSys->m_SimBodies.addBody(m_bodyList[i]);
                 }
             }
             m_nSimBodies += instances;
@@ -513,7 +513,7 @@ protected:
         } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
             if(m_bParseDynamics) {
                 for(int i=0; i < m_bodyList.size(); i++) {
-                    m_pDynSys->m_Bodies.push_back(m_bodyList[i]);
+                    m_pDynSys->m_Bodies.addBody(m_bodyList[i]);
                 }
             }
             m_nBodies += instances;
@@ -1432,7 +1432,7 @@ protected:
     unsigned int m_globalMaxGroupId; // Group Id used to build a unique id!
     // Temprary structures
     typename RigidBodyType::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
-    typename DynamicsSystemType::RigidBodySimPtrListType m_bodyList; ///< Used to process a RigidBody Node
+    typename std::vector<RigidBodyType*> m_bodyList; ///< Used to process a RigidBody Node
     std::vector<Vector3> m_bodyListScales;
     std::vector< DynamicsState<LayoutConfigType> > m_SimBodyInitStates;
 

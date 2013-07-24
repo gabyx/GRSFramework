@@ -107,7 +107,7 @@ bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
 
     timer.start();
     LOG(m_pSimulationLog,  "MPI> Body check,  MPI_Reduce... "<< std::endl;);
-    MPI_Reduce(&nSimBodies,&numberOfBodiesInSimulation, 1, MPI_INT, MPI_SUM, ProcessInfoType::MASTER, MPI_COMM_WORLD);
+    MPI_Reduce(&nSimBodies,&numberOfBodiesInSimulation, 1, MPI_INT, MPI_SUM, ProcessInfoType::MASTER_RANK, MPI_COMM_WORLD);
     timer.stop();
     double elapsed = ((double)timer.elapsed().wall)*1e-9;
 
