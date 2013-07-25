@@ -45,9 +45,9 @@ public:
     GlobalGeometryMapType m_globalGeoms;
 
     // All RigidBodies which are owned by this class!
-    typedef RigidBodyList<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimPtrListType;
-    RigidBodySimPtrListType m_SimBodies; // Simulated Objects
-    typedef RigidBodyList<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodyNotAniPtrListType;
+    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimPtrListType;
+    RigidBodySimPtrListType m_SimBodies;    // Simulated Objects
+    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodyNotAniPtrListType;
     RigidBodyNotAniPtrListType m_Bodies;    // all not simulated objects
 
 
@@ -175,11 +175,11 @@ void DynamicsSystem<TDynamicsSystemConfig>::reset(){
 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state){
-    InitialConditionBodies::applyBodiesToDynamicsState(m_SimBodies,state);
+    InitialConditionBodies::applyBodiesToDynamicsState<RigidBodyType, RigidBodySimPtrListType>(m_SimBodies,state);
 }
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state){
-    InitialConditionBodies::applyDynamicsStateToBodies(state,m_SimBodies);
+    InitialConditionBodies::applyDynamicsStateToBodies<RigidBodyType, RigidBodySimPtrListType>(state,m_SimBodies);
 }
 
 template<typename TDynamicsSystemConfig>

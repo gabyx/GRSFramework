@@ -83,24 +83,24 @@ class RigidBodyId{
 public:
     typedef uint64_t Type;
 
-    template<typename TRigidBodyConfig >
-    static unsigned int getProcessNr(const RigidBodyBase<TRigidBodyConfig> * body){
+    template<typename TRigidBodyType >
+    static unsigned int getProcessNr(const TRigidBodyType * body){
         Type id = body->m_id;
         id >>= 32;
         return *(reinterpret_cast<unsigned int *>(&(id)));
     };
 
-    template<typename TRigidBodyConfig >
-    static unsigned int getBodyNr(const RigidBodyBase<TRigidBodyConfig> * body){
+    template<typename TRigidBodyType >
+    static unsigned int getBodyNr(const TRigidBodyType * body){
         return *(reinterpret_cast<const unsigned int *>(&(body->m_id)));
     };
 
-    template<typename TRigidBodyConfig >
-    static void setId(RigidBodyBase<TRigidBodyConfig> * body, unsigned int bodyNr, unsigned int processNr){
-        body->m_id = 0;
-        body->m_id |= (uint64_t)processNr;
-        body->m_id <<= 32;
-        body->m_id |= (uint64_t)bodyNr;
+    static Type makeId( unsigned int bodyNr, unsigned int processNr){
+        Type res = 0;
+        res |= (uint64_t)processNr;
+        res <<= 32;
+        res |= (uint64_t)bodyNr;
+        return res;
     };
 
 };
@@ -121,29 +121,6 @@ public:
     }; ///< Emuration which defines if the object is simulated, animated or not simulated (which means fixed, and does not take part in the dynamics).
 
     typedef unsigned int BodyMaterial;
-
-    RigidBodyBase(){
-        m_mass = 1;
-        m_MassMatrixInv_diag.setZero();
-        m_MassMatrix_diag.setZero();
-        m_K_Theta_S.setIdentity();
-        m_A_IK.setIdentity();
-        m_id = -1;
-        m_r_S.setZero();
-        setQuaternionZero(m_q_KI);
-        m_h_term_const.setZero();
-        m_h_term.setZero();
-        m_eState = NOT_SIMULATED;
-        m_eMaterial = 0;
-        m_pSolverData = NULL;
-        m_globalGeomId = 0;
-    }; ///< Constructor which sets standart values.
-
-    ~RigidBodyBase(){
-        //DECONSTRUCTOR_MESSAGE
-        if(m_pSolverData){delete m_pSolverData; m_pSolverData = NULL;}
-    };
-
 
     unsigned int m_globalGeomId; ///< The Id for the global geometry, if this is 0 then the geometry belongs to the body and gets deallocated, otherwise not
 
@@ -175,13 +152,35 @@ public:
     Quaternion m_q_KI; ///< Quaternion which represents a rotation from I to the K frame, \f$ \tilde{\mathbf{a}}_{KI} \f$,  at time t_s + deltaT/2.
 
     typedef RigidBodyId::Type RigidBodyIdType;
-    RigidBodyIdType m_id; ///< This is the id of the body.
+    const RigidBodyIdType m_id; ///< This is the id of the body.
 
     BodyState m_eState; ///< The state of the body.
     BodyMaterial m_eMaterial; ///< The material id.
 
     RigidBodySolverDataType * m_pSolverData; /// Simulated bodies have a solverData. For all others, animated and not simulated this pointer is zero!
 
+
+     RigidBodyBase(const RigidBodyIdType & id): m_id(id){
+        m_mass = 1;
+        m_MassMatrixInv_diag.setZero();
+        m_MassMatrix_diag.setZero();
+        m_K_Theta_S.setIdentity();
+        m_A_IK.setIdentity();
+
+        m_r_S.setZero();
+        setQuaternionZero(m_q_KI);
+        m_h_term_const.setZero();
+        m_h_term.setZero();
+        m_eState = NOT_SIMULATED;
+        m_eMaterial = 0;
+        m_pSolverData = NULL;
+        m_globalGeomId = 0;
+    }; ///< Constructor which sets standart values.
+
+    ~RigidBodyBase(){
+        //DECONSTRUCTOR_MESSAGE
+        if(m_pSolverData){delete m_pSolverData; m_pSolverData = NULL;}
+    };
 };
 
   /** @} */

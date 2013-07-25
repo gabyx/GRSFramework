@@ -208,10 +208,9 @@ protected:
         }
 
         for(int i=0; i<instances; i++) {
-            RigidBodyType * temp_ptr = new RigidBodyType();
+            RigidBodyIdType id = RigidBodyId::makeId(i+1, groupId);
 
-            //Assign a unique id
-            RigidBodyId::setId(temp_ptr,i, groupId);
+            RigidBodyType * temp_ptr = new RigidBodyType(RigidBodyId::makeId(i, groupId));
 
             m_bodyList.push_back(temp_ptr);
 

@@ -474,10 +474,13 @@ protected:
 
 
         for(int i=0; i<instances; i++) {
-            RigidBodyType * temp_ptr = new RigidBodyType();
+
+            typename RigidBodyId::Type id = RigidBodyId::makeId(i, groupId);
+
+            RigidBodyType * temp_ptr = new RigidBodyType(id);
 
             //Assign a unique id
-            RigidBodyId::setId(temp_ptr,i, groupId);
+
             LOG(m_pSimulationLog,"---> Added RigidBody Instance: "<<temp_ptr->m_id<<std::endl);
             m_bodyList.push_back(temp_ptr);
 
@@ -1091,7 +1094,9 @@ protected:
             }
         }
 
-        InitialConditionBodies::applyDynamicsStateToBodies(m_SimBodyInitStates.back(), m_bodyList);
+        InitialConditionBodies::applyDynamicsStateToBodies<
+            typename DynamicsSystemType::RigidBodyType,
+            std::vector<RigidBodyType*> >(m_SimBodyInitStates.back(), m_bodyList);
 
     }
 
@@ -1119,7 +1124,9 @@ protected:
             throw ticpp::Exception("---> The attribute 'distribute' '" + distribute + std::string("' of 'InitialPositionLinear' has no implementation in the parser"));
         }
 
-        InitialConditionBodies::applyDynamicsStateToBodies(state, m_bodyList);
+        InitialConditionBodies::applyDynamicsStateToBodies<
+            typename DynamicsSystemType::RigidBodyType,
+            std::vector<RigidBodyType*> >(state, m_bodyList);
 
         element = dynProp->FirstChild("Material")->ToElement();
         distribute = element->GetAttribute("distribute");
