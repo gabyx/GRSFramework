@@ -10,6 +10,7 @@
 #include "LogDefines.hpp"
 
 #include "RigidBody.hpp"
+#include "RigidBodyContainer.hpp"
 
 #include "ContactParameterMap.hpp"
 
@@ -46,13 +47,14 @@ public:
     GlobalGeometryMapType m_globalGeoms;
 
     // All RigidBodies which are owned by this class!"============================
-    typedef std::map< typename RigidBodyType::RigidBodyIdType,  RigidBodyType*  > RigidBodySimPtrListType;
+    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimPtrListType;
     RigidBodySimPtrListType m_SimBodies;        // simulated objects
     RigidBodySimPtrListType m_RemoteSimBodies;  // all remote bodies
 
     typedef std::map<typename RigidBodyType::RigidBodyIdType,  RigidBodyType*  > RigidBodyNotAniPtrListType;
     RigidBodyNotAniPtrListType m_Bodies;        // all not simulated objects
     // ============================================================================
+
 
 
     //NeighbourDataListType m_neighbourDataList;

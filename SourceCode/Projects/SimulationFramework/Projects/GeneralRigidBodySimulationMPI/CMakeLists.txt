@@ -88,7 +88,7 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourData.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyList.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MoreauTimeStepperMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp

@@ -7,7 +7,7 @@
 #include "LogDefines.hpp"
 
 #include "RigidBody.hpp"
-#include "RigidBodyList.hpp"
+#include "RigidBodyContainer.hpp"
 #include "DynamicsState.hpp"
 #include "ContactParameterMap.hpp"
 

@@ -25,7 +25,10 @@ public:
     typedef TRigidBodyIdType RigidBodyIdType;
     typedef TRigidBodyType RigidBodyType;
 
-    //This container grants only const access with its iterators to RigidBodyType*
+    //This container grants only const access with its iterators with (RigidBodyType* const)
+    //So we are able to change these rigidbodies, but cant change the m_id because it is const in the rigidbody class
+    //If we could accidentally change m_id, this container will still find  with the old hashes the right bucket, but will
+    // fail to retrieve it because the check by boost::multi_index::member will fail because we changed id!
     typedef boost::multi_index::multi_index_container<
         RigidBodyType * ,
         boost::multi_index::indexed_by<
