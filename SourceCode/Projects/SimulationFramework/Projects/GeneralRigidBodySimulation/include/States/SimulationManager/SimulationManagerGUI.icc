@@ -96,8 +96,10 @@ void SimulationManagerGUI<TConfig>::setup() {
     m_pStateRecorder = boost::shared_ptr<StateRecorder<DynamicsSystemType> >(new StateRecorder<DynamicsSystemType>(m_nSimBodies));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added StateRecorder... ");
 
+
     m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());
     m_pSceneParser->cleanUp(); // Take care this cleans all stuff
+    m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBuffer... ");
 
     m_pVisBuffer = m_pSharedBuffer->updateVisBuffer();
 

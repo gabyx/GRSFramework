@@ -60,40 +60,41 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
-        m_pSimulationLog->logMessage("---> Creating SimulationManager...");
     }
 
-    m_pSimulationLog->logMessage("---> SimulationManager::setup(): ");
+    m_pSimulationLog->logMessage("---> SimulationManagerMPI::setup(): ");
 
     // MPI Process Commnunicator
+
     m_pProcComm = boost::shared_ptr<MPILayer::ProcessCommunicator<LayoutConfigType> >(new MPILayer::ProcessCommunicator<LayoutConfigType>());
+    m_pSimulationLog->logMessage("--->SimulationManagerMPI:: Added ProcessCommunicator");
 
 
     m_pDynSys = boost::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
+    m_pSimulationLog->logMessage("--->SimulationManagerMPI:: Added DynamicsSystem");
 
     // Parse the Scene from XML! ==========================
+
     m_pSceneParser = boost::shared_ptr< SceneParserMPI<TConfig> >( new SceneParserMPI<TConfig>( m_pDynSys, m_pProcComm ) );
-
+    m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
     m_pSceneParser->parseScene(sceneFilePathNew);
-
-    m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
-
     m_nGlobalSimBodies = m_pSceneParser->getNumberOfGlobalSimBodies();
-
-    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_nSimBodies << " Bodies!" << std::endl;);
+    LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: SceneParsing finshed: Added "<< m_pSceneParser->getNumberOfSimBodies() << " Bodies!" << std::endl;);
 
     // Do Safty Check
     // Do a Reduction of all Simbodies, to count if no bodies are missing!
+    m_pSimulationLog->logMessage("---> Check number of Bodies in Process:");
     checkNumberOfBodiesInProcess();
 
     // =====================================================
 
-
-    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys) );
-
+    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pProcComm) );
     m_pStateRecorder = boost::shared_ptr<StateRecorderBody<DynamicsSystemType> >(new StateRecorderBody<DynamicsSystemType>());
 
-    m_pSimulationLog->logMessage("---> setup finished! ");
+
+
+
+    m_pSimulationLog->logMessage("---> imulationManager::setup() finished!");
 }
 
 
@@ -111,7 +112,7 @@ bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
     timer.stop();
     double elapsed = ((double)timer.elapsed().wall)*1e-9;
 
-    if(m_pProcComm->m_pProcessInfo->hasMasterRank()) {
+    if(m_pProcComm->getProcessInfo()->hasMasterRank()) {
         LOG(m_pSimulationLog,  "MPI> Allreduce needed: " << elapsed <<"sec."<<std::endl; );
 
         if(numberOfBodiesInSimulation != m_nGlobalSimBodies) {
@@ -176,7 +177,7 @@ void SimulationManagerMPI<TConfig>::initSim() {
 
     MPILayer::GenericMessage1<boost::filesystem::path> message;
 
-    if(m_pProcComm->m_pProcessInfo->hasMasterRank()) { // Only master process
+    if(m_pProcComm->getProcessInfo()->hasMasterRank()) { // Only master process
         // Get new sim folder path relative to global directory
 
         m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
@@ -195,7 +196,7 @@ void SimulationManagerMPI<TConfig>::initSim() {
 
         m_pProcComm->sendBroadcast(message, MPI_COMM_WORLD);
     } else { // All other processes
-        m_pProcComm->receiveBroadcast(message, m_pProcComm->m_pProcessInfo->getMasterRank(), MPI_COMM_WORLD);
+        m_pProcComm->receiveBroadcast(message, m_pProcComm->getProcessInfo()->getMasterRank(), MPI_COMM_WORLD);
 
         m_SimFolderPath = message.m_data.get<0>();
     }

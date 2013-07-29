@@ -21,6 +21,8 @@
 #include "InclusionSolverSettings.hpp"
 #include "TimeStepperSettings.hpp"
 
+#include "MPICommunication.hpp"
+#include "NeighbourCommunicator.hpp"
 
 #include "SimpleLogger.hpp"
 
@@ -32,6 +34,7 @@ public:
 
     typedef TDynamicsSystemConfig DynamicsSystemConfig;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemConfig)
+
 
     DynamicsSystem();
     ~DynamicsSystem();
@@ -46,23 +49,21 @@ public:
     typedef std::map< unsigned int /* id */, typename RigidBodyType::GeometryType> GlobalGeometryMapType;
     GlobalGeometryMapType m_globalGeoms;
 
-    // All RigidBodies which are owned by this class!"============================
-    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimPtrListType;
-    RigidBodySimPtrListType m_SimBodies;        // simulated objects
-    RigidBodySimPtrListType m_RemoteSimBodies;  // all remote bodies
+    // All global RigidBodies Container for this Process, these bodies which are owned by this class!"============================
+    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimContainer;
+    RigidBodySimContainer m_SimBodies;        // simulated objects
+    RigidBodySimContainer m_RemoteSimBodies;  // all remote bodies
 
-    typedef std::map<typename RigidBodyType::RigidBodyIdType,  RigidBodyType*  > RigidBodyNotAniPtrListType;
-    RigidBodyNotAniPtrListType m_Bodies;        // all not simulated objects
+    typedef RigidBodySimContainer RigidBodyNotAniContainer;
+    RigidBodyNotAniContainer m_Bodies;        // all not simulated objects
     // ============================================================================
 
 
 
-    //NeighbourDataListType m_neighbourDataList;
 
     inline void addSimBodyPtr(RigidBodyType * ptr ) { m_SimBodies.insert(ptr); }
     inline void addBodyPtr(RigidBodyType * ptr ) { m_Bodies.push_back(ptr); }
 
-    void init(); // Only call if Timestepper has been created
     void initializeLog(Logging::Log* pLog);
 
     void init_MassMatrix(); // MassMatrix is const
@@ -87,12 +88,11 @@ public:
 
 protected:
 
+
     RecorderSettings<LayoutConfigType> m_SettingsRecorder;
     TimeStepperSettings<LayoutConfigType> m_SettingsTimestepper;
     InclusionSolverSettings<LayoutConfigType> m_SettingsInclusionSolver;
 
-    //Inits
-    void initializeGlobalParameters();
 
     //Function
     //This is a minimal update of F, no checking if constant values are correct
@@ -112,19 +112,26 @@ protected:
 
 
 template<typename TDynamicsSystemConfig>
-DynamicsSystem<TDynamicsSystemConfig>::DynamicsSystem() {
-// Delete all RigidBodys
+DynamicsSystem<TDynamicsSystemConfig>::DynamicsSystem()
+{
+};
+
+template<typename TDynamicsSystemConfig>
+DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem() {
+    DECONSTRUCTOR_MESSAGE
+
+    // Delete all RigidBodys
     {
-        typename RigidBodySimPtrListType::iterator it;
+        typename RigidBodySimContainer::iterator it;
         for(it = m_SimBodies.begin(); it != m_SimBodies.end(); it++){
-            delete (*it).second;
+            delete (*it);
         }
     }
 
     {
-        typename RigidBodySimPtrListType::iterator it;
+        typename RigidBodyNotAniContainer::iterator it;
         for(it = m_Bodies.begin(); it != m_Bodies.end(); it++){
-            delete (*it).second;
+            delete (*it);
         }
     }
 
@@ -132,22 +139,6 @@ DynamicsSystem<TDynamicsSystemConfig>::DynamicsSystem() {
     m_Bodies.clear();
 
 };
-template<typename TDynamicsSystemConfig>
-DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem() {
-    DECONSTRUCTOR_MESSAGE
-};
-
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::init() {
-    initializeGlobalParameters();
-}
-
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::initializeGlobalParameters() {
-    m_gravity = 9.81;
-    m_gravityDir = Vector3(0,0,-1);
-
-}
 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const{
@@ -189,7 +180,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
     static Matrix43 F_i = Matrix43::Zero();
 
     // Do timestep for every object
-    typename RigidBodySimPtrListType::iterator bodyIt;
+    typename RigidBodySimContainer::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
@@ -238,7 +229,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
 
     m_CurrentStateEnergy = 0;
     // Do timestep for every object
-    typename RigidBodySimPtrListType::iterator  bodyIt;
+    typename RigidBodySimContainer::iterator  bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);

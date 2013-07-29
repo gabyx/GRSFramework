@@ -80,8 +80,8 @@ public:
   * @param SimBodies A reference to the list of all simulated bodies.
   * @param Bodies A reference to the list all not simulated bodies.
   */
-  CollisionSolver(typename DynamicsSystemType::RigidBodySimPtrListType & SimBodies,
-                  typename DynamicsSystemType::RigidBodyNotAniPtrListType & Bodies);
+  CollisionSolver(typename DynamicsSystemType::RigidBodySimContainer & SimBodies,
+                  typename DynamicsSystemType::RigidBodyNotAniContainer & Bodies);
 
    ~CollisionSolver();
 
@@ -106,8 +106,8 @@ protected:
 
   const unsigned int m_nDofqObj, m_nDofuObj, m_nSimBodies;
   unsigned int m_expectedNContacts;                                                 ///< Expected number of Contacts.
-  typename DynamicsSystemType::RigidBodySimPtrListType & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
-  typename DynamicsSystemType::RigidBodyNotAniPtrListType & m_Bodies;          ///< List of all fixed not simulated bodies.
+  typename DynamicsSystemType::RigidBodySimContainer & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
+  typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;          ///< List of all fixed not simulated bodies.
 
   Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> > m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
   friend class Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> >;
@@ -126,8 +126,8 @@ protected:
 
 template< typename TCollisionSolverConfig >
 CollisionSolver<TCollisionSolverConfig>::CollisionSolver(
-                                         typename DynamicsSystemType::RigidBodySimPtrListType & SimBodies,
-                                         typename DynamicsSystemType::RigidBodyNotAniPtrListType & Bodies):
+                                         typename DynamicsSystemType::RigidBodySimContainer & SimBodies,
+                                         typename DynamicsSystemType::RigidBodyNotAniContainer & Bodies):
 m_SimBodies(SimBodies), m_Bodies(Bodies),
 m_nSimBodies(SimBodies.size()),m_nDofqObj(NDOFqObj),m_nDofuObj(NDOFuObj)
 {
@@ -196,9 +196,9 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision(){
     // All objects have been updated...
 
     //// Do simple collision detection (SimBodies to SimBodies)
-    typename DynamicsSystemType::RigidBodySimPtrListType::iterator bodyIti;
+    typename DynamicsSystemType::RigidBodySimContainer::iterator bodyIti;
     for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++){
-      typename DynamicsSystemType::RigidBodySimPtrListType::iterator bodyItj = bodyIti;
+      typename DynamicsSystemType::RigidBodySimContainer::iterator bodyItj = bodyIti;
       bodyItj++;
       for(; bodyItj != m_SimBodies.end(); bodyItj++ ){
 
@@ -211,7 +211,7 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision(){
 
 
     // Do simple collision detection (SimBodies to Bodies)
-    typename DynamicsSystemType::RigidBodyNotAniPtrListType::iterator bodyItk;
+    typename DynamicsSystemType::RigidBodyNotAniContainer::iterator bodyItk;
     for(bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++){
         for(bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++){
 

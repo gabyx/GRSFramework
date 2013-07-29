@@ -8,36 +8,31 @@
 #include "LogDefines.hpp"
 
 #include "RigidBody.hpp"
-
+#include "RigidBodyContainer.hpp"
 
 
 
 template<typename TDynamicsSystemConfig>
 class NeighbourData {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     typedef TDynamicsSystemConfig DynamicsSystemConfig;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemConfig)
 
-    struct ExtRemoteData{
+    struct RemoteOverlapData{
         RigidBodyType * m_body;
-
     };
 
-    struct IntRemoteData{
+    struct LocalOverlapData{
         RigidBodyType * m_body;
         enum {NOT_NOTFIED, NOTIFIED, MOVE};
     };
 
-    typedef ExtRemoteData ExtDataType;
-    typedef IntRemoteData IntDataType;
-
-    std::map<RigidBodyType::RigidBodyIdType, ExtDataType * > m_extRemoteBodies; // All external remote bodies
+    std::map<typename RigidBodyType::RigidBodyIdType, RemoteOverlapData > m_remoteBodies; // All overlapping remote bodies
         // These bodies need an update from the neighbour.
         // If no update move body to m_garbageBodyList list
 
-    std::map<RigidBodyType::RigidBodyIdType, IntDataType * > m_intRemoteBodies; // All external remote bodies
+    std::map<typename RigidBodyType::RigidBodyIdType, LocalOverlapData > m_localBodies; // All overlapping local bodies
         // NOT_NOTIFIED: send whole body to the neighbour (change to NOTIFIED)
         // NOTIFIED: send update to neighbour
         // MOVE: send whole body to neighbour (put into m_garbageBodyList)
@@ -46,8 +41,7 @@ public:
 
 private:
 
-    std::list<RigidBodyType::RigidBodyType *> m_garbageBodyList;
+};
 
-    // We sent an Update for thesekind of bodies
-    unsigned int m_ProcessId;
-}
+
+#endif

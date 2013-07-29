@@ -55,6 +55,8 @@ private:
     boost::shared_ptr< TimeStepperType >	m_pTimestepper;
 
     boost::shared_ptr< DynamicsSystemType > m_pDynSys;
+
+
     // ===========================================
 
     // File Paths for one Simulation, always reset ==============================
@@ -62,7 +64,7 @@ private:
 
 
     typedef typename MPILayer::ProcessCommunicator<LayoutConfigType>::ProcessInfoType ProcessInfoType;
-    boost::shared_ptr< MPILayer::ProcessCommunicator<LayoutConfigType>> m_pProcComm;
+    boost::shared_ptr< MPILayer::ProcessCommunicator<LayoutConfigType> > m_pProcComm;
 
 
     bool checkNumberOfBodiesInProcess();

@@ -21,6 +21,10 @@ public:
     virtual bool belongsPointToProcess(const Vector3 & point) const{
         ERRORMSG("The ProcessTopology::belongsPointToProcess has not been implemented!");
     };
+
+    virtual const std::vector<unsigned int> & getNeigbourRanks() const{
+        ERRORMSG("The ProcessTopology::belongsPointToProcess has not been implemented!");
+    }
 };
 
 // Prototype
@@ -55,6 +59,11 @@ public:
         }
         return false;
     };
+
+    const std::vector<unsigned int> & getNeigbourRanks() const{
+        return m_nbRanks;
+    };
+
 
 private:
     unsigned int m_rank; ///< Own rank;
@@ -124,9 +133,9 @@ public:
         m_pProcTopo = new MPILayer::ProcessTopologyGrid<TLayoutConfig>(minPoint,maxPoint,dim, getRank() );
     }
 
-    inline const ProcessTopology<TLayoutConfig> & getProcTopo() const{
+    inline const ProcessTopology<TLayoutConfig> * getProcTopo() const{
         ASSERTMSG(m_pProcTopo,"m_pProcTopo == NULL");
-        return *m_pProcTopo;
+        return m_pProcTopo;
     };
 
 private:

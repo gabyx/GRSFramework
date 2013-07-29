@@ -45,13 +45,11 @@ public:
     GlobalGeometryMapType m_globalGeoms;
 
     // All RigidBodies which are owned by this class!
-    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimPtrListType;
-    RigidBodySimPtrListType m_SimBodies;    // Simulated Objects
-    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodyNotAniPtrListType;
-    RigidBodyNotAniPtrListType m_Bodies;    // all not simulated objects
+    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimContainer;
+    RigidBodySimContainer m_SimBodies;    // Simulated Objects
+    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodyNotAniContainer;
+    RigidBodyNotAniContainer m_Bodies;    // all not simulated objects
 
-
-    void init(); // Only call if Timestepper has been created
     void initializeLog(Logging::Log* pLog);
 
 
@@ -84,9 +82,6 @@ protected:
     TimeStepperSettings<LayoutConfigType> m_SettingsTimestepper;
     InclusionSolverSettings<LayoutConfigType> m_SettingsInclusionSolver;
 
-    //Inits
-    void initializeGlobalParameters();
-
     //Function
     //This is a minimal update of F, no checking if constant values are correct
     void updateFMatrix(const Quaternion & q, Matrix43 & F_i);
@@ -105,16 +100,22 @@ protected:
 
 template<typename TDynamicsSystemConfig>
 DynamicsSystem<TDynamicsSystemConfig>::DynamicsSystem() {
-  // Delete all RigidBodys
+
+};
+template<typename TDynamicsSystemConfig>
+DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem() {
+    DECONSTRUCTOR_MESSAGE
+
+    // Delete all RigidBodys
     {
-        typename RigidBodySimPtrListType::iterator it;
+        typename RigidBodySimContainer::iterator it;
         for(it = m_SimBodies.begin(); it != m_SimBodies.end(); it++){
             delete (*it);
         }
     }
 
     {
-        typename RigidBodyNotAniPtrListType::iterator it;
+        typename RigidBodyNotAniContainer::iterator it;
         for(it = m_Bodies.begin(); it != m_Bodies.end(); it++){
             delete (*it);
         }
@@ -124,21 +125,6 @@ DynamicsSystem<TDynamicsSystemConfig>::DynamicsSystem() {
     m_Bodies.clear();
 
 };
-template<typename TDynamicsSystemConfig>
-DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem() {
-    DECONSTRUCTOR_MESSAGE
-};
-
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::init() {
-    initializeGlobalParameters();
-}
-
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::initializeGlobalParameters() {
-    m_gravity = 9.81;
-    m_gravityDir = Vector3(0,0,-1);
-}
 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const{
@@ -175,11 +161,11 @@ void DynamicsSystem<TDynamicsSystemConfig>::reset(){
 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state){
-    InitialConditionBodies::applyBodiesToDynamicsState<RigidBodyType, RigidBodySimPtrListType>(m_SimBodies,state);
+    InitialConditionBodies::applyBodiesToDynamicsState<RigidBodyType, RigidBodySimContainer>(m_SimBodies,state);
 }
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state){
-    InitialConditionBodies::applyDynamicsStateToBodies<RigidBodyType, RigidBodySimPtrListType>(state,m_SimBodies);
+    InitialConditionBodies::applyDynamicsStateToBodies<RigidBodyType, RigidBodySimContainer>(state,m_SimBodies);
 }
 
 template<typename TDynamicsSystemConfig>
@@ -189,7 +175,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
     static Matrix43 F_i = Matrix43::Zero();
 
     // Do timestep for every object
-    typename RigidBodySimPtrListType::iterator bodyIt;
+    typename RigidBodySimContainer::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
@@ -241,7 +227,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
     m_CurrentStateEnergy = 0;
 
     // Do timestep for every object
-    typename RigidBodySimPtrListType::iterator bodyIt;
+    typename RigidBodySimContainer::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
@@ -288,7 +274,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::updateFMatrix(const Quaternion & q, 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrix() {
     // iterate over all objects and assemble matrix M
-    typename RigidBodySimPtrListType::iterator bodyIt;
+    typename RigidBodySimContainer::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++){
         (*bodyIt)->m_MassMatrix_diag.template head<3>().setConstant((*bodyIt)->m_mass);
          (*bodyIt)->m_MassMatrix_diag.template tail<3>() = (*bodyIt)->m_K_Theta_S;
@@ -298,7 +284,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrix() {
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrixInv() {
     // iterate over all objects and assemble matrix M inverse
-    typename RigidBodySimPtrListType::iterator bodyIt;
+    typename RigidBodySimContainer::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++){
         (*bodyIt)->m_MassMatrixInv_diag = (*bodyIt)->m_MassMatrix_diag.array().inverse().matrix();
     }
@@ -306,7 +292,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrixInv() {
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::init_const_hTerm() {
     // Fill in constant terms of h-Term
-    typename RigidBodySimPtrListType::iterator bodyIt;
+    typename RigidBodySimContainer::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++){
          (*bodyIt)->m_h_term_const.template head<3>() =  (*bodyIt)->m_mass * m_gravity * m_gravityDir;
     }

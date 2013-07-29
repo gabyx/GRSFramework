@@ -32,9 +32,9 @@ public:
     StateRecorderBody();
     ~StateRecorderBody();
 
-    void writeStates(const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list);
+    void writeStates(const typename TDynamicsSystemType::RigidBodySimContainer & body_list);
 
-    bool openFiles(boost::filesystem::path dir_path, const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list, bool truncate = false);
+    bool openFiles(boost::filesystem::path dir_path, const typename TDynamicsSystemType::RigidBodySimContainer & body_list, bool truncate = false);
     bool closeFile(typename RigidBodyType::RigidBodyIdType);
 
     void closeAllSimFiles();
@@ -79,7 +79,7 @@ StateRecorderBody<TDynamicsSystemType>::~StateRecorderBody() {
 
 template<typename TDynamicsSystemType>
 bool StateRecorderBody<TDynamicsSystemType>::openFiles(boost::filesystem::path dir_path,
-                                                       const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list,
+                                                       const typename TDynamicsSystemType::RigidBodySimContainer & body_list,
                                                        bool truncate)
 {
 
@@ -87,7 +87,7 @@ bool StateRecorderBody<TDynamicsSystemType>::openFiles(boost::filesystem::path d
     std::stringstream s;
 
     // For every body add a Sim File!
-    typename TDynamicsSystemType::RigidBodySimPtrListType::const_iterator it;
+    typename TDynamicsSystemType::RigidBodySimContainer::const_iterator it;
     for(it = body_list.begin();it != body_list.end();it++){
 
         file = dir_path;
@@ -136,9 +136,9 @@ void StateRecorderBody<TDynamicsSystemType>::getSimBodyFileName(typename TDynami
 }
 
 template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list){
+void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamicsSystemType::RigidBodySimContainer & body_list){
 
-    typename TDynamicsSystemType::RigidBodySimPtrListType::const_iterator it;
+    typename TDynamicsSystemType::RigidBodySimContainer::const_iterator it;
 
     static DynamicsState<LayoutConfigType> dynState(1); // State for one Body only
         // Iterate over all bodies

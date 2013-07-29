@@ -83,7 +83,6 @@ public:
 
             m_pSimulationLog->logMessage("---> Try to parse the scene ...");
 
-            // Start off with the gravity!
             m_xmlRootNode = m_xmlDoc.FirstChild("DynamicsSystem");
             if(m_xmlRootNode) {
                 ticpp::Node *node = NULL;
@@ -175,13 +174,13 @@ protected:
                 throw ticpp::Exception("---> String conversion in processMPISettings: dimension failed");
             }
             // saftey check
-            if(dim(0)*dim(1)*dim(2) != m_pProcComm->m_pProcessInfo->getNProcesses()) {
-                LOG(m_pSimulationLog,"---> Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcComm->m_pProcessInfo->getNProcesses() <<" Processes"<<std::endl; );
+            if(dim(0)*dim(1)*dim(2) != m_pProcComm->getProcessInfo()->getNProcesses()) {
+                LOG(m_pSimulationLog,"---> Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcComm->getProcessInfo()->getNProcesses() <<" Processes"<<std::endl; );
                 sleep(2);
                 throw ticpp::Exception("---> You have launched to many processes for the grid!");
             }
 
-            m_pProcComm->m_pProcessInfo->createProcTopoGrid(minPoint,maxPoint, dim);
+            m_pProcComm->getProcessInfo()->createProcTopoGrid(minPoint,maxPoint, dim);
 
         } else {
             throw ticpp::Exception("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
@@ -208,7 +207,7 @@ protected:
         }
 
         for(int i=0; i<instances; i++) {
-            RigidBodyIdType id = RigidBodyId::makeId(i+1, groupId);
+            typename RigidBodyType::RigidBodyIdType id = RigidBodyId::makeId(i+1, groupId);
 
             RigidBodyType * temp_ptr = new RigidBodyType(RigidBodyId::makeId(i, groupId));
 
@@ -237,11 +236,11 @@ protected:
 
             for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
                 // Check if Body belongs to the topology! // Check CoG!
-                if(m_pProcComm->m_pProcessInfo->getProcTopo().belongsPointToProcess((*bodyIt)->m_r_S)) {
+                if(m_pProcComm->getProcessInfo()->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {
 
                     LOG(m_pSimulationLog, "---> Added Body with ID: (" << RigidBodyId::getProcessNr(*bodyIt)<<","<<RigidBodyId::getBodyNr(*bodyIt)<<")"<< std::endl);
 
-                    m_pDynSys->m_SimBodies.push_back((*bodyIt));
+                    m_pDynSys->m_SimBodies.addBody((*bodyIt));
 
                     m_nSimBodies++;
                     m_nBodies++;
@@ -257,7 +256,7 @@ protected:
 
             for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
 
-                m_pDynSys->m_Bodies.push_back((*bodyIt));
+                m_pDynSys->m_Bodies.addBody((*bodyIt));
 
                 m_nBodies++;
             }

@@ -87,6 +87,8 @@ SET(COMMON_SRC
 SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourData.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourCommunicator.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodyGarbageCollector.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MoreauTimeStepperMPI.hpp

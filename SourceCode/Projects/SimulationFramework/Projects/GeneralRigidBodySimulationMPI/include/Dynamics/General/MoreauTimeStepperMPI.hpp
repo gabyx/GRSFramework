@@ -34,7 +34,8 @@
 #include "CollisionSolverMPI.hpp"
 #include "DynamicsSystemMPI.hpp"
 
-
+#include "MPICommunication.hpp"
+#include "NeighbourCommunicator.hpp"
 //===========================================
 
 
@@ -50,18 +51,19 @@ public:
 
     typedef TConfigTimeStepper TimeStepperConfigType;
     DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( TConfigTimeStepper )
-
+    typedef typename MPILayer::ProcessCommunicator<LayoutConfigType> ProcessCommunicatorType;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
-    MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys);
+    MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr< ProcessCommunicatorType > pProcCom);
     ~MoreauTimeStepper();
 
     // The Core Objects ==================================
     boost::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
     boost::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
     boost::shared_ptr<DynamicsSystemType>	m_pDynSys;
+    boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> > m_pNbCommunicator;
     // ===================================================
 
     void initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile="");
@@ -89,8 +91,6 @@ public:
 
 protected:
 
-    const unsigned int m_nSimBodies;
-
     PREC m_currentSimulationTime;
 
     int m_IterationCounter;
@@ -116,6 +116,10 @@ protected:
     boost::filesystem::path m_SystemDataFilePath;
     boost::filesystem::path m_CollisionDataFilePath;
     boost::filesystem::path m_SolverLogFilePath;
+
+
+    //MPI
+    boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
 };
 
 //=========================================================
@@ -125,8 +129,8 @@ definitions of template class MoreauTimeStepper
 _________________________________________________________*/
 
 template< typename TConfigTimeStepper>
-MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys):
-    m_nSimBodies(nSimBodies),
+MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
+                                                           boost::shared_ptr< ProcessCommunicatorType > pProcCom):
     m_ReferenceSimFile(NDOFqObj,NDOFuObj) {
 
 
@@ -139,7 +143,10 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nS
     m_pSolverLog = NULL;
 
     m_pDynSys = pDynSys;
-    m_pDynSys->init();
+    m_pProcCom = pProcCom;
+
+    m_pNbCommunicator = boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> >(
+                                new NeighbourCommunicator<DynamicsSystemType>(m_pDynSys->m_SimBodies, m_pDynSys->m_RemoteSimBodies, m_pProcCom) );
 
     m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys->m_SimBodies, m_pDynSys->m_Bodies));
     m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys));
