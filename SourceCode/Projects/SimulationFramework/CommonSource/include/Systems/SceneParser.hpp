@@ -963,7 +963,7 @@ protected:
                 ss << "---> addToGlobalGeomList: geometry with id: " <<  id<< " exists already!";
                 throw ticpp::Exception(ss.str());
             }
-            LOG(m_pSimulationLog,"---> Added geometry with id: " <<  id << "to global geometry list" <<std::endl;);
+            LOG(m_pSimulationLog,"---> Added geometry with id: " <<  id << " to global geometry list" <<std::endl;);
     }
 
     virtual void fillMeshInfo( Assimp::Importer & importer, const aiScene* scene, MeshData<MeshPREC> & meshInfo, Vector3 scale_factor, Quaternion quat, Vector3 trans) {

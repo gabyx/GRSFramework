@@ -30,17 +30,22 @@ public:
                           : m_globalLocal(globalLocal), m_globalRemote(globalRemote), m_pProcCom(pProcCom)
 
     {
-        // Initialize all NeighbourDatas
-        const std::vector<unsigned int> & nbRanks = m_pProcCom->getProcessInfo()->getProcTopo()->getNeigbourRanks();
-        for(int i=0;i< nbRanks.size();i++){
-            m_nbDataMap[nbRanks[i]] = NeighbourData<DynamicsSystemConfig>();
-        }
-
         if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")){
             m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
         }else{
             ERRORMSG("SimulationLog does not yet exist? Did you create it?")
         }
+
+
+        // Initialize all NeighbourDatas
+
+        const std::vector<unsigned int> & nbRanks = m_pProcCom->getProcessInfo()->getProcTopo()->getNeigbourRanks();
+        for(int i=0;i< nbRanks.size();i++){
+            LOG(m_pSimulationLog,"---> Add neighbour data for process rank: "<<nbRanks[i]<<std::endl;);
+            m_nbDataMap[nbRanks[i]] = NeighbourData<DynamicsSystemConfig>();
+        }
+        m_pSimulationLog->logMessage("---> Initialized all NeighbourDatas");
+
 
 
     }

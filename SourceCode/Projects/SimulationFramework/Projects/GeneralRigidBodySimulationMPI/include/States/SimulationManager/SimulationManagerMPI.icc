@@ -79,11 +79,14 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
     m_pSceneParser->parseScene(sceneFilePathNew);
     m_nGlobalSimBodies = m_pSceneParser->getNumberOfGlobalSimBodies();
-    LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: SceneParsing finshed: Added "<< m_pSceneParser->getNumberOfSimBodies() << " Bodies!" << std::endl;);
+    m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
+    LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: SceneParsing finshed: Added "<< m_nSimBodies << " Bodies!" << std::endl;);
+    LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: Global Bodies in Simulation "<< m_nGlobalSimBodies<< " Bodies!" << std::endl;);
 
     // Do Safty Check
     // Do a Reduction of all Simbodies, to count if no bodies are missing!
     m_pSimulationLog->logMessage("---> Check number of Bodies in Process:");
+    m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
     checkNumberOfBodiesInProcess();
 
     // =====================================================
@@ -94,7 +97,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
 
 
-    m_pSimulationLog->logMessage("---> imulationManager::setup() finished!");
+    m_pSimulationLog->logMessage("---> SimulationManagerMPI::setup() finished!");
 }
 
 
