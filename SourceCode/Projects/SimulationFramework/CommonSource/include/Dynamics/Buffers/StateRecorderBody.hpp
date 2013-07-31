@@ -34,6 +34,9 @@ public:
 
     void writeStates(const typename TDynamicsSystemType::RigidBodySimContainer & body_list);
 
+    void addBody(RigidBodyType * body);
+    void removeBody(RigidBodyType * body);
+
     bool openFiles(boost::filesystem::path dir_path, const typename TDynamicsSystemType::RigidBodySimContainer & body_list, bool truncate = false);
     bool closeFile(typename RigidBodyType::RigidBodyIdType);
 
@@ -189,6 +192,15 @@ void StateRecorderBody<TDynamicsSystemType>::closeAllSimFiles() {
         delete it->second;
     }
     m_BinarySimFiles.clear();
+}
+
+template<typename TDynamicsSystemType>
+void StateRecorderBody<TDynamicsSystemType>::addBody(RigidBodyType * body) {
+    LOG(m_pSimulationLog, "---> StateRecorderBody:: Trying to add body with id: " << body->m_id <<std::endl;);
+}
+template<typename TDynamicsSystemType>
+void StateRecorderBody<TDynamicsSystemType>::removeBody(RigidBodyType * body) {
+    LOG(m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << body->m_id <<std::endl;);
 }
 
 

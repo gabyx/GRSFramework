@@ -66,7 +66,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     // MPI Process Commnunicator
 
-    m_pProcComm = boost::shared_ptr<MPILayer::ProcessCommunicator<LayoutConfigType> >(new MPILayer::ProcessCommunicator<LayoutConfigType>());
+    m_pProcCommunicator = boost::shared_ptr<MPILayer::ProcessCommunicator<LayoutConfigType> >(new MPILayer::ProcessCommunicator<LayoutConfigType>());
     m_pSimulationLog->logMessage("--->SimulationManagerMPI:: Added ProcessCommunicator");
 
 
@@ -75,7 +75,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     // Parse the Scene from XML! ==========================
 
-    m_pSceneParser = boost::shared_ptr< SceneParserMPI<TConfig> >( new SceneParserMPI<TConfig>( m_pDynSys, m_pProcComm ) );
+    m_pSceneParser = boost::shared_ptr< SceneParserMPI<TConfig> >( new SceneParserMPI<TConfig>( m_pDynSys, m_pProcCommunicator ) );
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
     m_pSceneParser->parseScene(sceneFilePathNew);
     m_nGlobalSimBodies = m_pSceneParser->getNumberOfGlobalSimBodies();
@@ -91,8 +91,21 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     // =====================================================
 
-    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pProcComm) );
     m_pStateRecorder = boost::shared_ptr<StateRecorderBody<DynamicsSystemType> >(new StateRecorderBody<DynamicsSystemType>());
+
+    m_pNbCommunicator = boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> >(
+                                new NeighbourCommunicator<DynamicsSystemType>(m_pDynSys->m_SimBodies, m_pDynSys->m_RemoteSimBodies, m_pProcCommunicator) );
+
+    //Set up delegate function from NeighbourCommunicator to StateRecorederBody (close and open files)
+    m_pNbCommunicator->addNotificationLocalAdd(
+                                               NeighbourCommunicator::AddDelegate::template from_method< StateRecorderBody,
+                                               &StateRecorderBody::addBody>(& *m_pStateRecorder.get())
+                                               )
+                                               // Danger shared_ptr.get() in delegate class,
+                                               //as along as there is the SimMgrMpi there is a NbCommunicator and a StatRecorder, so no problem
+
+    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pProcCommunicator, m_pNbCommunicator) );
+
 
 
 
@@ -115,7 +128,7 @@ bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
     timer.stop();
     double elapsed = ((double)timer.elapsed().wall)*1e-9;
 
-    if(m_pProcComm->getProcessInfo()->hasMasterRank()) {
+    if(m_pProcCommunicator->getProcessInfo()->hasMasterRank()) {
         LOG(m_pSimulationLog,  "MPI> Allreduce needed: " << elapsed <<"sec."<<std::endl; );
 
         if(numberOfBodiesInSimulation != m_nGlobalSimBodies) {
@@ -159,8 +172,8 @@ void SimulationManagerMPI<TConfig>::startSim() {
 //      m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
 //      // Write Data to CollisionDataFile
 //      m_pTimestepper->writeIterationToCollisionDataFile();
-//      // Write  State to Sim File
-        //m_pStateRecorder->writeStates(m_pDynSys->m_SimBodies);
+        // Write  State to Sim File
+        m_pStateRecorder->writeStates(m_pDynSys->m_SimBodies);
 
       // Check if simulation can be aborted!
 //      if(m_pTimestepper->finished()){
@@ -180,7 +193,7 @@ void SimulationManagerMPI<TConfig>::initSim() {
 
     MPILayer::GenericMessage1<boost::filesystem::path> message;
 
-    if(m_pProcComm->getProcessInfo()->hasMasterRank()) { // Only master process
+    if(m_pProcCommunicator->getProcessInfo()->hasMasterRank()) { // Only master process
         // Get new sim folder path relative to global directory
 
         m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
@@ -197,9 +210,9 @@ void SimulationManagerMPI<TConfig>::initSim() {
 
         message.m_data.get<0>() = m_SimFolderPath;
 
-        m_pProcComm->sendBroadcast(message, MPI_COMM_WORLD);
+        m_pProcCommunicator->sendBroadcast(message, MPI_COMM_WORLD);
     } else { // All other processes
-        m_pProcComm->receiveBroadcast(message, m_pProcComm->getProcessInfo()->getMasterRank(), MPI_COMM_WORLD);
+        m_pProcCommunicator->receiveBroadcast(message, m_pProcCommunicator->getProcessInfo()->getMasterRank(), MPI_COMM_WORLD);
 
         m_SimFolderPath = message.m_data.get<0>();
     }

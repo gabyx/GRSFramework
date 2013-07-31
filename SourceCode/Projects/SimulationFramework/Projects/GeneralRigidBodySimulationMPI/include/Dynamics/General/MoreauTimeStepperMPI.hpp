@@ -56,7 +56,9 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
-    MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr< ProcessCommunicatorType > pProcCom);
+    MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
+                      boost::shared_ptr< ProcessCommunicatorType > pProcCom,
+                      boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> > pNbCommunicator);
     ~MoreauTimeStepper();
 
     // The Core Objects ==================================
@@ -130,7 +132,8 @@ _________________________________________________________*/
 
 template< typename TConfigTimeStepper>
 MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                                                           boost::shared_ptr< ProcessCommunicatorType > pProcCom):
+                                                           boost::shared_ptr< ProcessCommunicatorType > pProcCom,
+                                                           boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> > pNbCommunicator):
     m_ReferenceSimFile(NDOFqObj,NDOFuObj) {
 
 
@@ -145,8 +148,7 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(boost::shared_ptr<Dyn
     m_pDynSys = pDynSys;
     m_pProcCom = pProcCom;
 
-    m_pNbCommunicator = boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> >(
-                                new NeighbourCommunicator<DynamicsSystemType>(m_pDynSys->m_SimBodies, m_pDynSys->m_RemoteSimBodies, m_pProcCom) );
+    m_pNbCommunicator = pNbCommunicator;
 
     m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys->m_SimBodies, m_pDynSys->m_Bodies));
     m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys));
@@ -360,6 +362,9 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
          if we receive update , search for the remote body and update it
          if we receive a new (local or remote) body, add it either to the remote or local list depending on what it is, check if the body belongs to our topology
     */
+
+
+
 
 
 

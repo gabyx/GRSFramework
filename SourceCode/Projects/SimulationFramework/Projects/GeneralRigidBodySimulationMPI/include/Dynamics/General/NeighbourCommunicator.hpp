@@ -5,6 +5,8 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
+
+#include <srutil/delegate/delegate.hpp> // Use fast SR delegates
 #include <boost/shared_ptr.hpp>
 
 #include "RigidBody.hpp"
@@ -13,8 +15,69 @@
 #include "NeighbourData.hpp"
 #include "MPICommunication.hpp"
 
+template< typename TRigidBody>
+class RigidBodyAddRemoveNotificator {
+public:
+
+    typedef TRigidBody RigidBodyType;
+    typedef typename RigidBodyType::LayoutConfigType LayoutConfigType;
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType)
+
+    RigidBodyAddRemoveNotificator() {
+        m_LocalNotifyAddList.clear();
+//        m_AddRemoteDelegateList.clear();
+        m_LocalNotifyRemoveList.clear();
+//        m_RemoveRemoteDelegateList.clear();
+    }
+
+#ifdef SRUTIL_DELEGATE_PREFERRED_SYNTAX
+    typedef srutil::delegate<void, (RigidBodyType*) > AddDelegate; ///< This is the delegate type which is used, when a new body is added then all delegates are invoked in the list.
+#else
+    typedef srutil::delegate1<void, RigidBodyType*  > AddDelegate;
+#endif
+
+#ifdef SRUTIL_DELEGATE_PREFERRED_SYNTAX
+    typedef srutil::delegate<void, (RigidBodyType*) > RemoveDelegate; ///< This is the delegate type which is used, when a body is removed then all delegates are invoked in the list.
+#else
+    typedef srutil::delegate1<void, RigidBodyType*  > RemoveDelegate;
+#endif
+
+    /** Adds a new Delegate for a add notification of a local body*/
+    void addNotificationLocalAdd(const AddDelegate & cD) {
+        m_LocalNotifyAddList.push_back(cD);
+    }
+    /** Adds a new Delegate for a remove notifaction of a local body*/
+    void addNotificationLocalRemove(const RemoveDelegate & cD) {
+        m_LocalNotifyRemoveList.push_back(cD);
+    }
+
+private:
+
+    /** Invokes all delegates for a add notifaction of a local body*/
+    void addBodyLocal(RigidBodyType *body) const {
+        typename std::vector<AddDelegate>::const_iterator it;
+        for(it = m_LocalNotifyAddList.begin(); it != m_LocalNotifyAddList.end(); it++) {
+            (*it)(body);
+        }
+    }
+    /** Invokes all delegates for a remove notifaction of a local body*/
+    void removeBodyLocal(RigidBodyType *body) const {
+        typename std::vector<RemoveDelegate>::const_iterator it;
+        for(it = m_LocalNotifyRemoveList.begin(); it != m_LocalNotifyRemoveList.end(); it++) {
+            (*it)(body);
+        }
+    }
+
+
+    std::vector<AddDelegate> m_LocalNotifyAddList;
+//    std::vector<ContactDelegate> m_AddRemoteDelegateList;
+    std::vector<RemoveDelegate> m_LocalNotifyRemoveList;
+//    std::vector<ContactDelegate> m_RemoveRemoteDelegateList;
+};
+
+
 template<typename TDynamicsSystem>
-class NeighbourCommunicator{
+class NeighbourCommunicator: public RigidBodyAddRemoveNotificator<typename TDynamicsSystem::RigidBodyType> {
 public:
 
     typedef typename TDynamicsSystem::DynamicsSystemConfig              DynamicsSystemConfig;
@@ -27,28 +90,29 @@ public:
     NeighbourCommunicator(typename DynamicsSystemType::RigidBodySimContainer & globalLocal,
                           typename DynamicsSystemType::RigidBodySimContainer & globalRemote,
                           boost::shared_ptr< ProcessCommunicatorType > pProcCom)
-                          : m_globalLocal(globalLocal), m_globalRemote(globalRemote), m_pProcCom(pProcCom)
+        : m_globalLocal(globalLocal), m_globalRemote(globalRemote), m_pProcCom(pProcCom)
 
     {
-        if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")){
+        if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
             m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
-        }else{
+        } else {
             ERRORMSG("SimulationLog does not yet exist? Did you create it?")
         }
 
-
         // Initialize all NeighbourDatas
-
         const std::vector<unsigned int> & nbRanks = m_pProcCom->getProcessInfo()->getProcTopo()->getNeigbourRanks();
-        for(int i=0;i< nbRanks.size();i++){
+        for(int i=0; i< nbRanks.size(); i++) {
             LOG(m_pSimulationLog,"---> Add neighbour data for process rank: "<<nbRanks[i]<<std::endl;);
             m_nbDataMap[nbRanks[i]] = NeighbourData<DynamicsSystemConfig>();
         }
         m_pSimulationLog->logMessage("---> Initialized all NeighbourDatas");
-
-
-
     }
+
+    /** Add delegate functions which enables the Communicator to inform other classes about
+    *   Bodies which have been added/removed during communication
+    */
+    void addDelegateAddRigidBody();
+    void addDelegateRemoveRigidBody();
 
 
 private:
