@@ -142,6 +142,7 @@ SET(COMMON_SRC
 SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/MoreauTimeStepper.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp

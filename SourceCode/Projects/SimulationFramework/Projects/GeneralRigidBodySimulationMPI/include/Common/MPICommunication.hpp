@@ -181,9 +181,11 @@ public:
         m_binary_message >> t;
     };
 
-    boost::shared_ptr<ProcessInfoType> m_pProcessInfo;
+    boost::shared_ptr<ProcessInfoType> getProcessInfo(){return m_pProcessInfo;}
 
     private:
+
+    boost::shared_ptr<ProcessInfoType> m_pProcessInfo;
 
     MessageBinarySerializer m_binary_message; // 1 MB serialization buffer
 

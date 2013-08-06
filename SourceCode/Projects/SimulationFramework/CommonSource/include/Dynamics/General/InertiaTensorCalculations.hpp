@@ -55,8 +55,8 @@ namespace InertiaTensor{
     };
 
     template<typename TRigidBody>
-    void calculateInertiaTensor( const boost::shared_ptr<TRigidBody > & rigidBody) {
-        CalculateInertiaTensorVisitor<TRigidBody> vis(rigidBody.get());
+    void calculateInertiaTensor( TRigidBody * rigidBody) {
+        CalculateInertiaTensorVisitor<TRigidBody> vis(rigidBody);
     }
 
 

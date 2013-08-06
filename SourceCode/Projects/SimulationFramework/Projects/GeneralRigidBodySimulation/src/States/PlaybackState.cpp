@@ -274,7 +274,11 @@ void PlaybackState::itemSelected(OgreBites::SelectMenu * menu)
 }
 
 void PlaybackState::changeScene(){
+
    m_pBaseNode->removeAndDestroyAllChildren();
+   m_pSceneMgr->destroyAllManualObjects();
+   m_pSceneMgr->destroyAllEntities();
+
    m_pAppLog->logMessage("Loading new Scene...");
    //Load new scene
    m_pPlaybackMgr = boost::shared_ptr<PlaybackManager<GeneralConfig> > (new PlaybackManager<GeneralConfig>(m_pSceneMgr)); // overwrite the existing, which gets deleted!

@@ -32,9 +32,12 @@ public:
     StateRecorderBody();
     ~StateRecorderBody();
 
-    void writeStates(const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list);
+    void writeStates(const typename TDynamicsSystemType::RigidBodySimContainer & body_list);
 
-    bool openFiles(boost::filesystem::path dir_path, const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list, bool truncate = false);
+    void addBody(RigidBodyType * body);
+    void removeBody(RigidBodyType * body);
+
+    bool openFiles(boost::filesystem::path dir_path, const typename TDynamicsSystemType::RigidBodySimContainer & body_list, bool truncate = false);
     bool closeFile(typename RigidBodyType::RigidBodyIdType);
 
     void closeAllSimFiles();
@@ -79,7 +82,7 @@ StateRecorderBody<TDynamicsSystemType>::~StateRecorderBody() {
 
 template<typename TDynamicsSystemType>
 bool StateRecorderBody<TDynamicsSystemType>::openFiles(boost::filesystem::path dir_path,
-                                                       const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list,
+                                                       const typename TDynamicsSystemType::RigidBodySimContainer & body_list,
                                                        bool truncate)
 {
 
@@ -87,12 +90,12 @@ bool StateRecorderBody<TDynamicsSystemType>::openFiles(boost::filesystem::path d
     std::stringstream s;
 
     // For every body add a Sim File!
-    typename TDynamicsSystemType::RigidBodySimPtrListType::const_iterator it;
+    typename TDynamicsSystemType::RigidBodySimContainer::const_iterator it;
     for(it = body_list.begin();it != body_list.end();it++){
 
         file = dir_path;
 
-        getSimBodyFileName(it->get(),s);
+        getSimBodyFileName(*it,s);
 
         file /= s.str();
 
@@ -100,30 +103,30 @@ bool StateRecorderBody<TDynamicsSystemType>::openFiles(boost::filesystem::path d
         MultiBodySimFile* pBodyFile = new MultiBodySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj);
         std::pair<typename FileMap::iterator, bool> res = m_BinarySimFiles.insert(typename FileMap::value_type((*it)->m_id,pBodyFile));
         if(!res.second){
-            m_pSimulationLog->logMessage("--->StateRecorderBody:: Sim file : " + file.string() + "already exists!");
+            m_pSimulationLog->logMessage("---> StateRecorderBody:: Sim file : " + file.string() + "already exists!");
             delete pBodyFile;
         }else{ //if insert took place
 
             // Do truncate
             if(!pBodyFile->openSimFileWrite(file,1,truncate)){
-                m_pSimulationLog->logMessage("--->StateRecorderBody:: Could not open Sim file: " + file.string());
+                m_pSimulationLog->logMessage("---> StateRecorderBody:: Could not open Sim file: " + file.string());
                 m_pSimulationLog->logMessage(pBodyFile->getErrorString());
                 delete pBodyFile;
                 m_BinarySimFiles.erase(res.first);
                 return false;
             }
             if(truncate){
-                m_pSimulationLog->logMessage("--->StateRecorderBody:: Added Sim file (truncated):" + file.string() );
+                m_pSimulationLog->logMessage("---> StateRecorderBody:: Added Sim file (truncated):" + file.string() );
             }
             else{
-                m_pSimulationLog->logMessage("--->StateRecorderBody:: Added Sim file: " + file.string() );
+                m_pSimulationLog->logMessage("---> StateRecorderBody:: Added Sim file: " + file.string() );
 
             }
         }
 
 
     }
-    m_pSimulationLog->logMessage("--->StateRecorderBody:: Opened all Sim files");
+    m_pSimulationLog->logMessage("---> StateRecorderBody:: Opened all Sim files");
 
     return true;
 }
@@ -136,9 +139,9 @@ void StateRecorderBody<TDynamicsSystemType>::getSimBodyFileName(typename TDynami
 }
 
 template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamicsSystemType::RigidBodySimPtrListType & body_list){
+void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamicsSystemType::RigidBodySimContainer & body_list){
 
-    typename TDynamicsSystemType::RigidBodySimPtrListType::const_iterator it;
+    typename TDynamicsSystemType::RigidBodySimContainer::const_iterator it;
 
     static DynamicsState<LayoutConfigType> dynState(1); // State for one Body only
         // Iterate over all bodies
@@ -150,7 +153,7 @@ void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamic
             LOG(m_pSimulationLog, "StateRecorderBody:: Did not found SimFile for Body Id:" << (*it)->m_id<< ". There is no SimFile corresponding to this body!" ;);
         }else{
 
-            InitialConditionBodies::applyBodyToRigidBodyState( *(it->get()) , dynState.m_SimBodyStates[0]);
+            InitialConditionBodies::applyBodyToRigidBodyState( *(*it) , dynState.m_SimBodyStates[0]);
             *(fileIt->second) << dynState;
 
         }
@@ -169,9 +172,9 @@ bool StateRecorderBody<TDynamicsSystemType>::closeFile(typename RigidBodyType::R
         it->second->closeSimFile();
         delete it->second;
         m_BinarySimFiles.erase(it);
-        LOG(m_pSimulationLog, "--->StateRecorderBody:: Closed and removed Sim file";);
+        LOG(m_pSimulationLog, "---> StateRecorderBody:: Closed and removed Sim file";);
     }else{
-        LOG(m_pSimulationLog,"--->StateRecorderBody:: No Sim file to remove for Body Id: "<<bodyId);
+        LOG(m_pSimulationLog,"---> StateRecorderBody:: No Sim file to remove for Body Id: "<<bodyId);
         return false;
     }
 
@@ -189,6 +192,15 @@ void StateRecorderBody<TDynamicsSystemType>::closeAllSimFiles() {
         delete it->second;
     }
     m_BinarySimFiles.clear();
+}
+
+template<typename TDynamicsSystemType>
+void StateRecorderBody<TDynamicsSystemType>::addBody(RigidBodyType * body) {
+    LOG(m_pSimulationLog, "---> StateRecorderBody:: Trying to add body with id: " << body->m_id <<std::endl;);
+}
+template<typename TDynamicsSystemType>
+void StateRecorderBody<TDynamicsSystemType>::removeBody(RigidBodyType * body) {
+    LOG(m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << body->m_id <<std::endl;);
 }
 
 

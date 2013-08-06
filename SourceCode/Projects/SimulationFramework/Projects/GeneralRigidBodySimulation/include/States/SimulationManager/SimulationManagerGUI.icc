@@ -44,7 +44,7 @@ SimulationManagerGUI<TConfig>::SimulationManagerGUI(boost::shared_ptr<Ogre::Scen
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
-        m_pSimulationLog->logMessage("--->Creating SimulationManagerGUI...");
+        m_pSimulationLog->logMessage("---> Creating SimulationManagerGUI...");
     }
 
 
@@ -76,12 +76,12 @@ void SimulationManagerGUI<TConfig>::setup() {
 
 
     m_pDynSys = boost::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
-    m_pSimulationLog->logMessage("--->SimulationManagerGUI:: Added DynamicsSystemType... ");
+    m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added DynamicsSystemType... ");
 
     // Parse the Scene from XML! ==========================
 
     m_pSceneParser = boost::shared_ptr< SceneParserOgre<TConfig> >( new SceneParserOgre<TConfig>( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies, m_pDynSys) );
-    m_pSimulationLog->logMessage("--->SimulationManagerGUI:: Added SceneParserOgre... ");
+    m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserOgre... ");
     m_pSceneParser->parseScene("SceneFile.xml");
 
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
@@ -89,15 +89,17 @@ void SimulationManagerGUI<TConfig>::setup() {
 
 
     m_pSharedBuffer = boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >(new SharedBufferDynSys<LayoutConfigType>(m_nSimBodies));
-    m_pSimulationLog->logMessage("--->SimulationManagerGUI:: Added SharedBufferDynSys... ");
+    m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBufferDynSys... ");
     m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys, m_pSharedBuffer) );
-    m_pSimulationLog->logMessage("--->SimulationManagerGUI:: Added TimeStepperType... ");
+    m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added TimeStepperType... ");
 
     m_pStateRecorder = boost::shared_ptr<StateRecorder<DynamicsSystemType> >(new StateRecorder<DynamicsSystemType>(m_nSimBodies));
-    m_pSimulationLog->logMessage("--->SimulationManagerGUI:: Added StateRecorder... ");
+    m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added StateRecorder... ");
+
 
     m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());
     m_pSceneParser->cleanUp(); // Take care this cleans all stuff
+    m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBuffer... ");
 
     m_pVisBuffer = m_pSharedBuffer->updateVisBuffer();
 
@@ -480,7 +482,7 @@ void SimulationManagerGUI<TConfig>::startSimThread(Threads threadToStart) {
         }
 
     } else {
-        m_pSimulationLog->logMessage("--->SimulationManagerGUI:: A SimThread is already running!");
+        m_pSimulationLog->logMessage("---> SimulationManagerGUI:: A SimThread is already running!");
     }
 }
 
@@ -492,18 +494,18 @@ void SimulationManagerGUI<TConfig>::stopSimThread(Threads threadToStop, bool for
                 (m_eSimThreadRunning & REALTIME &&  threadToStop & REALTIME) || force_stop == true) {
             setThreadToBeStopped(true);
             m_pThread->join();
-            m_pSimulationLog->logMessage("--->SimulationManagerGUI:: Stop Thread: SimThread has been stopped!");
+            m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Stop Thread: SimThread has been stopped!");
 
             m_eSimThreadRunning = SimulationManagerBase::NONE;
         } else {
             if(threadToStop & RECORD) {
-                m_pSimulationLog->logMessage("--->SimulationManagerGUI:: Stop Thread: \n To stop the thread which is running in REALTIME mode, you need to switch to REALTIME mode to stop it!");
+                m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Stop Thread: \n To stop the thread which is running in REALTIME mode, you need to switch to REALTIME mode to stop it!");
             } else {
-                m_pSimulationLog->logMessage("--->SimulationManagerGUI:: Stop Thread: \n To stop the thread which is running in RECORD mode, you need to switch to RECORD mode to stop it!");
+                m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Stop Thread: \n To stop the thread which is running in RECORD mode, you need to switch to RECORD mode to stop it!");
             }
         }
     } else {
-        m_pSimulationLog->logMessage("--->SimulationManagerGUI:: Stop Thread: SimThread is not running!");
+        m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Stop Thread: SimThread is not running!");
     }
 }
 

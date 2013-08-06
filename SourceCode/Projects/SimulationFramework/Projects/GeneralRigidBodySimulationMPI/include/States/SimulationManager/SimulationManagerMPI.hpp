@@ -27,15 +27,10 @@ public:
     SimulationManagerMPI();
     ~SimulationManagerMPI();
 
-    boost::shared_ptr<StateRecorderBody<DynamicsSystemType> >		    m_pStateRecorder;
-
     void setup();
     void setup(boost::filesystem::path sceneFilePath);
 
-
     void startSim();
-
-    boost::shared_ptr< SceneParserMPI<TConfig> > m_pSceneParser;
 
 private:
 
@@ -43,7 +38,9 @@ private:
 
     unsigned int m_nSimBodies, m_nGlobalSimBodies;
 
-    // Accessed only by thread ===================
+
+    // File Paths for one Simulation, always reset ==============================
+    boost::filesystem::path m_SimFolderPath;
 
     struct SettingsSimThread {
         double m_EndTime;
@@ -52,21 +49,18 @@ private:
 
     Logging::Log *  m_pSimulationLog;
 
+    boost::shared_ptr<StateRecorderBody<DynamicsSystemType> >   m_pStateRecorder;
+    boost::shared_ptr< SceneParserMPI<TConfig> > m_pSceneParser;
+
     boost::shared_ptr< TimeStepperType >	m_pTimestepper;
-
     boost::shared_ptr< DynamicsSystemType > m_pDynSys;
-    // ===========================================
-
-    // File Paths for one Simulation, always reset ==============================
-    boost::filesystem::path m_SimFolderPath;
-
+    boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> > m_pNbCommunicator;
 
     typedef typename MPILayer::ProcessCommunicator<LayoutConfigType>::ProcessInfoType ProcessInfoType;
-    boost::shared_ptr< MPILayer::ProcessCommunicator<LayoutConfigType>> m_pProcComm;
+    boost::shared_ptr< MPILayer::ProcessCommunicator<LayoutConfigType> > m_pProcCommunicator;
 
 
     bool checkNumberOfBodiesInProcess();
-
 };
 
 

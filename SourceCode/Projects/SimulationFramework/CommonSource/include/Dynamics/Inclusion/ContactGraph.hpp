@@ -434,7 +434,7 @@ public:
 
         //Take care state, is only q = q_m, u is not set and is zero!
 
-        ASSERTMSG(pCollData->m_pBody1.get() != NULL && pCollData->m_pBody2.get() != NULL, " Bodys are null pointers?");
+        ASSERTMSG(pCollData->m_pBody1 != NULL && pCollData->m_pBody2 != NULL, " Bodys are null pointers?");
         //cout << "add node : "<<m_nodeCounter<< " body id:" << pCollData->m_pBody1->m_id <<" and "<< pCollData->m_pBody2->m_id <<endl;
 
         //  add a contact node to the graph
@@ -618,7 +618,7 @@ private:
     inline void connectNode(NodeType * pNode) {
 
         EdgeType * addedEdge;
-        RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1.get() : pNode->m_nodeData.m_pCollData->m_pBody2.get();
+        RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1 : pNode->m_nodeData.m_pCollData->m_pBody2;
 
         // Add self edge! ===========================================================
         this->m_edges.push_back(new EdgeType(m_edgeCounter));

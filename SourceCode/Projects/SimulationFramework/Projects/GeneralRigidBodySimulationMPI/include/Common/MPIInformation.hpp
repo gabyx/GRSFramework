@@ -21,6 +21,10 @@ public:
     virtual bool belongsPointToProcess(const Vector3 & point) const{
         ERRORMSG("The ProcessTopology::belongsPointToProcess has not been implemented!");
     };
+
+    virtual const std::vector<unsigned int> & getNeigbourRanks() const{
+        ERRORMSG("The ProcessTopology::belongsPointToProcess has not been implemented!");
+    }
 };
 
 // Prototype
@@ -34,7 +38,7 @@ public:
     ProcessTopologyGrid(  const Vector3 & minPoint,
                           const Vector3 & maxPoint,
                           const MyMatrix<unsigned int>::Vector3 & dim,
-                          unsigned int processRank): m_grid(minPoint,maxPoint, dim, ProcessInformation<TLayoutConfig>::MASTER ) {
+                          unsigned int processRank): m_grid(minPoint,maxPoint, dim, ProcessInformation<TLayoutConfig>::MASTER_RANK ) {
         m_rank = processRank;
         //Initialize neighbours
         m_nbRanks = m_grid.getCellNeigbours(m_rank);
@@ -56,6 +60,11 @@ public:
         return false;
     };
 
+    const std::vector<unsigned int> & getNeigbourRanks() const{
+        return m_nbRanks;
+    };
+
+
 private:
     unsigned int m_rank; ///< Own rank;
     std::vector<unsigned int> m_nbRanks; ///< Neighbour ranks
@@ -71,7 +80,7 @@ public:
 
     DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
 
-    static const int MASTER = 0;
+    static const int MASTER_RANK = 0;
 
     ProcessInformation() {
         m_pProcTopo = NULL;
@@ -87,11 +96,11 @@ public:
 
 
      unsigned int getMasterRank() const {
-        return MASTER;
+        return MASTER_RANK;
     };
 
     bool hasMasterRank() const{
-        if(m_rank == MASTER){
+        if(m_rank == MASTER_RANK){
             return true;
         }
         return false;
@@ -117,17 +126,16 @@ public:
 
     void createProcTopoGrid(const Vector3 & minPoint,
                             const Vector3 & maxPoint,
-                            const MyMatrix<unsigned int>::Vector3 & dim,
-                            unsigned int processRank){
+                            const MyMatrix<unsigned int>::Vector3 & dim){
         if(m_pProcTopo){
             delete m_pProcTopo;
         }
         m_pProcTopo = new MPILayer::ProcessTopologyGrid<TLayoutConfig>(minPoint,maxPoint,dim, getRank() );
     }
 
-    inline const ProcessTopology<TLayoutConfig> & getProcTopo() const{
+    inline const ProcessTopology<TLayoutConfig> * getProcTopo() const{
         ASSERTMSG(m_pProcTopo,"m_pProcTopo == NULL");
-        return *m_pProcTopo;
+        return m_pProcTopo;
     };
 
 private:

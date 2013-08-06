@@ -104,48 +104,64 @@ bool setupPositionBodiesFromFile(DynamicsState<TLayoutConfig> & init_state, boos
 }
 
 template<typename TLayoutConfig>
-void setupPositionBodyPosAxisAngle(RigidBodyState<TLayoutConfig> & rigibodyState, const typename TLayoutConfig::Vector3 & pos, typename TLayoutConfig::Vector3 & axis, typename TLayoutConfig::PREC angleRadian) {
+void setupPositionBodyPosAxisAngle(RigidBodyState<TLayoutConfig> & rigibodyState,
+                                   const typename TLayoutConfig::Vector3 & pos,
+                                   typename TLayoutConfig::Vector3 & axis,
+                                   typename TLayoutConfig::PREC angleRadian) {
 
     rigibodyState.m_q.template head<3>() = pos;
     setQuaternion(rigibodyState.m_q.template tail<4>(),axis,angleRadian);
 }
 
 
-template<typename TLayoutConfig,  template<class,class> class TVec, typename TRigidBody, typename TAllocator>
-void applyDynamicsStateToBodies(const DynamicsState<TLayoutConfig> & state, TVec<boost::shared_ptr<TRigidBody>,TAllocator> & bodies) {
+template<typename TRigidBodyType,  typename TRigidBodyList>
+inline void applyDynamicsStateToBodies(
+                                       const DynamicsState<typename TRigidBodyType::LayoutConfigType > & state,
+                                       TRigidBodyList & bodies) {
+
+    typedef typename TRigidBodyType::LayoutConfigType LayoutConfigType;
+
     ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
 
-    for(int i=0; i < bodies.size(); i++) {
-        bodies[i]->m_r_S = state.m_SimBodyStates[i].m_q.template head<3>();
-        bodies[i]->m_q_KI= state.m_SimBodyStates[i].m_q.template tail<4>();
+    typename  TRigidBodyList::iterator bodyIt;
+    typename  DynamicsState<LayoutConfigType>::RigidBodyStateListType::const_iterator stateBodyIt = state.m_SimBodyStates.begin();
 
-        if(bodies[i]->m_eState == TRigidBody::SIMULATED) {
-            bodies[i]->m_pSolverData->m_uBuffer.m_Back = state.m_SimBodyStates[i].m_u;
-            bodies[i]->m_pSolverData->m_t = state.m_t;
+    for(bodyIt = bodies.begin(); bodyIt != bodies.end() ; bodyIt++) {
+
+        (*bodyIt)->m_r_S = stateBodyIt->m_q.template head<3>();
+        (*bodyIt)->m_q_KI= stateBodyIt->m_q.template tail<4>();
+
+        if( (*bodyIt)->m_eState == TRigidBodyType::SIMULATED) {
+            (*bodyIt)->m_pSolverData->m_uBuffer.m_Back = stateBodyIt->m_u;
+            (*bodyIt)->m_pSolverData->m_t = state.m_t;
         }
 
-        bodies[i]->m_A_IK= getRotFromQuaternion<>(bodies[i]->m_q_KI);
+        (*bodyIt)->m_A_IK= getRotFromQuaternion<>((*bodyIt)->m_q_KI);
+        stateBodyIt++;
     }
 }
 
 
-template<typename TLayoutConfig, template<class,class> class TVec, typename TRigidBody, typename TAllocator>
-void applyBodiesToDynamicsState(const TVec<boost::shared_ptr<TRigidBody>,TAllocator> & bodies,
-                                DynamicsState<TLayoutConfig> & state ) {
-    ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
+template<typename TRigidBodyType, typename TRigidBodyList>
+inline void applyBodiesToDynamicsState(const TRigidBodyList & bodies,
+                                         DynamicsState<typename TRigidBodyType::LayoutConfigType> & state ) {
 
-    typename  TVec<boost::shared_ptr<TRigidBody>,TAllocator>::const_iterator bodyIt;
-    typename  DynamicsState<TLayoutConfig>::RigidBodyStateListType::iterator stateBodyIt = state.m_SimBodyStates.begin();
+    typedef typename TRigidBodyType::LayoutConfigType LayoutConfigType;
+
+    ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
+    typename  TRigidBodyList::const_iterator bodyIt = bodies.begin();
+    typename  DynamicsState<LayoutConfigType>::RigidBodyStateListType::iterator stateBodyIt = state.m_SimBodyStates.begin();
 
     for(bodyIt = bodies.begin(); bodyIt != bodies.end() ; bodyIt++) {
-        applyBodyToRigidBodyState( *(bodyIt->get()), (*stateBodyIt) );
+        //std::cout << (*bodyIt)->m_id << std::cout;
+        applyBodyToRigidBodyState( *(*bodyIt), (*stateBodyIt) );
         stateBodyIt++;
     }
 }
 
 
 template<typename TRigidBody, typename TRigidBodyState>
-inline void applyBodyToRigidBodyState( const TRigidBody & body, TRigidBodyState & rigidBodyState ) {
+inline void applyBodyToRigidBodyState( const TRigidBody  & body, TRigidBodyState & rigidBodyState ) {
 
     rigidBodyState.m_q.template head<3>() = body.m_r_S;
     rigidBodyState.m_q.template tail<4>() = body.m_q_KI;

@@ -8,6 +8,7 @@ class SphereGeometry {
 public:
 
     SphereGeometry(PREC r) : m_radius(r){};
+    SphereGeometry(): m_radius(0){};
 
     PREC m_radius;
 
@@ -15,7 +16,6 @@ private:
 
     friend class boost::serialization::access;
 
-    SphereGeometry(): m_radius(0){};
 };
 
 

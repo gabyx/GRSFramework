@@ -51,7 +51,7 @@ public:
 
     SceneParserMPI(boost::shared_ptr<DynamicsSystemType> pDynSys,
                    boost::shared_ptr<MPILayer::ProcessCommunicator<LayoutConfigType> > procComm)
-        : SceneParser<TConfig>(pDynSys), m_pProcComm(procComm) {
+        : SceneParser<TConfig>(pDynSys), m_pProcCommunicator(procComm) {
         m_nGlobalSimBodies = 0;
     }
 
@@ -60,10 +60,10 @@ public:
         m_currentParseFilePath = file;
         m_currentParseFileDir = m_currentParseFilePath.parent_path();
 
-        m_pSimulationLog->logMessage("--->Parsing Scene...");
+        m_pSimulationLog->logMessage("---> Parsing Scene...");
 
         LOG( m_pSimulationLog,"Scene Input file: "  << file.string() <<std::endl; );
-        m_pSimulationLog->logMessage("--->Parsing Scene...");
+        m_pSimulationLog->logMessage("---> Parsing Scene...");
 
 
         //Reset all variables
@@ -74,43 +74,41 @@ public:
 
         m_bodyList.clear();
         m_SimBodyInitStates.clear();
-        m_SceneMeshs.clear();
 
 
         try {
             m_xmlDoc.LoadFile(m_currentParseFilePath.string());
 
-            m_pSimulationLog->logMessage("--->File successfully loaded ...");
+            m_pSimulationLog->logMessage("---> File successfully loaded ...");
 
-            m_pSimulationLog->logMessage("--->Try to parse the scene ...");
+            m_pSimulationLog->logMessage("---> Try to parse the scene ...");
 
-            // Start off with the gravity!
             m_xmlRootNode = m_xmlDoc.FirstChild("DynamicsSystem");
             if(m_xmlRootNode) {
                 ticpp::Node *node = NULL;
 
                 node = node = m_xmlRootNode->FirstChild("MPISettings");
                 processMPISettings(node);
-                m_pSimulationLog->logMessage("--->Parsed MPISettings...");
+                m_pSimulationLog->logMessage("---> Parsed MPISettings...");
 
                 node = m_xmlRootNode->FirstChild("SceneSettings");
                 this->processSceneSettings(node);
-                m_pSimulationLog->logMessage("--->Parsed SceneSettings...");
+                m_pSimulationLog->logMessage("---> Parsed SceneSettings...");
 
                 node = m_xmlRootNode->FirstChild("SceneObjects");
                 this->processSceneObjects(node);
-                m_pSimulationLog->logMessage("--->Parsed SceneObjects...");
+                m_pSimulationLog->logMessage("---> Parsed SceneObjects...");
 
                 /*ticpp::Node * initialConditionAll = m_xmlRootNode->FirstChild("InitialCondition");
                 processinitialConditionAll(initialConditionAll);*/
 
             } else {
-                m_pSimulationLog->logMessage("--->No DynamicsSystem Node found in XML ...");
+                m_pSimulationLog->logMessage("---> No DynamicsSystem Node found in XML ...");
                 return false;
             }
 
         } catch(ticpp::Exception& ex) {
-            LOG(m_pSimulationLog,"--->Scene XML error: "  << ex.what() << std::endl;);
+            LOG(m_pSimulationLog,"---> Scene XML error: "  << ex.what() << std::endl;);
             exit(-1);
         }
 
@@ -144,7 +142,7 @@ protected:
 
     void processSceneObjects( ticpp::Node *sceneObjects) {
 
-        LOG(m_pSimulationLog,"--->Process SceneObjects ..."<<std::endl;);
+        LOG(m_pSimulationLog,"---> Process SceneObjects ..."<<std::endl;);
 
         ticpp::Iterator< ticpp::Node > child;
 
@@ -165,27 +163,27 @@ protected:
 
             Vector3 minPoint, maxPoint;
             if(!Utilities::stringToVector3<PREC>(minPoint,  topo->GetAttribute("minPoint"))) {
-                throw ticpp::Exception("--->String conversion in processMPISettings: minPoint failed");
+                throw ticpp::Exception("---> String conversion in processMPISettings: minPoint failed");
             }
             if(!Utilities::stringToVector3<PREC>(maxPoint,  topo->GetAttribute("maxPoint"))) {
-                throw ticpp::Exception("--->String conversion in processMPISettings: maxPoint failed");
+                throw ticpp::Exception("---> String conversion in processMPISettings: maxPoint failed");
             }
 
             MyMatrix<unsigned int>::Vector3 dim;
             if(!Utilities::stringToVector3<unsigned int>(dim,  topo->GetAttribute("dimension"))) {
-                throw ticpp::Exception("--->String conversion in processMPISettings: dimension failed");
+                throw ticpp::Exception("---> String conversion in processMPISettings: dimension failed");
             }
             // saftey check
-            if(dim(0)*dim(1)*dim(2) != m_pProcComm->m_pProcessInfo->getNProcesses()) {
-                LOG(m_pSimulationLog,"--->Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcComm->m_pProcessInfo->getNProcesses() <<" Processes"<<std::endl; );
+            if(dim(0)*dim(1)*dim(2) != m_pProcCommunicator->getProcessInfo()->getNProcesses()) {
+                LOG(m_pSimulationLog,"---> Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcCommunicator->getProcessInfo()->getNProcesses() <<" Processes"<<std::endl; );
                 sleep(2);
-                throw ticpp::Exception("--->You have launched to many processes for the grid!");
+                throw ticpp::Exception("---> You have launched to many processes for the grid!");
             }
 
-            m_pProcComm->m_pProcessInfo->createProcTopoGrid(minPoint,maxPoint, dim, m_pProcComm->m_pProcessInfo->getRank() );
+            m_pProcCommunicator->getProcessInfo()->createProcTopoGrid(minPoint,maxPoint, dim);
 
         } else {
-            throw ticpp::Exception("--->String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
+            throw ticpp::Exception("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
         }
 
     }
@@ -209,10 +207,9 @@ protected:
         }
 
         for(int i=0; i<instances; i++) {
-            boost::shared_ptr< RigidBodyType > temp_ptr(new RigidBodyType());
+            typename RigidBodyType::RigidBodyIdType id = RigidBodyId::makeId(i+1, groupId);
 
-            //Assign a unique id
-            RigidBodyId::setId(temp_ptr.get(),i, groupId);
+            RigidBodyType * temp_ptr = new RigidBodyType(RigidBodyId::makeId(i, groupId));
 
             m_bodyList.push_back(temp_ptr);
 
@@ -235,15 +232,15 @@ protected:
 
         if(m_eBodiesState == RigidBodyType::SIMULATED) {
 
-            typename std::vector<boost::shared_ptr< RigidBodyType > >::iterator bodyIt;
+            typename std::vector<RigidBodyType*>::iterator bodyIt;
 
             for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
                 // Check if Body belongs to the topology! // Check CoG!
-                if(m_pProcComm->m_pProcessInfo->getProcTopo().belongsPointToProcess((*bodyIt)->m_r_S)) {
+                if(m_pProcCommunicator->getProcessInfo()->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {
 
-                    LOG(m_pSimulationLog, "--->Added Body with ID: (" << RigidBodyId::getProcessNr(bodyIt->get())<<","<<RigidBodyId::getBodyNr(bodyIt->get())<<")"<< std::endl);
+                    LOG(m_pSimulationLog, "---> Added Body with ID: (" << RigidBodyId::getProcessNr(*bodyIt)<<","<<RigidBodyId::getBodyNr(*bodyIt)<<")"<< std::endl);
 
-                    m_pDynSys->m_SimBodies.push_back((*bodyIt));
+                    m_pDynSys->m_SimBodies.addBody((*bodyIt));
 
                     m_nSimBodies++;
                     m_nBodies++;
@@ -255,16 +252,16 @@ protected:
 
         } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
 
-           typename std::vector<boost::shared_ptr< RigidBodyType > >::iterator bodyIt;
+           typename std::vector<RigidBodyType*>::iterator bodyIt;
 
             for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
 
-                m_pDynSys->m_Bodies.push_back((*bodyIt));
+                m_pDynSys->m_Bodies.addBody((*bodyIt));
 
                 m_nBodies++;
             }
         } else {
-            throw ticpp::Exception("--->Adding only simulated and not simulated objects supported!");
+            throw ticpp::Exception("---> Adding only simulated and not simulated objects supported!");
         }
 
 
@@ -279,7 +276,7 @@ protected:
 
 
 
-    boost::shared_ptr< MPILayer::ProcessCommunicator<LayoutConfigType> > m_pProcComm;
+    boost::shared_ptr< MPILayer::ProcessCommunicator<LayoutConfigType> > m_pProcCommunicator;
 
     unsigned int m_nGlobalSimBodies;
 
@@ -301,8 +298,6 @@ protected:
     using SceneParser<TConfig>::m_bodyListScales;
     using SceneParser<TConfig>::m_SimBodyInitStates;
 
-
-    using SceneParser<TConfig>::m_SceneMeshs;
 
 };
 
