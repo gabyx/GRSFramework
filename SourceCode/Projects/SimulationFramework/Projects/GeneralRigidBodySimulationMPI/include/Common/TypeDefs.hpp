@@ -68,12 +68,12 @@ struct SolverConfig{
    typedef _TTimeStepper TimeStepperType;
 };
 
-template < typename _TDynamicsSystem, typename _TCollisionSolver, typename _TInclusionSolver, typename _TStatePool>
+template < typename _TDynamicsSystem, typename _TCollisionSolver, typename _TInclusionSolver>
 struct ConfigTimeStepper{
+
     typedef _TDynamicsSystem DynamicsSystemType;
     typedef _TCollisionSolver CollisionSolverType;
     typedef _TInclusionSolver InclusionSolverType;
-    typedef _TStatePool StatePoolType;
 };
 
 template < typename _TRigidBody>
@@ -127,8 +127,6 @@ struct ConfigRigidBody{
 
 
 
-template< typename TLayoutConfig > class StatePoolVisBackFront;
-
 template< typename TCollisionSolverConfig > class CollisionSolver;
 template< typename TDynamicsSystemConfig  > class DynamicsSystem;
 
@@ -176,8 +174,7 @@ typedef InclusionSolverCONoG< MyConfigInclusionSolver >  MyInclusionSolver; //De
 typedef ConfigTimeStepper<
              MyDynamicsSystem,
              MyCollisionSolver,
-             MyInclusionSolver,
-             StatePoolVisBackFront<MyLayoutConfigType>
+             MyInclusionSolver
           > MyConfigTimeStepper;
 
 typedef MoreauTimeStepper< MyConfigTimeStepper > MyMoreauTimeStepper; //Define the Class
@@ -205,7 +202,6 @@ typedef Config< MySolverConfig > GeneralConfig;
    DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( _SolverConfigName_::TimeStepperType::TimeStepperConfigType ) \
 
 #define DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( _TimeStepperConfigName_ ) \
-   typedef typename _TimeStepperConfigName_::StatePoolType          StatePoolType;                 \
    typedef typename _TimeStepperConfigName_::DynamicsSystemType     DynamicsSystemType;                 \
    typedef typename _TimeStepperConfigName_::InclusionSolverType     InclusionSolverType;                 \
    typedef typename _TimeStepperConfigName_::CollisionSolverType     CollisionSolverType;                 \

@@ -89,14 +89,14 @@ public:
 
     bool m_bConverged;
 
-    inline void swapVelocities() {
+    void swapVelocities() {
 
         if(m_u1BufferPtr){ m_u1BufferPtr->m_Back.swap(m_u1BufferPtr->m_Front); }
 
         if(m_u2BufferPtr){m_u2BufferPtr->m_Back.swap(m_u2BufferPtr->m_Front); }
     };
 
-    inline void swapLambdas() {
+    void swapLambdas() {
         m_LambdaBack.swap(m_LambdaFront);
     };
 
@@ -235,12 +235,12 @@ public:
     }
 
 
-    static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1.get()  == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1.get() == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
     }
 
-    static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1.get() == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1.get() == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
@@ -253,7 +253,7 @@ public:
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
 private:
 
-    inline void computeParams(NodeDataType & nodeData) {
+    void computeParams(NodeDataType & nodeData) {
         if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {
             // Get Contact Parameters
 
@@ -273,7 +273,7 @@ private:
     }
 
     template<int bodyNr>
-    inline void computeW(NodeDataType & nodeData) {
+    void computeW(NodeDataType & nodeData) {
 
 
 
@@ -328,7 +328,7 @@ private:
     }
 
     template<int bodyNr>
-    inline void connectNode(NodeType * pNode) {
+    void connectNode(NodeType * pNode) {
 
         EdgeType * addedEdge;
         RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1.get() : pNode->m_nodeData.m_pCollData->m_pBody2.get();
@@ -510,12 +510,12 @@ public:
     }
 
 
-    static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1.get()  == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1.get() == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
     }
 
-    static inline const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1.get() == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1.get() == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
@@ -528,7 +528,7 @@ public:
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
 private:
 
-    inline void computeParams(NodeDataType & nodeData) {
+    void computeParams(NodeDataType & nodeData) {
         if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {
             // Get Contact Parameters
 
@@ -615,7 +615,7 @@ private:
 
 
     template<int bodyNr>
-    inline void connectNode(NodeType * pNode) {
+    void connectNode(NodeType * pNode) {
 
         EdgeType * addedEdge;
         RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1 : pNode->m_nodeData.m_pCollData->m_pBody2;

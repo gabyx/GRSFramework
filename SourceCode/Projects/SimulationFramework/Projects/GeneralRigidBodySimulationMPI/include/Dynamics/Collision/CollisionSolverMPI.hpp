@@ -58,7 +58,7 @@ public:
         }
     }
 
-    inline bool isEmpty() {
+    bool isEmpty() {
         return m_ContactDelegateList.empty();
     }
 
@@ -111,8 +111,7 @@ protected:
     typename DynamicsSystemType::RigidBodySimContainer & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
     typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;          ///< List of all fixed not simulated bodies.
 
-    Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> > m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
-    friend class Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> >;
+    Collider<DynamicsSystemType > m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
 
     Logging::Log *  m_pSolverLog;  ///< Ogre::Log
     std::stringstream logstream;
@@ -131,7 +130,6 @@ CollisionSolver<TCollisionSolverConfig>::CollisionSolver(
     typename DynamicsSystemType::RigidBodyNotAniContainer & Bodies):
     m_SimBodies(SimBodies), m_Bodies(Bodies),
     m_nSimBodies(SimBodies.size()),m_nDofqObj(NDOFqObj),m_nDofuObj(NDOFuObj) {
-    m_Collider.init(this);
     m_expectedNContacts = 10;
 }
 
@@ -223,7 +221,7 @@ std::string CollisionSolver<TCollisionSolverConfig>::getIterationStats(){
 }
 
 template<typename TCollisionSolverConfig>
-inline void CollisionSolver<TCollisionSolverConfig>::signalContactAdd(CollisionData<RigidBodyType> * pColData) {
+void CollisionSolver<TCollisionSolverConfig>::signalContactAdd(CollisionData<RigidBodyType> * pColData) {
 
     // Before we send, determine what kind of contactmodel we have!
     // TODO (implemented only NContactModel)

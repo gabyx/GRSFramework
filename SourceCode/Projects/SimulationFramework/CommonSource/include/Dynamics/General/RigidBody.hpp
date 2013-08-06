@@ -65,11 +65,11 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData<TLayoutConfig> {
     ///< The front buffer is the velocity which is used to during ONE prox iteration
     FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> m_uBuffer;
 
-    inline void swapBuffer(){
+    void swapBuffer(){
         m_uBuffer.m_Front.swap(m_uBuffer.m_Back);
     }
 
-    inline void reset(){
+    void reset(){
         m_uBuffer.m_Front.setZero();
         m_bInContactGraph = false;
     };

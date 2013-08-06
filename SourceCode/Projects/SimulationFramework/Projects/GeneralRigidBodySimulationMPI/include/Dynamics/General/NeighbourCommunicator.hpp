@@ -84,15 +84,21 @@ public:
     typedef TDynamicsSystem DynamicsSystemType;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
 
-    typedef typename MPILayer::ProcessCommunicator<LayoutConfigType>    ProcessCommunicatorType;
+    typedef typename MPILayer::ProcessCommunicator<DynamicsSystemType>           ProcessCommunicatorType;
+    typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
+    typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
+
     typedef typename DynamicsSystemType::RigidBodySimContainer          RigidBodyContainerType;
 
     NeighbourCommunicator(typename DynamicsSystemType::RigidBodySimContainer & globalLocal,
                           typename DynamicsSystemType::RigidBodySimContainer & globalRemote,
                           boost::shared_ptr< ProcessCommunicatorType > pProcCom)
-        : m_globalLocal(globalLocal), m_globalRemote(globalRemote), m_pProcCom(pProcCom)
+        : m_globalLocal(globalLocal), m_globalRemote(globalRemote), m_pProcCom(pProcCom),
+        m_pProcInfo(m_pProcCom->getProcInfo()), m_pProcTopo(m_pProcCom->getProcInfo()->getProcTopo())
 
     {
+
+
         if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
             m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
         } else {
@@ -100,29 +106,45 @@ public:
         }
 
         // Initialize all NeighbourDatas
-        const std::vector<unsigned int> & nbRanks = m_pProcCom->getProcessInfo()->getProcTopo()->getNeigbourRanks();
+        const std::vector<unsigned int> & nbRanks = m_pProcCom->getProcInfo()->getProcTopo()->getNeigbourRanks();
         for(int i=0; i< nbRanks.size(); i++) {
             LOG(m_pSimulationLog,"---> Add neighbour data for process rank: "<<nbRanks[i]<<std::endl;);
             m_nbDataMap[nbRanks[i]] = NeighbourData<DynamicsSystemConfig>();
         }
         m_pSimulationLog->logMessage("---> Initialized all NeighbourDatas");
+
+        // Fill in all ranks
+        typename RigidBodyContainerType::iterator it;
+        typename ProcessInfoType::RankIdType rank = m_pProcCom->getProcInfo()->getRank();
+        for(it = m_globalLocal.begin();it != m_globalLocal.end();it++){
+            ASSERTMSG(m_pProcTopo->belongsBodyToProcess(*it), "Body with id: "<< (*it)->m_id <<" does not belong to process? How did you initialize your bodies?")
+            m_bodyToProcess[(*it)->m_id] = rank;
+        }
+
+       m_pSimulationLog->logMessage("---> Initialized NeighbourCommunicator");
     }
 
-    /** Add delegate functions which enables the Communicator to inform other classes about
-    *   Bodies which have been added/removed during communication
-    */
-    void addDelegateAddRigidBody();
-    void addDelegateRemoveRigidBody();
-
+    void communicate(){
+        // Find all local bodies which overlap
+        std::vector<typename ProcessInfoType::RankIdType> neighbours;
+        typename RigidBodyContainerType::iterator it;
+        for(it = m_globalLocal.begin();it != m_globalLocal.end();it++){
+            m_pProcTopo->checkOverlap(*it, neighbours);
+        }
+    }
 
 private:
+
+
     boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
+    boost::shared_ptr< ProcessInfoType > m_pProcInfo;
+    const ProcessTopologyType * m_pProcTopo;
 
     RigidBodyContainerType & m_globalRemote;
     RigidBodyContainerType & m_globalLocal;
-    std::map<unsigned int, NeighbourData<DynamicsSystemConfig> > m_nbDataMap;
 
-    RigidBodyGarbageCollector<DynamicsSystemConfig>  m_rigidBodyGC;
+    std::map<unsigned int, NeighbourData<DynamicsSystemConfig> > m_nbDataMap;
+    std::map<typename RigidBodyType::RigidBodyIdType, typename ProcessInfoType::RankIdType > m_bodyToProcess;
 
     Logging::Log *  m_pSimulationLog;
 

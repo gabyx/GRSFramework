@@ -112,7 +112,7 @@ protected:
     typename DynamicsSystemType::RigidBodySimContainer & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
     typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;          ///< List of all fixed not simulated bodies.
 
-    Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> > m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
+    Collider<DynamicsSystemType> m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
     friend class Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> >;
 
     Logging::Log *  m_pSolverLog;  ///< Ogre::Log
@@ -194,13 +194,17 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
 
     //// Do simple collision detection (SimBodies to SimBodies)
     typename DynamicsSystemType::RigidBodySimContainer::iterator bodyIti;
+    CollisionData<RigidBodyType> * pColData;
     for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
         typename DynamicsSystemType::RigidBodySimContainer::iterator bodyItj = bodyIti;
         bodyItj++;
         for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
 
             //check for a collision
-            m_Collider.checkCollision((*bodyIti), (*bodyItj));
+            pColData = m_Collider.checkCollision((*bodyIti), (*bodyItj));
+            if(pColData){
+                signalContactAdd(pColData);
+            }
 
 
         }
@@ -213,7 +217,11 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
         for(bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++) {
 
             //check for a collision
-            m_Collider.checkCollision((*bodyIti), (*bodyItk));
+            pColData = m_Collider.checkCollision((*bodyIti), (*bodyItk));
+
+            if(pColData){
+                signalContactAdd(pColData);
+            }
 
         }
     }
@@ -227,7 +235,7 @@ std::string CollisionSolver<TCollisionSolverConfig>::getIterationStats() {
 }
 
 template<typename TCollisionSolverConfig>
-inline void CollisionSolver<TCollisionSolverConfig>::signalContactAdd(CollisionData<RigidBodyType> * pColData) {
+void CollisionSolver<TCollisionSolverConfig>::signalContactAdd(CollisionData<RigidBodyType> * pColData) {
 
     // Before we send, determine what kind of contactmodel we have!
     // TODO (implemented only NContactModel)

@@ -54,10 +54,10 @@ private:
 
     boost::shared_ptr< TimeStepperType >	m_pTimestepper;
     boost::shared_ptr< DynamicsSystemType > m_pDynSys;
-    boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> > m_pNbCommunicator;
+    boost::shared_ptr< NeighbourCommunicator<DynamicsSystemType> > m_pNbCommunicator;
 
-    typedef typename MPILayer::ProcessCommunicator<LayoutConfigType>::ProcessInfoType ProcessInfoType;
-    boost::shared_ptr< MPILayer::ProcessCommunicator<LayoutConfigType> > m_pProcCommunicator;
+    typedef typename MPILayer::ProcessCommunicator<DynamicsSystemType>::ProcessInfoType ProcessInfoType;
+    boost::shared_ptr< MPILayer::ProcessCommunicator<DynamicsSystemType> > m_pProcCommunicator;
 
 
     bool checkNumberOfBodiesInProcess();

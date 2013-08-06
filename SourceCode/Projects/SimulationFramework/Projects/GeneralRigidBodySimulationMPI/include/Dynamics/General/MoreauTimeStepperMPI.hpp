@@ -51,7 +51,8 @@ public:
 
     typedef TConfigTimeStepper TimeStepperConfigType;
     DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( TConfigTimeStepper )
-    typedef typename MPILayer::ProcessCommunicator<LayoutConfigType> ProcessCommunicatorType;
+
+    typedef typename MPILayer::ProcessCommunicator<DynamicsSystemType> ProcessCommunicatorType;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -327,7 +328,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     m_pDynSys->afterFirstTimeStep();
     // ====================================================================================
 
-
+    m_pNbCommunicator->communicate();
 
     /* Communicate all bodies which are in the overlap zone or are out of the processes topology!
 

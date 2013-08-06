@@ -105,11 +105,11 @@ public:
     }
 
     void resize(std::size_t bytes) {
-       m_buffer.resize(bytes);
+        m_buffer.resize(bytes);
     }
 
     void reserve(std::size_t bytes) {
-       m_buffer.reserve(bytes);
+        m_buffer.reserve(bytes);
     }
 
 private:
@@ -117,13 +117,15 @@ private:
 };
 
 
-template<typename TLayoutConfig>
+template<typename TDynamicsSystem>
 class ProcessCommunicator {
 public:
 
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+    typedef typename TDynamicsSystem::DynamicsSystemConfig DynamicsSystemConfig;
+    typedef TDynamicsSystem DynamicsSystemType;
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
 
-    typedef MPILayer::ProcessInformation<TLayoutConfig> ProcessInfoType;
+    typedef MPILayer::ProcessInformation<DynamicsSystemType> ProcessInfoType;
 
 
     ProcessCommunicator():
@@ -132,66 +134,80 @@ public:
     {};
 
     template<typename T>
-    void sendBroadcast(const T & t, MPI_Comm comm) {
-
-        m_binary_message.clear();
-
-        m_binary_message << t ;
-
-        int size = m_binary_message.size();
-
-        int error = MPI_Bcast(&(size), 1 , MPI_INT, m_pProcessInfo->getRank(), comm); // First send size, because we cannot probe on the other side!! Collective Communication
-        ASSERTMPIERROR(error,"MPISendBroadcast failed!");
-        MPI_Bcast(const_cast<char*>(m_binary_message.data()), m_binary_message.size(), m_binary_message.getMPIDataType(), m_pProcessInfo->getRank(), comm);
-        ASSERTMPIERROR(error,"MPISendBroadcast failed!");
-    };
+    void sendBroadcast(const T & t, MPI_Comm comm);
 
     template<typename T>
-    void receiveBroadcast(T & t, unsigned int rank, MPI_Comm comm) {
+    void receiveBroadcast(T & t, unsigned int rank, MPI_Comm comm);
 
-        int message_length;
+    void sendBroadcast(const std::string & t, MPI_Comm comm);
 
-        int error = MPI_Bcast(&message_length, 1 , MPI_INT, rank, comm);
-        ASSERTMPIERROR(error,"MPISendBroadcast failed!");
-        m_binary_message.resize(message_length);
+    void receiveBroadcast(std::string & t, unsigned int rank, MPI_Comm comm);
 
-        error = MPI_Bcast(const_cast<char*>(m_binary_message.data()), m_binary_message.size(), m_binary_message.getMPIDataType(), rank, comm);
-        ASSERTMPIERROR(error,"MPISendBroadcast failed!");
-        m_binary_message >> t;
-    };
+    boost::shared_ptr<ProcessInfoType> getProcInfo() {
+        return m_pProcessInfo;
+    }
 
-    void sendBroadcast(const std::string & t, MPI_Comm comm) {
-        int size = t.size();
-        int error = MPI_Bcast(&(size), 1 , MPI_INT, m_pProcessInfo->getRank(), comm); // First send size, because we cannot probe on the other side!! Collective Communication
-        ASSERTMPIERROR(error,"MPISendBroadcast failed!");
-        MPI_Bcast(const_cast<char*>(t.data()), t.size(), MPI_CHAR, m_pProcessInfo->getRank(), comm);
-        ASSERTMPIERROR(error,"MPISendBroadcast failed!");
-    };
-
-    void receiveBroadcast(std::string & t, unsigned int rank, MPI_Comm comm) {
-
-        int message_length;
-
-        int error = MPI_Bcast(&message_length, 1 , MPI_INT, rank, comm);
-        ASSERTMPIERROR(error,"MPISendBroadcast failed!");
-        t.resize(message_length);
-
-        error = MPI_Bcast(t.data(), t.size() , MPI_CHAR, rank, comm);
-        ASSERTMPIERROR(error,"MPISendBroadcast failed!");
-        m_binary_message >> t;
-    };
-
-    boost::shared_ptr<ProcessInfoType> getProcessInfo(){return m_pProcessInfo;}
-
-    private:
+private:
 
     boost::shared_ptr<ProcessInfoType> m_pProcessInfo;
 
     MessageBinarySerializer m_binary_message; // 1 MB serialization buffer
-
-
-
 };
+
+template<typename TDynamicsSystem>
+template<typename T>
+void ProcessCommunicator<TDynamicsSystem>::sendBroadcast(const T & t, MPI_Comm comm) {
+
+    m_binary_message.clear();
+
+    m_binary_message << t ;
+
+    int size = m_binary_message.size();
+
+    int error = MPI_Bcast(&(size), 1 , MPI_INT, m_pProcessInfo->getRank(), comm); // First send size, because we cannot probe on the other side!! Collective Communication
+    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    MPI_Bcast(const_cast<char*>(m_binary_message.data()), m_binary_message.size(), m_binary_message.getMPIDataType(), m_pProcessInfo->getRank(), comm);
+    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+};
+
+template<typename TDynamicsSystem>
+template<typename T>
+void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(T & t, unsigned int rank, MPI_Comm comm) {
+
+    int message_length;
+
+    int error = MPI_Bcast(&message_length, 1 , MPI_INT, rank, comm);
+    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    m_binary_message.resize(message_length);
+
+    error = MPI_Bcast(const_cast<char*>(m_binary_message.data()), m_binary_message.size(), m_binary_message.getMPIDataType(), rank, comm);
+    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    m_binary_message >> t;
+};
+
+template<typename TDynamicsSystem>
+void ProcessCommunicator<TDynamicsSystem>::sendBroadcast(const std::string & t, MPI_Comm comm) {
+    int size = t.size();
+    int error = MPI_Bcast(&(size), 1 , MPI_INT, m_pProcessInfo->getRank(), comm); // First send size, because we cannot probe on the other side!! Collective Communication
+    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    MPI_Bcast(const_cast<char*>(t.data()), t.size(), MPI_CHAR, m_pProcessInfo->getRank(), comm);
+    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+};
+
+template<typename TDynamicsSystem>
+void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(std::string & t, unsigned int rank, MPI_Comm comm) {
+
+    int message_length;
+
+    int error = MPI_Bcast(&message_length, 1 , MPI_INT, rank, comm);
+    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    t.resize(message_length);
+
+    error = MPI_Bcast(t.data(), t.size() , MPI_CHAR, rank, comm);
+    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    m_binary_message >> t;
+};
+
 
 };
 

@@ -62,7 +62,7 @@ protected:
 
     // Push stringstream to all sinks!
 
-    inline void writeOut(std::stringstream & s){
+    void writeOut(std::stringstream & s){
         boost::mutex::scoped_lock l(m_busy_mutex);
         std::vector<LogSink *>::iterator it;
         for(it=m_sinkList.begin(); it != m_sinkList.end(); it++) {

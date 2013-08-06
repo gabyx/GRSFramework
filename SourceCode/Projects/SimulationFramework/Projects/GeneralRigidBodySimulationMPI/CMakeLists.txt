@@ -73,9 +73,9 @@ SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/TypenameComparision.hpp
     ${COMMONSOURCE_DIR}/include/Common/MultiBodySimFile.hpp
     ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/AABB.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPICommunication.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/MPITopology.hpp
 )
 SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
@@ -103,6 +103,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParameterMap.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/AABB.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/SphereGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/PlaneGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
