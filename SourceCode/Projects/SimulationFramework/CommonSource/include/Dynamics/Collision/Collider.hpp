@@ -71,18 +71,18 @@ public:
 
         ASSERTMSG(m_pBody1 != m_pBody2, "Are you sure you want to checkCollision between the same objects?");
         m_bObjectsSwapped = false;
-        m_checkOnlyIfOverlap = false;
+        m_bOverlapTest = false;
         boost::apply_visitor(*this, m_pBody1->m_geometry, m_pBody2->m_geometry);
         return m_pColData;
     }
 
-    bool checkOverlap(RigidBodyType * pBody1, const AABB<LayoutConfigType> & aabb){
+    bool checkOverlap(const RigidBodyType * pBody1, const AABB<LayoutConfigType> & aabb){
 
         // Resets always its own ColData, if there is a collision it is not NULL
         m_pColData = NULL;
         m_pBody1 = pBody1;
 
-        m_checkOnlyIfOverlap = true;
+        m_bOverlapTest = true;
         boost::apply_visitor(*this, m_pBody1->m_geometry, aabb);
         return m_bOverlap;
     }
@@ -129,7 +129,8 @@ private:
     RigidBodyType* m_pBody1; ///< Shared pointer to the first RigidBodyBase class instance.
     RigidBodyType* m_pBody2; ///< Shared pointer to the second RigidBodyBase class instance.
     bool m_bObjectsSwapped; ///< Boolean indicating if the bodies are swapped.
-    bool m_bOverlap;        ///< Boolean to decide if we only to overlap test or the whole collision output
+    bool m_bOverlapTest;    ///< Boolean to decide if we only do overlap test or the whole collision output
+    bool m_bOverlap;        ///<Boolean which tells if the collision detection catched an overlap in the last call
     CollisionData<RigidBodyType> * m_pColData;
     /**
     * @brief The collision functions.
