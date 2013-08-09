@@ -55,19 +55,18 @@ public:
     typedef std::map<RankIdType, NeighbourData<DynamicsSystemType> > NeighbourDataMapType;
 
 
+    NeighbourMap(RankIdType rank): m_rank(rank){};
 
 
-    NeighbourMap(){
-    }
-
-    void addLocalBodyExclusive(std::vector<RankIdType> neighbours);
+    template< template<typename> class TList>
+    void addLocalBodyExclusive( RigidBodyType * body, TList<RankIdType> neighbourRanks);
 
     void addNewNeighbourData(const RankIdType & rank){
         std::pair<typename NeighbourDataMapType::iterator,bool> res =
             m_nbDataMap.insert(
-                               std::pair<RankIdType,NeighbourData<DynamicsSystemType> >(rank,NeighbourData<DynamicsSystemType>() )
+            std::pair<RankIdType,NeighbourData<DynamicsSystemType> >(rank,NeighbourData<DynamicsSystemType>() )
                                 );
-        ASSERTMSG(res.second == true,"You inserted an NeighbourData which is already existing for this rank: "<<rank);
+        ASSERTMSG(res.second == true,"You inserted a NeighbourData which is already existing for this rank: "<<rank);
     }
 
     inline NeighbourData<DynamicsSystemType> & operator[](const RankIdType & rank){
@@ -75,12 +74,22 @@ public:
     }
 
 private:
-
+    RankIdType m_rank;
     NeighbourDataMapType m_nbDataMap;
-    std::map<typename RigidBodyType::RigidBodyIdType, std::map<RankIdType, int> > m_bodyToOverlapProcess; ///< map which gives all overlapping processes
+
+    std::map<typename RigidBodyType::RigidBodyIdType, std::map<RankIdType, int> > m_bodyToNeighbourProcess; ///< map which gives all overlapping processes
 
 };
 
+template<typename TDynamicsSystem, typename TRankId>
+template< template<typename> class TList>
+ void NeighbourMap<TDynamicsSystem,TRankId>::addLocalBodyExclusive(RigidBodyType * body, TList<RankIdType> neighbourRanks)
+{
+    // Add this local body exclusively to the given neighbours
+    // Exclusive means we
+
+
+}
 
 
 

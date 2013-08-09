@@ -92,60 +92,9 @@ public:
 
     NeighbourCommunicator(typename DynamicsSystemType::RigidBodySimContainer & globalLocal,
                           typename DynamicsSystemType::RigidBodySimContainer & globalRemote,
-                          boost::shared_ptr< ProcessCommunicatorType > pProcCom)
-        : m_globalLocal(globalLocal), m_globalRemote(globalRemote), m_pProcCom(pProcCom),
-        m_pProcInfo(m_pProcCom->getProcInfo()), m_pProcTopo(m_pProcCom->getProcInfo()->getProcTopo())
+                          boost::shared_ptr< ProcessCommunicatorType > pProcCom);
 
-    {
-
-
-        if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-            m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
-        } else {
-            ERRORMSG("SimulationLog does not yet exist? Did you create it?")
-        }
-
-        // Initialize all NeighbourDatas
-        const std::vector<unsigned int> & nbRanks = m_pProcCom->getProcInfo()->getProcTopo()->getNeigbourRanks();
-        for(int i=0; i< nbRanks.size(); i++) {
-            LOG(m_pSimulationLog,"---> Add neighbour data for process rank: "<<nbRanks[i]<<std::endl;);
-            m_nbDataMap.addNewNeighbourData( nbRanks[i]);
-        }
-        m_pSimulationLog->logMessage("---> Initialized all NeighbourDatas");
-
-        // Fill in all ranks for the local bodies (remote bodies are not considered, there should not be any of those)
-        typename RigidBodyContainerType::iterator it;
-        typename ProcessInfoType::RankIdType rank = m_pProcCom->getProcInfo()->getRank();
-        for(it = m_globalLocal.begin();it != m_globalLocal.end();it++){
-            ASSERTMSG(m_pProcTopo->belongsBodyToProcess(*it), "Body with id: "<< (*it)->m_id <<" does not belong to process? How did you initialize your bodies?")
-            m_bodyToProcess[(*it)->m_id] = rank;
-        }
-
-       m_pSimulationLog->logMessage("---> Initialized NeighbourCommunicator");
-    }
-
-    void communicate(){
-        // Find all local bodies which overlap
-        std::vector<typename ProcessInfoType::RankIdType> neighbours;
-        typename std::vector<typename ProcessInfoType::RankIdType>::iterator itRank;
-
-        typename RigidBodyContainerType::iterator it;
-        LOG(m_pSimulationLog,"---> Communicate: Checking if local bodies overlap neighbours!"<<std::endl;)
-        for(it = m_globalLocal.begin();it != m_globalLocal.end();it++){
-            RigidBodyType * body = (*it);
-
-            m_pProcTopo->checkOverlap(body, neighbours);
-            // If overlap: put into the neighbour data container
-            for(itRank = neighbours.begin();itRank != neighbours.end();itRank++){
-                LOG(m_pSimulationLog,"---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" overlaps Neigbour with Rank: "<< (*itRank) <<std::endl;)
-                //m_nbDataMap[*itRank].m_localBodies[body->m_id] = body;
-            }
-
-        }
-
-
-
-    }
+    void communicate();
 
 private:
 
@@ -166,5 +115,60 @@ private:
     Logging::Log *  m_pSimulationLog;
 
 };
+
+template<typename TDynamicsSystem>
+NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(typename DynamicsSystemType::RigidBodySimContainer & globalLocal,
+        typename DynamicsSystemType::RigidBodySimContainer & globalRemote,
+        boost::shared_ptr< ProcessCommunicatorType > pProcCom):
+    m_globalLocal(globalLocal), m_globalRemote(globalRemote), m_pProcCom(pProcCom),
+    m_pProcInfo(m_pProcCom->getProcInfo()), m_pProcTopo(m_pProcCom->getProcInfo()->getProcTopo()),
+    m_nbDataMap(m_pProcCom->getProcInfo()->getRank()) {
+
+
+    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    } else {
+        ERRORMSG("SimulationLog does not yet exist? Did you create it?")
+    }
+
+    // Initialize all NeighbourDatas
+    const std::vector<unsigned int> & nbRanks = m_pProcCom->getProcInfo()->getProcTopo()->getNeigbourRanks();
+    for(int i=0; i< nbRanks.size(); i++) {
+        LOG(m_pSimulationLog,"---> Add neighbour data for process rank: "<<nbRanks[i]<<std::endl;);
+        m_nbDataMap.addNewNeighbourData( nbRanks[i]);
+    }
+    m_pSimulationLog->logMessage("---> Initialized all NeighbourDatas");
+
+    // Fill in all ranks for the local bodies (remote bodies are not considered, there should not be any of those)
+    typename RigidBodyContainerType::iterator it;
+    typename ProcessInfoType::RankIdType rank = m_pProcCom->getProcInfo()->getRank();
+    for(it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
+        ASSERTMSG(m_pProcTopo->belongsBodyToProcess(*it), "Body with id: "<< (*it)->m_id <<" does not belong to process? How did you initialize your bodies?")
+        m_bodyToProcess[(*it)->m_id] = rank;
+    }
+
+    m_pSimulationLog->logMessage("---> Initialized NeighbourCommunicator");
+}
+
+template<typename TDynamicsSystem>
+void NeighbourCommunicator<TDynamicsSystem>::communicate() {
+    // Find all local bodies which overlap
+    std::vector<typename ProcessInfoType::RankIdType> neighbours;
+    typename std::vector<typename ProcessInfoType::RankIdType>::iterator itRank;
+
+    typename RigidBodyContainerType::iterator it;
+    LOG(m_pSimulationLog,"---> Communicate: Checking if local bodies overlap neighbours!"<<std::endl;)
+    for(it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
+        RigidBodyType * body = (*it);
+
+        m_pProcTopo->checkOverlap(body, neighbours);
+        // If overlap: put into the neighbour data container
+        for(itRank = neighbours.begin(); itRank != neighbours.end(); itRank++) {
+            LOG(m_pSimulationLog,"---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" overlaps Neigbour with Rank: "<< (*itRank) <<std::endl;)
+            //m_nbDataMap[*itRank].m_localBodies[body->m_id] = body;
+        }
+
+    }
+}
 
 #endif
