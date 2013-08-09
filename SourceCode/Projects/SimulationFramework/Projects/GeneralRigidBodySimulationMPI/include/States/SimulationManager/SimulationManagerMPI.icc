@@ -199,11 +199,14 @@ void SimulationManagerMPI<TConfig>::initSim() {
 
         m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
 
+        LOG(m_pSimulationLog,"MPI> Broadcast new simulation directory: "<< m_SimFolderPath <<std::endl;);
+
         boost::filesystem::path sceneFilePath = m_SimFolderPath;
         std::string filename = SIM_SCENE_FILE_NAME;
         filename += ".xml";
         sceneFilePath /= filename;
 
+        LOG(m_pSimulationLog,"---> Copy parsed scene file to: " << sceneFilePath <<std::endl;)
         FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),sceneFilePath,true);
 
         // Need to broadcast the filename of the actual folder
@@ -213,6 +216,7 @@ void SimulationManagerMPI<TConfig>::initSim() {
 
         m_pProcCommunicator->sendBroadcast(message, MPI_COMM_WORLD);
     } else { // All other processes
+        LOG(m_pSimulationLog,"MPI> Receive new simulation directory: "<< m_SimFolderPath <<std::endl;);
         m_pProcCommunicator->receiveBroadcast(message, m_pProcCommunicator->getProcInfo()->getMasterRank(), MPI_COMM_WORLD);
 
         m_SimFolderPath = message.m_data.get<0>();

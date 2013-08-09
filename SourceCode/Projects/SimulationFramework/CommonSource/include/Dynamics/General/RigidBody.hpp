@@ -5,6 +5,8 @@
 #include <boost/variant.hpp>
 #include <boost/serialization/variant.hpp>
 
+#include <sstream>
+
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
@@ -84,7 +86,7 @@ public:
     typedef uint64_t Type;
 
     template<typename TRigidBodyType >
-    static unsigned int getProcessNr(const TRigidBodyType * body){
+    static unsigned int getGroupNr(const TRigidBodyType * body){
         Type id = body->m_id;
         id >>= 32;
         return *(reinterpret_cast<unsigned int *>(&(id)));
@@ -93,6 +95,13 @@ public:
     template<typename TRigidBodyType >
     static unsigned int getBodyNr(const TRigidBodyType * body){
         return *(reinterpret_cast<const unsigned int *>(&(body->m_id)));
+    };
+
+    template<typename TRigidBodyType >
+    static std::string getBodyIdString(const TRigidBodyType * body){
+        std::stringstream s;
+        s <<"("<< RigidBodyId::getGroupNr(body) << ","<< RigidBodyId::getBodyNr(body) << ")";
+        return s.str();
     };
 
     static Type makeId( unsigned int bodyNr, unsigned int processNr){

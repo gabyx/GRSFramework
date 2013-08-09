@@ -69,10 +69,8 @@ void setupPositionBodiesGrid(DynamicsState<TLayoutConfig> & init_state,
     for(unsigned int i=0; i< init_state.m_nSimBodies; i++) {
         init_state.m_SimBodyStates[i].m_q.template tail<4>() = typename TLayoutConfig::Quaternion(1,0,0,0);
         int index_z = (i /(gDim_x*gDim_y));
-        int index_y = (i - index_z*(gDim_x*gDim_y)) / gDim_y;
-        int index_x = (i - index_z*(gDim_x*gDim_y)- index_y*gDim_y);
-        //cout << index_x<<","<< index_y<<","<< index_z<<endl;
-        double x = -d/2 + d/(double)(init_state.m_nSimBodies) * i;
+        int index_y = (i - index_z*(gDim_x*gDim_y)) / gDim_x;
+        int index_x = (i - index_z*(gDim_x*gDim_y)- index_y*gDim_x);
 
         typedef boost::mt19937  RNG;
         static RNG generator(seed);

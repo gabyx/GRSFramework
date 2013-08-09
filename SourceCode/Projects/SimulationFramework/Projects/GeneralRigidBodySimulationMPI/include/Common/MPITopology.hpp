@@ -37,7 +37,7 @@ public:
         ERRORMSG("The ProcessTopology::belongsBodyToProcess2 has not been implemented!");
     }
 
-    virtual bool checkOverlap(const  RigidBodyType * body, std::vector<TRankId> & neighbourProcessRanks) {
+    virtual bool checkOverlap(RigidBodyType * body, std::vector<TRankId> & neighbourProcessRanks) {
         ERRORMSG("The ProcessTopology::checkOverlap has not been implemented!");
     }
 
@@ -61,7 +61,7 @@ public:
                           const MyMatrix<unsigned int>::Vector3 & dim,
                           unsigned int processRank);
 
-    bool checkOverlap(const  RigidBodyType * body, std::vector<RankIdType> & neighbourProcessRanks);
+    bool checkOverlap( RigidBodyType * body, std::vector<RankIdType> & neighbourProcessRanks);
 
     bool belongsBodyToProcess(const RigidBodyType * body) const {
         RankIdType nb;
@@ -124,7 +124,7 @@ bool ProcessTopologyGrid<TDynamicsSystem,TRankId>::belongsPointToProcess(const V
 
 
 template<typename TDynamicsSystem, typename TRankId>
-bool ProcessTopologyGrid<TDynamicsSystem,TRankId>::checkOverlap(const  RigidBodyType * body,
+bool ProcessTopologyGrid<TDynamicsSystem,TRankId>::checkOverlap(RigidBodyType * body,
                                                                 std::vector<RankIdType> & neighbourProcessRanks) {
 
     typename RankToAABBType::const_iterator it;

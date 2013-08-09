@@ -52,15 +52,16 @@ class GetScaleOfGeomVisitor : public boost::static_visitor<>{
 
     GetScaleOfGeomVisitor(Vector3 & scale): m_scale(scale){};
 
-    void operator()(  boost::shared_ptr<SphereGeometry<PREC> >  & sphereGeom ){
+    void operator()(  boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom ){
         m_scale.setConstant(sphereGeom->m_radius);
     }
-    void operator()(  boost::shared_ptr<BoxGeometry<PREC> >  & boxGeom){
+    void operator()(  boost::shared_ptr<const BoxGeometry<PREC> >  & boxGeom){
         m_scale = boxGeom->m_extent;
     }
 
     template<typename T>
     void operator()(  boost::shared_ptr<T>  & ptr){
+        ERRORMSG("This GetScaleOfGeomVisitor visitor operator() has not been implemented!");
     }
 
     Vector3 & m_scale;
@@ -89,7 +90,6 @@ public:
         m_currentParseFileDir = m_currentParseFilePath.parent_path();
 
         m_pSimulationLog->logMessage("---> Parsing Scene...");
-
         LOG( m_pSimulationLog, "---> Scene Input file: "  << file.string() <<std::endl; );
 
         if(!boost::filesystem::exists(m_currentParseFilePath)){

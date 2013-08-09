@@ -130,12 +130,14 @@ public:
         typename std::vector<typename ProcessInfoType::RankIdType>::iterator itRank;
 
         typename RigidBodyContainerType::iterator it;
+        LOG(m_pSimulationLog,"---> Communicate: Checking if local bodies overlap neighbours!"<<std::endl;)
         for(it = m_globalLocal.begin();it != m_globalLocal.end();it++){
             RigidBodyType * body = (*it);
+
             m_pProcTopo->checkOverlap(body, neighbours);
             // If overlap: put into the neighbour data container
             for(itRank = neighbours.begin();itRank != neighbours.end();itRank++){
-                LOG(m_pSimulationLog,"Body with id: " << body->m_id <<" overlaps Neigbour with Rank: "<< (*itRank))
+                LOG(m_pSimulationLog,"---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" overlaps Neigbour with Rank: "<< (*itRank) <<std::endl;)
                 //m_nbDataMap[*itRank].m_localBodies[body->m_id] = body;
             }
 

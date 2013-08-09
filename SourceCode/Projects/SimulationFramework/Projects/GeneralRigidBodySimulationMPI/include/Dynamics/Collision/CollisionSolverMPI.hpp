@@ -189,6 +189,7 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
 
    //// Do simple collision detection (SimBodies to SimBodies)
     typename DynamicsSystemType::RigidBodySimContainer::iterator bodyIti;
+    CollisionData<RigidBodyType> * pColData;
     for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++){
       typename DynamicsSystemType::RigidBodySimContainer::iterator bodyItj = bodyIti;
       bodyItj++;

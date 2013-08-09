@@ -61,9 +61,7 @@ public:
         m_currentParseFileDir = m_currentParseFilePath.parent_path();
 
         m_pSimulationLog->logMessage("---> Parsing Scene...");
-
-        LOG( m_pSimulationLog,"Scene Input file: "  << file.string() <<std::endl; );
-        m_pSimulationLog->logMessage("---> Parsing Scene...");
+        LOG( m_pSimulationLog,"---> Scene Input file: "  << file.string() <<std::endl; );
 
 
         //Reset all variables
@@ -238,7 +236,7 @@ protected:
                 // Check if Body belongs to the topology! // Check CoG!
                 if(m_pProcCommunicator->getProcInfo()->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {
 
-                    LOG(m_pSimulationLog, "---> Added Body with ID: (" << RigidBodyId::getProcessNr(*bodyIt)<<","<<RigidBodyId::getBodyNr(*bodyIt)<<")"<< std::endl);
+                    LOG(m_pSimulationLog, "---> Added Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
 
                     m_pDynSys->m_SimBodies.addBody((*bodyIt));
 
