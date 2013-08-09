@@ -77,7 +77,11 @@ private:
     RankIdType m_rank;
     NeighbourDataMapType m_nbDataMap;
 
-    std::map<typename RigidBodyType::RigidBodyIdType, std::map<RankIdType, int> > m_bodyToNeighbourProcess; ///< map which gives all overlapping processes
+    struct Flags{
+
+    };
+    typedef  std::map<typename RigidBodyType::RigidBodyIdType, std::map<RankIdType, NoData> > BodyToNeighbourProcessType;
+    BodyToNeighbourProcessType m_bodyToNeighbourProcess; ///< map which gives all overlapping processes
 
 };
 
@@ -86,7 +90,18 @@ template< template<typename> class TList>
  void NeighbourMap<TDynamicsSystem,TRankId>::addLocalBodyExclusive(RigidBodyType * body, TList<RankIdType> neighbourRanks)
 {
     // Add this local body exclusively to the given neighbours
-    // Exclusive means we
+
+    BodyToNeighbourProcessType::iterator itAN = m_bodyToNeighbourProcess.find(body->m_id);
+    // itAN: assigned neighbours (map wih ranks)
+    if( itAN != m_bodyToNeighbourProcess.end() ){
+          TList<RankIdType>::it;
+          for( it = neighbourRanks.begin();it!= neighbourRanks.end();it++){
+
+          }
+
+    }else{
+        // no entry: no neighbours
+    }
 
 
 }
