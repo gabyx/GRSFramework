@@ -194,9 +194,11 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
       bodyItj++;
       for(; bodyItj != m_SimBodies.end(); bodyItj++ ){
 
-        //check for a collision
-        m_Collider.checkCollision((*bodyIti), (*bodyItj));
-
+         //check for a collision
+            pColData = m_Collider.checkCollision((*bodyIti), (*bodyItj));
+            if(pColData){
+                signalContactAdd(pColData);
+            }
 
       }
     }
@@ -206,8 +208,12 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
     for(bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++){
         for(bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++){
 
-            //check for a collision
-            m_Collider.checkCollision((*bodyIti), (*bodyItk));
+           //check for a collision
+            pColData = m_Collider.checkCollision((*bodyIti), (*bodyItk));
+
+            if(pColData){
+                signalContactAdd(pColData);
+            }
 
         }
     }

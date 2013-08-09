@@ -221,7 +221,7 @@ endif()
 # DEFINE if we should use the GPU for the simulation or not!
 
 
-SET(MYPROJECT_CXX_FLAGS "-std=c++0x" CACHE STRING "The project's own compiler flags")
+SET(MYPROJECT_CXX_FLAGS "-std=c++0x -ftree-vectorize -ftree-vectorizer-verbose=2" CACHE STRING "The project's own compiler flags")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MYPROJECT_CXX_FLAGS}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MYPROJECT_CXX_FLAGS}")
 MESSAGE(STATUS "Added ${MYPROJECT_CXX_FLAGS} to CMAKE_CXX and CMAKE_C_FLAGS: ${CMAKE_CXX_FLAGS} and ${CMAKE_C_FLAGS}")

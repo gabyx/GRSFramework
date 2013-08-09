@@ -1,7 +1,6 @@
 ﻿#ifndef Collider_hpp
 #define Collider_hpp
 
-
 #include "boost/variant.hpp"
 #include <boost/shared_ptr.hpp>
 
@@ -61,29 +60,38 @@ public:
     * which are tested against each other.
     */
 
-    CollisionData< typename TDynamicsSystem::RigidBodyType> * checkCollision(RigidBodyType * pBody1, RigidBodyType * pBody2){
+    CollisionData< typename TDynamicsSystem::RigidBodyType> * checkCollision(const RigidBodyType * pBody1, const RigidBodyType * pBody2){
 
-        // Resets always its own ColData, if there is a collision it is not NULL
+        // Resets always pColData pointer, if there is a collision it is not NULL
+        // delegate shall handle the proper storage where it should be (contact graph :-))
         m_pColData = NULL;
 
-        m_pBody1 = pBody1;
-        m_pBody2 = pBody2;
+        // We know that we are not changing anything inside rigid body!
+        // Otherwise all operators()(const boost::shared_ptr...)
+        m_pBody1 = const_cast<RigidBodyType *>(pBody1);
+        m_pBody2 = const_cast<RigidBodyType *>(pBody2);
 
         ASSERTMSG(m_pBody1 != m_pBody2, "Are you sure you want to checkCollision between the same objects?");
         m_bObjectsSwapped = false;
         m_bOverlapTest = false;
+        m_bOverlap = false;
         boost::apply_visitor(*this, m_pBody1->m_geometry, m_pBody2->m_geometry);
         return m_pColData;
     }
 
     bool checkOverlap(const RigidBodyType * pBody1, const AABB<LayoutConfigType> & aabb){
 
-        // Resets always its own ColData, if there is a collision it is not NULL
+        // Resets always pColData pointer, if there is a collision it is not NULL
+        // delegate shall handle the proper storage where it should be (contact graph :-))
         m_pColData = NULL;
-        m_pBody1 = pBody1;
+        // We know that we are not changing anything inside rigid body!
+        // Otherwise all operators()(const boost::shared_ptr...)
+        m_pBody1 = const_cast<RigidBodyType *>(pBody1);
 
         m_bOverlapTest = true;
-        boost::apply_visitor(*this, m_pBody1->m_geometry, aabb);
+        m_bOverlap = false;
+        otherGeoms = &aabb;
+        boost::apply_visitor(*this, m_pBody1->m_geometry, otherGeoms);
         return m_bOverlap;
     }
 
@@ -113,7 +121,7 @@ public:
 
     // For AABB's
     void operator()( boost::shared_ptr<SphereGeometry<PREC> >  & sphereGeom1,
-                        const AABB<LayoutConfigType> & aabb); ///< Calls Sphere/AABB collision detection.
+                       const AABB<LayoutConfigType> * aabb); ///< Calls Sphere/AABB collision detection.
 
 
     /**
@@ -128,6 +136,9 @@ public:
 private:
     RigidBodyType* m_pBody1; ///< Shared pointer to the first RigidBodyBase class instance.
     RigidBodyType* m_pBody2; ///< Shared pointer to the second RigidBodyBase class instance.
+
+    boost::variant<const AABB<LayoutConfigType> *> otherGeoms; ///< Used for other intersection tests
+
     bool m_bObjectsSwapped; ///< Boolean indicating if the bodies are swapped.
     bool m_bOverlapTest;    ///< Boolean to decide if we only do overlap test or the whole collision output
     bool m_bOverlap;        ///<Boolean which tells if the collision detection catched an overlap in the last call
@@ -137,7 +148,8 @@ private:
     * @{
     */
     //Collision Functions ===============================================================================
-    inline void collide( RigidBodyType * b1,
+    // For RigidBodies
+    inline void collide(RigidBodyType * b1,
                   boost::shared_ptr< const SphereGeometry<PREC> >  & sphereGeom1,
                   RigidBodyType * b2,
                   boost::shared_ptr< const SphereGeometry<PREC> >  & sphereGeom2); ///< Sphere/Sphere collision.
@@ -147,23 +159,28 @@ private:
                   RigidBodyType * b2,
                   boost::shared_ptr<const HalfspaceGeometry<PREC> >  & halfspaceGeom); ///< Sphere/Halfspace collision.
 
-    inline void collide( RigidBodyType * a,
+    inline void collide(RigidBodyType * a,
                   boost::shared_ptr<const BoxGeometry<PREC> >  & boxA,
                   RigidBodyType * b,
                   boost::shared_ptr<const BoxGeometry<PREC> >  & boxB); ///< Box/Box collision.
 
-    inline void collide( RigidBodyType * box,
+    inline void collide(RigidBodyType * box,
                   boost::shared_ptr<const BoxGeometry<PREC> >  & boxGeom,
                   RigidBodyType * halfspace,
                   boost::shared_ptr<const HalfspaceGeometry<PREC> >  &halfspaceGeom); ///< Box/Halfspace collision.
 
-    inline void collide( RigidBodyType * sphere,
+    inline void collide(RigidBodyType * sphere,
                   boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom,
                   RigidBodyType * mesh,
                   boost::shared_ptr<const MeshGeometry<PREC> >  & meshGeom); ///< Sphere/Mesh collision.
 
+    // For AABB's
+    inline void collide( RigidBodyType * sphere,
+                          boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom1,
+                          const AABB<LayoutConfigType>* aabb); ///< Sphere/AABB collision
+
     template <typename O1, typename O2>
-    inline void collide( RigidBodyType * b1,
+    inline void collide(RigidBodyType * b1,
                   boost::shared_ptr<const O1> & o1,
                   RigidBodyType * b2,
                   boost::shared_ptr<const O2>  & o2); ///< Exception, to indicate that no collision function could be matched, because its not implemented.
@@ -185,7 +202,7 @@ Collider<TDynamicsSystem>::Collider() {
 // Dispatch =======================================================================================
 template<typename TDynamicsSystem>
 void Collider<TDynamicsSystem>::operator()(  boost::shared_ptr<SphereGeometry<PREC> >  & sphereGeom1 ,
-        boost::shared_ptr<SphereGeometry<PREC> >  & sphereGeom2) {
+                                               boost::shared_ptr<SphereGeometry<PREC> >  & sphereGeom2) {
 
     collide(m_pBody1, (boost::shared_ptr<const SphereGeometry<PREC> > &)sphereGeom1,
             m_pBody2, (boost::shared_ptr<const SphereGeometry<PREC> > &)sphereGeom2);
@@ -200,7 +217,7 @@ void Collider<TDynamicsSystem>::operator()(  boost::shared_ptr<SphereGeometry<PR
 
 template<typename TDynamicsSystem>
 void Collider<TDynamicsSystem>::operator()(  boost::shared_ptr<BoxGeometry<PREC> >  & box1 ,
-        boost::shared_ptr<BoxGeometry<PREC> >  & box2) {
+                                               boost::shared_ptr<BoxGeometry<PREC> >  & box2) {
     ASSERTMSG(false,"No collision detection implemented for Box Box Collision!");
     collide(m_pBody1, (boost::shared_ptr<const BoxGeometry<PREC> > &)box1,
             m_pBody2, (boost::shared_ptr<const BoxGeometry<PREC> > &)box2);
@@ -208,7 +225,7 @@ void Collider<TDynamicsSystem>::operator()(  boost::shared_ptr<BoxGeometry<PREC>
 
 template<typename TDynamicsSystem>
 void Collider<TDynamicsSystem>::operator()(  boost::shared_ptr<BoxGeometry<PREC> >  & box ,
-        boost::shared_ptr<HalfspaceGeometry<PREC> >  & halfspaceGeom) {
+                                               boost::shared_ptr<HalfspaceGeometry<PREC> >  & halfspaceGeom) {
     //ASSERTMSG(false,"No collision detection implemented for Box Box Collision!");
     collide(m_pBody1, (boost::shared_ptr<const BoxGeometry<PREC> > &)box,
             m_pBody2, (boost::shared_ptr<const HalfspaceGeometry<PREC> > &)halfspaceGeom);
@@ -216,7 +233,7 @@ void Collider<TDynamicsSystem>::operator()(  boost::shared_ptr<BoxGeometry<PREC>
 
 template<typename TDynamicsSystem>
 void Collider<TDynamicsSystem>::operator()(  boost::shared_ptr<SphereGeometry<PREC> >  & sphere ,
-        boost::shared_ptr<MeshGeometry<PREC> >  & mesh) {
+                                               boost::shared_ptr<MeshGeometry<PREC> >  & mesh) {
     collide(m_pBody1, (boost::shared_ptr<const SphereGeometry<PREC> > &)sphere,
             m_pBody2, (boost::shared_ptr<const MeshGeometry<PREC> > &)mesh);
 }
@@ -224,7 +241,7 @@ void Collider<TDynamicsSystem>::operator()(  boost::shared_ptr<SphereGeometry<PR
 
 template<typename TDynamicsSystem>
 void Collider<TDynamicsSystem>::operator()(  boost::shared_ptr<SphereGeometry<PREC> >  & sphereGeom1 ,
-        const AABB<LayoutConfigType> & aabb) {
+                                               const AABB<LayoutConfigType> * aabb) {
 
     collide(m_pBody1, (boost::shared_ptr<const SphereGeometry<PREC> > &)sphereGeom1, aabb);
 }
@@ -293,7 +310,7 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * b1,
 template<typename TDynamicsSystem>
 void Collider<TDynamicsSystem>::collide( RigidBodyType * b1,
         boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom,
-        RigidBodyType * b2,
+         RigidBodyType * b2,
         boost::shared_ptr<const HalfspaceGeometry<PREC> >  & halfspaceGeom) {
 
 
@@ -327,7 +344,7 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * b1,
 }
 
 template<typename TDynamicsSystem>
-void Collider<TDynamicsSystem>::collide(   RigidBodyType * a,
+void Collider<TDynamicsSystem>::collide(RigidBodyType * a,
         boost::shared_ptr<const BoxGeometry<PREC> >  & boxA,
         RigidBodyType * b,
         boost::shared_ptr<const BoxGeometry<PREC> >  & boxB) {
@@ -383,7 +400,7 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * box,
 
 
 template<typename TDynamicsSystem>
-void Collider<TDynamicsSystem>::collide(   RigidBodyType * sphere,
+void Collider<TDynamicsSystem>::collide( RigidBodyType * sphere,
         boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom,
         RigidBodyType * mesh,
         boost::shared_ptr<const MeshGeometry<PREC> >  & meshGeom) {
@@ -518,10 +535,33 @@ void Collider<TDynamicsSystem>::collide(   RigidBodyType * sphere,
 
 }
 
+template<typename TDynamicsSystem>
+void Collider<TDynamicsSystem>::collide(RigidBodyType * sphere,
+                                        boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom1,
+                                        const AABB<LayoutConfigType>* aabb)
+{
+            //Intersection test by Thomas Larsson "On Faster Sphere-Box Overlap Testing"
+            // Using arvos overlap test because larsons gives false positives!
+            PREC d = 0;
+            PREC e,c;
+            PREC r = sphereGeom1->m_radius;
+            m_bOverlap = false;
+            for(int i=0;i<3;i++){
+                c = sphere->m_r_S(i);
+                e = std::max(aabb->m_minPoint(i)-c, 0) + std::max( c -  aabb->m_maxPoint(i) ,0);
+                d = d + e*e;
+            }
+            if(d > r*r){
+                return;
+            }
+            m_bOverlap = true;
+            return;
+}
+
 
 template<typename TDynamicsSystem>
 template <typename O1, typename O2>
-void Collider<TDynamicsSystem>::collide( RigidBodyType * b1,
+void Collider<TDynamicsSystem>::collide(RigidBodyType * b1,
         boost::shared_ptr<const O1> & o1,
         RigidBodyType * b2,
         boost::shared_ptr<const O2>  & o2) {

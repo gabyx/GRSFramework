@@ -11,13 +11,13 @@
 #include "RigidBodyContainer.hpp"
 
 
-
-template<typename TDynamicsSystemConfig>
+template<typename TDynamicsSystem>
 class NeighbourData {
 public:
 
-    typedef TDynamicsSystemConfig DynamicsSystemConfig;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemConfig)
+    typedef typename TDynamicsSystem::DynamicsSystemConfig   DynamicsSystemConfig;
+    typedef TDynamicsSystem DynamicsSystemType;
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
 
     struct RemoteOverlapData{
         RigidBodyType * m_body;
@@ -42,6 +42,46 @@ public:
 private:
 
 };
+
+template<typename TDynamicsSystem, typename TRankId>
+class NeighbourMap {
+public:
+
+    typedef typename TDynamicsSystem::DynamicsSystemConfig DynamicsSystemConfig;
+    typedef TDynamicsSystem DynamicsSystemType;
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
+
+    typedef TRankId RankIdType;
+    typedef std::map<RankIdType, NeighbourData<DynamicsSystemType> > NeighbourDataMapType;
+
+
+
+
+    NeighbourMap(){
+    }
+
+    void addLocalBodyExclusive(std::vector<RankIdType> neighbours);
+
+    void addNewNeighbourData(const RankIdType & rank){
+        std::pair<typename NeighbourDataMapType::iterator,bool> res =
+            m_nbDataMap.insert(
+                               std::pair<RankIdType,NeighbourData<DynamicsSystemType> >(rank,NeighbourData<DynamicsSystemType>() )
+                                );
+        ASSERTMSG(res.second == true,"You inserted an NeighbourData which is already existing for this rank: "<<rank);
+    }
+
+    inline NeighbourData<DynamicsSystemType> & operator[](const RankIdType & rank){
+        return m_nbDataMap[rank];
+    }
+
+private:
+
+    NeighbourDataMapType m_nbDataMap;
+    std::map<typename RigidBodyType::RigidBodyIdType, std::map<RankIdType, int> > m_bodyToOverlapProcess; ///< map which gives all overlapping processes
+
+};
+
+
 
 
 #endif

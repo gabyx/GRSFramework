@@ -109,11 +109,11 @@ public:
         const std::vector<unsigned int> & nbRanks = m_pProcCom->getProcInfo()->getProcTopo()->getNeigbourRanks();
         for(int i=0; i< nbRanks.size(); i++) {
             LOG(m_pSimulationLog,"---> Add neighbour data for process rank: "<<nbRanks[i]<<std::endl;);
-            m_nbDataMap[nbRanks[i]] = NeighbourData<DynamicsSystemConfig>();
+            m_nbDataMap.addNewNeighbourData( nbRanks[i]);
         }
         m_pSimulationLog->logMessage("---> Initialized all NeighbourDatas");
 
-        // Fill in all ranks
+        // Fill in all ranks for the local bodies (remote bodies are not considered, there should not be any of those)
         typename RigidBodyContainerType::iterator it;
         typename ProcessInfoType::RankIdType rank = m_pProcCom->getProcInfo()->getRank();
         for(it = m_globalLocal.begin();it != m_globalLocal.end();it++){
@@ -127,10 +127,22 @@ public:
     void communicate(){
         // Find all local bodies which overlap
         std::vector<typename ProcessInfoType::RankIdType> neighbours;
+        typename std::vector<typename ProcessInfoType::RankIdType>::iterator itRank;
+
         typename RigidBodyContainerType::iterator it;
         for(it = m_globalLocal.begin();it != m_globalLocal.end();it++){
-            m_pProcTopo->checkOverlap(*it, neighbours);
+            RigidBodyType * body = (*it);
+            m_pProcTopo->checkOverlap(body, neighbours);
+            // If overlap: put into the neighbour data container
+            for(itRank = neighbours.begin();itRank != neighbours.end();itRank++){
+                LOG(m_pSimulationLog,"Body with id: " << body->m_id <<" overlaps Neigbour with Rank: "<< (*itRank))
+                //m_nbDataMap[*itRank].m_localBodies[body->m_id] = body;
+            }
+
         }
+
+
+
     }
 
 private:
@@ -138,12 +150,15 @@ private:
 
     boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
     boost::shared_ptr< ProcessInfoType > m_pProcInfo;
-    const ProcessTopologyType * m_pProcTopo;
+    ProcessTopologyType * m_pProcTopo;
 
     RigidBodyContainerType & m_globalRemote;
     RigidBodyContainerType & m_globalLocal;
 
-    std::map<unsigned int, NeighbourData<DynamicsSystemConfig> > m_nbDataMap;
+
+    NeighbourMap<DynamicsSystemType,typename ProcessInfoType::RankIdType> m_nbDataMap;
+
+    // Map, body to owning process
     std::map<typename RigidBodyType::RigidBodyIdType, typename ProcessInfoType::RankIdType > m_bodyToProcess;
 
     Logging::Log *  m_pSimulationLog;

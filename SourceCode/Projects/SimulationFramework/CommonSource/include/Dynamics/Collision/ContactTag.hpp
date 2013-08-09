@@ -63,17 +63,13 @@ private:
 * @param id2 The id of the contact type2.
 */
 template<typename TRigidBody>
-ContactTag makeContactTag( TRigidBody* b1, unsigned char type1, unsigned int id1, TRigidBody * b2 , unsigned char type2 , unsigned int id2)
+ContactTag makeContactTag( const TRigidBody* b1, unsigned char type1, unsigned int id1, const TRigidBody * b2 , unsigned char type2 , unsigned int id2)
 {
    // Make sure we always construct the same Tag!
    if(b1->m_id < b2->m_id){
-      boost::uint64_t intptr_b1 = reinterpret_cast<boost::uint64_t>(b1);
-      boost::uint64_t intptr_b2 = reinterpret_cast<boost::uint64_t>(b2);
-      return ContactTag(intptr_b1,type1,id1,intptr_b2,type2,id2);
+      return ContactTag(b1->m_id,type1,id1,b2->m_id,type2,id2);
    }
-   boost::uint64_t intptr_b1 = reinterpret_cast<boost::uint64_t>(b1);
-   boost::uint64_t intptr_b2 = reinterpret_cast<boost::uint64_t>(b2);
-   return ContactTag(intptr_b2,type2,id2,intptr_b1,type1,id1);
+   return ContactTag(b2->m_id,type2,id2,b1->m_id,type1,id1);
 
 }
 /** @} */

@@ -77,7 +77,7 @@ public:
         m_pProcTopo = new MPILayer::ProcessTopologyGrid<DynamicsSystemType,RankIdType>(minPoint,maxPoint,dim, getRank() );
     }
 
-    const ProcessTopologyType * getProcTopo() const{
+    ProcessTopologyType * getProcTopo() const{
         ASSERTMSG(m_pProcTopo,"m_pProcTopo == NULL");
         return m_pProcTopo;
     };

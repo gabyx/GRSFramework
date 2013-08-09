@@ -113,7 +113,7 @@ protected:
     typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;          ///< List of all fixed not simulated bodies.
 
     Collider<DynamicsSystemType> m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
-    friend class Collider<LayoutConfigType, CollisionSolver<TCollisionSolverConfig> >;
+    friend class Collider<DynamicsSystemType>;
 
     Logging::Log *  m_pSolverLog;  ///< Ogre::Log
     std::stringstream logstream;
@@ -133,7 +133,6 @@ CollisionSolver<TCollisionSolverConfig>::CollisionSolver(
     typename DynamicsSystemType::RigidBodyNotAniContainer & Bodies):
     m_SimBodies(SimBodies), m_Bodies(Bodies),
     m_nSimBodies(SimBodies.size()),m_nDofqObj(NDOFqObj),m_nDofuObj(NDOFuObj) {
-    m_Collider.init(this);
     m_expectedNContacts = 10;
 }
 
