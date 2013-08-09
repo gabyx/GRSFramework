@@ -18,19 +18,19 @@ public:
     }
 
 
-    void operator()(boost::shared_ptr<SphereGeometry<PREC> > & sphereGeom) {
+    void operator()(boost::shared_ptr<const SphereGeometry<PREC> > & sphereGeom) {
         return;
     }
 
-    void operator()(boost::shared_ptr<BoxGeometry<PREC> > & box)  {
+    void operator()(boost::shared_ptr<const BoxGeometry<PREC> > & box)  {
         addGyroTerm();
     }
 
-    void operator()(boost::shared_ptr<MeshGeometry<PREC> > & box) {
+    void operator()(boost::shared_ptr<const MeshGeometry<PREC> > & box) {
         addGyroTerm();
     }
 
-    void operator()(boost::shared_ptr<HalfspaceGeometry<PREC> > & halfspace) {
+    void operator()(boost::shared_ptr<const HalfspaceGeometry<PREC> > & halfspace) {
         addGyroTerm();
     }
 
