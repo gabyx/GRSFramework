@@ -161,7 +161,14 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate() {
     for(it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
         RigidBodyType * body = (*it);
 
+        //Check overlapping processes
         m_pProcTopo->checkOverlap(body, neighbours);
+        //Check owner of this body
+        typename ProcessInfoType::RankIdType belongingRank;
+        m_pProcTopo->belongsBodyToProcess(body,belongingRank);
+
+        m_nbDataMap.addLocalBodyExclusive<std::vector<type >(body,neighbours,belongingRank);
+
         // If overlap: put into the neighbour data container
         for(itRank = neighbours.begin(); itRank != neighbours.end(); itRank++) {
             LOG(m_pSimulationLog,"---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" overlaps Neigbour with Rank: "<< (*itRank) <<std::endl;)
