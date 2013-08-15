@@ -97,7 +97,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
                                 new NeighbourCommunicator<DynamicsSystemType>(m_pDynSys->m_SimBodies, m_pDynSys->m_RemoteSimBodies, m_pProcCommunicator) );
 
     //Set up delegate function from NeighbourCommunicator to StateRecorederBody (close and open files)
-    m_pNbCommunicator->addNotificationLocalAdd(
+    m_pNbCommunicator->addNotificationLocalRemove(
                                                NeighbourCommunicator<DynamicsSystemType>::AddDelegate::template
                                                     from_method< StateRecorderBody<DynamicsSystemType>,&StateRecorderBody<DynamicsSystemType>::addBody>
                                                         (& *m_pStateRecorder.get())
