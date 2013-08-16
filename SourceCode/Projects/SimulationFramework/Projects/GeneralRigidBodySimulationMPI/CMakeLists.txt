@@ -76,6 +76,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPICommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPITopology.hpp
+    ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
 )
 SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp

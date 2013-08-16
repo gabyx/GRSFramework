@@ -151,7 +151,7 @@ inline void applyBodiesToDynamicsState(const TRigidBodyList & bodies,
     typename  DynamicsState<LayoutConfigType>::RigidBodyStateListType::iterator stateBodyIt = state.m_SimBodyStates.begin();
 
     for(bodyIt = bodies.begin(); bodyIt != bodies.end() ; bodyIt++) {
-        //std::cout << (*bodyIt)->m_id << std::cout;
+        //std::cout << RigidBodyId::getBodyIdString(*bodyIt) << std::cout;
         applyBodyToRigidBodyState( *(*bodyIt), (*stateBodyIt) );
         stateBodyIt++;
     }

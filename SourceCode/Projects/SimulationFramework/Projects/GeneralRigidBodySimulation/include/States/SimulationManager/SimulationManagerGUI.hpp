@@ -36,7 +36,7 @@ public:
     std::vector<Ogre::SceneNode*>	m_SceneNodeSimBodies;
     std::vector<Ogre::SceneNode*>	m_SceneNodeBodies;
 
-    void setup();
+    void setup(boost::filesystem::path sceneFilePath);
 
     boost::shared_ptr< SceneParserOgre<TConfig> > m_pSceneParser;
 

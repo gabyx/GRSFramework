@@ -2,7 +2,7 @@
 
 #include "SimulationManagerGUI.hpp"
 #include "PlaybackManager.hpp"
-
+#include "ApplicationCLOptions.hpp"
 #include "FileManager.hpp"
 #include "OgreSceneManagerDeleter.hpp"
 
@@ -59,7 +59,7 @@ void SimulationState::enter() {
     // Setup the Simulation Manager with the loaded system;
     m_pAppLog->logMessage("Adding SimulationManagerGUI...");
     m_pSimMgr  = boost::shared_ptr<SimulationManagerGUI<GeneralConfig> > (new SimulationManagerGUI<GeneralConfig>(m_pSceneMgr));
-    m_pSimMgr->setup();
+    m_pSimMgr->setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
 
     updateSceneFunction = boost::bind(&SimulationState::updateSceneRealtime,this,_1);
 

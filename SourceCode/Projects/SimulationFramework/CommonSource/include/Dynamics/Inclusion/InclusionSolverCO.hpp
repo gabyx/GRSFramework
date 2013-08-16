@@ -331,7 +331,7 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 
          pCollData = currentContactNode->m_nodeData.m_pCollData;
 
-         //cout <<"body1 Id: "<< pCollData->m_pBody1->m_id<<", body2 Id:"<< pCollData->m_pBody2->m_id <<endl;
+         //cout <<"body1 Id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody1)<<", body2 Id:"<< RigidBodyId::getBodyIdString(pCollData->m_pBody2)<<endl;
          /*if(m_nContacts == 4){
                cout << "4 contacts"<<endl;
          }*/

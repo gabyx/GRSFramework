@@ -37,7 +37,9 @@ public:
         ERRORMSG("The ProcessTopology::belongsBodyToProcess2 has not been implemented!");
     }
 
-    virtual bool checkOverlap(RigidBodyType * body, std::vector<TRankId> & neighbourProcessRanks) {
+    virtual bool checkOverlap( RigidBodyType * body,
+                                std::vector<TRankId> & neighbourProcessRanks,
+                                bool & overlapsOwnProcess) {
         ERRORMSG("The ProcessTopology::checkOverlap has not been implemented!");
     }
 
@@ -61,7 +63,7 @@ public:
                           const MyMatrix<unsigned int>::Vector3 & dim,
                           unsigned int processRank);
 
-    bool checkOverlap( RigidBodyType * body, std::vector<RankIdType> & neighbourProcessRanks);
+    bool checkOverlap( RigidBodyType * body, std::vector<RankIdType> & neighbourProcessRanks, bool & overlapsOwnProcess);
 
     bool belongsBodyToProcess(const RigidBodyType * body) const {
         RankIdType nb;
@@ -89,6 +91,7 @@ private:
     unsigned int m_rank; ///< Own rank;
     std::vector<unsigned int> m_nbRanks; ///< Neighbour ranks
     RankToAABBType m_nbAABB;            ///< Neighbour AABB
+    AABB<LayoutConfigType> m_aabb;      ///< Own AABB of this process
     CartesianGrid<LayoutConfigType,NoCellData> m_grid;
 
     Collider<DynamicsSystemType> m_Collider;
@@ -109,12 +112,15 @@ ProcessTopologyGrid<TDynamicsSystem,TRankId>::ProcessTopologyGrid(  const Vector
         for(int i = 0; i < m_nbRanks.size(); i++) {
             m_nbAABB[ m_nbRanks[i] ] =  m_grid.getCellAABB(m_nbRanks[i]) ;
         }
+
+        //Get AABB of own rank!
+        m_aabb = m_grid.getCellAABB(m_rank);
 };
 
 
 template<typename TDynamicsSystem, typename TRankId>
 bool ProcessTopologyGrid<TDynamicsSystem,TRankId>::belongsPointToProcess(const Vector3 & point, unsigned int &neighbourProcessRank) const {
-    //TODO
+
     neighbourProcessRank = m_grid.getCellNumber(point);
     if(neighbourProcessRank == m_rank) {
         return true;
@@ -125,8 +131,9 @@ bool ProcessTopologyGrid<TDynamicsSystem,TRankId>::belongsPointToProcess(const V
 
 template<typename TDynamicsSystem, typename TRankId>
 bool ProcessTopologyGrid<TDynamicsSystem,TRankId>::checkOverlap(RigidBodyType * body,
-                                                                std::vector<RankIdType> & neighbourProcessRanks) {
-
+                                                                std::vector<RankIdType> & neighbourProcessRanks,
+                                                                bool & overlapsOwnProcess) {
+    // Check neighbour AABB
     typename RankToAABBType::const_iterator it;
     neighbourProcessRanks.clear();
     for(it = m_nbAABB.begin(); it != m_nbAABB.end(); it++) {
@@ -134,6 +141,10 @@ bool ProcessTopologyGrid<TDynamicsSystem,TRankId>::checkOverlap(RigidBodyType * 
             neighbourProcessRanks.push_back(it->first);
         }
     }
+
+    // Check own AABB
+    overlapsOwnProcess = m_Collider.checkOverlap(body, m_aabb);
+
     return neighbourProcessRanks.size() > 0;
 };
 

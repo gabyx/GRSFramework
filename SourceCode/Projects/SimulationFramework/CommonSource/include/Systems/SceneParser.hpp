@@ -417,8 +417,7 @@ protected:
 
     virtual void processGlobalGeometries(ticpp::Node *sceneSettings){
 
-
-        ticpp::Node *globalGeom = sceneSettings->FirstChild("GlobalGeometries");
+        ticpp::Node *globalGeom = sceneSettings->FirstChild("GlobalGeometries",false);
         if(globalGeom){
             ticpp::Iterator< ticpp::Node > child;
             for ( child = child.begin( globalGeom ); child != child.end(); child++ ) {
@@ -481,7 +480,7 @@ protected:
 
             //Assign a unique id
 
-            LOG(m_pSimulationLog,"---> Added RigidBody Instance: "<<temp_ptr->m_id<<std::endl);
+            LOG(m_pSimulationLog,"---> Added RigidBody Instance: "<<RigidBodyId::getBodyIdString(temp_ptr)<<std::endl);
             m_bodyList.push_back(temp_ptr);
 
             Vector3 scale;

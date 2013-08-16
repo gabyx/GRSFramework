@@ -2,6 +2,8 @@
 
 using namespace std;
 
+#include "ApplicationCLOptions.hpp"
+
 #include <App.hpp>
 
 //#if OGRE_PLATFORM == PLATFORM_WIN32 || OGRE_PLATFORM == OGRE_PLATFORM_WIN32
@@ -13,6 +15,12 @@ using namespace std;
 int main(int argc, char **argv)
 //#endif
 {
+
+    // Parsing Input Parameters===================================
+    new ApplicationCLOptions();
+    ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
+   // End Parsing =================================
+
 
 	try
     {

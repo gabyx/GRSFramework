@@ -93,7 +93,10 @@ public:
             Flags():m_bToRemove(true){};
             bool m_bToRemove; ///< Remove flag from this ranks neighbour data
         };
-        std::map<RankIdType, Flags> m_bodyToNeighbourRanks;
+
+        typedef std::map<RankIdType, Flags> RankToFlagsType;
+        RankToFlagsType m_NeighbourRanks;
+
         RankIdType m_ownerRank;   ///< The process rank to which this body belongs (changes during simulation, if change -> send to other process)
         bool m_overlapsThisRank; ///< True if body overlaps this process!, if false
 
@@ -125,7 +128,7 @@ public:
     typedef typename DynamicsSystemType::RigidBodySimContainer          RigidBodyContainerType;
 
     typedef BodyProcessInfo<RigidBodyType, typename ProcessInfoType::RankIdType> BodyProcessInfoType;
-    typedef  std::map<
+    typedef std::map<
                        typename RigidBodyType::RigidBodyIdType,
                        BodyProcessInfoType *
                        > BodyToInfoMapType;
@@ -155,7 +158,6 @@ private:
     RigidBodyContainerType & m_globalLocal;
 
     BodyToInfoMapType m_bodyToInfo; ///< map which gives all overlapping processes to the body
-
 
     NeighbourMap<DynamicsSystemType, BodyToInfoMapType> m_nbDataMap;
 
@@ -195,7 +197,8 @@ NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  typename Dynamic
     typename RigidBodyContainerType::iterator it;
     typename ProcessInfoType::RankIdType rank = m_pProcCom->getProcInfo()->getRank();
     for(it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
-        ASSERTMSG(m_pProcTopo->belongsBodyToProcess(*it), "Body with id: "<< (*it)->m_id <<" does not belong to process? How did you initialize your bodies?")
+
+        ASSERTMSG(m_pProcTopo->belongsBodyToProcess(*it), "Body with id: "<< RigidBodyId::getBodyIdString(*it) <<" does not belong to process? How did you initialize your bodies?")
         m_bodyToInfo.insert(
                             typename BodyToInfoMapType::value_type( (*it)->m_id,
                                                                      new BodyProcessInfoType(*it,rank)
@@ -212,29 +215,42 @@ template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::communicate() {
     // Find all local bodies which overlap
     std::vector<typename ProcessInfoType::RankIdType> neighbours;
-    typename std::vector<typename ProcessInfoType::RankIdType>::iterator itRank;
+
 
     typename RigidBodyContainerType::iterator it;
-    LOG(m_pSimulationLog,"---> Communicate: Checking if local bodies overlap neighbours!"<<std::endl;)
+    LOG(m_pSimulationLog,"---> Communicate: Update neighbour data structures:"<<std::endl;)
     for(it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
         RigidBodyType * body = (*it);
 
         //Check overlapping processes
         bool overlapsOwnProcess;
-        m_pProcTopo->checkOverlap(body, neighbours);
+        LOG(m_pSimulationLog,"---> Communicate: Overlap Test..."<<std::endl;)
+        bool overlapsNeighbours = m_pProcTopo->checkOverlap(body, neighbours, overlapsOwnProcess);
 
-        // Insert this body into the underlying structure for all nieghbours
+        // Insert this body into the underlying structure for all nieghbours exclusively! (if no overlap, it is removed everywhere)
+        LOG(m_pSimulationLog,"---> Communicate: Add neighbours exclusively..."<<std::endl;)
         m_nbDataMap.addLocalBodyExclusive(body,neighbours);
 
         //Check owner of this body
         typename ProcessInfoType::RankIdType belongingRank;
         m_pProcTopo->belongsBodyToProcess(body,belongingRank);
+        LOG(m_pSimulationLog,"---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" has owner rank: "<<
+            (belongingRank) << ", proccess rank: " << m_pProcInfo->getRank()<<std::endl;)
+
+        //Set the owning rank for this body:
+        typename BodyToInfoMapType::iterator bodyInfoIt = m_bodyToInfo.find(body->m_id);
+        ASSERTMSG(bodyInfoIt != m_bodyToInfo.end(),"No body info found for body id: " << RigidBodyId::getBodyIdString(body) << " !");
+        bodyInfoIt->second->m_ownerRank = belongingRank;
+        bodyInfoIt->second->m_overlapsThisRank = overlapsOwnProcess;
 
         // If overlap: put into the neighbour data container
+        typename std::vector<typename ProcessInfoType::RankIdType>::iterator itRank;
         for(itRank = neighbours.begin(); itRank != neighbours.end(); itRank++) {
             LOG(m_pSimulationLog,"---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" overlaps Neigbour with Rank: "<< (*itRank) <<std::endl;)
             //m_nbDataMap[*itRank].m_localBodies[body->m_id] = body;
         }
+
+
 
     }
 }

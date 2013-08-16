@@ -150,7 +150,7 @@ void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamic
         typename FileMap::iterator fileIt = m_BinarySimFiles.find((*it)->m_id);
 
         if(fileIt == m_BinarySimFiles.end()){
-            LOG(m_pSimulationLog, "StateRecorderBody:: Did not found SimFile for Body Id:" << (*it)->m_id<< ". There is no SimFile corresponding to this body!" ;);
+            LOG(m_pSimulationLog, "StateRecorderBody:: Did not found SimFile for Body Id:" << RigidBodyId::getBodyIdString(*it)<< ". There is no SimFile corresponding to this body!" ;);
         }else{
 
             InitialConditionBodies::applyBodyToRigidBodyState( *(*it) , dynState.m_SimBodyStates[0]);
@@ -196,11 +196,11 @@ void StateRecorderBody<TDynamicsSystemType>::closeAllSimFiles() {
 
 template<typename TDynamicsSystemType>
 void StateRecorderBody<TDynamicsSystemType>::addBody(RigidBodyType * body) {
-    LOG(m_pSimulationLog, "---> StateRecorderBody:: Trying to add body with id: " << body->m_id <<std::endl;);
+    LOG(m_pSimulationLog, "---> StateRecorderBody:: Trying to add body with id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
 }
 template<typename TDynamicsSystemType>
 void StateRecorderBody<TDynamicsSystemType>::removeBody(RigidBodyType * body) {
-    LOG(m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << body->m_id <<std::endl;);
+    LOG(m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
 }
 
 

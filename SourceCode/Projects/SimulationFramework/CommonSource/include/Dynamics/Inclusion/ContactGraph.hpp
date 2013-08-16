@@ -435,7 +435,7 @@ public:
         //Take care state, is only q = q_m, u is not set and is zero!
 
         ASSERTMSG(pCollData->m_pBody1 != NULL && pCollData->m_pBody2 != NULL, " Bodys are null pointers?");
-        //cout << "add node : "<<m_nodeCounter<< " body id:" << pCollData->m_pBody1->m_id <<" and "<< pCollData->m_pBody2->m_id <<endl;
+        //cout << "add node : "<<m_nodeCounter<< " body id:" << RigidBodyId::getBodyIdString(pCollData->m_pBody1) <<" and "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2) <<endl;
 
         //  add a contact node to the graph
         // check to which nodes we need to connect?
@@ -632,7 +632,7 @@ private:
         // Add the edge to the nodes edge list!
         pNode->m_edgeList.push_back( addedEdge );
         m_edgeCounter++;
-        //cout << "add self edge: "<<pNode->m_nodeNumber<<" to "<<pNode->m_nodeNumber<<" body Id:"<< pBody->m_id<<endl;
+        //cout << "add self edge: "<<pNode->m_nodeNumber<<" to "<<pNode->m_nodeNumber<<" body Id:"<< RigidBodyId::getBodyIdString(pBody)<<endl;
         // ===========================================================================
 
         // Get all contacts on this body and connect to them =========================
@@ -653,7 +653,7 @@ private:
             pNode->m_edgeList.push_back( addedEdge );
             (*it)->m_edgeList.push_back( addedEdge );
             m_edgeCounter++;
-            //cout << "add edge: "<<pNode->m_nodeNumber<<" to "<<(*it)->m_nodeNumber<<" body Id:"<< pBody->m_id<<endl;
+            //cout << "add edge: "<<pNode->m_nodeNumber<<" to "<<(*it)->m_nodeNumber<<" body Id:"<< RigidBodyId::getBodyIdString(pBody)<<endl;
         }
 
         // Add new Node to the list;

@@ -65,7 +65,7 @@ SimulationManagerGUI<TConfig>::~SimulationManagerGUI() {
 
 }
 template<typename TConfig>
-void SimulationManagerGUI<TConfig>::setup() {
+void SimulationManagerGUI<TConfig>::setup(boost::filesystem::path sceneFilePath) {
 
 
     m_pSimulationLog->logMessage("---> SimulationManagerGUI::setup(): ");
@@ -82,7 +82,13 @@ void SimulationManagerGUI<TConfig>::setup() {
 
     m_pSceneParser = boost::shared_ptr< SceneParserOgre<TConfig> >( new SceneParserOgre<TConfig>( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies, m_pDynSys) );
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserOgre... ");
-    m_pSceneParser->parseScene("SceneFile.xml");
+
+
+    std::cout << "ScenePath:" << sceneFilePath <<std::endl;
+    if(sceneFilePath.empty()){
+        sceneFilePath = "SceneFile.xml";
+    }
+    m_pSceneParser->parseScene(sceneFilePath);
 
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
     // =====================================================

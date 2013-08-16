@@ -6,7 +6,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "AssertionDebug.hpp"
-
+#include <boost/filesystem.hpp>
 #include <boost/timer/timer.hpp>
 
 class SimulationManagerBase
@@ -35,7 +35,7 @@ public:
   unsigned int getNumberOfContacts();
   void          setNumberOfContacts(unsigned int & nContacts);
 
-  virtual void setup() = 0;
+  virtual void setup(boost::filesystem::path sceneFilePath) = 0;
 
 protected:
 

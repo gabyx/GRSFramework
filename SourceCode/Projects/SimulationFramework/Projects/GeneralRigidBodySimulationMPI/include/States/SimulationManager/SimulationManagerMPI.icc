@@ -99,6 +99,11 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     //Set up delegate function from NeighbourCommunicator to StateRecorederBody (close and open files)
     m_pNbCommunicator->addNotificationLocalRemove(
                                                NeighbourCommunicator<DynamicsSystemType>::AddDelegate::template
+                                                    from_method< StateRecorderBody<DynamicsSystemType>,&StateRecorderBody<DynamicsSystemType>::removeBody>
+                                                        (& *m_pStateRecorder.get())
+                                               );
+     m_pNbCommunicator->addNotificationLocalAdd(
+                                               NeighbourCommunicator<DynamicsSystemType>::AddDelegate::template
                                                     from_method< StateRecorderBody<DynamicsSystemType>,&StateRecorderBody<DynamicsSystemType>::addBody>
                                                         (& *m_pStateRecorder.get())
                                                );
@@ -216,10 +221,10 @@ void SimulationManagerMPI<TConfig>::initSim() {
 
         m_pProcCommunicator->sendBroadcast(message, MPI_COMM_WORLD);
     } else { // All other processes
-        LOG(m_pSimulationLog,"MPI> Receive new simulation directory: "<< m_SimFolderPath <<std::endl;);
-        m_pProcCommunicator->receiveBroadcast(message, m_pProcCommunicator->getProcInfo()->getMasterRank(), MPI_COMM_WORLD);
 
+        m_pProcCommunicator->receiveBroadcast(message, m_pProcCommunicator->getProcInfo()->getMasterRank(), MPI_COMM_WORLD);
         m_SimFolderPath = message.m_data.get<0>();
+        LOG(m_pSimulationLog,"MPI> Received new simulation directory: "<< m_SimFolderPath <<std::endl;);
     }
 
     // Create same folder name in Local Process Directory, to save all data...
