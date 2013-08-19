@@ -48,7 +48,7 @@ public:
 
 
 
-    private:
+    protected:
     unsigned int m_rank; ///< Own rank;
     NeighbourRankList m_nbRanks; ///< Neighbour ranks
 

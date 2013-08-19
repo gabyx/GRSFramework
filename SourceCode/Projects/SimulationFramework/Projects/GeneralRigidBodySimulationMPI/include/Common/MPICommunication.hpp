@@ -218,4 +218,6 @@ void ProcessCommunicator<TDynamicsSystem>::sendMessageToRank(const T & t, RankId
 
 };
 
+}; // MPILayer
+
 #endif
