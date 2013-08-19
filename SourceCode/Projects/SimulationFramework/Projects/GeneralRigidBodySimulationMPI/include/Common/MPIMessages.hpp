@@ -106,25 +106,46 @@ namespace MPILayer{
 
             NeighbourMessageWrapper(NeighbourCommunicatorType * nc): m_nc(nc){};
 
-//            template<class Archive>
-//            void save(Archive & ar, const unsigned int version)
-//            {
-//
-//            }
-//
-//            template<class Archive>
-//            void load(Archive & ar, const unsigned int version)
-//            {
-//
-//            }
-//
-//            BOOST_SERIALIZATION_SPLIT_MEMBER();
+            template<class Archive>
+            void save(Archive & ar, const unsigned int version)
+            {
+
+                //Message Content:
+                /*
+                 - PREC simulationTime (to check if the message is the correct one
+                 - bool hasUpdates
+                    - unsigned int size of BodyUpdates
+                    - UpdatePart for local overlapping Body 1
+                    - UpdatePart for local overlapping Body 1
+                 - bool hasRemoves
+                    - unsigned int size of Removes
+                    - Body Id of local body which should be removed in the nieghbour
+                    - Body Id ....
+                    - ....
+                 - bool hasMoves
+                    - unsigned int number of moving bodies
+                    - MoveBodyPart
+                        - Body Id (to indetify where to overwrite the data if its already in the remote list)
+                        - RigidBody (full Data)
+                        - RigidBody (full Data)
+
+                */
+
+            }
+
+            template<class Archive>
+            void load(Archive & ar, const unsigned int version)
+            {
+
+            }
+
+            BOOST_SERIALIZATION_SPLIT_MEMBER();
 
         private:
             NeighbourCommunicatorType* m_nc;
     };
 
-};
+}; // MPILayer
 
 
 #endif

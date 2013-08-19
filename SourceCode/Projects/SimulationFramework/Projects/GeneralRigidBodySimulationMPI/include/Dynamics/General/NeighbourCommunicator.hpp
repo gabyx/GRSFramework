@@ -13,7 +13,7 @@
 #include "RigidBodyGarbageCollector.hpp"
 
 #include "NeighbourData.hpp"
-//#include "MPIMessages.hpp"
+#include "MPIMessages.hpp"
 #include "MPICommunication.hpp"
 
 template< typename TRigidBody>
@@ -285,14 +285,14 @@ template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
 
 
-//    // Instanciate a MessageWrapper which contains a boost::serialization function!
-//    MPILayer::NeighbourMessageWrapper<NeighbourCommunicator<TDynamicsSystem> > message(this);
-//
-//    const typename ProcessTopologyType::NeighbourRankList & nbRanks = m_pProcTopo->getNeigbourRanks();
-//    for(typename ProcessTopologyType::NeighbourRankList::const_iterator it = nbRanks.begin(); it != nbRanks.end(); it++){
-//        LOG(m_pSimulationLog,"---> Communicate: Send message to neighbours with rank: "<< *it <<std::endl;)
-//        //m_pProcCom->sendMessageToRank(message,*it);
-//    }
+    // Instanciate a MessageWrapper which contains a boost::serialization function!
+    MPILayer::NeighbourMessageWrapper< NeighbourCommunicator<TDynamicsSystem> > message(this);
+
+    const typename ProcessTopologyType::NeighbourRankList & nbRanks = m_pProcTopo->getNeigbourRanks();
+    for(typename ProcessTopologyType::NeighbourRankList::const_iterator it = nbRanks.begin(); it != nbRanks.end(); it++){
+        LOG(m_pSimulationLog,"---> Communicate: Send message to neighbours with rank: "<< *it <<std::endl;)
+        //m_pProcCom->sendMessageToRank(message,*it);
+    }
 }
 
 template<typename TDynamicsSystem>
