@@ -18,6 +18,9 @@ public:
     typedef TDynamicsSystem DynamicsSystemType;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
 
+    typedef TRankId RankIdType;
+    typedef std::vector<RankIdType> NeighbourRankList;
+
     virtual bool belongsPointToProcess(const Vector3 & point, TRankId &neighbourProcessRank) const {
         ERRORMSG("The ProcessTopology::belongsPointToProcess has not been implemented!");
     }
@@ -43,6 +46,12 @@ public:
         ERRORMSG("The ProcessTopology::checkOverlap has not been implemented!");
     }
 
+
+
+    private:
+    unsigned int m_rank; ///< Own rank;
+    NeighbourRankList m_nbRanks; ///< Neighbour ranks
+
 };
 
 // Prototype
@@ -55,8 +64,14 @@ public:
     typedef TDynamicsSystem DynamicsSystemType;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
 
-    typedef std::map<unsigned int, AABB<LayoutConfigType> > RankToAABBType;
+    typedef typename ProcessTopology<TDynamicsSystem, TRankId>::NeighbourRankList  NeighbourRankList;
     typedef TRankId RankIdType;
+
+    typedef std::map<unsigned int, AABB<LayoutConfigType> > RankToAABBType;
+
+
+
+
 
     ProcessTopologyGrid(  const Vector3 & minPoint,
                           const Vector3 & maxPoint,
@@ -80,16 +95,15 @@ public:
     }
 
 
-    bool belongsPointToProcess(const Vector3 & point, unsigned int &neighbourProcessRank) const;
+    bool belongsPointToProcess(const Vector3 & point, RankIdType &neighbourProcessRank) const;
 
-    const std::vector<unsigned int> & getNeigbourRanks() const {
-        return m_nbRanks;
+    const NeighbourRankList & getNeigbourRanks() const {
+        return this->m_nbRanks;
     }
 
 
 private:
-    unsigned int m_rank; ///< Own rank;
-    std::vector<unsigned int> m_nbRanks; ///< Neighbour ranks
+
     RankToAABBType m_nbAABB;            ///< Neighbour AABB
     AABB<LayoutConfigType> m_aabb;      ///< Own AABB of this process
     CartesianGrid<LayoutConfigType,NoCellData> m_grid;
@@ -103,26 +117,26 @@ ProcessTopologyGrid<TDynamicsSystem,TRankId>::ProcessTopologyGrid(  const Vector
                           const Vector3 & maxPoint,
                           const MyMatrix<unsigned int>::Vector3 & dim,
                           unsigned int processRank): m_grid(minPoint,maxPoint, dim, ProcessInformation<TDynamicsSystem>::MASTER_RANK ) {
-        m_rank = processRank;
+        this->m_rank = processRank;
 
         //Initialize neighbours
-        m_nbRanks = m_grid.getCellNeigbours(m_rank);
+        this->m_nbRanks = m_grid.getCellNeigbours(this->m_rank);
 
         //Get all AABB's of all neighbours
-        for(int i = 0; i < m_nbRanks.size(); i++) {
-            m_nbAABB[ m_nbRanks[i] ] =  m_grid.getCellAABB(m_nbRanks[i]) ;
+        for(int i = 0; i < this->m_nbRanks.size(); i++) {
+            m_nbAABB[ this->m_nbRanks[i] ] =  m_grid.getCellAABB(this->m_nbRanks[i]) ;
         }
 
         //Get AABB of own rank!
-        m_aabb = m_grid.getCellAABB(m_rank);
+        m_aabb = m_grid.getCellAABB(this->m_rank);
 };
 
 
 template<typename TDynamicsSystem, typename TRankId>
-bool ProcessTopologyGrid<TDynamicsSystem,TRankId>::belongsPointToProcess(const Vector3 & point, unsigned int &neighbourProcessRank) const {
+bool ProcessTopologyGrid<TDynamicsSystem,TRankId>::belongsPointToProcess(const Vector3 & point, RankIdType &neighbourProcessRank) const {
 
     neighbourProcessRank = m_grid.getCellNumber(point);
-    if(neighbourProcessRank == m_rank) {
+    if(neighbourProcessRank == this->m_rank) {
         return true;
     }
     return false;

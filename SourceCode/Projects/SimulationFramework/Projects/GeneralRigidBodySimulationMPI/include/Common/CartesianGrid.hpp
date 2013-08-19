@@ -73,6 +73,8 @@ MyMatrix<unsigned int>::Vector3 CartesianGrid<TLayoutConfig,NoCellData>::getCell
     ASSERTMSG(m_Box.inside(point),"Point is not inside the Grid!");
     MyMatrix<unsigned int>::Vector3 v;
     v.array() =  (((point - m_Box.m_minPoint).array()) / m_dxyz.array()).template cast<unsigned int>();
+    ASSERTMSG( ( (v(0) >=0 && v(0) < m_dim(0)) && (v(1) >=0 && v(1) < m_dim(1)) && (v(2) >=0 && v(2) < m_dim(2)) ),
+              "Index: " << v << " is out of bound" )
     return v;
 };
 
@@ -89,7 +91,9 @@ unsigned int CartesianGrid<TLayoutConfig,NoCellData>::getCellNumber(const MyMatr
     ASSERTMSG( ( (v(0) >=0 && v(0) < m_dim(0)) && (v(1) >=0 && v(1) < m_dim(1)) && (v(2) >=0 && v(2) < m_dim(2)) ),
               "Index: " << v << " is out of bound" )
 
-    return v(0) + v(1)*m_dim(0) + v(2) *(m_dim(0)*m_dim(1)) + m_cellNumberingStart;
+    unsigned int cellNumber = v(0) + v(1)*m_dim(0) + v(2) *(m_dim(0)*m_dim(1)) + m_cellNumberingStart;
+    ASSERTMSG(cellNumber < m_dim(0)*m_dim(1)*m_dim(2) && cellNumber >= 0,"cellNumber: " << cellNumber <<" not in Dimension: "<<m_dim(0)<<","<<m_dim(1)<<","<<m_dim(2)<<std::endl );
+    return cellNumber;
 
 };
 

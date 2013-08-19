@@ -126,7 +126,7 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
 
     typedef MPILayer::ProcessInformation<DynamicsSystemType> ProcessInfoType;
-
+    typedef typename ProcessInfoType::RankIdType RankIdType;
 
     ProcessCommunicator():
         m_pProcessInfo(new ProcessInfoType()),
@@ -137,11 +137,14 @@ public:
     void sendBroadcast(const T & t, MPI_Comm comm);
 
     template<typename T>
-    void receiveBroadcast(T & t, unsigned int rank, MPI_Comm comm);
+    void receiveBroadcast(T & t, RankIdType rank, MPI_Comm comm);
 
     void sendBroadcast(const std::string & t, MPI_Comm comm);
 
-    void receiveBroadcast(std::string & t, unsigned int rank, MPI_Comm comm);
+    void receiveBroadcast(std::string & t, RankIdType rank, MPI_Comm comm);
+
+    template<typename T>
+    void sendMessageToRank(const T & t, RankIdType rank, MPI_Comm comm);
 
     boost::shared_ptr<ProcessInfoType> getProcInfo() {
         return m_pProcessInfo;
@@ -172,7 +175,7 @@ void ProcessCommunicator<TDynamicsSystem>::sendBroadcast(const T & t, MPI_Comm c
 
 template<typename TDynamicsSystem>
 template<typename T>
-void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(T & t, unsigned int rank, MPI_Comm comm) {
+void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(T & t, RankIdType rank, MPI_Comm comm) {
 
     int message_length;
 
@@ -195,7 +198,7 @@ void ProcessCommunicator<TDynamicsSystem>::sendBroadcast(const std::string & t, 
 };
 
 template<typename TDynamicsSystem>
-void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(std::string & t, unsigned int rank, MPI_Comm comm) {
+void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(std::string & t, RankIdType rank, MPI_Comm comm) {
 
     int message_length;
 
@@ -207,6 +210,10 @@ void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(std::string & t, uns
     ASSERTMPIERROR(error,"MPISendBroadcast failed!");
     m_binary_message >> t;
 };
+
+template<typename TDynamicsSystem>
+template<typename T>
+void ProcessCommunicator<TDynamicsSystem>::sendMessageToRank(const T & t, RankIdType rank, MPI_Comm comm){
 
 
 };

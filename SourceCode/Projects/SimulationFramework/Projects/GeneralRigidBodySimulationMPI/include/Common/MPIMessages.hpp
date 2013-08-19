@@ -13,35 +13,38 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/serialization/level.hpp>
+//#include <boost/serialization/split_member.hpp>
 
-namespace boost { namespace serialization {
+namespace boost {
+    namespace serialization {
 
-template<class Archive >
-void serialize(Archive& ar, boost::filesystem::path & p,
-                const unsigned int version)
-{
-     boost::filesystem::path::string_type s;
-     if(Archive::is_saving::value)
-         s = p.string();
-     ar & s;
-     if(Archive::is_loading::value)
-         p = s;
+        template<class Archive >
+        void serialize(Archive& ar, boost::filesystem::path & p,
+                        const unsigned int version)
+        {
+             boost::filesystem::path::string_type s;
+             if(Archive::is_saving::value)
+                 s = p.string();
+             ar & s;
+             if(Archive::is_loading::value)
+                 p = s;
+        }
+
+        //template<class Archive, typename T >
+        //void serialize(Archive& ar, T * p, const unsigned int version)
+        //{
+        //     if(Archive::is_saving::value){
+        //         ar & *p;
+        //     }else{
+        //         if(!p){
+        //            p = new T();
+        //         }
+        //         ar & *p;
+        //     }
+        //}
+
+    }
 }
-
-//template<class Archive, typename T >
-//void serialize(Archive& ar, T * p, const unsigned int version)
-//{
-//     if(Archive::is_saving::value){
-//         ar & *p;
-//     }else{
-//         if(!p){
-//            p = new T();
-//         }
-//         ar & *p;
-//     }
-//}
-
-}}
 
 namespace MPILayer{
 
@@ -80,9 +83,46 @@ namespace MPILayer{
         boost::tuple<T1,T2> m_data;
     };
 
-
-
     //BOOST_PP_REPEAT_FROM_TO(2,3,GENERATE_GENERICMESSAGE_CLASS,nothing);
+
+
+    template<typename TNeighbourCommunicator >
+    class NeighbourMessageWrapper{
+        public:
+
+
+            typedef TNeighbourCommunicator NeighbourCommunicatorType;
+            typedef typename NeighbourCommunicatorType::DynamicsSystemType DynamicsSystemType;
+            DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(NeighbourCommunicatorType::DynamicsSystemConfig)
+
+            typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
+            typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
+            typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
+            typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
+            typedef typename DynamicsSystemType::RigidBodySimContainer                RigidBodyContainerType;
+
+            typedef typename NeighbourCommunicatorType::BodyProcessInfoType           BodyProcessInfoType;
+            typedef typename NeighbourCommunicatorType::BodyToInfoMapType             BodyToInfoMapType;
+
+            NeighbourMessageWrapper(NeighbourCommunicatorType * nc): m_nc(nc){};
+
+//            template<class Archive>
+//            void save(Archive & ar, const unsigned int version)
+//            {
+//
+//            }
+//
+//            template<class Archive>
+//            void load(Archive & ar, const unsigned int version)
+//            {
+//
+//            }
+//
+//            BOOST_SERIALIZATION_SPLIT_MEMBER();
+
+        private:
+            NeighbourCommunicatorType* m_nc;
+    };
 
 };
 

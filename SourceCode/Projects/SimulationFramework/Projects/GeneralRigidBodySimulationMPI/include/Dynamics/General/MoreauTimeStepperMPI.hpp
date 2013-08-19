@@ -328,7 +328,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     m_pDynSys->afterFirstTimeStep();
     // ====================================================================================
 
-    m_pNbCommunicator->communicate();
+    m_pNbCommunicator->communicate(m_currentSimulationTime);
 
     /* Communicate all bodies which are in the overlap zone or are out of the processes topology!
 

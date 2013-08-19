@@ -51,6 +51,10 @@ public:
         typename LocalBodiesMapType::size_type e = m_localBodies.erase(body->m_id);
         ASSERTMSG(e!=0,"Tried to delete body id: " << RigidBodyId::getBodyIdString(body) << " which failed ")
     }
+    void removeLocalBody(typename RigidBodyType::RigidBodyIdType id){
+        typename LocalBodiesMapType::size_type e = m_localBodies.erase(id);
+        ASSERTMSG(e!=0,"Tried to delete body id: " << RigidBodyId::getBodyIdString(id) << " which failed ")
+    }
 
     typedef std::map<typename RigidBodyType::RigidBodyIdType, LocalOverlapData > RemoteBodiesMapType;
     RemoteBodiesMapType m_remoteBodies; // All overlapping remote bodies
@@ -111,6 +115,8 @@ public:
     template< template<typename,typename> class TList, typename Alloc>
     void addLocalBodyExclusive( RigidBodyType * body, const TList<RankIdType, Alloc> & neighbourRanks);
 
+    void cleanUp();
+
     inline NeighbourDataType * getNeighbourData(const RankIdType & rank){
         typename NeighbourDataMapType::iterator it = m_nbDataMap.find(rank);
         ASSERTMSG(it != m_nbDataMap.end(),"There is no NeighbourData for rank: " << rank << "!")
@@ -163,27 +169,38 @@ void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBo
 
     }
 
-    // Loop over all (ranks,flags) for this body (remove the necessary ones)
-    typename RankToFlagsType::iterator rankToFlagsIt = bodyInfo->m_NeighbourRanks.begin();
-    while(  rankToFlagsIt != bodyInfo->m_NeighbourRanks.end() ){
-        if( rankToFlagsIt->second.m_bToRemove == true){
+    // Clean up of the structure is done after communication!
+    // We cannot already remove the local bodies from the neighbours for
+    // which the flag remove = true because, this needs to be communicated first!
 
-            // we need to remove this body from this rank
-           this->getNeighbourData(rankToFlagsIt->first)->removeLocalBody(body);
+}
 
-            //remove the rank from the rankToFlag list of THIS Body
-            bodyInfo->m_NeighbourRanks.erase(rankToFlagsIt++);    // Note the post increment here.
-                                                   // This increments 'rankToFlagsIt' and returns a copy of
-                                                   // the original 'rankToFlagsIt' to be used by erase()
-        }else{
+template<typename TDynamicsSystem, typename TBodyToInfoMap>
+void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::cleanUp()
+{
+    for( typename BodyInfoType::iterator bodyInfoIt = m_bodyToInfo.begin(); bodyInfoIt != m_bodyToInfo.end(); bodyInfoIt++){
 
-            //set the flag to remove to true, so that next time it will be removed if no other decision taken above
-           rankToFlagsIt->second.m_bToRemove == true;
-           ++rankToFlagsIt;
+        // Loop over all (ranks,flags) for this body (remove the necessary ones)
+        typename RankToFlagsType::iterator rankToFlagsIt = bodyInfoIt->second.m_NeighbourRanks.begin();
+        while(  rankToFlagsIt != bodyInfoIt->second.m_NeighbourRanks.end() ){
+            if( rankToFlagsIt->second.m_bToRemove == true){
+
+                // we need to remove this body from this rank
+               this->getNeighbourData(rankToFlagsIt->first)->removeLocalBody(bodyInfoIt->first);
+
+                //remove the rank from the rankToFlag list of THIS Body
+                bodyInfoIt->secondm_NeighbourRanks.erase(rankToFlagsIt++);    // Note the post increment here.
+                                                       // This increments 'rankToFlagsIt' and returns a copy of
+                                                       // the original 'rankToFlagsIt' to be used by erase()
+            }else{
+
+                //set the flag to remove to true, so that next time it will be removed if no other decision taken above
+               rankToFlagsIt->second.m_bToRemove == true;
+               ++rankToFlagsIt;
+            }
         }
     }
 }
-
 
 
 #endif
