@@ -31,7 +31,7 @@ namespace MPILayer {
 
 class MPIMessageTag {
     public:
-        enum class Type : int{
+        enum Type {
             GENERICMESSAGE = 1 << 0,
             STDSTRING = 1 << 1,
             NEIGHBOUR_MESSAGE = 1 << 2
@@ -59,7 +59,7 @@ public:
         m_buffer.reserve(reserve_bytes);
     }
 
-    void clear() { // Clears the buffer
+    void clear() { // Clears the buffer, but does not affect std::vector.capacity!
         m_buffer.clear();
     }
 
@@ -125,7 +125,13 @@ public:
     ProcessCommunicator():
         m_pProcessInfo(new ProcessInfoType()),
         m_binary_message(1024*1024)
-    {};
+    {
+        if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
+            m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+        } else {
+            ERRORMSG("SimulationLog does not yet exist? Did you create it?")
+        }
+    };
 
     template<typename T>
     void sendBroadcast(const T & t, MPI_Comm comm = MPI_COMM_WORLD);
@@ -140,11 +146,17 @@ public:
     template<typename T>
     void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm = MPI_COMM_WORLD);
 
+    template<typename T, template<typename,typename> class TList, typename Alloc >
+    void receiveMessageFromRanks(T & t,const TList<RankIdType,Alloc> & ranks,
+                                  MPIMessageTag tag,  MPI_Comm comm = MPI_COMM_WORLD );
+
     boost::shared_ptr<ProcessInfoType> getProcInfo() {
         return m_pProcessInfo;
     }
 
 private:
+
+    Logging::Log *  m_pSimulationLog;
 
     boost::shared_ptr<ProcessInfoType> m_pProcessInfo;
 
@@ -213,8 +225,54 @@ void ProcessCommunicator<TDynamicsSystem>::sendMessageToRank(const T & t, RankId
     // Serialize the message
     m_binary_message << t ;
 
-    int error = MPI_Send( const_cast<char*>(m_binary_message.data()) , m_binary_message.size(), m_binary_message.getMPIDataType(), rank, tag.getInt(), comm );
+    int error = MPI_Send( const_cast<char*>(m_binary_message.data()) , m_binary_message.size(), m_binary_message.getMPIDataType(),
+                          rank, tag.getInt(), comm );
     ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToRank failed!")
+};
+
+
+template<typename TDynamicsSystem>
+template<typename T, template<typename,typename> class TList, typename Alloc >
+void ProcessCommunicator<TDynamicsSystem>::receiveMessageFromRanks(T & t,
+                                                                   const TList<RankIdType,Alloc> & ranks,
+                                                                   MPIMessageTag tag,  MPI_Comm comm){
+
+
+    std::set<RankIdType> ranksReceived;
+    // has an entry if a message has already been received for this rank.
+    MPI_Status status;
+    for(int i = 0; i <ranks.size();i++){
+
+        int error = MPI_Probe(MPI_ANY_SOURCE, tag.getInt(), comm, &status); // Blocks
+        ASSERTMPIERROR(error,"ProcessCommunicator:: receiveMessageFromRanks1 failed for loop index: " << i )
+
+        RankIdType recv_rank = status.MPI_SOURCE;
+
+        std::pair< typename std::set<RankIdType>::iterator,bool> res = ranksReceived.insert( recv_rank );
+        if(res.second == false){
+            ERRORMSGMPI("A message from this rank: " << recv_rank << " has already been received for this tag: "<< tag.getInt());
+        }
+
+        //Receive the message for this rank!
+
+        int message_size;
+        MPI_Get_count(&status,m_binary_message.getMPIDataType(),&message_size);
+        m_binary_message.resize(message_size);
+        LOG(m_pSimulationLog,"MPI> Receiving "<< message_size << " bytes from rank: " << recv_rank << "...")
+        error = MPI_Recv( const_cast<char*>(m_binary_message.data()),
+                              m_binary_message.size(),
+                              m_binary_message.getMPIDataType(),
+                              status.MPI_SOURCE, status.MPI_TAG, comm, &status
+                             );
+
+        ASSERTMPIERROR(error,"ProcessCommunicator:: receiveMessageFromRanks2 failed for loop index: " << i )
+        LOG(m_pSimulationLog, "Received" << std::endl );
+
+
+        // Deserialize
+        t.setRank(recv_rank); // Set the rank
+        m_binary_message >> t;
+    }
 };
 
 }; // MPILayer
