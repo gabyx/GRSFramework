@@ -104,37 +104,83 @@ namespace MPILayer{
             typedef typename NeighbourCommunicatorType::BodyProcessInfoType           BodyProcessInfoType;
             typedef typename NeighbourCommunicatorType::BodyToInfoMapType             BodyToInfoMapType;
 
-            NeighbourMessageWrapper(NeighbourCommunicatorType * nc): m_nc(nc){};
+            typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourMapType;
+            typedef typename NeighbourMapType::NeighbourDataType                      NeighbourDataType ;
+
+            NeighbourMessageWrapper(NeighbourCommunicatorType * nc, RankIdType neigbourRank): m_nc(nc), m_neigbourRank(neigbourRank){};
+
+            enum SubMessageFlag{
+                NOTIFICATION = 1 << 0,
+                UPDATE = 1 << 1,
+                REMOVAL = 1 << 2
+            };
 
             template<class Archive>
-            void save(Archive & ar, const unsigned int version)
+            void save(Archive & ar, const unsigned int version) const
             {
 
                 //Message Content:
                 /*
                  - PREC simulationTime (to check if the message is the correct one
-                 - bool hasUpdates
-                    - unsigned int size of BodyUpdates
+                 - unsigned int number of notifications + removes + updates
+                 - char hasNotifactions / hasRemoves / hasUpdates
+                 - Update:
+                    - unsigned int size of body updates
                     - UpdatePart for local overlapping Body 1
-                    - UpdatePart for local overlapping Body 1
-                 - bool hasRemoves
-                    - unsigned int size of Removes
-                    - Body Id of local body which should be removed in the nieghbour
-                    - Body Id ....
-                    - ....
-                 - bool hasMoves
-                    - unsigned int number of moving bodies
-                    - MoveBodyPart
+                        - Body Id
+                        - ownerRank (to check if local or remote)
+                        - bool overlaps ( false -> remove from NeighbourData )
+                          if(ownerRank != receiver && overlap = false){
+                            - Remove body (Should not happen! Send remove!)
+                          }else{
+                            - q
+                            - u
+                          }
+                 - Remove:
+                    - Body Id of local body which should be removed in this neighbour splitting surface
+                 - Notification:
                         - Body Id (to indetify where to overwrite the data if its already in the remote list)
                         - RigidBody (full Data)
-                        - RigidBody (full Data)
+                             - id
+                             - q
+                             - u
+                             - ...
 
                 */
+
+                // Simulation Time:
+                ar & m_nc->m_currentSimTime;
+                // Number of submessages to send (for each local body 1)
+                unsigned int size = (unsigned int)m_nc->m_nbDataMap[m_neigbourRank]->m_localBodies.size();
+                ar & size;
+
+                //Loop over all localBodies in this NeighbourData
+                typename NeighbourDataType::LocalBodiesMapType & localBodies = m_nc->m_nbDataMap[m_neigbourRank]->m_localBodies;
+
+                for(typename NeighbourDataType::LocalBodiesMapType::iterator it = localBodies.begin();
+                    it != localBodies.end(); it++)
+                {
+                    SubMessageFlag flag;
+                    if(it->second.m_commStatus == NeighbourDataType::LocalOverlapData::SEND_NOTIFICATION){
+                        flag = NOTIFICATION;
+                        ar & flag;
+
+                    }else if (it->second.m_commStatus == NeighbourDataType::LocalOverlapData::SEND_UPDATE) {
+                        flag = UPDATE;
+                        ar & flag;
+
+                    }else if (it->second.m_commStatus == NeighbourDataType::LocalOverlapData::SEND_REMOVE) {
+                        flag = REMOVAL;
+                        ar & flag;
+
+                    }
+
+                }
 
             }
 
             template<class Archive>
-            void load(Archive & ar, const unsigned int version)
+            void load(Archive & ar, const unsigned int version) const
             {
 
             }
@@ -143,6 +189,7 @@ namespace MPILayer{
 
         private:
             NeighbourCommunicatorType* m_nc;
+            RankIdType m_neigbourRank;
     };
 
 }; // MPILayer

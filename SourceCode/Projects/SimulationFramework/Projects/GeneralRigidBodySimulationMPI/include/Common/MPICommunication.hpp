@@ -28,30 +28,24 @@ namespace MPILayer {
 /**
 *    Important struct to define all MPI message tags used in this framework!
 */
-class MPIMessageTags {
-public:
 
-    template<typename T>
-    static unsigned int getTag() {
-        getTag(type<T>());
-    };
+class MPIMessageTag {
+    public:
+        enum class Type : int{
+            GENERICMESSAGE = 1 << 0,
+            STDSTRING = 1 << 1,
+            NEIGHBOUR_MESSAGE = 1 << 2
+        };
 
-private:
-    template<typename T> struct type {};
+        MPIMessageTag( Type t): m_t(t){};
 
-    static unsigned int getTag(type<std::string>) {
-        return STDSTRING;
-    }
+        int getInt(){return static_cast<int>(m_t);}
+        operator Type() const {return m_t;}
 
-    enum {
-        RIGIDBODY_NUMBER_CHECK,
-        RIGIDBODY_UPDATE_MESSAGE,
-        RIGIDBODY_MESSAGE,
-        CONTACT_UPDATE_MESSAGE,
-        STDSTRING,
-        GENERIC_STRING_MESSAGE,
-        CURRENT_SIMFOLDER_MESSAGE
-    };
+    private:
+        Type m_t;
+        //prevent automatic conversion for any other built-in types such as bool, int, etc
+        template<typename T> operator T () const;
 };
 
 
@@ -134,17 +128,17 @@ public:
     {};
 
     template<typename T>
-    void sendBroadcast(const T & t, MPI_Comm comm);
+    void sendBroadcast(const T & t, MPI_Comm comm = MPI_COMM_WORLD);
 
     template<typename T>
-    void receiveBroadcast(T & t, RankIdType rank, MPI_Comm comm);
+    void receiveBroadcast(T & t, RankIdType rank, MPI_Comm comm = MPI_COMM_WORLD);
 
-    void sendBroadcast(const std::string & t, MPI_Comm comm);
+    void sendBroadcast(const std::string & t, MPI_Comm comm = MPI_COMM_WORLD);
 
-    void receiveBroadcast(std::string & t, RankIdType rank, MPI_Comm comm);
+    void receiveBroadcast(std::string & t, RankIdType rank, MPI_Comm comm = MPI_COMM_WORLD);
 
     template<typename T>
-    void sendMessageToRank(const T & t, RankIdType rank, MPI_Comm comm);
+    void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm = MPI_COMM_WORLD);
 
     boost::shared_ptr<ProcessInfoType> getProcInfo() {
         return m_pProcessInfo;
@@ -168,9 +162,9 @@ void ProcessCommunicator<TDynamicsSystem>::sendBroadcast(const T & t, MPI_Comm c
     int size = m_binary_message.size();
 
     int error = MPI_Bcast(&(size), 1 , MPI_INT, m_pProcessInfo->getRank(), comm); // First send size, because we cannot probe on the other side!! Collective Communication
-    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcastT1 failed!")
     MPI_Bcast(const_cast<char*>(m_binary_message.data()), m_binary_message.size(), m_binary_message.getMPIDataType(), m_pProcessInfo->getRank(), comm);
-    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcastT2 failed!")
 };
 
 template<typename TDynamicsSystem>
@@ -180,11 +174,11 @@ void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(T & t, RankIdType ra
     int message_length;
 
     int error = MPI_Bcast(&message_length, 1 , MPI_INT, rank, comm);
-    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcastT1 failed!")
     m_binary_message.resize(message_length);
 
     error = MPI_Bcast(const_cast<char*>(m_binary_message.data()), m_binary_message.size(), m_binary_message.getMPIDataType(), rank, comm);
-    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcastT2 failed!")
     m_binary_message >> t;
 };
 
@@ -192,9 +186,9 @@ template<typename TDynamicsSystem>
 void ProcessCommunicator<TDynamicsSystem>::sendBroadcast(const std::string & t, MPI_Comm comm) {
     int size = t.size();
     int error = MPI_Bcast(&(size), 1 , MPI_INT, m_pProcessInfo->getRank(), comm); // First send size, because we cannot probe on the other side!! Collective Communication
-    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcast1 failed!");
     MPI_Bcast(const_cast<char*>(t.data()), t.size(), MPI_CHAR, m_pProcessInfo->getRank(), comm);
-    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcast2 failed!");
 };
 
 template<typename TDynamicsSystem>
@@ -203,19 +197,24 @@ void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(std::string & t, Ran
     int message_length;
 
     int error = MPI_Bcast(&message_length, 1 , MPI_INT, rank, comm);
-    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcast1 failed!");
     t.resize(message_length);
 
     error = MPI_Bcast(t.data(), t.size() , MPI_CHAR, rank, comm);
-    ASSERTMPIERROR(error,"MPISendBroadcast failed!");
+    ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcast2 failed!");
     m_binary_message >> t;
 };
 
 template<typename TDynamicsSystem>
 template<typename T>
-void ProcessCommunicator<TDynamicsSystem>::sendMessageToRank(const T & t, RankIdType rank, MPI_Comm comm){
+void ProcessCommunicator<TDynamicsSystem>::sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag,  MPI_Comm comm){
 
+    m_binary_message.clear();
+    // Serialize the message
+    m_binary_message << t ;
 
+    int error = MPI_Send( const_cast<char*>(m_binary_message.data()) , m_binary_message.size(), m_binary_message.getMPIDataType(), rank, tag.getInt(), comm );
+    ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToRank failed!")
 };
 
 }; // MPILayer

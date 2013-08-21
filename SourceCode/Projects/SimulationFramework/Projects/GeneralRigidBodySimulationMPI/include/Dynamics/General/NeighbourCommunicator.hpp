@@ -88,11 +88,11 @@ public:
                         bool isRemote = false): m_body(body), m_ownerRank(ownRank), m_overlapsThisRank(true), m_isRemote(isRemote){};
         /**
         * Data structure in the Map: Rank -> Flags, Flags define the behaviour what needs to be done with this Body.
-        * m_bToRemove: Used to decide if body is removed from the corresponding neigbourS
+        * m_bOverlaps: Used to decide if body is removed from the corresponding neigbourS
         */
         struct Flags{
-            Flags():m_bToRemove(true){};
-            bool m_bToRemove; ///< Remove flag from this ranks neighbour data
+            Flags():m_bOverlaps(false){};
+            bool m_bOverlaps; ///< Remove flag from this ranks neighbour data
         };
 
         typedef std::map<RankIdType, Flags> RankToFlagsType;
@@ -135,6 +135,8 @@ public:
                        BodyProcessInfoType *
                        > BodyToInfoMapType;
 
+    typedef NeighbourMap<DynamicsSystemType, BodyToInfoMapType> NeighbourMapType;
+
     NeighbourCommunicator(typename DynamicsSystemType::RigidBodySimContainer & globalLocal,
                           typename DynamicsSystemType::RigidBodySimContainer & globalRemote,
                           boost::shared_ptr< ProcessCommunicatorType > pProcCom);
@@ -152,9 +154,9 @@ public:
 private:
 
     /**
-    * This class need to
+    * The NeighbourMessageWrapper class needs access, to be able to serialize all together!
     */
-    //template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapper;
+    template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapper;
 
     /**
     * @brief Sends a combined message with all info to the neighbour which then extracts it
@@ -178,7 +180,7 @@ private:
 
     BodyToInfoMapType m_bodyToInfo; ///< map which gives all overlapping processes to the body
 
-    NeighbourMap<DynamicsSystemType, BodyToInfoMapType> m_nbDataMap;
+    NeighbourMapType m_nbDataMap;
 
 
     Logging::Log *  m_pSimulationLog;
@@ -284,19 +286,19 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
 template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
 
-
-    // Instanciate a MessageWrapper which contains a boost::serialization function!
-    MPILayer::NeighbourMessageWrapper< NeighbourCommunicator<TDynamicsSystem> > message(this);
-
     const typename ProcessTopologyType::NeighbourRankList & nbRanks = m_pProcTopo->getNeigbourRanks();
     for(typename ProcessTopologyType::NeighbourRankList::const_iterator it = nbRanks.begin(); it != nbRanks.end(); it++){
         LOG(m_pSimulationLog,"---> Communicate: Send message to neighbours with rank: "<< *it <<std::endl;)
-        //m_pProcCom->sendMessageToRank(message,*it);
+        // Instanciate a MessageWrapper which contains a boost::serialization function!
+        MPILayer::NeighbourMessageWrapper< NeighbourCommunicator<TDynamicsSystem> > message(this, *it);
+        m_pProcCom->sendMessageToRank(message,*it, MPILayer::MPIMessageTag::Type::NEIGHBOUR_MESSAGE );
     }
 }
 
 template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::receiveMessagesFromNeighbours(){
+
+
 
 }
 

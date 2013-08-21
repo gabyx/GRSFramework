@@ -19,22 +19,24 @@ public:
     typedef typename TDynamicsSystem::DynamicsSystemConfig   DynamicsSystemConfig;
     typedef TDynamicsSystem DynamicsSystemType;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
-    typedef TRankId RankIdType;
 
-    NeighbourData(RankIdType neighbourRank): m_neighbourRank(neighbourRank){};
+    typedef TRankId RankIdType;
 
     struct RemoteOverlapData{
         RemoteOverlapData():m_body(NULL){};
         RigidBodyType * m_body;
     };
-
     struct LocalOverlapData{
-        LocalOverlapData():m_body(NULL),m_commStatus(NOT_NOTFIED){};
+        LocalOverlapData():m_body(NULL),m_commStatus(SEND_NOTIFICATION){};
         RigidBodyType * m_body;
-        enum {NOT_NOTFIED, NOTIFIED, MOVE} m_commStatus;
+        enum {SEND_NOTIFICATION, SEND_UPDATE, SEND_REMOVE} m_commStatus;
     };
+    typedef std::map<typename RigidBodyType::RigidBodyIdType, LocalOverlapData > LocalBodiesMapType;
 
-    void addLocalBody(RigidBodyType * body){
+
+    NeighbourData(RankIdType neighbourRank): m_neighbourRank(neighbourRank){};
+
+    typename LocalBodiesMapType::iterator addLocalBody(RigidBodyType * body){
 
         std::pair<typename LocalBodiesMapType::iterator, bool> res = m_localBodies.insert(
                     typename LocalBodiesMapType::value_type(body->m_id,LocalOverlapData())
@@ -44,6 +46,7 @@ public:
             res.first->second.m_body = body;
         }
 
+        return res.first;
     }
 
 
@@ -61,7 +64,6 @@ public:
         // These bodies need an update from the neighbour.
         // If no update move body to m_garbageBodyList list
 
-    typedef std::map<typename RigidBodyType::RigidBodyIdType, LocalOverlapData > LocalBodiesMapType;
     LocalBodiesMapType m_localBodies; // All overlapping local bodies
         // NOT_NOTIFIED: send whole body to the neighbour (change to NOTIFIED)
         // NOTIFIED: send update to neighbour
@@ -154,24 +156,44 @@ void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBo
     // Loop over all incoming  ranks
     typename TList<RankIdType,Alloc>::const_iterator rankIt;
     for( rankIt = neighbourRanks.begin();rankIt!= neighbourRanks.end();rankIt++){
-        // insert the new element (rank, flags)
+        // insert the new element into body info --> (rank, flags)
         std::pair<typename RankToFlagsType::iterator,bool> res =
                    bodyInfo->m_NeighbourRanks.insert(
                                         typename RankToFlagsType::value_type(*rankIt,typename BodyInfoType::Flags())
                                                        );
 
-        res.first->second.m_bToRemove = false; // set the Flags for the existing or the newly inserted entry (rank,flags)
+        res.first->second.m_bOverlaps = true; // set the Flags for the existing or the newly inserted entry (rank,flags)
 
+        typename NeighbourDataType::LocalBodiesMapType::iterator localOverlapIt;
         if(res.second){//if inserted we need to add this body to the underlying neighbour data
            //add to the data
+           typename NeighbourDataType::LocalBodiesMapType::iterator localOverlapIt =
            this->getNeighbourData(*rankIt)->addLocalBody(body);
+
+           localOverlapIt->second.m_commStatus = NeighbourDataType::LocalOverlapData::SEND_NOTIFICATION; // No need because is set automatically in constructor
         }
+
 
     }
 
-    // Clean up of the structure is done after communication!
+    // Clean up of the neighbour structure is done after communication!
     // We cannot already remove the local bodies from the neighbours for
-    // which the flag remove = true because, this needs to be communicated first!
+    // which the flag m_bOverlaps = false because, this needs to be communicated first! (such that any neighbour does not request any update anymore!)
+    // So set the flags for this body to SEND_REMOVE for all his neighbours which have m_bOverlaps = false
+
+    for( typename RankToFlagsType::iterator rankToFlagsIt = bodyInfo->m_NeighbourRanks.begin();
+        rankToFlagsIt != bodyInfo->m_NeighbourRanks.end(); rankToFlagsIt++ ){
+
+        if( rankToFlagsIt->second.m_bOverlaps == false){
+
+            typename NeighbourDataType::LocalBodiesMapType::iterator localOverlapIt =
+            this->getNeighbourData(rankToFlagsIt->first)->m_localBodies.find(body->m_id);
+
+            localOverlapIt->second.m_commStatus = NeighbourDataType::LocalOverlapData::SEND_REMOVE;
+
+        }
+
+    }
 
 }
 
@@ -183,7 +205,7 @@ void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::cleanUp()
         // Loop over all (ranks,flags) for this body (remove the necessary ones)
         typename RankToFlagsType::iterator rankToFlagsIt = bodyInfoIt->second.m_NeighbourRanks.begin();
         while(  rankToFlagsIt != bodyInfoIt->second.m_NeighbourRanks.end() ){
-            if( rankToFlagsIt->second.m_bToRemove == true){
+            if( rankToFlagsIt->second.m_bOverlaps == false){
 
                 // we need to remove this body from this rank
                this->getNeighbourData(rankToFlagsIt->first)->removeLocalBody(bodyInfoIt->first);
@@ -194,8 +216,8 @@ void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::cleanUp()
                                                        // the original 'rankToFlagsIt' to be used by erase()
             }else{
 
-                //set the flag to remove to true, so that next time it will be removed if no other decision taken above
-               rankToFlagsIt->second.m_bToRemove == true;
+                //set the flag to false, so that next time it will be removed if no other decision taken above
+               rankToFlagsIt->second.m_bOverlaps == false;
                ++rankToFlagsIt;
             }
         }

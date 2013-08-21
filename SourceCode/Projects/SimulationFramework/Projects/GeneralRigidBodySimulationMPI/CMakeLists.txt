@@ -73,6 +73,7 @@ SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/TypenameComparision.hpp
     ${COMMONSOURCE_DIR}/include/Common/MultiBodySimFile.hpp
     ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/MPIMessages.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPICommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPITopology.hpp
