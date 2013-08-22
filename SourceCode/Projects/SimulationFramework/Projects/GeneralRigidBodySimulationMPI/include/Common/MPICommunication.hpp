@@ -69,7 +69,7 @@ public:
         m_buffer.clear(); //Clear serializable string, no allocation if we push less or equal as much into the string next time!
         boost::iostreams::back_insert_device<std::vector<char> > inserter(m_buffer);
         boost::iostreams::stream< boost::iostreams::back_insert_device<std::vector<char> > > s(inserter);
-        boost::archive::binary_oarchive oa(s);
+        boost::archive::binary_oarchive oa(s, boost::archive::no_codecvt | boost::archive::no_header);
         oa << t;
         s.flush();
 
@@ -81,7 +81,7 @@ public:
     MessageBinarySerializer & operator>>(T & t) {
         boost::iostreams::basic_array_source<char> device(data(), size());
         boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s(device);
-        boost::archive::binary_iarchive ia(s);
+        boost::archive::binary_iarchive ia(s,  boost::archive::no_codecvt | boost::archive::no_header);
         ia >> t;
 
         return *this;

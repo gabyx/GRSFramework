@@ -78,6 +78,15 @@ public:
         return (a>0);
     }
 
+    inline iterator find(RigidBodyIdType id){
+        MapByIdType::iterator it = m_mapById.find(id);
+        return m_map.project<by_insertion>(it);
+    }
+    inline iterator find(RigidBodyType * body){
+        MapByIdType::iterator it = m_mapById.find(body->m_id);
+        return m_map.project<by_insertion>(it);
+    }
+
     inline void clear(){
         m_map.clear();
     }

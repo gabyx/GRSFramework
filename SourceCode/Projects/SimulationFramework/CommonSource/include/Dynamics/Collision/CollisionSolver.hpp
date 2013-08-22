@@ -82,7 +82,7 @@ public:
     * @param SimBodies A reference to the list of all simulated bodies.
     * @param Bodies A reference to the list all not simulated bodies.
     */
-    CollisionSolver(typename DynamicsSystemType::RigidBodySimContainer & SimBodies,
+    CollisionSolver(typename DynamicsSystemType::RigidBodySimContainerType & SimBodies,
                     typename DynamicsSystemType::RigidBodyNotAniContainer & Bodies);
 
     ~CollisionSolver();
@@ -109,7 +109,7 @@ protected:
 
     const unsigned int m_nDofqObj, m_nDofuObj, m_nSimBodies;
     unsigned int m_expectedNContacts;                                                 ///< Expected number of Contacts.
-    typename DynamicsSystemType::RigidBodySimContainer & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
+    typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
     typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;          ///< List of all fixed not simulated bodies.
 
     Collider<DynamicsSystemType> m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
@@ -129,7 +129,7 @@ protected:
 
 template< typename TCollisionSolverConfig >
 CollisionSolver<TCollisionSolverConfig>::CollisionSolver(
-    typename DynamicsSystemType::RigidBodySimContainer & SimBodies,
+    typename DynamicsSystemType::RigidBodySimContainerType & SimBodies,
     typename DynamicsSystemType::RigidBodyNotAniContainer & Bodies):
     m_SimBodies(SimBodies), m_Bodies(Bodies),
     m_nSimBodies(SimBodies.size()),m_nDofqObj(NDOFqObj),m_nDofuObj(NDOFuObj) {
@@ -192,10 +192,10 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
     // All objects have been updated...
 
     //// Do simple collision detection (SimBodies to SimBodies)
-    typename DynamicsSystemType::RigidBodySimContainer::iterator bodyIti;
+    typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyIti;
     CollisionData<RigidBodyType> * pColData;
     for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
-        typename DynamicsSystemType::RigidBodySimContainer::iterator bodyItj = bodyIti;
+        typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
         bodyItj++;
         for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
 

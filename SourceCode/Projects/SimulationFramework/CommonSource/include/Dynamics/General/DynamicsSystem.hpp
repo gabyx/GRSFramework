@@ -45,8 +45,8 @@ public:
     GlobalGeometryMapType m_globalGeoms;
 
     // All RigidBodies which are owned by this class!
-    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimContainer;
-    RigidBodySimContainer m_SimBodies;    // Simulated Objects
+    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimContainerType;
+    RigidBodySimContainerType m_SimBodies;    // Simulated Objects
     typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodyNotAniContainer;
     RigidBodyNotAniContainer m_Bodies;    // all not simulated objects
 
@@ -108,7 +108,7 @@ DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem() {
 
     // Delete all RigidBodys
     {
-        typename RigidBodySimContainer::iterator it;
+        typename RigidBodySimContainerType::iterator it;
         for(it = m_SimBodies.begin(); it != m_SimBodies.end(); it++){
             delete (*it);
         }
@@ -161,11 +161,11 @@ void DynamicsSystem<TDynamicsSystemConfig>::reset(){
 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state){
-    InitialConditionBodies::applyBodiesToDynamicsState<RigidBodyType, RigidBodySimContainer>(m_SimBodies,state);
+    InitialConditionBodies::applyBodiesToDynamicsState<RigidBodyType, RigidBodySimContainerType>(m_SimBodies,state);
 }
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state){
-    InitialConditionBodies::applyDynamicsStateToBodies<RigidBodyType, RigidBodySimContainer>(state,m_SimBodies);
+    InitialConditionBodies::applyDynamicsStateToBodies<RigidBodyType, RigidBodySimContainerType>(state,m_SimBodies);
 }
 
 template<typename TDynamicsSystemConfig>
@@ -175,7 +175,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
     static Matrix43 F_i = Matrix43::Zero();
 
     // Do timestep for every object
-    typename RigidBodySimContainer::iterator bodyIt;
+    typename RigidBodySimContainerType::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
@@ -227,7 +227,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
     m_CurrentStateEnergy = 0;
 
     // Do timestep for every object
-    typename RigidBodySimContainer::iterator bodyIt;
+    typename RigidBodySimContainerType::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
@@ -274,7 +274,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::updateFMatrix(const Quaternion & q, 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrix() {
     // iterate over all objects and assemble matrix M
-    typename RigidBodySimContainer::iterator bodyIt;
+    typename RigidBodySimContainerType::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++){
         (*bodyIt)->m_MassMatrix_diag.template head<3>().setConstant((*bodyIt)->m_mass);
          (*bodyIt)->m_MassMatrix_diag.template tail<3>() = (*bodyIt)->m_K_Theta_S;
@@ -284,7 +284,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrix() {
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrixInv() {
     // iterate over all objects and assemble matrix M inverse
-    typename RigidBodySimContainer::iterator bodyIt;
+    typename RigidBodySimContainerType::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++){
         (*bodyIt)->m_MassMatrixInv_diag = (*bodyIt)->m_MassMatrix_diag.array().inverse().matrix();
     }
@@ -292,7 +292,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrixInv() {
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::init_const_hTerm() {
     // Fill in constant terms of h-Term
-    typename RigidBodySimContainer::iterator bodyIt;
+    typename RigidBodySimContainerType::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++){
          (*bodyIt)->m_h_term_const.template head<3>() =  (*bodyIt)->m_mass * m_gravity * m_gravityDir;
     }

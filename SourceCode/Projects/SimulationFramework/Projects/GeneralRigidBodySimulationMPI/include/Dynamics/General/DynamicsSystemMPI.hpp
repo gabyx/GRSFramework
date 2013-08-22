@@ -50,11 +50,11 @@ public:
     GlobalGeometryMapType m_globalGeoms;
 
     // All global RigidBodies Container for this Process, these bodies which are owned by this class!"============================
-    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimContainer;
-    RigidBodySimContainer m_SimBodies;        // simulated objects
-    RigidBodySimContainer m_RemoteSimBodies;  // all remote bodies
+    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimContainerType;
+    RigidBodySimContainerType m_SimBodies;        // simulated objects
+    RigidBodySimContainerType m_RemoteSimBodies;  // all remote bodies
 
-    typedef RigidBodySimContainer RigidBodyNotAniContainer;
+    typedef RigidBodySimContainerType RigidBodyNotAniContainer;
     RigidBodyNotAniContainer m_Bodies;        // all not simulated objects
     // ============================================================================
 
@@ -122,7 +122,7 @@ DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem() {
 
     // Delete all RigidBodys
     {
-        typename RigidBodySimContainer::iterator it;
+        typename RigidBodySimContainerType::iterator it;
         for(it = m_SimBodies.begin(); it != m_SimBodies.end(); it++){
             delete (*it);
         }
@@ -180,7 +180,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
     static Matrix43 F_i = Matrix43::Zero();
 
     // Do timestep for every object
-    typename RigidBodySimContainer::iterator bodyIt;
+    typename RigidBodySimContainerType::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
@@ -229,7 +229,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
 
     m_CurrentStateEnergy = 0;
     // Do timestep for every object
-    typename RigidBodySimContainer::iterator  bodyIt;
+    typename RigidBodySimContainerType::iterator  bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);

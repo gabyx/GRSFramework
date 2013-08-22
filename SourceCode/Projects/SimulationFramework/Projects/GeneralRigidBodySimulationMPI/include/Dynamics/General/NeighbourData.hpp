@@ -50,13 +50,22 @@ public:
     }
 
 
-    void removeLocalBody(RigidBodyType * body){
+    bool removeLocalBody(RigidBodyType * body){
         typename LocalBodiesMapType::size_type e = m_localBodies.erase(body->m_id);
-        ASSERTMSG(e!=0,"Tried to delete body id: " << RigidBodyId::getBodyIdString(body) << " which failed ")
+        return e>0;
     }
-    void removeLocalBody(typename RigidBodyType::RigidBodyIdType id){
+    bool removeLocalBody(typename RigidBodyType::RigidBodyIdType id){
         typename LocalBodiesMapType::size_type e = m_localBodies.erase(id);
-        ASSERTMSG(e!=0,"Tried to delete body id: " << RigidBodyId::getBodyIdString(id) << " which failed ")
+        return e>0;
+    }
+
+    bool removeRemoteBody(RigidBodyType * body){
+        typename LocalBodiesMapType::size_type e = m_remoteBodies.erase(body->m_id);
+        return e>0;
+    }
+    bool removeRemoteBody(typename RigidBodyType::RigidBodyIdType id){
+        typename LocalBodiesMapType::size_type e = m_remoteBodies.erase(id);
+        return e>0;
     }
 
     typedef std::map<typename RigidBodyType::RigidBodyIdType, LocalOverlapData > RemoteBodiesMapType;
@@ -92,14 +101,14 @@ public:
     typedef typename BodyInfoType::RankToFlagsType RankToFlagsType;
 
     // Neighbour data definitions
-    typedef NeighbourData<DynamicsSystemType,RankIdType> NeighbourDataType;
-    typedef std::map<RankIdType, NeighbourDataType * > NeighbourDataMapType;
+    typedef NeighbourData<DynamicsSystemType,RankIdType> DataType;
+    typedef std::map<RankIdType, DataType * > Type;
 
 
     NeighbourMap(RankIdType rank, BodyToInfoMapType & bodyToInfo): m_rank(rank), m_bodyToInfo(bodyToInfo){};
     ~NeighbourMap(){
         //Delete all neighbour datas
-        typename NeighbourDataMapType::iterator it;
+        typename Type::iterator it;
         for(it=m_nbDataMap.begin();it != m_nbDataMap.end();it++){
             delete it->second;
         }
@@ -107,9 +116,9 @@ public:
 
 
     void addNewNeighbourData(const RankIdType & rank){
-        std::pair<typename NeighbourDataMapType::iterator,bool> res =
+        std::pair<typename Type::iterator,bool> res =
             m_nbDataMap.insert(
-                    typename NeighbourDataMapType::value_type(rank, new NeighbourDataType(rank))
+                    typename Type::value_type(rank, new DataType(rank))
                                 );
         ASSERTMSG(res.second == true,"You inserted a NeighbourData which is already existing for this rank: "<<rank);
     }
@@ -119,22 +128,22 @@ public:
 
     void cleanUp();
 
-    inline NeighbourDataType * getNeighbourData(const RankIdType & rank){
-        typename NeighbourDataMapType::iterator it = m_nbDataMap.find(rank);
+    inline DataType * getNeighbourData(const RankIdType & rank){
+        typename Type::iterator it = m_nbDataMap.find(rank);
         ASSERTMSG(it != m_nbDataMap.end(),"There is no NeighbourData for rank: " << rank << "!")
         return (it->second);
     }
 
 
-    inline NeighbourDataType * operator[](const RankIdType & rank){
-        typename NeighbourDataMapType::iterator it = m_nbDataMap.find(rank);
+    inline DataType * operator[](const RankIdType & rank){
+        typename Type::iterator it = m_nbDataMap.find(rank);
         ASSERTMSG(it != m_nbDataMap.end(),"There is no NeighbourData for rank: " << rank << "!")
         return (it->second);
     }
 
 private:
     RankIdType m_rank;
-    NeighbourDataMapType m_nbDataMap;
+    Type m_nbDataMap;
 
     BodyToInfoMapType & m_bodyToInfo;
 
@@ -164,13 +173,13 @@ void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBo
 
         res.first->second.m_bOverlaps = true; // set the Flags for the existing or the newly inserted entry (rank,flags)
 
-        typename NeighbourDataType::LocalBodiesMapType::iterator localOverlapIt;
+        typename DataType::LocalBodiesMapType::iterator localOverlapIt;
         if(res.second){//if inserted we need to add this body to the underlying neighbour data
            //add to the data
-           typename NeighbourDataType::LocalBodiesMapType::iterator localOverlapIt =
+           typename DataType::LocalBodiesMapType::iterator localOverlapIt =
            this->getNeighbourData(*rankIt)->addLocalBody(body);
 
-           localOverlapIt->second.m_commStatus = NeighbourDataType::LocalOverlapData::SEND_NOTIFICATION; // No need because is set automatically in constructor
+           localOverlapIt->second.m_commStatus = DataType::LocalOverlapData::SEND_NOTIFICATION; // No need because is set automatically in constructor
         }
 
 
@@ -186,10 +195,10 @@ void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBo
 
         if( rankToFlagsIt->second.m_bOverlaps == false){
 
-            typename NeighbourDataType::LocalBodiesMapType::iterator localOverlapIt =
+            typename DataType::LocalBodiesMapType::iterator localOverlapIt =
             this->getNeighbourData(rankToFlagsIt->first)->m_localBodies.find(body->m_id);
 
-            localOverlapIt->second.m_commStatus = NeighbourDataType::LocalOverlapData::SEND_REMOVE;
+            localOverlapIt->second.m_commStatus = DataType::LocalOverlapData::SEND_REMOVE;
 
         }
 

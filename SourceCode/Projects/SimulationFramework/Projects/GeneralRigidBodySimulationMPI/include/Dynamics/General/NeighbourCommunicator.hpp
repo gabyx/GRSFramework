@@ -127,7 +127,7 @@ public:
     typedef typename ProcessInfoType::RankIdType                                        RankIdType;
     typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
 
-    typedef typename DynamicsSystemType::RigidBodySimContainer          RigidBodyContainerType;
+    typedef typename DynamicsSystemType::RigidBodySimContainerType                      RigidBodyContainerType;
 
     typedef BodyProcessInfo<RigidBodyType, typename ProcessInfoType::RankIdType> BodyProcessInfoType;
     typedef std::map<
@@ -137,8 +137,8 @@ public:
 
     typedef NeighbourMap<DynamicsSystemType, BodyToInfoMapType> NeighbourMapType;
 
-    NeighbourCommunicator(typename DynamicsSystemType::RigidBodySimContainer & globalLocal,
-                          typename DynamicsSystemType::RigidBodySimContainer & globalRemote,
+    NeighbourCommunicator(typename DynamicsSystemType::RigidBodySimContainerType & globalLocal,
+                          typename DynamicsSystemType::RigidBodySimContainerType & globalRemote,
                           boost::shared_ptr< ProcessCommunicatorType > pProcCom);
 
     ~NeighbourCommunicator(){
@@ -172,8 +172,14 @@ private:
     PREC m_currentSimTime;
 
     boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
+
     boost::shared_ptr< ProcessInfoType > m_pProcInfo;
+    RankIdType m_rank;
+
     ProcessTopologyType * m_pProcTopo;
+    const std::vector<RankIdType> & m_nbRanks;
+
+
 
     RigidBodyContainerType & m_globalRemote;
     RigidBodyContainerType & m_globalLocal;
@@ -188,15 +194,17 @@ private:
 };
 
 template<typename TDynamicsSystem>
-NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  typename DynamicsSystemType::RigidBodySimContainer & globalLocal,
-                                                                typename DynamicsSystemType::RigidBodySimContainer & globalRemote,
+NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  typename DynamicsSystemType::RigidBodySimContainerType & globalLocal,
+                                                                typename DynamicsSystemType::RigidBodySimContainerType & globalRemote,
                                                                 boost::shared_ptr< ProcessCommunicatorType > pProcCom):
             m_globalLocal(globalLocal),
             m_globalRemote(globalRemote),
             m_pProcCom(pProcCom),
             m_pProcInfo(m_pProcCom->getProcInfo()),
             m_pProcTopo(m_pProcCom->getProcInfo()->getProcTopo()),
-            m_nbDataMap(m_pProcCom->getProcInfo()->getRank(),m_bodyToInfo)
+            m_nbDataMap(m_pProcCom->getProcInfo()->getRank(),m_bodyToInfo),
+            m_rank(m_pProcCom->getProcInfo()->getRank());
+            m_nbRanks(m_pProcTopo->getNeighbourRanks());
 {
 
 
@@ -249,6 +257,10 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
         LOG(m_pSimulationLog,"---> Communicate: Overlap Test..."<<std::endl;)
         bool overlapsNeighbours = m_pProcTopo->checkOverlap(body, neighbours, overlapsOwnProcess);
 
+        if(overlapsNeighbours == false && overlapsOwnProcess == false){
+            LOG(m_pSimulationLog,"---> Communicate: Body with "<<std::endl;)
+        }
+
         // Insert this body into the underlying structure for all nieghbours exclusively! (if no overlap, it is removed everywhere)
         LOG(m_pSimulationLog,"---> Communicate: Add neighbours exclusively..."<<std::endl;)
         m_nbDataMap.addLocalBodyExclusive(body,neighbours);
@@ -256,6 +268,16 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
         //Check owner of this body
         typename ProcessInfoType::RankIdType belongingRank;
         m_pProcTopo->belongsBodyToProcess(body,belongingRank);
+
+        //Check if belonging rank is in the neighbours or our own
+        if(belongingRank != m_rank){
+            if( std::find(m_nbRanks.begin(), m_nbRanks.end(), belongingRank) == m_nbRanks.end() ){
+                LOG(m_pSimulationLog,"---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<
+                "This is not good as we cannot send any message to some other rank other then a neighbour!");
+                RRORMSG("---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<
+                "This is not good as we cannot send any message to some other rank other then a neighbour!");
+            }
+        }
         LOG(m_pSimulationLog,"---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" has owner rank: "<<
             (belongingRank) << ", proccess rank: " << m_pProcInfo->getRank()<<std::endl;)
 

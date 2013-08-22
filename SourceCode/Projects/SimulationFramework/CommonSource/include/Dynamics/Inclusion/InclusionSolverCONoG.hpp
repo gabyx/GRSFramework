@@ -79,7 +79,7 @@ protected:
     boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
 
-    typename DynamicsSystemType::RigidBodySimContainer & m_SimBodies;
+    typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;
 
     typedef ContactGraph<RigidBodyType,ContactGraphMode::ForIteration> ContactGraphType;
@@ -282,7 +282,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doJorProx() {
 template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::integrateAllBodyVelocities() {
 
-    typename DynamicsSystemType::RigidBodySimContainer::iterator bodyIt;
+    typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyIt;
 
     for( bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
@@ -353,7 +353,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
     }
 
     // Integrate all bodies!
-    typename DynamicsSystemType::RigidBodySimContainer::iterator bodyIt;
+    typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyIt;
 
     for( bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
