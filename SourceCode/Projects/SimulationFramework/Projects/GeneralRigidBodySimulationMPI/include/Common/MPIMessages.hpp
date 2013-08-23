@@ -12,6 +12,8 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/serialization/level.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/set.hpp>
 //#include <boost/serialization/split_member.hpp>
 
 #include "MPISerializationHelpers.hpp"
@@ -241,19 +243,24 @@ private:
 
         ar & bodyInfo->m_ownerRank;
 
-        if( bodyInfo->m_ownerRank == m_neighbourRank){ // if body belongs now to neighbour
+        if( bodyInfo->m_ownerRank == m_neighbourRank){ // the body belongs now to m_neighbourRank
             // send a list of all adjacent neighbours where the body overlaps
             // need to know where to send the update next time!
             std::set<RankIdType> overlappingNeighbours; // set of ranks where this body overlaps for m_neighbourRank!
             const typename ProcessTopologyType::NeighbourRanksListType & adjRanks =
             m_nc->m_pProcTopo->getAdjacentNeighbourRanks(m_neighbourRank);
+
             for( typename BodyInfoType::RankToFlagsType::iterator it =  bodyInfo->m_neighbourRanks.begin();
                   it != bodyInfo->m_neighbourRanks.end(); it++){
-
+                if(it->second.m_bOverlaps == true && adjRanks.find(it->first) != adjRanks.end() ){
+                    // this body overlaps a rank which is adjacent to m_neighbourRank
+                    overlappingNeighbours.insert(it->first);
+                }
             }
 
+            //serialize the set
+            ar & overlappingNeighbours;
         }
-
 
         //Position
         serializeEigen(ar,body->m_r_S,version);
