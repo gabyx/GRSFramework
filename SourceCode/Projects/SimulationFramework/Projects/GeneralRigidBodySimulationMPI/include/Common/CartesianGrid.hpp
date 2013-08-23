@@ -32,7 +32,12 @@ public:
 
     AABB<LayoutConfigType> getCellAABB(unsigned int cellNumber) const;
 
-    std::vector<unsigned int> getCellNeigbours(unsigned int cellNumber) const;
+    std::set<unsigned int> getCellNeigbours(unsigned int cellNumber) const;
+
+    /**
+    * Gets the common cells between all cellNumbers and the neighbours of cell number cellNumber2
+    */
+    std::set<unsigned int> getCommonNeighbourCells(const std::set<unsigned int> & cellNumbers, unsigned int cellNumber2) const;
 
 
 private:
@@ -129,8 +134,8 @@ MyMatrix<unsigned int>::Vector3 CartesianGrid<TLayoutConfig,NoCellData>::getCell
 };
 
 template<typename TLayoutConfig>
-std::vector<unsigned int> CartesianGrid<TLayoutConfig,NoCellData>::getCellNeigbours(unsigned int cellNumber) const {
-    std::vector<unsigned int> v;
+std::set<unsigned int> CartesianGrid<TLayoutConfig,NoCellData>::getCellNeigbours(unsigned int cellNumber) const {
+    std::set<unsigned int> v;
     // cellNumber zero indexed
     ASSERTMSG(cellNumber < m_dim(0)*m_dim(1)*m_dim(2) && cellNumber >= 0,"cellNumber: " << cellNumber <<" not in Dimension: "<<m_dim(0)<<","<<m_dim(1)<<","<<m_dim(2)<<std::endl );
 
@@ -147,14 +152,29 @@ std::vector<unsigned int> CartesianGrid<TLayoutConfig,NoCellData>::getCellNeigbo
             ( ind(1) >=0 &&  ind(1) < m_dim(1)) &&
             ( ind(2) >=0 &&  ind(2) < m_dim(2)) ) {
             // Add neighbour
-            v.push_back(getCellNumber(ind));
+            std::pair< typename std::set<unsigned int>::iterator, bool> res =
+                    v.insert(getCellNumber(ind));
+            ASSERTMSG(res.second,"This neighbour number: "<< getCellNumber(ind) << " for cell number: "<< cellNumber <<" alreads exists!");
         }
 
     }
     return v;
 };
 
+template<typename TLayoutConfig>
+std::set<unsigned int> CartesianGrid<TLayoutConfig,NoCellData>::getCommonNeighbourCells(const std::set<unsigned int> & cellNumbers,
+                                                                                 unsigned int cellNumber2) const
+{
 
+    std::set<unsigned int> nbRanks = getCellNeigbours(cellNumber2);
+
+    std::set<unsigned int> intersec;
+    // intersect nbRanks with cellNumbers
+    set_intersection(cellNumbers.begin(),cellNumbers.end(),nbRanks.begin(),nbRanks.end(),
+                  std::inserter(intersec,intersec.begin()));
+
+    return intersec;
+};
 
 
 template<typename TLayoutConfig>

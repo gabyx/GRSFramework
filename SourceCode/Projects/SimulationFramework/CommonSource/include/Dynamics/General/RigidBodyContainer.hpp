@@ -73,18 +73,31 @@ public:
         std::pair<typename MapByIdType::iterator,bool> res=  m_mapById.insert(ptr);
         return res.second;
     }
-    inline bool removeBody(RigidBodyIdType const & id){
-        typename MapByIdType::size_type a = m_mapById.erase(id);
-        return (a>0);
+    inline bool removeAndDeleteBody(RigidBodyIdType const & id){
+        typename MapByIdType::iterator it = m_mapById.find(id);
+        if(it != m_mapById.end()){
+            delete *it; // Delete body!
+            m_mapById.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+    inline bool removeAndDeleteAllBodies(){
+        iterator it;
+        for(it = begin(); it != end(); it++){
+            delete (*it);
+        }
+        m_map.clear();
     }
 
     inline iterator find(RigidBodyIdType id){
-        MapByIdType::iterator it = m_mapById.find(id);
-        return m_map.project<by_insertion>(it);
+        typename MapByIdType::iterator it = m_mapById.find(id);
+        return m_map.project(it);
     }
     inline iterator find(RigidBodyType * body){
-        MapByIdType::iterator it = m_mapById.find(body->m_id);
-        return m_map.project<by_insertion>(it);
+        typename MapByIdType::iterator it = m_mapById.find(body->m_id);
+        return m_map.project(it);
     }
 
     inline void clear(){

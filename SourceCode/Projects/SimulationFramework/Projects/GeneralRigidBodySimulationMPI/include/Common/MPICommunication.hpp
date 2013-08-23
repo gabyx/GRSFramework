@@ -146,9 +146,8 @@ public:
     template<typename T>
     void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm = MPI_COMM_WORLD);
 
-    template<typename T, template<typename,typename> class TList, typename Alloc >
-    void receiveMessageFromRanks(T & t,const TList<RankIdType,Alloc> & ranks,
-                                  MPIMessageTag tag,  MPI_Comm comm = MPI_COMM_WORLD );
+    template<typename T, typename TIterator>
+    void receiveMessageFromRanks(T & t,TIterator ranksBegin, TIterator ranksEnd, MPIMessageTag tag,  MPI_Comm comm = MPI_COMM_WORLD);
 
     boost::shared_ptr<ProcessInfoType> getProcInfo() {
         return m_pProcessInfo;
@@ -232,16 +231,17 @@ void ProcessCommunicator<TDynamicsSystem>::sendMessageToRank(const T & t, RankId
 
 
 template<typename TDynamicsSystem>
-template<typename T, template<typename,typename> class TList, typename Alloc >
+template<typename T, typename TIterator>
 void ProcessCommunicator<TDynamicsSystem>::receiveMessageFromRanks(T & t,
-                                                                   const TList<RankIdType,Alloc> & ranks,
+                                                                   TIterator ranksBegin, TIterator ranksEnd,
                                                                    MPIMessageTag tag,  MPI_Comm comm){
 
 
     std::set<RankIdType> ranksReceived;
     // has an entry if a message has already been received for this rank.
     MPI_Status status;
-    for(int i = 0; i <ranks.size();i++){
+    int i = 0;
+    for(TIterator ranksIt = ranksBegin; ranksIt != ranksEnd ;ranksIt++){
 
         int error = MPI_Probe(MPI_ANY_SOURCE, tag.getInt(), comm, &status); // Blocks
         ASSERTMPIERROR(error,"ProcessCommunicator:: receiveMessageFromRanks1 failed for loop index: " << i )
@@ -267,11 +267,13 @@ void ProcessCommunicator<TDynamicsSystem>::receiveMessageFromRanks(T & t,
 
         ASSERTMPIERROR(error,"ProcessCommunicator:: receiveMessageFromRanks2 failed for loop index: " << i )
         LOG(m_pSimulationLog, "Received" << std::endl );
-
+        ranksReceived.insert(recv_rank);
 
         // Deserialize
         t.setRank(recv_rank); // Set the rank
         m_binary_message >> t;
+
+        i++;
     }
 };
 

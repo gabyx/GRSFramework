@@ -91,9 +91,9 @@ public:
 
     void swapVelocities() {
 
-        if(m_u1BufferPtr){ m_u1BufferPtr->m_Back.swap(m_u1BufferPtr->m_Front); }
+        if(m_u1BufferPtr){ m_u1BufferPtr->m_back.swap(m_u1BufferPtr->m_front); }
 
-        if(m_u2BufferPtr){m_u2BufferPtr->m_Back.swap(m_u2BufferPtr->m_Front); }
+        if(m_u2BufferPtr){m_u2BufferPtr->m_back.swap(m_u2BufferPtr->m_front); }
     };
 
     void swapLambdas() {

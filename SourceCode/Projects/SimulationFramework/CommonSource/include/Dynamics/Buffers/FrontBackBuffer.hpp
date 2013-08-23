@@ -112,8 +112,8 @@ public:
   };
 
 
-  TBufferType  m_Front;       ///< The front buffer which is readable and writable.
-  TBufferType  m_Back;        ///< The back buffer which is only readable and writable.
+  TBufferType  m_front;       ///< The front buffer which is readable and writable.
+  TBufferType  m_back;        ///< The back buffer which is only readable and writable.
 
 };
 

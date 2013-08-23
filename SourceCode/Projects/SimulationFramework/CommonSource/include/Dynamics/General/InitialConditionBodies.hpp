@@ -130,7 +130,7 @@ inline void applyDynamicsStateToBodies(
         (*bodyIt)->m_q_KI= stateBodyIt->m_q.template tail<4>();
 
         if( (*bodyIt)->m_eState == TRigidBodyType::SIMULATED) {
-            (*bodyIt)->m_pSolverData->m_uBuffer.m_Back = stateBodyIt->m_u;
+            (*bodyIt)->m_pSolverData->m_uBuffer.m_back = stateBodyIt->m_u;
             (*bodyIt)->m_pSolverData->m_t = state.m_t;
         }
 
@@ -165,7 +165,7 @@ inline void applyBodyToRigidBodyState( const TRigidBody  & body, TRigidBodyState
     rigidBodyState.m_q.template tail<4>() = body.m_q_KI;
 
     if(body.m_pSolverData) {
-        rigidBodyState.m_u = body.m_pSolverData->m_uBuffer.m_Back;
+        rigidBodyState.m_u = body.m_pSolverData->m_uBuffer.m_back;
     } else {
         ASSERTMSG(false,"Your rigid body has no data in m_pSolverData (for velocity), this operation might be incorret!")
         rigidBodyState.m_u.setZero();

@@ -19,16 +19,13 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
 
     typedef TRankId RankIdType;
-    typedef std::vector<RankIdType> NeighbourRankList;
+    typedef std::set<RankIdType> NeighbourRanksListType;
+    typedef std::map<RankIdType, NeighbourRanksListType> AdjacentNeighbourRanksMapType;
 
     virtual bool belongsPointToProcess(const Vector3 & point, TRankId &neighbourProcessRank) const {
         ERRORMSG("The ProcessTopology::belongsPointToProcess has not been implemented!");
     }
     virtual bool belongsPointToProcess(const Vector3 & point) const {
-        ERRORMSG("The ProcessTopology::belongsPointToProcess has not been implemented!");
-    }
-
-    virtual const std::vector<TRankId> & getNeigbourRanks() const {
         ERRORMSG("The ProcessTopology::belongsPointToProcess has not been implemented!");
     }
 
@@ -41,17 +38,20 @@ public:
     }
 
     virtual bool checkOverlap( RigidBodyType * body,
-                                std::vector<TRankId> & neighbourProcessRanks,
+                                NeighbourRanksListType & neighbourProcessRanks,
                                 bool & overlapsOwnProcess) {
         ERRORMSG("The ProcessTopology::checkOverlap has not been implemented!");
     }
 
 
+    virtual const NeighbourRanksListType & getNeighbourRanks() const = 0;
+    virtual const NeighbourRanksListType & getAdjacentNeighbourRanks(RankIdType neighbourRank) const = 0;
+
 
     protected:
     unsigned int m_rank; ///< Own rank;
-    NeighbourRankList m_nbRanks; ///< Neighbour ranks
-
+    NeighbourRanksListType m_nbRanks; ///< Neighbour ranks
+    AdjacentNeighbourRanksMapType m_adjNbRanks; ///< Adjacent ranks between m_rank and each neighbour
 };
 
 // Prototype
@@ -64,7 +64,8 @@ public:
     typedef TDynamicsSystem DynamicsSystemType;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
 
-    typedef typename ProcessTopology<TDynamicsSystem, TRankId>::NeighbourRankList  NeighbourRankList;
+    typedef typename ProcessTopology<TDynamicsSystem, TRankId>::NeighbourRanksListType  NeighbourRanksListType;
+    typedef typename ProcessTopology<TDynamicsSystem, TRankId>::AdjacentNeighbourRanksMapType AdjacentNeighbourRanksMapType;
     typedef TRankId RankIdType;
 
     typedef std::map<unsigned int, AABB<LayoutConfigType> > RankToAABBType;
@@ -78,7 +79,7 @@ public:
                           const MyMatrix<unsigned int>::Vector3 & dim,
                           unsigned int processRank);
 
-    bool checkOverlap( RigidBodyType * body, std::vector<RankIdType> & neighbourProcessRanks, bool & overlapsOwnProcess);
+    bool checkOverlap( RigidBodyType * body, NeighbourRanksListType & neighbourProcessRanks, bool & overlapsOwnProcess);
 
     bool belongsBodyToProcess(const RigidBodyType * body) const {
         RankIdType nb;
@@ -97,10 +98,17 @@ public:
 
     bool belongsPointToProcess(const Vector3 & point, RankIdType &neighbourProcessRank) const;
 
-    const NeighbourRankList & getNeigbourRanks() const {
+    const NeighbourRanksListType & getNeighbourRanks() const {
         return this->m_nbRanks;
     }
 
+    const NeighbourRanksListType & getAdjacentNeighbourRanks(RankIdType neighbourRank) const {
+        ASSERTMSG(  this->m_nbRanks.find(neighbourRank) !=  this->m_nbRanks.end(),
+                  "No neighbour rank: " << neighbourRank << " for this process rank: "<< this->m_rank<<"!");
+        ASSERTMSG( this->m_adjNbRanks.find(neighbourRank) != this->m_adjNbRanks.end(),
+                  "No adjacent ranks for this neighbour: "<< neighbourRank << "for process rank: " << this->m_rank<<"!");
+        return this->m_adjNbRanks.find(neighbourRank)->second;
+    }
 
 private:
 
@@ -122,10 +130,16 @@ ProcessTopologyGrid<TDynamicsSystem,TRankId>::ProcessTopologyGrid(  const Vector
         //Initialize neighbours
         this->m_nbRanks = m_grid.getCellNeigbours(this->m_rank);
 
-        //Get all AABB's of all neighbours
-        for(int i = 0; i < this->m_nbRanks.size(); i++) {
-            m_nbAABB[ this->m_nbRanks[i] ] =  m_grid.getCellAABB(this->m_nbRanks[i]) ;
+        typename NeighbourRanksListType::iterator it;
+        for(it = this->m_nbRanks.begin(); it!= this->m_nbRanks.end(); it++){
+
+            //Initialize adjacent neighbour ranks to m_nbRanks for this neighbour *it
+            this->m_adjNbRanks[*it] = m_grid.getCommonNeighbourCells(this->m_nbRanks, *it);
+
+            //Get all AABB's of all neighbours
+            m_nbAABB[ *it ] =  m_grid.getCellAABB(*it) ;
         }
+
 
         //Get AABB of own rank!
         m_aabb = m_grid.getCellAABB(this->m_rank);
@@ -145,14 +159,14 @@ bool ProcessTopologyGrid<TDynamicsSystem,TRankId>::belongsPointToProcess(const V
 
 template<typename TDynamicsSystem, typename TRankId>
 bool ProcessTopologyGrid<TDynamicsSystem,TRankId>::checkOverlap(RigidBodyType * body,
-                                                                std::vector<RankIdType> & neighbourProcessRanks,
+                                                                NeighbourRanksListType & neighbourProcessRanks,
                                                                 bool & overlapsOwnProcess) {
     // Check neighbour AABB
     typename RankToAABBType::const_iterator it;
     neighbourProcessRanks.clear();
     for(it = m_nbAABB.begin(); it != m_nbAABB.end(); it++) {
         if( m_Collider.checkOverlap(body,it->second) ) {
-            neighbourProcessRanks.push_back(it->first);
+            neighbourProcessRanks.insert(it->first);
         }
     }
 

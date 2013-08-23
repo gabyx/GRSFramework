@@ -1,5 +1,5 @@
-#ifndef NeighbourData_hpp
-#define NeighbourData_hpp
+#ifndef NeighbourMap_hpp
+#define NeighbourMap_hpp
 
 #include <vector>
 #include <list>
@@ -95,36 +95,30 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
 
     // Body info definitions
-    typedef TBodyToInfoMap BodyToInfoMapType;
-    typedef typename std::remove_pointer<typename BodyToInfoMapType::mapped_type>::type BodyInfoType;
+    typedef TBodyToInfoMap BodyInfoMapType;
+    typedef typename BodyInfoMapType::DataType BodyInfoType;
     typedef typename BodyInfoType::RankIdType RankIdType;
     typedef typename BodyInfoType::RankToFlagsType RankToFlagsType;
 
     // Neighbour data definitions
     typedef NeighbourData<DynamicsSystemType,RankIdType> DataType;
     typedef std::map<RankIdType, DataType * > Type;
+    typedef typename Type::iterator iterator;
+
+    NeighbourMap(RankIdType rank, BodyInfoMapType & bodyToInfo): m_rank(rank), m_bodyToInfo(bodyToInfo){};
+    ~NeighbourMap(){}
 
 
-    NeighbourMap(RankIdType rank, BodyToInfoMapType & bodyToInfo): m_rank(rank), m_bodyToInfo(bodyToInfo){};
-    ~NeighbourMap(){
-        //Delete all neighbour datas
-        typename Type::iterator it;
-        for(it=m_nbDataMap.begin();it != m_nbDataMap.end();it++){
-            delete it->second;
+    std::pair<iterator,bool> insert(const RankIdType & rank){
+        std::pair<typename Type::iterator,bool> res = m_nbDataMap.insert( typename Type::value_type(rank, (DataType*)NULL));
+        if(res.second){
+            res.first->second = new DataType(rank);
         }
+        return res;
     }
 
-
-    void addNewNeighbourData(const RankIdType & rank){
-        std::pair<typename Type::iterator,bool> res =
-            m_nbDataMap.insert(
-                    typename Type::value_type(rank, new DataType(rank))
-                                );
-        ASSERTMSG(res.second == true,"You inserted a NeighbourData which is already existing for this rank: "<<rank);
-    }
-
-    template< template<typename,typename> class TList, typename Alloc>
-    void addLocalBodyExclusive( RigidBodyType * body, const TList<RankIdType, Alloc> & neighbourRanks);
+    template<typename TIterator>
+    void addLocalBodyExclusive(RigidBodyType * body, TIterator neighbourRanksBegin, TIterator neighbourRanksEnd);
 
     void cleanUp();
 
@@ -134,40 +128,30 @@ public:
         return (it->second);
     }
 
-
-    inline DataType * operator[](const RankIdType & rank){
-        typename Type::iterator it = m_nbDataMap.find(rank);
-        ASSERTMSG(it != m_nbDataMap.end(),"There is no NeighbourData for rank: " << rank << "!")
-        return (it->second);
-    }
-
 private:
     RankIdType m_rank;
     Type m_nbDataMap;
 
-    BodyToInfoMapType & m_bodyToInfo;
+    BodyInfoMapType & m_bodyToInfo;
 
 };
 
 template<typename TDynamicsSystem, typename TBodyToInfoMap>
-template< template<typename,typename> class TList, typename Alloc>
+template< typename TIterator>
 void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBodyType * body,
-                                                                   const TList<RankIdType,Alloc> & neighbourRanks)
+                                                                          TIterator neighbourRanksBegin,
+                                                                          TIterator neighbourRanksEnd)
 {
     // Add this local body exclusively to the given neighbours
 
-    typename BodyToInfoMapType::iterator bodyInfoIt = m_bodyToInfo.find(body->m_id);
-    BodyInfoType * bodyInfo = bodyInfoIt->second;
-
-    ASSERTMSG(bodyInfoIt != m_bodyToInfo.end(), "m_bodyToInfo does not contain any info for body id: "<< RigidBodyId::getBodyIdString(body) << " !");
-
+    BodyInfoType * bodyInfo = m_bodyToInfo.getBodyInfo(body);
 
     // Loop over all incoming  ranks
-    typename TList<RankIdType,Alloc>::const_iterator rankIt;
-    for( rankIt = neighbourRanks.begin();rankIt!= neighbourRanks.end();rankIt++){
+    TIterator rankIt;
+    for( rankIt = neighbourRanksBegin;rankIt!= neighbourRanksEnd;rankIt++){
         // insert the new element into body info --> (rank, flags)
         std::pair<typename RankToFlagsType::iterator,bool> res =
-                   bodyInfo->m_NeighbourRanks.insert(
+                   bodyInfo->m_neighbourRanks.insert(
                                         typename RankToFlagsType::value_type(*rankIt,typename BodyInfoType::Flags())
                                                        );
 
@@ -190,8 +174,8 @@ void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBo
     // which the flag m_bOverlaps = false because, this needs to be communicated first! (such that any neighbour does not request any update anymore!)
     // So set the flags for this body to SEND_REMOVE for all his neighbours which have m_bOverlaps = false
 
-    for( typename RankToFlagsType::iterator rankToFlagsIt = bodyInfo->m_NeighbourRanks.begin();
-        rankToFlagsIt != bodyInfo->m_NeighbourRanks.end(); rankToFlagsIt++ ){
+    for( typename RankToFlagsType::iterator rankToFlagsIt = bodyInfo->m_neighbourRanks.begin();
+        rankToFlagsIt != bodyInfo->m_neighbourRanks.end(); rankToFlagsIt++ ){
 
         if( rankToFlagsIt->second.m_bOverlaps == false){
 

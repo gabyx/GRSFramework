@@ -77,6 +77,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPICommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPITopology.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/MPISerializationHelpers.hpp
     ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
 )
 SET(COMMON_SRC
@@ -88,7 +89,8 @@ SET(COMMON_SRC
 
 SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourData.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourMap.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/BodyInfoMap.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourCommunicator.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodyGarbageCollector.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp

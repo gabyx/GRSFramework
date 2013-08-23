@@ -121,22 +121,9 @@ DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem() {
     DECONSTRUCTOR_MESSAGE
 
     // Delete all RigidBodys
-    {
-        typename RigidBodySimContainerType::iterator it;
-        for(it = m_SimBodies.begin(); it != m_SimBodies.end(); it++){
-            delete (*it);
-        }
-    }
-
-    {
-        typename RigidBodyNotAniContainer::iterator it;
-        for(it = m_Bodies.begin(); it != m_Bodies.end(); it++){
-            delete (*it);
-        }
-    }
-
-    m_SimBodies.clear();
-    m_Bodies.clear();
+    m_SimBodies.removeAndDeleteAllBodies();
+    m_RemoteSimBodies.removeAndDeleteAllBodies();
+    m_Bodies.removeAndDeleteAllBodies();
 
 };
 
@@ -197,8 +184,8 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
         updateFMatrix(pBody->m_q_KI, F_i);
 
         // Timestep for position;
-        pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_Back.template head<3>();
-        pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_Back.template tail<3>();
+        pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_back.template head<3>();
+        pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_back.template tail<3>();
 
         // Update Transformation A_IK
         setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
@@ -245,8 +232,8 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
         updateFMatrix(pBody->m_q_KI, F_i);
 
         // Timestep for position;
-        pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_Front.template head<3>();
-        pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_Front.template tail<3>();
+        pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_front.template head<3>();
+        pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_front.template tail<3>();
 
         //Normalize Quaternion
         pBody->m_q_KI.normalize();
@@ -254,7 +241,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
 
 #if OUTPUT_SYSTEMDATA_FILE == 1
         // Calculate Energy
-        m_CurrentStateEnergy += 0.5* pBody->m_pSolverData->m_uBuffer.m_Front.transpose() * pBody->m_MassMatrix_diag.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_Front;
+        m_CurrentStateEnergy += 0.5* pBody->m_pSolverData->m_uBuffer.m_front.transpose() * pBody->m_MassMatrix_diag.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front;
         m_CurrentStateEnergy -= +  pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir ;
 #endif
 

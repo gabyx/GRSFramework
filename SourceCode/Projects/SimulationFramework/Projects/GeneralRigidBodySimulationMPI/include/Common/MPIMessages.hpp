@@ -8,12 +8,13 @@
 
 
 #include <boost/tuple/tuple.hpp>
-
 #include <boost/type_traits.hpp>
 
 #include <boost/filesystem/path.hpp>
 #include <boost/serialization/level.hpp>
 //#include <boost/serialization/split_member.hpp>
+
+#include "MPISerializationHelpers.hpp"
 
 namespace boost {
 namespace serialization {
@@ -93,7 +94,7 @@ public:
 
     typedef TNeighbourCommunicator NeighbourCommunicatorType;
     typedef typename NeighbourCommunicatorType::DynamicsSystemType DynamicsSystemType;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(NeighbourCommunicatorType::DynamicsSystemConfig)
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(NeighbourCommunicatorType::DynamicsSystemConfig);
 
     typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
     typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
@@ -101,20 +102,21 @@ public:
     typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
     typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
 
-    typedef typename NeighbourCommunicatorType::BodyProcessInfoType           BodyProcessInfoType;
-    typedef typename NeighbourCommunicatorType::BodyToInfoMapType             BodyToInfoMapType;
 
-    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourMapType;
-    typedef typename NeighbourMapType::DataType                               NeighbourMapDataType ;
+    typedef typename NeighbourCommunicatorType::BodyInfoMapType               BodyInfoMapType;
+    typedef typename BodyInfoMapType::DataType                                BodyInfoType;
 
-    NeighbourMessageWrapper(NeighbourCommunicatorType * nc, RankIdType neigbourRank): m_nc(nc), m_neigbourRank(neigbourRank), m_initialized(true) {};
+    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
+    typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
+
+    NeighbourMessageWrapper(NeighbourCommunicatorType * nc, RankIdType neigbourRank): m_nc(nc), m_neighbourRank(neigbourRank), m_initialized(true) {};
     NeighbourMessageWrapper(NeighbourCommunicatorType * nc): m_nc(nc), m_initialized(false) {};
 
     /**
     * Set the rank if we want to reuse this instance and receive another message
     */
     void setRank( RankIdType neigbourRank) {
-        m_neigbourRank = neigbourRank;
+        m_neighbourRank = neigbourRank;
         if(!m_initialized) {
             m_initialized = true;
         }
@@ -122,15 +124,15 @@ public:
 
     enum class SubMessageFlag : char {
         NOTIFICATION = 1 << 0,
-                       UPDATE = 1 << 1,
-                                REMOVAL = 1 << 2
-                                      };
+        UPDATE = 1 << 1,
+        REMOVAL = 1 << 2
+    };
 
     template<class Archive>
     void save(Archive & ar, const unsigned int version) const {
 
 
-        ASSERTMSG(m_initialized, "The NeighbourMessageWrapper is not correctly initialized, Rank not set!")
+        ASSERTMSG(m_initialized, "The NeighbourMessageWrapper is not correctly initialized, Rank not set!");
 
         //Message Content:
         /*
@@ -163,30 +165,31 @@ public:
 
 //        // Simulation Time:
         ar & m_nc->m_currentSimTime;
-//        // Number of submessages to send (for each local body 1)
-        unsigned int size = (unsigned int)m_nc->m_nbDataMap[m_neigbourRank]->m_localBodies.size();
+
+        // Number of submessages to send (for each local body 1)
+        NeighbourDataType * neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
+        unsigned int size = (unsigned int)neighbourData->m_localBodies.size();
         ar & size;
 
         //Loop over all localBodies in this NeighbourData
-        typename NeighbourDataType::LocalBodiesMapType & localBodies = m_nc->m_nbDataMap[m_neigbourRank]->m_localBodies;
 
-        for(typename NeighbourDataType::LocalBodiesMapType::iterator it = localBodies.begin();
-                it != localBodies.end(); it++) {
+        for(typename NeighbourDataType::LocalBodiesMapType::iterator it = neighbourData->m_localBodies.begin();
+                it != neighbourData->m_localBodies.end(); it++) {
             SubMessageFlag flag;
             if(it->second.m_commStatus == NeighbourDataType::LocalOverlapData::SEND_NOTIFICATION) {
-                flag = NOTIFICATION;
+                flag = SubMessageFlag::NOTIFICATION;
                 ar & flag;
-                serializeNotification(ar, it->second.m_body);
+                serializeNotification(ar, it->second.m_body,version);
 
             } else if (it->second.m_commStatus == NeighbourDataType::LocalOverlapData::SEND_UPDATE) {
-                flag = UPDATE;
+                flag = SubMessageFlag::UPDATE;
                 ar & flag;
-                serializeUpdate(ar, it->second.m_body);
+                serializeUpdate(ar, it->second.m_body,version);
 
             } else if (it->second.m_commStatus == NeighbourDataType::LocalOverlapData::SEND_REMOVE) {
-                flag = REMOVAL;
+                flag = SubMessageFlag::REMOVAL;
                 ar & flag;
-                serializeRemoval(ar, it->second.m_body)
+                serializeRemoval(ar, it->second.m_body,version);
             }
 
         }
@@ -203,69 +206,68 @@ public:
 private:
 
     template<class Archive>
-    void serializeRemoval(Archive & ar, RigidBodyType * body) {
-        // serialize
+    void serializeRemoval(Archive & ar, RigidBodyType * body, const unsigned int version) const {
+        // serialize (ONLY LOCAL BODIES)
         // send the id to remove
         ar & body->m_id;
 
-        // Body is removed in NeighbourCommunicator CleanUp routine!
-
-//            // Go into the neighbour data structure and remove the local body
-//            m_nc->m_nbDataMap[m_neigbourRank]->removeLocalBody(body);
-//            // Remove this neighbour rank from the bodyInfo List
-//
-//            ASSERTMSG( m_nc->m_bodyToInfo[body->m_id]->m_neighbourRanks.find(m_neigbourRank) != m_nc->m_bodyToInfo[body->m_id]->m_neighbourRanks.end(),
-//                      " Not entry in m_neighbourRanks for body with id: " << body->m_id <<" !" )
-//            ASSERTMSG(m_nc->m_bodyToInfo[body->m_id]->m_neighbourRanks.find(m_neigbourRank)->second.m_bOverlaps == false,
-//                      "The body with id: "<< body->m_id << " should not overlap this neighbour rank: " << m_neigbourRank <<"anymore!")
-//
-//            m_nc->m_bodyToInfo[body->m_id]->m_neighbourRanks.erase(body->m_id);
     }
 
     template<class Archive>
-    void deserializeRemoval(Archive & ar) {
+    void deserializeRemoval(Archive & ar, const unsigned int version) {
         // deserialize
-        RigidBodyIdType id;
+        typename RigidBodyType::RigidBodyIdType id;
         ar & id;
         // Go into the neighbour data structure and remove the remote body
-        m_nc->m_nbDataMap.find(m_neigbourRank)->second->removeRemoteBody(id);
+        m_nc->m_nbDataMap.find(m_neighbourRank)->second->removeRemoteBody(id);
         // Remove from bodyToInfoList
-        BodyToInfoMapType::iterator it = m_nc->m_bodyToInfo.erase(id);
+        typename BodyInfoMapType::iterator it = m_nc->m_bodyToInfo.erase(id);
         ASSERTMSG(it !=  m_nc->m_bodyToInfo.end(), "Remote Body with id: " << id << " is not contained in m_bodyToInfo!");
-        //Remove from global list
-        bool res = m_nc->m_globalRemote.removeBody(id);
+        //Remove and delete from global list
+        bool res = m_nc->m_globalRemote.removeAndDeleteBody(id);
         ASSERTMSG(res == true, "Remote Body with id: " << id << " could not be deleted in m_globalRemote!");
+
 
     }
 
     template<class Archive>
-    void serializeUpdate(Archive & ar, RigidBodyType * body) {
-        // serialize
+    void serializeUpdate(Archive & ar, RigidBodyType * body, const unsigned int version) const {
+        // serialize (ONLY LOCAL BODIES)
 
         // id
         ar & body->m_id;
-        // owning rank / and bool if it overlaps sending rank
-        BodyToInfoMapType::iterator it = m_nc->m_bodyToInfo.find(body->m_id);
-        ASSERTMSG(it != m_nc->m_bodyToInfo.end(),"No entry in m_bodyToInfo for body with id: " << body->m_id <<"!");
+        // owning rank
+        BodyInfoType * bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(body);
 
-        ar & it->second->m_owningRank;
-        ar & it->second->m_overlapsThisRank;
+        ar & bodyInfo->m_ownerRank;
+
+        if( bodyInfo->m_ownerRank == m_neighbourRank){ // if body belongs now to neighbour
+            // send a list of all adjacent neighbours where the body overlaps
+            // need to know where to send the update next time!
+            std::set<RankIdType> overlappingNeighbours; // set of ranks where this body overlaps for m_neighbourRank!
+            const typename ProcessTopologyType::NeighbourRanksListType & adjRanks =
+            m_nc->m_pProcTopo->getAdjacentNeighbourRanks(m_neighbourRank);
+            for( typename BodyInfoType::RankToFlagsType::iterator it =  bodyInfo->m_neighbourRanks.begin();
+                  it != bodyInfo->m_neighbourRanks.end(); it++){
+
+            }
+
+        }
+
 
         //Position
-        serializeEigen(ar,body->m_r_S);
-        serializeEigen(ar,body->m_q_KI);
-
-        ASSERTMSG(body->m_pSolverData,"No SolverData present in body with id: "<< body->m_id << "!"")
-
+        serializeEigen(ar,body->m_r_S,version);
+        serializeEigen(ar,body->m_q_KI,version);
         //Velocity
-        serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
+        ASSERTMSG(body->m_pSolverData,"No SolverData present in body with id: "<< body->m_id << "!");
+        serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back,version);
 
     }
 
     template<class Archive>
-    void deserializeUpdate(Archive & ar) {
+    void deserializeUpdate(Archive & ar, const unsigned int version) {
         // deserialize
-        RigidBodyIdType id;
+        typename RigidBodyType::RigidBodyIdType id;
         ar & id;
         RankIdType owningRank;
         ar & owningRank;
@@ -275,14 +277,14 @@ private:
         if( owningRank == m_neighbourRank || owningRank == m_nc->m_rank ) {
             // normal update
 
-            RigidBodyContainerType::iterator bodyIt = m_nc->m_globalRemote.find(id);
+            typename RigidBodyContainerType::iterator bodyIt = m_nc->m_globalRemote.find(id);
             ASSERTMSG(bodyIt != m_nc->m_globalRemote.end(),"m_globalRemote does not contain body with id: " << id << "!");
 
             RigidBodyType * body = (*bodyIt);
 
             //Update the body:
-            serializeEigen(ar, body->m_r_S);
-            serializeEigen(ar,body->m_q_KI);
+            serializeEigen(ar, body->m_r_S,version);
+            serializeEigen(ar,body->m_q_KI,version);
             ASSERTMSG(body->m_pSolverData, "No SolverData present in body with id: "<< id << "!");
             serializeEigen(ar,body->m_pSolverData.m_buffer.m_back);
 
@@ -294,9 +296,9 @@ private:
                 m_nc->m_globalLocal.addBody(body);
 
                 // Move the remote out of the neighbour structure
-                m_nc->m_nbDataMap.find(m_neigbourRank)->second->removeRemoteBody(body->m_id);
+                m_nc->m_nbDataMap.find(m_neighbourRank)->second->removeRemoteBody(body->m_id);
                 if( overlapsNeighbour == true ){
-                   NeighbourDataType::LocalBodiesMapType::iterator m_nc->m_nbDataMap.find(m_neigbourRank)->second->addLocalBody(body);
+                   typename NeighbourDataType::LocalBodiesMapType::iterator it =  m_nc->m_nbDataMap.find(m_neighbourRank)->second->addLocalBody(body);
 
                 }
             }
@@ -313,17 +315,17 @@ private:
                           << m_neighbourRank << " but the owner is this rank, -> impossible!");
 
                 //remove from this neighbour data
-                m_nc->m_nbDataMap.find(m_neigbourRank)->second->removeRemoteBody(id);
+                m_nc->m_nbDataMap.find(m_neighbourRank)->second->removeRemoteBody(id);
         }else{
-                m_nc->m_nbDataMap.find(m_neigbourRank)->second->removeRemoteBody(id);
+                m_nc->m_nbDataMap.find(m_neighbourRank)->second->removeRemoteBody(id);
         }
 
     }
 
     template<class Archive>
-    void serializeNotification(Archive & ar, RigidBodyType * body) {
+    void serializeNotification(Archive & ar, RigidBodyType * body, const unsigned int version) const {
         if( Archive::is_saving::value ) {
-            // serialize
+            // serialize (ONLY LOCAL BODIES)
 
         } else {
             // deserialize
@@ -333,7 +335,7 @@ private:
 
 
     NeighbourCommunicatorType* m_nc;
-    RankIdType m_neigbourRank; ///< This is the neighbour rank where the message is send to or received from!
+    RankIdType m_neighbourRank; ///< This is the neighbour rank where the message is send to or received from!
     bool m_initialized;
 };
 

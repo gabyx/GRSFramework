@@ -53,8 +53,8 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData<TLayoutConfig> {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
     RigidBodySolverDataCONoG(): m_bInContactGraph(false){
-        m_uBuffer.m_Front.setZero();
-        m_uBuffer.m_Back.setZero();
+        m_uBuffer.m_front.setZero();
+        m_uBuffer.m_back.setZero();
     };
 
     ///< Get the actual velocity
@@ -68,11 +68,11 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData<TLayoutConfig> {
     FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> m_uBuffer;
 
     void swapBuffer(){
-        m_uBuffer.m_Front.swap(m_uBuffer.m_Back);
+        m_uBuffer.m_front.swap(m_uBuffer.m_back);
     }
 
     void reset(){
-        m_uBuffer.m_Front.setZero();
+        m_uBuffer.m_front.setZero();
         m_bInContactGraph = false;
     };
 

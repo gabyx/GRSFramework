@@ -37,7 +37,7 @@ public:
     private:
 
     void addGyroTerm(){
-        Vector3 K_omega_IK = m_rigidBody->m_pSolverData->m_uBuffer.m_Back.template tail<3>();
+        Vector3 K_omega_IK = m_rigidBody->m_pSolverData->m_uBuffer.m_back.template tail<3>();
         m_rigidBody->m_h_term.template tail<3>() -= K_omega_IK.cross((m_rigidBody->m_K_Theta_S.asDiagonal() * K_omega_IK).eval());
     }
 
