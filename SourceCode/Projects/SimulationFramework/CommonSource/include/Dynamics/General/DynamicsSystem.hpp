@@ -108,7 +108,6 @@ DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem() {
 
     // Delete all RigidBodys
     m_SimBodies.removeAndDeleteAllBodies();
-    m_RemoteSimBodies.removeAndDeleteAllBodies();
     m_Bodies.removeAndDeleteAllBodies();
 
 };

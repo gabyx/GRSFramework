@@ -17,7 +17,7 @@ public:
         * m_bOverlaps: Used to decide if body is removed from the corresponding neigbourS
         */
         struct Flags{
-            Flags():m_bOverlaps(false){};
+            Flags(bool overlap = false):m_bOverlaps(overlap){};
             bool m_bOverlaps; ///< Remove flag from this ranks neighbour data
         };
 
@@ -26,13 +26,6 @@ public:
 
         RankIdType m_ownerRank;   ///< The process rank to which this body belongs (changes during simulation, if change -> send to other process)
         bool m_overlapsThisRank; ///< True if body overlaps this process!, if false
-
-        /**
-        If ownerRank is not this Process and  m_overlapsThisRank = false:
-            Send to full body neighbour and delete here
-        If ownerRank is not this Process and  m_overlapsThisRank = true:
-            Send to full body neighbour and add to remote Bodies to receive updates
-        */
 
         RigidBodyType * m_body;
 
@@ -62,7 +55,22 @@ public:
 
 
     BodyInfoMap(){};
-    ~BodyInfoMap(){};
+    ~BodyInfoMap(){
+        for(auto it = m_map.begin(); it != m_map.end(); it++){
+            delete it->second;
+        }
+        m_map.clear();
+    }
+
+    bool erase(RigidBodyType * body){
+        auto it = m_map.find(body->m_id);
+        if(it != m_map.end()){
+            delete it->second;
+            m_map.erase(it);
+            return true;
+        }
+        return false;
+    }
 
 
     std::pair<iterator,bool> insert(RigidBodyType * body, RankIdType ownerRank){
@@ -74,15 +82,17 @@ public:
     }
 
     inline DataType * getBodyInfo(const RigidBodyType * body){
-        typename Type::iterator it = m_map.find(body->m_id);
-        ASSERTMSG(it != m_map.end(),"There is no BodyInfo for body with id: " << body->m_id << "!")
-        return (it->second);
+        return getBodyInfo(body->m_id);
     }
 
     inline DataType * getBodyInfo(typename RigidBodyType::RigidBodyIdType id){
         typename Type::iterator it = m_map.find(id);
-        ASSERTMSG(it != m_map.end(),"There is no BodyInfo for body with id: " << id << "!")
-        return (it->second);
+        if(it != m_map.end()){
+           return (it->second);
+        }else{
+           ASSERTMSG(false,"There is no BodyInfo for body with id: " << id << "!")
+           return NULL;
+        }
     }
 
 private:

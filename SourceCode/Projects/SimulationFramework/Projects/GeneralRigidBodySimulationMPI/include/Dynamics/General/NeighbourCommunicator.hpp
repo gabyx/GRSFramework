@@ -127,6 +127,8 @@ private:
 
 
     PREC m_currentSimTime;
+    MPILayer::NeighbourMessageWrapper< NeighbourCommunicator<TDynamicsSystem> > m_message;
+
 
     boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
 
@@ -161,7 +163,8 @@ NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  typename Dynamic
             m_pProcTopo(m_pProcCom->getProcInfo()->getProcTopo()),
             m_nbDataMap(m_pProcCom->getProcInfo()->getRank(),m_bodyToInfo),
             m_rank(m_pProcCom->getProcInfo()->getRank()),
-            m_nbRanks(m_pProcCom->getProcInfo()->getProcTopo()->getNeighbourRanks())
+            m_nbRanks(m_pProcCom->getProcInfo()->getProcTopo()->getNeighbourRanks()),
+            m_message(this)
 {
 
 
@@ -264,8 +267,8 @@ void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
     for(typename ProcessTopologyType::NeighbourRanksListType::const_iterator it = nbRanks.begin(); it != nbRanks.end(); it++){
         LOG(m_pSimulationLog,"---> Communicate: Send message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
-        MPILayer::NeighbourMessageWrapper< NeighbourCommunicator<TDynamicsSystem> > message(this, *it);
-        m_pProcCom->sendMessageToRank(message,*it, MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
+        m_message.setRank(*it);
+        m_pProcCom->sendMessageToRank(m_message,*it, MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
     }
 }
 
@@ -273,8 +276,8 @@ template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::receiveMessagesFromNeighbours(){
 
     const typename ProcessTopologyType::NeighbourRanksListType & nbRanks = m_pProcTopo->getNeighbourRanks();
-    MPILayer::NeighbourMessageWrapper< NeighbourCommunicator<TDynamicsSystem> > message(this);
-    m_pProcCom->receiveMessageFromRanks(message, nbRanks.begin(), nbRanks.end(),  MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
+    // set the rank of from the receiving message automatically! inside the function!
+    m_pProcCom->receiveMessageFromRanks(m_message, nbRanks.begin(), nbRanks.end(),  MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
 
 }
 

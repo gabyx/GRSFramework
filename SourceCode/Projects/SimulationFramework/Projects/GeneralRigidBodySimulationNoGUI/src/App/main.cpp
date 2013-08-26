@@ -12,9 +12,9 @@ int main(int argc, char **argv)
 {
    // Parsing Input Parameters===================================
     new ApplicationCLOptions();
-    ApplicationCLOptions::getSingeltonPtr()->parseOptions(argc,argv);
+    ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
 
-    ApplicationCLOptions::getSingeltonPtr()->checkArguments();
+    ApplicationCLOptions::getSingletonPtr()->checkArguments();
 
    // End Parsing =================================
 

@@ -36,19 +36,19 @@ MPI_Abort(MPI_COMM_WORLD, -1); \
 	/**
 	* @brief An Assert Macro to use within C++ code.
 	* @param condition The condition which needs to be true otherwise an assertion is thrown!
-	* @param message The message in form of cout out expression like: ÒVariable:Ó<<i<< Òhas failedÓ
+	* @param message The message in form of cout out expression like:
 	*/
     #define ASSERTMPIERROR( error_code , message ) { \
         if(error_code != MPI_SUCCESS){  \
             char * string; \
             int length; \
             MPI_Error_string( error_code , string, &length ); \
-            ERRORMSGMPI2( string , message ) \
+            ERRORMSGMPI2( string , message ); \
         } \
     }
 
 #else
-	#define ASSERTMPIERROR(condition,message) (void)0
+	#define ASSERTMPIERROR( error_code ,message)
 #endif
 
 

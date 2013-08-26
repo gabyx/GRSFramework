@@ -173,9 +173,9 @@ void ProcessCommunicator<TDynamicsSystem>::sendBroadcast(const T & t, MPI_Comm c
     int size = m_binary_message.size();
 
     int error = MPI_Bcast(&(size), 1 , MPI_INT, m_pProcessInfo->getRank(), comm); // First send size, because we cannot probe on the other side!! Collective Communication
-    ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcastT1 failed!")
+    ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcastT1 failed!");
     MPI_Bcast(const_cast<char*>(m_binary_message.data()), m_binary_message.size(), m_binary_message.getMPIDataType(), m_pProcessInfo->getRank(), comm);
-    ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcastT2 failed!")
+    ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcastT2 failed!");
 };
 
 template<typename TDynamicsSystem>
@@ -185,11 +185,11 @@ void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(T & t, RankIdType ra
     int message_length;
 
     int error = MPI_Bcast(&message_length, 1 , MPI_INT, rank, comm);
-    ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcastT1 failed!")
+    ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcastT1 failed!");
     m_binary_message.resize(message_length);
 
     error = MPI_Bcast(const_cast<char*>(m_binary_message.data()), m_binary_message.size(), m_binary_message.getMPIDataType(), rank, comm);
-    ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcastT2 failed!")
+    ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcastT2 failed!");
     m_binary_message >> t;
 };
 
@@ -226,7 +226,7 @@ void ProcessCommunicator<TDynamicsSystem>::sendMessageToRank(const T & t, RankId
 
     int error = MPI_Send( const_cast<char*>(m_binary_message.data()) , m_binary_message.size(), m_binary_message.getMPIDataType(),
                           rank, tag.getInt(), comm );
-    ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToRank failed!")
+    ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToRank failed!");
 };
 
 
@@ -265,8 +265,8 @@ void ProcessCommunicator<TDynamicsSystem>::receiveMessageFromRanks(T & t,
                               status.MPI_SOURCE, status.MPI_TAG, comm, &status
                              );
 
-        ASSERTMPIERROR(error,"ProcessCommunicator:: receiveMessageFromRanks2 failed for loop index: " << i )
-        LOG(m_pSimulationLog, "Received" << std::endl );
+        ASSERTMPIERROR(error, "ProcessCommunicator:: receiveMessageFromRanks2 failed for loop index: " << i )
+        LOG(m_pSimulationLog, "Received" << std::endl; )
         ranksReceived.insert(recv_rank);
 
         // Deserialize

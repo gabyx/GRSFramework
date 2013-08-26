@@ -24,6 +24,7 @@
 #define CLEARLOG logstream.str("");                        ///< Macro to easily write into a Ogre::Log.
 #define LOG( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ;  ///< Macro to easily write into a SimpleLogger::Log.
 #define OGRE_LOG( _logptr_ ) (_logptr_)->logMessage(logstream.str());  ///< Macro to easily write into a Ogre::Log.
+#define LOGSZ( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
 /* @} */
 
 
