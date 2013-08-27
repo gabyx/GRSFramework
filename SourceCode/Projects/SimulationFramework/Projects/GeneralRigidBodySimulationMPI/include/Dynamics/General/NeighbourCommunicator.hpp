@@ -45,7 +45,7 @@ public:
 #endif
 
     /** Adds a new Delegate for a add notification of a local body*/
-    void addNotificationLocalAdd(const AddDelegate & cD) {
+    void addDelegateLocalAdd(const AddDelegate & cD) {
         m_LocalNotifyAddList.push_back(cD);
     }
     /** Adds a new Delegate for a remove notifaction of a local body*/
@@ -94,12 +94,14 @@ public:
     typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
 
     typedef typename DynamicsSystemType::RigidBodySimContainerType                      RigidBodyContainerType;
+    typedef typename DynamicsSystemType::GlobalGeometryMapType                          GlobalGeometryMapType;
 
     typedef BodyInfoMap<DynamicsSystemType,RankIdType>                                   BodyInfoMapType;
     typedef NeighbourMap<DynamicsSystemType, BodyInfoMapType>                            NeighbourMapType;
 
     NeighbourCommunicator(typename DynamicsSystemType::RigidBodySimContainerType & globalLocal,
                           typename DynamicsSystemType::RigidBodySimContainerType & globalRemote,
+                          typename DynamicsSystemType::GlobalGeometryMapType & globalGeoms,
                           boost::shared_ptr< ProcessCommunicatorType > pProcCom);
 
     ~NeighbourCommunicator(){
@@ -142,6 +144,7 @@ private:
 
     RigidBodyContainerType & m_globalRemote;
     RigidBodyContainerType & m_globalLocal;
+    GlobalGeometryMapType & m_globalGeoms;
 
     BodyInfoMapType m_bodyToInfo; ///< map which gives all overlapping processes to the body
 
@@ -155,9 +158,11 @@ private:
 template<typename TDynamicsSystem>
 NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  typename DynamicsSystemType::RigidBodySimContainerType & globalLocal,
                                                                 typename DynamicsSystemType::RigidBodySimContainerType & globalRemote,
+                                                                typename DynamicsSystemType::GlobalGeometryMapType & globalGeoms,
                                                                 boost::shared_ptr< ProcessCommunicatorType > pProcCom):
             m_globalLocal(globalLocal),
             m_globalRemote(globalRemote),
+            m_globalGeoms(globalGeoms),
             m_pProcCom(pProcCom),
             m_pProcInfo(m_pProcCom->getProcInfo()),
             m_pProcTopo(m_pProcCom->getProcInfo()->getProcTopo()),

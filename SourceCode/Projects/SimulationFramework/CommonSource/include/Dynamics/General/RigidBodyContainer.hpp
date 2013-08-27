@@ -98,11 +98,11 @@ public:
 
     inline iterator find(RigidBodyIdType id){
         typename MapByIdType::iterator it = m_mapById.find(id);
-        return m_map.template project<by_id>(it);
+        return m_map.template project<by_insertion>(it);
     }
     inline iterator find(RigidBodyType * body){
         typename MapByIdType::iterator it = m_mapById.find(body->m_id);
-        return m_map.template project<by_id>(it);
+        return m_map.template project<by_insertion>(it);
     }
 
     inline void clear(){

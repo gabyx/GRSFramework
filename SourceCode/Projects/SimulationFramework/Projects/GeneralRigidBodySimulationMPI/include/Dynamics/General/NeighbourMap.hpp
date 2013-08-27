@@ -64,9 +64,9 @@ public:
     LocalIterator localEnd(){ return m_localBodies.end(); }
     RemoteIterator remoteEnd(){ return m_remoteBodies.end(); }
 
-    LocalIterator addLocalBodyData(RigidBodyType * body){
+    std::pair<LocalIterator, bool> addLocalBodyData(RigidBodyType * body){
 
-        std::pair<typename LocalBodiesMapType::iterator, bool> res = m_localBodies.insert(
+        std::pair<LocalIterator, bool>  res = m_localBodies.insert(
                     typename LocalBodiesMapType::value_type(body->m_id, (LocalData*) NULL )
                     );
 
@@ -74,13 +74,13 @@ public:
             res.first->second = new LocalData(body);
         }
 
-        return res.first;
+        return res;
     }
 
 
-    RemoteIterator addRemoteBodyData(RigidBodyType * body){
+    std::pair<RemoteIterator, bool> addRemoteBodyData(RigidBodyType * body){
 
-        std::pair<typename RemoteBodiesMapType::iterator, bool> res = m_remoteBodies.insert(
+        std::pair<RemoteIterator, bool> res = m_remoteBodies.insert(
                     typename RemoteBodiesMapType::value_type(body->m_id,(RemoteData*) NULL)
                     );
 
@@ -88,7 +88,7 @@ public:
             res.first->second = new RemoteData(body);
         }
 
-        return res.first;
+        return res;
     }
 
     RemoteData * getRemoteBodyData(RigidBodyType * body){
@@ -245,13 +245,16 @@ void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBo
 
         res.first->second.m_bOverlaps = true; // set the Flags for the existing or the newly inserted entry (rank,flags)
 
-        typename DataType::LocalIterator localOverlapIt;
+        typename DataType::LocalIterator pairlocalDataIt;
         if(res.second){//if inserted we need to add this body to the underlying neighbour data
            //add to the data
-           typename DataType::LocalBodiesMapType::iterator localOverlapIt =
-           this->getNeighbourData(*rankIt)->addLocalBodyData(body);
-
-           localOverlapIt->second->m_commStatus = DataType::LocalData::SEND_NOTIFICATION; // No need because is set automatically in constructor
+           auto pairlocalDataIt = this->getNeighbourData(*rankIt)->addLocalBodyData(body);
+           ASSERTMSG(pairlocalDataIt.second, "Insert to neighbour data rank: " << *rankIt << " in process rank: " <<m_rank << " failed!");
+           pairlocalDataIt.first->second->m_commStatus = DataType::LocalData::SEND_NOTIFICATION; // No need because is set automatically in constructor
+        }else{
+            ASSERTMSG(this->getNeighbourData(*rankIt)->getLocalBodyData(body),"body with id "<<body->m_id << " in neighbour structure rank: " << *rankIt << " does not exist?" );
+            ASSERTMSG(this->getNeighbourData(*rankIt)->getLocalBodyData(body)->m_commStatus == DataType::LocalData::SEND_UPDATE,
+                      "m_commStatus for body with id: " << body->m_id << " in neighbour structure rank: " << *rankIt << "should be in update mode!");
         }
 
 

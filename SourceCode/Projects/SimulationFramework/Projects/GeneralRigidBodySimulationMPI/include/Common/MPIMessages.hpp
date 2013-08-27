@@ -21,6 +21,7 @@
 #include "FileManager.hpp"
 #include "SimpleLogger.hpp"
 
+#include "QuaternionHelpers.hpp"
 
 
 namespace boost {
@@ -150,7 +151,7 @@ public:
     void save(Archive & ar, const unsigned int version) const {
 
 
-        ASSERTMSG(m_initialized, "The NeighbourMessageWrapper is not correctly initialized, Rank not set!");
+            ASSERTMSG(m_initialized, "The NeighbourMessageWrapper is not correctly initialized, Rank not set!");
         LOGSZ(m_pSerializerLog, "=========================================================================================="<< std::endl;)
         LOGSZ(m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
 
@@ -226,7 +227,7 @@ public:
 
     template<class Archive>
     void load(Archive & ar, const unsigned int version) const {
-        ASSERTMSG(m_initialized, "The NeighbourMessageWrapper is not correctly initialized, Rank not set!")
+            ASSERTMSG(m_initialized, "The NeighbourMessageWrapper is not correctly initialized, Rank not set!")
         LOGSZ(m_pSerializerLog, "=========================================================================================="<< std::endl;)
         LOGSZ(m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
 
@@ -234,7 +235,7 @@ public:
         // Simulation Time:
         PREC simulationTime;
         ar & simulationTime; LOGSZ(m_pSerializerLog, "---> Timestamp: "<<  simulationTime << std::endl;);
-        ASSERTMSG(m_nc->m_currentSimTime == simulationTime, "The message from rank: "<< m_neighbourRank << " has timeStamp: " << simulationTime<<" which does not fit our current simulation Time: "<< m_nc->m_currentSimTime << " for rank: " << m_nc->m_rank <<" !")
+            ASSERTMSG(m_nc->m_currentSimTime == simulationTime, "The message from rank: "<< m_neighbourRank << " has timeStamp: " << simulationTime<<" which does not fit our current simulation Time: "<< m_nc->m_currentSimTime << " for rank: " << m_nc->m_rank <<" !")
 
 
         // Number of submessages
@@ -259,6 +260,9 @@ public:
                 LOGSZ(m_pSerializerLog, "---> RemovalSTART: " << i<<std::endl;);
                 //deserializeRemoval(ar,version);
                 LOGSZ(m_pSerializerLog, "---> RemovalEND: "<<std::endl;);
+            }else{
+                LOGSZ(m_pSerializerLog, "---> Received WRONG FLAG: "<< (int)flag << std::endl;);
+                ASSERTMSG(false, "Wrong flag received!")
             }
         }
 
@@ -283,13 +287,13 @@ private:
         typename RigidBodyType::RigidBodyIdType id;
         ar & id;
         // Go into the neighbour data structure and remove the remote body
-        m_nc->m_nbDataMap.find(m_neighbourRank)->second->removeRemoteBody(id);
+        m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank)->deleteRemoteBodyData(id);
         // Remove from bodyToInfoList
-        typename BodyInfoMapType::iterator it = m_nc->m_bodyToInfo.erase(id);
-        ASSERTMSG(it !=  m_nc->m_bodyToInfo.end(), "Remote Body with id: " << id << " is not contained in m_bodyToInfo!");
+        bool res =  m_nc->m_bodyToInfo.erase(id);
+            ASSERTMSG(res, "Remote Body with id: " << id << " is not contained in m_bodyToInfo!");
         //Remove and delete from global list
-        bool res = m_nc->m_globalRemote.removeAndDeleteBody(id);
-        ASSERTMSG(res == true, "Remote Body with id: " << id << " could not be deleted in m_globalRemote!");
+        res = m_nc->m_globalRemote.removeAndDeleteBody(id);
+            ASSERTMSG(res == true, "Remote Body with id: " << id << " could not be deleted in m_globalRemote!");
 
 
     }
@@ -303,18 +307,9 @@ private:
 
         // owning rank
         BodyInfoType * bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(body);
-
-
         ar & bodyInfo->m_ownerRank; LOGSZ(m_pSerializerLog, "-----> owning rank: " << bodyInfo->m_ownerRank<<std::endl;);
-        //Position
-        serializeEigen(ar,body->m_r_S,version);
-        serializeEigen(ar,body->m_q_KI,version);
 
-        //TODO
-
-        //Velocity
-        ASSERTMSG(body->m_pSolverData,"No SolverData present in body with id: "<< body->m_id << "!");
-        serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back,version);
+        serializeBodyUpdate(ar,body,version);
 
         // Additional info if body belongs to neighbour!
         if( bodyInfo->m_ownerRank == m_neighbourRank){ // the body belongs now to m_neighbourRank
@@ -347,19 +342,20 @@ private:
     void deserializeUpdate(Archive & ar, const unsigned int version) const {
         // deserialize
         typename RigidBodyType::RigidBodyIdType id;
-        ar & id;
+        ar & id; LOGSZ(m_pSerializerLog, "-----> body id: " << id <<std::endl;);
         RankIdType owningRank;
-        ar & owningRank;
+        ar & owningRank; LOGSZ(m_pSerializerLog, "-----> owning rank: " << owningRank<<std::endl;);
 
-        ASSERTMSG( m_nc->m_nbRanks.find(owningRank) != m_nc->m_nbRanks.end(), "Owner Rank: " << owningRank << " for body with id: "<<id << " is no neighbour in process rank: " << m_nc->m_rank << "!")
+            ASSERTMSG( m_nc->m_nbRanks.find(owningRank) != m_nc->m_nbRanks.end(), "Owner Rank: " << owningRank << " for body with id: "<<id << " is no neighbour in process rank: " << m_nc->m_rank << "!")
 
         // normal update
+            LOGSZ(m_pSerializerLog, "-----> Update body... ");
         auto * neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
-        ASSERTMSG(neighbourData,"There exists no NeighbourData for body with id: " << id << " for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
+            ASSERTMSG(neighbourData,"There exists no NeighbourData for body with id: " << id << " for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
 
         auto * remoteData = neighbourData->getRemoteBodyData(id);
-        ASSERTMSG(remoteData,"There exists no RemoteData for body with id: " << id << " for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
-        ASSERTMSG(m_nc->m_globalRemote.find(id) != m_nc->m_globalRemote.end(),"m_globalRemote does not contain body with id: " << id << " in process rank: " << m_nc->m_rank << "!");
+            ASSERTMSG(remoteData,"There exists no RemoteData for body with id: " << id << " for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
+            ASSERTMSG(m_nc->m_globalRemote.find(id) != m_nc->m_globalRemote.end(),"m_globalRemote does not contain body with id: " << id << " in process rank: " << m_nc->m_rank << "!");
 
         RigidBodyType * body = remoteData->m_body;
 
@@ -367,25 +363,28 @@ private:
         // Position
         serializeEigen(ar, body->m_r_S,version);
         serializeEigen(ar,body->m_q_KI,version);
-        // TODO Update A_IK!!!!!
-        // Velocity
-        ASSERTMSG(body->m_pSolverData, "No SolverData present in body with id: "<< id << " in process rank: " << m_nc->m_rank << "!");
-        serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back,version);
 
+
+        // Velocity
+            ASSERTMSG(body->m_pSolverData, "No SolverData present in body with id: "<< id << " in process rank: " << m_nc->m_rank << "!");
+        serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back,version);
+            LOGSZ(m_pSerializerLog, "finished" <<std::endl;);
+
+        // NEW BODY FROM REMOTE  to  LOCAL!!!
 
         if(owningRank == m_nc->m_rank){ // if the body is now our local body!
-
+                LOGSZ(m_pSerializerLog, "-----> Changing remote body to LOCAL" <<std::endl;);
             std::set<RankIdType> overlappingNeighbours; // these are only the common neighbours between m_neighbourRank and m_nc->m_rank
             ar & overlappingNeighbours; // all ranks where the body overlaps
 
             // Move the remote body to the locale ones and delete in remotes
             m_nc->m_globalRemote.removeBody(body);
-            m_nc->m_globalLocal.addBody(body); // NEW BODY AS LOCAL!!!
+            m_nc->m_globalLocal.addBody(body);
 
             // Move the remote out of the neighbour structure
             // (needs to be in the neighbour structure with rank m_neighbourRank, otherwise this update is somewhat stupid?
             bool res = neighbourData->deleteRemoteBodyData(body);
-            ASSERTMSG(res,"Body with id: " << id << "not deleted in neighbour structure (?)");
+                ASSERTMSG(res,"Body with id: " << id << "not deleted in neighbour structure (?)");
 
             // Change the body info
             auto * bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(id);
@@ -396,29 +395,33 @@ private:
             // Add all neighbours which need updates!
             bodyInfo->m_neighbourRanks.clear();
             for(auto it = overlappingNeighbours.begin(); it != overlappingNeighbours.end(); it++){
-                ASSERTMSG( *it != m_nc->m_rank, "overlappingNeighbours should not contain own rank: " << m_nc->m_rank);
-                ASSERTMSG(m_nc->m_nbRanks.find(*it) !=  m_nc->m_nbRanks.end(), "This rank: " << *it << " is no neighbour of our process rank: " << m_nc->m_rank);
-                bodyInfo->m_neighbourRanks[*it] = typename BodyInfoType::Flags(true); // Overlaps this rank!
-
-                auto localDataIt = m_nc->m_nbDataMap.getNeighbourData(*it)->addLocalBodyData(body);
-                localDataIt->second->m_commStatus = NeighbourDataType::LocalData::SEND_UPDATE;
+                    ASSERTMSG( *it != m_nc->m_rank, "overlappingNeighbours should not contain own rank: " << m_nc->m_rank);
+                if(m_nc->m_nbRanks.find(*it) !=  m_nc->m_nbRanks.end()){
+                    bodyInfo->m_neighbourRanks[*it] = typename BodyInfoType::Flags(true); // Overlaps this rank!
+                }else{
+                    ERRORMSG("This rank: " << *it << " is no neighbour of our process rank: " << m_nc->m_rank);
+                }
+                // Change comm status!
+                auto pairlocalDataIt = m_nc->m_nbDataMap.getNeighbourData(*it)->addLocalBodyData(body);
+                    ASSERTMSG(pairlocalDataIt.second, "Insert to neighbour data rank: " << *it << " in process rank: " << m_nc->m_rank << " failed!");
+                pairlocalDataIt.first->second->m_commStatus = NeighbourDataType::LocalData::SEND_UPDATE;
             }
 
 
 
-
-        }else if(owningRank != m_neighbourRank) { // if the body is not owned anymore by the sending process
-
+        // FROM REMOTE to REMOTE
+        }else if(owningRank != m_neighbourRank) { // if the body is not owned anymore by the sending process but by another of our neighbours
+                LOGSZ(m_pSerializerLog, "-----> Changing remote body to REMOTE" <<std::endl;);
             // Move the remote out of the neighbour structure
-            // (needs to be in the neighbour structure with rank m_neighbourRank, otherwise this update is somewhat stupid?
             bool res = neighbourData->deleteRemoteBodyData(body);
-            ASSERTMSG(res,"Body with id: " << id << "not deleted in neighbour structure (?)");
+                ASSERTMSG(res,"Body with id: " << id << "not deleted in neighbour structure (?)");
 
-            m_nc->m_nbDataMap.getNeighbourData(owningRank)->addRemoteBodyData(body);
+            auto pairRes = m_nc->m_nbDataMap.getNeighbourData(owningRank)->addRemoteBodyData(body);
+                ASSERTMSG(pairRes.second, "Insertion of body with id: " << body->m_id << " in neighbour structure rank: " << owningRank << " failed!")
 
             // Change the body info
             auto * bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(id);
-            bodyInfo->m_isRemote = true; // No need to set!
+            bodyInfo->m_isRemote = true; // No need to set! REMOTE BODY!!!!!!!!!!!!!
             bodyInfo->m_overlapsThisRank = true; // No need to set!
             bodyInfo->m_ownerRank = owningRank;
             bodyInfo->m_neighbourRanks.clear();
@@ -429,14 +432,117 @@ private:
 
     template<class Archive>
     void serializeNotification(Archive & ar, RigidBodyType * body, const unsigned int version) const {
-        if( Archive::is_saving::value ) {
-            // serialize (ONLY LOCAL BODIES)
 
-        } else {
-            // deserialize
-        }
+        // ONLY LOCAL Bodies
+
+        // id
+        ar & body->m_id; LOGSZ(m_pSerializerLog, "-----> body id: " << body->m_id<<std::endl;);
+
+        // owning rank
+        BodyInfoType * bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(body);
+
+
+        ar & bodyInfo->m_ownerRank; LOGSZ(m_pSerializerLog, "-----> owning rank: " << bodyInfo->m_ownerRank<<std::endl;);
+        //Position
+        serializeEigen(ar,body->m_r_S,version);
+        serializeEigen(ar,body->m_q_KI,version);
+
+        //Velocity
+            ASSERTMSG(body->m_pSolverData,"No SolverData present in body with id: "<< body->m_id << "!");
+        serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back,version);
+
+
     }
 
+    template<class Archive>
+    void serializeBodyUpdate(Archive & ar, RigidBodyType * body, const int version) const{
+         //Position
+        serializeEigen(ar,body->m_r_S,version);
+        serializeEigen(ar,body->m_q_KI,version);
+        LOGSZ(m_pSerializerLog, "----->  m_r_S: " << body->m_r_S<<std::endl;);
+        LOGSZ(m_pSerializerLog, "----->  m_q_KI: " << body->m_q_KI<<std::endl;);
+
+        if(Archive::is_loading::value){
+            setRotFromQuaternion(body->m_q_KI , body->m_A_IK);
+        }
+
+        //Velocity
+            ASSERTMSG(body->m_pSolverData,"No SolverData present in body with id: "<< body->m_id << "!");
+        //Reset solver data
+        body->m_pSolverData->reset();
+        serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back,version);
+        LOGSZ(m_pSerializerLog, "----->  m_uBuffer.m_back: " << body->m_pSolverData->m_uBuffer.m_back <<std::endl;);
+    }
+
+    template<class Archive>
+    void serializeBodyFull(Archive & ar, RigidBodyType * body, const int version) const{
+
+        // State
+        ar & body->m_eState;
+
+        //Material id
+        ar & body->m_eMaterial;
+
+        //Geometry
+
+        ar & body->m_globalGeomId;
+        if( body->m_globalGeomId != 0){
+            //This geometry is not a global one! serialize too!
+            serializeGeom(body);
+        }else{
+            if(Archive::is_loading::value){
+                body->m_geometry = m_nc->m_globalGeoms.find(body->m_globalGeomId)->second;
+            }
+        }
+        LOGSZ(m_pSerializerLog, "-----> global geometry id: " << body->m_globalGeomId <<std::endl;);
+
+        //Position
+        serializeEigen(ar,body->m_r_S,version);
+        serializeEigen(ar,body->m_q_KI,version);
+         if(Archive::is_loading::value){
+            setRotFromQuaternion(body->m_q_KI , body->m_A_IK);
+        }
+        LOGSZ(m_pSerializerLog, "----->  m_r_S: " << body->m_r_S<<std::endl;);
+        LOGSZ(m_pSerializerLog, "----->  m_q_KI: " << body->m_q_KI<<std::endl;);
+
+        // Other Dynamics Stuff
+        ar & body->m_mass;
+        serializeEigen(ar,body->m_K_Theta_S,version);
+        serializeEigen(ar,body->m_MassMatrix_diag,version);
+        serializeEigen(ar,body->m_MassMatrixInv_diag,version);
+        serializeEigen(ar,body->m_h_term,version);
+        serializeEigen(ar,body->m_h_term_const,version);
+
+
+        if(body->m_eState == RigidBodyType::BodyState::SIMULATED){
+
+            //Velocity
+            if(Archive::is_loading::value){
+                if(body->m_pSolverData == NULL){
+                    body->m_pSolverData = new typename RigidBodyType::RigidBodySolverDataType();
+                }else{
+                    ERRORMSG("There is a SolverData already present in body with id: " << body->m_id);
+                }
+            }
+                ASSERTMSG(body->m_pSolverData,"There is no SolverData present in body with id: "<< body->m_id << "! ?");
+            serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back,version);
+            LOGSZ(m_pSerializerLog, "----->  m_uBuffer.m_back: " << body->m_pSolverData->m_uBuffer.m_back <<std::endl;);
+        }else{
+            if(Archive::is_loading::value){
+                ERRORMSG("Deserializing a not simulated body should not happen?");
+            }else{
+                ERRORMSG("Serializing a not simulated body should not happen?");
+            }
+
+        }
+
+    }
+
+    template<class Archive>
+    void serializeGeom(Archive & ar, RigidBodyType * body, const int version){
+        // take care this serialization replaces any shared_ptr if body->m_geometry is already filled!
+        ar & body->m_geometry;
+    }
 
 
     NeighbourCommunicatorType* m_nc;
