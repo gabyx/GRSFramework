@@ -57,7 +57,8 @@ SET(STATES_SRC
 
 SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
-    ${COMMONSOURCE_DIR}/include/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/RedirectOutput.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/AssertionDebug.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
     ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp

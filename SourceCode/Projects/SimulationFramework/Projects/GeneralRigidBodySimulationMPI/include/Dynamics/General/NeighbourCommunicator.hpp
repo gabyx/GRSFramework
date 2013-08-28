@@ -183,7 +183,7 @@ NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  typename Dynamic
     typename ProcessTopologyType::NeighbourRanksListType::const_iterator rankIt;
     for(rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
         LOG(m_pSimulationLog,"---> Add neighbour data for process rank: "<<*rankIt<<std::endl;);
-        std::pair<typename NeighbourMapType::iterator, bool> res = m_nbDataMap.insert(*rankIt);
+        auto res = m_nbDataMap.insert(*rankIt);
         ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << *rankIt);
     }
     m_pSimulationLog->logMessage("---> Initialized all NeighbourDatas");
@@ -192,7 +192,7 @@ NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  typename Dynamic
     typename RigidBodyContainerType::iterator it;
     for(it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
         ASSERTMSG(m_pProcTopo->belongsBodyToProcess(*it), "Body with id: "<< RigidBodyId::getBodyIdString(*it) <<" does not belong to process? How did you initialize your bodies?")
-        std::pair<typename BodyInfoMapType::iterator, bool> res = m_bodyToInfo.insert(*it, m_rank);
+        auto res = m_bodyToInfo.insert(*it, m_rank);
         ASSERTMSG(res.second,"Could not insert in m_bodyToInfo for rank: " << m_rank);
     }
 
@@ -212,6 +212,9 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
     LOG(m_pSimulationLog,"---> Communicate: Update neighbour data structures:"<<std::endl;)
     for(typename RigidBodyContainerType::iterator it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
         RigidBodyType * body = (*it);
+
+        typename BodyInfoMapType::DataType * bodyInfo = m_bodyToInfo.getBodyInfo(body);
+        bodyInfo->resetNeighbourFlags(); // Reset the overlap flag to false! (addLocalBodyExclusive uses this assumption!)
 
         //Check overlapping processes
         bool overlapsOwnProcess;
@@ -243,7 +246,7 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
             (belongingRank) << ", proccess rank: " << m_pProcInfo->getRank()<<std::endl;)
 
         //Set the owning rank for this body:
-        typename BodyInfoMapType::DataType * bodyInfo = m_bodyToInfo.getBodyInfo(body);
+
         bodyInfo->m_ownerRank = belongingRank;
         bodyInfo->m_overlapsThisRank = overlapsOwnProcess;
 
@@ -258,6 +261,8 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
 
     LOG(m_pSimulationLog,"---> Communicate: Send structure to neighbours!"<<std::endl;)
     sendMessagesToNeighbours();
+
+    // All
 
     LOG(m_pSimulationLog,"---> Communicate: Receive all structures from neighbours!"<<std::endl;)
     receiveMessagesFromNeighbours();

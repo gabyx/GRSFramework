@@ -6,7 +6,6 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
-#include "AssertionDebugMPI.hpp"
 
 #include "DynamicsState.hpp"
 #include "SharedBufferDynSys.hpp"
@@ -139,7 +138,7 @@ bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
 
         if(numberOfBodiesInSimulation != m_nGlobalSimBodies) {
             LOG(m_pSimulationLog,  "ERROR:---> Body check NOT successful! : "<< numberOfBodiesInSimulation <<"!="<< m_nGlobalSimBodies<< std::endl;);
-            ERRORMSGMPI("Body check Not successfull");
+            ERRORMSG("Body check Not successfull");
         }
 
         LOG(m_pSimulationLog,  "---> Body check successfull!: "<<numberOfBodiesInSimulation<<" SimBodies in Simulation" << std::endl;);
@@ -171,7 +170,7 @@ void SimulationManagerMPI<TConfig>::startSim() {
 
       // Do one iteration
       m_pTimestepper->doOneIteration();
-
+      m_pTimestepper->doOneIteration();
 //      // get global time for logging!
 //      timelineSimulation = ((double)global_time.elapsed().wall)*1e-9;
 //      // Write Data to SystemDataFile (maps all data to back buffer!)
@@ -232,13 +231,13 @@ void SimulationManagerMPI<TConfig>::initSim() {
     localSimFolderPath /= m_SimFolderPath.filename();
     if(!boost::filesystem::create_directories(localSimFolderPath)) {
         LOG(m_pSimulationLog,  "ERROR:---> Could not create directory: " << localSimFolderPath.string() << std::endl;);
-        ERRORMSGMPI("ERROR:---> Could not create directory: " << localSimFolderPath.string() << std::endl )
+        ERRORMSG("ERROR:---> Could not create directory: " << localSimFolderPath.string() << std::endl )
     }
 
 
     if(!m_pStateRecorder->openFiles(m_SimFolderPath, m_pDynSys->m_SimBodies,true)){ // Truncate the files, important!
         LOG(m_pSimulationLog,  "ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl;);
-        ERRORMSGMPI("ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
+        ERRORMSG("ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
     }
 
     m_pTimestepper->initLogs(localSimFolderPath);

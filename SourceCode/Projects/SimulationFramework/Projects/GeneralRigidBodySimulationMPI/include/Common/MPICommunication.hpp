@@ -15,7 +15,6 @@
 #include <boost/serialization/version.hpp>
 
 #include "AssertionDebug.hpp"
-#include "AssertionDebugMPI.hpp"
 #include "TypeDefs.hpp"
 
 #include "MPIInformation.hpp"
@@ -250,7 +249,7 @@ void ProcessCommunicator<TDynamicsSystem>::receiveMessageFromRanks(T & t,
 
         std::pair< typename std::set<RankIdType>::iterator,bool> res = ranksReceived.insert( recv_rank );
         if(res.second == false){
-            ERRORMSGMPI("A message from this rank: " << recv_rank << " has already been received for this tag: "<< tag.getInt());
+            ERRORMSG("A message from this rank: " << recv_rank << " has already been received for this tag: "<< tag.getInt());
         }
 
         //Receive the message for this rank!

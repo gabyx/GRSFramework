@@ -115,7 +115,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/CommonFunctionsOgre.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
-    ${COMMONSOURCE_DIR}/include/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/AssertionDebug.hpp
     ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
     ${COMMONSOURCE_DIR}/include/Common/MeshData.hpp

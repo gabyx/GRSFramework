@@ -30,6 +30,13 @@ public:
         RigidBodyType * m_body;
 
         bool m_isRemote;
+
+        void resetNeighbourFlags(){
+            for(auto it = m_neighbourRanks.begin(); it != m_neighbourRanks.end(); it++ ){
+                ASSERTMSG( it->second.m_bOverlaps == true , "Body with id: " << RigidBodyId::getBodyIdString(m_body) << ", there is still a neighbour rank (non overlapping): " << it->first << " inside the list which should have been removed already!");
+                it->second.m_bOverlaps = false;
+            }
+        }
 };
 
 
@@ -63,7 +70,11 @@ public:
     }
 
     bool erase(RigidBodyType * body){
-        auto it = m_map.find(body->m_id);
+        return erase(body->m_id);
+    }
+
+    bool erase(const typename RigidBodyType::RigidBodyIdType & id){
+        auto it = m_map.find(id);
         if(it != m_map.end()){
             delete it->second;
             m_map.erase(it);
@@ -73,12 +84,12 @@ public:
     }
 
 
-    std::pair<iterator,bool> insert(RigidBodyType * body, RankIdType ownerRank){
+    std::pair<DataType *, bool> insert(RigidBodyType * body, RankIdType ownerRank){
         std::pair<typename Type::iterator,bool> res = m_map.insert( typename Type::value_type(body->m_id, (DataType*)NULL) );
         if(res.second){
              res.first->second = new DataType(body,body->m_id, ownerRank);
         }
-        return res;
+        return std::pair<DataType *, bool>(res.first->second, res.second);
     }
 
     inline DataType * getBodyInfo(const RigidBodyType * body){
@@ -90,7 +101,7 @@ public:
         if(it != m_map.end()){
            return (it->second);
         }else{
-           ASSERTMSG(false,"There is no BodyInfo for body with id: " << id << "!")
+           //ASSERTMSG(false,"There is no BodyInfo for body with id: " << RigidBodyId::getBodyIdString(id) << "!")
            return NULL;
         }
     }

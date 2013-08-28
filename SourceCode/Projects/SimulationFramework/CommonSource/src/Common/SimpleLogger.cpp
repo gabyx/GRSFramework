@@ -1,4 +1,7 @@
 #include "SimpleLogger.hpp"
+
+#include "AssertionDebug.hpp"
+
 #include "LogDefines.hpp"
 
 

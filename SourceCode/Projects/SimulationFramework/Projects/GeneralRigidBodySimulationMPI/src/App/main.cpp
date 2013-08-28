@@ -7,7 +7,7 @@
 #include "ApplicationCLOptions.hpp"
 #include "FileManager.hpp"
 #include "SimpleLogger.hpp"
-
+#include "RedirectOutput.hpp"
 #include "SimulationManagerMPI.hpp"
 
 
@@ -45,6 +45,14 @@ int main(int argc, char **argv) {
     new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
     new Logging::LogManager();
 
+
+
+    // Redirect std::cerr to Global file:
+    boost::filesystem::path file = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
+    file /= "GlobalMPIError.log";
+    std::fstream f;
+    f.open(file.string().c_str(), std::ios_base::trunc | std::ios_base::out);
+    const RedirectOutputs _(f, std::cerr);
 
 
     SimulationManagerMPI<GeneralConfig> mgr;

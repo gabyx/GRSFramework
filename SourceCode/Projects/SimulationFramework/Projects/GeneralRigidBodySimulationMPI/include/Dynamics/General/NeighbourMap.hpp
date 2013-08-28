@@ -64,7 +64,7 @@ public:
     LocalIterator localEnd(){ return m_localBodies.end(); }
     RemoteIterator remoteEnd(){ return m_remoteBodies.end(); }
 
-    std::pair<LocalIterator, bool> addLocalBodyData(RigidBodyType * body){
+    std::pair<LocalData*, bool> addLocalBodyData(RigidBodyType * body){
 
         std::pair<LocalIterator, bool>  res = m_localBodies.insert(
                     typename LocalBodiesMapType::value_type(body->m_id, (LocalData*) NULL )
@@ -74,11 +74,11 @@ public:
             res.first->second = new LocalData(body);
         }
 
-        return res;
+        return std::pair<LocalData *, bool>(res.first->second, res.second);
     }
 
 
-    std::pair<RemoteIterator, bool> addRemoteBodyData(RigidBodyType * body){
+    std::pair<RemoteData*, bool> addRemoteBodyData(RigidBodyType * body){
 
         std::pair<RemoteIterator, bool> res = m_remoteBodies.insert(
                     typename RemoteBodiesMapType::value_type(body->m_id,(RemoteData*) NULL)
@@ -88,7 +88,7 @@ public:
             res.first->second = new RemoteData(body);
         }
 
-        return res;
+        return std::pair<RemoteData *, bool>(res.first->second, res.second);
     }
 
     RemoteData * getRemoteBodyData(RigidBodyType * body){
@@ -100,7 +100,7 @@ public:
         if(it != m_remoteBodies.end()){
            return (it->second);
         }else{
-           ASSERTMSG(false,"There is no RemoteData for body with id: " << id << "!")
+           //ASSERTMSG(false,"There is no RemoteData for body with id: " << id << "!")
            return NULL;
         }
     }
@@ -114,7 +114,7 @@ public:
         if(it != m_localBodies.end()){
            return (it->second);
         }else{
-           ASSERTMSG(false,"There is no LocalData for body with id: " << id << "!")
+           //ASSERTMSG(false,"There is no LocalData for body with id: " << id << "!")
            return NULL;
         }
     }
@@ -172,6 +172,8 @@ public:
     typedef TDynamicsSystem DynamicsSystemType;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
 
+    typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
+
     // Body info definitions
     typedef TBodyToInfoMap BodyInfoMapType;
     typedef typename BodyInfoMapType::DataType BodyInfoType;
@@ -193,12 +195,12 @@ public:
     }
 
 
-    std::pair<iterator,bool> insert(const RankIdType & rank){
+    std::pair<DataType *, bool> insert(const RankIdType & rank){
         std::pair<typename Type::iterator,bool> res = m_nbDataMap.insert( typename Type::value_type(rank, (DataType*)NULL));
         if(res.second){
             res.first->second = new DataType(rank);
         }
-        return res;
+        return std::pair<DataType *, bool>(res.first->second, res.second);
     }
 
     template<typename TIterator>
@@ -248,13 +250,13 @@ void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBo
         typename DataType::LocalIterator pairlocalDataIt;
         if(res.second){//if inserted we need to add this body to the underlying neighbour data
            //add to the data
-           auto pairlocalDataIt = this->getNeighbourData(*rankIt)->addLocalBodyData(body);
-           ASSERTMSG(pairlocalDataIt.second, "Insert to neighbour data rank: " << *rankIt << " in process rank: " <<m_rank << " failed!");
-           pairlocalDataIt.first->second->m_commStatus = DataType::LocalData::SEND_NOTIFICATION; // No need because is set automatically in constructor
+           auto pairlocalData = this->getNeighbourData(*rankIt)->addLocalBodyData(body);
+           ASSERTMSG(pairlocalData.second, "Insert to neighbour data rank: " << *rankIt << " in process rank: " <<m_rank << " failed!");
+           pairlocalData.first->m_commStatus = DataType::LocalData::SEND_NOTIFICATION; // No need because is set automatically in constructor
         }else{
-            ASSERTMSG(this->getNeighbourData(*rankIt)->getLocalBodyData(body),"body with id "<<body->m_id << " in neighbour structure rank: " << *rankIt << " does not exist?" );
+            ASSERTMSG(this->getNeighbourData(*rankIt)->getLocalBodyData(body),"body with id "<< RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << *rankIt << " does not exist?" );
             ASSERTMSG(this->getNeighbourData(*rankIt)->getLocalBodyData(body)->m_commStatus == DataType::LocalData::SEND_UPDATE,
-                      "m_commStatus for body with id: " << body->m_id << " in neighbour structure rank: " << *rankIt << "should be in update mode!");
+                      "m_commStatus for body with id: " << RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << *rankIt << "should be in update mode!");
         }
 
 
@@ -273,40 +275,19 @@ void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBo
             typename DataType::LocalData * localData =
             this->getNeighbourData(rankToFlagsIt->first)->getLocalBodyData(body);
 
-            localData->m_commStatus = DataType::LocalData::SEND_REMOVE;
-
-        }
-
-    }
-
-}
-
-template<typename TDynamicsSystem, typename TBodyToInfoMap>
-void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::cleanUp()
-{
-    for( typename BodyInfoType::iterator bodyInfoIt = m_bodyToInfo.begin(); bodyInfoIt != m_bodyToInfo.end(); bodyInfoIt++){
-
-        // Loop over all (ranks,flags) for this body (remove the necessary ones)
-        typename RankToFlagsType::iterator rankToFlagsIt = bodyInfoIt->second->m_NeighbourRanks.begin();
-        while(  rankToFlagsIt != bodyInfoIt->second->m_NeighbourRanks.end() ){
-            if( rankToFlagsIt->second->m_bOverlaps == false){
-
-                // we need to remove this body from this rank
-               this->getNeighbourData(rankToFlagsIt->first)->removeLocalBodyData(bodyInfoIt->first);
-
-                //remove the rank from the rankToFlag list of THIS Body
-                bodyInfoIt->second->m_NeighbourRanks.erase(rankToFlagsIt++);    // Note the post increment here.
-                                                       // This increments 'rankToFlagsIt' and returns a copy of
-                                                       // the original 'rankToFlagsIt' to be used by erase()
-            }else{
-
-                //set the flag to false, so that next time it will be removed if no other decision taken above
-               rankToFlagsIt->second->m_bOverlaps == false;
-               ++rankToFlagsIt;
+            if(localData->m_commStatus == DataType::LocalData::SEND_UPDATE){
+                localData->m_commStatus = DataType::LocalData::SEND_REMOVE;
+            }else if (localData->m_commStatus = DataType::LocalData::SEND_NOTIFICATION){
+                // Falls notification
             }
+
+
         }
+
     }
+
 }
+
 
 
 #endif

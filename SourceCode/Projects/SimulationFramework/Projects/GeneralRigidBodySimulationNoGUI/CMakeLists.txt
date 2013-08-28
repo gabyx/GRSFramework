@@ -82,7 +82,7 @@ SET(COMMON_INC
 #    ${SOURCE_DIR}/include/Common/CommonFunctionsOgre.hpp
     ${SOURCE_DIR}/include/Common/LogDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
-    ${COMMONSOURCE_DIR}/include/Common/AssertionDebug.hpp
+    ${SOURCE_DIR}/include/Common/AssertionDebug.hpp
     ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
     ${COMMONSOURCE_DIR}/include/Common/MeshData.hpp

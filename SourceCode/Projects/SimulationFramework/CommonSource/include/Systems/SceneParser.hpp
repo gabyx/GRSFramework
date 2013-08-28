@@ -866,6 +866,7 @@ protected:
                 GetScaleOfGeomVisitor<DynamicsSystemType> vis(m_bodyListScales[i]);
                 boost::apply_visitor(vis, it->second);
                 m_bodyList[i]->m_geometry = it->second;
+                m_bodyList[i]->m_globalGeomId = id;
             }
 
         }
@@ -882,7 +883,7 @@ protected:
             }
 
             for(int i=0; i < m_bodyList.size(); i++){
-
+                int id = startId+i;
                 typename DynamicsSystemType::GlobalGeometryMapType::iterator it = m_pDynSys->m_globalGeoms.find(startId+i);
                 // it->second is the GeometryType in RigidBody
                 if(it == m_pDynSys->m_globalGeoms.end()){
@@ -893,6 +894,7 @@ protected:
                 GetScaleOfGeomVisitor<DynamicsSystemType> vis(m_bodyListScales[i]);
                 boost::apply_visitor(vis, it->second);
                 m_bodyList[i]->m_geometry = it->second;
+                m_bodyList[i]->m_globalGeomId = id;
             }
 
 
@@ -940,6 +942,7 @@ protected:
                 GetScaleOfGeomVisitor<DynamicsSystemType> vis(m_bodyListScales[i]);
                 boost::apply_visitor(vis, it->second);
                 m_bodyList[i]->m_geometry = it->second;
+                m_bodyList[i]->m_globalGeomId = id;
             }
 
 

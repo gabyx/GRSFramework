@@ -97,10 +97,26 @@ public:
         return *(reinterpret_cast<const unsigned int *>(&(body->m_id)));
     };
 
+    static unsigned int getGroupNr(const Type & id){
+        Type id2 = id;
+        id2 >>= 32;
+        return *(reinterpret_cast<unsigned int *>(&(id2)));
+    };
+
+    static unsigned int getBodyNr(const Type & id){
+        return *(reinterpret_cast<const unsigned int *>(&(id)));
+    };
+
     template<typename TRigidBodyType >
     static std::string getBodyIdString(const TRigidBodyType * body){
         std::stringstream s;
         s <<"("<< RigidBodyId::getGroupNr(body) << ","<< RigidBodyId::getBodyNr(body) << ")";
+        return s.str();
+    };
+
+    static std::string getBodyIdString(const Type & id){
+        std::stringstream s;
+        s <<"("<< RigidBodyId::getGroupNr(id) << ","<< RigidBodyId::getBodyNr(id) << ")";
         return s.str();
     };
 
