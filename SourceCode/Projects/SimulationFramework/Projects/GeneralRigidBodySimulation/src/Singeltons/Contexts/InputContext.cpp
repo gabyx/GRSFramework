@@ -333,7 +333,7 @@ bool InputContext::keyPressed( const OIS::KeyEvent &e ) {
 	   itKeyListener != it_end;
 	   itKeyListener = it_next)
 	{
-		++it_next;
+		++it_next; // because we have a std::map iterators are valid if something is erased!
 
 		if(!itKeyListener->second->keyPressed( e ) )
 			break;
@@ -371,9 +371,11 @@ bool InputContext::mouseMoved( const OIS::MouseEvent &e ) {
 
 bool InputContext::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
 
-	for( std::map<std::string,OIS::MouseListener* >::iterator itMouseListener=mMouseListeners.begin(), it_next=itMouseListener, it_end=mMouseListeners.end();
+	for( std::map<std::string,OIS::MouseListener* >::iterator itMouseListener = mMouseListeners.begin(),
+     it_next= itMouseListener, it_end=mMouseListeners.end();
 	   itMouseListener != it_end;
-	   itMouseListener = it_next)
+	   itMouseListener = it_next
+	   )
 	{
 		++it_next;
 

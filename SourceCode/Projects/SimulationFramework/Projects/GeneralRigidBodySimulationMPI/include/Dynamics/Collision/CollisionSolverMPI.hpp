@@ -154,7 +154,7 @@ void CollisionSolver<TCollisionSolverConfig>::reset() {
 
     clearCollisionSet();
 
-    reserveCollisionSetSpace(m_nSimBodies * 3);
+    reserveCollisionSetSpace(300 * 3);
 
      m_maxOverlap = 0;
 }
@@ -187,22 +187,22 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
 
     // All objects have been updated...
 
-   //// Do simple collision detection (SimBodies to SimBodies)
+//   //// Do simple collision detection (SimBodies to SimBodies)
     typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyIti;
     CollisionData<RigidBodyType> * pColData;
-    for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++){
-      typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
-      bodyItj++;
-      for(; bodyItj != m_SimBodies.end(); bodyItj++ ){
-
-         //check for a collision
-            pColData = m_Collider.checkCollision((*bodyIti), (*bodyItj));
-            if(pColData){
-                signalContactAdd(pColData);
-            }
-
-      }
-    }
+//    for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++){
+//      typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
+//      bodyItj++;
+//      for(; bodyItj != m_SimBodies.end(); bodyItj++ ){
+//
+//         //check for a collision
+//            pColData = m_Collider.checkCollision((*bodyIti), (*bodyItj));
+//            if(pColData){
+//                signalContactAdd(pColData);
+//            }
+//
+//      }
+//    }
 
     // Do simple collision detection (SimBodies to Bodies)
     typename DynamicsSystemType::RigidBodyNotAniContainer::iterator bodyItk;

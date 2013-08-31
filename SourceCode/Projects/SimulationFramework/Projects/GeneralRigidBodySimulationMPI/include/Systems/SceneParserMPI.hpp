@@ -230,9 +230,11 @@ protected:
 
         if(m_eBodiesState == RigidBodyType::SIMULATED) {
 
-            typename std::vector<RigidBodyType*>::iterator bodyIt;
+            m_nGlobalSimBodies += m_bodyList.size();
 
-            for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
+            typename std::vector<RigidBodyType*>::iterator bodyIt;
+            LOG(m_pSimulationLog, "---> SIZE: " << m_bodyList.size() << std::endl)
+            for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end();  ) {
                 // Check if Body belongs to the topology! // Check CoG!
                 if(m_pProcCommunicator->getProcInfo()->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {
 
@@ -243,9 +245,18 @@ protected:
                     m_nSimBodies++;
                     m_nBodies++;
 
+                    ++bodyIt;
+
+                }else{
+                     LOG(m_pSimulationLog, "---> Rejected Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
+                    //Delete this body immediately!
+                    delete *bodyIt;
+                    bodyIt = m_bodyList.erase(bodyIt);
                 }
             }
-            m_nGlobalSimBodies += m_bodyList.size();
+
+
+
 
 
         } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {

@@ -208,7 +208,7 @@ void SimulationManagerGUI<TConfig>::threadRunSimulation() {
     setSimThreadRunning(true);
     initSimThread();
 
-    m_pTimestepper->reset();
+
 
     // wait for vis thread! (which does some loops before)
     m_barrier_start.wait();
@@ -257,6 +257,7 @@ void SimulationManagerGUI<TConfig>::initSimThread() {
 
     m_pTimestepper->initLogs(m_SimFolderPath);
 
+    m_pTimestepper->reset();
 
 }
 

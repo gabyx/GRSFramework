@@ -407,7 +407,7 @@ private:
             bodyInfo->m_neighbourRanks.clear();
             for(auto it = overlappingNeighbours.begin(); it != overlappingNeighbours.end(); it++){
                     LOGASSERTMSG(  *it != m_nc->m_rank, m_pSerializerLog, "overlappingNeighbours should not contain own rank: " << m_nc->m_rank);
-                if(m_nc->m_nbRanks.find(*it) !=  m_nc->m_nbRanks.end()){
+                if(m_nc->m_nbRanks.find(*it) !=  m_nc->m_nbRanks.end()){ // If rank is neighbour rank
                     bodyInfo->m_neighbourRanks[*it] = typename BodyInfoType::Flags(true); // Overlaps this rank!
                 }else{
                     ERRORMSG("This rank: " << *it << " is no neighbour of our process rank: " << m_nc->m_rank);
@@ -505,6 +505,7 @@ private:
         LOGASSERTMSG( m_nc->m_globalRemote.find(id) == m_nc->m_globalRemote.end(), m_pSerializerLog, "m_globalRemote does contain body with id: " << RigidBodyId::getBodyIdString(id) << " in process rank: " << m_nc->m_rank << "!");
         LOGASSERTMSG( m_nc->m_globalLocal.find(id) == m_nc->m_globalLocal.end(), m_pSerializerLog, "m_globalLocal does contain body with id: " << RigidBodyId::getBodyIdString(id) << " in process rank: " << m_nc->m_rank << "!");
 
+        //MAKE NEW BODY!!!
         RigidBodyType * body = new RigidBodyType(id);
 
             LOGSZ(m_pSerializerLog, "-----> Deserialize body (full): ... "<< std::endl;);

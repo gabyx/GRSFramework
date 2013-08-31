@@ -149,10 +149,6 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initializeLog( Logging::Log
 template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::reset() {
 
-    m_pDynSys->init_const_hTerm();
-    m_pDynSys->init_MassMatrix();
-    m_pDynSys->init_MassMatrixInv();
-
     resetForNextIter();
 
 #if HAVE_CUDA_SUPPORT == 1

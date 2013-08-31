@@ -13,7 +13,7 @@
 #include "RigidBodyContainer.hpp"
 
 #include "ContactParameterMap.hpp"
-
+#include "AddGyroTermVisitor.hpp"
 #include "DynamicsState.hpp"
 #include "InitialConditionBodies.hpp"
 #include "CommonFunctions.hpp"
@@ -66,9 +66,7 @@ public:
 
     void initializeLog(Logging::Log* pLog);
 
-    void init_MassMatrix(); // MassMatrix is const
-    void init_MassMatrixInv(); // MassMatrix is const
-    void init_const_hTerm(); // Initializes constant terms in h
+    void initMassMatrixAndHTerm();
 
     //Virtuals
     void doFirstHalfTimeStep( PREC timestep);
@@ -157,7 +155,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::initializeLog(Logging::Log* pLog) {
 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::reset(){
-
+    initMassMatrixAndHTerm();
 }
 
 template<typename TDynamicsSystemConfig>
@@ -192,8 +190,12 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
 
         // Add in to h-Term ==========
         pBody->m_h_term = pBody->m_h_term_const;
-        // Term omega x Theta * omega = 0, because theta is diagonal
+//        LOG(m_pSolverLog, "Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
+//            << "m_h_term= "  <<pBody->m_h_term<<std::endl)
         // =========================
+
+        // Term omega x Theta * omega = if Theta is diagonal : for a Spehere for example!
+        AddGyroTermVisitor<RigidBodyType> vis(pBody);
 
         // Add in to Mass Matrix
         // Mass Matrix is Constant!
@@ -263,26 +265,19 @@ void DynamicsSystem<TDynamicsSystemConfig>::updateFMatrix(const Quaternion & q, 
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrix() {
+void DynamicsSystem<TDynamicsSystemConfig>::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
-    for(int i=0; i < m_SimBodies.size(); i++) {
-        m_SimBodies[i]->m_MassMatrix_diag.template head<3>().setConstant(m_SimBodies[i]->m_mass);
-        m_SimBodies[i]->m_MassMatrix_diag.template tail<3>() = m_SimBodies[i]->m_K_Theta_S;
-    }
-}
+    typename RigidBodySimContainerType::iterator bodyIt;
+    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrixInv() {
-    // iterate over all objects and assemble matrix M inverse
-    for(int i=0; i < m_SimBodies.size(); i++) {
-        m_SimBodies[i]->m_MassMatrixInv_diag = m_SimBodies[i]->m_MassMatrix_diag.array().inverse().matrix();
-    }
-}
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::init_const_hTerm() {
-    // Fill in constant terms of h-Term
-    for(int i=0; i < m_SimBodies.size(); i++) {
-        m_SimBodies[i]->m_h_term_const.template head<3>() =  m_SimBodies[i]->m_mass * m_gravity * m_gravityDir;
+        //Mass Matrix
+        (*bodyIt)->m_MassMatrix_diag.template head<3>().setConstant((*bodyIt)->m_mass);
+        (*bodyIt)->m_MassMatrix_diag.template tail<3>() = (*bodyIt)->m_K_Theta_S;
+
+        // Massmatrix Inverse
+        (*bodyIt)->m_MassMatrixInv_diag = (*bodyIt)->m_MassMatrix_diag.array().inverse().matrix();
+        // H_const term
+        (*bodyIt)->m_h_term_const.template head<3>() =  (*bodyIt)->m_mass * m_gravity * m_gravityDir;
     }
 }
 

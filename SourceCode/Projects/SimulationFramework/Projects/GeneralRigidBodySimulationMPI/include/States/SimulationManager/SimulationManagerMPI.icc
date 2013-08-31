@@ -240,4 +240,6 @@ void SimulationManagerMPI<TConfig>::initSim() {
 
     m_pTimestepper->initLogs(localSimFolderPath);
 
+    m_pTimestepper->reset();
+
 }

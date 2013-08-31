@@ -56,9 +56,7 @@ public:
     inline void applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state);
     inline void applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state);
 
-    void init_MassMatrix(); // MassMatrix is const
-    void init_MassMatrixInv(); // MassMatrix is const
-    void init_const_hTerm(); // Initializes constant terms in h
+    void initMassMatrixAndHTerm(); // MassMatrix is const
 
     //Virtuals
     void doFirstHalfTimeStep( PREC timestep);
@@ -113,17 +111,17 @@ DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem() {
 };
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const{
+void DynamicsSystem<TDynamicsSystemConfig>::getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const {
     SettingsRecorder = m_SettingsRecorder;
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder){
+void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder) {
     m_SettingsRecorder = SettingsRecorder;
 }
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper,
-                                                        InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) const{
+        InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) const {
     SettingsTimestepper = m_SettingsTimestepper;
     SettingsInclusionSolver = m_SettingsInclusionSolver;
 }
@@ -141,16 +139,16 @@ void DynamicsSystem<TDynamicsSystemConfig>::initializeLog(Logging::Log* pLog) {
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::reset(){
-
+void DynamicsSystem<TDynamicsSystemConfig>::reset() {
+   initMassMatrixAndHTerm();
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state){
+void DynamicsSystem<TDynamicsSystemConfig>::applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state) {
     InitialConditionBodies::applyBodiesToDynamicsState<RigidBodyType, RigidBodySimContainerType>(m_SimBodies,state);
 }
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state){
+void DynamicsSystem<TDynamicsSystemConfig>::applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state) {
     InitialConditionBodies::applyDynamicsStateToBodies<RigidBodyType, RigidBodySimContainerType>(state,m_SimBodies);
 }
 
@@ -258,29 +256,19 @@ void DynamicsSystem<TDynamicsSystemConfig>::updateFMatrix(const Quaternion & q, 
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrix() {
+void DynamicsSystem<TDynamicsSystemConfig>::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
-    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++){
-        (*bodyIt)->m_MassMatrix_diag.template head<3>().setConstant((*bodyIt)->m_mass);
-         (*bodyIt)->m_MassMatrix_diag.template tail<3>() = (*bodyIt)->m_K_Theta_S;
-    }
-}
+    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::init_MassMatrixInv() {
-    // iterate over all objects and assemble matrix M inverse
-    typename RigidBodySimContainerType::iterator bodyIt;
-    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++){
+        //Mass Matrix
+        (*bodyIt)->m_MassMatrix_diag.template head<3>().setConstant((*bodyIt)->m_mass);
+        (*bodyIt)->m_MassMatrix_diag.template tail<3>() = (*bodyIt)->m_K_Theta_S;
+
+        // Massmatrix Inverse
         (*bodyIt)->m_MassMatrixInv_diag = (*bodyIt)->m_MassMatrix_diag.array().inverse().matrix();
-    }
-}
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::init_const_hTerm() {
-    // Fill in constant terms of h-Term
-    typename RigidBodySimContainerType::iterator bodyIt;
-    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++){
-         (*bodyIt)->m_h_term_const.template head<3>() =  (*bodyIt)->m_mass * m_gravity * m_gravityDir;
+        // H_const term
+        (*bodyIt)->m_h_term_const.template head<3>() =  (*bodyIt)->m_mass * m_gravity * m_gravityDir;
     }
 }
 

@@ -223,13 +223,15 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
         bodyInfo->resetNeighbourFlags(); // Reset the overlap flag to false! (addLocalBodyExclusive uses this assumption!)
 
         //Check overlapping processes
+        //TODO (We should return a map of cellNUmbers -> To Rank (any cell which has no rank
         bool overlapsOwnProcess;
         LOG(m_pSimulationLog,"---> Communicate: Overlap Test..."<<std::endl;)
         bool overlapsNeighbours = m_pProcTopo->checkOverlap(body, neighbours, overlapsOwnProcess);
 
-        if(overlapsNeighbours == false && overlapsOwnProcess == false){
-            LOG(m_pSimulationLog,"---> Communicate: Body with "<<std::endl;)
-        }
+
+        LOGASSERTMSG(!(overlapsNeighbours == false && overlapsOwnProcess == false) ,m_pSimulationLog,
+                     "Body with id: " << RigidBodyId::getBodyIdString(body) << " does not belong to our process rank: " << m_rank << " nor to any neighbour!")
+
 
         // Insert this body into the underlying structure for all nieghbours exclusively! (if no overlap, it is removed everywhere)
         LOG(m_pSimulationLog,"---> Communicate: Add neighbours exclusively..."<<std::endl;)
