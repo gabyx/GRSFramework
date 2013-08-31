@@ -134,6 +134,7 @@ public:
         m_pSerializerLog = Logging::LogManager::getSingletonPtr()->createLog("MPISerializerLog",false,true,filePath);
     };
 
+
     /**
     * Set the rank if we want to reuse this instance and receive another message
     */
@@ -296,6 +297,7 @@ private:
                      "Body with id: " << RigidBodyId::getBodyIdString(body) << " overlaps (m_bOverlaps = true) neighbour rank: " << m_neighbourRank << " which should not because we have send a removal!" );
 
         bodyInfo->m_neighbourRanks.erase(m_neighbourRank); // Erase the neighbour rank in the list!
+
     }
 
     template<class Archive>
@@ -417,6 +419,9 @@ private:
                 pairlocalData.first->m_commStatus = NeighbourDataType::LocalData::SEND_UPDATE;
             }
 
+            // Notify all delegates which registered about the new local (StateRecorder)
+            LOGSZ(m_pSerializerLog, "-----> Invoke delegates for new LOCAL" <<std::endl;);
+            m_nc->invokeAllAddBodyLocal(body);
 
 
         // FROM REMOTE to REMOTE
@@ -480,6 +485,7 @@ private:
 
             //serialize the set
             ar & overlappingNeighbours;
+
         }
 
         // Change the commStatus!
@@ -535,6 +541,11 @@ private:
                     LOGASSERTMSG( pairlocalData.second, m_pSerializerLog, "Insert to neighbour data rank: " << *it << " in process rank: " << m_nc->m_rank << " failed!");
                 pairlocalData.first->m_commStatus = NeighbourDataType::LocalData::SEND_UPDATE;
             }
+
+
+            // Notify all delegates which registered about the new local
+            LOGSZ(m_pSerializerLog, "-----> Invoke delegates for new LOCAL" <<std::endl;);
+            m_nc->invokeAllAddBodyLocal(body);
 
 
         }else{

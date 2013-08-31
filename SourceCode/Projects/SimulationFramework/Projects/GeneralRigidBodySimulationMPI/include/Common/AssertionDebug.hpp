@@ -25,7 +25,7 @@
 
 	#define LOGASSERTMSG( condition , log , message ) { \
         if( !( condition ) ){                              \
-            LOG( (log) , message );                    \
+            LOG( log , message );                    \
             ERRORMSG( message );                   \
         }\
     }

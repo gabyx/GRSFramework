@@ -93,21 +93,21 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     m_pStateRecorder = boost::shared_ptr<StateRecorderBody<DynamicsSystemType> >(new StateRecorderBody<DynamicsSystemType>());
 
     m_pNbCommunicator = boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> >(
-                                new NeighbourCommunicator<DynamicsSystemType>(m_pDynSys->m_SimBodies, m_pDynSys->m_RemoteSimBodies, m_pDynSys->m_globalGeoms,  m_pProcCommunicator) );
+                            new NeighbourCommunicator<DynamicsSystemType>(m_pDynSys->m_SimBodies, m_pDynSys->m_RemoteSimBodies, m_pDynSys->m_globalGeoms,  m_pProcCommunicator) );
 
     //Set up delegate function from NeighbourCommunicator to StateRecorederBody (close and open files)
     m_pNbCommunicator->addNotificationLocalRemove(
-                                               NeighbourCommunicator<DynamicsSystemType>::AddDelegate::template
-                                                    from_method< StateRecorderBody<DynamicsSystemType>,&StateRecorderBody<DynamicsSystemType>::removeBody>
-                                                        (& *m_pStateRecorder.get())
-                                               );
-     m_pNbCommunicator->addDelegateLocalAdd(
-                                               NeighbourCommunicator<DynamicsSystemType>::AddDelegate::template
-                                                    from_method< StateRecorderBody<DynamicsSystemType>,&StateRecorderBody<DynamicsSystemType>::addBody>
-                                                        (& *m_pStateRecorder.get())
-                                               );
-                                               // TODO: Danger shared_ptr.get() in delegate class,
-                                               //as along as there is the SimMgrMpi there is a NbCommunicator and a StatRecorder, so no problem
+        NeighbourCommunicator<DynamicsSystemType>::AddDelegate::template
+        from_method< StateRecorderBody<DynamicsSystemType>,&StateRecorderBody<DynamicsSystemType>::removeBody>
+        (& *m_pStateRecorder.get())
+    );
+    m_pNbCommunicator->addDelegateLocalAdd(
+        NeighbourCommunicator<DynamicsSystemType>::AddDelegate::template
+        from_method< StateRecorderBody<DynamicsSystemType>,&StateRecorderBody<DynamicsSystemType>::addBody>
+        (& *m_pStateRecorder.get())
+    );
+    // TODO: Danger shared_ptr.get() in delegate class,
+    //as along as there is the SimMgrMpi there is a NbCommunicator and a StatRecorder, so no problem
 
     m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pProcCommunicator, m_pNbCommunicator) );
 
@@ -160,17 +160,16 @@ void SimulationManagerMPI<TConfig>::startSim() {
 
     //Write first initial value out!
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
-       m_pStateRecorder->writeStates(m_pDynSys->m_SimBodies);
+        m_pStateRecorder->writeStates(m_pDynSys->m_SimBodies);
     }
 
 
 //
-//    while(1)
-//    {
+    while(1){
 
-      // Do one iteration
-      m_pTimestepper->doOneIteration();
-      m_pTimestepper->doOneIteration();
+        // Do one iteration
+        m_pTimestepper->doOneIteration();
+        //m_pTimestepper->doOneIteration();
 //      // get global time for logging!
 //      timelineSimulation = ((double)global_time.elapsed().wall)*1e-9;
 //      // Write Data to SystemDataFile (maps all data to back buffer!)
@@ -180,16 +179,15 @@ void SimulationManagerMPI<TConfig>::startSim() {
         // Write  State to Sim File
         m_pStateRecorder->writeStates(m_pDynSys->m_SimBodies);
 
-      // Check if simulation can be aborted!
-//      if(m_pTimestepper->finished()){
-//         m_pSimulationLog->logMessage("---> SimulationManager: Timestepper finished, exit...");
-//         break;
-      //}
-//  }
+        // Check if simulation can be aborted!
+        if(m_pTimestepper->finished()) {
+            m_pSimulationLog->logMessage("---> SimulationManager: Timestepper finished, exit...");
+            break;
+        }
+    }
 
-
-  m_pSimulationLog->logMessage("---> SimulationManager: Simulation leaving...");
-  return;
+m_pSimulationLog->logMessage("---> SimulationManager: Simulation leaving...");
+return;
 }
 
 template<typename TConfig>
@@ -235,7 +233,7 @@ void SimulationManagerMPI<TConfig>::initSim() {
     }
 
 
-    if(!m_pStateRecorder->openFiles(m_SimFolderPath, m_pDynSys->m_SimBodies,true)){ // Truncate the files, important!
+    if(!m_pStateRecorder->openFiles(m_SimFolderPath, m_pDynSys->m_SimBodies,true)) { // Truncate the files, important!
         LOG(m_pSimulationLog,  "ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl;);
         ERRORMSG("ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
     }

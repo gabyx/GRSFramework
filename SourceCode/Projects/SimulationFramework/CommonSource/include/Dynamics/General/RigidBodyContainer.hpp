@@ -78,6 +78,10 @@ public:
         return m_mapById.erase(ptr->m_id)>0;
     }
 
+    inline bool removeAndDeleteBody(RigidBodyType* ptr){
+        return removeAndDeleteBody(ptr->m_id);
+    }
+
     inline bool removeAndDeleteBody(RigidBodyIdType const & id){
         typename MapByIdType::iterator it = m_mapById.find(id);
         if(it != m_mapById.end()){
