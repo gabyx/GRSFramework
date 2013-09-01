@@ -288,8 +288,7 @@ void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
 
     m_localBodiesToDelete.clear();
 
-    const typename ProcessTopologyType::NeighbourRanksListType & nbRanks = m_pProcTopo->getNeighbourRanks();
-    for(typename ProcessTopologyType::NeighbourRanksListType::const_iterator it = nbRanks.begin(); it != nbRanks.end(); it++){
+    for(typename ProcessTopologyType::NeighbourRanksListType::const_iterator it = m_nbRanks.begin(); it != m_nbRanks.end(); it++){
         LOG(m_pSimulationLog,"---> Communicate: Send message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_message.setRank(*it);
@@ -300,9 +299,8 @@ void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
 template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::receiveMessagesFromNeighbours(){
 
-    const typename ProcessTopologyType::NeighbourRanksListType & nbRanks = m_pProcTopo->getNeighbourRanks();
     // set the rank of from the receiving message automatically! inside the function!
-    m_pProcCom->receiveMessageFromRanks(m_message, nbRanks.begin(), nbRanks.end(),  MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
+    m_pProcCom->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
 
 }
 

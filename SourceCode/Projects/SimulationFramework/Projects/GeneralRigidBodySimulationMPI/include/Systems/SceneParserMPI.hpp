@@ -205,7 +205,6 @@ protected:
         }
 
         for(int i=0; i<instances; i++) {
-            typename RigidBodyType::RigidBodyIdType id = RigidBodyId::makeId(i+1, groupId);
 
             RigidBodyType * temp_ptr = new RigidBodyType(RigidBodyId::makeId(i, groupId));
 

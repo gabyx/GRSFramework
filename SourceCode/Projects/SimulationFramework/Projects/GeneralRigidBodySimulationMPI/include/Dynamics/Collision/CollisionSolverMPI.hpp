@@ -91,7 +91,6 @@ public:
 
     void initializeLog(Logging::Log* pSolverLog);                        ///< Initializes an Ogre::Log.
     void reset();                                                        ///< Resets the whole Solver. This function is called at the start of the simulation.
-    void reserveCollisionSetSpace(unsigned int nContacts);              ///< Reserves some space for the collision set.
     void solveCollision();    ///< Main routine which solves the collision for all bodies.
 
     std::list< CollisionData<RigidBodyType> * > m_CollisionSet;       ///< This list is only used if no  ContactDelegate is in m_ContactDelegateList, then the contacts are simply added here.
@@ -148,13 +147,8 @@ void CollisionSolver<TCollisionSolverConfig>::initializeLog( Logging::Log* pSolv
 
 template< typename TCollisionSolverConfig >
 void CollisionSolver<TCollisionSolverConfig>::reset() {
-    // Do a Debug check if sizes match!
-    ASSERTMSG( m_SimBodies.size() != 0, "CollisionSolver:: No Bodies added to the system!");
-
 
     clearCollisionSet();
-
-    reserveCollisionSetSpace(300 * 3);
 
      m_maxOverlap = 0;
 }
@@ -166,12 +160,6 @@ void CollisionSolver<TCollisionSolverConfig>::clearCollisionSet() {
     }
     m_CollisionSet.clear();
 }
-
-template< typename TCollisionSolverConfig >
-void CollisionSolver<TCollisionSolverConfig>::reserveCollisionSetSpace(unsigned int nContacts) {
-    m_expectedNContacts = nContacts;
-}
-
 
 template< typename TCollisionSolverConfig >
 void CollisionSolver<TCollisionSolverConfig>::solveCollision() {

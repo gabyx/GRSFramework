@@ -167,7 +167,7 @@ protected:
 
     }
 
-     void processPlane(ticpp::Node * planeNode ) {
+    void processPlane(ticpp::Node * planeNode ) {
 
         static int nodeCounter = 0;
         static int entityCounter = 0;
@@ -469,6 +469,15 @@ protected:
         }
     }
 
+
+    virtual typename DynamicsSystemType::GlobalGeometryMapType::iterator findGlobalGeomId(unsigned int id){
+        return m_globalGeometries.find(id);
+    }
+
+    virtual typename DynamicsSystemType::GlobalGeometryMapType & getGlobalGeometryListRef(){
+        return m_globalGeometries;
+    }
+
 protected:
 
      std::vector<std::string> m_materialList;
@@ -477,6 +486,9 @@ protected:
     Ogre::SceneNode * m_BaseFrame;
     std::vector<Ogre::SceneNode*>	&m_rSceneNodeSimBodies;
     std::vector<Ogre::SceneNode*>	&m_rSceneNodeBodies;
+
+
+    typename DynamicsSystemType::GlobalGeometryMapType m_globalGeometries;
 
 };
 

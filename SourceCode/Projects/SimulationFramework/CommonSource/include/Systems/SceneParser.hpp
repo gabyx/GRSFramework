@@ -347,9 +347,11 @@ protected:
             // Parse ContactParameter Map
             processContactParameterMap(sceneSettings);
 
-            // Parse Global Geometries
+
+        } // m_bparseDynamics
+
+         // Parse Global Geometries (also in playback manager)!
             processGlobalGeometries(sceneSettings);
-        }
 
     }
 
@@ -490,8 +492,10 @@ protected:
         LOG(m_pSimulationLog,"---> Added "<<instances<<" RigidBody Instances..."<<std::endl;);
 
 
+
         ticpp::Node * geometryNode = rigidbodies->FirstChild("Geometry");
         processGeometry(geometryNode);
+
 
 
         ticpp::Node * dynPropNode = rigidbodies->FirstChild("DynamicProperties");
@@ -501,11 +505,11 @@ protected:
 
 
 
-
         //Copy the pointers!
-        LOG(m_pSimulationLog,"---> Copy RigidBody References to DynamicSystem ..."<<std::endl;);
+
         if(m_eBodiesState == RigidBodyType::SIMULATED) {
             if(m_bParseDynamics) {
+                LOG(m_pSimulationLog,"---> Copy RigidBody References to DynamicSystem ..."<<std::endl;);
                 for(int i=0; i < m_bodyList.size(); i++) {
                     m_pDynSys->m_SimBodies.addBody(m_bodyList[i]);
                 }
@@ -514,6 +518,7 @@ protected:
             m_nBodies += instances;
         } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
             if(m_bParseDynamics) {
+                LOG(m_pSimulationLog,"---> Copy RigidBody References to DynamicSystem ..."<<std::endl;);
                 for(int i=0; i < m_bodyList.size(); i++) {
                     m_pDynSys->m_Bodies.addBody(m_bodyList[i]);
                 }
@@ -847,7 +852,6 @@ protected:
     virtual void processGlobalGeomId( ticpp::Element * globalGeomId ){
 
         std::string distribute = globalGeomId->GetAttribute("distribute");
-
         if(distribute == "uniform") {
 
             unsigned int id;
@@ -855,9 +859,9 @@ protected:
                 throw ticpp::Exception("---> String conversion in processGlobalGeomId: id failed");
             }
 
-            typename DynamicsSystemType::GlobalGeometryMapType::iterator it = m_pDynSys->m_globalGeoms.find(id);
+            typename DynamicsSystemType::GlobalGeometryMapType::iterator it = findGlobalGeomId(id);
             // it->second is the GeometryType in RigidBody
-            if(it == m_pDynSys->m_globalGeoms.end()){
+            if(it == this->getGlobalGeometryListRef().end()){
                LOG(m_pSimulationLog,"---> Geometry with id: " << id << " not found in global geometry list!" <<std::endl;);
                throw ticpp::Exception("---> Geometry search in processGlobalGeomId: failed!");
             }
@@ -884,9 +888,9 @@ protected:
 
             for(int i=0; i < m_bodyList.size(); i++){
                 int id = startId+i;
-                typename DynamicsSystemType::GlobalGeometryMapType::iterator it = m_pDynSys->m_globalGeoms.find(startId+i);
+                typename DynamicsSystemType::GlobalGeometryMapType::iterator it = findGlobalGeomId(startId+i);
                 // it->second is the GeometryType in RigidBody
-                if(it == m_pDynSys->m_globalGeoms.end()){
+                if(it == this->getGlobalGeometryListRef().end()){
                    LOG(m_pSimulationLog,"---> processGlobalGeomId: Geometry with id: " << startId+i << " not found in global geometry list!" <<std::endl;);
                    throw ticpp::Exception("---> processGlobalGeomId: Geometry search failed!");
                 }
@@ -932,9 +936,9 @@ protected:
             for(int i=0; i < m_bodyList.size(); i++){
 
                 unsigned int id = randomNumber();
-                typename DynamicsSystemType::GlobalGeometryMapType::iterator it = m_pDynSys->m_globalGeoms.find(id);
+                typename DynamicsSystemType::GlobalGeometryMapType::iterator it = findGlobalGeomId(id);
                 // it->second is the GeometryType in RigidBody
-                if(it == m_pDynSys->m_globalGeoms.end()){
+                if(it == this->getGlobalGeometryListRef().end()){
                    LOG(m_pSimulationLog,"---> Geometry with id: " << id << " not found in global geometry list!" <<std::endl;);
                    throw ticpp::Exception("---> Geometry search in processGlobalGeomId: failed!");
                 }
@@ -955,17 +959,27 @@ protected:
 
     }
 
+
+    virtual typename DynamicsSystemType::GlobalGeometryMapType::iterator findGlobalGeomId(unsigned int id){
+        return m_pDynSys->m_globalGeoms.find(id);
+    }
+
+
     template<typename T>
     void addToGlobalGeomList(unsigned int id,  boost::shared_ptr<T> ptr){
 
             std::pair<typename DynamicsSystemType::GlobalGeometryMapType::iterator, bool> ret =
-            m_pDynSys->m_globalGeoms.insert(typename DynamicsSystemType::GlobalGeometryMapType::value_type( id, ptr) );
+            this->getGlobalGeometryListRef().insert(typename DynamicsSystemType::GlobalGeometryMapType::value_type( id, ptr) );
             if(ret.second == false){
                 std::stringstream ss;
                 ss << "---> addToGlobalGeomList: geometry with id: " <<  id<< " exists already!";
                 throw ticpp::Exception(ss.str());
             }
             LOG(m_pSimulationLog,"---> Added geometry with id: " <<  id << " to global geometry list" <<std::endl;);
+    }
+
+    virtual typename DynamicsSystemType::GlobalGeometryMapType & getGlobalGeometryListRef(){
+        return m_pDynSys->m_globalGeoms;
     }
 
     virtual void fillMeshInfo( Assimp::Importer & importer, const aiScene* scene, MeshData<MeshPREC> & meshInfo, Vector3 scale_factor, Quaternion quat, Vector3 trans) {
@@ -1444,6 +1458,8 @@ protected:
     typename std::vector<RigidBodyType*> m_bodyList; ///< Used to process a RigidBody Node
     std::vector<Vector3> m_bodyListScales;
     std::vector< DynamicsState<LayoutConfigType> > m_SimBodyInitStates;
+
+
 
     typedef std::map<std::string, boost::shared_ptr<MeshGeometry<PREC> > > ContainerSceneMeshs;
 

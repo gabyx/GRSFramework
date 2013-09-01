@@ -145,8 +145,8 @@ public:
     template<typename T>
     void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm = MPI_COMM_WORLD);
 
-    template<typename T, typename TIterator>
-    void receiveMessageFromRanks(T & t,TIterator ranksBegin, TIterator ranksEnd, MPIMessageTag tag,  MPI_Comm comm = MPI_COMM_WORLD);
+    template<typename T, typename List>
+    void receiveMessageFromRanks(T & t,const List & ranks, MPIMessageTag tag,  MPI_Comm comm = MPI_COMM_WORLD );
 
     boost::shared_ptr<ProcessInfoType> getProcInfo() {
         return m_pProcessInfo;
@@ -228,52 +228,65 @@ void ProcessCommunicator<TDynamicsSystem>::sendMessageToRank(const T & t, RankId
     ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToRank failed!");
 };
 
-
 template<typename TDynamicsSystem>
-template<typename T, typename TIterator>
+template<typename T, typename List>
 void ProcessCommunicator<TDynamicsSystem>::receiveMessageFromRanks(T & t,
-                                                                   TIterator ranksBegin, TIterator ranksEnd,
+                                                                   const List & ranks,
                                                                    MPIMessageTag tag,  MPI_Comm comm){
 
+    STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );
 
-    std::set<RankIdType> ranksReceived;
+    typename List::const_iterator ranksIt;
+    std::vector<bool>::iterator itBool;
+    std::vector<bool> receivedRanks(ranks.size(),false);
+
     // has an entry if a message has already been received for this rank.
     MPI_Status status;
-    int i = 0;
-    for(TIterator ranksIt = ranksBegin; ranksIt != ranksEnd ;ranksIt++){
 
-        int error = MPI_Probe(MPI_ANY_SOURCE, tag.getInt(), comm, &status); // Blocks
-        ASSERTMPIERROR(error,"ProcessCommunicator:: receiveMessageFromRanks1 failed for loop index: " << i )
+    int received_messages = 0;
+    int flag, i;
+    LOG(m_pSimulationLog,  "MPI> Receiving message from neighbours (spin loop)..." << std::endl;)
+    while( received_messages !=  ranks.size()){
 
-        RankIdType recv_rank = status.MPI_SOURCE;
+        for(ranksIt = ranks.begin(), itBool = receivedRanks.begin(); ranksIt !=  ranks.end(); ++ranksIt , ++itBool){
 
-        std::pair< typename std::set<RankIdType>::iterator,bool> res = ranksReceived.insert( recv_rank );
-        if(res.second == false){
-            ERRORMSG("A message from this rank: " << recv_rank << " has already been received for this tag: "<< tag.getInt());
+            if(*itBool == true){
+                //Received this rank already! Skip
+                continue;
+            }
+
+            // Probe for a message!
+            int error = MPI_Iprobe( (int)(*ranksIt), tag.getInt(), comm, &flag, &status); // Non blocking test if message is there!
+            ASSERTMPIERROR(error,"ProcessCommunicator:: receiveMessageFromRanks1 failed for rank " << *ranksIt )
+
+            if(flag){ // We received a message
+
+                RankIdType recv_rank = status.MPI_SOURCE;
+
+                //Receive the message for this rank!
+                int message_size;
+                MPI_Get_count(&status,m_binary_message.getMPIDataType(),&message_size);
+                m_binary_message.resize(message_size);
+
+                error = MPI_Recv( const_cast<char*>(m_binary_message.data()),
+                                      m_binary_message.size(),
+                                      m_binary_message.getMPIDataType(),
+                                      status.MPI_SOURCE, status.MPI_TAG, comm, &status
+                                     );
+                LOG(m_pSimulationLog, "--->\tReceived message from rank: " << recv_rank << " [" << message_size << "b]" << std::endl;)
+                ASSERTMPIERROR(error, "ProcessCommunicator:: receiveMessageFromRanks2 failed for rank "<< *ranksIt)
+
+                // Deserialize
+                t.setRank(recv_rank); // Set the rank
+                m_binary_message >> t;
+
+                  // Set the bool to true for this index
+                *itBool = true;
+                received_messages++; // count up
+            }
         }
-
-        //Receive the message for this rank!
-
-        int message_size;
-        MPI_Get_count(&status,m_binary_message.getMPIDataType(),&message_size);
-        m_binary_message.resize(message_size);
-        LOG(m_pSimulationLog,"MPI> Receiving "<< message_size << " bytes from rank: " << recv_rank << "...")
-        error = MPI_Recv( const_cast<char*>(m_binary_message.data()),
-                              m_binary_message.size(),
-                              m_binary_message.getMPIDataType(),
-                              status.MPI_SOURCE, status.MPI_TAG, comm, &status
-                             );
-
-        ASSERTMPIERROR(error, "ProcessCommunicator:: receiveMessageFromRanks2 failed for loop index: " << i )
-        LOG(m_pSimulationLog, "Received" << std::endl; )
-        ranksReceived.insert(recv_rank);
-
-        // Deserialize
-        t.setRank(recv_rank); // Set the rank
-        m_binary_message >> t;
-
-        i++;
     }
+    LOG(m_pSimulationLog, "MPI> finished!" << std::endl; )
 };
 
 }; // MPILayer

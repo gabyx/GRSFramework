@@ -89,7 +89,6 @@ public:
 
     void initializeLog(Logging::Log* pSolverLog);                          ///< Initializes an Ogre::Log.
     void reset();                                                       ///< Resets the whole Solver. This function is called at the start of the simulation.
-    void reserveCollisionSetSpace(unsigned int nContacts);              ///< Reserves some space for the collision set.
     void solveCollision();    ///< Main routine which solves the collision for all bodies.
 
     typedef typename std::vector< CollisionData<RigidBodyType> * > CollisionSet;
@@ -133,7 +132,7 @@ CollisionSolver<TCollisionSolverConfig>::CollisionSolver(
     typename DynamicsSystemType::RigidBodyNotAniContainer & Bodies):
     m_SimBodies(SimBodies), m_Bodies(Bodies),
     m_nSimBodies(SimBodies.size()),m_nDofqObj(NDOFqObj),m_nDofuObj(NDOFuObj) {
-    m_expectedNContacts = 10;
+    m_expectedNContacts = 300;
 }
 
 template< typename TCollisionSolverConfig >
@@ -157,7 +156,8 @@ void CollisionSolver<TCollisionSolverConfig>::reset() {
 
     clearCollisionSet();
 
-    reserveCollisionSetSpace(m_nSimBodies * 3);
+    m_expectedNContacts =  m_SimBodies.size() * 3;
+
 
     m_maxOverlap = 0;
 
@@ -171,10 +171,6 @@ void CollisionSolver<TCollisionSolverConfig>::clearCollisionSet() {
     m_CollisionSet.clear();
 }
 
-template< typename TCollisionSolverConfig >
-void CollisionSolver<TCollisionSolverConfig>::reserveCollisionSetSpace(unsigned int nContacts) {
-    m_expectedNContacts = nContacts;
-}
 
 
 template< typename TCollisionSolverConfig >
