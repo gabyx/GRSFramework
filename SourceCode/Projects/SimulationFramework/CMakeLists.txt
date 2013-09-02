@@ -12,7 +12,30 @@ set(SIMULATIONFRAMEWORK_BUILD_NOGUI ON CACHE BOOL "Build the NOGUI version of Si
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_MPI )
 set(SIMULATIONFRAMEWORK_BUILD_MPI OFF CACHE BOOL "Build the MPI version of SimulationFramework")
 
+# Set the variable if we like to build with CLANG or GCC
+option(MYPROJECT_USE_CLANG "build application with clang" OFF) # OFF is the default
+if(MYPROJECT_USE_CLANG)
+	SET(CMAKE_TOOLCHAIN_PREFIX "llvm-")
+	SET (CMAKE_C_COMPILER             "/usr/bin/clang")
+    SET (CMAKE_C_FLAGS                "-Wall -std=c99")
+    SET (CMAKE_C_FLAGS_DEBUG          "-g")
+    SET (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
+    SET (CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG")
+    SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
+    SET (CMAKE_CXX_COMPILER             "/usr/bin/clang++")
+    SET (CMAKE_CXX_FLAGS                "-Wall -pedantic -fdiagnostics-show-template-tree")
+    SET (CMAKE_CXX_FLAGS_DEBUG          "-g")
+    SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
+    SET (CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG")
+    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+
+    SET (CMAKE_AR      "/usr/bin/llvm-ar")
+    SET (CMAKE_LINKER  "/usr/bin/llvm-ld")
+    SET (CMAKE_NM      "/usr/bin/llvm-nm")
+    SET (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
+    SET (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
+endif(MYPROJECT_USE_CLANG)
 
 # Set the makefile build type (only for make file based generators)
 MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )

@@ -369,7 +369,6 @@ private:
         RankIdType owningRank;
         ar & owningRank; LOGSZ(m_pSerializerLog, "-----> owning rank: " << owningRank<<std::endl;);
 
-            LOGASSERTMSG(  m_nc->m_nbRanks.find(owningRank) != m_nc->m_nbRanks.end(), m_pSerializerLog, "Owner Rank: " << owningRank << " for body with id: "<<RigidBodyId::getBodyIdString(id) << " is no neighbour in process rank: " << m_nc->m_rank << "!")
 
         // normal update
             LOGSZ(m_pSerializerLog, "-----> Deserialize body (update)... "<<std::endl;);
@@ -385,6 +384,7 @@ private:
 
         if(owningRank == m_nc->m_rank){ // if the body is now our local body!
                 LOGSZ(m_pSerializerLog, "-----> Changing remote body to LOCAL" <<std::endl;);
+
             std::set<RankIdType> overlappingNeighbours; // these are only the common neighbours between m_neighbourRank and m_nc->m_rank
             ar & overlappingNeighbours; // all ranks where the body overlaps
 
@@ -427,6 +427,9 @@ private:
         // FROM REMOTE to REMOTE
         }else if(owningRank != m_neighbourRank) { // if the body is not owned anymore by the sending process but by another of our neighbours
                 LOGSZ(m_pSerializerLog, "-----> Changing remote body to REMOTE" <<std::endl;);
+                 LOGASSERTMSG(  m_nc->m_nbRanks.find(owningRank) != m_nc->m_nbRanks.end(), m_pSerializerLog, "Owner Rank: " << owningRank << " for body with id: "
+                              <<RigidBodyId::getBodyIdString(id) << " is no neighbour in process rank: " << m_nc->m_rank << "!")
+
             // Move the remote out of the neighbour structure
             bool res = m_neighbourData->deleteRemoteBodyData(body);
                 LOGASSERTMSG( res, m_pSerializerLog, "Body with id: " << RigidBodyId::getBodyIdString(id) << "not deleted in neighbour structure (?)");
