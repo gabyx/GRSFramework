@@ -18,6 +18,12 @@
 */
 /* @{ */
 
+
+//Prototype
+template<class Derived, class DerivedOther>
+void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , Eigen::MatrixBase<DerivedOther> &A);
+
+
 /**
 * @brief This returns a 3x3 rotation matrix from a 4x1 quaternion.
 * @param quat The input quaternion.
@@ -31,7 +37,7 @@ Eigen::Matrix<double,3,3> getRotFromQuaternion(const Eigen::MatrixBase<Derived>&
 
    Eigen::Matrix<double,3,3> A;
 	//No check if quaternion is unit...(performance)
-  setRotFromQuaternion(quat,A);
+   setRotFromQuaternion(quat,A);
 	return A;
 }
 

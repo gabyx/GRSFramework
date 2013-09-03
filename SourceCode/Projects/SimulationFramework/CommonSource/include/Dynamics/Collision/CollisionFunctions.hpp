@@ -47,7 +47,7 @@ public:
         // somewhere in the space, this point is the center of the sphere...
 
         static Vector3 vertex0,vertex1,vertex2, M_r_MS;
-        MeshData<MeshPREC>::MeshIndices & indices = mesh.m_Faces[indexFace];
+        const MeshData<MeshPREC>::MeshIndices & indices = mesh.m_Faces[indexFace];
         vertex0 = mesh.m_Vertices[indices(0)];
         vertex1 = mesh.m_Vertices[indices(1)];
         vertex2 = mesh.m_Vertices[indices(2)];
@@ -59,7 +59,7 @@ public:
 
 
 
-    inline static Vector3 getClosestPointsInRadius_PointMesh(  const Vector3 & I_r_S,
+    inline static void getClosestPointsInRadius_PointMesh(  const Vector3 & I_r_S,
             const PREC & radius,
             const MeshData<MeshPREC> & mesh,
             const Vector3 & I_r_M,

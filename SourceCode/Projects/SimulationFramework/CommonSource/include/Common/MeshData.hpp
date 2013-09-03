@@ -22,6 +22,7 @@
 #include "TypeDefs.hpp"
 
 #include "SimpleLogger.hpp"
+#include "QuaternionHelpers.hpp"
 
 ///==========================================
 

@@ -239,36 +239,28 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
         m_nbDataMap.addLocalBodyExclusive(body,neighbours.begin(), neighbours.end());
 
         //Check owner of this body
-        typename ProcessInfoType::RankIdType belongingRank;
-        m_pProcTopo->belongsBodyToProcess(body,belongingRank);
-
+        typename ProcessInfoType::RankIdType ownerRank;
+        m_pProcTopo->belongsBodyToProcess(body,ownerRank);
         //Check if belonging rank is in the neighbours or our own
-        if(belongingRank != m_rank){
-            if( m_nbRanks.find(belongingRank) == m_nbRanks.end() ){
-                LOG(m_pSimulationLog,"--->\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<
-                "This is not good as we cannot send any message to some other rank other then a neighbour!");
-                ERRORMSG("---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<
-                "This is not good as we cannot send any message to some other rank other then a neighbour!");
+        if(ownerRank != m_rank){
+            if( m_nbRanks.find(ownerRank) == m_nbRanks.end() ){
+                LOG(m_pSimulationLog,"--->\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<"This is not good as we cannot send any message to some other rank other then a neighbour!");
+                ERRORMSG("---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<"This is not good as we cannot send any message to some other rank other then a neighbour!");
             }
         }
-        LOG(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" has owner rank: "<<
-            (belongingRank) << ", proccess rank: " << m_pProcInfo->getRank()<<std::endl;)
+        LOG(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" has owner rank: "<< (ownerRank) << ", proccess rank: " << m_pProcInfo->getRank()<<std::endl;)
 
         //Set the owning rank for this body:
 
-        bodyInfo->m_ownerRank = belongingRank;
+        bodyInfo->m_ownerRank = ownerRank;
         bodyInfo->m_overlapsThisRank = overlapsOwnProcess;
-
-        if( bodyInfo->m_ownerRank != m_rank){
-            LOG(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" marked for deletion after send!" <<std::endl;)
-            m_localBodiesToDelete.insert(body);
-        }
 
         // Status output
         typename ProcessTopologyType::NeighbourRanksListType::iterator itRank;
         for(itRank = neighbours.begin(); itRank != neighbours.end(); itRank++) {
             LOG(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" overlaps Neigbour with Rank: "<< (*itRank) <<std::endl;)
         }
+
     }
     LOG(m_pSimulationLog,"--->\t Update neighbour data structures complete!"<<std::endl;)
 
@@ -309,10 +301,10 @@ void NeighbourCommunicator<TDynamicsSystem>::receiveMessagesFromNeighbours(){
 
 template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::cleanUp(){
-
+    LOG(m_pSimulationLog,"--->\t CleanUp Routine " <<std::endl;)
     //Delete all bodies in the list
     for(auto it = m_localBodiesToDelete.begin(); it != m_localBodiesToDelete.end(); it++){
-        RigidBodyType * body = body;
+        RigidBodyType * body = *it;
 
         auto bodyInfo = m_bodyToInfo.getBodyInfo(body);
         LOGASSERTMSG(bodyInfo, m_pSimulationLog , "Body info for local body with id: " << (body)->m_id << " does not exist!");
@@ -327,7 +319,7 @@ void NeighbourCommunicator<TDynamicsSystem>::cleanUp(){
                 LOGASSERTMSG( res,  m_pSimulationLog , "This local body with id: " << (body)->m_id << " could not be deleted in neighbour data rank: " << rankIt->first);
             }
             else{
-                LOGASSERTMSG(rankIt->second.m_bOverlaps == true, m_pSimulationLog , "This local body with id: " << (body)->m_id << " does not overlap rank: " << rankIt->first << " should have been deleted during sending! (REMOVAL)");
+                LOGASSERTMSG(true, m_pSimulationLog , "This local body with id: " << (body)->m_id << " does not overlap rank: " << rankIt->first << " should have been deleted during sending! (REMOVAL)");
             }
         }
 
@@ -337,6 +329,8 @@ void NeighbourCommunicator<TDynamicsSystem>::cleanUp(){
         bool res = m_globalLocal.removeAndDeleteBody(body);
         LOGASSERTMSG( res == true, m_pSimulationLog , "Remote Body with id: " << (body)->m_id << " could not be deleted in m_globalRemote!");
         // FROM now it needs to be sure that this body is no where else in the system anymore!
+
+        LOG(m_pSimulationLog,"--->\t Deleted body with id: "<< body->m_id <<std::endl;)
     }
 
     m_localBodiesToDelete.clear();

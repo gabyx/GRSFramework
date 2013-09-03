@@ -6,6 +6,8 @@
 
 #include "SceneParser.hpp"
 
+#include "MakeCoordinateSystem.hpp"
+
 template<typename TConfig>
 class SceneParserOgre : public SceneParser<TConfig> {
 public:

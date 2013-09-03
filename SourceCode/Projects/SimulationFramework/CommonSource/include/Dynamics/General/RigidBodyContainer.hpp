@@ -98,6 +98,7 @@ public:
             delete (*it);
         }
         m_map.clear();
+        return true;
     }
 
     inline iterator find(RigidBodyIdType id){

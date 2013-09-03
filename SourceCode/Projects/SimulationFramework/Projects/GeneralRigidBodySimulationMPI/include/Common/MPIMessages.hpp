@@ -202,19 +202,22 @@ public:
         //Loop over all localBodies in this NeighbourData
         int i = 0;
         for(typename NeighbourDataType::LocalIterator it = m_neighbourData->localBegin(); it != m_neighbourData->localEnd(); it++) {
+
+            m_bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(it->second->m_body);
+
             SubMessageFlag flag;
             if(it->second->m_commStatus == NeighbourDataType::LocalData::SEND_NOTIFICATION) {
                 flag = SubMessageFlag::NOTIFICATION;
                 ar & flag;
                 LOGSZ(m_pSerializerLog, "---> NotifactionSTART: " << i<<std::endl;);
-                serializeNotification(ar, it->second->m_body);
+                serializeNotificationOrUpdate(ar, it->second->m_body, flag );
                 LOGSZ(m_pSerializerLog, "---> NotifactionEND: "<<std::endl;);
 
             } else if (it->second->m_commStatus == NeighbourDataType::LocalData::SEND_UPDATE) {
                 flag = SubMessageFlag::UPDATE;
                 ar & flag;
                 LOGSZ(m_pSerializerLog, "---> UpdateSTART: " << i<<std::endl;);
-                serializeUpdate(ar, it->second->m_body);
+                serializeNotificationOrUpdate(ar, it->second->m_body, flag);
                 LOGSZ(m_pSerializerLog, "---> UpdateEND: "<<std::endl;);
 
             } else if (it->second->m_commStatus == NeighbourDataType::LocalData::SEND_REMOVE) {
@@ -247,7 +250,10 @@ public:
         // Number of submessages
         unsigned int size;
         ar & size; LOGSZ(m_pSerializerLog, "---> Size: "<<  size << std::endl;);
+
         m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
+        m_bodyInfo = NULL;
+
         LOGASSERTMSG( m_neighbourData, m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
 
         //Loop over all messages
@@ -292,74 +298,93 @@ private:
         LOGASSERTMSG(res, m_pSerializerLog, "Could not delete local body with id: " << RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << m_neighbourRank << " !" );
 
         // remove neighbour from body info!
-        BodyInfoType * bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(body);
-        LOGASSERTMSG(bodyInfo->m_neighbourRanks.find(m_neighbourRank)->second.m_bOverlaps == false , m_pSerializerLog,
+
+        LOGASSERTMSG(m_bodyInfo->m_neighbourRanks.find(m_neighbourRank)->second.m_bOverlaps == false , m_pSerializerLog,
                      "Body with id: " << RigidBodyId::getBodyIdString(body) << " overlaps (m_bOverlaps = true) neighbour rank: " << m_neighbourRank << " which should not because we have send a removal!" );
 
-        bodyInfo->m_neighbourRanks.erase(m_neighbourRank); // Erase the neighbour rank in the list!
+        m_bodyInfo->m_neighbourRanks.erase(m_neighbourRank); // Erase the neighbour rank in the list!
 
     }
 
     template<class Archive>
-    void deserializeRemoval(Archive & ar) const {
-        // deserialize (ONLY REMOTE BODIES)
-        typename RigidBodyType::RigidBodyIdType id;
-        ar & id;     LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
-        // Go into the neighbour data structure and remove the remote body
-        bool res = m_neighbourData->deleteRemoteBodyData(id);
-        LOGASSERTMSG(res, m_pSerializerLog, "Could not delete remote body with id: " << RigidBodyId::getBodyIdString(id) << " in neighbour structure rank: " << m_neighbourRank << " !" );
-
-        // Remove from bodyToInfoList
-        res =  m_nc->m_bodyToInfo.erase(id) > 0;
-            LOGASSERTMSG( res, m_pSerializerLog, "Remote Body with id: " << RigidBodyId::getBodyIdString(id) << " is not contained in m_bodyToInfo!");
-        //Remove and delete from global list
-        res = m_nc->m_globalRemote.removeAndDeleteBody(id);
-            LOGASSERTMSG( res == true, m_pSerializerLog, "Remote Body with id: " << RigidBodyId::getBodyIdString(id) << " could not be deleted in m_globalRemote!");
-
-
-    }
-
-    template<class Archive>
-    void serializeUpdate(Archive & ar, RigidBodyType * body) const {
+    void serializeNotificationOrUpdate(Archive & ar, RigidBodyType * body, const SubMessageFlag & flag) const {
         // serialize (ONLY LOCAL BODIES)
 
         // id
         ar & body->m_id; LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(body)<<std::endl;);
 
         // owning rank
-        BodyInfoType * bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(body);
-        ar & bodyInfo->m_ownerRank; LOGSZ(m_pSerializerLog, "-----> owning rank: " << bodyInfo->m_ownerRank<<std::endl;);
 
-        LOGSZ(m_pSerializerLog, "-----> Serialize body (update)... "<< std::endl;);
-        serializeBodyUpdate(ar,body);
-        LOGSZ(m_pSerializerLog, "-----> Serialize body (update): finished " << std::endl;);
+        ar & m_bodyInfo->m_ownerRank; LOGSZ(m_pSerializerLog, "-----> owning rank: " << m_bodyInfo->m_ownerRank<<std::endl;);
 
-        // Additional info if body belongs to neighbour!
-        if( bodyInfo->m_ownerRank == m_neighbourRank){ // the body belongs now to m_neighbourRank
+        if(flag == SubMessageFlag::NOTIFICATION){
+            LOGSZ(m_pSerializerLog, "-----> Serialize body (full)... "<< std::endl;);
+            serializeBodyFull(ar,body);
+            LOGSZ(m_pSerializerLog, "-----> Serialize body (full): finished" << std::endl);
+        }else if(flag == SubMessageFlag::UPDATE) {
+            LOGSZ(m_pSerializerLog, "-----> Serialize body (update)... "<< std::endl;);
+            serializeBodyUpdate(ar,body);
+            LOGSZ(m_pSerializerLog, "-----> Serialize body (update): finished " << std::endl;);
+        }else{
+            ERRORMSG("flag not recognized!")
+        }
+
+
+        bool removeBody = false;
+        if( m_bodyInfo->m_ownerRank == m_neighbourRank){ // the body belongs now to m_neighbourRank
             // send a list of all adjacent neighbours where the body overlaps
             // need to know where to send the update next time!
-            std::set<RankIdType> overlappingNeighbours; // set of ranks where this body overlaps for m_neighbourRank!
-            const typename ProcessTopologyType::NeighbourRanksListType & adjRanks = m_nc->m_pProcTopo->getAdjacentNeighbourRanks(m_neighbourRank);
+            serializeOverlappingCommonNeighbours(ar,body);
 
-            LOGSZ(m_pSerializerLog, "-----> overlappingNeigbours: "<<std::endl;);
-            for( auto it =  bodyInfo->m_neighbourRanks.begin(); it != bodyInfo->m_neighbourRanks.end(); it++){
-                if(it->second.m_bOverlaps == true && adjRanks.find(it->first) != adjRanks.end() ){
-                    // this body overlaps a rank which is adjacent to m_neighbourRank
-                    overlappingNeighbours.insert(it->first);
+            // FROM LOCAL to REMOTE!
+            if( m_bodyInfo->m_overlapsThisRank){// if it still overlaps our rank
+                //Move local body to remote global list
+                LOGSZ(m_pSerializerLog, "-----> Changing LOCAL body to REMOTE in neighbour structure rank: " << m_neighbourRank << std::endl;);
+                m_nc->m_globalRemote.addBody(body);
+                m_nc->m_globalLocal.removeBody(body);
 
-                    LOGSZ(m_pSerializerLog, "-------> " << it->first <<std::endl;);
-                }
+                // Change m_bodyInfo
+                m_bodyInfo->m_isRemote = true;
+                m_bodyInfo->m_neighbourRanks.clear();
+                m_bodyInfo->m_neighbourRanks[m_neighbourRank] = typename BodyInfoType::Flags(true);
+
+                //Add into the neighbour structure!
+                m_neighbourData->deleteLocalBodyData(body);
+                auto resPair = m_neighbourData->addRemoteBodyData(body);
+                LOGASSERTMSG( resPair.second == true, m_pSerializerLog, "Remote Body with id: " << RigidBodyId::getBodyIdString(body->m_id) << " could not be added in neighbour data structure rank: " << m_neighbourRank << "!");
+            }else{
+            // FROM LOCAL to REMOVE!
+                // If it does not overlap anymore, it gets deleted by the delete list in NeighbourCommunicator
+                LOGSZ(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" marked for deletion after send!" <<std::endl;)
+                m_nc->m_localBodiesToDelete.insert(body);
+                removeBody = true;
             }
 
-            if( bodyInfo->m_overlapsThisRank){
-                overlappingNeighbours.insert(m_nc->m_rank);
-                LOGSZ(m_pSerializerLog, "-------> own: " << m_nc->m_rank <<std::endl;);
-            }
-
-            //serialize the set
-            ar & overlappingNeighbours;
+        }else if(m_bodyInfo->m_ownerRank != m_nc->m_rank){ // if owner rank is not the sending neighbour and  not our rank!
+            removeBody = true;
         }
+
+
+        // Remove local body from this neighbour structure and remove neighbour from bodyinfo!
+        if(removeBody){
+            //Remove this local from this neighbour structure!
+            LOGSZ(m_pSerializerLog, "-----> Deleting LOCAL body in neighbour structure rank: " << m_neighbourRank << std::endl;);
+            bool res = m_neighbourData->deleteLocalBodyData(body);
+            LOGASSERTMSG( res == true, m_pSerializerLog, "Could not delete local body with id: " << RigidBodyId::getBodyIdString(body->m_id) <<"in neighbour structure rank: " << m_neighbourRank << "!");
+
+            //Update body info
+            res = m_bodyInfo->m_neighbourRanks.erase(m_neighbourRank) > 0;
+            LOGASSERTMSG( res == true, m_pSerializerLog, "Could not delete rank: " << m_neighbourRank << "from body info for body with id: " << RigidBodyId::getBodyIdString(body->m_id) << "!");
+        }
+
+
+        if(flag == SubMessageFlag::NOTIFICATION){
+            // Change the commStatus!
+            m_neighbourData->getLocalBodyData(body)->m_commStatus = NeighbourDataType::LocalData::SEND_UPDATE;
+        }
+
     }
+
 
     template<class Archive>
     void deserializeUpdate(Archive & ar) const {
@@ -449,60 +474,16 @@ private:
     }
 
     template<class Archive>
-    void serializeNotification(Archive & ar, RigidBodyType * body) const {
-
-        // ONLY LOCAL Bodies
-
-        // id
-        ar & body->m_id; LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(body)<<std::endl;);
-
-        // owning rank
-        BodyInfoType * bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(body);
-        ar & bodyInfo->m_ownerRank; LOGSZ(m_pSerializerLog, "-----> owning rank: " << bodyInfo->m_ownerRank<<std::endl;);
-
-            LOGSZ(m_pSerializerLog, "-----> Serialize body (full)... "<< std::endl;);
-        serializeBodyFull(ar,body);
-            LOGSZ(m_pSerializerLog, "-----> Serialize body (full): finished" << std::endl);
-
-        // Additional info if body belongs to neighbour!
-        if( bodyInfo->m_ownerRank == m_neighbourRank){ // the body belongs now to m_neighbourRank
-            // send a list of all adjacent neighbours where the body overlaps
-            // m_neighbourRank need to know where to send the update next time!
-            std::set<RankIdType> overlappingNeighbours; // set of ranks where this body overlaps for m_neighbourRank!
-            const typename ProcessTopologyType::NeighbourRanksListType & adjRanks = m_nc->m_pProcTopo->getAdjacentNeighbourRanks(m_neighbourRank);
-
-            LOGSZ(m_pSerializerLog, "-----> overlappingNeigbours: "<<std::endl;);
-            for( auto it =  bodyInfo->m_neighbourRanks.begin(); it != bodyInfo->m_neighbourRanks.end(); it++){
-                if(it->second.m_bOverlaps == true && adjRanks.find(it->first) != adjRanks.end() ){
-                    // this body overlaps a rank which is adjacent to m_neighbourRank
-                    overlappingNeighbours.insert(it->first);
-
-                    LOGSZ(m_pSerializerLog, "-------> " << it->first <<std::endl;);
-                }
-            }
-
-            if( bodyInfo->m_overlapsThisRank){
-                overlappingNeighbours.insert(m_nc->m_rank);
-                LOGSZ(m_pSerializerLog, "-------> own: " << m_nc->m_rank <<std::endl;);
-            }
-
-            //serialize the set
-            ar & overlappingNeighbours;
-
-        }
-
-        // Change the commStatus!
-        m_neighbourData->getLocalBodyData(body)->m_commStatus = NeighbourDataType::LocalData::SEND_UPDATE;
-    }
-
-    template<class Archive>
     void deserializeNotification(Archive & ar) const {
 
+        //id
         typename RigidBodyType::RigidBodyIdType id;
         ar & id; LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
+        // owner rankk
         RankIdType owningRank;
         ar & owningRank; LOGSZ(m_pSerializerLog, "-----> owning rank: " << owningRank<<std::endl;);
-            LOGASSERTMSG(  m_nc->m_nbRanks.find(owningRank) != m_nc->m_nbRanks.end(), m_pSerializerLog, "Owner Rank: " << owningRank << " for body with id: "<<RigidBodyId::getBodyIdString(id) << " is no neighbour in process rank: " << m_nc->m_rank << "!")
+
+        LOGASSERTMSG(  m_nc->m_nbRanks.find(owningRank) != m_nc->m_nbRanks.end(), m_pSerializerLog, "Owner Rank: " << owningRank << " for body with id: "<<RigidBodyId::getBodyIdString(id) << " is no neighbour in process rank: " << m_nc->m_rank << "!")
 
         // normal update (make a new body!)
         LOGASSERTMSG( m_nc->m_globalRemote.find(id) == m_nc->m_globalRemote.end(), m_pSerializerLog, "m_globalRemote does contain body with id: " << RigidBodyId::getBodyIdString(id) << " in process rank: " << m_nc->m_rank << "!");
@@ -525,11 +506,9 @@ private:
             m_nc->m_globalLocal.addBody(body);
 
             // insert a new body info
-            auto pairBodyInfo = m_nc->m_bodyToInfo.insert(body,owningRank);
-                LOGASSERTMSG( pairBodyInfo.second, m_pSerializerLog, "Insertion of new body info for body with id: " << id );
-            pairBodyInfo.first->m_isRemote = false;
-            pairBodyInfo.first->m_overlapsThisRank = true;
-            pairBodyInfo.first->m_ownerRank = m_nc->m_rank;
+            auto pairBodyInfo = m_nc->m_bodyToInfo.insert(body,owningRank,true,false);
+            LOGASSERTMSG( pairBodyInfo.second, m_pSerializerLog, "Insertion of new body info for body with id: " << id );
+
 
             // Add all neighbours which need updates!
             pairBodyInfo.first->m_neighbourRanks.clear();
@@ -563,14 +542,30 @@ private:
             LOGASSERTMSG( pairRes.second, m_pSerializerLog, "Insertion of body with id: " << RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << owningRank << " failed!")
 
             // add the body info
-            auto pairBodyInfo = m_nc->m_bodyToInfo.insert(body,owningRank);
-            pairBodyInfo.first->m_isRemote = true; // REMOTE BODY!!!
-            pairBodyInfo.first->m_overlapsThisRank = true; // No need to set!
-            pairBodyInfo.first->m_ownerRank = owningRank;
+            auto pairBodyInfo = m_nc->m_bodyToInfo.insert(body,owningRank,true,true);
             pairBodyInfo.first->m_neighbourRanks.clear();
             pairBodyInfo.first->m_neighbourRanks[owningRank] = typename BodyInfoType::Flags(true);
 
         }
+
+    }
+
+    template<class Archive>
+    void deserializeRemoval(Archive & ar) const {
+        // deserialize (ONLY REMOTE BODIES)
+        typename RigidBodyType::RigidBodyIdType id;
+        ar & id;     LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
+        // Go into the neighbour data structure and remove the remote body
+        bool res = m_neighbourData->deleteRemoteBodyData(id);
+        LOGASSERTMSG(res, m_pSerializerLog, "Could not delete remote body with id: " << RigidBodyId::getBodyIdString(id) << " in neighbour structure rank: " << m_neighbourRank << " !" );
+
+        // Remove from bodyToInfoList
+        res =  m_nc->m_bodyToInfo.erase(id) > 0;
+            LOGASSERTMSG( res, m_pSerializerLog, "Remote Body with id: " << RigidBodyId::getBodyIdString(id) << " is not contained in m_bodyToInfo!");
+        //Remove and delete from global list
+        res = m_nc->m_globalRemote.removeAndDeleteBody(id);
+            LOGASSERTMSG( res == true, m_pSerializerLog, "Remote Body with id: " << RigidBodyId::getBodyIdString(id) << " could not be deleted in m_globalRemote!");
+
 
     }
 
@@ -663,6 +658,31 @@ private:
     }
 
     template<class Archive>
+    void serializeOverlappingCommonNeighbours(Archive & ar, RigidBodyType * body) const{
+    std::set<RankIdType> overlappingNeighbours; // set of ranks where this body overlaps for m_neighbourRank!
+            const typename ProcessTopologyType::NeighbourRanksListType & adjRanks = m_nc->m_pProcTopo->getAdjacentNeighbourRanks(m_neighbourRank);
+
+            LOGSZ(m_pSerializerLog, "-----> overlappingNeigbours: "<<std::endl;);
+            for( auto it =  m_bodyInfo->m_neighbourRanks.begin(); it != m_bodyInfo->m_neighbourRanks.end(); it++){
+                if(it->second.m_bOverlaps == true && adjRanks.find(it->first) != adjRanks.end() ){
+                    // this body overlaps a rank which is adjacent to m_neighbourRank
+                    overlappingNeighbours.insert(it->first);
+
+                    LOGSZ(m_pSerializerLog, "-------> " << it->first <<std::endl;);
+                }
+            }
+
+            if( m_bodyInfo->m_overlapsThisRank){
+                overlappingNeighbours.insert(m_nc->m_rank);
+                LOGSZ(m_pSerializerLog, "-------> own: " << m_nc->m_rank <<std::endl;);
+            }
+
+            //serialize the set
+            ar & overlappingNeighbours;
+    }
+
+
+    template<class Archive>
     void serializeGeom(Archive & ar, RigidBodyType * body) const{
         // take care this serialization replaces any shared_ptr if body->m_geometry is already filled!
         ar & body->m_geometry;
@@ -672,6 +692,7 @@ private:
     NeighbourCommunicatorType* m_nc;
     RankIdType m_neighbourRank;        ///< This is the neighbour rank where the message is send to or received from!
     mutable NeighbourDataType * m_neighbourData;
+    mutable BodyInfoType * m_bodyInfo;
 
     mutable bool m_initialized;
 

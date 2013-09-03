@@ -1,5 +1,4 @@
-#The CMake Minimum version that is required. The FindCUDA script
-#is distributed since version 2.8
+#The CMake Minimum version that is required. 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 
@@ -12,55 +11,50 @@ set(SIMULATIONFRAMEWORK_BUILD_NOGUI ON CACHE BOOL "Build the NOGUI version of Si
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_MPI )
 set(SIMULATIONFRAMEWORK_BUILD_MPI OFF CACHE BOOL "Build the MPI version of SimulationFramework")
 
-# Set the variable if we like to build with CLANG or GCC
-option(MYPROJECT_USE_CLANG "build application with clang" OFF) # OFF is the default
-if(MYPROJECT_USE_CLANG)
-	SET(CMAKE_TOOLCHAIN_PREFIX "llvm-")
-	SET (CMAKE_C_COMPILER             "/usr/bin/clang")
-    SET (CMAKE_C_FLAGS                "-Wall -std=c99")
-    SET (CMAKE_C_FLAGS_DEBUG          "-g")
-    SET (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
-    SET (CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG")
-    SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
-
-    SET (CMAKE_CXX_COMPILER             "/usr/bin/clang++")
-    SET (CMAKE_CXX_FLAGS                "-Wall -pedantic -fdiagnostics-show-template-tree")
-    SET (CMAKE_CXX_FLAGS_DEBUG          "-g")
-    SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
-    SET (CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG")
-    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-
-    SET (CMAKE_AR      "/usr/bin/llvm-ar")
-    SET (CMAKE_LINKER  "/usr/bin/llvm-ld")
-    SET (CMAKE_NM      "/usr/bin/llvm-nm")
-    SET (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
-    SET (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
-endif(MYPROJECT_USE_CLANG)
 
 # Set the makefile build type (only for make file based generators)
 MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )
-
 set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
 
 
-#The name of the project ====================================================================
+
+set(SimulationFrameworkName "SimulationFramework ${CMAKE_CXX_COMPILER_ID}")
 if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
-        set(SimulationFrameworkName "SimulationFramework${CMAKE_BUILD_TYPE}")
-else()
-        set(SimulationFrameworkName "SimulationFramework")
+        set(SimulationFrameworkName  ${SimulationFrameworkName}${CMAKE_BUILD_TYPE})
 endif()
+
+
+#The name of the project ====================================================================
 PROJECT(${SimulationFrameworkName})
 
-
+MESSAGE(STATUS "Project Name is: " ${SimulationFrameworkName})
 
 
 # If GNU C Compiler set warning lenght to one line for eclipse
-IF(CMAKE_COMPILER_IS_GNUCC)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-ENDIF(CMAKE_COMPILER_IS_GNUCC)
-IF(CMAKE_COMPILER_IS_GNUCXX)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
-ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+MESSAGE(STATUS "Compiler ID is: " ${CMAKE_CXX_COMPILER_ID})
+IF(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+
+	MESSAGE(STATUS "Setting Values for GCC")
+	SET(CMAKE_C_FLAGS "-fmessage-length=0" CACHE STRING "Flags for C Compiler" FORCE)
+	SET(CMAKE_CXX_FLAGS "-std=c++11 -ftree-vectorize -ftree-vectorizer-verbose=2 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" FORCE)
+	
+ELSEIF ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
+
+	MESSAGE(STATUS "Setting Values for CLANG")
+    SET (CMAKE_C_FLAGS                "-Wall -std=c99" CACHE STRING "Flags for C Compiler" FORCE)
+    SET (CMAKE_C_FLAGS_DEBUG          "-g" CACHE STRING "Flags for C Compiler for debug builds" FORCE)
+    SET (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for C Compiler for release minsize builds" FORCE)
+    SET (CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for C Compiler for release builds" FORCE)
+    SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for C Compiler for release builds with debug info" FORCE)
+    
+    #SET (CMAKE_CXX_FLAGS                "-Weverything -Wno-covered-switch -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -Wextra-semi -fdiagnostics-show-template-tree")
+    SET (CMAKE_CXX_FLAGS                "-w" CACHE STRING "Flags for CXX Compiler" FORCE)
+    SET (CMAKE_CXX_FLAGS_DEBUG          "-g" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
+    SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release minsize builds" FORCE)
+    SET (CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release builds")
+    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for CXX Compiler for release builds with debug info" FORCE)
+    
+ENDIF()
 
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/;${CMAKE_MODULE_PATH}")
@@ -242,9 +236,6 @@ endif()
 
 
 # DEFINE if we should use the GPU for the simulation or not!
-
-
-SET(MYPROJECT_CXX_FLAGS "-std=c++0x -ftree-vectorize -ftree-vectorizer-verbose=2" CACHE STRING "The project's own compiler flags")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MYPROJECT_CXX_FLAGS}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MYPROJECT_CXX_FLAGS}")
 MESSAGE(STATUS "Added ${MYPROJECT_CXX_FLAGS} to CMAKE_CXX and CMAKE_C_FLAGS: ${CMAKE_CXX_FLAGS} and ${CMAKE_C_FLAGS}")

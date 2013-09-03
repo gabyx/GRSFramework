@@ -108,7 +108,7 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
     }
 
   filePath /= "StatePoolVisSimLog.log";
-  m_logfile.open(filePath.string());
+  m_logfile.open(filePath.string().c_str());
   m_logfile.clear();
   m_logfile << "This is the State pool log file: each line describes the actual mode in which the state pool is\n";
 }

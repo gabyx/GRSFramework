@@ -6,6 +6,7 @@
 #include <map>
 #include <fstream>
 
+//#define BOOST_NO_CXX11_SCOPED_ENUMS
 #include <boost/filesystem.hpp>
 
 #include <boost/thread.hpp>

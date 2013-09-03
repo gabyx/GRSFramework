@@ -139,6 +139,9 @@ inline void applyDynamicsStateToBodies(
     }
 }
 
+// Prototype
+template<typename TRigidBody, typename TRigidBodyState>
+inline void applyBodyToRigidBodyState( const TRigidBody  & body, TRigidBodyState & rigidBodyState );
 
 template<typename TRigidBodyType, typename TRigidBodyList>
 inline void applyBodiesToDynamicsState(const TRigidBodyList & bodies,

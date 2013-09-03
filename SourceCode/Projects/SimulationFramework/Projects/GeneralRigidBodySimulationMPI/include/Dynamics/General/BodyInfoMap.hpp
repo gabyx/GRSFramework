@@ -11,7 +11,7 @@ public:
         BodyProcessInfo(RigidBodyType *body,
                         RankIdType ownRank,
                         bool overlapsThisRank = true,
-                        bool isRemote = false): m_body(body), m_ownerRank(ownRank), m_overlapsThisRank(true), m_isRemote(isRemote){};
+                        bool isRemote = false): m_body(body), m_ownerRank(ownRank), m_overlapsThisRank(overlapsThisRank), m_isRemote(isRemote){};
         /**
         * Data structure in the Map: Rank -> Flags, Flags define the behaviour what needs to be done with this Body.
         * m_bOverlaps: Used to decide if body is removed from the corresponding neigbourS
@@ -84,10 +84,11 @@ public:
     }
 
 
-    std::pair<DataType *, bool> insert(RigidBodyType * body, RankIdType ownerRank){
+    std::pair<DataType *, bool> insert(RigidBodyType * body, RankIdType ownerRank, bool overlapsThisRank = true,
+                        bool isRemote = false){
         std::pair<typename Type::iterator,bool> res = m_map.insert( typename Type::value_type(body->m_id, (DataType*)NULL) );
         if(res.second){
-             res.first->second = new DataType(body,body->m_id, ownerRank);
+             res.first->second = new DataType(body, ownerRank, overlapsThisRank, isRemote);
         }
         return std::pair<DataType *, bool>(res.first->second, res.second);
     }
