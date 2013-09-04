@@ -49,7 +49,7 @@ public:
         m_LocalNotifyAddList.push_back(cD);
     }
     /** Adds a new Delegate for a remove notifaction of a local body*/
-    void addNotificationLocalRemove(const RemoveDelegate & cD) {
+    void addDelegateLocalRemove(const RemoveDelegate & cD) {
         m_LocalNotifyRemoveList.push_back(cD);
     }
 
@@ -265,12 +265,11 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
     LOG(m_pSimulationLog,"--->\t Update neighbour data structures complete!"<<std::endl;)
 
 
-    LOG(m_pSimulationLog,"--->\t Send Messages to neighbours!"<<std::endl;)
     sendMessagesToNeighbours();
 
     cleanUp();
 
-    LOG(m_pSimulationLog,"--->\t Receive all structures from neighbours!"<<std::endl;)
+
     receiveMessagesFromNeighbours();
 
     LOG(m_pSimulationLog,"---> Communicate: finished"<< std::endl;)
@@ -279,7 +278,7 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
 
 template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
-
+    LOG(m_pSimulationLog,"--->\t Send messages to neighbours!"<<std::endl;)
     m_localBodiesToDelete.clear();
 
     for(typename ProcessTopologyType::NeighbourRanksListType::const_iterator it = m_nbRanks.begin(); it != m_nbRanks.end(); it++){
@@ -292,7 +291,7 @@ void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
 
 template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::receiveMessagesFromNeighbours(){
-
+    LOG(m_pSimulationLog,"--->\t Receive all messages from neighbours!"<<std::endl;)
     // set the rank of from the receiving message automatically! inside the function!
     m_pProcCom->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
 

@@ -385,7 +385,7 @@ bool PlaybackState::keyPressed(const OIS::KeyEvent &keyEventRef)
      }
   case OIS::KC_L:
     {
-      m_pTrayMgr->hideAll();
+      //m_pTrayMgr->hideAll();
       m_pPlaybackMgr->startPlaybackThread();
       break;
     }

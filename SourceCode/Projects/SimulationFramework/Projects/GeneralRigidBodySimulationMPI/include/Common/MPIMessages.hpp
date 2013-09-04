@@ -201,7 +201,11 @@ public:
         LOGSZ(m_pSerializerLog, "---> Size: "<<  size << std::endl;);
         //Loop over all localBodies in this NeighbourData
         int i = 0;
-        for(typename NeighbourDataType::LocalIterator it = m_neighbourData->localBegin(); it != m_neighbourData->localEnd(); it++) {
+
+        typename NeighbourDataType::LocalIterator it, it_next;
+        for(it = m_neighbourData->localBegin(), it_next = it ; it != m_neighbourData->localEnd(); it = it_next)
+        {
+            it_next++; // take care here, because, we might invalidate this iterator it because we might remove local bodies, thats why it_next is used above!
 
             m_bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(it->second->m_body);
 
@@ -232,12 +236,14 @@ public:
         }
 
         m_initialized = false;
+
+
     }
 
     template<class Archive>
     void load(Archive & ar, const unsigned int version) const {
             LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapper is not correctly initialized, Rank not set!")
-        LOGSZ(m_pSerializerLog, "=========================================================================================="<< std::endl;)
+        //LOGSZ(m_pSerializerLog, "=========================================================================================="<< std::endl;)
         LOGSZ(m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
 
 
@@ -340,8 +346,12 @@ private:
             if( m_bodyInfo->m_overlapsThisRank){// if it still overlaps our rank
                 //Move local body to remote global list
                 LOGSZ(m_pSerializerLog, "-----> Changing LOCAL body to REMOTE in neighbour structure rank: " << m_neighbourRank << std::endl;);
-                m_nc->m_globalRemote.addBody(body);
-                m_nc->m_globalLocal.removeBody(body);
+                bool res = m_nc->m_globalRemote.addBody(body);
+                LOGASSERTMSG(res, m_pSerializerLog, "Could not add body with id: " << RigidBodyId::getBodyIdString(body->m_id) << "in global remote list")
+
+                res = m_nc->m_globalLocal.removeBody(body);
+                LOGASSERTMSG(res, m_pSerializerLog, "Could not remove body with id: " << RigidBodyId::getBodyIdString(body->m_id) << "in global local list")
+
 
                 // Change m_bodyInfo
                 m_bodyInfo->m_isRemote = true;
@@ -349,16 +359,21 @@ private:
                 m_bodyInfo->m_neighbourRanks[m_neighbourRank] = typename BodyInfoType::Flags(true);
 
                 //Add into the neighbour structure!
-                m_neighbourData->deleteLocalBodyData(body);
+                res = m_neighbourData->deleteLocalBodyData(body);
+                LOGASSERTMSG(res, m_pSerializerLog, "Could not delete body with id: " << RigidBodyId::getBodyIdString(body->m_id) << "in neighbour structure rank: " << m_neighbourRank)
                 auto resPair = m_neighbourData->addRemoteBodyData(body);
                 LOGASSERTMSG( resPair.second == true, m_pSerializerLog, "Remote Body with id: " << RigidBodyId::getBodyIdString(body->m_id) << " could not be added in neighbour data structure rank: " << m_neighbourRank << "!");
+
+
             }else{
             // FROM LOCAL to REMOVE!
                 // If it does not overlap anymore, it gets deleted by the delete list in NeighbourCommunicator
-                LOGSZ(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" marked for deletion after send!" <<std::endl;)
+                LOGSZ(m_pSerializerLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" marked for deletion after send!" <<std::endl;)
                 m_nc->m_localBodiesToDelete.insert(body);
                 removeBody = true;
             }
+
+            m_nc->invokeAllRemoveBodyLocal(body);
 
         }else if(m_bodyInfo->m_ownerRank != m_nc->m_rank){ // if owner rank is not the sending neighbour and  not our rank!
             removeBody = true;
@@ -406,7 +421,6 @@ private:
             LOGSZ(m_pSerializerLog, "-----> Deserialize body (update): finished "  <<std::endl;);
 
         // NEW BODY FROM REMOTE  to  LOCAL!!!
-
         if(owningRank == m_nc->m_rank){ // if the body is now our local body!
                 LOGSZ(m_pSerializerLog, "-----> Changing remote body to LOCAL" <<std::endl;);
 
@@ -450,7 +464,7 @@ private:
 
 
         // FROM REMOTE to REMOTE
-        }else if(owningRank != m_neighbourRank) { // if the body is not owned anymore by the sending process but by another of our neighbours
+        }else if(owningRank != m_neighbourRank) { // if the body is not owned anymore by the sending process but by another of our neighbours (hoppfully)
                 LOGSZ(m_pSerializerLog, "-----> Changing remote body to REMOTE" <<std::endl;);
                  LOGASSERTMSG(  m_nc->m_nbRanks.find(owningRank) != m_nc->m_nbRanks.end(), m_pSerializerLog, "Owner Rank: " << owningRank << " for body with id: "
                               <<RigidBodyId::getBodyIdString(id) << " is no neighbour in process rank: " << m_nc->m_rank << "!")
@@ -507,7 +521,7 @@ private:
 
             // insert a new body info
             auto pairBodyInfo = m_nc->m_bodyToInfo.insert(body,owningRank,true,false);
-            LOGASSERTMSG( pairBodyInfo.second, m_pSerializerLog, "Insertion of new body info for body with id: " << id );
+            LOGASSERTMSG( pairBodyInfo.second, m_pSerializerLog, "Insertion of new body info for body with id: " << id <<" failed!");
 
 
             // Add all neighbours which need updates!

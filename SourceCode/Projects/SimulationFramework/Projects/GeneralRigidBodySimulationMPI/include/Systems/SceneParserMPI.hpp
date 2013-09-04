@@ -232,7 +232,7 @@ protected:
             m_nGlobalSimBodies += m_bodyList.size();
 
             typename std::vector<RigidBodyType*>::iterator bodyIt;
-            LOG(m_pSimulationLog, "---> SIZE: " << m_bodyList.size() << std::endl)
+            //LOG(m_pSimulationLog, "---> SIZE: " << m_bodyList.size() << std::endl)
             for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end();  ) {
                 // Check if Body belongs to the topology! // Check CoG!
                 if(m_pProcCommunicator->getProcInfo()->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {

@@ -96,7 +96,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
                             new NeighbourCommunicator<DynamicsSystemType>(m_pDynSys->m_SimBodies, m_pDynSys->m_RemoteSimBodies, m_pDynSys->m_globalGeoms,  m_pProcCommunicator) );
 
     //Set up delegate function from NeighbourCommunicator to StateRecorederBody (close and open files)
-    m_pNbCommunicator->addNotificationLocalRemove(
+    m_pNbCommunicator->addDelegateLocalRemove(
         NeighbourCommunicator<DynamicsSystemType>::AddDelegate::template
         from_method< StateRecorderBody<DynamicsSystemType>,&StateRecorderBody<DynamicsSystemType>::removeBody>
         (& *m_pStateRecorder.get())
@@ -233,7 +233,8 @@ void SimulationManagerMPI<TConfig>::initSim() {
     }
 
 
-    if(!m_pStateRecorder->openFiles(m_SimFolderPath, m_pDynSys->m_SimBodies,true)) { // Truncate the files, important!
+    m_pStateRecorder->setDirectoryPath(m_SimFolderPath);
+    if(!m_pStateRecorder->openFiles(m_pDynSys->m_SimBodies,true)) { // Truncate the files, important!
         LOG(m_pSimulationLog,  "ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl;);
         ERRORMSG("ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
     }

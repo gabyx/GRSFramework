@@ -141,7 +141,7 @@ inline void applyDynamicsStateToBodies(
 
 // Prototype
 template<typename TRigidBody, typename TRigidBodyState>
-inline void applyBodyToRigidBodyState( const TRigidBody  & body, TRigidBodyState & rigidBodyState );
+inline void applyBodyToRigidBodyState( const TRigidBody  * body, TRigidBodyState & rigidBodyState );
 
 template<typename TRigidBodyType, typename TRigidBodyList>
 inline void applyBodiesToDynamicsState(const TRigidBodyList & bodies,
@@ -155,20 +155,20 @@ inline void applyBodiesToDynamicsState(const TRigidBodyList & bodies,
 
     for(bodyIt = bodies.begin(); bodyIt != bodies.end() ; bodyIt++) {
         //std::cout << RigidBodyId::getBodyIdString(*bodyIt) << std::cout;
-        applyBodyToRigidBodyState( *(*bodyIt), (*stateBodyIt) );
+        applyBodyToRigidBodyState( (*bodyIt), (*stateBodyIt) );
         stateBodyIt++;
     }
 }
 
 
 template<typename TRigidBody, typename TRigidBodyState>
-inline void applyBodyToRigidBodyState( const TRigidBody  & body, TRigidBodyState & rigidBodyState ) {
+inline void applyBodyToRigidBodyState( const TRigidBody  * body, TRigidBodyState & rigidBodyState ) {
 
-    rigidBodyState.m_q.template head<3>() = body.m_r_S;
-    rigidBodyState.m_q.template tail<4>() = body.m_q_KI;
+    rigidBodyState.m_q.template head<3>() = body->m_r_S;
+    rigidBodyState.m_q.template tail<4>() = body->m_q_KI;
 
-    if(body.m_pSolverData) {
-        rigidBodyState.m_u = body.m_pSolverData->m_uBuffer.m_back;
+    if(body->m_pSolverData) {
+        rigidBodyState.m_u = body->m_pSolverData->m_uBuffer.m_back;
     } else {
         ASSERTMSG(false,"Your rigid body has no data in m_pSolverData (for velocity), this operation might be incorret!")
         rigidBodyState.m_u.setZero();

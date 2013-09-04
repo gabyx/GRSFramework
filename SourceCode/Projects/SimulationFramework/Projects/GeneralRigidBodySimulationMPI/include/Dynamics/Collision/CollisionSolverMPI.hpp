@@ -93,8 +93,9 @@ public:
     void reset();                                                        ///< Resets the whole Solver. This function is called at the start of the simulation.
     void solveCollision();    ///< Main routine which solves the collision for all bodies.
 
-    std::list< CollisionData<RigidBodyType> * > m_CollisionSet;       ///< This list is only used if no  ContactDelegate is in m_ContactDelegateList, then the contacts are simply added here.
     typedef typename std::list< CollisionData<RigidBodyType> * > CollisionSet;
+    CollisionSet m_CollisionSet;       ///< This list is only used if no  ContactDelegate is in m_ContactDelegateList, then the contacts are simply added here.
+
     inline void clearCollisionSet();
     ContactDelegateList<RigidBodyType> m_ContactDelegateList;
 

@@ -84,8 +84,7 @@ public:
     }
 
 
-    std::pair<DataType *, bool> insert(RigidBodyType * body, RankIdType ownerRank, bool overlapsThisRank = true,
-                        bool isRemote = false){
+    std::pair<DataType *, bool> insert(RigidBodyType * body, RankIdType ownerRank, bool overlapsThisRank = true, bool isRemote = false){
         std::pair<typename Type::iterator,bool> res = m_map.insert( typename Type::value_type(body->m_id, (DataType*)NULL) );
         if(res.second){
              res.first->second = new DataType(body, ownerRank, overlapsThisRank, isRemote);

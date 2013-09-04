@@ -75,7 +75,7 @@ public:
     }
 
     inline bool removeBody(RigidBodyType* ptr){
-        return m_mapById.erase(ptr->m_id)>0;
+        return m_mapById.erase(ptr->m_id);
     }
 
     inline bool removeAndDeleteBody(RigidBodyType* ptr){

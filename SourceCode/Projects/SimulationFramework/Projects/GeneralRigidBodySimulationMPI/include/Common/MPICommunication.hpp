@@ -225,6 +225,7 @@ void ProcessCommunicator<TDynamicsSystem>::sendMessageToRank(const T & t, RankId
 
     int error = MPI_Send( const_cast<char*>(m_binary_message.data()) , m_binary_message.size(), m_binary_message.getMPIDataType(),
                           rank, tag.getInt(), comm );
+
     ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToRank failed!");
 };
 
@@ -247,7 +248,6 @@ void ProcessCommunicator<TDynamicsSystem>::receiveMessageFromRanks(T & t,
     int flag, i;
     LOG(m_pSimulationLog,  "MPI> Receiving message from neighbours (spin loop)..." << std::endl;)
     while( received_messages !=  ranks.size()){
-
         for(ranksIt = ranks.begin(), itBool = receivedRanks.begin(); ranksIt !=  ranks.end(); ++ranksIt , ++itBool){
 
             if(*itBool == true){
