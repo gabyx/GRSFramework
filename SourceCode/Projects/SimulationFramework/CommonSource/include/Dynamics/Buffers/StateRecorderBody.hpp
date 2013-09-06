@@ -162,7 +162,6 @@ void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamic
             LOG(m_pSimulationLog, "StateRecorderBody:: Did not found SimFile for Body Id:"
                 << RigidBodyId::getBodyIdString(*it)<< ". There is no SimFile corresponding to this body!" <<std::endl);
         }else{
-            LOG(m_pSimulationLog, "TIME:" << (*it)->m_pSolverData->m_t <<std::endl)
             dynState.m_t = (*it)->m_pSolverData->m_t;
             InitialConditionBodies::applyBodyToRigidBodyState( *it , dynState.m_SimBodyStates[0]);
             *(fileIt->second) << dynState;

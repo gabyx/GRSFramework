@@ -203,8 +203,8 @@ public:
         return std::pair<DataType *, bool>(res.first->second, res.second);
     }
 
-    template<typename TIterator>
-    void addLocalBodyExclusive(RigidBodyType * body, TIterator neighbourRanksBegin, TIterator neighbourRanksEnd);
+    template<typename List>
+    void addLocalBodyExclusive(RigidBodyType * body, const List & neighbourRanks);
 
     void cleanUp();
 
@@ -227,25 +227,25 @@ private:
 };
 
 template<typename TDynamicsSystem, typename TBodyToInfoMap>
-template< typename TIterator>
+template<typename List>
 void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBodyType * body,
-                                                                          TIterator neighbourRanksBegin,
-                                                                          TIterator neighbourRanksEnd)
+                                                                          const List & neighbourRanks)
 {
+    STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );
     // Add this local body exclusively to the given neighbours
 
     BodyInfoType * bodyInfo = m_bodyToInfo.getBodyInfo(body);
 
     // Loop over all incoming  ranks
-    TIterator rankIt;
-    for( rankIt = neighbourRanksBegin;rankIt!= neighbourRanksEnd;rankIt++){
+    typename List::const_iterator rankIt;
+    for( rankIt = neighbourRanks.begin();rankIt!= neighbourRanks.end();rankIt++){
         // insert the new element into body info --> (rank, flags)
         std::pair<typename RankToFlagsType::iterator,bool> res =
                    bodyInfo->m_neighbourRanks.insert(
                                         typename RankToFlagsType::value_type(*rankIt,typename BodyInfoType::Flags())
                                                        );
 
-        res.first->second.m_bOverlaps = true; // set the Flags for the existing or the newly inserted entry (rank,flags)
+        res.first->second.m_overlaps = true; // set the Flags for the existing or the newly inserted entry (rank,flags)
 
         typename DataType::LocalIterator pairlocalDataIt;
         if(res.second){//if inserted we need to add this body to the underlying neighbour data
@@ -264,13 +264,13 @@ void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBo
 
     // Clean up of the neighbour structure is done after communication!
     // We cannot already remove the local bodies from the neighbours for
-    // which the flag m_bOverlaps = false because, this needs to be communicated first! (such that any neighbour does not request any update anymore!)
-    // So set the flags for this body to SEND_REMOVE for all his neighbours which have m_bOverlaps = false
+    // which the flag m_overlaps = false because, this needs to be communicated first! (such that any neighbour does not request any update anymore!)
+    // So set the flags for this body to SEND_REMOVE for all his neighbours which have m_overlaps = false
 
     for( typename RankToFlagsType::iterator rankToFlagsIt = bodyInfo->m_neighbourRanks.begin();
         rankToFlagsIt != bodyInfo->m_neighbourRanks.end(); rankToFlagsIt++ ){
 
-        if( rankToFlagsIt->second.m_bOverlaps == false){
+        if( rankToFlagsIt->second.m_overlaps == false){
 
             typename DataType::LocalData * localData =
             this->getNeighbourData(rankToFlagsIt->first)->getLocalBodyData(body);

@@ -243,8 +243,8 @@ public:
     template<class Archive>
     void load(Archive & ar, const unsigned int version) const {
             LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapper is not correctly initialized, Rank not set!")
-        //LOGSZ(m_pSerializerLog, "=========================================================================================="<< std::endl;)
-        LOGSZ(m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
+        LOGSZ(m_pSerializerLog, "=========================================================================================="<< std::endl;)
+        LOGSZ(m_pSerializerLog, "DESERIALIZE Message from neighbour rank: " << m_neighbourRank << std::endl;);
 
 
         // Simulation Time:
@@ -305,10 +305,10 @@ private:
 
         // remove neighbour from body info!
 
-        LOGASSERTMSG(m_bodyInfo->m_neighbourRanks.find(m_neighbourRank)->second.m_bOverlaps == false , m_pSerializerLog,
-                     "Body with id: " << RigidBodyId::getBodyIdString(body) << " overlaps (m_bOverlaps = true) neighbour rank: " << m_neighbourRank << " which should not because we have send a removal!" );
+        LOGASSERTMSG(m_bodyInfo->m_neighbourRanks.find(m_neighbourRank)->second.m_overlaps == false , m_pSerializerLog,
+                     "Body with id: " << RigidBodyId::getBodyIdString(body) << " overlaps (m_overlaps = true) neighbour rank: " << m_neighbourRank << " which should not because we have send a removal!" );
 
-        m_bodyInfo->m_neighbourRanks.erase(m_neighbourRank); // Erase the neighbour rank in the list!
+        m_bodyInfo->markNeighbourRankToRemove(m_neighbourRank); // Mark this rank to remove!
 
     }
 
@@ -370,27 +370,25 @@ private:
                 // If it does not overlap anymore, it gets deleted by the delete list in NeighbourCommunicator
                 LOGSZ(m_pSerializerLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" marked for deletion after send!" <<std::endl;)
                 m_nc->m_localBodiesToDelete.insert(body);
-                removeBody = true;
+
+                //Remove this local from this neighbour structure!
+                LOGSZ(m_pSerializerLog, "-----> Deleting LOCAL body in neighbour structure rank: " << m_neighbourRank << std::endl;);
+                bool res = m_neighbourData->deleteLocalBodyData(body);
+                LOGASSERTMSG( res == true, m_pSerializerLog, "Could not delete local body with id: " << RigidBodyId::getBodyIdString(body->m_id) <<"in neighbour structure rank: " << m_neighbourRank << "!");
             }
 
             m_nc->invokeAllRemoveBodyLocal(body);
 
         }else if(m_bodyInfo->m_ownerRank != m_nc->m_rank){ // if owner rank is not the sending neighbour and  not our rank!
-            removeBody = true;
-        }
-
-
-        // Remove local body from this neighbour structure and remove neighbour from bodyinfo!
-        if(removeBody){
             //Remove this local from this neighbour structure!
             LOGSZ(m_pSerializerLog, "-----> Deleting LOCAL body in neighbour structure rank: " << m_neighbourRank << std::endl;);
             bool res = m_neighbourData->deleteLocalBodyData(body);
             LOGASSERTMSG( res == true, m_pSerializerLog, "Could not delete local body with id: " << RigidBodyId::getBodyIdString(body->m_id) <<"in neighbour structure rank: " << m_neighbourRank << "!");
 
-            //Update body info
-            res = m_bodyInfo->m_neighbourRanks.erase(m_neighbourRank) > 0;
-            LOGASSERTMSG( res == true, m_pSerializerLog, "Could not delete rank: " << m_neighbourRank << "from body info for body with id: " << RigidBodyId::getBodyIdString(body->m_id) << "!");
+            //Mark bodyinfo
+            m_bodyInfo->markNeighbourRankToRemove(m_neighbourRank);
         }
+
 
 
         if(flag == SubMessageFlag::NOTIFICATION){
@@ -678,7 +676,7 @@ private:
 
             LOGSZ(m_pSerializerLog, "-----> overlappingNeigbours: "<<std::endl;);
             for( auto it =  m_bodyInfo->m_neighbourRanks.begin(); it != m_bodyInfo->m_neighbourRanks.end(); it++){
-                if(it->second.m_bOverlaps == true && adjRanks.find(it->first) != adjRanks.end() ){
+                if(it->second.m_overlaps == true && adjRanks.find(it->first) != adjRanks.end() ){
                     // this body overlaps a rank which is adjacent to m_neighbourRank
                     overlappingNeighbours.insert(it->first);
 

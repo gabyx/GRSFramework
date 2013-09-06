@@ -14,11 +14,12 @@ public:
                         bool isRemote = false): m_body(body), m_ownerRank(ownRank), m_overlapsThisRank(overlapsThisRank), m_isRemote(isRemote){};
         /**
         * Data structure in the Map: Rank -> Flags, Flags define the behaviour what needs to be done with this Body.
-        * m_bOverlaps: Used to decide if body is removed from the corresponding neigbourS
+        * m_overlaps: Used to decide if body is removed from the corresponding neigbourS
         */
         struct Flags{
-            Flags(bool overlap = false):m_bOverlaps(overlap){};
-            bool m_bOverlaps; ///< Remove flag from this ranks neighbour data
+            Flags(bool overlap = false, bool inNeighbourMap = true):m_overlaps(overlap), m_inNeighbourMap(inNeighbourMap){};
+            bool m_overlaps;         ///< If this body overlaps this neighbour in this timestep
+            bool m_inNeighbourMap;   ///< If this body is contained in the neighbourmap or not!
         };
 
         typedef std::map<RankIdType, Flags> RankToFlagsType;
@@ -32,10 +33,23 @@ public:
         bool m_isRemote;
 
         void resetNeighbourFlags(){
-            for(auto it = m_neighbourRanks.begin(); it != m_neighbourRanks.end(); it++ ){
-                ASSERTMSG( it->second.m_bOverlaps == true , "Body with id: " << RigidBodyId::getBodyIdString(m_body) << ", there is still a neighbour rank (non overlapping): " << it->first << " inside the list which should have been removed already!");
-                it->second.m_bOverlaps = false;
+            for(auto it = m_neighbourRanks.begin(); it != m_neighbourRanks.end();){
+                it->second.m_overlaps = false;
+                if(it->second.m_inNeighbourMap == false){
+                    it=m_neighbourRanks.erase(it);
+                }else{
+                    ++it;
+                }
             }
+        }
+
+        bool markNeighbourRankToRemove(RankIdType rank){
+            auto it = m_neighbourRanks.find(rank);
+            if(it!=m_neighbourRanks.end()){
+                it->second.m_inNeighbourMap = false;
+                return true;
+            }
+            return false;
         }
 };
 
