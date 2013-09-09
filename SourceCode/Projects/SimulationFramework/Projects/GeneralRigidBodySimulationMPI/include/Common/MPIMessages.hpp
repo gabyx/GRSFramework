@@ -155,7 +155,7 @@ public:
     void save(Archive & ar, const unsigned int version) const {
 
 
-            LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapper is not correctly initialized, Rank not set!");
+        LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapper is not correctly initialized, Rank not set!");
         LOGSZ(m_pSerializerLog, "=========================================================================================="<< std::endl;)
         LOGSZ(m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
 
@@ -385,7 +385,7 @@ private:
             bool res = m_neighbourData->deleteLocalBodyData(body);
             LOGASSERTMSG( res == true, m_pSerializerLog, "Could not delete local body with id: " << RigidBodyId::getBodyIdString(body->m_id) <<"in neighbour structure rank: " << m_neighbourRank << "!");
 
-            //Mark bodyinfo
+            //Mark bodyinfo , dont remove this rank (only mark it) because we might send a notification which needs access to the overlap bool!
             m_bodyInfo->markNeighbourRankToRemove(m_neighbourRank);
         }
 

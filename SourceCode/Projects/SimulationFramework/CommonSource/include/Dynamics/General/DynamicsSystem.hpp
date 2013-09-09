@@ -16,6 +16,8 @@
 #include "InclusionSolverSettings.hpp"
 #include "CommonFunctions.hpp"
 
+#include "ExternalForces.hpp"
+
 #include "RecorderSettings.hpp"
 #include "TimeStepperSettings.hpp"
 
@@ -39,6 +41,8 @@ public:
     Vector3 m_gravityDir;
 
     ContactParameterMap<RigidBodyType> m_ContactParameterMap;
+
+    ExternalForceList<DynamicsSystem> m_externalForces; ///< Special class of function objects
 
     //All Global Geometries used in the System
     typedef std::map< unsigned int /* id */, typename RigidBodyType::GeometryType> GlobalGeometryMapType;
@@ -159,8 +163,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
     static Matrix43 F_i = Matrix43::Zero();
 
     // Do timestep for every object
-    typename RigidBodySimContainerType::iterator bodyIt;
-    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
+    for(auto bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
 
@@ -193,6 +196,12 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
         // Add in to Mass Matrix
         // Mass Matrix is Constant!
         // =================
+
+        // Add external forces to h_term
+        for(auto it = m_externalForces.begin(); it != m_externalForces.end();it++){
+            (*it)(*bodyIt); // Apply calculation function!
+        }
+
 
 #if CoutLevelSolver>2
         LOG(m_pSolverLog, "Body: "<< RigidBodyId::getBodyIdString(pBody)<<"-----" std::endl

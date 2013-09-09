@@ -33,6 +33,9 @@
 #include "InertiaTensorCalculations.hpp"
 #include "InitialConditionBodies.hpp"
 
+#include "ExternalForces.hpp"
+
+
 #include <assimp.hpp>      // C++ importer interface
 #include <aiScene.h>       // Output data structure
 #include <aiPostProcess.h> // Post processing flags
@@ -350,8 +353,11 @@ protected:
 
         } // m_bparseDynamics
 
-         // Parse Global Geometries (also in playback manager)!
-            processGlobalGeometries(sceneSettings);
+        // Parse external forces
+        processExternalForces(sceneSettings);
+
+        // Parse Global Geometries (also in playback manager)!
+        processGlobalGeometries(sceneSettings);
 
     }
 
@@ -427,10 +433,74 @@ protected:
                 if( child->Value() == "Geometry") {
                     processGeometry( &(*child) , true);
                 }
-
             }
         }
     }
+
+    virtual void processExternalForces( ticpp::Node *sceneSettings ){
+        ticpp::Node *externalForces = sceneSettings->FirstChild("ExternalForces",false);
+        if(externalForces ){
+            LOG(m_pSimulationLog,"---> Process ExternalForces ..."<<std::endl;);
+            ticpp::Iterator< ticpp::Node > child;
+            for ( child = child.begin( externalForces ); child != child.end(); child++ ) {
+                if( child->Value() == "ForceField") {
+                    ticpp::Element* elem = (&(*child))->ToElement();
+                    processForceField( elem );
+                }
+            }
+        }
+    }
+
+    void processForceField( ticpp::Element * forceField){
+
+        bool enabled = false;
+        if(!Utilities::stringToType<bool>(enabled, forceField->GetAttribute("enabled"))) {
+            throw ticpp::Exception("---> String conversion in processForceField: enable failed");
+        }
+        if(enabled){
+
+            std::string apply  = forceField->GetAttribute("applyTo");
+
+            std::vector<typename RigidBodyType::RigidBodyIdType > applyList;
+            if( !(apply=="all" || apply=="All" || apply=="ALL" )) {
+                //process all applyTo bodies
+            }else if (apply=="all" || apply=="All" || apply=="ALL" ) {
+                // do nothing
+            }
+            else{
+                throw ticpp::Exception("---> String conversion in processForceField: applyTo failed");
+            }
+
+            std::string type = forceField->GetAttribute("type");
+            if(type == "spatialuniform-timerandom") {
+
+                unsigned int seed;
+                if(!Utilities::stringToType<unsigned int>(seed, forceField->GetAttribute("seed"))) {
+                    throw ticpp::Exception("---> String conversion in processForceField: seed failed");
+                }
+                PREC boostTime;
+                if(!Utilities::stringToType<PREC>(boostTime, forceField->GetAttribute("boostTime"))) {
+                    throw ticpp::Exception("---> String conversion in processForceField: boostTime failed");
+                }
+                PREC pauseTime;
+                if(!Utilities::stringToType<PREC>(pauseTime, forceField->GetAttribute("pauseTime"))) {
+                    throw ticpp::Exception("---> String conversion in processForceField: pauseTime failed");
+                }
+                PREC amplitude;
+                if(!Utilities::stringToType<PREC>(amplitude, forceField->GetAttribute("amplitude"))) {
+                    throw ticpp::Exception("---> String conversion in processForceField: pauseTime failed");
+                }
+
+                m_pDynSys->m_externalForces.addExternalForceCalculation(
+                                                    new SpatialUniformTimeRandomForceField<DynamicsSystemType>(
+                                                                seed,boostTime,pauseTime, amplitude)
+                                                    );
+            }else{
+                throw ticpp::Exception("---> String conversion in processForceField: applyTo failed");
+            }
+        }
+    }
+
 
     virtual void processSceneObjects( ticpp::Node *sceneObjects) {
 

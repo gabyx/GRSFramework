@@ -26,6 +26,7 @@
 
 #include "SimpleLogger.hpp"
 
+#include "ExternalForces.hpp"
 
 template<typename TDynamicsSystemConfig>
 class DynamicsSystem {
@@ -44,6 +45,8 @@ public:
     Vector3 m_gravityDir;
 
     ContactParameterMap<RigidBodyType> m_ContactParameterMap;
+
+    ExternalForceList m_externalForces; ///< Special class of function objects
 
     //All Global Geometries used in the System
     typedef std::map< unsigned int /* id */, typename RigidBodyType::GeometryType> GlobalGeometryMapType;
@@ -200,6 +203,13 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
         // Add in to Mass Matrix
         // Mass Matrix is Constant!
         // =================
+
+        // Add external forces to h_term
+        for(auto it = m_externalForces.begin(); it != m_externalForces.end();it++){
+            (*it)(*bodyIt,) // Apply calculation function!
+        }
+
+
 
 #if CoutLevelSolver>2
         LOG(m_pSolverLog, "Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
