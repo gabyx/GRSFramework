@@ -15,31 +15,31 @@ class SpatialUniformTimeRandomForceField{
 
         SpatialUniformTimeRandomForceField(unsigned int seed, PREC boostTime, PREC pauseTime, PREC amplitude):
             m_boostTime(boostTime),m_pauseTime(pauseTime),m_seed(seed), m_amplitude(amplitude)
-            {
-                reset();
-            }
+        {
+            m_randomG = NULL;
+            reset();
+        }
 
         ~SpatialUniformTimeRandomForceField(){
             delete m_randomG;
         }
-        void operator()(RigidBodyType * body){
-            addForce(body);
-        }
-        void addForce(RigidBodyType * body){
-
-
-
-            PREC t = std::fmod(body->m_pSolverData->m_t, (m_boostTime+m_pauseTime)) ;
-            if(t < m_boostTime){
-                Vector3 r = Vector3(body->m_r_S(0)+m_offsetX,body->m_r_S(1)+m_offsetY, 0.5+ body->m_r_S(2) + m_offsetZ)  ;
+        void calculate(RigidBodyType * body){
+            ASSERTMSG(body->m_pSolverData, "Solverdata not present!")
+            if(m_ts > m_pauseTime){
+                Vector3 r = Vector3(body->m_r_S(0)+m_offsetX,body->m_r_S(1)+m_offsetY, 0.5+ body->m_r_S(2))  ;
                 r.normalize();
                 body->m_h_term.template head<3>() += r*m_amplitude;
-            }else{
-                //set location of the spherical boost new
-                m_offsetX = (*m_randomG)();
-                m_offsetY = (*m_randomG)();
-                m_offsetZ = (*m_randomG)();
-                // apply no force =)
+            }
+        }
+
+        void setTime(PREC time){
+            m_t = time;
+            m_ts = std::fmod(time, (m_boostTime+m_pauseTime)) ;
+            if(m_newPos == false && m_ts<m_pauseTime){
+                m_offsetX=(*m_randomG)()*3;
+                m_offsetY=(*m_randomG)()*3;
+                m_offsetZ=(*m_randomG)()*3;
+                m_newPos = true;
             }
         }
 
@@ -47,20 +47,29 @@ class SpatialUniformTimeRandomForceField{
             if(m_randomG){
                 delete m_randomG;
             }
-            typedef boost::mt19937  RNG;
-            RNG generator(m_seed);
-            boost::uniform_int<unsigned int> uniform(-1,1);
-            m_randomG  = new boost::variate_generator< boost::mt19937 & , boost::uniform_int<unsigned int> > (generator, uniform);
 
+            boost::mt19937  generator(m_seed);
+            boost::uniform_real<PREC> uniform(-1,1);
+            m_randomG  = new boost::variate_generator< boost::mt19937 , boost::uniform_real<PREC> >(generator, uniform);
+
+            m_t = 0;
+            m_ts = 0;
+            m_newPos = true;
             m_offsetX=0;
             m_offsetY=0;
             m_offsetZ=0;
         }
 
+        SpatialUniformTimeRandomForceField(const SpatialUniformTimeRandomForceField &){
+            std::cout << "COPY CONSRUCTOR!" << std::endl;
+        }
+
     private:
-        boost::variate_generator< boost::mt19937 & , boost::uniform_int<unsigned int> > * m_randomG;
-        PREC m_boostTime, m_pauseTime, m_amplitude, m_offsetX, m_offsetY, m_offsetZ ;
+        boost::variate_generator< boost::mt19937 , boost::uniform_real<PREC> > * m_randomG;
+        PREC m_boostTime, m_pauseTime, m_amplitude, m_offsetX, m_offsetY, m_offsetZ, m_t, m_ts ;
         unsigned int m_seed ;
+
+
 };
 
 
@@ -76,12 +85,28 @@ class ExternalForceList{
         template<typename T>
         void addExternalForceCalculation(T * extForce){
             m_deleterList.push_back( ExternalForceList::DeleteFunctor<T>(extForce) );
-            m_calculationList.push_back( *extForce  );
+            m_resetList.push_back( std::bind( &T::reset, extForce ) );
+            m_calculationList.push_back( std::bind(&T::calculate, extForce, std::placeholders::_1 ) );
+            m_setTimeList.push_back( std::bind(&T::setTime, extForce, std::placeholders::_1 ) );
         }
 
         ~ExternalForceList(){
+            //std::cout << "DELETE EXTERNAL FORCES" << std::endl;
             for (auto it = m_deleterList.begin(); it != m_deleterList.end(); it++){
                 (*it)(); // delete all objects
+            }
+        }
+
+        void reset(){
+            //std::cout << "RESET EXTERNAL FORCES" << std::endl;
+            for(auto it = m_resetList.begin(); it != m_resetList.end(); it++){
+                (*it)(); // reseter list
+            }
+        }
+
+        void setTime(Prec time){
+            for(auto it = m_setTimeList.begin(); it != m_setTimeList.end(); it++){
+                (*it)(time); // reseter list
             }
         }
 
@@ -92,9 +117,12 @@ class ExternalForceList{
         typedef std::vector< std::function<void (RigidBodyType *)> > CalcListType;
 
 
-        std::vector< std::function<void (RigidBodyType *)> > m_calculationList;
+        CalcListType m_calculationList;
+        std::vector< std::function<void (void)> > m_resetList;
+        std::vector< std::function<void (PREC)> > m_setTimeList;
         std::vector< std::function<void (void)> > m_deleterList;
 
+        // Must be copy constructable!
         template<typename T>
         class DeleteFunctor {
             public:

@@ -133,6 +133,8 @@ private:
     */
     void cleanUp();
 
+    void checkReceiveForRemotes();
+
     void printAllNeighbourRanks();
 
     PREC m_currentSimTime;
@@ -272,10 +274,26 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
     cleanUp();
 
     receiveMessagesFromNeighbours();
+    checkReceiveForRemotes();
 
     LOG(m_pSimulationLog,"---> Communicate: finished"<< std::endl;)
 
 
+}
+
+template<typename TDynamicsSystem>
+void NeighbourCommunicator<TDynamicsSystem>::checkReceiveForRemotes(){
+    for(auto it = m_globalRemote.begin(); it != m_globalRemote.end(); it++){
+        typename BodyInfoMapType::DataType * bodyInfoPtr = m_bodyToInfo.getBodyInfo( (*it) );
+        LOGASSERTMSG(bodyInfoPtr , m_pSimulationLog, "bodyInfoPtr is NULL! ");
+
+        if(bodyInfoPtr->m_receivedUpdate == false ){
+            LOG(m_pSimulationLog,"---> WARNING: Remote body with id: " << (*it)->m_id << " has not received an update!" << std::endl;)
+        }else{
+           // Set to false for next iteration!
+           bodyInfoPtr->m_receivedUpdate == false;
+        }
+    }
 }
 
 

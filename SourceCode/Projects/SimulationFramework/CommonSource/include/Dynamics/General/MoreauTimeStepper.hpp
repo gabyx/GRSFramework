@@ -370,7 +370,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
 
     //Calculate Midpoint Rule ============================================================
     // Middle Time Step ==================================================================
-    m_pDynSys->doFirstHalfTimeStep(m_Settings.m_deltaT/2.0);
+    m_pDynSys->doFirstHalfTimeStep(m_StateBuffers.m_pBack->m_t + m_Settings.m_deltaT/2.0, m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs
     m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Calculations after first timestep

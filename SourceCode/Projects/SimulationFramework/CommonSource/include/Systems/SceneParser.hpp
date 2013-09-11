@@ -1068,15 +1068,13 @@ protected:
         LOG(m_pSimulationLog,"---> Process DynamicProperties ..."<<std::endl;);
         ticpp::Element * element = dynProp->FirstChild("DynamicState")->ToElement();
 
+
+
         std::string type = element->GetAttribute("type");
         if(type == "simulated") {
             m_eBodiesState =  RigidBodyType::SIMULATED;
-
-            processDynamicPropertiesSimulated(dynProp);
         } else if(type == "not simulated") {
             m_eBodiesState =  RigidBodyType::NOT_SIMULATED;
-
-            processDynamicPropertiesNotSimulated(dynProp);
         } else if(type == "animated") {
             m_eBodiesState =  RigidBodyType::ANIMATED;
             throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'DynamicState' has no implementation in the parser"));
@@ -1084,11 +1082,17 @@ protected:
             throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'DynamicState' has no implementation in the parser"));
         }
 
+        // apply first to all bodies :-)
         for(int i=0; i < m_bodyList.size(); i++) {
             m_bodyList[i]->m_eState = m_eBodiesState;
         }
 
-    }
+        if(m_eBodiesState == RigidBodyType::SIMULATED) {
+            processDynamicPropertiesSimulated(dynProp);
+        } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
+            processDynamicPropertiesNotSimulated(dynProp);
+        }
+}
 
 
     virtual void processDynamicPropertiesSimulated( ticpp::Node * dynProp) {
@@ -1180,8 +1184,7 @@ protected:
             }
         }
 
-        InitialConditionBodies::applyDynamicsStateToBodies<
-            typename DynamicsSystemType::RigidBodyType,
+        InitialConditionBodies::applyDynamicsStateToBodies<typename DynamicsSystemType::RigidBodyType,
             std::vector<RigidBodyType*> >(m_SimBodyInitStates.back(), m_bodyList);
 
     }

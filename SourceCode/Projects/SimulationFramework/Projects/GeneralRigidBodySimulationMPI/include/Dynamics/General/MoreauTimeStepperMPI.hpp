@@ -321,7 +321,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     // Middle Time Step for all LOCAL Bodies==============================================
     // Remote bodies belong to other processes which are timestepped
     m_currentSimulationTime += m_Settings.m_deltaT/2.0;
-    m_pDynSys->doFirstHalfTimeStep(m_Settings.m_deltaT/2.0);
+    m_pDynSys->doFirstHalfTimeStep(m_currentSimulationTime, m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs
     m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Calculations after first timestep

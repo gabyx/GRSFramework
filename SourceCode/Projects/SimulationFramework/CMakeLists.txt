@@ -36,7 +36,7 @@ IF(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 
 	MESSAGE(STATUS "Setting Values for GCC")
 	SET(CMAKE_C_FLAGS "-fmessage-length=0" CACHE STRING "Flags for C Compiler" FORCE)
-	SET(CMAKE_CXX_FLAGS "-std=c++11 -ftree-vectorize -ftree-vectorizer-verbose=2 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" FORCE)
+	SET(CMAKE_CXX_FLAGS "-std=c++11 -ftree-vectorize -ftree-vectorizer-verbose=0 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" FORCE)
 	
 ELSEIF ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
 
@@ -69,7 +69,7 @@ MARK_AS_ADVANCED(MULTITHREADED_BUILD)
 set(MULTITHREADED_BUILD 12 CACHE STRING "How many threads are used to build the project")
 if(MULTITHREADED_BUILD)
     if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
-#           set(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM_INTERNAL} -j${MULTITHREADED_BUILD}")
+            set(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM_INTERNAL} -j${MULTITHREADED_BUILD}")
             message(STATUS "Added arguments to CMAKE_BUILD_TOOL: ${CMAKE_MAKE_PROGRAM}")
     elseif(MSVC)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")

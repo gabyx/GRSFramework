@@ -238,7 +238,6 @@ protected:
                 if(m_pProcCommunicator->getProcInfo()->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {
 
                     LOG(m_pSimulationLog, "---> Added Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
-
                     m_pDynSys->m_SimBodies.addBody((*bodyIt));
 
                     m_nSimBodies++;

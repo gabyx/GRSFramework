@@ -242,7 +242,7 @@ void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBo
         // insert the new element into body info --> (rank, flags)
         std::pair<typename RankToFlagsType::iterator,bool> res =
                    bodyInfo->m_neighbourRanks.insert(
-                                        typename RankToFlagsType::value_type(*rankIt,typename BodyInfoType::Flags())
+                                        typename RankToFlagsType::value_type(*rankIt,typename BodyInfoType::Flags(true))
                                                        );
 
         res.first->second.m_overlaps = true; // set the Flags for the existing or the newly inserted entry (rank,flags)

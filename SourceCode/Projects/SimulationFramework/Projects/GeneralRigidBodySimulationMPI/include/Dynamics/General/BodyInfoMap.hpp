@@ -11,13 +11,19 @@ public:
         BodyProcessInfo(RigidBodyType *body,
                         RankIdType ownRank,
                         bool overlapsThisRank = true,
-                        bool isRemote = false): m_body(body), m_ownerRank(ownRank), m_overlapsThisRank(overlapsThisRank), m_isRemote(isRemote){};
+                        bool isRemote = false, bool receivedUpdate = false):
+                            m_body(body),
+                            m_ownerRank(ownRank),
+                            m_overlapsThisRank(overlapsThisRank),
+                            m_isRemote(isRemote),
+                            m_receivedUpdate(receivedUpdate)
+                            {};
         /**
         * Data structure in the Map: Rank -> Flags, Flags define the behaviour what needs to be done with this Body.
         * m_overlaps: Used to decide if body is removed from the corresponding neigbourS
         */
         struct Flags{
-            Flags(bool overlap = false, bool inNeighbourMap = true):m_overlaps(overlap), m_inNeighbourMap(inNeighbourMap){};
+            Flags(bool overlap = true, bool inNeighbourMap = true):m_overlaps(overlap), m_inNeighbourMap(inNeighbourMap){};
             bool m_overlaps;         ///< If this body overlaps this neighbour in this timestep
             bool m_inNeighbourMap;   ///< If this body is contained in the neighbourmap or not!
         };
@@ -31,6 +37,7 @@ public:
         RigidBodyType * m_body;
 
         bool m_isRemote;
+        bool m_receivedUpdate;
 
         void resetNeighbourFlags(){
             for(auto it = m_neighbourRanks.begin(); it != m_neighbourRanks.end();){
@@ -98,10 +105,14 @@ public:
     }
 
 
-    std::pair<DataType *, bool> insert(RigidBodyType * body, RankIdType ownerRank, bool overlapsThisRank = true, bool isRemote = false){
+    std::pair<DataType *, bool> insert(RigidBodyType * body,
+                                       RankIdType ownerRank,
+                                       bool overlapsThisRank = true,
+                                       bool isRemote = false,
+                                       bool receivedUpdate = false){
         std::pair<typename Type::iterator,bool> res = m_map.insert( typename Type::value_type(body->m_id, (DataType*)NULL) );
         if(res.second){
-             res.first->second = new DataType(body, ownerRank, overlapsThisRank, isRemote);
+             res.first->second = new DataType(body, ownerRank, overlapsThisRank, isRemote,receivedUpdate);
         }
         return std::pair<DataType *, bool>(res.first->second, res.second);
     }

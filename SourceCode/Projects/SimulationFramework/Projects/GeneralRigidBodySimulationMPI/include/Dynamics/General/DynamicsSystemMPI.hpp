@@ -46,7 +46,7 @@ public:
 
     ContactParameterMap<RigidBodyType> m_ContactParameterMap;
 
-    ExternalForceList m_externalForces; ///< Special class of function objects
+    ExternalForceList<DynamicsSystem> m_externalForces; ///< Special class of function objects
 
     //All Global Geometries used in the System
     typedef std::map< unsigned int /* id */, typename RigidBodyType::GeometryType> GlobalGeometryMapType;
@@ -158,6 +158,8 @@ void DynamicsSystem<TDynamicsSystemConfig>::initializeLog(Logging::Log* pLog) {
 
 template<typename TDynamicsSystemConfig>
 void DynamicsSystem<TDynamicsSystemConfig>::reset(){
+    //reset all external forces
+    m_externalForces.reset();
     initMassMatrixAndHTerm();
 }
 
@@ -203,10 +205,9 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
         // Add in to Mass Matrix
         // Mass Matrix is Constant!
         // =================
-
-        // Add external forces to h_term
+         // Add external forces to h_term
         for(auto it = m_externalForces.begin(); it != m_externalForces.end();it++){
-            (*it)(*bodyIt,) // Apply calculation function!
+            (*it)(pBody); // Apply calculation function!
         }
 
 
