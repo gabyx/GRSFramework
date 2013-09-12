@@ -203,7 +203,7 @@ template<typename TDynamicsSystemType>
 void StateRecorderBody<TDynamicsSystemType>::getSimBodyLogFileName(typename TDynamicsSystemType::RigidBodyType *body,
                                                                 std::stringstream & s){
     s.str("");
-    s <<"SimDataBodyAccess" <<"-"<<RigidBodyId::getGroupNr(body)<<"-"<< RigidBodyId::getBodyNr(body)<<SIM_FILE_ACCESS_LOG_EXTENSION;
+    s <<"SimDataBody" <<"-"<<RigidBodyId::getGroupNr(body)<<"-"<< RigidBodyId::getBodyNr(body)<<"-Access"<< SIM_FILE_ACCESS_LOG_EXTENSION;
 }
 
 template<typename TDynamicsSystemType>
