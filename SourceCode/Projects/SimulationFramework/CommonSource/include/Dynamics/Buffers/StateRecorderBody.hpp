@@ -34,8 +34,6 @@ public:
 
     void writeStates(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list);
 
-    void setWriterId(unsigned int id);
-
     void addBody(RigidBodyType * body);
     void removeBody(RigidBodyType * body);
 
@@ -59,10 +57,10 @@ protected:
     FileMap m_BinarySimFiles;
 
     //open files to log the writes!
-    typedef boost::unordered_map< typename RigidBodyType::RigidBodyIdType, BinaryFile* > FileMapLog;
-    FileMap m_LogSimFiles;
+    typedef boost::unordered_map< typename RigidBodyType::RigidBodyIdType, std::ofstream* > FileMapLog;
+    FileMapLog m_LogSimFiles;
     bool m_logWriteAccess;
-    unsigned int writerId;
+    unsigned int m_accessId;
 
     unsigned int m_nSimBodies;
 };
@@ -75,7 +73,7 @@ template<typename TDynamicsSystemType>
 StateRecorderBody<TDynamicsSystemType>::StateRecorderBody(bool logWriteAccess, unsigned int id) {
 
     m_logWriteAccess = logWriteAccess;
-    m_id = id;
+    m_accessId = id;
 
     //Check if LogManager is available
     Logging::LogManager * manager = Logging::LogManager::getSingletonPtr();
@@ -101,11 +99,6 @@ void StateRecorderBody<TDynamicsSystemType>::setDirectoryPath(boost::filesystem:
     m_directoryPath = dir_path;
 }
 
-template<typename TDynamicsSystemType>
-StateRecorderBody<TDynamicsSystemType>::setWriterId(unsigned int id) {
-    writerId = id;
-}
-
 
 template<typename TDynamicsSystemType>
 bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool truncate){
@@ -117,37 +110,40 @@ bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool
     file /= s.str();
 
 
-    std::pair<typename FileMap::iterator, bool> res = m_BinarySimFiles.insert(typename FileMap::value_type(body->m_id,NULL));
-    if(!res.second){
-        m_pSimulationLog->logMessage("---> StateRecorderBody:: SimFile : " + file.string() + "already exists!");
-    }else{
-        // Do truncate
-        MultiBodySimFile* pBodyFile = new MultiBodySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj);
-        (*res.first) =  pBodyFile; // Set the file
+        std::pair<typename FileMap::iterator, bool> res = m_BinarySimFiles.insert(typename FileMap::value_type(body->m_id,NULL));
+        if(!res.second){
+            m_pSimulationLog->logMessage("---> StateRecorderBody:: SimFile : " + file.string() + "already exists!");
+        }else{
+            // Do truncate
+            MultiBodySimFile* pBodyFile = new MultiBodySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj);
+            res.first->second =  pBodyFile; // Set the file
 
-            if(!pBodyFile->openSimFileWrite(file,1,truncate)){
-                m_pSimulationLog->logMessage("---> StateRecorderBody:: Could not open SimFile: " + file.string());
-                m_pSimulationLog->logMessage(pBodyFile->getErrorString());
-                delete pBodyFile;
-                m_BinarySimFiles.erase(res.first);
-                return false;
-            }
-            if(truncate){
-                m_pSimulationLog->logMessage("---> StateRecorderBody:: Added SimFile (truncated):" + file.string() );
-            }
-            else{
-                m_pSimulationLog->logMessage("---> StateRecorderBody:: Added SimFile: " + file.string() );
+                if(!pBodyFile->openSimFileWrite(file,1,truncate)){
+                    m_pSimulationLog->logMessage("---> StateRecorderBody:: Could not open SimFile: " + file.string());
+                    m_pSimulationLog->logMessage(pBodyFile->getErrorString());
+                    delete pBodyFile;
+                    m_BinarySimFiles.erase(res.first);
+                    return false;
+                }
+                if(truncate){
+                    m_pSimulationLog->logMessage("---> StateRecorderBody:: Added SimFile (truncated):" + file.string() );
+                }
+                else{
+                    m_pSimulationLog->logMessage("---> StateRecorderBody:: Added SimFile: " + file.string() );
 
-            }
-    }
+                }
+        }
+
+
 
     if( m_logWriteAccess ){
 
         file = m_directoryPath;
-        getSimBodyFileName(body,s);
+        getSimBodyLogFileName(body,s);
+        file /= s.str();
 
         // open the log file and append to it!
-        auto resPair = m_LogSimFiles.insert(typename FileMapLog::value_type(body->m_id,NULL));
+        auto res = m_LogSimFiles.insert(typename FileMapLog::value_type(body->m_id,NULL));
 
         if(!res.second){
             m_pSimulationLog->logMessage("---> StateRecorderBody:: LogSimFile : " + file.string() + "already exists!");
@@ -155,10 +151,10 @@ bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool
             // Do append!
             std::ofstream * pLogFile = new std::ofstream();
             pLogFile->close(); //safty
-            pLogFile->open(file,std::ios::app | std::ios::out)
-            (*res.first) =  pLogFile; // Set the file
+            pLogFile->open(file.string(),std::ios::app | std::ios::out);
+            res.first->second =  pLogFile; // Set the file
 
-                if(pLogFile.fail()){
+                if(pLogFile->fail()){
                     m_pSimulationLog->logMessage("---> StateRecorderBody:: Could not open LogSimFile: " + file.string());
                     delete pLogFile;
                     m_LogSimFiles.erase(res.first);
@@ -236,7 +232,7 @@ void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamic
             if(logfileIt == m_LogSimFiles.end()){
                 LOG(m_pSimulationLog, "StateRecorderBody:: Did not found LogSimFile for Body Id:" << RigidBodyId::getBodyIdString(*it)<< ". There is no SimFile corresponding to this body!" <<std::endl);
             }else{
-                *(logfileIt->second) << (*it)->m_pSolverData->m_t << "\t" << m_writerId  << std::endl;
+                *(logfileIt->second) << (*it)->m_pSolverData->m_t << "\t" << m_accessId  << std::endl;
             }
         }
 

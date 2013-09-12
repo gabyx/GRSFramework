@@ -90,9 +90,9 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     // =====================================================
 
-    m_pStateRecorder = boost::shared_ptr<StateRecorderBody<DynamicsSystemType> >(new StateRecorderBody<DynamicsSystemType>());
+    m_pStateRecorder  =  boost::shared_ptr<StateRecorderBody<DynamicsSystemType> >(new StateRecorderBody<DynamicsSystemType>(true,m_pProcCommunicator->getProcInfo()->getRank()));
 
-    m_pNbCommunicator = boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> >(
+    m_pNbCommunicator =  boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> >(
                             new NeighbourCommunicator<DynamicsSystemType>(m_pDynSys->m_SimBodies, m_pDynSys->m_RemoteSimBodies, m_pDynSys->m_globalGeoms,  m_pProcCommunicator) );
 
     //Set up delegate function from NeighbourCommunicator to StateRecorederBody (close and open files)

@@ -49,7 +49,7 @@ private:
 
     Logging::Log *  m_pSimulationLog;
 
-    boost::shared_ptr<StateRecorderBody<DynamicsSystemType> >   m_pStateRecorder;
+    boost::shared_ptr< StateRecorderBody<DynamicsSystemType> >   m_pStateRecorder;
     boost::shared_ptr< SceneParserMPI<TConfig> > m_pSceneParser;
 
     boost::shared_ptr< TimeStepperType >	m_pTimestepper;
