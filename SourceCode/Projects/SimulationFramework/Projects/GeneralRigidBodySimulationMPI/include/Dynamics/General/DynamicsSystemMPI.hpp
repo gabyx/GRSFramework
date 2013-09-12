@@ -71,8 +71,8 @@ public:
 
     void initMassMatrixAndHTerm();
 
-    //Virtuals
-    void doFirstHalfTimeStep( PREC timestep);
+
+    void doFirstHalfTimeStep(PREC currentTime, PREC timestep);
     void doSecondHalfTimeStep( PREC timestep);
 
     void getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const;
@@ -164,10 +164,12 @@ void DynamicsSystem<TDynamicsSystemConfig>::reset(){
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
+void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC currentTime, PREC timestep) {
     using namespace std;
 
     static Matrix43 F_i = Matrix43::Zero();
+
+     m_externalForces.setTime(currentTime);
 
     // Do timestep for every object
     typename RigidBodySimContainerType::iterator bodyIt;
@@ -205,11 +207,9 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC timestep) {
         // Add in to Mass Matrix
         // Mass Matrix is Constant!
         // =================
-         // Add external forces to h_term
-        for(auto it = m_externalForces.begin(); it != m_externalForces.end();it++){
-            (*it)(pBody); // Apply calculation function!
-        }
 
+        // Add external forces to h_term
+        m_externalForces.calculate(pBody);
 
 
 #if CoutLevelSolver>2

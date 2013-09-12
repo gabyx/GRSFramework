@@ -18,7 +18,7 @@ public:
       if(m_file_stream.is_open()){
          m_file_stream.close();
       }
-      m_file_stream.open(file_path.string().c_str(),Mode);
+      m_file_stream.open(file_path.string().c_str(),Mode | std::ios::binary); // make it binary as a guaranty!!
       m_file_stream.clear();
       m_file_stream.rdbuf()->pubsetbuf(m_Buffer, BUF_SIZE);
 

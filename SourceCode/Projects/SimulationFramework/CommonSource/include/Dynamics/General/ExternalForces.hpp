@@ -60,13 +60,15 @@ class SpatialUniformTimeRandomForceField{
             m_offsetZ=0;
         }
 
-        SpatialUniformTimeRandomForceField(const SpatialUniformTimeRandomForceField &){
-            std::cout << "COPY CONSRUCTOR!" << std::endl;
-        }
+
 
     private:
+
+        SpatialUniformTimeRandomForceField(const SpatialUniformTimeRandomForceField &);
+
         boost::variate_generator< boost::mt19937 , boost::uniform_real<PREC> > * m_randomG;
         PREC m_boostTime, m_pauseTime, m_amplitude, m_offsetX, m_offsetY, m_offsetZ, m_t, m_ts ;
+        bool m_newPos;
         unsigned int m_seed ;
 
 
@@ -104,9 +106,15 @@ class ExternalForceList{
             }
         }
 
-        void setTime(Prec time){
+        void setTime(PREC time){
             for(auto it = m_setTimeList.begin(); it != m_setTimeList.end(); it++){
                 (*it)(time); // reseter list
+            }
+        }
+
+        void calculate(RigidBodyType * body){
+            for(auto it = m_calculationList.begin(); it != m_calculationList.end();it++){
+                (*it)(body); // Apply calculation function!
             }
         }
 

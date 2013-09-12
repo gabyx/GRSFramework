@@ -353,7 +353,7 @@ private:
 
             // send extended dynamic stuff (h vector) which is important for the neighbour which overtakes this body!
             if(flag == SubMessageFlag::UPDATE) {
-                LOGSZ(m_pSerializerLog, "-----> Send h_term: " << body->m_h_term << std::endl;);
+                //LOGSZ(m_pSerializerLog, "-----> Send h_term: " << body->m_h_term << std::endl;);
                 serializeAdditionalDynamicsProperties(ar,body);
             }
 
@@ -390,8 +390,11 @@ private:
                 LOGSZ(m_pSerializerLog, "-----> Deleting LOCAL body in neighbour structure rank: " << m_neighbourRank << std::endl;);
                 bool res = m_neighbourData->deleteLocalBodyData(body);
                 LOGASSERTMSG( res == true, m_pSerializerLog, "Could not delete local body with id: " << RigidBodyId::getBodyIdString(body->m_id) <<"in neighbour structure rank: " << m_neighbourRank << "!");
+
+                m_bodyInfo->markNeighbourRankToRemove(m_neighbourRank); // Mark this rank to remove!
             }
 
+            //Notify all delegates need to be done here before message is sent! (File is open for this body! needs to be closed!)
             m_nc->invokeAllRemoveBodyLocal(body);
 
         }else if(m_bodyInfo->m_ownerRank != m_nc->m_rank){ // if owner rank is not the sending neighbour and  not our rank!
@@ -440,7 +443,7 @@ private:
             ar & overlappingNeighbours; // all ranks where the body overlaps
 
             serializeAdditionalDynamicsProperties(ar,body);
-            LOGSZ(m_pSerializerLog, "-----> GOT h_term: " << body->m_h_term << std::endl;);
+            //LOGSZ(m_pSerializerLog, "-----> GOT h_term: " << body->m_h_term << std::endl;);
 
             // Move the remote body to the locale ones and delete in remotes
             m_nc->m_globalRemote.removeBody(body);

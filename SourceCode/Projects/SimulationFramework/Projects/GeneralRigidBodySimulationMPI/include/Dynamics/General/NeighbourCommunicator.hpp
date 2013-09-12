@@ -337,7 +337,6 @@ void NeighbourCommunicator<TDynamicsSystem>::cleanUp(){
         }
         m_bodyToInfo.erase(body);
 
-        this->invokeAllRemoveBodyLocal(body);
 
         bool res = m_globalLocal.removeAndDeleteBody(body);
         LOGASSERTMSG( res == true, m_pSimulationLog , "Remote Body with id: " << RigidBodyId::getBodyIdString(body)<< " could not be deleted in m_globalRemote!");

@@ -165,7 +165,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC currentTime
 
     static Matrix43 F_i = Matrix43::Zero();
 
-    m_externalForces.setTime(timestep)
+    m_externalForces.setTime(currentTime);
 
     // Do timestep for every object
     for(auto bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
@@ -203,9 +203,8 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC currentTime
         // =================
 
         // Add external forces to h_term
-        for(auto it = m_externalForces.begin(); it != m_externalForces.end();it++){
-            (*it)(pBody); // Apply calculation function!
-        }
+        m_externalForces.calculate(pBody);
+
 
 
 #if CoutLevelSolver>2
