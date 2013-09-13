@@ -4,42 +4,55 @@
 #include <functional>
 #include <cmath>
 
-#include "boost/random.hpp"
-#include "boost/generator_iterator.hpp"
+#include <boost/random.hpp>
+#include <boost/generator_iterator.hpp>
+
+#include "AABB.hpp"
 
 template<typename TDynamicsSystem>
-class SpatialUniformTimeRandomForceField{
+class SpatialSphericalTimeRandomForceField{
     public:
         typedef TDynamicsSystem DynamicsSystemType;
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemType::DynamicsSystemConfig);
 
-        SpatialUniformTimeRandomForceField(unsigned int seed, PREC boostTime, PREC pauseTime, PREC amplitude):
-            m_boostTime(boostTime),m_pauseTime(pauseTime),m_seed(seed), m_amplitude(amplitude)
+        SpatialSphericalTimeRandomForceField(unsigned int seed,
+                                           PREC boostTime,
+                                           PREC pauseTime,
+                                           PREC amplitude,
+                                           AABB<LayoutConfigType> randomBox,
+                                           bool randomOn
+                                           ):
+            m_boostTime(boostTime),m_pauseTime(pauseTime),m_seed(seed), m_amplitude(amplitude), m_randomBox(randomBox), m_randomOn(randomOn)
         {
             m_randomG = NULL;
             reset();
         }
 
-        ~SpatialUniformTimeRandomForceField(){
+        ~SpatialSphericalTimeRandomForceField(){
             delete m_randomG;
         }
         void calculate(RigidBodyType * body){
             ASSERTMSG(body->m_pSolverData, "Solverdata not present!")
             if(m_ts > m_pauseTime){
-                Vector3 r = Vector3(body->m_r_S(0)+m_offsetX,body->m_r_S(1)+m_offsetY, 0.5+ body->m_r_S(2))  ;
+                Vector3 r = body->m_r_S - m_offset ;
                 r.normalize();
                 body->m_h_term.template head<3>() += r*m_amplitude;
             }
         }
 
         void setTime(PREC time){
+
             m_t = time;
             m_ts = std::fmod(time, (m_boostTime+m_pauseTime)) ;
-            if(m_newPos == false && m_ts<m_pauseTime){
-                m_offsetX=(*m_randomG)()*3;
-                m_offsetY=(*m_randomG)()*3;
-                m_offsetZ=(*m_randomG)()*3;
-                m_newPos = true;
+
+            if(m_randomOn){
+                if(m_newPos == false && m_ts<m_pauseTime){
+                    Vector3 ex = m_randomBox.extent();
+                    m_offset = m_randomBox.m_minPoint + Vector3( ex(0)* (*m_randomG)(),  ex(1) * (*m_randomG)() , ex(2) * (*m_randomG)() );
+                    m_newPos = true;
+                }else{
+                    m_newPos = false;
+                }
             }
         }
 
@@ -49,26 +62,26 @@ class SpatialUniformTimeRandomForceField{
             }
 
             boost::mt19937  generator(m_seed);
-            boost::uniform_real<PREC> uniform(-1,1);
+            boost::uniform_real<PREC> uniform(0,1);
             m_randomG  = new boost::variate_generator< boost::mt19937 , boost::uniform_real<PREC> >(generator, uniform);
 
             m_t = 0;
             m_ts = 0;
             m_newPos = true;
-            m_offsetX=0;
-            m_offsetY=0;
-            m_offsetZ=0;
+            m_offset = m_randomBox.m_minPoint;
         }
 
 
 
     private:
 
-        SpatialUniformTimeRandomForceField(const SpatialUniformTimeRandomForceField &);
+        SpatialSphericalTimeRandomForceField(const SpatialSphericalTimeRandomForceField &);
 
         boost::variate_generator< boost::mt19937 , boost::uniform_real<PREC> > * m_randomG;
-        PREC m_boostTime, m_pauseTime, m_amplitude, m_offsetX, m_offsetY, m_offsetZ, m_t, m_ts ;
-        bool m_newPos;
+        PREC m_boostTime, m_pauseTime, m_amplitude, m_t, m_ts ;
+        Vector3 m_offset;
+        bool m_newPos, m_randomOn;
+        AABB<LayoutConfigType> m_randomBox;
         unsigned int m_seed ;
 
 

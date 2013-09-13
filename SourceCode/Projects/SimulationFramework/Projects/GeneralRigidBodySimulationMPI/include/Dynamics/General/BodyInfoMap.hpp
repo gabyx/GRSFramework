@@ -110,7 +110,8 @@ public:
                                        bool overlapsThisRank = true,
                                        bool isRemote = false,
                                        bool receivedUpdate = false){
-        std::pair<typename Type::iterator,bool> res = m_map.insert( typename Type::value_type(body->m_id, (DataType*)NULL) );
+        std::pair<typename Type::iterator,bool> res = m_map.insert(
+                                                                   typename Type::value_type(body->m_id, (DataType*)NULL) );
         if(res.second){
              res.first->second = new DataType(body, ownerRank, overlapsThisRank, isRemote,receivedUpdate);
         }

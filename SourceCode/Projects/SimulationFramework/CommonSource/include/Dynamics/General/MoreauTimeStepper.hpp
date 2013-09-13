@@ -370,7 +370,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
 
     //Calculate Midpoint Rule ============================================================
     // Middle Time Step ==================================================================
-    m_pDynSys->doFirstHalfTimeStep(m_StateBuffers.m_pBack->m_t + m_Settings.m_deltaT/2.0, m_Settings.m_deltaT/2.0);
+    m_pDynSys->doFirstHalfTimeStep(m_StateBuffers.m_pBack->m_t, m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs
     m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Calculations after first timestep
@@ -397,7 +397,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     // ===================================================================================
 
     // Middle Time Step ==================================================================
-    m_pDynSys->doSecondHalfTimeStep(m_Settings.m_deltaT/2.0);
+    m_StateBuffers.m_pFront->m_t= m_StateBuffers.m_pBack->m_t + m_Settings.m_deltaT;
+    m_pDynSys->doSecondHalfTimeStep(m_StateBuffers.m_pFront->m_t, m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs
     m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Calculations after second timestep
@@ -406,7 +407,6 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
 
 
     // Apply all rigid body local states to the Front buffer and set the time!
-    m_StateBuffers.m_pFront->m_t= m_StateBuffers.m_pBack->m_t + m_Settings.m_deltaT;
     m_pDynSys->applySimBodiesToDynamicsState(*m_StateBuffers.m_pFront);
 
 

@@ -320,12 +320,14 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     //Calculate Midpoint Rule ============================================================
     // Middle Time Step for all LOCAL Bodies==============================================
     // Remote bodies belong to other processes which are timestepped
-    m_currentSimulationTime += m_Settings.m_deltaT/2.0;
-    m_pDynSys->doFirstHalfTimeStep(m_currentSimulationTime, m_Settings.m_deltaT/2.0);
+    double ts = m_currentSimulationTime;
+    m_pDynSys->doFirstHalfTimeStep(ts, m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs
     m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Calculations after first timestep
     m_pDynSys->afterFirstTimeStep();
+
+    m_currentSimulationTime = ts + m_Settings.m_deltaT/2.0;
     // ====================================================================================
 
     m_pNbCommunicator->communicate(m_currentSimulationTime);
@@ -388,8 +390,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
 
     // ===================================================================================
     // Middle Time Step ==================================================================
-    m_currentSimulationTime += m_Settings.m_deltaT/2.0;
-    m_pDynSys->doSecondHalfTimeStep(m_Settings.m_deltaT/2.0);
+    m_currentSimulationTime = ts + m_Settings.m_deltaT ;
+    m_pDynSys->doSecondHalfTimeStep(m_currentSimulationTime, m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs
     m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Calculations after second timestep

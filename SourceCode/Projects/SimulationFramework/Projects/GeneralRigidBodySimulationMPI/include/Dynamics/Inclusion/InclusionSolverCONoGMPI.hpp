@@ -468,7 +468,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
            #endif
 
 
-                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal) {
+                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal)
+                {
                     if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
                         converged = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
                         if(!converged) {

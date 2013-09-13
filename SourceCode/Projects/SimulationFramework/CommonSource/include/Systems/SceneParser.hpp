@@ -472,7 +472,7 @@ protected:
             }
 
             std::string type = forceField->GetAttribute("type");
-            if(type == "spatialuniform-timerandom") {
+            if(type == "spatialspherical-timerandom") {
 
                 unsigned int seed;
                 if(!Utilities::stringToType<unsigned int>(seed, forceField->GetAttribute("seed"))) {
@@ -488,12 +488,33 @@ protected:
                 }
                 PREC amplitude;
                 if(!Utilities::stringToType<PREC>(amplitude, forceField->GetAttribute("amplitude"))) {
-                    throw ticpp::Exception("---> String conversion in processForceField: pauseTime failed");
+                    throw ticpp::Exception("---> String conversion in processForceField: amplitude failed");
                 }
 
+                Vector3 boxMin;
+                if(!Utilities::stringToVector3<PREC>(boxMin, forceField->GetAttribute("minPoint"))) {
+                    throw ticpp::Exception("---> String conversion in processForceField: boxMin failed");
+                }
+                Vector3 boxMax;
+                if(!Utilities::stringToVector3<PREC>(boxMax, forceField->GetAttribute("maxPoint"))) {
+                    throw ticpp::Exception("---> String conversion in processForceField: boxMax failed");
+                }
+
+                bool randomOn;
+                if(!Utilities::stringToType<bool>(randomOn, forceField->GetAttribute("randomOn"))) {
+                    throw ticpp::Exception("---> String conversion in processForceField: randomOn failed");
+                }
+
+
                 m_pDynSys->m_externalForces.addExternalForceCalculation(
-                                                    new SpatialUniformTimeRandomForceField<DynamicsSystemType>(
-                                                                seed,boostTime,pauseTime, amplitude)
+                                                    new SpatialSphericalTimeRandomForceField<DynamicsSystemType>(
+                                                                seed,
+                                                                boostTime,
+                                                                pauseTime,
+                                                                amplitude,
+                                                                AABB<LayoutConfigType>(boxMin,boxMax),
+                                                                randomOn
+                                                                )
                                                     );
             }else{
                 throw ticpp::Exception("---> String conversion in processForceField: applyTo failed");

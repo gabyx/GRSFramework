@@ -370,6 +370,7 @@ private:
 
                 // Change m_bodyInfo
                 m_bodyInfo->m_isRemote = true;
+                m_bodyInfo->m_receivedUpdate = true;
                 m_bodyInfo->m_neighbourRanks.clear();
                 m_bodyInfo->m_neighbourRanks[m_neighbourRank] = typename BodyInfoType::Flags(true);
 
@@ -433,7 +434,11 @@ private:
 
         RigidBodyType * body = remoteData->m_body;
         serializeBodyUpdate(ar,body);
-            LOGSZ(m_pSerializerLog, "-----> Deserialize body (update): finished "  <<std::endl;);
+        LOGSZ(m_pSerializerLog, "-----> Deserialize body (update): finished "  <<std::endl;);
+
+        // Set flag that we received update
+        auto * bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(id);
+        bodyInfo->m_receivedUpdate = true;
 
         // NEW BODY FROM REMOTE  to  LOCAL!!!
         if(owningRank == m_nc->m_rank){ // if the body is now our local body!
@@ -455,7 +460,6 @@ private:
                 LOGASSERTMSG( res, m_pSerializerLog, "Body with id: " << RigidBodyId::getBodyIdString(id) << "not deleted in neighbour structure (?)");
 
             // Change the body info
-            auto * bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(id);
             bodyInfo->m_isRemote = false;
             bodyInfo->m_overlapsThisRank = true;
             bodyInfo->m_ownerRank = owningRank;
@@ -496,9 +500,8 @@ private:
                 LOGASSERTMSG( pairRes.second, m_pSerializerLog, "Insertion of body with id: " << RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << owningRank << " failed!")
 
             // Change the body info
-            auto * bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(id);
             bodyInfo->m_isRemote = true; // No need to set! REMOTE BODY!!!!!!!!!!!!!
-            bodyInfo->m_receivedUpdate= true;
+            bodyInfo->m_receivedUpdate = true;
             bodyInfo->m_overlapsThisRank = true; // No need to set!
             bodyInfo->m_ownerRank = owningRank;
             bodyInfo->m_neighbourRanks.clear();
@@ -517,7 +520,6 @@ private:
         RankIdType owningRank;
         ar & owningRank; LOGSZ(m_pSerializerLog, "-----> owning rank: " << owningRank<<std::endl;);
 
-        LOGASSERTMSG(  m_nc->m_nbRanks.find(owningRank) != m_nc->m_nbRanks.end(), m_pSerializerLog, "Owner Rank: " << owningRank << " for body with id: "<<RigidBodyId::getBodyIdString(id) << " is no neighbour in process rank: " << m_nc->m_rank << "!")
 
         // normal update (make a new body!)
         LOGASSERTMSG( m_nc->m_globalRemote.find(id) == m_nc->m_globalRemote.end(), m_pSerializerLog, "m_globalRemote does contain body with id: " << RigidBodyId::getBodyIdString(id) << " in process rank: " << m_nc->m_rank << "!");
@@ -567,6 +569,7 @@ private:
 
         }else{
             // This is a new remote body!
+            LOGASSERTMSG(  m_nc->m_nbRanks.find(owningRank) != m_nc->m_nbRanks.end(), m_pSerializerLog, "Owner Rank: " << owningRank << " for body with id: "<<RigidBodyId::getBodyIdString(id) << " is no neighbour in process rank: " << m_nc->m_rank << "!")
             LOGSZ(m_pSerializerLog, "-----> New body as REMOTE" <<std::endl;);
             // add in global
             m_nc->m_globalRemote.addBody(body);

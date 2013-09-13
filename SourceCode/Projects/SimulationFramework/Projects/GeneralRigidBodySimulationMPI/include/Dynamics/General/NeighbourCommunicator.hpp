@@ -133,7 +133,7 @@ private:
     */
     void cleanUp();
 
-    void checkReceiveForRemotes();
+    bool checkReceiveForRemotes();
 
     void printAllNeighbourRanks();
 
@@ -192,7 +192,7 @@ NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  typename Dynamic
     // Initialize all NeighbourDatas
     typename ProcessTopologyType::NeighbourRanksListType::const_iterator rankIt;
     for(rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
-        LOG(m_pSimulationLog,"---> Add neighbour data for process rank: "<<*rankIt<<std::endl;);
+        LOGNC(m_pSimulationLog,"---> Add neighbour data for process rank: "<<*rankIt<<std::endl;);
         auto res = m_nbDataMap.insert(*rankIt);
         ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << *rankIt);
     }
@@ -213,25 +213,25 @@ NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  typename Dynamic
 
 template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
-    LOG(m_pSimulationLog,"---> Communicate: Send and Receive message from/to neighbours"<< std::endl;)
+    LOGNC(m_pSimulationLog,"---> Communicate: Send and Receive message from/to neighbours, t = "<<currentSimTime<< std::endl;)
 
     m_currentSimTime = currentSimTime;
 
     // Find all local bodies which overlap
     typename ProcessTopologyType::NeighbourRanksListType neighbours;
 
-    LOG(m_pSimulationLog,"--->\t Update neighbour data structures with LOCAL bodies:"<<std::endl;)
+    LOGNC(m_pSimulationLog,"--->\t Update neighbour data structures with LOCAL bodies:"<<std::endl;)
     for(typename RigidBodyContainerType::iterator it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
         RigidBodyType * body = (*it);
 
         typename BodyInfoMapType::DataType * bodyInfo = m_bodyToInfo.getBodyInfo(body);
-        LOG(m_pSimulationLog,"--->\t\t Resett neighbours flags..."<<std::endl;)
+        LOGNC(m_pSimulationLog,"--->\t\t Resett neighbours flags..."<<std::endl;)
         bodyInfo->resetNeighbourFlags(); // Reset the overlap flag to false! (addLocalBodyExclusive uses this assumption!)
 
         //Check overlapping processes
         //TODO (We should return a map of cellNUmbers -> To Rank (any cell which has no rank
         bool overlapsOwnProcess;
-        LOG(m_pSimulationLog,"--->\t\t Overlap Test..."<<std::endl;)
+        LOGNC(m_pSimulationLog,"--->\t\t Overlap Test..."<<std::endl;)
         bool overlapsNeighbours = m_pProcTopo->checkOverlap(body, neighbours, overlapsOwnProcess);
 
 
@@ -240,7 +240,7 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
 
 
         // Insert this body into the underlying structure for all nieghbours exclusively! (if no overlap, it is removed everywhere)
-        LOG(m_pSimulationLog,"--->\t\t Add neighbours exclusively..."<<std::endl;)
+        LOGNC(m_pSimulationLog,"--->\t\t Add neighbours exclusively..."<<std::endl;)
         m_nbDataMap.addLocalBodyExclusive(body,neighbours);
 
         //Check owner of this body
@@ -249,11 +249,11 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
         //Check if belonging rank is in the neighbours or our own
         if(ownerRank != m_rank){
             if( m_nbRanks.find(ownerRank) == m_nbRanks.end() ){
-                LOG(m_pSimulationLog,"--->\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<"This is not good as we cannot send any message to some other rank other then a neighbour!");
+                LOGNC(m_pSimulationLog,"--->\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<"This is not good as we cannot send any message to some other rank other then a neighbour!");
                 ERRORMSG("---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<"This is not good as we cannot send any message to some other rank other then a neighbour!");
             }
         }
-        LOG(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" has owner rank: "<< (ownerRank) << ", proccess rank: " << m_pProcInfo->getRank()<<std::endl;)
+        LOGNC(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" has owner rank: "<< (ownerRank) << ", proccess rank: " << m_pProcInfo->getRank()<<std::endl;)
 
         //Set the owning rank for this body:
 
@@ -263,47 +263,55 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
         // Status output
 //        typename ProcessTopologyType::NeighbourRanksListType::iterator itRank;
 //        for(itRank = neighbours.begin(); itRank != neighbours.end(); itRank++) {
-//            LOG(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" overlaps Neigbour with Rank: "<< (*itRank) <<std::endl;)
+//            LOGNC(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" overlaps Neigbour with Rank: "<< (*itRank) <<std::endl;)
 //        }
 
     }
-    LOG(m_pSimulationLog,"--->\t Update neighbour data structures complete!"<<std::endl;)
+    LOGNC(m_pSimulationLog,"--->\t Update neighbour data structures complete!"<<std::endl;)
 
     //printAllNeighbourRanks();
     sendMessagesToNeighbours();
     cleanUp();
 
     receiveMessagesFromNeighbours();
-    checkReceiveForRemotes();
 
-    LOG(m_pSimulationLog,"---> Communicate: finished"<< std::endl;)
+    if(checkReceiveForRemotes()){
+        LOGNC(m_pSimulationLog,"--->\t Update for Remotes: OK"<< std::endl;)
+    }else{
+        LOGNC(m_pSimulationLog,"--->\t Update for Remotes: FAIL"<< std::endl;)
+    }
+
+    LOGNC(m_pSimulationLog,"---> Communicate: finished"<< std::endl;)
 
 
 }
 
 template<typename TDynamicsSystem>
-void NeighbourCommunicator<TDynamicsSystem>::checkReceiveForRemotes(){
+bool NeighbourCommunicator<TDynamicsSystem>::checkReceiveForRemotes(){
+    bool m_ok = true;
     for(auto it = m_globalRemote.begin(); it != m_globalRemote.end(); it++){
         typename BodyInfoMapType::DataType * bodyInfoPtr = m_bodyToInfo.getBodyInfo( (*it) );
         LOGASSERTMSG(bodyInfoPtr , m_pSimulationLog, "bodyInfoPtr is NULL! ");
 
         if(bodyInfoPtr->m_receivedUpdate == false ){
-            LOG(m_pSimulationLog,"---> WARNING: Remote body with id: " << (*it)->m_id << " has not received an update!" << std::endl;)
+            LOGNC(m_pSimulationLog,"---> WARNING: Remote body with id: " << RigidBodyId::getBodyIdString(*it) << " has not received an update!" << std::endl;)
+            m_ok = false;
         }else{
            // Set to false for next iteration!
            bodyInfoPtr->m_receivedUpdate == false;
         }
     }
+    return m_ok;
 }
 
 
 template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
-    LOG(m_pSimulationLog,"--->\t Send messages to neighbours!"<<std::endl;)
+    LOGNC(m_pSimulationLog,"--->\t Send messages to neighbours!"<<std::endl;)
     m_localBodiesToDelete.clear();
 
     for(typename ProcessTopologyType::NeighbourRanksListType::const_iterator it = m_nbRanks.begin(); it != m_nbRanks.end(); it++){
-        LOG(m_pSimulationLog,"--->\t\t Send message to neighbours with rank: "<< *it <<std::endl;)
+        LOGNC(m_pSimulationLog,"--->\t\t Send message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_message.setRank(*it);
         m_pProcCom->sendMessageToRank(m_message,*it, MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
@@ -312,7 +320,7 @@ void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
 
 template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::receiveMessagesFromNeighbours(){
-    LOG(m_pSimulationLog,"--->\t Receive all messages from neighbours!"<<std::endl;)
+    LOGNC(m_pSimulationLog,"--->\t Receive all messages from neighbours!"<<std::endl;)
     // set the rank of from the receiving message automatically! inside the function!
     m_pProcCom->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
 
@@ -321,7 +329,7 @@ void NeighbourCommunicator<TDynamicsSystem>::receiveMessagesFromNeighbours(){
 
 template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::cleanUp(){
-    LOG(m_pSimulationLog,"--->\t CleanUp Routine " <<std::endl;)
+    LOGNC(m_pSimulationLog,"--->\t CleanUp Routine " <<std::endl;)
     //Delete all bodies in the list
     for(auto it = m_localBodiesToDelete.begin(); it != m_localBodiesToDelete.end(); it++){
         RigidBodyType * body = *it;
@@ -342,7 +350,7 @@ void NeighbourCommunicator<TDynamicsSystem>::cleanUp(){
         LOGASSERTMSG( res == true, m_pSimulationLog , "Remote Body with id: " << RigidBodyId::getBodyIdString(body)<< " could not be deleted in m_globalRemote!");
         // FROM now it needs to be sure that this body is no where else in the system anymore!
 
-        LOG(m_pSimulationLog,"--->\t Deleted body with id: "<< RigidBodyId::getBodyIdString(body) <<std::endl;)
+        LOGNC(m_pSimulationLog,"--->\t Deleted body with id: "<< RigidBodyId::getBodyIdString(body) <<std::endl;)
     }
 
     m_localBodiesToDelete.clear();
@@ -357,11 +365,11 @@ void NeighbourCommunicator<TDynamicsSystem>::printAllNeighbourRanks(){
         auto * bodyInfo = m_bodyToInfo.getBodyInfo(body);
         LOGASSERTMSG(bodyInfo, m_pSimulationLog , "Body info for local body with id: " << (body)->m_id << " does not exist!");
         LOGASSERTMSG(bodyInfo->m_isRemote == false , m_pSimulationLog , "Local body to delete is not a local body?!" );
-        LOG(m_pSimulationLog,"BodyInfoRanks for body: "<<RigidBodyId::getBodyIdString(body)<< std::endl)
+        LOGNC(m_pSimulationLog,"BodyInfoRanks for body: "<<RigidBodyId::getBodyIdString(body)<< std::endl)
         for( auto ranksIt = bodyInfo->m_neighbourRanks.begin(); ranksIt !=  bodyInfo->m_neighbourRanks.end();ranksIt++ ){
-            LOG(m_pSimulationLog, "("<< ranksIt->first << ","<<ranksIt->second.m_overlaps <<"), ")
+            LOGNC(m_pSimulationLog, "("<< ranksIt->first << ","<<ranksIt->second.m_overlaps <<"), ")
         }
-        LOG(m_pSimulationLog, std::endl)
+        LOGNC(m_pSimulationLog, std::endl)
     }
 }
 

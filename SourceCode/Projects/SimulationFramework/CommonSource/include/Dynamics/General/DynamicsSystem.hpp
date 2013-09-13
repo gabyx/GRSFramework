@@ -62,9 +62,8 @@ public:
 
     void initMassMatrixAndHTerm(); // MassMatrix is const
 
-    //Virtuals
-    void doFirstHalfTimeStep(PREC currentTime, PREC timestep);
-    void doSecondHalfTimeStep( PREC timestep);
+    void doFirstHalfTimeStep(PREC ts, PREC timestep);
+    void doSecondHalfTimeStep(PREC te, PREC timestep);
 
     void getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const;
     void setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder);
@@ -160,12 +159,12 @@ void DynamicsSystem<TDynamicsSystemConfig>::applyDynamicsStateToSimBodies(const 
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC currentTime, PREC timestep) {
+void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC ts, PREC timestep) {
     using namespace std;
 
     static Matrix43 F_i = Matrix43::Zero();
 
-    m_externalForces.setTime(currentTime);
+    m_externalForces.setTime(ts+timestep);
 
     // Do timestep for every object
     for(auto bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
@@ -178,7 +177,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC currentTime
             << "m_q_s= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
 #endif
         // Update time:
-        pBody->m_pSolverData->m_t += timestep;
+        pBody->m_pSolverData->m_t = ts + timestep;
 
         // Set F for this object:
         updateFMatrix(pBody->m_q_KI, F_i);
@@ -216,7 +215,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC currentTime
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) {
+void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC te, PREC timestep) {
     using namespace std;
 
     static Matrix43 F_i = Matrix43::Zero();
@@ -234,7 +233,7 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC timestep) 
             << "m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
 #endif
         // Update time:
-        pBody->m_pSolverData->m_t += timestep;
+        pBody->m_pSolverData->m_t = te;
 
         // Set F for this object:
         updateFMatrix(pBody->m_q_KI, F_i);

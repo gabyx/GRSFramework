@@ -246,7 +246,7 @@ void ProcessCommunicator<TDynamicsSystem>::receiveMessageFromRanks(T & t,
 
     int received_messages = 0;
     int flag, i;
-    LOG(m_pSimulationLog,  "MPI> Receiving message from neighbours (spin loop)..." << std::endl;)
+    LOGPC(m_pSimulationLog,  "MPI> Receiving message from neighbours (spin loop)..." << std::endl;)
     while( received_messages !=  ranks.size()){
         for(ranksIt = ranks.begin(), itBool = receivedRanks.begin(); ranksIt !=  ranks.end(); ++ranksIt , ++itBool){
 
@@ -273,7 +273,7 @@ void ProcessCommunicator<TDynamicsSystem>::receiveMessageFromRanks(T & t,
                                       m_binary_message.getMPIDataType(),
                                       status.MPI_SOURCE, status.MPI_TAG, comm, &status
                                      );
-                LOG(m_pSimulationLog, "--->\tReceived message from rank: " << recv_rank << " [" << message_size << "b]" << std::endl;)
+                LOGPC(m_pSimulationLog, "--->\tReceived message from rank: " << recv_rank << " [" << message_size << "b]" << std::endl;)
                 ASSERTMPIERROR(error, "ProcessCommunicator:: receiveMessageFromRanks2 failed for rank "<< *ranksIt)
 
                 // Deserialize
@@ -286,7 +286,7 @@ void ProcessCommunicator<TDynamicsSystem>::receiveMessageFromRanks(T & t,
             }
         }
     }
-    LOG(m_pSimulationLog, "MPI> finished!" << std::endl; )
+    LOGPC(m_pSimulationLog, "MPI> finished!" << std::endl; )
 };
 
 }; // MPILayer

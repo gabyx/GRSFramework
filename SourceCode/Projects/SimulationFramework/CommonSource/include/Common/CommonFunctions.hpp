@@ -70,6 +70,9 @@ template<>
 bool stringToType<bool>(bool & t, const std::string& s);
 
 
+
+
+
 /**
 * @brief This functions returns a uniformally distributed random number:
 * @param low Lower bound of random number.
@@ -102,7 +105,7 @@ void vec2Vec(const std::vector<PREC> &vec, Eigen::Matrix<PREC,M,1> &V){
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector3.
 */
-template <typename PREC> bool stringToVector2( typename MyMatrix<PREC>::Vector2 & vector2, std::string s){
+template <typename PREC> bool stringToVector2( typename MyMatrix<PREC>::Vector2 & vector2, const std::string & s){
 	unsigned int i=0, j;
 	PREC number;
 
@@ -163,7 +166,7 @@ template <typename PREC> bool stringToVector2( typename MyMatrix<PREC>::Vector2 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector3.
 */
-template <typename PREC> bool stringToVector3( typename MyMatrix<PREC>::Vector3 & vector3, std::string s){
+template <typename PREC> bool stringToVector3( typename MyMatrix<PREC>::Vector3 & vector3, const std::string & s){
 	unsigned int i=0, j;
 	PREC number;
 
@@ -249,7 +252,7 @@ template <typename PREC> bool stringToVector3( typename MyMatrix<PREC>::Vector3 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector4.
 */
-template <class PREC> bool stringToVector4(typename MyMatrix<PREC>::Vector4 & vector4, std::string s){
+template <class PREC> bool stringToVector4(typename MyMatrix<PREC>::Vector4 & vector4, const std::string & s){
 	unsigned int i=0, j;
 	PREC number;
    if( s.empty()){ return false;}
