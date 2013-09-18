@@ -17,6 +17,7 @@
 #include <cmath>
 #include <limits>
 #include <vector>
+#include <type_traits>
 #include <Eigen/Dense>
 
 
@@ -36,21 +37,7 @@ namespace Utilities{
 */
 /* @{ */
 
-/**
-* @brief This functions casts a string into another template specifix type.
-* @param t The ouput where the casted string is put into.
-* @param s The string to cast.
-* @param f The format (e.g std::dec).
-* @return true if conversion worked, false if not.
-*/
-template <class T>
-bool stringToType(T& t,
-                 const std::string& s,
-                 std::ios_base& (*f)(std::ios_base&))
-{
-  std::istringstream iss(s);
-  return !(iss >> f >> t).fail();
-}
+
 
 
 inline bool operator == (const std::string & a, const std::string & b)
@@ -62,14 +49,86 @@ inline bool operator == (const std::string & a, const std::string & b)
 inline bool operator == (const std::string & a, const char * b){	return  strcmp(a.c_str(), b) == 0; }
 inline bool operator == (const char* a, const std::string & b) {  return b == a; }
 
-template<typename T> bool stringToType(T & t, const std::string& s){
-   return stringToType(t,s, std::dec);
+namespace details{
+
+    template<typename T>
+    struct stringToTypeImpl{
+        /**
+        * @brief This functions casts a string into another template specifix type.
+        * @param t The ouput where the casted string is put into.
+        * @param s The string to cast.
+        * @param f The format (e.g std::dec).
+        * @return true if conversion worked, false if not.
+        */
+        bool operator()(T& t, const std::string& s)
+        {
+              std::istringstream iss(s);
+              return !(iss >> t).fail();
+        }
+    };
+
+    template<>
+    struct stringToTypeImpl< bool >
+    {
+        bool operator()(bool & t, const std::string& s)
+        {
+           int a;
+           if( stringToTypeImpl<int>()(a, s)){
+              if(a){
+                 t = true;
+                 return true;
+              }else{
+                 t = false;
+                 return true;
+              }
+           }
+
+           if( s == "true" || s =="True" || s=="TRUE"){
+              t = true;
+              return true;
+           }
+           else if( s == "false" || s =="False" || s=="FALSE"){
+              t = false;
+              return true;
+           }
+
+           t = false;
+           return false;
+        }
+    };
+
+
+// SAD that this spezialization does not work for typename MyMatrix<PREC>::Vector3
+//    template<typename PREC>
+//    struct stringToTypeImpl< Eigen::Matrix<PREC,2,1>  >{
+//        bool operator()(typename MyMatrix<PREC>::Vector2 & t, const std::string& s)
+//        {
+//          stringToVector2<PREC>(t,s);
+//        }
+//    };
+//
+//
+//    template<typename PREC>
+//    struct stringToTypeImpl< typename MyMatrix<PREC>::Vector3  >{
+//        bool operator()(typename MyMatrix<PREC>::Vector3 & t, const std::string& s)
+//        {
+//          stringToVector3<PREC>(t,s);
+//        }
+//    };
+//    template<typename PREC>
+//    struct stringToTypeImpl< typename MyMatrix<PREC>::Vector4  >{
+//        bool operator()(typename MyMatrix<PREC>::Vector4 & t, const std::string& s)
+//        {
+//          stringToVector4<PREC>(t,s);
+//        }
+//    };
+
 }
 
-template<>
-bool stringToType<bool>(bool & t, const std::string& s);
 
-
+template<typename T> bool stringToType(T & t, const std::string& s){
+   return details::stringToTypeImpl<T>()(t,s);
+}
 
 
 

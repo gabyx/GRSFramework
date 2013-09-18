@@ -35,6 +35,9 @@ public:
               globalFilePathChar  = argv[i + 1];
               i++;
               std::cout << " GlobalFilePath Arg: " << globalFilePathChar <<std::endl;
+            }
+            else if(std::string(argv[i]) == "-h" || std::string(argv[i]) == "--help" ){
+                printHelp();
             } else {
                 std::cout << "Wrong option: '" <<std::string(argv[i]) << "'" << std::endl;
                 printHelp();
@@ -46,7 +49,7 @@ public:
         }
 
         if(globalFilePathChar){
-           m_globalDir =  boost::filesystem::path(std::string(globalFilePathChar));
+            m_globalDir =  boost::filesystem::path(std::string(globalFilePathChar));
         }
 
 
@@ -54,6 +57,7 @@ public:
 
     void checkArguments(){
         if(m_sceneFile.empty()){
+            printHelp();
             ERRORMSG("No scene file (.xml) supplied as argument: -s [SceneFilePath]");
         }
     }
@@ -68,8 +72,9 @@ public:
 
     void printHelp(){
         std::cout << "Help for the Application:" << std::endl <<"Options:" <<std::endl
-                              << " \t -s [SceneFilePath] (This is a .xml file)" <<std::endl
-                              << " \t -p [GlobalFilePath]"  <<std::endl;
+                              << " \t -s [SceneFilePath] (This is a .xml file for the scene, essential for CLI version, in GUI version: \"SceneFile.xml\" is standart)" <<std::endl
+                              << " \t -p [GlobalFilePath] ( optional ) "  <<std::endl
+                              << " \t -h|--help  prints this help" <<std::endl;
                     exit(-1);
     }
 };

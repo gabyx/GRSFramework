@@ -4,6 +4,8 @@
 #include <string>
 #include <sstream>
 
+#include <cstring>
+#include <cerrno>
 
 #include <boost/unordered_map.hpp>
 
@@ -16,6 +18,8 @@
 
 #include "MultiBodySimFile.hpp"
 #include "SimpleLogger.hpp"
+
+#include "GetFileDescriptorInfo.hpp"
 
 
 /**
@@ -86,6 +90,11 @@ StateRecorderBody<TDynamicsSystemType>::StateRecorderBody(bool logWriteAccess, u
         m_pSimulationLog = manager->createLog("StateRecorderLog",true,true,filePath);
     }
 
+    // Get status information about file descriptors ...
+    std::stringstream s;
+    getLimitOpenFiles(s);
+
+    LOG(m_pSimulationLog,"---> StateRecorderBody:: File Descriptor Info: " << std::endl << "\t\t" << s.str() << std::endl;)
 }
 
 template<typename TDynamicsSystemType>
@@ -112,24 +121,26 @@ bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool
 
         std::pair<typename FileMap::iterator, bool> res = m_BinarySimFiles.insert(typename FileMap::value_type(body->m_id,NULL));
         if(!res.second){
-            m_pSimulationLog->logMessage("---> StateRecorderBody:: SimFile : " + file.string() + "already exists!");
+            LOG(m_pSimulationLog, "---> StateRecorderBody:: SimFile : " << file.string() << "already exists!");
         }else{
             // Do truncate
             MultiBodySimFile* pBodyFile = new MultiBodySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj);
             res.first->second =  pBodyFile; // Set the file
 
                 if(!pBodyFile->openSimFileWrite(file,1,truncate)){
-                    m_pSimulationLog->logMessage("---> StateRecorderBody:: Could not open SimFile: " + file.string());
-                    m_pSimulationLog->logMessage(pBodyFile->getErrorString());
+                    LOG(m_pSimulationLog,"---> StateRecorderBody:: Could not open SimFile: " << file.string() <<
+                        " number of files open: " << m_BinarySimFiles.size() << std::endl;
+                        );
+                    LOG(m_pSimulationLog, pBodyFile->getErrorString() );
                     delete pBodyFile;
                     m_BinarySimFiles.erase(res.first);
                     return false;
                 }
                 if(truncate){
-                    m_pSimulationLog->logMessage("---> StateRecorderBody:: Added SimFile (truncated):" + file.string() );
+                   LOG(m_pSimulationLog,"---> StateRecorderBody:: Added SimFile (truncated):" << file.string() );
                 }
                 else{
-                    m_pSimulationLog->logMessage("---> StateRecorderBody:: Added SimFile: " + file.string() );
+                    LOG(m_pSimulationLog,"---> StateRecorderBody:: Added SimFile: " << file.string() );
 
                 }
         }
@@ -146,7 +157,7 @@ bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool
         auto res = m_LogSimFiles.insert(typename FileMapLog::value_type(body->m_id,NULL));
 
         if(!res.second){
-            m_pSimulationLog->logMessage("---> StateRecorderBody:: LogSimFile : " + file.string() + "already exists!");
+            LOG(m_pSimulationLog,"---> StateRecorderBody:: LogSimFile : " << file.string() << "already exists!");
         }else{
             // Do append!
             std::ofstream * pLogFile = new std::ofstream();
@@ -155,16 +166,16 @@ bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool
             res.first->second =  pLogFile; // Set the file
 
                 if(pLogFile->fail()){
-                    m_pSimulationLog->logMessage("---> StateRecorderBody:: Could not open LogSimFile: " + file.string());
+                    LOG(m_pSimulationLog, "---> StateRecorderBody:: Could not open LogSimFile: " << file.string() << ", error: " << std::strerror(errno) );
                     delete pLogFile;
                     m_LogSimFiles.erase(res.first);
                     return false;
                 }
                 if(truncate){
-                    m_pSimulationLog->logMessage("---> StateRecorderBody:: Added LogSimFile (truncated):" + file.string() );
+                    LOG(m_pSimulationLog,"---> StateRecorderBody:: Added LogSimFile (truncated):" << file.string() );
                 }
                 else{
-                    m_pSimulationLog->logMessage("---> StateRecorderBody:: Added LogSimFile: " + file.string() );
+                    LOG(m_pSimulationLog,"---> StateRecorderBody:: Added LogSimFile: " << file.string() );
 
                 }
         }

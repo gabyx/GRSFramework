@@ -128,6 +128,7 @@ public:
     unsigned int getNStates(); ///< Gets the number of states in a read only .sim file.
 
     std::string getErrorString() {
+        m_errorString << " error: " << std::strerror(errno) <<std::endl;
         return m_errorString.str();
     }
 

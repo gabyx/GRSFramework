@@ -53,6 +53,14 @@
 /* @} */
 
 
+/** @name SimulationLog
+* @brief All these defines are used in the solver thread. The output goes into the solver log with filename #SOLVER_LOG_FILE_PREFIX
+*/
+
+#define SIMULATION_LOG_TO_CONSOLE true
+
+
+
 /** @name Solver Threads
 * @brief All these defines are used in the solver thread. The output goes into the solver log with filename #SOLVER_LOG_FILE_PREFIX
 */

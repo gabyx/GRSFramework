@@ -43,7 +43,7 @@ SimulationManagerGUI<TConfig>::SimulationManagerGUI(boost::shared_ptr<Ogre::Scen
         boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",SIMULATION_LOG_TO_CONSOLE,true,filePath);
         m_pSimulationLog->logMessage("---> Creating SimulationManagerGUI...");
     }
 

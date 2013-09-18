@@ -70,7 +70,7 @@ bool MultiBodySimFile::writeOutAllStateTimes()
       return true;
    }
 
-   m_errorString << "Could not open text file: " << new_path.string()<<endl;
+   m_errorString << "Could not open text file: " << new_path.string()<< std::endl;
 
    return false;
 }
@@ -103,7 +103,7 @@ bool MultiBodySimFile::openSimFileWrite(const boost::filesystem::path &file_path
          return true;
       }
 
-      m_errorString << "Could not open and truncate sim file: " << file_path.string();
+      m_errorString << "Could not open and truncate sim file: " << file_path.string() <<std::endl;
 
   }else{
       //Here we need to check that, we set the put position exactly at the last state, we might have overhanging bits  because user has cancled and some binary stuff is hanging at the end!!!
@@ -124,7 +124,7 @@ bool MultiBodySimFile::openSimFileWrite(const boost::filesystem::path &file_path
          }
      }
 
-     m_errorString << "Could not open sim file: " << file_path.string() <<" for appending data"<<std::endl;
+     m_errorString << "Could not open sim file: " << file_path.string() <<" for appending data" <<std::endl;
   }
 
   closeSimFile();
@@ -176,7 +176,7 @@ bool  MultiBodySimFile::openSimFileRead(const boost::filesystem::path &file_path
 
   }
 
-  m_errorString << "Could not open sim file: " << file_path.string()<<std::endl;
+  m_errorString << "Could not open sim file: " << file_path.string() <<std::endl;
 
   closeSimFile();
   return false;
@@ -212,8 +212,7 @@ using namespace std;
   m_nBytes = (std::streamoff)m_file_stream.tellg();
   m_file_stream.seekg(0, ios::beg);
 
-  //TODO
-  std::cout << m_nBytes << "," << m_headerLength<<","<<m_nBytesPerState<<std::endl;
+
   if(m_nBytes > m_headerLength){
      long long int nStates = (m_nBytes - m_headerLength) / ( m_nBytesPerState );
      //cout << "States:" << (unsigned int) nStates << std::endl;

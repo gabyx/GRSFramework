@@ -182,7 +182,7 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path &relDirectoryP
            if( number_length >0){
              std::string number_string = name.substr(found, number_length);
              unsigned int numberId;
-             if( Utilities::stringToType<unsigned int>(numberId,number_string, std::dec)){
+             if( Utilities::stringToType<unsigned int>(numberId,number_string)){
                // Conversion worked
                if( m_fileIdCounter <= numberId){
                  m_fileIdCounter = numberId+1;

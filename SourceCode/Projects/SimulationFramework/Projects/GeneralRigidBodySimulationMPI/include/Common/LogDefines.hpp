@@ -25,13 +25,13 @@
 #define LOG( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ;  ///< Macro to easily write into a SimpleLogger::Log.
 #define OGRE_LOG( _logptr_ ) (_logptr_)->logMessage(logstream.str());  ///< Macro to easily write into a Ogre::Log.
 
-//#define LOGSZ( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
-//#define LOGNC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
-//#define LOGPC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
+#define LOGSZ( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+#define LOGNC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+#define LOGPC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
 
-#define LOGSZ( _logptr_ , _message_ )
-#define LOGNC( _logptr_ , _message_ )
-#define LOGPC( _logptr_ , _message_ )
+//#define LOGSZ( _logptr_ , _message_ )
+//#define LOGNC( _logptr_ , _message_ )
+//#define LOGPC( _logptr_ , _message_ )
 /* @} */
 
 
@@ -60,6 +60,12 @@
 #define COLLISION_DATA_FILE_PREFIX "CollisionData"               ///< Prefix for the collision data file.
 #define SYSTEM_DATA_FILE_PREFIX "SimulationData"                     ///< Prefix for the system data file.
 /* @} */
+
+/** @name SimulationLog
+* @brief All these defines are used in the solver thread. The output goes into the solver log with filename #SOLVER_LOG_FILE_PREFIX
+*/
+
+#define SIMULATION_LOG_TO_CONSOLE false
 
 
 /** @name Solver Threads

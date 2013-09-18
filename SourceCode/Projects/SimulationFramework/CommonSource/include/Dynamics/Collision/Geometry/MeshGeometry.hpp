@@ -82,8 +82,8 @@ public:
             //poly.setIndicesMemory(3,reinterpret_cast<int *>(pMeshData->m_Faces[i].data() ));
             ozcollide::Polygon poly;
             //poly.setNbIndices(3);
-            std::cout << pMeshData->m_Faces[i] <<","<<std::endl;
-            std::cout << sizeof(int)<<std::endl;
+            //std::cout << pMeshData->m_Faces[i] <<","<<std::endl;
+            //std::cout << sizeof(int)<<std::endl;
             poly.setIndex(0,(int) pMeshData->m_Faces[i](0));
             poly.setIndex(1,(int) pMeshData->m_Faces[i](1));
             poly.setIndex(2,(int) pMeshData->m_Faces[i](2));

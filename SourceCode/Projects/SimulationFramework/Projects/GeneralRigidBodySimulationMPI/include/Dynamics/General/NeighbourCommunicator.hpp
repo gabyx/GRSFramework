@@ -206,7 +206,9 @@ NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  typename Dynamic
         ASSERTMSG(res.second,"Could not insert in m_bodyToInfo for rank: " << m_rank);
     }
 
+    // Initialize the buffer in the Process Communicator
 
+    m_pProcCom->initializeBuffers();
 
     m_pSimulationLog->logMessage("---> Initialized NeighbourCommunicator");
 }
@@ -307,7 +309,7 @@ bool NeighbourCommunicator<TDynamicsSystem>::checkReceiveForRemotes(){
 
 template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
-    LOGNC(m_pSimulationLog,"--->\t Send messages to neighbours!"<<std::endl;)
+    LOGNC(m_pSimulationLog,"MPI>\t Send messages to neighbours!"<<std::endl;)
     m_localBodiesToDelete.clear();
 
     for(typename ProcessTopologyType::NeighbourRanksListType::const_iterator it = m_nbRanks.begin(); it != m_nbRanks.end(); it++){
@@ -316,14 +318,15 @@ void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
         m_message.setRank(*it);
         m_pProcCom->sendMessageToRank(m_message,*it, MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
     }
+    LOGNC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
 
 template<typename TDynamicsSystem>
 void NeighbourCommunicator<TDynamicsSystem>::receiveMessagesFromNeighbours(){
-    LOGNC(m_pSimulationLog,"--->\t Receive all messages from neighbours!"<<std::endl;)
+    LOGNC(m_pSimulationLog,"MPI>\t Receive all messages from neighbours!"<<std::endl;)
     // set the rank of from the receiving message automatically! inside the function!
     m_pProcCom->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
-
+    LOGNC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
 }
 
 

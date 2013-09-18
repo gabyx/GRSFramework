@@ -75,7 +75,7 @@ CartesianGrid<TLayoutConfig,NoCellData>::CartesianGrid(const Vector3 & minPoint,
 
 template<typename TLayoutConfig>
 MyMatrix<unsigned int>::Vector3 CartesianGrid<TLayoutConfig,NoCellData>::getCellIndex(const Vector3 & point) const {
-    ASSERTMSG(m_Box.inside(point),"Point is not inside the Grid!");
+    ASSERTMSG(m_Box.inside(point),"Point: " << point << " is not inside the Grid!");
     MyMatrix<unsigned int>::Vector3 v;
     v.array() =  (((point - m_Box.m_minPoint).array()) / m_dxyz.array()).template cast<unsigned int>();
     ASSERTMSG( ( (v(0) >=0 && v(0) < m_dim(0)) && (v(1) >=0 && v(1) < m_dim(1)) && (v(2) >=0 && v(2) < m_dim(2)) ),
@@ -85,7 +85,7 @@ MyMatrix<unsigned int>::Vector3 CartesianGrid<TLayoutConfig,NoCellData>::getCell
 
 template<typename TLayoutConfig>
 unsigned int CartesianGrid<TLayoutConfig,NoCellData>::getCellNumber(const Vector3 & point) const {
-    ASSERTMSG(m_Box.inside(point),"Point is not inside the Grid!");
+    ASSERTMSG(m_Box.inside(point),"Point: " << point << " is not inside the Grid!");
     MyMatrix<unsigned int>::Vector3 v = getCellIndex(point);
     return getCellNumber(v);
 
