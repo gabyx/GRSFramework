@@ -33,6 +33,7 @@ set(TICPP_LIBRARY_NAMES "ticpp")
 get_release_debug_names(TICPP_LIBRARY_NAMES)
 
 use_pkgconfig(TICPP_PKGC TICPP)
+PRINTLIST("Search path PKGConfig:" "${TICPP_PKGC_INCLUDE_DIRS}")
 
 findpkg_framework(TICPP)
 

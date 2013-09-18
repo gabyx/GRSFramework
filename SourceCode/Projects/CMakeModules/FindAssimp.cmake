@@ -20,7 +20,7 @@ getenv_path(ASSIMP_HOME)
 set(ASSIMP_PREFIX_PATH ${ASSIMP_HOME} ${ENV_ASSIMP_HOME} /usr/local /usr/local/include /usr/local/lib /usr/include /usr/lib /usr/local/include/assimp /usr/include/assimp /usr/lib/assimp /usr/local/lib/assimp)
 
 create_search_paths(ASSIMP)
-# PRINTLIST("Search path:" "${ASSIMP_INC_SEARCH_PATH}")
+PRINTLIST("Search path:" "${ASSIMP_INC_SEARCH_PATH}")
 
 # redo search if prefix path changed
 clear_if_changed(ASSIMP_PREFIX_PATH
@@ -33,6 +33,8 @@ set(ASSIMP_LIBRARY_NAMES assimp)
 get_release_debug_names(ASSIMP_LIBRARY_NAMES)
 
 use_pkgconfig(ASSIMP_PKGC ASSIMP)
+PRINTLIST("Search path PKGConfig:" "${ASSIMP_PKGC_INCLUDE_DIRS}")
+
 
 findpkg_framework(ASSIMP)
 
@@ -56,3 +58,4 @@ findpkg_finish(ASSIMP)
 
 add_parent_dir(ASSIMP_INCLUDE_DIRS ASSIMP_INCLUDE_DIR)
 
+include(FindPackageHandleStandardArgs)
