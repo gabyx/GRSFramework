@@ -29,6 +29,8 @@ PROJECT(${SimulationFrameworkName})
 
 MESSAGE(STATUS "Project Name is: " ${SimulationFrameworkName})
 
+SET(MYPROJECT_LIBRARY_PATH "" CACHE STRING "Where cmake searches for libraries (on cluster change this value)")
+SET(CMAKE_LIBRARY_PATH ${MYPROJECT_LIBRARY_PATH} ${CMAKE_LIBRARY_PATH} )
 
 # If GNU C Compiler set warning lenght to one line for eclipse
 MESSAGE(STATUS "Compiler ID is: " ${CMAKE_CXX_COMPILER_ID})
