@@ -645,7 +645,7 @@ private:
             serializeGeom(ar,body);
         }else{
             if(Archive::is_loading::value){
-                body->m_geometry = m_nc->m_globalGeoms.find(body->m_globalGeomId)->second;
+                body->m_geometry = m_nc->m_globalGeometries.find(body->m_globalGeomId)->second;
             }
         }
         LOGSZ(m_pSerializerLog, "-----> global geometry id: " << body->m_globalGeomId <<std::endl;);

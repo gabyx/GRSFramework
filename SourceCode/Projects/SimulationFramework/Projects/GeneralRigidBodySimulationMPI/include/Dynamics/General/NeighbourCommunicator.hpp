@@ -153,7 +153,7 @@ private:
 
     RigidBodyContainerType & m_globalRemote;
     RigidBodyContainerType & m_globalLocal;
-    GlobalGeometryMapType & m_globalGeoms;
+    GlobalGeometryMapType & m_globalGeometries;
 
     BodyInfoMapType m_bodyToInfo; ///< map which gives all overlapping processes to the body
 
@@ -172,7 +172,7 @@ NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  typename Dynamic
                                                                 boost::shared_ptr< ProcessCommunicatorType > pProcCom):
             m_globalLocal(globalLocal),
             m_globalRemote(globalRemote),
-            m_globalGeoms(globalGeoms),
+            m_globalGeometries(globalGeoms),
             m_pProcCom(pProcCom),
             m_pProcInfo(m_pProcCom->getProcInfo()),
             m_pProcTopo(m_pProcCom->getProcInfo()->getProcTopo()),

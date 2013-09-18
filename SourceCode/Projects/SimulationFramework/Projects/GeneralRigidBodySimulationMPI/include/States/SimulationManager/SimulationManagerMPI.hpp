@@ -60,7 +60,8 @@ private:
     boost::shared_ptr< MPILayer::ProcessCommunicator<DynamicsSystemType> > m_pProcCommunicator;
 
 
-    bool checkNumberOfBodiesInProcess();
+    void checkNumberOfBodiesInProcess();
+    void getMaxRuntime(PREC runtime);
 };
 
 

@@ -93,7 +93,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     m_pStateRecorder  =  boost::shared_ptr<StateRecorderBody<DynamicsSystemType> >(new StateRecorderBody<DynamicsSystemType>(true,m_pProcCommunicator->getProcInfo()->getRank()));
 
     m_pNbCommunicator =  boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> >(
-                            new NeighbourCommunicator<DynamicsSystemType>(m_pDynSys->m_SimBodies, m_pDynSys->m_RemoteSimBodies, m_pDynSys->m_globalGeoms,  m_pProcCommunicator) );
+                            new NeighbourCommunicator<DynamicsSystemType>(m_pDynSys->m_SimBodies, m_pDynSys->m_RemoteSimBodies, m_pDynSys->m_globalGeometries,  m_pProcCommunicator) );
 
     //Set up delegate function from NeighbourCommunicator to StateRecorederBody (close and open files)
     m_pNbCommunicator->addDelegateLocalRemove(
@@ -120,7 +120,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
 
 template<typename TConfig>
-bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
+void SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
 
     int numberOfBodiesInSimulation = 0;
     int nSimBodies = m_nSimBodies;
@@ -149,6 +149,24 @@ bool SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
 }
 
 template<typename TConfig>
+void SimulationManagerMPI<TConfig>::getMaxRuntime(PREC runtime){
+
+    LOG(m_pSimulationLog,  "MPI> Get Max Runtime,  MPI_Reduce... "<< std::endl;);
+    PREC maxRuntime;
+
+    MPI_Reduce(&runtime,&maxRuntime, 1, MPI_DOUBLE, MPI_MAX, ProcessInfoType::MASTER_RANK, MPI_COMM_WORLD);
+
+    if(m_pProcCommunicator->getProcInfo()->hasMasterRank()){
+        LOG(m_pSimulationLog, "---> Total runtime for simulation needed: "<<maxRuntime<< " sec. " << std::endl;);
+    }else{
+        LOG(m_pSimulationLog, "---> Runtime sent ... !"<< std::endl;);
+    }
+
+
+}
+
+
+template<typename TConfig>
 void SimulationManagerMPI<TConfig>::startSim() {
 
     static double timelineSimulation;
@@ -164,7 +182,10 @@ void SimulationManagerMPI<TConfig>::startSim() {
     }
 
 
-//
+    boost::timer::cpu_timer timer;
+    PREC runtime;
+    timer.start();
+
     while(1){
 
         // Do one iteration
@@ -181,10 +202,16 @@ void SimulationManagerMPI<TConfig>::startSim() {
 
         // Check if simulation can be aborted!
         if(m_pTimestepper->finished()) {
-            m_pSimulationLog->logMessage("---> SimulationManager: Timestepper finished, exit...");
+            timer.stop();
+            runtime = ((PREC)timer.elapsed().wall)*1e-9;
+            LOG(m_pSimulationLog, "---> SimulationManager: Timestepper finished, needed: " << runtime << " sec. , exit..." );
             break;
         }
     }
+
+    // Communicat times, get the max runtime
+    getMaxRuntime(runtime);
+
 
 m_pSimulationLog->logMessage("---> SimulationManager: Simulation leaving...");
 return;

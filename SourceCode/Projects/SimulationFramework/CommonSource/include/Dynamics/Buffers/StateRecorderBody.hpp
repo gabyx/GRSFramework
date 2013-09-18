@@ -137,10 +137,10 @@ bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool
                     return false;
                 }
                 if(truncate){
-                   LOG(m_pSimulationLog,"---> StateRecorderBody:: Added SimFile (truncated):" << file.string() );
+                   LOG(m_pSimulationLog,"---> StateRecorderBody:: Added SimFile (truncated):" << file.string() << std::endl; );
                 }
                 else{
-                    LOG(m_pSimulationLog,"---> StateRecorderBody:: Added SimFile: " << file.string() );
+                    LOG(m_pSimulationLog,"---> StateRecorderBody:: Added SimFile: " << file.string() << std::endl; );
 
                 }
         }

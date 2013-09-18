@@ -59,6 +59,7 @@ int main(int argc, char **argv) {
 
     mgr.setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
 
+
     mgr.startSim();
 
     // Finalize MPI =================================

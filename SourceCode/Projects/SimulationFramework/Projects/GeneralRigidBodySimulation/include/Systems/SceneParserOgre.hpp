@@ -14,6 +14,7 @@ public:
 
     DEFINE_CONFIG_TYPES_OF(TConfig)
 
+    // For simulation manager
     SceneParserOgre(
         Ogre::SceneNode * baseFrame,
         boost::shared_ptr<Ogre::SceneManager> pSceneMgr,
@@ -27,6 +28,7 @@ public:
         this->m_nSimBodies = 0;
     }
 
+    // For playback manager
     SceneParserOgre(
         Ogre::SceneNode * baseFrame,
         boost::shared_ptr<Ogre::SceneManager> pSceneMgr,
@@ -473,12 +475,23 @@ protected:
 
 
     virtual typename DynamicsSystemType::GlobalGeometryMapType::iterator findGlobalGeomId(unsigned int id){
-        return m_globalGeometries.find(id);
+
+        if( this->m_pDynSys ){
+            return this->m_pDynSys->m_globalGeometries.find(id);
+        }else{
+            return m_globalGeometries.find(id);
+        }
+
     }
 
     virtual typename DynamicsSystemType::GlobalGeometryMapType & getGlobalGeometryListRef(){
-        return m_globalGeometries;
+        if( this->m_pDynSys ){
+            return this->m_pDynSys->m_globalGeometries;
+        }else{
+            return m_globalGeometries;
+        }
     }
+
 
 protected:
 
@@ -491,7 +504,7 @@ protected:
 
 
     typename DynamicsSystemType::GlobalGeometryMapType m_globalGeometries;
-
+    typename DynamicsSystemType::ExternalForceListType m_externalForces;
 };
 
 

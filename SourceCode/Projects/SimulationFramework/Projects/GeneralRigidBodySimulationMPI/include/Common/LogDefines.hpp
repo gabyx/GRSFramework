@@ -25,13 +25,17 @@
 #define LOG( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ;  ///< Macro to easily write into a SimpleLogger::Log.
 #define OGRE_LOG( _logptr_ ) (_logptr_)->logMessage(logstream.str());  ///< Macro to easily write into a Ogre::Log.
 
-#define LOGSZ( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
-#define LOGNC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
-#define LOGPC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
+//// Serializer
+//#define LOGSZ( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+//// Neighbour Communicator
+//#define LOGNC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+//// Process Communicator
+//#define LOGPC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
 
-//#define LOGSZ( _logptr_ , _message_ )
-//#define LOGNC( _logptr_ , _message_ )
-//#define LOGPC( _logptr_ , _message_ )
+#define LOGSZ( _logptr_ , _message_ )
+#define LOGNC( _logptr_ , _message_ )
+#define LOGPC( _logptr_ , _message_ )
+
 /* @} */
 
 
@@ -77,14 +81,12 @@
   #define CoutLevelSolver 3            ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
   #define CoutLevelSolverWhenContact 2 ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
   #define LogToFileSolver 1            ///< {0,1} Determines if logstream is saved into a file.
-  #define LogToConsoleSolver 0         ///< {0,1} Determines if logstream is outputted into console.
-  #define AllCoutToLogSolver 0         ///< {0,1} Determines if all couts are routed into the logstream (not working yet).
+  #define LogToConsoleSolver 1         ///< {0,1} Determines if logstream is outputted into console.
 #else
   #define CoutLevelSolver 1
   #define CoutLevelSolverWhenContact 1
   #define LogToFileSolver 1
-  #define LogToConsoleSolver 1
-  #define AllCoutToLogSolver 0
+  #define LogToConsoleSolver 0
 #endif
 /* @} */
 

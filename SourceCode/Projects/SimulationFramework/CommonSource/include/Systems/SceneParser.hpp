@@ -354,7 +354,9 @@ protected:
         } // m_bparseDynamics
 
         // Parse external forces
-        processExternalForces(sceneSettings);
+        if(m_bParseDynamics){
+             processExternalForces(sceneSettings);
+        }
 
         // Parse Global Geometries (also in playback manager)!
         processGlobalGeometries(sceneSettings);
@@ -1052,7 +1054,7 @@ protected:
 
 
     virtual typename DynamicsSystemType::GlobalGeometryMapType::iterator findGlobalGeomId(unsigned int id){
-        return m_pDynSys->m_globalGeoms.find(id);
+        return m_pDynSys->m_globalGeometries.find(id);
     }
 
 
@@ -1070,7 +1072,7 @@ protected:
     }
 
     virtual typename DynamicsSystemType::GlobalGeometryMapType & getGlobalGeometryListRef(){
-        return m_pDynSys->m_globalGeoms;
+        return m_pDynSys->m_globalGeometries;
     }
 
     virtual void fillMeshInfo( Assimp::Importer & importer, const aiScene* scene, MeshData<MeshPREC> & meshInfo, Vector3 scale_factor, Quaternion quat, Vector3 trans) {
