@@ -229,7 +229,7 @@ set(INCLUDE_DIRS
 
     #${NVIDIA_SDK_DIR}/common/inc
     #${NVIDIA_SDK_DIR}/../shared/inc
-    ${BOOST_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
     ${EIGEN_INCLUDE_DIR}
 #    ${TOON_INCLUDE_DIR}
 #    ${OGRE_INCLUDE_DIRS}
