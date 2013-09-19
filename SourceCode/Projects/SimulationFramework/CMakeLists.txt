@@ -178,13 +178,13 @@ find_package(Boost QUIET)
 # ===============================================================================================================================================================
 
 # Searching TICPP =============================================================================================================================================
-FIND_PACKAGE(TICPP REQUIRED)
+FIND_PACKAGE(Ticpp REQUIRED)
 PRINTLIST( "TICPP_LIBRARY:" "${TICPP_LIBRARY}")
 PRINTLIST( "TICPP_LIBRARIES:" "${TICPP_LIBRARIES}")
 # ===============================================================================================================================================================
 
 # Searching Assimp ==================================
-FIND_PACKAGE(Assimp REQUIRED)
+FIND_PACKAGE(Assimp REQUIRED 3)
 # ===================================================
 
 
@@ -217,7 +217,7 @@ if(USE_OZCOLLIDE)
 # Searching OZCollide ==================================
 FIND_PACKAGE(OZCollide REQUIRED)
 # ===================================================
-SET(COLLISIONLIB_INCLUDE_DIR ${OZCOLLIDE_INCLUDE_DIR})
+SET(COLLISIONLIB_INCLUDE_DIRS ${OZCOLLIDE_INCLUDE_DIR})
 SET(COLLISIONLIB_LIB_REL ${OZCOLLIDE_LIB_REL})
 SET(COLLISIONLIB_LIB_DBG ${OZCOLLIDE_LIB_DBG})
 SET(COLLISIONLIB_REL ${OZCOLLIDE_REL})

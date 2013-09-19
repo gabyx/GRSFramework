@@ -51,9 +51,13 @@ IF(WIN32)
         FIND_FILE(TICPP_DLL_REL ${TICPP_DLL_NAMES_DEL} HINTS ${TICPP_DLL_SEARCH_PATH} )
 ENDIF(WIN32)
 
-
 findpkg_finish(TICPP)
 
-
 add_parent_dir(TICPP_INCLUDE_DIRS TICPP_INCLUDE_DIR)
+
+
+include(FindPackageHandleStandardArgs)
+## handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE
+## if all listed variables are TRUE
+find_package_handle_standard_args(Ticpp DEFAULT_MSG TICPP_LIBRARY TICPP_INCLUDE_DIR)
 

@@ -36,14 +36,14 @@
 #include "ExternalForces.hpp"
 
 
-#include <assimp.hpp>      // C++ importer interface
-#include <aiScene.h>       // Output data structure
-#include <aiPostProcess.h> // Post processing flags
+#include <assimp/Importer.hpp>      // C++ importer interface
+#include <assimp/scene.h>       // Output data structure
+#include <assimp/postprocess.h> // Post processing flags
 
 //#include "OgreMeshExtraction.hpp"
 
 #define TIXML_USE_TICPP
-#include "ticpp.h"
+#include "ticpp/ticpp.h"
 //#include "tinyxml.h"
 
 

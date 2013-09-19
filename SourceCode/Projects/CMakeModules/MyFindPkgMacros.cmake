@@ -118,19 +118,6 @@ macro(add_parent_dir VAR DIR)
   set(${VAR} ${${VAR}} ${${DIR}_TEMP})
 endmacro(add_parent_dir)
 
-#macro(foo in1)
-#  message("FIRST" ${in1})
-#  message("OPtional1:" ${ARGV1})
-#message("OPtional2:" ${ARGV2})
-#message("OPtional3:" ${ARGV3})
-#if( NOT "${ARGV1}" AND "${ARGV2}" )
-#message("OPtional1:" ${ARGV1} "TRUE")
-#message("OPtional2:" ${ARGV2} "TRUE") 
-#else()
-#message("OPtional1:" ${ARGV1} "false")  
-#endif()
-#endmacro()
-
 # Do the final processing for the package find.
 # ARGV1 is TRUE if we only have headers!
 

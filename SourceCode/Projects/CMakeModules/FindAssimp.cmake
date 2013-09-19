@@ -13,6 +13,25 @@ include(MyFindPkgMacros)
 include(PrintListMacro)
 findpkg_begin(ASSIMP)
 
+if(NOT Assimp_FIND_VERSION)
+  if(NOT Assimp_FIND_VERSION_MAJOR)
+    set(Assimp_FIND_VERSION_MAJOR 3)
+  endif()
+  if(NOT Assimp_FIND_VERSION_MINOR)
+    set(Assimp_FIND_VERSION_MINOR 0)
+  endif()
+  if(NOT Assimp_FIND_VERSION_PATCH)
+    set(Assimp_FIND_VERSION_PATCH 0)
+  endif()
+  set(Assimp_FIND_VERSION "${Assimp_FIND_VERSION_MAJOR}.${Assimp_FIND_VERSION_MINOR}.${Assimp_FIND_VERSION_PATCH}")
+endif()
+
+if(Assimp_FIND_VERSION_MAJOR VERSION_LESS 3)
+set(ASSIMP_SEARCH_INCLUDE_FILES "assimp.hpp")
+else()
+set(ASSIMP_SEARCH_INCLUDE_FILES "Importer.hpp")
+endif()
+
 # Get path, convert backslashes as ${ENV_${var}}
 getenv_path(ASSIMP_HOME)
 
@@ -33,12 +52,10 @@ set(ASSIMP_LIBRARY_NAMES assimp)
 get_release_debug_names(ASSIMP_LIBRARY_NAMES)
 
 use_pkgconfig(ASSIMP_PKGC ASSIMP)
-PRINTLIST("Search path PKGConfig:" "${ASSIMP_PKGC_INCLUDE_DIRS}")
-
 
 findpkg_framework(ASSIMP)
 
-find_path(ASSIMP_INCLUDE_DIR NAMES assimp.h HINTS ${ASSIMP_INC_SEARCH_PATH} ${ASSIMP_PKGC_INCLUDE_DIRS} PATH_SUFFIXES assimp)
+find_path(ASSIMP_INCLUDE_DIR NAMES ${ASSIMP_SEARCH_INCLUDE_FILES} HINTS ${ASSIMP_INC_SEARCH_PATH} ${ASSIMP_PKGC_INCLUDE_DIRS} PATH_SUFFIXES assimp)
 find_library(ASSIMP_LIBRARY_REL NAMES ${ASSIMP_LIBRARY_NAMES_REL} HINTS ${ASSIMP_LIB_SEARCH_PATH} ${ASSIMP_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" release relwithdebinfo minsizerel)
 find_library(ASSIMP_LIBRARY_DBG NAMES ${ASSIMP_LIBRARY_NAMES_DBG} HINTS ${ASSIMP_LIB_SEARCH_PATH} ${ASSIMP_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" debug)
 
@@ -59,3 +76,8 @@ findpkg_finish(ASSIMP)
 add_parent_dir(ASSIMP_INCLUDE_DIRS ASSIMP_INCLUDE_DIR)
 
 include(FindPackageHandleStandardArgs)
+## handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE
+## if all listed variables are TRUE
+find_package_handle_standard_args(ASSIMP DEFAULT_MSG ASSIMP_LIBRARY ASSIMP_INCLUDE_DIR)
+
+

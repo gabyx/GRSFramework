@@ -15,9 +15,9 @@
 #include <assert.h>
 #include <vector>
 
-#include <assimp.hpp>      // C++ importer interface
-#include <aiScene.h>       // Output data structure
-#include <aiPostProcess.h> // Post processing flags
+#include <assimp/Importer.hpp>      // C++ importer interface
+#include <assimp/scene.h>       // Output data structure
+#include <assimp/postprocess.h> // Post processing flags
 
 #include "TypeDefs.hpp"
 
