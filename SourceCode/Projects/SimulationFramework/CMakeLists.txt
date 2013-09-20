@@ -38,6 +38,9 @@ IF(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 	SET(CMAKE_C_FLAGS "-fmessage-length=0" CACHE STRING "Flags for C Compiler" FORCE)
 	SET(CMAKE_CXX_FLAGS "-std=c++11 -ftree-vectorize -ftree-vectorizer-verbose=0 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" FORCE)
 	
+	set(GCCFILTER_TOOL OFF CACHE BOOL "Use the perl script gccfilter , http://www.mixtion.org/gccfilter/, this tool gets appended to the gcc command")
+	MARK_AS_ADVANCED(GCCFILTER_TOOL)
+	
 ELSEIF ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
 
 	MESSAGE(STATUS "Setting Values for CLANG")
@@ -78,6 +81,13 @@ if(MULTITHREADED_BUILD)
 endif()
 # ========================================================================================================================================
 
+#Find GCCFilter Tool
+if(GCCFILTER_TOOL)
+FIND_PACKAGE(Gccfilter)
+	if(GCCFILTER_FOUND)
+		
+	endif()
+endif()
 
 #Find Doxygen
 FIND_PACKAGE(Doxygen)
