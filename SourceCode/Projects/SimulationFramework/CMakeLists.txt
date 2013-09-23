@@ -31,34 +31,38 @@ MESSAGE(STATUS "Project Name is: " ${SimulationFrameworkName})
 
 
 # If GNU C Compiler set warning lenght to one line for eclipse
-MESSAGE(STATUS "Compiler ID is: " ${CMAKE_CXX_COMPILER_ID})
-IF(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-
-	MESSAGE(STATUS "Setting Values for GCC")
-	SET(CMAKE_C_FLAGS "-fmessage-length=0" CACHE STRING "Flags for C Compiler" )
-	SET(CMAKE_CXX_FLAGS "-std=c++11 -ftree-vectorize -ftree-vectorizer-verbose=0 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" )
+IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
+	MESSAGE(STATUS "Compiler ID is: " ${CMAKE_CXX_COMPILER_ID})
+	IF(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 	
-	set(GCCFILTER_TOOL OFF CACHE BOOL "Use the perl script gccfilter , http://www.mixtion.org/gccfilter/, this tool gets appended to the gcc command")
-MARK_AS_ADVANCED(GCCFILTER_TOOL)
+		SET(MYPROJECT_SET_COMPILER_FLAGS_INTERNAL TRUE CACHE INTERNAL "x" FORCE)
+		MESSAGE(STATUS "Setting Values for GNU")
+		SET(CMAKE_C_FLAGS "-fmessage-length=0" CACHE STRING "Flags for C Compiler" FORCE)
+		SET(CMAKE_CXX_FLAGS "-std=c++11 -ftree-vectorize -ftree-vectorizer-verbose=0 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" FORCE)
+		
+		set(GCCFILTER_TOOL OFF CACHE BOOL "Use the perl script gccfilter , http://www.mixtion.org/gccfilter/, this tool gets appended to the gcc command" )
+		MARK_AS_ADVANCED(GCCFILTER_TOOL)
 
-ELSEIF ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
+	ELSEIF ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
 
-    MESSAGE(STATUS "Setting Values for CLANG")
-    SET (CMAKE_C_FLAGS                "-Wall -std=c99" CACHE STRING "Flags for C Compiler" )
-    SET (CMAKE_C_FLAGS_DEBUG          "-g" CACHE STRING "Flags for C Compiler for debug builds" )
-    SET (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for C Compiler for release minsize builds" )
-    SET (CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for C Compiler for release builds" )
-    SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for C Compiler for release builds with debug info" )
+		MESSAGE(STATUS "Setting Values for Clang")
+		SET(MYPROJECT_SET_COMPILER_FLAGS_INTERNAL TRUE CACHE INTERNAL "x" FORCE)
+		SET (CMAKE_C_FLAGS                "-Wall" CACHE STRING "Flags for C Compiler" FORCE)
+		SET (CMAKE_C_FLAGS_DEBUG          "-g" CACHE STRING "Flags for C Compiler for debug builds" FORCE)
+		SET (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for C Compiler for release minsize builds" FORCE)
+		SET (CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for C Compiler for release builds" FORCE)
+		SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for C Compiler for release builds with debug info" FORCE)
 
-#SET (CMAKE_CXX_FLAGS                "-Weverything -Wno-covered-switch -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -Wextra-semi -fdiagnostics-show-template-tree")
-    SET (CMAKE_CXX_FLAGS                "-w" CACHE STRING "Flags for CXX Compiler" )
-    SET (CMAKE_CXX_FLAGS_DEBUG          "-g" CACHE STRING "Flags for CXX Compiler for debug builds" )
-    SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release minsize builds" )
-    SET (CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release builds")
-    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for CXX Compiler for release builds with debug info" )
+		#SET (CMAKE_CXX_FLAGS                "-Weverything -Wno-covered-switch -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -Wextra-semi -fdiagnostics-show-template-tree")
+		SET (CMAKE_CXX_FLAGS                "-w" CACHE STRING "Flags for CXX Compiler" FORCE)
+		SET (CMAKE_CXX_FLAGS_DEBUG          "-g" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
+		SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release minsize builds" FORCE)
+		SET (CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release builds" FORCE)
+		SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for CXX Compiler for release builds with debug info" FORCE)
 
+	ENDIF()
 ENDIF()
-
+MESSAGE(STATUS ${CMAKE_CXX_FLAGS})
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/;${CMAKE_MODULE_PATH}")
 message(STATUS "Module path is now set to: " ${CMAKE_MODULE_PATH} )
@@ -67,7 +71,7 @@ include(PrintListMacro)
 
 
 #Add some multithreaded build support =====================================================================================================
-set(CMAKE_MAKE_PROGRAM_INTERNAL ${CMAKE_MAKE_PROGRAM} CACHE STRING "internal")
+set(CMAKE_MAKE_PROGRAM_INTERNAL ${CMAKE_MAKE_PROGRAM} CACHE INTERNAL "internal" )
 MARK_AS_ADVANCED(MULTITHREADED_BUILD)
 set(MULTITHREADED_BUILD 12 CACHE STRING "How many threads are used to build the project")
 if(MULTITHREADED_BUILD)
@@ -85,10 +89,10 @@ endif()
 if(GCCFILTER_TOOL)
     FIND_PACKAGE(Gccfilter)
 	if(GCCFILTER_FOUND)
-	        set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${GCCFILTER_BIN} ${GCCFILTER_ADDITIONAL_FLAGS}")
+	    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${GCCFILTER_BIN} ${GCCFILTER_ADDITIONAL_FLAGS}")
 	endif()
 else()
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "")
+		set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "")
 endif()
 
 

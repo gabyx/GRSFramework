@@ -598,6 +598,8 @@ protected:
 
 
 
+
+
         //Copy the pointers!
 
         if(m_eBodiesState == RigidBodyType::SIMULATED) {
@@ -733,6 +735,7 @@ protected:
                     }
             }else{
 
+
                 for(int i=0; i < m_bodyList.size(); i++) {
                     double radius = randomNumber();
                     Vector3 scale;
@@ -751,6 +754,8 @@ protected:
         } else {
             throw ticpp::Exception("---> The attribute 'distribute' '" + type + std::string("' of 'Sphere' has no implementation in the parser"));
         }
+
+
     }
 
     virtual void processHalfspaceGeometry( ticpp::Element * halfspace, bool addToGlobalGeoms = false) {
