@@ -62,7 +62,6 @@ IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
 
 	ENDIF()
 ENDIF()
-MESSAGE(STATUS ${CMAKE_CXX_FLAGS})
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/;${CMAKE_MODULE_PATH}")
 message(STATUS "Module path is now set to: " ${CMAKE_MODULE_PATH} )
@@ -71,12 +70,12 @@ include(PrintListMacro)
 
 
 #Add some multithreaded build support =====================================================================================================
-set(CMAKE_MAKE_PROGRAM_INTERNAL ${CMAKE_MAKE_PROGRAM} CACHE INTERNAL "internal" )
 MARK_AS_ADVANCED(MULTITHREADED_BUILD)
 set(MULTITHREADED_BUILD 12 CACHE STRING "How many threads are used to build the project")
-if(MULTITHREADED_BUILD)
-if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
-            set(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM_INTERNAL} -j${MULTITHREADED_BUILD}")
+if(MULTITHREADED_BUILD AND NOT MULTITHREADED_BUILD_SET)
+	set(MULTITHREADED_BUILD_SET TRUE CACHE INTERNAL "internal check if we set the multithread stuff already" FORCE)
+	if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
+            set(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM} -j${MULTITHREADED_BUILD}")
             message(STATUS "Added arguments to CMAKE_BUILD_TOOL: ${CMAKE_MAKE_PROGRAM}")
     elseif(MSVC)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
