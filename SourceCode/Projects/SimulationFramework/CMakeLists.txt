@@ -35,28 +35,28 @@ MESSAGE(STATUS "Compiler ID is: " ${CMAKE_CXX_COMPILER_ID})
 IF(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 
 	MESSAGE(STATUS "Setting Values for GCC")
-	SET(CMAKE_C_FLAGS "-fmessage-length=0" CACHE STRING "Flags for C Compiler" FORCE)
-	SET(CMAKE_CXX_FLAGS "-std=c++11 -ftree-vectorize -ftree-vectorizer-verbose=0 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" FORCE)
+	SET(CMAKE_C_FLAGS "-fmessage-length=0" CACHE STRING "Flags for C Compiler" )
+	SET(CMAKE_CXX_FLAGS "-std=c++11 -ftree-vectorize -ftree-vectorizer-verbose=0 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" )
 	
 	set(GCCFILTER_TOOL OFF CACHE BOOL "Use the perl script gccfilter , http://www.mixtion.org/gccfilter/, this tool gets appended to the gcc command")
-	MARK_AS_ADVANCED(GCCFILTER_TOOL)
-	
+MARK_AS_ADVANCED(GCCFILTER_TOOL)
+
 ELSEIF ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
 
-	MESSAGE(STATUS "Setting Values for CLANG")
-    SET (CMAKE_C_FLAGS                "-Wall -std=c99" CACHE STRING "Flags for C Compiler" FORCE)
-    SET (CMAKE_C_FLAGS_DEBUG          "-g" CACHE STRING "Flags for C Compiler for debug builds" FORCE)
-    SET (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for C Compiler for release minsize builds" FORCE)
-    SET (CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for C Compiler for release builds" FORCE)
-    SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for C Compiler for release builds with debug info" FORCE)
-    
-    #SET (CMAKE_CXX_FLAGS                "-Weverything -Wno-covered-switch -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -Wextra-semi -fdiagnostics-show-template-tree")
-    SET (CMAKE_CXX_FLAGS                "-w" CACHE STRING "Flags for CXX Compiler" FORCE)
-    SET (CMAKE_CXX_FLAGS_DEBUG          "-g" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
-    SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release minsize builds" FORCE)
+    MESSAGE(STATUS "Setting Values for CLANG")
+    SET (CMAKE_C_FLAGS                "-Wall -std=c99" CACHE STRING "Flags for C Compiler" )
+    SET (CMAKE_C_FLAGS_DEBUG          "-g" CACHE STRING "Flags for C Compiler for debug builds" )
+    SET (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for C Compiler for release minsize builds" )
+    SET (CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for C Compiler for release builds" )
+    SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for C Compiler for release builds with debug info" )
+
+#SET (CMAKE_CXX_FLAGS                "-Weverything -Wno-covered-switch -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -Wextra-semi -fdiagnostics-show-template-tree")
+    SET (CMAKE_CXX_FLAGS                "-w" CACHE STRING "Flags for CXX Compiler" )
+    SET (CMAKE_CXX_FLAGS_DEBUG          "-g" CACHE STRING "Flags for CXX Compiler for debug builds" )
+    SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release minsize builds" )
     SET (CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release builds")
-    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for CXX Compiler for release builds with debug info" FORCE)
-    
+    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for CXX Compiler for release builds with debug info" )
+
 ENDIF()
 
 
@@ -71,7 +71,7 @@ set(CMAKE_MAKE_PROGRAM_INTERNAL ${CMAKE_MAKE_PROGRAM} CACHE STRING "internal")
 MARK_AS_ADVANCED(MULTITHREADED_BUILD)
 set(MULTITHREADED_BUILD 12 CACHE STRING "How many threads are used to build the project")
 if(MULTITHREADED_BUILD)
-    if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
+if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
             set(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM_INTERNAL} -j${MULTITHREADED_BUILD}")
             message(STATUS "Added arguments to CMAKE_BUILD_TOOL: ${CMAKE_MAKE_PROGRAM}")
     elseif(MSVC)
@@ -83,11 +83,15 @@ endif()
 
 #Find GCCFilter Tool
 if(GCCFILTER_TOOL)
-FIND_PACKAGE(Gccfilter)
+    FIND_PACKAGE(Gccfilter)
 	if(GCCFILTER_FOUND)
-		
+	        set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${GCCFILTER_BIN} ${GCCFILTER_ADDITIONAL_FLAGS}")
 	endif()
+else()
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "")
 endif()
+
+
 
 #Find Doxygen
 FIND_PACKAGE(Doxygen)
