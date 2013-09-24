@@ -639,15 +639,15 @@ protected:
     virtual void processGeometry( ticpp::Node * geometryNode, bool addToGlobalGeoms = false) {
         LOG(m_pSimulationLog,"---> Process Geometry ..."<<std::endl;);
         if(geometryNode->FirstChild()->Value() == "Sphere") {
-            processSphereGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
+           // processSphereGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
         } else if(geometryNode->FirstChild()->Value() == "Halfspace") {
-            processHalfspaceGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
+           // processHalfspaceGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
         } else if(geometryNode->FirstChild()->Value() == "Mesh") {
-            processMeshGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
+           // processMeshGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
         } else if(geometryNode->FirstChild()->Value() == "Box") {
-            processBoxGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
+           // processBoxGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
         }else if(geometryNode->FirstChild()->Value() == "GlobalGeomId"){
-            processGlobalGeomId(geometryNode->FirstChild()->ToElement());
+           // processGlobalGeomId(geometryNode->FirstChild()->ToElement());
         } else {
             throw ticpp::Exception("---> The geometry '" + std::string(geometryNode->FirstChild()->Value()) + std::string("' has no implementation in the parser"));
         }
@@ -678,7 +678,7 @@ protected:
             }else{
                 for(int i=0; i < m_bodyList.size(); i++) {
                     m_bodyListScales[i] = scale;
-                    m_bodyList[i]->m_geometry = pSphereGeom;
+                    //m_bodyList[i]->m_geometry = pSphereGeom;
                 }
             }
         } else if(type == "random") {
@@ -744,7 +744,7 @@ protected:
                     scale(2)=radius;
                     m_bodyListScales[i] = scale;
                     boost::shared_ptr<SphereGeometry<PREC> > pSphereGeom = boost::shared_ptr<SphereGeometry<PREC> >(new SphereGeometry<PREC>(radius));
-                    m_bodyList[i]->m_geometry = pSphereGeom;
+                    //m_bodyList[i]->m_geometry = pSphereGeom;
 
                 }
             }
@@ -786,7 +786,7 @@ protected:
                 addToGlobalGeomList(id, pHalfspaceGeom);
             }else{
                 for(int i=0; i < m_bodyList.size(); i++) {
-                    m_bodyList[i]->m_geometry = pHalfspaceGeom;
+                    //m_bodyList[i]->m_geometry = pHalfspaceGeom;
                 }
             }
 
@@ -829,7 +829,7 @@ protected:
             }else{
                 for(int i=0; i < m_bodyList.size(); i++) {
                     m_bodyListScales[i] = scale;
-                    m_bodyList[i]->m_geometry = pBoxGeom;
+                    //m_bodyList[i]->m_geometry = pBoxGeom;
                 }
             }
 
@@ -938,7 +938,7 @@ protected:
                     addToGlobalGeomList(id, pMeshGeom);
             }else{
                 for(int i=0; i < m_bodyList.size(); i++) {
-                    m_bodyList[i]->m_geometry = pMeshGeom;
+                    //m_bodyList[i]->m_geometry = pMeshGeom;
                 }
             }
 
@@ -967,7 +967,7 @@ protected:
             for(int i=0; i < m_bodyList.size(); i++){
                 GetScaleOfGeomVisitor<DynamicsSystemType> vis(m_bodyListScales[i]);
                 boost::apply_visitor(vis, it->second);
-                m_bodyList[i]->m_geometry = it->second;
+                //m_bodyList[i]->m_geometry = it->second;
                 m_bodyList[i]->m_globalGeomId = id;
             }
 
@@ -995,7 +995,7 @@ protected:
 
                 GetScaleOfGeomVisitor<DynamicsSystemType> vis(m_bodyListScales[i]);
                 boost::apply_visitor(vis, it->second);
-                m_bodyList[i]->m_geometry = it->second;
+                //m_bodyList[i]->m_geometry = it->second;
                 m_bodyList[i]->m_globalGeomId = id;
             }
 
@@ -1043,7 +1043,7 @@ protected:
 
                 GetScaleOfGeomVisitor<DynamicsSystemType> vis(m_bodyListScales[i]);
                 boost::apply_visitor(vis, it->second);
-                m_bodyList[i]->m_geometry = it->second;
+                //m_bodyList[i]->m_geometry = it->second;
                 m_bodyList[i]->m_globalGeomId = id;
             }
 

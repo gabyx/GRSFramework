@@ -2,12 +2,15 @@
 #
 #-------------------------------------------------------------------
 
+
 # - Try to find Assimp
+# The user can define ZLIB_ROOT, to point ZLIB Find module to the directory where Zlib is installed
+
 # Once done, this will define
 #
 # ASSIMP_FOUND - system has Assimp
 # ASSIMP_INCLUDE_DIR - the Assimp include directories
-# ASSIMP_LIBRARY - link these to use Assimp
+# ASSIMP_LIBRARIES - link these to use Assimp
 
 include(MyFindPkgMacros)
 include(PrintListMacro)
@@ -59,6 +62,10 @@ find_path(ASSIMP_INCLUDE_DIR NAMES ${ASSIMP_SEARCH_INCLUDE_FILES} HINTS ${ASSIMP
 find_library(ASSIMP_LIBRARY_REL NAMES ${ASSIMP_LIBRARY_NAMES_REL} HINTS ${ASSIMP_LIB_SEARCH_PATH} ${ASSIMP_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" release relwithdebinfo minsizerel)
 find_library(ASSIMP_LIBRARY_DBG NAMES ${ASSIMP_LIBRARY_NAMES_DBG} HINTS ${ASSIMP_LIB_SEARCH_PATH} ${ASSIMP_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" debug)
 
+# ASSIMP depends on ZLIB 
+find_package(ZLIB REQUIRED)
+
+
 #Find the DLL's for the Runtime under Windows
 IF(WIN32)
         set(ASSIMP_DLL_NAMES assimp)
@@ -74,6 +81,9 @@ make_library_set(ASSIMP_LIBRARY)
 findpkg_finish(ASSIMP)
 
 add_parent_dir(ASSIMP_INCLUDE_DIRS ASSIMP_INCLUDE_DIR)
+
+set(ASSIMP_LIBRARIES ${ASSIMP_LIBRARIES} ${ZLIB_LIBRARIES})
+
 
 include(FindPackageHandleStandardArgs)
 ## handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE
