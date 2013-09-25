@@ -32,6 +32,8 @@
 */
 /* @{ */
 
+#define PROCESS_FOLDER_PREFIX "ProcessGUI_"
+
 #define GLOBAL_LOG_FOLDER_DIRECTORY "./Logs"
 
 #define VIDEO_FOLDER_PATH "./Videos"                       ///< Directory where new simulation folders are place during record.

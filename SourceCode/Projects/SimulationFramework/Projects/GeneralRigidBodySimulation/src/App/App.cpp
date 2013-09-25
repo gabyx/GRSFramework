@@ -28,7 +28,14 @@ App::~App()
 void App::startApp()
 {
 
-    new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir);
+    std::stringstream processFolder;
+    processFolder << PROCESS_FOLDER_PREFIX << my_rank;
+    boost::filesystem::path localDirPath;
+
+    localDirPath = ApplicationCLOptions::getSingletonPtr()->m_globalDir;
+    localDirPath /= processFolder.str();
+    new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
+
     new Logging::LogManager();
 
 	new RenderContext();
