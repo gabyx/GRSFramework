@@ -38,11 +38,11 @@
 #define SIM_VIDEO_PREFIX "VideoFrame_"                       ///< File prefix for the video frames;
 
 #define SIMULATION_FOLDER_PATH "./SimFiles"                       ///< Directory where new simulation folders are place during record.
-#define SIM_FOLDER_PREFIX_RESAMPLE "SimDataRESAMPLEGUI_"                       ///< Directory where the video frames are place during record.
+#define SIM_FOLDER_PREFIX_RESAMPLE "SimDataRESAMPLE_"                       ///< Directory where the video frames are place during record.
 #define SIM_FILE_EXTENSION ".sim"                                       ///< File extension for .sim file.
 #define SIM_SCENE_FILE_NAME "SceneFile"                                 ///< File name for the Scene xml file which describes the scene
-#define SIM_FOLDER_PREFIX_REALTIME "SimDataREALTIMEGUI_"            ///< Prefix for the simulation folder during realtime simulation.
-#define SIM_FOLDER_PREFIX_RECORD "SimDataRECORDGUI_"                ///< Prefix for the simulation folder during record.
+#define SIM_FOLDER_PREFIX_REALTIME "SimDataREALTIME_"            ///< Prefix for the simulation folder during realtime simulation.
+#define SIM_FOLDER_PREFIX_RECORD "SimDataRECORD_"                ///< Prefix for the simulation folder during record.
 #define SIM_FOLDER_PREFIX_INIT "SimDataInitialState_"             ///< Prefix for the folder where the inital states are written, press Key I!
 #define SIM_INIT_FILE_EXTENSION ".sim"                              ///< File extension for .siminit file.
 #define SIM_INIT_FILE_PREFIX "InitialState"                      ///< The name for the Initial state file!
