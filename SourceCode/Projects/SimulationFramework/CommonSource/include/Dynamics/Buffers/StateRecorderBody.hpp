@@ -309,13 +309,17 @@ template<typename TDynamicsSystemType>
 void StateRecorderBody<TDynamicsSystemType>::addBody(RigidBodyType * body) {
     LOG(m_pSimulationLog, "---> StateRecorderBody:: Add body with id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
     bool res = openFile(body, false); // no truncate!
-    LOGASSERTMSG(res, m_pSimulationLog, "---> StateRecorderBody:: Add body with id: " << RigidBodyId::getBodyIdString(body) <<"failed!");
+    LOGASSERTMSG(res, m_pSimulationLog, "---> StateRecorderBody:: Add body with id: " << RigidBodyId::getBodyIdString(body) <<"failed!" 
+            << ", StateRecorderBody has " << m_BinarySimFiles.size() << " files open currently!" 
+            );
 }
 template<typename TDynamicsSystemType>
 void StateRecorderBody<TDynamicsSystemType>::removeBody(RigidBodyType * body) {
     LOG(m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
     bool res = closeFile(body);
-    LOGASSERTMSG(res, m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << RigidBodyId::getBodyIdString(body) <<"failed!");
+    LOGASSERTMSG(res, m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << RigidBodyId::getBodyIdString(body) <<"failed!" 
+            << ", StateRecorderBody has " << m_BinarySimFiles.size() << " files open currently!" 
+            );
 }
 
 
