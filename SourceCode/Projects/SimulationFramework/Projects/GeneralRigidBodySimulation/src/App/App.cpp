@@ -29,7 +29,7 @@ void App::startApp()
 {
 
     std::stringstream processFolder;
-    processFolder << PROCESS_FOLDER_PREFIX << my_rank;
+    processFolder << PROCESS_FOLDER_PREFIX;
     boost::filesystem::path localDirPath;
 
     localDirPath = ApplicationCLOptions::getSingletonPtr()->m_globalDir;

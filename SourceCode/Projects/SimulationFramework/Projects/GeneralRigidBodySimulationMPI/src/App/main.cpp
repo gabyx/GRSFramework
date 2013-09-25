@@ -39,13 +39,10 @@ int main(int argc, char **argv) {
 
     localDirPath = ApplicationCLOptions::getSingletonPtr()->m_globalDir;
     localDirPath /= processFolder.str();
-
-
-    // Process static global members! (Singletons)
     new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
+
+
     new Logging::LogManager();
-
-
 
     // Redirect std::cerr to Global file:
     boost::filesystem::path file = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
