@@ -18,11 +18,17 @@ class SpatialSphericalTimeRandomForceField{
         SpatialSphericalTimeRandomForceField(unsigned int seed,
                                            PREC boostTime,
                                            PREC pauseTime,
+                                           PREC startTime,
+                                           PREC endTime,
                                            PREC amplitude,
                                            AABB<LayoutConfigType> randomBox,
                                            bool randomOn
                                            ):
-            m_boostTime(boostTime),m_pauseTime(pauseTime),m_seed(seed), m_amplitude(amplitude), m_randomBox(randomBox), m_randomOn(randomOn)
+            m_boostTime(boostTime),
+            m_pauseTime(pauseTime),
+            m_startTime(startTime),
+            m_endTime(endTime),
+            m_seed(seed), m_amplitude(amplitude), m_randomBox(randomBox), m_randomOn(randomOn)
         {
             m_randomG = NULL;
             reset();
@@ -32,31 +38,48 @@ class SpatialSphericalTimeRandomForceField{
             delete m_randomG;
         }
         void calculate(RigidBodyType * body){
-            ASSERTMSG(body->m_pSolverData, "Solverdata not present!")
-            if(m_ts > m_pauseTime){
-                Vector3 r = body->m_r_S - m_offset ;
-                r.normalize();
-                body->m_h_term.template head<3>() += r*m_amplitude;
+            if(m_inInterval){
+                ASSERTMSG(body->m_pSolverData, "Solverdata not present!")
+                if(m_ts <= m_boostTime){
+                    Vector3 r = body->m_r_S - m_offset ;
+                    r.normalize();
+                    body->m_h_term.template head<3>() += r*m_amplitude;
+                }
             }
         }
 
         void setTime(PREC time){
-
             m_t = time;
-            m_ts = std::fmod(time, (m_boostTime+m_pauseTime)) ;
 
-            if(m_randomOn){
-                if(m_newPos == false && m_ts<m_pauseTime){
-                    Vector3 ex = m_randomBox.extent();
-                    m_offset = m_randomBox.m_minPoint + Vector3( ex(0)* (*m_randomG)(),  ex(1) * (*m_randomG)() , ex(2) * (*m_randomG)() );
-                    m_newPos = true;
-                }else{
-                    m_newPos = false;
+            if(m_inInterval == false){
+                if(m_t >= m_startTime && m_t <= m_endTime){
+                    m_inInterval = true;
+                }
+            }
+
+            if(m_inInterval == true){
+                if(m_t < m_startTime || m_t > m_endTime){
+                    m_inInterval = false;
+                    return;
+                }
+
+
+                m_ts = std::fmod((m_t-m_startTime), (m_boostTime+m_pauseTime)) ;
+
+                if(m_randomOn){
+                    if(m_newPos == false && m_ts>m_boostTime){
+                        Vector3 ex = m_randomBox.extent();
+                        m_offset = m_randomBox.m_minPoint + Vector3( ex(0)* (*m_randomG)(),  ex(1) * (*m_randomG)() , ex(2) * (*m_randomG)() );
+                        m_newPos = true;
+                    }else if( m_newPos == true && m_ts<=m_boostTime){
+                        m_newPos = false;
+                    }
                 }
             }
         }
 
         void reset(){
+
             if(m_randomG){
                 delete m_randomG;
             }
@@ -69,6 +92,7 @@ class SpatialSphericalTimeRandomForceField{
             m_ts = 0;
             m_newPos = true;
             m_offset = m_randomBox.m_minPoint;
+            m_inInterval = false;
         }
 
 
@@ -78,9 +102,9 @@ class SpatialSphericalTimeRandomForceField{
         SpatialSphericalTimeRandomForceField(const SpatialSphericalTimeRandomForceField &);
 
         boost::variate_generator< boost::mt19937 , boost::uniform_real<PREC> > * m_randomG;
-        PREC m_boostTime, m_pauseTime, m_amplitude, m_t, m_ts ;
+        PREC m_boostTime, m_pauseTime, m_amplitude, m_t, m_ts, m_startTime, m_endTime;
         Vector3 m_offset;
-        bool m_newPos, m_randomOn;
+        bool m_newPos, m_randomOn, m_inInterval;
         AABB<LayoutConfigType> m_randomBox;
         unsigned int m_seed ;
 

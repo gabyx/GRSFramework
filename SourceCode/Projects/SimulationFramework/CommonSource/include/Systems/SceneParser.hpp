@@ -488,6 +488,16 @@ protected:
                 if(!Utilities::stringToType<PREC>(pauseTime, forceField->GetAttribute("pauseTime"))) {
                     throw ticpp::Exception("---> String conversion in processForceField: pauseTime failed");
                 }
+
+                PREC startTime;
+                if(!Utilities::stringToType<PREC>(startTime, forceField->GetAttribute("startTime"))) {
+                        throw ticpp::Exception("---> String conversion in processForceField: startTime failed");
+                }
+
+                PREC endTime;
+                if(!Utilities::stringToType<PREC>(endTime, forceField->GetAttribute("endTime"))) {
+                    throw ticpp::Exception("---> String conversion in processForceField: endTime failed");
+                }
                 PREC amplitude;
                 if(!Utilities::stringToType<PREC>(amplitude, forceField->GetAttribute("amplitude"))) {
                     throw ticpp::Exception("---> String conversion in processForceField: amplitude failed");
@@ -513,6 +523,8 @@ protected:
                                                                 seed,
                                                                 boostTime,
                                                                 pauseTime,
+                                                                startTime,
+                                                                endTime,
                                                                 amplitude,
                                                                 AABB<LayoutConfigType>(boxMin,boxMax),
                                                                 randomOn
