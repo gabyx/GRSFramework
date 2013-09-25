@@ -32,17 +32,13 @@
 */
 /* @{ */
 
+#define PROCESS_FOLDER_PREFIX "ProcessNoGUI"
+
 #define GLOBAL_LOG_FOLDER_DIRECTORY "./Logs"
 
-#define VIDEO_FOLDER_PATH "./Videos"                       ///< Directory where new simulation folders are place during record.
-#define VIDEO_FOLDER_PREFIX "Video_"                       ///< Directory where the video frames are place during record.
-#define SIM_VIDEO_PREFIX "VideoFrame_"                       ///< File prefix for the video frames;
-
 #define SIMULATION_FOLDER_PATH "./SimFiles"                       ///< Directory where new simulation folders are place during record.
-#define SIM_FOLDER_PREFIX_RESAMPLE "SimDataRESAMPLE_"                       ///< Directory where the video frames are place during record.
 #define SIM_FILE_EXTENSION ".sim"                                       ///< File extension for .sim file.
 #define SIM_SCENE_FILE_NAME "SceneFile"                                 ///< File name for the Scene xml file which describes the scene
-#define SIM_FOLDER_PREFIX_REALTIME "SimDataREALTIME_"            ///< Prefix for the simulation folder during realtime simulation.
 #define SIM_FOLDER_PREFIX_RECORD "SimDataRECORD_"                ///< Prefix for the simulation folder during record.
 #define SIM_FOLDER_PREFIX_INIT "SimDataInitialState_"             ///< Prefix for the folder where the inital states are written, press Key I!
 #define SIM_INIT_FILE_EXTENSION ".sim"                              ///< File extension for .siminit file.
@@ -99,41 +95,6 @@
 /* @} */
 
 
-/** @name Playback Manager
-* @brief  Log file of the Playback Manager.
-*/
-/* @{ */
-#define LogToFilePlayback 1      ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsolePlayback 1   ///< {0,1} Set if log is outputted to console or not.
-/* @} */
-
-/** @name Loader Thread
-* @brief Log file of the Loader Thread which is started during playback.
-*/
-/* @{ */
-#define LogToFileLoader 1        ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsoleLoader 1     ///< {0,1} Set if log is outputted to console or not.
-/* @} */
-
-
-/** @name App Log File
-* @brief Log File for the Application.
-*/
-/* @{ */
-#define LogToFileApp 1     ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsoleApp 1  ///< {0,1} Set if log is outputted to console or not.
-/* @} */
-
-
-/** @name Ogre Log File
-* @brief Ogre File for the Application.
-*/
-/* @{ */
-#define LogToFileOgre 1     ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsoleOgre 1  ///< {0,1} Set if log is outputted to console or not.
-/* @} */
-
-
 
 /** @name  Deconstructor and Constructor Macros
 * @brief Deconstructor and Constructor Macros to Debug correct dealloction of objects.
@@ -149,19 +110,6 @@
   #define CONSTRUCTOR_MESSAGE
 #endif
 /* @} */
-
-
-
-/** @name State Ring Pool */
-/* @{ */
-#define LogToFileStateRingPool 0 ///< {0,1} Set if log is outputted to file or not.
-/* @} */
-
-/** @name State Pool */
-/* @{ */
-#define LogToFileStatePool 0     ///< {0,1} Set if log is outputted to file or not.
-/* @} */
-
 
 /* @} */
 #endif

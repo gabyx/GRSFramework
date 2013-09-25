@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     MPI_Comm_size(MPI_COMM_WORLD,&nProcesses);
 
     std::stringstream processFolder;
-    processFolder << "Process_" << my_rank;
+    processFolder << PROCESS_FOLDER_PREFIX << my_rank;
     boost::filesystem::path localDirPath;
 
     localDirPath = ApplicationCLOptions::getSingletonPtr()->m_globalDir;

@@ -15,7 +15,7 @@ FileManager::FileManager(boost::filesystem::path globalDirPath, boost::filesyste
 }
 
 FileManager::FileManager(){
-    init("","");
+    init("./","./");
 }
 
 void FileManager::init(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath){

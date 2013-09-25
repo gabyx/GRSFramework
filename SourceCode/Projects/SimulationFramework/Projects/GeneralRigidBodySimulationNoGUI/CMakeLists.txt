@@ -80,7 +80,7 @@ SET(COMMON_INC
     ${SOURCE_DIR}/include/Common/TypeDefs.hpp
 #    ${SOURCE_DIR}/include/Common/OgreMeshExtraction.hpp
 #    ${SOURCE_DIR}/include/Common/CommonFunctionsOgre.hpp
-    ${SOURCE_DIR}/include/Common/LogDefines.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
     ${SOURCE_DIR}/include/Common/AssertionDebug.hpp
     ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
@@ -243,6 +243,9 @@ set(INCLUDE_DIRS
     ${PROJECT_BINARY_DIR}/ConfigFiles/
 
     ${PROJECT_SOURCE_DIR}/include/App
+    
+    #Only for LogDefines.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common # Needs to be previous to {SOURCE_DIR}/include/Common (because there is another LogDefines.hpp
 
     #Linked Source
     #${SOURCE_DIR}/include/App

@@ -358,7 +358,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     swapStateBuffers();
 
 #if CoutLevelSolver==1
-      if(m_IterationCounter % 10000 == 1){
+      if(m_IterationCounter % (unsigned int)(m_Settings.m_endTime/m_Settings.m_deltaT / 10) == 1){
             LOG(m_pSolverLog,"% m_t: " << m_StateBuffers.m_pBack->m_t<<std::endl; );
       }
 #endif

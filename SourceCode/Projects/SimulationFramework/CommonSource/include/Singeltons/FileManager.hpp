@@ -27,7 +27,7 @@ public:
       globalDirPath = first simulation directory, localDirPath = process specific simulation directory
     */
     FileManager();
-    FileManager(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath = "");
+    FileManager(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath = "./");
     ~FileManager();
 
     boost::filesystem::path getGlobalDirectoryPath();

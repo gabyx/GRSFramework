@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include "LogDefines.hpp"
 #include "TypeDefs.hpp"
 #include "ApplicationCLOptions.hpp"
 #include "FileManager.hpp"
@@ -8,26 +9,36 @@
 #include "SimulationManager.hpp"
 
 
-int main(int argc, char **argv)
-{
-   // Parsing Input Parameters===================================
+int main(int argc, char **argv) {
+    // Parsing Input Parameters===================================
     new ApplicationCLOptions();
     ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
 
     ApplicationCLOptions::getSingletonPtr()->checkArguments();
 
-   // End Parsing =================================
+    // End Parsing =================================
 
-   new Logging::LogManager();
-   new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir);
+    new Logging::LogManager();
 
-   SimulationManager<GeneralConfig> mgr;
+    std::stringstream processFolder;
+    processFolder <<  PROCESS_FOLDER_PREFIX;
+    boost::filesystem::path localDirPath;
 
-   mgr.setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
-   mgr.startSim();
+    localDirPath = ApplicationCLOptions::getSingletonPtr()->m_globalDir;
+    localDirPath /= processFolder.str();
 
 
-  system("pause");
-  return 0;
+    // Process static global members! (Singletons)
+    new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
+
+
+    SimulationManager<GeneralConfig> mgr;
+
+    mgr.setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
+    mgr.startSim();
+
+
+    system("pause");
+    return 0;
 }
 
