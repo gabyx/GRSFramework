@@ -33,7 +33,8 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    StateRecorderBody(bool logWriteAccess = false, unsigned int id = 0);
+    StateRecorderBody(bool logWriteAccess = false, unsigned int id = 0,
+                      bool useCache = false, unsigned long long cacheLimit = 100*1024*1024);
     ~StateRecorderBody();
 
     void writeStates(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list);
@@ -67,6 +68,11 @@ protected:
     unsigned int m_accessId;
 
     unsigned int m_nSimBodies;
+
+    bool m_useCache;
+    unsigned long long m_cacheLimit;
+    std::map<typename RigidBodyType::RigidBodyIdType, std::stringstream > m_cache;
+
 };
 
 /** @} */
@@ -74,10 +80,15 @@ protected:
 
 
 template<typename TDynamicsSystemType>
-StateRecorderBody<TDynamicsSystemType>::StateRecorderBody(bool logWriteAccess, unsigned int id) {
+StateRecorderBody<TDynamicsSystemType>::StateRecorderBody(bool logWriteAccess, unsigned int id,
+                                                          bool useCache, unsigned long long cacheLimit) {
 
     m_logWriteAccess = logWriteAccess;
     m_accessId = id;
+
+    m_useCache= useCache;
+    m_cacheLimit= cacheLimit;
+
 
     //Check if LogManager is available
     Logging::LogManager * manager = Logging::LogManager::getSingletonPtr();
@@ -93,8 +104,9 @@ StateRecorderBody<TDynamicsSystemType>::StateRecorderBody(bool logWriteAccess, u
     // Get status information about file descriptors ...
     std::stringstream s;
     getLimitOpenFiles(s);
-
     LOG(m_pSimulationLog,"---> StateRecorderBody:: File Descriptor Info: " << std::endl << "\t\t" << s.str() << std::endl;)
+
+
 }
 
 template<typename TDynamicsSystemType>
@@ -178,6 +190,12 @@ bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool
                     LOG(m_pSimulationLog,"---> StateRecorderBody:: Added LogSimFile: " << file.string() );
 
                 }
+        }
+
+
+        if(m_useCache){
+            // make cache for this body
+
         }
 
     }
@@ -309,16 +327,16 @@ template<typename TDynamicsSystemType>
 void StateRecorderBody<TDynamicsSystemType>::addBody(RigidBodyType * body) {
     LOG(m_pSimulationLog, "---> StateRecorderBody:: Add body with id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
     bool res = openFile(body, false); // no truncate!
-    LOGASSERTMSG(res, m_pSimulationLog, "---> StateRecorderBody:: Add body with id: " << RigidBodyId::getBodyIdString(body) <<"failed!" 
-            << ", StateRecorderBody has " << m_BinarySimFiles.size() << " files open currently!" 
+    LOGASSERTMSG(res, m_pSimulationLog, "---> StateRecorderBody:: Add body with id: " << RigidBodyId::getBodyIdString(body) <<"failed!"
+            << ", StateRecorderBody has " << m_BinarySimFiles.size() + m_LogSimFiles.size() << " files open currently!"
             );
 }
 template<typename TDynamicsSystemType>
 void StateRecorderBody<TDynamicsSystemType>::removeBody(RigidBodyType * body) {
     LOG(m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
     bool res = closeFile(body);
-    LOGASSERTMSG(res, m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << RigidBodyId::getBodyIdString(body) <<"failed!" 
-            << ", StateRecorderBody has " << m_BinarySimFiles.size() << " files open currently!" 
+    LOGASSERTMSG(res, m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << RigidBodyId::getBodyIdString(body) <<"failed!"
+            << ", StateRecorderBody has " << m_BinarySimFiles.size() + m_LogSimFiles.size()<< " files open currently!"
             );
 }
 

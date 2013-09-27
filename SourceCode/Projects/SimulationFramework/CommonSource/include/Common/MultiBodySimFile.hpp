@@ -2,11 +2,14 @@
 #define MultiBodySimFile_hpp
 
 #include <boost/filesystem.hpp>
-#include <boost/static_assert.hpp>
+#include <StaticAssert.hpp>
 
+#include <type_traits>
 #include <fstream>
 
 #include "DynamicsState.hpp"
+
+#include "MultiBodySimFileIOHelpers.hpp"
 
 /**
 * @ingroup Common
@@ -144,8 +147,9 @@ private:
     template<typename T>
     MultiBodySimFile & operator >> (T &value);
 
+
     std::fstream m_file_stream;                      ///< The file stream which represents the binary data.
-    enum BuffSize { BUF_SIZE = 1<<14 };              ///< The internal buffer size.
+    const unsigned int BUF_SIZE = 1<<14;              ///< The internal buffer size.
     char * m_Buffer;                                 ///< The buffer.
 
     static const char m_simHeader[SIM_FILE_SIGNATURE_LENGTH]; ///< The .sim file header.
@@ -230,12 +234,18 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState<TLayoutCon
     *this << (double)state->m_t;
     // write states
     for(unsigned int i=0 ; i< state->m_nSimBodies; i++) {
-        for(int k=0; k < m_nDOFqObj; k++) {
-            *this << (double)(state->m_SimBodyStates[i].m_q(k));
-        }
-        for(int k=0; k < m_nDOFuObj; k++) {
-            *this << (double)(state->m_SimBodyStates[i].m_u(k));
-        }
+
+//        for(int k=0; k < m_nDOFqObj; k++) {
+//            *this << (double)(state->m_SimBodyStates[i].m_q(k));
+//        }
+        STATIC_ASSERT2((std::is_same<double, typename TLayoutConfig::PREC>::value),
+                       "OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
+
+        IOHelpers::writeBinary(m_file_stream, state->m_SimBodyStates[i].m_q );
+//        for(int k=0; k < m_nDOFuObj; k++) {
+//            *this << (double)(state->m_SimBodyStates[i].m_u(k));
+//        }
+        IOHelpers::writeBinary(m_file_stream, state->m_SimBodyStates[i].m_u );
     }
 
     m_nStates++;
@@ -253,16 +263,19 @@ MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState<TLayoutConfig>* 
     // write states
     for(unsigned int i=0 ; i< state->m_nSimBodies; i++) {
         //std::cout << "q_"<<i<<": ";
-        for(int k=0; k < m_nDOFqObj; k++) {
-            *this >> (double &)(state->m_SimBodyStates[i].m_q(k));
-            //std::cout << "q"<<i <<state->m_SimBodyStates[i].m_q(k)  << std::endl;
-        }
+
+//        for(int k=0; k < m_nDOFqObj; k++) {
+//            *this >> (double &)(state->m_SimBodyStates[i].m_q(k));
+//            //std::cout << "q"<<i <<state->m_SimBodyStates[i].m_q(k)  << std::endl;
+//        }
+        IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[i].m_q );
         //std::cout<< state->m_SimBodyStates[i].m_q.transpose()  << std::endl;
         if(m_bReadFullState) {
             //std::cout << "u_"<<i<<": ";
-            for(int k=0; k < m_nDOFuObj; k++) {
-                *this >> (double &)(state->m_SimBodyStates[i].m_u(k));
-            }
+//            for(int k=0; k < m_nDOFuObj; k++) {
+//                *this >> (double &)(state->m_SimBodyStates[i].m_u(k));
+//            }
+            IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[i].m_u );
             //std::cout<< state->m_SimBodyStates[i].m_u.transpose()  << std::endl;
         } else {
             //Dont read in velocities, its not needed!
