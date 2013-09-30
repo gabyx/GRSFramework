@@ -1,7 +1,7 @@
 #include "MultiBodySimFile.hpp"
 
 
-const char MultiBodySimFile::m_simHeader[SIM_FILE_SIGNATURE_LENGTH] = SIM_FILE_SIGNATURE;
+const char MultiBodySimFile::m_simFileSignature[SIM_FILE_SIGNATURE_LENGTH] = SIM_FILE_SIGNATURE;
 
 // Implementation
 
@@ -26,7 +26,7 @@ MultiBodySimFile::MultiBodySimFile(unsigned int nDOFqObj, unsigned int nDOFuObj,
 }
 
 MultiBodySimFile::~MultiBodySimFile() {
-    closeSimFile();
+    close();
     delete[] m_Buffer;
 }
 
@@ -80,17 +80,17 @@ void MultiBodySimFile::setByteLengths(const unsigned int nSimBodies) {
 }
 
 
-bool MultiBodySimFile::openSimFileWrite(const boost::filesystem::path &file_path, const unsigned int nSimBodies, bool truncate) {
+bool MultiBodySimFile::openWrite(const boost::filesystem::path &file_path, const unsigned int nSimBodies, bool truncate) {
     m_errorString.str("");
 
-    closeSimFile();
+    close();
 
     setByteLengths(nSimBodies);
 
     if(truncate) {
 
         m_file_stream.open(file_path.string().c_str(), std::ios_base::trunc | std::ios_base::binary | std::ios_base::out);
-        m_file_stream.rdbuf()->pubsetbuf(m_Buffer, BUF_SIZE);
+        m_file_stream.rdbuf()->pubsetbuf(m_Buffer, m_buf_size);
         if(m_file_stream.good()) {
             writeHeader();
             m_filePath = file_path;
@@ -101,7 +101,7 @@ bool MultiBodySimFile::openSimFileWrite(const boost::filesystem::path &file_path
 
     } else {
         //Here we need to check that, we set the put position exactly at the last state, we might have overhanging bits  because user has cancled and some binary stuff is hanging at the end!!!
-        if(openSimFileRead(file_path,nSimBodies)) {
+        if(openRead(file_path,nSimBodies)) {
             // Reopen only in write mode!
             m_file_stream.close();
             m_file_stream.clear();
@@ -120,7 +120,7 @@ bool MultiBodySimFile::openSimFileWrite(const boost::filesystem::path &file_path
         m_errorString << "Could not open sim file: " << file_path.string() <<" for appending data" <<std::endl;
     }
 
-    closeSimFile();
+    close();
 
     return false;
 }
@@ -129,7 +129,7 @@ bool MultiBodySimFile::openSimFileWrite(const boost::filesystem::path &file_path
 void  MultiBodySimFile::writeHeader() {
 
     for(int i=0; i<SIM_FILE_SIGNATURE_LENGTH; i++) {
-        *this << m_simHeader[i];
+        *this << m_simFileSignature[i];
     }
 
     *this << (unsigned int)m_nSimBodies << (unsigned int)m_nDOFqObj << (unsigned int)m_nDOFuObj; // Precision output is always double!
@@ -139,18 +139,18 @@ void  MultiBodySimFile::writeHeader() {
 }
 
 
-bool  MultiBodySimFile::openSimFileRead(const boost::filesystem::path &file_path, const unsigned int nSimBodies, bool readFullState) {
+bool  MultiBodySimFile::openRead(const boost::filesystem::path &file_path, const unsigned int nSimBodies, bool readFullState) {
     m_errorString.str("");
 
     // Set if the read commands are reading the whole state! not only q! also u!
     m_bReadFullState = readFullState;
 
-    closeSimFile();
+    close();
 
     setByteLengths(nSimBodies);
 
     m_file_stream.open(file_path.string().c_str(), std::ios_base::binary | std::ios_base::in);
-    m_file_stream.rdbuf()->pubsetbuf(m_Buffer, BUF_SIZE);
+    m_file_stream.rdbuf()->pubsetbuf(m_Buffer, m_buf_size);
     m_file_stream.sync();
     if(m_file_stream.good()) {
 
@@ -169,13 +169,13 @@ bool  MultiBodySimFile::openSimFileRead(const boost::filesystem::path &file_path
 
     m_errorString << "Could not open sim file: " << file_path.string() <<std::endl;
 
-    closeSimFile();
+    close();
     return false;
 }
 
 
 
-void MultiBodySimFile::closeSimFile() {
+void MultiBodySimFile::close() {
     // Reset all values;
     m_nStates = 0;
     m_nBytes = 0;
@@ -220,7 +220,7 @@ bool  MultiBodySimFile::readLength() {
 bool  MultiBodySimFile::readHeader() {
     char signature[4];
     m_file_stream.read(signature,4);
-    if(std::strncmp(signature,m_simHeader,SIM_FILE_SIGNATURE_LENGTH)==0) {
+    if(std::strncmp(signature,m_simFileSignature,SIM_FILE_SIGNATURE_LENGTH)==0) {
         unsigned int nBodies, nDofqObj, nDofuObj;
         *this >> nBodies >> nDofqObj >> nDofuObj;
 
@@ -241,7 +241,7 @@ bool  MultiBodySimFile::readHeader() {
         }
 
     } else {
-        m_errorString << "Binary file contains a wrong header and is not equal to: '" << m_simHeader<<"'"<<std::endl;
+        m_errorString << "Binary file contains a wrong header and is not equal to: '" << m_simFileSignature<<"'"<<std::endl;
     }
 
     return false;

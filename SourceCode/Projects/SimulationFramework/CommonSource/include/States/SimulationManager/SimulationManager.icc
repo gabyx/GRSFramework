@@ -197,7 +197,7 @@ bool SimulationManager<TConfig>::initRecordThread() {
 template<typename TConfig>
 void SimulationManager<TConfig>::cleanUpRecordThread() {
     m_pTimestepper->closeAllFiles();
-    m_pStateRecorder->closeSimFile();
+    m_pStateRecorder->close();
 }
 
 template<typename TConfig>

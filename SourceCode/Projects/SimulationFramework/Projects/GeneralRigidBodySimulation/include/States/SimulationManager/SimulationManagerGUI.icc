@@ -129,9 +129,9 @@ bool SimulationManagerGUI<TConfig>::writeInitialState() {
     std::string filename = SIM_INIT_FILE_PREFIX;
     filename += SIM_INIT_FILE_EXTENSION;
     file /= filename;
-    if(simFile.openSimFileWrite(file,m_nSimBodies)) {
+    if(simFile.openWrite(file,m_nSimBodies)) {
         simFile << m_pVisBuffer.get();
-        simFile.closeSimFile();
+        simFile.close();
         m_pSimulationLog->logMessage(std::string("Successfully written initial state file to:") + file.string() );
         return true;
     }
@@ -394,7 +394,7 @@ bool SimulationManagerGUI<TConfig>::initRecordThread() {
 template<typename TConfig>
 void SimulationManagerGUI<TConfig>::cleanUpRecordThread() {
     m_pTimestepper->closeAllFiles();
-    m_pStateRecorder->closeSimFile();
+    m_pStateRecorder->close();
 }
 
 

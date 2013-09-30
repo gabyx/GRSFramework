@@ -2,6 +2,7 @@
 #define RigidBodyList_hpp
 
 #include <boost/multi_index_container.hpp>
+#include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/random_access_index.hpp>
 #include <boost/multi_index/tag.hpp>
@@ -19,7 +20,8 @@ private:
 
     // Tags for accesing the index
     struct by_insertion{};
-    struct by_id{};
+    struct by_hashed_id{};
+    struct by_ordered_id{};
 
 public:
     typedef TRigidBodyIdType RigidBodyIdType;
@@ -36,7 +38,11 @@ public:
                 boost::multi_index::tag<by_insertion>
             >, // this index represents insertion order
             boost::multi_index::hashed_unique<
-                boost::multi_index::tag<by_id>,
+                boost::multi_index::tag<by_hashed_id>,
+                boost::multi_index::member<RigidBodyType, const RigidBodyIdType, &RigidBodyType::m_id>
+            >,
+            boost::multi_index::ordered_unique<
+                boost::multi_index::tag<by_ordered_id>,
                 boost::multi_index::member<RigidBodyType, const RigidBodyIdType, &RigidBodyType::m_id>
             >
         >
@@ -46,53 +52,64 @@ private:
 
     MapType m_map;
 
-    typedef  typename MapType::template index<by_insertion>::type MapByInsertionType;
-    typedef  typename MapType::template index<by_id>::type        MapByIdType;
-
-    MapByIdType & m_mapById;
+    typedef  typename MapType::template index<by_insertion>::type    MapByInsertionType;
+    typedef  typename MapType::template index<by_hashed_id>::type    MapByHashedIdType;
+    typedef  typename MapType::template index<by_ordered_id>::type   MapByOrderedIdType;
+    MapByHashedIdType & m_mapByHashedId;
     MapByInsertionType & m_mapByInsertion;
+    MapByOrderedIdType & m_mapByOrderedId;
 
 public:
 
      RigidBodyContainer():
-        m_mapById(m_map.template get<by_id>()),
-        m_mapByInsertion( m_map.template get<by_insertion>())
+        m_mapByHashedId(m_map.template get<by_hashed_id>()),
+        m_mapByInsertion( m_map.template get<by_insertion>()),
+        m_mapByOrderedId( m_map.template get<by_ordered_id>())
     {}
 
     typedef typename MapByInsertionType::iterator iterator;
     typedef typename MapByInsertionType::const_iterator const_iterator;
 
+    typedef typename MapByOrderedIdType::iterator iterator_ordered;
+    typedef typename MapByOrderedIdType::const_iterator const_iterator_ordered;
 
-    inline iterator begin(){return m_mapByInsertion.begin();}
-    inline iterator end(){return m_mapByInsertion.end();}
-    inline const_iterator begin() const {return m_mapByInsertion.begin();}
-    inline const_iterator end() const {return m_mapByInsertion.end();}
+    // Ordered by id
+    iterator_ordered beginOrdered(){ return m_mapByOrderedId.begin(); }
+    iterator_ordered endOrdered(){ return m_mapByOrderedId.end(); }
+    const_iterator_ordered beginOrdered() const{ return m_mapByOrderedId.begin(); }
+    const_iterator_ordered endOrdered() const { return m_mapByOrderedId.end(); }
+
+    // Ordered by insertion
+    iterator begin(){return m_mapByInsertion.begin();}
+    iterator end(){return m_mapByInsertion.end();}
+    const_iterator begin() const {return m_mapByInsertion.begin();}
+    const_iterator end() const {return m_mapByInsertion.end();}
 
 
-    inline bool addBody(RigidBodyType* ptr){
-        std::pair<typename MapByIdType::iterator,bool> res=  m_mapById.insert(ptr);
+    bool addBody(RigidBodyType* ptr){
+        std::pair<typename MapByHashedIdType::iterator,bool> res=  m_mapByHashedId.insert(ptr);
         return res.second;
     }
 
-    inline bool removeBody(RigidBodyType* ptr){
-        return m_mapById.erase(ptr->m_id);
+    bool removeBody(RigidBodyType* ptr){
+        return m_mapByHashedId.erase(ptr->m_id);
     }
 
-    inline bool removeAndDeleteBody(RigidBodyType* ptr){
+    bool removeAndDeleteBody(RigidBodyType* ptr){
         return removeAndDeleteBody(ptr->m_id);
     }
 
-    inline bool removeAndDeleteBody(RigidBodyIdType const & id){
-        typename MapByIdType::iterator it = m_mapById.find(id);
-        if(it != m_mapById.end()){
+    bool removeAndDeleteBody(RigidBodyIdType const & id){
+        typename MapByHashedIdType::iterator it = m_mapByHashedId.find(id);
+        if(it != m_mapByHashedId.end()){
             delete *it; // Delete body!
-            m_mapById.erase(it);
+            m_mapByHashedId.erase(it);
             return true;
         }
         return false;
     }
 
-    inline bool removeAndDeleteAllBodies(){
+    bool removeAndDeleteAllBodies(){
         iterator it;
         for(it = begin(); it != end(); it++){
             delete (*it);
@@ -101,20 +118,20 @@ public:
         return true;
     }
 
-    inline iterator find(RigidBodyIdType id){
-        typename MapByIdType::iterator it = m_mapById.find(id);
+    iterator find(RigidBodyIdType id){
+        typename MapByHashedIdType::iterator it = m_mapByHashedId.find(id);
         return m_map.template project<by_insertion>(it);
     }
-    inline iterator find(RigidBodyType * body){
-        typename MapByIdType::iterator it = m_mapById.find(body->m_id);
+    iterator find(RigidBodyType * body){
+        typename MapByHashedIdType::iterator it = m_mapByHashedId.find(body->m_id);
         return m_map.template project<by_insertion>(it);
     }
 
-    inline void clear(){
+    void clear(){
         m_map.clear();
     }
 
-    inline typename MapType::size_type size() const{
+    typename MapType::size_type size() const{
         return m_map.size();
     }
 

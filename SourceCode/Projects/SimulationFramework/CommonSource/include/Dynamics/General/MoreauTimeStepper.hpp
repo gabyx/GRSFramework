@@ -261,7 +261,7 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
 
      if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::NONE) {
 
-        if(!m_ReferenceSimFile.openSimFileRead(m_Settings.m_simStateReferenceFile,m_nSimBodies,true)) {
+        if(!m_ReferenceSimFile.openRead(m_Settings.m_simStateReferenceFile,m_nSimBodies,true)) {
             std::stringstream error;
             error << "Could not open file: " << m_Settings.m_simStateReferenceFile.string()<<std::endl;
             error << "File errors: " <<std::endl<< m_ReferenceSimFile.getErrorString();

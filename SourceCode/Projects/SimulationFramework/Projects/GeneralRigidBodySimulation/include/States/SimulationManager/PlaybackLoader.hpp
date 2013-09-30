@@ -312,7 +312,7 @@ bool PlaybackLoader<TLayoutConfig, TStatePool>::loadFile()
       if(!boost::filesystem::is_empty(file_path)){
 
         // Try to load the file
-        if(m_BinarySimFile.openSimFileRead(file_path,m_nSimBodies,m_bReadFullState))
+        if(m_BinarySimFile.openRead(file_path,m_nSimBodies,m_bReadFullState))
         {
           return true;
         }else{
@@ -341,7 +341,7 @@ bool PlaybackLoader<TLayoutConfig, TStatePool>::loadFile()
 template< typename TLayoutConfig , typename TStatePool>
 void PlaybackLoader<TLayoutConfig, TStatePool>::unloadFile()
 {
-  m_BinarySimFile.closeSimFile();
+  m_BinarySimFile.close();
   m_pThreadLog->logMessage("PlaybackLoader:: File closed...");
 }
 

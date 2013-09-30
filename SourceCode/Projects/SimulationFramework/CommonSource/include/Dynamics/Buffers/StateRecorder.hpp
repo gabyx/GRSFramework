@@ -30,7 +30,7 @@ public:
   ~StateRecorder();
   bool createSimFile(boost::filesystem::path file_path);
   bool createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path);
-  void closeSimFile();
+  void close();
 
   //void addState(const DynamicsState<TLayoutConfig> * state);
   /*void writeAllStates();*/
@@ -84,7 +84,7 @@ template<typename TDynamicsSystemType>
 StateRecorder<TDynamicsSystemType>::~StateRecorder()
 {
   DECONSTRUCTOR_MESSAGE
-  closeSimFile();
+  close();
 }
 
 
@@ -92,7 +92,7 @@ template<typename TDynamicsSystemType>
 bool StateRecorder<TDynamicsSystemType>::createSimFile(boost::filesystem::path file_path)
 {
   m_pSimulationLog->logMessage("---> Record to Sim file at: " + file_path.string());
-  if(m_BinarySimFile.openSimFileWrite(file_path,m_nSimBodies)){
+  if(m_BinarySimFile.openWrite(file_path,m_nSimBodies)){
     return true;
   }
   return false;
@@ -103,15 +103,15 @@ bool StateRecorder<TDynamicsSystemType>::createSimFileCopyFromReference(boost::f
 {
 
    MultiBodySimFile tmpFile(NDOFqObj,NDOFuObj);
-   bool fileOK = tmpFile.openSimFileRead(ref_file_path,m_nSimBodies,false); //Open file to see if this file fits our simulation!!
-   tmpFile.closeSimFile();
+   bool fileOK = tmpFile.openRead(ref_file_path,m_nSimBodies,false); //Open file to see if this file fits our simulation!!
+   tmpFile.close();
 
    if(fileOK){
       m_pSimulationLog->logMessage("---> Copy file:" + ref_file_path.string() + " to: " + new_file_path.string());
       FileManager::getSingletonPtr()->copyFile(ref_file_path,new_file_path,true);
 
       m_pSimulationLog->logMessage("---> Record and append to Sim file at: " + new_file_path.string());
-      if(m_BinarySimFile.openSimFileWrite(new_file_path,m_nSimBodies,false)){ //APPEND!
+      if(m_BinarySimFile.openWrite(new_file_path,m_nSimBodies,false)){ //APPEND!
          return true;
       }
    }
@@ -127,9 +127,9 @@ StateRecorder<TDynamicsSystemType> & StateRecorder<TDynamicsSystemType>::operato
 
 
 template<typename TDynamicsSystemType>
-void StateRecorder<TDynamicsSystemType>::closeSimFile()
+void StateRecorder<TDynamicsSystemType>::close()
 {
-  m_BinarySimFile.closeSimFile();
+  m_BinarySimFile.close();
 }
 
 //template<typename TLayoutConfig>

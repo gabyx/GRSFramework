@@ -92,9 +92,9 @@ bool setupPositionBodiesFromFile(DynamicsState<TLayoutConfig> & init_state, boos
     MultiBodySimFile simFile( TLayoutConfig::LayoutType::NDOFqObj,
                               TLayoutConfig::LayoutType::NDOFuObj);
 
-    if(simFile.openSimFileRead(file_path,init_state.m_nSimBodies)) {
+    if(simFile.openRead(file_path,init_state.m_nSimBodies)) {
         simFile >> init_state ;
-        simFile.closeSimFile();
+        simFile.close();
         return true;
     }
 

@@ -22,6 +22,9 @@
 #include "GetFileDescriptorInfo.hpp"
 
 
+#define SIM_FILE_ACCESS_LOG_EXTENSION ".dat" ///< File extension for the access log file.
+
+
 /**
 * @ingroup StatesAndBuffers
 * @brief This is the StateRecorder class which records each body's states to one MultiBodySimFile.
@@ -33,8 +36,7 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    StateRecorderBody(bool logWriteAccess = false, unsigned int id = 0,
-                      bool useCache = false, unsigned long long cacheLimit = 100*1024*1024);
+    StateRecorderBody(bool logWriteAccess = false, unsigned int id = 0);
     ~StateRecorderBody();
 
     void writeStates(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list);
@@ -81,15 +83,10 @@ protected:
 
 
 template<typename TDynamicsSystemType>
-StateRecorderBody<TDynamicsSystemType>::StateRecorderBody(bool logWriteAccess, unsigned int id,
-                                                          bool useCache, unsigned long long cacheLimit) {
+StateRecorderBody<TDynamicsSystemType>::StateRecorderBody(bool logWriteAccess, unsigned int id) {
 
     m_logWriteAccess = logWriteAccess;
     m_accessId = id;
-
-    m_useCache= useCache;
-    m_cacheLimit= cacheLimit;
-
 
     //Check if LogManager is available
     Logging::LogManager * manager = Logging::LogManager::getSingletonPtr();
@@ -140,7 +137,7 @@ bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool
             MultiBodySimFile* pBodyFile = new MultiBodySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj);
             res.first->second =  pBodyFile; // Set the file
 
-                if(!pBodyFile->openSimFileWrite(file,1,truncate)){
+                if(!pBodyFile->openWrite(file,1,truncate)){
                     LOG(m_pSimulationLog,"---> StateRecorderBody:: Could not open SimFile: " << file.string() <<
                         " number of files open: " << m_BinarySimFiles.size() << std::endl;
                         );
@@ -279,7 +276,7 @@ bool StateRecorderBody<TDynamicsSystemType>::closeFile(RigidBodyType * body){
 
 
     if(it != m_BinarySimFiles.end()){
-        it->second->closeSimFile();
+        it->second->close();
         delete it->second;
         m_BinarySimFiles.erase(it);
         LOG(m_pSimulationLog, "---> StateRecorderBody:: Closed and removed SimFile" << std::endl;);
@@ -311,7 +308,7 @@ void StateRecorderBody<TDynamicsSystemType>::closeAllSimFiles() {
     typename FileMap::iterator it;
 
     for(it=m_BinarySimFiles.begin();it!=m_BinarySimFiles.end();it++){
-        it->second->closeSimFile();
+        it->second->close();
         delete it->second;
     }
     m_BinarySimFiles.clear();

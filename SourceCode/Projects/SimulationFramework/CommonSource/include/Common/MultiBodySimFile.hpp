@@ -27,6 +27,16 @@
 #define SIM_FILE_SIGNATURE {'M','B','S','F'}
 
 /**
+* @brief Defines the extentsion of the file.
+*/
+#define SIM_FILE_EXTENSION ".sim"
+
+/**
+* @brief Defines the extentsion of the file for an initial sim file.
+*/
+#define SIM_INIT_FILE_EXTENSION ".sim"
+
+/**
 * @brief This is the input output class for writting a binary multi body system file to the disk.
 * It is used to save all simulated data.
 * The layout of the document is as follows:
@@ -34,8 +44,11 @@
 * - 3 doubles: nSimBodies, nDOFqObj, nDofuObj.
 * - DynamicsState:
 *     - double --> Time in [seconds]
-*     - nSimBodies*nDOFqObj doubles --> generalized coordinates of all bodies.
-*     - nSimBodies*nDOFuObj doubles --> generalized velocities of all bodies.
+*       - all states for all nSimBodies
+*         - ...
+*         - nDOFqObj doubles --> generalized coordinates of all bodies.
+*         - nDOFuObj doubles --> generalized velocities of all bodies.
+*         - ...
 */
 class MultiBodySimFile {
 public:
@@ -50,19 +63,19 @@ public:
     * @param nSimBodies The number of bodies which should be included in the file.
     * @return true if the file is successfully opened and readable and false if not.
     */
-    bool openSimFileRead( const boost::filesystem::path & file_path,   const unsigned int nSimBodies, bool readFullState = true);
+    bool openRead( const boost::filesystem::path & file_path,   const unsigned int nSimBodies, bool readFullState = true);
     /**
     * @brief Opens a .sim file for write only.
     * @param file_path The path to the file to open.
     * @param nSimBodies The number of bodies which should be included in the file.
     * @return true if the file is successfully opened and writable and false if not.
     */
-    bool openSimFileWrite( const boost::filesystem::path & file_path,   const unsigned int nSimBodies,  bool truncate = true);
+    bool openWrite( const boost::filesystem::path & file_path,   const unsigned int nSimBodies,  bool truncate = true);
 
     /**
-    * @brief Closes the .sim file which was opened by an openSimFileWrite or openSimFileRead command.
+    * @brief Closes the .sim file which was opened by an openWrite or openRead command.
     */
-    void closeSimFile();
+    void close();
 
     /**
     * @brief Checks if there are still dynamics states to read or not.
@@ -79,14 +92,7 @@ public:
     MultiBodySimFile & operator << (const DynamicsState<TLayoutConfig>* state);
     /**
 
-    /**
-    * @brief Overlaod!
-    */
-    template<typename TLayoutConfig>
-    MultiBodySimFile & operator << (DynamicsState<TLayoutConfig>* state) {
-        return this->operator<<((const DynamicsState<TLayoutConfig>*)state);
-    }
-    /**
+
     /**
     * @brief Overlaod!
     */
@@ -94,16 +100,8 @@ public:
     MultiBodySimFile & operator << (const DynamicsState<TLayoutConfig>& state) {
         return this->operator<<(&state);
     }
-    /**
-    /**
-    * @brief Overlaod!
-    */
-    template<typename TLayoutConfig>
-    MultiBodySimFile & operator << (DynamicsState<TLayoutConfig>& state) {
-        return this->operator<<((const DynamicsState<TLayoutConfig>*)(&state));
-    }
-    /**
 
+    /**
     * @brief Operator to read a state from a file, only reads position!
     */
     template<typename TLayoutConfig>
@@ -113,13 +111,6 @@ public:
     */
     template<typename TLayoutConfig>
     MultiBodySimFile & operator >> (DynamicsState<TLayoutConfig>& state);
-
-    /**
-    * @brief Operator to read a state from a file, reads position and velocity!
-    */
-    template<typename TLayoutConfig>
-    MultiBodySimFile & operator >> (boost::shared_ptr<DynamicsState<TLayoutConfig> > &state);
-
 
     /**
     * @brief Gets the state at the time t.
@@ -152,7 +143,7 @@ private:
     unsigned int m_buf_size;                         ///< The internal buffer size.
     char * m_Buffer;                                 ///< The buffer.
 
-    static const char m_simHeader[SIM_FILE_SIGNATURE_LENGTH]; ///< The .sim file header.
+    static const char m_simFileSignature[SIM_FILE_SIGNATURE_LENGTH]; ///< The .sim file header.
 
 
 
@@ -226,6 +217,7 @@ MultiBodySimFile & MultiBodySimFile::operator>>( T &value ) {
 //
 template<typename TLayoutConfig>
 MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState<TLayoutConfig>* state ) {
+    using namespace IOHelpers;
 
     ASSERTMSG(m_nSimBodies == state->m_nSimBodies,
               "You try to write "<<state->m_nSimBodies<<"bodies into a file which was instanced to hold "<<m_nSimBodies);
@@ -234,18 +226,14 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState<TLayoutCon
     *this << (double)state->m_t;
     // write states
     for(unsigned int i=0 ; i< state->m_nSimBodies; i++) {
+        STATIC_ASSERT2((std::is_same<double, typename TLayoutConfig::PREC>::value),
+                       "OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
 
 //        for(int k=0; k < m_nDOFqObj; k++) {
 //            *this << (double)(state->m_SimBodyStates[i].m_q(k));
 //        }
-        STATIC_ASSERT2((std::is_same<double, typename TLayoutConfig::PREC>::value),
-                       "OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
-
-        IOHelpers::writeBinary(m_file_stream, state->m_SimBodyStates[i].m_q );
-//        for(int k=0; k < m_nDOFuObj; k++) {
-//            *this << (double)(state->m_SimBodyStates[i].m_u(k));
-//        }
-        IOHelpers::writeBinary(m_file_stream, state->m_SimBodyStates[i].m_u );
+        m_file_stream << state->m_SimBodyStates[i].m_q;
+        m_file_stream << state->m_SimBodyStates[i].m_u;
     }
 
     m_nStates++;
@@ -255,6 +243,8 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState<TLayoutCon
 
 template<typename TLayoutConfig>
 MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState<TLayoutConfig>* state ) {
+    using namespace IOHelpers;
+
     // write time
     *this >> (double &)state->m_t;
     //std::cout << "m_t:"<< state->m_t <<std::endl;
@@ -262,26 +252,16 @@ MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState<TLayoutConfig>* 
     state->m_StateType = DynamicsState<TLayoutConfig>::NONE;
     // write states
     for(unsigned int i=0 ; i< state->m_nSimBodies; i++) {
-        //std::cout << "q_"<<i<<": ";
 
-//        for(int k=0; k < m_nDOFqObj; k++) {
-//            *this >> (double &)(state->m_SimBodyStates[i].m_q(k));
-//            //std::cout << "q"<<i <<state->m_SimBodyStates[i].m_q(k)  << std::endl;
-//        }
-        IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[i].m_q );
+        m_file_stream >> state->m_SimBodyStates[i].m_q;
         //std::cout<< state->m_SimBodyStates[i].m_q.transpose()  << std::endl;
         if(m_bReadFullState) {
-            //std::cout << "u_"<<i<<": ";
-//            for(int k=0; k < m_nDOFuObj; k++) {
-//                *this >> (double &)(state->m_SimBodyStates[i].m_u(k));
-//            }
-            IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[i].m_u );
+        m_file_stream >> state->m_SimBodyStates[i].m_u;
             //std::cout<< state->m_SimBodyStates[i].m_u.transpose()  << std::endl;
         } else {
             //Dont read in velocities, its not needed!
             m_file_stream.seekg(m_nBytesPerUObj,std::ios_base::cur);
         }
-
 
     }
     return *this;
@@ -291,12 +271,6 @@ template<typename TLayoutConfig>
 MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState<TLayoutConfig> & state ) {
     return this->operator>>(&state);
 }
-
-template<typename TLayoutConfig>
-MultiBodySimFile &  MultiBodySimFile::operator>>( boost::shared_ptr<DynamicsState<TLayoutConfig> > & state ) {
-    return this->operator>>(state.get());
-}
-
 
 template<typename TLayoutConfig>
 void MultiBodySimFile::getEndState(DynamicsState<TLayoutConfig>& state) {

@@ -50,12 +50,9 @@
 
 
 #define SIMULATION_FOLDER_PATH "./SimFiles"                       ///< Directory where new simulation folders are place during record.
-#define SIM_FILE_EXTENSION ".sim"
-#define SIM_FILE_ACCESS_LOG_EXTENSION ".dat"                                      ///< File extension for .sim file.
 #define SIM_SCENE_FILE_NAME "SceneFile"                                 ///< File name for the Scene xml file which describes the scene
 #define SIM_FOLDER_PREFIX_RECORD "SimDataRECORDMPI_"                ///< Prefix for the simulation folder during record.
 #define SIM_FOLDER_PREFIX_INIT "SimDataInitialState_"             ///< Prefix for the folder where the inital states are written, press Key I!
-#define SIM_INIT_FILE_EXTENSION ".sim"                              ///< File extension for .siminit file.
 #define SIM_INIT_FILE_PREFIX "InitialState"                      ///< The name for the Initial state file!
 #define SIM_FILE_PREFIX "SimulationState"                              ///< Prefix for the .sim file.
 #define SOLVER_LOG_FILE_PREFIX "SolverLog"                       ///< Prefix for the solver log file.

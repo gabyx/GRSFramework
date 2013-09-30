@@ -3,6 +3,8 @@
 
 #include "LogDefines.hpp"
 
+#include "MultiBodySimFile.hpp"
+
 //=========================================================
 
 

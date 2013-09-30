@@ -340,7 +340,7 @@ void PlaybackManager<TConfig>::initSimThread() {
 template<typename TConfig>
 void PlaybackManager<TConfig>::cleanUpSimThread() {
     if(m_SettingsSimThread.m_bSimFileDrop) {
-        m_pStateRecorderResampler->closeSimFile();
+        m_pStateRecorderResampler->close();
     }
 }
 
