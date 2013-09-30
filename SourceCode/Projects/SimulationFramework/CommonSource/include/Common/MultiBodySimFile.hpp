@@ -41,7 +41,7 @@ class MultiBodySimFile {
 public:
 
 
-    MultiBodySimFile(unsigned int nDOFqObj, unsigned int nDOFuObj);
+    MultiBodySimFile(unsigned int nDOFqObj, unsigned int nDOFuObj,unsigned int bufferSize = 1<<14);
     ~MultiBodySimFile();
 
     /**
@@ -149,7 +149,7 @@ private:
 
 
     std::fstream m_file_stream;                      ///< The file stream which represents the binary data.
-    const unsigned int BUF_SIZE = 1<<14;              ///< The internal buffer size.
+    unsigned int m_buf_size;                         ///< The internal buffer size.
     char * m_Buffer;                                 ///< The buffer.
 
     static const char m_simHeader[SIM_FILE_SIGNATURE_LENGTH]; ///< The .sim file header.

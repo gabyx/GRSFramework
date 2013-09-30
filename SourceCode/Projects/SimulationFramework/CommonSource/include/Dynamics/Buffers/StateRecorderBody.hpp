@@ -71,7 +71,8 @@ protected:
 
     bool m_useCache;
     unsigned long long m_cacheLimit;
-    std::map<typename RigidBodyType::RigidBodyIdType, std::stringstream > m_cache;
+    typedef std::map<typename RigidBodyType::RigidBodyIdType, std::stringstream >  CacheType;
+    m_cache;
 
 };
 
@@ -195,7 +196,8 @@ bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool
 
         if(m_useCache){
             // make cache for this body
-
+            char * cache = new cache[]
+            m_cache.insert(typename CacheType::value_type(body->m_id, cache) )
         }
 
     }
