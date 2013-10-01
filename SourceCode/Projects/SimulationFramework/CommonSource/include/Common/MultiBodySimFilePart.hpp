@@ -9,6 +9,8 @@
 
 #include "MultiBodySimFileIOHelpers.hpp"
 
+#include "RigidBodyContainer.hpp"
+
 /**
 * @ingroup Common
 * @defgroup MultiBodySimFilePart
@@ -22,7 +24,7 @@
 /**
 * @brief Defines for the signature of the .sim file.
 */
-#define SIM_FILE_PART_SIGNATURE_PART {'M','B','S','P'}
+#define SIM_FILE_PART_SIGNATURE {'M','B','S','P'}
 
 /**
 * @brief Defines the extentsion of the file.
@@ -61,19 +63,17 @@ public:
     bool openWrite( const boost::filesystem::path & file_path,  bool truncate = true);
 
     /**
+    * @brief Operator to write all states of the bodies to the file, writes position and velocity!
+    */
+    template<typename TRigidBody>
+    inline void write(double time, const RigidBodyContainer<TRigidBody> & bodyList);
+
+
+    /**
     * @brief Closes the .sim file which was opened by an openWrite or openRead command.
     */
     void close();
 
-    /**
-    * @brief Checks if there are still dynamics states to read or not.
-    * @return true if there are still dynamics states to read, false if the file end has been reached.
-    */
-    bool isGood();
-
-
-
-    unsigned int getNStates(); ///< Gets the number of states in a read only .sim file.
 
     std::string getErrorString() {
         m_errorString << " error: " << std::strerror(errno) <<std::endl;
@@ -81,28 +81,30 @@ public:
     }
 
 private:
+     /**
+    * @brief Operator to write a generic value to the file as binary data.
+    */
+    template<typename T>
+    inline MultiBodySimFilePart & operator << (const T &value);
+    /**
+    * @brief Operator to read a generic value from a .sim file as binary data.
+    */
+    template<typename T>
+    inline MultiBodySimFilePart & operator >> (T &value);
 
 
     std::fstream m_file_stream;                      ///< The file stream which represents the binary data.
     unsigned int m_buf_size;                         ///< The internal buffer size.
     char * m_Buffer;                                 ///< The buffer.
 
-    static const char m_simFileSignature[SIM_FILE_SIGNATURE_LENGTH]; ///< The .sim file header.
+    static const char m_simFileSignature[SIM_FILE_PART_SIGNATURE_LENGTH]; ///< The .sim file header.
 
     /**
     * @brief Writes the header to the file which has been opened.
     */
     void writeHeader();
-    /**
-    * @brief Reads the header from .sim file.
-    * @return true if header has been read successfully.
-    */
-    bool readHeader();
-    /**
-    * @brief Reads in all the length of the .sim file.
-    * @{
-    */
-    bool readLength();
+
+
     std::streamoff m_nBytes;
     /** @}*/
 
@@ -113,10 +115,10 @@ private:
     std::streampos m_beginHeader;
     std::streampos m_beginOfStates;
 
-    unsigned int m_nDOFuObj, m_nDOFqObj, unsigned int m_nStates;
+    unsigned int m_nDOFuObj, m_nDOFqObj, m_nStates;
     const  std::streamoff m_nBytesPerQObj ;
     const  std::streamoff m_nBytesPerUObj ;
-    static const  std::streamoff m_headerLength = (2*sizeof(unsigned int) + SIM_FILE_SIGNATURE_LENGTH*sizeof(char));
+    static const  std::streamoff m_headerLength = (2*sizeof(unsigned int) + SIM_FILE_PART_SIGNATURE_LENGTH*sizeof(char));
 
     std::stringstream m_errorString;
 
@@ -126,6 +128,38 @@ private:
 
 };
 /** @} */
+
+
+
+
+template<typename T>
+MultiBodySimFilePart & MultiBodySimFilePart::operator<<( const T &value ) {
+    m_file_stream.write(
+        reinterpret_cast<char const *>(&value),
+        sizeof(value)
+    );
+    return *this;
+};
+
+
+template<typename T>
+MultiBodySimFilePart & MultiBodySimFilePart::operator>>( T &value ) {
+    m_file_stream.read(
+        reinterpret_cast<char *>(&value),
+        sizeof(value)
+    );
+    return *this;
+};
+
+template<typename TRigidBody>
+void MultiBodySimFilePart::write(double time, const RigidBodyContainer<TRigidBody> & bodyList){
+    *this << time;
+    STATIC_ASSERT2((std::is_same<double, typename TRigidBody::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
+    for(auto it = bodyList.begin(); it != bodyList.end(); it++){
+        IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
+        IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
+    }
+}
 
 
 

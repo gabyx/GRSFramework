@@ -158,7 +158,12 @@ public:
 
     GeometryType m_geometry; ///< A boost::variant which takes different geometry shared pointers.
 
-
+    VectorUObj get_u(){
+        return m_pSolverData->m_uBuffer.m_back;
+    }
+    VectorQObj get_q(){
+        VectorQObj r; r.template head<3>() = m_r_S; r.template tail<4>() = m_q_KI; return r;
+    }
 
     PREC m_mass; ///< The rigid body mass \f$m\f$ in \f$ \textrm{[kg]} \f$
     Vector3 m_K_Theta_S; ///< The rigid body inertia tensor in diagonal form, \f$ {_K}\mathbf{\Theta}_{S}\f$ in \f$ [\textrm{kg} \cdot \textrm{m}^2] \f$

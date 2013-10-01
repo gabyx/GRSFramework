@@ -18,59 +18,63 @@
 * @brief This is the StateRecorder class which records states to a MultiBodySimFile.
 * @{
 */
-template <typename TDynamicsSystemType>
-class StateRecorder
-{
+template <typename TDynamicsSystem>
+class StateRecorder {
 public:
-  DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    typedef TDynamicsSystem DynamicsSystemType;
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystem::DynamicsSystemConfig)
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  StateRecorder(const unsigned int nSimBodies);
+    StateRecorder(const unsigned int nSimBodies);
 
-  ~StateRecorder();
-  bool createSimFile(boost::filesystem::path file_path);
-  bool createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path);
-  void close();
+    ~StateRecorder();
+    bool createSimFile(boost::filesystem::path file_path);
+    bool createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path);
+    void close();
 
-  //void addState(const DynamicsState<TLayoutConfig> * state);
-  /*void writeAllStates();*/
+    //void addState(const DynamicsState<TLayoutConfig> * state);
+    /*void writeAllStates();*/
 
-  void write(const DynamicsState<LayoutConfigType>* value);
+    void write(const DynamicsState<LayoutConfigType>* value);
 
-  StateRecorder<TDynamicsSystemType> & operator << (const DynamicsState<LayoutConfigType>* value);
+    void write(PREC time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList) {
+        m_binarySimFile.write(time, bodyList);
+    }
+
+
+    StateRecorder<TDynamicsSystem> & operator << (const DynamicsState<LayoutConfigType>* value);
 
 protected:
 
-  Logging::Log * m_pSimulationLog;
+    Logging::Log * m_pSimulationLog;
 
-  //void scanAllSimDataFiles(boost::filesystem::path path_name, bool with_SubDirs = false);
-  // All files created have the name "<m_fileNamePrefix>_<m_fileIdCounter>.sim"
-  // If files already exist in the folder m_fileIdCounter is set to the actual number which does not exist already!
-  //std::vector<boost::filesystem::path> m_SimFilePaths;
-  //Ogre::StringVector m_SimFileNames;
+    //void scanAllSimDataFiles(boost::filesystem::path path_name, bool with_SubDirs = false);
+    // All files created have the name "<m_fileNamePrefix>_<m_fileIdCounter>.sim"
+    // If files already exist in the folder m_fileIdCounter is set to the actual number which does not exist already!
+    //std::vector<boost::filesystem::path> m_SimFilePaths;
+    //Ogre::StringVector m_SimFileNames;
 
 
-  MultiBodySimFile    m_BinarySimFile;
+    MultiBodySimFile    m_binarySimFile;
 
-  //std::vector< DynamicsState<LayoutConfigType> >	m_states;
+    //std::vector< DynamicsState<LayoutConfigType> >	m_states;
 
-  unsigned int m_nSimBodies;
+    unsigned int m_nSimBodies;
 };
 
 /** @} */
 
 
 
-template<typename TDynamicsSystemType>
-StateRecorder<TDynamicsSystemType>::StateRecorder(const unsigned int nSimBodies):
-m_BinarySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj)
-{
-   m_nSimBodies = nSimBodies;
+template<typename TDynamicsSystem>
+StateRecorder<TDynamicsSystem>::StateRecorder(const unsigned int nSimBodies):
+    m_binarySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj) {
+    m_nSimBodies = nSimBodies;
 
-   //Check if LogManager is available
-   Logging::LogManager * manager = Logging::LogManager::getSingletonPtr();
-   m_pSimulationLog = manager->getLog("SimulationLog");
-    if(!m_pSimulationLog){
+    //Check if LogManager is available
+    Logging::LogManager * manager = Logging::LogManager::getSingletonPtr();
+    m_pSimulationLog = manager->getLog("SimulationLog");
+    if(!m_pSimulationLog) {
         // Log does not exist make a new standart log!
         boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
@@ -80,83 +84,59 @@ m_BinarySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::Layout
 
 }
 
-template<typename TDynamicsSystemType>
-StateRecorder<TDynamicsSystemType>::~StateRecorder()
-{
-  DECONSTRUCTOR_MESSAGE
-  close();
+template<typename TDynamicsSystem>
+StateRecorder<TDynamicsSystem>::~StateRecorder() {
+    DECONSTRUCTOR_MESSAGE
+    close();
 }
 
 
-template<typename TDynamicsSystemType>
-bool StateRecorder<TDynamicsSystemType>::createSimFile(boost::filesystem::path file_path)
-{
-  m_pSimulationLog->logMessage("---> Record to Sim file at: " + file_path.string());
-  if(m_BinarySimFile.openWrite(file_path,m_nSimBodies)){
-    return true;
-  }
-  return false;
+template<typename TDynamicsSystem>
+bool StateRecorder<TDynamicsSystem>::createSimFile(boost::filesystem::path file_path) {
+    m_pSimulationLog->logMessage("---> Record to Sim file at: " + file_path.string());
+    if(m_binarySimFile.openWrite(file_path,m_nSimBodies)) {
+        return true;
+    }
+    return false;
 }
 
-template<typename TDynamicsSystemType>
-bool StateRecorder<TDynamicsSystemType>::createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path)
-{
+template<typename TDynamicsSystem>
+bool StateRecorder<TDynamicsSystem>::createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path) {
 
-   MultiBodySimFile tmpFile(NDOFqObj,NDOFuObj);
-   bool fileOK = tmpFile.openRead(ref_file_path,m_nSimBodies,false); //Open file to see if this file fits our simulation!!
-   tmpFile.close();
+    MultiBodySimFile tmpFile(NDOFqObj,NDOFuObj);
+    bool fileOK = tmpFile.openRead(ref_file_path,m_nSimBodies,false); //Open file to see if this file fits our simulation!!
+    tmpFile.close();
 
-   if(fileOK){
-      m_pSimulationLog->logMessage("---> Copy file:" + ref_file_path.string() + " to: " + new_file_path.string());
-      FileManager::getSingletonPtr()->copyFile(ref_file_path,new_file_path,true);
+    if(fileOK) {
+        m_pSimulationLog->logMessage("---> Copy file:" + ref_file_path.string() + " to: " + new_file_path.string());
+        FileManager::getSingletonPtr()->copyFile(ref_file_path,new_file_path,true);
 
-      m_pSimulationLog->logMessage("---> Record and append to Sim file at: " + new_file_path.string());
-      if(m_BinarySimFile.openWrite(new_file_path,m_nSimBodies,false)){ //APPEND!
-         return true;
-      }
-   }
+        m_pSimulationLog->logMessage("---> Record and append to Sim file at: " + new_file_path.string());
+        if(m_binarySimFile.openWrite(new_file_path,m_nSimBodies,false)) { //APPEND!
+            return true;
+        }
+    }
 
-  return false;
+    return false;
 }
 
-template<typename TDynamicsSystemType>
-StateRecorder<TDynamicsSystemType> & StateRecorder<TDynamicsSystemType>::operator << (const DynamicsState<LayoutConfigType>* value)
-{
-  m_BinarySimFile << (value);
+template<typename TDynamicsSystem>
+StateRecorder<TDynamicsSystem> & StateRecorder<TDynamicsSystem>::operator << (const DynamicsState<LayoutConfigType>* value) {
+    m_binarySimFile << (value);
 }
 
 
-template<typename TDynamicsSystemType>
-void StateRecorder<TDynamicsSystemType>::close()
-{
-  m_BinarySimFile.close();
+template<typename TDynamicsSystem>
+void StateRecorder<TDynamicsSystem>::close() {
+    m_binarySimFile.close();
 }
 
-//template<typename TLayoutConfig>
-//void StateRecorder<TLayoutConfig>::addState(const DynamicsState<TLayoutConfig> * state)
-//{
-//  m_states.push_back(*state);
-//  return;
-//}
 
-
-//template <typename TLayoutConfig>
-//void StateRecorder<TLayoutConfig>::writeAllStates()
-//{
-//
-//  if(createSimFile()){
-//    for(std::vector<double>::iterator it = m_states.begin(); it != m_states.end(); it++)
-//    {
-//      m_BinarySimFile << (*it);
-//    }
-//  }
-//}
-
-
-template <typename TDynamicsSystemType>
-void StateRecorder<TDynamicsSystemType>::write( const DynamicsState<LayoutConfigType>* value )
-{
-  m_BinarySimFile << value;
+template <typename TDynamicsSystem>
+void StateRecorder<TDynamicsSystem>::write( const DynamicsState<LayoutConfigType>* value ) {
+    m_binarySimFile << value;
 }
+
+
 
 #endif

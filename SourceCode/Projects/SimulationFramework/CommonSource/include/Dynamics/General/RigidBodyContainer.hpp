@@ -14,7 +14,7 @@
 #include "AssertionDebug.hpp"
 
 
-template<typename TRigidBodyIdType, typename TRigidBodyType >
+template<typename TRigidBodyType >
 class RigidBodyContainer {
 private:
 
@@ -24,8 +24,8 @@ private:
     struct by_ordered_id{};
 
 public:
-    typedef TRigidBodyIdType RigidBodyIdType;
     typedef TRigidBodyType RigidBodyType;
+    typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
 
     //This container grants only const access with its iterators with (RigidBodyType* const)
     //So we are able to change these rigidbodies, but cant change the m_id because it is const in the rigidbody class
@@ -136,5 +136,34 @@ public:
     }
 
 };
+
+//template<typename TIterator, typename TRigidBody>
+//class RigidBodyWrapperIterator{
+//public:
+//    RigidBodyWrapperIterator(TIterator & it): m_bodyIt(it){};
+//
+//    typename TRigidBody::VectorQObj get_q();
+//    typename TRigidBody::VectorUObj get_u();
+//
+//    TIterator & m_bodyIt;
+//};
+
+//template<typename TRigidBodyContainer>
+//class RigidBodyContainerWrapper{
+//public:
+//    RigidBodyContainerWrapper( TRigidBodyContainer & ref ): m_ref(ref){}
+//
+//    TRigidBodyContainer::iterator begin(){
+//        return ref.begin();
+//    }
+//
+//    TRigidBodyContainer::iterator end(){
+//        return ref.end();
+//    }
+//
+//};
+
+
+
 
 #endif

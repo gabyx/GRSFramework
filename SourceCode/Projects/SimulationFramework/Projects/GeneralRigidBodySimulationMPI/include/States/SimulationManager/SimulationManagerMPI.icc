@@ -178,7 +178,7 @@ void SimulationManagerMPI<TConfig>::startSim() {
 
     //Write first initial value out!
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
-        m_pStateRecorder->writeStates(m_pDynSys->m_SimBodies);
+        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(),m_pDynSys->m_SimBodies);
     }
 
 
@@ -190,15 +190,13 @@ void SimulationManagerMPI<TConfig>::startSim() {
 
         // Do one iteration
         m_pTimestepper->doOneIteration();
-        //m_pTimestepper->doOneIteration();
-//      // get global time for logging!
-//      timelineSimulation = ((double)global_time.elapsed().wall)*1e-9;
+
 //      // Write Data to SystemDataFile (maps all data to back buffer!)
 //      m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
 //      // Write Data to CollisionDataFile
 //      m_pTimestepper->writeIterationToCollisionDataFile();
         // Write  State to Sim File
-        m_pStateRecorder->writeStates(m_pDynSys->m_SimBodies);
+        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(),m_pDynSys->m_SimBodies);
 
         // Check if simulation can be aborted!
         if(m_pTimestepper->finished()) {
@@ -209,7 +207,7 @@ void SimulationManagerMPI<TConfig>::startSim() {
         }
     }
 
-    // Communicat times, get the max runtime
+    // MPI Communicat times, get the max runtime
     getMaxRuntime(runtime);
 
 

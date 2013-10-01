@@ -27,14 +27,8 @@ MultiBodySimFilePart::~MultiBodySimFilePart() {
 }
 
 
-bool MultiBodySimFilePart::isGood() {
-    if(m_file_stream.good()) {
-        return true;
-    }
-    return false;
-}
 
-bool MultiBodySimFilePart::openWrite(const boost::filesystem::path &file_path, const unsigned int nSimBodies, bool truncate) {
+bool MultiBodySimFilePart::openWrite(const boost::filesystem::path &file_path, bool truncate) {
     m_errorString.str("");
 
     close();
@@ -74,7 +68,7 @@ bool MultiBodySimFilePart::openWrite(const boost::filesystem::path &file_path, c
 void  MultiBodySimFilePart::writeHeader() {
 
     for(int i=0; i<SIM_FILE_PART_SIGNATURE_LENGTH; i++) {
-        *this << m_simHeader[i];
+        *this << m_simFileSignature[i];
     }
 
     m_beginHeader = m_file_stream.tellp();

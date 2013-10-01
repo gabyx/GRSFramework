@@ -39,8 +39,9 @@ public:
     StateRecorderBody(bool logWriteAccess = false, unsigned int id = 0);
     ~StateRecorderBody();
 
-    void writeStates(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list);
+    void write(PREC time, const typename TDynamicsSystemType::RigidBodySimContainerType & body_list);
 
+    // Functions which are used for a delegate in other classes
     void addBody(RigidBodyType * body);
     void removeBody(RigidBodyType * body);
 
@@ -70,11 +71,6 @@ protected:
     unsigned int m_accessId;
 
     unsigned int m_nSimBodies;
-
-    bool m_useCache;
-    unsigned long long m_cacheLimit;
-    typedef std::map<typename RigidBodyType::RigidBodyIdType, std::stringstream >  CacheType;
-    m_cache;
 
 };
 
@@ -190,13 +186,6 @@ bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool
                 }
         }
 
-
-        if(m_useCache){
-            // make cache for this body
-            char * cache = new cache[]
-            m_cache.insert(typename CacheType::value_type(body->m_id, cache) )
-        }
-
     }
 
 
@@ -235,7 +224,8 @@ void StateRecorderBody<TDynamicsSystemType>::getSimBodyLogFileName(typename TDyn
 }
 
 template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list){
+void StateRecorderBody<TDynamicsSystemType>::write(PREC time, const typename
+                                                         TDynamicsSystemType::RigidBodySimContainerType & body_list){
 
     typename TDynamicsSystemType::RigidBodySimContainerType::const_iterator it;
 
@@ -245,14 +235,13 @@ void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamic
         // find Sim file in list
         typename FileMap::iterator fileIt = m_BinarySimFiles.find((*it)->m_id);
 
-        if(fileIt == m_BinarySimFiles.end()){
-            LOG(m_pSimulationLog, "StateRecorderBody:: Did not found SimFile for Body Id:"
-                << RigidBodyId::getBodyIdString(*it)<< ". There is no SimFile corresponding to this body!" <<std::endl);
-        }else{
-            dynState.m_t = (*it)->m_pSolverData->m_t;
-            InitialConditionBodies::applyBodyToRigidBodyState( *it , dynState.m_SimBodyStates[0]);
-            *(fileIt->second) << dynState;
-        }
+        LOGASSERTMSG(fileIt != m_BinarySimFiles.end(), m_pSimulationLog, "StateRecorderBody:: Did not found SimFile for Body Id:"
+            << RigidBodyId::getBodyIdString(*it)<< ". There is no SimFile corresponding to this body!" <<std::endl);
+
+        dynState.m_t = time;
+        InitialConditionBodies::applyBodyToRigidBodyState( *it , dynState.m_SimBodyStates[0]);
+        *(fileIt->second) << dynState;
+
 
         if(m_logWriteAccess){
             // find LogSim file

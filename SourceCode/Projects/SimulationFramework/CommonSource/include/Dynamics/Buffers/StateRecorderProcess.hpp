@@ -33,10 +33,10 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    StateRecorderProcess( unsigned int id = 0, unsigned int cacheSize = 100 * 1024 * 1024);
+    StateRecorderProcess( unsigned int id = 0, unsigned int bufferSize = 100 * 1024 * 1024);
     ~StateRecorderProcess();
 
-    void writeStates(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list);
+    void write(PREC time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList);
 
     void setDirectoryPath(boost::filesystem::path dir_path);
 
@@ -47,17 +47,15 @@ protected:
 
     boost::filesystem::path m_directoryPath; ///< The path where the sim body part file is opened!
 
-    void getSimBodyPartFileName(std::stringstream & s);
+    void getSimFilePartName(std::stringstream & s);
 
     Logging::Log * m_pSimulationLog;
 
-    MultiBodySimFilePart m_simFilePart;
+    MultiBodySimFilePart m_binarySimFile;
 
     unsigned int m_accessId;
 
-    unsigned long long m_cacheLimit;
-    unsigned long long m_cachedBytes;
-    char * m_cache;
+    unsigned long long m_bufferSize;
 
 };
 
@@ -66,9 +64,11 @@ protected:
 
 
 template<typename TDynamicsSystemType>
-StateRecorderProcess<TDynamicsSystemType>::StateRecorderProcess( unsigned int id) {
+StateRecorderProcess<TDynamicsSystemType>::StateRecorderProcess( unsigned int id,  unsigned int bufferSize) {
 
     m_accessId = id;
+
+    m_bufferSize = bufferSize;
 
     //Check if LogManager is available
     Logging::LogManager * manager = Logging::LogManager::getSingletonPtr();
@@ -81,16 +81,12 @@ StateRecorderProcess<TDynamicsSystemType>::StateRecorderProcess( unsigned int id
         m_pSimulationLog = manager->createLog("StateRecorderLog",true,true,filePath);
     }
 
-
-    //Make new cache array
-    m_cache = new cache[m_cacheLimit];
-
 }
 
 template<typename TDynamicsSystemType>
 StateRecorderProcess<TDynamicsSystemType>::~StateRecorderProcess() {
     DECONSTRUCTOR_MESSAGE
-    m_simFilePart.close();
+    m_binarySimFile.close();
 }
 
 template<typename TDynamicsSystemType>
@@ -98,18 +94,17 @@ void StateRecorderProcess<TDynamicsSystemType>::setDirectoryPath(boost::filesyst
     m_directoryPath = dir_path;
 }
 
-
 template<typename TDynamicsSystemType>
 bool StateRecorderProcess<TDynamicsSystemType>::openFile(bool truncate){
     boost::filesystem::path file;
     std::stringstream s;
 
     file = m_directoryPath;
-    getSimBodyPartFileName(s);
+    getSimFilePartName(s);
     file /= s.str();
 
 
-    if(!m_simFilePart->openWrite(file,truncate)){
+    if(!m_binarySimFile->openWrite(file,truncate,m_bufferSize)){
         LOG(m_pSimulationLog,"---> StateRecorderBody:: Could not open SimFile: " << file.string() << std::endl;);
         LOG(m_pSimulationLog, pBodyFile->getErrorString() );
         return false;
@@ -124,29 +119,20 @@ bool StateRecorderProcess<TDynamicsSystemType>::openFile(bool truncate){
 }
 
 template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::getSimBodyPartFileName(std::stringstream & s){
+void StateRecorderProcess<TDynamicsSystemType>::getSimFilePartName(std::stringstream & s){
     s.str("");
     s <<"SimDataProcess" <<"-"<<m_accessId<<SIM_FILE_PART_EXTENSION;
 }
 
 template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::writeStates(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list){
-
-    typename TDynamicsSystemType::RigidBodySimContainerType::const_iterator_ordered it;
-
-    //iterate over all bodies ordered by id
-    for(it = body_list.begin(); it != body_list.end(); it++){
-        // dump the date into the file directly, it will use a cache anyway!
-
-
-    }
-
+void StateRecorderProcess<TDynamicsSystemType>::write(PREC time, const typename TDynamicsSystemType::RigidBodySimContainerType & bodyList){
+    m_binarySimFile.write(time, bodyList);
 }
 
 
 template<typename TDynamicsSystemType>
-bool StateRecorderBody<TDynamicsSystemType>::closeFile(){
-    m_simFilePart.close();
+bool StateRecorderProcess<TDynamicsSystemType>::closeFile(){
+    m_binarySimFile.close();
     return true;
 }
 

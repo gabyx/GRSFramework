@@ -73,6 +73,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/TypenameComparision.hpp
     ${COMMONSOURCE_DIR}/include/Common/MultiBodySimFile.hpp
+    ${COMMONSOURCE_DIR}/include/Common/MultiBodySimFilePart.hpp
     ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPIMessages.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
@@ -86,6 +87,7 @@ SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
     ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
     ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFile.cpp
+    ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFilePart.cpp
 )
 
 SET(DYNAMICS_INC
@@ -131,6 +133,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/SharedBufferPlayback.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderBody.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderProcess.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp

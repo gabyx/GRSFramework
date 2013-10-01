@@ -85,7 +85,7 @@ void SimulationManagerGUI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
 
     std::cout << "ScenePath:" << sceneFilePath <<std::endl;
-    if(sceneFilePath.empty()){
+    if(sceneFilePath.empty()) {
         sceneFilePath = "SceneFile.xml";
     }
     m_pSceneParser->parseScene(sceneFilePath);
@@ -315,17 +315,18 @@ void SimulationManagerGUI<TConfig>::threadRunRecord() {
 template<typename TConfig>
 void SimulationManagerGUI<TConfig>::writeAllOutput() {
 
-            if(m_RecorderSettings.outputCheck(m_pTimestepper->getIterationCount())){
-                //m_pSimulationLog->logMessage("---> Output: now");
-                // get global time for logging!
-                double timelineSimulation = ((double)m_global_time.elapsed().wall)*1e-9;
-                // Write Data to SystemDataFile (maps all data to back buffer!)
-                m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
-                // Write Data to CollisionDataFile
-                m_pTimestepper->writeIterationToCollisionDataFile();
-                // Write  State to Sim File
-                m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
-            }
+    if(m_RecorderSettings.outputCheck(m_pTimestepper->getIterationCount())) {
+        //m_pSimulationLog->logMessage("---> Output: now");
+        // get global time for logging!
+        double timelineSimulation = ((double)m_global_time.elapsed().wall)*1e-9;
+        // Write Data to SystemDataFile (maps all data to back buffer!)
+        m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
+        // Write Data to CollisionDataFile
+        m_pTimestepper->writeIterationToCollisionDataFile();
+        // Write  State to Sim File
+        //m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
+        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_SimBodies);
+    }
 }
 
 
@@ -359,7 +360,7 @@ bool SimulationManagerGUI<TConfig>::initRecordThread() {
     FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),m_SceneFilePath,true);
 
     //Copy SimeState file, if necessary
-     //Open SimState File
+    //Open SimState File
     m_pSimulationLog->logMessage("---> Copy SimulationState.sim to right place...");
     bool fileOK = false;
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::CONTINUE) {
@@ -375,19 +376,19 @@ bool SimulationManagerGUI<TConfig>::initRecordThread() {
     // Copy File: SimulationData
     m_pSimulationLog->logMessage("---> Copy SimulationData.dat to right place...");
     boost::filesystem::path simDataFile;
-    if(!m_pTimestepper->m_Settings.m_simDataReferenceFile.empty()){
-         ASSERTMSG(false,"HERE IS CODE ZU VERFOLSTÄNDIGEN! FALSCH!")
-         simDataFile = FileManager::getSingletonPtr()->copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_Settings.m_simDataReferenceFile,true);
+    if(!m_pTimestepper->m_Settings.m_simDataReferenceFile.empty()) {
+        ASSERTMSG(false,"HERE IS CODE ZU VERFOLSTÄNDIGEN! FALSCH!")
+        simDataFile = FileManager::getSingletonPtr()->copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_Settings.m_simDataReferenceFile,true);
     }
 
     m_pSimulationLog->logMessage("---> Init Timestepper Logs...");
     m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);
 
-   // Write first initial value
-   if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
-            m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
-            m_pSimulationLog->logMessage("---> Wrote first initial value to file...");
-   }
+    // Write first initial value
+    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
+        m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
+        m_pSimulationLog->logMessage("---> Wrote first initial value to file...");
+    }
 
     return true;
 }

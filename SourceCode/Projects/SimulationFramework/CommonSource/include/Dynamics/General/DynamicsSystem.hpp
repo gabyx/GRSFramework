@@ -50,9 +50,9 @@ public:
     GlobalGeometryMapType m_globalGeometries;
 
     // All RigidBodies which are owned by this class!
-    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodySimContainerType;
+    typedef RigidBodyContainer<RigidBodyType> RigidBodySimContainerType;
     RigidBodySimContainerType m_SimBodies;    // Simulated Objects
-    typedef RigidBodyContainer<typename RigidBodyType::RigidBodyIdType,RigidBodyType> RigidBodyNotAniContainer;
+    typedef RigidBodySimContainerType RigidBodyNotAniContainer;
     RigidBodyNotAniContainer m_Bodies;    // all not simulated objects
 
     void initializeLog(Logging::Log* pLog);
@@ -93,6 +93,7 @@ protected:
     Logging::Log*	m_pSolverLog;
     std::stringstream logstream;
 };
+
 
 
 

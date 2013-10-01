@@ -126,8 +126,8 @@ inline void applyDynamicsStateToBodies(
 
     for(bodyIt = bodies.begin(); bodyIt != bodies.end() ; bodyIt++) {
 
-        (*bodyIt)->m_r_S = stateBodyIt->m_q.template head<3>();
-        (*bodyIt)->m_q_KI= stateBodyIt->m_q.template tail<4>();
+        (*bodyIt)->m_r_S  = stateBodyIt->m_q.template head<3>();
+        (*bodyIt)->m_q_KI = stateBodyIt->m_q.template tail<4>();
 
         if( (*bodyIt)->m_eState == TRigidBodyType::SIMULATED) {
             (*bodyIt)->m_pSolverData->m_uBuffer.m_back = stateBodyIt->m_u;

@@ -8,7 +8,7 @@
 #include <fstream>
 
 #include "DynamicsState.hpp"
-
+#include "RigidBodyContainer.hpp"
 #include "MultiBodySimFileIOHelpers.hpp"
 
 /**
@@ -86,13 +86,16 @@ public:
     bool writeOutAllStateTimes();
 
     /**
+    * @brief Operator to write all states of the bodies to the file, writes position and velocity!
+    */
+    template<typename TRigidBody>
+    inline void write(double time, const RigidBodyContainer<TRigidBody> & bodyList);
+
+    /**
     * @brief Operator to write a state to the file, writes position and velocity!
     */
     template<typename TLayoutConfig>
-    MultiBodySimFile & operator << (const DynamicsState<TLayoutConfig>* state);
-    /**
-
-
+    inline MultiBodySimFile & operator << (const DynamicsState<TLayoutConfig>* state);
     /**
     * @brief Overlaod!
     */
@@ -102,22 +105,26 @@ public:
     }
 
     /**
-    * @brief Operator to read a state from a file, only reads position!
+    * @brief Operator to read a state from a file.
     */
     template<typename TLayoutConfig>
-    MultiBodySimFile & operator >> (DynamicsState<TLayoutConfig>* state);
+    inline MultiBodySimFile & operator >> (DynamicsState<TLayoutConfig>* state);
     /**
-    * @brief Operator to read a state from a file, reads position and velocity!
+    * @brief Overlaod!
     */
     template<typename TLayoutConfig>
-    MultiBodySimFile & operator >> (DynamicsState<TLayoutConfig>& state);
-
-    /**
-    * @brief Gets the state at the time t.
-    */
+    MultiBodySimFile &  operator>>( DynamicsState<TLayoutConfig> & state ) {
+        return this->operator>>(&state);
+    }
+    //  /**
+    //  * @brief Gets the state at the time t.
+    //  */
     //bool getStateAt(DynamicsState<TLayoutConfig>& state, PREC t);
+    /**
+    * @brief Gets the end state.
+    */
     template<typename TLayoutConfig>
-    void getEndState(DynamicsState<TLayoutConfig>& state);
+    inline void getEndState(DynamicsState<TLayoutConfig>& state);
 
     unsigned int getNStates(); ///< Gets the number of states in a read only .sim file.
 
@@ -131,12 +138,12 @@ private:
     * @brief Operator to write a generic value to the file as binary data.
     */
     template<typename T>
-    MultiBodySimFile & operator << (const T &value);
+    inline MultiBodySimFile & operator << (const T &value);
     /**
     * @brief Operator to read a generic value from a .sim file as binary data.
     */
     template<typename T>
-    MultiBodySimFile & operator >> (T &value);
+    inline MultiBodySimFile & operator >> (T &value);
 
 
     std::fstream m_file_stream;                      ///< The file stream which represents the binary data.
@@ -144,8 +151,6 @@ private:
     char * m_Buffer;                                 ///< The buffer.
 
     static const char m_simFileSignature[SIM_FILE_SIGNATURE_LENGTH]; ///< The .sim file header.
-
-
 
     /**
     * @brief Writes the header to the file which has been opened.
@@ -194,6 +199,8 @@ private:
 
 
 
+
+
 template<typename T>
 MultiBodySimFile & MultiBodySimFile::operator<<( const T &value ) {
     m_file_stream.write(
@@ -214,10 +221,22 @@ MultiBodySimFile & MultiBodySimFile::operator>>( T &value ) {
 };
 
 
+template<typename TRigidBody>
+void MultiBodySimFile::write(double time, const RigidBodyContainer<TRigidBody> & bodyList){
+    *this << time;
+    ASSERTMSG(m_nSimBodies == bodyList.size(),"You try to write "<<bodyList.size()
+              <<"bodies into a file which was instanced to hold "<<m_nSimBodies);
+    STATIC_ASSERT2((std::is_same<double, typename TRigidBody::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
+    for(auto it = bodyList.begin(); it != bodyList.end(); it++){
+        IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
+        IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
+    }
+}
+
 //
 template<typename TLayoutConfig>
 MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState<TLayoutConfig>* state ) {
-    using namespace IOHelpers;
+
 
     ASSERTMSG(m_nSimBodies == state->m_nSimBodies,
               "You try to write "<<state->m_nSimBodies<<"bodies into a file which was instanced to hold "<<m_nSimBodies);
@@ -232,8 +251,11 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState<TLayoutCon
 //        for(int k=0; k < m_nDOFqObj; k++) {
 //            *this << (double)(state->m_SimBodyStates[i].m_q(k));
 //        }
-        m_file_stream << state->m_SimBodyStates[i].m_q;
-        m_file_stream << state->m_SimBodyStates[i].m_u;
+//        m_file_stream << state->m_SimBodyStates[i].m_q; //ADL fails because Eigen has an overload already for fstream
+//        m_file_stream << state->m_SimBodyStates[i].m_u;
+
+        IOHelpers::writeBinary(m_file_stream, state->m_SimBodyStates[i].m_q );
+        IOHelpers::writeBinary(m_file_stream, state->m_SimBodyStates[i].m_u );
     }
 
     m_nStates++;
@@ -243,7 +265,7 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState<TLayoutCon
 
 template<typename TLayoutConfig>
 MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState<TLayoutConfig>* state ) {
-    using namespace IOHelpers;
+
 
     // write time
     *this >> (double &)state->m_t;
@@ -253,10 +275,12 @@ MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState<TLayoutConfig>* 
     // write states
     for(unsigned int i=0 ; i< state->m_nSimBodies; i++) {
 
-        m_file_stream >> state->m_SimBodyStates[i].m_q;
+        //m_file_stream >> state->m_SimBodyStates[i].m_q; //ADL fails
+        IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[i].m_q );
         //std::cout<< state->m_SimBodyStates[i].m_q.transpose()  << std::endl;
         if(m_bReadFullState) {
-        m_file_stream >> state->m_SimBodyStates[i].m_u;
+        //m_file_stream >> state->m_SimBodyStates[i].m_u;
+        IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[i].m_u );
             //std::cout<< state->m_SimBodyStates[i].m_u.transpose()  << std::endl;
         } else {
             //Dont read in velocities, its not needed!
@@ -267,10 +291,6 @@ MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState<TLayoutConfig>* 
     return *this;
 }
 
-template<typename TLayoutConfig>
-MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState<TLayoutConfig> & state ) {
-    return this->operator>>(&state);
-}
 
 template<typename TLayoutConfig>
 void MultiBodySimFile::getEndState(DynamicsState<TLayoutConfig>& state) {

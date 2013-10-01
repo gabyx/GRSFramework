@@ -37,7 +37,7 @@ public:
 
   const unsigned int m_nSimBodies; // These are the dimensions for one Obj
 
-  MultiBodySimFile m_BinarySimFile;
+  MultiBodySimFile m_binarySimFile;
 
 private:
   Logging::Log * m_pThreadLog; /**< This log is set to the thread log which calls this loader thread.  */
@@ -78,7 +78,7 @@ template< typename TLayoutConfig , typename TStatePool>
 PlaybackLoader<TLayoutConfig, TStatePool>::PlaybackLoader( const unsigned int nSimBodies, boost::shared_ptr<TStatePool> pStatePool):
 m_barrier_start(2),
 m_nSimBodies(nSimBodies),
-m_BinarySimFile(NDOFqObj,NDOFuObj)
+m_binarySimFile(NDOFqObj,NDOFuObj)
 {
   //Set the Log Output =========================================================================
   m_pThreadLog = new Logging::Log("PlaybackLoaderThreadLog");
@@ -159,7 +159,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
 
     if(loadFile()){
 
-      LOG(m_pThreadLog, " File loaded: Number of States = " << m_BinarySimFile.getNStates() << std::endl;);
+      LOG(m_pThreadLog, " File loaded: Number of States = " << m_binarySimFile.getNStates() << std::endl;);
 
       reset();
 
@@ -173,7 +173,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
       {
 
          if(current_state== FILE_CHECK){
-            if(m_BinarySimFile.isGood()){
+            if(m_binarySimFile.isGood()){
                current_state = MOVE_POINTER;
             }else{
                // Write end flag to state!
@@ -193,7 +193,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
              }
          }else if(current_state== READ_IN){
            i++;
-           m_BinarySimFile >> m_state.get();
+           m_binarySimFile >> m_state.get();
             if(i % 20==0){
                LOG(m_pThreadLog,  "File loader buffering state: " << m_state->m_t <<"..."<<std::endl);
            }
@@ -215,7 +215,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
       {
 
          if(current_state== FILE_CHECK){
-            if(m_BinarySimFile.isGood()){
+            if(m_binarySimFile.isGood()){
                current_state = MOVE_POINTER;
             }else{
                // Write end flag to state!
@@ -230,7 +230,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
                current_state = READ_IN;
             }
          }else if(current_state== READ_IN){
-           m_BinarySimFile >> m_state.get();
+           m_binarySimFile >> m_state.get();
                /*
                LOG(m_pThreadLog,  "Loaded m_t:" << m_state->m_t <<endl;);
                 */
@@ -312,13 +312,13 @@ bool PlaybackLoader<TLayoutConfig, TStatePool>::loadFile()
       if(!boost::filesystem::is_empty(file_path)){
 
         // Try to load the file
-        if(m_BinarySimFile.openRead(file_path,m_nSimBodies,m_bReadFullState))
+        if(m_binarySimFile.openRead(file_path,m_nSimBodies,m_bReadFullState))
         {
           return true;
         }else{
            std::stringstream error;
            error << "PlaybackLoader:: Could not open file: " << file_path.string();
-           error << "File errors: " <<endl<< m_BinarySimFile.getErrorString();
+           error << "File errors: " <<endl<< m_binarySimFile.getErrorString();
            m_pThreadLog->logMessage(error.str());
         }
       }
@@ -341,7 +341,7 @@ bool PlaybackLoader<TLayoutConfig, TStatePool>::loadFile()
 template< typename TLayoutConfig , typename TStatePool>
 void PlaybackLoader<TLayoutConfig, TStatePool>::unloadFile()
 {
-  m_BinarySimFile.close();
+  m_binarySimFile.close();
   m_pThreadLog->logMessage("PlaybackLoader:: File closed...");
 }
 
