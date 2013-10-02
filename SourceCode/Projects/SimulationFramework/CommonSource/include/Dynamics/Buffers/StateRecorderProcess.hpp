@@ -24,12 +24,13 @@
 
 /**
 * @ingroup StatesAndBuffers
-* @brief This is the StateRecorder class which records each body's states to one MultiBodySimFile.
+* @brief This is the StateRecorder class which records each body's states to one process own MultiBodySimFilePart.
 * @{
 */
 template <typename TDynamicsSystemType>
 class StateRecorderProcess {
 public:
+    typedef TDynamicsSystemType DynamicsSystemType;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -64,7 +65,9 @@ protected:
 
 
 template<typename TDynamicsSystemType>
-StateRecorderProcess<TDynamicsSystemType>::StateRecorderProcess( unsigned int id,  unsigned int bufferSize) {
+StateRecorderProcess<TDynamicsSystemType>::StateRecorderProcess( unsigned int id,  unsigned int bufferSize):
+        m_binarySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj, m_bufferSize)
+{
 
     m_accessId = id;
 
@@ -104,9 +107,9 @@ bool StateRecorderProcess<TDynamicsSystemType>::openFile(bool truncate){
     file /= s.str();
 
 
-    if(!m_binarySimFile->openWrite(file,truncate,m_bufferSize)){
+    if(!m_binarySimFile.openWrite(file,truncate)){
         LOG(m_pSimulationLog,"---> StateRecorderBody:: Could not open SimFile: " << file.string() << std::endl;);
-        LOG(m_pSimulationLog, pBodyFile->getErrorString() );
+        LOG(m_pSimulationLog, m_binarySimFile.getErrorString() );
         return false;
     }
     if(truncate){

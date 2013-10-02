@@ -16,6 +16,7 @@
 
 template <typename TDynamicsSystemType> class StateRecorder;
 template <typename TDynamicsSystemType> class StateRecorderBody;
+template <typename TDynamicsSystemType> class StateRecorderProcess;
 
 
 template<typename TConfig>
@@ -30,6 +31,7 @@ public:
     void setup();
     void setup(boost::filesystem::path sceneFilePath);
 
+
     void startSim();
 
 private:
@@ -38,6 +40,7 @@ private:
 
     unsigned int m_nSimBodies, m_nGlobalSimBodies;
 
+    RecorderSettings<LayoutConfigType> m_RecorderSettings;
 
     // File Paths for one Simulation, always reset ==============================
     boost::filesystem::path m_SimFolderPath;
@@ -49,7 +52,12 @@ private:
 
     Logging::Log *  m_pSimulationLog;
 
-    boost::shared_ptr< StateRecorderBody<DynamicsSystemType> >   m_pStateRecorder;
+    //typedef StateRecorderBody<DynamicsSystemType> StateRecorderType;
+    typedef StateRecorderProcess<DynamicsSystemType> StateRecorderType;
+    // ===============================================
+
+    boost::shared_ptr< StateRecorderType >   m_pStateRecorder;
+
     boost::shared_ptr< SceneParserMPI<TConfig> > m_pSceneParser;
 
     boost::shared_ptr< TimeStepperType >	m_pTimestepper;
@@ -59,6 +67,7 @@ private:
     typedef typename MPILayer::ProcessCommunicator<DynamicsSystemType>::ProcessInfoType ProcessInfoType;
     boost::shared_ptr< MPILayer::ProcessCommunicator<DynamicsSystemType> > m_pProcCommunicator;
 
+    void writeAllOutput();
 
     void checkNumberOfBodiesInProcess();
     void getMaxRuntime(PREC runtime);

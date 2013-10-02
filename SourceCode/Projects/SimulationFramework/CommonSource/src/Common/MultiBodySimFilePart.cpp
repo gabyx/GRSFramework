@@ -80,6 +80,11 @@ void  MultiBodySimFilePart::writeHeader() {
 
 
 void MultiBodySimFilePart::close() {
+
+    //Write the m_nStates variable into the header
+    m_file_stream.seekp(m_beginHeader);
+    *this << (unsigned int)m_nStates;
+
     // Reset all values;
     m_nBytes = 0;
     m_nStates = 0;

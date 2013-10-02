@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
     processFolder << PROCESS_FOLDER_PREFIX << my_rank;
     boost::filesystem::path localDirPath;
 
-    localDirPath = ApplicationCLOptions::getSingletonPtr()->m_globalDir;
+    localDirPath = ApplicationCLOptions::getSingletonPtr()->m_localDir;
     localDirPath /= processFolder.str();
     new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
 

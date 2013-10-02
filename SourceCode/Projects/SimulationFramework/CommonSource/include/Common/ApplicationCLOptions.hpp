@@ -12,12 +12,14 @@
 class ApplicationCLOptions: public Utilities::Singleton<ApplicationCLOptions>{
 public:
 
-    boost::filesystem::path m_globalDir;
+    boost::filesystem::path m_localDir = "./";
+    boost::filesystem::path m_globalDir = "./";
     boost::filesystem::path m_sceneFile;
 
     void parseOptions(int argc, char **argv){
         char * sceneFilePathChar = NULL;
         char * globalFilePathChar = NULL;
+        char * localFilePathChar = NULL;
 
         for (int i = 1; i < argc; i++) {
             if (std::string(argv[i]) == "-s") {
@@ -28,13 +30,21 @@ public:
                 sceneFilePathChar = argv[i + 1];
                 i++;
                 std::cout << " SceneFile Arg: " << sceneFilePathChar <<std::endl;
-            }else if(std::string(argv[i]) == "-p"){
+            }else if(std::string(argv[i]) == "-pg"){
                 if(i + 1 >= argc){
-                    printErrorNoArg("-p");
+                    printErrorNoArg("-pg");
                 }
               globalFilePathChar  = argv[i + 1];
               i++;
               std::cout << " GlobalFilePath Arg: " << globalFilePathChar <<std::endl;
+            }
+            else if(std::string(argv[i]) == "-pl"){
+                if(i + 1 >= argc){
+                    printErrorNoArg("-pl");
+                }
+              localFilePathChar  = argv[i + 1];
+              i++;
+              std::cout << " LocalFilePath Arg: " << localFilePathChar <<std::endl;
             }
             else if(std::string(argv[i]) == "-h" || std::string(argv[i]) == "--help" ){
                 printHelp();
@@ -50,6 +60,11 @@ public:
 
         if(globalFilePathChar){
             m_globalDir =  boost::filesystem::path(std::string(globalFilePathChar));
+            m_localDir =  m_globalDir;
+        }
+
+        if(localFilePathChar){
+            m_localDir =  boost::filesystem::path(std::string(localFilePathChar));
         }
 
 
@@ -73,7 +88,8 @@ public:
     void printHelp(){
         std::cout << "Help for the Application:" << std::endl <<"Options:" <<std::endl
                               << " \t -s [SceneFilePath] (This is a .xml file for the scene, essential for CLI version, in GUI version: \"SceneFile.xml\" is standart)" <<std::endl
-                              << " \t -p [GlobalFilePath] ( optional ) "  <<std::endl
+                              << " \t -pg [GlobalDirectoryPath] ( optional ) This is the global directory.  "  <<std::endl
+                              << " \t -pl [LocalDirectoryPath] (optional) This is the local directory for each processes output, if not specified the local directory is the same as the global directory."  <<std::endl
                               << " \t -h|--help  prints this help" <<std::endl;
                     exit(-1);
     }
