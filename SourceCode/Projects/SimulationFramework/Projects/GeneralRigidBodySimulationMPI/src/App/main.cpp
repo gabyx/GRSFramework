@@ -39,8 +39,17 @@ int main(int argc, char **argv) {
 
     localDirPath = ApplicationCLOptions::getSingletonPtr()->m_localDir;
     localDirPath /= processFolder.str();
-    new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
 
+    // Rank 0 makes the FileManager first( to ensure that all folders are set up properly)
+    if(my_rank == 0){
+        new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+    else{
+        MPI_Barrier(MPI_COMM_WORLD);
+        //These do not create paths anymore because rank 0 has already made the stuff
+        new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath);
+    }
 
     new Logging::LogManager();
 

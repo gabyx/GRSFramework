@@ -21,6 +21,8 @@ FileManager::FileManager(){
 }
 
 void FileManager::init(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath){
+      using namespace boost::filesystem;
+
       m_fileIdCounter = 0;
       m_globalDirPath = globalDirPath;
       m_localDirPath = localDirPath;

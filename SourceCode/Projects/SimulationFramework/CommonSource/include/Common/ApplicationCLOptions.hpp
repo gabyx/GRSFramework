@@ -87,10 +87,17 @@ public:
 
     void printHelp(){
         std::cout << "Help for the Application:" << std::endl <<"Options:" <<std::endl
-                              << " \t -s [SceneFilePath] (This is a .xml file for the scene, essential for CLI version, in GUI version: \"SceneFile.xml\" is standart)" <<std::endl
-                              << " \t -pg [GlobalDirectoryPath] ( optional ) This is the global directory.  "  <<std::endl
-                              << " \t -pl [LocalDirectoryPath] (optional) This is the local directory for each processes output, if not specified the local directory is the same as the global directory."  <<std::endl
-                              << " \t -h|--help  prints this help" <<std::endl;
+                              << " \t -s [SceneFilePath] \n"
+                              <<            "\t\t This is a .xml file for the scene, essential \n"
+                              <<            "\t\t for CLI version, in GUI version: \"SceneFile.xml\" is the default file \n"
+                              << " \t -pg [GlobalDirectoryPath] (optional) \n"
+                              <<            "\t\t This is the global directory path. (no slash at the end, boost::create_directory bug!)\n"
+                              << " \t -pl [LocalDirectoryPath] (optional) \n"
+                              <<            "\t\t This is the local directory for each processes output, \n"
+                              <<            "\t\t if not specified the local directory is the same as the global directory.\n"
+                              <<            "\t\t (no slash at the end, boost::create_directory bug!)\n"
+                              << " \t -h|--help \n"
+                              <<            "\t\t Prints this help" <<std::endl;
                     exit(-1);
     }
 };
