@@ -49,8 +49,8 @@ protected:
     Logging::Log * m_pSimulationLog;
 
     //void scanAllSimDataFiles(boost::filesystem::path path_name, bool with_SubDirs = false);
-    // All files created have the name "<m_fileNamePrefix>_<m_fileIdCounter>.sim"
-    // If files already exist in the folder m_fileIdCounter is set to the actual number which does not exist already!
+    // All files created have the name "<m_fileNamePrefix>_<m_folderIdCounter>.sim"
+    // If files already exist in the folder m_folderIdCounter is set to the actual number which does not exist already!
     //std::vector<boost::filesystem::path> m_SimFilePaths;
     //Ogre::StringVector m_SimFileNames;
 

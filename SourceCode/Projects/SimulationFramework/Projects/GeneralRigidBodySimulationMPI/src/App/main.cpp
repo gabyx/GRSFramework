@@ -19,26 +19,34 @@ int main(int argc, char **argv) {
     // Start MPI =================================
     MPI_Init(&argc, &argv);
 
-
-    // Parsing Input Parameters===================================
-    new ApplicationCLOptions();
-    ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
-    ApplicationCLOptions::getSingletonPtr()->checkArguments();
-    // End Parsing =================================
-
-
-    // Add the process rank to the Global File Path for this Process...
+     // Add the process rank to the Global File Path for this Process...
     int my_rank;
     MPI_Comm_rank(MPI_COMM_WORLD,&my_rank);
     int nProcesses;
     MPI_Comm_size(MPI_COMM_WORLD,&nProcesses);
 
+
+    // Parsing Input Parameters===================================
+    new ApplicationCLOptions();
+    ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
+    ApplicationCLOptions::getSingletonPtr()->checkArguments();
+    if(my_rank == 0){
+        ApplicationCLOptions::getSingletonPtr()->printArgs();
+    }
+    // End Parsing =================================
+
+
     std::stringstream processFolder;
     processFolder << PROCESS_FOLDER_PREFIX << my_rank;
     boost::filesystem::path localDirPath;
 
-    localDirPath = ApplicationCLOptions::getSingletonPtr()->m_localDir;
-    localDirPath /= processFolder.str();
+    //Calculate the directory where the processes have theis local dir
+    {
+        unsigned int groups = nProcesses / ApplicationCLOptions::getSingletonPtr()->m_localDirs.size();
+        unsigned int index = std::min( (unsigned int)(my_rank/ groups), (unsigned int)ApplicationCLOptions::getSingletonPtr()->m_localDirs.size()-1);
+        localDirPath = ApplicationCLOptions::getSingletonPtr()->m_localDirs[index];
+        localDirPath /= processFolder.str();
+    }
 
     // Rank 0 makes the FileManager first( to ensure that all folders are set up properly)
     if(my_rank == 0){

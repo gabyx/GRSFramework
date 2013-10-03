@@ -1,10 +1,12 @@
 #ifndef ApplicationCLOptions_hpp
 #define ApplicationCLOptions_hpp
 
+
 #include <string>
 #include <boost/filesystem.hpp>
 #include "Singleton.hpp"
 
+#include "CommonFunctions.hpp"
 
 /**
 *  @brief CommandLineOptions for the Application
@@ -16,12 +18,7 @@ public:
     boost::filesystem::path m_globalDir = "./";
     boost::filesystem::path m_sceneFile;
 
-    ApplicationCLOptions(): m_localDirs(1,"./") {}
-
     void parseOptions(int argc, char **argv) {
-        char * sceneFilePathChar = NULL;
-        char * globalFilePathChar = NULL;
-        char * localFilePathChar = NULL;
 
         for (int i = 1; i < argc; i++) {
             if (std::string(argv[i]) == "-s") {
@@ -31,14 +28,13 @@ public:
                 }
                 m_sceneFile = boost::filesystem::path(std::string(argv[i + 1]));
                 i++;
-                std::cout << " SceneFile Arg: " << sceneFilePathChar <<std::endl;
+
             } else if(std::string(argv[i]) == "-pg") {
                 if(i + 1 >= argc) {
                     printErrorNoArg("-pg");
                 }
                 m_globalDir =  boost::filesystem::path(std::string(argv[i + 1]));
                 i++;
-                std::cout << " GlobalFilePath Arg: " << globalFilePathChar <<std::endl;
             } else if(std::string(argv[i]) == "-pl") {
                 //Process all further local paths
                 int j = i+1;
@@ -51,11 +47,11 @@ public:
                     }
 
                     // we can check the argument, if we are at a new command break
-                    if( argv[j][0] =="-" || argv[j][0] =="--") {
+                    if( std::string(argv[j])[0] =='-') {
                         j--; i = j; break;
                     }
 
-                    m_localDirs.push_back(  boost::filesystem::path(std::string(argv[j])) )
+                    m_localDirs.push_back(  boost::filesystem::path(std::string(argv[j])) );
                     j++;
                 }
 
@@ -67,19 +63,30 @@ public:
             }
         }
 
-
-
-        if(localFilePathChar) {
-            m_localDir =  boost::filesystem::path(std::string(localFilePathChar));
+        if(m_localDirs.size()==0){
+            m_localDirs.push_back("./");
         }
 
 
+    }
+
+    void printArgs(){
+        std::cout << " SceneFile Arg: " << m_sceneFile <<std::endl;
+        std::cout << " GlobalFilePath Arg: " << m_globalDir <<std::endl;
+        std::cout << " LocalFilePaths Args: ";
+        Utilities::printVector(std::cout, m_localDirs.begin(), m_localDirs.end(), std::string(", "));
+        std::cout << std::endl;
     }
 
     void checkArguments() {
         if(m_sceneFile.empty()) {
             printHelp();
             ERRORMSG("No scene file (.xml) supplied as argument: -s [SceneFilePath]");
+        }else{
+            if(! boost::filesystem::exists(m_sceneFile)){
+                printHelp();
+                ERRORMSG("Scene file supplied as argument: " << m_sceneFile << " does not exist!" );
+            }
         }
     }
 
@@ -102,7 +109,8 @@ private:
                   <<            "\t\t This is the local directory for each processes output, \n"
                   <<            "\t\t if not specified the local directory is the same as the global directory.\n"
                   <<            "\t\t (no slash at the end, boost::create_directory bug!)\n"
-                  <<            "\t\t This can also be a list of directories (space delimited), which is the distributed linearly
+                  <<            "\t\t This can also be a list of directories (space delimited), which is \n"
+                  <<            "\t\t distributed linearly over all participating processes.\n"
                   << " \t -h|--help \n"
                   <<            "\t\t Prints this help" <<std::endl;
                   exit(-1);
