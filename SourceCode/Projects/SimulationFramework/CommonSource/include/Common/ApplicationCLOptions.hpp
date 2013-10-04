@@ -4,8 +4,10 @@
 
 #include <string>
 #include <boost/filesystem.hpp>
-#include "Singleton.hpp"
+#include <getoptpp/getopt_pp_standalone.h>
 
+
+#include "Singleton.hpp"
 #include "CommonFunctions.hpp"
 
 /**
