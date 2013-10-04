@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include <algorithm>
 #include <boost/filesystem.hpp>
 #include <getoptpp/getopt_pp_standalone.h>
 
@@ -16,71 +17,90 @@
 class ApplicationCLOptions: public Utilities::Singleton<ApplicationCLOptions> {
 public:
 
+    struct PostProcessTask{
+        PostProcessTask(std::string name):m_name(name){};
+        std::string m_name;
+        std::vector<std::string> m_options;
+    };
+
     std::vector<boost::filesystem::path> m_localDirs;
     boost::filesystem::path m_globalDir = "./";
     boost::filesystem::path m_sceneFile;
 
+    // If I would like to have some posst process tasks going on afterwards
+    // Like bash command and so one
+    // This is not needed sofar in MPI mode, because I can do this with mpirun -npernode 1 command and so on which lets me postprocess files
+    // per node on the cluster or
+    std::vector<PostProcessTask> m_postProcessTasks;
+
     void parseOptions(int argc, char **argv) {
         using namespace GetOpt;
         GetOpt::GetOpt_pp ops(argc, argv);
+        ops.exceptions_all();
+        try {
 
-        std::vector<std::string> args;
-
-        ops >> Option("s",args);
-        Utilities::printVector(std::cout, args.begin(), args.end(), ", ");
-        exit(-1);
-
-        for (int i = 1; i < argc; i++) {
-            if (std::string(argv[i]) == "-s") {
-                // We know the next argument *should* be the filename:
-                if(i + 1 >= argc) {
-                    printErrorNoArg("-s");
-                }
-                m_sceneFile = boost::filesystem::path(std::string(argv[i + 1]));
-                i++;
-
-            } else if(std::string(argv[i]) == "-pg") {
-                if(i + 1 >= argc) {
-                    printErrorNoArg("-pg");
-                }
-                m_globalDir =  boost::filesystem::path(std::string(argv[i + 1]));
-                i++;
-            } else if(std::string(argv[i]) == "-pl") {
-                //Process all further local paths
-                int j = i+1;
-                while(true) {
-                    if(j >= argc) {
-                        if(j==i+1) {
-                            printErrorNoArg("-pl");
-                        }
-                        j--; i = j; break;
-                    }
-
-                    // we can check the argument, if we are at a new command break
-                    if( std::string(argv[j])[0] =='-') {
-                        j--; i = j; break;
-                    }
-
-                    m_localDirs.push_back(  boost::filesystem::path(std::string(argv[j])) );
-                    j++;
-                }
-
-            } else if(std::string(argv[i]) == "-h" || std::string(argv[i]) == "--help" ) {
-                printHelp();
-            } else {
-                std::cout << "Wrong option: '" <<std::string(argv[i]) << "'" << std::endl;
+            if( ops >> OptionPresent('h',"help")) {
                 printHelp();
             }
+
+            std::string s;
+            ops >> Option('s',s);
+            m_sceneFile = boost::filesystem::path(s);
+
+
+
+            if( ops >> OptionPresent('g',"global-path")) {
+                ops >> Option('g',"global-path",s);
+                m_globalDir = boost::filesystem::path(s);
+            }
+
+            if( ops >> OptionPresent('l',"local-path")) {
+                std::vector<std::string> svec;
+                ops >> Option('l',"local-path",svec);
+                for(auto it = svec.begin(); it != svec.end(); it++){
+                    m_localDirs.push_back(*it);
+                }
+            }
+
+//            if( ops >> OptionPresent('p', "post-process")) {
+//                std::vector<std::string> svec;
+//                ops >> Option('p',"post-process",svec);
+//
+//                std::vector<int> splitIdx;
+//                int nextArgIdx;
+//                for(int i = 0; i < svec.size; it++){
+//                    if(svec[i] == "bash"){
+//                        // has 2 arguments [int|all] and string which is the bash command!
+//                       splitIdx.push_back(i);
+//                       nextArgIdx = i + 3;
+//                    }else if( *it == "copy-local-to-global"){
+//                        //has no arguments
+//                        nextArgIdx = i + 1;
+//                        m_postProcessTasks.push_back("copy-local-to-global");
+//                    }else{
+//                        if(i >= nextArg){
+//                            std::cerr <<"Postprocess Argument: " << svec[i] << " not known!"
+//                            printHelp();
+//                        }
+//                    }
+//                }
+//
+//            }
+
+        } catch(GetOpt::GetOptEx ex) {
+            std::cerr <<"Exception occured in parsing CMD args:\n" << std::endl;
+            printHelp();
         }
 
-        if(m_localDirs.size()==0){
+
+        if(m_localDirs.size()==0) {
             m_localDirs.push_back("./");
         }
 
 
     }
 
-    void printArgs(){
+    void printArgs() {
         std::cout << " SceneFile Arg: " << m_sceneFile <<std::endl;
         std::cout << " GlobalFilePath Arg: " << m_globalDir <<std::endl;
         std::cout << " LocalFilePaths Args: ";
@@ -90,12 +110,12 @@ public:
 
     void checkArguments() {
         if(m_sceneFile.empty()) {
+            std::cerr  << "No scene file (.xml) supplied as argument: -s [SceneFilePath]" << std::endl;
             printHelp();
-            ERRORMSG("No scene file (.xml) supplied as argument: -s [SceneFilePath]");
-        }else{
-            if(! boost::filesystem::exists(m_sceneFile)){
+        } else {
+            if(! boost::filesystem::exists(m_sceneFile)) {
+                std::cerr  << "Scene file supplied as argument: " << m_sceneFile << " does not exist!"<< std::endl;
                 printHelp();
-                ERRORMSG("Scene file supplied as argument: " << m_sceneFile << " does not exist!" );
             }
         }
     }
@@ -123,9 +143,9 @@ private:
                   <<            "\t\t distributed linearly over all participating processes.\n"
                   << " \t -h|--help \n"
                   <<            "\t\t Prints this help" <<std::endl;
-                  exit(-1);
-              }
-              };
+        exit(-1);
+    }
+};
 
 
 
