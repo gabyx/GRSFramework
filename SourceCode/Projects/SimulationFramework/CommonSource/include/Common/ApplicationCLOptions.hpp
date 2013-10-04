@@ -21,6 +21,14 @@ public:
     boost::filesystem::path m_sceneFile;
 
     void parseOptions(int argc, char **argv) {
+        using namespace GetOpt;
+        GetOpt::GetOpt_pp ops(argc, argv);
+
+        std::vector<std::string> args;
+
+        ops >> Option("s",args);
+        Utilities::printVector(std::cout, args.begin(), args.end(), ", ");
+        exit(-1);
 
         for (int i = 1; i < argc; i++) {
             if (std::string(argv[i]) == "-s") {
