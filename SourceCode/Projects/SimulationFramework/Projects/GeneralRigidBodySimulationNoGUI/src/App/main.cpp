@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     processFolder <<  PROCESS_FOLDER_PREFIX;
     boost::filesystem::path localDirPath;
 
-    localDirPath = ApplicationCLOptions::getSingletonPtr()->m_localDir[0];
+    localDirPath = ApplicationCLOptions::getSingletonPtr()->m_localDirs[0];
     localDirPath /= processFolder.str();
 
 
