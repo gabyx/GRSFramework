@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
     ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
     ApplicationCLOptions::getSingletonPtr()->checkArguments();
     if(my_rank == 0){
-        ApplicationCLOptions::getSingletonPtr()->printArgs();
+        ApplicationCLOptions::getSingletonPtr()->printArgs(std::cout);
     }
     // End Parsing =================================
 
@@ -75,6 +75,18 @@ int main(int argc, char **argv) {
 
 
     mgr.startSim();
+
+
+   // Do post processes at the end of the simulation
+    //TODO
+    auto & tasks = ApplicationCLOptions::getSingletonPtr()->m_postProcessTasks;
+    for(auto it = tasks.begin(); it != tasks.end(); it++){
+        if((*it)->getName() == "bash"){
+            (*it)->execute();
+        }
+    }
+
+
 
     // Finalize MPI =================================
     MPI_Finalize();

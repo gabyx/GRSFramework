@@ -11,17 +11,54 @@
 #include "Singleton.hpp"
 #include "CommonFunctions.hpp"
 
+
+
 /**
 *  @brief CommandLineOptions for the Application
 */
 class ApplicationCLOptions: public Utilities::Singleton<ApplicationCLOptions> {
 public:
 
-    struct PostProcessTask{
-        PostProcessTask(std::string name):m_name(name){};
-        std::string m_name;
-        std::vector<std::string> m_options;
+
+    class PostProcessTask{
+        public:
+        PostProcessTask(const std::string & name):m_name(name){};
+
+        std::string getName(){return m_name;}
+
+        virtual void addOption(unsigned int index, const std::string &option){
+            m_options[index] = option;
+        }
+
+        virtual void execute() = 0;
+
+        protected:
+
+            friend std::ostream & operator<<(std::ostream & s, const PostProcessTask & p);
+
+            std::string m_name;
+            std::map<unsigned int, std::string> m_options;
     };
+
+    class PostProcessTaskBash : public PostProcessTask{
+        public:
+            PostProcessTaskBash(const std::string & name): PostProcessTask(name){}
+            void execute(){
+                system( this->m_options[1].c_str());
+            }
+    };
+
+    class PostProcessTaskCopyLocalTo : public PostProcessTask{
+        public:
+            PostProcessTaskCopyLocalTo(const std::string & name): PostProcessTask(name){}
+            void addOption(unsigned int index, const std::string &option){
+
+            }
+            virtual void execute(){
+
+            }
+    };
+
 
     std::vector<boost::filesystem::path> m_localDirs;
     boost::filesystem::path m_globalDir = "./";
@@ -31,7 +68,14 @@ public:
     // Like bash command and so one
     // This is not needed sofar in MPI mode, because I can do this with mpirun -npernode 1 command and so on which lets me postprocess files
     // per node on the cluster or
-    std::vector<PostProcessTask> m_postProcessTasks;
+    std::vector<PostProcessTask *> m_postProcessTasks;
+
+    ~ApplicationCLOptions(){
+        for(auto it = m_postProcessTasks.begin(); it != m_postProcessTasks.end(); it++){
+            delete (*it);
+        }
+    }
+
 
     void parseOptions(int argc, char **argv) {
         using namespace GetOpt;
@@ -62,33 +106,67 @@ public:
                 }
             }
 
-//            if( ops >> OptionPresent('p', "post-process")) {
-//                std::vector<std::string> svec;
-//                ops >> Option('p',"post-process",svec);
-//
-//                std::vector<int> splitIdx;
-//                int nextArgIdx;
-//                for(int i = 0; i < svec.size; it++){
-//                    if(svec[i] == "bash"){
-//                        // has 2 arguments [int|all] and string which is the bash command!
-//                       splitIdx.push_back(i);
-//                       nextArgIdx = i + 3;
-//                    }else if( *it == "copy-local-to-global"){
-//                        //has no arguments
-//                        nextArgIdx = i + 1;
-//                        m_postProcessTasks.push_back("copy-local-to-global");
-//                    }else{
-//                        if(i >= nextArg){
-//                            std::cerr <<"Postprocess Argument: " << svec[i] << " not known!"
-//                            printHelp();
-//                        }
-//                    }
-//                }
-//
-//            }
+            if( ops >> OptionPresent('p', "post-process")) {
+                std::vector<std::string> svec;
+                ops >> Option('p',"post-process",svec);
+
+                int currentArgIdx = 0;
+                int nextArgIdx = 0;
+                PostProcessTask * p;
+                for(int i = 0; i < svec.size(); i++){
+                    if(svec[i] == "bash"){
+                        if(i != nextArgIdx){
+                           std::cerr <<"Postprocess Argument: " << "bash" << " at wrong position!" << std::endl;
+                           printHelp();
+                        }
+
+                        // has 2 arguments [int|all] and string which is the bash command!
+                       currentArgIdx = i;
+                       nextArgIdx = i + 3;
+                       if(nextArgIdx-1 >=  svec.size()){
+                           std::cerr <<"Postprocess Argument: " << "bash" << ", two little arguments!" << std::endl;
+                           printHelp();
+                       }
+                       m_postProcessTasks.push_back(new PostProcessTaskBash("bash"));
+                       p = m_postProcessTasks.back();
+                    }else if( svec[i] == "copy-local-to"){
+                        if(i != nextArgIdx){
+                           std::cerr <<"Postprocess Argument: " << "copy-local-to" << " at wrong position!" << std::endl;
+                           printHelp();
+                        }
+
+                        currentArgIdx = i;
+                        nextArgIdx = i + 1;
+                        if(nextArgIdx-1 >=  svec.size()){
+                           std::cerr <<"Postprocess Argument: " << "copy-local-to" << ", two little arguments!" << std::endl;
+                           printHelp();
+                        }
+                        m_postProcessTasks.push_back(new PostProcessTaskCopyLocalTo("copy-local-to"));
+                        p = m_postProcessTasks.back();
+                    }else{
+                        if(i >= nextArgIdx){
+                            std::cerr <<"Postprocess Argument: " << svec[i] << " not known!" << std::endl;
+                            printHelp();
+                        }
+                        if(p){
+                            p->addOption(i-currentArgIdx-1,svec[i]);
+                        }
+                        // otherwise skip (it belongs to a argument befor
+                    }
+                }
+
+
+
+
+            }
 
         } catch(GetOpt::GetOptEx ex) {
             std::cerr <<"Exception occured in parsing CMD args:\n" << std::endl;
+            printHelp();
+        }
+
+        if (ops.options_remain()){
+            std::cerr <<"Some unexpected options where given!" << std::endl;
             printHelp();
         }
 
@@ -100,12 +178,17 @@ public:
 
     }
 
-    void printArgs() {
-        std::cout << " SceneFile Arg: " << m_sceneFile <<std::endl;
-        std::cout << " GlobalFilePath Arg: " << m_globalDir <<std::endl;
-        std::cout << " LocalFilePaths Args: ";
-        Utilities::printVector(std::cout, m_localDirs.begin(), m_localDirs.end(), std::string(", "));
-        std::cout << std::endl;
+    void printArgs(std::ostream & s){
+        s << " SceneFile Arg: " << m_sceneFile <<std::endl;
+        s << " GlobalFilePath Arg: " << m_globalDir <<std::endl;
+        s << " LocalFilePaths Args: ";
+        Utilities::printVector(s, m_localDirs.begin(), m_localDirs.end(), std::string(" "));
+        s << std::endl;
+
+        for(auto it = m_postProcessTasks.begin(); it != m_postProcessTasks.end(); it++){
+            s << *(*it);
+        }
+        //exit(-1);
     }
 
     void checkArguments() {
@@ -133,9 +216,9 @@ private:
                   << " \t -s [SceneFilePath] \n"
                   <<            "\t\t This is a .xml file for the scene, essential \n"
                   <<            "\t\t for CLI version, in GUI version: \"SceneFile.xml\" is the default file \n"
-                  << " \t -pg [GlobalDirectoryPath] (optional) \n"
+                  << " \t -g|--global-path [GlobalDirectoryPath] (optional) \n"
                   <<            "\t\t This is the global directory path. (no slash at the end, boost::create_directory bug!)\n"
-                  << " \t -pl [LocalDirectoryPath] (optional) \n"
+                  << " \t -l|--local-path [LocalDirectoryPath] (optional) \n"
                   <<            "\t\t This is the local directory for each processes output, \n"
                   <<            "\t\t if not specified the local directory is the same as the global directory.\n"
                   <<            "\t\t (no slash at the end, boost::create_directory bug!)\n"
@@ -145,6 +228,16 @@ private:
                   <<            "\t\t Prints this help" <<std::endl;
         exit(-1);
     }
+};
+
+// Global implementation for ApplicationCLOptions::PostProcessTask
+std::ostream & operator<<(std::ostream & s, const ApplicationCLOptions::PostProcessTask & p){
+            s << " Postprocess: " << p.m_name << " : ";
+            s << (p.m_options.begin())->first << ":\""<<(p.m_options.begin())->second <<"\"";
+            for(auto it= ++(p.m_options.begin());it != p.m_options.end(); it++){
+                s <<", " <<it->first<< ":\""<<it->second <<"\"";
+            }
+            return s;
 };
 
 
