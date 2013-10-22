@@ -70,7 +70,6 @@ StateRecorderProcess<TDynamicsSystemType>::StateRecorderProcess( unsigned int id
 {
 
     m_accessId = id;
-
     m_bufferSize = bufferSize;
 
     //Check if LogManager is available

@@ -230,7 +230,13 @@ void SimulationManagerMPI<TConfig>::writeAllOutput() {
         //m_pTimestepper->writeIterationToCollisionDataFile();
         // Write  State to Sim File
         //m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
+
+        // if the recorder would support parallel write , interleaving the calculation we could
+        // wait here for the recorder to finish up
+        // m_pStateRecorder->wait(); // waits till the recorder has finished its parallel stuff
+
         m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_SimBodies);
+        // this would then be asynchronous call (copies states internally and writes everything out
     }
 }
 

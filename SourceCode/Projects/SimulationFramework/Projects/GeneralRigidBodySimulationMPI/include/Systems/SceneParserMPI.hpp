@@ -204,9 +204,22 @@ protected:
             groupId = m_globalMaxGroupId;
         }
 
+
+        // Get the startidx for this group
+        auto it = groupIdToNBodies.find(groupId);
+        if( it == groupIdToNBodies.end()){
+            groupIdToNBodies[groupId] = startIdx = 0;
+        }else{
+            startIdx = groupIdToNBodies[groupId];
+        }
+
+        // update the number of bodies
+        groupIdToNBodies[groupId] += instances;
+
+
         for(int i=0; i<instances; i++) {
 
-            RigidBodyType * temp_ptr = new RigidBodyType(RigidBodyId::makeId(i, groupId));
+            RigidBodyType * temp_ptr = new RigidBodyType(RigidBodyId::makeId(startIdx+i, groupId));
 
             m_bodyList.push_back(temp_ptr);
 
@@ -237,8 +250,12 @@ protected:
                 // Check if Body belongs to the topology! // Check CoG!
                 if(m_pProcCommunicator->getProcInfo()->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {
 
+
+                    if(! m_pDynSys->m_SimBodies.addBody((*bodyIt))){
+                        ERRORMSG("Could not add body to m_SimBodies! Id: " << RigidBodyId::getBodyIdString(m_bodyList[i]) << " already in map!");
+                    };
                     LOG(m_pSimulationLog, "---> Added Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
-                    m_pDynSys->m_SimBodies.addBody((*bodyIt));
+
 
                     m_nSimBodies++;
                     m_nBodies++;
@@ -263,7 +280,9 @@ protected:
 
             for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
 
-                m_pDynSys->m_Bodies.addBody((*bodyIt));
+                if(! m_pDynSys->m_Bodies.addBody((*bodyIt))){
+                        ERRORMSG("Could not add body to m_Bodies! Id: " << RigidBodyId::getBodyIdString(m_bodyList[i]) << " already in map!");
+                };
 
                 m_nBodies++;
             }

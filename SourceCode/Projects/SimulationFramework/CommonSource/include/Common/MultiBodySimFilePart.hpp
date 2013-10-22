@@ -154,6 +154,7 @@ MultiBodySimFilePart & MultiBodySimFilePart::operator>>( T &value ) {
 template<typename TRigidBody>
 void MultiBodySimFilePart::write(double time, const RigidBodyContainer<TRigidBody> & bodyList){
     *this << time;
+    *this << (unsigned int) bodyList.size();
     STATIC_ASSERT2((std::is_same<double, typename TRigidBody::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
     for(auto it = bodyList.beginOrdered(); it != bodyList.endOrdered(); it++){
         *this << (*it)->m_id;
