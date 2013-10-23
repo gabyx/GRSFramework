@@ -17,7 +17,7 @@
 template <typename TDynamicsSystemType> class StateRecorder;
 template <typename TDynamicsSystemType> class StateRecorderBody;
 template <typename TDynamicsSystemType> class StateRecorderProcess;
-
+template <typename TDynamicsSystemType> class StateRecorderMPI;
 
 template<typename TConfig>
 class SimulationManagerMPI {
@@ -53,7 +53,7 @@ private:
     Logging::Log *  m_pSimulationLog;
 
     //typedef StateRecorderBody<DynamicsSystemType> StateRecorderType;
-    typedef StateRecorderProcess<DynamicsSystemType> StateRecorderType;
+    typedef StateRecorderMPI<DynamicsSystemType> StateRecorderType;
     // ===============================================
 
     boost::shared_ptr< StateRecorderType >   m_pStateRecorder;

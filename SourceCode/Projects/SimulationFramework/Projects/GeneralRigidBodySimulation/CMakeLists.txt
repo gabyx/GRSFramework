@@ -138,6 +138,7 @@ SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
     ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
     ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFile.cpp
+    ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
 )
 
 SET(DYNAMICS_INC

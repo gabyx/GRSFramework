@@ -41,8 +41,8 @@ public:
 
     void setDirectoryPath(boost::filesystem::path dir_path);
 
-    bool openFile(bool truncate = true);
-    bool closeFile();
+    bool createSimFile(bool truncate = true);
+    bool closeSimFile();
 
 protected:
 
@@ -97,7 +97,7 @@ void StateRecorderProcess<TDynamicsSystemType>::setDirectoryPath(boost::filesyst
 }
 
 template<typename TDynamicsSystemType>
-bool StateRecorderProcess<TDynamicsSystemType>::openFile(bool truncate){
+bool StateRecorderProcess<TDynamicsSystemType>::createSimFile(bool truncate){
     boost::filesystem::path file;
     std::stringstream s;
 
@@ -133,7 +133,7 @@ void StateRecorderProcess<TDynamicsSystemType>::write(PREC time, const typename 
 
 
 template<typename TDynamicsSystemType>
-bool StateRecorderProcess<TDynamicsSystemType>::closeFile(){
+bool StateRecorderProcess<TDynamicsSystemType>::closeSimFile(){
     m_binarySimFile.close();
     return true;
 }

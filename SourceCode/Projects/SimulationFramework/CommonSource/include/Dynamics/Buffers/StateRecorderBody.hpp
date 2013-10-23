@@ -47,11 +47,11 @@ public:
 
     void setDirectoryPath(boost::filesystem::path dir_path);
 
-    bool openFiles(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list, bool truncate = false);
-    bool openFile(RigidBodyType * body, bool truncate);
-    bool closeFile(RigidBodyType * body);
+    bool createSimFiles(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list, bool truncate = false);
+    bool createSimFile(RigidBodyType * body, bool truncate);
+    bool closeSimFile(RigidBodyType * body);
 
-    void closeAllSimFiles();
+    void closeAll();
 
 protected:
 
@@ -106,7 +106,7 @@ StateRecorderBody<TDynamicsSystemType>::StateRecorderBody(bool logWriteAccess, u
 template<typename TDynamicsSystemType>
 StateRecorderBody<TDynamicsSystemType>::~StateRecorderBody() {
     DECONSTRUCTOR_MESSAGE
-    closeAllSimFiles();
+    closeAll();
 }
 
 template<typename TDynamicsSystemType>
@@ -116,7 +116,7 @@ void StateRecorderBody<TDynamicsSystemType>::setDirectoryPath(boost::filesystem:
 
 
 template<typename TDynamicsSystemType>
-bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool truncate){
+bool StateRecorderBody<TDynamicsSystemType>::createSimFile(RigidBodyType * body, bool truncate){
     boost::filesystem::path file;
     std::stringstream s;
 
@@ -193,13 +193,13 @@ bool StateRecorderBody<TDynamicsSystemType>::openFile(RigidBodyType * body, bool
 }
 
 template<typename TDynamicsSystemType>
-bool StateRecorderBody<TDynamicsSystemType>::openFiles(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list,
+bool StateRecorderBody<TDynamicsSystemType>::createSimFiles(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list,
                                                        bool truncate)
 {
     // For every body add a Sim File!
     typename TDynamicsSystemType::RigidBodySimContainerType::const_iterator it;
     for(it = body_list.begin();it != body_list.end();it++){
-        if(!openFile(*it,truncate)){
+        if(!createSimFile(*it,truncate)){
             m_pSimulationLog->logMessage("---> StateRecorderBody:: Opened all Sim files failed!");
             return false;
         }
@@ -259,7 +259,7 @@ void StateRecorderBody<TDynamicsSystemType>::write(PREC time, const typename
 
 
 template<typename TDynamicsSystemType>
-bool StateRecorderBody<TDynamicsSystemType>::closeFile(RigidBodyType * body){
+bool StateRecorderBody<TDynamicsSystemType>::closeSimFile(RigidBodyType * body){
 
     typename FileMap::iterator it = m_BinarySimFiles.find(body->m_id);
 
@@ -292,7 +292,7 @@ bool StateRecorderBody<TDynamicsSystemType>::closeFile(RigidBodyType * body){
 
 
 template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::closeAllSimFiles() {
+void StateRecorderBody<TDynamicsSystemType>::closeAll() {
 
     typename FileMap::iterator it;
 
@@ -314,7 +314,7 @@ void StateRecorderBody<TDynamicsSystemType>::closeAllSimFiles() {
 template<typename TDynamicsSystemType>
 void StateRecorderBody<TDynamicsSystemType>::addBody(RigidBodyType * body) {
     LOG(m_pSimulationLog, "---> StateRecorderBody:: Add body with id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
-    bool res = openFile(body, false); // no truncate!
+    bool res = createSimFile(body, false); // no truncate!
     LOGASSERTMSG(res, m_pSimulationLog, "---> StateRecorderBody:: Add body with id: " << RigidBodyId::getBodyIdString(body) <<"failed!"
             << ", StateRecorderBody has " << m_BinarySimFiles.size() + m_LogSimFiles.size() << " files open currently!"
             );
@@ -322,7 +322,7 @@ void StateRecorderBody<TDynamicsSystemType>::addBody(RigidBodyType * body) {
 template<typename TDynamicsSystemType>
 void StateRecorderBody<TDynamicsSystemType>::removeBody(RigidBodyType * body) {
     LOG(m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
-    bool res = closeFile(body);
+    bool res = closeSimFile(body);
     LOGASSERTMSG(res, m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << RigidBodyId::getBodyIdString(body) <<"failed!"
             << ", StateRecorderBody has " << m_BinarySimFiles.size() + m_LogSimFiles.size()<< " files open currently!"
             );

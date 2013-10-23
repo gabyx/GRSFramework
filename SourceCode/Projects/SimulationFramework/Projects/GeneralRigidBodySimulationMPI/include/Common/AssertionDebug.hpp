@@ -75,10 +75,11 @@ MPI_Abort(MPI_COMM_WORLD, -1); \
 
 #define ERRORMSG2( _message1_ , _message2_ ) ERRORMSG( _message1_ << _message2_ )
 
+
 #ifndef NDEBUG
 	/**
 	* @brief An Assert Macro for MPI routines to use within C++ MPI code.
-	 * Writes in a global file! Needs FileManager
+	 * Writes in a global file!
 	*/
     #define ASSERTMPIERROR( error_code , message ) { \
         if(error_code != MPI_SUCCESS){  \
@@ -90,7 +91,14 @@ MPI_Abort(MPI_COMM_WORLD, -1); \
     }
 
 #else
-	#define ASSERTMPIERROR( error_code ,message)
+	#define ASSERTMPIERROR( error_code , message ) { \
+        if(error_code != MPI_SUCCESS){  \
+            char * string; \
+            int length; \
+            MPI_Error_string( error_code , string, &length ); \
+            ERRORMSG2( string , message ); \
+        } \
+    }
 #endif
 
 

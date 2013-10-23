@@ -195,7 +195,7 @@ protected:
 
          unsigned int instances = rigidbodies->ToElement()->GetAttribute<unsigned int>("instances");
 
-        unsigned int groupId;
+        unsigned int groupId, startIdx;
         if(rigidBodiesEl->HasAttribute("groupId")){
             groupId = rigidBodiesEl->GetAttribute<unsigned int>("groupId");
             m_globalMaxGroupId = std::max(m_globalMaxGroupId,groupId);
@@ -206,15 +206,15 @@ protected:
 
 
         // Get the startidx for this group
-        auto it = groupIdToNBodies.find(groupId);
-        if( it == groupIdToNBodies.end()){
-            groupIdToNBodies[groupId] = startIdx = 0;
+        auto it = this->groupIdToNBodies.find(groupId);
+        if( it == this->groupIdToNBodies.end()){
+            this->groupIdToNBodies[groupId] = startIdx = 0;
         }else{
-            startIdx = groupIdToNBodies[groupId];
+            startIdx = this->groupIdToNBodies[groupId];
         }
 
         // update the number of bodies
-        groupIdToNBodies[groupId] += instances;
+        this->groupIdToNBodies[groupId] += instances;
 
 
         for(int i=0; i<instances; i++) {
@@ -252,7 +252,7 @@ protected:
 
 
                     if(! m_pDynSys->m_SimBodies.addBody((*bodyIt))){
-                        ERRORMSG("Could not add body to m_SimBodies! Id: " << RigidBodyId::getBodyIdString(m_bodyList[i]) << " already in map!");
+                        ERRORMSG("Could not add body to m_SimBodies! Id: " << RigidBodyId::getBodyIdString(*bodyIt) << " already in map!");
                     };
                     LOG(m_pSimulationLog, "---> Added Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
 
@@ -281,7 +281,7 @@ protected:
             for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
 
                 if(! m_pDynSys->m_Bodies.addBody((*bodyIt))){
-                        ERRORMSG("Could not add body to m_Bodies! Id: " << RigidBodyId::getBodyIdString(m_bodyList[i]) << " already in map!");
+                        ERRORMSG("Could not add body to m_Bodies! Id: " << RigidBodyId::getBodyIdString(*bodyIt) << " already in map!");
                 };
 
                 m_nBodies++;

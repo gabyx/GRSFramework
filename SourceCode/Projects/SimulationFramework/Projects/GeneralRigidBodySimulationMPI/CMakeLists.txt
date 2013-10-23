@@ -74,6 +74,7 @@ SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/TypenameComparision.hpp
     ${COMMONSOURCE_DIR}/include/Common/MultiBodySimFile.hpp
     ${COMMONSOURCE_DIR}/include/Common/MultiBodySimFilePart.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/MultiBodySimFileMPI.hpp
     ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPIMessages.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
@@ -88,6 +89,8 @@ SET(COMMON_SRC
     ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
     ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFile.cpp
     ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFilePart.cpp
+    ${PROJECT_SOURCE_DIR}/src/Common/MultiBodySimFileMPI.cpp
+    ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
 )
 
 SET(DYNAMICS_INC

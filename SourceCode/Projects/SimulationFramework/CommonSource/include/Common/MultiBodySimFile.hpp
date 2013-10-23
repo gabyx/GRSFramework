@@ -175,7 +175,8 @@ private:
 
     /** @brief Determined from number of bodies! @{*/
     void setByteLengths(const unsigned int nSimBodies);
-    std::streamoff m_nBytesPerState, m_nBytesPerQ, m_nBytesPerU;
+    std::streamoff m_nBytesPerState; ///< m_nSimBodies*(q,u) + time
+    std::streamoff m_nBytesPerQ, m_nBytesPerU;
     unsigned long long int m_nSimBodies;
     /** @}*/
 
@@ -184,6 +185,7 @@ private:
     unsigned int m_nDOFuObj, m_nDOFqObj;
     const  std::streamoff m_nBytesPerQObj ;
     const  std::streamoff m_nBytesPerUObj ;
+
     static const  std::streamoff m_headerLength = (3*sizeof(unsigned int) + SIM_FILE_SIGNATURE_LENGTH*sizeof(char));
 
     bool m_bReadFullState;

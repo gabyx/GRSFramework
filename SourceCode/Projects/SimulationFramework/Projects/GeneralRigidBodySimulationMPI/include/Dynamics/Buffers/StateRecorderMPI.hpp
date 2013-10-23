@@ -1,5 +1,5 @@
-#ifndef StateRecorderProcess_HPP
-#define  StateRecorderProcess_HPP
+#ifndef StateRecorderMPI_HPP
+#define  StateRecorderMPI_HPP
 
 #include <mpi.h>
 
@@ -9,14 +9,7 @@
 #include <cstring>
 #include <cerrno>
 
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
-
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-
-#include <boost/unordered_map.hpp>
-
+#include "AssertionDebug.hpp"
 #include "LogDefines.hpp"
 #include "TypeDefs.hpp"
 
@@ -28,7 +21,7 @@
 
 #include "MPIInformation.hpp"
 
-
+#include "MultiBodySimFileMPI.hpp"
 
 /**
 * @ingroup StatesAndBuffers
@@ -42,15 +35,18 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    StateRecorderMPI( unsigned int id = 0, unsigned int bufferSize = 100 * 1024 * 1024);
+    StateRecorderMPI(unsigned int nSimBodies);
     ~StateRecorderMPI();
 
+    //Each process writes its stuff at a specific offset
     void write(PREC time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList);
 
     void setDirectoryPath(boost::filesystem::path dir_path);
 
-    bool openFile(bool truncate = true);
-    bool closeFile();
+    //Collective operation
+    bool createSimFile(bool truncate = true);
+    //Collective operation
+    bool closeAll();
 
 protected:
 
@@ -59,26 +55,18 @@ protected:
 
     boost::filesystem::path m_directoryPath; ///< The path where the sim body part file is opened!
 
-    void getSimFilePartName(std::stringstream & s);
+    void getSimBodyFileName(std::stringstream & s);
 
     Logging::Log * m_pSimulationLog;
 
-    std::vector<int> m_process_send_body_count;
-    std::vector<int> m_process_send_body_displ;
+    unsigned int m_nSimBodies;
+    MultiBodySimFileMPI<DynamicsSystemType> m_fh;
 
-    std::vector<int> m_process_recv_body_count;
-    std::vector<int> m_process_recv_body_displ;
-
-    std::vector<char> m_sendbuffer;
-    boost::archive::binary_oarchive m_oa;
-
-    std::vector<char> m_recvbuffer;
-
-
-    unsigned int m_nSimBodies, m_nBodiesPerProc, m_nRecvBodies;
-    std::pair<unsigned int , unsigned int> m_bodyRange;
-
-    MPI_File m_fh;
+    //Write buffer
+    std::vector<char> m_writebuffer;
+    boost::iostreams::back_insert_device<std::vector<char> >m_ins; // is initialized first
+    boost::iostreams::stream< boost::iostreams::back_insert_device<std::vector<char> > > m_stream;  //is initialized second
+    boost::archive::binary_oarchive m_oa; // is initialized third
 };
 
 /** @} */
@@ -87,23 +75,11 @@ protected:
 
 template<typename TDynamicsSystemType>
 StateRecorderMPI<TDynamicsSystemType>::StateRecorderMPI(unsigned int nSimBodies):
-    m_nSimBodies(nSimBodies)
+    m_fh(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj), m_nSimBodies(nSimBodies),
+    m_ins(m_writebuffer),
+    m_stream(m_ins),
+    m_oa( m_stream,boost::archive::no_codecvt | boost::archive::no_header)
 {
-    // id: 0 -10  Process 0
-    // id: 11-20 Process 1
-    //...
-    // id: 1001-1010 Process N-1
-
-    // each processor (except the last) contains exactly m_nBodiesPerProc bodies which he writes
-    m_nBodiesPerProc =  m_nSimBodies / m_processInfo.getNProcesses();
-
-    m_nRecvBodies = m_nBodiesPerProc;
-
-    //last rank nimmt den rest der bodies
-    if( m_processInfo.getRank() == m_processInfo.getNProcesses()-1  ){
-        m_nRecvBodies += m_nSimBodies % m_processInfo.getNProcesses()
-    }
-
     //Check if LogManager is available
     Logging::LogManager * manager = Logging::LogManager::getSingletonPtr();
     m_pSimulationLog = manager->getLog("SimulationLog");
@@ -115,30 +91,44 @@ StateRecorderMPI<TDynamicsSystemType>::StateRecorderMPI(unsigned int nSimBodies)
         m_pSimulationLog = manager->createLog("StateRecorderLog",true,true,filePath);
     }
 
-    //send buffer
+     //write buffer
+    m_writebuffer.reserve(4000*((LayoutConfigType::LayoutType::NDOFqObj + LayoutConfigType::LayoutType::NDOFuObj)*sizeof(double)+1*sizeof(typename RigidBodyType::RigidBodyIdType))); // reserved for 5000 bodies :)
 
-    m_sendbuffer.reserve(4000*((7+6)*sizeof(double)+1*sizeof(typename RigidBodyType::RigidBodyIdType))); // reserved for 5000 bodies :)
+    // id: 0 -10  Process 0
+    // id: 11-20 Process 1
+    //...
+    // id: 1001-1010 Process N-1
 
-    boost::iostreams::back_insert_device<std::vector<char> > inserter(m_sendbuffer);
-    boost::iostreams::stream< boost::iostreams::back_insert_device<std::vector<char> > > s(inserter);
-    m_oa =  boost::archive::binary_oarchive(s, boost::archive::no_codecvt | boost::archive::no_header);
+//    // each processor (except the last) contains exactly m_nBodiesPerProc bodies which he writes
+//    m_nBodiesPerProc =  m_nSimBodies / m_processInfo.getNProcesses();
+//
+//    m_nRecvBodies = m_nBodiesPerProc;
+//
+//    //last rank nimmt den rest der bodies
+//    if( m_processInfo.getRank() == m_processInfo.getNProcesses()-1  ){
+//        m_nRecvBodies += m_nSimBodies % m_processInfo.getNProcesses()
+//    }
+
+
 
     //receive buffer
     // this buffer should stays the same and contains only the bodies in the range!
-    m_recvbuffer.reserve(m_nRecvBodies * ((7+6)*sizeof(double)+1*sizeof(typename RigidBodyType::RigidBodyIdType)) )
+    //m_recvbuffer.reserve(m_nRecvBodies * ((7+6)*sizeof(double)+1*sizeof(typename RigidBodyType::RigidBodyIdType)) )
 
-    // for each process
-    m_process_send_body_count.assign(m_processInfo.getNProcesses(),0);
-    m_process_send_body_displ.assign(m_processInfo.getNProcesses(),0);
+//    // for each process
+//    m_process_send_body_count.assign(m_processInfo.getNProcesses(),0);
+//    m_process_send_body_displ.assign(m_processInfo.getNProcesses(),0);
+//
+//    m_process_recv_body_count.assign(m_processInfo.getNProcesses(),0);
+//    m_process_recv_body_displ.assign(m_processInfo.getNProcesses(),0);
 
-    m_process_recv_body_count.assign(m_processInfo.getNProcesses(),0);
-    m_process_recv_body_displ.assign(m_processInfo.getNProcesses(),0);
+
 }
 
 template<typename TDynamicsSystemType>
 StateRecorderMPI<TDynamicsSystemType>::~StateRecorderMPI() {
 
-    MPI_File_close(&m_fh);
+
 
 }
 
@@ -148,114 +138,61 @@ void StateRecorderMPI<TDynamicsSystemType>::setDirectoryPath(boost::filesystem::
 }
 
 template<typename TDynamicsSystemType>
-bool StateRecorderMPI<TDynamicsSystemType>::openFile(bool truncate){
+bool StateRecorderMPI<TDynamicsSystemType>::createSimFile(bool truncate){
 
-     boost::filesystem::path file;
+    boost::filesystem::path file;
     std::stringstream s;
 
     file = m_directoryPath;
-    getSimBodyFileName(body,s);
+    getSimBodyFileName(s);
     file /= s.str();
 
-    MPI_File_open(MPI_COMM_WORLD, file.str().c_str(), MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &m_fh);
-
-    // write header
-
-    for(int i=0; i<SIM_FILE_SIGNATURE_LENGTH; i++) {
-        *this << m_simFileSignature[i];
+    LOG(m_pSimulationLog,"MPI> StateRecorderMPI: Try Opened File : " << file << std::endl)
+    //Collective (all processes do this)
+    bool res = m_fh.openWrite(m_processInfo.getMPIComm(),file,m_nSimBodies);
+    if(!res){
+        ERRORMSG(m_fh.getErrorString());
     }
-
-    *this << (unsigned int)m_nSimBodies << (unsigned int)m_nDOFqObj << (unsigned int)m_nDOFuObj; // Precision output is always double!
-
-
+    LOG(m_pSimulationLog,"MPI> StateRecorderMPI: Opened File : " << file << std::endl)
+    return true;
 }
 
 template<typename TDynamicsSystemType>
-void StateRecorderMPI<TDynamicsSystemType>::getSimFilePartName(std::stringstream & s){
+void StateRecorderMPI<TDynamicsSystemType>::getSimBodyFileName(std::stringstream & s){
     s.str("");
-    s <<"SimDataProcess" <<"-"<<m_accessId<<SIM_FILE_EXTENSION;
+    s <<"SimDataMPIUnordered"<<SIM_FILE_MPI_EXTENSION;
 }
 
 template<typename TDynamicsSystemType>
 void StateRecorderMPI<TDynamicsSystemType>::write(PREC time, const typename TDynamicsSystemType::RigidBodySimContainerType & bodyList){
 
-    // Copy all data into the send binary buffer
-    unsigned int bodyIdxG = 0;
-    unsigned int bodyCountL = 0;
-    unsigned int processIdx = 0;
-    unsigned int processIdxLast = 0;
+    m_writebuffer.clear();
 
-    //clear for each process
-    m_process_send_body_count.assign(m_processInfo.getNProcesses(),0);
-    m_process_send_body_displ.assign(m_processInfo.getNProcesses(),0);
-
+    boost::iostreams::back_insert_device<std::vector<char> >ins(m_writebuffer); // is initialized first
+    boost::iostreams::stream< boost::iostreams::back_insert_device<std::vector<char> > > stream(ins);  //is initialized second
+    boost::archive::binary_oarchive  oa( stream,boost::archive::no_codecvt | boost::archive::no_header); // is initialized third
 
     for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
-        bodyCountL++
 
-        m_oa << (*it)->m_id;
-        serializeEigen(m_oa, (*it)->get_q());
-        serializeEigen(m_oa, (*it)->get_u());
+        oa << (*it)->m_id;
+        serializeEigen(oa, (*it)->get_q());
+        serializeEigen(oa, (*it)->get_u());
 
-        // calculate  belonging process
-        processIdx = std::min( (unsigned int)( RigidBodyId::getBodyNr(*it) / m_nBodiesPerProc), m_processInfo.getNProcesses()-1 );
-        // at first body update the last process idx
-        if(bodyIdxG == 0){
-            processIdxLast = processIdx;
-        }
-
-        if(processIdxLast != processIdx){
-            ASSERTMSG(processIdxLast > processIdx,"ProcessIdx needs to be bigger?, is the body list ordered by id?");
-
-            // We are at a boundary
-            ASSERTMSG(processIdx < m_processInfo.getNProcesses(),"ProcessIdx not in range");
-            //Write the new index
-            m_process_send_body_displ[processIdx] = bodyIdxG;
-            //Write the count
-            m_process_send_body_count[processIdxLast] = bodyCountL-1;
-
-        }
-
-        bodyIdxG++;
+        std::cout << "Size: " <<m_writebuffer.size() << std::endl;
     }
 
-    // Distribute the counts
-    MPI_Alltoall(&m_process_send_body_count[0], 1, MPI_INT, &m_process_recv_body_count[0], 1,MPI_INT,MPI_COMM_WORLD);
+    ASSERTMSG( (bodyList.size() == 0 && m_writebuffer.size() == 0 )
+                   || (bodyList.size() != 0 && m_writebuffer.size() != 0 ) , "m_writebuffer.size()" << m_writebuffer.size() );
 
-    bool sorted = false;
+    m_fh.write(time, m_writebuffer, bodyList.size());
 
-
-    if(sorted){
-
-        //Count the counts (should match up to m_nBodiesPerProc)
-        int size = std::accumulate(m_process_recv_body_count.begin(),m_process_recv_body_count.end(),0);
-        ASSERTMSG(size == m_nRecvBodies, "Process with rank: "<<m_processInfo.getRank() << " receives " <<
-                  size << "body states instead of " << m_nRecvBodies);
-
-        // Calculate the displacements in the recv buffer from the m_process_recv_body_count
-        m_process_recv_body_disp[0] = 0;
-        for(int i = 0; i < m_process_recv_body_count.size()-1; i++){
-            m_process_recv_body_disp[i+1] = m_process_recv_body_disp[i] + m_process_recv_body_count[i];
-        }
-
-        // Allocate enough space for all m_nRecvBodies states
-        m_recvbuffer.clear() // Clear, we deserialize into these
-
-
-        // TODO
-    }else{
-        // Write out all states unsorted at the right offset
-
-
-
-    }
 
 }
 
 
 template<typename TDynamicsSystemType>
-bool StateRecorderMPI<TDynamicsSystemType>::closeFile(){
-
+bool StateRecorderMPI<TDynamicsSystemType>::closeAll(){
+   m_fh.close();
 }
 
 #endif

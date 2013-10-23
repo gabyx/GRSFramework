@@ -12,6 +12,7 @@
 #include "StateRecorder.hpp"
 #include "StateRecorderBody.hpp"
 #include "StateRecorderProcess.hpp"
+#include "StateRecorderMPI.hpp"
 
 #include "MoreauTimeStepperMPI.hpp"
 #include "DynamicsSystemMPI.hpp"
@@ -86,14 +87,13 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     // Do Safty Check
     // Do a Reduction of all Simbodies, to count if no bodies are missing!
     m_pSimulationLog->logMessage("---> Check number of Bodies in Process:");
-    m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
     checkNumberOfBodiesInProcess();
 
     // =====================================================
 
     //Uncomment if StateRecorderType = StateRecorderBodys
     //m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(true,m_pProcCommunicator->getProcInfo()->getRank()));
-    m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(m_pProcCommunicator->getProcInfo()->getRank(), 100*1024*1024));
+    m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(m_nGlobalSimBodies));
     // =====================================================
 
     m_pNbCommunicator =  boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> >(
@@ -212,6 +212,9 @@ void SimulationManagerMPI<TConfig>::startSim() {
         }
     }
 
+    m_pTimestepper->closeAllFiles();
+    m_pStateRecorder->closeAll();
+
     // MPI Communicat times, get the max runtime
     getMaxRuntime(runtime);
 
@@ -283,20 +286,21 @@ void SimulationManagerMPI<TConfig>::initSim() {
     }
 
 
-    //m_pStateRecorder->setDirectoryPath(m_SimFolderPath); // If StateRecorder is StateRecorderBody
-    m_pStateRecorder->setDirectoryPath(localSimFolderPath);
+    m_pStateRecorder->setDirectoryPath(m_SimFolderPath); // If StateRecorder is StateRecorderBody or StateRecorderMPI
+    //m_pStateRecorder->setDirectoryPath(localSimFolderPath);
 
 // Uncomment if StateRecorder is StateRecorderBody
-//    if(!m_pStateRecorder->openFiles(m_pDynSys->m_SimBodies,true)) { // Truncate the files, important!
+//    if(!m_pStateRecorder->createSimFiles(m_pDynSys->m_SimBodies,true)) { // Truncate the files, important!
 //        LOG(m_pSimulationLog,  "ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl;);
 //        ERRORMSG("ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
 //    }
 
-    if(!m_pStateRecorder->openFile(true)) { // Truncate the files, important!
+    if(!m_pStateRecorder->createSimFile(true)) { // Truncate the files, important!
         LOG(m_pSimulationLog,  "ERROR:---> Could not open SimFilePart: " << localSimFolderPath.string() << std::endl;);
         ERRORMSG("ERROR:---> Could not open SimFilePart: " << localSimFolderPath.string() << std::endl)
     }
 // ===============================================
+
 
     m_pTimestepper->initLogs(localSimFolderPath);
 
