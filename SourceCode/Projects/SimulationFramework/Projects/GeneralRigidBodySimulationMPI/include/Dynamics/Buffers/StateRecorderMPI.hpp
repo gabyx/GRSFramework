@@ -63,10 +63,11 @@ protected:
     MultiBodySimFileMPI<DynamicsSystemType> m_fh;
 
     //Write buffer
-    std::vector<char> m_writebuffer;
-    boost::iostreams::back_insert_device<std::vector<char> >m_ins; // is initialized first
-    boost::iostreams::stream< boost::iostreams::back_insert_device<std::vector<char> > > m_stream;  //is initialized second
-    boost::archive::binary_oarchive m_oa; // is initialized third
+    //std::vector<char> m_writebuffer;
+    //    boost::iostreams::back_insert_device<std::vector<char> >m_ins; // is initialized first
+    //    boost::iostreams::stream< boost::iostreams::back_insert_device<std::vector<char> > > m_stream;  //is initialized second
+    //    boost::archive::binary_oarchive m_oa; // is initialized third
+
 };
 
 /** @} */
@@ -75,10 +76,10 @@ protected:
 
 template<typename TDynamicsSystemType>
 StateRecorderMPI<TDynamicsSystemType>::StateRecorderMPI(unsigned int nSimBodies):
-    m_fh(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj), m_nSimBodies(nSimBodies),
-    m_ins(m_writebuffer),
-    m_stream(m_ins),
-    m_oa( m_stream,boost::archive::no_codecvt | boost::archive::no_header)
+    m_fh(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj), m_nSimBodies(nSimBodies)
+//    ,m_ins(m_writebuffer),
+//    m_stream(m_ins),
+//    m_oa( m_stream,boost::archive::no_codecvt | boost::archive::no_header)
 {
     //Check if LogManager is available
     Logging::LogManager * manager = Logging::LogManager::getSingletonPtr();
@@ -92,7 +93,7 @@ StateRecorderMPI<TDynamicsSystemType>::StateRecorderMPI(unsigned int nSimBodies)
     }
 
      //write buffer
-    m_writebuffer.reserve(4000*((LayoutConfigType::LayoutType::NDOFqObj + LayoutConfigType::LayoutType::NDOFuObj)*sizeof(double)+1*sizeof(typename RigidBodyType::RigidBodyIdType))); // reserved for 5000 bodies :)
+    //m_writebuffer.reserve(4000*((LayoutConfigType::LayoutType::NDOFqObj + LayoutConfigType::LayoutType::NDOFuObj)*sizeof(double)+1*sizeof(typename RigidBodyType::RigidBodyIdType))); // reserved for 5000 bodies :)
 
     // id: 0 -10  Process 0
     // id: 11-20 Process 1
@@ -166,26 +167,7 @@ void StateRecorderMPI<TDynamicsSystemType>::getSimBodyFileName(std::stringstream
 template<typename TDynamicsSystemType>
 void StateRecorderMPI<TDynamicsSystemType>::write(PREC time, const typename TDynamicsSystemType::RigidBodySimContainerType & bodyList){
 
-    m_writebuffer.clear();
-
-    boost::iostreams::back_insert_device<std::vector<char> >ins(m_writebuffer); // is initialized first
-    boost::iostreams::stream< boost::iostreams::back_insert_device<std::vector<char> > > stream(ins);  //is initialized second
-    boost::archive::binary_oarchive  oa( stream,boost::archive::no_codecvt | boost::archive::no_header); // is initialized third
-
-    for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
-
-        oa << (*it)->m_id;
-        serializeEigen(oa, (*it)->get_q());
-        serializeEigen(oa, (*it)->get_u());
-
-        std::cout << "Size: " <<m_writebuffer.size() << std::endl;
-    }
-
-    ASSERTMSG( (bodyList.size() == 0 && m_writebuffer.size() == 0 )
-                   || (bodyList.size() != 0 && m_writebuffer.size() != 0 ) , "m_writebuffer.size()" << m_writebuffer.size() );
-
-    m_fh.write(time, m_writebuffer, bodyList.size());
-
+    m_fh.write(time,bodyList);
 
 }
 
