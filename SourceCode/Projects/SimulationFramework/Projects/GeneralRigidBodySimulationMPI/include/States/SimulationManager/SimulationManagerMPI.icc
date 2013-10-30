@@ -184,6 +184,9 @@ void SimulationManagerMPI<TConfig>::startSim() {
 
 
     //Write first initial value out!
+//    for(auto it = m_pDynSys->m_SimBodies.begin(); it != m_pDynSys->m_SimBodies.end(); it++){
+//        LOG(m_pSimulationLog, "RigidBody Id: " << (*it)->m_id << std::endl;)
+//    }
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
         m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(),m_pDynSys->m_SimBodies);
     }

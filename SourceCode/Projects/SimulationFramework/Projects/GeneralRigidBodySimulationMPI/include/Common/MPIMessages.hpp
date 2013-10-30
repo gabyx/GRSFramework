@@ -307,6 +307,8 @@ private:
         // serialize (ONLY LOCAL BODIES)
         // send the id to remove
         ar & body->m_id;
+        ASSERTMSG(body->m_id != RigidBodyIdType(0)," ID zero!");
+
         LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
         // remove local from this neighbour structure!
         bool res = m_neighbourData->deleteLocalBodyData(body);
@@ -327,7 +329,7 @@ private:
 
         // id
         ar & body->m_id; LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(body)<<std::endl;);
-
+        ASSERTMSG(body->m_id != RigidBodyIdType(0)," ID zero!");
         // owning rank
 
         ar & m_bodyInfo->m_ownerRank; LOGSZ(m_pSerializerLog, "-----> owning rank: " << m_bodyInfo->m_ownerRank<<std::endl;);
@@ -422,6 +424,8 @@ private:
         // deserialize
         typename RigidBodyType::RigidBodyIdType id;
         ar & id; LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
+        ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
+
         RankIdType owningRank;
         ar & owningRank; LOGSZ(m_pSerializerLog, "-----> owning rank: " << owningRank<<std::endl;);
 
@@ -516,6 +520,7 @@ private:
         //id
         typename RigidBodyType::RigidBodyIdType id;
         ar & id; LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
+        ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
         // owner rankk
         RankIdType owningRank;
         ar & owningRank; LOGSZ(m_pSerializerLog, "-----> owning rank: " << owningRank<<std::endl;);
@@ -592,6 +597,7 @@ private:
         // deserialize (ONLY REMOTE BODIES)
         typename RigidBodyType::RigidBodyIdType id;
         ar & id;     LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
+        ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
         // Go into the neighbour data structure and remove the remote body
         bool res = m_neighbourData->deleteRemoteBodyData(id);
         LOGASSERTMSG(res, m_pSerializerLog, "Could not delete remote body with id: " << RigidBodyId::getBodyIdString(id) << " in neighbour structure rank: " << m_neighbourRank << " !" );

@@ -43,6 +43,7 @@ public:
         return m_errorString.str();
     }
 private:
+    typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
 
     // Communicator which is used to write the file in parallel, this communicator is duplicated from the one inputed
     // This prevents that accidentaly some other synchronization and stuff is
@@ -56,8 +57,9 @@ private:
     static const char m_simFileSignature[SIM_FILE_MPI_SIGNATURE_LENGTH]; ///< The .sim file header.
 
 
-    void writeBySharedPtr(double time, const RigidBodyContainer<RigidBodyType> & bodyList)
-    void writeByOffsets(double time, const RigidBodyContainer<RigidBodyType> & bodyList);
+    void writeBySharedPtr(double time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList);
+    void writeByOffsets(double time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList);
+    void writeByOffsets2(double time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList);
 
     void writeHeader();
     boost::filesystem::path m_filePath;
@@ -128,7 +130,7 @@ MultiBodySimFileMPI<TDynamicsSystemType>::MultiBodySimFileMPI(unsigned int nDOFq
     ASSERTMSG(size == m_nBytesPerBody, "MPI type has not the same byte size");
 
     m_writebuffer.reserve(4000*((LayoutConfigType::LayoutType::NDOFqObj + LayoutConfigType::LayoutType::NDOFuObj)*sizeof(double)
-                                        +1*sizeof(typename RigidBodyType::RigidBodyIdType)) + 1*sizeof(double) ); // t + 4000*(id,q,u)
+                                        +1*sizeof(RigidBodyIdType)) + 1*sizeof(double) ); // t + 4000*(id,q,u)
 
 
 }
@@ -151,14 +153,15 @@ void MultiBodySimFileMPI<TDynamicsSystemType>::close(){
 template <typename TDynamicsSystemType>
 void MultiBodySimFileMPI<TDynamicsSystemType>::write(double time, const RigidBodyContainer<RigidBodyType> & bodyList){
 
-    writeSharedPtr(time, bodyList);
-
+    //writeBySharedPtr(time, bodyList);
+    writeByOffsets(time, bodyList);
+    //writeByOffsets2(time, bodyList);
 }
 
 template <typename TDynamicsSystemType>
-void MultiBodySimFileMPI<TDynamicsSystemType>::writeBySharedPtr(double time, const RigidBodyContainer<RigidBodyType> & bodyList)
+void MultiBodySimFileMPI<TDynamicsSystemType>::writeBySharedPtr(double time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList)
 {
-
+    int err;
     m_writebuffer.clear();
 
     boost::iostreams::back_insert_device<std::vector<char> >ins(m_writebuffer); // is initialized first
@@ -188,7 +191,7 @@ void MultiBodySimFileMPI<TDynamicsSystemType>::writeBySharedPtr(double time, con
 
     if(m_rank == 0 ){
         //write time
-        int err = MPI_File_write_shared(m_file_handle,&time,1,MPI_DOUBLE,&s);
+        err = MPI_File_write_shared(m_file_handle,&time,1,MPI_DOUBLE,&s);
         ASSERTMPIERROR(err, "write time");
     }
     // Use shared file pointer to write ordered stuff (collective, rank=0 will start
@@ -198,24 +201,25 @@ void MultiBodySimFileMPI<TDynamicsSystemType>::writeBySharedPtr(double time, con
 }
 
 template <typename TDynamicsSystemType>
-void MultiBodySimFileMPI<TDynamicsSystemType>::writeByOffsets(double time, const RigidBodyContainer<RigidBodyType> & bodyList)
+void MultiBodySimFileMPI<TDynamicsSystemType>::writeByOffsets(double time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList)
 {
-    m_writebuffer.clear();
+
     unsigned int nBodies = bodyList.size();
     MPI_Status s;
 
     //Next State offset
     MPI_Offset nextState;
-    MPI_File_get_position(m_file_handle,nextState);
+    MPI_File_get_position(m_file_handle,&nextState);
     nextState += m_nBytesPerState;
 
-
+    m_writebuffer.clear();
     if(nBodies != 0){
         boost::iostreams::back_insert_device<std::vector<char> >ins(m_writebuffer); // is initialized first
         boost::iostreams::stream< boost::iostreams::back_insert_device<std::vector<char> > > stream(ins);  //is initialized second
         boost::archive::binary_oarchive  oa( stream,boost::archive::no_codecvt | boost::archive::no_header); // is initialized third
 
         for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
+            ASSERTMSG((*it)->m_id != RigidBodyIdType(0x0)," ID zero! at time: " << time);
             oa << (*it)->m_id;
             serializeEigen(oa, (*it)->get_q());
             serializeEigen(oa, (*it)->get_u());
@@ -226,7 +230,7 @@ void MultiBodySimFileMPI<TDynamicsSystemType>::writeByOffsets(double time, const
         ASSERTMSG( (bodyList.size() == 0 && m_writebuffer.size() == 0 )
                        || (bodyList.size() != 0 && m_writebuffer.size() != 0 ) , "m_writebuffer.size()" << m_writebuffer.size() );
         //bytes need to be a multiple of the bytes for one body state
-        ASSERTMSG(( m_writebuffer.size() - sizeof(double))  % ( m_nBytesPerBody ) == 0, ( m_writebuffer.size() - sizeof(double)) << " bytes not a multiple of " << m_nBytesPerBody << " bytes");
+        ASSERTMSG(( m_writebuffer.size())  % ( m_nBytesPerBody ) == 0, ( m_writebuffer.size()) << " bytes not a multiple of " << m_nBytesPerBody << " bytes");
     }
 
     std::vector<int> nbodiesPerProc(m_processes);
@@ -234,45 +238,108 @@ void MultiBodySimFileMPI<TDynamicsSystemType>::writeByOffsets(double time, const
     ASSERTMPIERROR(err, "gather");
     //Calculate our offset
     unsigned int bodyOffset = 0;
-
-    // All calculate offset
+    MPI_Offset offsetMPI = 0;
+    // All calculate offset [begin, begin + rank)
+    ASSERTMSG( std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.end(),0) == m_nSimBodies, " accumulation not the same");
     if(m_rank != 0 ){
-        bodyOffset = std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.begin() + m_rank - 1 , 0);
-        //std::cout << "m_rank: " << m_rank << " Offset: " << offset << " list : ";
-        //Utilities::printVector(std::cout,nbodiesPerProc.begin(),nbodiesPerProc.end(),"\t");
-        //std::cout << std::endl;
+        bodyOffset = std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.begin() + m_rank , 0);
+        offsetMPI = bodyOffset*m_nBytesPerBody;
     }
 
     // Find first process which has bodies (this one writes the time!)
     unsigned int rankWriteTime = 0;
-    for(auto it = nbodiesPerProc.begin(); it != nbodiesPerProc.end(); it++){
-        if(*it > 0){
-            break;
-        }
-        rankWriteTime++
-    }
     ASSERTMSG(rankWriteTime < m_processes," rankWriteTime: " << rankWriteTime);
 
     //Calculate offset
-    MPI_Offset offsetMPI = bodyOffset*m_nBytesPerBody;
+
     if(m_rank > rankWriteTime){
-        offsetMPI += sizeof(double);
+        offsetMPI += sizeof(double); // for time
     }
 
-    MPI_File_seek(m_file_handle, offsetMPI, MPI_SEEK_CUR );
-    // Use shared file pointer to write ordered stuff (collective, rank=0 will start
+    //each sets the offset
+    err = MPI_File_seek(m_file_handle, offsetMPI, MPI_SEEK_CUR );
+    ASSERTMPIERROR(err, " set offset");
+    // Use the offsets to write collectively
     if(m_rank == rankWriteTime){
-
+        err = MPI_File_write(m_file_handle,&time,1 * sizeof(double),MPI_BYTE,&s);
     }
-    err = MPI_File_write_ordered(m_file_handle,const_cast<void*>((const void*)(&m_writebuffer[0] + sizeof(double)),nBodies,m_bodyStateTypeMPI,&s);
-
-
-    ASSERTMPIERROR(err, "write states");
-
+    ASSERTMPIERROR(err, " write states");
+    err = MPI_File_write_all(m_file_handle,const_cast<void*>((const void*)(&m_writebuffer[0])),nBodies,m_bodyStateTypeMPI,&s);
+    ASSERTMPIERROR(err, " seek new state");
 
     // move individual file pointer to next begining!
-    int err = MPI_File_seek(m_file_handle, nextState, MPI_SEEK_SET );
+    err = MPI_File_seek(m_file_handle, nextState, MPI_SEEK_SET );
+    ASSERTMPIERROR(err, " seek new state");
 }
+
+template <typename TDynamicsSystemType>
+void MultiBodySimFileMPI<TDynamicsSystemType>::writeByOffsets2(double time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList)
+{
+
+    unsigned int nBodies = bodyList.size();
+    MPI_Status s;
+
+    //Next State offset
+    MPI_Offset nextState;
+    MPI_File_get_position(m_file_handle,&nextState);
+    nextState += m_nBytesPerState;
+
+    m_writebuffer.clear();
+    if(nBodies != 0){
+        boost::iostreams::back_insert_device<std::vector<char> >ins(m_writebuffer); // is initialized first
+        boost::iostreams::stream< boost::iostreams::back_insert_device<std::vector<char> > > stream(ins);  //is initialized second
+        boost::archive::binary_oarchive  oa( stream,boost::archive::no_codecvt | boost::archive::no_header); // is initialized third
+
+        for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
+            ASSERTMSG((*it)->m_id != RigidBodyIdType(0x0)," ID zero! at time: " << time);
+            oa << (*it)->m_id;
+            serializeEigen(oa, (*it)->get_q());
+            serializeEigen(oa, (*it)->get_u());
+        }
+        //Necessary to make stream flush
+        stream.flush();
+
+        ASSERTMSG( (bodyList.size() == 0 && m_writebuffer.size() == 0 )
+                       || (bodyList.size() != 0 && m_writebuffer.size() != 0 ) , "m_writebuffer.size()" << m_writebuffer.size() );
+        //bytes need to be a multiple of the bytes for one body state
+        ASSERTMSG(( m_writebuffer.size())  % ( m_nBytesPerBody ) == 0, ( m_writebuffer.size()) << " bytes not a multiple of " << m_nBytesPerBody << " bytes");
+    }
+
+    std::vector<int> nbodiesPerProc(m_processes);
+    int err = MPI_Allgather(&nBodies,1,MPI_INT,&nbodiesPerProc[0] , 1, MPI_INT, m_comm);
+    ASSERTMPIERROR(err, "gather");
+    //Calculate our offset
+    unsigned int bodyOffset = 0;
+    MPI_Offset offsetMPI = 0;
+    // All calculate offset
+    ASSERTMSG( std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.end(),0) == m_nSimBodies, " accumulation not the same");
+    if(m_rank != 0 ){
+        bodyOffset = std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.begin() + m_rank, 0);
+        //Calculate offset
+        offsetMPI = bodyOffset*m_nBytesPerBody;
+    }
+
+
+    unsigned int rankWriteTime = 0;
+
+
+    offsetMPI += sizeof(double); // for time
+
+
+    // Use the offsets to write collectively
+    if(m_rank == rankWriteTime){
+        err = MPI_File_write_at(m_file_handle,0,&time,1 * sizeof(double),MPI_BYTE,&s);
+    }
+    ASSERTMPIERROR(err, " write states");
+    std::cout << "Rank: " << m_rank << " Size of buffer: " << m_writebuffer.size() << " Offset: " << bodyOffset<< std::endl;
+    err = MPI_File_write_at_all(m_file_handle,offsetMPI,const_cast<void*>((const void*)(&m_writebuffer[0])),nBodies,m_bodyStateTypeMPI,&s);
+    ASSERTMPIERROR(err, " seek new state");
+    MPI_File_sync(m_file_handle);
+    // move individual file pointer to next begining!
+    //err = MPI_File_seek(m_file_handle, nextState, MPI_SEEK_SET );
+//    ASSERTMPIERROR(err, " seek new state");
+}
+
 
 
 template <typename TDynamicsSystemType>
