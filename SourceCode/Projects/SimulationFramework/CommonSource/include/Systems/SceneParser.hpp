@@ -933,7 +933,7 @@ protected:
             const aiScene* scene = importer.ReadFile( fileName.string(),
                                    aiProcess_JoinIdenticalVertices  |
                                    aiProcess_SortByPType |
-                                   aiProcess_Triangulate | aiProcess_GenNormals);
+                                   aiProcess_Triangulate /*| aiProcess_GenNormals*/);
 
             // If the import failed, report it
             if(!scene) {
@@ -948,6 +948,16 @@ protected:
 
             // Build Geometry
             pMeshGeom = boost::shared_ptr<MeshGeometry<PREC> >(new MeshGeometry<PREC>(meshData));
+
+            if(mesh->HasAttribute("writeToLog")) {
+                bool writeToLog;
+                if(!Utilities::stringToType<bool>(writeToLog, mesh->GetAttribute("writeToLog"))) {
+                    throw ticpp::Exception("---> String conversion in processMeshGeometry: angleDegree failed");
+                }
+                if(writeToLog){
+                    meshData->writeToLog(fileName.string(), m_pSimulationLog);
+                }
+            }
 
 
 

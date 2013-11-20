@@ -6,14 +6,14 @@
  *
  */
 
-#ifndef DynamicLines_h
-#define DynamicLines_h
+#ifndef DynamicLines_hpp
+#define DynamicLines_hpp
 
 /// Includes =================================
 #include <vector>
 #include <Ogre.h>
 
-#include "DynamicRenderable.h"
+#include "DynamicRenderable.hpp"
 /// ==========================================
 
 class DynamicLines : public DynamicRenderable

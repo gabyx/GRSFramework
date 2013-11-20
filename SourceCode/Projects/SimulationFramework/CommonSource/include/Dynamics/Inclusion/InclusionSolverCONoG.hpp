@@ -337,7 +337,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
         nodeData.m_R_i_inv_diag(2) = r_T;
 
 #if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog,   << " nodeData.m_b"<< nodeData.m_b <<std::endl
+        LOG(m_pSolverLog, " nodeData.m_b"<< nodeData.m_b <<std::endl
             << " nodeData.m_G_ii"<< nodeData.m_G_ii <<std::endl
             << " nodeData.m_R_i_inv_diag"<< nodeData.m_R_i_inv_diag <<std::endl;);
 #endif
@@ -364,9 +364,9 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx() {
 #if CoutLevelSolverWhenContact>2
     LOG(m_pSolverLog, " u_e = [ ");
 
-    for(int i=0; i< m_SimBodies.size(); i++) {
-        LOG(m_pSolverLog, "Back: \t" << m_SimBodies[i]->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
-        LOG(m_pSolverLog, "Front: \t" <<m_SimBodies[i]->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
+    for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
+        LOG(m_pSolverLog, "Back: \t" << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
+        LOG(m_pSolverLog, "Front: \t" <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
     }
     LOG(m_pSolverLog, " ]" << std::endl);
 #endif
@@ -380,8 +380,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx() {
 
 #if CoutLevelSolverWhenContact>2
         LOG(m_pSolverLog, std::endl<< "Next iteration: "<< m_iterationsNeeded <<"=========================" << std::endl<< std::endl<<" u_e: \t");
-        for(int i=0; i< m_SimBodies.size(); i++) {
-            LOG(m_pSolverLog, m_SimBodies[i]->m_pSolverData->m_uBuffer.m_front.transpose());
+        for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
+            LOG(m_pSolverLog, (*it)->m_pSolverData->m_uBuffer.m_front.transpose());
         }
         LOG(m_pSolverLog,""<< std::endl);
 #endif
@@ -421,7 +421,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
         if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {
 
 #if CoutLevelSolverWhenContact>2
-            *m_pSolverLog, "Node: " << nodeCounter <<"====================="<<  std::endl;
+            LOG(m_pSolverLog, "Node: " << nodeCounter <<"====================="<<  std::endl;)
 #endif
             // Init the prox value
             nodeData.m_LambdaFront = nodeData.m_b;

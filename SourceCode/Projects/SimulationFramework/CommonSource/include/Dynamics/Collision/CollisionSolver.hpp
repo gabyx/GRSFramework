@@ -94,6 +94,8 @@ public:
     typedef typename std::vector< CollisionData<RigidBodyType> * > CollisionSet;
     CollisionSet m_CollisionSet;       ///< This list is only used if no  ContactDelegate is in m_ContactDelegateList, then the contacts are simply added here.
 
+    const CollisionSet & getCollisionSetRef();
+
     inline void clearCollisionSet();
 
     std::string getIterationStats();
@@ -171,6 +173,10 @@ void CollisionSolver<TCollisionSolverConfig>::clearCollisionSet() {
     m_CollisionSet.clear();
 }
 
+template< typename TCollisionSolverConfig >
+const CollisionSet & CollisionSolver<TCollisionSolverConfig>::getCollisionSetRef() {
+    return m_CollisionSet;
+}
 
 
 template< typename TCollisionSolverConfig >
@@ -196,6 +202,7 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
 //        for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
 //
 //            //check for a collision
+//            pColData == NULL;
 //            pColData = m_Collider.checkCollision((*bodyIti), (*bodyItj));
 //            if(pColData){
 //                signalContactAdd(pColData);
@@ -212,6 +219,7 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
         for(bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++) {
 
             //check for a collision
+            pColData == NULL;
             pColData = m_Collider.checkCollision((*bodyIti), (*bodyItk));
 
             if(pColData){
@@ -235,6 +243,8 @@ void CollisionSolver<TCollisionSolverConfig>::signalContactAdd(CollisionData<Rig
     // Before we send, determine what kind of contactmodel we have!
     // TODO (implemented only NContactModel)
     ASSERTMSG( std::abs(pColData->m_e_x.dot(pColData->m_e_y)) < 1e-3 && std::abs(pColData->m_e_y.dot(pColData->m_e_z))< 1e-3, "Vectors not parallel");
+
+    LOG(m_pSolverLog,"Contact Frame: n: " << pColData->m_e_z << std::endl;)
 
     m_CollisionSet.push_back(pColData); // Copy it to the owning list! colData gets deleted!
 

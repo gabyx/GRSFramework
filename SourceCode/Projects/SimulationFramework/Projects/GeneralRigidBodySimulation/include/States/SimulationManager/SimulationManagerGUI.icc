@@ -14,7 +14,7 @@
 
 
 #include "MoreauTimeStepper.hpp"
-#include "InclusionSolverNT.hpp"
+//#include "InclusionSolverNT.hpp"
 #include "InclusionSolverCO.hpp"
 #include "InclusionSolverCONoG.hpp"
 
@@ -114,6 +114,8 @@ void SimulationManagerGUI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     enableInput(true);
 
+    // Init ContactFrameData for visualization
+    m_contactFrameData.reserve(m_nSimBodies*3) // Approx. 3 contacts per body as init guess
 
     m_pSimulationLog->logMessage("---> setup finished: ");
 }
@@ -415,6 +417,12 @@ void SimulationManagerGUI<TConfig>::writeSharedBuffer() {
 
     //}
 
+    if(showContactFrameEnabled){
+        //Update contact frames visualization list
+        m_contactFrameData.clear();
+
+    }
+
 }
 
 
@@ -428,6 +436,9 @@ bool SimulationManagerGUI<TConfig>::keyPressed(const OIS::KeyEvent &e) {
         break;
     case OIS::KC_N:
         addToTimeScale(-0.1);
+        break;
+    case OIS::KC_C:
+        toggleShowContactFrames();
         break;
     case OIS::KC_UP:
         break;
@@ -526,4 +537,22 @@ void SimulationManagerGUI<TConfig>::enableInput(bool value) {
         // add some key,mouse listener to change the input
         InputContext::getSingletonPtr()->removeKeyListener(this);
     }
+}
+
+
+template<typename TConfig>
+void SimulationManagerGUI<TConfig>::toggleShowContactFrames(){
+    // locak mutex
+    boost::mutex::scoped_lock l (m_mutexShowContactFrames);
+    if(m_bShowContactFrame){
+        m_bShowContactFrame = false;
+    }else{
+        m_bShowContactFrame = true;
+    }
+}
+
+template<typename TConfig>
+bool SimulationManagerGUI<TConfig>::showContactFrameEnabled(){
+    boost::mutex::scoped_lock l (m_mutexShowContactFrames);
+    return m_bShowContactFrame;
 }

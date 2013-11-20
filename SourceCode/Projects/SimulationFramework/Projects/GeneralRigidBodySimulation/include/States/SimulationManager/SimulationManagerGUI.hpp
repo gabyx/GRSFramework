@@ -99,6 +99,14 @@ private:
 
     bool writeInitialState();
 
+    // Visualization of ContactFrame
+    bool m_bShowContactFrames;
+    std::vector<ContactFrameData> m_contactFrameData; // gets refilled in each iteration
+    boost::mutex m_mutexShowContactFrames;
+    void toggleShowContactFrames();
+    bool showContactFrameEnabled();
+    // ==============================
+
     // Timming Variables for updateScene =====
     bool m_bFirstPass;
 

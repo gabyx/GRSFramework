@@ -167,19 +167,19 @@ public:
    }
 
 
-   void writeToLog(Logging::Log * plog){
+   void writeToLog(std::string name, Logging::Log * plog){
       std::stringstream logmessage;
 
       using std::endl;
       using std::cout;
 
-      logmessage << "MeshData:: " <<std::endl<<"Vertices : "<<std::endl;
+      logmessage << "MeshData:: "<<name<<std::endl<<"Vertices : "<<std::endl;
       for (int i=0;i<m_Vertices.size();i++){
-         logmessage <<i<<": "<<m_Vertices[i] <<endl;
+         logmessage <<i<<": "<<m_Vertices[i].transpose() <<endl;
       }
       logmessage << "Indices & Normals : "<<endl;
       for (int i=0;i<m_Faces.size();i++){
-         logmessage <<i<<": "<<m_Faces[i] <<  "\t n:"<<m_Normals[i] <<std::endl;
+         logmessage <<i<<": "<<m_Faces[i].transpose() <<  "\t n:"<<m_Normals[i].transpose() <<std::endl;
       }
       plog->logMessage(logmessage.str());
    };

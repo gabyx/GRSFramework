@@ -498,7 +498,7 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * sphere,
 //    }
 
 
-#if USE_OWN_COLLISION_CODE
+#if USE_OWN_COLLISION_CODE == 1
 
     static typename CollisionFunctions<LayoutConfigType >::ClosestPointSet temporarySet; //[ overlap, and normal from sphere center!, type, id] (see makeContactTag())
     //Iterate over all faces and check if it overlaps sphere

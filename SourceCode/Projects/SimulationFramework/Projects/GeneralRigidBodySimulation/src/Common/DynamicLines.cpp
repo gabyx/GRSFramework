@@ -6,7 +6,7 @@
  *
  */
 
-#include "DynamicLines.h"
+#include "DynamicLines.hpp"
 
 /// Includes =================================
 #include <Ogre.h>

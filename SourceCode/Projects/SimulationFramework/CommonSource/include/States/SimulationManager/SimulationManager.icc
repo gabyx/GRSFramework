@@ -17,7 +17,7 @@
 // Config, unterhalb in den Subclassen müssen diese nicht mehr hinzugefügt werden?
 //
 #include "MoreauTimeStepper.hpp"
-#include "InclusionSolverNT.hpp"
+//#include "InclusionSolverNT.hpp"
 #include "InclusionSolverCO.hpp"
 #include "InclusionSolverCONoG.hpp"
 #include "DynamicsSystem.hpp"
@@ -197,7 +197,7 @@ bool SimulationManager<TConfig>::initRecordThread() {
 template<typename TConfig>
 void SimulationManager<TConfig>::cleanUpRecordThread() {
     m_pTimestepper->closeAllFiles();
-    m_pStateRecorder->close();
+    m_pStateRecorder->closeAll();
 }
 
 template<typename TConfig>

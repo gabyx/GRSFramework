@@ -85,16 +85,18 @@ public:
 
             M_r_MS = A_IM.transpose() * (I_r_S - I_r_M);
             I_r_SC = A_IM*(getClosestPoint_PointTriangle(M_r_MS,vertex0,vertex1,vertex2,(*faceIt),faceNr,type,id) - M_r_MS);
-            double overlap = radius - I_r_SC.norm();
+            double normI_r_SC = I_r_SC.norm();
+            double overlap = radius - normI_r_SC;
 
             I_r_SC.normalize();
             //If closest point is in sphere, then add this to the set
-            if(overlap >= 0){
+            if(overlap >= 0.0 && normI_r_SC > 0.0){
                 validContact = true;
                 for(unsigned int j=0; j<pointSet.size(); j++) {
+                    Vector3 p1 = pointSet[j].template get<1>();
                     //std::cout <<"Cos : "<< acos( pointSet[j].template get<1>().dot( I_r_SC )) << "<" << (5.0/180.0*M_PI)<<std::endl;
 
-                    if( acos( pointSet[j].template get<1>().dot( I_r_SC )) < (5.0/180.0*M_PI)) {
+                    if( acos( p1.dot( I_r_SC ) /(p1.norm() * normI_r_SC ) ) < (5.0/180.0*M_PI)) {
 
                         validContact=false;
                         break;
@@ -117,6 +119,8 @@ public:
                                                             const unsigned int & indexFace,
                                                             unsigned int & type,unsigned int & id )
     {
+//      ab * ( I_r_0S - I_n(I_n *(I_r_S - I_r_0)) ) == ab *  I_r_0S
+
         Vector3 ab = vertex1 - vertex0;
         Vector3 ac = vertex2 - vertex0;
         Vector3 bc = vertex2 - vertex1;
@@ -150,7 +154,7 @@ public:
         double vc = n.dot((vertex0 - I_r_S).cross(vertex1 - I_r_S));
 
         id = indices(0);
-        // Check if point lies behind ab!
+        // Check if point lies behind ab! (normale mit vc muss negativ sein)
         if (vc <= 0.0 && snom >= 0.0 && sdenom >= 0.0)
             return vertex0 + (snom / (snom + sdenom)) * ab;
 
@@ -167,7 +171,8 @@ public:
             return vertex0 + (tnom / (tnom + tdenom)) * ac;
 
 
-        //Otherwise we know that the point closest is the projection onto the
+        //Otherwise we know that the point closest is the projection onto the triangle
+        // Barycentric coordinates, area ratio is used to calculate these!
         type = 1;
         id = indexFace;
         double u = va / (va + vb + vc);
@@ -178,6 +183,105 @@ public:
    };
 
 };
+
+
+// do: http://www.geometrictools.com/Documentation/DistancePoint3Triangle3.pdf However it's heavy on math and does not give the complete source code. Here is the complete source code:
+//vector3 closesPointOnTriangle( const vector3 *triangle, const vector3 &sourcePosition )
+//{
+//    vector3 edge0 = triangle[1] - triangle[0];
+//    vector3 edge1 = triangle[2] - triangle[0];
+//    vector3 v0 = triangle[0] - sourcePosition;
+//
+//    float a = edge0.dot( edge0 );
+//    float b = edge0.dot( edge1 );
+//    float c = edge1.dot( edge1 );
+//    float d = edge0.dot( v0 );
+//    float e = edge1.dot( v0 );
+//
+//    float det = a*c - b*b;
+//    float s = b*e - c*d;
+//    float t = b*d - a*e;
+//
+//    if ( s + t < det )
+//    {
+//        if ( s < 0.f )
+//        {
+//            if ( t < 0.f )
+//            {
+//                if ( d < 0.f )
+//                {
+//                    s = clamp( -d/a, 0.f, 1.f );
+//                    t = 0.f;
+//                }
+//                else
+//                {
+//                    s = 0.f;
+//                    t = clamp( -e/c, 0.f, 1.f );
+//                }
+//            }
+//            else
+//            {
+//                s = 0.f;
+//                t = clamp( -e/c, 0.f, 1.f );
+//            }
+//        }
+//        else if ( t < 0.f )
+//        {
+//            s = clamp( -d/a, 0.f, 1.f );
+//            t = 0.f;
+//        }
+//        else
+//        {
+//            float invDet = 1.f / det;
+//            s *= invDet;
+//            t *= invDet;
+//        }
+//    }
+//    else
+//    {
+//        if ( s < 0.f )
+//        {
+//            float tmp0 = b+d;
+//            float tmp1 = c+e;
+//            if ( tmp1 > tmp0 )
+//            {
+//                float numer = tmp1 - tmp0;
+//                float denom = a-2*b+c;
+//                s = clamp( numer/denom, 0.f, 1.f );
+//                t = 1-s;
+//            }
+//            else
+//            {
+//                t = clamp( -e/c, 0.f, 1.f );
+//                s = 0.f;
+//            }
+//        }
+//        else if ( t < 0.f )
+//        {
+//            if ( a+d > b+e )
+//            {
+//                float numer = c+e-b-d;
+//                float denom = a-2*b+c;
+//                s = clamp( numer/denom, 0.f, 1.f );
+//                t = 1-s;
+//            }
+//            else
+//            {
+//                s = clamp( -e/c, 0.f, 1.f );
+//                t = 0.f;
+//            }
+//        }
+//        else
+//        {
+//            float numer = c+e-b-d;
+//            float denom = a-2*b+c;
+//            s = clamp( numer/denom, 0.f, 1.f );
+//            t = 1.f - s;
+//        }
+//    }
+//
+//    return triangle[0] + s * edge0 + t * edge1;
+//}
 
 
 #endif

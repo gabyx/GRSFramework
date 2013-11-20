@@ -7,8 +7,8 @@
  */
 
 
-#ifndef DynamicRenderable_h
-#define DynamicRenderable_h
+#ifndef DynamicRenderable_hpp
+#define DynamicRenderable_hpp
 
 /// Includes =================================
 #include <OgreSimpleRenderable.h>
