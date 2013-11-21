@@ -42,6 +42,10 @@ RenderOperation::OperationType DynamicLines::getOperationType() const
   return mRenderOp.operationType;
 }
 
+void DynamicLines::reserve(unsigned int n){
+    mPoints.reserve(n);
+}
+
 void DynamicLines::addPoint(const Vector3 &p)
 {
    mPoints.push_back(p);

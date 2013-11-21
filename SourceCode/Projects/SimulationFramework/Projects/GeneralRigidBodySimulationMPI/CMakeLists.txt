@@ -94,7 +94,7 @@ SET(COMMON_SRC
 )
 
 SET(DYNAMICS_INC
-	${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourMap.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/BodyInfoMap.hpp
@@ -107,6 +107,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/AddGyroTermVisitor.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactFrame.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/CollisionSolverMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp

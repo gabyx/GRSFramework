@@ -9,6 +9,7 @@
 #ifndef CollisionFunctions_hpp
 #define CollisionFunctions_hpp
 
+#include <cmath>
 #include <vector>
 #include "boost/tuple/tuple.hpp"
 #include <Eigen/Dense>
@@ -73,34 +74,36 @@ public:
         unsigned int type; unsigned int id;
         bool validContact;
         int faceNr=0;
-
+        double maxOverlap=0;
         for(faceIt = mesh.m_Faces.begin(); faceIt != mesh.m_Faces.end(); faceIt++) {
             // Check each face!
             vertex0 = mesh.m_Vertices[(*faceIt)(0)];
             vertex1 = mesh.m_Vertices[(*faceIt)(1)];
             vertex2 = mesh.m_Vertices[(*faceIt)(2)];
 
-//            std::cout <<faceNr <<":" << vertex0.transpose() <<std::endl
-//            << vertex1.transpose() <<std::endl<< vertex2.transpose() << std::endl;
+//            std::cout <<"Check with faceNr" <<faceNr <<":" << vertex0.transpose() <<
+//             ","<< vertex1.transpose() <<","<< vertex2.transpose() << std::endl;
 
             M_r_MS = A_IM.transpose() * (I_r_S - I_r_M);
             I_r_SC = A_IM*(getClosestPoint_PointTriangle(M_r_MS,vertex0,vertex1,vertex2,(*faceIt),faceNr,type,id) - M_r_MS);
             double normI_r_SC = I_r_SC.norm();
             double overlap = radius - normI_r_SC;
 
-            I_r_SC.normalize();
             //If closest point is in sphere, then add this to the set
             if(overlap >= 0.0 && normI_r_SC > 0.0){
+//                std::cout <<"Collision with faceNr" <<faceNr <<":" << vertex0.transpose() <<std::endl;
                 validContact = true;
                 for(unsigned int j=0; j<pointSet.size(); j++) {
                     Vector3 p1 = pointSet[j].template get<1>();
                     //std::cout <<"Cos : "<< acos( pointSet[j].template get<1>().dot( I_r_SC )) << "<" << (5.0/180.0*M_PI)<<std::endl;
-
-                    if( acos( p1.dot( I_r_SC ) /(p1.norm() * normI_r_SC ) ) < (5.0/180.0*M_PI)) {
-
-                        validContact=false;
-                        break;
-                    }
+//                    std::cout << "p1:" << p1 <<std::endl;
+//                    std::cout << "I_r_SC:" << I_r_SC <<std::endl;
+                    double angle = std::acos( p1.dot( I_r_SC ) /(p1.norm() * normI_r_SC ));
+//                                        std::cout << "Angle: " <<angle<< std::endl;
+//                    if( angle  < (10.0/180.0*M_PI)) {
+//                        validContact=false;
+//                        break;
+//                    }
                 }
                 if(validContact){
                     pointSet.push_back(ClosestPoint(overlap,I_r_SC,type,id));
@@ -110,6 +113,49 @@ public:
         }
         //std::cout <<"Coll: ==========" <<  std::endl;
     };
+
+    /* Finds the point with the maximum overlap */
+     inline static void getClosestPointInRadius_PointMesh(  const Vector3 & I_r_S,
+            const PREC & radius,
+            const MeshData<MeshPREC> & mesh,
+            const Vector3 & I_r_M,
+            const Matrix33 & A_IM,
+            ClosestPointSet & pointSet) {
+
+        // Iterate over all faces
+        MeshData<MeshPREC>::Faces::const_iterator faceIt;
+
+        static Vector3 vertex0,vertex1,vertex2, M_r_MS, I_r_SC;
+        unsigned int type; unsigned int id;
+        int faceNr=0;
+
+        static ClosestPoint cp;
+        cp.template get<0>() = 0; // set overlap to zero
+
+        for(faceIt = mesh.m_Faces.begin(); faceIt != mesh.m_Faces.end(); faceIt++) {
+            // Check each face!
+            vertex0 = mesh.m_Vertices[(*faceIt)(0)];
+            vertex1 = mesh.m_Vertices[(*faceIt)(1)];
+            vertex2 = mesh.m_Vertices[(*faceIt)(2)];
+
+            M_r_MS = A_IM.transpose() * (I_r_S - I_r_M);
+            I_r_SC = A_IM*(getClosestPoint_PointTriangle(M_r_MS,vertex0,vertex1,vertex2,(*faceIt),faceNr,type,id) - M_r_MS);
+            double overlap = radius - I_r_SC.norm();
+            if(overlap>cp.template get<0>()){
+                //save this point
+                cp.template get<0>() = overlap;
+                cp.template get<1>() = I_r_SC;
+                cp.template get<2>() = type;
+                cp.template get<3>() = id;
+            }
+            faceNr++;
+        }
+        if(cp.template get<0>()>0.0){
+           pointSet.push_back(cp);
+        }
+        //std::cout <<"Coll: ==========" <<  std::endl;
+    };
+
 
     inline static Vector3 getClosestPoint_PointTriangle(    const Vector3 & I_r_S,
                                                             const Vector3 & vertex0,

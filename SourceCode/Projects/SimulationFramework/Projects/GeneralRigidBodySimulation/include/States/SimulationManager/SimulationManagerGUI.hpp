@@ -4,10 +4,13 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 
+#include <Ogre.h>
+
 #include <OIS/OISEvents.h>
 #include <OIS/OISKeyboard.h>
 #include <OIS/OISJoyStick.h>
 #include <OIS/OISMouse.h>
+
 
 #include "TypeDefs.hpp"
 
@@ -15,6 +18,8 @@
 #include "InputContext.hpp"
 
 #include "SceneParserOgre.hpp"
+
+#include "DynamicCoordinateFrames.hpp"
 
 template <typename TLayoutConfig> class DynamicsState;
 template <typename DynamicsSystemType> class StateRecorder;
@@ -42,7 +47,7 @@ public:
 
 
     void updateScene(double timeSinceLastFrame);
-    void updateSimBodies();
+    inline void updateSimBodies();
     void initBeforeThreads();
 
     double getSimulationTime(); // used to access the current simulation state time, from the AppState
@@ -101,10 +106,12 @@ private:
 
     // Visualization of ContactFrame
     bool m_bShowContactFrames;
-    std::vector<ContactFrameData> m_contactFrameData; // gets refilled in each iteration
     boost::mutex m_mutexShowContactFrames;
     void toggleShowContactFrames();
-    bool showContactFrameEnabled();
+    bool showContactFramesEnabled();
+
+    DynamicCoordinateFrames m_dynCoordFrame;
+    inline void updateContactFrameVisualization();
     // ==============================
 
     // Timming Variables for updateScene =====

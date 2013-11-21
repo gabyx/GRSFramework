@@ -269,7 +269,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 #endif
 
   // Iterate over Collision set and assemble the matrices...
-  std::vector<CollisionData<RigidBodyType> > & collSet = m_pCollisionSolver->m_CollisionSet;
+  std::vector<CollisionData<RigidBodyType> > & collSet = m_pCollisionSolver->m_collisionSet;
   m_nContacts = (unsigned int)collSet.size();
   m_iterationsNeeded = 0;
   m_bConverged = false;
@@ -330,13 +330,13 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
     {
 
 #if CoutLevelSolverWhenContact>2
-      LOG(m_pSolverLog,    << "e_x= "<< collSet[contactIdx].m_e_x.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
-                           << "e_y= "<< collSet[contactIdx].m_e_y.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
-                           << "e_z= "<< collSet[contactIdx].m_e_z.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
-                           << collSet[contactIdx].m_e_x.dot(collSet[contactIdx].m_e_y) << collSet[contactIdx].m_e_y.dot(collSet[contactIdx].m_e_z) <<std::endl
+      LOG(m_pSolverLog,    << "e_x= "<< collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+                           << "e_y= "<< collSet[contactIdx].m_cFrame.m_e_y.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+                           << "e_z= "<< collSet[contactIdx].m_cFrame.m_e_z.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+                           << collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.dot(collSet[contactIdx].m_cFrame.m_e_y) << collSet[contactIdx].m_cFrame.m_e_y.dot(collSet[contactIdx].m_cFrame.m_e_z) <<std::endl
                            << "r_s1c1="<< collSet[contactIdx].m_r_S1C1.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
-      ASSERTMSG( std::abs(collSet[contactIdx].m_e_x.dot(collSet[contactIdx].m_e_y)) < 1e-3 && std::abs(collSet[contactIdx].m_e_y.dot(collSet[contactIdx].m_e_z))< 1e-3, "Vectors not parallel");
+      ASSERTMSG( std::abs(collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.dot(collSet[contactIdx].m_cFrame.m_e_y)) < 1e-3 && std::abs(collSet[contactIdx].m_cFrame.m_e_y.dot(collSet[contactIdx].m_cFrame.m_e_z))< 1e-3, "Vectors not parallel");
 
 
 
@@ -351,8 +351,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         I_Jacobi_2 = ( collSet[contactIdx].m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
 
         // N direction =================================================
-        w_N_part.template head<3>() = - collSet[contactIdx].m_e_z; // I frame
-        w_N_part.template tail<3>() = - I_Jacobi_2 * collSet[contactIdx].m_e_z;
+        w_N_part.template head<3>() = - collSet[contactIdx].m_cFrame.m_e_z; // I frame
+        w_N_part.template tail<3>() = - I_Jacobi_2 * collSet[contactIdx].m_cFrame.m_e_z;
         // pop into W_N
         m_W_N.template block<NDOFuObj,1>( id1 * NDOFuObj ,  contactIdx) =  w_N_part;
 
@@ -361,8 +361,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WN_Minv_h_dt(contactIdx) += w_N_part.dot( m_Minv_h_dt.template segment<NDOFuObj>( id1 * NDOFuObj ));
 
         // T1 direction =================================================
-        w_T_part.template head<3>() = - collSet[contactIdx].m_e_x; // I frame
-        w_T_part.template tail<3>() = - I_Jacobi_2 * collSet[contactIdx].m_e_x;
+        w_T_part.template head<3>() = - collSet[contactIdx].m_cFrame.m_cFrame.m_e_x; // I frame
+        w_T_part.template tail<3>() = - I_Jacobi_2 * collSet[contactIdx].m_cFrame.m_cFrame.m_e_x;
         // pop into W_T
         m_W_T.template block<NDOFuObj,1>( id1 * NDOFuObj ,  m_nDofFriction*contactIdx) =  w_T_part ;
         // compute part to m_WT_uS and to m_WT_Minv_h_dt
@@ -370,8 +370,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WT_Minv_h_dt(m_nDofFriction*contactIdx) += w_T_part.dot( m_Minv_h_dt.template segment<NDOFuObj>( id1 * NDOFuObj ));
 
         // T2 direction =================================================
-        w_T_part.template head<3>() = - collSet[contactIdx].m_e_y; // I frame
-        w_T_part.template tail<3>() = - I_Jacobi_2 * collSet[contactIdx].m_e_y;
+        w_T_part.template head<3>() = - collSet[contactIdx].m_cFrame.m_e_y; // I frame
+        w_T_part.template tail<3>() = - I_Jacobi_2 * collSet[contactIdx].m_cFrame.m_e_y;
         // pop into W_T
         m_W_T.template block<NDOFuObj,1>( id1 * NDOFuObj ,  m_nDofFriction*contactIdx + 1) = w_T_part;
         // compute part to m_WT_uS
@@ -393,8 +393,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         I_Jacobi_2 = ( collSet[contactIdx].m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
 
         // N direction =================================================
-        w_N_part.template head<3>() =  collSet[contactIdx].m_e_z;
-        w_N_part.template tail<3>() =  I_Jacobi_2 * collSet[contactIdx].m_e_z;
+        w_N_part.template head<3>() =  collSet[contactIdx].m_cFrame.m_e_z;
+        w_N_part.template tail<3>() =  I_Jacobi_2 * collSet[contactIdx].m_cFrame.m_e_z;
         // pop into W_N
         m_W_N.template block<NDOFuObj,1>( id2 * NDOFuObj ,  contactIdx) =  w_N_part; // I frame
         // compute part to m_WN_uS and to m_WN_Minv_h_dt
@@ -402,8 +402,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WN_Minv_h_dt(contactIdx)  += w_N_part.dot( m_Minv_h_dt.template segment<NDOFuObj>( id2 * NDOFuObj ));
 
         // T1 direction =================================================
-        w_T_part.template head<3>() =  collSet[contactIdx].m_e_x;
-        w_T_part.template tail<3>() =  I_Jacobi_2 * collSet[contactIdx].m_e_x;
+        w_T_part.template head<3>() =  collSet[contactIdx].m_cFrame.m_cFrame.m_e_x;
+        w_T_part.template tail<3>() =  I_Jacobi_2 * collSet[contactIdx].m_cFrame.m_cFrame.m_e_x;
         // pop into W_T
         m_W_T.template block<NDOFuObj,1>( id2 * NDOFuObj ,  m_nDofFriction*contactIdx) =  w_T_part ; // I frame
         // compute part to m_WT_uS and to m_WT_Minv_h_dt
@@ -411,8 +411,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WT_Minv_h_dt(m_nDofFriction*contactIdx) += w_T_part.dot( m_Minv_h_dt.template segment<NDOFuObj>( id2 * NDOFuObj ));
 
         // T2 direction =================================================
-        w_T_part.template head<3>() =  collSet[contactIdx].m_e_y;
-        w_T_part.template tail<3>() =  I_Jacobi_2 * collSet[contactIdx].m_e_y;
+        w_T_part.template head<3>() =  collSet[contactIdx].m_cFrame.m_e_y;
+        w_T_part.template tail<3>() =  I_Jacobi_2 * collSet[contactIdx].m_cFrame.m_e_y;
         // pop into W_T
         m_W_T.template block<NDOFuObj,1>( id2 * NDOFuObj ,  m_nDofFriction*contactIdx + 1) = w_T_part; // I frame
         // compute part to m_WT_uS and to m_WT_Minv_h_dt
@@ -660,7 +660,7 @@ template< typename TInclusionSolverConfig >
 void  InclusionSolverNT<TInclusionSolverConfig>::readFromPercussionPool(unsigned int index, VectorDyn & P_Nold, VectorDyn & P_Told)
 {
    static VectorDyn P_contact(NDOFFriction+1);
-   m_PercussionPool.getPercussion(m_pCollisionSolver->m_CollisionSet[index].m_ContactTag,P_contact);
+   m_PercussionPool.getPercussion(m_pCollisionSolver->m_collisionSet[index].m_ContactTag,P_contact);
    P_Nold(index) = P_contact(0);
    P_Told(NDOFFriction*index) =   P_contact(1);
    P_Told(NDOFFriction*index+1) = P_contact(2);

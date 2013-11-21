@@ -94,7 +94,7 @@ public:
     void solveCollision();    ///< Main routine which solves the collision for all bodies.
 
     typedef typename std::list< CollisionData<RigidBodyType> * > CollisionSet;
-    CollisionSet m_CollisionSet;       ///< This list is only used if no  ContactDelegate is in m_ContactDelegateList, then the contacts are simply added here.
+    CollisionSet m_collisionSet;       ///< This list is only used if no  ContactDelegate is in m_ContactDelegateList, then the contacts are simply added here.
 
     inline void clearCollisionSet();
     ContactDelegateList<RigidBodyType> m_ContactDelegateList;
@@ -116,7 +116,7 @@ protected:
     Logging::Log *  m_pSolverLog;  ///< Ogre::Log
     std::stringstream logstream;
 
-    inline void signalContactAdd(CollisionData<RigidBodyType> * pColData); ///< Adds the contact either sends it to the delegate functions or it adds it in the set m_CollisionSet if no delegate has been added.
+    inline void signalContactAdd(CollisionData<RigidBodyType> * pColData); ///< Adds the contact either sends it to the delegate functions or it adds it in the set m_collisionSet if no delegate has been added.
 
     PREC m_maxOverlap;
 
@@ -156,10 +156,10 @@ void CollisionSolver<TCollisionSolverConfig>::reset() {
 
 template< typename TCollisionSolverConfig >
 void CollisionSolver<TCollisionSolverConfig>::clearCollisionSet() {
-    for( typename CollisionSet::iterator it = m_CollisionSet.begin(); it != m_CollisionSet.end(); it++) {
+    for( typename CollisionSet::iterator it = m_collisionSet.begin(); it != m_collisionSet.end(); it++) {
         delete (*it);
     }
-    m_CollisionSet.clear();
+    m_collisionSet.clear();
 }
 
 template< typename TCollisionSolverConfig >
@@ -221,15 +221,15 @@ void CollisionSolver<TCollisionSolverConfig>::signalContactAdd(CollisionData<Rig
 
     // Before we send, determine what kind of contactmodel we have!
     // TODO (implemented only NContactModel)
-    ASSERTMSG( std::abs(pColData->m_e_x.dot(pColData->m_e_y)) < 1e-3 && std::abs(pColData->m_e_y.dot(pColData->m_e_z))< 1e-3, "Vectors not parallel");
+    ASSERTMSG( std::abs(pColData->m_cFrame.m_e_x.dot(pColData->m_cFrame.m_e_y)) < 1e-3 && std::abs(pColData->m_cFrame.m_e_y.dot(pColData->m_cFrame.m_e_z))< 1e-3, "Vectors not parallel");
 
-    m_CollisionSet.push_back(pColData); // Copy it to the owning list! colData gets deleted!
+    m_collisionSet.push_back(pColData); // Copy it to the owning list! colData gets deleted!
 
     // Calculate some Statistics
     m_maxOverlap = std::max(m_maxOverlap,pColData->m_overlap);
 
     if(!m_ContactDelegateList.isEmpty()) {
-        m_ContactDelegateList.invokeAll(m_CollisionSet.back()); // Propagate pointers! they will not be deleted!
+        m_ContactDelegateList.invokeAll(m_collisionSet.back()); // Propagate pointers! they will not be deleted!
     }
 }
 
