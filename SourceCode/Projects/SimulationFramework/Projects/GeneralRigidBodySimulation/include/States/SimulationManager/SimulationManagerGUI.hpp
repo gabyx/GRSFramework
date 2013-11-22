@@ -52,6 +52,7 @@ public:
 
     double getSimulationTime(); // used to access the current simulation state time, from the AppState
 
+
     void startSimThread(Threads threadToStop);
     void stopSimThread(Threads threadToStop, bool force_stop);
 

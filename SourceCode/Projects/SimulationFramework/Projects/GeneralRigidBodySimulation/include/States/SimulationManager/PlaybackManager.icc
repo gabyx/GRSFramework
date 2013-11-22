@@ -355,6 +355,8 @@ bool PlaybackManager<TConfig>::keyPressed(const OIS::KeyEvent &e) {
     case OIS::KC_N:
         addToTimeScale(-0.1);
         break;
+    case OIS::KC_B:
+        togglePauseSimulation();
     case OIS::KC_UP:
         break;
     case OIS::KC_DOWN:

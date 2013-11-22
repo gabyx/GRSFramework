@@ -28,6 +28,7 @@ public:
   enum Threads m_eSimThreadRunning;
 
   double getTimeScale();
+  bool isSimulationPaused();
   // Information to visualize by GUI
   void getIterationTime(double & averageIterationTime, double & maxIterationTime);
   void setIterationTime(double averageIterationTime,   double maxIterationTime);
@@ -50,7 +51,7 @@ protected:
   unsigned int m_nCurrentContacts;
 
   boost::mutex m_bThreadToBeStopped_mutex;
-	bool m_bThreadToBeStopped;
+  bool m_bThreadToBeStopped;
 
   boost::mutex m_bSimThreadRunning_mutex;
   bool m_bSimThreadRunning;
@@ -60,14 +61,19 @@ protected:
   bool isSimThreadToBeStopped();          /**	\brief Checks if the sim thread should be stopped. */
   void setSimThreadRunning(bool value);   /**	\brief Sets the variable which is used in the vis thread to check if the thread is still alive. */
 
-  boost::mutex		m_mutexTimelineSimulation;
+  boost::mutex	m_mutexTimelineSimulation;
   boost::shared_ptr<boost::timer::cpu_timer>		m_pTimelineSimulation;
   double m_lastTime; // This is used to stop the timer, set m_lastTime, increase/decrease timeScale, startTimer again
 
-  double	m_timeScale;
+  double m_timeScale;
+  double m_timeScaleSave;
+
   std::vector<double> m_timeScaleList;
   int m_timeScaleListIdx;
   void addToTimeScale(double step);
+
+  void togglePauseSimulation();
+  bool m_bPauseEnabled;
 
   boost::barrier m_barrier_start; // waits for 2 threads! // if needed,
 

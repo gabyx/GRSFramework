@@ -126,8 +126,8 @@ void SimulationState::exit() {
 void SimulationState::setupParamsPanel() {
     m_pPhysicsStatsPanel = (m_pTrayMgr->createParamsPanel(OgreBites::TL_TOPLEFT, "Physics Stats", 300, 8));
     m_PhysicsStatsParams.push_back("Timeline Rendering");
-    m_PhysicsStatsParams.push_back("Global Realtime");
-    m_PhysicsStatsParams.push_back("Simulation Realtime");
+    m_PhysicsStatsParams.push_back("Visualization Time");
+    m_PhysicsStatsParams.push_back("Simulation Time");
     m_PhysicsStatsParams.push_back("Delay");
     m_PhysicsStatsParams.push_back("Average Iter. Time");
     m_PhysicsStatsParams.push_back("Max Iter. Time");
@@ -195,22 +195,25 @@ void SimulationState::setupScene() {
     m_pBaseNode =  m_pSceneMgr->getRootSceneNode()->createChildSceneNode("BaseFrame");
 
     Ogre::Light* pLight = m_pSceneMgr->createLight("Light");
-    pLight->setType(Ogre::Light::LT_POINT);
+    pLight->setType(Ogre::Light::LT_DIRECTIONAL);
     pLight->setDirection(Ogre::Vector3(-1,-1,-1));
-    pLight->setDiffuseColour((Ogre::Real)0.6,(Ogre::Real) 0.6,(Ogre::Real) 0.6);
-    pLight->setPosition( 75, 75, 150 );
+    pLight->setDiffuseColour((Ogre::Real)0.8,(Ogre::Real) 0.8,(Ogre::Real) 0.8);
+    pLight->setPosition( 75, 75, 300 );
     //pLight->setAttenuation(5000000,0,0.1,0);
     //pLight->setCastShadows(true);
 
     pLight = m_pSceneMgr->createLight("Light2");
-    pLight->setType(Ogre::Light::LT_POINT);
-    pLight->setDirection(Ogre::Vector3(-1,-1,-1));
+    pLight->setType(Ogre::Light::LT_DIRECTIONAL);
+    pLight->setDirection(Ogre::Vector3(1,1,-1));
     pLight->setDiffuseColour((Ogre::Real)0.8,(Ogre::Real) 0.8,(Ogre::Real) 0.8);
-    pLight->setPosition( -75, -75, 150 );
+    pLight->setPosition( -75, -75, 300 );
     pLight->setCastShadows(false);
+
+//    m_pSceneMgr->setAmbientLight(Ogre::ColourValue((Ogre::Real)0.2, (Ogre::Real)0.2, (Ogre::Real)0.2));
+
+
 // pLight->setAttenuation(5000000,0,0.1,0);
     // Set Shadow Technique
-    //m_pSceneMgr->setAmbientLight(Ogre::ColourValue((Ogre::Real)0.2, (Ogre::Real)0.2, (Ogre::Real)0.2));
     //m_pSceneMgr->setShadowTechnique(SHADOWTYPE_STENCIL_ADDITIVE);
 //  m_pSceneMgr->setShadowTextureSelfShadow(true);
 //  m_pSceneMgr->setShadowTextureSettings(512, 2);
@@ -377,6 +380,9 @@ void SimulationState::updateParamsPanelSimulation() {
         GlobalTimeText << std::setw(10) <<std::fixed<< std::setprecision (4) << m_pTimelineRendering->getMilliseconds()*1e-3;
         DynamicsThreadTimeText << std::setprecision (4) << Realtime;
         SimTimeText <<std::fixed<< std::setprecision (4) << SimTime;
+        if( m_pSimMgr->isSimulationPaused()){
+            SimTimeText<<" (Paused)";
+        }
         DelayText <<std::fixed<< std::setprecision (4) << Realtime-SimTime;
         AverageIterTimeText << std::fixed<< std::setprecision (4) <<AverageIterTime;
         MaxIterTimeText << std::fixed<< std::setprecision (4) << MaxIterTime;

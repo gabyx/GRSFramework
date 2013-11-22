@@ -974,6 +974,7 @@ protected:
                     addToGlobalGeomList(id, pMeshGeom);
             }else{
                 for(int i=0; i < m_bodyList.size(); i++) {
+                    m_bodyListScales[i] = scale_factor;
                     m_bodyList[i]->m_geometry = pMeshGeom;
                 }
             }

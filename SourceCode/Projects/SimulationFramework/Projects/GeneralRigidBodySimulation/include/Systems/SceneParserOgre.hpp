@@ -135,9 +135,23 @@ protected:
             ent->setCastShadows(renderSettings.shadowsEnabled);
             Ogre::SceneNode* sceneNode = m_BaseFrame->createChildSceneNode(node_name.str());
             Ogre::SceneNode* sceneNodeScale = sceneNode->createChildSceneNode();
+
+
+
             if(scaleLikeGeometry) {
+//                std::cout << "SCALE: " << this->m_bodyListScales[i] <<std::endl;
+                if(this->m_bodyListScales[i](0)<=0 &&
+                   this->m_bodyListScales[i](1)<=0 &&
+                   this->m_bodyListScales[i](2)<=0) {
+                    throw ticpp::Exception("---> processMesh:: Scale for Mesh: " + meshName.string() +"is zero or smaller!");
+                }
                 sceneNodeScale->setScale(this->m_bodyListScales[i](0),this->m_bodyListScales[i](1),this->m_bodyListScales[i](2));
             } else {
+                if(scale(0)<=0 &&
+                   scale(1)<=0 &&
+                   scale(2)<=0) {
+                    throw ticpp::Exception("---> processMesh:: Scale for Mesh: " + meshName.string() + "is zero or smaller!");
+                }
                 sceneNodeScale->setScale(scale(0),scale(1),scale(2));
             }
             sceneNodeScale->attachObject(ent);

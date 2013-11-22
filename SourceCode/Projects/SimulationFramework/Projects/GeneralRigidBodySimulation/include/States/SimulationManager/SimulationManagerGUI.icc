@@ -84,7 +84,7 @@ void SimulationManagerGUI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserOgre... ");
 
 
-    std::cout << "ScenePath:" << sceneFilePath <<std::endl;
+    m_pSimulationLog->logMessage("---> ScenePath:" << sceneFilePath );
     if(sceneFilePath.empty()) {
         sceneFilePath = "SceneFile.xml";
     }
@@ -454,6 +454,9 @@ bool SimulationManagerGUI<TConfig>::keyPressed(const OIS::KeyEvent &e) {
     case OIS::KC_N:
         addToTimeScale(-0.1);
         break;
+    case OIS::KC_B:
+        togglePauseSimulation();
+        break;
     case OIS::KC_F:
         toggleShowContactFrames();
         break;
@@ -569,6 +572,7 @@ void SimulationManagerGUI<TConfig>::toggleShowContactFrames(){
         m_bShowContactFrames = true;
     }
 }
+
 
 template<typename TConfig>
 bool SimulationManagerGUI<TConfig>::showContactFramesEnabled(){

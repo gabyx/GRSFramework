@@ -173,13 +173,13 @@ public:
       using std::endl;
       using std::cout;
 
-      logmessage << "MeshData:: "<<name<<std::endl<<"Vertices : "<<std::endl;
+      logmessage << "---> MeshData:: "<<name<<std::endl<<"\t Vertices : "<<std::endl;
       for (int i=0;i<m_Vertices.size();i++){
-         logmessage <<"\t Vertex "<< i<<": "<<m_Vertices[i].transpose() <<endl;
+         logmessage <<"\t\t Vertex "<< i<<": "<<m_Vertices[i].transpose() <<endl;
       }
-      logmessage << "Faces (Indices) & Normals : "<<endl;
+      logmessage << " \t Faces (Indices) & Normals : "<<endl;
       for (int i=0;i<m_Faces.size();i++){
-         logmessage <<"\t Face "<<i<<": "<<m_Faces[i].transpose() <<  "\t n:"<<m_Normals[i].transpose() <<std::endl;
+         logmessage <<"\t\t Face "<<i<<": "<<m_Faces[i].transpose() <<  "\t n:"<<m_Normals[i].transpose() <<std::endl;
       }
       plog->logMessage(logmessage.str());
    };
