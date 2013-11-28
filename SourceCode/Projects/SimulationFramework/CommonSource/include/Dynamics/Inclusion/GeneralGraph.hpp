@@ -89,7 +89,7 @@ public:
    }
 */
 
-	const unsigned int m_edgeNumber;
+   const unsigned int m_edgeNumber;
    EdgeDataType m_edgeData;
 
 	// visitor dispatch

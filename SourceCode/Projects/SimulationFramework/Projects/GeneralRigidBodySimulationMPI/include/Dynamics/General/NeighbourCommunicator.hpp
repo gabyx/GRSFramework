@@ -13,7 +13,7 @@
 #include "RigidBodyGarbageCollector.hpp"
 
 #include "NeighbourMap.hpp"
-#include "BodyInfoMap.hpp"
+
 #include "MPIMessages.hpp"
 #include "MPICommunication.hpp"
 
@@ -97,8 +97,8 @@ public:
     typedef typename DynamicsSystemType::RigidBodySimContainerType                      RigidBodyContainerType;
     typedef typename DynamicsSystemType::GlobalGeometryMapType                          GlobalGeometryMapType;
 
-    typedef BodyInfoMap<DynamicsSystemType,RankIdType>                                   BodyInfoMapType;
-    typedef NeighbourMap<DynamicsSystemType, BodyInfoMapType>                            NeighbourMapType;
+    typedef typename DynamicsSystemType::BodyInfoMap<DynamicsSystemType,RankIdType>     BodyInfoMapType;
+    typedef NeighbourMap<DynamicsSystemType, BodyInfoMapType>                           NeighbourMapType;
 
     NeighbourCommunicator(typename DynamicsSystemType::RigidBodySimContainerType & globalLocal,
                           typename DynamicsSystemType::RigidBodySimContainerType & globalRemote,

@@ -415,7 +415,6 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
     for(nodeIt = nodes.begin(); nodeIt != nodes.end(); nodeIt++) {
 
         nodeCounter++;
-        converged = true;
 
         typename ContactGraphType::NodeDataType & nodeData = (*nodeIt)->m_nodeData;
 
@@ -463,13 +462,13 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
                 nodeData.m_u1BufferPtr->m_front = nodeData.m_u1BufferPtr->m_front + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
-           #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog,"Node: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
-           #endif
+               #if CoutLevelSolverWhenContact>2
+                LOG(m_pSolverLog,"Node: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
+               #endif
 
 
                 if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal) {
-                    if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
+                    if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
                         converged = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
                         if(!converged) {
                             //converged stays false;
@@ -481,7 +480,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
                         m_bConverged=false;
                     }
                 }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InEnergyLocalMix){
-                    if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
+                    if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
                         converged = Numerics::cancelCriteriaMatrixNorm(   uCache1,
                                                                           nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
                                                                           nodeData.m_LambdaBack,
