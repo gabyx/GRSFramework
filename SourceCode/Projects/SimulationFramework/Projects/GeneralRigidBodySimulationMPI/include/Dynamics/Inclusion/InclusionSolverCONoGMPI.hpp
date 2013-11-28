@@ -199,9 +199,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
 
     // Integrate all bodies to u_e
     // u_E = u_S + M^⁻1 * h * deltaT
-
     if(m_nContacts == 0){
-
         integrateAllBodyVelocities();
     }
     else{
@@ -280,7 +278,9 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doJorProx() {
 
 template< typename TInclusionSolverConfig >
 void InclusionSolverCONoG<TInclusionSolverConfig>::integrateAllBodyVelocities() {
+
     typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyIt;
+
     for( bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
         (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
@@ -332,13 +332,13 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
 
 
         // Calculate R_ii
-        nodeData.m_R_i_inv_diag(0) = alpha / nodeData.m_G_ii(0,0);
-        PREC r_T = alpha / (nodeData.m_G_ii.diagonal().template tail<2>()).maxCoeff();
+        nodeData.m_R_i_inv_diag(0) = alpha / (nodeData.m_G_ii(0,0));
+        PREC r_T = alpha / ((nodeData.m_G_ii.diagonal().template tail<2>()).maxCoeff());
         nodeData.m_R_i_inv_diag(1) = r_T;
         nodeData.m_R_i_inv_diag(2) = r_T;
 
 #if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog,   << " nodeData.m_b"<< nodeData.m_b <<std::endl
+        LOG(m_pSolverLog, " nodeData.m_b"<< nodeData.m_b <<std::endl
             << " nodeData.m_G_ii"<< nodeData.m_G_ii <<std::endl
             << " nodeData.m_R_i_inv_diag"<< nodeData.m_R_i_inv_diag <<std::endl;);
 #endif
@@ -365,9 +365,9 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx() {
 #if CoutLevelSolverWhenContact>2
     LOG(m_pSolverLog, " u_e = [ ");
 
-    for(int i=0; i< m_SimBodies.size(); i++) {
-        LOG(m_pSolverLog, "Back: \t" << m_SimBodies[i]->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
-        LOG(m_pSolverLog, "Front: \t" <<m_SimBodies[i]->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
+    for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
+        LOG(m_pSolverLog, "Back: \t" << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
+        LOG(m_pSolverLog, "Front: \t" <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
     }
     LOG(m_pSolverLog, " ]" << std::endl);
 #endif
@@ -381,8 +381,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx() {
 
 #if CoutLevelSolverWhenContact>2
         LOG(m_pSolverLog, std::endl<< "Next iteration: "<< m_iterationsNeeded <<"=========================" << std::endl<< std::endl<<" u_e: \t");
-        for(int i=0; i< m_SimBodies.size(); i++) {
-            LOG(m_pSolverLog, m_SimBodies[i]->m_pSolverData->m_uBuffer.m_front.transpose());
+        for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
+            LOG(m_pSolverLog, (*it)->m_pSolverData->m_uBuffer.m_front.transpose());
         }
         LOG(m_pSolverLog,""<< std::endl);
 #endif
@@ -468,8 +468,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
            #endif
 
 
-                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal)
-                {
+                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal) {
                     if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
                         converged = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
                         if(!converged) {

@@ -155,7 +155,7 @@ private:
     RigidBodyContainerType & m_globalLocal;
     GlobalGeometryMapType & m_globalGeometries;
 
-    BodyInfoMapType m_bodyToInfo; ///< map which gives all overlapping processes to the body
+    BodyInfoMapType m_bodyToInfo; ///< map which gives all mpi related information to the body
 
     NeighbourMapType m_nbDataMap;   ///< map which gives all neighbour data structures
 
