@@ -84,7 +84,7 @@ void SimulationManagerGUI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserOgre... ");
 
 
-    m_pSimulationLog->logMessage("---> ScenePath:" << sceneFilePath );
+    LOG(m_pSimulationLog,"---> ScenePath:" << sceneFilePath );
     if(sceneFilePath.empty()) {
         sceneFilePath = "SceneFile.xml";
     }

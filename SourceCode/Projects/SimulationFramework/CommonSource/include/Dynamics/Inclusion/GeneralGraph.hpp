@@ -22,11 +22,12 @@ template <typename NodeDataType, typename EdgeDataType> class GeneralGraph;
 
 
 /* Node Structures */
-template <typename NodeDataType, typename EdgeDataType>
-class NodeVisitor {
-public:
-	virtual void visitNode(Node<NodeDataType, EdgeDataType>& v) = 0;
-};
+// We dont need to derive from this class! We do it with a templated acceptNode
+//template <typename NodeDataType, typename EdgeDataType>
+//class NodeVisitor {
+//public:
+//	virtual void visitNode(Node<NodeDataType, EdgeDataType>&) = 0;
+//};
 
 
 template <typename NodeDataType, typename EdgeDataType>
@@ -47,7 +48,8 @@ public:
 	NodeDataType m_nodeData;
 
 	// visitor dispatch
-	void acceptVisitor(NodeVisitor<NodeDataType, EdgeDataType>& vv) {
+	template<typename TVisitor>
+	void acceptVisitor(TVisitor & vv) {
 		vv.visitNode(*this);
 	}
 };
@@ -55,11 +57,12 @@ public:
 
 
 /* Edge Structures */
-template <typename NodeDataType, typename EdgeDataType>
-class EdgeVisitor {
-public:
-	virtual void visitEdge(Edge<NodeDataType, EdgeDataType>& e) = 0;
-};
+// We dont need to derive from this class! We do it with a templated acceptNode
+//template <typename NodeDataType, typename EdgeDataType>
+//class EdgeVisitor {
+//public:
+//	virtual void visitEdge(Edge<NodeDataType, EdgeDataType>&) = 0;
+//};
 
 template <typename NodeDataType, typename EdgeDataType>
 class Edge {
@@ -93,7 +96,8 @@ public:
    EdgeDataType m_edgeData;
 
 	// visitor dispatch
-	void acceptVisitor(EdgeVisitor<NodeDataType, EdgeDataType>& ev) {
+	template<typename TVisitor>
+	void acceptVisitor(TVisitor & ev) {
 		ev.visitEdge(*this);
 	}
 };
@@ -120,9 +124,9 @@ public:
 
    ~GeneralGraph() {
 		// cleanup allocated memory
-		for(typename std::vector<Node<NodeDataType, EdgeDataType>* >::iterator n_it = m_nodes.begin(); n_it != m_nodes.end(); n_it++)
+		for(auto n_it = m_nodes.begin(); n_it != m_nodes.end(); n_it++)
 			delete (*n_it);
-		for(typename std::vector<Edge<NodeDataType, EdgeDataType>* >::iterator e_it = m_edges.begin(); e_it != m_edges.end(); e_it++)
+		for(auto e_it = m_edges.begin(); e_it != m_edges.end(); e_it++)
 			delete (*e_it);
 	}
 
@@ -133,13 +137,16 @@ public:
    NodeListType & getNodeListRef(){ return m_nodes; };
    EdgeListType & getEdgeListRef(){ return m_edges; };
 
-	void applyNodeVisitor(NodeVisitor<NodeDataType, EdgeDataType>& vv) {
-		for(typename std::vector<Node<NodeDataType, EdgeDataType>* >::iterator curr_node = m_nodes.begin(); curr_node != m_nodes.end(); curr_node++)
-			(*curr_node)->acceptVisitor(vv);
+    template<typename TNodeVisitor>
+	void applyNodeVisitor(TNodeVisitor & vv){
+		for(auto curr_node = m_nodes.begin(); curr_node != m_nodes.end(); curr_node++)
+			(*(*curr_node)).template acceptVisitor<TNodeVisitor>(vv);
 	}
-	void applyEdgeVisitor(EdgeVisitor<NodeDataType, EdgeDataType>& hev) {
-		for(typename std::vector<Edge<NodeDataType, EdgeDataType>* >::iterator curr_he = m_edges.begin(); curr_he != m_edges.end(); curr_he++)
-			(*curr_he)->acceptVisitor(hev);
+
+	template<typename TEdgeVisitor>
+	void applyEdgeVisitor(TEdgeVisitor & hev){
+		for(auto curr_he = m_edges.begin(); curr_he != m_edges.end(); curr_he++)
+			(*(*curr_he)).template acceptVisitor<TEdgeVisitor>(hev);
 	}
 };
 

@@ -94,61 +94,6 @@ public:
 
     bool m_bConverged; ///< Converged either in LambdaLocal (lambdaNew to lambdaOld), or
 
-    void printToLog(Logging::Log * logPtr){
-        #if CoutLevelSolverWhenContact>2
-
-            LOG(m_pSolverLog,"Node: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
-            LOG(m_pSolverLog,"chi: " << nodeData.m_LambdaFront.transpose() << std::endl);
-            *m_pSolverLog <<"Lambda Back: "  << nodeData.m_LambdaBack.transpose() << std::endl;
-            *m_pSolverLog <<"Lambda Front: " << nodeData.m_LambdaFront.transpose() << std::endl;
-            if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol)){
-              *m_pSolverLog <<"Lambda converged"<<std::endl;
-            }
-        #endif
-
-    }
-
-    void initForIteration(){
-        // Assert ContactModel
-        ASSERTMSG(m_m_eContactModel == ContactModels::NCFContactModel
-                  ,"You use InclusionSolverCONoG which only supports NCFContactModel Contacts so far!");
-
-        // Get lambda from percussion pool otherwise set to zero
-        // TODO
-        m_LambdaBack.setZero();
-
-        // (1+e)*xi -> b
-        m_b = m_I_plus_eps.asDiagonal() * m_xi;
-
-        // u_0 , calculate const b
-        // First Body
-        if(m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED) {
-
-            // m_back contains u_s + M^⁻1*h*deltaT already!
-            m_u1BufferPtr->m_front +=  m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (m_W_body1 * m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
-
-            m_b += m_eps.asDiagonal() * m_W_body1.transpose() * m_u1BufferPtr->m_back /* m_u_s */ ;
-            m_G_ii += m_W_body1.transpose() * m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * m_W_body1 ;
-        }
-        // SECOND BODY!
-        if(m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
-
-            // m_back contains u_s + M^⁻1*h*deltaT already!
-            m_u2BufferPtr->m_front +=   m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (m_W_body2 * m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
-
-            m_b += m_eps.asDiagonal() * m_W_body2.transpose() *  m_u1BufferPtr->m_back;
-            m_G_ii += m_W_body2.transpose() * m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * m_W_body2 ;
-        }
-
-
-
-        // Calculate R_ii
-        m_R_i_inv_diag(0) = alpha / (m_G_ii(0,0));
-        PREC r_T = alpha / ((m_G_ii.diagonal().template tail<2>()).maxCoeff());
-        m_R_i_inv_diag(1) = r_T;
-        m_R_i_inv_diag(2) = r_T;
-    }
-
    void swapVelocities() {
 
         if(m_u1BufferPtr){ m_u1BufferPtr->m_back.swap(m_u1BufferPtr->m_front); }
@@ -460,8 +405,6 @@ public:
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
 
-    typedef typename Graph::NodeVisitor<NodeDataType,EdgeDataType> NodeVisitorType;
-
     ContactGraph(ContactParameterMap<RigidBodyType> * contactParameterMap):
     m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0)
     {
@@ -729,38 +672,46 @@ private:
 };
 
 
-
+/**
+@brief Visitor for class ContactGraph<TRigidBody,ContactGraphMode::ForIteration>
+*/
 template < typename TRigidBody>
-class SorProxStepNodeVisitor: public Graph::NodeVisitor< typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::NodeDataType,
-                                                         typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::EdgeDataType<TRigidBody> >
-{
+class SorProxStepNodeVisitor{
 public:
 
-    typedef typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::NodeDataType NodeDataType;
-    typedef typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::EdgeDataType EdgeDataType;
-    typedef typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::EdgeType EdgeType;
-    typedef typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::NodeType NodeType;
+    typedef TRigidBody RigidBodyType;
+    typedef typename RigidBodyType::LayoutConfigType LayoutConfigType;
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
+    typedef ContactGraph<TRigidBody,ContactGraphMode::ForIteration> ContactGraphType;
+    typedef typename ContactGraphType::NodeDataType NodeDataType;
+    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
+    typedef typename ContactGraphType::EdgeType EdgeType;
+    typedef typename ContactGraphType::NodeType NodeType;
 
     SorProxStepNodeVisitor(const InclusionSolverSettings<LayoutConfigType> &settings,
-                           bool & globalConverged ,
-                           Logging::Log & solverLog):
-            m_Settings(settings),m_bConverged(globalConverged),m_pSolverLog(solverLog)
+                           bool & globalConverged, const unsigned int & globalIterationNeeded):
+            m_Settings(settings),m_bConverged(globalConverged),
+            m_iterationsNeeded(globalIterationNeeded)
     {}
 
+    void setLog(Logging::Log * solverLog){
+        m_pSolverLog = solverLog;
+    }
 
-
-
-     void visitNode(NodeDataType & node){
-        /* Convergence Criterias are no more checked if the globalConverged flag is already flase
+    void visitNode(NodeType& node){
+        /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
            Then the iteration is not converged somewhere, and we need to wait till the next iteration!
         */
         typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
+        static VectorDyn uCache1,uCache2;
+
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+        #endif
 
         if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {
 
-#if CoutLevelSolverWhenContact>2
-            *m_pSolverLog, "Node: " << node.m_nodeNumber <<"====================="<<  std::endl;
-#endif
+
             // Init the prox value
             nodeData.m_LambdaFront = nodeData.m_b;
 
@@ -787,8 +738,8 @@ public:
             );
 
 #if CoutLevelSolverWhenContact>2
-            *m_pSolverLog <<"Lambda Back: "  << nodeData.m_LambdaBack.transpose() << std::endl;
-            *m_pSolverLog <<"Lambda Front: " << nodeData.m_LambdaFront.transpose() << std::endl;
+            LOG(m_pSolverLog, "Lambda Back: "  << nodeData.m_LambdaBack.transpose() << std::endl);
+            LOG(m_pSolverLog, "Lambda Front: " << nodeData.m_LambdaFront.transpose() << std::endl);
             if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol)){
               *m_pSolverLog <<"Lambda converged"<<std::endl;
             }
@@ -902,37 +853,96 @@ public:
 
 private:
     Logging::Log * m_pSolverLog;
-    const InclusionSolverSettings & m_Settings;
+    const InclusionSolverSettings<LayoutConfigType> & m_Settings;
     bool & m_bConverged; ///< Access to global flag for cancelation criteria
+    const unsigned int & m_iterationsNeeded; ///< Access to global iteration counter
 
 };
 
 
+/**
+@brief Visitor for class ContactGraph<TRigidBody,ContactGraphMode::ForIteration>
+*/
 template < typename TRigidBody>
-class SorProxInitNodeVisitor: public Graph::NodeVisitor< typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::NodeDataType,
-                                                         typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::EdgeDataType<TRigidBody> >
-{
+class SorProxInitNodeVisitor{
 public:
 
+    typedef TRigidBody RigidBodyType;
+    typedef typename RigidBodyType::LayoutConfigType LayoutConfigType;
+    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
+    typedef ContactGraph<TRigidBody,ContactGraphMode::ForIteration> ContactGraphType;
     typedef typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::NodeDataType NodeDataType;
     typedef typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::EdgeDataType EdgeDataType;
     typedef typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::EdgeType EdgeType;
     typedef typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::NodeType NodeType;
 
-    SorProxStepNodeVisitor(const InclusionSolverSettings<LayoutConfigType> &settings,
-                           bool & globalConverged ,
-                           Logging::Log & solverLog):
-            m_Settings(settings),m_bConverged(globalConverged),m_pSolverLog(solverLog)
+    SorProxInitNodeVisitor()
     {}
 
-    void visitNode(NodeDataType & node){
+    void setLog(Logging::Log * solverLog){
+        m_pSolverLog = solverLog;
+    }
+
+    // Set Sor Prox parameter
+    void setParams(PREC alpha){
+        m_alpha = alpha;
+    }
+
+    void visitNode(NodeType & node){
+
+        typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
+
+        // Get lambda from percussion pool otherwise set to zero
+        // TODO
+        nodeData.m_LambdaBack.setZero();
+
+        // (1+e)*xi -> b
+        nodeData.m_b = nodeData.m_I_plus_eps.asDiagonal() * nodeData.m_xi;
+
+        // u_0 , calculate const b
+        // First Body
+        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED) {
+
+            // m_back contains u_s + M^⁻1*h*deltaT already!
+            nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
+
+            nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_back /* m_u_s */ ;
+            nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
+        }
+        // SECOND BODY!
+        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
+
+            // m_back contains u_s + M^⁻1*h*deltaT already!
+            nodeData.m_u2BufferPtr->m_front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
+
+            nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() *  nodeData.m_u1BufferPtr->m_back;
+            nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
+        }
+
+
+
+        // Calculate R_ii
+        nodeData.m_R_i_inv_diag(0) = m_alpha / (nodeData.m_G_ii(0,0));
+        PREC r_T = m_alpha / ((nodeData.m_G_ii.diagonal().template tail<2>()).maxCoeff());
+        nodeData.m_R_i_inv_diag(1) = r_T;
+        nodeData.m_R_i_inv_diag(2) = r_T;
+
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, " nodeData.m_b :"<< nodeData.m_b.transpose() <<std::endl
+                << " nodeData.m_G_ii :"<<std::endl<< nodeData.m_G_ii <<std::endl
+                << " nodeData.m_R_i_inv_diag: "<< nodeData.m_R_i_inv_diag.transpose() <<std::endl;);
+        #endif
+
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog,  " nodeData.m_mu: "<< nodeData.m_mu <<std::endl;);
+        #endif
+
 
     }
 
 private:
     Logging::Log * m_pSolverLog;
-    const InclusionSolverSettings & m_Settings;
-    bool & m_bConverged; ///< Access to global flag for cancelation criteria
+    PREC m_alpha;
 };
 
 
