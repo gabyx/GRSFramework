@@ -10,11 +10,11 @@
 #include "StatePoolVisBackFront.hpp"
 
 
-template< typename TLayoutConfig>
-class SharedBufferDynSys : public StatePoolVisBackFront<TLayoutConfig>
+class SharedBufferDynSys : public StatePoolVisBackFront
 {
 public:
-   DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+    DEFINE_LAYOUT_CONFIG_TYPES
+
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 	//Static and Dynamic allocation of the matrices in the class
@@ -29,20 +29,20 @@ private:
 
 
 };
-template< typename TLayoutConfig>
-SharedBufferDynSys<TLayoutConfig>::SharedBufferDynSys(unsigned int nSimBodies):
-StatePoolVisBackFront<TLayoutConfig>(nSimBodies)
+
+SharedBufferDynSys::SharedBufferDynSys(unsigned int nSimBodies):
+StatePoolVisBackFront(nSimBodies)
 {
 	reset();
 }
 
-template< typename TLayoutConfig>
-SharedBufferDynSys<TLayoutConfig>::~SharedBufferDynSys(){
+
+SharedBufferDynSys::~SharedBufferDynSys(){
   DECONSTRUCTOR_MESSAGE
 }
 
-template< typename TLayoutConfig>
-void SharedBufferDynSys<TLayoutConfig>::reset(){
+
+void SharedBufferDynSys::reset(){
 	this->resetStatePool();
 }
 

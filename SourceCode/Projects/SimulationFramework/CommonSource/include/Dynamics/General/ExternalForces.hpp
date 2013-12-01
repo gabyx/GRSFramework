@@ -1,19 +1,23 @@
 #ifndef ExternalForces_hpp
 #define ExternalForces_hpp
 
+
+
 #include <functional>
 #include <cmath>
 
 #include <boost/random.hpp>
 #include <boost/generator_iterator.hpp>
 
+#include "TypeDefs.hpp"
 #include "AABB.hpp"
 
-template<typename TDynamicsSystem>
+#include RigidBody_INCLUDE_FILE
+
 class SpatialSphericalTimeRandomForceField{
     public:
-        typedef TDynamicsSystem DynamicsSystemType;
-        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemType::DynamicsSystemConfig);
+
+        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
         SpatialSphericalTimeRandomForceField(unsigned int seed,
                                            PREC boostTime,
@@ -36,14 +40,13 @@ class SpatialSphericalTimeRandomForceField{
 
         ~SpatialSphericalTimeRandomForceField(){
             delete m_randomG;
-        }
-        void calculate(RigidBodyType * body){
+        }        void calculate(RigidBodyType * body){
             if(m_inInterval){
                 ASSERTMSG(body->m_pSolverData, "Solverdata not present!")
                 if(m_ts <= m_boostTime){
                     Vector3 r = body->m_r_S - m_offset ;
                     r.normalize();
-                    body->m_h_term.template head<3>() += r*m_amplitude;
+                    body->m_h_term.head<3>() += r*m_amplitude;
                 }
             }
         }
@@ -112,11 +115,10 @@ class SpatialSphericalTimeRandomForceField{
 };
 
 
-template<typename TDynamicsSystem>
+
 class ExternalForceList{
     public:
-        typedef TDynamicsSystem DynamicsSystemType;
-        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemType::DynamicsSystemConfig);
+        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
         typedef typename std::vector< std::function<void (RigidBodyType *)> >::iterator iterator;
 

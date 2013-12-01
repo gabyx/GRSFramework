@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
     new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
 
 
-    SimulationManager<GeneralConfig> mgr;
+    SimulationManager mgr;
 
     mgr.setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
     mgr.startSim();

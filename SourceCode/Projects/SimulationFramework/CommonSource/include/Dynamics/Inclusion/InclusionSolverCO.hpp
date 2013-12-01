@@ -38,7 +38,7 @@
 * @ingroup Inclusion
 * @brief The inclusion solver for an ordered problem.
 */
-template< typename TInclusionSolverConfig>
+
 class InclusionSolverCO {
 public:
 
@@ -136,8 +136,8 @@ protected:
 
 
 
-template< typename TInclusionSolverConfig>
-InclusionSolverCO<TInclusionSolverConfig>::InclusionSolverCO(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,  boost::shared_ptr<DynamicsSystemType> pDynSys):
+
+InclusionSolverCO::InclusionSolverCO(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,  boost::shared_ptr<DynamicsSystemType> pDynSys):
     m_SimBodies(pCollisionSolver->m_SimBodies),
     m_Bodies(pCollisionSolver->m_Bodies) {
 
@@ -179,8 +179,8 @@ InclusionSolverCO<TInclusionSolverConfig>::InclusionSolverCO(boost::shared_ptr< 
 
 }
 
-template< typename TInclusionSolverConfig>
-void InclusionSolverCO<TInclusionSolverConfig>::initializeLog( Logging::Log* pSolverLog,  boost::filesystem::path folder_path ) {
+
+void InclusionSolverCO::initializeLog( Logging::Log* pSolverLog,  boost::filesystem::path folder_path ) {
     m_pSolverLog = pSolverLog;
 
 
@@ -190,13 +190,13 @@ void InclusionSolverCO<TInclusionSolverConfig>::initializeLog( Logging::Log* pSo
 }
 
 
-template< typename TInclusionSolverConfig>
-unsigned int InclusionSolverCO<TInclusionSolverConfig>::getNObjects() {
+
+unsigned int InclusionSolverCO::getNObjects() {
     return m_nSimBodies;
 }
 
-template< typename TInclusionSolverConfig>
-void InclusionSolverCO<TInclusionSolverConfig>::reset() {
+
+void InclusionSolverCO::reset() {
     // Do a Debug check if sizes match!
     ASSERTMSG( m_SimBodies.size() * NDOFuObj == m_nDofu, "InclusionSolverCO:: Error in Dimension of System!");
     ASSERTMSG( m_SimBodies.size() * NDOFqObj == m_nDofq, "InclusionSolverCO:: Error in Dimension of System!");
@@ -224,8 +224,8 @@ void InclusionSolverCO<TInclusionSolverConfig>::reset() {
 
 }
 
-template< typename TInclusionSolverConfig>
-void InclusionSolverCO<TInclusionSolverConfig>::resetForNextIter() {
+
+void InclusionSolverCO::resetForNextIter() {
     m_nContacts = 0;
     m_nLambdas = 0;
 
@@ -238,27 +238,27 @@ void InclusionSolverCO<TInclusionSolverConfig>::resetForNextIter() {
 }
 
 
-template< typename TInclusionSolverConfig>
-void InclusionSolverCO<TInclusionSolverConfig>::swapPercussionBuffer() {
+
+void InclusionSolverCO::swapPercussionBuffer() {
     std::swap(m_P_back,m_P_front);
 }
 
-template< typename TInclusionSolverConfig>
-void InclusionSolverCO<TInclusionSolverConfig>::resetPercussionBuffer() {
+
+void InclusionSolverCO::resetPercussionBuffer() {
     m_P_back = &m_P_1;
     m_P_front = &m_P_2;
 }
 
 
 
-template< typename TInclusionSolverConfig>
-void InclusionSolverCO<TInclusionSolverConfig>::reservePercussionPoolSpace( unsigned int nExpectedContacts ) {
+
+void InclusionSolverCO::reservePercussionPoolSpace( unsigned int nExpectedContacts ) {
     m_nExpectedContacts = nExpectedContacts;
     m_PercussionPool.rehashPercussionPool(m_nExpectedContacts);
 }
 
-template< typename TInclusionSolverConfig>
-void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const DynamicsState<LayoutConfigType> * state_s,
+
+void InclusionSolverCO::solveInclusionProblem(const DynamicsState<LayoutConfigType> * state_s,
         const DynamicsState<LayoutConfigType> * state_m,
         DynamicsState<LayoutConfigType> * state_e) {
 
@@ -504,8 +504,8 @@ void InclusionSolverCO<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 
 }
 
-template< typename TInclusionSolverConfig>
-void InclusionSolverCO<TInclusionSolverConfig>::setupRMatrix(PREC alpha) {
+
+void InclusionSolverCO::setupRMatrix(PREC alpha) {
     PREC r_T_i;
     for(unsigned int i=0; i<m_nContacts; i++) {
         m_R((ContactDim)*i) =  alpha / m_T((ContactDim)*i,(ContactDim)*i);
@@ -521,8 +521,8 @@ void InclusionSolverCO<TInclusionSolverConfig>::setupRMatrix(PREC alpha) {
 
 }
 
-template< typename TInclusionSolverConfig>
-void InclusionSolverCO<TInclusionSolverConfig>::doJorProx() {
+
+void InclusionSolverCO::doJorProx() {
 
     // This JOR Prox is worse then JOR prox of InclusionSolverNT which uses P_Front_N already for tangential directions.
 
@@ -592,8 +592,8 @@ void InclusionSolverCO<TInclusionSolverConfig>::doJorProx() {
 
 }
 
-template< typename TInclusionSolverConfig>
-void InclusionSolverCO<TInclusionSolverConfig>::doSorProx() {
+
+void InclusionSolverCO::doSorProx() {
 
     static VectorDyn PContact_back(NDOFFriction);
     static unsigned int counterConverged;
@@ -674,8 +674,8 @@ void InclusionSolverCO<TInclusionSolverConfig>::doSorProx() {
 #endif
 }
 
-template< typename TInclusionSolverConfig>
-void InclusionSolverCO<TInclusionSolverConfig>::updatePercussionPool(const VectorDyn & P_old ) {
+
+void InclusionSolverCO::updatePercussionPool(const VectorDyn & P_old ) {
     static VectorDyn P_contact(ContactDim);
     for(unsigned int i = 0; i< m_nContacts; i++) {
         P_contact(0) = P_old((ContactDim)*i);
@@ -689,8 +689,8 @@ void InclusionSolverCO<TInclusionSolverConfig>::updatePercussionPool(const Vecto
 }
 
 
-template< typename TInclusionSolverConfig>
-void  InclusionSolverCO<TInclusionSolverConfig>::readFromPercussionPool(unsigned int index, const CollisionData<RigidBodyType> * pCollData, VectorDyn & P_old) {
+
+void  InclusionSolverCO::readFromPercussionPool(unsigned int index, const CollisionData<RigidBodyType> * pCollData, VectorDyn & P_old) {
     static VectorDyn P_contact(ContactDim);
 //
 //   std::cout << pCollData->m_ContactTag.m_tag.template get<0>()
@@ -706,8 +706,8 @@ void  InclusionSolverCO<TInclusionSolverConfig>::readFromPercussionPool(unsigned
     P_old((ContactDim)*index+2) = P_contact(2);
 }
 
-template< typename TInclusionSolverConfig>
-std::string InclusionSolverCO<TInclusionSolverConfig>::getIterationStats() {
+
+std::string InclusionSolverCO::getIterationStats() {
     std::stringstream s;
 
     s   << m_bUsedGPU<<"\t"

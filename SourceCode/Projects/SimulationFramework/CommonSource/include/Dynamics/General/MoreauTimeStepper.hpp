@@ -20,6 +20,12 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
+
+
+#include DynamicsSystem_INCLUDE_FILE
+#include CollisionSolver_INCLUDE_FILE
+#include InclusionSolver_INCLUDE_FILE
+
 #include "DynamicsState.hpp"
 #include "FrontBackBuffer.hpp"
 #include "BinaryFile.hpp"
@@ -36,13 +42,11 @@
 * @ingroup DynamicsGeneral
 * @brief The Moreau time stepper.
 */
-template< typename TConfigTimeStepper >
+
 class MoreauTimeStepper {
 public:
 
-    typedef TConfigTimeStepper TimeStepperConfigType;
-    DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( TConfigTimeStepper )
-
+    DEFINE_TIMESTEPPER_CONFIG_TYPES
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -127,12 +131,12 @@ protected:
 definitions of template class MoreauTimeStepper
 _________________________________________________________*/
 #include <iostream>
-#include "DynamicsSystem.hpp"
+#include DynamicsSystem_INCLUDE_FILE
 
 #include "LogDefines.hpp"
 
-template< typename TConfigTimeStepper>
-MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState):
+
+MoreauTimeStepper::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState):
     m_state_m(nSimBodies),
     m_nSimBodies(nSimBodies),
     m_ReferenceSimFile(NDOFqObj,NDOFuObj)
@@ -162,15 +166,15 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(const unsigned int nS
 
 
 
-template< typename TConfigTimeStepper>
-MoreauTimeStepper<  TConfigTimeStepper>::~MoreauTimeStepper() {
+
+MoreauTimeStepper::~MoreauTimeStepper() {
     m_CollisionDataFile.close();
     m_SystemDataFile.close();
     DECONSTRUCTOR_MESSAGE
 };
 
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::closeAllFiles() {
+
+void MoreauTimeStepper::closeAllFiles() {
 
     Logging::LogManager::getSingletonPtr()->destroyLog("SolverLog");
     m_pSolverLog = NULL;
@@ -179,8 +183,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::closeAllFiles() {
     m_SystemDataFile.close();
 }
 
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ) {
+
+void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ) {
 
     // Set new Simfile Path
     m_SimFolderPath = folder_path;
@@ -239,8 +243,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::initLogs(  const boost::filesystem
 }
 
 
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
+
+void MoreauTimeStepper::reset() {
     //set standart values for parameters
     m_IterationCounter = 0;
     m_bIterationFinished = false;
@@ -289,8 +293,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
     m_bFinished = false;
 };
 
-template< typename TConfigTimeStepper>
-double MoreauTimeStepper<  TConfigTimeStepper>::getTimeCurrent() {
+
+double MoreauTimeStepper::getTimeCurrent() {
     if(!m_bIterationFinished){
         return m_StateBuffers.m_pBack->m_t;
     }
@@ -299,35 +303,35 @@ double MoreauTimeStepper<  TConfigTimeStepper>::getTimeCurrent() {
     }
 }
 
-template< typename TConfigTimeStepper>
-unsigned int MoreauTimeStepper<  TConfigTimeStepper>::getIterationCount() {
+
+unsigned int MoreauTimeStepper::getIterationCount() {
     return m_IterationCounter;
 }
 
 
-template< typename TConfigTimeStepper>
+
 boost::shared_ptr<
 const DynamicsState<
-typename TConfigTimeStepper::DynamicsSystemType::RigidBodyType::RigidBodyConfigType::LayoutConfigType
+typename MoreauTimeStepper::LayoutConfigType
 >
 >
-MoreauTimeStepper<  TConfigTimeStepper>::getBackStateBuffer() {
+MoreauTimeStepper::getBackStateBuffer() {
     return m_StateBuffers.m_pBack;
 }
 
 
-template< typename TConfigTimeStepper>
+
 boost::shared_ptr<
 const DynamicsState<
-typename TConfigTimeStepper::DynamicsSystemType::RigidBodyType::RigidBodyConfigType::LayoutConfigType
+typename MoreauTimeStepper::LayoutConfigType
 >
 >
-MoreauTimeStepper<  TConfigTimeStepper>::getFrontStateBuffer() {
+MoreauTimeStepper::getFrontStateBuffer() {
     return m_StateBuffers.m_pFront;
 }
 
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
+
+void MoreauTimeStepper::doOneIteration() {
     static std::stringstream logstream;
 
     static int iterations=0; // Average is reset after 1000 Iterations
@@ -443,12 +447,12 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     m_bIterationFinished = true;
 }
 
-template< typename TConfigTimeStepper>
-bool MoreauTimeStepper<  TConfigTimeStepper>::finished() {
+
+bool MoreauTimeStepper::finished() {
     return m_bFinished;
 }
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToSystemDataFile(double globalTime) {
+
+void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
 #if OUTPUT_SYSTEMDATA_FILE == 1
 
     m_SystemDataFile
@@ -462,8 +466,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToSystemDataFile(dou
     << m_pInclusionSolver->getIterationStats() << std::endl;
 #endif
 }
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToCollisionDataFile() {
+
+void MoreauTimeStepper::writeIterationToCollisionDataFile() {
 #if OUTPUT_COLLISIONDATA_FILE == 1
 
     double averageOverlap = 0;
@@ -480,8 +484,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToCollisionDataFile(
 #endif
 }
 
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::swapStateBuffers() {
+
+void MoreauTimeStepper::swapStateBuffers() {
     m_StateBuffers = m_pStatePool->swapFrontBackBuffer();
 }
 

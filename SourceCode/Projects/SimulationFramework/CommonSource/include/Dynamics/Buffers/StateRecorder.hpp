@@ -13,16 +13,18 @@
 #include "MultiBodySimFile.hpp"
 #include "SimpleLogger.hpp"
 
+#include DynamicsSystem_INCLUDE_FILE
+
 /**
 * @ingroup StatesAndBuffers
 * @brief This is the StateRecorder class which records states to a MultiBodySimFile.
 * @{
 */
-template <typename TDynamicsSystem>
 class StateRecorder {
 public:
-    typedef TDynamicsSystem DynamicsSystemType;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystem::DynamicsSystemConfig)
+
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     StateRecorder(const unsigned int nSimBodies);
@@ -42,7 +44,7 @@ public:
     }
 
 
-    StateRecorder<TDynamicsSystem> & operator << (const DynamicsState<LayoutConfigType>* value);
+    StateRecorder & operator << (const DynamicsState<LayoutConfigType>* value);
 
 protected:
 
@@ -66,8 +68,8 @@ protected:
 
 
 
-template<typename TDynamicsSystem>
-StateRecorder<TDynamicsSystem>::StateRecorder(const unsigned int nSimBodies):
+
+StateRecorder::StateRecorder(const unsigned int nSimBodies):
     m_binarySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj) {
     m_nSimBodies = nSimBodies;
 
@@ -84,15 +86,15 @@ StateRecorder<TDynamicsSystem>::StateRecorder(const unsigned int nSimBodies):
 
 }
 
-template<typename TDynamicsSystem>
-StateRecorder<TDynamicsSystem>::~StateRecorder() {
+
+StateRecorder::~StateRecorder() {
     DECONSTRUCTOR_MESSAGE
     closeAll();
 }
 
 
-template<typename TDynamicsSystem>
-bool StateRecorder<TDynamicsSystem>::createSimFile(boost::filesystem::path file_path) {
+
+bool StateRecorder::createSimFile(boost::filesystem::path file_path) {
     m_pSimulationLog->logMessage("---> Record to Sim file at: " + file_path.string());
     if(m_binarySimFile.openWrite(file_path,m_nSimBodies)) {
         return true;
@@ -100,8 +102,8 @@ bool StateRecorder<TDynamicsSystem>::createSimFile(boost::filesystem::path file_
     return false;
 }
 
-template<typename TDynamicsSystem>
-bool StateRecorder<TDynamicsSystem>::createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path) {
+
+bool StateRecorder::createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path) {
 
     MultiBodySimFile tmpFile(NDOFqObj,NDOFuObj);
     bool fileOK = tmpFile.openRead(ref_file_path,m_nSimBodies,false); //Open file to see if this file fits our simulation!!
@@ -120,20 +122,19 @@ bool StateRecorder<TDynamicsSystem>::createSimFileCopyFromReference(boost::files
     return false;
 }
 
-template<typename TDynamicsSystem>
-StateRecorder<TDynamicsSystem> & StateRecorder<TDynamicsSystem>::operator << (const DynamicsState<LayoutConfigType>* value) {
+
+StateRecorder & StateRecorder::operator << (const DynamicsState<LayoutConfigType>* value) {
     m_binarySimFile << (value);
 }
 
 
-template<typename TDynamicsSystem>
-void StateRecorder<TDynamicsSystem>::closeAll() {
+
+void StateRecorder::closeAll() {
     m_binarySimFile.close();
 }
 
 
-template <typename TDynamicsSystem>
-void StateRecorder<TDynamicsSystem>::write( const DynamicsState<LayoutConfigType>* value ) {
+void StateRecorder::write( const DynamicsState<LayoutConfigType>* value ) {
     m_binarySimFile << value;
 }
 

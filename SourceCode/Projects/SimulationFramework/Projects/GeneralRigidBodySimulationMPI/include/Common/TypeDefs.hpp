@@ -137,7 +137,7 @@ template< typename TRigidBodyConfig> class RigidBodyBase;
 template< typename TLayoutConfig > class RigidBodySolverDataCONoG;
 template< typename TLayoutConfig > class RigidBodySolverDataNone;
 
-template< typename TConfigTimeStepper > class MoreauTimeStepper;
+ class MoreauTimeStepper;
 
 
 // Just defintion to save it!
@@ -232,7 +232,6 @@ typedef Config< MySolverConfig > GeneralConfig;
 struct MyIOFormat{
   static Eigen::IOFormat Matlab;
 };
-
 
 
 typedef double MeshPREC;

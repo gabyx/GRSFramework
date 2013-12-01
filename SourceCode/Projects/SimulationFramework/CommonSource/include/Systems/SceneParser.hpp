@@ -18,6 +18,8 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
+#include DynamicsSystem_INCLUDE_FILE
+
 #include "RigidBodyId.hpp"
 
 #include "ContactParams.hpp"
@@ -48,11 +50,10 @@
 //#include "tinyxml.h"
 
 
-template<typename TDynamicsSystemConfig>
 class GetScaleOfGeomVisitor : public boost::static_visitor<>{
     public:
-    typedef TDynamicsSystemConfig DynamicsSystemConfig;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemConfig)
+
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     GetScaleOfGeomVisitor(Vector3 & scale): m_scale(scale){};
 
@@ -71,11 +72,10 @@ class GetScaleOfGeomVisitor : public boost::static_visitor<>{
     Vector3 & m_scale;
 };
 
-template<typename TConfig>
 class SceneParser {
 public:
 
-    DEFINE_CONFIG_TYPES_OF(TConfig)
+    DEFINE_CONFIG_TYPES
 
     SceneParser(boost::shared_ptr<DynamicsSystemType> pDynSys)
         : m_pDynSys(pDynSys) {
@@ -520,7 +520,7 @@ protected:
 
 
                 m_pDynSys->m_externalForces.addExternalForceCalculation(
-                                                    new SpatialSphericalTimeRandomForceField<DynamicsSystemType>(
+                                                    new SpatialSphericalTimeRandomForceField(
                                                                 seed,
                                                                 boostTime,
                                                                 pauseTime,
@@ -1003,7 +1003,7 @@ protected:
             }
 
             for(int i=0; i < m_bodyList.size(); i++){
-                GetScaleOfGeomVisitor<DynamicsSystemType> vis(m_bodyListScales[i]);
+                GetScaleOfGeomVisitor vis(m_bodyListScales[i]);
                 boost::apply_visitor(vis, it->second);
                 m_bodyList[i]->m_geometry = it->second;
                 m_bodyList[i]->m_globalGeomId = id;
@@ -1031,7 +1031,7 @@ protected:
                    throw ticpp::Exception("---> processGlobalGeomId: Geometry search failed!");
                 }
 
-                GetScaleOfGeomVisitor<DynamicsSystemType> vis(m_bodyListScales[i]);
+                GetScaleOfGeomVisitor vis(m_bodyListScales[i]);
                 boost::apply_visitor(vis, it->second);
                 m_bodyList[i]->m_geometry = it->second;
                 m_bodyList[i]->m_globalGeomId = id;
@@ -1079,7 +1079,7 @@ protected:
                    throw ticpp::Exception("---> Geometry search in processGlobalGeomId: failed!");
                 }
 
-                GetScaleOfGeomVisitor<DynamicsSystemType> vis(m_bodyListScales[i]);
+                GetScaleOfGeomVisitor vis(m_bodyListScales[i]);
                 boost::apply_visitor(vis, it->second);
                 m_bodyList[i]->m_geometry = it->second;
                 m_bodyList[i]->m_globalGeomId = id;
@@ -1503,8 +1503,8 @@ protected:
             }
 
             // Apply overall transformation!
-            state.m_SimBodyStates[bodyCounter].m_q.template head<3>() = I_r_IK;
-            state.m_SimBodyStates[bodyCounter].m_q.template tail<4>() = q_KI;
+            state.m_SimBodyStates[bodyCounter].m_q.head<3>() = I_r_IK;
+            state.m_SimBodyStates[bodyCounter].m_q.tail<4>() = q_KI;
 
             bodyCounter++;
         }
@@ -1512,8 +1512,8 @@ protected:
         if(bodyCounter < state.m_SimBodyStates.size()) {
             LOG(m_pSimulationLog,"---> InitialPositionTransforms: You specified to little transforms, -> applying last to all remainig bodies ..."<<std::endl;);
             for(int i=bodyCounter;i<state.m_SimBodyStates.size();i++){
-                state.m_SimBodyStates[i].m_q.template head<3>() = I_r_IK;
-                state.m_SimBodyStates[i].m_q.template tail<4>() = q_KI;
+                state.m_SimBodyStates[i].m_q.head<3>() = I_r_IK;
+                state.m_SimBodyStates[i].m_q.tail<4>() = q_KI;
             }
         }
 
@@ -1555,8 +1555,8 @@ protected:
                 throw ticpp::Exception("---> String conversion in InitialVelocityTransRot: absTransVel failed");
             }
 
-            state.m_SimBodyStates[bodyCounter].m_u.template head<3>() = transDir*vel;
-            state.m_SimBodyStates[bodyCounter].m_u.template tail<3>() = rotDir*rot;
+            state.m_SimBodyStates[bodyCounter].m_u.head<3>() = transDir*vel;
+            state.m_SimBodyStates[bodyCounter].m_u.tail<3>() = rotDir*rot;
 
             bodyCounter++;
         }
@@ -1564,8 +1564,8 @@ protected:
         if(bodyCounter < state.m_SimBodyStates.size()) {
             LOG(m_pSimulationLog,"---> InitialVelocityTransRot: You specified to little transforms, -> applying last to all remainig bodies ..."<<std::endl;);
             for(int i=bodyCounter;i<state.m_SimBodyStates.size();i++){
-                state.m_SimBodyStates[i].m_u.template head<3>() = transDir*vel;
-                state.m_SimBodyStates[i].m_u.template tail<3>() = rotDir*rot;
+                state.m_SimBodyStates[i].m_u.head<3>() = transDir*vel;
+                state.m_SimBodyStates[i].m_u.tail<3>() = rotDir*rot;
             }
         }
 

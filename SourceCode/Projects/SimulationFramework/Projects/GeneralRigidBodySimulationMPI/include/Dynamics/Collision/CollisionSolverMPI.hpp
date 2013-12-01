@@ -69,7 +69,7 @@ private:
 * @brief This is the CollisionSolver class, which basically solves the collision.
 */
 /** @{ */
-template< typename TCollisionSolverConfig >
+
 class CollisionSolver {
 public:
 
@@ -134,29 +134,29 @@ protected:
 
 
 
-template< typename TCollisionSolverConfig >
-CollisionSolver<TCollisionSolverConfig>::CollisionSolver(boost::shared_ptr< DynamicsSystemType> pDynSys):
+
+CollisionSolver::CollisionSolver(boost::shared_ptr< DynamicsSystemType> pDynSys):
     m_SimBodies(pDynSys->m_SimBodies), m_Bodies(pDynSys->m_Bodies), m_RemoteSimBodies(pDynSys->m_RemoteSimBodies),
     m_Collider(&m_collisionSet)
 {
     m_expectedNContacts = 300;
 }
 
-template< typename TCollisionSolverConfig >
-CollisionSolver<TCollisionSolverConfig>::~CollisionSolver() {
+
+CollisionSolver::~CollisionSolver() {
     clearCollisionSet();
 }
 
 
-template< typename TCollisionSolverConfig >
-void CollisionSolver<TCollisionSolverConfig>::initializeLog( Logging::Log* pSolverLog ) {
+
+void CollisionSolver::initializeLog( Logging::Log* pSolverLog ) {
     m_pSolverLog = pSolverLog;
     ASSERTMSG(m_pSolverLog != NULL, "Logging::Log: NULL!");
 }
 
 
-template< typename TCollisionSolverConfig >
-void CollisionSolver<TCollisionSolverConfig>::reset() {
+
+void CollisionSolver::reset() {
     // Do a Debug check if sizes match!
     ASSERTMSG( m_SimBodies.size() != 0, "CollisionSolver:: No Bodies added to the system!");
 
@@ -170,24 +170,24 @@ void CollisionSolver<TCollisionSolverConfig>::reset() {
 
 }
 
-template< typename TCollisionSolverConfig >
-void CollisionSolver<TCollisionSolverConfig>::clearCollisionSet() {
+
+void CollisionSolver::clearCollisionSet() {
     for( typename CollisionSetType::iterator it = m_collisionSet.begin(); it != m_collisionSet.end(); it++) {
         delete (*it);
     }
     m_collisionSet.clear();
 }
 
-template< typename TCollisionSolverConfig >
-const typename CollisionSolver<TCollisionSolverConfig>::CollisionSetType &
-CollisionSolver<TCollisionSolverConfig>::getCollisionSetRef()
+
+const typename CollisionSolver::CollisionSetType &
+CollisionSolver::getCollisionSetRef()
 {
     return m_collisionSet;
 }
 
 
-template< typename TCollisionSolverConfig >
-void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
+
+void CollisionSolver::solveCollision() {
 
 
     clearCollisionSet();
@@ -237,15 +237,15 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
 
 }
 
-template<typename TCollisionSolverConfig>
-std::string CollisionSolver<TCollisionSolverConfig>::getIterationStats() {
+
+std::string CollisionSolver::getIterationStats() {
     std::stringstream s;
     s << m_maxOverlap;
     return s.str();
 }
 
-template<typename TCollisionSolverConfig>
-void CollisionSolver<TCollisionSolverConfig>::signalContactAdd() {
+
+void CollisionSolver::signalContactAdd() {
 
     if(m_collisionSet.size()!=0){
 

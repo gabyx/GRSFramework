@@ -13,27 +13,26 @@
 
 
 template <typename TLayoutConfig> class DynamicsState;
-template <typename TLayoutConfig> class StateRecorder;
-template< typename TLayoutConfig> class SharedBufferDynSys;
+class StateRecorder;
+class SharedBufferDynSys;
 
 
-template<typename TConfig>
 class SimulationManager
 {
 public:
 
-   DEFINE_CONFIG_TYPES_OF(TConfig)
+   DEFINE_CONFIG_TYPES
 
     SimulationManager();
    ~SimulationManager();
 
-   boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >	    m_pSharedBuffer;
-   boost::shared_ptr<StateRecorder<DynamicsSystemType> >		m_pStateRecorder;
+   boost::shared_ptr<SharedBufferDynSys >	    m_pSharedBuffer;
+   boost::shared_ptr<StateRecorder >		m_pStateRecorder;
 
    void setup();
    void setup(boost::filesystem::path sceneFilePath);
 
-   boost::shared_ptr< SceneParser<TConfig> > m_pSceneParser;
+   boost::shared_ptr< SceneParser > m_pSceneParser;
 
    void startSim();
 

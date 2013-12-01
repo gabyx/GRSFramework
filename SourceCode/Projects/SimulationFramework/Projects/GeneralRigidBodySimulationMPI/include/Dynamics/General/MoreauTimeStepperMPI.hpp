@@ -45,7 +45,7 @@
 * @ingroup DynamicsGeneral
 * @brief The Moreau time stepper.
 */
-template< typename TConfigTimeStepper>
+
 class MoreauTimeStepper {
 public:
 
@@ -128,8 +128,8 @@ protected:
 definitions of template class MoreauTimeStepper
 _________________________________________________________*/
 
-template< typename TConfigTimeStepper>
-MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
+
+MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
                                                            boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> > pNbCommunicator):
     m_ReferenceSimFile(NDOFqObj,NDOFuObj) {
 
@@ -153,15 +153,15 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(boost::shared_ptr<Dyn
 
 
 
-template< typename TConfigTimeStepper>
-MoreauTimeStepper<  TConfigTimeStepper>::~MoreauTimeStepper() {
+
+MoreauTimeStepper::~MoreauTimeStepper() {
     m_CollisionDataFile.close();
     m_SystemDataFile.close();
     DECONSTRUCTOR_MESSAGE
 };
 
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::closeAllFiles() {
+
+void MoreauTimeStepper::closeAllFiles() {
 
     Logging::LogManager::getSingletonPtr()->destroyLog("SolverLog");
     m_pSolverLog = NULL;
@@ -170,8 +170,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::closeAllFiles() {
     m_SystemDataFile.close();
 }
 
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ) {
+
+void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ) {
 
     // Set new Simfile Path
     m_SimFolderPath = folder_path;
@@ -230,8 +230,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::initLogs(  const boost::filesystem
 }
 
 
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
+
+void MoreauTimeStepper::reset() {
      //set standart values for parameters
     m_IterationCounter = 0;
     m_bIterationFinished = false;
@@ -269,19 +269,19 @@ void MoreauTimeStepper<  TConfigTimeStepper>::reset() {
     m_bFinished = false;
 };
 
-template< typename TConfigTimeStepper>
-double MoreauTimeStepper<  TConfigTimeStepper>::getTimeCurrent() {
+
+double MoreauTimeStepper::getTimeCurrent() {
     return m_currentSimulationTime;
 }
 
-template< typename TConfigTimeStepper>
-unsigned int MoreauTimeStepper<  TConfigTimeStepper>::getIterationCount() {
+
+unsigned int MoreauTimeStepper::getIterationCount() {
     return m_IterationCounter;
 }
 
 
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
+
+void MoreauTimeStepper::doOneIteration() {
     static std::stringstream logstream;
 
     static int iterations=0; // Average is reset after 1000 Iterations
@@ -428,12 +428,12 @@ void MoreauTimeStepper<  TConfigTimeStepper>::doOneIteration() {
     m_bIterationFinished = true;
 }
 
-template< typename TConfigTimeStepper>
-bool MoreauTimeStepper<  TConfigTimeStepper>::finished() {
+
+bool MoreauTimeStepper::finished() {
     return m_bFinished;
 }
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToSystemDataFile(double globalTime) {
+
+void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
 #if OUTPUT_SYSTEMDATA_FILE == 1
 
     m_SystemDataFile
@@ -446,8 +446,8 @@ void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToSystemDataFile(dou
     << m_pInclusionSolver->getIterationStats() << std::endl;
 #endif
 }
-template< typename TConfigTimeStepper>
-void MoreauTimeStepper<  TConfigTimeStepper>::writeIterationToCollisionDataFile() {
+
+void MoreauTimeStepper::writeIterationToCollisionDataFile() {
 #if OUTPUT_COLLISIONDATA_FILE == 1
 
     double averageOverlap = 0;

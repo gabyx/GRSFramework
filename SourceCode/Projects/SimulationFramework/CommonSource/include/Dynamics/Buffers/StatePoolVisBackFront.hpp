@@ -17,13 +17,13 @@
 * gives the state for the back buffer and the first index is the state corresponding to the front buffer.
 * @{
 */
-template< typename TLayoutConfig >
-class StatePoolVisBackFront : public StatePool<TLayoutConfig>{
+class StatePoolVisBackFront : public StatePool{
 public:
 
   DECLERATIONS_STATEPOOL
 
-  DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+  DEFINE_LAYOUT_CONFIG_TYPES
+
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   StatePoolVisBackFront(const unsigned int nSimBodies);
@@ -32,7 +32,7 @@ public:
   /** @name Only accessed by Simulation Thread.
   * @{
   */
-  typedef FrontBackBuffer<DynamicsState<TLayoutConfig>, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
+  typedef FrontBackBuffer<DynamicsState<LayoutConfigType>, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
 
   FrontBackBufferType getFrontBackBuffer();
   FrontBackBufferType swapFrontBackBuffer();
@@ -41,15 +41,15 @@ public:
   /** @name Only accessed by Visualization Thread.
   * @{
   */
-  boost::shared_ptr<const DynamicsState<TLayoutConfig> > updateVisBuffer(bool & out_changed);
-  boost::shared_ptr<const DynamicsState<TLayoutConfig> > updateVisBuffer();
+  boost::shared_ptr<const DynamicsState<LayoutConfigType> > updateVisBuffer(bool & out_changed);
+  boost::shared_ptr<const DynamicsState<LayoutConfigType> > updateVisBuffer();
   /** @} */
 
   /** @name Only accessed by if only Visualization Thread runs.
   * @{
   */
-  void initializeStatePool(const DynamicsState<TLayoutConfig> & state_init);
-  void initializeStatePool(const std::vector<DynamicsState<TLayoutConfig> > & state_initList); ///< Used to initialize from a list of DynamicStates which count up to the number of simulated bodies.
+  void initializeStatePool(const DynamicsState<LayoutConfigType> & state_init);
+  void initializeStatePool(const std::vector<DynamicsState<LayoutConfigType> > & state_initList); ///< Used to initialize from a list of DynamicStates which count up to the number of simulated bodies.
   void resetStatePool();
   /** @} */
 
@@ -65,14 +65,14 @@ protected:
   const unsigned int m_nDofuObj, m_nDofqObj, m_nSimBodies; // These are the dimensions for one Obj
 
   boost::mutex	m_mutexStateInit; ///< Mutex for the initial state.
-  DynamicsState<TLayoutConfig> m_state_init; ///< The initial state for the system.
+  DynamicsState<LayoutConfigType> m_state_init; ///< The initial state for the system.
 };
 /** @} */
 
 
-template<typename TLayoutConfig>
-StatePoolVisBackFront<TLayoutConfig>::StatePoolVisBackFront(const unsigned int nSimBodies):
-StatePool<TLayoutConfig>(3),
+
+StatePoolVisBackFront::StatePoolVisBackFront(const unsigned int nSimBodies):
+StatePool(3),
 m_state_init(nSimBodies),
 m_nSimBodies(nSimBodies),
 m_nDofqObj(NDOFqObj),
@@ -83,21 +83,21 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
 
   // Add the 3 state pools, if m_state_pointer is deleted, all elements inside are deleted because of shared_ptr
   m_pool.push_back(
-    boost::shared_ptr<DynamicsState<TLayoutConfig> >(new DynamicsState<TLayoutConfig>(nSimBodies))
+    boost::shared_ptr<DynamicsState<LayoutConfigType> >(new DynamicsState<LayoutConfigType>(nSimBodies))
     );
   m_pool.push_back(
-    boost::shared_ptr<DynamicsState<TLayoutConfig> >(new DynamicsState<TLayoutConfig>(nSimBodies))
+    boost::shared_ptr<DynamicsState<LayoutConfigType> >(new DynamicsState<LayoutConfigType>(nSimBodies))
     );
 
   m_pool.push_back(
-    boost::shared_ptr<DynamicsState<TLayoutConfig> >(new DynamicsState<TLayoutConfig>(nSimBodies))
+    boost::shared_ptr<DynamicsState<LayoutConfigType> >(new DynamicsState<LayoutConfigType>(nSimBodies))
     );
 
   m_idx[0] = 1; //front
   m_idx[1] = 0; //back
   m_idx[2] = 0; //vis
 
-  initializeStatePool( DynamicsState<TLayoutConfig>(nSimBodies) );
+  initializeStatePool( DynamicsState<LayoutConfigType>(nSimBodies) );
 
 
   // Init Log
@@ -114,8 +114,8 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
 }
 
 
-template<typename TLayoutConfig>
-void StatePoolVisBackFront<TLayoutConfig>::initializeStatePool(const DynamicsState<TLayoutConfig> & state_init){
+
+void StatePoolVisBackFront::initializeStatePool(const DynamicsState<LayoutConfigType> & state_init){
 
   boost::mutex::scoped_lock l1(m_mutexStateInit);
   boost::mutex::scoped_lock l2(m_change_pointer_mutex);
@@ -130,8 +130,8 @@ void StatePoolVisBackFront<TLayoutConfig>::initializeStatePool(const DynamicsSta
 #endif
 }
 
-template<typename TLayoutConfig>
-void StatePoolVisBackFront<TLayoutConfig>::initializeStatePool(const std::vector<DynamicsState<TLayoutConfig> > & state_initList){
+
+void StatePoolVisBackFront::initializeStatePool(const std::vector<DynamicsState<LayoutConfigType> > & state_initList){
 
   boost::mutex::scoped_lock l1(m_mutexStateInit);
   boost::mutex::scoped_lock l2(m_change_pointer_mutex);
@@ -156,26 +156,26 @@ void StatePoolVisBackFront<TLayoutConfig>::initializeStatePool(const std::vector
 #endif
 }
 
-template<typename TLayoutConfig>
-StatePoolVisBackFront<TLayoutConfig>::~StatePoolVisBackFront()
+
+StatePoolVisBackFront::~StatePoolVisBackFront()
 {
   DECONSTRUCTOR_MESSAGE
   m_logfile.close();
 }
 
 // ==========================
-template<typename TLayoutConfig>
-typename TLayoutConfig::VectorQObj StatePoolVisBackFront<TLayoutConfig>::getqInit(const unsigned idxObject)
+
+typename StatePoolVisBackFront::VectorQObj StatePoolVisBackFront::getqInit(const unsigned idxObject)
 {
-  static typename TLayoutConfig::VectorQObj  q;
+  static typename LayoutConfigType::VectorQObj  q;
   m_mutexStateInit.lock();
   q = m_state_init.m_SimBodyStates[idxObject].m_q;
   m_mutexStateInit.unlock();
   return q;
 }
 
-template<typename TLayoutConfig>
-void StatePoolVisBackFront<TLayoutConfig>::setqInit(const VectorQObj & q ,const unsigned idxObject)
+
+void StatePoolVisBackFront::setqInit(const VectorQObj & q ,const unsigned idxObject)
 {
   m_mutexStateInit.lock();
   m_state_init.m_SimBodyStates[idxObject].m_q = q;
@@ -184,18 +184,18 @@ void StatePoolVisBackFront<TLayoutConfig>::setqInit(const VectorQObj & q ,const 
 }
 
 
-template<typename TLayoutConfig>
-typename TLayoutConfig::VectorUObj StatePoolVisBackFront<TLayoutConfig>::getuInit(const unsigned idxObject)
+
+typename StatePoolVisBackFront::VectorUObj StatePoolVisBackFront::getuInit(const unsigned idxObject)
 {
-  typename TLayoutConfig::VectorUObj u;
+  typename LayoutConfigType::VectorUObj u;
   m_mutexStateInit.lock();
   u = m_state_init.m_SimBodyStates[idxObject].m_u;
   m_mutexStateInit.unlock();
   return u;
 }
 
-template<typename TLayoutConfig>
-void StatePoolVisBackFront<TLayoutConfig>::setuInit(const VectorUObj & u, const unsigned idxObject)
+
+void StatePoolVisBackFront::setuInit(const VectorUObj & u, const unsigned idxObject)
 {
   m_mutexStateInit.lock();
   m_state_init.m_SimBodyStates[idxObject].m_u = u;
@@ -204,8 +204,8 @@ void StatePoolVisBackFront<TLayoutConfig>::setuInit(const VectorUObj & u, const 
 }
 
 
-template<typename TLayoutConfig>
-void StatePoolVisBackFront<TLayoutConfig>::resetStatePool()
+
+void StatePoolVisBackFront::resetStatePool()
 {
   boost::mutex::scoped_lock l(m_change_pointer_mutex);
 
@@ -224,16 +224,16 @@ void StatePoolVisBackFront<TLayoutConfig>::resetStatePool()
 
 
 // ONLY USED IN SIM THREAD
-template<typename TLayoutConfig>
-typename StatePoolVisBackFront<TLayoutConfig>::FrontBackBufferType
-StatePoolVisBackFront<TLayoutConfig>::getFrontBackBuffer() {
+
+typename StatePoolVisBackFront::FrontBackBufferType
+StatePoolVisBackFront::getFrontBackBuffer() {
   return FrontBackBufferType(m_pool[m_idx[0]], m_pool[m_idx[1]]);
 }
 
 // ONLY USED IN SIM THREAD
-template<typename TLayoutConfig>
-typename StatePoolVisBackFront<TLayoutConfig>::FrontBackBufferType
-StatePoolVisBackFront<TLayoutConfig>::swapFrontBackBuffer()
+
+typename StatePoolVisBackFront::FrontBackBufferType
+StatePoolVisBackFront::swapFrontBackBuffer()
 {
   boost::mutex::scoped_lock l(m_change_pointer_mutex);
   if(m_idx[1] != m_idx[2]) {
@@ -257,9 +257,9 @@ StatePoolVisBackFront<TLayoutConfig>::swapFrontBackBuffer()
 }
 
 // ONLY USED IN VISUALIZATION THREAD
-template<typename TLayoutConfig>
-boost::shared_ptr<const DynamicsState<TLayoutConfig> >
-StatePoolVisBackFront<TLayoutConfig>::updateVisBuffer(bool & out_changed)
+
+boost::shared_ptr<const DynamicsState<StatePoolVisBackFront::LayoutConfigType> >
+StatePoolVisBackFront::updateVisBuffer(bool & out_changed)
 {
   boost::mutex::scoped_lock l(m_change_pointer_mutex);
   if(m_idx[2] == m_idx[1]){
@@ -278,9 +278,9 @@ StatePoolVisBackFront<TLayoutConfig>::updateVisBuffer(bool & out_changed)
   return m_pool[m_idx[2]];
 }
 
-template<typename TLayoutConfig>
-boost::shared_ptr<const DynamicsState<TLayoutConfig> >
-StatePoolVisBackFront<TLayoutConfig>::updateVisBuffer()
+
+boost::shared_ptr<const DynamicsState<StatePoolVisBackFront::LayoutConfigType> >
+StatePoolVisBackFront::updateVisBuffer()
 {
   bool changed;
   return updateVisBuffer(changed);

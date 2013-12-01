@@ -23,7 +23,7 @@
 
 template <typename TLayoutConfig> class DynamicsState;
 template <typename DynamicsSystemType> class StateRecorder;
-template< typename TLayoutConfig> class SharedBufferDynSys;
+class SharedBufferDynSys;
 
 template<typename TConfig>
 class SimulationManagerGUI : public SimulationManagerBase , public OIS::KeyListener {

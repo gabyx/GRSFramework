@@ -38,11 +38,12 @@
 * @ingroup Inclusion
 * @brief The inclusion solver for an ordered problem. Does not assemble G. Iterates over Contact Graph in a SOR fashion!
 */
-template< typename TInclusionSolverConfig >
+
 class InclusionSolverCONoG {
 public:
 
-    DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES_OF(TInclusionSolverConfig)
+    DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     InclusionSolverCONoG(boost::shared_ptr<CollisionSolverType >  pCollisionSolver, boost::shared_ptr<DynamicsSystemType> pDynSys);
@@ -105,8 +106,8 @@ protected:
 
 
 
-template< typename TInclusionSolverConfig >
-InclusionSolverCONoG<TInclusionSolverConfig>::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,  boost::shared_ptr<DynamicsSystemType > pDynSys):
+
+InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,  boost::shared_ptr<DynamicsSystemType > pDynSys):
     m_SimBodies(pCollisionSolver->m_SimBodies),
     m_Bodies(pCollisionSolver->m_Bodies),
     m_ContactGraph(&(pDynSys->m_ContactParameterMap)){
@@ -121,7 +122,7 @@ InclusionSolverCONoG<TInclusionSolverConfig>::InclusionSolverCONoG(boost::shared
 
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     m_pCollisionSolver->m_ContactDelegateList.addContactDelegate(
-        ContactDelegateList<RigidBodyType>::ContactDelegate::template from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
+        ContactDelegateList<RigidBodyType>::ContactDelegate::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
     );
 
     m_nContacts = 0;
@@ -135,14 +136,14 @@ InclusionSolverCONoG<TInclusionSolverConfig>::InclusionSolverCONoG(boost::shared
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<RigidBodyType>();
 }
 
-template< typename TInclusionSolverConfig >
-InclusionSolverCONoG<TInclusionSolverConfig>::~InclusionSolverCONoG(){
+
+InclusionSolverCONoG::~InclusionSolverCONoG(){
     delete m_pSorProxStepNodeVisitor;
     delete m_pSorProxInitNodeVisitor;
 }
 
-template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::initializeLog( Logging::Log * pSolverLog,  boost::filesystem::path folder_path ) {
+
+void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::filesystem::path folder_path ) {
 
     m_pSolverLog = pSolverLog;
     m_pSorProxStepNodeVisitor->setLog(m_pSolverLog);
@@ -153,8 +154,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initializeLog( Logging::Log *
     #endif
 }
 
-template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::reset() {
+
+void InclusionSolverCONoG::reset() {
 
     resetForNextIter();
 
@@ -171,8 +172,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::reset() {
 
 }
 
-template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::resetForNextIter() {
+
+void InclusionSolverCONoG::resetForNextIter() {
 
     m_nContacts = 0;
     m_iterationsNeeded =0;
@@ -183,8 +184,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::resetForNextIter() {
 }
 
 
-template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
+
+void InclusionSolverCONoG::solveInclusionProblem() {
 
 #if CoutLevelSolver>1
     LOG(m_pSolverLog,  " % -> solveInclusionProblem(): "<< std::endl;);
@@ -276,13 +277,13 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
 }
 
 
-template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::doJorProx() {
+
+void InclusionSolverCONoG::doJorProx() {
     ASSERTMSG(false,"InclusionSolverCONoG:: JOR Prox iteration not implemented!");
 }
 
-template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::integrateAllBodyVelocities() {
+
+void InclusionSolverCONoG::integrateAllBodyVelocities() {
     for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
         (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
@@ -290,8 +291,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::integrateAllBodyVelocities() 
 }
 
 
-template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(PREC alpha) {
+
+void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
     // Calculates b vector for all nodes, u_0, R_ii, ...
     m_pSorProxInitNodeVisitor->setParams(alpha);
@@ -305,8 +306,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::initContactGraphForIteration(
     }
 }
 
-template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx() {
+
+void InclusionSolverCONoG::doSorProx() {
 
     #if CoutLevelSolverWhenContact>2
         LOG(m_pSolverLog, " u_e = [ ");
@@ -348,8 +349,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx() {
 
 }
 
-template< typename TInclusionSolverConfig >
-void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
+
+void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     // Move over all nodes, and do a sor prox step
     m_ContactGraph.applyNodeVisitor(*m_pSorProxStepNodeVisitor);
@@ -409,8 +410,8 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
 
 
 
-template< typename TInclusionSolverConfig >
-std::string  InclusionSolverCONoG<TInclusionSolverConfig>::getIterationStats() {
+
+std::string  InclusionSolverCONoG::getIterationStats() {
     std::stringstream s;
 
     s   << m_bUsedGPU<<"\t"

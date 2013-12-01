@@ -30,28 +30,24 @@
 */
 /** @{ */
 
-
-
-template< typename TLayoutConfig >
 class RigidBodySolverData{
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
-
     public:
 
-    RigidBodySolverData(): m_t(0){};
+        DEFINE_LAYOUT_CONFIG_TYPES
 
-    ///< The actual time, which belongs to FrontBuffer and m_r_S and I_q_IK
-    PREC m_t;
+        RigidBodySolverData(): m_t(0){};
+
+        ///< The actual time, which belongs to FrontBuffer and m_r_S and I_q_IK
+        PREC m_t;
 };
 
 
 
 /** Class with  Data Structure for the Solver! */
-template< typename TLayoutConfig >
-class RigidBodySolverDataCONoG : public RigidBodySolverData<TLayoutConfig> {
+class RigidBodySolverDataCONoG : public RigidBodySolverData {
 
     public:
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+    DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
     RigidBodySolverDataCONoG(): m_bInContactGraph(false){
@@ -80,16 +76,10 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData<TLayoutConfig> {
 
 };
 
-template<typename TRigidBodyConfig > class RigidBodyBase;
-
-
-
-template<typename TRigidBodyConfig >
 class RigidBodyBase{
 public:
 
-    typedef TRigidBodyConfig RigidBodyConfigType;
-    DEFINE_RIGIDBODY_CONFIG_TYPES_OF(TRigidBodyConfig);
+    DEFINE_RIGIDBODY_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     enum BodyState{
@@ -115,7 +105,7 @@ public:
         return m_pSolverData->m_uBuffer.m_back;
     }
     VectorQObj get_q(){
-        VectorQObj r; r.template head<3>() = m_r_S; r.template tail<4>() = m_q_KI; return r;
+        VectorQObj r; r.head<3>() = m_r_S; r.tail<4>() = m_q_KI; return r;
     }
 
     PREC m_mass; ///< The rigid body mass \f$m\f$ in \f$ \textrm{[kg]} \f$

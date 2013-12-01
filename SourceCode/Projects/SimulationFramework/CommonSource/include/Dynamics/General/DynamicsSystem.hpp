@@ -6,7 +6,7 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
-#include "RigidBody.hpp"
+#include RigidBody_INCLUDE_FILE
 //#include "RigidBodyId.hpp" //Not used
 
 #include "RigidBodyContainer.hpp"
@@ -27,13 +27,12 @@
 
 
 
-template<typename TDynamicsSystemConfig>
+
 class DynamicsSystem {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    typedef TDynamicsSystemConfig DynamicsSystemConfig;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemConfig)
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     DynamicsSystem();
     ~DynamicsSystem();
@@ -44,7 +43,7 @@ public:
 
     ContactParameterMap<RigidBodyType> m_ContactParameterMap;
 
-    typedef ExternalForceList<DynamicsSystem> ExternalForceListType;
+    typedef ExternalForceList ExternalForceListType;
     ExternalForceListType m_externalForces; ///< Special class of function objects
 
     //All Global Geometries used in the System
@@ -103,12 +102,12 @@ protected:
 #include "VectorToSkewMatrix.hpp"
 
 
-template<typename TDynamicsSystemConfig>
-DynamicsSystem<TDynamicsSystemConfig>::DynamicsSystem() {
+
+DynamicsSystem::DynamicsSystem() {
 
 };
-template<typename TDynamicsSystemConfig>
-DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem() {
+
+DynamicsSystem::~DynamicsSystem() {
     DECONSTRUCTOR_MESSAGE
 
     // Delete all RigidBodys
@@ -117,53 +116,53 @@ DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem() {
 
 };
 
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const {
+
+void DynamicsSystem::getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const {
     SettingsRecorder = m_SettingsRecorder;
 }
 
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder) {
+
+void DynamicsSystem::setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder) {
     m_SettingsRecorder = SettingsRecorder;
 }
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper,
+
+void DynamicsSystem::getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper,
         InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) const {
     SettingsTimestepper = m_SettingsTimestepper;
     SettingsInclusionSolver = m_SettingsInclusionSolver;
 }
 
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, const InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) {
+
+void DynamicsSystem::setSettings(const TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, const InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) {
     m_SettingsTimestepper = SettingsTimestepper;
     m_SettingsInclusionSolver = SettingsInclusionSolver;
 }
 
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::initializeLog(Logging::Log* pLog) {
+
+void DynamicsSystem::initializeLog(Logging::Log* pLog) {
     m_pSolverLog = pLog;
     ASSERTMSG(m_pSolverLog != NULL, "Logging::Log: NULL!");
 }
 
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::reset() {
+
+void DynamicsSystem::reset() {
    //reset all external forces
    m_externalForces.reset();
 
    initMassMatrixAndHTerm();
 }
 
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state) {
+
+void DynamicsSystem::applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state) {
     InitialConditionBodies::applyBodiesToDynamicsState<RigidBodyType, RigidBodySimContainerType>(m_SimBodies,state);
 }
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state) {
+
+void DynamicsSystem::applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state) {
     InitialConditionBodies::applyDynamicsStateToBodies<RigidBodyType, RigidBodySimContainerType>(state,m_SimBodies);
 }
 
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC ts, PREC timestep) {
+
+void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
     using namespace std;
 
     static Matrix43 F_i = Matrix43::Zero();
@@ -187,8 +186,8 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC ts, PREC ti
         updateFMatrix(pBody->m_q_KI, F_i);
 
         // Timestep for position;
-        pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_back.template head<3>();
-        pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_back.template tail<3>();
+        pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_back.head<3>();
+        pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_back.tail<3>();
 
         // Update Transformation A_IK
         setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
@@ -218,8 +217,8 @@ void DynamicsSystem<TDynamicsSystemConfig>::doFirstHalfTimeStep(PREC ts, PREC ti
     }
 }
 
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC te, PREC timestep) {
+
+void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
     using namespace std;
 
     static Matrix43 F_i = Matrix43::Zero();
@@ -243,8 +242,8 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC te, PREC t
         updateFMatrix(pBody->m_q_KI, F_i);
 
         // Timestep for position;
-        pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_front.template head<3>();
-        pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_front.template tail<3>();
+        pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_front.head<3>();
+        pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_front.tail<3>();
 
         //Normalize Quaternion
         pBody->m_q_KI.normalize();
@@ -262,29 +261,29 @@ void DynamicsSystem<TDynamicsSystemConfig>::doSecondHalfTimeStep(PREC te, PREC t
     }
 
 }
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
+
+void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
     static Matrix33 a_tilde = Matrix33::Zero();
 
-    F_i.template block<1,3>(0,0) = -0.5 * q.template tail<3>();
-    updateSkewSymmetricMatrix<>(q.template tail<3>(), a_tilde );
-    F_i.template block<3,3>(1,0) = 0.5 * ( Matrix33::Identity() * q(0) + a_tilde );
+    F_i.block<1,3>(0,0) = -0.5 * q.tail<3>();
+    updateSkewSymmetricMatrix<>(q.tail<3>(), a_tilde );
+    F_i.block<3,3>(1,0) = 0.5 * ( Matrix33::Identity() * q(0) + a_tilde );
 }
 
-template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::initMassMatrixAndHTerm() {
+
+void DynamicsSystem::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         //Mass Matrix
-        (*bodyIt)->m_MassMatrix_diag.template head<3>().setConstant((*bodyIt)->m_mass);
-        (*bodyIt)->m_MassMatrix_diag.template tail<3>() = (*bodyIt)->m_K_Theta_S;
+        (*bodyIt)->m_MassMatrix_diag.head<3>().setConstant((*bodyIt)->m_mass);
+        (*bodyIt)->m_MassMatrix_diag.tail<3>() = (*bodyIt)->m_K_Theta_S;
 
         // Massmatrix Inverse
         (*bodyIt)->m_MassMatrixInv_diag = (*bodyIt)->m_MassMatrix_diag.array().inverse().matrix();
         // H_const term
-        (*bodyIt)->m_h_term_const.template head<3>() =  (*bodyIt)->m_mass * m_gravity * m_gravityDir;
+        (*bodyIt)->m_h_term_const.head<3>() =  (*bodyIt)->m_mass * m_gravity * m_gravityDir;
     }
 }
 
