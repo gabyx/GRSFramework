@@ -162,7 +162,6 @@ typedef ConfigRigidBody< MyLayoutConfigType, RigidBodySolverDataCONoG<MyLayoutCo
 typedef RigidBodyBase< MyRigidBodyConfig > MyRigidBody; //Define the Class
 
 typedef ConfigDynamicsSystem< MyRigidBody> MyConfigDynamicsSystem;
-
 typedef DynamicsSystem<MyConfigDynamicsSystem> MyDynamicsSystem; //Define the Class
 
 typedef ConfigCollisionSolver< MyDynamicsSystem> MyConfigCollisionSolver;

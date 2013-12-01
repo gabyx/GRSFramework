@@ -246,6 +246,82 @@ typedef double MeshPREC;
 /* @} */
 
 
+
+//Try to make framework settings simpler:
+namespace GlobalDefs{
+
+    namespace RigidBodyConfigs{
+        typedef LayoutConfig<double, DynamicLayout<7,6> > LayoutConfigType;
+        typedef RigidBodySolverDataCONoG RigidBodySolverDataType;
+    }
+    namespace DynamicSystemConfigs{
+        typedef MyConfigs::RigidBodyType RigidBodyType;
+    };
+    namespace InclusionSolverConfigs{
+        typedef MyConfigs::DynamicsSystemType           DynamicsSystemType;
+    };
+    namespace CollisionSolverConfigs{
+        typedef MyConfigs::DynamicsSystemType           DynamicsSystemType;
+    };
+
+    namespace TimeStepperConfigs{
+        typedef MyConfigs::DynamicsSystemType           DynamicsSystemType;
+        typedef MyConfigs::CollisionSolverType          CollisionSolverType;
+        typedef MyConfigs::InclusionSolverType          InclusionSolverType;
+        typedef StatePoolVisBackFront                   StatePoolType;
+    };
+
+    namespace SolverConfigs{
+        typedef MyConfigs::TimeStepperType              TimeStepperType;
+    };
+
+    namespace MyConfigs{
+        typedef RigidBodyBase           RigidBodyType;
+        typedef DynamicsSystem          DynamicsSystemType;
+        typedef MoreauTimeStepper       TimeStepperType;
+        typedef CollisionSolver         CollisionSolverType;
+        typedef InclusionSolverCONoG    InclusionSolverType
+    }
+};
+
+
+#define DEFINE_CONFIG_TYPES \
+   DEFINE_SOLVER_CONFIG_TYPES \
+
+#define DEFINE_SOLVER_CONFIG_TYPES \
+   typedef typename GlobalDefs::SolverConfigs::TimeStepperType TimeStepperType; \
+   DEFINE_TIMESTEPPER_CONFIG_TYPES \
+
+#define DEFINE_TIMESTEPPER_CONFIG_TYPES \
+   typedef typename GlobalDefs::TimeStepperConfigs::StatePoolType          StatePoolType;                 \
+   typedef typename GlobalDefs::TimeStepperConfigs::DynamicsSystemType     DynamicsSystemType;                 \
+   typedef typename GlobalDefs::TimeStepperConfigs::InclusionSolverType     InclusionSolverType;                 \
+   typedef typename GlobalDefs::TimeStepperConfigs::CollisionSolverType     CollisionSolverType;                 \
+   DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
+
+#define DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES \
+    typedef typename GlobalDefs::TimeStepperConfigs::DynamicsSystemType      DynamicsSystemType;                 \
+    typedef typename GlobalDefs::TimeStepperConfigs::CollisionSolverType     CollisionSolverType;                 \
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
+
+#define DEFINE_COLLISION_SOLVER_CONFIG_TYPES \
+    typedef typename GlobalDefs::TimeStepperConfigs::DynamicsSystemType     DynamicsSystemType;                 \
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
+
+#define DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
+    typedef typename GlobalDefs::DynamicSystemConfigs::RigidBodyType RigidBodyType; \
+    DEFINE_RIGIDBODY_CONFIG_TYPES \
+
+
+#define DEFINE_RIGIDBODY_CONFIG_TYPES \
+    typedef typename GlobalDefs::RigidBodyConfigs::LayoutConfigType LayoutConfigType; \
+    typedef typename GlobalDefs::RigidBodyConfigs::RigidBodySolverDataType RigidBodySolverDataType; \
+    DEFINE_LAYOUT_CONFIG_TYPES_OF( LayoutConfigType ) \
+
+
+
+
+
 #endif
 
 
