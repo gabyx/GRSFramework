@@ -8,10 +8,9 @@
 * @brief This is the ContactParams class, which stores the contact parameters.
 */
 /** @{ */
-template< typename TLayoutConfig>
 struct ContactParams{
 
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+    DEFINE_LAYOUT_CONFIG_TYPES
 
     ContactParams(double epsilon_N, double epsilon_T, double mu)
       : m_epsilon_N(epsilon_N), m_epsilon_T(epsilon_T),m_mu(mu)

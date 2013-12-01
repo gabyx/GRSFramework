@@ -60,7 +60,7 @@ private:
 
   bool m_bReadFullState;
 
-  boost::shared_ptr< DynamicsState<TLayoutConfig> > m_state; /**<   This is the actual loader state pointer ;*/
+  boost::shared_ptr< DynamicsState > m_state; /**<   This is the actual loader state pointer ;*/
   boost::shared_ptr<TStatePool>	m_pStatePool;
 };
 
@@ -178,7 +178,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
             }else{
                // Write end flag to state!
                m_pThreadLog->logMessage("Write endstate");
-               m_state->m_StateType = DynamicsState<TLayoutConfig>::ENDSTATE;
+               m_state->m_StateType = DynamicsState::ENDSTATE;
                current_state = FINALIZE_AND_BREAK;
             }
          }
@@ -220,7 +220,7 @@ void PlaybackLoader<TLayoutConfig, TStatePool>::runLoaderThread()
             }else{
                // Write end flag to state!
                LOG(m_pThreadLog,  "Write endstate to m_state m_t:" << m_state->m_t <<endl;);
-               m_state->m_StateType = DynamicsState<TLayoutConfig>::ENDSTATE;
+               m_state->m_StateType = DynamicsState::ENDSTATE;
                current_state = FINALIZE_AND_BREAK;
             }
          }

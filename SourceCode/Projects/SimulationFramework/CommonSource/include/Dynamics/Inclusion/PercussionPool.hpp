@@ -30,7 +30,7 @@
 template< typename TLayoutConfig>
 class PercussionPool    {
 public:
-   typedef boost::unordered_map<ContactTag, ContactPercussion<TLayoutConfig>, ContactTagHash > PercussionMap;
+   typedef boost::unordered_map<ContactTag, ContactPercussion, ContactTagHash > PercussionMap;
 
    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
 
@@ -63,7 +63,7 @@ public:
    }
 
    void getPercussion(const ContactTag & tag, VectorDyn & P_old) {
-      static typename std::pair<ContactTag, ContactPercussion<TLayoutConfig> > new_value(ContactTag(), ContactPercussion<TLayoutConfig>(P_old.rows()) );  // Standart constructor, Percussion = zero
+      static typename std::pair<ContactTag, ContactPercussion > new_value(ContactTag(), ContactPercussion(P_old.rows()) );  // Standart constructor, Percussion = zero
       new_value.first = tag;
 
       // try to insert a new one!

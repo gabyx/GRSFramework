@@ -74,8 +74,8 @@ public:
     TimeStepperSettings<LayoutConfigType> m_Settings;
 
     //Accessed only by Simulation manager, after doOneIteration();
-    boost::shared_ptr<const DynamicsState<LayoutConfigType> > getBackStateBuffer();
-    boost::shared_ptr<const DynamicsState<LayoutConfigType> > getFrontStateBuffer();
+    boost::shared_ptr<const DynamicsState > getBackStateBuffer();
+    boost::shared_ptr<const DynamicsState > getFrontStateBuffer();
 
 
     //Performance Time of one Iteration (averaged)
@@ -111,12 +111,12 @@ protected:
     // General Log file
     Logging::Log *m_pSolverLog, *m_pSimulationLog;
 
-    typedef FrontBackBuffer<DynamicsState<LayoutConfigType>, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
+    typedef FrontBackBuffer<DynamicsState, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
     FrontBackBufferType m_StateBuffers;
     //Solver state pool front and back buffer
     void swapStateBuffers();
 
-    DynamicsState<LayoutConfigType> m_state_m;  // middle state of iteration
+    DynamicsState m_state_m;  // middle state of iteration
 
     // Logs
     boost::filesystem::path m_SimFolderPath;
@@ -310,22 +310,14 @@ unsigned int MoreauTimeStepper::getIterationCount() {
 
 
 
-boost::shared_ptr<
-const DynamicsState<
-typename MoreauTimeStepper::LayoutConfigType
->
->
+boost::shared_ptr<const DynamicsState>
 MoreauTimeStepper::getBackStateBuffer() {
     return m_StateBuffers.m_pBack;
 }
 
 
 
-boost::shared_ptr<
-const DynamicsState<
-typename MoreauTimeStepper::LayoutConfigType
->
->
+boost::shared_ptr<const DynamicsState>
 MoreauTimeStepper::getFrontStateBuffer() {
     return m_StateBuffers.m_pFront;
 }

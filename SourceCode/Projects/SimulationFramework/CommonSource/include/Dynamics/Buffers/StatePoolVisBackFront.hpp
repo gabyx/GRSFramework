@@ -32,7 +32,7 @@ public:
   /** @name Only accessed by Simulation Thread.
   * @{
   */
-  typedef FrontBackBuffer<DynamicsState<LayoutConfigType>, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
+  typedef FrontBackBuffer<DynamicsState, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
 
   FrontBackBufferType getFrontBackBuffer();
   FrontBackBufferType swapFrontBackBuffer();
@@ -41,15 +41,15 @@ public:
   /** @name Only accessed by Visualization Thread.
   * @{
   */
-  boost::shared_ptr<const DynamicsState<LayoutConfigType> > updateVisBuffer(bool & out_changed);
-  boost::shared_ptr<const DynamicsState<LayoutConfigType> > updateVisBuffer();
+  boost::shared_ptr<const DynamicsState > updateVisBuffer(bool & out_changed);
+  boost::shared_ptr<const DynamicsState > updateVisBuffer();
   /** @} */
 
   /** @name Only accessed by if only Visualization Thread runs.
   * @{
   */
-  void initializeStatePool(const DynamicsState<LayoutConfigType> & state_init);
-  void initializeStatePool(const std::vector<DynamicsState<LayoutConfigType> > & state_initList); ///< Used to initialize from a list of DynamicStates which count up to the number of simulated bodies.
+  void initializeStatePool(const DynamicsState & state_init);
+  void initializeStatePool(const std::vector<DynamicsState > & state_initList); ///< Used to initialize from a list of DynamicStates which count up to the number of simulated bodies.
   void resetStatePool();
   /** @} */
 
@@ -65,7 +65,7 @@ protected:
   const unsigned int m_nDofuObj, m_nDofqObj, m_nSimBodies; // These are the dimensions for one Obj
 
   boost::mutex	m_mutexStateInit; ///< Mutex for the initial state.
-  DynamicsState<LayoutConfigType> m_state_init; ///< The initial state for the system.
+  DynamicsState m_state_init; ///< The initial state for the system.
 };
 /** @} */
 
@@ -83,21 +83,21 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
 
   // Add the 3 state pools, if m_state_pointer is deleted, all elements inside are deleted because of shared_ptr
   m_pool.push_back(
-    boost::shared_ptr<DynamicsState<LayoutConfigType> >(new DynamicsState<LayoutConfigType>(nSimBodies))
+    boost::shared_ptr<DynamicsState >(new DynamicsState(nSimBodies))
     );
   m_pool.push_back(
-    boost::shared_ptr<DynamicsState<LayoutConfigType> >(new DynamicsState<LayoutConfigType>(nSimBodies))
+    boost::shared_ptr<DynamicsState >(new DynamicsState(nSimBodies))
     );
 
   m_pool.push_back(
-    boost::shared_ptr<DynamicsState<LayoutConfigType> >(new DynamicsState<LayoutConfigType>(nSimBodies))
+    boost::shared_ptr<DynamicsState >(new DynamicsState(nSimBodies))
     );
 
   m_idx[0] = 1; //front
   m_idx[1] = 0; //back
   m_idx[2] = 0; //vis
 
-  initializeStatePool( DynamicsState<LayoutConfigType>(nSimBodies) );
+  initializeStatePool( DynamicsState(nSimBodies) );
 
 
   // Init Log
@@ -115,7 +115,7 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
 
 
 
-void StatePoolVisBackFront::initializeStatePool(const DynamicsState<LayoutConfigType> & state_init){
+void StatePoolVisBackFront::initializeStatePool(const DynamicsState & state_init){
 
   boost::mutex::scoped_lock l1(m_mutexStateInit);
   boost::mutex::scoped_lock l2(m_change_pointer_mutex);
@@ -131,7 +131,7 @@ void StatePoolVisBackFront::initializeStatePool(const DynamicsState<LayoutConfig
 }
 
 
-void StatePoolVisBackFront::initializeStatePool(const std::vector<DynamicsState<LayoutConfigType> > & state_initList){
+void StatePoolVisBackFront::initializeStatePool(const std::vector<DynamicsState > & state_initList){
 
   boost::mutex::scoped_lock l1(m_mutexStateInit);
   boost::mutex::scoped_lock l2(m_change_pointer_mutex);
@@ -258,7 +258,7 @@ StatePoolVisBackFront::swapFrontBackBuffer()
 
 // ONLY USED IN VISUALIZATION THREAD
 
-boost::shared_ptr<const DynamicsState<StatePoolVisBackFront::LayoutConfigType> >
+boost::shared_ptr<const DynamicsState >
 StatePoolVisBackFront::updateVisBuffer(bool & out_changed)
 {
   boost::mutex::scoped_lock l(m_change_pointer_mutex);
@@ -279,7 +279,7 @@ StatePoolVisBackFront::updateVisBuffer(bool & out_changed)
 }
 
 
-boost::shared_ptr<const DynamicsState<StatePoolVisBackFront::LayoutConfigType> >
+boost::shared_ptr<const DynamicsState >
 StatePoolVisBackFront::updateVisBuffer()
 {
   bool changed;

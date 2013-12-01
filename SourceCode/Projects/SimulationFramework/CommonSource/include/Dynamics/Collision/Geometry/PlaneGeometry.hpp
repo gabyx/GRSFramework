@@ -5,10 +5,9 @@
 
 #include <boost/serialization/access.hpp>
 
-template<class PREC>
 class PlaneGeometry {
 public:
-    DEFINE_MATRIX_TYPES
+    DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     PlaneGeometry() {

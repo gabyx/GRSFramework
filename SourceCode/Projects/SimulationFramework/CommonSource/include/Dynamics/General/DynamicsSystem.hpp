@@ -41,7 +41,7 @@ public:
     double m_gravity;
     Vector3 m_gravityDir;
 
-    ContactParameterMap<RigidBodyType> m_ContactParameterMap;
+    ContactParameterMap m_ContactParameterMap;
 
     typedef ExternalForceList ExternalForceListType;
     ExternalForceListType m_externalForces; ///< Special class of function objects
@@ -59,8 +59,8 @@ public:
     void initializeLog(Logging::Log* pLog);
 
 
-    inline void applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state);
-    inline void applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state);
+    inline void applySimBodiesToDynamicsState(DynamicsState & state);
+    inline void applyDynamicsStateToSimBodies(const DynamicsState & state);
 
     void initMassMatrixAndHTerm(); // MassMatrix is const
 
@@ -153,11 +153,11 @@ void DynamicsSystem::reset() {
 }
 
 
-void DynamicsSystem::applySimBodiesToDynamicsState(DynamicsState<LayoutConfigType> & state) {
+void DynamicsSystem::applySimBodiesToDynamicsState(DynamicsState & state) {
     InitialConditionBodies::applyBodiesToDynamicsState<RigidBodyType, RigidBodySimContainerType>(m_SimBodies,state);
 }
 
-void DynamicsSystem::applyDynamicsStateToSimBodies(const DynamicsState<LayoutConfigType> & state) {
+void DynamicsSystem::applyDynamicsStateToSimBodies(const DynamicsState & state) {
     InitialConditionBodies::applyDynamicsStateToBodies<RigidBodyType, RigidBodySimContainerType>(state,m_SimBodies);
 }
 
@@ -196,7 +196,7 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
         pBody->m_h_term = pBody->m_h_term_const;
 
         // Term omega x Theta * omega = if Theta is diagonal : for a Spehere for example!
-        AddGyroTermVisitor<RigidBodyType> vis(pBody);
+        AddGyroTermVisitor vis(pBody);
 
         // =========================
 

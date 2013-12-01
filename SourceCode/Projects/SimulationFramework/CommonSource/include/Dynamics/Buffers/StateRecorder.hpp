@@ -34,17 +34,17 @@ public:
     bool createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path);
     void closeAll();
 
-    //void addState(const DynamicsState<TLayoutConfig> * state);
+    //void addState(const DynamicsState * state);
     /*void writeAllStates();*/
 
-    void write(const DynamicsState<LayoutConfigType>* value);
+    void write(const DynamicsState* value);
 
     void write(PREC time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList) {
         m_binarySimFile.write(time, bodyList);
     }
 
 
-    StateRecorder & operator << (const DynamicsState<LayoutConfigType>* value);
+    StateRecorder & operator << (const DynamicsState* value);
 
 protected:
 
@@ -59,7 +59,7 @@ protected:
 
     MultiBodySimFile    m_binarySimFile;
 
-    //std::vector< DynamicsState<LayoutConfigType> >	m_states;
+    //std::vector< DynamicsState >	m_states;
 
     unsigned int m_nSimBodies;
 };
@@ -123,7 +123,7 @@ bool StateRecorder::createSimFileCopyFromReference(boost::filesystem::path new_f
 }
 
 
-StateRecorder & StateRecorder::operator << (const DynamicsState<LayoutConfigType>* value) {
+StateRecorder & StateRecorder::operator << (const DynamicsState* value) {
     m_binarySimFile << (value);
 }
 
@@ -134,7 +134,7 @@ void StateRecorder::closeAll() {
 }
 
 
-void StateRecorder::write( const DynamicsState<LayoutConfigType>* value ) {
+void StateRecorder::write( const DynamicsState* value ) {
     m_binarySimFile << value;
 }
 

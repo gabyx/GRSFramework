@@ -5,13 +5,14 @@
 
 #include "TypeDefs.hpp"
 
-template<typename TRigidBody>
+
+
 class AddGyroTermVisitor : public boost::static_visitor<> {
 public:
 
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TRigidBody::LayoutConfigType);
+    DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    AddGyroTermVisitor(TRigidBody * body):
+    AddGyroTermVisitor(RigidBodyType * body):
     m_rigidBody(body)
     {
         boost::apply_visitor(*this, m_rigidBody->m_geometry);
@@ -22,7 +23,7 @@ public:
         return;
     }
 
-    void operator()(boost::shared_ptr<const BoxGeometry<PREC> > & box)  {
+    void operator()(boost::shared_ptr<const BoxGeometry > & box)  {
         addGyroTerm();
     }
 
@@ -30,18 +31,18 @@ public:
         addGyroTerm();
     }
 
-    void operator()(boost::shared_ptr<const HalfspaceGeometry<PREC> > & halfspace) {
+    void operator()(boost::shared_ptr<const HalfspaceGeometry > & halfspace) {
         addGyroTerm();
     }
 
     private:
 
     void addGyroTerm(){
-        Vector3 K_omega_IK = m_rigidBody->m_pSolverData->m_uBuffer.m_back.template tail<3>();
-        m_rigidBody->m_h_term.template tail<3>() -= K_omega_IK.cross((m_rigidBody->m_K_Theta_S.asDiagonal() * K_omega_IK).eval());
+        Vector3 K_omega_IK = m_rigidBody->m_pSolverData->m_uBuffer.m_back.tail<3>();
+        m_rigidBody->m_h_term.tail<3>() -= K_omega_IK.cross((m_rigidBody->m_K_Theta_S.asDiagonal() * K_omega_IK).eval());
     }
 
-    TRigidBody * m_rigidBody;
+    RigidBodyType * m_rigidBody;
 };
 
 

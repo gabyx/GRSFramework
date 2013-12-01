@@ -60,7 +60,7 @@ class GetScaleOfGeomVisitor : public boost::static_visitor<>{
     void operator()(  boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom ){
         m_scale.setConstant(sphereGeom->m_radius);
     }
-    void operator()(  boost::shared_ptr<const BoxGeometry<PREC> >  & boxGeom){
+    void operator()(  boost::shared_ptr<const BoxGeometry >  & boxGeom){
         m_scale = boxGeom->m_extent;
     }
 
@@ -160,7 +160,7 @@ public:
         return m_currentParseFilePath;
     }
 
-    virtual const std::vector< DynamicsState<LayoutConfigType> > & getInitialConditionSimBodies() {
+    virtual const std::vector< DynamicsState > & getInitialConditionSimBodies() {
         ASSERTMSG(m_SimBodyInitStates.size(), "m_SimBodyInitStates.size() contains no initial states!")
         return m_SimBodyInitStates;
     }
@@ -372,7 +372,7 @@ protected:
 
         if(paramMap){
             LOG(m_pSimulationLog,"---> Process ContactParameterMap..."<<std::endl;);
-            typename RigidBodyType::BodyMaterial material1,material2;
+            typename RigidBodyType::BodyMaterialType material1,material2;
             PREC mu,epsilonN,epsilonT;
 
             ticpp::Element * element = paramMap->FirstChild("ContactParameterStandard",false)->ToElement();
@@ -388,7 +388,7 @@ protected:
                 if(!Utilities::stringToType<PREC>(epsilonT, element->GetAttribute("epsilonT"))) {
                     throw ticpp::Exception("---> String conversion in ContactParameterStandard: epsilonT failed");
                 }
-                ContactParams<LayoutConfigType> params(epsilonN,epsilonT,mu);
+                ContactParams params(epsilonN,epsilonT,mu);
 
                 m_pDynSys->m_ContactParameterMap.setStandardValues(params);
             }
@@ -397,10 +397,10 @@ protected:
             ticpp::Iterator< ticpp::Element > valueElem("ContactParameter");
             for ( valueElem = valueElem.begin( paramMap->ToElement() ); valueElem != valueElem.end(); valueElem++) {
 
-                if(!Utilities::stringToType<typename RigidBodyType::BodyMaterial>(material1, valueElem->GetAttribute("materialId1"))) {
+                if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(material1, valueElem->GetAttribute("materialId1"))) {
                     throw ticpp::Exception("---> String conversion in ContactParameter: materialId1 failed");
                 }
-                if(!Utilities::stringToType<typename RigidBodyType::BodyMaterial>(material2, valueElem->GetAttribute("materialId2"))) {
+                if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(material2, valueElem->GetAttribute("materialId2"))) {
                     throw ticpp::Exception("---> String conversion in ContactParameter: materialId2 failed");
                 }
                 if(!Utilities::stringToType<PREC>(mu, valueElem->GetAttribute("mu"))) {
@@ -412,7 +412,7 @@ protected:
                 if(!Utilities::stringToType<PREC>(epsilonT, valueElem->GetAttribute("epsilonT"))) {
                     throw ticpp::Exception("---> String conversion in ContactParameter: epsilonT failed");
                 }
-                ContactParams<LayoutConfigType> params(epsilonN,epsilonT,mu);
+                ContactParams params(epsilonN,epsilonT,mu);
 
                 LOG(m_pSimulationLog,"---> Add ContactParameter of id="<<material1<<" to id="<<material2<<std::endl;);
                 if(!m_pDynSys->m_ContactParameterMap.addContactParameter(material1,material2,params)){
@@ -527,7 +527,7 @@ protected:
                                                                 startTime,
                                                                 endTime,
                                                                 amplitude,
-                                                                AABB<LayoutConfigType>(boxMin,boxMax),
+                                                                AABB(boxMin,boxMax),
                                                                 randomOn
                                                                 )
                                                     );
@@ -799,7 +799,7 @@ protected:
                 throw ticpp::Exception("---> String conversion in HalfsphereGeometry: position failed");
             }
 
-            boost::shared_ptr<HalfspaceGeometry<PREC> > pHalfspaceGeom = boost::shared_ptr<HalfspaceGeometry<PREC> >(new HalfspaceGeometry<PREC>(n,p));
+            boost::shared_ptr<HalfspaceGeometry > pHalfspaceGeom = boost::shared_ptr<HalfspaceGeometry >(new HalfspaceGeometry(n,p));
 
             if(addToGlobalGeoms){
                 unsigned int id;
@@ -836,7 +836,7 @@ protected:
                 throw ticpp::Exception("---> String conversion in BoxGeometry: position failed");
             }
 
-            boost::shared_ptr<BoxGeometry<PREC> > pBoxGeom = boost::shared_ptr<BoxGeometry<PREC> >(new BoxGeometry<PREC>(center,extent));
+            boost::shared_ptr<BoxGeometry > pBoxGeom = boost::shared_ptr<BoxGeometry >(new BoxGeometry(center,extent));
 
             Vector3 scale;
             scale(0)=extent(0);
@@ -1199,9 +1199,9 @@ protected:
         element = dynProp->FirstChild("Material")->ToElement();
         distribute = element->GetAttribute("distribute");
         if(distribute == "uniform") {
-            typename RigidBodyType::BodyMaterial eMaterial = 0;
+            typename RigidBodyType::BodyMaterialType eMaterial = 0;
 
-            if(!Utilities::stringToType<typename RigidBodyType::BodyMaterial>(eMaterial, element->GetAttribute("id"))){
+            if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(eMaterial, element->GetAttribute("id"))){
               throw ticpp::Exception("---> String conversion in Material: id failed");
             }
 
@@ -1214,7 +1214,7 @@ protected:
 
          // InitialPosition ============================================================
 
-        m_SimBodyInitStates.push_back( DynamicsState<LayoutConfigType>((unsigned int)m_bodyList.size()));
+        m_SimBodyInitStates.push_back( DynamicsState((unsigned int)m_bodyList.size()));
 
         element = dynProp->FirstChild("InitialPosition")->ToElement();
         distribute = element->GetAttribute("distribute");
@@ -1262,7 +1262,7 @@ protected:
         ticpp::Element *element = dynProp->FirstChild("InitialPosition")->ToElement();
         std::string distribute = element->GetAttribute("distribute");
 
-        DynamicsState<LayoutConfigType> state((unsigned int)m_bodyList.size());
+        DynamicsState state((unsigned int)m_bodyList.size());
         if(distribute == "linear") {
             processInitialPositionLinear(state,element);
         } else if(distribute == "grid") {
@@ -1286,9 +1286,9 @@ protected:
         element = dynProp->FirstChild("Material")->ToElement();
         distribute = element->GetAttribute("distribute");
         if(distribute == "uniform") {
-            typename RigidBodyType::BodyMaterial eMaterial = 0;
+            typename RigidBodyType::BodyMaterialType eMaterial = 0;
 
-            if(!Utilities::stringToType<typename RigidBodyType::BodyMaterial>(eMaterial, element->GetAttribute("id"))){
+            if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(eMaterial, element->GetAttribute("id"))){
               throw ticpp::Exception("---> String conversion in Material: id failed");
             }
 
@@ -1302,7 +1302,7 @@ protected:
     }
 
 
-    virtual void processInitialPositionLinear(DynamicsState<LayoutConfigType> & state, ticpp::Element * initCond) {
+    virtual void processInitialPositionLinear(DynamicsState & state, ticpp::Element * initCond) {
 
         Vector3 pos;
         if(!Utilities::stringToVector3<PREC>(pos, initCond->GetAttribute("position"))) {
@@ -1337,7 +1337,7 @@ protected:
 
     }
 
-    virtual void processInitialPositionGrid(DynamicsState<LayoutConfigType> & state, ticpp::Element * initCond) {
+    virtual void processInitialPositionGrid(DynamicsState & state, ticpp::Element * initCond) {
 
         Vector3 trans;
         if(!Utilities::stringToVector3<PREC>(trans, initCond->GetAttribute("translation"))) {
@@ -1373,8 +1373,8 @@ protected:
         InitialConditionBodies::setupPositionBodiesGrid(state,gridX,gridY,dist,trans,jitter,delta, seed);
     }
 
-    virtual void processInitialPositionFile(DynamicsState<LayoutConfigType> & state, ticpp::Element * initCond) {
-        m_SimBodyInitStates.push_back(DynamicsState<LayoutConfigType>((unsigned int)m_bodyList.size()));
+    virtual void processInitialPositionFile(DynamicsState & state, ticpp::Element * initCond) {
+        m_SimBodyInitStates.push_back(DynamicsState((unsigned int)m_bodyList.size()));
 
         boost::filesystem::path name =  initCond->GetAttribute<std::string>("name");
 
@@ -1382,7 +1382,7 @@ protected:
         InitialConditionBodies::setupPositionBodiesFromFile(state,filePath);
     }
 
-    virtual void processInitialPositionPosAxisAngle(DynamicsState<LayoutConfigType> & state, ticpp::Element * initCond) {
+    virtual void processInitialPositionPosAxisAngle(DynamicsState & state, ticpp::Element * initCond) {
 
         int bodyCounter = 0;
 
@@ -1439,7 +1439,7 @@ protected:
         }
     }
 
-    virtual void processInitialPositionTransforms(DynamicsState<LayoutConfigType> & state, ticpp::Element * initCond) {
+    virtual void processInitialPositionTransforms(DynamicsState & state, ticpp::Element * initCond) {
 
 
 
@@ -1519,7 +1519,7 @@ protected:
 
     }
 
-    virtual void processInitialVelocityTransRot(DynamicsState<LayoutConfigType> & state, ticpp::Element * initCond) {
+    virtual void processInitialVelocityTransRot(DynamicsState & state, ticpp::Element * initCond) {
 
 
         int bodyCounter = 0;
@@ -1597,7 +1597,7 @@ protected:
     typename RigidBodyType::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
     typename std::vector<RigidBodyType*> m_bodyList; ///< Used to process a RigidBody Node
     std::vector<Vector3> m_bodyListScales;
-    std::vector< DynamicsState<LayoutConfigType> > m_SimBodyInitStates;
+    std::vector< DynamicsState > m_SimBodyInitStates;
 
 
 

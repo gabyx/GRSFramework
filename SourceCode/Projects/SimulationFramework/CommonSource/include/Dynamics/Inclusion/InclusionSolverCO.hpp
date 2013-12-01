@@ -54,7 +54,7 @@ public:
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
     void reset();
     void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
-    void solveInclusionProblem( const DynamicsState<LayoutConfigType> * state_s, const DynamicsState<LayoutConfigType> * state_m, DynamicsState<LayoutConfigType> * state_e);
+    void solveInclusionProblem( const DynamicsState * state_s, const DynamicsState * state_m, DynamicsState * state_e);
 
     std::string getIterationStats();
     PREC m_G_conditionNumber;
@@ -71,7 +71,7 @@ public:
     PercussionPool<LayoutConfigType> m_PercussionPool;
 
     void reservePercussionPoolSpace(unsigned int nExpectedContacts);
-    void readFromPercussionPool(unsigned int index, const CollisionData<RigidBodyType> * pCollData, VectorDyn & P_old);
+    void readFromPercussionPool(unsigned int index, const CollisionData * pCollData, VectorDyn & P_old);
     void updatePercussionPool(const VectorDyn & P_old ) ;
 
 
@@ -258,9 +258,9 @@ void InclusionSolverCO::reservePercussionPoolSpace( unsigned int nExpectedContac
 }
 
 
-void InclusionSolverCO::solveInclusionProblem(const DynamicsState<LayoutConfigType> * state_s,
-        const DynamicsState<LayoutConfigType> * state_m,
-        DynamicsState<LayoutConfigType> * state_e) {
+void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
+        const DynamicsState * state_m,
+        DynamicsState * state_e) {
 
 #if CoutLevelSolver>1
     LOG(m_pSolverLog, " % -> solveInclusionProblem(): "<< std::endl;);
@@ -304,7 +304,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState<LayoutConfigTy
 
 
         // Assemble W_N and W_T and xi_N and xi_T =====================================================
-        static const CollisionData<RigidBodyType> * pCollData;
+        static const CollisionData * pCollData;
 
         static Eigen::Matrix<PREC,Eigen::Dynamic,Eigen::Dynamic> G_part;
         static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic>* W_j_body;
@@ -690,7 +690,7 @@ void InclusionSolverCO::updatePercussionPool(const VectorDyn & P_old ) {
 
 
 
-void  InclusionSolverCO::readFromPercussionPool(unsigned int index, const CollisionData<RigidBodyType> * pCollData, VectorDyn & P_old) {
+void  InclusionSolverCO::readFromPercussionPool(unsigned int index, const CollisionData * pCollData, VectorDyn & P_old) {
     static VectorDyn P_contact(ContactDim);
 //
 //   std::cout << pCollData->m_ContactTag.m_tag.template get<0>()

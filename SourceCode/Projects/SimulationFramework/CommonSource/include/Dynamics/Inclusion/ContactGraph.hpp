@@ -9,20 +9,19 @@
 
 #include "GeneralGraph.hpp"
 
+#include "CollisionData.hpp"
+
 #include "ContactModels.hpp"
 #include "ContactParameterMap.hpp"
-#include "CollisionData.hpp"
 
 #include "ProxFunctions.hpp"
 #include "InclusionSolverSettings.hpp"
 
 
-template<typename TRigidBody>
 class ContactGraphNodeData {
 public:
 
-    typedef TRigidBody RigidBodyType;
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
+    DEFINE_RIGIDBODY_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     ContactGraphNodeData(): m_pCollData(NULL) {
@@ -35,7 +34,7 @@ public:
         m_nLambdas = 0;
     }
 
-    ContactGraphNodeData(CollisionData<RigidBodyType> * collDataPtr): m_pCollData(collDataPtr) {}
+    ContactGraphNodeData(CollisionData * collDataPtr): m_pCollData(collDataPtr) {}
 
     Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> m_W_body1;
     Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> m_W_body2;
@@ -50,17 +49,15 @@ public:
 
     unsigned int m_nodeColor;
 
-    const CollisionData<RigidBodyType> * m_pCollData;
+    const CollisionData * m_pCollData;
 
     ContactModels::ContactModelEnum m_eContactModel;                  ///< This is a generic type which is used to distinguish between the different models!. See namespace ContactModels.
 };
 
-template<typename TRigidBody>
-class ContactGraphNodeDataIteration : public ContactGraphNodeData<TRigidBody> {
+class ContactGraphNodeDataIteration : public ContactGraphNodeData {
 public:
 
-    typedef TRigidBody RigidBodyType;
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
+    DEFINE_RIGIDBODY_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     ContactGraphNodeDataIteration()
@@ -110,12 +107,10 @@ public:
 /*
 * The EdgeData class for the Contact Graph, nothing is deleted in this class, this is plain old data!
 */
-template<typename TRigidBody>
 class ContactGraphEdgeData {
 public:
 
-    typedef TRigidBody RigidBodyType;
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
+    DEFINE_RIGIDBODY_CONFIG_TYPES
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -127,24 +122,22 @@ public:
 
 };
 
-template<typename TRigidBody, typename ContactGraphMode > class ContactGraph;
+template<typename ContactGraphMode > class ContactGraph;
 
 struct ContactGraphMode{
     struct NoIteration{};
     struct ForIteration{};
 };
 
-template < typename TRigidBody>
-class ContactGraph<TRigidBody, ContactGraphMode::NoIteration> : public Graph::GeneralGraph< ContactGraphNodeData<TRigidBody>,ContactGraphEdgeData<TRigidBody> > {
+template <>
+class ContactGraph<ContactGraphMode::NoIteration> : public Graph::GeneralGraph< ContactGraphNodeData,ContactGraphEdgeData > {
 public:
 
 
-    typedef TRigidBody RigidBodyType;
-    typedef typename RigidBodyType::LayoutConfigType LayoutConfigType;
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
+    DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef ContactGraphNodeData<RigidBodyType> NodeDataType;
-    typedef ContactGraphEdgeData<RigidBodyType> EdgeDataType;
+    typedef ContactGraphNodeData NodeDataType;
+    typedef ContactGraphEdgeData EdgeDataType;
     typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
     typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
 
@@ -155,7 +148,7 @@ public:
 
 public:
 
-    ContactGraph(const ContactParameterMap<RigidBodyType> * contactParameterMap):
+    ContactGraph(ContactParameterMap * contactParameterMap):
     m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0)
     {
         m_pContactParameterMap = contactParameterMap;
@@ -182,9 +175,9 @@ public:
 
     }
 
-    void addNode(CollisionData<RigidBodyType> * pCollData) {
+    void addNode(CollisionData * pCollData) {
 
-        ASSERTMSG(pCollData->m_pBody1.get() != NULL && pCollData->m_pBody2.get() != NULL, " Bodys are null pointers?");
+        ASSERTMSG(pCollData->m_pBody1 != NULL && pCollData->m_pBody2 != NULL, " Bodys are null pointers?");
         //cout << "add node : "<<m_nodeCounter<< " body id:" << pCollData->m_pBody1->m_id <<" and "<< pCollData->m_pBody2->m_id <<endl;
 
         //  add a contact node to the graph
@@ -241,13 +234,13 @@ public:
 
 
     static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
-        ASSERTMSG( nodeData.m_pCollData->m_pBody1.get()  == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
-        return (nodeData.m_pCollData->m_pBody1.get() == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
+        ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
+        return (nodeData.m_pCollData->m_pBody1 == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
     }
 
     static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
-        ASSERTMSG( nodeData.m_pCollData->m_pBody1.get() == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
-        return (nodeData.m_pCollData->m_pBody1.get() == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
+        ASSERTMSG( nodeData.m_pCollData->m_pBody1 == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
+        return (nodeData.m_pCollData->m_pBody1 == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
 
 
@@ -266,7 +259,7 @@ private:
             nodeData.m_I_plus_eps.setZero(ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
             nodeData.m_mu.setZero(ContactModels::NormalAndCoulombFrictionContactModel::nFrictionParams);
 
-            ContactParams<LayoutConfigType> & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
+            ContactParams & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
             nodeData.m_mu(0)         = params.m_mu;
             nodeData.m_I_plus_eps(0)    = 1 + params.m_epsilon_N;
             nodeData.m_I_plus_eps(1)    = 1 + params.m_epsilon_T;
@@ -287,7 +280,7 @@ private:
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
             static Matrix33 I_Jacobi_2; // this is the second part of the Jacobi;
-            static const CollisionData<RigidBodyType> * pCollData;
+            static const CollisionData * pCollData;
 
             pCollData = nodeData.m_pCollData;
 
@@ -336,7 +329,7 @@ private:
     void connectNode(NodeType * pNode) {
 
         EdgeType * addedEdge;
-        RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1.get() : pNode->m_nodeData.m_pCollData->m_pBody2.get();
+        RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1 : pNode->m_nodeData.m_pCollData->m_pBody2;
 
         // Add self edge! ===========================================================
         this->m_edges.push_back(new EdgeType(m_edgeCounter));
@@ -379,24 +372,22 @@ private:
 
     }
 
-    ContactParameterMap<RigidBodyType>* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
+    ContactParameterMap* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 
     unsigned int m_nodeCounter; ///< An node counter, starting at 0.
     unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
 
 };
 
-template < typename TRigidBody>
-class ContactGraph<TRigidBody,ContactGraphMode::ForIteration> : public Graph::GeneralGraph< ContactGraphNodeDataIteration<TRigidBody>,ContactGraphEdgeData<TRigidBody> > {
+template <>
+class ContactGraph<ContactGraphMode::ForIteration> : public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
 public:
 
 
-    typedef TRigidBody RigidBodyType;
-    typedef typename RigidBodyType::LayoutConfigType LayoutConfigType;
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
+    DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef ContactGraphNodeDataIteration<RigidBodyType> NodeDataType;
-    typedef ContactGraphEdgeData<RigidBodyType> EdgeDataType;
+    typedef ContactGraphNodeDataIteration NodeDataType;
+    typedef ContactGraphEdgeData EdgeDataType;
     typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
     typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
 
@@ -405,7 +396,7 @@ public:
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
 
-    ContactGraph(ContactParameterMap<RigidBodyType> * contactParameterMap):
+    ContactGraph(ContactParameterMap * contactParameterMap):
     m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0)
     {
         m_pContactParameterMap = contactParameterMap;
@@ -433,7 +424,7 @@ public:
 
     }
 
-    void addNode(CollisionData<RigidBodyType> * pCollData) {
+    void addNode(CollisionData * pCollData) {
 
         //Take care state, is only q = q_m, u is not set and is zero!
 
@@ -514,13 +505,13 @@ public:
 
 
     static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
-        ASSERTMSG( nodeData.m_pCollData->m_pBody1.get()  == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
-        return (nodeData.m_pCollData->m_pBody1.get() == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
+        ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
+        return (nodeData.m_pCollData->m_pBody1 == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
     }
 
     static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
-        ASSERTMSG( nodeData.m_pCollData->m_pBody1.get() == pBody || nodeData.m_pCollData->m_pBody2.get()  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
-        return (nodeData.m_pCollData->m_pBody1.get() == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
+        ASSERTMSG( nodeData.m_pCollData->m_pBody1 == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
+        return (nodeData.m_pCollData->m_pBody1 == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
 
 
@@ -543,7 +534,7 @@ private:
 
 
 
-            ContactParams<LayoutConfigType> & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
+            ContactParams & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
             nodeData.m_mu(0)     = params.m_mu;
             nodeData.m_eps(0)    = params.m_epsilon_N;
             nodeData.m_eps(1)    = params.m_epsilon_T;
@@ -569,7 +560,7 @@ private:
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
             static Matrix33 I_Jacobi_2; // this is the second part of the Jacobi;
-            static const CollisionData<RigidBodyType> * pCollData;
+            static const CollisionData * pCollData;
 
             pCollData = nodeData.m_pCollData;
 
@@ -664,7 +655,7 @@ private:
 
     }
 
-    ContactParameterMap<RigidBodyType>* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
+    ContactParameterMap* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 
     unsigned int m_nodeCounter; ///< An node counter, starting at 0.
     unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
@@ -675,14 +666,12 @@ private:
 /**
 @brief Visitor for class ContactGraph<TRigidBody,ContactGraphMode::ForIteration>
 */
-template < typename TRigidBody>
 class SorProxStepNodeVisitor{
 public:
 
-    typedef TRigidBody RigidBodyType;
-    typedef typename RigidBodyType::LayoutConfigType LayoutConfigType;
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
-    typedef ContactGraph<TRigidBody,ContactGraphMode::ForIteration> ContactGraphType;
+    DEFINE_RIGIDBODY_CONFIG_TYPES
+
+    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
     typedef typename ContactGraphType::NodeDataType NodeDataType;
     typedef typename ContactGraphType::EdgeDataType EdgeDataType;
     typedef typename ContactGraphType::EdgeType EdgeType;
@@ -734,7 +723,7 @@ public:
 
             Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle(
                 nodeData.m_mu(0),
-                nodeData.m_LambdaFront.template head<ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension>()
+                nodeData.m_LambdaFront.head<ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension>()
             );
 
 #if CoutLevelSolverWhenContact>2
@@ -863,18 +852,16 @@ private:
 /**
 @brief Visitor for class ContactGraph<TRigidBody,ContactGraphMode::ForIteration>
 */
-template < typename TRigidBody>
 class SorProxInitNodeVisitor{
 public:
 
-    typedef TRigidBody RigidBodyType;
-    typedef typename RigidBodyType::LayoutConfigType LayoutConfigType;
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType);
-    typedef ContactGraph<TRigidBody,ContactGraphMode::ForIteration> ContactGraphType;
-    typedef typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::NodeDataType NodeDataType;
-    typedef typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::EdgeDataType EdgeDataType;
-    typedef typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::EdgeType EdgeType;
-    typedef typename ContactGraph<TRigidBody,ContactGraphMode::ForIteration>::NodeType NodeType;
+    DEFINE_RIGIDBODY_CONFIG_TYPES
+
+    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
+    typedef typename ContactGraphType::NodeDataType NodeDataType;
+    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
+    typedef typename ContactGraphType::EdgeType EdgeType;
+    typedef typename ContactGraphType::NodeType NodeType;
 
     SorProxInitNodeVisitor()
     {}
@@ -923,7 +910,7 @@ public:
 
         // Calculate R_ii
         nodeData.m_R_i_inv_diag(0) = m_alpha / (nodeData.m_G_ii(0,0));
-        PREC r_T = m_alpha / ((nodeData.m_G_ii.diagonal().template tail<2>()).maxCoeff());
+        PREC r_T = m_alpha / ((nodeData.m_G_ii.diagonal().tail<2>()).maxCoeff());
         nodeData.m_R_i_inv_diag(1) = r_T;
         nodeData.m_R_i_inv_diag(2) = r_T;
 

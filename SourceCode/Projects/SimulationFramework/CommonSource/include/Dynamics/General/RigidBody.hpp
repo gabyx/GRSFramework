@@ -88,14 +88,14 @@ public:
      NOT_SIMULATED
     }; ///< Emuration which defines if the object is simulated, animated or not simulated (which means fixed, and does not take part in the dynamics).
 
-    typedef unsigned int BodyMaterial;
+    typedef unsigned int BodyMaterialType;
 
     unsigned int m_globalGeomId; ///< The Id for the global geometry, if this is 0 then the geometry belongs to the body and gets deallocated, otherwise not
 
     typedef boost::variant<
       boost::shared_ptr<const SphereGeometry<PREC> >,
-      boost::shared_ptr<const HalfspaceGeometry<PREC> > ,
-      boost::shared_ptr<const BoxGeometry<PREC> >,
+      boost::shared_ptr<const HalfspaceGeometry > ,
+      boost::shared_ptr<const BoxGeometry >,
       boost::shared_ptr<const MeshGeometry<PREC> >
     > GeometryType;
 
@@ -128,7 +128,7 @@ public:
     const RigidBodyIdType m_id; ///< This is the id of the body.
 
     BodyState m_eState; ///< The state of the body.
-    BodyMaterial m_eMaterial; ///< The material id.
+    BodyMaterialType m_eMaterial; ///< The material id.
 
     unsigned char m_flags; ///< Different Flags which can be used during the timestep process, introduces because of MPI
 

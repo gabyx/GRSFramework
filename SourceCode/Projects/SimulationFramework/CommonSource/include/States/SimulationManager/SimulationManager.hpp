@@ -12,7 +12,7 @@
 #include "SceneParser.hpp"
 
 
-template <typename TLayoutConfig> class DynamicsState;
+class DynamicsState;
 class StateRecorder;
 class SharedBufferDynSys;
 

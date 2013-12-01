@@ -91,11 +91,11 @@ namespace GlobalDefs{
 
 #define DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
     typedef typename GlobalDefs::TimeStepperConfigs::DynamicsSystemType     DynamicsSystemType; \
-    typedef typename GlobalDefs::DynamicSystemConfigs::RigidBodyType RigidBodyType; \
     DEFINE_RIGIDBODY_CONFIG_TYPES \
 
 
 #define DEFINE_RIGIDBODY_CONFIG_TYPES \
+    typedef typename GlobalDefs::DynamicSystemConfigs::RigidBodyType RigidBodyType; \
     typedef typename GlobalDefs::RigidBodyConfigs::RigidBodySolverDataType RigidBodySolverDataType; \
     DEFINE_LAYOUT_CONFIG_TYPES\
 

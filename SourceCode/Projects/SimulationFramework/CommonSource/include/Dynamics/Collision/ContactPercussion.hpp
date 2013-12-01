@@ -6,10 +6,9 @@
 * @brief This is the ContactPercussion class, which stores the percussions for one contact.
 */
 /** @{ */
-template<typename TLayoutConfig>
 class ContactPercussion {
 public:
-   DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+   DEFINE_LAYOUT_CONFIG_TYPES
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    ContactPercussion(unsigned int dim){

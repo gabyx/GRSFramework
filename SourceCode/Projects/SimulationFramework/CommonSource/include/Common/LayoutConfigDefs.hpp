@@ -10,6 +10,7 @@
 #define LayoutConfigDefs_hpp
 
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 #include "MyMatrixDefs.hpp"
 
@@ -78,6 +79,8 @@ struct LayoutConfig{
    typedef typename MyMatrix< PREC >::MatrixDiagDyn MatrixDiagDyn;
    typedef typename MyMatrix< PREC >::MatrixDynRow MatrixDynRow;
 
+   typedef Eigen::Transform<PREC,3,Eigen::TransformTraits::Affine> AffineTrafo;
+
 };
 
 
@@ -115,7 +118,8 @@ struct LayoutConfig{
    typedef typename _LayoutConfigName_::VectorDyn VectorDyn;   \
    typedef typename _LayoutConfigName_::MatrixDyn MatrixDyn;   \
    typedef typename _LayoutConfigName_::MatrixDiagDyn MatrixDiagDyn;   \
-   typedef typename _LayoutConfigName_::MatrixDynRow MatrixDynRow;
+   typedef typename _LayoutConfigName_::MatrixDynRow MatrixDynRow; \
+   typedef typename _LayoutConfigName_::AffineTrafo AffineTrafo;
 
 /**
 * @brief This macro is used to typedef all template arguments outside of a class for a specific LayoutConfig.

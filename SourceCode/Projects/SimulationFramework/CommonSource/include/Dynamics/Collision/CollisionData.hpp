@@ -29,13 +29,11 @@
 * @brief This is the CollisionData class which describes one collision contact.
 */
 /** @{ */
-template<typename TRigidBody>
 class CollisionData
 {
 public:
 
-    typedef TRigidBody RigidBodyType;
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TRigidBody::LayoutConfigType)
+    DEFINE_RIGIDBODY_CONFIG_TYPES
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -54,7 +52,7 @@ public:
   * The contact frame which is always located at the contact point of the first body. The coordinate frame vectors are resolved in the I Frame!
   * @{
   */
-  ContactFrame<PREC> m_cFrame;
+  ContactFrame m_cFrame;
   //contains Vector3 m_cFrame.m_e_x, m_cFrame.m_e_y, m_cFrame.m_e_z;
 
   /** @} */

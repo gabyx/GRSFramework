@@ -34,7 +34,7 @@ namespace InertiaTensor{
             m_rigidBody->m_K_Theta_S(2) = 2.0/5.0 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
         }
 
-        void operator()(boost::shared_ptr<const BoxGeometry<PREC> > & box)  {
+        void operator()(boost::shared_ptr<const BoxGeometry > & box)  {
             m_rigidBody->m_K_Theta_S(0) = 1.0/12.0 * m_rigidBody->m_mass * (box->m_extent(1)*box->m_extent(1) + box->m_extent(2)*box->m_extent(2));
             m_rigidBody->m_K_Theta_S(1) = 1.0/12.0 * m_rigidBody->m_mass * (box->m_extent(0)*box->m_extent(0) + box->m_extent(2)*box->m_extent(2));
             m_rigidBody->m_K_Theta_S(2) = 1.0/12.0 * m_rigidBody->m_mass * (box->m_extent(1)*box->m_extent(1) + box->m_extent(0)*box->m_extent(0));
@@ -44,7 +44,7 @@ namespace InertiaTensor{
             ASSERTMSG(false,"MeshGeometry InertiaCalculations: This has not been implemented yet!");
         }
 
-        void operator()(boost::shared_ptr<const HalfspaceGeometry<PREC> > & halfspace)  {
+        void operator()(boost::shared_ptr<const HalfspaceGeometry > & halfspace)  {
             //This has not been implemented yet!
             ASSERTMSG(false,"HalfspaceGeometry InertiaCalculations: This has not been implemented yet!");
         }

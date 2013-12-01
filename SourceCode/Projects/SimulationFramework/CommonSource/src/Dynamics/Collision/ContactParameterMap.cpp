@@ -4,6 +4,7 @@
 
 #include "ContactParameterMap.hpp"
 
+#include "AssertionDebug.hpp"
 
 
 ContactParameterTag::ContactParameterTag( unsigned int materialid1, unsigned int materialid2){
@@ -37,4 +38,41 @@ std::size_t ContactParameterTagHash::operator()(ContactParameterTag const& c) co
     boost::hash_combine(seed, c.m_tag.get<1>());
 
     return seed;
+}
+
+
+ContactParameterMap::ContactParameterMap() {
+    m_nMaterials = 1;
+    m_std_values.m_epsilon_N = 0.5;
+    m_std_values.m_epsilon_T = 0.5;
+    m_std_values.m_mu = 0.3;
+
+}
+
+bool ContactParameterMap::addContactParameter(typename RigidBodyType::BodyMaterialType  material1,
+                                              typename RigidBodyType::BodyMaterialType  material2,
+                                              const ContactParams & params)
+{
+    typename ContactParameterMapType::value_type pair(ContactParameterTag(material1,material2),params);
+
+    std::pair<  typename ContactParameterMapType::iterator, bool> res = m_ContactParams.insert(pair);
+
+    if(res.second){
+        m_nMaterials++;
+    }
+
+    return res.second;
+}
+
+
+ContactParams & ContactParameterMap::getContactParams(  typename RigidBodyType::BodyMaterialType material1,
+                                                        typename RigidBodyType::BodyMaterialType material2){
+
+     typename ContactParameterMapType::iterator it = m_ContactParams.find(ContactParameterTag(material1,material2));
+
+    if(it != m_ContactParams.end()){
+        return it->second;
+    }
+    ASSERTMSG(false,"ContactParams for id: "<< material1 <<" and " <<material2 << " not found"<<std::endl);
+    return m_std_values;
 }

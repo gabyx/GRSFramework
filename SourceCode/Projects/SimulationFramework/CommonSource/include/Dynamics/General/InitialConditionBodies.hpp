@@ -16,14 +16,13 @@
 
 namespace InitialConditionBodies {
 
-template<typename TLayoutConfig>
 void setupPositionBodiesLinear(
-    DynamicsState<TLayoutConfig> & init_state,
-    typename TLayoutConfig::Vector3 pos,
-    typename TLayoutConfig::Vector3 dir,
+    DynamicsState & init_state,
+    typename DynamicsState::Vector3 pos,
+    typename DynamicsState::Vector3 dir,
     double dist, bool jitter, double delta, unsigned int seed) {
 
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+    DEFINE_LAYOUT_CONFIG_TYPES
 
 
     dir.normalize();
@@ -33,7 +32,7 @@ void setupPositionBodiesLinear(
     // Set only m_q, m_u is zero in constructor!
     double d = 2; //spread around origin with 0.5m
     for(unsigned int i=0; i< init_state.m_nSimBodies; i++) {
-        init_state.m_SimBodyStates[i].m_q.template tail<4>() = typename TLayoutConfig::Quaternion(1,0,0,0);
+        init_state.m_SimBodyStates[i].m_q.tail<4>() = Quaternion(1,0,0,0);
 
         typedef boost::mt19937  RNG;
         static  RNG generator(seed);
@@ -48,26 +47,26 @@ void setupPositionBodiesLinear(
             jitter_vec = random_vec * delta;
         }
 
-        init_state.m_SimBodyStates[i].m_q.template head<3>() = pos + dir*dist*i + jitter_vec;
+       init_state.m_SimBodyStates[i].m_q.head<3>() = pos + dir*dist*i + jitter_vec;
     }
 }
 
-template<typename TLayoutConfig>
-void setupPositionBodiesGrid(DynamicsState<TLayoutConfig> & init_state,
+void setupPositionBodiesGrid(DynamicsState & init_state,
                      unsigned int gDim_x,
                      unsigned int gDim_y,
                      double d,
-                     typename TLayoutConfig::Vector3 vec_trans,
+                     typename DynamicsState::Vector3 vec_trans,
                      bool jitter,
                      double delta,
                      unsigned int seed) {
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+
+    DEFINE_LAYOUT_CONFIG_TYPES
 
     Vector3 jitter_vec;
     jitter_vec.setZero();
 
     for(unsigned int i=0; i< init_state.m_nSimBodies; i++) {
-        init_state.m_SimBodyStates[i].m_q.template tail<4>() = typename TLayoutConfig::Quaternion(1,0,0,0);
+        init_state.m_SimBodyStates[i].m_q.tail<4>() = Quaternion(1,0,0,0);
         int index_z = (i /(gDim_x*gDim_y));
         int index_y = (i - index_z*(gDim_x*gDim_y)) / gDim_x;
         int index_x = (i - index_z*(gDim_x*gDim_y)- index_y*gDim_x);
@@ -81,16 +80,15 @@ void setupPositionBodiesGrid(DynamicsState<TLayoutConfig> & init_state,
             jitter_vec = Vector3(randomNumber(),randomNumber(),randomNumber()) * delta; // No uniform distribution!, but does not matter
         }
 
-        init_state.m_SimBodyStates[i].m_q.template head<3>() = Vector3(index_x * d - 0.5*(gDim_x-1)*d, index_y*d - 0.5*(gDim_y-1)*d , index_z*d) + vec_trans + jitter_vec;
+        init_state.m_SimBodyStates[i].m_q. head<3>() = Vector3(index_x * d - 0.5*(gDim_x-1)*d, index_y*d - 0.5*(gDim_y-1)*d , index_z*d) + vec_trans + jitter_vec;
     }
 
 }
 
-template<typename TLayoutConfig>
-bool setupPositionBodiesFromFile(DynamicsState<TLayoutConfig> & init_state, boost::filesystem::path file_path) {
+bool setupPositionBodiesFromFile(DynamicsState & init_state, boost::filesystem::path file_path) {
 
-    MultiBodySimFile simFile( TLayoutConfig::LayoutType::NDOFqObj,
-                              TLayoutConfig::LayoutType::NDOFuObj);
+    MultiBodySimFile simFile( DynamicsState::LayoutConfigType::LayoutType::NDOFqObj,
+                              DynamicsState::LayoutConfigType::LayoutType::NDOFuObj);
 
     if(simFile.openRead(file_path,init_state.m_nSimBodies)) {
         simFile >> init_state ;
@@ -101,20 +99,20 @@ bool setupPositionBodiesFromFile(DynamicsState<TLayoutConfig> & init_state, boos
     return false;
 }
 
-template<typename TLayoutConfig>
-void setupPositionBodyPosAxisAngle(RigidBodyState<TLayoutConfig> & rigibodyState,
-                                   const typename TLayoutConfig::Vector3 & pos,
-                                   typename TLayoutConfig::Vector3 & axis,
-                                   typename TLayoutConfig::PREC angleRadian) {
 
-    rigibodyState.m_q.template head<3>() = pos;
-    setQuaternion(rigibodyState.m_q.template tail<4>(),axis,angleRadian);
+void setupPositionBodyPosAxisAngle(RigidBodyState & rigibodyState,
+                                   const typename RigidBodyState::Vector3 & pos,
+                                   typename RigidBodyState::Vector3 & axis,
+                                   typename RigidBodyState::PREC angleRadian) {
+
+    rigibodyState.m_q.head<3>() = pos;
+    setQuaternion(rigibodyState.m_q.tail<4>(),axis,angleRadian);
 }
 
 
 template<typename TRigidBodyType,  typename TRigidBodyList>
 inline void applyDynamicsStateToBodies(
-                                       const DynamicsState<typename TRigidBodyType::LayoutConfigType > & state,
+                                       const DynamicsState & state,
                                        TRigidBodyList & bodies) {
 
     typedef typename TRigidBodyType::LayoutConfigType LayoutConfigType;
@@ -122,7 +120,7 @@ inline void applyDynamicsStateToBodies(
     ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
 
     typename  TRigidBodyList::iterator bodyIt;
-    typename  DynamicsState<LayoutConfigType>::RigidBodyStateListType::const_iterator stateBodyIt = state.m_SimBodyStates.begin();
+    typename  DynamicsState::RigidBodyStateListType::const_iterator stateBodyIt = state.m_SimBodyStates.begin();
 
     for(bodyIt = bodies.begin(); bodyIt != bodies.end() ; bodyIt++) {
 
@@ -145,13 +143,13 @@ inline void applyBodyToRigidBodyState( const TRigidBody  * body, TRigidBodyState
 
 template<typename TRigidBodyType, typename TRigidBodyList>
 inline void applyBodiesToDynamicsState(const TRigidBodyList & bodies,
-                                         DynamicsState<typename TRigidBodyType::LayoutConfigType> & state ) {
+                                         DynamicsState & state ) {
 
     typedef typename TRigidBodyType::LayoutConfigType LayoutConfigType;
 
     ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
     typename  TRigidBodyList::const_iterator bodyIt = bodies.begin();
-    typename  DynamicsState<LayoutConfigType>::RigidBodyStateListType::iterator stateBodyIt = state.m_SimBodyStates.begin();
+    typename  DynamicsState::RigidBodyStateListType::iterator stateBodyIt = state.m_SimBodyStates.begin();
 
     for(bodyIt = bodies.begin(); bodyIt != bodies.end() ; bodyIt++) {
         //std::cout << RigidBodyId::getBodyIdString(*bodyIt) << std::cout;

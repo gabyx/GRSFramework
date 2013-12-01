@@ -10,6 +10,7 @@
 #define MyMatrixDefs_hpp
 
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 // ================================================================================================
 /** @brief This
@@ -31,6 +32,9 @@ struct MyMatrix{
    typedef Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic >       MatrixDyn;
    typedef Eigen::DiagonalMatrix<PREC, Eigen::Dynamic >                MatrixDiagDyn;
    typedef Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor> MatrixDynRow;
+
+   typedef Eigen::Transform<PREC,3,Eigen::TransformTraits::Affine> AffineTrafo;
+
 };
 
 /**
@@ -48,7 +52,7 @@ struct MyMatrix{
    typedef typename MyMatrix< PREC >::VectorDyn VectorDyn; \
    typedef typename MyMatrix< PREC >::MatrixDyn MatrixDyn; \
    typedef typename MyMatrix< PREC >::MatrixDiagDyn MatrixDiagDyn; \
-   typedef typename MyMatrix< PREC >::MatrixDynRow MatrixDynRow;
-
+   typedef typename MyMatrix< PREC >::MatrixDynRow MatrixDynRow; \
+   typedef typename MyMatrix< PREC >::AffineTrafo AffineTrafo;
 
 #endif

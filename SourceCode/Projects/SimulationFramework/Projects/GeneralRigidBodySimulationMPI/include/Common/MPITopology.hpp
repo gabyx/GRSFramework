@@ -68,7 +68,7 @@ public:
     typedef typename ProcessTopology<TDynamicsSystem, TRankId>::AdjacentNeighbourRanksMapType AdjacentNeighbourRanksMapType;
     typedef TRankId RankIdType;
 
-    typedef std::map<unsigned int, AABB<LayoutConfigType> > RankToAABBType;
+    typedef std::map<unsigned int, AABB > RankToAABBType;
 
 
 
@@ -113,7 +113,7 @@ public:
 private:
 
     RankToAABBType m_nbAABB;            ///< Neighbour AABB
-    AABB<LayoutConfigType> m_aabb;      ///< Own AABB of this process
+    AABB m_aabb;      ///< Own AABB of this process
     CartesianGrid<LayoutConfigType,NoCellData> m_grid;
 
     Collider<DynamicsSystemType> m_Collider;

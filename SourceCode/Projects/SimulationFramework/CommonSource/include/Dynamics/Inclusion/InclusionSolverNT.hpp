@@ -43,9 +43,9 @@ public:
   void initializeLog(Logging::Log* pSolverLog);
   void reset();
   void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
-  void solveInclusionProblem( const DynamicsState<LayoutConfigType> * state_s,
-    const DynamicsState<LayoutConfigType> * state_m,
-    DynamicsState<LayoutConfigType> * state_e);
+  void solveInclusionProblem( const DynamicsState * state_s,
+    const DynamicsState * state_m,
+    DynamicsState * state_e);
 
   // These are updated from the System, over Inclusion Solver;
   VectorU m_Minv_diag;
@@ -247,9 +247,9 @@ void InclusionSolverNT<TInclusionSolverConfig>::reservePercussionPoolSpace( unsi
 }
 
 template< typename TInclusionSolverConfig >
-void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const DynamicsState<LayoutConfigType> * state_s,
-                                                                                        const DynamicsState<LayoutConfigType> * state_m,
-                                                                                        DynamicsState<LayoutConfigType> * state_e)
+void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const DynamicsState * state_s,
+                                                                                        const DynamicsState * state_m,
+                                                                                        DynamicsState * state_e)
 {
 
 #if CoutLevelSolver>0

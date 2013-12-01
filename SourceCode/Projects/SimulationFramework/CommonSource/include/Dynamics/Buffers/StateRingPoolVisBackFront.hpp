@@ -29,30 +29,30 @@ public:
   /** @name Only accessed by Simulation Thread.
   * @{
   */
-  boost::shared_ptr<DynamicsState<TLayoutConfig> > getSimBuffer();
-  boost::shared_ptr<DynamicsState<TLayoutConfig> > advanceSimBuffer(bool & out_changed);
+  boost::shared_ptr<DynamicsState > getSimBuffer();
+  boost::shared_ptr<DynamicsState > advanceSimBuffer(bool & out_changed);
   /** @} */
 
   /** @name Only accessed by Loader Thread.
   * @{
   */
-  boost::shared_ptr<DynamicsState<TLayoutConfig> > getLoadBuffer();
-  boost::shared_ptr<DynamicsState<TLayoutConfig> > advanceLoadBuffer(bool & out_changed);
+  boost::shared_ptr<DynamicsState > getLoadBuffer();
+  boost::shared_ptr<DynamicsState > advanceLoadBuffer(bool & out_changed);
   /** @} */
 
   /** @name Only accessed by Visualization Thread.
   * @{
   */
-  boost::shared_ptr<const DynamicsState<TLayoutConfig> > getVisBuffer();
-  boost::shared_ptr<const DynamicsState<TLayoutConfig> > updateVisBuffer(bool & out_changed);
-  boost::shared_ptr<const DynamicsState<TLayoutConfig> > updateVisBuffer();
+  boost::shared_ptr<const DynamicsState > getVisBuffer();
+  boost::shared_ptr<const DynamicsState > updateVisBuffer(bool & out_changed);
+  boost::shared_ptr<const DynamicsState > updateVisBuffer();
   /** @} */
 
   /** @name Only accessed by if only Visualization Thread runs.
   * @{
   */
-  void initializeStateRingPool(const DynamicsState<TLayoutConfig> & state_init);
-  void initializeStateRingPool(const std::vector<DynamicsState<TLayoutConfig> > & state_initList);
+  void initializeStateRingPool(const DynamicsState & state_init);
+  void initializeStateRingPool(const std::vector<DynamicsState > & state_initList);
   void resetStateRingPool();
   /** @} */
 
@@ -69,7 +69,7 @@ protected:
   const unsigned int m_nDofuObj, m_nDofqObj, m_nSimBodies; // These are the dimensions for one Obj
 
   boost::mutex	m_mutexStateInit; ///< Mutex for the initial state.
-  DynamicsState<TLayoutConfig> m_state_init; ///< The initial state for the system.
+  DynamicsState m_state_init; ///< The initial state for the system.
 
   std::ofstream m_logfile;
   #define POOL_SIZE 50 ///< The ring pool size, must not exceed 256 and be lower than 3!, because of the integer for the index in the StatePool class.
@@ -91,7 +91,7 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
   // Add the 3 state pools, if m_state_pointer is deleted, all elements inside are deleted because of shared_ptr
   for(int i = 0; i < POOL_SIZE; i++){
     m_pool.push_back(
-      boost::shared_ptr<DynamicsState<TLayoutConfig> >(new DynamicsState<TLayoutConfig>(nSimBodies))
+      boost::shared_ptr<DynamicsState >(new DynamicsState(nSimBodies))
       );
   }
 
@@ -99,7 +99,7 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
   m_idx[1] = 0; // back
   m_idx[2] = 1; // front
 
-  initializeStateRingPool( DynamicsState<TLayoutConfig>(nSimBodies) );
+  initializeStateRingPool( DynamicsState(nSimBodies) );
 
 
   // Init Log
@@ -116,7 +116,7 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
 
 
 template<typename TLayoutConfig>
-void StateRingPoolVisBackFront<TLayoutConfig>::initializeStateRingPool(const DynamicsState<TLayoutConfig> & state_init){
+void StateRingPoolVisBackFront<TLayoutConfig>::initializeStateRingPool(const DynamicsState & state_init){
 
   boost::mutex::scoped_lock l1(m_mutexStateInit);
   boost::mutex::scoped_lock l2(m_change_pointer_mutex);
@@ -135,7 +135,7 @@ void StateRingPoolVisBackFront<TLayoutConfig>::initializeStateRingPool(const Dyn
 
 
 template<typename TLayoutConfig>
-void StateRingPoolVisBackFront<TLayoutConfig>::initializeStateRingPool(const std::vector<DynamicsState<TLayoutConfig> > & state_initList){
+void StateRingPoolVisBackFront<TLayoutConfig>::initializeStateRingPool(const std::vector<DynamicsState > & state_initList){
 
   boost::mutex::scoped_lock l1(m_mutexStateInit);
   boost::mutex::scoped_lock l2(m_change_pointer_mutex);
@@ -239,7 +239,7 @@ void StateRingPoolVisBackFront<TLayoutConfig>::resetStateRingPool()
 
 // ONLY USED IN SIM THREAD
 template<typename TLayoutConfig>
-boost::shared_ptr<DynamicsState<TLayoutConfig> >
+boost::shared_ptr<DynamicsState >
 StateRingPoolVisBackFront<TLayoutConfig>::getSimBuffer() {
   //cout << " idx: " << (unsigned int)m_idx[1] << endl;
   return m_pool[m_idx[1]];
@@ -248,7 +248,7 @@ StateRingPoolVisBackFront<TLayoutConfig>::getSimBuffer() {
 
 // ONLY USED IN SIM THREAD
 template<typename TLayoutConfig>
-boost::shared_ptr< DynamicsState<TLayoutConfig> >
+boost::shared_ptr< DynamicsState >
 StateRingPoolVisBackFront<TLayoutConfig>::advanceSimBuffer(bool & out_changed)
 {
   boost::mutex::scoped_lock l(m_change_pointer_mutex);
@@ -272,7 +272,7 @@ StateRingPoolVisBackFront<TLayoutConfig>::advanceSimBuffer(bool & out_changed)
 
 // ONLY USED IN VISUALIZATION THREAD
 template<typename TLayoutConfig>
-boost::shared_ptr<const DynamicsState<TLayoutConfig> >
+boost::shared_ptr<const DynamicsState >
 StateRingPoolVisBackFront<TLayoutConfig>::updateVisBuffer(bool & out_changed)
 {
   boost::mutex::scoped_lock l(m_change_pointer_mutex);
@@ -293,7 +293,7 @@ StateRingPoolVisBackFront<TLayoutConfig>::updateVisBuffer(bool & out_changed)
 }
 
 template<typename TLayoutConfig>
-boost::shared_ptr<const DynamicsState<TLayoutConfig> >
+boost::shared_ptr<const DynamicsState >
 StateRingPoolVisBackFront<TLayoutConfig>::updateVisBuffer()
 {
   bool out_changed;
@@ -301,7 +301,7 @@ StateRingPoolVisBackFront<TLayoutConfig>::updateVisBuffer()
 }
 
 template<typename TLayoutConfig>
-boost::shared_ptr<const DynamicsState<TLayoutConfig> > StateRingPoolVisBackFront<TLayoutConfig>::getVisBuffer()
+boost::shared_ptr<const DynamicsState > StateRingPoolVisBackFront<TLayoutConfig>::getVisBuffer()
 {
    return m_pool[m_idx[0]];
 }
@@ -309,13 +309,13 @@ boost::shared_ptr<const DynamicsState<TLayoutConfig> > StateRingPoolVisBackFront
 
 
 template< typename TLayoutConfig >
-boost::shared_ptr<DynamicsState<TLayoutConfig> > StateRingPoolVisBackFront<TLayoutConfig>::getLoadBuffer()
+boost::shared_ptr<DynamicsState > StateRingPoolVisBackFront<TLayoutConfig>::getLoadBuffer()
 {
   return m_pool[m_idx[2]];
 }
 
 template< typename TLayoutConfig >
-boost::shared_ptr<DynamicsState<TLayoutConfig> > StateRingPoolVisBackFront<TLayoutConfig>::advanceLoadBuffer( bool & out_changed )
+boost::shared_ptr<DynamicsState > StateRingPoolVisBackFront<TLayoutConfig>::advanceLoadBuffer( bool & out_changed )
 {
   boost::mutex::scoped_lock l(m_change_pointer_mutex);
   // calculated next index!

@@ -68,7 +68,7 @@ private:
 
     void setShadowTechniques();
 
-    boost::shared_ptr<const DynamicsState<LayoutConfigType> > m_pVisBuffer;
+    boost::shared_ptr<const DynamicsState > m_pVisBuffer;
 
     // Accessed only by thread ===================
     void threadRunSimulation();

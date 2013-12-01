@@ -68,7 +68,7 @@ public:
     PercussionPool<LayoutConfigType> m_PercussionPool;
 
 //    void reservePercussionPoolSpace(unsigned int nExpectedContacts);
-//    void readFromPercussionPool(unsigned int index, const CollisionData<LayoutConfigType> * pCollData, VectorDyn & P_old);
+//    void readFromPercussionPool(unsigned int index, const CollisionData * pCollData, VectorDyn & P_old);
 //    void updatePercussionPool(const VectorDyn & P_old ) ;
 
     InclusionSolverSettings<LayoutConfigType> m_Settings;
@@ -85,7 +85,7 @@ protected:
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;
 
-    typedef ContactGraph<RigidBodyType,ContactGraphMode::ForIteration> ContactGraphType;
+    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
     ContactGraphType m_ContactGraph;
 
     void integrateAllBodyVelocities();
@@ -95,8 +95,8 @@ protected:
 
     inline void doSorProx();
     inline void sorProxOverAllNodes();
-    SorProxStepNodeVisitor<RigidBodyType> * m_pSorProxStepNodeVisitor;
-    SorProxInitNodeVisitor<RigidBodyType> * m_pSorProxInitNodeVisitor;
+    SorProxStepNodeVisitor * m_pSorProxStepNodeVisitor;
+    SorProxInitNodeVisitor * m_pSorProxInitNodeVisitor;
 
     // Log
     Logging::Log *m_pSolverLog, *m_pSimulationLog;
@@ -132,8 +132,8 @@ InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverTyp
     m_pDynSys = pDynSys;
 
     //Make a new Sor Prox Visitor (takes references from these class member)
-    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor<RigidBodyType>(m_Settings,m_bConverged,m_iterationsNeeded);
-    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<RigidBodyType>();
+    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor(m_Settings,m_bConverged,m_iterationsNeeded);
+    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor();
 }
 
 

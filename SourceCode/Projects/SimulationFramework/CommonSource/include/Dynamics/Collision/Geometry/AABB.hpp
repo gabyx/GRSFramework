@@ -6,11 +6,11 @@
 
 
 
-template<typename TLayoutConfig>
 class AABB {
 public:
 
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
+    DEFINE_LAYOUT_CONFIG_TYPES
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     AABB() {
@@ -88,16 +88,16 @@ public:
         return m_maxPoint - m_minPoint;
     };
 
-    AABB & transform(const Matrix44 & M) {
+    AABB & transform(const AffineTrafo & M) {
 
-        AABB ret(M * (Vector3( m_minPoint(0), m_minPoint(1), m_minPoint(2))));
-        ret.unite(M* (Vector3(m_maxPoint(0), m_minPoint(1), m_minPoint(2))));
+        AABB ret( M*(Vector3( m_minPoint(0), m_minPoint(1), m_minPoint(2))));
+        ret.unite(M*(Vector3( m_maxPoint(0), m_minPoint(1), m_minPoint(2))));
         ret.unite(M*(Vector3( m_minPoint(0), m_maxPoint(1), m_minPoint(2))));
         ret.unite(M*(Vector3( m_minPoint(0), m_minPoint(1), m_maxPoint(2))));
         ret.unite(M*(Vector3( m_minPoint(0), m_maxPoint(1), m_maxPoint(2))));
-        ret.unite(M*(Vector3(m_maxPoint(0), m_maxPoint(1), m_minPoint(2))));
-        ret.unite(M*(Vector3(m_maxPoint(0), m_minPoint(1), m_maxPoint(2))));
-        ret.unite(M*(Vector3(m_maxPoint(0), m_maxPoint(1), m_maxPoint(2))));
+        ret.unite(M*(Vector3( m_maxPoint(0), m_maxPoint(1), m_minPoint(2))));
+        ret.unite(M*(Vector3( m_maxPoint(0), m_minPoint(1), m_maxPoint(2))));
+        ret.unite(M*(Vector3( m_maxPoint(0), m_maxPoint(1), m_maxPoint(2))));
         *this = ret;
         return *this;
     };
