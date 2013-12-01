@@ -9,7 +9,7 @@
 #include <srutil/delegate/delegate.hpp> // Use fast SR delegates
 #include <boost/shared_ptr.hpp>
 
-#include "RigidBody.hpp"
+
 #include "RigidBodyGarbageCollector.hpp"
 #include "BodyInfoMap.hpp"
 #include "NeighbourMap.hpp"

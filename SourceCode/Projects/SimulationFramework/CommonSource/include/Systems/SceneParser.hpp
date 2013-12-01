@@ -18,7 +18,7 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
-#include "RigidBody.hpp"
+#include "RigidBodyId.hpp"
 
 #include "ContactParams.hpp"
 
@@ -34,6 +34,7 @@
 #include "InitialConditionBodies.hpp"
 
 #include "ExternalForces.hpp"
+
 
 
 #include <assimp/Importer.hpp>      // C++ importer interface

@@ -148,6 +148,7 @@ SET(COMMON_SRC
 SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/MoreauTimeStepper.hpp

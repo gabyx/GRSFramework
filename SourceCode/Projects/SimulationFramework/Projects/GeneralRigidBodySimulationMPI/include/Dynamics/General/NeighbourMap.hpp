@@ -8,9 +8,6 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
-#include "RigidBody.hpp"
-#include "RigidBodyContainer.hpp"
-
 
 template<typename TDynamicsSystem,typename TRankId>
 class NeighbourData {
