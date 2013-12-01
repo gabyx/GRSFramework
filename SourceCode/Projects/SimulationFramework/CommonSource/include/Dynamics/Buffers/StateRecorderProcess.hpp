@@ -24,12 +24,13 @@
 
 /**
 * @ingroup StatesAndBuffers
-* @brief This is the StateRecorder class which records each body's states to one MultiBodySimFile.
+* @brief This is the StateRecorder class which records each body's states to one process own MultiBodySimFilePart.
 * @{
 */
 template <typename TDynamicsSystemType>
 class StateRecorderProcess {
 public:
+    typedef TDynamicsSystemType DynamicsSystemType;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -40,8 +41,8 @@ public:
 
     void setDirectoryPath(boost::filesystem::path dir_path);
 
-    bool openFile(bool truncate = true);
-    bool closeFile();
+    bool createSimFile(bool truncate = true);
+    bool closeSimFile();
 
 protected:
 
@@ -64,10 +65,11 @@ protected:
 
 
 template<typename TDynamicsSystemType>
-StateRecorderProcess<TDynamicsSystemType>::StateRecorderProcess( unsigned int id,  unsigned int bufferSize) {
+StateRecorderProcess<TDynamicsSystemType>::StateRecorderProcess( unsigned int id,  unsigned int bufferSize):
+        m_binarySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj, m_bufferSize)
+{
 
     m_accessId = id;
-
     m_bufferSize = bufferSize;
 
     //Check if LogManager is available
@@ -95,7 +97,7 @@ void StateRecorderProcess<TDynamicsSystemType>::setDirectoryPath(boost::filesyst
 }
 
 template<typename TDynamicsSystemType>
-bool StateRecorderProcess<TDynamicsSystemType>::openFile(bool truncate){
+bool StateRecorderProcess<TDynamicsSystemType>::createSimFile(bool truncate){
     boost::filesystem::path file;
     std::stringstream s;
 
@@ -104,9 +106,9 @@ bool StateRecorderProcess<TDynamicsSystemType>::openFile(bool truncate){
     file /= s.str();
 
 
-    if(!m_binarySimFile->openWrite(file,truncate,m_bufferSize)){
+    if(!m_binarySimFile.openWrite(file,truncate)){
         LOG(m_pSimulationLog,"---> StateRecorderBody:: Could not open SimFile: " << file.string() << std::endl;);
-        LOG(m_pSimulationLog, pBodyFile->getErrorString() );
+        LOG(m_pSimulationLog, m_binarySimFile.getErrorString() );
         return false;
     }
     if(truncate){
@@ -131,7 +133,7 @@ void StateRecorderProcess<TDynamicsSystemType>::write(PREC time, const typename 
 
 
 template<typename TDynamicsSystemType>
-bool StateRecorderProcess<TDynamicsSystemType>::closeFile(){
+bool StateRecorderProcess<TDynamicsSystemType>::closeSimFile(){
     m_binarySimFile.close();
     return true;
 }

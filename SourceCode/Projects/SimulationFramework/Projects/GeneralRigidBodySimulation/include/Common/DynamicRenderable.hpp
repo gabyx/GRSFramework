@@ -7,8 +7,8 @@
  */
 
 
-#ifndef DynamicRenderable_h
-#define DynamicRenderable_h
+#ifndef DynamicRenderable_hpp
+#define DynamicRenderable_hpp
 
 /// Includes =================================
 #include <OgreSimpleRenderable.h>
@@ -75,6 +75,9 @@ protected:
       be written. Afterwards the vertex and index buffers (if using
       indices) can be locked, and data can be written to them. */
   virtual void fillHardwareBuffers() = 0;
+
+//  virtual bool preRender(Ogre::SceneManager *sm, Ogre::RenderSystem *rsys);
+//  virtual void postRender(Ogre::SceneManager *sm, Ogre::RenderSystem *rsys);
 };
 
 #endif // DYNAMIC_RENDERABLE_H

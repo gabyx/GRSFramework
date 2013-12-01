@@ -61,6 +61,10 @@ public:
         return m_nProcesses;
     };
 
+    MPI_Comm getMPIComm(){
+        return MPI_COMM_WORLD;
+    }
+
     std::string getName() const {
         return m_name;
     };

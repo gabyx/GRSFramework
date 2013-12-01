@@ -340,7 +340,7 @@ void PlaybackManager<TConfig>::initSimThread() {
 template<typename TConfig>
 void PlaybackManager<TConfig>::cleanUpSimThread() {
     if(m_SettingsSimThread.m_bSimFileDrop) {
-        m_pStateRecorderResampler->close();
+        m_pStateRecorderResampler->closeAll();
     }
 }
 
@@ -355,6 +355,8 @@ bool PlaybackManager<TConfig>::keyPressed(const OIS::KeyEvent &e) {
     case OIS::KC_N:
         addToTimeScale(-0.1);
         break;
+    case OIS::KC_B:
+        togglePauseSimulation();
     case OIS::KC_UP:
         break;
     case OIS::KC_DOWN:

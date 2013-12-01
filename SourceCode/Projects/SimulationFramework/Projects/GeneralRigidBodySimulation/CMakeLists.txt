@@ -112,6 +112,8 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/OgreMeshExtraction.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/AxisObject.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/DynamicLines.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/DynamicRenderable.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/CommonFunctionsOgre.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
@@ -133,11 +135,14 @@ SET(COMMON_INC
 SET(COMMON_SRC
     ${PROJECT_SOURCE_DIR}/src/Common/OgreMeshExtraction.cpp
     ${PROJECT_SOURCE_DIR}/src/Common/AxisObject.cpp
+    ${PROJECT_SOURCE_DIR}/src/Common/DynamicLines.cpp
+    ${PROJECT_SOURCE_DIR}/src/Common/DynamicRenderable.cpp
     ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
     ${PROJECT_SOURCE_DIR}/src/Common/CommonFunctionsOgre.cpp
     ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
     ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
     ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFile.cpp
+    ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
 )
 
 SET(DYNAMICS_INC
@@ -150,6 +155,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/AddGyroTermVisitor.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactFrame.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionSolver.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
@@ -290,7 +296,9 @@ set(INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/include/Systems
 
     ${COMMONSOURCE_DIR}/include/Common
-    ${COMMONSOURCE_DIR}/include/Common/SRDelegates/include/
+    ${COMMONSOURCE_DIR}/external/SRDelegates/include/
+    ${COMMONSOURCE_DIR}/external/getoptpp/
+    ${COMMONSOURCE_DIR}/external/getoptpp/src/ 
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry
@@ -348,15 +356,14 @@ source_group("Header Files\\Dynamics\\Cuda\\MatrixVectorMult" FILES ${MatrixVect
 source_group("Header Files\\Dynamics\\Cuda\\General" FILES ${GeneralCommonFiles_INC})
 source_group("Header Files\\Systems" FILES ${SYSTEMS_INC})
 
-source_group("Common Source" FILES ${COMMON_FILES_SRC})
-source_group("Common Header" FILES ${COMMON_FILES_INC})
+
 
 
 message(STATUS "Add executable:...")
 if(SIMULATIONFRAMEWORK_USE_CUDA)
-CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} ${COMMON_FILES_SRC} ${COMMON_FILES_INC})
+CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} )
 else()
-ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} ${COMMON_FILES_SRC} ${COMMON_FILES_INC})
+ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} )
 endif()
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 

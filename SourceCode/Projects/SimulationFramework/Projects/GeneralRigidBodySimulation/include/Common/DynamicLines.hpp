@@ -6,18 +6,20 @@
  *
  */
 
-#ifndef DynamicLines_h
-#define DynamicLines_h
+#ifndef DynamicLines_hpp
+#define DynamicLines_hpp
 
 /// Includes =================================
+#include "GL/gl.h"
 #include <vector>
 #include <Ogre.h>
 
-#include "DynamicRenderable.h"
+#include "DynamicRenderable.hpp"
 /// ==========================================
 
 class DynamicLines : public DynamicRenderable
 {
+public:
   typedef Ogre::Vector3 Vector3;
   typedef Ogre::Quaternion Quaternion;
   typedef Ogre::Camera Camera;
@@ -43,6 +45,9 @@ public:
   /// Return the total number of points in the point list
   unsigned short getNumPoints(void) const;
 
+  /// Reserve n points
+  void reserve(unsigned int n);
+
   /// Remove all points from the point list
   void clear();
 
@@ -67,6 +72,13 @@ protected:
   virtual void createVertexDeclaration();
   /// Implementation DynamicRenderable, pushes point list out to hardware memory
   virtual void fillHardwareBuffers();
+
+//  bool preRender(Ogre::SceneManager *sm, Ogre::RenderSystem *rsys){
+//
+//  }
+//  void postRender(Ogre::SceneManager *sm, Ogre::RenderSystem *rsys){
+//
+//  }
 
 private:
   std::vector<Vector3> mPoints;

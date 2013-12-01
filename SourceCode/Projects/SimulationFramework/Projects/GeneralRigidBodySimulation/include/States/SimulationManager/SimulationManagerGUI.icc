@@ -14,7 +14,7 @@
 
 
 #include "MoreauTimeStepper.hpp"
-#include "InclusionSolverNT.hpp"
+//#include "InclusionSolverNT.hpp"
 #include "InclusionSolverCO.hpp"
 #include "InclusionSolverCONoG.hpp"
 
@@ -84,7 +84,7 @@ void SimulationManagerGUI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserOgre... ");
 
 
-    std::cout << "ScenePath:" << sceneFilePath <<std::endl;
+    LOG(m_pSimulationLog,"---> ScenePath:" << sceneFilePath );
     if(sceneFilePath.empty()) {
         sceneFilePath = "SceneFile.xml";
     }
@@ -114,6 +114,9 @@ void SimulationManagerGUI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     enableInput(true);
 
+    // Init ContactFrameData for visualization
+    m_dynCoordFrame.reserve(m_nSimBodies*3); // Approx. 3 contacts per body as init guess
+    m_dynCoordFrame.addToScene(m_pBaseNode, "ContactFrameXAxis", "ContactFrameYAxis", "ContactFrameZAxis");
 
     m_pSimulationLog->logMessage("---> setup finished: ");
 }
@@ -152,6 +155,7 @@ void SimulationManagerGUI<TConfig>::updateScene(double timeSinsfceLastFrame) {
 
             if(bStateChanged) {
                 updateSimBodies();
+                updateContactFrameVisualization();
             }
         } else { // Only do at the beginning
 
@@ -191,6 +195,13 @@ void SimulationManagerGUI<TConfig>::updateSimBodies() {
     }
 }
 
+template<typename TConfig>
+void SimulationManagerGUI<TConfig>::updateContactFrameVisualization() {
+    // Fill the shared buffer m_contactData into the render struct
+    //cout << "Update Frames" << std::endl;
+    m_dynCoordFrame.updateFramesVis();
+}
+
 
 template<typename TConfig>
 double SimulationManagerGUI<TConfig>::getSimulationTime() {
@@ -223,6 +234,9 @@ void SimulationManagerGUI<TConfig>::threadRunSimulation() {
             readSharedBuffer();
             // Do one iteration
             m_pTimestepper->doOneIteration();
+            // TODO: after this call the vis buffer is new (will be rendered,
+            // but the shared buffer is not yet synchronized)
+
             // Write outputs
             writeSharedBuffer();
 
@@ -289,6 +303,9 @@ void SimulationManagerGUI<TConfig>::threadRunRecord() {
             readSharedBuffer();
             // Do one iteration
             m_pTimestepper->doOneIteration();
+            // TODO: after this call the vis buffer is new (will be rendered,
+            // but the shared buffer is not yet synchronized)
+
             // Write outputs
             writeSharedBuffer();
 
@@ -395,7 +412,7 @@ bool SimulationManagerGUI<TConfig>::initRecordThread() {
 template<typename TConfig>
 void SimulationManagerGUI<TConfig>::cleanUpRecordThread() {
     m_pTimestepper->closeAllFiles();
-    m_pStateRecorder->close();
+    m_pStateRecorder->closeAll();
 }
 
 
@@ -415,6 +432,14 @@ void SimulationManagerGUI<TConfig>::writeSharedBuffer() {
 
     //}
 
+
+    //Update contact frames visualization list
+    if(showContactFramesEnabled()){
+       auto & collSet = m_pTimestepper->m_pCollisionSolver->getCollisionSetRef();
+       m_dynCoordFrame.updateFramesSim(collSet.begin(),collSet.end());
+    }
+
+
 }
 
 
@@ -428,6 +453,12 @@ bool SimulationManagerGUI<TConfig>::keyPressed(const OIS::KeyEvent &e) {
         break;
     case OIS::KC_N:
         addToTimeScale(-0.1);
+        break;
+    case OIS::KC_B:
+        togglePauseSimulation();
+        break;
+    case OIS::KC_F:
+        toggleShowContactFrames();
         break;
     case OIS::KC_UP:
         break;
@@ -526,4 +557,25 @@ void SimulationManagerGUI<TConfig>::enableInput(bool value) {
         // add some key,mouse listener to change the input
         InputContext::getSingletonPtr()->removeKeyListener(this);
     }
+}
+
+
+template<typename TConfig>
+void SimulationManagerGUI<TConfig>::toggleShowContactFrames(){
+    // locak mutex
+    boost::mutex::scoped_lock l (m_mutexShowContactFrames);
+    if(m_bShowContactFrames){
+        m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Show ContactFrames: False");
+        m_bShowContactFrames = false;
+    }else{
+        m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Show ContactFrames: True");
+        m_bShowContactFrames = true;
+    }
+}
+
+
+template<typename TConfig>
+bool SimulationManagerGUI<TConfig>::showContactFramesEnabled(){
+    boost::mutex::scoped_lock l (m_mutexShowContactFrames);
+    return m_bShowContactFrames;
 }

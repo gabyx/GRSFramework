@@ -104,10 +104,11 @@ SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
     ${SOURCE_DIR}/src/Common/TypeDefs.cpp
     ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFile.cpp
+    ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
 )
 
 SET(DYNAMICS_INC
-	${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
@@ -116,6 +117,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/AddGyroTermVisitor.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactFrame.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionSolver.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
@@ -257,7 +259,9 @@ set(INCLUDE_DIRS
     #${SOURCE_DIR}/include/Systems
 
     ${COMMONSOURCE_DIR}/include/Common
-    ${COMMONSOURCE_DIR}/include/Common/SRDelegates/include/
+    ${COMMONSOURCE_DIR}/external/SRDelegates/include/
+    ${COMMONSOURCE_DIR}/external/getoptpp/
+    ${COMMONSOURCE_DIR}/external/getoptpp/src/ 
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry
@@ -312,15 +316,13 @@ source_group("Header Files\\Dynamics\\Cuda\\MatrixVectorMult" FILES ${MatrixVect
 source_group("Header Files\\Dynamics\\Cuda\\General" FILES ${GeneralCommonFiles_INC})
 source_group("Header Files\\Systems" FILES ${SYSTEMS_INC})
 
-source_group("Common Source" FILES ${COMMON_FILES_SRC})
-source_group("Common Header" FILES ${COMMON_FILES_INC})
 
 
 message(STATUS "Add executable:...")
 if(SIMULATIONFRAMEWORK_USE_CUDA)
-CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} ${COMMON_FILES_SRC} ${COMMON_FILES_INC})
+CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES})
 else()
-ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} ${COMMON_FILES_SRC} ${COMMON_FILES_INC})
+ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} )
 endif()
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 

@@ -568,20 +568,30 @@ protected:
 
         unsigned int instances = rigidbodies->ToElement()->GetAttribute<unsigned int>("instances");
 
-        unsigned int groupId;
+        unsigned int groupId, startIdx;
         if(rigidBodiesEl->HasAttribute("groupId")){
             m_globalMaxGroupId++; // Goes one up!
             groupId = rigidBodiesEl->GetAttribute<unsigned int>("groupId");
             m_globalMaxGroupId = groupId = std::max(m_globalMaxGroupId,groupId);
+
         }else{
             m_globalMaxGroupId++;
             groupId = m_globalMaxGroupId;
         }
 
+        // Get the startidx for this group
+        auto it = groupIdToNBodies.find(groupId);
+        if( it == groupIdToNBodies.end()){
+            groupIdToNBodies[groupId] = 0;
+        }
+        startIdx = groupIdToNBodies[groupId];
+        // update the number of bodies
+        groupIdToNBodies[groupId] += instances;
+
 
         for(int i=0; i<instances; i++) {
 
-            typename RigidBodyId::Type id = RigidBodyId::makeId(i, groupId);
+            typename RigidBodyId::Type id = RigidBodyId::makeId(startIdx+i, groupId);
 
             RigidBodyType * temp_ptr = new RigidBodyType(id);
 
@@ -618,7 +628,9 @@ protected:
             if(m_bParseDynamics) {
                 LOG(m_pSimulationLog,"---> Copy RigidBody References to DynamicSystem ..."<<std::endl;);
                 for(int i=0; i < m_bodyList.size(); i++) {
-                    m_pDynSys->m_SimBodies.addBody(m_bodyList[i]);
+                    if(! m_pDynSys->m_SimBodies.addBody(m_bodyList[i])){
+                        ERRORMSG("Could not add body to m_SimBodies! Id: " << RigidBodyId::getBodyIdString(m_bodyList[i]) << " already in map!");
+                    };
                 }
             }
             m_nSimBodies += instances;
@@ -627,7 +639,9 @@ protected:
             if(m_bParseDynamics) {
                 LOG(m_pSimulationLog,"---> Copy RigidBody References to DynamicSystem ..."<<std::endl;);
                 for(int i=0; i < m_bodyList.size(); i++) {
-                    m_pDynSys->m_Bodies.addBody(m_bodyList[i]);
+                    if(! m_pDynSys->m_Bodies.addBody(m_bodyList[i])){
+                        ERRORMSG("Could not add body to m_Bodies! Id: " << RigidBodyId::getBodyIdString(m_bodyList[i]) << " already in map!")
+                    };
                 }
             }
             m_nBodies += instances;
@@ -919,7 +933,7 @@ protected:
             const aiScene* scene = importer.ReadFile( fileName.string(),
                                    aiProcess_JoinIdenticalVertices  |
                                    aiProcess_SortByPType |
-                                   aiProcess_Triangulate | aiProcess_GenNormals);
+                                   aiProcess_Triangulate /*| aiProcess_GenNormals*/);
 
             // If the import failed, report it
             if(!scene) {
@@ -934,6 +948,16 @@ protected:
 
             // Build Geometry
             pMeshGeom = boost::shared_ptr<MeshGeometry<PREC> >(new MeshGeometry<PREC>(meshData));
+
+            if(mesh->HasAttribute("writeToLog")) {
+                bool writeToLog;
+                if(!Utilities::stringToType<bool>(writeToLog, mesh->GetAttribute("writeToLog"))) {
+                    throw ticpp::Exception("---> String conversion in processMeshGeometry: angleDegree failed");
+                }
+                if(writeToLog){
+                    meshData->writeToLog(fileName.string(), m_pSimulationLog);
+                }
+            }
 
 
 
@@ -950,6 +974,7 @@ protected:
                     addToGlobalGeomList(id, pMeshGeom);
             }else{
                 for(int i=0; i < m_bodyList.size(); i++) {
+                    m_bodyListScales[i] = scale_factor;
                     m_bodyList[i]->m_geometry = pMeshGeom;
                 }
             }
@@ -1565,6 +1590,7 @@ protected:
     std::stringstream logstream;
 
     unsigned int m_nSimBodies, m_nBodies;
+    std::map<unsigned int,unsigned int> groupIdToNBodies;
     unsigned int m_globalMaxGroupId; // Group Id used to build a unique id!
     // Temprary structures
     typename RigidBodyType::BodyState m_eBodiesState; ///< Used to process a RigidBody Node

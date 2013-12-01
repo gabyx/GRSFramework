@@ -53,7 +53,7 @@ public:
       for (int i=0;i<m_Vertices.size();i++){
          std::cout <<i<<": "<<m_Vertices[i] <<std::endl;
       }
-      std::cout << "Indices & Normals : "<<std::endl;
+      std::cout << "Faces (Indices) & Normals : "<<std::endl;
       for (int i=0;i<m_Faces.size();i++){
          std::cout <<i<<": "<<m_Faces[i] <<  "\t n:"<<m_Normals[i] <<std::endl;
       }
@@ -167,19 +167,19 @@ public:
    }
 
 
-   void writeToLog(Logging::Log * plog){
+   void writeToLog(std::string name, Logging::Log * plog){
       std::stringstream logmessage;
 
       using std::endl;
       using std::cout;
 
-      logmessage << "MeshData:: " <<std::endl<<"Vertices : "<<std::endl;
+      logmessage << "---> MeshData:: "<<name<<std::endl<<"\t Vertices : "<<std::endl;
       for (int i=0;i<m_Vertices.size();i++){
-         logmessage <<i<<": "<<m_Vertices[i] <<endl;
+         logmessage <<"\t\t Vertex "<< i<<": "<<m_Vertices[i].transpose() <<endl;
       }
-      logmessage << "Indices & Normals : "<<endl;
+      logmessage << " \t Faces (Indices) & Normals : "<<endl;
       for (int i=0;i<m_Faces.size();i++){
-         logmessage <<i<<": "<<m_Faces[i] <<  "\t n:"<<m_Normals[i] <<std::endl;
+         logmessage <<"\t\t Face "<<i<<": "<<m_Faces[i].transpose() <<  "\t n:"<<m_Normals[i].transpose() <<std::endl;
       }
       plog->logMessage(logmessage.str());
    };

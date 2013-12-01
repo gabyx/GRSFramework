@@ -27,7 +27,7 @@ public:
       globalDirPath = first simulation directory, localDirPath = process specific simulation directory
     */
     FileManager();
-    FileManager(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath = "./");
+    FileManager(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath);
     ~FileManager();
 
     boost::filesystem::path getGlobalDirectoryPath();
@@ -55,7 +55,7 @@ private:
     std::map< boost::filesystem::path, boost::filesystem::path > m_SimFilePaths;
     std::vector<std::string> m_SimFileNames;
 
-    unsigned int m_fileIdCounter;
+    unsigned int m_folderIdCounter;
     boost::mutex m_busy_mutex;
 
     boost::filesystem::path m_selectedFilePath;

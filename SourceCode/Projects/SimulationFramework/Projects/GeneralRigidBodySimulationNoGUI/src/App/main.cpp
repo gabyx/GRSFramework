@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
     ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
 
     ApplicationCLOptions::getSingletonPtr()->checkArguments();
-
+    ApplicationCLOptions::getSingletonPtr()->printArgs(std::cout);
     // End Parsing =================================
 
     new Logging::LogManager();
@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     processFolder <<  PROCESS_FOLDER_PREFIX;
     boost::filesystem::path localDirPath;
 
-    localDirPath = ApplicationCLOptions::getSingletonPtr()->m_globalDir;
+    localDirPath = ApplicationCLOptions::getSingletonPtr()->m_localDirs[0];
     localDirPath /= processFolder.str();
 
 
@@ -38,7 +38,16 @@ int main(int argc, char **argv) {
     mgr.startSim();
 
 
-    system("pause");
+    // Do post processes at the end of the simulation
+    //TODO
+    auto & tasks = ApplicationCLOptions::getSingletonPtr()->m_postProcessTasks;
+    for(auto it = tasks.begin(); it != tasks.end(); it++){
+        if((*it)->getName() == "bash"){
+            (*it)->execute();
+        }
+    }
+
+
     return 0;
 }
 

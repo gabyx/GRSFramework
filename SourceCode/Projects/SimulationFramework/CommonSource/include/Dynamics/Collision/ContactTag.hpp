@@ -39,6 +39,7 @@ public:
 
 /**
 * This tuple builds up the hash. It consists of:
+* - Body with smalled id is always first!
 * - uint64_t: Body1 Ptr
 * - unsigned char: Type1: None = 0, Face = 1, Edge = 2, Vertex = 3
 * - unsigned int: Id of the geomTypeId1

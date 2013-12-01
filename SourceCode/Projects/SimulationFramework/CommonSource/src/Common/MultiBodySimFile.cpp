@@ -75,7 +75,7 @@ bool MultiBodySimFile::writeOutAllStateTimes() {
 void MultiBodySimFile::setByteLengths(const unsigned int nSimBodies) {
     m_nBytesPerU = nSimBodies*(m_nBytesPerUObj);
     m_nBytesPerQ = nSimBodies*(m_nBytesPerQObj);
-    m_nBytesPerState = m_nBytesPerU + m_nBytesPerQ + nSimBodies*1*sizeof(double);
+    m_nBytesPerState = m_nBytesPerU + m_nBytesPerQ + 1*sizeof(double);
     m_nSimBodies = nSimBodies;
 }
 

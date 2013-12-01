@@ -6,7 +6,7 @@
  *
  */
 
-#include "DynamicLines.h"
+#include "DynamicLines.hpp"
 
 /// Includes =================================
 #include <Ogre.h>
@@ -40,6 +40,10 @@ void DynamicLines::setOperationType(OperationType opType)
 RenderOperation::OperationType DynamicLines::getOperationType() const
 {
   return mRenderOp.operationType;
+}
+
+void DynamicLines::reserve(unsigned int n){
+    mPoints.reserve(n);
 }
 
 void DynamicLines::addPoint(const Vector3 &p)

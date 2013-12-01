@@ -49,22 +49,27 @@ public:
     typedef TDynamicsSystem DynamicsSystemType;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
 
+    typedef std::vector<CollisionData<RigidBodyType>* > CollisionSetType;
 
     /**
     * @brief The collider constructor which takes a reference to an existing collision set.
     */
+    Collider(CollisionSetType * pColSet);
+
+    /**
+    * @brief The collider constructor which constructs internally maintains its own collision set.
+    */
     Collider();
+
+    ~Collider();
 
     /**
     * @brief The initializer before this functor class should be used. This initializer is used to have two pointers to the RigidBodyBase classes
     * which are tested against each other.
     */
 
-    CollisionData< typename TDynamicsSystem::RigidBodyType> * checkCollision(RigidBodyType * pBody1, RigidBodyType * pBody2) {
+    void checkCollision(RigidBodyType * pBody1, RigidBodyType * pBody2) {
 
-        // Resets always pColData pointer, if there is a collision it is not NULL
-        // delegate shall handle the proper storage where it should be (contact graph :-))
-        m_pColData = NULL;
 
         // We know that we are not changing anything inside rigid body!
         // Otherwise all operators()(const boost::shared_ptr...)
@@ -76,14 +81,11 @@ public:
         m_bOverlapTest = false;
         m_bOverlap = false;
         boost::apply_visitor(*this, m_pBody1->m_geometry, m_pBody2->m_geometry);
-        return m_pColData;
+
     }
 
     bool checkOverlap(RigidBodyType * pBody1, const AABB<LayoutConfigType> & aabb) {
 
-        // Resets always pColData pointer, if there is a collision it is not NULL
-        // delegate shall handle the proper storage where it should be (contact graph :-))
-        m_pColData = NULL;
         // We know that we are not changing anything inside rigid body!
         // Otherwise all operators()(const boost::shared_ptr...)
         m_pBody1 = pBody1;
@@ -105,23 +107,23 @@ public:
 
     //For RigidBodies
     inline void operator()(  boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom1,
-                      boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom2); ///< Calls Sphere/Sphere collision detection.
+                             boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom2); ///< Calls Sphere/Sphere collision detection.
 
     inline void operator()(  boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom ,
-                      boost::shared_ptr<const HalfspaceGeometry<PREC> >  & halfspaceGeom); ///< Calls Sphere/Halfspace collision detection
+                             boost::shared_ptr<const HalfspaceGeometry<PREC> >  & halfspaceGeom); ///< Calls Sphere/Halfspace collision detection
 
     inline void operator()( boost::shared_ptr<const BoxGeometry<PREC> >  & box,
-                     boost::shared_ptr<const HalfspaceGeometry<PREC> >  & halfspaceGeom); ///< Calls Box/Halfsphere collision detection
+                            boost::shared_ptr<const HalfspaceGeometry<PREC> >  & halfspaceGeom); ///< Calls Box/Halfsphere collision detection
 
     inline void operator()(  boost::shared_ptr<const BoxGeometry<PREC> >  & box1,
-                      boost::shared_ptr<const BoxGeometry<PREC> >  & box2); ///< Calls Box/Box collision detection.
+                             boost::shared_ptr<const BoxGeometry<PREC> >  & box2); ///< Calls Box/Box collision detection.
 
     inline void operator()(  boost::shared_ptr<const SphereGeometry<PREC> >  & sphere,
-                      boost::shared_ptr<const MeshGeometry<PREC> >  & mesh); ///< Calls Mesh/Mesh collision detection.
+                             boost::shared_ptr<const MeshGeometry<PREC> >  & mesh); ///< Calls Mesh/Mesh collision detection.
 
     // For AABB's
     inline void operator()( boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom1,
-                     const AABB<LayoutConfigType> * aabb); ///< Calls Sphere/AABB collision detection.
+                            const AABB<LayoutConfigType> * aabb); ///< Calls Sphere/AABB collision detection.
 
 
     /**
@@ -146,10 +148,12 @@ private:
 
     boost::variant<const AABB<LayoutConfigType> *> otherGeoms; ///< Used for other intersection tests
 
-    bool m_bObjectsSwapped; ///< Boolean indicating if the bodies are swapped.
-    bool m_bOverlapTest;    ///< Boolean to decide if we only do overlap test or the whole collision output
-    bool m_bOverlap;        ///<Boolean which tells if the collision detection catched an overlap in the last call
-    CollisionData<RigidBodyType> * m_pColData;
+    bool m_bObjectsSwapped;                     ///< Boolean indicating if the bodies are swapped.
+    bool m_bOverlapTest;                        ///< Boolean to decide if we only do overlap test or the whole collision output
+    bool m_bOverlap;                            ///< Boolean which tells if the collision detection catched an overlap in the last call
+    CollisionSetType * m_pColSet;               ///< List of found contacts for each query, gets cleard every time
+    bool m_bDeleteColSet;                       ///< Boolean to decide if we own and should delete the m_pColSet pointer
+    CollisionData<RigidBodyType> * m_pColData;  ///< Temporary which is used always!
     /**
     * @brief The collision functions.
     * @{
@@ -202,8 +206,29 @@ private:
 // IMPLEMENTATION ===============================================================================================================================================================
 
 template<typename TDynamicsSystem>
-Collider<TDynamicsSystem>::Collider() {
+Collider<TDynamicsSystem>::Collider(CollisionSetType * pColSet): m_pColSet(pColSet) {
+    m_bDeleteColSet = false;
     m_bObjectsSwapped = false;
+}
+
+template<typename TDynamicsSystem>
+Collider<TDynamicsSystem>::Collider(){
+    m_pColSet =  new CollisionSetType();
+    m_bDeleteColSet = true;
+    m_bObjectsSwapped = false;
+}
+
+template<typename TDynamicsSystem>
+Collider<TDynamicsSystem>::~Collider(){
+    if(m_bDeleteColSet){
+        // Clear all entries
+        for( auto it = m_pColSet->begin(); it != m_pColSet->end(); it++) {
+            delete (*it);
+        }
+        m_pColSet->clear();
+
+        delete m_pColSet;
+    }
 }
 
 // Dispatch =======================================================================================
@@ -253,8 +278,7 @@ void Collider<TDynamicsSystem>::operator()(boost::shared_ptr<const Geom1> &g1, b
 
 template<typename TDynamicsSystem>
 template <typename Geom1>
-void Collider<TDynamicsSystem>::operator()(boost::shared_ptr<const Geom1> &g1, const AABB<LayoutConfigType> * aabb)
-{
+void Collider<TDynamicsSystem>::operator()(boost::shared_ptr<const Geom1> &g1, const AABB<LayoutConfigType> * aabb) {
     ERRORMSG("Collider:: collision detection for object-combination "<< typeid(Geom1).name()<<" and AABB not supported!");
 }
 // ==================================================================================================
@@ -279,6 +303,7 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * b1,
 
         //We have a collision
         m_pColData = new CollisionData<RigidBodyType>();
+        m_pColSet->push_back( m_pColData );
 
         //if the spheres are practically concentric just choose a random direction
         //to avoid division by zero
@@ -287,18 +312,18 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * b1,
             dist(0) = 0.0;
             dist(1) = 0.0;
             dist(2) = 1.0;
-        }
 
+        }
         //we have a collision
         PREC d = sqrt(dsqr);
 
-        m_pColData->m_e_z = dist / d;
+        m_pColData->m_cFrame.m_e_z = dist / d;
         // Coordinate system belongs to first body!
-        makeCoordinateSystem<>(m_pColData->m_e_z,m_pColData->m_e_x,m_pColData->m_e_y);
+        makeCoordinateSystem<>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
         m_pColData->m_overlap = (sphereGeom1->m_radius + sphereGeom2->m_radius) - d;
-        m_pColData->m_r_S1C1 =   m_pColData->m_e_z * (sphereGeom1->m_radius - m_pColData->m_overlap/2);
-        m_pColData->m_r_S2C2 =  -m_pColData->m_e_z * (sphereGeom2->m_radius - m_pColData->m_overlap/2);
+        m_pColData->m_r_S1C1 =   m_pColData->m_cFrame.m_e_z * (sphereGeom1->m_radius - m_pColData->m_overlap/2);
+        m_pColData->m_r_S2C2 =  -m_pColData->m_cFrame.m_e_z * (sphereGeom2->m_radius - m_pColData->m_overlap/2);
 
 
         // Set pointers
@@ -327,13 +352,14 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * b1,
     if(overlap >=0) {
         //We have a collision
         m_pColData = new CollisionData<RigidBodyType>();
+        m_pColSet->push_back( m_pColData );
 
         m_pColData->m_overlap = overlap;
         // Coordinate system belongs to first body!
-        m_pColData->m_e_z = - I_n_plane ;
-        makeCoordinateSystem<>(m_pColData->m_e_z,m_pColData->m_e_x,m_pColData->m_e_y);
+        m_pColData->m_cFrame.m_e_z = - I_n_plane ;
+        makeCoordinateSystem<>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
-        m_pColData->m_r_S1C1 = (sphereGeom->m_radius - overlap/2) * m_pColData->m_e_z ;
+        m_pColData->m_r_S1C1 = (sphereGeom->m_radius - overlap/2) * m_pColData->m_cFrame.m_e_z ;
         m_pColData->m_r_S2C2 = ( b1->m_r_S + m_pColData->m_r_S1C1 ) - b2->m_r_S;
 
         // Set pointers
@@ -382,11 +408,13 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * box,
         if(overlap >=0) {
             //We have a collision
             m_pColData = new CollisionData<RigidBodyType>();
+            m_pColSet->push_back( m_pColData );
+
 
             m_pColData->m_overlap = overlap;
             // Coordinate system belongs to first body!
-            m_pColData->m_e_z = - I_n_plane ;
-            makeCoordinateSystem<>(m_pColData->m_e_z,m_pColData->m_e_x,m_pColData->m_e_y);
+            m_pColData->m_cFrame.m_e_z = - I_n_plane ;
+            makeCoordinateSystem<>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
             m_pColData->m_r_S1C1 = r_SC1;
             m_pColData->m_r_S2C2 = r_SC2;
@@ -498,13 +526,21 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * sphere,
 //    }
 
 
-#if USE_OWN_COLLISION_CODE
+#if USE_OWN_COLLISION_CODE == 1
 
     static typename CollisionFunctions<LayoutConfigType >::ClosestPointSet temporarySet; //[ overlap, and normal from sphere center!, type, id] (see makeContactTag())
     //Iterate over all faces and check if it overlaps sphere
     temporarySet.clear();
     temporarySet.reserve(3);
-    CollisionFunctions<LayoutConfigType>::getClosestPointsInRadius_PointMesh(   sphere->m_r_S,
+//    CollisionFunctions<LayoutConfigType>::getClosestPointsInRadius_PointMesh(   sphere->m_r_S,
+//            sphereGeom->m_radius,
+//            *meshGeom->m_pMeshData,
+//            mesh->m_r_S,
+//            mesh->m_A_IK,
+//            temporarySet);
+
+    //point with maximum overlap
+    CollisionFunctions<LayoutConfigType>::getClosestPointInRadius_PointMesh(   sphere->m_r_S,
             sphereGeom->m_radius,
             *meshGeom->m_pMeshData,
             mesh->m_r_S,
@@ -520,13 +556,14 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * sphere,
     // Signal all remaining contacts int the temporary set!
     for(unsigned int j=0; j<temporarySet.size(); j++) {
         m_pColData = new CollisionData<RigidBodyType>();
+        m_pColSet->push_back( m_pColData );
 
         m_pColData->m_overlap = temporarySet[j].template get<0>();
         // Coordinate system belongs to first body!
-        m_pColData->m_e_z = temporarySet[j].template get<1>();
-        makeCoordinateSystem<>(m_pColData->m_e_z,m_pColData->m_e_x,m_pColData->m_e_y);
+        m_pColData->m_cFrame.m_e_z = temporarySet[j].template get<1>(); //needs not to be normalized
+        makeCoordinateSystem<>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
-        m_pColData->m_r_S1C1 = ( sphereGeom->m_radius - m_pColData->m_overlap/2) * m_pColData->m_e_z ;
+        m_pColData->m_r_S1C1 = ( sphereGeom->m_radius - m_pColData->m_overlap/2) * m_pColData->m_cFrame.m_e_z ;
         m_pColData->m_r_S2C2 = ( sphere->m_r_S + m_pColData->m_r_S1C1 ) - mesh->m_r_S;
 
         // Set pointers

@@ -176,7 +176,6 @@ private:
     MessageBinarySerializer m_binary_message; // 1 MB serialization buffer
 
 
-
     typedef std::tuple< MessageBinarySerializer, MPI_Request*> SendTupleType;
     typedef std::map<RankIdType, SendTupleType> BufferMapType;
     BufferMapType m_sendMessageBuffers;

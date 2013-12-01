@@ -12,6 +12,7 @@
 // Includes =================================
 #include <cstdlib>
 #include <iostream>
+#include <iterator>
 #include <string>
 #include <sstream>
 #include <cmath>
@@ -139,6 +140,23 @@ template<typename T> bool stringToType(T & t, const std::string& s){
 * @return Random number in range [low,high]
 */
 double randd(double low, double high);
+
+
+/**
+* @brief This functions prints a std::vector, onliner :-)
+*/
+template<typename Iterator>
+void printVector(std::ostream& ostr, const Iterator & itBegin, const Iterator & itEnd, const std::string& delimiter){
+        std::copy(itBegin, itEnd, std::ostream_iterator<typename Iterator::value_type>(ostr, delimiter.c_str()));
+}
+template<typename Iterator>
+void printVectorNoCopy(std::ostream& ostr, const Iterator & itBegin, const Iterator & itEnd, const std::string& delimiter){
+        ostr << *itBegin;
+        Iterator it = itBegin;
+        for(it++; it != itEnd; it++){
+            ostr << delimiter << *it;
+        }
+}
 
 
 /**

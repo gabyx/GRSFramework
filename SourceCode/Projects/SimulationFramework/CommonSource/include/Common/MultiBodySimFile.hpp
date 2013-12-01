@@ -175,7 +175,8 @@ private:
 
     /** @brief Determined from number of bodies! @{*/
     void setByteLengths(const unsigned int nSimBodies);
-    std::streamoff m_nBytesPerState, m_nBytesPerQ, m_nBytesPerU;
+    std::streamoff m_nBytesPerState; ///< m_nSimBodies*(q,u) + time
+    std::streamoff m_nBytesPerQ, m_nBytesPerU;
     unsigned long long int m_nSimBodies;
     /** @}*/
 
@@ -184,6 +185,7 @@ private:
     unsigned int m_nDOFuObj, m_nDOFqObj;
     const  std::streamoff m_nBytesPerQObj ;
     const  std::streamoff m_nBytesPerUObj ;
+
     static const  std::streamoff m_headerLength = (3*sizeof(unsigned int) + SIM_FILE_SIGNATURE_LENGTH*sizeof(char));
 
     bool m_bReadFullState;
@@ -227,7 +229,7 @@ void MultiBodySimFile::write(double time, const RigidBodyContainer<TRigidBody> &
     ASSERTMSG(m_nSimBodies == bodyList.size(),"You try to write "<<bodyList.size()
               <<"bodies into a file which was instanced to hold "<<m_nSimBodies);
     STATIC_ASSERT2((std::is_same<double, typename TRigidBody::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
-    for(auto it = bodyList.begin(); it != bodyList.end(); it++){
+    for(auto it = bodyList.beginOrdered(); it != bodyList.endOrdered(); it++){
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
     }

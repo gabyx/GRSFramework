@@ -19,7 +19,7 @@
 //==========================================
 
 #include "TypeDefs.hpp"
-
+#include "ContactFrame.hpp"
 #include "ContactTag.hpp"
 
 #include <boost/any.hpp>
@@ -40,9 +40,6 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     CollisionData(){
-		  m_e_x.setZero();
-		  m_e_y.setZero();
-		  m_e_z.setZero();
 		  m_r_S1C1.setZero();
 		  m_r_S2C2.setZero();
       m_overlap=0;
@@ -57,7 +54,9 @@ public:
   * The contact frame which is always located at the contact point of the first body. The coordinate frame vectors are resolved in the I Frame!
   * @{
   */
-  Vector3 m_e_x, m_e_y, m_e_z;
+  ContactFrame<PREC> m_cFrame;
+  //contains Vector3 m_cFrame.m_e_x, m_cFrame.m_e_y, m_cFrame.m_e_z;
+
   /** @} */
 
   /**

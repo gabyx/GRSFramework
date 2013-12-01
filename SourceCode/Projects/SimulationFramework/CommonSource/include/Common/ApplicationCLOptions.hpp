@@ -1,84 +1,237 @@
 #ifndef ApplicationCLOptions_hpp
 #define ApplicationCLOptions_hpp
 
+
 #include <string>
+#include <algorithm>
 #include <boost/filesystem.hpp>
+#include <getoptpp/getopt_pp_standalone.h>
+
+
 #include "Singleton.hpp"
+#include "CommonFunctions.hpp"
+
 
 
 /**
 *  @brief CommandLineOptions for the Application
 */
-class ApplicationCLOptions: public Utilities::Singleton<ApplicationCLOptions>{
+class ApplicationCLOptions: public Utilities::Singleton<ApplicationCLOptions> {
 public:
 
-    boost::filesystem::path m_globalDir;
+
+    class PostProcessTask{
+        public:
+        PostProcessTask(const std::string & name):m_name(name){};
+
+        std::string getName(){return m_name;}
+
+        virtual void addOption(unsigned int index, const std::string &option){
+            m_options[index] = option;
+        }
+
+        virtual void execute() = 0;
+
+        protected:
+
+            friend std::ostream & operator<<(std::ostream & s, const PostProcessTask & p);
+
+            std::string m_name;
+            std::map<unsigned int, std::string> m_options;
+    };
+
+    class PostProcessTaskBash : public PostProcessTask{
+        public:
+            PostProcessTaskBash(const std::string & name): PostProcessTask(name){}
+            void execute(){
+                system( this->m_options[1].c_str());
+            }
+    };
+
+    class PostProcessTaskCopyLocalTo : public PostProcessTask{
+        public:
+            PostProcessTaskCopyLocalTo(const std::string & name): PostProcessTask(name){}
+            void addOption(unsigned int index, const std::string &option){
+
+            }
+            virtual void execute(){
+
+            }
+    };
+
+
+    std::vector<boost::filesystem::path> m_localDirs;
+    boost::filesystem::path m_globalDir = "./";
     boost::filesystem::path m_sceneFile;
 
-    void parseOptions(int argc, char **argv){
-        char * sceneFilePathChar = NULL;
-        char * globalFilePathChar = NULL;
+    // If I would like to have some posst process tasks going on afterwards
+    // Like bash command and so one
+    // This is not needed sofar in MPI mode, because I can do this with mpirun -npernode 1 command and so on which lets me postprocess files
+    // per node on the cluster or
+    std::vector<PostProcessTask *> m_postProcessTasks;
 
-        for (int i = 1; i < argc; i++) {
-            if (std::string(argv[i]) == "-s") {
-                // We know the next argument *should* be the filename:
-                if(i + 1 >= argc){
-                    printErrorNoArg("-s");
-                }
-                sceneFilePathChar = argv[i + 1];
-                i++;
-                std::cout << " SceneFile Arg: " << sceneFilePathChar <<std::endl;
-            }else if(std::string(argv[i]) == "-p"){
-                if(i + 1 >= argc){
-                    printErrorNoArg("-p");
-                }
-              globalFilePathChar  = argv[i + 1];
-              i++;
-              std::cout << " GlobalFilePath Arg: " << globalFilePathChar <<std::endl;
-            }
-            else if(std::string(argv[i]) == "-h" || std::string(argv[i]) == "--help" ){
-                printHelp();
-            } else {
-                std::cout << "Wrong option: '" <<std::string(argv[i]) << "'" << std::endl;
-                printHelp();
-            }
+    ~ApplicationCLOptions(){
+        for(auto it = m_postProcessTasks.begin(); it != m_postProcessTasks.end(); it++){
+            delete (*it);
         }
-
-        if(sceneFilePathChar){
-            m_sceneFile = boost::filesystem::path(std::string(sceneFilePathChar));
-        }
-
-        if(globalFilePathChar){
-            m_globalDir =  boost::filesystem::path(std::string(globalFilePathChar));
-        }
-
-
     }
 
-    void checkArguments(){
-        if(m_sceneFile.empty()){
+
+    void parseOptions(int argc, char **argv) {
+        using namespace GetOpt;
+        GetOpt::GetOpt_pp ops(argc, argv);
+        ops.exceptions_all();
+        try {
+
+            if( ops >> OptionPresent('h',"help")) {
+                printHelp();
+            }
+
+            std::string s;
+            ops >> Option('s',s);
+            m_sceneFile = boost::filesystem::path(s);
+
+
+
+            if( ops >> OptionPresent('g',"global-path")) {
+                ops >> Option('g',"global-path",s);
+                m_globalDir = boost::filesystem::path(s);
+            }
+
+            if( ops >> OptionPresent('l',"local-path")) {
+                std::vector<std::string> svec;
+                ops >> Option('l',"local-path",svec);
+                for(auto it = svec.begin(); it != svec.end(); it++){
+                    m_localDirs.push_back(*it);
+                }
+            }
+
+            if( ops >> OptionPresent('p', "post-process")) {
+                std::vector<std::string> svec;
+                ops >> Option('p',"post-process",svec);
+
+                int currentArgIdx = 0;
+                int nextArgIdx = 0;
+                PostProcessTask * p;
+                for(int i = 0; i < svec.size(); i++){
+                    if(svec[i] == "bash"){
+                        if(i != nextArgIdx){
+                           std::cerr <<"Postprocess Argument: " << "bash" << " at wrong position!" << std::endl;
+                           printHelp();
+                        }
+
+                        // has 2 arguments [int|all] and string which is the bash command!
+                       currentArgIdx = i;
+                       nextArgIdx = i + 3;
+                       if(nextArgIdx-1 >=  svec.size()){
+                           std::cerr <<"Postprocess Argument: " << "bash" << ", two little arguments!" << std::endl;
+                           printHelp();
+                       }
+                       m_postProcessTasks.push_back(new PostProcessTaskBash("bash"));
+                       p = m_postProcessTasks.back();
+                    }else if( svec[i] == "copy-local-to"){
+                        if(i != nextArgIdx){
+                           std::cerr <<"Postprocess Argument: " << "copy-local-to" << " at wrong position!" << std::endl;
+                           printHelp();
+                        }
+
+                        currentArgIdx = i;
+                        nextArgIdx = i + 1;
+                        if(nextArgIdx-1 >=  svec.size()){
+                           std::cerr <<"Postprocess Argument: " << "copy-local-to" << ", two little arguments!" << std::endl;
+                           printHelp();
+                        }
+                        m_postProcessTasks.push_back(new PostProcessTaskCopyLocalTo("copy-local-to"));
+                        p = m_postProcessTasks.back();
+                    }else{
+                        if(i >= nextArgIdx){
+                            std::cerr <<"Postprocess Argument: " << svec[i] << " not known!" << std::endl;
+                            printHelp();
+                        }
+                        if(p){
+                            p->addOption(i-currentArgIdx-1,svec[i]);
+                        }
+                        // otherwise skip (it belongs to a argument befor
+                    }
+                }
+
+
+
+
+            }
+
+        } catch(GetOpt::GetOptEx ex) {
+            std::cerr <<"Exception occured in parsing CMD args:\n" << std::endl;
             printHelp();
-            ERRORMSG("No scene file (.xml) supplied as argument: -s [SceneFilePath]");
+        }
+
+        if (ops.options_remain()){
+            std::cerr <<"Some unexpected options where given!" << std::endl;
+            printHelp();
+        }
+
+
+        if(m_localDirs.size()==0) {
+            m_localDirs.push_back("./");
+        }
+
+
+    }
+
+    void printArgs(std::ostream & s){
+        s << " SceneFile Arg: " << m_sceneFile <<std::endl;
+        s << " GlobalFilePath Arg: " << m_globalDir <<std::endl;
+        s << " LocalFilePaths Args: ";
+        Utilities::printVector(s, m_localDirs.begin(), m_localDirs.end(), std::string(" "));
+        s << std::endl;
+
+        for(auto it = m_postProcessTasks.begin(); it != m_postProcessTasks.end(); it++){
+            s << *(*it);
+        }
+        //exit(-1);
+    }
+
+    void checkArguments() {
+        if(m_sceneFile.empty()) {
+            std::cerr  << "No scene file (.xml) supplied as argument: -s [SceneFilePath]" << std::endl;
+            printHelp();
+        } else {
+            if(! boost::filesystem::exists(m_sceneFile)) {
+                std::cerr  << "Scene file supplied as argument: " << m_sceneFile << " does not exist!"<< std::endl;
+                printHelp();
+            }
         }
     }
 
-    private:
+private:
 
-    void printErrorNoArg(std::string arg){
+    void printErrorNoArg(std::string arg) {
         std::cout << "Wrong options specified for arguement: '" << arg <<"'"<< std::endl;
         printHelp();
         exit(-1);
     }
 
-    void printHelp(){
+    void printHelp() {
         std::cout << "Help for the Application:" << std::endl <<"Options:" <<std::endl
-                              << " \t -s [SceneFilePath] (This is a .xml file for the scene, essential for CLI version, in GUI version: \"SceneFile.xml\" is standart)" <<std::endl
-                              << " \t -p [GlobalFilePath] ( optional ) "  <<std::endl
-                              << " \t -h|--help  prints this help" <<std::endl;
-                    exit(-1);
+                  << " \t -s [SceneFilePath] \n"
+                  <<            "\t\t This is a .xml file for the scene, essential \n"
+                  <<            "\t\t for CLI version, in GUI version: \"SceneFile.xml\" is the default file \n"
+                  << " \t -g|--global-path [GlobalDirectoryPath] (optional) \n"
+                  <<            "\t\t This is the global directory path. (no slash at the end, boost::create_directory bug!)\n"
+                  << " \t -l|--local-path [LocalDirectoryPath] (optional) \n"
+                  <<            "\t\t This is the local directory for each processes output, \n"
+                  <<            "\t\t if not specified the local directory is the same as the global directory.\n"
+                  <<            "\t\t (no slash at the end, boost::create_directory bug!)\n"
+                  <<            "\t\t This can also be a list of directories (space delimited), which is \n"
+                  <<            "\t\t distributed linearly over all participating processes.\n"
+                  << " \t -h|--help \n"
+                  <<            "\t\t Prints this help" <<std::endl;
+        exit(-1);
     }
 };
 
+// Global implementation for ApplicationCLOptions::PostProcessTask
+std::ostream & operator<<(std::ostream & s, const ApplicationCLOptions::PostProcessTask & p);
 
 
 

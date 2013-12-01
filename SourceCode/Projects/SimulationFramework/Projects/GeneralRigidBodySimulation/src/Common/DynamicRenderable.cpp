@@ -6,7 +6,7 @@
  *
  */
 
-#include "DynamicRenderable.h"
+#include "DynamicRenderable.hpp"
 
 /// Includes =================================
 #include <OgreCamera.h>

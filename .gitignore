@@ -3,4 +3,5 @@ BUILD
 *.ipynb_checkpoints
 *.pyc
 *.swp
+*.swo
 *~

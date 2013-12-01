@@ -187,10 +187,12 @@ public:
     BodyState m_eState; ///< The state of the body.
     BodyMaterial m_eMaterial; ///< The material id.
 
+    unsigned char m_flags; ///< Different Flags which can be used during the timestep process, introduces because of MPI
+
     RigidBodySolverDataType * m_pSolverData; /// Simulated bodies have a solverData. For all others, animated and not simulated this pointer is zero!
 
 
-     RigidBodyBase(const RigidBodyIdType & id): m_id(id){
+    RigidBodyBase(const RigidBodyIdType & id): m_id(id){
         m_mass = 1;
         m_MassMatrixInv_diag.setZero();
         m_MassMatrix_diag.setZero();
