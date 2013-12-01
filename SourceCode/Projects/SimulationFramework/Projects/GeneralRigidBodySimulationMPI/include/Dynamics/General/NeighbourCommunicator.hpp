@@ -11,7 +11,7 @@
 
 #include "RigidBody.hpp"
 #include "RigidBodyGarbageCollector.hpp"
-
+#include "BodyInfoMap.hpp"
 #include "NeighbourMap.hpp"
 
 #include "MPIMessages.hpp"
@@ -97,12 +97,10 @@ public:
     typedef typename DynamicsSystemType::RigidBodySimContainerType                      RigidBodyContainerType;
     typedef typename DynamicsSystemType::GlobalGeometryMapType                          GlobalGeometryMapType;
 
-    typedef typename DynamicsSystemType::BodyInfoMap<DynamicsSystemType,RankIdType>     BodyInfoMapType;
+    typedef BodyInfoMap<DynamicsSystemType,RankIdType>                         BodyInfoMapType;
     typedef NeighbourMap<DynamicsSystemType, BodyInfoMapType>                           NeighbourMapType;
 
-    NeighbourCommunicator(typename DynamicsSystemType::RigidBodySimContainerType & globalLocal,
-                          typename DynamicsSystemType::RigidBodySimContainerType & globalRemote,
-                          typename DynamicsSystemType::GlobalGeometryMapType & globalGeoms,
+    NeighbourCommunicator(boost::shared_ptr< DynamicsSystemType> pDynSys ,
                           boost::shared_ptr< ProcessCommunicatorType > pProcCom);
 
     ~NeighbourCommunicator(){
@@ -140,10 +138,11 @@ private:
     PREC m_currentSimTime;
     MPILayer::NeighbourMessageWrapper< NeighbourCommunicator<TDynamicsSystem> > m_message;
 
-
+    boost::shared_ptr< DynamicsSystemType> m_pDynSys;
     boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
-
     boost::shared_ptr< ProcessInfoType > m_pProcInfo;
+
+
     RankIdType m_rank;
 
     ProcessTopologyType * m_pProcTopo;
@@ -166,13 +165,12 @@ private:
 };
 
 template<typename TDynamicsSystem>
-NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  typename DynamicsSystemType::RigidBodySimContainerType & globalLocal,
-                                                                typename DynamicsSystemType::RigidBodySimContainerType & globalRemote,
-                                                                typename DynamicsSystemType::GlobalGeometryMapType & globalGeoms,
+NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  boost::shared_ptr< DynamicsSystemType> pDynSys ,
                                                                 boost::shared_ptr< ProcessCommunicatorType > pProcCom):
-            m_globalLocal(globalLocal),
-            m_globalRemote(globalRemote),
-            m_globalGeometries(globalGeoms),
+            m_pDynSys(pDynSys),
+            m_globalLocal(pDynSys->m_SimBodies),
+            m_globalRemote(pDynSys->m_RemoteSimBodies),
+            m_globalGeometries(pDynSys->m_globalGeometries),
             m_pProcCom(pProcCom),
             m_pProcInfo(m_pProcCom->getProcInfo()),
             m_pProcTopo(m_pProcCom->getProcInfo()->getProcTopo()),

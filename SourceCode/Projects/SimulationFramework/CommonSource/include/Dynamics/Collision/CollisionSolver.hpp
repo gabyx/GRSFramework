@@ -83,8 +83,7 @@ public:
     * @param SimBodies A reference to the list of all simulated bodies.
     * @param Bodies A reference to the list all not simulated bodies.
     */
-    CollisionSolver(typename DynamicsSystemType::RigidBodySimContainerType & SimBodies,
-                    typename DynamicsSystemType::RigidBodyNotAniContainer & Bodies);
+    CollisionSolver(boost::shared_ptr< DynamicsSystemType> pDynSys);
 
     ~CollisionSolver();
 
@@ -132,11 +131,9 @@ protected:
 
 
 template< typename TCollisionSolverConfig >
-CollisionSolver<TCollisionSolverConfig>::CollisionSolver(
-    typename DynamicsSystemType::RigidBodySimContainerType & SimBodies,
-    typename DynamicsSystemType::RigidBodyNotAniContainer & Bodies):
-    m_SimBodies(SimBodies), m_Bodies(Bodies),
-    m_Collider(m_collisionSet)
+CollisionSolver<TCollisionSolverConfig>::CollisionSolver(boost::shared_ptr< DynamicsSystemType> pDynSys):
+    m_SimBodies(pDynSys->m_SimBodies), m_Bodies(pDynSys->m_Bodies),
+    m_Collider(&m_collisionSet)
 {
     m_expectedNContacts = 300;
 }

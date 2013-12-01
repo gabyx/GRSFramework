@@ -40,7 +40,7 @@ public:
 	friend class GeneralGraph<NodeDataType, EdgeDataType>;
 public:
 
-   Node() : m_nodeNumber(-1) {};
+    Node() : m_nodeNumber(-1) {};
 	Node(unsigned int vN) : m_nodeNumber(vN) {};
 
 	// node data

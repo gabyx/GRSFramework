@@ -321,16 +321,19 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx() {
     while(true) {
 
         m_bConverged = true;
-
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, std::endl<< "Next iteration: "<< m_iterationsNeeded <<"=========================" << std::endl);
+        #endif
         sorProxOverAllNodes(); // Do one Sor Prox Iteration
 
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, std::endl<< "Next iteration: "<< m_iterationsNeeded <<"=========================" << std::endl<< std::endl<<" u_e: \t");
-            for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
-                LOG(m_pSolverLog, (*it)->m_pSolverData->m_uBuffer.m_front.transpose());
-            }
-            LOG(m_pSolverLog,""<< std::endl);
+        LOG(m_pSolverLog, std::endl<< "After Prox: "<< std::endl<<" u_e: \t");
+        for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
+            LOG(m_pSolverLog, (*it)->m_pSolverData->m_uBuffer.m_front.transpose());
+        }
+        LOG(m_pSolverLog,""<< std::endl);
         #endif
+
 
         m_iterationsNeeded++;
 

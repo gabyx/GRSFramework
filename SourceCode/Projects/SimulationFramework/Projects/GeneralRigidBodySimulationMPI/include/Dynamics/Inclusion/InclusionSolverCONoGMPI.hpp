@@ -376,24 +376,26 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::doSorProx() {
     while(true) {
 
         m_bConverged = true;
-
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, std::endl<< "Next iteration: "<< m_iterationsNeeded <<"=========================" << std::endl);
+        #endif
         sorProxOverAllNodes(); // Do one Sor Prox Iteration
 
-#if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog, std::endl<< "Next iteration: "<< m_iterationsNeeded <<"=========================" << std::endl<< std::endl<<" u_e: \t");
+        #if CoutLevelSolverWhenContact>2
+        LOG(m_pSolverLog, std::endl<< "After Prox: "<< std::endl<<" u_e: \t");
         for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
             LOG(m_pSolverLog, (*it)->m_pSolverData->m_uBuffer.m_front.transpose());
         }
         LOG(m_pSolverLog,""<< std::endl);
-#endif
+        #endif
 
         m_iterationsNeeded++;
 
         if ( (m_bConverged == true || m_iterationsNeeded >= m_Settings.m_MaxIter) && m_iterationsNeeded >= m_Settings.m_MinIter) {
 
-#if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog, " converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_iterationsNeeded <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
-#endif
+        #if CoutLevelSolverWhenContact>0
+            LOG(m_pSolverLog, " % SorProx: converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_iterationsNeeded <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
+        #endif
             break;
         }
     }

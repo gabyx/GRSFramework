@@ -54,7 +54,14 @@ public:
     /**
     * @brief The collider constructor which takes a reference to an existing collision set.
     */
-    Collider(CollisionSetType & colDataList);
+    Collider(CollisionSetType * pColSet);
+
+    /**
+    * @brief The collider constructor which constructs internally maintains its own collision set.
+    */
+    Collider();
+
+    ~Collider();
 
     /**
     * @brief The initializer before this functor class should be used. This initializer is used to have two pointers to the RigidBodyBase classes
@@ -141,11 +148,12 @@ private:
 
     boost::variant<const AABB<LayoutConfigType> *> otherGeoms; ///< Used for other intersection tests
 
-    bool m_bObjectsSwapped; ///< Boolean indicating if the bodies are swapped.
-    bool m_bOverlapTest;    ///< Boolean to decide if we only do overlap test or the whole collision output
-    bool m_bOverlap;        ///<Boolean which tells if the collision detection catched an overlap in the last call
-    CollisionSetType & m_colSetRef; /// List of found contacts for each query, gets cleard every time
-    CollisionData<RigidBodyType> * m_pColData; /// Temporary which is used always!
+    bool m_bObjectsSwapped;                     ///< Boolean indicating if the bodies are swapped.
+    bool m_bOverlapTest;                        ///< Boolean to decide if we only do overlap test or the whole collision output
+    bool m_bOverlap;                            ///< Boolean which tells if the collision detection catched an overlap in the last call
+    CollisionSetType * m_pColSet;               ///< List of found contacts for each query, gets cleard every time
+    bool m_bDeleteColSet;                       ///< Boolean to decide if we own and should delete the m_pColSet pointer
+    CollisionData<RigidBodyType> * m_pColData;  ///< Temporary which is used always!
     /**
     * @brief The collision functions.
     * @{
@@ -198,8 +206,29 @@ private:
 // IMPLEMENTATION ===============================================================================================================================================================
 
 template<typename TDynamicsSystem>
-Collider<TDynamicsSystem>::Collider(CollisionSetType & colDataList): m_colSetRef(colDataList) {
+Collider<TDynamicsSystem>::Collider(CollisionSetType * pColSet): m_pColSet(pColSet) {
+    m_bDeleteColSet = false;
     m_bObjectsSwapped = false;
+}
+
+template<typename TDynamicsSystem>
+Collider<TDynamicsSystem>::Collider(){
+    m_pColSet =  new CollisionSetType();
+    m_bDeleteColSet = true;
+    m_bObjectsSwapped = false;
+}
+
+template<typename TDynamicsSystem>
+Collider<TDynamicsSystem>::~Collider(){
+    if(m_bDeleteColSet){
+        // Clear all entries
+        for( auto it = m_pColSet->begin(); it != m_pColSet->end(); it++) {
+            delete (*it);
+        }
+        m_pColSet->clear();
+
+        delete m_pColSet;
+    }
 }
 
 // Dispatch =======================================================================================
@@ -274,7 +303,7 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * b1,
 
         //We have a collision
         m_pColData = new CollisionData<RigidBodyType>();
-        m_colSetRef.push_back( m_pColData );
+        m_pColSet->push_back( m_pColData );
 
         //if the spheres are practically concentric just choose a random direction
         //to avoid division by zero
@@ -323,7 +352,7 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * b1,
     if(overlap >=0) {
         //We have a collision
         m_pColData = new CollisionData<RigidBodyType>();
-        m_colSetRef.push_back( m_pColData );
+        m_pColSet->push_back( m_pColData );
 
         m_pColData->m_overlap = overlap;
         // Coordinate system belongs to first body!
@@ -379,7 +408,7 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * box,
         if(overlap >=0) {
             //We have a collision
             m_pColData = new CollisionData<RigidBodyType>();
-            m_colSetRef.push_back( m_pColData );
+            m_pColSet->push_back( m_pColData );
 
 
             m_pColData->m_overlap = overlap;
@@ -527,7 +556,7 @@ void Collider<TDynamicsSystem>::collide( RigidBodyType * sphere,
     // Signal all remaining contacts int the temporary set!
     for(unsigned int j=0; j<temporarySet.size(); j++) {
         m_pColData = new CollisionData<RigidBodyType>();
-        m_colSetRef.push_back( m_pColData );
+        m_pColSet->push_back( m_pColData );
 
         m_pColData->m_overlap = temporarySet[j].template get<0>();
         // Coordinate system belongs to first body!

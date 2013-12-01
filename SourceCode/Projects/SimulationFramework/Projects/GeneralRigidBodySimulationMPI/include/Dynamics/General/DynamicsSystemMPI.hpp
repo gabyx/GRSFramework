@@ -21,7 +21,7 @@
 #include "InclusionSolverSettings.hpp"
 #include "TimeStepperSettings.hpp"
 
-#include "BodyInfoMap.hpp"
+
 
 #include "MPICommunication.hpp"
 #include "NeighbourCommunicator.hpp"
@@ -59,9 +59,6 @@ public:
     typedef RigidBodyContainer<RigidBodyType> RigidBodySimContainerType;
     RigidBodySimContainerType m_SimBodies;        // simulated objects
     RigidBodySimContainerType m_RemoteSimBodies;  // all remote bodies
-
-    // Body MPI related information
-    typedef BodyInfoMap<DynamicsSystemType,RankIdType>     BodyInfoMapType;
 
     typedef RigidBodySimContainerType RigidBodyNotAniContainer;
     RigidBodyNotAniContainer m_Bodies;        // all not simulated objects

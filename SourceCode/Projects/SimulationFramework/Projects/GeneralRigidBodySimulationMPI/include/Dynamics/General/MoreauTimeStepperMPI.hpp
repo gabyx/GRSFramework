@@ -58,7 +58,6 @@ public:
 
 
     MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                      boost::shared_ptr< ProcessCommunicatorType > pProcCom,
                       boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> > pNbCommunicator);
     ~MoreauTimeStepper();
 
@@ -121,8 +120,6 @@ protected:
     boost::filesystem::path m_SolverLogFilePath;
 
 
-    //MPI
-    boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
 };
 
 //=========================================================
@@ -133,7 +130,6 @@ _________________________________________________________*/
 
 template< typename TConfigTimeStepper>
 MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                                                           boost::shared_ptr< ProcessCommunicatorType > pProcCom,
                                                            boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> > pNbCommunicator):
     m_ReferenceSimFile(NDOFqObj,NDOFuObj) {
 
@@ -147,11 +143,10 @@ MoreauTimeStepper<  TConfigTimeStepper>::MoreauTimeStepper(boost::shared_ptr<Dyn
     m_pSolverLog = NULL;
 
     m_pDynSys = pDynSys;
-    m_pProcCom = pProcCom;
 
     m_pNbCommunicator = pNbCommunicator;
 
-    m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys->m_SimBodies, m_pDynSys->m_Bodies));
+    m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys));
     m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys));
 
 };

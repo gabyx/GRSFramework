@@ -70,7 +70,7 @@ private:
 */
 /** @{ */
 template< typename TCollisionSolverConfig >
-class CollisionSolverMPI {
+class CollisionSolver {
 public:
 
     typedef TCollisionSolverConfig CollisionSolverConfig;
@@ -83,8 +83,7 @@ public:
     * @param SimBodies A reference to the list of all simulated bodies.
     * @param Bodies A reference to the list all not simulated bodies.
     */
-    CollisionSolver(typename DynamicsSystemType::RigidBodySimContainerType & SimBodies,
-                    typename DynamicsSystemType::RigidBodyNotAniContainer & Bodies);
+    CollisionSolver(boost::shared_ptr< DynamicsSystemType> pDynSys);
 
     ~CollisionSolver();
 
@@ -112,9 +111,12 @@ protected:
 
     ContactDelegateList<RigidBodyType> m_ContactDelegateList;
 
-    unsigned int m_expectedNContacts;                                                 ///< Expected number of Contacts.
-    typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
-    typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;          ///< List of all fixed not simulated bodies.
+    unsigned int m_expectedNContacts;
+                          ///< Expected number of Contacts.
+    typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
+    typename DynamicsSystemType::RigidBodySimContainerType & m_RemoteSimBodies;
+    typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;           ///< List of all fixed not simulated bodies.
+
 
     Collider<DynamicsSystemType> m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
     friend class Collider<DynamicsSystemType>;
@@ -131,12 +133,11 @@ protected:
 /** @} */
 
 
+
 template< typename TCollisionSolverConfig >
-CollisionSolver<TCollisionSolverConfig>::CollisionSolver(
-    typename DynamicsSystemType::RigidBodySimContainerType & SimBodies,
-    typename DynamicsSystemType::RigidBodyNotAniContainer & Bodies):
-    m_SimBodies(SimBodies), m_Bodies(Bodies),
-    m_Collider(m_collisionSet)
+CollisionSolver<TCollisionSolverConfig>::CollisionSolver(boost::shared_ptr< DynamicsSystemType> pDynSys):
+    m_SimBodies(pDynSys->m_SimBodies), m_Bodies(pDynSys->m_Bodies), m_RemoteSimBodies(pDynSys->m_RemoteSimBodies),
+    m_Collider(&m_collisionSet)
 {
     m_expectedNContacts = 300;
 }
@@ -201,28 +202,33 @@ void CollisionSolver<TCollisionSolverConfig>::solveCollision() {
 
     //// Do simple collision detection (SimBodies to SimBodies)
     typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyIti;
-    CollisionData<RigidBodyType> * pColData;
-//    for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
-//        typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
-//        bodyItj++;
-//        for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
-//
-//            //check for a collision
-//            m_Collider.checkCollision((*bodyIti), (*bodyItj));
-//
-//        }
-//    }
+    for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
+        typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
+        bodyItj++;
+        for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
+
+            //check for a collision
+            m_Collider.checkCollision((*bodyIti), (*bodyItj));
+
+        }
+    }
+
+    //// Do simple collision detection (SimBodies to RemoteSimBodies)
+
+    for(auto bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
+        for(auto bodyItj = m_RemoteSimBodies.begin(); bodyItj != m_RemoteSimBodies.end(); bodyItj++ ) {
+            //check for a collision
+            m_Collider.checkCollision((*bodyIti), (*bodyItj));
+
+        }
+    }
 
 
     // Do simple collision detection (SimBodies to Bodies)
-    typename DynamicsSystemType::RigidBodyNotAniContainer::iterator bodyItk;
-    for(bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
-        for(bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++) {
-
+    for(auto bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
+        for(auto bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++) {
                 //check for a collision and signal
                 m_Collider.checkCollision((*bodyIti), (*bodyItk));
-
-
         }
     }
 
