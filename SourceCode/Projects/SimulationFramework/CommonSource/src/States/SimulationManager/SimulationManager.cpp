@@ -5,9 +5,10 @@
 
 #include <boost/timer/timer.hpp>
 
-
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
+
+#include "SimulationManager.hpp"
 
 #include "DynamicsState.hpp"
 #include "SharedBufferDynSys.hpp"
@@ -166,7 +167,7 @@ bool SimulationManager::initRecordThread() {
 
     //Open File
     bool fileOK = false;
-    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::CONTINUE) {
+    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::CONTINUE) {
         fileOK = m_pStateRecorder->createSimFileCopyFromReference(m_SimFilePath,m_pTimestepper->m_Settings.m_simStateReferenceFile);
     } else {
         fileOK = m_pStateRecorder->createSimFile(m_SimFilePath);
@@ -185,7 +186,7 @@ bool SimulationManager::initRecordThread() {
     m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);
 
     // Write first initial value out!
-    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
+    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
         m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
     }
 

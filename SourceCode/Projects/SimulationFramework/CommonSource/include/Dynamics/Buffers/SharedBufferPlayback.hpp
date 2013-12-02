@@ -15,11 +15,11 @@
 * @ingroup StatesAndBuffers
 * @brief This is the SharedBufferPlayback class which is a specialisation which is used to add several more shared data to the StateRingPoolVisBackFront base class.
 */
-template< typename TLayoutConfig>
-class SharedBufferPlayback : public StateRingPoolVisBackFront<TLayoutConfig>
+
+class SharedBufferPlayback : public StateRingPoolVisBackFront
 {
 public:
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+    DEFINE_LAYOUT_CONFIG_TYPES
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 	//Static and Dynamic allocation of the matrices in the class
@@ -33,21 +33,21 @@ private:
 };
 
 
-template< typename TLayoutConfig>
-SharedBufferPlayback<TLayoutConfig>::SharedBufferPlayback(unsigned int nSimBodies):
-StateRingPoolVisBackFront<TLayoutConfig>(nSimBodies)
+
+SharedBufferPlayback::SharedBufferPlayback(unsigned int nSimBodies):
+StateRingPoolVisBackFront(nSimBodies)
 {
 	reset();
 }
 
-template< typename TLayoutConfig>
-SharedBufferPlayback<TLayoutConfig>::~SharedBufferPlayback(){
+
+SharedBufferPlayback::~SharedBufferPlayback(){
   DECONSTRUCTOR_MESSAGE
 }
 
-template< typename TLayoutConfig>
-void SharedBufferPlayback<TLayoutConfig>::reset(){
-	StateRingPoolVisBackFront<TLayoutConfig>::resetStateRingPool();
+
+void SharedBufferPlayback::reset(){
+	StateRingPoolVisBackFront::resetStateRingPool();
 }
 
 

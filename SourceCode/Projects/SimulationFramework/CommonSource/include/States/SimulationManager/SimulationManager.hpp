@@ -41,7 +41,7 @@ private:
    boost::timer::cpu_timer m_global_time;
 
    void writeAllOutput();
-   RecorderSettings<LayoutConfigType> m_RecorderSettings;
+   RecorderSettings m_RecorderSettings;
 
    // Accessed only by thread ===================
    void threadRunRecord();
@@ -66,10 +66,6 @@ private:
    boost::filesystem::path m_SimFolderPath;
    boost::filesystem::path m_SimFilePath;
 };
-
-
-// Implementation
-#include "SimulationManager.icc"
 
 
 #endif // SIMULATIONMANAGERMAZE_HPP

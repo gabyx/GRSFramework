@@ -66,20 +66,7 @@ struct LayoutConfig{
    typedef Eigen::Matrix<PREC, LayoutType::NDOFuObj, 1>                    VectorUObj;
 
    // Static Vectors/Matrices
-   typedef typename MyMatrix< PREC >::Matrix44 Matrix44;
-   typedef typename MyMatrix< PREC >::Matrix33 Matrix33;
-   typedef typename MyMatrix< PREC >::Matrix43 Matrix43;
-   typedef typename MyMatrix< PREC >::Matrix34 Matrix34;
-   typedef typename MyMatrix< PREC >::Vector2 Vector2;
-   typedef typename MyMatrix< PREC >::Vector3 Vector3;
-   typedef typename MyMatrix< PREC >::Vector4 Vector4;
-   typedef typename MyMatrix< PREC >::Quaternion Quaternion;
-   typedef typename MyMatrix< PREC >::VectorDyn VectorDyn;
-   typedef typename MyMatrix< PREC >::MatrixDyn MatrixDyn;
-   typedef typename MyMatrix< PREC >::MatrixDiagDyn MatrixDiagDyn;
-   typedef typename MyMatrix< PREC >::MatrixDynRow MatrixDynRow;
-
-   typedef Eigen::Transform<PREC,3,Eigen::TransformTraits::Affine> AffineTrafo;
+   DEFINE_MATRIX_TYPES_OF( PREC );
 
 };
 

@@ -112,6 +112,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/CollisionSolverMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionFunctions.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParams.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
@@ -144,10 +145,13 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
 )
 SET(DYNAMICS_SRC
+    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Collider.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/BoxGeometry.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactParameterMap.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystem.cpp
 )
 
 

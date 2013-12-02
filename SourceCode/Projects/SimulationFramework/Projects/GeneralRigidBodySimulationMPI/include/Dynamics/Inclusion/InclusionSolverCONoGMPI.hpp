@@ -69,7 +69,7 @@ public:
 //    void updatePercussionPool(const VectorDyn & P_old ) ;
 
 
-    InclusionSolverSettings<LayoutConfigType> m_Settings;
+    InclusionSolverSettings m_Settings;
 
 protected:
 
@@ -217,7 +217,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
 
 
         // =============================================================================================================
-        if( m_Settings.m_eMethod == InclusionSolverSettings<LayoutConfigType>::SOR) {
+        if( m_Settings.m_eMethod == InclusionSolverSettings::SOR) {
 
 #if MEASURE_TIME_PROX == 1
             boost::timer::cpu_timer counter;
@@ -232,7 +232,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::solveInclusionProblem() {
             m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
 #endif
 
-        } else if(m_Settings.m_eMethod == InclusionSolverSettings<LayoutConfigType>::JOR) {
+        } else if(m_Settings.m_eMethod == InclusionSolverSettings::JOR) {
 
 #if MEASURE_TIME_PROX == 1
             boost::timer::cpu_timer counter;
@@ -469,7 +469,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
                #endif
 
 
-                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal) {
+                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
                     if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
                         converged = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
                         if(!converged) {
@@ -481,7 +481,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
                     } else {
                         m_bConverged=false;
                     }
-                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InEnergyLocalMix){
+                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
                     if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
                         converged = Numerics::cancelCriteriaMatrixNorm(   uCache1,
                                                                           nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
@@ -506,7 +506,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
                 nodeData.m_u2BufferPtr->m_front = nodeData.m_u2BufferPtr->m_front  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
-                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal) {
+                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
                     if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
                         converged = Numerics::cancelCriteriaValue(uCache2,
                                                                   nodeData.m_u2BufferPtr->m_front,
@@ -521,7 +521,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
                         m_bConverged=false;
                     }
 
-                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InEnergyLocalMix){
+                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
                     if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
                         converged = Numerics::cancelCriteriaMatrixNorm(   uCache2,
                                                                           nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
@@ -541,7 +541,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
                 }
             }
 
-            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InLambda) {
+            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InLambda) {
                 if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {
                     converged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol);
                     if(!converged) {
@@ -567,7 +567,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
 
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
-    if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocity) {
+    if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocity) {
         typename ContactGraphType::BodyToContactsListIteratorType it;
         //std::cout << "Bodies: " << m_ContactGraph.m_SimBodyToContactsList.size() << std::endl;
         for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
@@ -591,7 +591,7 @@ void InclusionSolverCONoG<TInclusionSolverConfig>::sorProxOverAllNodes() {
             // Just fill back buffer with new values!
             it->first->m_pSolverData->m_uBuffer.m_back = it->first->m_pSolverData->m_uBuffer.m_front;
         }
-    }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InEnergyVelocity){
+    }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyVelocity){
         typename ContactGraphType::BodyToContactsListIteratorType it;
         for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
             if(m_iterationsNeeded >= m_Settings.m_MinIter && converged) {

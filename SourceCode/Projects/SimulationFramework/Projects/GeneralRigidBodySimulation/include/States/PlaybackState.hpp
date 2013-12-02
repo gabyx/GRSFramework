@@ -59,7 +59,7 @@ public:
   boost::function<void (double)> updateSceneFunction; // this function binds to updateScenePlayback() or  updateSceneRealtime()
   void updateScenePlayback(double timeSinceLastFrame);
 
-   boost::shared_ptr<PlaybackManager<GeneralConfig> >	   m_pPlaybackMgr;
+   boost::shared_ptr<PlaybackManager>	   m_pPlaybackMgr;
 
 private:
 

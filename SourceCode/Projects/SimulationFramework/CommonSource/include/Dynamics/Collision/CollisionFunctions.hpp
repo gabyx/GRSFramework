@@ -35,7 +35,7 @@ public:
 
 
     inline static Vector3 getClosestPoint_PointTriangle(   const Vector3 & I_r_S,
-            const MeshData<MeshPREC> & mesh,
+            const MeshData & mesh,
             const Vector3 & I_r_M,
             const Matrix33 & A_IM,
             const unsigned int & indexFace,
@@ -48,7 +48,7 @@ public:
         // somewhere in the space, this point is the center of the sphere...
 
         static Vector3 vertex0,vertex1,vertex2, M_r_MS;
-        const MeshData<MeshPREC>::MeshIndices & indices = mesh.m_Faces[indexFace];
+        const MeshData::MeshIndices & indices = mesh.m_Faces[indexFace];
         vertex0 = mesh.m_Vertices[indices(0)];
         vertex1 = mesh.m_Vertices[indices(1)];
         vertex2 = mesh.m_Vertices[indices(2)];
@@ -62,13 +62,13 @@ public:
 
     inline static void getClosestPointsInRadius_PointMesh(  const Vector3 & I_r_S,
             const PREC & radius,
-            const MeshData<MeshPREC> & mesh,
+            const MeshData & mesh,
             const Vector3 & I_r_M,
             const Matrix33 & A_IM,
             ClosestPointSet & pointSet) {
 
         // Iterate over all faces
-        MeshData<MeshPREC>::Faces::const_iterator faceIt;
+        MeshData::Faces::const_iterator faceIt;
 
         static Vector3 vertex0,vertex1,vertex2, M_r_MS, I_r_SC;
         unsigned int type; unsigned int id;
@@ -117,13 +117,13 @@ public:
     /* Finds the point with the maximum overlap */
      inline static void getClosestPointInRadius_PointMesh(  const Vector3 & I_r_S,
             const PREC & radius,
-            const MeshData<MeshPREC> & mesh,
+            const MeshData & mesh,
             const Vector3 & I_r_M,
             const Matrix33 & A_IM,
             ClosestPointSet & pointSet) {
 
         // Iterate over all faces
-        MeshData<MeshPREC>::Faces::const_iterator faceIt;
+        MeshData::Faces::const_iterator faceIt;
 
         static Vector3 vertex0,vertex1,vertex2, M_r_MS, I_r_SC;
         unsigned int type; unsigned int id;
@@ -161,7 +161,7 @@ public:
                                                             const Vector3 & vertex0,
                                                             const Vector3 & vertex1,
                                                             const Vector3 & vertex2,
-                                                            const typename MeshData<MeshPREC>::MeshIndices & indices,
+                                                            const typename MeshData::MeshIndices & indices,
                                                             const unsigned int & indexFace,
                                                             unsigned int & type,unsigned int & id )
     {

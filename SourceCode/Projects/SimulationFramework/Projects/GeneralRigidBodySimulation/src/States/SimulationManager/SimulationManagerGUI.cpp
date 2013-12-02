@@ -6,6 +6,8 @@
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
+#include "SimulationManagerGUI.hpp"
+
 #include <RenderContext.hpp>
 
 #include "DynamicsState.hpp"
@@ -15,7 +17,7 @@
 
 #include TimeStepper_INCLUDE_FILE
 //#include "InclusionSolverNT.hpp"
-#include "InclusionSolverCO.hpp"
+//#include "InclusionSolverCO.hpp"
 #include "InclusionSolverCONoG.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
@@ -31,8 +33,8 @@ using namespace std;
 
 
 
-template<typename TConfig>
-SimulationManagerGUI<TConfig>::SimulationManagerGUI(boost::shared_ptr<Ogre::SceneManager> pSceneMgr):
+
+SimulationManagerGUI::SimulationManagerGUI(boost::shared_ptr<Ogre::SceneManager> pSceneMgr):
     SimulationManagerBase() {
 
     m_pSimulationLog = NULL;
@@ -52,8 +54,8 @@ SimulationManagerGUI<TConfig>::SimulationManagerGUI(boost::shared_ptr<Ogre::Scen
 
     m_pSceneMgr = pSceneMgr;
 }
-template<typename TConfig>
-SimulationManagerGUI<TConfig>::~SimulationManagerGUI() {
+
+SimulationManagerGUI::~SimulationManagerGUI() {
     DECONSTRUCTOR_MESSAGE
 
     // Remove all SceneGraph objects!
@@ -64,8 +66,8 @@ SimulationManagerGUI<TConfig>::~SimulationManagerGUI() {
     InputContext::getSingletonPtr()->removeKeyListener(this);
 
 }
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::setup(boost::filesystem::path sceneFilePath) {
+
+void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
 
 
     m_pSimulationLog->logMessage("---> SimulationManagerGUI::setup(): ");
@@ -80,7 +82,7 @@ void SimulationManagerGUI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     // Parse the Scene from XML! ==========================
 
-    m_pSceneParser = boost::shared_ptr< SceneParserOgre<TConfig> >( new SceneParserOgre<TConfig>( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies, m_pDynSys) );
+    m_pSceneParser = boost::shared_ptr< SceneParserOgre >( new SceneParserOgre( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies, m_pDynSys) );
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserOgre... ");
 
 
@@ -99,7 +101,7 @@ void SimulationManagerGUI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys, m_pSharedBuffer) );
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added TimeStepperType... ");
 
-    m_pStateRecorder = boost::shared_ptr<StateRecorder<DynamicsSystemType> >(new StateRecorder<DynamicsSystemType>(m_nSimBodies));
+    m_pStateRecorder = boost::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added StateRecorder... ");
 
 
@@ -122,8 +124,8 @@ void SimulationManagerGUI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 }
 
 
-template<typename TConfig>
-bool SimulationManagerGUI<TConfig>::writeInitialState() {
+
+bool SimulationManagerGUI::writeInitialState() {
     MultiBodySimFile simFile(NDOFqObj,NDOFuObj);
     // Request new file Paths for all logs from FileManager
     // Get new folder path
@@ -143,8 +145,8 @@ bool SimulationManagerGUI<TConfig>::writeInitialState() {
 }
 
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::updateScene(double timeSinsfceLastFrame) {
+
+void SimulationManagerGUI::updateScene(double timeSinsfceLastFrame) {
     static bool bStateChanged;
 
     if (isSimThreadRunning()) {
@@ -170,13 +172,13 @@ void SimulationManagerGUI<TConfig>::updateScene(double timeSinsfceLastFrame) {
 
 }
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::initBeforeThreads() {
+
+void SimulationManagerGUI::initBeforeThreads() {
     m_bFirstPass = true;
 }
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::updateSimBodies() {
+
+void SimulationManagerGUI::updateSimBodies() {
     //update objects...
     for(int i=0; i<m_pVisBuffer->m_SimBodyStates.size(); i++) {
         // Check for Nan or Inf
@@ -195,22 +197,22 @@ void SimulationManagerGUI<TConfig>::updateSimBodies() {
     }
 }
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::updateContactFrameVisualization() {
+
+void SimulationManagerGUI::updateContactFrameVisualization() {
     // Fill the shared buffer m_contactData into the render struct
     //cout << "Update Frames" << std::endl;
     m_dynCoordFrame.updateFramesVis();
 }
 
 
-template<typename TConfig>
-double SimulationManagerGUI<TConfig>::getSimulationTime() {
+
+double SimulationManagerGUI::getSimulationTime() {
     return m_pVisBuffer->m_t;
 }
 
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::threadRunSimulation() {
+
+void SimulationManagerGUI::threadRunSimulation() {
     m_pSimulationLog->logMessage("---> SimulationManagerGUI: SimThread entering...");
     static double timelineSimulation;
     static double state_time;
@@ -260,8 +262,8 @@ void SimulationManagerGUI<TConfig>::threadRunSimulation() {
 
 
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::initSimThread() {
+
+void SimulationManagerGUI::initSimThread() {
 
 
     // Request new file Paths for all logs from FileManager
@@ -276,13 +278,13 @@ void SimulationManagerGUI<TConfig>::initSimThread() {
 }
 
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::cleanUpSimThread() {
+
+void SimulationManagerGUI::cleanUpSimThread() {
     m_pTimestepper->closeAllFiles();
 }
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::threadRunRecord() {
+
+void SimulationManagerGUI::threadRunRecord() {
 
     static double timelineSimulation;
 
@@ -329,8 +331,8 @@ void SimulationManagerGUI<TConfig>::threadRunRecord() {
 }
 
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::writeAllOutput() {
+
+void SimulationManagerGUI::writeAllOutput() {
 
     if(m_RecorderSettings.outputCheck(m_pTimestepper->getIterationCount())) {
         //m_pSimulationLog->logMessage("---> Output: now");
@@ -348,8 +350,8 @@ void SimulationManagerGUI<TConfig>::writeAllOutput() {
 
 
 
-template<typename TConfig>
-bool SimulationManagerGUI<TConfig>::initRecordThread() {
+
+bool SimulationManagerGUI::initRecordThread() {
     // Get new folder path
     m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
 
@@ -380,7 +382,7 @@ bool SimulationManagerGUI<TConfig>::initRecordThread() {
     //Open SimState File
     m_pSimulationLog->logMessage("---> Copy SimulationState.sim to right place...");
     bool fileOK = false;
-    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::CONTINUE) {
+    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::CONTINUE) {
         fileOK = m_pStateRecorder->createSimFileCopyFromReference(m_SimFilePath,m_pTimestepper->m_Settings.m_simStateReferenceFile);
     } else {
         fileOK = m_pStateRecorder->createSimFile(m_SimFilePath);
@@ -402,27 +404,27 @@ bool SimulationManagerGUI<TConfig>::initRecordThread() {
     m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);
 
     // Write first initial value
-    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
+    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
         m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
         m_pSimulationLog->logMessage("---> Wrote first initial value to file...");
     }
 
     return true;
 }
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::cleanUpRecordThread() {
+
+void SimulationManagerGUI::cleanUpRecordThread() {
     m_pTimestepper->closeAllFiles();
     m_pStateRecorder->closeAll();
 }
 
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::readSharedBuffer() {
+
+void SimulationManagerGUI::readSharedBuffer() {
 
 }
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::writeSharedBuffer() {
+
+void SimulationManagerGUI::writeSharedBuffer() {
     static int iterations = 0;
     iterations++;
 
@@ -444,8 +446,8 @@ void SimulationManagerGUI<TConfig>::writeSharedBuffer() {
 
 
 
-template<typename TConfig>
-bool SimulationManagerGUI<TConfig>::keyPressed(const OIS::KeyEvent &e) {
+
+bool SimulationManagerGUI::keyPressed(const OIS::KeyEvent &e) {
 
     switch (e.key) {
     case OIS::KC_M:
@@ -482,8 +484,8 @@ bool SimulationManagerGUI<TConfig>::keyPressed(const OIS::KeyEvent &e) {
     return true;
 }
 
-template<typename TConfig>
-bool SimulationManagerGUI<TConfig>::keyReleased(const OIS::KeyEvent &e) {
+
+bool SimulationManagerGUI::keyReleased(const OIS::KeyEvent &e) {
     switch (e.key) {
     case OIS::KC_UP:
     case OIS::KC_DOWN:
@@ -498,8 +500,8 @@ bool SimulationManagerGUI<TConfig>::keyReleased(const OIS::KeyEvent &e) {
 }
 
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::startSimThread(Threads threadToStart) {
+
+void SimulationManagerGUI::startSimThread(Threads threadToStart) {
 
     // TODO Switch Update function to the SimThread update!
 
@@ -510,12 +512,12 @@ void SimulationManagerGUI<TConfig>::startSimThread(Threads threadToStart) {
         //Start Dynamics Thread===========================================
         if(threadToStart & SimulationManagerBase::REALTIME) {
             initBeforeThreads();
-            m_pThread = new boost::thread( boost::bind(&SimulationManagerGUI<TConfig>::threadRunSimulation, &*this) );
+            m_pThread = new boost::thread( boost::bind(&SimulationManagerGUI::threadRunSimulation, &*this) );
             m_eSimThreadRunning = SimulationManagerBase::REALTIME;
             m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Start Thread: SimThread in REALTIME mode started ...");
         } else if(threadToStart & SimulationManagerBase::RECORD) {
             initBeforeThreads();
-            m_pThread = new boost::thread( boost::bind(&SimulationManagerGUI<TConfig>::threadRunRecord, &*this) );
+            m_pThread = new boost::thread( boost::bind(&SimulationManagerGUI::threadRunRecord, &*this) );
             m_eSimThreadRunning = SimulationManagerBase::RECORD;
             m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Start Thread: SimThread in RECORD mode started ...");
         }
@@ -525,8 +527,8 @@ void SimulationManagerGUI<TConfig>::startSimThread(Threads threadToStart) {
     }
 }
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::stopSimThread(Threads threadToStop, bool force_stop) {
+
+void SimulationManagerGUI::stopSimThread(Threads threadToStop, bool force_stop) {
 
     if (isSimThreadRunning()) {
         if((m_eSimThreadRunning & RECORD &&  threadToStop & RECORD) ||
@@ -548,8 +550,8 @@ void SimulationManagerGUI<TConfig>::stopSimThread(Threads threadToStop, bool for
     }
 }
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::enableInput(bool value) {
+
+void SimulationManagerGUI::enableInput(bool value) {
     if(value) {
         // add some key,mouse listener to change the input
         InputContext::getSingletonPtr()->addKeyListener(this,m_KeyListenerName);
@@ -560,8 +562,8 @@ void SimulationManagerGUI<TConfig>::enableInput(bool value) {
 }
 
 
-template<typename TConfig>
-void SimulationManagerGUI<TConfig>::toggleShowContactFrames(){
+
+void SimulationManagerGUI::toggleShowContactFrames(){
     // locak mutex
     boost::mutex::scoped_lock l (m_mutexShowContactFrames);
     if(m_bShowContactFrames){
@@ -574,8 +576,8 @@ void SimulationManagerGUI<TConfig>::toggleShowContactFrames(){
 }
 
 
-template<typename TConfig>
-bool SimulationManagerGUI<TConfig>::showContactFramesEnabled(){
+
+bool SimulationManagerGUI::showContactFramesEnabled(){
     boost::mutex::scoped_lock l (m_mutexShowContactFrames);
     return m_bShowContactFrames;
 }

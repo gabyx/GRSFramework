@@ -27,7 +27,7 @@ public:
         addGyroTerm();
     }
 
-    void operator()(boost::shared_ptr<const MeshGeometry<PREC> > & box) {
+    void operator()(boost::shared_ptr<const MeshGeometry > & box) {
         addGyroTerm();
     }
 

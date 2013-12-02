@@ -65,7 +65,7 @@ public:
   boost::function<void (double)> updateSceneFunction; // this function binds to updateScenePlayback() or  updateSceneRealtime()
   void updateSceneRealtime(double timeSinceLastFrame);
 
-   boost::shared_ptr<SimulationManagerGUI<GeneralConfig> >	m_pSimMgr;
+   boost::shared_ptr<SimulationManagerGUI >	m_pSimMgr;
 
 private:
 

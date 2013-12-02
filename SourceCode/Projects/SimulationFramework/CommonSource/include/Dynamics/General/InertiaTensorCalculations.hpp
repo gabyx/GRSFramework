@@ -15,13 +15,12 @@ namespace InertiaTensor{
 
 
 
-    template<typename TRigidBody>
     class CalculateInertiaTensorVisitor : public boost::static_visitor<> {
     public:
 
-        typedef typename TRigidBody::LayoutConfigType::PREC PREC;
+        DEFINE_RIGIDBODY_CONFIG_TYPES
 
-        CalculateInertiaTensorVisitor(TRigidBody * body):
+        CalculateInertiaTensorVisitor(RigidBodyType * body):
         m_rigidBody(body)
         {
             boost::apply_visitor(*this, m_rigidBody->m_geometry);
@@ -40,7 +39,7 @@ namespace InertiaTensor{
             m_rigidBody->m_K_Theta_S(2) = 1.0/12.0 * m_rigidBody->m_mass * (box->m_extent(1)*box->m_extent(1) + box->m_extent(0)*box->m_extent(0));
         }
 
-        void operator()(boost::shared_ptr<const MeshGeometry<PREC> > & box)  {
+        void operator()(boost::shared_ptr<const MeshGeometry > & box)  {
             ASSERTMSG(false,"MeshGeometry InertiaCalculations: This has not been implemented yet!");
         }
 
@@ -50,13 +49,13 @@ namespace InertiaTensor{
         }
 
         private:
-        TRigidBody  * m_rigidBody;
+        RigidBodyType  * m_rigidBody;
 
     };
 
     template<typename TRigidBody>
     void calculateInertiaTensor( TRigidBody * rigidBody) {
-        CalculateInertiaTensorVisitor<TRigidBody> vis(rigidBody);
+        CalculateInertiaTensorVisitor vis(rigidBody);
     }
 
 

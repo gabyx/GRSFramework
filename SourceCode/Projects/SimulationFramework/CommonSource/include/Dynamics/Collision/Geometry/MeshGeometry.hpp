@@ -22,11 +22,11 @@
 #include "MeshData.hpp"
 
 
-template<class PREC>
 class MeshGeometry {
 public:
 
     DEFINE_MATRIX_TYPES
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
@@ -34,7 +34,7 @@ public:
         m_pMeshData=NULL;
     }
 
-    MeshGeometry( MeshData<MeshPREC> * pMeshData):
+    MeshGeometry( MeshData * pMeshData):
         m_pMeshData(pMeshData) {
 
 #if USE_OPCODE == 1
@@ -141,7 +141,7 @@ public:
         delete m_pMeshData;
     }
 
-    MeshData<MeshPREC> * m_pMeshData;
+    MeshData * m_pMeshData;
 
 #if USE_OPCODE == 1
     Opcode::Model * m_pOpcodeModel;

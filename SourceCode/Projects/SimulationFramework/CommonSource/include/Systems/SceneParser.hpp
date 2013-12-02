@@ -200,8 +200,8 @@ protected:
 
             ticpp::Element *timestepElement = sceneSettings->FirstChild("TimeStepperSettings",true)->ToElement();
 
-            TimeStepperSettings<LayoutConfigType> timestepperSettings;
-            InclusionSolverSettings<LayoutConfigType> inclusionSettings;
+            TimeStepperSettings timestepperSettings;
+            InclusionSolverSettings inclusionSettings;
 
             // Get standart values!
             m_pDynSys->getSettings(timestepperSettings,inclusionSettings);
@@ -225,16 +225,16 @@ protected:
                 if(enabled) {
                     std::string type = simFromRef->GetAttribute("type");
                     if(type == "useStates") {
-                        timestepperSettings.m_eSimulateFromReference = TimeStepperSettings<LayoutConfigType>::USE_STATES;
+                        timestepperSettings.m_eSimulateFromReference = TimeStepperSettings::USE_STATES;
                     } else if(type == "continue") {
-                        timestepperSettings.m_eSimulateFromReference = TimeStepperSettings<LayoutConfigType>::CONTINUE;
+                        timestepperSettings.m_eSimulateFromReference = TimeStepperSettings::CONTINUE;
                     } else {
                         throw ticpp::Exception("---> String conversion in SimulateFromReference: type. The type '" + type + std::string("' has no implementation in the parser"));
                     }
                     timestepperSettings.m_simStateReferenceFile = simFromRef->GetAttribute("file");
                     checkFileExists(timestepperSettings.m_simStateReferenceFile);
                 } else {
-                    timestepperSettings.m_eSimulateFromReference = TimeStepperSettings<LayoutConfigType>::NONE;
+                    timestepperSettings.m_eSimulateFromReference = TimeStepperSettings::NONE;
                 }
             }
 
@@ -263,24 +263,24 @@ protected:
                 if(inclusionElement->HasAttribute("convergenceMethod")){
                     std::string method = inclusionElement->GetAttribute("convergenceMethod");
                     if(method == "InLambda") {
-                    inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InLambda;
+                    inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings::InLambda;
                     } else if (method == "InVelocity") {
-                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InVelocity;
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings::InVelocity;
                     }
                     else if (method == "InVelocityLocal") {
-                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InVelocityLocal;
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings::InVelocityLocal;
                     }
                     else if (method == "InEnergyVelocity") {
-                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InEnergyVelocity;
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings::InEnergyVelocity;
                     }
                     else if (method == "InEnergyLocalMix") {
-                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InEnergyLocalMix;
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings::InEnergyLocalMix;
                     }
                     else {
                         throw ticpp::Exception("---> String conversion in SceneSettings: convergenceMethod failed: not a valid setting");
                     }
                 }else{
-                    inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings<LayoutConfigType>::InLambda;
+                    inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings::InLambda;
                 }
 
                 if(!Utilities::stringToType<PREC>(inclusionSettings.m_AbsTol, inclusionElement->GetAttribute("absTol"))) {
@@ -298,9 +298,9 @@ protected:
 
                 std::string method = inclusionElement->GetAttribute("method");
                 if(method == "JOR") {
-                    inclusionSettings.m_eMethod = InclusionSolverSettings<LayoutConfigType>::JOR;
+                    inclusionSettings.m_eMethod = InclusionSolverSettings::JOR;
                 } else if (method == "SOR") {
-                    inclusionSettings.m_eMethod = InclusionSolverSettings<LayoutConfigType>::SOR;
+                    inclusionSettings.m_eMethod = InclusionSolverSettings::SOR;
                 } else {
                     throw ticpp::Exception("---> String conversion in SceneSettings: method failed: not a valid setting");
                 }
@@ -324,22 +324,22 @@ protected:
             m_pDynSys->setSettings(timestepperSettings,inclusionSettings);
 
             // OutputParameters
-            RecorderSettings<LayoutConfigType> recorderSettings; // Fills in standart values
+            RecorderSettings recorderSettings; // Fills in standart values
             ticpp::Node *node = sceneSettings->FirstChild("RecorderSettings",false);
             if(node){
                 ticpp::Element *elem = node->ToElement();
                 std::string method = elem->GetAttribute("recorderMode");
                 if(method == "everyTimeStep") {
-                    recorderSettings.setMode(RecorderSettings<LayoutConfigType>::RECORD_EVERY_STEP);
+                    recorderSettings.setMode(RecorderSettings::RECORD_EVERY_STEP);
                 } else if (method == "everyXTimeStep") {
-                    recorderSettings.setMode(RecorderSettings<LayoutConfigType>::RECORD_EVERY_X_STEP);
+                    recorderSettings.setMode(RecorderSettings::RECORD_EVERY_X_STEP);
                     PREC fps;
                     if(!Utilities::stringToType<double>(fps, elem->GetAttribute("statesPerSecond"))) {
                         throw ticpp::Exception("---> String conversion in RecorderSettings: statesPerSecond failed");
                     }
                     recorderSettings.setEveryXTimestep(fps,timestepperSettings.m_deltaT);
                 } else if (method == "noOutput" || method=="none" || method=="nothing") {
-                    recorderSettings.setMode(RecorderSettings<LayoutConfigType>::RECORD_NOTHING);
+                    recorderSettings.setMode(RecorderSettings::RECORD_NOTHING);
                 }
                 else {
                     throw ticpp::Exception("---> String conversion in RecorderSettings: recorderMode failed: not a valid setting");
@@ -868,7 +868,7 @@ protected:
 
     virtual void processMeshGeometry( ticpp::Element * mesh, bool addToGlobalGeoms = false) {
 
-        boost::shared_ptr<MeshGeometry<PREC> > pMeshGeom;
+        boost::shared_ptr<MeshGeometry > pMeshGeom;
 
         std::string meshName = mesh->GetAttribute<std::string>("name");
 
@@ -941,14 +941,14 @@ protected:
                 throw ticpp::Exception("---> File import failed in processMeshGeometry: for file" + fileName.string() );
             }
 
-            MeshData<MeshPREC> * meshData = new MeshData<MeshPREC>();
+            MeshData * meshData = new MeshData();
 
             if(!meshData->setup(importer,scene, scale_factor,quat,trans)) {
                 throw ticpp::Exception("---> Imported Mesh (with Assimp) could not be setup internally");
             }
 
             // Build Geometry
-            pMeshGeom = boost::shared_ptr<MeshGeometry<PREC> >(new MeshGeometry<PREC>(meshData));
+            pMeshGeom = boost::shared_ptr<MeshGeometry >(new MeshGeometry(meshData));
 
             if(mesh->HasAttribute("writeToLog")) {
                 bool writeToLog;
@@ -1118,7 +1118,7 @@ protected:
         return m_pDynSys->m_globalGeometries;
     }
 
-    virtual void fillMeshInfo( Assimp::Importer & importer, const aiScene* scene, MeshData<MeshPREC> & meshInfo, Vector3 scale_factor, Quaternion quat, Vector3 trans) {
+    virtual void fillMeshInfo( Assimp::Importer & importer, const aiScene* scene, MeshData & meshInfo, Vector3 scale_factor, Quaternion quat, Vector3 trans) {
 
 
 
@@ -1601,7 +1601,7 @@ protected:
 
 
 
-    typedef std::map<std::string, boost::shared_ptr<MeshGeometry<PREC> > > ContainerSceneMeshs;
+    typedef std::map<std::string, boost::shared_ptr<MeshGeometry > > ContainerSceneMeshs;
 
 };
 

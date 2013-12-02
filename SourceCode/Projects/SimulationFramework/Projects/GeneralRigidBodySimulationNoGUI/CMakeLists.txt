@@ -62,13 +62,13 @@ SET( STATES_INC
 #    ${SOURCE_DIR}/include/States/VideoDropper.hpp
 #    ${SOURCE_DIR}/include/States/SimulationManager/SimulationManagerBase.hpp
     ${COMMONSOURCE_DIR}/include/States/SimulationManager/SimulationManager.hpp
-    ${COMMONSOURCE_DIR}/include/States/SimulationManager/SimulationManager.icc
 #    ${SOURCE_DIR}/include/States/SimulationManager/PlaybackManagerBase.hpp
 #    ${SOURCE_DIR}/include/States/SimulationManager/PlaybackManager.hpp
 #    ${SOURCE_DIR}/include/States/SimulationManager/PlaybackManager.icc
 #    ${SOURCE_DIR}/include/States/SimulationManager/PlaybackLoader.hpp
 )
 SET(STATES_SRC
+    ${COMMONSOURCE_DIR}/src/States/SimulationManager/SimulationManager.cpp
 #    ${SOURCE_DIR}/src/States/AppStateManager.cpp
 #    ${SOURCE_DIR}/src/States/SimulationState.cpp
 #    ${SOURCE_DIR}/src/States/PlaybackState.cpp
@@ -119,6 +119,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/General/AddGyroTermVisitor.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactFrame.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionFunctions.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionSolver.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
@@ -152,10 +153,19 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
 )
 SET(DYNAMICS_SRC
+    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoG.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionSolver.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/General/MoreauTimeStepper.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Collider.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StateRecorder.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StatePoolVisBackFront.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystem.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/BoxGeometry.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactParameterMap.cpp
+    
 )
 
 

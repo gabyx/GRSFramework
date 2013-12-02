@@ -32,6 +32,7 @@
 #include "MakeCoordinateSystem.hpp"
 #include "CollisionFunctions.hpp"
 
+#include RigidBody_INCLUDE_FILE
 
 /**
 * @ingroup Collision
@@ -50,14 +51,34 @@ public:
     /**
     * @brief The collider constructor which takes a reference to an existing collision set.
     */
-    Collider(CollisionSetType * pColSet);
+    Collider(CollisionSetType * pColSet): m_pColSet(pColSet) {
+        m_bDeleteColSet = false;
+        m_bObjectsSwapped = false;
+    }
+
+
 
     /**
     * @brief The collider constructor which constructs internally maintains its own collision set.
     */
-    Collider();
 
-    ~Collider();
+    Collider(){
+        m_pColSet =  new CollisionSetType();
+        m_bDeleteColSet = true;
+        m_bObjectsSwapped = false;
+    }
+
+    ~Collider(){
+        if(m_bDeleteColSet){
+            // Clear all entries
+            for( auto it = m_pColSet->begin(); it != m_pColSet->end(); it++) {
+                delete (*it);
+            }
+            m_pColSet->clear();
+
+            delete m_pColSet;
+        }
+    }
 
     /**
     * @brief The initializer before this functor class should be used. This initializer is used to have two pointers to the RigidBodyBase classes
@@ -115,7 +136,7 @@ public:
                              boost::shared_ptr<const BoxGeometry >  & box2); ///< Calls Box/Box collision detection.
 
     inline void operator()(  boost::shared_ptr<const SphereGeometry<PREC> >  & sphere,
-                             boost::shared_ptr<const MeshGeometry<PREC> >  & mesh); ///< Calls Mesh/Mesh collision detection.
+                             boost::shared_ptr<const MeshGeometry >  & mesh); ///< Calls Mesh/Mesh collision detection.
 
     // For AABB's
     inline void operator()( boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom1,
@@ -179,7 +200,7 @@ private:
     inline void collide(RigidBodyType * sphere,
                         boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom,
                         RigidBodyType * mesh,
-                        boost::shared_ptr<const MeshGeometry<PREC> >  & meshGeom); ///< Sphere/Mesh collision.
+                        boost::shared_ptr<const MeshGeometry >  & meshGeom); ///< Sphere/Mesh collision.
 
     // For AABB's
     inline void collide( RigidBodyType * sphere,
@@ -198,34 +219,13 @@ private:
 /** @} */
 
 // ==============================================================================================================================================================================
-
 // IMPLEMENTATION ===============================================================================================================================================================
 
 
-Collider::Collider(CollisionSetType * pColSet): m_pColSet(pColSet) {
-    m_bDeleteColSet = false;
-    m_bObjectsSwapped = false;
-}
 
 
-Collider::Collider(){
-    m_pColSet =  new CollisionSetType();
-    m_bDeleteColSet = true;
-    m_bObjectsSwapped = false;
-}
 
 
-Collider::~Collider(){
-    if(m_bDeleteColSet){
-        // Clear all entries
-        for( auto it = m_pColSet->begin(); it != m_pColSet->end(); it++) {
-            delete (*it);
-        }
-        m_pColSet->clear();
-
-        delete m_pColSet;
-    }
-}
 
 // Dispatch =======================================================================================
 
@@ -254,7 +254,7 @@ void Collider::operator()(  boost::shared_ptr<const BoxGeometry >  & box ,
 
 
 void Collider::operator()(  boost::shared_ptr<const SphereGeometry<PREC> >  & sphere ,
-        boost::shared_ptr<const MeshGeometry<PREC> >  & mesh) {
+        boost::shared_ptr<const MeshGeometry >  & mesh) {
     collide(m_pBody1, sphere, m_pBody2, mesh);
 }
 
@@ -431,7 +431,7 @@ void Collider::collide( RigidBodyType * box,
 void Collider::collide( RigidBodyType * sphere,
         boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom,
         RigidBodyType * mesh,
-        boost::shared_ptr<const MeshGeometry<PREC> >  & meshGeom) {
+        boost::shared_ptr<const MeshGeometry >  & meshGeom) {
     using namespace MatrixHelpers;
 
 #if USE_OPCODE == 1
@@ -605,7 +605,6 @@ void Collider::collide(RigidBodyType * b1,
 }
 
 
-//====================================================================================================
 
 
 #endif

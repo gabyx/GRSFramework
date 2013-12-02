@@ -8,6 +8,9 @@
 #include <OIS/OISMouse.h>
 
 #include "TypeDefs.hpp"
+
+#include "SceneParserOgre.hpp"
+
 #include "PlaybackLoader.hpp"
 #include "PlaybackManagerBase.hpp"
 #include "InputContext.hpp"
@@ -16,27 +19,28 @@
 #include "VideoDropper.hpp"
 #include "StateRecorderResampler.hpp"
 
-template< typename TLayoutConfig > class StateRingPoolVisBackFront;
-template< typename TLayoutConfig , typename TStatePool> class PlaybackLoader;
-template< typename TLayoutConfig> class SharedBufferPlayback;
+class StateRingPoolVisBackFront;
+template< typename TStatePool> class PlaybackLoader;
+class SharedBufferPlayback;
 
-template<typename TConfig>
+
 class PlaybackManager : public PlaybackManagerBase , public OIS::KeyListener
 {
 public:
-  DEFINE_CONFIG_TYPES_OF(TConfig);
+
+  DEFINE_CONFIG_TYPES
 
 	PlaybackManager(boost::shared_ptr<Ogre::SceneManager> pSceneMgr);
 	~PlaybackManager();
 
-  boost::shared_ptr<SharedBufferPlayback<LayoutConfigType> >	m_pSharedBuffer;
+  boost::shared_ptr<SharedBufferPlayback >	m_pSharedBuffer;
 
-  boost::shared_ptr< SceneParserOgre<TConfig> > m_pSceneParser;
+  boost::shared_ptr< SceneParserOgre > m_pSceneParser;
 
   boost::shared_ptr< VideoDropper > m_pVideoDropper;
   struct VideoDropSettings{ bool m_bVideoDrop; double m_FPS;} m_VideoDropSettings;
 
-  boost::shared_ptr< StateRecorderResampler<DynamicsSystemType> > m_pStateRecorderResampler;
+  boost::shared_ptr< StateRecorderResampler > m_pStateRecorderResampler;
   struct SimFileDropSettings{ bool m_bSimFileDrop; double m_FPS; bool m_bSimFileDropInterpolate; double m_startTime; double m_endTime;} m_SimFileDropSettings;
 
   bool setup();
@@ -68,7 +72,7 @@ private:
   bool parseScene();
   bool m_bSetupSuccessful;
 
-  boost::shared_ptr<const DynamicsState<LayoutConfigType> > m_pVisBuffer;
+  boost::shared_ptr<const DynamicsState > m_pVisBuffer;
 
   //Accessed only by Graphic thread ==========
    void updateSimBodies();
@@ -95,7 +99,7 @@ private:
    // =========================================
 
   // Accessed only by Loader Thread
-  boost::shared_ptr< PlaybackLoader<LayoutConfigType, StateRingPoolVisBackFront<LayoutConfigType> > > m_pFileLoader;
+  boost::shared_ptr< PlaybackLoader<StateRingPoolVisBackFront > > m_pFileLoader;
 
 
   const unsigned int m_nDofuObj, m_nDofqObj; // These are the dimensions for one Obj
@@ -103,12 +107,7 @@ private:
   double m_lengthScale;
   Ogre::SceneNode * m_pBaseNode;
 
-
 };
-
-
-//Implementation
-#include "PlaybackManager.icc"
 
 
 #endif // SIMULATIONMANAGERMAZE_HPP

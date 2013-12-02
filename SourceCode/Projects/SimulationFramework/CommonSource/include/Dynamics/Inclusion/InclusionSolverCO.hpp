@@ -42,7 +42,7 @@
 class InclusionSolverCO {
 public:
 
-    DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES_OF(TInclusionSolverConfig)
+    DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
@@ -68,19 +68,18 @@ public:
 
 
 
-    PercussionPool<LayoutConfigType> m_PercussionPool;
+    PercussionPool m_PercussionPool;
 
     void reservePercussionPoolSpace(unsigned int nExpectedContacts);
     void readFromPercussionPool(unsigned int index, const CollisionData * pCollData, VectorDyn & P_old);
     void updatePercussionPool(const VectorDyn & P_old ) ;
 
 
-    InclusionSolverSettings<LayoutConfigType> m_Settings;
+    InclusionSolverSettings m_Settings;
 
     unsigned int getNObjects();
 
 protected:
-    unsigned int m_nDofq, m_nDofu, m_nDofqObj, m_nDofuObj, m_nSimBodies;
 
 
     unsigned int m_nExpectedContacts;
@@ -90,7 +89,7 @@ protected:
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;
 
-    typedef ContactGraph<RigidBodyType,ContactGraphMode::NoIteration> ContactGraphType;
+    typedef ContactGraph<ContactGraphMode::NoIteration> ContactGraphType;
     ContactGraphType m_ContactGraph;
 
     // Matrices for solving the inclusion ===========================
@@ -137,21 +136,16 @@ protected:
 
 
 
-InclusionSolverCO::InclusionSolverCO(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,  boost::shared_ptr<DynamicsSystemType> pDynSys):
-    m_SimBodies(pCollisionSolver->m_SimBodies),
-    m_Bodies(pCollisionSolver->m_Bodies) {
+InclusionSolverCO::InclusionSolverCO(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
+                                     boost::shared_ptr<DynamicsSystemType> pDynSys):
+    m_SimBodies(pDynSys->m_SimBodies),
+    m_Bodies(pDynSys->m_Bodies), m_ContactGraph(&(pDynSys->m_ContactParameterMap)) {
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
     } else {
         ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }
-
-    m_nSimBodies = pCollisionSolver->m_nSimBodies;
-    m_nDofqObj = NDOFqObj;
-    m_nDofuObj = NDOFuObj;
-    m_nDofq = m_nSimBodies * m_nDofqObj;
-    m_nDofu = m_nSimBodies * m_nDofuObj;
 
 
     resetPercussionBuffer();
@@ -160,7 +154,7 @@ InclusionSolverCO::InclusionSolverCO(boost::shared_ptr< CollisionSolverType >  p
 
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     m_pCollisionSolver->m_ContactDelegateList.addContactDelegate(
-        ContactDelegateList<RigidBodyType>::ContactDelegate::template from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
+        ContactDelegateList<RigidBodyType>::ContactDelegate::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
     );
 
 
@@ -192,23 +186,18 @@ void InclusionSolverCO::initializeLog( Logging::Log* pSolverLog,  boost::filesys
 
 
 unsigned int InclusionSolverCO::getNObjects() {
-    return m_nSimBodies;
+    return m_SimBodies.size();
 }
 
 
 void InclusionSolverCO::reset() {
-    // Do a Debug check if sizes match!
-    ASSERTMSG( m_SimBodies.size() * NDOFuObj == m_nDofu, "InclusionSolverCO:: Error in Dimension of System!");
-    ASSERTMSG( m_SimBodies.size() * NDOFqObj == m_nDofq, "InclusionSolverCO:: Error in Dimension of System!");
 
-    m_pDynSys->init_const_hTerm();
-    m_pDynSys->init_MassMatrix();
-    m_pDynSys->init_MassMatrixInv();
+    m_pDynSys->initMassMatrixAndHTerm();
 
     resetForNextIter();
 
 #if USE_PERCUSSION_POOL == 1
-    reservePercussionPoolSpace(m_nSimBodies * 3);
+    reservePercussionPoolSpace(m_SimBodies.size() * 3);
 #endif
 
 #if HAVE_CUDA_SUPPORT == 1
@@ -363,20 +352,20 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
 
                 if(i == j) { // We are on a self referencing edge! Thats good build diagonal of G and parts of c
                     W_i_bodyT_M_body = (*W_i_body).transpose() * edgesBody->m_MassMatrixInv_diag.asDiagonal();
-                    m_T.template block<(ContactDim),(ContactDim)>((ContactDim)*i,(ContactDim)*j).noalias()  += W_i_bodyT_M_body * (*W_i_body);
-                    m_d.template segment<ContactDim>((ContactDim)*i).noalias() +=  W_i_bodyT_M_body * edgesBody->m_h_term * m_Settings.m_deltaT +
+                    m_T.block<(ContactDim),(ContactDim)>((ContactDim)*i,(ContactDim)*j).noalias()  += W_i_bodyT_M_body * (*W_i_body);
+                    m_d.segment<ContactDim>((ContactDim)*i).noalias() +=  W_i_bodyT_M_body * edgesBody->m_h_term * m_Settings.m_deltaT +
                             currentContactNode->m_nodeData.m_I_plus_eps.asDiagonal()*( (*W_i_body).transpose() * state_s->m_SimBodyStates[bodyId].m_u );
                 } else {
                     W_j_body = ContactGraphType::getW_body((*it)->m_endNode->m_nodeData, edgesBody);
                     G_part = (*W_i_body).transpose() * edgesBody->m_MassMatrixInv_diag.asDiagonal() * (*W_j_body);
-                    m_T.template block<(ContactDim),(ContactDim)>((ContactDim)*i,(ContactDim)*j).noalias() = G_part;
-                    m_T.template block<(ContactDim),(ContactDim)>((ContactDim)*j,(ContactDim)*i).noalias() = G_part.transpose();
+                    m_T.block<(ContactDim),(ContactDim)>((ContactDim)*i,(ContactDim)*j).noalias() = G_part;
+                    m_T.block<(ContactDim),(ContactDim)>((ContactDim)*j,(ContactDim)*i).noalias() = G_part.transpose();
                 }
 
             }
 
             // add once xi to c (d is used will be later completed to d)
-            m_d.template segment<ContactDim>((ContactDim)*i).noalias() +=  currentContactNode->m_nodeData.m_I_plus_eps.asDiagonal() * currentContactNode->m_nodeData.m_xi;
+            m_d.segment<ContactDim>((ContactDim)*i).noalias() +=  currentContactNode->m_nodeData.m_I_plus_eps.asDiagonal() * currentContactNode->m_nodeData.m_xi;
 
 
             // Fill in Percussions
@@ -411,7 +400,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
 #endif
 
 
-        if( m_Settings.m_eMethod == InclusionSolverSettings<LayoutConfigType>::SOR) {
+        if( m_Settings.m_eMethod == InclusionSolverSettings::SOR) {
             // Calculate  R_N, R_T,
             setupRMatrix(m_Settings.m_alphaSORProx);
             m_T = (-m_R).asDiagonal()*m_T;
@@ -429,7 +418,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
             counter.stop();
             m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
 #endif
-        } else if(m_Settings.m_eMethod == InclusionSolverSettings<LayoutConfigType>::JOR) {
+        } else if(m_Settings.m_eMethod == InclusionSolverSettings::JOR) {
             // Calculate  R_N, R_T,
             setupRMatrix(m_Settings.m_alphaJORProx);
             m_T = (-m_R).asDiagonal()*m_T;
@@ -478,15 +467,15 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
 
         static Eigen::Matrix<PREC,NDOFuObj,1> delta_u_E;
         static RigidBodyType * pBody;
-        for(unsigned int i=0; i < m_nSimBodies; i++) {
-            pBody = m_SimBodies[i].get();
+        for(auto it= m_SimBodies.begin(); it != m_SimBodies.end(); it) {
+            pBody = *it;
             delta_u_E = pBody->m_h_term * m_Settings.m_deltaT;
 
             typename ContactGraphType::BodyToContactsListIterator itList  = m_ContactGraph.m_SimBodyToContactsList.find(pBody);
             // itList->second is the NodeList!
             if(itList != m_ContactGraph.m_SimBodyToContactsList.end()) {
                 for( typename ContactGraphType::NodeListIteratorType it = itList->second.begin(); it != itList->second.end(); it++) {
-                    delta_u_E.noalias() += *(ContactGraphType::getW_body((*it)->m_nodeData,pBody)) * P_front.template segment<ContactDim>( (*it)->m_nodeNumber * (ContactDim));
+                    delta_u_E.noalias() += *(ContactGraphType::getW_body((*it)->m_nodeData,pBody)) * P_front.segment<ContactDim>( (*it)->m_nodeNumber * (ContactDim));
                 }
             }
 
@@ -496,8 +485,8 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
     } else {
         // Do simple timestep to u_E for each body in the state...
         static RigidBodyType * pBody;
-        for(unsigned int i=0; i < m_nSimBodies; i++) {
-            pBody = m_SimBodies[i].get();
+        for(auto it= m_SimBodies.begin(); it != m_SimBodies.end(); it) {
+            pBody = *it;
             state_e->m_SimBodyStates[i].m_u = state_s->m_SimBodyStates[i].m_u + pBody->m_MassMatrixInv_diag.asDiagonal()*pBody->m_h_term * m_Settings.m_deltaT;;
         }
     }
@@ -509,7 +498,7 @@ void InclusionSolverCO::setupRMatrix(PREC alpha) {
     PREC r_T_i;
     for(unsigned int i=0; i<m_nContacts; i++) {
         m_R((ContactDim)*i) =  alpha / m_T((ContactDim)*i,(ContactDim)*i);
-        r_T_i = alpha / (m_T.diagonal().template segment<NDOFFriction>((ContactDim)*i+1)).maxCoeff();
+        r_T_i = alpha / (m_T.diagonal().segment<NDOFFriction>((ContactDim)*i+1)).maxCoeff();
         m_R((ContactDim)*i+1) = r_T_i;
         m_R((ContactDim)*i+2) = r_T_i;
     }

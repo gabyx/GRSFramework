@@ -8,6 +8,8 @@
 
 #include "RenderContext.hpp"
 
+#include "StateRecorder.hpp"
+
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
 
@@ -16,19 +18,18 @@
 /**
 * @brief only used in sim thread to resample and drop a new sim file if the option is selected in playback! Not mutex locks or something else!
 */
-template<typename TDynamicsSystemType>
-class StateRecorderResampler: public StateRecorder<TDynamicsSystemType> {
+class StateRecorderResampler: public StateRecorder {
 public:
 
-   DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
+   DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    StateRecorderResampler(const unsigned nSimBodies):
-      StateRecorder<TDynamicsSystemType>(nSimBodies)
+      StateRecorder(nSimBodies)
    {
-      m_pStateArray.push_back(new DynamicsState<LayoutConfigType>(nSimBodies));
-      m_pStateArray.push_back(new DynamicsState<LayoutConfigType>(nSimBodies));
-      m_pStateArray.push_back(new DynamicsState<LayoutConfigType>(nSimBodies));
+      m_pStateArray.push_back(new DynamicsState(nSimBodies));
+      m_pStateArray.push_back(new DynamicsState(nSimBodies));
+      m_pStateArray.push_back(new DynamicsState(nSimBodies));
 
       reset();
       m_fps = 25; // Standart value
@@ -42,7 +43,7 @@ public:
       }
    };
 
-   void tryToWrite( const DynamicsState<LayoutConfigType>* state, bool bInterpolate){
+   void tryToWrite( const DynamicsState* state, bool bInterpolate){
 
 
       std::stringstream logstream;
@@ -99,10 +100,10 @@ public:
    }
 
 private:
-   std::vector< DynamicsState<LayoutConfigType> *> m_pStateArray;
-   DynamicsState<LayoutConfigType> * m_pPrevState;
-   DynamicsState<LayoutConfigType> * m_pNextState;
-   DynamicsState<LayoutConfigType> * m_pLerpState;
+   std::vector< DynamicsState *> m_pStateArray;
+   DynamicsState * m_pPrevState;
+   DynamicsState * m_pNextState;
+   DynamicsState * m_pLerpState;
    bool m_bFirstInsert;
 
    boost::filesystem::path m_folderPath;

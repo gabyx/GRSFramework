@@ -78,7 +78,7 @@ public:
     unsigned int getIterationCount();
 
     // Solver Parameters
-    TimeStepperSettings<LayoutConfigType> m_Settings;
+    TimeStepperSettings m_Settings;
 
     // General Log file
     Logging::Log *m_pSolverLog, *m_pSimulationLog;
@@ -254,12 +254,12 @@ void MoreauTimeStepper::reset() {
 
 
 
-    if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::NONE) {
+    if(m_Settings.m_eSimulateFromReference != TimeStepperSettings::NONE) {
 
         //TODO Open all simfiles references for the bodies
         //LOG(m_pSimulationLog,"---> Opened Reference SimFile: m_Settings.m_simStateReferenceFile"<<std::endl);
 
-        if(m_Settings.m_eSimulateFromReference != TimeStepperSettings<LayoutConfigType>::CONTINUE) {
+        if(m_Settings.m_eSimulateFromReference != TimeStepperSettings::CONTINUE) {
             //Inject the end state into the front buffer
             //TODO
         }
@@ -419,7 +419,7 @@ void MoreauTimeStepper::doOneIteration() {
 #endif
 
     // Check if we can finish the timestepping!
-    if(m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::USE_STATES ) {
+    if(m_Settings.m_eSimulateFromReference == TimeStepperSettings::USE_STATES ) {
         m_bFinished =  !m_ReferenceSimFile.isGood();
     } else {
         m_bFinished =  m_currentSimulationTime >= m_Settings.m_endTime;

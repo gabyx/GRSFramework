@@ -21,29 +21,28 @@
 
 #include "DynamicCoordinateFrames.hpp"
 
-template <typename TLayoutConfig> class DynamicsState;
-template <typename DynamicsSystemType> class StateRecorder;
+class DynamicsState;
+class StateRecorder;
 class SharedBufferDynSys;
 
-template<typename TConfig>
 class SimulationManagerGUI : public SimulationManagerBase , public OIS::KeyListener {
 public:
 
-    DEFINE_CONFIG_TYPES_OF(TConfig)
+    DEFINE_CONFIG_TYPES
 
     SimulationManagerGUI(boost::shared_ptr<Ogre::SceneManager> pSceneMgr);
     ~SimulationManagerGUI();
 
 
-    boost::shared_ptr<SharedBufferDynSys<LayoutConfigType> >	    m_pSharedBuffer;
-    boost::shared_ptr<StateRecorder<DynamicsSystemType> >		m_pStateRecorder;
+    boost::shared_ptr<SharedBufferDynSys >	    m_pSharedBuffer;
+    boost::shared_ptr<StateRecorder >		m_pStateRecorder;
 
     std::vector<Ogre::SceneNode*>	m_SceneNodeSimBodies;
     std::vector<Ogre::SceneNode*>	m_SceneNodeBodies;
 
     void setup(boost::filesystem::path sceneFilePath);
 
-    boost::shared_ptr< SceneParserOgre<TConfig> > m_pSceneParser;
+    boost::shared_ptr< SceneParserOgre > m_pSceneParser;
 
 
     void updateScene(double timeSinceLastFrame);
@@ -78,7 +77,7 @@ private:
     boost::timer::cpu_timer m_global_time;
 
     void writeAllOutput();
-    RecorderSettings<LayoutConfigType> m_RecorderSettings;
+    RecorderSettings m_RecorderSettings;
 
     void threadRunRecord();
     bool initRecordThread();
@@ -138,9 +137,6 @@ private:
     boost::filesystem::path m_SimFilePath;
 };
 
-
-// Implementation
-#include "SimulationManagerGUI.icc"
 
 
 #endif // SIMULATIONMANAGERMAZE_HPP

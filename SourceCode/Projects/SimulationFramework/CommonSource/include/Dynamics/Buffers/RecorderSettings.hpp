@@ -8,10 +8,10 @@
 * @ingroup DynamicsGeneral
 * @brief The recorder settings.
 */
-template<typename TLayoutConfig>
+
 class RecorderSettings {
 public:
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+    DEFINE_LAYOUT_CONFIG_TYPES
     RecorderSettings() {
         m_eMode = RECORD_EVERY_STEP;
         m_recordEveryXTimestep = 1;

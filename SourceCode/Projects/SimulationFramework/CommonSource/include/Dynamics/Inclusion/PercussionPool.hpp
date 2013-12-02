@@ -27,12 +27,11 @@
 * @ingroup Inclusion
 * @brief Percussion Pool.
 */
-template< typename TLayoutConfig>
 class PercussionPool    {
 public:
    typedef boost::unordered_map<ContactTag, ContactPercussion, ContactTagHash > PercussionMap;
 
-   DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+   DEFINE_LAYOUT_CONFIG_TYPES
 
    PercussionPool(){
 

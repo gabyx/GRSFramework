@@ -3,6 +3,8 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include "PlaybackManager.hpp"
+
 #include <RenderContext.hpp>
 #include "SharedBufferPlayback.hpp"
 #include "CommonFunctions.hpp"
@@ -17,10 +19,9 @@
 
 #include "LogDefines.hpp"
 
-using namespace std;
 
-template<typename TConfig>
-PlaybackManager<TConfig>::PlaybackManager(boost::shared_ptr<Ogre::SceneManager> pSceneMgr):
+
+PlaybackManager::PlaybackManager(boost::shared_ptr<Ogre::SceneManager> pSceneMgr):
     PlaybackManagerBase(),
     m_nDofqObj(NDOFqObj),
     m_nDofuObj(NDOFuObj),
@@ -54,8 +55,8 @@ PlaybackManager<TConfig>::PlaybackManager(boost::shared_ptr<Ogre::SceneManager> 
     m_pSceneMgr = pSceneMgr;
 }
 
-template<typename TConfig>
-PlaybackManager<TConfig>::~PlaybackManager() {
+
+PlaybackManager::~PlaybackManager() {
     DECONSTRUCTOR_MESSAGE
 
     stopPlaybackThread(true);
@@ -66,8 +67,8 @@ PlaybackManager<TConfig>::~PlaybackManager() {
     InputContext::getSingletonPtr()->removeKeyListener(this);
 }
 
-template<typename TConfig>
-bool PlaybackManager<TConfig>::setup() {
+
+bool PlaybackManager::setup() {
 
 
     m_lengthScale = 100;  // 1m = 100 Ogre units , 1cm -> 1 Ogre Unit
@@ -82,14 +83,14 @@ bool PlaybackManager<TConfig>::setup() {
     // =====================================================
 
     //init shared buffer
-    m_pSharedBuffer = boost::shared_ptr<SharedBufferPlayback<LayoutConfigType> >(
-                          new SharedBufferPlayback<LayoutConfigType>(m_nSimBodies)
+    m_pSharedBuffer = boost::shared_ptr<SharedBufferPlayback >(
+                          new SharedBufferPlayback(m_nSimBodies)
                       );
     m_pSharedBuffer->initializeStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
 
 
-    m_pFileLoader = boost::shared_ptr< PlaybackLoader<LayoutConfigType, StateRingPoolVisBackFront<LayoutConfigType> > >(
-                        new PlaybackLoader<LayoutConfigType, StateRingPoolVisBackFront<LayoutConfigType> >(m_nSimBodies, m_pSharedBuffer)
+    m_pFileLoader = boost::shared_ptr< PlaybackLoader<StateRingPoolVisBackFront > >(
+                        new PlaybackLoader< StateRingPoolVisBackFront >(m_nSimBodies, m_pSharedBuffer)
                     );
 
     //Make a videodropper
@@ -97,7 +98,7 @@ bool PlaybackManager<TConfig>::setup() {
     m_pVideoDropper->reset();
 
     //Make a Sim File Resampler
-    m_pStateRecorderResampler = boost::shared_ptr<StateRecorderResampler<DynamicsSystemType> >(new StateRecorderResampler<DynamicsSystemType>(m_nSimBodies));
+    m_pStateRecorderResampler = boost::shared_ptr<StateRecorderResampler >(new StateRecorderResampler(m_nSimBodies));
     m_pStateRecorderResampler->reset();
 
     m_pVisBuffer = m_pSharedBuffer->getVisBuffer();
@@ -110,14 +111,14 @@ bool PlaybackManager<TConfig>::setup() {
     return m_bSetupSuccessful;
 }
 
-template<typename TConfig>
-bool PlaybackManager<TConfig>::parseScene() {
+
+bool PlaybackManager::parseScene() {
     boost::filesystem::path sceneFilePath = FileManager::getSingleton().getPathSceneFileSelected();
     if(sceneFilePath.empty()) {
         return false;
     }
 
-    m_pSceneParser = boost::shared_ptr< SceneParserOgre<TConfig> >( new SceneParserOgre<TConfig>( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies) );
+    m_pSceneParser = boost::shared_ptr< SceneParserOgre >( new SceneParserOgre( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies) );
     m_pSceneParser->parseScene(sceneFilePath);
 
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
@@ -125,8 +126,8 @@ bool PlaybackManager<TConfig>::parseScene() {
     return true;
 }
 
-template<typename TConfig>
-void PlaybackManager<TConfig>::updateScene(double timeSinceLastFrame) {
+
+void PlaybackManager::updateScene(double timeSinceLastFrame) {
     static bool bStateChanged;
     static double state_time;
     std::stringstream logstream;
@@ -157,8 +158,8 @@ void PlaybackManager<TConfig>::updateScene(double timeSinceLastFrame) {
 
 }
 
-template<typename TConfig>
-void PlaybackManager<TConfig>::updateSimBodies() {
+
+void PlaybackManager::updateSimBodies() {
     //update objects...
     for(int i=0; i<m_pVisBuffer->m_SimBodyStates.size(); i++) {
         m_SceneNodeSimBodies[i]->setPosition(
@@ -175,8 +176,8 @@ void PlaybackManager<TConfig>::updateSimBodies() {
     }
 }
 
-template<typename TConfig>
-double PlaybackManager<TConfig>::getSimulationTime() {
+
+double PlaybackManager::getSimulationTime() {
     if(m_pVisBuffer) {
         return m_pVisBuffer->m_t;
     }
@@ -184,8 +185,8 @@ double PlaybackManager<TConfig>::getSimulationTime() {
     return 0;
 }
 
-template<typename TConfig>
-void PlaybackManager<TConfig>::initBeforeThreads() {
+
+void PlaybackManager::initBeforeThreads() {
     std::stringstream logstream;
 
     m_SettingsVisThread.m_bFirstPass = true;
@@ -195,9 +196,9 @@ void PlaybackManager<TConfig>::initBeforeThreads() {
     m_SettingsVisThread.m_bVideoDrop = m_VideoDropSettings.m_bVideoDrop;
     m_SettingsSimThread.m_bVideoDrop = m_VideoDropSettings.m_bVideoDrop;
     if(m_SettingsSimThread.m_bVideoDrop) {
-        logstream <<"PlaybackManager: Drop Video: "<< "true" << endl;
+        logstream <<"PlaybackManager: Drop Video: "<< "true" << std::endl;
     } else {
-        logstream <<"PlaybackManager: Drop Video: "<< "false" << endl;
+        logstream <<"PlaybackManager: Drop Video: "<< "false" << std::endl;
     }
 
     m_pStateRecorderResampler->setFPS(m_VideoDropSettings.m_FPS);
@@ -206,16 +207,16 @@ void PlaybackManager<TConfig>::initBeforeThreads() {
     m_SettingsSimThread.m_bSimFileDrop = m_SimFileDropSettings.m_bSimFileDrop;
     m_SettingsSimThread.m_bSimFileDropInterpolate = m_SimFileDropSettings.m_bSimFileDropInterpolate;
     if(m_SettingsSimThread.m_bSimFileDrop) {
-        logstream <<"PlaybackManager: Drop Sim File: "<< "true" << endl;
+        logstream <<"PlaybackManager: Drop Sim File: "<< "true" << std::endl;
     } else {
-        logstream <<"PlaybackManager: Drop Sim File: "<< "false" << endl;
+        logstream <<"PlaybackManager: Drop Sim File: "<< "false" << std::endl;
     }
 
     m_pThreadLog->logMessage(logstream);
 
 }
-template<typename TConfig>
-void PlaybackManager<TConfig>::threadRunSimulation() {
+
+void PlaybackManager::threadRunSimulation() {
     static bool bchangedState;
     static double timelineSimulation, state_time, old_state_time, deltaT;
 
@@ -234,7 +235,7 @@ void PlaybackManager<TConfig>::threadRunSimulation() {
     // Wait for vis thread
     m_barrier_start.wait();
 
-    DynamicsState<LayoutConfigType> * currentState = m_pSharedBuffer->getSimBuffer().get();
+    DynamicsState * currentState = m_pSharedBuffer->getSimBuffer().get();
 
     state_time = 0;
     old_state_time =0;
@@ -276,7 +277,7 @@ void PlaybackManager<TConfig>::threadRunSimulation() {
             }
 
 
-            if(currentState->m_StateType == DynamicsState<LayoutConfigType>::ENDSTATE) {
+            if(currentState->m_StateType == DynamicsState::ENDSTATE) {
                 LOG(m_pThreadLog, " PlaybackManager: Detected end state at " << currentState->m_t <<" --> leaving..."<<std::endl;);
                 break;
             }
@@ -299,8 +300,8 @@ void PlaybackManager<TConfig>::threadRunSimulation() {
 
 }
 
-template<typename TConfig>
-void PlaybackManager<TConfig>::initSimThread() {
+
+void PlaybackManager::initSimThread() {
 
     m_pSharedBuffer->resetStateRingPool();
 
@@ -337,16 +338,16 @@ void PlaybackManager<TConfig>::initSimThread() {
 
 }
 
-template<typename TConfig>
-void PlaybackManager<TConfig>::cleanUpSimThread() {
+
+void PlaybackManager::cleanUpSimThread() {
     if(m_SettingsSimThread.m_bSimFileDrop) {
         m_pStateRecorderResampler->closeAll();
     }
 }
 
 
-template<typename TConfig>
-bool PlaybackManager<TConfig>::keyPressed(const OIS::KeyEvent &e) {
+
+bool PlaybackManager::keyPressed(const OIS::KeyEvent &e) {
 
     switch (e.key) {
     case OIS::KC_M:
@@ -376,8 +377,8 @@ bool PlaybackManager<TConfig>::keyPressed(const OIS::KeyEvent &e) {
     return true;
 }
 
-template<typename TConfig>
-bool PlaybackManager<TConfig>::keyReleased(const OIS::KeyEvent &e) {
+
+bool PlaybackManager::keyReleased(const OIS::KeyEvent &e) {
     switch (e.key) {
     case OIS::KC_UP:
     case OIS::KC_DOWN:
@@ -392,14 +393,14 @@ bool PlaybackManager<TConfig>::keyReleased(const OIS::KeyEvent &e) {
 }
 
 
-template<typename TConfig>
-void PlaybackManager<TConfig>::startPlaybackThread() {
+
+void PlaybackManager::startPlaybackThread() {
     if(m_bSetupSuccessful) {
         if (!isSimThreadRunning()) {
             setThreadToBeStopped(false);
             //Start  Thread===========================================
             initBeforeThreads();
-            m_pThread = new boost::thread( boost::bind(&PlaybackManager<TConfig>::threadRunSimulation, &*this) );
+            m_pThread = new boost::thread( boost::bind(&PlaybackManager::threadRunSimulation, &*this) );
 
             m_pSimulationLog->logMessage("---> PlaybackManager:: Start Thread: PlaybackThread started ...");
         } else {
@@ -411,8 +412,8 @@ void PlaybackManager<TConfig>::startPlaybackThread() {
 
 }
 
-template<typename TConfig>
-void PlaybackManager<TConfig>::stopPlaybackThread(bool force_stop) {
+
+void PlaybackManager::stopPlaybackThread(bool force_stop) {
     if(m_bSetupSuccessful) {
         if (isSimThreadRunning()) {
             setThreadToBeStopped(true);
@@ -429,13 +430,13 @@ void PlaybackManager<TConfig>::stopPlaybackThread(bool force_stop) {
 }
 
 
-template<typename TConfig>
-void PlaybackManager<TConfig>::cancelAllWaits() {
+
+void PlaybackManager::cancelAllWaits() {
     m_pVideoDropper->cancelWait();
 }
 
-template<typename TConfig>
-void PlaybackManager<TConfig>::enableInput(bool value) {
+
+void PlaybackManager::enableInput(bool value) {
     if(value) {
         // add some key,mouse listener to change the input
         InputContext::getSingletonPtr()->addKeyListener(this,m_KeyListenerName);

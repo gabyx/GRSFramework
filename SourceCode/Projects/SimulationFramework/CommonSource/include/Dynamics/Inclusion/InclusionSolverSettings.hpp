@@ -10,10 +10,9 @@
 * @ingroup Inclusion
 * @brief The inclusion solver settings.
 */
-template<typename TLayoutConfig>
 struct InclusionSolverSettings
 {
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+    DEFINE_LAYOUT_CONFIG_TYPES
 
     InclusionSolverSettings()
     {

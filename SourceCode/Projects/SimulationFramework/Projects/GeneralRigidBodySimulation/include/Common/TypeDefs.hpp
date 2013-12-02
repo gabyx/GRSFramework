@@ -22,6 +22,7 @@ class RigidBodySolverDataCONoG;
 class RigidBodySolverDataNone;
 class MoreauTimeStepper;
 
+#define StatePool_INCLUDE_FILE "StatePoolVisBackFront.hpp"
 #define RigidBody_INCLUDE_FILE "RigidBody.hpp"
 #define TimeStepper_INCLUDE_FILE "MoreauTimeStepper.hpp"
 #define DynamicsSystem_INCLUDE_FILE "DynamicsSystem.hpp"
@@ -103,6 +104,9 @@ namespace GlobalDefs{
     typedef typename GlobalDefs::RigidBodyConfigs::LayoutConfigType LayoutConfigType; \
     DEFINE_LAYOUT_CONFIG_TYPES_OF( GlobalDefs::RigidBodyConfigs::LayoutConfigType )
 
+#define DEFINE_MATRIX_TYPES \
+    typedef typename GlobalDefs::RigidBodyConfigs::LayoutConfigType::PREC PREC; \
+    DEFINE_MATRIX_TYPES_OF( GlobalDefs::RigidBodyConfigs::LayoutConfigType::PREC )
 
 struct MyIOFormat{
   static Eigen::IOFormat Matlab;

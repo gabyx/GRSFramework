@@ -96,7 +96,7 @@ public:
       boost::shared_ptr<const SphereGeometry<PREC> >,
       boost::shared_ptr<const HalfspaceGeometry > ,
       boost::shared_ptr<const BoxGeometry >,
-      boost::shared_ptr<const MeshGeometry<PREC> >
+      boost::shared_ptr<const MeshGeometry >
     > GeometryType;
 
     GeometryType m_geometry; ///< A boost::variant which takes different geometry shared pointers.

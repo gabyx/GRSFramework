@@ -60,35 +60,34 @@ void getMeshInformation(Ogre::Entity *entity,
 
 /** @brief This function extracts mesh information of en Ogre::Entity objects.
 * This function extracts all meshs from a list and stores it in a class MeshData
-* @param myMeshInfo The mesh information where the mesh is stored.
-* @param
+* @param meshData The mesh information where the mesh is stored.
+* @param Uncommented function!
 */
-template<typename PREC>
-void extractMesh(MeshData<PREC> &myMeshInfo, std::vector<Ogre::Entity *> &CollisionEntities, Ogre::SceneNode * referenceFrame){
-
-    // mesh data to retrieve
-    size_t vertex_count;
-    size_t index_count;
-    Ogre::Vector3 *vertices;
-    unsigned long *indices;
-
-    using std::endl;
-    using std::cout;
-
-    for(int i=0;i<CollisionEntities.size();i++){
-        cout <<"Adding mesh in MeshInfo for:" << CollisionEntities[i]->getName()<<endl;
-        // Get the mesh information in the Object Frame, but unscaled -> meaning in the Ogre Units of the World Frame!
-
-        getMeshInformation(CollisionEntities[i], vertex_count, vertices, index_count, indices,
-								   referenceFrame->_getFullTransform().inverse()*CollisionEntities[i]->getParentNode()->_getFullTransform());
-
-        // Save it in the MeshInfo
-        myMeshInfo.setup(vertex_count,vertices,index_count,indices, 1.0);
-
-        delete[] vertices;
-        delete[] indices;
-    }
-};
+//void extractMesh(MeshData &meshData, std::vector<Ogre::Entity *> &CollisionEntities, Ogre::SceneNode * referenceFrame){
+//
+//    // mesh data to retrieve
+//    size_t vertex_count;
+//    size_t index_count;
+//    Ogre::Vector3 *vertices;
+//    unsigned long *indices;
+//
+//    using std::endl;
+//    using std::cout;
+//
+//    for(int i=0;i<CollisionEntities.size();i++){
+//        cout <<"Adding mesh in MeshInfo for:" << CollisionEntities[i]->getName()<<endl;
+//        // Get the mesh information in the Object Frame, but unscaled -> meaning in the Ogre Units of the World Frame!
+//
+//        getMeshInformation(CollisionEntities[i], vertex_count, vertices, index_count, indices,
+//								   referenceFrame->_getFullTransform().inverse()*CollisionEntities[i]->getParentNode()->_getFullTransform());
+//
+//        // Save it in the MeshInfo
+//        meshData.setup(vertex_count,vertices,index_count,indices, 1.0);
+//
+//        delete[] vertices;
+//        delete[] indices;
+//    }
+//};
 
 
 #endif

@@ -7,7 +7,7 @@
 
 class PlaneGeometry {
 public:
-    DEFINE_LAYOUT_CONFIG_TYPES
+    DEFINE_MATRIX_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     PlaneGeometry() {

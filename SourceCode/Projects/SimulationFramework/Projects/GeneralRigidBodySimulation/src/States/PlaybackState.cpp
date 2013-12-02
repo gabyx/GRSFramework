@@ -268,7 +268,7 @@ void PlaybackState::changeScene() {
 
     m_pAppLog->logMessage("Loading new Scene...");
     //Load new scene
-    m_pPlaybackMgr = boost::shared_ptr<PlaybackManager<GeneralConfig> > (new PlaybackManager<GeneralConfig>(m_pSceneMgr)); // overwrite the existing, which gets deleted!
+    m_pPlaybackMgr = boost::shared_ptr<PlaybackManager > (new PlaybackManager(m_pSceneMgr)); // overwrite the existing, which gets deleted!
 
     if(m_pPlaybackMgr->setup()) {
         m_pAppLog->logMessage("Loading new scene successful");

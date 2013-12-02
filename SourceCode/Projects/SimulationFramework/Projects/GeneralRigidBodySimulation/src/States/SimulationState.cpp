@@ -58,7 +58,7 @@ void SimulationState::enter() {
 
     // Setup the Simulation Manager with the loaded system;
     m_pAppLog->logMessage("Adding SimulationManagerGUI...");
-    m_pSimMgr  = boost::shared_ptr<SimulationManagerGUI<GeneralConfig> > (new SimulationManagerGUI<GeneralConfig>(m_pSceneMgr));
+    m_pSimMgr  = boost::shared_ptr<SimulationManagerGUI > (new SimulationManagerGUI(m_pSceneMgr));
     m_pSimMgr->setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
 
     updateSceneFunction = boost::bind(&SimulationState::updateSceneRealtime,this,_1);
@@ -267,9 +267,9 @@ bool SimulationState::keyPressed(const OIS::KeyEvent &keyEventRef) {
     }
     case OIS::KC_K: {
         if(m_eSimulationActiveMode == REALTIME) {
-            m_pSimMgr->stopSimThread(SimulationManagerGUI<GeneralConfig>::REALTIME,false);
+            m_pSimMgr->stopSimThread(SimulationManagerGUI::REALTIME,false);
         } else if(m_eSimulationActiveMode == RECORD) {
-            m_pSimMgr->stopSimThread(SimulationManagerGUI<GeneralConfig>::RECORD,false);
+            m_pSimMgr->stopSimThread(SimulationManagerGUI::RECORD,false);
         }
         break;
     }

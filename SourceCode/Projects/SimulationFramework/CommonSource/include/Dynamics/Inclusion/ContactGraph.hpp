@@ -677,7 +677,7 @@ public:
     typedef typename ContactGraphType::EdgeType EdgeType;
     typedef typename ContactGraphType::NodeType NodeType;
 
-    SorProxStepNodeVisitor(const InclusionSolverSettings<LayoutConfigType> &settings,
+    SorProxStepNodeVisitor(const InclusionSolverSettings &settings,
                            bool & globalConverged, const unsigned int & globalIterationNeeded):
             m_Settings(settings),m_bConverged(globalConverged),
             m_iterationsNeeded(globalIterationNeeded)
@@ -745,7 +745,7 @@ public:
                #endif
 
 
-                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal) {
+                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
                     if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
                         if(!nodeData.m_bConverged ) {
@@ -757,7 +757,7 @@ public:
                     } else {
                         m_bConverged=false;
                     }
-                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InEnergyLocalMix){
+                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
                     if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache1,
                                                                           nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
@@ -782,7 +782,7 @@ public:
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
                 nodeData.m_u2BufferPtr->m_front = nodeData.m_u2BufferPtr->m_front  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
-                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InVelocityLocal) {
+                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
                     if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache2,
                                                                   nodeData.m_u2BufferPtr->m_front,
@@ -797,7 +797,7 @@ public:
                         m_bConverged=false;
                     }
 
-                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InEnergyLocalMix){
+                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
                     if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
                                                                           nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
@@ -817,7 +817,7 @@ public:
                 }
             }
 
-            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings<LayoutConfigType>::InLambda) {
+            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InLambda) {
                 if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
                     nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol);
                     if(!nodeData.m_bConverged) {
@@ -842,7 +842,7 @@ public:
 
 private:
     Logging::Log * m_pSolverLog;
-    const InclusionSolverSettings<LayoutConfigType> & m_Settings;
+    const InclusionSolverSettings & m_Settings;
     bool & m_bConverged; ///< Access to global flag for cancelation criteria
     const unsigned int & m_iterationsNeeded; ///< Access to global iteration counter
 

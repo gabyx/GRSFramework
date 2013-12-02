@@ -9,11 +9,9 @@
 * @ingroup DynamicsGeneral
 * @brief The time stepper settings.
 */
-template<typename TLayoutConfig>
 struct TimeStepperSettings
 {
-  DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
-
+  DEFINE_LAYOUT_CONFIG_TYPES
   TimeStepperSettings(){
       //standart values
       m_deltaT = 0.001;

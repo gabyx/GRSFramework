@@ -26,12 +26,12 @@
 
 ///==========================================
 
-template<typename PREC>
 class MeshData
 {
 public:
 
-   DEFINE_MATRIX_TYPES
+   DEFINE_MATRIX_TYPES_OF( MeshPREC )
+
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     MeshData(){};
@@ -113,7 +113,7 @@ public:
                vertice.y = temp(1);
                vertice.z = temp(2);
 
-               this->m_Vertices.push_back(temp.template cast<MeshPREC>());
+               this->m_Vertices.push_back(temp.cast<MeshPREC>());
             }
 
 
@@ -138,7 +138,7 @@ public:
                if(n.norm()==0){
                   n(0) = 1; n(1)=0; n(2)=0;
                }
-               this->m_Normals.push_back(n.template cast<MeshPREC>());
+               this->m_Normals.push_back(n.cast<MeshPREC>());
 
 
             }

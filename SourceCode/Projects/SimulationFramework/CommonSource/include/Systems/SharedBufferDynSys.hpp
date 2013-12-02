@@ -18,34 +18,25 @@ public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 	//Static and Dynamic allocation of the matrices in the class
-	SharedBufferDynSys(unsigned int nSimBodies);
+	SharedBufferDynSys(unsigned int nSimBodies):
+        StatePoolVisBackFront(nSimBodies)
+    {
+            reset();
+    };
 
-	~SharedBufferDynSys();
+	~SharedBufferDynSys(){
+      DECONSTRUCTOR_MESSAGE
+    };
 
-	void	reset();
+	void reset(){
+        this->resetStatePool();
+    };
 
 private:
 
 
 
 };
-
-SharedBufferDynSys::SharedBufferDynSys(unsigned int nSimBodies):
-StatePoolVisBackFront(nSimBodies)
-{
-	reset();
-}
-
-
-SharedBufferDynSys::~SharedBufferDynSys(){
-  DECONSTRUCTOR_MESSAGE
-}
-
-
-void SharedBufferDynSys::reset(){
-	this->resetStatePool();
-}
-
 
 
 #endif

@@ -78,10 +78,10 @@ public:
     void doFirstHalfTimeStep(PREC ts, PREC timestep);
     void doSecondHalfTimeStep(PREC te, PREC timestep);
 
-    void getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const;
-    void setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder);
-    void getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver);
-    void setSettings(const TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, const InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver);
+    void getSettings(RecorderSettings & SettingsRecorder) const;
+    void setSettings(const RecorderSettings & SettingsRecorder);
+    void getSettings(TimeStepperSettings &SettingsTimestepper, InclusionSolverSettings &SettingsInclusionSolver);
+    void setSettings(const TimeStepperSettings &SettingsTimestepper, const InclusionSolverSettings &SettingsInclusionSolver);
 
     void reset();
     inline  void afterFirstTimeStep() {};
@@ -93,9 +93,9 @@ public:
 protected:
 
 
-    RecorderSettings<LayoutConfigType> m_SettingsRecorder;
-    TimeStepperSettings<LayoutConfigType> m_SettingsTimestepper;
-    InclusionSolverSettings<LayoutConfigType> m_SettingsInclusionSolver;
+    RecorderSettings m_SettingsRecorder;
+    TimeStepperSettings m_SettingsTimestepper;
+    InclusionSolverSettings m_SettingsInclusionSolver;
 
 
     //Function
@@ -132,23 +132,23 @@ DynamicsSystem<TDynamicsSystemConfig>::~DynamicsSystem() {
 };
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::getSettings(RecorderSettings<LayoutConfigType> & SettingsRecorder) const{
+void DynamicsSystem<TDynamicsSystemConfig>::getSettings(RecorderSettings & SettingsRecorder) const{
     SettingsRecorder = m_SettingsRecorder;
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const RecorderSettings<LayoutConfigType> & SettingsRecorder){
+void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const RecorderSettings & SettingsRecorder){
     m_SettingsRecorder = SettingsRecorder;
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::getSettings(TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) {
+void DynamicsSystem<TDynamicsSystemConfig>::getSettings(TimeStepperSettings &SettingsTimestepper, InclusionSolverSettings &SettingsInclusionSolver) {
     SettingsTimestepper = m_SettingsTimestepper;
     SettingsInclusionSolver = m_SettingsInclusionSolver;
 }
 
 template<typename TDynamicsSystemConfig>
-void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const TimeStepperSettings<LayoutConfigType> &SettingsTimestepper, const InclusionSolverSettings<LayoutConfigType> &SettingsInclusionSolver) {
+void DynamicsSystem<TDynamicsSystemConfig>::setSettings(const TimeStepperSettings &SettingsTimestepper, const InclusionSolverSettings &SettingsInclusionSolver) {
     m_SettingsTimestepper = SettingsTimestepper;
     m_SettingsInclusionSolver = SettingsInclusionSolver;
 }

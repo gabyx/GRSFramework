@@ -8,11 +8,10 @@
 
 #include "MakeCoordinateSystem.hpp"
 
-template<typename TConfig>
-class SceneParserOgre : public SceneParser<TConfig> {
+class SceneParserOgre : public SceneParser {
 public:
 
-    DEFINE_CONFIG_TYPES_OF(TConfig)
+    DEFINE_CONFIG_TYPES
 
     // For simulation manager
     SceneParserOgre(
@@ -21,7 +20,7 @@ public:
         std::vector<Ogre::SceneNode*> &nodesSimBodies,
         std::vector<Ogre::SceneNode*> &nodesBodies,
         boost::shared_ptr<DynamicsSystemType> pDynSys
-    ) : m_pSceneMgr(pSceneMgr),  m_rSceneNodeSimBodies(nodesSimBodies), m_rSceneNodeBodies(nodesBodies) , SceneParser<TConfig>(pDynSys) {
+    ) : m_pSceneMgr(pSceneMgr),  m_rSceneNodeSimBodies(nodesSimBodies), m_rSceneNodeBodies(nodesBodies) , SceneParser(pDynSys) {
         ASSERTMSG(baseFrame != NULL, "Pointer is NULL");
         m_BaseFrame = baseFrame;
         this->m_bParseDynamics = true;
@@ -380,7 +379,7 @@ protected:
                 extent.array() = (maxPoint - minPoint);
                 Vector3 center = 0.5*extent + minPoint;
                 Vector3 dxyz;
-                dxyz.array() = extent.array() / dim.array().template cast<PREC>();
+                dxyz.array() = extent.array() / dim.array().cast<PREC>();
 
                 // Add MPI Visulaization
                 ticpp::Element *mat =  topo->FirstChild("Visualization",true)->FirstChild("Material")->ToElement();
