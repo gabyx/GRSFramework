@@ -19,7 +19,7 @@ public:
     }
 
 
-    void operator()(boost::shared_ptr<const SphereGeometry<PREC> > & sphereGeom) {
+    void operator()(boost::shared_ptr<const SphereGeometry > & sphereGeom) {
         return;
     }
 

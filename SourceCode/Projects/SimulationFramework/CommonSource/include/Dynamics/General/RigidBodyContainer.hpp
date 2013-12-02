@@ -11,10 +11,11 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
+#include RigidBody_INCLUDE_FILE
+
 #include "AssertionDebug.hpp"
 
 
-template<typename TRigidBodyType >
 class RigidBodyContainer {
 private:
 
@@ -24,8 +25,9 @@ private:
     struct by_ordered_id{};
 
 public:
-    typedef TRigidBodyType RigidBodyType;
-    typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
+    DEFINE_RIGIDBODY_CONFIG_TYPES
+
+    typedef RigidBodyType::RigidBodyIdType RigidBodyIdType;
 
     //This container grants only const access with its iterators with (RigidBodyType* const)
     //So we are able to change these rigidbodies, but cant change the m_id because it is const in the rigidbody class
@@ -52,9 +54,9 @@ private:
 
     MapType m_map;
 
-    typedef  typename MapType::template index<by_insertion>::type    MapByInsertionType;
-    typedef  typename MapType::template index<by_hashed_id>::type    MapByHashedIdType;
-    typedef  typename MapType::template index<by_ordered_id>::type   MapByOrderedIdType;
+    typedef  typename MapType::index<by_insertion>::type    MapByInsertionType;
+    typedef  typename MapType::index<by_hashed_id>::type    MapByHashedIdType;
+    typedef  typename MapType::index<by_ordered_id>::type   MapByOrderedIdType;
     MapByHashedIdType & m_mapByHashedId;
     MapByInsertionType & m_mapByInsertion;
     MapByOrderedIdType & m_mapByOrderedId;
@@ -62,9 +64,9 @@ private:
 public:
 
      RigidBodyContainer():
-        m_mapByHashedId(m_map.template get<by_hashed_id>()),
-        m_mapByInsertion( m_map.template get<by_insertion>()),
-        m_mapByOrderedId( m_map.template get<by_ordered_id>())
+        m_mapByHashedId(m_map.get<by_hashed_id>()),
+        m_mapByInsertion( m_map.get<by_insertion>()),
+        m_mapByOrderedId( m_map.get<by_ordered_id>())
     {}
 
     typedef typename MapByInsertionType::iterator iterator;
@@ -120,11 +122,11 @@ public:
 
     iterator find(RigidBodyIdType id){
         typename MapByHashedIdType::iterator it = m_mapByHashedId.find(id);
-        return m_map.template project<by_insertion>(it);
+        return m_map.project<by_insertion>(it);
     }
     iterator find(RigidBodyType * body){
         typename MapByHashedIdType::iterator it = m_mapByHashedId.find(body->m_id);
-        return m_map.template project<by_insertion>(it);
+        return m_map.project<by_insertion>(it);
     }
 
     void clear(){

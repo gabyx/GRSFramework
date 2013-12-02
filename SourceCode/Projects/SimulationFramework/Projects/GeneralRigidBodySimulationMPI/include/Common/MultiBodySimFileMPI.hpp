@@ -36,7 +36,7 @@ public:
 
     inline void write(double time, const std::vector<char> & bytes, unsigned int nBodies);
 
-    inline void write(double time, const RigidBodyContainer<RigidBodyType> & bodyList);
+    inline void write(double time, const RigidBodyContainer & bodyList);
 
 
     std::string getErrorString() {
@@ -151,7 +151,7 @@ void MultiBodySimFileMPI<TDynamicsSystemType>::close(){
 
 
 template <typename TDynamicsSystemType>
-void MultiBodySimFileMPI<TDynamicsSystemType>::write(double time, const RigidBodyContainer<RigidBodyType> & bodyList){
+void MultiBodySimFileMPI<TDynamicsSystemType>::write(double time, const RigidBodyContainer & bodyList){
 
     //writeBySharedPtr(time, bodyList);
     writeByOffsets(time, bodyList);

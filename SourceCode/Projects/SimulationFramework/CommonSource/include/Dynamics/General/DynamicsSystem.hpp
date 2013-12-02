@@ -51,7 +51,7 @@ public:
     GlobalGeometryMapType m_globalGeometries;
 
     // All RigidBodies which are owned by this class!
-    typedef RigidBodyContainer<RigidBodyType> RigidBodySimContainerType;
+    typedef RigidBodyContainer RigidBodySimContainerType;
     RigidBodySimContainerType m_SimBodies;    // Simulated Objects
     typedef RigidBodySimContainerType RigidBodyNotAniContainer;
     RigidBodyNotAniContainer m_Bodies;    // all not simulated objects

@@ -57,7 +57,7 @@ class GetScaleOfGeomVisitor : public boost::static_visitor<>{
 
     GetScaleOfGeomVisitor(Vector3 & scale): m_scale(scale){};
 
-    void operator()(  boost::shared_ptr<const SphereGeometry<PREC> >  & sphereGeom ){
+    void operator()(  boost::shared_ptr<const SphereGeometry >  & sphereGeom ){
         m_scale.setConstant(sphereGeom->m_radius);
     }
     void operator()(  boost::shared_ptr<const BoxGeometry >  & boxGeom){
@@ -690,7 +690,7 @@ protected:
             scale(1)=radius;
             scale(2)=radius;
 
-            boost::shared_ptr<SphereGeometry<PREC> > pSphereGeom = boost::shared_ptr<SphereGeometry<PREC> >(new SphereGeometry<PREC>(radius));
+            boost::shared_ptr<SphereGeometry > pSphereGeom = boost::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
 
             if(addToGlobalGeoms){
                 unsigned int id;
@@ -757,7 +757,7 @@ protected:
 
                     for(int i = id; i < id + instances;i++){
                         double radius = randomNumber();
-                        boost::shared_ptr<SphereGeometry<PREC> > pSphereGeom = boost::shared_ptr<SphereGeometry<PREC> >(new SphereGeometry<PREC>(radius));
+                        boost::shared_ptr<SphereGeometry > pSphereGeom = boost::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
                         addToGlobalGeomList(i, pSphereGeom);
                     }
             }else{
@@ -770,7 +770,7 @@ protected:
                     scale(1)=radius;
                     scale(2)=radius;
                     m_bodyListScales[i] = scale;
-                    boost::shared_ptr<SphereGeometry<PREC> > pSphereGeom = boost::shared_ptr<SphereGeometry<PREC> >(new SphereGeometry<PREC>(radius));
+                    boost::shared_ptr<SphereGeometry > pSphereGeom = boost::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
                     m_bodyList[i]->m_geometry = pSphereGeom;
 
                 }

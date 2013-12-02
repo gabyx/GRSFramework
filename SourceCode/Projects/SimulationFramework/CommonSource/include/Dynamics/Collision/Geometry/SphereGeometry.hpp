@@ -3,9 +3,9 @@
 
 #include <boost/serialization/access.hpp>
 
-template<class PREC>
 class SphereGeometry {
 public:
+    DEFINE_MATRIX_TYPES
 
     SphereGeometry(PREC r) : m_radius(r){};
     SphereGeometry(): m_radius(0){};

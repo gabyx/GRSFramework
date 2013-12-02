@@ -30,16 +30,16 @@
 * @brief This is the StateRecorder class which records each body's states to one MultiBodySimFile.
 * @{
 */
-template <typename TDynamicsSystemType>
+
 class StateRecorderBody {
 public:
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     StateRecorderBody(bool logWriteAccess = false, unsigned int id = 0);
     ~StateRecorderBody();
 
-    void write(PREC time, const typename TDynamicsSystemType::RigidBodySimContainerType & body_list);
+    void write(PREC time, const typename DynamicsSystemType::RigidBodySimContainerType & body_list);
 
     // Functions which are used for a delegate in other classes
     void addBody(RigidBodyType * body);
@@ -47,7 +47,7 @@ public:
 
     void setDirectoryPath(boost::filesystem::path dir_path);
 
-    bool createSimFiles(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list, bool truncate = false);
+    bool createSimFiles(const typename DynamicsSystemType::RigidBodySimContainerType & body_list, bool truncate = false);
     bool createSimFile(RigidBodyType * body, bool truncate);
     bool closeSimFile(RigidBodyType * body);
 
@@ -57,8 +57,8 @@ protected:
 
     boost::filesystem::path m_directoryPath; ///< The path where the sim body files are opened!
 
-    void getSimBodyFileName(typename TDynamicsSystemType::RigidBodyType *body, std::stringstream & s);
-    void getSimBodyLogFileName(typename TDynamicsSystemType::RigidBodyType *body, std::stringstream & s);
+    void getSimBodyFileName(typename DynamicsSystemType::RigidBodyType *body, std::stringstream & s);
+    void getSimBodyLogFileName(typename DynamicsSystemType::RigidBodyType *body, std::stringstream & s);
 
     Logging::Log * m_pSimulationLog;
     typedef boost::unordered_map< typename RigidBodyType::RigidBodyIdType, MultiBodySimFile* > FileMap;
@@ -78,8 +78,7 @@ protected:
 
 
 
-template<typename TDynamicsSystemType>
-StateRecorderBody<TDynamicsSystemType>::StateRecorderBody(bool logWriteAccess, unsigned int id) {
+StateRecorderBody::StateRecorderBody(bool logWriteAccess, unsigned int id) {
 
     m_logWriteAccess = logWriteAccess;
     m_accessId = id;
@@ -103,20 +102,20 @@ StateRecorderBody<TDynamicsSystemType>::StateRecorderBody(bool logWriteAccess, u
 
 }
 
-template<typename TDynamicsSystemType>
-StateRecorderBody<TDynamicsSystemType>::~StateRecorderBody() {
+
+StateRecorderBody::~StateRecorderBody() {
     DECONSTRUCTOR_MESSAGE
     closeAll();
 }
 
-template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::setDirectoryPath(boost::filesystem::path dir_path){
+
+void StateRecorderBody::setDirectoryPath(boost::filesystem::path dir_path){
     m_directoryPath = dir_path;
 }
 
 
-template<typename TDynamicsSystemType>
-bool StateRecorderBody<TDynamicsSystemType>::createSimFile(RigidBodyType * body, bool truncate){
+
+bool StateRecorderBody::createSimFile(RigidBodyType * body, bool truncate){
     boost::filesystem::path file;
     std::stringstream s;
 
@@ -192,8 +191,8 @@ bool StateRecorderBody<TDynamicsSystemType>::createSimFile(RigidBodyType * body,
     return true;
 }
 
-template<typename TDynamicsSystemType>
-bool StateRecorderBody<TDynamicsSystemType>::createSimFiles(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list,
+
+bool StateRecorderBody::createSimFiles(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list,
                                                        bool truncate)
 {
     // For every body add a Sim File!
@@ -209,22 +208,22 @@ bool StateRecorderBody<TDynamicsSystemType>::createSimFiles(const typename TDyna
     return true;
 }
 
-template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::getSimBodyFileName(typename TDynamicsSystemType::RigidBodyType *body,
+
+void StateRecorderBody::getSimBodyFileName(typename TDynamicsSystemType::RigidBodyType *body,
                                                                 std::stringstream & s){
     s.str("");
     s <<"SimDataBody" <<"-"<<RigidBodyId::getGroupNr(body)<<"-"<< RigidBodyId::getBodyNr(body)<<SIM_FILE_EXTENSION;
 }
 
-template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::getSimBodyLogFileName(typename TDynamicsSystemType::RigidBodyType *body,
+
+void StateRecorderBody::getSimBodyLogFileName(typename TDynamicsSystemType::RigidBodyType *body,
                                                                 std::stringstream & s){
     s.str("");
     s <<"SimDataBody" <<"-"<<RigidBodyId::getGroupNr(body)<<"-"<< RigidBodyId::getBodyNr(body)<<"-Access"<< SIM_FILE_ACCESS_LOG_EXTENSION;
 }
 
-template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::write(PREC time, const typename
+
+void StateRecorderBody::write(PREC time, const typename
                                                          TDynamicsSystemType::RigidBodySimContainerType & body_list){
 
     typename TDynamicsSystemType::RigidBodySimContainerType::const_iterator it;
@@ -258,8 +257,8 @@ void StateRecorderBody<TDynamicsSystemType>::write(PREC time, const typename
 }
 
 
-template<typename TDynamicsSystemType>
-bool StateRecorderBody<TDynamicsSystemType>::closeSimFile(RigidBodyType * body){
+
+bool StateRecorderBody::closeSimFile(RigidBodyType * body){
 
     typename FileMap::iterator it = m_BinarySimFiles.find(body->m_id);
 
@@ -291,8 +290,8 @@ bool StateRecorderBody<TDynamicsSystemType>::closeSimFile(RigidBodyType * body){
 }
 
 
-template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::closeAll() {
+
+void StateRecorderBody::closeAll() {
 
     typename FileMap::iterator it;
 
@@ -311,16 +310,16 @@ void StateRecorderBody<TDynamicsSystemType>::closeAll() {
     }
 }
 
-template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::addBody(RigidBodyType * body) {
+
+void StateRecorderBody::addBody(RigidBodyType * body) {
     LOG(m_pSimulationLog, "---> StateRecorderBody:: Add body with id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
     bool res = createSimFile(body, false); // no truncate!
     LOGASSERTMSG(res, m_pSimulationLog, "---> StateRecorderBody:: Add body with id: " << RigidBodyId::getBodyIdString(body) <<"failed!"
             << ", StateRecorderBody has " << m_BinarySimFiles.size() + m_LogSimFiles.size() << " files open currently!"
             );
 }
-template<typename TDynamicsSystemType>
-void StateRecorderBody<TDynamicsSystemType>::removeBody(RigidBodyType * body) {
+
+void StateRecorderBody::removeBody(RigidBodyType * body) {
     LOG(m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
     bool res = closeSimFile(body);
     LOGASSERTMSG(res, m_pSimulationLog, "---> StateRecorderBody:: Remove body with id: " << RigidBodyId::getBodyIdString(body) <<"failed!"

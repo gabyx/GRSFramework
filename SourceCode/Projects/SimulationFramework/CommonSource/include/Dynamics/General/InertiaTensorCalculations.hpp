@@ -27,7 +27,7 @@ namespace InertiaTensor{
         }
 
 
-        void operator()(boost::shared_ptr<const SphereGeometry<PREC> > & sphereGeom)  {
+        void operator()(boost::shared_ptr<const SphereGeometry > & sphereGeom)  {
             m_rigidBody->m_K_Theta_S(0) = 2.0/5.0 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
             m_rigidBody->m_K_Theta_S(1) = 2.0/5.0 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
             m_rigidBody->m_K_Theta_S(2) = 2.0/5.0 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);

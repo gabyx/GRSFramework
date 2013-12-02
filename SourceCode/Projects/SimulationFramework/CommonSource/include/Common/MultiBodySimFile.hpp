@@ -88,8 +88,7 @@ public:
     /**
     * @brief Operator to write all states of the bodies to the file, writes position and velocity!
     */
-    template<typename TRigidBody>
-    inline void write(double time, const RigidBodyContainer<TRigidBody> & bodyList);
+    inline void write(double time, const RigidBodyContainer & bodyList);
 
     /**
     * @brief Operator to write a state to the file, writes position and velocity!
@@ -221,12 +220,11 @@ MultiBodySimFile & MultiBodySimFile::operator>>( T &value ) {
 };
 
 
-template<typename TRigidBody>
-void MultiBodySimFile::write(double time, const RigidBodyContainer<TRigidBody> & bodyList){
+void MultiBodySimFile::write(double time, const RigidBodyContainer & bodyList){
     *this << time;
     ASSERTMSG(m_nSimBodies == bodyList.size(),"You try to write "<<bodyList.size()
               <<"bodies into a file which was instanced to hold "<<m_nSimBodies);
-    STATIC_ASSERT2((std::is_same<double, typename TRigidBody::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
+    STATIC_ASSERT2((std::is_same<double, typename RigidBodyContainer::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
     for(auto it = bodyList.beginOrdered(); it != bodyList.endOrdered(); it++){
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());

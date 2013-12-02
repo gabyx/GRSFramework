@@ -30,7 +30,6 @@
 template <typename TDynamicsSystemType>
 class StateRecorderProcess {
 public:
-    typedef TDynamicsSystemType DynamicsSystemType;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 

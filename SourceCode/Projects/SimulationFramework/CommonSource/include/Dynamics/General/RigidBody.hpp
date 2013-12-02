@@ -93,7 +93,7 @@ public:
     unsigned int m_globalGeomId; ///< The Id for the global geometry, if this is 0 then the geometry belongs to the body and gets deallocated, otherwise not
 
     typedef boost::variant<
-      boost::shared_ptr<const SphereGeometry<PREC> >,
+      boost::shared_ptr<const SphereGeometry >,
       boost::shared_ptr<const HalfspaceGeometry > ,
       boost::shared_ptr<const BoxGeometry >,
       boost::shared_ptr<const MeshGeometry >

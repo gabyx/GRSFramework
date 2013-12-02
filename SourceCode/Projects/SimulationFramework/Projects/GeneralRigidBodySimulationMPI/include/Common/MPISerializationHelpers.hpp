@@ -47,7 +47,7 @@ namespace serialization {
     }
 
     template<class Archive, typename PREC>
-    void serialize(Archive & ar, SphereGeometry<PREC> & g, const unsigned int version) {
+    void serialize(Archive & ar, SphereGeometry & g, const unsigned int version) {
 
         ar & g.m_radius;
 
