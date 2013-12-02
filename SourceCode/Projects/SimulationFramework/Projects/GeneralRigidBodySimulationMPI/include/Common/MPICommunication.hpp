@@ -121,15 +121,12 @@ private:
 };
 
 
-template<typename TDynamicsSystem>
 class ProcessCommunicator {
 public:
 
-    typedef typename TDynamicsSystem::DynamicsSystemConfig DynamicsSystemConfig;
-    typedef TDynamicsSystem DynamicsSystemType;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef MPILayer::ProcessInformation<DynamicsSystemType> ProcessInfoType;
+    typedef MPILayer::ProcessInformation ProcessInfoType;
     typedef typename ProcessInfoType::RankIdType RankIdType;
 
     ProcessCommunicator():
@@ -183,8 +180,8 @@ private:
     std::vector<MPI_Status>                       m_sendStatuses;
 };
 
-template<typename TDynamicsSystem>
-void ProcessCommunicator<TDynamicsSystem>::initializeBuffers() {
+
+void ProcessCommunicator::initializeBuffers() {
     if( ! m_pProcessInfo->getProcTopo() ){
         ERRORMSG("initializeBuffers:: ProcessTopology is not created!")
     }else{
@@ -209,9 +206,9 @@ void ProcessCommunicator<TDynamicsSystem>::initializeBuffers() {
     }
 }
 
-template<typename TDynamicsSystem>
+
 template<typename T>
-void ProcessCommunicator<TDynamicsSystem>::sendBroadcast(const T & t, MPI_Comm comm) {
+void ProcessCommunicator::sendBroadcast(const T & t, MPI_Comm comm) {
 
 
     m_binary_message.clear();
@@ -226,9 +223,9 @@ void ProcessCommunicator<TDynamicsSystem>::sendBroadcast(const T & t, MPI_Comm c
     ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcastT2 failed!");
 };
 
-template<typename TDynamicsSystem>
+
 template<typename T>
-void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(T & t, RankIdType rank, MPI_Comm comm) {
+void ProcessCommunicator::receiveBroadcast(T & t, RankIdType rank, MPI_Comm comm) {
 
     int message_length;
 
@@ -241,8 +238,8 @@ void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(T & t, RankIdType ra
     m_binary_message >> t;
 };
 
-template<typename TDynamicsSystem>
-void ProcessCommunicator<TDynamicsSystem>::sendBroadcast(const std::string & t, MPI_Comm comm) {
+
+void ProcessCommunicator::sendBroadcast(const std::string & t, MPI_Comm comm) {
     int size = t.size();
     int error = MPI_Bcast(&(size), 1 , MPI_INT, m_pProcessInfo->getRank(), comm); // First send size, because we cannot probe on the other side!! Collective Communication
     ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcast1 failed!");
@@ -250,8 +247,8 @@ void ProcessCommunicator<TDynamicsSystem>::sendBroadcast(const std::string & t, 
     ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcast2 failed!");
 };
 
-template<typename TDynamicsSystem>
-void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(std::string & t, RankIdType rank, MPI_Comm comm) {
+
+void ProcessCommunicator::receiveBroadcast(std::string & t, RankIdType rank, MPI_Comm comm) {
 
     int message_length;
 
@@ -259,14 +256,14 @@ void ProcessCommunicator<TDynamicsSystem>::receiveBroadcast(std::string & t, Ran
     ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcast1 failed!");
     t.resize(message_length);
 
-    error = MPI_Bcast(t.data(), t.size() , MPI_CHAR, rank, comm);
+    error = MPI_Bcast(const_cast<char*>(t.data()), t.size() , MPI_CHAR, rank, comm);
     ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcast2 failed!");
     m_binary_message >> t;
 };
 
-template<typename TDynamicsSystem>
+
 template<typename T>
-void ProcessCommunicator<TDynamicsSystem>::sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag,  MPI_Comm comm){
+void ProcessCommunicator::sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag,  MPI_Comm comm){
 
     auto it = m_sendMessageBuffers.find(rank);
     ASSERTMSG(it != m_sendMessageBuffers.end(),"No buffer for this rank!, Did you call initializeBuffers" );
@@ -284,9 +281,9 @@ void ProcessCommunicator<TDynamicsSystem>::sendMessageToRank(const T & t, RankId
     ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToRank failed!");
 };
 
-template<typename TDynamicsSystem>
+
 template<typename T, typename List>
-void ProcessCommunicator<TDynamicsSystem>::receiveMessageFromRanks(T & t,
+void ProcessCommunicator::receiveMessageFromRanks(T & t,
                                                                    const List & ranks,
                                                                    MPIMessageTag tag,  MPI_Comm comm){
 

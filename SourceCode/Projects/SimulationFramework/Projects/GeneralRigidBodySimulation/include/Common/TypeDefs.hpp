@@ -22,7 +22,7 @@ class RigidBodySolverDataCONoG;
 class RigidBodySolverDataNone;
 class MoreauTimeStepper;
 
-#define StatePool_INCLUDE_FILE "StatePoolVisBackFront.hpp"
+
 #define RigidBody_INCLUDE_FILE "RigidBody.hpp"
 #define TimeStepper_INCLUDE_FILE "MoreauTimeStepper.hpp"
 #define DynamicsSystem_INCLUDE_FILE "DynamicsSystem.hpp"
@@ -31,7 +31,7 @@ class MoreauTimeStepper;
 #define StatePool_INCLUDE_FILE "StatePoolVisBackFront.hpp"
 
 //Try to make framework settings simpler:
-namespace GlobalDefs{
+namespace GlobalConfigs{
 
     namespace MyConfigs{
         typedef RigidBodyBase           RigidBodyType;
@@ -74,39 +74,39 @@ namespace GlobalDefs{
    DEFINE_SOLVER_CONFIG_TYPES \
 
 #define DEFINE_SOLVER_CONFIG_TYPES \
-   typedef typename GlobalDefs::SolverConfigs::TimeStepperType TimeStepperType; \
+   typedef typename GlobalConfigs::SolverConfigs::TimeStepperType TimeStepperType; \
    DEFINE_TIMESTEPPER_CONFIG_TYPES \
 
 #define DEFINE_TIMESTEPPER_CONFIG_TYPES \
-   typedef typename GlobalDefs::TimeStepperConfigs::StatePoolType          StatePoolType;                 \
-   typedef typename GlobalDefs::TimeStepperConfigs::InclusionSolverType     InclusionSolverType;                 \
-   typedef typename GlobalDefs::TimeStepperConfigs::CollisionSolverType     CollisionSolverType;                 \
+   typedef typename GlobalConfigs::TimeStepperConfigs::StatePoolType          StatePoolType;                 \
+   typedef typename GlobalConfigs::TimeStepperConfigs::InclusionSolverType     InclusionSolverType;                 \
+   typedef typename GlobalConfigs::TimeStepperConfigs::CollisionSolverType     CollisionSolverType;                 \
    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
 
 #define DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES \
-    typedef typename GlobalDefs::TimeStepperConfigs::CollisionSolverType     CollisionSolverType;                 \
+    typedef typename GlobalConfigs::TimeStepperConfigs::CollisionSolverType     CollisionSolverType;                 \
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
 
 #define DEFINE_COLLISION_SOLVER_CONFIG_TYPES \
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
 
 #define DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
-    typedef typename GlobalDefs::TimeStepperConfigs::DynamicsSystemType     DynamicsSystemType; \
+    typedef typename GlobalConfigs::TimeStepperConfigs::DynamicsSystemType     DynamicsSystemType; \
     DEFINE_RIGIDBODY_CONFIG_TYPES \
 
 
 #define DEFINE_RIGIDBODY_CONFIG_TYPES \
-    typedef typename GlobalDefs::DynamicSystemConfigs::RigidBodyType RigidBodyType; \
-    typedef typename GlobalDefs::RigidBodyConfigs::RigidBodySolverDataType RigidBodySolverDataType; \
+    typedef typename GlobalConfigs::DynamicSystemConfigs::RigidBodyType RigidBodyType; \
+    typedef typename GlobalConfigs::RigidBodyConfigs::RigidBodySolverDataType RigidBodySolverDataType; \
     DEFINE_LAYOUT_CONFIG_TYPES\
 
 #define DEFINE_LAYOUT_CONFIG_TYPES \
-    typedef typename GlobalDefs::RigidBodyConfigs::LayoutConfigType LayoutConfigType; \
-    DEFINE_LAYOUT_CONFIG_TYPES_OF( GlobalDefs::RigidBodyConfigs::LayoutConfigType )
+    typedef typename GlobalConfigs::RigidBodyConfigs::LayoutConfigType LayoutConfigType; \
+    DEFINE_LAYOUT_CONFIG_TYPES_OF( GlobalConfigs::RigidBodyConfigs::LayoutConfigType )
 
 #define DEFINE_MATRIX_TYPES \
-    typedef typename GlobalDefs::RigidBodyConfigs::LayoutConfigType::PREC PREC; \
-    DEFINE_MATRIX_TYPES_OF( GlobalDefs::RigidBodyConfigs::LayoutConfigType::PREC )
+    typedef typename GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC PREC; \
+    DEFINE_MATRIX_TYPES_OF( GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC )
 
 struct MyIOFormat{
   static Eigen::IOFormat Matlab;

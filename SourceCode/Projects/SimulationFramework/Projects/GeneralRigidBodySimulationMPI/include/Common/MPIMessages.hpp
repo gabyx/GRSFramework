@@ -102,8 +102,7 @@ public:
 
 
     typedef TNeighbourCommunicator NeighbourCommunicatorType;
-    typedef typename NeighbourCommunicatorType::DynamicsSystemType DynamicsSystemType;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(NeighbourCommunicatorType::DynamicsSystemConfig);
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
 

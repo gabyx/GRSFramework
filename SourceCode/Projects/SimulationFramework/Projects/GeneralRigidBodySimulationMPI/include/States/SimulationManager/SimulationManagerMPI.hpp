@@ -14,16 +14,18 @@
 #include "MPIInformation.hpp"
 #include "MPICommunication.hpp"
 
-template <typename TDynamicsSystemType> class StateRecorder;
-template <typename TDynamicsSystemType> class StateRecorderBody;
-template <typename TDynamicsSystemType> class StateRecorderProcess;
-template <typename TDynamicsSystemType> class StateRecorderMPI;
+#include "NeighbourCommunicator.hpp"
 
-template<typename TConfig>
+class StateRecorder;
+class StateRecorderBody;
+class StateRecorderProcess;
+class StateRecorderMPI;
+
+
 class SimulationManagerMPI {
 public:
 
-    DEFINE_CONFIG_TYPES_OF(TConfig)
+    DEFINE_CONFIG_TYPES
 
     SimulationManagerMPI();
     ~SimulationManagerMPI();
@@ -40,7 +42,7 @@ private:
 
     unsigned int m_nSimBodies, m_nGlobalSimBodies;
 
-    RecorderSettings<LayoutConfigType> m_RecorderSettings;
+    RecorderSettings m_RecorderSettings;
 
     // File Paths for one Simulation, always reset ==============================
     boost::filesystem::path m_SimFolderPath;
@@ -53,19 +55,19 @@ private:
     Logging::Log *  m_pSimulationLog;
 
     //typedef StateRecorderBody<DynamicsSystemType> StateRecorderType;
-    typedef StateRecorderMPI<DynamicsSystemType> StateRecorderType;
+    typedef StateRecorderMPI StateRecorderType;
     // ===============================================
 
     boost::shared_ptr< StateRecorderType >   m_pStateRecorder;
 
-    boost::shared_ptr< SceneParserMPI<TConfig> > m_pSceneParser;
+    boost::shared_ptr< SceneParserMPI > m_pSceneParser;
 
     boost::shared_ptr< TimeStepperType >	m_pTimestepper;
     boost::shared_ptr< DynamicsSystemType > m_pDynSys;
-    boost::shared_ptr< NeighbourCommunicator<DynamicsSystemType> > m_pNbCommunicator;
+    boost::shared_ptr< NeighbourCommunicator > m_pNbCommunicator;
 
-    typedef typename MPILayer::ProcessCommunicator<DynamicsSystemType>::ProcessInfoType ProcessInfoType;
-    boost::shared_ptr< MPILayer::ProcessCommunicator<DynamicsSystemType> > m_pProcCommunicator;
+    typedef typename MPILayer::ProcessCommunicator::ProcessInfoType ProcessInfoType;
+    boost::shared_ptr< MPILayer::ProcessCommunicator > m_pProcCommunicator;
 
     void writeAllOutput();
 

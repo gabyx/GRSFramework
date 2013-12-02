@@ -33,28 +33,28 @@ void serializeEigen(Archive & ar, const Eigen::EigenBase<Derived> & gc) {
 namespace boost {
 namespace serialization {
 
-    template<class Archive, typename PREC>
-    void serialize(Archive & ar, BoxGeometry<PREC> & g, const unsigned int version) {
+    template<class Archive>
+    void serialize(Archive & ar, BoxGeometry & g, const unsigned int version) {
         serializeEigen(ar,g.m_extent);
         serializeEigen(ar,g.m_center);
     }
 
-    template<class Archive, typename PREC>
-    void serialize(Archive & ar, HalfspaceGeometry<PREC> & g, const unsigned int version) {
+    template<class Archive>
+    void serialize(Archive & ar, HalfspaceGeometry & g, const unsigned int version) {
 
         serializeEigen(ar,g.m_normal);
         serializeEigen(ar,g.m_pos);
     }
 
-    template<class Archive, typename PREC>
+    template<class Archive>
     void serialize(Archive & ar, SphereGeometry & g, const unsigned int version) {
 
         ar & g.m_radius;
 
     }
 
-    template<class Archive, typename PREC>
-    void serialize(Archive & ar, MeshGeometry<PREC> & g, const unsigned int version) {
+    template<class Archive>
+    void serialize(Archive & ar, MeshGeometry & g, const unsigned int version) {
         ERRORMSG("No implementation for MeshGeometry serialization!");
     }
 

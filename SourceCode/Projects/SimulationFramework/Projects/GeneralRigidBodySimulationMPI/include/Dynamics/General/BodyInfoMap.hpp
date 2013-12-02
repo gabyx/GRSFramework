@@ -1,12 +1,13 @@
 #ifndef BodyInfoMap_hpp
 #define BodyInfoMap_hpp
 
+#include "TypeDefs.hpp"
 
-template<typename TRigidBody, typename TRankId>
 class BodyProcessInfo{
 public:
-        typedef TRankId RankIdType;
-        typedef TRigidBody RigidBodyType;
+
+        DEFINE_RIGIDBODY_CONFIG_TYPES
+        DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
         BodyProcessInfo(RigidBodyType *body,
                         RankIdType ownRank,
@@ -62,19 +63,15 @@ public:
 
 
 
-
-template<typename TDynamicsSystem, typename TRankId>
 class BodyInfoMap {
 public:
 
-    typedef typename TDynamicsSystem::DynamicsSystemConfig DynamicsSystemConfig;
-    typedef TDynamicsSystem DynamicsSystemType;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef TRankId RankIdType;
+    DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     // BodyInfoMap data definitions
-    typedef BodyProcessInfo<RigidBodyType,RankIdType> DataType;
+    typedef BodyProcessInfo DataType;
     typedef std::map<RankIdType, DataType *> Type;
     typedef typename Type::iterator iterator;
 

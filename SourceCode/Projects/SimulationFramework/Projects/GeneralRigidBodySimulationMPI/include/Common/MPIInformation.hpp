@@ -14,17 +14,16 @@
 
 namespace MPILayer {
 
-template<typename TDynamicsSystem>
+
 class ProcessInformation {
 
 public:
 
-    typedef typename TDynamicsSystem::DynamicsSystemConfig DynamicsSystemConfig;
-    typedef TDynamicsSystem DynamicsSystemType;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef unsigned int RankIdType;
-    typedef typename MPILayer::ProcessTopology<DynamicsSystemType,RankIdType> ProcessTopologyType;
+    DEFINE_MPI_INFORMATION_CONFIG_TYPES
+
+    typedef typename MPILayer::ProcessTopology ProcessTopologyType;
 
     static const int MASTER_RANK = 0;
 
@@ -78,7 +77,7 @@ public:
         if(m_pProcTopo){
             delete m_pProcTopo;
         }
-        m_pProcTopo = new MPILayer::ProcessTopologyGrid<DynamicsSystemType,RankIdType>(minPoint,maxPoint,dim, getRank() );
+        m_pProcTopo = new MPILayer::ProcessTopologyGrid(minPoint,maxPoint,dim, getRank(), MPILayer::ProcessInformation::MASTER_RANK  );
     }
 
     ProcessTopologyType * getProcTopo() const{

@@ -15,12 +15,13 @@
 
 #include "AddGyroTermVisitor.hpp"
 #include "InitialConditionBodies.hpp"
-#include "InclusionSolverSettings.hpp"
+
 #include "CommonFunctions.hpp"
 
 #include "ExternalForces.hpp"
 
 #include "RecorderSettings.hpp"
+#include "InclusionSolverSettings.hpp"
 #include "TimeStepperSettings.hpp"
 
 #include "SimpleLogger.hpp"

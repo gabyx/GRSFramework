@@ -10,20 +10,17 @@
 #include <boost/shared_ptr.hpp>
 
 
-#include "RigidBodyGarbageCollector.hpp"
 #include "BodyInfoMap.hpp"
 #include "NeighbourMap.hpp"
 
 #include "MPIMessages.hpp"
 #include "MPICommunication.hpp"
 
-template< typename TRigidBody>
+
 class RigidBodyAddRemoveNotificator {
 public:
 
-    typedef TRigidBody RigidBodyType;
-    typedef typename RigidBodyType::LayoutConfigType LayoutConfigType;
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType)
+    DEFINE_RIGIDBODY_CONFIG_TYPES
 
     RigidBodyAddRemoveNotificator() {
         m_LocalNotifyAddList.clear();
@@ -80,16 +77,12 @@ private:
 
 
 
-
-template<typename TDynamicsSystem>
-class NeighbourCommunicator: public RigidBodyAddRemoveNotificator<typename TDynamicsSystem::RigidBodyType> {
+class NeighbourCommunicator: public RigidBodyAddRemoveNotificator{;
 public:
 
-    typedef typename TDynamicsSystem::DynamicsSystemConfig              DynamicsSystemConfig;
-    typedef TDynamicsSystem DynamicsSystemType;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef typename MPILayer::ProcessCommunicator<DynamicsSystemType>                  ProcessCommunicatorType;
+    typedef typename MPILayer::ProcessCommunicator                                      ProcessCommunicatorType;
     typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
     typedef typename ProcessInfoType::RankIdType                                        RankIdType;
     typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
@@ -97,8 +90,8 @@ public:
     typedef typename DynamicsSystemType::RigidBodySimContainerType                      RigidBodyContainerType;
     typedef typename DynamicsSystemType::GlobalGeometryMapType                          GlobalGeometryMapType;
 
-    typedef BodyInfoMap<DynamicsSystemType,RankIdType>                         BodyInfoMapType;
-    typedef NeighbourMap<DynamicsSystemType, BodyInfoMapType>                           NeighbourMapType;
+    typedef BodyInfoMap                       BodyInfoMapType;
+    typedef NeighbourMap<BodyInfoMapType>     NeighbourMapType;
 
     NeighbourCommunicator(boost::shared_ptr< DynamicsSystemType> pDynSys ,
                           boost::shared_ptr< ProcessCommunicatorType > pProcCom);
@@ -136,7 +129,7 @@ private:
     void printAllNeighbourRanks();
 
     PREC m_currentSimTime;
-    MPILayer::NeighbourMessageWrapper< NeighbourCommunicator<TDynamicsSystem> > m_message;
+    MPILayer::NeighbourMessageWrapper< NeighbourCommunicator > m_message;
 
     boost::shared_ptr< DynamicsSystemType> m_pDynSys;
     boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
@@ -164,8 +157,8 @@ private:
 
 };
 
-template<typename TDynamicsSystem>
-NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  boost::shared_ptr< DynamicsSystemType> pDynSys ,
+
+NeighbourCommunicator::NeighbourCommunicator(  boost::shared_ptr< DynamicsSystemType> pDynSys ,
                                                                 boost::shared_ptr< ProcessCommunicatorType > pProcCom):
             m_pDynSys(pDynSys),
             m_globalLocal(pDynSys->m_SimBodies),
@@ -211,8 +204,8 @@ NeighbourCommunicator<TDynamicsSystem>::NeighbourCommunicator(  boost::shared_pt
     m_pSimulationLog->logMessage("---> Initialized NeighbourCommunicator");
 }
 
-template<typename TDynamicsSystem>
-void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
+
+void NeighbourCommunicator::communicate(PREC currentSimTime){
     LOGNC(m_pSimulationLog,"---> Communicate: Send and Receive message from/to neighbours, t = "<<currentSimTime<< std::endl;)
 
     m_currentSimTime = currentSimTime;
@@ -286,8 +279,8 @@ void NeighbourCommunicator<TDynamicsSystem>::communicate(PREC currentSimTime){
 
 }
 
-template<typename TDynamicsSystem>
-bool NeighbourCommunicator<TDynamicsSystem>::checkReceiveForRemotes(){
+
+bool NeighbourCommunicator::checkReceiveForRemotes(){
     bool m_ok = true;
     for(auto it = m_globalRemote.begin(); it != m_globalRemote.end(); it++){
         typename BodyInfoMapType::DataType * bodyInfoPtr = m_bodyToInfo.getBodyInfo( (*it) );
@@ -305,8 +298,8 @@ bool NeighbourCommunicator<TDynamicsSystem>::checkReceiveForRemotes(){
 }
 
 
-template<typename TDynamicsSystem>
-void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
+
+void NeighbourCommunicator::sendMessagesToNeighbours(){
     LOGNC(m_pSimulationLog,"MPI>\t Send messages to neighbours!"<<std::endl;)
     m_localBodiesToDelete.clear();
 
@@ -319,8 +312,8 @@ void NeighbourCommunicator<TDynamicsSystem>::sendMessagesToNeighbours(){
     LOGNC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
 
-template<typename TDynamicsSystem>
-void NeighbourCommunicator<TDynamicsSystem>::receiveMessagesFromNeighbours(){
+
+void NeighbourCommunicator::receiveMessagesFromNeighbours(){
     LOGNC(m_pSimulationLog,"MPI>\t Receive all messages from neighbours!"<<std::endl;)
     // set the rank of from the receiving message automatically! inside the function!
     m_pProcCom->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
@@ -328,8 +321,8 @@ void NeighbourCommunicator<TDynamicsSystem>::receiveMessagesFromNeighbours(){
 }
 
 
-template<typename TDynamicsSystem>
-void NeighbourCommunicator<TDynamicsSystem>::cleanUp(){
+
+void NeighbourCommunicator::cleanUp(){
     LOGNC(m_pSimulationLog,"--->\t CleanUp Routine " <<std::endl;)
     //Delete all bodies in the list
     for(auto it = m_localBodiesToDelete.begin(); it != m_localBodiesToDelete.end(); it++){
@@ -358,8 +351,8 @@ void NeighbourCommunicator<TDynamicsSystem>::cleanUp(){
 
 }
 
-template<typename TDynamicsSystem>
-void NeighbourCommunicator<TDynamicsSystem>::printAllNeighbourRanks(){
+
+void NeighbourCommunicator::printAllNeighbourRanks(){
     for(typename RigidBodyContainerType::iterator it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
         RigidBodyType * body = (*it);
 

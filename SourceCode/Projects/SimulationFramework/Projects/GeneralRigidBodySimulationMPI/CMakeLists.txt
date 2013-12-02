@@ -151,7 +151,9 @@ SET(DYNAMICS_SRC
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactParameterMap.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystem.cpp
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/General/DynamicsSystemMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/CollisionSolverMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoGMPI.cpp
 )
 
 

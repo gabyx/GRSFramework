@@ -30,9 +30,9 @@
 
 #include "SimpleLogger.hpp"
 
-#include "InclusionSolverCONoGMPI.hpp"
-#include "CollisionSolverMPI.hpp"
-#include "DynamicsSystemMPI.hpp"
+#include InclusionSolver_INCLUDE_FILE
+#include CollisionSolver_INCLUDE_FILE
+#include DynamicsSystem_INCLUDE_FILE
 
 #include "MPICommunication.hpp"
 #include "NeighbourCommunicator.hpp"
@@ -49,23 +49,22 @@
 class MoreauTimeStepper {
 public:
 
-    typedef TConfigTimeStepper TimeStepperConfigType;
-    DEFINE_TIMESTEPPER_CONFIG_TYPES_OF( TConfigTimeStepper )
+    DEFINE_TIMESTEPPER_CONFIG_TYPES
 
-    typedef typename MPILayer::ProcessCommunicator<DynamicsSystemType> ProcessCommunicatorType;
+    typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
     MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                      boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> > pNbCommunicator);
+                      boost::shared_ptr<NeighbourCommunicator > pNbCommunicator);
     ~MoreauTimeStepper();
 
     // The Core Objects ==================================
     boost::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
     boost::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
     boost::shared_ptr<DynamicsSystemType>	m_pDynSys;
-    boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> > m_pNbCommunicator;
+    boost::shared_ptr<NeighbourCommunicator > m_pNbCommunicator;
     // ===================================================
 
     void initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile="");
@@ -130,7 +129,7 @@ _________________________________________________________*/
 
 
 MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                                                           boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> > pNbCommunicator):
+                                     boost::shared_ptr<NeighbourCommunicator > pNbCommunicator):
     m_ReferenceSimFile(NDOFqObj,NDOFuObj) {
 
 

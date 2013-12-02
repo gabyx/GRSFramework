@@ -28,11 +28,11 @@
 * @brief This is the StateRecorder class which records each body's states to one process own MultiBodySimFilePart.
 * @{
 */
-template <typename TDynamicsSystemType>
+
 class StateRecorderMPI {
 public:
-    typedef TDynamicsSystemType DynamicsSystemType;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
+
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     StateRecorderMPI(unsigned int nSimBodies);
@@ -50,7 +50,7 @@ public:
 
 protected:
 
-    typedef MPILayer::ProcessInformation<DynamicsSystemType> ProcessInfoType;
+    typedef MPILayer::ProcessInformation ProcessInfoType;
     ProcessInfoType m_processInfo;
 
     boost::filesystem::path m_directoryPath; ///< The path where the sim body part file is opened!
@@ -60,7 +60,7 @@ protected:
     Logging::Log * m_pSimulationLog;
 
     unsigned int m_nSimBodies;
-    MultiBodySimFileMPI<DynamicsSystemType> m_fh;
+    MultiBodySimFileMPI m_fh;
 
     //Write buffer
     //std::vector<char> m_writebuffer;
@@ -74,8 +74,8 @@ protected:
 
 
 
-template<typename TDynamicsSystemType>
-StateRecorderMPI<TDynamicsSystemType>::StateRecorderMPI(unsigned int nSimBodies):
+
+StateRecorderMPI::StateRecorderMPI(unsigned int nSimBodies):
     m_fh(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj), m_nSimBodies(nSimBodies)
 //    ,m_ins(m_writebuffer),
 //    m_stream(m_ins),
@@ -126,20 +126,20 @@ StateRecorderMPI<TDynamicsSystemType>::StateRecorderMPI(unsigned int nSimBodies)
 
 }
 
-template<typename TDynamicsSystemType>
-StateRecorderMPI<TDynamicsSystemType>::~StateRecorderMPI() {
+
+StateRecorderMPI::~StateRecorderMPI() {
 
 
 
 }
 
-template<typename TDynamicsSystemType>
-void StateRecorderMPI<TDynamicsSystemType>::setDirectoryPath(boost::filesystem::path dir_path){
+
+void StateRecorderMPI::setDirectoryPath(boost::filesystem::path dir_path){
     m_directoryPath = dir_path;
 }
 
-template<typename TDynamicsSystemType>
-bool StateRecorderMPI<TDynamicsSystemType>::createSimFile(bool truncate){
+
+bool StateRecorderMPI::createSimFile(bool truncate){
 
     boost::filesystem::path file;
     std::stringstream s;
@@ -158,22 +158,22 @@ bool StateRecorderMPI<TDynamicsSystemType>::createSimFile(bool truncate){
     return true;
 }
 
-template<typename TDynamicsSystemType>
-void StateRecorderMPI<TDynamicsSystemType>::getSimBodyFileName(std::stringstream & s){
+
+void StateRecorderMPI::getSimBodyFileName(std::stringstream & s){
     s.str("");
     s <<"SimDataMPIUnordered"<<SIM_FILE_MPI_EXTENSION;
 }
 
-template<typename TDynamicsSystemType>
-void StateRecorderMPI<TDynamicsSystemType>::write(PREC time, const typename TDynamicsSystemType::RigidBodySimContainerType & bodyList){
+
+void StateRecorderMPI::write(PREC time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList){
 
     m_fh.write(time,bodyList);
 
 }
 
 
-template<typename TDynamicsSystemType>
-bool StateRecorderMPI<TDynamicsSystemType>::closeAll(){
+
+bool StateRecorderMPI::closeAll(){
    m_fh.close();
 }
 

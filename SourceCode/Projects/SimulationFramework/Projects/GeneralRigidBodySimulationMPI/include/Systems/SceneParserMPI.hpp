@@ -43,15 +43,15 @@
 * @Does not work yet, to implement a scene parser, implement everything starting from SimulationState, enter(), we exit the State, delete all Objects, and reinitialize with another system in XML format.
 *
 */
-template<typename TConfig>
-class SceneParserMPI : public SceneParser<TConfig> {
+
+class SceneParserMPI : public SceneParser {
 public:
 
-    DEFINE_CONFIG_TYPES_OF(TConfig)
+    DEFINE_CONFIG_TYPES
 
     SceneParserMPI(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                   boost::shared_ptr<MPILayer::ProcessCommunicator<DynamicsSystemType> > procComm)
-        : SceneParser<TConfig>(pDynSys), m_pProcCommunicator(procComm) {
+                   boost::shared_ptr<MPILayer::ProcessCommunicator > procComm)
+        : SceneParser(pDynSys), m_pProcCommunicator(procComm) {
         m_nGlobalSimBodies = 0;
     }
 
@@ -302,27 +302,27 @@ protected:
 
 
 
-    boost::shared_ptr< MPILayer::ProcessCommunicator<DynamicsSystemType> > m_pProcCommunicator;
+    boost::shared_ptr< MPILayer::ProcessCommunicator > m_pProcCommunicator;
 
     unsigned int m_nGlobalSimBodies;
 
     //using declerations
-    using SceneParser<TConfig>::m_globalMaxGroupId;
-    using SceneParser<TConfig>::m_nSimBodies;
-    using SceneParser<TConfig>::m_nBodies;
-    using SceneParser<TConfig>::m_bParseDynamics;
-    using SceneParser<TConfig>::m_pDynSys;
-    using SceneParser<TConfig>::m_currentParseFilePath;
-    using SceneParser<TConfig>::m_currentParseFileDir;
-    using SceneParser<TConfig>::m_xmlDoc;
-    using SceneParser<TConfig>::m_xmlRootNode;
-    using SceneParser<TConfig>::m_pSimulationLog;
-    using SceneParser<TConfig>::logstream;
+    using SceneParser::m_globalMaxGroupId;
+    using SceneParser::m_nSimBodies;
+    using SceneParser::m_nBodies;
+    using SceneParser::m_bParseDynamics;
+    using SceneParser::m_pDynSys;
+    using SceneParser::m_currentParseFilePath;
+    using SceneParser::m_currentParseFileDir;
+    using SceneParser::m_xmlDoc;
+    using SceneParser::m_xmlRootNode;
+    using SceneParser::m_pSimulationLog;
+    using SceneParser::logstream;
     // Temprary structures
-    using SceneParser<TConfig>::m_eBodiesState;
-    using SceneParser<TConfig>::m_bodyList;
-    using SceneParser<TConfig>::m_bodyListScales;
-    using SceneParser<TConfig>::m_SimBodyInitStates;
+    using SceneParser::m_eBodiesState;
+    using SceneParser::m_bodyList;
+    using SceneParser::m_bodyListScales;
+    using SceneParser::m_SimBodyInitStates;
 
 
 };

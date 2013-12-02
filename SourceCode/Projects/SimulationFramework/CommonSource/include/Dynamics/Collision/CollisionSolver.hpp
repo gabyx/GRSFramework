@@ -29,13 +29,11 @@
 * @ingroup Collision
 * @brief Contact Delegate List which is used to store all callbacks which are invoked when a new contact has been found!
 */
-template< typename TRigidBody>
+
 class ContactDelegateList {
 public:
 
-    typedef TRigidBody RigidBodyType;
-    typedef typename RigidBodyType::LayoutConfigType LayoutConfigType;
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(RigidBodyType::LayoutConfigType)
+    DEFINE_RIGIDBODY_CONFIG_TYPES
 
     ContactDelegateList() {
         m_ContactDelegateList.clear();
@@ -110,7 +108,7 @@ protected:
     friend class InclusionSolverCO;
     friend class InclusionSolverCONoG;
 
-    ContactDelegateList<RigidBodyType> m_ContactDelegateList;
+    ContactDelegateList m_ContactDelegateList;
 
     unsigned int m_expectedNContacts;                                                 ///< Expected number of Contacts.
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.

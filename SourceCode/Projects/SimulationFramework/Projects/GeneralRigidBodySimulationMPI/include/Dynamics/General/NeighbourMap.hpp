@@ -9,15 +9,12 @@
 #include "LogDefines.hpp"
 
 
-template<typename TDynamicsSystem,typename TRankId>
 class NeighbourData {
 public:
 
-    typedef typename TDynamicsSystem::DynamicsSystemConfig   DynamicsSystemConfig;
-    typedef TDynamicsSystem DynamicsSystemType;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    typedef TRankId RankIdType;
 
     struct RemoteData{
         RemoteData(RigidBodyType * body):m_body(body){};
@@ -146,7 +143,7 @@ public:
     void cleanUp();
 
 private:
-    TRankId m_neighbourRank; // This is the rank to which this data structure belongs!
+    RankIdType m_neighbourRank; // This is the rank to which this data structure belongs!
 
     // Private because we do not want that the operator[] is called anywhere in these maps!
     // Not good behaviour if oeprator [] is used, as new element get inserted easily!
@@ -161,24 +158,22 @@ private:
         // MOVE: send whole body to neighbour (put into m_garbageBodyList)
 };
 
-template<typename TDynamicsSystem, typename TBodyToInfoMap>
+template<typename TBodyToInfoMap>
 class NeighbourMap {
 public:
 
-    typedef typename TDynamicsSystem::DynamicsSystemConfig DynamicsSystemConfig;
-    typedef TDynamicsSystem DynamicsSystemType;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(DynamicsSystemConfig)
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
 
     // Body info definitions
     typedef TBodyToInfoMap BodyInfoMapType;
     typedef typename BodyInfoMapType::DataType BodyInfoType;
-    typedef typename BodyInfoType::RankIdType RankIdType;
     typedef typename BodyInfoType::RankToFlagsType RankToFlagsType;
 
     // Neighbour data definitions
-    typedef NeighbourData<DynamicsSystemType,RankIdType> DataType;
+    typedef NeighbourData DataType;
     typedef std::map<RankIdType, DataType * > Type;
     typedef typename Type::iterator iterator;
 
@@ -223,9 +218,9 @@ private:
 
 };
 
-template<typename TDynamicsSystem, typename TBodyToInfoMap>
+template<typename TBodyToInfoMap>
 template<typename List>
-void NeighbourMap<TDynamicsSystem,TBodyToInfoMap>::addLocalBodyExclusive(RigidBodyType * body,
+void NeighbourMap<TBodyToInfoMap>::addLocalBodyExclusive(RigidBodyType * body,
                                                                           const List & neighbourRanks)
 {
     STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );

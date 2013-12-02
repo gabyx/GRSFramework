@@ -27,10 +27,10 @@
 * @brief This is the StateRecorder class which records each body's states to one process own MultiBodySimFilePart.
 * @{
 */
-template <typename TDynamicsSystemType>
+
 class StateRecorderProcess {
 public:
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemType::DynamicsSystemConfig)
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     StateRecorderProcess( unsigned int id = 0, unsigned int bufferSize = 100 * 1024 * 1024);
@@ -63,8 +63,8 @@ protected:
 
 
 
-template<typename TDynamicsSystemType>
-StateRecorderProcess<TDynamicsSystemType>::StateRecorderProcess( unsigned int id,  unsigned int bufferSize):
+
+StateRecorderProcess::StateRecorderProcess( unsigned int id,  unsigned int bufferSize):
         m_binarySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj, m_bufferSize)
 {
 
@@ -84,19 +84,19 @@ StateRecorderProcess<TDynamicsSystemType>::StateRecorderProcess( unsigned int id
 
 }
 
-template<typename TDynamicsSystemType>
-StateRecorderProcess<TDynamicsSystemType>::~StateRecorderProcess() {
+
+StateRecorderProcess::~StateRecorderProcess() {
     DECONSTRUCTOR_MESSAGE
     m_binarySimFile.close();
 }
 
-template<typename TDynamicsSystemType>
-void StateRecorderProcess<TDynamicsSystemType>::setDirectoryPath(boost::filesystem::path dir_path){
+
+void StateRecorderProcess::setDirectoryPath(boost::filesystem::path dir_path){
     m_directoryPath = dir_path;
 }
 
-template<typename TDynamicsSystemType>
-bool StateRecorderProcess<TDynamicsSystemType>::createSimFile(bool truncate){
+
+bool StateRecorderProcess::createSimFile(bool truncate){
     boost::filesystem::path file;
     std::stringstream s;
 
@@ -119,20 +119,20 @@ bool StateRecorderProcess<TDynamicsSystemType>::createSimFile(bool truncate){
     return true;
 }
 
-template<typename TDynamicsSystemType>
-void StateRecorderProcess<TDynamicsSystemType>::getSimFilePartName(std::stringstream & s){
+
+void StateRecorderProcess::getSimFilePartName(std::stringstream & s){
     s.str("");
     s <<"SimDataProcess" <<"-"<<m_accessId<<SIM_FILE_PART_EXTENSION;
 }
 
-template<typename TDynamicsSystemType>
-void StateRecorderProcess<TDynamicsSystemType>::write(PREC time, const typename TDynamicsSystemType::RigidBodySimContainerType & bodyList){
+
+void StateRecorderProcess::write(PREC time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList){
     m_binarySimFile.write(time, bodyList);
 }
 
 
-template<typename TDynamicsSystemType>
-bool StateRecorderProcess<TDynamicsSystemType>::closeSimFile(){
+
+bool StateRecorderProcess::closeSimFile(){
     m_binarySimFile.close();
     return true;
 }

@@ -14,8 +14,8 @@
 #include "StateRecorderProcess.hpp"
 #include "StateRecorderMPI.hpp"
 
-#include "MoreauTimeStepperMPI.hpp"
-#include "DynamicsSystemMPI.hpp"
+#include TimeStepper_INCLUDE_FILE
+#include DynamicsSystem_INCLUDE_FILE
 
 #include "CommonFunctions.hpp"
 #include "QuaternionHelpers.hpp"
@@ -30,23 +30,23 @@ using namespace std;
 
 
 
-template<typename TConfig>
-SimulationManagerMPI<TConfig>::SimulationManagerMPI() {
+
+SimulationManagerMPI::SimulationManagerMPI() {
 
 }
-template<typename TConfig>
-SimulationManagerMPI<TConfig>::~SimulationManagerMPI() {
+
+SimulationManagerMPI::~SimulationManagerMPI() {
     DECONSTRUCTOR_MESSAGE
 
 }
 
-template<typename TConfig>
-void SimulationManagerMPI<TConfig>::setup() {
+
+void SimulationManagerMPI::setup() {
     setup("SceneFile.xml");
 }
 
-template<typename TConfig>
-void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath) {
+
+void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
     //Each Process copies its SceneFile.xml to the folders, that each Process can read its own file (better)
     boost::filesystem::path sceneFilePathNew = FileManager::getSingletonPtr()->copyFile(sceneFilePath,
@@ -67,7 +67,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     // MPI Process Commnunicator
 
-    m_pProcCommunicator = boost::shared_ptr<MPILayer::ProcessCommunicator<DynamicsSystemType> >(new MPILayer::ProcessCommunicator<DynamicsSystemType>());
+    m_pProcCommunicator = boost::shared_ptr<MPILayer::ProcessCommunicator >(new MPILayer::ProcessCommunicator());
     m_pSimulationLog->logMessage("--->SimulationManagerMPI:: Added ProcessCommunicator");
 
 
@@ -76,7 +76,7 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 
     // Parse the Scene from XML! ==========================
 
-    m_pSceneParser = boost::shared_ptr< SceneParserMPI<TConfig> >( new SceneParserMPI<TConfig>( m_pDynSys, m_pProcCommunicator ) );
+    m_pSceneParser = boost::shared_ptr< SceneParserMPI >( new SceneParserMPI( m_pDynSys, m_pProcCommunicator ) );
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
     m_pSceneParser->parseScene(sceneFilePathNew);
     m_nGlobalSimBodies = m_pSceneParser->getNumberOfGlobalSimBodies();
@@ -96,8 +96,8 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
     m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(m_nGlobalSimBodies));
     // =====================================================
 
-    m_pNbCommunicator =  boost::shared_ptr<NeighbourCommunicator<DynamicsSystemType> >(
-                            new NeighbourCommunicator<DynamicsSystemType>(m_pDynSys,  m_pProcCommunicator) );
+    m_pNbCommunicator =  boost::shared_ptr<NeighbourCommunicator >(
+                            new NeighbourCommunicator(m_pDynSys,  m_pProcCommunicator) );
 
 
     //Uncomment if StateRecorderType = StateRecorderBodys
@@ -122,8 +122,8 @@ void SimulationManagerMPI<TConfig>::setup(boost::filesystem::path sceneFilePath)
 }
 
 
-template<typename TConfig>
-void SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
+
+void SimulationManagerMPI::checkNumberOfBodiesInProcess() {
 
     int numberOfBodiesInSimulation = 0;
     int nSimBodies = m_nSimBodies;
@@ -151,8 +151,8 @@ void SimulationManagerMPI<TConfig>::checkNumberOfBodiesInProcess() {
 
 }
 
-template<typename TConfig>
-void SimulationManagerMPI<TConfig>::getMaxRuntime(PREC runtime){
+
+void SimulationManagerMPI::getMaxRuntime(PREC runtime){
 
     LOG(m_pSimulationLog,  "MPI> Get Max Runtime,  MPI_Reduce... "<< std::endl;);
     PREC maxRuntime;
@@ -169,8 +169,8 @@ void SimulationManagerMPI<TConfig>::getMaxRuntime(PREC runtime){
 }
 
 
-template<typename TConfig>
-void SimulationManagerMPI<TConfig>::startSim() {
+
+void SimulationManagerMPI::startSim() {
 
     static double timelineSimulation;
 
@@ -183,7 +183,7 @@ void SimulationManagerMPI<TConfig>::startSim() {
 //    for(auto it = m_pDynSys->m_SimBodies.begin(); it != m_pDynSys->m_SimBodies.end(); it++){
 //        LOG(m_pSimulationLog, "RigidBody Id: " << (*it)->m_id << std::endl;)
 //    }
-    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings<LayoutConfigType>::NONE) {
+    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
         m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(),m_pDynSys->m_SimBodies);
     }
 
@@ -222,8 +222,8 @@ m_pSimulationLog->logMessage("---> SimulationManager: Simulation leaving...");
 return;
 }
 
-template<typename TConfig>
-void SimulationManagerMPI<TConfig>::writeAllOutput() {
+
+void SimulationManagerMPI::writeAllOutput() {
 
     if(m_RecorderSettings.outputCheck(m_pTimestepper->getIterationCount())) {
         // Write Data to SystemDataFile (maps all data to back buffer!)
@@ -242,8 +242,8 @@ void SimulationManagerMPI<TConfig>::writeAllOutput() {
     }
 }
 
-template<typename TConfig>
-void SimulationManagerMPI<TConfig>::initSim() {
+
+void SimulationManagerMPI::initSim() {
 
 
     MPILayer::GenericMessage1<boost::filesystem::path> message;

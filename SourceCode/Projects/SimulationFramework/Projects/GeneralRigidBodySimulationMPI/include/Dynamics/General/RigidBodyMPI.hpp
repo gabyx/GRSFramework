@@ -5,13 +5,13 @@
 
 #include "BodyInfoMap.hpp"
 
-template<typename TRigidBodyConfig >
-class RigidBodyMPI: public RigidBodyBase<TRigidBodyConfig> {
-public:
-
-    BodyInfo m_pBodyProcessInfo;
-
-};
+//template<typename TRigidBodyConfig >
+//class RigidBodyMPI: public RigidBodyBase<TRigidBodyConfig> {
+//public:
+//
+//    BodyInfo m_pBodyProcessInfo;
+//
+//};
 
 
 #endif

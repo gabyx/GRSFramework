@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
         const RedirectOutputs _(f, std::cerr);
 
 
-        SimulationManagerMPI<GeneralConfig> mgr;
+        SimulationManagerMPI mgr;
 
         mgr.setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
 

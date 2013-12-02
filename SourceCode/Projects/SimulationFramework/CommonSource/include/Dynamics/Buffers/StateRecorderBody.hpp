@@ -192,11 +192,11 @@ bool StateRecorderBody::createSimFile(RigidBodyType * body, bool truncate){
 }
 
 
-bool StateRecorderBody::createSimFiles(const typename TDynamicsSystemType::RigidBodySimContainerType & body_list,
+bool StateRecorderBody::createSimFiles(const typename DynamicsSystemType::RigidBodySimContainerType & body_list,
                                                        bool truncate)
 {
     // For every body add a Sim File!
-    typename TDynamicsSystemType::RigidBodySimContainerType::const_iterator it;
+    typename DynamicsSystemType::RigidBodySimContainerType::const_iterator it;
     for(it = body_list.begin();it != body_list.end();it++){
         if(!createSimFile(*it,truncate)){
             m_pSimulationLog->logMessage("---> StateRecorderBody:: Opened all Sim files failed!");
@@ -209,14 +209,14 @@ bool StateRecorderBody::createSimFiles(const typename TDynamicsSystemType::Rigid
 }
 
 
-void StateRecorderBody::getSimBodyFileName(typename TDynamicsSystemType::RigidBodyType *body,
+void StateRecorderBody::getSimBodyFileName(typename DynamicsSystemType::RigidBodyType *body,
                                                                 std::stringstream & s){
     s.str("");
     s <<"SimDataBody" <<"-"<<RigidBodyId::getGroupNr(body)<<"-"<< RigidBodyId::getBodyNr(body)<<SIM_FILE_EXTENSION;
 }
 
 
-void StateRecorderBody::getSimBodyLogFileName(typename TDynamicsSystemType::RigidBodyType *body,
+void StateRecorderBody::getSimBodyLogFileName(typename DynamicsSystemType::RigidBodyType *body,
                                                                 std::stringstream & s){
     s.str("");
     s <<"SimDataBody" <<"-"<<RigidBodyId::getGroupNr(body)<<"-"<< RigidBodyId::getBodyNr(body)<<"-Access"<< SIM_FILE_ACCESS_LOG_EXTENSION;
@@ -224,11 +224,11 @@ void StateRecorderBody::getSimBodyLogFileName(typename TDynamicsSystemType::Rigi
 
 
 void StateRecorderBody::write(PREC time, const typename
-                                                         TDynamicsSystemType::RigidBodySimContainerType & body_list){
+                                                         DynamicsSystemType::RigidBodySimContainerType & body_list){
 
-    typename TDynamicsSystemType::RigidBodySimContainerType::const_iterator it;
+    typename DynamicsSystemType::RigidBodySimContainerType::const_iterator it;
 
-    static DynamicsState<LayoutConfigType> dynState(1); // state for one Body only
+    static DynamicsState dynState(1); // state for one Body only
         // iterate over all bodies
     for(it = body_list.begin(); it != body_list.end(); it++){
         // find Sim file in list
