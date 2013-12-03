@@ -200,8 +200,6 @@ void SimulationManagerMPI::startSim() {
 
         writeAllOutput();
 
-
-
         // Check if simulation can be aborted!
         if(m_pTimestepper->finished()) {
             timer.stop();

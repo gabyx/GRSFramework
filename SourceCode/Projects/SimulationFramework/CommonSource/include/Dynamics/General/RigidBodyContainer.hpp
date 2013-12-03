@@ -41,11 +41,11 @@ public:
             >, // this index represents insertion order
             boost::multi_index::hashed_unique<
                 boost::multi_index::tag<by_hashed_id>,
-                boost::multi_index::member<RigidBodyType, const RigidBodyIdType, &RigidBodyType::m_id>
+                boost::multi_index::member<RigidBodyType::AbsoluteBaseType, const RigidBodyIdType, &RigidBodyType::AbsoluteBaseType::m_id>
             >,
             boost::multi_index::ordered_unique<
                 boost::multi_index::tag<by_ordered_id>,
-                boost::multi_index::member<RigidBodyType, const RigidBodyIdType, &RigidBodyType::m_id>
+                boost::multi_index::member<RigidBodyType::AbsoluteBaseType, const RigidBodyIdType, &RigidBodyType::AbsoluteBaseType::m_id>
             >
         >
     > MapType;

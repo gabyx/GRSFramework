@@ -9,7 +9,7 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
-#include "RigidBody.hpp"
+#include RigidBody_INCLUDE_FILE
 #include "RigidBodyContainer.hpp"
 
 #include "ContactParameterMap.hpp"

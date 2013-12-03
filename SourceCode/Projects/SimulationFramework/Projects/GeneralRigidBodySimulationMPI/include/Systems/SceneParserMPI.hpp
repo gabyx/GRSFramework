@@ -22,7 +22,7 @@
 
 #include "MPICommunication.hpp"
 
-#include "DynamicsSystemMPI.hpp"
+#include DynamicsSystem_INCLUDE_FILE
 
 #include "CommonFunctions.hpp"
 #include "QuaternionHelpers.hpp"

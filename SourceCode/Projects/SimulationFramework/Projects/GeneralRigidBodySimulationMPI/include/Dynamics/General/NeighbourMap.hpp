@@ -158,7 +158,6 @@ private:
         // MOVE: send whole body to neighbour (put into m_garbageBodyList)
 };
 
-template<typename TBodyToInfoMap>
 class NeighbourMap {
 public:
 
@@ -166,18 +165,16 @@ public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
+    typedef typename RigidBodyType::BodyInfoType BodyInfoType;
+    typedef typename RigidBodyType::BodyInfoType::RankToFlagsType RankToFlagsType;
 
-    // Body info definitions
-    typedef TBodyToInfoMap BodyInfoMapType;
-    typedef typename BodyInfoMapType::DataType BodyInfoType;
-    typedef typename BodyInfoType::RankToFlagsType RankToFlagsType;
 
     // Neighbour data definitions
     typedef NeighbourData DataType;
     typedef std::map<RankIdType, DataType * > Type;
     typedef typename Type::iterator iterator;
 
-    NeighbourMap(RankIdType rank, BodyInfoMapType & bodyToInfo): m_rank(rank), m_bodyToInfo(bodyToInfo){};
+    NeighbourMap(RankIdType rank): m_rank(rank){};
 
     ~NeighbourMap(){
         for(auto it = m_nbDataMap.begin(); it != m_nbDataMap.end(); it++){
@@ -214,27 +211,24 @@ private:
     RankIdType m_rank;
     Type m_nbDataMap;
 
-    BodyInfoMapType & m_bodyToInfo;
-
 };
 
-template<typename TBodyToInfoMap>
+
 template<typename List>
-void NeighbourMap<TBodyToInfoMap>::addLocalBodyExclusive(RigidBodyType * body,
-                                                                          const List & neighbourRanks)
+void NeighbourMap::addLocalBodyExclusive(RigidBodyType * body,const List & neighbourRanks)
 {
     STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );
     // Add this local body exclusively to the given neighbours
 
-    BodyInfoType * bodyInfo = m_bodyToInfo.getBodyInfo(body);
+
 
     // Loop over all incoming  ranks
     typename List::const_iterator rankIt;
     for( rankIt = neighbourRanks.begin();rankIt!= neighbourRanks.end();rankIt++){
         // insert the new element into body info --> (rank, flags)
         std::pair<typename RankToFlagsType::iterator,bool> res =
-                   bodyInfo->m_neighbourRanks.insert(
-                                        typename RankToFlagsType::value_type(*rankIt,typename BodyInfoType::Flags(true))
+                   body->m_pBodyInfo->m_neighbourRanks.insert(
+                                        typename RankToFlagsType::value_type(*rankIt,typename RigidBodyType::BodyInfoType::Flags(true))
                                                        );
 
         res.first->second.m_overlaps = true; // set the Flags for the existing or the newly inserted entry (rank,flags)
@@ -259,8 +253,8 @@ void NeighbourMap<TBodyToInfoMap>::addLocalBodyExclusive(RigidBodyType * body,
     // which the flag m_overlaps = false because, this needs to be communicated first! (such that any neighbour does not request any update anymore!)
     // So set the flags for this body to SEND_REMOVE for all his neighbours which have m_overlaps = false
 
-    for( typename RankToFlagsType::iterator rankToFlagsIt = bodyInfo->m_neighbourRanks.begin();
-        rankToFlagsIt != bodyInfo->m_neighbourRanks.end(); rankToFlagsIt++ ){
+    for( typename RankToFlagsType::iterator rankToFlagsIt = body->m_pBodyInfo->m_neighbourRanks.begin();
+        rankToFlagsIt != body->m_pBodyInfo->m_neighbourRanks.end(); rankToFlagsIt++ ){
 
         if( rankToFlagsIt->second.m_overlaps == false){
 

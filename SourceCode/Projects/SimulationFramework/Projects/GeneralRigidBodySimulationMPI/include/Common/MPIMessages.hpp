@@ -112,9 +112,7 @@ public:
     typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
     typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
 
-
-    typedef typename NeighbourCommunicatorType::BodyInfoMapType               BodyInfoMapType;
-    typedef typename BodyInfoMapType::DataType                                BodyInfoType;
+    typedef typename RigidBodyType::BodyInfoType                              BodyInfoType;
 
     typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
     typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
@@ -210,7 +208,7 @@ public:
         {
             it_next++; // take care here, because, we might invalidate this iterator it because we might remove local bodies, thats why it_next is used above!
 
-            m_bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(it->second->m_body);
+            m_bodyInfo = it->second->m_body->m_pBodyInfo;
 
             SubMessageFlag flag;
             if(it->second->m_commStatus == NeighbourDataType::LocalData::SEND_NOTIFICATION) {
@@ -440,8 +438,7 @@ private:
         LOGSZ(m_pSerializerLog, "-----> Deserialize body (update): finished "  <<std::endl;);
 
         // Set flag that we received update
-        auto * bodyInfo = m_nc->m_bodyToInfo.getBodyInfo(id);
-        bodyInfo->m_receivedUpdate = true;
+        body->m_pBodyInfo->m_receivedUpdate = true;
 
         // NEW BODY FROM REMOTE  to  LOCAL!!!
         if(owningRank == m_nc->m_rank){ // if the body is now our local body!
@@ -463,17 +460,17 @@ private:
                 LOGASSERTMSG( res, m_pSerializerLog, "Body with id: " << RigidBodyId::getBodyIdString(id) << "not deleted in neighbour structure (?)");
 
             // Change the body info
-            bodyInfo->m_isRemote = false;
-            bodyInfo->m_overlapsThisRank = true;
-            bodyInfo->m_ownerRank = owningRank;
+            body->m_pBodyInfo->m_isRemote = false;
+            body->m_pBodyInfo->m_overlapsThisRank = true;
+            body->m_pBodyInfo->m_ownerRank = owningRank;
 
             // Add all neighbours which need updates!
-            bodyInfo->m_neighbourRanks.clear();
+            body->m_pBodyInfo->m_neighbourRanks.clear();
             for(auto it = overlappingNeighbours.begin(); it != overlappingNeighbours.end(); it++){
                     LOGASSERTMSG(  *it != m_nc->m_rank, m_pSerializerLog, "overlappingNeighbours should not contain own rank: " << m_nc->m_rank);
 
                 if(m_nc->m_nbRanks.find(*it) !=  m_nc->m_nbRanks.end()){ // If rank is neighbour rank
-                    bodyInfo->m_neighbourRanks[*it] = typename BodyInfoType::Flags(true); // Overlaps this rank!
+                    body->m_pBodyInfo->m_neighbourRanks[*it] = typename BodyInfoType::Flags(true); // Overlaps this rank!
                 }else{
                     ERRORMSG("This rank: " << *it << " is no neighbour of our process rank: " << m_nc->m_rank);
                 }
@@ -503,12 +500,12 @@ private:
                 LOGASSERTMSG( pairRes.second, m_pSerializerLog, "Insertion of body with id: " << RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << owningRank << " failed!")
 
             // Change the body info
-            bodyInfo->m_isRemote = true; // No need to set! REMOTE BODY!!!!!!!!!!!!!
-            bodyInfo->m_receivedUpdate = true;
-            bodyInfo->m_overlapsThisRank = true; // No need to set!
-            bodyInfo->m_ownerRank = owningRank;
-            bodyInfo->m_neighbourRanks.clear();
-            bodyInfo->m_neighbourRanks[owningRank] = typename BodyInfoType::Flags(true);
+            body->m_pBodyInfo->m_isRemote = true; // No need to set! REMOTE BODY!!!!!!!!!!!!!
+            body->m_pBodyInfo->m_receivedUpdate = true;
+            body->m_pBodyInfo->m_overlapsThisRank = true; // No need to set!
+            body->m_pBodyInfo->m_ownerRank = owningRank;
+            body->m_pBodyInfo->m_neighbourRanks.clear();
+            body->m_pBodyInfo->m_neighbourRanks[owningRank] = typename BodyInfoType::Flags(true);
 
         }
     }
@@ -545,17 +542,16 @@ private:
             // add to global Local list!
             m_nc->m_globalLocal.addBody(body);
 
-            // insert a new body info
-            auto pairBodyInfo = m_nc->m_bodyToInfo.insert(body,owningRank,true,false);
-            LOGASSERTMSG( pairBodyInfo.second, m_pSerializerLog, "Insertion of new body info for body with id: " << id <<" failed!");
+            // add a new body info
+            body->m_pBodyInfo = new BodyInfoType(owningRank,true,false);
 
 
             // Add all neighbours which need updates!
-            pairBodyInfo.first->m_neighbourRanks.clear();
+            body->m_pBodyInfo->m_neighbourRanks.clear();
             for(auto it = overlappingNeighbours.begin(); it != overlappingNeighbours.end(); it++){
                     LOGASSERTMSG(  *it != m_nc->m_rank, m_pSerializerLog, "overlappingNeighbours should not contain own rank: " << m_nc->m_rank);
                 if(m_nc->m_nbRanks.find(*it) !=  m_nc->m_nbRanks.end()){
-                    pairBodyInfo.first->m_neighbourRanks[*it] = typename BodyInfoType::Flags(true); // Overlaps this rank!
+                    body->m_pBodyInfo->m_neighbourRanks[*it] = typename BodyInfoType::Flags(true); // Overlaps this rank!
                 }else{
                     ERRORMSG("This rank: " << *it << " is no neighbour of our process rank: " << m_nc->m_rank);
                 }
@@ -583,12 +579,11 @@ private:
             LOGASSERTMSG( pairRes.second, m_pSerializerLog, "Insertion of body with id: " << RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << owningRank << " failed!")
 
             // add the body info
-            auto pairBodyInfo = m_nc->m_bodyToInfo.insert(body,owningRank,true,true,true);
-            pairBodyInfo.first->m_neighbourRanks.clear();
-            pairBodyInfo.first->m_neighbourRanks[owningRank] = typename BodyInfoType::Flags(true);
+            body->m_pBodyInfo = new BodyInfoType(owningRank,true,true,true);
+            body->m_pBodyInfo->m_neighbourRanks.clear();
+            body->m_pBodyInfo->m_neighbourRanks[owningRank] = typename BodyInfoType::Flags(true);
 
         }
-
     }
 
     template<class Archive>
@@ -601,10 +596,7 @@ private:
         bool res = m_neighbourData->deleteRemoteBodyData(id);
         LOGASSERTMSG(res, m_pSerializerLog, "Could not delete remote body with id: " << RigidBodyId::getBodyIdString(id) << " in neighbour structure rank: " << m_neighbourRank << " !" );
 
-        // Remove from bodyToInfoList
-        res =  m_nc->m_bodyToInfo.erase(id) > 0;
-            LOGASSERTMSG( res, m_pSerializerLog, "Remote Body with id: " << RigidBodyId::getBodyIdString(id) << " is not contained in m_bodyToInfo!");
-        //Remove and delete from global list
+        // Remove and delete from global list, deletes also the body info data
         res = m_nc->m_globalRemote.removeAndDeleteBody(id);
             LOGASSERTMSG( res == true, m_pSerializerLog, "Remote Body with id: " << RigidBodyId::getBodyIdString(id) << " could not be deleted in m_globalRemote!");
 

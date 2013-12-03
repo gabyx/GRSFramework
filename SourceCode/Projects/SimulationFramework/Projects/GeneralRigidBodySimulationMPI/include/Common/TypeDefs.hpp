@@ -12,7 +12,7 @@
 #include "LayoutConfigDefs.hpp"
 
 
-#define RigidBody_INCLUDE_FILE "RigidBody.hpp"
+#define RigidBody_INCLUDE_FILE "RigidBodyMPI.hpp"
 #define TimeStepper_INCLUDE_FILE "MoreauTimeStepperMPI.hpp"
 #define DynamicsSystem_INCLUDE_FILE "DynamicsSystemMPI.hpp"
 #define InclusionSolver_INCLUDE_FILE "InclusionSolverCONoGMPI.hpp"
@@ -23,7 +23,7 @@ class CollisionSolver;
 class DynamicsSystem;
 class InclusionSolverCO;
 class InclusionSolverCONoG;
-class RigidBodyBase;
+class RigidBodyBaseMPI;
 class RigidBodySolverDataCONoG;
 class RigidBodySolverDataNone;
 class MoreauTimeStepper;
@@ -32,7 +32,7 @@ class MoreauTimeStepper;
 namespace GlobalConfigs{
 
     namespace MyConfigs{
-        typedef RigidBodyBase           RigidBodyType;
+        typedef RigidBodyBaseMPI        RigidBodyType;
         typedef DynamicsSystem          DynamicsSystemType;
         typedef MoreauTimeStepper       TimeStepperType;
         typedef CollisionSolver         CollisionSolverType;

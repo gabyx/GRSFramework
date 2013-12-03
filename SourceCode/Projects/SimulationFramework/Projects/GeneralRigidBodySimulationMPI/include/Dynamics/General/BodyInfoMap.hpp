@@ -9,11 +9,9 @@ public:
         DEFINE_RIGIDBODY_CONFIG_TYPES
         DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-        BodyProcessInfo(RigidBodyType *body,
-                        RankIdType ownRank,
+        BodyProcessInfo(RankIdType ownRank,
                         bool overlapsThisRank = true,
                         bool isRemote = false, bool receivedUpdate = false):
-                            m_body(body),
                             m_ownerRank(ownRank),
                             m_overlapsThisRank(overlapsThisRank),
                             m_isRemote(isRemote),
@@ -35,7 +33,6 @@ public:
         RankIdType m_ownerRank;   ///< The process rank to which this body belongs (changes during simulation, if change -> send to other process)
         bool m_overlapsThisRank; ///< True if body overlaps this process!, if false
 
-        RigidBodyType * m_body;
 
         bool m_isRemote;
         bool m_receivedUpdate;
@@ -61,77 +58,77 @@ public:
         }
 };
 
-
-
-class BodyInfoMap {
-public:
-
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-
-    DEFINE_MPI_INFORMATION_CONFIG_TYPES
-
-    // BodyInfoMap data definitions
-    typedef BodyProcessInfo DataType;
-    typedef std::map<RankIdType, DataType *> Type;
-    typedef typename Type::iterator iterator;
-
-    // Body info definitions
-    typedef typename DataType::RankToFlagsType RankToFlagsType;
-
-
-    BodyInfoMap(){};
-    ~BodyInfoMap(){
-        for(auto it = m_map.begin(); it != m_map.end(); it++){
-            delete it->second;
-        }
-        m_map.clear();
-    }
-
-    bool erase(RigidBodyType * body){
-        return erase(body->m_id);
-    }
-
-    bool erase(const typename RigidBodyType::RigidBodyIdType & id){
-        auto it = m_map.find(id);
-        if(it != m_map.end()){
-            delete it->second;
-            m_map.erase(it);
-            return true;
-        }
-        return false;
-    }
-
-
-    std::pair<DataType *, bool> insert(RigidBodyType * body,
-                                       RankIdType ownerRank,
-                                       bool overlapsThisRank = true,
-                                       bool isRemote = false,
-                                       bool receivedUpdate = false){
-        std::pair<typename Type::iterator,bool> res = m_map.insert(
-                                                                   typename Type::value_type(body->m_id, (DataType*)NULL) );
-        if(res.second){
-             res.first->second = new DataType(body, ownerRank, overlapsThisRank, isRemote,receivedUpdate);
-        }
-        return std::pair<DataType *, bool>(res.first->second, res.second);
-    }
-
-    inline DataType * getBodyInfo(const RigidBodyType * body){
-        return getBodyInfo(body->m_id);
-    }
-
-    inline DataType * getBodyInfo(typename RigidBodyType::RigidBodyIdType id){
-        typename Type::iterator it = m_map.find(id);
-        if(it != m_map.end()){
-           return (it->second);
-        }else{
-           //ASSERTMSG(false,"There is no BodyInfo for body with id: " << RigidBodyId::getBodyIdString(id) << "!")
-           return NULL;
-        }
-    }
-
-private:
-    Type m_map;
-};
+//
+//
+//class BodyInfoMap {
+//public:
+//
+//    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+//
+//    DEFINE_MPI_INFORMATION_CONFIG_TYPES
+//
+//    // BodyInfoMap data definitions
+//    typedef BodyProcessInfo DataType;
+//    typedef std::map<RankIdType, DataType *> Type;
+//    typedef typename Type::iterator iterator;
+//
+//    // Body info definitions
+//    typedef typename DataType::RankToFlagsType RankToFlagsType;
+//
+//
+//    BodyInfoMap(){};
+//    ~BodyInfoMap(){
+//        for(auto it = m_map.begin(); it != m_map.end(); it++){
+//            delete it->second;
+//        }
+//        m_map.clear();
+//    }
+//
+//    bool erase(RigidBodyType * body){
+//        return erase(body->m_id);
+//    }
+//
+//    bool erase(const typename RigidBodyType::RigidBodyIdType & id){
+//        auto it = m_map.find(id);
+//        if(it != m_map.end()){
+//            delete it->second;
+//            m_map.erase(it);
+//            return true;
+//        }
+//        return false;
+//    }
+//
+//
+//    std::pair<DataType *, bool> insert(RigidBodyType * body,
+//                                       RankIdType ownerRank,
+//                                       bool overlapsThisRank = true,
+//                                       bool isRemote = false,
+//                                       bool receivedUpdate = false){
+//        std::pair<typename Type::iterator,bool> res = m_map.insert(
+//                                                                   typename Type::value_type(body->m_id, (DataType*)NULL) );
+//        if(res.second){
+//             res.first->second = new DataType(body, ownerRank, overlapsThisRank, isRemote,receivedUpdate);
+//        }
+//        return std::pair<DataType *, bool>(res.first->second, res.second);
+//    }
+//
+//    inline DataType * getBodyInfo(const RigidBodyType * body){
+//        return getBodyInfo(body->m_id);
+//    }
+//
+//    inline DataType * getBodyInfo(typename RigidBodyType::RigidBodyIdType id){
+//        typename Type::iterator it = m_map.find(id);
+//        if(it != m_map.end()){
+//           return (it->second);
+//        }else{
+//           //ASSERTMSG(false,"There is no BodyInfo for body with id: " << RigidBodyId::getBodyIdString(id) << "!")
+//           return NULL;
+//        }
+//    }
+//
+//private:
+//    Type m_map;
+//};
 
 
 #endif
