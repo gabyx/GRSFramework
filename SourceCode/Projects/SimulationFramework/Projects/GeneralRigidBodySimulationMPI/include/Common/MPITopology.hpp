@@ -8,10 +8,10 @@
 
 //#include "MPIInformation.hpp"
 
-#include "Collider.hpp"
+#include "MPITopologyGrid.hpp"
+#include "MPITopologyVisitors.hpp"
 
 namespace MPILayer {
-
 
 class ProcessTopology {
 public:
@@ -22,155 +22,77 @@ public:
     typedef std::set<RankIdType> NeighbourRanksListType;
     typedef std::map<RankIdType, NeighbourRanksListType> AdjacentNeighbourRanksMapType;
 
-    virtual bool belongsPointToProcess(const Vector3 & point, RankIdType &neighbourProcessRank) const {
-        ERRORMSG("The ProcessTopology::belongsPointToProcess has not been implemented!");
-    }
-    virtual bool belongsPointToProcess(const Vector3 & point) const {
-        ERRORMSG("The ProcessTopology::belongsPointToProcess has not been implemented!");
-    }
+    ProcessTopology(){}
 
-    virtual bool belongsBodyToProcess(const RigidBodyType * body) const{
-        ERRORMSG("The ProcessTopology::belongsBodyToProcess has not been implemented!");
+    ~ProcessTopology(){
+        // Delete the created pointers in the variant!
+        boost::apply_visitor( TopologyVisitors::Deleter<ProcessTopology>() , m_procTopo);
     }
 
-    virtual bool belongsBodyToProcess(const RigidBodyType * body, RankIdType &neighbourProcessRank) const {
-        ERRORMSG("The ProcessTopology::belongsBodyToProcess2 has not been implemented!");
+    void init(RankIdType rank){m_rank = rank;}
+
+    // Main function
+    inline bool belongsPointToProcess(const Vector3 & point, RankIdType &neighbourProcessRank) const {
+        TopologyVisitors::BelongsPointToProcess<ProcessTopology> vis(point,neighbourProcessRank);
+        return boost::apply_visitor(vis, m_procTopo);
     }
 
-    virtual bool checkOverlap( RigidBodyType * body,
-                                NeighbourRanksListType & neighbourProcessRanks,
-                                bool & overlapsOwnProcess) {
-        ERRORMSG("The ProcessTopology::checkOverlap has not been implemented!");
-    }
-
-
-    virtual const NeighbourRanksListType & getNeighbourRanks() const = 0;
-    virtual const NeighbourRanksListType & getAdjacentNeighbourRanks(RankIdType neighbourRank) const = 0;
-
-
-    protected:
-    unsigned int m_rank; ///< Own rank;
-    NeighbourRanksListType m_nbRanks; ///< Neighbour ranks
-    AdjacentNeighbourRanksMapType m_adjNbRanks; ///< Adjacent ranks between m_rank and each neighbour
-};
-
-
-
-class ProcessTopologyGrid : public ProcessTopology {
-public:
-
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-
-    typedef typename ProcessTopology::NeighbourRanksListType  NeighbourRanksListType;
-    typedef typename ProcessTopology::AdjacentNeighbourRanksMapType AdjacentNeighbourRanksMapType;
-
-    typedef std::map<unsigned int, AABB > RankToAABBType;
-
-
-
-
-
-    ProcessTopologyGrid(  const Vector3 & minPoint,
-                          const Vector3 & maxPoint,
-                          const MyMatrix<unsigned int>::Vector3 & dim,
-                          unsigned int processRank, unsigned int masterRank);
-
-    bool checkOverlap( RigidBodyType * body, NeighbourRanksListType & neighbourProcessRanks, bool & overlapsOwnProcess);
-
-    bool belongsBodyToProcess(const RigidBodyType * body) const {
+    inline bool belongsBodyToProcess(const RigidBodyType * body) const {
         RankIdType nb;
         return belongsPointToProcess(body->m_r_S,nb);
     }
 
-    bool belongsBodyToProcess(const RigidBodyType * body, RankIdType &neighbourProcessRank) const {
+    inline bool belongsBodyToProcess(const RigidBodyType * body, RankIdType &neighbourProcessRank) const {
         return belongsPointToProcess(body->m_r_S,neighbourProcessRank);
     }
 
-    bool belongsPointToProcess(const Vector3 & point) const {
+    inline bool belongsPointToProcess(const Vector3 & point) const {
         unsigned int nb;
         return belongsPointToProcess(point,nb);
     }
 
+    inline bool checkOverlap(   const RigidBodyType * body,
+                                NeighbourRanksListType & neighbourProcessRanks,
+                                bool & overlapsOwnProcess)
+    {
+        TopologyVisitors::CheckOverlap<ProcessTopology> vis(body,neighbourProcessRanks,overlapsOwnProcess);
+        return boost::apply_visitor(vis , m_procTopo);
+    }
 
-    bool belongsPointToProcess(const Vector3 & point, RankIdType &neighbourProcessRank) const;
 
     const NeighbourRanksListType & getNeighbourRanks() const {
-        return this->m_nbRanks;
+        return m_nbRanks;
     }
 
     const NeighbourRanksListType & getAdjacentNeighbourRanks(RankIdType neighbourRank) const {
-        ASSERTMSG(  this->m_nbRanks.find(neighbourRank) !=  this->m_nbRanks.end(),
-                  "No neighbour rank: " << neighbourRank << " for this process rank: "<< this->m_rank<<"!");
-        ASSERTMSG( this->m_adjNbRanks.find(neighbourRank) != this->m_adjNbRanks.end(),
-                  "No adjacent ranks for this neighbour: "<< neighbourRank << "for process rank: " << this->m_rank<<"!");
-        return this->m_adjNbRanks.find(neighbourRank)->second;
+        ASSERTMSG(  m_nbRanks.find(neighbourRank) !=  m_nbRanks.end(),
+                  "No neighbour rank: " << neighbourRank << " for this process rank: "<< m_rank<<"!");
+        ASSERTMSG( m_adjNbRanks.find(neighbourRank) != m_adjNbRanks.end(),
+                  "No adjacent ranks for this neighbour: "<< neighbourRank << "for process rank: " << m_rank<<"!");
+        return m_adjNbRanks.find(neighbourRank)->second;
     }
 
-private:
-
-    RankToAABBType m_nbAABB;            ///< Neighbour AABB
-    AABB m_aabb;      ///< Own AABB of this process
-    CartesianGrid<NoCellData> m_grid;
-
-    Collider m_Collider;
-};
-
-
-
-ProcessTopologyGrid::ProcessTopologyGrid(  const Vector3 & minPoint,
-                          const Vector3 & maxPoint,
-                          const MyMatrix<unsigned int>::Vector3 & dim,
-                          unsigned int processRank, unsigned int masterRank): m_grid(minPoint,maxPoint, dim, masterRank) {
-        this->m_rank = processRank;
-
-        //Initialize neighbours
-        this->m_nbRanks = m_grid.getCellNeigbours(this->m_rank);
-
-        typename NeighbourRanksListType::iterator it;
-        for(it = this->m_nbRanks.begin(); it!= this->m_nbRanks.end(); it++){
-
-            //Initialize adjacent neighbour ranks to m_nbRanks for this neighbour *it
-            this->m_adjNbRanks[*it] = m_grid.getCommonNeighbourCells(this->m_nbRanks, *it);
-
-            //Get all AABB's of all neighbours
-            m_nbAABB[ *it ] =  m_grid.getCellAABB(*it) ;
-        }
-
-
-        //Get AABB of own rank!
-        m_aabb = m_grid.getCellAABB(this->m_rank);
-};
-
-
-
-bool ProcessTopologyGrid::belongsPointToProcess(const Vector3 & point, RankIdType &neighbourProcessRank) const {
-
-    neighbourProcessRank = m_grid.getCellNumber(point);
-    if(neighbourProcessRank == this->m_rank) {
-        return true;
-    }
-    return false;
-};
-
-
-
-bool ProcessTopologyGrid::checkOverlap(RigidBodyType * body,
-                                                                NeighbourRanksListType & neighbourProcessRanks,
-                                                                bool & overlapsOwnProcess) {
-    // Check neighbour AABB
-    typename RankToAABBType::const_iterator it;
-    neighbourProcessRanks.clear();
-    for(it = m_nbAABB.begin(); it != m_nbAABB.end(); it++) {
-        if( m_Collider.checkOverlap(body,it->second) ) {
-            neighbourProcessRanks.insert(it->first);
-        }
+    void createProcessTopologyGrid(const Vector3 & minPoint,
+                                   const Vector3 & maxPoint,
+                                   const MyMatrix<unsigned int>::Vector3 & dim,
+                                   unsigned int processRank, unsigned int masterRank)
+    {
+        boost::apply_visitor( TopologyVisitors::Deleter<ProcessTopology>() , m_procTopo);
+        m_procTopo =  new ProcessTopologyGrid<ProcessTopology>(m_nbRanks,m_adjNbRanks, minPoint,maxPoint,dim, m_rank , masterRank);
     }
 
-    // Check own AABB
-    overlapsOwnProcess = m_Collider.checkOverlap(body, m_aabb);
+    private:
 
-    return neighbourProcessRanks.size() > 0;
+    boost::variant<boost::blank, ProcessTopologyGrid<ProcessTopology> * > m_procTopo;
+    RankIdType m_rank;
+
+    // These values are set by references in the specific implementation classes
+    NeighbourRanksListType  m_nbRanks; ///< Neighbour ranks
+    AdjacentNeighbourRanksMapType  m_adjNbRanks; ///< Adjacent ranks between m_rank and each neighbour
+
 };
+
+
 
 }; //MPILayer
 

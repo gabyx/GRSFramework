@@ -19,23 +19,21 @@ class ProcessInformation {
 
 public:
 
+    typedef ProcessTopology ProcessTopologyType;
+
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    typedef typename MPILayer::ProcessTopology ProcessTopologyType;
-
     static const int MASTER_RANK = 0;
 
     ProcessInformation() {
-        m_pProcTopo = NULL;
         initialize();
+        m_procTopo.init(m_rank);
     }
 
     ~ProcessInformation() {
-        if(m_pProcTopo) {
-            delete m_pProcTopo;
-        }
+
     }
 
     RankIdType getMasterRank() const {
@@ -74,15 +72,11 @@ public:
     void createProcTopoGrid(const Vector3 & minPoint,
                             const Vector3 & maxPoint,
                             const MyMatrix<unsigned int>::Vector3 & dim){
-        if(m_pProcTopo){
-            delete m_pProcTopo;
-        }
-        m_pProcTopo = new MPILayer::ProcessTopologyGrid(minPoint,maxPoint,dim, getRank(), MPILayer::ProcessInformation::MASTER_RANK  );
+        m_procTopo.createProcessTopologyGrid(minPoint,maxPoint,dim, m_rank, MPILayer::ProcessInformation::MASTER_RANK  );
     }
 
-    ProcessTopologyType * getProcTopo() const{
-        ASSERTMSG(m_pProcTopo,"m_pProcTopo == NULL");
-        return m_pProcTopo;
+    ProcessTopology* getProcTopo(){
+        return &m_procTopo;
     };
 
 private:
@@ -98,7 +92,7 @@ private:
         m_name = s.str();
     };
 
-    ProcessTopologyType * m_pProcTopo;
+    ProcessTopology m_procTopo;
 
     RankIdType m_rank;
     int m_nProcesses;

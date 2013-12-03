@@ -206,7 +206,7 @@ void SimulationManagerMPI::startSim() {
         if(m_pTimestepper->finished()) {
             timer.stop();
             runtime = ((PREC)timer.elapsed().wall)*1e-9;
-            LOG(m_pSimulationLog, "---> SimulationManager: Timestepper finished, needed: " << runtime << " sec. , exit..." );
+            LOG(m_pSimulationLog, "---> SimulationManager: Timestepper finished, needed: " << runtime << " sec. , exit..."<< std::endl );
             break;
         }
     }

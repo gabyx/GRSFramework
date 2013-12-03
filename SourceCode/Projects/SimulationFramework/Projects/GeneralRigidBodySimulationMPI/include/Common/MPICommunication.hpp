@@ -22,7 +22,6 @@
 #include "MPIInformation.hpp"
 
 
-
 namespace MPILayer {
 
 
