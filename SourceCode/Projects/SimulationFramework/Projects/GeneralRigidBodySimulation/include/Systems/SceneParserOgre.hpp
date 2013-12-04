@@ -174,7 +174,7 @@ protected:
 
             if( this->m_eBodiesState == RigidBodyType::SIMULATED) {
                 m_rSceneNodeSimBodies.push_back(sceneNode);
-            } else if( this->m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
+            } else if( this->m_eBodiesState == RigidBodyType::STATIC) {
                 m_rSceneNodeBodies.push_back(sceneNode);
             }
 
@@ -312,7 +312,7 @@ protected:
 
             if( this->m_eBodiesState == RigidBodyType::SIMULATED) {
                 m_rSceneNodeSimBodies.push_back(sceneNode);
-            } else if( this->m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
+            } else if( this->m_eBodiesState == RigidBodyType::STATIC) {
                 m_rSceneNodeBodies.push_back(sceneNode);
             }
 

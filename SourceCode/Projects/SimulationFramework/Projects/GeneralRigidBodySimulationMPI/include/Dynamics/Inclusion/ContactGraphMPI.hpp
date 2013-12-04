@@ -1,5 +1,5 @@
-#ifndef ContactGraph_hpp
-#define ContactGraph_hpp
+#ifndef ContactGraphMPI_hpp
+#define ContactGraphMPI_hpp
 
 
 /** Contact Graph */
@@ -16,6 +16,8 @@
 
 #include "ProxFunctions.hpp"
 #include "InclusionSolverSettings.hpp"
+
+#include "CompileTimeArray.hpp"
 
 
 class ContactGraphNodeData {
@@ -128,255 +130,70 @@ struct ContactGraphMode{
     struct ForIteration{};
 };
 
-template <>
-class ContactGraph<ContactGraphMode::NoIteration> : public Graph::GeneralGraph< ContactGraphNodeData,ContactGraphEdgeData > {
-public:
 
+struct ContactFeasibilityTable1{
+
+/*                |------> i2
+                       Locals  ||  Remotes
+                   ==========================
+                    sim|sta|ani||sim|sta|ani|
+ _                 ==========================
+ |    L   simulated| 1 | 1 | x || 1 | 0 | x |
+ |    o      static| 1 | 0 | x || 1 | 0 | x |
+ |    c.   animated| x | x | x || x | x | x |
+ |        ---------------------------------------
+ |    R   simulated| 1 | 1 | x || 0 | 0 | x |
+ i1   e      static| 0 | 0 | x || 0 | 0 | x |
+      m.   animated| x | x | x || x | x | x |
+
+      1= feasible or allowed
+      x= not implemented
+
+*/
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef ContactGraphNodeData NodeDataType;
-    typedef ContactGraphEdgeData EdgeDataType;
-    typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
-    typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
+    // 2D to 1D index with length L (store symetric matrix as 1D array)
+    template<unsigned int L, char i1, char i2>
+    struct make1DIndexSym{enum{result = i1*L +i2 - i1*(i1+1)/2 }};
 
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType NodeListType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType EdgeListType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
-
-public:
-
-    ContactGraph(ContactParameterMap * contactParameterMap):
-    m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0)
+    //Always zero
+    template<unsigned int index> struct TableIndexFunc {
+        enum { value = 0 };
+    };
+    // Contact combinations which are feasible value = 1
+    //Specialization for Sim Local - Sim Local
+    template<> struct TableIndexFunc
+    <make1DIndexSym<RigidBodyType::BodyState::NSTATES, RigidBodyType::BodyState::SIMULATED, RigidBodyType::BodyState::SIMULATED>::result>
     {
-        m_pContactParameterMap = contactParameterMap;
-    }
-    ~ContactGraph() {
-        clearGraph();
-    }
+        enum { value = 1 };
+    };
+    //Specialization for Sim Local - Static Local
+    template<> struct TableIndexFunc
+    <make1DIndexSym<RigidBodyType::BodyState::NSTATES,RigidBodyType::BodyState::SIMULATED, RigidBodyType::BodyState::STATIC>::result>
+    {
+        enum { value = 1 };
+    };
+    //Specialization for Sim Local - Sim Remote ( + RigidBodyType::BodyState::NSTATES)
+    template<> struct TableIndexFunc
+    <make1DIndexSym<RigidBodyType::BodyState::NSTATES,RigidBodyType::BodyState::SIMULATED, RigidBodyType::BodyState::SIMULATED + RigidBodyType::BodyState::NSTATES>::result>
+    {
+        enum { value = 1 };
+    };
+    //Specialization for Static Local - Sim Remote ( + RigidBodyType::BodyState::NSTATES)
+    template<> struct TableIndexFunc
+    <make1DIndexSym<RigidBodyType::BodyState::NSTATES,RigidBodyType::BodyState::STATIC, RigidBodyType::BodyState::SIMULATED + RigidBodyType::BodyState::NSTATES>::result>
+    {
+        enum { value = 1 };
+    };
 
-    void clearGraph() {
-        // This deletes all nodes, edges, and decrements the reference counts for the nodedata and edgedata
-        // cleanup allocated memory
-        for(NodeListIteratorType n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
-            delete (*n_it);
-        for(EdgeListIteratorType e_it = this->m_edges.begin(); e_it != this->m_edges.end(); e_it++)
-            delete (*e_it);
-        //cout << "clear graph"<<endl;
-        this->m_nodes.clear();
-        m_nodeCounter = 0;
-        this->m_edges.clear();
-        m_edgeCounter = 0;
-        m_nLambdas =0;
-        m_nFrictionParams=0;
-        m_SimBodyToContactsList.clear();
-
-    }
-
-    void addNode(CollisionData * pCollData) {
-
-        ASSERTMSG(pCollData->m_pBody1 != NULL && pCollData->m_pBody2 != NULL, " Bodys are null pointers?");
-        //cout << "add node : "<<m_nodeCounter<< " body id:" << pCollData->m_pBody1->m_id <<" and "<< pCollData->m_pBody2->m_id <<endl;
-
-        //  add a contact node to the graph
-        // check to which nodes we need to connect?
-        // all nodes (contacts) which are in the BodyContactList (maps bodies -> contacts)
-
-        // add the pNodeData to the node list
-        this->m_nodes.push_back( new NodeType(m_nodeCounter));
-        NodeType * addedNode = this->m_nodes.back();
-        addedNode->m_nodeData.m_pCollData = pCollData;
-
-
-
-        // Specify the contact model, (here we should do a look up or what ever)! ==================================
-        addedNode->m_nodeData.m_eContactModel = ContactModels::NCFContactModel;
-        addedNode->m_nodeData.m_nLambdas = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
-        addedNode->m_nodeData.m_xi.setZero(addedNode->m_nodeData.m_nLambdas);
-        // =========================================================================================================
-
-
-        // Compute general parameters for the contact
-        computeParams(addedNode->m_nodeData);
-
-        // FIRST BODY!
-        if( pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
-
-            computeW<1>( addedNode->m_nodeData);
-            connectNode<1>( addedNode);
-
-        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::ANIMATED ) {
-            // Contact goes into xi_N, xi_T
-            ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
-        }
-
-
-        // SECOND BODY!
-        if( pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
-
-            computeW<2>( addedNode->m_nodeData);
-            connectNode<2>( addedNode);
-
-        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::ANIMATED ) {
-            // Contact goes into xi_N, xi_T
-            ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
-        }
-
-
-        // increment the lambda counter, of how many forces we have so far!
-        m_nLambdas += addedNode->m_nodeData.m_nLambdas;
-        m_nFrictionParams += addedNode->m_nodeData.m_mu.rows();
-
-        m_nodeCounter++;
-    }
-
-
-    static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
-        ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
-        return (nodeData.m_pCollData->m_pBody1 == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
-    }
-
-    static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
-        ASSERTMSG( nodeData.m_pCollData->m_pBody1 == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
-        return (nodeData.m_pCollData->m_pBody1 == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
-    }
-
-
-    std::map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;
-    typedef typename std::map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIterator;
-
-    unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
-    unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
-private:
-
-    void computeParams(NodeDataType & nodeData) {
-        if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {
-            // Get Contact Parameters
-
-            //Set matrix size!
-            nodeData.m_I_plus_eps.setZero(ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
-            nodeData.m_mu.setZero(ContactModels::NormalAndCoulombFrictionContactModel::nFrictionParams);
-
-            ContactParams & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
-            nodeData.m_mu(0)         = params.m_mu;
-            nodeData.m_I_plus_eps(0)    = 1 + params.m_epsilon_N;
-            nodeData.m_I_plus_eps(1)    = 1 + params.m_epsilon_T;
-            nodeData.m_I_plus_eps(2)    = 1 + params.m_epsilon_T;
-        } else {
-            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
-        }
-
-    }
-
-    template<int bodyNr>
-    void computeW(NodeDataType & nodeData) {
-
-
-
-        if(nodeData.m_eContactModel == ContactModels::NCFContactModel) {
-
-
-            static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
-            static Matrix33 I_Jacobi_2; // this is the second part of the Jacobi;
-            static const CollisionData * pCollData;
-
-            pCollData = nodeData.m_pCollData;
-
-
-
-            if(bodyNr == 1) {
-                nodeData.m_W_body1.setZero(NDOFuObj, ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
-
-                updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
-                I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
-                // N direction =================================================
-                nodeData.m_W_body1.col(0).template head<3>() = - pCollData->m_cFrame.m_e_z; // I frame
-                nodeData.m_W_body1.col(0).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_z;
-
-                // T1 direction =================================================
-                nodeData.m_W_body1.col(1).template head<3>() = - pCollData->m_cFrame.m_e_x; // I frame
-                nodeData.m_W_body1.col(1).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_x;
-
-                // T2 direction =================================================
-                nodeData.m_W_body1.col(2).template head<3>() = - pCollData->m_cFrame.m_e_y; // I frame
-                nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
-            } else {
-                nodeData.m_W_body2.setZero(NDOFuObj, ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
-
-                updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
-                I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
-                // N direction =================================================
-                nodeData.m_W_body2.col(0).template head<3>() =  pCollData->m_cFrame.m_e_z; // I frame
-                nodeData.m_W_body2.col(0).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_z;
-
-                // T1 direction =================================================
-                nodeData.m_W_body2.col(1).template head<3>() =  pCollData->m_cFrame.m_e_x; // I frame
-                nodeData.m_W_body2.col(1).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_x;
-
-                // T2 direction =================================================
-                nodeData.m_W_body2.col(2).template head<3>() =  pCollData->m_cFrame.m_e_y; // I frame
-                nodeData.m_W_body2.col(2).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
-            }
-        } else {
-            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
-        }
-
-    }
-
-    template<int bodyNr>
-    void connectNode(NodeType * pNode) {
-
-        EdgeType * addedEdge;
-        RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1 : pNode->m_nodeData.m_pCollData->m_pBody2;
-
-        // Add self edge! ===========================================================
-        this->m_edges.push_back(new EdgeType(m_edgeCounter));
-        addedEdge = this->m_edges.back();
-        addedEdge->m_edgeData.m_pBody = pBody;
-
-        // add links
-        addedEdge->m_startNode = pNode;
-        addedEdge->m_endNode = pNode;
-        addedEdge->m_twinEdge = this->m_edges.back(); // Current we dont need a twin edge, self referencing!
-        // Add the edge to the nodes edge list!
-        pNode->m_edgeList.push_back( addedEdge );
-        m_edgeCounter++;
-        //cout << "add self edge: "<<pNode->m_nodeNumber<<" to "<<pNode->m_nodeNumber<<" body Id:"<< pBody->m_id<<endl;
-        // ===========================================================================
-
-        // Get all contacts on this body and connect to them =========================
-        NodeListType & nodeList = m_SimBodyToContactsList[pBody];
-        //iterate over the nodeList and add edges!
-        typename NodeListType::iterator it;
-        // if no contacts are already on the body we skip this
-        for(it = nodeList.begin(); it != nodeList.end(); it++) {
-
-            this->m_edges.push_back(new EdgeType(m_edgeCounter));
-            addedEdge = this->m_edges.back();
-            addedEdge->m_edgeData.m_pBody = pBody;
-            // add link
-            addedEdge->m_startNode = pNode;
-            addedEdge->m_endNode = (*it);
-            addedEdge->m_twinEdge = addedEdge; // Current we dont need a twin edge, self referencing!
-            // Add the edge to the nodes edge list!
-            pNode->m_edgeList.push_back( addedEdge );
-            (*it)->m_edgeList.push_back( addedEdge );
-            m_edgeCounter++;
-            //cout << "add edge: "<<pNode->m_nodeNumber<<" to "<<(*it)->m_nodeNumber<<" body Id:"<< pBody->m_id<<endl;
-        }
-
-        // Add new Node to the list;
-        nodeList.push_back(pNode);
-
-    }
-
-    ContactParameterMap* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
-
-    unsigned int m_nodeCounter; ///< An node counter, starting at 0.
-    unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
+    typedef typename CompileTimeArray::generateArray<char,
+            RigidBodyType::BodyState::NSTATES*(RigidBodyType::BodyState::NSTATES+1)/2,
+            TableIndexFunc
+            >::result Array;
 
 };
+
 
 template <>
 class ContactGraph<ContactGraphMode::ForIteration> : public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
@@ -395,6 +212,10 @@ public:
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
 
+
+
+    enum class NodeColor: int {LOCALNODE, REMOTENODE};
+
     ContactGraph(ContactParameterMap * contactParameterMap):
     m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0)
     {
@@ -406,7 +227,7 @@ public:
     }
 
     void clearGraph() {
-        // This deletes all nodes, edges, and decrements the reference counts for the nodedata and edgedata
+        // This deletes all nodes, edges
         // cleanup allocated memory
         for(NodeListIteratorType n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
             delete (*n_it);
@@ -421,6 +242,9 @@ public:
         m_nFrictionParams=0;
         m_SimBodyToContactsList.clear();
 
+        //clear own lists
+        m_localNodes.clear();
+        m_remoteNodes.clear();
     }
 
     void addNode(CollisionData * pCollData) {
@@ -437,6 +261,22 @@ public:
         // add the pNodeData to the node list
         this->m_nodes.push_back( new NodeType(m_nodeCounter));
         NodeType * addedNode = this->m_nodes.back();
+        // Add to Remote or Local list
+        // Check that contact is Local-Local or Remote-Local or Local-Remote
+        // So Fail if Remote-Remote
+        bool isRemoteNode;
+        bool feasible = checkFeasibilityOfContact(pCollData->m_pBody1, pCollData->m_pBody2 , isRemoteNode);
+
+        if( pCollData->m_pBody1->m_pBodyInfo->m_isRemote || pCollData->m_pBody2->m_pBodyInfo->m_isRemote){
+            //set the node color
+            addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
+            m_remoteNodes.push_back(addedNode);
+        }else{
+            //set the node color
+            addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::LOCALNODE);
+            m_localNodes.push_back(addedNode);
+        }
+
         addedNode->m_nodeData.m_pCollData = pCollData;
 
 
@@ -520,6 +360,42 @@ public:
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
 private:
+
+
+    NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies
+    NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies
+
+    bool checkFeasibilityOfContact(RigidBodyType * p1, RigidBodyType * p2, bool & isRemoteNode){
+
+        //Define the feasibility table
+        typedef typename ContactFeasibilityTable1::Array ContactFeasibilityTable;
+
+        // calculate table index
+        char i1 = p1->m_eState;
+        char i2 = p1->m_eState;
+
+        // add offset if remote
+        isRemoteNode = false;
+        if(p1->m_pBodyInfo){
+            if(p1->m_pBodyInfo->m_isRemote){
+                i1 += RigidBodyType::BodyState::NSTATES
+                isRemoteNode = true;
+            }
+        }
+        if(p2->m_pBodyInfo){
+            if(p2->m_pBodyInfo->m_isRemote){
+                i2 += RigidBodyType::BodyState::NSTATES
+                isRemoteNode = true;
+            }
+        }
+
+        if(i1>i2){
+            std::swap(i1,i2);
+        }
+        // Index into symetric array data of bools
+        if(ContactFeasibilityTable::data[i1*NSTATES+i2  - i1*(i1+1)/2 ]
+
+    }
 
     void computeParams(NodeDataType & nodeData) {
         if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {

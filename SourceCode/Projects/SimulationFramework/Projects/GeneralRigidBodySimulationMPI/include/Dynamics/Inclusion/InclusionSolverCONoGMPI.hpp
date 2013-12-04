@@ -18,7 +18,8 @@
 #include "VectorToSkewMatrix.hpp"
 #include "ProxFunctions.hpp"
 #include "InclusionSolverSettings.hpp"
-#include "ContactGraph.hpp"
+
+#include "ContactGraphMPI.hpp"
 
 #include "LogDefines.hpp"
 #include "ConfigureFile.hpp"

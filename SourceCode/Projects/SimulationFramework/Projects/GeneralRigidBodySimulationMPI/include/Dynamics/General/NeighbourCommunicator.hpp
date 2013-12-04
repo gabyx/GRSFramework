@@ -188,6 +188,7 @@ NeighbourCommunicator::NeighbourCommunicator(  boost::shared_ptr< DynamicsSystem
     m_pSimulationLog->logMessage("---> Initialized all NeighbourDatas");
 
     // Fill in all BodyInfos for the local bodies (remote bodies are not considered, there should not be any of those)
+    //
     typename RigidBodyContainerType::iterator it;
     for(it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
         ASSERTMSG(m_pProcTopo->belongsBodyToProcess(*it), "Body with id: "<< RigidBodyId::getBodyIdString(*it) <<" does not belong to process? How did you initialize your bodies?")

@@ -274,7 +274,7 @@ protected:
 
 
 
-        } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
+        } else if(m_eBodiesState == RigidBodyType::STATIC) {
 
            typename std::vector<RigidBodyType*>::iterator bodyIt;
 

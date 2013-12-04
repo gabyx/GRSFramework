@@ -636,7 +636,7 @@ protected:
             }
             m_nSimBodies += instances;
             m_nBodies += instances;
-        } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
+        } else if(m_eBodiesState == RigidBodyType::STATIC) {
             if(m_bParseDynamics) {
                 LOG(m_pSimulationLog,"---> Copy RigidBody References to DynamicSystem ..."<<std::endl;);
                 for(int i=0; i < m_bodyList.size(); i++) {
@@ -1140,7 +1140,7 @@ protected:
         if(type == "simulated") {
             m_eBodiesState =  RigidBodyType::SIMULATED;
         } else if(type == "not simulated") {
-            m_eBodiesState =  RigidBodyType::NOT_SIMULATED;
+            m_eBodiesState =  RigidBodyType::STATIC;
         } else if(type == "animated") {
             m_eBodiesState =  RigidBodyType::ANIMATED;
             throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'DynamicState' has no implementation in the parser"));
@@ -1155,7 +1155,7 @@ protected:
 
         if(m_eBodiesState == RigidBodyType::SIMULATED) {
             processDynamicPropertiesSimulated(dynProp);
-        } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
+        } else if(m_eBodiesState == RigidBodyType::STATIC) {
             processDynamicPropertiesNotSimulated(dynProp);
         }
 }

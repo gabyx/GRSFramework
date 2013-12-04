@@ -84,10 +84,11 @@ public:
 
     typedef RigidBodyBase AbsoluteBaseType; ///< The absolut base type where m_id is defined, for the rigid body container
 
-    enum BodyState{
-     SIMULATED,
-     ANIMATED,
-     NOT_SIMULATED
+    enum class BodyState: char {
+     SIMULATED = 0,
+     STATIC = 1,
+     ANIMATED = 2,
+     NSTATES=3 // Just to have the number of how many states are defined!
     }; ///< Emuration which defines if the object is simulated, animated or not simulated (which means fixed, and does not take part in the dynamics).
 
     typedef unsigned int BodyMaterialType;
@@ -148,7 +149,7 @@ public:
         setQuaternionZero(m_q_KI);
         m_h_term_const.setZero();
         m_h_term.setZero();
-        m_eState = NOT_SIMULATED;
+        m_eState = STATIC;
         m_eMaterial = 0;
         m_pSolverData = NULL;
         m_globalGeomId = 0;

@@ -1,4 +1,4 @@
-#include "InclusionSolverCONoG.hpp"
+#include "InclusionSolverCONoGMPI.hpp"
 
 
 

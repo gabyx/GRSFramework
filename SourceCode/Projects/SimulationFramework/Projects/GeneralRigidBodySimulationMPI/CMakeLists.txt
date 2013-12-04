@@ -101,6 +101,7 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourCommunicator.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodyGarbageCollector.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodyMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MoreauTimeStepperMPI.hpp
@@ -124,7 +125,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
@@ -209,8 +210,8 @@ SET(SOURCE_FILES
     ${SINGELTON_SRC}
     ${STATES_SRC}
     ${COMMON_SRC}
-    ${DYNAMICS_INC}
-    ${SYSTEMS_INC}
+    ${DYNAMICS_SRC}
+    ${SYSTEMS_SRC}
     ${CUDA_SRC}
 )
 
@@ -220,8 +221,8 @@ SET(INCLUDE_FILES
     ${SINGELTON_INC}
     ${STATES_INC}
     ${COMMON_INC}
-    ${DYNAMICS_SRC}
-    ${SYSTEMS_SRC}
+    ${DYNAMICS_INC}
+    ${SYSTEMS_INC}
     ${CUDA_INC}
 )
 
