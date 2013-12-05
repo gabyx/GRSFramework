@@ -149,7 +149,7 @@ public:
         setQuaternionZero(m_q_KI);
         m_h_term_const.setZero();
         m_h_term.setZero();
-        m_eState = STATIC;
+        m_eState = BodyState::STATIC;
         m_eMaterial = 0;
         m_pSolverData = NULL;
         m_globalGeomId = 0;

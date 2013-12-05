@@ -240,7 +240,7 @@ protected:
 
         //Copy the pointers!
 
-        if(m_eBodiesState == RigidBodyType::SIMULATED) {
+        if(m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
 
             m_nGlobalSimBodies += m_bodyList.size();
 
@@ -274,7 +274,7 @@ protected:
 
 
 
-        } else if(m_eBodiesState == RigidBodyType::STATIC) {
+        } else if(m_eBodiesState == RigidBodyType::BodyState::STATIC) {
 
            typename std::vector<RigidBodyType*>::iterator bodyIt;
 

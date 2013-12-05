@@ -3,48 +3,62 @@
 
 
 // http://stackoverflow.com/questions/2978259/programmatically-create-static-arrays-at-compile-time-in-c
-// Usage as: (MetaFunc is a class which defines a MetaFunc<index>::value for each index
-//    template<unsigned int index> struct MetaFunc {
-//         enum { value = index };
-//    };
+// Usage as: (Generator is a struct which defines a generator(size_t i) function for each index i
+// It needs to be a constexpr! -> Only one line code is accepted!
+// struct special
+//{
+//    static constexpr double generator(size_t index) {
+//        return (index==1)? 3 :
+//            ( (index==3)? 100 :
+//                ((index==0)? 40 : 0)
+//            );
+//    }
+//};
 //    const unsigned int count = 10;
-//    typedef CompileTimeArray::generate_array<count, MetaFunc>::result A;
+//    typedef CompileTimeArray::Array<count, special> A;
 //
 //    for (size_t i=0; i<count; ++i)
-//        std::cout << A::data[i] << "\n";
+//        std::cout << A::values[i] << "\n";
 
 namespace CompileTimeArray{
     namespace internal{
 
-        template<unsigned int... values>
-        struct ArrayHolder{
-            static unsigned int data[sizeof...(values)];
-        };
-        // static initializer  with variadic template arguments
-        template<unsigned int... values>
-        unsigned int ArrayHolder<values... >::data[] = { values... };
+        // generate the intgeral tempalte sequence ================
+        template <size_t...> struct indices {};
 
-        template<unsigned int N, template<unsigned int> class Func, unsigned int... values>
-        struct generateArray_impl{
-            typedef typename generateArray_impl<
-                                        N-1,
-                                        Func,
-                                        Func<N-1>::value, values...
-                                    >::result result;
+        template <size_t N, typename T> struct MakeIndices;
+
+        template <size_t... Indices>
+        struct MakeIndices<0, indices<Indices...> > {
+            typedef indices<0, Indices...> type;
         };
 
-        template<template<unsigned int> class Func, unsigned int... values>
-        struct generateArray_impl<0,Func, values...>{
-            typedef ArrayHolder<values...> result;
+        template <size_t N, size_t... Indices>
+        struct MakeIndices<N, indices<Indices...> > {
+            typedef typename MakeIndices<N-1, indices<N, Indices...> >::type type;
         };
+        // =========================================================
+
+        // Define template for ArrayHolder
+        template <typename Gen, size_t N, typename T> struct ArrayHolder;
+
+        //Sepcialization
+        template <typename Gen, size_t N, size_t... Indices>
+        struct ArrayHolder<Gen, N, indices<Indices...> >
+        {
+            static decltype(Gen::generate(size_t())) values[N];
+        };
+
+        //Static Initialization
+        template <typename Gen, size_t N, size_t... Indices>
+        decltype(Gen::generate(size_t()))  ArrayHolder<Gen, N, indices<Indices...> >::values[N] =  { Gen::generate(Indices)...};
+
     };
 
+    template <typename Gen, size_t N>
+    struct Array : internal::ArrayHolder<Gen, N, typename internal::MakeIndices<N-1,internal::indices<> >::type  >{};
 
-    //Main function
-    template<unsigned int N, template<unsigned int> class Func>
-    struct generateArray{
-        typedef typename internal::generateArray_impl<N,Func>::result result;
-    };
 };
+
 
 #endif // CompileTimeArray_hpp

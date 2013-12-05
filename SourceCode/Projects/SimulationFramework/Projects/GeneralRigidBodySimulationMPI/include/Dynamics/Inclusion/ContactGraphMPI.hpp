@@ -17,7 +17,7 @@
 #include "ProxFunctions.hpp"
 #include "InclusionSolverSettings.hpp"
 
-#include "CompileTimeArray.hpp"
+#include "ContactFeasibilityTable.hpp"
 
 
 class ContactGraphNodeData {
@@ -131,70 +131,6 @@ struct ContactGraphMode{
 };
 
 
-struct ContactFeasibilityTable1{
-
-/*                |------> i2
-                       Locals  ||  Remotes
-                   ==========================
-                    sim|sta|ani||sim|sta|ani|
- _                 ==========================
- |    L   simulated| 1 | 1 | x || 1 | 0 | x |
- |    o      static| 1 | 0 | x || 1 | 0 | x |
- |    c.   animated| x | x | x || x | x | x |
- |        ---------------------------------------
- |    R   simulated| 1 | 1 | x || 0 | 0 | x |
- i1   e      static| 0 | 0 | x || 0 | 0 | x |
-      m.   animated| x | x | x || x | x | x |
-
-      1= feasible or allowed
-      x= not implemented
-
-*/
-
-    DEFINE_RIGIDBODY_CONFIG_TYPES
-
-    // 2D to 1D index with length L (store symetric matrix as 1D array)
-    template<unsigned int L, char i1, char i2>
-    struct make1DIndexSym{enum{result = i1*L +i2 - i1*(i1+1)/2 }};
-
-    //Always zero
-    template<unsigned int index> struct TableIndexFunc {
-        enum { value = 0 };
-    };
-    // Contact combinations which are feasible value = 1
-    //Specialization for Sim Local - Sim Local
-    template<> struct TableIndexFunc
-    <make1DIndexSym<RigidBodyType::BodyState::NSTATES, RigidBodyType::BodyState::SIMULATED, RigidBodyType::BodyState::SIMULATED>::result>
-    {
-        enum { value = 1 };
-    };
-    //Specialization for Sim Local - Static Local
-    template<> struct TableIndexFunc
-    <make1DIndexSym<RigidBodyType::BodyState::NSTATES,RigidBodyType::BodyState::SIMULATED, RigidBodyType::BodyState::STATIC>::result>
-    {
-        enum { value = 1 };
-    };
-    //Specialization for Sim Local - Sim Remote ( + RigidBodyType::BodyState::NSTATES)
-    template<> struct TableIndexFunc
-    <make1DIndexSym<RigidBodyType::BodyState::NSTATES,RigidBodyType::BodyState::SIMULATED, RigidBodyType::BodyState::SIMULATED + RigidBodyType::BodyState::NSTATES>::result>
-    {
-        enum { value = 1 };
-    };
-    //Specialization for Static Local - Sim Remote ( + RigidBodyType::BodyState::NSTATES)
-    template<> struct TableIndexFunc
-    <make1DIndexSym<RigidBodyType::BodyState::NSTATES,RigidBodyType::BodyState::STATIC, RigidBodyType::BodyState::SIMULATED + RigidBodyType::BodyState::NSTATES>::result>
-    {
-        enum { value = 1 };
-    };
-
-    typedef typename CompileTimeArray::generateArray<char,
-            RigidBodyType::BodyState::NSTATES*(RigidBodyType::BodyState::NSTATES+1)/2,
-            TableIndexFunc
-            >::result Array;
-
-};
-
-
 template <>
 class ContactGraph<ContactGraphMode::ForIteration> : public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
 public:
@@ -299,7 +235,7 @@ public:
         computeParams(addedNode->m_nodeData);
 
         // FIRST BODY!
-        if( pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
+        if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
 
             //Set Flag that this Body in ContactGraph
             pCollData->m_pBody1->m_pSolverData->m_bInContactGraph = true;
@@ -311,14 +247,14 @@ public:
             computeW<1>( addedNode->m_nodeData);
             connectNode<1>( addedNode);
 
-        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::ANIMATED ) {
+        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
 
 
         // SECOND BODY!
-        if( pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
+        if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
 
             //Set Flag that this Body in ContactGraph
             pCollData->m_pBody2->m_pSolverData->m_bInContactGraph = true;
@@ -330,7 +266,7 @@ public:
             computeW<2>( addedNode->m_nodeData);
             connectNode<2>( addedNode);
 
-        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::ANIMATED ) {
+        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
@@ -366,25 +302,28 @@ private:
     NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies
 
     bool checkFeasibilityOfContact(RigidBodyType * p1, RigidBodyType * p2, bool & isRemoteNode){
-
         //Define the feasibility table
-        typedef typename ContactFeasibilityTable1::Array ContactFeasibilityTable;
+        typedef typename ContactFeasibilityTableMPI::Array CFT;
+        typedef RigidBodyType::BodyState BS;
+
+
+        ContactFeasibilityTableMPI::printArray(std::cout);
 
         // calculate table index
-        char i1 = p1->m_eState;
-        char i2 = p1->m_eState;
+        char i1 = (char)p1->m_eState;
+        char i2 = (char)p1->m_eState;
 
         // add offset if remote
         isRemoteNode = false;
         if(p1->m_pBodyInfo){
             if(p1->m_pBodyInfo->m_isRemote){
-                i1 += RigidBodyType::BodyState::NSTATES
+                i1 += (char)BS::NSTATES;
                 isRemoteNode = true;
             }
         }
         if(p2->m_pBodyInfo){
             if(p2->m_pBodyInfo->m_isRemote){
-                i2 += RigidBodyType::BodyState::NSTATES
+                i2 += (char)BS::NSTATES;
                 isRemoteNode = true;
             }
         }
@@ -393,8 +332,11 @@ private:
             std::swap(i1,i2);
         }
         // Index into symetric array data of bools
-        if(ContactFeasibilityTable::data[i1*NSTATES+i2  - i1*(i1+1)/2 ]
-
+        ASSERTMSG(i1* (unsigned int)BS::NSTATES +i2  - i1*(i1+1)/2 < ContactFeasibilityTableMPI::size, "Index wrong!" )
+//        if(CFT::values[i1* (unsigned int)BS::NSTATES +i2  - i1*(i1+1)/2 ] == true){
+//            return true;
+//        }
+        return false;
     }
 
     void computeParams(NodeDataType & nodeData) {
@@ -580,11 +522,11 @@ public:
             nodeData.m_LambdaFront = nodeData.m_b;
 
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_front ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
             }
 
@@ -611,7 +553,7 @@ public:
 
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
                 nodeData.m_u1BufferPtr->m_front = nodeData.m_u1BufferPtr->m_front + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
@@ -653,7 +595,7 @@ public:
 
             }
             // SECOND BODY
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
                 nodeData.m_u2BufferPtr->m_front = nodeData.m_u2BufferPtr->m_front  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
@@ -763,7 +705,7 @@ public:
 
         // u_0 , calculate const b
         // First Body
-        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED) {
+        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED) {
 
             // m_back contains u_s + M^⁻1*h*deltaT already!
             nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
@@ -772,7 +714,7 @@ public:
             nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
         }
         // SECOND BODY!
-        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
+        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
 
             // m_back contains u_s + M^⁻1*h*deltaT already!
             nodeData.m_u2BufferPtr->m_front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool

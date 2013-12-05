@@ -625,7 +625,7 @@ protected:
 
         //Copy the pointers!
 
-        if(m_eBodiesState == RigidBodyType::SIMULATED) {
+        if(m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
             if(m_bParseDynamics) {
                 LOG(m_pSimulationLog,"---> Copy RigidBody References to DynamicSystem ..."<<std::endl;);
                 for(int i=0; i < m_bodyList.size(); i++) {
@@ -636,7 +636,7 @@ protected:
             }
             m_nSimBodies += instances;
             m_nBodies += instances;
-        } else if(m_eBodiesState == RigidBodyType::STATIC) {
+        } else if(m_eBodiesState == RigidBodyType::BodyState::STATIC) {
             if(m_bParseDynamics) {
                 LOG(m_pSimulationLog,"---> Copy RigidBody References to DynamicSystem ..."<<std::endl;);
                 for(int i=0; i < m_bodyList.size(); i++) {
@@ -1138,11 +1138,11 @@ protected:
 
         std::string type = element->GetAttribute("type");
         if(type == "simulated") {
-            m_eBodiesState =  RigidBodyType::SIMULATED;
+            m_eBodiesState =  RigidBodyType::BodyState::SIMULATED;
         } else if(type == "not simulated") {
-            m_eBodiesState =  RigidBodyType::STATIC;
+            m_eBodiesState =  RigidBodyType::BodyState::STATIC;
         } else if(type == "animated") {
-            m_eBodiesState =  RigidBodyType::ANIMATED;
+            m_eBodiesState =  RigidBodyType::BodyState::ANIMATED;
             throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'DynamicState' has no implementation in the parser"));
         } else {
             throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'DynamicState' has no implementation in the parser"));
@@ -1153,9 +1153,9 @@ protected:
             m_bodyList[i]->m_eState = m_eBodiesState;
         }
 
-        if(m_eBodiesState == RigidBodyType::SIMULATED) {
+        if(m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
             processDynamicPropertiesSimulated(dynProp);
-        } else if(m_eBodiesState == RigidBodyType::STATIC) {
+        } else if(m_eBodiesState == RigidBodyType::BodyState::STATIC) {
             processDynamicPropertiesNotSimulated(dynProp);
         }
 }
