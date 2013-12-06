@@ -1,7 +1,7 @@
 #ifndef ContactFeasibilityTable_hpp
 #define ContactFeasibilityTable_hpp
 
-
+#include "AssertionDebug.hpp"
 #include "CompileTimeArray.hpp"
 
 /**
@@ -76,6 +76,47 @@ namespace ContactFeasibilityTableMPI{
         }
         os <<Array::values[size-1] << " ]" << std::endl;
     };
+
+    template<typename RigidBodyType>
+    bool checkFeasibilityOfContact(RigidBodyType * p1, RigidBodyType * p2, bool & isRemoteNode){
+        //Define the feasibility table
+        typedef typename RigidBodyType::BodyState BS;
+
+        //printArray(std::cout);
+
+        // calculate table index
+        char i1 = (char)p1->m_eState;
+        char i2 = (char)p1->m_eState;
+
+        // add offset if remote
+        isRemoteNode = false;
+        if(p1->m_pBodyInfo){
+            if(p1->m_pBodyInfo->m_isRemote){
+                i1 += (char)BS::NSTATES;
+                isRemoteNode = true;
+            }
+        }
+        if(p2->m_pBodyInfo){
+            if(p2->m_pBodyInfo->m_isRemote){
+                i2 += (char)BS::NSTATES;
+                isRemoteNode = true;
+            }
+        }
+
+        if(i1>i2){
+            std::swap(i1,i2);
+        }
+        // Index into symetric array data of bools
+        ASSERTMSG(i1* (char)BS::NSTATES +i2  - i1*(i1+1)/2 < size, "Index wrong: id1: "<< p1->m_id <<" i1: " << i1 << "id2: " << p2->m_id<< " i2: " << i2 )
+        if(Array::values[i1* (char)BS::NSTATES +i2  - i1*(i1+1)/2 ] == true){
+
+            return true;
+        }
+        ERRORMSG("Contact not feasible! -> id1: "<< p1->m_id <<" i1: " << i1 << "id2: " << p2->m_id<< " i2: " << i2 );
+        return false;
+    }
+
+
 };
 
 

@@ -150,7 +150,7 @@ public:
 
 
 
-    enum class NodeColor: int {LOCALNODE, REMOTENODE};
+    enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE};
 
     ContactGraph(ContactParameterMap * contactParameterMap):
     m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0)
@@ -160,6 +160,10 @@ public:
 
     ~ContactGraph() {
         clearGraph();
+    }
+
+    void setLog(Logging::Log * solverLog){
+        m_pSolverLog = solverLog;
     }
 
     void clearGraph() {
@@ -201,9 +205,10 @@ public:
         // Check that contact is Local-Local or Remote-Local or Local-Remote
         // So Fail if Remote-Remote
         bool isRemoteNode;
-        bool feasible = checkFeasibilityOfContact(pCollData->m_pBody1, pCollData->m_pBody2 , isRemoteNode);
+        bool feasible = ContactFeasibilityTableMPI::checkFeasibilityOfContact(pCollData->m_pBody1, pCollData->m_pBody2 , isRemoteNode);
+        LOGASSERTMSG(feasible, m_pSolverLog, "Contact not feasible between body:  id1: " <<pCollData->m_pBody1->m_id << " and id2: " <<pCollData->m_pBody2->m_id )
 
-        if( pCollData->m_pBody1->m_pBodyInfo->m_isRemote || pCollData->m_pBody2->m_pBodyInfo->m_isRemote){
+        if(isRemoteNode){
             //set the node color
             addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
             m_remoteNodes.push_back(addedNode);
@@ -279,15 +284,30 @@ public:
     }
 
 
-    static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    inline  const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
     }
 
-    static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    inline  const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1 == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
+
+
+    //Local Visitor
+    template<typename TNodeVisitor>
+	void applyNodeVisitorLocal(TNodeVisitor & vv){
+		for(auto curr_node = m_localNodes.begin(); curr_node != m_localNodes.end(); curr_node++)
+			(*(*curr_node)).template acceptVisitor<TNodeVisitor>(vv);
+	}
+	//Remote Visitor
+    template<typename TNodeVisitor>
+	void applyNodeVisitorRemote(TNodeVisitor & vv){
+		for(auto curr_node = m_remoteNodes.begin(); curr_node != m_remoteNodes.end(); curr_node++)
+			(*(*curr_node)).template acceptVisitor<TNodeVisitor>(vv);
+	}
+
 
 
     std::map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;
@@ -297,47 +317,11 @@ public:
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
 private:
 
+    Logging::Log * m_pSolverLog;
 
     NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies
     NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies
 
-    bool checkFeasibilityOfContact(RigidBodyType * p1, RigidBodyType * p2, bool & isRemoteNode){
-        //Define the feasibility table
-        typedef typename ContactFeasibilityTableMPI::Array CFT;
-        typedef RigidBodyType::BodyState BS;
-
-
-        ContactFeasibilityTableMPI::printArray(std::cout);
-
-        // calculate table index
-        char i1 = (char)p1->m_eState;
-        char i2 = (char)p1->m_eState;
-
-        // add offset if remote
-        isRemoteNode = false;
-        if(p1->m_pBodyInfo){
-            if(p1->m_pBodyInfo->m_isRemote){
-                i1 += (char)BS::NSTATES;
-                isRemoteNode = true;
-            }
-        }
-        if(p2->m_pBodyInfo){
-            if(p2->m_pBodyInfo->m_isRemote){
-                i2 += (char)BS::NSTATES;
-                isRemoteNode = true;
-            }
-        }
-
-        if(i1>i2){
-            std::swap(i1,i2);
-        }
-        // Index into symetric array data of bools
-        ASSERTMSG(i1* (unsigned int)BS::NSTATES +i2  - i1*(i1+1)/2 < ContactFeasibilityTableMPI::size, "Index wrong!" )
-//        if(CFT::values[i1* (unsigned int)BS::NSTATES +i2  - i1*(i1+1)/2 ] == true){
-//            return true;
-//        }
-        return false;
-    }
 
     void computeParams(NodeDataType & nodeData) {
         if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {

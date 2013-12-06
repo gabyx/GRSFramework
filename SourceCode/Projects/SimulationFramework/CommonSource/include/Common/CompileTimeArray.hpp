@@ -2,24 +2,26 @@
 #define CompileTimeArray_hpp
 
 
-// http://stackoverflow.com/questions/2978259/programmatically-create-static-arrays-at-compile-time-in-c
-// Usage as: (Generator is a struct which defines a generator(size_t i) function for each index i
-// It needs to be a constexpr! -> Only one line code is accepted!
-// struct special
-//{
-//    static constexpr double generator(size_t index) {
-//        return (index==1)? 3 :
-//            ( (index==3)? 100 :
-//                ((index==0)? 40 : 0)
-//            );
-//    }
-//};
-//    const unsigned int count = 10;
-//    typedef CompileTimeArray::Array<count, special> A;
-//
-//    for (size_t i=0; i<count; ++i)
-//        std::cout << A::values[i] << "\n";
-
+/**
+* http://stackoverflow.com/questions/2978259/programmatically-create-static-arrays-at-compile-time-in-c
+* Usage as: (Generator is a struct which defines a  " generator(size_t i) " function for each index i
+* It needs to be a constexpr! -> Only one line code is accepted!
+*
+*    struct special
+*    {
+*       static constexpr double generator(size_t index) {
+*           return (index==1)? 3 :
+*               ( (index==3)? 100 :
+*                   ((index==0)? 40 : 0)
+*               );
+*       }
+*    };
+*    const unsigned int count = 10;
+*    typedef CompileTimeArray::Array<count, special> A;
+*
+*    for (size_t i=0; i<count; ++i)
+*        std::cout << A::values[i] << "\n";
+*/
 namespace CompileTimeArray{
     namespace internal{
 

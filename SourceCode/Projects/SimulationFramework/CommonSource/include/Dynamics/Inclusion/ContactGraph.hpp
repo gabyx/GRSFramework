@@ -201,24 +201,24 @@ public:
         computeParams(addedNode->m_nodeData);
 
         // FIRST BODY!
-        if( pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
+        if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
 
             computeW<1>( addedNode->m_nodeData);
             connectNode<1>( addedNode);
 
-        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::ANIMATED ) {
+        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
 
 
         // SECOND BODY!
-        if( pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
+        if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
 
             computeW<2>( addedNode->m_nodeData);
             connectNode<2>( addedNode);
 
-        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::ANIMATED ) {
+        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
@@ -459,7 +459,7 @@ public:
         computeParams(addedNode->m_nodeData);
 
         // FIRST BODY!
-        if( pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
+        if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
 
             //Set Flag that this Body in ContactGraph
             pCollData->m_pBody1->m_pSolverData->m_bInContactGraph = true;
@@ -471,14 +471,14 @@ public:
             computeW<1>( addedNode->m_nodeData);
             connectNode<1>( addedNode);
 
-        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::ANIMATED ) {
+        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
 
 
         // SECOND BODY!
-        if( pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
+        if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
 
             //Set Flag that this Body in ContactGraph
             pCollData->m_pBody2->m_pSolverData->m_bInContactGraph = true;
@@ -490,7 +490,7 @@ public:
             computeW<2>( addedNode->m_nodeData);
             connectNode<2>( addedNode);
 
-        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::ANIMATED ) {
+        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
@@ -704,11 +704,11 @@ public:
             nodeData.m_LambdaFront = nodeData.m_b;
 
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_front ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
             }
 
@@ -735,7 +735,7 @@ public:
 
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
                 nodeData.m_u1BufferPtr->m_front = nodeData.m_u1BufferPtr->m_front + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
@@ -777,7 +777,7 @@ public:
 
             }
             // SECOND BODY
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
                 nodeData.m_u2BufferPtr->m_front = nodeData.m_u2BufferPtr->m_front  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
@@ -887,7 +887,7 @@ public:
 
         // u_0 , calculate const b
         // First Body
-        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::SIMULATED) {
+        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED) {
 
             // m_back contains u_s + M^⁻1*h*deltaT already!
             nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
@@ -896,7 +896,7 @@ public:
             nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
         }
         // SECOND BODY!
-        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::SIMULATED ) {
+        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
 
             // m_back contains u_s + M^⁻1*h*deltaT already!
             nodeData.m_u2BufferPtr->m_front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool

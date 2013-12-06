@@ -64,20 +64,21 @@ void CollisionSolver::solveCollision() {
     // All objects have been updated...
 
     //// Do simple collision detection (SimBodies to SimBodies)
-//    #if CoutLevelSolver>1
-//        LOG(m_pSolverLog, " \t\t -> SimBodies to SimBodies "<<std::endl;)
-//    #endif
-//    typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyIti;
-//    for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
-//        typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
-//        bodyItj++;
-//        for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
-//
-//            //check for a collision
-//            m_Collider.checkCollision((*bodyIti), (*bodyItj));
-//
-//        }
-//    }
+    #if CoutLevelSolver>1
+        LOG(m_pSolverLog, " \t\t -> SimBodies to SimBodies "<<std::endl;)
+    #endif
+    if(m_SimBodies.size()){
+        for(auto bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
+            typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
+            bodyItj++;
+            for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
+
+                //check for a collision
+                m_Collider.checkCollision((*bodyIti), (*bodyItj));
+
+            }
+        }
+    }
 
     //// Do simple collision detection (SimBodies to RemoteSimBodies)
 

@@ -42,8 +42,12 @@ InclusionSolverCONoG::~InclusionSolverCONoG(){
 void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::filesystem::path folder_path ) {
 
     m_pSolverLog = pSolverLog;
+
+    m_ContactGraph.setLog(m_pSolverLog);
     m_pSorProxStepNodeVisitor->setLog(m_pSolverLog);
     m_pSorProxInitNodeVisitor->setLog(m_pSolverLog);
+
+
 
     #if HAVE_CUDA_SUPPORT == 1
 
@@ -192,9 +196,9 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
     // Calculates b vector for all nodes, u_0, R_ii, ...
     m_pSorProxInitNodeVisitor->setParams(alpha);
-    m_ContactGraph.applyNodeVisitor(*m_pSorProxInitNodeVisitor);
+    m_ContactGraph.applyNodeVisitorLocal(*m_pSorProxInitNodeVisitor);
 
-    // Integrate all bodies!
+    // Integrate all local sim bodies!
     for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
         (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
@@ -249,7 +253,7 @@ void InclusionSolverCONoG::doSorProx() {
 void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     // Move over all nodes, and do a sor prox step
-    m_ContactGraph.applyNodeVisitor(*m_pSorProxStepNodeVisitor);
+    m_ContactGraph.applyNodeVisitorLocal(*m_pSorProxStepNodeVisitor);
     // Move over all nodes, end of Sor Prox
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph

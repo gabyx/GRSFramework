@@ -172,9 +172,9 @@ protected:
             sceneNode->setOrientation(this->m_bodyList[i]->m_q_KI(0),this->m_bodyList[i]->m_q_KI(1),this->m_bodyList[i]->m_q_KI(2),this->m_bodyList[i]->m_q_KI(3));
 
 
-            if( this->m_eBodiesState == RigidBodyType::SIMULATED) {
+            if( this->m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
                 m_rSceneNodeSimBodies.push_back(sceneNode);
-            } else if( this->m_eBodiesState == RigidBodyType::STATIC) {
+            } else if( this->m_eBodiesState == RigidBodyType::BodyState::STATIC) {
                 m_rSceneNodeBodies.push_back(sceneNode);
             }
 
@@ -310,9 +310,9 @@ protected:
             sceneNode->setOrientation(this->m_bodyList[i]->m_q_KI(0),this->m_bodyList[i]->m_q_KI(1),this->m_bodyList[i]->m_q_KI(2),this->m_bodyList[i]->m_q_KI(3));
 
 
-            if( this->m_eBodiesState == RigidBodyType::SIMULATED) {
+            if( this->m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
                 m_rSceneNodeSimBodies.push_back(sceneNode);
-            } else if( this->m_eBodiesState == RigidBodyType::STATIC) {
+            } else if( this->m_eBodiesState == RigidBodyType::BodyState::STATIC) {
                 m_rSceneNodeBodies.push_back(sceneNode);
             }
 

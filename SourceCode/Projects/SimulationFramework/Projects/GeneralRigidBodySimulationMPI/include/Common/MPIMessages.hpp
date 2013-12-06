@@ -675,7 +675,7 @@ private:
                     ERRORMSG("There is a SolverData already present in body with id: " << body->m_id);
                 }
             }
-                LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "There is no SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "! ?");
+            LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "There is no SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "! ?");
             serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
             ar & body->m_pSolverData->m_t;
             LOGSZ(m_pSerializerLog, "----->  m_t: " << body->m_pSolverData->m_t <<std::endl;);

@@ -69,16 +69,19 @@ void CollisionSolver::solveCollision() {
     //// Do simple collision detection (SimBodies to SimBodies)
     typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyIti;
     CollisionData * pColData;
-//    for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
-//        typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
-//        bodyItj++;
-//        for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
-//
-//            //check for a collision
-//            m_Collider.checkCollision((*bodyIti), (*bodyItj));
-//
-//        }
-//    }
+
+    if(m_SimBodies.size()){
+        for(auto bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
+            typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
+            bodyItj++;
+            for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
+
+                //check for a collision
+                m_Collider.checkCollision((*bodyIti), (*bodyItj));
+
+            }
+        }
+    }
 
 
     // Do simple collision detection (SimBodies to Bodies)
