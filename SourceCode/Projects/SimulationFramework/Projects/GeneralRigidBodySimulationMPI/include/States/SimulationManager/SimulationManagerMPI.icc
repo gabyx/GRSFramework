@@ -96,9 +96,6 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(m_nGlobalSimBodies));
     // =====================================================
 
-    m_pNbCommunicator =  boost::shared_ptr<NeighbourCommunicator >(
-                            new NeighbourCommunicator(m_pDynSys,  m_pProcCommunicator) );
-
 
     //Uncomment if StateRecorderType = StateRecorderBodys
     //Set up delegate function from NeighbourCommunicator to StateRecorederBody (close and open files)
@@ -116,7 +113,7 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     //as along as there is the SimMgrMpi there is a NbCommunicator and a StatRecorder, so no problem
     // ===============================================
 
-    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pNbCommunicator) );
+    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pProcCommunicator) );
 
     m_pSimulationLog->logMessage("---> SimulationManagerMPI::setup() finished!");
 }

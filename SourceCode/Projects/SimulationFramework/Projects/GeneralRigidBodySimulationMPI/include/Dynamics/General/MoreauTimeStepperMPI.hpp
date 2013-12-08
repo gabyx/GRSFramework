@@ -57,13 +57,14 @@ public:
 
 
     MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                      boost::shared_ptr<NeighbourCommunicator > pNbCommunicator);
+                      boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator);
     ~MoreauTimeStepper();
 
     // The Core Objects ==================================
     boost::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
     boost::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
     boost::shared_ptr<DynamicsSystemType>	m_pDynSys;
+    boost::shared_ptr<ProcessCommunicatorType > m_pProcCommunicator;
     boost::shared_ptr<NeighbourCommunicator > m_pNbCommunicator;
     // ===================================================
 
@@ -129,8 +130,11 @@ _________________________________________________________*/
 
 
 MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                                     boost::shared_ptr<NeighbourCommunicator > pNbCommunicator):
-    m_ReferenceSimFile(NDOFqObj,NDOFuObj) {
+                                     boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
+    m_ReferenceSimFile(NDOFqObj,NDOFuObj),
+    m_pSolverLog(NULL),
+    m_pDynSys(pDynSys),
+    m_pProcCommunicator(pProcCommunicator) {
 
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
@@ -139,14 +143,12 @@ MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynS
         ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }
 
-    m_pSolverLog = NULL;
 
-    m_pDynSys = pDynSys;
-
-    m_pNbCommunicator = pNbCommunicator;
+    m_pNbCommunicator =  boost::shared_ptr<NeighbourCommunicator >(
+                            new NeighbourCommunicator(m_pDynSys,  m_pProcCommunicator) );
 
     m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys));
-    m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys));
+    m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys, m_pProcCommunicator));
 
 };
 

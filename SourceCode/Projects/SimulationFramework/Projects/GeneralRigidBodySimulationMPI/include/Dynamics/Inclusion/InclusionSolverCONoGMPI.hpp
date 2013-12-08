@@ -6,34 +6,27 @@
 #include <fstream>
 
 
+#include <boost/timer/timer.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "AssertionDebug.hpp"
 
 #include "TypeDefs.hpp"
+#include "LogDefines.hpp"
 
 #include CollisionSolver_INCLUDE_FILE
 #include "PercussionPool.hpp"
-#include "MatrixHelpers.hpp"
-#include "VectorToSkewMatrix.hpp"
-#include "ProxFunctions.hpp"
+
 #include "InclusionSolverSettings.hpp"
 
 #include "ContactGraphMPI.hpp"
 
-#include "LogDefines.hpp"
-#include "ConfigureFile.hpp"
-
 #include "SimpleLogger.hpp"
 
-#if HAVE_CUDA_SUPPORT == 1
-#include "JorProxGPUVariant.hpp"
-#include "SorProxGPUVariant.hpp"
-#endif
+#include "MPICommunication.hpp"
 
-#include <boost/timer/timer.hpp>
-
-
+#include "NeighbourMap.hpp"
+#include "NeighbourDataInclusionCommunication.hpp"
 
 /**
 * @ingroup Inclusion
@@ -47,7 +40,13 @@ public:
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    InclusionSolverCONoG(boost::shared_ptr<CollisionSolverType >  pCollisionSolver, boost::shared_ptr<DynamicsSystemType> pDynSys);
+    typedef typename MPILayer::ProcessCommunicator                                      ProcessCommunicatorType;
+    typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
+    typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
+
+    InclusionSolverCONoG(boost::shared_ptr<CollisionSolverType >  pCollisionSolver,
+                         boost::shared_ptr<DynamicsSystemType> pDynSys,
+                         boost::shared_ptr< ProcessCommunicatorType > pProcCom);
     ~InclusionSolverCONoG();
 
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
@@ -102,6 +101,13 @@ protected:
     // Log
     Logging::Log *m_pSolverLog, *m_pSimulationLog;
     std::stringstream logstream;
+
+
+    //MPI Stuff
+    boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
+    boost::shared_ptr< ProcessInfoType > m_pProcInfo;
+    NeighbourMap<NeighbourDataInclusionCommunication> m_nbDataMap;
+    const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
 };
 
 

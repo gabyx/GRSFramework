@@ -19,7 +19,12 @@
 
 #include "ContactFeasibilityTable.hpp"
 
+#include "VectorToSkewMatrix.hpp"
 
+
+// Thiss two data classes are used for  m_eContactModel = ContactModels::N_ContactModel,
+//                                      m_eContactModel = ContactModels::NCF_ContactModel,
+//                                      m_eContactModel = ContactModels::NCFC_ContactModel,
 class ContactGraphNodeData {
 public:
 
@@ -52,9 +57,8 @@ public:
 
     const CollisionData * m_pCollData;
 
-    ContactModels::ContactModelEnum m_eContactModel;                  ///< This is a generic type which is used to distinguish between the different models!. See namespace ContactModels.
+    ContactModels::ContactModelEnum m_eContactModel;///< This is a generic type which is used to distinguish between the different models!. See namespace ContactModels.
 };
-
 class ContactGraphNodeDataIteration : public ContactGraphNodeData {
 public:
 
@@ -224,7 +228,7 @@ public:
 
         // Specify the contact model, (here we should do a look up or what ever)! ==================================
         // TODO
-        addedNode->m_nodeData.m_eContactModel = ContactModels::NCFContactModel;
+        addedNode->m_nodeData.m_eContactModel = ContactModels::NCF_ContactModel;
         const unsigned int dimSet = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
 
         addedNode->m_nodeData.m_xi.setZero(dimSet); //TODO take care, relative velocity dimesion independet of dimSet, could be?
@@ -315,16 +319,22 @@ public:
 
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
+
+
+    //std::map<unsigned int, NodeListType> m_nodeMap; //TODO make a map whith each color!
+    NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies (ref to m_nodeMap)
+    NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies (ref to m_nodeMap)
+
+
 private:
 
     Logging::Log * m_pSolverLog;
 
-    NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies
-    NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies
+
 
 
     void computeParams(NodeDataType & nodeData) {
-        if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {
+        if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
             // Get Contact Parameters
 
 
@@ -356,7 +366,7 @@ private:
 
 
 
-        if(nodeData.m_eContactModel == ContactModels::NCFContactModel) {
+        if(nodeData.m_eContactModel == ContactModels::NCF_ContactModel) {
 
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
@@ -407,7 +417,6 @@ private:
         }
 
     }
-
 
     template<int bodyNr>
     void connectNode(NodeType * pNode) {
@@ -499,7 +508,7 @@ public:
             LOG(m_pSolverLog, "Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
         #endif
 
-        if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {
+        if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
 
 
             // Init the prox value
@@ -692,7 +701,9 @@ public:
         if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED) {
 
             // m_back contains u_s + M^⁻1*h*deltaT already!
-            nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
+            // add + initial values M^⁻1 W lambda0 from percussion pool
+            nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
+
 
             nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_back /* m_u_s */ ;
             nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;

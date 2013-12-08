@@ -10,12 +10,13 @@
 #include <boost/shared_ptr.hpp>
 
 
-#include "BodyInfoMap.hpp"
-#include "NeighbourMap.hpp"
 
 #include "MPIMessages.hpp"
 #include "MPICommunication.hpp"
 
+#include "BodyInfoMap.hpp"
+#include "NeighbourMap.hpp"
+#include "NeighbourDataBodyCommunication.hpp"
 
 class RigidBodyAddRemoveNotificator {
 public:
@@ -81,17 +82,16 @@ class NeighbourCommunicator: public RigidBodyAddRemoveNotificator{;
 public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     typedef typename MPILayer::ProcessCommunicator                                      ProcessCommunicatorType;
     typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
-    typedef typename ProcessInfoType::RankIdType                                        RankIdType;
     typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
 
     typedef typename DynamicsSystemType::RigidBodySimContainerType                      RigidBodyContainerType;
     typedef typename DynamicsSystemType::GlobalGeometryMapType                          GlobalGeometryMapType;
 
-    //typedef BodyInfoMap                       BodyInfoMapType; //Not used
-    typedef NeighbourMap     NeighbourMapType;
+    typedef NeighbourMap<NeighbourDataBodyCommunication>     NeighbourMapType;
 
     NeighbourCommunicator(boost::shared_ptr< DynamicsSystemType> pDynSys ,
                           boost::shared_ptr< ProcessCommunicatorType > pProcCom);
@@ -142,12 +142,13 @@ private:
     const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
 
 
-
     RigidBodyContainerType & m_globalRemote;
     RigidBodyContainerType & m_globalLocal;
     GlobalGeometryMapType & m_globalGeometries;
 
     NeighbourMapType m_nbDataMap;   ///< map which gives all neighbour data structures
+    template<typename List>
+    void addLocalBodyExclusiveToNeighbourMap(RigidBodyType * body, const List & neighbourRanks);
 
     std::set< RigidBodyType * > m_localBodiesToDelete;
 
@@ -157,7 +158,7 @@ private:
 
 
 NeighbourCommunicator::NeighbourCommunicator(  boost::shared_ptr< DynamicsSystemType> pDynSys ,
-                                                                boost::shared_ptr< ProcessCommunicatorType > pProcCom):
+                                               boost::shared_ptr< ProcessCommunicatorType > pProcCom):
             m_pDynSys(pDynSys),
             m_globalLocal(pDynSys->m_SimBodies),
             m_globalRemote(pDynSys->m_RemoteSimBodies),
@@ -231,7 +232,8 @@ void NeighbourCommunicator::communicate(PREC currentSimTime){
 
         // Insert this body into the underlying structure for all nieghbours exclusively! (if no overlap, it is removed everywhere)
         LOGNC(m_pSimulationLog,"--->\t\t Add neighbours exclusively..."<<std::endl;)
-        m_nbDataMap.addLocalBodyExclusive(body,neighbours);
+        addLocalBodyExclusiveToNeighbourMap(body,neighbours);
+//        m_nbDataMap.addLocalBodyExclusive(body,neighbours);
 
         //Check owner of this body
         typename ProcessInfoType::RankIdType ownerRank;
@@ -273,6 +275,62 @@ void NeighbourCommunicator::communicate(PREC currentSimTime){
 
     LOGNC(m_pSimulationLog,"---> Communicate: finished"<< std::endl;)
 
+
+}
+
+
+
+template<typename List>
+void NeighbourCommunicator::addLocalBodyExclusiveToNeighbourMap(RigidBodyType * body,const List & neighbourRanks)
+{
+    STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );
+    // Add this local body exclusively to the given neighbours
+
+    // Loop over all incoming  ranks
+    typename List::const_iterator rankIt;
+    for( rankIt = neighbourRanks.begin();rankIt!= neighbourRanks.end();rankIt++){
+        // insert the new element into body info --> (rank, flags)
+        std::pair<typename BodyProcessInfo::RankToFlagsType::iterator,bool> res =
+                   body->m_pBodyInfo->m_neighbourRanks.insert(
+                                        typename BodyProcessInfo::RankToFlagsType::value_type(*rankIt,typename RigidBodyType::BodyInfoType::Flags(true))
+                                                       );
+
+        res.first->second.m_overlaps = true; // set the Flags for the existing or the newly inserted entry (rank,flags)
+
+        if(res.second){//if inserted we need to add this body to the underlying neighbour data
+           //add to the data
+           auto pairlocalData = m_nbDataMap.getNeighbourData(*rankIt)->addLocalBodyData(body);
+           ASSERTMSG(pairlocalData.second, "Insert to neighbour data rank: " << *rankIt << " in process rank: " <<m_rank << " failed!");
+           pairlocalData.first->m_commStatus = NeighbourMapType::DataType::LocalData::SEND_NOTIFICATION; // No need because is set automatically in constructor
+        }else{
+            ASSERTMSG(m_nbDataMap.getNeighbourData(*rankIt)->getLocalBodyData(body),"body with id "<< RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << *rankIt << " does not exist?" );
+            ASSERTMSG(m_nbDataMap.getNeighbourData(*rankIt)->getLocalBodyData(body)->m_commStatus ==  NeighbourMapType::DataType::LocalData::SEND_UPDATE,
+                      "m_commStatus for body with id: " << RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << *rankIt << "should be in update mode!");
+        }
+
+
+    }
+
+    // Clean up of the neighbour structure is done after communication!
+    // We cannot already remove the local bodies from the neighbours for
+    // which the flag m_overlaps = false because, this needs to be communicated first! (such that any neighbour does not request any update anymore!)
+    // So set the flags for this body to SEND_REMOVE for all his neighbours which have m_overlaps = false
+
+    for( typename BodyProcessInfo::RankToFlagsType::iterator rankToFlagsIt = body->m_pBodyInfo->m_neighbourRanks.begin();
+        rankToFlagsIt != body->m_pBodyInfo->m_neighbourRanks.end(); rankToFlagsIt++ ){
+
+        if( rankToFlagsIt->second.m_overlaps == false){
+
+            auto * localData = m_nbDataMap.getNeighbourData(rankToFlagsIt->first)->getLocalBodyData(body);
+
+            if(localData->m_commStatus == NeighbourMapType::DataType::LocalData::SEND_UPDATE){
+                localData->m_commStatus = NeighbourMapType::DataType::LocalData::SEND_REMOVE;
+            }else if (localData->m_commStatus = NeighbourMapType::DataType::LocalData::SEND_NOTIFICATION){
+                // Falls notification
+            }
+        }
+
+    }
 
 }
 

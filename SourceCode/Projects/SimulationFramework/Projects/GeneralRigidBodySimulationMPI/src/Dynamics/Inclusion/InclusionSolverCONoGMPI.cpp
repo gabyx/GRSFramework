@@ -1,12 +1,29 @@
 #include "InclusionSolverCONoGMPI.hpp"
 
+#include "ConfigureFile.hpp"
+
+#include "MatrixHelpers.hpp"
+#include "VectorToSkewMatrix.hpp"
+#include "ProxFunctions.hpp"
+
+#if HAVE_CUDA_SUPPORT == 1
+#include "JorProxGPUVariant.hpp"
+#include "SorProxGPUVariant.hpp"
+#endif
 
 
 InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
-                                           boost::shared_ptr<DynamicsSystemType > pDynSys):
+                                           boost::shared_ptr<DynamicsSystemType > pDynSys,
+                                           boost::shared_ptr< ProcessCommunicatorType > pProcCom
+                                           ):
     m_SimBodies(pDynSys->m_SimBodies),
     m_Bodies(pDynSys->m_Bodies),
-    m_ContactGraph(&(pDynSys->m_ContactParameterMap)){
+    m_ContactGraph(&(pDynSys->m_ContactParameterMap),
+    m_pProcCom(pProcCom),
+    m_pProcCom(pProcCom),
+    m_nbRanks(m_pProcCom->getProcInfo()->getProcTopo()->getNeighbourRanks()),
+    m_nbDataMap(m_pProcCom->getProcInfo()->getRank())
+    ){
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");

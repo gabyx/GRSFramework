@@ -191,7 +191,7 @@ public:
 
 
         // Specify the contact model, (here we should do a look up or what ever)! ==================================
-        addedNode->m_nodeData.m_eContactModel = ContactModels::NCFContactModel;
+        addedNode->m_nodeData.m_eContactModel = ContactModels::NCF_ContactModel;
         addedNode->m_nodeData.m_nLambdas = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
         addedNode->m_nodeData.m_xi.setZero(addedNode->m_nodeData.m_nLambdas);
         // =========================================================================================================
@@ -251,7 +251,7 @@ public:
 private:
 
     void computeParams(NodeDataType & nodeData) {
-        if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {
+        if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
             // Get Contact Parameters
 
             //Set matrix size!
@@ -274,7 +274,7 @@ private:
 
 
 
-        if(nodeData.m_eContactModel == ContactModels::NCFContactModel) {
+        if(nodeData.m_eContactModel == ContactModels::NCF_ContactModel) {
 
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
@@ -443,7 +443,7 @@ public:
 
         // Specify the contact model, (here we should do a look up or what ever)! ==================================
         // TODO
-        addedNode->m_nodeData.m_eContactModel = ContactModels::NCFContactModel;
+        addedNode->m_nodeData.m_eContactModel = ContactModels::NCF_ContactModel;
         const unsigned int dimSet = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
 
         addedNode->m_nodeData.m_xi.setZero(dimSet); //TODO take care, relative velocity dimesion independet of dimSet, could be?
@@ -522,7 +522,7 @@ public:
 private:
 
     void computeParams(NodeDataType & nodeData) {
-        if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {
+        if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
             // Get Contact Parameters
 
 
@@ -554,7 +554,7 @@ private:
 
 
 
-        if(nodeData.m_eContactModel == ContactModels::NCFContactModel) {
+        if(nodeData.m_eContactModel == ContactModels::NCF_ContactModel) {
 
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
@@ -697,7 +697,7 @@ public:
             LOG(m_pSolverLog, "Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
         #endif
 
-        if( nodeData.m_eContactModel == ContactModels::NCFContactModel ) {
+        if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
 
 
             // Init the prox value
