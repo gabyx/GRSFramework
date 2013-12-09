@@ -65,7 +65,7 @@ SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/MeshData.hpp
     ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
     ${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
-
+    ${PROJECT_SOURCE_DIR}/include/Common/CartesianGrid.hpp
     ${COMMONSOURCE_DIR}/include/Common/MakeCoordinateSystem.hpp
     ${COMMONSOURCE_DIR}/include/Common/VectorToSkewMatrix.hpp
     ${COMMONSOURCE_DIR}/include/Common/MatrixHelpers.hpp
@@ -91,6 +91,7 @@ SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFilePart.cpp
     ${PROJECT_SOURCE_DIR}/src/Common/MultiBodySimFileMPI.cpp
     ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
+    ${PROJECT_SOURCE_DIR}/src/Common/CartesianGrid.cpp
 )
 
 SET(DYNAMICS_INC

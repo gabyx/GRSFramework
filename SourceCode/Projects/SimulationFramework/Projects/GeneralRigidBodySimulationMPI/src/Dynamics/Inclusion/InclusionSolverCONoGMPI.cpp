@@ -18,12 +18,12 @@ InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverTyp
                                            ):
     m_SimBodies(pDynSys->m_SimBodies),
     m_Bodies(pDynSys->m_Bodies),
-    m_ContactGraph(&(pDynSys->m_ContactParameterMap),
+    m_ContactGraph(&(pDynSys->m_ContactParameterMap)),
     m_pProcCom(pProcCom),
-    m_pProcCom(pProcCom),
+    m_pProcInfo(m_pProcCom->getProcInfo()),
     m_nbRanks(m_pProcCom->getProcInfo()->getProcTopo()->getNeighbourRanks()),
     m_nbDataMap(m_pProcCom->getProcInfo()->getRank())
-    ){
+{
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
