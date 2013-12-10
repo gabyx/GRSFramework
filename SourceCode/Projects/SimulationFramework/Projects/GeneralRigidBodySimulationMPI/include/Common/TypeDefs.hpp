@@ -12,20 +12,19 @@
 #include "LayoutConfigDefs.hpp"
 
 
-#define RigidBody_INCLUDE_FILE "RigidBodyMPI.hpp"
-#define TimeStepper_INCLUDE_FILE "MoreauTimeStepperMPI.hpp"
-#define DynamicsSystem_INCLUDE_FILE "DynamicsSystemMPI.hpp"
+#define RigidBody_INCLUDE_FILE       "RigidBodyMPI.hpp"
+#define TimeStepper_INCLUDE_FILE     "MoreauTimeStepperMPI.hpp"
+#define DynamicsSystem_INCLUDE_FILE  "DynamicsSystemMPI.hpp"
 #define InclusionSolver_INCLUDE_FILE "InclusionSolverCONoGMPI.hpp"
 #define CollisionSolver_INCLUDE_FILE "CollisionSolverMPI.hpp"
-
+#define RigidBodySolverData_INCLUDE_FILE "RigidBodySolverDataMPI.hpp"
 
 class CollisionSolver;
 class DynamicsSystem;
 class InclusionSolverCO;
 class InclusionSolverCONoG;
 class RigidBodyBaseMPI;
-class RigidBodySolverDataCONoG;
-class RigidBodySolverDataNone;
+class RigidBodySolverDataCONoGMPI;
 class MoreauTimeStepper;
 
 //Try to make framework settings simpler:
@@ -41,7 +40,7 @@ namespace GlobalConfigs{
 
     namespace RigidBodyConfigs{
         typedef LayoutConfig<double, DynamicLayout<7,6> > LayoutConfigType;
-        typedef RigidBodySolverDataCONoG RigidBodySolverDataType;
+        typedef RigidBodySolverDataCONoGMPI RigidBodySolverDataType;
     }
     namespace DynamicSystemConfigs{
         typedef typename MyConfigs::RigidBodyType RigidBodyType;

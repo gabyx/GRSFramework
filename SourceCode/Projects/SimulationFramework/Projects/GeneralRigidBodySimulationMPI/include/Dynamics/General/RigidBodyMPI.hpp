@@ -5,6 +5,7 @@
 
 #include "BodyInfoMap.hpp"
 
+
 class RigidBodyBaseMPI: public RigidBodyBase {
 public:
 

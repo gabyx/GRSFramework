@@ -76,17 +76,23 @@ public:
 
 protected:
 
+    //MPI Stuff
+    boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
+    boost::shared_ptr< ProcessInfoType > m_pProcInfo;
+    const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
 
     unsigned int m_nExpectedContacts;
 
     boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
+    boost::shared_ptr<InclusionCommunicator> m_pInclusionComm;
 
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
-    ContactGraphType m_ContactGraph;
+     // Graph // needs m_nbDataMap
+    typedef ContactGraph<NeighbourMapType> ContactGraphType;
+    boost::shared_ptr<ContactGraphType> m_ContactGraph;
 
     void integrateAllBodyVelocities();
     void initContactGraphForIteration(PREC alpha);
@@ -95,19 +101,16 @@ protected:
 
     inline void doSorProx();
     inline void sorProxOverAllNodes();
-    SorProxStepNodeVisitor * m_pSorProxStepNodeVisitor;
-    SorProxInitNodeVisitor * m_pSorProxInitNodeVisitor;
+    SorProxStepNodeVisitor<ContactGraphType> * m_pSorProxStepNodeVisitor;
+    SorProxInitNodeVisitor<ContactGraphType> * m_pSorProxInitNodeVisitor;
 
     // Log
     Logging::Log *m_pSolverLog, *m_pSimulationLog;
     std::stringstream logstream;
 
 
-    //MPI Stuff
-    boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
-    boost::shared_ptr< ProcessInfoType > m_pProcInfo;
-    NeighbourMap<NeighbourDataInclusionCommunication> m_nbDataMap;
-    const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
+
+
 };
 
 

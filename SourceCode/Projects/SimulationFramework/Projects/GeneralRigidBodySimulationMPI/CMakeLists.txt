@@ -100,9 +100,10 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourMap.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourDataBodyCommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/BodyInfoMap.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourCommunicator.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/BodyCommunicator.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodyGarbageCollector.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodySolverDataMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodyMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
@@ -268,7 +269,7 @@ set(INCLUDE_DIRS
     ${COMMONSOURCE_DIR}/include/Common
     ${COMMONSOURCE_DIR}/external/SRDelegates/include/
     ${COMMONSOURCE_DIR}/external/getoptpp/
-    ${COMMONSOURCE_DIR}/external/getoptpp/src/ 
+    ${COMMONSOURCE_DIR}/external/getoptpp/src/
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry

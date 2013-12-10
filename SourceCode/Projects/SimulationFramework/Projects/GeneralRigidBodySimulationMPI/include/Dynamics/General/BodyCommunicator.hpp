@@ -78,7 +78,7 @@ private:
 
 
 
-class NeighbourCommunicator: public RigidBodyAddRemoveNotificator{;
+class BodyCommunicator: public RigidBodyAddRemoveNotificator{;
 public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
@@ -93,10 +93,10 @@ public:
 
     typedef NeighbourMap<NeighbourDataBodyCommunication>     NeighbourMapType;
 
-    NeighbourCommunicator(boost::shared_ptr< DynamicsSystemType> pDynSys ,
+    BodyCommunicator(boost::shared_ptr< DynamicsSystemType> pDynSys ,
                           boost::shared_ptr< ProcessCommunicatorType > pProcCom);
 
-    ~NeighbourCommunicator(){
+    ~BodyCommunicator(){
 
     }
 
@@ -105,9 +105,9 @@ public:
 private:
 
     /**
-    * The NeighbourMessageWrapper class needs access, to be able to serialize all together!
+    * The NeighbourMessageWrapperBodies class needs access, to be able to serialize all together!
     */
-    template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapper;
+    template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapperBodies;
 
     /**
     * @brief Sends a combined message with all info to the neighbour which then extracts it
@@ -129,7 +129,7 @@ private:
     void printAllNeighbourRanks();
 
     PREC m_currentSimTime;
-    MPILayer::NeighbourMessageWrapper< NeighbourCommunicator > m_message;
+    MPILayer::NeighbourMessageWrapperBodies< BodyCommunicator > m_message;
 
     boost::shared_ptr< DynamicsSystemType> m_pDynSys;
     boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
@@ -157,8 +157,8 @@ private:
 };
 
 
-NeighbourCommunicator::NeighbourCommunicator(  boost::shared_ptr< DynamicsSystemType> pDynSys ,
-                                               boost::shared_ptr< ProcessCommunicatorType > pProcCom):
+BodyCommunicator::BodyCommunicator(  boost::shared_ptr< DynamicsSystemType> pDynSys ,
+                                     boost::shared_ptr< ProcessCommunicatorType > pProcCom):
             m_pDynSys(pDynSys),
             m_globalLocal(pDynSys->m_SimBodies),
             m_globalRemote(pDynSys->m_RemoteSimBodies),
@@ -180,18 +180,15 @@ NeighbourCommunicator::NeighbourCommunicator(  boost::shared_ptr< DynamicsSystem
     }
 
     // Initialize all NeighbourDatas
-    typename ProcessTopologyType::NeighbourRanksListType::const_iterator rankIt;
-    for(rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
-        LOGNC(m_pSimulationLog,"---> Add neighbour data for process rank: "<<*rankIt<<std::endl;);
+    for(auto rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
+        LOGNC(m_pSimulationLog,"--->BodyCommunicator Add neighbour data for process rank: "<<*rankIt<<std::endl;);
         auto res = m_nbDataMap.insert(*rankIt);
         ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << *rankIt);
     }
     m_pSimulationLog->logMessage("---> Initialized all NeighbourDatas");
 
     // Fill in all BodyInfos for the local bodies (remote bodies are not considered, there should not be any of those)
-    //
-    typename RigidBodyContainerType::iterator it;
-    for(it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
+    for(auto it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
         ASSERTMSG(m_pProcTopo->belongsBodyToProcess(*it), "Body with id: "<< RigidBodyId::getBodyIdString(*it) <<" does not belong to process? How did you initialize your bodies?")
         (*it)->m_pBodyInfo = new RigidBodyType::BodyInfoType(m_rank);
     }
@@ -199,11 +196,11 @@ NeighbourCommunicator::NeighbourCommunicator(  boost::shared_ptr< DynamicsSystem
     // Initialize the buffer in the Process Communicator
     m_pProcCom->initializeBuffers();
 
-    m_pSimulationLog->logMessage("---> Initialized NeighbourCommunicator");
+    m_pSimulationLog->logMessage("---> Initialized BodyCommunicator");
 }
 
 
-void NeighbourCommunicator::communicate(PREC currentSimTime){
+void BodyCommunicator::communicate(PREC currentSimTime){
     LOGNC(m_pSimulationLog,"---> Communicate: Send and Receive message from/to neighbours, t = "<<currentSimTime<< std::endl;)
 
     m_currentSimTime = currentSimTime;
@@ -281,7 +278,7 @@ void NeighbourCommunicator::communicate(PREC currentSimTime){
 
 
 template<typename List>
-void NeighbourCommunicator::addLocalBodyExclusiveToNeighbourMap(RigidBodyType * body,const List & neighbourRanks)
+void BodyCommunicator::addLocalBodyExclusiveToNeighbourMap(RigidBodyType * body,const List & neighbourRanks)
 {
     STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );
     // Add this local body exclusively to the given neighbours
@@ -335,7 +332,7 @@ void NeighbourCommunicator::addLocalBodyExclusiveToNeighbourMap(RigidBodyType * 
 }
 
 
-bool NeighbourCommunicator::checkReceiveForRemotes(){
+bool BodyCommunicator::checkReceiveForRemotes(){
     bool m_ok = true;
     for(auto it = m_globalRemote.begin(); it != m_globalRemote.end(); it++){
 
@@ -354,7 +351,7 @@ bool NeighbourCommunicator::checkReceiveForRemotes(){
 
 
 
-void NeighbourCommunicator::sendMessagesToNeighbours(){
+void BodyCommunicator::sendMessagesToNeighbours(){
     LOGNC(m_pSimulationLog,"MPI>\t Send messages to neighbours!"<<std::endl;)
     m_localBodiesToDelete.clear();
 
@@ -368,16 +365,19 @@ void NeighbourCommunicator::sendMessagesToNeighbours(){
 }
 
 
-void NeighbourCommunicator::receiveMessagesFromNeighbours(){
+void BodyCommunicator::receiveMessagesFromNeighbours(){
     LOGNC(m_pSimulationLog,"MPI>\t Receive all messages from neighbours!"<<std::endl;)
     // set the rank of the receiving message automatically! inside the function!
     m_pProcCom->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTag::NEIGHBOUR_MESSAGE );
     LOGNC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
+
+    // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
+    m_pProcCom->waitForAllSends();
 }
 
 
 
-void NeighbourCommunicator::cleanUp(){
+void BodyCommunicator::cleanUp(){
     LOGNC(m_pSimulationLog,"--->\t CleanUp Routine " <<std::endl;)
     //Delete all bodies in the list
     for(auto it = m_localBodiesToDelete.begin(); it != m_localBodiesToDelete.end(); it++){
@@ -408,7 +408,7 @@ void NeighbourCommunicator::cleanUp(){
 }
 
 
-void NeighbourCommunicator::printAllNeighbourRanks(){
+void BodyCommunicator::printAllNeighbourRanks(){
     for(typename RigidBodyContainerType::iterator it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
         RigidBodyType * body = (*it);
 

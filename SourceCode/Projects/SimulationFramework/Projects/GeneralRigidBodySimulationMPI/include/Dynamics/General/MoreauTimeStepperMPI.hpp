@@ -35,7 +35,7 @@
 #include DynamicsSystem_INCLUDE_FILE
 
 #include "MPICommunication.hpp"
-#include "NeighbourCommunicator.hpp"
+#include "BodyCommunicator.hpp"
 //===========================================
 
 
@@ -65,7 +65,7 @@ public:
     boost::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
     boost::shared_ptr<DynamicsSystemType>	m_pDynSys;
     boost::shared_ptr<ProcessCommunicatorType > m_pProcCommunicator;
-    boost::shared_ptr<NeighbourCommunicator > m_pNbCommunicator;
+    boost::shared_ptr<BodyCommunicator > m_pNbCommunicator;
     // ===================================================
 
     void initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile="");
@@ -144,8 +144,8 @@ MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynS
     }
 
 
-    m_pNbCommunicator =  boost::shared_ptr<NeighbourCommunicator >(
-                            new NeighbourCommunicator(m_pDynSys,  m_pProcCommunicator) );
+    m_pNbCommunicator =  boost::shared_ptr<BodyCommunicator >(
+                            new BodyCommunicator(m_pDynSys,  m_pProcCommunicator) );
 
     m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys));
     m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys, m_pProcCommunicator));

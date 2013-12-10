@@ -150,6 +150,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodySolverData.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/MoreauTimeStepper.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp

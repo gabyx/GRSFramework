@@ -95,7 +95,7 @@ public:
 
 
 template<typename TNeighbourCommunicator >
-class NeighbourMessageWrapper : public boost::serialization::traits< NeighbourMessageWrapper<TNeighbourCommunicator>,
+class NeighbourMessageWrapperBodies : public boost::serialization::traits< NeighbourMessageWrapperBodies<TNeighbourCommunicator>,
     boost::serialization::object_serializable,
         boost::serialization::track_never> {
 public:
@@ -117,7 +117,7 @@ public:
     typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
     typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
 
-    NeighbourMessageWrapper(NeighbourCommunicatorType * nc): m_nc(nc), m_initialized(false), m_neighbourData(NULL) {
+    NeighbourMessageWrapperBodies(NeighbourCommunicatorType * nc): m_nc(nc), m_initialized(false), m_neighbourData(NULL) {
 
         if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
             m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
@@ -152,7 +152,7 @@ public:
     void save(Archive & ar, const unsigned int version) const {
 
 
-        LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapper is not correctly initialized, Rank not set!");
+        LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapperBodies is not correctly initialized, Rank not set!");
 
         //Message Content:
         /*
@@ -243,7 +243,7 @@ public:
 
     template<class Archive>
     void load(Archive & ar, const unsigned int version) const {
-            LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapper is not correctly initialized, Rank not set!")
+            LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapperBodies is not correctly initialized, Rank not set!")
 
 
         // Simulation Time:
@@ -382,7 +382,7 @@ private:
 
             }else{
             // FROM LOCAL to REMOVE!
-                // If it does not overlap anymore, it gets deleted by the delete list in NeighbourCommunicator
+                // If it does not overlap anymore, it gets deleted by the delete list in BodyCommunicator
                 LOGSZ(m_pSerializerLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" marked for deletion after send!" <<std::endl;)
                 m_nc->m_localBodiesToDelete.insert(body);
 

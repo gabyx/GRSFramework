@@ -78,10 +78,9 @@ namespace ContactFeasibilityTableMPI{
     };
 
     template<typename RigidBodyType>
-    bool checkFeasibilityOfContact(RigidBodyType * p1, RigidBodyType * p2, bool & isRemoteNode){
+    bool checkFeasibilityOfContact(const RigidBodyType * p1, const RigidBodyType * p2, std::pair<bool,bool> & isRemote ){
         //Define the feasibility table
         typedef typename RigidBodyType::BodyState BS;
-
         //printArray(std::cout);
 
         // calculate table index
@@ -89,17 +88,18 @@ namespace ContactFeasibilityTableMPI{
         char i2 = (char)p1->m_eState;
 
         // add offset if remote
-        isRemoteNode = false;
+        isRemote.first = false;
+        isRemote.second = false;
         if(p1->m_pBodyInfo){
             if(p1->m_pBodyInfo->m_isRemote){
                 i1 += (char)BS::NSTATES;
-                isRemoteNode = true;
+                isRemote.first = true;
             }
         }
         if(p2->m_pBodyInfo){
             if(p2->m_pBodyInfo->m_isRemote){
                 i2 += (char)BS::NSTATES;
-                isRemoteNode = true;
+                isRemote.second = true;
             }
         }
 

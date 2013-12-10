@@ -98,14 +98,14 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
 
     //Uncomment if StateRecorderType = StateRecorderBodys
-    //Set up delegate function from NeighbourCommunicator to StateRecorederBody (close and open files)
+    //Set up delegate function from BodyCommunicator to StateRecorederBody (close and open files)
     //        m_pNbCommunicator->addDelegateLocalRemove(
-    //            NeighbourCommunicator<DynamicsSystemType>::AddDelegate::template
+    //            BodyCommunicator<DynamicsSystemType>::AddDelegate::template
     //            from_method< StateRecorderType,&StateRecorderType::removeBody>
     //            (& *m_pStateRecorder.get())
     //        );
     //        m_pNbCommunicator->addDelegateLocalAdd(
-    //            NeighbourCommunicator<DynamicsSystemType>::AddDelegate::template
+    //            BodyCommunicator<DynamicsSystemType>::AddDelegate::template
     //            from_method< StateRecorderType,&StateRecorderType::addBody>
     //            (& *m_pStateRecorder.get())
     //        );

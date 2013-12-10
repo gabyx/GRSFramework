@@ -127,20 +127,15 @@ public:
 
 };
 
-template<typename ContactGraphMode > class ContactGraph;
 
-struct ContactGraphMode{
-    struct NoIteration{};
-    struct ForIteration{};
-};
-
-
-template <>
-class ContactGraph<ContactGraphMode::ForIteration> : public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
+template <typename TNeighbourDataMap>
+class ContactGraph : public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
 public:
 
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
+
+    typedef TNeighbourDataMap NeighbourDataMapType;
 
     typedef ContactGraphNodeDataIteration NodeDataType;
     typedef ContactGraphEdgeData EdgeDataType;
@@ -156,11 +151,14 @@ public:
 
     enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE};
 
-    ContactGraph(ContactParameterMap * contactParameterMap):
-    m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0)
-    {
-        m_pContactParameterMap = contactParameterMap;
-    }
+    ContactGraph(NeighbourDataMapType & nbDataMap, ContactParameterMap * contactParameterMap):
+    m_nodeCounter(0),
+    m_edgeCounter(0),
+    m_nLambdas(0),
+    m_nFrictionParams(0),
+    m_pContactParameterMap(contactParameterMap),
+    m_nbDataMap(nbDataMap)
+    {}
 
     ~ContactGraph() {
         clearGraph();
@@ -208,14 +206,23 @@ public:
         // Add to Remote or Local list
         // Check that contact is Local-Local or Remote-Local or Local-Remote
         // So Fail if Remote-Remote
-        bool isRemoteNode;
-        bool feasible = ContactFeasibilityTableMPI::checkFeasibilityOfContact(pCollData->m_pBody1, pCollData->m_pBody2 , isRemoteNode);
+        std::pair<bool,bool> isRemote;
+        bool feasible = ContactFeasibilityTableMPI::checkFeasibilityOfContact(pCollData->m_pBody1, pCollData->m_pBody2 , isRemote );
         LOGASSERTMSG(feasible, m_pSolverLog, "Contact not feasible between body:  id1: " <<pCollData->m_pBody1->m_id << " and id2: " <<pCollData->m_pBody2->m_id )
 
-        if(isRemoteNode){
+        if(isRemote.first or isRemote.second){
             //set the node color
             addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
             m_remoteNodes.push_back(addedNode);
+
+            //Add to the neighbour data
+            if(isRemote.first){
+                m_nbDataMap.getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteBody(pCollData->m_pBody1);
+            }
+            if(isRemote.second){
+                m_nbDataMap.getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteBody(pCollData->m_pBody2);
+            }
+
         }else{
             //set the node color
             addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::LOCALNODE);
@@ -470,18 +477,21 @@ private:
     unsigned int m_nodeCounter; ///< An node counter, starting at 0.
     unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
 
+    NeighbourDataMapType & m_nbDataMap;
+
 };
 
 
 /**
 @brief Visitor for class ContactGraph<TRigidBody,ContactGraphMode::ForIteration>
 */
+template<typename TContactGraph>
 class SorProxStepNodeVisitor{
 public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
+    typedef TContactGraph ContactGraphType;
     typedef typename ContactGraphType::NodeDataType NodeDataType;
     typedef typename ContactGraphType::EdgeDataType EdgeDataType;
     typedef typename ContactGraphType::EdgeType EdgeType;
@@ -533,7 +543,7 @@ public:
 
             Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle(
                 nodeData.m_mu(0),
-                nodeData.m_LambdaFront.head<ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension>()
+                nodeData.m_LambdaFront.template head<ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension>()
             );
 
 #if CoutLevelSolverWhenContact>2
@@ -662,12 +672,13 @@ private:
 /**
 @brief Visitor for class ContactGraph<TRigidBody,ContactGraphMode::ForIteration>
 */
+template<typename TContactGraph>
 class SorProxInitNodeVisitor{
 public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
+    typedef TContactGraph ContactGraphType;
     typedef typename ContactGraphType::NodeDataType NodeDataType;
     typedef typename ContactGraphType::EdgeDataType EdgeDataType;
     typedef typename ContactGraphType::EdgeType EdgeType;
@@ -722,7 +733,7 @@ public:
 
         // Calculate R_ii
         nodeData.m_R_i_inv_diag(0) = m_alpha / (nodeData.m_G_ii(0,0));
-        PREC r_T = m_alpha / ((nodeData.m_G_ii.diagonal().tail<2>()).maxCoeff());
+        PREC r_T = m_alpha / ((nodeData.m_G_ii.diagonal().template tail<2>()).maxCoeff());
         nodeData.m_R_i_inv_diag(1) = r_T;
         nodeData.m_R_i_inv_diag(2) = r_T;
 

@@ -14,7 +14,7 @@
 #include "MPIInformation.hpp"
 #include "MPICommunication.hpp"
 
-#include "NeighbourCommunicator.hpp"
+#include "BodyCommunicator.hpp"
 
 class StateRecorder;
 class StateRecorderBody;
@@ -64,7 +64,7 @@ private:
 
     boost::shared_ptr< TimeStepperType >	m_pTimestepper;
     boost::shared_ptr< DynamicsSystemType > m_pDynSys;
-    boost::shared_ptr< NeighbourCommunicator > m_pNbCommunicator;
+    boost::shared_ptr< BodyCommunicator > m_pNbCommunicator;
 
     typedef typename MPILayer::ProcessCommunicator::ProcessInfoType ProcessInfoType;
     boost::shared_ptr< MPILayer::ProcessCommunicator > m_pProcCommunicator;

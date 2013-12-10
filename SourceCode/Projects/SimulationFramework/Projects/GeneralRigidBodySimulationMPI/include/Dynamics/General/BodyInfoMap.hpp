@@ -19,7 +19,7 @@ public:
                             {};
         /**
         * Data structure in the Map: Rank -> Flags, Flags define the behaviour what needs to be done with this Body.
-        * m_overlaps: Used to decide if body is removed from the corresponding neigbourS
+        * m_overlaps: Used to decide if body is removed from the corresponding neigbourStructure
         */
         struct Flags{
             Flags(bool overlap = true, bool inNeighbourMap = true):m_overlaps(overlap), m_inNeighbourMap(inNeighbourMap){};
@@ -28,7 +28,7 @@ public:
         };
 
         typedef std::map<RankIdType, Flags> RankToFlagsType;
-        RankToFlagsType m_neighbourRanks;
+        RankToFlagsType m_neighbourRanks; ///< if body is remote: only one rankId has m_inNeighbourMap= true (only in the neighbour data it belongs to) all other ranks is for information only which ranks
 
         RankIdType m_ownerRank;   ///< The process rank to which this body belongs (changes during simulation, if change -> send to other process)
         bool m_overlapsThisRank; ///< True if body overlaps this process!, if false

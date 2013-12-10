@@ -19,7 +19,6 @@ class InclusionSolverCO;
 class InclusionSolverCONoG;
 class RigidBodyBase;
 class RigidBodySolverDataCONoG;
-class RigidBodySolverDataNone;
 class MoreauTimeStepper;
 
 
@@ -29,6 +28,7 @@ class MoreauTimeStepper;
 #define InclusionSolver_INCLUDE_FILE "InclusionSolverCONoG.hpp"
 #define CollisionSolver_INCLUDE_FILE "CollisionSolver.hpp"
 #define StatePool_INCLUDE_FILE "StatePoolVisBackFront.hpp"
+#define RigidBodySolverData_INCLUDE_FILE "RigidBodySolverData.hpp"
 
 //Try to make framework settings simpler:
 namespace GlobalConfigs{
