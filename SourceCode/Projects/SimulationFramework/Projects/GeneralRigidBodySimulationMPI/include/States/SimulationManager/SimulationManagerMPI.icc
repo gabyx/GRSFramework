@@ -99,12 +99,12 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
     //Uncomment if StateRecorderType = StateRecorderBodys
     //Set up delegate function from BodyCommunicator to StateRecorederBody (close and open files)
-    //        m_pNbCommunicator->addDelegateLocalRemove(
+    //        m_pBodyCommunicator->addDelegateLocalRemove(
     //            BodyCommunicator<DynamicsSystemType>::AddDelegate::template
     //            from_method< StateRecorderType,&StateRecorderType::removeBody>
     //            (& *m_pStateRecorder.get())
     //        );
-    //        m_pNbCommunicator->addDelegateLocalAdd(
+    //        m_pBodyCommunicator->addDelegateLocalAdd(
     //            BodyCommunicator<DynamicsSystemType>::AddDelegate::template
     //            from_method< StateRecorderType,&StateRecorderType::addBody>
     //            (& *m_pStateRecorder.get())
@@ -114,6 +114,9 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     // ===============================================
 
     m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pProcCommunicator) );
+
+    m_pSimulationLog->logMessage("---> Initialize ProcessCommunicator buffers...");
+    m_pProcCommunicator->initializeBuffers();
 
     m_pSimulationLog->logMessage("---> SimulationManagerMPI::setup() finished!");
 }

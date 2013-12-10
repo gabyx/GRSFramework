@@ -65,7 +65,7 @@ public:
     boost::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
     boost::shared_ptr<DynamicsSystemType>	m_pDynSys;
     boost::shared_ptr<ProcessCommunicatorType > m_pProcCommunicator;
-    boost::shared_ptr<BodyCommunicator > m_pNbCommunicator;
+    boost::shared_ptr<BodyCommunicator > m_pBodyCommunicator;
     // ===================================================
 
     void initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile="");
@@ -144,11 +144,11 @@ MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynS
     }
 
 
-    m_pNbCommunicator =  boost::shared_ptr<BodyCommunicator >(
+    m_pBodyCommunicator =  boost::shared_ptr<BodyCommunicator >(
                             new BodyCommunicator(m_pDynSys,  m_pProcCommunicator) );
 
     m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys));
-    m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys, m_pProcCommunicator));
+    m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pBodyCommunicator, m_pCollisionSolver,m_pDynSys, m_pProcCommunicator));
 
 };
 
@@ -326,7 +326,7 @@ void MoreauTimeStepper::doOneIteration() {
     m_currentSimulationTime = ts + m_Settings.m_deltaT/2.0;
     // ====================================================================================
 
-    m_pNbCommunicator->communicate(m_currentSimulationTime);
+    m_pBodyCommunicator->communicate(m_currentSimulationTime);
     /* Communicate all bodies which are in the overlap zone or are out of the processes topology!
 
      Sending

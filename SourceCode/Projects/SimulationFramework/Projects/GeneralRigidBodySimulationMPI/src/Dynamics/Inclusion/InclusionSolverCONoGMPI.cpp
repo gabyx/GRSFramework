@@ -12,17 +12,22 @@
 #endif
 
 
-InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
+
+
+InclusionSolverCONoG::InclusionSolverCONoG(
+                                           boost::shared_ptr< BodyCommunicator >  pBodyComm,
+                                           boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
                                            boost::shared_ptr< DynamicsSystemType > pDynSys,
                                            boost::shared_ptr< ProcessCommunicatorType > pProcCom
                                            ):
     m_SimBodies(pDynSys->m_SimBodies),
     m_Bodies(pDynSys->m_Bodies),
-    m_pProcCom(pProcCom),
-    m_pProcInfo(m_pProcCom->getProcInfo()),
-    m_nbRanks(m_pProcCom->getProcInfo()->getProcTopo()->getNeighbourRanks()),
-    m_nbDataMap(m_pProcCom->getProcInfo()->getRank()),
-    m_ContactGraph(m_nbDataMap,&(pDynSys->m_ContactParameterMap))
+    m_pDynSys(pDynSys),
+    m_pCollisionSolver(pCollisionSolver),
+    m_pBodyComm(pBodyComm),
+    m_pProcComm(pProcCom),
+    m_pProcInfo(m_pProcComm->getProcInfo()),
+    m_nbRanks(m_pProcComm->getProcInfo()->getProcTopo()->getNeighbourRanks())
 {
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
@@ -31,31 +36,32 @@ InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverTyp
         ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }
 
-    m_pCollisionSolver = pCollisionSolver;
 
-    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
-    m_pCollisionSolver->m_ContactDelegateList.addContactDelegate(
-        ContactDelegateList::ContactDelegate::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
-    );
-
+    m_timeProx = 0;
+    m_proxIterationTime = 0;
+    m_bUsedGPU = false;
+    m_isFinite = 0;
     m_nContacts = 0;
-
     m_iterationsNeeded =0;
     m_bConverged = true;
-    m_pDynSys = pDynSys;
+
+
 
 
     //Make a new Sor Prox Visitor (takes references from these class member)
     m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor<ContactGraphType>(m_Settings,m_bConverged,m_iterationsNeeded);
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>();
 
-    // Initialize all NeighbourDatas
-    for(auto rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
-        LOG(m_pSimulationLog,"---> InclusionSolver: Add neighbour data for process rank: "<<*rankIt<<std::endl;);
-        auto res = m_nbDataMap.insert(*rankIt);
-        ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << *rankIt);
-    }
-    m_pSimulationLog->logMessage("--->InclusionSolver: Initialized all NeighbourDatas");
+    m_pInclusionComm = boost::shared_ptr<InclusionCommunicator>( new InclusionCommunicator(pBodyComm, m_pDynSys,  m_pProcComm));
+    m_pContactGraph  = boost::shared_ptr<ContactGraphType>( new ContactGraphType(pDynSys));
+
+    m_pContactGraph->setInclusionCommunicator( m_pInclusionComm );
+    m_pInclusionComm->setContactGraph( m_pContactGraph );
+
+        //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
+    m_pCollisionSolver->m_ContactDelegateList.addContactDelegate(
+        ContactDelegateList::ContactDelegate::from_method< ContactGraphType,  &ContactGraphType::addNode>(m_pContactGraph.get())
+    );
 
 }
 
@@ -221,8 +227,7 @@ void InclusionSolverCONoG::integrateAllBodyVelocities() {
 void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
     // First communicate all remote bodies, which have contacts, to the owner
-    // Receive the multiplicity factor and apply this factor for every M and h term in the calculation!
-
+    m_pInclusionComm->communicateRemoteContacts();
 
 
     // Calculates b vector for all nodes, u_0, R_ii, ...

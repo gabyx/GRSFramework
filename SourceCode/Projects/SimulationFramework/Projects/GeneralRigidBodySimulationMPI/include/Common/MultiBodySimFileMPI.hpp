@@ -19,7 +19,7 @@
 #include "RigidBodyContainer.hpp"
 #include "MultiBodySimFileIOHelpers.hpp"
 
-#include "MPISerializationHelpers.hpp"
+#include "MPISerializationHelpersEigen.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE //Not used
 

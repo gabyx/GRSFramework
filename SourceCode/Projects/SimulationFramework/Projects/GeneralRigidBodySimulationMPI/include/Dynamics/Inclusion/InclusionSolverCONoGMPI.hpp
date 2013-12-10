@@ -19,14 +19,15 @@
 
 #include "InclusionSolverSettings.hpp"
 
-#include "ContactGraphMPI.hpp"
-
 #include "SimpleLogger.hpp"
 
 #include "MPICommunication.hpp"
 
-#include "NeighbourMap.hpp"
-#include "NeighbourDataInclusionCommunication.hpp"
+#include "BodyCommunicator.hpp"
+#include "InclusionCommunicator.hpp"
+
+#include "ContactGraphMPI.hpp"
+
 
 /**
 * @ingroup Inclusion
@@ -44,7 +45,8 @@ public:
     typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
     typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
 
-    InclusionSolverCONoG(boost::shared_ptr<CollisionSolverType >  pCollisionSolver,
+    InclusionSolverCONoG(boost::shared_ptr< BodyCommunicator >  pBodyComm,
+                         boost::shared_ptr<CollisionSolverType >  pCollisionSolver,
                          boost::shared_ptr<DynamicsSystemType> pDynSys,
                          boost::shared_ptr< ProcessCommunicatorType > pProcCom);
     ~InclusionSolverCONoG();
@@ -77,7 +79,7 @@ public:
 protected:
 
     //MPI Stuff
-    boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
+    boost::shared_ptr< ProcessCommunicatorType > m_pProcComm;
     boost::shared_ptr< ProcessInfoType > m_pProcInfo;
     const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
 
@@ -85,14 +87,18 @@ protected:
 
     boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
-    boost::shared_ptr<InclusionCommunicator> m_pInclusionComm;
+
+    boost::shared_ptr<BodyCommunicator>  m_pBodyComm;
+
+    typedef InclusionCommunicator InclusionCommunicatorType;
+    boost::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
+
+     // Graph // needs m_nbDataMap
+    typedef ContactGraph ContactGraphType;
+    boost::shared_ptr<ContactGraphType> m_pContactGraph;
 
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;
-
-     // Graph // needs m_nbDataMap
-    typedef ContactGraph<NeighbourMapType> ContactGraphType;
-    boost::shared_ptr<ContactGraphType> m_ContactGraph;
 
     void integrateAllBodyVelocities();
     void initContactGraphForIteration(PREC alpha);

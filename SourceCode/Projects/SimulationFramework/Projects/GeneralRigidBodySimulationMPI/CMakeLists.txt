@@ -80,7 +80,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPICommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPITopology.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/MPISerializationHelpers.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/MPISerializationHelpersEigen.hpp
     ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
 )
 SET(COMMON_SRC
@@ -127,6 +127,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
@@ -134,6 +135,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCONoGMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionCommunicator.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/NeighbourDataInclusionCommunication.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
@@ -157,8 +159,10 @@ SET(DYNAMICS_SRC
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactParameterMap.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/DynamicsSystemMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/General/BodyCommunicator.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/CollisionSolverMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoGMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/InclusionCommunicator.cpp
 )
 
 

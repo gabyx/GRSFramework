@@ -127,15 +127,15 @@ public:
 
 };
 
+class InclusionCommunicator;
 
-template <typename TNeighbourDataMap>
 class ContactGraph : public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
 public:
 
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    DEFINE_RIGIDBODY_CONFIG_TYPES
-
-    typedef TNeighbourDataMap NeighbourDataMapType;
+    typedef InclusionCommunicator InclusionCommunicatorType;
+    typedef typename InclusionCommunicatorType::NeighbourMapType NeighbourMapType;
 
     typedef ContactGraphNodeDataIteration NodeDataType;
     typedef ContactGraphEdgeData EdgeDataType;
@@ -148,17 +148,21 @@ public:
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
 
 
-
     enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE};
 
-    ContactGraph(NeighbourDataMapType & nbDataMap, ContactParameterMap * contactParameterMap):
-    m_nodeCounter(0),
-    m_edgeCounter(0),
-    m_nLambdas(0),
-    m_nFrictionParams(0),
-    m_pContactParameterMap(contactParameterMap),
-    m_nbDataMap(nbDataMap)
+    ContactGraph(boost::shared_ptr<DynamicsSystemType> pDynSys):
+        m_nodeCounter(0),
+        m_edgeCounter(0),
+        m_nLambdas(0),
+        m_nFrictionParams(0),
+        m_pDynSys(pDynSys),
+        m_pContactParameterMap(&pDynSys->m_ContactParameterMap)
     {}
+
+    void setInclusionCommunicator(boost::shared_ptr<InclusionCommunicatorType> pInclusionComm){
+        m_pInclusionComm = pInclusionComm;
+        m_pNbDataMap = m_pInclusionComm->getNeighbourMap();
+    }
 
     ~ContactGraph() {
         clearGraph();
@@ -217,10 +221,12 @@ public:
 
             //Add to the neighbour data
             if(isRemote.first){
-                m_nbDataMap.getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteBody(pCollData->m_pBody1);
+                m_pNbDataMap->getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody1);
+                // if this body is already added it does not matter
             }
             if(isRemote.second){
-                m_nbDataMap.getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteBody(pCollData->m_pBody2);
+                m_pNbDataMap->getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody2);
+                // if this body is already added it does not matter
             }
 
         }else{
@@ -337,7 +343,10 @@ private:
 
     Logging::Log * m_pSolverLog;
 
+    boost::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
+    NeighbourMapType * m_pNbDataMap; ///< NeighbourMap to insert remote bodies which have contacts
 
+    boost::shared_ptr<DynamicsSystemType> m_pDynSys;
 
 
     void computeParams(NodeDataType & nodeData) {
@@ -477,7 +486,7 @@ private:
     unsigned int m_nodeCounter; ///< An node counter, starting at 0.
     unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
 
-    NeighbourDataMapType & m_nbDataMap;
+
 
 };
 

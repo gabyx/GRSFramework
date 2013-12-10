@@ -64,7 +64,7 @@ private:
 
     boost::shared_ptr< TimeStepperType >	m_pTimestepper;
     boost::shared_ptr< DynamicsSystemType > m_pDynSys;
-    boost::shared_ptr< BodyCommunicator > m_pNbCommunicator;
+    boost::shared_ptr< BodyCommunicator > m_pBodyCommunicator;
 
     typedef typename MPILayer::ProcessCommunicator::ProcessInfoType ProcessInfoType;
     boost::shared_ptr< MPILayer::ProcessCommunicator > m_pProcCommunicator;

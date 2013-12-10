@@ -31,21 +31,19 @@ namespace MPILayer {
 
 class MPIMessageTag {
     public:
-        enum Type {
+        enum class Type: unsigned int {
             GENERICMESSAGE = 1 << 0,
             STDSTRING = 1 << 1,
-            NEIGHBOUR_MESSAGE = 1 << 2
+            NEIGHBOUR_MESSAGE = 1 << 2,
+            CONTACT_MESSAGE = 1 << 3
         };
 
         MPIMessageTag( Type t): m_t(t){};
 
         int getInt(){return static_cast<int>(m_t);}
-        operator Type() const {return m_t;}
 
     private:
         Type m_t;
-        //prevent automatic conversion for any other built-in types such as bool, int, etc
-        template<typename T> operator T () const;
 };
 
 

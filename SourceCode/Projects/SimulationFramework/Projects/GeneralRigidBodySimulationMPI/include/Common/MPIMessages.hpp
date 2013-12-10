@@ -1,11 +1,6 @@
 #ifndef MPIMessages_hpp
 #define MPIMessages_hpp
 
-
-#include "AssertionDebug.hpp"
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
-
 #include <boost/tuple/tuple.hpp>
 #include <boost/type_traits.hpp>
 
@@ -15,7 +10,13 @@
 #include <boost/serialization/set.hpp>
 //#include <boost/serialization/split_member.hpp>
 
-#include "MPISerializationHelpers.hpp"
+
+#include "AssertionDebug.hpp"
+#include "TypeDefs.hpp"
+#include "LogDefines.hpp"
+
+#include "MPISerializationHelpersEigen.hpp"
+#include "MPISerializationHelpersGeometry.hpp"
 
 #include "FileManager.hpp"
 #include "SimpleLogger.hpp"
@@ -100,10 +101,9 @@ class NeighbourMessageWrapperBodies : public boost::serialization::traits< Neigh
         boost::serialization::track_never> {
 public:
 
-
-    typedef TNeighbourCommunicator NeighbourCommunicatorType;
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
+    typedef TNeighbourCommunicator NeighbourCommunicatorType;
     typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
 
     typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
@@ -117,7 +117,12 @@ public:
     typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
     typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
 
-    NeighbourMessageWrapperBodies(NeighbourCommunicatorType * nc): m_nc(nc), m_initialized(false), m_neighbourData(NULL) {
+    NeighbourMessageWrapperBodies(NeighbourCommunicatorType * nc):
+        m_nc(nc),
+        m_initialized(false),
+        m_neighbourData(NULL),
+        m_bodyInfo(NULL)
+    {
 
         if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
             m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
@@ -125,10 +130,14 @@ public:
             ERRORMSG("SimulationLog does not yet exist? Did you create it?")
         }
 
-        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
-        filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
-        filePath /= "MPISerializer.log";
-        m_pSerializerLog = Logging::LogManager::getSingletonPtr()->createLog("MPISerializerLog",false,true,filePath);
+        if(Logging::LogManager::getSingletonPtr()->existsLog("MPISerializerLog")) {
+            m_pSerializerLog =  Logging::LogManager::getSingletonPtr()->getLog("MPISerializerLog");
+        }else{
+            boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+            filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
+            filePath /= "MPISerializer.log";
+            m_pSerializerLog = Logging::LogManager::getSingletonPtr()->createLog("MPISerializerLog",false,true,filePath);
+        }
     };
 
 
@@ -195,7 +204,7 @@ public:
         ar & size;
 
         if(size>0){
-            LOGSZ(m_pSerializerLog, "=========================================================================================="<< std::endl;)
+            LOGSZ(m_pSerializerLog, "BodyComm=================================================================================="<< std::endl;)
             LOGSZ(m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
             LOGSZ(m_pSerializerLog, "---> Timestamp: "<<  m_nc->m_currentSimTime << std::endl;);
             LOGSZ(m_pSerializerLog, "---> Size: "<<  size << std::endl;);
@@ -208,28 +217,28 @@ public:
         {
             it_next++; // take care here, because, we might invalidate this iterator it because we might remove local bodies, thats why it_next is used above!
 
-            m_bodyInfo = it->second->m_body->m_pBodyInfo;
+            m_bodyInfo = it->second.m_body->m_pBodyInfo;
 
             SubMessageFlag flag;
-            if(it->second->m_commStatus == NeighbourDataType::LocalData::SEND_NOTIFICATION) {
+            if(it->second.m_commStatus == NeighbourDataType::LocalData::SEND_NOTIFICATION) {
                 flag = SubMessageFlag::NOTIFICATION;
                 ar & flag;
                 LOGSZ(m_pSerializerLog, "---> NotifactionSTART: " << i<<std::endl;);
-                saveNotificationOrUpdate(ar, it->second->m_body, flag );
+                saveNotificationOrUpdate(ar, it->second.m_body, flag );
                 LOGSZ(m_pSerializerLog, "---> NotifactionEND: "<<std::endl;);
 
-            } else if (it->second->m_commStatus == NeighbourDataType::LocalData::SEND_UPDATE) {
+            } else if (it->second.m_commStatus == NeighbourDataType::LocalData::SEND_UPDATE) {
                 flag = SubMessageFlag::UPDATE;
                 ar & flag;
                 LOGSZ(m_pSerializerLog, "---> UpdateSTART: " << i<<std::endl;);
-                saveNotificationOrUpdate(ar, it->second->m_body, flag);
+                saveNotificationOrUpdate(ar, it->second.m_body, flag);
                 LOGSZ(m_pSerializerLog, "---> UpdateEND: "<<std::endl;);
 
-            } else if (it->second->m_commStatus == NeighbourDataType::LocalData::SEND_REMOVE) {
+            } else if (it->second.m_commStatus == NeighbourDataType::LocalData::SEND_REMOVE) {
                 flag = SubMessageFlag::REMOVAL;
                 ar & flag;
                 LOGSZ(m_pSerializerLog, "---> RemovalSTART: " << i<<std::endl;);
-                saveRemoval(ar, it->second->m_body);
+                saveRemoval(ar, it->second.m_body);
                 LOGSZ(m_pSerializerLog, "---> RemovalEND: "<<std::endl;);
             }
 
@@ -732,6 +741,151 @@ private:
     RankIdType m_neighbourRank;        ///< This is the neighbour rank where the message is send to or received from!
     mutable NeighbourDataType * m_neighbourData;
     mutable BodyInfoType * m_bodyInfo;
+
+    mutable bool m_initialized;
+
+    Logging::Log *  m_pSerializerLog;
+    Logging::Log *  m_pSimulationLog;
+
+};
+
+
+template<typename TNeighbourCommunicator >
+class NeighbourMessageWrapperInclusion : public boost::serialization::traits< NeighbourMessageWrapperBodies<TNeighbourCommunicator>,
+    boost::serialization::object_serializable,
+        boost::serialization::track_never> {
+public:
+
+
+    typedef TNeighbourCommunicator NeighbourCommunicatorType;
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
+
+    typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
+    typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
+    typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
+    typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
+    typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
+
+    typedef typename RigidBodyType::BodyInfoType                              BodyInfoType;
+
+    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
+    typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
+
+    NeighbourMessageWrapperInclusion(NeighbourCommunicatorType * nc):
+        m_nc(nc),
+        m_initialized(false),
+        m_neighbourData(NULL)
+    {
+
+        if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
+            m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+        } else {
+            ERRORMSG("SimulationLog does not yet exist? Did you create it?")
+        }
+
+        if(Logging::LogManager::getSingletonPtr()->existsLog("MPISerializerLog")) {
+            m_pSerializerLog =  Logging::LogManager::getSingletonPtr()->getLog("MPISerializerLog");
+        }else{
+            boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+            filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
+            filePath /= "MPISerializer.log";
+            m_pSerializerLog = Logging::LogManager::getSingletonPtr()->createLog("MPISerializerLog",false,true,filePath);
+        }
+    };
+
+    /**
+    * Set the rank if we want to reuse this instance and receive another message
+    */
+    void setRank( RankIdType neigbourRank) {
+        m_neighbourRank = neigbourRank;
+        if(!m_initialized) {
+            m_initialized = true;
+        }
+    }
+
+
+    template<class Archive>
+    void save(Archive & ar, const unsigned int version) const {
+
+        LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapperInclusion is not correctly initialized, Rank not set!");
+
+        //Serialize all body ids which have contact
+        m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
+        LOGASSERTMSG( m_neighbourData, m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
+
+        //Serialize all remote body ids which have contact
+        unsigned int size = m_neighbourData->sizeRemote();
+
+        ar & size;
+
+        if(size>0){
+            LOGSZ(m_pSerializerLog, "InclusionComm=============================================================================="<< std::endl;)
+            LOGSZ(m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
+
+            LOGSZ(m_pSerializerLog, "# Remote Bodies (with Contacts): " << size << std::endl;);
+            for(auto it = m_neighbourData->remoteBegin(); it != m_neighbourData->remoteEnd(); it++){
+                ar & (it->first); //m_id
+            }
+
+        }
+
+        m_initialized = false;
+    }
+
+    template<class Archive>
+    void load(Archive & ar, const unsigned int version) const {
+        LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapperInclusion is not correctly initialized, Rank not set!")
+
+        // for each body one bilateral node
+        // for each received body , if no node in the bilateral set in ContactGraph exists , add one bilateral node
+        // with this participating rank;
+        unsigned int size;
+        ar & size;
+
+        if(size>0){
+            LOGSZ(m_pSerializerLog, "InclusionComm=============================================================================="<< std::endl;)
+            LOGSZ(m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
+
+            LOGSZ(m_pSerializerLog, "# Remote Bodies (with Contacts): " << size << std::endl;);
+            for(unsigned int i = 0; i < size ; i++){
+                RigidBodyIdType id;
+                ar & id;
+
+                auto * localData = m_nc->m_pBodyComm->getNeighbourMap()->getNeighbourData(m_neighbourRank)->getLocalBodyData(id);
+                    LOGASSERTMSG(localData, m_pSerializerLog, "There is no bodydata for local body id: " << id << " in body communicators neighbour data for rank:" << m_neighbourRank)
+
+                //add a local bodydata which connects to the billateral constraint
+                    LOGASSERTMSG(localData->m_body, m_pSerializerLog,"Local body pointer null for id: " << id << " in body communicators neighbour data for rank:" << m_neighbourRank)
+                auto pairAddLocal = m_neighbourData->addLocalBodyData(localData->m_body);
+                    LOGASSERTMSG(pairAddLocal.second,, m_pSerializerLog, "Could not add body with id: " << id << " to neighbour data, already added!")
+
+                auto * billateralNode = m_nc->m_pContactGraph->addToBillateralContact(m_neighbourRank,m_body);
+
+                //Connect billateral node to the local body data (for sending and receiving updates later)
+                pairAddLocal.first->m_billateralNode = billateralNode;
+
+
+            }
+        }
+
+
+        m_initialized = false;
+    }
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER();
+
+private:
+
+
+
+
+
+    NeighbourCommunicatorType* m_nc;
+    RankIdType m_neighbourRank;        ///< This is the neighbour rank where the message is send to or received from!
+
+    mutable NeighbourDataType * m_neighbourData;
 
     mutable bool m_initialized;
 
