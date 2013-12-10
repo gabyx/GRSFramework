@@ -193,12 +193,20 @@ public:
         MPI_Request* req = std::get<1>(it->second); // Get copy of the pointer (double pointer)
 
         message.clear();
-        // Serialize the message
+        // Serialize the message into the buffer
         message << t ;
-
+        // Nonblocking Send (we keep the buffer message till the messages have been sent!)
+        // If MPI uses buffering, these message might have been sent before the receive has been posted
+        // if there is no buffering in MPI we post the sends (leave the buffer existing)
         int error = MPI_Isend( const_cast<char*>(message.data()) , message.size(), message.getMPIDataType(),
                               rank, tag.getInt(), comm, req );
         ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToRank failed!");
+
+        // IMPORTANT! Always call a waitForAllSends() after this call!!!
+    }
+
+    void waitForAllSends(){
+        MPI_Waitall(m_sendRequests.size(), &m_sendRequests[0], &m_sendStatuses[0]);
     }
 
     template<typename T, typename List>
