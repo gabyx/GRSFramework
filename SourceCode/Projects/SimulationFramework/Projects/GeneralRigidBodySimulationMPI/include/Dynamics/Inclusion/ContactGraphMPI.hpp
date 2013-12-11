@@ -21,118 +21,17 @@
 
 #include "VectorToSkewMatrix.hpp"
 
-
-// Thiss two data classes are used for  m_eContactModel = ContactModels::N_ContactModel,
-//                                      m_eContactModel = ContactModels::NCF_ContactModel,
-//                                      m_eContactModel = ContactModels::NCFC_ContactModel,
-class ContactGraphNodeData {
-public:
-
-    DEFINE_RIGIDBODY_CONFIG_TYPES
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    ContactGraphNodeData(): m_pCollData(NULL) {
-        m_W_body1.setZero();
-        m_W_body2.setZero();
-        m_xi.setZero();
-        m_mu.setZero();
-        m_I_plus_eps.setZero();
-        m_eps.setZero();
-        m_nLambdas = 0;
-    }
-
-    ContactGraphNodeData(CollisionData * collDataPtr): m_pCollData(collDataPtr) {}
-
-    Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> m_W_body1;
-    Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> m_W_body2;
-    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_xi;
-
-    Eigen::Matrix<PREC,Eigen::Dynamic,1>  m_I_plus_eps;
-    Eigen::Matrix<PREC,Eigen::Dynamic,1>  m_eps;
-    Eigen::Matrix<PREC,Eigen::Dynamic,1>  m_mu;
-
-    unsigned int m_nLambdas;
-
-    unsigned int m_nodeColor;
-
-    const CollisionData * m_pCollData;
-
-    ContactModels::ContactModelEnum m_eContactModel;///< This is a generic type which is used to distinguish between the different models!. See namespace ContactModels.
-};
-class ContactGraphNodeDataIteration : public ContactGraphNodeData {
-public:
-
-    DEFINE_RIGIDBODY_CONFIG_TYPES
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    ContactGraphNodeDataIteration()
-    {
-        m_LambdaBack.setZero();
-        m_LambdaFront.setZero();
-
-        m_b.setZero();
-
-        m_u1BufferPtr = NULL; ///< Points to the velocity buffer only if the body is simulated
-        m_u2BufferPtr = NULL; ///< Points to the velocity buffer only if the body is simulated
-
-        m_bConverged = false; ///< Flag if convergence criteria is fulfilled, either InVelocityLocal, InLambda, InEnergyMix (with Lambda, and G_ii)
-    }
-
-
-    ~ContactGraphNodeDataIteration(){
-    }
-
-    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
-    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u2BufferPtr; ///< Only valid for Simulated Objects
-
-
-    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_LambdaBack;
-    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_LambdaFront;
-
-    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_R_i_inv_diag; // Build over G_ii
-    Eigen::Matrix<PREC,Eigen::Dynamic,Eigen::Dynamic> m_G_ii; // just for R_ii, and maybee later for better solvers!
-
-    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_b;
-
-    bool m_bConverged; ///< Converged either in LambdaLocal (lambdaNew to lambdaOld), or
-
-   void swapVelocities() {
-
-        if(m_u1BufferPtr){ m_u1BufferPtr->m_back.swap(m_u1BufferPtr->m_front); }
-
-        if(m_u2BufferPtr){m_u2BufferPtr->m_back.swap(m_u2BufferPtr->m_front); }
-    };
-
-    void swapLambdas() {
-        m_LambdaBack.swap(m_LambdaFront);
-    };
-
-};
-
-/*
-* The EdgeData class for the Contact Graph, nothing is deleted in this class, this is plain old data!
-*/
-class ContactGraphEdgeData {
-public:
-
-    DEFINE_RIGIDBODY_CONFIG_TYPES
-
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    ContactGraphEdgeData(): m_pBody(NULL) {};
-
-    RigidBodyType * m_pBody; // Tells to which body this edges belongs!
-
-    //Eigen::Matrix<PREC,NDOFFriction+1,NDOFFriction+1> m_G_SE; // Start Node 1 to End Node 3 = G_13
-
-};
+#include "ContactGraphNodeDataMPI.hpp"
 
 class InclusionCommunicator;
 
 class ContactGraph : public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
 public:
 
+    DEFINE_MPI_INFORMATION_CONFIG_TYPES
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
 
     typedef InclusionCommunicator InclusionCommunicatorType;
     typedef typename InclusionCommunicatorType::NeighbourMapType NeighbourMapType;
@@ -147,8 +46,10 @@ public:
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
 
+    typedef ContactGraphNodeDataSplitBody SplitBodyNodeType;
+    typedef std::map<RigidBodyIdType, SplitBodyNodeType* > SplitBodyNodeListType;
 
-    enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE};
+    enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE, SPLITNODE};
 
     ContactGraph(boost::shared_ptr<DynamicsSystemType> pDynSys):
         m_nodeCounter(0),
@@ -175,9 +76,9 @@ public:
     void clearGraph() {
         // This deletes all nodes, edges
         // cleanup allocated memory
-        for(NodeListIteratorType n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
+        for(auto n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
             delete (*n_it);
-        for(EdgeListIteratorType e_it = this->m_edges.begin(); e_it != this->m_edges.end(); e_it++)
+        for(auto e_it = this->m_edges.begin(); e_it != this->m_edges.end(); e_it++)
             delete (*e_it);
         //cout << "clear graph"<<endl;
         this->m_nodes.clear();
@@ -191,6 +92,12 @@ public:
         //clear own lists
         m_localNodes.clear();
         m_remoteNodes.clear();
+
+        for(auto n_it = m_splittedNodes.begin(); n_it != m_splittedNodes.end(); n_it++){
+            delete (n_it->second);
+        }
+
+        m_splittedNodes.clear();
     }
 
     void addNode(CollisionData * pCollData) {
@@ -216,15 +123,25 @@ public:
 
         if(isRemote.first or isRemote.second){
             //set the node color
+        #if CoutLevelSolverWhenContact>1
+            LOG(m_pSolverLog,"---> Added Remote Node on bodies:" << std::endl;)
+        #endif
+
             addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
             m_remoteNodes.push_back(addedNode);
 
             //Add to the neighbour data
             if(isRemote.first){
+                #if CoutLevelSolverWhenContact>1
+                    LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << std::endl;)
+                #endif
                 m_pNbDataMap->getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody1);
                 // if this body is already added it does not matter
             }
             if(isRemote.second){
+                #if CoutLevelSolverWhenContact>1
+                    LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2->m_id) << std::endl;)
+                #endif
                 m_pNbDataMap->getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody2);
                 // if this body is already added it does not matter
             }
@@ -334,10 +251,23 @@ public:
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
 
 
-    //std::map<unsigned int, NodeListType> m_nodeMap; //TODO make a map whith each color!
-    NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies (ref to m_nodeMap)
-    NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies (ref to m_nodeMap)
+    std::pair<SplitBodyNodeType *, bool> addSplitBodyNode(RigidBodyType * body, const RankIdType & rank){
+        auto pairRes = m_splittedNodes.insert(
+                                              SplitBodyNodeListType::value_type(body->m_id, (SplitBodyNodeType*) NULL )
+                                                );
 
+        if(pairRes.second){
+            //if insered set the new pointer
+            pairRes.first->second = new SplitBodyNodeType(body);
+        }
+
+        LOGASSERTMSG(pairRes.first->second,m_pSolverLog, "SplitBodyNode pointer of body " << body->m_id << " is zero!")
+        //Set rank
+        bool added = pairRes.first->second->addRank(rank);
+        LOGASSERTMSG(added,m_pSolverLog, "Rank could not been added to SplitBodyNode with id: " << body->m_id)
+
+        return std::pair<SplitBodyNodeType *, bool>(pairRes.first->second, pairRes.second);
+    }
 
 private:
 
@@ -347,6 +277,14 @@ private:
     NeighbourMapType * m_pNbDataMap; ///< NeighbourMap to insert remote bodies which have contacts
 
     boost::shared_ptr<DynamicsSystemType> m_pDynSys;
+
+    //std::map<unsigned int, NodeListType> m_nodeMap; //TODO make a map whith each color!
+    NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies (ref to m_nodeMap)
+    NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies (ref to m_nodeMap)
+
+    SplitBodyNodeListType m_splittedNodes; ///< These are the billateral nodes between the splitted bodies in the contact graph
+
+
 
 
     void computeParams(NodeDataType & nodeData) {
@@ -485,8 +423,6 @@ private:
 
     unsigned int m_nodeCounter; ///< An node counter, starting at 0.
     unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
-
-
 
 };
 

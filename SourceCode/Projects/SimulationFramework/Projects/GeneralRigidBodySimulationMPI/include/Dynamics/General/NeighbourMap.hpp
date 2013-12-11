@@ -24,34 +24,35 @@ public:
 
     // Neighbour data definitions
     typedef TData DataType;
-    typedef std::map<RankIdType, DataType * > Type;
+    typedef std::map<RankIdType, DataType > Type;
     typedef typename Type::iterator iterator;
 
     NeighbourMap(RankIdType rank): m_rank(rank){};
 
     ~NeighbourMap(){
-        for(auto it = m_nbDataMap.begin(); it != m_nbDataMap.end(); it++){
-            delete it->second;
-        }
         m_nbDataMap.clear();
     }
 
 
     std::pair<DataType *, bool> insert(const RankIdType & rank){
-        std::pair<typename Type::iterator,bool> res = m_nbDataMap.insert( typename Type::value_type(rank, (DataType*)NULL));
-        if(res.second){
-            res.first->second = new DataType(rank);
-        }
-        return std::pair<DataType *, bool>(res.first->second, res.second);
+        auto resPair = m_nbDataMap.insert( typename Type::value_type(rank, DataType(rank) ));
+        return std::pair<DataType*, bool>(&resPair.first->second, resPair.second);
     }
 
     inline DataType * getNeighbourData(const RankIdType & rank){
         auto it = m_nbDataMap.find(rank);
         if(it != m_nbDataMap.end()){
-           return (it->second);
+           return (&it->second);
         }else{
            ASSERTMSG(false,"There is no NeighbourData for rank: " << rank << "!")
            return NULL;
+        }
+    }
+
+    /** Executes clear on all neighbour datas*/
+    inline void emptyAllNeighbourData(){
+        for(auto it = m_nbDataMap.begin(); it != m_nbDataMap.end();it++){
+            it->second.clear();
         }
     }
 

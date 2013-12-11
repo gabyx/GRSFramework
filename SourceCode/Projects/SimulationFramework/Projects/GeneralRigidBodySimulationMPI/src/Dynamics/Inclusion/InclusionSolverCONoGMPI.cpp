@@ -93,13 +93,13 @@ void InclusionSolverCONoG::reset() {
     resetForNextIter();
 
 #if HAVE_CUDA_SUPPORT == 1
-    LOG(m_pSimulationLog, "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
+    LOG(m_pSimulationLog, "---> Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
 
     CHECK_CUDA(cudaSetDevice(m_Settings.m_UseGPUDeviceId));
     cudaDeviceProp props;
     CHECK_CUDA(cudaGetDeviceProperties(&props,m_Settings.m_UseGPUDeviceId));
 
-    LOG(m_pSimulationLog,  "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
+    LOG(m_pSimulationLog,  "---> Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
 #endif
 
 
@@ -114,6 +114,8 @@ void InclusionSolverCONoG::resetForNextIter() {
     m_bConverged = true;
 
     m_pContactGraph->clearGraph();
+
+    m_pInclusionComm->clearNeighbourMap();
 }
 
 
@@ -121,7 +123,7 @@ void InclusionSolverCONoG::resetForNextIter() {
 void InclusionSolverCONoG::solveInclusionProblem() {
 
 #if CoutLevelSolver>1
-    LOG(m_pSolverLog,  " % -> solveInclusionProblem(): "<< std::endl;);
+    LOG(m_pSolverLog,  "---> solveInclusionProblem(): "<< std::endl;);
 #endif
 
     typename ContactGraphType::NodeListType & nodes = m_pContactGraph->getNodeListRef();
@@ -134,6 +136,13 @@ void InclusionSolverCONoG::solveInclusionProblem() {
     m_bUsedGPU = false;
     m_timeProx = 0;
     m_proxIterationTime = 0;
+
+
+     // First communicate all remote bodies, which have contacts, to the owner
+    #if CoutLevelSolverWhenContact>1
+        LOG(m_pSolverLog,  "MPI> Communicate Remote Contacts (splitted bodies)" << std::endl; );
+    #endif
+    m_pInclusionComm->communicateRemoteContacts();
 
 
     // Integrate all bodies to u_e
@@ -151,7 +160,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
         #endif
 
         #if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog,  " % nContacts: "<< m_nContacts <<std::endl;);
+            LOG(m_pSolverLog,  "---> nContacts: "<< m_nContacts <<std::endl;);
         #endif
 
 
@@ -192,7 +201,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
         if(m_Settings.m_bIsFiniteCheck) {
             // TODO CHECK IF finite!
             #if CoutLevelSolverWhenContact>0
-                LOG(m_pSolverLog,  " % Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
+                LOG(m_pSolverLog,  "---> Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
             #endif
         }
 
@@ -202,7 +211,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
         #endif
 
 #if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog,  " % Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
+        LOG(m_pSolverLog,  "---> Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
 #endif
     }
 
@@ -226,9 +235,6 @@ void InclusionSolverCONoG::integrateAllBodyVelocities() {
 
 void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
-    // First communicate all remote bodies, which have contacts, to the owner
-    m_pInclusionComm->communicateRemoteContacts();
-
 
     // Calculates b vector for all nodes, u_0, R_ii, ...
     m_pSorProxInitNodeVisitor->setParams(alpha);
@@ -248,8 +254,8 @@ void InclusionSolverCONoG::doSorProx() {
     #if CoutLevelSolverWhenContact>2
         LOG(m_pSolverLog, " u_e = [ ");
         for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
-            LOG(m_pSolverLog, "Back: \t" << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
-            LOG(m_pSolverLog, "Front: \t" <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
+            LOG(m_pSolverLog, "\t uBack: " << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
+            LOG(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
         }
         LOG(m_pSolverLog, " ]" << std::endl);
     #endif
@@ -258,17 +264,17 @@ void InclusionSolverCONoG::doSorProx() {
     while(true) {
 
         m_bConverged = true;
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, std::endl<< "Next iteration: "<< m_iterationsNeeded <<"=========================" << std::endl);
+        #if CoutLevelSolverWhenContact>1
+            LOG(m_pSolverLog, std::endl<< "---> Next iteration: "<< m_iterationsNeeded << std::endl);
         #endif
         sorProxOverAllNodes(); // Do one Sor Prox Iteration
 
         #if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog, std::endl<< "After Prox: "<< std::endl<<" u_e: \t");
+        LOG(m_pSolverLog, " u_e = [ ");
         for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
-            LOG(m_pSolverLog, (*it)->m_pSolverData->m_uBuffer.m_front.transpose());
+            LOG(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
         }
-        LOG(m_pSolverLog,""<< std::endl);
+        LOG(m_pSolverLog, " ]" << std::endl);
         #endif
 
 
@@ -276,7 +282,7 @@ void InclusionSolverCONoG::doSorProx() {
 
         if ( (m_bConverged == true || m_iterationsNeeded >= m_Settings.m_MaxIter) && m_iterationsNeeded >= m_Settings.m_MinIter) {
             #if CoutLevelSolverWhenContact>0
-                LOG(m_pSolverLog, " converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_iterationsNeeded <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
+                LOG(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_iterationsNeeded <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
             #endif
             break;
         }

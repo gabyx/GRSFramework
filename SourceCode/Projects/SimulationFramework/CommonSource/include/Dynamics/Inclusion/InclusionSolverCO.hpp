@@ -522,7 +522,7 @@ void InclusionSolverCO::doJorProx() {
 
     if( m_Settings.m_bUseGPU && goOnGPU ) {
 #if CoutLevelSolverWhenContact>0
-        m_pSolverLog->logMessage(" % Using GPU JOR...");
+        m_pSolverLog->logMessage("---> Using GPU JOR...");
 #endif
         m_jorGPUVariant.setSettings(m_Settings.m_MaxIter,m_Settings.m_AbsTol,m_Settings.m_RelTol);
         gpuSuccess = m_jorGPUVariant.runGPUPlain(P_front,m_T,P_back,m_d,m_mu);
@@ -533,7 +533,7 @@ void InclusionSolverCO::doJorProx() {
 
     if( !m_Settings.m_bUseGPU || !gpuSuccess || !goOnGPU) {
 #if CoutLevelSolverWhenContact>0
-        m_pSolverLog->logMessage(" % Using CPU JOR...");
+        m_pSolverLog->logMessage("---> Using CPU JOR...");
 #endif
         m_jorGPUVariant.setSettings(m_Settings.m_MaxIter,m_Settings.m_AbsTol,m_Settings.m_RelTol);
         m_jorGPUVariant.runCPUEquivalentPlain(P_front,m_T,P_back,m_d,m_mu);

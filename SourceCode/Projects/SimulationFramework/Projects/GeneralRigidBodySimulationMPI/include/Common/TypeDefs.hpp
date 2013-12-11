@@ -39,7 +39,7 @@ namespace GlobalConfigs{
     };
 
     namespace RigidBodyConfigs{
-        typedef LayoutConfig<double, DynamicLayout<7,6> > LayoutConfigType;
+        typedef LayoutConfig<double, GeneralLayout<7,6> > LayoutConfigType;
         typedef RigidBodySolverDataCONoGMPI RigidBodySolverDataType;
     }
     namespace DynamicSystemConfigs{

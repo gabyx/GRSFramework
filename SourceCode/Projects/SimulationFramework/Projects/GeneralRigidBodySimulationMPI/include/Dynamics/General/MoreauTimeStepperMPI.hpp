@@ -288,7 +288,7 @@ void MoreauTimeStepper::doOneIteration() {
     static int iterations=0; // Average is reset after 1000 Iterations
 
 #if CoutLevelSolver>0
-    LOG(m_pSolverLog, "% Do one time-step =================================" <<std::endl;);
+    LOG(m_pSolverLog, "---> Do one time-step =================================" <<std::endl;);
 #endif
 
     m_PerformanceTimer.stop();
@@ -305,12 +305,12 @@ void MoreauTimeStepper::doOneIteration() {
 
 #if CoutLevelSolver==1
       if(m_IterationCounter % 10000 == 1){
-            LOG(m_pSolverLog,"% m_t: " << m_currentSimulationTime <<std::endl; );
+            LOG(m_pSolverLog,"---> m_t: " << m_currentSimulationTime <<std::endl; );
       }
 #endif
 
 #if CoutLevelSolver>2
-      LOG(m_pSolverLog,"m_t Begin: " << m_currentSimulationTime <<std::endl; );
+      LOG(m_pSolverLog,"---> m_t Begin: " << m_currentSimulationTime <<std::endl; );
 #endif
 
     //Calculate Midpoint Rule ============================================================
@@ -367,7 +367,7 @@ void MoreauTimeStepper::doOneIteration() {
 
 
 
-    m_pInclusionSolver->resetForNextIter(); // Clears the contact graph!
+    m_pInclusionSolver->resetForNextIter(); // Clears the contact graph and other inclusion related stuff!
 
     // Solve Collision
     m_startTimeCollisionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
@@ -397,7 +397,7 @@ void MoreauTimeStepper::doOneIteration() {
 
 
 #if CoutLevelSolver>2
-      LOG(m_pSolverLog,"m_t End: " << m_currentSimulationTime <<std::endl );
+      LOG(m_pSolverLog,"---> m_t End: " << m_currentSimulationTime <<std::endl );
 #endif
 
     //Force switch
@@ -415,7 +415,7 @@ void MoreauTimeStepper::doOneIteration() {
     }
 
 #if CoutLevelSolver>0
-    //LOG( m_pSolverLog,  "% Iteration Time: "<<std::setprecision(5)<<(double)(m_endTime-m_startTime)<<std::endl
+    //LOG( m_pSolverLog,  "---> Iteration Time: "<<std::setprecision(5)<<(double)(m_endTime-m_startTime)<<std::endl
     // <<  "% End time-step ====================================" <<std::endl<<std::endl; );
 #endif
 

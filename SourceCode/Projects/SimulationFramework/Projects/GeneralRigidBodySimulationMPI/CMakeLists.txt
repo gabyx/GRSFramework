@@ -130,6 +130,7 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp

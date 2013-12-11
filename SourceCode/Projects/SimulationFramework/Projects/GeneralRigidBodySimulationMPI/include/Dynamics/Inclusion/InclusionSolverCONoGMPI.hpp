@@ -90,12 +90,26 @@ protected:
 
     boost::shared_ptr<BodyCommunicator>  m_pBodyComm;
 
+
+    /** Circulare template dependency of InclusionCommunicator and ContactGraph
+    *   Can be solved with this combo trait class :-)
+    *    struct ComboIncGraph {
+    *        typedef InclusionCommunicator<ComboIncGraph> InclusionCommunicatorType;
+    *        typedef ContactGraph<ComboIncGraph> ContactGraphType;
+    *    };
+    *    Nevertheless, we avoided this here
+    */
+
+
     typedef InclusionCommunicator InclusionCommunicatorType;
     boost::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
 
-     // Graph // needs m_nbDataMap
     typedef ContactGraph ContactGraphType;
     boost::shared_ptr<ContactGraphType> m_pContactGraph;
+    /// =========================================================================
+
+
+
 
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;

@@ -17,109 +17,8 @@
 #include "ProxFunctions.hpp"
 #include "InclusionSolverSettings.hpp"
 
+#include "ContactGraphNodeData.hpp"
 
-class ContactGraphNodeData {
-public:
-
-    DEFINE_RIGIDBODY_CONFIG_TYPES
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    ContactGraphNodeData(): m_pCollData(NULL) {
-        m_W_body1.setZero();
-        m_W_body2.setZero();
-        m_xi.setZero();
-        m_mu.setZero();
-        m_I_plus_eps.setZero();
-        m_eps.setZero();
-        m_nLambdas = 0;
-    }
-
-    ContactGraphNodeData(CollisionData * collDataPtr): m_pCollData(collDataPtr) {}
-
-    Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> m_W_body1;
-    Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic> m_W_body2;
-    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_xi;
-
-    Eigen::Matrix<PREC,Eigen::Dynamic,1>  m_I_plus_eps;
-    Eigen::Matrix<PREC,Eigen::Dynamic,1>  m_eps;
-    Eigen::Matrix<PREC,Eigen::Dynamic,1>  m_mu;
-
-    unsigned int m_nLambdas;
-
-    unsigned int m_nodeColor;
-
-    const CollisionData * m_pCollData;
-
-    ContactModels::ContactModelEnum m_eContactModel;                  ///< This is a generic type which is used to distinguish between the different models!. See namespace ContactModels.
-};
-
-class ContactGraphNodeDataIteration : public ContactGraphNodeData {
-public:
-
-    DEFINE_RIGIDBODY_CONFIG_TYPES
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    ContactGraphNodeDataIteration()
-    {
-        m_LambdaBack.setZero();
-        m_LambdaFront.setZero();
-
-        m_b.setZero();
-
-        m_u1BufferPtr = NULL; ///< Points to the velocity buffer only if the body is simulated
-        m_u2BufferPtr = NULL; ///< Points to the velocity buffer only if the body is simulated
-
-        m_bConverged = false; ///< Flag if convergence criteria is fulfilled, either InVelocityLocal, InLambda, InEnergyMix (with Lambda, and G_ii)
-    }
-
-
-    ~ContactGraphNodeDataIteration(){
-    }
-
-    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
-    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u2BufferPtr; ///< Only valid for Simulated Objects
-
-
-    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_LambdaBack;
-    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_LambdaFront;
-
-    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_R_i_inv_diag; // Build over G_ii
-    Eigen::Matrix<PREC,Eigen::Dynamic,Eigen::Dynamic> m_G_ii; // just for R_ii, and maybee later for better solvers!
-
-    Eigen::Matrix<PREC,Eigen::Dynamic,1> m_b;
-
-    bool m_bConverged; ///< Converged either in LambdaLocal (lambdaNew to lambdaOld), or
-
-   void swapVelocities() {
-
-        if(m_u1BufferPtr){ m_u1BufferPtr->m_back.swap(m_u1BufferPtr->m_front); }
-
-        if(m_u2BufferPtr){m_u2BufferPtr->m_back.swap(m_u2BufferPtr->m_front); }
-    };
-
-    void swapLambdas() {
-        m_LambdaBack.swap(m_LambdaFront);
-    };
-
-};
-
-/*
-* The EdgeData class for the Contact Graph, nothing is deleted in this class, this is plain old data!
-*/
-class ContactGraphEdgeData {
-public:
-
-    DEFINE_RIGIDBODY_CONFIG_TYPES
-
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    ContactGraphEdgeData(): m_pBody(NULL) {};
-
-    RigidBodyType * m_pBody; // Tells to which body this edges belongs!
-
-    //Eigen::Matrix<PREC,NDOFFriction+1,NDOFFriction+1> m_G_SE; // Start Node 1 to End Node 3 = G_13
-
-};
 
 template<typename ContactGraphMode > class ContactGraph;
 
@@ -131,7 +30,6 @@ struct ContactGraphMode{
 template <>
 class ContactGraph<ContactGraphMode::NoIteration> : public Graph::GeneralGraph< ContactGraphNodeData,ContactGraphEdgeData > {
 public:
-
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
@@ -694,7 +592,7 @@ public:
         static VectorDyn uCache1,uCache2;
 
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+            LOG(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
         #endif
 
         if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
@@ -713,7 +611,7 @@ public:
             }
 
 #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog,"chi: " << nodeData.m_LambdaFront.transpose() << std::endl);
+            LOG(m_pSolverLog,"\t---> nd.chi: " << nodeData.m_LambdaFront.transpose() << std::endl);
 #endif
 
             nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
@@ -726,10 +624,10 @@ public:
             );
 
 #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "Lambda Back: "  << nodeData.m_LambdaBack.transpose() << std::endl);
-            LOG(m_pSolverLog, "Lambda Front: " << nodeData.m_LambdaFront.transpose() << std::endl);
+            LOG(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
+            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront Front: " << nodeData.m_LambdaFront.transpose() << std::endl);
             if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol)){
-              *m_pSolverLog <<"Lambda converged"<<std::endl;
+              *m_pSolverLog <<"\t---> Lambda converged"<<std::endl;
             }
 #endif
 
@@ -740,7 +638,7 @@ public:
                 nodeData.m_u1BufferPtr->m_front = nodeData.m_u1BufferPtr->m_front + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
                #if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"Node: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
+                LOG(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
                #endif
 
 
@@ -751,7 +649,7 @@ public:
                             //converged stays false;
                             // Set global Converged = false;
                             m_bConverged = false;
-                            *m_pSolverLog << "m_bConverged = false;"<<std::endl;
+                            *m_pSolverLog << "\t---> m_bConverged = false;"<<std::endl;
                         }
                     } else {
                         m_bConverged=false;
@@ -780,6 +678,10 @@ public:
             if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
                 nodeData.m_u2BufferPtr->m_front = nodeData.m_u2BufferPtr->m_front  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
+
+                #if CoutLevelSolverWhenContact>2
+                LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
+                #endif
 
                 if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
                     if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
@@ -914,13 +816,13 @@ public:
         nodeData.m_R_i_inv_diag(2) = r_T;
 
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, " nodeData.m_b :"<< nodeData.m_b.transpose() <<std::endl
-                << " nodeData.m_G_ii :"<<std::endl<< nodeData.m_G_ii <<std::endl
-                << " nodeData.m_R_i_inv_diag: "<< nodeData.m_R_i_inv_diag.transpose() <<std::endl;);
+            LOG(m_pSolverLog, "\t ---> nd.m_b: "<< nodeData.m_b.transpose() <<std::endl
+                << "\t ---> nd.m_G_ii: "<<std::endl<< nodeData.m_G_ii <<std::endl
+                << "\t ---> nd.m_R_i_inv_diag: "<< nodeData.m_R_i_inv_diag.transpose() <<std::endl;);
         #endif
 
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog,  " nodeData.m_mu: "<< nodeData.m_mu <<std::endl;);
+            LOG(m_pSolverLog,  "\t ---> nd.m_mu: "<< nodeData.m_mu <<std::endl;);
         #endif
 
 

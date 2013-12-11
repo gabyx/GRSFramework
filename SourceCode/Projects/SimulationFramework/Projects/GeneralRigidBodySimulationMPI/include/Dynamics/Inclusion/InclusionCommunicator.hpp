@@ -2,6 +2,7 @@
 #define InclusionCommunicator_hpp
 
 #include "TypeDefs.hpp"
+#include "LogDefines.hpp"
 
 #include "MPIMessages.hpp"
 
@@ -54,11 +55,15 @@ public:
 
         // Initialize all NeighbourDatas
         for(auto rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
-            LOGNC(m_pSimulationLog,"--->InclusionCommunicator: Add neighbour data for process rank: "<<*rankIt<<std::endl;);
+            LOGIC(m_pSimulationLog,"--->InclusionCommunicator: Add neighbour data for process rank: "<<*rankIt<<std::endl;);
             auto res = m_nbDataMap.insert(*rankIt);
             ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << *rankIt);
         }
         m_pSimulationLog->logMessage("--->InclusionCommunicator: Initialized all NeighbourDatas");
+
+        m_nbRanksSending.reserve(m_nbRanks.size());
+        m_nbRanksReceiving.reserve(m_nbRanks.size());
+        m_nbRanksSending.append
 
         m_pSimulationLog->logMessage("---> Initialized InclusionCommunicator");
     }
@@ -73,8 +78,17 @@ public:
     }
 
     void communicateRemoteContacts(){
-        // Send all remote contacts of a body to its owning neighbour
-        // Receive the multiplicity factor and apply this factor for every M and h term in the calculation!
+        LOGIC(m_pSimulationLog,"---> InclusionCommunication: Send remote contacts (initialize global prox)"<< std::endl;)
+        // First for each neighbour, communicate the ids
+        sendContactMessageToNeighbours();
+
+        receiveMessagesFromNeighbours();
+
+        LOGIC(m_pSimulationLog,"---> InclusionCommunication: finished"<< std::endl;)
+    }
+
+    void clearNeighbourMap(){
+        m_nbDataMap.emptyAllNeighbourData();
     }
 
     NeighbourMapType * getNeighbourMap(){return &m_nbDataMap;}
@@ -84,15 +98,25 @@ private:
 
 
     void sendContactMessageToNeighbours(){
-        LOGNC(m_pSimulationLog,"MPI>\t Send contact message to neighbours!"<<std::endl;)
+        LOGIC(m_pSimulationLog,"MPI>\t Send message (CONTACT_MESSAGE) to neighbours!"<<std::endl;)
 
         for(auto it = m_nbRanks.begin(); it != m_nbRanks.end(); it++){
-            LOGNC(m_pSimulationLog,"--->\t\t Send message to neighbours with rank: "<< *it <<std::endl;)
+            LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
             // Instanciate a MessageWrapper which contains a boost::serialization function!
             m_message.setRank(*it);
             m_pProcCom->sendMessageToRank(m_message,*it, MPILayer::MPIMessageTag::Type::CONTACT_MESSAGE );
         }
-        LOGNC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
+        LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
+    }
+
+    void receiveMessagesFromNeighbours(){
+        LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (CONTACT_MESSAGE) from neighbours!"<<std::endl;)
+        // set the rank of the receiving message automatically! inside the function!
+        m_pProcCom->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTag::Type::CONTACT_MESSAGE );
+        LOGIC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
+
+        // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
+        m_pProcCom->waitForAllSends();
     }
 
 
@@ -116,6 +140,8 @@ private:
     ProcessTopologyType * m_pProcTopo;
     const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
 
+    std::set<RankIdType> m_nbRanksSending;
+    std::set<RankIdType> m_nbRanksReceiving;
 
     RigidBodyContainerType & m_globalRemote;
     RigidBodyContainerType & m_globalLocal;

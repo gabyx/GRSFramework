@@ -59,7 +59,7 @@ void CollisionSolver::solveCollision() {
     clearCollisionSet();
 
 #if CoutLevelSolver>1
-    LOG(m_pSolverLog, " % -> solveCollision(): "<<std::endl;)
+    LOG(m_pSolverLog, "---> solveCollision(): "<<std::endl;)
 #endif
 
 
@@ -118,7 +118,7 @@ void CollisionSolver::signalContactAdd() {
                       std::abs((*colDataIt)->m_cFrame.m_e_y.dot((*colDataIt)->m_cFrame.m_e_z))< 1e-3, "Vectors not orthogonal");
 
             #if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"Contact Frame: n: " << (*colDataIt)->m_cFrame.m_e_z.transpose() << std::endl;)
+                LOG(m_pSolverLog,"---> Contact Frame: n: " << (*colDataIt)->m_cFrame.m_e_z.transpose() << std::endl;)
             #endif
 
             //Set contact frame point

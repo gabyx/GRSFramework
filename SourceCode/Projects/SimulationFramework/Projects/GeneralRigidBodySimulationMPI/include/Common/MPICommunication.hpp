@@ -34,7 +34,7 @@ class MPIMessageTag {
         enum class Type: unsigned int {
             GENERICMESSAGE = 1 << 0,
             STDSTRING = 1 << 1,
-            NEIGHBOUR_MESSAGE = 1 << 2,
+            BODY_MESSAGE = 1 << 2,
             CONTACT_MESSAGE = 1 << 3
         };
 
@@ -212,7 +212,6 @@ public:
         STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );
 
         typename List::const_iterator ranksIt;
-        std::vector<bool>::iterator itBool;
         std::vector<bool> receivedRanks(ranks.size(),false);
 
         // has an entry if a message has already been received for this rank.
@@ -222,7 +221,7 @@ public:
         int flag, i;
         LOGPC(m_pSimulationLog,  "--->\t\t Receiving message from neighbours (spin loop)..." << std::endl;)
         while( received_messages !=  ranks.size()){
-            for(ranksIt = ranks.begin(), itBool = receivedRanks.begin(); ranksIt !=  ranks.end(); ++ranksIt , ++itBool){
+            for(ranksIt = ranks.begin(), auto itBool = receivedRanks.begin(); ranksIt !=  ranks.end(); ++ranksIt , ++itBool){
 
                 if(*itBool == true){
                     //Received this rank already! Skip

@@ -4,6 +4,7 @@
 
 #include <string>
 #include <algorithm>
+#include <unordered_map>
 #include <boost/filesystem.hpp>
 #include <getoptpp/getopt_pp_standalone.h>
 
@@ -37,7 +38,7 @@ public:
             friend std::ostream & operator<<(std::ostream & s, const PostProcessTask & p);
 
             std::string m_name;
-            std::map<unsigned int, std::string> m_options;
+            std::unordered_map<unsigned int, std::string> m_options;
     };
 
     class PostProcessTaskBash : public PostProcessTask{
