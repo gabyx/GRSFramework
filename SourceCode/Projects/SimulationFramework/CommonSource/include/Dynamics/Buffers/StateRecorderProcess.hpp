@@ -7,7 +7,7 @@
 #include <cstring>
 #include <cerrno>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include "LogDefines.hpp"
 #include "TypeDefs.hpp"

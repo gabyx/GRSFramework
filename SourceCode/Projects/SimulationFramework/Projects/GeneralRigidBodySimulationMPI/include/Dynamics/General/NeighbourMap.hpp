@@ -24,7 +24,7 @@ public:
 
     // Neighbour data definitions
     typedef TData DataType;
-    typedef std::map<RankIdType, DataType > Type;
+    typedef std::unordered_map<RankIdType, DataType > Type;
     typedef typename Type::iterator iterator;
 
     NeighbourMap(RankIdType rank): m_rank(rank){};

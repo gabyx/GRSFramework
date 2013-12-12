@@ -37,9 +37,7 @@ public:
     boost::filesystem::path getPathSceneFileSelected();
     void setPathSelectedSimFile(std::string file_name);
 
-    boost::filesystem::path getSimFilePath(std::string file_name);
-
-    std::vector<std::string> getSimFileNameList();
+    std::set< boost::filesystem::path > getSimFileNameList();
 
     boost::filesystem::path getNewSimFolderPath(boost::filesystem::path directory, std::string folder_prefix);
     void updateFileList(boost::filesystem::path directory, bool with_SubDirs);
@@ -52,8 +50,7 @@ private:
     void scanAllSimFolders(const boost::filesystem::path &directory, const std::string &prefix, const bool &with_SubDirs);
     void updateAllSimDataFiles(const boost::filesystem::path &directory, const bool &with_SubDirs);
 
-    std::map< boost::filesystem::path, boost::filesystem::path > m_SimFilePaths;
-    std::vector<std::string> m_SimFileNames;
+    std::set< boost::filesystem::path > m_SimFilePaths;
 
     unsigned int m_folderIdCounter;
     boost::mutex m_busy_mutex;

@@ -221,7 +221,8 @@ public:
         int flag, i;
         LOGPC(m_pSimulationLog,  "--->\t\t Receiving message from neighbours (spin loop)..." << std::endl;)
         while( received_messages !=  ranks.size()){
-            for(ranksIt = ranks.begin(), auto itBool = receivedRanks.begin(); ranksIt !=  ranks.end(); ++ranksIt , ++itBool){
+            auto itBool = receivedRanks.begin();
+            for(ranksIt = ranks.begin(); ranksIt !=  ranks.end(); ++ranksIt , ++itBool){
 
                 if(*itBool == true){
                     //Received this rank already! Skip
@@ -311,7 +312,7 @@ private:
 
 
     typedef std::tuple< MessageBinarySerializer, MPI_Request*> SendTupleType;
-    typedef std::map<RankIdType, SendTupleType> BufferMapType;
+    typedef std::unordered_map<RankIdType, SendTupleType> BufferMapType;
     BufferMapType m_sendMessageBuffers;
     std::vector<MPI_Request>                      m_sendRequests; ///< these are the requests, these are pointers!
     std::vector<MPI_Status>                       m_sendStatuses;

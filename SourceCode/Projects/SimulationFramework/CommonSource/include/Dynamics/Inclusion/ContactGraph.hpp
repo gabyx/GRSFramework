@@ -141,8 +141,8 @@ public:
     }
 
 
-    std::map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;
-    typedef typename std::map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIterator;
+    std::unordered_map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;
+    typedef typename std::unordered_map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIterator;
 
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
@@ -412,8 +412,8 @@ public:
     }
 
 
-    std::map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;
-    typedef typename std::map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIteratorType;
+    std::unordered_map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;
+    typedef typename std::unordered_map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIteratorType;
 
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.

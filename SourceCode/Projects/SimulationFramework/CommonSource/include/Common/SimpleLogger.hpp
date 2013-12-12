@@ -2,6 +2,7 @@
 #define SimpleLogger_hpp
 
 #include <iostream>
+#include <unordered_map>
 #include <string>
 #include <sstream>
 
@@ -143,8 +144,8 @@ public:
 
 class LogManager : public Utilities::Singleton<LogManager> {
 private:
-    typedef std::map<std::string, Log *> LogListType;
-    typedef std::map<std::string, Log *>::iterator LogListIteratorType;
+    typedef std::unordered_map<std::string, Log *> LogListType;
+    typedef std::unordered_map<std::string, Log *>::iterator LogListIteratorType;
     LogListType m_logList;
 
     boost::mutex m_busy_mutex;

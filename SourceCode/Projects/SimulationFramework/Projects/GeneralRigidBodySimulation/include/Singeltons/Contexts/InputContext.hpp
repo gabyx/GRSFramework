@@ -1,6 +1,8 @@
 ﻿#ifndef INPUTCONTEXT_HPP
 #define INPUTCONTEXT_HPP
 
+#include <unordered_map>
+
 #include <boost/shared_ptr.hpp>
 #include <OIS/OISEvents.h>
 #include <OIS/OISInputManager.h>
@@ -81,17 +83,17 @@ private:
     std::vector<OIS::JoyStick*>::iterator itJoystick;
     std::vector<OIS::JoyStick*>::iterator itJoystickEnd;
 
-    std::map<std::string, OIS::KeyListener*> mKeyListeners;
-    std::map<std::string, OIS::MouseListener*> mMouseListeners;
-    std::map<std::string, OIS::JoyStickListener*> mJoystickListeners;
+    std::unordered_map<std::string, OIS::KeyListener*> mKeyListeners;
+    std::unordered_map<std::string, OIS::MouseListener*> mMouseListeners;
+    std::unordered_map<std::string, OIS::JoyStickListener*> mJoystickListeners;
 
-    std::map<std::string, OIS::KeyListener*>::iterator itKeyListener;
-    std::map<std::string, OIS::MouseListener*>::iterator itMouseListener;
-    std::map<std::string, OIS::JoyStickListener*>::iterator itJoystickListener;
+    std::unordered_map<std::string, OIS::KeyListener*>::iterator itKeyListener;
+    std::unordered_map<std::string, OIS::MouseListener*>::iterator itMouseListener;
+    std::unordered_map<std::string, OIS::JoyStickListener*>::iterator itJoystickListener;
 
-    std::map<std::string, OIS::KeyListener*>::iterator itKeyListenerEnd;
-    std::map<std::string, OIS::MouseListener*>::iterator itMouseListenerEnd;
-    std::map<std::string, OIS::JoyStickListener*>::iterator itJoystickListenerEnd;
+    std::unordered_map<std::string, OIS::KeyListener*>::iterator itKeyListenerEnd;
+    std::unordered_map<std::string, OIS::MouseListener*>::iterator itMouseListenerEnd;
+    std::unordered_map<std::string, OIS::JoyStickListener*>::iterator itJoystickListenerEnd;
 
 };
 

@@ -61,9 +61,9 @@ public:
         }
         m_pSimulationLog->logMessage("--->InclusionCommunicator: Initialized all NeighbourDatas");
 
-        m_nbRanksSending.reserve(m_nbRanks.size());
-        m_nbRanksReceiving.reserve(m_nbRanks.size());
-        m_nbRanksSending.append
+//        m_nbRanksSending.reserve(m_nbRanks.size());
+//        m_nbRanksReceiving.reserve(m_nbRanks.size());
+//        m_nbRanksSending.append
 
         m_pSimulationLog->logMessage("---> Initialized InclusionCommunicator");
     }

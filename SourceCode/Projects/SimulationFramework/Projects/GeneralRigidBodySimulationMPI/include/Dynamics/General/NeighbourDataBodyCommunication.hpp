@@ -17,10 +17,10 @@ public:
     typedef TLocalData LocalDataType;
     typedef TLocalData RemoteDataType;
 
-    typedef std::map<typename RigidBodyType::RigidBodyIdType, RemoteDataType > RemoteBodiesMapType;
+    typedef std::unordered_map<typename RigidBodyType::RigidBodyIdType, RemoteDataType > RemoteBodiesMapType;
     typedef typename RemoteBodiesMapType::iterator RemoteIterator;
 
-    typedef std::map<typename RigidBodyType::RigidBodyIdType, LocalDataType > LocalBodiesMapType;
+    typedef std::unordered_map<typename RigidBodyType::RigidBodyIdType, LocalDataType > LocalBodiesMapType;
     typedef typename LocalBodiesMapType::iterator LocalIterator;
 
 

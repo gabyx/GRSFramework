@@ -47,7 +47,7 @@ public:
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
 
     typedef ContactGraphNodeDataSplitBody SplitBodyNodeType;
-    typedef std::map<RigidBodyIdType, SplitBodyNodeType* > SplitBodyNodeListType;
+    typedef std::unordered_map<RigidBodyIdType, SplitBodyNodeType* > SplitBodyNodeListType;
 
     enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE, SPLITNODE};
 
@@ -244,8 +244,7 @@ public:
 
 
 
-    std::map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;
-    typedef typename std::map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIteratorType;
+    std::unordered_map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;
 
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.

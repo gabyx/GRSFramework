@@ -1591,7 +1591,7 @@ protected:
     std::stringstream logstream;
 
     unsigned int m_nSimBodies, m_nBodies;
-    std::map<unsigned int,unsigned int> groupIdToNBodies;
+    std::unordered_map<unsigned int,unsigned int> groupIdToNBodies;
     unsigned int m_globalMaxGroupId; // Group Id used to build a unique id!
     // Temprary structures
     typename RigidBodyType::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
@@ -1601,7 +1601,7 @@ protected:
 
 
 
-    typedef std::map<std::string, boost::shared_ptr<MeshGeometry > > ContainerSceneMeshs;
+    typedef std::unordered_map<std::string, boost::shared_ptr<MeshGeometry > > ContainerSceneMeshs;
 
 };
 

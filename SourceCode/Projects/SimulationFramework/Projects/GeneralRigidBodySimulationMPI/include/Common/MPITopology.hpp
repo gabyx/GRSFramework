@@ -20,7 +20,7 @@ public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     typedef std::set<RankIdType> NeighbourRanksListType;
-    typedef std::map<RankIdType, NeighbourRanksListType> AdjacentNeighbourRanksMapType;
+    typedef std::unordered_map<RankIdType, NeighbourRanksListType> AdjacentNeighbourRanksMapType;
 
     ProcessTopology(){}
 
