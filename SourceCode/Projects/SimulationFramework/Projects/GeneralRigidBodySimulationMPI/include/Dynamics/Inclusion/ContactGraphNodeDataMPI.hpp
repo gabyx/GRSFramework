@@ -23,6 +23,8 @@ class ContactGraphNodeDataSplitBody{
             return pairRes.second;
     }
 
+   unsigned int getMultiplicity(){ return m_partRanks.size();}
+
     private:
         std::set<RankIdType> m_partRanks; ///< Participating ranks, defines the multiplicity
         RigidBodyType * m_body;

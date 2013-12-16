@@ -751,34 +751,16 @@ private:
 
 
 template<typename TNeighbourCommunicator >
-class NeighbourMessageWrapperInclusion : public boost::serialization::traits< NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
-    boost::serialization::object_serializable,
-        boost::serialization::track_never> {
+class NeighbourMessageWrapperInclusion {
 public:
 
 
     typedef TNeighbourCommunicator NeighbourCommunicatorType;
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-
-    typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
-
-    typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
-    typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
     typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
-    typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
-    typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
-
-    typedef typename RigidBodyType::BodyInfoType                              BodyInfoType;
-
-    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
-    typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
-
-    typedef typename NeighbourCommunicatorType::ContactGraphType              ContactGraphType;
 
     NeighbourMessageWrapperInclusion(NeighbourCommunicatorType * nc):
         m_nc(nc),
-        m_initialized(false),
-        m_neighbourData(NULL)
+        m_initialized(false)
     {
 
         if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
@@ -807,96 +789,11 @@ public:
         }
     }
 
-
-    template<class Archive>
-    void save(Archive & ar, const unsigned int version) const {
-
-        LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapperInclusion is not correctly initialized, Rank not set!");
-
-        //Serialize all body ids which have contact
-        m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
-        LOGASSERTMSG( m_neighbourData, m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
-
-        //Serialize all remote body ids which have contact
-        unsigned int size = m_neighbourData->sizeRemote();
-
-        ar & size;
-
-        if(size>0){
-            LOGSZ(m_pSerializerLog, "InclusionComm=============================================================================="<< std::endl;)
-            LOGSZ(m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
-
-            LOGSZ(m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
-            for(auto it = m_neighbourData->remoteBegin(); it != m_neighbourData->remoteEnd(); it++){
-                ar & (it->first); //m_id
-            }
-
-        }
-
-        m_initialized = false;
-    }
-
-    template<class Archive>
-    void load(Archive & ar, const unsigned int version) const {
-        LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapperInclusion is not correctly initialized, Rank not set!")
-
-        // for each body one bilateral node
-        // for each received body , if no node in the bilateral set in ContactGraph exists , add one bilateral node
-        // with this participating rank;
-        unsigned int size;
-        ar & size;
-
-        if(size>0){
-            LOGSZ(m_pSerializerLog, "InclusionComm=============================================================================="<< std::endl;)
-            LOGSZ(m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
-
-            LOGSZ(m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
-
-            // Update m_neighbourData;
-            m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
-
-            for(unsigned int i = 0; i < size ; i++){
-                RigidBodyIdType id;
-                ar & id; LOGSZ(m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl;);
-
-                auto * localData = m_nc->m_pBodyComm->getNeighbourMap()->getNeighbourData(m_neighbourRank)->getLocalBodyData(id);
-                    LOGASSERTMSG(localData, m_pSerializerLog, "There is no bodydata for local body id: " << id
-                                 << " in body communicators neighbour data for rank:" << m_neighbourRank)
-
-                RigidBodyType * body = localData->m_pBody;
-                //add a local bodydata which connects to the billateral constraint
-                    LOGASSERTMSG(body, m_pSerializerLog,"Local body pointer null for id: "
-                                 << id << " in body communicators neighbour data for rank:" << m_neighbourRank)
-                auto pairAddLocal = m_neighbourData->addLocalBodyData(body);
-                    LOGASSERTMSG(pairAddLocal.second, m_pSerializerLog, "Could not add body with id: "
-                                 << id << " to neighbour data, already added!")
-
-                auto pairRes = m_nc->m_pContactGraph->addSplitBodyNode(body,m_neighbourRank);
-                //first: SplitBodyNode * pointer / second: bool
-
-                //Connect local body data (for sending and receiving updates later) to this splitBodyNode
-                pairAddLocal.first->m_pSplitBodyNode = pairRes.first;
-                LOGSZ(m_pSerializerLog, "----> added rank: " << m_neighbourRank << " to SplitBodyNode for body id: "<< RigidBodyId::getBodyIdString(id) << std::endl);
-
-            }
-        }
-
-
-        m_initialized = false;
-    }
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER();
-
-private:
-
-
-
-
+protected:
 
     NeighbourCommunicatorType* m_nc;
     RankIdType m_neighbourRank;        ///< This is the neighbour rank where the message is send to or received from!
 
-    mutable NeighbourDataType * m_neighbourData;
 
     mutable bool m_initialized;
 
@@ -905,8 +802,236 @@ private:
 
 };
 
+template<typename TNeighbourCommunicator >
+class NeighbourMessageWrapperInclusionContact : public NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
+                                                public boost::serialization::traits< NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
+                                                            boost::serialization::object_serializable,
+                                                            boost::serialization::track_never>
+{
+public:
+
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    typedef TNeighbourCommunicator NeighbourCommunicatorType;
+
+    typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
+    typedef typename RigidBodyType::BodyInfoType                              BodyInfoType;
+
+    typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
+    typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
+    typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
+    typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
+    typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
+    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
+    typedef typename NeighbourCommunicatorType::ContactGraphType              ContactGraphType;
+
+    typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
+
+
+    NeighbourMessageWrapperInclusionContact(NeighbourCommunicatorType * nc):
+        NeighbourMessageWrapperInclusion<NeighbourCommunicatorType>(nc),
+        m_neighbourData(NULL)
+    {}
+
+    template<class Archive>
+    void save(Archive & ar, const unsigned int version) const {
+
+        LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusionContact is not correctly initialized, Rank not set!");
+
+        //Serialize all body ids which have contact
+        m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
+        LOGASSERTMSG( m_neighbourData, this->m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: " << this->m_nc->m_rank << "!");
+
+        //Serialize all remote body ids which have contact
+        unsigned int size = m_neighbourData->sizeRemote();
+
+        ar & size;
+
+        if(size>0){
+            LOGSZ(this->m_pSerializerLog, "InclusionComm=============================================================================="<< std::endl;)
+            LOGSZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+
+            LOGSZ(this->m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
+            for(auto it = m_neighbourData->remoteBegin(); it != m_neighbourData->remoteEnd(); it++){
+                ar & (it->first); //m_id
+            }
+
+            // Add this rank to the sending list for further communication
+            this->m_nc->m_nbRanksSendRecvRemote.insert( this->m_neighbourRank );
+        }
+
+        this->m_initialized = false;
+    }
+
+    template<class Archive>
+    void load(Archive & ar, const unsigned int version) const {
+        LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusion is not correctly initialized, Rank not set!")
+
+        // for each body one bilateral node
+        // for each received body , if no node in the bilateral set in ContactGraph exists , add one bilateral node
+        // with this participating rank;
+        unsigned int size;
+        ar & size;
+
+        if(size>0){
+            LOGSZ(this->m_pSerializerLog, "InclusionCommm-Contact=============================================================================="<< std::endl;)
+            LOGSZ(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+
+            LOGSZ(this->m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
+
+            // Update m_neighbourData;
+            m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
+
+            for(unsigned int i = 0; i < size ; i++){
+                RigidBodyIdType id;
+                ar & id; LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl;);
+
+                auto * localData = this->m_nc->m_pBodyComm->getNeighbourMap()->getNeighbourData(this->m_neighbourRank)->getLocalBodyData(id);
+                    LOGASSERTMSG(localData, this->m_pSerializerLog, "There is no bodydata for local body id: " << id
+                                 << " in body communicators neighbour data for rank:" << this->m_neighbourRank)
+
+                RigidBodyType * body = localData->m_pBody;
+                //add a local bodydata which connects to the billateral constraint
+                    LOGASSERTMSG(body, this->m_pSerializerLog,"Local body pointer null for id: "
+                                 << id << " in body communicators neighbour data for rank:" << this->m_neighbourRank)
+                auto pairAddLocal = m_neighbourData->addLocalBodyData(body);
+                    LOGASSERTMSG(pairAddLocal.second, this->m_pSerializerLog, "Could not add body with id: "
+                                 << id << " to neighbour data, already added!")
+
+                auto pairRes = this->m_nc->m_pContactGraph->addSplitBodyNode(body,this->m_neighbourRank);
+                //first: SplitBodyNode * pointer / second: bool
+
+                //Connect local body data (for sending and receiving updates later) to this splitBodyNode
+                pairAddLocal.first->m_pSplitBodyNode = pairRes.first;
+                LOGSZ(this->m_pSerializerLog, "----> added rank: " << this->m_neighbourRank << " to SplitBodyNode for body id: "<< RigidBodyId::getBodyIdString(id) << std::endl);
+
+                // Add this rank to the receving list for further communication
+                this->m_nc->m_nbRanksSendRecvLocal.insert( this->m_neighbourRank );
+
+            }
+        }
+
+
+        this->m_initialized = false;
+    }
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER();
+
+private:
+    mutable NeighbourDataType * m_neighbourData;
+
+};
+
+
+template<typename TNeighbourCommunicator >
+class NeighbourMessageWrapperInclusionMultiplicity : public NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
+                                                     public boost::serialization::traits< NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
+                                                            boost::serialization::object_serializable,
+                                                            boost::serialization::track_never>
+{
+public:
+
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    typedef TNeighbourCommunicator NeighbourCommunicatorType;
+    typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
+
+    typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
+    typedef typename RigidBodyType::BodyInfoType                              BodyInfoType;
+
+    typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
+    typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
+    typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
+    typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
+    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
+    typedef typename NeighbourCommunicatorType::ContactGraphType              ContactGraphType;
+
+    typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
+
+
+    NeighbourMessageWrapperInclusionMultiplicity(NeighbourCommunicatorType * nc):
+        NeighbourMessageWrapperInclusion<NeighbourCommunicatorType>(nc),
+        m_neighbourData(NULL)
+    {}
+
+
+    template<class Archive>
+    void save(Archive & ar, const unsigned int version) const {
+
+        LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusionMultiplicity is not correctly initialized, Rank not set!");
+
+        //Serialize all body ids which have contact
+        m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
+        LOGASSERTMSG( m_neighbourData, m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
+
+        //Serialize all remote body ids which have contact
+        unsigned int size = m_neighbourData->sizeLocal();
+
+        ar & size;
+
+        if(size>0){
+            LOGSZ(m_pSerializerLog, "InclusionComm-Multiplicity=============================================================================="<< std::endl;)
+            LOGSZ(m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
+
+            LOGSZ(m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
+            for(auto it = m_neighbourData->localBegin(); it != m_neighbourData->localBegin(); it++){
+                ar & (it->first); //m_id
+                ar & (unsigned int)(it->second.m_pSplitBodyNode.getMultiplicity()) // multiplicity
+            }
+        }else{
+            ASSERTMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
+            // We know to which neighbours we send receive a nonempty message
+        }
+
+        this->m_initialized = false;
+    }
+
+    template<class Archive>
+    void load(Archive & ar, const unsigned int version) const {
+         LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusionMultiplicity is not correctly initialized, Rank not set!")
+
+        unsigned int size;
+        ar & size;
+
+        if(size>0){
+            LOGSZ(m_pSerializerLog, "InclusionComm-Multiplicity=============================================================================="<< std::endl;)
+            LOGSZ(m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
+
+            LOGSZ(m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
+
+            // Update m_neighbourData;
+            m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
+
+            unsigned int multFactor ;
+            RigidBodyIdType id;
+            for(unsigned int i = 0; i < size ; i++){
+                ar & id;
+                // Save this multfactor in the rigid body
+
+                auto * remoteBodyData = m_neighbourData->getRemoteBodyData(id);
+                ASSERTMSG( remoteBodyData, "remoteBodyData is null for body id: " << RigidBodyId::getBodyIdString(id) << " in neighbour data rank " << this->m_neighbourRank)
+                ASSERTMSG( m_pSolverData , "m_pSolverData is null for body id: " << RigidBodyId::getBodyIdString(id));
+                ar & remoteBodyData->m_pBody->m_pSolverData->m_multFactor;
+
+            }
+
+        }else{
+            ASSERTMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
+            // We know from which neighbours we should receive a nonempty message
+        }
+
+
+        this->m_initialized = false;
+    }
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER();
+
+private:
+    mutable NeighbourDataType * m_neighbourData;
+};
 
 }; // MPILayer
+
 
 
 #endif

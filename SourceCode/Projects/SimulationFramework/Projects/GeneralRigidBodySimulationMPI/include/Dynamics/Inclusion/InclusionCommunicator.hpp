@@ -45,7 +45,7 @@ public:
             m_nbDataMap(m_pProcCom->getProcInfo()->getRank()),
             m_rank(m_pProcCom->getProcInfo()->getRank()),
             m_nbRanks(m_pProcCom->getProcInfo()->getProcTopo()->getNeighbourRanks()),
-            m_message(this)
+            m_messageContact(this),m_messageMultiplicity(this)
     {
         if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
             m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
@@ -79,10 +79,16 @@ public:
 
     void communicateRemoteContacts(){
         LOGIC(m_pSimulationLog,"---> InclusionCommunication: Send remote contacts (initialize global prox)"<< std::endl;)
-        // First for each neighbour, communicate the ids
+
+        // First for each neighbour, communicate the ids of all remote body which have contacts
         sendContactMessageToNeighbours();
 
-        receiveMessagesFromNeighbours();
+        receiveContactMessagesFromNeighbours();
+
+        // Send all multiplicity factors of all local splitBodyNodes
+        sendBodyMultiplicityMessageToNeighbours();
+        // Recv all multiplicity factor of all remote bodies
+        recvBodyMultiplicityMessageFromNeighbours();
 
         LOGIC(m_pSimulationLog,"---> InclusionCommunication: finished"<< std::endl;)
     }
@@ -103,20 +109,42 @@ private:
         for(auto it = m_nbRanks.begin(); it != m_nbRanks.end(); it++){
             LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
             // Instanciate a MessageWrapper which contains a boost::serialization function!
-            m_message.setRank(*it);
-            m_pProcCom->sendMessageToRank(m_message,*it, MPILayer::MPIMessageTag::Type::CONTACT_MESSAGE );
+            m_messageContact.setRank(*it);
+            m_pProcCom->sendMessageToRank(m_messageContact,*it, MPILayer::MPIMessageTag::Type::CONTACT_MESSAGE );
         }
         LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
     }
 
-    void receiveMessagesFromNeighbours(){
+    void receiveContactMessagesFromNeighbours(){
         LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (CONTACT_MESSAGE) from neighbours!"<<std::endl;)
         // set the rank of the receiving message automatically! inside the function!
-        m_pProcCom->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTag::Type::CONTACT_MESSAGE );
+        m_pProcCom->receiveMessageFromRanks(m_messageContact, m_nbRanks, MPILayer::MPIMessageTag::Type::CONTACT_MESSAGE );
         LOGIC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
 
         // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
         m_pProcCom->waitForAllSends();
+    }
+
+    void sendBodyMultiplicityMessageToNeighbours(){
+//        LOGIC(m_pSimulationLog,"MPI>\t Send message (CONTACT_MESSAGE) to neighbours!"<<std::endl;)
+//
+//        for(auto it = m_nbRanks.begin(); it != m_nbRanks.end(); it++){
+//            LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
+//            // Instanciate a MessageWrapper which contains a boost::serialization function!
+//            m_messageContact.setRank(*it);
+//            m_pProcCom->sendMessageToRank(m_messageContact,*it, MPILayer::MPIMessageTag::Type::CONTACT_MESSAGE );
+//        }
+//        LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
+    }
+
+    void recvBodyMultiplicityMessageFromNeighbours(){
+//        LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (CONTACT_MESSAGE) from neighbours!"<<std::endl;)
+//        // set the rank of the receiving message automatically! inside the function!
+//        m_pProcCom->receiveMessageFromRanks(m_messageContact, m_nbRanks, MPILayer::MPIMessageTag::Type::CONTACT_MESSAGE );
+//        LOGIC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
+//
+//        // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
+//        m_pProcCom->waitForAllSends();
     }
 
 
@@ -124,10 +152,11 @@ private:
     /**
     * The NeighbourMessageWrapperInclusion class needs access, to be able to serialize all together!
     */
-    template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapperInclusion;
+    template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapperInclusionContact;
+    template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapperInclusionMultiplicity;
 
-
-    MPILayer::NeighbourMessageWrapperInclusion< InclusionCommunicator > m_message;
+    MPILayer::NeighbourMessageWrapperInclusionContact< InclusionCommunicator > m_messageContact;
+    MPILayer::NeighbourMessageWrapperInclusionMultiplicity< InclusionCommunicator > m_messageMultiplicity;
 
     boost::shared_ptr< DynamicsSystemType >      m_pDynSys;
     boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
@@ -140,8 +169,13 @@ private:
     ProcessTopologyType * m_pProcTopo;
     const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
 
-    std::set<RankIdType> m_nbRanksSending;
-    std::set<RankIdType> m_nbRanksReceiving;
+    std::set<RankIdType> m_nbRanksSendRecvRemote;
+    /** If rank is in this set then there are remote bodies: send Velocities to rank,
+                                                             recv BillateralUpdate from rank*/
+
+    std::set<RankIdType> m_nbRanksSendRecvLocal;
+    /** If rank is in this set then there are local bodies: recv Velocities from rank,
+                                                            send BillateralUpdate to rank */
 
     RigidBodyContainerType & m_globalRemote;
     RigidBodyContainerType & m_globalLocal;
