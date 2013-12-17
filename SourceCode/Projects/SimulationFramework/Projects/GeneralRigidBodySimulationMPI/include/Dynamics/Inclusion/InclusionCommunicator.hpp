@@ -145,6 +145,8 @@ private:
     void recvBodyMultiplicityMessageFromNeighbours(){
         LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (SPLITBODYFACTOR_MESSAGE) from neighbours!"<<std::endl;)
         // set the rank of the receiving message automatically! inside the function!
+        // m_nbRanksSendRecvRem#ote.erase(m_nbRanksSendRecvRemote.begin()); with this in, it obviously hangs!!
+        // so the code is correct! all messages get received
         m_pProcCom->receiveMessageFromRanks(m_messageMultiplicity, m_nbRanksSendRecvRemote, MPILayer::MPIMessageTag::Type::SPLITBODYFACTOR_MESSAGE );
         LOGIC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
 

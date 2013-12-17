@@ -19,7 +19,7 @@ class ContactGraphNodeDataSplitBody{
     ~ContactGraphNodeDataSplitBody(){};
 
     bool addRank(const RankIdType & rank){
-            auto pairRes = m_partRanks.insert(rank);
+            auto pairRes = m_partRanks.push_back(rank);
             return pairRes.second;
     }
 
@@ -27,8 +27,12 @@ class ContactGraphNodeDataSplitBody{
    unsigned int getMultiplicity(){ return m_partRanks.size() + 1;}
 
     private:
-        std::set<RankIdType> m_partRanks; ///< Participating ranks, defines the multiplicity
+        std::vector<RankIdType> m_partRanks; ///< Participating ranks, defines the multiplicity
         RigidBodyType * m_body;
+
+        VectorDyn m_u_G; // all velocities of all split bodies m_u_G = [u1,u2,u3,u4,u5...], correspond to rank in vector
+        VectorDyn m_lambdaB_back; //Bilateral Lambda
+        VectorDyn m_lambdaB_front; //Bilateral Lambda
 };
 
 
