@@ -977,12 +977,12 @@ public:
             LOGSZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
             LOGSZ(this->m_pSerializerLog, "---> # Local Split Bodies (with external Contacts): " << size << std::endl;);
-            for(auto it = m_neighbourData->localBegin(); it != m_neighbourData->localBegin(); it++){
+            for(auto it = m_neighbourData->localBegin(); it != m_neighbourData->localEnd(); it++){
                 LOGASSERTMSG(it->second.m_pSplitBodyNode, this->m_pSerializerLog, "m_pSplitBodyNode is null for body id: "
                              << RigidBodyId::getBodyIdString(it->first) <<std::endl)
                 unsigned int multFact = it->second.m_pSplitBodyNode->getMultiplicity();
                 LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl <<
-                                              "----> multFactor: " << multFact);
+                                  "----> multFactor: " << multFact <<std::endl;);
                 ar & (it->first);
                 ar & multFact; // multiplicity
 
@@ -1015,15 +1015,17 @@ public:
             unsigned int multFactor ;
             RigidBodyIdType id;
             for(unsigned int i = 0; i < size ; i++){
-                //ar & id;
-                //ar & multFactor;
-//                // Save this multfactor in the rigid body
-//                auto * remoteBodyData = m_neighbourData->getRemoteBodyData(id);
-//                LOGASSERTMSG( remoteBodyData, this->m_pSerializerLog,"remoteBodyData is null for body id: " << RigidBodyId::getBodyIdString(id) << " in neighbour data rank " << this->m_neighbourRank)
-//                LOGASSERTMSG( remoteBodyData->m_pBody->m_pSolverData , this->m_pSerializerLog,"m_pSolverData is null for body id: " << RigidBodyId::getBodyIdString(id));
-//                remoteBodyData->m_pBody->m_pSolverData->m_multFactor = multFactor;
+                unsigned int a;
+                ar & id;
+                ar & multFactor;
+                // Save this multfactor in the rigid body
+                LOGASSERTMSG(multFactor != 0, this->m_pSerializerLog, "multFactor can not be zero!" )
+                auto * remoteBodyData = m_neighbourData->getRemoteBodyData(id);
+                LOGASSERTMSG( remoteBodyData, this->m_pSerializerLog,"remoteBodyData is null for body id: " << RigidBodyId::getBodyIdString(id) << " in neighbour data rank " << this->m_neighbourRank)
+                LOGASSERTMSG( remoteBodyData->m_pBody->m_pSolverData , this->m_pSerializerLog,"m_pSolverData is null for body id: " << RigidBodyId::getBodyIdString(id));
+                remoteBodyData->m_pBody->m_pSolverData->m_multFactor = multFactor;
                 LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
-                                              "----> multFactor: " << multFactor );
+                                              "----> multFactor: " << multFactor <<std::endl;);
 
             }
 
