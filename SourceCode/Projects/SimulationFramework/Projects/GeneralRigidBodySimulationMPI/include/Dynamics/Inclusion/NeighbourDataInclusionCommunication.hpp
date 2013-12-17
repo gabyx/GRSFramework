@@ -21,7 +21,7 @@ namespace NeighbourDataInclusionCommunication_impl{
     };
     struct LocalData{
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-        LocalData(RigidBodyType * body):m_pBody(body){};
+        LocalData(RigidBodyType * body):m_pBody(body),m_pSplitBodyNode(NULL){};
         RigidBodyType * const m_pBody;
         ContactGraphNodeDataSplitBody * m_pSplitBodyNode;
     };

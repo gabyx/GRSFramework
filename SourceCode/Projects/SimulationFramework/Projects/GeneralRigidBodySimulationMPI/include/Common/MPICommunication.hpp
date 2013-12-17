@@ -35,7 +35,8 @@ class MPIMessageTag {
             GENERICMESSAGE = 1 << 0,
             STDSTRING = 1 << 1,
             BODY_MESSAGE = 1 << 2,
-            CONTACT_MESSAGE = 1 << 3
+            EXTERNALCONTACTS_MESSAGE = 1 << 3,
+            SPLITBODYFACTOR_MESSAGE = 1 << 4
         };
 
         MPIMessageTag( Type t): m_t(t){};
@@ -204,12 +205,18 @@ public:
     }
 
     void waitForAllSends(){
-        MPI_Waitall(m_sendRequests.size(), &m_sendRequests[0], &m_sendStatuses[0]);
+
+        LOGPC(m_pSimulationLog,  "--->\t\t Waiting for all sends to complete ..." << std::endl;)
+        int error = MPI_Waitall(m_sendRequests.size(), &m_sendRequests[0],&m_sendStatuses[0]);
+
+        ASSERTMPIERROR(error, "ProcessCommunicator:: waiting for sends failed")
     }
 
     template<typename T, typename List>
     void receiveMessageFromRanks(T & t,const List & ranks, MPIMessageTag tag,  MPI_Comm comm = MPI_COMM_WORLD ){
         STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );
+
+        if(ranks.size() == 0){return;};
 
         typename List::const_iterator ranksIt;
         std::vector<bool> receivedRanks(ranks.size(),false);
@@ -262,12 +269,6 @@ public:
                 }
             }
         }
-
-        // Wait for the asynchronours sends
-        LOGPC(m_pSimulationLog,  "--->\t\t Waiting for all sends to complete ..." << std::endl;)
-        int error = MPI_Waitall(m_sendRequests.size(), &m_sendRequests[0],&m_sendStatuses[0]);
-
-        ASSERTMPIERROR(error, "ProcessCommunicator:: waiting for sends failed")
 
     };
 

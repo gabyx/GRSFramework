@@ -848,12 +848,13 @@ public:
         ar & size;
 
         if(size>0){
-            LOGSZ(this->m_pSerializerLog, "InclusionComm=============================================================================="<< std::endl;)
+            LOGSZ(this->m_pSerializerLog, "InclusionComm-Contact=============================================================================="<< std::endl;)
             LOGSZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
             LOGSZ(this->m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
             for(auto it = m_neighbourData->remoteBegin(); it != m_neighbourData->remoteEnd(); it++){
                 ar & (it->first); //m_id
+                LOGSZ(this->m_pSerializerLog, "---->  body id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl;);
             }
 
             // Add this rank to the sending list for further communication
@@ -874,7 +875,7 @@ public:
         ar & size;
 
         if(size>0){
-            LOGSZ(this->m_pSerializerLog, "InclusionCommm-Contact=============================================================================="<< std::endl;)
+            LOGSZ(this->m_pSerializerLog, "InclusionComm-Contact=============================================================================="<< std::endl;)
             LOGSZ(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
             LOGSZ(this->m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
@@ -887,16 +888,16 @@ public:
                 ar & id; LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl;);
 
                 auto * localData = this->m_nc->m_pBodyComm->getNeighbourMap()->getNeighbourData(this->m_neighbourRank)->getLocalBodyData(id);
-                    LOGASSERTMSG(localData, this->m_pSerializerLog, "There is no bodydata for local body id: " << id
+                    LOGASSERTMSG(localData, this->m_pSerializerLog, "There is no bodydata for local body id: " << RigidBodyId::getBodyIdString(id)
                                  << " in body communicators neighbour data for rank:" << this->m_neighbourRank)
 
                 RigidBodyType * body = localData->m_pBody;
                 //add a local bodydata which connects to the billateral constraint
                     LOGASSERTMSG(body, this->m_pSerializerLog,"Local body pointer null for id: "
-                                 << id << " in body communicators neighbour data for rank:" << this->m_neighbourRank)
+                                 << RigidBodyId::getBodyIdString(id) << " in body communicators neighbour data for rank:" << this->m_neighbourRank)
                 auto pairAddLocal = m_neighbourData->addLocalBodyData(body);
                     LOGASSERTMSG(pairAddLocal.second, this->m_pSerializerLog, "Could not add body with id: "
-                                 << id << " to neighbour data, already added!")
+                                 << RigidBodyId::getBodyIdString(id) << " to neighbour data, already added!")
 
                 auto pairRes = this->m_nc->m_pContactGraph->addSplitBodyNode(body,this->m_neighbourRank);
                 //first: SplitBodyNode * pointer / second: bool
@@ -961,8 +962,10 @@ public:
         LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusionMultiplicity is not correctly initialized, Rank not set!");
 
         //Serialize all body ids which have contact
-        m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
-        LOGASSERTMSG( m_neighbourData, m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
+        m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
+        LOGASSERTMSG( this->m_neighbourData, this->m_pSerializerLog,
+                     "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
+                     << this->m_nc->m_rank << "!");
 
         //Serialize all remote body ids which have contact
         unsigned int size = m_neighbourData->sizeLocal();
@@ -970,16 +973,23 @@ public:
         ar & size;
 
         if(size>0){
-            LOGSZ(m_pSerializerLog, "InclusionComm-Multiplicity=============================================================================="<< std::endl;)
-            LOGSZ(m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
+            LOGSZ(this->m_pSerializerLog, "InclusionComm-Multiplicity=============================================================================="<< std::endl;)
+            LOGSZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
-            LOGSZ(m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
+            LOGSZ(this->m_pSerializerLog, "---> # Local Split Bodies (with external Contacts): " << size << std::endl;);
             for(auto it = m_neighbourData->localBegin(); it != m_neighbourData->localBegin(); it++){
-                ar & (it->first); //m_id
-                ar & (unsigned int)(it->second.m_pSplitBodyNode.getMultiplicity()) // multiplicity
+                LOGASSERTMSG(it->second.m_pSplitBodyNode, this->m_pSerializerLog, "m_pSplitBodyNode is null for body id: "
+                             << RigidBodyId::getBodyIdString(it->first) <<std::endl)
+                unsigned int multFact = it->second.m_pSplitBodyNode->getMultiplicity();
+                LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl <<
+                                              "----> multFactor: " << multFact);
+                ar & (it->first);
+                ar & multFact; // multiplicity
+
+
             }
         }else{
-            ASSERTMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
+            ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
             // We know to which neighbours we send receive a nonempty message
         }
 
@@ -994,29 +1004,31 @@ public:
         ar & size;
 
         if(size>0){
-            LOGSZ(m_pSerializerLog, "InclusionComm-Multiplicity=============================================================================="<< std::endl;)
-            LOGSZ(m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
+            LOGSZ(this->m_pSerializerLog, "InclusionComm-Multiplicity=============================================================================="<< std::endl;)
+            LOGSZ(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
-            LOGSZ(m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
+            LOGSZ(this->m_pSerializerLog, "---> # Remote SplitBodies: " << size << std::endl;);
 
             // Update m_neighbourData;
-            m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
+            m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
 
             unsigned int multFactor ;
             RigidBodyIdType id;
             for(unsigned int i = 0; i < size ; i++){
-                ar & id;
-                // Save this multfactor in the rigid body
-
-                auto * remoteBodyData = m_neighbourData->getRemoteBodyData(id);
-                ASSERTMSG( remoteBodyData, "remoteBodyData is null for body id: " << RigidBodyId::getBodyIdString(id) << " in neighbour data rank " << this->m_neighbourRank)
-                ASSERTMSG( m_pSolverData , "m_pSolverData is null for body id: " << RigidBodyId::getBodyIdString(id));
-                ar & remoteBodyData->m_pBody->m_pSolverData->m_multFactor;
+                //ar & id;
+                //ar & multFactor;
+//                // Save this multfactor in the rigid body
+//                auto * remoteBodyData = m_neighbourData->getRemoteBodyData(id);
+//                LOGASSERTMSG( remoteBodyData, this->m_pSerializerLog,"remoteBodyData is null for body id: " << RigidBodyId::getBodyIdString(id) << " in neighbour data rank " << this->m_neighbourRank)
+//                LOGASSERTMSG( remoteBodyData->m_pBody->m_pSolverData , this->m_pSerializerLog,"m_pSolverData is null for body id: " << RigidBodyId::getBodyIdString(id));
+//                remoteBodyData->m_pBody->m_pSolverData->m_multFactor = multFactor;
+                LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
+                                              "----> multFactor: " << multFactor );
 
             }
 
         }else{
-            ASSERTMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
+            ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
             // We know from which neighbours we should receive a nonempty message
         }
 
