@@ -1,0 +1,175 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 9.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[      6715,        166]
+NotebookOptionsPosition[      6144,        142]
+NotebookOutlinePosition[      6482,        157]
+CellTagsIndexPosition[      6439,        154]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{"lc", "=", 
+  RowBox[{"FileNameJoin", "[", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"SetDirectory", "[", 
+      RowBox[{"NotebookDirectory", "[", "]"}], "]"}], ",", 
+     "\"\<MultiProcessorProx2.nb\>\""}], "}"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.596359046910572*^9, 3.59635905767537*^9}, 
+   3.596361555236833*^9, {3.596361620190915*^9, 3.596361621186886*^9}}],
+
+Cell[BoxData["\<\"/home/zfmgpu/Desktop/Repository/SimulationFramework/\
+SourceCode/Projects/SimulationFramework/Projects/\
+GeneralRigidBodySimulationMPI/include/Dynamics/Inclusion/LMatrixGeneration/\
+MultiProcessorProx2.nb\"\>"], "Output",
+ CellChangeTimes->{3.596361555999284*^9, 3.596361621682879*^9, 
+  3.596361827107513*^9, 3.596372918024341*^9, 3.596373817479412*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"generateMultiplicityMatrix", "[", "m_", "]"}], ":=", 
+    RowBox[{"(", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"nMultiplicity", "=", "m"}], ";", "\[IndentingNewLine]", 
+      RowBox[{"NotebookEvaluate", "[", 
+       RowBox[{"lc", ",", " ", 
+        RowBox[{"InsertResults", "\[Rule]", "True"}]}], "]"}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"s", " ", "<>", " ", "\"\<\\n\>\""}]}], "\[IndentingNewLine]", 
+     ")"}]}], ";"}]}]], "Input",
+ CellChangeTimes->{{3.5963590643390827`*^9, 3.5963591751562853`*^9}, {
+   3.596359236343985*^9, 3.5963593220361223`*^9}, {3.596359390990745*^9, 
+   3.596359398813834*^9}, 3.596359453740416*^9, {3.596359505238864*^9, 
+   3.596359530040015*^9}, 3.5963602084080963`*^9, {3.5963602449826612`*^9, 
+   3.596360251569221*^9}, {3.596360307826352*^9, 3.596360322333696*^9}, {
+   3.596360948674342*^9, 3.596360949552053*^9}, {3.596361081876996*^9, 
+   3.596361082504101*^9}, {3.5963615023860397`*^9, 3.596361513165552*^9}, {
+   3.596373057113284*^9, 3.5963730610543613`*^9}, {3.59637310339106*^9, 
+   3.596373106826789*^9}}],
+
+Cell[BoxData[
+ RowBox[{"generateMultiplicityMatrix", "[", "8", "]"}]], "Input",
+ CellChangeTimes->{{3.596361524950107*^9, 3.596361533314703*^9}, 
+   3.596361635205893*^9, 3.5963618467469187`*^9, 3.596373072819153*^9, {
+   3.596373111658338*^9, 3.596373119772121*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{
+    RowBox[{"Generate", " ", "all", " ", "Codefiles"}], ",", " ", 
+    RowBox[{
+    "need", " ", "to", " ", "make", " ", "sure", " ", "nMultiplicity", " ", 
+     "is", " ", "commented", " ", "out", " ", "in", " ", "notebook"}]}], 
+   "*)"}], "\n", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"multRange", " ", "=", " ", 
+     RowBox[{"Range", "[", 
+      RowBox[{"2", ",", "8"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"holeFile", " ", "=", 
+     RowBox[{"StringJoin", "[", 
+      RowBox[{"generateMultiplicityMatrix", " ", "/@", "multRange"}], " ", 
+      "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{"fileName", " ", "=", " ", 
+    RowBox[{"FileNameJoin", "[", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"SetDirectory", "[", 
+        RowBox[{"NotebookDirectory", "[", "]"}], "]"}], " ", ",", 
+       "\"\<generate_LMatrix_Multiplicity.hpp\>\""}], "}"}], "]"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"f", "=", 
+    RowBox[{"OpenWrite", "[", "fileName", "]"}]}], "\[IndentingNewLine]", 
+   RowBox[{"WriteString", "[", 
+    RowBox[{"f", ",", "holeFile"}], "]"}], "\[IndentingNewLine]", 
+   RowBox[{"Close", "[", "f", "]"}], "\[IndentingNewLine]"}]}]], "Input",
+ CellChangeTimes->{{3.5963590643390827`*^9, 3.5963591751562853`*^9}, {
+   3.596359236343985*^9, 3.5963593220361223`*^9}, {3.596359390990745*^9, 
+   3.596359398813834*^9}, 3.596359453740416*^9, {3.596359505238864*^9, 
+   3.596359530040015*^9}, 3.5963602084080963`*^9, {3.5963602449826612`*^9, 
+   3.596360251569221*^9}, 3.596360307826352*^9, {3.596361154505459*^9, 
+   3.596361154801512*^9}, 3.596361914440702*^9, {3.596373128203472*^9, 
+   3.596373155183152*^9}, {3.596373217631213*^9, 3.596373241474238*^9}, {
+   3.596373949991012*^9, 3.596373970433329*^9}, {3.596374006895681*^9, 
+   3.596374036331831*^9}}],
+
+Cell[BoxData["\<\"/home/zfmgpu/Desktop/Repository/SimulationFramework/\
+SourceCode/Projects/SimulationFramework/Projects/\
+GeneralRigidBodySimulationMPI/include/Dynamics/Inclusion/LMatrixGeneration/\
+generate_LMatrix_Multiplicity.hpp\"\>"], "Output",
+ CellChangeTimes->{{3.596373165155843*^9, 3.596373192186921*^9}, 
+   3.596373253279778*^9, 3.596373291977276*^9, 3.59637382823357*^9, 
+   3.596373985574519*^9, {3.596374021277562*^9, 3.5963740433501453`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"OutputStream", "[", 
+  RowBox[{"\<\"/home/zfmgpu/Desktop/Repository/SimulationFramework/SourceCode/\
+Projects/SimulationFramework/Projects/GeneralRigidBodySimulationMPI/include/\
+Dynamics/Inclusion/LMatrixGeneration/generate_LMatrix_Multiplicity.hpp\"\>", 
+   ",", "132"}], "]"}]], "Output",
+ CellChangeTimes->{{3.596373165155843*^9, 3.596373192186921*^9}, 
+   3.596373253279778*^9, 3.596373291977276*^9, 3.59637382823357*^9, 
+   3.596373985574519*^9, {3.596374021277562*^9, 3.5963740433529997`*^9}}],
+
+Cell[BoxData["\<\"/home/zfmgpu/Desktop/Repository/SimulationFramework/\
+SourceCode/Projects/SimulationFramework/Projects/\
+GeneralRigidBodySimulationMPI/include/Dynamics/Inclusion/LMatrixGeneration/\
+generate_LMatrix_Multiplicity.hpp\"\>"], "Output",
+ CellChangeTimes->{{3.596373165155843*^9, 3.596373192186921*^9}, 
+   3.596373253279778*^9, 3.596373291977276*^9, 3.59637382823357*^9, 
+   3.596373985574519*^9, {3.596374021277562*^9, 3.596374043373942*^9}}]
+}, Open  ]]
+},
+WindowSize->{1043, 869},
+WindowMargins->{{Automatic, 762}, {65, Automatic}},
+FrontEndVersion->"9.0 for Linux x86 (64-bit) (February 7, 2013)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[579, 22, 395, 9, 32, "Input"],
+Cell[977, 33, 372, 5, 55, "Output"]
+}, Open  ]],
+Cell[1364, 41, 1160, 22, 143, "Input"],
+Cell[2527, 65, 267, 4, 32, "Input"],
+Cell[CellGroupData[{
+Cell[2819, 73, 1860, 40, 187, "Input"],
+Cell[4682, 115, 459, 6, 77, "Output"],
+Cell[5144, 123, 524, 8, 99, "Output"],
+Cell[5671, 133, 457, 6, 77, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

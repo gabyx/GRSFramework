@@ -10,6 +10,7 @@
 #define MyMatrixDefs_hpp
 
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include <Eigen/Geometry>
 
 // ================================================================================================
@@ -35,6 +36,9 @@ struct MyMatrix{
 
    typedef Eigen::Transform<PREC,3,Eigen::TransformTraits::Affine> AffineTrafo;
 
+   typedef Eigen::SparseMatrix<PREC>    MatrixSparse;       // declares a column-major sparse matrix of type PREC
+   typedef Eigen::Triplet<PREC>         MatrixSparseTriplet;
+
 };
 
 /**
@@ -53,6 +57,8 @@ struct MyMatrix{
    typedef typename MyMatrix< _PREC_ >::MatrixDyn MatrixDyn; \
    typedef typename MyMatrix< _PREC_ >::MatrixDiagDyn MatrixDiagDyn; \
    typedef typename MyMatrix< _PREC_ >::MatrixDynRow MatrixDynRow; \
-   typedef typename MyMatrix< _PREC_ >::AffineTrafo AffineTrafo;
-
+   typedef typename MyMatrix< _PREC_ >::AffineTrafo AffineTrafo; \
+   typedef typename MyMatrix< _PREC_ >::MatrixSparse MatrixSparse; \
+   typedef typename MyMatrix< _PREC_ >::MatrixSparseTriplet MatrixSparseTriplet;
 #endif
+

@@ -285,7 +285,6 @@ private:
 
 
 
-
     void computeParams(NodeDataType & nodeData) {
         if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
             // Get Contact Parameters
@@ -427,7 +426,7 @@ private:
 
 
 /**
-@brief Visitor for class ContactGraph<TRigidBody,ContactGraphMode::ForIteration>
+@brief Visitor for class ContactGraph
 */
 template<typename TContactGraph>
 class SorProxStepNodeVisitor{
@@ -614,7 +613,60 @@ private:
 
 
 /**
-@brief Visitor for class ContactGraph<TRigidBody,ContactGraphMode::ForIteration>
+@brief Visitor for class ContactGraph
+*/
+template<typename TContactGraph>
+class SorProxStepSplitNodeVisitor{
+public:
+
+    DEFINE_RIGIDBODY_CONFIG_TYPES
+
+    typedef TContactGraph ContactGraphType;
+
+    typedef typename ContactGraphType::NodeDataType NodeDataType;
+    typedef typename ContactGraphType::SplitBodyNodeType NodeType;
+
+    SorProxStepSplitNodeVisitor(const InclusionSolverSettings &settings, bool & globalConverged, const unsigned int & globalIterationNeeded):
+                           m_Settings(settings),m_bConverged(globalConverged),
+                           m_iterationsNeeded(globalIterationNeeded)
+    {}
+
+    void setLog(Logging::Log * solverLog){
+        m_pSolverLog = solverLog;
+    }
+
+    void visitNode(NodeType& node){
+        /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
+           Then the iteration is not converged somewhere, and we need to wait till the next iteration!
+        */
+
+        // Calculate the exact values for the billateral split nodes
+
+        // Build gamma = [u1-u2, u2-u3, u3-u4,..., un-1- un]
+        // make all but first
+        for(unsigned int i = 0; i < node.m_partRanks.size()-1; i++){
+            node.m_gamma.segment<NDOFuObj>(NDOFuObj*(i+1)) =   node.m_u_G.segment<NDOFuObj>(NDOFuObj*i)
+                                                             - node.m_u_G.segment<NDOFuObj>(NDOFuObj*(i+1));
+        }
+        // make first entry in gamma
+        //node.m_gamma.head<NDOFuObj>() = node.m_pBody->m_pSolverData->m_uBuffer.m_front - node.m_u_G.head<NDOFuObj>();
+
+        // calculate L⁻¹*gamma = Lambda, where L⁻¹ is the matrix choosen by the multiplicity
+
+
+    }
+
+private:
+    Logging::Log * m_pSolverLog;
+    const InclusionSolverSettings & m_Settings;
+    bool & m_bConverged; ///< Access to global flag for cancelation criteria
+    const unsigned int & m_iterationsNeeded; ///< Access to global iteration counter
+
+};
+
+
+/**
+@brief Visitor for class ContactGraph
 */
 template<typename TContactGraph>
 class SorProxInitNodeVisitor{
