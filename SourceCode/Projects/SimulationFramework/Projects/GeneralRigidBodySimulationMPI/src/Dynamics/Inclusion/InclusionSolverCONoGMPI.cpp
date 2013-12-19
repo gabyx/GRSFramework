@@ -359,7 +359,6 @@ std::string  InclusionSolverCONoG::getIterationStats() {
     << m_proxIterationTime<<"\t"
     << m_pDynSys->m_CurrentStateEnergy <<"\t"
     << -1<<"\t" //No m_G_conditionNumber
-    << -1<<"\t" //No m_G_notDiagDominant
-    << m_PercussionPool.getPoolSize();
+    << -1<<"\t"; //No m_G_notDiagDominant
     return s.str();
 }

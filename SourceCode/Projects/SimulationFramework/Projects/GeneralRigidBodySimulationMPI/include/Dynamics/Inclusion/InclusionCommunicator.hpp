@@ -5,7 +5,10 @@
 #include "LogDefines.hpp"
 
 
-class ContactGraph;
+
+
+//#include DynamicsSystem_INCLUDE_FILE
+
 
 #include "MPICommunication.hpp"
 #include "BodyCommunicator.hpp"
@@ -13,11 +16,9 @@ class ContactGraph;
 #include "NeighbourMap.hpp"
 #include "NeighbourDataInclusionCommunication.hpp"
 
-
 #include "MPIMessages.hpp"
 
-
-template<typename TContactGraph> class ComputeMultiplcitiesSplitNodeVisitor;
+class ContactGraph;
 
 class InclusionCommunicator {
 public:

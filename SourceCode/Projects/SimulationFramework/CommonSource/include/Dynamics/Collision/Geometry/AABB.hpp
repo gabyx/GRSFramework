@@ -2,6 +2,7 @@
 #define AABB_hpp
 
 #include <algorithm>
+
 #include "TypeDefs.hpp"
 
 

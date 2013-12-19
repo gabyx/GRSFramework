@@ -14,8 +14,9 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
+
 #include CollisionSolver_INCLUDE_FILE
-#include "PercussionPool.hpp"
+//#include "PercussionPool.hpp"
 
 #include "InclusionSolverSettings.hpp"
 
@@ -28,7 +29,7 @@
 #include "InclusionCommunicator.hpp"
 // those two include each other (forwarding)
 #include "ContactGraphMPI.hpp"
-
+#include "ContactGraphVisitorsMPI.hpp"
 
 /**
 * @ingroup Inclusion
@@ -66,13 +67,6 @@ public:
     bool m_bUsedGPU;
     double m_timeProx, m_proxIterationTime;
 
-
-
-    PercussionPool m_PercussionPool;
-
-//    void reservePercussionPoolSpace(unsigned int nExpectedContacts);
-//    void readFromPercussionPool(unsigned int index, const CollisionData * pCollData, VectorDyn & P_old);
-//    void updatePercussionPool(const VectorDyn & P_old ) ;
 
     InclusionSolverSettings m_Settings;
 
