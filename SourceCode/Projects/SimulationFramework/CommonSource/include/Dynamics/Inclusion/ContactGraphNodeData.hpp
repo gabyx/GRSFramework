@@ -23,7 +23,7 @@ public:
     ContactGraphNodeData(): m_pCollData(NULL) {
         m_W_body1.setZero();
         m_W_body2.setZero();
-        m_xi.setZero();
+        m_chi.setZero();
         m_mu.setZero();
         m_I_plus_eps.setZero();
         m_eps.setZero();
@@ -34,7 +34,7 @@ public:
 
     MatrixUObjDyn m_W_body1;
     MatrixUObjDyn m_W_body2;
-    VectorDyn m_xi;
+    VectorDyn m_chi;
 
     VectorDyn  m_I_plus_eps;
     VectorDyn  m_eps;
@@ -69,6 +69,7 @@ public:
 
 
     ~ContactGraphNodeDataIteration(){
+
     }
 
     FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2

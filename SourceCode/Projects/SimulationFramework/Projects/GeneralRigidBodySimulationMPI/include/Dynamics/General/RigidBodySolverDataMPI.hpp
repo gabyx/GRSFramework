@@ -15,7 +15,7 @@ class RigidBodySolverDataCONoGMPI : public RigidBodySolverDataCONoG {
     RigidBodySolverDataCONoGMPI(): RigidBodySolverDataCONoG(){
 
     };
-
+    PREC m_multiplicityWeight;
     unsigned int m_multFactor;  ///< This is the factor in how many virtual parts the body is split during the global inlcusion solving process
 
 };

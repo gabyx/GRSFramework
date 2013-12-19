@@ -365,7 +365,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
             }
 
             // add once xi to c (d is used will be later completed to d)
-            m_d.segment<ContactDim>((ContactDim)*i).noalias() +=  currentContactNode->m_nodeData.m_I_plus_eps.asDiagonal() * currentContactNode->m_nodeData.m_xi;
+            m_d.segment<ContactDim>((ContactDim)*i).noalias() +=  currentContactNode->m_nodeData.m_I_plus_eps.asDiagonal() * currentContactNode->m_nodeData.m_chi;
 
 
             // Fill in Percussions

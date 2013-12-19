@@ -4,12 +4,20 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
-#include "MPIMessages.hpp"
+
+class ContactGraph;
+
+#include "MPICommunication.hpp"
+#include "BodyCommunicator.hpp"
 
 #include "NeighbourMap.hpp"
 #include "NeighbourDataInclusionCommunication.hpp"
 
-class ContactGraph;
+
+#include "MPIMessages.hpp"
+
+
+template<typename TContactGraph> class ComputeMultiplcitiesSplitNodeVisitor;
 
 class InclusionCommunicator {
 public:
@@ -88,6 +96,8 @@ public:
 
         receiveContactMessagesFromNeighbours();
 
+        computeMultiplicityWeights();
+
         // Send all multiplicity factors of all local splitBodyNodes
         sendBodyMultiplicityMessageToNeighbours();
         // Recv all multiplicity factor of all remote bodies
@@ -104,7 +114,7 @@ public:
 
 private:
 
-
+    void computeMultiplicityWeights();
 
     void sendContactMessageToNeighbours(){
         LOGIC(m_pSimulationLog,"MPI>\t Send message (EXTERNALCONTACTS_MESSAGE) to neighbours!"<<std::endl;)
@@ -194,6 +204,9 @@ private:
     Logging::Log *  m_pSimulationLog;
 
 };
+
+
+
 
 
 #endif

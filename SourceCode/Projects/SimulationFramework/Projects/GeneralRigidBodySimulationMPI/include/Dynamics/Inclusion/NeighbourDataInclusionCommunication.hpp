@@ -2,15 +2,11 @@
 #define NeighbourDataInclusionCommunication_hpp
 
 
-#include <vector>
-#include <list>
-#include <type_traits>
-
-
 #include "TypeDefs.hpp"
 
-#include "ContactGraphNodeDataMPI.hpp"
+#include "NeighbourData.hpp"
 
+class ContactGraphNodeDataSplitBody;
 
 namespace NeighbourDataInclusionCommunication_impl{
 

@@ -5,11 +5,16 @@
 
 #include <vector>
 
+// Dump Matrices
+#include <mpi.h>
+#include <ostream>
+#include <sstream>
+
 namespace LMatrixGenerator{
 
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    #include "LMatrixGeneration/generate_LMatrix_Multiplicity.hpp"
+    #include "LMatrixGeneration/generate_LInvMatrix_Multiplicity.hpp"
 
 };
 
@@ -17,7 +22,7 @@ namespace LMatrixGenerator{
 #define BOOST_PP_LOCAL_LIMITS (2, 8)
 
 #define FUNC_PREFIX \
-    LMatrixGenerator::generate_LMatrix_Multiplicity_
+    LMatrixGenerator::generate_LInvMatrix_Multiplicity_
 #define APPLY(n,v) n(v)
 #define GENERATE_FUNCTION_NAME(n) \
     APPLY( BOOST_PP_CAT(FUNC_PREFIX , n ) , v );
@@ -26,20 +31,39 @@ namespace LMatrixGenerator{
 #define BOOST_PP_LOCAL_MACRO(n) \
     v.clear(); \
     GENERATE_FUNCTION_NAME(n) \
-    BOOST_PP_CAT(L,n).setFromTriplets(v.begin(),v.end()); \
+    LInv.push_back( MatrixSparse( (n-1)*NDOFuObj , (n-1)*NDOFuObj  ) ); \
+    LInv.back().setFromTriplets(v.begin(),v.end()); \
 
 //Constructor for the LMatrices
-ContactGraphNodeDataSplitBody::LMatrices::LMatrices(){
+ContactGraphNodeDataSplitBody::LInvMatrices::LInvMatrices(){
 
     //Generate Matrix
     std::vector<MatrixSparseTriplet> v;
+
     #include BOOST_PP_LOCAL_ITERATE()
+
+
+    // open file and dump matrices :-)
+//    MPI_Init(0,0);
+//    int rank;
+//    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+//    std::stringstream s;
+//    s << "LMatrixDump" << rank << ".txt";
+//    std::ofstream f(s.str(),std::ios::trunc);
+//
+//    for(int i=0; i< L.size(); i++){
+//        f <<"L"<<i+2<< ":"<< std::endl << L[i] << std::endl;
+//    }
+//
+//    MPI_Finalize();
+//    ERRORMSG("Dumped LMatrices!")
+
 }
 
 
 
 // Static initializer for the LMatrices
-ContactGraphNodeDataSplitBody::LMatrices ContactGraphNodeDataSplitBody::m_LMatrices;
+ContactGraphNodeDataSplitBody::LInvMatrices ContactGraphNodeDataSplitBody::m_LInvMatrices;
 
 
 

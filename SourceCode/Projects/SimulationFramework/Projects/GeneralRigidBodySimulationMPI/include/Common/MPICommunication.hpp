@@ -17,6 +17,7 @@
 #include <boost/serialization/version.hpp>
 
 #include "AssertionDebug.hpp"
+#include "StaticAssert.hpp"
 #include "TypeDefs.hpp"
 
 #include "MPIInformation.hpp"

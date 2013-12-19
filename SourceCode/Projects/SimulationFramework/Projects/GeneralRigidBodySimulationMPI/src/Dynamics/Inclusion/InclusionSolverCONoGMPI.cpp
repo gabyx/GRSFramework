@@ -126,8 +126,9 @@ void InclusionSolverCONoG::solveInclusionProblem() {
     LOG(m_pSolverLog,  "---> solveInclusionProblem(): "<< std::endl;);
 #endif
 
-    typename ContactGraphType::NodeListType & nodes = m_pContactGraph->getNodeListRef();
-    m_nContacts = (unsigned int)nodes.size();
+    auto & nodesLocal = m_pContactGraph->getLocalNodeListRef();
+    auto & nodesRemote = m_pContactGraph->getRemoteNodeListRef();
+    auto & nodesSplitBody = m_pContactGraph->getSplitBodyNodeListRef();
 
     // Standart values
     m_iterationsNeeded = 0;
@@ -145,22 +146,26 @@ void InclusionSolverCONoG::solveInclusionProblem() {
     m_pInclusionComm->communicateRemoteContacts();
 
 
-    // Integrate all bodies to u_e
+    // Integrate all local bodies to u_e
     // u_E = u_S + M^⁻1 * h * deltaT
-    if(m_nContacts == 0){
+    // if we have splitBodyNodes we also have some remote nodes!
+    LOGASSERTMSG( (nodesSplitBody.size() == 0 && nodesRemote.size() == 0) ||
+                  (nodesSplitBody.size() > 0 && nodesRemote.size() > 0),m_pSolverLog, "If we have splitBody nodes we also have some remote nodes!" );
+
+   if(nodesLocal.size() == 0 && nodesSplitBody.size()==0){
+        // Nothing to solve
         integrateAllBodyVelocities();
     }
     else{
 
     // Solve Inclusion
 
-        // Fill in Percussions
-        #if USE_PERCUSSION_POOL == 1
-        //readFromPercussionPool(contactIdx,pCollData,P_back);
-        #endif
-
         #if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog,  "---> nContacts: "<< m_nContacts <<std::endl;);
+            LOG(m_pSolverLog,
+                "---> Nodes Local: "<< nodesLocal.size() <<std::endl<<
+                "---> Nodes Remote: "<< nodesRemote.size() <<std::endl<<
+                "---> Nodes SplitBodies: "<< nodesSplitBody.size() <<std::endl;
+            );
         #endif
 
 
@@ -182,20 +187,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
             #endif
 
         } else if(m_Settings.m_eMethod == InclusionSolverSettings::JOR) {
-
-            #if MEASURE_TIME_PROX == 1
-                boost::timer::cpu_timer counter;
-                counter.start();
-            #endif
-
-            initContactGraphForIteration(m_Settings.m_alphaJORProx);
             ASSERTMSG(false,"Jor Algorithm has not been implemented yet");
-//            doJorProx();
-
-            #if MEASURE_TIME_PROX == 1
-                counter.stop();
-                m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
-            #endif
         }
 
         if(m_Settings.m_bIsFiniteCheck) {
@@ -205,10 +197,6 @@ void InclusionSolverCONoG::solveInclusionProblem() {
             #endif
         }
 
-        //TODO update ContactPercussions
-        #if USE_PERCUSSION_POOL == 1
-            //updatePercussionPool(P_front);
-        #endif
 
 #if CoutLevelSolverWhenContact>0
         LOG(m_pSolverLog,  "---> Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
@@ -236,14 +224,21 @@ void InclusionSolverCONoG::integrateAllBodyVelocities() {
 void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
 
-    // Calculates b vector for all nodes, u_0, R_ii, ...
+
     m_pSorProxInitNodeVisitor->setParams(alpha);
+
+    // Init local nodes
     m_pContactGraph->applyNodeVisitorLocal(*m_pSorProxInitNodeVisitor);
+
+    // Init Remote nodes
+    //m_pContactGraph->applyNodeVisitorRemote(*m_pSorProxInitNodeVisitor);
 
     // Integrate all local sim bodies!
     for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
-        (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
+        // add u_s + M^⁻1*h*deltaT ,  all contact forces initial values have already been applied!
+        (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back +
+                            (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
         (*bodyIt)->m_pSolverData->m_uBuffer.m_back = (*bodyIt)->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
     }
 }
@@ -294,9 +289,10 @@ void InclusionSolverCONoG::doSorProx() {
 
 void InclusionSolverCONoG::sorProxOverAllNodes() {
 
-    // Move over all nodes, and do a sor prox step
+    // Move over all local nodes, and do a sor prox step
     m_pContactGraph->applyNodeVisitorLocal(*m_pSorProxStepNodeVisitor);
-    // Move over all nodes, end of Sor Prox
+
+    //m_pContactGraph->applyNodeVisitorRemote(*m_pSorProxStepNodeVisitor);
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
     bool converged;

@@ -157,6 +157,8 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
         pBody->m_pSolverData->reset();
     }
 
+
+
 }
 
 void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {

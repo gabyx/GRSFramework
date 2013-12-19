@@ -46,8 +46,8 @@ public:
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
 
-    typedef ContactGraphNodeDataSplitBody SplitBodyNodeType;
-    typedef std::unordered_map<RigidBodyIdType, SplitBodyNodeType* > SplitBodyNodeListType;
+    typedef ContactGraphNodeDataSplitBody SplitBodyNodeDataType;
+    typedef std::unordered_map<RigidBodyIdType, SplitBodyNodeDataType* > SplitBodyNodeDataListType;
 
     enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE, SPLITNODE};
 
@@ -161,7 +161,7 @@ public:
         addedNode->m_nodeData.m_eContactModel = ContactModels::NCF_ContactModel;
         const unsigned int dimSet = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
 
-        addedNode->m_nodeData.m_xi.setZero(dimSet); //TODO take care, relative velocity dimesion independet of dimSet, could be?
+        addedNode->m_nodeData.m_chi.setZero(dimSet); //TODO take care, relative velocity dimesion independet of dimSet, could be?
         addedNode->m_nodeData.m_b.setZero(dimSet);
         addedNode->m_nodeData.m_LambdaBack.setZero(dimSet);
         addedNode->m_nodeData.m_LambdaFront.setZero(dimSet);
@@ -233,13 +233,21 @@ public:
     template<typename TNodeVisitor>
 	void applyNodeVisitorLocal(TNodeVisitor & vv){
 		for(auto curr_node = m_localNodes.begin(); curr_node != m_localNodes.end(); curr_node++)
-			(*(*curr_node)).template acceptVisitor<TNodeVisitor>(vv);
+			vv.visitNode(*(*curr_node));
 	}
 	//Remote Visitor
     template<typename TNodeVisitor>
 	void applyNodeVisitorRemote(TNodeVisitor & vv){
 		for(auto curr_node = m_remoteNodes.begin(); curr_node != m_remoteNodes.end(); curr_node++)
-			(*(*curr_node)).template acceptVisitor<TNodeVisitor>(vv);
+			vv.visitNode(*(*curr_node));
+	}
+
+	//Remote Visitor
+    template<typename TNodeVisitor>
+	void applyNodeVisitorSplitBody(TNodeVisitor & vv){
+		for(auto curr_node = m_splittedNodes.begin(); curr_node != m_splittedNodes.end(); curr_node++){
+           vv.visitNode(*(*curr_node).second);
+		}
 	}
 
 
@@ -250,14 +258,14 @@ public:
     unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
 
 
-    std::pair<SplitBodyNodeType *, bool> addSplitBodyNode(RigidBodyType * body, const RankIdType & rank){
+    std::pair<SplitBodyNodeDataType *, bool> addSplitBodyNode(RigidBodyType * body, const RankIdType & rank){
         auto pairRes = m_splittedNodes.insert(
-                                              SplitBodyNodeListType::value_type(body->m_id, (SplitBodyNodeType*) NULL )
+                                              SplitBodyNodeDataListType::value_type(body->m_id, (SplitBodyNodeDataType*) NULL )
                                                 );
 
         if(pairRes.second){
             //if insered set the new pointer
-            pairRes.first->second = new SplitBodyNodeType(body);
+            pairRes.first->second = new SplitBodyNodeDataType(body);
         }
 
         LOGASSERTMSG(pairRes.first->second,m_pSolverLog, "SplitBodyNode pointer of body " << body->m_id << " is zero!")
@@ -265,8 +273,12 @@ public:
         bool added = pairRes.first->second->addRank(rank);
         LOGASSERTMSG(added,m_pSolverLog, "Rank could not been added to SplitBodyNode with id: " << body->m_id)
 
-        return std::pair<SplitBodyNodeType *, bool>(pairRes.first->second, pairRes.second);
+        return std::pair<SplitBodyNodeDataType *, bool>(pairRes.first->second, pairRes.second);
     }
+
+    inline NodeListType & getLocalNodeListRef(){return m_localNodes;}
+    inline NodeListType & getRemoteNodeListRef(){return m_remoteNodes;}
+    inline SplitBodyNodeDataListType & getSplitBodyNodeListRef(){return m_splittedNodes;}
 
 private:
 
@@ -281,7 +293,7 @@ private:
     NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies (ref to m_nodeMap)
     NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies (ref to m_nodeMap)
 
-    SplitBodyNodeListType m_splittedNodes; ///< These are the billateral nodes between the splitted bodies in the contact graph
+    SplitBodyNodeDataListType m_splittedNodes; ///< These are the billateral nodes between the splitted bodies in the contact graph
 
 
 
@@ -458,7 +470,7 @@ public:
         static VectorDyn uCache1,uCache2;
 
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+            LOG(m_pSolverLog, "---> SorProx, Normal Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
         #endif
 
         if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
@@ -476,10 +488,6 @@ public:
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
             }
 
-#if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog,"chi: " << nodeData.m_LambdaFront.transpose() << std::endl);
-#endif
-
             nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
             nodeData.m_LambdaFront += nodeData.m_LambdaBack;
             //Prox
@@ -490,10 +498,10 @@ public:
             );
 
 #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "Lambda Back: "  << nodeData.m_LambdaBack.transpose() << std::endl);
-            LOG(m_pSolverLog, "Lambda Front: " << nodeData.m_LambdaFront.transpose() << std::endl);
+            LOG(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
+            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << nodeData.m_LambdaFront.transpose() << std::endl);
             if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol)){
-              *m_pSolverLog <<"Lambda converged"<<std::endl;
+              *m_pSolverLog <<"\t---> Lambda converged"<<std::endl;
             }
 #endif
 
@@ -504,7 +512,7 @@ public:
                 nodeData.m_u1BufferPtr->m_front = nodeData.m_u1BufferPtr->m_front + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
                #if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"Node: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
+                LOG(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
                #endif
 
 
@@ -544,6 +552,10 @@ public:
             if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
                 nodeData.m_u2BufferPtr->m_front = nodeData.m_u2BufferPtr->m_front  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
+
+                #if CoutLevelSolverWhenContact>2
+                LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
+                #endif
 
                 if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
                     if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
@@ -623,8 +635,8 @@ public:
 
     typedef TContactGraph ContactGraphType;
 
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::SplitBodyNodeType NodeType;
+
+    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
 
     SorProxStepSplitNodeVisitor(const InclusionSolverSettings &settings, bool & globalConverged, const unsigned int & globalIterationNeeded):
                            m_Settings(settings),m_bConverged(globalConverged),
@@ -639,21 +651,46 @@ public:
         /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
            Then the iteration is not converged somewhere, and we need to wait till the next iteration!
         */
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "---> SorProx, Billateral Node: ====================="<<  std::endl << " local body id: "
+                << RigidBodyId::getBodyIdString(node.m_pBody->m_id) );
+        #endif
 
+        auto mult = node.getMultiplicity();
         // Calculate the exact values for the billateral split nodes
-
+        node.m_uBack.template head<NDOFuObj>() = node.m_pBody->m_pSolverData->m_uBuffer.m_front;
         // Build gamma = [u1-u2, u2-u3, u3-u4,..., un-1- un]
-        // make all but first
-        for(unsigned int i = 0; i < node.m_partRanks.size()-1; i++){
-            node.m_gamma.segment<NDOFuObj>(NDOFuObj*(i+1)) =   node.m_u_G.segment<NDOFuObj>(NDOFuObj*i)
-                                                             - node.m_u_G.segment<NDOFuObj>(NDOFuObj*(i+1));
-        }
-        // make first entry in gamma
-        //node.m_gamma.head<NDOFuObj>() = node.m_pBody->m_pSolverData->m_uBuffer.m_front - node.m_u_G.head<NDOFuObj>();
+        node.m_gamma =   node.m_uBack.head(NDOFuObj*node.m_nLambdas) - node.m_uBack.segment(NDOFuObj, NDOFuObj*node.m_nLambdas);
 
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "\t---> nd.m_gamma: " << node.m_gamma.transpose() );
+        #endif
         // calculate L⁻¹*gamma = Lambda, where L⁻¹ is the matrix choosen by the multiplicity
 
+        node.m_LambdaFront = node.getLInvMatrix() * node.m_gamma;
 
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << node.m_LambdaFront.transpose() );
+        #endif
+
+        //Propagate billateral forces to velocities:
+        // The sign is contained in the m_multiplicityWeights vector
+        // u_G_End = uBack + M_G⁻¹ * W_M * Lambda_M
+
+
+        node.m_uFront.segement(NDOFuObj,NDOFuObj*node.m_nLambdas) = node.m_LambdaFront;
+        node.m_uFront.template segement(NDOFuObj,NDOFuObj*node.m_nLambdas) -= node.m_LambdaFront;
+        for(int i = 0; i<mult; i++){
+            node.m_uFront.segement(NDOFuObj*i,NDOFuObj) *= 1.0 / node.m_multiplicityWeights(i);
+        }
+        node.m_uFront  +=  node.m_uBack;
+
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "\t---> nd.m_uFront: " << node.m_uFront.transpose() );
+        #endif
+
+        // Because we solve this billateral contact directly, we are converged for this node!
+        // no change of the flag m_bConverged
     }
 
 private:
@@ -663,6 +700,8 @@ private:
     const unsigned int & m_iterationsNeeded; ///< Access to global iteration counter
 
 };
+
+
 
 
 /**
@@ -701,11 +740,13 @@ public:
         nodeData.m_LambdaBack.setZero();
 
         // (1+e)*xi -> b
-        nodeData.m_b = nodeData.m_I_plus_eps.asDiagonal() * nodeData.m_xi;
+        nodeData.m_b = nodeData.m_I_plus_eps.asDiagonal() * nodeData.m_chi;
 
         // u_0 , calculate const b
         // First Body
         if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED) {
+
+
 
             // m_back contains u_s + M^⁻1*h*deltaT already!
             // add + initial values M^⁻1 W lambda0 from percussion pool
@@ -751,7 +792,62 @@ private:
     PREC m_alpha;
 };
 
+/**
+@brief Visitor for class ContactGraph
+*/
+template<typename TContactGraph>
+class SorProxInitSplitNodeVisitor{
+public:
 
+    DEFINE_RIGIDBODY_CONFIG_TYPES
 
+    typedef TContactGraph ContactGraphType;
+
+    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+
+    SorProxInitSplitNodeVisitor()
+    {}
+
+    void setLog(Logging::Log * solverLog){
+        m_pSolverLog = solverLog;
+    }
+
+    void visitNode(NodeType& node){
+        auto mult = node.getMultiplicity();
+        node.m_uBack.setZero(NDOFuObj*mult);
+        node.m_uFront.setZero(NDOFuObj*mult);
+        node.m_LambdaFront.setZero( NDOFuObj * node.m_nLambdas);
+        node.m_gamma.setZero(node.m_nLambdas);
+    }
+
+private:
+    Logging::Log * m_pSolverLog;
+    const InclusionSolverSettings & m_Settings;
+    bool & m_bConverged; ///< Access to global flag for cancelation criteria
+    const unsigned int & m_iterationsNeeded; ///< Access to global iteration counter
+
+};
+
+/**
+@brief Visitor for class ContactGraph
+*/
+template<typename TContactGraph>
+class ComputeMultiplcitiesSplitNodeVisitor{
+public:
+
+    DEFINE_RIGIDBODY_CONFIG_TYPES
+
+    typedef TContactGraph ContactGraphType;
+
+    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+
+    ComputeMultiplcitiesSplitNodeVisitor(){};
+
+    void visitNode(NodeType& node){
+        auto mult = node.getMultiplicity();
+        node.m_multiplicityWeights.setConstant(mult,1.0/mult);
+    }
+
+};
 
 #endif

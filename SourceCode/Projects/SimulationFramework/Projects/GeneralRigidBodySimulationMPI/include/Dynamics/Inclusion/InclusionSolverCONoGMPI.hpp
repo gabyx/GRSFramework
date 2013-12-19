@@ -24,8 +24,9 @@
 #include "MPICommunication.hpp"
 
 #include "BodyCommunicator.hpp"
-#include "InclusionCommunicator.hpp"
 
+#include "InclusionCommunicator.hpp"
+// those two include each other (forwarding)
 #include "ContactGraphMPI.hpp"
 
 

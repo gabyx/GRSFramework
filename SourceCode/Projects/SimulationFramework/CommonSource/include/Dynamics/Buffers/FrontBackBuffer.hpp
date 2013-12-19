@@ -93,7 +93,6 @@ public:
 };
 
 
-// Specialization for shared ptr!
 template< typename TBufferType >
 class FrontBackBuffer< TBufferType, FrontBackBufferPtrType::NoPtr , FrontBackBufferMode::NoConst>{
 

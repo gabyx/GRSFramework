@@ -91,7 +91,7 @@ public:
         // Specify the contact model, (here we should do a look up or what ever)! ==================================
         addedNode->m_nodeData.m_eContactModel = ContactModels::NCF_ContactModel;
         addedNode->m_nodeData.m_nLambdas = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
-        addedNode->m_nodeData.m_xi.setZero(addedNode->m_nodeData.m_nLambdas);
+        addedNode->m_nodeData.m_chi.setZero(addedNode->m_nodeData.m_nLambdas);
         // =========================================================================================================
 
 
@@ -344,7 +344,7 @@ public:
         addedNode->m_nodeData.m_eContactModel = ContactModels::NCF_ContactModel;
         const unsigned int dimSet = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
 
-        addedNode->m_nodeData.m_xi.setZero(dimSet); //TODO take care, relative velocity dimesion independet of dimSet, could be?
+        addedNode->m_nodeData.m_chi.setZero(dimSet); //TODO take care, relative velocity dimesion independet of dimSet, could be?
         addedNode->m_nodeData.m_b.setZero(dimSet);
         addedNode->m_nodeData.m_LambdaBack.setZero(dimSet);
         addedNode->m_nodeData.m_LambdaFront.setZero(dimSet);
@@ -610,10 +610,6 @@ public:
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
             }
 
-#if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog,"\t---> nd.chi: " << nodeData.m_LambdaFront.transpose() << std::endl);
-#endif
-
             nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
             nodeData.m_LambdaFront += nodeData.m_LambdaBack;
             //Prox
@@ -785,14 +781,15 @@ public:
         nodeData.m_LambdaBack.setZero();
 
         // (1+e)*xi -> b
-        nodeData.m_b = nodeData.m_I_plus_eps.asDiagonal() * nodeData.m_xi;
+        nodeData.m_b = nodeData.m_I_plus_eps.asDiagonal() * nodeData.m_chi;
 
         // u_0 , calculate const b
         // First Body
         if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED) {
 
-            // m_back contains u_s + M^⁻1*h*deltaT already!
-            nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
+            // m_front is zero here-> see DynamicsSystem sets it to zero!
+            nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
+            /// + initial values M^⁻1 W lambda0 from percussion pool
 
             nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_back /* m_u_s */ ;
             nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
@@ -800,8 +797,9 @@ public:
         // SECOND BODY!
         if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
 
-            // m_back contains u_s + M^⁻1*h*deltaT already!
-            nodeData.m_u2BufferPtr->m_front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
+            // m_front is zero here-> see DynamicsSystem sets it to zero!
+            nodeData.m_u2BufferPtr->m_front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack );
+            /// + initial values M^⁻1 W lambda0 from percussion pool
 
             nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() *  nodeData.m_u1BufferPtr->m_back;
             nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
