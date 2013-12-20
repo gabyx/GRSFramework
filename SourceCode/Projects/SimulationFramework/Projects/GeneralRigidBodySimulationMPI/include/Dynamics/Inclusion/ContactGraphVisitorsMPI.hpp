@@ -371,9 +371,7 @@ private:
 template<typename TContactGraph>
 class SorProxInitSplitNodeVisitor{
 public:
-
-    DEFINE_RIGIDBODY_CONFIG_TYPES
-
+    DEFINE_LAYOUT_CONFIG_TYPES
     typedef TContactGraph ContactGraphType;
 
     typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
@@ -407,8 +405,6 @@ private:
 template<typename TContactGraph>
 class ComputeMultiplicitySplitNodeVisitor{
 public:
-
-    DEFINE_RIGIDBODY_CONFIG_TYPES
 
     typedef TContactGraph ContactGraphType;
 

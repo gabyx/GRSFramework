@@ -45,7 +45,7 @@ public:
         public:
             PostProcessTaskBash(const std::string & name): PostProcessTask(name){}
             void execute(){
-                system( this->m_options[1].c_str());
+                int r = system( this->m_options[1].c_str());
             }
     };
 
