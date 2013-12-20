@@ -29,13 +29,12 @@ void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , Eigen::Matrix
 * @param quat The input quaternion.
 * @return 3x3 rotation matrix.
 */
-template<class Derived>
-Eigen::Matrix<double,3,3> getRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat)
+template<typename PREC>
+typename MyMatrix<PREC>::Matrix33 getRotFromQuaternion(const typename MyMatrix<PREC>::Vector4 & quat)
 {
-   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
    //ASSERTMSG(quat.rows() == 4 && quat.cols()==1, "IN: "<< quat.rows()<<","<<quat.cols());
 
-   Eigen::Matrix<double,3,3> A;
+   typename MyMatrix<PREC>::Matrix33 A;
 	//No check if quaternion is unit...(performance)
    setRotFromQuaternion(quat,A);
 	return A;

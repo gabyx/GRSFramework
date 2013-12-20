@@ -8,13 +8,11 @@
 
 //#define BOOST_NO_CXX11_SCOPED_ENUMS
 #include <boost/filesystem.hpp>
-
 #include <boost/thread.hpp>
+
 #include "Singleton.hpp"
 
 #include "CommonFunctions.hpp"
-
-
 
 /**
 * @ingroup Singeltons

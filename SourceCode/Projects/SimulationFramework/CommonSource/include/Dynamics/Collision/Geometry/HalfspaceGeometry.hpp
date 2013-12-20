@@ -9,7 +9,7 @@
 class HalfspaceGeometry : public PlaneGeometry {
 public:
 
-    DEFINE_LAYOUT_CONFIG_TYPES
+    DEFINE_MATRIX_TYPES
 
     HalfspaceGeometry(): PlaneGeometry() {};
     HalfspaceGeometry( const Vector3 & n, const Vector3 & p ): PlaneGeometry(n,p){};

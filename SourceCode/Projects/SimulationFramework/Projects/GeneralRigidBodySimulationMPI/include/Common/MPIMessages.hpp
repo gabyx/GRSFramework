@@ -23,7 +23,6 @@
 
 #include "QuaternionHelpers.hpp"
 
-#include RigidBody_INCLUDE_FILE
 
 
 namespace boost {

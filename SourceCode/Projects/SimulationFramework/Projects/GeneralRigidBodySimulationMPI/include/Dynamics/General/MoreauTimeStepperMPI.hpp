@@ -21,13 +21,11 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
+
 #include "DynamicsState.hpp"
 #include "FrontBackBuffer.hpp"
 #include "BinaryFile.hpp"
 #include "MultiBodySimFile.hpp"
-
-#include "TimeStepperSettings.hpp"
-
 #include "SimpleLogger.hpp"
 
 #include InclusionSolver_INCLUDE_FILE
@@ -36,6 +34,8 @@
 
 #include "MPICommunication.hpp"
 #include "BodyCommunicator.hpp"
+
+#include "TimeStepperSettings.hpp"
 //===========================================
 
 

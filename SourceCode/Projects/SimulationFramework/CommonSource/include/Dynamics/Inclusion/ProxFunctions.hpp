@@ -13,12 +13,9 @@
 #include <iomanip>
 
 #include "TypeDefs.hpp"
-
 #include "AssertionDebug.hpp"
 
-
 #include "ConvexSets.hpp"
-
 
 
 #define INLINE_PROX 1

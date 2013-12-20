@@ -5,11 +5,9 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ConfigureFile.hpp"
-#include "AssertionDebug.hpp"
 
 #include "TypeDefs.hpp"
-
-#include "CollisionData.hpp"
+#include "AssertionDebug.hpp"
 
 #if USE_OPCODE == 1
 #include <Opcode.h>
@@ -20,19 +18,16 @@
 #endif
 #endif
 
+#include RigidBody_INCLUDE_FILE
 
 #include "AABB.hpp"
-#include "SphereGeometry.hpp"
-#include "BoxGeometry.hpp"
-#include "HalfspaceGeometry.hpp"
-#include "MeshGeometry.hpp"
+#include "CollisionData.hpp"
 
 #include "QuaternionHelpers.hpp"
 #include "MatrixHelpers.hpp"
 #include "MakeCoordinateSystem.hpp"
 #include "CollisionFunctions.hpp"
 
-#include RigidBody_INCLUDE_FILE
 
 /**
 * @ingroup Collision
@@ -314,7 +309,7 @@ void Collider::collide( const RigidBodyType * b1,
 
         m_pColData->m_cFrame.m_e_z = dist / d;
         // Coordinate system belongs to first body!
-        makeCoordinateSystem<>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
+        makeCoordinateSystem<PREC>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
         m_pColData->m_overlap = (sphereGeom1->m_radius + sphereGeom2->m_radius) - d;
         m_pColData->m_r_S1C1 =   m_pColData->m_cFrame.m_e_z * (sphereGeom1->m_radius - m_pColData->m_overlap/2);
@@ -352,7 +347,7 @@ void Collider::collide( const RigidBodyType * b1,
         m_pColData->m_overlap = overlap;
         // Coordinate system belongs to first body!
         m_pColData->m_cFrame.m_e_z = - I_n_plane ;
-        makeCoordinateSystem<>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
+        makeCoordinateSystem<PREC>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
         m_pColData->m_r_S1C1 = (sphereGeom->m_radius - overlap/2) * m_pColData->m_cFrame.m_e_z ;
         m_pColData->m_r_S2C2 = ( b1->m_r_S + m_pColData->m_r_S1C1 ) - b2->m_r_S;
@@ -409,7 +404,7 @@ void Collider::collide( const RigidBodyType * box,
             m_pColData->m_overlap = overlap;
             // Coordinate system belongs to first body!
             m_pColData->m_cFrame.m_e_z = - I_n_plane ;
-            makeCoordinateSystem<>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
+            makeCoordinateSystem<PREC>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
             m_pColData->m_r_S1C1 = r_SC1;
             m_pColData->m_r_S2C2 = r_SC2;
@@ -523,11 +518,11 @@ void Collider::collide( const RigidBodyType * sphere,
 
 #if USE_OWN_COLLISION_CODE == 1
 
-    static typename CollisionFunctions<LayoutConfigType >::ClosestPointSet temporarySet; //[ overlap, and normal from sphere center!, type, id] (see makeContactTag())
+    static typename CollisionFunctions::ClosestPointSet temporarySet; //[ overlap, and normal from sphere center!, type, id] (see makeContactTag())
     //Iterate over all faces and check if it overlaps sphere
     temporarySet.clear();
     temporarySet.reserve(3);
-//    CollisionFunctions<LayoutConfigType>::getClosestPointsInRadius_PointMesh(   sphere->m_r_S,
+//    CollisionFunctions::getClosestPointsInRadius_PointMesh(   sphere->m_r_S,
 //            sphereGeom->m_radius,
 //            *meshGeom->m_pMeshData,
 //            mesh->m_r_S,
@@ -535,7 +530,7 @@ void Collider::collide( const RigidBodyType * sphere,
 //            temporarySet);
 
     //point with maximum overlap
-    CollisionFunctions<LayoutConfigType>::getClosestPointInRadius_PointMesh(   sphere->m_r_S,
+    CollisionFunctions::getClosestPointInRadius_PointMesh(   sphere->m_r_S,
             sphereGeom->m_radius,
             *meshGeom->m_pMeshData,
             mesh->m_r_S,
@@ -556,7 +551,7 @@ void Collider::collide( const RigidBodyType * sphere,
         m_pColData->m_overlap = temporarySet[j].get<0>();
         // Coordinate system belongs to first body!
         m_pColData->m_cFrame.m_e_z = temporarySet[j].get<1>(); //needs not to be normalized
-        makeCoordinateSystem<>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
+        makeCoordinateSystem<PREC>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
         m_pColData->m_r_S1C1 = ( sphereGeom->m_radius - m_pColData->m_overlap/2) * m_pColData->m_cFrame.m_e_z ;
         m_pColData->m_r_S2C2 = ( sphere->m_r_S + m_pColData->m_r_S1C1 ) - mesh->m_r_S;

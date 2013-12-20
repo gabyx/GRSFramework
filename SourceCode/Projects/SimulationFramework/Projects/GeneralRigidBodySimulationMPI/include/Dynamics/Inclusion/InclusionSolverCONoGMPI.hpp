@@ -26,9 +26,10 @@
 
 #include "BodyCommunicator.hpp"
 
-#include "InclusionCommunicator.hpp"
+class InclusionCommunicator;
 // those two include each other (forwarding)
-#include "ContactGraphMPI.hpp"
+class ContactGraph;
+
 #include "ContactGraphVisitorsMPI.hpp"
 
 /**

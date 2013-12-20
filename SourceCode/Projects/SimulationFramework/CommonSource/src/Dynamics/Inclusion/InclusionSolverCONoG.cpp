@@ -1,5 +1,8 @@
 #include "InclusionSolverCONoG.hpp"
 
+#include "MatrixHelpers.hpp"
+#include "VectorToSkewMatrix.hpp"
+#include "ProxFunctions.hpp"
 
 
 InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,

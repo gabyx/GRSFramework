@@ -10,10 +10,7 @@
 
 #include "TypeDefs.hpp"
 
-
 #include "ContactParams.hpp"
-
-#include RigidBody_INCLUDE_FILE
 
 /**
 * @ingroup Contact
@@ -52,7 +49,8 @@ private:
 
 class ContactParameterMap {
 public:
-    DEFINE_RIGIDBODY_CONFIG_TYPES
+
+    DEFINE_LAYOUT_CONFIG_TYPES
 
     typedef boost::unordered_map<ContactParameterTag, ContactParams, ContactParameterTagHash > ContactParameterMapType;
 
@@ -63,7 +61,7 @@ public:
     /**
     * Adds parameters for one contact defined by two materials!
     */
-    bool addContactParameter(typename RigidBodyType::BodyMaterialType material1, typename RigidBodyType::BodyMaterialType  material2, const ContactParams & params);
+    //bool addContactParameter(typename RigidBodyType::BodyMaterialType material1, typename RigidBodyType::BodyMaterialType  material2, const ContactParams & params);
 
     /**
     * @brief Gets the ContactParams for the material pair.
@@ -71,7 +69,36 @@ public:
     * @param material2 The second material.
     * @return The reference to the ContactParams which corresponds to this kind of contact meterial pair.
     */
-    ContactParams & getContactParams(typename RigidBodyType::BodyMaterialType material1, typename RigidBodyType::BodyMaterialType  material2);
+    //ContactParams & getContactParams(typename RigidBodyType::BodyMaterialType material1, typename RigidBodyType::BodyMaterialType  material2);
+
+    template<typename TBodyMaterial>
+    bool addContactParameter(TBodyMaterial  material1,
+                             TBodyMaterial  material2,
+                             const ContactParams & params)
+    {
+        typename ContactParameterMapType::value_type pair(ContactParameterTag(material1,material2),params);
+
+        std::pair<  typename ContactParameterMapType::iterator, bool> res = m_ContactParams.insert(pair);
+
+        if(res.second){
+            m_nMaterials++;
+        }
+
+        return res.second;
+    }
+
+    template<typename TBodyMaterial>
+    ContactParams & getContactParams(  TBodyMaterial material1,
+                                       TBodyMaterial material2){
+
+        typename ContactParameterMapType::iterator it = m_ContactParams.find(ContactParameterTag(material1,material2));
+
+        if(it != m_ContactParams.end()){
+            return it->second;
+        }
+        ASSERTMSG(false,"ContactParams for id: "<< material1 <<" and " <<material2 << " not found"<<std::endl);
+        return m_std_values;
+    }
 
     ContactParameterMapType & getContactParamsVector(){ return m_ContactParams;}
 

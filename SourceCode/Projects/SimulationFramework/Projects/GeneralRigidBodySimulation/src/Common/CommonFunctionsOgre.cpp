@@ -8,11 +8,6 @@
 
 #include <CommonFunctionsOgre.hpp>
 
-/// Includes =================================
-
-/// ==========================================
-
-
 
 Ogre::StringVector OgreUtilities::convertToOgreStringVector(const std::vector<std::string> & strings) {
     Ogre::StringVector vec;

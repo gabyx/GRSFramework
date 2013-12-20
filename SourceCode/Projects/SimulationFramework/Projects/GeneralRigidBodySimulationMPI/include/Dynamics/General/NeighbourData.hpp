@@ -6,12 +6,14 @@
 
 #include "TypeDefs.hpp"
 
-#include "RigidBodyId.hpp"
+#include RigidBody_INCLUDE_FILE
+
 
 template<typename TLocalData, typename TRemoteData>
 class NeighbourData{
 public:
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    DEFINE_RIGIDBODY_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     typedef TLocalData LocalDataType;

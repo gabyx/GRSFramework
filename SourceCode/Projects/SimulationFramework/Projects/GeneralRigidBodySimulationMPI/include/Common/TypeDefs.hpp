@@ -12,11 +12,11 @@
 #include "LayoutConfigDefs.hpp"
 
 
-#define RigidBody_INCLUDE_FILE       "RigidBodyMPI.hpp"
-#define TimeStepper_INCLUDE_FILE     "MoreauTimeStepperMPI.hpp"
-#define DynamicsSystem_INCLUDE_FILE  "DynamicsSystemMPI.hpp"
-#define InclusionSolver_INCLUDE_FILE "InclusionSolverCONoGMPI.hpp"
-#define CollisionSolver_INCLUDE_FILE "CollisionSolverMPI.hpp"
+#define RigidBody_INCLUDE_FILE           "RigidBodyMPI.hpp"
+#define TimeStepper_INCLUDE_FILE         "MoreauTimeStepperMPI.hpp"
+#define DynamicsSystem_INCLUDE_FILE      "DynamicsSystemMPI.hpp"
+#define InclusionSolver_INCLUDE_FILE     "InclusionSolverCONoGMPI.hpp"
+#define CollisionSolver_INCLUDE_FILE     "CollisionSolverMPI.hpp"
 #define RigidBodySolverData_INCLUDE_FILE "RigidBodySolverDataMPI.hpp"
 
 class CollisionSolver;

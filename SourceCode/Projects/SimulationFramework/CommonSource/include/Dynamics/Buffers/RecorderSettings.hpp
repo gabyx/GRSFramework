@@ -12,6 +12,7 @@
 class RecorderSettings {
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
+
     RecorderSettings() {
         m_eMode = RECORD_EVERY_STEP;
         m_recordEveryXTimestep = 1;

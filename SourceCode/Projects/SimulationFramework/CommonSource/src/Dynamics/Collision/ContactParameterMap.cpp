@@ -1,7 +1,3 @@
-#include <boost/tuple/tuple.hpp>
-#include <boost/functional/hash.hpp>
-#include <boost/unordered_map.hpp>
-
 #include "ContactParameterMap.hpp"
 
 #include "AssertionDebug.hpp"
@@ -49,30 +45,4 @@ ContactParameterMap::ContactParameterMap() {
 
 }
 
-bool ContactParameterMap::addContactParameter(typename RigidBodyType::BodyMaterialType  material1,
-                                              typename RigidBodyType::BodyMaterialType  material2,
-                                              const ContactParams & params)
-{
-    typename ContactParameterMapType::value_type pair(ContactParameterTag(material1,material2),params);
 
-    std::pair<  typename ContactParameterMapType::iterator, bool> res = m_ContactParams.insert(pair);
-
-    if(res.second){
-        m_nMaterials++;
-    }
-
-    return res.second;
-}
-
-
-ContactParams & ContactParameterMap::getContactParams(  typename RigidBodyType::BodyMaterialType material1,
-                                                        typename RigidBodyType::BodyMaterialType material2){
-
-     typename ContactParameterMapType::iterator it = m_ContactParams.find(ContactParameterTag(material1,material2));
-
-    if(it != m_ContactParams.end()){
-        return it->second;
-    }
-    ASSERTMSG(false,"ContactParams for id: "<< material1 <<" and " <<material2 << " not found"<<std::endl);
-    return m_std_values;
-}

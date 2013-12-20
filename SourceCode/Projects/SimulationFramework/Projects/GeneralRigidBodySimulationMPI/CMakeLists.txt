@@ -165,6 +165,7 @@ SET(DYNAMICS_SRC
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoGMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/InclusionCommunicator.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/ContactGraphNodeDataMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/ContactGraphMPI.cpp
 )
 
 

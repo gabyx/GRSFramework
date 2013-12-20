@@ -5,9 +5,8 @@
 #include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
 
-#include "LogDefines.hpp"
 #include "TypeDefs.hpp"
-
+#include "LogDefines.hpp"
 
 #include "SceneParser.hpp"
 
@@ -27,7 +26,7 @@ public:
    ~SimulationManager();
 
    boost::shared_ptr<SharedBufferDynSys >	    m_pSharedBuffer;
-   boost::shared_ptr<StateRecorder >		m_pStateRecorder;
+   boost::shared_ptr<StateRecorder >		    m_pStateRecorder;
 
    void setup();
    void setup(boost::filesystem::path sceneFilePath);

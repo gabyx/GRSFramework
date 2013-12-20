@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     10051,        238]
-NotebookOptionsPosition[      9363,        210]
-NotebookOutlinePosition[      9701,        225]
-CellTagsIndexPosition[      9658,        222]
+NotebookDataLength[     10609,        248]
+NotebookOptionsPosition[      9920,        220]
+NotebookOutlinePosition[     10258,        235]
+CellTagsIndexPosition[     10215,        232]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -37,7 +37,7 @@ GeneralRigidBodySimulationMPI/include/Dynamics/Inclusion/LMatrixGeneration/\
 MultiProcessorProx2.nb\"\>"], "Output",
  CellChangeTimes->{3.596361555999284*^9, 3.596361621682879*^9, 
   3.596361827107513*^9, 3.596372918024341*^9, 3.596373817479412*^9, 
-  3.596435932372616*^9}]
+  3.596435932372616*^9, 3.596436068262051*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -61,11 +61,15 @@ Cell[BoxData[
       RowBox[{"value", "\[NotEqual]", "0"}], ",", "\[IndentingNewLine]", 
       RowBox[{"\"\<v.push_back( MatrixSparseTriplet(\>\"", "<>", 
        RowBox[{"ToString", "[", 
-        RowBox[{"index", "[", 
-         RowBox[{"[", "2", "]"}], "]"}], "]"}], "<>", "\"\<,\>\"", "<>", 
+        RowBox[{
+         RowBox[{"index", "[", 
+          RowBox[{"[", "2", "]"}], "]"}], "-", "1"}], "]"}], "<>", 
+       "\"\<,\>\"", "<>", 
        RowBox[{"ToString", "[", 
-        RowBox[{"index", "[", 
-         RowBox[{"[", "1", "]"}], "]"}], "]"}], "<>", "\"\<,\>\"", "<>", 
+        RowBox[{
+         RowBox[{"index", "[", 
+          RowBox[{"[", "1", "]"}], "]"}], "-", "1"}], "]"}], "<>", 
+       "\"\<,\>\"", "<>", 
        RowBox[{"ToString", "[", 
         RowBox[{"N", "[", 
          RowBox[{"value", ",", "9"}], "]"}], "]"}], "<>", "\"\<));\\n\>\""}], 
@@ -79,7 +83,8 @@ Cell[BoxData[
    3.596372783663473*^9}, {3.596372815545554*^9, 3.5963729045201473`*^9}, 
    3.596373216127489*^9, 3.596373276834443*^9, {3.596374200778194*^9, 
    3.596374209693465*^9}, {3.596435809654179*^9, 3.596435926557235*^9}, {
-   3.596436017323393*^9, 3.596436043772079*^9}}],
+   3.596436017323393*^9, 3.596436043772079*^9}, {3.596436417778212*^9, 
+   3.59643643372383*^9}}],
 
 Cell[BoxData[
  RowBox[{"\[IndentingNewLine]", 
@@ -97,15 +102,15 @@ Cell[BoxData[
       RowBox[{"s", "=", 
        RowBox[{"StringJoin", "[", 
         RowBox[{
-         RowBox[{
-         "\"\</** Generates L Matrix, Multiplicity: \>\"", " ", "<>", 
+         RowBox[{"\"\</** Generates LInv Matrix, Multiplicity: \>\"", " ", "<>", 
           RowBox[{"ToString", "[", "nMultiplicity", "]"}], " ", "<>", 
           "\"\<  Size: \>\"", " ", "<>", 
           RowBox[{"ToString", "[", 
            RowBox[{"Dimensions", "[", 
             SubscriptBox["LInv", "num"], "]"}], "]"}], "<>", "\"\<*/ \\n\>\"",
            "<>", "\[IndentingNewLine]", 
-          "\"\<inline void generate_LMatrix_Multiplicity_\>\"", "<>", " ", 
+          "\"\<inline void generate_LInvMatrix_Multiplicity_\>\"", "<>", " ", 
+          
           RowBox[{"ToString", "[", "nMultiplicity", "]"}], "<>", 
           "\"\<(std::vector<MatrixSparseTriplet> &v){\\n\>\""}], ",", 
          RowBox[{"MapIndexed", "[", 
@@ -125,7 +130,8 @@ Cell[BoxData[
    3.596360948674342*^9, 3.596360949552053*^9}, {3.596361081876996*^9, 
    3.596361082504101*^9}, {3.5963615023860397`*^9, 3.596361513165552*^9}, {
    3.596373057113284*^9, 3.5963730610543613`*^9}, {3.59637310339106*^9, 
-   3.596373106826789*^9}, {3.59643603353778*^9, 3.596436056584112*^9}}],
+   3.596373106826789*^9}, {3.59643603353778*^9, 3.596436056584112*^9}, {
+   3.596443715576942*^9, 3.5964437227700233`*^9}}],
 
 Cell[BoxData[
  RowBox[{"generateMultiplicityMatrix", "[", "8", "]"}]], "Input",
@@ -160,7 +166,7 @@ Cell[BoxData[
       RowBox[{
        RowBox[{"SetDirectory", "[", 
         RowBox[{"NotebookDirectory", "[", "]"}], "]"}], " ", ",", 
-       "\"\<generate_LMatrix_Multiplicity.hpp\>\""}], "}"}], "]"}]}], 
+       "\"\<generate_LInvMatrix_Multiplicity.hpp\>\""}], "}"}], "]"}]}], 
    "\[IndentingNewLine]", 
    RowBox[{"f", "=", 
     RowBox[{"OpenWrite", "[", "fileName", "]"}]}], "\[IndentingNewLine]", 
@@ -175,36 +181,40 @@ Cell[BoxData[
    3.596361154801512*^9}, 3.596361914440702*^9, {3.596373128203472*^9, 
    3.596373155183152*^9}, {3.596373217631213*^9, 3.596373241474238*^9}, {
    3.596373949991012*^9, 3.596373970433329*^9}, {3.596374006895681*^9, 
-   3.596374036331831*^9}, {3.596435783719584*^9, 3.596435785421503*^9}}],
+   3.596374036331831*^9}, {3.596435783719584*^9, 3.596435785421503*^9}, {
+   3.59644373851403*^9, 3.5964437404561996`*^9}}],
 
 Cell[BoxData["\<\"/home/zfmgpu/Desktop/Repository/SimulationFramework/\
 SourceCode/Projects/SimulationFramework/Projects/\
 GeneralRigidBodySimulationMPI/include/Dynamics/Inclusion/LMatrixGeneration/\
-generate_LMatrix_Multiplicity.hpp\"\>"], "Output",
+generate_LInvMatrix_Multiplicity.hpp\"\>"], "Output",
  CellChangeTimes->{{3.596373165155843*^9, 3.596373192186921*^9}, 
    3.596373253279778*^9, 3.596373291977276*^9, 3.59637382823357*^9, 
    3.596373985574519*^9, {3.596374021277562*^9, 3.5963740433501453`*^9}, 
-   3.596374220686186*^9, 3.596435946885766*^9}],
+   3.596374220686186*^9, 3.596435946885766*^9, 3.596436080622209*^9, 
+   3.596436445322627*^9, {3.5964437392674007`*^9, 3.596443748620742*^9}}],
 
 Cell[BoxData[
  RowBox[{"OutputStream", "[", 
   RowBox[{"\<\"/home/zfmgpu/Desktop/Repository/SimulationFramework/SourceCode/\
 Projects/SimulationFramework/Projects/GeneralRigidBodySimulationMPI/include/\
-Dynamics/Inclusion/LMatrixGeneration/generate_LMatrix_Multiplicity.hpp\"\>", 
-   ",", "108"}], "]"}]], "Output",
+Dynamics/Inclusion/LMatrixGeneration/generate_LInvMatrix_Multiplicity.hpp\"\>\
+", ",", "121"}], "]"}]], "Output",
  CellChangeTimes->{{3.596373165155843*^9, 3.596373192186921*^9}, 
    3.596373253279778*^9, 3.596373291977276*^9, 3.59637382823357*^9, 
    3.596373985574519*^9, {3.596374021277562*^9, 3.5963740433501453`*^9}, 
-   3.596374220686186*^9, 3.596435946888735*^9}],
+   3.596374220686186*^9, 3.596435946885766*^9, 3.596436080622209*^9, 
+   3.596436445322627*^9, {3.5964437392674007`*^9, 3.596443748622933*^9}}],
 
 Cell[BoxData["\<\"/home/zfmgpu/Desktop/Repository/SimulationFramework/\
 SourceCode/Projects/SimulationFramework/Projects/\
 GeneralRigidBodySimulationMPI/include/Dynamics/Inclusion/LMatrixGeneration/\
-generate_LMatrix_Multiplicity.hpp\"\>"], "Output",
+generate_LInvMatrix_Multiplicity.hpp\"\>"], "Output",
  CellChangeTimes->{{3.596373165155843*^9, 3.596373192186921*^9}, 
    3.596373253279778*^9, 3.596373291977276*^9, 3.59637382823357*^9, 
    3.596373985574519*^9, {3.596374021277562*^9, 3.5963740433501453`*^9}, 
-   3.596374220686186*^9, 3.596435946906034*^9}]
+   3.596374220686186*^9, 3.596435946885766*^9, 3.596436080622209*^9, 
+   3.596436445322627*^9, {3.5964437392674007`*^9, 3.596443748640128*^9}}]
 }, Open  ]]
 }, Open  ]]
 },
@@ -226,18 +236,18 @@ CellTagsIndex->{}
 Notebook[{
 Cell[CellGroupData[{
 Cell[579, 22, 395, 9, 32, "Input"],
-Cell[977, 33, 397, 6, 55, "Output"]
+Cell[977, 33, 419, 6, 55, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1411, 44, 103, 1, 45, "Subsection"],
-Cell[1517, 47, 1723, 34, 121, "Input"],
-Cell[3243, 83, 2296, 44, 341, "Input"],
-Cell[5542, 129, 267, 4, 32, "Input"],
+Cell[1433, 44, 103, 1, 45, "Subsection"],
+Cell[1539, 47, 1850, 39, 121, "Input"],
+Cell[3392, 88, 2355, 45, 341, "Input"],
+Cell[5750, 135, 267, 4, 32, "Input"],
 Cell[CellGroupData[{
-Cell[5834, 137, 1906, 40, 187, "Input"],
-Cell[7743, 179, 507, 7, 77, "Output"],
-Cell[8253, 188, 572, 9, 99, "Output"],
-Cell[8828, 199, 507, 7, 77, "Output"]
+Cell[6042, 143, 1960, 41, 209, "Input"],
+Cell[8005, 186, 606, 8, 77, "Output"],
+Cell[8614, 196, 669, 10, 99, "Output"],
+Cell[9286, 208, 606, 8, 77, "Output"]
 }, Open  ]]
 }, Open  ]]
 }

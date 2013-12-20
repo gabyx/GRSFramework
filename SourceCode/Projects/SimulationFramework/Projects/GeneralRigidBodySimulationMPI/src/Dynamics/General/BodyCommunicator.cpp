@@ -1,7 +1,6 @@
 #include "BodyCommunicator.hpp"
 
 
-
 BodyCommunicator::BodyCommunicator(  boost::shared_ptr< DynamicsSystemType> pDynSys ,
                                      boost::shared_ptr< ProcessCommunicatorType > pProcCom):
             m_pDynSys(pDynSys),

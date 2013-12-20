@@ -7,7 +7,6 @@
 #include "MultiBodySimFile.hpp"
 
 
-
 namespace InitialConditionBodies {
 
 void setupPositionBodiesLinear(
@@ -55,7 +54,7 @@ inline void applyDynamicsStateToBodies(
             (*bodyIt)->m_pSolverData->m_t = state.m_t;
         }
 
-        (*bodyIt)->m_A_IK= getRotFromQuaternion<>((*bodyIt)->m_q_KI);
+        (*bodyIt)->m_A_IK= getRotFromQuaternion<typename LayoutConfigType::PREC>((*bodyIt)->m_q_KI);
         stateBodyIt++;
     }
 }

@@ -2,11 +2,8 @@
 #define SceneParser_hpp
 
 #include <fstream>
-
 #define _USE_MATH_DEFINES
 #include <cmath>
-
-#include "AssertionDebug.hpp"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
@@ -15,39 +12,34 @@
 #include "boost/random.hpp"
 #include "boost/generator_iterator.hpp"
 
+#include <assimp/Importer.hpp>      // C++ importer interface
+#include <assimp/scene.h>       // Output data structure
+#include <assimp/postprocess.h> // Post processing flags
+
+#define TIXML_USE_TICPP
+#include "ticpp/ticpp.h"
+//#include "tinyxml.h"
+
 #include "TypeDefs.hpp"
+#include "AssertionDebug.hpp"
 #include "LogDefines.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 
 #include "RigidBodyId.hpp"
-
 #include "ContactParams.hpp"
-
-#include "InclusionSolverSettings.hpp"
-#include "TimeStepperSettings.hpp"
-#include "RecorderSettings.hpp"
-
 #include "MeshGeometry.hpp"
+#include "ExternalForces.hpp"
 
 #include "CommonFunctions.hpp"
 #include "QuaternionHelpers.hpp"
 #include "InertiaTensorCalculations.hpp"
 #include "InitialConditionBodies.hpp"
 
-#include "ExternalForces.hpp"
 
-
-
-#include <assimp/Importer.hpp>      // C++ importer interface
-#include <assimp/scene.h>       // Output data structure
-#include <assimp/postprocess.h> // Post processing flags
-
-//#include "OgreMeshExtraction.hpp"
-
-#define TIXML_USE_TICPP
-#include "ticpp/ticpp.h"
-//#include "tinyxml.h"
+#include "InclusionSolverSettings.hpp"
+#include "TimeStepperSettings.hpp"
+#include "RecorderSettings.hpp"
 
 
 class GetScaleOfGeomVisitor : public boost::static_visitor<>{
@@ -464,7 +456,7 @@ protected:
 
             std::string apply  = forceField->GetAttribute("applyTo");
 
-            std::vector<typename RigidBodyType::RigidBodyIdType > applyList;
+            std::vector<RigidBodyIdType > applyList;
             if( !(apply=="all" || apply=="All" || apply=="ALL" )) {
                 //process all applyTo bodies
             }else if (apply=="all" || apply=="All" || apply=="ALL" ) {
@@ -1496,7 +1488,7 @@ protected:
 
                 setQuaternion(q_BK,axis,angle);
                 K_r_KB = trans;
-                Rot_KI = getRotFromQuaternion(q_KI);
+                Rot_KI = getRotFromQuaternion<PREC>(q_KI);
                 I_r_IK += Rot_KI * K_r_KB; // Transforms like A_IK * A_r_AB;
                 q_KI = quatMult(q_KI,q_BK); // Sequential (aktiv) rotation
 

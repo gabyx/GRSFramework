@@ -3,30 +3,27 @@
 
 #include <fstream>
 #include <vector>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
-
 #include <boost/shared_ptr.hpp>
 
 //#define SRUTIL_DELEGATE_PREFERRED_SYNTAX
 #include <srutil/delegate/delegate.hpp> // Use fast SR delegates
 
-#include "AssertionDebug.hpp"
 
 #include "TypeDefs.hpp"
+#include "LogDefines.hpp"
+#include "AssertionDebug.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 
 #include "ContactFrame.hpp"
 #include "CollisionData.hpp"
 #include "Collider.hpp"
-#include "LogDefines.hpp"
-
-#include "QuaternionHelpers.hpp"
-
 #include "SimpleLogger.hpp"
 
-
+#include "QuaternionHelpers.hpp"
 
 /**
 * @ingroup Collision

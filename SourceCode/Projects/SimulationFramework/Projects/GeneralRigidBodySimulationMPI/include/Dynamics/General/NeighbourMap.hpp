@@ -14,13 +14,7 @@ template<typename TData>
 class NeighbourMap {
 public:
 
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
-
-    typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
-    typedef typename RigidBodyType::BodyInfoType BodyInfoType;
-    typedef typename RigidBodyType::BodyInfoType::RankToFlagsType RankToFlagsType;
-
 
     // Neighbour data definitions
     typedef TData DataType;

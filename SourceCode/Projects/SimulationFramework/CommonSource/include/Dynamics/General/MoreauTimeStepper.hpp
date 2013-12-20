@@ -30,10 +30,11 @@
 #include "FrontBackBuffer.hpp"
 #include "BinaryFile.hpp"
 #include "MultiBodySimFile.hpp"
+#include "SimpleLogger.hpp"
 
 #include "TimeStepperSettings.hpp"
 
-#include "SimpleLogger.hpp"
+
 //===========================================
 
 

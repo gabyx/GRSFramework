@@ -1,5 +1,10 @@
 #include "InclusionSolverCONoGMPI.hpp"
 
+#include "InclusionCommunicator.hpp"
+// those two include each other (forwarding)
+#include "ContactGraphMPI.hpp"
+
+
 #include "ConfigureFile.hpp"
 
 #include "MatrixHelpers.hpp"

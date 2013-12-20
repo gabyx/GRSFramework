@@ -1,8 +1,9 @@
 
 #include "DynamicsSystemMPI.hpp"
 
+#include "AddGyroTermVisitor.hpp"
 #include "VectorToSkewMatrix.hpp"
-
+#include "CommonFunctions.hpp"
 
 DynamicsSystem::~DynamicsSystem() {
     DECONSTRUCTOR_MESSAGE

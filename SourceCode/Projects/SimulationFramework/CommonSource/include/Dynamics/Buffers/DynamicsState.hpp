@@ -3,12 +3,8 @@
 
 #include <vector>
 
-#include <boost/thread.hpp>
-
-#include "AssertionDebug.hpp"
-#include "LogDefines.hpp"
-
 #include "TypeDefs.hpp"
+#include "AssertionDebug.hpp"
 
 #include "QuaternionHelpers.hpp"
 

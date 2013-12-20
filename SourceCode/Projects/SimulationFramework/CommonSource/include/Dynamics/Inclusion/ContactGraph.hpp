@@ -7,18 +7,17 @@
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
+
 #include "GeneralGraph.hpp"
-
 #include "CollisionData.hpp"
-
 #include "ContactModels.hpp"
 #include "ContactParameterMap.hpp"
-
-#include "ProxFunctions.hpp"
-#include "InclusionSolverSettings.hpp"
-
 #include "ContactGraphNodeData.hpp"
 
+#include "InclusionSolverSettings.hpp"
+
+#include "VectorToSkewMatrix.hpp"
+#include "ProxFunctions.hpp"
 
 template<typename ContactGraphMode > class ContactGraph;
 

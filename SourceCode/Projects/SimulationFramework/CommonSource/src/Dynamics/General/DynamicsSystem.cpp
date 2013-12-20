@@ -2,10 +2,8 @@
 #include "DynamicsSystem.hpp"
 
 #include "VectorToSkewMatrix.hpp"
+#include "AddGyroTermVisitor.hpp"
 #include "CommonFunctions.hpp"
-
-
-
 
 
 DynamicsSystem::~DynamicsSystem() {

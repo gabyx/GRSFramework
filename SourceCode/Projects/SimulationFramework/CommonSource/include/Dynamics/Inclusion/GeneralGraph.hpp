@@ -11,8 +11,6 @@
 #include <memory>
 #include <utility>
 
-#include <boost/shared_ptr.hpp>
-
 namespace Graph{
 
 // prototypes
@@ -48,10 +46,10 @@ public:
 	NodeDataType m_nodeData;
 
 	// visitor dispatch
-//	template<typename TVisitor>
-//	void acceptVisitor(TVisitor & vv) {
-//		vv.visitNode(*this);
-//	}
+    //	template<typename TVisitor>
+    //	void acceptVisitor(TVisitor & vv) {
+    //		vv.visitNode(*this);
+    //	}
 };
 
 
@@ -96,10 +94,10 @@ public:
    EdgeDataType m_edgeData;
 
 	// visitor dispatch
-//	template<typename TVisitor>
-//	void acceptVisitor(TVisitor & ev) {
-//		ev.visitEdge(*this);
-//	}
+    //	template<typename TVisitor>
+    //	void acceptVisitor(TVisitor & ev) {
+    //		ev.visitEdge(*this);
+    //	}
 };
 
 

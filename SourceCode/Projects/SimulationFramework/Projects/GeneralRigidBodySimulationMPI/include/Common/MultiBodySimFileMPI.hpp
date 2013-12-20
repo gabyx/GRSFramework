@@ -3,25 +3,21 @@
 
 
 #include <type_traits>
+#include <vector>
+#include <sstream>
 #include <fstream>
 
 #include <boost/filesystem.hpp>
 
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-
 #include "TypeDefs.hpp"
-
 #include "StaticAssert.hpp"
+
+#include DynamicsSystem_INCLUDE_FILE
+
+
 #include "CommonFunctions.hpp"
-#include "RigidBodyContainer.hpp"
-#include "MultiBodySimFileIOHelpers.hpp"
-
 #include "MPISerializationHelpersEigen.hpp"
-
-#include DynamicsSystem_INCLUDE_FILE //Not used
+#include "MultiBodySimFileIOHelpers.hpp"
 
 #define SIM_FILE_MPI_SIGNATURE_LENGTH 4
 #define SIM_FILE_MPI_SIGNATURE {'M','B','S','F'}

@@ -275,7 +275,7 @@ protected:
 
             // Do some calculation becaus eOgre nees a correct UpVector ...
             Vector3 v1,v2;
-            makeCoordinateSystem(normal,v1,v2);
+            makeCoordinateSystem<PREC>(normal,v1,v2);
 
             Ogre::MeshManager::getSingleton().createPlane(plane_name.str(),
             Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane,

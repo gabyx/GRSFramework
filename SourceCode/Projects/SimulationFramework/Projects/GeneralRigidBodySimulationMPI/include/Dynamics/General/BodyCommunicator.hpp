@@ -11,12 +11,11 @@
 
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "MPIMessages.hpp"
-#include "MPICommunication.hpp"
-
-#include "BodyInfoMap.hpp"
 #include "NeighbourMap.hpp"
 #include "NeighbourDataBodyCommunication.hpp"
+
+#include "MPICommunication.hpp"
+#include "MPIMessages.hpp"
 
 class RigidBodyAddRemoveNotificator {
 public:

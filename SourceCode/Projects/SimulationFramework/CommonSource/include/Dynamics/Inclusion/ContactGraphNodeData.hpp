@@ -17,7 +17,7 @@
 class ContactGraphNodeData {
 public:
 
-    DEFINE_RIGIDBODY_CONFIG_TYPES
+    DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     ContactGraphNodeData(): m_pCollData(NULL) {
@@ -48,10 +48,12 @@ public:
 
     ContactModels::ContactModelEnum m_eContactModel;///< This is a generic type which is used to distinguish between the different models!. See namespace ContactModels.
 };
+
+
 class ContactGraphNodeDataIteration : public ContactGraphNodeData {
 public:
 
-    DEFINE_RIGIDBODY_CONFIG_TYPES
+    DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     ContactGraphNodeDataIteration()
@@ -106,14 +108,12 @@ class ContactGraphEdgeData {
 public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
-
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     ContactGraphEdgeData(): m_pBody(NULL) {};
 
     RigidBodyType * m_pBody; // Tells to which body this edges belongs!
 
-    //Eigen::Matrix<PREC,NDOFFriction+1,NDOFFriction+1> m_G_SE; // Start Node 1 to End Node 3 = G_13
 
 };
 

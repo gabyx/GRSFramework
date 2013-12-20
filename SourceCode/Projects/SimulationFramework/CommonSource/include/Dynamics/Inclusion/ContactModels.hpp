@@ -2,9 +2,9 @@
 #ifndef ContactModels_hpp
 #define ContactModels_hpp
 
-#include "ConvexSets.hpp"
-
 #include <boost/any.hpp>
+
+#include "ConvexSets.hpp"
 
    /**
    * @brief Definitions of all contact models which can be used in the framework.

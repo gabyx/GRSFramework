@@ -61,11 +61,11 @@ protected:
     void getSimBodyLogFileName(typename DynamicsSystemType::RigidBodyType *body, std::stringstream & s);
 
     Logging::Log * m_pSimulationLog;
-    typedef std::unordered_map< typename RigidBodyType::RigidBodyIdType, MultiBodySimFile* > FileMap;
+    typedef std::unordered_map< RigidBodyIdType, MultiBodySimFile* > FileMap;
     FileMap m_BinarySimFiles;
 
     //open files to log the writes!
-    typedef std::unordered_map< typename RigidBodyType::RigidBodyIdType, std::ofstream* > FileMapLog;
+    typedef std::unordered_map< RigidBodyIdType, std::ofstream* > FileMapLog;
     FileMapLog m_LogSimFiles;
     bool m_logWriteAccess;
     unsigned int m_accessId;

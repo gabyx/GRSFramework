@@ -2,11 +2,8 @@
 #define SceneParserMPI_hpp
 
 #include <fstream>
-
 #define _USE_MATH_DEFINES
 #include <cmath>
-
-#include "AssertionDebug.hpp"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
@@ -15,34 +12,22 @@
 #include "boost/random.hpp"
 #include "boost/generator_iterator.hpp"
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
-
-#include "SceneParser.hpp"
-
-#include "MPICommunication.hpp"
-
-#include DynamicsSystem_INCLUDE_FILE
-
-#include "CommonFunctions.hpp"
-#include "QuaternionHelpers.hpp"
-#include "InertiaTensorCalculations.hpp"
-#include "InitialConditionBodies.hpp"
-
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
-
-//#include "OgreMeshExtraction.hpp"
 
 #define TIXML_USE_TICPP
 #include "ticpp/ticpp.h"
 //#include "tinyxml.h"
 
-/*
-* @Does not work yet, to implement a scene parser, implement everything starting from SimulationState, enter(), we exit the State, delete all Objects, and reinitialize with another system in XML format.
-*
-*/
+#include "TypeDefs.hpp"
+#include "AssertionDebug.hpp"
+#include "LogDefines.hpp"
+
+#include "SceneParser.hpp"
+#include "MPICommunication.hpp"
+
+
 
 class SceneParserMPI : public SceneParser {
 public:

@@ -405,7 +405,7 @@ private:
 @brief Visitor for class ContactGraph
 */
 template<typename TContactGraph>
-class ComputeMultiplcitiesSplitNodeVisitor{
+class ComputeMultiplicitySplitNodeVisitor{
 public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
@@ -414,7 +414,7 @@ public:
 
     typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
 
-    ComputeMultiplcitiesSplitNodeVisitor(){};
+    ComputeMultiplicitySplitNodeVisitor(){};
 
     void visitNode(NodeType& node){
         auto mult = node.getMultiplicity();

@@ -51,7 +51,9 @@ public:
         res |= (uint64_t)bodyNr;
         return res;
     };
-
 };
+
+/** Definition of the RigidBodyId type */
+typedef RigidBodyId::Type RigidBodyIdType;
 
 #endif

@@ -3,29 +3,23 @@
 
 #include <vector>
 #include <list>
-#include <Eigen/Core>
-#include <Eigen/LU>
 
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
 #include RigidBody_INCLUDE_FILE
 #include "RigidBodyContainer.hpp"
-
 #include "ContactParameterMap.hpp"
-#include "AddGyroTermVisitor.hpp"
+#include "SimpleLogger.hpp"
+#include "ExternalForces.hpp"
 
 #include "InitialConditionBodies.hpp"
-#include "CommonFunctions.hpp"
 
 #include "RecorderSettings.hpp"
 #include "InclusionSolverSettings.hpp"
 #include "TimeStepperSettings.hpp"
 
 
-#include "SimpleLogger.hpp"
-
-#include "ExternalForces.hpp"
 
 
 class DynamicsSystem {

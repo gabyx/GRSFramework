@@ -1,13 +1,14 @@
 #ifndef MPISerializationHelpersGeometry_hpp
 #define MPISerializationHelpersGeometry_hpp
 
-#include <Eigen/Dense>
 #include <boost/serialization/array.hpp>
 
 #include "BoxGeometry.hpp"
 #include "SphereGeometry.hpp"
 #include "HalfspaceGeometry.hpp"
 #include "MeshGeometry.hpp"
+
+#include "MPISerializationHelpersGeometry.hpp"
 
 namespace boost {
 namespace serialization {

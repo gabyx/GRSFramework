@@ -7,26 +7,18 @@
 #include "LogDefines.hpp"
 
 #include RigidBody_INCLUDE_FILE
-//#include "RigidBodyId.hpp" //Not used
 
 #include "RigidBodyContainer.hpp"
 #include "DynamicsState.hpp"
 #include "ContactParameterMap.hpp"
-
-#include "AddGyroTermVisitor.hpp"
-#include "InitialConditionBodies.hpp"
-
-#include "CommonFunctions.hpp"
-
 #include "ExternalForces.hpp"
+#include "SimpleLogger.hpp"
+
+#include "InitialConditionBodies.hpp"
 
 #include "RecorderSettings.hpp"
 #include "InclusionSolverSettings.hpp"
 #include "TimeStepperSettings.hpp"
-
-#include "SimpleLogger.hpp"
-
-
 
 
 class DynamicsSystem {

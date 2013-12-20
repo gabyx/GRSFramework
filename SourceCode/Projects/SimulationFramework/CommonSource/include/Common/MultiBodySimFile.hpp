@@ -1,14 +1,16 @@
 ﻿#ifndef MultiBodySimFile_hpp
 #define MultiBodySimFile_hpp
 
-#include <boost/filesystem.hpp>
-#include <StaticAssert.hpp>
-
 #include <type_traits>
 #include <fstream>
 
+#include <boost/filesystem.hpp>
+
+#include <StaticAssert.hpp>
+
 #include "DynamicsState.hpp"
 #include "RigidBodyContainer.hpp"
+
 #include "MultiBodySimFileIOHelpers.hpp"
 
 /**

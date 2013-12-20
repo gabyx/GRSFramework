@@ -4,26 +4,21 @@
 
 #include <iostream>
 #include <fstream>
-
-
 #include <boost/shared_ptr.hpp>
 
-#include "AssertionDebug.hpp"
+#include "ConfigureFile.hpp"
 
 #include "TypeDefs.hpp"
+#include "LogDefines.hpp"
+#include "AssertionDebug.hpp"
 
 #include CollisionSolver_INCLUDE_FILE
 #include "PercussionPool.hpp"
-#include "MatrixHelpers.hpp"
-#include "VectorToSkewMatrix.hpp"
-#include "ProxFunctions.hpp"
+
 #include "InclusionSolverSettings.hpp"
 #include "ContactGraph.hpp"
-
-#include "LogDefines.hpp"
-#include "ConfigureFile.hpp"
-
 #include "SimpleLogger.hpp"
+
 
 #if HAVE_CUDA_SUPPORT == 1
 #include "JorProxGPUVariant.hpp"
