@@ -57,7 +57,7 @@ InclusionSolverCONoG::InclusionSolverCONoG(
     m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor<ContactGraphType>(m_Settings,m_bConverged,m_iterationsNeeded);
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>();
 
-    m_pInclusionComm = boost::shared_ptr<InclusionCommunicator>( new InclusionCommunicator(pBodyComm, m_pDynSys,  m_pProcComm));
+    m_pInclusionComm = boost::shared_ptr<InclusionCommunicatorType >( new InclusionCommunicatorType(pBodyComm, m_pDynSys,  m_pProcComm));
     m_pContactGraph  = boost::shared_ptr<ContactGraphType>( new ContactGraphType(pDynSys));
 
     m_pContactGraph->setInclusionCommunicator( m_pInclusionComm );

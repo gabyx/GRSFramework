@@ -130,6 +130,7 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.icc
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
@@ -137,6 +138,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCONoGMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionCommunicator.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionCommunicator.icc
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/NeighbourDataInclusionCommunication.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
@@ -163,9 +165,7 @@ SET(DYNAMICS_SRC
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/BodyCommunicator.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/CollisionSolverMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoGMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/InclusionCommunicator.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/ContactGraphNodeDataMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/ContactGraphMPI.cpp
 )
 
 

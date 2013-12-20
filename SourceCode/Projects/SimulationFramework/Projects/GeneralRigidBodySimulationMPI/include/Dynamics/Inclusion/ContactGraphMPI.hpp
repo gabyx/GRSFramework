@@ -19,8 +19,8 @@
 #include "InclusionSolverSettings.hpp"
 #include "VectorToSkewMatrix.hpp"
 
-#include "InclusionCommunicator.hpp"
 
+template<typename Combo>
 class ContactGraph : public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
 public:
 
@@ -29,7 +29,7 @@ public:
 
     typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
 
-    typedef InclusionCommunicator InclusionCommunicatorType;
+    typedef typename Combo::InclusionCommunicatorType InclusionCommunicatorType;
     typedef typename InclusionCommunicatorType::NeighbourMapType NeighbourMapType;
 
     typedef ContactGraphNodeDataIteration NodeDataType;
@@ -228,5 +228,7 @@ private:
 
 };
 
+
+#include "ContactGraphMPI.icc"
 
 #endif

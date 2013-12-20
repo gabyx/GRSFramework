@@ -26,9 +26,9 @@
 
 #include "BodyCommunicator.hpp"
 
-class InclusionCommunicator;
+#include "InclusionCommunicator.hpp"
 // those two include each other (forwarding)
-class ContactGraph;
+#include "ContactGraphMPI.hpp"
 
 #include "ContactGraphVisitorsMPI.hpp"
 
@@ -96,11 +96,16 @@ protected:
     *    Nevertheless, we avoided this here
     */
 
+    struct Combo{
+        typedef InclusionCommunicator<Combo> InclusionCommunicatorType;
+        typedef ContactGraph<Combo> ContactGraphType;
+    };
 
-    typedef InclusionCommunicator InclusionCommunicatorType;
+
+    typedef Combo::InclusionCommunicatorType InclusionCommunicatorType;
     boost::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
 
-    typedef ContactGraph ContactGraphType;
+    typedef Combo::ContactGraphType ContactGraphType;
     boost::shared_ptr<ContactGraphType> m_pContactGraph;
     /// =========================================================================
 

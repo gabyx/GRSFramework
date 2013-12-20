@@ -1,5 +1,5 @@
 
-#include "InclusionCommunicator<Combo>.hpp"
+#include "InclusionCommunicator.hpp"
 
 #include "ContactGraphMPI.hpp"
 
@@ -7,7 +7,7 @@
 
 
 template<typename Combo>
-InclusionCommunicator<Combo>::InclusionCommunicator<Combo>(boost::shared_ptr< BodyCommunicator> pBodyComm,
+InclusionCommunicator<Combo>::InclusionCommunicator(boost::shared_ptr< BodyCommunicator> pBodyComm,
         boost::shared_ptr< DynamicsSystemType> pDynSys ,
         boost::shared_ptr< ProcessCommunicatorType > pProcCom):
 

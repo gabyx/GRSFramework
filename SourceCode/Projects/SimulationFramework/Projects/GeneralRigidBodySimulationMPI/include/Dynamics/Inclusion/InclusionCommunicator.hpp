@@ -13,8 +13,9 @@
 
 #include "MPIMessages.hpp"
 
-class ContactGraph;
 
+
+template<typename Combo>
 class InclusionCommunicator {
 public:
 
@@ -24,7 +25,7 @@ public:
     //Cannot template on this type, template cyclic dependency because ContactGraph also template on InlcusionComm
     // Dont template on InclusionCommunicator and ContactGraph
     // Cannnot typedef more dependent types in ContactGraph, because doing so,
-    typedef ContactGraph ContactGraphType;
+    typedef typename Combo::ContactGraphType ContactGraphType;
 
     typedef typename MPILayer::ProcessCommunicator                                      ProcessCommunicatorType;
     typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
@@ -109,7 +110,7 @@ private:
 };
 
 
-
+#include "InclusionCommunicator.icc"
 
 
 #endif

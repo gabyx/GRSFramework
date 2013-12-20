@@ -18,7 +18,7 @@ void ContactGraph<Combo>::setInclusionCommunicator(boost::shared_ptr<InclusionCo
     m_pNbDataMap = m_pInclusionComm->getNeighbourMap();
 }
 template<typename Combo>
-ContactGraph::~ContactGraph() {
+ContactGraph<Combo>::~ContactGraph() {
     clearGraph();
 }
 template<typename Combo>
