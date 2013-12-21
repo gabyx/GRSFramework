@@ -61,14 +61,14 @@ public:
 
 private:
 
-    void computeMultiplicityWeights();
+
 
     void sendContactMessageToNeighbours();
-
     void receiveContactMessagesFromNeighbours();
 
-    void sendBodyMultiplicityMessageToNeighbours();
+    void computeMultiplicityWeights();
 
+    void sendBodyMultiplicityMessageToNeighbours();
     void recvBodyMultiplicityMessageFromNeighbours();
 
     /**

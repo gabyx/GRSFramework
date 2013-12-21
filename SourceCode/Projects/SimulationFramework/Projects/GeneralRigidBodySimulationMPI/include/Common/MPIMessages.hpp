@@ -971,14 +971,18 @@ public:
                 LOGASSERTMSG(it->second.m_pSplitBodyNode, this->m_pSerializerLog, "m_pSplitBodyNode is null for body id: "
                              << RigidBodyId::getBodyIdString(it->first) <<std::endl)
 
-                unsigned int multiplicity = it->second.m_pSplitBodyNode->getMultiplicity();
-                PREC multiplicityWeight = it->second.m_pSplitBodyNode->getMultiplicityWeight(this->m_neighbourRank);
+                unsigned int multiplicity;
+                PREC multiplicityWeight;
+                it->second.m_pSplitBodyNode->getMultiplicityAndWeight(this->m_neighbourRank, multiplicity, multiplicityWeight );
 
                 LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl <<
-                      "----> multiplicity: " << multiplicity <<std::endl;);
+                      "----> multiplicity: " << multiplicity <<std::endl <<
+                      "----> multiplicityWeight: " <<multiplicityWeight<<std::endl; );
+                      "----> it->second.m_pBody->m_h_term"
                 ar & (it->first);
                 ar & multiplicity; // multiplicity
                 ar & multiplicityWeight;
+                serializeEigen(ar,it->second.m_pBody->m_h_term); // send the current h_term , mass matrix is already in the remote on the neighbour
             }
         } else {
             ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
@@ -1007,11 +1011,14 @@ public:
             unsigned int multiplicity ;
             PREC multiplicityWeight;
             RigidBodyIdType id;
+            static VectorUObj h_term;
             for(unsigned int i = 0; i < size ; i++) {
                 unsigned int a;
                 ar & id;
                 ar & multiplicity;
                 ar & multiplicityWeight;
+                serializeEigen(ar,h_term);
+
                 // Save this multfactor in the rigid body
                     LOGASSERTMSG(multiplicity != 0, this->m_pSerializerLog, "multiplicity can not be zero!" )
                 auto * remoteBodyData = m_neighbourData->getRemoteBodyData(id);
@@ -1020,11 +1027,17 @@ public:
 
                 remoteBodyData->m_pBody->m_pSolverData->m_multFactor = multiplicity;
                 remoteBodyData->m_pBody->m_pSolverData->m_multiplicityWeight = multiplicityWeight;
+                remoteBodyData->m_pBody->m_h_term = h_term;
 
                 LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
-                      "----> multiplicity: " << multiplicity <<std::endl;);
+                      "----> multiplicity: " << multiplicity <<std::endl <<
+                      "----> multiplicityWeight: " <<multiplicityWeight<<std::endl<<
+                      "----> h_term current: " << h_term << std::endl;  );
 
+                // Turn this remote into a split body
                 //Scale the inverse mass matrix
+                RigidBodyType::changeToSplitBody( remoteBodyData->m_pBody, multiplicityWeight);
+
             }
 
         } else {

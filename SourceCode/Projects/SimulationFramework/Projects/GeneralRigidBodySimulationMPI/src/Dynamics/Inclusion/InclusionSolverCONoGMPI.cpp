@@ -153,11 +153,8 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
     // Integrate all local bodies to u_e
     // u_E = u_S + M^⁻1 * h * deltaT
-    // if we have splitBodyNodes we also have some remote nodes!
-    LOGASSERTMSG( (nodesSplitBody.size() == 0 && nodesRemote.size() == 0) ||
-                  (nodesSplitBody.size() > 0 && nodesRemote.size() > 0),m_pSolverLog, "If we have splitBody nodes we also have some remote nodes!" );
 
-   if(nodesLocal.size() == 0 && nodesSplitBody.size()==0){
+   if(nodesLocal.size() == 0 && nodesSplitBody.size()==0 && nodesRemote.size()==0){
         // Nothing to solve
         integrateAllBodyVelocities();
     }

@@ -175,6 +175,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphNodeData.hpp
+    #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
