@@ -170,15 +170,9 @@ void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
 void DynamicsSystem::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
+
+    Vector3 gravity = m_gravity * m_gravityDir;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
-
-        //Mass Matrix
-        (*bodyIt)->m_MassMatrix_diag.head<3>().setConstant((*bodyIt)->m_mass);
-        (*bodyIt)->m_MassMatrix_diag.tail<3>() = (*bodyIt)->m_K_Theta_S;
-
-        // Massmatrix Inverse
-        (*bodyIt)->m_MassMatrixInv_diag = (*bodyIt)->m_MassMatrix_diag.array().inverse().matrix();
-        // H_const term
-        (*bodyIt)->m_h_term_const.head<3>() =  (*bodyIt)->m_mass * m_gravity * m_gravityDir;
+        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt, gravity);
     }
 }
