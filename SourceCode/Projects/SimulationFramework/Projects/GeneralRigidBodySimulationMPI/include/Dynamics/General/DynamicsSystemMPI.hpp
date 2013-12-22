@@ -68,10 +68,10 @@ public:
     void doFirstHalfTimeStep(PREC ts, PREC timestep);
     void doSecondHalfTimeStep(PREC te, PREC timestep);
 
-    void getSettings(RecorderSettings & SettingsRecorder) const;
-    void setSettings(const RecorderSettings & SettingsRecorder);
-    void getSettings(TimeStepperSettings &SettingsTimestepper, InclusionSolverSettings &SettingsInclusionSolver);
-    void setSettings(const TimeStepperSettings &SettingsTimestepper, const InclusionSolverSettings &SettingsInclusionSolver);
+    void getSettings(RecorderSettings & settingsRecorder) const;
+    void setSettings(const RecorderSettings & settingsRecorder);
+    void getSettings(TimeStepperSettings &settingsTimestepper, InclusionSolverSettings &settingsInclusionSolver);
+    void setSettings(const TimeStepperSettings &settingsTimestepper, const InclusionSolverSettings &settingsInclusionSolver);
 
     void reset();
     inline  void afterFirstTimeStep() {};

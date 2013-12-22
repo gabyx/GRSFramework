@@ -13,7 +13,7 @@
 
 #include "MPIMessages.hpp"
 
-
+#include "InclusionSolverSettings.hpp"
 
 template<typename Combo>
 class InclusionCommunicator {
@@ -52,17 +52,24 @@ public:
 
 
     void communicateRemoteContacts();
+    void resetAllWeightings();
 
     void clearNeighbourMap(){
         m_nbDataMap.emptyAllNeighbourData();
+    }
+
+    void setSettings(const InclusionSolverSettings & settings){
+        m_Settings = settings;
     }
 
     NeighbourMapType * getNeighbourMap(){return &m_nbDataMap;}
 
 private:
 
+    InclusionSolverSettings m_Settings;
 
 
+    /** Functions are executed in this order */
     void sendContactMessageToNeighbours();
     void receiveContactMessagesFromNeighbours();
 
@@ -70,6 +77,9 @@ private:
 
     void sendBodyMultiplicityMessageToNeighbours();
     void recvBodyMultiplicityMessageFromNeighbours();
+
+    void initLocalSplitBodies();
+
 
     /**
     * The NeighbourMessageWrapperInclusion class needs access, to be able to serialize all together!

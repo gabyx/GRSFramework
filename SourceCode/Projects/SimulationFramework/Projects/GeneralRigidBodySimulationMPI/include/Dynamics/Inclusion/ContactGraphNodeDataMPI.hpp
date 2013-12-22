@@ -41,7 +41,7 @@ public:
         return m_multiplicityWeights(it->second+1); // First weight belongs to local owner
     }
     inline void getMultiplicityAndWeight(const RankIdType &rank, unsigned int & mult, PREC & multWeight){
-        multWeight = getMultiplicity();
+        mult = getMultiplicity();
         auto it = m_partRanks.find(rank);
         ASSERTMSG(it!=m_partRanks.end(), "Requested a weight for a non participating rank "<< rank << std::endl);
         multWeight = m_multiplicityWeights(it->second+1); // First weight belongs to local owner

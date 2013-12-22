@@ -27,8 +27,11 @@ public:
         m_nbDataMap.clear();
     }
 
+    inline typename Type::iterator begin(){return m_nbDataMap.begin();}
+    inline typename Type::iterator end(){return m_nbDataMap.end();}
 
-    std::pair<DataType *, bool> insert(const RankIdType & rank){
+
+    inline std::pair<DataType *, bool> insert(const RankIdType & rank){
         auto resPair = m_nbDataMap.insert( typename Type::value_type(rank, DataType(rank) ));
         return std::pair<DataType*, bool>(&resPair.first->second, resPair.second);
     }

@@ -49,8 +49,8 @@ public:
     typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
 
     InclusionSolverCONoG(boost::shared_ptr< BodyCommunicator >  pBodyComm,
-                         boost::shared_ptr<CollisionSolverType >  pCollisionSolver,
-                         boost::shared_ptr<DynamicsSystemType> pDynSys,
+                         boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
+                         boost::shared_ptr< DynamicsSystemType> pDynSys,
                          boost::shared_ptr< ProcessCommunicatorType > pProcCom);
     ~InclusionSolverCONoG();
 
@@ -122,6 +122,7 @@ protected:
 
     inline void doSorProx();
     inline void sorProxOverAllNodes();
+    inline void finalizeSorProx();
     SorProxStepNodeVisitor<ContactGraphType> * m_pSorProxStepNodeVisitor;
     SorProxInitNodeVisitor<ContactGraphType> * m_pSorProxInitNodeVisitor;
 

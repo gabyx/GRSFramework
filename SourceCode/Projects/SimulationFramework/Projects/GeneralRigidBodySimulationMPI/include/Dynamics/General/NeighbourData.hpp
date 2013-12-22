@@ -32,19 +32,19 @@ public:
         m_localBodies.clear();
     }
 
-    unsigned int sizeLocal(){
+    inline unsigned int sizeLocal(){
         return m_localBodies.size();
     }
-    unsigned int sizeRemote(){
+    inline unsigned int sizeRemote(){
         return m_remoteBodies.size();
     }
 
-    LocalIterator localBegin(){ return m_localBodies.begin(); }
-    RemoteIterator remoteBegin(){ return m_remoteBodies.begin(); }
-    LocalIterator localEnd(){ return m_localBodies.end(); }
-    RemoteIterator remoteEnd(){ return m_remoteBodies.end(); }
+    inline LocalIterator localBegin(){ return m_localBodies.begin(); }
+    inline RemoteIterator remoteBegin(){ return m_remoteBodies.begin(); }
+    inline LocalIterator localEnd(){ return m_localBodies.end(); }
+    inline RemoteIterator remoteEnd(){ return m_remoteBodies.end(); }
 
-    std::pair<LocalDataType*, bool> addLocalBodyData(RigidBodyType * body){
+    inline std::pair<LocalDataType*, bool> addLocalBodyData(RigidBodyType * body){
 
         auto resPair = m_localBodies.insert(
                        typename LocalBodiesMapType::value_type(body->m_id, LocalDataType(body) )
@@ -53,7 +53,7 @@ public:
     }
 
 
-    std::pair<RemoteDataType*, bool> addRemoteBodyData(RigidBodyType * body){
+    inline std::pair<RemoteDataType*, bool> addRemoteBodyData(RigidBodyType * body){
         // <iterator,bool>
         auto resPair = m_remoteBodies.insert(
                     typename RemoteBodiesMapType::value_type(body->m_id, RemoteDataType(body) )
@@ -62,11 +62,11 @@ public:
         return std::pair<RemoteDataType *, bool>(&resPair.first->second, resPair.second);
     }
 
-    RemoteDataType * getRemoteBodyData(RigidBodyType * body){
+    inline RemoteDataType * getRemoteBodyData(RigidBodyType * body){
         return  getRemoteBodyData(body->m_id);
     }
 
-    RemoteDataType * getRemoteBodyData(typename RigidBodyType::RigidBodyIdType id){
+    inline RemoteDataType * getRemoteBodyData(typename RigidBodyType::RigidBodyIdType id){
         auto it = m_remoteBodies.find(id);
         if(it != m_remoteBodies.end()){
            return (&it->second);
@@ -76,11 +76,11 @@ public:
         }
     }
 
-    LocalDataType * getLocalBodyData(RigidBodyType * body){
+    inline LocalDataType * getLocalBodyData(RigidBodyType * body){
         return  getLocalBodyData(body->m_id);
     }
 
-    LocalDataType * getLocalBodyData(typename RigidBodyType::RigidBodyIdType id){
+    inline LocalDataType * getLocalBodyData(typename RigidBodyType::RigidBodyIdType id){
         auto it = m_localBodies.find(id);
         if(it != m_localBodies.end()){
            return (&it->second);
@@ -90,10 +90,11 @@ public:
         }
     }
 
-    bool eraseLocalBodyData(RigidBodyType * body){
+    inline bool eraseLocalBodyData(RigidBodyType * body){
         return eraseLocalBodyData(body->m_id);
     }
-    bool eraseLocalBodyData(typename RigidBodyType::RigidBodyIdType id){
+
+    inline bool eraseLocalBodyData(typename RigidBodyType::RigidBodyIdType id){
         auto it = m_localBodies.find(id);
         if(it != m_localBodies.end()){
             m_localBodies.erase(it);
@@ -102,11 +103,11 @@ public:
         return false;
     }
 
-    bool eraseRemoteBodyData(RigidBodyType * body){
+    inline bool eraseRemoteBodyData(RigidBodyType * body){
         return eraseRemoteBodyData(body->m_id);
     }
 
-    bool eraseRemoteBodyData(typename RigidBodyType::RigidBodyIdType id){
+    inline bool eraseRemoteBodyData(typename RigidBodyType::RigidBodyIdType id){
         auto it = m_remoteBodies.find(id);
         if(it != m_remoteBodies.end()){
             m_remoteBodies.erase(it);

@@ -1,8 +1,8 @@
 #include "InclusionSolverCONoGMPI.hpp"
 
-#include "InclusionCommunicator.hpp"
+//#include "InclusionCommunicator.hpp"
 // those two include each other (forwarding)
-#include "ContactGraphMPI.hpp"
+//#include "ContactGraphMPI.hpp"
 
 
 #include "ConfigureFile.hpp"
@@ -108,6 +108,8 @@ void InclusionSolverCONoG::reset() {
 #endif
 
 
+
+
 }
 
 
@@ -121,6 +123,7 @@ void InclusionSolverCONoG::resetForNextIter() {
     m_pContactGraph->clearGraph();
 
     m_pInclusionComm->clearNeighbourMap();
+    m_pInclusionComm->setSettings(m_Settings);
 }
 
 
@@ -205,6 +208,11 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 #endif
     }
 
+#if CoutLevelSolverWhenContact>0
+    LOG(m_pSolverLog,  "---> Finalize Prox ");
+    finalizeSorProx();
+#endif
+
 }
 
 
@@ -235,7 +243,10 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
     // Init Remote nodes
     //m_pContactGraph->applyNodeVisitorRemote(*m_pSorProxInitNodeVisitor);
 
-    // Integrate all local sim bodies!
+
+
+    // Set the initial u_0 for the prox iteration in the velocities for LOCAL BODIES!
+    // The ones which do not participate in the contact graph are already integrated
     for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
         // add u_s + M^⁻1*h*deltaT ,  all contact forces initial values have already been applied!
@@ -243,6 +254,12 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
                             (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
         (*bodyIt)->m_pSolverData->m_uBuffer.m_back = (*bodyIt)->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
     }
+
+    // The initialization of the velocity for all remote bodies taking part in a split body node
+    // has already been done in the communication step before
+
+
+
 }
 
 
@@ -347,7 +364,15 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 }
 
 
+void InclusionSolverCONoG::finalizeSorProx(){
 
+    // Set all weightings of remote and local bodies back to the original!
+    #if CoutLevelSolverWhenContact>0
+    LOG(m_pSolverLog,  "---> Reset All Weigths");
+    m_pInclusionComm->resetAllWeightings();
+    #endif
+
+}
 
 std::string  InclusionSolverCONoG::getIterationStats() {
     std::stringstream s;

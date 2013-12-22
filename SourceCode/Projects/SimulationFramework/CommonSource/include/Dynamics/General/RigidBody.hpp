@@ -119,23 +119,6 @@ public:
 };
 
 
-namespace RigidBodyFunctions{
-
-    template<typename TRigidBody>
-    void initMassMatrixAndHTerm(TRigidBody * body,
-                                const typename MyMatrix<typename TRigidBody::PREC >::Vector3 & gravitiy) {
-
-            //Mass Matrix
-            body->m_MassMatrix_diag.head<3>().setConstant(body->m_mass);
-            body->m_MassMatrix_diag.tail<3>() = body->m_K_Theta_S;
-
-            // Massmatrix Inverse
-            body>m_MassMatrixInv_diag = body->m_MassMatrix_diag.array().inverse().matrix();
-            // H_const term
-            body->m_h_term_const.head<3>() =  (body)->m_mass * gravitiy;
-    }
-
-};
 
 
   /** @} */

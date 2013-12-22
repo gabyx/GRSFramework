@@ -10,7 +10,7 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include <boost/thread.hpp>
-
+#include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 #include "Singleton.hpp"
 

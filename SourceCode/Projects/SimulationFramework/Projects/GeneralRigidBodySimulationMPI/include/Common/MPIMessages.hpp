@@ -24,6 +24,8 @@
 #include "QuaternionHelpers.hpp"
 
 
+#include "RigidBodyFunctionsMPI.hpp"
+
 
 namespace boost {
 namespace serialization {
@@ -39,8 +41,8 @@ void serialize(Archive& ar, boost::filesystem::path & p,
         p = s;
 }
 
-}
-}
+};
+};
 
 namespace MPILayer {
 
@@ -915,6 +917,7 @@ private:
 };
 
 
+
 template<typename TNeighbourCommunicator >
 class NeighbourMessageWrapperInclusionMultiplicity : public NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
     public boost::serialization::traits< NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
@@ -948,7 +951,7 @@ public:
 
     template<class Archive>
     void save(Archive & ar, const unsigned int version) const {
-
+        // LOCAL BODIES
         LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusionMultiplicity is not correctly initialized, Rank not set!");
 
 
@@ -977,8 +980,8 @@ public:
 
                 LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl <<
                       "----> multiplicity: " << multiplicity <<std::endl <<
-                      "----> multiplicityWeight: " <<multiplicityWeight<<std::endl; );
-                      "----> it->second.m_pBody->m_h_term"
+                      "----> multiplicityWeight: " <<multiplicityWeight<<std::endl <<
+                      "----> h_term: " << it->second.m_pBody->m_h_term.transpose() <<std::endl;)
                 ar & (it->first);
                 ar & multiplicity; // multiplicity
                 ar & multiplicityWeight;
@@ -995,7 +998,7 @@ public:
     template<class Archive>
     void load(Archive & ar, const unsigned int version) const {
         LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusionMultiplicity is not correctly initialized, Rank not set!")
-
+        // REMOTE BODIES
         unsigned int size;
         ar & size;
 
@@ -1008,7 +1011,7 @@ public:
             // Update m_neighbourData;
             m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
 
-            unsigned int multiplicity ;
+            unsigned int multiplicity;
             PREC multiplicityWeight;
             RigidBodyIdType id;
             static VectorUObj h_term;
@@ -1019,24 +1022,36 @@ public:
                 ar & multiplicityWeight;
                 serializeEigen(ar,h_term);
 
-                // Save this multfactor in the rigid body
+                // Save this multfactor in the REMOTE rigid body
                     LOGASSERTMSG(multiplicity != 0, this->m_pSerializerLog, "multiplicity can not be zero!" )
                 auto * remoteBodyData = m_neighbourData->getRemoteBodyData(id);
+
                     LOGASSERTMSG( remoteBodyData, this->m_pSerializerLog,"remoteBodyData is null for body id: " << RigidBodyId::getBodyIdString(id) << " in neighbour data rank " << this->m_neighbourRank)
                     LOGASSERTMSG( remoteBodyData->m_pBody->m_pSolverData , this->m_pSerializerLog,"m_pSolverData is null for body id: " << RigidBodyId::getBodyIdString(id));
 
-                remoteBodyData->m_pBody->m_pSolverData->m_multFactor = multiplicity;
-                remoteBodyData->m_pBody->m_pSolverData->m_multiplicityWeight = multiplicityWeight;
-                remoteBodyData->m_pBody->m_h_term = h_term;
+                RigidBodyType * body = remoteBodyData->m_pBody;
+                //Set new h_term;
+                body->m_h_term = h_term;
 
                 LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
                       "----> multiplicity: " << multiplicity <<std::endl <<
                       "----> multiplicityWeight: " <<multiplicityWeight<<std::endl<<
-                      "----> h_term current: " << h_term << std::endl;  );
+                      "----> h_term current: " << h_term.transpose() << std::endl;  );
 
+                // Apply weighting factors
                 // Turn this remote into a split body
-                //Scale the inverse mass matrix
-                RigidBodyType::changeToSplitBody( remoteBodyData->m_pBody, multiplicityWeight);
+                // Scale the inverse mass matrix, and h_term
+                LOGSZ(this->m_pSerializerLog, "----> changeBodyToSplitWeighting()" <<std::endl;);
+                RigidBodyFunctions::changeBodyToSplitWeighting( body, multiplicity, multiplicityWeight);
+
+
+                // Compute initial velocity u_0 for this body
+                LOGSZ(this->m_pSerializerLog, "----> initialize velocity for prox iteration" <<std::endl; );
+                ASSERTMSG(body->m_pSolverData, "m_pSolverData for body id: " << RigidBodyId::getBodyIdString(id) << " is zero!")
+                body->m_pSolverData->m_uBuffer.m_front += body->m_pSolverData->m_uBuffer.m_back +
+                            body->m_MassMatrixInv_diag.asDiagonal()  *  body->m_h_term * this->m_nc->m_Settings.m_deltaT;
+                body->m_pSolverData->m_uBuffer.m_back = body->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
+
 
             }
 

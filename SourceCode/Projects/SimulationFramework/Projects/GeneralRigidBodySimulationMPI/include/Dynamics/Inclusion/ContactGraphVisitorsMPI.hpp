@@ -10,6 +10,8 @@
 #include "ProxFunctions.hpp"
 #include "InclusionSolverSettings.hpp"
 
+
+
 /**
 @brief Visitor for class ContactGraph
 */
@@ -417,6 +419,27 @@ public:
         node.m_multiplicityWeights.setConstant(mult,1.0/mult);
     }
 
+};
+
+
+#include "RigidBodyFunctionsMPI.hpp"
+
+
+template<typename TContactGraph>
+class SetWeightingLocalBodiesSplitNodeVisitor{
+public:
+
+    typedef TContactGraph ContactGraphType;
+
+    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+
+    SetWeightingLocalBodiesSplitNodeVisitor(){};
+
+
+    void visitNode(NodeType& node){
+        auto mult = node.getMultiplicity();
+        RigidBodyFunctions::changeBodyToSplitWeighting(node.m_pBody, mult, node.m_multiplicityWeights(0));
+    }
 };
 
 #endif // ContactGraphVisitorMPI_hpp

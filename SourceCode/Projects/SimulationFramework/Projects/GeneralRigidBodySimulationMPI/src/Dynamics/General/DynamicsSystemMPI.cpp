@@ -4,6 +4,7 @@
 #include "AddGyroTermVisitor.hpp"
 #include "VectorToSkewMatrix.hpp"
 #include "CommonFunctions.hpp"
+#include "RigidBodyFunctions.hpp"
 
 DynamicsSystem::~DynamicsSystem() {
     DECONSTRUCTOR_MESSAGE
@@ -16,25 +17,25 @@ DynamicsSystem::~DynamicsSystem() {
 };
 
 
-void DynamicsSystem::getSettings(RecorderSettings & SettingsRecorder) const{
-    SettingsRecorder = m_SettingsRecorder;
+void DynamicsSystem::getSettings(RecorderSettings & settingsRecorder) const{
+    settingsRecorder = m_SettingsRecorder;
 }
 
 
-void DynamicsSystem::setSettings(const RecorderSettings & SettingsRecorder){
-    m_SettingsRecorder = SettingsRecorder;
+void DynamicsSystem::setSettings(const RecorderSettings & settingsRecorder){
+    m_SettingsRecorder = settingsRecorder;
 }
 
 
-void DynamicsSystem::getSettings(TimeStepperSettings &SettingsTimestepper, InclusionSolverSettings &SettingsInclusionSolver) {
-    SettingsTimestepper = m_SettingsTimestepper;
-    SettingsInclusionSolver = m_SettingsInclusionSolver;
+void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper, InclusionSolverSettings &settingsInclusionSolver) {
+    settingsTimestepper = m_SettingsTimestepper;
+    settingsInclusionSolver = m_SettingsInclusionSolver;
 }
 
 
-void DynamicsSystem::setSettings(const TimeStepperSettings &SettingsTimestepper, const InclusionSolverSettings &SettingsInclusionSolver) {
-    m_SettingsTimestepper = SettingsTimestepper;
-    m_SettingsInclusionSolver = SettingsInclusionSolver;
+void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper, const InclusionSolverSettings &settingsInclusionSolver) {
+    m_SettingsTimestepper = settingsTimestepper;
+    m_SettingsInclusionSolver = settingsInclusionSolver;
 }
 
 

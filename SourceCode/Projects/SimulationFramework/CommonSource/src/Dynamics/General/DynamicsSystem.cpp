@@ -4,7 +4,7 @@
 #include "VectorToSkewMatrix.hpp"
 #include "AddGyroTermVisitor.hpp"
 #include "CommonFunctions.hpp"
-
+#include "RigidBodyFunctions.hpp"
 
 DynamicsSystem::~DynamicsSystem() {
     DECONSTRUCTOR_MESSAGE
@@ -16,25 +16,25 @@ DynamicsSystem::~DynamicsSystem() {
 };
 
 
-void DynamicsSystem::getSettings(RecorderSettings & SettingsRecorder) const {
-    SettingsRecorder = m_SettingsRecorder;
+void DynamicsSystem::getSettings(RecorderSettings & settingsRecorder) const {
+    settingsRecorder = m_SettingsRecorder;
 }
 
 
-void DynamicsSystem::setSettings(const RecorderSettings & SettingsRecorder) {
-    m_SettingsRecorder = SettingsRecorder;
+void DynamicsSystem::setSettings(const RecorderSettings & settingsRecorder) {
+    m_SettingsRecorder = settingsRecorder;
 }
 
-void DynamicsSystem::getSettings(TimeStepperSettings &SettingsTimestepper,
-        InclusionSolverSettings &SettingsInclusionSolver) const {
-    SettingsTimestepper = m_SettingsTimestepper;
-    SettingsInclusionSolver = m_SettingsInclusionSolver;
+void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper,
+        InclusionSolverSettings &settingsInclusionSolver) const {
+    settingsTimestepper = m_SettingsTimestepper;
+    settingsInclusionSolver = m_SettingsInclusionSolver;
 }
 
 
-void DynamicsSystem::setSettings(const TimeStepperSettings &SettingsTimestepper, const InclusionSolverSettings &SettingsInclusionSolver) {
-    m_SettingsTimestepper = SettingsTimestepper;
-    m_SettingsInclusionSolver = SettingsInclusionSolver;
+void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper, const InclusionSolverSettings &settingsInclusionSolver) {
+    m_SettingsTimestepper = settingsTimestepper;
+    m_SettingsInclusionSolver = settingsInclusionSolver;
 }
 
 
@@ -171,15 +171,10 @@ void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
 void DynamicsSystem::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
+
+    Vector3 gravity = m_gravity * m_gravityDir;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
-
-        //Mass Matrix
-        (*bodyIt)->m_MassMatrix_diag.head<3>().setConstant((*bodyIt)->m_mass);
-        (*bodyIt)->m_MassMatrix_diag.tail<3>() = (*bodyIt)->m_K_Theta_S;
-
-        // Massmatrix Inverse
-        (*bodyIt)->m_MassMatrixInv_diag = (*bodyIt)->m_MassMatrix_diag.array().inverse().matrix();
-        // H_const term
-        (*bodyIt)->m_h_term_const.head<3>() =  (*bodyIt)->m_mass * m_gravity * m_gravityDir;
+        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt, gravity);
     }
 }
+
