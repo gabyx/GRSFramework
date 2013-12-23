@@ -454,6 +454,9 @@ private:
             m_nc->m_globalRemote.removeBody(body);
             m_nc->m_globalLocal.addBody(body);
 
+            // Make sure this new local( from a remote) is correctly initialized, set velocity of front buffer to zero
+            RigidBodyFunctions::remoteToLocalBodyInitialization(body);
+
             // Move the remote out of the neighbour structure
             // (needs to be in the neighbour structure with rank m_neighbourRank, otherwise this update is somewhat stupid?
             bool res = m_neighbourData->eraseRemoteBodyData(body);
@@ -620,9 +623,13 @@ private:
 
         //Velocity
         LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "No SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "!");
-        //Reset solver data
-        //body->m_pSolverData->reset();
+
+        // if(Archive::is_loading::value) {
+            //Reset solver data, we are updating a remote
+            //body->m_pSolverData->reset();
+        // }
         serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
+
         ar & body->m_pSolverData->m_t;
         LOGSZ(m_pSerializerLog, "----->  m_t: " << body->m_pSolverData->m_t <<std::endl;);
         LOGSZ(m_pSerializerLog, "----->  m_uBuffer.m_back: " << body->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl;);
@@ -1029,9 +1036,19 @@ public:
                     LOGASSERTMSG( remoteBodyData, this->m_pSerializerLog,"remoteBodyData is null for body id: " << RigidBodyId::getBodyIdString(id) << " in neighbour data rank " << this->m_neighbourRank)
                     LOGASSERTMSG( remoteBodyData->m_pBody->m_pSolverData , this->m_pSerializerLog,"m_pSolverData is null for body id: " << RigidBodyId::getBodyIdString(id));
 
-                RigidBodyType * body = remoteBodyData->m_pBody;
+
+
+                RigidBodyType * remoteBody = remoteBodyData->m_pBody;
+
+                    LOGASSERTMSG(remoteBody->m_pBodyInfo,this->m_pSerializerLog,"bodyInfo is null for body id: "
+                                 << RigidBodyId::getBodyIdString(id) << " in neighbour data rank " << this->m_neighbourRank);
+                    LOGASSERTMSG(remoteBody->m_pBodyInfo->m_isRemote,this->m_pSerializerLog,
+                                 "Body id: " << RigidBodyId::getBodyIdString(id) << " in neighbour data rank "
+                                 << this->m_neighbourRank << " is not remote!");
+
+
                 //Set new h_term;
-                body->m_h_term = h_term;
+                remoteBody->m_h_term = h_term;
 
                 LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
                       "----> multiplicity: " << multiplicity <<std::endl <<
@@ -1041,17 +1058,16 @@ public:
                 // Apply weighting factors
                 // Turn this remote into a split body
                 // Scale the inverse mass matrix, and h_term
-                LOGSZ(this->m_pSerializerLog, "----> changeBodyToSplitWeighting()" <<std::endl;);
-                RigidBodyFunctions::changeBodyToSplitWeighting( body, multiplicity, multiplicityWeight);
+                LOGSZ(this->m_pSerializerLog, "----> change weighting for remote body" <<std::endl;);
+                RigidBodyFunctions::changeBodyToSplitWeighting( remoteBody, multiplicity, multiplicityWeight);
 
 
-                // Compute initial velocity u_0 for this body
+                // Compute initial velocity u_0 for this remoteBody
                 LOGSZ(this->m_pSerializerLog, "----> initialize velocity for prox iteration" <<std::endl; );
-                ASSERTMSG(body->m_pSolverData, "m_pSolverData for body id: " << RigidBodyId::getBodyIdString(id) << " is zero!")
-                body->m_pSolverData->m_uBuffer.m_front += body->m_pSolverData->m_uBuffer.m_back +
-                            body->m_MassMatrixInv_diag.asDiagonal()  *  body->m_h_term * this->m_nc->m_Settings.m_deltaT;
-                body->m_pSolverData->m_uBuffer.m_back = body->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
-
+                ASSERTMSG(remoteBody->m_pSolverData, "m_pSolverData for body id: " << RigidBodyId::getBodyIdString(id) << " is zero!")
+                remoteBody->m_pSolverData->m_uBuffer.m_front += remoteBody->m_pSolverData->m_uBuffer.m_back +
+                            remoteBody->m_MassMatrixInv_diag.asDiagonal()  *  remoteBody->m_h_term * this->m_nc->m_Settings.m_deltaT;
+                remoteBody->m_pSolverData->m_uBuffer.m_back = remoteBody->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
 
             }
 

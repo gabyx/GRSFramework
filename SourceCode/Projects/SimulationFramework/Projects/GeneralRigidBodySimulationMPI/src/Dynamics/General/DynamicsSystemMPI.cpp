@@ -125,11 +125,7 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
-#if CoutLevelSolver>2
-        LOG(m_pSolverLog, "Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
-            << "m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
-            << "m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
-#endif
+
         // Update time:
         pBody->m_pSolverData->m_t = te;
 
@@ -143,6 +139,11 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
         //Normalize Quaternion
         pBody->m_q_KI.normalize();
 
+#if CoutLevelSolver>2
+        LOG(m_pSolverLog, "Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
+            << "m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
+            << "m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
+#endif
 
 #if OUTPUT_SYSTEMDATA_FILE == 1
         // Calculate Energy
@@ -150,7 +151,7 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
         m_CurrentStateEnergy -= +  pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir ;
 #endif
 
-        // Swap uBuffer and reset Front
+        // Swap uBuffer and reset Front to zero
         pBody->m_pSolverData->swapBuffer();
         pBody->m_pSolverData->reset();
 

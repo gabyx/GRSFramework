@@ -414,7 +414,7 @@ public:
 
     ComputeMultiplicitySplitNodeVisitor(){};
 
-    void visitNode(NodeType& node){
+    inline void visitNode(NodeType& node){
         auto mult = node.getMultiplicity();
         node.m_multiplicityWeights.setConstant(mult,1.0/mult);
     }
@@ -436,10 +436,27 @@ public:
     SetWeightingLocalBodiesSplitNodeVisitor(){};
 
 
-    void visitNode(NodeType& node){
+    inline void visitNode(NodeType& node){
         auto mult = node.getMultiplicity();
         RigidBodyFunctions::changeBodyToSplitWeighting(node.m_pBody, mult, node.m_multiplicityWeights(0));
     }
 };
+
+template<typename TContactGraph>
+class ResetWeightingLocalBodiesSplitNodeVisitor{
+public:
+
+    typedef TContactGraph ContactGraphType;
+
+    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+
+    ResetWeightingLocalBodiesSplitNodeVisitor(){};
+
+    inline void visitNode(NodeType& node){
+        RigidBodyFunctions::changeBodyToNormalWeighting(node.m_pBody);
+    }
+};
+
+
 
 #endif // ContactGraphVisitorMPI_hpp

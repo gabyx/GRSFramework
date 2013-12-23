@@ -8,6 +8,13 @@
 
 namespace RigidBodyFunctions {
 
+
+    template<typename TRigidBody>
+    void remoteToLocalBodyInitialization(TRigidBody * body){
+         ASSERTMSG( body->m_pSolverData, "Body id: " << RigidBodyId::getBodyIdString(body->m_id) << "no solver data!");
+         body->m_pSolverData->reset();
+    }
+
     template<typename TRigidBody>
     void changeBodyToSplitWeighting(TRigidBody * body,
                              const unsigned int & multiplicity,

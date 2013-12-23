@@ -223,7 +223,7 @@ void InclusionSolverCONoG::doSorProx() {
 
         m_bConverged = true;
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, std::endl<< "---> Next iteration: "<< m_iterationsNeeded << std::endl);
+            LOG(m_pSolverLog,"---> Next iteration: "<< m_iterationsNeeded << std::endl);
         #endif
         sorProxOverAllNodes(); // Do one Sor Prox Iteration
 

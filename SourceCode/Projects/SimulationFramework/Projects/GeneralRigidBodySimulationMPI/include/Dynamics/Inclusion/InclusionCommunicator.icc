@@ -67,8 +67,8 @@ void InclusionCommunicator<Combo>::communicateRemoteContacts() {
 
     // Init all local bodies weights in the split body nodes
     // Weighting factors are applied, initial velocities is NOT calculated, later!
-    //LOGIC(m_pSimulationLog,"\t---> InclusionCommunication: Apply weights for local bodies in SplitBodyNodes"<< std::endl;)
-    //initLocalSplitBodies();
+    LOGIC(m_pSimulationLog,"\t---> InclusionCommunication: Apply weights for local bodies in SplitBodyNodes"<< std::endl;)
+    initLocalSplitBodies();
 
 
     LOGIC(m_pSimulationLog,"---> InclusionCommunication: finished"<< std::endl;)
@@ -80,10 +80,10 @@ void InclusionCommunicator<Combo>::resetAllWeightings() {
 
 
     //Reset all local bodies
-//    ResetWeightingLocalBodiesSplitNodeVisitor<ContactGraphType> v;
-//    m_pContactGraph->applyNodeVisitorSplitBody(v);
+    ResetWeightingLocalBodiesSplitNodeVisitor<ContactGraphType> v;
+    m_pContactGraph->applyNodeVisitorSplitBody(v);
 
-    //Reset all remote bodies
+    //Reset weigthing of all remote bodies
     for(auto nbIt = m_nbDataMap.begin(); nbIt != m_nbDataMap.end(); nbIt++){
         for( auto remoteIt = nbIt->second.remoteBegin(); remoteIt != nbIt->second.remoteEnd(); remoteIt++){
             RigidBodyFunctions::changeBodyToNormalWeighting(remoteIt->second.m_pBody);

@@ -209,7 +209,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
     }
 
 #if CoutLevelSolverWhenContact>0
-    LOG(m_pSolverLog,  "---> Finalize Prox ");
+    LOG(m_pSolverLog,  "---> Finalize Prox " <<std::endl; );
     finalizeSorProx();
 #endif
 
@@ -241,7 +241,7 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
     m_pContactGraph->applyNodeVisitorLocal(*m_pSorProxInitNodeVisitor);
 
     // Init Remote nodes
-    //m_pContactGraph->applyNodeVisitorRemote(*m_pSorProxInitNodeVisitor);
+    m_pContactGraph->applyNodeVisitorRemote(*m_pSorProxInitNodeVisitor);
 
 
 
@@ -279,7 +279,7 @@ void InclusionSolverCONoG::doSorProx() {
 
         m_bConverged = true;
         #if CoutLevelSolverWhenContact>1
-            LOG(m_pSolverLog, std::endl<< "---> Next iteration: "<< m_iterationsNeeded << std::endl);
+            LOG(m_pSolverLog,"---> Next iteration: "<< m_iterationsNeeded << std::endl);
         #endif
         sorProxOverAllNodes(); // Do one Sor Prox Iteration
 
@@ -368,7 +368,7 @@ void InclusionSolverCONoG::finalizeSorProx(){
 
     // Set all weightings of remote and local bodies back to the original!
     #if CoutLevelSolverWhenContact>0
-    LOG(m_pSolverLog,  "---> Reset All Weigths");
+    LOG(m_pSolverLog,  "---> Reset All Weigths" <<std::endl;);
     m_pInclusionComm->resetAllWeightings();
     #endif
 
