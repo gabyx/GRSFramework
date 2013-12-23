@@ -51,7 +51,7 @@ public:
 
 
     std::string getIterationStats();
-    unsigned int m_iterationsNeeded;
+    unsigned int m_globalIterationCounter;
     bool m_bConverged;
     unsigned int m_isFinite;
     unsigned int m_nContacts;

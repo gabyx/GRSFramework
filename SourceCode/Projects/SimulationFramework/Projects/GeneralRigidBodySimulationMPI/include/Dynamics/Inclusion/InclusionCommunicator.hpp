@@ -52,6 +52,9 @@ public:
 
 
     void communicateRemoteContacts();
+    void communicateSplitBodyUpdate(unsigned int globalIterationNumber);
+    void communicateSplitBodySolution(unsigned int globalIterationNumber);
+
     void resetAllWeightings();
 
     void clearNeighbourMap(){
@@ -69,26 +72,37 @@ private:
     InclusionSolverSettings m_Settings;
 
 
-    /** Functions are executed in this order */
+    /** Functions are executed in this order in communicateRemoteContacts() */
     void sendContactMessageToNeighbours();
     void receiveContactMessagesFromNeighbours();
-
-    void computeMultiplicityWeights();
 
     void sendBodyMultiplicityMessageToNeighbours();
     void recvBodyMultiplicityMessageFromNeighbours();
 
-    void initLocalSplitBodies();
 
+
+    /** Functions are executed in this order in communicateSplitBodyUpdate() */
+    void sendUpdateSplitBodiesToNeighbours();
+    void recvUpdateSplitBodiesFromNeighbours();
+
+    void sendSolutionSplitBodiesToNeighbours();
+    void recvSolutionSplitBodiesFromNeighbours();
+
+    unsigned int m_globalIterationNumber;
 
     /**
     * The NeighbourMessageWrapperInclusion class needs access, to be able to serialize all together!
     */
     template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapperInclusionContact;
     template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapperInclusionMultiplicity;
+    template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapperInclusionSplitBodyUpdate;
+    template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapperInclusionSplitBodySolution;
+
 
     MPILayer::NeighbourMessageWrapperInclusionContact< InclusionCommunicator > m_messageContact;
     MPILayer::NeighbourMessageWrapperInclusionMultiplicity< InclusionCommunicator > m_messageMultiplicity;
+    MPILayer::NeighbourMessageWrapperInclusionSplitBodyUpdate< InclusionCommunicator > m_messageSplitBodyUpdate;
+    MPILayer::NeighbourMessageWrapperInclusionSplitBodySolution< InclusionCommunicator > m_messageSplitBodySolution;
 
     boost::shared_ptr< DynamicsSystemType >      m_pDynSys;
     boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;

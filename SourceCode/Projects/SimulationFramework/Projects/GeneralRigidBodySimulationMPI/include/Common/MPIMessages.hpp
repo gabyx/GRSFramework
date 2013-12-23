@@ -625,8 +625,8 @@ private:
         LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "No SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "!");
 
         // if(Archive::is_loading::value) {
-            //Reset solver data, we are updating a remote
-            //body->m_pSolverData->reset();
+        //Reset solver data, we are updating a remote
+        //body->m_pSolverData->reset();
         // }
         serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
 
@@ -1023,28 +1023,27 @@ public:
             RigidBodyIdType id;
             static VectorUObj h_term;
             for(unsigned int i = 0; i < size ; i++) {
-                unsigned int a;
                 ar & id;
                 ar & multiplicity;
                 ar & multiplicityWeight;
                 serializeEigen(ar,h_term);
 
                 // Save this multfactor in the REMOTE rigid body
-                    LOGASSERTMSG(multiplicity != 0, this->m_pSerializerLog, "multiplicity can not be zero!" )
+                LOGASSERTMSG(multiplicity != 0, this->m_pSerializerLog, "multiplicity can not be zero!" )
                 auto * remoteBodyData = m_neighbourData->getRemoteBodyData(id);
 
-                    LOGASSERTMSG( remoteBodyData, this->m_pSerializerLog,"remoteBodyData is null for body id: " << RigidBodyId::getBodyIdString(id) << " in neighbour data rank " << this->m_neighbourRank)
-                    LOGASSERTMSG( remoteBodyData->m_pBody->m_pSolverData , this->m_pSerializerLog,"m_pSolverData is null for body id: " << RigidBodyId::getBodyIdString(id));
+                LOGASSERTMSG( remoteBodyData, this->m_pSerializerLog,"remoteBodyData is null for body id: " << RigidBodyId::getBodyIdString(id) << " in neighbour data rank " << this->m_neighbourRank)
+                LOGASSERTMSG( remoteBodyData->m_pBody->m_pSolverData , this->m_pSerializerLog,"m_pSolverData is null for body id: " << RigidBodyId::getBodyIdString(id));
 
 
 
                 RigidBodyType * remoteBody = remoteBodyData->m_pBody;
 
-                    LOGASSERTMSG(remoteBody->m_pBodyInfo,this->m_pSerializerLog,"bodyInfo is null for body id: "
-                                 << RigidBodyId::getBodyIdString(id) << " in neighbour data rank " << this->m_neighbourRank);
-                    LOGASSERTMSG(remoteBody->m_pBodyInfo->m_isRemote,this->m_pSerializerLog,
-                                 "Body id: " << RigidBodyId::getBodyIdString(id) << " in neighbour data rank "
-                                 << this->m_neighbourRank << " is not remote!");
+                LOGASSERTMSG(remoteBody->m_pBodyInfo,this->m_pSerializerLog,"bodyInfo is null for body id: "
+                             << RigidBodyId::getBodyIdString(id) << " in neighbour data rank " << this->m_neighbourRank);
+                LOGASSERTMSG(remoteBody->m_pBodyInfo->m_isRemote,this->m_pSerializerLog,
+                             "Body id: " << RigidBodyId::getBodyIdString(id) << " in neighbour data rank "
+                             << this->m_neighbourRank << " is not remote!");
 
 
                 //Set new h_term;
@@ -1065,8 +1064,7 @@ public:
                 // Compute initial velocity u_0 for this remoteBody
                 LOGSZ(this->m_pSerializerLog, "----> initialize velocity for prox iteration" <<std::endl; );
                 ASSERTMSG(remoteBody->m_pSolverData, "m_pSolverData for body id: " << RigidBodyId::getBodyIdString(id) << " is zero!")
-                remoteBody->m_pSolverData->m_uBuffer.m_front += remoteBody->m_pSolverData->m_uBuffer.m_back +
-                            remoteBody->m_MassMatrixInv_diag.asDiagonal()  *  remoteBody->m_h_term * this->m_nc->m_Settings.m_deltaT;
+                remoteBody->m_pSolverData->m_uBuffer.m_front = remoteBody->m_pSolverData->m_uBuffer.m_back + remoteBody->m_MassMatrixInv_diag.asDiagonal()  *  remoteBody->m_h_term * this->m_nc->m_Settings.m_deltaT;
                 remoteBody->m_pSolverData->m_uBuffer.m_back = remoteBody->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
 
             }
@@ -1085,6 +1083,258 @@ public:
 private:
     mutable NeighbourDataType * m_neighbourData;
 };
+
+
+
+template<typename TNeighbourCommunicator >
+class NeighbourMessageWrapperInclusionSplitBodyUpdate : public NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
+    public boost::serialization::traits< NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
+    boost::serialization::object_serializable,
+        boost::serialization::track_never> {
+public:
+
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    typedef TNeighbourCommunicator NeighbourCommunicatorType;
+    typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
+
+    typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
+    typedef typename RigidBodyType::BodyInfoType                              BodyInfoType;
+
+    typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
+    typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
+    typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
+    typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
+    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
+    typedef typename NeighbourCommunicatorType::ContactGraphType              ContactGraphType;
+
+    typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
+
+
+    NeighbourMessageWrapperInclusionSplitBodyUpdate(NeighbourCommunicatorType * nc):
+        NeighbourMessageWrapperInclusion<NeighbourCommunicatorType>(nc),
+        m_neighbourData(NULL)
+    {}
+
+
+    template<class Archive>
+    void save(Archive & ar, const unsigned int version) const {
+        // Remote SplitBodies
+        LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusionSplitBodyUpdate is not correctly initialized, Rank not set!");
+
+
+        m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
+        LOGASSERTMSG( this->m_neighbourData, this->m_pSerializerLog,
+                      "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
+                      << this->m_nc->m_rank << "!");
+
+
+        //Serialize all velocities of all remote SplitBodies
+        unsigned int size = m_neighbourData->sizeRemote();
+
+        ar & size;
+
+        if(size>0) {
+            LOGSZ(this->m_pSerializerLog, "InclusionComm-SplitBodyUpdate=============================================================================="<< std::endl;)
+            LOGSZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+
+            LOGSZ(this->m_pSerializerLog, "---> # Remote SplitBody Updates: " << size << std::endl;);
+
+            for(auto it = m_neighbourData->remoteBegin(); it != m_neighbourData->remoteEnd(); it++){
+                ar & it->first; // id
+
+                LOGASSERTMSG( it->second.m_pBody->m_pSolverData, this->m_pSerializerLog,
+                             "SolverData for body id: " << RigidBodyId::getBodyIdString(it->first) << "zero!");
+
+                serializeEigen(ar,it->second.m_pBody->m_pSolverData->m_uBuffer.m_front); // front velocity
+
+                LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl <<
+                          "----> uFront: " << it->second.m_pBody->m_pSolverData->m_uBuffer.m_front.transpose() <<std::endl)
+            }
+        }
+        else{
+            ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
+            // We know from which neighbours we should receive a nonempty message
+        }
+
+        this->m_initialized = false;
+    }
+
+    template<class Archive>
+    void load(Archive & ar, const unsigned int version) const {
+        LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusionSplitBodyUpdate is not correctly initialized, Rank not set!")
+        //Local SplitBodyUpdates
+
+        m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
+        LOGASSERTMSG( this->m_neighbourData, this->m_pSerializerLog,
+                      "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
+                      << this->m_nc->m_rank << "!");
+
+        unsigned int size;
+        ar & size;
+
+        if(size>0) {
+            LOGSZ(this->m_pSerializerLog, "InclusionComm-SplitBodyUpdate=============================================================================="<< std::endl;)
+            LOGSZ(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+
+            LOGSZ(this->m_pSerializerLog, "---> # Local SplitBody Updates: " << size << std::endl;);
+
+            RigidBodyIdType id;
+            VectorUObj u;
+            for(unsigned int i = 0; i < size ; i++) {
+                ar & id;
+                serializeEigen(ar,u);
+
+                auto * localBodyData = m_neighbourData->getLocalBodyData(id);
+
+                LOGASSERTMSG(localBodyData, this->m_pSerializerLog, "The local split body id: "
+                             << RigidBodyId::getBodyIdString(id) << "is not in this neighbour rank: " << this->m_neighbourRank)
+
+                localBodyData->m_pSplitBodyNode->updateVelocity(this->m_neighbourRank,u);
+                LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
+                          "----> uFront: " << u.transpose() <<std::endl)
+            }
+        }
+        else{
+            ERRORMSG("We should not receive an empty message from neighbour " << this->m_neighbourRank << std::endl);
+        }
+
+        this->m_initialized = false;
+    }
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER();
+
+private:
+    mutable NeighbourDataType * m_neighbourData;
+};
+
+
+template<typename TNeighbourCommunicator >
+class NeighbourMessageWrapperInclusionSplitBodySolution : public NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
+    public boost::serialization::traits< NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
+    boost::serialization::object_serializable,
+        boost::serialization::track_never> {
+public:
+
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    typedef TNeighbourCommunicator NeighbourCommunicatorType;
+    typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
+
+    typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
+    typedef typename RigidBodyType::BodyInfoType                              BodyInfoType;
+
+    typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
+    typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
+    typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
+    typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
+    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
+    typedef typename NeighbourCommunicatorType::ContactGraphType              ContactGraphType;
+
+    typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
+
+
+    NeighbourMessageWrapperInclusionSplitBodySolution(NeighbourCommunicatorType * nc):
+        NeighbourMessageWrapperInclusion<NeighbourCommunicatorType>(nc),
+        m_neighbourData(NULL)
+    {}
+
+
+    template<class Archive>
+    void save(Archive & ar, const unsigned int version) const {
+        // LOCAL SPLITBODIES
+        LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusionSplitBodySolution is not correctly initialized, Rank not set!");
+
+
+        m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
+        LOGASSERTMSG( this->m_neighbourData, this->m_pSerializerLog,
+                      "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
+                      << this->m_nc->m_rank << "!");
+
+
+        //Serialize all solved velocities of all local SplitBodies
+        unsigned int size = m_neighbourData->sizeLocal();
+
+        ar & size;
+
+        if(size>0) {
+            LOGSZ(this->m_pSerializerLog, "InclusionComm-SplitBodySolution=============================================================================="<< std::endl;)
+            LOGSZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+
+            for(auto it = m_neighbourData->localBegin(); it != m_neighbourData->localEnd(); it++){
+                ar & it->first; // id
+
+                LOGASSERTMSG( it->second.m_pBody->m_pSolverData, this->m_pSerializerLog,
+                             "SolverData for body id: " << RigidBodyId::getBodyIdString(it->first) << "zero!");
+
+                //Because all splitbody velocities in the splitNode are equal due to the billateral cosntraint,
+                // we can just send the first velocity to all participating ranks
+                // which is the local bodies new front velocity
+                serializeEigen(ar,it->second.m_pBody->m_pSolverData->m_uBuffer.m_front); // front velocity
+
+                LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl <<
+                          "----> uFront: " << it->second.m_pBody->m_pSolverData->m_uBuffer.m_front.transpose() <<std::endl)
+            }
+        }
+        else{
+            ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
+            // We know from which neighbours we should receive a nonempty message
+        }
+
+        this->m_initialized = false;
+    }
+
+    template<class Archive>
+    void load(Archive & ar, const unsigned int version) const {
+        // REMOTE SPLITBODIES
+        LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusionSplitBodySolution is not correctly initialized, Rank not set!")
+
+        m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
+        LOGASSERTMSG( this->m_neighbourData, this->m_pSerializerLog,
+                      "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
+                      << this->m_nc->m_rank << "!");
+
+        unsigned int size;
+        ar & size;
+
+        if(size>0) {
+            LOGSZ(this->m_pSerializerLog, "InclusionComm-SplitBodySolution=============================================================================="<< std::endl;)
+            LOGSZ(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+
+            LOGSZ(this->m_pSerializerLog, "---> # Remote SplitBodies Solutions: " << size << std::endl;);
+
+            RigidBodyIdType id;
+            VectorUObj u;
+            for(unsigned int i = 0; i < size ; i++) {
+                ar & id;
+                serializeEigen(ar,u);
+
+                auto * remoteBodyData = m_neighbourData->getRemoteBodyData(id);
+                LOGASSERTMSG(remoteBodyData, this->m_pSerializerLog, "The remote split body id: "
+                             << RigidBodyId::getBodyIdString(id) << "is not in this neighbour rank: " << this->m_neighbourRank)
+
+                LOGASSERTMSG(remoteBodyData->m_pBody->m_pSolverData, this->m_pSerializerLog, "No solver data in remote split body id: "
+                             << RigidBodyId::getBodyIdString(id) << " in this neighbour rank: " << this->m_neighbourRank)
+
+                remoteBodyData->m_pBody->m_pSolverData->m_uBuffer.m_front = u;
+
+                LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
+                          "----> uFront: " << u.transpose() <<std::endl)
+            }
+        }
+        else{
+            ERRORMSG("We should not receive an empty message from neighbour " << this->m_neighbourRank << std::endl);
+        }
+
+        this->m_initialized = false;
+    }
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER();
+
+private:
+    mutable NeighbourDataType * m_neighbourData;
+};
+
 
 }; // MPILayer
 

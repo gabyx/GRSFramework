@@ -30,7 +30,7 @@ public:
     SorProxStepNodeVisitor(const InclusionSolverSettings &settings,
                            bool & globalConverged, const unsigned int & globalIterationNeeded):
             m_Settings(settings),m_bConverged(globalConverged),
-            m_iterationsNeeded(globalIterationNeeded)
+            m_globalIterationCounter(globalIterationNeeded)
     {}
 
     void setLog(Logging::Log * solverLog){
@@ -92,7 +92,7 @@ public:
 
 
                 if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
-                    if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
                         if(!nodeData.m_bConverged ) {
                             //converged stays false;
@@ -104,7 +104,7 @@ public:
                         m_bConverged=false;
                     }
                 }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
-                    if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache1,
                                                                           nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
                                                                           nodeData.m_LambdaBack,
@@ -133,7 +133,7 @@ public:
                 #endif
 
                 if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
-                    if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache2,
                                                                   nodeData.m_u2BufferPtr->m_front,
                                                                   m_Settings.m_AbsTol,
@@ -148,7 +148,7 @@ public:
                     }
 
                 }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
-                    if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
                                                                           nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
                                                                           nodeData.m_LambdaBack,
@@ -168,7 +168,7 @@ public:
             }
 
             if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InLambda) {
-                if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+                if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                     nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol);
                     if(!nodeData.m_bConverged) {
                         //converged stays false;
@@ -194,7 +194,7 @@ private:
     Logging::Log * m_pSolverLog;
     const InclusionSolverSettings & m_Settings;
     bool & m_bConverged; ///< Access to global flag for cancelation criteria
-    const unsigned int & m_iterationsNeeded; ///< Access to global iteration counter
+    const unsigned int & m_globalIterationCounter; ///< Access to global iteration counter
 
 };
 
@@ -215,7 +215,7 @@ public:
 
     SorProxStepSplitNodeVisitor(const InclusionSolverSettings &settings, bool & globalConverged, const unsigned int & globalIterationNeeded):
                            m_Settings(settings),m_bConverged(globalConverged),
-                           m_iterationsNeeded(globalIterationNeeded)
+                           m_globalIterationCounter(globalIterationNeeded)
     {}
 
     void setLog(Logging::Log * solverLog){
@@ -226,53 +226,75 @@ public:
         /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
            Then the iteration is not converged somewhere, and we need to wait till the next iteration!
         */
+        // Calculate the exact values for the billateral split nodes
+
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "---> SorProx, Billateral Node: ====================="<<  std::endl << " local body id: "
-                << RigidBodyId::getBodyIdString(node.m_pBody->m_id) );
+            LOG(m_pSolverLog, "---> SorProx, Billateral Node: ====================="<<  std::endl
+                << "\t---> local body id: " << RigidBodyId::getBodyIdString(node.m_pBody->m_id) << std::endl);
         #endif
 
         auto mult = node.getMultiplicity();
-        // Calculate the exact values for the billateral split nodes
-        node.m_uBack.template head<NDOFuObj>() = node.m_pBody->m_pSolverData->m_uBuffer.m_front;
-        // Build gamma = [u1-u2, u2-u3, u3-u4,..., un-1- un]
-        node.m_gamma =   node.m_uBack.head(NDOFuObj*node.m_nLambdas) - node.m_uBack.segment(NDOFuObj, NDOFuObj*node.m_nLambdas);
 
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t---> nd.m_gamma: " << node.m_gamma.transpose() );
+            LOG(m_pSolverLog,"\t---> multiplicity: " << mult << std::endl;)
         #endif
-        // calculate L⁻¹*gamma = Lambda, where L⁻¹ is the matrix choosen by the multiplicity
 
-        node.m_LambdaFront = node.getLInvMatrix() * node.m_gamma;
+
+        // Copy local velocity
+        node.m_uBack.template head<NDOFuObj>() = node.m_pBody->m_pSolverData->m_uBuffer.m_front;
 
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << node.m_LambdaFront.transpose() );
+            LOG(m_pSolverLog,"\t---> uBack: " << node.m_uBack.transpose() <<std::endl;);
+        #endif
+
+        // Build gamma = [u1-u2, u2-u3, u3-u4,..., un-1- un]
+        node.m_gamma =   node.m_uBack.head(NDOFuObj*node.m_nLambdas) -
+                           node.m_uBack.segment(NDOFuObj, NDOFuObj*node.m_nLambdas);
+
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "\t---> nd.m_gamma: " << node.m_gamma.transpose() << std::endl;);
+        #endif
+
+        // calculate L⁻¹*gamma = Lambda, where L⁻¹ is the matrix choosen by the multiplicity
+        #if CoutLevelSolverWhenContact>2
+            //LOG(m_pSolverLog, "\t---> nd.LInv: " << std::endl;);
+            //LOG(m_pSolverLog, node.getLInvMatrix() << std::endl;);
+        #endif
+
+        node.m_LambdaFront = node.getLInvMatrix() * -1*node.m_gamma;
+
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << node.m_LambdaFront.transpose() << std::endl;);
         #endif
 
         //Propagate billateral forces to velocities:
         // The sign is contained in the m_multiplicityWeights vector
         // u_G_End = uBack + M_G⁻¹ * W_M * Lambda_M
 
-
-        node.m_uFront.segement(NDOFuObj,NDOFuObj*node.m_nLambdas) = node.m_LambdaFront;
-        node.m_uFront.template segement(NDOFuObj,NDOFuObj*node.m_nLambdas) -= node.m_LambdaFront;
+        node.m_uFront.setZero();
+        node.m_uFront.segment(0,NDOFuObj*node.m_nLambdas) = node.m_LambdaFront;
+        node.m_uFront.template segment(NDOFuObj,NDOFuObj*node.m_nLambdas) -= node.m_LambdaFront;
         for(int i = 0; i<mult; i++){
-            node.m_uFront.segement(NDOFuObj*i,NDOFuObj) *= 1.0 / node.m_multiplicityWeights(i);
+            node.m_uFront.segment(NDOFuObj*i,NDOFuObj) *= 1.0 / node.m_multiplicityWeights(i);
         }
         node.m_uFront  +=  node.m_uBack;
 
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t---> nd.m_uFront: " << node.m_uFront.transpose() );
+            LOG(m_pSolverLog, "\t---> nd.m_uFront: " << node.m_uFront.transpose() <<std::endl; );
         #endif
 
         // Because we solve this billateral contact directly, we are converged for this node!
         // no change of the flag m_bConverged
+
+        //Copy local back
+        node.m_pBody->m_pSolverData->m_uBuffer.m_front = node.m_uFront.template head<NDOFuObj>();
     }
 
 private:
     Logging::Log * m_pSolverLog;
     const InclusionSolverSettings & m_Settings;
     bool & m_bConverged; ///< Access to global flag for cancelation criteria
-    const unsigned int & m_iterationsNeeded; ///< Access to global iteration counter
+    const unsigned int & m_globalIterationCounter; ///< Access to global iteration counter
 
 };
 
@@ -307,6 +329,10 @@ public:
     }
 
     void visitNode(NodeType & node){
+
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "---> SorProx, Init Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+        #endif
 
         typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
 
@@ -349,15 +375,15 @@ public:
         nodeData.m_R_i_inv_diag(1) = r_T;
         nodeData.m_R_i_inv_diag(2) = r_T;
 
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, " nodeData.m_b :"<< nodeData.m_b.transpose() <<std::endl
-                << " nodeData.m_G_ii :"<<std::endl<< nodeData.m_G_ii <<std::endl
-                << " nodeData.m_R_i_inv_diag: "<< nodeData.m_R_i_inv_diag.transpose() <<std::endl;);
-        #endif
-
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog,  " nodeData.m_mu: "<< nodeData.m_mu <<std::endl;);
-        #endif
+//        #if CoutLevelSolverWhenContact>2
+//            LOG(m_pSolverLog, " nodeData.m_b :"<< nodeData.m_b.transpose() <<std::endl
+//                << " nodeData.m_G_ii :"<<std::endl<< nodeData.m_G_ii <<std::endl
+//                << " nodeData.m_R_i_inv_diag: "<< nodeData.m_R_i_inv_diag.transpose() <<std::endl;);
+//        #endif
+//
+//        #if CoutLevelSolverWhenContact>2
+//            LOG(m_pSolverLog,  " nodeData.m_mu: "<< nodeData.m_mu <<std::endl;);
+//        #endif
 
 
     }
@@ -381,42 +407,15 @@ public:
     SorProxInitSplitNodeVisitor()
     {}
 
-    void setLog(Logging::Log * solverLog){
-        m_pSolverLog = solverLog;
-    }
-
     void visitNode(NodeType& node){
+
         auto mult = node.getMultiplicity();
+        node.m_multiplicityWeights.setConstant(mult,1.0/mult);
+
         node.m_uBack.setZero(NDOFuObj*mult);
         node.m_uFront.setZero(NDOFuObj*mult);
         node.m_LambdaFront.setZero( NDOFuObj * node.m_nLambdas);
-        node.m_gamma.setZero(node.m_nLambdas);
-    }
-
-private:
-    Logging::Log * m_pSolverLog;
-    const InclusionSolverSettings & m_Settings;
-    bool & m_bConverged; ///< Access to global flag for cancelation criteria
-    const unsigned int & m_iterationsNeeded; ///< Access to global iteration counter
-
-};
-
-/**
-@brief Visitor for class ContactGraph
-*/
-template<typename TContactGraph>
-class ComputeMultiplicitySplitNodeVisitor{
-public:
-
-    typedef TContactGraph ContactGraphType;
-
-    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
-
-    ComputeMultiplicitySplitNodeVisitor(){};
-
-    inline void visitNode(NodeType& node){
-        auto mult = node.getMultiplicity();
-        node.m_multiplicityWeights.setConstant(mult,1.0/mult);
+        node.m_gamma.setZero(node.m_nLambdas*NDOFuObj);
     }
 
 };

@@ -59,7 +59,7 @@ public:
     std::string getIterationStats();
     PREC m_G_conditionNumber;
     PREC m_G_notDiagDominant;
-    unsigned int m_iterationsNeeded;
+    unsigned int m_globalIterationCounter;
     bool m_bConverged;
     unsigned int m_isFinite;
     unsigned int m_nContacts;
@@ -161,7 +161,7 @@ InclusionSolverCO::InclusionSolverCO(boost::shared_ptr< CollisionSolverType >  p
     m_nContacts = 0;
     m_nLambdas = 0;
 
-    m_iterationsNeeded =0;
+    m_globalIterationCounter =0;
     m_bConverged = false;
     m_G_conditionNumber = 0;
     m_G_notDiagDominant = 0;
@@ -218,7 +218,7 @@ void InclusionSolverCO::resetForNextIter() {
     m_nContacts = 0;
     m_nLambdas = 0;
 
-    m_iterationsNeeded =0;
+    m_globalIterationCounter =0;
     m_bConverged = false;
     m_G_conditionNumber = 0;
     m_G_notDiagDominant = 0;
@@ -260,7 +260,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
     typename ContactGraphType::NodeType * currentContactNode;
     m_nContacts = (unsigned int)nodes.size();
 
-    m_iterationsNeeded = 0;
+    m_globalIterationCounter = 0;
     m_bConverged = false;
     m_isFinite = -1;
     m_bUsedGPU = false;
@@ -460,7 +460,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
 #endif
 
 #if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog,  " % Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
+        LOG(m_pSolverLog,  " % Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
 #endif
 
         // Calculate u_E for each body in the state...
@@ -526,7 +526,7 @@ void InclusionSolverCO::doJorProx() {
 #endif
         m_jorGPUVariant.setSettings(m_Settings.m_MaxIter,m_Settings.m_AbsTol,m_Settings.m_RelTol);
         gpuSuccess = m_jorGPUVariant.runGPUPlain(P_front,m_T,P_back,m_d,m_mu);
-        m_iterationsNeeded = m_jorGPUVariant.m_nIterGPU;
+        m_globalIterationCounter = m_jorGPUVariant.m_nIterGPU;
         m_proxIterationTime = m_jorGPUVariant.m_gpuIterationTime*1e-3;
         m_bUsedGPU = true;
     }
@@ -537,11 +537,11 @@ void InclusionSolverCO::doJorProx() {
 #endif
         m_jorGPUVariant.setSettings(m_Settings.m_MaxIter,m_Settings.m_AbsTol,m_Settings.m_RelTol);
         m_jorGPUVariant.runCPUEquivalentPlain(P_front,m_T,P_back,m_d,m_mu);
-        m_iterationsNeeded = m_jorGPUVariant.m_nIterCPU;
+        m_globalIterationCounter = m_jorGPUVariant.m_nIterCPU;
         m_proxIterationTime = m_jorGPUVariant.m_cpuIterationTime*1e-3;
         m_bUsedGPU = false;
     }
-    m_bConverged = (m_iterationsNeeded < m_Settings.m_MaxIter)? true : false;
+    m_bConverged = (m_globalIterationCounter < m_Settings.m_MaxIter)? true : false;
 
 #else
 
@@ -564,12 +564,12 @@ void InclusionSolverCO::doJorProx() {
         LOG(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
-        m_iterationsNeeded++;
+        m_globalIterationCounter++;
 
-        if (m_bConverged == true || m_iterationsNeeded >= m_Settings.m_MaxIter) {
+        if (m_bConverged == true || m_globalIterationCounter >= m_Settings.m_MaxIter) {
 
 #if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog,  " converged = "<<m_bConverged<< "\t"<< "iterations:" <<m_iterationsNeeded <<"/"<<  m_Settings.m_MaxIter<< std::endl;);
+            LOG(m_pSolverLog,  " converged = "<<m_bConverged<< "\t"<< "iterations:" <<m_globalIterationCounter <<"/"<<  m_Settings.m_MaxIter<< std::endl;);
 #endif
 
             break;
@@ -600,7 +600,7 @@ void InclusionSolverCO::doSorProx() {
         m_sorGPUVariant.setSettings(m_Settings.m_MaxIter,m_Settings.m_AbsTol,m_Settings.m_RelTol);
         P_back.setZero();
         gpuSuccess = m_sorGPUVariant.runGPUPlain(P_front,m_T,P_back,m_d,m_mu);
-        m_iterationsNeeded = m_sorGPUVariant.m_nIterGPU;
+        m_globalIterationCounter = m_sorGPUVariant.m_nIterGPU;
         m_proxIterationTime = m_sorGPUVariant.m_gpuIterationTime*1e-3;
         m_bUsedGPU = true;
     }
@@ -611,11 +611,11 @@ void InclusionSolverCO::doSorProx() {
 #endif
         m_sorGPUVariant.setSettings(m_Settings.m_MaxIter,m_Settings.m_AbsTol,m_Settings.m_RelTol);
         m_sorGPUVariant.runCPUEquivalentPlain(P_front,m_T,P_back,m_d,m_mu);
-        m_iterationsNeeded = m_sorGPUVariant.m_nIterCPU;
+        m_globalIterationCounter = m_sorGPUVariant.m_nIterCPU;
         m_proxIterationTime = m_sorGPUVariant.m_cpuIterationTime*1e-3;
         m_bUsedGPU = false;
     }
-    m_bConverged = (m_iterationsNeeded < m_Settings.m_MaxIter)? true : false;
+    m_bConverged = (m_globalIterationCounter < m_Settings.m_MaxIter)? true : false;
 #else
 
 #if CoutLevelSolverWhenContact>0
@@ -651,9 +651,9 @@ void InclusionSolverCO::doSorProx() {
         LOG(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
-        m_iterationsNeeded++;
+        m_globalIterationCounter++;
 
-        if (counterConverged == m_nContacts || m_iterationsNeeded >= m_Settings.m_MaxIter) {
+        if (counterConverged == m_nContacts || m_globalIterationCounter >= m_Settings.m_MaxIter) {
             m_bConverged = true;
             // P_front has newest values.
             break;
@@ -701,7 +701,7 @@ std::string InclusionSolverCO::getIterationStats() {
 
     s   << m_bUsedGPU<<"\t"
         << m_nContacts<<"\t"
-        << m_iterationsNeeded<<"\t"
+        << m_globalIterationCounter<<"\t"
         << m_bConverged<<"\t"
         << m_isFinite<<"\t"
         << m_timeProx<<"\t"

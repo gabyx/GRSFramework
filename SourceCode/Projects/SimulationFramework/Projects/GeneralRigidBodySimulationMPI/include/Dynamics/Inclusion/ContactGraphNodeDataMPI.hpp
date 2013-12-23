@@ -2,10 +2,13 @@
 #define ContactGraphNodeDataMPI_hpp
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 #include "TypeDefs.hpp"
 #include "AssertionDebug.hpp"
+
+
+#include "RigidBodyId.hpp"
 
 #include "ContactGraphNodeData.hpp"
 
@@ -24,7 +27,7 @@ public:
 
     bool addRank(const RankIdType & rank) {
 
-        auto pairRes = m_partRanks.insert( std::make_pair(rank,m_partRanks.size()) );
+        auto pairRes = m_partRanks.insert( std::make_pair(rank,  Flags(m_partRanks.size()) ) );
 
         m_nLambdas +=1; //Increase lambda by 1 (one more constraint)
 
@@ -35,19 +38,39 @@ public:
     inline unsigned int getMultiplicity() {
         return m_partRanks.size() + 1;
     }
-    inline PREC getMultiplicityWeight(const RankIdType &rank){
+    inline PREC getMultiplicityWeight(const RankIdType rank){
         auto it = m_partRanks.find(rank);
         ASSERTMSG(it!=m_partRanks.end(), "Requested a weight for a non participating rank "<< rank << std::endl)
-        return m_multiplicityWeights(it->second+1); // First weight belongs to local owner
+        return m_multiplicityWeights(it->second.m_splitBodyIdx+1); // First weight belongs to local owner
     }
-    inline void getMultiplicityAndWeight(const RankIdType &rank, unsigned int & mult, PREC & multWeight){
+    inline void getMultiplicityAndWeight(const RankIdType rank, unsigned int & mult, PREC & multWeight){
         mult = getMultiplicity();
         auto it = m_partRanks.find(rank);
         ASSERTMSG(it!=m_partRanks.end(), "Requested a weight for a non participating rank "<< rank << std::endl);
-        multWeight = m_multiplicityWeights(it->second+1); // First weight belongs to local owner
+        multWeight = m_multiplicityWeights(it->second.m_splitBodyIdx+1); // First weight belongs to local owner
     }
 
-    std::map< RankIdType,unsigned int > m_partRanks; ///< Participating ranks to insertion number, defines the multiplicity
+    inline void updateVelocity(const RankIdType rank, const VectorUObj & u){
+        auto it = m_partRanks.find(rank);
+        ASSERTMSG(it!=m_partRanks.end(), "Rank: " << rank <<
+                  " is not contained in the SplitBodyNode for body id: " << RigidBodyId::getBodyIdString(m_pBody));
+        it->second.m_bGotUpdate = true;
+        m_uBack.segment<NDOFuObj>(NDOFuObj * (it->second.m_splitBodyIdx+1)) = u;
+    }
+
+    /** SplitBodyNumber is the internalNumber which is used in all comments in this class*/
+    struct Flags{
+        Flags(unsigned int splitBodyIdx): m_splitBodyIdx(splitBodyIdx), m_bGotUpdate(false){};
+        unsigned int m_splitBodyIdx;
+        bool m_bGotUpdate;
+    };
+    std::unordered_map< RankIdType, Flags > m_partRanks; ///< Participating ranks Flags, size defines the multiplicity
+
+    inline void resetFlags(){
+        for(auto it = m_partRanks.begin(); it != m_partRanks.end(); it++){
+            it->second.m_bGotUpdate = false;
+        }
+    }
 
     /** Contains the weight factor for the partion of unity: [alpha_1, alpha_2, alpha_3,... , alpha_multiplicity]
     *   alpha_i = 1 / multiplicity so far, needs to be initialized befor the global prox loop */
@@ -61,7 +84,7 @@ public:
 
     /** These values get set from all remotes*/
     VectorDyn m_uBack;  ///                           Local Velocity-------*
-    VectorDyn m_uFront; ///< all velocities of all split bodies m_u_G = [  u1 , u2,u3,u4,u5...], correspond to rank in vector
+    VectorDyn m_uFront; ///< all velocities of all split bodies m_u_G = [  u_1 , u_2,u_3,u_4,u_5...], correspond to rank in vector
 
     //VectorDyn m_LambdaBack;  ///< Bilateral Lambda (Lambda_M_tilde = M⁻¹*Lambda_M
     VectorDyn m_LambdaFront; ///< Bilateral Lambda (Lambda_M_tilde = M⁻¹*Lambda_M
@@ -72,7 +95,7 @@ public:
     inline MatrixSparse & getLInvMatrix(){
         auto mult = getMultiplicity();
         ASSERTMSG(mult>=2 && mult<=8, "Requested LMatrix for multiplicity: " << mult << " which is not implemented!");
-        return m_LInvMatrices.LInv[mult];
+        return m_LInvMatrices.LInv[mult-2];
     }
 
 

@@ -576,7 +576,7 @@ public:
     SorProxStepNodeVisitor(const InclusionSolverSettings &settings,
                            bool & globalConverged, const unsigned int & globalIterationNeeded):
             m_Settings(settings),m_bConverged(globalConverged),
-            m_iterationsNeeded(globalIterationNeeded)
+            m_globalIterationCounter(globalIterationNeeded)
     {}
 
     void setLog(Logging::Log * solverLog){
@@ -638,7 +638,7 @@ public:
 
 
                 if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
-                    if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
                         if(!nodeData.m_bConverged ) {
                             //converged stays false;
@@ -650,7 +650,7 @@ public:
                         m_bConverged=false;
                     }
                 }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
-                    if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache1,
                                                                           nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
                                                                           nodeData.m_LambdaBack,
@@ -679,7 +679,7 @@ public:
                 #endif
 
                 if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
-                    if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache2,
                                                                   nodeData.m_u2BufferPtr->m_front,
                                                                   m_Settings.m_AbsTol,
@@ -694,7 +694,7 @@ public:
                     }
 
                 }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
-                    if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
                                                                           nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
                                                                           nodeData.m_LambdaBack,
@@ -714,7 +714,7 @@ public:
             }
 
             if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InLambda) {
-                if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+                if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                     nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol);
                     if(!nodeData.m_bConverged) {
                         //converged stays false;
@@ -740,7 +740,7 @@ private:
     Logging::Log * m_pSolverLog;
     const InclusionSolverSettings & m_Settings;
     bool & m_bConverged; ///< Access to global flag for cancelation criteria
-    const unsigned int & m_iterationsNeeded; ///< Access to global iteration counter
+    const unsigned int & m_globalIterationCounter; ///< Access to global iteration counter
 
 };
 

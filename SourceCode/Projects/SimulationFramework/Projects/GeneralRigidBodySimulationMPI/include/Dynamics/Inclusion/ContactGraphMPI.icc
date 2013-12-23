@@ -172,6 +172,7 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
 
 template<typename Combo>
 std::pair<typename ContactGraph<Combo>::SplitBodyNodeDataType *, bool> ContactGraph<Combo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & rank) {
+
     auto pairRes = m_splittedNodes.insert(
                        SplitBodyNodeDataListType::value_type(body->m_id, (SplitBodyNodeDataType*) NULL )
                    );
@@ -181,13 +182,25 @@ std::pair<typename ContactGraph<Combo>::SplitBodyNodeDataType *, bool> ContactGr
         pairRes.first->second = new SplitBodyNodeDataType(body);
     }
 
-    LOGASSERTMSG(pairRes.first->second,m_pSolverLog, "SplitBodyNode pointer of body " << body->m_id << " is zero!")
+    LOGASSERTMSG(pairRes.first->second,m_pSolverLog, "SplitBodyNode pointer of body " << RigidBodyId::getBodyIdString(body->m_id) << " is zero!")
     //Set rank
     bool added = pairRes.first->second->addRank(rank);
-    LOGASSERTMSG(added,m_pSolverLog, "Rank could not been added to SplitBodyNode with id: " << body->m_id)
+    LOGASSERTMSG(added,m_pSolverLog, "Rank could not been added to SplitBodyNode with id: " << RigidBodyId::getBodyIdString(body->m_id))
 
     return std::pair<SplitBodyNodeDataType *, bool>(pairRes.first->second, pairRes.second);
 }
+
+//template<typename Combo>
+//void ContactGraph<Combo>::updateSplitBodyNode(RigidBodyIdType id , RankIdType rank, const VectorUObj & u){
+//    auto it = m_splittedNodes.find(id);
+//    LOGASSERTMSG(it!=m_splittedNodes.end(),m_pSolverLog,
+//                 "Did not find SplitBodyNode for body id: " << RigidBodyId::getBodyIdString(id));
+//
+//    it->second->updateVelocity(rank,u);
+//
+//}
+
+
 template<typename Combo>
 void ContactGraph<Combo>::computeParams(NodeDataType & nodeData) {
     if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {

@@ -56,7 +56,7 @@ public:
   std::string getIterationStats();
   PREC m_G_conditionNumber;
   PREC m_G_notDiagDominant;
-  unsigned int m_iterationsNeeded;
+  unsigned int m_globalIterationCounter;
   bool m_bConverged;
   unsigned int m_nContacts;
 
@@ -174,7 +174,7 @@ m_Bodies(pCollisionSolver->m_Bodies)
   m_pCollisionSolver = pCollisionSolver;
   m_nContacts = 0;
 
-  m_iterationsNeeded =0;
+  m_globalIterationCounter =0;
   m_bConverged = false;
   m_G_conditionNumber = 0;
   m_G_notDiagDominant = 0;
@@ -214,7 +214,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::resetForNextIter()
   m_h.setZero();
   m_nContacts = 0;
 
-  m_iterationsNeeded =0;
+  m_globalIterationCounter =0;
   m_bConverged = false;
   m_G_conditionNumber = 0;
   m_G_notDiagDominant = 0;
@@ -271,7 +271,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
   // Iterate over Collision set and assemble the matrices...
   std::vector<CollisionData<RigidBodyType> > & collSet = m_pCollisionSolver->m_collisionSet;
   m_nContacts = (unsigned int)collSet.size();
-  m_iterationsNeeded = 0;
+  m_globalIterationCounter = 0;
   m_bConverged = false;
 
   if(m_nContacts > 0){
@@ -510,7 +510,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 #endif
 
 #if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, "% Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
+    LOG(m_pSolverLog, "% Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
 #endif
 
     // Calculate u_E for each body in the state...
@@ -559,7 +559,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::doJorProx(){
    setupRMatrix(m_Settings.m_alphaJORProx);
 
    // Prox- Iteration
-   while (m_iterationsNeeded < m_Settings.m_MaxIter)
+   while (m_globalIterationCounter < m_Settings.m_MaxIter)
    {
       P_N_front.noalias() = P_N_back - m_R_N.asDiagonal() * (m_G_NN * P_N_back + m_G_NT * P_T_back + m_c_N);
       Prox::ProxFunction<ConvexSets::RPlus>::doProxMulti(P_N_front);
@@ -576,7 +576,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::doJorProx(){
                         << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;)
    #endif
 
-      m_iterationsNeeded++;
+      m_globalIterationCounter++;
 
       if (m_bConverged == true)
       {
@@ -594,7 +594,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::doSorProx(){
    setupRMatrix(m_Settings.m_alphaSORProx);
 
    // Prox- Iteration
-   while (m_iterationsNeeded < m_Settings.m_MaxIter)
+   while (m_globalIterationCounter < m_Settings.m_MaxIter)
    {
 
       // Copy all values
@@ -629,7 +629,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::doSorProx(){
                         << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
-      m_iterationsNeeded++;
+      m_globalIterationCounter++;
 
       if (m_bConverged == true)
       {
@@ -672,7 +672,7 @@ std::string InclusionSolverNT<TInclusionSolverConfig>::getIterationStats() {
 
     s   << -1<<"\t"// NO GPU
         << m_nContacts<<"\t"
-        << m_iterationsNeeded<<"\t"
+        << m_globalIterationCounter<<"\t"
         << m_bConverged<<"\t"
         << -1<<"\t" // No is Finite
         << -1<<"\t" // No time prox

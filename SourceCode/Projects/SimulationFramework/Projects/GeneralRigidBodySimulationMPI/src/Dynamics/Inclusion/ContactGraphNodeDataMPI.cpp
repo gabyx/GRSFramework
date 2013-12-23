@@ -10,6 +10,10 @@
 #include <ostream>
 #include <sstream>
 
+
+#include RigidBody_INCLUDE_FILE
+
+
 namespace LMatrixGenerator{
 
     DEFINE_LAYOUT_CONFIG_TYPES

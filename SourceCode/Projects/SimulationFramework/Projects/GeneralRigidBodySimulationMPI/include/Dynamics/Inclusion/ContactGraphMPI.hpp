@@ -89,6 +89,8 @@ public:
 		}
 	}
 
+	//void updateSplitBodyNode(RigidBodyIdType id , RankIdType rank, const VectorUObj & u);
+
 
 
     std::unordered_map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;

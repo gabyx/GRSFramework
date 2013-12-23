@@ -34,10 +34,12 @@ class MPIMessageTag {
     public:
         enum class Type: unsigned int {
             GENERICMESSAGE = 1 << 0,
-            STDSTRING = 1 << 1,
-            BODY_MESSAGE = 1 << 2,
+            STDSTRING =      1 << 1,
+            BODY_MESSAGE =   1 << 2,
             EXTERNALCONTACTS_MESSAGE = 1 << 3,
-            SPLITBODYFACTOR_MESSAGE = 1 << 4
+            SPLITBODYFACTOR_MESSAGE  = 1 << 4,
+            SPLITBODYUPDATE_MESSAGE  = 1 << 5,
+            SPLITBODYSOLUTION_MESSAGE = 1<< 6
         };
 
         MPIMessageTag( Type t): m_t(t){};

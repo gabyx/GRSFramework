@@ -61,7 +61,7 @@ public:
 
 
     std::string getIterationStats();
-    unsigned int m_iterationsNeeded;
+    unsigned int m_globalIterationCounter;
     bool m_bConverged;
     unsigned int m_isFinite;
     unsigned int m_nContacts;
@@ -123,8 +123,10 @@ protected:
     inline void doSorProx();
     inline void sorProxOverAllNodes();
     inline void finalizeSorProx();
+
     SorProxStepNodeVisitor<ContactGraphType> * m_pSorProxStepNodeVisitor;
     SorProxInitNodeVisitor<ContactGraphType> * m_pSorProxInitNodeVisitor;
+    SorProxStepSplitNodeVisitor<ContactGraphType> * m_pSorProxStepSplitNodeVisitor;
 
     // Log
     Logging::Log *m_pSolverLog, *m_pSimulationLog;

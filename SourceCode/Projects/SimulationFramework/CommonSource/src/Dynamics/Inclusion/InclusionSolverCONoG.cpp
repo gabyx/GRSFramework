@@ -26,12 +26,12 @@ InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverTyp
 
     m_nContacts = 0;
 
-    m_iterationsNeeded =0;
+    m_globalIterationCounter =0;
     m_bConverged = true;
     m_pDynSys = pDynSys;
 
     //Make a new Sor Prox Visitor (takes references from these class member)
-    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor(m_Settings,m_bConverged,m_iterationsNeeded);
+    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor(m_Settings,m_bConverged,m_globalIterationCounter);
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor();
 }
 
@@ -75,7 +75,7 @@ void InclusionSolverCONoG::reset() {
 void InclusionSolverCONoG::resetForNextIter() {
 
     m_nContacts = 0;
-    m_iterationsNeeded =0;
+    m_globalIterationCounter =0;
 
     m_bConverged = true;
 
@@ -95,7 +95,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
     m_nContacts = (unsigned int)nodes.size();
 
     // Standart values
-    m_iterationsNeeded = 0;
+    m_globalIterationCounter = 0;
     m_bConverged = false; // Set true later, if one node is not converged then 0! and we do one more loop
     m_isFinite = -1;
     m_bUsedGPU = false;
@@ -169,7 +169,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
         #endif
 
 #if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog,  "---> Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
+        LOG(m_pSolverLog,  "---> Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
 #endif
     }
 
@@ -223,7 +223,7 @@ void InclusionSolverCONoG::doSorProx() {
 
         m_bConverged = true;
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog,"---> Next iteration: "<< m_iterationsNeeded << std::endl);
+            LOG(m_pSolverLog,"---> Next iteration: "<< m_globalIterationCounter << std::endl);
         #endif
         sorProxOverAllNodes(); // Do one Sor Prox Iteration
 
@@ -236,11 +236,11 @@ void InclusionSolverCONoG::doSorProx() {
         #endif
 
 
-        m_iterationsNeeded++;
+        m_globalIterationCounter++;
 
-        if ( (m_bConverged == true || m_iterationsNeeded >= m_Settings.m_MaxIter) && m_iterationsNeeded >= m_Settings.m_MinIter) {
+        if ( (m_bConverged == true || m_globalIterationCounter >= m_Settings.m_MaxIter) && m_globalIterationCounter >= m_Settings.m_MinIter) {
             #if CoutLevelSolverWhenContact>0
-                LOG(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_iterationsNeeded <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
+                LOG(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_globalIterationCounter <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
             #endif
             break;
         }
@@ -262,7 +262,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
         typename ContactGraphType::BodyToContactsListIteratorType it;
         //std::cout << "Bodies: " << m_ContactGraph.m_SimBodyToContactsList.size() << std::endl;
         for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
-            if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+            if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                 //std::cout << "before Criteria"<<std::endl;
                 //std::cout <<"new "<< it->first->m_pSolverData->m_uBuffer.m_front.transpose() << std::endl;
                 //std::cout <<"old "<< it->first->m_pSolverData->m_uBuffer.m_back.transpose() << std::endl;
@@ -285,7 +285,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
     }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyVelocity){
         typename ContactGraphType::BodyToContactsListIteratorType it;
         for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
-            if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+            if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
 
                 converged = Numerics::cancelCriteriaMatrixNorm( it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
                                                                 it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
@@ -316,7 +316,7 @@ std::string  InclusionSolverCONoG::getIterationStats() {
 
     s   << m_bUsedGPU<<"\t"
     << m_nContacts<<"\t"
-    << m_iterationsNeeded<<"\t"
+    << m_globalIterationCounter<<"\t"
     << m_bConverged<<"\t"
     << m_isFinite<<"\t"
     << m_timeProx<<"\t"
