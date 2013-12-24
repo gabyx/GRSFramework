@@ -73,6 +73,7 @@ void MultiBodySimFileMPI::writeBySharedPtr(double time, const typename DynamicsS
     for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
 
         oa << (*it)->m_id;
+        oa << (unsigned int)((*it)->m_pBodyInfo->m_ownerRank); // write owner rank
         serializeEigen(oa, (*it)->get_q());
         serializeEigen(oa, (*it)->get_u());
     }
@@ -123,6 +124,7 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
         for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
             ASSERTMSG((*it)->m_id != RigidBodyIdType(0x0)," ID zero! at time: " << time);
             oa << (*it)->m_id;
+            oa << (unsigned int)((*it)->m_pBodyInfo->m_ownerRank); // write owner rank
             serializeEigen(oa, (*it)->get_q());
             serializeEigen(oa, (*it)->get_u());
         }
@@ -195,6 +197,7 @@ void MultiBodySimFileMPI::writeByOffsets2(double time, const typename DynamicsSy
         for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
             ASSERTMSG((*it)->m_id != RigidBodyIdType(0x0)," ID zero! at time: " << time);
             oa << (*it)->m_id;
+            oa << (unsigned int)((*it)->m_pBodyInfo->m_ownerRank); // write owner rank
             serializeEigen(oa, (*it)->get_q());
             serializeEigen(oa, (*it)->get_u());
         }

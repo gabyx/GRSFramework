@@ -67,7 +67,6 @@ void CollisionSolver::solveCollision() {
     // All objects have been updated...
 
     //// Do simple collision detection (SimBodies to SimBodies)
-    typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyIti;
     CollisionData * pColData;
 
     if(m_SimBodies.size()){
@@ -85,9 +84,8 @@ void CollisionSolver::solveCollision() {
 
 
     // Do simple collision detection (SimBodies to Bodies)
-    typename DynamicsSystemType::RigidBodyNotAniContainer::iterator bodyItk;
-    for(bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
-        for(bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++) {
+    for(auto bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
+        for(auto bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++) {
 
                 //check for a collision and signal
                 m_Collider.checkCollision((*bodyIti), (*bodyItk));

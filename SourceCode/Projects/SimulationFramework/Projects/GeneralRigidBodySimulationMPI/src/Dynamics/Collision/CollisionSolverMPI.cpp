@@ -63,7 +63,7 @@ void CollisionSolver::solveCollision() {
 
     // All objects have been updated...
 
-    //// Do simple collision detection (SimBodies to SimBodies)
+    // Do simple collision detection (SimBodies to SimBodies)
     #if CoutLevelSolver>1
         LOG(m_pSolverLog, "\t---> SimBodies to SimBodies "<<std::endl;)
     #endif

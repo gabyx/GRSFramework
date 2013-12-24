@@ -79,7 +79,10 @@ private:
     const  std::streamoff m_nBytesPerQObj ;
     const  std::streamoff m_nBytesPerUObj ;
     const  std::streamoff m_nBytesPerBody; ///< id,q,u
+
     static const  std::streamoff m_headerLength = (3*sizeof(unsigned int) + SIM_FILE_MPI_SIGNATURE_LENGTH*sizeof(char));
+                                                ///< nBodies, NDOFq, NDOFu
+
 
     MultiBodySimFileMPI & operator =(const MultiBodySimFileMPI & file);
 

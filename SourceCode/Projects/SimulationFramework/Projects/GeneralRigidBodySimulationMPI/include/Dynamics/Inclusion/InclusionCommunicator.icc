@@ -59,8 +59,6 @@ void InclusionCommunicator<Combo>::communicateRemoteContacts() {
         m_pContactGraph->applyNodeVisitorSplitBody(v);
     }
 
-    // Send all multiplicity factors of all local splitBodyNodes
-    LOGIC(m_pSimulationLog,"\t---> Communicate Multiplicities"<< std::endl;)
     sendBodyMultiplicityMessageToNeighbours();
 
     // Recv all multiplicity factor of all remote bodies
