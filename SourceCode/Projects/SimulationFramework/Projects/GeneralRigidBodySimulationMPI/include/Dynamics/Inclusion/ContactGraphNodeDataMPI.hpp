@@ -77,9 +77,6 @@ public:
     VectorDyn m_multiplicityWeights;
 
 
-
-
-
     RigidBodyType * m_pBody;
 
     /** These values get set from all remotes*/

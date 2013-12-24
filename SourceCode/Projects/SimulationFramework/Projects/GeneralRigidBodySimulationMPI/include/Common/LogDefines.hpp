@@ -76,8 +76,8 @@
 /* @{ */
 #ifndef NDEBUG
   // DEBUG!
-  #define CoutLevelSolver 3            ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
-  #define CoutLevelSolverWhenContact 3 ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
+  #define CoutLevelSolver 2            ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
+  #define CoutLevelSolverWhenContact 1 ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
   #define LogToFileSolver 1            ///< {0,1} Determines if logstream is saved into a file.
   #define LogToConsoleSolver 1         ///< {0,1} Determines if logstream is outputted into console.
 #else
@@ -107,41 +107,6 @@
 /* @} */
 
 
-/** @name Playback Manager
-* @brief  Log file of the Playback Manager.
-*/
-/* @{ */
-#define LogToFilePlayback 1      ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsolePlayback 1   ///< {0,1} Set if log is outputted to console or not.
-/* @} */
-
-/** @name Loader Thread
-* @brief Log file of the Loader Thread which is started during playback.
-*/
-/* @{ */
-#define LogToFileLoader 1        ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsoleLoader 1     ///< {0,1} Set if log is outputted to console or not.
-/* @} */
-
-
-/** @name App Log File
-* @brief Log File for the Application.
-*/
-/* @{ */
-#define LogToFileApp 1     ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsoleApp 1  ///< {0,1} Set if log is outputted to console or not.
-/* @} */
-
-
-/** @name Ogre Log File
-* @brief Ogre File for the Application.
-*/
-/* @{ */
-#define LogToFileOgre 1     ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsoleOgre 1  ///< {0,1} Set if log is outputted to console or not.
-/* @} */
-
-
 
 /** @name  Deconstructor and Constructor Macros
 * @brief Deconstructor and Constructor Macros to Debug correct dealloction of objects.
@@ -157,19 +122,6 @@
   #define CONSTRUCTOR_MESSAGE
 #endif
 /* @} */
-
-
-
-/** @name State Ring Pool */
-/* @{ */
-#define LogToFileStateRingPool 0 ///< {0,1} Set if log is outputted to file or not.
-/* @} */
-
-/** @name State Pool */
-/* @{ */
-#define LogToFileStatePool 0     ///< {0,1} Set if log is outputted to file or not.
-/* @} */
-
 
 /* @} */
 #endif

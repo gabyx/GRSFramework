@@ -316,6 +316,10 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     // Communicate all remote velocities to neighbour :-)
     m_pInclusionComm->communicateSplitBodyUpdate(m_globalIterationCounter);
+
+    // Safety test if all updates have been received!
+    SplitNodeCheckUpdateVisitor<ContactGraphType> v;
+    m_pContactGraph->applyNodeVisitorSplitBody(v);
     // Move over all split body nodes and solve the billateral constraint directly
     m_pContactGraph->applyNodeVisitorSplitBody(*m_pSorProxStepSplitNodeVisitor);
     // Communicate all local solved split body velocities

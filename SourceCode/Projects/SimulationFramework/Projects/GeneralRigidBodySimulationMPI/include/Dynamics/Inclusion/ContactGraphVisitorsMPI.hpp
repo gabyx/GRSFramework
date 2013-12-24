@@ -421,6 +421,34 @@ public:
 };
 
 
+/**
+@brief Visitor for class ContactGraph
+*/
+template<typename TContactGraph>
+class SplitNodeCheckUpdateVisitor{
+public:
+    DEFINE_LAYOUT_CONFIG_TYPES
+    typedef TContactGraph ContactGraphType;
+
+    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+
+    SplitNodeCheckUpdateVisitor()
+    {}
+
+    void visitNode(NodeType& node){
+        for( auto it = node.m_partRanks.begin(); it != node.m_partRanks.end(); it++){
+            if(it->second.m_bGotUpdate == false){
+                ERRORMSG("Rank: " << it->first << " in SplitNode for body id: "
+                         << RigidBodyId::getBodyIdString(node.m_pBody) << " has not got update!" );
+            }else{
+                it->second.m_bGotUpdate == false;
+            }
+        }
+    }
+
+};
+
+
 #include "RigidBodyFunctionsMPI.hpp"
 
 
