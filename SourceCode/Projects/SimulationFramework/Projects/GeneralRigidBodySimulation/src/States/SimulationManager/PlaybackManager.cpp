@@ -23,8 +23,8 @@
 
 PlaybackManager::PlaybackManager(boost::shared_ptr<Ogre::SceneManager> pSceneMgr):
     PlaybackManagerBase(),
-    m_nDofqObj(NDOFqObj),
-    m_nDofuObj(NDOFuObj),
+    m_nDofqBody(NDOFqBody),
+    m_nDofuBody(NDOFuBody),
     m_bSetupSuccessful(false) {
 
     m_pSimulationLog = NULL;

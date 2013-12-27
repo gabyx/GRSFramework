@@ -65,7 +65,7 @@ protected:
 
 
 StateRecorderProcess::StateRecorderProcess( unsigned int id,  unsigned int bufferSize):
-        m_binarySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj, m_bufferSize)
+        m_binarySimFile(LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody, m_bufferSize)
 {
 
     m_accessId = id;

@@ -129,7 +129,7 @@ bool StateRecorderBody::createSimFile(RigidBodyType * body, bool truncate){
             LOG(m_pSimulationLog, "---> StateRecorderBody:: SimFile : " << file.string() << "already exists!");
         }else{
             // Do truncate
-            MultiBodySimFile* pBodyFile = new MultiBodySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj);
+            MultiBodySimFile* pBodyFile = new MultiBodySimFile(LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody);
             res.first->second =  pBodyFile; // Set the file
 
                 if(!pBodyFile->openWrite(file,1,truncate)){

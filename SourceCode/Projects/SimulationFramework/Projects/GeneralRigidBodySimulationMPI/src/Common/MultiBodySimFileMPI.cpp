@@ -9,23 +9,22 @@
 
 const char MultiBodySimFileMPI::m_simFileSignature[SIM_FILE_MPI_SIGNATURE_LENGTH] = SIM_FILE_MPI_SIGNATURE;
 
+const std::streamoff MultiBodySimFileMPI::m_nAdditionalBytesPerBody= setAdditionalBytes();
 
 
 
-MultiBodySimFileMPI::MultiBodySimFileMPI(unsigned int nDOFqObj, unsigned int nDOFuObj)
-    : m_nBytesPerQObj(nDOFqObj*sizeof(double)),
-      m_nBytesPerUObj(nDOFuObj*sizeof(double)),
-      m_nBytesPerBody(m_nBytesPerQObj + m_nBytesPerUObj + 1*sizeof(typename RigidBodyType::RigidBodyIdType))
+MultiBodySimFileMPI::MultiBodySimFileMPI(unsigned int nDOFqBody, unsigned int nDOFuBody)
+    : m_nBytesPerQBody(nDOFqBody*sizeof(double)),
+      m_nBytesPerUBody(nDOFuBody*sizeof(double)),
+      m_nBytesPerBody(nDOFuBody*sizeof(double) + nDOFqBody*sizeof(double)  + sizeof(unsigned int) + m_nAdditionalBytesPerBody),
+      m_nDOFuBody(nDOFuBody),
+      m_nDOFqBody(nDOFqBody),
+      m_nStates(0),
+      m_nBytesPerState(0),
+      m_nBytesPerU(0),
+      m_nBytesPerQ(0),
+      m_nSimBodies(0),
 {
-    m_nDOFuObj = nDOFuObj;
-    m_nDOFqObj = nDOFqObj;
-
-    m_nStates = 0;
-
-    m_nBytesPerState =0;
-    m_nBytesPerU = 0;
-    m_nBytesPerQ = 0;
-    m_nSimBodies = 0;
 
     m_filePath = boost::filesystem::path();
     //Make datatype
@@ -38,13 +37,11 @@ MultiBodySimFileMPI::MultiBodySimFileMPI(unsigned int nDOFqObj, unsigned int nDO
     ASSERTMPIERROR(error, "Type size");
     ASSERTMSG(size == m_nBytesPerBody, "MPI type has not the same byte size");
 
-    m_writebuffer.reserve(4000*((LayoutConfigType::LayoutType::NDOFqObj + LayoutConfigType::LayoutType::NDOFuObj)*sizeof(double)
+    m_writebuffer.reserve(4000*((LayoutConfigType::LayoutType::NDOFqBody + LayoutConfigType::LayoutType::NDOFuBody)*sizeof(double)
                                         +1*sizeof(RigidBodyIdType)) + 1*sizeof(double) ); // t + 4000*(id,q,u)
 
 
 }
-
-
 
 
 MultiBodySimFileMPI::~MultiBodySimFileMPI(){
@@ -73,9 +70,9 @@ void MultiBodySimFileMPI::writeBySharedPtr(double time, const typename DynamicsS
     for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
 
         oa << (*it)->m_id;
-        oa << (unsigned int)((*it)->m_pBodyInfo->m_ownerRank); // write owner rank
         serializeEigen(oa, (*it)->get_q());
         serializeEigen(oa, (*it)->get_u());
+        AddBytes<m_additionalBytesType>::write(oa,*it);
     }
     //Necessary to make stream flush
     stream.flush();
@@ -104,6 +101,7 @@ void MultiBodySimFileMPI::writeBySharedPtr(double time, const typename DynamicsS
 }
 
 
+
 void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList)
 {
 
@@ -124,9 +122,9 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
         for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
             ASSERTMSG((*it)->m_id != RigidBodyIdType(0x0)," ID zero! at time: " << time);
             oa << (*it)->m_id;
-            oa << (unsigned int)((*it)->m_pBodyInfo->m_ownerRank); // write owner rank
             serializeEigen(oa, (*it)->get_q());
             serializeEigen(oa, (*it)->get_u());
+            AddBytes<m_additionalBytesType>::write(oa,*it);
         }
         //Necessary to make stream flush
         stream.flush();
@@ -197,9 +195,9 @@ void MultiBodySimFileMPI::writeByOffsets2(double time, const typename DynamicsSy
         for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
             ASSERTMSG((*it)->m_id != RigidBodyIdType(0x0)," ID zero! at time: " << time);
             oa << (*it)->m_id;
-            oa << (unsigned int)((*it)->m_pBodyInfo->m_ownerRank); // write owner rank
             serializeEigen(oa, (*it)->get_q());
             serializeEigen(oa, (*it)->get_u());
+            AddBytes<m_additionalBytesType>::write(oa,*it);
         }
         //Necessary to make stream flush
         stream.flush();
@@ -257,15 +255,23 @@ void  MultiBodySimFileMPI::writeHeader() {
         memcpy((void*)p,&m_simFileSignature,sizeof(char)*SIM_FILE_MPI_SIGNATURE_LENGTH);
         p += sizeof(char)*SIM_FILE_MPI_SIGNATURE_LENGTH;
 
+        unsigned short v = SIM_FILE_MPI_VERSION;
+        memcpy((void*)p,&v,sizeof(unsigned short));
+        p += sizeof(unsigned short);
+
         unsigned int t = m_nSimBodies;
         memcpy((void*)p,&t,sizeof(unsigned int));
         p += sizeof(unsigned int);
 
-        t = m_nDOFqObj;
+        t = m_nDOFqBody;
         memcpy((void*)p,&t,sizeof(unsigned int));
         p += sizeof(unsigned int);
 
-        t = m_nDOFuObj;
+        t = m_nDOFuBody;
+        memcpy((void*)p,&t,sizeof(unsigned int));
+        p += sizeof(unsigned int);
+
+        t = m_additionalBytesType;
         memcpy((void*)p,&t,sizeof(unsigned int));
 
         MPI_Status status;

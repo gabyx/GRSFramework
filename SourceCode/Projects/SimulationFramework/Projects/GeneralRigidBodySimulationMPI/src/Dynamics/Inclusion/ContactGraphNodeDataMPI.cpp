@@ -35,7 +35,7 @@ namespace LMatrixGenerator{
 #define BOOST_PP_LOCAL_MACRO(n) \
     v.clear(); \
     GENERATE_FUNCTION_NAME(n) \
-    LInv.push_back( MatrixSparse( (n-1)*NDOFuObj , (n-1)*NDOFuObj  ) ); \
+    LInv.push_back( MatrixSparse( (n-1)*NDOFuBody , (n-1)*NDOFuBody  ) ); \
     LInv.back().setFromTriplets(v.begin(),v.end()); \
 
 //Constructor for the LMatrices

@@ -241,15 +241,15 @@ public:
 
 
         // Copy local velocity
-        node.m_uBack.template head<NDOFuObj>() = node.m_pBody->m_pSolverData->m_uBuffer.m_front;
+        node.m_uBack.template head<NDOFuBody>() = node.m_pBody->m_pSolverData->m_uBuffer.m_front;
 
         #if CoutLevelSolverWhenContact>2
             LOG(m_pSolverLog,"\t---> uBack: " << node.m_uBack.transpose() <<std::endl;);
         #endif
 
         // Build gamma = [u1-u2, u2-u3, u3-u4,..., un-1- un]
-        node.m_gamma =   node.m_uBack.head(NDOFuObj*node.m_nLambdas) -
-                           node.m_uBack.segment(NDOFuObj, NDOFuObj*node.m_nLambdas);
+        node.m_gamma =   node.m_uBack.head(NDOFuBody*node.m_nLambdas) -
+                           node.m_uBack.segment(NDOFuBody, NDOFuBody*node.m_nLambdas);
 
         #if CoutLevelSolverWhenContact>2
             LOG(m_pSolverLog, "\t---> nd.m_gamma: " << node.m_gamma.transpose() << std::endl;);
@@ -272,10 +272,10 @@ public:
         // u_G_End = uBack + M_G⁻¹ * W_M * Lambda_M
 
         node.m_uFront.setZero();
-        node.m_uFront.segment(0,NDOFuObj*node.m_nLambdas) = node.m_LambdaFront;
-        node.m_uFront.template segment(NDOFuObj,NDOFuObj*node.m_nLambdas) -= node.m_LambdaFront;
+        node.m_uFront.segment(0,NDOFuBody*node.m_nLambdas) = node.m_LambdaFront;
+        node.m_uFront.template segment(NDOFuBody,NDOFuBody*node.m_nLambdas) -= node.m_LambdaFront;
         for(int i = 0; i<mult; i++){
-            node.m_uFront.segment(NDOFuObj*i,NDOFuObj) *= 1.0 / node.m_multiplicityWeights(i);
+            node.m_uFront.segment(NDOFuBody*i,NDOFuBody) *= 1.0 / node.m_multiplicityWeights(i);
         }
         node.m_uFront  +=  node.m_uBack;
 
@@ -287,7 +287,7 @@ public:
         // no change of the flag m_bConverged
 
         //Copy local back
-        node.m_pBody->m_pSolverData->m_uBuffer.m_front = node.m_uFront.template head<NDOFuObj>();
+        node.m_pBody->m_pSolverData->m_uBuffer.m_front = node.m_uFront.template head<NDOFuBody>();
     }
 
 private:
@@ -412,10 +412,10 @@ public:
         auto mult = node.getMultiplicity();
         node.m_multiplicityWeights.setConstant(mult,1.0/mult);
 
-        node.m_uBack.setZero(NDOFuObj*mult);
-        node.m_uFront.setZero(NDOFuObj*mult);
-        node.m_LambdaFront.setZero( NDOFuObj * node.m_nLambdas);
-        node.m_gamma.setZero(node.m_nLambdas*NDOFuObj);
+        node.m_uBack.setZero(NDOFuBody*mult);
+        node.m_uFront.setZero(NDOFuBody*mult);
+        node.m_LambdaFront.setZero( NDOFuBody * node.m_nLambdas);
+        node.m_gamma.setZero(node.m_nLambdas*NDOFuBody);
     }
 
 };

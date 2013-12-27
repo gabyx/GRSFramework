@@ -144,8 +144,8 @@ public:
 //public:
 //    RigidBodyWrapperIterator(TIterator & it): m_bodyIt(it){};
 //
-//    typename TRigidBody::VectorQObj get_q();
-//    typename TRigidBody::VectorUObj get_u();
+//    typename TRigidBody::VectorQBody get_q();
+//    typename TRigidBody::VectorUBody get_u();
 //
 //    TIterator & m_bodyIt;
 //};

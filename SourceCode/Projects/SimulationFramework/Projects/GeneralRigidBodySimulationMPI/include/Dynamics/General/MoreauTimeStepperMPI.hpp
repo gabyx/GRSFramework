@@ -131,7 +131,7 @@ _________________________________________________________*/
 
 MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
                                      boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
-    m_ReferenceSimFile(NDOFqObj,NDOFuObj),
+    m_ReferenceSimFile(NDOFqBody,NDOFuBody),
     m_pSolverLog(NULL),
     m_pDynSys(pDynSys),
     m_pProcCommunicator(pProcCommunicator) {

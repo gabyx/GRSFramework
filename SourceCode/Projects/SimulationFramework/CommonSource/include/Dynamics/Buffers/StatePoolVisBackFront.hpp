@@ -53,16 +53,16 @@ public:
   void resetStatePool();
   /** @} */
 
-  VectorUObj	getuInit(const unsigned idxObject);
-  void						setuInit(const VectorUObj & u, const unsigned idxObject);
-  VectorQObj	getqInit(const unsigned idxObject);
-  void						setqInit(const VectorQObj & q, const unsigned idxObject);
+  VectorUBody	getuInit(const unsigned idxObject);
+  void						setuInit(const VectorUBody & u, const unsigned idxObject);
+  VectorQBody	getqInit(const unsigned idxObject);
+  void						setqInit(const VectorQBody & q, const unsigned idxObject);
 
 protected:
   std::ofstream m_logfile;
 
   const unsigned int m_nDofu, m_nDofq; // These are the global dimensions of q and u
-  const unsigned int m_nDofuObj, m_nDofqObj, m_nSimBodies; // These are the dimensions for one Obj
+  const unsigned int m_nDofuBody, m_nDofqBody, m_nSimBodies; // These are the dimensions for one Obj
 
   boost::mutex	m_mutexStateInit; ///< Mutex for the initial state.
   DynamicsState m_state_init; ///< The initial state for the system.

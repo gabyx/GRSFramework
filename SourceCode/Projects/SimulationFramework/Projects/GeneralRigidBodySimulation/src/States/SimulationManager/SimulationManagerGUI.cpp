@@ -126,7 +126,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
 
 
 bool SimulationManagerGUI::writeInitialState() {
-    MultiBodySimFile simFile(NDOFqObj,NDOFuObj);
+    MultiBodySimFile simFile(NDOFqBody,NDOFuBody);
     // Request new file Paths for all logs from FileManager
     // Get new folder path
     boost::filesystem::path file = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_INIT);
@@ -403,9 +403,9 @@ bool SimulationManagerGUI::initRecordThread() {
     m_pSimulationLog->logMessage("---> Init Timestepper Logs...");
     m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);
 
-    // Write first initial value
+    // Write first initial value out!
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
-        m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
+        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_SimBodies);
         m_pSimulationLog->logMessage("---> Wrote first initial value to file...");
     }
 

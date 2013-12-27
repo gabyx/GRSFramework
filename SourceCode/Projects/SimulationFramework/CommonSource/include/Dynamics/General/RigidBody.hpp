@@ -60,19 +60,19 @@ public:
 
     GeometryType m_geometry; ///< A boost::variant which takes different geometry shared pointers.
 
-    VectorUObj get_u(){
+    VectorUBody get_u(){
         return m_pSolverData->m_uBuffer.m_back;
     }
-    VectorQObj get_q(){
-        VectorQObj r; r.head<3>() = m_r_S; r.tail<4>() = m_q_KI; return r;
+    VectorQBody get_q(){
+        VectorQBody r; r.head<3>() = m_r_S; r.tail<4>() = m_q_KI; return r;
     }
 
     PREC m_mass; ///< The rigid body mass \f$m\f$ in \f$ \textrm{[kg]} \f$
     Vector3 m_K_Theta_S; ///< The rigid body inertia tensor in diagonal form, \f$ {_K}\mathbf{\Theta}_{S}\f$ in \f$ [\textrm{kg} \cdot \textrm{m}^2] \f$
 
-    VectorUObj m_MassMatrix_diag; ///< The mass matrix which is diagonal, \f$ \textrm{diag}(m,m,m, \textrm{diag}({_K}\mathbf{\Theta}_{S})) \f$.
-    VectorUObj m_MassMatrixInv_diag;
-    VectorUObj m_h_term, m_h_term_const;
+    VectorUBody m_MassMatrix_diag; ///< The mass matrix which is diagonal, \f$ \textrm{diag}(m,m,m, \textrm{diag}({_K}\mathbf{\Theta}_{S})) \f$.
+    VectorUBody m_MassMatrixInv_diag;
+    VectorUBody m_h_term, m_h_term_const;
 
     Matrix33 m_A_IK; ///< The transformation matrix \f$ \mathbf{A}_{IK} \f$ from K frame to the I frame which is updated at each timestep.
 

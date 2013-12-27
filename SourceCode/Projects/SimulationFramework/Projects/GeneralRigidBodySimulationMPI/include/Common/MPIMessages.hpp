@@ -1021,7 +1021,7 @@ public:
             unsigned int multiplicity;
             PREC multiplicityWeight;
             RigidBodyIdType id;
-            static VectorUObj h_term;
+            static VectorUBody h_term;
             for(unsigned int i = 0; i < size ; i++) {
                 ar & id;
                 ar & multiplicity;
@@ -1180,7 +1180,7 @@ public:
             LOGSZ(this->m_pSerializerLog, "---> # Local SplitBody Updates: " << size << std::endl;);
 
             RigidBodyIdType id;
-            VectorUObj u;
+            VectorUBody u;
             for(unsigned int i = 0; i < size ; i++) {
                 ar & id;
                 serializeEigen(ar,u);
@@ -1304,7 +1304,7 @@ public:
             LOGSZ(this->m_pSerializerLog, "---> # Remote SplitBodies Solutions: " << size << std::endl;);
 
             RigidBodyIdType id;
-            VectorUObj u;
+            VectorUBody u;
             for(unsigned int i = 0; i < size ; i++) {
                 ar & id;
                 serializeEigen(ar,u);

@@ -6,10 +6,10 @@ StatePoolVisBackFront::StatePoolVisBackFront(const unsigned int nSimBodies):
 StatePool(3),
 m_state_init(nSimBodies),
 m_nSimBodies(nSimBodies),
-m_nDofqObj(NDOFqObj),
-m_nDofuObj(NDOFuObj),
-m_nDofq(m_nSimBodies * m_nDofqObj),
-m_nDofu(m_nSimBodies * m_nDofuObj)
+m_nDofqBody(NDOFqBody),
+m_nDofuBody(NDOFuBody),
+m_nDofq(m_nSimBodies * m_nDofqBody),
+m_nDofu(m_nSimBodies * m_nDofuBody)
 {
 
   // Add the 3 state pools, if m_state_pointer is deleted, all elements inside are deleted because of shared_ptr
@@ -96,9 +96,9 @@ StatePoolVisBackFront::~StatePoolVisBackFront()
 
 // ==========================
 
-typename StatePoolVisBackFront::VectorQObj StatePoolVisBackFront::getqInit(const unsigned idxObject)
+typename StatePoolVisBackFront::VectorQBody StatePoolVisBackFront::getqInit(const unsigned idxObject)
 {
-  static typename LayoutConfigType::VectorQObj  q;
+  static typename LayoutConfigType::VectorQBody  q;
   m_mutexStateInit.lock();
   q = m_state_init.m_SimBodyStates[idxObject].m_q;
   m_mutexStateInit.unlock();
@@ -106,7 +106,7 @@ typename StatePoolVisBackFront::VectorQObj StatePoolVisBackFront::getqInit(const
 }
 
 
-void StatePoolVisBackFront::setqInit(const VectorQObj & q ,const unsigned idxObject)
+void StatePoolVisBackFront::setqInit(const VectorQBody & q ,const unsigned idxObject)
 {
   m_mutexStateInit.lock();
   m_state_init.m_SimBodyStates[idxObject].m_q = q;
@@ -116,9 +116,9 @@ void StatePoolVisBackFront::setqInit(const VectorQObj & q ,const unsigned idxObj
 
 
 
-typename StatePoolVisBackFront::VectorUObj StatePoolVisBackFront::getuInit(const unsigned idxObject)
+typename StatePoolVisBackFront::VectorUBody StatePoolVisBackFront::getuInit(const unsigned idxObject)
 {
-  typename LayoutConfigType::VectorUObj u;
+  typename LayoutConfigType::VectorUBody u;
   m_mutexStateInit.lock();
   u = m_state_init.m_SimBodyStates[idxObject].m_u;
   m_mutexStateInit.unlock();
@@ -126,7 +126,7 @@ typename StatePoolVisBackFront::VectorUObj StatePoolVisBackFront::getuInit(const
 }
 
 
-void StatePoolVisBackFront::setuInit(const VectorUObj & u, const unsigned idxObject)
+void StatePoolVisBackFront::setuInit(const VectorUBody & u, const unsigned idxObject)
 {
   m_mutexStateInit.lock();
   m_state_init.m_SimBodyStates[idxObject].m_u = u;

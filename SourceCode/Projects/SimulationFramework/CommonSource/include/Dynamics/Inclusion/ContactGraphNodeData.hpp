@@ -32,8 +32,8 @@ public:
 
     ContactGraphNodeData(CollisionData * collDataPtr): m_pCollData(collDataPtr) {}
 
-    MatrixUObjDyn m_W_body1;
-    MatrixUObjDyn m_W_body2;
+    MatrixUBodyDyn m_W_body1;
+    MatrixUBodyDyn m_W_body2;
     VectorDyn m_chi;
 
     VectorDyn  m_I_plus_eps;
@@ -74,8 +74,8 @@ public:
 
     }
 
-    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
-    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u2BufferPtr; ///< Only valid for Simulated Objects
+    FrontBackBuffer<VectorUBody,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
+    FrontBackBuffer<VectorUBody,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u2BufferPtr; ///< Only valid for Simulated Objects
 
 
     VectorDyn m_LambdaBack;

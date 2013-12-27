@@ -61,16 +61,16 @@ public:
   /** @} */
 
 
-  VectorUObj	getuInit(const unsigned idxObject);
-  void				setuInit(const VectorUObj & u, const unsigned idxObject);
-  VectorQObj	getqInit(const unsigned idxObject);
-  void				setqInit(const VectorQObj & q, const unsigned idxObject);
+  VectorUBody	getuInit(const unsigned idxObject);
+  void				setuInit(const VectorUBody & u, const unsigned idxObject);
+  VectorQBody	getqInit(const unsigned idxObject);
+  void				setqInit(const VectorQBody & q, const unsigned idxObject);
 
 
 protected:
 
   const unsigned int m_nDofu, m_nDofq; // These are the global dimensions of q and u
-  const unsigned int m_nDofuObj, m_nDofqObj, m_nSimBodies; // These are the dimensions for one Obj
+  const unsigned int m_nDofuBody, m_nDofqBody, m_nSimBodies; // These are the dimensions for one Obj
 
   boost::mutex	m_mutexStateInit; ///< Mutex for the initial state.
   DynamicsState m_state_init; ///< The initial state for the system.
@@ -86,10 +86,10 @@ StateRingPoolVisBackFront::StateRingPoolVisBackFront(const unsigned int nSimBodi
 StatePool(3),
 m_state_init(nSimBodies),
 m_nSimBodies(nSimBodies),
-m_nDofqObj(NDOFqObj),
-m_nDofuObj(NDOFuObj),
-m_nDofq(m_nSimBodies * m_nDofqObj),
-m_nDofu(m_nSimBodies * m_nDofuObj)
+m_nDofqBody(NDOFqBody),
+m_nDofuBody(NDOFuBody),
+m_nDofq(m_nSimBodies * m_nDofqBody),
+m_nDofu(m_nSimBodies * m_nDofuBody)
 {
 
   // Add the 3 state pools, if m_state_pointer is deleted, all elements inside are deleted because of shared_ptr
@@ -175,9 +175,9 @@ StateRingPoolVisBackFront::~StateRingPoolVisBackFront()
 
 // ==========================
 
-typename StateRingPoolVisBackFront::VectorQObj StateRingPoolVisBackFront::getqInit(const unsigned idxObject)
+typename StateRingPoolVisBackFront::VectorQBody StateRingPoolVisBackFront::getqInit(const unsigned idxObject)
 {
-  static typename StateRingPoolVisBackFront::VectorQObj  q;
+  static typename StateRingPoolVisBackFront::VectorQBody  q;
   m_mutexStateInit.lock();
   q = m_state_init.m_SimBodyStates[idxObject].m_q;
   m_mutexStateInit.unlock();
@@ -185,7 +185,7 @@ typename StateRingPoolVisBackFront::VectorQObj StateRingPoolVisBackFront::getqIn
 }
 
 
-void StateRingPoolVisBackFront::setqInit(const VectorQObj & q ,const unsigned idxObject)
+void StateRingPoolVisBackFront::setqInit(const VectorQBody & q ,const unsigned idxObject)
 {
   m_mutexStateInit.lock();
   m_state_init.m_SimBodyStates[idxObject].m_q = q;
@@ -195,9 +195,9 @@ void StateRingPoolVisBackFront::setqInit(const VectorQObj & q ,const unsigned id
 
 
 
-typename StateRingPoolVisBackFront::VectorUObj StateRingPoolVisBackFront::getuInit(const unsigned idxObject)
+typename StateRingPoolVisBackFront::VectorUBody StateRingPoolVisBackFront::getuInit(const unsigned idxObject)
 {
-  typename StateRingPoolVisBackFront::VectorUObj u;
+  typename StateRingPoolVisBackFront::VectorUBody u;
   m_mutexStateInit.lock();
   u = m_state_init.m_SimBodyStates[idxObject].m_u;
   m_mutexStateInit.unlock();
@@ -205,7 +205,7 @@ typename StateRingPoolVisBackFront::VectorUObj StateRingPoolVisBackFront::getuIn
 }
 
 
-void StateRingPoolVisBackFront::setuInit(const VectorUObj & u, const unsigned idxObject)
+void StateRingPoolVisBackFront::setuInit(const VectorUBody & u, const unsigned idxObject)
 {
   m_mutexStateInit.lock();
   m_state_init.m_SimBodyStates[idxObject].m_u = u;

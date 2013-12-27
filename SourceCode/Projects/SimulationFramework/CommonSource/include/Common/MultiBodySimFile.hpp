@@ -28,6 +28,8 @@
 */
 #define SIM_FILE_SIGNATURE {'M','B','S','F'}
 
+#define SIM_FILE_VERSION 1
+
 /**
 * @brief Defines the extentsion of the file.
 */
@@ -43,20 +45,20 @@
 * It is used to save all simulated data.
 * The layout of the document is as follows:
 * - The first #SIM_FILE_SIGNATURE_LENGTH bytes are for the signature of the file.
-* - 3 doubles: nSimBodies, nDOFqObj, nDofuObj.
+* - 3 doubles: nSimBodies, nDOFqBody, nDofuBody.
 * - DynamicsState:
 *     - double --> Time in [seconds]
 *       - all states for all nSimBodies
 *         - ...
-*         - nDOFqObj doubles --> generalized coordinates of all bodies.
-*         - nDOFuObj doubles --> generalized velocities of all bodies.
+*         - nDOFqBody doubles --> generalized coordinates of all bodies.
+*         - nDOFuBody doubles --> generalized velocities of all bodies.
 *         - ...
 */
 class MultiBodySimFile {
 public:
 
 
-    MultiBodySimFile(unsigned int nDOFqObj, unsigned int nDOFuObj,unsigned int bufferSize = 1<<14);
+    MultiBodySimFile(unsigned int nDOFqBody, unsigned int nDOFuBody,unsigned int bufferSize = 1<<14);
     ~MultiBodySimFile();
 
     /**
@@ -128,7 +130,7 @@ public:
     unsigned int getNStates(); ///< Gets the number of states in a read only .sim file.
 
     std::string getErrorString() {
-        m_errorString << " error: " << std::strerror(errno) <<std::endl;
+        m_errorString << " strerror: " << std::strerror(errno) <<std::endl;
         return m_errorString.str();
     }
 
@@ -175,17 +177,25 @@ private:
     /** @brief Determined from number of bodies! @{*/
     void setByteLengths(const unsigned int nSimBodies);
     std::streamoff m_nBytesPerState; ///< m_nSimBodies*(q,u) + time
-    std::streamoff m_nBytesPerQ, m_nBytesPerU;
-    unsigned long long int m_nSimBodies;
+    unsigned int m_nSimBodies;
     /** @}*/
 
     std::streampos m_beginOfStates;
 
-    unsigned int m_nDOFuObj, m_nDOFqObj;
-    const  std::streamoff m_nBytesPerQObj ;
-    const  std::streamoff m_nBytesPerUObj ;
+    unsigned int m_nDOFuBody, m_nDOFqBody;
+    const  std::streamoff m_nBytesPerQBody;
+    const  std::streamoff m_nBytesPerUBody;
 
-    static const  std::streamoff m_headerLength = (3*sizeof(unsigned int) + SIM_FILE_SIGNATURE_LENGTH*sizeof(char));
+    // Write addditional bytes, not yet implemented, but the type is written in the header
+    static const unsigned short m_additionalBytesType = 0;
+    static constexpr std::streamoff setAdditionalBytes(){
+        return 0;
+    }
+    static const  std::streamoff m_nAdditionalBytesPerBody;
+
+    static const  std::streamoff m_headerLength = (4*sizeof(unsigned int) + SIM_FILE_SIGNATURE_LENGTH*sizeof(char));
+
+    const  std::streamoff m_nBytesPerBody;
 
     bool m_bReadFullState;
 
@@ -228,12 +238,13 @@ void MultiBodySimFile::write(double time, const RigidBodyContainer & bodyList){
               <<"bodies into a file which was instanced to hold "<<m_nSimBodies);
     STATIC_ASSERT2((std::is_same<double, typename RigidBodyContainer::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
     for(auto it = bodyList.beginOrdered(); it != bodyList.endOrdered(); it++){
+        *this << (*it)->m_id;
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
     }
 }
 
-//
+
 MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
 
 
@@ -247,14 +258,11 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
         STATIC_ASSERT2((std::is_same<double, typename DynamicsState::PREC>::value),
                        "OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
 
-//        for(int k=0; k < m_nDOFqObj; k++) {
-//            *this << (double)(state->m_SimBodyStates[i].m_q(k));
-//        }
-//        m_file_stream << state->m_SimBodyStates[i].m_q; //ADL fails because Eigen has an overload already for fstream
-//        m_file_stream << state->m_SimBodyStates[i].m_u;
-
+        *this << state->m_SimBodyStates[i].m_id ;
         IOHelpers::writeBinary(m_file_stream, state->m_SimBodyStates[i].m_q );
         IOHelpers::writeBinary(m_file_stream, state->m_SimBodyStates[i].m_u );
+
+//        AddBytes::write<m_additionalBytesType>(m_file_stream);
     }
 
     m_nStates++;
@@ -275,15 +283,16 @@ MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState* state ) {
     for(unsigned int i=0 ; i< state->m_nSimBodies; i++) {
 
         //m_file_stream >> state->m_SimBodyStates[i].m_q; //ADL fails
+        *this >> state->m_SimBodyStates[i].m_id;
         IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[i].m_q );
         //std::cout<< state->m_SimBodyStates[i].m_q.transpose()  << std::endl;
         if(m_bReadFullState) {
-        //m_file_stream >> state->m_SimBodyStates[i].m_u;
-        IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[i].m_u );
+            //m_file_stream >> state->m_SimBodyStates[i].m_u;
+            IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[i].m_u );
             //std::cout<< state->m_SimBodyStates[i].m_u.transpose()  << std::endl;
         } else {
             //Dont read in velocities, its not needed!
-            m_file_stream.seekg(m_nBytesPerUObj,std::ios_base::cur);
+            m_file_stream.seekg(m_nBytesPerUBody,std::ios_base::cur);
         }
 
     }

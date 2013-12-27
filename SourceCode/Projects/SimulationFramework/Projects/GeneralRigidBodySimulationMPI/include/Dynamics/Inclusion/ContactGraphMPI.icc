@@ -191,7 +191,7 @@ std::pair<typename ContactGraph<Combo>::SplitBodyNodeDataType *, bool> ContactGr
 }
 
 //template<typename Combo>
-//void ContactGraph<Combo>::updateSplitBodyNode(RigidBodyIdType id , RankIdType rank, const VectorUObj & u){
+//void ContactGraph<Combo>::updateSplitBodyNode(RigidBodyIdType id , RankIdType rank, const VectorUBody & u){
 //    auto it = m_splittedNodes.find(id);
 //    LOGASSERTMSG(it!=m_splittedNodes.end(),m_pSolverLog,
 //                 "Did not find SplitBodyNode for body id: " << RigidBodyId::getBodyIdString(id));

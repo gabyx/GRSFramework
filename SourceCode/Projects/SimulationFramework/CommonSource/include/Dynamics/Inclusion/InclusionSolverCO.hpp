@@ -296,9 +296,9 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
         static const CollisionData * pCollData;
 
         static Eigen::Matrix<PREC,Eigen::Dynamic,Eigen::Dynamic> G_part;
-        static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic>* W_j_body;
-        static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic>* W_i_body;
-        static Eigen::Matrix<PREC,Eigen::Dynamic,NDOFuObj> W_i_bodyT_M_body;
+        static const Eigen::Matrix<PREC,NDOFuBody,Eigen::Dynamic>* W_j_body;
+        static const Eigen::Matrix<PREC,NDOFuBody,Eigen::Dynamic>* W_i_body;
+        static Eigen::Matrix<PREC,Eigen::Dynamic,NDOFuBody> W_i_bodyT_M_body;
 
         for ( unsigned int contactIdx = 0 ; contactIdx < m_nContacts ; contactIdx++) {
 
@@ -465,7 +465,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
 
         // Calculate u_E for each body in the state...
 
-        static Eigen::Matrix<PREC,NDOFuObj,1> delta_u_E;
+        static Eigen::Matrix<PREC,NDOFuBody,1> delta_u_E;
         static RigidBodyType * pBody;
         for(auto it= m_SimBodies.begin(); it != m_SimBodies.end(); it) {
             pBody = *it;

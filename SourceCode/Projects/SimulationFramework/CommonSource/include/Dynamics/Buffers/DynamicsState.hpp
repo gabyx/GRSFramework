@@ -7,6 +7,7 @@
 #include "AssertionDebug.hpp"
 
 #include "QuaternionHelpers.hpp"
+#include "RigidBodyId.hpp"
 
 //Prototype
 class DynamicsState;
@@ -42,9 +43,9 @@ public:
     }
 
     friend void Interpolate::lerp<PREC>( const RigidBodyState & A, const RigidBodyState & B, RigidBodyState & X,PREC factor);
-
-    VectorQObj	m_q; ///< These are the generalized coordinates \f$\mathbf{q}\f$ of a rigid body.
-    VectorUObj	m_u; ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
+    RigidBodyIdType m_id;
+    VectorQBody	m_q; ///< These are the generalized coordinates \f$\mathbf{q}\f$ of a rigid body.
+    VectorUBody	m_u; ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
 };
 
 

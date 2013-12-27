@@ -36,7 +36,7 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData {
     ///< Pointers into the right Front BackBuffer for the velocity which get iteratet in the InclusionSolverCONoG
     ///< The back buffer is the velocity before the prox iteration (over all nodes)
     ///< The front buffer is the velocity which is used to during ONE prox iteration
-    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> m_uBuffer;
+    FrontBackBuffer<VectorUBody,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> m_uBuffer;
 
     void swapBuffer(){
         m_uBuffer.m_front.swap(m_uBuffer.m_back);

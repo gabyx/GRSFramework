@@ -83,7 +83,7 @@ inline void applyBodiesToDynamicsState(const TRigidBodyList & bodies,
 
 template<typename TRigidBody, typename TRigidBodyState>
 inline void applyBodyToRigidBodyState( const TRigidBody  * body, TRigidBodyState & rigidBodyState ) {
-
+    rigidBodyState.m_id = body->m_id;
     rigidBodyState.m_q.template head<3>() = body->m_r_S;
     rigidBodyState.m_q.template tail<4>() = body->m_q_KI;
 

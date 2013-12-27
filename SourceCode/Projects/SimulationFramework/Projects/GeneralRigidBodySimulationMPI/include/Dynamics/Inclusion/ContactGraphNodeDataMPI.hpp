@@ -50,12 +50,12 @@ public:
         multWeight = m_multiplicityWeights(it->second.m_splitBodyIdx+1); // First weight belongs to local owner
     }
 
-    inline void updateVelocity(const RankIdType rank, const VectorUObj & u){
+    inline void updateVelocity(const RankIdType rank, const VectorUBody & u){
         auto it = m_partRanks.find(rank);
         ASSERTMSG(it!=m_partRanks.end(), "Rank: " << rank <<
                   " is not contained in the SplitBodyNode for body id: " << RigidBodyId::getBodyIdString(m_pBody));
         it->second.m_bGotUpdate = true;
-        m_uBack.segment<NDOFuObj>(NDOFuObj * (it->second.m_splitBodyIdx+1)) = u;
+        m_uBack.segment<NDOFuBody>(NDOFuBody * (it->second.m_splitBodyIdx+1)) = u;
     }
 
     /** SplitBodyNumber is the internalNumber which is used in all comments in this class*/

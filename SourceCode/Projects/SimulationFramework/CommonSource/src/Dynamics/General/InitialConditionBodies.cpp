@@ -81,8 +81,8 @@ void InitialConditionBodies::setupPositionBodiesGrid(DynamicsState & init_state,
 
 bool InitialConditionBodies::setupPositionBodiesFromFile(DynamicsState & init_state, boost::filesystem::path file_path) {
 
-    MultiBodySimFile simFile( DynamicsState::LayoutConfigType::LayoutType::NDOFqObj,
-                              DynamicsState::LayoutConfigType::LayoutType::NDOFuObj);
+    MultiBodySimFile simFile( DynamicsState::LayoutConfigType::LayoutType::NDOFqBody,
+                              DynamicsState::LayoutConfigType::LayoutType::NDOFuBody);
 
     if(simFile.openRead(file_path,init_state.m_nSimBodies)) {
         simFile >> init_state ;
