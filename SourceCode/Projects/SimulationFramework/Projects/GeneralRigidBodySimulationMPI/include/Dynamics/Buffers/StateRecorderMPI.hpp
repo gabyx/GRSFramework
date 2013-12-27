@@ -76,7 +76,7 @@ protected:
 
 
 StateRecorderMPI::StateRecorderMPI(unsigned int nSimBodies):
-    m_fh(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj), m_nSimBodies(nSimBodies)
+    m_fh(LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody), m_nSimBodies(nSimBodies)
 //    ,m_ins(m_writebuffer),
 //    m_stream(m_ins),
 //    m_oa( m_stream,boost::archive::no_codecvt | boost::archive::no_header)

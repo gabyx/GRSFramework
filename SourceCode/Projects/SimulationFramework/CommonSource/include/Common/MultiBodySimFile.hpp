@@ -193,7 +193,7 @@ private:
     }
     static const  std::streamoff m_nAdditionalBytesPerBody;
 
-    static const  std::streamoff m_headerLength = (4*sizeof(unsigned int) + SIM_FILE_SIGNATURE_LENGTH*sizeof(char));
+    static const  std::streamoff m_headerLength = SIM_FILE_SIGNATURE_LENGTH*sizeof(char) + sizeof(unsigned int) + 4*sizeof(unsigned int) ;
 
     const  std::streamoff m_nBytesPerBody;
 

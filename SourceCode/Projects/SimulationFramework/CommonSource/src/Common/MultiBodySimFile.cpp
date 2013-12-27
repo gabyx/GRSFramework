@@ -10,7 +10,7 @@ const std::streamoff MultiBodySimFile::m_nAdditionalBytesPerBody= setAdditionalB
 MultiBodySimFile::MultiBodySimFile(unsigned int nDOFqBody, unsigned int nDOFuBody, unsigned int bufferSize):
     m_nBytesPerQBody(nDOFqBody*sizeof(double)),
     m_nBytesPerUBody(nDOFuBody*sizeof(double)),
-    m_nBytesPerBody(nDOFuBody*sizeof(double) + nDOFqBody*sizeof(double) + m_nAdditionalBytesPerBody),
+    m_nBytesPerBody(nDOFuBody*sizeof(double) + nDOFqBody*sizeof(double) + sizeof(RigidBodyIdType) + m_nAdditionalBytesPerBody),
     m_nDOFuBody(nDOFuBody),
     m_nDOFqBody(nDOFqBody),
     m_nStates(0),
@@ -130,9 +130,9 @@ void  MultiBodySimFile::writeHeader() {
     for(int i=0; i<SIM_FILE_SIGNATURE_LENGTH; i++) {
         *this << m_simFileSignature[i];
     }
-    *this << (unsigned short)SIM_FILE_VERSION;
+    *this << (unsigned int)SIM_FILE_VERSION;
     *this << (unsigned int)m_nSimBodies << (unsigned int)m_nDOFqBody << (unsigned int)m_nDOFuBody; // Precision output is always double!
-    *this << (unsigned short)m_additionalBytesType;
+    *this << (unsigned int)m_additionalBytesType;
 
     m_beginOfStates = m_file_stream.tellp();
 }
@@ -219,7 +219,7 @@ bool  MultiBodySimFile::readHeader() {
     m_file_stream.read(signature,SIM_FILE_SIGNATURE_LENGTH);
     if(std::strncmp(signature,m_simFileSignature,SIM_FILE_SIGNATURE_LENGTH)==0) {
 
-        unsigned short version;
+        unsigned int version;
         unsigned int  nBodies, nDofqBody, nDofuBody, addBytesType;
         *this >> version;
 

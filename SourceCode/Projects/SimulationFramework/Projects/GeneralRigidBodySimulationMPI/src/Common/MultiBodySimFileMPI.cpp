@@ -16,14 +16,14 @@ const std::streamoff MultiBodySimFileMPI::m_nAdditionalBytesPerBody= setAddition
 MultiBodySimFileMPI::MultiBodySimFileMPI(unsigned int nDOFqBody, unsigned int nDOFuBody)
     : m_nBytesPerQBody(nDOFqBody*sizeof(double)),
       m_nBytesPerUBody(nDOFuBody*sizeof(double)),
-      m_nBytesPerBody(nDOFuBody*sizeof(double) + nDOFqBody*sizeof(double)  + sizeof(unsigned int) + m_nAdditionalBytesPerBody),
+      m_nBytesPerBody(nDOFuBody*sizeof(double) + nDOFqBody*sizeof(double)  + sizeof(RigidBodyIdType) + m_nAdditionalBytesPerBody),
       m_nDOFuBody(nDOFuBody),
       m_nDOFqBody(nDOFqBody),
       m_nStates(0),
       m_nBytesPerState(0),
       m_nBytesPerU(0),
       m_nBytesPerQ(0),
-      m_nSimBodies(0),
+      m_nSimBodies(0)
 {
 
     m_filePath = boost::filesystem::path();
@@ -255,24 +255,24 @@ void  MultiBodySimFileMPI::writeHeader() {
         memcpy((void*)p,&m_simFileSignature,sizeof(char)*SIM_FILE_MPI_SIGNATURE_LENGTH);
         p += sizeof(char)*SIM_FILE_MPI_SIGNATURE_LENGTH;
 
-        unsigned short v = SIM_FILE_MPI_VERSION;
-        memcpy((void*)p,&v,sizeof(unsigned short));
-        p += sizeof(unsigned short);
+        unsigned int v = SIM_FILE_MPI_VERSION;
+        memcpy((void*)p,&v,sizeof(v));
+        p += sizeof(v);
 
         unsigned int t = m_nSimBodies;
-        memcpy((void*)p,&t,sizeof(unsigned int));
-        p += sizeof(unsigned int);
+        memcpy((void*)p,&t,sizeof(t));
+        p += sizeof(t);
 
         t = m_nDOFqBody;
-        memcpy((void*)p,&t,sizeof(unsigned int));
-        p += sizeof(unsigned int);
+        memcpy((void*)p,&t,sizeof(t));
+        p += sizeof(t);
 
         t = m_nDOFuBody;
-        memcpy((void*)p,&t,sizeof(unsigned int));
-        p += sizeof(unsigned int);
+        memcpy((void*)p,&t,sizeof(t));
+        p += sizeof(t);
 
         t = m_additionalBytesType;
-        memcpy((void*)p,&t,sizeof(unsigned int));
+        memcpy((void*)p,&t,sizeof(t));
 
         MPI_Status status;
         int err;
