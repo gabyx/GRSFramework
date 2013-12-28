@@ -268,6 +268,9 @@ void MoreauTimeStepper::reset() {
     }
 
     m_bFinished = false;
+
+    m_PerformanceTimer.stop();
+    m_PerformanceTimer.start();
 };
 
 
@@ -291,14 +294,13 @@ void MoreauTimeStepper::doOneIteration() {
     LOG(m_pSolverLog, "---> Do one time-step =================================" <<std::endl;);
 #endif
 
-    m_PerformanceTimer.stop();
-    m_PerformanceTimer.start();
-
     m_bIterationFinished = false;
 
     iterations++;
     m_IterationCounter++;
 
+
+    m_startTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
 
     //Force switch
     //boost::thread::yield();
@@ -403,20 +405,21 @@ void MoreauTimeStepper::doOneIteration() {
     //Force switch
     //boost::thread::yield();
 
+    m_endTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
 
     // Measure Time again
     if (m_IterationCounter%100==0) {
         m_AvgTimeForOneIteration=0;
         iterations = 1;
     }
-    m_AvgTimeForOneIteration = ( ((double)m_PerformanceTimer.elapsed().wall)*1e-9  + m_AvgTimeForOneIteration*(iterations-1)) / iterations;
+    m_AvgTimeForOneIteration = ( (m_endTime - m_startTime) + m_AvgTimeForOneIteration*(iterations-1)) / iterations;
     if (m_AvgTimeForOneIteration > m_MaxTimeForOneIteration) {
         m_MaxTimeForOneIteration = m_AvgTimeForOneIteration;
     }
 
 #if CoutLevelSolver>0
-    //LOG( m_pSolverLog,  "---> Iteration Time: "<<std::setprecision(5)<<(double)(m_endTime-m_startTime)<<std::endl
-    // <<  "% End time-step ====================================" <<std::endl<<std::endl; );
+    LOG( m_pSolverLog,  "---> Iteration Time: "<<std::setprecision(5)<<(m_endTime-m_startTime)<<std::endl
+    <<  "% End time-step ====================================" <<std::endl<<std::endl; );
 #endif
 
     // Check if we can finish the timestepping!
@@ -439,12 +442,14 @@ void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
 
     m_SystemDataFile
     << globalTime << "\t"
-    << m_currentSimulationTime <<"\t"
-    << (double)(m_endTime-m_startTime) <<"\t"
-    << (double)(m_endTimeCollisionSolver-m_startTimeCollisionSolver) <<"\t"
-    << (double)(m_endTimeInclusionSolver-m_startTimeInclusionSolver) <<"\t"
+    << m_StateBuffers.m_pBack->m_t <<"\t"
+    << (m_endTime-m_startTime) <<"\t"
+    << (m_endTimeCollisionSolver-m_startTimeCollisionSolver) <<"\t"
+    << (m_endTimeInclusionSolver-m_startTimeInclusionSolver) <<"\t"
     << m_AvgTimeForOneIteration <<"\t"
+    << m_pCollisionSolver->getIterationStats() << "\t"
     << m_pInclusionSolver->getIterationStats() << std::endl;
+
 #endif
 }
 

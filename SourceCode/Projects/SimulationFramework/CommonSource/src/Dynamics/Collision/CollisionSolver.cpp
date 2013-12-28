@@ -106,6 +106,12 @@ std::string CollisionSolver::getIterationStats() {
     return s.str();
 }
 
+std::string CollisionSolver::getStatsHeader() {
+    std::stringstream s;
+    s << "MaxOverlap [m]";
+    return s.str();
+}
+
 void CollisionSolver::signalContactAdd() {
 
     if(m_collisionSet.size()!=0){

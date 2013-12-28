@@ -57,6 +57,7 @@ public:
     void solveInclusionProblem( const DynamicsState * state_s, const DynamicsState * state_m, DynamicsState * state_e);
 
     std::string getIterationStats();
+    std::string getStatsHeader();
     PREC m_G_conditionNumber;
     PREC m_G_notDiagDominant;
     unsigned int m_globalIterationCounter;
@@ -710,6 +711,23 @@ std::string InclusionSolverCO::getIterationStats() {
         << m_G_conditionNumber<<"\t" //No m_G_conditionNumber
         << m_G_notDiagDominant<<"\t" //No m_G_notDiagDominant
         << m_PercussionPool.getPoolSize();
+    return s.str();
+}
+
+std::string InclusionSolverCO::getStatsHeader() {
+    std::stringstream s;
+    s
+    << "GPUUsed"<<"\t"
+    << "nContacts"<<"\t"
+    << "nGlobalIterations"<<"\t"
+    << "Converged"<<"\t"
+    << "IsFinite"<<"\t"
+    << "TotalTimeProx [s]"<<"\t"
+    << "IterTimeProx [s]"<<"\t"
+    << "TotalStateEnergy [J]" <<"\t"
+    << "ConditionNumberG"<<"\t" //No m_G_conditionNumber
+    << "GnotDiagDom" <<"\t" //No m_G_notDiagDominant
+    << "PercussionPoolSize";
     return s.str();
 }
 

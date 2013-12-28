@@ -51,6 +51,8 @@ public:
 
 
     std::string getIterationStats();
+    std::string getStatsHeader();
+
     unsigned int m_globalIterationCounter;
     bool m_bConverged;
     unsigned int m_isFinite;

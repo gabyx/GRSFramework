@@ -95,6 +95,7 @@ public:
     inline void clearCollisionSet();
 
     std::string getIterationStats();
+    std::string getStatsHeader();
 
 protected:
 

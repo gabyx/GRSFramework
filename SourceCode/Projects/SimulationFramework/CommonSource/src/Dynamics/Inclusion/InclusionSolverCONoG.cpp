@@ -313,8 +313,8 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
 std::string  InclusionSolverCONoG::getIterationStats() {
     std::stringstream s;
-
-    s   << m_bUsedGPU<<"\t"
+    s
+    << m_bUsedGPU<<"\t"
     << m_nContacts<<"\t"
     << m_globalIterationCounter<<"\t"
     << m_bConverged<<"\t"
@@ -325,5 +325,22 @@ std::string  InclusionSolverCONoG::getIterationStats() {
     << -1<<"\t" //No m_G_conditionNumber
     << -1<<"\t" //No m_G_notDiagDominant
     << m_PercussionPool.getPoolSize();
+    return s.str();
+}
+
+std::string InclusionSolverCONoG::getStatsHeader() {
+    std::stringstream s;
+    s
+    << "GPUUsed"<<"\t"
+    << "nContacts"<<"\t"
+    << "nGlobalIterations"<<"\t"
+    << "Converged"<<"\t"
+    << "IsFinite"<<"\t"
+    << "TotalTimeProx [s]"<<"\t"
+    << "IterTimeProx [s]"<<"\t"
+    << "TotalStateEnergy [J]" <<"\t"
+    << "ConditionNumberG"<<"\t" //No m_G_conditionNumber
+    << "GnotDiagDom" <<"\t" //No m_G_notDiagDominant
+    << "PercussionPoolSize";
     return s.str();
 }

@@ -110,6 +110,7 @@ void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, c
 #if OUTPUT_SYSTEMDATA_FILE == 1
     m_SystemDataFile.close();
     m_SystemDataFile.open(m_SystemDataFilePath, std::ios_base::app | std::ios_base::out);
+    writeHeaderToSystemDataFile();
     m_SystemDataFile.clear();
 #endif
 
@@ -170,6 +171,9 @@ void MoreauTimeStepper::reset() {
     m_MaxTimeForOneIteration = 0;
 
     m_bFinished = false;
+
+    m_PerformanceTimer.stop();
+    m_PerformanceTimer.start();
 };
 
 
@@ -213,11 +217,11 @@ void MoreauTimeStepper::doOneIteration() {
 
     m_bIterationFinished = false;
 
-    m_PerformanceTimer.stop();
-    m_PerformanceTimer.start();
-
     iterations++;
     m_IterationCounter++;
+
+    m_startTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+
 
     //Force switch
     //boost::thread::yield();
@@ -292,20 +296,22 @@ void MoreauTimeStepper::doOneIteration() {
     //Force switch
     //boost::thread::yield();
 
+    m_endTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+
 
     // Measure Time again
     if (m_IterationCounter%100==0) {
         m_AvgTimeForOneIteration=0;
         iterations = 1;
     }
-    m_AvgTimeForOneIteration = ( ((double)m_PerformanceTimer.elapsed().wall)*1e-9  + m_AvgTimeForOneIteration*(iterations-1)) / iterations;
+    m_AvgTimeForOneIteration =  ( (m_endTime-m_startTime) + m_AvgTimeForOneIteration*(iterations-1)) / iterations;
     if (m_AvgTimeForOneIteration > m_MaxTimeForOneIteration) {
         m_MaxTimeForOneIteration = m_AvgTimeForOneIteration;
     }
 
 #if CoutLevelSolver>0
-    //LOG( m_pSolverLog,  "---> Iteration Time: "<<std::setprecision(5)<<(double)(m_endTime-m_startTime)<<std::endl
-    // <<  "% End time-step ====================================" <<std::endl<<std::endl; );
+    LOG( m_pSolverLog,  "---> Iteration Time: "<<std::setprecision(5)<<(m_endTime-m_startTime)<<std::endl
+     <<  "% End time-step ====================================" <<std::endl<<std::endl; );
 #endif
 
     // Check if we can finish the timestepping!
