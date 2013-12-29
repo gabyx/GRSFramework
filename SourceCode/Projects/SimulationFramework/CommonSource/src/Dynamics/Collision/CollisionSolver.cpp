@@ -56,7 +56,7 @@ CollisionSolver::getCollisionSetRef()
 void CollisionSolver::solveCollision() {
 
 
-    clearCollisionSet();
+    reset();
 
 #if CoutLevelSolver>1
     LOG(m_pSolverLog, "---> solveCollision(): "<<std::endl;)

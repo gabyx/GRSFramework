@@ -106,15 +106,15 @@ bool StateRecorderProcess::createSimFile(bool truncate){
 
 
     if(!m_binarySimFile.openWrite(file,truncate)){
-        LOG(m_pSimulationLog,"---> StateRecorderBody:: Could not open SimFile: " << file.string() << std::endl;);
+        LOG(m_pSimulationLog,"---> StateRecorderProcess:: Could not open SimFile: " << file.string() << std::endl;);
         LOG(m_pSimulationLog, m_binarySimFile.getErrorString() );
         return false;
     }
     if(truncate){
-       LOG(m_pSimulationLog,"---> StateRecorderBody:: Added SimFile (truncated):" << file.string() << std::endl; );
+       LOG(m_pSimulationLog,"---> StateRecorderProcess:: Added SimFile (truncated):" << file.string() << std::endl; );
     }
     else{
-        LOG(m_pSimulationLog,"---> StateRecorderBody:: Added SimFile: " << file.string() << std::endl; );
+        LOG(m_pSimulationLog,"---> StateRecorderProcess:: Added SimFile: " << file.string() << std::endl; );
     }
     return true;
 }

@@ -61,10 +61,12 @@ public:
 
 
     std::string getIterationStats();
+    std::string getStatsHeader();
     unsigned int m_globalIterationCounter;
     bool m_bConverged;
     unsigned int m_isFinite;
     unsigned int m_nContacts;
+    unsigned int m_nSplitBodyNodes;
     bool m_bUsedGPU;
     double m_timeProx, m_proxIterationTime;
 

@@ -3,6 +3,7 @@
 
 #include <mpi.h>
 
+#include <boost/timer/timer.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 
@@ -37,6 +38,8 @@ public:
     void startSim();
 
 private:
+
+    boost::timer::cpu_timer m_globalTimer;
 
     void initSim();
 

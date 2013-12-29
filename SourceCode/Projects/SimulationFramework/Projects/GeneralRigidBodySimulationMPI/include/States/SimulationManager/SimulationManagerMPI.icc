@@ -188,9 +188,9 @@ void SimulationManagerMPI::startSim() {
     }
 
 
-    boost::timer::cpu_timer timer;
+
     PREC runtime;
-    timer.start();
+    m_globalTimer.start();
 
     while(1){
 
@@ -202,8 +202,8 @@ void SimulationManagerMPI::startSim() {
 
         // Check if simulation can be aborted!
         if(m_pTimestepper->finished()) {
-            timer.stop();
-            runtime = ((PREC)timer.elapsed().wall)*1e-9;
+            m_globalTimer.stop();
+            runtime = ((PREC)m_globalTimer.elapsed().wall)*1e-9;
             LOG(m_pSimulationLog, "---> SimulationManager: Timestepper finished, needed: " << runtime << " sec. , exit..."<< std::endl );
             break;
         }
@@ -225,7 +225,7 @@ void SimulationManagerMPI::writeAllOutput() {
 
     if(m_RecorderSettings.outputCheck(m_pTimestepper->getIterationCount())) {
         // Write Data to SystemDataFile (maps all data to back buffer!)
-        //m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
+        m_pTimestepper->writeIterationToSystemDataFile((PREC)m_globalTimer.elapsed().wall*1e-9);
         // Write Data to CollisionDataFile
         //m_pTimestepper->writeIterationToCollisionDataFile();
         // Write  State to Sim File

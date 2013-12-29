@@ -150,6 +150,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/SharedBufferPlayback.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderBody.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/StateRecorderMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderProcess.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp

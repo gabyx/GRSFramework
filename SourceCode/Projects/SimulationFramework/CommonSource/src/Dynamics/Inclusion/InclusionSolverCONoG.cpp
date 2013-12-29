@@ -90,6 +90,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
     LOG(m_pSolverLog,  "---> solveInclusionProblem(): "<< std::endl;);
 #endif
 
+
     // Iterate over all nodes set and assemble the matrices...
     typename ContactGraphType::NodeListType & nodes = m_ContactGraph.getNodeListRef();
     m_nContacts = (unsigned int)nodes.size();
@@ -321,10 +322,7 @@ std::string  InclusionSolverCONoG::getIterationStats() {
     << m_isFinite<<"\t"
     << m_timeProx<<"\t"
     << m_proxIterationTime<<"\t"
-    << m_pDynSys->m_CurrentStateEnergy <<"\t"
-    << -1<<"\t" //No m_G_conditionNumber
-    << -1<<"\t" //No m_G_notDiagDominant
-    << m_PercussionPool.getPoolSize();
+    << m_pDynSys->m_CurrentStateEnergy;
     return s.str();
 }
 
@@ -338,9 +336,6 @@ std::string InclusionSolverCONoG::getStatsHeader() {
     << "IsFinite"<<"\t"
     << "TotalTimeProx [s]"<<"\t"
     << "IterTimeProx [s]"<<"\t"
-    << "TotalStateEnergy [J]" <<"\t"
-    << "ConditionNumberG"<<"\t" //No m_G_conditionNumber
-    << "GnotDiagDom" <<"\t" //No m_G_notDiagDominant
-    << "PercussionPoolSize";
+    << "TotalStateEnergy [J]";
     return s.str();
 }

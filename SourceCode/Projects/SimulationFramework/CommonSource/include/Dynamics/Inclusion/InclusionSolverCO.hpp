@@ -193,7 +193,7 @@ unsigned int InclusionSolverCO::getNObjects() {
 
 void InclusionSolverCO::reset() {
 
-    m_pDynSys->initMassMatrixAndHTerm();
+    m_pDynSys->initMassMatrixAndHTerm();  //TODO what does that make here?
 
     resetForNextIter();
 
@@ -255,6 +255,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
 #if CoutLevelSolver>1
     LOG(m_pSolverLog, " % -> solveInclusionProblem(): "<< std::endl;);
 #endif
+
 
     // Iterate over all nodes set and assemble the matrices...
     typename ContactGraphType::NodeListType & nodes = m_ContactGraph.getNodeListRef();

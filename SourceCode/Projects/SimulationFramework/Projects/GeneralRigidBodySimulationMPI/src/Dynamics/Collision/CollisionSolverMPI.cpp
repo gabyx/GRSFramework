@@ -53,7 +53,7 @@ CollisionSolver::getCollisionSetRef()
 void CollisionSolver::solveCollision() {
 
 
-    clearCollisionSet();
+    reset();
 
 #if CoutLevelSolver>1
     LOG(m_pSolverLog, "---> solveCollision(): "<<std::endl;)
@@ -118,6 +118,12 @@ std::string CollisionSolver::getIterationStats() {
     s << m_maxOverlap;
     return s.str();
 }
+std::string CollisionSolver::getStatsHeader() {
+    std::stringstream s;
+    s << "MaxOverlap [m]";
+    return s.str();
+}
+
 
 
 void CollisionSolver::signalContactAdd() {

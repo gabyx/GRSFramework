@@ -116,6 +116,7 @@ void InclusionSolverCONoG::reset() {
 void InclusionSolverCONoG::resetForNextIter() {
 
     m_nContacts = 0;
+    m_nSplitBodyNodes = 0;
     m_globalIterationCounter = 0;
 
     m_bConverged = true;
@@ -153,6 +154,9 @@ void InclusionSolverCONoG::solveInclusionProblem() {
     #endif
     m_pInclusionComm->communicateRemoteContacts();
 
+    // All detected contacts in ths process
+    m_nContacts = nodesLocal.size() + nodesRemote.size();
+    m_nSplitBodyNodes = nodesSplitBody.size();
 
     // Integrate all local bodies to u_e
     // u_E = u_S + M^⁻1 * h * deltaT
@@ -389,16 +393,30 @@ void InclusionSolverCONoG::finalizeSorProx(){
 
 std::string  InclusionSolverCONoG::getIterationStats() {
     std::stringstream s;
-
-    s   << m_bUsedGPU<<"\t"
+    s
+    << m_bUsedGPU<<"\t"
     << m_nContacts<<"\t"
+    << m_nSplitBodyNodes << "\t"
     << m_globalIterationCounter<<"\t"
     << m_bConverged<<"\t"
     << m_isFinite<<"\t"
     << m_timeProx<<"\t"
     << m_proxIterationTime<<"\t"
-    << m_pDynSys->m_CurrentStateEnergy <<"\t"
-    << -1<<"\t" //No m_G_conditionNumber
-    << -1<<"\t"; //No m_G_notDiagDominant
+    << m_pDynSys->m_CurrentStateEnergy;
+    return s.str();
+}
+
+std::string InclusionSolverCONoG::getStatsHeader() {
+    std::stringstream s;
+    s
+    << "GPUUsed"<<"\t"
+    << "nContacts"<<"\t"
+    << "nSplitBodyNodes" << "\t"
+    << "nGlobalIterations"<<"\t"
+    << "Converged"<<"\t"
+    << "IsFinite"<<"\t"
+    << "TotalTimeProx [s]"<<"\t"
+    << "IterTimeProx [s]"<<"\t"
+    << "TotalStateEnergy [J]";
     return s.str();
 }
