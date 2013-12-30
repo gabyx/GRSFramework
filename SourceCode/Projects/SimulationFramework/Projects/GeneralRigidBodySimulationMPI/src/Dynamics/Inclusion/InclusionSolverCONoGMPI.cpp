@@ -156,12 +156,14 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
     // All detected contacts in ths process
     m_nContacts = nodesLocal.size() + nodesRemote.size();
+    m_nContactsLocal = nodesLocal.size();
+    m_nContactsRemote = nodesRemote.size();
     m_nSplitBodyNodes = nodesSplitBody.size();
 
     // Integrate all local bodies to u_e
     // u_E = u_S + M^⁻1 * h * deltaT
 
-   if(nodesLocal.size() == 0 && nodesSplitBody.size()==0 && nodesRemote.size()==0){
+   if(m_nContactsLocal == 0 && m_nSplitBodyNodes==0 && m_nContactsRemote==0){
         // Nothing to solve
         integrateAllBodyVelocities();
     }
@@ -396,6 +398,8 @@ std::string  InclusionSolverCONoG::getIterationStats() {
     s
     << m_bUsedGPU<<"\t"
     << m_nContacts<<"\t"
+    << m_nContactsLocal << "\t"
+    << m_nContactsRemote << "\t"
     << m_nSplitBodyNodes << "\t"
     << m_globalIterationCounter<<"\t"
     << m_bConverged<<"\t"
@@ -411,6 +415,8 @@ std::string InclusionSolverCONoG::getStatsHeader() {
     s
     << "GPUUsed"<<"\t"
     << "nContacts"<<"\t"
+    << "nContactsLocal" << "\t"
+    << "nContactsRemote" << "\t"
     << "nSplitBodyNodes" << "\t"
     << "nGlobalIterations"<<"\t"
     << "Converged"<<"\t"
