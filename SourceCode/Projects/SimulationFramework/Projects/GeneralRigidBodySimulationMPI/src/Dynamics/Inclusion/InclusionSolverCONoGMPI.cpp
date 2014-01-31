@@ -155,9 +155,9 @@ void InclusionSolverCONoG::solveInclusionProblem() {
     m_pInclusionComm->communicateRemoteContacts();
 
     // All detected contacts in ths process
-    m_nContacts = nodesLocal.size() + nodesRemote.size();
     m_nContactsLocal = nodesLocal.size();
     m_nContactsRemote = nodesRemote.size();
+    m_nContacts = m_nContactsLocal + m_nContactsRemote;
     m_nSplitBodyNodes = nodesSplitBody.size();
 
     // Integrate all local bodies to u_e

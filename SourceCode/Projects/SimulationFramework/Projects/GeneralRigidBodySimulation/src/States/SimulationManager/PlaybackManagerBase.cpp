@@ -108,8 +108,9 @@ void PlaybackManagerBase::addToTimeScale(double step) {
     }
 
     m_timeScale = m_timeScaleList[m_timeScaleListIdx];
+
     m_mutexTimelineSimulation.unlock();
-    //LOG(m_pSimluationLog, "TimeScale set to " << m_timeScale <<std::endl;);
+
 }
 
 void PlaybackManagerBase::togglePauseSimulation() {
@@ -117,7 +118,7 @@ void PlaybackManagerBase::togglePauseSimulation() {
     if(m_bPauseEnabled==false){
 
         m_bPauseEnabled = true;
-        std::cout << "Paused Simulation!"<< std::endl;
+
 
         m_mutexTimelineSimulation.lock();
         // Reset the Timer

@@ -244,8 +244,8 @@ void AppStateManager::init(boost::shared_ptr<RenderAppState> state)
 
 void AppStateManager::init(boost::shared_ptr<AppState> state)
 {
-	InputContext::getSingletonPtr()->addKeyListener(state.get(),"AppStateManager::KeyListener");
-	InputContext::getSingletonPtr()->addMouseListener(state.get(),"AppStateManager::MouseListener");
+//	InputContext::getSingletonPtr()->addKeyListener(state.get(),"AppStateManager::KeyListener");
+//	InputContext::getSingletonPtr()->addMouseListener(state.get(),"AppStateManager::MouseListener");
 
 	RenderContext::getSingletonPtr()->m_pRenderWnd->resetStatistics();
 }

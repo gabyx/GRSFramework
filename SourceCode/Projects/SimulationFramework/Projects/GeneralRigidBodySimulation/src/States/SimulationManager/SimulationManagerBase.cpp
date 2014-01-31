@@ -110,12 +110,9 @@ void SimulationManagerBase::addToTimeScale(double step) {
     }
 
     m_timeScale = m_timeScaleList[m_timeScaleListIdx];
-    std::cout << "TimeScale set to " << m_timeScale << std::endl;
+//    LOG(m_pSimluationLog, "---> TimeScale set to " << m_timeScale <<std::endl;);
 
     m_mutexTimelineSimulation.unlock();
-//    std::stringstream logstream;
-
-//    LOG(m_pAppLog);
 
 }
 

@@ -317,7 +317,7 @@ void MoreauTimeStepper::doOneIteration() {
       }
 #endif
 
-#if CoutLevelSolver>2
+#if CoutLevelSolver>1
       LOG(m_pSolverLog,"---> m_t Begin: " << m_currentSimulationTime <<std::endl; );
 #endif
 
@@ -423,7 +423,7 @@ void MoreauTimeStepper::doOneIteration() {
 
 #if CoutLevelSolver>0
     LOG( m_pSolverLog,  "---> Iteration Time: "<<std::setprecision(5)<<(m_endTime-m_startTime)<<std::endl
-    <<  "% End time-step ====================================" <<std::endl<<std::endl; );
+    <<  "---> End time-step ====================================" <<std::endl<<std::endl; );
 #endif
 
     // Check if we can finish the timestepping!

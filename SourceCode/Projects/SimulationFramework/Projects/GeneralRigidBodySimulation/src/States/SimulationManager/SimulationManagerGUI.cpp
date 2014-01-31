@@ -451,9 +451,11 @@ bool SimulationManagerGUI::keyPressed(const OIS::KeyEvent &e) {
 
     switch (e.key) {
     case OIS::KC_M:
+        LOG(m_pSimulationLog, "---> Add 0.1 to TimeScale" << std::endl;);
         addToTimeScale(0.1);
         break;
     case OIS::KC_N:
+        LOG(m_pSimulationLog, "---> Add -0.1 to TimeScale" << std::endl;);
         addToTimeScale(-0.1);
         break;
     case OIS::KC_B:
@@ -556,7 +558,7 @@ void SimulationManagerGUI::enableInput(bool value) {
         // add some key,mouse listener to change the input
         InputContext::getSingletonPtr()->addKeyListener(this,m_KeyListenerName);
     } else {
-        // add some key,mouse listener to change the input
+        // remove key,mouse listener to change the input
         InputContext::getSingletonPtr()->removeKeyListener(this);
     }
 }

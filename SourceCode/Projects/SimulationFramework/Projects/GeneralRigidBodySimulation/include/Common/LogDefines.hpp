@@ -74,7 +74,7 @@
   #define LogToConsoleSolver 1         ///< {0,1} Determines if logstream is outputted into console.
 #else
   #define CoutLevelSolver 1
-  #define CoutLevelSolverWhenContact 0
+  #define CoutLevelSolverWhenContact 1
   #define LogToFileSolver 1
   #define LogToConsoleSolver 0
 #endif
