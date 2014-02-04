@@ -125,14 +125,15 @@ void SimulationManagerBase::togglePauseSimulation() {
 
         m_mutexTimelineSimulation.lock();
         // Reset the Timer
+        m_timeScale = m_timeScaleList[0];
         m_pTimelineSimulation->stop();
-
-//        m_timeScale = 0;
+//      m_timeScale = 0;
         m_mutexTimelineSimulation.unlock();
     }
     else{
         m_bPauseEnabled = false;
         m_mutexTimelineSimulation.lock();
+        m_timeScale = m_timeScaleList[m_timeScaleListIdx];
         m_lastTime = ((double)m_pTimelineSimulation->elapsed().wall) * 1e-9 * m_timeScale + m_lastTime;
         m_pTimelineSimulation->start();
         m_mutexTimelineSimulation.unlock();

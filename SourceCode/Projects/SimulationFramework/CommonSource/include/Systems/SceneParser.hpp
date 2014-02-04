@@ -41,6 +41,8 @@
 #include "TimeStepperSettings.hpp"
 #include "RecorderSettings.hpp"
 
+#include "PrintGeometryDetails.hpp"
+
 
 class GetScaleOfGeomVisitor : public boost::static_visitor<>{
     public:
@@ -697,6 +699,8 @@ protected:
             }else{
                 for(int i=0; i < m_bodyList.size(); i++) {
                     m_bodyListScales[i] = scale;
+                    LOG(m_pSimulationLog, "\t---> Body id:" << m_bodyList[i]->m_id << ", GeometryType: Sphere" << std::endl);
+                    LOG(m_pSimulationLog, "\t\t---> radius: " << radius << std::endl; );
                     m_bodyList[i]->m_geometry = pSphereGeom;
                 }
             }
@@ -763,6 +767,8 @@ protected:
                     scale(2)=radius;
                     m_bodyListScales[i] = scale;
                     boost::shared_ptr<SphereGeometry > pSphereGeom = boost::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
+                    LOG(m_pSimulationLog, "\t---> Body id:" << m_bodyList[i]->m_id << ", GeometryType: Sphere" << std::endl);
+                    LOG(m_pSimulationLog, "\t\t---> radius: " << radius << std::endl; );
                     m_bodyList[i]->m_geometry = pSphereGeom;
 
                 }
@@ -999,6 +1005,7 @@ protected:
                 boost::apply_visitor(vis, it->second);
                 m_bodyList[i]->m_geometry = it->second;
                 m_bodyList[i]->m_globalGeomId = id;
+                LOG(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(m_bodyList[i]) << ", GlobalGeomId: " << id <<  std::endl);
             }
 
         }
@@ -1027,6 +1034,8 @@ protected:
                 boost::apply_visitor(vis, it->second);
                 m_bodyList[i]->m_geometry = it->second;
                 m_bodyList[i]->m_globalGeomId = id;
+                LOG(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(m_bodyList[i]) << ", GlobalGeomId: " << id <<  std::endl);
+
             }
 
 
@@ -1075,6 +1084,7 @@ protected:
                 boost::apply_visitor(vis, it->second);
                 m_bodyList[i]->m_geometry = it->second;
                 m_bodyList[i]->m_globalGeomId = id;
+                LOG(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(m_bodyList[i]) << ", GlobalGeomId: " << id <<  std::endl);
             }
 
 
@@ -1096,6 +1106,8 @@ protected:
     template<typename T>
     void addToGlobalGeomList(unsigned int id,  boost::shared_ptr<T> ptr){
 
+
+
             std::pair<typename DynamicsSystemType::GlobalGeometryMapType::iterator, bool> ret =
             this->getGlobalGeometryListRef().insert(typename DynamicsSystemType::GlobalGeometryMapType::value_type( id, ptr) );
             if(ret.second == false){
@@ -1104,6 +1116,12 @@ protected:
                 throw ticpp::Exception(ss.str());
             }
             LOG(m_pSimulationLog,"---> Added geometry with id: " <<  id << " to global geometry list" <<std::endl;);
+
+            // Print some details:
+            LOG(m_pSimulationLog,"\t---> GlobalGeomId: " << id <<std::endl);
+            PrintGeometryDetailsVisitor(m_pSimulationLog, ret.first->second, "\t\t--->");
+
+
     }
 
     virtual typename DynamicsSystemType::GlobalGeometryMapType & getGlobalGeometryListRef(){

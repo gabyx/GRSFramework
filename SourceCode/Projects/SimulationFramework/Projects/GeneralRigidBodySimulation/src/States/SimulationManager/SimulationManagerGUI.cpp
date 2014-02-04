@@ -86,7 +86,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserOgre... ");
 
 
-    LOG(m_pSimulationLog,"---> ScenePath:" << sceneFilePath );
+    LOG(m_pSimulationLog,"---> ScenePath: " << sceneFilePath << std::endl );
     if(sceneFilePath.empty()) {
         sceneFilePath = "SceneFile.xml";
     }
