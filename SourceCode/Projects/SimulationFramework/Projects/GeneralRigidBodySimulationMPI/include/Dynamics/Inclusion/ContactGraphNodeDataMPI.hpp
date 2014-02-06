@@ -19,7 +19,7 @@ public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    ContactGraphNodeDataSplitBody(RigidBodyType * body): m_pBody(body),m_nLambdas(0) {
+    ContactGraphNodeDataSplitBody(RigidBodyType * body): m_pBody(body),m_nConstraints(0) {
 
     };
 
@@ -29,12 +29,12 @@ public:
 
         auto pairRes = m_partRanks.insert( std::make_pair(rank,  Flags(m_partRanks.size()) ) );
 
-        m_nLambdas +=1; //Increase lambda by 1 (one more constraint)
+        m_nConstraints +=1; //Increase lambda by 1 (one more constraint)
 
         return pairRes.second;
     }
 
-    /** plus one because this rank counts also as on split body to the overall body*/
+    /** plus one because this rank counts also as one split body to the overall body*/
     inline unsigned int getMultiplicity() {
         return m_partRanks.size() + 1;
     }
@@ -52,16 +52,15 @@ public:
 
     inline void updateVelocity(const RankIdType rank, const VectorUBody & u){
         auto it = m_partRanks.find(rank);
-        ASSERTMSG(it!=m_partRanks.end(), "Rank: " << rank <<
-                  " is not contained in the SplitBodyNode for body id: " << RigidBodyId::getBodyIdString(m_pBody));
+        ASSERTMSG(it!=m_partRanks.end(), "Rank: " << rank << " is not contained in the SplitBodyNode for body id: " << RigidBodyId::getBodyIdString(m_pBody));
         it->second.m_bGotUpdate = true;
         m_uBack.segment<NDOFuBody>(NDOFuBody * (it->second.m_splitBodyIdx+1)) = u;
     }
 
-    /** SplitBodyNumber is the internalNumber which is used in all comments in this class*/
+    /** m_splitBodyIdx is the internal number which is used in all subscripts in the comments in this class*/
     struct Flags{
         Flags(unsigned int splitBodyIdx): m_splitBodyIdx(splitBodyIdx), m_bGotUpdate(false){};
-        unsigned int m_splitBodyIdx;
+        const unsigned int m_splitBodyIdx;
         bool m_bGotUpdate;
     };
     std::unordered_map< RankIdType, Flags > m_partRanks; ///< Participating ranks Flags, size defines the multiplicity
@@ -72,7 +71,7 @@ public:
         }
     }
 
-    /** Contains the weight factor for the partion of unity: [alpha_1, alpha_2, alpha_3,... , alpha_multiplicity]
+    /** Contains the weight factor for the partion of unity: [alpha_0, alpha_1, alpha_2,... , alpha_multiplicity-1]
     *   alpha_i = 1 / multiplicity so far, needs to be initialized befor the global prox loop */
     VectorDyn m_multiplicityWeights;
 
@@ -80,14 +79,14 @@ public:
     RigidBodyType * m_pBody;
 
     /** These values get set from all remotes*/
-    VectorDyn m_uBack;  ///                           Local Velocity-------*
-    VectorDyn m_uFront; ///< all velocities of all split bodies m_u_G = [  u_1 , u_2,u_3,u_4,u_5...], correspond to rank in vector
+    VectorDyn m_uBack;  ///                            Local Velocity-------*
+    VectorDyn m_uFront; ///< all velocities of all split bodies m_u_G = [  u_0 , u_1,u_2,u_3,u_4...], correspond to rank in vector
 
     //VectorDyn m_LambdaBack;  ///< Bilateral Lambda (Lambda_M_tilde = M⁻¹*Lambda_M
     VectorDyn m_LambdaFront; ///< Bilateral Lambda (Lambda_M_tilde = M⁻¹*Lambda_M
-    unsigned int m_nLambdas; ///< How many bilateral constraints between bodies we have, currently = m_partRanks.size()
+    unsigned int m_nConstraints; ///< How many bilateral constraints between bodies we have, currently = m_partRanks.size()
 
-    VectorDyn m_gamma; ///< Gamma = [u_1-u_2, u_2-u_3, u_3-_u4,..., u_n-1 - u_n, ], u1 is always the velocity of the owner!
+    VectorDyn m_gamma; ///< Gamma = [u_0-u_1, u_1-u_2, u_2-_u3,..., u_n-1 - u_n, ], u_0 is always the velocity of the owner!
 
     inline MatrixSparse & getLInvMatrix(){
         auto mult = getMultiplicity();

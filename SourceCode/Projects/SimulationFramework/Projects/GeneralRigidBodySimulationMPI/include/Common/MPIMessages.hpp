@@ -802,6 +802,8 @@ protected:
 
 };
 
+
+/// CHECKED OK
 template<typename TNeighbourCommunicator >
 class NeighbourMessageWrapperInclusionContact : public NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
     public boost::serialization::traits< NeighbourMessageWrapperInclusion<TNeighbourCommunicator>,
@@ -1064,7 +1066,8 @@ public:
                 // Compute initial velocity u_0 for this remoteBody
                 LOGSZ(this->m_pSerializerLog, "----> initialize velocity for prox iteration" <<std::endl; );
                 ASSERTMSG(remoteBody->m_pSolverData, "m_pSolverData for body id: " << RigidBodyId::getBodyIdString(id) << " is zero!")
-                remoteBody->m_pSolverData->m_uBuffer.m_front = remoteBody->m_pSolverData->m_uBuffer.m_back + remoteBody->m_MassMatrixInv_diag.asDiagonal()  *  remoteBody->m_h_term * this->m_nc->m_Settings.m_deltaT;
+                remoteBody->m_pSolverData->m_uBuffer.m_front = remoteBody->m_pSolverData->m_uBuffer.m_back
+                                                               + remoteBody->m_MassMatrixInv_diag.asDiagonal()*remoteBody->m_h_term*this->m_nc->m_Settings.m_deltaT;
                 remoteBody->m_pSolverData->m_uBuffer.m_back = remoteBody->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
 
             }

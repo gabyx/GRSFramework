@@ -28,7 +28,7 @@
 */
 #define SIM_FILE_SIGNATURE {'M','B','S','F'}
 
-#define SIM_FILE_VERSION 1
+#define SIM_FILE_VERSION 2
 
 /**
 * @brief Defines the extentsion of the file.
@@ -103,7 +103,7 @@ public:
     * @brief Overlaod!
     */
 
-    MultiBodySimFile & operator << (const DynamicsState& state) {
+    inline MultiBodySimFile & operator << (const DynamicsState& state) {
         return this->operator<<(&state);
     }
 
@@ -115,7 +115,7 @@ public:
     * @brief Overlaod!
     */
 
-    MultiBodySimFile &  operator>>( DynamicsState & state ) {
+    inline MultiBodySimFile &  operator>>( DynamicsState & state ) {
         return this->operator>>(&state);
     }
     //  /**
@@ -171,11 +171,18 @@ private:
     std::streamoff m_nStates;
     /** @}*/
 
-    /** brief File path */
+    /** @brief File path */
     boost::filesystem::path m_filePath;
 
+    /** @brief Header length */
+    static const  std::streamoff m_headerLength = SIM_FILE_SIGNATURE_LENGTH*sizeof(char)
+                                                  + sizeof(unsigned int)
+                                                  +3*sizeof(unsigned int) +2*sizeof(unsigned int) ; ///< 'MBSF' + nBodies, NDOFq, NDOFu, additionalBytesType (0=nothing, 1 = + process rank, etc.), additionalBytesPerBody
+
+
+
     /** @brief Determined from number of bodies! @{*/
-    void setByteLengths(const unsigned int nSimBodies);
+    void setByteLengths();
     std::streamoff m_nBytesPerState; ///< m_nSimBodies*(q,u) + time
     unsigned int m_nSimBodies;
     /** @}*/
@@ -187,15 +194,12 @@ private:
     const  std::streamoff m_nBytesPerUBody;
 
     // Write addditional bytes, not yet implemented, but the type is written in the header
-    static const unsigned short m_additionalBytesType = 0;
-    static constexpr std::streamoff setAdditionalBytes(){
-        return 0;
-    }
-    static const  std::streamoff m_nAdditionalBytesPerBody;
+    unsigned int m_additionalBytesType;
+    std::streamoff getAdditionalBytes();
+    std::streamoff m_nAdditionalBytesPerBody;
 
-    static const  std::streamoff m_headerLength = SIM_FILE_SIGNATURE_LENGTH*sizeof(char) + sizeof(unsigned int) + 4*sizeof(unsigned int) ;
 
-    const  std::streamoff m_nBytesPerBody;
+    std::streamoff m_nBytesPerBody;
 
     bool m_bReadFullState;
 
@@ -241,6 +245,8 @@ void MultiBodySimFile::write(double time, const RigidBodyContainer & bodyList){
         *this << (*it)->m_id;
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
+
+//        AddBytes::write<m_additionalBytesType>(m_file_stream);
     }
 }
 
@@ -258,7 +264,7 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
         STATIC_ASSERT2((std::is_same<double, typename DynamicsState::PREC>::value),
                        "OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
 
-        *this << state->m_SimBodyStates[i].m_id ;
+        *this << state->m_SimBodyStates[i].m_id;
         IOHelpers::writeBinary(m_file_stream, state->m_SimBodyStates[i].m_q );
         IOHelpers::writeBinary(m_file_stream, state->m_SimBodyStates[i].m_u );
 
@@ -280,20 +286,29 @@ MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState* state ) {
 
     state->m_StateType = DynamicsState::NONE;
     // write states
+    RigidBodyIdType id;
     for(unsigned int i=0 ; i< state->m_nSimBodies; i++) {
 
         //m_file_stream >> state->m_SimBodyStates[i].m_q; //ADL fails
-        *this >> state->m_SimBodyStates[i].m_id;
-        IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[i].m_q );
+        *this >> id;
+        unsigned int bodyNr = RigidBodyId::getBodyNr(id);
+        ASSERTMSG(bodyNr >=0 && bodyNr < state->m_SimBodyStates.size(), "BodyNr: " << bodyNr << " is out of bound!")
+
+        state->m_SimBodyStates[bodyNr].m_id = id;
+
+        IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[bodyNr].m_q );
         //std::cout<< state->m_SimBodyStates[i].m_q.transpose()  << std::endl;
         if(m_bReadFullState) {
             //m_file_stream >> state->m_SimBodyStates[i].m_u;
-            IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[i].m_u );
+            IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[bodyNr].m_u );
             //std::cout<< state->m_SimBodyStates[i].m_u.transpose()  << std::endl;
         } else {
             //Dont read in velocities, its not needed!
             m_file_stream.seekg(m_nBytesPerUBody,std::ios_base::cur);
         }
+
+        // Dont read in additional bytes
+        m_file_stream.seekg(m_nAdditionalBytesPerBody,std::ios_base::cur);
 
     }
     return *this;

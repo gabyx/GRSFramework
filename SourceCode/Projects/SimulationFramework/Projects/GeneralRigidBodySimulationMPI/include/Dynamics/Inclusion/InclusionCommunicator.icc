@@ -52,6 +52,8 @@ void InclusionCommunicator<Combo>::communicateRemoteContacts() {
     sendContactMessageToNeighbours();
     receiveContactMessagesFromNeighbours();
 
+    ///CHECKED OK
+
     //Init all weights on the nodes
     LOGIC(m_pSimulationLog,"\t---> Compute Multiplicities"<< std::endl;)
     {
@@ -87,7 +89,7 @@ void InclusionCommunicator<Combo>::communicateSplitBodyUpdate(unsigned int globa
     LOGIC(m_pSimulationLog,"\t---> Send Velocities of Remote SplitBodies..."<< std::endl;)
     sendUpdateSplitBodiesToNeighbours();
 
-    LOGIC(m_pSimulationLog,"\t---> Recv Velocities of Remote SplitBodies..."<< std::endl;)
+    LOGIC(m_pSimulationLog,"\t---> Recv Velocities of Local SplitBodies..."<< std::endl;)
     recvUpdateSplitBodiesFromNeighbours();
 
     LOGIC(m_pSimulationLog,"---> InclusionCommunication: Communicate Remote Velocities finished"<< std::endl;)
@@ -196,7 +198,7 @@ template<typename Combo>
 void InclusionCommunicator<Combo>::recvUpdateSplitBodiesFromNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (SPLITBODYUPDATE_MESSAGE) from neighbours!"<<std::endl;)
     // set the rank of the receiving message automatically! inside the function!
-    // m_nbRanksSendRecvRem#ote.erase(m_nbRanksSendRecvRemote.begin()); with this in, it obviously hangs!!
+    // m_nbRanksSendRecvRemote.erase(m_nbRanksSendRecvRemote.begin()); with this in, it obviously hangs!!
     // so the code is correct! all messages get received
     m_pProcCom->receiveMessageFromRanks(m_messageSplitBodyUpdate, m_nbRanksSendRecvLocal,
                                         MPILayer::MPIMessageTag::Type::SPLITBODYUPDATE_MESSAGE );

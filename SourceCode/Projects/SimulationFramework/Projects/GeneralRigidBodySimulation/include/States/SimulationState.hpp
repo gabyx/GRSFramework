@@ -34,78 +34,83 @@ _________________________________________________________*/
 * @brief	Simulation State.
 **/
 
-class SimulationState : public AppState, OgreBites::SdkTrayListener
-{
+class SimulationState : public AppState, OgreBites::SdkTrayListener {
 public:
-	SimulationState();
-	~SimulationState();
+    SimulationState();
+    ~SimulationState();
 
-	DECLARE_APPSTATE_CLASS(SimulationState);
+    DECLARE_APPSTATE_CLASS(SimulationState);
 
-	void enter();
-	void setupScene();
-	void exit();
-	bool pause();
-	void resume();
+    void enter();
+    void setupScene();
+    void exit();
+    bool pause();
+    void resume();
 
-	void moveCamera();
-	void getInput();
+    void moveCamera();
+    void getInput();
 
-	bool keyPressed(const OIS::KeyEvent &keyEventRef);
-	bool keyReleased(const OIS::KeyEvent &keyEventRef);
+    bool keyPressed(const OIS::KeyEvent &keyEventRef);
+    bool keyReleased(const OIS::KeyEvent &keyEventRef);
 
-	bool mouseMoved(const OIS::MouseEvent &evt){return true;};
-	bool mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id){return true;};
-	bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id){return true;};
+    bool mouseMoved(const OIS::MouseEvent &evt) {
+        return true;
+    };
+    bool mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id) {
+        return true;
+    };
+    bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id) {
+        return true;
+    };
 
-	void buttonHit(OgreBites::Button* button){};
+    void buttonHit(OgreBites::Button* button) {};
 
-	void update(double timeSinceLastFrame);
+    void update(double timeSinceLastFrame);
 
-  boost::function<void (double)> updateSceneFunction; // this function binds to updateScenePlayback() or  updateSceneRealtime()
-  void updateSceneRealtime(double timeSinceLastFrame);
+    boost::function<void (double)> updateSceneFunction; // this function binds to updateScenePlayback() or  updateSceneRealtime()
+    void updateSceneRealtime(double timeSinceLastFrame);
 
-   boost::shared_ptr<SimulationManagerGUI >	m_pSimMgr;
+    boost::shared_ptr<SimulationManagerGUI >	m_pSimMgr;
 
 private:
 
-  Ogre::Log * m_pAppLog;
+    Ogre::Log * m_pAppLog;
 
-	void setupParamsPanel();
+    void setupParamsPanel();
 
-	Ogre::SceneNode * m_pBaseNode;
+    Ogre::SceneNode * m_pBaseNode;
 
-	boost::shared_ptr<OrbitCamera>	m_pOrbitCamera;
-	boost::shared_ptr<MenuMouse>	m_pMenuMouse;
+    boost::shared_ptr<OrbitCamera>	m_pOrbitCamera;
+    boost::shared_ptr<MenuMouse>	m_pMenuMouse;
 
-   void switchToPlaybackState();
+    void switchToPlaybackState();
 
-  enum MouseMode{ CAMERA = 0, MENU } m_eMouseMode;
-  void setMouseMode(bool switchMode);
-  enum ActiveMode{ REALTIME = 0 , RECORD} m_eSimulationActiveMode;
-  void setupActiveModeSelection();
-  // In each mode you can start a thread, realtime thread, record thread
-  // Realtime and Recorder Thread start only one thread!
-  // You cannot start Realtime thread, and a record thread at the same time
+    enum MouseMode { CAMERA = 0, MENU } m_eMouseMode;
+    void setMouseMode(bool switchMode);
+    enum ActiveMode { REALTIME = 0 , RECORD} m_eSimulationActiveMode;
+    void setupActiveModeSelection();
+    // In each mode you can start a thread, realtime thread, record thread
+    // Realtime and Recorder Thread start only one thread!
+    // You cannot start Realtime thread, and a record thread at the same time
 
-  void updateParamsPanelSimulation();
+    void updateParamsPanelSimulation();
 
-  unsigned int m_SceneDetailIndex;
-  void switchSceneDetailIndex();
+    unsigned int m_SceneDetailIndex;
+    void switchSceneDetailIndex();
 
-	boost::shared_ptr<Ogre::Timer>	m_pTimelineRendering;
+    boost::shared_ptr<Ogre::Timer>	m_pTimelineRendering;
 
-	double m_lengthScale;
+    double m_lengthScale;
 
-	boost::shared_ptr<OgreBites::SdkTrayManager>	m_pTrayMgr;
-	OgreBites::ParamsPanel*		m_pPhysicsStatsPanel;
-	Ogre::StringVector			m_PhysicsStatsParams;
-	Ogre::StringVector			m_pPhysicsStatsValues;
+    boost::shared_ptr<OgreBites::SdkTrayManager>	m_pTrayMgr;
+    OgreBites::ParamsPanel*		m_pPhysicsStatsPanel;
+    Ogre::StringVector			m_PhysicsStatsParams;
+    Ogre::StringVector			m_pPhysicsStatsValues;
 
-  OgreBites::SelectMenu* m_pActiveModeSelectMenu;
-  void itemSelected(OgreBites::SelectMenu * menu); // Virtual of SdkTrayListner
-  void switchSimulationMode();
-  void setSimulationMode(int i);
+    OgreBites::SelectMenu* m_pActiveModeSelectMenu;
+    void itemSelected(OgreBites::SelectMenu * menu); // Virtual of SdkTrayListner
+    void switchSimulationMode();
+    void setSimulationMode(int i);
 };
 //=========================================================
 

@@ -9,7 +9,7 @@
 
 const char MultiBodySimFileMPI::m_simFileSignature[SIM_FILE_MPI_SIGNATURE_LENGTH] = SIM_FILE_MPI_SIGNATURE;
 
-const std::streamoff MultiBodySimFileMPI::m_nAdditionalBytesPerBody= setAdditionalBytes();
+const std::streamoff MultiBodySimFileMPI::m_nAdditionalBytesPerBody= getAdditionalBytes();
 
 
 
@@ -272,6 +272,10 @@ void  MultiBodySimFileMPI::writeHeader() {
         p += sizeof(t);
 
         t = m_additionalBytesType;
+        memcpy((void*)p,&t,sizeof(t));
+        p += sizeof(t);
+
+        t = m_nAdditionalBytesPerBody;
         memcpy((void*)p,&t,sizeof(t));
 
         MPI_Status status;

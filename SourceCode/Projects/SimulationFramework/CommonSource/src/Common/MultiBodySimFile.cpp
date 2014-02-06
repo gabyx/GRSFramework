@@ -4,13 +4,9 @@
 const char MultiBodySimFile::m_simFileSignature[SIM_FILE_SIGNATURE_LENGTH] = SIM_FILE_SIGNATURE;
 
 
-const std::streamoff MultiBodySimFile::m_nAdditionalBytesPerBody= setAdditionalBytes();
-// Implementation
-
 MultiBodySimFile::MultiBodySimFile(unsigned int nDOFqBody, unsigned int nDOFuBody, unsigned int bufferSize):
     m_nBytesPerQBody(nDOFqBody*sizeof(double)),
     m_nBytesPerUBody(nDOFuBody*sizeof(double)),
-    m_nBytesPerBody(nDOFuBody*sizeof(double) + nDOFqBody*sizeof(double) + sizeof(RigidBodyIdType) + m_nAdditionalBytesPerBody),
     m_nDOFuBody(nDOFuBody),
     m_nDOFqBody(nDOFqBody),
     m_nStates(0),
@@ -18,6 +14,9 @@ MultiBodySimFile::MultiBodySimFile(unsigned int nDOFqBody, unsigned int nDOFuBod
     m_nBytes(0),
     m_nSimBodies(0)
 {
+
+
+
     m_filePath = boost::filesystem::path();
 
     m_buf_size = bufferSize;
@@ -72,18 +71,35 @@ bool MultiBodySimFile::writeOutAllStateTimes() {
 }
 
 
-void MultiBodySimFile::setByteLengths(const unsigned int nSimBodies) {
-    m_nBytesPerState = nSimBodies * m_nBytesPerBody + 1*sizeof(double);
-    m_nSimBodies = nSimBodies;
+void MultiBodySimFile::setByteLengths() {
+
+    m_nBytesPerBody = m_nDOFuBody*sizeof(double)
+                    + m_nDOFqBody*sizeof(double)
+                    + sizeof(RigidBodyIdType) + m_nAdditionalBytesPerBody;
+
+    m_nBytesPerState = m_nSimBodies * m_nBytesPerBody + 1*sizeof(double);
 }
 
+/** Only for writting*/
+std::streamoff MultiBodySimFile::getAdditionalBytes()
+{
+        switch(m_additionalBytesType){
+            case 0:
+                return 0;
+            default:
+                ERRORMSG("Additional Byte Type not implemented");
+        }
+        return 0;
+}
 
 bool MultiBodySimFile::openWrite(const boost::filesystem::path &file_path, const unsigned int nSimBodies, bool truncate) {
     m_errorString.str("");
 
     close();
 
-    setByteLengths(nSimBodies);
+    m_additionalBytesType = 0; // no special output so far
+    m_nSimBodies = nSimBodies;
+    setByteLengths();
 
     if(truncate) {
 
@@ -130,9 +146,12 @@ void  MultiBodySimFile::writeHeader() {
     for(int i=0; i<SIM_FILE_SIGNATURE_LENGTH; i++) {
         *this << m_simFileSignature[i];
     }
-    *this << (unsigned int)SIM_FILE_VERSION;
-    *this << (unsigned int)m_nSimBodies << (unsigned int)m_nDOFqBody << (unsigned int)m_nDOFuBody; // Precision output is always double!
-    *this << (unsigned int)m_additionalBytesType;
+    *this << (unsigned int)SIM_FILE_VERSION
+    << (unsigned int)m_nSimBodies
+    << (unsigned int)m_nDOFqBody
+    << (unsigned int)m_nDOFuBody
+    << (unsigned int)m_additionalBytesType
+    << (unsigned int)m_nAdditionalBytesPerBody;
 
     m_beginOfStates = m_file_stream.tellp();
 }
@@ -141,12 +160,11 @@ void  MultiBodySimFile::writeHeader() {
 bool  MultiBodySimFile::openRead(const boost::filesystem::path &file_path, const unsigned int nSimBodies, bool readFullState) {
     m_errorString.str("");
 
-    // Set if the read commands are reading the whole state! not only q! also u!
-    m_bReadFullState = readFullState;
-
     close();
 
-    setByteLengths(nSimBodies);
+    // Set if the read commands are reading the whole state! not only q! also u!
+    m_bReadFullState = readFullState;
+    m_nSimBodies = nSimBodies;
 
     m_file_stream.open(file_path.string().c_str(), std::ios_base::binary | std::ios_base::in);
     m_file_stream.rdbuf()->pubsetbuf(m_Buffer, m_buf_size);
@@ -154,9 +172,11 @@ bool  MultiBodySimFile::openRead(const boost::filesystem::path &file_path, const
     if(m_file_stream.good()) {
 
         // Read length
-        if(readLength()) {
-            if(readHeader()) {
+        if(readHeader()) {
 
+            setByteLengths();
+
+            if(readLength()) {
                 //Set the get pointer!
                 m_file_stream.seekg(m_beginOfStates);
                 m_filePath = file_path;
@@ -220,7 +240,7 @@ bool  MultiBodySimFile::readHeader() {
     if(std::strncmp(signature,m_simFileSignature,SIM_FILE_SIGNATURE_LENGTH)==0) {
 
         unsigned int version;
-        unsigned int  nBodies, nDofqBody, nDofuBody, addBytesType;
+        unsigned int  nBodies, nDofqBody, nDofuBody, addBytesPerBody;
         *this >> version;
 
         if(version != SIM_FILE_VERSION){
@@ -228,11 +248,15 @@ bool  MultiBodySimFile::readHeader() {
             return false;
         }
 
-        *this >> nBodies >> nDofqBody >> nDofuBody >> addBytesType;
+        *this >> nBodies >> nDofqBody >> nDofuBody >> m_additionalBytesType >> addBytesPerBody;
+        m_nAdditionalBytesPerBody = addBytesPerBody;
 
-        if( addBytesType != m_additionalBytesType){
-            m_errorString << " Binary file does not have additionalBytesType: " <<
-            addBytesType << " equal to " <<m_additionalBytesType << std::endl;
+        if( m_nAdditionalBytesPerBody < 0){
+            m_errorString << "Binary File, m_nAdditionalBytesPerBody not valid : " << m_nAdditionalBytesPerBody << std::endl;
+            return false;
+        }
+        if( m_additionalBytesType < 0){
+            m_errorString << "Binary File, additionalBytesType not valid : " << m_additionalBytesType << std::endl;
             return false;
         }
 

@@ -84,7 +84,8 @@ public:
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
-                nodeData.m_u1BufferPtr->m_front = nodeData.m_u1BufferPtr->m_front + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
+                nodeData.m_u1BufferPtr->m_front = nodeData.m_u1BufferPtr->m_front
+                                                  + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
                #if CoutLevelSolverWhenContact>2
                 LOG(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
@@ -223,9 +224,7 @@ public:
     }
 
     void visitNode(NodeType& node){
-        /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
-           Then the iteration is not converged somewhere, and we need to wait till the next iteration!
-        */
+
         // Calculate the exact values for the billateral split nodes
 
         #if CoutLevelSolverWhenContact>2
@@ -247,9 +246,9 @@ public:
             LOG(m_pSolverLog,"\t---> uBack: " << node.m_uBack.transpose() <<std::endl;);
         #endif
 
-        // Build gamma = [u1-u2, u2-u3, u3-u4,..., un-1- un]
-        node.m_gamma =   node.m_uBack.head(NDOFuBody*node.m_nLambdas) -
-                           node.m_uBack.segment(NDOFuBody, NDOFuBody*node.m_nLambdas);
+        // Build gamma = [u0-u1, u1-u2, u2-u3] for multiplicity = 4
+        node.m_gamma =   node.m_uBack.head(NDOFuBody*node.m_nConstraints) -
+                           node.m_uBack.segment(NDOFuBody, NDOFuBody*node.m_nConstraints);
 
         #if CoutLevelSolverWhenContact>2
             LOG(m_pSolverLog, "\t---> nd.m_gamma: " << node.m_gamma.transpose() << std::endl;);
@@ -272,8 +271,8 @@ public:
         // u_G_End = uBack + M_G⁻¹ * W_M * Lambda_M
 
         node.m_uFront.setZero();
-        node.m_uFront.segment(0,NDOFuBody*node.m_nLambdas) = node.m_LambdaFront;
-        node.m_uFront.template segment(NDOFuBody,NDOFuBody*node.m_nLambdas) -= node.m_LambdaFront;
+        node.m_uFront.head(NDOFuBody*node.m_nConstraints) = node.m_LambdaFront;
+        node.m_uFront.template segment(NDOFuBody,NDOFuBody*node.m_nConstraints) -= node.m_LambdaFront;
         for(int i = 0; i<mult; i++){
             node.m_uFront.segment(NDOFuBody*i,NDOFuBody) *= 1.0 / node.m_multiplicityWeights(i);
         }
@@ -346,9 +345,6 @@ public:
         // u_0 , calculate const b
         // First Body
         if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED) {
-
-
-
             // m_back contains u_s + M^⁻1*h*deltaT already!
             // add + initial values M^⁻1 W lambda0 from percussion pool
             nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
@@ -363,7 +359,7 @@ public:
             // m_back contains u_s + M^⁻1*h*deltaT already!
             nodeData.m_u2BufferPtr->m_front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
 
-            nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() *  nodeData.m_u1BufferPtr->m_back;
+            nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() *  nodeData.m_u2BufferPtr->m_back;
             nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
         }
 
@@ -414,8 +410,8 @@ public:
 
         node.m_uBack.setZero(NDOFuBody*mult);
         node.m_uFront.setZero(NDOFuBody*mult);
-        node.m_LambdaFront.setZero( NDOFuBody * node.m_nLambdas);
-        node.m_gamma.setZero(node.m_nLambdas*NDOFuBody);
+        node.m_LambdaFront.setZero( NDOFuBody * node.m_nConstraints);
+        node.m_gamma.setZero(node.m_nConstraints*NDOFuBody);
     }
 
 };

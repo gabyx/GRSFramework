@@ -250,6 +250,9 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
     m_pContactGraph->applyNodeVisitorRemote(*m_pSorProxInitNodeVisitor);
 
     // Init SplitBodyNodes has already been done during communication!
+    //m_pContactGraph->applyNodeVisitorSplitBody(*m_pSorProxInitSplitBodyNodeVisitor);
+
+
 
     // Set the initial u_0 for the prox iteration in the velocities for LOCAL BODIES!
     // The ones which do not participate in the contact graph are already integrated

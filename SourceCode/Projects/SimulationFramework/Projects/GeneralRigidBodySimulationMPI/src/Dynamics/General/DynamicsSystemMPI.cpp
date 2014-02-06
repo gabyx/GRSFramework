@@ -151,6 +151,7 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
         m_CurrentStateEnergy -= +  pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir ;
 #endif
 
+        // Very  important here:
         // Swap uBuffer and reset Front to zero
         pBody->m_pSolverData->swapBuffer();
         pBody->m_pSolverData->reset();

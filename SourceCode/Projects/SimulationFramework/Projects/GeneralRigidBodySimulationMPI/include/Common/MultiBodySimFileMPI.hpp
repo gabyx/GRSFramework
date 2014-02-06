@@ -22,7 +22,7 @@
 #define SIM_FILE_MPI_SIGNATURE_LENGTH 4
 #define SIM_FILE_MPI_SIGNATURE {'M','B','S','F'}
 
-#define SIM_FILE_MPI_VERSION 1
+#define SIM_FILE_MPI_VERSION 2
 
 #define SIM_FILE_MPI_EXTENSION ".simmpi"
 
@@ -84,8 +84,8 @@ private:
     const  std::streamoff m_nBytesPerQBody ;
     const  std::streamoff m_nBytesPerUBody ;
 
-    static const unsigned short m_additionalBytesType = 1;
-    static constexpr std::streamoff setAdditionalBytes(){
+    static const unsigned int m_additionalBytesType = 1;
+    static constexpr std::streamoff getAdditionalBytes(){
         return (m_additionalBytesType==1) ? 1*sizeof(RankIdType) : 0 ;
     }
     static const  std::streamoff m_nAdditionalBytesPerBody;
@@ -93,7 +93,7 @@ private:
     const  std::streamoff m_nBytesPerBody; ///< id,q,u + m_nAdditionalBytesPerBody
 
     static const  std::streamoff m_headerLength = SIM_FILE_MPI_SIGNATURE_LENGTH*sizeof(char) + sizeof(unsigned int)
-                                                    +3*sizeof(unsigned int) +sizeof(unsigned int) ; ///< 'MBSF' + nBodies, NDOFq, NDOFu, additionalBytesType (0=nothing, 1 = + process rank, etc.)
+                                                    +3*sizeof(unsigned int) +2*sizeof(unsigned int) ; ///< 'MBSF' + nBodies, NDOFq, NDOFu, additionalBytesType (0=nothing, 1 = + process rank, etc.), additionalBytesPerBody
 
     MultiBodySimFileMPI & operator =(const MultiBodySimFileMPI & file);
 
