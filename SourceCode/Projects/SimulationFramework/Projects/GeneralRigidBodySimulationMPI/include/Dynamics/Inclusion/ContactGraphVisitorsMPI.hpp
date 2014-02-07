@@ -46,6 +46,9 @@ public:
 
         #if CoutLevelSolverWhenContact>2
             LOG(m_pSolverLog, "---> SorProx, Normal Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED){
+               LOG(m_pSolverLog, "---> Sim<->Sim Node:"<<  std::endl);
+            }
         #endif
 
         if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
@@ -83,103 +86,116 @@ public:
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+                #if CoutLevelSolverWhenContact>2
+                    LOG(m_pSolverLog, "\t---> body1.massInv: " << nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag << std::endl;)
+                    LOG(m_pSolverLog, "\t---> body1.h_term: " << nodeData.m_pCollData->m_pBody1->m_h_term << std::endl;)
+                #endif
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
                 nodeData.m_u1BufferPtr->m_front = nodeData.m_u1BufferPtr->m_front
-                                                  + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
+                                                  + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal()
+                                                  * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
                #if CoutLevelSolverWhenContact>2
                 LOG(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
                #endif
 
 
-                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
-                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
-                        if(!nodeData.m_bConverged ) {
-                            //converged stays false;
-                            // Set global Converged = false;
-                            m_bConverged = false;
-                            *m_pSolverLog << "m_bConverged = false;"<<std::endl;
-                        }
-                    } else {
-                        m_bConverged=false;
-                    }
-                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
-                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache1,
-                                                                          nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
-                                                                          nodeData.m_LambdaBack,
-                                                                          nodeData.m_LambdaFront,
-                                                                          nodeData.m_G_ii,
-                                                                          m_Settings.m_AbsTol,
-                                                                          m_Settings.m_RelTol);
-                        if(!nodeData.m_bConverged ) {
-                            //converged stays false;
-                            // Set global Converged = false;
-                            m_bConverged = false;
-                        }
-                    } else {
-                        m_bConverged=false;
-                    }
-                }
+//                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
+//                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
+//                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
+//                        if(!nodeData.m_bConverged ) {
+//                            //converged stays false;
+//                            // Set global Converged = false;
+//                            m_bConverged = false;
+//                            *m_pSolverLog << "m_bConverged = false;"<<std::endl;
+//                        }
+//                    } else {
+//                        m_bConverged=false;
+//                    }
+//                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
+//                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
+//                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache1,
+//                                                                          nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
+//                                                                          nodeData.m_LambdaBack,
+//                                                                          nodeData.m_LambdaFront,
+//                                                                          nodeData.m_G_ii,
+//                                                                          m_Settings.m_AbsTol,
+//                                                                          m_Settings.m_RelTol);
+//                        if(!nodeData.m_bConverged ) {
+//                            //converged stays false;
+//                            // Set global Converged = false;
+//                            m_bConverged = false;
+//                        }
+//                    } else {
+//                        m_bConverged=false;
+//                    }
+//                }
 
             }
             // SECOND BODY
             if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
-                uCache2 = nodeData.m_u2BufferPtr->m_front;
-                nodeData.m_u2BufferPtr->m_front = nodeData.m_u2BufferPtr->m_front  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
                 #if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
+                    LOG(m_pSolverLog, "\t---> body1.massInv: " << nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag << std::endl;)
+                    LOG(m_pSolverLog, "\t---> body1.h_term: " << nodeData.m_pCollData->m_pBody2->m_h_term << std::endl;)
                 #endif
 
-                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
-                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache2,
-                                                                  nodeData.m_u2BufferPtr->m_front,
-                                                                  m_Settings.m_AbsTol,
-                                                                  m_Settings.m_RelTol);
-                        if(!nodeData.m_bConverged ) {
-                            //converged stays false;
-                            // Set global Converged = false;
-                            m_bConverged = false;
-                        }
-                    } else {
-                        m_bConverged=false;
-                    }
+                uCache2 = nodeData.m_u2BufferPtr->m_front;
+                nodeData.m_u2BufferPtr->m_front = nodeData.m_u2BufferPtr->m_front
+                                                    + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal()
+                                                    * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
-                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
-                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
-                                                                          nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
-                                                                          nodeData.m_LambdaBack,
-                                                                          nodeData.m_LambdaFront,
-                                                                          nodeData.m_G_ii,
-                                                                          m_Settings.m_AbsTol,
-                                                                          m_Settings.m_RelTol);
-                        if(!nodeData.m_bConverged ) {
-                            //converged stays false;
-                            // Set global Converged = false;
-                            m_bConverged = false;
-                        }
-                    } else {
-                        m_bConverged=false;
-                    }
-                }
+                #if CoutLevelSolverWhenContact>2
+                LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
+                #endif
+
+//                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
+//                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
+//                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache2,
+//                                                                  nodeData.m_u2BufferPtr->m_front,
+//                                                                  m_Settings.m_AbsTol,
+//                                                                  m_Settings.m_RelTol);
+//                        if(!nodeData.m_bConverged ) {
+//                            //converged stays false;
+//                            // Set global Converged = false;
+//                            m_bConverged = false;
+//                        }
+//                    } else {
+//                        m_bConverged=false;
+//                    }
+//
+//                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
+//                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
+//                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
+//                                                                          nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
+//                                                                          nodeData.m_LambdaBack,
+//                                                                          nodeData.m_LambdaFront,
+//                                                                          nodeData.m_G_ii,
+//                                                                          m_Settings.m_AbsTol,
+//                                                                          m_Settings.m_RelTol);
+//                        if(!nodeData.m_bConverged ) {
+//                            //converged stays false;
+//                            // Set global Converged = false;
+//                            m_bConverged = false;
+//                        }
+//                    } else {
+//                        m_bConverged=false;
+//                    }
+//                }
             }
 
-            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InLambda) {
-                if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-                    nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol);
-                    if(!nodeData.m_bConverged) {
-                        //converged stays false;
-                        // Set global Converged = false;
-                        m_bConverged = false;
-                    }
-                } else {
-                    m_bConverged=false;
-                }
-            }
+//            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InLambda) {
+//                if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
+//                    nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol);
+//                    if(!nodeData.m_bConverged) {
+//                        //converged stays false;
+//                        // Set global Converged = false;
+//                        m_bConverged = false;
+//                    }
+//                } else {
+//                    m_bConverged=false;
+//                }
+//            }
 
             // Swap Lambdas, but dont swap Velocities...
             // Swap velocities when we finished ONE Sor Prox Iteration! (very important!)
@@ -260,19 +276,19 @@ public:
             //LOG(m_pSolverLog, node.getLInvMatrix() << std::endl;);
         #endif
 
-        node.m_LambdaFront = node.getLInvMatrix() * -1*node.m_gamma;
+        node.m_deltaLambda = node.getLInvMatrix() *-1*node.m_gamma;
 
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << node.m_LambdaFront.transpose() << std::endl;);
+            LOG(m_pSolverLog, "\t---> nd.m_deltaLambda: " << node.m_deltaLambda.transpose() << std::endl;);
         #endif
 
         //Propagate billateral forces to velocities:
         // The sign is contained in the m_multiplicityWeights vector
-        // u_G_End = uBack + M_G⁻¹ * W_M * Lambda_M
+        // u_G_End = uBack + M_G⁻¹ * W_M * deltaLambda_M
 
         node.m_uFront.setZero();
-        node.m_uFront.head(NDOFuBody*node.m_nConstraints) = node.m_LambdaFront;
-        node.m_uFront.template segment(NDOFuBody,NDOFuBody*node.m_nConstraints) -= node.m_LambdaFront;
+        node.m_uFront.segment(0,NDOFuBody*node.m_nConstraints) = node.m_deltaLambda;
+        node.m_uFront.template segment(NDOFuBody,NDOFuBody*node.m_nConstraints) -= node.m_deltaLambda;
         for(int i = 0; i<mult; i++){
             node.m_uFront.segment(NDOFuBody*i,NDOFuBody) *= 1.0 / node.m_multiplicityWeights(i);
         }
@@ -410,7 +426,7 @@ public:
 
         node.m_uBack.setZero(NDOFuBody*mult);
         node.m_uFront.setZero(NDOFuBody*mult);
-        node.m_LambdaFront.setZero( NDOFuBody * node.m_nConstraints);
+        node.m_deltaLambda.setZero( NDOFuBody * node.m_nConstraints);
         node.m_gamma.setZero(node.m_nConstraints*NDOFuBody);
     }
 

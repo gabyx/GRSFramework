@@ -216,8 +216,9 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
 #if CoutLevelSolverWhenContact>0
     LOG(m_pSolverLog,  "---> Finalize Prox " <<std::endl; );
-    finalizeSorProx();
 #endif
+
+    finalizeSorProx();
 
 }
 
@@ -243,6 +244,10 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
     m_pSorProxInitNodeVisitor->setParams(alpha);
 
+
+
+
+
     // Init local nodes
     m_pContactGraph->applyNodeVisitorLocal(*m_pSorProxInitNodeVisitor);
 
@@ -251,7 +256,6 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
     // Init SplitBodyNodes has already been done during communication!
     //m_pContactGraph->applyNodeVisitorSplitBody(*m_pSorProxInitSplitBodyNodeVisitor);
-
 
 
     // Set the initial u_0 for the prox iteration in the velocities for LOCAL BODIES!
@@ -266,6 +270,7 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
     // The initialization of the front velocity for all remote bodies taking part in a split body node
     // has already been done in the communication step before
+
 
 
 
@@ -290,7 +295,7 @@ void InclusionSolverCONoG::doSorProx() {
         #if CoutLevelSolverWhenContact>1
             LOG(m_pSolverLog,"---> Next iteration: "<< m_globalIterationCounter << std::endl);
         #endif
-        sorProxOverAllNodes(); // Do one Sor Prox Iteration
+        sorProxOverAllNodes(); // Do one global Sor Prox Iteration
 
         #if CoutLevelSolverWhenContact>2
         LOG(m_pSolverLog, " u_e = [ ");
@@ -335,52 +340,52 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
     m_pInclusionComm->communicateSplitBodySolution(m_globalIterationCounter);
 
 
-    // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
-    bool converged;
-    if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocity) {
-        //std::cout << "Bodies: " << m_pContactGraph->m_SimBodyToContactsList.size() << std::endl;
-        for(auto it=m_pContactGraph->m_SimBodyToContactsList.begin(); it !=m_pContactGraph->m_SimBodyToContactsList.end(); it++) {
-            if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-                //std::cout << "before Criteria"<<std::endl;
-                //std::cout <<"new "<< it->first->m_pSolverData->m_uBuffer.m_front.transpose() << std::endl;
-                //std::cout <<"old "<< it->first->m_pSolverData->m_uBuffer.m_back.transpose() << std::endl;
-                converged = Numerics::cancelCriteriaValue(it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
-                            it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
-                            m_Settings.m_AbsTol,
-                            m_Settings.m_RelTol);
-                //std::cout << "after Criteria"<<std::endl;
-                if(!converged) {
-                    m_bConverged=false;
-                }
-
-            } else {
-                m_bConverged=false;
-            }
-            // Do not switch Velocities (for next Sor Prox Iteration)
-            // Just fill back buffer with new values!
-            it->first->m_pSolverData->m_uBuffer.m_back = it->first->m_pSolverData->m_uBuffer.m_front;
-        }
-    }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyVelocity){
-        for(auto it=m_pContactGraph->m_SimBodyToContactsList.begin(); it !=m_pContactGraph->m_SimBodyToContactsList.end(); it++) {
-            if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-
-                converged = Numerics::cancelCriteriaMatrixNorm( it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
-                                                                it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
-                                                                it->first->m_MassMatrix_diag,
-                                                                m_Settings.m_AbsTol,
-                                                                m_Settings.m_RelTol);
-                if(!converged) {
-                    m_bConverged=false;
-                }
-
-            } else {
-                m_bConverged=false;
-            }
-            // Do not switch Velocities (for next Sor Prox Iteration)
-            // Just fill back buffer with new values! for next global iteration
-            it->first->m_pSolverData->m_uBuffer.m_back = it->first->m_pSolverData->m_uBuffer.m_front;
-        }
-    }
+//    // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
+//    bool converged;
+//    if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocity) {
+//        //std::cout << "Bodies: " << m_pContactGraph->m_SimBodyToContactsList.size() << std::endl;
+//        for(auto it=m_pContactGraph->m_SimBodyToContactsList.begin(); it !=m_pContactGraph->m_SimBodyToContactsList.end(); it++) {
+//            if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
+//                //std::cout << "before Criteria"<<std::endl;
+//                //std::cout <<"new "<< it->first->m_pSolverData->m_uBuffer.m_front.transpose() << std::endl;
+//                //std::cout <<"old "<< it->first->m_pSolverData->m_uBuffer.m_back.transpose() << std::endl;
+//                converged = Numerics::cancelCriteriaValue(it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
+//                            it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
+//                            m_Settings.m_AbsTol,
+//                            m_Settings.m_RelTol);
+//                //std::cout << "after Criteria"<<std::endl;
+//                if(!converged) {
+//                    m_bConverged=false;
+//                }
+//
+//            } else {
+//                m_bConverged=false;
+//            }
+//            // Do not switch Velocities (for next Sor Prox Iteration)
+//            // Just fill back buffer with new values!
+//            it->first->m_pSolverData->m_uBuffer.m_back = it->first->m_pSolverData->m_uBuffer.m_front;
+//        }
+//    }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyVelocity){
+//        for(auto it=m_pContactGraph->m_SimBodyToContactsList.begin(); it !=m_pContactGraph->m_SimBodyToContactsList.end(); it++) {
+//            if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
+//
+//                converged = Numerics::cancelCriteriaMatrixNorm( it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
+//                                                                it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
+//                                                                it->first->m_MassMatrix_diag,
+//                                                                m_Settings.m_AbsTol,
+//                                                                m_Settings.m_RelTol);
+//                if(!converged) {
+//                    m_bConverged=false;
+//                }
+//
+//            } else {
+//                m_bConverged=false;
+//            }
+//            // Do not switch Velocities (for next Sor Prox Iteration)
+//            // Just fill back buffer with new values! for next global iteration
+//            it->first->m_pSolverData->m_uBuffer.m_back = it->first->m_pSolverData->m_uBuffer.m_front;
+//        }
+//    }
 
 
 }
@@ -391,9 +396,9 @@ void InclusionSolverCONoG::finalizeSorProx(){
     // Set all weightings of remote and local bodies back to the original!
     #if CoutLevelSolverWhenContact>0
     LOG(m_pSolverLog,  "---> Reset All Weigths" <<std::endl;);
-    m_pInclusionComm->resetAllWeightings();
     #endif
 
+    m_pInclusionComm->resetAllWeightings();
 }
 
 std::string  InclusionSolverCONoG::getIterationStats() {

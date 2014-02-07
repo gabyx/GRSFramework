@@ -592,6 +592,9 @@ public:
 
         #if CoutLevelSolverWhenContact>2
             LOG(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED){
+               LOG(m_pSolverLog, "---> Sim<->Sim Node:"<<  std::endl);
+            }
         #endif
 
         if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
@@ -620,7 +623,7 @@ public:
 
 #if CoutLevelSolverWhenContact>2
             LOG(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
-            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront Front: " << nodeData.m_LambdaFront.transpose() << std::endl);
+            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << nodeData.m_LambdaFront.transpose() << std::endl);
             if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol)){
               *m_pSolverLog <<"\t---> Lambda converged"<<std::endl;
             }
@@ -675,7 +678,7 @@ public:
                 nodeData.m_u2BufferPtr->m_front = nodeData.m_u2BufferPtr->m_front  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
                 #if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
+                LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
                 #endif
 
                 if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
@@ -727,7 +730,6 @@ public:
             }
 
             // Swap Lambdas, but dont swap Velocities...
-            // Swap velocities when we finished ONE Sor Prox Iteration! (very important!)
             nodeData.swapLambdas();
 
 

@@ -19,25 +19,25 @@ public:
     }
 
 
-    void operator()(boost::shared_ptr<const SphereGeometry > & sphereGeom) {
+    inline void operator()(boost::shared_ptr<const SphereGeometry > & sphereGeom) {
         return;
     }
 
-    void operator()(boost::shared_ptr<const BoxGeometry > & box)  {
+    inline void operator()(boost::shared_ptr<const BoxGeometry > & box)  {
         addGyroTerm();
     }
 
-    void operator()(boost::shared_ptr<const MeshGeometry > & box) {
+    inline void operator()(boost::shared_ptr<const MeshGeometry > & box) {
         addGyroTerm();
     }
 
-    void operator()(boost::shared_ptr<const HalfspaceGeometry > & halfspace) {
+    inline void operator()(boost::shared_ptr<const HalfspaceGeometry > & halfspace) {
         addGyroTerm();
     }
 
     private:
 
-    void addGyroTerm(){
+    inline void addGyroTerm(){
         Vector3 K_omega_IK = m_rigidBody->m_pSolverData->m_uBuffer.m_back.tail<3>();
         m_rigidBody->m_h_term.tail<3>() -= K_omega_IK.cross((m_rigidBody->m_K_Theta_S.asDiagonal() * K_omega_IK).eval());
     }

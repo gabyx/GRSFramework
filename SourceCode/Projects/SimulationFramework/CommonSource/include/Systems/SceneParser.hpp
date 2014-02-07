@@ -192,6 +192,8 @@ protected:
                 throw ticpp::Exception("---> String conversion in SceneSettings: gravity failed");
             }
 
+            m_pDynSys->m_gravityDir.normalize();
+
             ticpp::Element *timestepElement = sceneSettings->FirstChild("TimeStepperSettings",true)->ToElement();
 
             TimeStepperSettings timestepperSettings;

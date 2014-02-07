@@ -37,7 +37,7 @@ namespace RigidBodyFunctions {
     void changeBodyToNormalWeighting(TRigidBody * body){
             ASSERTMSG( body->m_pSolverData, "Body id: " << RigidBodyId::getBodyIdString(body->m_id) << "no solver data!");
             ASSERTMSG( body->m_pSolverData->m_multiplicity != 1, "Body id: "
-                      << RigidBodyId::getBodyIdString(body->m_id) << " has multiplcity : "
+                      << RigidBodyId::getBodyIdString(body->m_id) << " has multiplicity : "
                       << body->m_pSolverData->m_multiplicity)
 
             body->m_h_term *= 1.0/body->m_pSolverData->m_multiplicityWeight;  // h_i * 1/alpha_i = h

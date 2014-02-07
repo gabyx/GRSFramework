@@ -27,7 +27,7 @@ public:
 
     bool addRank(const RankIdType & rank) {
 
-        auto pairRes = m_partRanks.insert( std::make_pair(rank,  Flags(m_partRanks.size()) ) );
+        auto pairRes = m_partRanks.insert( std::make_pair(rank,  Flags(m_partRanks.size()+1) ) );
 
         m_nConstraints +=1; //Increase lambda by 1 (one more constraint)
 
@@ -41,20 +41,20 @@ public:
     inline PREC getMultiplicityWeight(const RankIdType rank){
         auto it = m_partRanks.find(rank);
         ASSERTMSG(it!=m_partRanks.end(), "Requested a weight for a non participating rank "<< rank << std::endl)
-        return m_multiplicityWeights(it->second.m_splitBodyIdx+1); // First weight belongs to local owner
+        return m_multiplicityWeights(it->second.m_splitBodyIdx); // First weight belongs to local owner
     }
     inline void getMultiplicityAndWeight(const RankIdType rank, unsigned int & mult, PREC & multWeight){
         mult = getMultiplicity();
         auto it = m_partRanks.find(rank);
         ASSERTMSG(it!=m_partRanks.end(), "Requested a weight for a non participating rank "<< rank << std::endl);
-        multWeight = m_multiplicityWeights(it->second.m_splitBodyIdx+1); // First weight belongs to local owner
+        multWeight = m_multiplicityWeights(it->second.m_splitBodyIdx); // First weight belongs to local owner
     }
 
     inline void updateVelocity(const RankIdType rank, const VectorUBody & u){
         auto it = m_partRanks.find(rank);
         ASSERTMSG(it!=m_partRanks.end(), "Rank: " << rank << " is not contained in the SplitBodyNode for body id: " << RigidBodyId::getBodyIdString(m_pBody));
         it->second.m_bGotUpdate = true;
-        m_uBack.segment<NDOFuBody>(NDOFuBody * (it->second.m_splitBodyIdx+1)) = u;
+        m_uBack.segment<NDOFuBody>(NDOFuBody * (it->second.m_splitBodyIdx)) = u;
     }
 
     /** m_splitBodyIdx is the internal number which is used in all subscripts in the comments in this class*/
@@ -82,8 +82,7 @@ public:
     VectorDyn m_uBack;  ///                            Local Velocity-------*
     VectorDyn m_uFront; ///< all velocities of all split bodies m_u_G = [  u_0 , u_1,u_2,u_3,u_4...], correspond to rank in vector
 
-    //VectorDyn m_LambdaBack;  ///< Bilateral Lambda (Lambda_M_tilde = M⁻¹*Lambda_M
-    VectorDyn m_LambdaFront; ///< Bilateral Lambda (Lambda_M_tilde = M⁻¹*Lambda_M
+    VectorDyn m_deltaLambda; ///< Bilateral Lambda (Lambda_M_tilde = M⁻¹*(Lambda_M^k+1-Lambda_M^k-1)
     unsigned int m_nConstraints; ///< How many bilateral constraints between bodies we have, currently = m_partRanks.size()
 
     VectorDyn m_gamma; ///< Gamma = [u_0-u_1, u_1-u_2, u_2-_u3,..., u_n-1 - u_n, ], u_0 is always the velocity of the owner!

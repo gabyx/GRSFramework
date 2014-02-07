@@ -310,11 +310,19 @@ void PlaybackState::setupScene() {
 
 
     Ogre::Light* pLight = m_pSceneMgr->createLight("Light");
-    pLight->setType(Ogre::Light::LT_POINT);
+    pLight->setType(Ogre::Light::LT_DIRECTIONAL);
     pLight->setDirection(Ogre::Vector3(-1,-1,-1));
-    pLight->setDiffuseColour((Ogre::Real)0.9,(Ogre::Real) 0.9,(Ogre::Real) 0.9);
+    pLight->setDiffuseColour((Ogre::Real)0.8,(Ogre::Real) 0.8,(Ogre::Real) 0.8);
     pLight->setPosition( 75, 75, 300 );
-    pLight->setCastShadows(true);
+    //pLight->setAttenuation(5000000,0,0.1,0);
+    //pLight->setCastShadows(true);
+
+    pLight = m_pSceneMgr->createLight("Light2");
+    pLight->setType(Ogre::Light::LT_DIRECTIONAL);
+    pLight->setDirection(Ogre::Vector3(1,1,-1));
+    pLight->setDiffuseColour((Ogre::Real)0.8,(Ogre::Real) 0.8,(Ogre::Real) 0.8);
+    pLight->setPosition( -75, -75, 300 );
+    pLight->setCastShadows(false);
 
     // Set Shadow Technique
     m_pSceneMgr->setAmbientLight(Ogre::ColourValue(0.7, 0.7, 0.7));

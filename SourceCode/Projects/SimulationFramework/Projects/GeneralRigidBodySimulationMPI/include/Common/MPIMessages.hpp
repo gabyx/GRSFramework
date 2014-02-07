@@ -624,10 +624,10 @@ private:
         //Velocity
         LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "No SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "!");
 
-        // if(Archive::is_loading::value) {
-        //Reset solver data, we are updating a remote
-        //body->m_pSolverData->reset();
-        // }
+         if(Archive::is_loading::value) {
+            //Reset solver data, we are updating a remote
+            body->m_pSolverData->reset();
+         }
         serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
 
         ar & body->m_pSolverData->m_t;

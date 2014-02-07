@@ -47,7 +47,7 @@ ContactGraphNodeDataSplitBody::LInvMatrices::LInvMatrices(){
     #include BOOST_PP_LOCAL_ITERATE()
 
 
-    // open file and dump matrices :-)
+//    // open file and dump matrices :-)
 //    MPI_Init(0,0);
 //    int rank;
 //    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
@@ -55,8 +55,8 @@ ContactGraphNodeDataSplitBody::LInvMatrices::LInvMatrices(){
 //    s << "LMatrixDump" << rank << ".txt";
 //    std::ofstream f(s.str(),std::ios::trunc);
 //
-//    for(int i=0; i< L.size(); i++){
-//        f <<"L"<<i+2<< ":"<< std::endl << L[i] << std::endl;
+//    for(int i=0; i< LInv.size(); i++){
+//        f <<"LInv"<<i+2<< ":"<< std::endl << LInv[i] << std::endl;
 //    }
 //
 //    MPI_Finalize();

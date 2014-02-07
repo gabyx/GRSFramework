@@ -82,13 +82,16 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_back.head<3>();
         pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_back.tail<3>();
 
+        //Normalize Quaternion
+        pBody->m_q_KI.normalize();
+
         // Update Transformation A_IK
         setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
 
         // Add in to h-Term ==========
         pBody->m_h_term = pBody->m_h_term_const;
-//        LOG(m_pSolverLog, "Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
-//            << "m_h_term= "  <<pBody->m_h_term<<std::endl)
+        LOG(m_pSolverLog, "Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
+            << "m_h_term= "  <<pBody->m_h_term<<std::endl)
         // =========================
 
         // Term omega x Theta * omega = if Theta is diagonal : for a Spehere for example!

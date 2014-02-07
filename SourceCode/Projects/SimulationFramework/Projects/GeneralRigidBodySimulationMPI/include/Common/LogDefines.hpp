@@ -79,10 +79,10 @@
   #define CoutLevelSolver 3            ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
   #define CoutLevelSolverWhenContact 3 ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
   #define LogToFileSolver 1            ///< {0,1} Determines if logstream is saved into a file.
-  #define LogToConsoleSolver 1         ///< {0,1} Determines if logstream is outputted into console.
+  #define LogToConsoleSolver 0         ///< {0,1} Determines if logstream is outputted into console.
 #else
-  #define CoutLevelSolver 2
-  #define CoutLevelSolverWhenContact 1
+  #define CoutLevelSolver 3
+  #define CoutLevelSolverWhenContact 3
   #define LogToFileSolver 1
   #define LogToConsoleSolver 0
 #endif
