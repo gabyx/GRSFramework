@@ -130,7 +130,8 @@ void MoreauTimeStepper::reset() {
     m_bIterationFinished = false;
 
     m_pSimulationLog->logMessage("---> Reset StatePool...");
-    m_pStatePool->resetStatePool(); // Sets initial values to front and back;
+
+    m_pStatePool->resetStatePool(m_pDynSys->m_simBodiesInitStates); // Sets initial values to front and back;
     m_StateBuffers = m_pStatePool->getFrontBackBuffer();
 
     m_pSimulationLog->logMessage("---> Reset DynamicsSystem...");
@@ -143,7 +144,7 @@ void MoreauTimeStepper::reset() {
     m_pSimulationLog->logMessage("---> Reset InclusionSolver...");
     m_pInclusionSolver->reset();
 
-     if(m_Settings.m_eSimulateFromReference != TimeStepperSettings::NONE) {
+    if(m_Settings.m_eSimulateFromReference != TimeStepperSettings::NONE) {
 
         if(!m_ReferenceSimFile.openRead(m_Settings.m_simStateReferenceFile,m_nSimBodies,true)) {
             std::stringstream error;
@@ -158,14 +159,16 @@ void MoreauTimeStepper::reset() {
             //Inject the end state into the front buffer
             m_ReferenceSimFile.getEndState(*m_StateBuffers.m_pFront);
             LOG(m_pSimulationLog,"---> Injected first state of Reference SimFile into StateBuffer"<<std::endl);
+            m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
         }
 
+    }else{
+        // Apply all init states to the bodies!
+        m_pDynSys->applyInitStatesToBodies();
     }
 
     //m_ReferenceSimFile.writeOutAllStateTimes();
 
-    //Write the Front buffer which contains the initial values to all bodies!
-    m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
 
     m_AvgTimeForOneIteration = 0;
     m_MaxTimeForOneIteration = 0;

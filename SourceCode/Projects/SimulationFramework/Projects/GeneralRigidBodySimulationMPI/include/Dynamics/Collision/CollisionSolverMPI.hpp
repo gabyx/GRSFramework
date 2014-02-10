@@ -113,7 +113,7 @@ protected:
                           ///< Expected number of Contacts.
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodySimContainerType & m_RemoteSimBodies;
-    typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;           ///< List of all fixed not simulated bodies.
+    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;           ///< List of all fixed not simulated bodies.
 
 
     Collider m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.

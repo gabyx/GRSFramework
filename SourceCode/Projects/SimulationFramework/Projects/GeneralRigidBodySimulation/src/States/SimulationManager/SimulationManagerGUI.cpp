@@ -105,7 +105,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added StateRecorder... ");
 
 
-    m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());
+    m_pSharedBuffer->resetStatePool(m_pDynSys->m_simBodiesInitStates);
     m_pSceneParser->cleanUp(); // Take care this cleans all stuff
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBuffer... ");
 

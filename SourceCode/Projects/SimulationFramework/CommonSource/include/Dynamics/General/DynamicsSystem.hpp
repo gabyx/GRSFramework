@@ -44,14 +44,21 @@ public:
     GlobalGeometryMapType m_globalGeometries;
 
     // All RigidBodies which are owned by this class!
-    typedef RigidBodyContainer RigidBodySimContainerType;
+    typedef RigidBodyContainer RigidBodyContainerType;
+    typedef RigidBodyContainerType RigidBodySimContainerType;
     RigidBodySimContainerType m_SimBodies;    // Simulated Objects
-    typedef RigidBodySimContainerType RigidBodyNotAniContainer;
-    RigidBodyNotAniContainer m_Bodies;    // all not simulated objects
+    typedef RigidBodySimContainerType RigidBodyStaticContainer;
+    RigidBodyStaticContainer m_Bodies;    // all not simulated objects
+
+    //All initial conditions for all bodies
+    //We need an order, which is sorted according to the id!
+    typedef std::unordered_map<RigidBodyIdType, RigidBodyState> RigidBodyStatesContainerType;
+    RigidBodyStatesContainerType m_simBodiesInitStates;
+
 
     void initializeLog(Logging::Log* pLog);
 
-
+    inline void applyInitStatesToBodies();
     inline void applySimBodiesToDynamicsState(DynamicsState & state);
     inline void applyDynamicsStateToSimBodies(const DynamicsState & state);
 
@@ -88,13 +95,18 @@ protected:
     std::stringstream logstream;
 };
 
+inline void DynamicsSystem::applyInitStatesToBodies(){
+    // Apply all init states to the sim bodies
+    InitialConditionBodies::applyRigidBodyStatesToBodies(m_SimBodies, m_simBodiesInitStates);
+}
 
 inline void DynamicsSystem::applySimBodiesToDynamicsState(DynamicsState & state) {
     InitialConditionBodies::applyBodiesToDynamicsState<RigidBodyType, RigidBodySimContainerType>(m_SimBodies,state);
 }
 
 inline void DynamicsSystem::applyDynamicsStateToSimBodies(const DynamicsState & state) {
-    InitialConditionBodies::applyDynamicsStateToBodies<RigidBodyType, RigidBodySimContainerType>(state,m_SimBodies);
+    ERRORMSG("NOT USED")
+    //InitialConditionBodies::applyDynamicsStateToBodies<RigidBodyType, RigidBodySimContainerType>(state,m_SimBodies);
 }
 
 #endif

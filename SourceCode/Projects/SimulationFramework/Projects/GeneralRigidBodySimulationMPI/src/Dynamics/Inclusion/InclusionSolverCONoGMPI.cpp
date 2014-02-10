@@ -129,7 +129,7 @@ void InclusionSolverCONoG::resetForNextIter() {
 
 
 
-void InclusionSolverCONoG::solveInclusionProblem() {
+void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
 
 #if CoutLevelSolver>1
     LOG(m_pSolverLog,  "---> solveInclusionProblem(): "<< std::endl;);
@@ -140,6 +140,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
     auto & nodesSplitBody = m_pContactGraph->getSplitBodyNodeListRef();
 
     // Standart values
+    m_currentSimulationTime = currentSimulationTime;
     m_globalIterationCounter = 0;
     m_bConverged = false; // Set true later, if one node is not converged then 0! and we do one more loop
     m_isFinite = -1;
@@ -152,7 +153,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
     #if CoutLevelSolverWhenContact>1
         LOG(m_pSolverLog,  "MPI> Communicate Remote Contacts (splitted bodies)" << std::endl; );
     #endif
-    m_pInclusionComm->communicateRemoteContacts();
+    m_pInclusionComm->communicateRemoteContacts(m_currentSimulationTime);
 
     // All detected contacts in ths process
     m_nContactsLocal = nodesLocal.size();
@@ -212,13 +213,16 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 #if CoutLevelSolverWhenContact>0
         LOG(m_pSolverLog,  "---> Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
 #endif
-    }
 
 #if CoutLevelSolverWhenContact>0
     LOG(m_pSolverLog,  "---> Finalize Prox " <<std::endl; );
 #endif
 
     finalizeSorProx();
+
+    }
+
+
 
 }
 
@@ -244,10 +248,6 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
     m_pSorProxInitNodeVisitor->setParams(alpha);
 
-
-
-
-
     // Init local nodes
     m_pContactGraph->applyNodeVisitorLocal(*m_pSorProxInitNodeVisitor);
 
@@ -268,10 +268,8 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
         (*bodyIt)->m_pSolverData->m_uBuffer.m_back = (*bodyIt)->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
     }
 
-    // The initialization of the front velocity for all remote bodies taking part in a split body node
-    // has already been done in the communication step before
 
-
+    m_pInclusionComm->initRemoteBodyVelocities();
 
 
 }

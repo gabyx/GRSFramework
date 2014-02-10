@@ -383,7 +383,7 @@ void MoreauTimeStepper::doOneIteration() {
     //Solve Contact Problem
     //boost::thread::yield();
     m_startTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
-    m_pInclusionSolver->solveInclusionProblem();
+    m_pInclusionSolver->solveInclusionProblem(m_currentSimulationTime);
     m_endTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
 
     //boost::this_thread::sleep(boost::posix_time::milliseconds(1000));

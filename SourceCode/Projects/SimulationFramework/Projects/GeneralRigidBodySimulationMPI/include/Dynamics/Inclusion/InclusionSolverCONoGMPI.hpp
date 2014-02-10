@@ -57,11 +57,12 @@ public:
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
     void reset();
     void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
-    void solveInclusionProblem();
+    void solveInclusionProblem(PREC currentSimulationTime);
 
 
     std::string getIterationStats();
     std::string getStatsHeader();
+    PREC m_currentSimulationTime;
     unsigned int m_globalIterationCounter;
     bool m_bConverged;
     unsigned int m_isFinite;
@@ -118,7 +119,7 @@ protected:
 
 
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;
+    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;
 
     void integrateAllBodyVelocities();
     void initContactGraphForIteration(PREC alpha);

@@ -40,11 +40,12 @@ InclusionCommunicator<Combo>::InclusionCommunicator(boost::shared_ptr< BodyCommu
     m_pSimulationLog->logMessage("---> Initialized InclusionCommunicator<Combo>");
 }
 template<typename Combo>
-void InclusionCommunicator<Combo>::communicateRemoteContacts() {
+void InclusionCommunicator<Combo>::communicateRemoteContacts(PREC currentSimulationTime) {
+
+    m_currentSimulationTime = m_currentSimulationTime;
 
     m_nbRanksSendRecvLocal.clear();
     m_nbRanksSendRecvRemote.clear();
-
 
 
     // First for each neighbour, communicate the ids of all remote body which have contacts
@@ -52,7 +53,6 @@ void InclusionCommunicator<Combo>::communicateRemoteContacts() {
     sendContactMessageToNeighbours();
     receiveContactMessagesFromNeighbours();
 
-    ///CHECKED OK
 
     //Init all weights on the nodes
     LOGIC(m_pSimulationLog,"\t---> Compute Multiplicities"<< std::endl;)
@@ -132,8 +132,27 @@ void InclusionCommunicator<Combo>::resetAllWeightings() {
 }
 
 template<typename Combo>
+void InclusionCommunicator<Combo>::initRemoteBodyVelocities() {
+    for(auto nbIt = m_nbDataMap.begin(); nbIt != m_nbDataMap.end(); nbIt++){
+        for( auto remoteIt = nbIt->second.remoteBegin(); remoteIt != nbIt->second.remoteEnd(); remoteIt++){
+
+            auto * remoteBody = remoteIt->second.m_pBody;
+
+            // Only add the terms, velocity contains already initial contribution from contacts
+            remoteBody->m_pSolverData->m_uBuffer.m_front += remoteBody->m_pSolverData->m_uBuffer.m_back +
+                            remoteBody->m_MassMatrixInv_diag.asDiagonal()  *  remoteBody->m_h_term * m_Settings.m_deltaT;
+            remoteBody->m_pSolverData->m_uBuffer.m_back = remoteBody->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteri
+
+        }
+    }
+}
+
+
+template<typename Combo>
 void InclusionCommunicator<Combo>::sendContactMessageToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (EXTERNALCONTACTS_MESSAGE) to neighbours!"<<std::endl;)
+
+    m_messageContact.setTime(m_currentSimulationTime);
 
     for(auto it = m_nbRanks.begin(); it != m_nbRanks.end(); it++) {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
@@ -156,6 +175,8 @@ void InclusionCommunicator<Combo>::receiveContactMessagesFromNeighbours() {
 template<typename Combo>
 void InclusionCommunicator<Combo>::sendBodyMultiplicityMessageToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYFACTOR_MESSAGE) to neighbours!"<<std::endl;)
+
+    m_messageMultiplicity.setTime(m_currentSimulationTime);
 
     for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); it++) {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
@@ -185,6 +206,9 @@ template<typename Combo>
 void InclusionCommunicator<Combo>::sendUpdateSplitBodiesToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYUPDATE_MESSAGE) to neighbours!"<<std::endl;)
 
+    m_messageSplitBodyUpdate.setTime(m_currentSimulationTime);
+    m_messageSplitBodyUpdate.setStep(m_globalIterationNumber);
+
     for(auto it = m_nbRanksSendRecvRemote.begin(); it != m_nbRanksSendRecvRemote.end(); it++) {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
@@ -212,6 +236,9 @@ void InclusionCommunicator<Combo>::recvUpdateSplitBodiesFromNeighbours() {
 template<typename Combo>
 void InclusionCommunicator<Combo>::sendSolutionSplitBodiesToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYSOLUTION_MESSAGE) to neighbours!"<<std::endl;)
+
+    m_messageSplitBodySolution.setTime(m_currentSimulationTime);
+    m_messageSplitBodySolution.setStep(m_globalIterationNumber);
 
     for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); it++) {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)

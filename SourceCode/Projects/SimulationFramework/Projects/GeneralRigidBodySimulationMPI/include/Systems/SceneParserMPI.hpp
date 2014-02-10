@@ -102,19 +102,6 @@ public:
     }
 
 
-
-//    boost::filesystem::path getParsedSceneFile() {
-//        return m_currentParseFilePath;
-//    }
-//
-//    const std::vector< DynamicsState<LayoutConfigType> > & getInitialConditionSimBodies() {
-//        return m_SimBodyInitStates;
-//    }
-//
-//    unsigned int getNumberOfSimBodies() {
-//        return m_nSimBodies;
-//    }
-
     unsigned int getNumberOfGlobalSimBodies() {
         return m_nGlobalSimBodies;
     }

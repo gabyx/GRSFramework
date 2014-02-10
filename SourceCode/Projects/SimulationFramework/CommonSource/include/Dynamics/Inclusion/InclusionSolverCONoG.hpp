@@ -80,7 +80,7 @@ protected:
     boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
 
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;
+    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;
 
     typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
     ContactGraphType m_ContactGraph;

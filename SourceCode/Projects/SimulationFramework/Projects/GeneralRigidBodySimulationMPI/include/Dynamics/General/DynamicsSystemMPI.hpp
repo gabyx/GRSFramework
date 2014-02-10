@@ -46,12 +46,12 @@ public:
     GlobalGeometryMapType m_globalGeometries;
 
     // All global RigidBodies Container for this Process, these bodies which are owned by this class!"============================
-    typedef RigidBodyContainer RigidBodySimContainerType;
+    typedef RigidBodyContainer<RigidBodyType *> RigidBodySimContainerType;
     RigidBodySimContainerType m_SimBodies;        // simulated objects
     RigidBodySimContainerType m_RemoteSimBodies;  // all remote bodies
 
-    typedef RigidBodySimContainerType RigidBodyNotAniContainer;
-    RigidBodyNotAniContainer m_Bodies;        // all not simulated objects
+    typedef RigidBodySimContainerType RigidBodyStaticContainer;
+    RigidBodyStaticContainer m_Bodies;        // all not simulated objects
     // ============================================================================
 
 

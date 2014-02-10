@@ -17,57 +17,89 @@
 * gives the state for the back buffer and the first index is the state corresponding to the front buffer.
 * @{
 */
-class StatePoolVisBackFront : public StatePool{
+class StatePoolVisBackFront : public StatePool {
 public:
 
-  DECLERATIONS_STATEPOOL
+    DECLERATIONS_STATEPOOL
 
-  DEFINE_LAYOUT_CONFIG_TYPES
+    DEFINE_LAYOUT_CONFIG_TYPES
 
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  StatePoolVisBackFront(const unsigned int nSimBodies);
-  ~StatePoolVisBackFront();
+    StatePoolVisBackFront(const unsigned int nSimBodies);
+    ~StatePoolVisBackFront();
 
-  /** @name Only accessed by Simulation Thread.
-  * @{
-  */
-  typedef FrontBackBuffer<DynamicsState, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
+    /** @name Only accessed by Simulation Thread.
+    * @{
+    */
+    typedef FrontBackBuffer<DynamicsState, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
 
-  FrontBackBufferType getFrontBackBuffer();
-  FrontBackBufferType swapFrontBackBuffer();
-  /** @} */
+    FrontBackBufferType getFrontBackBuffer();
+    FrontBackBufferType swapFrontBackBuffer();
+    /** @} */
 
-  /** @name Only accessed by Visualization Thread.
-  * @{
-  */
-  boost::shared_ptr<const DynamicsState > updateVisBuffer(bool & out_changed);
-  boost::shared_ptr<const DynamicsState > updateVisBuffer();
-  /** @} */
+    /** @name Only accessed by Visualization Thread.
+    * @{
+    */
+    boost::shared_ptr<const DynamicsState > updateVisBuffer(bool & out_changed);
+    boost::shared_ptr<const DynamicsState > updateVisBuffer();
+    /** @} */
 
-  /** @name Only accessed by if only Visualization Thread runs.
-  * @{
-  */
-  void initializeStatePool(const DynamicsState & state_init);
-  void initializeStatePool(const std::vector<DynamicsState > & state_initList); ///< Used to initialize from a list of DynamicStates which count up to the number of simulated bodies.
-  void resetStatePool();
-  /** @} */
+    /** @name Only accessed by if only Visualization Thread runs.
+    * @{
+    */
+    template<typename RigidBodyStateContainerType>
+    void resetStatePool(const RigidBodyStateContainerType & state_init);
+    /** @} */
 
-  VectorUBody	getuInit(const unsigned idxObject);
-  void						setuInit(const VectorUBody & u, const unsigned idxObject);
-  VectorQBody	getqInit(const unsigned idxObject);
-  void						setqInit(const VectorQBody & q, const unsigned idxObject);
+//    VectorUBody	getuInit(const unsigned idxObject);
+//    void						setuInit(const VectorUBody & u, const unsigned idxObject);
+//    VectorQBody	getqInit(const unsigned idxObject);
+//    void						setqInit(const VectorQBody & q, const unsigned idxObject);
 
 protected:
-  std::ofstream m_logfile;
+    std::ofstream m_logfile;
 
-  const unsigned int m_nDofu, m_nDofq; // These are the global dimensions of q and u
-  const unsigned int m_nDofuBody, m_nDofqBody, m_nSimBodies; // These are the dimensions for one Obj
+    const unsigned int m_nDofu, m_nDofq; // These are the global dimensions of q and u
+    const unsigned int m_nDofuBody, m_nDofqBody, m_nSimBodies; // These are the dimensions for one Obj
 
-  boost::mutex	m_mutexStateInit; ///< Mutex for the initial state.
-  DynamicsState m_state_init; ///< The initial state for the system.
 };
 /** @} */
+
+
+template<typename RigidBodyStateContainerType>
+void StatePoolVisBackFront::resetStatePool(const RigidBodyStateContainerType & state_init) {
+
+    boost::mutex::scoped_lock l2(m_change_pointer_mutex);
+
+    //initialize state buffer pointers
+    m_idx[0] = 1; //front
+    m_idx[1] = 0; //back
+    m_idx[2] = 0; //vis
+
+
+    DynamicsState & state = *m_pool[0];
+
+    if( state_init.size() != state.m_SimBodyStates.size()) {
+        ERRORMSG(" initializeStatePool:: state_init has size: " << state_init.size() << "instead of " << state.m_SimBodyStates.size());
+    }
+    // Fill in the initial values
+    for(auto it = state_init.begin(); it!= state_init.end(); it++) {
+        unsigned int bodyNr = RigidBodyId::getBodyNr(it->first);
+        if( bodyNr > state.m_SimBodyStates.size()) {
+            ERRORMSG("body nr: " << bodyNr << " out of bound for DynamicState!")
+        }
+        state.m_SimBodyStates[bodyNr] =  it->second;
+    }
+
+    // Fill in the initial values
+    //*m_pool[0] = state;
+    *m_pool[1] = state;
+
+#if LogToFileStatePool == 1
+    m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
+#endif
+}
 
 
 #endif

@@ -593,7 +593,7 @@ public:
         #if CoutLevelSolverWhenContact>2
             LOG(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED){
-               LOG(m_pSolverLog, "---> Sim<->Sim Node:"<<  std::endl);
+               LOG(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
             }
         #endif
 

@@ -88,7 +88,7 @@ protected:
     boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;
+    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;
 
     typedef ContactGraph<ContactGraphMode::NoIteration> ContactGraphType;
     ContactGraphType m_ContactGraph;

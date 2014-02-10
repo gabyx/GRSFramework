@@ -87,6 +87,16 @@ public:
     const_iterator begin() const {return m_mapByInsertion.begin();}
     const_iterator end() const {return m_mapByInsertion.end();}
 
+    template<typename Iterator>
+    bool addBodies(Iterator beginIt, Iterator endIt){
+        for( auto it = beginIt; it!= endIt; it++){
+           auto res =  m_mapByHashedId.insert(*it);
+           if( res.second == false){
+                return false;
+           }
+        }
+        return true;
+    }
 
     bool addBody(RigidBodyType* ptr){
         std::pair<typename MapByHashedIdType::iterator,bool> res=  m_mapByHashedId.insert(ptr);

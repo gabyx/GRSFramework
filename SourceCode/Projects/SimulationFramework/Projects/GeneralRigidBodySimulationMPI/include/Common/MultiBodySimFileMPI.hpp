@@ -24,7 +24,7 @@
 
 #define SIM_FILE_MPI_VERSION 2
 
-#define SIM_FILE_MPI_EXTENSION ".simmpi"
+#define SIM_FILE_MPI_EXTENSION ".sim"
 
 class MultiBodySimFileMPI {
 public:

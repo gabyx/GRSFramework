@@ -86,7 +86,7 @@ bool PlaybackManager::setup() {
     m_pSharedBuffer = boost::shared_ptr<SharedBufferPlayback >(
                           new SharedBufferPlayback(m_nSimBodies)
                       );
-    m_pSharedBuffer->initializeStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
+    m_pSharedBuffer->resetStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
 
 
     m_pFileLoader = boost::shared_ptr< PlaybackLoader<StateRingPoolVisBackFront > >(
@@ -303,7 +303,7 @@ void PlaybackManager::threadRunSimulation() {
 
 void PlaybackManager::initSimThread() {
 
-    m_pSharedBuffer->resetStateRingPool();
+    m_pSharedBuffer->resetStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
 
     if(m_SettingsSimThread.m_bVideoDrop) {
         m_pVideoDropper->reset();

@@ -70,6 +70,8 @@ class SceneParser {
 public:
 
     DEFINE_CONFIG_TYPES
+    typedef DynamicsSystemType::RigidBodyStatesContainerType RigidBodyStatesContainerType;
+
 
     SceneParser(boost::shared_ptr<DynamicsSystemType> pDynSys)
         : m_pDynSys(pDynSys) {
@@ -100,7 +102,8 @@ public:
         m_nSimBodies = 0;
         m_nBodies = 0;
         m_bodyList.clear();
-        m_SimBodyInitStates.clear();
+        m_bodyListScales.clear();
+        m_bodyInitStates.clear();
 
 
         try {
@@ -120,9 +123,6 @@ public:
 
                 node = m_xmlRootNode->FirstChild("SceneObjects");
                 processSceneObjects(node);
-
-                /*ticpp::Node * initialConditionAll = m_xmlRootNode->FirstChild("InitialPositionLinear");
-                processinitialConditionAll(initialConditionAll);*/
 
                 processOtherOptions(m_xmlRootNode);
 
@@ -146,7 +146,7 @@ public:
 
      m_bodyList.clear();
      m_bodyListScales.clear();
-     m_SimBodyInitStates.clear();
+     m_bodyInitStates.clear();
 
     }
 
@@ -154,9 +154,9 @@ public:
         return m_currentParseFilePath;
     }
 
-    virtual const std::vector< DynamicsState > & getInitialConditionSimBodies() {
-        ASSERTMSG(m_SimBodyInitStates.size(), "m_SimBodyInitStates.size() contains no initial states!")
-        return m_SimBodyInitStates;
+    virtual const RigidBodyStatesContainerType & getInitialConditionSimBodies() {
+        ASSERTMSG(m_initStates.size(), "m_initStates.size() contains no initial states!")
+        return m_initStates;
     }
 
     virtual unsigned int getNumberOfSimBodies() {
@@ -358,6 +358,8 @@ protected:
         // Parse Global Geometries (also in playback manager)!
         processGlobalGeometries(sceneSettings);
 
+        processGlobalInitialCondition(sceneSettings);
+
     }
 
     virtual void processContactParameterMap(ticpp::Node *sceneSettings){
@@ -533,6 +535,15 @@ protected:
         }
     }
 
+    virtual void processGlobalInitialCondition( ticpp::Node *sceneSettings){
+        ticpp::Node *initCond = sceneSettings->FirstChild("GlobalInitialCondition",false);
+        if(initCond){
+            ticpp::Element *elem = initCond->ToElement();
+            boost::filesystem::path relpath = elem->GetAttribute("relpath");
+
+
+        }
+    }
 
     virtual void processSceneObjects( ticpp::Node *sceneObjects) {
 
@@ -560,6 +571,7 @@ protected:
         ticpp::Element* rigidBodiesEl = rigidbodies->ToElement();
 
         //Clear current body list;
+        m_bodyInitStates.clear();
         m_bodyList.clear();
         m_bodyListScales.clear();
 
@@ -623,23 +635,28 @@ protected:
 
         if(m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
             if(m_bParseDynamics) {
-                LOG(m_pSimulationLog,"---> Copy RigidBody References to DynamicSystem ..."<<std::endl;);
-                for(int i=0; i < m_bodyList.size(); i++) {
-                    if(! m_pDynSys->m_SimBodies.addBody(m_bodyList[i])){
-                        ERRORMSG("Could not add body to m_SimBodies! Id: " << RigidBodyId::getBodyIdString(m_bodyList[i]) << " already in map!");
-                    };
-                }
+                LOG(m_pSimulationLog,"---> Copy Simulated RigidBody References to DynamicSystem ..."<<std::endl;);
+
+                if(! m_pDynSys->m_SimBodies.addBodies(m_bodyList.begin(),m_bodyList.end())){
+                    ERRORMSG("Could not add body to m_SimBodies!, some bodies exist already in map!");
+                };
+
+                m_pDynSys->m_simBodiesInitStates.insert( m_bodyInitStates.begin(), m_bodyInitStates.end() );
+
             }
             m_nSimBodies += instances;
             m_nBodies += instances;
         } else if(m_eBodiesState == RigidBodyType::BodyState::STATIC) {
             if(m_bParseDynamics) {
-                LOG(m_pSimulationLog,"---> Copy RigidBody References to DynamicSystem ..."<<std::endl;);
-                for(int i=0; i < m_bodyList.size(); i++) {
-                    if(! m_pDynSys->m_Bodies.addBody(m_bodyList[i])){
-                        ERRORMSG("Could not add body to m_Bodies! Id: " << RigidBodyId::getBodyIdString(m_bodyList[i]) << " already in map!")
-                    };
-                }
+                LOG(m_pSimulationLog,"---> Copy Static RigidBody References to DynamicSystem ..."<<std::endl;);
+
+                if(! m_pDynSys->m_Bodies.addBodies(m_bodyList.begin(),m_bodyList.end())){
+                    ERRORMSG("Could not add body to m_SimBodies!, some bodies exist already in map!");
+                };
+
+                //m_pDynSys->m_simBodiesInitStates.insert( m_bodyInitStates.begin(), m_bodyInitStates.end() );
+            }else{
+                //m_initStates.insert( m_bodyInitStates.begin(), m_bodyInitStates.end() );
             }
             m_nBodies += instances;
         } else {
@@ -1225,22 +1242,30 @@ protected:
         }
 
          // InitialPosition ============================================================
+         // Fill as many initial states as needed!
+         for(int i=0; i < m_bodyList.size(); i++) {
+            auto res = m_bodyInitStates.insert( std::make_pair(m_bodyList[i]->m_id, RigidBodyState(m_bodyList[i]->m_id) ) );
+             if(!res.second){
+                std::stringstream s; s << "--->Initial State of body id: " << RigidBodyId::getBodyIdString(m_bodyList[i]) << " has already been added!";
+                throw ticpp::Exception(s.str());
 
-        m_SimBodyInitStates.push_back( DynamicsState((unsigned int)m_bodyList.size()));
+             }
+         }
 
         element = dynProp->FirstChild("InitialPosition")->ToElement();
         distribute = element->GetAttribute("distribute");
 
         if(distribute == "linear") {
-            processInitialPositionLinear(m_SimBodyInitStates.back(),element);
+            processInitialPositionLinear(element);
         } else if(distribute == "grid") {
-            processInitialPositionGrid(m_SimBodyInitStates.back(),element);
-        } else if(distribute == "file") {
-            processInitialPositionFile(m_SimBodyInitStates.back(),element);
-        } else if(distribute == "posaxisangle") {
-            processInitialPositionPosAxisAngle(m_SimBodyInitStates.back(),element);
+            processInitialPositionGrid(element);
+        }
+        else if(distribute == "posaxisangle") {
+            processInitialPositionPosAxisAngle(element);
         } else if(distribute == "transforms") {
-            processInitialPositionTransforms(m_SimBodyInitStates.back(),element);
+            processInitialPositionTransforms(element);
+        } else if(distribute == "generalized") {
+            //processInitialPositionGeneralized(element);
         } else if(distribute == "none") {
             // does nothing leaves the zero state pushed!
         } else {
@@ -1253,8 +1278,11 @@ protected:
             element = initVel->ToElement();
             distribute = element->GetAttribute("distribute");
 
-            if(distribute == "uniform") {
-                processInitialVelocityTransRot(m_SimBodyInitStates.back(),element);
+            if(distribute == "transrot") {
+                processInitialVelocityTransRot(element);
+            }
+            else if(distribute == "generalized") {
+                //processInitialVelocityGeneralized(element);
             } else if(distribute == "none") {
                 // does nothing leaves the zero state pushed!
             } else {
@@ -1262,8 +1290,7 @@ protected:
             }
         }
 
-        InitialConditionBodies::applyDynamicsStateToBodies<typename DynamicsSystemType::RigidBodyType,
-            std::vector<RigidBodyType*> >(m_SimBodyInitStates.back(), m_bodyList);
+        InitialConditionBodies::applyRigidBodyStatesToBodies(m_bodyList, m_bodyInitStates);
 
     }
 
@@ -1274,26 +1301,32 @@ protected:
         ticpp::Element *element = dynProp->FirstChild("InitialPosition")->ToElement();
         std::string distribute = element->GetAttribute("distribute");
 
-        DynamicsState state((unsigned int)m_bodyList.size());
+        // Fill as many initial states as needed!
+         for(int i=0; i < m_bodyList.size(); i++) {
+            auto res = m_bodyInitStates.insert( std::make_pair(m_bodyList[i]->m_id, RigidBodyState(m_bodyList[i]->m_id) ) );
+             if(!res.second){
+                std::stringstream s; s << "--->Initial State of body id: " << RigidBodyId::getBodyIdString(m_bodyList[i]) << " has already been added!";
+                throw ticpp::Exception(s.str());
+
+             }
+         }
+
         if(distribute == "linear") {
-            processInitialPositionLinear(state,element);
+            processInitialPositionLinear(element);
         } else if(distribute == "grid") {
-            processInitialPositionGrid(state,element);
-        } else if(distribute == "file") {
-            processInitialPositionFile(state,element);
+            processInitialPositionGrid(element);
         } else if(distribute == "posaxisangle") {
-            processInitialPositionPosAxisAngle(state,element);
+            processInitialPositionPosAxisAngle(element);
         } else if(distribute == "transforms") {
-            processInitialPositionTransforms(state,element);
+            processInitialPositionTransforms(element);
         } else if(distribute == "none") {
             // does nothing leaves the zero state pushed!
         } else {
             throw ticpp::Exception("---> The attribute 'distribute' '" + distribute + std::string("' of 'InitialPositionLinear' has no implementation in the parser"));
         }
 
-        InitialConditionBodies::applyDynamicsStateToBodies<
-            typename DynamicsSystemType::RigidBodyType,
-            std::vector<RigidBodyType*> >(state, m_bodyList);
+        InitialConditionBodies::applyRigidBodyStatesToBodies(m_bodyList, m_bodyInitStates);
+
 
         element = dynProp->FirstChild("Material")->ToElement();
         distribute = element->GetAttribute("distribute");
@@ -1314,7 +1347,7 @@ protected:
     }
 
 
-    virtual void processInitialPositionLinear(DynamicsState & state, ticpp::Element * initCond) {
+    virtual void processInitialPositionLinear(ticpp::Element * initCond) {
 
         Vector3 pos;
         if(!Utilities::stringToVector3<PREC>(pos, initCond->GetAttribute("position"))) {
@@ -1345,11 +1378,11 @@ protected:
             }
         }
 
-        InitialConditionBodies::setupPositionBodiesLinear(state,pos,dir,dist,jitter,delta,seed);
+        InitialConditionBodies::setupPositionBodiesLinear(m_bodyInitStates,pos,dir,dist,jitter,delta,seed);
 
     }
 
-    virtual void processInitialPositionGrid(DynamicsState & state, ticpp::Element * initCond) {
+    virtual void processInitialPositionGrid(ticpp::Element * initCond) {
 
         Vector3 trans;
         if(!Utilities::stringToVector3<PREC>(trans, initCond->GetAttribute("translation"))) {
@@ -1382,19 +1415,19 @@ protected:
             throw ticpp::Exception("---> String conversion in InitialPositionGrid: delta failed");
         }
 
-        InitialConditionBodies::setupPositionBodiesGrid(state,gridX,gridY,dist,trans,jitter,delta, seed);
+        InitialConditionBodies::setupPositionBodiesGrid(m_bodyInitStates,gridX,gridY,dist,trans,jitter,delta, seed);
     }
 
-    virtual void processInitialPositionFile(DynamicsState & state, ticpp::Element * initCond) {
-        m_SimBodyInitStates.push_back(DynamicsState((unsigned int)m_bodyList.size()));
+//    virtual void processInitialPositionFile(DynamicsState & state, ticpp::Element * initCond) {
+//        m_SimBodyInitStates.push_back(DynamicsState((unsigned int)m_bodyList.size()));
+//
+//        boost::filesystem::path name =  initCond->GetAttribute<std::string>("relpath");
+//
+//        boost::filesystem::path filePath = m_currentParseFileDir / name;
+//        InitialConditionBodies::setupPositionBodiesFromFile(state,filePath);
+//    }
 
-        boost::filesystem::path name =  initCond->GetAttribute<std::string>("name");
-
-        boost::filesystem::path filePath = m_currentParseFileDir / name;
-        InitialConditionBodies::setupPositionBodiesFromFile(state,filePath);
-    }
-
-    virtual void processInitialPositionPosAxisAngle(DynamicsState & state, ticpp::Element * initCond) {
+    virtual void processInitialPositionPosAxisAngle(ticpp::Element * initCond) {
 
         int bodyCounter = 0;
 
@@ -1406,7 +1439,7 @@ protected:
         ticpp::Iterator< ticpp::Element > valueElem("Value");
         for ( valueElem = valueElem.begin( initCond ); valueElem != valueElem.end(); valueElem++) {
 
-            if(bodyCounter >= state.m_SimBodyStates.size()){
+            if(bodyCounter >= m_bodyList.size()){
                LOG(m_pSimulationLog,"---> InitialPositionPosAxisAngle: You specified to many transforms, -> neglecting ..."<<std::endl;);
                break;
             }
@@ -1438,20 +1471,22 @@ protected:
             }
 
 
-            InitialConditionBodies::setupPositionBodyPosAxisAngle(state.m_SimBodyStates[bodyCounter], pos, axis, angle);
+            InitialConditionBodies::setupPositionBodyPosAxisAngle( m_bodyInitStates[m_bodyList[bodyCounter]->m_id],
+                                                                   pos, axis, angle);
+
 
             bodyCounter++;
         }
 
-        if(bodyCounter < state.m_SimBodyStates.size()) {
+        if(bodyCounter < m_bodyList.size()) {
             LOG(m_pSimulationLog,"---> InitialPositionPosAxisAngle: You specified to little values, -> applying last to all remainig bodies ..."<<std::endl;);
-            for(int i=bodyCounter;i<state.m_SimBodyStates.size();i++){
-                InitialConditionBodies::setupPositionBodyPosAxisAngle(state.m_SimBodyStates[i], pos, axis, angle);
+            for(int i=bodyCounter;i<m_bodyList.size();i++){
+                InitialConditionBodies::setupPositionBodyPosAxisAngle(m_bodyInitStates[m_bodyList[i]->m_id], pos, axis, angle);
             }
         }
     }
 
-    virtual void processInitialPositionTransforms(DynamicsState & state, ticpp::Element * initCond) {
+    virtual void processInitialPositionTransforms(ticpp::Element * initCond) {
 
 
 
@@ -1465,7 +1500,7 @@ protected:
         ticpp::Iterator< ticpp::Element > valueElem("Value");
         for ( valueElem = valueElem.begin( initCond ); valueElem != valueElem.end(); valueElem++) {
 
-            if(bodyCounter >= state.m_SimBodyStates.size()){
+            if(bodyCounter >= m_bodyList.size()){
                LOG(m_pSimulationLog,"---> InitialPositionTransforms: You specified to many transforms, -> neglecting ..."<<std::endl;);
                break;
             }
@@ -1515,23 +1550,25 @@ protected:
             }
 
             // Apply overall transformation!
-            state.m_SimBodyStates[bodyCounter].m_q.head<3>() = I_r_IK;
-            state.m_SimBodyStates[bodyCounter].m_q.tail<4>() = q_KI;
+            auto & state = m_bodyInitStates[m_bodyList[bodyCounter]->m_id];
+            state.m_q.head<3>() = I_r_IK;
+            state.m_q.tail<4>() = q_KI;
 
             bodyCounter++;
         }
 
-        if(bodyCounter < state.m_SimBodyStates.size()) {
+        if(bodyCounter < m_bodyList.size()) {
             LOG(m_pSimulationLog,"---> InitialPositionTransforms: You specified to little transforms, -> applying last to all remainig bodies ..."<<std::endl;);
-            for(int i=bodyCounter;i<state.m_SimBodyStates.size();i++){
-                state.m_SimBodyStates[i].m_q.head<3>() = I_r_IK;
-                state.m_SimBodyStates[i].m_q.tail<4>() = q_KI;
+            for(int i=bodyCounter;i<m_bodyList.size();i++){
+                auto & state = m_bodyInitStates[m_bodyList[i]->m_id];
+                state.m_q.head<3>() = I_r_IK;
+                state.m_q.tail<4>() = q_KI;
             }
         }
 
     }
 
-    virtual void processInitialVelocityTransRot(DynamicsState & state, ticpp::Element * initCond) {
+    virtual void processInitialVelocityTransRot(ticpp::Element * initCond) {
 
 
         int bodyCounter = 0;
@@ -1542,7 +1579,7 @@ protected:
         ticpp::Iterator< ticpp::Element > valueElem("Value");
         for ( valueElem = valueElem.begin( initCond ); valueElem != valueElem.end(); valueElem++) {
 
-            if(bodyCounter >= state.m_SimBodyStates.size()){
+            if(bodyCounter >= m_bodyList.size()){
                LOG(m_pSimulationLog,"---> InitialVelocityTransRot: You specified to many transforms, -> neglecting ..."<<std::endl;);
                break;
             }
@@ -1566,18 +1603,19 @@ protected:
             if(!Utilities::stringToType<PREC>(rot, valueElem->GetAttribute("absRotVel"))) {
                 throw ticpp::Exception("---> String conversion in InitialVelocityTransRot: absTransVel failed");
             }
-
-            state.m_SimBodyStates[bodyCounter].m_u.head<3>() = transDir*vel;
-            state.m_SimBodyStates[bodyCounter].m_u.tail<3>() = rotDir*rot;
+            auto & state = m_bodyInitStates[m_bodyList[bodyCounter]->m_id];
+            state.m_u.head<3>() = transDir*vel;
+            state.m_u.tail<3>() = rotDir*rot;
 
             bodyCounter++;
         }
 
-        if(bodyCounter < state.m_SimBodyStates.size()) {
+        if(bodyCounter < m_bodyList.size()) {
             LOG(m_pSimulationLog,"---> InitialVelocityTransRot: You specified to little transforms, -> applying last to all remainig bodies ..."<<std::endl;);
-            for(int i=bodyCounter;i<state.m_SimBodyStates.size();i++){
-                state.m_SimBodyStates[i].m_u.head<3>() = transDir*vel;
-                state.m_SimBodyStates[i].m_u.tail<3>() = rotDir*rot;
+            for(int i=bodyCounter;i<m_bodyList.size();i++){
+                auto & state = m_bodyInitStates[m_bodyList[i]->m_id];
+                state.m_u.head<3>() = transDir*vel;
+                state.m_u.tail<3>() = rotDir*rot;
             }
         }
 
@@ -1605,13 +1643,15 @@ protected:
     unsigned int m_nSimBodies, m_nBodies;
     std::unordered_map<unsigned int,unsigned int> groupIdToNBodies;
     unsigned int m_globalMaxGroupId; // Group Id used to build a unique id!
-    // Temprary structures
+
+    // Temprary structures for each sub list of rigid bodies
     typename RigidBodyType::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
     typename std::vector<RigidBodyType*> m_bodyList; ///< Used to process a RigidBody Node
     std::vector<Vector3> m_bodyListScales;
-    std::vector< DynamicsState > m_SimBodyInitStates;
+    RigidBodyStatesContainerType m_bodyInitStates;
 
 
+    RigidBodyStatesContainerType m_initStates; ///< Init states of sim bodies, if  m_bParseDynamics = false
 
     typedef std::unordered_map<std::string, boost::shared_ptr<MeshGeometry > > ContainerSceneMeshs;
 

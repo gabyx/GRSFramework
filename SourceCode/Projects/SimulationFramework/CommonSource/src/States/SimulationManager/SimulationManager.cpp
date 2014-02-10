@@ -82,7 +82,7 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
 
     m_pStateRecorder = boost::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
 
-    m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());
+    m_pSharedBuffer->initializeStatePool(m_pDynSys->m_simBodiesInitStates);
 
     m_pSceneParser->cleanUp();
 

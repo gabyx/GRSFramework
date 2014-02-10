@@ -32,11 +32,19 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     RigidBodyState() {
+        m_id = 0 ;
+        m_u.setZero();
+        m_q.setZero();
+    };
+
+    RigidBodyState(const RigidBodyIdType & id) {
+        m_id = id ;
         m_u.setZero();
         m_q.setZero();
     };
 
     RigidBodyState & operator =(const RigidBodyState& state) {
+        m_id = state.m_id;
         m_u = state.m_u;
         m_q = state.m_q;
         return *this;

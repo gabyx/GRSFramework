@@ -70,7 +70,8 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 #if CoutLevelSolver>2
         LOG(m_pSolverLog, "\t---> Body: "<< RigidBodyId::getBodyIdString(pBody) << std::endl
             << "\t\t--->m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
-            << "\t\t--->m_q_s= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
+            << "\t\t--->m_q_s= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl
+            << "\t\t--->m_u_s= "  <<pBody->m_pSolverData->m_uBuffer.m_back.transpose()<<std::endl;)
 #endif
         // Update time:
         pBody->m_pSolverData->m_t = ts + timestep;
@@ -143,9 +144,10 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
         pBody->m_q_KI.normalize();
 
 #if CoutLevelSolver>2
-        LOG(m_pSolverLog, "Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
-            << "m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
-            << "m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
+        LOG(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
+            << "\t\t--->m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
+            << "\t\t--->m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl
+            << "\t\t--->m_u_e= "  <<pBody->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl;)
 #endif
 
 #if OUTPUT_SYSTEMDATA_FILE == 1

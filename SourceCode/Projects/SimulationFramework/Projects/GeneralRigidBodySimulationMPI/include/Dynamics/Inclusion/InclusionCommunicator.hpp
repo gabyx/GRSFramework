@@ -51,11 +51,12 @@ public:
 
 
 
-    void communicateRemoteContacts();
+    void communicateRemoteContacts(PREC currentSimulationTime);
     void communicateSplitBodyUpdate(unsigned int globalIterationNumber);
     void communicateSplitBodySolution(unsigned int globalIterationNumber);
 
     void resetAllWeightings();
+    void initRemoteBodyVelocities();
 
     void clearNeighbourMap(){
         m_nbDataMap.emptyAllNeighbourData();
@@ -88,6 +89,7 @@ private:
     void sendSolutionSplitBodiesToNeighbours();
     void recvSolutionSplitBodiesFromNeighbours();
 
+    PREC m_currentSimulationTime;
     unsigned int m_globalIterationNumber;
 
     /**

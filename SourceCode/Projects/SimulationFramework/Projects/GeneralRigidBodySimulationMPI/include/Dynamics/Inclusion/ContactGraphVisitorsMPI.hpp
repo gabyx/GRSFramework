@@ -56,6 +56,15 @@ public:
 
             // Init the prox value
             nodeData.m_LambdaFront = nodeData.m_b;
+            #if CoutLevelSolverWhenContact>2
+//                LOG(m_pSolverLog, "\t---> nd.b: " << nodeData.m_b.transpose() << std::endl);
+            #endif
+
+
+            #if CoutLevelSolverWhenContact>2
+//                LOG(m_pSolverLog, "\t---> nd.W1_T: " <<std::endl<< nodeData.m_W_body1.transpose() << std::endl);
+//                LOG(m_pSolverLog, "\t---> nd.W2_T: " <<std::endl<< nodeData.m_W_body2.transpose() << std::endl);
+            #endif
 
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
@@ -65,6 +74,10 @@ public:
             if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
             }
+
+            #if CoutLevelSolverWhenContact>2
+//                LOG(m_pSolverLog, "\t---> nd.chi: " << nodeData.m_LambdaFront.transpose() << std::endl);
+            #endif
 
             nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
             nodeData.m_LambdaFront += nodeData.m_LambdaBack;
@@ -87,8 +100,8 @@ public:
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 #if CoutLevelSolverWhenContact>2
-                    LOG(m_pSolverLog, "\t---> body1.massInv: " << nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag << std::endl;)
-                    LOG(m_pSolverLog, "\t---> body1.h_term: " << nodeData.m_pCollData->m_pBody1->m_h_term << std::endl;)
+//                    LOG(m_pSolverLog, "\t---> body1.massInv: " << nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.transpose() << std::endl;)
+//                    LOG(m_pSolverLog, "\t---> body1.h_term: " << nodeData.m_pCollData->m_pBody1->m_h_term.transpose() << std::endl;)
                 #endif
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
                 nodeData.m_u1BufferPtr->m_front = nodeData.m_u1BufferPtr->m_front
@@ -136,8 +149,8 @@ public:
             if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
 
                 #if CoutLevelSolverWhenContact>2
-                    LOG(m_pSolverLog, "\t---> body1.massInv: " << nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag << std::endl;)
-                    LOG(m_pSolverLog, "\t---> body1.h_term: " << nodeData.m_pCollData->m_pBody2->m_h_term << std::endl;)
+//                    LOG(m_pSolverLog, "\t---> body1.massInv: " << nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.transpose() << std::endl;)
+//                    LOG(m_pSolverLog, "\t---> body1.h_term: " << nodeData.m_pCollData->m_pBody2->m_h_term.transpose() << std::endl;)
                 #endif
 
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
@@ -295,7 +308,7 @@ public:
         node.m_uFront  +=  node.m_uBack;
 
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t---> nd.m_uFront: " << node.m_uFront.transpose() <<std::endl; );
+//            LOG(m_pSolverLog, "\t---> nd.m_uFront: " << node.m_uFront.transpose() <<std::endl; );
         #endif
 
         // Because we solve this billateral contact directly, we are converged for this node!
@@ -379,7 +392,10 @@ public:
             nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
         }
 
-
+        #if CoutLevelSolverWhenContact>2
+//            LOG(m_pSolverLog,  " nodeData.m_eps: "<< nodeData.m_eps.transpose() <<std::endl;);
+//            LOG(m_pSolverLog,  " nodeData.m_b: "<< nodeData.m_b.transpose() <<std::endl;);
+        #endif
 
         // Calculate R_ii
         nodeData.m_R_i_inv_diag(0) = m_alpha / (nodeData.m_G_ii(0,0));

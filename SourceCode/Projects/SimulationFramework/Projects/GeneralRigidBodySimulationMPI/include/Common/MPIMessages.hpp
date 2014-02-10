@@ -755,6 +755,7 @@ template<typename TNeighbourCommunicator >
 class NeighbourMessageWrapperInclusion {
 public:
 
+    DEFINE_RIGIDBODY_CONFIG_TYPES
 
     typedef TNeighbourCommunicator NeighbourCommunicatorType;
     typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
@@ -789,7 +790,14 @@ public:
         }
     }
 
+    void setTime(RigidBodyType::PREC time){
+        m_time = time;
+    }
+
+
 protected:
+
+    mutable RigidBodyType::PREC m_time;
 
     NeighbourCommunicatorType* m_nc;
     RankIdType m_neighbourRank;        ///< This is the neighbour rank where the message is send to or received from!
@@ -834,6 +842,7 @@ public:
         m_neighbourData(NULL)
     {}
 
+
     template<class Archive>
     void save(Archive & ar, const unsigned int version) const {
 
@@ -842,6 +851,8 @@ public:
         //Serialize all body ids which have contact
         m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
         LOGASSERTMSG( m_neighbourData, this->m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: " << this->m_nc->m_rank << "!");
+
+        ar & this->m_time;
 
         //Serialize all remote body ids which have contact
         unsigned int size = m_neighbourData->sizeRemote();
@@ -868,6 +879,10 @@ public:
     template<class Archive>
     void load(Archive & ar, const unsigned int version) const {
         LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusion is not correctly initialized, Rank not set!")
+
+        RigidBodyType::PREC time;
+        ar & time;
+        LOGASSERTMSG(time == this->m_time, this->m_pSerializerLog, "Wrong message received!")
 
         // for each body one bilateral node
         // for each received body , if no node in the bilateral set in ContactGraph exists , add one bilateral node
@@ -921,6 +936,7 @@ public:
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
 private:
+
     mutable NeighbourDataType * m_neighbourData;
 
 };
@@ -969,6 +985,8 @@ public:
                       "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
                       << this->m_nc->m_rank << "!");
 
+        ar & this->m_time;
+
         //Serialize all local body mulitplicities which have contact
         unsigned int size = m_neighbourData->sizeLocal();
 
@@ -1007,6 +1025,12 @@ public:
     template<class Archive>
     void load(Archive & ar, const unsigned int version) const {
         LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusionMultiplicity is not correctly initialized, Rank not set!")
+
+        RigidBodyType::PREC time;
+        ar & time;
+        LOGASSERTMSG(time == this->m_time, this->m_pSerializerLog, "Wrong message received!")
+
+
         // REMOTE BODIES
         unsigned int size;
         ar & size;
@@ -1063,13 +1087,6 @@ public:
                 RigidBodyFunctions::changeBodyToSplitWeighting( remoteBody, multiplicity, multiplicityWeight);
 
 
-                // Compute initial velocity u_0 for this remoteBody
-                LOGSZ(this->m_pSerializerLog, "----> initialize velocity for prox iteration" <<std::endl; );
-                ASSERTMSG(remoteBody->m_pSolverData, "m_pSolverData for body id: " << RigidBodyId::getBodyIdString(id) << " is zero!")
-                remoteBody->m_pSolverData->m_uBuffer.m_front = remoteBody->m_pSolverData->m_uBuffer.m_back
-                                                               + remoteBody->m_MassMatrixInv_diag.asDiagonal()*remoteBody->m_h_term*this->m_nc->m_Settings.m_deltaT;
-                remoteBody->m_pSolverData->m_uBuffer.m_back = remoteBody->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
-
             }
 
         } else {
@@ -1119,6 +1136,9 @@ public:
         m_neighbourData(NULL)
     {}
 
+    void setStep(unsigned int step){
+        m_step = step;
+    }
 
     template<class Archive>
     void save(Archive & ar, const unsigned int version) const {
@@ -1132,9 +1152,11 @@ public:
                       << this->m_nc->m_rank << "!");
 
 
+        ar & this->m_time;
+        ar & m_step;
+
         //Serialize all velocities of all remote SplitBodies
         unsigned int size = m_neighbourData->sizeRemote();
-
         ar & size;
 
         if(size>0) {
@@ -1173,6 +1195,12 @@ public:
                       "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
                       << this->m_nc->m_rank << "!");
 
+        unsigned int step;
+        RigidBodyType::PREC time;
+        ar & time;
+        ar & step;
+        LOGASSERTMSG(time == this->m_time && step == m_step, this->m_pSerializerLog, "Wrong message received!")
+
         unsigned int size;
         ar & size;
 
@@ -1208,6 +1236,7 @@ public:
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
 private:
+    mutable unsigned int m_step;
     mutable NeighbourDataType * m_neighbourData;
 };
 
@@ -1243,6 +1272,10 @@ public:
     {}
 
 
+    void setStep(unsigned int step){
+        m_step = step;
+    }
+
     template<class Archive>
     void save(Archive & ar, const unsigned int version) const {
         // LOCAL SPLITBODIES
@@ -1254,6 +1287,9 @@ public:
                       "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
                       << this->m_nc->m_rank << "!");
 
+
+        ar & this->m_time;
+        ar & m_step;
 
         //Serialize all solved velocities of all local SplitBodies
         unsigned int size = m_neighbourData->sizeLocal();
@@ -1297,6 +1333,12 @@ public:
                       "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
                       << this->m_nc->m_rank << "!");
 
+        unsigned int step;
+        RigidBodyType::PREC time;
+        ar & time;
+        ar & step;
+        LOGASSERTMSG(time == this->m_time && step == m_step, this->m_pSerializerLog, "Wrong message received!")
+
         unsigned int size;
         ar & size;
 
@@ -1335,6 +1377,7 @@ public:
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
 private:
+    mutable unsigned int m_step;
     mutable NeighbourDataType * m_neighbourData;
 };
 
