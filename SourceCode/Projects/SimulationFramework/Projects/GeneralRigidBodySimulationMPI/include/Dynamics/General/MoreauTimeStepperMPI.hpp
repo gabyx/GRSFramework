@@ -273,6 +273,12 @@ void MoreauTimeStepper::reset() {
 
     }
 
+
+    // Apply all init states to the bodies!
+    m_pSimulationLog->logMessage("---> Initialize Bodies...");
+    m_pDynSys->applyInitStatesToBodies();
+
+
     m_bFinished = false;
 
     m_PerformanceTimer.stop();

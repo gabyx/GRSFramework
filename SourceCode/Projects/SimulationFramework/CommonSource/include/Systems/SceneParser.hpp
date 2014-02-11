@@ -1282,6 +1282,7 @@ protected:
 
          // InitialPosition ============================================================
          // Fill as many initial states as needed!
+         m_bodyInitStates.clear();
          for(int i=0; i < m_bodyList.size(); i++) {
             auto res = m_bodyInitStates.insert( std::make_pair(m_bodyList[i]->m_id, RigidBodyState(m_bodyList[i]->m_id) ) );
              if(!res.second){
@@ -1343,6 +1344,7 @@ protected:
         std::string distribute = element->GetAttribute("distribute");
 
         // Fill as many initial states as needed!
+        m_bodyInitStates.clear();
          for(int i=0; i < m_bodyList.size(); i++) {
             auto res = m_bodyInitStates.insert( std::make_pair(m_bodyList[i]->m_id, RigidBodyState(m_bodyList[i]->m_id) ) );
              if(!res.second){

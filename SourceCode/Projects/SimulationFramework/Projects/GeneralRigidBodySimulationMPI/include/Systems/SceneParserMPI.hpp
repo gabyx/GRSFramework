@@ -54,10 +54,9 @@ public:
         m_nBodies = 0;
         m_nGlobalSimBodies = 0;
         m_globalMaxGroupId = 0;
-
         m_bodyList.clear();
-        m_SimBodyInitStates.clear();
-
+        m_bodyListScales.clear();
+        m_bodyInitStates.clear();
 
         try {
             m_xmlDoc.LoadFile(m_currentParseFilePath.string());
@@ -82,8 +81,9 @@ public:
                 this->processSceneObjects(node);
                 m_pSimulationLog->logMessage("---> Parsed SceneObjects...");
 
-                /*ticpp::Node * initialConditionAll = m_xmlRootNode->FirstChild("InitialCondition");
-                processinitialConditionAll(initialConditionAll);*/
+                node = m_xmlRootNode->FirstChild("SceneSettings");
+                processSceneSettings2(node);
+                m_pSimulationLog->logMessage("---> Parsed SceneSettings (second part)...");
 
             } else {
                 m_pSimulationLog->logMessage("---> No DynamicsSystem Node found in XML ...");
@@ -164,6 +164,7 @@ protected:
         ticpp::Element* rigidBodiesEl = rigidbodies->ToElement();
         m_bodyList.clear();
         m_bodyListScales.clear();
+        m_bodyInitStates.clear();
 
          unsigned int instances = rigidbodies->ToElement()->GetAttribute<unsigned int>("instances");
 
@@ -235,14 +236,21 @@ protected:
                     ++bodyIt;
 
                 }else{
-                     LOG(m_pSimulationLog, "---> Rejected Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
+                    LOG(m_pSimulationLog, "---> Rejected Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
+
+                    m_bodyInitStates.erase((*bodyIt)->m_id);
                     //Delete this body immediately!
                     delete *bodyIt;
                     bodyIt = m_bodyList.erase(bodyIt);
                 }
             }
 
-
+            // Copy all init states
+            LOG(m_pSimulationLog, "---> Copy init states... ");
+//            for(auto it = m_bodyInitStates.begin(); it!=m_bodyInitStates.end();it++){
+//                LOG(m_pSimulationLog, RigidBodyId::getBodyIdString(it->first));
+//            }
+            m_pDynSys->m_simBodiesInitStates.insert( m_bodyInitStates.begin(), m_bodyInitStates.end() );
 
 
 
@@ -270,6 +278,7 @@ protected:
         //Remove all bodies from the sceneparsers intern list!
         m_bodyList.clear();
         m_bodyListScales.clear();
+        m_bodyInitStates.clear();
     }
 
 
@@ -294,8 +303,7 @@ protected:
     using SceneParser::m_eBodiesState;
     using SceneParser::m_bodyList;
     using SceneParser::m_bodyListScales;
-    using SceneParser::m_SimBodyInitStates;
-
+    using SceneParser::m_bodyInitStates;
 
 };
 

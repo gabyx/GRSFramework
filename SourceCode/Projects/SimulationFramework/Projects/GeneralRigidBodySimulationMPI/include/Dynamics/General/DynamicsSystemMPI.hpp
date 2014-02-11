@@ -46,7 +46,8 @@ public:
     GlobalGeometryMapType m_globalGeometries;
 
     // All global RigidBodies Container for this Process, these bodies which are owned by this class!"============================
-    typedef RigidBodyContainer<RigidBodyType *> RigidBodySimContainerType;
+    typedef RigidBodyContainer RigidBodyContainerType;
+    typedef RigidBodyContainer RigidBodySimContainerType;
     RigidBodySimContainerType m_SimBodies;        // simulated objects
     RigidBodySimContainerType m_RemoteSimBodies;  // all remote bodies
 
@@ -54,7 +55,10 @@ public:
     RigidBodyStaticContainer m_Bodies;        // all not simulated objects
     // ============================================================================
 
-
+    //All initial conditions for all bodies
+    //We need an order, which is sorted according to the id!
+    typedef std::map<RigidBodyIdType, RigidBodyState> RigidBodyStatesContainerType;
+    RigidBodyStatesContainerType m_simBodiesInitStates;
 
 
     inline void addSimBodyPtr(RigidBodyType * ptr ) { m_SimBodies.addBody(ptr); }
@@ -64,6 +68,7 @@ public:
 
     void initMassMatrixAndHTerm();
 
+    void applyInitStatesToBodies();
 
     void doFirstHalfTimeStep(PREC ts, PREC timestep);
     void doSecondHalfTimeStep(PREC te, PREC timestep);
@@ -98,5 +103,12 @@ protected:
     std::stringstream logstream;
 
 };
+
+
+inline void DynamicsSystem::applyInitStatesToBodies(){
+    // Apply all init states to the sim bodies
+    InitialConditionBodies::applyRigidBodyStatesToBodies(m_SimBodies, m_simBodiesInitStates);
+}
+
 
 #endif

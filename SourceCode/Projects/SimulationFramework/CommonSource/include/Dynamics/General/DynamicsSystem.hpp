@@ -52,7 +52,7 @@ public:
 
     //All initial conditions for all bodies
     //We need an order, which is sorted according to the id!
-    typedef std::unordered_map<RigidBodyIdType, RigidBodyState> RigidBodyStatesContainerType;
+    typedef std::map<RigidBodyIdType, RigidBodyState> RigidBodyStatesContainerType;
     RigidBodyStatesContainerType m_simBodiesInitStates;
 
 

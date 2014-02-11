@@ -68,6 +68,7 @@ void setupPositionBodiesGrid(StateContainerType & states,
     jitter_vec.setZero();
     unsigned int i = 0;
     for(auto itState = states.begin(); itState != states.end(); itState++) {
+        //std::cout << itState->second << std::endl;
         auto & state = itState->second;
         state.m_q.template tail<4>() = Quaternion(1,0,0,0);
         int index_z = (i /(gDim_x*gDim_y));
@@ -132,7 +133,7 @@ inline void applyRigidBodyStatesToBodies(RigidBodyContainer & bodies, const Rigi
     for(auto bodyIt = bodies.begin(); bodyIt!= bodies.end(); bodyIt++){
         auto resIt = states.find((*bodyIt)->m_id);
         if( resIt == states.end()){
-            ERRORMSG(" There is no initial state for sim body id: " << (*bodyIt)->m_id << std::endl);
+            ERRORMSG(" There is no initial state for sim body id: " << RigidBodyId::getBodyIdString(*bodyIt) << std::endl);
         }
         InitialConditionBodies::applyRigidBodyStateToBody( resIt->second, (*bodyIt) );
     }
