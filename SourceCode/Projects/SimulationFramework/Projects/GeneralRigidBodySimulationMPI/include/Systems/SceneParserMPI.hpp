@@ -54,9 +54,9 @@ public:
         m_nBodies = 0;
         m_nGlobalSimBodies = 0;
         m_globalMaxGroupId = 0;
-        m_bodyList.clear();
-        m_bodyListScales.clear();
-        m_bodyInitStates.clear();
+        m_bodyListGroup.clear();
+        m_bodyScalesGroup.clear();
+        m_initStatesGroup.clear();
 
         try {
             m_xmlDoc.LoadFile(m_currentParseFilePath.string());
@@ -158,13 +158,17 @@ protected:
 
     }
 
+    virtual void processGlobalInitialCondition( ticpp::Node *sceneSettings){
+        LOG(m_pSimulationLog,"---> Global initial condition is not supported " << std::endl; );
+    }
+
     void processRigidBodies( ticpp::Node * rigidbodies ) {
 
         //Clear current body list;
         ticpp::Element* rigidBodiesEl = rigidbodies->ToElement();
-        m_bodyList.clear();
-        m_bodyListScales.clear();
-        m_bodyInitStates.clear();
+        m_bodyListGroup.clear();
+        m_bodyScalesGroup.clear();
+        m_initStatesGroup.clear();
 
          unsigned int instances = rigidbodies->ToElement()->GetAttribute<unsigned int>("instances");
 
@@ -194,11 +198,11 @@ protected:
 
             RigidBodyType * temp_ptr = new RigidBodyType(RigidBodyId::makeId(startIdx+i, groupId));
 
-            m_bodyList.push_back(temp_ptr);
+            m_bodyListGroup.push_back(temp_ptr);
 
             Vector3 scale;
             scale.setOnes();
-            m_bodyListScales.push_back(scale);
+            m_bodyScalesGroup.push_back(scale);
         }
 
 
@@ -210,16 +214,17 @@ protected:
         this->processDynamicProperties(dynPropNode);
 
 
-
         //Copy the pointers!
 
         if(m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
 
-            m_nGlobalSimBodies += m_bodyList.size();
+            m_nGlobalSimBodies += m_bodyListGroup.size();
 
             typename std::vector<RigidBodyType*>::iterator bodyIt;
-            //LOG(m_pSimulationLog, "---> SIZE: " << m_bodyList.size() << std::endl)
-            for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end();  ) {
+            //LOG(m_pSimulationLog, "---> SIZE: " << m_bodyListGroup.size() << std::endl)
+            for(bodyIt= m_bodyListGroup.begin(); bodyIt!=m_bodyListGroup.end();  ) {
+
+
                 // Check if Body belongs to the topology! // Check CoG!
                 if(m_pProcCommunicator->getProcInfo()->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {
 
@@ -238,19 +243,22 @@ protected:
                 }else{
                     LOG(m_pSimulationLog, "---> Rejected Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
 
-                    m_bodyInitStates.erase((*bodyIt)->m_id);
+                    m_initStatesGroup.erase((*bodyIt)->m_id);
                     //Delete this body immediately!
                     delete *bodyIt;
-                    bodyIt = m_bodyList.erase(bodyIt);
+                    bodyIt = m_bodyListGroup.erase(bodyIt);
                 }
             }
 
             // Copy all init states
-            LOG(m_pSimulationLog, "---> Copy init states... ");
-//            for(auto it = m_bodyInitStates.begin(); it!=m_bodyInitStates.end();it++){
-//                LOG(m_pSimulationLog, RigidBodyId::getBodyIdString(it->first));
-//            }
-            m_pDynSys->m_simBodiesInitStates.insert( m_bodyInitStates.begin(), m_bodyInitStates.end() );
+            LOG(m_pSimulationLog, "---> Copy init states... " << std::endl;);
+            for(auto it = m_initStatesGroup.begin(); it!=m_initStatesGroup.end();it++){
+                LOG(m_pSimulationLog, " state id: " << RigidBodyId::getBodyIdString(it->first)
+                    << std::endl << "q: " << it->second.m_q.transpose()
+                    << std::endl << "u: " << it->second.m_u.transpose() << std::endl;
+                    );
+            }
+            m_pDynSys->m_simBodiesInitStates.insert( m_initStatesGroup.begin(), m_initStatesGroup.end() );
 
 
 
@@ -258,11 +266,14 @@ protected:
 
            typename std::vector<RigidBodyType*>::iterator bodyIt;
 
-            for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
+            for(bodyIt= m_bodyListGroup.begin(); bodyIt!=m_bodyListGroup.end(); bodyIt++) {
 
                 if(! m_pDynSys->m_Bodies.addBody((*bodyIt))){
                         ERRORMSG("Could not add body to m_Bodies! Id: " << RigidBodyId::getBodyIdString(*bodyIt) << " already in map!");
                 };
+
+                // Delete body
+                bodyIt = m_bodyListGroup.erase(bodyIt);
 
                 m_nBodies++;
             }
@@ -271,14 +282,14 @@ protected:
         }
 
 
-        ticpp::Node * visualizationNode = rigidbodies->FirstChild("Visualization");
-        this->processVisualization( visualizationNode);
+//        ticpp::Node * visualizationNode = rigidbodies->FirstChild("Visualization");
+//        this->processVisualization( visualizationNode);
 
 
         //Remove all bodies from the sceneparsers intern list!
-        m_bodyList.clear();
-        m_bodyListScales.clear();
-        m_bodyInitStates.clear();
+        m_bodyListGroup.clear();
+        m_bodyScalesGroup.clear();
+        m_initStatesGroup.clear();
     }
 
 
@@ -301,9 +312,9 @@ protected:
     using SceneParser::logstream;
     // Temprary structures
     using SceneParser::m_eBodiesState;
-    using SceneParser::m_bodyList;
-    using SceneParser::m_bodyListScales;
-    using SceneParser::m_bodyInitStates;
+    using SceneParser::m_bodyListGroup;
+    using SceneParser::m_bodyScalesGroup;
+    using SceneParser::m_initStatesGroup;
 
 };
 

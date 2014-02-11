@@ -97,7 +97,7 @@ bool setupPositionBodiesFromFile(TBodyStateMap & states, boost::filesystem::path
     MultiBodySimFile simFile( DynamicsState::LayoutConfigType::LayoutType::NDOFqBody,
                               DynamicsState::LayoutConfigType::LayoutType::NDOFuBody);
     bool failed = false;
-    if(simFile.openRead(file_path,states.size())) {
+    if(simFile.openRead(file_path,0,true)) {
         // We only perform an update! -> true
         if(!simFile.read(states,true,which,time)){
             failed = true;

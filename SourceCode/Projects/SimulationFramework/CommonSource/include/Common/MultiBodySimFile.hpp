@@ -66,15 +66,17 @@ public:
     * @param file_path The path to the file to open.
     * @param nSimBodies The number of bodies which should be included in the file.
     * @return true if the file is successfully opened and readable and false if not.
+    * @detail if nSimBodies = 0, the sim file does not need to match nSimBodies
     */
-    bool openRead( const boost::filesystem::path & file_path,   const unsigned int nSimBodies = 0, bool readFullState = true);
+    bool openRead( const boost::filesystem::path & file_path,   const unsigned int nSimBodies, bool readFullState = true);
     /**
     * @brief Opens a .sim file for write only.
     * @param file_path The path to the file to open.
     * @param nSimBodies The number of bodies which should be included in the file.
     * @return true if the file is successfully opened and writable and false if not.
+    * @detail if nSimBodies = 0, the sim file does not need to match nSimBodies
     */
-    bool openWrite( const boost::filesystem::path & file_path,   const unsigned int nSimBodies = 0,  bool truncate = true);
+    bool openWrite( const boost::filesystem::path & file_path,   const unsigned int nSimBodies,  bool truncate = true);
 
     /**
     * @brief Closes the .sim file which was opened by an openWrite or openRead command.
@@ -104,7 +106,12 @@ public:
     *         If the time is greater then the maximum time, then this time is taken.
     */
     template<typename TBodyStateMap>
-    bool read(TBodyStateMap & states, bool onlyUpdate = true, short which = 2, double time = 0);
+    bool read(TBodyStateMap & states,
+              bool readPos = true,
+              bool readVel= true,
+              bool onlyUpdate = true,
+              short which = 2,
+              double time = 0);
 
 
     /**
@@ -268,7 +275,7 @@ void MultiBodySimFile::write(double time, const TRigidBodyContainer & bodyList){
 
 
 template<typename TBodyStateMap>
-bool MultiBodySimFile::read(TBodyStateMap & states, bool onlyUpdate, short which, double time){
+bool MultiBodySimFile::read(TBodyStateMap & states, bool readPos, bool readVel, bool onlyUpdate, short which, double time){
     m_errorString.str("");
 
     std::set<RigidBodyIdType> updatedStates;

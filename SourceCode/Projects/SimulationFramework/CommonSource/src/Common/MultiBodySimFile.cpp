@@ -260,7 +260,7 @@ bool  MultiBodySimFile::readHeader() {
             return false;
         }
 
-        // if the body count is not
+        // if the body count is zero we dont need to check on the simBodies
         if(m_nSimBodies == 0){
             m_nSimBodies = nBodies;
         }
