@@ -126,6 +126,7 @@ void StateRingPoolVisBackFront::resetStateRingPool(const RigidBodyStateContainer
     m_idx[2] = 1; // front
 
     DynamicsState & state = *m_pool[0];
+    state.m_StateType = DynamicsState::STARTSTATE;
 
     if( state_init.size() != state.m_SimBodyStates.size()) {
         ERRORMSG(" initializeStatePool:: state_init has size: " << state_init.size() << "instead of " << state.m_SimBodyStates.size());

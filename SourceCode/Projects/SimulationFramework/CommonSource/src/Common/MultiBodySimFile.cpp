@@ -59,7 +59,7 @@ bool MultiBodySimFile::writeOutAllStateTimes() {
             double t;
             *this >> (double &)t;
             file << "m_t: " << t <<endl;
-            m_file_stream.seekg(m_nBytesPerBody * m_nSimBodies,ios_base::cur);
+            m_file_stream.seekg(m_nBytesPerState - sizeof(double),ios_base::cur);
         }
         file.close();
         return true;
@@ -258,6 +258,11 @@ bool  MultiBodySimFile::readHeader() {
         if( m_additionalBytesType < 0){
             m_errorString << "Binary File, additionalBytesType not valid : " << m_additionalBytesType << std::endl;
             return false;
+        }
+
+        // if the body count is not
+        if(m_nSimBodies == 0){
+            m_nSimBodies = nBodies;
         }
 
         bool abort;

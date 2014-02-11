@@ -124,6 +124,9 @@ public:
                 node = m_xmlRootNode->FirstChild("SceneObjects");
                 processSceneObjects(node);
 
+                node = m_xmlRootNode->FirstChild("SceneSettings");
+                processSceneSettings2(node);
+
                 processOtherOptions(m_xmlRootNode);
 
             } else {
@@ -358,8 +361,15 @@ protected:
         // Parse Global Geometries (also in playback manager)!
         processGlobalGeometries(sceneSettings);
 
-        processGlobalInitialCondition(sceneSettings);
+    }
 
+    virtual void processSceneSettings2( ticpp::Node *sceneSettings ) {
+
+        LOG(m_pSimulationLog,"---> Process SceneSettings2..."<<std::endl;);
+
+        if(m_bParseDynamics) {
+            processGlobalInitialCondition(sceneSettings);
+        }
     }
 
     virtual void processContactParameterMap(ticpp::Node *sceneSettings){
@@ -539,8 +549,32 @@ protected:
         ticpp::Node *initCond = sceneSettings->FirstChild("GlobalInitialCondition",false);
         if(initCond){
             ticpp::Element *elem = initCond->ToElement();
-            boost::filesystem::path relpath = elem->GetAttribute("relpath");
 
+            bool enabled = false;
+            if(!Utilities::stringToType<bool>(enabled, elem->GetAttribute("enabled"))) {
+                throw ticpp::Exception("---> String conversion in GlobalInitialCondition: enable failed");
+            }
+            if(enabled){
+                double time = -1;
+                short which = 2;
+                std::string str = elem->GetAttribute("whichState");
+                if( str == "end" || str == "END" || str== "End"){
+                    which = 2;
+                }else if(str == "beg" || str == "begin" || str== "BEG" || str == "Beg"){
+                    which = 0;
+                }else if(str == "time" || str =="TIME"){
+                    which = 1;
+                    if(!Utilities::stringToType<double>(time, elem->GetAttribute("time"))) {
+                        throw ticpp::Exception("---> String conversion in GlobalInitialCondition: time failed");
+                    }
+                }
+                else{
+                     throw ticpp::Exception("---> String conversion in GlobalInitialCondition: whichState failed");
+                }
+
+                boost::filesystem::path relpath = elem->GetAttribute("relpath");
+                InitialConditionBodies::setupPositionBodiesFromFile(m_pDynSys->m_simBodiesInitStates,relpath,which,time);
+            }
 
         }
     }
@@ -643,7 +677,10 @@ protected:
 
                 m_pDynSys->m_simBodiesInitStates.insert( m_bodyInitStates.begin(), m_bodyInitStates.end() );
 
+            }else{
+                m_initStates.insert( m_bodyInitStates.begin(), m_bodyInitStates.end() );
             }
+
             m_nSimBodies += instances;
             m_nBodies += instances;
         } else if(m_eBodiesState == RigidBodyType::BodyState::STATIC) {
@@ -655,8 +692,6 @@ protected:
                 };
 
                 //m_pDynSys->m_simBodiesInitStates.insert( m_bodyInitStates.begin(), m_bodyInitStates.end() );
-            }else{
-                //m_initStates.insert( m_bodyInitStates.begin(), m_bodyInitStates.end() );
             }
             m_nBodies += instances;
         } else {
@@ -1191,54 +1226,58 @@ protected:
 
 
     virtual void processDynamicPropertiesSimulated( ticpp::Node * dynProp) {
+        ticpp::Element *element = nullptr;
+        std::string distribute;
 
-        // First allocate a new SolverDate structure
-        for(int i=0; i < m_bodyList.size(); i++) {
-            m_bodyList[i]->m_pSolverData = new RigidBodySolverDataType();
-        }
-
-
-        // Mass ============================================================
-        ticpp::Element *element = dynProp->FirstChild("Mass")->ToElement();
-        std::string distribute = element->GetAttribute("distribute");
-        if(distribute == "uniform") {
-
-            double mass = element->GetAttribute<double>("value");
-
+        if(m_bParseDynamics){
+            // First allocate a new SolverDate structure
             for(int i=0; i < m_bodyList.size(); i++) {
-                m_bodyList[i]->m_mass = mass;
+                m_bodyList[i]->m_pSolverData = new RigidBodySolverDataType();
             }
 
 
-        } else {
-            throw ticpp::Exception("---> The attribute 'distribute' '" + distribute + std::string("' of 'Mass' has no implementation in the parser"));
-        }
+            // Mass ============================================================
+            element = dynProp->FirstChild("Mass")->ToElement();
+            distribute = element->GetAttribute("distribute");
+            if(distribute == "uniform") {
 
-        // InertiaTensor ============================================================
-        element = dynProp->FirstChild("InertiaTensor")->ToElement();
-        std::string type = element->GetAttribute("type");
-        if(type == "homogen") {
-            for(int i=0; i < m_bodyList.size(); i++) {
-                InertiaTensor::calculateInertiaTensor(m_bodyList[i]);
-            }
-        } else {
-            throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'InertiaTensor' has no implementation in the parser"));
-        }
+                double mass = element->GetAttribute<double>("value");
 
-        element = dynProp->FirstChild("Material")->ToElement();
-        distribute = element->GetAttribute("distribute");
-        if(distribute == "uniform") {
-            typename RigidBodyType::BodyMaterialType eMaterial = 0;
+                for(int i=0; i < m_bodyList.size(); i++) {
+                    m_bodyList[i]->m_mass = mass;
+                }
 
-            if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(eMaterial, element->GetAttribute("id"))){
-              throw ticpp::Exception("---> String conversion in Material: id failed");
+
+            } else {
+                throw ticpp::Exception("---> The attribute 'distribute' '" + distribute + std::string("' of 'Mass' has no implementation in the parser"));
             }
 
-            for(int i=0; i < m_bodyList.size(); i++) {
-                m_bodyList[i]->m_eMaterial = eMaterial;
+            // InertiaTensor ============================================================
+            element = dynProp->FirstChild("InertiaTensor")->ToElement();
+            std::string type = element->GetAttribute("type");
+            if(type == "homogen") {
+                for(int i=0; i < m_bodyList.size(); i++) {
+                    InertiaTensor::calculateInertiaTensor(m_bodyList[i]);
+                }
+            } else {
+                throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'InertiaTensor' has no implementation in the parser"));
             }
-        } else {
-            throw ticpp::Exception("---> The attribute 'distribute' '" + distribute + std::string("' of 'Material' has no implementation in the parser"));
+
+            element = dynProp->FirstChild("Material")->ToElement();
+            distribute = element->GetAttribute("distribute");
+            if(distribute == "uniform") {
+                typename RigidBodyType::BodyMaterialType eMaterial = 0;
+
+                if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(eMaterial, element->GetAttribute("id"))){
+                  throw ticpp::Exception("---> String conversion in Material: id failed");
+                }
+
+                for(int i=0; i < m_bodyList.size(); i++) {
+                    m_bodyList[i]->m_eMaterial = eMaterial;
+                }
+            } else {
+                throw ticpp::Exception("---> The attribute 'distribute' '" + distribute + std::string("' of 'Material' has no implementation in the parser"));
+            }
         }
 
          // InitialPosition ============================================================
@@ -1273,20 +1312,22 @@ protected:
         }
 
         //Initial Velocity
-        ticpp::Node * initVel = dynProp->FirstChild("InitialVelocity",false);
-        if(initVel){
-            element = initVel->ToElement();
-            distribute = element->GetAttribute("distribute");
+        if(m_bParseDynamics){
+            ticpp::Node * initVel = dynProp->FirstChild("InitialVelocity",false);
+            if(initVel){
+                element = initVel->ToElement();
+                distribute = element->GetAttribute("distribute");
 
-            if(distribute == "transrot") {
-                processInitialVelocityTransRot(element);
-            }
-            else if(distribute == "generalized") {
-                //processInitialVelocityGeneralized(element);
-            } else if(distribute == "none") {
-                // does nothing leaves the zero state pushed!
-            } else {
-                throw ticpp::Exception("---> The attribute 'distribute' '" + distribute + std::string("' of 'InitialPositionLinear' has no implementation in the parser"));
+                if(distribute == "transrot") {
+                    processInitialVelocityTransRot(element);
+                }
+                else if(distribute == "generalized") {
+                    //processInitialVelocityGeneralized(element);
+                } else if(distribute == "none") {
+                    // does nothing leaves the zero state pushed!
+                } else {
+                    throw ticpp::Exception("---> The attribute 'distribute' '" + distribute + std::string("' of 'InitialPositionLinear' has no implementation in the parser"));
+                }
             }
         }
 
@@ -1327,21 +1368,22 @@ protected:
 
         InitialConditionBodies::applyRigidBodyStatesToBodies(m_bodyList, m_bodyInitStates);
 
+        if(m_bParseDynamics){
+            element = dynProp->FirstChild("Material")->ToElement();
+            distribute = element->GetAttribute("distribute");
+            if(distribute == "uniform") {
+                typename RigidBodyType::BodyMaterialType eMaterial = 0;
 
-        element = dynProp->FirstChild("Material")->ToElement();
-        distribute = element->GetAttribute("distribute");
-        if(distribute == "uniform") {
-            typename RigidBodyType::BodyMaterialType eMaterial = 0;
+                if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(eMaterial, element->GetAttribute("id"))){
+                  throw ticpp::Exception("---> String conversion in Material: id failed");
+                }
 
-            if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(eMaterial, element->GetAttribute("id"))){
-              throw ticpp::Exception("---> String conversion in Material: id failed");
+                for(int i=0; i < m_bodyList.size(); i++) {
+                    m_bodyList[i]->m_eMaterial = eMaterial;
+                }
+            } else {
+                throw ticpp::Exception("---> The attribute 'distribute' '" + distribute + std::string("' of 'Material' has no implementation in the parser"));
             }
-
-            for(int i=0; i < m_bodyList.size(); i++) {
-                m_bodyList[i]->m_eMaterial = eMaterial;
-            }
-        } else {
-            throw ticpp::Exception("---> The attribute 'distribute' '" + distribute + std::string("' of 'Material' has no implementation in the parser"));
         }
 
     }

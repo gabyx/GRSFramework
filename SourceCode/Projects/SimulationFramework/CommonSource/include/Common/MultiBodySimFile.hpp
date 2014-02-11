@@ -67,14 +67,14 @@ public:
     * @param nSimBodies The number of bodies which should be included in the file.
     * @return true if the file is successfully opened and readable and false if not.
     */
-    bool openRead( const boost::filesystem::path & file_path,   const unsigned int nSimBodies, bool readFullState = true);
+    bool openRead( const boost::filesystem::path & file_path,   const unsigned int nSimBodies = 0, bool readFullState = true);
     /**
     * @brief Opens a .sim file for write only.
     * @param file_path The path to the file to open.
     * @param nSimBodies The number of bodies which should be included in the file.
     * @return true if the file is successfully opened and writable and false if not.
     */
-    bool openWrite( const boost::filesystem::path & file_path,   const unsigned int nSimBodies,  bool truncate = true);
+    bool openWrite( const boost::filesystem::path & file_path,   const unsigned int nSimBodies = 0,  bool truncate = true);
 
     /**
     * @brief Closes the .sim file which was opened by an openWrite or openRead command.
@@ -90,9 +90,22 @@ public:
     bool writeOutAllStateTimes();
 
     /**
-    * @brief Operator to write all states of the bodies to the file, writes position and velocity!
+    * @brief Write all states of the bodies to the file, writes position and velocity!
     */
-    inline void write(double time, const RigidBodyContainer & bodyList);
+    template<typename TRigidBodyContainer>
+    inline void write(double time, const TRigidBodyContainer & bodyList);
+
+    /**
+    * @brief Reads in the state at the given time and if the id in states is found, the state with id in states is overwritten.
+    * @param which is 0 for begin state, 1 for current state given at time, 2 for end state
+    * @param time is the time if which is 1
+    * @tparam TBodyStateMap, is a std::map or any hashed map with mapped_type: std::pair<key,value>
+    * @detail If time is in between two states in the sim file, then the next bigger is taken!
+    *         If the time is greater then the maximum time, then this time is taken.
+    */
+    template<typename TBodyStateMap>
+    bool read(TBodyStateMap & states, bool onlyUpdate = true, short which = 2, double time = 0);
+
 
     /**
     * @brief Operator to write a state to the file, writes position and velocity!
@@ -133,6 +146,9 @@ public:
         m_errorString << " strerror: " << std::strerror(errno) <<std::endl;
         return m_errorString.str();
     }
+
+    unsigned int getNSimBodies(){return m_nSimBodies;}
+
 
 private:
     /**
@@ -235,8 +251,8 @@ MultiBodySimFile & MultiBodySimFile::operator>>( T &value ) {
     return *this;
 };
 
-
-void MultiBodySimFile::write(double time, const RigidBodyContainer & bodyList){
+template<typename TRigidBodyContainer>
+void MultiBodySimFile::write(double time, const TRigidBodyContainer & bodyList){
     *this << time;
     ASSERTMSG(m_nSimBodies == bodyList.size(),"You try to write "<<bodyList.size()
               <<"bodies into a file which was instanced to hold "<<m_nSimBodies);
@@ -250,6 +266,98 @@ void MultiBodySimFile::write(double time, const RigidBodyContainer & bodyList){
     }
 }
 
+
+template<typename TBodyStateMap>
+bool MultiBodySimFile::read(TBodyStateMap & states, bool onlyUpdate, short which, double time){
+    m_errorString.str("");
+
+    std::set<RigidBodyIdType> updatedStates;
+    double currentTime = 0;
+    double lastTime =-1000;
+
+    RigidBodyState * pState = nullptr;
+    RigidBodyIdType id;
+    bool timeFound = false;
+
+    m_file_stream.seekg(m_beginOfStates);
+
+    if(which == 0){
+        timeFound = true;
+    }
+    else if(which == 1){
+        //Scan all states
+        for( std::streamoff stateIdx = 0; stateIdx < m_nStates; stateIdx++){
+            *this >> currentTime;
+            if( (time > lastTime && time <= currentTime )|| time <= 0.0){
+               break;
+            }else{
+                lastTime = currentTime;
+                if(stateIdx < m_nStates-1){
+                    m_file_stream.seekg( m_nBytesPerState - sizeof(double) ,std::ios_base::cur);
+                }
+            }
+        }
+        timeFound = true;
+    }
+    else if(which == 2){
+        m_file_stream.seekg( (m_nStates-1)*m_nBytesPerState ,std::ios_base::cur);
+        timeFound = true;
+    }
+
+    if(timeFound){
+        // Current time found!
+        for(unsigned int body = 0; body < m_nSimBodies; body++){
+            *this >> id;
+
+
+            if(onlyUpdate){
+                auto res = states.find(id);
+                if(res != states.end()){
+                    pState = &res->second;
+                }
+            }else{
+                auto res = states[id];
+                pState = &res;
+            }
+
+            // State found
+            if(pState != nullptr ){
+                // Read in state:
+                IOHelpers::readBinary(m_file_stream, pState->m_q );
+                if(m_bReadFullState) {
+                    IOHelpers::readBinary(m_file_stream, pState->m_u );
+                } else {
+                    m_file_stream.seekg(m_nBytesPerUBody,std::ios_base::cur);
+                }
+
+                updatedStates.insert(id);
+
+            }else{
+                // State not found
+                // Jump body (u and q)
+                m_file_stream.seekg( m_nBytesPerQBody+ m_nBytesPerUBody ,std::ios_base::cur);
+            }
+
+            // Jump additional bytes
+            m_file_stream.seekg(m_nAdditionalBytesPerBody,std::ios_base::cur);
+        }
+
+        m_file_stream.seekg(m_beginOfStates);
+
+        if(onlyUpdate){
+            if(updatedStates.size() != states.size()){
+               m_errorString << "Some states have not been updated!" << std::endl;
+               return false;
+            }
+        }
+        return true;
+    }
+
+    m_file_stream.seekg(m_beginOfStates);
+
+    m_errorString << "The time type: " << which << " (time: " <<time <<") was not found" << std::endl;
+    return false;
+}
 
 MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
 
@@ -279,6 +387,8 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
 
 MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState* state ) {
 
+    ASSERTMSG(m_nSimBodies == state->m_nSimBodies,
+              "You try to read "<<m_nSimBodies<<"bodies into a state which was instanced to hold "<<state->m_nSimBodies);
 
     // write time
     *this >> (double &)state->m_t;
