@@ -193,6 +193,8 @@ unsigned int InclusionSolverCO::getNObjects() {
 
 void InclusionSolverCO::reset() {
 
+    m_pDynSys->getSettings(m_Settings);
+
     m_pDynSys->initMassMatrixAndHTerm();  //TODO what does that make here?
 
     resetForNextIter();

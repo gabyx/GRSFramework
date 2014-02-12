@@ -68,8 +68,13 @@ public:
     void doSecondHalfTimeStep(PREC te, PREC timestep);
 
     void getSettings(RecorderSettings & settingsRecorder) const;
-    void setSettings(const RecorderSettings & settingsRecorder);
+    void getSettings(TimeStepperSettings &settingsTimestepper) const;
+    void getSettings(InclusionSolverSettings &settingsInclusionSolver) const;
     void getSettings(TimeStepperSettings &settingsTimestepper, InclusionSolverSettings &settingsInclusionSolver) const;
+
+    void setSettings(const RecorderSettings & settingsRecorder);
+    void setSettings(const TimeStepperSettings &settingsTimestepper);
+    void setSettings(const InclusionSolverSettings &settingsInclusionSolver);
     void setSettings(const TimeStepperSettings &settingsTimestepper, const InclusionSolverSettings &settingsInclusionSolver);
 
     void reset();
@@ -97,6 +102,12 @@ protected:
 
 inline void DynamicsSystem::applyInitStatesToBodies(){
     // Apply all init states to the sim bodies
+//    for(auto it = m_simBodiesInitStates.begin(); it!=m_simBodiesInitStates.end();it++){
+//                LOG(&std::cout, "\t---> state id: " << RigidBodyId::getBodyIdString(it->first)
+//                    << std::endl << "\t\t---> q: " << it->second.m_q.transpose()
+//                    << std::endl << "\t\t---> u: " << it->second.m_u.transpose() << std::endl;
+//                    );
+//    }
     InitialConditionBodies::applyRigidBodyStatesToBodies(m_SimBodies, m_simBodiesInitStates);
 }
 

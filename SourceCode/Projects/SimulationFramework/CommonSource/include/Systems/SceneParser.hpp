@@ -363,6 +363,7 @@ protected:
         LOG(m_pSimulationLog,"---> Process SceneSettings2..."<<std::endl;);
 
         if(m_bParseDynamics) {
+            LOG(m_pSimulationLog,"---> Process GlobalInitialCondition..."<<std::endl;);
             processGlobalInitialCondition(sceneSettings);
         }
     }
@@ -566,11 +567,38 @@ protected:
                 }
 
                 boost::filesystem::path relpath = elem->GetAttribute("relpath");
-                InitialConditionBodies::setupPositionBodiesFromFile(m_pDynSys->m_simBodiesInitStates,relpath,which,time);
+
+
+                setupInitialConditionBodiesFromFile_imp(relpath, time, which);
+
+                bool useTime = false;
+                if(!Utilities::stringToType<bool>(useTime, elem->GetAttribute("useTimeToContinue"))) {
+                    throw ticpp::Exception("---> String conversion in GlobalInitialCondition: useTimeToContinue failed");
+                }
+
+                // Set the time in the dynamics system timestepper settings
+                if(useTime){
+                    TimeStepperSettings setTime;
+                    m_pDynSys->getSettings(setTime);
+                    setTime.m_startTime = time;
+                    m_pDynSys->setSettings(setTime);
+                }
+
+
             }
 
         }
     }
+
+    virtual void setupInitialConditionBodiesFromFile_imp(boost::filesystem::path relpath, double &time , short which ){
+
+        InitialConditionBodies::setupInitialConditionBodiesFromFile(relpath,m_pDynSys->m_simBodiesInitStates,time,true,true,which);
+        LOG(m_pSimulationLog,"---> Found time: "<< time << " in " << relpath << std::endl;);
+
+        m_pDynSys->applyInitStatesToBodies();
+
+    }
+
 
     virtual void processSceneObjects( ticpp::Node *sceneObjects) {
 

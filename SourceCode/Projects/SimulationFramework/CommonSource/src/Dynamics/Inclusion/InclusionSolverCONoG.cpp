@@ -56,6 +56,8 @@ void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::fil
 
 void InclusionSolverCONoG::reset() {
 
+    m_pDynSys->getSettings(m_Settings);
+
     resetForNextIter();
 
 #if HAVE_CUDA_SUPPORT == 1

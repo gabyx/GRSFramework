@@ -245,7 +245,7 @@ void MoreauTimeStepper::reset() {
 
     m_pSimulationLog->logMessage("---> Reset DynamicsSystem...");
     m_pDynSys->reset();
-    m_pDynSys->getSettings(m_Settings, m_pInclusionSolver->m_Settings);
+    m_pDynSys->getSettings(m_Settings);
 
     m_pSimulationLog->logMessage("---> Reset CollisionSolver...");
     m_pCollisionSolver->reset();
@@ -257,7 +257,7 @@ void MoreauTimeStepper::reset() {
     m_AvgTimeForOneIteration = 0;
     m_MaxTimeForOneIteration = 0;
 
-    m_currentSimulationTime = 0;
+    m_currentSimulationTime = m_Settings.m_startTime;
 
 
 
@@ -286,7 +286,7 @@ void MoreauTimeStepper::reset() {
 };
 
 
-double MoreauTimeStepper::getTimeCurrent() {
+MoreauTimeStepper::PREC MoreauTimeStepper::getTimeCurrent() {
     return m_currentSimulationTime;
 }
 

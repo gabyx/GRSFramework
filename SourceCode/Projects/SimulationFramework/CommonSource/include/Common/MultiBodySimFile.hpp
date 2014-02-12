@@ -100,18 +100,18 @@ public:
     /**
     * @brief Reads in the state at the given time and if the id in states is found, the state with id in states is overwritten.
     * @param which is 0 for begin state, 1 for current state given at time, 2 for end state
-    * @param time is the time if which is 1
+    * @param time is the input time if variable which is 1, and the output time if variable which is 0 or 2
     * @tparam TBodyStateMap, is a std::map or any hashed map with mapped_type: std::pair<key,value>
     * @detail If time is in between two states in the sim file, then the next bigger is taken!
     *         If the time is greater then the maximum time, then this time is taken.
     */
     template<typename TBodyStateMap>
     bool read(TBodyStateMap & states,
+              double & stateTime,
               bool readPos = true,
               bool readVel= true,
-              bool onlyUpdate = true,
               short which = 2,
-              double time = 0);
+              bool onlyUpdate = true);
 
 
     /**
@@ -275,12 +275,17 @@ void MultiBodySimFile::write(double time, const TRigidBodyContainer & bodyList){
 
 
 template<typename TBodyStateMap>
-bool MultiBodySimFile::read(TBodyStateMap & states, bool readPos, bool readVel, bool onlyUpdate, short which, double time){
+bool MultiBodySimFile::read(TBodyStateMap & states,
+                            double & stateTime,
+                            bool readPos,
+                            bool readVel,
+                            short which,
+                            bool onlyUpdate){
     m_errorString.str("");
 
     std::set<RigidBodyIdType> updatedStates;
     double currentTime = 0;
-    double lastTime =-1000;
+    double lastTime =-1;
 
     RigidBodyState * pState = nullptr;
     RigidBodyIdType id;
@@ -288,14 +293,21 @@ bool MultiBodySimFile::read(TBodyStateMap & states, bool readPos, bool readVel, 
 
     m_file_stream.seekg(m_beginOfStates);
 
+    if(stateTime < 0){
+        stateTime = 0;
+    }
+
     if(which == 0){
+        *this >> stateTime;
+
         timeFound = true;
     }
     else if(which == 1){
         //Scan all states
         for( std::streamoff stateIdx = 0; stateIdx < m_nStates; stateIdx++){
             *this >> currentTime;
-            if( (time > lastTime && time <= currentTime )|| time <= 0.0){
+            if( (stateTime > lastTime && stateTime <= currentTime )|| stateTime <= 0.0){
+               timeFound = true;
                break;
             }else{
                 lastTime = currentTime;
@@ -304,14 +316,17 @@ bool MultiBodySimFile::read(TBodyStateMap & states, bool readPos, bool readVel, 
                 }
             }
         }
-        timeFound = true;
+        stateTime = currentTime;
     }
     else if(which == 2){
         m_file_stream.seekg( (m_nStates-1)*m_nBytesPerState ,std::ios_base::cur);
+        *this >> stateTime;
         timeFound = true;
     }
 
     if(timeFound){
+
+        ASSERTMSG(stateTime>=0.0, " Found state time is " << stateTime);
         // Current time found!
         for(unsigned int body = 0; body < m_nSimBodies; body++){
             *this >> id;
@@ -321,6 +336,8 @@ bool MultiBodySimFile::read(TBodyStateMap & states, bool readPos, bool readVel, 
                 auto res = states.find(id);
                 if(res != states.end()){
                     pState = &res->second;
+                }else{
+                    pState = nullptr;
                 }
             }else{
                 auto res = states[id];
@@ -353,7 +370,8 @@ bool MultiBodySimFile::read(TBodyStateMap & states, bool readPos, bool readVel, 
 
         if(onlyUpdate){
             if(updatedStates.size() != states.size()){
-               m_errorString << "Some states have not been updated!" << std::endl;
+               m_errorString << "Some states have not been updated!; updated states: " << updatedStates.size() <<  std::endl;
+
                return false;
             }
         }

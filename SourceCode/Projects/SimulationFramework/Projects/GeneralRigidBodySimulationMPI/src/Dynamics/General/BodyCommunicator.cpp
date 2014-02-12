@@ -238,7 +238,7 @@ void BodyCommunicator::cleanUp(){
         delete body->m_pBodyInfo;
 
 
-        bool res = m_globalLocal.removeAndDeleteBody(body);
+        bool res = m_globalLocal.deleteBody(body);
         LOGASSERTMSG( res == true, m_pSimulationLog , "Remote Body with id: " << RigidBodyId::getBodyIdString(body)<< " could not be deleted in m_globalRemote!");
         // FROM now it needs to be sure that this body is no where else in the system anymore!
 

@@ -42,14 +42,14 @@ InclusionCommunicator<Combo>::InclusionCommunicator(boost::shared_ptr< BodyCommu
 template<typename Combo>
 void InclusionCommunicator<Combo>::communicateRemoteContacts(PREC currentSimulationTime) {
 
-    m_currentSimulationTime = m_currentSimulationTime;
+    m_currentSimulationTime = currentSimulationTime;
 
     m_nbRanksSendRecvLocal.clear();
     m_nbRanksSendRecvRemote.clear();
 
 
     // First for each neighbour, communicate the ids of all remote body which have contacts
-    LOGIC(m_pSimulationLog,"\t---> InclusionCommunication: Communicate Remote Contacts ..."<< std::endl;)
+    LOGIC(m_pSimulationLog,"\t---> InclusionCommunication: Communicate Remote Contacts at t="<<m_currentSimulationTime<< std::endl;)
     sendContactMessageToNeighbours();
     receiveContactMessagesFromNeighbours();
 

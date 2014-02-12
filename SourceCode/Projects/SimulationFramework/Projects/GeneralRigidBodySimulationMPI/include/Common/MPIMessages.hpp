@@ -603,7 +603,7 @@ private:
         LOGASSERTMSG(res, m_pSerializerLog, "Could not delete remote body with id: " << RigidBodyId::getBodyIdString(id) << " in neighbour structure rank: " << m_neighbourRank << " !" );
 
         // Remove and delete from global list, deletes also the body info data
-        res = m_nc->m_globalRemote.removeAndDeleteBody(id);
+        res = m_nc->m_globalRemote.deleteBody(id);
         LOGASSERTMSG( res == true, m_pSerializerLog, "Remote Body with id: " << RigidBodyId::getBodyIdString(id) << " could not be deleted in m_globalRemote!");
 
 
@@ -882,7 +882,7 @@ public:
 
         RigidBodyType::PREC time;
         ar & time;
-        LOGASSERTMSG(time == this->m_time, this->m_pSerializerLog, "Wrong message received!")
+        LOGASSERTMSG(time == this->m_time, this->m_pSerializerLog, "Wrong message received! message time: " << time << ", current time: " << this->m_time)
 
         // for each body one bilateral node
         // for each received body , if no node in the bilateral set in ContactGraph exists , add one bilateral node

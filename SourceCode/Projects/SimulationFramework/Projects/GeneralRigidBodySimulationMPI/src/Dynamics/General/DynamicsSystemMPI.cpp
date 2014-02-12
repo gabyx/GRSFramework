@@ -10,30 +10,38 @@ DynamicsSystem::~DynamicsSystem() {
     DECONSTRUCTOR_MESSAGE
 
     // Delete all RigidBodys
-    m_SimBodies.removeAndDeleteAllBodies();
-    m_RemoteSimBodies.removeAndDeleteAllBodies();
-    m_Bodies.removeAndDeleteAllBodies();
+    m_SimBodies.deleteAllBodies();
+    m_RemoteSimBodies.deleteAllBodies();
+    m_Bodies.deleteAllBodies();
 
 };
 
 
-void DynamicsSystem::getSettings(RecorderSettings & settingsRecorder) const{
+void DynamicsSystem::getSettings(RecorderSettings & settingsRecorder) const {
     settingsRecorder = m_SettingsRecorder;
 }
-
-
-void DynamicsSystem::setSettings(const RecorderSettings & settingsRecorder){
+void DynamicsSystem::setSettings(const RecorderSettings & settingsRecorder) {
     m_SettingsRecorder = settingsRecorder;
 }
-
-
-void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper, InclusionSolverSettings &settingsInclusionSolver) {
+void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper) const {
+    settingsTimestepper = m_SettingsTimestepper;
+}
+void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper){
+    m_SettingsTimestepper = settingsTimestepper;
+}
+void DynamicsSystem::getSettings(InclusionSolverSettings &settingsInclusionSolver) const {
+    settingsInclusionSolver = m_SettingsInclusionSolver;
+}
+void DynamicsSystem::setSettings(const InclusionSolverSettings &settingsInclusionSolver){
+    m_SettingsInclusionSolver = settingsInclusionSolver;
+}
+void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper,
+                                 InclusionSolverSettings &settingsInclusionSolver) const {
     settingsTimestepper = m_SettingsTimestepper;
     settingsInclusionSolver = m_SettingsInclusionSolver;
 }
-
-
-void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper, const InclusionSolverSettings &settingsInclusionSolver) {
+void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper,
+                                 const InclusionSolverSettings &settingsInclusionSolver) {
     m_SettingsTimestepper = settingsTimestepper;
     m_SettingsInclusionSolver = settingsInclusionSolver;
 }

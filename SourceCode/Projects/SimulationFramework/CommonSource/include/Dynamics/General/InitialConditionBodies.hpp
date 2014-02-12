@@ -92,18 +92,22 @@ void setupPositionBodiesGrid(StateContainerType & states,
 
 
 template<typename TBodyStateMap>
-bool setupPositionBodiesFromFile(TBodyStateMap & states, boost::filesystem::path file_path, short which = 2, double time = 0){
+bool setupInitialConditionBodiesFromFile(boost::filesystem::path file_path,
+                                         TBodyStateMap & states,
+                                         double & stateTime,
+                                         bool readPos = true,
+                                         bool readVel = true,
+                                         short which = 2){
 
     MultiBodySimFile simFile( DynamicsState::LayoutConfigType::LayoutType::NDOFqBody,
                               DynamicsState::LayoutConfigType::LayoutType::NDOFuBody);
     bool failed = false;
     if(simFile.openRead(file_path,0,true)) {
         // We only perform an update! -> true
-        if(!simFile.read(states,true,which,time)){
+        if(!simFile.read(states,stateTime,readPos,readVel,which,true)){
             failed = true;
         }
         simFile.close();
-        return true;
     }else{
         failed = true;
     }
@@ -112,7 +116,7 @@ bool setupPositionBodiesFromFile(TBodyStateMap & states, boost::filesystem::path
         return true;
     }
 
-    ERRORMSG("setupPositionBodiesFromFile:: failed: " << simFile.getErrorString())
+    ERRORMSG("setupInitialConditionBodiesFromFile:: failed: " << simFile.getErrorString())
     return false;
 }
 

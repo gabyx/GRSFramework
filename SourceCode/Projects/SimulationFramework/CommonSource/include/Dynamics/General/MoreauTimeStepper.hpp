@@ -52,7 +52,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
-    MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState);
+    MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState);
     ~MoreauTimeStepper();
 
     // The Core Objects ==================================
@@ -68,7 +68,7 @@ public:
     void reset();
     void doOneIteration();
 
-    double getTimeCurrent();
+    PREC getTimeCurrent();
     unsigned int getIterationCount();
 
     // Solver Parameters
@@ -95,7 +95,10 @@ public:
 
 protected:
 
-    const unsigned int m_nSimBodies; // These are the dimensions for one Obj
+    PREC m_currentSimulationTime;
+    PREC m_startSimulationTime;
+
+//    const unsigned int m_nSimBodies; // These are the dimensions for one Obj
 
     int m_IterationCounter;
     bool m_bIterationFinished;
@@ -123,7 +126,7 @@ protected:
     //Solver state pool front and back buffer
     void swapStateBuffers();
 
-    DynamicsState m_state_m;  // middle state of iteration
+    //DynamicsState m_state_m;  // middle state of iteration
 
     // Logs
     boost::filesystem::path m_SimFolderPath;

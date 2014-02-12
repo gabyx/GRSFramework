@@ -1,4 +1,3 @@
-
 #include "DynamicsSystem.hpp"
 
 #include "VectorToSkewMatrix.hpp"
@@ -10,8 +9,8 @@ DynamicsSystem::~DynamicsSystem() {
     DECONSTRUCTOR_MESSAGE
 
     // Delete all RigidBodys
-    m_SimBodies.removeAndDeleteAllBodies();
-    m_Bodies.removeAndDeleteAllBodies();
+    m_SimBodies.deleteAllBodies();
+    m_Bodies.deleteAllBodies();
 
 };
 
@@ -19,20 +18,28 @@ DynamicsSystem::~DynamicsSystem() {
 void DynamicsSystem::getSettings(RecorderSettings & settingsRecorder) const {
     settingsRecorder = m_SettingsRecorder;
 }
-
-
 void DynamicsSystem::setSettings(const RecorderSettings & settingsRecorder) {
     m_SettingsRecorder = settingsRecorder;
 }
-
+void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper) const {
+    settingsTimestepper = m_SettingsTimestepper;
+}
+void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper){
+    m_SettingsTimestepper = settingsTimestepper;
+}
+void DynamicsSystem::getSettings(InclusionSolverSettings &settingsInclusionSolver) const {
+    settingsInclusionSolver = m_SettingsInclusionSolver;
+}
+void DynamicsSystem::setSettings(const InclusionSolverSettings &settingsInclusionSolver){
+    m_SettingsInclusionSolver = settingsInclusionSolver;
+}
 void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper,
-        InclusionSolverSettings &settingsInclusionSolver) const {
+                                 InclusionSolverSettings &settingsInclusionSolver) const {
     settingsTimestepper = m_SettingsTimestepper;
     settingsInclusionSolver = m_SettingsInclusionSolver;
 }
-
-
-void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper, const InclusionSolverSettings &settingsInclusionSolver) {
+void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper,
+                                 const InclusionSolverSettings &settingsInclusionSolver) {
     m_SettingsTimestepper = settingsTimestepper;
     m_SettingsInclusionSolver = settingsInclusionSolver;
 }
@@ -45,18 +52,18 @@ void DynamicsSystem::initializeLog(Logging::Log* pLog) {
 
 
 void DynamicsSystem::reset() {
-   //reset all external forces
-   m_externalForces.reset();
+    //reset all external forces
+    m_externalForces.reset();
 
-   initMassMatrixAndHTerm();
+    initMassMatrixAndHTerm();
 }
 
 
 void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
     using namespace std;
-    #if CoutLevelSolver>1
+#if CoutLevelSolver>1
     LOG(m_pSolverLog, "---> doFirstHalfTimeStep(): "<<std::endl;)
-    #endif
+#endif
 
     static Matrix43 F_i = Matrix43::Zero();
 
@@ -117,9 +124,9 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 
 void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
     using namespace std;
-    #if CoutLevelSolver>1
+#if CoutLevelSolver>1
     LOG(m_pSolverLog, "---> doSecondHalfTimeStep(): "<<std::endl;)
-    #endif
+#endif
     static Matrix43 F_i = Matrix43::Zero();
 
     m_CurrentStateEnergy = 0;

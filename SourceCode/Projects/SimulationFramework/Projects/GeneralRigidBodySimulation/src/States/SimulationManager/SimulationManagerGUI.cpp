@@ -98,7 +98,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
 
     m_pSharedBuffer = boost::shared_ptr<SharedBufferDynSys>(new SharedBufferDynSys(m_nSimBodies));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBufferDynSys... ");
-    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys, m_pSharedBuffer) );
+    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added TimeStepperType... ");
 
     m_pStateRecorder = boost::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
@@ -146,7 +146,7 @@ bool SimulationManagerGUI::writeInitialState() {
 
 
 
-void SimulationManagerGUI::updateScene(double timeSinsfceLastFrame) {
+void SimulationManagerGUI::updateScene(double timeSinceLastFrame) {
     static bool bStateChanged;
 
     if (isSimThreadRunning()) {
@@ -228,7 +228,7 @@ void SimulationManagerGUI::threadRunSimulation() {
 
     resetTimelineSimulation();
     while(!isSimThreadToBeStopped()) {
-        timelineSimulation = getTimelineSimulation();
+        timelineSimulation = getTimelineSimulation() + m_pTimestepper->m_Settings.m_startTime;
         state_time = m_pTimestepper->getTimeCurrent();
 
         if ( state_time <= timelineSimulation) {
@@ -275,11 +275,14 @@ void SimulationManagerGUI::initSimThread() {
 
     m_pTimestepper->reset();
 
+
+
 }
 
 
 
 void SimulationManagerGUI::cleanUpSimThread() {
+
     m_pTimestepper->closeAllFiles();
 }
 
