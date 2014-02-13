@@ -37,7 +37,7 @@
 #include "InitialConditionBodies.hpp"
 
 
-#include "InclusionSolverSettings.hpp"
+#include InclusionSolverSettings_INCLUDE_FILE
 #include "TimeStepperSettings.hpp"
 #include "RecorderSettings.hpp"
 

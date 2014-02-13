@@ -15,7 +15,7 @@
 #include "MatrixHelpers.hpp"
 #include "VectorToSkewMatrix.hpp"
 #include "ProxFunctions.hpp"
-#include "InclusionSolverSettings.hpp"
+#include InclusionSolverSettings_INCLUDE_FILE
 #include "ContactGraph.hpp"
 
 #include "LogDefines.hpp"

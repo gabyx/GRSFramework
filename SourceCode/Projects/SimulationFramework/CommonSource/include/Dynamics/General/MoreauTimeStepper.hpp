@@ -140,7 +140,7 @@ void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
 
     m_SystemDataFile
     << globalTime << "\t"
-    << m_StateBuffers.m_pBack->m_t <<"\t"
+    << m_currentSimulationTime <<"\t"
     << (m_endTime-m_startTime) <<"\t"
     << (m_endTimeCollisionSolver-m_startTimeCollisionSolver) <<"\t"
     << (m_endTimeInclusionSolver-m_startTimeInclusionSolver) <<"\t"
@@ -170,7 +170,7 @@ void MoreauTimeStepper::writeIterationToCollisionDataFile() {
     double averageOverlap = 0;
 
     unsigned int nContacts = m_pCollisionSolver->m_collisionSet.size();
-    m_CollisionDataFile << (double)m_StateBuffers.m_pFront->m_t; // Write Time
+    m_CollisionDataFile << m_currentSimulationTime; // Write Time
     m_CollisionDataFile << nContacts; // Write number of Contacts
     for(unsigned int i=0; i<nContacts; i++) {
         averageOverlap += m_pCollisionSolver->m_collisionSet[i].m_overlap;

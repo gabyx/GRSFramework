@@ -12,28 +12,40 @@
 #include "LayoutConfigDefs.hpp"
 
 
+
+
+
+#define StatePool_INCLUDE_FILE "StatePoolVisBackFront.hpp"
 class StatePoolVisBackFront;
+
+#define CollisionSolver_INCLUDE_FILE "CollisionSolver.hpp"
 class CollisionSolver;
+
+#define DynamicsSystem_INCLUDE_FILE "DynamicsSystem.hpp"
 class DynamicsSystem;
-class InclusionSolverCO;
+#define InclusionSolverSettings_INCLUDE_FILE    "InclusionSolverSettings.hpp"
+class InclusionSolverSettings;
+
+#define InclusionSolver_INCLUDE_FILE "InclusionSolverCONoG.hpp"
+//class InclusionSolverCO;
 class InclusionSolverCONoG;
+
+#define RigidBody_INCLUDE_FILE "RigidBody.hpp"
 class RigidBodyBase;
+
+#define RigidBodySolverData_INCLUDE_FILE "RigidBodySolverData.hpp"
 class RigidBodySolverDataCONoG;
+
+#define TimeStepper_INCLUDE_FILE "MoreauTimeStepper.hpp"
 class MoreauTimeStepper;
 
 
-#define RigidBody_INCLUDE_FILE "RigidBody.hpp"
-#define TimeStepper_INCLUDE_FILE "MoreauTimeStepper.hpp"
-#define DynamicsSystem_INCLUDE_FILE "DynamicsSystem.hpp"
-#define InclusionSolver_INCLUDE_FILE "InclusionSolverCONoG.hpp"
-#define CollisionSolver_INCLUDE_FILE "CollisionSolver.hpp"
-#define StatePool_INCLUDE_FILE "StatePoolVisBackFront.hpp"
-#define RigidBodySolverData_INCLUDE_FILE "RigidBodySolverData.hpp"
+
 
 //Try to make framework settings simpler:
-namespace GlobalConfigs{
+namespace GlobalConfigs {
 
-    namespace MyConfigs{
+    namespace MyConfigs {
         typedef RigidBodyBase           RigidBodyType;
         typedef DynamicsSystem          DynamicsSystemType;
         typedef MoreauTimeStepper       TimeStepperType;
@@ -41,31 +53,34 @@ namespace GlobalConfigs{
         typedef InclusionSolverCONoG    InclusionSolverType;
     };
 
-    namespace RigidBodyConfigs{
-        typedef LayoutConfig<double, GeneralLayout<7,6> > LayoutConfigType;
-        typedef RigidBodySolverDataCONoG RigidBodySolverDataType;
-    }
-    namespace DynamicSystemConfigs{
-        typedef typename MyConfigs::RigidBodyType RigidBodyType;
-    };
-    namespace InclusionSolverConfigs{
-        typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
-    };
-    namespace CollisionSolverConfigs{
-        typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
+    namespace SolverConfigs {
+        typedef MyConfigs::TimeStepperType                       TimeStepperType;
     };
 
-    namespace TimeStepperConfigs{
+    namespace TimeStepperConfigs {
         typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
         typedef typename MyConfigs::CollisionSolverType          CollisionSolverType;
         typedef typename MyConfigs::InclusionSolverType          InclusionSolverType;
-        typedef StatePoolVisBackFront                   StatePoolType;
+        typedef StatePoolVisBackFront                            StatePoolType;
     };
 
-    namespace SolverConfigs{
-        typedef MyConfigs::TimeStepperType              TimeStepperType;
+    namespace DynamicSystemConfigs {
+        typedef typename MyConfigs::RigidBodyType                RigidBodyType;
+        typedef InclusionSolverSettings                          InclusionSolverSettingsType;
     };
 
+    namespace RigidBodyConfigs {
+        typedef LayoutConfig<double, GeneralLayout<7,6> >        LayoutConfigType;
+        typedef RigidBodySolverDataCONoG                         RigidBodySolverDataType;
+    }
+
+
+    namespace InclusionSolverConfigs {
+        typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
+    };
+    namespace CollisionSolverConfigs {
+        typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
+    };
 
 };
 
@@ -74,11 +89,11 @@ namespace GlobalConfigs{
    DEFINE_SOLVER_CONFIG_TYPES \
 
 #define DEFINE_SOLVER_CONFIG_TYPES \
-   typedef typename GlobalConfigs::SolverConfigs::TimeStepperType TimeStepperType; \
-   DEFINE_TIMESTEPPER_CONFIG_TYPES \
+    DEFINE_TIMESTEPPER_CONFIG_TYPES \
 
 #define DEFINE_TIMESTEPPER_CONFIG_TYPES \
-   typedef typename GlobalConfigs::TimeStepperConfigs::StatePoolType          StatePoolType;                 \
+   typedef typename GlobalConfigs::SolverConfigs::TimeStepperType              TimeStepperType; \
+   typedef typename GlobalConfigs::TimeStepperConfigs::StatePoolType           StatePoolType;                 \
    typedef typename GlobalConfigs::TimeStepperConfigs::InclusionSolverType     InclusionSolverType;                 \
    typedef typename GlobalConfigs::TimeStepperConfigs::CollisionSolverType     CollisionSolverType;                 \
    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
@@ -91,13 +106,14 @@ namespace GlobalConfigs{
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
 
 #define DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
-    typedef typename GlobalConfigs::TimeStepperConfigs::DynamicsSystemType     DynamicsSystemType; \
+    typedef typename GlobalConfigs::DynamicSystemConfigs::InclusionSolverSettingsType     InclusionSolverSettingsType; \
+    typedef typename GlobalConfigs::TimeStepperConfigs::DynamicsSystemType                DynamicsSystemType; \
     DEFINE_RIGIDBODY_CONFIG_TYPES \
 
 
 #define DEFINE_RIGIDBODY_CONFIG_TYPES \
-    typedef typename GlobalConfigs::DynamicSystemConfigs::RigidBodyType RigidBodyType; \
-    typedef typename GlobalConfigs::RigidBodyConfigs::RigidBodySolverDataType RigidBodySolverDataType; \
+    typedef typename GlobalConfigs::DynamicSystemConfigs::RigidBodyType          RigidBodyType; \
+    typedef typename GlobalConfigs::RigidBodyConfigs::RigidBodySolverDataType    RigidBodySolverDataType; \
     DEFINE_LAYOUT_CONFIG_TYPES\
 
 #define DEFINE_LAYOUT_CONFIG_TYPES \
@@ -108,8 +124,8 @@ namespace GlobalConfigs{
     typedef typename GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC PREC; \
     DEFINE_MATRIX_TYPES_OF( GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC )
 
-struct MyIOFormat{
-  static Eigen::IOFormat Matlab;
+struct MyIOFormat {
+    static Eigen::IOFormat Matlab;
 };
 
 typedef double MeshPREC;

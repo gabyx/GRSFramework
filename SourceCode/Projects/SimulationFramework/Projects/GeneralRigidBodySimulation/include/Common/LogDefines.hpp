@@ -73,8 +73,8 @@
   #define LogToFileSolver 1            ///< {0,1} Determines if logstream is saved into a file.
   #define LogToConsoleSolver 0         ///< {0,1} Determines if logstream is outputted into console.
 #else
-  #define CoutLevelSolver 3
-  #define CoutLevelSolverWhenContact 3
+  #define CoutLevelSolver 0
+  #define CoutLevelSolverWhenContact 0
   #define LogToFileSolver 1
   #define LogToConsoleSolver 0
 #endif

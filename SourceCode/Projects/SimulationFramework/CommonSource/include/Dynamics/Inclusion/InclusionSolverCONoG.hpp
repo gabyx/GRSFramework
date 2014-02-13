@@ -15,7 +15,7 @@
 #include CollisionSolver_INCLUDE_FILE
 #include "PercussionPool.hpp"
 
-#include "InclusionSolverSettings.hpp"
+#include InclusionSolverSettings_INCLUDE_FILE
 #include "ContactGraph.hpp"
 #include "SimpleLogger.hpp"
 

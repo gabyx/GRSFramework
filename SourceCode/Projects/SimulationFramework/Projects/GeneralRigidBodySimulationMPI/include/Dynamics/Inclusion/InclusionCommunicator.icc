@@ -48,10 +48,17 @@ void InclusionCommunicator<Combo>::communicateRemoteContacts(PREC currentSimulat
     m_nbRanksSendRecvRemote.clear();
 
 
+    m_messageContact.setTime(m_currentSimulationTime);
+    m_messageMultiplicity.setTime(m_currentSimulationTime);
+    m_messageSplitBodyUpdate.setTime(m_currentSimulationTime);
+    m_messageSplitBodySolution.setTime(m_currentSimulationTime);
+
+
     // First for each neighbour, communicate the ids of all remote body which have contacts
     LOGIC(m_pSimulationLog,"\t---> InclusionCommunication: Communicate Remote Contacts at t="<<m_currentSimulationTime<< std::endl;)
-    sendContactMessageToNeighbours();
-    receiveContactMessagesFromNeighbours();
+    //TODO
+    sendContactMessageToNeighbours(); //TODO Send only message to neighbour if there are remotes in bodyCommunicators neighbour map
+    receiveContactMessagesFromNeighbours(); //TODO Receive only message if local bodies are in bodyCommunicators neighbour map
 
 
     //Init all weights on the nodes
@@ -152,7 +159,7 @@ template<typename Combo>
 void InclusionCommunicator<Combo>::sendContactMessageToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (EXTERNALCONTACTS_MESSAGE) to neighbours!"<<std::endl;)
 
-    m_messageContact.setTime(m_currentSimulationTime);
+
 
     for(auto it = m_nbRanks.begin(); it != m_nbRanks.end(); it++) {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
@@ -176,7 +183,7 @@ template<typename Combo>
 void InclusionCommunicator<Combo>::sendBodyMultiplicityMessageToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYFACTOR_MESSAGE) to neighbours!"<<std::endl;)
 
-    m_messageMultiplicity.setTime(m_currentSimulationTime);
+
 
     for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); it++) {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
@@ -206,7 +213,7 @@ template<typename Combo>
 void InclusionCommunicator<Combo>::sendUpdateSplitBodiesToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYUPDATE_MESSAGE) to neighbours!"<<std::endl;)
 
-    m_messageSplitBodyUpdate.setTime(m_currentSimulationTime);
+
     m_messageSplitBodyUpdate.setStep(m_globalIterationNumber);
 
     for(auto it = m_nbRanksSendRecvRemote.begin(); it != m_nbRanksSendRecvRemote.end(); it++) {
@@ -237,7 +244,7 @@ template<typename Combo>
 void InclusionCommunicator<Combo>::sendSolutionSplitBodiesToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYSOLUTION_MESSAGE) to neighbours!"<<std::endl;)
 
-    m_messageSplitBodySolution.setTime(m_currentSimulationTime);
+
     m_messageSplitBodySolution.setStep(m_globalIterationNumber);
 
     for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); it++) {

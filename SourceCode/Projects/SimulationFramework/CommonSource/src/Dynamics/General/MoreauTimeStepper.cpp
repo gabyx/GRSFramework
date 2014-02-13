@@ -168,6 +168,7 @@ void MoreauTimeStepper::reset() {
     //m_ReferenceSimFile.writeOutAllStateTimes();
 
     m_currentSimulationTime = m_Settings.m_startTime;
+    m_StateBuffers.m_pFront->m_t= m_currentSimulationTime;
 
     m_AvgTimeForOneIteration = 0;
     m_MaxTimeForOneIteration = 0;
@@ -220,6 +221,7 @@ void MoreauTimeStepper::doOneIteration() {
     m_startTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
 
 
+
     //Force switch
     //boost::thread::yield();
 
@@ -246,6 +248,7 @@ void MoreauTimeStepper::doOneIteration() {
 
     //Calculate Midpoint Rule ============================================================
     // Middle Time Step ==================================================================
+
     m_startSimulationTime = m_currentSimulationTime;
     m_pDynSys->doFirstHalfTimeStep(m_startSimulationTime, m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs

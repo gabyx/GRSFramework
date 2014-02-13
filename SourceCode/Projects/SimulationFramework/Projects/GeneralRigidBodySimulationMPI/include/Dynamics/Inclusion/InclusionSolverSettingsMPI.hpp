@@ -28,6 +28,7 @@ struct InclusionSolverSettings
       m_UseGPUDeviceId = 0;
       m_bIsFiniteCheck = false;
       m_eConvergenceMethod = InVelocity;
+      m_bilateralUpdateFreq = 1;
     }
 
 
@@ -36,6 +37,7 @@ struct InclusionSolverSettings
     PREC m_alphaSORProx;
     unsigned int m_MaxIter;
     unsigned int m_MinIter;
+    unsigned int m_bilateralUpdateFreq;
     PREC m_AbsTol;
     PREC m_RelTol;
     enum Method{ SOR, JOR} m_eMethod;

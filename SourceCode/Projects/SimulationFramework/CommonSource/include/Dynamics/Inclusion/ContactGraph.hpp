@@ -14,7 +14,7 @@
 #include "ContactParameterMap.hpp"
 #include "ContactGraphNodeData.hpp"
 
-#include "InclusionSolverSettings.hpp"
+#include InclusionSolverSettings_INCLUDE_FILE
 
 #include "VectorToSkewMatrix.hpp"
 #include "ProxFunctions.hpp"

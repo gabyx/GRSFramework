@@ -18,7 +18,7 @@
 #include CollisionSolver_INCLUDE_FILE
 //#include "PercussionPool.hpp"
 
-#include "InclusionSolverSettings.hpp"
+#include InclusionSolverSettings_INCLUDE_FILE
 
 #include "SimpleLogger.hpp"
 

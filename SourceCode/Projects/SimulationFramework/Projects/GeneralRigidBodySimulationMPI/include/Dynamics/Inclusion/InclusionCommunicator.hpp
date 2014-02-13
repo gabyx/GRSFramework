@@ -13,7 +13,7 @@
 
 #include "MPIMessages.hpp"
 
-#include "InclusionSolverSettings.hpp"
+#include InclusionSolverSettings_INCLUDE_FILE
 
 template<typename Combo>
 class InclusionCommunicator {

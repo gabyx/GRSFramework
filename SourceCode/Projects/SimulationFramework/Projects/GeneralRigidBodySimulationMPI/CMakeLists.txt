@@ -143,7 +143,7 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/NeighbourDataInclusionCommunication.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettings.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettingsMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/FrontBackBuffer.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePool.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePoolVisBackFront.hpp

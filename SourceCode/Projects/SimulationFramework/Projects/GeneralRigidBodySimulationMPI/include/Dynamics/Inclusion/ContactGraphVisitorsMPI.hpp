@@ -8,7 +8,7 @@
 
 #include "ContactModels.hpp"
 #include "ProxFunctions.hpp"
-#include "InclusionSolverSettings.hpp"
+#include InclusionSolverSettings_INCLUDE_FILE
 
 
 

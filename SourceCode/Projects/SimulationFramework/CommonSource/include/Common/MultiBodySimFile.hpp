@@ -427,19 +427,21 @@ MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState* state ) {
         //m_file_stream >> state->m_SimBodyStates[i].m_q; //ADL fails
         *this >> id;
         unsigned int bodyNr = RigidBodyId::getBodyNr(id);
+
         ASSERTMSG(bodyNr >=0 && bodyNr < state->m_SimBodyStates.size(), "BodyNr: " << bodyNr << " is out of bound!")
+        if(bodyNr >=0 && bodyNr < state->m_SimBodyStates.size()){
+            state->m_SimBodyStates[bodyNr].m_id = id;
 
-        state->m_SimBodyStates[bodyNr].m_id = id;
-
-        IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[bodyNr].m_q );
-        //std::cout<< state->m_SimBodyStates[i].m_q.transpose()  << std::endl;
-        if(m_bReadFullState) {
-            //m_file_stream >> state->m_SimBodyStates[i].m_u;
-            IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[bodyNr].m_u );
-            //std::cout<< state->m_SimBodyStates[i].m_u.transpose()  << std::endl;
-        } else {
-            //Dont read in velocities, its not needed!
-            m_file_stream.seekg(m_nBytesPerUBody,std::ios_base::cur);
+            IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[bodyNr].m_q );
+            //std::cout<< state->m_SimBodyStates[i].m_q.transpose()  << std::endl;
+            if(m_bReadFullState) {
+                //m_file_stream >> state->m_SimBodyStates[i].m_u;
+                IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[bodyNr].m_u );
+                //std::cout<< state->m_SimBodyStates[i].m_u.transpose()  << std::endl;
+            } else {
+                //Dont read in velocities, its not needed!
+                m_file_stream.seekg(m_nBytesPerUBody,std::ios_base::cur);
+            }
         }
 
         // Dont read in additional bytes
