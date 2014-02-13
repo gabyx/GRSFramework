@@ -29,19 +29,19 @@ void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper) const
 void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper){
     m_SettingsTimestepper = settingsTimestepper;
 }
-void DynamicsSystem::getSettings(InclusionSolverSettings &settingsInclusionSolver) const {
+void DynamicsSystem::getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const {
     settingsInclusionSolver = m_SettingsInclusionSolver;
 }
-void DynamicsSystem::setSettings(const InclusionSolverSettings &settingsInclusionSolver){
+void DynamicsSystem::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
     m_SettingsInclusionSolver = settingsInclusionSolver;
 }
 void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper,
-                                 InclusionSolverSettings &settingsInclusionSolver) const {
+                                 InclusionSolverSettingsType &settingsInclusionSolver) const {
     settingsTimestepper = m_SettingsTimestepper;
     settingsInclusionSolver = m_SettingsInclusionSolver;
 }
 void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper,
-                                 const InclusionSolverSettings &settingsInclusionSolver) {
+                                 const InclusionSolverSettingsType &settingsInclusionSolver) {
     m_SettingsTimestepper = settingsTimestepper;
     m_SettingsInclusionSolver = settingsInclusionSolver;
 }

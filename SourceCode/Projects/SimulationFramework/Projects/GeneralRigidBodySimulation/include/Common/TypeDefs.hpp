@@ -46,11 +46,18 @@ class MoreauTimeStepper;
 namespace GlobalConfigs {
 
     namespace MyConfigs {
+
         typedef RigidBodyBase           RigidBodyType;
+
         typedef DynamicsSystem          DynamicsSystemType;
+
         typedef MoreauTimeStepper       TimeStepperType;
+
         typedef CollisionSolver         CollisionSolverType;
+
         typedef InclusionSolverCONoG    InclusionSolverType;
+        typedef InclusionSolverSettings InclusionSolverSettingsType;
+
     };
 
     namespace SolverConfigs {
@@ -66,7 +73,7 @@ namespace GlobalConfigs {
 
     namespace DynamicSystemConfigs {
         typedef typename MyConfigs::RigidBodyType                RigidBodyType;
-        typedef InclusionSolverSettings                          InclusionSolverSettingsType;
+        typedef typename MyConfigs::InclusionSolverSettingsType  InclusionSolverSettingsType;
     };
 
     namespace RigidBodyConfigs {
@@ -77,6 +84,7 @@ namespace GlobalConfigs {
 
     namespace InclusionSolverConfigs {
         typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
+        typedef typename MyConfigs::InclusionSolverSettingsType  InclusionSolverSettingsType;
     };
     namespace CollisionSolverConfigs {
         typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;

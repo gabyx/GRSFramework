@@ -62,7 +62,7 @@ public:
         m_nbDataMap.emptyAllNeighbourData();
     }
 
-    void setSettings(const InclusionSolverSettings & settings){
+    void setSettings(const InclusionSolverSettingsType & settings){
         m_Settings = settings;
     }
 
@@ -70,7 +70,7 @@ public:
 
 private:
 
-    InclusionSolverSettings m_Settings;
+    InclusionSolverSettingsType m_Settings;
 
 
     /** Functions are executed in this order in communicateRemoteContacts() */

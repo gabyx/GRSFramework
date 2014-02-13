@@ -69,7 +69,7 @@ public:
   void updatePercussionPool(const VectorDyn & P_Nold, const VectorDyn & P_Told ) ;
 
 
-  InclusionSolverSettings m_Settings;
+  InclusionSolverSettingsType m_Settings;
 
   unsigned int getNObjects();
 

@@ -75,13 +75,13 @@ public:
 
     void getSettings(RecorderSettings & settingsRecorder) const;
     void getSettings(TimeStepperSettings &settingsTimestepper) const;
-    void getSettings(InclusionSolverSettings &settingsInclusionSolver) const;
-    void getSettings(TimeStepperSettings &settingsTimestepper, InclusionSolverSettings &settingsInclusionSolver) const;
+    void getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const;
+    void getSettings(TimeStepperSettings &settingsTimestepper, InclusionSolverSettingsType &settingsInclusionSolver) const;
 
     void setSettings(const RecorderSettings & settingsRecorder);
     void setSettings(const TimeStepperSettings &settingsTimestepper);
-    void setSettings(const InclusionSolverSettings &settingsInclusionSolver);
-    void setSettings(const TimeStepperSettings &settingsTimestepper, const InclusionSolverSettings &settingsInclusionSolver);
+    void setSettings(const InclusionSolverSettingsType &settingsInclusionSolver);
+    void setSettings(const TimeStepperSettings &settingsTimestepper, const InclusionSolverSettingsType &settingsInclusionSolver);
 
 
     void reset();
@@ -96,7 +96,7 @@ protected:
 
     RecorderSettings m_SettingsRecorder;
     TimeStepperSettings m_SettingsTimestepper;
-    InclusionSolverSettings m_SettingsInclusionSolver;
+    InclusionSolverSettingsType m_SettingsInclusionSolver;
 
 
     //Function

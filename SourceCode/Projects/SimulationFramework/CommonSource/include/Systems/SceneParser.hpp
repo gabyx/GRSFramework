@@ -200,7 +200,7 @@ protected:
             ticpp::Element *timestepElement = sceneSettings->FirstChild("TimeStepperSettings",true)->ToElement();
 
             TimeStepperSettings timestepperSettings;
-            InclusionSolverSettings inclusionSettings;
+            InclusionSolverSettingsType inclusionSettings;
 
             // Get standart values!
             m_pDynSys->getSettings(timestepperSettings,inclusionSettings);
@@ -262,20 +262,20 @@ protected:
                 if(inclusionElement->HasAttribute("convergenceMethod")) {
                     std::string method = inclusionElement->GetAttribute("convergenceMethod");
                     if(method == "InLambda") {
-                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings::InLambda;
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettingsType::InLambda;
                     } else if (method == "InVelocity") {
-                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings::InVelocity;
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettingsType::InVelocity;
                     } else if (method == "InVelocityLocal") {
-                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings::InVelocityLocal;
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettingsType::InVelocityLocal;
                     } else if (method == "InEnergyVelocity") {
-                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings::InEnergyVelocity;
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettingsType::InEnergyVelocity;
                     } else if (method == "InEnergyLocalMix") {
-                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings::InEnergyLocalMix;
+                        inclusionSettings.m_eConvergenceMethod = InclusionSolverSettingsType::InEnergyLocalMix;
                     } else {
                         throw ticpp::Exception("---> String conversion in SceneSettings: convergenceMethod failed: not a valid setting");
                     }
                 } else {
-                    inclusionSettings.m_eConvergenceMethod = InclusionSolverSettings::InLambda;
+                    inclusionSettings.m_eConvergenceMethod = InclusionSolverSettingsType::InLambda;
                 }
 
                 if(!Utilities::stringToType<PREC>(inclusionSettings.m_AbsTol, inclusionElement->GetAttribute("absTol"))) {
@@ -293,9 +293,9 @@ protected:
 
                 std::string method = inclusionElement->GetAttribute("method");
                 if(method == "JOR") {
-                    inclusionSettings.m_eMethod = InclusionSolverSettings::JOR;
+                    inclusionSettings.m_eMethod = InclusionSolverSettingsType::JOR;
                 } else if (method == "SOR") {
-                    inclusionSettings.m_eMethod = InclusionSolverSettings::SOR;
+                    inclusionSettings.m_eMethod = InclusionSolverSettingsType::SOR;
                 } else {
                     throw ticpp::Exception("---> String conversion in SceneSettings: method failed: not a valid setting");
                 }

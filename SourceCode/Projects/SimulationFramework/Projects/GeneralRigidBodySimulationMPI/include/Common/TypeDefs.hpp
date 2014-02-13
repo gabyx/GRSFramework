@@ -39,12 +39,20 @@ class InclusionSolverSettings;
 //Try to make framework settings simpler:
 namespace GlobalConfigs{
 
+    // Global definitions used below
     namespace MyConfigs{
+
         typedef RigidBodyBaseMPI        RigidBodyType;
+
         typedef DynamicsSystem          DynamicsSystemType;
+
         typedef MoreauTimeStepper       TimeStepperType;
+
         typedef CollisionSolver         CollisionSolverType;
+
         typedef InclusionSolverCONoG    InclusionSolverType;
+        typedef InclusionSolverSettings InclusionSolverSettingsType;
+
     };
 
 
@@ -59,9 +67,10 @@ namespace GlobalConfigs{
     };
 
     namespace DynamicSystemConfigs{
-        typedef typename MyConfigs::RigidBodyType RigidBodyType;
-        typedef InclusionSolverSettings                          InclusionSolverSettingsType;
+        typedef typename MyConfigs::RigidBodyType                RigidBodyType;
+        typedef typename MyConfigs::InclusionSolverSettingsType      InclusionSolverSettingsType;
     };
+
     namespace RigidBodyConfigs{
         typedef LayoutConfig<double, GeneralLayout<7,6> > LayoutConfigType;
         typedef RigidBodySolverDataCONoGMPI RigidBodySolverDataType;
@@ -70,6 +79,7 @@ namespace GlobalConfigs{
 
     namespace InclusionSolverConfigs{
         typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
+        typedef typename MyConfigs::InclusionSolverSettingsType  InclusionSolverSettingsType;
     };
     namespace CollisionSolverConfigs{
         typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
@@ -103,8 +113,8 @@ namespace GlobalConfigs{
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
 
 #define DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
-    typedef typename GlobalConfigs::DynamicSystemConfigs::InclusionSolverSettingsType     InclusionSolverSettingsType; \
-    typedef typename GlobalConfigs::TimeStepperConfigs::DynamicsSystemType                DynamicsSystemType; \
+    typedef typename GlobalConfigs::InclusionSolverConfigs::InclusionSolverSettingsType     InclusionSolverSettingsType; \
+    typedef typename GlobalConfigs::TimeStepperConfigs::DynamicsSystemType                  DynamicsSystemType; \
     DEFINE_RIGIDBODY_CONFIG_TYPES \
 
 

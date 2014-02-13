@@ -133,21 +133,21 @@ protected:
     }
 
     void processMPISettings( ticpp::Node *mpiSettings ) {
-        ticpp::Element *topo = mpiSettings->FirstChild("ProcessTopology",true)->ToElement();
+        ticpp::Element *elem = mpiSettings->FirstChild("ProcessTopology",true)->ToElement();
 
-        std::string type = topo->GetAttribute("type");
+        std::string type = elem->GetAttribute("type");
         if(type=="grid") {
 
             Vector3 minPoint, maxPoint;
-            if(!Utilities::stringToVector3<PREC>(minPoint,  topo->GetAttribute("minPoint"))) {
+            if(!Utilities::stringToVector3<PREC>(minPoint,  elem->GetAttribute("minPoint"))) {
                 throw ticpp::Exception("---> String conversion in processMPISettings: minPoint failed");
             }
-            if(!Utilities::stringToVector3<PREC>(maxPoint,  topo->GetAttribute("maxPoint"))) {
+            if(!Utilities::stringToVector3<PREC>(maxPoint,  elem->GetAttribute("maxPoint"))) {
                 throw ticpp::Exception("---> String conversion in processMPISettings: maxPoint failed");
             }
 
             MyMatrix<unsigned int>::Vector3 dim;
-            if(!Utilities::stringToVector3<unsigned int>(dim,  topo->GetAttribute("dimension"))) {
+            if(!Utilities::stringToVector3<unsigned int>(dim,  elem->GetAttribute("dimension"))) {
                 throw ticpp::Exception("---> String conversion in processMPISettings: dimension failed");
             }
             // saftey check
@@ -163,6 +163,20 @@ protected:
             throw ticpp::Exception("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
         }
 
+
+        // Process special Inclusion solver settings
+        elem = mpiSettings->FirstChild("InclusionSolverSettings",true)->ToElement();
+        PREC splitNodeUpdateFrequency;
+        if(!Utilities::stringToType<PREC>(splitNodeUpdateFrequency,  elem->GetAttribute("splitNodeUpdateFrequency"))) {
+                throw ticpp::Exception("---> String conversion in MPISettings::InclusionSolverSettings: splitNodeUpdateFrequency failed");
+        }
+        if(splitNodeUpdateFrequency <= 0){
+            throw ticpp::Exception("---> MPISettings::InclusionSolverSettings: splitNodeUpdateFrequency <= 0");
+        }
+        InclusionSolverSettingsType settIncl;
+        m_pDynSys->getSettings(settIncl);
+        settIncl.m_splitNodeUpdateFrequency = splitNodeUpdateFrequency;
+        m_pDynSys->setSettings(settIncl);
     }
 
     virtual void setupInitialConditionBodiesFromFile_imp(boost::filesystem::path relpath, short which, double time){

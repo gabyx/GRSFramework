@@ -68,7 +68,7 @@ public:
 //    void readFromPercussionPool(unsigned int index, const CollisionData * pCollData, VectorDyn & P_old);
 //    void updatePercussionPool(const VectorDyn & P_old ) ;
 
-    InclusionSolverSettings m_Settings;
+    InclusionSolverSettingsType m_Settings;
 
 
 protected:

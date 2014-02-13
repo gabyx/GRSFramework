@@ -75,7 +75,7 @@ public:
     double m_timeProx, m_proxIterationTime;
 
 
-    InclusionSolverSettings m_Settings;
+    InclusionSolverSettingsType m_Settings;
 
 
 protected:

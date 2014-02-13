@@ -185,7 +185,7 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
 
 
         // =============================================================================================================
-        if( m_Settings.m_eMethod == InclusionSolverSettings::SOR) {
+        if( m_Settings.m_eMethod == InclusionSolverSettingsType::SOR) {
 
             #if MEASURE_TIME_PROX == 1
                 boost::timer::cpu_timer counter;
@@ -200,7 +200,7 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
                 m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
             #endif
 
-        } else if(m_Settings.m_eMethod == InclusionSolverSettings::JOR) {
+        } else if(m_Settings.m_eMethod == InclusionSolverSettingsType::JOR) {
             ASSERTMSG(false,"Jor Algorithm has not been implemented yet");
         }
 
@@ -329,26 +329,26 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
 
     // Do this only after a certain numer of iterations!
-    if(m_globalIterationCounter % m_Settings. )
-    // Communicate all remote velocities to neighbour (if nSplitBodies != 0 || remoteNodes != 0)
-    m_pInclusionComm->communicateSplitBodyUpdate(m_globalIterationCounter);
+    if(m_globalIterationCounter % m_Settings.m_splitNodeUpdateFrequency == 0 ){
+        // Communicate all remote velocities to neighbour (if nSplitBodies != 0 || remoteNodes != 0)
+        m_pInclusionComm->communicateSplitBodyUpdate(m_globalIterationCounter);
 
-    // Safety test if all updates have been received!
-            SplitNodeCheckUpdateVisitor<ContactGraphType> v;
-            m_pContactGraph->applyNodeVisitorSplitBody(v);
-    // Move over all split body nodes and solve the billateral constraint directly
-    //(if nSplitBodies != 0)
-    m_pContactGraph->applyNodeVisitorSplitBody(*m_pSorProxStepSplitNodeVisitor);
-    // Communicate all local solved split body velocities
-    //(if nSplitBodies != 0 || remoteNodes != 0)
-    m_pInclusionComm->communicateSplitBodySolution(m_globalIterationCounter);
-
+        // Safety test if all updates have been received!
+                SplitNodeCheckUpdateVisitor<ContactGraphType> v;
+                m_pContactGraph->applyNodeVisitorSplitBody(v);
+        // Move over all split body nodes and solve the billateral constraint directly
+        //(if nSplitBodies != 0)
+        m_pContactGraph->applyNodeVisitorSplitBody(*m_pSorProxStepSplitNodeVisitor);
+        // Communicate all local solved split body velocities
+        //(if nSplitBodies != 0 || remoteNodes != 0)
+        m_pInclusionComm->communicateSplitBodySolution(m_globalIterationCounter);
+    }
 
 
 
 //    // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
 //    bool converged;
-//    if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocity) {
+//    if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity) {
 //        //std::cout << "Bodies: " << m_pContactGraph->m_SimBodyToContactsList.size() << std::endl;
 //        for(auto it=m_pContactGraph->m_SimBodyToContactsList.begin(); it !=m_pContactGraph->m_SimBodyToContactsList.end(); it++) {
 //            if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
@@ -371,7 +371,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 //            // Just fill back buffer with new values!
 //            it->first->m_pSolverData->m_uBuffer.m_back = it->first->m_pSolverData->m_uBuffer.m_front;
 //        }
-//    }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyVelocity){
+//    }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity){
 //        for(auto it=m_pContactGraph->m_SimBodyToContactsList.begin(); it !=m_pContactGraph->m_SimBodyToContactsList.end(); it++) {
 //            if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
 //

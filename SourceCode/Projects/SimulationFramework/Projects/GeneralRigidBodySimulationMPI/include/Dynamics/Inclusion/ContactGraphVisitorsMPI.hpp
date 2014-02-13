@@ -19,7 +19,7 @@ template<typename TContactGraph>
 class SorProxStepNodeVisitor{
 public:
 
-    DEFINE_RIGIDBODY_CONFIG_TYPES
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     typedef TContactGraph ContactGraphType;
     typedef typename ContactGraphType::NodeDataType NodeDataType;
@@ -27,7 +27,7 @@ public:
     typedef typename ContactGraphType::EdgeType EdgeType;
     typedef typename ContactGraphType::NodeType NodeType;
 
-    SorProxStepNodeVisitor(const InclusionSolverSettings &settings,
+    SorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
                            bool & globalConverged, const unsigned int & globalIterationNeeded):
             m_Settings(settings),m_bConverged(globalConverged),
             m_globalIterationCounter(globalIterationNeeded)
@@ -113,7 +113,7 @@ public:
                #endif
 
 
-//                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
+//                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
 //                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
 //                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
 //                        if(!nodeData.m_bConverged ) {
@@ -125,7 +125,7 @@ public:
 //                    } else {
 //                        m_bConverged=false;
 //                    }
-//                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
+//                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
 //                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
 //                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache1,
 //                                                                          nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
@@ -162,7 +162,7 @@ public:
                 LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
                 #endif
 
-//                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocityLocal) {
+//                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
 //                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
 //                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache2,
 //                                                                  nodeData.m_u2BufferPtr->m_front,
@@ -177,7 +177,7 @@ public:
 //                        m_bConverged=false;
 //                    }
 //
-//                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyLocalMix){
+//                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
 //                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
 //                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
 //                                                                          nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
@@ -197,7 +197,7 @@ public:
 //                }
             }
 
-//            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InLambda) {
+//            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InLambda) {
 //                if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
 //                    nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol);
 //                    if(!nodeData.m_bConverged) {
@@ -222,7 +222,7 @@ public:
 
 private:
     Logging::Log * m_pSolverLog;
-    const InclusionSolverSettings & m_Settings;
+    const InclusionSolverSettingsType & m_Settings;
     bool & m_bConverged; ///< Access to global flag for cancelation criteria
     const unsigned int & m_globalIterationCounter; ///< Access to global iteration counter
 
@@ -236,14 +236,14 @@ template<typename TContactGraph>
 class SorProxStepSplitNodeVisitor{
 public:
 
-    DEFINE_RIGIDBODY_CONFIG_TYPES
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     typedef TContactGraph ContactGraphType;
 
 
     typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
 
-    SorProxStepSplitNodeVisitor(const InclusionSolverSettings &settings, bool & globalConverged, const unsigned int & globalIterationNeeded):
+    SorProxStepSplitNodeVisitor(const InclusionSolverSettingsType &settings, bool & globalConverged, const unsigned int & globalIterationNeeded):
                            m_Settings(settings),m_bConverged(globalConverged),
                            m_globalIterationCounter(globalIterationNeeded)
     {}
@@ -320,7 +320,7 @@ public:
 
 private:
     Logging::Log * m_pSolverLog;
-    const InclusionSolverSettings & m_Settings;
+    const InclusionSolverSettingsType & m_Settings;
     bool & m_bConverged; ///< Access to global flag for cancelation criteria
     const unsigned int & m_globalIterationCounter; ///< Access to global iteration counter
 
@@ -336,7 +336,7 @@ template<typename TContactGraph>
 class SorProxInitNodeVisitor{
 public:
 
-    DEFINE_RIGIDBODY_CONFIG_TYPES
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     typedef TContactGraph ContactGraphType;
     typedef typename ContactGraphType::NodeDataType NodeDataType;

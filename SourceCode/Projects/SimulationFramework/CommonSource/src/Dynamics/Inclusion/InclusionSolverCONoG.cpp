@@ -127,7 +127,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
 
         // =============================================================================================================
-        if( m_Settings.m_eMethod == InclusionSolverSettings::SOR) {
+        if( m_Settings.m_eMethod == InclusionSolverSettingsType::SOR) {
 
             #if MEASURE_TIME_PROX == 1
                 boost::timer::cpu_timer counter;
@@ -142,7 +142,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
                 m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
             #endif
 
-        } else if(m_Settings.m_eMethod == InclusionSolverSettings::JOR) {
+        } else if(m_Settings.m_eMethod == InclusionSolverSettingsType::JOR) {
 
             #if MEASURE_TIME_PROX == 1
                 boost::timer::cpu_timer counter;
@@ -261,7 +261,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
     bool converged;
-    if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocity) {
+    if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity) {
         typename ContactGraphType::BodyToContactsListIteratorType it;
         //std::cout << "Bodies: " << m_ContactGraph.m_SimBodyToContactsList.size() << std::endl;
         for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
@@ -285,7 +285,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
             // Just fill back buffer with new values!
             it->first->m_pSolverData->m_uBuffer.m_back = it->first->m_pSolverData->m_uBuffer.m_front;
         }
-    }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyVelocity){
+    }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity){
         typename ContactGraphType::BodyToContactsListIteratorType it;
         for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
             if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {

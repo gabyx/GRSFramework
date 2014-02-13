@@ -76,7 +76,7 @@ public:
     void updatePercussionPool(const VectorDyn & P_old ) ;
 
 
-    InclusionSolverSettings m_Settings;
+    InclusionSolverSettingsType m_Settings;
 
     unsigned int getNObjects();
 
@@ -404,7 +404,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
 #endif
 
 
-        if( m_Settings.m_eMethod == InclusionSolverSettings::SOR) {
+        if( m_Settings.m_eMethod == InclusionSolverSettingsType::SOR) {
             // Calculate  R_N, R_T,
             setupRMatrix(m_Settings.m_alphaSORProx);
             m_T = (-m_R).asDiagonal()*m_T;
@@ -422,7 +422,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
             counter.stop();
             m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
 #endif
-        } else if(m_Settings.m_eMethod == InclusionSolverSettings::JOR) {
+        } else if(m_Settings.m_eMethod == InclusionSolverSettingsType::JOR) {
             // Calculate  R_N, R_T,
             setupRMatrix(m_Settings.m_alphaJORProx);
             m_T = (-m_R).asDiagonal()*m_T;
