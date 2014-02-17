@@ -2,7 +2,7 @@
 #include "StateRecorder.hpp"
 
 StateRecorder::StateRecorder(const unsigned int nSimBodies):
-    m_binarySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj) {
+    m_binarySimFile(LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody) {
     m_nSimBodies = nSimBodies;
 
     //Check if LogManager is available
@@ -37,7 +37,7 @@ bool StateRecorder::createSimFile(boost::filesystem::path file_path) {
 
 bool StateRecorder::createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path) {
 
-    MultiBodySimFile tmpFile(NDOFqObj,NDOFuObj);
+    MultiBodySimFile tmpFile(NDOFqBody,NDOFuBody);
     bool fileOK = tmpFile.openRead(ref_file_path,m_nSimBodies,false); //Open file to see if this file fits our simulation!!
     tmpFile.close();
 

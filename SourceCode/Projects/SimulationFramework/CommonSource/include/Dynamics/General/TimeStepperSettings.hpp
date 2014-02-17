@@ -15,6 +15,7 @@ struct TimeStepperSettings
   TimeStepperSettings(){
       //standart values
       m_deltaT = 0.001;
+      m_startTime = 0;
       m_endTime = 10;
       m_simStateReferenceFile = boost::filesystem::path(); ///< The reference file which is used to simulate, either continue or use_states!
       m_simDataReferenceFile = boost::filesystem::path(); // No implemented yet
@@ -22,6 +23,7 @@ struct TimeStepperSettings
   }
 
   PREC	m_deltaT;
+  PREC	m_startTime;
   PREC	m_endTime;
 
 

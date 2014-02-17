@@ -10,14 +10,14 @@
 #include <boost/generator_iterator.hpp>
 
 #include "TypeDefs.hpp"
+
 #include "AABB.hpp"
 
-#include RigidBody_INCLUDE_FILE
 
 class SpatialSphericalTimeRandomForceField{
     public:
 
-        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+        DEFINE_LAYOUT_CONFIG_TYPES
 
         SpatialSphericalTimeRandomForceField(unsigned int seed,
                                            PREC boostTime,
@@ -40,16 +40,21 @@ class SpatialSphericalTimeRandomForceField{
 
         ~SpatialSphericalTimeRandomForceField(){
             delete m_randomG;
-        }        void calculate(RigidBodyType * body){
+        }
+
+        template<typename TRigidBody>
+        void calculate(TRigidBody * body){
             if(m_inInterval){
                 ASSERTMSG(body->m_pSolverData, "Solverdata not present!")
                 if(m_ts <= m_boostTime){
                     Vector3 r = body->m_r_S - m_offset ;
                     r.normalize();
-                    body->m_h_term.head<3>() += r*m_amplitude;
+                    body->m_h_term.template head<3>() += r*m_amplitude;
                 }
             }
         }
+
+
 
         void setTime(PREC time){
             m_t = time;
@@ -115,6 +120,7 @@ class SpatialSphericalTimeRandomForceField{
 };
 
 
+#include RigidBody_INCLUDE_FILE
 
 class ExternalForceList{
     public:
@@ -126,8 +132,11 @@ class ExternalForceList{
         template<typename T>
         void addExternalForceCalculation(T * extForce){
             m_deleterList.push_back( ExternalForceList::DeleteFunctor<T>(extForce) );
+
             m_resetList.push_back( std::bind( &T::reset, extForce ) );
-            m_calculationList.push_back( std::bind(&T::calculate, extForce, std::placeholders::_1 ) );
+            m_calculationList.push_back( std::bind(&T::template calculate<RigidBodyType>, extForce, std::placeholders::_1 ) );
+            //m_calculationList.push_back( std::bind(&T::calculate, extForce, std::placeholders::_1 ) );
+
             m_setTimeList.push_back( std::bind(&T::setTime, extForce, std::placeholders::_1 ) );
         }
 

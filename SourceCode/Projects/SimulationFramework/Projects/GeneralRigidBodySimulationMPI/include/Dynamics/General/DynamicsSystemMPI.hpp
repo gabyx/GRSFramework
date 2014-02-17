@@ -3,29 +3,23 @@
 
 #include <vector>
 #include <list>
-#include <Eigen/Core>
-#include <Eigen/LU>
 
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
-#include "RigidBody.hpp"
+#include RigidBody_INCLUDE_FILE
 #include "RigidBodyContainer.hpp"
-
 #include "ContactParameterMap.hpp"
-#include "AddGyroTermVisitor.hpp"
+#include "SimpleLogger.hpp"
+#include "ExternalForces.hpp"
 
 #include "InitialConditionBodies.hpp"
-#include "CommonFunctions.hpp"
 
 #include "RecorderSettings.hpp"
-#include "InclusionSolverSettings.hpp"
+#include InclusionSolverSettings_INCLUDE_FILE
 #include "TimeStepperSettings.hpp"
 
 
-#include "SimpleLogger.hpp"
-
-#include "ExternalForces.hpp"
 
 
 class DynamicsSystem {
@@ -48,19 +42,23 @@ public:
     ExternalForceListType m_externalForces; ///< Special class of function objects
 
     //All Global Geometries used in the System
-    typedef std::map< unsigned int /* id */, typename RigidBodyType::GeometryType> GlobalGeometryMapType;
+    typedef std::unordered_map< unsigned int /* id */, typename RigidBodyType::GeometryType> GlobalGeometryMapType;
     GlobalGeometryMapType m_globalGeometries;
 
     // All global RigidBodies Container for this Process, these bodies which are owned by this class!"============================
+    typedef RigidBodyContainer RigidBodyContainerType;
     typedef RigidBodyContainer RigidBodySimContainerType;
     RigidBodySimContainerType m_SimBodies;        // simulated objects
     RigidBodySimContainerType m_RemoteSimBodies;  // all remote bodies
 
-    typedef RigidBodySimContainerType RigidBodyNotAniContainer;
-    RigidBodyNotAniContainer m_Bodies;        // all not simulated objects
+    typedef RigidBodySimContainerType RigidBodyStaticContainer;
+    RigidBodyStaticContainer m_Bodies;        // all not simulated objects
     // ============================================================================
 
-
+    //All initial conditions for all bodies
+    //We need an order, which is sorted according to the id!
+    typedef std::map<RigidBodyIdType, RigidBodyState> RigidBodyStatesContainerType;
+    RigidBodyStatesContainerType m_simBodiesInitStates;
 
 
     inline void addSimBodyPtr(RigidBodyType * ptr ) { m_SimBodies.addBody(ptr); }
@@ -70,14 +68,21 @@ public:
 
     void initMassMatrixAndHTerm();
 
+    void applyInitStatesToBodies();
 
     void doFirstHalfTimeStep(PREC ts, PREC timestep);
     void doSecondHalfTimeStep(PREC te, PREC timestep);
 
-    void getSettings(RecorderSettings & SettingsRecorder) const;
-    void setSettings(const RecorderSettings & SettingsRecorder);
-    void getSettings(TimeStepperSettings &SettingsTimestepper, InclusionSolverSettings &SettingsInclusionSolver);
-    void setSettings(const TimeStepperSettings &SettingsTimestepper, const InclusionSolverSettings &SettingsInclusionSolver);
+    void getSettings(RecorderSettings & settingsRecorder) const;
+    void getSettings(TimeStepperSettings &settingsTimestepper) const;
+    void getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const;
+    void getSettings(TimeStepperSettings &settingsTimestepper, InclusionSolverSettingsType &settingsInclusionSolver) const;
+
+    void setSettings(const RecorderSettings & settingsRecorder);
+    void setSettings(const TimeStepperSettings &settingsTimestepper);
+    void setSettings(const InclusionSolverSettingsType &settingsInclusionSolver);
+    void setSettings(const TimeStepperSettings &settingsTimestepper, const InclusionSolverSettingsType &settingsInclusionSolver);
+
 
     void reset();
     inline  void afterFirstTimeStep() {};
@@ -91,7 +96,7 @@ protected:
 
     RecorderSettings m_SettingsRecorder;
     TimeStepperSettings m_SettingsTimestepper;
-    InclusionSolverSettings m_SettingsInclusionSolver;
+    InclusionSolverSettingsType m_SettingsInclusionSolver;
 
 
     //Function
@@ -104,5 +109,12 @@ protected:
     std::stringstream logstream;
 
 };
+
+
+inline void DynamicsSystem::applyInitStatesToBodies(){
+    // Apply all init states to the sim bodies
+    InitialConditionBodies::applyRigidBodyStatesToBodies(m_SimBodies, m_simBodiesInitStates);
+}
+
 
 #endif

@@ -37,16 +37,16 @@
 * It is used to save partial simulated data for one process.
 * The layout of the document is as follows:
 * - The first #SIM_FILE_SIGNATURE_LENGTH bytes are for the signature of the file.
-* - 2 doubles: nDOFqObj, nDofuObj.
+* - 2 doubles: nDOFqBody, nDofuBody.
 *     - double --> Time in [seconds]
-*       - nDOFqObj doubles --> generalized coordinates of all bodies.
-*       - nDOFuObj doubles --> generalized velocities of all bodies.
+*       - nDOFqBody doubles --> generalized coordinates of all bodies.
+*       - nDOFuBody doubles --> generalized velocities of all bodies.
 */
 class MultiBodySimFilePart {
 public:
 
 
-    MultiBodySimFilePart(unsigned int nDOFqObj, unsigned int nDOFuObj,unsigned int bufferSize = 1<<14);
+    MultiBodySimFilePart(unsigned int nDOFqBody, unsigned int nDOFuBody,unsigned int bufferSize = 1<<14);
     ~MultiBodySimFilePart();
 
     /**
@@ -114,9 +114,9 @@ private:
     std::streampos m_beginHeader;
     std::streampos m_beginOfStates;
 
-    unsigned int m_nDOFuObj, m_nDOFqObj, m_nStates;
-    const  std::streamoff m_nBytesPerQObj ;
-    const  std::streamoff m_nBytesPerUObj ;
+    unsigned int m_nDOFuBody, m_nDOFqBody, m_nStates;
+    const  std::streamoff m_nBytesPerQBody ;
+    const  std::streamoff m_nBytesPerUBody ;
     static const  std::streamoff m_headerLength = (2*sizeof(unsigned int) + SIM_FILE_PART_SIGNATURE_LENGTH*sizeof(char));
 
     std::stringstream m_errorString;

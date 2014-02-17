@@ -76,7 +76,7 @@ protected:
 
 
 StateRecorderMPI::StateRecorderMPI(unsigned int nSimBodies):
-    m_fh(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj), m_nSimBodies(nSimBodies)
+    m_fh(LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody), m_nSimBodies(nSimBodies)
 //    ,m_ins(m_writebuffer),
 //    m_stream(m_ins),
 //    m_oa( m_stream,boost::archive::no_codecvt | boost::archive::no_header)
@@ -91,38 +91,6 @@ StateRecorderMPI::StateRecorderMPI(unsigned int nSimBodies):
         filePath /= "StateRecorderLog.log";
         m_pSimulationLog = manager->createLog("StateRecorderLog",true,true,filePath);
     }
-
-     //write buffer
-    //m_writebuffer.reserve(4000*((LayoutConfigType::LayoutType::NDOFqObj + LayoutConfigType::LayoutType::NDOFuObj)*sizeof(double)+1*sizeof(typename RigidBodyType::RigidBodyIdType))); // reserved for 5000 bodies :)
-
-    // id: 0 -10  Process 0
-    // id: 11-20 Process 1
-    //...
-    // id: 1001-1010 Process N-1
-
-//    // each processor (except the last) contains exactly m_nBodiesPerProc bodies which he writes
-//    m_nBodiesPerProc =  m_nSimBodies / m_processInfo.getNProcesses();
-//
-//    m_nRecvBodies = m_nBodiesPerProc;
-//
-//    //last rank nimmt den rest der bodies
-//    if( m_processInfo.getRank() == m_processInfo.getNProcesses()-1  ){
-//        m_nRecvBodies += m_nSimBodies % m_processInfo.getNProcesses()
-//    }
-
-
-
-    //receive buffer
-    // this buffer should stays the same and contains only the bodies in the range!
-    //m_recvbuffer.reserve(m_nRecvBodies * ((7+6)*sizeof(double)+1*sizeof(typename RigidBodyType::RigidBodyIdType)) )
-
-//    // for each process
-//    m_process_send_body_count.assign(m_processInfo.getNProcesses(),0);
-//    m_process_send_body_displ.assign(m_processInfo.getNProcesses(),0);
-//
-//    m_process_recv_body_count.assign(m_processInfo.getNProcesses(),0);
-//    m_process_recv_body_displ.assign(m_processInfo.getNProcesses(),0);
-
 
 }
 
@@ -161,7 +129,7 @@ bool StateRecorderMPI::createSimFile(bool truncate){
 
 void StateRecorderMPI::getSimBodyFileName(std::stringstream & s){
     s.str("");
-    s <<"SimDataMPIUnordered"<<SIM_FILE_MPI_EXTENSION;
+    s <<SIM_FILE_PREFIX<<SIM_FILE_MPI_EXTENSION;
 }
 
 

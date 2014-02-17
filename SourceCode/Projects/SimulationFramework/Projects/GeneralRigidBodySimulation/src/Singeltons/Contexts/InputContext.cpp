@@ -329,7 +329,7 @@ bool InputContext::keyPressed( const OIS::KeyEvent &e ) {
     // this loop needs to be special because, the function keyPressed can add/remove elements which invalidate iterators!!
 	// But the ->keyPressed but for actions like adding and removing in the keyPressed function should return false!! that the loop breaks!
 
-	for( std::map<std::string,OIS::KeyListener* >::iterator itKeyListener=mKeyListeners.begin(), it_next=itKeyListener, it_end=mKeyListeners.end();
+	for( auto itKeyListener=mKeyListeners.begin(), it_next=itKeyListener, it_end=mKeyListeners.end();
 	   itKeyListener != it_end;
 	   itKeyListener = it_next)
 	{
@@ -344,7 +344,7 @@ bool InputContext::keyPressed( const OIS::KeyEvent &e ) {
 
 bool InputContext::keyReleased( const OIS::KeyEvent &e ) {
 
-    for( std::map<std::string,OIS::KeyListener* >::iterator itKeyListener=mKeyListeners.begin(), it_next=itKeyListener, it_end=mKeyListeners.end();
+    for( auto itKeyListener=mKeyListeners.begin(), it_next=itKeyListener, it_end=mKeyListeners.end();
 	   itKeyListener != it_end;
 	   itKeyListener = it_next)
 	{
@@ -371,7 +371,7 @@ bool InputContext::mouseMoved( const OIS::MouseEvent &e ) {
 
 bool InputContext::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
 
-	for( std::map<std::string,OIS::MouseListener* >::iterator itMouseListener = mMouseListeners.begin(),
+	for( auto itMouseListener = mMouseListeners.begin(),
      it_next= itMouseListener, it_end=mMouseListeners.end();
 	   itMouseListener != it_end;
 	   itMouseListener = it_next
@@ -390,7 +390,7 @@ bool InputContext::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id
 bool InputContext::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
 
 
-	for( std::map<std::string,OIS::MouseListener* >::iterator itMouseListener=mMouseListeners.begin(), it_next=itMouseListener, it_end=mMouseListeners.end();
+	for( auto itMouseListener=mMouseListeners.begin(), it_next=itMouseListener, it_end=mMouseListeners.end();
 	   itMouseListener != it_end;
 	   itMouseListener = it_next)
 	{

@@ -18,7 +18,7 @@ SimulationManagerBase::SimulationManagerBase():
     m_barrier_start(2) {
     m_lastTime = 0;
     m_pTimelineSimulation = boost::shared_ptr<boost::timer::cpu_timer>(new boost::timer::cpu_timer);
-    m_pTimelineSimulation->start();
+    m_pTimelineSimulation->stop();
 
     // Setup timeScale List;
     m_timeScaleList.push_back(0);
@@ -74,6 +74,14 @@ void  SimulationManagerBase::resetTimelineSimulation() {
     m_mutexTimelineSimulation.unlock();
 };
 
+void  SimulationManagerBase::stopTimelineSimulation() {
+    m_mutexTimelineSimulation.lock();
+    m_pTimelineSimulation->stop();
+    m_lastTime = 0;
+    m_bPauseEnabled = false;
+    m_mutexTimelineSimulation.unlock();
+};
+
 void SimulationManagerBase::getIterationTime(double & averageIterationTime, double & maxIterationTime) {
     m_mutexIterationtime.lock();
     averageIterationTime = m_averageIterationTime;
@@ -110,36 +118,35 @@ void SimulationManagerBase::addToTimeScale(double step) {
     }
 
     m_timeScale = m_timeScaleList[m_timeScaleListIdx];
-    std::cout << "TimeScale set to " << m_timeScale << std::endl;
+//    LOG(m_pSimluationLog, "---> TimeScale set to " << m_timeScale <<std::endl;);
 
     m_mutexTimelineSimulation.unlock();
-//    std::stringstream logstream;
-
-//    LOG(m_pAppLog);
 
 }
 
 void SimulationManagerBase::togglePauseSimulation() {
 
+    m_mutexTimelineSimulation.lock();
     if(m_bPauseEnabled==false){
 
         m_bPauseEnabled = true;
         std::cout << "Paused Simulation!"<< std::endl;
 
-        m_mutexTimelineSimulation.lock();
-        // Reset the Timer
-        m_pTimelineSimulation->stop();
 
-//        m_timeScale = 0;
-        m_mutexTimelineSimulation.unlock();
+        // Reset the Timer
+        m_timeScale = m_timeScaleList[0];
+        m_pTimelineSimulation->stop();
+//      m_timeScale = 0;
     }
     else{
         m_bPauseEnabled = false;
-        m_mutexTimelineSimulation.lock();
+        m_timeScale = m_timeScaleList[m_timeScaleListIdx];
         m_lastTime = ((double)m_pTimelineSimulation->elapsed().wall) * 1e-9 * m_timeScale + m_lastTime;
         m_pTimelineSimulation->start();
-        m_mutexTimelineSimulation.unlock();
+
     }
+
+    m_mutexTimelineSimulation.unlock();
 }
 
 bool SimulationManagerBase::isSimulationPaused() {

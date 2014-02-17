@@ -1,10 +1,11 @@
 ﻿#ifndef ContactTag_hpp
 #define ContactTag_hpp
 
+#include <functional>
+#include <cstdint>
 #include <boost/tuple/tuple.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/cstdint.hpp>
+
 
 #include "AssertionDebug.hpp"
 
@@ -27,11 +28,11 @@ class ContactTagHash : std::unary_function<ContactTag, std::size_t>{
 class ContactTag{
 public:
 
-  typedef boost::tuples::tuple<boost::uint64_t, unsigned char, unsigned int, boost::uint64_t, unsigned char, unsigned int> ContactTagTuple;
+  typedef boost::tuples::tuple<std::uint64_t, unsigned char, unsigned int, std::uint64_t, unsigned char, unsigned int> ContactTagTuple;
 
   ContactTag();
 
-  ContactTag( boost::uint64_t b1, unsigned char type1, unsigned int id1, boost::uint64_t b2 , unsigned char type2 , unsigned int id2);
+  ContactTag( std::uint64_t b1, unsigned char type1, unsigned int id1, std::uint64_t b2 , unsigned char type2 , unsigned int id2);
 
    bool operator==(ContactTag const& c2) const;
 

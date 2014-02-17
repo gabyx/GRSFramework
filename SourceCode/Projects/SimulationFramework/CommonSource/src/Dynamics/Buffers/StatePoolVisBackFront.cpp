@@ -4,12 +4,11 @@
 
 StatePoolVisBackFront::StatePoolVisBackFront(const unsigned int nSimBodies):
 StatePool(3),
-m_state_init(nSimBodies),
 m_nSimBodies(nSimBodies),
-m_nDofqObj(NDOFqObj),
-m_nDofuObj(NDOFuObj),
-m_nDofq(m_nSimBodies * m_nDofqObj),
-m_nDofu(m_nSimBodies * m_nDofuObj)
+m_nDofqBody(NDOFqBody),
+m_nDofuBody(NDOFuBody),
+m_nDofq(m_nSimBodies * m_nDofqBody),
+m_nDofu(m_nSimBodies * m_nDofuBody)
 {
 
   // Add the 3 state pools, if m_state_pointer is deleted, all elements inside are deleted because of shared_ptr
@@ -28,7 +27,7 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
   m_idx[1] = 0; //back
   m_idx[2] = 0; //vis
 
-  initializeStatePool( DynamicsState(nSimBodies) );
+
 
 
   // Init Log
@@ -46,46 +45,6 @@ m_nDofu(m_nSimBodies * m_nDofuObj)
 
 
 
-void StatePoolVisBackFront::initializeStatePool(const DynamicsState & state_init){
-
-  boost::mutex::scoped_lock l1(m_mutexStateInit);
-  boost::mutex::scoped_lock l2(m_change_pointer_mutex);
-
-  m_state_init = state_init; // Assignement operator
-  // Fill in the initial values
-
-  *(m_pool[0]) = m_state_init; // Assignment operator
-
-#if LogToFileStatePool == 1
-  m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
-#endif
-}
-
-
-void StatePoolVisBackFront::initializeStatePool(const std::vector<DynamicsState > & state_initList){
-
-  boost::mutex::scoped_lock l1(m_mutexStateInit);
-  boost::mutex::scoped_lock l2(m_change_pointer_mutex);
-
-  unsigned int index = 0;
-  for(int i=0; i< state_initList.size(); i++){
-
-     for(int k = 0; k < state_initList[i].m_SimBodyStates.size(); k++){
-       m_state_init.m_SimBodyStates[index + k] = state_initList[i].m_SimBodyStates[k];
-       //cout <<"State1: q:" << m_state_init.m_SimBodyStates[index + k].m_q.transpose()  <<endl<<" u: "<< m_state_init.m_SimBodyStates[index + k].m_u.transpose() <<endl;
-     }
-
-     index += (unsigned int) state_initList[i].m_SimBodyStates.size();
-  }
-
-  // Fill in the initial values
-
-  *(m_pool[0]) = m_state_init; // Assignment operator
-
-#if LogToFileStatePool == 1
-  m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
-#endif
-}
 
 
 StatePoolVisBackFront::~StatePoolVisBackFront()
@@ -96,61 +55,61 @@ StatePoolVisBackFront::~StatePoolVisBackFront()
 
 // ==========================
 
-typename StatePoolVisBackFront::VectorQObj StatePoolVisBackFront::getqInit(const unsigned idxObject)
-{
-  static typename LayoutConfigType::VectorQObj  q;
-  m_mutexStateInit.lock();
-  q = m_state_init.m_SimBodyStates[idxObject].m_q;
-  m_mutexStateInit.unlock();
-  return q;
-}
-
-
-void StatePoolVisBackFront::setqInit(const VectorQObj & q ,const unsigned idxObject)
-{
-  m_mutexStateInit.lock();
-  m_state_init.m_SimBodyStates[idxObject].m_q = q;
-  m_mutexStateInit.unlock();
-  return;
-}
-
-
-
-typename StatePoolVisBackFront::VectorUObj StatePoolVisBackFront::getuInit(const unsigned idxObject)
-{
-  typename LayoutConfigType::VectorUObj u;
-  m_mutexStateInit.lock();
-  u = m_state_init.m_SimBodyStates[idxObject].m_u;
-  m_mutexStateInit.unlock();
-  return u;
-}
-
-
-void StatePoolVisBackFront::setuInit(const VectorUObj & u, const unsigned idxObject)
-{
-  m_mutexStateInit.lock();
-  m_state_init.m_SimBodyStates[idxObject].m_u = u;
-  m_mutexStateInit.unlock();
-  return;
-}
+//typename StatePoolVisBackFront::VectorQBody StatePoolVisBackFront::getqInit(const unsigned idxObject)
+//{
+//  static typename LayoutConfigType::VectorQBody  q;
+//  m_mutexStateInit.lock();
+//  q = m_state_init.m_SimBodyStates[idxObject].m_q;
+//  m_mutexStateInit.unlock();
+//  return q;
+//}
+//
+//
+//void StatePoolVisBackFront::setqInit(const VectorQBody & q ,const unsigned idxObject)
+//{
+//  m_mutexStateInit.lock();
+//  m_state_init.m_SimBodyStates[idxObject].m_q = q;
+//  m_mutexStateInit.unlock();
+//  return;
+//}
 
 
 
-void StatePoolVisBackFront::resetStatePool()
-{
-  boost::mutex::scoped_lock l(m_change_pointer_mutex);
+//typename StatePoolVisBackFront::VectorUBody StatePoolVisBackFront::getuInit(const unsigned idxObject)
+//{
+//  typename LayoutConfigType::VectorUBody u;
+//  m_mutexStateInit.lock();
+//  u = m_state_init.m_SimBodyStates[idxObject].m_u;
+//  m_mutexStateInit.unlock();
+//  return u;
+//}
+//
+//
+//void StatePoolVisBackFront::setuInit(const VectorUBody & u, const unsigned idxObject)
+//{
+//  m_mutexStateInit.lock();
+//  m_state_init.m_SimBodyStates[idxObject].m_u = u;
+//  m_mutexStateInit.unlock();
+//  return;
+//}
 
-  //initialize state buffer pointers
-  m_idx[0] = 1; //front
-  m_idx[1] = 0; //back
-  m_idx[2] = 0; //vis
 
-  // Fill in the initial values
-  *m_pool[0] = m_state_init;
-  *m_pool[1] = m_state_init;
 
-  return;
-}
+//void StatePoolVisBackFront::resetStatePool()
+//{
+//  boost::mutex::scoped_lock l(m_change_pointer_mutex);
+//
+//  //initialize state buffer pointers
+//  m_idx[0] = 1; //front
+//  m_idx[1] = 0; //back
+//  m_idx[2] = 0; //vis
+//
+//  // Fill in the initial values
+//  *m_pool[0] = m_state_init;
+//  *m_pool[1] = m_state_init;
+//
+//  return;
+//}
 
 
 

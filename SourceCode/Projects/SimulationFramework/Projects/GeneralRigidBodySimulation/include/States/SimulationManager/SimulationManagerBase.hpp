@@ -19,6 +19,7 @@ public:
 
 	double  getTimelineSimulation();
 	void    resetTimelineSimulation();
+	void    stopTimelineSimulation();
 
   // Used by vis thread
   void setThreadToBeStopped(bool stop);   /**	\brief Sets the variable in the vis thread to make the sim thread cancel. */

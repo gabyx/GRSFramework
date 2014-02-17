@@ -91,7 +91,7 @@ void SimulationState::resume() {
     m_pTrayMgr->showAll();
 
     InputContext::getSingletonPtr()->addKeyListener(this,"SimulationState::KeyListener");
-    m_pSimMgr->enableInput(false);
+    m_pSimMgr->enableInput(true);
 }
 
 

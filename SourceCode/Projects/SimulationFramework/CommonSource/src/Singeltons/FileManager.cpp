@@ -98,25 +98,12 @@ void FileManager::updateFileList(boost::filesystem::path relDirectoryPath, bool 
     directory /= relDirectoryPath;
 
     m_SimFilePaths.clear();
-    m_SimFileNames.clear();
     updateAllSimDataFiles(directory,with_SubDirs);
 }
 
-std::vector<std::string> FileManager::getSimFileNameList() {
+std::set<boost::filesystem::path > FileManager::getSimFileNameList() {
     boost::mutex::scoped_lock l(m_busy_mutex);
-    return m_SimFileNames;
-}
-
-boost::filesystem::path FileManager::getSimFilePath(std::string file_name) {
-    boost::mutex::scoped_lock l(m_busy_mutex);
-    boost::filesystem::path name =  file_name;
-
-    std::map<boost::filesystem::path,boost::filesystem::path>::iterator it;
-    it= m_SimFilePaths.find(name);
-    if(it != m_SimFilePaths.end()) {
-        return (*it).second;
-    }
-    return "";
+    return m_SimFilePaths;
 }
 
 void FileManager::updateAllSimDataFiles(const boost::filesystem::path &directory, const bool &with_SubDirs = false) {
@@ -136,8 +123,7 @@ void FileManager::updateAllSimDataFiles(const boost::filesystem::path &directory
                 if(prefix.string() == SIM_FILE_EXTENSION) {
 
                     // add file to the list
-                    m_SimFilePaths.insert(std::pair<path,path>(iter->path(),iter->path()));
-                    m_SimFileNames.push_back(iter->path().string());
+                    m_SimFilePaths.insert(iter->path());
                 }
             }
         }
@@ -183,22 +169,6 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, co
                 //Recurse into subdirectories
                 if( with_SubDirs ) scanAllSimFolders(*iter, folder_prefix, with_SubDirs);
 
-            } else {
-                //cout << iter->path().string() << " (file)\n" ;
-                // Check for all .sim files and add to the list
-                path suffix = iter->path().extension();
-                if(suffix.string() == SIM_FILE_EXTENSION) {
-                    // add file to the list
-                    std::map<boost::filesystem::path,boost::filesystem::path>::iterator it;
-                    it= m_SimFilePaths.find(iter->path().filename());
-                    if(it == m_SimFilePaths.end()) {
-                        m_SimFilePaths.insert(std::pair<path,path>(iter->path().filename(),iter->path()));
-                        m_SimFileNames.push_back(iter->path().string());
-                    }
-
-                    std::string name = iter->path().filename().string();
-                    //m_pAppLog->logMessage("Found file " + name);
-                }
             }
         }
     }
@@ -233,10 +203,9 @@ void FileManager::setPathSelectedSimFile( std::string file_name ) {
     boost::mutex::scoped_lock l(m_busy_mutex);
     boost::filesystem::path name =  file_name;
 
-    std::map<boost::filesystem::path,boost::filesystem::path>::iterator it;
-    it= m_SimFilePaths.find(name);
+    auto it= m_SimFilePaths.find(name);
     if(it != m_SimFilePaths.end()) {
-        m_selectedFilePath = (*it).second;
+        m_selectedFilePath = (*it);
     } else {
         m_selectedFilePath = boost::filesystem::path();
     }

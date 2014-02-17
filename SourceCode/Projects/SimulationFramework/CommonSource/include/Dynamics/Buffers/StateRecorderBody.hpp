@@ -7,7 +7,7 @@
 #include <cstring>
 #include <cerrno>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include "LogDefines.hpp"
 #include "TypeDefs.hpp"
@@ -61,11 +61,11 @@ protected:
     void getSimBodyLogFileName(typename DynamicsSystemType::RigidBodyType *body, std::stringstream & s);
 
     Logging::Log * m_pSimulationLog;
-    typedef boost::unordered_map< typename RigidBodyType::RigidBodyIdType, MultiBodySimFile* > FileMap;
+    typedef std::unordered_map< RigidBodyIdType, MultiBodySimFile* > FileMap;
     FileMap m_BinarySimFiles;
 
     //open files to log the writes!
-    typedef boost::unordered_map< typename RigidBodyType::RigidBodyIdType, std::ofstream* > FileMapLog;
+    typedef std::unordered_map< RigidBodyIdType, std::ofstream* > FileMapLog;
     FileMapLog m_LogSimFiles;
     bool m_logWriteAccess;
     unsigned int m_accessId;
@@ -129,7 +129,7 @@ bool StateRecorderBody::createSimFile(RigidBodyType * body, bool truncate){
             LOG(m_pSimulationLog, "---> StateRecorderBody:: SimFile : " << file.string() << "already exists!");
         }else{
             // Do truncate
-            MultiBodySimFile* pBodyFile = new MultiBodySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj);
+            MultiBodySimFile* pBodyFile = new MultiBodySimFile(LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody);
             res.first->second =  pBodyFile; // Set the file
 
                 if(!pBodyFile->openWrite(file,1,truncate)){

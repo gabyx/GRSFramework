@@ -4,6 +4,8 @@
 
 #include <boost/variant.hpp>
 
+#include "TypeDefs.hpp"
+
 #include "AssertionDebug.hpp"
 #include "StaticAssert.hpp"
 
@@ -12,7 +14,6 @@
 #include "HalfspaceGeometry.hpp"
 
 namespace InertiaTensor{
-
 
 
     class CalculateInertiaTensorVisitor : public boost::static_visitor<> {

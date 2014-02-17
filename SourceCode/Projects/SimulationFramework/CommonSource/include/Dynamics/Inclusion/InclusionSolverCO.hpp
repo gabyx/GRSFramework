@@ -15,7 +15,7 @@
 #include "MatrixHelpers.hpp"
 #include "VectorToSkewMatrix.hpp"
 #include "ProxFunctions.hpp"
-#include "InclusionSolverSettings.hpp"
+#include InclusionSolverSettings_INCLUDE_FILE
 #include "ContactGraph.hpp"
 
 #include "LogDefines.hpp"
@@ -57,9 +57,10 @@ public:
     void solveInclusionProblem( const DynamicsState * state_s, const DynamicsState * state_m, DynamicsState * state_e);
 
     std::string getIterationStats();
+    std::string getStatsHeader();
     PREC m_G_conditionNumber;
     PREC m_G_notDiagDominant;
-    unsigned int m_iterationsNeeded;
+    unsigned int m_globalIterationCounter;
     bool m_bConverged;
     unsigned int m_isFinite;
     unsigned int m_nContacts;
@@ -75,7 +76,7 @@ public:
     void updatePercussionPool(const VectorDyn & P_old ) ;
 
 
-    InclusionSolverSettings m_Settings;
+    InclusionSolverSettingsType m_Settings;
 
     unsigned int getNObjects();
 
@@ -87,7 +88,7 @@ protected:
     boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;
+    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;
 
     typedef ContactGraph<ContactGraphMode::NoIteration> ContactGraphType;
     ContactGraphType m_ContactGraph;
@@ -161,7 +162,7 @@ InclusionSolverCO::InclusionSolverCO(boost::shared_ptr< CollisionSolverType >  p
     m_nContacts = 0;
     m_nLambdas = 0;
 
-    m_iterationsNeeded =0;
+    m_globalIterationCounter =0;
     m_bConverged = false;
     m_G_conditionNumber = 0;
     m_G_notDiagDominant = 0;
@@ -192,7 +193,9 @@ unsigned int InclusionSolverCO::getNObjects() {
 
 void InclusionSolverCO::reset() {
 
-    m_pDynSys->initMassMatrixAndHTerm();
+    m_pDynSys->getSettings(m_Settings);
+
+    m_pDynSys->initMassMatrixAndHTerm();  //TODO what does that make here?
 
     resetForNextIter();
 
@@ -218,7 +221,7 @@ void InclusionSolverCO::resetForNextIter() {
     m_nContacts = 0;
     m_nLambdas = 0;
 
-    m_iterationsNeeded =0;
+    m_globalIterationCounter =0;
     m_bConverged = false;
     m_G_conditionNumber = 0;
     m_G_notDiagDominant = 0;
@@ -255,12 +258,13 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
     LOG(m_pSolverLog, " % -> solveInclusionProblem(): "<< std::endl;);
 #endif
 
+
     // Iterate over all nodes set and assemble the matrices...
     typename ContactGraphType::NodeListType & nodes = m_ContactGraph.getNodeListRef();
     typename ContactGraphType::NodeType * currentContactNode;
     m_nContacts = (unsigned int)nodes.size();
 
-    m_iterationsNeeded = 0;
+    m_globalIterationCounter = 0;
     m_bConverged = false;
     m_isFinite = -1;
     m_bUsedGPU = false;
@@ -296,9 +300,9 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
         static const CollisionData * pCollData;
 
         static Eigen::Matrix<PREC,Eigen::Dynamic,Eigen::Dynamic> G_part;
-        static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic>* W_j_body;
-        static const Eigen::Matrix<PREC,NDOFuObj,Eigen::Dynamic>* W_i_body;
-        static Eigen::Matrix<PREC,Eigen::Dynamic,NDOFuObj> W_i_bodyT_M_body;
+        static const Eigen::Matrix<PREC,NDOFuBody,Eigen::Dynamic>* W_j_body;
+        static const Eigen::Matrix<PREC,NDOFuBody,Eigen::Dynamic>* W_i_body;
+        static Eigen::Matrix<PREC,Eigen::Dynamic,NDOFuBody> W_i_bodyT_M_body;
 
         for ( unsigned int contactIdx = 0 ; contactIdx < m_nContacts ; contactIdx++) {
 
@@ -317,8 +321,8 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
             }*/
 
 
-            ASSERTMSG(currentContactNode->m_nodeData.m_eContactModel == ContactModels::NCFContactModel
-                      ,"You use InclusionSolverCO which only supports NCFContactModel Contacts so far!");
+            ASSERTMSG(currentContactNode->m_nodeData.m_eContactModel == ContactModels::NCF_ContactModel
+                      ,"You use InclusionSolverCO which only supports NCF_ContactModel Contacts so far!");
 
             // Write mu parameters to m_mu
             m_mu(i) = currentContactNode->m_nodeData.m_mu(0);
@@ -365,7 +369,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
             }
 
             // add once xi to c (d is used will be later completed to d)
-            m_d.segment<ContactDim>((ContactDim)*i).noalias() +=  currentContactNode->m_nodeData.m_I_plus_eps.asDiagonal() * currentContactNode->m_nodeData.m_xi;
+            m_d.segment<ContactDim>((ContactDim)*i).noalias() +=  currentContactNode->m_nodeData.m_I_plus_eps.asDiagonal() * currentContactNode->m_nodeData.m_chi;
 
 
             // Fill in Percussions
@@ -400,7 +404,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
 #endif
 
 
-        if( m_Settings.m_eMethod == InclusionSolverSettings::SOR) {
+        if( m_Settings.m_eMethod == InclusionSolverSettingsType::SOR) {
             // Calculate  R_N, R_T,
             setupRMatrix(m_Settings.m_alphaSORProx);
             m_T = (-m_R).asDiagonal()*m_T;
@@ -418,7 +422,7 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
             counter.stop();
             m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
 #endif
-        } else if(m_Settings.m_eMethod == InclusionSolverSettings::JOR) {
+        } else if(m_Settings.m_eMethod == InclusionSolverSettingsType::JOR) {
             // Calculate  R_N, R_T,
             setupRMatrix(m_Settings.m_alphaJORProx);
             m_T = (-m_R).asDiagonal()*m_T;
@@ -460,20 +464,20 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
 #endif
 
 #if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog,  " % Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
+        LOG(m_pSolverLog,  " % Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
 #endif
 
         // Calculate u_E for each body in the state...
 
-        static Eigen::Matrix<PREC,NDOFuObj,1> delta_u_E;
+        static Eigen::Matrix<PREC,NDOFuBody,1> delta_u_E;
         static RigidBodyType * pBody;
         for(auto it= m_SimBodies.begin(); it != m_SimBodies.end(); it) {
             pBody = *it;
             delta_u_E = pBody->m_h_term * m_Settings.m_deltaT;
 
-            typename ContactGraphType::BodyToContactsListIterator itList  = m_ContactGraph.m_SimBodyToContactsList.find(pBody);
+            typename ContactGraphType::BodyToContactsListIterator itList  = m_ContactGraph.m_simBodiesToContactsList.find(pBody);
             // itList->second is the NodeList!
-            if(itList != m_ContactGraph.m_SimBodyToContactsList.end()) {
+            if(itList != m_ContactGraph.m_simBodiesToContactsList.end()) {
                 for( typename ContactGraphType::NodeListIteratorType it = itList->second.begin(); it != itList->second.end(); it++) {
                     delta_u_E.noalias() += *(ContactGraphType::getW_body((*it)->m_nodeData,pBody)) * P_front.segment<ContactDim>( (*it)->m_nodeNumber * (ContactDim));
                 }
@@ -522,26 +526,26 @@ void InclusionSolverCO::doJorProx() {
 
     if( m_Settings.m_bUseGPU && goOnGPU ) {
 #if CoutLevelSolverWhenContact>0
-        m_pSolverLog->logMessage(" % Using GPU JOR...");
+        m_pSolverLog->logMessage("---> Using GPU JOR...");
 #endif
         m_jorGPUVariant.setSettings(m_Settings.m_MaxIter,m_Settings.m_AbsTol,m_Settings.m_RelTol);
         gpuSuccess = m_jorGPUVariant.runGPUPlain(P_front,m_T,P_back,m_d,m_mu);
-        m_iterationsNeeded = m_jorGPUVariant.m_nIterGPU;
+        m_globalIterationCounter = m_jorGPUVariant.m_nIterGPU;
         m_proxIterationTime = m_jorGPUVariant.m_gpuIterationTime*1e-3;
         m_bUsedGPU = true;
     }
 
     if( !m_Settings.m_bUseGPU || !gpuSuccess || !goOnGPU) {
 #if CoutLevelSolverWhenContact>0
-        m_pSolverLog->logMessage(" % Using CPU JOR...");
+        m_pSolverLog->logMessage("---> Using CPU JOR...");
 #endif
         m_jorGPUVariant.setSettings(m_Settings.m_MaxIter,m_Settings.m_AbsTol,m_Settings.m_RelTol);
         m_jorGPUVariant.runCPUEquivalentPlain(P_front,m_T,P_back,m_d,m_mu);
-        m_iterationsNeeded = m_jorGPUVariant.m_nIterCPU;
+        m_globalIterationCounter = m_jorGPUVariant.m_nIterCPU;
         m_proxIterationTime = m_jorGPUVariant.m_cpuIterationTime*1e-3;
         m_bUsedGPU = false;
     }
-    m_bConverged = (m_iterationsNeeded < m_Settings.m_MaxIter)? true : false;
+    m_bConverged = (m_globalIterationCounter < m_Settings.m_MaxIter)? true : false;
 
 #else
 
@@ -564,12 +568,12 @@ void InclusionSolverCO::doJorProx() {
         LOG(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
-        m_iterationsNeeded++;
+        m_globalIterationCounter++;
 
-        if (m_bConverged == true || m_iterationsNeeded >= m_Settings.m_MaxIter) {
+        if (m_bConverged == true || m_globalIterationCounter >= m_Settings.m_MaxIter) {
 
 #if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog,  " converged = "<<m_bConverged<< "\t"<< "iterations:" <<m_iterationsNeeded <<"/"<<  m_Settings.m_MaxIter<< std::endl;);
+            LOG(m_pSolverLog,  " converged = "<<m_bConverged<< "\t"<< "iterations:" <<m_globalIterationCounter <<"/"<<  m_Settings.m_MaxIter<< std::endl;);
 #endif
 
             break;
@@ -600,7 +604,7 @@ void InclusionSolverCO::doSorProx() {
         m_sorGPUVariant.setSettings(m_Settings.m_MaxIter,m_Settings.m_AbsTol,m_Settings.m_RelTol);
         P_back.setZero();
         gpuSuccess = m_sorGPUVariant.runGPUPlain(P_front,m_T,P_back,m_d,m_mu);
-        m_iterationsNeeded = m_sorGPUVariant.m_nIterGPU;
+        m_globalIterationCounter = m_sorGPUVariant.m_nIterGPU;
         m_proxIterationTime = m_sorGPUVariant.m_gpuIterationTime*1e-3;
         m_bUsedGPU = true;
     }
@@ -611,11 +615,11 @@ void InclusionSolverCO::doSorProx() {
 #endif
         m_sorGPUVariant.setSettings(m_Settings.m_MaxIter,m_Settings.m_AbsTol,m_Settings.m_RelTol);
         m_sorGPUVariant.runCPUEquivalentPlain(P_front,m_T,P_back,m_d,m_mu);
-        m_iterationsNeeded = m_sorGPUVariant.m_nIterCPU;
+        m_globalIterationCounter = m_sorGPUVariant.m_nIterCPU;
         m_proxIterationTime = m_sorGPUVariant.m_cpuIterationTime*1e-3;
         m_bUsedGPU = false;
     }
-    m_bConverged = (m_iterationsNeeded < m_Settings.m_MaxIter)? true : false;
+    m_bConverged = (m_globalIterationCounter < m_Settings.m_MaxIter)? true : false;
 #else
 
 #if CoutLevelSolverWhenContact>0
@@ -651,9 +655,9 @@ void InclusionSolverCO::doSorProx() {
         LOG(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 #endif
 
-        m_iterationsNeeded++;
+        m_globalIterationCounter++;
 
-        if (counterConverged == m_nContacts || m_iterationsNeeded >= m_Settings.m_MaxIter) {
+        if (counterConverged == m_nContacts || m_globalIterationCounter >= m_Settings.m_MaxIter) {
             m_bConverged = true;
             // P_front has newest values.
             break;
@@ -701,7 +705,7 @@ std::string InclusionSolverCO::getIterationStats() {
 
     s   << m_bUsedGPU<<"\t"
         << m_nContacts<<"\t"
-        << m_iterationsNeeded<<"\t"
+        << m_globalIterationCounter<<"\t"
         << m_bConverged<<"\t"
         << m_isFinite<<"\t"
         << m_timeProx<<"\t"
@@ -710,6 +714,23 @@ std::string InclusionSolverCO::getIterationStats() {
         << m_G_conditionNumber<<"\t" //No m_G_conditionNumber
         << m_G_notDiagDominant<<"\t" //No m_G_notDiagDominant
         << m_PercussionPool.getPoolSize();
+    return s.str();
+}
+
+std::string InclusionSolverCO::getStatsHeader() {
+    std::stringstream s;
+    s
+    << "GPUUsed"<<"\t"
+    << "nContacts"<<"\t"
+    << "nGlobalIterations"<<"\t"
+    << "Converged"<<"\t"
+    << "IsFinite"<<"\t"
+    << "TotalTimeProx [s]"<<"\t"
+    << "IterTimeProx [s]"<<"\t"
+    << "TotalStateEnergy [J]" <<"\t"
+    << "ConditionNumberG"<<"\t" //No m_G_conditionNumber
+    << "GnotDiagDom" <<"\t" //No m_G_notDiagDominant
+    << "PercussionPoolSize";
     return s.str();
 }
 

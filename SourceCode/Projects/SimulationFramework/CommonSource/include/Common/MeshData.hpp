@@ -30,7 +30,7 @@ class MeshData
 {
 public:
 
-   DEFINE_MATRIX_TYPES_OF( MeshPREC )
+   DEFINE_MATRIX_TYPES
 
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -87,7 +87,7 @@ public:
 //   };
 
    bool setup( Assimp::Importer & importer, const aiScene* scene, Vector3 scale_factor, Quaternion quat, Vector3 trans){
-    Matrix33 Rot_KI = getRotFromQuaternion(quat);
+    Matrix33 Rot_KI = getRotFromQuaternion<PREC>(quat);
 
 
       if(scene->mNumMeshes >=1){

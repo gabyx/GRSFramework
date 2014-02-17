@@ -1,11 +1,8 @@
-#ifndef MPISerializationHelpers_hpp
-#define MPISerializationHelpers_hpp
+#ifndef MPISerializationHelpersEigen_hpp
+#define MPISerializationHelpersEigen_hpp
 
 #include <Eigen/Dense>
 #include <boost/serialization/array.hpp>
-
-
-
 
 template<class Archive, typename Derived>
 void serializeEigen(Archive & ar, Eigen::EigenBase<Derived> & g) {
@@ -28,37 +25,4 @@ void serializeEigen(Archive & ar, const Eigen::EigenBase<Derived> & gc) {
     ar & boost::serialization::make_array(g.derived().data(), g.size());
 };
 
-
-
-namespace boost {
-namespace serialization {
-
-    template<class Archive>
-    void serialize(Archive & ar, BoxGeometry & g, const unsigned int version) {
-        serializeEigen(ar,g.m_extent);
-        serializeEigen(ar,g.m_center);
-    }
-
-    template<class Archive>
-    void serialize(Archive & ar, HalfspaceGeometry & g, const unsigned int version) {
-
-        serializeEigen(ar,g.m_normal);
-        serializeEigen(ar,g.m_pos);
-    }
-
-    template<class Archive>
-    void serialize(Archive & ar, SphereGeometry & g, const unsigned int version) {
-
-        ar & g.m_radius;
-
-    }
-
-    template<class Archive>
-    void serialize(Archive & ar, MeshGeometry & g, const unsigned int version) {
-        ERRORMSG("No implementation for MeshGeometry serialization!");
-    }
-
-};
-};
-
-#endif
+#endif // MPISerializationHelpersEigen_hpp

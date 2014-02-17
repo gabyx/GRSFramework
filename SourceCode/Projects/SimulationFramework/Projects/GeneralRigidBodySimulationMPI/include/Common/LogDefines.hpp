@@ -26,15 +26,18 @@
 #define OGRE_LOG( _logptr_ ) (_logptr_)->logMessage(logstream.str());  ///< Macro to easily write into a Ogre::Log.
 
 //// Serializer
-//#define LOGSZ( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
-//// Neighbour Communicator
-//#define LOGNC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
-//// Process Communicator
-//#define LOGPC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
+#define LOGSZ( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+// Body Communicator
+#define LOGBC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+// Inclusion Communicator
+#define LOGIC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+// Process Communicator
+#define LOGPC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
 
-#define LOGSZ( _logptr_ , _message_ )
-#define LOGNC( _logptr_ , _message_ )
-#define LOGPC( _logptr_ , _message_ )
+//#define LOGSZ( _logptr_ , _message_ )
+//#define LOGBC( _logptr_ , _message_ )
+//#define LOGIC( _logptr_ , _message_ )
+//#define LOGPC( _logptr_ , _message_ )
 
 /* @} */
 
@@ -54,10 +57,10 @@
 #define SIM_FOLDER_PREFIX_RECORD "SimDataRECORDMPI_"                ///< Prefix for the simulation folder during record.
 #define SIM_FOLDER_PREFIX_INIT "SimDataInitialState_"             ///< Prefix for the folder where the inital states are written, press Key I!
 #define SIM_INIT_FILE_PREFIX "InitialState"                      ///< The name for the Initial state file!
-#define SIM_FILE_PREFIX "SimulationState"                              ///< Prefix for the .sim file.
+#define SIM_FILE_PREFIX "SimState"                              ///< Prefix for the .sim file.
 #define SOLVER_LOG_FILE_PREFIX "SolverLog"                       ///< Prefix for the solver log file.
 #define COLLISION_DATA_FILE_PREFIX "CollisionData"               ///< Prefix for the collision data file.
-#define SYSTEM_DATA_FILE_PREFIX "SimulationData"                     ///< Prefix for the system data file.
+#define SYSTEM_DATA_FILE_PREFIX "SimData"                     ///< Prefix for the system data file.
 /* @} */
 
 /** @name SimulationLog
@@ -74,12 +77,12 @@
 #ifndef NDEBUG
   // DEBUG!
   #define CoutLevelSolver 3            ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
-  #define CoutLevelSolverWhenContact 2 ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
+  #define CoutLevelSolverWhenContact 3 ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
   #define LogToFileSolver 1            ///< {0,1} Determines if logstream is saved into a file.
-  #define LogToConsoleSolver 1         ///< {0,1} Determines if logstream is outputted into console.
+  #define LogToConsoleSolver 0         ///< {0,1} Determines if logstream is outputted into console.
 #else
-  #define CoutLevelSolver 1
-  #define CoutLevelSolverWhenContact 1
+  #define CoutLevelSolver 3
+  #define CoutLevelSolverWhenContact 3
   #define LogToFileSolver 1
   #define LogToConsoleSolver 0
 #endif
@@ -104,41 +107,6 @@
 /* @} */
 
 
-/** @name Playback Manager
-* @brief  Log file of the Playback Manager.
-*/
-/* @{ */
-#define LogToFilePlayback 1      ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsolePlayback 1   ///< {0,1} Set if log is outputted to console or not.
-/* @} */
-
-/** @name Loader Thread
-* @brief Log file of the Loader Thread which is started during playback.
-*/
-/* @{ */
-#define LogToFileLoader 1        ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsoleLoader 1     ///< {0,1} Set if log is outputted to console or not.
-/* @} */
-
-
-/** @name App Log File
-* @brief Log File for the Application.
-*/
-/* @{ */
-#define LogToFileApp 1     ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsoleApp 1  ///< {0,1} Set if log is outputted to console or not.
-/* @} */
-
-
-/** @name Ogre Log File
-* @brief Ogre File for the Application.
-*/
-/* @{ */
-#define LogToFileOgre 1     ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsoleOgre 1  ///< {0,1} Set if log is outputted to console or not.
-/* @} */
-
-
 
 /** @name  Deconstructor and Constructor Macros
 * @brief Deconstructor and Constructor Macros to Debug correct dealloction of objects.
@@ -154,19 +122,6 @@
   #define CONSTRUCTOR_MESSAGE
 #endif
 /* @} */
-
-
-
-/** @name State Ring Pool */
-/* @{ */
-#define LogToFileStateRingPool 0 ///< {0,1} Set if log is outputted to file or not.
-/* @} */
-
-/** @name State Pool */
-/* @{ */
-#define LogToFileStatePool 0     ///< {0,1} Set if log is outputted to file or not.
-/* @} */
-
 
 /* @} */
 #endif

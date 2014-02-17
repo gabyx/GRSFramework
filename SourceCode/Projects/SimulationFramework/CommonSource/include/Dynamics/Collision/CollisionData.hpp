@@ -9,20 +9,20 @@
 #ifndef CollisionData_hpp
 #define CollisionData_hpp
 
-// Includes =================================
+
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <map>
 #include <utility>
 
-//==========================================
+#include <boost/any.hpp>
+
 
 #include "TypeDefs.hpp"
+
 #include "ContactFrame.hpp"
 #include "ContactTag.hpp"
-
-#include <boost/any.hpp>
 
 /**
 * @ingroup Collision

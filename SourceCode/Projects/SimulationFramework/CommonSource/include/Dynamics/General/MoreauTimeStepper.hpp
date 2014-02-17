@@ -30,10 +30,11 @@
 #include "FrontBackBuffer.hpp"
 #include "BinaryFile.hpp"
 #include "MultiBodySimFile.hpp"
+#include "SimpleLogger.hpp"
 
 #include "TimeStepperSettings.hpp"
 
-#include "SimpleLogger.hpp"
+
 //===========================================
 
 
@@ -51,7 +52,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
-    MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState);
+    MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState);
     ~MoreauTimeStepper();
 
     // The Core Objects ==================================
@@ -67,7 +68,7 @@ public:
     void reset();
     void doOneIteration();
 
-    double getTimeCurrent();
+    PREC getTimeCurrent();
     unsigned int getIterationCount();
 
     // Solver Parameters
@@ -85,12 +86,19 @@ public:
     inline bool finished() {
         return m_bFinished;
     }
+
+    inline void writeHeaderToSystemDataFile();
     inline void writeIterationToSystemDataFile(double globalTime);
+
+
     inline void writeIterationToCollisionDataFile();
 
 protected:
 
-    const unsigned int m_nSimBodies; // These are the dimensions for one Obj
+    PREC m_currentSimulationTime;
+    PREC m_startSimulationTime;
+
+//    const unsigned int m_nSimBodies; // These are the dimensions for one Obj
 
     int m_IterationCounter;
     bool m_bIterationFinished;
@@ -118,7 +126,7 @@ protected:
     //Solver state pool front and back buffer
     void swapStateBuffers();
 
-    DynamicsState m_state_m;  // middle state of iteration
+    //DynamicsState m_state_m;  // middle state of iteration
 
     // Logs
     boost::filesystem::path m_SimFolderPath;
@@ -132,13 +140,27 @@ void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
 
     m_SystemDataFile
     << globalTime << "\t"
-    << m_StateBuffers.m_pBack->m_t <<"\t"
-    << (double)(m_endTime-m_startTime) <<"\t"
-    << (double)(m_endTimeCollisionSolver-m_startTimeCollisionSolver) <<"\t"
-    << (double)(m_endTimeInclusionSolver-m_startTimeInclusionSolver) <<"\t"
+    << m_currentSimulationTime <<"\t"
+    << (m_endTime-m_startTime) <<"\t"
+    << (m_endTimeCollisionSolver-m_startTimeCollisionSolver) <<"\t"
+    << (m_endTimeInclusionSolver-m_startTimeInclusionSolver) <<"\t"
     << m_AvgTimeForOneIteration <<"\t"
     << m_pCollisionSolver->getIterationStats() << "\t"
     << m_pInclusionSolver->getIterationStats() << std::endl;
+#endif
+}
+
+void MoreauTimeStepper::writeHeaderToSystemDataFile() {
+#if OUTPUT_SYSTEMDATA_FILE == 1
+    m_SystemDataFile <<"# "
+    << "GlobalTime [s]" << "\t"
+    << "SimulationTime [s]" <<"\t"
+    << "TimeStepTime [s]" <<"\t"
+    << "CollisionTime [s]" <<"\t"
+    << "InclusionTime [s]" <<"\t"
+    << "AvgIterTime [s]" <<"\t"
+    << m_pCollisionSolver->getStatsHeader() << "\t"
+    << m_pInclusionSolver->getStatsHeader() << std::endl;
 #endif
 }
 
@@ -148,7 +170,7 @@ void MoreauTimeStepper::writeIterationToCollisionDataFile() {
     double averageOverlap = 0;
 
     unsigned int nContacts = m_pCollisionSolver->m_collisionSet.size();
-    m_CollisionDataFile << (double)m_StateBuffers.m_pFront->m_t; // Write Time
+    m_CollisionDataFile << m_currentSimulationTime; // Write Time
     m_CollisionDataFile << nContacts; // Write number of Contacts
     for(unsigned int i=0; i<nContacts; i++) {
         averageOverlap += m_pCollisionSolver->m_collisionSet[i].m_overlap;

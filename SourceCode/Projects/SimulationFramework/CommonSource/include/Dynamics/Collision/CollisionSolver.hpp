@@ -10,20 +10,19 @@
 
 //#define SRUTIL_DELEGATE_PREFERRED_SYNTAX
 #include <srutil/delegate/delegate.hpp> // Use fast SR delegates
-#include "AssertionDebug.hpp"
 
 #include "TypeDefs.hpp"
+#include "LogDefines.hpp"
+#include "AssertionDebug.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 
 #include "ContactFrame.hpp"
 #include "CollisionData.hpp"
 #include "Collider.hpp"
-#include "LogDefines.hpp"
+#include "SimpleLogger.hpp"
 
 #include "QuaternionHelpers.hpp"
-
-#include "SimpleLogger.hpp"
 
 /**
 * @ingroup Collision
@@ -96,6 +95,7 @@ public:
     inline void clearCollisionSet();
 
     std::string getIterationStats();
+    std::string getStatsHeader();
 
 protected:
 
@@ -112,13 +112,12 @@ protected:
 
     unsigned int m_expectedNContacts;                                                 ///< Expected number of Contacts.
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
-    typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;          ///< List of all fixed not simulated bodies.
+    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;          ///< List of all fixed not simulated bodies.
 
     Collider m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
     friend class Collider;
 
-    Logging::Log *  m_pSolverLog;  ///< Ogre::Log
-    std::stringstream logstream;
+    Logging::Log *  m_pSolverLog;
 
     inline void signalContactAdd(); ///< Sends all contact found by the collider which are in m_collisionSet to the delegate!
 

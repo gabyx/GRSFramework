@@ -2,11 +2,8 @@
 #define SceneParserMPI_hpp
 
 #include <fstream>
-
 #define _USE_MATH_DEFINES
 #include <cmath>
-
-#include "AssertionDebug.hpp"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
@@ -15,34 +12,22 @@
 #include "boost/random.hpp"
 #include "boost/generator_iterator.hpp"
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
-
-#include "SceneParser.hpp"
-
-#include "MPICommunication.hpp"
-
-#include "DynamicsSystemMPI.hpp"
-
-#include "CommonFunctions.hpp"
-#include "QuaternionHelpers.hpp"
-#include "InertiaTensorCalculations.hpp"
-#include "InitialConditionBodies.hpp"
-
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
-
-//#include "OgreMeshExtraction.hpp"
 
 #define TIXML_USE_TICPP
 #include "ticpp/ticpp.h"
 //#include "tinyxml.h"
 
-/*
-* @Does not work yet, to implement a scene parser, implement everything starting from SimulationState, enter(), we exit the State, delete all Objects, and reinitialize with another system in XML format.
-*
-*/
+#include "TypeDefs.hpp"
+#include "AssertionDebug.hpp"
+#include "LogDefines.hpp"
+
+#include "SceneParser.hpp"
+#include "MPICommunication.hpp"
+
+
 
 class SceneParserMPI : public SceneParser {
 public:
@@ -69,10 +54,9 @@ public:
         m_nBodies = 0;
         m_nGlobalSimBodies = 0;
         m_globalMaxGroupId = 0;
-
-        m_bodyList.clear();
-        m_SimBodyInitStates.clear();
-
+        m_bodyListGroup.clear();
+        m_bodyScalesGroup.clear();
+        m_initStatesGroup.clear();
 
         try {
             m_xmlDoc.LoadFile(m_currentParseFilePath.string());
@@ -97,8 +81,12 @@ public:
                 this->processSceneObjects(node);
                 m_pSimulationLog->logMessage("---> Parsed SceneObjects...");
 
-                /*ticpp::Node * initialConditionAll = m_xmlRootNode->FirstChild("InitialCondition");
-                processinitialConditionAll(initialConditionAll);*/
+                node = m_xmlRootNode->FirstChild("SceneSettings");
+                processSceneSettings2(node);
+                m_pSimulationLog->logMessage("---> Parsed SceneSettings (second part)...");
+
+
+
 
             } else {
                 m_pSimulationLog->logMessage("---> No DynamicsSystem Node found in XML ...");
@@ -111,24 +99,15 @@ public:
         }
 
 
+        // Filter all bodies according to MPI Grid
+        m_pSimulationLog->logMessage("---> Filter bodies ...");
+        filterBodies();
+
         //ASSERTMSG(false,"XML parsing...");
 
         return true;
     }
 
-
-
-//    boost::filesystem::path getParsedSceneFile() {
-//        return m_currentParseFilePath;
-//    }
-//
-//    const std::vector< DynamicsState<LayoutConfigType> > & getInitialConditionSimBodies() {
-//        return m_SimBodyInitStates;
-//    }
-//
-//    unsigned int getNumberOfSimBodies() {
-//        return m_nSimBodies;
-//    }
 
     unsigned int getNumberOfGlobalSimBodies() {
         return m_nGlobalSimBodies;
@@ -154,21 +133,21 @@ protected:
     }
 
     void processMPISettings( ticpp::Node *mpiSettings ) {
-        ticpp::Element *topo = mpiSettings->FirstChild("ProcessTopology",true)->ToElement();
+        ticpp::Element *elem = mpiSettings->FirstChild("ProcessTopology",true)->ToElement();
 
-        std::string type = topo->GetAttribute("type");
+        std::string type = elem->GetAttribute("type");
         if(type=="grid") {
 
             Vector3 minPoint, maxPoint;
-            if(!Utilities::stringToVector3<PREC>(minPoint,  topo->GetAttribute("minPoint"))) {
+            if(!Utilities::stringToVector3<PREC>(minPoint,  elem->GetAttribute("minPoint"))) {
                 throw ticpp::Exception("---> String conversion in processMPISettings: minPoint failed");
             }
-            if(!Utilities::stringToVector3<PREC>(maxPoint,  topo->GetAttribute("maxPoint"))) {
+            if(!Utilities::stringToVector3<PREC>(maxPoint,  elem->GetAttribute("maxPoint"))) {
                 throw ticpp::Exception("---> String conversion in processMPISettings: maxPoint failed");
             }
 
             MyMatrix<unsigned int>::Vector3 dim;
-            if(!Utilities::stringToVector3<unsigned int>(dim,  topo->GetAttribute("dimension"))) {
+            if(!Utilities::stringToVector3<unsigned int>(dim,  elem->GetAttribute("dimension"))) {
                 throw ticpp::Exception("---> String conversion in processMPISettings: dimension failed");
             }
             // saftey check
@@ -184,14 +163,46 @@ protected:
             throw ticpp::Exception("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
         }
 
+
+        // Process special Inclusion solver settings
+        elem = mpiSettings->FirstChild("InclusionSolverSettings",true)->ToElement();
+        PREC splitNodeUpdateRatio;
+        if(!Utilities::stringToType<PREC>(splitNodeUpdateRatio,  elem->GetAttribute("splitNodeUpdateRatio"))) {
+                throw ticpp::Exception("---> String conversion in MPISettings::InclusionSolverSettings: splitNodeUpdateRatio failed");
+        }
+        if(splitNodeUpdateRatio <= 0){
+            throw ticpp::Exception("---> MPISettings::InclusionSolverSettings: splitNodeUpdateRatio <= 0");
+        }
+
+        PREC convergenceCheckRatio;
+        if(!Utilities::stringToType<PREC>(convergenceCheckRatio,  elem->GetAttribute("convergenceCheckRatio"))) {
+                throw ticpp::Exception("---> String conversion in MPISettings::InclusionSolverSettings: convergenceCheckRatio failed");
+        }
+        if(convergenceCheckRatio <= 0){
+            throw ticpp::Exception("---> MPISettings::InclusionSolverSettings: convergenceCheckRatio <= 0");
+        }
+
+        InclusionSolverSettingsType settIncl;
+        m_pDynSys->getSettings(settIncl);
+        settIncl.m_splitNodeUpdateRatio = splitNodeUpdateRatio;
+        settIncl.m_convergenceCheckRatio = convergenceCheckRatio;
+        m_pDynSys->setSettings(settIncl);
+    }
+
+    virtual void setupInitialConditionBodiesFromFile_imp(boost::filesystem::path relpath, short which, double time){
+
+        InitialConditionBodies::setupInitialConditionBodiesFromFile(relpath,m_pDynSys->m_simBodiesInitStates,time,true,true,which);
+        LOG(m_pSimulationLog,"---> Found time: "<< time << " in " << relpath << std::endl;);
+        m_pDynSys->applyInitStatesToBodies();
     }
 
     void processRigidBodies( ticpp::Node * rigidbodies ) {
 
         //Clear current body list;
         ticpp::Element* rigidBodiesEl = rigidbodies->ToElement();
-        m_bodyList.clear();
-        m_bodyListScales.clear();
+        m_bodyListGroup.clear();
+        m_bodyScalesGroup.clear();
+        m_initStatesGroup.clear();
 
          unsigned int instances = rigidbodies->ToElement()->GetAttribute<unsigned int>("instances");
 
@@ -221,11 +232,11 @@ protected:
 
             RigidBodyType * temp_ptr = new RigidBodyType(RigidBodyId::makeId(startIdx+i, groupId));
 
-            m_bodyList.push_back(temp_ptr);
+            m_bodyListGroup.push_back(temp_ptr);
 
             Vector3 scale;
             scale.setOnes();
-            m_bodyListScales.push_back(scale);
+            m_bodyScalesGroup.push_back(scale);
         }
 
 
@@ -237,20 +248,15 @@ protected:
         this->processDynamicProperties(dynPropNode);
 
 
-
         //Copy the pointers!
 
-        if(m_eBodiesState == RigidBodyType::SIMULATED) {
+        if(m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
 
-            m_nGlobalSimBodies += m_bodyList.size();
+            m_nGlobalSimBodies += m_bodyListGroup.size();
 
             typename std::vector<RigidBodyType*>::iterator bodyIt;
-            //LOG(m_pSimulationLog, "---> SIZE: " << m_bodyList.size() << std::endl)
-            for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end();  ) {
-                // Check if Body belongs to the topology! // Check CoG!
-                if(m_pProcCommunicator->getProcInfo()->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {
-
-
+            //LOG(m_pSimulationLog, "---> SIZE: " << m_bodyListGroup.size() << std::endl)
+            for(bodyIt= m_bodyListGroup.begin(); bodyIt!=m_bodyListGroup.end();  ) {
                     if(! m_pDynSys->m_SimBodies.addBody((*bodyIt))){
                         ERRORMSG("Could not add body to m_SimBodies! Id: " << RigidBodyId::getBodyIdString(*bodyIt) << " already in map!");
                     };
@@ -261,24 +267,25 @@ protected:
                     m_nBodies++;
 
                     ++bodyIt;
-
-                }else{
-                     LOG(m_pSimulationLog, "---> Rejected Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
-                    //Delete this body immediately!
-                    delete *bodyIt;
-                    bodyIt = m_bodyList.erase(bodyIt);
-                }
             }
 
+            // Copy all init states
+            LOG(m_pSimulationLog, "---> Copy init states... " << std::endl;);
+            for(auto it = m_initStatesGroup.begin(); it!=m_initStatesGroup.end();it++){
+                LOG(m_pSimulationLog, "\t---> state id: " << RigidBodyId::getBodyIdString(it->first)
+                    << std::endl << "\t\t---> q: " << it->second.m_q.transpose()
+                    << std::endl << "\t\t---> u: " << it->second.m_u.transpose() << std::endl;
+                    );
+            }
+            m_pDynSys->m_simBodiesInitStates.insert( m_initStatesGroup.begin(), m_initStatesGroup.end() );
 
 
 
-
-        } else if(m_eBodiesState == RigidBodyType::NOT_SIMULATED) {
+        } else if(m_eBodiesState == RigidBodyType::BodyState::STATIC) {
 
            typename std::vector<RigidBodyType*>::iterator bodyIt;
 
-            for(bodyIt= m_bodyList.begin(); bodyIt!=m_bodyList.end(); bodyIt++) {
+            for(bodyIt= m_bodyListGroup.begin(); bodyIt!=m_bodyListGroup.end(); bodyIt++) {
 
                 if(! m_pDynSys->m_Bodies.addBody((*bodyIt))){
                         ERRORMSG("Could not add body to m_Bodies! Id: " << RigidBodyId::getBodyIdString(*bodyIt) << " already in map!");
@@ -291,16 +298,36 @@ protected:
         }
 
 
-        ticpp::Node * visualizationNode = rigidbodies->FirstChild("Visualization");
-        this->processVisualization( visualizationNode);
+//        ticpp::Node * visualizationNode = rigidbodies->FirstChild("Visualization");
+//        this->processVisualization( visualizationNode);
 
 
         //Remove all bodies from the sceneparsers intern list!
-        m_bodyList.clear();
-        m_bodyListScales.clear();
+        m_bodyListGroup.clear();
+        m_bodyScalesGroup.clear();
+        m_initStatesGroup.clear();
     }
 
+    void filterBodies(){
 
+        auto & simBodies = m_pDynSys->m_SimBodies;
+        for(auto bodyIt= simBodies.begin(); bodyIt!=simBodies.end();
+        /*No incremente because we delete inside the loop invalidating iterators*/ ) {
+        // Check if Body belongs to the topology! // Check CoG!
+                if(!m_pProcCommunicator->getProcInfo()->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {
+                    LOG(m_pSimulationLog, "---> Reject Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
+
+                    // Delete the init state
+                    m_pDynSys->m_simBodiesInitStates.erase((*bodyIt)->m_id);
+                    // Delete this body immediately!
+                    bodyIt = simBodies.deleteBody(bodyIt);
+
+                    m_nSimBodies--;
+                }else{
+                    bodyIt++;
+                }
+        }
+    }
 
     boost::shared_ptr< MPILayer::ProcessCommunicator > m_pProcCommunicator;
 
@@ -320,10 +347,9 @@ protected:
     using SceneParser::logstream;
     // Temprary structures
     using SceneParser::m_eBodiesState;
-    using SceneParser::m_bodyList;
-    using SceneParser::m_bodyListScales;
-    using SceneParser::m_SimBodyInitStates;
-
+    using SceneParser::m_bodyListGroup;
+    using SceneParser::m_bodyScalesGroup;
+    using SceneParser::m_initStatesGroup;
 
 };
 

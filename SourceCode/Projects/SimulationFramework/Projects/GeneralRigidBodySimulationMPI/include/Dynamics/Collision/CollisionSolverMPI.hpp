@@ -3,30 +3,27 @@
 
 #include <fstream>
 #include <vector>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
-
 #include <boost/shared_ptr.hpp>
 
 //#define SRUTIL_DELEGATE_PREFERRED_SYNTAX
 #include <srutil/delegate/delegate.hpp> // Use fast SR delegates
 
-#include "AssertionDebug.hpp"
 
 #include "TypeDefs.hpp"
+#include "LogDefines.hpp"
+#include "AssertionDebug.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 
 #include "ContactFrame.hpp"
 #include "CollisionData.hpp"
 #include "Collider.hpp"
-#include "LogDefines.hpp"
-
-#include "QuaternionHelpers.hpp"
-
 #include "SimpleLogger.hpp"
 
-
+#include "QuaternionHelpers.hpp"
 
 /**
 * @ingroup Collision
@@ -99,7 +96,7 @@ public:
     inline void clearCollisionSet();
 
     std::string getIterationStats();
-
+    std::string getStatsHeader();
 protected:
 
 
@@ -116,7 +113,7 @@ protected:
                           ///< Expected number of Contacts.
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodySimContainerType & m_RemoteSimBodies;
-    typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;           ///< List of all fixed not simulated bodies.
+    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;           ///< List of all fixed not simulated bodies.
 
 
     Collider m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.

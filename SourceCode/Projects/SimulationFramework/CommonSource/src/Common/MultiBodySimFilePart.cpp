@@ -5,10 +5,10 @@ const char MultiBodySimFilePart::m_simFileSignature[SIM_FILE_PART_SIGNATURE_LENG
 
 // Implementation
 
-MultiBodySimFilePart::MultiBodySimFilePart(unsigned int nDOFqObj, unsigned int nDOFuObj, unsigned int bufferSize)
-    : m_nBytesPerQObj(nDOFqObj*sizeof(double)), m_nBytesPerUObj(nDOFuObj*sizeof(double)) {
-    m_nDOFuObj = nDOFuObj;
-    m_nDOFqObj = nDOFqObj;
+MultiBodySimFilePart::MultiBodySimFilePart(unsigned int nDOFqBody, unsigned int nDOFuBody, unsigned int bufferSize)
+    : m_nBytesPerQBody(nDOFqBody*sizeof(double)), m_nBytesPerUBody(nDOFuBody*sizeof(double)) {
+    m_nDOFuBody = nDOFuBody;
+    m_nDOFqBody = nDOFqBody;
 
     m_nBytes = 0;
     m_nStates = 0;
@@ -73,7 +73,7 @@ void  MultiBodySimFilePart::writeHeader() {
 
     m_beginHeader = m_file_stream.tellp();
     // The number of states will be written at the end when file is closed!
-    *this << (unsigned int)m_nStates<< (unsigned int)m_nDOFqObj << (unsigned int)m_nDOFuObj; // Precision output is always double!
+    *this << (unsigned int)m_nStates<< (unsigned int)m_nDOFqBody << (unsigned int)m_nDOFuBody; // Precision output is always double!
 
     m_beginOfStates = m_file_stream.tellp();
 }

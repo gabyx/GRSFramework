@@ -12,8 +12,6 @@
 #include <cmath>
 #include <vector>
 #include "boost/tuple/tuple.hpp"
-#include <Eigen/Dense>
-
 
 #include "TypeDefs.hpp"
 
@@ -23,12 +21,12 @@
 * @brief Collision helper functions for the Collider!
 */
 
-template<typename TLayoutConfig>
+
 class CollisionFunctions {
 
 public:
 
-    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
+    DEFINE_MATRIX_TYPES
 
     typedef boost::tuple<double, Vector3 ,unsigned int,unsigned int> ClosestPoint;
     typedef std::vector< ClosestPoint > ClosestPointSet;
@@ -94,8 +92,8 @@ public:
 //                std::cout <<"Collision with faceNr" <<faceNr <<":" << vertex0.transpose() <<std::endl;
                 validContact = true;
                 for(unsigned int j=0; j<pointSet.size(); j++) {
-                    Vector3 p1 = pointSet[j].template get<1>();
-                    //std::cout <<"Cos : "<< acos( pointSet[j].template get<1>().dot( I_r_SC )) << "<" << (5.0/180.0*M_PI)<<std::endl;
+                    Vector3 p1 = pointSet[j].get<1>();
+                    //std::cout <<"Cos : "<< acos( pointSet[j].get<1>().dot( I_r_SC )) << "<" << (5.0/180.0*M_PI)<<std::endl;
 //                    std::cout << "p1:" << p1 <<std::endl;
 //                    std::cout << "I_r_SC:" << I_r_SC <<std::endl;
                     double angle = std::acos( p1.dot( I_r_SC ) /(p1.norm() * normI_r_SC ));
@@ -130,7 +128,7 @@ public:
         int faceNr=0;
 
         static ClosestPoint cp;
-        cp.template get<0>() = 0; // set overlap to zero
+        cp.get<0>() = 0; // set overlap to zero
 
         for(faceIt = mesh.m_Faces.begin(); faceIt != mesh.m_Faces.end(); faceIt++) {
             // Check each face!
@@ -141,16 +139,16 @@ public:
             M_r_MS = A_IM.transpose() * (I_r_S - I_r_M);
             I_r_SC = A_IM*(getClosestPoint_PointTriangle(M_r_MS,vertex0,vertex1,vertex2,(*faceIt),faceNr,type,id) - M_r_MS);
             double overlap = radius - I_r_SC.norm();
-            if(overlap>cp.template get<0>()){
+            if(overlap>cp.get<0>()){
                 //save this point
-                cp.template get<0>() = overlap;
-                cp.template get<1>() = I_r_SC;
-                cp.template get<2>() = type;
-                cp.template get<3>() = id;
+                cp.get<0>() = overlap;
+                cp.get<1>() = I_r_SC;
+                cp.get<2>() = type;
+                cp.get<3>() = id;
             }
             faceNr++;
         }
-        if(cp.template get<0>()>0.0){
+        if(cp.get<0>()>0.0){
            pointSet.push_back(cp);
         }
         //std::cout <<"Coll: ==========" <<  std::endl;

@@ -86,7 +86,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserOgre... ");
 
 
-    LOG(m_pSimulationLog,"---> ScenePath:" << sceneFilePath );
+    LOG(m_pSimulationLog,"---> ScenePath: " << sceneFilePath << std::endl );
     if(sceneFilePath.empty()) {
         sceneFilePath = "SceneFile.xml";
     }
@@ -98,14 +98,14 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
 
     m_pSharedBuffer = boost::shared_ptr<SharedBufferDynSys>(new SharedBufferDynSys(m_nSimBodies));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBufferDynSys... ");
-    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys, m_pSharedBuffer) );
+    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added TimeStepperType... ");
 
     m_pStateRecorder = boost::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added StateRecorder... ");
 
 
-    m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());
+    m_pSharedBuffer->resetStatePool(m_pDynSys->m_simBodiesInitStates);
     m_pSceneParser->cleanUp(); // Take care this cleans all stuff
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBuffer... ");
 
@@ -126,7 +126,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
 
 
 bool SimulationManagerGUI::writeInitialState() {
-    MultiBodySimFile simFile(NDOFqObj,NDOFuObj);
+    MultiBodySimFile simFile(NDOFqBody,NDOFuBody);
     // Request new file Paths for all logs from FileManager
     // Get new folder path
     boost::filesystem::path file = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_INIT);
@@ -146,7 +146,7 @@ bool SimulationManagerGUI::writeInitialState() {
 
 
 
-void SimulationManagerGUI::updateScene(double timeSinsfceLastFrame) {
+void SimulationManagerGUI::updateScene(double timeSinceLastFrame) {
     static bool bStateChanged;
 
     if (isSimThreadRunning()) {
@@ -228,7 +228,7 @@ void SimulationManagerGUI::threadRunSimulation() {
 
     resetTimelineSimulation();
     while(!isSimThreadToBeStopped()) {
-        timelineSimulation = getTimelineSimulation();
+        timelineSimulation = getTimelineSimulation() + m_pTimestepper->m_Settings.m_startTime;
         state_time = m_pTimestepper->getTimeCurrent();
 
         if ( state_time <= timelineSimulation) {
@@ -275,11 +275,14 @@ void SimulationManagerGUI::initSimThread() {
 
     m_pTimestepper->reset();
 
+
+
 }
 
 
 
 void SimulationManagerGUI::cleanUpSimThread() {
+
     m_pTimestepper->closeAllFiles();
 }
 
@@ -403,9 +406,9 @@ bool SimulationManagerGUI::initRecordThread() {
     m_pSimulationLog->logMessage("---> Init Timestepper Logs...");
     m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);
 
-    // Write first initial value
+    // Write first initial value out!
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
-        m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
+        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_SimBodies);
         m_pSimulationLog->logMessage("---> Wrote first initial value to file...");
     }
 
@@ -451,9 +454,11 @@ bool SimulationManagerGUI::keyPressed(const OIS::KeyEvent &e) {
 
     switch (e.key) {
     case OIS::KC_M:
+        LOG(m_pSimulationLog, "---> Add 0.1 to TimeScale" << std::endl;);
         addToTimeScale(0.1);
         break;
     case OIS::KC_N:
+        LOG(m_pSimulationLog, "---> Add -0.1 to TimeScale" << std::endl;);
         addToTimeScale(-0.1);
         break;
     case OIS::KC_B:
@@ -556,7 +561,7 @@ void SimulationManagerGUI::enableInput(bool value) {
         // add some key,mouse listener to change the input
         InputContext::getSingletonPtr()->addKeyListener(this,m_KeyListenerName);
     } else {
-        // add some key,mouse listener to change the input
+        // remove key,mouse listener to change the input
         InputContext::getSingletonPtr()->removeKeyListener(this);
     }
 }

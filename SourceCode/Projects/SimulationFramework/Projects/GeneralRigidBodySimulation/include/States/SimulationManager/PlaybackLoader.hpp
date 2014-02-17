@@ -79,7 +79,7 @@ template<typename TStatePool>
 PlaybackLoader<TStatePool>::PlaybackLoader( const unsigned int nSimBodies, boost::shared_ptr<TStatePool> pStatePool):
 m_barrier_start(2),
 m_nSimBodies(nSimBodies),
-m_binarySimFile(NDOFqObj,NDOFuObj)
+m_binarySimFile(NDOFqBody,NDOFuBody)
 {
   //Set the Log Output =========================================================================
   m_pThreadLog = new Logging::Log("PlaybackLoaderThreadLog");

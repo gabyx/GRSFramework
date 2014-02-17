@@ -11,8 +11,6 @@
 #include <memory>
 #include <utility>
 
-#include <boost/shared_ptr.hpp>
-
 namespace Graph{
 
 // prototypes
@@ -48,10 +46,10 @@ public:
 	NodeDataType m_nodeData;
 
 	// visitor dispatch
-	template<typename TVisitor>
-	void acceptVisitor(TVisitor & vv) {
-		vv.visitNode(*this);
-	}
+    //	template<typename TVisitor>
+    //	void acceptVisitor(TVisitor & vv) {
+    //		vv.visitNode(*this);
+    //	}
 };
 
 
@@ -96,10 +94,10 @@ public:
    EdgeDataType m_edgeData;
 
 	// visitor dispatch
-	template<typename TVisitor>
-	void acceptVisitor(TVisitor & ev) {
-		ev.visitEdge(*this);
-	}
+    //	template<typename TVisitor>
+    //	void acceptVisitor(TVisitor & ev) {
+    //		ev.visitEdge(*this);
+    //	}
 };
 
 
@@ -140,13 +138,15 @@ public:
     template<typename TNodeVisitor>
 	void applyNodeVisitor(TNodeVisitor & vv){
 		for(auto curr_node = m_nodes.begin(); curr_node != m_nodes.end(); curr_node++)
-			(*(*curr_node)).template acceptVisitor<TNodeVisitor>(vv);
+			// (*(*curr_node)).template acceptVisitor<TNodeVisitor>(vv);
+			vv.visitNode(*(*curr_node));
 	}
 
 	template<typename TEdgeVisitor>
 	void applyEdgeVisitor(TEdgeVisitor & hev){
 		for(auto curr_he = m_edges.begin(); curr_he != m_edges.end(); curr_he++)
-			(*(*curr_he)).template acceptVisitor<TEdgeVisitor>(hev);
+			// (*(*curr_he)).template acceptVisitor<TEdgeVisitor>(hev);
+			hev.visitEdge(*(*curr_he));
 	}
 };
 

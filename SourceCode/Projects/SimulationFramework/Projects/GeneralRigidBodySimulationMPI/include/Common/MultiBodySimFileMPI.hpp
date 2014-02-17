@@ -3,36 +3,36 @@
 
 
 #include <type_traits>
+#include <vector>
+#include <sstream>
 #include <fstream>
 
 #include <boost/filesystem.hpp>
 
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-
 #include "TypeDefs.hpp"
-
 #include "StaticAssert.hpp"
+
+#include DynamicsSystem_INCLUDE_FILE
+
+
 #include "CommonFunctions.hpp"
-#include "RigidBodyContainer.hpp"
+#include "MPISerializationHelpersEigen.hpp"
 #include "MultiBodySimFileIOHelpers.hpp"
-
-#include "MPISerializationHelpers.hpp"
-
-#include DynamicsSystem_INCLUDE_FILE //Not used
 
 #define SIM_FILE_MPI_SIGNATURE_LENGTH 4
 #define SIM_FILE_MPI_SIGNATURE {'M','B','S','F'}
-#define SIM_FILE_MPI_EXTENSION ".simmpi"
+
+#define SIM_FILE_MPI_VERSION 2
+
+#define SIM_FILE_MPI_EXTENSION ".sim"
 
 class MultiBodySimFileMPI {
 public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    MultiBodySimFileMPI(unsigned int nDOFqObj, unsigned int nDOFuObj);
+    MultiBodySimFileMPI(unsigned int nDOFqBody, unsigned int nDOFuBody);
     ~MultiBodySimFileMPI();
 
     bool openWrite(MPI_Comm comm,  const boost::filesystem::path & file_path,   const unsigned int nSimBodies,  bool truncate = true);
@@ -40,7 +40,7 @@ public:
 
     inline void write(double time, const std::vector<char> & bytes, unsigned int nBodies);
 
-    inline void write(double time, const RigidBodyContainer & bodyList){
+    inline void write(double time, const RigidBodyContainer & bodyList) {
         //writeBySharedPtr(time, bodyList);
         writeByOffsets(time, bodyList);
         //writeByOffsets2(time, bodyList);
@@ -79,11 +79,21 @@ private:
 
     unsigned int m_nStates;
 
-    unsigned int m_nDOFuObj, m_nDOFqObj;
-    const  std::streamoff m_nBytesPerQObj ;
-    const  std::streamoff m_nBytesPerUObj ;
-    const  std::streamoff m_nBytesPerBody; ///< id,q,u
-    static const  std::streamoff m_headerLength = (3*sizeof(unsigned int) + SIM_FILE_MPI_SIGNATURE_LENGTH*sizeof(char));
+    unsigned int m_nDOFuBody, m_nDOFqBody;
+
+    const  std::streamoff m_nBytesPerQBody ;
+    const  std::streamoff m_nBytesPerUBody ;
+
+    static const unsigned int m_additionalBytesType = 1;
+    static constexpr std::streamoff getAdditionalBytes(){
+        return (m_additionalBytesType==1) ? 1*sizeof(RankIdType) : 0 ;
+    }
+    static const  std::streamoff m_nAdditionalBytesPerBody;
+
+    const  std::streamoff m_nBytesPerBody; ///< id,q,u + m_nAdditionalBytesPerBody
+
+    static const  std::streamoff m_headerLength = SIM_FILE_MPI_SIGNATURE_LENGTH*sizeof(char) + sizeof(unsigned int)
+                                                    +3*sizeof(unsigned int) +2*sizeof(unsigned int) ; ///< 'MBSF' + nBodies, NDOFq, NDOFu, additionalBytesType (0=nothing, 1 = + process rank, etc.), additionalBytesPerBody
 
     MultiBodySimFileMPI & operator =(const MultiBodySimFileMPI & file);
 
@@ -91,10 +101,11 @@ private:
 
     std::stringstream m_errorString;
 
-    bool mpiSucceded(int err){
+    bool mpiSucceded(int err) {
         m_errorString.str("");
-        if(err != MPI_SUCCESS){
-            char * string; int length;
+        if(err != MPI_SUCCESS) {
+            char * string;
+            int length;
             MPI_Error_string( err , string, &length );
             m_errorString << string;
             return false;
@@ -104,6 +115,24 @@ private:
 
 };
 
+/** Function template to add the spcific bytes */
+template<unsigned int type> struct AddBytes;
+
+template<>
+struct AddBytes<1>{
+    template<typename Archive, typename TRigidBody >
+    static void write(Archive & oa, TRigidBody *body) {
+        oa << body->m_pBodyInfo->m_ownerRank; // write owner rank
+    }
+};
+
+template<>
+struct AddBytes<0>{
+    template<typename Archive, typename TRigidBody >
+    static void write(Archive  & oa, TRigidBody *body) {
+        return;
+    }
+};
 
 
 #endif

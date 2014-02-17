@@ -65,7 +65,7 @@ SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/MeshData.hpp
     ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
     ${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
-
+    ${PROJECT_SOURCE_DIR}/include/Common/CartesianGrid.hpp
     ${COMMONSOURCE_DIR}/include/Common/MakeCoordinateSystem.hpp
     ${COMMONSOURCE_DIR}/include/Common/VectorToSkewMatrix.hpp
     ${COMMONSOURCE_DIR}/include/Common/MatrixHelpers.hpp
@@ -80,7 +80,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPICommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPITopology.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/MPISerializationHelpers.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/MPISerializationHelpersEigen.hpp
     ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
 )
 SET(COMMON_SRC
@@ -91,16 +91,20 @@ SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFilePart.cpp
     ${PROJECT_SOURCE_DIR}/src/Common/MultiBodySimFileMPI.cpp
     ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
+    ${PROJECT_SOURCE_DIR}/src/Common/CartesianGrid.cpp
 )
 
 SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourMap.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourDataBodyCommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/BodyInfoMap.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourCommunicator.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/BodyCommunicator.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodyGarbageCollector.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodySolverDataMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodyMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MoreauTimeStepperMPI.hpp
@@ -123,22 +127,30 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.icc
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitorsMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCONoGMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionCommunicator.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionCommunicator.icc
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/NeighbourDataInclusionCommunication.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettings.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettingsMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/FrontBackBuffer.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePool.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePoolVisBackFront.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/SharedBufferPlayback.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderBody.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/StateRecorderMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderProcess.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
@@ -152,8 +164,10 @@ SET(DYNAMICS_SRC
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactParameterMap.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/DynamicsSystemMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/General/BodyCommunicator.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/CollisionSolverMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoGMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/ContactGraphNodeDataMPI.cpp
 )
 
 
@@ -209,8 +223,8 @@ SET(SOURCE_FILES
     ${SINGELTON_SRC}
     ${STATES_SRC}
     ${COMMON_SRC}
-    ${DYNAMICS_INC}
-    ${SYSTEMS_INC}
+    ${DYNAMICS_SRC}
+    ${SYSTEMS_SRC}
     ${CUDA_SRC}
 )
 
@@ -220,8 +234,8 @@ SET(INCLUDE_FILES
     ${SINGELTON_INC}
     ${STATES_INC}
     ${COMMON_INC}
-    ${DYNAMICS_SRC}
-    ${SYSTEMS_SRC}
+    ${DYNAMICS_INC}
+    ${SYSTEMS_INC}
     ${CUDA_INC}
 )
 
@@ -264,7 +278,7 @@ set(INCLUDE_DIRS
     ${COMMONSOURCE_DIR}/include/Common
     ${COMMONSOURCE_DIR}/external/SRDelegates/include/
     ${COMMONSOURCE_DIR}/external/getoptpp/
-    ${COMMONSOURCE_DIR}/external/getoptpp/src/ 
+    ${COMMONSOURCE_DIR}/external/getoptpp/src/
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry

@@ -1,0 +1,257 @@
+
+#include "InclusionCommunicator.hpp"
+
+#include "ContactGraphMPI.hpp"
+
+#include "ContactGraphVisitorsMPI.hpp"
+
+
+template<typename Combo>
+InclusionCommunicator<Combo>::InclusionCommunicator(boost::shared_ptr< BodyCommunicator> pBodyComm,
+        boost::shared_ptr< DynamicsSystemType> pDynSys ,
+        boost::shared_ptr< ProcessCommunicatorType > pProcCom):
+
+    m_pDynSys(pDynSys),
+    m_globalLocal(pDynSys->m_SimBodies),
+    m_globalRemote(pDynSys->m_RemoteSimBodies),
+    m_pProcCom(pProcCom),
+    m_pProcInfo(m_pProcCom->getProcInfo()),
+    m_pProcTopo(m_pProcCom->getProcInfo()->getProcTopo()),
+    m_pBodyComm(pBodyComm),
+    m_nbDataMap(m_pProcCom->getProcInfo()->getRank()),
+    m_rank(m_pProcCom->getProcInfo()->getRank()),
+    m_nbRanks(m_pProcCom->getProcInfo()->getProcTopo()->getNeighbourRanks()),
+    m_messageContact(this),m_messageMultiplicity(this), m_messageSplitBodyUpdate(this), m_messageSplitBodySolution(this) {
+    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    } else {
+        ERRORMSG("SimulationLog does not yet exist? Did you create it?")
+    }
+
+    // Initialize all NeighbourDatas
+    for(auto rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
+        LOGIC(m_pSimulationLog,"--->InclusionCommunicator<Combo>: Add neighbour data for process rank: "<<*rankIt<<std::endl;);
+        auto res = m_nbDataMap.insert(*rankIt);
+        ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << *rankIt);
+    }
+    m_pSimulationLog->logMessage("--->InclusionCommunicator<Combo>: Initialized all NeighbourDatas");
+
+
+    m_pSimulationLog->logMessage("---> Initialized InclusionCommunicator<Combo>");
+}
+template<typename Combo>
+void InclusionCommunicator<Combo>::communicateRemoteContacts(PREC currentSimulationTime) {
+
+    m_currentSimulationTime = currentSimulationTime;
+
+    m_nbRanksSendRecvLocal.clear();
+    m_nbRanksSendRecvRemote.clear();
+
+
+    m_messageContact.setTime(m_currentSimulationTime);
+    m_messageMultiplicity.setTime(m_currentSimulationTime);
+    m_messageSplitBodyUpdate.setTime(m_currentSimulationTime);
+    m_messageSplitBodySolution.setTime(m_currentSimulationTime);
+
+
+    // First for each neighbour, communicate the ids of all remote body which have contacts
+    LOGIC(m_pSimulationLog,"\t---> InclusionCommunication: Communicate Remote Contacts at t="<<m_currentSimulationTime<< std::endl;)
+    //TODO
+    sendContactMessageToNeighbours(); //TODO Send only message to neighbour if there are remotes in bodyCommunicators neighbour map
+    receiveContactMessagesFromNeighbours(); //TODO Receive only message if local bodies are in bodyCommunicators neighbour map
+
+
+    //Init all weights on the nodes
+    LOGIC(m_pSimulationLog,"\t---> Compute Multiplicities"<< std::endl;)
+    {
+        SorProxInitSplitNodeVisitor<ContactGraphType> v;
+        m_pContactGraph->applyNodeVisitorSplitBody(v);
+    }
+
+    sendBodyMultiplicityMessageToNeighbours();
+
+    // Recv all multiplicity factor of all remote bodies
+    // Weighting factors are applied, initial velocity is calculated for each remote
+    recvBodyMultiplicityMessageFromNeighbours();
+
+
+    // Init all local bodies weights in the split body nodes
+    // Weighting factors are applied, initial velocities is NOT calculated, later!
+    LOGIC(m_pSimulationLog,"\t---> Apply weights for local bodies in SplitBodyNodes"<< std::endl;)
+    {
+        SetWeightingLocalBodiesSplitNodeVisitor<ContactGraphType> v;
+        m_pContactGraph->applyNodeVisitorSplitBody(v);
+    }
+
+    LOGIC(m_pSimulationLog,"---> InclusionCommunication: Communicate Remote finished"<< std::endl;)
+}
+
+template<typename Combo>
+void InclusionCommunicator<Combo>::communicateSplitBodyUpdate(unsigned int globalIterationNumber) {
+
+    m_globalIterationNumber = globalIterationNumber;
+    // First for each neighbour, communicate the ids of all remote body which have contacts
+    LOGIC(m_pSimulationLog,"---> InclusionCommunication: Communicate Remote Velocities for SplitBodyNode Update ..."<< std::endl;)
+
+    LOGIC(m_pSimulationLog,"\t---> Send Velocities of Remote SplitBodies..."<< std::endl;)
+    sendUpdateSplitBodiesToNeighbours();
+
+    LOGIC(m_pSimulationLog,"\t---> Recv Velocities of Local SplitBodies..."<< std::endl;)
+    recvUpdateSplitBodiesFromNeighbours();
+
+    LOGIC(m_pSimulationLog,"---> InclusionCommunication: Communicate Remote Velocities finished"<< std::endl;)
+}
+
+template<typename Combo>
+void InclusionCommunicator<Combo>::communicateSplitBodySolution(unsigned int globalIterationNumber) {
+    m_globalIterationNumber = globalIterationNumber;
+
+    // First for each neighbour, communicate the ids of all remote body which have contacts
+    LOGIC(m_pSimulationLog,"---> InclusionCommunication: Communicate Solved SplitBody Velocity ..."<< std::endl;)
+
+    LOGIC(m_pSimulationLog,"\t---> Send Velocities of Local SplitBodies..."<< std::endl;)
+    sendSolutionSplitBodiesToNeighbours();
+
+    LOGIC(m_pSimulationLog,"\t---> Recv Velocities of Remote SplitBodies..."<< std::endl;)
+    recvSolutionSplitBodiesFromNeighbours();
+
+    LOGIC(m_pSimulationLog,"---> InclusionCommunication: Communicate Solved SplitBody Velocity finished"<< std::endl;)
+
+}
+
+
+
+template<typename Combo>
+void InclusionCommunicator<Combo>::resetAllWeightings() {
+
+
+    //Reset all local bodies
+    ResetWeightingLocalBodiesSplitNodeVisitor<ContactGraphType> v;
+    m_pContactGraph->applyNodeVisitorSplitBody(v);
+
+    //Reset weigthing of all remote bodies
+    for(auto nbIt = m_nbDataMap.begin(); nbIt != m_nbDataMap.end(); nbIt++){
+        for( auto remoteIt = nbIt->second.remoteBegin(); remoteIt != nbIt->second.remoteEnd(); remoteIt++){
+            RigidBodyFunctions::changeBodyToNormalWeighting(remoteIt->second.m_pBody);
+        }
+    }
+
+}
+
+
+
+template<typename Combo>
+void InclusionCommunicator<Combo>::sendContactMessageToNeighbours() {
+    LOGIC(m_pSimulationLog,"MPI>\t Send message (EXTERNALCONTACTS_MESSAGE) to neighbours!"<<std::endl;)
+
+
+
+    for(auto it = m_nbRanks.begin(); it != m_nbRanks.end(); it++) {
+        LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
+        // Instanciate a MessageWrapper which contains a boost::serialization function!
+        m_messageContact.setRank(*it);
+        m_pProcCom->sendMessageToRank(m_messageContact,*it, MPILayer::MPIMessageTag::Type::EXTERNALCONTACTS_MESSAGE );
+    }
+    LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
+}
+template<typename Combo>
+void InclusionCommunicator<Combo>::receiveContactMessagesFromNeighbours() {
+    LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (EXTERNALCONTACTS_MESSAGE) from neighbours!"<<std::endl;)
+    // set the rank of the receiving message automatically! inside the function!
+    m_pProcCom->receiveMessageFromRanks(m_messageContact, m_nbRanks, MPILayer::MPIMessageTag::Type::EXTERNALCONTACTS_MESSAGE );
+    LOGIC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
+
+    // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
+    m_pProcCom->waitForAllSends();
+}
+template<typename Combo>
+void InclusionCommunicator<Combo>::sendBodyMultiplicityMessageToNeighbours() {
+    LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYFACTOR_MESSAGE) to neighbours!"<<std::endl;)
+
+
+
+    for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); it++) {
+        LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
+        // Instanciate a MessageWrapper which contains a boost::serialization function!
+        m_messageMultiplicity.setRank(*it);
+        m_pProcCom->sendMessageToRank(m_messageMultiplicity,*it, MPILayer::MPIMessageTag::Type::SPLITBODYFACTOR_MESSAGE );
+    }
+    LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
+}
+
+template<typename Combo>
+void InclusionCommunicator<Combo>::recvBodyMultiplicityMessageFromNeighbours() {
+    LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (SPLITBODYFACTOR_MESSAGE) from neighbours!"<<std::endl;)
+    // set the rank of the receiving message automatically! inside the function!
+    // m_nbRanksSendRecvRem#ote.erase(m_nbRanksSendRecvRemote.begin()); with this in, it obviously hangs!!
+    // so the code is correct! all messages get received
+    m_pProcCom->receiveMessageFromRanks(m_messageMultiplicity, m_nbRanksSendRecvRemote, MPILayer::MPIMessageTag::Type::SPLITBODYFACTOR_MESSAGE );
+    LOGIC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
+
+    // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
+    // We dont send to all neighbours but this should not be a problem for the underlying MPI_Wait call
+    m_pProcCom->waitForAllSends();
+}
+
+
+template<typename Combo>
+void InclusionCommunicator<Combo>::sendUpdateSplitBodiesToNeighbours() {
+    LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYUPDATE_MESSAGE) to neighbours!"<<std::endl;)
+
+
+    m_messageSplitBodyUpdate.setStep(m_globalIterationNumber);
+
+    for(auto it = m_nbRanksSendRecvRemote.begin(); it != m_nbRanksSendRecvRemote.end(); it++) {
+        LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
+        // Instanciate a MessageWrapper which contains a boost::serialization function!
+        m_messageSplitBodyUpdate.setRank(*it);
+        m_pProcCom->sendMessageToRank(m_messageSplitBodyUpdate,*it, MPILayer::MPIMessageTag::Type::SPLITBODYUPDATE_MESSAGE );
+    }
+    LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
+}
+
+template<typename Combo>
+void InclusionCommunicator<Combo>::recvUpdateSplitBodiesFromNeighbours() {
+    LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (SPLITBODYUPDATE_MESSAGE) from neighbours!"<<std::endl;)
+    // set the rank of the receiving message automatically! inside the function!
+    // m_nbRanksSendRecv##Remote.erase(m_nbRanksSendRecvRemote.begin()); with this in, it obviously hangs!!
+    // so the code is correct! all messages get received
+    m_pProcCom->receiveMessageFromRanks(m_messageSplitBodyUpdate, m_nbRanksSendRecvLocal,
+                                        MPILayer::MPIMessageTag::Type::SPLITBODYUPDATE_MESSAGE );
+    LOGIC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
+
+    // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
+    // We dont send to all neighbours but this should not be a problem for the underlying MPI_Wait call
+    m_pProcCom->waitForAllSends();
+}
+
+template<typename Combo>
+void InclusionCommunicator<Combo>::sendSolutionSplitBodiesToNeighbours() {
+    LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYSOLUTION_MESSAGE) to neighbours!"<<std::endl;)
+
+
+    m_messageSplitBodySolution.setStep(m_globalIterationNumber);
+
+    for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); it++) {
+        LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
+        // Instanciate a MessageWrapper which contains a boost::serialization function!
+        m_messageSplitBodySolution.setRank(*it);
+        m_pProcCom->sendMessageToRank(m_messageSplitBodySolution,*it, MPILayer::MPIMessageTag::Type::SPLITBODYSOLUTION_MESSAGE );
+    }
+    LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
+}
+
+template<typename Combo>
+void InclusionCommunicator<Combo>::recvSolutionSplitBodiesFromNeighbours() {
+    LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (SPLITBODYSOLUTION_MESSAGE) from neighbours!"<<std::endl;)
+    // set the rank of the receiving message automatically! inside the function!
+    // m_nbRanksSendRecvRem#ote.erase(m_nbRanksSendRecvRemote.begin()); with this in, it obviously hangs!!
+    // so the code is correct! all messages get received
+    m_pProcCom->receiveMessageFromRanks(m_messageSplitBodySolution, m_nbRanksSendRecvRemote,
+                                        MPILayer::MPIMessageTag::Type::SPLITBODYSOLUTION_MESSAGE );
+    LOGIC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
+
+    // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
+    // We dont send to all neighbours but this should not be a problem for the underlying MPI_Wait call
+    m_pProcCom->waitForAllSends();
+}

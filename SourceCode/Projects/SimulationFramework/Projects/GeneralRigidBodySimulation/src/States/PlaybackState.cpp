@@ -145,20 +145,13 @@ void PlaybackState::setupGUI() {
     setupParamsPanel();
     setupActiveModeSelection();
 
-    FileManager::getSingletonPtr()->updateFileList(SIMULATION_FOLDER_PATH,true);
-    std::vector<std::string> strings = FileManager::getSingletonPtr()->getSimFileNameList();
-
-    //Convert String to ogre String
-    Ogre::StringVector vec;
-    for(int i=0; i<strings.size(); i++) {
-        vec.push_back(strings[i]);
-    }
 
     m_pTrayMgr->hideBackdrop();
     m_pPlaybackFiles = (m_pTrayMgr->createThickSelectMenu(
                             TL_TOP,"PlaybackFiles","Playback Files",600,10,
-                            vec
+                            Ogre::StringVector()
                         ));
+    updatePlaybackPanel();
 
     // Setup reload button
     m_pPlaybackFilesReload = m_pTrayMgr->createButton(TL_TOP,"ButtonReloadFiles","Reload",100);
@@ -183,18 +176,18 @@ void PlaybackState::setupGUI() {
     m_pSliderStartTime->setValue(0,false);
     m_pSliderEndTime->setValue(10,false);
 
-    if(strings.size()!=0) {
-        m_pPlaybackFiles->selectItem(strings[0]);
+    if(m_pPlaybackFiles->getNumItems()!=0) {
+        m_pPlaybackFiles->selectItem(0);
     }
 
 }
 void PlaybackState::updatePlaybackPanel() {
     FileManager::getSingletonPtr()->updateFileList(SIMULATION_FOLDER_PATH,true);
-    std::vector<std::string> strings = FileManager::getSingletonPtr()->getSimFileNameList();
+    auto stringMap = FileManager::getSingletonPtr()->getSimFileNameList();
 
     Ogre::StringVector vec;
-    for(int i=0; i<strings.size(); i++) {
-        vec.push_back(strings[i]);
+    for(auto it=stringMap.begin(); it!=stringMap.end(); it++) {
+        vec.push_back(it->string());
     }
 
     m_pPlaybackFiles->setItems(vec);
@@ -317,11 +310,19 @@ void PlaybackState::setupScene() {
 
 
     Ogre::Light* pLight = m_pSceneMgr->createLight("Light");
-    pLight->setType(Ogre::Light::LT_POINT);
+    pLight->setType(Ogre::Light::LT_DIRECTIONAL);
     pLight->setDirection(Ogre::Vector3(-1,-1,-1));
-    pLight->setDiffuseColour((Ogre::Real)0.9,(Ogre::Real) 0.9,(Ogre::Real) 0.9);
+    pLight->setDiffuseColour((Ogre::Real)0.8,(Ogre::Real) 0.8,(Ogre::Real) 0.8);
     pLight->setPosition( 75, 75, 300 );
-    pLight->setCastShadows(true);
+    //pLight->setAttenuation(5000000,0,0.1,0);
+    //pLight->setCastShadows(true);
+
+    pLight = m_pSceneMgr->createLight("Light2");
+    pLight->setType(Ogre::Light::LT_DIRECTIONAL);
+    pLight->setDirection(Ogre::Vector3(1,1,-1));
+    pLight->setDiffuseColour((Ogre::Real)0.8,(Ogre::Real) 0.8,(Ogre::Real) 0.8);
+    pLight->setPosition( -75, -75, 300 );
+    pLight->setCastShadows(false);
 
     // Set Shadow Technique
     m_pSceneMgr->setAmbientLight(Ogre::ColourValue(0.7, 0.7, 0.7));

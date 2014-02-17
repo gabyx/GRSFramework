@@ -27,6 +27,11 @@ struct InclusionSolverSettings
       m_bUseGPU = false;
       m_UseGPUDeviceId = 0;
       m_bIsFiniteCheck = false;
+      m_eConvergenceMethod = InVelocity;
+
+      //Experimental
+      m_dinv = 0; //Inverse Damper Coefficient which acts on the diagonal of G,
+
     }
 
 

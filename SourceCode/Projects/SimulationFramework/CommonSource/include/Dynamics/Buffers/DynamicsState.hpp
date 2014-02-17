@@ -3,14 +3,11 @@
 
 #include <vector>
 
-#include <boost/thread.hpp>
-
-#include "AssertionDebug.hpp"
-#include "LogDefines.hpp"
-
 #include "TypeDefs.hpp"
+#include "AssertionDebug.hpp"
 
 #include "QuaternionHelpers.hpp"
+#include "RigidBodyId.hpp"
 
 //Prototype
 class DynamicsState;
@@ -35,20 +32,28 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     RigidBodyState() {
+        m_id = 0 ;
+        m_u.setZero();
+        m_q.setZero();
+    };
+
+    RigidBodyState(const RigidBodyIdType & id) {
+        m_id = id ;
         m_u.setZero();
         m_q.setZero();
     };
 
     RigidBodyState & operator =(const RigidBodyState& state) {
+        m_id = state.m_id;
         m_u = state.m_u;
         m_q = state.m_q;
         return *this;
     }
 
     friend void Interpolate::lerp<PREC>( const RigidBodyState & A, const RigidBodyState & B, RigidBodyState & X,PREC factor);
-
-    VectorQObj	m_q; ///< These are the generalized coordinates \f$\mathbf{q}\f$ of a rigid body.
-    VectorUObj	m_u; ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
+    RigidBodyIdType m_id;
+    VectorQBody	m_q; ///< These are the generalized coordinates \f$\mathbf{q}\f$ of a rigid body.
+    VectorUBody	m_u; ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
 };
 
 

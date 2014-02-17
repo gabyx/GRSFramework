@@ -4,11 +4,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/type_traits.hpp>
 
-#include "TypeDefs.hpp"
-
-#include "DynamicsState.hpp"
-#include "LogDefines.hpp"
-
 /**
 * @ingroup StatesAndBuffers
 * @brief This is a class to store the front and back buffer pointers to the DynamicsState. This class is used in the timestepper.
@@ -93,7 +88,6 @@ public:
 };
 
 
-// Specialization for shared ptr!
 template< typename TBufferType >
 class FrontBackBuffer< TBufferType, FrontBackBufferPtrType::NoPtr , FrontBackBufferMode::NoConst>{
 

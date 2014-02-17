@@ -7,7 +7,7 @@
 class ContactFrame{
 public:
 
-    DEFINE_LAYOUT_CONFIG_TYPES
+    DEFINE_MATRIX_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     ContactFrame(){
@@ -21,21 +21,6 @@ public:
     Vector3 m_e_z; /// e_z in frame I
     Vector3 m_p;  /// location of the contact in frame I
 };
-
-//template<typename PREC>
-//class ContactFrameVis : public ContactFrame<PREC> {
-//public:
-//    unsigned int m_id;
-//
-//    ContactFrameVis(): ContactFrame(){
-//        m_id = 0;
-//    };
-//
-//    //Copy constructor to copy from a base
-//    ContactFrameVis( ContactFrame<PREC> & cf): ContactFrame<PREC>(cf){};
-//};
-
-
 
 
 #endif

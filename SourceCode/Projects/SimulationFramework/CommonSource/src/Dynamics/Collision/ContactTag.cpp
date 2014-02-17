@@ -4,7 +4,7 @@ ContactTag::ContactTag(){
    m_tag = boost::make_tuple(0, 0, 0, 0, 0, 0);
 }
 
-ContactTag::ContactTag( boost::uint64_t b1, unsigned char type1, unsigned int id1, boost::uint64_t b2 , unsigned char type2 , unsigned int id2)
+ContactTag::ContactTag( std::uint64_t b1, unsigned char type1, unsigned int id1, std::uint64_t b2 , unsigned char type2 , unsigned int id2)
 {
    ASSERTMSG(b1 != b2, "Error: uint64_t have the same value: "<<b1<<" , something is wrong!");
       if(b1>b2){

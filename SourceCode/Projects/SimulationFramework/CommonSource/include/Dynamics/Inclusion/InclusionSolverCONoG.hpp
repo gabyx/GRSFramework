@@ -4,26 +4,21 @@
 
 #include <iostream>
 #include <fstream>
-
-
 #include <boost/shared_ptr.hpp>
 
-#include "AssertionDebug.hpp"
+#include "ConfigureFile.hpp"
 
 #include "TypeDefs.hpp"
+#include "LogDefines.hpp"
+#include "AssertionDebug.hpp"
 
 #include CollisionSolver_INCLUDE_FILE
 #include "PercussionPool.hpp"
-#include "MatrixHelpers.hpp"
-#include "VectorToSkewMatrix.hpp"
-#include "ProxFunctions.hpp"
-#include "InclusionSolverSettings.hpp"
+
+#include InclusionSolverSettings_INCLUDE_FILE
 #include "ContactGraph.hpp"
-
-#include "LogDefines.hpp"
-#include "ConfigureFile.hpp"
-
 #include "SimpleLogger.hpp"
+
 
 #if HAVE_CUDA_SUPPORT == 1
 #include "JorProxGPUVariant.hpp"
@@ -56,7 +51,9 @@ public:
 
 
     std::string getIterationStats();
-    unsigned int m_iterationsNeeded;
+    std::string getStatsHeader();
+
+    unsigned int m_globalIterationCounter;
     bool m_bConverged;
     unsigned int m_isFinite;
     unsigned int m_nContacts;
@@ -71,7 +68,7 @@ public:
 //    void readFromPercussionPool(unsigned int index, const CollisionData * pCollData, VectorDyn & P_old);
 //    void updatePercussionPool(const VectorDyn & P_old ) ;
 
-    InclusionSolverSettings m_Settings;
+    InclusionSolverSettingsType m_Settings;
 
 
 protected:
@@ -83,7 +80,7 @@ protected:
     boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
 
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;
+    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;
 
     typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
     ContactGraphType m_ContactGraph;

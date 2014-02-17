@@ -7,7 +7,7 @@
 #include <cstring>
 #include <cerrno>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include "LogDefines.hpp"
 #include "TypeDefs.hpp"
@@ -65,7 +65,7 @@ protected:
 
 
 StateRecorderProcess::StateRecorderProcess( unsigned int id,  unsigned int bufferSize):
-        m_binarySimFile(LayoutConfigType::LayoutType::NDOFqObj, LayoutConfigType::LayoutType::NDOFuObj, m_bufferSize)
+        m_binarySimFile(LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody, m_bufferSize)
 {
 
     m_accessId = id;
@@ -106,15 +106,15 @@ bool StateRecorderProcess::createSimFile(bool truncate){
 
 
     if(!m_binarySimFile.openWrite(file,truncate)){
-        LOG(m_pSimulationLog,"---> StateRecorderBody:: Could not open SimFile: " << file.string() << std::endl;);
+        LOG(m_pSimulationLog,"---> StateRecorderProcess:: Could not open SimFile: " << file.string() << std::endl;);
         LOG(m_pSimulationLog, m_binarySimFile.getErrorString() );
         return false;
     }
     if(truncate){
-       LOG(m_pSimulationLog,"---> StateRecorderBody:: Added SimFile (truncated):" << file.string() << std::endl; );
+       LOG(m_pSimulationLog,"---> StateRecorderProcess:: Added SimFile (truncated):" << file.string() << std::endl; );
     }
     else{
-        LOG(m_pSimulationLog,"---> StateRecorderBody:: Added SimFile: " << file.string() << std::endl; );
+        LOG(m_pSimulationLog,"---> StateRecorderProcess:: Added SimFile: " << file.string() << std::endl; );
     }
     return true;
 }

@@ -23,8 +23,8 @@
 
 PlaybackManager::PlaybackManager(boost::shared_ptr<Ogre::SceneManager> pSceneMgr):
     PlaybackManagerBase(),
-    m_nDofqObj(NDOFqObj),
-    m_nDofuObj(NDOFuObj),
+    m_nDofqBody(NDOFqBody),
+    m_nDofuBody(NDOFuBody),
     m_bSetupSuccessful(false) {
 
     m_pSimulationLog = NULL;
@@ -86,7 +86,7 @@ bool PlaybackManager::setup() {
     m_pSharedBuffer = boost::shared_ptr<SharedBufferPlayback >(
                           new SharedBufferPlayback(m_nSimBodies)
                       );
-    m_pSharedBuffer->initializeStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
+    m_pSharedBuffer->resetStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
 
 
     m_pFileLoader = boost::shared_ptr< PlaybackLoader<StateRingPoolVisBackFront > >(
@@ -303,7 +303,7 @@ void PlaybackManager::threadRunSimulation() {
 
 void PlaybackManager::initSimThread() {
 
-    m_pSharedBuffer->resetStateRingPool();
+    m_pSharedBuffer->resetStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
 
     if(m_SettingsSimThread.m_bVideoDrop) {
         m_pVideoDropper->reset();

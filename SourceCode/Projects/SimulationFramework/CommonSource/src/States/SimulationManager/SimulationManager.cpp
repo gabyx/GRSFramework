@@ -82,7 +82,7 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
 
     m_pStateRecorder = boost::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
 
-    m_pSharedBuffer->initializeStatePool(m_pSceneParser->getInitialConditionSimBodies());
+    m_pSharedBuffer->initializeStatePool(m_pDynSys->m_simBodiesInitStates);
 
     m_pSceneParser->cleanUp();
 
@@ -187,7 +187,8 @@ bool SimulationManager::initRecordThread() {
 
     // Write first initial value out!
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
-        m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
+        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_SimBodies);
+        m_pSimulationLog->logMessage("---> Wrote first initial value to file...");
     }
 
     return true;

@@ -2,9 +2,9 @@
 #ifndef ContactModels_hpp
 #define ContactModels_hpp
 
-#include "ConvexSets.hpp"
-
 #include <boost/any.hpp>
+
+#include "ConvexSets.hpp"
 
    /**
    * @brief Definitions of all contact models which can be used in the framework.
@@ -13,9 +13,9 @@
    */
    namespace ContactModels{
 
-      /* 
+      /*
       * @brief This is the friction model for a unilateral contact.
-      * Abreviations : NContactModel
+      * Abreviations : N_ContactModel
       */
       struct NormalContactModel{
          typedef NormalContactModel type;
@@ -23,10 +23,10 @@
          static const int nDOFFriction = 0;
       };
 
-    
-      /* 
+
+      /*
       * @brief This is the friction model for a unilateral contact with spatial coulomb friction.
-      * Abreviations : NCFContactModel
+      * Abreviations : NCF_ContactModel
       */
       struct NormalAndCoulombFrictionContactModel{
          typedef NormalAndCoulombFrictionContactModel type;
@@ -34,12 +34,12 @@
          static const int nDOFFriction = 2;
          static const int nFrictionParams = 1; // mu
       };
-     
-    
+
+
 
       /**
       * @brief This is the friction model for a unilateral contact with Coulombe-Contensou friction.
-      * Abreviations : NCCFContactModel
+      * Abreviations : NCCF_ContactModel
       */
       struct NormalAndCoulombeContensouFrictionContactModel{
          typedef NormalAndCoulombeContensouFrictionContactModel type;
@@ -47,12 +47,13 @@
          static const int nDOFFriction = 3;
          static const int nFrictionParams = 2; // mu, r (?)
       };
-     
-    
+
+
       enum ContactModelEnum {
-         NContactModel = 0,
-         NCFContactModel = 1,
-         NCCFContactModel = 2
+         N_ContactModel = 0,
+         NCF_ContactModel = 1,
+         NCCF_ContactModel = 2,
+         B_ContactModel = 3, // Billateral Contact Model (not used yet)
       };
 
 

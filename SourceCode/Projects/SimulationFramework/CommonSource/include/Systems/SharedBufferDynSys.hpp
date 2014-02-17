@@ -21,16 +21,16 @@ public:
 	SharedBufferDynSys(unsigned int nSimBodies):
         StatePoolVisBackFront(nSimBodies)
     {
-            reset();
+            //reset();
     };
 
 	~SharedBufferDynSys(){
       DECONSTRUCTOR_MESSAGE
     };
 
-	void reset(){
-        this->resetStatePool();
-    };
+//	void reset(){
+//        this->resetStatePool();
+//    };
 
 private:
 

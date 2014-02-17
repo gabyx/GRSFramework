@@ -23,15 +23,15 @@ public:
     //Static and Dynamic allocation of the matrices in the class
     SharedBufferPlayback(unsigned int nSimBodies):
         StateRingPoolVisBackFront(nSimBodies) {
-        reset();
+        //reset();
     };
     ~SharedBufferPlayback() {
         DECONSTRUCTOR_MESSAGE
     };
 
-    void	reset() {
-        StateRingPoolVisBackFront::resetStateRingPool();
-    };
+//    void	reset() {
+//        StateRingPoolVisBackFront::resetStateRingPool();
+//    };
 
 private:
 

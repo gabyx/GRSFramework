@@ -102,7 +102,7 @@ private:
   boost::shared_ptr< PlaybackLoader<StateRingPoolVisBackFront > > m_pFileLoader;
 
 
-  const unsigned int m_nDofuObj, m_nDofqObj; // These are the dimensions for one Obj
+  const unsigned int m_nDofuBody, m_nDofqBody; // These are the dimensions for one Obj
   unsigned int m_nSimBodies;
   double m_lengthScale;
   Ogre::SceneNode * m_pBaseNode;

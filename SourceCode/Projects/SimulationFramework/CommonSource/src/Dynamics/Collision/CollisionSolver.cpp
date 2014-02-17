@@ -56,10 +56,10 @@ CollisionSolver::getCollisionSetRef()
 void CollisionSolver::solveCollision() {
 
 
-    clearCollisionSet();
+    reset();
 
 #if CoutLevelSolver>1
-    LOG(m_pSolverLog, " % -> solveCollision(): "<<std::endl;)
+    LOG(m_pSolverLog, "---> solveCollision(): "<<std::endl;)
 #endif
 
 
@@ -67,24 +67,25 @@ void CollisionSolver::solveCollision() {
     // All objects have been updated...
 
     //// Do simple collision detection (SimBodies to SimBodies)
-    typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyIti;
     CollisionData * pColData;
-//    for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
-//        typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
-//        bodyItj++;
-//        for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
-//
-//            //check for a collision
-//            m_Collider.checkCollision((*bodyIti), (*bodyItj));
-//
-//        }
-//    }
+
+    if(m_SimBodies.size()){
+        for(auto bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
+            typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
+            bodyItj++;
+            for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
+
+                //check for a collision
+                m_Collider.checkCollision((*bodyIti), (*bodyItj));
+
+            }
+        }
+    }
 
 
     // Do simple collision detection (SimBodies to Bodies)
-    typename DynamicsSystemType::RigidBodyNotAniContainer::iterator bodyItk;
-    for(bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
-        for(bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++) {
+    for(auto bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
+        for(auto bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++) {
 
                 //check for a collision and signal
                 m_Collider.checkCollision((*bodyIti), (*bodyItk));
@@ -105,6 +106,12 @@ std::string CollisionSolver::getIterationStats() {
     return s.str();
 }
 
+std::string CollisionSolver::getStatsHeader() {
+    std::stringstream s;
+    s << "MaxOverlap [m]";
+    return s.str();
+}
+
 void CollisionSolver::signalContactAdd() {
 
     if(m_collisionSet.size()!=0){
@@ -115,7 +122,7 @@ void CollisionSolver::signalContactAdd() {
                       std::abs((*colDataIt)->m_cFrame.m_e_y.dot((*colDataIt)->m_cFrame.m_e_z))< 1e-3, "Vectors not orthogonal");
 
             #if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"Contact Frame: n: " << (*colDataIt)->m_cFrame.m_e_z.transpose() << std::endl;)
+                LOG(m_pSolverLog,"---> Contact Frame: n: " << (*colDataIt)->m_cFrame.m_e_z.transpose() << std::endl;)
             #endif
 
             //Set contact frame point

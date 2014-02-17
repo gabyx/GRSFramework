@@ -1,39 +1,49 @@
 
 #include "DynamicsSystemMPI.hpp"
 
+#include "AddGyroTermVisitor.hpp"
 #include "VectorToSkewMatrix.hpp"
-
+#include "CommonFunctions.hpp"
+#include "RigidBodyFunctions.hpp"
 
 DynamicsSystem::~DynamicsSystem() {
     DECONSTRUCTOR_MESSAGE
 
     // Delete all RigidBodys
-    m_SimBodies.removeAndDeleteAllBodies();
-    m_RemoteSimBodies.removeAndDeleteAllBodies();
-    m_Bodies.removeAndDeleteAllBodies();
+    m_SimBodies.deleteAllBodies();
+    m_RemoteSimBodies.deleteAllBodies();
+    m_Bodies.deleteAllBodies();
 
 };
 
 
-void DynamicsSystem::getSettings(RecorderSettings & SettingsRecorder) const{
-    SettingsRecorder = m_SettingsRecorder;
+void DynamicsSystem::getSettings(RecorderSettings & settingsRecorder) const {
+    settingsRecorder = m_SettingsRecorder;
 }
-
-
-void DynamicsSystem::setSettings(const RecorderSettings & SettingsRecorder){
-    m_SettingsRecorder = SettingsRecorder;
+void DynamicsSystem::setSettings(const RecorderSettings & settingsRecorder) {
+    m_SettingsRecorder = settingsRecorder;
 }
-
-
-void DynamicsSystem::getSettings(TimeStepperSettings &SettingsTimestepper, InclusionSolverSettings &SettingsInclusionSolver) {
-    SettingsTimestepper = m_SettingsTimestepper;
-    SettingsInclusionSolver = m_SettingsInclusionSolver;
+void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper) const {
+    settingsTimestepper = m_SettingsTimestepper;
 }
-
-
-void DynamicsSystem::setSettings(const TimeStepperSettings &SettingsTimestepper, const InclusionSolverSettings &SettingsInclusionSolver) {
-    m_SettingsTimestepper = SettingsTimestepper;
-    m_SettingsInclusionSolver = SettingsInclusionSolver;
+void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper){
+    m_SettingsTimestepper = settingsTimestepper;
+}
+void DynamicsSystem::getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const {
+    settingsInclusionSolver = m_SettingsInclusionSolver;
+}
+void DynamicsSystem::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
+    m_SettingsInclusionSolver = settingsInclusionSolver;
+}
+void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper,
+                                 InclusionSolverSettingsType &settingsInclusionSolver) const {
+    settingsTimestepper = m_SettingsTimestepper;
+    settingsInclusionSolver = m_SettingsInclusionSolver;
+}
+void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper,
+                                 const InclusionSolverSettingsType &settingsInclusionSolver) {
+    m_SettingsTimestepper = settingsTimestepper;
+    m_SettingsInclusionSolver = settingsInclusionSolver;
 }
 
 
@@ -52,7 +62,9 @@ void DynamicsSystem::reset(){
 
 void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
     using namespace std;
-
+     #if CoutLevelSolver>1
+    LOG(m_pSolverLog, "---> doFirstHalfTimeStep(): "<<std::endl;)
+    #endif
     static Matrix43 F_i = Matrix43::Zero();
 
      m_externalForces.setTime(ts+timestep);
@@ -64,9 +76,10 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
         RigidBodyType * pBody = (*bodyIt);
 
 #if CoutLevelSolver>2
-        LOG(m_pSolverLog, "Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
-            << "m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
-            << "m_q_s= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
+        LOG(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody)<< std::endl
+            << "\t\t--->m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
+            << "\t\t--->m_q_s= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl
+            << "\t\t--->m_u_s= "  <<pBody->m_pSolverData->m_uBuffer.m_back.transpose()<<std::endl;)
 #endif
         // Update time:
         pBody->m_pSolverData->m_t = ts + timestep;
@@ -78,13 +91,17 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_back.head<3>();
         pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_back.tail<3>();
 
+        //Normalize Quaternion
+        pBody->m_q_KI.normalize();
+
         // Update Transformation A_IK
         setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
 
         // Add in to h-Term ==========
         pBody->m_h_term = pBody->m_h_term_const;
-//        LOG(m_pSolverLog, "Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
-//            << "m_h_term= "  <<pBody->m_h_term<<std::endl)
+        LOG(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
+            << "\t\t--->m_h_term= "  <<pBody->m_h_term.transpose()<<std::endl
+            << "\t\t--->m_MassMatrixInv_diag= "  <<pBody->m_MassMatrixInv_diag.transpose()<<std::endl)
         // =========================
 
         // Term omega x Theta * omega = if Theta is diagonal : for a Spehere for example!
@@ -99,9 +116,9 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 
 
 #if CoutLevelSolver>2
-        LOG(m_pSolverLog, "Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
-            << "m_t= "  << pBody->m_pSolverData->m_t<<std::endl
-            << "m_q_m= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
+        LOG(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody)<< std::endl
+            << "\t\t--->m_t= "  << pBody->m_pSolverData->m_t<<std::endl
+            << "\t\t--->m_q_m= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
 #endif
     }
 
@@ -110,7 +127,9 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 
 void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
     using namespace std;
-
+     #if CoutLevelSolver>1
+    LOG(m_pSolverLog, "---> doSecondHalfTimeStep(): "<<std::endl;)
+    #endif
     static Matrix43 F_i = Matrix43::Zero();
 
     m_CurrentStateEnergy = 0;
@@ -119,11 +138,7 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
-#if CoutLevelSolver>2
-        LOG(m_pSolverLog, "Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
-            << "m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
-            << "m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
-#endif
+
         // Update time:
         pBody->m_pSolverData->m_t = te;
 
@@ -137,6 +152,14 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
         //Normalize Quaternion
         pBody->m_q_KI.normalize();
 
+#if CoutLevelSolver>2
+        LOG(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
+            << "\t\t--->m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
+            << "\t\t--->m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl
+            << "\t\t--->m_u_e= "  <<pBody->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl
+            << "\t\t--->m_h_term= "  <<pBody->m_h_term.transpose()<<std::endl
+            << "\t\t--->m_MassMatrixInv_diag= "  <<pBody->m_MassMatrixInv_diag.transpose()<<std::endl)
+#endif
 
 #if OUTPUT_SYSTEMDATA_FILE == 1
         // Calculate Energy
@@ -144,7 +167,8 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
         m_CurrentStateEnergy -= +  pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir ;
 #endif
 
-        // Swap uBuffer and reset Front
+        // Very  important here:
+        // Swap uBuffer and reset Front to zero
         pBody->m_pSolverData->swapBuffer();
         pBody->m_pSolverData->reset();
 
@@ -165,15 +189,9 @@ void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
 void DynamicsSystem::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
+
+    Vector3 gravity = m_gravity * m_gravityDir;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
-
-        //Mass Matrix
-        (*bodyIt)->m_MassMatrix_diag.head<3>().setConstant((*bodyIt)->m_mass);
-        (*bodyIt)->m_MassMatrix_diag.tail<3>() = (*bodyIt)->m_K_Theta_S;
-
-        // Massmatrix Inverse
-        (*bodyIt)->m_MassMatrixInv_diag = (*bodyIt)->m_MassMatrix_diag.array().inverse().matrix();
-        // H_const term
-        (*bodyIt)->m_h_term_const.head<3>() =  (*bodyIt)->m_mass * m_gravity * m_gravityDir;
+        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt, gravity);
     }
 }

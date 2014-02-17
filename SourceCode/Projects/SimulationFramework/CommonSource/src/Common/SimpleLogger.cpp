@@ -1,9 +1,5 @@
 #include "SimpleLogger.hpp"
 
-#include "AssertionDebug.hpp"
-
-#include "LogDefines.hpp"
-
 
 using namespace Logging;
 

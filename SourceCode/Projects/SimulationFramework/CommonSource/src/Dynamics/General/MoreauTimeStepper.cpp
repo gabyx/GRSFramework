@@ -15,10 +15,8 @@ _________________________________________________________*/
 
 
 
-MoreauTimeStepper::MoreauTimeStepper(const unsigned int nSimBodies, boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState):
-    m_state_m(nSimBodies),
-    m_nSimBodies(nSimBodies),
-    m_ReferenceSimFile(NDOFqObj,NDOFuObj)
+MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState):
+    m_ReferenceSimFile(NDOFqBody,NDOFuBody)
 {
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
@@ -110,6 +108,7 @@ void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, c
 #if OUTPUT_SYSTEMDATA_FILE == 1
     m_SystemDataFile.close();
     m_SystemDataFile.open(m_SystemDataFilePath, std::ios_base::app | std::ios_base::out);
+    writeHeaderToSystemDataFile();
     m_SystemDataFile.clear();
 #endif
 
@@ -129,12 +128,13 @@ void MoreauTimeStepper::reset() {
     m_bIterationFinished = false;
 
     m_pSimulationLog->logMessage("---> Reset StatePool...");
-    m_pStatePool->resetStatePool(); // Sets initial values to front and back;
+
+    m_pStatePool->resetStatePool(m_pDynSys->m_simBodiesInitStates); // Sets initial values to front and back;
     m_StateBuffers = m_pStatePool->getFrontBackBuffer();
 
     m_pSimulationLog->logMessage("---> Reset DynamicsSystem...");
     m_pDynSys->reset();
-    m_pDynSys->getSettings(m_Settings, m_pInclusionSolver->m_Settings);
+    m_pDynSys->getSettings(m_Settings);
 
     m_pSimulationLog->logMessage("---> Reset CollisionSolver...");
     m_pCollisionSolver->reset();
@@ -142,9 +142,9 @@ void MoreauTimeStepper::reset() {
     m_pSimulationLog->logMessage("---> Reset InclusionSolver...");
     m_pInclusionSolver->reset();
 
-     if(m_Settings.m_eSimulateFromReference != TimeStepperSettings::NONE) {
+    if(m_Settings.m_eSimulateFromReference != TimeStepperSettings::NONE) {
 
-        if(!m_ReferenceSimFile.openRead(m_Settings.m_simStateReferenceFile,m_nSimBodies,true)) {
+        if(!m_ReferenceSimFile.openRead(m_Settings.m_simStateReferenceFile,m_pDynSys->m_SimBodies.size(),true)) {
             std::stringstream error;
             error << "Could not open file: " << m_Settings.m_simStateReferenceFile.string()<<std::endl;
             error << "File errors: " <<std::endl<< m_ReferenceSimFile.getErrorString();
@@ -157,29 +157,31 @@ void MoreauTimeStepper::reset() {
             //Inject the end state into the front buffer
             m_ReferenceSimFile.getEndState(*m_StateBuffers.m_pFront);
             LOG(m_pSimulationLog,"---> Injected first state of Reference SimFile into StateBuffer"<<std::endl);
+            m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
         }
 
+    }else{
+        // Apply all init states to the bodies!
+        m_pDynSys->applyInitStatesToBodies();
     }
 
     //m_ReferenceSimFile.writeOutAllStateTimes();
 
-    //Write the Front buffer which contains the initial values to all bodies!
-    m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
+    m_currentSimulationTime = m_Settings.m_startTime;
+    m_StateBuffers.m_pFront->m_t= m_currentSimulationTime;
 
     m_AvgTimeForOneIteration = 0;
     m_MaxTimeForOneIteration = 0;
 
     m_bFinished = false;
+
+    m_PerformanceTimer.stop();
+    m_PerformanceTimer.start();
 };
 
 
-double MoreauTimeStepper::getTimeCurrent() {
-    if(!m_bIterationFinished){
-        return m_StateBuffers.m_pBack->m_t;
-    }
-    else{
-        return m_StateBuffers.m_pFront->m_t;
-    }
+MoreauTimeStepper::PREC MoreauTimeStepper::getTimeCurrent() {
+    return m_currentSimulationTime;
 }
 
 
@@ -208,16 +210,17 @@ void MoreauTimeStepper::doOneIteration() {
     static int iterations=0; // Average is reset after 1000 Iterations
 
 #if CoutLevelSolver>1
-    LOG(m_pSolverLog, "% Do one time-step =================================" <<std::endl;);
+    LOG(m_pSolverLog, "---> Do one time-step =================================" <<std::endl;);
 #endif
 
     m_bIterationFinished = false;
 
-    m_PerformanceTimer.stop();
-    m_PerformanceTimer.start();
-
     iterations++;
     m_IterationCounter++;
+
+    m_startTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+
+
 
     //Force switch
     //boost::thread::yield();
@@ -233,23 +236,27 @@ void MoreauTimeStepper::doOneIteration() {
     swapStateBuffers();
 
 #if CoutLevelSolver==1
-      if(m_IterationCounter % (unsigned int)(m_Settings.m_endTime/m_Settings.m_deltaT / 10) == 1){
-            LOG(m_pSolverLog,"% m_t: " << m_StateBuffers.m_pBack->m_t<<std::endl; );
+      if(m_IterationCounter % (unsigned int)((m_Settings.m_endTime-m_Settings.m_startTime)/m_Settings.m_deltaT / 10) == 1){
+            LOG(m_pSolverLog,"--->  m_t: " << m_currentSimulationTime<<std::endl; );
       }
 #endif
 
 #if CoutLevelSolver>2
-      LOG(m_pSolverLog,"m_t Begin: " << m_StateBuffers.m_pBack->m_t<<std::endl; );
+      LOG(m_pSolverLog,"---> m_tB: " << m_currentSimulationTime <<std::endl; );
 #endif
 
 
     //Calculate Midpoint Rule ============================================================
     // Middle Time Step ==================================================================
-    m_pDynSys->doFirstHalfTimeStep(m_StateBuffers.m_pBack->m_t, m_Settings.m_deltaT/2.0);
+
+    m_startSimulationTime = m_currentSimulationTime;
+    m_pDynSys->doFirstHalfTimeStep(m_startSimulationTime, m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs
     m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Calculations after first timestep
     m_pDynSys->afterFirstTimeStep();
+
+    m_currentSimulationTime = m_startSimulationTime + m_Settings.m_deltaT/2.0;
     // ====================================================================================
 
     m_pInclusionSolver->resetForNextIter(); // Clears the contact graph!
@@ -272,8 +279,9 @@ void MoreauTimeStepper::doOneIteration() {
     // ===================================================================================
 
     // Middle Time Step ==================================================================
-    m_StateBuffers.m_pFront->m_t= m_StateBuffers.m_pBack->m_t + m_Settings.m_deltaT;
-    m_pDynSys->doSecondHalfTimeStep(m_StateBuffers.m_pFront->m_t, m_Settings.m_deltaT/2.0);
+    m_currentSimulationTime = m_startSimulationTime + m_Settings.m_deltaT ;
+
+    m_pDynSys->doSecondHalfTimeStep(m_currentSimulationTime, m_Settings.m_deltaT/2.0);
     // Custom Integration for Inputs
     m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
     // Custom Calculations after second timestep
@@ -282,15 +290,18 @@ void MoreauTimeStepper::doOneIteration() {
 
 
     // Apply all rigid body local states to the Front buffer and set the time!
+    m_StateBuffers.m_pFront->m_t= m_currentSimulationTime;
     m_pDynSys->applySimBodiesToDynamicsState(*m_StateBuffers.m_pFront);
 
 
 #if CoutLevelSolver>2
-      LOG(m_pSolverLog,"m_t End: " << m_StateBuffers.m_pFront->m_t<<std::endl );
+      LOG(m_pSolverLog,"---> m_tE: " << m_currentSimulationTime <<std::endl );
 #endif
 
     //Force switch
     //boost::thread::yield();
+
+    m_endTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
 
 
     // Measure Time again
@@ -298,14 +309,14 @@ void MoreauTimeStepper::doOneIteration() {
         m_AvgTimeForOneIteration=0;
         iterations = 1;
     }
-    m_AvgTimeForOneIteration = ( ((double)m_PerformanceTimer.elapsed().wall)*1e-9  + m_AvgTimeForOneIteration*(iterations-1)) / iterations;
+    m_AvgTimeForOneIteration =  ( (m_endTime-m_startTime) + m_AvgTimeForOneIteration*(iterations-1)) / iterations;
     if (m_AvgTimeForOneIteration > m_MaxTimeForOneIteration) {
         m_MaxTimeForOneIteration = m_AvgTimeForOneIteration;
     }
 
 #if CoutLevelSolver>0
-    //LOG( m_pSolverLog,  "% Iteration Time: "<<std::setprecision(5)<<(double)(m_endTime-m_startTime)<<std::endl
-    // <<  "% End time-step ====================================" <<std::endl<<std::endl; );
+    LOG( m_pSolverLog,  "---> Iteration Time: "<<std::setprecision(5)<<(m_endTime-m_startTime)<<std::endl
+     <<  "---> End time-step ====================================" <<std::endl<<std::endl; );
 #endif
 
     // Check if we can finish the timestepping!
@@ -322,3 +333,6 @@ void MoreauTimeStepper::doOneIteration() {
 void MoreauTimeStepper::swapStateBuffers() {
     m_StateBuffers = m_pStatePool->swapFrontBackBuffer();
 }
+
+
+

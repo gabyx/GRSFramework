@@ -43,10 +43,10 @@
 #define SIM_FOLDER_PREFIX_INIT "SimDataInitialState_"             ///< Prefix for the folder where the inital states are written, press Key I!
 #define SIM_INIT_FILE_EXTENSION ".sim"                              ///< File extension for .siminit file.
 #define SIM_INIT_FILE_PREFIX "InitialState"                      ///< The name for the Initial state file!
-#define SIM_FILE_PREFIX "SimulationState"                              ///< Prefix for the .sim file.
+#define SIM_FILE_PREFIX "SimState"                              ///< Prefix for the .sim file.
 #define SOLVER_LOG_FILE_PREFIX "SolverLog"                       ///< Prefix for the solver log file.
 #define COLLISION_DATA_FILE_PREFIX "CollisionData"               ///< Prefix for the collision data file.
-#define SYSTEM_DATA_FILE_PREFIX "SimulationData"                     ///< Prefix for the system data file.
+#define SYSTEM_DATA_FILE_PREFIX "SimData"                     ///< Prefix for the system data file.
 /* @} */
 
 

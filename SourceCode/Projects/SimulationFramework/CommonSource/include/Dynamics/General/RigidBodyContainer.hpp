@@ -41,11 +41,11 @@ public:
             >, // this index represents insertion order
             boost::multi_index::hashed_unique<
                 boost::multi_index::tag<by_hashed_id>,
-                boost::multi_index::member<RigidBodyType, const RigidBodyIdType, &RigidBodyType::m_id>
+                boost::multi_index::member<RigidBodyType::AbsoluteBaseType, const RigidBodyIdType, &RigidBodyType::AbsoluteBaseType::m_id>
             >,
             boost::multi_index::ordered_unique<
                 boost::multi_index::tag<by_ordered_id>,
-                boost::multi_index::member<RigidBodyType, const RigidBodyIdType, &RigidBodyType::m_id>
+                boost::multi_index::member<RigidBodyType::AbsoluteBaseType, const RigidBodyIdType, &RigidBodyType::AbsoluteBaseType::m_id>
             >
         >
     > MapType;
@@ -87,23 +87,47 @@ public:
     const_iterator begin() const {return m_mapByInsertion.begin();}
     const_iterator end() const {return m_mapByInsertion.end();}
 
+    template<typename Iterator>
+    bool addBodies(Iterator beginIt, Iterator endIt){
+        for( auto it = beginIt; it!= endIt; it++){
+           auto res =  m_mapByHashedId.insert(*it);
+           if( res.second == false){
+                return false;
+           }
+        }
+        return true;
+    }
 
-    bool addBody(RigidBodyType* ptr){
+    /** Similiar to std::map::insert*/
+    inline bool addBody(RigidBodyType* ptr){
+        ASSERTMSG(ptr != nullptr, "Null pointer added!")
         std::pair<typename MapByHashedIdType::iterator,bool> res=  m_mapByHashedId.insert(ptr);
         return res.second;
     }
 
-    bool removeBody(RigidBodyType* ptr){
-        return m_mapByHashedId.erase(ptr->m_id);
+    /** Similiar to std::map::erase, does not delete the pointer*/
+    inline bool removeBody(RigidBodyType* ptr){
+        return m_mapByHashedId.erase(ptr->m_id); // Returns size_type integer
     }
 
-    bool removeAndDeleteBody(RigidBodyType* ptr){
-        return removeAndDeleteBody(ptr->m_id);
+    /** Similiar to std::map::erase, but also deletes the underlying body*/
+    iterator deleteBody(iterator it){
+        if(it != this->end()){
+            ASSERTMSG(*it != nullptr, " Pointer in map is null!")
+            delete *it; // Delete body!
+            it = m_mapByInsertion.erase(it);
+        }
+        return it;
     }
 
-    bool removeAndDeleteBody(RigidBodyIdType const & id){
+    bool deleteBody(RigidBodyType* ptr){
+        return deleteBody(ptr->m_id);
+    }
+
+    bool deleteBody(RigidBodyIdType const & id){
         typename MapByHashedIdType::iterator it = m_mapByHashedId.find(id);
         if(it != m_mapByHashedId.end()){
+            ASSERTMSG(*it != nullptr, " Pointer in map is null!")
             delete *it; // Delete body!
             m_mapByHashedId.erase(it);
             return true;
@@ -111,25 +135,28 @@ public:
         return false;
     }
 
-    bool removeAndDeleteAllBodies(){
+
+    inline bool deleteAllBodies(){
         iterator it;
         for(it = begin(); it != end(); it++){
+            ASSERTMSG(*it != nullptr, " Pointer in map is null!")
             delete (*it);
         }
         m_map.clear();
         return true;
     }
 
-    iterator find(RigidBodyIdType id){
+    inline iterator find(RigidBodyIdType id){
         typename MapByHashedIdType::iterator it = m_mapByHashedId.find(id);
         return m_map.project<by_insertion>(it);
     }
-    iterator find(RigidBodyType * body){
+
+    inline iterator find(RigidBodyType * body){
         typename MapByHashedIdType::iterator it = m_mapByHashedId.find(body->m_id);
         return m_map.project<by_insertion>(it);
     }
 
-    void clear(){
+    inline void clear(){
         m_map.clear();
     }
 
@@ -144,8 +171,8 @@ public:
 //public:
 //    RigidBodyWrapperIterator(TIterator & it): m_bodyIt(it){};
 //
-//    typename TRigidBody::VectorQObj get_q();
-//    typename TRigidBody::VectorUObj get_u();
+//    typename TRigidBody::VectorQBody get_q();
+//    typename TRigidBody::VectorUBody get_u();
 //
 //    TIterator & m_bodyIt;
 //};

@@ -24,57 +24,13 @@
 
 #include "QuaternionHelpers.hpp"
 
+#include RigidBodySolverData_INCLUDE_FILE
+
 /**
 * @ingroup DynamicsGeneral
 * @brief This is the RigidBody class, which describes a rigid body.
 */
 /** @{ */
-
-class RigidBodySolverData{
-    public:
-
-        DEFINE_LAYOUT_CONFIG_TYPES
-
-        RigidBodySolverData(): m_t(0){};
-
-        ///< The actual time, which belongs to FrontBuffer and m_r_S and I_q_IK
-        PREC m_t;
-};
-
-
-
-/** Class with  Data Structure for the Solver! */
-class RigidBodySolverDataCONoG : public RigidBodySolverData {
-
-    public:
-    DEFINE_LAYOUT_CONFIG_TYPES
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-
-    RigidBodySolverDataCONoG(): m_bInContactGraph(false){
-        m_uBuffer.m_front.setZero();
-        m_uBuffer.m_back.setZero();
-    };
-
-    ///< Get the actual velocity
-
-    ///< Flag which determines if this body is in the contact graph!
-    bool m_bInContactGraph;
-
-    ///< Pointers into the right Front BackBuffer for the velocity which get iteratet in the InclusionSolverCONoG
-    ///< The back buffer is the velocity before the prox iteration (over all nodes)
-    ///< The front buffer is the velocity which is used to during ONE prox iteration
-    FrontBackBuffer<VectorUObj,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> m_uBuffer;
-
-    void swapBuffer(){
-        m_uBuffer.m_front.swap(m_uBuffer.m_back);
-    }
-
-    void reset(){
-        m_uBuffer.m_front.setZero();
-        m_bInContactGraph = false;
-    };
-
-};
 
 class RigidBodyBase{
 public:
@@ -82,10 +38,13 @@ public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    enum BodyState{
-     SIMULATED,
-     ANIMATED,
-     NOT_SIMULATED
+    typedef RigidBodyBase AbsoluteBaseType; ///< The absolut base type where m_id is defined, for the rigid body container
+
+    enum class BodyState: char {
+     SIMULATED = 0,
+     STATIC = 1,
+     ANIMATED = 2,
+     NSTATES=3 // Just to have the number of how many states are defined!
     }; ///< Emuration which defines if the object is simulated, animated or not simulated (which means fixed, and does not take part in the dynamics).
 
     typedef unsigned int BodyMaterialType;
@@ -101,19 +60,19 @@ public:
 
     GeometryType m_geometry; ///< A boost::variant which takes different geometry shared pointers.
 
-    VectorUObj get_u(){
+    VectorUBody get_u(){
         return m_pSolverData->m_uBuffer.m_back;
     }
-    VectorQObj get_q(){
-        VectorQObj r; r.head<3>() = m_r_S; r.tail<4>() = m_q_KI; return r;
+    VectorQBody get_q(){
+        VectorQBody r; r.head<3>() = m_r_S; r.tail<4>() = m_q_KI; return r;
     }
 
     PREC m_mass; ///< The rigid body mass \f$m\f$ in \f$ \textrm{[kg]} \f$
     Vector3 m_K_Theta_S; ///< The rigid body inertia tensor in diagonal form, \f$ {_K}\mathbf{\Theta}_{S}\f$ in \f$ [\textrm{kg} \cdot \textrm{m}^2] \f$
 
-    VectorUObj m_MassMatrix_diag; ///< The mass matrix which is diagonal, \f$ \textrm{diag}(m,m,m, \textrm{diag}({_K}\mathbf{\Theta}_{S})) \f$.
-    VectorUObj m_MassMatrixInv_diag;
-    VectorUObj m_h_term, m_h_term_const;
+    VectorUBody m_MassMatrix_diag; ///< The mass matrix which is diagonal, \f$ \textrm{diag}(m,m,m, \textrm{diag}({_K}\mathbf{\Theta}_{S})) \f$.
+    VectorUBody m_MassMatrixInv_diag;
+    VectorUBody m_h_term, m_h_term_const;
 
     Matrix33 m_A_IK; ///< The transformation matrix \f$ \mathbf{A}_{IK} \f$ from K frame to the I frame which is updated at each timestep.
 
@@ -146,7 +105,7 @@ public:
         setQuaternionZero(m_q_KI);
         m_h_term_const.setZero();
         m_h_term.setZero();
-        m_eState = NOT_SIMULATED;
+        m_eState = BodyState::STATIC;
         m_eMaterial = 0;
         m_pSolverData = NULL;
         m_globalGeomId = 0;
@@ -156,7 +115,11 @@ public:
         //DECONSTRUCTOR_MESSAGE
         if(m_pSolverData){delete m_pSolverData; m_pSolverData = NULL;}
     };
+
 };
+
+
+
 
   /** @} */
 

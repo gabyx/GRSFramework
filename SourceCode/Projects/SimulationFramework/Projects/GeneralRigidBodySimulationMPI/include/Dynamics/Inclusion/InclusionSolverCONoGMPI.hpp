@@ -6,33 +6,31 @@
 #include <fstream>
 
 
+#include <boost/timer/timer.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "AssertionDebug.hpp"
 
 #include "TypeDefs.hpp"
+#include "LogDefines.hpp"
+
 
 #include CollisionSolver_INCLUDE_FILE
-#include "PercussionPool.hpp"
-#include "MatrixHelpers.hpp"
-#include "VectorToSkewMatrix.hpp"
-#include "ProxFunctions.hpp"
-#include "InclusionSolverSettings.hpp"
-#include "ContactGraph.hpp"
+//#include "PercussionPool.hpp"
 
-#include "LogDefines.hpp"
-#include "ConfigureFile.hpp"
+#include InclusionSolverSettings_INCLUDE_FILE
 
 #include "SimpleLogger.hpp"
 
-#if HAVE_CUDA_SUPPORT == 1
-#include "JorProxGPUVariant.hpp"
-#include "SorProxGPUVariant.hpp"
-#endif
+#include "MPICommunication.hpp"
 
-#include <boost/timer/timer.hpp>
+#include "BodyCommunicator.hpp"
 
+#include "InclusionCommunicator.hpp"
+// those two include each other (forwarding)
+#include "ContactGraphMPI.hpp"
 
+#include "ContactGraphVisitorsMPI.hpp"
 
 /**
 * @ingroup Inclusion
@@ -46,47 +44,82 @@ public:
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    InclusionSolverCONoG(boost::shared_ptr<CollisionSolverType >  pCollisionSolver, boost::shared_ptr<DynamicsSystemType> pDynSys);
+    typedef typename MPILayer::ProcessCommunicator                                      ProcessCommunicatorType;
+    typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
+    typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
+
+    InclusionSolverCONoG(boost::shared_ptr< BodyCommunicator >  pBodyComm,
+                         boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
+                         boost::shared_ptr< DynamicsSystemType> pDynSys,
+                         boost::shared_ptr< ProcessCommunicatorType > pProcCom);
     ~InclusionSolverCONoG();
 
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
     void reset();
     void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
-    void solveInclusionProblem();
+    void solveInclusionProblem(PREC currentSimulationTime);
 
 
     std::string getIterationStats();
-    unsigned int m_iterationsNeeded;
+    std::string getStatsHeader();
+    PREC m_currentSimulationTime;
+    unsigned int m_globalIterationCounter;
     bool m_bConverged;
     unsigned int m_isFinite;
     unsigned int m_nContacts;
+    unsigned int m_nContactsLocal;
+    unsigned int m_nContactsRemote;
+    unsigned int m_nSplitBodyNodes;
+
     bool m_bUsedGPU;
     double m_timeProx, m_proxIterationTime;
 
 
-
-    PercussionPool m_PercussionPool;
-
-//    void reservePercussionPoolSpace(unsigned int nExpectedContacts);
-//    void readFromPercussionPool(unsigned int index, const CollisionData * pCollData, VectorDyn & P_old);
-//    void updatePercussionPool(const VectorDyn & P_old ) ;
-
-    InclusionSolverSettings m_Settings;
+    InclusionSolverSettingsType m_Settings;
 
 
 protected:
 
+    //MPI Stuff
+    boost::shared_ptr< ProcessCommunicatorType > m_pProcComm;
+    boost::shared_ptr< ProcessInfoType > m_pProcInfo;
+    const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
 
     unsigned int m_nExpectedContacts;
 
     boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
 
-    typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyNotAniContainer & m_Bodies;
+    boost::shared_ptr<BodyCommunicator>  m_pBodyComm;
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
-    ContactGraphType m_ContactGraph;
+
+    /** Circulare template dependency of InclusionCommunicator and ContactGraph
+    *   Can be solved with this combo trait class :-)
+    *    struct ComboIncGraph {
+    *        typedef InclusionCommunicator<ComboIncGraph> InclusionCommunicatorType;
+    *        typedef ContactGraph<ComboIncGraph> ContactGraphType;
+    *    };
+    *    Nevertheless, we avoided this here
+    */
+
+    struct Combo{
+        typedef InclusionCommunicator<Combo> InclusionCommunicatorType;
+        typedef ContactGraph<Combo> ContactGraphType;
+    };
+
+
+    typedef Combo::InclusionCommunicatorType InclusionCommunicatorType;
+    boost::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
+
+    typedef Combo::ContactGraphType ContactGraphType;
+    boost::shared_ptr<ContactGraphType> m_pContactGraph;
+    /// =========================================================================
+
+
+
+
+    typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
+    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;
 
     void integrateAllBodyVelocities();
     void initContactGraphForIteration(PREC alpha);
@@ -95,12 +128,19 @@ protected:
 
     inline void doSorProx();
     inline void sorProxOverAllNodes();
-    SorProxStepNodeVisitor * m_pSorProxStepNodeVisitor;
-    SorProxInitNodeVisitor * m_pSorProxInitNodeVisitor;
+    inline void finalizeSorProx();
+
+    SorProxStepNodeVisitor<ContactGraphType> * m_pSorProxStepNodeVisitor;
+    SorProxInitNodeVisitor<ContactGraphType> * m_pSorProxInitNodeVisitor;
+    SorProxStepSplitNodeVisitor<ContactGraphType> * m_pSorProxStepSplitNodeVisitor;
 
     // Log
     Logging::Log *m_pSolverLog, *m_pSimulationLog;
     std::stringstream logstream;
+
+
+
+
 };
 
 

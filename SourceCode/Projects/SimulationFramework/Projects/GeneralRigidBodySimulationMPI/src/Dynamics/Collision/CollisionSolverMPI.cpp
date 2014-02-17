@@ -53,44 +53,47 @@ CollisionSolver::getCollisionSetRef()
 void CollisionSolver::solveCollision() {
 
 
-    clearCollisionSet();
+    reset();
 
 #if CoutLevelSolver>1
-    LOG(m_pSolverLog, " % -> solveCollision(): "<<std::endl;)
+    LOG(m_pSolverLog, "---> solveCollision(): "<<std::endl;)
 #endif
 
 
 
     // All objects have been updated...
 
-    //// Do simple collision detection (SimBodies to SimBodies)
-//    #if CoutLevelSolver>1
-//        LOG(m_pSolverLog, " \t\t -> SimBodies to SimBodies "<<std::endl;)
-//    #endif
-//    typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyIti;
-//    for(bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
-//        typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
-//        bodyItj++;
-//        for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
-//
-//            //check for a collision
-//            m_Collider.checkCollision((*bodyIti), (*bodyItj));
-//
-//        }
-//    }
+    // Do simple collision detection (SimBodies to SimBodies)
+    #if CoutLevelSolver>1
+        LOG(m_pSolverLog, "\t---> SimBodies to SimBodies "<<std::endl;)
+    #endif
+    if(m_SimBodies.size()){
+        for(auto bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
+            typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
+            bodyItj++;
+            for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
+
+                //check for a collision
+                m_Collider.checkCollision((*bodyIti), (*bodyItj));
+
+            }
+        }
+    }
 
     //// Do simple collision detection (SimBodies to RemoteSimBodies)
+    #if CoutLevelSolver>1
+        LOG(m_pSolverLog, "\t---> SimBodies to RemoteBodies "<<std::endl;)
+    #endif
+    for(auto bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
+        for(auto bodyItj = m_RemoteSimBodies.begin(); bodyItj != m_RemoteSimBodies.end(); bodyItj++ ) {
+            //check for a collision
+            m_Collider.checkCollision((*bodyIti), (*bodyItj));
 
-//    for(auto bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
-//        for(auto bodyItj = m_RemoteSimBodies.begin(); bodyItj != m_RemoteSimBodies.end(); bodyItj++ ) {
-//            //check for a collision
-//            m_Collider.checkCollision((*bodyIti), (*bodyItj));
-//
-//        }
-//    }
+        }
+    }
 
     #if CoutLevelSolver>1
-        LOG(m_pSolverLog, " \t -> SimBodies to Bodies "<<std::endl;)
+        LOG(m_pSolverLog, "\t---> SimBodies to Bodies "<<std::endl;)
     #endif
     // Do simple collision detection (SimBodies to Bodies)
     for(auto bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
@@ -101,7 +104,7 @@ void CollisionSolver::solveCollision() {
     }
 
     #if CoutLevelSolver>1
-        LOG(m_pSolverLog, " \t -> Collision done "<<std::endl;)
+        LOG(m_pSolverLog, "\t---> Collision done "<<std::endl;)
     #endif
 
     // Signal all found contact
@@ -115,6 +118,12 @@ std::string CollisionSolver::getIterationStats() {
     s << m_maxOverlap;
     return s.str();
 }
+std::string CollisionSolver::getStatsHeader() {
+    std::stringstream s;
+    s << "MaxOverlap [m]";
+    return s.str();
+}
+
 
 
 void CollisionSolver::signalContactAdd() {
@@ -126,7 +135,7 @@ void CollisionSolver::signalContactAdd() {
             ASSERTMSG( std::abs((*colDataIt)->m_cFrame.m_e_x.dot((*colDataIt)->m_cFrame.m_e_y)) < 1e-3 &&
                       std::abs((*colDataIt)->m_cFrame.m_e_y.dot((*colDataIt)->m_cFrame.m_e_z))< 1e-3, "Vectors not orthogonal");
 
-            LOG(m_pSolverLog,"Contact Frame: n: " << (*colDataIt)->m_cFrame.m_e_z << std::endl;)
+            LOG(m_pSolverLog,"---> Contact Frame: n: " << (*colDataIt)->m_cFrame.m_e_z.transpose() << std::endl;)
 
             //Set contact frame point
             (*colDataIt)->m_cFrame.m_p = (*colDataIt)->m_pBody1->m_r_S + (*colDataIt)->m_r_S1C1;

@@ -47,10 +47,10 @@
 #define SIM_FOLDER_PREFIX_RECORD "SimDataRECORDGUI_"                ///< Prefix for the simulation folder during record.
 #define SIM_FOLDER_PREFIX_INIT "SimDataInitialState_"             ///< Prefix for the folder where the inital states are written, press Key I!
 #define SIM_INIT_FILE_PREFIX "InitialState"                      ///< The name for the Initial state file!
-#define SIM_FILE_PREFIX "SimulationState"                              ///< Prefix for the .sim file.
+#define SIM_FILE_PREFIX "SimState"                              ///< Prefix for the .sim file.
 #define SOLVER_LOG_FILE_PREFIX "SolverLog"                       ///< Prefix for the solver log file.
 #define COLLISION_DATA_FILE_PREFIX "CollisionData"               ///< Prefix for the collision data file.
-#define SYSTEM_DATA_FILE_PREFIX "SimulationData"                     ///< Prefix for the system data file.
+#define SYSTEM_DATA_FILE_PREFIX "SimData"                     ///< Prefix for the system data file.
 /* @} */
 
 
@@ -71,9 +71,9 @@
   #define CoutLevelSolver 3            ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
   #define CoutLevelSolverWhenContact 3 ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
   #define LogToFileSolver 1            ///< {0,1} Determines if logstream is saved into a file.
-  #define LogToConsoleSolver 1         ///< {0,1} Determines if logstream is outputted into console.
+  #define LogToConsoleSolver 0         ///< {0,1} Determines if logstream is outputted into console.
 #else
-  #define CoutLevelSolver 1
+  #define CoutLevelSolver 0
   #define CoutLevelSolverWhenContact 0
   #define LogToFileSolver 1
   #define LogToConsoleSolver 0

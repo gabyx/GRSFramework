@@ -1,5 +1,8 @@
 #include "InclusionSolverCONoG.hpp"
 
+#include "MatrixHelpers.hpp"
+#include "VectorToSkewMatrix.hpp"
+#include "ProxFunctions.hpp"
 
 
 InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
@@ -23,12 +26,12 @@ InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverTyp
 
     m_nContacts = 0;
 
-    m_iterationsNeeded =0;
+    m_globalIterationCounter =0;
     m_bConverged = true;
     m_pDynSys = pDynSys;
 
     //Make a new Sor Prox Visitor (takes references from these class member)
-    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor(m_Settings,m_bConverged,m_iterationsNeeded);
+    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor(m_Settings,m_bConverged,m_globalIterationCounter);
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor();
 }
 
@@ -53,6 +56,8 @@ void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::fil
 
 void InclusionSolverCONoG::reset() {
 
+    m_pDynSys->getSettings(m_Settings);
+
     resetForNextIter();
 
 #if HAVE_CUDA_SUPPORT == 1
@@ -72,7 +77,7 @@ void InclusionSolverCONoG::reset() {
 void InclusionSolverCONoG::resetForNextIter() {
 
     m_nContacts = 0;
-    m_iterationsNeeded =0;
+    m_globalIterationCounter =0;
 
     m_bConverged = true;
 
@@ -84,15 +89,16 @@ void InclusionSolverCONoG::resetForNextIter() {
 void InclusionSolverCONoG::solveInclusionProblem() {
 
 #if CoutLevelSolver>1
-    LOG(m_pSolverLog,  " % -> solveInclusionProblem(): "<< std::endl;);
+    LOG(m_pSolverLog,  "---> solveInclusionProblem(): "<< std::endl;);
 #endif
+
 
     // Iterate over all nodes set and assemble the matrices...
     typename ContactGraphType::NodeListType & nodes = m_ContactGraph.getNodeListRef();
     m_nContacts = (unsigned int)nodes.size();
 
     // Standart values
-    m_iterationsNeeded = 0;
+    m_globalIterationCounter = 0;
     m_bConverged = false; // Set true later, if one node is not converged then 0! and we do one more loop
     m_isFinite = -1;
     m_bUsedGPU = false;
@@ -115,13 +121,13 @@ void InclusionSolverCONoG::solveInclusionProblem() {
         #endif
 
         #if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog,  " % nContacts: "<< m_nContacts <<std::endl;);
+            LOG(m_pSolverLog,  "--->  nContacts: "<< m_nContacts <<std::endl;);
         #endif
 
 
 
         // =============================================================================================================
-        if( m_Settings.m_eMethod == InclusionSolverSettings::SOR) {
+        if( m_Settings.m_eMethod == InclusionSolverSettingsType::SOR) {
 
             #if MEASURE_TIME_PROX == 1
                 boost::timer::cpu_timer counter;
@@ -136,7 +142,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
                 m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
             #endif
 
-        } else if(m_Settings.m_eMethod == InclusionSolverSettings::JOR) {
+        } else if(m_Settings.m_eMethod == InclusionSolverSettingsType::JOR) {
 
             #if MEASURE_TIME_PROX == 1
                 boost::timer::cpu_timer counter;
@@ -156,7 +162,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
         if(m_Settings.m_bIsFiniteCheck) {
             // TODO CHECK IF finite!
             #if CoutLevelSolverWhenContact>0
-                LOG(m_pSolverLog,  " % Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
+                LOG(m_pSolverLog,  "--->  Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
             #endif
         }
 
@@ -166,7 +172,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
         #endif
 
 #if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog,  " % Prox Iterations needed: "<< m_iterationsNeeded <<std::endl;);
+        LOG(m_pSolverLog,  "---> Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
 #endif
     }
 
@@ -197,6 +203,7 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
     // Integrate all bodies!
     for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
+        // add u_s + M^⁻1*h*deltaT ,  all contact forces initial values have already been applied!
         (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
         (*bodyIt)->m_pSolverData->m_uBuffer.m_back = (*bodyIt)->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
     }
@@ -206,10 +213,10 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 void InclusionSolverCONoG::doSorProx() {
 
     #if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog, " u_e = [ ");
+        LOG(m_pSolverLog, "---> u_e = [ ");
         for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
-            LOG(m_pSolverLog, "Back: \t" << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
-            LOG(m_pSolverLog, "Front: \t" <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
+            LOG(m_pSolverLog, "\t uBack: " << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
+            LOG(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
         }
         LOG(m_pSolverLog, " ]" << std::endl);
     #endif
@@ -219,24 +226,24 @@ void InclusionSolverCONoG::doSorProx() {
 
         m_bConverged = true;
         #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, std::endl<< "Next iteration: "<< m_iterationsNeeded <<"=========================" << std::endl);
+            LOG(m_pSolverLog,"---> Next iteration: "<< m_globalIterationCounter << std::endl);
         #endif
         sorProxOverAllNodes(); // Do one Sor Prox Iteration
 
         #if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog, std::endl<< "After Prox: "<< std::endl<<" u_e: \t");
+        LOG(m_pSolverLog, "---> u_e = [ ");
         for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
-            LOG(m_pSolverLog, (*it)->m_pSolverData->m_uBuffer.m_front.transpose());
+            LOG(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
         }
-        LOG(m_pSolverLog,""<< std::endl);
+        LOG(m_pSolverLog, " ]" << std::endl);
         #endif
 
 
-        m_iterationsNeeded++;
+        m_globalIterationCounter++;
 
-        if ( (m_bConverged == true || m_iterationsNeeded >= m_Settings.m_MaxIter) && m_iterationsNeeded >= m_Settings.m_MinIter) {
+        if ( (m_bConverged == true || m_globalIterationCounter >= m_Settings.m_MaxIter) && m_globalIterationCounter >= m_Settings.m_MinIter) {
             #if CoutLevelSolverWhenContact>0
-                LOG(m_pSolverLog, " converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_iterationsNeeded <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
+                LOG(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_globalIterationCounter <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
             #endif
             break;
         }
@@ -254,18 +261,18 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
     bool converged;
-    if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InVelocity) {
+    if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity) {
         typename ContactGraphType::BodyToContactsListIteratorType it;
-        //std::cout << "Bodies: " << m_ContactGraph.m_SimBodyToContactsList.size() << std::endl;
-        for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
-            if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+        //std::cout << "Bodies: " << m_ContactGraph.m_simBodiesToContactsList.size() << std::endl;
+        for(it=m_ContactGraph.m_simBodiesToContactsList.begin(); it !=m_ContactGraph.m_simBodiesToContactsList.end(); it++) {
+            if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                 //std::cout << "before Criteria"<<std::endl;
                 //std::cout <<"new "<< it->first->m_pSolverData->m_uBuffer.m_front.transpose() << std::endl;
                 //std::cout <<"old "<< it->first->m_pSolverData->m_uBuffer.m_back.transpose() << std::endl;
-                converged = Numerics::cancelCriteriaValue(it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
-                            it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
-                            m_Settings.m_AbsTol,
-                            m_Settings.m_RelTol);
+                converged = Numerics::cancelCriteriaValue(  it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
+                                                            it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
+                                                            m_Settings.m_AbsTol,
+                                                            m_Settings.m_RelTol);
                 //std::cout << "after Criteria"<<std::endl;
                 if(!converged) {
                     m_bConverged=false;
@@ -278,10 +285,10 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
             // Just fill back buffer with new values!
             it->first->m_pSolverData->m_uBuffer.m_back = it->first->m_pSolverData->m_uBuffer.m_front;
         }
-    }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettings::InEnergyVelocity){
+    }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity){
         typename ContactGraphType::BodyToContactsListIteratorType it;
-        for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
-            if(m_iterationsNeeded >= m_Settings.m_MinIter && m_bConverged) {
+        for(it=m_ContactGraph.m_simBodiesToContactsList.begin(); it !=m_ContactGraph.m_simBodiesToContactsList.end(); it++) {
+            if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
 
                 converged = Numerics::cancelCriteriaMatrixNorm( it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
                                                                 it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
@@ -309,17 +316,28 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
 std::string  InclusionSolverCONoG::getIterationStats() {
     std::stringstream s;
-
-    s   << m_bUsedGPU<<"\t"
+    s
+    << m_bUsedGPU<<"\t"
     << m_nContacts<<"\t"
-    << m_iterationsNeeded<<"\t"
+    << m_globalIterationCounter<<"\t"
     << m_bConverged<<"\t"
     << m_isFinite<<"\t"
     << m_timeProx<<"\t"
     << m_proxIterationTime<<"\t"
-    << m_pDynSys->m_CurrentStateEnergy <<"\t"
-    << -1<<"\t" //No m_G_conditionNumber
-    << -1<<"\t" //No m_G_notDiagDominant
-    << m_PercussionPool.getPoolSize();
+    << m_pDynSys->m_CurrentStateEnergy;
+    return s.str();
+}
+
+std::string InclusionSolverCONoG::getStatsHeader() {
+    std::stringstream s;
+    s
+    << "GPUUsed"<<"\t"
+    << "nContacts"<<"\t"
+    << "nGlobalIterations"<<"\t"
+    << "Converged"<<"\t"
+    << "IsFinite"<<"\t"
+    << "TotalTimeProx [s]"<<"\t"
+    << "IterTimeProx [s]"<<"\t"
+    << "TotalStateEnergy [J]";
     return s.str();
 }

@@ -10,7 +10,6 @@
 #define CommonFunctions_h
 
 // Includes =================================
-#include <cstdlib>
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -18,16 +17,10 @@
 #include <cmath>
 #include <limits>
 #include <vector>
-#include <type_traits>
-#include <Eigen/Dense>
 
 
-#include "TypeDefs.hpp"
-// ==========================================
+#include "MyMatrixDefs.hpp"
 
-//using namespace std;
-//using namespace Eigen;
-//using namespace Ogre;
 
 namespace Utilities{
 
