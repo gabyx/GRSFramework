@@ -263,16 +263,16 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
     bool converged;
     if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity) {
         typename ContactGraphType::BodyToContactsListIteratorType it;
-        //std::cout << "Bodies: " << m_ContactGraph.m_SimBodyToContactsList.size() << std::endl;
-        for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
+        //std::cout << "Bodies: " << m_ContactGraph.m_simBodiesToContactsList.size() << std::endl;
+        for(it=m_ContactGraph.m_simBodiesToContactsList.begin(); it !=m_ContactGraph.m_simBodiesToContactsList.end(); it++) {
             if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
                 //std::cout << "before Criteria"<<std::endl;
                 //std::cout <<"new "<< it->first->m_pSolverData->m_uBuffer.m_front.transpose() << std::endl;
                 //std::cout <<"old "<< it->first->m_pSolverData->m_uBuffer.m_back.transpose() << std::endl;
-                converged = Numerics::cancelCriteriaValue(it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
-                            it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
-                            m_Settings.m_AbsTol,
-                            m_Settings.m_RelTol);
+                converged = Numerics::cancelCriteriaValue(  it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
+                                                            it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
+                                                            m_Settings.m_AbsTol,
+                                                            m_Settings.m_RelTol);
                 //std::cout << "after Criteria"<<std::endl;
                 if(!converged) {
                     m_bConverged=false;
@@ -287,7 +287,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
         }
     }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity){
         typename ContactGraphType::BodyToContactsListIteratorType it;
-        for(it=m_ContactGraph.m_SimBodyToContactsList.begin(); it !=m_ContactGraph.m_SimBodyToContactsList.end(); it++) {
+        for(it=m_ContactGraph.m_simBodiesToContactsList.begin(); it !=m_ContactGraph.m_simBodiesToContactsList.end(); it++) {
             if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
 
                 converged = Numerics::cancelCriteriaMatrixNorm( it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)

@@ -40,11 +40,13 @@ void ContactGraph<Combo>::clearGraph() {
     m_edgeCounter = 0;
     m_nLambdas =0;
     m_nFrictionParams=0;
-    m_SimBodyToContactsList.clear();
 
     //clear own lists
     m_localNodes.clear();
     m_remoteNodes.clear();
+
+    m_localBodiesWithContacts.clear();
+    m_remoteBodiesWithContacts.clear();
 
     for(auto n_it = m_splittedNodes.begin(); n_it != m_splittedNodes.end(); n_it++) {
         delete (n_it->second);
@@ -81,28 +83,45 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
 #endif
 
         addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
+
         m_remoteNodes.push_back(addedNode);
 
         //Add to the neighbour data
         if(isRemote.first) {
+
+            m_remoteBodiesWithContacts.addBody(pCollData->m_pBody1);
+
 #if CoutLevelSolverWhenContact>1
             LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << std::endl;)
 #endif
             m_pNbDataMap->getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody1);
             // if this body is already added it does not matter
+
+        }else{
+            m_localBodiesWithContacts.addBody(pCollData->m_pBody1);
         }
+
         if(isRemote.second) {
+
+            m_remoteBodiesWithContacts.addBody(pCollData->m_pBody2);
+
 #if CoutLevelSolverWhenContact>1
             LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2->m_id) << std::endl;)
 #endif
             m_pNbDataMap->getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody2);
             // if this body is already added it does not matter
+
+        }else{
+            m_localBodiesWithContacts.addBody(pCollData->m_pBody2);
         }
 
     } else {
         //set the node color
         addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::LOCALNODE);
         m_localNodes.push_back(addedNode);
+
+        m_localBodiesWithContacts.addBody(pCollData->m_pBody1);
+        m_localBodiesWithContacts.addBody(pCollData->m_pBody2);
     }
 
     addedNode->m_nodeData.m_pCollData = pCollData;
@@ -137,7 +156,7 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
         addedNode->m_nodeData.m_u1BufferPtr = & pCollData->m_pBody1->m_pSolverData->m_uBuffer;
 
         computeW<1>( addedNode->m_nodeData);
-        connectNode<1>( addedNode);
+        //connectNode<1>( addedNode);
 
     } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::ANIMATED ) {
         // Contact goes into xi_N, xi_T
@@ -156,7 +175,7 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
         addedNode->m_nodeData.m_u2BufferPtr = & pCollData->m_pBody2->m_pSolverData->m_uBuffer;
 
         computeW<2>( addedNode->m_nodeData);
-        connectNode<2>( addedNode);
+        //connectNode<2>( addedNode);
 
     } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::ANIMATED ) {
         // Contact goes into xi_N, xi_T

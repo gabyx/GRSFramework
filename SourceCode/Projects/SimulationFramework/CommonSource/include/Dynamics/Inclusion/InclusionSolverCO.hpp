@@ -475,9 +475,9 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
             pBody = *it;
             delta_u_E = pBody->m_h_term * m_Settings.m_deltaT;
 
-            typename ContactGraphType::BodyToContactsListIterator itList  = m_ContactGraph.m_SimBodyToContactsList.find(pBody);
+            typename ContactGraphType::BodyToContactsListIterator itList  = m_ContactGraph.m_simBodiesToContactsList.find(pBody);
             // itList->second is the NodeList!
-            if(itList != m_ContactGraph.m_SimBodyToContactsList.end()) {
+            if(itList != m_ContactGraph.m_simBodiesToContactsList.end()) {
                 for( typename ContactGraphType::NodeListIteratorType it = itList->second.begin(); it != itList->second.end(); it++) {
                     delta_u_E.noalias() += *(ContactGraphType::getW_body((*it)->m_nodeData,pBody)) * P_front.segment<ContactDim>( (*it)->m_nodeNumber * (ContactDim));
                 }

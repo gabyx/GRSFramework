@@ -67,7 +67,7 @@ public:
         m_edgeCounter = 0;
         m_nLambdas =0;
         m_nFrictionParams=0;
-        m_SimBodyToContactsList.clear();
+        m_simBodiesToContactsList.clear();
 
     }
 
@@ -140,7 +140,7 @@ public:
     }
 
 
-    std::unordered_map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;
+    std::unordered_map<const RigidBodyType *, NodeListType > m_simBodiesToContactsList;
     typedef typename std::unordered_map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIterator;
 
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
@@ -243,7 +243,7 @@ private:
         // ===========================================================================
 
         // Get all contacts on this body and connect to them =========================
-        NodeListType & nodeList = m_SimBodyToContactsList[pBody];
+        NodeListType & nodeList = m_simBodiesToContactsList[pBody];
         //iterate over the nodeList and add edges!
         typename NodeListType::iterator it;
         // if no contacts are already on the body we skip this
@@ -316,7 +316,7 @@ public:
         m_edgeCounter = 0;
         m_nLambdas =0;
         m_nFrictionParams=0;
-        m_SimBodyToContactsList.clear();
+        m_simBodiesToContactsList.clear();
 
     }
 
@@ -411,7 +411,7 @@ public:
     }
 
 
-    std::unordered_map<const RigidBodyType *, NodeListType > m_SimBodyToContactsList;
+    std::unordered_map<const RigidBodyType *, NodeListType > m_simBodiesToContactsList;
     typedef typename std::unordered_map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIteratorType;
 
     unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
@@ -526,7 +526,7 @@ private:
         // ===========================================================================
 
         // Get all contacts on this body and connect to them =========================
-        NodeListType & nodeList = m_SimBodyToContactsList[pBody];
+        NodeListType & nodeList = m_simBodiesToContactsList[pBody];
         //iterate over the nodeList and add edges!
         typename NodeListType::iterator it;
         // if no contacts are already on the body we skip this
@@ -612,8 +612,16 @@ public:
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
             }
 
+            // Experimental
+            //Relaxation term damper (take care R_i_inv needs to be initialized as well!)
+            //nodeData.m_LambdaFront += nodeData.m_LambdaBack * m_Settings.m_dinv;
+
             nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
             nodeData.m_LambdaFront += nodeData.m_LambdaBack;
+
+
+
+
             //Prox
 
             Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle(

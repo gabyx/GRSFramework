@@ -28,20 +28,26 @@ struct InclusionSolverSettings
       m_UseGPUDeviceId = 0;
       m_bIsFiniteCheck = false;
       m_eConvergenceMethod = InVelocity;
-      m_splitNodeUpdateFrequency = 1;
+      m_splitNodeUpdateRatio = 1;
+      m_convergenceCheckRatio = 1;
     }
 
 
     PREC m_deltaT;
     PREC m_alphaJORProx;
     PREC m_alphaSORProx;
+
     unsigned int m_MaxIter;
     unsigned int m_MinIter;
-    unsigned int m_splitNodeUpdateFrequency;
-    PREC m_AbsTol;
-    PREC m_RelTol;
+
+    unsigned int m_splitNodeUpdateRatio;        ///< Local iterations per remote billateral constraints updates (splitNodes)
+    unsigned int m_convergenceCheckRatio;      ///< Billatreal constraints updates (splitNodes)  per convergence checks
+
     enum Method{ SOR, JOR} m_eMethod;
     enum Convergence {InLambda,InVelocity, InVelocityLocal, InEnergyVelocity,InEnergyLocalMix} m_eConvergenceMethod;
+    PREC m_AbsTol;
+    PREC m_RelTol;
+
     bool  m_bUseGPU;
     int m_UseGPUDeviceId;
     bool m_bIsFiniteCheck;

@@ -166,16 +166,26 @@ protected:
 
         // Process special Inclusion solver settings
         elem = mpiSettings->FirstChild("InclusionSolverSettings",true)->ToElement();
-        PREC splitNodeUpdateFrequency;
-        if(!Utilities::stringToType<PREC>(splitNodeUpdateFrequency,  elem->GetAttribute("splitNodeUpdateFrequency"))) {
-                throw ticpp::Exception("---> String conversion in MPISettings::InclusionSolverSettings: splitNodeUpdateFrequency failed");
+        PREC splitNodeUpdateRatio;
+        if(!Utilities::stringToType<PREC>(splitNodeUpdateRatio,  elem->GetAttribute("splitNodeUpdateRatio"))) {
+                throw ticpp::Exception("---> String conversion in MPISettings::InclusionSolverSettings: splitNodeUpdateRatio failed");
         }
-        if(splitNodeUpdateFrequency <= 0){
-            throw ticpp::Exception("---> MPISettings::InclusionSolverSettings: splitNodeUpdateFrequency <= 0");
+        if(splitNodeUpdateRatio <= 0){
+            throw ticpp::Exception("---> MPISettings::InclusionSolverSettings: splitNodeUpdateRatio <= 0");
         }
+
+        PREC convergenceCheckRatio;
+        if(!Utilities::stringToType<PREC>(convergenceCheckRatio,  elem->GetAttribute("convergenceCheckRatio"))) {
+                throw ticpp::Exception("---> String conversion in MPISettings::InclusionSolverSettings: convergenceCheckRatio failed");
+        }
+        if(convergenceCheckRatio <= 0){
+            throw ticpp::Exception("---> MPISettings::InclusionSolverSettings: convergenceCheckRatio <= 0");
+        }
+
         InclusionSolverSettingsType settIncl;
         m_pDynSys->getSettings(settIncl);
-        settIncl.m_splitNodeUpdateFrequency = splitNodeUpdateFrequency;
+        settIncl.m_splitNodeUpdateRatio = splitNodeUpdateRatio;
+        settIncl.m_convergenceCheckRatio = convergenceCheckRatio;
         m_pDynSys->setSettings(settIncl);
     }
 

@@ -56,7 +56,6 @@ public:
     void communicateSplitBodySolution(unsigned int globalIterationNumber);
 
     void resetAllWeightings();
-    void initRemoteBodyVelocities();
 
     void clearNeighbourMap(){
         m_nbDataMap.emptyAllNeighbourData();
