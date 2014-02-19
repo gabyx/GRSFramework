@@ -1,6 +1,8 @@
 #ifndef MPICommunicationFunctions_hpp
 #define MPICommunicationFunctions_hpp
 
+#include <type_traits>
+
 #include <mpi.h>
 
 #include <boost/tuple/tuple.hpp>
@@ -184,6 +186,23 @@ public:
         ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcast2 failed!");
         m_binary_message >> t;
     };
+
+    template<typename T>
+    void allGather(T value, std::vector<T> & gatheredValues, MPI_Comm comm = MPI_COMM_WORLD){
+
+        // Assert on std::vector<bool> (bitwise implementation which fails for c array style)
+        STATIC_ASSERT2((!std::is_same<T,bool>::value), "WORKS ONLY FOR non bool")
+        // GCC No support STATIC_ASSERT2(std::is_trivially_copyable<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES")
+        STATIC_ASSERT2(std::is_trivial<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES")
+        ASSERTMSG( comm == MPI_COMM_WORLD,"This command is only implemented for MPI_COMM_WORLD")
+
+        gatheredValues.resize(m_pProcessInfo->getNProcesses());
+
+        char * p = static_cast<char*>(gatheredValues.data());
+
+        int error = MPI_Allgather(&value,sizeof(T),MPI_BYTE, p , sizeof(T), MPI_BYTE, comm);
+        ASSERTMPIERROR(error, "ProcessCommunicator:: allGather failed");
+    }
 
     template<typename T>
     void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm = MPI_COMM_WORLD){

@@ -55,6 +55,8 @@ public:
     void communicateSplitBodyUpdate(unsigned int globalIterationNumber);
     void communicateSplitBodySolution(unsigned int globalIterationNumber);
 
+    bool communicateConvergence(bool converged);
+
     void resetAllWeightings();
 
     void clearNeighbourMap(){

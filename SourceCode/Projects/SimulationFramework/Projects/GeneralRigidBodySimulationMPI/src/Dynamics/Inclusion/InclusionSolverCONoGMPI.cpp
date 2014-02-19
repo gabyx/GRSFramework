@@ -324,9 +324,11 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
 void InclusionSolverCONoG::sorProxOverAllNodes() {
 
+    bool doConvergenceCheck = m_globalIterationCounter % (m_Settings.m_convergenceCheckRatio*m_Settings.m_splitNodeUpdateRatio)  == 0
+                                && m_globalIterationCounter >= m_Settings.m_MinIter;
+
     // cache the velocities if convergence check should be done
-    if( m_globalIterationCounter % m_Settings.m_convergenceCheckRatio == 0 &&
-            m_globalIterationCounter >= m_Settings.m_MinIter) {
+    if( doConvergenceCheck ) {
 
         if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity ||
                 m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity) {
@@ -370,8 +372,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
     // (m_Settings.m_convergenceCheckRatio*m_Settings.m_splitNodeUpdateRatio) = local iterations per convergence checks
-    if(m_globalIterationCounter % (m_Settings.m_convergenceCheckRatio*m_Settings.m_splitNodeUpdateRatio)  == 0 &&
-       m_globalIterationCounter >= m_Settings.m_MinIter) {
+    if(doConvergenceCheck) {
 
         bool converged;
         auto & localWithContacts   = m_pContactGraph->getLocalBodiesWithContactsListRef();
@@ -423,19 +424,17 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
                 for(auto it = remotesWithContacts.begin(); it !=remotesWithContacts.end(); it++) {
 
                     converged = Numerics::cancelCriteriaMatrixNorm( (*it)->m_pSolverData->m_uBuffer.m_back,(*it)->m_pSolverData->m_uBuffer.m_front,(*it)->m_MassMatrix_diag,m_Settings.m_AbsTol,m_Settings.m_RelTol);
-                    if(!converged) {
-                        m_bConverged=false;
-                        break;
-                    }
+                    if(!converged) { m_bConverged=false; break; }
                 }
             }
 
         }
 
         //Communicates our converged flags and sets it to false if some neighbours are not convgered
-        //m_pInclusionComm->communicateConvergence(m_bConverged);
+        //
+        m_bConverged =  m_pInclusionComm->communicateConvergence(m_bConverged);
 
-    }
+    } // end doConvergence
 }
 
 

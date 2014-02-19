@@ -120,6 +120,23 @@ void InclusionCommunicator<Combo>::communicateSplitBodySolution(unsigned int glo
 }
 
 
+template<typename Combo>
+bool InclusionCommunicator<Combo>::communicateConvergence(bool converged) {
+
+    std::vector<char> convergedGather;
+    m_pProcCom->allGather((char)converged,convergedGather);
+
+    // Sum up all boolean values and decide if all neighbours converged?
+    converged = true;
+    for(auto it = convergedGather.begin(); it!= convergedGather.end(); it++){
+        converged = converged && *it;
+        if(!converged){
+                return false;
+        }
+    }
+    return true;
+}
+
 
 template<typename Combo>
 void InclusionCommunicator<Combo>::resetAllWeightings() {
