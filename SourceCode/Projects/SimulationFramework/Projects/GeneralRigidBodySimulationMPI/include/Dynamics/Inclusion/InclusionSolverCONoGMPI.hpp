@@ -67,8 +67,8 @@ public:
     bool m_bConverged;
     unsigned int m_isFinite;
     unsigned int m_nContacts;
-    unsigned int m_nContactsLocal;
-    unsigned int m_nContactsRemote;
+    unsigned int m_nLocalNodes;
+    unsigned int m_nRemoteNodes;
     unsigned int m_nSplitBodyNodes;
 
     bool m_bUsedGPU;

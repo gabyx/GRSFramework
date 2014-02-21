@@ -162,13 +162,13 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
     // All detected contacts in ths process
     m_nLocalNodes  = m_nodesLocal.size();
     m_nRemoteNodes = m_nodesRemote.size();
-    m_nContacts = m_nContactsLocal + m_nContactsRemote;
+    m_nContacts = m_nLocalNodes + m_nRemoteNodes;
     m_nSplitBodyNodes = m_nodesSplitBody.size();
 
     // Integrate all local bodies to u_e
     // u_E = u_S + M^⁻1 * h * deltaT
 
-    if(m_nContactsLocal == 0 && m_nSplitBodyNodes==0 && m_nContactsRemote==0) {
+    if(m_nLocalNodes == 0 && m_nSplitBodyNodes==0 && m_nRemoteNodes==0) {
         // Nothing to solve
         integrateAllBodyVelocities();
 

@@ -35,7 +35,7 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    StateRecorderMPI(unsigned int nSimBodies, boost::shared_ptr<MPILayer::ProcessCommunicator > pProcInfo);
+    StateRecorderMPI(unsigned int nSimBodies, boost::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> pProcInfo);
     ~StateRecorderMPI();
 
     //Each process writes its stuff at a specific offset
