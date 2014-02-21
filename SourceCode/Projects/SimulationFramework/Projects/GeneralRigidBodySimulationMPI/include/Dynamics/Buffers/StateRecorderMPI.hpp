@@ -35,7 +35,7 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    StateRecorderMPI(unsigned int nSimBodies);
+    StateRecorderMPI(unsigned int nSimBodies, boost::shared_ptr<MPILayer::ProcessCommunicator > pProcInfo);
     ~StateRecorderMPI();
 
     //Each process writes its stuff at a specific offset
@@ -50,8 +50,7 @@ public:
 
 protected:
 
-    typedef MPILayer::ProcessInformation ProcessInfoType;
-    ProcessInfoType m_processInfo;
+    boost::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> m_pProcInfo;
 
     boost::filesystem::path m_directoryPath; ///< The path where the sim body part file is opened!
 
@@ -75,8 +74,10 @@ protected:
 
 
 
-StateRecorderMPI::StateRecorderMPI(unsigned int nSimBodies):
-    m_fh(LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody), m_nSimBodies(nSimBodies)
+StateRecorderMPI::StateRecorderMPI(unsigned int nSimBodies,
+                                   boost::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> pProcInfo):
+    m_fh(LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody), m_nSimBodies(nSimBodies),
+    m_pProcInfo(pProcInfo)
 //    ,m_ins(m_writebuffer),
 //    m_stream(m_ins),
 //    m_oa( m_stream,boost::archive::no_codecvt | boost::archive::no_header)
@@ -118,7 +119,7 @@ bool StateRecorderMPI::createSimFile(bool truncate){
 
     LOG(m_pSimulationLog,"MPI> StateRecorderMPI: Try Opened File : " << file << std::endl)
     //Collective (all processes do this)
-    bool res = m_fh.openWrite(m_processInfo.getMPIComm(),file,m_nSimBodies);
+    bool res = m_fh.openWrite(m_pProcInfo->getMPIComm(),file,m_nSimBodies);
     if(!res){
         ERRORMSG(m_fh.getErrorString());
     }

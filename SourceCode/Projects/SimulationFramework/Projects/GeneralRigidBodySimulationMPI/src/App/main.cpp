@@ -22,6 +22,8 @@ int main(int argc, char **argv) {
     // Scope that all stuff is deconstructed before MPI FINALIZE IS CALLED
     {
 
+        new MPIGlobalCommunicators();
+
 
          // Add the process rank to the Global File Path for this Process...
         int my_rank;
@@ -75,13 +77,19 @@ int main(int argc, char **argv) {
         const RedirectOutputs _(f, std::cerr);
 
 
-        SimulationManagerMPI mgr;
+        // Construct the communicator for the Simulation
+        MPILayer::MPIGlobalCommunicators::getSingeltonPtr()->addCommunicator(MPILayer::MPICommunicatorId::SIM_COMM,MPI_COMM_WORLD);
 
-        mgr.setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
+        // Only Simulation Processes enter this region:
+            SimulationManagerMPI mgr;
+            mgr.setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
+            mgr.startSim();
+        // =============================================
+
+        // Only other process (not needed yet) enter this region
 
 
-        mgr.startSim();
-
+        // =============================================
 
        // Do post processes at the end of the simulation
         //TODO

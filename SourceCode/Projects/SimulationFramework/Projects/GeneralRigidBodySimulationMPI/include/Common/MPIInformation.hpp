@@ -27,7 +27,7 @@ public:
 
     static const int MASTER_RANK = 0;
 
-    ProcessInformation() {
+    ProcessInformation(MPI_Comm comm): m_comm(comm) {
         initialize();
         m_procTopo.init(m_rank);
     }
@@ -40,7 +40,7 @@ public:
         return MASTER_RANK;
     };
 
-    bool hasMasterRank() const{
+    bool isMasterRank() const{
         if(m_rank == MASTER_RANK){
             return true;
         }
@@ -59,7 +59,7 @@ public:
     };
 
     MPI_Comm getMPIComm(){
-        return MPI_COMM_WORLD;
+        return m_comm;
     }
 
     std::string getName() const {
@@ -83,19 +83,23 @@ private:
 
     void initialize() {
         int rank;
-        MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+
+        MPI_Comm_rank(m_comm,&rank);
         m_rank = rank;
-        MPI_Comm_size(MPI_COMM_WORLD,&this->m_nProcesses);
+        MPI_Comm_size(m_comm,&this->m_nProcesses);
 
         std::stringstream s;
-        s << "Process_"<<m_rank;
+        s << "SimProcess_"<<m_rank;
         m_name = s.str();
     };
 
+
+    MPI_Comm m_comm; ///< Simulation communicator
+
     ProcessTopology m_procTopo;
 
-    RankIdType m_rank;
-    int m_nProcesses;
+    RankIdType m_rank; ///< rank of communicator m_comm
+    int m_nProcesses;  ///< processes in m_comm
     std::string m_name;
 };
 

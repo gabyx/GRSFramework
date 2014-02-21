@@ -121,6 +121,11 @@ protected:
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;
 
+    typename ContactGraphType::SplitBodyNodeDataListType m_nodesSplitBody;
+    typename ContactGraphType::NodeListType              m_nodesLocal, m_nodesRemote;
+
+
+
     void integrateAllBodyVelocities();
     void initContactGraphForIteration(PREC alpha);
 

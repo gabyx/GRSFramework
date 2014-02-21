@@ -43,11 +43,6 @@ public:
 
     typedef NeighbourDataDerived::LocalDataType LocalDataType;
     typedef NeighbourDataDerived::RemoteDataType RemoteDataType;
-
-    void clear(){
-        m_localBodies.clear();
-        m_remoteBodies.clear();
-    }
 };
 
 

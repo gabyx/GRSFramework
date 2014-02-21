@@ -46,7 +46,7 @@ void SimulationManagerMPI::setup() {
 }
 
 
-void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
+void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath, ) {
 
     //Each Process copies its SceneFile.xml to the folders, that each Process can read its own file (better)
     boost::filesystem::path sceneFilePathNew = FileManager::getSingletonPtr()->copyFile(sceneFilePath,
@@ -67,7 +67,11 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
     // MPI Process Commnunicator
 
-    m_pProcCommunicator = boost::shared_ptr<MPILayer::ProcessCommunicator >(new MPILayer::ProcessCommunicator());
+    m_pProcCommunicator = boost::shared_ptr<MPILayer::ProcessCommunicator >(new MPILayer::ProcessCommunicator(
+                                                    MPILayer::MPIGlobalCommunicators::getSingeltonPtr()->getCommunicator(
+                                                      MPILayer::MPICommunicatorId::SIM_COMM
+                                                    )
+                                           ));
     m_pSimulationLog->logMessage("--->SimulationManagerMPI:: Added ProcessCommunicator");
 
 
@@ -93,7 +97,7 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
     //Uncomment if StateRecorderType = StateRecorderBodys
     //m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(true,m_pProcCommunicator->getProcInfo()->getRank()));
-    m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(m_nGlobalSimBodies));
+    m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(m_nGlobalSimBodies, m_pProcCommunicator->m_pProcInfo));
     // =====================================================
 
 
@@ -136,7 +140,7 @@ void SimulationManagerMPI::checkNumberOfBodiesInProcess() {
     timer.stop();
     double elapsed = ((double)timer.elapsed().wall)*1e-9;
 
-    if(m_pProcCommunicator->getProcInfo()->hasMasterRank()) {
+    if(m_pProcCommunicator->getProcInfo()->isMasterRank()) {
         LOG(m_pSimulationLog,  "MPI> Allreduce needed: " << elapsed <<"sec."<<std::endl; );
 
         if(numberOfBodiesInSimulation != m_nGlobalSimBodies) {
@@ -159,7 +163,7 @@ void SimulationManagerMPI::getMaxRuntime(PREC runtime){
 
     MPI_Reduce(&runtime,&maxRuntime, 1, MPI_DOUBLE, MPI_MAX, ProcessInfoType::MASTER_RANK, MPI_COMM_WORLD);
 
-    if(m_pProcCommunicator->getProcInfo()->hasMasterRank()){
+    if(m_pProcCommunicator->getProcInfo()->isMasterRank()){
         LOG(m_pSimulationLog, "---> Total runtime for simulation needed: "<<maxRuntime<< " sec. " << std::endl;);
     }else{
         LOG(m_pSimulationLog, "---> Runtime sent ... !"<< std::endl;);
@@ -246,7 +250,7 @@ void SimulationManagerMPI::initSim() {
 
     MPILayer::GenericMessage1<boost::filesystem::path> message;
 
-    if(m_pProcCommunicator->getProcInfo()->hasMasterRank()) { // Only master process
+    if(m_pProcCommunicator->getProcInfo()->isMasterRank()) { // Only master process
         // Get new sim folder path relative to global directory
 
         m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);

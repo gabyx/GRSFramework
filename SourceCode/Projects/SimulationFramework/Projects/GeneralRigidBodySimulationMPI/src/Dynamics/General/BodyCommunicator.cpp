@@ -47,6 +47,9 @@ void BodyCommunicator::communicate(PREC currentSimTime){
 
     m_currentSimTime = currentSimTime;
 
+    // Reset all neighbour ranks which are empty!
+    m_nbRanksEmpty.clear();
+
     // Find all local bodies which overlap
     typename ProcessTopologyType::NeighbourRanksListType neighbours;
 
@@ -197,11 +200,14 @@ void BodyCommunicator::sendMessagesToNeighbours(){
     LOGBC(m_pSimulationLog,"MPI>\t Send messages (BODY_MESSAGE) to neighbours!"<<std::endl;)
     m_localBodiesToDelete.clear();
 
+    //Set flags
+    m_message.setFlags(m_pDynSys->m_SimBodies.size() == 0);
+
     for(typename ProcessTopologyType::NeighbourRanksListType::const_iterator it = m_nbRanks.begin(); it != m_nbRanks.end(); it++){
         LOGBC(m_pSimulationLog,"--->\t\t Send message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_message.setRank(*it);
-        m_pProcCom->sendMessageToRank(m_message,*it, MPILayer::MPIMessageTag::Type::BODY_MESSAGE );
+        m_pProcCom->sendMessageToRank(m_message,*it, MPILayer::MPIMessageTags::BODY_MESSAGE );
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
@@ -210,7 +216,7 @@ void BodyCommunicator::sendMessagesToNeighbours(){
 void BodyCommunicator::receiveMessagesFromNeighbours(){
     LOGBC(m_pSimulationLog,"MPI>\t Receive all messages (BODY_MESSAGE) from neighbours!"<<std::endl;)
     // set the rank of the receiving message automatically! inside the function!
-    m_pProcCom->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTag::Type::BODY_MESSAGE );
+    m_pProcCom->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTags::BODY_MESSAGE );
     LOGBC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
 
     // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours

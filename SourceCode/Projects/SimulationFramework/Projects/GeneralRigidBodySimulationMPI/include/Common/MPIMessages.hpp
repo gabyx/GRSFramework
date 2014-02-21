@@ -138,6 +138,12 @@ public:
             m_initialized = true;
         }
     }
+    /**
+    * Set the flags which are sent to the neighbours
+    */
+    void setFlags(bool hasNoSimBodies){
+        m_isEmpty = hasNoSimBodies;
+    }
 
     enum class SubMessageFlag : char {
         NOTIFICATION = 1 << 0,
@@ -183,6 +189,9 @@ public:
         // Simulation Time:
 
         ar & m_nc->m_currentSimTime;
+
+        // Send all flags
+        ar & m_isEmpty;
 
         // Number of submessages to send (for each local body 1)
         m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
@@ -241,50 +250,58 @@ public:
     void load(Archive & ar, const unsigned int version) const {
         LOGASSERTMSG( m_initialized, m_pSerializerLog, "The NeighbourMessageWrapperBodies is not correctly initialized, Rank not set!")
 
-
         // Simulation Time:
         PREC simulationTime;
         ar & simulationTime;
         LOGASSERTMSG( m_nc->m_currentSimTime == simulationTime, m_pSerializerLog, "The message from rank: "<< m_neighbourRank << " has timeStamp: " << simulationTime<<" which does not fit our current simulation Time: "<< m_nc->m_currentSimTime << " for rank: " << m_nc->m_rank <<" !")
 
+        // All flags
+        bool isEmpty;
+        ar & isEmpty;
+        if(isEmpty){
+            //add rank to the empty list
+            m_nc->m_nbRanksEmpty.insert(m_neighbourRank);
 
-        // Number of submessages
-        unsigned int size;
-        ar & size;
+        }else{
 
-        if(size>0) {
-            LOGSZ(m_pSerializerLog, "BodyComm=================================================================================="<< std::endl;)
-            LOGSZ(m_pSerializerLog, "DESERIALIZE Message from neighbour rank: " << m_neighbourRank << std::endl;);
-            LOGSZ(m_pSerializerLog, "---> Timestamp: "<<  simulationTime << std::endl;);
-            LOGSZ(m_pSerializerLog, "---> Size: "<<  size << std::endl;);
-        }
+            // Number of submessages
+            unsigned int size;
+            ar & size;
 
-        m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
-        m_bodyInfo = NULL;
+            if(size>0) {
+                LOGSZ(m_pSerializerLog, "BodyComm=================================================================================="<< std::endl;)
+                LOGSZ(m_pSerializerLog, "DESERIALIZE Message from neighbour rank: " << m_neighbourRank << std::endl;);
+                LOGSZ(m_pSerializerLog, "---> Timestamp: "<<  simulationTime << std::endl;);
+                LOGSZ(m_pSerializerLog, "---> Size: "<<  size << std::endl;);
+            }
 
-        LOGASSERTMSG( m_neighbourData, m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
+            m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
+            m_bodyInfo = NULL;
 
-        //Loop over all messages
-        for(int i = 0; i < size; i++) {
-            SubMessageFlag flag;
-            ar & flag;
-            if(flag == SubMessageFlag::NOTIFICATION) {
-                LOGSZ(m_pSerializerLog, "---> NotifactionSTART: " << i<<std::endl;);
-                loadNotification(ar);
-                LOGSZ(m_pSerializerLog, "---> NotifactionEND: "<<std::endl;);
+            LOGASSERTMSG( m_neighbourData, m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
 
-            } else if (flag == SubMessageFlag::UPDATE) {
-                LOGSZ(m_pSerializerLog, "---> UpdateSTART: " << i<<std::endl;);
-                loadUpdate(ar);
-                LOGSZ(m_pSerializerLog, "---> UpdateEND: "<<std::endl;);
+            //Loop over all messages
+            for(int i = 0; i < size; i++) {
+                SubMessageFlag flag;
+                ar & flag;
+                if(flag == SubMessageFlag::NOTIFICATION) {
+                    LOGSZ(m_pSerializerLog, "---> NotifactionSTART: " << i<<std::endl;);
+                    loadNotification(ar);
+                    LOGSZ(m_pSerializerLog, "---> NotifactionEND: "<<std::endl;);
 
-            } else if (flag == SubMessageFlag::REMOVAL) {
-                LOGSZ(m_pSerializerLog, "---> RemovalSTART: " << i<<std::endl;);
-                loadRemoval(ar);
-                LOGSZ(m_pSerializerLog, "---> RemovalEND: "<<std::endl;);
-            } else {
-                LOGSZ(m_pSerializerLog, "---> Received WRONG FLAG: "<< (int)flag << std::endl;);
-                LOGASSERTMSG( false, m_pSerializerLog, "Wrong flag received!")
+                } else if (flag == SubMessageFlag::UPDATE) {
+                    LOGSZ(m_pSerializerLog, "---> UpdateSTART: " << i<<std::endl;);
+                    loadUpdate(ar);
+                    LOGSZ(m_pSerializerLog, "---> UpdateEND: "<<std::endl;);
+
+                } else if (flag == SubMessageFlag::REMOVAL) {
+                    LOGSZ(m_pSerializerLog, "---> RemovalSTART: " << i<<std::endl;);
+                    loadRemoval(ar);
+                    LOGSZ(m_pSerializerLog, "---> RemovalEND: "<<std::endl;);
+                } else {
+                    LOGSZ(m_pSerializerLog, "---> Received WRONG FLAG: "<< (int)flag << std::endl;);
+                    LOGASSERTMSG( false, m_pSerializerLog, "Wrong flag received!")
+                }
             }
         }
 
@@ -740,6 +757,9 @@ private:
 
     NeighbourCommunicatorType* m_nc;
     RankIdType m_neighbourRank;        ///< This is the neighbour rank where the message is send to or received from!
+
+    bool m_isEmpty;
+
     mutable NeighbourDataType * m_neighbourData;
     mutable BodyInfoType * m_bodyInfo;
 

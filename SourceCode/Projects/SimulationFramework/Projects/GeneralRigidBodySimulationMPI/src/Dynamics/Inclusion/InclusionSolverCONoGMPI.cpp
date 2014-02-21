@@ -66,6 +66,11 @@ InclusionSolverCONoG::InclusionSolverCONoG(
         ContactDelegateList::ContactDelegate::from_method< ContactGraphType,  &ContactGraphType::addNode>(m_pContactGraph.get())
     );
 
+
+    m_nodesLocal     = m_pContactGraph->getLocalNodeListRef();
+    m_nodesRemote    = m_pContactGraph->getRemoteNodeListRef();
+    m_nodesSplitBody = m_pContactGraph->getSplitBodyNodeListRef();
+
 }
 
 
@@ -136,9 +141,7 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
     LOG(m_pSolverLog,  "---> solveInclusionProblem(): "<< std::endl;);
 #endif
 
-    auto & nodesLocal = m_pContactGraph->getLocalNodeListRef();
-    auto & nodesRemote = m_pContactGraph->getRemoteNodeListRef();
-    auto & nodesSplitBody = m_pContactGraph->getSplitBodyNodeListRef();
+
 
     // Standart values
     m_currentSimulationTime = currentSimulationTime;
@@ -150,17 +153,17 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
     m_proxIterationTime = 0;
 
 
-    // First communicate all remote bodies, which have contacts, to the owner
+    // First communicate all remote bodies, which have contacts, to the owner, all processes are involved
 #if CoutLevelSolverWhenContact>1
     LOG(m_pSolverLog,  "MPI> Communicate Remote Contacts (splitted bodies)" << std::endl; );
 #endif
     m_pInclusionComm->communicateRemoteContacts(m_currentSimulationTime);
 
     // All detected contacts in ths process
-    m_nContactsLocal = nodesLocal.size();
-    m_nContactsRemote = nodesRemote.size();
+    m_nLocalNodes  = m_nodesLocal.size();
+    m_nRemoteNodes = m_nodesRemote.size();
     m_nContacts = m_nContactsLocal + m_nContactsRemote;
-    m_nSplitBodyNodes = nodesSplitBody.size();
+    m_nSplitBodyNodes = m_nodesSplitBody.size();
 
     // Integrate all local bodies to u_e
     // u_E = u_S + M^⁻1 * h * deltaT
@@ -168,6 +171,7 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
     if(m_nContactsLocal == 0 && m_nSplitBodyNodes==0 && m_nContactsRemote==0) {
         // Nothing to solve
         integrateAllBodyVelocities();
+
     } else {
 
         // Solve Inclusion
@@ -234,10 +238,15 @@ void InclusionSolverCONoG::doJorProx() {
 
 
 void InclusionSolverCONoG::integrateAllBodyVelocities() {
+
+
     for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
         (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
     }
+
+
+
 }
 
 
@@ -293,10 +302,13 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
     m_pSorProxInitNodeVisitor->setParams(alpha);
 
     // Init local nodes
-    m_pContactGraph->applyNodeVisitorLocal(*m_pSorProxInitNodeVisitor);
-
+    if(m_nLocalNodes){
+        m_pContactGraph->applyNodeVisitorLocal(*m_pSorProxInitNodeVisitor);
+    }
     // Init Remote nodes
-    m_pContactGraph->applyNodeVisitorRemote(*m_pSorProxInitNodeVisitor);
+    if(m_nRemoteNodes){
+        m_pContactGraph->applyNodeVisitorRemote(*m_pSorProxInitNodeVisitor);
+    }
 
     // Init SplitBodyNodes has already been done during communication!
     //m_pContactGraph->applyNodeVisitorSplitBody(*m_pSorProxInitSplitBodyNodeVisitor);
@@ -324,8 +336,15 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
 void InclusionSolverCONoG::sorProxOverAllNodes() {
 
-    bool doConvergenceCheck = m_globalIterationCounter % (m_Settings.m_convergenceCheckRatio*m_Settings.m_splitNodeUpdateRatio)  == 0
-                                && m_globalIterationCounter >= m_Settings.m_MinIter;
+    bool doConvergenceCheck;
+
+    // if only local nodes then we do always a convergence check after each global iteration
+    if(m_nLocalNodes>=0 && m_nRemoteNodes == 0 && m_nSplitBodyNodes == 0){
+        doConvergenceCheck = true;
+    }else{
+        doConvergenceCheck = m_globalIterationCounter % (m_Settings.m_convergenceCheckRatio*m_Settings.m_splitNodeUpdateRatio)  == 0
+                             && m_globalIterationCounter >= m_Settings.m_MinIter;
+    }
 
     // cache the velocities if convergence check should be done
     if( doConvergenceCheck ) {
@@ -343,31 +362,35 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
                 (*bodyIt)->m_pSolverData->m_uBuffer.m_back = (*bodyIt)->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
             }
         }
-
     }
 
     // Move over all local nodes, and do a sor prox step
-    m_pContactGraph->applyNodeVisitorLocal(*m_pSorProxStepNodeVisitor);
+    if(m_nLocalNodes){
+        m_pContactGraph->applyNodeVisitorLocal(*m_pSorProxStepNodeVisitor);
+    }
     // Move over all remote nodes, and do a sor prox step
-    m_pContactGraph->applyNodeVisitorRemote(*m_pSorProxStepNodeVisitor);
+    if(m_nRemoteNodes){
+        m_pContactGraph->applyNodeVisitorRemote(*m_pSorProxStepNodeVisitor);
+    }
 
 
     // Do this only after a certain numer of iterations!
-    if(m_globalIterationCounter % m_Settings.m_splitNodeUpdateRatio == 0 ) {
-        // Communicate all remote velocities to neighbour (if nSplitBodies != 0 || remoteNodes != 0)
-        m_pInclusionComm->communicateSplitBodyUpdate(m_globalIterationCounter);
+    if(m_nSplitBodyNodes){
+        if(m_globalIterationCounter % m_Settings.m_splitNodeUpdateRatio == 0 ) {
+            // Communicate all remote velocities to neighbour (if nSplitBodies != 0 || remoteNodes != 0)
+            m_pInclusionComm->communicateSplitBodyUpdate(m_globalIterationCounter);
 
-        // Safety test if all updates have been received!
-        SplitNodeCheckUpdateVisitor<ContactGraphType> v;
-        m_pContactGraph->applyNodeVisitorSplitBody(v);
-        // Move over all split body nodes and solve the billateral constraint directly
-        //(if nSplitBodies != 0)
-        m_pContactGraph->applyNodeVisitorSplitBody(*m_pSorProxStepSplitNodeVisitor);
-        // Communicate all local solved split body velocities
-        //(if nSplitBodies != 0 || remoteNodes != 0)
-        m_pInclusionComm->communicateSplitBodySolution(m_globalIterationCounter);
+            // Safety test if all updates have been received!
+            SplitNodeCheckUpdateVisitor<ContactGraphType> v;
+            m_pContactGraph->applyNodeVisitorSplitBody(v);
+            // Move over all split body nodes and solve the billateral constraint directly
+            //(if nSplitBodies != 0)
+            m_pContactGraph->applyNodeVisitorSplitBody(*m_pSorProxStepSplitNodeVisitor);
+            // Communicate all local solved split body velocities
+            //(if nSplitBodies != 0 || remoteNodes != 0)
+            m_pInclusionComm->communicateSplitBodySolution(m_globalIterationCounter);
+        }
     }
-
 
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
@@ -430,11 +453,20 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
         }
 
-        //Communicates our converged flags and sets it to false if some neighbours are not convgered
-        //
-        m_bConverged =  m_pInclusionComm->communicateConvergence(m_bConverged);
+
+        if(m_nLocalNodes>=0 && m_nRemoteNodes == 0 && m_nSplitBodyNodes == 0){
+
+        }else{
+             //Communicates our converged flags and sets it to false if some neighbours are not convgered
+             m_bConverged =  m_pInclusionComm->communicateConvergence(m_bConverged);
+        }
+
+
 
     } // end doConvergence
+    else{
+        m_bConverged = false;
+    }
 }
 
 
