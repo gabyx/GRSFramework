@@ -69,8 +69,9 @@ private:
     boost::shared_ptr< DynamicsSystemType > m_pDynSys;
     boost::shared_ptr< BodyCommunicator > m_pBodyCommunicator;
 
-    typedef typename MPILayer::ProcessCommunicator::ProcessInfoType ProcessInfoType;
-    boost::shared_ptr< MPILayer::ProcessCommunicator > m_pProcCommunicator;
+    typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
+    typedef typename ProcessCommunicatorType::ProcessInfoType ProcessInfoType;
+    boost::shared_ptr< ProcessCommunicatorType > m_pProcCommunicator;
 
     void writeAllOutput();
 

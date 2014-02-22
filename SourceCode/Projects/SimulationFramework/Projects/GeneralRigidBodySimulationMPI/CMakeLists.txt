@@ -46,6 +46,7 @@ SET(SINGELTON_INC
 
 SET( SINGELTON_SRC
     ${COMMONSOURCE_DIR}/src/Singeltons/FileManager.cpp
+    ${PROJECT_SOURCE_DIR}/include/Singeltons/MPIGlobalCommunicators.hpp
 )
 
 SET( STATES_INC
@@ -76,6 +77,8 @@ SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/MultiBodySimFilePart.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MultiBodySimFileMPI.hpp
     ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/MPICommunicatorId.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/MPIMessageTag.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPIMessages.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPICommunication.hpp

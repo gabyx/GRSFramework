@@ -9,7 +9,7 @@
 #include "CartesianGrid.hpp"
 
 //#include "Collider.hpp"
-
+#include "MPIGlobalCommunicators.hpp"
 #include "MPITopology.hpp"
 
 namespace MPILayer {
@@ -25,8 +25,6 @@ public:
 
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    static const int MASTER_RANK = 0;
-
     ProcessInformation(MPI_Comm comm): m_comm(comm) {
         initialize();
         m_procTopo.init(m_rank);
@@ -36,36 +34,35 @@ public:
 
     }
 
-    RankIdType getMasterRank() const {
+    inline RankIdType getMasterRank() const {
         return MASTER_RANK;
     };
 
-    bool isMasterRank() const{
+    inline bool isMasterRank() const{
         if(m_rank == MASTER_RANK){
             return true;
         }
         return false;
     }
 
-    RankIdType getRank() const {
+    inline RankIdType getRank() const {
         return m_rank;
     };
-    void setRank(unsigned int rank) {
-        m_rank = rank;
-    };
 
-    unsigned int getNProcesses() const {
+    inline unsigned int getNProcesses() const {
         return m_nProcesses;
     };
 
-    MPI_Comm getMPIComm(){
+    inline MPI_Comm getCommunicator() const{
         return m_comm;
-    }
+    };
 
-    std::string getName() const {
+    /** Global name */
+    inline std::string getName() const {
         return m_name;
     };
-    void setName(std::string name) {
+
+    inline void setName(std::string name) {
         m_name = name;
     };
 
@@ -78,28 +75,39 @@ public:
     ProcessTopology* getProcTopo(){
         return &m_procTopo;
     };
+    const ProcessTopology* getProcTopo() const{
+        return &m_procTopo;
+    };
 
-private:
+protected:
+
+    static const int MASTER_RANK = 0;
 
     void initialize() {
-        int rank;
+        int v;
 
-        MPI_Comm_rank(m_comm,&rank);
-        m_rank = rank;
-        MPI_Comm_size(m_comm,&this->m_nProcesses);
-
+        // get world rank
+        MPI_Comm comm = MPIGlobalCommunicators::getSingletonPtr()->getCommunicator(MPILayer::MPICommunicatorId::WORLD_COMM);
+        MPI_Comm_rank(comm,&v);
         std::stringstream s;
-        s << "SimProcess_"<<m_rank;
+        s << "SimProcess_"<<v;
         m_name = s.str();
+
+        //Get specific rank and size for this comm
+        MPI_Comm_rank(m_comm,&v);
+        m_rank = v;
+        MPI_Comm_size(m_comm,&v);
+        m_nProcesses = v;
+
     };
 
 
-    MPI_Comm m_comm; ///< Simulation communicator
+    MPI_Comm m_comm; ///< communicator
 
     ProcessTopology m_procTopo;
 
     RankIdType m_rank; ///< rank of communicator m_comm
-    int m_nProcesses;  ///< processes in m_comm
+    unsigned int m_nProcesses;  ///< processes in m_comm
     std::string m_name;
 };
 

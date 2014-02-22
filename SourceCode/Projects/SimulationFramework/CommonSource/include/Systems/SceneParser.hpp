@@ -136,7 +136,7 @@ public:
 
         } catch(ticpp::Exception& ex) {
             LOG(m_pSimulationLog,  "Scene XML error: "  << ex.what() <<std::endl;);
-            exit(-1);
+            ERRORMSG( "Scene XML error: "  << ex.what() <<std::endl );
         }
 
 

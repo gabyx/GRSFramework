@@ -133,8 +133,7 @@ private:
     MPILayer::NeighbourMessageWrapperBodies< BodyCommunicator > m_message;
 
     boost::shared_ptr< DynamicsSystemType> m_pDynSys;
-    boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
-    boost::shared_ptr< ProcessInfoType > m_pProcInfo;
+    boost::shared_ptr< ProcessCommunicatorType > m_pProcComm;
 
 
     RankIdType m_rank;

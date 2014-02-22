@@ -3,6 +3,8 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include <boost/shared_ptr.hpp>
+
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
@@ -46,7 +48,7 @@ void SimulationManagerMPI::setup() {
 }
 
 
-void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath, ) {
+void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
     //Each Process copies its SceneFile.xml to the folders, that each Process can read its own file (better)
     boost::filesystem::path sceneFilePathNew = FileManager::getSingletonPtr()->copyFile(sceneFilePath,
@@ -67,8 +69,8 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath, ) {
 
     // MPI Process Commnunicator
 
-    m_pProcCommunicator = boost::shared_ptr<MPILayer::ProcessCommunicator >(new MPILayer::ProcessCommunicator(
-                                                    MPILayer::MPIGlobalCommunicators::getSingeltonPtr()->getCommunicator(
+    m_pProcCommunicator = boost::shared_ptr<ProcessCommunicatorType >(new ProcessCommunicatorType(
+                                                    MPILayer::MPIGlobalCommunicators::getSingletonPtr()->getCommunicator(
                                                       MPILayer::MPICommunicatorId::SIM_COMM
                                                     )
                                            ));
@@ -97,7 +99,9 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath, ) {
 
     //Uncomment if StateRecorderType = StateRecorderBodys
     //m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(true,m_pProcCommunicator->getProcInfo()->getRank()));
-    m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(m_nGlobalSimBodies, m_pProcCommunicator->m_pProcInfo));
+
+    m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(m_nGlobalSimBodies,
+                                                                boost::static_pointer_cast<ProcessCommunicatorType::ProcessInfoType>(m_pProcCommunicator)));
     // =====================================================
 
 
@@ -135,12 +139,12 @@ void SimulationManagerMPI::checkNumberOfBodiesInProcess() {
     boost::timer::cpu_timer timer;
 
     timer.start();
-    LOG(m_pSimulationLog,  "MPI> Body check,  MPI_Reduce... "<< std::endl;);
-    MPI_Reduce(&nSimBodies,&numberOfBodiesInSimulation, 1, MPI_INT, MPI_SUM, ProcessInfoType::MASTER_RANK, MPI_COMM_WORLD);
+    LOG(m_pSimulationLog,  "MPI> Body check,  MPI_Reduce... "<< std::endl;)
+    MPI_Reduce(&nSimBodies,&numberOfBodiesInSimulation, 1, MPI_INT, MPI_SUM, m_pProcCommunicator->getMasterRank(), m_pProcCommunicator->getCommunicator());
     timer.stop();
     double elapsed = ((double)timer.elapsed().wall)*1e-9;
 
-    if(m_pProcCommunicator->getProcInfo()->isMasterRank()) {
+    if(m_pProcCommunicator->isMasterRank()) {
         LOG(m_pSimulationLog,  "MPI> Allreduce needed: " << elapsed <<"sec."<<std::endl; );
 
         if(numberOfBodiesInSimulation != m_nGlobalSimBodies) {
@@ -161,9 +165,9 @@ void SimulationManagerMPI::getMaxRuntime(PREC runtime){
     LOG(m_pSimulationLog,  "MPI> Get Max Runtime,  MPI_Reduce... "<< std::endl;);
     PREC maxRuntime;
 
-    MPI_Reduce(&runtime,&maxRuntime, 1, MPI_DOUBLE, MPI_MAX, ProcessInfoType::MASTER_RANK, MPI_COMM_WORLD);
+    MPI_Reduce(&runtime,&maxRuntime, 1, MPI_DOUBLE, MPI_MAX, m_pProcCommunicator->getMasterRank(), m_pProcCommunicator->getCommunicator());
 
-    if(m_pProcCommunicator->getProcInfo()->isMasterRank()){
+    if(m_pProcCommunicator->isMasterRank()){
         LOG(m_pSimulationLog, "---> Total runtime for simulation needed: "<<maxRuntime<< " sec. " << std::endl;);
     }else{
         LOG(m_pSimulationLog, "---> Runtime sent ... !"<< std::endl;);
@@ -250,7 +254,7 @@ void SimulationManagerMPI::initSim() {
 
     MPILayer::GenericMessage1<boost::filesystem::path> message;
 
-    if(m_pProcCommunicator->getProcInfo()->isMasterRank()) { // Only master process
+    if(m_pProcCommunicator->isMasterRank()) { // Only master process
         // Get new sim folder path relative to global directory
 
         m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
@@ -270,10 +274,10 @@ void SimulationManagerMPI::initSim() {
 
         message.m_data.get<0>() = m_SimFolderPath;
 
-        m_pProcCommunicator->sendBroadcast(message, MPI_COMM_WORLD);
+        m_pProcCommunicator->sendBroadcast(message);
     } else { // All other processes
 
-        m_pProcCommunicator->receiveBroadcast(message, m_pProcCommunicator->getProcInfo()->getMasterRank(), MPI_COMM_WORLD);
+        m_pProcCommunicator->receiveBroadcast(message, m_pProcCommunicator->getMasterRank());
         m_SimFolderPath = message.m_data.get<0>();
         LOG(m_pSimulationLog,"MPI> Received new simulation directory: "<< m_SimFolderPath <<std::endl;);
     }

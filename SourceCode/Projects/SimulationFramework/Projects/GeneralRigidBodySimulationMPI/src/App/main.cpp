@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     // Scope that all stuff is deconstructed before MPI FINALIZE IS CALLED
     {
 
-        new MPIGlobalCommunicators();
+        new MPILayer::MPIGlobalCommunicators();
 
 
          // Add the process rank to the Global File Path for this Process...
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 
 
         // Construct the communicator for the Simulation
-        MPILayer::MPIGlobalCommunicators::getSingeltonPtr()->addCommunicator(MPILayer::MPICommunicatorId::SIM_COMM,MPI_COMM_WORLD);
+        MPILayer::MPIGlobalCommunicators::getSingletonPtr()->addCommunicator(MPILayer::MPICommunicatorId::SIM_COMM,MPI_COMM_WORLD);
 
         // Only Simulation Processes enter this region:
             SimulationManagerMPI mgr;

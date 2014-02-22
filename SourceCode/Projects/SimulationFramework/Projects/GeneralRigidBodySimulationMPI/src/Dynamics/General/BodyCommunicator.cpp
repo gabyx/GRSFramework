@@ -1,5 +1,6 @@
 #include "BodyCommunicator.hpp"
 
+#include "MPIMessageTag.hpp"
 
 BodyCommunicator::BodyCommunicator(  boost::shared_ptr< DynamicsSystemType> pDynSys ,
                                      boost::shared_ptr< ProcessCommunicatorType > pProcCom):
@@ -7,12 +8,11 @@ BodyCommunicator::BodyCommunicator(  boost::shared_ptr< DynamicsSystemType> pDyn
             m_globalLocal(pDynSys->m_SimBodies),
             m_globalRemote(pDynSys->m_RemoteSimBodies),
             m_globalGeometries(pDynSys->m_globalGeometries),
-            m_pProcCom(pProcCom),
-            m_pProcInfo(m_pProcCom->getProcInfo()),
-            m_pProcTopo(m_pProcCom->getProcInfo()->getProcTopo()),
-            m_nbDataMap(m_pProcCom->getProcInfo()->getRank()),
-            m_rank(m_pProcCom->getProcInfo()->getRank()),
-            m_nbRanks(m_pProcCom->getProcInfo()->getProcTopo()->getNeighbourRanks()),
+            m_pProcComm(pProcCom),
+            m_pProcTopo(m_pProcComm->getProcTopo()),
+            m_nbDataMap(m_pProcComm->getRank()),
+            m_rank(m_pProcComm->getRank()),
+            m_nbRanks(m_pProcComm->getProcTopo()->getNeighbourRanks()),
             m_message(this)
 {
 
@@ -77,6 +77,7 @@ void BodyCommunicator::communicate(PREC currentSimTime){
         addLocalBodyExclusiveToNeighbourMap(body,neighbours);
 //        m_nbDataMap.addLocalBodyExclusive(body,neighbours);
 
+
         //Check owner of this body
         typename ProcessInfoType::RankIdType ownerRank;
         m_pProcTopo->belongsBodyToProcess(body,ownerRank);
@@ -86,8 +87,8 @@ void BodyCommunicator::communicate(PREC currentSimTime){
                 LOGBC(m_pSimulationLog,"--->\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<"This is not good as we cannot send any message to some other rank other then a neighbour!");
                 ERRORMSG("---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<"This is not good as we cannot send any message to some other rank other then a neighbour!");
             }
+        LOGBC(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" has owner rank: "<< (ownerRank) << ", proccess rank: " << m_pProcComm->getRank()<<std::endl;)
         }
-        LOGBC(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" has owner rank: "<< (ownerRank) << ", proccess rank: " << m_pProcInfo->getRank()<<std::endl;)
 
         //Set the owning rank for this body:
 
@@ -207,7 +208,7 @@ void BodyCommunicator::sendMessagesToNeighbours(){
         LOGBC(m_pSimulationLog,"--->\t\t Send message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_message.setRank(*it);
-        m_pProcCom->sendMessageToRank(m_message,*it, MPILayer::MPIMessageTags::BODY_MESSAGE );
+        m_pProcComm->sendMessageToRank(m_message,*it, MPILayer::MPIMessageTag::BODY_MESSAGE );
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
@@ -216,11 +217,11 @@ void BodyCommunicator::sendMessagesToNeighbours(){
 void BodyCommunicator::receiveMessagesFromNeighbours(){
     LOGBC(m_pSimulationLog,"MPI>\t Receive all messages (BODY_MESSAGE) from neighbours!"<<std::endl;)
     // set the rank of the receiving message automatically! inside the function!
-    m_pProcCom->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTags::BODY_MESSAGE );
+    m_pProcComm->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTag::BODY_MESSAGE );
     LOGBC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
 
     // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
-    m_pProcCom->waitForAllSends();
+    m_pProcComm->waitForAllSends();
 }
 
 

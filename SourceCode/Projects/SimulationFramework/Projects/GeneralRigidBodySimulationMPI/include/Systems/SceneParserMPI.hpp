@@ -151,13 +151,13 @@ protected:
                 throw ticpp::Exception("---> String conversion in processMPISettings: dimension failed");
             }
             // saftey check
-            if(dim(0)*dim(1)*dim(2) != m_pProcCommunicator->getProcInfo()->getNProcesses()) {
-                LOG(m_pSimulationLog,"---> Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcCommunicator->getProcInfo()->getNProcesses() <<" Processes"<<std::endl; );
+            if(dim(0)*dim(1)*dim(2) != m_pProcCommunicator->getNProcesses()) {
+                LOG(m_pSimulationLog,"---> Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcCommunicator->getNProcesses() <<" Processes"<<std::endl; );
                 sleep(2);
                 throw ticpp::Exception("---> You have launched to many processes for the grid!");
             }
 
-            m_pProcCommunicator->getProcInfo()->createProcTopoGrid(minPoint,maxPoint, dim);
+            m_pProcCommunicator->createProcTopoGrid(minPoint,maxPoint, dim);
 
         } else {
             throw ticpp::Exception("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
@@ -314,7 +314,7 @@ protected:
         for(auto bodyIt= simBodies.begin(); bodyIt!=simBodies.end();
         /*No incremente because we delete inside the loop invalidating iterators*/ ) {
         // Check if Body belongs to the topology! // Check CoG!
-                if(!m_pProcCommunicator->getProcInfo()->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {
+                if(!m_pProcCommunicator->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {
                     LOG(m_pSimulationLog, "---> Reject Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
 
                     // Delete the init state

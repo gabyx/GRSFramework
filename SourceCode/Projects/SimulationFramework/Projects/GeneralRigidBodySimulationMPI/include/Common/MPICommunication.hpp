@@ -22,10 +22,9 @@
 #include "StaticAssert.hpp"
 #include "TypeDefs.hpp"
 
-#include "Singleton.hpp"
-
 #include "MPIInformation.hpp"
-
+#include "MPIMessageTag.hpp"
+#include "MPICommunicatorId.hpp"
 
 namespace MPILayer {
 
@@ -33,66 +32,6 @@ namespace MPILayer {
 /**
 *    Important struct to define all MPI message tags used in this framework!
 */
-
-
-
-
-enum class MPICommunicatorId: unsigned int{
-        WORLD_COMM = 0,
-        SIM_COMM = 1,                 /// All processes
-
-        INCLUSION_CONVERGENCE_COMM = 2 /// Only processes which take part in the convergence comm
-};
-
-/**
-* @brief Collects the top most important communicators which are fixed during the simulation
-* e.g. SIM_COMM and WORLD_COMM usually
-*/
-class MPIGlobalCommunicators : public Utilities::Singleton<MPIGlobalCommunicators>{
-    public:
-        MPIGlobalCommunicators(){
-            // Add MPI WORLD
-            m_communicators.insert(std::make_pair(static_cast<unsigned int>(MPICommunicatorId::WORLD_COMM),
-                                                  MPI_COMM_WORLD ));
-
-        }
-        void addCommunicator(MPICommunicatorId commId, MPI_Comm comm){
-            auto res = m_communicators.insert(std::make_pair(static_cast<unsigned int>(commId),comm));
-            if(!res.second){
-                ERRORMSG("Communicator with id: " << static_cast<unsigned int>(commId) << " already exists!")
-            }
-        }
-
-        MPI_Comm getCommunicator(MPICommunicatorId commId){
-            auto res = m_communicators.find(static_cast<unsigned int>(commId));
-            if(res == m_communicators.end()){
-                ERRORMSG("Communicator with id: " << static_cast<unsigned int>(commId) <<" does not exists!")
-            }
-            return (res->second);
-        }
-
-    private:
-        std::map<unsigned int, MPI_Comm> m_communicators;
-};
-
-enum class MPIMessageTags: unsigned int {
-    GENERICMESSAGE = 1 << 0,
-    STDSTRING =      1 << 1,
-    BODY_MESSAGE =   1 << 2,
-    EXTERNALCONTACTS_MESSAGE = 1 << 3,
-    SPLITBODYFACTOR_MESSAGE  = 1 << 4,
-    SPLITBODYUPDATE_MESSAGE  = 1 << 5,
-    SPLITBODYSOLUTION_MESSAGE = 1<< 6
-};
-
-class MPIMessageTag {
-    public:
-        MPIMessageTag( MPIMessageTags t): m_t(t){};
-
-        int getInt(){return static_cast<int>(m_t);}
-    private:
-        MPIMessageTags m_t;
-};
 
 
 /**
@@ -166,16 +105,20 @@ private:
 };
 
 
-class ProcessCommunicator {
+class ProcessCommunicator : public ProcessInformation{
 public:
 
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    //DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef MPILayer::ProcessInformation ProcessInfoType;
+    typedef ProcessInformation ProcessInfoType;
+    typedef ProcessInfoType BaseType;
     typedef typename ProcessInfoType::RankIdType RankIdType;
 
+    /**
+    * General communication is done with the communicator comm, but also with other communicators is possible
+    */
     ProcessCommunicator(MPI_Comm comm):
-        m_pProcessInfo(new ProcessInfoType(comm)),
+        ProcessInformation(comm),
         m_binary_message(1024*1024)
     {
         if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
@@ -184,70 +127,71 @@ public:
             ERRORMSG("SimulationLog does not yet exist? Did you create it?")
         }
 
-        m_comm = m_pProcessInfo->getMPIComm();
-
     };
 
 
     ~ProcessCommunicator(){
         for(auto it = m_communicators.begin(); it!= m_communicators.end(); it++){
             auto error =  MPI_Comm_free( &(it->second) );
-            ASSERTMPIERROR(error, "MPI_Comm_free failed in rank: " << m_pProcessInfo->getRank());
+            ASSERTMPIERROR(error, "MPI_Comm_free failed in rank: " << this->getRank());
         }
     }
 
 
     template<typename T>
-    void sendBroadcast(const T & t, MPI_Comm comm){
+    void sendBroadcast(const T & t, RankIdType rootRank, MPI_Comm comm){
         m_binary_message.clear();
         m_binary_message << t ;
         int size = m_binary_message.size();
-        int error = MPI_Bcast(&(size), 1 , MPI_INT, m_pProcessInfo->getRank(), comm); // First send size, because we cannot probe on the other side!! Collective Communication
+        int error = MPI_Bcast(&(size), 1 , MPI_INT, rootRank, comm); // First send size, because we cannot probe on the other side!! Collective Communication
         ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcastT1 failed!");
-        MPI_Bcast(const_cast<char*>(m_binary_message.data()), m_binary_message.size(), m_binary_message.getMPIDataType(), m_pProcessInfo->getRank(), comm);
+        MPI_Bcast(const_cast<char*>(m_binary_message.data()),
+                  m_binary_message.size(),
+                  m_binary_message.getMPIDataType(),
+                  rootRank, comm);
         ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcastT2 failed!");
     };
     template<typename T>
-    inline void sendBroadcast(T & t){sendBroadcast(t,m_comm);}
+    inline void sendBroadcast(T & t){sendBroadcast(t,this->m_rank, this->m_comm);}
 
     template<typename T>
-    void receiveBroadcast(T & t, RankIdType rank, MPI_Comm comm) {
+    void receiveBroadcast(T & t, RankIdType rootRank, MPI_Comm comm) {
         int message_length;
 
-        int error = MPI_Bcast(&message_length, 1 , MPI_INT, rank, comm);
+        int error = MPI_Bcast(&message_length, 1 , MPI_INT, rootRank, comm);
         ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcastT1 failed!");
         m_binary_message.resize(message_length);
 
-        error = MPI_Bcast(const_cast<char*>(m_binary_message.data()), m_binary_message.size(), m_binary_message.getMPIDataType(), rank, comm);
+        error = MPI_Bcast(const_cast<char*>(m_binary_message.data()), m_binary_message.size(), m_binary_message.getMPIDataType(), rootRank, comm);
         ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcastT2 failed!");
         m_binary_message >> t;
     };
     template<typename T>
-    inline void receiveBroadcast(T & t, RankIdType rank){receiveBroadcast(t,rank,m_comm);}
+    inline void receiveBroadcast(T & t, RankIdType rootRank){receiveBroadcast(t,rootRank,this->m_comm);}
 
 
-    void sendBroadcast(const std::string & t, MPI_Comm comm){
+    void sendBroadcast(const std::string & t, RankIdType rootRank,  MPI_Comm comm){
         int size = t.size();
-        int error = MPI_Bcast(&(size), 1 , MPI_INT, m_pProcessInfo->getRank(), comm); // First send size, because we cannot probe on the other side!! Collective Communication
+        int error = MPI_Bcast(&(size), 1 , MPI_INT, rootRank, comm); // First send size, because we cannot probe on the other side!! Collective Communication
         ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcast1 failed!");
-        MPI_Bcast(const_cast<char*>(t.data()), t.size(), MPI_CHAR, m_pProcessInfo->getRank(), comm);
+        MPI_Bcast(const_cast<char*>(t.data()), t.size(), MPI_CHAR, rootRank, comm);
         ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcast2 failed!");
     };
-    inline void sendBroadcast(const std::string & t){sendBroadcast(t,m_comm);}
+    inline void sendBroadcast(const std::string & t){sendBroadcast(t,this->m_rank, this->m_comm);}
 
 
-    void receiveBroadcast(std::string & t, RankIdType rank, MPI_Comm comm) {
+    void receiveBroadcast(std::string & t, RankIdType rootRank, MPI_Comm comm) {
         int message_length;
 
-        int error = MPI_Bcast(&message_length, 1 , MPI_INT, rank, comm);
+        int error = MPI_Bcast(&message_length, 1 , MPI_INT, rootRank, comm);
         ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcast1 failed!");
         t.resize(message_length);
 
-        error = MPI_Bcast(const_cast<char*>(t.data()), t.size() , MPI_CHAR, rank, comm);
+        error = MPI_Bcast(const_cast<char*>(t.data()), t.size() , MPI_CHAR, rootRank, comm);
         ASSERTMPIERROR(error,"ProcessCommunicator:: receiveBroadcast2 failed!");
         m_binary_message >> t;
     };
-    inline void receiveBroadcast(std::string & t, RankIdType rank){receiveBroadcast(t,rank,m_comm);}
+    inline void receiveBroadcast(std::string & t, RankIdType rootRank){receiveBroadcast(t,rootRank,m_comm);}
 
 
     template<typename T>
@@ -259,7 +203,7 @@ public:
         STATIC_ASSERT2(std::is_trivial<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES")
         ASSERTMSG( comm == MPI_COMM_WORLD,"This command is only implemented for MPI_COMM_WORLD")
 
-        gatheredValues.resize(m_pProcessInfo->getNProcesses());
+        gatheredValues.resize(this->getNProcesses());
 
         char * p = static_cast<char*>(gatheredValues.data());
 
@@ -268,7 +212,12 @@ public:
     }
     template<typename T>
     void allGather(T value, std::vector<T> & gatheredValues){ allGather(value,gatheredValues,m_comm); }
-
+    template<typename T>
+    void allGather(T value, std::vector<T> & gatheredValues, MPICommunicatorId id){
+        auto it = m_communicators.find(static_cast<unsigned int>(id));
+        ASSERTMSG(it!=m_communicators.end(),"This communicator does not exist in the set in rank: " << this->getRank())
+        allGather(value,gatheredValues,m_comm);
+    }
 
     template<typename T>
     void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm ){
@@ -286,13 +235,13 @@ public:
         // If MPI uses buffering, these message might have been sent before the receive has been posted
         // if there is no buffering in MPI we post the sends (leave the buffer existing)
         int error = MPI_Isend( const_cast<char*>(message.data()) , message.size(), message.getMPIDataType(),
-                              rank, tag.getInt(), comm, req );
+                              rank, static_cast<int>(tag), comm, req );
         ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToRank failed!");
 
         // IMPORTANT! Always call a waitForAllSends() after this call!!!
     }
     template<typename T>
-    void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag ){ sendMessageToRank(t,rank,tag,m_comm);}
+    void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag ){ sendMessageToRank(t,rank,tag,this->m_comm);}
 
     void waitForAllSends(){
 
@@ -330,7 +279,7 @@ public:
                 // Probe for a message!
                 //LOGPC(m_pSimulationLog,  "--->\t\t Waiting for message from neighbour: " << *ranksIt << std::endl;)
 
-                int error = MPI_Iprobe( (int)(*ranksIt), tag.getInt(), comm, &flag, &status); // Non blocking test if message is there!
+                int error = MPI_Iprobe( (int)(*ranksIt), static_cast<int>(tag), comm, &flag, &status); // Non blocking test if message is there!
                 ASSERTMPIERROR(error,"ProcessCommunicator:: receiveMessageFromRanks1 failed for rank " << *ranksIt )
 
                 if(flag){ // We received a message
@@ -363,20 +312,15 @@ public:
 
     };
     template<typename T, typename List>
-    void receiveMessageFromRanks(const T & t, const List & ranks, MPIMessageTag tag ){ receiveMessageFromRanks(t,ranks,tag,m_comm);}
-
-
-    boost::shared_ptr<ProcessInfoType> getProcInfo() {
-        return m_pProcessInfo;
-    }
+    void receiveMessageFromRanks(T & t, const List & ranks, MPIMessageTag tag ){ receiveMessageFromRanks(t,ranks,tag,this->m_comm);}
 
     /** May be called after a process topo has been made in the process info*/
     void initializeBuffers() {
-        if( ! m_pProcessInfo->getProcTopo() ){
+        if( ! this->getProcTopo() ){
             ERRORMSG("initializeBuffers:: ProcessTopology is not created!")
         }else{
 
-            typename ProcessInfoType::ProcessTopologyType::NeighbourRanksListType ranks = m_pProcessInfo->getProcTopo()->getNeighbourRanks();
+            typename ProcessInfoType::ProcessTopologyType::NeighbourRanksListType ranks = this->getProcTopo()->getNeighbourRanks();
 
             // Reserve space , if not the vector might reallocate itself!!!
             m_sendRequests.reserve(ranks.size());
@@ -396,31 +340,50 @@ public:
         }
     }
 
+    /**
+    * Inserts a new splitted communicator with id newCommId if color is not -1
+    * Rank ordering is preserved  from the old communicator
+    */
+    void generateCommunicatorSplitAndUpdate(MPICommunicatorId newCommId, int groupColor){
 
-    void generateCommunicatorSplit(MPICommunicatorId commId, int groupColor){
+        unsigned int id = static_cast<unsigned int>(newCommId);
         // groupColor < 0  is MPI_UNDEFINED
         if(groupColor<0){
             groupColor = MPI_UNDEFINED;
         }
 
-        auto res = m_communicators.insert(std::make_pair(static_cast<unsigned int>(commId),MPI_Comm()));
-        if(!res.second){
-            // Free communicator
-            auto error =  MPI_Comm_free( &(res.first->second) );
-            ASSERTMPIERROR(error, "MPI_Comm_free failed in rank: " << m_pProcessInfo->getRank());
+        MPI_Comm comm;
+        /// Collective call, all processes in comm need to call this function!
+        auto error = MPI_Comm_split(m_comm,groupColor,this->m_rank,&comm);
+        ASSERTMPIERROR(error, "MPI_Comm_split failed in rank: " << this->m_rank);
+
+        auto it = m_communicators.find(id);
+        if(it != m_communicators.end()){
+             // Free communicator
+                auto error =  MPI_Comm_free( &(it->second) );
+                ASSERTMPIERROR(error, "MPI_Comm_free failed in rank: " << this->m_rank)
         }
 
-        // Collective call, all processes in comm need to call this function!
-        auto error = MPI_Comm_split(m_comm,groupColor,m_pProcessInfo->getRank(),&(res.first->second));
-        ASSERTMPIERROR(error, "MPI_Comm_split failed in rank: " << m_pProcessInfo->getRank());
+        //Overwrite or insert new communicator only if it is not a null comm
+        if(comm != MPI_COMM_NULL){
+            auto res = m_communicators[id] = comm;
+        }
+    }
 
+    /** Return a copy of the communicator with id commId*/
+    using BaseType::getCommunicator;
+    MPI_Comm getCommunicator( MPICommunicatorId commId ){
+        auto it = m_communicators.find(static_cast<unsigned int>(commId));
+        if(it!= m_communicators.end()){
+            return it->second;
+        }else{
+            ERRORMSG("Communicator with id: " << static_cast<unsigned int>(commId) <<" does not exist!");
+        }
     }
 
 private:
 
     Logging::Log *  m_pSimulationLog;
-
-    boost::shared_ptr<ProcessInfoType> m_pProcessInfo;
 
     // Standart binary message for standart communication
     MessageBinarySerializer m_binary_message; // 1 MB serialization buffer
@@ -432,8 +395,7 @@ private:
     std::vector<MPI_Request>                      m_sendRequests; ///< these are the requests, these are pointers!
     std::vector<MPI_Status>                       m_sendStatuses;
 
-    MPI_Comm m_comm; /// General Communicator from ProcessInfo;
-
+    /** These communicators are subject to change during communications, id's are chosen from MPICommunicatorId enumration */
     std::map<unsigned int, MPI_Comm> m_communicators;
 };
 

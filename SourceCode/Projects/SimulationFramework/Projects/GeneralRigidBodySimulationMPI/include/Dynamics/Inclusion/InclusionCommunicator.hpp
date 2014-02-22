@@ -111,7 +111,6 @@ private:
 
     boost::shared_ptr< DynamicsSystemType >      m_pDynSys;
     boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
-    boost::shared_ptr< ProcessInfoType >         m_pProcInfo;
     boost::shared_ptr< ContactGraphType >        m_pContactGraph;
     boost::shared_ptr< BodyCommunicator>         m_pBodyComm;
 

@@ -31,8 +31,7 @@ InclusionSolverCONoG::InclusionSolverCONoG(
     m_pCollisionSolver(pCollisionSolver),
     m_pBodyComm(pBodyComm),
     m_pProcComm(pProcCom),
-    m_pProcInfo(m_pProcComm->getProcInfo()),
-    m_nbRanks(m_pProcComm->getProcInfo()->getProcTopo()->getNeighbourRanks()) {
+    m_nbRanks(m_pProcComm->getProcTopo()->getNeighbourRanks()) {
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
@@ -178,9 +177,9 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
 
 #if CoutLevelSolverWhenContact>0
         LOG(m_pSolverLog,
-            "---> Nodes Local: "<< nodesLocal.size() <<std::endl<<
-            "---> Nodes Remote: "<< nodesRemote.size() <<std::endl<<
-            "---> Nodes SplitBodies: "<< nodesSplitBody.size() <<std::endl;
+            "---> Nodes Local: "<< m_nodesLocal.size() <<std::endl<<
+            "---> Nodes Remote: "<< m_nodesRemote.size() <<std::endl<<
+            "---> Nodes SplitBodies: "<< m_nodesSplitBody.size() <<std::endl;
            );
 #endif
 
@@ -266,10 +265,15 @@ void InclusionSolverCONoG::doSorProx() {
     while(true) {
 
         m_bConverged = true;
+
 #if CoutLevelSolverWhenContact>1
         LOG(m_pSolverLog,"---> Next iteration: "<< m_globalIterationCounter << std::endl);
 #endif
+
+
         sorProxOverAllNodes(); // Do one global Sor Prox Iteration
+
+
 
 #if CoutLevelSolverWhenContact>2
         LOG(m_pSolverLog, " u_e = [ ");
@@ -337,14 +341,15 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     bool doConvergenceCheck;
-
     // if only local nodes then we do always a convergence check after each global iteration
-    if(m_nLocalNodes>=0 && m_nRemoteNodes == 0 && m_nSplitBodyNodes == 0){
+    if( m_pContactGraph->isUncoupled() ){
         doConvergenceCheck = true;
     }else{
         doConvergenceCheck = m_globalIterationCounter % (m_Settings.m_convergenceCheckRatio*m_Settings.m_splitNodeUpdateRatio)  == 0
                              && m_globalIterationCounter >= m_Settings.m_MinIter;
     }
+
+    doConvergenceCheck = false;
 
     // cache the velocities if convergence check should be done
     if( doConvergenceCheck ) {
@@ -428,6 +433,10 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
                 }
             }
 
+            #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "---> Convergence criteria (InVelocity) converged: "<<  m_bConverged<< std::endl;);
+            #endif
+
         } else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity) {
 
             for(auto it=localWithContacts.begin(); it!=localWithContacts.end(); it++) {
@@ -451,12 +460,14 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
                 }
             }
 
+            #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "---> Convergence criteria (InEnergyVelocity) converged: "<<  m_bConverged<< std::endl;);
+            #endif
+
         }
 
-
-        if(m_nLocalNodes>=0 && m_nRemoteNodes == 0 && m_nSplitBodyNodes == 0){
-
-        }else{
+        // If local contact problem is uncoupled from other processes we do not check for convergence
+        if( !m_pContactGraph->isUncoupled() ){
              //Communicates our converged flags and sets it to false if some neighbours are not convgered
              m_bConverged =  m_pInclusionComm->communicateConvergence(m_bConverged);
         }
@@ -485,8 +496,8 @@ std::string  InclusionSolverCONoG::getIterationStats() {
     s
             << m_bUsedGPU<<"\t"
             << m_nContacts<<"\t"
-            << m_nContactsLocal << "\t"
-            << m_nContactsRemote << "\t"
+            << m_nLocalNodes << "\t"
+            << m_nRemoteNodes << "\t"
             << m_nSplitBodyNodes << "\t"
             << m_globalIterationCounter<<"\t"
             << m_bConverged<<"\t"
