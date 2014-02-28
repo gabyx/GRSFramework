@@ -126,7 +126,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
 
 
 bool SimulationManagerGUI::writeInitialState() {
-    MultiBodySimFile simFile(NDOFqBody,NDOFuBody);
+    MultiBodySimFile simFile;
     // Request new file Paths for all logs from FileManager
     // Get new folder path
     boost::filesystem::path file = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_INIT);
@@ -134,7 +134,7 @@ bool SimulationManagerGUI::writeInitialState() {
     std::string filename = SIM_INIT_FILE_PREFIX;
     filename += SIM_INIT_FILE_EXTENSION;
     file /= filename;
-    if(simFile.openWrite(file,m_nSimBodies)) {
+    if(simFile.openWrite(file,NDOFqBody,NDOFuBody,m_nSimBodies)) {
         simFile << m_pVisBuffer.get();
         simFile.close();
         m_pSimulationLog->logMessage(std::string("Successfully written initial state file to:") + file.string() );

@@ -48,7 +48,7 @@ private:
   void runLoaderThread();
 
   void reset();
-  bool loadFile();
+  bool loadNextFile();
   void unloadFile();
 
   boost::mutex m_bLoaderThreadRunning_mutex;
@@ -63,6 +63,10 @@ private:
 
   boost::shared_ptr< DynamicsState > m_state; /**<   This is the actual loader state pointer ;*/
   boost::shared_ptr<TStatePool>	m_pStatePool;
+
+  std::set<boost::filesystem::path> m_simFileList;
+  std::set<boost::filesystem::path>::iterator m_currentFileIt;
+  unsigned int m_currentFileIndex;
 };
 
 // Implementation
@@ -78,8 +82,7 @@ PlaybackLoader<TStatePool>::~PlaybackLoader()
 template<typename TStatePool>
 PlaybackLoader<TStatePool>::PlaybackLoader( const unsigned int nSimBodies, boost::shared_ptr<TStatePool> pStatePool):
 m_barrier_start(2),
-m_nSimBodies(nSimBodies),
-m_binarySimFile(NDOFqBody,NDOFuBody)
+m_nSimBodies(nSimBodies)
 {
   //Set the Log Output =========================================================================
   m_pThreadLog = new Logging::Log("PlaybackLoaderThreadLog");
@@ -115,11 +118,11 @@ void PlaybackLoader<TStatePool>::stopLoaderThread()
   {
       setThreadToBeStopped(true);
       m_pThreadDynamics->join();
-      m_pThreadLog->logMessage("PlaybackLoader:: Stop Thread: Loader Thread has been stopped!");
+      m_pThreadLog->logMessage("---> PlaybackLoader:: Stop Thread: Loader Thread has been stopped!");
       m_bLoaderThreadRunning = false;
 
   }else{
-    m_pThreadLog->logMessage("PlaybackLoader:: Stop Thread: Loader Thread is not running!");
+    m_pThreadLog->logMessage("---> PlaybackLoader:: Stop Thread: Loader Thread is not running!");
   }
 
 }
@@ -134,10 +137,10 @@ void PlaybackLoader<TStatePool>::startLoaderThread()
     //Start Loader Thread===========================================
       initLoaderThread(); // Initialize everything so that we can immediatly start in the loop
       m_pThreadDynamics = new boost::thread( boost::bind(&PlaybackLoader::runLoaderThread, this) );
-      m_pThreadLog->logMessage(" PlaybackLoader:: Loader Thread for Playback started ...");
+      m_pThreadLog->logMessage("---> PlaybackLoader:: Loader Thread for Playback started ...");
 
   }else{
-    m_pThreadLog->logMessage("PlaybackLoader:: There is already on Loader Thread running!");
+    m_pThreadLog->logMessage("---> PlaybackLoader:: There is already on Loader Thread running!");
   }
 }
 
@@ -146,6 +149,10 @@ template<typename TStatePool>
 void PlaybackLoader<TStatePool>::initLoaderThread()
 {
 
+    // Set the sim file list to the actual current simfolder of the FileManager
+    m_simFileList = FileManager::getSingletonPtr()->getPathsSimFilesOfCurrentSimFolder();
+    m_currentFileIt = m_simFileList.begin();
+    m_currentFileIndex = -1;
 }
 
 template<typename TStatePool>
@@ -153,41 +160,48 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
 {
   static std::stringstream logstream;
   static bool bMovedBuffer;
-  enum {FILE_CHECK,MOVE_POINTER, READ_IN,FINALIZE_AND_BREAK,EXIT} current_state;
+  enum {LOAD_NEXT_FILE, FILE_CHECK,MOVE_POINTER, READ_IN,FINALIZE_AND_BREAK,EXIT} current_state;
 
-    m_pThreadLog->logMessage(" PlaybackLoader: LoaderThread entering...");
+    m_pThreadLog->logMessage("---> PlaybackLoader: LoaderThread entering...");
     setLoaderThreadRunning(true);
 
-    if(loadFile()){
-
-      LOG(m_pThreadLog, " File loaded: Number of States = " << m_binarySimFile.getNStates() << std::endl;);
-
-      reset();
+    reset();
 
       // Fill buffer =====================================================================
 
-
       bMovedBuffer = true;
       unsigned int i=0;
-      current_state = READ_IN;
-      while(!isLoaderThreadToBeStopped())
+      current_state = LOAD_NEXT_FILE;
+      while(!isLoaderThreadToBeStopped() && current_state != EXIT)
       {
-
-         if(current_state== FILE_CHECK){
+         if(current_state== LOAD_NEXT_FILE ){
+            //Load next file
+            if(m_currentFileIndex != m_simFileList.size()-1){
+                if(!loadNextFile()){
+                    current_state = EXIT;
+                }else{
+                    LOG(m_pThreadLog, "---> SimFile "<<m_currentFileIndex<<"/"<<m_simFileList.size()<<" loaded: Number of States = " << m_binarySimFile.getNStates() << std::endl;);
+                    current_state = READ_IN;
+                }
+            }else{
+                 // Write end flag to state if that was the last file!
+                LOG(m_pThreadLog,  "---> Write endstate to m_state m_t:" << m_state->m_t <<std::endl;);
+                m_state->m_StateType = DynamicsState::ENDSTATE;
+                current_state = FINALIZE_AND_BREAK;
+            }
+         }
+         else if(current_state== FILE_CHECK){
+            //Check if we can read one more state
             if(m_binarySimFile.isGood()){
                current_state = MOVE_POINTER;
             }else{
-               // Write end flag to state!
-               m_pThreadLog->logMessage("Buffering endstate");
-               m_state->m_StateType = DynamicsState::ENDSTATE;
-               current_state = FINALIZE_AND_BREAK;
+               current_state = LOAD_NEXT_FILE;
             }
          }
          else if(current_state== MOVE_POINTER){
             // Moves pointer as long as the buffer is no full
             m_state = m_pStatePool->advanceLoadBuffer(bMovedBuffer);
              if(!bMovedBuffer){
-               m_pThreadLog->logMessage("File buffering finished...");
                current_state=FILE_CHECK;
                break;
              }else{
@@ -197,15 +211,15 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
            i++;
            m_binarySimFile >> m_state.get();
             if(i % 20==0){
-               LOG(m_pThreadLog,  "File loader buffering state: " << m_state->m_t <<"..."<<std::endl);
+               LOG(m_pThreadLog,  "---> File loader buffering state: " << m_state->m_t <<"..."<<std::endl);
            }
            current_state = FILE_CHECK;
          }
          else if(current_state== FINALIZE_AND_BREAK){
-            //Move pointer once more! To make this state avalibale to the vis pointer!
+            // Buffer full, break here
+            m_pThreadLog->logMessage("---> File pre-buffering finished...");
             break;
          }
-
       }
       // =========================================================================================
 
@@ -216,14 +230,27 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
       while(!isLoaderThreadToBeStopped() && current_state != EXIT)
       {
 
-         if(current_state== FILE_CHECK){
+         if(current_state == LOAD_NEXT_FILE ){
+            //Load next file
+            if(m_currentFileIndex != m_simFileList.size()-1){
+                if(!loadNextFile()){
+                    current_state = EXIT;
+                }else{
+                    LOG(m_pThreadLog, "---> SimFile "<<m_currentFileIndex<<"/"<<m_simFileList.size()<<" loaded: Number of States = " << m_binarySimFile.getNStates() << std::endl;);
+                    current_state = READ_IN;
+                }
+            }else{
+                 // Write end flag to state if that was the last file!
+                LOG(m_pThreadLog,  "---> Write endstate to m_state m_t:" << m_state->m_t <<std::endl;);
+                m_state->m_StateType = DynamicsState::ENDSTATE;
+                current_state = FINALIZE_AND_BREAK;
+            }
+         }
+         else if(current_state== FILE_CHECK){
             if(m_binarySimFile.isGood()){
                current_state = MOVE_POINTER;
             }else{
-               // Write end flag to state!
-               LOG(m_pThreadLog,  "Write endstate to m_state m_t:" << m_state->m_t <<std::endl;);
-               m_state->m_StateType = DynamicsState::ENDSTATE;
-               current_state = FINALIZE_AND_BREAK;
+                current_state = LOAD_NEXT_FILE;
             }
          }
          else if(current_state== MOVE_POINTER){
@@ -232,7 +259,7 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
                current_state = READ_IN;
             }
          }else if(current_state== READ_IN){
-           m_binarySimFile >> m_state.get();
+            m_binarySimFile >> m_state.get();
                /*
                LOG(m_pThreadLog,  "Loaded m_t:" << m_state->m_t <<endl;);
                 */
@@ -241,24 +268,18 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
             //Move pointer once more! To make this state avalibale to the vis pointer!
             m_state = m_pStatePool->advanceLoadBuffer(bMovedBuffer);
             if(bMovedBuffer){
-               m_pThreadLog->logMessage("Buffering reached end of file...");
-               current_state=EXIT;
-               break;
+               m_pThreadLog->logMessage("---> Buffering reached end of file...");
+               // Try to load next file;
+               current_state=LOAD_NEXT_FILE;
             }
          }
-
       }
 
       // Close file
       unloadFile();
 
-    }else{
-      m_barrier_start.wait();
-      m_pThreadLog->logMessage(" PlaybackLoader: There was a file error! ");
-    }
 
-
-     m_pThreadLog->logMessage(" PlaybackLoader: LoaderThread leaving...");
+     m_pThreadLog->logMessage("---> PlaybackLoader: LoaderThread leaving...");
      setLoaderThreadRunning(false);
 }
 
@@ -299,41 +320,51 @@ bool PlaybackLoader<TStatePool>::isLoaderThreadToBeStopped()
 
 
 template<typename TStatePool>
-bool PlaybackLoader<TStatePool>::loadFile()
+bool PlaybackLoader<TStatePool>::loadNextFile()
 {
   using namespace boost::filesystem;
 
-  path file_path = FileManager::getSingletonPtr()->getPathSimFileSelected();
-  if(file_path.empty()){
-    m_pThreadLog->logMessage("PlaybackLoader:: You have no file selected, please rescan the directory...");
-    return false;
+  m_currentFileIndex++;
+
+  if(m_currentFileIndex != 0){
+    m_currentFileIt++;
   }
 
-  if(boost::filesystem::exists(file_path)){
-    if(is_regular_file(file_path)){
-      if(!boost::filesystem::is_empty(file_path)){
+  if(m_currentFileIt!=m_simFileList.end() ){
+    if( m_currentFileIt->empty()){
+        m_pThreadLog->logMessage("---> PlaybackLoader:: Path in File list is empty! This should not happen!");
+        return false;
+    }
+  }else{
+        m_pThreadLog->logMessage("---> PlaybackLoader:: You have no files selected, please rescan the directory...");
+        return false;
+  }
+
+
+  if(boost::filesystem::exists(*m_currentFileIt)){
+    if(is_regular_file(*m_currentFileIt)){
+      if(!boost::filesystem::is_empty(*m_currentFileIt)){
 
         // Try to load the file
-        if(m_binarySimFile.openRead(file_path,m_nSimBodies,m_bReadFullState))
+        m_binarySimFile.close();
+        if(m_binarySimFile.openRead(*m_currentFileIt,NDOFqBody,NDOFuBody,m_nSimBodies,m_bReadFullState))
         {
           return true;
         }else{
-           std::stringstream error;
-           error << "PlaybackLoader:: Could not open file: " << file_path.string();
-           error << "File errors: " <<std::endl<< m_binarySimFile.getErrorString();
-           m_pThreadLog->logMessage(error.str());
+           LOG(m_pThreadLog, "---> PlaybackLoader:: Could not open file: " << m_currentFileIt->string()
+               << std::endl << "---> File errors: " <<std::endl<< m_binarySimFile.getErrorString(););
         }
       }
       else{
-        m_pThreadLog->logMessage("PlaybackLoader:: File Error:  File is empty...");
+        m_pThreadLog->logMessage("---> PlaybackLoader:: File Error:  File is empty...");
       }
     }
     else{
-     m_pThreadLog->logMessage("PlaybackLoader:: File Error: File is not a regular file...");
+     m_pThreadLog->logMessage("---> PlaybackLoader:: File Error: File is not a regular file...");
     }
   }
   else{
-    m_pThreadLog->logMessage("PlaybackLoader:: File Error: File does not exist...");
+    m_pThreadLog->logMessage("---> PlaybackLoader:: File Error: File does not exist...");
   }
 
   return false;
@@ -344,7 +375,7 @@ template<typename TStatePool>
 void PlaybackLoader<TStatePool>::unloadFile()
 {
   m_binarySimFile.close();
-  m_pThreadLog->logMessage("PlaybackLoader:: File closed...");
+  m_pThreadLog->logMessage("---> PlaybackLoader:: File closed...");
 }
 
 #endif

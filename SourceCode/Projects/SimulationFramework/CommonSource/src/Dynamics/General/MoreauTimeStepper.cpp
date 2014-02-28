@@ -15,8 +15,7 @@ _________________________________________________________*/
 
 
 
-MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState):
-    m_ReferenceSimFile(NDOFqBody,NDOFuBody)
+MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState)
 {
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {

@@ -31,7 +31,7 @@ PlaybackState::~PlaybackState() {
 
 void PlaybackState::enter() {
 
-    m_pAppLog->logMessage("Entering PlaybackState...");
+    m_pAppLog->logMessage("---> Entering PlaybackState...");
 
     m_pSceneMgr = boost::shared_ptr<Ogre::SceneManager>( RenderContext::getSingletonPtr()->m_pRoot->createSceneManager(ST_GENERIC, "PlaybackStateSceneMgr"), OgreSceneManagerDeleter());
     setupScene();
@@ -66,7 +66,7 @@ void PlaybackState::enter() {
 
 
 bool PlaybackState::pause() {
-    RenderContext::getSingletonPtr()->m_pAppLog->logMessage("Pausing PlaybackState...");
+    m_pAppLog->logMessage("Pausing PlaybackState...");
 
     m_pOrbitCamera->disableInput();
     m_pMenuMouse->setInactive();
@@ -80,7 +80,7 @@ bool PlaybackState::pause() {
 
 
 void PlaybackState::resume() {
-    m_pAppLog->logMessage("Resuming PlaybackState...");
+    m_pAppLog->logMessage("---> Resuming PlaybackState...");
 
     setMouseMode(false);
     m_pTrayMgr->showAll();
@@ -97,7 +97,7 @@ void PlaybackState::exit() {
     m_PhysicsStatsParams.clear();
     m_pTrayMgr.reset();
 
-    m_pAppLog->logMessage("Leaving PlaybackState...");	// DEBUG	runtime error on quitting...
+    m_pAppLog->logMessage("---> Leaving PlaybackState...");	// DEBUG	runtime error on quitting...
 
     //Delete Camera
     m_pOrbitCamera.reset();
@@ -182,11 +182,16 @@ void PlaybackState::setupGUI() {
 
 }
 void PlaybackState::updatePlaybackPanel() {
+
     FileManager::getSingletonPtr()->updateFileList(SIMULATION_FOLDER_PATH,true);
-    auto stringMap = FileManager::getSingletonPtr()->getSimFileNameList();
+    auto pathMap = FileManager::getSingletonPtr()->getSimFolderList();
+
+//    m_pAppLog->logMessage("---> SimFolders are: ");
+//    Utilities::printVectorNoCopy(*m_pAppLog , pathMap.begin(),pathMap.end(),",");
+
 
     Ogre::StringVector vec;
-    for(auto it=stringMap.begin(); it!=stringMap.end(); it++) {
+    for(auto it=pathMap.begin(); it!=pathMap.end(); it++) {
         vec.push_back(it->string());
     }
 
@@ -241,15 +246,19 @@ void PlaybackState::buttonHit(OgreBites::Button * button) {
 
 void PlaybackState::itemSelected(OgreBites::SelectMenu * menu) {
     if(menu == m_pPlaybackFiles) {
+
         Ogre::DisplayString str = menu->getSelectedItem();
         std::string str_utf8 = str.asUTF8();
-        FileManager::getSingletonPtr()->setPathSelectedSimFile(str_utf8);
+        FileManager::getSingletonPtr()->setPathCurrentSimFolder(str_utf8);
         changeScene();
+
     } else if( menu == m_pActiveModeSelectMenu) {
+
         Ogre::DisplayString str = menu->getSelectedItem();
         if(str ==  Ogre::UTFString("Playback") ) {
             setSimulationMode(0);
         }
+
     }
 }
 
@@ -259,14 +268,14 @@ void PlaybackState::changeScene() {
     m_pSceneMgr->destroyAllManualObjects();
     m_pSceneMgr->destroyAllEntities();
 
-    m_pAppLog->logMessage("Loading new Scene...");
+    m_pAppLog->logMessage("---> Loading new Scene...");
     //Load new scene
     m_pPlaybackMgr = boost::shared_ptr<PlaybackManager > (new PlaybackManager(m_pSceneMgr)); // overwrite the existing, which gets deleted!
 
     if(m_pPlaybackMgr->setup()) {
-        m_pAppLog->logMessage("Loading new scene successful");
+        m_pAppLog->logMessage("---> Loading new scene successful");
     } else {
-        m_pAppLog->logMessage("Loading new scene failed");
+        m_pAppLog->logMessage("---> Loading new scene failed");
     }
 
     // Set Guis stuff, release callbacks!
@@ -280,7 +289,7 @@ void PlaybackState::changeScene() {
 void PlaybackState::setSimulationMode(int i) {
     switch(i) {
     case 0:
-        m_pAppLog->logMessage("PlaybackState:: Switched to PLAYBACK");
+        m_pAppLog->logMessage("---> PlaybackState:: Switched to PLAYBACK");
         m_eSimulationActiveMode = PLAYBACK;
         // Show file panel
         m_pPlaybackFiles->show();
@@ -396,13 +405,13 @@ void PlaybackState::setMouseMode(bool switchMode = false) {
     if(switchMode) {
         if(m_eMouseMode == MENU) {
             m_eMouseMode = CAMERA;
-            std::cout << " Switched to Camera Mode"<<std::endl;
+            std::cout << "---> Switched to Camera Mode"<<std::endl;
             m_pOrbitCamera->setActive();
             m_pOrbitCamera->enableInput();
             m_pMenuMouse->setInactive();
         } else {
             m_eMouseMode = MENU;
-            std::cout << " Switched to Mouse Mode"<<std::endl;
+            std::cout << "---> Switched to Mouse Mode"<<std::endl;
             m_pOrbitCamera->disableInput();
             m_pMenuMouse->setActive();
         }

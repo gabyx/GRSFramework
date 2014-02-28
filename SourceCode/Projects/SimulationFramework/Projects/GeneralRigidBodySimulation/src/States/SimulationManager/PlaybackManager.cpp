@@ -113,7 +113,7 @@ bool PlaybackManager::setup() {
 
 
 bool PlaybackManager::parseScene() {
-    boost::filesystem::path sceneFilePath = FileManager::getSingleton().getPathSceneFileSelected();
+    boost::filesystem::path sceneFilePath = FileManager::getSingleton().getPathSceneFileOfCurrentSimFolder();
     if(sceneFilePath.empty()) {
         return false;
     }

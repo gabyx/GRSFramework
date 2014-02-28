@@ -99,10 +99,13 @@ bool setupInitialConditionBodiesFromFile(boost::filesystem::path file_path,
                                          bool readVel = true,
                                          short which = 2){
 
-    MultiBodySimFile simFile( DynamicsState::LayoutConfigType::LayoutType::NDOFqBody,
-                              DynamicsState::LayoutConfigType::LayoutType::NDOFuBody);
+    MultiBodySimFile simFile;
     bool failed = false;
-    if(simFile.openRead(file_path,0,true)) {
+    if(simFile.openRead(file_path,
+                        DynamicsState::LayoutConfigType::LayoutType::NDOFqBody,
+                        DynamicsState::LayoutConfigType::LayoutType::NDOFuBody,
+                        0,true))
+    {
         // We only perform an update! -> true
         if(!simFile.read(states,stateTime,readPos,readVel,which,true)){
             failed = true;

@@ -1,8 +1,7 @@
 
 #include "StateRecorder.hpp"
 
-StateRecorder::StateRecorder(const unsigned int nSimBodies):
-    m_binarySimFile(LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody) {
+StateRecorder::StateRecorder(const unsigned int nSimBodies){
     m_nSimBodies = nSimBodies;
 
     //Check if LogManager is available
@@ -28,7 +27,10 @@ StateRecorder::~StateRecorder() {
 
 bool StateRecorder::createSimFile(boost::filesystem::path file_path) {
     m_pSimulationLog->logMessage("---> Record to Sim file at: " + file_path.string());
-    if(m_binarySimFile.openWrite(file_path,m_nSimBodies)) {
+    if(m_binarySimFile.openWrite(file_path,
+                                 LayoutConfigType::LayoutType::NDOFqBody,
+                                 LayoutConfigType::LayoutType::NDOFuBody,
+                                 m_nSimBodies)) {
         return true;
     }
     return false;
@@ -37,8 +39,12 @@ bool StateRecorder::createSimFile(boost::filesystem::path file_path) {
 
 bool StateRecorder::createSimFileCopyFromReference(boost::filesystem::path new_file_path, boost::filesystem::path ref_file_path) {
 
-    MultiBodySimFile tmpFile(NDOFqBody,NDOFuBody);
-    bool fileOK = tmpFile.openRead(ref_file_path,m_nSimBodies,false); //Open file to see if this file fits our simulation!!
+    MultiBodySimFile tmpFile;
+    bool fileOK = tmpFile.openRead(ref_file_path,
+                                   LayoutConfigType::LayoutType::NDOFqBody,
+                                   LayoutConfigType::LayoutType::NDOFuBody,
+                                   m_nSimBodies,
+                                   false); //Open file to see if this file fits our simulation!!
     tmpFile.close();
 
     if(fileOK) {
@@ -46,7 +52,12 @@ bool StateRecorder::createSimFileCopyFromReference(boost::filesystem::path new_f
         FileManager::getSingletonPtr()->copyFile(ref_file_path,new_file_path,true);
 
         m_pSimulationLog->logMessage("---> Record and append to Sim file at: " + new_file_path.string());
-        if(m_binarySimFile.openWrite(new_file_path,m_nSimBodies,false)) { //APPEND!
+        if(m_binarySimFile.openWrite(new_file_path,
+                                     LayoutConfigType::LayoutType::NDOFqBody,
+                                     LayoutConfigType::LayoutType::NDOFuBody,
+                                     m_nSimBodies,
+                                     false))
+        { //APPEND!
             return true;
         }
     }

@@ -31,14 +31,18 @@ public:
     boost::filesystem::path getGlobalDirectoryPath();
     boost::filesystem::path getLocalDirectoryPath();
 
-    boost::filesystem::path getPathSimFileSelected();
-    boost::filesystem::path getPathSceneFileSelected();
-    void setPathSelectedSimFile(std::string file_name);
+    boost::filesystem::path           getPathCurrentSimFolder();
+    void                              setPathCurrentSimFolder(std::string file_name);
 
-    std::set< boost::filesystem::path > getSimFileNameList();
+    std::set< boost::filesystem::path > getSimFolderList();
+    std::set< boost::filesystem::path > getPathsSimFilesOfCurrentSimFolder();
+    boost::filesystem::path             getPathSceneFileOfCurrentSimFolder();
 
     boost::filesystem::path getNewSimFolderPath(boost::filesystem::path directory, std::string folder_prefix);
+
     void updateFileList(boost::filesystem::path directory, bool with_SubDirs);
+
+
 
     boost::filesystem::path copyFile(boost::filesystem::path from, boost::filesystem::path to, bool overwrite = false);
 
@@ -48,14 +52,13 @@ private:
     void scanAllSimFolders(const boost::filesystem::path &directory, const std::string &prefix, const bool &with_SubDirs);
     void updateAllSimDataFiles(const boost::filesystem::path &directory, const bool &with_SubDirs);
 
-    std::set< boost::filesystem::path > m_SimFilePaths;
-
-    std::map< boost::filesystem::path, std::vector<> > m_SimFilePaths;
+    std::map< boost::filesystem::path, std::set<boost::filesystem::path> > m_SimFilePaths; ///< [parent folderPath , set of simfiles paths inside folderPath]
+    std::set< boost::filesystem::path > m_SimFolderPaths; ///< folderPaths , keys into m_SimFilePaths;
 
     unsigned int m_folderIdCounter;
     boost::mutex m_busy_mutex;
 
-    boost::filesystem::path m_selectedFilePath;
+    boost::filesystem::path m_selectedFolderPath; ///< current folderPath , key into m_SimFilePaths;
 
     boost::filesystem::path m_globalDirPath, m_localDirPath;
 

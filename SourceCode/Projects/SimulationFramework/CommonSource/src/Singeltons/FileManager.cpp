@@ -86,7 +86,7 @@ boost::filesystem::path FileManager::getNewSimFolderPath(boost::filesystem::path
     directory /= new_foldername.str();
     //std::cout << "RELDIR:" << relDirectoryPath << " FILEIDCOUNTER: "<< m_folderIdCounter <<" PREFIX: " << folder_prefix<< std::endl;
     if(!create_directories(directory)) {
-        return "";
+        return boost::filesystem::path();
     }
     return directory;
 }
@@ -98,12 +98,13 @@ void FileManager::updateFileList(boost::filesystem::path relDirectoryPath, bool 
     directory /= relDirectoryPath;
 
     m_SimFilePaths.clear();
+    m_SimFolderPaths.clear();
     updateAllSimDataFiles(directory,with_SubDirs);
 }
 
-std::set<boost::filesystem::path > FileManager::getSimFileNameList() {
+std::set<boost::filesystem::path > FileManager::getSimFolderList() {
     boost::mutex::scoped_lock l(m_busy_mutex);
-    return m_SimFilePaths;
+    return m_SimFolderPaths;
 }
 
 void FileManager::updateAllSimDataFiles(const boost::filesystem::path &directory, const bool &with_SubDirs = false) {
@@ -121,9 +122,9 @@ void FileManager::updateAllSimDataFiles(const boost::filesystem::path &directory
                 // Check for filename
                 path prefix = iter->path().extension();
                 if(prefix.string() == SIM_FILE_EXTENSION) {
-
-                    // add file to the list
-                    m_SimFilePaths.insert(iter->path());
+                    // add file to the list of the parent path
+                    m_SimFilePaths[iter->path().parent_path()].insert(iter->path());
+                    m_SimFolderPaths.insert(iter->path().parent_path());
                 }
             }
         }
@@ -131,7 +132,9 @@ void FileManager::updateAllSimDataFiles(const boost::filesystem::path &directory
 }
 
 
-void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, const std::string & folder_prefix, const bool &with_SubDirs) {
+void FileManager::scanAllSimFolders(const boost::filesystem::path &directory,
+                                    const std::string & folder_prefix,
+                                    const bool &with_SubDirs) {
     //std::cout << "directory: " << directory << std::endl;
 
     m_folderIdCounter = 0;
@@ -177,18 +180,28 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path &directory, co
 
 }
 
-boost::filesystem::path FileManager::getPathSimFileSelected() {
+boost::filesystem::path FileManager::getPathCurrentSimFolder() {
     boost::mutex::scoped_lock l(m_busy_mutex);
-    return m_selectedFilePath;
+    return m_selectedFolderPath;
 }
-boost::filesystem::path FileManager::getPathSceneFileSelected() {
+
+std::set<boost::filesystem::path> FileManager::getPathsSimFilesOfCurrentSimFolder() {
     boost::mutex::scoped_lock l(m_busy_mutex);
-    boost::filesystem::path simFilePath = m_selectedFilePath;
-    if(simFilePath.empty()) {
+    auto it = m_SimFilePaths.find(m_selectedFolderPath);
+    if( it != m_SimFilePaths.end()){
+        return it->second;
+    }
+    return std::set<boost::filesystem::path>();
+}
+
+boost::filesystem::path FileManager::getPathSceneFileOfCurrentSimFolder() {
+
+    boost::mutex::scoped_lock l(m_busy_mutex);
+    if(m_selectedFolderPath.empty()) {
         return boost::filesystem::path();
     }
 
-    boost::filesystem::path sceneFilePath = simFilePath.parent_path();
+    boost::filesystem::path sceneFilePath = m_selectedFolderPath;
     std::string sceneFile = SIM_SCENE_FILE_NAME + std::string(".xml");
     sceneFilePath /= sceneFile;
     if(boost::filesystem::exists(sceneFilePath)) {
@@ -199,15 +212,15 @@ boost::filesystem::path FileManager::getPathSceneFileSelected() {
 }
 
 
-void FileManager::setPathSelectedSimFile( std::string file_name ) {
+void FileManager::setPathCurrentSimFolder( std::string file_name ) {
     boost::mutex::scoped_lock l(m_busy_mutex);
     boost::filesystem::path name =  file_name;
 
     auto it= m_SimFilePaths.find(name);
     if(it != m_SimFilePaths.end()) {
-        m_selectedFilePath = (*it);
+        m_selectedFolderPath = (it->first);
     } else {
-        m_selectedFilePath = boost::filesystem::path();
+        m_selectedFolderPath = boost::filesystem::path();
     }
 }
 
