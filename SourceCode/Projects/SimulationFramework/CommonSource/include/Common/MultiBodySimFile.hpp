@@ -2,14 +2,14 @@
 #define MultiBodySimFile_hpp
 
 #include <type_traits>
+#include <set>
 #include <fstream>
 
 #include <boost/filesystem.hpp>
 
-#include <StaticAssert.hpp>
-
+#include "StaticAssert.hpp"
+#include "RigidBodyId.hpp"
 #include "DynamicsState.hpp"
-#include "RigidBodyContainer.hpp"
 
 #include "MultiBodySimFileIOHelpers.hpp"
 
@@ -58,7 +58,7 @@ class MultiBodySimFile {
 public:
 
 
-    MultiBodySimFile(unsigned int nDOFqBody, unsigned int nDOFuBody,unsigned int bufferSize = 1<<14);
+    MultiBodySimFile(unsigned int bufferSize = 1<<14);
     ~MultiBodySimFile();
 
     /**
@@ -68,15 +68,22 @@ public:
     * @return true if the file is successfully opened and readable and false if not.
     * @detail if nSimBodies = 0, the sim file does not need to match nSimBodies
     */
-    bool openRead( const boost::filesystem::path & file_path,   const unsigned int nSimBodies, bool readFullState = true);
+    bool openRead(const boost::filesystem::path & file_path,
+                  unsigned int nDOFqBody = 0,
+                  unsigned int nDOFuBody = 0,
+                  unsigned int nSimBodies = 0,
+                  bool readFullState = true);
     /**
     * @brief Opens a .sim file for write only.
     * @param file_path The path to the file to open.
     * @param nSimBodies The number of bodies which should be included in the file.
     * @return true if the file is successfully opened and writable and false if not.
-    * @detail if nSimBodies = 0, the sim file does not need to match nSimBodies
     */
-    bool openWrite( const boost::filesystem::path & file_path,   const unsigned int nSimBodies,  bool truncate = true);
+    bool openWrite(const boost::filesystem::path & file_path,
+                   unsigned int nDOFqBody,
+                   unsigned int nDOFuBody,
+                   unsigned int nSimBodies,
+                   bool truncate = true);
 
     /**
     * @brief Closes the .sim file which was opened by an openWrite or openRead command.
@@ -138,6 +145,13 @@ public:
     inline MultiBodySimFile &  operator>>( DynamicsState & state ) {
         return this->operator>>(&state);
     }
+
+    /**
+    * @brief Dumps all data from file to this sim file.
+    */
+    MultiBodySimFile & operator << (MultiBodySimFile& file);
+
+
     //  /**
     //  * @brief Gets the state at the time t.
     //  */
@@ -147,15 +161,17 @@ public:
     */
     inline void getEndState(DynamicsState& state);
 
-    unsigned int getNStates(); ///< Gets the number of states in a read only .sim file.
-
     std::string getErrorString() {
         m_errorString << " strerror: " << std::strerror(errno) <<std::endl;
         return m_errorString.str();
     }
 
+    unsigned int getNDOFq(){return m_nDOFqBody;}
+    unsigned int getNDOFu(){return m_nDOFuBody;}
     unsigned int getNSimBodies(){return m_nSimBodies;}
+    unsigned int getNStates() {return m_nStates;}
 
+    std::streamsize getBytesPerState() { return m_nBytesPerState;}
 
 private:
     /**
@@ -190,15 +206,15 @@ private:
     * @{
     */
     bool readLength();
-    std::streamoff m_nBytes;
-    std::streamoff m_nStates;
+    std::streamsize m_nBytes;
+    std::streamsize m_nStates;
     /** @}*/
 
     /** @brief File path */
     boost::filesystem::path m_filePath;
 
     /** @brief Header length */
-    static const  std::streamoff m_headerLength = SIM_FILE_SIGNATURE_LENGTH*sizeof(char)
+    static const  std::streamsize m_headerLength = SIM_FILE_SIGNATURE_LENGTH*sizeof(char)
                                                   + sizeof(unsigned int)
                                                   +3*sizeof(unsigned int) +2*sizeof(unsigned int) ; ///< 'MBSF' + nBodies, NDOFq, NDOFu, additionalBytesType (0=nothing, 1 = + process rank, etc.), additionalBytesPerBody
 
@@ -206,23 +222,23 @@ private:
 
     /** @brief Determined from number of bodies! @{*/
     void setByteLengths();
-    std::streamoff m_nBytesPerState; ///< m_nSimBodies*(q,u) + time
+    std::streamsize m_nBytesPerState; ///< m_nSimBodies*(q,u) + time
     unsigned int m_nSimBodies;
     /** @}*/
 
     std::streampos m_beginOfStates;
 
     unsigned int m_nDOFuBody, m_nDOFqBody;
-    const  std::streamoff m_nBytesPerQBody;
-    const  std::streamoff m_nBytesPerUBody;
+    std::streamsize m_nBytesPerQBody;
+    std::streamsize m_nBytesPerUBody;
 
     // Write addditional bytes, not yet implemented, but the type is written in the header
     unsigned int m_additionalBytesType;
-    std::streamoff getAdditionalBytes();
-    std::streamoff m_nAdditionalBytesPerBody;
+    std::streamsize getAdditionalBytes();
+    std::streamsize m_nAdditionalBytesPerBody;
 
 
-    std::streamoff m_nBytesPerBody;
+    std::streamsize m_nBytesPerBody;
 
     bool m_bReadFullState;
 
@@ -263,7 +279,7 @@ void MultiBodySimFile::write(double time, const TRigidBodyContainer & bodyList){
     *this << time;
     ASSERTMSG(m_nSimBodies == bodyList.size(),"You try to write "<<bodyList.size()
               <<"bodies into a file which was instanced to hold "<<m_nSimBodies);
-    STATIC_ASSERT2((std::is_same<double, typename RigidBodyContainer::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
+    STATIC_ASSERT2((std::is_same<double, typename TRigidBodyContainer::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
     for(auto it = bodyList.beginOrdered(); it != bodyList.endOrdered(); it++){
         *this << (*it)->m_id;
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
@@ -288,7 +304,7 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
     double lastTime =-1;
 
     RigidBodyState * pState = nullptr;
-    RigidBodyIdType id;
+    unsigned int id;
     bool timeFound = false;
 
     m_file_stream.seekg(m_beginOfStates);

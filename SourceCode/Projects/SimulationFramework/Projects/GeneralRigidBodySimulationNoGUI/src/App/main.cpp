@@ -11,14 +11,15 @@
 
 int main(int argc, char **argv) {
     // Parsing Input Parameters===================================
-    new ApplicationCLOptions();
+    ApplicationCLOptions opts;
     ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
 
     ApplicationCLOptions::getSingletonPtr()->checkArguments();
     ApplicationCLOptions::getSingletonPtr()->printArgs(std::cout);
     // End Parsing =================================
 
-    new Logging::LogManager();
+    //Create singleton logger
+    Logging::LogManager logger;
 
     std::stringstream processFolder;
     processFolder <<  PROCESS_FOLDER_PREFIX;
@@ -29,7 +30,7 @@ int main(int argc, char **argv) {
 
 
     // Process static global members! (Singletons)
-    new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
+    FileManager fileManger(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
 
 
     SimulationManager mgr;

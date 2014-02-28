@@ -138,7 +138,7 @@ protected:
 void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
 #if OUTPUT_SYSTEMDATA_FILE == 1
 
-    m_SystemDataFile
+    m_SystemDataFile << std::fixed
     << globalTime << "\t"
     << m_currentSimulationTime <<"\t"
     << (m_endTime-m_startTime) <<"\t"

@@ -164,7 +164,7 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
 
       reset();
 
-      // Fill buffering =====================================================================
+      // Fill buffer =====================================================================
 
 
       bMovedBuffer = true;
@@ -178,12 +178,13 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
                current_state = MOVE_POINTER;
             }else{
                // Write end flag to state!
-               m_pThreadLog->logMessage("Write endstate");
+               m_pThreadLog->logMessage("Buffering endstate");
                m_state->m_StateType = DynamicsState::ENDSTATE;
                current_state = FINALIZE_AND_BREAK;
             }
          }
          else if(current_state== MOVE_POINTER){
+            // Moves pointer as long as the buffer is no full
             m_state = m_pStatePool->advanceLoadBuffer(bMovedBuffer);
              if(!bMovedBuffer){
                m_pThreadLog->logMessage("File buffering finished...");
@@ -240,7 +241,7 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
             //Move pointer once more! To make this state avalibale to the vis pointer!
             m_state = m_pStatePool->advanceLoadBuffer(bMovedBuffer);
             if(bMovedBuffer){
-               m_pThreadLog->logMessage("End of file reached...");
+               m_pThreadLog->logMessage("Buffering reached end of file...");
                current_state=EXIT;
                break;
             }

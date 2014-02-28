@@ -207,24 +207,32 @@ public:
 private:
 
     void printErrorNoArg(std::string arg) {
-        std::cout << "Wrong options specified for arguement: '" << arg <<"'"<< std::endl;
+        std::cerr << "Wrong options specified for arguement: '" << arg <<"'"<< std::endl;
         printHelp();
         exit(-1);
     }
 
     void printHelp() {
-        std::cout << "Help for the Application:" << std::endl <<"Options:" <<std::endl
-                  << " \t -s [SceneFilePath] \n"
-                  <<            "\t\t This is a .xml file for the scene, essential \n"
+        std::cerr << "Help for the Application:" << std::endl <<"Options:" <<std::endl
+                  << " \t -s <SceneFilePath> \n"
+                  <<            "\t\t <SceneFilePath>: is a .xml file path for the scene, essential \n"
                   <<            "\t\t for CLI version, in GUI version: \"SceneFile.xml\" is the default file \n"
-                  << " \t -g|--global-path [GlobalDirectoryPath] (optional) \n"
-                  <<            "\t\t This is the global directory path. (no slash at the end, boost::create_directory bug!)\n"
-                  << " \t -l|--local-path [LocalDirectoryPath] (optional) \n"
-                  <<            "\t\t This is the local directory for each processes output, \n"
+                  << " \t -g|--global-path <GlobalDirectoryPath> (optional) \n"
+                  <<            "\t\t <GlobalDirectoryPath>: is the global directory path. (no slash at the end, boost::create_directory bug!)\n"
+                  << " \t -l|--local-path <LocalDirectoryPath> (optional) \n"
+                  <<            "\t\t <LocalDirectoryPath>: is the local directory for each processes output, \n"
                   <<            "\t\t if not specified the local directory is the same as the global directory.\n"
                   <<            "\t\t (no slash at the end, boost::create_directory bug!)\n"
                   <<            "\t\t This can also be a list of directories (space delimited), which is \n"
                   <<            "\t\t distributed linearly over all participating processes.\n"
+                  << " \t -p|--post-process bash|copy-local-to (optional) \n"
+                  <<            "\t\t Various post process task which can be launched ath the end of the simulation:\n"
+                  <<            "\t\t bash <int>|all <command> \n"
+                  <<            "\t\t\t <command>: specifies a quoted bash command as \"rm -r ./dir/\" \n"
+                  <<            "\t\t\t <int> is the rank number on which the bash command is launched, \n"
+                  <<            "\t\t\t 'all' specifies all process who execute this command \n"
+                  <<            "\t\t copy-local-to <path> \n"
+                  <<            "\t\t\t Copies the local directory which is process specific to another folder at <path> \n"
                   << " \t -h|--help \n"
                   <<            "\t\t Prints this help" <<std::endl;
         exit(-1);

@@ -39,7 +39,7 @@ public:
 
     InclusionCommunicator(boost::shared_ptr< BodyCommunicator> pBodyComm,
                           boost::shared_ptr< DynamicsSystemType> pDynSys ,
-                          boost::shared_ptr< ProcessCommunicatorType > pProcCom);
+                          boost::shared_ptr< ProcessCommunicatorType > pProcComm);
 
 
     void setContactGraph(boost::shared_ptr< ContactGraphType> pGraph){
@@ -61,7 +61,7 @@ public:
 
     void resetAllWeightings();
 
-    void clearNeighbourMap(){
+    void reset(){
         m_nbDataMap.emptyAllNeighbourData();
     }
 
@@ -110,7 +110,7 @@ private:
     MPILayer::NeighbourMessageWrapperInclusionSplitBodySolution< InclusionCommunicator > m_messageSplitBodySolution;
 
     boost::shared_ptr< DynamicsSystemType >      m_pDynSys;
-    boost::shared_ptr< ProcessCommunicatorType > m_pProcCom;
+    boost::shared_ptr< ProcessCommunicatorType > m_pProcComm;
     boost::shared_ptr< ContactGraphType >        m_pContactGraph;
     boost::shared_ptr< BodyCommunicator>         m_pBodyComm;
 

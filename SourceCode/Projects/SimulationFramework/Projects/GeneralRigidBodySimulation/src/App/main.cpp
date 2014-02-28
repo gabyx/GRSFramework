@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 {
 
     // Parsing Input Parameters===================================
-    new ApplicationCLOptions();
+    ApplicationCLOptions opts;
     ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
    // End Parsing =================================
 

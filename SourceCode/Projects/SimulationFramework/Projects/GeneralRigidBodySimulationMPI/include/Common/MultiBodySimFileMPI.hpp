@@ -74,25 +74,25 @@ private:
 
     void setByteLengths(const unsigned int nSimBodies);
     unsigned int m_nSimBodies;
-    std::streamoff m_nBytesPerState; ///< m_nSimBodies*(id,q,u) + time
-    std::streamoff m_nBytesPerQ, m_nBytesPerU;
+    std::streamsize m_nBytesPerState; ///< m_nSimBodies*(id,q,u) + time
+    std::streamsize m_nBytesPerQ, m_nBytesPerU;
 
     unsigned int m_nStates;
 
     unsigned int m_nDOFuBody, m_nDOFqBody;
 
-    const  std::streamoff m_nBytesPerQBody ;
-    const  std::streamoff m_nBytesPerUBody ;
+    std::streamsize m_nBytesPerQBody ;
+    std::streamsize m_nBytesPerUBody ;
 
     static const unsigned int m_additionalBytesType = 1;
     static constexpr std::streamoff getAdditionalBytes(){
         return (m_additionalBytesType==1) ? 1*sizeof(RankIdType) : 0 ;
     }
-    static const  std::streamoff m_nAdditionalBytesPerBody;
+    static const  std::streamsize m_nAdditionalBytesPerBody;
 
-    const  std::streamoff m_nBytesPerBody; ///< id,q,u + m_nAdditionalBytesPerBody
+    const  std::streamsize m_nBytesPerBody; ///< id,q,u + m_nAdditionalBytesPerBody
 
-    static const  std::streamoff m_headerLength = SIM_FILE_MPI_SIGNATURE_LENGTH*sizeof(char) + sizeof(unsigned int)
+    static const  std::streamsize m_headerLength = SIM_FILE_MPI_SIGNATURE_LENGTH*sizeof(char) + sizeof(unsigned int)
                                                     +3*sizeof(unsigned int) +2*sizeof(unsigned int) ; ///< 'MBSF' + nBodies, NDOFq, NDOFu, additionalBytesType (0=nothing, 1 = + process rank, etc.), additionalBytesPerBody
 
     MultiBodySimFileMPI & operator =(const MultiBodySimFileMPI & file);

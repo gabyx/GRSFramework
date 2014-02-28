@@ -25,20 +25,22 @@
 #define LOG( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ;  ///< Macro to easily write into a SimpleLogger::Log.
 #define OGRE_LOG( _logptr_ ) (_logptr_)->logMessage(logstream.str());  ///< Macro to easily write into a Ogre::Log.
 
-//// Serializer
-#define LOGSZ( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
-// Body Communicator
-#define LOGBC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
-// Inclusion Communicator
-#define LOGIC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
-// Process Communicator
-#define LOGPC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
-
-//#define LOGSZ( _logptr_ , _message_ )
-//#define LOGBC( _logptr_ , _message_ )
-//#define LOGIC( _logptr_ , _message_ )
-//#define LOGPC( _logptr_ , _message_ )
-
+// Serializer
+#ifndef NDEBUG
+  // DEBUG!
+    #define LOGSZ( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+    // Body Communicator
+    #define LOGBC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+    // Inclusion Communicator
+    #define LOGIC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+    // Process Communicator
+    #define LOGPC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
+#else
+    #define LOGSZ( _logptr_ , _message_ )
+    #define LOGBC( _logptr_ , _message_ )
+    #define LOGIC( _logptr_ , _message_ )
+    #define LOGPC( _logptr_ , _message_ )
+#endif
 /* @} */
 
 
@@ -81,8 +83,8 @@
   #define LogToFileSolver 1            ///< {0,1} Determines if logstream is saved into a file.
   #define LogToConsoleSolver 0         ///< {0,1} Determines if logstream is outputted into console.
 #else
-  #define CoutLevelSolver 3
-  #define CoutLevelSolverWhenContact 3
+  #define CoutLevelSolver 1
+  #define CoutLevelSolverWhenContact 1
   #define LogToFileSolver 1
   #define LogToConsoleSolver 0
 #endif

@@ -3,12 +3,12 @@
 #include "MPIMessageTag.hpp"
 
 BodyCommunicator::BodyCommunicator(  boost::shared_ptr< DynamicsSystemType> pDynSys ,
-                                     boost::shared_ptr< ProcessCommunicatorType > pProcCom):
+                                     boost::shared_ptr< ProcessCommunicatorType > pProcComm):
             m_pDynSys(pDynSys),
             m_globalLocal(pDynSys->m_SimBodies),
             m_globalRemote(pDynSys->m_RemoteSimBodies),
             m_globalGeometries(pDynSys->m_globalGeometries),
-            m_pProcComm(pProcCom),
+            m_pProcComm(pProcComm),
             m_pProcTopo(m_pProcComm->getProcTopo()),
             m_nbDataMap(m_pProcComm->getRank()),
             m_rank(m_pProcComm->getRank()),

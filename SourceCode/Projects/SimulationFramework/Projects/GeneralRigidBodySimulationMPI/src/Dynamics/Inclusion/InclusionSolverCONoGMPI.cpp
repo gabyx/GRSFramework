@@ -23,14 +23,14 @@ InclusionSolverCONoG::InclusionSolverCONoG(
     boost::shared_ptr< BodyCommunicator >  pBodyComm,
     boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
     boost::shared_ptr< DynamicsSystemType > pDynSys,
-    boost::shared_ptr< ProcessCommunicatorType > pProcCom
+    boost::shared_ptr< ProcessCommunicatorType > pProcComm
 ):
     m_SimBodies(pDynSys->m_SimBodies),
     m_Bodies(pDynSys->m_Bodies),
     m_pDynSys(pDynSys),
     m_pCollisionSolver(pCollisionSolver),
     m_pBodyComm(pBodyComm),
-    m_pProcComm(pProcCom),
+    m_pProcComm(pProcComm),
     m_nbRanks(m_pProcComm->getProcTopo()->getNeighbourRanks()) {
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
@@ -64,12 +64,6 @@ InclusionSolverCONoG::InclusionSolverCONoG(
     m_pCollisionSolver->m_ContactDelegateList.addContactDelegate(
         ContactDelegateList::ContactDelegate::from_method< ContactGraphType,  &ContactGraphType::addNode>(m_pContactGraph.get())
     );
-
-
-    m_nodesLocal     = m_pContactGraph->getLocalNodeListRef();
-    m_nodesRemote    = m_pContactGraph->getRemoteNodeListRef();
-    m_nodesSplitBody = m_pContactGraph->getSplitBodyNodeListRef();
-
 }
 
 
@@ -128,7 +122,7 @@ void InclusionSolverCONoG::resetForNextIter() {
 
     m_pContactGraph->clearGraph();
 
-    m_pInclusionComm->clearNeighbourMap();
+    m_pInclusionComm->reset();
     m_pInclusionComm->setSettings(m_Settings);
 }
 
@@ -139,8 +133,6 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
 #if CoutLevelSolver>1
     LOG(m_pSolverLog,  "---> solveInclusionProblem(): "<< std::endl;);
 #endif
-
-
 
     // Standart values
     m_currentSimulationTime = currentSimulationTime;
@@ -159,32 +151,29 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
     m_pInclusionComm->communicateRemoteContacts(m_currentSimulationTime);
 
     // All detected contacts in ths process
-    m_nLocalNodes  = m_nodesLocal.size();
-    m_nRemoteNodes = m_nodesRemote.size();
+    m_nLocalNodes  = m_pContactGraph->getNLocalNodes();
+    m_nRemoteNodes = m_pContactGraph->getNRemoteNodes();
     m_nContacts = m_nLocalNodes + m_nRemoteNodes;
-    m_nSplitBodyNodes = m_nodesSplitBody.size();
+    m_nSplitBodyNodes = m_pContactGraph->getNSplitBodyNodes();
+
+#if CoutLevelSolverWhenContact>0
+        LOG(m_pSolverLog,
+            "---> Nodes Local: "<< m_nLocalNodes <<std::endl<<
+            "---> Nodes Remote: "<< m_nRemoteNodes <<std::endl<<
+            "---> Nodes SplitBodies: "<< m_nSplitBodyNodes <<std::endl;
+           );
+#endif
 
     // Integrate all local bodies to u_e
     // u_E = u_S + M^⁻1 * h * deltaT
 
-    if(m_nLocalNodes == 0 && m_nSplitBodyNodes==0 && m_nRemoteNodes==0) {
+    if(m_pContactGraph->hasNoNodes()) {
         // Nothing to solve
         integrateAllBodyVelocities();
 
     } else {
 
         // Solve Inclusion
-
-#if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog,
-            "---> Nodes Local: "<< m_nodesLocal.size() <<std::endl<<
-            "---> Nodes Remote: "<< m_nodesRemote.size() <<std::endl<<
-            "---> Nodes SplitBodies: "<< m_nodesSplitBody.size() <<std::endl;
-           );
-#endif
-
-
-
         // =============================================================================================================
         if( m_Settings.m_eMethod == InclusionSolverSettingsType::SOR) {
 
@@ -222,10 +211,13 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
 #endif
 
         finalizeSorProx();
-
     }
 
 
+#if CoutLevelSolverWhenContact>0
+    LOG(m_pSolverLog,  "MPI> Reset All Communicators" <<std::endl;);
+#endif
+    m_pProcComm->deleteAllCommunicators();
 
 }
 
@@ -241,7 +233,8 @@ void InclusionSolverCONoG::integrateAllBodyVelocities() {
 
     for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
-        (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
+        (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()
+                                                        *(*bodyIt)->m_h_term * m_Settings.m_deltaT;
     }
 
 
@@ -349,7 +342,6 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
                              && m_globalIterationCounter >= m_Settings.m_MinIter;
     }
 
-    doConvergenceCheck = false;
 
     // cache the velocities if convergence check should be done
     if( doConvergenceCheck ) {
@@ -379,8 +371,8 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
     }
 
 
-    // Do this only after a certain numer of iterations!
-    if(m_nSplitBodyNodes){
+    // Do this only after a certain number of iterations!
+    if(m_nSplitBodyNodes || m_nRemoteNodes ){
         if(m_globalIterationCounter % m_Settings.m_splitNodeUpdateRatio == 0 ) {
             // Communicate all remote velocities to neighbour (if nSplitBodies != 0 || remoteNodes != 0)
             m_pInclusionComm->communicateSplitBodyUpdate(m_globalIterationCounter);
@@ -466,7 +458,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
         }
 
-        // If local contact problem is uncoupled from other processes we do not check for convergence
+        // If local contact problem is uncoupled from other processes we do not check for convergence of other processes
         if( !m_pContactGraph->isUncoupled() ){
              //Communicates our converged flags and sets it to false if some neighbours are not convgered
              m_bConverged =  m_pInclusionComm->communicateConvergence(m_bConverged);
@@ -489,11 +481,13 @@ void InclusionSolverCONoG::finalizeSorProx() {
 #endif
 
     m_pInclusionComm->resetAllWeightings();
+
+
 }
 
 std::string  InclusionSolverCONoG::getIterationStats() {
     std::stringstream s;
-    s
+    s << std::fixed
             << m_bUsedGPU<<"\t"
             << m_nContacts<<"\t"
             << m_nLocalNodes << "\t"

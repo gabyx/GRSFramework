@@ -201,9 +201,10 @@ public:
         STATIC_ASSERT2((!std::is_same<T,bool>::value), "WORKS ONLY FOR non bool")
         // GCC No support STATIC_ASSERT2(std::is_trivially_copyable<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES")
         STATIC_ASSERT2(std::is_trivial<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES")
-        ASSERTMSG( comm == MPI_COMM_WORLD,"This command is only implemented for MPI_COMM_WORLD")
 
-        gatheredValues.resize(this->getNProcesses());
+        int size;
+        MPI_Comm_size(comm,&size);
+        gatheredValues.resize(size);
 
         char * p = static_cast<char*>(gatheredValues.data());
 
@@ -213,10 +214,10 @@ public:
     template<typename T>
     void allGather(T value, std::vector<T> & gatheredValues){ allGather(value,gatheredValues,m_comm); }
     template<typename T>
-    void allGather(T value, std::vector<T> & gatheredValues, MPICommunicatorId id){
+    inline void allGather(T value, std::vector<T> & gatheredValues, MPICommunicatorId id){
         auto it = m_communicators.find(static_cast<unsigned int>(id));
         ASSERTMSG(it!=m_communicators.end(),"This communicator does not exist in the set in rank: " << this->getRank())
-        allGather(value,gatheredValues,m_comm);
+        allGather(value,gatheredValues,it->second);
     }
 
     template<typename T>
@@ -341,10 +342,11 @@ public:
     }
 
     /**
-    * Inserts a new splitted communicator with id newCommId if color is not -1
+    * Inserts/Overwrites a new splitted communicator with id newCommId if color is not -1
+    * No communicator freeing is done here!
     * Rank ordering is preserved  from the old communicator
     */
-    void generateCommunicatorSplitAndUpdate(MPICommunicatorId newCommId, int groupColor){
+    void generateCommunicatorSplitAndOverwrite(MPICommunicatorId newCommId, int groupColor){
 
         unsigned int id = static_cast<unsigned int>(newCommId);
         // groupColor < 0  is MPI_UNDEFINED
@@ -357,17 +359,12 @@ public:
         auto error = MPI_Comm_split(m_comm,groupColor,this->m_rank,&comm);
         ASSERTMPIERROR(error, "MPI_Comm_split failed in rank: " << this->m_rank);
 
-        auto it = m_communicators.find(id);
-        if(it != m_communicators.end()){
-             // Free communicator
-                auto error =  MPI_Comm_free( &(it->second) );
-                ASSERTMPIERROR(error, "MPI_Comm_free failed in rank: " << this->m_rank)
+        ASSERTMSG(m_communicators.find(id) == m_communicators.end(), "This communicator is already in the set! This should not happend!")
+
+        if(comm != MPI_COMM_NULL){
+            m_communicators[id] = comm;
         }
 
-        //Overwrite or insert new communicator only if it is not a null comm
-        if(comm != MPI_COMM_NULL){
-            auto res = m_communicators[id] = comm;
-        }
     }
 
     /** Return a copy of the communicator with id commId*/
@@ -379,6 +376,17 @@ public:
         }else{
             ERRORMSG("Communicator with id: " << static_cast<unsigned int>(commId) <<" does not exist!");
         }
+    }
+
+    void deleteAllCommunicators(){
+        //Collective call to free all communicators, this
+        // Take care, dead lock might happen if communicators are freed not according to a sorted global id!
+        // our id is the MPICommunicatorId which are global, and m_communicator is sorted according to these ids
+        for(auto it = m_communicators.begin(); it!= m_communicators.begin(); it++){
+             auto error =  MPI_Comm_free( &(it->second) );
+             ASSERTMPIERROR(error, "MPI_Comm_free failed in rank: " << this->m_rank)
+        }
+        m_communicators.clear();
     }
 
 private:
@@ -395,7 +403,10 @@ private:
     std::vector<MPI_Request>                      m_sendRequests; ///< these are the requests, these are pointers!
     std::vector<MPI_Status>                       m_sendStatuses;
 
-    /** These communicators are subject to change during communications, id's are chosen from MPICommunicatorId enumration */
+    /** These communicators are subject to change during communications, id's are chosen from MPICommunicatorId enumration
+    *   Ids are global and thus on each process the same id corresponds to the same type of communicator
+    *   Therefore freeing these communicators collectively in deleteAllCommunicators does not result in deadlock
+    */
     std::map<unsigned int, MPI_Comm> m_communicators;
 };
 

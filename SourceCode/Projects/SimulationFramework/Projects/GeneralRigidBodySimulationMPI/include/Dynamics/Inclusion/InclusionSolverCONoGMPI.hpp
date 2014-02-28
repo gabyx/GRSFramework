@@ -51,7 +51,7 @@ public:
     InclusionSolverCONoG(boost::shared_ptr< BodyCommunicator >  pBodyComm,
                          boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
                          boost::shared_ptr< DynamicsSystemType> pDynSys,
-                         boost::shared_ptr< ProcessCommunicatorType > pProcCom);
+                         boost::shared_ptr< ProcessCommunicatorType > pProcComm);
     ~InclusionSolverCONoG();
 
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
@@ -120,10 +120,6 @@ protected:
 
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;
-
-    typename ContactGraphType::SplitBodyNodeDataListType m_nodesSplitBody;
-    typename ContactGraphType::NodeListType              m_nodesLocal, m_nodesRemote;
-
 
 
     void integrateAllBodyVelocities();

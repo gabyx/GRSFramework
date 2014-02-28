@@ -318,8 +318,10 @@ void MoreauTimeStepper::doOneIteration() {
     //boost::thread::yield();
 
 #if CoutLevelSolver==1
-      if(m_IterationCounter % 10000 == 1){
-            LOG(m_pSolverLog,"---> m_t: " << m_currentSimulationTime <<std::endl; );
+     unsigned int when = (m_Settings.m_endTime-m_Settings.m_startTime)/m_Settings.m_deltaT / 10.0;
+      if(when<=0){when=1;}
+      if(m_IterationCounter % when == 0){
+            LOG(m_pSolverLog,"--->  m_t: " << m_currentSimulationTime<<std::endl; );
       }
 #endif
 

@@ -56,14 +56,7 @@ public:
     void clearGraph();
     void addNode(CollisionData * pCollData);
 
-    /**
-    * @brief Return true if the current contact problem is uncoupled from other processes
-    */
-    inline bool isUncoupled(){
-        return (m_localNodes.size() >= 0
-                && m_remoteNodes.size() == 0
-                && m_splittedNodes.size() == 0 );
-    }
+
 
     inline  const Eigen::Matrix<PREC,NDOFuBody,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
@@ -111,6 +104,25 @@ public:
     inline NodeListType & getLocalNodeListRef(){return m_localNodes;}
     inline NodeListType & getRemoteNodeListRef(){return m_remoteNodes;}
     inline SplitBodyNodeDataListType & getSplitBodyNodeListRef(){return m_splittedNodes;}
+
+    /**
+    * @brief Return true if the current contact problem is uncoupled from other processes
+    */
+    inline bool isUncoupled(){
+        return (m_localNodes.size() >= 0
+                && m_remoteNodes.size() == 0
+                && m_splittedNodes.size() == 0 );
+    }
+
+    inline bool hasNoNodes(){
+        return (m_localNodes.size() == 0
+                && m_remoteNodes.size() == 0
+                && m_splittedNodes.size() == 0 );
+    }
+
+    inline typename NodeListType::size_type getNLocalNodes(){return m_localNodes.size();}
+    inline typename NodeListType::size_type getNRemoteNodes(){return m_remoteNodes.size();}
+    inline typename NodeListType::size_type getNSplitBodyNodes(){return m_splittedNodes.size();}
 
     inline typename DynamicsSystemType::RigidBodyContainerType & getRemoteBodiesWithContactsListRef(){return m_remoteBodiesWithContacts;}
     inline typename DynamicsSystemType::RigidBodyContainerType & getLocalBodiesWithContactsListRef(){return m_localBodiesWithContacts;};

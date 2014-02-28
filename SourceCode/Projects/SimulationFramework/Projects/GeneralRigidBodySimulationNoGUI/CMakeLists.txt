@@ -184,7 +184,7 @@ SET(SYSTEMS_SRC
 
 # CUDA SOURCE INCLUDES ====================================================================
 if(SIMULATIONFRAMEWORK_USE_CUDA)
-
+MESSAGE(ERROR "CUDE does not work, write library to include!")
 INCLUDE(IncludeModulesCUDA)
 
 # Configure File for the BUILD!
@@ -203,10 +203,9 @@ SET(CUDA_INC
    ${ProxGPU_INC} ${VectorAddGPU_INC} ${MatrixVectorMultGPU_INC} ${GeneralCommonFiles_INC}
 )
 else()
-INCLUDE(IncludeModulesCUDA)
-INCLUDE_GENERAL_EXTERN_CUDA_ESSENTIAL(GeneralCommonFiles_SRC GeneralCommonFiles_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
-SET(CUDA_SRC ${GeneralCommonFiles_SRC})
-SET(CUDA_INC ${GeneralCommonFiles_INC})
+
+# Include nothing
+
 endif()
 # ===========================================================================================
 

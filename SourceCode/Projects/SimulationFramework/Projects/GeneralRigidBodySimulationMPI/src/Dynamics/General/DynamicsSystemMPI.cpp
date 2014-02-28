@@ -99,11 +99,12 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 
         // Add in to h-Term ==========
         pBody->m_h_term = pBody->m_h_term_const;
+        #if CoutLevelSolver>2
         LOG(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
             << "\t\t--->m_h_term= "  <<pBody->m_h_term.transpose()<<std::endl
             << "\t\t--->m_MassMatrixInv_diag= "  <<pBody->m_MassMatrixInv_diag.transpose()<<std::endl)
+        #endif
         // =========================
-
         // Term omega x Theta * omega = if Theta is diagonal : for a Spehere for example!
         AddGyroTermVisitor vis(pBody);
 

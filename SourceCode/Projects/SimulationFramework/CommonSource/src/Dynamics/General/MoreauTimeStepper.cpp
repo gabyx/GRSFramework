@@ -209,7 +209,8 @@ void MoreauTimeStepper::doOneIteration() {
 
     static int iterations=0; // Average is reset after 1000 Iterations
 
-#if CoutLevelSolver>1
+
+#if CoutLevelSolver>0
     LOG(m_pSolverLog, "---> Do one time-step =================================" <<std::endl;);
 #endif
 
@@ -236,7 +237,9 @@ void MoreauTimeStepper::doOneIteration() {
     swapStateBuffers();
 
 #if CoutLevelSolver==1
-      if(m_IterationCounter % (unsigned int)((m_Settings.m_endTime-m_Settings.m_startTime)/m_Settings.m_deltaT / 10) == 1){
+      unsigned int when = (m_Settings.m_endTime-m_Settings.m_startTime)/m_Settings.m_deltaT / 10.0;
+      if(when<=0){when=1;}
+      if(m_IterationCounter % when == 0){
             LOG(m_pSolverLog,"--->  m_t: " << m_currentSimulationTime<<std::endl; );
       }
 #endif

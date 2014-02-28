@@ -200,7 +200,7 @@ void SimulationState::setupScene() {
     pLight->setDiffuseColour((Ogre::Real)0.8,(Ogre::Real) 0.8,(Ogre::Real) 0.8);
     pLight->setPosition( 75, 75, 300 );
     //pLight->setAttenuation(5000000,0,0.1,0);
-    //pLight->setCastShadows(true);
+    pLight->setCastShadows(true);
 
     pLight = m_pSceneMgr->createLight("Light2");
     pLight->setType(Ogre::Light::LT_DIRECTIONAL);

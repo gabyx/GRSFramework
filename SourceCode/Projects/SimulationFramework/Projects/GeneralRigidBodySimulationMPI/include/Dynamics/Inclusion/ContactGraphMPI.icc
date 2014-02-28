@@ -70,63 +70,30 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
     this->m_nodes.push_back( new NodeType(m_nodeCounter));
     NodeType * addedNode = this->m_nodes.back();
     // Add to Remote or Local list
+
     // Check that contact is Local-Local or Remote-Local or Local-Remote
     // So Fail if Remote-Remote
     std::pair<bool,bool> isRemote;
     bool feasible = ContactFeasibilityTableMPI::checkFeasibilityOfContact(pCollData->m_pBody1, pCollData->m_pBody2 , isRemote );
     LOGASSERTMSG(feasible, m_pSolverLog, "Contact not feasible between body:  id1: " <<pCollData->m_pBody1->m_id << " and id2: " <<pCollData->m_pBody2->m_id )
 
+
+
     if(isRemote.first or isRemote.second) {
         //set the node color
 #if CoutLevelSolverWhenContact>1
         LOG(m_pSolverLog,"---> Added Remote Node on bodies:" << std::endl;)
 #endif
-
         addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
-
         m_remoteNodes.push_back(addedNode);
-
-        //Add to the neighbour data
-        if(isRemote.first) {
-
-            m_remoteBodiesWithContacts.addBody(pCollData->m_pBody1);
-
-#if CoutLevelSolverWhenContact>1
-            LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << std::endl;)
-#endif
-            m_pNbDataMap->getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody1);
-            // if this body is already added it does not matter
-
-        }else{
-            m_localBodiesWithContacts.addBody(pCollData->m_pBody1);
-        }
-
-        if(isRemote.second) {
-
-            m_remoteBodiesWithContacts.addBody(pCollData->m_pBody2);
-
-#if CoutLevelSolverWhenContact>1
-            LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2->m_id) << std::endl;)
-#endif
-            m_pNbDataMap->getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody2);
-            // if this body is already added it does not matter
-
-        }else{
-            m_localBodiesWithContacts.addBody(pCollData->m_pBody2);
-        }
 
     } else {
         //set the node color
         addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::LOCALNODE);
         m_localNodes.push_back(addedNode);
-
-        m_localBodiesWithContacts.addBody(pCollData->m_pBody1);
-        m_localBodiesWithContacts.addBody(pCollData->m_pBody2);
     }
 
     addedNode->m_nodeData.m_pCollData = pCollData;
-
-
 
     // Specify the contact model, (here we should do a look up or what ever)! ==================================
     // TODO
@@ -148,6 +115,19 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
     // FIRST BODY!
     if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
 
+        //Add to the neighbour data if remote contact
+        if(isRemote.first) {
+            m_remoteBodiesWithContacts.addBody(pCollData->m_pBody1);
+        #if CoutLevelSolverWhenContact>1
+            LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << std::endl;)
+        #endif
+            m_pNbDataMap->getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody1);
+            // if this body is already added it does not matter
+        }else{
+            m_localBodiesWithContacts.addBody(pCollData->m_pBody1);
+        }
+
+
         //Set Flag that this Body in ContactGraph
         pCollData->m_pBody1->m_pSolverData->m_bInContactGraph = true;
         // Unset the flag when this Node is removed;
@@ -160,12 +140,25 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
 
     } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::ANIMATED ) {
         // Contact goes into xi_N, xi_T
-        ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
+        ASSERTMSG(false,"RigidBody::ANIMATED objects have not been implemented correctly so far!");
     }
 
 
     // SECOND BODY!
     if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+
+        //Add to the neighbour data if remote contact
+        if(isRemote.second) {
+            m_remoteBodiesWithContacts.addBody(pCollData->m_pBody2);
+            #if CoutLevelSolverWhenContact>1
+                LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2->m_id) << std::endl;)
+            #endif
+            m_pNbDataMap->getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody2);
+            // if this body is already added it does not matter
+
+        }else{
+            m_localBodiesWithContacts.addBody(pCollData->m_pBody2);
+        }
 
         //Set Flag that this Body in ContactGraph
         pCollData->m_pBody2->m_pSolverData->m_bInContactGraph = true;
@@ -179,7 +172,7 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
 
     } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::ANIMATED ) {
         // Contact goes into xi_N, xi_T
-        ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
+        ASSERTMSG(false,"RigidBody::ANIMATED objects have not been implemented correctly so far!");
     }
 
     // increment the lambda counter, of how many forces we have so far!

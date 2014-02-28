@@ -383,7 +383,7 @@ bool SimulationManagerGUI::initRecordThread() {
 
     //Copy SimeState file, if necessary
     //Open SimState File
-    m_pSimulationLog->logMessage("---> Copy SimulationState.sim to right place...");
+    m_pSimulationLog->logMessage("---> Copy SimState.sim to right place...");
     bool fileOK = false;
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::CONTINUE) {
         fileOK = m_pStateRecorder->createSimFileCopyFromReference(m_SimFilePath,m_pTimestepper->m_Settings.m_simStateReferenceFile);
@@ -396,7 +396,7 @@ bool SimulationManagerGUI::initRecordThread() {
     }
 
     // Copy File: SimulationData
-    m_pSimulationLog->logMessage("---> Copy SimulationData.dat to right place...");
+    m_pSimulationLog->logMessage("---> Copy SimData.dat to right place...");
     boost::filesystem::path simDataFile;
     if(!m_pTimestepper->m_Settings.m_simDataReferenceFile.empty()) {
         ASSERTMSG(false,"HERE IS CODE ZU VERFOLSTÄNDIGEN! FALSCH!")

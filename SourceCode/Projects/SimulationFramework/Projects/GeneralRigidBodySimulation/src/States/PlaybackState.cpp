@@ -315,7 +315,7 @@ void PlaybackState::setupScene() {
     pLight->setDiffuseColour((Ogre::Real)0.8,(Ogre::Real) 0.8,(Ogre::Real) 0.8);
     pLight->setPosition( 75, 75, 300 );
     //pLight->setAttenuation(5000000,0,0.1,0);
-    //pLight->setCastShadows(true);
+    pLight->setCastShadows(false);
 
     pLight = m_pSceneMgr->createLight("Light2");
     pLight->setType(Ogre::Light::LT_DIRECTIONAL);
@@ -326,7 +326,7 @@ void PlaybackState::setupScene() {
 
     // Set Shadow Technique
     m_pSceneMgr->setAmbientLight(Ogre::ColourValue(0.7, 0.7, 0.7));
-    m_pSceneMgr->setShadowTechnique(SHADOWTYPE_STENCIL_ADDITIVE);
+    //m_pSceneMgr->setShadowTechnique(SHADOWTYPE_STENCIL_ADDITIVE);
 
 
 

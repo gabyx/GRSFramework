@@ -470,6 +470,7 @@ private:
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
                 // N direction =================================================
                 nodeData.m_W_body1.col(0).template head<3>() = - pCollData->m_cFrame.m_e_z; // I frame
+
                 nodeData.m_W_body1.col(0).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_z;
 
                 // T1 direction =================================================
@@ -565,13 +566,14 @@ private:
 class SorProxStepNodeVisitor{
 public:
 
-    DEFINE_RIGIDBODY_CONFIG_TYPES
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
     typedef typename ContactGraphType::NodeDataType NodeDataType;
     typedef typename ContactGraphType::EdgeDataType EdgeDataType;
     typedef typename ContactGraphType::EdgeType EdgeType;
     typedef typename ContactGraphType::NodeType NodeType;
+
 
     SorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
                            bool & globalConverged, const unsigned int & globalIterationNeeded):
@@ -623,6 +625,19 @@ public:
 
 
             //Prox
+            // HACK drive up parameter mu, does not help
+//            PREC mu =  nodeData.m_mu(0);
+//            if(m_globalIterationCounter <= 10){
+//                 mu = ((m_globalIterationCounter) / 10 ) * nodeData.m_mu(0);
+//                 m_bConverged = false;
+//            }
+//            else if (m_globalIterationCounter <= 300) {
+//                mu = ((m_globalIterationCounter-200) / 500 ) * nodeData.m_mu(0);
+//                m_bConverged = false;
+//            }
+//            else{
+//                mu =  nodeData.m_mu(0);
+//            }
 
             Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle(
                 nodeData.m_mu(0),
@@ -817,7 +832,12 @@ public:
 
 
         // Calculate R_ii
-        nodeData.m_R_i_inv_diag(0) = m_alpha / (nodeData.m_G_ii(0,0));
+
+        // Take also offdiagonal values for lambda_N
+        //nodeData.m_R_i_inv_diag(0) = m_alpha / std::max(std::max(nodeData.m_G_ii(0,0), nodeData.m_mu(0)*nodeData.m_G_ii(0,1)), nodeData.m_mu(0)*nodeData.m_G_ii(0,2));
+        // Take only diagonal
+        nodeData.m_R_i_inv_diag(0) = m_alpha / nodeData.m_G_ii(0,0);
+
         PREC r_T = m_alpha / ((nodeData.m_G_ii.diagonal().tail<2>()).maxCoeff());
         nodeData.m_R_i_inv_diag(1) = r_T;
         nodeData.m_R_i_inv_diag(2) = r_T;

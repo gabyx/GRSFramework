@@ -50,6 +50,8 @@ private:
 
     std::set< boost::filesystem::path > m_SimFilePaths;
 
+    std::map< boost::filesystem::path, std::vector<> > m_SimFilePaths;
+
     unsigned int m_folderIdCounter;
     boost::mutex m_busy_mutex;
 

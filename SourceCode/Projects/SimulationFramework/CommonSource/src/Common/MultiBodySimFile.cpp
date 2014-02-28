@@ -3,20 +3,19 @@
 
 const char MultiBodySimFile::m_simFileSignature[SIM_FILE_SIGNATURE_LENGTH] = SIM_FILE_SIGNATURE;
 
-
-MultiBodySimFile::MultiBodySimFile(unsigned int nDOFqBody, unsigned int nDOFuBody, unsigned int bufferSize):
-    m_nBytesPerQBody(nDOFqBody*sizeof(double)),
-    m_nBytesPerUBody(nDOFuBody*sizeof(double)),
-    m_nDOFuBody(nDOFuBody),
-    m_nDOFqBody(nDOFqBody),
-    m_nStates(0),
-    m_nBytesPerState(0),
+MultiBodySimFile::MultiBodySimFile(unsigned int bufferSize):
+    m_nDOFuBody(0),m_nDOFqBody(0),
     m_nBytes(0),
-    m_nSimBodies(0)
+    m_nBytesPerState(0),
+    m_nBytesPerQBody(0),
+    m_nBytesPerUBody(0),
+    m_additionalBytesType(0),
+    m_nAdditionalBytesPerBody(0),
+    m_nStates(0),
+    m_nSimBodies(0),
+    m_beginOfStates(0),
+    m_bReadFullState(true)
 {
-
-
-
     m_filePath = boost::filesystem::path();
 
     m_buf_size = bufferSize;
@@ -72,9 +71,11 @@ bool MultiBodySimFile::writeOutAllStateTimes() {
 
 
 void MultiBodySimFile::setByteLengths() {
+    m_nBytesPerQBody = m_nDOFqBody*sizeof(double);
+    m_nBytesPerUBody = m_nDOFuBody*sizeof(double);
 
-    m_nBytesPerBody = m_nDOFuBody*sizeof(double)
-                    + m_nDOFqBody*sizeof(double)
+    m_nBytesPerBody = m_nBytesPerUBody
+                    + m_nBytesPerQBody
                     + sizeof(RigidBodyIdType) + m_nAdditionalBytesPerBody;
 
     m_nBytesPerState = m_nSimBodies * m_nBytesPerBody + 1*sizeof(double);
@@ -92,14 +93,28 @@ std::streamoff MultiBodySimFile::getAdditionalBytes()
         return 0;
 }
 
-bool MultiBodySimFile::openWrite(const boost::filesystem::path &file_path, const unsigned int nSimBodies, bool truncate) {
-    m_errorString.str("");
+bool MultiBodySimFile::openWrite(const boost::filesystem::path &file_path,
+                                 unsigned int nDOFqBody,
+                                 unsigned int nDOFuBody,
+                                 const unsigned int nSimBodies,
+                                 bool truncate) {
 
     close();
 
-    m_additionalBytesType = 0; // no special output so far
+
+    if(nDOFqBody == 0 || nDOFuBody == 0 || nSimBodies == 0){
+        m_errorString << "Wrong openWrite parameters: nDOFqBody:" << nDOFqBody << " nDOFuBody: "<<nDOFuBody << " nSimBodies:" << nSimBodies<< std::endl;
+        return false;
+    }
+
+    m_nDOFuBody = nDOFuBody;
+    m_nDOFqBody = nDOFqBody;
+    m_additionalBytesType = 0;
     m_nSimBodies = nSimBodies;
+
     setByteLengths();
+    m_errorString.str("");
+
 
     if(truncate) {
 
@@ -157,14 +172,22 @@ void  MultiBodySimFile::writeHeader() {
 }
 
 
-bool  MultiBodySimFile::openRead(const boost::filesystem::path &file_path, const unsigned int nSimBodies, bool readFullState) {
-    m_errorString.str("");
+bool  MultiBodySimFile::openRead(const boost::filesystem::path &file_path,
+                                 unsigned int nDOFqBody,
+                                 unsigned int nDOFuBody,
+                                 unsigned int nSimBodies,
+                                 bool readFullState) {
 
     close();
 
+
+    m_nDOFuBody = nDOFuBody;
+    m_nDOFqBody = nDOFqBody;
     // Set if the read commands are reading the whole state! not only q! also u!
     m_bReadFullState = readFullState;
     m_nSimBodies = nSimBodies;
+
+    m_errorString.str("");
 
     m_file_stream.open(file_path.string().c_str(), std::ios_base::binary | std::ios_base::in);
     m_file_stream.rdbuf()->pubsetbuf(m_Buffer, m_buf_size);
@@ -196,10 +219,18 @@ bool  MultiBodySimFile::openRead(const boost::filesystem::path &file_path, const
 
 void MultiBodySimFile::close() {
     // Reset all values;
-    m_nStates = 0;
-    m_nBytes = 0;
-    m_nBytesPerState = 0;
-    m_nSimBodies = 0;
+    m_nDOFuBody=0;
+    m_nDOFqBody=0;
+    m_nBytes=0;
+    m_nBytesPerState=0;
+    m_nBytesPerQBody=0;
+    m_nBytesPerUBody=0;
+    m_additionalBytesType=0;
+    m_nAdditionalBytesPerBody=0;
+    m_nStates=0;
+    m_nSimBodies=0;
+    m_beginOfStates=0;
+    m_bReadFullState =  true;
 
     m_filePath = boost::filesystem::path();
 
@@ -220,7 +251,7 @@ bool  MultiBodySimFile::readLength() {
 
 
     if(m_nBytes > m_headerLength) {
-        long long int nStates = (m_nBytes - m_headerLength) / ( m_nBytesPerState );
+        std::streamsize nStates = (m_nBytes - m_headerLength) / ( m_nBytesPerState );
         //cout << "States:" << (unsigned int) nStates << std::endl;
         if(nStates > 0) {
             m_nStates = nStates;
@@ -260,19 +291,25 @@ bool  MultiBodySimFile::readHeader() {
             return false;
         }
 
-        // if the body count is zero we dont need to check on the simBodies
+        // if the body count is zero we dont need to check on the values, so overwrite the values
         if(m_nSimBodies == 0){
             m_nSimBodies = nBodies;
         }
-
-        bool abort;
-        if(m_bReadFullState) {
-            abort = nBodies == m_nSimBodies && nDofuBody == m_nDOFuBody && nDofqBody == m_nDOFqBody;
-        } else {
-            abort = nBodies == m_nSimBodies && nDofqBody == m_nDOFqBody;
+        if(m_nDOFqBody == 0){
+            m_nDOFqBody = nDofqBody;
+        }
+        if(m_nDOFuBody == 0){
+            m_nDOFuBody = nDofuBody;
         }
 
-        if(abort) {
+        bool ok;
+        if(m_bReadFullState) {
+            ok = nBodies == m_nSimBodies && nDofuBody == m_nDOFuBody && nDofqBody == m_nDOFqBody;
+        } else {
+            ok = nBodies == m_nSimBodies && nDofqBody == m_nDOFqBody;
+        }
+
+        if(ok) {
             m_beginOfStates = m_file_stream.tellg();
             return true;
         } else {
@@ -288,8 +325,38 @@ bool  MultiBodySimFile::readHeader() {
     return false;
 }
 
-unsigned int MultiBodySimFile::getNStates() {
-    return m_nStates;
-}
 
+MultiBodySimFile & MultiBodySimFile::operator << (MultiBodySimFile& file){
+
+
+
+    const std::size_t blockSize = 1024 * 1024; // 1mb buffer size;
+    std::vector<char> data(blockSize);
+
+    //Calculate bytes to write to this file;
+    file.m_file_stream.seekg(0, std::ios::cur);
+    std::streampos currentLoc = file.m_file_stream.tellg();
+    std::streamsize states_rest = (file.m_nBytes - currentLoc) / file.m_nBytesPerState;
+
+
+    if( states_rest > 0){
+
+        std::streamsize bytesToCopy = states_rest * file.m_nBytesPerState;
+
+        //Write loop in blockSize
+        for(std::size_t block = 0; block < bytesToCopy/blockSize; block++)
+        {
+            file.m_file_stream.read(&data[0], blockSize);
+            m_file_stream.write(&data[0], blockSize);
+        }
+
+        std::streamsize restBytes = bytesToCopy%blockSize;
+        // Write rest
+        if(restBytes != 0)
+        {
+            file.m_file_stream.read(&data[0], restBytes);
+            m_file_stream.write(&data[0], restBytes);
+        }
+    }
+}
 

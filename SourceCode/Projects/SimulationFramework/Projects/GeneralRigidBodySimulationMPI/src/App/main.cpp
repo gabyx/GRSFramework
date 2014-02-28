@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     // Scope that all stuff is deconstructed before MPI FINALIZE IS CALLED
     {
 
-        new MPILayer::MPIGlobalCommunicators();
+        MPILayer::MPIGlobalCommunicators globalComm;
 
 
          // Add the process rank to the Global File Path for this Process...
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 
 
         // Parsing Input Parameters===================================
-        new ApplicationCLOptions();
+        ApplicationCLOptions opts;
         ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
         ApplicationCLOptions::getSingletonPtr()->checkArguments();
         if(my_rank == 0){
@@ -55,17 +55,18 @@ int main(int argc, char **argv) {
         }
 
         // Rank 0 makes the FileManager first( to ensure that all folders are set up properly)
+        FileManager * fileManager;
         if(my_rank == 0){
-            new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
+            fileManager = new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
             MPI_Barrier(MPI_COMM_WORLD);
         }
         else{
             MPI_Barrier(MPI_COMM_WORLD);
             //These do not create paths anymore because rank 0 has already made the stuff
-            new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath);
+            fileManager = new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath);
         }
 
-        new Logging::LogManager();
+        Logging::LogManager logger;
 
         // Redirect std::cerr to Global file:
         boost::filesystem::path file = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
@@ -100,6 +101,8 @@ int main(int argc, char **argv) {
             }
         }
 
+
+        delete fileManager;
 
     } // SCOPE
 

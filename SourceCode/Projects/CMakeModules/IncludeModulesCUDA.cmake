@@ -128,15 +128,3 @@ set(${SRC}
 set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/General/)
 endmacro(INCLUDE_GENERAL_EXTERN_CUDA)
 
-MACRO(INCLUDE_GENERAL_EXTERN_CUDA_ESSENTIAL SRC INC INCLUDE_DIRS PATH_TO_MODULES )
-set(${INC}
-	${PATH_TO_MODULES}/inc/General/FloatingPointType.hpp
-	${PATH_TO_MODULES}/inc/General/TemplateHelper.hpp
-	${PATH_TO_MODULES}/inc/General/AssertionDebugC.hpp
-	${PATH_TO_MODULES}/inc/General/StaticAssert.hpp
-	${PATH_TO_MODULES}/inc/General/FlopsCounting.hpp
-)
-set(${SRC}
-)
-set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/General/)
-endmacro(INCLUDE_GENERAL_EXTERN_CUDA_ESSENTIAL)

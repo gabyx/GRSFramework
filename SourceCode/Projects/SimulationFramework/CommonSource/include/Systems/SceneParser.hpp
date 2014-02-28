@@ -214,9 +214,9 @@ protected:
                 throw ticpp::Exception("---> String conversion in SceneSettings: endTime failed");
             }
 
-            ticpp::Element *simFromRef = timestepElement->FirstChild("SimulateFromReference",false)->ToElement();
-            if(simFromRef) {
-
+            ticpp::Node * ptr = timestepElement->FirstChild("SimulateFromReference",false);
+            if(ptr) {
+                ticpp::Element *simFromRef = ptr->ToElement();
                 bool enabled = false;
                 if(!Utilities::stringToType<bool>(enabled, simFromRef->GetAttribute("enabled"))) {
                     throw ticpp::Exception("---> String conversion in SimulateFromReference: enable failed");

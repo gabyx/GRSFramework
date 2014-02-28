@@ -36,7 +36,7 @@
         }\
     }
 
-    #define WARNINGMSG(condition , message) { if(!(condition)){ std::cerr << "WARNING : " << #condition << " @ " <<std::endl<< message << std::endl << __FILE__ << " (" << __LINE__ << ")" << std::endl;} }
+    #define WARNINGMSG(condition , message) { if(!(condition)){ std::cerr << "WARNING: " << #condition << " : " <<std::endl<< message << std::endl << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl;} }
 
 #else
 //   #define ASSERTMSG(condition,message);
@@ -56,7 +56,7 @@
         }\
     }
 
-    #define WARNINGMSG(condition , message) { if(!(condition)){ std::cerr << "WARNING : " << #condition << " @ " <<std::endl<< message << std::endl << __FILE__ << " (" << __LINE__ << ")" << std::endl;} }
+    #define WARNINGMSG(condition , message) { if(!(condition)){ std::cerr << "WARNING: " << #condition << " : " <<std::endl<< message << std::endl << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl;} }
 
 
 
@@ -69,7 +69,7 @@
 	*/
 #define ERRORMSG( _message_ ) { \
 int rank; MPI_Comm_rank(MPI_COMM_WORLD,&rank); \
-std::cerr << "ERROR in ProcessRank: " << rank << " @ " <<std::endl<< _message_ << std::endl << __FILE__ << "(" << __LINE__ << ")" << std::endl; \
+std::cerr << "ERROR in ProcessRank: " << rank << " : " << _message_ << std::endl << " @ " <<  __FILE__ << "(" << __LINE__ << ")" << std::endl; \
 MPI_Abort(MPI_COMM_WORLD, -1); \
 }
 

@@ -225,7 +225,7 @@ void InclusionSolverCONoG::doSorProx() {
     while(true) {
 
         m_bConverged = true;
-        #if CoutLevelSolverWhenContact>2
+        #if CoutLevelSolverWhenContact>1
             LOG(m_pSolverLog,"---> Next iteration: "<< m_globalIterationCounter << std::endl);
         #endif
         sorProxOverAllNodes(); // Do one Sor Prox Iteration

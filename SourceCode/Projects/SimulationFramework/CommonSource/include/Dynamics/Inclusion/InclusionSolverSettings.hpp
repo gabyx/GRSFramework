@@ -30,7 +30,7 @@ struct InclusionSolverSettings
       m_eConvergenceMethod = InVelocity;
 
       //Experimental
-      m_dinv = 0; //Inverse Damper Coefficient which acts on the diagonal of G,
+      //m_dinv = 0; //Inverse Damper Coefficient which acts on the diagonal of G,
 
     }
 

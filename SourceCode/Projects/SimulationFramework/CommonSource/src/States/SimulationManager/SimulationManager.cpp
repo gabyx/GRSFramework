@@ -77,12 +77,12 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
 
 
     m_pSharedBuffer = boost::shared_ptr<SharedBufferDynSys >(new SharedBufferDynSys(m_nSimBodies));
-    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_nSimBodies, m_pDynSys, m_pSharedBuffer) );
+    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
 
 
     m_pStateRecorder = boost::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
 
-    m_pSharedBuffer->initializeStatePool(m_pDynSys->m_simBodiesInitStates);
+    m_pSharedBuffer->resetStatePool(m_pDynSys->m_simBodiesInitStates);
 
     m_pSceneParser->cleanUp();
 

@@ -93,7 +93,7 @@ public:
     typedef NeighbourMap<NeighbourDataBodyCommunication>     NeighbourMapType;
 
     BodyCommunicator(boost::shared_ptr< DynamicsSystemType> pDynSys ,
-                     boost::shared_ptr< ProcessCommunicatorType > pProcCom);
+                     boost::shared_ptr< ProcessCommunicatorType > pProcComm);
 
     ~BodyCommunicator(){
 

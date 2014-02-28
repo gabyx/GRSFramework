@@ -142,8 +142,8 @@ template<typename Iterator>
 void printVector(std::ostream& ostr, const Iterator & itBegin, const Iterator & itEnd, const std::string& delimiter){
         std::copy(itBegin, itEnd, std::ostream_iterator<typename Iterator::value_type>(ostr, delimiter.c_str()));
 }
-template<typename Iterator>
-void printVectorNoCopy(std::ostream& ostr, const Iterator & itBegin, const Iterator & itEnd, const std::string& delimiter){
+template<typename Stream, typename Iterator>
+void printVectorNoCopy(Stream & ostr, const Iterator & itBegin, const Iterator & itEnd, const std::string& delimiter){
         ostr << *itBegin;
         Iterator it = itBegin;
         for(it++; it != itEnd; it++){

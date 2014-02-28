@@ -11,6 +11,9 @@ set(SIMULATIONFRAMEWORK_BUILD_NOGUI ON CACHE BOOL "Build the NOGUI version of Si
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_MPI )
 set(SIMULATIONFRAMEWORK_BUILD_MPI OFF CACHE BOOL "Build the MPI version of SimulationFramework")
 
+MARK_AS_ADVANCED( SIMFILECONVERTER_BUILD )
+set(SIMFILECONVERTER_BUILD ON CACHE BOOL "Build the SimFileConverter for the simulation files of the framework")
+
 
 # Set the makefile build type (only for make file based generators)
 MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )
@@ -272,6 +275,10 @@ endif()
 
 if(SIMULATIONFRAMEWORK_BUILD_MPI)
 add_subdirectory(Projects/GeneralRigidBodySimulationMPI)
+endif()
+
+if(SIMFILECONVERTER_BUILD)
+add_subdirectory(Projects/SimFileConverter)
 endif()
 
 # Copy Media Files to Project folder

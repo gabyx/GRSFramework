@@ -14,16 +14,16 @@ const std::streamoff MultiBodySimFileMPI::m_nAdditionalBytesPerBody= getAddition
 
 
 MultiBodySimFileMPI::MultiBodySimFileMPI(unsigned int nDOFqBody, unsigned int nDOFuBody)
-    : m_nBytesPerQBody(nDOFqBody*sizeof(double)),
-      m_nBytesPerUBody(nDOFuBody*sizeof(double)),
-      m_nBytesPerBody(nDOFuBody*sizeof(double) + nDOFqBody*sizeof(double)  + sizeof(RigidBodyIdType) + m_nAdditionalBytesPerBody),
-      m_nDOFuBody(nDOFuBody),
-      m_nDOFqBody(nDOFqBody),
-      m_nStates(0),
-      m_nBytesPerState(0),
-      m_nBytesPerU(0),
-      m_nBytesPerQ(0),
-      m_nSimBodies(0)
+    :   m_nDOFuBody(0),m_nDOFqBody(0),
+        m_nBytes(0),
+        m_nBytesPerState(0),
+        m_nBytesPerQBody(0),
+        m_nBytesPerUBody(0),
+        m_additionalBytesType(0),
+        m_nAdditionalBytesPerBody(0),
+        m_nStates(0),
+        m_nSimBodies(0),
+        m_beginOfStates(0)
 {
 
     m_filePath = boost::filesystem::path();
@@ -288,21 +288,34 @@ void  MultiBodySimFileMPI::writeHeader() {
 }
 
 
-void MultiBodySimFileMPI::setByteLengths(const unsigned int nSimBodies) {
+void MultiBodySimFileMPI::setByteLengths() {
+    m_nBytesPerQBody = nDOFqBody*sizeof(double);
+    m_nBytesPerUBody = nDOFuBody*sizeof(double);
+
+    m_nBytesPerBody = m_nBytesPerQBody + m_nBytesPerUBody  + sizeof(RigidBodyIdType) + m_nAdditionalBytesPerBody),
+
     m_nBytesPerState = nSimBodies*(m_nBytesPerBody) + 1*sizeof(double);
-    m_nSimBodies = nSimBodies;
 }
 
 
-bool MultiBodySimFileMPI::openWrite(MPI_Comm comm, const boost::filesystem::path &file_path, const unsigned int nSimBodies, bool truncate) {
+bool MultiBodySimFileMPI::openWrite(MPI_Comm comm,
+                                    const boost::filesystem::path &file_path,
+                                    unsigned int nDOFqBody,
+                                    unsigned int nDOFuBody,
+                                    const unsigned int nSimBodies,
+                                    bool truncate) {
+
+    m_nDOFuBody = nDOFuBody;
+    m_nDOFqBody = nDOFqBody;
+    m_nSimBodies = nSimBodies;
 
     // Duplicate the communicator, this file Io does not use the same communicator as all other stuff!
     MPI_Comm_dup(comm,&m_comm);
-
     MPI_Comm_rank(m_comm, &m_rank);
     MPI_Comm_size(m_comm, &m_processes);
 
-    setByteLengths(nSimBodies);
+
+    setByteLengths();
 
 
     std::string filepath_tmp =  file_path.string();
