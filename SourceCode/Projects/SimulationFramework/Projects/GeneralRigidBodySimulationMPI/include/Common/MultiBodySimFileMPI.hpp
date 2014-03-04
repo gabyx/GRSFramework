@@ -32,10 +32,15 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    MultiBodySimFileMPI(unsigned int nDOFqBody, unsigned int nDOFuBody);
+    MultiBodySimFileMPI();
     ~MultiBodySimFileMPI();
 
-    bool openWrite(MPI_Comm comm,  const boost::filesystem::path & file_path,   const unsigned int nSimBodies,  bool truncate = true);
+    bool openWrite(MPI_Comm comm,
+                   const boost::filesystem::path & file_path,
+                   unsigned int nDOFqBody,
+                   unsigned int nDOFuBody,
+                   const unsigned int nSimBodies,
+                   bool truncate = true);
     void close();
 
     inline void write(double time, const std::vector<char> & bytes, unsigned int nBodies);
@@ -72,7 +77,7 @@ private:
     void writeHeader();
     boost::filesystem::path m_filePath;
 
-    void setByteLengths(const unsigned int nSimBodies);
+    void setByteLengths();
     unsigned int m_nSimBodies;
     std::streamsize m_nBytesPerState; ///< m_nSimBodies*(id,q,u) + time
     std::streamsize m_nBytesPerQ, m_nBytesPerU;
@@ -90,7 +95,7 @@ private:
     }
     static const  std::streamsize m_nAdditionalBytesPerBody;
 
-    const  std::streamsize m_nBytesPerBody; ///< id,q,u + m_nAdditionalBytesPerBody
+    std::streamsize m_nBytesPerBody; ///< id,q,u + m_nAdditionalBytesPerBody
 
     static const  std::streamsize m_headerLength = SIM_FILE_MPI_SIGNATURE_LENGTH*sizeof(char) + sizeof(unsigned int)
                                                     +3*sizeof(unsigned int) +2*sizeof(unsigned int) ; ///< 'MBSF' + nBodies, NDOFq, NDOFu, additionalBytesType (0=nothing, 1 = + process rank, etc.), additionalBytesPerBody

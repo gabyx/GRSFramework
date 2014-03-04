@@ -127,7 +127,7 @@ public:
 //                    }
 //                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
 //                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-//                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache1,
+//                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNormSq(   uCache1,
 //                                                                          nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
 //                                                                          nodeData.m_LambdaBack,
 //                                                                          nodeData.m_LambdaFront,
@@ -179,7 +179,7 @@ public:
 //
 //                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
 //                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-//                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
+//                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNormSq(   uCache2,
 //                                                                          nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
 //                                                                          nodeData.m_LambdaBack,
 //                                                                          nodeData.m_LambdaFront,

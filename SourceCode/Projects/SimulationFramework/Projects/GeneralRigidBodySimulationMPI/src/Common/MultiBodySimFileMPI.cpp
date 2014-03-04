@@ -13,17 +13,17 @@ const std::streamoff MultiBodySimFileMPI::m_nAdditionalBytesPerBody= getAddition
 
 
 
-MultiBodySimFileMPI::MultiBodySimFileMPI(unsigned int nDOFqBody, unsigned int nDOFuBody)
+MultiBodySimFileMPI::MultiBodySimFileMPI()
     :   m_nDOFuBody(0),m_nDOFqBody(0),
-        m_nBytes(0),
+//        m_nBytes(0),
         m_nBytesPerState(0),
         m_nBytesPerQBody(0),
         m_nBytesPerUBody(0),
-        m_additionalBytesType(0),
-        m_nAdditionalBytesPerBody(0),
+//        m_additionalBytesType(0),
+//        m_nAdditionalBytesPerBody(0),
         m_nStates(0),
-        m_nSimBodies(0),
-        m_beginOfStates(0)
+        m_nSimBodies(0)
+//        m_beginOfStates(0)
 {
 
     m_filePath = boost::filesystem::path();
@@ -289,12 +289,12 @@ void  MultiBodySimFileMPI::writeHeader() {
 
 
 void MultiBodySimFileMPI::setByteLengths() {
-    m_nBytesPerQBody = nDOFqBody*sizeof(double);
-    m_nBytesPerUBody = nDOFuBody*sizeof(double);
+    m_nBytesPerQBody = m_nDOFqBody*sizeof(double);
+    m_nBytesPerUBody = m_nDOFuBody*sizeof(double);
 
-    m_nBytesPerBody = m_nBytesPerQBody + m_nBytesPerUBody  + sizeof(RigidBodyIdType) + m_nAdditionalBytesPerBody),
+    m_nBytesPerBody = m_nBytesPerQBody + m_nBytesPerUBody  + sizeof(RigidBodyIdType) + m_nAdditionalBytesPerBody;
 
-    m_nBytesPerState = nSimBodies*(m_nBytesPerBody) + 1*sizeof(double);
+    m_nBytesPerState = m_nSimBodies*(m_nBytesPerBody) + 1*sizeof(double);
 }
 
 

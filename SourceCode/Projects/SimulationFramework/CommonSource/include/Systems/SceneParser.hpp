@@ -242,18 +242,18 @@ protected:
             if(inclusionElement) {
 
                 if(!Utilities::stringToType<PREC>(inclusionSettings.m_alphaJORProx, inclusionElement->GetAttribute("alphaJORProx"))) {
-                    throw ticpp::Exception("---> String conversion in SceneSettings: alphaJORProx failed");
+                    throw ticpp::Exception("---> String conversion in InclusionSolverSettings: alphaJORProx failed");
                 }
                 if(!Utilities::stringToType<PREC>(inclusionSettings.m_alphaSORProx, inclusionElement->GetAttribute("alphaSORProx"))) {
-                    throw ticpp::Exception("---> String conversion in SceneSettings: alphaJORProx failed");
+                    throw ticpp::Exception("---> String conversion in InclusionSolverSettings: alphaJORProx failed");
                 }
                 if(!Utilities::stringToType<unsigned int>(inclusionSettings.m_MaxIter, inclusionElement->GetAttribute("maxIter"))) {
-                    throw ticpp::Exception("---> String conversion in SceneSettings: maxIter failed");
+                    throw ticpp::Exception("---> String conversion in InclusionSolverSettings: maxIter failed");
                 }
 
                 if(inclusionElement->HasAttribute("minIter")) {
                     if(!Utilities::stringToType<unsigned int>(inclusionSettings.m_MinIter, inclusionElement->GetAttribute("minIter"))) {
-                        throw ticpp::Exception("---> String conversion in SceneSettings: minIter failed");
+                        throw ticpp::Exception("---> String conversion in InclusionSolverSettings: minIter failed");
                     }
                 } else {
                     inclusionSettings.m_MinIter = 0;
@@ -272,22 +272,29 @@ protected:
                     } else if (method == "InEnergyLocalMix") {
                         inclusionSettings.m_eConvergenceMethod = InclusionSolverSettingsType::InEnergyLocalMix;
                     } else {
-                        throw ticpp::Exception("---> String conversion in SceneSettings: convergenceMethod failed: not a valid setting");
+                        throw ticpp::Exception("---> String conversion in InclusionSolverSettings: convergenceMethod failed: not a valid setting");
                     }
                 } else {
-                    inclusionSettings.m_eConvergenceMethod = InclusionSolverSettingsType::InLambda;
+                    inclusionSettings.m_eConvergenceMethod = InclusionSolverSettingsType::InVelocity;
                 }
 
                 if(!Utilities::stringToType<PREC>(inclusionSettings.m_AbsTol, inclusionElement->GetAttribute("absTol"))) {
-                    throw ticpp::Exception("---> String conversion in SceneSettings: absTol failed");
+                    throw ticpp::Exception("---> String conversion in InclusionSolverSettings: absTol failed");
                 }
                 if(!Utilities::stringToType<PREC>(inclusionSettings.m_RelTol, inclusionElement->GetAttribute("relTol"))) {
-                    throw ticpp::Exception("---> String conversion in SceneSettings: relTol failed");
+                    throw ticpp::Exception("---> String conversion in InclusionSolverSettings: relTol failed");
                 }
+
+                if(inclusionElement->HasAttribute("computeResidual")) {
+                    if(!Utilities::stringToType<bool>(inclusionSettings.m_bComputeResidual, inclusionElement->GetAttribute("computeResidual"))) {
+                    throw ticpp::Exception("---> String conversion in InclusionSolverSettings: computeResidual failed");
+                }
+                }
+
 
                 if(inclusionElement->HasAttribute("isFiniteCheck")) {
                     if(!Utilities::stringToType<bool>(inclusionSettings.m_bIsFiniteCheck, inclusionElement->GetAttribute("isFiniteCheck"))) {
-                        throw ticpp::Exception("---> String conversion in SceneSettings: isFiniteCheck failed");
+                        throw ticpp::Exception("---> String conversion in InclusionSolverSettings: isFiniteCheck failed");
                     }
                 }
 
@@ -297,17 +304,17 @@ protected:
                 } else if (method == "SOR") {
                     inclusionSettings.m_eMethod = InclusionSolverSettingsType::SOR;
                 } else {
-                    throw ticpp::Exception("---> String conversion in SceneSettings: method failed: not a valid setting");
+                    throw ticpp::Exception("---> String conversion in InclusionSolverSettings: method failed: not a valid setting");
                 }
 
 
                 if(!Utilities::stringToType<bool>(inclusionSettings.m_bUseGPU, inclusionElement->GetAttribute("useGPU"))) {
-                    throw ticpp::Exception("---> String conversion in SceneSettings: useGPU failed");
+                    throw ticpp::Exception("---> String conversion in InclusionSolverSettings: useGPU failed");
                 }
 
                 if(inclusionElement->HasAttribute("useGPUID")) {
                     if(!Utilities::stringToType<int>(inclusionSettings.m_UseGPUDeviceId, inclusionElement->GetAttribute("useGPUID"))) {
-                        throw ticpp::Exception("---> String conversion in SceneSettings: useGPU failed");
+                        throw ticpp::Exception("---> String conversion in InclusionSolverSettings: useGPU failed");
                     }
                     if(inclusionSettings.m_UseGPUDeviceId <0) {
                         inclusionSettings.m_UseGPUDeviceId = 0;

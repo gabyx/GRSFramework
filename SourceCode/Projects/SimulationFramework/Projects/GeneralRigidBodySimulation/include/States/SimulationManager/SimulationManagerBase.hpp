@@ -35,7 +35,7 @@ public:
   void setIterationTime(double averageIterationTime,   double maxIterationTime);
 
   unsigned int getNumberOfContacts();
-  void          setNumberOfContacts(unsigned int & nContacts);
+  void         setNumberOfContacts(unsigned int nContacts);
 
   virtual void setup(boost::filesystem::path sceneFilePath) = 0;
 

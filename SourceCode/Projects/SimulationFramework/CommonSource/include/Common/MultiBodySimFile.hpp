@@ -304,7 +304,7 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
     double lastTime =-1;
 
     RigidBodyState * pState = nullptr;
-    unsigned int id;
+    RigidBodyIdType id;
     bool timeFound = false;
 
     m_file_stream.seekg(m_beginOfStates);
@@ -347,6 +347,7 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
         for(unsigned int body = 0; body < m_nSimBodies; body++){
             *this >> id;
 
+            //std::cout << RigidBodyId::getBodyIdString(id) << std::endl;
 
             if(onlyUpdate){
                 auto res = states.find(id);

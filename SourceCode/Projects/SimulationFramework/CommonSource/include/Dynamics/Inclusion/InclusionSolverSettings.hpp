@@ -27,7 +27,9 @@ struct InclusionSolverSettings
       m_bUseGPU = false;
       m_UseGPUDeviceId = 0;
       m_bIsFiniteCheck = false;
+
       m_eConvergenceMethod = InVelocity;
+      m_bComputeResidual = false; ///< If true convergence check is done for all contacts/bodies, no break in the loop
 
       //Experimental
       //m_dinv = 0; //Inverse Damper Coefficient which acts on the diagonal of G,
@@ -44,6 +46,7 @@ struct InclusionSolverSettings
     PREC m_RelTol;
     enum Method{ SOR, JOR} m_eMethod;
     enum Convergence {InLambda,InVelocity, InVelocityLocal, InEnergyVelocity,InEnergyLocalMix} m_eConvergenceMethod;
+    bool m_bComputeResidual;
     bool  m_bUseGPU;
     int m_UseGPUDeviceId;
     bool m_bIsFiniteCheck;

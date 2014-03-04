@@ -53,12 +53,7 @@ public:
     std::string getIterationStats();
     std::string getStatsHeader();
 
-    unsigned int m_globalIterationCounter;
-    bool m_bConverged;
-    unsigned int m_isFinite;
-    unsigned int m_nContacts;
-    bool m_bUsedGPU;
-    double m_timeProx, m_proxIterationTime;
+
 
 
 
@@ -70,9 +65,17 @@ public:
 
     InclusionSolverSettingsType m_Settings;
 
+    unsigned int getNContacts(){return m_nContacts;}
 
 protected:
 
+    unsigned int m_globalIterationCounter;
+    bool m_bConverged;
+    PREC m_maxResidual;
+    unsigned int m_isFinite;
+    unsigned int m_nContacts;
+    bool m_bUsedGPU;
+    double m_timeProx, m_proxIterationTime;
 
     unsigned int m_nExpectedContacts;
 
@@ -97,7 +100,9 @@ protected:
 
     // Log
     Logging::Log *m_pSolverLog, *m_pSimulationLog;
-    std::stringstream logstream;
+
+    // Residual File
+    std::fstream m_iterationDataFile;
 };
 
 

@@ -76,7 +76,7 @@ protected:
 
 StateRecorderMPI::StateRecorderMPI(unsigned int nSimBodies,
                                    boost::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> pProcInfo):
-    m_fh(LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody), m_nSimBodies(nSimBodies),
+    m_nSimBodies(nSimBodies),
     m_pProcInfo(pProcInfo)
 //    ,m_ins(m_writebuffer),
 //    m_stream(m_ins),
@@ -119,7 +119,7 @@ bool StateRecorderMPI::createSimFile(bool truncate){
 
     LOG(m_pSimulationLog,"MPI> StateRecorderMPI: Try Opened File : " << file << std::endl)
     //Collective (all processes do this)
-    bool res = m_fh.openWrite(m_pProcInfo->getCommunicator(),file,m_nSimBodies);
+    bool res = m_fh.openWrite(m_pProcInfo->getCommunicator(),file,NDOFqBody, NDOFuBody,m_nSimBodies);
     if(!res){
         ERRORMSG(m_fh.getErrorString());
     }

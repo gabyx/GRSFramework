@@ -433,7 +433,7 @@ void SimulationManagerGUI::writeSharedBuffer() {
 
     //if(iterations%100==0){
     setIterationTime(m_pTimestepper->m_AvgTimeForOneIteration, m_pTimestepper->m_MaxTimeForOneIteration);
-    setNumberOfContacts(m_pTimestepper->m_pInclusionSolver->m_nContacts);
+    setNumberOfContacts(m_pTimestepper->m_pInclusionSolver->getNContacts());
 
     //}
 

@@ -84,7 +84,7 @@
 * @brief
 */
 /* @{ */
-#define OUTPUT_SYSTEMDATA_FILE 1  ///< {0,1} Sets if the System Data file is outputted
+#define OUTPUT_SIMDATA_FILE 1  ///< {0,1} Sets if the System Data file is outputted
 #define CALCULATE_COND_OF_G 0     ///< {0,1} Set if the condition of the G matrix is calculated and outputted. Takes alot of time!
 #define CALCULATE_DIAGDOM_OF_G 1  ///< {0,1} Set if the diagonal dominant criteria is calculated, the number shows how many rows are not diagonal dominant!
 #define MEASURE_TIME_PROX 1
@@ -139,11 +139,11 @@
 * @brief Deconstructor and Constructor Macros to Debug correct dealloction of objects.
 */
 /* @{ */
-#ifdef _DEBUG
-#define DESTRUCTOR_MESSAGE \
- LOG(m_pSimulationLog, "Destructor: "<< typeid(*this).name()  <<" , @ : "<< this;);
+#ifndef NDEBUG
+#define DECONSTRUCTOR_MESSAGE \
+ std::cout << "Destructor: "<< typeid(*this).name()  <<" , @ : "<< this << std::endl;
 #define CONSTRUCTOR_MESSAGE \
-  LOG(m_pSimulationLog, "Constructor: "<< typeid(*this).name()  <<" , @ : "<< this;);
+  std::cout << "Constructor: "<< typeid(*this).name()  <<" , @ : "<< this << std::endl;;
 #else
   #define DECONSTRUCTOR_MESSAGE
   #define CONSTRUCTOR_MESSAGE

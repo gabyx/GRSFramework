@@ -7,6 +7,9 @@
 App::App()
 {
 	m_bShutdown			= false;
+
+
+
 }
 
 
@@ -34,33 +37,31 @@ void App::startApp()
 
     localDirPath = ApplicationCLOptions::getSingletonPtr()->m_localDirs[0];
     localDirPath /= processFolder.str();
-    FileManager fileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
+    new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
 
-    Logging::LogManager logger;
+    new Logging::LogManager;
 
-	RenderContext renderContext;
+	new RenderContext;
 
 	if(!RenderContext::getSingletonPtr()->initOgre("RigidBodySimulation v1.0"))
 		return;
-	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("RigidBodySimulation(RenderContext) initialized!");
+	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("RenderContext initialized!");
 
 	m_bShutdown = false;
 
 	m_pAppStateManager = boost::shared_ptr<AppStateManager>( new AppStateManager());
 
 
-	InputContext inputContext;
+	new InputContext;
 	if(!InputContext::getSingletonPtr()->initialise())
 		return;
 	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("InputContext initialized!");
 
 
-	GuiContext guiContext;
+	new GuiContext;
 	if(!GuiContext::getSingletonPtr()->initBitesTray())
 		return;
 	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("GuiContext initialized!");
-
-
 
 
 

@@ -136,7 +136,7 @@ _________________________________________________________*/
 
 MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
                                      boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
-    m_ReferenceSimFile(NDOFqBody,NDOFuBody),
+    m_ReferenceSimFile(),
     m_pSolverLog(NULL),
     m_pDynSys(pDynSys),
     m_pProcCommunicator(pProcCommunicator) {
@@ -217,11 +217,11 @@ void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, c
 #endif
 
     m_pDynSys->initializeLog(m_pSolverLog);
-    m_pInclusionSolver->initializeLog(m_pSolverLog,m_SolverLogFilePath);
+    m_pInclusionSolver->initializeLog(m_pSolverLog,m_SimFolderPath);
     m_pCollisionSolver->initializeLog(m_pSolverLog);
 
     // SystemDataFile
-#if OUTPUT_SYSTEMDATA_FILE == 1
+#if OUTPUT_SIMDATA_FILE == 1
     m_SystemDataFile.close();
     m_SystemDataFile.open(m_SystemDataFilePath, std::ios_base::app | std::ios_base::out);
     writeHeaderToSystemDataFile();
@@ -450,7 +450,7 @@ bool MoreauTimeStepper::finished() {
 }
 
 void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
-#if OUTPUT_SYSTEMDATA_FILE == 1
+#if OUTPUT_SIMDATA_FILE == 1
     m_SystemDataFile
     << globalTime << "\t"
     << m_startSimulationTime <<"\t"
@@ -465,7 +465,7 @@ void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
 #endif
 }
 void MoreauTimeStepper::writeHeaderToSystemDataFile() {
-#if OUTPUT_SYSTEMDATA_FILE == 1
+#if OUTPUT_SIMDATA_FILE == 1
     m_SystemDataFile <<"# "
     << "GlobalTime [s]" << "\t"
     << "SimulationTime [s]" <<"\t"

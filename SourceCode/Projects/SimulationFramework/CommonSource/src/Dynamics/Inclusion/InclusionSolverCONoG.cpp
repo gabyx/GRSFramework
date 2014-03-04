@@ -48,6 +48,13 @@ void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::fil
     m_pSorProxStepNodeVisitor->setLog(m_pSolverLog);
     m_pSorProxInitNodeVisitor->setLog(m_pSolverLog);
 
+    // if we should
+    #if OUTPUT_SIMDATAITERATION_FILE == 1
+        boost::filesystem::path file = folder_path / "SimDataIteration.dat";
+        LOG(m_pSimulationLog, "---> Open SimDataIteration file : "<< file<< std::endl;)
+        m_iterationDataFile.open(file.string(), std::ios::trunc | std::ios::out);
+    #endif
+
     #if HAVE_CUDA_SUPPORT == 1
 
     #endif
@@ -61,15 +68,19 @@ void InclusionSolverCONoG::reset() {
     resetForNextIter();
 
 #if HAVE_CUDA_SUPPORT == 1
-    LOG(m_pSimulationLog, "Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
+    LOG(m_pSimulationLog, "---> Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
 
     CHECK_CUDA(cudaSetDevice(m_Settings.m_UseGPUDeviceId));
     cudaDeviceProp props;
     CHECK_CUDA(cudaGetDeviceProperties(&props,m_Settings.m_UseGPUDeviceId));
 
-    LOG(m_pSimulationLog,  "Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
+    LOG(m_pSimulationLog,  "---> Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
 #endif
 
+    #if OUTPUT_SIMDATAITERATION_FILE == 1
+    LOG(m_pSimulationLog,  "---> Close IterationDataFile" << std::endl;);
+    m_iterationDataFile.close();
+    #endif
 
 }
 
@@ -247,13 +258,27 @@ void InclusionSolverCONoG::doSorProx() {
             #endif
             break;
         }
+
+        #if OUTPUT_SIMDATAITERATION_FILE == 1
+            if(m_bConverged == false && m_globalIterationCounter >= m_Settings.m_MinIter){
+                m_iterationDataFile << m_maxResidual << "\t";
+            }
+        #endif // OUTPUT_SIMDATAITERATION_FILE
     }
 
+
+    #if OUTPUT_SIMDATAITERATION_FILE == 1
+            if(m_bConverged == false && m_globalIterationCounter >= m_Settings.m_MinIter){
+                m_iterationDataFile << std::endl;
+            }
+    #endif // OUTPUT_SIMDATAITERATION_FILE
 
 }
 
 
 void InclusionSolverCONoG::sorProxOverAllNodes() {
+
+    m_maxResidual  = 0;
 
     // Move over all nodes, and do a sor prox step
     m_ContactGraph.applyNodeVisitor(*m_pSorProxStepNodeVisitor);
@@ -261,20 +286,25 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
     bool converged;
+    PREC residual;
     if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity) {
         typename ContactGraphType::BodyToContactsListIteratorType it;
         //std::cout << "Bodies: " << m_ContactGraph.m_simBodiesToContactsList.size() << std::endl;
         for(it=m_ContactGraph.m_simBodiesToContactsList.begin(); it !=m_ContactGraph.m_simBodiesToContactsList.end(); it++) {
-            if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
+            if(m_globalIterationCounter >= m_Settings.m_MinIter && (m_bConverged || m_Settings.m_bComputeResidual) )  {
                 //std::cout << "before Criteria"<<std::endl;
                 //std::cout <<"new "<< it->first->m_pSolverData->m_uBuffer.m_front.transpose() << std::endl;
                 //std::cout <<"old "<< it->first->m_pSolverData->m_uBuffer.m_back.transpose() << std::endl;
                 converged = Numerics::cancelCriteriaValue(  it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
                                                             it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
                                                             m_Settings.m_AbsTol,
-                                                            m_Settings.m_RelTol);
+                                                            m_Settings.m_RelTol,
+                                                            residual
+                                                            );
+
                 //std::cout << "after Criteria"<<std::endl;
                 if(!converged) {
+                    m_maxResidual = std::max(residual,m_maxResidual);
                     m_bConverged=false;
                 }
 
@@ -288,14 +318,17 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
     }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity){
         typename ContactGraphType::BodyToContactsListIteratorType it;
         for(it=m_ContactGraph.m_simBodiesToContactsList.begin(); it !=m_ContactGraph.m_simBodiesToContactsList.end(); it++) {
-            if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
+            if(m_globalIterationCounter >= m_Settings.m_MinIter && (m_bConverged || m_Settings.m_bComputeResidual)) {
 
-                converged = Numerics::cancelCriteriaMatrixNorm( it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
+                converged = Numerics::cancelCriteriaMatrixNormSq( it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
                                                                 it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
                                                                 it->first->m_MassMatrix_diag,
                                                                 m_Settings.m_AbsTol,
-                                                                m_Settings.m_RelTol);
+                                                                m_Settings.m_RelTol,
+                                                                residual
+                                                                );
                 if(!converged) {
+                    m_maxResidual = std::max(residual,m_maxResidual);
                     m_bConverged=false;
                 }
 
@@ -329,15 +362,5 @@ std::string  InclusionSolverCONoG::getIterationStats() {
 }
 
 std::string InclusionSolverCONoG::getStatsHeader() {
-    std::stringstream s;
-    s
-    << "GPUUsed"<<"\t"
-    << "nContacts"<<"\t"
-    << "nGlobalIterations"<<"\t"
-    << "Converged"<<"\t"
-    << "IsFinite"<<"\t"
-    << "TotalTimeProx [s]"<<"\t"
-    << "IterTimeProx [s]"<<"\t"
-    << "TotalStateEnergy [J]";
-    return s.str();
+    return std::string("GPUUsed\tnContacts\tnGlobalIterations\tConverged\tIsFinite\tTotalTimeProx [s]\tIterTimeProx [s]\tTotalStateEnergy [J]");
 }

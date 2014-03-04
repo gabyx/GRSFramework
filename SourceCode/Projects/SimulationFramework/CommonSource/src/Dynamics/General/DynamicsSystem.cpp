@@ -157,7 +157,7 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
             << "\t\t--->m_u_e= "  <<pBody->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl;)
 #endif
 
-#if OUTPUT_SYSTEMDATA_FILE == 1
+#if OUTPUT_SIMDATA_FILE == 1
         // Calculate Energy
         m_CurrentStateEnergy += 0.5* pBody->m_pSolverData->m_uBuffer.m_front.transpose() * pBody->m_MassMatrix_diag.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front;
         m_CurrentStateEnergy -= +  pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir ;

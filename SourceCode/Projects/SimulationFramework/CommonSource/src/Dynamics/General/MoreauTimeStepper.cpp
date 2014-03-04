@@ -100,11 +100,11 @@ void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, c
 #endif
 
     m_pDynSys->initializeLog(m_pSolverLog);
-    m_pInclusionSolver->initializeLog(m_pSolverLog,m_SolverLogFilePath);
+    m_pInclusionSolver->initializeLog(m_pSolverLog,m_SimFolderPath);
     m_pCollisionSolver->initializeLog(m_pSolverLog);
 
     // SystemDataFile
-#if OUTPUT_SYSTEMDATA_FILE == 1
+#if OUTPUT_SIMDATA_FILE == 1
     m_SystemDataFile.close();
     m_SystemDataFile.open(m_SystemDataFilePath, std::ios_base::app | std::ios_base::out);
     writeHeaderToSystemDataFile();

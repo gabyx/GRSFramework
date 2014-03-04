@@ -432,7 +432,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
         } else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity) {
 
             for(auto it=localWithContacts.begin(); it!=localWithContacts.end(); it++) {
-                converged = Numerics::cancelCriteriaMatrixNorm( (*it)->m_pSolverData->m_uBuffer.m_back,
+                converged = Numerics::cancelCriteriaMatrixNormSq( (*it)->m_pSolverData->m_uBuffer.m_back,
                                                                 (*it)->m_pSolverData->m_uBuffer.m_front,
                                                                 (*it)->m_MassMatrix_diag,
                                                                 m_Settings.m_AbsTol,
@@ -447,7 +447,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
             if( m_bConverged ) {
                 for(auto it = remotesWithContacts.begin(); it !=remotesWithContacts.end(); it++) {
 
-                    converged = Numerics::cancelCriteriaMatrixNorm( (*it)->m_pSolverData->m_uBuffer.m_back,(*it)->m_pSolverData->m_uBuffer.m_front,(*it)->m_MassMatrix_diag,m_Settings.m_AbsTol,m_Settings.m_RelTol);
+                    converged = Numerics::cancelCriteriaMatrixNormSq( (*it)->m_pSolverData->m_uBuffer.m_back,(*it)->m_pSolverData->m_uBuffer.m_front,(*it)->m_MassMatrix_diag,m_Settings.m_AbsTol,m_Settings.m_RelTol);
                     if(!converged) { m_bConverged=false; break; }
                 }
             }

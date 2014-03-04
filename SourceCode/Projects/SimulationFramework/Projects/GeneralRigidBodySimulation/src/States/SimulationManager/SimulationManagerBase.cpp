@@ -158,7 +158,7 @@ double SimulationManagerBase::getTimeScale() {
     return m_timeScale;
 }
 
-void SimulationManagerBase::setNumberOfContacts( unsigned int & nContacts ) {
+void SimulationManagerBase::setNumberOfContacts( unsigned int nContacts ) {
     boost::mutex::scoped_lock l(m_nCurrentContacts_mutex);
     m_nCurrentContacts = nContacts;
 }

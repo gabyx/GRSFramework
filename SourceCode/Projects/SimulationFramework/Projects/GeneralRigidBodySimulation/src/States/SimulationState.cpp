@@ -26,7 +26,7 @@ SimulationState::SimulationState() {
 
 SimulationState::~SimulationState() {
     DECONSTRUCTOR_MESSAGE
-    exit();
+    //exit();
 }
 
 void SimulationState::enter() {

@@ -43,7 +43,7 @@ namespace ContactFeasibilityTableMPI{
     }
 
     //Generator
-    struct Generator{
+    struct ContactFeasibilityTableMPI_Generator{
         static constexpr bool generate(size_t index){
 
             return
@@ -65,7 +65,7 @@ namespace ContactFeasibilityTableMPI{
         }
     };
     static const size_t size = (2*(size_t)BS::NSTATES* (2*(size_t)BS::NSTATES + 1) / 2);
-    typedef CompileTimeArray::Array<Generator, size > Array;
+    typedef CompileTimeArray::Array<ContactFeasibilityTableMPI_Generator, size > Array;
 
     template<typename Stream>
     void printArray(Stream & os){

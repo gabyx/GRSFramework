@@ -180,7 +180,7 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
                 if(!loadNextFile()){
                     current_state = EXIT;
                 }else{
-                    LOG(m_pThreadLog, "---> SimFile "<<m_currentFileIndex<<"/"<<m_simFileList.size()<<" loaded: Number of States = " << m_binarySimFile.getNStates() << std::endl;);
+                    LOG(m_pThreadLog, "---> SimFile: " << m_currentFileIndex<<"/"<<m_simFileList.size()<<":" << *m_currentFileIt<<" loaded: Number of States = " << m_binarySimFile.getNStates() << std::endl;);
                     current_state = READ_IN;
                 }
             }else{

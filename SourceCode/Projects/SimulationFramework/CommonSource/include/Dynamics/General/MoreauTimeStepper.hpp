@@ -136,7 +136,7 @@ protected:
 };
 
 void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
-#if OUTPUT_SYSTEMDATA_FILE == 1
+#if OUTPUT_SIMDATA_FILE == 1
 
     m_SystemDataFile << std::fixed
     << globalTime << "\t"
@@ -151,7 +151,7 @@ void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
 }
 
 void MoreauTimeStepper::writeHeaderToSystemDataFile() {
-#if OUTPUT_SYSTEMDATA_FILE == 1
+#if OUTPUT_SIMDATA_FILE == 1
     m_SystemDataFile <<"# "
     << "GlobalTime [s]" << "\t"
     << "SimulationTime [s]" <<"\t"
