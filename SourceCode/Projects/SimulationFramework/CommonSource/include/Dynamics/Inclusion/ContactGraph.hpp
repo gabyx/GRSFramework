@@ -591,6 +591,7 @@ public:
         */
         typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
         static VectorDyn uCache1,uCache2;
+        PREC residual;
 
         #if CoutLevelSolverWhenContact>2
             LOG(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
@@ -739,18 +740,25 @@ public:
                 }
             }
 
-            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InLambda) {
-                if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-                    nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol);
+
+            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InLambda &&
+               m_globalIterationCounter >= m_Settings.m_MinIter && (m_bConverged || m_Settings.m_bComputeResidual) ) {
+                    nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,
+                                                                          nodeData.m_LambdaFront,
+                                                                          m_Settings.m_AbsTol,
+                                                                          m_Settings.m_RelTol,
+                                                                          residual
+                                                                          );
+                    m_maxResidual = std::max(residual,m_maxResidual);
                     if(!nodeData.m_bConverged) {
-                        //converged stays false;
                         // Set global Converged = false;
                         m_bConverged = false;
                     }
-                } else {
-                    m_bConverged=false;
-                }
+
+            } else {
+                m_bConverged=false;
             }
+
 
             // Swap Lambdas, but dont swap Velocities...
             nodeData.swapLambdas();
@@ -761,11 +769,15 @@ public:
         }
     }
 
+
+    PREC m_maxResidual;
 private:
     Logging::Log * m_pSolverLog;
     const InclusionSolverSettingsType & m_Settings;
     bool & m_bConverged; ///< Access to global flag for cancelation criteria
     const unsigned int & m_globalIterationCounter; ///< Access to global iteration counter
+
+
 
 };
 
