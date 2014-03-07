@@ -10,11 +10,11 @@
 
 #include "TypeDefs.hpp"
 
-#include "ContactParams.hpp"
+#include "ContactParameter.hpp"
 
 /**
 * @ingroup Contact
-* @brief This is the ContactParameterMap class, which basically stores a diagonal matrix which maps a Material/Material to the corresponding ContactParams.
+* @brief This is the ContactParameterMap class, which basically stores a diagonal matrix which maps a Material/Material to the corresponding ContactParameter.
 */
 /** @{ */
 class ContactParameterTag ;
@@ -52,43 +52,39 @@ public:
 
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    typedef boost::unordered_map<ContactParameterTag, ContactParams, ContactParameterTagHash > ContactParameterMapType;
+    typedef boost::unordered_map<ContactParameterTag, ContactParameter, ContactParameterTagHash > ContactParameterMapType;
 
     ContactParameterMap();
 
-    void setStandardValues(const ContactParams & params){ m_std_values = params;}
+    void setStandardValues(const ContactParameter & params){ m_std_values = params;}
 
     /**
     * Adds parameters for one contact defined by two materials!
     */
-    //bool addContactParameter(typename RigidBodyType::BodyMaterialType material1, typename RigidBodyType::BodyMaterialType  material2, const ContactParams & params);
+    //bool addContactParameter(typename RigidBodyType::BodyMaterialType material1, typename RigidBodyType::BodyMaterialType  material2, const ContactParameter & params);
 
     /**
-    * @brief Gets the ContactParams for the material pair.
+    * @brief Gets the ContactParameter for the material pair.
     * @param material1 The first material.
     * @param material2 The second material.
-    * @return The reference to the ContactParams which corresponds to this kind of contact meterial pair.
+    * @return The reference to the ContactParameter which corresponds to this kind of contact meterial pair.
     */
-    //ContactParams & getContactParams(typename RigidBodyType::BodyMaterialType material1, typename RigidBodyType::BodyMaterialType  material2);
+    //ContactParameter & getContactParams(typename RigidBodyType::BodyMaterialType material1, typename RigidBodyType::BodyMaterialType  material2);
 
     template<typename TBodyMaterial>
     bool addContactParameter(TBodyMaterial  material1,
                              TBodyMaterial  material2,
-                             const ContactParams & params)
+                             const ContactParameter & params)
     {
         typename ContactParameterMapType::value_type pair(ContactParameterTag(material1,material2),params);
 
         std::pair<  typename ContactParameterMapType::iterator, bool> res = m_ContactParams.insert(pair);
 
-        if(res.second){
-            m_nMaterials++;
-        }
-
         return res.second;
     }
 
     template<typename TBodyMaterial>
-    ContactParams & getContactParams(  TBodyMaterial material1,
+    ContactParameter & getContactParams(  TBodyMaterial material1,
                                        TBodyMaterial material2){
 
         typename ContactParameterMapType::iterator it = m_ContactParams.find(ContactParameterTag(material1,material2));
@@ -96,16 +92,14 @@ public:
         if(it != m_ContactParams.end()){
             return it->second;
         }
-        ASSERTMSG(false,"ContactParams for id: "<< material1 <<" and " <<material2 << " not found"<<std::endl);
+        ASSERTMSG(false,"ContactParameter for id: "<< material1 <<" and " <<material2 << " not found"<<std::endl);
         return m_std_values;
     }
 
     ContactParameterMapType & getContactParamsVector(){ return m_ContactParams;}
 
 private:
-    unsigned int m_nMaterials; ///< The number of materials. Determined from the @ref RigidBody::BodyMaterialType enumeration.
-
-    ContactParams m_std_values; ///< Some standart values: m_std_values.m_epsilon_N = 0.5, m_std_values.m_epsilon_T = 0.5, m_std_values.m_mu = 0.3 .
+    ContactParameter m_std_values; ///< Some standart values: m_std_values.m_epsilon_N = 0.5, m_std_values.m_epsilon_T = 0.5, m_std_values.m_mu = 0.3 .
     ContactParameterMapType m_ContactParams; /// All contact parameters (except the standart value);
 
 };

@@ -35,6 +35,19 @@
          static const int nFrictionParams = 1; // mu
       };
 
+       /*
+      * @brief This is the friction model for a unilateral contact with spatial coulomb friction.
+      * Abreviations : NCF_ContactModel
+      */
+      struct NormalAndCoulombFrictionRelaxedContactModel{
+         typedef NormalAndCoulombFrictionRelaxedContactModel type;
+         typedef ConvexSets::RPlusAndDisk ConvexSet;
+         static const int nDOFFriction = 2;
+         static const int nFrictionParams = 1; // mu
+         static const int nDampingParams = 2; // d1 normal and d2 tangential
+      };
+
+
 
 
       /**
@@ -49,11 +62,12 @@
       };
 
 
-      enum ContactModelEnum {
+      enum class ContactModelEnum : short {
          N_ContactModel = 0,
          NCF_ContactModel = 1,
+         NCFD_ContactModel = 4,
          NCCF_ContactModel = 2,
-         B_ContactModel = 3, // Billateral Contact Model (not used yet)
+         B_ContactModel = 3 // Billateral Contact Model (not used yet)
       };
 
 

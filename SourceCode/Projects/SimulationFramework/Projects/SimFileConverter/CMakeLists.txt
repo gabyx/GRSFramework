@@ -103,7 +103,7 @@ SET(DYNAMICS_INC
     #${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/CollisionSolverMPI.hpp
     #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
     #${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionFunctions.hpp
-    #${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParams.hpp
+    #${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParameter.hpp
     #${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
     #${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
     #${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParameterMap.hpp
@@ -193,13 +193,13 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 set(INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
     ${EIGEN_INCLUDE_DIR}
-	
+
 	${COMMONSOURCE_DIR}/external/getoptpp/
-    ${COMMONSOURCE_DIR}/external/getoptpp/src/ 
-	
+    ${COMMONSOURCE_DIR}/external/getoptpp/src/
+
     ${PROJECT_SOURCE_DIR}/include/App
 	${PROJECT_SOURCE_DIR}/include/Common
-	
+
 	${SOURCE_DIR}/include/Common
 
     ${COMMONSOURCE_DIR}/include/Common

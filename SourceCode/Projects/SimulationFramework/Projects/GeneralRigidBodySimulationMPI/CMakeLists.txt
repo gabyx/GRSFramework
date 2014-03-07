@@ -120,7 +120,7 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/CollisionSolverMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionFunctions.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParams.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParameter.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParameterMap.hpp

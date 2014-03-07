@@ -417,20 +417,16 @@ INLINE_PROX_KEYWORD bool cancelCriteriaValue(   const Eigen::MatrixBase<Derived>
     ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
 
     using std::abs;
-    //std::cout << "====== Cancel =====" <<std::endl;
     for(int i=0; i<P_old.size(); i++) {
-
-        //std::cout <<std::setprecision(13) << abs(P_new[i]-P_old[i]) << "\t >  \t" << abs(P_old[i]) * RelTol + AbsTol <<std::endl;
-        residual = abs(P_new[i]-P_old[i]) - ( abs(P_old[i]) * RelTol + AbsTol);
-        if ( residual > 0.0) {
-            //std::cout << "====== ====== ====="<<std::endl;
-            //std::cout << i << ". value: " << std::endl;
-            //std::cout <<std::setprecision(13) << abs(P_new[i]-P_old[i]) << "\t >  \t" << abs(P_old[i]) * RelTol + AbsTol <<std::endl;
-            //std::cout << "====== ====== ====="<<std::endl;
+//        residual = abs(P_new[i]-P_old[i]) - ( abs(P_old[i]) * RelTol + AbsTol);
+//        if ( residual > 0.0) {
+//            return  false;
+//        }
+        residual = abs(P_new[i]-P_old[i]) ;
+        if ( residual - ( abs(P_old[i]) * RelTol + AbsTol) > 0.0) {
             return  false;
         }
     }
-    //std::cout << "====== ====== ====="<<std::endl;
     return true;
 }
 
@@ -471,9 +467,14 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNorm(  const Eigen::MatrixBase<Deri
 
     using std::abs;
     using std::sqrt;
-    residual = sqrt(abs( (PREC)(diff.transpose()  * NormMatrix_diag.asDiagonal() * diff )))
-             - (sqrt(abs( (PREC)(P_old.transpose() * NormMatrix_diag.asDiagonal() * P_old))) * RelTol + AbsTol);
-    if ( residual > 0.0) {
+//    residual = sqrt(abs( (PREC)(diff.transpose()  * NormMatrix_diag.asDiagonal() * diff )))
+//             - (sqrt(abs( (PREC)(P_old.transpose() * NormMatrix_diag.asDiagonal() * P_old))) * RelTol + AbsTol);
+//    if ( residual > 0.0) {
+//        return  false;
+//    }
+
+    residual = sqrt(abs( (PREC)(diff.transpose()  * NormMatrix_diag.asDiagonal() * diff )));
+    if ( residual - (sqrt(abs( (PREC)(P_old.transpose() * NormMatrix_diag.asDiagonal() * P_old))) * RelTol + AbsTol) > 0.0) {
         return  false;
     }
     return true;
@@ -497,9 +498,13 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNormSq(  const Eigen::MatrixBase<De
 
     using std::abs;
     using std::sqrt;
-    residual = abs( (PREC)(diff.transpose()  * NormMatrix_diag.asDiagonal() * diff ))
-             - (abs( (PREC)(P_old.transpose() * NormMatrix_diag.asDiagonal() * P_old)) * RelTol + AbsTol);
-    if ( residual > 0.0) {
+//    residual = abs( (PREC)(diff.transpose()  * NormMatrix_diag.asDiagonal() * diff ))
+//             - (abs( (PREC)(P_old.transpose() * NormMatrix_diag.asDiagonal() * P_old)) * RelTol + AbsTol);
+//    if ( residual > 0.0) {
+//        return  false;
+//    }
+    residual = abs( (PREC)(diff.transpose()  * NormMatrix_diag.asDiagonal() * diff ));
+    if ( residual - (abs( (PREC)(P_old.transpose() * NormMatrix_diag.asDiagonal() * P_old)) * RelTol + AbsTol) > 0.0) {
         return  false;
     }
     return true;

@@ -27,7 +27,7 @@
 #include DynamicsSystem_INCLUDE_FILE
 
 #include "RigidBodyId.hpp"
-#include "ContactParams.hpp"
+#include "ContactParameter.hpp"
 #include "MeshGeometry.hpp"
 #include "ExternalForces.hpp"
 
@@ -399,9 +399,9 @@ protected:
                 if(!Utilities::stringToType<PREC>(epsilonT, element->GetAttribute("epsilonT"))) {
                     throw ticpp::Exception("---> String conversion in ContactParameterStandard: epsilonT failed");
                 }
-                ContactParams params(epsilonN,epsilonT,mu);
 
-                m_pDynSys->m_ContactParameterMap.setStandardValues(params);
+
+                m_pDynSys->m_ContactParameterMap.setStandardValues(ContactParameter::createParams_NCF_ContactModel(epsilonN,epsilonT,mu));
             }
 
 
@@ -423,10 +423,13 @@ protected:
                 if(!Utilities::stringToType<PREC>(epsilonT, valueElem->GetAttribute("epsilonT"))) {
                     throw ticpp::Exception("---> String conversion in ContactParameter: epsilonT failed");
                 }
-                ContactParams params(epsilonN,epsilonT,mu);
+
 
                 LOG(m_pSimulationLog,"---> Add ContactParameter of id="<<material1<<" to id="<<material2<<std::endl;);
-                if(!m_pDynSys->m_ContactParameterMap.addContactParameter(material1,material2,params)) {
+                if(!m_pDynSys->m_ContactParameterMap.addContactParameter(material1,
+                                                                         material2,
+                                                                         ContactParameter::createParams_NCF_ContactModel(epsilonN,epsilonT,mu)
+                                                                         )) {
                     throw ticpp::Exception("---> Add ContactParameter failed");
                 }
 

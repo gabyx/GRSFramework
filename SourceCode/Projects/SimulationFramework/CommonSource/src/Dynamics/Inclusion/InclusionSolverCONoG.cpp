@@ -235,11 +235,15 @@ void InclusionSolverCONoG::doSorProx() {
     // General stupid Prox- Iteration
     while(true) {
 
+        // Set global flag to true, if it is not converged we set it to false
         m_bConverged = true;
+
         #if CoutLevelSolverWhenContact>1
             LOG(m_pSolverLog,"---> Next iteration: "<< m_globalIterationCounter << std::endl);
         #endif
-        sorProxOverAllNodes(); // Do one Sor Prox Iteration
+
+        // Do one Sor Prox Iteration
+        sorProxOverAllNodes();
 
         #if CoutLevelSolverWhenContact>2
         LOG(m_pSolverLog, "---> u_e = [ ");
@@ -252,7 +256,8 @@ void InclusionSolverCONoG::doSorProx() {
 
         m_globalIterationCounter++;
 
-        if ( (m_bConverged == true || m_globalIterationCounter >= m_Settings.m_MaxIter) && m_globalIterationCounter >= m_Settings.m_MinIter) {
+        if ( (m_bConverged == true || m_globalIterationCounter >= m_Settings.m_MaxIter)
+             && m_globalIterationCounter >= m_Settings.m_MinIter) {
             #if CoutLevelSolverWhenContact>0
                 LOG(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_globalIterationCounter <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
             #endif
@@ -289,14 +294,13 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
     bool converged;
     PREC residual;
+
     if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity) {
-        typename ContactGraphType::BodyToContactsListIteratorType it;
+
         //std::cout << "Bodies: " << m_ContactGraph.m_simBodiesToContactsList.size() << std::endl;
-        for(it=m_ContactGraph.m_simBodiesToContactsList.begin(); it !=m_ContactGraph.m_simBodiesToContactsList.end(); it++) {
+        for(auto it=m_ContactGraph.m_simBodiesToContactsList.begin(); it !=m_ContactGraph.m_simBodiesToContactsList.end(); it++) {
             if(m_globalIterationCounter >= m_Settings.m_MinIter && (m_bConverged || m_Settings.m_bComputeResidual) )  {
-                //std::cout << "before Criteria"<<std::endl;
-                //std::cout <<"new "<< it->first->m_pSolverData->m_uBuffer.m_front.transpose() << std::endl;
-                //std::cout <<"old "<< it->first->m_pSolverData->m_uBuffer.m_back.transpose() << std::endl;
+
                 converged = Numerics::cancelCriteriaValue(  it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
                                                             it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
                                                             m_Settings.m_AbsTol,
@@ -306,9 +310,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
                 //std::cout << "after Criteria"<<std::endl;
                 m_maxResidual = std::max(residual,m_maxResidual);
-                if(!converged) {
-                    m_bConverged=false;
-                }
+                if(!converged) {m_bConverged=false;}
 
             } else {
                 m_bConverged=false;
@@ -317,9 +319,10 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
             // Just fill back buffer with new values!
             it->first->m_pSolverData->m_uBuffer.m_back = it->first->m_pSolverData->m_uBuffer.m_front;
         }
+
     }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity){
-        typename ContactGraphType::BodyToContactsListIteratorType it;
-        for(it=m_ContactGraph.m_simBodiesToContactsList.begin(); it !=m_ContactGraph.m_simBodiesToContactsList.end(); it++) {
+
+        for(auto it=m_ContactGraph.m_simBodiesToContactsList.begin(); it !=m_ContactGraph.m_simBodiesToContactsList.end(); it++) {
             if(m_globalIterationCounter >= m_Settings.m_MinIter && (m_bConverged || m_Settings.m_bComputeResidual)) {
 
                 converged = Numerics::cancelCriteriaMatrixNormSq( it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)

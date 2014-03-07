@@ -38,11 +38,7 @@ std::size_t ContactParameterTagHash::operator()(ContactParameterTag const& c) co
 
 
 ContactParameterMap::ContactParameterMap() {
-    m_nMaterials = 1;
-    m_std_values.m_epsilon_N = 0.5;
-    m_std_values.m_epsilon_T = 0.5;
-    m_std_values.m_mu = 0.3;
-
+    m_std_values =  ContactParameter::createParams_NCF_ContactModel(0.5,0.5,0.3);
 }
 
 

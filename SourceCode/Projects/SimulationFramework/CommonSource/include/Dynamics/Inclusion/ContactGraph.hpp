@@ -155,7 +155,7 @@ private:
             nodeData.m_I_plus_eps.setZero(ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
             nodeData.m_mu.setZero(ContactModels::NormalAndCoulombFrictionContactModel::nFrictionParams);
 
-            ContactParams & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
+            ContactParameter & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
             nodeData.m_mu(0)         = params.m_mu;
             nodeData.m_I_plus_eps(0)    = 1 + params.m_epsilon_N;
             nodeData.m_I_plus_eps(1)    = 1 + params.m_epsilon_T;
@@ -430,7 +430,7 @@ private:
 
 
 
-            ContactParams & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
+            ContactParameter & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
             nodeData.m_mu(0)     = params.m_mu;
             nodeData.m_eps(0)    = params.m_epsilon_N;
             nodeData.m_eps(1)    = params.m_epsilon_T;
@@ -741,8 +741,8 @@ public:
             }
 
 
-            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InLambda &&
-               m_globalIterationCounter >= m_Settings.m_MinIter && (m_bConverged || m_Settings.m_bComputeResidual) ) {
+            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InLambda){
+                if(m_globalIterationCounter >= m_Settings.m_MinIter && (m_bConverged || m_Settings.m_bComputeResidual) ) {
                     nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,
                                                                           nodeData.m_LambdaFront,
                                                                           m_Settings.m_AbsTol,
@@ -754,10 +754,10 @@ public:
                         // Set global Converged = false;
                         m_bConverged = false;
                     }
-
-            } else {
-                m_bConverged=false;
-            }
+                } else {
+                    m_bConverged=false;
+                }
+        }
 
 
             // Swap Lambdas, but dont swap Velocities...

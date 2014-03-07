@@ -162,7 +162,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionSolver.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionFunctions.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParams.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParameter.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParameterMap.hpp
@@ -207,7 +207,7 @@ SET(DYNAMICS_SRC
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/BoxGeometry.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactParameterMap.cpp
-    
+
 )
 
 
@@ -310,7 +310,7 @@ set(INCLUDE_DIRS
     ${COMMONSOURCE_DIR}/include/Common
     ${COMMONSOURCE_DIR}/external/SRDelegates/include/
     ${COMMONSOURCE_DIR}/external/getoptpp/
-    ${COMMONSOURCE_DIR}/external/getoptpp/src/ 
+    ${COMMONSOURCE_DIR}/external/getoptpp/src/
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry

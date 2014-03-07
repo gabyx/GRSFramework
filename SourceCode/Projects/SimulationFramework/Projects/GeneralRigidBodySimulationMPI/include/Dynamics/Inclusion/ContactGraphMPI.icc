@@ -226,7 +226,7 @@ void ContactGraph<Combo>::computeParams(NodeDataType & nodeData) {
 
 
 
-        ContactParams & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
+        ContactParameter & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
         nodeData.m_mu(0)     = params.m_mu;
         nodeData.m_eps(0)    = params.m_epsilon_N;
         nodeData.m_eps(1)    = params.m_epsilon_T;

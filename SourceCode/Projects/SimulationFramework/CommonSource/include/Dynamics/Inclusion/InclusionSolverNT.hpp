@@ -424,8 +424,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         // Contact goes into xi_N, xi_T
       }
 
-      // Get the ContactParams and fill the parameters
-      ContactParams<LayoutConfigType> & params  = m_ContactParameterMap.getContactParams(collSet[contactIdx].m_pBody1->m_eMaterial,collSet[contactIdx].m_pBody2->m_eMaterial);
+      // Get the ContactParameter and fill the parameters
+      ContactParameter<LayoutConfigType> & params  = m_ContactParameterMap.getContactParams(collSet[contactIdx].m_pBody1->m_eMaterial,collSet[contactIdx].m_pBody2->m_eMaterial);
       m_mu(contactIdx)                              = params.m_mu;
       m_I_epsilon_N(contactIdx)                     = 1 + params.m_epsilon_N;
       m_I_epsilon_T(m_nDofFriction*contactIdx)      = 1 + params.m_epsilon_T;
