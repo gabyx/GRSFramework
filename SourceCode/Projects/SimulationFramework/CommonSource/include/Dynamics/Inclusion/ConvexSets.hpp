@@ -24,24 +24,21 @@
       * @brief Convex set for \f$ C = \mathcal{R}_{+} \f$ .
       */
       struct RPlus{
-         typedef RPlus type;
-         static const int Dimension = 1; 
+         static const int Dimension=1;
       };
 
       /**
       * @brief Convex set for a unit disk \f$ C = \{ x | |x| < 1 \} \f$ .
       */
       struct Disk{
-         typedef Disk type;
-         static const int Dimension = 2; 
+         static const int Dimension=2;
       };
 
       /**
       * @brief Convex set for a Contensou ellipsoid.
       */
-      struct ContensouElliposoid{
-         typedef ContensouElliposoid type;
-         static const int Dimension = 3; 
+      struct ContensouEllipsoid{
+         static const int Dimension=3;
       };
 
       /**
@@ -49,8 +46,7 @@
       * This function applies for triplets, the first value is proxed onto \f$ C_1 \f$  and the second to values in sequence are proxed on to \f$ C_2 \f$ .
       */
       struct RPlusAndDisk{
-         typedef RPlusAndDisk type;
-         static const int Dimension = 3; 
+         static const int Dimension=3;
       };
 
       /**
@@ -58,11 +54,13 @@
       * This function applies for triplets, the first value is proxed onto \f$ C_1 \f$  and the second to values in sequence are proxed on to the Contensou ellipsoid.
       */
       struct RPlusAndContensouEllipsoid{
-         typedef RPlusAndContensouEllipsoid type;
-         static const int Dimension = 4; 
+         static const int Dimension=4;
       };
 
    };
+
+
+
 
    /** @}*/
 

@@ -6,14 +6,15 @@
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
-#include "ContactModels.hpp"
+
+#include "ContactParameter.hpp"
 
 #include "FrontBackBuffer.hpp"
 #include "CollisionData.hpp"
 
 // This two data classes are used for  m_eContactModel = ContactModels::N_ContactModel,
-//                                      m_eContactModel = ContactModels::NCF_ContactModel,
-//                                      m_eContactModel = ContactModels::NCFC_ContactModel,
+//                                      m_eContactModel = ContactModels::UCF_ContactModel,
+//                                      m_eContactModel = ContactModels::UCFC_ContactModel,
 class ContactGraphNodeData {
 public:
 
@@ -24,10 +25,7 @@ public:
         m_W_body1.setZero();
         m_W_body2.setZero();
         m_chi.setZero();
-        m_mu.setZero();
-        m_I_plus_eps.setZero();
         m_eps.setZero();
-        m_nLambdas = 0;
     }
 
     ContactGraphNodeData(CollisionData * collDataPtr): m_pCollData(collDataPtr) {}
@@ -36,17 +34,14 @@ public:
     MatrixUBodyDyn m_W_body2;
     VectorDyn m_chi;
 
-    VectorDyn  m_I_plus_eps;
     VectorDyn  m_eps;
-    VectorDyn  m_mu;
 
-    unsigned int m_nLambdas;
 
     unsigned int m_nodeColor;
 
     const CollisionData * m_pCollData;
 
-    ContactModels::ContactModelEnum m_eContactModel;///< This is a generic type which is used to distinguish between the different models!. See namespace ContactModels.
+    ContactParameter m_contactParameter;
 };
 
 

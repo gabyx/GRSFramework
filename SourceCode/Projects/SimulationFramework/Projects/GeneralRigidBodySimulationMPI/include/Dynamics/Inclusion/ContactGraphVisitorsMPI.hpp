@@ -51,7 +51,7 @@ public:
             }
         #endif
 
-        if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ) {
 
 
             // Init the prox value
@@ -84,7 +84,7 @@ public:
             //Prox
 
             Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle(
-                nodeData.m_mu(0),
+                nodeData.m_contactParameter.m_params[2],
                 nodeData.m_LambdaFront.template head<ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension>()
             );
 
@@ -369,7 +369,7 @@ public:
         nodeData.m_LambdaBack.setZero();
 
         // (1+e)*xi -> b
-        nodeData.m_b = nodeData.m_I_plus_eps.asDiagonal() * nodeData.m_chi;
+        nodeData.m_b = (nodeData.m_eps.array() + 1).matrix().asDiagonal() * nodeData.m_chi;
 
         // u_0 , calculate const b
         // First Body

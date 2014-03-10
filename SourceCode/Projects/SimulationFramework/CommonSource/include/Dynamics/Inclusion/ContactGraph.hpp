@@ -45,7 +45,7 @@ public:
 public:
 
     ContactGraph(ContactParameterMap * contactParameterMap):
-    m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0)
+    m_nodeCounter(0),m_edgeCounter(0)
     {
         m_pContactParameterMap = contactParameterMap;
     }
@@ -65,8 +65,6 @@ public:
         m_nodeCounter = 0;
         this->m_edges.clear();
         m_edgeCounter = 0;
-        m_nLambdas =0;
-        m_nFrictionParams=0;
         m_simBodiesToContactsList.clear();
 
     }
@@ -85,17 +83,8 @@ public:
         NodeType * addedNode = this->m_nodes.back();
         addedNode->m_nodeData.m_pCollData = pCollData;
 
-
-
-        // Specify the contact model, (here we should do a look up or what ever)! ==================================
-        addedNode->m_nodeData.m_eContactModel = ContactModels::NCF_ContactModel;
-        addedNode->m_nodeData.m_nLambdas = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
-        addedNode->m_nodeData.m_chi.setZero(addedNode->m_nodeData.m_nLambdas);
-        // =========================================================================================================
-
-
         // Compute general parameters for the contact
-        computeParams(addedNode->m_nodeData);
+        setContactModel(addedNode->m_nodeData);
 
         // FIRST BODY!
         if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
@@ -121,10 +110,6 @@ public:
         }
 
 
-        // increment the lambda counter, of how many forces we have so far!
-        m_nLambdas += addedNode->m_nodeData.m_nLambdas;
-        m_nFrictionParams += addedNode->m_nodeData.m_mu.rows();
-
         m_nodeCounter++;
     }
 
@@ -143,27 +128,27 @@ public:
     std::unordered_map<const RigidBodyType *, NodeListType > m_simBodiesToContactsList;
     typedef typename std::unordered_map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIterator;
 
-    unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
-    unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
 private:
 
-    void computeParams(NodeDataType & nodeData) {
-        if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
-            // Get Contact Parameters
+    void setContactModel(NodeDataType & nodeData) {
 
-            //Set matrix size!
-            nodeData.m_I_plus_eps.setZero(ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
-            nodeData.m_mu.setZero(ContactModels::NormalAndCoulombFrictionContactModel::nFrictionParams);
+        // Specify the contact model
+        nodeData.m_contactParameter  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,
+                                                                                      nodeData.m_pCollData->m_pBody2->m_eMaterial);
 
-            ContactParameter & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
-            nodeData.m_mu(0)         = params.m_mu;
-            nodeData.m_I_plus_eps(0)    = 1 + params.m_epsilon_N;
-            nodeData.m_I_plus_eps(1)    = 1 + params.m_epsilon_T;
-            nodeData.m_I_plus_eps(2)    = 1 + params.m_epsilon_T;
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ) {
+
+            const unsigned int dimSet = ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension;
+
+            nodeData.m_chi.setZero(dimSet);
+            nodeData.m_eps.setZero(dimSet);
+
+            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[1];
+            nodeData.m_eps(2) = nodeData.m_contactParameter.m_params[1];
+
         } else {
             ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
         }
-
     }
 
     template<int bodyNr>
@@ -171,7 +156,7 @@ private:
 
 
 
-        if(nodeData.m_eContactModel == ContactModels::NCF_ContactModel) {
+        if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel) {
 
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
@@ -183,7 +168,7 @@ private:
 
 
             if(bodyNr == 1) {
-                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
+                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -199,7 +184,7 @@ private:
                 nodeData.m_W_body1.col(2).template head<3>() = - pCollData->m_cFrame.m_e_y; // I frame
                 nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
             } else {
-                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
+                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -293,7 +278,7 @@ public:
     typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
 
     ContactGraph(ContactParameterMap * contactParameterMap):
-    m_nodeCounter(0),m_edgeCounter(0), m_nLambdas(0),m_nFrictionParams(0)
+    m_nodeCounter(0),m_edgeCounter(0)
     {
         m_pContactParameterMap = contactParameterMap;
     }
@@ -314,8 +299,6 @@ public:
         m_nodeCounter = 0;
         this->m_edges.clear();
         m_edgeCounter = 0;
-        m_nLambdas =0;
-        m_nFrictionParams=0;
         m_simBodiesToContactsList.clear();
 
     }
@@ -336,24 +319,8 @@ public:
         NodeType * addedNode = this->m_nodes.back();
         addedNode->m_nodeData.m_pCollData = pCollData;
 
-
-
-        // Specify the contact model, (here we should do a look up or what ever)! ==================================
-        // TODO
-        addedNode->m_nodeData.m_eContactModel = ContactModels::NCF_ContactModel;
-        const unsigned int dimSet = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
-
-        addedNode->m_nodeData.m_chi.setZero(dimSet); //TODO take care, relative velocity dimesion independet of dimSet, could be?
-        addedNode->m_nodeData.m_b.setZero(dimSet);
-        addedNode->m_nodeData.m_LambdaBack.setZero(dimSet);
-        addedNode->m_nodeData.m_LambdaFront.setZero(dimSet);
-        addedNode->m_nodeData.m_R_i_inv_diag.setZero(dimSet);
-        addedNode->m_nodeData.m_G_ii.setZero(dimSet,dimSet);
-        addedNode->m_nodeData.m_nLambdas = dimSet;
-        // =========================================================================================================
-
         // Compute general parameters for the contact
-        computeParams(addedNode->m_nodeData);
+        setContactModel(addedNode->m_nodeData);
 
         // FIRST BODY!
         if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
@@ -392,9 +359,6 @@ public:
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
 
-        // increment the lambda counter, of how many forces we have so far!
-        m_nLambdas += addedNode->m_nodeData.m_nLambdas;
-        m_nFrictionParams += addedNode->m_nodeData.m_mu.rows();
 
         m_nodeCounter++;
     }
@@ -414,31 +378,34 @@ public:
     std::unordered_map<const RigidBodyType *, NodeListType > m_simBodiesToContactsList;
     typedef typename std::unordered_map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIteratorType;
 
-    unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
-    unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
+
 private:
 
-    void computeParams(NodeDataType & nodeData) {
-        if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
-            // Get Contact Parameters
+    void setContactModel(NodeDataType & nodeData) {
+        // Specify the contact model
+        nodeData.m_contactParameter  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,
+                                                                                      nodeData.m_pCollData->m_pBody2->m_eMaterial);
 
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel
+           ) {
 
-            //Set matrix size!
-            nodeData.m_I_plus_eps.setZero(ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
-            nodeData.m_eps.setZero(ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
-            nodeData.m_mu.setZero(ContactModels::NormalAndCoulombFrictionContactModel::nFrictionParams);
+            const unsigned int dimSet = ContactModels::getLambdaDim(nodeData.m_contactParameter.m_contactModel);
 
+            nodeData.m_chi.setZero(dimSet);
+            nodeData.m_b.setZero(dimSet);
+            nodeData.m_LambdaBack.setZero(dimSet);
+            nodeData.m_LambdaFront.setZero(dimSet);
+            nodeData.m_R_i_inv_diag.setZero(dimSet);
+            nodeData.m_G_ii.setZero(dimSet,dimSet);
+//            nodeData.m_I_plus_eps.setZero(dimSet);
+            nodeData.m_eps.setZero(dimSet);
+    //        nodeData.m_mu.setZero(dimSet);
+            // =========================================================================================================
 
-
-            ContactParameter & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
-            nodeData.m_mu(0)     = params.m_mu;
-            nodeData.m_eps(0)    = params.m_epsilon_N;
-            nodeData.m_eps(1)    = params.m_epsilon_T;
-            nodeData.m_eps(2)    = params.m_epsilon_T;
-
-            nodeData.m_I_plus_eps.array() = nodeData.m_eps.array() + 1;
-
-
+            nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[0];
+            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[1];
+            nodeData.m_eps(2) = nodeData.m_contactParameter.m_params[1];
 
         } else {
             ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
@@ -451,7 +418,8 @@ private:
 
 
 
-        if(nodeData.m_eContactModel == ContactModels::NCF_ContactModel) {
+        if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
+           nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ) {
 
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
@@ -464,7 +432,7 @@ private:
 
             if(bodyNr == 1) {
                 //Set matrix size!
-                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
+                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -482,7 +450,7 @@ private:
                 nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
             } else {
                 //Set matrix size!
-                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
+                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -600,7 +568,8 @@ public:
             }
         #endif
 
-        if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
+           nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ) {
 
 
             // Init the prox value
@@ -617,7 +586,10 @@ public:
 
             // Experimental
             //Relaxation term damper (take care R_i_inv needs to be initialized as well!)
-            //nodeData.m_LambdaFront += nodeData.m_LambdaBack * m_Settings.m_dinv;
+            nodeData.m_LambdaFront(0) += nodeData.m_LambdaBack(0) * m_nodeData.m_contactParameter.m_params[3] / m_Settings.m_deltaT;
+            nodeData.m_LambdaFront(1) += nodeData.m_LambdaBack(1) * m_nodeData.m_contactParameter.m_params[4] / m_Settings.m_deltaT;
+            nodeData.m_LambdaFront(2) += nodeData.m_LambdaBack(2) * m_nodeData.m_contactParameter.m_params[4] / m_Settings.m_deltaT;
+
 
             nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
             nodeData.m_LambdaFront += nodeData.m_LambdaBack;
@@ -641,8 +613,8 @@ public:
 //            }
 
             Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle(
-                nodeData.m_mu(0),
-                nodeData.m_LambdaFront.head<ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension>()
+                nodeData.m_contactParameter.m_params[2],
+                nodeData.m_LambdaFront.head<ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension>()
             );
 
 #if CoutLevelSolverWhenContact>2
@@ -678,13 +650,13 @@ public:
                     }
                 }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
                     if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache1,
-                                                                          nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
-                                                                          nodeData.m_LambdaBack,
-                                                                          nodeData.m_LambdaFront,
-                                                                          nodeData.m_G_ii,
-                                                                          m_Settings.m_AbsTol,
-                                                                          m_Settings.m_RelTol);
+                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(      uCache1,
+                                                                                          nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
+                                                                                          nodeData.m_LambdaBack,
+                                                                                          nodeData.m_LambdaFront,
+                                                                                          nodeData.m_G_ii,
+                                                                                          m_Settings.m_AbsTol,
+                                                                                          m_Settings.m_RelTol);
                         if(!nodeData.m_bConverged ) {
                             //converged stays false;
                             // Set global Converged = false;
@@ -796,80 +768,91 @@ public:
     typedef typename ContactGraphType::EdgeType EdgeType;
     typedef typename ContactGraphType::NodeType NodeType;
 
-    SorProxInitNodeVisitor()
+    SorProxInitNodeVisitor(const InclusionSolverSettingsType &settings): m_alpha(1), m_settings(settings)
     {}
 
     void setLog(Logging::Log * solverLog){
         m_pSolverLog = solverLog;
     }
 
-    // Set Sor Prox parameter
+    // Set Sor Prox parameter, before calling visitNode
     void setParams(PREC alpha){
         m_alpha = alpha;
+        m_deltaT = deltaT;
     }
 
     void visitNode(NodeType & node){
-
         typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
 
-        // Get lambda from percussion pool otherwise set to zero
-        // TODO
-        nodeData.m_LambdaBack.setZero();
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ) {
+            // Get lambda from percussion pool otherwise set to zero
+            // TODO
+            nodeData.m_LambdaBack.setZero();
 
-        // (1+e)*xi -> b
-        nodeData.m_b = nodeData.m_I_plus_eps.asDiagonal() * nodeData.m_chi;
+            // (1+e)*xi -> b
+            nodeData.m_b = (nodeData.m_eps.array() + 1).matrix().asDiagonal() * nodeData.m_chi;
 
-        // u_0 , calculate const b
-        // First Body
-        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED) {
+            // u_0 , calculate const b
+            // First Body
+            if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED) {
 
-            // m_front is zero here-> see DynamicsSystem sets it to zero!
-            nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
-            /// + initial values M^⁻1 W lambda0 from percussion pool
+                // m_front is zero here-> see DynamicsSystem sets it to zero!
+                nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
+                /// + initial values M^⁻1 W lambda0 from percussion pool
 
-            nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_back /* m_u_s */ ;
-            nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
+                nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_back /* m_u_s */ ;
+                nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
+            }
+            // SECOND BODY!
+            if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+
+                // m_front is zero here-> see DynamicsSystem sets it to zero!
+                nodeData.m_u2BufferPtr->m_front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack );
+                /// + initial values M^⁻1 W lambda0 from percussion pool
+
+                nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() *  nodeData.m_u2BufferPtr->m_back;
+                nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
+            }
+
+            if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel){
+                    Vector3 d(nodeData.m_contactParameter.m_params[3], //d_N
+                              nodeData.m_contactParameter.m_params[4], //d_T
+                              nodeData.m_contactParameter.m_params[4]) //d_T
+                nodeData.m_G_ii.diagonal() += d*1.0/m_settings.m_deltaT;
+            }
+
+            // Calculate R_ii
+
+            // Take also offdiagonal values for lambda_N
+            //nodeData.m_R_i_inv_diag(0) = m_alpha / std::max(std::max(nodeData.m_G_ii(0,0), nodeData.m_mu(0)*nodeData.m_G_ii(0,1)), nodeData.m_mu(0)*nodeData.m_G_ii(0,2));
+            // Take only diagonal
+            nodeData.m_R_i_inv_diag(0) = m_alpha / nodeData.m_G_ii(0,0);
+
+            PREC r_T = m_alpha / ((nodeData.m_G_ii.diagonal().tail<2>()).maxCoeff());
+            nodeData.m_R_i_inv_diag(1) = r_T;
+            nodeData.m_R_i_inv_diag(2) = r_T;
+
+            #if CoutLevelSolverWhenContact>2
+                LOG(m_pSolverLog, "\t ---> nd.m_b: "<< nodeData.m_b.transpose() <<std::endl
+                    << "\t ---> nd.m_G_ii: "<<std::endl<< nodeData.m_G_ii <<std::endl
+                    << "\t ---> nd.m_R_i_inv_diag: "<< nodeData.m_R_i_inv_diag.transpose() <<std::endl;);
+            #endif
+
+            #if CoutLevelSolverWhenContact>2
+                LOG(m_pSolverLog,  "\t ---> nd.m_mu: "<< nodeData.m_contactParameter.m_params[2] <<std::endl;);
+            #endif
         }
-        // SECOND BODY!
-        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
-
-            // m_front is zero here-> see DynamicsSystem sets it to zero!
-            nodeData.m_u2BufferPtr->m_front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack );
-            /// + initial values M^⁻1 W lambda0 from percussion pool
-
-            nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() *  nodeData.m_u2BufferPtr->m_back;
-            nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
+        else {
+            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
         }
-
-
-
-        // Calculate R_ii
-
-        // Take also offdiagonal values for lambda_N
-        //nodeData.m_R_i_inv_diag(0) = m_alpha / std::max(std::max(nodeData.m_G_ii(0,0), nodeData.m_mu(0)*nodeData.m_G_ii(0,1)), nodeData.m_mu(0)*nodeData.m_G_ii(0,2));
-        // Take only diagonal
-        nodeData.m_R_i_inv_diag(0) = m_alpha / nodeData.m_G_ii(0,0);
-
-        PREC r_T = m_alpha / ((nodeData.m_G_ii.diagonal().tail<2>()).maxCoeff());
-        nodeData.m_R_i_inv_diag(1) = r_T;
-        nodeData.m_R_i_inv_diag(2) = r_T;
-
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t ---> nd.m_b: "<< nodeData.m_b.transpose() <<std::endl
-                << "\t ---> nd.m_G_ii: "<<std::endl<< nodeData.m_G_ii <<std::endl
-                << "\t ---> nd.m_R_i_inv_diag: "<< nodeData.m_R_i_inv_diag.transpose() <<std::endl;);
-        #endif
-
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog,  "\t ---> nd.m_mu: "<< nodeData.m_mu <<std::endl;);
-        #endif
-
 
     }
 
 private:
     Logging::Log * m_pSolverLog;
     PREC m_alpha;
+    InclusionSolverSettingsType m_settings;
 };
 
 

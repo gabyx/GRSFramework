@@ -95,8 +95,8 @@ public:
 
 
 
-    unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
-    unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
+//    unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
+//    unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
 
 
     std::pair<SplitBodyNodeDataType *, bool> addSplitBodyNode(RigidBodyType * body, const RankIdType & rank);
@@ -145,12 +145,12 @@ private:
     typename DynamicsSystemType::RigidBodyContainerType  m_remoteBodiesWithContacts; ///< This is our storage of all remote bodies which are in the contact graph
     typename DynamicsSystemType::RigidBodyContainerType  m_localBodiesWithContacts;
 
-    void computeParams(NodeDataType & nodeData);
+    void setContactModel(NodeDataType & nodeData);
 
     template<int bodyNr>
     inline void computeW(NodeDataType & nodeData) {
 
-        if(nodeData.m_eContactModel == ContactModels::NCF_ContactModel) {
+        if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel) {
 
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
@@ -199,55 +199,6 @@ private:
         }
 
     }
-
-// UNCOMMENTED because we do not need to connnect the nodes!
-//    template<int bodyNr>
-//    void connectNode(NodeType * pNode) {
-
-
-//        EdgeType * addedEdge;
-//        RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1 : pNode->m_nodeData.m_pCollData->m_pBody2;
-//
-//        // Add self edge! ===========================================================
-//        this->m_edges.push_back(new EdgeType(m_edgeCounter));
-//        addedEdge = this->m_edges.back();
-//        addedEdge->m_edgeData.m_pBody = pBody;
-//
-//        // add links
-//        addedEdge->m_startNode = pNode;
-//        addedEdge->m_endNode = pNode;
-//        addedEdge->m_twinEdge = this->m_edges.back(); // Current we dont need a twin edge, self referencing!
-//        // Add the edge to the nodes edge list!
-//        pNode->m_edgeList.push_back( addedEdge );
-//        m_edgeCounter++;
-//        //cout << "add self edge: "<<pNode->m_nodeNumber<<" to "<<pNode->m_nodeNumber<<" body Id:"<< RigidBodyId::getBodyIdString(pBody)<<endl;
-//        // ===========================================================================
-//
-//        // Get all contacts on this body and connect to them =========================
-//        NodeListType & nodeList = m_simBodiesToContactsList[pBody];
-//        //iterate over the nodeList and add edges!
-//        typename NodeListType::iterator it;
-//        // if no contacts are already on the body we skip this
-//        for(it = nodeList.begin(); it != nodeList.end(); it++) {
-//
-//            this->m_edges.push_back(new EdgeType(m_edgeCounter));
-//            addedEdge = this->m_edges.back();
-//            addedEdge->m_edgeData.m_pBody = pBody;
-//            // add link
-//            addedEdge->m_startNode = pNode;
-//            addedEdge->m_endNode = (*it);
-//            addedEdge->m_twinEdge = addedEdge; // Current we dont need a twin edge, self referencing!
-//            // Add the edge to the nodes edge list!
-//            pNode->m_edgeList.push_back( addedEdge );
-//            (*it)->m_edgeList.push_back( addedEdge );
-//            m_edgeCounter++;
-//            //cout << "add edge: "<<pNode->m_nodeNumber<<" to "<<(*it)->m_nodeNumber<<" body Id:"<< RigidBodyId::getBodyIdString(pBody)<<endl;
-//        }
-//
-//        // Add new Node to the list;
-//        nodeList.push_back(pNode);
-
-//    }
 
     ContactParameterMap* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 

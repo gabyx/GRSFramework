@@ -120,10 +120,8 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/CollisionSolverMPI.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionFunctions.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParameter.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactParameterMap.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/AABB.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/SphereGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/PlaneGeometry.hpp
@@ -131,6 +129,8 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameter.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameterMap.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.icc
@@ -164,7 +164,9 @@ SET(DYNAMICS_SRC
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/BoxGeometry.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactParameterMap.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactParameterMap.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactModels.cpp
+     ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ConvexSets.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/DynamicsSystemMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/BodyCommunicator.cpp

@@ -7,8 +7,6 @@ template<typename Combo>
 ContactGraph<Combo>::ContactGraph(boost::shared_ptr<DynamicsSystemType> pDynSys):
     m_nodeCounter(0),
     m_edgeCounter(0),
-    m_nLambdas(0),
-    m_nFrictionParams(0),
     m_pDynSys(pDynSys),
     m_pContactParameterMap(&pDynSys->m_ContactParameterMap)
 {}
@@ -38,8 +36,6 @@ void ContactGraph<Combo>::clearGraph() {
     m_nodeCounter = 0;
     this->m_edges.clear();
     m_edgeCounter = 0;
-    m_nLambdas =0;
-    m_nFrictionParams=0;
 
     //clear own lists
     m_localNodes.clear();
@@ -95,22 +91,8 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
 
     addedNode->m_nodeData.m_pCollData = pCollData;
 
-    // Specify the contact model, (here we should do a look up or what ever)! ==================================
-    // TODO
-    addedNode->m_nodeData.m_eContactModel = ContactModels::NCF_ContactModel;
-    const unsigned int dimSet = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
-
-    addedNode->m_nodeData.m_chi.setZero(dimSet); //TODO take care, relative velocity dimesion independet of dimSet, could be?
-    addedNode->m_nodeData.m_b.setZero(dimSet);
-    addedNode->m_nodeData.m_LambdaBack.setZero(dimSet);
-    addedNode->m_nodeData.m_LambdaFront.setZero(dimSet);
-    addedNode->m_nodeData.m_R_i_inv_diag.setZero(dimSet);
-    addedNode->m_nodeData.m_G_ii.setZero(dimSet,dimSet);
-    addedNode->m_nodeData.m_nLambdas = dimSet;
-    // =========================================================================================================
-
     // Compute general parameters for the contact
-    computeParams(addedNode->m_nodeData);
+    setContactModel(addedNode->m_nodeData);
 
     // FIRST BODY!
     if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
@@ -175,9 +157,6 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
         ASSERTMSG(false,"RigidBody::ANIMATED objects have not been implemented correctly so far!");
     }
 
-    // increment the lambda counter, of how many forces we have so far!
-    m_nLambdas += addedNode->m_nodeData.m_nLambdas;
-    m_nFrictionParams += addedNode->m_nodeData.m_mu.rows();
 
     m_nodeCounter++;
 }
@@ -202,42 +181,32 @@ std::pair<typename ContactGraph<Combo>::SplitBodyNodeDataType *, bool> ContactGr
     return std::pair<SplitBodyNodeDataType *, bool>(pairRes.first->second, pairRes.second);
 }
 
-//template<typename Combo>
-//void ContactGraph<Combo>::updateSplitBodyNode(RigidBodyIdType id , RankIdType rank, const VectorUBody & u){
-//    auto it = m_splittedNodes.find(id);
-//    LOGASSERTMSG(it!=m_splittedNodes.end(),m_pSolverLog,
-//                 "Did not find SplitBodyNode for body id: " << RigidBodyId::getBodyIdString(id));
-//
-//    it->second->updateVelocity(rank,u);
-//
-//}
-
 
 template<typename Combo>
-void ContactGraph<Combo>::computeParams(NodeDataType & nodeData) {
-    if( nodeData.m_eContactModel == ContactModels::NCF_ContactModel ) {
-        // Get Contact Parameters
+void ContactGraph<Combo>::setContactModel(NodeDataType & nodeData) {
 
+    // Specify the contact model
+        nodeData.m_contactParameter  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,
+                                                                                      nodeData.m_pCollData->m_pBody2->m_eMaterial);
 
-        //Set matrix size!
-        nodeData.m_I_plus_eps.setZero(ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
-        nodeData.m_eps.setZero(ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension);
-        nodeData.m_mu.setZero(ContactModels::NormalAndCoulombFrictionContactModel::nFrictionParams);
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ) {
 
+            const unsigned int dimSet = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
 
+            nodeData.m_chi.setZero(dimSet);
+            nodeData.m_b.setZero(dimSet);
+            nodeData.m_LambdaBack.setZero(dimSet);
+            nodeData.m_LambdaFront.setZero(dimSet);
+            nodeData.m_R_i_inv_diag.setZero(dimSet);
+            nodeData.m_G_ii.setZero(dimSet,dimSet);
+            nodeData.m_eps.setZero(dimSet);
 
-        ContactParameter & params  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,nodeData.m_pCollData->m_pBody2->m_eMaterial);
-        nodeData.m_mu(0)     = params.m_mu;
-        nodeData.m_eps(0)    = params.m_epsilon_N;
-        nodeData.m_eps(1)    = params.m_epsilon_T;
-        nodeData.m_eps(2)    = params.m_epsilon_T;
+            nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[0];
+            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[1];
+            nodeData.m_eps(2) = nodeData.m_contactParameter.m_params[1];
 
-        nodeData.m_I_plus_eps.array() = nodeData.m_eps.array() + 1;
-
-
-
-    } else {
-        ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
-    }
+        } else {
+            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
+        }
 
 }

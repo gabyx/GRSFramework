@@ -321,8 +321,8 @@ void InclusionSolverCO::solveInclusionProblem(const DynamicsState * state_s,
             }*/
 
 
-            ASSERTMSG(currentContactNode->m_nodeData.m_eContactModel == ContactModels::NCF_ContactModel
-                      ,"You use InclusionSolverCO which only supports NCF_ContactModel Contacts so far!");
+            ASSERTMSG(currentContactNode->m_nodeData.m_eContactModel == ContactModels::UCF_ContactModel
+                      ,"You use InclusionSolverCO which only supports UCF_ContactModel Contacts so far!");
 
             // Write mu parameters to m_mu
             m_mu(i) = currentContactNode->m_nodeData.m_mu(0);

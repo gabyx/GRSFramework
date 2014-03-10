@@ -383,61 +383,81 @@ protected:
 
         if(paramMap) {
             LOG(m_pSimulationLog,"---> Process ContactParameterMap..."<<std::endl;);
-            typename RigidBodyType::BodyMaterialType material1,material2;
-            PREC mu,epsilonN,epsilonT;
 
-            ticpp::Element * element = paramMap->FirstChild("ContactParameterStandard",false)->ToElement();
+            ticpp::Element * element = paramMap->FirstChild("ContactParameterStandard",true)->ToElement();
             if(element) {
-
-                LOG(m_pSimulationLog,"---> Add ContactParameterStandard..."<<std::endl;);
-                if(!Utilities::stringToType<PREC>(mu, element->GetAttribute("mu"))) {
-                    throw ticpp::Exception("---> String conversion in ContactParameterStandard: mu failed");
-                }
-                if(!Utilities::stringToType<PREC>(epsilonN, element->GetAttribute("epsilonN"))) {
-                    throw ticpp::Exception("---> String conversion in ContactParameterStandard: epsilonN failed");
-                }
-                if(!Utilities::stringToType<PREC>(epsilonT, element->GetAttribute("epsilonT"))) {
-                    throw ticpp::Exception("---> String conversion in ContactParameterStandard: epsilonT failed");
-                }
-
-
-                m_pDynSys->m_ContactParameterMap.setStandardValues(ContactParameter::createParams_NCF_ContactModel(epsilonN,epsilonT,mu));
+                parseContactParameter(element, true);
             }
 
 
             ticpp::Iterator< ticpp::Element > valueElem("ContactParameter");
             for ( valueElem = valueElem.begin( paramMap->ToElement() ); valueElem != valueElem.end(); valueElem++) {
-
-                if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(material1, valueElem->GetAttribute("materialId1"))) {
-                    throw ticpp::Exception("---> String conversion in ContactParameter: materialId1 failed");
-                }
-                if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(material2, valueElem->GetAttribute("materialId2"))) {
-                    throw ticpp::Exception("---> String conversion in ContactParameter: materialId2 failed");
-                }
-                if(!Utilities::stringToType<PREC>(mu, valueElem->GetAttribute("mu"))) {
-                    throw ticpp::Exception("---> String conversion in ContactParameter: mu failed");
-                }
-                if(!Utilities::stringToType<PREC>(epsilonN, valueElem->GetAttribute("epsilonN"))) {
-                    throw ticpp::Exception("---> String conversion in ContactParameter: epsilonN failed");
-                }
-                if(!Utilities::stringToType<PREC>(epsilonT, valueElem->GetAttribute("epsilonT"))) {
-                    throw ticpp::Exception("---> String conversion in ContactParameter: epsilonT failed");
-                }
-
-
-                LOG(m_pSimulationLog,"---> Add ContactParameter of id="<<material1<<" to id="<<material2<<std::endl;);
-                if(!m_pDynSys->m_ContactParameterMap.addContactParameter(material1,
-                                                                         material2,
-                                                                         ContactParameter::createParams_NCF_ContactModel(epsilonN,epsilonT,mu)
-                                                                         )) {
-                    throw ticpp::Exception("---> Add ContactParameter failed");
-                }
-
+               parseContactParameter(&(*valueElem));
             }
 
         }
 
 
+    }
+
+    virtual void parseContactParameter(ticpp::Element * contactParam, bool stdMaterial=false){
+        typename RigidBodyType::BodyMaterialType material1,material2;
+        if(!stdMaterial){
+            if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(material1, contactParam->GetAttribute("materialId1"))) {
+                throw ticpp::Exception("---> String conversion in ContactParameter: materialId1 failed");
+            }
+            if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(material2, contactParam->GetAttribute("materialId2"))) {
+                throw ticpp::Exception("---> String conversion in ContactParameter: materialId2 failed");
+            }
+        }
+
+        std::string type = contactParam->GetAttribute("type");
+        if(type == "UCF" || type == "UCFD"){
+
+            PREC mu,epsilonN,epsilonT, invDampingN, invDampingT;
+            ContactParameter contactParameter;
+
+            if(!Utilities::stringToType<PREC>(mu, contactParam->GetAttribute("mu"))) {
+                throw ticpp::Exception("---> String conversion in ContactParameter: mu failed");
+            }
+            if(!Utilities::stringToType<PREC>(epsilonN, contactParam->GetAttribute("epsilonN"))) {
+                throw ticpp::Exception("---> String conversion in ContactParameter: epsilonN failed");
+            }
+            if(!Utilities::stringToType<PREC>(epsilonT, contactParam->GetAttribute("epsilonT"))) {
+                throw ticpp::Exception("---> String conversion in ContactParameter: epsilonT failed");
+            }
+
+            if(type == "UCFD"){
+                if(!Utilities::stringToType<PREC>(invDampingN, contactParam->GetAttribute("invDampingN"))) {
+                    throw ticpp::Exception("---> String conversion in ContactParameter: invDampingN failed");
+                }
+                if(!Utilities::stringToType<PREC>(invDampingT, contactParam->GetAttribute("invDampingT"))) {
+                    throw ticpp::Exception("---> String conversion in ContactParameter: invDampingT failed");
+                }
+
+                contactParameter = ContactParameter::createParams_UCFD_ContactModel(epsilonN,epsilonT,mu,invDampingN,invDampingT);
+
+
+            }else{
+                contactParameter = ContactParameter::createParams_UCF_ContactModel(epsilonN,epsilonT,mu);
+            }
+
+            if(stdMaterial){
+                LOG(m_pSimulationLog,"---> Add ContactParameter standart"<<std::endl;);
+                m_pDynSys->m_ContactParameterMap.setStandardValues(contactParameter);
+            }
+            else{
+                LOG(m_pSimulationLog,"---> Add ContactParameter standart of id="<<material1<<" to id="<<material2<<std::endl;);
+                if(!m_pDynSys->m_ContactParameterMap.addContactParameter(material1,material2,contactParameter)){
+                    throw ticpp::Exception("---> Add ContactParameter failed");
+                }
+            }
+
+
+        }
+        else{
+            throw ticpp::Exception("---> String conversion in ContactParameter: type failed");
+        }
     }
 
     virtual void processGlobalGeometries(ticpp::Node *sceneSettings) {

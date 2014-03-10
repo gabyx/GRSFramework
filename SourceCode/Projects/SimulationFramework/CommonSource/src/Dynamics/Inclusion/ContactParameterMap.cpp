@@ -38,7 +38,7 @@ std::size_t ContactParameterTagHash::operator()(ContactParameterTag const& c) co
 
 
 ContactParameterMap::ContactParameterMap() {
-    m_std_values =  ContactParameter::createParams_NCF_ContactModel(0.5,0.5,0.3);
+    m_std_values =  ContactParameter::createParams_UCF_ContactModel(0.5,0.5,0.3);
 }
 
 

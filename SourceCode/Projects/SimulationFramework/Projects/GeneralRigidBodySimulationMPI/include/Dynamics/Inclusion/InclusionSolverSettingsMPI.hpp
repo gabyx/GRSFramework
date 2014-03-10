@@ -28,6 +28,8 @@ struct InclusionSolverSettings
       m_UseGPUDeviceId = 0;
       m_bIsFiniteCheck = false;
       m_eConvergenceMethod = InVelocity;
+      m_bComputeResidual = false; ///< If true convergence check is done for all contacts/bodies, no break in the loop (does not work yet)
+
       m_splitNodeUpdateRatio = 1;
       m_convergenceCheckRatio = 1;
     }
@@ -45,6 +47,7 @@ struct InclusionSolverSettings
 
     enum Method{ SOR, JOR} m_eMethod;
     enum Convergence {InLambda,InVelocity, InVelocityLocal, InEnergyVelocity,InEnergyLocalMix} m_eConvergenceMethod;
+    bool m_bComputeResidual;
     PREC m_AbsTol;
     PREC m_RelTol;
 

@@ -2,9 +2,9 @@
 #ifndef ContactModels_hpp
 #define ContactModels_hpp
 
-#include <boost/any.hpp>
 
 #include "ConvexSets.hpp"
+
 
    /**
    * @brief Definitions of all contact models which can be used in the framework.
@@ -15,10 +15,9 @@
 
       /*
       * @brief This is the friction model for a unilateral contact.
-      * Abreviations : N_ContactModel
+      * Abreviations : U_ContactModel
       */
-      struct NormalContactModel{
-         typedef NormalContactModel type;
+      struct UnilateralContactModel{
          typedef ConvexSets::RPlus ConvexSet;
          static const int nDOFFriction = 0;
       };
@@ -26,10 +25,9 @@
 
       /*
       * @brief This is the friction model for a unilateral contact with spatial coulomb friction.
-      * Abreviations : NCF_ContactModel
+      * Abreviations : UCF_ContactModel
       */
-      struct NormalAndCoulombFrictionContactModel{
-         typedef NormalAndCoulombFrictionContactModel type;
+      struct UnilateralAndCoulombFrictionContactModel{
          typedef ConvexSets::RPlusAndDisk ConvexSet;
          static const int nDOFFriction = 2;
          static const int nFrictionParams = 1; // mu
@@ -37,10 +35,9 @@
 
        /*
       * @brief This is the friction model for a unilateral contact with spatial coulomb friction.
-      * Abreviations : NCF_ContactModel
+      * Abreviations : UCF_ContactModel
       */
-      struct NormalAndCoulombFrictionRelaxedContactModel{
-         typedef NormalAndCoulombFrictionRelaxedContactModel type;
+      struct UnilateralAndCoulombFrictionDampedContactModel{
          typedef ConvexSets::RPlusAndDisk ConvexSet;
          static const int nDOFFriction = 2;
          static const int nFrictionParams = 1; // mu
@@ -52,10 +49,9 @@
 
       /**
       * @brief This is the friction model for a unilateral contact with Coulombe-Contensou friction.
-      * Abreviations : NCCF_ContactModel
+      * Abreviations : UCCF_ContactModel
       */
-      struct NormalAndCoulombeContensouFrictionContactModel{
-         typedef NormalAndCoulombeContensouFrictionContactModel type;
+      struct UnilateralAndCoulombContensouFrictionContactModel{
          typedef ConvexSets::RPlusAndContensouEllipsoid ConvexSet;
          static const int nDOFFriction = 3;
          static const int nFrictionParams = 2; // mu, r (?)
@@ -63,13 +59,28 @@
 
 
       enum class ContactModelEnum : short {
-         N_ContactModel = 0,
-         NCF_ContactModel = 1,
-         NCFD_ContactModel = 4,
-         NCCF_ContactModel = 2,
-         B_ContactModel = 3 // Billateral Contact Model (not used yet)
+         U_ContactModel = 0,
+         UCF_ContactModel = 1,
+         UCFD_ContactModel = 2,
+         UCCF_ContactModel = 3
       };
 
+
+    constexpr unsigned int getLambdaDim(const ContactModelEnum & e){
+        return (e == ContactModelEnum::U_ContactModel) ?  UnilateralContactModel::ConvexSet::Dimension :
+            (
+              (e == ContactModelEnum::UCF_ContactModel) ? UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension :
+
+              (
+                    (e == ContactModelEnum::UCFD_ContactModel) ? UnilateralAndCoulombFrictionDampedContactModel::ConvexSet::Dimension :
+                    (
+                        /*(e==ContactModelEnum::UCCF_ContactModel)?*/
+                       +UnilateralAndCoulombContensouFrictionContactModel::ConvexSet::Dimension //(make an lvalue to rvalue conversion (all other static variables inherit this behaviour) with the unary+ operator, otherwise linking errors)
+
+                    )
+              )
+            );
+    }
 
    };
 
