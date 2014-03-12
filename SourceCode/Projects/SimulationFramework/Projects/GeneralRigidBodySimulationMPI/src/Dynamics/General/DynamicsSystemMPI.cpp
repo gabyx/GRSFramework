@@ -149,8 +149,8 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
 
         // Timestep for position;
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_front.head<3>();
-        pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_front.tail<3>();
-        //pBody->m_q_KI += timestep * F_i * (pBody->m_pSolverData->m_uBegin.tail<3>() + pBody->m_pSolverData->m_uBuffer.m_front.tail<3>());
+        //pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_front.tail<3>();
+        pBody->m_q_KI += timestep * F_i * (pBody->m_pSolverData->m_uBegin.tail<3>() + pBody->m_pSolverData->m_uBuffer.m_front.tail<3>());
 
 
         //Normalize Quaternion

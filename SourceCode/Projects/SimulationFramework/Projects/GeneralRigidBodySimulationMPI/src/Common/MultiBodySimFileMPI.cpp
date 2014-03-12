@@ -9,7 +9,7 @@
 
 const char MultiBodySimFileMPI::m_simFileSignature[SIM_FILE_MPI_SIGNATURE_LENGTH] = SIM_FILE_MPI_SIGNATURE;
 
-const std::streamoff MultiBodySimFileMPI::m_nAdditionalBytesPerBody= getAdditionalBytes();
+const std::streamsize MultiBodySimFileMPI::m_nAdditionalBytesPerBody= getAdditionalBytes();
 
 
 
@@ -27,15 +27,7 @@ MultiBodySimFileMPI::MultiBodySimFileMPI()
 {
 
     m_filePath = boost::filesystem::path();
-    //Make datatype
-    int error = MPI_Type_contiguous(m_nBytesPerBody ,MPI_BYTE,&m_bodyStateTypeMPI);
-    ASSERTMPIERROR(error,"Type contignous");
-    error = MPI_Type_commit(&m_bodyStateTypeMPI);
-    ASSERTMPIERROR(error, "Type commit");
-    int size;
-    error = MPI_Type_size(m_bodyStateTypeMPI,&size);
-    ASSERTMPIERROR(error, "Type size");
-    ASSERTMSG(size == m_nBytesPerBody, "MPI type has not the same byte size");
+
 
     m_writebuffer.reserve(4000*((LayoutConfigType::LayoutType::NDOFqBody + LayoutConfigType::LayoutType::NDOFuBody)*sizeof(double)
                                         +1*sizeof(RigidBodyIdType)) + 1*sizeof(double) ); // t + 4000*(id,q,u)
@@ -45,14 +37,14 @@ MultiBodySimFileMPI::MultiBodySimFileMPI()
 
 
 MultiBodySimFileMPI::~MultiBodySimFileMPI(){
-    int error = MPI_Type_free(&m_bodyStateTypeMPI);
-    ASSERTMPIERROR(error, "Type free");
 }
 
 
 void MultiBodySimFileMPI::close(){
      int err = MPI_File_close(&m_file_handle);
      ASSERTMPIERROR(err, "File close");
+     err = MPI_Type_free(&m_bodyStateTypeMPI);
+     ASSERTMPIERROR(err, "Type free");
 }
 
 
@@ -108,7 +100,7 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
     unsigned int nBodies = bodyList.size();
     MPI_Status s;
 
-    //Next State offset
+    //Next State offset ( see end of code )
     MPI_Offset nextState;
     MPI_File_get_position(m_file_handle,&nextState);
     nextState += m_nBytesPerState;
@@ -145,6 +137,7 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
     ASSERTMSG( std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.end(),0) == m_nSimBodies, " accumulation not the same");
     if(m_rank != 0 ){
         bodyOffset = std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.begin() + m_rank , 0);
+
         offsetMPI = bodyOffset*m_nBytesPerBody;
     }
 
@@ -154,7 +147,7 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
 
     //Calculate offset
 
-    if(m_rank > rankWriteTime){
+    if(m_rank != rankWriteTime){
         offsetMPI += sizeof(double); // for time
     }
 
@@ -165,6 +158,7 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
     if(m_rank == rankWriteTime){
         err = MPI_File_write(m_file_handle,&time,1 * sizeof(double),MPI_BYTE,&s);
     }
+
     ASSERTMPIERROR(err, " write states");
     err = MPI_File_write_all(m_file_handle,const_cast<void*>((const void*)(&m_writebuffer[0])),nBodies,m_bodyStateTypeMPI,&s);
     ASSERTMPIERROR(err, " seek new state");
@@ -295,6 +289,18 @@ void MultiBodySimFileMPI::setByteLengths() {
     m_nBytesPerBody = m_nBytesPerQBody + m_nBytesPerUBody  + sizeof(RigidBodyIdType) + m_nAdditionalBytesPerBody;
 
     m_nBytesPerState = m_nSimBodies*(m_nBytesPerBody) + 1*sizeof(double);
+
+    //Make datatype
+    int error = MPI_Type_contiguous(m_nBytesPerBody ,MPI_BYTE,&m_bodyStateTypeMPI);
+    ASSERTMPIERROR(error,"Type contignous");
+    error = MPI_Type_commit(&m_bodyStateTypeMPI);
+    ASSERTMPIERROR(error, "Type commit");
+    int size;
+    error = MPI_Type_size(m_bodyStateTypeMPI,&size);
+    ASSERTMPIERROR(error, "Type size");
+    ASSERTMSG(size == m_nBytesPerBody, "MPI type has not the same byte size");
+
+
 }
 
 
