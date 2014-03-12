@@ -677,7 +677,7 @@ std::string InclusionSolverNT<TInclusionSolverConfig>::getIterationStats() {
         << -1<<"\t" // No is Finite
         << -1<<"\t" // No time prox
         << -1<<"\t" // No proxIterationtime
-        << m_pDynSys->m_CurrentStateEnergy <<"\t"
+        << m_pDynSys->m_currentTotEnergy <<"\t"
         << m_G_conditionNumber<<"\t" //No m_G_conditionNumber
         << m_G_notDiagDominant<<"\t" //No m_G_notDiagDominant
         << -1<<std::endl;

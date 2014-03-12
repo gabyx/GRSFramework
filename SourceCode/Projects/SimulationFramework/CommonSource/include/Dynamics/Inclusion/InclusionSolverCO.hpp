@@ -710,7 +710,7 @@ std::string InclusionSolverCO::getIterationStats() {
         << m_isFinite<<"\t"
         << m_timeProx<<"\t"
         << m_proxIterationTime<<"\t"
-        << m_pDynSys->m_CurrentStateEnergy <<"\t"
+        << m_pDynSys->m_currentTotEnergy <<"\t"
         << m_G_conditionNumber<<"\t" //No m_G_conditionNumber
         << m_G_notDiagDominant<<"\t" //No m_G_notDiagDominant
         << m_PercussionPool.getPoolSize();

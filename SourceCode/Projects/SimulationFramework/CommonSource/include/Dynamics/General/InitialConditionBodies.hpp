@@ -218,7 +218,8 @@ inline void applyRigidBodyStateToBody(const TRigidBodyState & rigidBodyState, TR
     body->m_A_IK= getRotFromQuaternion<typename TRigidBody::PREC>(body->m_q_KI);
 
     if(body->m_pSolverData) {
-        body->m_pSolverData->m_uBuffer.m_back = rigidBodyState.m_u ;
+        body->m_pSolverData->m_uBegin = rigidBodyState.m_u;
+        body->m_pSolverData->m_uBuffer.m_back = rigidBodyState.m_u;
     }
 }
 

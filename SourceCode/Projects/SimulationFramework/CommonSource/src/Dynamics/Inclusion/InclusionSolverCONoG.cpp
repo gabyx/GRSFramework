@@ -32,7 +32,7 @@ InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverTyp
 
     //Make a new Sor Prox Visitor (takes references from these class member)
     m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor(m_Settings,m_bConverged,m_globalIterationCounter);
-    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor();
+    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor(m_Settings);
 }
 
 
@@ -209,6 +209,8 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
     // Calculates b vector for all nodes, u_0, R_ii, ...
     m_pSorProxInitNodeVisitor->setParams(alpha);
+    m_pSorProxStepNodeVisitor->setParams(alpha);
+
     m_ContactGraph.applyNodeVisitor(*m_pSorProxInitNodeVisitor);
 
     // Integrate all bodies!
@@ -362,10 +364,13 @@ std::string  InclusionSolverCONoG::getIterationStats() {
     << m_isFinite<<"\t"
     << m_timeProx<<"\t"
     << m_proxIterationTime<<"\t"
-    << m_pDynSys->m_CurrentStateEnergy;
+    << m_pDynSys->m_currentTotEnergy<<"\t"
+    << m_pDynSys->m_currentKinEnergy<<"\t"
+    << m_pDynSys->m_currentRotKinEnergy<<"\t"
+    << m_pDynSys->m_currentSpinNorm;
     return s.str();
 }
 
 std::string InclusionSolverCONoG::getStatsHeader() {
-    return std::string("GPUUsed\tnContacts\tnGlobalIterations\tConverged\tIsFinite\tTotalTimeProx [s]\tIterTimeProx [s]\tTotalStateEnergy [J]");
+    return std::string("GPUUsed\tnContacts\tnGlobalIterations\tConverged\tIsFinite\tTotalTimeProx [s]\tIterTimeProx [s]\tTotalStateEnergy [J]\tTotalKinEnergy [J]\tTotalRotKinEnergy [J]\tTotalSpinNorm [Nms]");
 }

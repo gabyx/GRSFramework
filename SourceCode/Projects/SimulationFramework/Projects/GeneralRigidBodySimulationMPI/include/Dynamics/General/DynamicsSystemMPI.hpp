@@ -89,7 +89,12 @@ public:
     inline  void afterSecondTimeStep() {};
     void doInputTimeStep(PREC T) {};
 
-    double m_CurrentStateEnergy;
+    PREC m_currentTotEnergy;
+    PREC m_currentPotEnergy;
+    PREC m_currentKinEnergy;
+    PREC m_currentTransKinEnergy;
+    PREC m_currentRotKinEnergy;
+    PREC m_currentSpinNorm;
 
 protected:
 

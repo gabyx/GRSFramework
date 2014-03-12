@@ -85,7 +85,7 @@ public:
 
             Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle(
                 nodeData.m_contactParameter.m_params[2],
-                nodeData.m_LambdaFront.template head<ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension>()
+                nodeData.m_LambdaFront.template head<ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension>()
             );
 
 #if CoutLevelSolverWhenContact>2

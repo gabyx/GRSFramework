@@ -498,23 +498,15 @@ std::string  InclusionSolverCONoG::getIterationStats() {
             << m_isFinite<<"\t"
             << m_timeProx<<"\t"
             << m_proxIterationTime<<"\t"
-            << m_pDynSys->m_CurrentStateEnergy;
+            << m_pDynSys->m_currentTotEnergy<<"\t"
+            << m_pDynSys->m_currentKinEnergy<<"\t"
+            << m_pDynSys->m_currentRotKinEnergy<<"\t"
+            << m_pDynSys->m_currentSpinNorm;
     return s.str();
 }
 
 std::string InclusionSolverCONoG::getStatsHeader() {
     std::stringstream s;
-    s
-            << "GPUUsed"<<"\t"
-            << "nContacts"<<"\t"
-            << "nContactsLocal" << "\t"
-            << "nContactsRemote" << "\t"
-            << "nSplitBodyNodes" << "\t"
-            << "nGlobalIterations"<<"\t"
-            << "Converged"<<"\t"
-            << "IsFinite"<<"\t"
-            << "TotalTimeProx [s]"<<"\t"
-            << "IterTimeProx [s]"<<"\t"
-            << "TotalStateEnergy [J]";
+    s << "GPUUsed\tnContacts\tnContactsLocal\tnContactsRemote\tnSplitBodyNodes\tnGlobalIterations\tConverged\tIsFinite\tTotalTimeProx [s]\tIterTimeProx [s]\tTotalStateEnergy [J]\tTotalKinEnergy [J]\tTotalRotKinEnergy [J]\tTotalSpinNorm [Nms]";
     return s.str();
 }

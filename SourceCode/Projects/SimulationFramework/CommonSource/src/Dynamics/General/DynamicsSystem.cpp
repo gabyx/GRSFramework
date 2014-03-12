@@ -129,7 +129,7 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
 #endif
     static Matrix43 F_i = Matrix43::Zero();
 
-    m_CurrentStateEnergy = 0;
+    m_currentTotEnergy = 0;
 
     // Do timestep for every object
     typename RigidBodySimContainerType::iterator bodyIt;
@@ -140,12 +140,15 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
         // Update time:
         pBody->m_pSolverData->m_t = te;
 
-        // Set F for this object:
+        // We do this: Symmetric update q_E = q_B + deltaT * F(q_M)(u_E+u_B)/2 (only influences rotation)
+        // Original Moreau update    q_E = q_B + deltaT * F(q_M)u_E/2  + F(q_B) u_B/2
+
+        // Set F(q_m) for this object:
         updateFMatrix(pBody->m_q_KI, F_i);
 
         // Timestep for position;
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_front.head<3>();
-        pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_front.tail<3>();
+        pBody->m_q_KI += timestep * F_i * (pBody->m_pSolverData->m_uBegin.tail<3>() + pBody->m_pSolverData->m_uBuffer.m_front.tail<3>());
 
         //Normalize Quaternion
         pBody->m_q_KI.normalize();
@@ -159,12 +162,19 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
 
 #if OUTPUT_SIMDATA_FILE == 1
         // Calculate Energy
-        m_CurrentStateEnergy += 0.5* pBody->m_pSolverData->m_uBuffer.m_front.transpose() * pBody->m_MassMatrix_diag.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front;
-        m_CurrentStateEnergy -= +  pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir ;
+        PREC potE = -pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir;
+        PREC kinE = 0.5* pBody->m_pSolverData->m_uBuffer.m_front.transpose() * pBody->m_MassMatrix_diag.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front;
+        PREC transKinE = 0.5*pBody->m_pSolverData->m_uBuffer.m_front.squaredNorm()*pBody->m_mass;
+        m_currentPotEnergy += potE;
+        m_currentKinEnergy += kinE;
+        m_currentTransKinEnergy += transKinE;
+        m_currentRotKinEnergy += kinE - transKinE;
+        m_currentTotEnergy += kinE + potE;
+        m_currentSpinNorm = (pBody->m_K_Theta_S.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front.tail<3>()).norm();
 #endif
 
 
-        // Swap uuffer and reset Front
+        // Swap uBuffer and reset Front
         pBody->m_pSolverData->swapBuffer();
         pBody->m_pSolverData->reset();
     }

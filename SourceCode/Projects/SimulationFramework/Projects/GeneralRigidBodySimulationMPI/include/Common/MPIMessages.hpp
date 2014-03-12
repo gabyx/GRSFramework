@@ -704,6 +704,7 @@ private:
             }
             LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "There is no SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "! ?");
             serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
+            serializeEigen(ar,body->m_pSolverData->m_uBegin);
             ar & body->m_pSolverData->m_t;
             LOGSZ(m_pSerializerLog, "----->  m_t: " << body->m_pSolverData->m_t <<std::endl;);
             LOGSZ(m_pSerializerLog, "----->  m_uBuffer.m_back: " << body->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl;);

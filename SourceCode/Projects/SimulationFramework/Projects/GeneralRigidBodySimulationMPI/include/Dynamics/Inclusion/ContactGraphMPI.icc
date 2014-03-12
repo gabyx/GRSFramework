@@ -191,7 +191,7 @@ void ContactGraph<Combo>::setContactModel(NodeDataType & nodeData) {
 
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ) {
 
-            const unsigned int dimSet = ContactModels::NormalAndCoulombFrictionContactModel::ConvexSet::Dimension;
+            const unsigned int dimSet = ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension;
 
             nodeData.m_chi.setZero(dimSet);
             nodeData.m_b.setZero(dimSet);
