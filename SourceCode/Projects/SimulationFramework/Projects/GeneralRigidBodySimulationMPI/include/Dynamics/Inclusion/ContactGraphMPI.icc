@@ -3,28 +3,28 @@
 
 
 #include "ContactFeasibilityTable.hpp"
-template<typename Combo>
-ContactGraph<Combo>::ContactGraph(boost::shared_ptr<DynamicsSystemType> pDynSys):
+template<typename TCombo>
+ContactGraph<TCombo>::ContactGraph(boost::shared_ptr<DynamicsSystemType> pDynSys):
     m_nodeCounter(0),
     m_edgeCounter(0),
     m_pDynSys(pDynSys),
     m_pContactParameterMap(&pDynSys->m_ContactParameterMap)
 {}
-template<typename Combo>
-void ContactGraph<Combo>::setInclusionCommunicator(boost::shared_ptr<InclusionCommunicatorType> pInclusionComm) {
+template<typename TCombo>
+void ContactGraph<TCombo>::setInclusionCommunicator(boost::shared_ptr<InclusionCommunicatorType> pInclusionComm) {
     m_pInclusionComm = pInclusionComm;
     m_pNbDataMap = m_pInclusionComm->getNeighbourMap();
 }
-template<typename Combo>
-ContactGraph<Combo>::~ContactGraph() {
+template<typename TCombo>
+ContactGraph<TCombo>::~ContactGraph() {
     clearGraph();
 }
-template<typename Combo>
-void ContactGraph<Combo>::setLog(Logging::Log * solverLog) {
+template<typename TCombo>
+void ContactGraph<TCombo>::setLog(Logging::Log * solverLog) {
     m_pSolverLog = solverLog;
 }
-template<typename Combo>
-void ContactGraph<Combo>::clearGraph() {
+template<typename TCombo>
+void ContactGraph<TCombo>::clearGraph() {
     // This deletes all nodes, edges
     // cleanup allocated memory
     for(auto n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
@@ -50,10 +50,9 @@ void ContactGraph<Combo>::clearGraph() {
 
     m_splittedNodes.clear();
 }
-template<typename Combo>
-void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
+template<typename TCombo>
+void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
 
-    //Take care state, is only q = q_m, u is not set and is zero!
 
     ASSERTMSG(pCollData->m_pBody1 != NULL && pCollData->m_pBody2 != NULL, " Bodys are null pointers?");
     //cout << "add node : "<<m_nodeCounter<< " body id:" << RigidBodyId::getBodyIdString(pCollData->m_pBody1) <<" and "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2) <<endl;
@@ -62,11 +61,6 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
     // check to which nodes we need to connect?
     // all nodes (contacts) which are in the BodyContactList (maps bodies -> contacts)
 
-    // add the pNodeData to the node list
-    this->m_nodes.push_back( new NodeType(m_nodeCounter));
-    NodeType * addedNode = this->m_nodes.back();
-    // Add to Remote or Local list
-
     // Check that contact is Local-Local or Remote-Local or Local-Remote
     // So Fail if Remote-Remote
     std::pair<bool,bool> isRemote;
@@ -74,25 +68,46 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
     LOGASSERTMSG(feasible, m_pSolverLog, "Contact not feasible between body:  id1: " <<pCollData->m_pBody1->m_id << " and id2: " <<pCollData->m_pBody2->m_id )
 
 
+    // add the pNodeData to the node list
+    NodeType * addedNode = new NodeType(m_nodeCounter);
 
-    if(isRemote.first or isRemote.second) {
-        //set the node color
-#if CoutLevelSolverWhenContact>1
-        LOG(m_pSolverLog,"---> Added Remote Node on bodies:" << std::endl;)
-#endif
-        addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
-        m_remoteNodes.push_back(addedNode);
-
-    } else {
-        //set the node color
-        addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::LOCALNODE);
-        m_localNodes.push_back(addedNode);
-    }
-
+    //Add collision data
     addedNode->m_nodeData.m_pCollData = pCollData;
 
     // Compute general parameters for the contact
     setContactModel(addedNode->m_nodeData);
+
+    // Add to Remote or Local list
+
+    bool firstBodyGetSplitted = true; // For remote-remote contact
+
+    if(isRemote.first or isRemote.second) {
+        //Remote - Remote or Remote-Local Contacts
+
+        if(!isRemote.first or !isRemote.second){
+            // Remote-Local
+            //set the node color
+            addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
+            m_remoteNodes.push_back(addedNode); // Add to remote list
+            this->m_nodes.push_back(addedNode); // Add to general list
+        }else{
+            //Remote-Remote contact
+            addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODETEMP);
+            m_remoteNodesTemp.push_back(addedNode);
+
+            ASSERTMSG( pCollData->m_pBody1->m_pBodyInfo->m_ownerRank != pCollData->m_pBody2->m_pBodyInfo->m_ownerRank , "This should not happen! Remote-Remote contact with same rank, should be determined in ")
+            firstBodyGetSplitted = (pCollData->m_pBody1->m_pBodyInfo->m_ownerRank < pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)? true : false;
+        }
+
+    } else {
+        // Local - Local Contacts
+        //set the node color
+        addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::LOCALNODE);
+        m_localNodes.push_back(addedNode);
+        this->m_nodes.push_back(addedNode);
+    }
+
+
 
     // FIRST BODY!
     if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
@@ -100,11 +115,17 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
         //Add to the neighbour data if remote contact
         if(isRemote.first) {
             m_remoteBodiesWithContacts.addBody(pCollData->m_pBody1);
-        #if CoutLevelSolverWhenContact>1
-            LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << std::endl;)
-        #endif
-            m_pNbDataMap->getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody1);
-            // if this body is already added it does not matter
+            #if CoutLevelSolverWhenContact>1
+                LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << std::endl;)
+            #endif
+            if(addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE)){
+                m_pNbDataMap->getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody1);
+                // if this body is already added it does not matter
+            }else if(addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODETEMP) ){
+                m_pNbDataMap->getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteDataTemp(firstBodyGetSplitted,&addedNode->m_nodeData);
+            }else{
+                ASSERTMSG(false, "Somthing wrong with node color!")
+            }
         }else{
             m_localBodiesWithContacts.addBody(pCollData->m_pBody1);
         }
@@ -135,8 +156,14 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
             #if CoutLevelSolverWhenContact>1
                 LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2->m_id) << std::endl;)
             #endif
-            m_pNbDataMap->getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody2);
-            // if this body is already added it does not matter
+            if(addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE)){
+                m_pNbDataMap->getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody2);
+                // if this body is already added it does not matter
+            }else if(addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODETEMP) ){
+                m_pNbDataMap->getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteDataTemp(firstBodyGetSplitted,&addedNode->m_nodeData);
+            }else{
+                ASSERTMSG(false, "Somthing wrong with node color!")
+            }
 
         }else{
             m_localBodiesWithContacts.addBody(pCollData->m_pBody2);
@@ -161,8 +188,8 @@ void ContactGraph<Combo>::addNode(CollisionData * pCollData) {
     m_nodeCounter++;
 }
 
-template<typename Combo>
-std::pair<typename ContactGraph<Combo>::SplitBodyNodeDataType *, bool> ContactGraph<Combo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & rank) {
+template<typename TCombo>
+std::pair<typename ContactGraph<TCombo>::SplitBodyNodeDataType *, bool> ContactGraph<TCombo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & rank) {
 
     auto pairRes = m_splittedNodes.insert(
                        SplitBodyNodeDataListType::value_type(body->m_id, (SplitBodyNodeDataType*) NULL )
@@ -182,8 +209,8 @@ std::pair<typename ContactGraph<Combo>::SplitBodyNodeDataType *, bool> ContactGr
 }
 
 
-template<typename Combo>
-void ContactGraph<Combo>::setContactModel(NodeDataType & nodeData) {
+template<typename TCombo>
+void ContactGraph<TCombo>::setContactModel(NodeDataType & nodeData) {
 
     // Specify the contact model
         nodeData.m_contactParameter  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,

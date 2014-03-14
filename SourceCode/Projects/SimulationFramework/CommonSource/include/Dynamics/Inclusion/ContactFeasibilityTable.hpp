@@ -29,6 +29,7 @@ namespace ContactFeasibilityTableMPI{
       m.   animated| x | x | x || x | x | x |
 
       1= feasible or allowed
+      0= infeasible
       x= not implemented
 
 */
@@ -112,7 +113,6 @@ namespace ContactFeasibilityTableMPI{
 
             return true;
         }
-        ERRORMSG("Contact not feasible! -> id1: "<< p1->m_id <<" i1: " << i1 << "id2: " << p2->m_id<< " i2: " << i2 );
         return false;
     }
 

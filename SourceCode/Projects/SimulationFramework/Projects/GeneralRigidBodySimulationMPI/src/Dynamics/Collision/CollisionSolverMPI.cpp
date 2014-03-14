@@ -92,6 +92,26 @@ void CollisionSolver::solveCollision() {
         }
     }
 
+
+    //// Do simple collision detection (RemoteSimBodies to RemoteSimBodies, but only different rank!)
+//    #if CoutLevelSolver>1
+//        LOG(m_pSolverLog, "\t---> RemoteSimBodies to RemoteSimBodies (different rank) "<<std::endl;)
+//    #endif
+//    if(RemoteSimBodies.size()){
+//        for(auto bodyIti = RemoteSimBodies.begin(); bodyIti != --RemoteSimBodies.end(); bodyIti++) {
+//            typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
+//            bodyItj++;
+//            for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
+//
+//                //check for a collision
+//                if((*bodyIti)->m_pBodyInfo->m_ownerRank !=  (*bodyItj)->m_pBodyInfo->m_ownerRank)){
+//                    m_Collider.checkCollision((*bodyIti), (*bodyItj));
+//                }
+//            }
+//        }
+//    }
+
+
     #if CoutLevelSolver>1
         LOG(m_pSolverLog, "\t---> SimBodies to Bodies "<<std::endl;)
     #endif

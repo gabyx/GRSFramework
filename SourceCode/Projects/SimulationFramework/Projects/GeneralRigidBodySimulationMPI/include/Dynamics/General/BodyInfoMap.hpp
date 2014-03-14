@@ -28,7 +28,8 @@ public:
         };
 
         typedef std::unordered_map<RankIdType, Flags> RankToFlagsType;
-        RankToFlagsType m_neighbourRanks; ///< if body is remote: only one rankId has m_inNeighbourMap= true (only in the neighbour data it belongs to) all other ranks is for information only which ranks
+        RankToFlagsType m_neighbourRanks; ///< if body is remote: only one rankId has m_inNeighbourMap= true (only in the neighbour data it belongs to)
+
 
         RankIdType m_ownerRank;   ///< The process rank to which this body belongs (changes during simulation, if change -> send to other process)
         bool m_overlapsThisRank; ///< True if body overlaps this process!, if false

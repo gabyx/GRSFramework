@@ -8,8 +8,8 @@
 
 #include "MPICommunicatorId.hpp"
 
-template<typename Combo>
-InclusionCommunicator<Combo>::InclusionCommunicator(boost::shared_ptr< BodyCommunicator> pBodyComm,
+template<typename TCombo>
+InclusionCommunicator<TCombo>::InclusionCommunicator(boost::shared_ptr< BodyCommunicator> pBodyComm,
         boost::shared_ptr< DynamicsSystemType> pDynSys ,
         boost::shared_ptr< ProcessCommunicatorType > pProcComm):
 
@@ -40,8 +40,8 @@ InclusionCommunicator<Combo>::InclusionCommunicator(boost::shared_ptr< BodyCommu
 
     m_pSimulationLog->logMessage("---> Initialized InclusionCommunicator");
 }
-template<typename Combo>
-void InclusionCommunicator<Combo>::communicateRemoteContacts(PREC currentSimulationTime) {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::communicateRemoteContacts(PREC currentSimulationTime) {
 
 
     m_currentSimulationTime = currentSimulationTime;
@@ -98,8 +98,8 @@ void InclusionCommunicator<Combo>::communicateRemoteContacts(PREC currentSimulat
     LOGIC(m_pSimulationLog,"---> InclusionCommunication: Communicate Remote finished"<< std::endl;)
 }
 
-template<typename Combo>
-void InclusionCommunicator<Combo>::communicateSplitBodyUpdate(unsigned int globalIterationNumber) {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::communicateSplitBodyUpdate(unsigned int globalIterationNumber) {
 
     m_globalIterationNumber = globalIterationNumber;
     // First for each neighbour, communicate the ids of all remote body which have contacts
@@ -114,8 +114,8 @@ void InclusionCommunicator<Combo>::communicateSplitBodyUpdate(unsigned int globa
     LOGIC(m_pSimulationLog,"---> InclusionCommunication: Communicate Remote Velocities finished"<< std::endl;)
 }
 
-template<typename Combo>
-void InclusionCommunicator<Combo>::communicateSplitBodySolution(unsigned int globalIterationNumber) {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::communicateSplitBodySolution(unsigned int globalIterationNumber) {
     m_globalIterationNumber = globalIterationNumber;
 
     // First for each neighbour, communicate the ids of all remote body which have contacts
@@ -132,8 +132,8 @@ void InclusionCommunicator<Combo>::communicateSplitBodySolution(unsigned int glo
 }
 
 
-template<typename Combo>
-void InclusionCommunicator<Combo>::buildCommunicatorGroups() {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::buildCommunicatorGroups() {
         // Build the communicator groups
 
         // Group -1 (MPI_UNDEFINED):
@@ -157,8 +157,8 @@ void InclusionCommunicator<Combo>::buildCommunicatorGroups() {
 
 }
 
-template<typename Combo>
-bool InclusionCommunicator<Combo>::communicateConvergence(bool converged) {
+template<typename TCombo>
+bool InclusionCommunicator<TCombo>::communicateConvergence(bool converged) {
 
     LOGBC(m_pSimulationLog,"MPI> Gather convergence flags..."<<std::endl;)
     std::vector<char> convergedGather;
@@ -184,8 +184,8 @@ bool InclusionCommunicator<Combo>::communicateConvergence(bool converged) {
 }
 
 
-template<typename Combo>
-void InclusionCommunicator<Combo>::resetAllWeightings() {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::resetAllWeightings() {
 
 
     //Reset all local bodies
@@ -203,8 +203,8 @@ void InclusionCommunicator<Combo>::resetAllWeightings() {
 
 
 
-template<typename Combo>
-void InclusionCommunicator<Combo>::sendContactMessageToNeighbours() {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::sendContactMessageToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (EXTERNALCONTACTS_MESSAGE) to neighbours!"<<std::endl;)
 
 
@@ -217,8 +217,8 @@ void InclusionCommunicator<Combo>::sendContactMessageToNeighbours() {
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
-template<typename Combo>
-void InclusionCommunicator<Combo>::receiveContactMessagesFromNeighbours() {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::receiveContactMessagesFromNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (EXTERNALCONTACTS_MESSAGE) from neighbours!"<<std::endl;)
     // set the rank of the receiving message automatically! inside the function!
     m_pProcComm->receiveMessageFromRanks(m_messageContact, m_nbRanks, MPILayer::MPIMessageTag::EXTERNALCONTACTS_MESSAGE );
@@ -227,8 +227,8 @@ void InclusionCommunicator<Combo>::receiveContactMessagesFromNeighbours() {
     // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
     m_pProcComm->waitForAllSends();
 }
-template<typename Combo>
-void InclusionCommunicator<Combo>::sendBodyMultiplicityMessageToNeighbours() {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::sendBodyMultiplicityMessageToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYFACTOR_MESSAGE) to neighbours!"<<std::endl;)
 
 
@@ -242,8 +242,8 @@ void InclusionCommunicator<Combo>::sendBodyMultiplicityMessageToNeighbours() {
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
 
-template<typename Combo>
-void InclusionCommunicator<Combo>::recvBodyMultiplicityMessageFromNeighbours() {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::recvBodyMultiplicityMessageFromNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (SPLITBODYFACTOR_MESSAGE) from neighbours!"<<std::endl;)
     // set the rank of the receiving message automatically! inside the function!
     // m_nbRanksSendRecvRem#ote.erase(m_nbRanksSendRecvRemote.begin()); with this in, it obviously hangs!!
@@ -257,8 +257,8 @@ void InclusionCommunicator<Combo>::recvBodyMultiplicityMessageFromNeighbours() {
 }
 
 
-template<typename Combo>
-void InclusionCommunicator<Combo>::sendUpdateSplitBodiesToNeighbours() {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::sendUpdateSplitBodiesToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYUPDATE_MESSAGE) to neighbours!"<<std::endl;)
 
 
@@ -273,8 +273,8 @@ void InclusionCommunicator<Combo>::sendUpdateSplitBodiesToNeighbours() {
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
 
-template<typename Combo>
-void InclusionCommunicator<Combo>::recvUpdateSplitBodiesFromNeighbours() {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::recvUpdateSplitBodiesFromNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (SPLITBODYUPDATE_MESSAGE) from neighbours!"<<std::endl;)
     // set the rank of the receiving message automatically! inside the function!
     // m_nbRanksSendRecv##Remote.erase(m_nbRanksSendRecvRemote.begin()); with this in, it obviously hangs!!
@@ -288,8 +288,8 @@ void InclusionCommunicator<Combo>::recvUpdateSplitBodiesFromNeighbours() {
     m_pProcComm->waitForAllSends();
 }
 
-template<typename Combo>
-void InclusionCommunicator<Combo>::sendSolutionSplitBodiesToNeighbours() {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::sendSolutionSplitBodiesToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYSOLUTION_MESSAGE) to neighbours!"<<std::endl;)
 
 
@@ -304,8 +304,8 @@ void InclusionCommunicator<Combo>::sendSolutionSplitBodiesToNeighbours() {
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
 
-template<typename Combo>
-void InclusionCommunicator<Combo>::recvSolutionSplitBodiesFromNeighbours() {
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::recvSolutionSplitBodiesFromNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (SPLITBODYSOLUTION_MESSAGE) from neighbours!"<<std::endl;)
     // set the rank of the receiving message automatically! inside the function!
     // m_nbRanksSendRecvRem#ote.erase(m_nbRanksSendRecvRemote.begin()); with this in, it obviously hangs!!

@@ -33,7 +33,7 @@ struct LayoutConfig{
    typedef TPREC PREC;
    typedef TLayout LayoutType;
 
-   typedef Eigen::Matrix<PREC, LayoutType::NDOFqBody, LayoutType::NDOFuBody>     MatrixQBodyUBody;
+   typedef Eigen::Matrix<PREC, LayoutType::NDOFqBody, LayoutType::NDOFuBody>    MatrixQBodyUBody;
    typedef Eigen::Matrix<PREC, LayoutType::NDOFqBody, 1>                        VectorQBody;
    typedef Eigen::Matrix<PREC, LayoutType::NDOFuBody, 1>                        VectorUBody;
    typedef Eigen::Matrix<PREC, LayoutType::NDOFqBody, Eigen::Dynamic >          MatrixQBodyDyn;

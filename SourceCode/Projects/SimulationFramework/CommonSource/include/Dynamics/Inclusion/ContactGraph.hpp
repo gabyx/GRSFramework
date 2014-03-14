@@ -56,9 +56,9 @@ public:
     void clearGraph() {
         // This deletes all nodes, edges, and decrements the reference counts for the nodedata and edgedata
         // cleanup allocated memory
-        for(NodeListIteratorType n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
+        for(auto n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
             delete (*n_it);
-        for(EdgeListIteratorType e_it = this->m_edges.begin(); e_it != this->m_edges.end(); e_it++)
+        for(auto e_it = this->m_edges.begin(); e_it != this->m_edges.end(); e_it++)
             delete (*e_it);
         //cout << "clear graph"<<endl;
         this->m_nodes.clear();
@@ -66,6 +66,10 @@ public:
         this->m_edges.clear();
         m_edgeCounter = 0;
         m_simBodiesToContactsList.clear();
+
+        for(auto n_it = m_remoteNodesTemp.begin(); n_it != m_remoteNodesTemp.end(); n_it++)
+            delete (*n_it);
+        m_remoteNodesTemp.clear();
 
     }
 
@@ -114,12 +118,12 @@ public:
     }
 
 
-    static const Eigen::Matrix<PREC,NDOFuBody,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    static const MatrixUBodyDyn & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
     }
 
-    static const Eigen::Matrix<PREC,NDOFuBody,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    static const MatrixUBodyDyn * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1 == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
@@ -364,12 +368,12 @@ public:
     }
 
 
-    static const Eigen::Matrix<PREC,NDOFuBody,Eigen::Dynamic> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    static const MatrixUBodyDyn & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
     }
 
-    static const Eigen::Matrix<PREC,NDOFuBody,Eigen::Dynamic> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    static const MatrixUBodyDyn * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1 == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
@@ -544,9 +548,12 @@ public:
 
 
     SorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
-                           bool & globalConverged, const unsigned int & globalIterationNeeded):
+                           bool & globalConverged,
+                           const unsigned int & globalIterationNeeded,
+                           ContactGraphType * graph):
             m_settings(settings),m_bConverged(globalConverged),
-            m_globalIterationCounter(globalIterationNeeded)
+            m_globalIterationCounter(globalIterationNeeded),
+            m_pGraph(graph)
     {}
 
     void setLog(Logging::Log * solverLog){
@@ -625,6 +632,7 @@ public:
 //                mu =  nodeData.m_mu(0);
 //            }
 
+            // PROX  ====================================================================================================================
             Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle(
                 nodeData.m_contactParameter.m_params[2],
                 nodeData.m_LambdaFront.head<ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension>()
@@ -637,12 +645,18 @@ public:
               *m_pSolverLog <<"\t---> Lambda converged"<<std::endl;
             }
 #endif
-
+            // Velocity Updates ====================================================================================================================
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
+
+                // Velocity update (wahrscheinlich Auslöschung bei Lambda)
                 nodeData.m_u1BufferPtr->m_front = nodeData.m_u1BufferPtr->m_front + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
+
+                //Sepcial update (no differences)
+                //doVelocityUpdate<1>(nodeData);
+
 
                #if CoutLevelSolverWhenContact>2
                 LOG(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
@@ -684,7 +698,12 @@ public:
             // SECOND BODY
             if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
+
+                // Velocity update (wahrscheinlich Auslöschung bei Lambda)
                 nodeData.m_u2BufferPtr->m_front = nodeData.m_u2BufferPtr->m_front  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
+
+                //Sepcial update (no differences)
+                //doVelocityUpdate<2>(nodeData);
 
                 #if CoutLevelSolverWhenContact>2
                 LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
@@ -746,12 +765,38 @@ public:
 
 
             // Swap Lambdas, but dont swap Velocities...
-            nodeData.swapLambdas();
+            //nodeData.m_LambdaBack = nodeData.m_LambdaFront; // necessary if we use doVelocityUpdate function!
+            nodeData.swapLambdas(); // faster only switch pointers
 
 
         } else {
             ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
         }
+    }
+
+    template<int B>
+    void doVelocityUpdate(typename ContactGraphType::NodeDataType & nodeData){
+        typedef decltype(nodeData.m_u1BufferPtr->m_front) VectorUType;
+        RigidBodyType * pBody;
+        VectorUType * pUBuffer;
+
+        if(B==1){
+            pUBuffer = &nodeData.m_u1BufferPtr->m_front;
+            pBody = nodeData.m_pCollData->m_pBody1;
+        }else{
+            pUBuffer = &nodeData.m_u2BufferPtr->m_front;
+            pBody = nodeData.m_pCollData->m_pBody2;
+        }
+
+        // u_S + Minv *h * deltaT
+        *pUBuffer = pBody->m_pSolverData->m_uBegin + pBody->m_MassMatrixInv_diag.asDiagonal() * pBody->m_h_term * m_settings.m_deltaT;
+
+        // Iterate over all nodes and add contribution
+        auto nodeList = m_pGraph->m_simBodiesToContactsList[pBody];
+        for(auto it = nodeList.begin(); it!=nodeList.end(); it++){
+            *pUBuffer += pBody->m_MassMatrixInv_diag.asDiagonal() * ContactGraphType::getW_bodyRef((*it)->m_nodeData,pBody) * (*it)->m_nodeData.m_LambdaFront;
+        }
+
     }
 
     void setNewDamping(typename ContactGraphType::NodeDataType & nodeData){
@@ -794,7 +839,7 @@ private:
     bool & m_bConverged; ///< Access to global flag for cancelation criteria
     const unsigned int & m_globalIterationCounter; ///< Access to global iteration counter
 
-
+    ContactGraphType * m_pGraph;
 
 };
 

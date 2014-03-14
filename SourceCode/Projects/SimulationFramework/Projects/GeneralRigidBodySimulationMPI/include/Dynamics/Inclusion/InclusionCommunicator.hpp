@@ -15,7 +15,7 @@
 
 #include InclusionSolverSettings_INCLUDE_FILE
 
-template<typename Combo>
+template<typename TCombo>
 class InclusionCommunicator {
 public:
 
@@ -25,7 +25,7 @@ public:
     //Cannot template on this type, template cyclic dependency because ContactGraph also template on InlcusionComm
     // Dont template on InclusionCommunicator and ContactGraph
     // Cannnot typedef more dependent types in ContactGraph, because doing so,
-    typedef typename Combo::ContactGraphType ContactGraphType;
+    typedef typename TCombo::ContactGraphType ContactGraphType;
 
     typedef typename MPILayer::ProcessCommunicator                                      ProcessCommunicatorType;
     typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
@@ -34,8 +34,8 @@ public:
     typedef typename DynamicsSystemType::RigidBodySimContainerType                      RigidBodyContainerType;
     typedef typename DynamicsSystemType::GlobalGeometryMapType                          GlobalGeometryMapType;
 
-
-    typedef NeighbourMap<NeighbourDataInclusionCommunication> NeighbourMapType;
+    typedef typename ContactGraphType::NodeDataType NodeDataType;
+    typedef NeighbourMap<NeighbourDataInclusionCommunication<NodeDataType> > NeighbourMapType;
 
     InclusionCommunicator(boost::shared_ptr< BodyCommunicator> pBodyComm,
                           boost::shared_ptr< DynamicsSystemType> pDynSys ,

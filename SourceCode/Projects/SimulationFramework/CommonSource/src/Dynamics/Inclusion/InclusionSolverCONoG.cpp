@@ -31,7 +31,7 @@ InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverTyp
     m_pDynSys = pDynSys;
 
     //Make a new Sor Prox Visitor (takes references from these class member)
-    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor(m_Settings,m_bConverged,m_globalIterationCounter);
+    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor(m_Settings,m_bConverged,m_globalIterationCounter,&m_ContactGraph);
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor(m_Settings);
 }
 

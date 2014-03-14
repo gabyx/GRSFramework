@@ -20,17 +20,18 @@
 #include "VectorToSkewMatrix.hpp"
 
 
-template<typename Combo>
+template<typename TCombo>
 class ContactGraph : public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
 public:
+
+
 
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
 
-    typedef typename Combo::InclusionCommunicatorType InclusionCommunicatorType;
-    typedef typename InclusionCommunicatorType::NeighbourMapType NeighbourMapType;
+
+    typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
 
     typedef ContactGraphNodeDataIteration NodeDataType;
     typedef ContactGraphEdgeData EdgeDataType;
@@ -45,7 +46,11 @@ public:
     typedef ContactGraphNodeDataSplitBody SplitBodyNodeDataType;
     typedef std::unordered_map<RigidBodyIdType, SplitBodyNodeDataType* > SplitBodyNodeDataListType;
 
-    enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE, SPLITNODE};
+    enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE, REMOTENODETEMP, SPLITNODE};
+
+    typedef typename TCombo::InclusionCommunicatorType InclusionCommunicatorType;
+    typedef typename InclusionCommunicatorType::NeighbourMapType NeighbourMapType;
+
 
     ContactGraph(boost::shared_ptr<DynamicsSystemType> pDynSys);
     void setInclusionCommunicator(boost::shared_ptr<InclusionCommunicatorType> pInclusionComm);
@@ -139,6 +144,7 @@ private:
     //std::map<unsigned int, NodeListType> m_nodeMap; //TODO make a map whith each color!
     NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies (ref to m_nodeMap)
     NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies (ref to m_nodeMap)
+    NodeListType m_remoteNodesTemp; ///< These are the contact nodes which are built by remote-remote contacts
 
     SplitBodyNodeDataListType m_splittedNodes; ///< These are the billateral nodes between the splitted bodies in the contact graph
 
