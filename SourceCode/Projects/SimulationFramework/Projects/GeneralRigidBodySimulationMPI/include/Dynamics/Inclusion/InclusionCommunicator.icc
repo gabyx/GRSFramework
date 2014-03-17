@@ -137,7 +137,7 @@ void InclusionCommunicator<TCombo>::buildCommunicatorGroups() {
         // Build the communicator groups
 
         // Group -1 (MPI_UNDEFINED):
-        //              - Empty processes (no sim bodies-> no remote contacts possible, only by remote to remote (but these are not handled by the rank who determines these)
+        //              - Empty processes (no sim bodies-> no remote contacts possible, only by remote to remote
         //              - processes with no nodes
         //              - processes with only local nodes
         //              They do not need communication during the solving process,
@@ -147,7 +147,7 @@ void InclusionCommunicator<TCombo>::buildCommunicatorGroups() {
         //              - all other processes, with additional remote or splitbody nodes
         //              - They need communication during the solving process
         int groupId;
-        if(  m_globalLocal.size() == 0 ||  m_pContactGraph->isUncoupled() ){
+        if(  m_pContactGraph->isUncoupled() ){
             groupId = -1;
         }else{
             groupId = 0;

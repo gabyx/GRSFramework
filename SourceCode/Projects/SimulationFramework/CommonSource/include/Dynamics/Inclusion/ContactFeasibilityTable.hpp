@@ -21,16 +21,17 @@ namespace ContactFeasibilityTableMPI{
                     sim|sta|ani||sim|sta|ani|
  _                 ==========================
  |    L   simulated| 1 | 1 | x || 1 | 0 | x |
- |    o      static| 1 | 0 | x || 1 | 0 | x |
- |    c.   animated| x | x | x || x | x | x |
+ |    o      static| - | 0 | x || 0 | 0 | x |
+ |    c.   animated| - | - | x || x | x | x |
  |        ---------------------------------------
- |    R   simulated| 1 | 1 | x || 0 | 0 | x |
- i1   e      static| 0 | 0 | x || 0 | 0 | x |
-      m.   animated| x | x | x || x | x | x |
+ |    R   simulated| - | - | - || 1 | 0 | x |
+ i1   e      static| - | - | - || - | 0 | x |
+      m.   animated| - | - | - || - | - | x |
 
       1= feasible or allowed
       0= infeasible
       x= not implemented
+      -= symmetric value
 
 */
 
@@ -57,8 +58,9 @@ namespace ContactFeasibilityTableMPI{
                         // Sim Local - Sim Remote ( + BS::NSTATES)
                         index==make1DIndexSym<(char)BS::NSTATES,(char)BS::SIMULATED, (char)BS::SIMULATED + (char)BS::NSTATES>() ? true :
                             (
-                                 // Static Local - Sim Remote ( + BS::NSTATES)
-                                 index == make1DIndexSym<(char)BS::NSTATES,(char)BS::STATIC, (char)BS::SIMULATED + (char)BS::NSTATES>() ? true : false
+                                 // Sim Remote ( + BS::NSTATES) - Sim Remote ( + BS::NSTATES)
+                                 index == make1DIndexSym<(char)BS::NSTATES,(char)BS::SIMULATED + (char)BS::NSTATES,
+                                                                           (char)BS::SIMULATED + (char)BS::NSTATES>() ? true : false
                             )
                         )
                     )

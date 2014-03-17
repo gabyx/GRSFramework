@@ -344,7 +344,7 @@ public:
     /**
     * Inserts/Overwrites a new splitted communicator with id newCommId if color is not -1
     * No communicator freeing is done here!
-    * Rank ordering is preserved  from the old communicator
+    * Rank ordering is preserved from the old communicator
     */
     void generateCommunicatorSplitAndOverwrite(MPICommunicatorId newCommId, int groupColor){
 

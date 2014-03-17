@@ -3,6 +3,7 @@
 
 
 #include "ContactFeasibilityTable.hpp"
+
 template<typename TCombo>
 ContactGraph<TCombo>::ContactGraph(boost::shared_ptr<DynamicsSystemType> pDynSys):
     m_nodeCounter(0),
@@ -65,7 +66,8 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
     // So Fail if Remote-Remote
     std::pair<bool,bool> isRemote;
     bool feasible = ContactFeasibilityTableMPI::checkFeasibilityOfContact(pCollData->m_pBody1, pCollData->m_pBody2 , isRemote );
-    LOGASSERTMSG(feasible, m_pSolverLog, "Contact not feasible between body:  id1: " <<pCollData->m_pBody1->m_id << " and id2: " <<pCollData->m_pBody2->m_id )
+    LOGASSERTMSG(feasible, m_pSolverLog, "Contact not feasible between body:  id1: "
+                 <<RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << " and id2: " <<RigidBodyId::getBodyIdString(pCollData->m_pBody2->m_id) )
 
 
     // add the pNodeData to the node list

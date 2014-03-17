@@ -686,9 +686,8 @@ protected:
 
         unsigned int groupId, startIdx;
         if(rigidBodiesEl->HasAttribute("groupId")) {
-            m_globalMaxGroupId++; // Goes one up!
             groupId = rigidBodiesEl->GetAttribute<unsigned int>("groupId");
-            m_globalMaxGroupId = groupId = std::max(m_globalMaxGroupId,groupId);
+            m_globalMaxGroupId = std::max(m_globalMaxGroupId,groupId);
 
         } else {
             m_globalMaxGroupId++;

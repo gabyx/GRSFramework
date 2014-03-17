@@ -1,6 +1,7 @@
 
 #include "CollisionSolverMPI.hpp"
 
+#include "PrintGeometryDetails.hpp"
 
 CollisionSolver::CollisionSolver(boost::shared_ptr< DynamicsSystemType> pDynSys):
     m_SimBodies(pDynSys->m_SimBodies), m_Bodies(pDynSys->m_Bodies), m_RemoteSimBodies(pDynSys->m_RemoteSimBodies),
@@ -69,7 +70,7 @@ void CollisionSolver::solveCollision() {
     #endif
     if(m_SimBodies.size()){
         for(auto bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
-            typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
+            auto bodyItj = bodyIti;
             bodyItj++;
             for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
 
@@ -93,23 +94,30 @@ void CollisionSolver::solveCollision() {
     }
 
 
-    //// Do simple collision detection (RemoteSimBodies to RemoteSimBodies, but only different rank!)
-//    #if CoutLevelSolver>1
-//        LOG(m_pSolverLog, "\t---> RemoteSimBodies to RemoteSimBodies (different rank) "<<std::endl;)
-//    #endif
-//    if(RemoteSimBodies.size()){
-//        for(auto bodyIti = RemoteSimBodies.begin(); bodyIti != --RemoteSimBodies.end(); bodyIti++) {
-//            typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
-//            bodyItj++;
-//            for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
-//
-//                //check for a collision
-//                if((*bodyIti)->m_pBodyInfo->m_ownerRank !=  (*bodyItj)->m_pBodyInfo->m_ownerRank)){
-//                    m_Collider.checkCollision((*bodyIti), (*bodyItj));
-//                }
-//            }
-//        }
-//    }
+    // Do simple collision detection (RemoteSimBodies to RemoteSimBodies, but only different rank!)
+    #if CoutLevelSolver>1
+        LOG(m_pSolverLog, "\t---> RemoteSimBodies to RemoteSimBodies (different rank) "<<std::endl;)
+    #endif
+    if(m_RemoteSimBodies.size()){
+        for(auto bodyIti = m_RemoteSimBodies.begin(); bodyIti != --m_RemoteSimBodies.end(); bodyIti++) {
+            auto bodyItj = bodyIti;
+            bodyItj++;
+            for(; bodyItj != m_RemoteSimBodies.end(); bodyItj++ ) {
+
+                //check for a collision
+
+                PrintGeometryDetailsVisitor _2(m_pSolverLog, (*bodyIti)->m_geometry, "--->");
+                PrintGeometryDetailsVisitor _1(m_pSolverLog, (*bodyItj)->m_geometry, "--->");
+
+                if((*bodyIti)->m_pBodyInfo->m_ownerRank !=  (*bodyItj)->m_pBodyInfo->m_ownerRank){
+
+
+
+                    m_Collider.checkCollision((*bodyIti), (*bodyItj));
+                }
+            }
+        }
+    }
 
 
     #if CoutLevelSolver>1
