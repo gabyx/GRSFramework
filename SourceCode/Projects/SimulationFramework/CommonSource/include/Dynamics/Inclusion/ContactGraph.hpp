@@ -389,7 +389,8 @@ private:
                                                                                       nodeData.m_pCollData->m_pBody2->m_eMaterial);
 
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
-            nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel
+            nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel
            ) {
 
             const unsigned int dimSet = ContactModels::getLambdaDim(nodeData.m_contactParameter.m_contactModel);
@@ -421,7 +422,8 @@ private:
 
 
         if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
-           nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ) {
+           nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel) {
 
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
