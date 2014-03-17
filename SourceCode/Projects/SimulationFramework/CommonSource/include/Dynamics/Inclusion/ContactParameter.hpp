@@ -17,8 +17,16 @@
 *    m_params[0];	///< The contact restitution coefficient in normal direction, \f$\epsilon_N\f$.
 *    m_params[1];	///< The contact restitution coefficiend in tangential direction, \f$\epsilon_T\f$.
 *    m_params[2];			///< The friction coefficient, \f$\mu\f$.
-*    m_params[3];			///< The inverse damping constant for the unilateral contact \f$invd_N\f$.
-*    m_params[4];			///< The inverse damping constant for the frictional contact \f$invd_T\f$.
+*    m_params[3];			///< The inverse damping constant for the unilateral contact \f$dinv_N\f$.
+*    m_params[4];			///< The inverse damping constant for the frictional contact \f$dinv_T\f$.
+* For  UCFDD_ContactModel
+*    m_params[0];	///< The contact restitution coefficient in normal direction, \f$\epsilon_N\f$.
+*    m_params[1];	///< The contact restitution coefficiend in tangential direction, \f$\epsilon_T\f$.
+*    m_params[2];			///< The friction coefficient, \f$\mu\f$.
+*    m_params[3];			///< The inverse damping constant for the unilateral contact \f$dinv_N\f$.
+*    m_params[4];			///< The fixed inverse damping constant for the frictional contact \f$dinv_{TFix}\f$ if \f$|lambda_N| \leq epsilon\f$
+*    m_params[5];			///< The maximum slipping velocity for frictional contact. \f$dinv_T = gamma_{max} / (\mu lambda_N) \f$
+*    m_params[6];           ///< The epsilon to determine when to set the fixed damping constant \f$ dinv_TFix \f$
 /** @{ */
 struct ContactParameter{
 
@@ -66,8 +74,11 @@ struct ContactParameter{
         return ContactParameter(ContactModels::ContactModelEnum::UCF_ContactModel, {epsN,epsT,mu} );
     }
 
-    static ContactParameter createParams_UCFD_ContactModel(PREC epsN, PREC epsT, PREC mu, PREC d_N, PREC d_T){
-        return ContactParameter(ContactModels::ContactModelEnum::UCFD_ContactModel, {epsN,epsT,mu,d_N,d_T} );
+    static ContactParameter createParams_UCFD_ContactModel(PREC epsN, PREC epsT, PREC mu, PREC dinv_N, PREC dinv_T){
+        return ContactParameter(ContactModels::ContactModelEnum::UCFD_ContactModel, {epsN,epsT,mu,dinv_N,dinv_T} );
+    }
+    static ContactParameter createParams_UCFDD_ContactModel(PREC epsN, PREC epsT, PREC mu, PREC dinv_N, PREC dinv_TFix, PREC gammaMax, PREC epsilon){
+        return ContactParameter(ContactModels::ContactModelEnum::UCFD_ContactModel, {epsN,epsT,mu,dinv_N,dinv_TFix,gammaMax,epsilon} );
     }
 
 };

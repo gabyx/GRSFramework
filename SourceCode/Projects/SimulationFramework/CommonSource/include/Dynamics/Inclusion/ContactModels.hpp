@@ -34,14 +34,29 @@
       };
 
        /*
-      * @brief This is the friction model for a unilateral contact with spatial coulomb friction.
-      * Abreviations : UCF_ContactModel
+      * @brief This is the friction model for a unilateral contact with spatial coulomb friction
+      * where for each law a damping is added serially.
+      * Abreviations : UCFD_ContactModel
       */
       struct UnilateralAndCoulombFrictionDampedContactModel{
          typedef ConvexSets::RPlusAndDisk ConvexSet;
          static const int nDOFFriction = 2;
          static const int nFrictionParams = 1; // mu
-         static const int nDampingParams = 2; // d1 normal and d2 tangential
+         static const int nDampingParams = 2; // d_N normal and d_T tangential
+      };
+
+      /*
+      * @brief This is the friction model for a unilateral contact with spatial coulomb friction
+      * where for each law a damping is added serially (coulomb damping d_N = mu lambdaN / gamma_max is defined by a given maximal
+      * relative velocity gamma_max (damping dependent on slip friction force lambda_N * mu)
+      *
+      * Abreviations : UCFDD_ContactModel
+      */
+      struct UnilateralAndCoulombFrictionDampingDependendContactModel{
+         typedef ConvexSets::RPlusAndDisk ConvexSet;
+         static const int nDOFFriction = 2;
+         static const int nFrictionParams = 1; // mu
+         static const int nDampingParams = 4; // d_N normal and gamma_max tangential and epsilon and d_Tfix in the case where lambda_N <= epsilon
       };
 
 
@@ -62,7 +77,8 @@
          U_ContactModel = 0,
          UCF_ContactModel = 1,
          UCFD_ContactModel = 2,
-         UCCF_ContactModel = 3
+         UCFDD_ContactModel = 3,
+         UCCF_ContactModel = 4
       };
 
 
@@ -74,8 +90,12 @@
               (
                     (e == ContactModelEnum::UCFD_ContactModel) ? UnilateralAndCoulombFrictionDampedContactModel::ConvexSet::Dimension :
                     (
-                        /*(e==ContactModelEnum::UCCF_ContactModel)?*/
-                       +UnilateralAndCoulombContensouFrictionContactModel::ConvexSet::Dimension //(make an lvalue to rvalue conversion (all other static variables inherit this behaviour) with the unary+ operator, otherwise linking errors)
+                        (e == ContactModelEnum::UCFDD_ContactModel) ? UnilateralAndCoulombFrictionDampingDependendContactModel::ConvexSet::Dimension :
+                        (
+                             /*(e==ContactModelEnum::UCCF_ContactModel)?*/
+                            +UnilateralAndCoulombContensouFrictionContactModel::ConvexSet::Dimension //(make an lvalue to rvalue conversion (all other static variables inherit this behaviour) with the unary+ operator, otherwise linking errors)
+
+                        )
 
                     )
               )

@@ -85,18 +85,16 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
         //Remote - Remote or Remote-Local Contacts
 
         if(!isRemote.first or !isRemote.second){
-            // Remote-Local
+            // Remote-Local or Remote-Remote
             //set the node color
             addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
             m_remoteNodes.push_back(addedNode); // Add to remote list
             this->m_nodes.push_back(addedNode); // Add to general list
         }else{
             //Remote-Remote contact
-            addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODETEMP);
-            m_remoteNodesTemp.push_back(addedNode);
-
-            ASSERTMSG( pCollData->m_pBody1->m_pBodyInfo->m_ownerRank != pCollData->m_pBody2->m_pBodyInfo->m_ownerRank , "This should not happen! Remote-Remote contact with same rank, should be determined in ")
-            firstBodyGetSplitted = (pCollData->m_pBody1->m_pBodyInfo->m_ownerRank < pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)? true : false;
+            addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
+            m_remoteNodes.push_back(addedNode); // Add to remote list
+            this->m_nodes.push_back(addedNode); // Add to general list
         }
 
     } else {
@@ -120,9 +118,7 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
             #endif
             if(addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE)){
                 m_pNbDataMap->getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody1);
-                // if this body is already added it does not matter
-            }else if(addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODETEMP) ){
-                m_pNbDataMap->getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteDataTemp(firstBodyGetSplitted,&addedNode->m_nodeData);
+                // if this body is already added it does nothing!
             }else{
                 ASSERTMSG(false, "Somthing wrong with node color!")
             }
@@ -158,9 +154,7 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
             #endif
             if(addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE)){
                 m_pNbDataMap->getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody2);
-                // if this body is already added it does not matter
-            }else if(addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODETEMP) ){
-                m_pNbDataMap->getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteDataTemp(firstBodyGetSplitted,&addedNode->m_nodeData);
+                // if this body is already added it does nothing!
             }else{
                 ASSERTMSG(false, "Somthing wrong with node color!")
             }

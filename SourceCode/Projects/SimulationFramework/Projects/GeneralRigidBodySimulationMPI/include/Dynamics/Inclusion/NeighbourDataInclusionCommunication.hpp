@@ -13,7 +13,7 @@ namespace NeighbourDataInclusionCommunication_impl{
     /**
     * Remote Data: Stores the remote splitted body. This data structure is useful to determine which remote body velocity updates need to be
     * sent to the neighbour rank for the splitbody update.
-    * These struct is used for Remote-Local Contacts
+    * These struct is used for Remote-Local Contacts, and is built before sending each neighbour all ids of these remoteDatas
     */
     struct RemoteData{
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
@@ -27,6 +27,7 @@ namespace NeighbourDataInclusionCommunication_impl{
     /**
     * Local Data: Stores the local split body and its node, this data structure is usefull to determine
     * from which neighbour we get updated velocities for the node.
+    * These structs are built during receiving of the messages (see above)
     */
     struct LocalData{
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
@@ -42,12 +43,14 @@ namespace NeighbourDataInclusionCommunication_impl{
     */
     template<typename TNodeData>
     struct RemoteDataTemp{
-        RemoteDataTemp(bool firstBodyIsSplitted, TNodeData * pNodeData):
-            m_firstBodyIsSplitted(firstBodyIsSplitted), m_isSplitted(isSplitted), m_pNode(pNodeData){};
+        RemoteDataTemp(bool firstBodyIsSplitted, bool sendSplit,  TNodeData * pNodeData):
+            m_firstBodyIsSplitted(firstBodyIsSplitted), m_sendSplit(sendSplit) , m_pNodeData(pNodeData){};
 
-        bool m_firstBodyIsSplitted; // if true, the first body is splitted!
+        bool m_firstBodyIsSplitted;  //Body 1 or 2 which is splitted
+        bool m_sendSplit; // Decides if split message or remote node message is sent!
 
-        TNode * m_pNodeData;
+
+        TNodeData * m_pNodeData;
 
     };
 
@@ -67,9 +70,9 @@ public:
 
     // Special temporary remote data for remote-remote contacts
     typedef TNode NodeType;
-    typedef NeighbourDataInclusionCommunication_impl::RemoteDataTemp<NodeType> RemoteDataTempType;
+    typedef typename NeighbourDataInclusionCommunication_impl::RemoteDataTemp<NodeType> RemoteDataTempType;
     typedef std::vector< RemoteDataTempType > RemoteDataTempList;
-    typedef RemoteDataTempList::iterator RemoteTempIterator;
+    typedef typename RemoteDataTempList::iterator RemoteTempIterator;
 
 private:
     typedef NeighbourData< NeighbourDataInclusionCommunication_impl::LocalData,
@@ -98,7 +101,7 @@ public:
         return &m_remoteDataTempList.back();
     }
 
-    unsigned int remoteTempSize(){ return m_remoteDataTempList.size();}
+    inline unsigned int sizeRemoteTemp(){ return m_remoteDataTempList.size();}
 
     inline RemoteTempIterator remoteTempBegin(){ return m_remoteDataTempList.begin(); }
     inline RemoteTempIterator remoteTempEnd(){   return m_remoteDataTempList.end(); }

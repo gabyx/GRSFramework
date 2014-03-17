@@ -896,7 +896,7 @@ public:
 
             LOGSZ(this->m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
             for(auto it = m_neighbourData->remoteBegin(); it != m_neighbourData->remoteEnd(); it++) {
-                ar & (it->first); //m_id
+                ar & (it->first); //m_id, all these bodies have remote contacts
                 LOGSZ(this->m_pSerializerLog, "---->  body id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl;);
             }
 
@@ -904,64 +904,7 @@ public:
             this->m_nc->m_nbRanksSendRecvRemote.insert( this->m_neighbourRank );
         }
 
-        //Serialize all remote-remote contacts
-        size = m_neighbourData->sizeRemoteTemp();
-        ar & size;
-
-        if(size>0){
-            SubMessageFlag flag;
-            for(auto it = m_neighbourData->remoteTempBegin(); it != m_neighbourData->remoteTempEnd(); it++) {
-
-                // NOTE: m_firstBody == true , means the owner of the first body in the CollisionData is exactly this neighbour rank
-                auto pSplittedBody = ((*it)->m_firstBodyIsSplitted==true)? (*it)->m_pNodeData->m_pCollData->m_pBody1 : (*it)->m_pNodeData->m_pCollData->m_pBody2;
-
-                // If the splittedBody rank is equal to the neighbour rank we need to inform about the splitted body!
-                if( pSplittedBody->m_pBodyInfo->m_ownerRank == this->m_neighbourRank ){
-                    flag = SubMessageFlag::SPLITBODYMESSAGE;
-                    ar & flag
-
-                    // We send the id of splitted body and the rank from which the neighbour rank receives the update
-                    ar & pSplittedBody->m_id;
-
-                    auto otherRank = ((*it)->m_firstBodyIsSplitted==true)? (*it)->m_pNodeData->m_pCollData->m_pBody2->m_pBodyInfo->m_ownerRank :
-                                                                           (*it)->m_pNodeData->m_pCollData->m_pBody1->m_pBodyInfo->m_ownerRank;
-                    ar & otherRank; // Send owner rank, from which neighbour rank receives update;
-
-                }else{
-                    flag = SubMessageFlag::REMOTENODEMESSAGE;
-                    ar & flag
-
-                    // Serialize the node
-                    ar & (*it)->m_firstBody;
-                    serializeNode(ar,(*it)->m_pNode);
-                }
-
-
-                LOGSZ(this->m_pSerializerLog, "---->  body id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl;);
-            }
-
-        }
-
         this->m_initialized = false;
-    }
-
-
-    template<class Archive, typename TNode>
-    void serializeNode(Archive & ar, TNode * node){
-        serializeEigen(ar,node->m_W_body1);
-        serializeEigen(ar,node->m_W_body2);
-//    MatrixUBodyDyn m_W_body1;
-//    MatrixUBodyDyn m_W_body2;
-//    VectorDyn m_chi;
-//
-//    VectorDyn  m_eps;
-//
-//
-//    unsigned int m_nodeColor;
-//
-//    const CollisionData * m_pCollData;
-//
-//    ContactParameter m_contactParameter;
     }
 
     template<class Archive>
@@ -989,7 +932,7 @@ public:
 
             for(unsigned int i = 0; i < size ; i++) {
                 RigidBodyIdType id;
-                ar & id;
+                ar & id; // get all unique ids!
                 LOGSZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl;);
 
                 auto * localData = this->m_nc->m_pBodyComm->getNeighbourMap()->getNeighbourData(this->m_neighbourRank)->getLocalBodyData(id);

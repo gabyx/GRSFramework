@@ -412,9 +412,9 @@ protected:
         }
 
         std::string type = contactParam->GetAttribute("type");
-        if(type == "UCF" || type == "UCFD"){
+        if(type == "UCF" || type == "UCFD" || type == "UCFDD"){
 
-            PREC mu,epsilonN,epsilonT, invDampingN, invDampingT;
+            PREC mu,epsilonN,epsilonT;
             ContactParameter contactParameter;
 
             if(!Utilities::stringToType<PREC>(mu, contactParam->GetAttribute("mu"))) {
@@ -428,6 +428,7 @@ protected:
             }
 
             if(type == "UCFD"){
+                PREC invDampingN, invDampingT;
                 if(!Utilities::stringToType<PREC>(invDampingN, contactParam->GetAttribute("invDampingN"))) {
                     throw ticpp::Exception("---> String conversion in ContactParameter: invDampingN failed");
                 }
@@ -438,7 +439,28 @@ protected:
                 contactParameter = ContactParameter::createParams_UCFD_ContactModel(epsilonN,epsilonT,mu,invDampingN,invDampingT);
 
 
-            }else{
+            }else if(type == "UCFDD"){
+
+                PREC invDampingN, gammaMax, epsilon, invDampingTFix;
+                if(!Utilities::stringToType<PREC>(invDampingN, contactParam->GetAttribute("invDampingN"))) {
+                    throw ticpp::Exception("---> String conversion in ContactParameter: invDampingN failed");
+                }
+
+                if(!Utilities::stringToType<PREC>(invDampingTFix, contactParam->GetAttribute("invDampingTFix"))) {
+                    throw ticpp::Exception("---> String conversion in ContactParameter: invDampingTFix failed");
+                }
+                if(!Utilities::stringToType<PREC>(gammaMax, contactParam->GetAttribute("gammaMax"))) {
+                    throw ticpp::Exception("---> String conversion in ContactParameter: gamma_max failed");
+                }
+                if(!Utilities::stringToType<PREC>(epsilon, contactParam->GetAttribute("epsilon"))) {
+                    throw ticpp::Exception("---> String conversion in ContactParameter: epsilon failed");
+                }
+
+                contactParameter = ContactParameter::createParams_UCFDD_ContactModel(epsilonN,epsilonT,mu,
+                                                                                     invDampingN,invDampingTFix,
+                                                                                     gammaMax,epsilon);
+            }
+            else{
                 contactParameter = ContactParameter::createParams_UCF_ContactModel(epsilonN,epsilonT,mu);
             }
 

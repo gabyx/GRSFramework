@@ -46,7 +46,7 @@ public:
     typedef ContactGraphNodeDataSplitBody SplitBodyNodeDataType;
     typedef std::unordered_map<RigidBodyIdType, SplitBodyNodeDataType* > SplitBodyNodeDataListType;
 
-    enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE, REMOTENODETEMP, SPLITNODE};
+    enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE, SPLITNODE};
 
     typedef typename TCombo::InclusionCommunicatorType InclusionCommunicatorType;
     typedef typename InclusionCommunicatorType::NeighbourMapType NeighbourMapType;
