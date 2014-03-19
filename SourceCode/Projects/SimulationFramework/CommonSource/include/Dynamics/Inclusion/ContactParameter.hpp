@@ -53,16 +53,22 @@ struct ContactParameter{
     * Assignment operator
     */
     ContactParameter& operator=(const ContactParameter & c){
-        m_contactModel = c.m_contactModel;
-        m_params = c.m_params;
+        if ( this != &c ){
+            m_contactModel = c.m_contactModel;
+            m_params = c.m_params;
+        }
+        return *this;
     }
 
     /**
     * Move assignment operator
     */
     ContactParameter& operator=(ContactParameter && c){
-        m_contactModel = std::move(c.m_contactModel);
-        m_params = std::move(c.m_params); // move the container
+        if ( this != &c ){
+            m_contactModel = std::move(c.m_contactModel);
+            m_params = std::move(c.m_params); // move the container
+        }
+        return *this;
     }
 
     /**
