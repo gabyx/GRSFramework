@@ -27,42 +27,37 @@ private:
     template<typename TYPE>
     struct InListOrInRangeVisitor: public boost::static_visitor<bool> {
         InListOrInRangeVisitor(TYPE t): m_t(t) {};
-        bool operator()(typename ListOrRangeTypes<TYPE>::ListType & l) {
+        bool operator()(typename ListOrRangeTypes<TYPE>::ListType & l) const {
             if(l.find(m_t)!=l.end()) {
                 return true;
             }
             return false;
         }
-        bool operator()(typename ListOrRangeTypes<TYPE>::RangeType & r) {
+        bool operator()(typename ListOrRangeTypes<TYPE>::RangeType & r) const {
             if(r.first <= m_t &&  m_t <= r.second) {
                 return true;
             }
             return false;
         }
-        bool operator()(typename ListOrRangeTypes<TYPE>::AllType & r) {}
+        bool operator()(typename ListOrRangeTypes<TYPE>::AllType & r) const {}
 
         TYPE m_t;
     };
 
     using InListOrInRangeBodyVisitorType = InListOrInRangeVisitor<unsigned int> ;
 
+    struct SimFileJoinerAllVisitor : public boost::static_visitor<bool> {
+        template<typename T1, typename T2>
+        bool operator()(T1 & t1, T2 & t2) const {return false;} ;
+        bool operator()(RangeAll & t1, RangeAll & t2) const {return true;};
+    };
+
 public:
 
     typedef ListOrRangeTypes<double>         TypesTimeRange;
     typedef ListOrRangeTypes<unsigned int>   TypesBodyRange;
 
-    class SimFileJoinerAllVisitor : public boost::static_visitor<bool> {
-    public:
-        template<typename T1, typename T2>
-        bool operator()(T1 & t1, T2 & t2) {
-            return false;
-        };
 
-        bool operator()(RangeAll & t1,
-                        RangeAll & t2) {
-            return true;
-        };
-    };
 
     void join(const std::vector<boost::filesystem::path> & inputFiles,
               boost::filesystem::path outputFile,
@@ -134,8 +129,9 @@ private:
         // Join all states together
         std::cerr << "---> Open new output file at: "  <<  m_oFile << " bodies: " << bodies<< std::endl;
         MultiBodySimFile output;
-        output.openWrite(m_oFile,dofq,dofu,bodies);
-
+        if(!output.openWrite_impl(m_oFile,dofq,dofu, bodies, simFile.m_additionalBytesType, simFile.m_nAdditionalBytesPerBody, true)){
+            THROWEXCEPTION(output.getErrorString());
+        };
         // Push all simfiles to output
         for(auto it=m_iFiles.begin(); it!=m_iFiles.end(); it++) {
             if(!simFile.openRead(*it)) {
@@ -169,7 +165,7 @@ private:
             if(i == 0) {
                 dofq = simFile.getNDOFq();
                 dofu = simFile.getNDOFu();
-                bodies = simFile.getNSimBodies();
+                bodies = simFile.getNSimBodies(); // May bee not important
                 bState = simFile.getBytesPerState();
             }
             if(i != 0 && (simFile.getNSimBodies() != bodies || simFile.getBytesPerState() != bState )) {
@@ -184,15 +180,18 @@ private:
         }
 
         // Join states together
-        std::cerr << "---> Open new output file at: "  <<  m_oFile << " bodies: " << bodies<< std::endl;
+        std::cerr << "---> Open new output file at: "  <<  m_oFile << std::endl;
         MultiBodySimFile output;
-        output.openWrite(m_oFile,dofq,dofu,bodies);
+        if(!output.openWrite_impl(m_oFile,dofq,dofu, 0, 0, 0, true)){
+            THROWEXCEPTION(output.getErrorString());
+        };
 
         // Push all simfiles to output
 
         m_bkWrittenTime.clear();
         m_bkMatchedTime.clear();
 
+        bool firstFile = true;
         for(auto it=m_iFiles.begin(); it!=m_iFiles.end(); it++) {
             if(!simFile.openRead(*it)) {
                 THROWEXCEPTION(simFile.getErrorString());
@@ -201,15 +200,18 @@ private:
             if( m_timeRange.which() == TypesTimeRange::ListTypeIdx) {
 
                 auto & l =  boost::get<typename TypesTimeRange::ListType>(m_timeRange);
-                writeTo(output,simFile, l, m_bkWrittenTime, m_bkMatchedTime, m_bodyRange);
+                writeTo(output,simFile, l, m_bkWrittenTime, m_bkMatchedTime, m_bodyRange,firstFile);
 
             } else if( m_timeRange.which() == TypesTimeRange::RangeTypeIdx) {
 
                 auto & r =  boost::get<typename TypesTimeRange::RangeType>(m_timeRange);
-                writeTo(output,simFile,r, m_bkWrittenTime,  m_bodyRange);
+                writeTo(output,simFile,r, m_bkWrittenTime,  m_bodyRange, firstFile);
             }
+
+            if(firstFile){ firstFile=false;}
         }
 
+        simFile.close();
         output.close();
 
     }
@@ -220,15 +222,27 @@ private:
                  TypesTimeRange::ListType & timeRange,
                  std::set<double> & bookWrittenTimes,
                  std::set<double> & bookMatchedTimes,
-                 TypesBodyRange::VariantType & bodyRange) {
+                 TypesBodyRange::VariantType & bodyRange,
+                 bool firstFile = true) {
+
+        auto itHint1 = bookWrittenTimes.begin();
+        auto itHint2 = bookMatchedTimes.begin();
 
         if( !toFile.m_file_stream.good() || !fromFile.m_file_stream.good()) {
-            ERRORMSG("Some filestreams are not valid!")
+            THROWEXCEPTION("Some filestreams are not valid!")
         }
+
+        std::set<RigidBodyIdType> bookBodyIds;
+
         //loop over all times if time is in the range, extract all body ids and add to the
         fromFile.m_file_stream.seekg(fromFile.m_beginOfStates);
 
-        std::vector<char> byteBuffer(fromFile.m_nBytesPerBody - sizeof(RigidBodyIdType) );
+
+        std::streamsize size = fromFile.m_nBytesPerBody - std::streamsize(sizeof(RigidBodyIdType));
+        std::vector<char> byteBuffer(size); // buffer 1mb of bodies
+        unsigned int initBodyCounter = 0; bool firstRun = true;
+
+        auto hintIt = timeRange.begin();
 
         double currentTime;
         bool newState;
@@ -237,71 +251,116 @@ private:
             newState = false;
             fromFile >> currentTime;
 
-            // Check with list
-            if( *(timeRange.begin()) <= currentTime) { // if currentTime is
-                auto itj = timeRange.begin();
-                for(auto it = timeRange.begin(); it!= timeRange.end(); it++) {
-                    ++itj;
-                    if(itj != timeRange.end()) {
-                        if(  *it <= currentTime && currentTime < *itj ) {
-                            // if the time has NOT already been written or the matched time was NOT already matched BEFORE
-                            if(bookMatchedTimes.insert(*it).second  && bookWrittenTimes.insert(currentTime).second) {
-                                newState = true;
-                                break;
-                            }
-
-                        }
-                    } else {
-                        //Check last element
-                        if(  *it <= currentTime  ) {
-                            if( bookMatchedTimes.insert(*it).second  && bookWrittenTimes.insert(currentTime).second) {
-                                newState = true;
-                                break;
-                            }
-                        }
-                    }
-                }
+            //std::cout << currentTime << std::endl;
+            if( *timeRange.begin() > currentTime) { // if currentTime is before range, break
+                // Jump over all bodies
+                fromFile.m_file_stream.seekg( fromFile.m_nBytesPerState - std::streamoff(sizeof(double)) ,std::ios_base::cur);
+                continue;
             }
 
+
+            double matchedTime;
+
+            double endTime = *timeRange.rbegin();
+            if(  endTime <= currentTime ){
+                //std::cout << "Here1";
+                matchedTime = endTime;
+            }else if( std::next(hintIt) != timeRange.end() && *hintIt<= currentTime &&  currentTime < *std::next(hintIt) ) {
+                //std::cout << "Here2";
+                // check if hintIt is usefull;
+                  matchedTime = *hintIt;
+
+            }else{ //(currTime<last) lower_bound does not return end
+                //std::cout << "Here3:"<< *hintIt;
+                hintIt = timeRange.lower_bound(currentTime); // currentTime <= *lbTime ( no || end  becaus above!)
+                if(*hintIt > currentTime) {
+                    hintIt = std::prev(hintIt);
+                }
+                matchedTime = *hintIt;
+            }
+
+
+            // if the matched value is not already matched and the corresponding currentTIme has not yet been written
+            if( bookMatchedTimes.insert(matchedTime).second && bookWrittenTimes.insert(currentTime).second){
+                    // we inserted the value
+                    newState = true;
+
+            }else{
+                //std::cout << "no write";
+            }
+
+
+
             //New state has been found, move over all bodies and write the ones which are either in the range or in the list!
-
-
-
             if(newState) {
                 // write time
-
+                std::cout << "Write time: " << currentTime << std::endl;
+                toFile << currentTime;
 
                 //Move over all bodies
                 RigidBodyIdType id;
+                unsigned int bodyCounter = 0;
                 for(unsigned int body = 0; body < fromFile.m_nSimBodies; body++) {
                     fromFile >> id;
 
-                    //std::cout << RigidBodyId::getBodyIdString(id) << std::endl;
-                    InListOrInRangeBodyVisitorType vis(RigidBodyId::getBodyNr(id));
-                    if( boost::apply_visitor(vis, bodyRange ) == true ) {
+                    //std::cout << RigidBodyId::getBodyIdString(id) << "," << std::endl;;
+                    if( boost::apply_visitor(InListOrInRangeBodyVisitorType(RigidBodyId::getBodyNr(id)), bodyRange ) == true ) {
 
-                        //write body
-
+                        std::cout << "Write body: " << RigidBodyId::getBodyIdString(id) << std::endl;
+                        bodyCounter++;
+                        fromFile.m_file_stream.read(&byteBuffer[0],size);
+                        toFile << id;
+                        toFile.m_file_stream.write(&byteBuffer[0],size);
 
                     } else {
                         // State not found
                         // Jump body (u and q)
-                        fromFile.m_file_stream.seekg( fromFile.m_nBytesPerBody - sizeof(id) ,std::ios_base::cur);
+                        fromFile.m_file_stream.seekg( size ,std::ios_base::cur);
                     }
                 }
 
+                if(!firstRun){
+                    if(bodyCounter != initBodyCounter){
+                         THROWEXCEPTION("At time :" << currentTime << " only " <<
+                                         bodyCounter << " bodies found, instead of " << initBodyCounter << " as in first found state!")
+                    }
+                }else{
+                    initBodyCounter = bodyCounter;
+                }
 
-            }
+                // If we matched all times break
+                if(bookMatchedTimes.size() == timeRange.size()){
+                    std::cout <<" matched all" << std::endl;
+                    break;
+                }
+
+            }else{
+                // Jump over all bodies
+                fromFile.m_file_stream.seekg( fromFile.m_nBytesPerState - std::streamoff(sizeof(double)) ,std::ios_base::cur);
+            } // New state
+
+
 
         }
+        std::cout << "Matched time: [ " ;
+        std::copy(bookWrittenTimes.begin(),bookWrittenTimes.end(),std::ostream_iterator<double>(std::cout," "));
+        std::cout << "]" << std::endl;
 
+        // Rewrite header if first file
+        if(firstFile){
+            toFile.m_additionalBytesType = fromFile.m_additionalBytesType;
+            toFile.m_nAdditionalBytesPerBody = fromFile.m_nAdditionalBytesPerBody;
+            toFile.m_nSimBodies = initBodyCounter;
+            toFile.writeHeader();
+        }
     }
 
     void writeTo(MultiBodySimFile & toFile,
                  MultiBodySimFile & fromFile,
                  TypesTimeRange::RangeType & timeRange,
                  std::set<double> & bookWrittenTimes,
-                 TypesBodyRange::VariantType & bodyRange) {
+                 TypesBodyRange::VariantType & bodyRange,
+                 bool firstFile = true) {
 
         if( !toFile.m_file_stream.good() || !fromFile.m_file_stream.good()) {
             ERRORMSG("Some filestreams are not valid!")

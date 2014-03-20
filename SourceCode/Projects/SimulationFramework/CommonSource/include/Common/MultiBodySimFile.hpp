@@ -187,6 +187,15 @@ public:
     }
 
 private:
+
+    bool openWrite_impl(const boost::filesystem::path & file_path,
+                   unsigned int nDOFqBody,
+                   unsigned int nDOFuBody,
+                   unsigned int nSimBodies,
+                   unsigned int additionalBytesType,
+                   std::streamsize additionalBytesPerBody,
+                   bool truncate);
+
     /**
     * @brief Operator to write a generic value to the file as binary data.
     */
@@ -245,7 +254,7 @@ private:
     std::streamsize m_nBytesPerQBody;
     std::streamsize m_nBytesPerUBody;
 
-    // Write addditional bytes, not yet implemented, but the type is written in the header
+    // Write mode, Write addditional bytes, not yet implemented, but the type is written in the header
     unsigned int m_additionalBytesType;
     std::streamsize getAdditionalBytes();
     std::streamsize m_nAdditionalBytesPerBody;

@@ -69,16 +69,16 @@ bool MultiBodySimFile::writeOutAllStateTimes() {
     return false;
 }
 
-
+/** given m_nDOFqBody, m_nDOFuBody, m_nSimBodies, m_nAdditionalBytesPerBody*/
 void MultiBodySimFile::setByteLengths() {
     m_nBytesPerQBody = m_nDOFqBody*sizeof(double);
     m_nBytesPerUBody = m_nDOFuBody*sizeof(double);
 
     m_nBytesPerBody = m_nBytesPerUBody
                     + m_nBytesPerQBody
-                    + sizeof(RigidBodyIdType) + m_nAdditionalBytesPerBody;
+                    + std::streamsize(sizeof(RigidBodyIdType)) + m_nAdditionalBytesPerBody;
 
-    m_nBytesPerState = m_nSimBodies * m_nBytesPerBody + 1*sizeof(double);
+    m_nBytesPerState = m_nSimBodies * m_nBytesPerBody + std::streamsize(sizeof(double));
 }
 
 /** Only for writting*/
@@ -97,19 +97,33 @@ bool MultiBodySimFile::openWrite(const boost::filesystem::path &file_path,
                                  unsigned int nDOFqBody,
                                  unsigned int nDOFuBody,
                                  const unsigned int nSimBodies,
-                                 bool truncate) {
-
-    close();
-
-
+                                 bool truncate)
+{
     if(nDOFqBody == 0 || nDOFuBody == 0 || nSimBodies == 0){
         m_errorString << "Wrong openWrite parameters: nDOFqBody:" << nDOFqBody << " nDOFuBody: "<<nDOFuBody << " nSimBodies:" << nSimBodies<< std::endl;
         return false;
     }
 
+    // Determine bytesType, and additional bytes, if necessary
+
+    return openWrite_impl(file_path,nDOFqBody,nDOFuBody,nSimBodies,0,0,truncate);
+}
+
+
+bool MultiBodySimFile::openWrite_impl(const boost::filesystem::path &file_path,
+                                 unsigned int nDOFqBody,
+                                 unsigned int nDOFuBody,
+                                 const unsigned int nSimBodies,
+                                 unsigned int additionalBytesType,
+                                 std::streamsize additionalBytesPerBody,
+                                 bool truncate) {
+
+    close();
+
     m_nDOFuBody = nDOFuBody;
     m_nDOFqBody = nDOFqBody;
-    m_additionalBytesType = 0;
+    m_nAdditionalBytesPerBody = additionalBytesPerBody;
+    m_additionalBytesType = additionalBytesType;
     m_nSimBodies = nSimBodies;
 
     setByteLengths();
@@ -157,6 +171,8 @@ bool MultiBodySimFile::openWrite(const boost::filesystem::path &file_path,
 
 
 void  MultiBodySimFile::writeHeader() {
+
+    m_file_stream.seekp(0);
 
     for(int i=0; i<SIM_FILE_SIGNATURE_LENGTH; i++) {
         *this << m_simFileSignature[i];
@@ -247,7 +263,7 @@ bool  MultiBodySimFile::readLength() {
     using namespace std;
     m_file_stream.seekg(0, ios::end);
     m_nBytes = (std::streamoff)m_file_stream.tellg();
-    m_file_stream.seekg(0, ios::beg);
+    m_file_stream.seekg(0);
 
 
     if(m_nBytes > m_headerLength) {
@@ -266,6 +282,10 @@ bool  MultiBodySimFile::readLength() {
 }
 
 bool  MultiBodySimFile::readHeader() {
+
+    // set to beginning of file:
+    m_file_stream.seekg(0);
+
     char signature[SIM_FILE_SIGNATURE_LENGTH];
     m_file_stream.read(signature,SIM_FILE_SIGNATURE_LENGTH);
     if(std::strncmp(signature,m_simFileSignature,SIM_FILE_SIGNATURE_LENGTH)==0) {

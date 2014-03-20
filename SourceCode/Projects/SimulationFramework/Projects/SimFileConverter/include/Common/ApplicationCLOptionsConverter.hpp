@@ -79,7 +79,7 @@ public:
                     std::vector<double> range;
                     ops >> Option("timerange",range);
                     if(range.size()!=2){
-                        THROWEXCEPTION("Exception occured in parsing timerange" )
+                        THROWEXCEPTION("Exception occured in parsing timerange: range.size()" )
                         printHelp();
                     }
                     m_timeRange = TypesTimeRange::RangeType(range[0],range[1]);
@@ -87,12 +87,12 @@ public:
                 }else if (ops >> OptionPresent("timelist")) {
                     std::vector<double> range;
                     ops >> Option("timelist",range);
-                    if(range.size()>0){
-                        THROWEXCEPTION("Exception occured in parsing timelist" )
+                    if(range.size()==0){
+                        THROWEXCEPTION("Exception occured in parsing timelist: range.size()" )
                         printHelp();
                     }
                     TypesTimeRange::ListType r(range.begin(), range.end());
-                    m_timeRange = TypesTimeRange::ListType(r);
+                    m_timeRange = r;
                 }
 
 
@@ -102,7 +102,7 @@ public:
                     std::vector<unsigned int> range;
                     ops >> Option("bodyrange",range);
                     if(range.size()!=2){
-                        THROWEXCEPTION("Exception occured in parsing bodyrange" )
+                        THROWEXCEPTION("Exception occured in parsing bodyrange: range.size()" )
                         printHelp();
                     }
                     m_bodyRange = TypesBodyRange::RangeType(range[0],range[1]);
@@ -110,12 +110,12 @@ public:
                 }else if (ops >> OptionPresent("bodylist")) {
                     std::vector<unsigned int> range;
                     ops >> Option("bodylist",range);
-                    if(range.size()>0){
-                        THROWEXCEPTION("Exception occured in parsing bodylist" )
+                    if(range.size()==0){
+                        THROWEXCEPTION("Exception occured in parsing bodylist: range.size()" )
                         printHelp();
                     }
                     TypesBodyRange::ListType l(range.begin(), range.end());
-                    m_bodyRange = TypesBodyRange::ListType(l);
+                    m_bodyRange = l;
                 }
 
 
