@@ -196,7 +196,7 @@ private:
             if(!simFile.openRead(*it)) {
                 THROWEXCEPTION(simFile.getErrorString());
             };
-
+            std::cout << "---> Process File: " << *it << std::endl;
             if( m_timeRange.which() == TypesTimeRange::ListTypeIdx) {
 
                 auto & l =  boost::get<typename TypesTimeRange::ListType>(m_timeRange);
@@ -210,6 +210,11 @@ private:
 
             if(firstFile){ firstFile=false;}
         }
+
+        std::cout << "---> Matched time: [ " ;
+        std::copy(m_bkWrittenTime.begin(),m_bkWrittenTime.end(),std::ostream_iterator<double>(std::cout," "));
+        std::cout << "]" << std::endl;
+
 
         simFile.close();
         output.close();
@@ -225,8 +230,6 @@ private:
                  TypesBodyRange::VariantType & bodyRange,
                  bool firstFile = true) {
 
-        auto itHint1 = bookWrittenTimes.begin();
-        auto itHint2 = bookMatchedTimes.begin();
 
         if( !toFile.m_file_stream.good() || !fromFile.m_file_stream.good()) {
             THROWEXCEPTION("Some filestreams are not valid!")
@@ -342,9 +345,7 @@ private:
 
 
         }
-        std::cout << "Matched time: [ " ;
-        std::copy(bookWrittenTimes.begin(),bookWrittenTimes.end(),std::ostream_iterator<double>(std::cout," "));
-        std::cout << "]" << std::endl;
+
 
         // Rewrite header if first file
         if(firstFile){
