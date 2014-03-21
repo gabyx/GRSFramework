@@ -78,7 +78,9 @@ public:
                     //parse in all times;
                     std::vector<double> range;
                     ops >> Option("timerange",range);
-                    if(range.size()!=2){
+                    if(range.size()!=2 || (range[1]!=-1 && range[1]<0) || (range[0]!=-1 && range[0]<0) ||
+                       (range[1] != -1  && range[1] < range[0])
+                       ){
                         THROWEXCEPTION("Exception occured in parsing timerange: range.size()" )
                         printHelp();
                     }
