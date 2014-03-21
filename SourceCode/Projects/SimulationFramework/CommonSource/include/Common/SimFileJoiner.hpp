@@ -20,11 +20,11 @@ class SimFileJoiner {
 public:
     struct RangeAll {};
 private:
-    template<typename TYPE>
+    template<typename TYPE, typename TYPE2 = TYPE>
     struct ListOrRangeTypes {
         using ListType = std::set<TYPE>; ///< ordered list!
         static const unsigned int ListTypeIdx = 0;
-        using RangeType =  std::pair<TYPE,TYPE>; ///< range start to end values
+        using RangeType =  std::pair<TYPE2,TYPE2>; ///< range start to end values
         static const unsigned int RangeTypeIdx = 1;
         using AllType = RangeAll;
         static const unsigned int AllTypeIdx = 2;
@@ -37,10 +37,10 @@ private:
     *         1 for in range or in list and
     *         2 for in range or in list and FINISHED (only for list)
     */
-    template<typename TYPE>
+    template<typename TYPE, typename TYPE2 = TYPE>
     struct InListOrInRangeVisitor: public boost::static_visitor<char> {
         InListOrInRangeVisitor(TYPE t, unsigned int bodyCounter): m_t(t), m_bodyC(bodyCounter) {};
-        char operator()(typename ListOrRangeTypes<TYPE>::ListType & l) const {
+        char operator()(typename ListOrRangeTypes<TYPE, TYPE2>::ListType & l) const {
             if(l.find(m_t)!=l.end()) {
                 if( m_bodyC+1 == l.size()){
                     //notfiy that we are finished
@@ -50,31 +50,67 @@ private:
             }
             return 0;
         }
-        char operator()(typename ListOrRangeTypes<TYPE>::RangeType & r) const {
-            if(r.first <= m_t &&  m_t <= r.second) {
+        char operator()(typename ListOrRangeTypes<TYPE, TYPE2>::RangeType & r) const {
+            // passes ranges tests if somewhere -1 is detected!
+            if( (r.first ==-1 || r.first <= m_t) &&  (r.second == -1 || m_t <= r.second) ) {
                 return 1;
             }
             return 0;
         }
-        char operator()(typename ListOrRangeTypes<TYPE>::AllType & r) const {}
+        char operator()(typename ListOrRangeTypes<TYPE, TYPE2>::AllType & r) const {}
 
         TYPE m_t;
         unsigned int m_bodyC;
     };
 
-    using InListOrInRangeBodyVisitorType = InListOrInRangeVisitor<unsigned int> ;
-
-    struct SimFileJoinerAllVisitor : public boost::static_visitor<bool> {
-        template<typename T1, typename T2>
-        bool operator()(T1 & t1, T2 & t2) const {return false;} ;
-        bool operator()(RangeAll & t1, RangeAll & t2) const {return true;};
-    };
-
+    using InListOrInRangeBodyVisitorType = InListOrInRangeVisitor<unsigned int , long long int> ;
 public:
 
     typedef ListOrRangeTypes<double>         TypesTimeRange;
-    typedef ListOrRangeTypes<unsigned int>   TypesBodyRange;
+    typedef ListOrRangeTypes<unsigned int, long long int>   TypesBodyRange;  // long long int for the range, it can be -1 -1
 
+private:
+
+    struct SimFileJoinerAllVisitor : public boost::static_visitor<bool> {
+        SimFileJoinerAllVisitor(TypesTimeRange::VariantType & var1, TypesBodyRange::VariantType & var2):
+            m_var1(var1), m_var2(var2)
+        {
+
+        }
+        template<typename T1, typename T2>
+        bool operator()(T1 & t1, T2 & t2) const {
+            // we call joinAll()
+            return false;
+        } ;
+
+        template<typename T1>
+        bool operator()(T1 & t1, RangeAll & t2) const {
+            // we call join(), but no body range specified, set it to all [-1,-1]
+            std::cout << "---> no bodyrange given: setting to all range" << std::endl;
+            m_var2 = TypesBodyRange::RangeType(-1,-1);
+            return false;
+        };
+
+        template<typename T2>
+        bool operator()( RangeAll & t1, T2 & t2) const {
+            // we call join(), but no body range specified, set it to all [-1,-1]
+            std::cout << "---> no timerange given: setting to all range" << std::endl;
+            m_var1 = TypesTimeRange::RangeType(-1,-1);
+            return false;
+        };
+
+        bool operator()(RangeAll & t1, RangeAll & t2) const {
+            // we call join(), but no time range specified, set it to all [-1,-1]
+            return true;
+        };
+
+        TypesTimeRange::VariantType & m_var1;
+        TypesBodyRange::VariantType & m_var2;
+    };
+
+
+
+public:
 
 
     void join(const std::vector<boost::filesystem::path> & inputFiles,
@@ -87,7 +123,7 @@ public:
         m_timeRange = timeRange;
         m_bodyRange = bodyRange;
 
-        SimFileJoinerAllVisitor all_vis;
+        SimFileJoinerAllVisitor all_vis(m_timeRange,m_bodyRange);
 
         if( boost::apply_visitor(all_vis, m_timeRange, m_bodyRange ) == true) {
             joinAll();
@@ -104,10 +140,6 @@ private:
 
     TypesTimeRange::VariantType  m_timeRange;
     TypesBodyRange::VariantType  m_bodyRange;
-
-    /** only used for ListType for times */
-    std::set<double>  m_bkWrittenTime; ///<Bookkeeping of written time, dont write same time twice!
-    std::set<double>  m_bkMatchedTime; ///<Bookkeeping of written time, dont match two times to the same time in list
 
     void joinAll() {
         std::cerr << "---> Execute Join (all)" << std::endl;
@@ -206,9 +238,6 @@ private:
 
         // Push all simfiles to output
 
-        m_bkWrittenTime.clear();
-        m_bkMatchedTime.clear();
-
         bool firstFile = true;
 
         if( m_timeRange.which() == TypesTimeRange::ListTypeIdx) {
@@ -246,11 +275,6 @@ private:
                 if(firstFile){ firstFile=false;}
             }
         }
-
-        std::cerr << "---> Matched time: [ " ;
-        std::copy(m_bkWrittenTime.begin(),m_bkWrittenTime.end(),std::ostream_iterator<double>(std::cerr," "));
-        std::cerr << "]" << std::endl;
-
 
         simFile.close();
         output.close();

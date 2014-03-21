@@ -73,7 +73,6 @@ public:
 
                 m_task = Task::JOIN;
 
-
                 if( ops >> OptionPresent("timerange")) {
                     //parse in all times;
                     std::vector<double> range;
@@ -101,9 +100,10 @@ public:
 
                  if( ops >> OptionPresent("bodyrange")) {
                     //parse in all times;
-                    std::vector<unsigned int> range;
+                    std::vector<long long int> range;
                     ops >> Option("bodyrange",range);
-                    if(range.size()!=2){
+                    if(range.size()!=2 || (range[1]!=-1 && range[1]<0) || (range[0]!=-1 && range[0]<0) ||
+                       (range[1] != -1  && range[1] < range[0]) ){
                         THROWEXCEPTION("Exception occured in parsing bodyrange: range.size()" )
                         printHelp();
                     }
@@ -200,10 +200,13 @@ private:
         std::cerr << "Help for the Application:" << std::endl <<"Options:" <<std::endl
                   << " \t -i|--input <path1> <path2> ... \n"
                   <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim file oaths which are processed \n"
-                  << " \t -t|--task join (optional) \n"
+                  << " \t -t|--task join \n"
                   <<            "\t\t This describes the task:\n"
                   <<            "\t\t\t 'join': Joins the multiple sim files together into one file\n"
-                  << " \t -o|--output <path> (optional) \n"
+                  <<            "\t\t\t         Takes the two following options:\n"
+                  <<            "\t\t\t         --bodyrange <start> <end> | --bodylist <id1> <id2> ... \n"
+                  <<            "\t\t\t         --timerange <start> <end> | --timelist <t1>  <t2> ... \n"
+                  << " \t -o|--output <path>  \n"
                   <<            "\t\t <path>: Specifies the ouput directory path \n"
                   << " \t -h|--help \n"
                   <<            "\t\t Prints this help" <<std::endl;
