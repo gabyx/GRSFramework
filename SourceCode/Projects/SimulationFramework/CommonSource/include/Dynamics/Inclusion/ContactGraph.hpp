@@ -2,6 +2,9 @@
 #define ContactGraph_hpp
 
 
+//#define SRUTIL_DELEGATE_PREFERRED_SYNTAX
+#include <srutil/delegate/delegate.hpp> // Use fast SR delegates
+
 /** Contact Graph */
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
@@ -556,237 +559,17 @@ public:
             m_pGraph(graph)
     {}
 
+
+    inline void visitNode(NodeType & node){
+        m_delegate(node);
+    }
+
     void setLog(Logging::Log * solverLog){
         m_pSolverLog = solverLog;
     }
     // Set Sor Prox parameter, before calling visitNode
     void setParams(PREC alpha){
         m_alpha = alpha;
-    }
-
-    void visitNode(NodeType& node){
-        /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
-           Then the iteration is not converged somewhere, and we need to wait till the next iteration!
-        */
-        typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
-        static VectorDyn uCache1,uCache2;
-        PREC residual;
-
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED){
-               LOG(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
-            }
-        #endif
-
-        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
-            nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ||
-            nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel  ) {
-
-
-            // Init the prox value
-            nodeData.m_LambdaFront = nodeData.m_b;
-
-            // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
-                nodeData.m_LambdaFront += nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_front ;
-            }
-            // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
-                nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
-            }
-
-            // Experimental
-            //Relaxation term damper (take care R_i_inv needs to be initialized as well!)
-            if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel){
-
-                //Drive damping to zero after some iterations:
-                if (m_globalIterationCounter == 300) {
-                    //setNewDamping(nodeData);
-                }
-
-                nodeData.m_LambdaFront(0) += nodeData.m_LambdaBack(0) * nodeData.m_contactParameter.m_params[3] / m_settings.m_deltaT;
-                nodeData.m_LambdaFront(1) += nodeData.m_LambdaBack(1) * nodeData.m_contactParameter.m_params[4] / m_settings.m_deltaT;
-                nodeData.m_LambdaFront(2) += nodeData.m_LambdaBack(2) * nodeData.m_contactParameter.m_params[4] / m_settings.m_deltaT;
-
-
-            }else if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel){
-
-                recalculateR(nodeData,nodeData.m_contactParameter);
-                // if lambda_N <= eps, set damping to d_Tfix
-                PREC dinvT;
-                if( std::abs(nodeData.m_LambdaBack(0)) <= nodeData.m_contactParameter.m_params[6] ){
-                    dinvT = nodeData.m_contactParameter.m_params[4];
-                }else{ //dinvT = gammaMax / (mu *lambdaN)
-                    dinvT = nodeData.m_contactParameter.m_params[5] / (nodeData.m_contactParameter.m_params[2]*nodeData.m_LambdaBack(0) );
-                }
-
-                nodeData.m_LambdaFront(0) += nodeData.m_LambdaBack(0) * nodeData.m_contactParameter.m_params[3] / m_settings.m_deltaT;
-                nodeData.m_LambdaFront(1) += nodeData.m_LambdaBack(1) * dinvT / m_settings.m_deltaT;
-                nodeData.m_LambdaFront(2) += nodeData.m_LambdaBack(2) * dinvT / m_settings.m_deltaT;
-            }
-
-            nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
-            nodeData.m_LambdaFront += nodeData.m_LambdaBack;
-
-
-
-
-            //Prox
-            // HACK drive up parameter mu, does not help
-//            PREC mu =  nodeData.m_mu(0);
-//            if(m_globalIterationCounter <= 10){
-//                 mu = ((m_globalIterationCounter) / 10 ) * nodeData.m_mu(0);
-//                 m_bConverged = false;
-//            }
-//            else if (m_globalIterationCounter <= 300) {
-//                mu = ((m_globalIterationCounter-200) / 500 ) * nodeData.m_mu(0);
-//                m_bConverged = false;
-//            }
-//            else{
-//                mu =  nodeData.m_mu(0);
-//            }
-
-            // PROX  ====================================================================================================================
-            Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle(
-                nodeData.m_contactParameter.m_params[2],
-                nodeData.m_LambdaFront.head<ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension>()
-            );
-
-#if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
-            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << nodeData.m_LambdaFront.transpose() << std::endl);
-            if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_settings.m_AbsTol, m_settings.m_RelTol)){
-              *m_pSolverLog <<"\t---> Lambda converged"<<std::endl;
-            }
-#endif
-            // Velocity Updates ====================================================================================================================
-            // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
-            // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
-                uCache1 = nodeData.m_u1BufferPtr->m_front;
-
-                // Velocity update (wahrscheinlich Auslöschung bei Lambda)
-                nodeData.m_u1BufferPtr->m_front = nodeData.m_u1BufferPtr->m_front + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
-
-                //Sepcial update (no differences)
-                //doVelocityUpdate<1>(nodeData);
-
-
-               #if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
-               #endif
-
-
-                if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
-                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
-                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_settings.m_AbsTol, m_settings.m_RelTol);
-                        if(!nodeData.m_bConverged ) {
-                            //converged stays false;
-                            // Set global Converged = false;
-                            m_bConverged = false;
-                            *m_pSolverLog << "\t---> m_bConverged = false;"<<std::endl;
-                        }
-                    } else {
-                        m_bConverged=false;
-                    }
-                }else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
-                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
-                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(      uCache1,
-                                                                                          nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
-                                                                                          nodeData.m_LambdaBack,
-                                                                                          nodeData.m_LambdaFront,
-                                                                                          nodeData.m_G_ii,
-                                                                                          m_settings.m_AbsTol,
-                                                                                          m_settings.m_RelTol);
-                        if(!nodeData.m_bConverged ) {
-                            //converged stays false;
-                            // Set global Converged = false;
-                            m_bConverged = false;
-                        }
-                    } else {
-                        m_bConverged=false;
-                    }
-                }
-
-            }
-            // SECOND BODY
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
-                uCache2 = nodeData.m_u2BufferPtr->m_front;
-
-                // Velocity update (wahrscheinlich Auslöschung bei Lambda)
-                nodeData.m_u2BufferPtr->m_front = nodeData.m_u2BufferPtr->m_front  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
-
-                //Sepcial update (no differences)
-                //doVelocityUpdate<2>(nodeData);
-
-                #if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
-                #endif
-
-                if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
-                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
-                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache2,
-                                                                  nodeData.m_u2BufferPtr->m_front,
-                                                                  m_settings.m_AbsTol,
-                                                                  m_settings.m_RelTol);
-                        if(!nodeData.m_bConverged ) {
-                            //converged stays false;
-                            // Set global Converged = false;
-                            m_bConverged = false;
-                        }
-                    } else {
-                        m_bConverged=false;
-                    }
-
-                }else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
-                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
-                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
-                                                                          nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
-                                                                          nodeData.m_LambdaBack,
-                                                                          nodeData.m_LambdaFront,
-                                                                          nodeData.m_G_ii,
-                                                                          m_settings.m_AbsTol,
-                                                                          m_settings.m_RelTol);
-                        if(!nodeData.m_bConverged ) {
-                            //converged stays false;
-                            // Set global Converged = false;
-                            m_bConverged = false;
-                        }
-                    } else {
-                        m_bConverged=false;
-                    }
-                }
-            }
-
-
-            if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InLambda){
-                if(m_globalIterationCounter >= m_settings.m_MinIter && (m_bConverged || m_settings.m_bComputeResidual) ) {
-                    nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,
-                                                                          nodeData.m_LambdaFront,
-                                                                          m_settings.m_AbsTol,
-                                                                          m_settings.m_RelTol,
-                                                                          residual
-                                                                          );
-                    m_maxResidual = std::max(residual,m_maxResidual);
-                    if(!nodeData.m_bConverged) {
-                        // Set global Converged = false;
-                        m_bConverged = false;
-                    }
-                } else {
-                    m_bConverged=false;
-                }
-            }
-
-
-            // Swap Lambdas, but dont swap Velocities...
-            //nodeData.m_LambdaBack = nodeData.m_LambdaFront; // necessary if we use doVelocityUpdate function!
-            nodeData.swapLambdas(); // faster only switch pointers
-
-
-        } else {
-            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
-        }
     }
 
     template<int B>
@@ -865,7 +648,10 @@ public:
 
 
     PREC m_maxResidual;
-private:
+
+    // Function delegate to make class visitable
+    typedef srutil::delegate1<void,NodeType &> VisitNodeDelegate;
+protected:
     Logging::Log * m_pSolverLog;
     PREC m_alpha;
     const InclusionSolverSettingsType & m_settings;
@@ -873,6 +659,501 @@ private:
     const unsigned int & m_globalIterationCounter; ///< Access to global iteration counter
 
     ContactGraphType * m_pGraph;
+
+
+    VisitNodeDelegate m_delegate;
+
+};
+
+/**
+* This is a contact sor, projects one contact together!
+*/
+class ContactSorProxStepNodeVisitor : public SorProxStepNodeVisitor{
+public:
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
+    typedef typename ContactGraphType::NodeDataType NodeDataType;
+    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
+    typedef typename ContactGraphType::EdgeType EdgeType;
+    typedef typename ContactGraphType::NodeType NodeType;
+
+    ContactSorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
+                                  bool & globalConverged,
+                                  const unsigned int & globalIterationNeeded,
+                                  ContactGraphType * graph):
+            SorProxStepNodeVisitor(settings,globalConverged,globalIterationNeeded,graph)
+    {
+        this->m_delegate = VisitNodeDelegate::from_method<ContactSorProxStepNodeVisitor,
+                                                          &ContactSorProxStepNodeVisitor::visitNode_imp>(this);
+    }
+
+    void visitNode_imp(NodeType& node){
+        /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
+           Then the iteration is not converged somewhere, and we need to wait till the next iteration!
+        */
+        typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
+        static VectorUBody uCache1,uCache2;
+        PREC residual;
+
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED){
+               LOG(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
+            }
+        #endif
+
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel  ) {
+
+
+            // Init the prox value
+            nodeData.m_LambdaFront = nodeData.m_b;
+
+            // FIRST BODY!
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+                nodeData.m_LambdaFront += nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_front ;
+            }
+            // SECOND BODY!
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+                nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
+            }
+
+            // Experimental
+            //Relaxation term damper (take care R_i_inv needs to be initialized as well!)
+            if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel){
+
+                //Drive damping to zero after some iterations:
+                if (m_globalIterationCounter == 300) {
+                    nodeData.m_contactParameter.m_params[4] = 1e-7;
+                }
+
+                nodeData.m_LambdaFront(0) += nodeData.m_LambdaBack(0) * nodeData.m_contactParameter.m_params[3] / m_settings.m_deltaT;
+                nodeData.m_LambdaFront(1) += nodeData.m_LambdaBack(1) * nodeData.m_contactParameter.m_params[4] / m_settings.m_deltaT;
+                nodeData.m_LambdaFront(2) += nodeData.m_LambdaBack(2) * nodeData.m_contactParameter.m_params[4] / m_settings.m_deltaT;
+
+
+            }else if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel){
+
+                recalculateR(nodeData,nodeData.m_contactParameter);
+                // if lambda_N <= eps, set damping to d_Tfix
+                PREC dinvT;
+                if( std::abs(nodeData.m_LambdaBack(0)) <= nodeData.m_contactParameter.m_params[6] ){
+                    dinvT = nodeData.m_contactParameter.m_params[4];
+                }else{ //dinvT = gammaMax / (mu *lambdaN)
+                    dinvT = nodeData.m_contactParameter.m_params[5] / (nodeData.m_contactParameter.m_params[2]*nodeData.m_LambdaBack(0) );
+                }
+
+                nodeData.m_LambdaFront(0) += nodeData.m_LambdaBack(0) * nodeData.m_contactParameter.m_params[3] / m_settings.m_deltaT;
+                nodeData.m_LambdaFront(1) += nodeData.m_LambdaBack(1) * dinvT / m_settings.m_deltaT;
+                nodeData.m_LambdaFront(2) += nodeData.m_LambdaBack(2) * dinvT / m_settings.m_deltaT;
+            }
+
+            nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
+            nodeData.m_LambdaFront += nodeData.m_LambdaBack;
+
+
+
+
+            //Prox
+            // HACK drive up parameter mu, does not help
+//            PREC mu =  nodeData.m_mu(0);
+//            if(m_globalIterationCounter <= 10){
+//                 mu = ((m_globalIterationCounter) / 10 ) * nodeData.m_mu(0);
+//                 m_bConverged = false;
+//            }
+//            else if (m_globalIterationCounter <= 300) {
+//                mu = ((m_globalIterationCounter-200) / 500 ) * nodeData.m_mu(0);
+//                m_bConverged = false;
+//            }
+//            else{
+//                mu =  nodeData.m_mu(0);
+//            }
+
+            // PROX  ====================================================================================================================
+            Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle( nodeData.m_contactParameter.m_params[2],nodeData.m_LambdaFront);
+
+#if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
+            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << nodeData.m_LambdaFront.transpose() << std::endl);
+            if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_settings.m_AbsTol, m_settings.m_RelTol)){
+              *m_pSolverLog <<"\t---> Lambda converged"<<std::endl;
+            }
+#endif
+            // Velocity Updates ====================================================================================================================
+            // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
+            // FIRST BODY!
+            decltype(nodeData.m_LambdaFront) deltaLambda = nodeData.m_LambdaFront - nodeData.m_LambdaBack ;
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+                uCache1 = nodeData.m_u1BufferPtr->m_front;
+
+                // Velocity update (wahrscheinlich Auslöschung bei Lambda)
+                nodeData.m_u1BufferPtr->m_front = uCache1
+                        + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * deltaLambda;
+
+                //Sepcial update (no differences)
+                //doVelocityUpdate<1>(nodeData);
+
+
+               #if CoutLevelSolverWhenContact>2
+                LOG(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
+               #endif
+
+
+                if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
+                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
+                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_settings.m_AbsTol, m_settings.m_RelTol);
+                        if(!nodeData.m_bConverged ) {
+                            //converged stays false;
+                            // Set global Converged = false;
+                            m_bConverged = false;
+                            *m_pSolverLog << "\t---> m_bConverged = false;"<<std::endl;
+                        }
+                    } else {
+                        m_bConverged=false;
+                    }
+                }else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
+                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
+                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(      uCache1,
+                                                                                          nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
+                                                                                          nodeData.m_LambdaBack,
+                                                                                          nodeData.m_LambdaFront,
+                                                                                          nodeData.m_G_ii,
+                                                                                          m_settings.m_AbsTol,
+                                                                                          m_settings.m_RelTol);
+                        if(!nodeData.m_bConverged ) {
+                            //converged stays false;
+                            // Set global Converged = false;
+                            m_bConverged = false;
+                        }
+                    } else {
+                        m_bConverged=false;
+                    }
+                }
+
+            }
+            // SECOND BODY
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+                uCache2 = nodeData.m_u2BufferPtr->m_front;
+
+                // Velocity update (wahrscheinlich Auslöschung bei Lambda)
+                nodeData.m_u2BufferPtr->m_front = uCache2
+                        + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * deltaLambda ;
+
+                //Sepcial update (no differences)
+                //doVelocityUpdate<2>(nodeData);
+
+                #if CoutLevelSolverWhenContact>2
+                LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
+                #endif
+
+                if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
+                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
+                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache2,
+                                                                  nodeData.m_u2BufferPtr->m_front,
+                                                                  m_settings.m_AbsTol,
+                                                                  m_settings.m_RelTol);
+                        if(!nodeData.m_bConverged ) {
+                            //converged stays false;
+                            // Set global Converged = false;
+                            m_bConverged = false;
+                        }
+                    } else {
+                        m_bConverged=false;
+                    }
+
+                }else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
+                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
+                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
+                                                                          nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
+                                                                          nodeData.m_LambdaBack,
+                                                                          nodeData.m_LambdaFront,
+                                                                          nodeData.m_G_ii,
+                                                                          m_settings.m_AbsTol,
+                                                                          m_settings.m_RelTol);
+                        if(!nodeData.m_bConverged ) {
+                            //converged stays false;
+                            // Set global Converged = false;
+                            m_bConverged = false;
+                        }
+                    } else {
+                        m_bConverged=false;
+                    }
+                }
+            }
+
+
+            if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InLambda){
+                if(m_globalIterationCounter >= m_settings.m_MinIter && (m_bConverged || m_settings.m_bComputeResidual) ) {
+                    nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,
+                                                                          nodeData.m_LambdaFront,
+                                                                          m_settings.m_AbsTol,
+                                                                          m_settings.m_RelTol,
+                                                                          residual
+                                                                          );
+                    m_maxResidual = std::max(residual,m_maxResidual);
+                    if(!nodeData.m_bConverged) {
+                        // Set global Converged = false;
+                        m_bConverged = false;
+                    }
+                } else {
+                    m_bConverged=false;
+                }
+            }
+
+
+            // Swap Lambdas, but dont swap Velocities...
+            //nodeData.m_LambdaBack = nodeData.m_LambdaFront; // necessary if we use doVelocityUpdate function!
+            nodeData.swapLambdas(); // faster only switch pointers
+
+
+
+        } else {
+            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
+        }
+    }
+
+};
+
+
+/**
+* This is a full sor, projects normal and then tangential consecutive!
+*/
+class FullSorProxStepNodeVisitor : public SorProxStepNodeVisitor{
+public:
+
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
+    typedef typename ContactGraphType::NodeDataType NodeDataType;
+    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
+    typedef typename ContactGraphType::EdgeType EdgeType;
+    typedef typename ContactGraphType::NodeType NodeType;
+
+     FullSorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
+                                bool & globalConverged,
+                                const unsigned int & globalIterationNeeded,
+                                ContactGraphType * graph):
+            SorProxStepNodeVisitor(settings,globalConverged,globalIterationNeeded,graph)
+    {
+        this->m_delegate = VisitNodeDelegate::from_method<  FullSorProxStepNodeVisitor,
+                                                            &FullSorProxStepNodeVisitor::visitNode_imp>(this);
+    }
+
+    void visitNode_imp(NodeType& node){
+        /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
+           Then the iteration is not converged somewhere, and we need to wait till the next iteration!
+        */
+        typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
+        static VectorUBody uCache1,uCache2;
+        PREC residual;
+
+        #if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED){
+               LOG(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
+            }
+        #endif
+
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ) {
+
+            //First normal direction ===================================
+
+            PREC lambda_N = nodeData.m_b(0);
+            // FIRST BODY!
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+                uCache1 = nodeData.m_u1BufferPtr->m_front;
+                lambda_N += nodeData.m_W_body1.transpose().row(0) * uCache1 ;
+            }
+            // SECOND BODY!
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+                uCache2 = nodeData.m_u2BufferPtr->m_front;
+                lambda_N += nodeData.m_W_body2.transpose().row(0) * uCache2;
+            }
+
+            // Damping
+            if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel){
+                lambda_N += nodeData.m_LambdaBack(0) * nodeData.m_contactParameter.m_params[3] / m_settings.m_deltaT;
+            }
+            lambda_N = -nodeData.m_R_i_inv_diag(0) * lambda_N;
+            lambda_N += nodeData.m_LambdaBack(0);
+
+            //Prox
+            Prox::ProxFunction<ConvexSets::RPlus>::doProxSingle( lambda_N, lambda_N );
+
+            //Apply to bodies
+            nodeData.m_LambdaFront(0) = lambda_N;
+            PREC deltaLambda_N = lambda_N - nodeData.m_LambdaBack(0); // Delta lambda_N
+
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+                nodeData.m_u1BufferPtr->m_front = uCache1
+                            + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() *
+                             nodeData.m_W_body1.col(0) * deltaLambda_N;
+            }
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+                nodeData.m_u2BufferPtr->m_front = uCache2
+                            + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() *
+                             nodeData.m_W_body2.col(0) * deltaLambda_N;
+            }
+
+
+            // =========================================================
+
+            // Second Tangential direction =============================
+            Vector2 lambda_T = nodeData.m_b.tail<2>();
+            // FIRST BODY!
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+                lambda_T += nodeData.m_W_body1.transpose().bottomRows<2>() * nodeData.m_u1BufferPtr->m_front ;
+            }
+            // SECOND BODY!
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+                lambda_T += nodeData.m_W_body2.transpose().bottomRows<2>() * nodeData.m_u2BufferPtr->m_front;
+            }
+            // Damping
+            if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel){
+                lambda_T += nodeData.m_LambdaBack.tail<2>() * (nodeData.m_contactParameter.m_params[4] / m_settings.m_deltaT);
+            }
+
+            lambda_T = - (nodeData.m_R_i_inv_diag.tail<2>().asDiagonal() * lambda_T).eval();
+            lambda_T += nodeData.m_LambdaBack.tail<2>();
+
+            //Prox
+            Prox::ProxFunction<ConvexSets::Disk>::doProxSingle( nodeData.m_contactParameter.m_params[2] * lambda_N, lambda_T );
+
+            nodeData.m_LambdaFront.tail<2>() =  lambda_T;
+
+            lambda_T = lambda_T - nodeData.m_LambdaBack.tail<2>(); // Delta lambda_T
+
+
+
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+
+                nodeData.m_u1BufferPtr->m_front +=
+                        nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1.rightCols<2>() * lambda_T;
+
+               #if CoutLevelSolverWhenContact>2
+                LOG(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
+               #endif
+
+                if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
+                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
+                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_settings.m_AbsTol, m_settings.m_RelTol);
+                        if(!nodeData.m_bConverged ) {
+                            //converged stays false;
+                            // Set global Converged = false;
+                            m_bConverged = false;
+                            *m_pSolverLog << "\t---> m_bConverged = false;"<<std::endl;
+                        }
+                    } else {
+                        m_bConverged=false;
+                    }
+                }else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
+                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
+                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(      uCache1,
+                                                                                          nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
+                                                                                          nodeData.m_LambdaBack,
+                                                                                          nodeData.m_LambdaFront,
+                                                                                          nodeData.m_G_ii,
+                                                                                          m_settings.m_AbsTol,
+                                                                                          m_settings.m_RelTol);
+                        if(!nodeData.m_bConverged ) {
+                            //converged stays false;
+                            // Set global Converged = false;
+                            m_bConverged = false;
+                        }
+                    } else {
+                        m_bConverged=false;
+                    }
+                }
+
+            }
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+
+                nodeData.m_u2BufferPtr->m_front +=
+                            nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal()*nodeData.m_W_body2.rightCols<2>() * lambda_T;
+
+                #if CoutLevelSolverWhenContact>2
+                LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
+                #endif
+
+                if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
+                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
+                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache2,
+                                                                  nodeData.m_u2BufferPtr->m_front,
+                                                                  m_settings.m_AbsTol,
+                                                                  m_settings.m_RelTol);
+                        if(!nodeData.m_bConverged ) {
+                            //converged stays false;
+                            // Set global Converged = false;
+                            m_bConverged = false;
+                        }
+                    } else {
+                        m_bConverged=false;
+                    }
+
+                }else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
+                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
+                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
+                                                                          nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
+                                                                          nodeData.m_LambdaBack,
+                                                                          nodeData.m_LambdaFront,
+                                                                          nodeData.m_G_ii,
+                                                                          m_settings.m_AbsTol,
+                                                                          m_settings.m_RelTol);
+                        if(!nodeData.m_bConverged ) {
+                            //converged stays false;
+                            // Set global Converged = false;
+                            m_bConverged = false;
+                        }
+                    } else {
+                        m_bConverged=false;
+                    }
+                }
+            }
+            // =========================================================
+
+
+#if CoutLevelSolverWhenContact>2
+            LOG(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
+            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << nodeData.m_LambdaFront.transpose() << std::endl);
+            if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_settings.m_AbsTol, m_settings.m_RelTol)){
+              *m_pSolverLog <<"\t---> Lambda converged"<<std::endl;
+            }
+#endif
+
+
+
+            if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InLambda){
+                if(m_globalIterationCounter >= m_settings.m_MinIter && (m_bConverged || m_settings.m_bComputeResidual) ) {
+                    nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,
+                                                                          nodeData.m_LambdaFront,
+                                                                          m_settings.m_AbsTol,
+                                                                          m_settings.m_RelTol,
+                                                                          residual
+                                                                          );
+                    m_maxResidual = std::max(residual,m_maxResidual);
+                    if(!nodeData.m_bConverged) {
+                        // Set global Converged = false;
+                        m_bConverged = false;
+                    }
+                } else {
+                    m_bConverged=false;
+                }
+            }
+
+
+            // Swap Lambdas, but dont swap Velocities...
+            //nodeData.m_LambdaBack = nodeData.m_LambdaFront; // necessary if we use doVelocityUpdate function!
+            nodeData.swapLambdas(); // faster only switch pointers
+
+
+
+        } else {
+            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
+        }
+    }
 
 };
 

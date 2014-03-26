@@ -72,7 +72,7 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
     m_pSceneParser->parseScene(sceneFilePath);
 
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
-    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_nSimBodies << " Bodies!");
+    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_nSimBodies << " Bodies!"  << std::endl;);
     // =====================================================
 
 

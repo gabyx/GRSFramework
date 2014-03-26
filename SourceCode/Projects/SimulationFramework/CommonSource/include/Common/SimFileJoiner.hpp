@@ -108,8 +108,6 @@ private:
         TypesBodyRange::VariantType & m_var2;
     };
 
-
-
 public:
 
 

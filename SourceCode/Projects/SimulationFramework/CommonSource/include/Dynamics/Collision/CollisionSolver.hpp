@@ -38,11 +38,9 @@ public:
         m_ContactDelegateList.clear();
     }
 
-#ifdef SRUTIL_DELEGATE_PREFERRED_SYNTAX
-    typedef srutil::delegate<void, (CollisionData*) > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
-#else
+
     typedef srutil::delegate1<void, CollisionData*  > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
-#endif
+
 
     /** Adds a new ContactDelegate which will be invoked during the solveCollision() part.*/
     void addContactDelegate(const ContactDelegate & cD) {

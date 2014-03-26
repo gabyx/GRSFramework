@@ -23,7 +23,7 @@ struct InclusionSolverSettings
       m_MaxIter = 5000;
       m_AbsTol = 1E-7;
       m_RelTol = 1E-7;
-      m_eMethod = SOR;
+      m_eMethod = SOR_CONTACT;
       m_bUseGPU = false;
       m_UseGPUDeviceId = 0;
       m_bIsFiniteCheck = false;
@@ -44,7 +44,10 @@ struct InclusionSolverSettings
     unsigned int m_MinIter;
     PREC m_AbsTol;
     PREC m_RelTol;
-    enum Method{ SOR, JOR} m_eMethod;
+    /**
+    *  SOR_CONTACT (project contacts consecutively), SOR_FULL (normal direction first, then tangential)
+    */
+    enum Method{SOR_CONTACT, SOR_FULL, JOR} m_eMethod;
     enum Convergence {InLambda,InVelocity, InVelocityLocal, InEnergyVelocity,InEnergyLocalMix} m_eConvergenceMethod;
     bool m_bComputeResidual;
     bool  m_bUseGPU;

@@ -302,7 +302,11 @@ protected:
                 if(method == "JOR") {
                     inclusionSettings.m_eMethod = InclusionSolverSettingsType::JOR;
                 } else if (method == "SOR") {
-                    inclusionSettings.m_eMethod = InclusionSolverSettingsType::SOR;
+                    inclusionSettings.m_eMethod = InclusionSolverSettingsType::SOR_CONTACT;
+                } else if (method == "SORContact") {
+                    inclusionSettings.m_eMethod = InclusionSolverSettingsType::SOR_CONTACT;
+                } else if (method == "SORFull") {
+                    inclusionSettings.m_eMethod = InclusionSolverSettingsType::SOR_FULL;
                 } else {
                     throw ticpp::Exception("---> String conversion in InclusionSolverSettings: method failed: not a valid setting");
                 }

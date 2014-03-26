@@ -39,6 +39,8 @@ struct MyMatrix{
    typedef Eigen::SparseMatrix<PREC>    MatrixSparse;       // declares a column-major sparse matrix of type PREC
    typedef Eigen::Triplet<PREC>         MatrixSparseTriplet;
 
+   template<typename EigenType> using MatrixRef = Eigen::Ref<EigenType>;
+
 };
 
 /**
