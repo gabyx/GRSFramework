@@ -223,11 +223,16 @@ void InclusionSolverCONoG::integrateAllBodyVelocities() {
 
 void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
+    // Init Graph for iteration;
+    m_ContactGraph.initForIteration();
+
     // Calculates b vector for all nodes, u_0, R_ii, ...
     m_pSorProxInitNodeVisitor->setParams(alpha);
     m_pSorProxStepNodeVisitor->setParams(alpha);
 
     m_ContactGraph.applyNodeVisitor(*m_pSorProxInitNodeVisitor);
+
+
 
     // Integrate all bodies!
     for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
@@ -302,11 +307,13 @@ void InclusionSolverCONoG::doSorProx() {
 void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     m_maxResidual  = 0;
-    m_pSorProxStepNodeVisitor->m_maxResidual = 0;
+
 
     // Move over all nodes, and do a sor prox step
-    m_ContactGraph.applyNodeVisitor(*m_pSorProxStepNodeVisitor);
-    m_maxResidual = m_pSorProxStepNodeVisitor->m_maxResidual;
+    //m_ContactGraph.shuffleNodesUniformly(1000);
+
+    m_ContactGraph.applyNodeVisitorSpecial(*m_pSorProxStepNodeVisitor);
+    m_maxResidual = m_ContactGraph.m_maxResidual;
     // Move over all nodes, end of Sor Prox
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
@@ -364,6 +371,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
         }
     }
 
+    m_ContactGraph.resetAfterOneIteration();
 
 }
 

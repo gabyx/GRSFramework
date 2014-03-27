@@ -172,8 +172,8 @@ struct ProxFunction<ConvexSets::Disk> {
         typedef typename Derived::Scalar PREC;
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
-        ASSERTMSG(x.rows()%2==0,"wrong size");
-        ASSERTMSG( (2) * radius.rows() == y_ref.rows(), "Wrong dimension!");
+        ASSERTMSG(y.rows()%2==0,"wrong size");
+        ASSERTMSG( (2) * radius.rows() == y.rows(), "Wrong dimension!");
 
         Eigen::MatrixBase<DerivedOther> & y_ref =  const_cast<Eigen::MatrixBase<DerivedOther> &>(y);
         //// Solve the set (disc with radius mu_P_N), one r is used for the prox!
@@ -202,8 +202,8 @@ struct ProxFunction<ConvexSets::Disk> {
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
         ASSERTMSG(x.rows()%2==0,"wrong size");
         ASSERTMSG(y.rows()%2==0,"wrong size");
-        ASSERTMSG( x.rows() == y_ref.rows(), "Wrong dimension!");
-        ASSERTMSG( (2) * radius.rows() == y_ref.rows(), "Wrong dimension!");
+        ASSERTMSG( x.rows() == y.rows(), "Wrong dimension!");
+        ASSERTMSG( (2) * radius.rows() == y.rows(), "Wrong dimension!");
 
 
         Eigen::MatrixBase<Derived> & y_ref =  const_cast<Eigen::MatrixBase<Derived> &>(y);
@@ -291,7 +291,6 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
         typedef typename Derived::Scalar PREC;
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
-        ASSERTMSG(x.rows() % 3==0,"wrong size");
         ASSERTMSG(y.rows() % 3==0,"wrong size");
         Eigen::MatrixBase<DerivedOther> & y_ref =  const_cast<Eigen::MatrixBase<DerivedOther> &>(y);
         ASSERTMSG( (3) * scale_factor.rows() == y_ref.rows(), "Wrong dimension!");
