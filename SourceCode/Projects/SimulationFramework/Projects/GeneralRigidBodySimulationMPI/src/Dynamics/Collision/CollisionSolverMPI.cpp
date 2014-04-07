@@ -106,8 +106,8 @@ void CollisionSolver::solveCollision() {
 
                 //check for a collision
 
-                PrintGeometryDetailsVisitor _2(m_pSolverLog, (*bodyIti)->m_geometry, "--->");
-                PrintGeometryDetailsVisitor _1(m_pSolverLog, (*bodyItj)->m_geometry, "--->");
+//                PrintGeometryDetailsVisitor _2(m_pSolverLog, (*bodyIti)->m_geometry, "--->");
+//                PrintGeometryDetailsVisitor _1(m_pSolverLog, (*bodyItj)->m_geometry, "--->");
 
                 if((*bodyIti)->m_pBodyInfo->m_ownerRank !=  (*bodyItj)->m_pBodyInfo->m_ownerRank){
 

@@ -316,6 +316,7 @@ private:
                   [](const TimeOffsetType & lhs, const TimeOffsetType & rhs) {
                      return lhs.first < rhs.first; });
         // Scan finished
+        std::cerr << "---> Scan finished!" << std::endl;
 //        std::cerr << "Time scan finished: " << std::endl;
 //        for( auto & e : fileTimesAndOff){
 //            std::cerr << e.first << " ";
@@ -332,33 +333,46 @@ private:
         std::vector< TimeOffsetType > matchedTimesAndRelOff; // Offset relative to last time, first time has offset relative to m_beginOfStates !
         matchedTimesAndRelOff.reserve(timeList.size());
 
-        auto currMatchRangeTimeIt = lastMatchedTime;
+        auto currMatchListTime = lastMatchedTime;
 //        std::streamoff lastMatchOff = fromFile.m_file_stream.tellg();
         auto itFileTime = fileTimesAndOff.begin();
+
         if( *timeList.rbegin() < itFileTime->first ){ //max range time < smallest filetime
-            std::cerr << "---> Nothing to match for this file: timeList below fileTimes" << std::endl;
+            std::cerr << "---> Nothing to match for this file: maxtime in timeList: " << *timeList.rbegin()
+            << " below smallest fileTime: "<< itFileTime->first<< std::endl;
             return;
         }else{
-            while(currMatchRangeTimeIt != timeList.end() && itFileTime != fileTimesAndOff.end() ){
+            while(currMatchListTime != timeList.end() && itFileTime != fileTimesAndOff.end() ){
 
-                if(  itFileTime->first < *currMatchRangeTimeIt){
+                if(  itFileTime->first < *currMatchListTime){
                       itFileTime++; // move file times
                 }
-                else if( (*currMatchRangeTimeIt == itFileTime->first) || (
-                    std::next(currMatchRangeTimeIt) !=  timeList.end() && *currMatchRangeTimeIt < itFileTime->first
-                                                                       && itFileTime->first < *std::next(currMatchRangeTimeIt) ) ){
-                    // match found
-                    // itFileTime->first im intervall [currMatchRangeTimeIt, currMatchRangeTimeIt++)
-                    std::cerr << "---> Matched: rangeTime: " << *currMatchRangeTimeIt<< "\t\t <--- \t\t" << itFileTime->first << " : fileTime " << std::endl;
-                    matchedTimesAndRelOff.push_back(std::make_pair(itFileTime->first, itFileTime->second ));
+                else if( (*currMatchListTime == itFileTime->first)  // if timeList and fileTime match exactly
+                        ||
+                    (std::next(currMatchListTime) == timeList.end() && *currMatchListTime < itFileTime->first )  //or if we are at the last listTime and fileTime is bigger
+                        ||
+                    (std::next(currMatchListTime) !=  timeList.end() && *currMatchListTime < itFileTime->first
+                     && itFileTime->first < *std::next(currMatchListTime) ) // // itFileTime->first im intervall (currMatchListTime, currMatchListTime++)
+                    ){
+                        // match found
+                        std::cerr << "---> Matched: rangeTime: " << *currMatchListTime<< "\t\t <--- \t\t" << itFileTime->first << " : fileTime " << std::endl;
+                        matchedTimesAndRelOff.push_back(std::make_pair(itFileTime->first, itFileTime->second ));
 
-                    itFileTime++;
-                    currMatchRangeTimeIt++;
+                        itFileTime++;
+                        currMatchListTime++;
                 }else{
-                    // moves rangeTime as long as the nexfile time is not in the intervall
-                    currMatchRangeTimeIt++;
+                    // moves rangeTime as long as the next filetime is not in the intervall
+                    currMatchListTime++;
                 }
+
+//                std::cout << "List time: "<< *currMatchListTime << std::endl;
+//                std::cout << "File time: "<< itFileTime->first << std::endl;
             }
+        }
+
+        if(matchedTimesAndRelOff.size()==0){
+           std::cerr << "---> No times matched!" << std::endl;
+           return;
         }
 
         std::streamsize size = fromFile.m_nBytesPerBody - std::streamsize(sizeof(RigidBodyIdType));
@@ -425,7 +439,7 @@ private:
         }
 
         // Set latest matched time;
-        lastMatchedTime = currMatchRangeTimeIt;
+        lastMatchedTime = currMatchListTime;
     }
 
     void writeTo(MultiBodySimFile & toFile,

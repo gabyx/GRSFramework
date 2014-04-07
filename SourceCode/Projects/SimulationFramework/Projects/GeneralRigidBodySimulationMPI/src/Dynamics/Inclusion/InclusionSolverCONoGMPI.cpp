@@ -175,7 +175,9 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
 
         // Solve Inclusion
         // =============================================================================================================
-        if( m_Settings.m_eMethod == InclusionSolverSettingsType::SOR) {
+        if( m_Settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT ||
+            m_Settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL
+             ) {
 
 #if MEASURE_TIME_PROX == 1
             boost::timer::cpu_timer counter;

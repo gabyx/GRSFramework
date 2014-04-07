@@ -104,8 +104,8 @@ public:
                     ops >> Option("bodyrange",range);
                     if(range.size()!=2 || (range[1]!=-1 && range[1]<0) || (range[0]!=-1 && range[0]<0) ||
                        (range[1] != -1  && range[1] < range[0]) ){
-                        THROWEXCEPTION("Exception occured in parsing bodyrange: range.size()" )
                         printHelp();
+                        THROWEXCEPTION("Exception occured in parsing bodyrange: range.size()" )
                     }
                     m_bodyRange = TypesBodyRange::RangeType(range[0],range[1]);
 
@@ -113,8 +113,9 @@ public:
                     std::vector<unsigned int> range;
                     ops >> Option("bodylist",range);
                     if(range.size()==0){
-                        THROWEXCEPTION("Exception occured in parsing bodylist: range.size()" )
                         printHelp();
+                        THROWEXCEPTION("Exception occured in parsing bodylist: range.size()" )
+
                     }
                     TypesBodyRange::ListType l(range.begin(), range.end());
                     m_bodyRange = l;
@@ -125,20 +126,22 @@ public:
                 ops >> Option('o',"output",m_outputFile);
 
             }else{
-                THROWEXCEPTION("Exception occured in parsing task arg" )
                 printHelp();
+                THROWEXCEPTION("Exception occured in parsing task arg" )
+
             }
 
 
 
         } catch(GetOpt::GetOptEx ex) {
-            THROWEXCEPTION("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
             printHelp();
+            THROWEXCEPTION("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
+
         }
 
         if (ops.options_remain()){
-            THROWEXCEPTION("Some unexpected options where given!" )
             printHelp();
+            THROWEXCEPTION("Some unexpected options where given!" )
         }
 
     }
@@ -163,13 +166,13 @@ public:
     void checkArguments() {
 
         if(m_inputFiles.empty()) {
-            THROWEXCEPTION( "No input files supplied!" )
             printHelp();
+            THROWEXCEPTION( "No input files supplied!" )
         } else {
             for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
                 if(! boost::filesystem::exists(*it)) {
-                    THROWEXCEPTION( "Input file supplied as argument: " << *it << " does not exist!")
                     printHelp();
+                    THROWEXCEPTION( "Input file supplied as argument: " << *it << " does not exist!")
                 }
             }
 
@@ -177,12 +180,12 @@ public:
 
         if(m_task == Task::JOIN){
             if(m_outputFile.empty()){
-                THROWEXCEPTION( "No output file supplied!" )
                 printHelp();
+                THROWEXCEPTION( "No output file supplied!" )
             }
             if(boost::filesystem::exists(m_outputFile)) {
-                    THROWEXCEPTION( "Input file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
                     printHelp();
+                    THROWEXCEPTION( "Input file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
             }
         }
 
@@ -191,8 +194,8 @@ public:
 private:
 
     void printErrorNoArg(std::string arg) {
-        THROWEXCEPTION( "Wrong options specified for arguement: '" << arg <<"'")
         printHelp();
+        THROWEXCEPTION( "Wrong options specified for arguement: '" << arg <<"'")
         exit(EXIT_FAILURE);
     }
 
@@ -206,11 +209,12 @@ private:
                   <<            "\t\t\t         Takes the two following options:\n"
                   <<            "\t\t\t         --bodyrange <start> <end> | --bodylist <id1> <id2> ... \n"
                   <<            "\t\t\t         --timerange <start> <end> | --timelist <t1>  <t2> ... \n"
+                  <<            "\t\t\t         Note: for option --bodyrange or --timerange: \n"
+                  <<            "\t\t\t               if end=-1, then all times/bodies are takes! \n"
                   << " \t -o|--output <path>  \n"
                   <<            "\t\t <path>: Specifies the ouput directory path \n"
                   << " \t -h|--help \n"
                   <<            "\t\t Prints this help" <<std::endl;
-        exit(EXIT_FAILURE);
     }
 };
 
