@@ -50,7 +50,7 @@ SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
     #${COMMONSOURCE_DIR}/include/Common/MeshData.hpp
     ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
-    ${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
+    #${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
     #${PROJECT_SOURCE_DIR}/include/Common/CartesianGrid.hpp
     #${COMMONSOURCE_DIR}/include/Common/MakeCoordinateSystem.hpp
     #${COMMONSOURCE_DIR}/include/Common/VectorToSkewMatrix.hpp
@@ -71,7 +71,7 @@ SET(COMMON_INC
 )
 SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
-    ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
+    #${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
     ${SOURCE_DIR}/src/Common/TypeDefs.cpp
     ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFile.cpp
     #${COMMONSOURCE_DIR}/src/Common/MultiBodySimFilePart.cpp

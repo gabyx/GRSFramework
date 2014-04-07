@@ -10,6 +10,8 @@
 #include <string>
 #include <memory>
 #include <utility>
+#include <algorithm>
+#include <random>
 
 namespace Graph{
 
@@ -111,11 +113,12 @@ protected:
 	std::vector<Edge<NodeDataType, EdgeDataType> *> m_edges;
 
 public:
-
-   typedef std::vector<Node<NodeDataType, EdgeDataType>* > NodeListType;
-   typedef std::vector<Edge<NodeDataType, EdgeDataType>* > EdgeListType;
-   typedef typename std::vector<Node<NodeDataType, EdgeDataType>* >::iterator NodeListIteratorType;
-   typedef typename std::vector<Edge<NodeDataType, EdgeDataType>* >::iterator EdgeListIteratorType;
+   typedef Node<NodeDataType, EdgeDataType> NodeType;
+   typedef Edge<NodeDataType, EdgeDataType> EdgeType;
+   typedef std::vector<NodeType* > NodeListType;
+   typedef std::vector<EdgeType* > EdgeListType;
+   typedef typename std::vector<NodeType* >::iterator NodeListIteratorType;
+   typedef typename std::vector<EdgeType* >::iterator EdgeListIteratorType;
 
 
    GeneralGraph(){};
@@ -147,6 +150,20 @@ public:
 		for(auto curr_he = m_edges.begin(); curr_he != m_edges.end(); curr_he++)
 			// (*(*curr_he)).template acceptVisitor<TEdgeVisitor>(hev);
 			hev.visitEdge(*(*curr_he));
+	}
+
+	void shuffleNodesUniformly(const unsigned int loops){
+	    static std::default_random_engine g;
+	    std::uniform_int_distribution<unsigned int> r(0,m_nodes.size()-1);
+	    static NodeType * p1;
+
+        for(auto it = m_nodes.begin(); it != m_nodes.end(); it++ ){
+            //swap the pointers
+            p1 = *it;
+            NodeType* & p2 = m_nodes[r(g)];
+            *it = p2;
+            p2 = p1;
+        }
 	}
 };
 

@@ -154,7 +154,7 @@ public:
 
     ~LogManager();
 
-     Log* createLog(const std::string & name, bool toConsole, bool toFile, boost::filesystem::path filePath);
+    Log* createLog(const std::string & name, bool toConsole, bool toFile, boost::filesystem::path filePath);
 
     void destroyLog(const std::string &name);
     void destroyLog(const Log * log);

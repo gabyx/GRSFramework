@@ -124,15 +124,16 @@ struct ProxFunction<ConvexSets::Disk> {
     * @param y Input/output vector which is proxed onto a scaled unit disk \f$ C_1 \f$.
     */
     template<typename PREC, typename Derived>
-    static INLINE_PROX_KEYWORD void  doProxSingle(  const PREC & radius, const Eigen::MatrixBase<Derived> & y) {
+    static INLINE_PROX_KEYWORD void  doProxSingle(const PREC & radius,
+                                                  const Eigen::MatrixBase<Derived> & y) {
         // Solve the set (disc with radius mu_P_N), one r is used for the prox!
-        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,2);
+        EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
+        ASSERTMSG(y.rows()%2==0,"wrong size");
         Eigen::MatrixBase<Derived> & y_ref =  const_cast<Eigen::MatrixBase<Derived> &>(y);
 
-        PREC absvalue;
-        absvalue = y_ref.norm();
-        if (absvalue > radius) {
-            y_ref =  y_ref / absvalue * radius;
+        PREC absvalue = y_ref.squaredNorm();
+        if (absvalue > radius*radius) {
+            y_ref *=   radius / std::sqrt(absvalue) ;
         }
     }
 
@@ -143,16 +144,20 @@ struct ProxFunction<ConvexSets::Disk> {
     * @param y Output which is proxed on to \f$ C_1 \f$.
     */
     template<typename PREC, typename Derived, typename DerivedOther>
-    static INLINE_PROX_KEYWORD void  doProxSingle(  const PREC & radius, const Eigen::MatrixBase<Derived> & x,  const Eigen::MatrixBase<DerivedOther> & y) {
+    static INLINE_PROX_KEYWORD void  doProxSingle(const PREC & radius,
+                                                  const Eigen::MatrixBase<Derived> & x,
+                                                  const Eigen::MatrixBase<DerivedOther> & y) {
         // Solve the set (disc with radius mu_P_N), one r is used for the prox!
-        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,2);
-        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(DerivedOther,2);
+        EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
+        EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
+        ASSERTMSG(x.rows()%2==0,"wrong size");
+        ASSERTMSG(y.rows()%2==0,"wrong size");
         Eigen::MatrixBase<DerivedOther> & y_ref =  const_cast<Eigen::MatrixBase<DerivedOther> &>(y);
 
         PREC absvalue;
-        absvalue = x.norm();
-        if (absvalue > radius) {
-            y_ref =  x / absvalue * radius;
+        absvalue = x.squaredNorm();
+        if (absvalue > radius*radius) {
+            y_ref =  x * (radius/std::sqrt(absvalue));
         }
     }
 
@@ -162,19 +167,21 @@ struct ProxFunction<ConvexSets::Disk> {
     * @param y Input/output vector which is proxed onto a scaled unit disk \f$ C_1 \f$.
     */
     template< typename Derived, typename DerivedOther>
-    static INLINE_PROX_KEYWORD void doProxMulti(  const Eigen::MatrixBase<Derived> & radius, const Eigen::MatrixBase<DerivedOther> & y) {
+    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived> & radius,
+                                                const Eigen::MatrixBase<DerivedOther> & y) {
         typedef typename Derived::Scalar PREC;
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
-        Eigen::MatrixBase<DerivedOther> & y_ref =  const_cast<Eigen::MatrixBase<DerivedOther> &>(y);
-        ASSERTMSG( (2) * radius.rows() == y_ref.rows(), "Wrong dimension!");
+        ASSERTMSG(y.rows()%2==0,"wrong size");
+        ASSERTMSG( (2) * radius.rows() == y.rows(), "Wrong dimension!");
 
+        Eigen::MatrixBase<DerivedOther> & y_ref =  const_cast<Eigen::MatrixBase<DerivedOther> &>(y);
         //// Solve the set (disc with radius mu_P_N), one r is used for the prox!
         PREC absvalue;
         for (int i=0; i<radius.rows(); i++) {
-            absvalue = (y_ref.segment<2>(2*i)).norm();
-            if (absvalue > radius(i,0)) {
-                y_ref.segment<2>(2*i) =  y_ref.segment<2>(2*i) / absvalue * radius(i,0);
+            absvalue = (y_ref.segment<2>(2*i)).squaredNorm();
+            if (absvalue > radius(i,0)*radius(i,0)) {
+                y_ref.segment<2>(2*i) *=  (radius(i,0) / sqrt(absvalue));
             }
         }
     }
@@ -186,21 +193,28 @@ struct ProxFunction<ConvexSets::Disk> {
     * @param y Output which is proxed on to \f$ C_1 \f$.
     */
     template< typename Derived, typename DerivedOther1, typename DerivedOther2>
-    static INLINE_PROX_KEYWORD void doProxMulti(  const Eigen::MatrixBase<Derived> & radius, const Eigen::MatrixBase<DerivedOther1> & x, const Eigen::MatrixBase<DerivedOther2> & y) {
+    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived> & radius,
+                                                const Eigen::MatrixBase<DerivedOther1> & x,
+                                                const Eigen::MatrixBase<DerivedOther2> & y) {
         typedef typename Derived::Scalar PREC;
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther1);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
+        ASSERTMSG(x.rows()%2==0,"wrong size");
+        ASSERTMSG(y.rows()%2==0,"wrong size");
+        ASSERTMSG( x.rows() == y.rows(), "Wrong dimension!");
+        ASSERTMSG( (2) * radius.rows() == y.rows(), "Wrong dimension!");
+
+
         Eigen::MatrixBase<Derived> & y_ref =  const_cast<Eigen::MatrixBase<Derived> &>(y);
-        ASSERTMSG( x.rows() == y_ref.rows(), "Wrong dimension!");
-        ASSERTMSG( (2) * radius.rows() == y_ref.rows(), "Wrong dimension!");
+
 
         // Solve the set (disc with radius mu_P_N), one r is used for the prox!
         PREC absvalue;
         for (int i=0; i<radius.rows(); i++) {
-            absvalue = (x.segment<2>(2*i)).norm();
-            if (absvalue > radius(i,0)) {
-                y_ref.segment<2>(2*i) =  x.segment<2>(2*i) / absvalue * radius(i,0);
+            absvalue = (x.segment<2>(2*i)).squaredNorm();
+            if (absvalue > radius(i,0)*radius(i,0)) {
+                y_ref.segment<2>(2*i) =  x.segment<2>(2*i) * (radius(i,0)/std::sqrt(absvalue));
             }
         }
     }
@@ -214,13 +228,15 @@ template<>
 struct ProxFunction<ConvexSets::RPlusAndDisk> {
 
     /** @brief Spezialisation for a single Prox onto  \f$ C_1 \f$  and \f$ C_2 \f$ .
-    * @param radius The radius for scaling.
-    * @param y Input/output vector, where the first value in y has been proxed onto  \f$ C_1 \f$  and the second 2 values onto the unit disk which is scaled by the first proxed value.
+    * @param scale_factor The scale_factor for scaling.
+    * @param y Input/output vector, where the first value in y has been proxed onto  \f$ C_1 \f$  and the second 2 values onto the unit disk which is scaled by the first proxed value times scale_factor.
     */
     template<typename PREC, typename Derived>
-    static INLINE_PROX_KEYWORD void doProxSingle(  const PREC & scale_factor, const Eigen::MatrixBase<Derived> & y) {
+    static INLINE_PROX_KEYWORD void doProxSingle(const PREC & scale_factor,
+                                                 const Eigen::MatrixBase<Derived> & y) {
 
-        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
+        EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
+        ASSERTMSG(y.rows()==3,"wrong size");
         Eigen::MatrixBase<Derived> & y_ref =  const_cast<Eigen::MatrixBase<Derived> &>(y);
 
         //// Solve the set (disc with radius mu_P_N), one r is used for the prox!
@@ -229,22 +245,27 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
         using std::max;
         y_ref(0) = max(y_ref(0),0.0);
         // Prox tangential
-        absvalue = (y_ref.template segment<2>(1)).norm();
-        if (absvalue > scale_factor*y_ref(0)) {
-            y_ref.template segment<2>(1) =  y_ref.template segment<2>(1) / absvalue * scale_factor*y_ref(0);
+        absvalue = (y_ref.template segment<2>(1)).squaredNorm();
+        if (absvalue > scale_factor*scale_factor*y_ref(0)*y_ref(0)) {
+            y_ref.template segment<2>(1) *=    (scale_factor * y_ref(0)) / std::sqrt(absvalue);
         }
     }
 
     /**
     * @brief Spezialisation for a single Prox onto  \f$ C_1 \f$  and \f$ C_2 \f$ .
-    * @param radius The radius for scaling.
+    * @param scale_factor The scale_factor for scaling.
     * @param x Input vector.
-    * @param y Output vector, where the first value in y has been proxed onto  \f$ C_1 \f$  and the second 2 values onto the unit disk which is scaled by the first proxed value.
+    * @param y Output vector, where the first value in y has been proxed onto  \f$ C_1 \f$
+    * and the second 2 values onto the unit disk which is scaled by the first proxed value times scale_factor.
     */
     template<typename PREC, typename Derived, typename DerivedOther>
-    static INLINE_PROX_KEYWORD void doProxSingle(  const PREC & scale_factor, const Eigen::MatrixBase<Derived> & x, Eigen::MatrixBase<DerivedOther> & y) {
-        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
-        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(DerivedOther,3);
+    static INLINE_PROX_KEYWORD void doProxSingle(const PREC & scale_factor,
+                                                 const Eigen::MatrixBase<Derived> & x,
+                                                 Eigen::MatrixBase<DerivedOther> & y) {
+        EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
+        EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
+        ASSERTMSG(x.rows()==3,"wrong size");
+        ASSERTMSG(y.rows()==3,"wrong size");
         Eigen::MatrixBase<Derived> & y_ref =  const_cast<Eigen::MatrixBase<Derived> &>(y);
 
         //// Solve the set (disc with radius mu_P_N), one r is used for the prox!
@@ -253,21 +274,24 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
         using std::max;
         y_ref(0) = max(x(0),0.0);
         // Prox tangential
-        absvalue = (x.template segment<2>(1)).norm();
-        if (absvalue > scale_factor*y_ref(0)) {
-            y_ref.template segment<2>(1) =  x.template segment<2>(1) / absvalue * scale_factor*y_ref(0);
+        absvalue = (x.template segment<2>(1)).squaredNorm();
+        if (absvalue > scale_factor*scale_factor*y_ref(0)*y_ref(0)) {
+            y_ref.template segment<2>(1) =  x.template segment<2>(1)  * (scale_factor*y_ref(0)/ std::sqrt(absvalue));
         }
     }
 
     /** @brief Spezialisation for a multi Prox onto  \f$ C_1 \f$  and \f$ C_2 \f$ .
-    * @param radius The radius for scaling.
-    * @param y Input/output vector, where the first value in y has been proxed onto  \f$ C_1 \f$  and the second 2 values onto the unit disk which is scaled by the first proxed value.
+    * @param scale_factor The scale_factor for scaling.
+    * @param y Input/output vector, where the first value in y has been proxed onto  \f$ C_1 \f$
+    * and the second 2 values onto the unit disk which is scaled by the first proxed value times scale_factor.
     */
     template< typename Derived, typename DerivedOther>
-    static INLINE_PROX_KEYWORD void doProxMulti( const Eigen::MatrixBase<Derived> & scale_factor, const Eigen::MatrixBase<DerivedOther> & y) {
+    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived> & scale_factor,
+                                                const Eigen::MatrixBase<DerivedOther> & y) {
         typedef typename Derived::Scalar PREC;
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
+        ASSERTMSG(y.rows() % 3==0,"wrong size");
         Eigen::MatrixBase<DerivedOther> & y_ref =  const_cast<Eigen::MatrixBase<DerivedOther> &>(y);
         ASSERTMSG( (3) * scale_factor.rows() == y_ref.rows(), "Wrong dimension!");
 
@@ -276,28 +300,33 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
         for (int i=0; i<scale_factor.rows(); i++) {
             // Rplus
             using std::max;
-            y_ref(3*i) = max(y_ref(3*i),(PREC)0.0);
+            y_ref(3*i) = max(y_ref(3*i), 0.0);
             // Disk
-            absvalue = (y_ref.template segment<2>(3*i+1)).norm();
-            if (absvalue > scale_factor(i)*y_ref(3*i)) {
-                y_ref.template segment<2>(3*i+1) =  y_ref.template segment<2>(3*i+1) / absvalue * scale_factor(i)*y_ref(3*i);
+            absvalue = (y_ref.template segment<2>(3*i+1)).squaredNorm();
+            if (absvalue > scale_factor(i)*y_ref(3*i)*scale_factor(i)*y_ref(3*i)) {
+                y_ref.template segment<2>(3*i+1) *=  scale_factor(i)*y_ref(3*i) / std::sqrt(absvalue);
             }
         }
     }
 
     /**
     * @brief Spezialisation for a multi Prox onto  \f$ C_1 \f$  and \f$ C_2 \f$ .
-    * @param radius The radius for scaling.
+    * @param scale_factor The scale_factor for scaling.
     * @param x Input vector.
-    * @param y Output vector, where the first value in y has been proxed onto  \f$ C_1 \f$  and the second 2 values onto the unit disk which is scaled by the first proxed value.
+    * @param y Output vector, where the first value in y has been proxed onto  \f$ C_1 \f$
+    *  and the second 2 values onto the unit disk which is scaled by the first proxed value time scale_factor.
     */
     template< typename Derived, typename DerivedOther1, typename DerivedOther2>
-    static INLINE_PROX_KEYWORD void doProxMulti( const Eigen::MatrixBase<Derived> & scale_factor, const Eigen::MatrixBase<DerivedOther1> & x, const Eigen::MatrixBase<DerivedOther2> & y) {
+    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived> & scale_factor,
+                                                const Eigen::MatrixBase<DerivedOther1> & x,
+                                                const Eigen::MatrixBase<DerivedOther2> & y) {
         typedef typename Derived::Scalar PREC;
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther1);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
         Eigen::MatrixBase<Derived> & y_ref =  const_cast<Eigen::MatrixBase<Derived> &>(y);
+        ASSERTMSG(x.rows() % 3==0,"wrong size");
+        ASSERTMSG(y.rows() % 3==0,"wrong size");
         ASSERTMSG( (3) * scale_factor.rows() == x.rows(), "Wrong dimension!");
         ASSERTMSG( (3) * scale_factor.rows() == y_ref.rows(), "Wrong dimension!");
 
@@ -308,9 +337,9 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
             using std::max;
             y_ref(3*i) = max(x(3*i),0.0);
             // Disk
-            absvalue = (x.segment<2>(3*i+1)).norm();
-            if (absvalue > scale_factor(i,0)*y_ref(3*i)) {
-                y_ref.segment<2>(3*i+1) =  x.segment<2>(3*i+1) / absvalue * scale_factor(i,0)*y_ref(3*i);
+            absvalue = (x.segment<2>(3*i+1)).squaredNorm();
+            if (absvalue > scale_factor(i,0)*y_ref(3*i)*scale_factor(i,0)*y_ref(3*i)) {
+                y_ref.segment<2>(3*i+1) =  x.segment<2>(3*i+1) * (scale_factor(i,0)*y_ref(3*i) / std::sqrt(absvalue)) ;
             }
         }
     }

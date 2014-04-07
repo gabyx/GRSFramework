@@ -85,6 +85,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/MPITopology.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPISerializationHelpersEigen.hpp
     ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
+    ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp
 )
 SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
@@ -280,6 +281,7 @@ set(INCLUDE_DIRS
 
     ${COMMONSOURCE_DIR}/include/Common
     ${COMMONSOURCE_DIR}/external/SRDelegates/include/
+    ${COMMONSOURCE_DIR}/external/FastFunc/include/
     ${COMMONSOURCE_DIR}/external/getoptpp/
     ${COMMONSOURCE_DIR}/external/getoptpp/src/
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers

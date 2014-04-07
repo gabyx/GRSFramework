@@ -96,6 +96,7 @@ SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/MultiBodySimFile.hpp
     ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
     ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
+    ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp
 )
 SET(COMMON_SRC
 #    ${SOURCE_DIR}/src/Common/OgreMeshExtraction.cpp
@@ -276,6 +277,7 @@ set(INCLUDE_DIRS
 
     ${COMMONSOURCE_DIR}/include/Common
     ${COMMONSOURCE_DIR}/external/SRDelegates/include/
+    ${COMMONSOURCE_DIR}/external/FastFunc/include/
     ${COMMONSOURCE_DIR}/external/getoptpp/
     ${COMMONSOURCE_DIR}/external/getoptpp/src/
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers

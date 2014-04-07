@@ -30,15 +30,14 @@ InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverTyp
     m_bConverged = true;
     m_pDynSys = pDynSys;
 
-    //Make a new Sor Prox Visitor (takes references from these class member)
-    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor(m_Settings,m_bConverged,m_globalIterationCounter,&m_ContactGraph);
-    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor(m_Settings);
+    m_pSorProxStepNodeVisitor = nullptr;
+    m_pSorProxInitNodeVisitor = nullptr;
 }
 
 
 InclusionSolverCONoG::~InclusionSolverCONoG(){
-    delete m_pSorProxStepNodeVisitor;
-    delete m_pSorProxInitNodeVisitor;
+    if(m_pSorProxStepNodeVisitor != nullptr ){ delete m_pSorProxStepNodeVisitor;}
+    if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
 }
 
 
@@ -81,6 +80,21 @@ void InclusionSolverCONoG::reset() {
     LOG(m_pSimulationLog,  "---> Close IterationDataFile" << std::endl;);
     m_iterationDataFile.close();
     #endif
+
+
+     //Make a new Sor Prox Visitor (takes references from these class member)
+    if(m_pSorProxStepNodeVisitor != nullptr ){ delete m_pSorProxStepNodeVisitor;}
+    if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
+
+    if(m_Settings.m_eMethod == InclusionSolverSettings::Method::SOR_CONTACT ){
+         LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor "<<  std::endl;);
+         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor(m_Settings,m_bConverged,m_globalIterationCounter,&m_ContactGraph);
+    }else if( m_Settings.m_eMethod == InclusionSolverSettings::Method::SOR_FULL ){
+         LOG(m_pSimulationLog, "---> Initialize FullSorProxVisitor "<<  std::endl;);
+         m_pSorProxStepNodeVisitor = new FullSorProxStepNodeVisitor(m_Settings,m_bConverged,m_globalIterationCounter,&m_ContactGraph);
+    }
+
+    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor(m_Settings);
 
 }
 
@@ -138,7 +152,9 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
 
         // =============================================================================================================
-        if( m_Settings.m_eMethod == InclusionSolverSettingsType::SOR) {
+        if( m_Settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT ||
+            m_Settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL
+           ) {
 
             #if MEASURE_TIME_PROX == 1
                 boost::timer::cpu_timer counter;
@@ -207,11 +223,16 @@ void InclusionSolverCONoG::integrateAllBodyVelocities() {
 
 void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
+    // Init Graph for iteration;
+    m_ContactGraph.initForIteration();
+
     // Calculates b vector for all nodes, u_0, R_ii, ...
     m_pSorProxInitNodeVisitor->setParams(alpha);
     m_pSorProxStepNodeVisitor->setParams(alpha);
 
     m_ContactGraph.applyNodeVisitor(*m_pSorProxInitNodeVisitor);
+
+
 
     // Integrate all bodies!
     for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
@@ -286,11 +307,13 @@ void InclusionSolverCONoG::doSorProx() {
 void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     m_maxResidual  = 0;
-    m_pSorProxStepNodeVisitor->m_maxResidual = 0;
+
 
     // Move over all nodes, and do a sor prox step
-    m_ContactGraph.applyNodeVisitor(*m_pSorProxStepNodeVisitor);
-    m_maxResidual = m_pSorProxStepNodeVisitor->m_maxResidual;
+    //m_ContactGraph.shuffleNodesUniformly(1000);
+
+    m_ContactGraph.applyNodeVisitorSpecial(*m_pSorProxStepNodeVisitor);
+    m_maxResidual = m_ContactGraph.m_maxResidual;
     // Move over all nodes, end of Sor Prox
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
@@ -348,6 +371,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
         }
     }
 
+    m_ContactGraph.resetAfterOneIteration(m_globalIterationCounter);
 
 }
 

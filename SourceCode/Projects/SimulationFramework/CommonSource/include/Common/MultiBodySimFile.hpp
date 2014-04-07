@@ -40,6 +40,8 @@
 */
 #define SIM_INIT_FILE_EXTENSION ".sim"
 
+class SimFileJoiner; ///< Friend declaration inside of MultiBodySimFile
+
 /**
 * @brief This is the input output class for writting a binary multi body system file to the disk.
 * It is used to save all simulated data.
@@ -55,6 +57,7 @@
 *         - ...
 */
 class MultiBodySimFile {
+    friend class SimFileJoiner;
 public:
 
 
@@ -166,14 +169,33 @@ public:
         return m_errorString.str();
     }
 
-    unsigned int getNDOFq(){return m_nDOFqBody;}
-    unsigned int getNDOFu(){return m_nDOFuBody;}
-    unsigned int getNSimBodies(){return m_nSimBodies;}
-    unsigned int getNStates() {return m_nStates;}
+    unsigned int getNDOFq() {
+        return m_nDOFqBody;
+    }
+    unsigned int getNDOFu() {
+        return m_nDOFuBody;
+    }
+    unsigned int getNSimBodies() {
+        return m_nSimBodies;
+    }
+    unsigned int getNStates() {
+        return m_nStates;
+    }
 
-    std::streamsize getBytesPerState() { return m_nBytesPerState;}
+    std::streamsize getBytesPerState() {
+        return m_nBytesPerState;
+    }
 
 private:
+
+    bool openWrite_impl(const boost::filesystem::path & file_path,
+                   unsigned int nDOFqBody,
+                   unsigned int nDOFuBody,
+                   unsigned int nSimBodies,
+                   unsigned int additionalBytesType,
+                   std::streamsize additionalBytesPerBody,
+                   bool truncate);
+
     /**
     * @brief Operator to write a generic value to the file as binary data.
     */
@@ -215,8 +237,8 @@ private:
 
     /** @brief Header length */
     static const  std::streamsize m_headerLength = SIM_FILE_SIGNATURE_LENGTH*sizeof(char)
-                                                  + sizeof(unsigned int)
-                                                  +3*sizeof(unsigned int) +2*sizeof(unsigned int) ; ///< 'MBSF' + nBodies, NDOFq, NDOFu, additionalBytesType (0=nothing, 1 = + process rank, etc.), additionalBytesPerBody
+            + sizeof(unsigned int)
+            +3*sizeof(unsigned int) +2*sizeof(unsigned int) ; ///< 'MBSF' + nBodies, NDOFq, NDOFu, additionalBytesType (0=nothing, 1 = + process rank, etc.), additionalBytesPerBody
 
 
 
@@ -232,7 +254,7 @@ private:
     std::streamsize m_nBytesPerQBody;
     std::streamsize m_nBytesPerUBody;
 
-    // Write addditional bytes, not yet implemented, but the type is written in the header
+    // Write mode, Write addditional bytes, not yet implemented, but the type is written in the header
     unsigned int m_additionalBytesType;
     std::streamsize getAdditionalBytes();
     std::streamsize m_nAdditionalBytesPerBody;
@@ -275,12 +297,12 @@ MultiBodySimFile & MultiBodySimFile::operator>>( T &value ) {
 };
 
 template<typename TRigidBodyContainer>
-void MultiBodySimFile::write(double time, const TRigidBodyContainer & bodyList){
+void MultiBodySimFile::write(double time, const TRigidBodyContainer & bodyList) {
     *this << time;
     ASSERTMSG(m_nSimBodies == bodyList.size(),"You try to write "<<bodyList.size()
               <<"bodies into a file which was instanced to hold "<<m_nSimBodies);
     STATIC_ASSERT2((std::is_same<double, typename TRigidBodyContainer::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
-    for(auto it = bodyList.beginOrdered(); it != bodyList.endOrdered(); it++){
+    for(auto it = bodyList.beginOrdered(); it != bodyList.endOrdered(); it++) {
         *this << (*it)->m_id;
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
@@ -296,7 +318,7 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
                             bool readPos,
                             bool readVel,
                             short which,
-                            bool onlyUpdate){
+                            bool onlyUpdate) {
     m_errorString.str("");
 
     std::set<RigidBodyIdType> updatedStates;
@@ -309,60 +331,58 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
 
     m_file_stream.seekg(m_beginOfStates);
 
-    if(stateTime < 0){
+    if(stateTime < 0) {
         stateTime = 0;
     }
 
-    if(which == 0){
+    if(which == 0) {
         *this >> stateTime;
 
         timeFound = true;
-    }
-    else if(which == 1){
+    } else if(which == 1) {
         //Scan all states
-        for( std::streamoff stateIdx = 0; stateIdx < m_nStates; stateIdx++){
+        for( std::streamoff stateIdx = 0; stateIdx < m_nStates; stateIdx++) {
             *this >> currentTime;
-            if( (stateTime > lastTime && stateTime <= currentTime )|| stateTime <= 0.0){
-               timeFound = true;
-               break;
-            }else{
+            if( ( lastTime > stateTime && stateTime <= currentTime )|| stateTime <= 0.0) {
+                timeFound = true;
+                break;
+            } else {
                 lastTime = currentTime;
-                if(stateIdx < m_nStates-1){
+                if(stateIdx < m_nStates-1) {
                     m_file_stream.seekg( m_nBytesPerState - sizeof(double) ,std::ios_base::cur);
                 }
             }
         }
         stateTime = currentTime;
-    }
-    else if(which == 2){
+    } else if(which == 2) {
         m_file_stream.seekg( (m_nStates-1)*m_nBytesPerState ,std::ios_base::cur);
         *this >> stateTime;
         timeFound = true;
     }
 
-    if(timeFound){
+    if(timeFound) {
 
         ASSERTMSG(stateTime>=0.0, " Found state time is " << stateTime);
         // Current time found!
-        for(unsigned int body = 0; body < m_nSimBodies; body++){
+        for(unsigned int body = 0; body < m_nSimBodies; body++) {
             *this >> id;
 
             //std::cout << RigidBodyId::getBodyIdString(id) << std::endl;
 
-            if(onlyUpdate){
+            if(onlyUpdate) {
                 auto res = states.find(id);
-                if(res != states.end()){
+                if(res != states.end()) {
                     pState = &res->second;
-                }else{
+                } else {
                     pState = nullptr;
                 }
-            }else{
+            } else {
                 auto res = states[id];
                 pState = &res;
             }
 
             // State found
-            if(pState != nullptr ){
+            if(pState != nullptr ) {
                 // Read in state:
                 IOHelpers::readBinary(m_file_stream, pState->m_q );
                 if(m_bReadFullState) {
@@ -373,7 +393,7 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
 
                 updatedStates.insert(id);
 
-            }else{
+            } else {
                 // State not found
                 // Jump body (u and q)
                 m_file_stream.seekg( m_nBytesPerQBody+ m_nBytesPerUBody ,std::ios_base::cur);
@@ -385,11 +405,11 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
 
         m_file_stream.seekg(m_beginOfStates);
 
-        if(onlyUpdate){
-            if(updatedStates.size() != states.size()){
-               m_errorString << "Some states have not been updated!; updated states: " << updatedStates.size() <<  std::endl;
+        if(onlyUpdate) {
+            if(updatedStates.size() != states.size()) {
+                m_errorString << "Some states have not been updated!; updated states: " << updatedStates.size() <<  std::endl;
 
-               return false;
+                return false;
             }
         }
         return true;
@@ -446,7 +466,7 @@ MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState* state ) {
         unsigned int bodyNr = RigidBodyId::getBodyNr(id);
 
         ASSERTMSG(bodyNr >=0 && bodyNr < state->m_SimBodyStates.size(), "BodyNr: " << bodyNr << " is out of bound!")
-        if(bodyNr >=0 && bodyNr < state->m_SimBodyStates.size()){
+        if(bodyNr >=0 && bodyNr < state->m_SimBodyStates.size()) {
             state->m_SimBodyStates[bodyNr].m_id = id;
 
             IOHelpers::readBinary(m_file_stream, state->m_SimBodyStates[bodyNr].m_q );
@@ -475,6 +495,10 @@ void MultiBodySimFile::getEndState(DynamicsState& state) {
     this->operator>>(&state);
     m_file_stream.seekg(m_beginOfStates);
 }
+
+
+
+
 
 #endif
 
