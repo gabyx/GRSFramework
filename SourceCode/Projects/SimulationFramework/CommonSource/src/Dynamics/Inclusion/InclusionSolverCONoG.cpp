@@ -371,7 +371,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
         }
     }
 
-    m_ContactGraph.resetAfterOneIteration();
+    m_ContactGraph.resetAfterOneIteration(m_globalIterationCounter);
 
 }
 

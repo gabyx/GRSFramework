@@ -305,25 +305,27 @@ public:
 
     template<typename TNodeVisitor>
 	void applyNodeVisitorSpecial(TNodeVisitor & vv){
-//	    if( m_firstIteration ){
+	    if( m_firstIteration ){
             for(auto curr_node = this->m_nodes.begin(); curr_node != this->m_nodes.end(); curr_node++){
                 vv.visitNode(*(*curr_node));
             }
             m_firstIteration = false;
-//	    }
-//	    else{
-//            for(auto curr_node = m_nodesBackRes->rbegin(); curr_node != m_nodesBackRes->rend(); curr_node++){
-//                vv.visitNode(*curr_node->second);
-//            }
-//	    }
+	    }
+	    else{
+            for(auto curr_node = m_nodesBackRes->begin(); curr_node != m_nodesBackRes->end(); curr_node++){
+                vv.visitNode(*curr_node->second);
+            }
+	    }
 
 	}
 
-    void resetAfterOneIteration(){
+    void resetAfterOneIteration(unsigned int globalIterationCounter){
         // Switch potiner of residual list;
-        auto * t = m_nodesBackRes;
-        m_nodesBackRes = m_nodesFrontRes;
-        m_nodesFrontRes = t;
+        if( globalIterationCounter % 1 == 0 ){
+            auto * t = m_nodesBackRes;
+            m_nodesBackRes = m_nodesFrontRes;
+            m_nodesFrontRes = t;
+        }
         // Clear front
         m_nodesFrontRes->clear();
 
