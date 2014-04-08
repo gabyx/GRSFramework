@@ -317,6 +317,9 @@ private:
                      return lhs.first < rhs.first; });
         // Scan finished
         std::cerr << "---> Scan finished!" << std::endl;
+        std::cerr << "---> TimeRange File: ["
+        << fileTimesAndOff.begin()->first << "," << fileTimesAndOff.rbegin()->first << "]" << std::endl;
+
 //        std::cerr << "Time scan finished: " << std::endl;
 //        for( auto & e : fileTimesAndOff){
 //            std::cerr << e.first << " ";
@@ -387,7 +390,7 @@ private:
             //Offset from current to next time! (time already read)
             fromFile.m_file_stream.seekg(matchedTimesIt->second);
 
-            std::cerr << "---> For time: " << matchedTimesIt->first << std::endl;
+            std::cerr << "---> Extract  bodies for time: " << matchedTimesIt->first << std::endl;
             toFile << matchedTimesIt->first;
 
             //Move over all bodies
@@ -478,6 +481,9 @@ private:
                   [](const TimeOffsetType & lhs, const TimeOffsetType & rhs) { return lhs.first < rhs.first; }
                   );
         // Scan finished
+        std::cerr << "---> Scan finished!" << std::endl;
+        std::cerr << "---> TimeRange File: ["
+        << fileTimesAndOff.begin()->first << "," << fileTimesAndOff.rbegin()->first << "]" << std::endl;
 
         // If intersection of range does not include the files Time range break
         if( (timeRange.second!=-1 && fileTimesAndOff.begin()->first > timeRange.second ) ||
@@ -519,7 +525,7 @@ private:
             //Offset from current to next time! (time already read)
             fromFile.m_file_stream.seekg(fileTimeIt->second);
 
-            std::cerr << "---> For time: " << fileTimeIt->first << std::endl;
+            std::cerr << "---> Extract bodies for time: " << fileTimeIt->first << std::endl;
             // Set latest written time for next files
             lastTimeWritten = fileTimeIt->first;
             // Write time
