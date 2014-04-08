@@ -1,4 +1,5 @@
 #include <iostream>
+#include <csignal>
 #include <string>
 
 #include <mpi.h>
@@ -10,11 +11,23 @@
 #include "RedirectOutput.hpp"
 #include "SimulationManagerMPI.hpp"
 
+// Define the function to be called when ctrl-c (SIGINT) signal is sent to process
+void signal_callback_handler(int signum)
+{
+   std::cerr << "---> Caught signal: " << signum << std::endl;
+   // Cleanup and close up stuff here
+   // Terminate program
+   exit(signum);
+}
+
 
 int main(int argc, char **argv) {
 
 
-
+    signal(SIGINT, signal_callback_handler);
+    signal(SIGTERM, signal_callback_handler);
+    signal(SIGUSR1, signal_callback_handler);
+    signal(SIGUSR2, signal_callback_handler);
 
     // Start MPI =================================
     MPI_Init(&argc, &argv);
