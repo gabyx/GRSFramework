@@ -622,7 +622,7 @@ protected:
                     throw ticpp::Exception("---> String conversion in GlobalInitialCondition: whichState failed");
                 }
 
-                boost::filesystem::path relpath = elem->GetAttribute("relpath");
+                boost::filesystem::path relpath = elem->GetAttribute("path");
 
 
                 setupInitialConditionBodiesFromFile_imp(relpath, time, which);
