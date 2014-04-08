@@ -14,10 +14,9 @@
 // Define the function to be called when ctrl-c (SIGINT) signal is sent to process
 void signal_callback_handler(int signum)
 {
-   std::cerr << "---> Caught signal: " << signum << std::endl;
    // Cleanup and close up stuff here
    // Terminate program
-   exit(signum);
+   ERRORMSG("---> Caught signal: " << signum << " in signal handler!" << std::endl);
 }
 
 
