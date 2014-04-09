@@ -316,6 +316,9 @@ private:
     void saveRemoval(Archive & ar, RigidBodyType * body) const {
         // serialize (ONLY LOCAL BODIES)
         // send the id to remove
+
+        LOGSZSpecial(m_pSerializerLog, "Removal of body @" << body << std::endl; )
+
         ar & body->m_id;
         ASSERTMSG(body->m_id != RigidBodyIdType(0)," ID zero!");
 
@@ -325,9 +328,11 @@ private:
         LOGASSERTMSG(res, m_pSerializerLog, "Could not delete local body with id: " << RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << m_neighbourRank << " !" );
 
         // remove neighbour from body info!
-
+        LOGASSERTMSG(m_bodyInfo->m_neighbourRanks.find(m_neighbourRank) != m_bodyInfo->m_neighbourRanks.end(), m_pSerializerLog,  "no such rank:" << m_neighbourRank )
         LOGASSERTMSG(m_bodyInfo->m_neighbourRanks.find(m_neighbourRank)->second.m_overlaps == false , m_pSerializerLog,
-                     "Body with id: " << RigidBodyId::getBodyIdString(body) << " overlaps (m_overlaps = true) neighbour rank: " << m_neighbourRank << " which should not because we have send a removal!" );
+                     "Body with id: " << RigidBodyId::getBodyIdString(body)
+                     << " overlaps (m_overlaps = true) neighbour rank: "
+                     << m_neighbourRank << " which should not because we have send a removal!" );
 
         m_bodyInfo->markNeighbourRankToRemove(m_neighbourRank); // Mark this rank to remove!
 

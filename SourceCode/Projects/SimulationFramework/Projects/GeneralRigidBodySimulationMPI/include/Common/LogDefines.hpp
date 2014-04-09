@@ -29,17 +29,29 @@
 #ifndef NDEBUG
   // DEBUG!
     #define LOGSZ( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+
     // Body Communicator
     #define LOGBC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+
     // Inclusion Communicator
     #define LOGIC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
     // Process Communicator
     #define LOGPC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
+
+    //Special for Debugging in Release
+    #define LOGSZSpecial( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+    #define LOGBCSpecial( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+
 #else
     #define LOGSZ( _logptr_ , _message_ )
     #define LOGBC( _logptr_ , _message_ )
     #define LOGIC( _logptr_ , _message_ )
     #define LOGPC( _logptr_ , _message_ )
+
+    //Special for Debugging in Release
+    #define LOGSZSpecial( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+    #define LOGBCSpecial( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+
 #endif
 /* @} */
 

@@ -237,7 +237,9 @@ void BodyCommunicator::cleanUp(){
 
         for( auto rankIt = (*it)->m_pBodyInfo->m_neighbourRanks.begin(); rankIt != (*it)->m_pBodyInfo->m_neighbourRanks.end(); rankIt++){
             if( rankIt->second.m_inNeighbourMap == true ){
+
                 bool res = m_nbDataMap.getNeighbourData(rankIt->first)->eraseLocalBodyData(body);
+
                 LOGASSERTMSG( res,  m_pSimulationLog , "This local body with id: " << RigidBodyId::getBodyIdString(body)<< " could not be deleted in neighbour data rank: " << rankIt->first);
             }
         }
@@ -249,7 +251,8 @@ void BodyCommunicator::cleanUp(){
         LOGASSERTMSG( res == true, m_pSimulationLog , "Remote Body with id: " << RigidBodyId::getBodyIdString(body)<< " could not be deleted in m_globalRemote!");
         // FROM now it needs to be sure that this body is no where else in the system anymore!
 
-        LOGBC(m_pSimulationLog,"--->\t Deleted body with id: "<< RigidBodyId::getBodyIdString(body) <<std::endl;)
+        LOGBCSpecial(m_pSimulationLog,"--->\t Deleted body with id: "<< RigidBodyId::getBodyIdString(body) <<"@" << body << std::endl;)
+
     }
 
     m_localBodiesToDelete.clear();

@@ -9,7 +9,7 @@
 #include RigidBody_INCLUDE_FILE
 
 
-template<typename TLocalData, typename TRemoteData>
+template<typename TLocalData, typename TRemoteData = TLocalData>
 class NeighbourData{
 public:
 
@@ -17,7 +17,7 @@ public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     typedef TLocalData LocalDataType;
-    typedef TLocalData RemoteDataType;
+    typedef TRemoteData RemoteDataType;
 
     typedef std::unordered_map<typename RigidBodyType::RigidBodyIdType, RemoteDataType > RemoteDataMapType;
     typedef typename RemoteDataMapType::iterator RemoteIterator;
