@@ -414,7 +414,6 @@ private:
                 m_bodyInfo->markNeighbourRankToRemove(m_neighbourRank); // Mark this rank to remove!
             }
 
-            //Notify all delegates need to be done here before message is sent! (File is open for this body! needs to be closed!)
             m_nc->invokeAllRemoveBodyLocal(body);
 
         } else if(m_bodyInfo->m_ownerRank != m_nc->m_rank) { // if owner rank is not the sending neighbour and  not our rank!

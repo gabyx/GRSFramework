@@ -260,7 +260,8 @@ protected:
                     if(! m_pDynSys->m_SimBodies.addBody((*bodyIt))){
                         ERRORMSG("Could not add body to m_SimBodies! Id: " << RigidBodyId::getBodyIdString(*bodyIt) << " already in map!");
                     };
-                    LOG(m_pSimulationLog, "---> Added Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
+
+                    //LOG(m_pSimulationLog, "---> Added Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
 
 
                     m_nSimBodies++;
@@ -271,12 +272,12 @@ protected:
 
             // Copy all init states
             LOG(m_pSimulationLog, "---> Copy init states... " << std::endl;);
-            for(auto it = m_initStatesGroup.begin(); it!=m_initStatesGroup.end();it++){
-                LOG(m_pSimulationLog, "\t---> state id: " << RigidBodyId::getBodyIdString(it->first)
-                    << std::endl << "\t\t---> q: " << it->second.m_q.transpose()
-                    << std::endl << "\t\t---> u: " << it->second.m_u.transpose() << std::endl;
-                    );
-            }
+//            for(auto it = m_initStatesGroup.begin(); it!=m_initStatesGroup.end();it++){
+//                LOG(m_pSimulationLog, "\t---> state id: " << RigidBodyId::getBodyIdString(it->first)
+//                    << std::endl << "\t\t---> q: " << it->second.m_q.transpose()
+//                    << std::endl << "\t\t---> u: " << it->second.m_u.transpose() << std::endl;
+//                    );
+//            }
             m_pDynSys->m_simBodiesInitStates.insert( m_initStatesGroup.begin(), m_initStatesGroup.end() );
 
 
@@ -311,11 +312,12 @@ protected:
     void filterBodies(){
 
         auto & simBodies = m_pDynSys->m_SimBodies;
+        LOG(m_pSimulationLog, "---> Reject Body with ID: ")
         for(auto bodyIt= simBodies.begin(); bodyIt!=simBodies.end();
         /*No incremente because we delete inside the loop invalidating iterators*/ ) {
         // Check if Body belongs to the topology! // Check CoG!
                 if(!m_pProcCommunicator->getProcTopo()->belongsPointToProcess((*bodyIt)->m_r_S)) {
-                    LOG(m_pSimulationLog, "---> Reject Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
+                    LOG(m_pSimulationLog, RigidBodyId::getBodyIdString(*bodyIt));
 
                     // Delete the init state
                     m_pDynSys->m_simBodiesInitStates.erase((*bodyIt)->m_id);
@@ -327,6 +329,7 @@ protected:
                     bodyIt++;
                 }
         }
+        LOG(m_pSimulationLog, std::endl);
     }
 
     boost::shared_ptr< MPILayer::ProcessCommunicator > m_pProcCommunicator;

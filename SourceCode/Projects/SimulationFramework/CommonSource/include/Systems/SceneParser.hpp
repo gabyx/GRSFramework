@@ -1131,7 +1131,7 @@ protected:
                 boost::apply_visitor(vis, it->second);
                 m_bodyListGroup[i]->m_geometry = it->second;
                 m_bodyListGroup[i]->m_globalGeomId = id;
-                LOG(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(m_bodyListGroup[i]) << ", GlobalGeomId: " << id <<  std::endl);
+                //LOG(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(m_bodyListGroup[i]) << ", GlobalGeomId: " << id <<  std::endl);
             }
 
         } else if(distribute == "linear") {
