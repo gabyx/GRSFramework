@@ -1417,6 +1417,60 @@ private:
 };
 
 
+
+
+
+template<typename TTopologyBuilder >
+class TopologyBuilderMessageWrapperBodies : public boost::serialization::traits< TopologyBuilderMessageWrapperBodies<TTopologyBuilder>,
+    boost::serialization::object_serializable,
+        boost::serialization::track_never> {
+public:
+
+    typedef TTopologyBuilder TopologyBuilderType;
+
+    TopologyBuilderMessageWrapperBodies(TopologyBuilderType * topoBuilder):
+            m_pTopoBuilder(topoBuilder)
+    {};
+
+
+    // broadcast
+    template<class Archive>
+    void save(Archive & ar, const unsigned int version) const {
+
+        unsigned int size = m_pTopoBuilder->m_pDynSys->m_SimBodies.size() ;
+        ar & size;
+
+        // send all bodie COG's to make master rank build the topology
+        for(auto bodyIt = m_pTopoBuilder->m_pDynSys->m_SimBodies.begin();
+                 bodyIt != m_pTopoBuilder->m_pDynSys->m_SimBodies.end(); bodyIt++){
+
+                serializeEigen(ar,(*bodyIt)->m_r_S);
+                ar & (*bodyIt)->m_r_S;
+        }
+
+        // AABB
+        ar & m_pTopoBuilder->m_currAABB.m_minPoint;
+        ar & m_pTopoBuilder->m_currAABB.m_maxPoint;
+
+    }
+
+    // receive broadcast
+    template<class Archive>
+    void load(Archive & ar, const unsigned int version) const {
+        // MASTER rank receives here all points and AABB
+    }
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER();
+
+
+
+
+private:
+    TTopologyBuilder * m_pTopoBuilder;
+};
+
+
+
 }; // MPILayer
 
 

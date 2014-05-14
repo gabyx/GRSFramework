@@ -144,7 +144,7 @@ void SimulationManagerMPI::checkNumberOfBodiesInProcess() {
     timer.stop();
     double elapsed = ((double)timer.elapsed().wall)*1e-9;
 
-    if(m_pProcCommunicator->isMasterRank()) {
+    if(m_pProcCommunicator->hasMasterRank()) {
         LOG(m_pSimulationLog,  "MPI> Allreduce needed: " << elapsed <<"sec."<<std::endl; );
 
         if(numberOfBodiesInSimulation != m_nGlobalSimBodies) {
@@ -167,7 +167,7 @@ void SimulationManagerMPI::getMaxRuntime(PREC runtime){
 
     MPI_Reduce(&runtime,&maxRuntime, 1, MPI_DOUBLE, MPI_MAX, m_pProcCommunicator->getMasterRank(), m_pProcCommunicator->getCommunicator());
 
-    if(m_pProcCommunicator->isMasterRank()){
+    if(m_pProcCommunicator->hasMasterRank()){
         LOG(m_pSimulationLog, "---> Total runtime for simulation needed: "<<maxRuntime<< " sec. " << std::endl;);
     }else{
         LOG(m_pSimulationLog, "---> Runtime sent ... !"<< std::endl;);
@@ -259,7 +259,7 @@ void SimulationManagerMPI::initSim() {
 
     MPILayer::GenericMessage1<boost::filesystem::path> message;
 
-    if(m_pProcCommunicator->isMasterRank()) { // Only master process
+    if(m_pProcCommunicator->hasMasterRank()) { // Only master process
         // Get new sim folder path relative to global directory
 
         m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);

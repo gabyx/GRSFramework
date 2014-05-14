@@ -14,7 +14,7 @@
 
 #include "MPIInformation.hpp"
 #include "MPICommunication.hpp"
-
+#include "MPITopologyBuilder.hpp"
 #include "BodyCommunicator.hpp"
 
 class StateRecorder;
@@ -61,17 +61,21 @@ private:
     typedef StateRecorderMPI StateRecorderType;
     // ===============================================
 
-    boost::shared_ptr< StateRecorderType >   m_pStateRecorder;
+    boost::shared_ptr< StateRecorderType >  m_pStateRecorder;
 
-    boost::shared_ptr< SceneParserMPI > m_pSceneParser;
+    boost::shared_ptr< SceneParserMPI >     m_pSceneParser;
 
     boost::shared_ptr< TimeStepperType >	m_pTimestepper;
     boost::shared_ptr< DynamicsSystemType > m_pDynSys;
-    boost::shared_ptr< BodyCommunicator > m_pBodyCommunicator;
+    boost::shared_ptr< BodyCommunicator >   m_pBodyCommunicator;
+
 
     typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
     typedef typename ProcessCommunicatorType::ProcessInfoType ProcessInfoType;
     boost::shared_ptr< ProcessCommunicatorType > m_pProcCommunicator;
+
+    typedef typename MPILayer::TopologyBuilder  TopologyBuilderType;
+    boost::shared_ptr< TopologyBuilderType >    m_pTopologyBuilder;
 
     void writeAllOutput();
 

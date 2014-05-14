@@ -38,7 +38,7 @@ public:
         return MASTER_RANK;
     };
 
-    inline bool isMasterRank() const{
+    inline bool hasMasterRank() const{
         if(m_rank == MASTER_RANK){
             return true;
         }

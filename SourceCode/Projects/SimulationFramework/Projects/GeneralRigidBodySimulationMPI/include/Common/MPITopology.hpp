@@ -25,8 +25,6 @@ public:
     ProcessTopology(){}
 
     ~ProcessTopology(){
-        // Delete the created pointers in the variant!
-        boost::apply_visitor( TopologyVisitors::Deleter<ProcessTopology>() , m_procTopo);
     }
 
     void init(RankIdType rank){m_rank = rank;}
@@ -34,7 +32,7 @@ public:
     // Main function
     inline bool belongsPointToProcess(const Vector3 & point, RankIdType &neighbourProcessRank) const {
         TopologyVisitors::BelongsPointToProcess<ProcessTopology> vis(point,neighbourProcessRank);
-        return boost::apply_visitor(vis, m_procTopo);
+        return m_procTopo.apply_visitor(vis);
     }
 
     inline bool belongsBodyToProcess(const RigidBodyType * body) const {
@@ -56,7 +54,7 @@ public:
                                 bool & overlapsOwnProcess)
     {
         TopologyVisitors::CheckOverlap<ProcessTopology> vis(body,neighbourProcessRanks,overlapsOwnProcess);
-        return boost::apply_visitor(vis , m_procTopo);
+        return m_procTopo.apply_visitor(vis);
     }
 
 
@@ -77,17 +75,17 @@ public:
                                    const MyMatrix<unsigned int>::Vector3 & dim,
                                    unsigned int processRank, unsigned int masterRank)
     {
-        boost::apply_visitor( TopologyVisitors::Deleter<ProcessTopology>() , m_procTopo);
-        m_procTopo =  new ProcessTopologyGrid<ProcessTopology>(m_nbRanks,m_adjNbRanks, minPoint,maxPoint,dim, m_rank , masterRank);
+        // Assign a new Topology
+        m_procTopo = ProcessTopologyGrid<ProcessTopology>(m_nbRanks,m_adjNbRanks, minPoint,maxPoint,dim, m_rank , masterRank);
     }
 
     private:
 
-    boost::variant<boost::blank, ProcessTopologyGrid<ProcessTopology> * > m_procTopo;
+    boost::variant<boost::blank, ProcessTopologyGrid<ProcessTopology> > m_procTopo;
     RankIdType m_rank;
 
-    // These values are set by references in the specific implementation classes
-    NeighbourRanksListType  m_nbRanks; ///< Neighbour ranks
+    // These values are set with call by references in the specific implementation classes
+    NeighbourRanksListType  m_nbRanks;           ///< Neighbour ranks
     AdjacentNeighbourRanksMapType  m_adjNbRanks; ///< Adjacent ranks between m_rank and each neighbour
 
 };

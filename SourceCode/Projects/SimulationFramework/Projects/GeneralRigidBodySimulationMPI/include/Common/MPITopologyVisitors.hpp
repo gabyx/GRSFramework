@@ -27,9 +27,9 @@ namespace TopologyVisitors {
             {}
 
             // Implementation for Grid
-            inline bool operator()(MPILayer::ProcessTopologyGrid<ProcessTopologyBase> * topo) {
-                m_neighbourProcessRank = topo->m_grid.getCellNumber(m_point);
-                if(m_neighbourProcessRank == topo->m_rank) {
+            inline bool operator()(const MPILayer::ProcessTopologyGrid<ProcessTopologyBase> & topo) {
+                m_neighbourProcessRank = topo.m_grid.getCellNumber(m_point);
+                if(m_neighbourProcessRank == topo.m_rank) {
                     return true;
                 }
                 return false;
@@ -53,17 +53,17 @@ namespace TopologyVisitors {
         {}
 
         // Implementation for Grid
-        inline bool operator()(MPILayer::ProcessTopologyGrid<ProcessTopologyBase> * topo) {
+        inline bool operator()(MPILayer::ProcessTopologyGrid<ProcessTopologyBase> & topo) {
             // Check neighbour AABB
             m_neighbourProcessRanks.clear();
-            for(auto it = topo->m_nbAABB.begin(); it != topo->m_nbAABB.end(); it++) {
-                if( topo->m_Collider.checkOverlap(m_body,it->second) ) {
+            for(auto it = topo.m_nbAABB.begin(); it != topo.m_nbAABB.end(); it++) {
+                if( topo.m_Collider.checkOverlap(m_body,it->second) ) {
                     m_neighbourProcessRanks.insert(it->first);
                 }
             }
 
             // Check own AABB
-            m_overlapsOwnProcess = topo->m_Collider.checkOverlap(m_body, topo->m_aabb);
+            m_overlapsOwnProcess = topo.m_Collider.checkOverlap(m_body, topo.m_aabb);
 
             return m_neighbourProcessRanks.size() > 0;
         }
@@ -78,17 +78,17 @@ namespace TopologyVisitors {
         bool & m_overlapsOwnProcess;
     };
 
-    template<typename ProcessTopologyBase>
-    class Deleter: public boost::static_visitor<> {
-        public:
-            inline void operator()(ProcessTopologyGrid<ProcessTopologyBase> * topo) const {
-                ASSERTMSG(topo,"Topo pointer is zero?");
-                delete topo;
-            }
-            inline void operator()(boost::blank & b) const{
-                // no entry defined in the variant, nothing to delete!
-            }
-    };
+//    template<typename ProcessTopologyBase>
+//    class Deleter: public boost::static_visitor<> {
+//        public:
+//            inline void operator()(ProcessTopologyGrid<ProcessTopologyBase> & topo) const {
+//                ASSERTMSG(topo,"Topo pointer is zero?");
+//                delete topo;
+//            }
+//            inline void operator()(boost::blank & b) const{
+//                // no entry defined in the variant, nothing to delete!
+//            }
+//    };
 
 }; // TopologyVisitors
 }; // MPILayer
