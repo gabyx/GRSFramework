@@ -208,7 +208,7 @@ void BodyCommunicator::sendMessagesToNeighbours(){
         LOGBC(m_pSimulationLog,"--->\t\t Send message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_message.setRank(*it);
-        m_pProcComm->sendMessageToRank(m_message,*it, MPILayer::MPIMessageTag::BODY_MESSAGE );
+        m_pProcComm->sendMessageToRank(m_message,*it, m_message.m_tag );
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
@@ -217,7 +217,7 @@ void BodyCommunicator::sendMessagesToNeighbours(){
 void BodyCommunicator::receiveMessagesFromNeighbours(){
     LOGBC(m_pSimulationLog,"MPI>\t Receive all messages (BODY_MESSAGE) from neighbours!"<<std::endl;)
     // set the rank of the receiving message automatically! inside the function!
-    m_pProcComm->receiveMessageFromRanks(m_message, m_nbRanks, MPILayer::MPIMessageTag::BODY_MESSAGE );
+    m_pProcComm->receiveMessageFromRanks(m_message, m_nbRanks, m_message.m_tag);
     LOGBC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
 
     // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours

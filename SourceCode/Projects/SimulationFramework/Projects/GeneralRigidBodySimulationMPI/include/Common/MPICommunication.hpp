@@ -220,10 +220,11 @@ public:
         allGather(value,gatheredValues,it->second);
     }
 
+    /** Buffered Neighbour Send Begin ===============================================================================*/
     template<typename T>
-    void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm ){
+    void sendMessageToNeighbourRank(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm ){
         auto it = m_sendMessageBuffers.find(rank);
-        ASSERTMSG(it != m_sendMessageBuffers.end(),"No buffer for this rank!, Did you call initializeBuffers" );
+        ASSERTMSG(it != m_sendMessageBuffers.end(),"No buffer for this rank!, Did you call initializeNeighbourBuffers" );
         // clear the buffer
 
         MessageBinarySerializer & message = std::get<0>(it->second);
@@ -237,20 +238,51 @@ public:
         // if there is no buffering in MPI we post the sends (leave the buffer existing)
         int error = MPI_Isend( const_cast<char*>(message.data()) , message.size(), message.getMPIDataType(),
                               rank, static_cast<int>(tag), comm, req );
-        ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToRank failed!");
+        ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToNeighbourRank failed!");
 
-        // IMPORTANT! Always call a waitForAllSends() after this call!!!
+        // IMPORTANT! Always call a waitForAllNeighbourSends() after this call!!!
     }
     template<typename T>
-    void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag ){ sendMessageToRank(t,rank,tag,this->m_comm);}
+    void sendMessageToNeighbourRank(const T & t, RankIdType rank, MPIMessageTag tag ){ sendMessageToNeighbourRank(t,rank,tag,this->m_comm);}
 
-    void waitForAllSends(){
+    void waitForAllNeighbourSends(){
 
         LOGPC(m_pSimulationLog,  "--->\t\t Waiting for all sends to complete ..." << std::endl;)
         int error = MPI_Waitall(m_sendRequests.size(), &m_sendRequests[0],&m_sendStatuses[0]);
 
         ASSERTMPIERROR(error, "ProcessCommunicator:: waiting for sends failed")
     }
+
+     /** May be called after a process topo has been made in the process info*/
+    void initializeNeighbourBuffers() {
+        if( ! this->getProcTopo() ){
+            ERRORMSG("initializeNeighbourBuffers:: ProcessTopology is not created!")
+        }else{
+
+            typename ProcessInfoType::ProcessTopologyType::NeighbourRanksListType ranks = this->getProcTopo()->getNeighbourRanks();
+            m_sendStatuses.clear();
+            m_sendRequests.clear();
+            m_sendMessageBuffers.clear();
+
+            // Reserve space , if not the vector might reallocate itself!!!
+            m_sendRequests.reserve(ranks.size());
+            for(auto it = ranks.begin(); it != ranks.end(); it++){
+                //this takes advantage of move semantics in MessageBinarySerializer
+                m_sendStatuses.push_back(MPI_Status());
+                m_sendRequests.push_back(NULL);
+                m_sendMessageBuffers.insert(std::make_pair(
+                                                        *it,
+                                                        SendTupleType(MessageBinarySerializer(1024*1024),
+                                                                      &m_sendRequests.back()
+                                                                      ))
+                                                        );
+
+            }
+
+        }
+    }
+
+    /** Buffered Neighbour Send Finished ===============================================================================*/
 
 
     template<typename T, typename List>
@@ -315,31 +347,6 @@ public:
     template<typename T, typename List>
     void receiveMessageFromRanks(T & t, const List & ranks, MPIMessageTag tag ){ receiveMessageFromRanks(t,ranks,tag,this->m_comm);}
 
-    /** May be called after a process topo has been made in the process info*/
-    void initializeBuffers() {
-        if( ! this->getProcTopo() ){
-            ERRORMSG("initializeBuffers:: ProcessTopology is not created!")
-        }else{
-
-            typename ProcessInfoType::ProcessTopologyType::NeighbourRanksListType ranks = this->getProcTopo()->getNeighbourRanks();
-
-            // Reserve space , if not the vector might reallocate itself!!!
-            m_sendRequests.reserve(ranks.size());
-            for(auto it = ranks.begin(); it != ranks.end(); it++){
-                //this takes advantage of move semantics in MessageBinarySerializer
-                m_sendStatuses.push_back(MPI_Status());
-                m_sendRequests.push_back(NULL);
-                m_sendMessageBuffers.insert(std::make_pair(
-                                                        *it,
-                                                        SendTupleType(MessageBinarySerializer(1024*1024),
-                                                                      &m_sendRequests.back()
-                                                                      ))
-                                                        );
-
-            }
-
-        }
-    }
 
     /**
     * Inserts/Overwrites a new splitted communicator with id newCommId if color is not -1
@@ -396,7 +403,7 @@ private:
     // Standart binary message for standart communication
     MessageBinarySerializer m_binary_message; // 1 MB serialization buffer
 
-
+    /** These are buffers for the asynchronous send of the messages to neighbours to make it a safe MPI program (buffer problem) */
     typedef std::tuple< MessageBinarySerializer, MPI_Request*> SendTupleType;
     typedef std::unordered_map<RankIdType, SendTupleType> BufferMapType;
     BufferMapType m_sendMessageBuffers;

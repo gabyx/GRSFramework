@@ -14,7 +14,7 @@
 #include "AssertionDebug.hpp"
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
-
+#include "MPIMessageTag.hpp"
 #include "MPISerializationHelpersEigen.hpp"
 #include "MPISerializationHelpersGeometry.hpp"
 
@@ -91,6 +91,8 @@ class NeighbourMessageWrapperBodies : public boost::serialization::traits< Neigh
 public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    static const MPIMessageTag m_tag = MPIMessageTag::BODY_MESSAGE;
 
     typedef TNeighbourCommunicator NeighbourCommunicatorType;
     typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
@@ -851,6 +853,8 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
+    static const MPIMessageTag m_tag = MPIMessageTag::EXTERNALCONTACTS_MESSAGE;
+
     typedef TNeighbourCommunicator NeighbourCommunicatorType;
 
     typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
@@ -986,6 +990,8 @@ class NeighbourMessageWrapperInclusionMultiplicity : public NeighbourMessageWrap
 public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    static const MPIMessageTag m_tag = MPIMessageTag::SPLITBODYFACTOR_MESSAGE;
 
     typedef TNeighbourCommunicator NeighbourCommunicatorType;
     typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
@@ -1150,6 +1156,8 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
+    static const MPIMessageTag m_tag = MPIMessageTag::SPLITBODYUPDATE_MESSAGE;
+
     typedef TNeighbourCommunicator NeighbourCommunicatorType;
     typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
 
@@ -1284,6 +1292,8 @@ class NeighbourMessageWrapperInclusionSplitBodySolution : public NeighbourMessag
 public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    static const MPIMessageTag m_tag = MPIMessageTag::SPLITBODYSOLUTION_MESSAGE;
 
     typedef TNeighbourCommunicator NeighbourCommunicatorType;
     typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
@@ -1426,6 +1436,8 @@ class TopologyBuilderMessageWrapperBodies : public boost::serialization::traits<
         boost::serialization::track_never> {
 public:
 
+    static const MPIMessageTag m_tag = MPIMessageTag::TOPOLOGYBUILDER_POINTGATHER;
+
     typedef TTopologyBuilder TopologyBuilderType;
 
     TopologyBuilderMessageWrapperBodies(TopologyBuilderType * topoBuilder):
@@ -1458,6 +1470,10 @@ public:
     template<class Archive>
     void load(Archive & ar, const unsigned int version) const {
         // MASTER rank receives here all points and AABB
+
+
+
+
     }
 
     BOOST_SERIALIZATION_SPLIT_MEMBER();

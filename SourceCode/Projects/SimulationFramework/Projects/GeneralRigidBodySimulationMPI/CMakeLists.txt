@@ -83,6 +83,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPICommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPITopology.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/MPITopologyBuilder.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPISerializationHelpersEigen.hpp
     ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
     ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp

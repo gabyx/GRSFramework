@@ -45,25 +45,35 @@ class GridTopologyBuilder : public TopologyBuilder {
         typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
 
         GridTopologyBuilder(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                        boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
+                            boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
                             TopologyBuilder(pDynSys, pProcCommunicator)
         {}
 
         void rebuildTopology(){
 
-            // Broadcast all body center of gravities and common AABB to master rank
+            // Gather all body center of gravities and common AABB to master rank
             buildCurrentAABB();
 
             TopologyBuilderMessageWrapperBodies<GridTopologyBuilder> m(this);
+            RankIdType masterRank = this->m_pProcCommunicator->getMasterRank();
             if(this->m_pProcCommunicator->hasMasterRank()){
-                this->m_pProcCommunicator->sendBroadcast(m);
+                // Fill linear array with all ranks except master
+                std::vector<RankIdType> ranks;
+                unsigned int count=0;
+                std::generate_n(std::back_inserter(ranks),
+                                this->m_pProcCommunicator->getNProcesses(),
+                                [&](){ if(count == masterRank){return (++count)++;}else{return count++;} });
+
+                this->m_pProcCommunicator->recvMessageFromRanks(m, ranks, m.m_tag);
+
             }else{
-                this->m_pProcCommunicator->receiveBroadcast(m, m_pProcCommunicator->getMasterRank() );
+                this->m_pProcCommunicator->sendMessageToNeighbourRank(m, masterRank, m.m_tag);
+                this->m_pProcCommunicator->waitForAllNeighbourSends();
             }
 
             // Build new and optimal grid and broadcast
             if(this->m_pProcCommunicator->hasMasterRank()){
-                // Build grid
+                buildGrid();
                 // Broadcast grid
                 // Install grid
             }else{
@@ -85,9 +95,19 @@ class GridTopologyBuilder : public TopologyBuilder {
             }
         }
 
+        //only master rank
+        void buildGrid(){
+
+
+
+        }
+
+
      private:
         AABB m_currAABB;
 
+        std::vector<AABB> m_rankAABBs;
+        std::vector<Vector3> m_points;
 };
 
 }; //MPILayer
