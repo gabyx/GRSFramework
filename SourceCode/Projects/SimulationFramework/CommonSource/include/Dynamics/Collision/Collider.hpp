@@ -29,6 +29,91 @@
 #include "CollisionFunctions.hpp"
 
 
+
+/**
+* @ingroup Collision
+* @brief This is the Collider class, this functor class handles the collision of different RigidBodies with an AABB.
+*/
+/** @{ */
+
+class ColliderAABB : public boost::static_visitor<> {
+public:
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    ColliderAABB(): m_bOverlapTest(false),m_bOverlap(false) {}
+
+    bool checkOverlap(const RigidBodyType * pBody1, const AABB & aabb) {
+
+        // We know that we are not changing anything inside rigid body!
+        // Otherwise all operators()(const boost::shared_ptr...)
+        m_pBody1 = pBody1;
+
+        m_bOverlapTest = true;
+        m_bOverlap = false;
+
+        m_aabb = &aabb;
+        boost::apply_visitor(*this, m_pBody1->m_geometry);
+        return m_bOverlap;
+    }
+
+    // Dispatch
+    inline void operator()( const boost::shared_ptr<const SphereGeometry >  & sphereGeom1); ///< Calls Sphere/AABB collision detection.
+
+    /**
+    * @brief If no routine matched for Body to AABB throw error
+    */
+    template <typename Geom1>
+    inline void operator()(const  boost::shared_ptr<const Geom1> &g1) {
+        ERRORMSG("Collider:: collision detection for object-combination "<< typeid(Geom1).name()<<" and AABB not supported!");
+    }
+
+private:
+
+    const AABB * m_aabb;
+
+    bool m_bOverlapTest;                        ///< Boolean to decide if we only do overlap test or the whole collision output
+    bool m_bOverlap;                            ///< Boolean which tells if the collision detection catched an overlap in the last call
+
+    const RigidBodyType* m_pBody1; ///< Shared pointer to the first RigidBodyBase class instance.
+
+
+    //Collision function
+    inline void collide( const RigidBodyType * sphere,
+                         const boost::shared_ptr<const SphereGeometry >  & sphereGeom1,
+                         const AABB* aabb); ///< Sphere/AABB collision
+};
+
+void ColliderAABB::operator()(  const boost::shared_ptr<const SphereGeometry >  & sphereGeom1) {
+    collide(m_pBody1, sphereGeom1, m_aabb);
+}
+
+
+void ColliderAABB::collide( const RigidBodyType * sphere,
+                            const boost::shared_ptr<const SphereGeometry >  & sphereGeom1,
+                            const AABB* aabb) {
+    //Intersection test by Thomas Larsson "On Faster Sphere-Box Overlap Testing"
+    // Using arvos overlap test because larsons gives false positives!
+    PREC d = 0;
+    PREC e,c;
+    PREC r = sphereGeom1->m_radius;
+    m_bOverlap = false;
+    for(int i=0; i<3; i++) {
+        c = sphere->m_r_S(i);
+        e = std::max(aabb->m_minPoint(i)-c, 0.0) + std::max( c -  aabb->m_maxPoint(i) ,0.0);
+        d = d + e*e;
+    }
+    if(d > r*r) {
+        return;
+    }
+    m_bOverlap = true;
+    return;
+}
+
+/** @} */
+
+
+
+
 /**
 * @ingroup Collision
 * @brief This is the Collider class, this functor class handles the collision of different RigidBodies.
@@ -36,6 +121,7 @@
     Which then matches the corresponding operator() which then further calls the corresponding collision routine!
 */
 /** @{ */
+
 class Collider : public boost::static_visitor<> {
 public:
 
@@ -57,14 +143,14 @@ public:
     * @brief The collider constructor which constructs internally maintains its own collision set.
     */
 
-    Collider(){
+    Collider() {
         m_pColSet =  new CollisionSetType();
         m_bDeleteColSet = true;
         m_bObjectsSwapped = false;
     }
 
-    ~Collider(){
-        if(m_bDeleteColSet){
+    ~Collider() {
+        if(m_bDeleteColSet) {
             // Clear all entries
             for( auto it = m_pColSet->begin(); it != m_pColSet->end(); it++) {
                 delete (*it);
@@ -90,25 +176,10 @@ public:
 
         ASSERTMSG(m_pBody1 != m_pBody2, "Are you sure you want to checkCollision between the same objects?");
         m_bObjectsSwapped = false;
-        m_bOverlapTest = false;
-        m_bOverlap = false;
+
         boost::apply_visitor(*this, m_pBody1->m_geometry, m_pBody2->m_geometry);
 
     }
-
-    bool checkOverlap(const RigidBodyType * pBody1, const AABB & aabb) {
-
-        // We know that we are not changing anything inside rigid body!
-        // Otherwise all operators()(const boost::shared_ptr...)
-        m_pBody1 = pBody1;
-
-        m_bOverlapTest = true;
-        m_bOverlap = false;
-        otherGeoms = &aabb;
-        boost::apply_visitor(*this, m_pBody1->m_geometry, otherGeoms);
-        return m_bOverlap;
-    }
-
 
     /**
     * @name Dispatch operators
@@ -133,11 +204,6 @@ public:
     inline void operator()(  const boost::shared_ptr<const SphereGeometry >  & sphere,
                              const boost::shared_ptr<const MeshGeometry >  & mesh); ///< Calls Mesh/Mesh collision detection.
 
-    // For AABB's
-    inline void operator()( const boost::shared_ptr<const SphereGeometry >  & sphereGeom1,
-                            const AABB * aabb); ///< Calls Sphere/AABB collision detection.
-
-
     /**
     * @brief If no routine matched try to swap objects. If that fails too, an exception is thrown
     */
@@ -145,11 +211,6 @@ public:
     inline void operator()(const boost::shared_ptr<const Geom1> &g1, const boost::shared_ptr<const Geom2> &g2);
     /** @} */
 
-    /**
-    * @brief If no routine matched for Body to AABB throw error
-    */
-    template <typename Geom1>
-    inline void operator()(const  boost::shared_ptr<const Geom1> &g1, const AABB * aabb);
     /** @} */
     // =================================================================================
 
@@ -160,18 +221,17 @@ private:
 
     boost::variant<const AABB *> otherGeoms; ///< Used for other intersection tests
 
+
+
     bool m_bObjectsSwapped;                     ///< Boolean indicating if the bodies are swapped.
-    bool m_bOverlapTest;                        ///< Boolean to decide if we only do overlap test or the whole collision output
-    bool m_bOverlap;                            ///< Boolean which tells if the collision detection catched an overlap in the last call
     CollisionSetType * m_pColSet;               ///< List of found contacts for each query, gets cleard every time
     bool m_bDeleteColSet;                       ///< Boolean to decide if we own and should delete the m_pColSet pointer
     CollisionData * m_pColData;  ///< Temporary which is used always!
+
     /**
     * @brief The collision functions.
     * @{
     */
-    //Collision Functions ===============================================================================
-    // For RigidBodies
     inline void collide(const RigidBodyType * b1,
                         const boost::shared_ptr< const SphereGeometry >  & sphereGeom1,
                         const RigidBodyType * b2,
@@ -197,10 +257,7 @@ private:
                         const RigidBodyType * mesh,
                         const boost::shared_ptr<const MeshGeometry >  & meshGeom); ///< Sphere/Mesh collision.
 
-    // For AABB's
-    inline void collide( const RigidBodyType * sphere,
-                         const boost::shared_ptr<const SphereGeometry >  & sphereGeom1,
-                         const AABB* aabb); ///< Sphere/AABB collision
+
 
     template <typename O1, typename O2>
     inline void collide(const RigidBodyType * b1,
@@ -217,12 +274,7 @@ private:
 // IMPLEMENTATION ===============================================================================================================================================================
 
 
-
-
-
-
-
-// Dispatch =======================================================================================
+// Inline Dispatch =======================================================================================
 
 void Collider::operator()(  const boost::shared_ptr<const SphereGeometry >  & sphereGeom1 ,
                             const boost::shared_ptr<const SphereGeometry >  & sphereGeom2) {
@@ -255,9 +307,7 @@ void Collider::operator()(  const boost::shared_ptr<const SphereGeometry >  & sp
 
 
 
-void Collider::operator()(  const boost::shared_ptr<const SphereGeometry >  & sphereGeom1 , const AABB * aabb) {
-    collide(m_pBody1, sphereGeom1, aabb);
-}
+
 
 
 template <typename Geom1, typename Geom2>
@@ -266,11 +316,6 @@ void Collider::operator()(const boost::shared_ptr<const Geom1> &g1, const  boost
     collide(m_pBody2, (const boost::shared_ptr<const Geom2> &)g2, m_pBody1, (const boost::shared_ptr<const Geom1> &)g1);
 }
 
-
-template <typename Geom1>
-void Collider::operator()(const boost::shared_ptr<const Geom1> &g1, const AABB * aabb) {
-    ERRORMSG("Collider:: collision detection for object-combination "<< typeid(Geom1).name()<<" and AABB not supported!");
-}
 // ==================================================================================================
 
 
@@ -566,27 +611,6 @@ void Collider::collide( const RigidBodyType * sphere,
 
 }
 
-
-void Collider::collide( const RigidBodyType * sphere,
-                        const boost::shared_ptr<const SphereGeometry >  & sphereGeom1,
-                        const AABB* aabb) {
-    //Intersection test by Thomas Larsson "On Faster Sphere-Box Overlap Testing"
-    // Using arvos overlap test because larsons gives false positives!
-    PREC d = 0;
-    PREC e,c;
-    PREC r = sphereGeom1->m_radius;
-    m_bOverlap = false;
-    for(int i=0; i<3; i++) {
-        c = sphere->m_r_S(i);
-        e = std::max(aabb->m_minPoint(i)-c, 0.0) + std::max( c -  aabb->m_maxPoint(i) ,0.0);
-        d = d + e*e;
-    }
-    if(d > r*r) {
-        return;
-    }
-    m_bOverlap = true;
-    return;
-}
 
 
 

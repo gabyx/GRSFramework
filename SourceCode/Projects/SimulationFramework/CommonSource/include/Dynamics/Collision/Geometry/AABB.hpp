@@ -89,6 +89,10 @@ public:
         return m_maxPoint - m_minPoint;
     };
 
+    PREC maxExtent() const{
+        return (m_maxPoint - m_minPoint).maxCoeff();
+    };
+
     AABB & transform(const AffineTrafo & M) {
 
         AABB ret( M*(Vector3( m_minPoint(0), m_minPoint(1), m_minPoint(2))));
@@ -119,24 +123,20 @@ public:
 
 
     void expand(PREC d) {
+        ASSERTMSG(d>=0,"d>=0")
         m_minPoint -= Vector3(d,d,d);
         m_maxPoint += Vector3(d,d,d);
+    };
+
+    void expand(Vector3 d) {
+        ASSERTMSG(d(0)>=0 && d(1)>=0 && d(2)>=0,"d>=0")
+        m_minPoint -= d;
+        m_maxPoint += d;
     };
 
     PREC volume() const {
         Vector3 d = m_maxPoint- m_minPoint;
         return d(0) * d(1) * d(2);
-    };
-
-    PREC maxExtend() const {
-        Vector3 d = m_maxPoint- m_minPoint;
-        if (d(0) > d(1) && d(0) > d(2)) {
-            return 0;
-        } else if (d(1) > d(2)) {
-            return 1;
-        } else {
-            return 2;
-        }
     };
 
     //info about axis aligned bounding box

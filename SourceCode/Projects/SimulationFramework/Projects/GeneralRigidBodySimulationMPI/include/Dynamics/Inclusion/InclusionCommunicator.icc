@@ -213,7 +213,7 @@ void InclusionCommunicator<TCombo>::sendContactMessageToNeighbours() {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageContact.setRank(*it);
-        m_pProcComm->sendMessageToRank(m_messageContact,*it, m_messageContact.m_tag);
+        m_pProcComm->sendMessageToNeighbourRank(m_messageContact,*it, m_messageContact.m_tag);
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
@@ -225,7 +225,7 @@ void InclusionCommunicator<TCombo>::receiveContactMessagesFromNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)
 
     // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
-    m_pProcComm->waitForAllSends();
+    m_pProcComm->waitForAllNeighbourSends();
 }
 template<typename TCombo>
 void InclusionCommunicator<TCombo>::sendBodyMultiplicityMessageToNeighbours() {
@@ -237,7 +237,7 @@ void InclusionCommunicator<TCombo>::sendBodyMultiplicityMessageToNeighbours() {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageMultiplicity.setRank(*it);
-        m_pProcComm->sendMessageToRank(m_messageMultiplicity,*it, m_messageMultiplicity.m_tag );
+        m_pProcComm->sendMessageToNeighbourRank(m_messageMultiplicity,*it, m_messageMultiplicity.m_tag );
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
@@ -253,7 +253,7 @@ void InclusionCommunicator<TCombo>::recvBodyMultiplicityMessageFromNeighbours() 
 
     // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
     // We dont send to all neighbours but this should not be a problem for the underlying MPI_Wait call
-    m_pProcComm->waitForAllSends();
+    m_pProcComm->waitForAllNeighbourSends();
 }
 
 
@@ -268,7 +268,7 @@ void InclusionCommunicator<TCombo>::sendUpdateSplitBodiesToNeighbours() {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageSplitBodyUpdate.setRank(*it);
-        m_pProcComm->sendMessageToRank(m_messageSplitBodyUpdate,*it, m_messageSplitBodyUpdate.m_tag );
+        m_pProcComm->sendMessageToNeighbourRank(m_messageSplitBodyUpdate,*it, m_messageSplitBodyUpdate.m_tag );
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
@@ -285,7 +285,7 @@ void InclusionCommunicator<TCombo>::recvUpdateSplitBodiesFromNeighbours() {
 
     // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
     // We dont send to all neighbours but this should not be a problem for the underlying MPI_Wait call
-    m_pProcComm->waitForAllSends();
+    m_pProcComm->waitForAllNeighbourSends();
 }
 
 template<typename TCombo>
@@ -299,7 +299,7 @@ void InclusionCommunicator<TCombo>::sendSolutionSplitBodiesToNeighbours() {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageSplitBodySolution.setRank(*it);
-        m_pProcComm->sendMessageToRank(m_messageSplitBodySolution,*it, m_messageSplitBodySolution.m_tag );
+        m_pProcComm->sendMessageToNeighbourRank(m_messageSplitBodySolution,*it, m_messageSplitBodySolution.m_tag );
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
@@ -316,5 +316,5 @@ void InclusionCommunicator<TCombo>::recvSolutionSplitBodiesFromNeighbours() {
 
     // Wait for all sends to complete, Important because we issue a nonblocking send in sendMessagesToNeighbours
     // We dont send to all neighbours but this should not be a problem for the underlying MPI_Wait call
-    m_pProcComm->waitForAllSends();
+    m_pProcComm->waitForAllNeighbourSends();
 }

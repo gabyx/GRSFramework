@@ -68,7 +68,7 @@ private:
     AABB m_aabb; ///< Own AABB of this process
     CartesianGrid<NoCellData> m_grid;
 
-    Collider m_Collider;
+    ColliderAABB m_Collider;
 };
 
 }; //MPILayer

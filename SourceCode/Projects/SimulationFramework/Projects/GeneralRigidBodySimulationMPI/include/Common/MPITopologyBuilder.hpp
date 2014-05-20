@@ -52,7 +52,8 @@ class GridTopologyBuilder : public TopologyBuilder {
         void rebuildTopology(){
 
             // Gather all body center of gravities and common AABB to master rank
-            buildCurrentAABB();
+            m_totalAABB = AABB(); // Reset total AABB
+            buildOwnAABB();
 
             TopologyBuilderMessageWrapperBodies<GridTopologyBuilder> m(this);
             RankIdType masterRank = this->m_pProcCommunicator->getMasterRank();
@@ -64,10 +65,10 @@ class GridTopologyBuilder : public TopologyBuilder {
                                 this->m_pProcCommunicator->getNProcesses(),
                                 [&](){ if(count == masterRank){return (++count)++;}else{return count++;} });
 
-                this->m_pProcCommunicator->recvMessageFromRanks(m, ranks, m.m_tag);
+                this->m_pProcCommunicator->receiveMessageFromRanks(m, ranks, m.m_tag);
 
             }else{
-                this->m_pProcCommunicator->sendMessageToNeighbourRank(m, masterRank, m.m_tag);
+                this->m_pProcCommunicator->sendMessageToRank(m, masterRank, m.m_tag);
                 this->m_pProcCommunicator->waitForAllNeighbourSends();
             }
 
@@ -88,25 +89,30 @@ class GridTopologyBuilder : public TopologyBuilder {
             // Finished
         }
 
-        void buildCurrentAABB(){
-            m_currAABB = AABB();
+        void buildOwnAABB(){
+            m_ownAABB = AABB();
             for(auto bodyIt = this->m_pDynSys->m_SimBodies.begin(); bodyIt != this->m_pDynSys->m_SimBodies.end(); bodyIt++){
-                m_currAABB.unite((*bodyIt)->m_r_S);
+                m_ownAABB.unite((*bodyIt)->m_r_S);
             }
         }
 
         //only master rank
         void buildGrid(){
 
-
+            // Expand grid by some percentage
+            PREC dmax = m_totalAABB.maxExtent();
+            ASSERTMSG(dmax>=0,"max extend not >=0");
+            //m_totalAABB.expand(dmax*0.)
 
         }
 
 
      private:
-        AABB m_currAABB;
+        AABB m_ownAABB;
 
+        AABB m_totalAABB;
         std::vector<AABB> m_rankAABBs;
+
         std::vector<Vector3> m_points;
 };
 

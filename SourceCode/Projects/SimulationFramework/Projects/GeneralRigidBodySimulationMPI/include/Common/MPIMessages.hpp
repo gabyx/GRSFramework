@@ -1436,9 +1436,12 @@ class TopologyBuilderMessageWrapperBodies : public boost::serialization::traits<
         boost::serialization::track_never> {
 public:
 
+    DEFINE_LAYOUT_CONFIG_TYPES
+
     static const MPIMessageTag m_tag = MPIMessageTag::TOPOLOGYBUILDER_POINTGATHER;
 
     typedef TTopologyBuilder TopologyBuilderType;
+    typedef typename TopologyBuilderType::RankIdType  RankIdType;
 
     TopologyBuilderMessageWrapperBodies(TopologyBuilderType * topoBuilder):
             m_pTopoBuilder(topoBuilder)
@@ -1461,8 +1464,8 @@ public:
         }
 
         // AABB
-        ar & m_pTopoBuilder->m_currAABB.m_minPoint;
-        ar & m_pTopoBuilder->m_currAABB.m_maxPoint;
+        ar & m_pTopoBuilder->m_ownAABB.m_minPoint;
+        ar & m_pTopoBuilder->m_ownAABB.m_maxPoint;
 
     }
 
@@ -1471,14 +1474,31 @@ public:
     void load(Archive & ar, const unsigned int version) const {
         // MASTER rank receives here all points and AABB
 
+        Vector3 a,b;
+
+        unsigned int size;
+        ar & size;
+
+        //Points
+        for(unsigned int i = 0; i < size; i++){
+            serializeEigen(ar, a);
+            m_pTopoBuilder->m_points.emplace_back(a);
+        }
 
 
+        //AABB
+        serializeEigen(ar, a);
+        serializeEigen(ar, b);
+        m_pTopoBuilder->m_rankAABBs.emplace_back(a,b);
+
+        // unite with total AABB
+        m_pTopoBuilder->m_totalAABB += m_pTopoBuilder->m_rankAABBs.back();
 
     }
 
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
-
+    void setRank(const RankIdType & rank){}
 
 
 private:

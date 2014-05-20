@@ -220,6 +220,9 @@ public:
         allGather(value,gatheredValues,it->second);
     }
 
+
+
+
     /** Buffered Neighbour Send Begin ===============================================================================*/
     template<typename T>
     void sendMessageToNeighbourRank(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm ){
@@ -283,6 +286,25 @@ public:
     }
 
     /** Buffered Neighbour Send Finished ===============================================================================*/
+
+
+    template<typename T>
+    void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm ){
+        m_binary_message.clear();
+        // Serialize the message into the buffer
+        m_binary_message << t ;
+        // Blocking Send
+        // If MPI does not use buffering this function might hang if the receive are not posted correctly!
+        // See unsafe MPI
+        int error = MPI_Send( const_cast<char*>(m_binary_message.data()) , m_binary_message.size(), m_binary_message.getMPIDataType(),
+                              rank, static_cast<int>(tag), comm);
+        ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToRank failed!");
+    }
+
+    template<typename T>
+    inline void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag){
+        sendMessageToRank(t,rank,tag,this->m_comm);
+    }
 
 
     template<typename T, typename List>
