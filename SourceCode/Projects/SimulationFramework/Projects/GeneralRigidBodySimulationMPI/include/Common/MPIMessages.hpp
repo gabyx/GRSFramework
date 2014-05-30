@@ -1459,50 +1459,80 @@ public:
         for(auto bodyIt = m_pTopoBuilder->m_pDynSys->m_SimBodies.begin();
                  bodyIt != m_pTopoBuilder->m_pDynSys->m_SimBodies.end(); bodyIt++){
 
-                serializeEigen(ar,(*bodyIt)->m_r_S);
-                ar & (*bodyIt)->m_r_S;
+            ar & (*bodyIt)->m_id;
+            //Pos
+            serializeEigen(ar,(*bodyIt)->m_r_S);
+            serializeEigen(ar,(*bodyIt)->m_q_IK);
+            //Velocity
+            LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "No SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "!");
+            serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
         }
 
         // AABB
-        ar & m_pTopoBuilder->m_ownAABB.m_minPoint;
-        ar & m_pTopoBuilder->m_ownAABB.m_maxPoint;
+        ar & m_pTopoBuilder->m_aabb_loc;
+        // Theta
+        serializeEigen(ar,m_pTopoBuilder->m_Theta_G_loc);
+        // r_G
+        serializeEigen(ar,m_r_G_loc);
+
+
 
     }
 
     // receive broadcast
     template<class Archive>
     void load(Archive & ar, const unsigned int version) const {
-        // MASTER rank receives here all points and AABB
 
-        Vector3 a,b;
+        // MASTER rank receives here all points and AABB from m_rank
 
+        // Size
         unsigned int size;
         ar & size;
-
-        //Points
+        // States
+        RigidBodyIdType id;
         for(unsigned int i = 0; i < size; i++){
-            serializeEigen(ar, a);
-            m_pTopoBuilder->m_points.emplace_back(a);
+            ar & id;
+            // Pos/Vel
+            auto massPointRes = m_pTopoBuilder->m_massPoints_glo.emplace(id);
+            serializeEigen(ar, massPointRes.first->m_initState.m_q);
+            serializeEigen(ar, massPointRes.first->m_initState.m_u);
+            // First point push
+            massPointRes.first->m_points.push_back(m_initState.m_q.head<3>());
         }
 
 
         //AABB
-        serializeEigen(ar, a);
-        serializeEigen(ar, b);
-        m_pTopoBuilder->m_rankAABBs.emplace_back(a,b);
+        // Insert a AABB
+        auto insertedAABB = m_pTopoBuilder->m_rankAABBs.emplace_back(m_rank);
+        ar & (*insertedAABB.first);
+
+        // Theta_I
+        // Add Theta to the global one
+        Vector6 theta;
+        serializeEigen(ar,theta);
+        m_pTopoBuilder->m_Theta_G_glo += theta;
+
+        // r_G
+        // add to global r_G (massen gewichtung, masse=1)
+        Vector3 r_G;
+        serializeEigen(ar,r_G);
+        m_pTopoBuilder->m_r_G_glo += size*r_G;
 
         // unite with total AABB
-        m_pTopoBuilder->m_totalAABB += m_pTopoBuilder->m_rankAABBs.back();
+        m_pTopoBuilder->m_aabb_glo += *insertedAABB.first;
 
     }
 
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
-    void setRank(const RankIdType & rank){}
+    void setRank(const RankIdType & rank){
+        m_rank = rank;
+    }
 
 
 private:
     TTopologyBuilder * m_pTopoBuilder;
+    RankIdType m_rank;
 };
 
 

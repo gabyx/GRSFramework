@@ -28,9 +28,6 @@
 #include "MPICommunication.hpp"
 
 
-using namespace std;
-
-
 
 
 SimulationManagerMPI::SimulationManagerMPI() {

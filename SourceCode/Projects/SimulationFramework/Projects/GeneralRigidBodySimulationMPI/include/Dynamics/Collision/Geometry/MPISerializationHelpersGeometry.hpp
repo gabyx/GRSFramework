@@ -7,8 +7,9 @@
 #include "SphereGeometry.hpp"
 #include "HalfspaceGeometry.hpp"
 #include "MeshGeometry.hpp"
+#include "AABB.hpp"
 
-#include "MPISerializationHelpersGeometry.hpp"
+#include "MPISerializationHelpersEigen.hpp"
 
 namespace boost {
 namespace serialization {
@@ -32,6 +33,15 @@ namespace serialization {
         ar & g.m_radius;
 
     }
+
+    template<class Archive>
+    void serialize(Archive & ar, AABB & g, const unsigned int version) {
+
+        serializeEigen(ar & g.m_minPoint);
+        serializeEigen(ar & g.m_maxPoint);
+
+    }
+
 
     template<class Archive>
     void serialize(Archive & ar, MeshGeometry & g, const unsigned int version) {

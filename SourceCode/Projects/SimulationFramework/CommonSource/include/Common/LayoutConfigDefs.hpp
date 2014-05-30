@@ -9,9 +9,6 @@
 #ifndef LayoutConfigDefs_hpp
 #define LayoutConfigDefs_hpp
 
-#include <Eigen/Dense>
-
-#include <Eigen/Geometry>
 
 #include "MyMatrixDefs.hpp"
 

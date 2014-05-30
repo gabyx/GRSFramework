@@ -15,6 +15,10 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     AABB() {
+        reset();
+    };
+
+    void reset(){
         // Violating the constraint min<max for making a completey empty box!
         m_minPoint(0) = std::numeric_limits<double>::max();
         m_maxPoint(0) = std::numeric_limits<double>::min();
@@ -22,8 +26,8 @@ public:
         m_maxPoint(1) = std::numeric_limits<double>::min();
         m_minPoint(2) = std::numeric_limits<double>::max();
         m_maxPoint(2) = std::numeric_limits<double>::min();
+    }
 
-    };
     AABB( const Vector3 &p) {
         m_minPoint = p;
         m_maxPoint = p;

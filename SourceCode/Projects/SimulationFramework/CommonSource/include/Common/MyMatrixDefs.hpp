@@ -13,6 +13,8 @@
 #include <Eigen/Sparse>
 #include <Eigen/Geometry>
 
+#include <Eigen/Eigenvalues>
+
 // ================================================================================================
 /** @brief This
 *	These are some small matrix definitions.
@@ -29,6 +31,7 @@ struct MyMatrix{
    typedef Eigen::Matrix<PREC, 2, 1> Vector2;
    typedef Eigen::Matrix<PREC, 4, 1> Quaternion;
    typedef Eigen::Matrix<PREC, 4, 1> Vector4;
+   typedef Eigen::Matrix<PREC, 4, 1> Vector6;
    typedef Eigen::Matrix<PREC, Eigen::Dynamic , 1 >                    VectorDyn;
    typedef Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic >       MatrixDyn;
    typedef Eigen::DiagonalMatrix<PREC, Eigen::Dynamic >                MatrixDiagDyn;
@@ -42,6 +45,14 @@ struct MyMatrix{
    template<typename EigenType> using MatrixRef = Eigen::Ref<EigenType>;
 
 };
+
+
+struct MyMatrixDecomposition{;
+
+    template<typename TMatrix>
+    using Eigen::SelfAdjointEigenSolver<TMatrix> EigenSolverSelfAdjoint;
+
+}
 
 /**
 * @brief This macro is used to typedef all custom matrix types which have nothing to do with the system.
