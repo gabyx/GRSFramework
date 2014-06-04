@@ -20,6 +20,7 @@ class SimFileJoiner {
 public:
     struct RangeAll {};
 private:
+
     template<typename TYPE, typename TYPE2 = TYPE>
     struct ListOrRangeTypes {
         using ListType = std::set<TYPE>; ///< ordered list!
@@ -28,7 +29,7 @@ private:
         static const unsigned int RangeTypeIdx = 1;
         using AllType = RangeAll;
         static const unsigned int AllTypeIdx = 2;
-        using VariantType = boost::variant< ListType, RangeType, AllType > ;
+        using VariantType = boost::variant< ListType, RangeType, AllType > ; // Indexes into the variants are defined above!
 
     };
 

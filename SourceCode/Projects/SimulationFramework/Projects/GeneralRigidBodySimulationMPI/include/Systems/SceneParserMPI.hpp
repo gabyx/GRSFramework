@@ -230,13 +230,11 @@ protected:
 
         for(int i=0; i<instances; i++) {
 
-            RigidBodyType * temp_ptr = new RigidBodyType(RigidBodyId::makeId(startIdx+i, groupId));
 
+            RigidBodyType * temp_ptr = new RigidBodyType(RigidBodyId::makeId(startIdx+i, groupId));
             m_bodyListGroup.push_back(temp_ptr);
 
-            Vector3 scale;
-            scale.setOnes();
-            m_bodyScalesGroup.push_back(scale);
+            m_bodyScalesGroup.emplace_back(1,1,1);
         }
 
 
