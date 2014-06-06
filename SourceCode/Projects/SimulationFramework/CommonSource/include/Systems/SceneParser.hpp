@@ -43,55 +43,6 @@
 
 #include "PrintGeometryDetails.hpp"
 
-template<typename T>
-class returnIterator
-    : public boost::static_visitor<return_type<T>::type>
-{
-public:
-
-    void operator()(int & i) const
-    {
-        i *= 2;
-    }
-
-    void operator()(std::string & str) const
-    {
-        str += str;
-    }
-
-};
-
-
-class BodyRange{
- public:
-
-    template<typename TYPE, typename TYPE2 = TYPE>
-    struct ListOrRangeTypes {
-        using ListType = std::set<TYPE>; ///< ordered list!
-        static const unsigned int ListTypeIdx = 0;
-        using RangeType =  std::pair<TYPE2,TYPE2>; ///< range start to end values
-        static const unsigned int RangeTypeIdx = 1;
-        using AllType = RangeAll;
-        static const unsigned int AllTypeIdx = 2;
-        using VariantType = boost::variant< ListType, RangeType, AllType > ; // Indexes into the variants are defined above!
-
-    };
-
-    BodyRange( Liste Init );
-
-    typename ListOrRangeTypes::VariantType m_rangeVariant;
-
-
-    iterator begin(){};
-
-    iterator end(){};
-
-    struct iterator{
-        iterator
-    };
-
-};
-
 
 
 class GetScaleOfGeomVisitor : public boost::static_visitor<> {

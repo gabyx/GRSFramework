@@ -2,7 +2,7 @@
 #define Ray_hpp
 
 
-#include "MyMatrixDefs.hpp"
+#include "TypeDefs.hpp"
 
 
 class Ray {
@@ -12,7 +12,10 @@ public:
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-	Ray(Vector3 p, Vector3 d) :m_p(p), m_d(d.normalize()){
+	Ray(Vector3 &p, Vector3 &d):
+	    m_p(p), m_d(d)
+    {
+        m_d.normalize();
         m_mint = 0.0;
         m_maxt = std::numeric_limits<PREC>::max();
     }
@@ -24,7 +27,7 @@ public:
         m_maxt = std::numeric_limits<PREC>::max();
     }
 
-    Ray::~Ray(){};
+    ~Ray(){};
 
     Vector3 getPointOnRay(double t) const {
         return m_p + (m_d*t);
@@ -38,7 +41,7 @@ public:
 
 	// epsilon t to avoid self intersection due to rounding errors
 	// if the ray starts exactly on an element
-	static const double epsilon_t = 0.001;
+	static const double epsilon_t;
 
 };
 

@@ -112,7 +112,7 @@ protected:
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.
     typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;          ///< List of all fixed not simulated bodies.
 
-    Collider m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
+    ColliderBody m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
     friend class Collider;
 
     Logging::Log *  m_pSolverLog;
