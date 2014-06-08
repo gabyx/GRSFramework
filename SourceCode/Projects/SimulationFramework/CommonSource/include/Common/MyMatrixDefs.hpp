@@ -50,9 +50,9 @@ struct MyMatrix{
 struct MyMatrixDecomposition{;
 
     template<typename TMatrix>
-    using Eigen::SelfAdjointEigenSolver<TMatrix> EigenSolverSelfAdjoint;
+    using EigenSolverSelfAdjoint = Eigen::SelfAdjointEigenSolver<TMatrix> ;
 
-}
+};
 
 /**
 * @brief This macro is used to typedef all custom matrix types which have nothing to do with the system.

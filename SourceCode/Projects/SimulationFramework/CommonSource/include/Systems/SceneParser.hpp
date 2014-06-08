@@ -44,6 +44,7 @@
 #include "PrintGeometryDetails.hpp"
 
 
+
 class GetScaleOfGeomVisitor : public boost::static_visitor<> {
 public:
 
@@ -689,16 +690,16 @@ protected:
         unsigned int instances = rigidbodies->ToElement()->GetAttribute<unsigned int>("instances");
 
         unsigned int groupId, startIdx;
+        // Determine GroupId (if specified, otherwise maximum)
         if(rigidBodiesEl->HasAttribute("groupId")) {
             groupId = rigidBodiesEl->GetAttribute<unsigned int>("groupId");
             m_globalMaxGroupId = std::max(m_globalMaxGroupId,groupId);
-
         } else {
             m_globalMaxGroupId++;
             groupId = m_globalMaxGroupId;
         }
 
-        // Get the startidx for this group
+        // Get the startidx for this GroupIds
         auto it = groupIdToNBodies.find(groupId);
         if( it == groupIdToNBodies.end()) {
             groupIdToNBodies[groupId] = 0;
@@ -710,18 +711,15 @@ protected:
 
         for(int i=0; i<instances; i++) {
 
+
+            //Assign a unique id and allcoacte body
             typename RigidBodyId::Type id = RigidBodyId::makeId(startIdx+i, groupId);
-
             RigidBodyType * temp_ptr = new RigidBodyType(id);
-
-            //Assign a unique id
 
             LOG(m_pSimulationLog,"---> Added RigidBody Instance: "<<RigidBodyId::getBodyIdString(temp_ptr)<<std::endl);
             m_bodyListGroup.push_back(temp_ptr);
 
-            Vector3 scale;
-            scale.setOnes();
-            m_bodyScalesGroup.push_back(scale);
+            m_bodyScalesGroup.emplace_back(1,1,1);
         }
         LOG(m_pSimulationLog,"---> Added "<<instances<<" RigidBody Instances..."<<std::endl;);
 
@@ -776,10 +774,6 @@ protected:
 
         ticpp::Node * visualizationNode = rigidbodies->FirstChild("Visualization");
         processVisualization( visualizationNode);
-
-
-
-
 
     }
 
@@ -1726,8 +1720,6 @@ protected:
         }
 
     }
-
-
 
     virtual void processVisualization( ticpp::Node * visualizationNode) {
 

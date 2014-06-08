@@ -127,6 +127,7 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/Ray.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/SphereGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/PlaneGeometry.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
@@ -168,6 +169,7 @@ SET(DYNAMICS_SRC
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/BoxGeometry.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/Ray.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactParameterMap.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactModels.cpp
      ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ConvexSets.cpp
