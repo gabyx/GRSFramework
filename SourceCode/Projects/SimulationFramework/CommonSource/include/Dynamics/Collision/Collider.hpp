@@ -238,7 +238,7 @@ public:
     ~ColliderBody() {
         if(m_bDeleteColSet) {
             // Clear all entries
-            for( auto it = m_pColSet->begin(); it != m_pColSet->end(); it++) {
+            for( auto it = m_pColSet->begin(); it != m_pColSet->end(); ++it){
                 delete (*it);
             }
             m_pColSet->clear();
@@ -518,7 +518,7 @@ void ColliderBody::collide(const boost::shared_ptr<const SphereGeometry >  & sph
 //
 //    // Take care! Direct X Compliant stupid fucking matrices!!
 //    IceMaths::Matrix4x4 * mat = (IceMaths::Matrix4x4 *)(H_IK.data());
-//    if(!sphereCollider.Collide(sphereCache,sphereTemp,*(meshGeom->m_pOpcodeModel),NULL, mat )) { //(const IceMaths::Matrix4x4 *)(H_IK.data())
+//    if(!sphereCollider.Collide(sphereCache,sphereTemp,*(meshGeom->m_pOpcodeModel),nullptr, mat )) { //(const IceMaths::Matrix4x4 *)(H_IK.data())
 //        ASSERTMSG(false,"Collision Sphere Mesh failed!");
 //    }
 //    /*

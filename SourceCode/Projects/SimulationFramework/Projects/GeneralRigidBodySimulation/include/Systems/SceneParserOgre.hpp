@@ -21,7 +21,7 @@ public:
         std::vector<Ogre::SceneNode*> &nodesBodies,
         boost::shared_ptr<DynamicsSystemType> pDynSys
     ) : m_pSceneMgr(pSceneMgr),  m_rSceneNodeSimBodies(nodesSimBodies), m_rSceneNodeBodies(nodesBodies) , SceneParser(pDynSys) {
-        ASSERTMSG(baseFrame != NULL, "Pointer is NULL");
+        ASSERTMSG(baseFrame != nullptr, "Pointer is nullptr");
         m_BaseFrame = baseFrame;
         this->m_bParseDynamics = true;
         this->m_nSimBodies = 0;
@@ -35,7 +35,7 @@ public:
         std::vector<Ogre::SceneNode*> &nodesBodies
     )
         : m_pSceneMgr(pSceneMgr),  m_rSceneNodeSimBodies(nodesSimBodies), m_rSceneNodeBodies(nodesBodies) {
-        ASSERTMSG(baseFrame != NULL, "Pointer is NULL");
+        ASSERTMSG(baseFrame != nullptr, "Pointer is nullptr");
         m_BaseFrame = baseFrame;
         this->m_bParseDynamics = false;
         this->m_nSimBodies = 0;

@@ -65,8 +65,8 @@ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   FrontBackBuffer(){
-    m_pFront = NULL;
-    m_pBack = NULL;
+    m_pFront = nullptr;
+    m_pBack = nullptr;
   };
 
   FrontBackBuffer(

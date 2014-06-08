@@ -120,6 +120,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/AssertionDebug.hpp
     ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
+    ${COMMONSOURCE_DIR}/include/Common/BitCount.hpp
     ${COMMONSOURCE_DIR}/include/Common/MeshData.hpp
     ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
     ${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
@@ -144,6 +145,7 @@ SET(COMMON_SRC
     ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
     ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFile.cpp
     ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
+    ${COMMONSOURCE_DIR}/src/Common/BitCount.cpp
 )
 
 SET(DYNAMICS_INC
@@ -198,6 +200,7 @@ SET(DYNAMICS_INC
 )
 SET(DYNAMICS_SRC
     ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoG.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCO.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionSolver.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/General/MoreauTimeStepper.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Collider.cpp

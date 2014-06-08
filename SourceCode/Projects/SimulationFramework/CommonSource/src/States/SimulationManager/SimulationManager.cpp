@@ -33,7 +33,7 @@ using namespace std;
 
 SimulationManager::SimulationManager() {
 
-    m_pSimulationLog = NULL;
+    m_pSimulationLog = nullptr;
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");

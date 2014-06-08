@@ -47,7 +47,7 @@ void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper,
 
 void DynamicsSystem::initializeLog(Logging::Log* pLog) {
     m_pSolverLog = pLog;
-    ASSERTMSG(m_pSolverLog != NULL, "Logging::Log: NULL!");
+    ASSERTMSG(m_pSolverLog != nullptr, "Logging::Log: nullptr!");
 }
 
 

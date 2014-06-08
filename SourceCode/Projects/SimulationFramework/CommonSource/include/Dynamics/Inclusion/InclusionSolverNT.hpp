@@ -190,12 +190,6 @@ void InclusionSolverNT<TInclusionSolverConfig>::initializeLog( Logging::Log* pSo
 
 
 template< typename TInclusionSolverConfig >
-unsigned int InclusionSolverNT<TInclusionSolverConfig>::getNObjects()
-{
-  return m_nSimBodies;
-}
-
-template< typename TInclusionSolverConfig >
 void InclusionSolverNT<TInclusionSolverConfig>::reset()
 {
   // Do a Debug check if sizes match!
@@ -431,10 +425,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
       m_I_epsilon_T(m_nDofFriction*contactIdx)      = 1 + params.m_epsilon_T;
       m_I_epsilon_T(m_nDofFriction*contactIdx + 1)  = 1 + params.m_epsilon_T;
 
-      // Fill in Percussions
-#if USE_PERCUSSION_POOL == 1
-      readFromPercussionPool(contactIdx,P_N_back,P_T_back);
-#endif
+
 
     }
     // =============================================================================================================
@@ -504,10 +495,6 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
     //doSorProx();
     doJorProx();
 
-    //TODO update ContactPercussions
-#if USE_PERCUSSION_POOL == 1
-    updatePercussionPool(P_N_front, P_T_front);
-#endif
 
 #if CoutLevelSolverWhenContact>2
     LOG(m_pSolverLog, "% Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);

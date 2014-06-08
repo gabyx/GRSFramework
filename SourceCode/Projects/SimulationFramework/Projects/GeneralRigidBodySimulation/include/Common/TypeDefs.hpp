@@ -13,6 +13,7 @@
 
 
 
+/// Forward declarations , includes and the GlobalConfig typed need to match!
 
 
 #define StatePool_INCLUDE_FILE "StatePoolVisBackFront.hpp"
@@ -26,9 +27,9 @@ class DynamicsSystem;
 #define InclusionSolverSettings_INCLUDE_FILE    "InclusionSolverSettings.hpp"
 class InclusionSolverSettings;
 
-#define InclusionSolver_INCLUDE_FILE "InclusionSolverCONoG.hpp"
-//class InclusionSolverCO;
-class InclusionSolverCONoG;
+#define InclusionSolver_INCLUDE_FILE "InclusionSolverCO.hpp"
+class InclusionSolverCO;
+//class InclusionSolverCONoG;
 
 #define RigidBody_INCLUDE_FILE "RigidBody.hpp"
 class RigidBodyBase;
@@ -55,7 +56,7 @@ namespace GlobalConfigs {
 
         typedef CollisionSolver         CollisionSolverType;
 
-        typedef InclusionSolverCONoG    InclusionSolverType;
+        typedef InclusionSolverCO       InclusionSolverType;
         typedef InclusionSolverSettings InclusionSolverSettingsType;
 
     };

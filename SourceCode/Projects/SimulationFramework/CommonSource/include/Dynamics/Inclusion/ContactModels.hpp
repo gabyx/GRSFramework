@@ -82,6 +82,7 @@
       };
 
 
+
     constexpr unsigned int getLambdaDim(const ContactModelEnum & e){
         return (e == ContactModelEnum::U_ContactModel) ?  UnilateralContactModel::ConvexSet::Dimension :
             (

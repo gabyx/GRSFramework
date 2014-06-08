@@ -191,7 +191,7 @@ void PlaybackState::updatePlaybackPanel() {
 
 
     Ogre::StringVector vec;
-    for(auto it=pathMap.begin(); it!=pathMap.end(); it++) {
+    for(auto it=pathMap.begin(); it!=pathMap.end(); ++it) {
         vec.push_back(it->string());
     }
 

@@ -10,6 +10,8 @@
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
+#include "BitCount.hpp"
+#include "EnumClassHelper.hpp"
 
 #include "GeneralGraph.hpp"
 #include "CollisionData.hpp"
@@ -48,7 +50,7 @@ public:
 public:
 
     ContactGraph(ContactParameterMap * contactParameterMap):
-        m_nodeCounter(0),m_edgeCounter(0) {
+        m_nodeCounter(0),m_edgeCounter(0),m_nLambdas(0) {
         m_pContactParameterMap = contactParameterMap;
     }
     ~ContactGraph() {
@@ -58,9 +60,9 @@ public:
     void clearGraph() {
         // This deletes all nodes, edges, and decrements the reference counts for the nodedata and edgedata
         // cleanup allocated memory
-        for(auto n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
+        for(auto n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); ++n_it)
             delete (*n_it);
-        for(auto e_it = this->m_edges.begin(); e_it != this->m_edges.end(); e_it++)
+        for(auto e_it = this->m_edges.begin(); e_it != this->m_edges.end(); ++e_it)
             delete (*e_it);
         //cout << "clear graph"<<endl;
         this->m_nodes.clear();
@@ -69,13 +71,13 @@ public:
         m_edgeCounter = 0;
         m_simBodiesToContactsList.clear();
 
-
+        m_nLambdas = 0;
 
     }
 
     void addNode(CollisionData * pCollData) {
 
-        ASSERTMSG(pCollData->m_pBody1 != NULL && pCollData->m_pBody2 != NULL, " Bodys are null pointers?");
+        ASSERTMSG(pCollData->m_pBody1 != nullptr && pCollData->m_pBody2 != nullptr, " Bodys are null pointers?");
         //cout << "add node : "<<m_nodeCounter<< " body id:" << pCollData->m_pBody1->m_id <<" and "<< pCollData->m_pBody2->m_id <<endl;
 
         //  add a contact node to the graph
@@ -132,7 +134,19 @@ public:
     std::unordered_map<const RigidBodyType *, NodeListType > m_simBodiesToContactsList;
     typedef typename std::unordered_map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIterator;
 
+    unsigned int getNLambdas(){return m_nLambdas;}
+
+    bool areContactModelsHomogen(){
+        if( BitCount::parallelBitcount(m_usedContactModels) > 1){
+            return false;
+        }
+        // Only one ContactModel used!
+        return true;
+    }
 private:
+
+    typename std::underlying_type<ContactModels::ContactModelEnum>::type m_usedContactModels; ///< Bitflags which mark all used contactmodels
+    unsigned int m_nLambdas = 0; ///< How many forces we have counted over all nodes
 
     void setContactModel(NodeDataType & nodeData) {
 
@@ -142,7 +156,11 @@ private:
 
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ) {
 
+            // Set flag for the corresponding model
+            m_usedContactModels |= 1 << EnumConversion::toIntegral(ContactModels::ContactModelEnum::UCF_ContactModel);
+
             const unsigned int dimSet = ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension;
+            m_nLambdas += dimSet; // Add to counter
 
             nodeData.m_chi.setZero(dimSet);
             nodeData.m_eps.setZero(dimSet);
@@ -236,7 +254,7 @@ private:
         //iterate over the nodeList and add edges!
         typename NodeListType::iterator it;
         // if no contacts are already on the body we skip this
-        for(it = nodeList.begin(); it != nodeList.end(); it++) {
+        for(it = nodeList.begin(); it != nodeList.end(); ++it) {
 
             this->m_edges.push_back(new EdgeType(m_edgeCounter));
             addedEdge = this->m_edges.back();
@@ -259,8 +277,8 @@ private:
 
     ContactParameterMap* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 
-    unsigned int m_nodeCounter; ///< An node counter, starting at 0.
-    unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
+    unsigned int m_nodeCounter = 0; ///< An node counter, starting at 0.
+    unsigned int m_edgeCounter = 0; ///< An edge counter, starting at 0.
 
 };
 
@@ -335,9 +353,9 @@ public:
     void clearGraph() {
         // This deletes all nodes, edges, and decrements the reference counts for the nodedata and edgedata
         // cleanup allocated memory
-        for(auto n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
+        for(auto n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); ++n_it)
             delete (*n_it);
-        for(auto e_it = this->m_edges.begin(); e_it != this->m_edges.end(); e_it++)
+        for(auto e_it = this->m_edges.begin(); e_it != this->m_edges.end(); ++e_it)
             delete (*e_it);
         //cout << "clear graph"<<endl;
         this->m_nodes.clear();
@@ -352,7 +370,7 @@ public:
 
         //Take care state, is only q = q_m, u is not set and is zero!
 
-        ASSERTMSG(pCollData->m_pBody1 != NULL && pCollData->m_pBody2 != NULL, " Bodys are null pointers?");
+        ASSERTMSG(pCollData->m_pBody1 != nullptr && pCollData->m_pBody2 != nullptr, " Bodys are null pointers?");
         //cout << "add node : "<<m_nodeCounter<< " body id:" << RigidBodyId::getBodyIdString(pCollData->m_pBody1) <<" and "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2) <<endl;
 
         //  add a contact node to the graph
@@ -424,7 +442,16 @@ public:
 
     PREC m_maxResidual;
 
+    bool areContactModelsHomogen(){
+        if( BitCount::parallelBitcount(m_usedContactModels) > 1){
+            return false;
+        }
+        // Only one ContactModel used!
+        return true;
+    }
+
 private:
+    typename std::underlying_type<ContactModels::ContactModelEnum>::type m_usedContactModels; ///< Bitflags which mark all used contactmodels;
 
     bool m_firstIteration;
 
@@ -440,6 +467,9 @@ private:
                 nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ||
                 nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel
           ) {
+
+            // Set flag for the corresponding model
+            m_usedContactModels |= 1 << EnumConversion::toIntegral(nodeData.m_contactParameter.m_contactModel);
 
             const unsigned int dimSet = ContactModels::getLambdaDim(nodeData.m_contactParameter.m_contactModel);
 
@@ -551,7 +581,7 @@ private:
         //iterate over the nodeList and add edges!
         typename NodeListType::iterator it;
         // if no contacts are already on the body we skip this
-        for(it = nodeList.begin(); it != nodeList.end(); it++) {
+        for(it = nodeList.begin(); it != nodeList.end(); ++it) {
 
             this->m_edges.push_back(new EdgeType(m_edgeCounter));
             addedEdge = this->m_edges.back();
@@ -631,30 +661,30 @@ public:
         m_alpha = alpha;
     }
 
-    template<int B>
-    void doVelocityUpdate(typename ContactGraphType::NodeDataType & nodeData) {
-        typedef decltype(nodeData.m_u1BufferPtr->m_front) VectorUType;
-        RigidBodyType * pBody;
-        VectorUType * pUBuffer;
-
-        if(B==1) {
-            pUBuffer = &nodeData.m_u1BufferPtr->m_front;
-            pBody = nodeData.m_pCollData->m_pBody1;
-        } else {
-            pUBuffer = &nodeData.m_u2BufferPtr->m_front;
-            pBody = nodeData.m_pCollData->m_pBody2;
-        }
-
-        // u_S + Minv *h * deltaT
-        *pUBuffer = pBody->m_pSolverData->m_uBegin + pBody->m_MassMatrixInv_diag.asDiagonal() * pBody->m_h_term * m_settings.m_deltaT;
-
-        // Iterate over all nodes and add contribution
-        auto nodeList = m_pGraph->m_simBodiesToContactsList[pBody];
-        for(auto it = nodeList.begin(); it!=nodeList.end(); it++) {
-            *pUBuffer += pBody->m_MassMatrixInv_diag.asDiagonal() * ContactGraphType::getW_bodyRef((*it)->m_nodeData,pBody) * (*it)->m_nodeData.m_LambdaFront;
-        }
-
-    }
+//    template<int B>
+//    void doVelocityUpdate(typename ContactGraphType::NodeDataType & nodeData) {
+//        typedef decltype(nodeData.m_u1BufferPtr->m_front) VectorUType;
+//        RigidBodyType * pBody;
+//        VectorUType * pUBuffer;
+//
+//        if(B==1) {
+//            pUBuffer = &nodeData.m_u1BufferPtr->m_front;
+//            pBody = nodeData.m_pCollData->m_pBody1;
+//        } else {
+//            pUBuffer = &nodeData.m_u2BufferPtr->m_front;
+//            pBody = nodeData.m_pCollData->m_pBody2;
+//        }
+//
+//        // u_S + Minv *h * deltaT
+//        *pUBuffer = pBody->m_pSolverData->m_uBegin + pBody->m_MassMatrixInv_diag.asDiagonal() * pBody->m_h_term * m_settings.m_deltaT;
+//
+//        // Iterate over all nodes and add contribution
+//        auto nodeList = m_pGraph->m_simBodiesToContactsList[pBody];
+//        for(auto it = nodeList.begin(); it!=nodeList.end(); ++it) {
+//            *pUBuffer += pBody->m_MassMatrixInv_diag.asDiagonal() * ContactGraphType::getW_bodyRef((*it)->m_nodeData,pBody) * (*it)->m_nodeData.m_LambdaFront;
+//        }
+//
+//    }
 
     void setNewDamping(typename ContactGraphType::NodeDataType & nodeData) {
 
@@ -977,7 +1007,7 @@ public:
 
 
 /**
-* This is a full sor, projects normal and then tangential consecutive!
+* This is a full sor, projects normal and then tangential of one contact consecutive!
 */
 class FullSorProxStepNodeVisitor : public SorProxStepNodeVisitor {
 public:

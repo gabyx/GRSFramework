@@ -154,7 +154,7 @@ void MultiBodySimFilePart::write(double time, const RigidBodyContainer & bodyLis
     *this << time;
     *this << (unsigned int) bodyList.size();
     STATIC_ASSERT2((std::is_same<double, typename RigidBodyContainer::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
-    for(auto it = bodyList.beginOrdered(); it != bodyList.endOrdered(); it++){
+    for(auto it = bodyList.beginOrdered(); it != bodyList.endOrdered(); ++it){
         *this << (*it)->m_id;
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());

@@ -73,7 +73,7 @@ public:
         bool validContact;
         int faceNr=0;
         double maxOverlap=0;
-        for(faceIt = mesh.m_Faces.begin(); faceIt != mesh.m_Faces.end(); faceIt++) {
+        for(faceIt = mesh.m_Faces.begin(); faceIt != mesh.m_Faces.end(); ++faceIt) {
             // Check each face!
             vertex0 = mesh.m_Vertices[(*faceIt)(0)];
             vertex1 = mesh.m_Vertices[(*faceIt)(1)];
@@ -130,7 +130,7 @@ public:
         static ClosestPoint cp;
         cp.get<0>() = 0; // set overlap to zero
 
-        for(faceIt = mesh.m_Faces.begin(); faceIt != mesh.m_Faces.end(); faceIt++) {
+        for(faceIt = mesh.m_Faces.begin(); faceIt != mesh.m_Faces.end(); ++faceIt) {
             // Check each face!
             vertex0 = mesh.m_Vertices[(*faceIt)(0)];
             vertex1 = mesh.m_Vertices[(*faceIt)(1)];

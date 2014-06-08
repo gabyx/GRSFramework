@@ -209,7 +209,7 @@ void InclusionCommunicator<TCombo>::sendContactMessageToNeighbours() {
 
 
 
-    for(auto it = m_nbRanks.begin(); it != m_nbRanks.end(); it++) {
+    for(auto it = m_nbRanks.begin(); it != m_nbRanks.end(); ++it) {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageContact.setRank(*it);
@@ -233,7 +233,7 @@ void InclusionCommunicator<TCombo>::sendBodyMultiplicityMessageToNeighbours() {
 
 
 
-    for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); it++) {
+    for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); ++it) {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageMultiplicity.setRank(*it);
@@ -264,7 +264,7 @@ void InclusionCommunicator<TCombo>::sendUpdateSplitBodiesToNeighbours() {
 
     m_messageSplitBodyUpdate.setStep(m_globalIterationNumber);
 
-    for(auto it = m_nbRanksSendRecvRemote.begin(); it != m_nbRanksSendRecvRemote.end(); it++) {
+    for(auto it = m_nbRanksSendRecvRemote.begin(); it != m_nbRanksSendRecvRemote.end(); ++it) {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageSplitBodyUpdate.setRank(*it);
@@ -295,7 +295,7 @@ void InclusionCommunicator<TCombo>::sendSolutionSplitBodiesToNeighbours() {
 
     m_messageSplitBodySolution.setStep(m_globalIterationNumber);
 
-    for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); it++) {
+    for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); ++it) {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageSplitBodySolution.setRank(*it);

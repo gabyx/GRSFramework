@@ -272,7 +272,7 @@ public:
             for(auto it = ranks.begin(); it != ranks.end(); it++){
                 //this takes advantage of move semantics in MessageBinarySerializer
                 m_sendStatuses.push_back(MPI_Status());
-                m_sendRequests.push_back(NULL);
+                m_sendRequests.push_back(nullptr);
                 m_sendMessageBuffers.insert(std::make_pair(
                                                         *it,
                                                         SendTupleType(MessageBinarySerializer(1024*1024),

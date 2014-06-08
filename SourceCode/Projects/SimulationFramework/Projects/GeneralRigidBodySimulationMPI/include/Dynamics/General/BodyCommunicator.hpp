@@ -55,14 +55,14 @@ protected:
     /** Invokes all delegates for a add notifaction of a local body*/
     void invokeAllAddBodyLocal(RigidBodyType *body) const {
         typename std::vector<AddDelegate>::const_iterator it;
-        for(it = m_LocalNotifyAddList.begin(); it != m_LocalNotifyAddList.end(); it++) {
+        for(it = m_LocalNotifyAddList.begin(); it != m_LocalNotifyAddList.end(); ++it) {
             (*it)(body);
         }
     }
     /** Invokes all delegates for a remove notifaction of a local body*/
     void invokeAllRemoveBodyLocal(RigidBodyType *body) const {
         typename std::vector<RemoveDelegate>::const_iterator it;
-        for(it = m_LocalNotifyRemoveList.begin(); it != m_LocalNotifyRemoveList.end(); it++) {
+        for(it = m_LocalNotifyRemoveList.begin(); it != m_LocalNotifyRemoveList.end(); ++it) {
             (*it)(body);
         }
     }

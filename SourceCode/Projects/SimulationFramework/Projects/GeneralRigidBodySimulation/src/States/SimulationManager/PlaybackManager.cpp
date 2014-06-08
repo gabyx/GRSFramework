@@ -27,7 +27,7 @@ PlaybackManager::PlaybackManager(boost::shared_ptr<Ogre::SceneManager> pSceneMgr
     m_nDofuBody(NDOFuBody),
     m_bSetupSuccessful(false) {
 
-    m_pSimulationLog = NULL;
+    m_pSimulationLog = nullptr;
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");

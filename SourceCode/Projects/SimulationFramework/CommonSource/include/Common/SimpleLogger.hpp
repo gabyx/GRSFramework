@@ -66,7 +66,7 @@ protected:
     void writeOut(std::stringstream & s){
         boost::mutex::scoped_lock l(m_busy_mutex);
         std::vector<LogSink *>::iterator it;
-        for(it=m_sinkList.begin(); it != m_sinkList.end(); it++) {
+        for(it=m_sinkList.begin(); it != m_sinkList.end(); ++it) {
             (*(*it)) << s;
         }
     };
@@ -82,7 +82,7 @@ public:
     void logMessage(const T & str){
         boost::mutex::scoped_lock l(m_busy_mutex);
         std::vector<LogSink *>::iterator it;
-        for(it=m_sinkList.begin(); it != m_sinkList.end(); it++) {
+        for(it=m_sinkList.begin(); it != m_sinkList.end(); ++it) {
             (*(*it)) << str;
             (*(*it)) << std::endl;
         }

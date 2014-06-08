@@ -107,13 +107,13 @@ public:
         m_h_term.setZero();
         m_eState = BodyState::STATIC;
         m_eMaterial = 0;
-        m_pSolverData = NULL;
+        m_pSolverData = nullptr;
         m_globalGeomId = 0;
     }; ///< Constructor which sets standart values.
 
     ~RigidBodyBase(){
         //DECONSTRUCTOR_MESSAGE
-        if(m_pSolverData){delete m_pSolverData; m_pSolverData = NULL;}
+        if(m_pSolverData){delete m_pSolverData; m_pSolverData = nullptr;}
     };
 
 };

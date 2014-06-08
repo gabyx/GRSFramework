@@ -194,6 +194,8 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
 
         } else if(m_Settings.m_eMethod == InclusionSolverSettingsType::JOR) {
             ASSERTMSG(false,"Jor Algorithm has not been implemented yet");
+        }else{
+            ASSERTMSG(false,"This algorithm has not been implemented yet");
         }
 
         if(m_Settings.m_bIsFiniteCheck) {
@@ -249,7 +251,7 @@ void InclusionSolverCONoG::doSorProx() {
 
 #if CoutLevelSolverWhenContact>2
     LOG(m_pSolverLog, " u_e = [ ");
-    for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
+    for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
         LOG(m_pSolverLog, "\t uBack: " << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
         LOG(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
     }
@@ -272,7 +274,7 @@ void InclusionSolverCONoG::doSorProx() {
 
 #if CoutLevelSolverWhenContact>2
         LOG(m_pSolverLog, " u_e = [ ");
-        for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); it++) {
+        for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
             LOG(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
         }
         LOG(m_pSolverLog, " ]" << std::endl);
@@ -403,7 +405,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
         if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity) {
             //Local Bodies
 
-            for(auto it = localWithContacts.begin(); it !=localWithContacts.end(); it++) {
+            for(auto it = localWithContacts.begin(); it !=localWithContacts.end(); ++it) {
                 //std::cout << "before Criteria"<<std::endl;//std::cout <<"new "<< (*it)->first->m_pSolverData->m_uBuffer.m_front.transpose() << std::endl; //std::cout <<"old "<< (*it)->first->m_pSolverData->m_uBuffer.m_back.transpose() << std::endl;
                 converged = Numerics::cancelCriteriaValue(  (*it)->m_pSolverData->m_uBuffer.m_back,
                                                             (*it)->m_pSolverData->m_uBuffer.m_front,
@@ -417,7 +419,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
             }
             // Remote Bodies
             if( m_bConverged ) {
-                for(auto it=remotesWithContacts.begin(); it !=remotesWithContacts.end(); it++) {
+                for(auto it=remotesWithContacts.begin(); it !=remotesWithContacts.end(); ++it) {
                     converged = Numerics::cancelCriteriaValue(  (*it)->m_pSolverData->m_uBuffer.m_back, (*it)->m_pSolverData->m_uBuffer.m_front,m_Settings.m_AbsTol,m_Settings.m_RelTol);
 
                     if(!converged) {
@@ -433,7 +435,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
         } else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity) {
 
-            for(auto it=localWithContacts.begin(); it!=localWithContacts.end(); it++) {
+            for(auto it=localWithContacts.begin(); it!=localWithContacts.end(); ++it) {
                 converged = Numerics::cancelCriteriaMatrixNormSq( (*it)->m_pSolverData->m_uBuffer.m_back,
                                                                 (*it)->m_pSolverData->m_uBuffer.m_front,
                                                                 (*it)->m_MassMatrix_diag,
@@ -447,7 +449,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
            // Remote Bodies
             if( m_bConverged ) {
-                for(auto it = remotesWithContacts.begin(); it !=remotesWithContacts.end(); it++) {
+                for(auto it = remotesWithContacts.begin(); it !=remotesWithContacts.end(); ++it) {
 
                     converged = Numerics::cancelCriteriaMatrixNormSq( (*it)->m_pSolverData->m_uBuffer.m_back,(*it)->m_pSolverData->m_uBuffer.m_front,(*it)->m_MassMatrix_diag,m_Settings.m_AbsTol,m_Settings.m_RelTol);
                     if(!converged) { m_bConverged=false; break; }

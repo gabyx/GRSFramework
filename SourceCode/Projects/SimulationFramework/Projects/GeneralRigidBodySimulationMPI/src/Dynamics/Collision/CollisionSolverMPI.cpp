@@ -19,7 +19,7 @@ CollisionSolver::~CollisionSolver() {
 
 void CollisionSolver::initializeLog( Logging::Log* pSolverLog ) {
     m_pSolverLog = pSolverLog;
-    ASSERTMSG(m_pSolverLog != NULL, "Logging::Log: NULL!");
+    ASSERTMSG(m_pSolverLog != nullptr, "Logging::Log: nullptr!");
 }
 
 
@@ -36,7 +36,7 @@ void CollisionSolver::reset() {
 
 
 void CollisionSolver::clearCollisionSet() {
-    for( typename CollisionSetType::iterator it = m_collisionSet.begin(); it != m_collisionSet.end(); it++) {
+    for( typename CollisionSetType::iterator it = m_collisionSet.begin(); it != m_collisionSet.end(); ++it) {
         delete (*it);
     }
     m_collisionSet.clear();

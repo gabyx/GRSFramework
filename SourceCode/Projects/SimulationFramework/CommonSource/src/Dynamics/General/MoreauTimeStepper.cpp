@@ -25,7 +25,7 @@ MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynS
     }
 
 
-    m_pSolverLog = NULL;
+    m_pSolverLog = nullptr;
 
     // Instanciate all Core Objects
     m_pStatePool = pSysState;
@@ -52,7 +52,7 @@ MoreauTimeStepper::~MoreauTimeStepper() {
 void MoreauTimeStepper::closeAllFiles() {
 
     Logging::LogManager::getSingletonPtr()->destroyLog("SolverLog");
-    m_pSolverLog = NULL;
+    m_pSolverLog = nullptr;
 
     m_CollisionDataFile.close();
     m_SystemDataFile.close();

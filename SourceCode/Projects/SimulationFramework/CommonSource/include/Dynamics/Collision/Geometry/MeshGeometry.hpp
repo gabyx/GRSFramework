@@ -31,7 +31,7 @@ public:
 
 
     MeshGeometry() {
-        m_pMeshData=NULL;
+        m_pMeshData=nullptr;
     }
 
     MeshGeometry( MeshData * pMeshData):
@@ -120,7 +120,7 @@ public:
                                               (const Vec3f*)m_pMeshData->m_Vertices[0].data(),
                                               m_pMeshData->m_Vertices.size(),
                                               1,
-                                              NULL);
+                                              nullptr);
 #endif
 
 

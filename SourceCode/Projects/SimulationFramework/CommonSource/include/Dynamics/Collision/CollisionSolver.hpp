@@ -48,7 +48,7 @@ public:
     }
     void invokeAll(CollisionData *pCollData) const {
         typename std::vector<ContactDelegate>::const_iterator it;
-        for(it = m_ContactDelegateList.begin(); it != m_ContactDelegateList.end(); it++) {
+        for(it = m_ContactDelegateList.begin(); it != m_ContactDelegateList.end(); ++it) {
             (*it)(pCollData);
         }
     }

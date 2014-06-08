@@ -77,7 +77,7 @@ public:
     SceneParser(boost::shared_ptr<DynamicsSystemType> pDynSys)
         : m_pDynSys(pDynSys) {
 
-        m_pSimulationLog = NULL;
+        m_pSimulationLog = nullptr;
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
         ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
 
@@ -117,7 +117,7 @@ public:
             // Start off with the gravity!
             m_xmlRootNode = m_xmlDoc.FirstChild("DynamicsSystem");
             if(m_xmlRootNode) {
-                ticpp::Node *node = NULL;
+                ticpp::Node *node = nullptr;
 
                 node = m_xmlRootNode->FirstChild("SceneSettings");
                 processSceneSettings(node);
@@ -171,7 +171,7 @@ public:
 protected:
 
     SceneParser() {
-        m_pSimulationLog = NULL;
+        m_pSimulationLog = nullptr;
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
         ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
         m_bParseDynamics = false;

@@ -21,7 +21,7 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    ContactGraphNodeData(): m_pCollData(NULL) {
+    ContactGraphNodeData(): m_pCollData(nullptr) {
         m_W_body1.setZero();
         m_W_body2.setZero();
         m_chi.setZero();
@@ -58,8 +58,8 @@ public:
 
         m_b.setZero();
 
-        m_u1BufferPtr = NULL; ///< Points to the velocity buffer only if the body is simulated
-        m_u2BufferPtr = NULL; ///< Points to the velocity buffer only if the body is simulated
+        m_u1BufferPtr = nullptr; ///< Points to the velocity buffer only if the body is simulated
+        m_u2BufferPtr = nullptr; ///< Points to the velocity buffer only if the body is simulated
 
         m_bConverged = false; ///< Flag if convergence criteria is fulfilled, either InVelocityLocal, InLambda, InEnergyMix (with Lambda, and G_ii)
     }
@@ -105,7 +105,7 @@ public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    ContactGraphEdgeData(): m_pBody(NULL) {};
+    ContactGraphEdgeData(): m_pBody(nullptr) {};
 
     RigidBodyType * m_pBody; // Tells to which body this edges belongs!
 

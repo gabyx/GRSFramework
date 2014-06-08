@@ -111,8 +111,8 @@ public:
     NeighbourMessageWrapperBodies(NeighbourCommunicatorType * nc):
         m_nc(nc),
         m_initialized(false),
-        m_neighbourData(NULL),
-        m_bodyInfo(NULL) {
+        m_neighbourData(nullptr),
+        m_bodyInfo(nullptr) {
 
         if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
             m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
@@ -278,7 +278,7 @@ public:
             }
 
             m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
-            m_bodyInfo = NULL;
+            m_bodyInfo = nullptr;
 
             LOGASSERTMSG( m_neighbourData, m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
 
@@ -492,7 +492,7 @@ private:
 
             // Add all neighbours which need updates!
             body->m_pBodyInfo->m_neighbourRanks.clear();
-            for(auto it = overlappingNeighbours.begin(); it != overlappingNeighbours.end(); it++) {
+            for(auto it = overlappingNeighbours.begin(); it != overlappingNeighbours.end(); ++it) {
                 LOGASSERTMSG(  *it != m_nc->m_rank, m_pSerializerLog, "overlappingNeighbours should not contain own rank: " << m_nc->m_rank);
 
                 if(m_nc->m_nbRanks.find(*it) !=  m_nc->m_nbRanks.end()) { // If rank is neighbour rank
@@ -576,7 +576,7 @@ private:
 
             // Add all neighbours which need updates!
             body->m_pBodyInfo->m_neighbourRanks.clear();
-            for(auto it = overlappingNeighbours.begin(); it != overlappingNeighbours.end(); it++) {
+            for(auto it = overlappingNeighbours.begin(); it != overlappingNeighbours.end(); ++it) {
                 LOGASSERTMSG(  *it != m_nc->m_rank, m_pSerializerLog, "overlappingNeighbours should not contain own rank: " << m_nc->m_rank);
                 if(m_nc->m_nbRanks.find(*it) !=  m_nc->m_nbRanks.end()) {
                     body->m_pBodyInfo->m_neighbourRanks[*it] = typename BodyInfoType::Flags(true); // Overlaps this rank!
@@ -702,7 +702,7 @@ private:
 
             //Velocity
             if(Archive::is_loading::value) {
-                if(body->m_pSolverData == NULL) {
+                if(body->m_pSolverData == nullptr) {
                     body->m_pSolverData = new typename RigidBodyType::RigidBodySolverDataType();
                 } else {
                     ERRORMSG("There is a SolverData already present in body with id: " << body->m_id);
@@ -741,7 +741,7 @@ private:
         const typename ProcessTopologyType::NeighbourRanksListType & adjRanks = m_nc->m_pProcTopo->getAdjacentNeighbourRanks(m_neighbourRank);
 
         LOGSZ(m_pSerializerLog, "-----> overlappingNeigbours: "<<std::endl;);
-        for( auto it =  m_bodyInfo->m_neighbourRanks.begin(); it != m_bodyInfo->m_neighbourRanks.end(); it++) {
+        for( auto it =  m_bodyInfo->m_neighbourRanks.begin(); it != m_bodyInfo->m_neighbourRanks.end(); ++it) {
             if(it->second.m_overlaps == true && adjRanks.find(it->first) != adjRanks.end() ) {
                 // this body overlaps a rank which is adjacent to m_neighbourRank
                 overlappingNeighbours.insert(it->first);
@@ -873,7 +873,7 @@ public:
 
     NeighbourMessageWrapperInclusionContact(NeighbourCommunicatorType * nc):
         NeighbourMessageWrapperInclusion<NeighbourCommunicatorType>(nc),
-        m_neighbourData(NULL)
+        m_neighbourData(nullptr)
     {}
 
     //For remote-remote contacts
@@ -903,7 +903,7 @@ public:
             LOGSZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
             LOGSZ(this->m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
-            for(auto it = m_neighbourData->remoteBegin(); it != m_neighbourData->remoteEnd(); it++) {
+            for(auto it = m_neighbourData->remoteBegin(); it != m_neighbourData->remoteEnd(); ++it) {
                 ar & (it->first); //m_id, all these bodies have remote contacts
                 LOGSZ(this->m_pSerializerLog, "---->  body id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl;);
             }
@@ -1011,7 +1011,7 @@ public:
 
     NeighbourMessageWrapperInclusionMultiplicity(NeighbourCommunicatorType * nc):
         NeighbourMessageWrapperInclusion<NeighbourCommunicatorType>(nc),
-        m_neighbourData(NULL)
+        m_neighbourData(nullptr)
     {}
 
 
@@ -1038,7 +1038,7 @@ public:
             LOGSZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
             LOGSZ(this->m_pSerializerLog, "---> # Local Split Bodies (with external Contacts): " << size << std::endl;);
-            for(auto it = m_neighbourData->localBegin(); it != m_neighbourData->localEnd(); it++) {
+            for(auto it = m_neighbourData->localBegin(); it != m_neighbourData->localEnd(); ++it) {
                 LOGASSERTMSG(it->second.m_pSplitBodyNode, this->m_pSerializerLog, "m_pSplitBodyNode is null for body id: "
                              << RigidBodyId::getBodyIdString(it->first) <<std::endl)
 
@@ -1176,7 +1176,7 @@ public:
 
     NeighbourMessageWrapperInclusionSplitBodyUpdate(NeighbourCommunicatorType * nc):
         NeighbourMessageWrapperInclusion<NeighbourCommunicatorType>(nc),
-        m_neighbourData(NULL)
+        m_neighbourData(nullptr)
     {}
 
     void setStep(unsigned int step){
@@ -1313,7 +1313,7 @@ public:
 
     NeighbourMessageWrapperInclusionSplitBodySolution(NeighbourCommunicatorType * nc):
         NeighbourMessageWrapperInclusion<NeighbourCommunicatorType>(nc),
-        m_neighbourData(NULL)
+        m_neighbourData(nullptr)
     {}
 
 

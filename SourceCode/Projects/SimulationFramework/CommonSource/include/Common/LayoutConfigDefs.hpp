@@ -33,8 +33,11 @@ struct LayoutConfig{
    typedef Eigen::Matrix<PREC, LayoutType::NDOFqBody, LayoutType::NDOFuBody>    MatrixQBodyUBody;
    typedef Eigen::Matrix<PREC, LayoutType::NDOFqBody, 1>                        VectorQBody;
    typedef Eigen::Matrix<PREC, LayoutType::NDOFuBody, 1>                        VectorUBody;
+
    typedef Eigen::Matrix<PREC, LayoutType::NDOFqBody, Eigen::Dynamic >          MatrixQBodyDyn;
    typedef Eigen::Matrix<PREC, LayoutType::NDOFuBody, Eigen::Dynamic >          MatrixUBodyDyn;
+   typedef Eigen::Matrix<PREC, Eigen::Dynamic, LayoutType::NDOFqBody >          MatrixDynQBody;
+   typedef Eigen::Matrix<PREC, Eigen::Dynamic, LayoutType::NDOFuBody>           MatrixDynUBody;
 
    // Static Vectors/Matrices
    DEFINE_MATRIX_TYPES_OF( PREC );
@@ -55,6 +58,8 @@ struct LayoutConfig{
    typedef typename _LayoutConfigName_::MatrixQBodyDyn MatrixQBodyDyn;       \
    typedef typename _LayoutConfigName_::MatrixUBodyDyn MatrixUBodyDyn;       \
    typedef typename _LayoutConfigName_::MatrixQBodyUBody MatrixQBodyUBody; \
+   typedef typename _LayoutConfigName_::MatrixDynQBody MatrixDynQBody;       \
+   typedef typename _LayoutConfigName_::MatrixDynUBody MatrixDynUBody;       \
    DEFINE_MATRIX_TYPES_OF( PREC );
 
 

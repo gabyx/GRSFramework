@@ -72,7 +72,7 @@ public:
     std::vector<PostProcessTask *> m_postProcessTasks;
 
     ~ApplicationCLOptions(){
-        for(auto it = m_postProcessTasks.begin(); it != m_postProcessTasks.end(); it++){
+        for(auto it = m_postProcessTasks.begin(); it != m_postProcessTasks.end(); ++it){
             delete (*it);
         }
     }
@@ -102,7 +102,7 @@ public:
             if( ops >> OptionPresent('l',"local-path")) {
                 std::vector<std::string> svec;
                 ops >> Option('l',"local-path",svec);
-                for(auto it = svec.begin(); it != svec.end(); it++){
+                for(auto it = svec.begin(); it != svec.end(); ++it){
                     m_localDirs.push_back(*it);
                 }
             }
@@ -186,7 +186,7 @@ public:
         Utilities::printVector(s, m_localDirs.begin(), m_localDirs.end(), std::string(" "));
         s << std::endl;
 
-        for(auto it = m_postProcessTasks.begin(); it != m_postProcessTasks.end(); it++){
+        for(auto it = m_postProcessTasks.begin(); it != m_postProcessTasks.end(); ++it){
             s << *(*it);
         }
         //exit(-1);

@@ -13,7 +13,7 @@ using namespace Eigen;
 
 SimulationState::SimulationState() {
     m_lengthScale = 100;
-    m_pBaseNode = NULL;
+    m_pBaseNode = nullptr;
     m_SceneDetailIndex = 0;
 
     m_eMouseMode = CAMERA;

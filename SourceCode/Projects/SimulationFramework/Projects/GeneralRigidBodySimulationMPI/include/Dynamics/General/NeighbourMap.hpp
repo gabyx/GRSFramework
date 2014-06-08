@@ -42,7 +42,7 @@ public:
            return (&it->second);
         }else{
            ASSERTMSG(false,"There is no NeighbourData for rank: " << rank << "!")
-           return NULL;
+           return nullptr;
         }
     }
 

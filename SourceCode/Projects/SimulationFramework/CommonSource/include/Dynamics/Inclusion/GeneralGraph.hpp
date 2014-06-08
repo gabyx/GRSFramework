@@ -78,8 +78,8 @@ public:
 	friend class Graph::GeneralGraph<NodeDataType, EdgeDataType>;
 	friend class Graph::Node<NodeDataType, EdgeDataType>;
 public:
-    Edge() : m_startNode(NULL), m_endNode(NULL), m_twinEdge(NULL), m_edgeNumber(0) {};
-	Edge(unsigned int eN) : m_startNode(NULL), m_endNode(NULL), m_twinEdge(NULL), m_edgeNumber(eN){};
+    Edge() : m_startNode(nullptr), m_endNode(nullptr), m_twinEdge(nullptr), m_edgeNumber(0) {};
+	Edge(unsigned int eN) : m_startNode(nullptr), m_endNode(nullptr), m_twinEdge(nullptr), m_edgeNumber(eN){};
 
   /* Node<NodeDataType, EdgeDataType> * getStartNode(){return m_startNode;}
    Node<NodeDataType, EdgeDataType> * getEndNode(){return m_endNode;}
@@ -125,9 +125,9 @@ public:
 
    ~GeneralGraph() {
 		// cleanup allocated memory
-		for(auto n_it = m_nodes.begin(); n_it != m_nodes.end(); n_it++)
+		for(auto n_it = m_nodes.begin(); n_it != m_nodes.end(); ++n_it)
 			delete (*n_it);
-		for(auto e_it = m_edges.begin(); e_it != m_edges.end(); e_it++)
+		for(auto e_it = m_edges.begin(); e_it != m_edges.end(); ++e_it)
 			delete (*e_it);
 	}
 
@@ -135,8 +135,8 @@ public:
    unsigned int getNumEdges(){return m_edges.size();};
 
 
-   NodeListType & getNodeListRef(){ return m_nodes; };
-   EdgeListType & getEdgeListRef(){ return m_edges; };
+   NodeListType & getNodeList(){ return m_nodes; };
+   EdgeListType & getEdgeList(){ return m_edges; };
 
     template<typename TNodeVisitor>
 	void applyNodeVisitor(TNodeVisitor & vv){
@@ -157,7 +157,7 @@ public:
 	    std::uniform_int_distribution<unsigned int> r(0,m_nodes.size()-1);
 	    static NodeType * p1;
 
-        for(auto it = m_nodes.begin(); it != m_nodes.end(); it++ ){
+        for(auto it = m_nodes.begin(); it != m_nodes.end(); ++it ){
             //swap the pointers
             p1 = *it;
             NodeType* & p2 = m_nodes[r(g)];

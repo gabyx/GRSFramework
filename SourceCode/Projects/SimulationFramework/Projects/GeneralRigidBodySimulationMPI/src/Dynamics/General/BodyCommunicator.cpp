@@ -32,7 +32,7 @@ BodyCommunicator::BodyCommunicator(  boost::shared_ptr< DynamicsSystemType> pDyn
     m_pSimulationLog->logMessage("--->BodyCommunicator: Initialized all NeighbourDatas");
 
     // Fill in all BodyInfos for the local bodies (remote bodies are not considered, there should not be any of those)
-    for(auto it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
+    for(auto it = m_globalLocal.begin(); it != m_globalLocal.end(); ++it) {
         ASSERTMSG(m_pProcTopo->belongsBodyToProcess(*it), "Body with id: "<< RigidBodyId::getBodyIdString(*it) <<" does not belong to process? How did you initialize your bodies?")
         (*it)->m_pBodyInfo = new RigidBodyType::BodyInfoType(m_rank);
     }
@@ -54,7 +54,7 @@ void BodyCommunicator::communicate(PREC currentSimTime){
     typename ProcessTopologyType::NeighbourRanksListType neighbours;
 
     LOGBC(m_pSimulationLog,"--->\t Update neighbour data structures with LOCAL bodies:"<<std::endl;)
-    for(typename RigidBodyContainerType::iterator it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
+    for(typename RigidBodyContainerType::iterator it = m_globalLocal.begin(); it != m_globalLocal.end(); ++it) {
         RigidBodyType * body = (*it);
 
 
@@ -182,7 +182,7 @@ bool BodyCommunicator::checkReceiveForRemotes(){
     bool m_ok = true;
     for(auto it = m_globalRemote.begin(); it != m_globalRemote.end(); it++){
 
-        LOGASSERTMSG((*it)->m_pBodyInfo , m_pSimulationLog, "bodyInfoPtr is NULL! ");
+        LOGASSERTMSG((*it)->m_pBodyInfo , m_pSimulationLog, "bodyInfoPtr is nullptr! ");
 
         if((*it)->m_pBodyInfo->m_receivedUpdate == false ){
             LOGBC(m_pSimulationLog,"---> WARNING: Remote body with id: " << RigidBodyId::getBodyIdString(*it) << " has not received an update!" << std::endl;)
@@ -261,7 +261,7 @@ void BodyCommunicator::cleanUp(){
 
 
 void BodyCommunicator::printAllNeighbourRanks(){
-    for(typename RigidBodyContainerType::iterator it = m_globalLocal.begin(); it != m_globalLocal.end(); it++) {
+    for(typename RigidBodyContainerType::iterator it = m_globalLocal.begin(); it != m_globalLocal.end(); ++it) {
         RigidBodyType * body = (*it);
 
         LOGASSERTMSG(body->m_pBodyInfo, m_pSimulationLog , "Body info for local body with id: " << (body)->m_id << " does not exist!");

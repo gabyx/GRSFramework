@@ -146,7 +146,7 @@ template<typename Stream, typename Iterator>
 void printVectorNoCopy(Stream & ostr, const Iterator & itBegin, const Iterator & itEnd, const std::string& delimiter){
         ostr << *itBegin;
         Iterator it = itBegin;
-        for(it++; it != itEnd; it++){
+        for(++it; it != itEnd; ++it){
             ostr << delimiter << *it;
         }
 }

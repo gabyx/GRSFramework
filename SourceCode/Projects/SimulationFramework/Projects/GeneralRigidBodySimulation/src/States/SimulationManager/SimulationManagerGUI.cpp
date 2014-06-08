@@ -37,7 +37,7 @@ using namespace std;
 SimulationManagerGUI::SimulationManagerGUI(boost::shared_ptr<Ogre::SceneManager> pSceneMgr):
     SimulationManagerBase() {
 
-    m_pSimulationLog = NULL;
+    m_pSimulationLog = nullptr;
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");

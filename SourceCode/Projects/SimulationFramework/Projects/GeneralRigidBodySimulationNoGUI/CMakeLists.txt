@@ -97,6 +97,7 @@ SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
     ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
     ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp
+    ${COMMONSOURCE_DIR}/include/Common/BitCount.hpp
 )
 SET(COMMON_SRC
 #    ${SOURCE_DIR}/src/Common/OgreMeshExtraction.cpp
@@ -106,6 +107,7 @@ SET(COMMON_SRC
     ${SOURCE_DIR}/src/Common/TypeDefs.cpp
     ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFile.cpp
     ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
+    ${COMMONSOURCE_DIR}/src/Common/BitCount.cpp
 )
 
 SET(DYNAMICS_INC
@@ -172,7 +174,8 @@ SET(DYNAMICS_SRC
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/Ray.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactParameterMap.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactModels.cpp
-     ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ConvexSets.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ConvexSets.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCO.cpp
 
 )
 

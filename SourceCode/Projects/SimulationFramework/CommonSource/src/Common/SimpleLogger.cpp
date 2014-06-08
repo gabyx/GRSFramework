@@ -27,7 +27,7 @@ void LogSink::operator<<( std::ostream&(*f)(std::ostream&) ) {
     (*m_pOutStream) << f;
 }
 
-LogSink::LogSink(const std::string & name): m_sinkName(name), m_pOutStream(NULL) {};
+LogSink::LogSink(const std::string & name): m_sinkName(name), m_pOutStream(nullptr) {};
 
 LogSink::~LogSink() {
     /* Derived class deletes the stuff */
@@ -60,7 +60,7 @@ LogSinkFile::~LogSinkFile() {
     //std::cout <<"Delete LogSinkFile:"<<std::endl;
     m_fileStream.flush();
     m_fileStream.close();
-    m_pOutStream = NULL;
+    m_pOutStream = nullptr;
 };
 
 
@@ -105,7 +105,7 @@ bool Log::addSink(LogSink * sink) {
 bool Log::removeSink(std::string sink_name) {
     boost::mutex::scoped_lock l(m_busy_mutex);
     std::vector<LogSink *>::iterator it;
-    for(it=m_sinkList.begin(); it!=m_sinkList.end(); it++) {
+    for(it=m_sinkList.begin(); it!=m_sinkList.end(); ++it) {
         if((*it)->getName()==sink_name) {
             it=m_sinkList.erase(it);
         }
@@ -138,7 +138,7 @@ Log::expression Log::expression::operator<<( std::ostream&(*f)(std::ostream&) ) 
 // LogManager =======================================================
 LogManager::~LogManager() {
     LogListIteratorType it;
-    for(it=m_logList.begin(); it!= m_logList.end(); it++) {
+    for(it=m_logList.begin(); it!= m_logList.end(); ++it) {
         if((*it).second) {
             delete (*it).second; //Delete all sinks!
         }
@@ -164,7 +164,7 @@ void LogManager::destroyLog(const std::string &name) {
     LogListIteratorType it = m_logList.find(name);
     ASSERTMSG(it != m_logList.end(),"This Log does not exist!");
     if( it != m_logList.end() ) {
-        ASSERTMSG(it->second != NULL,"This Log has Null Pointer!");
+        ASSERTMSG(it->second != nullptr,"This Log has Null Pointer!");
         if(it->second) {
             delete it->second; // Delete Log
         }
@@ -188,7 +188,7 @@ void LogManager::destroyLog(const Log * log) {
 };
 
 void LogManager::registerLog(Log * log) {
-    ASSERTMSG(log != NULL,"This Log has Null Pointer!");
+    ASSERTMSG(log != nullptr,"This Log has Null Pointer!");
     boost::mutex::scoped_lock l(m_busy_mutex);
     std::pair<LogListIteratorType, bool> res =  m_logList.insert(std::pair<std::string, Log* >(log->getName(), log));
     ASSERTMSG(res.second,"LogSink has already been added! :" << log->getName());
@@ -198,9 +198,9 @@ Log * LogManager::getLog(const std::string & name) {
     boost::mutex::scoped_lock l(m_busy_mutex);
     LogListIteratorType it = m_logList.find(name);
     ASSERTMSG(it != m_logList.end(),"This Log does not exist!: "<<name);
-    ASSERTMSG(it->second != NULL,"This Log has Null Pointer!: "<<name);
+    ASSERTMSG(it->second != nullptr,"This Log has Null Pointer!: "<<name);
     if(it == m_logList.end()) {
-        return NULL;
+        return nullptr;
     }
     return it->second;
 };

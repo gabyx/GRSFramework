@@ -133,7 +133,7 @@ void StateRingPoolVisBackFront::resetStateRingPool(const RigidBodyStateContainer
     }
     // Fill in the initial values
 
-    for(auto it = state_init.begin(); it!= state_init.end(); it++) {
+    for(auto it = state_init.begin(); it!= state_init.end(); ++it) {
         unsigned int bodyNr = RigidBodyId::getBodyNr(it->first);
         if( bodyNr > state.m_SimBodyStates.size()) {
             ERRORMSG("body nr: " << bodyNr << " out of bound for DynamicState!")

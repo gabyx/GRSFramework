@@ -137,7 +137,7 @@ _________________________________________________________*/
 MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
                                      boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
     m_ReferenceSimFile(),
-    m_pSolverLog(NULL),
+    m_pSolverLog(nullptr),
     m_pDynSys(pDynSys),
     m_pProcCommunicator(pProcCommunicator) {
 
@@ -170,7 +170,7 @@ MoreauTimeStepper::~MoreauTimeStepper() {
 void MoreauTimeStepper::closeAllFiles() {
 
     Logging::LogManager::getSingletonPtr()->destroyLog("SolverLog");
-    m_pSolverLog = NULL;
+    m_pSolverLog = nullptr;
 
     m_CollisionDataFile.close();
     m_SystemDataFile.close();

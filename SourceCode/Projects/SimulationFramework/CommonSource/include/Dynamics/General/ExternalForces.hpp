@@ -34,7 +34,7 @@ class SpatialSphericalTimeRandomForceField{
             m_endTime(endTime),
             m_seed(seed), m_amplitude(amplitude), m_randomBox(randomBox), m_randomOn(randomOn)
         {
-            m_randomG = NULL;
+            m_randomG = nullptr;
             reset();
         }
 

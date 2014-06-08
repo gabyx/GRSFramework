@@ -124,7 +124,7 @@ bool StateRecorderBody::createSimFile(RigidBodyType * body, bool truncate){
     file /= s.str();
 
 
-        std::pair<typename FileMap::iterator, bool> res = m_BinarySimFiles.insert(typename FileMap::value_type(body->m_id,NULL));
+        std::pair<typename FileMap::iterator, bool> res = m_BinarySimFiles.insert(typename FileMap::value_type(body->m_id,nullptr));
         if(!res.second){
             LOG(m_pSimulationLog, "---> StateRecorderBody:: SimFile : " << file.string() << "already exists!");
         }else{
@@ -159,7 +159,7 @@ bool StateRecorderBody::createSimFile(RigidBodyType * body, bool truncate){
         file /= s.str();
 
         // open the log file and append to it!
-        auto res = m_LogSimFiles.insert(typename FileMapLog::value_type(body->m_id,NULL));
+        auto res = m_LogSimFiles.insert(typename FileMapLog::value_type(body->m_id,nullptr));
 
         if(!res.second){
             LOG(m_pSimulationLog,"---> StateRecorderBody:: LogSimFile : " << file.string() << "already exists!");

@@ -67,7 +67,7 @@ public:
 
             m_xmlRootNode = m_xmlDoc.FirstChild("DynamicsSystem");
             if(m_xmlRootNode) {
-                ticpp::Node *node = NULL;
+                ticpp::Node *node = nullptr;
 
                 node = node = m_xmlRootNode->FirstChild("MPISettings");
                 processMPISettings(node);

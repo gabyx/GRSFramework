@@ -87,6 +87,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/MPISerializationHelpersEigen.hpp
     ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
     ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp
+    ${COMMONSOURCE_DIR}/include/Common/BitCount.hpp
 )
 SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
@@ -97,6 +98,8 @@ SET(COMMON_SRC
     ${PROJECT_SOURCE_DIR}/src/Common/MultiBodySimFileMPI.cpp
     ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
     ${PROJECT_SOURCE_DIR}/src/Common/CartesianGrid.cpp
+    ${COMMONSOURCE_DIR}/src/Common/BitCount.cpp
+    
 )
 
 SET(DYNAMICS_INC

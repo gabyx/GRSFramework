@@ -464,7 +464,7 @@ public:
     {}
 
     void visitNode(NodeType& node){
-        for( auto it = node.m_partRanks.begin(); it != node.m_partRanks.end(); it++){
+        for( auto it = node.m_partRanks.begin(); it != node.m_partRanks.end(); ++it){
             if(it->second.m_bGotUpdate == false){
                 ERRORMSG("Rank: " << it->first << " in SplitNode for body id: "
                          << RigidBodyId::getBodyIdString(node.m_pBody) << " has not got update!" );
