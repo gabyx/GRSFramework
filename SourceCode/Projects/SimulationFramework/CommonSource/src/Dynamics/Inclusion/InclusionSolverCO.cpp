@@ -13,6 +13,10 @@
 #include <boost/timer/timer.hpp>
 
 
+const unsigned int InclusionSolverCO::NDOFFriction = ContactModels::UnilateralAndCoulombFrictionContactModel::nDOFFriction;
+const unsigned int InclusionSolverCO::ContactDim = ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension;
+
+
 InclusionSolverCO::InclusionSolverCO(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
                                      boost::shared_ptr<DynamicsSystemType> pDynSys):
     m_SimBodies(pDynSys->m_SimBodies),
@@ -89,6 +93,18 @@ void InclusionSolverCO::resetForNextIter() {
 
 
 
+void InclusionSolverCO::swapPercussionBuffer() {
+    std::swap(m_P_back,m_P_front);
+}
+
+
+void InclusionSolverCO::resetPercussionBuffer() {
+    m_P_back = &m_P_1;
+    m_P_front = &m_P_2;
+}
+
+
+
 void InclusionSolverCO::solveInclusionProblem() {
 
 #if CoutLevelSolver>1
@@ -125,7 +141,7 @@ void InclusionSolverCO::solveInclusionProblem() {
         m_nLambdas = m_ContactGraph.getNLambdas();
         ASSERTMSG(m_ContactGraph.areContactModelsHomogen(), "ContactGraph uses not homogen contact models!")
 
-        if(nodes[0]->m_nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel){
+        if(nodes[0]->m_nodeData.m_contactParameter.m_contactModel != ContactModels::ContactModelEnum::UCF_ContactModel){
             ERRORMSG("The only supported contact model so far is: ContactModels::ContactModelEnum::UCF_ContactModel")
         }
         // Assign Space for matrices =====================================
@@ -141,6 +157,7 @@ void InclusionSolverCO::solveInclusionProblem() {
         m_R.resize(m_nLambdas);
         // ==============================================================
 
+        resetPercussionBuffer();
         P_back.setZero();
 
         // Assemble W_N and W_T and xi_N and xi_T =====================================================

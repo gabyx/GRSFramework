@@ -34,8 +34,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
-    static const int NDOFFriction = ContactModels::UnilateralAndCoulombFrictionContactModel::nDOFFriction;
-    static const int ContactDim = ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension;
+
 
     InclusionSolverCO(boost::shared_ptr<CollisionSolverType >  pCollisionSolver, boost::shared_ptr<DynamicsSystemType> pDynSys);
 
@@ -62,6 +61,8 @@ public:
 
 protected:
 
+    static const unsigned int NDOFFriction;
+    static const unsigned int ContactDim;
 
     unsigned int m_nExpectedContacts;
 
