@@ -88,6 +88,8 @@ set(${INC}
 	${PATH_TO_MODULES}/inc/General/TemplateHelper.hpp
 	${PATH_TO_MODULES}/inc/General/StaticAssert.hpp
 	${PATH_TO_MODULES}/inc/General/FlopsCounting.hpp
+    ${PATH_TO_MODULES}/inc/General/AssertionDebug.hpp
+    ${PATH_TO_MODULES}/inc/General/AssertionDebugC.hpp
     ${PATH_TO_MODULES}/inc/General/CudaModern/CudaEvent.hpp
     ${PATH_TO_MODULES}/inc/General/CudaModern/CudaTimer.hpp
     ${PATH_TO_MODULES}/inc/General/CudaModern/CudaAlloc.hpp
@@ -119,7 +121,7 @@ set(${SRC}
     ${PATH_TO_MODULES}/src/General/CudaModern/CudaTimer.cpp
 	${PATH_TO_MODULES}/src/General/Utilities.cpp
 )
-set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/General/)
+set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/General/CudaModern ${PATH_TO_MODULES}/inc/General/)
 endmacro(INCLUDE_GENERAL_CUDA)
 
 MACRO(INCLUDE_GENERAL_EXTERN_CUDA SRC INC INCLUDE_DIRS PATH_TO_MODULES )
