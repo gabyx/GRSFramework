@@ -1,113 +1,140 @@
 #ifndef BitCount_hpp
 #define BitCount_hpp
 
+#include <type_traits>
+#include <limits.h>
+#include <cstdint>
 
 namespace BitCount{
 
 
-    /* ==========================================================================
-   Bit Counting routines
+    namespace internal{
 
-   Author: Gurmeet Singh Manku    (manku@cs.stanford.edu)
-   Date:   27 Aug 2002
-   ========================================================================== */
+        /* ==========================================================================
+       Bit Counting routines
 
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
-
-/* Iterated bitcount iterates over each bit. The while condition sometimes helps
-   terminates the loop earlier */
-//int iterated_bitcount (unsigned int n)
-//{
-//    int count=0;
-//    while (n)
-//    {
-//        count += n & 0x1u ;
-//        n >>= 1 ;
-//    }
-//    return count ;
-//}
-
-
-/* Sparse Ones runs proportional to the number of ones in n.
-   The line   n &= (n-1)   simply sets the last 1 bit in n to zero. */
-//int sparse_ones_bitcount (unsigned int n)
-//{
-//    int count=0 ;
-//    while (n)
-//    {
-//        count++ ;
-//        n &= (n - 1) ;
-//    }
-//    return count ;
-//}
-
-
-/* Dense Ones runs proportional to the number of zeros in n.
-   It first toggles all bits in n, then diminishes count repeatedly */
-//int dense_ones_bitcount (unsigned int n)
-//{
-//    int count = 8 * sizeof(int) ;
-//    n ^= (unsigned int) -1 ;
-//    while (n)
-//    {
-//        count-- ;
-//        n &= (n - 1) ;
-//    }
-//    return count ;
-//}
-
-
-/* Precomputed bitcount uses a precomputed array that stores the number of ones
-   in each char. */
-//static int bits_in_char [256] ;
-//
-//void compute_bits_in_char (void)
-//{
-//    unsigned int i ;
-//    for (i = 0; i < 256; i++)
-//        bits_in_char [i] = iterated_bitcount (i) ;
-//    return ;
-//}
-
-//int precomputed_bitcount (unsigned int n)
-//{
-//    // works only for 32-bit ints
-//
-//    return bits_in_char [n         & 0xffu]
-//        +  bits_in_char [(n >>  8) & 0xffu]
-//        +  bits_in_char [(n >> 16) & 0xffu]
-//        +  bits_in_char [(n >> 24) & 0xffu] ;
-//}
-//
-
-/* Here is another version of precomputed bitcount that uses a precomputed array
-   that stores the number of ones in each short. */
-
-//static char bits_in_16bits [0x1u << 16] ;
-//
-//void compute_bits_in_16bits (void)
-//{
-//    unsigned int i ;
-//    for (i = 0; i < (0x1u<<16); i++)
-//        bits_in_16bits [i] = iterated_bitcount (i) ;
-//    return ;
-//}
-
-//int precomputed16_bitcount (unsigned int n)
-//{
-//    // works only for 32-bit int
-//
-//    return bits_in_16bits [n         & 0xffffu]
-//        +  bits_in_16bits [(n >> 16) & 0xffffu] ;
-//}
+       Author: Gurmeet Singh Manku    (manku@cs.stanford.edu)
+       Date:   27 Aug 2002
+       ========================================================================== */
 
 
 
+    /* Iterated bitcount iterates over each bit. The while condition sometimes helps
+       terminates the loop earlier */
+    //int iterated_bitcount (unsigned int n)
+    //{
+    //    int count=0;
+    //    while (n)
+    //    {
+    //        count += n & 0x1u ;
+    //        n >>= 1 ;
+    //    }
+    //    return count ;
+    //}
 
-int parallelBitcount (unsigned int n);
+
+    /* Sparse Ones runs proportional to the number of ones in n.
+       The line   n &= (n-1)   simply sets the last 1 bit in n to zero. */
+    //int sparse_ones_bitcount (unsigned int n)
+    //{
+    //    int count=0 ;
+    //    while (n)
+    //    {
+    //        count++ ;
+    //        n &= (n - 1) ;
+    //    }
+    //    return count ;
+    //}
+
+
+    /* Dense Ones runs proportional to the number of zeros in n.
+       It first toggles all bits in n, then diminishes count repeatedly */
+    //int dense_ones_bitcount (unsigned int n)
+    //{
+    //    int count = 8 * sizeof(int) ;
+    //    n ^= (unsigned int) -1 ;
+    //    while (n)
+    //    {
+    //        count-- ;
+    //        n &= (n - 1) ;
+    //    }
+    //    return count ;
+    //}
+
+
+    /* Precomputed bitcount uses a precomputed array that stores the number of ones
+       in each char. */
+    //static int bits_in_char [256] ;
+    //
+    //void compute_bits_in_char (void)
+    //{
+    //    unsigned int i ;
+    //    for (i = 0; i < 256; i++)
+    //        bits_in_char [i] = iterated_bitcount (i) ;
+    //    return ;
+    //}
+
+    //int precomputed_bitcount (unsigned int n)
+    //{
+    //    // works only for 32-bit ints
+    //
+    //    return bits_in_char [n         & 0xffu]
+    //        +  bits_in_char [(n >>  8) & 0xffu]
+    //        +  bits_in_char [(n >> 16) & 0xffu]
+    //        +  bits_in_char [(n >> 24) & 0xffu] ;
+    //}
+    //
+
+    /* Here is another version of precomputed bitcount that uses a precomputed array
+       that stores the number of ones in each short. */
+
+    //static char bits_in_16bits [0x1u << 16] ;
+    //
+    //void compute_bits_in_16bits (void)
+    //{
+    //    unsigned int i ;
+    //    for (i = 0; i < (0x1u<<16); i++)
+    //        bits_in_16bits [i] = iterated_bitcount (i) ;
+    //    return ;
+    //}
+
+    //int precomputed16_bitcount (unsigned int n)
+    //{
+    //    // works only for 32-bit int
+    //
+    //    return bits_in_16bits [n         & 0xffffu]
+    //        +  bits_in_16bits [(n >> 16) & 0xffffu] ;
+    //}
+
+
+
+    #define TWO(c) (0x1UL << (c))
+    #define MASK(c) (((unsigned int)(-1)) / (TWO(TWO(c)) + 1UL))
+    #define COUNT(x,c) ((x) & MASK(c)) + (((x) >> (TWO(c))) & MASK(c))
+
+    inline uint32_t parallelBitcount32(uint32_t n){
+        n = COUNT(n, 0) ;
+        n = COUNT(n, 1) ;
+        n = COUNT(n, 2) ;
+        n = COUNT(n, 3) ;
+        n = COUNT(n, 4) ;
+        return n ;
+    }
+    inline uint64_t parallelBitcount64(uint64_t n){
+        n = COUNT(n, 0) ;
+        n = COUNT(n, 1) ;
+        n = COUNT(n, 2) ;
+        n = COUNT(n, 3) ;
+        n = COUNT(n, 4) ;
+        n = COUNT(n, 5) ;    //for 64-bit integers
+        return n ;
+    }
+
+
+    #undef TWO
+    #undef MASK
+    #undef COUNT
+
 
 
 /* Nifty  Parallel Count works  the same  way as  Parallel Count  for the
@@ -225,7 +252,19 @@ int parallelBitcount (unsigned int n);
 //
 //    return ;
 //}
+};
 
+    template<typename T>
+    typename std::enable_if< (sizeof(T) <= sizeof(uint32_t)) , uint32_t>::type
+    count(uint32_t n){
+        return internal::parallelBitcount32(n);
+    }
+
+    template<typename T>
+    typename std::enable_if< (sizeof(T) > sizeof(uint32_t) && sizeof(T) <= sizeof(uint64_t)) , uint64_t>::type
+    count(uint64_t n){
+        return internal::parallelBitcount64(n);
+    }
 
 };
 

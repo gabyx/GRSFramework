@@ -139,7 +139,7 @@ void InclusionSolverCO::solveInclusionProblem() {
 #endif
 
         m_nLambdas = m_ContactGraph.getNLambdas();
-        ASSERTMSG(m_ContactGraph.areContactModelsHomogen(), "ContactGraph uses not homogen contact models!")
+        ASSERTMSG(m_ContactGraph.getNContactModelsUsed() == 1, "ContactGraph uses not homogen contact models!")
 
         if(nodes[0]->m_nodeData.m_contactParameter.m_contactModel != ContactModels::ContactModelEnum::UCF_ContactModel){
             ERRORMSG("The only supported contact model so far is: ContactModels::ContactModelEnum::UCF_ContactModel")

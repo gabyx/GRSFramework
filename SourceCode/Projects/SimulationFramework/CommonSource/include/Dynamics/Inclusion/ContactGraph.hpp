@@ -136,16 +136,14 @@ public:
 
     unsigned int getNLambdas(){return m_nLambdas;}
 
-    bool areContactModelsHomogen(){
-        if( BitCount::parallelBitcount(m_usedContactModels) > 1){
-            return false;
-        }
-        // Only one ContactModel used!
-        return true;
+    unsigned int getNContactModelsUsed(){
+                std::cout << BitCount::count<ContactModelEnumIntType>(m_usedContactModels) <<std::endl;
+        return BitCount::count<ContactModelEnumIntType>(m_usedContactModels);
     }
 private:
+    typedef typename std::underlying_type<ContactModels::ContactModelEnum>::type ContactModelEnumIntType;
+    ContactModelEnumIntType m_usedContactModels; ///< Bitflags which mark all used contactmodels
 
-    typename std::underlying_type<ContactModels::ContactModelEnum>::type m_usedContactModels; ///< Bitflags which mark all used contactmodels
     unsigned int m_nLambdas = 0; ///< How many forces we have counted over all nodes
 
     void setContactModel(NodeDataType & nodeData) {
@@ -442,16 +440,13 @@ public:
 
     PREC m_maxResidual;
 
-    bool areContactModelsHomogen(){
-        if( BitCount::parallelBitcount(m_usedContactModels) > 1){
-            return false;
-        }
-        // Only one ContactModel used!
-        return true;
+    unsigned int getNContactModelsUsed(){
+        return BitCount::count<ContactModelEnumIntType>(m_usedContactModels);
     }
 
 private:
-    typename std::underlying_type<ContactModels::ContactModelEnum>::type m_usedContactModels; ///< Bitflags which mark all used contactmodels;
+    typedef typename std::underlying_type<ContactModels::ContactModelEnum>::type ContactModelEnumIntType;
+    ContactModelEnumIntType m_usedContactModels; ///< Bitflags which mark all used contactmodels
 
     bool m_firstIteration;
 
