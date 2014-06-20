@@ -254,15 +254,16 @@ namespace BitCount{
 //}
 };
 
+    // This SFINAE pattern instantiates the right overload for the type (double,float,int,short,char etc...)
     template<typename T>
     typename std::enable_if< (sizeof(T) <= sizeof(uint32_t)) , uint32_t>::type
-    count(uint32_t n){
+    count(T n){
         return internal::parallelBitcount32(n);
     }
 
     template<typename T>
     typename std::enable_if< (sizeof(T) > sizeof(uint32_t) && sizeof(T) <= sizeof(uint64_t)) , uint64_t>::type
-    count(uint64_t n){
+    count(T n){
         return internal::parallelBitcount64(n);
     }
 

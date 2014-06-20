@@ -179,8 +179,8 @@ void InclusionSolverCO::solveInclusionProblem() {
             // Write mu parameters to m_mu
             m_mu(i) = currentContactNode->m_nodeData.m_contactParameter.m_params[2];
 
-            I_plus_eps(0) = currentContactNode->m_nodeData.m_contactParameter.m_params[0];
-            I_plus_eps(1) = currentContactNode->m_nodeData.m_contactParameter.m_params[1];
+            I_plus_eps(0) = 1+ currentContactNode->m_nodeData.m_contactParameter.m_params[0];
+            I_plus_eps(1) = 1+ currentContactNode->m_nodeData.m_contactParameter.m_params[1];
             I_plus_eps(2) = I_plus_eps(1);
 
             // iterate over all edges in current contact to build up G;
@@ -317,19 +317,19 @@ void InclusionSolverCO::solveInclusionProblem() {
         static VectorUBody delta_u_E;
         RigidBodyType * pBody;
 
+
         for( auto & node : nodes){
 
             pBody = node->m_nodeData.m_pCollData->m_pBody1;
             if( pBody->m_eState == RigidBodyType::BodyState::SIMULATED ) {
-
                 pBody->m_pSolverData->m_uBuffer.m_front +=
-                pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body1 * (*m_P_front)(ContactDim* node->m_nodeNumber);
+                pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body1 * (*m_P_front).segment<ContactDim>(ContactDim* node->m_nodeNumber);
             }
 
             pBody = node->m_nodeData.m_pCollData->m_pBody2;
             if( pBody->m_eState == RigidBodyType::BodyState::SIMULATED ) {
                 pBody->m_pSolverData->m_uBuffer.m_front +=
-                pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body2 * (*m_P_front)(ContactDim* node->m_nodeNumber);
+                pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body2 * (*m_P_front).segment<ContactDim>(ContactDim* node->m_nodeNumber);
             }
 
         }
@@ -431,7 +431,7 @@ void InclusionSolverCO::doSorProx() {
 
 
 
-#if HAVE_CUDA_SUPPORT == 1 && false
+#if HAVE_CUDA_SUPPORT == 1
     bool gpuSuccess = true;
     bool goOnGPU = m_nContacts >= m_sorGPUVariant.getTradeoff();
 

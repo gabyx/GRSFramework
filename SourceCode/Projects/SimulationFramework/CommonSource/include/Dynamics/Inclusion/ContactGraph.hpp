@@ -11,6 +11,7 @@
 #include "AssertionDebug.hpp"
 
 #include "BitCount.hpp"
+#include "BitRepresentation.hpp"
 #include "EnumClassHelper.hpp"
 
 #include "GeneralGraph.hpp"
@@ -137,8 +138,7 @@ public:
     unsigned int getNLambdas(){return m_nLambdas;}
 
     unsigned int getNContactModelsUsed(){
-                std::cout << BitCount::count<ContactModelEnumIntType>(m_usedContactModels) <<std::endl;
-        return BitCount::count<ContactModelEnumIntType>(m_usedContactModels);
+        return BitCount::count(m_usedContactModels);
     }
 private:
     typedef typename std::underlying_type<ContactModels::ContactModelEnum>::type ContactModelEnumIntType;
