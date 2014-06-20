@@ -3,7 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include <boost/timer/timer.hpp>
+
 
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
@@ -25,6 +25,7 @@
 #include "QuaternionHelpers.hpp"
 
 #include "FileManager.hpp"
+#include "CPUTimer.hpp"
 
 
 using namespace std;
@@ -129,7 +130,7 @@ void SimulationManager::writeAllOutput() {
             //TODO
             if(m_RecorderSettings.outputCheck(m_pTimestepper->getIterationCount())){
                  // get global time for logging!
-                double timelineSimulation = ((double)m_global_time.elapsed().wall)*1e-9;
+                double timelineSimulation = ((double)m_global_time.elapsed())*1e-9;
                 // Write Data to SystemDataFile (maps all data to back buffer!)
                 m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
                 // Write Data to CollisionDataFile

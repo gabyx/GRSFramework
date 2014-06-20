@@ -3,7 +3,6 @@
 
 #include <mpi.h>
 
-#include <boost/timer/timer.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 
@@ -16,6 +15,8 @@
 #include "MPICommunication.hpp"
 #include "MPITopologyBuilder.hpp"
 #include "BodyCommunicator.hpp"
+
+#include "CPUTimer.hpp"
 
 class StateRecorder;
 class StateRecorderBody;
@@ -39,7 +40,7 @@ public:
 
 private:
 
-    boost::timer::cpu_timer m_globalTimer;
+    CPUTimer m_globalTimer;
 
     void initSim();
 

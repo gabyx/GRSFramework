@@ -6,7 +6,6 @@
 #include <fstream>
 
 
-#include <boost/timer/timer.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "AssertionDebug.hpp"
@@ -31,6 +30,9 @@
 #include "ContactGraphMPI.hpp"
 
 #include "ContactGraphVisitorsMPI.hpp"
+
+
+#include "CPUTimer.hpp"
 
 /**
 * @ingroup Inclusion

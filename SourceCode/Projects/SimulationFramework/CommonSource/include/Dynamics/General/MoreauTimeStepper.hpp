@@ -13,7 +13,6 @@
 #include <fstream>
 #include <cmath>
 
-#include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -21,6 +20,7 @@
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
+#include "CPUTimer.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 #include CollisionSolver_INCLUDE_FILE
@@ -106,7 +106,7 @@ protected:
     bool m_bFinished;
 
     // Timer for the Performance
-    boost::timer::cpu_timer m_PerformanceTimer;
+    CPUTimer m_PerformanceTimer;
     double m_startTime, m_endTime, m_startTimeCollisionSolver, m_endTimeCollisionSolver, m_startTimeInclusionSolver, m_endTimeInclusionSolver;
 
     // Collision Data file

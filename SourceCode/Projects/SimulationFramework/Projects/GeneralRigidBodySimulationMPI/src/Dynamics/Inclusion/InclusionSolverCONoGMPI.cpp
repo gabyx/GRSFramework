@@ -180,7 +180,7 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
              ) {
 
 #if MEASURE_TIME_PROX == 1
-            boost::timer::cpu_timer counter;
+            CPUTimer counter;
             counter.start();
 #endif
 
@@ -188,8 +188,7 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
             doSorProx();
 
 #if MEASURE_TIME_PROX == 1
-            counter.stop();
-            m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
+            m_timeProx = ((double)counter.elapsed()) * 1e-9;
 #endif
 
         } else if(m_Settings.m_eMethod == InclusionSolverSettingsType::JOR) {

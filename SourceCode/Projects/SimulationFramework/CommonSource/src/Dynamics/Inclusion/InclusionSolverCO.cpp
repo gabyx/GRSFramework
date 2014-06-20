@@ -10,7 +10,7 @@
 #include "SorProxGPUVariant.hpp"
 #endif
 
-#include <boost/timer/timer.hpp>
+#include "CPUTimer.hpp"
 
 
 const unsigned int InclusionSolverCO::NDOFFriction = ContactModels::UnilateralAndCoulombFrictionContactModel::nDOFFriction;
@@ -260,15 +260,14 @@ void InclusionSolverCO::solveInclusionProblem() {
             m_d.noalias() = (-m_R).asDiagonal()*m_d;
 
 #if MEASURE_TIME_PROX == 1
-            boost::timer::cpu_timer counter;
+            CPUTimer counter;
             counter.start();
 #endif
 
             doSorProx();
 
 #if MEASURE_TIME_PROX == 1
-            counter.stop();
-            m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
+            m_timeProx = ((double)counter.elapsed()) * 1e-9;
 #endif
         } else if(m_Settings.m_eMethod == InclusionSolverSettingsType::JOR) {
             // Calculate  R_N, R_T,
@@ -278,15 +277,14 @@ void InclusionSolverCO::solveInclusionProblem() {
             m_d.noalias() = (-m_R).asDiagonal()*m_d;
 
 #if MEASURE_TIME_PROX == 1
-            boost::timer::cpu_timer counter;
+            CPUTimer counter;
             counter.start();
 #endif
 
             doJorProx();
 
 #if MEASURE_TIME_PROX == 1
-            counter.stop();
-            m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
+            m_timeProx = ((double)counter.elapsed()) * 1e-9;
 #endif
         }else{
             ASSERTMSG(false,"This algorithm has not been implemented yet");
@@ -413,9 +411,10 @@ void InclusionSolverCO::doJorProx() {
 #if CoutLevelSolverWhenContact>0
             LOG(m_pSolverLog,  " converged = "<<m_bConverged<< "\t"<< "iterations:" <<m_globalIterationCounter <<"/"<<  m_Settings.m_MaxIter<< std::endl;);
 #endif
-
             break;
+            // P_front contains newest values
         }
+
         swapPercussionBuffer();
     }
 

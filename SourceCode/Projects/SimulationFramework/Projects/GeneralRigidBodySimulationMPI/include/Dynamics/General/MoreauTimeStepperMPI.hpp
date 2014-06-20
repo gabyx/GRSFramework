@@ -14,7 +14,6 @@
 #include <fstream>
 #include <cmath>
 
-#include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -38,7 +37,7 @@
 #include "TimeStepperSettings.hpp"
 //===========================================
 
-
+#include "CPUTimer.hpp"
 
 
 /**
@@ -102,7 +101,7 @@ protected:
     bool m_bFinished;
 
     // Timer for the Performance
-    boost::timer::cpu_timer m_PerformanceTimer;
+    CPUTimer m_PerformanceTimer;
     PREC m_startTime, m_endTime,
     m_startTimeCollisionSolver, m_endTimeCollisionSolver,
     m_startTimeInclusionSolver, m_endTimeInclusionSolver,
@@ -281,7 +280,6 @@ void MoreauTimeStepper::reset() {
 
     m_bFinished = false;
 
-    m_PerformanceTimer.stop();
     m_PerformanceTimer.start();
 };
 
@@ -312,7 +310,7 @@ void MoreauTimeStepper::doOneIteration() {
     m_IterationCounter++;
 
 
-    m_startTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_startTime = ((double)m_PerformanceTimer.elapsed())*1e-9;
 
     //Force switch
     //boost::thread::yield();
@@ -342,9 +340,9 @@ void MoreauTimeStepper::doOneIteration() {
     m_currentSimulationTime = m_startSimulationTime + m_Settings.m_deltaT/2.0;
     // ====================================================================================
 
-    m_startBodyCommunication = ((PREC)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_startBodyCommunication = ((PREC)m_PerformanceTimer.elapsed())*1e-9;
     m_pBodyCommunicator->communicate(m_currentSimulationTime);
-    m_endBodyCommunication = ((PREC)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_endBodyCommunication = ((PREC)m_PerformanceTimer.elapsed())*1e-9;
 
     /* Communicate all bodies which are in the overlap zone or are out of the processes topology!
 
@@ -384,15 +382,15 @@ void MoreauTimeStepper::doOneIteration() {
     m_pInclusionSolver->resetForNextIter(); // Clears the contact graph and other inclusion related stuff!
 
     // Solve Collision
-    m_startTimeCollisionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_startTimeCollisionSolver = ((double)m_PerformanceTimer.elapsed())*1e-9;
     m_pCollisionSolver->solveCollision();
-    m_endTimeCollisionSolver =   ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_endTimeCollisionSolver =   ((double)m_PerformanceTimer.elapsed())*1e-9;
 
     //Solve Contact Problem
     //boost::thread::yield();
-    m_startTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_startTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed())*1e-9;
     m_pInclusionSolver->solveInclusionProblem(m_currentSimulationTime);
-    m_endTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_endTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed())*1e-9;
 
     //boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
     //boost::thread::yield();
@@ -417,7 +415,7 @@ void MoreauTimeStepper::doOneIteration() {
     //Force switch
     //boost::thread::yield();
 
-    m_endTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_endTime = ((double)m_PerformanceTimer.elapsed())*1e-9;
 
     // Measure Time again
     if (m_IterationCounter%100==0) {

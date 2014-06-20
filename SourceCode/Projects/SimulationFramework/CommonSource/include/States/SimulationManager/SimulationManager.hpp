@@ -2,7 +2,6 @@
 #define SimulationManager_hpp
 
 #include <boost/shared_ptr.hpp>
-#include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
 
 #include "TypeDefs.hpp"
@@ -10,6 +9,7 @@
 
 #include "SceneParser.hpp"
 
+#include "CPUTimer.hpp"
 
 class DynamicsState;
 class StateRecorder;
@@ -37,7 +37,7 @@ public:
 
 private:
 
-   boost::timer::cpu_timer m_global_time;
+   CPUTimer m_global_time;
 
    void writeAllOutput();
    RecorderSettings m_RecorderSettings;

@@ -173,7 +173,6 @@ void MoreauTimeStepper::reset() {
 
     m_bFinished = false;
 
-    m_PerformanceTimer.stop();
     m_PerformanceTimer.start();
 };
 
@@ -217,7 +216,7 @@ void MoreauTimeStepper::doOneIteration() {
     iterations++;
     m_IterationCounter++;
 
-    m_startTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_startTime = ((double)m_PerformanceTimer.elapsed())*1e-9;
 
 
 
@@ -263,15 +262,15 @@ void MoreauTimeStepper::doOneIteration() {
     m_pInclusionSolver->resetForNextIter(); // Clears the contact graph!
 
     // Solve Collision
-    m_startTimeCollisionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_startTimeCollisionSolver = ((double)m_PerformanceTimer.elapsed())*1e-9;
     m_pCollisionSolver->solveCollision();
-    m_endTimeCollisionSolver =   ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_endTimeCollisionSolver =   ((double)m_PerformanceTimer.elapsed())*1e-9;
 
     //Solve Contact Problem
     //boost::thread::yield();
-    m_startTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_startTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed())*1e-9;
     m_pInclusionSolver->solveInclusionProblem();
-    m_endTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_endTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed())*1e-9;
 
     //boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
     //boost::thread::yield();
@@ -302,7 +301,7 @@ void MoreauTimeStepper::doOneIteration() {
     //Force switch
     //boost::thread::yield();
 
-    m_endTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_endTime = ((double)m_PerformanceTimer.elapsed())*1e-9;
 
 
     // Measure Time again

@@ -17,7 +17,7 @@ SimulationManagerBase::SimulationManagerBase():
 
     m_barrier_start(2) {
     m_lastTime = 0;
-    m_pTimelineSimulation = boost::shared_ptr<boost::timer::cpu_timer>(new boost::timer::cpu_timer);
+    m_pTimelineSimulation = boost::shared_ptr<CPUTimer>(new CPUTimer);
     m_pTimelineSimulation->stop();
 
     // Setup timeScale List;
@@ -60,7 +60,7 @@ void  SimulationManagerBase::setThreadToBeStopped(bool stop) {
 double SimulationManagerBase::getTimelineSimulation() {
     double x;
     m_mutexTimelineSimulation.lock();
-    x = ((double)m_pTimelineSimulation->elapsed().wall) * 1e-9 * m_timeScale + m_lastTime;
+    x = ((double)m_pTimelineSimulation->elapsed()) * 1e-9 * m_timeScale + m_lastTime;
     m_mutexTimelineSimulation.unlock();
     return x;
 };
@@ -102,7 +102,7 @@ void SimulationManagerBase::addToTimeScale(double step) {
     m_mutexTimelineSimulation.lock();
     // Reset the Timer
     m_pTimelineSimulation->stop();
-    m_lastTime = ((double)m_pTimelineSimulation->elapsed().wall) * 1e-9 * m_timeScale + m_lastTime;
+    m_lastTime = ((double)m_pTimelineSimulation->elapsed()) * 1e-9 * m_timeScale + m_lastTime;
     m_pTimelineSimulation->start();
 
 
@@ -141,7 +141,7 @@ void SimulationManagerBase::togglePauseSimulation() {
     else{
         m_bPauseEnabled = false;
         m_timeScale = m_timeScaleList[m_timeScaleListIdx];
-        m_lastTime = ((double)m_pTimelineSimulation->elapsed().wall) * 1e-9 * m_timeScale + m_lastTime;
+        m_lastTime = ((double)m_pTimelineSimulation->elapsed()) * 1e-9 * m_timeScale + m_lastTime;
         m_pTimelineSimulation->start();
 
     }

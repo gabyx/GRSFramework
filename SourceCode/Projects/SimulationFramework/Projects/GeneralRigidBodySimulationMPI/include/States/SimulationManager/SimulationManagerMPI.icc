@@ -133,13 +133,12 @@ void SimulationManagerMPI::checkNumberOfBodiesInProcess() {
     int numberOfBodiesInSimulation = 0;
     int nSimBodies = m_nSimBodies;
 
-    boost::timer::cpu_timer timer;
+    CPUTimer timer;
 
     timer.start();
     LOG(m_pSimulationLog,  "MPI> Body check,  MPI_Reduce... "<< std::endl;)
     MPI_Reduce(&nSimBodies,&numberOfBodiesInSimulation, 1, MPI_INT, MPI_SUM, m_pProcCommunicator->getMasterRank(), m_pProcCommunicator->getCommunicator());
-    timer.stop();
-    double elapsed = ((double)timer.elapsed().wall)*1e-9;
+    double elapsed = ((double)timer.elapsed())*1e-9;
 
     if(m_pProcCommunicator->hasMasterRank()) {
         LOG(m_pSimulationLog,  "MPI> Allreduce needed: " << elapsed <<"sec."<<std::endl; );
@@ -212,8 +211,7 @@ void SimulationManagerMPI::startSim() {
 
         // Check if simulation can be aborted!
         if(m_pTimestepper->finished()) {
-            m_globalTimer.stop();
-            runtime = ((PREC)m_globalTimer.elapsed().wall)*1e-9;
+            runtime = ((PREC)m_globalTimer.elapsed())*1e-9;
             LOG(m_pSimulationLog, "---> SimulationManager: Timestepper finished, needed: " << runtime << " sec. , exit..."<< std::endl );
             break;
         }
@@ -235,7 +233,7 @@ void SimulationManagerMPI::writeAllOutput() {
 
     if(m_RecorderSettings.outputCheck(m_pTimestepper->getIterationCount())) {
         // Write Data to SystemDataFile (maps all data to back buffer!)
-        m_pTimestepper->writeIterationToSystemDataFile((PREC)m_globalTimer.elapsed().wall*1e-9);
+        m_pTimestepper->writeIterationToSystemDataFile((PREC)m_globalTimer.elapsed()*1e-9);
         // Write Data to CollisionDataFile
         //m_pTimestepper->writeIterationToCollisionDataFile();
         // Write  State to Sim File

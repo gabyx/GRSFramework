@@ -74,7 +74,7 @@ private:
     void initSimThread();
     void cleanUpSimThread();
 
-    boost::timer::cpu_timer m_global_time;
+    CPUTimer m_global_time;
 
     void writeAllOutput();
     RecorderSettings m_RecorderSettings;

@@ -12,7 +12,7 @@
 
 #include "AssertionDebug.hpp"
 
-#include <boost/timer/timer.hpp>
+#include "CPUTimer.hpp"
 
 class PlaybackManagerBase {
 public:
@@ -80,7 +80,7 @@ protected:
     void setSimThreadRunning(bool value);   /**	\brief Sets the variable which is used in the vis thread to check if the thread is still alive. */
 
     boost::mutex		m_mutexTimelineSimulation;
-    boost::shared_ptr<boost::timer::cpu_timer>		m_pTimelineSimulation;
+    boost::shared_ptr<CPUTimer>		m_pTimelineSimulation;
     double m_lastTime; // This is used to stop the timer, set m_lastTime, increase/decrease timeScale, startTimer again
 
     double	m_timeScale;

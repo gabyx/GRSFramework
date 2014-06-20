@@ -25,7 +25,7 @@
 #include "SorProxGPUVariant.hpp"
 #endif
 
-#include <boost/timer/timer.hpp>
+#include "CPUTimer.hpp"
 
 
 
