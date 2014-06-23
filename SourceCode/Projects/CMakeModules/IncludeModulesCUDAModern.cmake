@@ -85,7 +85,7 @@ set(${INC}
 	${PATH_TO_MODULES}/inc/General/Utilities.hpp
 	${PATH_TO_MODULES}/inc/General/FloatingPointType.hpp
 	${PATH_TO_MODULES}/inc/General/GPUMutex.hpp
-	${PATH_TO_MODULES}/inc/General/TemplateHelper.hpp
+	${PATH_TO_MODULES}/inc/General/TypeTraitsHelper.hpp
 	${PATH_TO_MODULES}/inc/General/StaticAssert.hpp
 	${PATH_TO_MODULES}/inc/General/FlopsCounting.hpp
     ${PATH_TO_MODULES}/inc/General/AssertionDebug.hpp
@@ -107,6 +107,7 @@ set(${INC}
     ${PATH_TO_MODULES}/inc/General/Exception.hpp
     ${PATH_TO_MODULES}/inc/General/CudaModern/CudaError.hpp
     ${PATH_TO_MODULES}/inc/General/CudaModern/CudaMatrix.hpp
+    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaPrint.hpp
 )
 set(${SRC}
     ${PATH_TO_MODULES}/src/General/CudaModern/CudaCompilerVersion.cu
@@ -119,6 +120,7 @@ set(${SRC}
     ${PATH_TO_MODULES}/src/General/CudaModern/CudaUtilities.cpp
     ${PATH_TO_MODULES}/src/General/CudaModern/CudaEvent.cpp
     ${PATH_TO_MODULES}/src/General/CudaModern/CudaTimer.cpp
+    ${PATH_TO_MODULES}/src/General/CudaModern/CudaPrint.cpp
 	${PATH_TO_MODULES}/src/General/Utilities.cpp
 )
 set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/General/CudaModern ${PATH_TO_MODULES}/inc/General/)
@@ -128,7 +130,7 @@ MACRO(INCLUDE_GENERAL_EXTERN_CUDA SRC INC INCLUDE_DIRS PATH_TO_MODULES )
 set(${INC}
 	${PATH_TO_MODULES}/inc/General/Utilities.hpp
 	${PATH_TO_MODULES}/inc/General/FloatingPointType.hpp
-	${PATH_TO_MODULES}/inc/General/TemplateHelper.hpp
+	${PATH_TO_MODULES}/inc/General/TypeTraitsHelper.hpp
 	${PATH_TO_MODULES}/inc/General/GPUMutex.hpp
 	${PATH_TO_MODULES}/inc/General/StaticAssert.hpp
 	${PATH_TO_MODULES}/inc/General/FlopsCounting.hpp
@@ -137,6 +139,7 @@ set(${INC}
     ${PATH_TO_MODULES}/inc/General/CudaModern/CudaAlloc.hpp
     ${PATH_TO_MODULES}/inc/General/CudaModern/CudaRefcounting.hpp
     ${PATH_TO_MODULES}/inc/General/CudaModern/CudaDeviceMemory.hpp
+    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaDeviceMatrix.hpp
     ${PATH_TO_MODULES}/inc/General/CudaModern/CudaTypeDefs.hpp
     ${PATH_TO_MODULES}/inc/General/CudaModern/CudaDeviceGroup.hpp
     ${PATH_TO_MODULES}/inc/General/CudaModern/CudaContextGroup.hpp
