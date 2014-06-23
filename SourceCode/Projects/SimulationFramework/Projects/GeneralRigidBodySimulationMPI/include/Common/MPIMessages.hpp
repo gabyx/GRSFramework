@@ -85,9 +85,10 @@ public:
 
 
 template<typename TNeighbourCommunicator >
-class NeighbourMessageWrapperBodies : public boost::serialization::traits< NeighbourMessageWrapperBodies<TNeighbourCommunicator>,
-    boost::serialization::object_serializable,
-        boost::serialization::track_never> {
+class NeighbourMessageWrapperBodies : public boost::serialization::traits<  NeighbourMessageWrapperBodies<TNeighbourCommunicator>,
+                                                                            boost::serialization::object_serializable,
+                                                                            boost::serialization::track_never>
+{
 public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES

@@ -66,7 +66,7 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
     // MPI Process Commnunicator
 
-    m_pProcCommunicator = boost::shared_ptr<ProcessCommunicatorType >(new ProcessCommunicatorType(
+    m_pProcCommunicator = std::shared_ptr<ProcessCommunicatorType >(new ProcessCommunicatorType(
                                                     MPILayer::MPIGlobalCommunicators::getSingletonPtr()->getCommunicator(
                                                       MPILayer::MPICommunicatorId::SIM_COMM
                                                     )
@@ -74,12 +74,12 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     m_pSimulationLog->logMessage("--->SimulationManagerMPI:: Added ProcessCommunicator");
 
 
-    m_pDynSys = boost::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
+    m_pDynSys = std::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
     m_pSimulationLog->logMessage("--->SimulationManagerMPI:: Added DynamicsSystem");
 
     // Parse the Scene from XML! ==========================
 
-    m_pSceneParser = boost::shared_ptr< SceneParserMPI >( new SceneParserMPI( m_pDynSys, m_pProcCommunicator ) );
+    m_pSceneParser = std::shared_ptr< SceneParserMPI >( new SceneParserMPI( m_pDynSys, m_pProcCommunicator ) );
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
     m_pSceneParser->parseScene(sceneFilePathNew);
     m_nGlobalSimBodies = m_pSceneParser->getNumberOfGlobalSimBodies();
@@ -95,10 +95,10 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     // =====================================================
 
     //Uncomment if StateRecorderType = StateRecorderBodys
-    //m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(true,m_pProcCommunicator->getProcInfo()->getRank()));
+    //m_pStateRecorder  =  std::shared_ptr<StateRecorderType >(new StateRecorderType(true,m_pProcCommunicator->getProcInfo()->getRank()));
 
-    m_pStateRecorder  =  boost::shared_ptr<StateRecorderType >(new StateRecorderType(m_nGlobalSimBodies,
-                                                                boost::static_pointer_cast<ProcessCommunicatorType::ProcessInfoType>(m_pProcCommunicator)));
+    m_pStateRecorder  =  std::shared_ptr<StateRecorderType >(new StateRecorderType(m_nGlobalSimBodies,
+                                                                std::static_pointer_cast<ProcessCommunicatorType::ProcessInfoType>(m_pProcCommunicator)));
     // =====================================================
 
 
@@ -118,7 +118,7 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     //as along as there is the SimMgrMpi there is a NbCommunicator and a StatRecorder, so no problem
     // ===============================================
 
-    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pProcCommunicator) );
+    m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pProcCommunicator) );
 
     m_pSimulationLog->logMessage("---> Initialize ProcessCommunicator buffers...");
     m_pProcCommunicator->initializeNeighbourBuffers();

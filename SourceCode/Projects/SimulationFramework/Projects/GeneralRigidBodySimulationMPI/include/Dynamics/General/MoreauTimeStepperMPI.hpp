@@ -340,7 +340,7 @@ void MoreauTimeStepper::doOneIteration() {
     m_currentSimulationTime = m_startSimulationTime + m_Settings.m_deltaT/2.0;
     // ====================================================================================
 
-    m_startBodyCommunication = m_PerformanceTimer.elapsedSec()
+    m_startBodyCommunication = m_PerformanceTimer.elapsedSec();
     m_pBodyCommunicator->communicate(m_currentSimulationTime);
     m_endBodyCommunication = m_PerformanceTimer.elapsedSec();
 
@@ -390,7 +390,7 @@ void MoreauTimeStepper::doOneIteration() {
     //boost::thread::yield();
     m_startTimeInclusionSolver = m_PerformanceTimer.elapsedSec();
     m_pInclusionSolver->solveInclusionProblem(m_currentSimulationTime);
-    m_endTimeInclusionSolver = m_PerformanceTimer.elapsedSec()
+    m_endTimeInclusionSolver = m_PerformanceTimer.elapsedSec();
 
     //boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
     //boost::thread::yield();
