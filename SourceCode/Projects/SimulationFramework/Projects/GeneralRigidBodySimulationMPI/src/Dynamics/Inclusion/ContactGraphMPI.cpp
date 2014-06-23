@@ -4,7 +4,7 @@
 
 #include "ContactFeasibilityTable.hpp"
 template<typename Combo>
-ContactGraph<Combo>::ContactGraph(boost::shared_ptr<DynamicsSystemType> pDynSys):
+ContactGraph<Combo>::ContactGraph(std::shared_ptr<DynamicsSystemType> pDynSys):
     m_nodeCounter(0),
     m_edgeCounter(0),
     m_nLambdas(0),
@@ -13,7 +13,7 @@ ContactGraph<Combo>::ContactGraph(boost::shared_ptr<DynamicsSystemType> pDynSys)
     m_pContactParameterMap(&pDynSys->m_ContactParameterMap)
 {}
 template<typename Combo>
-void ContactGraph<Combo>::setInclusionCommunicator(boost::shared_ptr<InclusionCommunicatorType> pInclusionComm) {
+void ContactGraph<Combo>::setInclusionCommunicator(std::shared_ptr<InclusionCommunicatorType> pInclusionComm) {
     m_pInclusionComm = pInclusionComm;
     m_pNbDataMap = m_pInclusionComm->getNeighbourMap();
 }

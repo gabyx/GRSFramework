@@ -37,12 +37,12 @@ public:
 
 	bool isOgreToBeShutDown()const{return m_bShutDownOgre;}  
 
-	boost::shared_ptr<Ogre::Root>					m_pRoot;
+	std::shared_ptr<Ogre::Root>					m_pRoot;
 	Ogre::RenderWindow*								m_pRenderWnd; //no shared pointer because class has no deconstructor!
 	Ogre::Viewport*									m_pViewport;
 	Ogre::Log*										m_pOgreLog;
 	Ogre::Log*										m_pAppLog;
-	boost::shared_ptr<Ogre::Timer>					m_pTimer;
+	std::shared_ptr<Ogre::Timer>					m_pTimer;
 
 	bool						m_bShutDownOgre;	// <debug>	better private, but InputContext needs access
 

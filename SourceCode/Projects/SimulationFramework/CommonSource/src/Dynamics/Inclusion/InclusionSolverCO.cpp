@@ -17,8 +17,8 @@ const unsigned int InclusionSolverCO::NDOFFriction = ContactModels::UnilateralAn
 const unsigned int InclusionSolverCO::ContactDim = ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension;
 
 
-InclusionSolverCO::InclusionSolverCO(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
-                                     boost::shared_ptr<DynamicsSystemType> pDynSys):
+InclusionSolverCO::InclusionSolverCO(std::shared_ptr< CollisionSolverType >  pCollisionSolver,
+                                     std::shared_ptr<DynamicsSystemType> pDynSys):
     m_SimBodies(pDynSys->m_SimBodies),
     m_Bodies(pDynSys->m_Bodies), m_ContactGraph(&(pDynSys->m_ContactParameterMap)),
     m_pCollisionSolver(pCollisionSolver),
@@ -267,7 +267,7 @@ void InclusionSolverCO::solveInclusionProblem() {
             doSorProx();
 
 #if MEASURE_TIME_PROX == 1
-            m_timeProx = ((double)counter.elapsed()) * 1e-9;
+            m_timeProx = counter.elapsedSec();
 #endif
         } else if(m_Settings.m_eMethod == InclusionSolverSettingsType::JOR) {
             // Calculate  R_N, R_T,
@@ -284,7 +284,7 @@ void InclusionSolverCO::solveInclusionProblem() {
             doJorProx();
 
 #if MEASURE_TIME_PROX == 1
-            m_timeProx = ((double)counter.elapsed()) * 1e-9;
+            m_timeProx = counter.elapsedSec();
 #endif
         }else{
             ASSERTMSG(false,"This algorithm has not been implemented yet");

@@ -15,7 +15,7 @@ _________________________________________________________*/
 
 
 
-MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState)
+MoreauTimeStepper::MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys,  std::shared_ptr<StatePoolType>	pSysState)
 {
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
@@ -33,9 +33,9 @@ MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynS
 
     m_pDynSys = pDynSys;
 
-    m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys));
+    m_pCollisionSolver = std::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys));
 
-    m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys));
+    m_pInclusionSolver = std::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys));
 
 };
 
@@ -188,14 +188,14 @@ unsigned int MoreauTimeStepper::getIterationCount() {
 
 
 
-boost::shared_ptr<const DynamicsState>
+std::shared_ptr<const DynamicsState>
 MoreauTimeStepper::getBackStateBuffer() {
     return m_StateBuffers.m_pBack;
 }
 
 
 
-boost::shared_ptr<const DynamicsState>
+std::shared_ptr<const DynamicsState>
 MoreauTimeStepper::getFrontStateBuffer() {
     return m_StateBuffers.m_pFront;
 }
@@ -216,7 +216,7 @@ void MoreauTimeStepper::doOneIteration() {
     iterations++;
     m_IterationCounter++;
 
-    m_startTime = ((double)m_PerformanceTimer.elapsed())*1e-9;
+    m_startTime = m_PerformanceTimer.elapsedSec();
 
 
 
@@ -262,15 +262,15 @@ void MoreauTimeStepper::doOneIteration() {
     m_pInclusionSolver->resetForNextIter(); // Clears the contact graph!
 
     // Solve Collision
-    m_startTimeCollisionSolver = ((double)m_PerformanceTimer.elapsed())*1e-9;
+    m_startTimeCollisionSolver = m_PerformanceTimer.elapsedSec();
     m_pCollisionSolver->solveCollision();
-    m_endTimeCollisionSolver =   ((double)m_PerformanceTimer.elapsed())*1e-9;
+    m_endTimeCollisionSolver =   m_PerformanceTimer.elapsedSec();
 
     //Solve Contact Problem
     //boost::thread::yield();
-    m_startTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed())*1e-9;
+    m_startTimeInclusionSolver = m_PerformanceTimer.elapsedSec();
     m_pInclusionSolver->solveInclusionProblem();
-    m_endTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed())*1e-9;
+    m_endTimeInclusionSolver = m_PerformanceTimer.elapsedSec();
 
     //boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
     //boost::thread::yield();
@@ -301,7 +301,7 @@ void MoreauTimeStepper::doOneIteration() {
     //Force switch
     //boost::thread::yield();
 
-    m_endTime = ((double)m_PerformanceTimer.elapsed())*1e-9;
+    m_endTime = m_PerformanceTimer.elapsedSec();
 
 
     // Measure Time again

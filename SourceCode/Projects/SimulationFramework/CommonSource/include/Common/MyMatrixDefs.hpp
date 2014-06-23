@@ -31,7 +31,7 @@ struct MyMatrix{
    typedef Eigen::Matrix<PREC, 2, 1> Vector2;
    typedef Eigen::Matrix<PREC, 4, 1> Quaternion;
    typedef Eigen::Matrix<PREC, 4, 1> Vector4;
-   typedef Eigen::Matrix<PREC, 4, 1> Vector6;
+   typedef Eigen::Matrix<PREC, 6, 1> Vector6;
    typedef Eigen::Matrix<PREC, Eigen::Dynamic , 1 >                    VectorDyn;
    typedef Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic >       MatrixDyn;
    typedef Eigen::DiagonalMatrix<PREC, Eigen::Dynamic >                MatrixDiagDyn;
@@ -65,6 +65,7 @@ struct MyMatrixDecomposition{;
    typedef typename MyMatrix< _PREC_ >::Vector3 Vector3;   \
    typedef typename MyMatrix< _PREC_ >::Vector2 Vector2;   \
    typedef typename MyMatrix< _PREC_ >::Vector4 Vector4;   \
+   typedef typename MyMatrix< _PREC_ >::Vector6 Vector6;   \
    typedef typename MyMatrix< _PREC_ >::Quaternion Quaternion; \
    typedef typename MyMatrix< _PREC_ >::VectorDyn VectorDyn; \
    typedef typename MyMatrix< _PREC_ >::MatrixDyn MatrixDyn; \

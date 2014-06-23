@@ -21,7 +21,7 @@
 
 
 
-PlaybackManager::PlaybackManager(boost::shared_ptr<Ogre::SceneManager> pSceneMgr):
+PlaybackManager::PlaybackManager(std::shared_ptr<Ogre::SceneManager> pSceneMgr):
     PlaybackManagerBase(),
     m_nDofqBody(NDOFqBody),
     m_nDofuBody(NDOFuBody),
@@ -83,22 +83,22 @@ bool PlaybackManager::setup() {
     // =====================================================
 
     //init shared buffer
-    m_pSharedBuffer = boost::shared_ptr<SharedBufferPlayback >(
+    m_pSharedBuffer = std::shared_ptr<SharedBufferPlayback >(
                           new SharedBufferPlayback(m_nSimBodies)
                       );
     m_pSharedBuffer->resetStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
 
 
-    m_pFileLoader = boost::shared_ptr< PlaybackLoader<StateRingPoolVisBackFront > >(
+    m_pFileLoader = std::shared_ptr< PlaybackLoader<StateRingPoolVisBackFront > >(
                         new PlaybackLoader< StateRingPoolVisBackFront >(m_nSimBodies, m_pSharedBuffer)
                     );
 
     //Make a videodropper
-    m_pVideoDropper = boost::shared_ptr<VideoDropper>(new VideoDropper());
+    m_pVideoDropper = std::shared_ptr<VideoDropper>(new VideoDropper());
     m_pVideoDropper->reset();
 
     //Make a Sim File Resampler
-    m_pStateRecorderResampler = boost::shared_ptr<StateRecorderResampler >(new StateRecorderResampler(m_nSimBodies));
+    m_pStateRecorderResampler = std::shared_ptr<StateRecorderResampler >(new StateRecorderResampler(m_nSimBodies));
     m_pStateRecorderResampler->reset();
 
     m_pVisBuffer = m_pSharedBuffer->getVisBuffer();
@@ -118,7 +118,7 @@ bool PlaybackManager::parseScene() {
         return false;
     }
 
-    m_pSceneParser = boost::shared_ptr< SceneParserOgre >( new SceneParserOgre( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies) );
+    m_pSceneParser = std::shared_ptr< SceneParserOgre >( new SceneParserOgre( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies) );
     m_pSceneParser->parseScene(sceneFilePath);
 
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();

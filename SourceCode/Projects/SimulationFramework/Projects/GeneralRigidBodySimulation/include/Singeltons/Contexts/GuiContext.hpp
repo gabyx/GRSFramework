@@ -2,7 +2,7 @@
 #define GUICONTEXT_HPP
 
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <OISMouse.h>
 #include <SdkTrays.h>
 #include "Contexts/RenderContext.hpp"
@@ -27,9 +27,9 @@ public:
 	void updateGuiContext(double timeSinceLastFrame);
 
 private:
-	boost::shared_ptr<OgreBites::SdkTrayManager>m_pTrayMgr;
+	std::shared_ptr<OgreBites::SdkTrayManager>m_pTrayMgr;
 	Ogre::FrameEvent            m_FrameEvent;
 };
 
 
-#endif	
+#endif

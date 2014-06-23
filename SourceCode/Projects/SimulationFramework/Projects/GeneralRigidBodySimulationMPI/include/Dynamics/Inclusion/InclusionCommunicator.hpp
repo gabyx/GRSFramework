@@ -37,12 +37,12 @@ public:
     typedef typename ContactGraphType::NodeDataType NodeDataType;
     typedef NeighbourMap<NeighbourDataInclusionCommunication<NodeDataType> > NeighbourMapType;
 
-    InclusionCommunicator(boost::shared_ptr< BodyCommunicator> pBodyComm,
-                          boost::shared_ptr< DynamicsSystemType> pDynSys ,
-                          boost::shared_ptr< ProcessCommunicatorType > pProcComm);
+    InclusionCommunicator(std::shared_ptr< BodyCommunicator> pBodyComm,
+                          std::shared_ptr< DynamicsSystemType> pDynSys ,
+                          std::shared_ptr< ProcessCommunicatorType > pProcComm);
 
 
-    void setContactGraph(boost::shared_ptr< ContactGraphType> pGraph){
+    void setContactGraph(std::shared_ptr< ContactGraphType> pGraph){
         m_pContactGraph = pGraph;
     }
 
@@ -109,10 +109,10 @@ private:
     MPILayer::NeighbourMessageWrapperInclusionSplitBodyUpdate< InclusionCommunicator > m_messageSplitBodyUpdate;
     MPILayer::NeighbourMessageWrapperInclusionSplitBodySolution< InclusionCommunicator > m_messageSplitBodySolution;
 
-    boost::shared_ptr< DynamicsSystemType >      m_pDynSys;
-    boost::shared_ptr< ProcessCommunicatorType > m_pProcComm;
-    boost::shared_ptr< ContactGraphType >        m_pContactGraph;
-    boost::shared_ptr< BodyCommunicator>         m_pBodyComm;
+    std::shared_ptr< DynamicsSystemType >      m_pDynSys;
+    std::shared_ptr< ProcessCommunicatorType > m_pProcComm;
+    std::shared_ptr< ContactGraphType >        m_pContactGraph;
+    std::shared_ptr< BodyCommunicator>         m_pBodyComm;
 
     RankIdType m_rank;
 

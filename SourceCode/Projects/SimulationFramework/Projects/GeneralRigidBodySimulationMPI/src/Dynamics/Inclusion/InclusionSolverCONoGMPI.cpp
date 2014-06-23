@@ -20,10 +20,10 @@
 
 
 InclusionSolverCONoG::InclusionSolverCONoG(
-    boost::shared_ptr< BodyCommunicator >  pBodyComm,
-    boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
-    boost::shared_ptr< DynamicsSystemType > pDynSys,
-    boost::shared_ptr< ProcessCommunicatorType > pProcComm
+    std::shared_ptr< BodyCommunicator >  pBodyComm,
+    std::shared_ptr< CollisionSolverType >  pCollisionSolver,
+    std::shared_ptr< DynamicsSystemType > pDynSys,
+    std::shared_ptr< ProcessCommunicatorType > pProcComm
 ):
     m_SimBodies(pDynSys->m_SimBodies),
     m_Bodies(pDynSys->m_Bodies),
@@ -54,8 +54,8 @@ InclusionSolverCONoG::InclusionSolverCONoG(
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>();
     m_pSorProxStepSplitNodeVisitor = new SorProxStepSplitNodeVisitor<ContactGraphType>(m_Settings,m_bConverged,m_globalIterationCounter);
 
-    m_pInclusionComm = boost::shared_ptr<InclusionCommunicatorType >( new InclusionCommunicatorType(pBodyComm, m_pDynSys,  m_pProcComm));
-    m_pContactGraph  = boost::shared_ptr<ContactGraphType>( new ContactGraphType(pDynSys));
+    m_pInclusionComm = std::shared_ptr<InclusionCommunicatorType >( new InclusionCommunicatorType(pBodyComm, m_pDynSys,  m_pProcComm));
+    m_pContactGraph  = std::shared_ptr<ContactGraphType>( new ContactGraphType(pDynSys));
 
     m_pContactGraph->setInclusionCommunicator( m_pInclusionComm );
     m_pInclusionComm->setContactGraph( m_pContactGraph );
@@ -188,7 +188,7 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
             doSorProx();
 
 #if MEASURE_TIME_PROX == 1
-            m_timeProx = ((double)counter.elapsed()) * 1e-9;
+            m_timeProx = counter.elapsedSec();
 #endif
 
         } else if(m_Settings.m_eMethod == InclusionSolverSettingsType::JOR) {

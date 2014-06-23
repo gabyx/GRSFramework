@@ -1,7 +1,7 @@
 ﻿#ifndef RigidBody_hpp
 #define RigidBody_hpp
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/variant.hpp>
 #include <boost/serialization/variant.hpp>
 
@@ -52,10 +52,10 @@ public:
     unsigned int m_globalGeomId; ///< The Id for the global geometry, if this is 0 then the geometry belongs to the body and gets deallocated, otherwise not
 
     typedef boost::variant<
-      boost::shared_ptr<const SphereGeometry >,
-      boost::shared_ptr<const HalfspaceGeometry > ,
-      boost::shared_ptr<const BoxGeometry >,
-      boost::shared_ptr<const MeshGeometry >
+      std::shared_ptr<const SphereGeometry >,
+      std::shared_ptr<const HalfspaceGeometry > ,
+      std::shared_ptr<const BoxGeometry >,
+      std::shared_ptr<const MeshGeometry >
     > GeometryType;
 
     GeometryType m_geometry; ///< A boost::variant which takes different geometry shared pointers.

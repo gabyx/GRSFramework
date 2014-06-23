@@ -1464,8 +1464,8 @@ public:
             serializeEigen(ar,(*bodyIt)->m_r_S);
             serializeEigen(ar,(*bodyIt)->m_q_IK);
             //Velocity
-            LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "No SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "!");
-            serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
+//            LOGASSERTMSG( (*bodyIt)->m_pSolverData, m_pSerializerLog, "No SolverData present in body with id: "<< RigidBodyId::getBodyIdString((*bodyIt)) << "!");
+            serializeEigen(ar,(*bodyIt)->m_pSolverData->m_uBuffer.m_back);
         }
 
         // AABB
@@ -1473,7 +1473,7 @@ public:
         // Theta
         serializeEigen(ar,m_pTopoBuilder->m_Theta_G_loc);
         // r_G
-        serializeEigen(ar,m_r_G_loc);
+        serializeEigen(ar,m_pTopoBuilder->m_r_G_loc);
 
 
 
@@ -1497,7 +1497,7 @@ public:
             serializeEigen(ar, massPointRes.first->m_initState.m_q);
             serializeEigen(ar, massPointRes.first->m_initState.m_u);
             // First point push
-            massPointRes.first->m_points.push_back(m_initState.m_q.head<3>());
+            massPointRes.first->m_points.push_back(massPointRes.first->m_initState.m_q.template head<3>());
         }
 
 

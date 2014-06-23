@@ -6,7 +6,7 @@
 #include <fstream>
 
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "AssertionDebug.hpp"
 
@@ -50,10 +50,10 @@ public:
     typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
     typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
 
-    InclusionSolverCONoG(boost::shared_ptr< BodyCommunicator >  pBodyComm,
-                         boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
-                         boost::shared_ptr< DynamicsSystemType> pDynSys,
-                         boost::shared_ptr< ProcessCommunicatorType > pProcComm);
+    InclusionSolverCONoG(std::shared_ptr< BodyCommunicator >  pBodyComm,
+                         std::shared_ptr< CollisionSolverType >  pCollisionSolver,
+                         std::shared_ptr< DynamicsSystemType> pDynSys,
+                         std::shared_ptr< ProcessCommunicatorType > pProcComm);
     ~InclusionSolverCONoG();
 
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
@@ -83,16 +83,16 @@ public:
 protected:
 
     //MPI Stuff
-    boost::shared_ptr< ProcessCommunicatorType > m_pProcComm;
-    boost::shared_ptr< ProcessInfoType > m_pProcInfo;
+    std::shared_ptr< ProcessCommunicatorType > m_pProcComm;
+    std::shared_ptr< ProcessInfoType > m_pProcInfo;
     const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
 
     unsigned int m_nExpectedContacts;
 
-    boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
-    boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
+    std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
+    std::shared_ptr<DynamicsSystemType>  m_pDynSys;
 
-    boost::shared_ptr<BodyCommunicator>  m_pBodyComm;
+    std::shared_ptr<BodyCommunicator>  m_pBodyComm;
 
 
     /** Circulare template dependency of InclusionCommunicator and ContactGraph
@@ -111,10 +111,10 @@ protected:
 
 
     typedef Combo::InclusionCommunicatorType InclusionCommunicatorType;
-    boost::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
+    std::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
 
     typedef Combo::ContactGraphType ContactGraphType;
-    boost::shared_ptr<ContactGraphType> m_pContactGraph;
+    std::shared_ptr<ContactGraphType> m_pContactGraph;
     /// =========================================================================
 
 

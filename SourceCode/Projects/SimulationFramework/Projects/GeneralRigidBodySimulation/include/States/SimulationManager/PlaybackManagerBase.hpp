@@ -3,7 +3,7 @@
 
 
 #include <boost/thread.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <OGRE/Ogre.h>
 #include <OIS/OISEvents.h>
 #include <OIS/OISKeyboard.h>
@@ -80,7 +80,7 @@ protected:
     void setSimThreadRunning(bool value);   /**	\brief Sets the variable which is used in the vis thread to check if the thread is still alive. */
 
     boost::mutex		m_mutexTimelineSimulation;
-    boost::shared_ptr<CPUTimer>		m_pTimelineSimulation;
+    std::shared_ptr<CPUTimer>		m_pTimelineSimulation;
     double m_lastTime; // This is used to stop the timer, set m_lastTime, increase/decrease timeScale, startTimer again
 
     double	m_timeScale;

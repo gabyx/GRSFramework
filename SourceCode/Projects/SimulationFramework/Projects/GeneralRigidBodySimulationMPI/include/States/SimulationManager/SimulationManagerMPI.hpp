@@ -3,7 +3,7 @@
 
 #include <mpi.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/filesystem.hpp>
 
 #include "LogDefines.hpp"
@@ -62,21 +62,21 @@ private:
     typedef StateRecorderMPI StateRecorderType;
     // ===============================================
 
-    boost::shared_ptr< StateRecorderType >  m_pStateRecorder;
+    std::shared_ptr< StateRecorderType >  m_pStateRecorder;
 
-    boost::shared_ptr< SceneParserMPI >     m_pSceneParser;
+    std::shared_ptr< SceneParserMPI >     m_pSceneParser;
 
-    boost::shared_ptr< TimeStepperType >	m_pTimestepper;
-    boost::shared_ptr< DynamicsSystemType > m_pDynSys;
-    boost::shared_ptr< BodyCommunicator >   m_pBodyCommunicator;
+    std::shared_ptr< TimeStepperType >	m_pTimestepper;
+    std::shared_ptr< DynamicsSystemType > m_pDynSys;
+    std::shared_ptr< BodyCommunicator >   m_pBodyCommunicator;
 
 
     typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
     typedef typename ProcessCommunicatorType::ProcessInfoType ProcessInfoType;
-    boost::shared_ptr< ProcessCommunicatorType > m_pProcCommunicator;
+    std::shared_ptr< ProcessCommunicatorType > m_pProcCommunicator;
 
     typedef typename MPILayer::TopologyBuilder  TopologyBuilderType;
-    boost::shared_ptr< TopologyBuilderType >    m_pTopologyBuilder;
+    std::shared_ptr< TopologyBuilderType >    m_pTopologyBuilder;
 
     void writeAllOutput();
 

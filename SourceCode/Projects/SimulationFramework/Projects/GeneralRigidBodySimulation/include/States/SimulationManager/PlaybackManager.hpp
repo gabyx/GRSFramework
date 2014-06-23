@@ -1,7 +1,7 @@
 ﻿#ifndef PLAYBACK_MANAGER_HPP
 #define PLAYBACK_MANAGER_HPP
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <OIS/OISEvents.h>
 #include <OIS/OISKeyboard.h>
 #include <OIS/OISJoyStick.h>
@@ -30,17 +30,17 @@ public:
 
   DEFINE_CONFIG_TYPES
 
-	PlaybackManager(boost::shared_ptr<Ogre::SceneManager> pSceneMgr);
+	PlaybackManager(std::shared_ptr<Ogre::SceneManager> pSceneMgr);
 	~PlaybackManager();
 
-  boost::shared_ptr<SharedBufferPlayback >	m_pSharedBuffer;
+  std::shared_ptr<SharedBufferPlayback >	m_pSharedBuffer;
 
-  boost::shared_ptr< SceneParserOgre > m_pSceneParser;
+  std::shared_ptr< SceneParserOgre > m_pSceneParser;
 
-  boost::shared_ptr< VideoDropper > m_pVideoDropper;
+  std::shared_ptr< VideoDropper > m_pVideoDropper;
   struct VideoDropSettings{ bool m_bVideoDrop; double m_FPS;} m_VideoDropSettings;
 
-  boost::shared_ptr< StateRecorderResampler > m_pStateRecorderResampler;
+  std::shared_ptr< StateRecorderResampler > m_pStateRecorderResampler;
   struct SimFileDropSettings{ bool m_bSimFileDrop; double m_FPS; bool m_bSimFileDropInterpolate; double m_startTime; double m_endTime;} m_SimFileDropSettings;
 
   bool setup();
@@ -65,14 +65,14 @@ private:
    Logging::Log*	m_pSimulationLog;
    Logging::Log*	m_pThreadLog;
 
-   boost::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
+   std::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
 
   std::string m_KeyListenerName;
 
   bool parseScene();
   bool m_bSetupSuccessful;
 
-  boost::shared_ptr<const DynamicsState > m_pVisBuffer;
+  std::shared_ptr<const DynamicsState > m_pVisBuffer;
 
   //Accessed only by Graphic thread ==========
    void updateSimBodies();
@@ -99,7 +99,7 @@ private:
    // =========================================
 
   // Accessed only by Loader Thread
-  boost::shared_ptr< PlaybackLoader<StateRingPoolVisBackFront > > m_pFileLoader;
+  std::shared_ptr< PlaybackLoader<StateRingPoolVisBackFront > > m_pFileLoader;
 
 
   const unsigned int m_nDofuBody, m_nDofqBody; // These are the dimensions for one Obj

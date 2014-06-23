@@ -5,7 +5,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/variant.hpp>
 #include <boost/serialization/variant.hpp>
 #include <boost/filesystem.hpp>
@@ -34,8 +34,8 @@ public:
 
     DEFINE_CONFIG_TYPES
 
-    SceneParserMPI(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                   boost::shared_ptr<MPILayer::ProcessCommunicator > procComm)
+    SceneParserMPI(std::shared_ptr<DynamicsSystemType> pDynSys,
+                   std::shared_ptr<MPILayer::ProcessCommunicator > procComm)
         : SceneParser(pDynSys), m_pProcCommunicator(procComm) {
         m_nGlobalSimBodies = 0;
     }
@@ -330,7 +330,7 @@ protected:
         LOG(m_pSimulationLog, std::endl);
     }
 
-    boost::shared_ptr< MPILayer::ProcessCommunicator > m_pProcCommunicator;
+    std::shared_ptr< MPILayer::ProcessCommunicator > m_pProcCommunicator;
 
     unsigned int m_nGlobalSimBodies;
 

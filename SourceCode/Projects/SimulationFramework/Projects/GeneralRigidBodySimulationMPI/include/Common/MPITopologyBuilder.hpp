@@ -24,15 +24,15 @@ class TopologyBuilder{
 
         typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
 
-        TopologyBuilder(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                        boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
+        TopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
+                        std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
                         unsigned int nGlobalSimBodies):
                             m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator), m_nGlobalSimBodies(nGlobalSimBodies) {
 
         }
     protected:
-       boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
-       boost::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
+       std::shared_ptr<DynamicsSystemType>  m_pDynSys;
+       std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
 };
 
 class GridTopologyBuilder : public TopologyBuilder {
@@ -45,9 +45,9 @@ class GridTopologyBuilder : public TopologyBuilder {
         DEFINE_MPI_INFORMATION_CONFIG_TYPES
         typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
 
-        GridTopologyBuilder(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                            boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
-                            TopologyBuilder(pDynSys, pProcCommunicator)
+        GridTopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
+                            std::shared_ptr<ProcessCommunicatorType > pProcCommunicator, unsigned int nGlobalSimBodies):
+                            TopologyBuilder(pDynSys, pProcCommunicator,nGlobalSimBodies)
         {}
 
         void rebuildTopology(){
@@ -145,7 +145,7 @@ class GridTopologyBuilder : public TopologyBuilder {
             Matrix33 Theta_G;
             Utilities::setSymMatrix(Theta_G,m_theta_G_glo);
             EigenSolverSelfAdjoint<Matrix33> eigenSolv(Theta_G);
-            LOG( eigenSolv.eigenvalues();
+            //LOG( eigenSolv.eigenvalues();
             eigenSolv.eigenvectors();
 
             // Expand grid by some percentage

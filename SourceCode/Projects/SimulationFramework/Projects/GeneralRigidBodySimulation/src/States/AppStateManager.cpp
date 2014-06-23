@@ -28,7 +28,7 @@ AppStateManager::~AppStateManager()
 }
 
 
-void AppStateManager::manageAppState(Ogre::String stateName, boost::shared_ptr<RenderAppState> state)
+void AppStateManager::manageAppState(Ogre::String stateName, std::shared_ptr<RenderAppState> state)
 {
 	try
 	{
@@ -45,7 +45,7 @@ void AppStateManager::manageAppState(Ogre::String stateName, boost::shared_ptr<R
 }
 
 
-boost::shared_ptr<RenderAppState> AppStateManager::findAppStateByName(Ogre::String stateName)
+std::shared_ptr<RenderAppState> AppStateManager::findAppStateByName(Ogre::String stateName)
 {
 	std::vector<state_info>::iterator itr;
 
@@ -55,11 +55,11 @@ boost::shared_ptr<RenderAppState> AppStateManager::findAppStateByName(Ogre::Stri
 			return itr->state;
 	}
 
-	return boost::shared_ptr<RenderAppState>();
+	return std::shared_ptr<RenderAppState>();
 }
 
 
-void AppStateManager::start(boost::shared_ptr<RenderAppState> state)
+void AppStateManager::start(std::shared_ptr<RenderAppState> state)
 {
 	pushAppState(state);
 
@@ -105,7 +105,7 @@ void AppStateManager::start(boost::shared_ptr<RenderAppState> state)
 
 
 
-void AppStateManager::start(boost::shared_ptr<AppState> state)
+void AppStateManager::start(std::shared_ptr<AppState> state)
 {
 	pushAppState(state);
 
@@ -162,7 +162,7 @@ void AppStateManager::start(boost::shared_ptr<AppState> state)
 }
 
 
-//void AppStateManager::changeAppState(boost::shared_ptr<RenderAppState> state)
+//void AppStateManager::changeAppState(std::shared_ptr<RenderAppState> state)
 //{
 //	if(!m_ActiveStateStack.empty())
 //	{
@@ -176,7 +176,7 @@ void AppStateManager::start(boost::shared_ptr<AppState> state)
 //}
 
 
-bool AppStateManager::pushAppState(boost::shared_ptr<RenderAppState> state)
+bool AppStateManager::pushAppState(std::shared_ptr<RenderAppState> state)
 {
 	if(!m_ActiveStateStack.empty())
 	{
@@ -188,7 +188,7 @@ bool AppStateManager::pushAppState(boost::shared_ptr<RenderAppState> state)
       }
 	}
    // Check if state is already in active state stack, if so, we need to move this state to the front and do resume instead of enter!!
-   std::list<boost::shared_ptr<RenderAppState> >::iterator it;
+   std::list<std::shared_ptr<RenderAppState> >::iterator it;
 
    bool isInActiveStack = false;
    for(it = m_ActiveStateStack.begin(); it != m_ActiveStateStack.end(); it++){
@@ -236,13 +236,13 @@ void AppStateManager::shutdown()
 }
 
 
-void AppStateManager::init(boost::shared_ptr<RenderAppState> state)
+void AppStateManager::init(std::shared_ptr<RenderAppState> state)
 {
 	RenderContext::getSingletonPtr()->m_pRenderWnd->resetStatistics();
 }
 
 
-void AppStateManager::init(boost::shared_ptr<AppState> state)
+void AppStateManager::init(std::shared_ptr<AppState> state)
 {
 //	InputContext::getSingletonPtr()->addKeyListener(state.get(),"AppStateManager::KeyListener");
 //	InputContext::getSingletonPtr()->addMouseListener(state.get(),"AppStateManager::MouseListener");

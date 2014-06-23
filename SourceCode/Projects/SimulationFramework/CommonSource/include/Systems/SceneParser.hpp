@@ -5,7 +5,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/variant.hpp>
 #include <boost/serialization/variant.hpp>
 #include <boost/filesystem.hpp>
@@ -52,15 +52,15 @@ public:
 
     GetScaleOfGeomVisitor(Vector3 & scale): m_scale(scale) {};
 
-    void operator()(  boost::shared_ptr<const SphereGeometry >  & sphereGeom ) {
+    void operator()(  std::shared_ptr<const SphereGeometry >  & sphereGeom ) {
         m_scale.setConstant(sphereGeom->m_radius);
     }
-    void operator()(  boost::shared_ptr<const BoxGeometry >  & boxGeom) {
+    void operator()(  std::shared_ptr<const BoxGeometry >  & boxGeom) {
         m_scale = boxGeom->m_extent;
     }
 
     template<typename T>
-    void operator()(  boost::shared_ptr<T>  & ptr) {
+    void operator()(  std::shared_ptr<T>  & ptr) {
         ERRORMSG("This GetScaleOfGeomVisitor visitor operator() has not been implemented!");
     }
 
@@ -74,7 +74,7 @@ public:
     typedef DynamicsSystemType::RigidBodyStatesContainerType RigidBodyStatesContainerType;
 
 
-    SceneParser(boost::shared_ptr<DynamicsSystemType> pDynSys)
+    SceneParser(std::shared_ptr<DynamicsSystemType> pDynSys)
         : m_pDynSys(pDynSys) {
 
         m_pSimulationLog = nullptr;
@@ -804,7 +804,7 @@ protected:
             scale(1)=radius;
             scale(2)=radius;
 
-            boost::shared_ptr<SphereGeometry > pSphereGeom = boost::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
+            std::shared_ptr<SphereGeometry > pSphereGeom = std::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
 
             if(addToGlobalGeoms) {
                 unsigned int id;
@@ -873,7 +873,7 @@ protected:
 
                 for(int i = id; i < id + instances; i++) {
                     double radius = randomNumber();
-                    boost::shared_ptr<SphereGeometry > pSphereGeom = boost::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
+                    std::shared_ptr<SphereGeometry > pSphereGeom = std::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
                     addToGlobalGeomList(i, pSphereGeom);
                 }
             } else {
@@ -886,7 +886,7 @@ protected:
                     scale(1)=radius;
                     scale(2)=radius;
                     m_bodyScalesGroup[i] = scale;
-                    boost::shared_ptr<SphereGeometry > pSphereGeom = boost::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
+                    std::shared_ptr<SphereGeometry > pSphereGeom = std::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
                     LOG(m_pSimulationLog, "\t---> Body id:" << m_bodyListGroup[i]->m_id << ", GeometryType: Sphere" << std::endl);
                     LOG(m_pSimulationLog, "\t\t---> radius: " << radius << std::endl; );
                     m_bodyListGroup[i]->m_geometry = pSphereGeom;
@@ -917,7 +917,7 @@ protected:
                 throw ticpp::Exception("---> String conversion in HalfsphereGeometry: position failed");
             }
 
-            boost::shared_ptr<HalfspaceGeometry > pHalfspaceGeom = boost::shared_ptr<HalfspaceGeometry >(new HalfspaceGeometry(n,p));
+            std::shared_ptr<HalfspaceGeometry > pHalfspaceGeom = std::shared_ptr<HalfspaceGeometry >(new HalfspaceGeometry(n,p));
 
             if(addToGlobalGeoms) {
                 unsigned int id;
@@ -954,7 +954,7 @@ protected:
                 throw ticpp::Exception("---> String conversion in BoxGeometry: position failed");
             }
 
-            boost::shared_ptr<BoxGeometry > pBoxGeom = boost::shared_ptr<BoxGeometry >(new BoxGeometry(center,extent));
+            std::shared_ptr<BoxGeometry > pBoxGeom = std::shared_ptr<BoxGeometry >(new BoxGeometry(center,extent));
 
             Vector3 scale;
             scale(0)=extent(0);
@@ -986,7 +986,7 @@ protected:
 
     virtual void processMeshGeometry( ticpp::Element * mesh, bool addToGlobalGeoms = false) {
 
-        boost::shared_ptr<MeshGeometry > pMeshGeom;
+        std::shared_ptr<MeshGeometry > pMeshGeom;
 
         std::string meshName = mesh->GetAttribute<std::string>("name");
 
@@ -1066,7 +1066,7 @@ protected:
             }
 
             // Build Geometry
-            pMeshGeom = boost::shared_ptr<MeshGeometry >(new MeshGeometry(meshData));
+            pMeshGeom = std::shared_ptr<MeshGeometry >(new MeshGeometry(meshData));
 
             if(mesh->HasAttribute("writeToLog")) {
                 bool writeToLog;
@@ -1221,7 +1221,7 @@ protected:
 
 
     template<typename T>
-    void addToGlobalGeomList(unsigned int id,  boost::shared_ptr<T> ptr) {
+    void addToGlobalGeomList(unsigned int id,  std::shared_ptr<T> ptr) {
 
 
 
@@ -1728,7 +1728,7 @@ protected:
 
     bool m_bParseDynamics; ///< Parse Dynamics stuff or do not. Playback Manager also has this SceneParser but does not need DynamicsStuff.
 
-    boost::shared_ptr<DynamicsSystemType> m_pDynSys;
+    std::shared_ptr<DynamicsSystemType> m_pDynSys;
 
     boost::filesystem::path m_currentParseFilePath;
     boost::filesystem::path m_currentParseFileDir;
@@ -1751,7 +1751,7 @@ protected:
 
     RigidBodyStatesContainerType m_initStates; ///< Init states of sim bodies, if  m_bParseDynamics = false
 
-    typedef std::unordered_map<std::string, boost::shared_ptr<MeshGeometry > > ContainerSceneMeshs;
+    typedef std::unordered_map<std::string, std::shared_ptr<MeshGeometry > > ContainerSceneMeshs;
 
 };
 

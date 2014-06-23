@@ -5,7 +5,7 @@
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "DynamicsState.hpp"
 #include "MultiBodySimFile.hpp"
@@ -22,7 +22,7 @@ public:
 
   DEFINE_LAYOUT_CONFIG_TYPES
 
-  PlaybackLoader(const unsigned int nSimBodies, boost::shared_ptr<TStatePool>	pStatePool);
+  PlaybackLoader(const unsigned int nSimBodies, std::shared_ptr<TStatePool>	pStatePool);
   ~PlaybackLoader();
 
 
@@ -61,8 +61,8 @@ private:
 
   bool m_bReadFullState;
 
-  boost::shared_ptr< DynamicsState > m_state; /**<   This is the actual loader state pointer ;*/
-  boost::shared_ptr<TStatePool>	m_pStatePool;
+  std::shared_ptr< DynamicsState > m_state; /**<   This is the actual loader state pointer ;*/
+  std::shared_ptr<TStatePool>	m_pStatePool;
 
   std::set<boost::filesystem::path> m_simFileList;
   std::set<boost::filesystem::path>::iterator m_currentFileIt;
@@ -80,7 +80,7 @@ PlaybackLoader<TStatePool>::~PlaybackLoader()
   delete m_pThreadLog;
 }
 template<typename TStatePool>
-PlaybackLoader<TStatePool>::PlaybackLoader( const unsigned int nSimBodies, boost::shared_ptr<TStatePool> pStatePool):
+PlaybackLoader<TStatePool>::PlaybackLoader( const unsigned int nSimBodies, std::shared_ptr<TStatePool> pStatePool):
 m_barrier_start(2),
 m_nSimBodies(nSimBodies)
 {

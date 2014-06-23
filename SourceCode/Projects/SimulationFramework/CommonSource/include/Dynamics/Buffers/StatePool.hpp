@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/thread.hpp>
 #include <Eigen/Core>
 
@@ -47,7 +47,7 @@ public:
 protected:
 
     boost::mutex    m_change_pointer_mutex; ///< This is the mutex which is used to have a mutual exclusion if the pointers on the buffer changes.
-    std::vector<boost::shared_ptr<DynamicsState > >  m_pool; ///< This is the vector of states which are present in the pool. The subclass implement how many such states are in the pool.
+    std::vector<std::shared_ptr<DynamicsState > >  m_pool; ///< This is the vector of states which are present in the pool. The subclass implement how many such states are in the pool.
     typedef volatile unsigned char atomic_char;
     atomic_char*   m_idx; ///< These are the indices into the pool m_pool. The subclasses handle this indices.
 

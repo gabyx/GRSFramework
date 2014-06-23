@@ -7,7 +7,7 @@
 
 
 #include <srutil/delegate/delegate.hpp> // Use fast SR delegates
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include DynamicsSystem_INCLUDE_FILE
 
@@ -92,8 +92,8 @@ public:
 
     typedef NeighbourMap<NeighbourDataBodyCommunication>     NeighbourMapType;
 
-    BodyCommunicator(boost::shared_ptr< DynamicsSystemType> pDynSys ,
-                     boost::shared_ptr< ProcessCommunicatorType > pProcComm);
+    BodyCommunicator(std::shared_ptr< DynamicsSystemType> pDynSys ,
+                     std::shared_ptr< ProcessCommunicatorType > pProcComm);
 
     ~BodyCommunicator(){
 
@@ -132,8 +132,8 @@ private:
     PREC m_currentSimTime;
     MPILayer::NeighbourMessageWrapperBodies< BodyCommunicator > m_message;
 
-    boost::shared_ptr< DynamicsSystemType> m_pDynSys;
-    boost::shared_ptr< ProcessCommunicatorType > m_pProcComm;
+    std::shared_ptr< DynamicsSystemType> m_pDynSys;
+    std::shared_ptr< ProcessCommunicatorType > m_pProcComm;
 
 
     RankIdType m_rank;

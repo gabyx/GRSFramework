@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "ConfigureFile.hpp"
 
@@ -41,7 +41,7 @@ public:
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    InclusionSolverCONoG(boost::shared_ptr<CollisionSolverType >  pCollisionSolver, boost::shared_ptr<DynamicsSystemType> pDynSys);
+    InclusionSolverCONoG(std::shared_ptr<CollisionSolverType >  pCollisionSolver, std::shared_ptr<DynamicsSystemType> pDynSys);
     ~InclusionSolverCONoG();
 
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
@@ -79,8 +79,8 @@ protected:
 
     unsigned int m_nExpectedContacts;
 
-    boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
-    boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
+    std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
+    std::shared_ptr<DynamicsSystemType>  m_pDynSys;
 
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;

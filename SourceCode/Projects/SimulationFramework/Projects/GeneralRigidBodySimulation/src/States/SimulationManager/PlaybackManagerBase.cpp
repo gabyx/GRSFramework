@@ -16,7 +16,7 @@ PlaybackManagerBase::PlaybackManagerBase():
 
     m_barrier_start(2) {
     m_lastTime = 0;
-    m_pTimelineSimulation = boost::shared_ptr<CPUTimer>(new CPUTimer);
+    m_pTimelineSimulation = std::shared_ptr<CPUTimer>(new CPUTimer);
     m_pTimelineSimulation->start();
 
     // Setup timeScale List;
@@ -59,7 +59,7 @@ void  PlaybackManagerBase::setThreadToBeStopped(bool stop) {
 double PlaybackManagerBase::getTimelineSimulation() {
     double x;
     m_mutexTimelineSimulation.lock();
-    x = ((double)m_pTimelineSimulation->elapsed()) * 1e-9 * m_timeScale + m_lastTime;
+    x = m_pTimelineSimulation->elapsedSec()* m_timeScale + m_lastTime;
     m_mutexTimelineSimulation.unlock();
     return x;
 };
@@ -90,7 +90,7 @@ void PlaybackManagerBase::addToTimeScale(double step) {
 
     m_mutexTimelineSimulation.lock();
     // Reset the Timer
-    m_lastTime = ((double)m_pTimelineSimulation->elapsed()) * 1e-9 * m_timeScale + m_lastTime;
+    m_lastTime = m_pTimelineSimulation->elapsedSec() * m_timeScale + m_lastTime;
     m_pTimelineSimulation->start();
 
 
@@ -126,7 +126,7 @@ void PlaybackManagerBase::togglePauseSimulation() {
     }
     else{
         m_bPauseEnabled = false;
-        m_lastTime = ((double)m_pTimelineSimulation->elapsed()) * 1e-9 * m_timeScale + m_lastTime;
+        m_lastTime = m_pTimelineSimulation->elapsedSec() * m_timeScale + m_lastTime;
         m_pTimelineSimulation->start();
 
     }

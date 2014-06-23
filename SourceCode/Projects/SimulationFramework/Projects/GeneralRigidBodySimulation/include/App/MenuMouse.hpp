@@ -42,7 +42,7 @@ class MenuMouse : public OIS::KeyListener, OIS::MouseListener{
 	* @param trayManager Pointer to en existing SdkTrayManager of Ogre.
 	* @param name The name of the mouse.
 	*/
-	MenuMouse(boost::shared_ptr<OgreBites::SdkTrayManager> trayManager, Ogre::String name);
+	MenuMouse(std::shared_ptr<OgreBites::SdkTrayManager> trayManager, Ogre::String name);
 	~MenuMouse();
 
 	/** \name Disabling/Enabling Event Inputs */
@@ -53,7 +53,7 @@ class MenuMouse : public OIS::KeyListener, OIS::MouseListener{
  protected:
 	Ogre::String m_Name; ///< The mouse name.
 
-	boost::shared_ptr<OgreBites::SdkTrayManager>	m_pTrayMgr; ///< The existing SdkTrayManager from Ogre.
+	std::shared_ptr<OgreBites::SdkTrayManager>	m_pTrayMgr; ///< The existing SdkTrayManager from Ogre.
 
     /** \name KeyListener for keyboard inputs */
 	 /* @{ */

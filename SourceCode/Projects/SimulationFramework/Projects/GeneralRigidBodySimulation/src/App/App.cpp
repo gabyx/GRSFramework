@@ -49,7 +49,7 @@ void App::startApp()
 
 	m_bShutdown = false;
 
-	m_pAppStateManager = boost::shared_ptr<AppStateManager>( new AppStateManager());
+	m_pAppStateManager = std::shared_ptr<AppStateManager>( new AppStateManager());
 
 
 	new InputContext;
@@ -68,8 +68,8 @@ void App::startApp()
    SimulationState::create(m_pAppStateManager, "SimulationState");
    PlaybackState::create(m_pAppStateManager, "PlaybackState");
 
-   boost::shared_ptr<AppState> appSim = boost::dynamic_pointer_cast<AppState>(m_pAppStateManager->findAppStateByName("SimulationState"));
-   //boost::shared_ptr<AppState> appPlayback = boost::dynamic_pointer_cast<AppState>(m_pAppStateManager->findAppStateByName("PlaybackState"));
+   std::shared_ptr<AppState> appSim = std::dynamic_pointer_cast<AppState>(m_pAppStateManager->findAppStateByName("SimulationState"));
+   //std::shared_ptr<AppState> appPlayback = boost::dynamic_pointer_cast<AppState>(m_pAppStateManager->findAppStateByName("PlaybackState"));
 
    m_pAppStateManager->pushAppState(appSim);
    //m_pAppStateManager->pushAppState(appPlayback);

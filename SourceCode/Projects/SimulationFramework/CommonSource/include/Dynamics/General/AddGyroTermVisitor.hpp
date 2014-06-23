@@ -19,19 +19,19 @@ public:
     }
 
 
-    inline void operator()(boost::shared_ptr<const SphereGeometry > & sphereGeom) {
+    inline void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom) {
         return;
     }
 
-    inline void operator()(boost::shared_ptr<const BoxGeometry > & box)  {
+    inline void operator()(std::shared_ptr<const BoxGeometry > & box)  {
         addGyroTerm();
     }
 
-    inline void operator()(boost::shared_ptr<const MeshGeometry > & box) {
+    inline void operator()(std::shared_ptr<const MeshGeometry > & box) {
         addGyroTerm();
     }
 
-    inline void operator()(boost::shared_ptr<const HalfspaceGeometry > & halfspace) {
+    inline void operator()(std::shared_ptr<const HalfspaceGeometry > & halfspace) {
         addGyroTerm();
     }
 

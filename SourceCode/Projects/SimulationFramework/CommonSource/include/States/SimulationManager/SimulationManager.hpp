@@ -1,7 +1,7 @@
 ﻿#ifndef SimulationManager_hpp
 #define SimulationManager_hpp
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/filesystem.hpp>
 
 #include "TypeDefs.hpp"
@@ -25,13 +25,13 @@ public:
     SimulationManager();
    ~SimulationManager();
 
-   boost::shared_ptr<SharedBufferDynSys >	    m_pSharedBuffer;
-   boost::shared_ptr<StateRecorder >		    m_pStateRecorder;
+   std::shared_ptr<SharedBufferDynSys >	    m_pSharedBuffer;
+   std::shared_ptr<StateRecorder >		    m_pStateRecorder;
 
    void setup();
    void setup(boost::filesystem::path sceneFilePath);
 
-   boost::shared_ptr< SceneParser > m_pSceneParser;
+   std::shared_ptr< SceneParser > m_pSceneParser;
 
    void startSim();
 
@@ -54,9 +54,9 @@ private:
 
    Logging::Log *  m_pSimulationLog;
 
-   boost::shared_ptr< TimeStepperType >	m_pTimestepper;
+   std::shared_ptr< TimeStepperType >	m_pTimestepper;
 
-   boost::shared_ptr< DynamicsSystemType > m_pDynSys;
+   std::shared_ptr< DynamicsSystemType > m_pDynSys;
    // ===========================================
 
    int m_nSimBodies;

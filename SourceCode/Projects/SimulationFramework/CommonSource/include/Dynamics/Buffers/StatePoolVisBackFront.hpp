@@ -41,8 +41,8 @@ public:
     /** @name Only accessed by Visualization Thread.
     * @{
     */
-    boost::shared_ptr<const DynamicsState > updateVisBuffer(bool & out_changed);
-    boost::shared_ptr<const DynamicsState > updateVisBuffer();
+    std::shared_ptr<const DynamicsState > updateVisBuffer(bool & out_changed);
+    std::shared_ptr<const DynamicsState > updateVisBuffer();
     /** @} */
 
     /** @name Only accessed by if only Visualization Thread runs.

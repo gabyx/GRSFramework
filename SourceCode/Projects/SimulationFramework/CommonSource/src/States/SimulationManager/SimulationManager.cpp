@@ -66,10 +66,10 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
     m_pSimulationLog->logMessage("---> SimulationManager::setup(): ");
 
 
-    m_pDynSys = boost::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
+    m_pDynSys = std::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
 
     // Parse the Scene from XML! ==========================
-    m_pSceneParser = boost::shared_ptr< SceneParser >( new SceneParser( m_pDynSys) );
+    m_pSceneParser = std::shared_ptr< SceneParser >( new SceneParser( m_pDynSys) );
     m_pSceneParser->parseScene(sceneFilePath);
 
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
@@ -77,11 +77,11 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
     // =====================================================
 
 
-    m_pSharedBuffer = boost::shared_ptr<SharedBufferDynSys >(new SharedBufferDynSys(m_nSimBodies));
-    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
+    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys >(new SharedBufferDynSys(m_nSimBodies));
+    m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
 
 
-    m_pStateRecorder = boost::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
+    m_pStateRecorder = std::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
 
     m_pSharedBuffer->resetStatePool(m_pDynSys->m_simBodiesInitStates);
 
@@ -130,7 +130,7 @@ void SimulationManager::writeAllOutput() {
             //TODO
             if(m_RecorderSettings.outputCheck(m_pTimestepper->getIterationCount())){
                  // get global time for logging!
-                double timelineSimulation = ((double)m_global_time.elapsed())*1e-9;
+                double timelineSimulation = m_global_time.elapsedSec();
                 // Write Data to SystemDataFile (maps all data to back buffer!)
                 m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
                 // Write Data to CollisionDataFile

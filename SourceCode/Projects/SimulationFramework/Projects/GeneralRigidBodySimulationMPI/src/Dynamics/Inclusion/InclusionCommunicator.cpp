@@ -7,9 +7,9 @@
 
 
 template<typename Combo>
-InclusionCommunicator<Combo>::InclusionCommunicator<Combo>(boost::shared_ptr< BodyCommunicator> pBodyComm,
-        boost::shared_ptr< DynamicsSystemType> pDynSys ,
-        boost::shared_ptr< ProcessCommunicatorType > pProcCom):
+InclusionCommunicator<Combo>::InclusionCommunicator<Combo>(std::shared_ptr< BodyCommunicator> pBodyComm,
+        std::shared_ptr< DynamicsSystemType> pDynSys ,
+        std::shared_ptr< ProcessCommunicatorType > pProcCom):
 
     m_pDynSys(pDynSys),
     m_globalLocal(pDynSys->m_SimBodies),

@@ -28,19 +28,19 @@ class PrintGeometryDetailsVisitor : public boost::static_visitor<> {
         }
 
 
-        void operator()(boost::shared_ptr<const SphereGeometry > & sphereGeom)  {
+        void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom)  {
             LOG(m_pLog, m_prefix << " radius: " <<sphereGeom->m_radius << std::endl);
         }
 
-        void operator()(boost::shared_ptr<const BoxGeometry > & box)  {
+        void operator()(std::shared_ptr<const BoxGeometry > & box)  {
             LOG(m_pLog, m_prefix << " extent: " <<box->m_extent << std::endl);
         }
 
-        void operator()(boost::shared_ptr<const MeshGeometry > & mesh)  {
+        void operator()(std::shared_ptr<const MeshGeometry > & mesh)  {
             ASSERTMSG(false,"MeshGeometry PrintDetails: This has not been implemented yet!");
         }
 
-        void operator()(boost::shared_ptr<const HalfspaceGeometry > & halfspace)  {
+        void operator()(std::shared_ptr<const HalfspaceGeometry > & halfspace)  {
             //This has not been implemented yet!
             ASSERTMSG(false,"HalfspaceGeometry PrintDetails: This has not been implemented yet!");
         }
