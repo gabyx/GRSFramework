@@ -8,7 +8,7 @@
 #include <boost/serialization/level.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/set.hpp>
-//#include <boost/serialization/split_member.hpp>
+#include <boost/serialization/split_member.hpp>
 
 
 #include "AssertionDebug.hpp"
@@ -765,14 +765,9 @@ private:
     void serializeGeom(Archive & ar, RigidBodyType * body) const {
         // take care this serialization replaces any shared_ptr if body->m_geometry is already filled!
         ERRORMSG(" serializeGeom not impletmented correctly!")
-        typedef decltype(body->m_geometry.which()) WhichType;
-        typedef decltype(body->m_geometry) VariantType;
 
-        WhichType w = body->m_geometry.which();
-        ar & w;
-
-        GeomVisitorSerialization<Archive,WhichType,VariantType> v(ar,w,body->m_geometry);
-        //body->m_geometry.apply_visitor(v);
+        GeomSerialization gs(body->m_geometry);
+        ar & gs;
     }
 
 
