@@ -11,31 +11,6 @@
 
 #include "MPISerializationHelpersEigen.hpp"
 
-
-template<typename Archive>
-class GeomVisitorSerialization: public boost::static_visitor<> {
-private:
-    Archive & m_ar;
-public:
-    GeomVisitorSerialization(Archive & ar): m_ar(ar) {}
-    void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom)  {
-        ar & *sphereGeom;
-    }
-
-    void operator()(std::shared_ptr<const BoxGeometry > & box)  {
-        ar & *box;
-    }
-
-    void operator()(std::shared_ptr<const MeshGeometry > & mesh)  {
-        ar & *mesh;
-    }
-
-    void operator()(std::shared_ptr<const HalfspaceGeometry > & halfspace)  {
-        ar & *halfspace;
-    }
-};
-
-
 namespace boost {
 namespace serialization {
 
@@ -73,8 +48,49 @@ void serialize(Archive & ar, MeshGeometry & g, const unsigned int version) {
 
     ERRORMSG("No implementation for MeshGeometry serialization!");
 }
+};
+};
 
+
+
+
+template<typename Archive, typename WhichType, typename Variant>
+class GeomVisitorSerialization: public boost::static_visitor<> {
+private:
+    Archive & m_ar;
+    WhichType m_w;
+    Variant & m_v;
+public:
+    GeomVisitorSerialization(Archive & ar, WhichType w, Variant v): m_ar(ar), m_w(w), m_v(v) {
+//        if(! Archive::is_saving::value ){
+//            if(w == boost::mpl::at){
+//            case
+//            }
+//        }
+    }
+
+    void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom)  {
+        if(Archive::is_saving::value){
+            m_ar & *sphereGeom;
+        }else{
+
+        }
+    }
+
+    void operator()(std::shared_ptr<const BoxGeometry > & box)  {
+        m_ar & *box;
+    }
+
+    void operator()(std::shared_ptr<const MeshGeometry > & mesh)  {
+        m_ar & *mesh;
+    }
+
+    void operator()(std::shared_ptr<const HalfspaceGeometry > & halfspace)  {
+        m_ar & *halfspace;
+    }
 };
-};
+
+
+
 
 #endif
