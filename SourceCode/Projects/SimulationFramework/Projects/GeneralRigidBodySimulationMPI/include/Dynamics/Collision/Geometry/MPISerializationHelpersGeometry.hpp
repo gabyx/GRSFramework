@@ -94,7 +94,7 @@ private:
     struct GeomVis: public boost::static_visitor<>{
         GeomVis(Archive & ar): m_ar(ar){};
         void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom)  {
-              m_ar & const_cast<SphereGeometry&>(*sphereGeom);
+            m_ar & const_cast<SphereGeometry&>(*sphereGeom);
         }
         void operator()(std::shared_ptr<const BoxGeometry > & box)  {
             m_ar & const_cast<BoxGeometry&>(*box);
@@ -109,7 +109,7 @@ private:
     };
 
 public:
-    GeomSerialization(GeometryType g): m_g(g) {
+    GeomSerialization(GeometryType & g): m_g(g) {
         m_w=m_g.which();
     }
 

@@ -204,7 +204,7 @@ protected:
         m_bodyScalesGroup.clear();
         m_initStatesGroup.clear();
 
-         unsigned int instances = rigidbodies->ToElement()->GetAttribute<unsigned int>("instances");
+        unsigned int instances = rigidbodies->ToElement()->GetAttribute<unsigned int>("instances");
 
         unsigned int groupId, startIdx;
         if(rigidBodiesEl->HasAttribute("groupId")){

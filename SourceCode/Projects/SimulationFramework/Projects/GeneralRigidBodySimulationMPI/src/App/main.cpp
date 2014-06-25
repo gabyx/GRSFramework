@@ -16,7 +16,21 @@ void signal_callback_handler(int signum)
 {
    // Cleanup and close up stuff here
    // Terminate program
-   ERRORMSG("---> Caught signal: " << signum << " in signal handler!" << std::endl);
+   std::string signal;
+
+   switch(signum){
+       case SIGINT:
+            signal = "SIGINT";  break;
+       case SIGTERM:
+            signal = "SIGTERM"; break;
+       case SIGUSR1:
+            signal = "SIGUSR1"; break;
+       case SIGUSR2:
+            signal = "SIGUSR2"; break;
+   }
+
+   std::cerr << "---> Caught signal: " << signal << " in signal handler! Exiting..." << std::endl;
+   exit(EXIT_FAILURE);
 }
 
 
