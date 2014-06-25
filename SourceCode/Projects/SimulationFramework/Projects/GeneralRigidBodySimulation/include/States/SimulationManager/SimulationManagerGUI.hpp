@@ -1,7 +1,7 @@
 ﻿#ifndef SimulationManagerGUI_hpp
 #define SimulationManagerGUI_hpp
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/filesystem.hpp>
 
 #include <Ogre.h>
@@ -30,19 +30,19 @@ public:
 
     DEFINE_CONFIG_TYPES
 
-    SimulationManagerGUI(boost::shared_ptr<Ogre::SceneManager> pSceneMgr);
+    SimulationManagerGUI(std::shared_ptr<Ogre::SceneManager> pSceneMgr);
     ~SimulationManagerGUI();
 
 
-    boost::shared_ptr<SharedBufferDynSys >	    m_pSharedBuffer;
-    boost::shared_ptr<StateRecorder >		m_pStateRecorder;
+    std::shared_ptr<SharedBufferDynSys >	    m_pSharedBuffer;
+    std::shared_ptr<StateRecorder >		m_pStateRecorder;
 
     std::vector<Ogre::SceneNode*>	m_SceneNodeSimBodies;
     std::vector<Ogre::SceneNode*>	m_SceneNodeBodies;
 
     void setup(boost::filesystem::path sceneFilePath);
 
-    boost::shared_ptr< SceneParserOgre > m_pSceneParser;
+    std::shared_ptr< SceneParserOgre > m_pSceneParser;
 
 
     void updateScene(double timeSinceLastFrame);
@@ -63,18 +63,18 @@ public:
 
 private:
 
-    boost::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
+    std::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
 
     void setShadowTechniques();
 
-    boost::shared_ptr<const DynamicsState > m_pVisBuffer;
+    std::shared_ptr<const DynamicsState > m_pVisBuffer;
 
     // Accessed only by thread ===================
     void threadRunSimulation();
     void initSimThread();
     void cleanUpSimThread();
 
-    boost::timer::cpu_timer m_global_time;
+    CPUTimer m_global_time;
 
     void writeAllOutput();
     RecorderSettings m_RecorderSettings;
@@ -93,9 +93,9 @@ private:
 
     Logging::Log *  m_pSimulationLog;
 
-    boost::shared_ptr< TimeStepperType >	m_pTimestepper;
+    std::shared_ptr< TimeStepperType >	m_pTimestepper;
 
-    boost::shared_ptr< DynamicsSystemType >		   m_pDynSys;
+    std::shared_ptr< DynamicsSystemType >		   m_pDynSys;
     // ===========================================
 
     int m_nSimBodies;

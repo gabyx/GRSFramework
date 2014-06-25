@@ -11,7 +11,7 @@
 #define APP_HPP
 
 // Includes =================================
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "SimulationState.hpp"
 #include "PlaybackState.hpp"
@@ -49,7 +49,7 @@ public:
 
 private:
 
-	boost::shared_ptr<AppStateManager>	m_pAppStateManager; ///< The AppStateManager which handles all AppStates in a queue.
+	std::shared_ptr<AppStateManager>	m_pAppStateManager; ///< The AppStateManager which handles all AppStates in a queue.
 
 	bool						m_bShutdown; 				///< Bool to indicate that the App should be shutdown.
 };

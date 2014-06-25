@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "AssertionDebug.hpp"
 
@@ -38,7 +38,7 @@ public:
 
   static const int NDOFFriction = 3;
 
-  InclusionSolverNT(boost::shared_ptr<CollisionSolverType >  pCollisionSolver, boost::shared_ptr<DynamicsSystemType> pDynSys);
+  InclusionSolverNT(std::shared_ptr<CollisionSolverType >  pCollisionSolver, std::shared_ptr<DynamicsSystemType> pDynSys);
 
   void initializeLog(Logging::Log* pSolverLog);
   void reset();
@@ -78,8 +78,8 @@ protected:
 
   unsigned int m_nExpectedContacts;
 
-  boost::shared_ptr<CollisionSolverType> m_pCollisionSolver;
-  boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
+  std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
+  std::shared_ptr<DynamicsSystemType>  m_pDynSys;
   std::vector< RigidBodyType* > & m_SimBodies;
   std::vector< RigidBodyType* > & m_Bodies;
 
@@ -146,7 +146,7 @@ protected:
 
 
 template< typename TInclusionSolverConfig >
-InclusionSolverNT<TInclusionSolverConfig>::InclusionSolverNT( boost::shared_ptr<CollisionSolverType > pCollisionSolver,  boost::shared_ptr<DynamicsSystemType> pDynSys):
+InclusionSolverNT<TInclusionSolverConfig>::InclusionSolverNT( std::shared_ptr<CollisionSolverType > pCollisionSolver,  std::shared_ptr<DynamicsSystemType> pDynSys):
 m_SimBodies(pCollisionSolver->m_SimBodies),
 m_Bodies(pCollisionSolver->m_Bodies)
 {

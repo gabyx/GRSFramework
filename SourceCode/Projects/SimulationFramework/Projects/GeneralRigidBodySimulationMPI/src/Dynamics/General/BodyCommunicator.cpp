@@ -2,8 +2,8 @@
 
 #include "MPIMessageTag.hpp"
 
-BodyCommunicator::BodyCommunicator(  boost::shared_ptr< DynamicsSystemType> pDynSys ,
-                                     boost::shared_ptr< ProcessCommunicatorType > pProcComm):
+BodyCommunicator::BodyCommunicator(  std::shared_ptr< DynamicsSystemType> pDynSys ,
+                                     std::shared_ptr< ProcessCommunicatorType > pProcComm):
             m_pDynSys(pDynSys),
             m_globalLocal(pDynSys->m_SimBodies),
             m_globalRemote(pDynSys->m_RemoteSimBodies),

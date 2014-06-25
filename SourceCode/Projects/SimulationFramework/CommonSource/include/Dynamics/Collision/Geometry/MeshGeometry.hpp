@@ -1,7 +1,7 @@
 #ifndef MeshGeometry_hpp
 #define MeshGeometry_hpp
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/serialization/access.hpp>
 
 #include "ConfigureFile.hpp"

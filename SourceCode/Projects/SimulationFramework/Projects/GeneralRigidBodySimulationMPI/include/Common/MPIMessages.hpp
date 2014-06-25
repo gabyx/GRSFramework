@@ -8,7 +8,7 @@
 #include <boost/serialization/level.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/set.hpp>
-//#include <boost/serialization/split_member.hpp>
+#include <boost/serialization/split_member.hpp>
 
 
 #include "AssertionDebug.hpp"
@@ -85,9 +85,10 @@ public:
 
 
 template<typename TNeighbourCommunicator >
-class NeighbourMessageWrapperBodies : public boost::serialization::traits< NeighbourMessageWrapperBodies<TNeighbourCommunicator>,
-    boost::serialization::object_serializable,
-        boost::serialization::track_never> {
+class NeighbourMessageWrapperBodies : public boost::serialization::traits<  NeighbourMessageWrapperBodies<TNeighbourCommunicator>,
+                                                                            boost::serialization::object_serializable,
+                                                                            boost::serialization::track_never>
+{
 public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
@@ -670,7 +671,7 @@ private:
         //Geometry
 
         ar & body->m_globalGeomId;
-        if( body->m_globalGeomId != 0) {
+        if( body->m_globalGeomId == 0) {
             //This geometry is not a global one! serialize too!
             serializeGeom(ar,body);
         } else {
@@ -763,7 +764,11 @@ private:
     template<class Archive>
     void serializeGeom(Archive & ar, RigidBodyType * body) const {
         // take care this serialization replaces any shared_ptr if body->m_geometry is already filled!
-        ar & body->m_geometry;
+        //ERRORMSG("Serialize Full GEOM")
+        LOGSZ(m_pSerializerLog,  "-----> Serializing full geometry!"<<std::endl;)
+
+        GeomSerialization gs(body->m_geometry);
+        ar & gs;
     }
 
 
@@ -1464,8 +1469,8 @@ public:
             serializeEigen(ar,(*bodyIt)->m_r_S);
             serializeEigen(ar,(*bodyIt)->m_q_IK);
             //Velocity
-            LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "No SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "!");
-            serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
+//            LOGASSERTMSG( (*bodyIt)->m_pSolverData, m_pSerializerLog, "No SolverData present in body with id: "<< RigidBodyId::getBodyIdString((*bodyIt)) << "!");
+            serializeEigen(ar,(*bodyIt)->m_pSolverData->m_uBuffer.m_back);
         }
 
         // AABB
@@ -1473,7 +1478,7 @@ public:
         // Theta
         serializeEigen(ar,m_pTopoBuilder->m_Theta_G_loc);
         // r_G
-        serializeEigen(ar,m_r_G_loc);
+        serializeEigen(ar,m_pTopoBuilder->m_r_G_loc);
 
 
 
@@ -1497,7 +1502,7 @@ public:
             serializeEigen(ar, massPointRes.first->m_initState.m_q);
             serializeEigen(ar, massPointRes.first->m_initState.m_u);
             // First point push
-            massPointRes.first->m_points.push_back(m_initState.m_q.head<3>());
+            massPointRes.first->m_points.push_back(massPointRes.first->m_initState.m_q.template head<3>());
         }
 
 

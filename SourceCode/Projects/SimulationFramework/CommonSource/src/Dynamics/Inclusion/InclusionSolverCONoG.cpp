@@ -5,8 +5,8 @@
 #include "ProxFunctions.hpp"
 
 
-InclusionSolverCONoG::InclusionSolverCONoG(boost::shared_ptr< CollisionSolverType >  pCollisionSolver,
-                                           boost::shared_ptr<DynamicsSystemType > pDynSys):
+InclusionSolverCONoG::InclusionSolverCONoG(std::shared_ptr< CollisionSolverType >  pCollisionSolver,
+                                           std::shared_ptr<DynamicsSystemType > pDynSys):
     m_SimBodies(pDynSys->m_SimBodies),
     m_Bodies(pDynSys->m_Bodies),
     m_ContactGraph(&(pDynSys->m_ContactParameterMap)){
@@ -154,7 +154,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
            ) {
 
             #if MEASURE_TIME_PROX == 1
-                boost::timer::cpu_timer counter;
+                CPUTimer counter;
                 counter.start();
             #endif
 
@@ -162,14 +162,13 @@ void InclusionSolverCONoG::solveInclusionProblem() {
             doSorProx();
 
             #if MEASURE_TIME_PROX == 1
-                counter.stop();
-                m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
+                m_timeProx = counter.elapsedSec();
             #endif
 
         } else if(m_Settings.m_eMethod == InclusionSolverSettingsType::JOR) {
 
             #if MEASURE_TIME_PROX == 1
-                boost::timer::cpu_timer counter;
+                CPUTimer counter;
                 counter.start();
             #endif
 
@@ -178,8 +177,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 //            doJorProx();
 
             #if MEASURE_TIME_PROX == 1
-                counter.stop();
-                m_timeProx = ((double)counter.elapsed().wall) * 1e-9;
+                m_timeProx = counter.elapsedSec();
             #endif
         }else{
             ASSERTMSG(false,"This algorithm has not been implemented yet");

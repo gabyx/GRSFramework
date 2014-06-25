@@ -1,7 +1,7 @@
 ﻿#ifndef FrontBackBuffer_hpp
 #define FrontBackBuffer_hpp
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/type_traits.hpp>
 
 /**
@@ -36,8 +36,8 @@ public:
   };
 
   FrontBackBuffer(
-    boost::shared_ptr<TBufferType > pfront,
-    boost::shared_ptr<const TBufferType > pback)
+    std::shared_ptr<TBufferType > pfront,
+    std::shared_ptr<const TBufferType > pback)
   {
     m_pFront = pfront;
     m_pBack = pback;
@@ -50,8 +50,8 @@ public:
     m_pBack.reset();
   };
 
-  boost::shared_ptr<TBufferType >       m_pFront;       ///< The front buffer which is readable and writable.
-  boost::shared_ptr<const TBufferType > m_pBack;  ///< The back buffer which is only readable.
+  std::shared_ptr<TBufferType >       m_pFront;       ///< The front buffer which is readable and writable.
+  std::shared_ptr<const TBufferType > m_pBack;  ///< The back buffer which is only readable.
 
 };
 

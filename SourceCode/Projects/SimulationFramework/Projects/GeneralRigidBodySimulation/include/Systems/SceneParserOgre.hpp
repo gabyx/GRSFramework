@@ -16,10 +16,10 @@ public:
     // For simulation manager
     SceneParserOgre(
         Ogre::SceneNode * baseFrame,
-        boost::shared_ptr<Ogre::SceneManager> pSceneMgr,
+        std::shared_ptr<Ogre::SceneManager> pSceneMgr,
         std::vector<Ogre::SceneNode*> &nodesSimBodies,
         std::vector<Ogre::SceneNode*> &nodesBodies,
-        boost::shared_ptr<DynamicsSystemType> pDynSys
+        std::shared_ptr<DynamicsSystemType> pDynSys
     ) : m_pSceneMgr(pSceneMgr),  m_rSceneNodeSimBodies(nodesSimBodies), m_rSceneNodeBodies(nodesBodies) , SceneParser(pDynSys) {
         ASSERTMSG(baseFrame != nullptr, "Pointer is nullptr");
         m_BaseFrame = baseFrame;
@@ -30,7 +30,7 @@ public:
     // For playback manager
     SceneParserOgre(
         Ogre::SceneNode * baseFrame,
-        boost::shared_ptr<Ogre::SceneManager> pSceneMgr,
+        std::shared_ptr<Ogre::SceneManager> pSceneMgr,
         std::vector<Ogre::SceneNode*> &nodesSimBodies,
         std::vector<Ogre::SceneNode*> &nodesBodies
     )
@@ -510,7 +510,7 @@ protected:
 
      std::vector<std::string> m_materialList;
 
-    boost::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
+    std::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
     Ogre::SceneNode * m_BaseFrame;
     std::vector<Ogre::SceneNode*>	&m_rSceneNodeSimBodies;
     std::vector<Ogre::SceneNode*>	&m_rSceneNodeBodies;

@@ -36,7 +36,7 @@ public:
    DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-      InclusionSolverNTContactOrdered(boost::shared_ptr<TCollisionSolver >  pCollisionSolver, boost::shared_ptr<TDynamicsSystem> pDynSys);
+      InclusionSolverNTContactOrdered(std::shared_ptr<TCollisionSolver >  pCollisionSolver, std::shared_ptr<TDynamicsSystem> pDynSys);
 
    void initializeLog(Ogre::Log* pSolverLog);
    void reset();
@@ -72,10 +72,10 @@ protected:
 
    unsigned int m_nExpectedContacts;
 
-   boost::shared_ptr<TCollisionSolver> m_pCollisionSolver;
-   boost::shared_ptr<TDynamicsSystem>  m_pDynSys;
-   std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_SimBodies;
-   std::vector< boost::shared_ptr< RigidBody<TLayoutConfig> > > & m_Bodies;
+   std::shared_ptr<TCollisionSolver> m_pCollisionSolver;
+   std::shared_ptr<TDynamicsSystem>  m_pDynSys;
+   std::vector< std::shared_ptr< RigidBody<TLayoutConfig> > > & m_SimBodies;
+   std::vector< std::shared_ptr< RigidBody<TLayoutConfig> > > & m_Bodies;
 
    TContactGraph m_ContactGraph;
 
@@ -127,7 +127,7 @@ protected:
 
 
 template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollisionSolver, typename TContactGraph >
-InclusionSolverNTContactOrdered<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::InclusionSolverNTContactOrdered(boost::shared_ptr< TCollisionSolver >  pCollisionSolver,  boost::shared_ptr<TDynamicsSystem> pDynSys):
+InclusionSolverNTContactOrdered<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::InclusionSolverNTContactOrdered(std::shared_ptr< TCollisionSolver >  pCollisionSolver,  std::shared_ptr<TDynamicsSystem> pDynSys):
 m_SimBodies(pCollisionSolver->m_SimBodies),
    m_Bodies(pCollisionSolver->m_Bodies)
 {

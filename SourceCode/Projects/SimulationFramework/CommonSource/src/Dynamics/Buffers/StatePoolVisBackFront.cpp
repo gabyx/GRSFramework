@@ -13,14 +13,14 @@ m_nDofu(m_nSimBodies * m_nDofuBody)
 
   // Add the 3 state pools, if m_state_pointer is deleted, all elements inside are deleted because of shared_ptr
   m_pool.push_back(
-    boost::shared_ptr<DynamicsState >(new DynamicsState(nSimBodies))
+    std::shared_ptr<DynamicsState >(new DynamicsState(nSimBodies))
     );
   m_pool.push_back(
-    boost::shared_ptr<DynamicsState >(new DynamicsState(nSimBodies))
+    std::shared_ptr<DynamicsState >(new DynamicsState(nSimBodies))
     );
 
   m_pool.push_back(
-    boost::shared_ptr<DynamicsState >(new DynamicsState(nSimBodies))
+    std::shared_ptr<DynamicsState >(new DynamicsState(nSimBodies))
     );
 
   m_idx[0] = 1; //front
@@ -148,7 +148,7 @@ StatePoolVisBackFront::swapFrontBackBuffer()
 
 // ONLY USED IN VISUALIZATION THREAD
 
-boost::shared_ptr<const DynamicsState >
+std::shared_ptr<const DynamicsState >
 StatePoolVisBackFront::updateVisBuffer(bool & out_changed)
 {
   boost::mutex::scoped_lock l(m_change_pointer_mutex);
@@ -169,7 +169,7 @@ StatePoolVisBackFront::updateVisBuffer(bool & out_changed)
 }
 
 
-boost::shared_ptr<const DynamicsState >
+std::shared_ptr<const DynamicsState >
 StatePoolVisBackFront::updateVisBuffer()
 {
   bool changed;

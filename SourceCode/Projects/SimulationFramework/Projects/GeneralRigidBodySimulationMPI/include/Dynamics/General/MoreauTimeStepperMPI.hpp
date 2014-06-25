@@ -14,7 +14,6 @@
 #include <fstream>
 #include <cmath>
 
-#include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -38,7 +37,7 @@
 #include "TimeStepperSettings.hpp"
 //===========================================
 
-
+#include "CPUTimer.hpp"
 
 
 /**
@@ -56,16 +55,16 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
-    MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                      boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator);
+    MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys,
+                      std::shared_ptr<ProcessCommunicatorType > pProcCommunicator);
     ~MoreauTimeStepper();
 
     // The Core Objects ==================================
-    boost::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
-    boost::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
-    boost::shared_ptr<DynamicsSystemType>	m_pDynSys;
-    boost::shared_ptr<ProcessCommunicatorType > m_pProcCommunicator;
-    boost::shared_ptr<BodyCommunicator > m_pBodyCommunicator;
+    std::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
+    std::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
+    std::shared_ptr<DynamicsSystemType>	m_pDynSys;
+    std::shared_ptr<ProcessCommunicatorType > m_pProcCommunicator;
+    std::shared_ptr<BodyCommunicator > m_pBodyCommunicator;
     // ===================================================
 
     void initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile="");
@@ -102,7 +101,7 @@ protected:
     bool m_bFinished;
 
     // Timer for the Performance
-    boost::timer::cpu_timer m_PerformanceTimer;
+    CPUTimer m_PerformanceTimer;
     PREC m_startTime, m_endTime,
     m_startTimeCollisionSolver, m_endTimeCollisionSolver,
     m_startTimeInclusionSolver, m_endTimeInclusionSolver,
@@ -134,8 +133,8 @@ definitions of template class MoreauTimeStepper
 _________________________________________________________*/
 
 
-MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                                     boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
+MoreauTimeStepper::MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys,
+                                     std::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
     m_ReferenceSimFile(),
     m_pSolverLog(nullptr),
     m_pDynSys(pDynSys),
@@ -149,11 +148,11 @@ MoreauTimeStepper::MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynS
     }
 
 
-    m_pBodyCommunicator =  boost::shared_ptr<BodyCommunicator >(
+    m_pBodyCommunicator =  std::shared_ptr<BodyCommunicator >(
                             new BodyCommunicator(m_pDynSys,  m_pProcCommunicator) );
 
-    m_pCollisionSolver = boost::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys));
-    m_pInclusionSolver = boost::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pBodyCommunicator, m_pCollisionSolver,m_pDynSys, m_pProcCommunicator));
+    m_pCollisionSolver = std::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys));
+    m_pInclusionSolver = std::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pBodyCommunicator, m_pCollisionSolver,m_pDynSys, m_pProcCommunicator));
 
 };
 
@@ -281,7 +280,6 @@ void MoreauTimeStepper::reset() {
 
     m_bFinished = false;
 
-    m_PerformanceTimer.stop();
     m_PerformanceTimer.start();
 };
 
@@ -312,7 +310,7 @@ void MoreauTimeStepper::doOneIteration() {
     m_IterationCounter++;
 
 
-    m_startTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_startTime = m_PerformanceTimer.elapsedSec();
 
     //Force switch
     //boost::thread::yield();
@@ -342,9 +340,9 @@ void MoreauTimeStepper::doOneIteration() {
     m_currentSimulationTime = m_startSimulationTime + m_Settings.m_deltaT/2.0;
     // ====================================================================================
 
-    m_startBodyCommunication = ((PREC)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_startBodyCommunication = m_PerformanceTimer.elapsedSec();
     m_pBodyCommunicator->communicate(m_currentSimulationTime);
-    m_endBodyCommunication = ((PREC)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_endBodyCommunication = m_PerformanceTimer.elapsedSec();
 
     /* Communicate all bodies which are in the overlap zone or are out of the processes topology!
 
@@ -384,15 +382,15 @@ void MoreauTimeStepper::doOneIteration() {
     m_pInclusionSolver->resetForNextIter(); // Clears the contact graph and other inclusion related stuff!
 
     // Solve Collision
-    m_startTimeCollisionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_startTimeCollisionSolver = m_PerformanceTimer.elapsedSec();
     m_pCollisionSolver->solveCollision();
-    m_endTimeCollisionSolver =   ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_endTimeCollisionSolver =   m_PerformanceTimer.elapsedSec();
 
     //Solve Contact Problem
     //boost::thread::yield();
-    m_startTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_startTimeInclusionSolver = m_PerformanceTimer.elapsedSec();
     m_pInclusionSolver->solveInclusionProblem(m_currentSimulationTime);
-    m_endTimeInclusionSolver = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_endTimeInclusionSolver = m_PerformanceTimer.elapsedSec();
 
     //boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
     //boost::thread::yield();
@@ -417,7 +415,7 @@ void MoreauTimeStepper::doOneIteration() {
     //Force switch
     //boost::thread::yield();
 
-    m_endTime = ((double)m_PerformanceTimer.elapsed().wall)*1e-9;
+    m_endTime = m_PerformanceTimer.elapsedSec();
 
     // Measure Time again
     if (m_IterationCounter%100==0) {

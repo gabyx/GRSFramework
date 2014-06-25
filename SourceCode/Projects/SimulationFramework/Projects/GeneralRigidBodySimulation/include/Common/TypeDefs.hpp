@@ -27,9 +27,10 @@ class DynamicsSystem;
 #define InclusionSolverSettings_INCLUDE_FILE    "InclusionSolverSettings.hpp"
 class InclusionSolverSettings;
 
-#define InclusionSolver_INCLUDE_FILE "InclusionSolverCO.hpp"
-class InclusionSolverCO;
-//class InclusionSolverCONoG;
+//#define InclusionSolver_INCLUDE_FILE "InclusionSolverCO.hpp"
+//class InclusionSolverCO;
+#define InclusionSolver_INCLUDE_FILE "InclusionSolverCONoG.hpp"
+class InclusionSolverCONoG;
 
 #define RigidBody_INCLUDE_FILE "RigidBody.hpp"
 class RigidBodyBase;
@@ -56,7 +57,7 @@ namespace GlobalConfigs {
 
         typedef CollisionSolver         CollisionSolverType;
 
-        typedef InclusionSolverCO       InclusionSolverType;
+        typedef InclusionSolverCONoG       InclusionSolverType;
         typedef InclusionSolverSettings InclusionSolverSettingsType;
 
     };

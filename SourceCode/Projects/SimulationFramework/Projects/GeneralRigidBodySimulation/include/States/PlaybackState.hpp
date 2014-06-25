@@ -5,7 +5,7 @@
 	implementation specific includes
 _________________________________________________________*/
 #include <boost/thread.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
@@ -59,7 +59,7 @@ public:
   boost::function<void (double)> updateSceneFunction; // this function binds to updateScenePlayback() or  updateSceneRealtime()
   void updateScenePlayback(double timeSinceLastFrame);
 
-   boost::shared_ptr<PlaybackManager>	   m_pPlaybackMgr;
+   std::shared_ptr<PlaybackManager>	   m_pPlaybackMgr;
 
 private:
 
@@ -70,8 +70,8 @@ private:
 	Ogre::SceneNode * m_pBaseNode;                                       ///<Everythin in the Scene, gets deleted when scene reloads!
    void changeScene();
 
-	boost::shared_ptr<OrbitCamera>	m_pOrbitCamera;
-	boost::shared_ptr<MenuMouse>	   m_pMenuMouse;
+	std::shared_ptr<OrbitCamera>	m_pOrbitCamera;
+	std::shared_ptr<MenuMouse>	   m_pMenuMouse;
 
   void switchToSimulationState();
   enum MouseMode{ CAMERA = 0, MENU } m_eMouseMode;
@@ -90,11 +90,11 @@ private:
   void toggleGUI();
 
 
-	boost::shared_ptr<Ogre::Timer>	m_pTimelineRendering;
+	std::shared_ptr<Ogre::Timer>	m_pTimelineRendering;
 
 	double m_lengthScale;
 
-	boost::shared_ptr<OgreBites::SdkTrayManager>	m_pTrayMgr;
+	std::shared_ptr<OgreBites::SdkTrayManager>	m_pTrayMgr;
 	OgreBites::ParamsPanel*		m_pPhysicsStatsPanel;
 	Ogre::StringVector			m_PhysicsStatsParams;
 	Ogre::StringVector			m_pPhysicsStatsValues;

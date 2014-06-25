@@ -33,19 +33,19 @@ void PlaybackState::enter() {
 
     m_pAppLog->logMessage("---> Entering PlaybackState...");
 
-    m_pSceneMgr = boost::shared_ptr<Ogre::SceneManager>( RenderContext::getSingletonPtr()->m_pRoot->createSceneManager(ST_GENERIC, "PlaybackStateSceneMgr"), OgreSceneManagerDeleter());
+    m_pSceneMgr = std::shared_ptr<Ogre::SceneManager>( RenderContext::getSingletonPtr()->m_pRoot->createSceneManager(ST_GENERIC, "PlaybackStateSceneMgr"), OgreSceneManagerDeleter());
     setupScene();
 
 
     InputContext::getSingletonPtr()->addKeyListener(this,"PlaybackState::KeyListener");
     InputContext::getSingletonPtr()->addMouseListener(this,"PlaybackState::MouseListener");
 
-    m_pTrayMgr = boost::shared_ptr< OgreBites::SdkTrayManager>(new OgreBites::SdkTrayManager("PlaybackStateTray",
+    m_pTrayMgr = std::shared_ptr< OgreBites::SdkTrayManager>(new OgreBites::SdkTrayManager("PlaybackStateTray",
                  RenderContext::getSingletonPtr()->m_pRenderWnd,
                  InputContext::getSingletonPtr()->getMouse(), this));
     m_pTrayMgr->hideBackdrop();
 
-    m_pMenuMouse = boost::shared_ptr< MenuMouse >(new MenuMouse(m_pTrayMgr,"MenuMouse"));
+    m_pMenuMouse = std::shared_ptr< MenuMouse >(new MenuMouse(m_pTrayMgr,"MenuMouse"));
     m_pMenuMouse->setInactive();
 
 
@@ -59,7 +59,7 @@ void PlaybackState::enter() {
         changeScene();
     }
 
-    m_pTimelineRendering = boost::shared_ptr<Ogre::Timer>(new Ogre::Timer());
+    m_pTimelineRendering = std::shared_ptr<Ogre::Timer>(new Ogre::Timer());
 
     setSimulationMode(0);
 }
@@ -270,7 +270,7 @@ void PlaybackState::changeScene() {
 
     m_pAppLog->logMessage("---> Loading new Scene...");
     //Load new scene
-    m_pPlaybackMgr = boost::shared_ptr<PlaybackManager > (new PlaybackManager(m_pSceneMgr)); // overwrite the existing, which gets deleted!
+    m_pPlaybackMgr = std::shared_ptr<PlaybackManager > (new PlaybackManager(m_pSceneMgr)); // overwrite the existing, which gets deleted!
 
     if(m_pPlaybackMgr->setup()) {
         m_pAppLog->logMessage("---> Loading new scene successful");
@@ -312,7 +312,7 @@ void PlaybackState::setupScene() {
 
     m_pBaseNode =  m_pSceneMgr->getRootSceneNode()->createChildSceneNode("BaseFrame");
 
-    m_pOrbitCamera = boost::shared_ptr<OrbitCamera>(new OrbitCamera(m_pSceneMgr.get(),"PlaybackState::OrbitCam", 0.13, 150, 200, 0, M_PI/4));
+    m_pOrbitCamera = std::shared_ptr<OrbitCamera>(new OrbitCamera(m_pSceneMgr.get(),"PlaybackState::OrbitCam", 0.13, 150, 200, 0, M_PI/4));
     m_pOrbitCamera->enableInput();
     // Push attachable objects for Orbit camera to list
     m_pOrbitCamera->m_OrbitNodeList.push_back(WorldAxes);
@@ -445,7 +445,7 @@ void PlaybackState::switchSceneDetailIndex() {
 }
 
 void PlaybackState::switchToSimulationState() {
-    boost::shared_ptr<RenderAppState> appState = this->findAppStateByName("SimulationState");
+    std::shared_ptr<RenderAppState> appState = this->findAppStateByName("SimulationState");
     if(appState) {
         this->pushAppState(appState);
     }

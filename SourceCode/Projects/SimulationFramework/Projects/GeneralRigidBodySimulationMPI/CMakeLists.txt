@@ -57,6 +57,7 @@ SET(STATES_SRC
 )
 
 SET(COMMON_INC
+    ${COMMONSOURCE_DIR}/include/Common/CPUTimer.hpp
     ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/RedirectOutput.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/AssertionDebug.hpp
@@ -180,6 +181,7 @@ SET(DYNAMICS_SRC
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/CollisionSolverMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoGMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/ContactGraphNodeDataMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.cpp
 )
 
 

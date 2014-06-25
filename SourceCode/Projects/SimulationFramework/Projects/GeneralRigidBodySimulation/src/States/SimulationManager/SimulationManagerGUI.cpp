@@ -34,7 +34,7 @@ using namespace std;
 
 
 
-SimulationManagerGUI::SimulationManagerGUI(boost::shared_ptr<Ogre::SceneManager> pSceneMgr):
+SimulationManagerGUI::SimulationManagerGUI(std::shared_ptr<Ogre::SceneManager> pSceneMgr):
     SimulationManagerBase() {
 
     m_pSimulationLog = nullptr;
@@ -77,12 +77,12 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     m_pBaseNode->setScale(Ogre::Vector3(1.0,1.0,1.0)*m_lengthScale);
 
 
-    m_pDynSys = boost::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
+    m_pDynSys = std::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added DynamicsSystemType... ");
 
     // Parse the Scene from XML! ==========================
 
-    m_pSceneParser = boost::shared_ptr< SceneParserOgre >( new SceneParserOgre( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies, m_pDynSys) );
+    m_pSceneParser = std::shared_ptr< SceneParserOgre >( new SceneParserOgre( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies, m_pDynSys) );
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserOgre... ");
 
 
@@ -96,12 +96,12 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     // =====================================================
 
 
-    m_pSharedBuffer = boost::shared_ptr<SharedBufferDynSys>(new SharedBufferDynSys(m_nSimBodies));
+    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys>(new SharedBufferDynSys(m_nSimBodies));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBufferDynSys... ");
-    m_pTimestepper = boost::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
+    m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added TimeStepperType... ");
 
-    m_pStateRecorder = boost::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
+    m_pStateRecorder = std::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added StateRecorder... ");
 
 
@@ -340,7 +340,7 @@ void SimulationManagerGUI::writeAllOutput() {
     if(m_RecorderSettings.outputCheck(m_pTimestepper->getIterationCount())) {
         //m_pSimulationLog->logMessage("---> Output: now");
         // get global time for logging!
-        double timelineSimulation = ((double)m_global_time.elapsed().wall)*1e-9;
+        double timelineSimulation = m_global_time.elapsedSec();
         // Write Data to SystemDataFile (maps all data to back buffer!)
         m_pTimestepper->writeIterationToSystemDataFile(timelineSimulation);
         // Write Data to CollisionDataFile

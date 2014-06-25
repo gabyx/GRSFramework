@@ -3,10 +3,10 @@
 
 #include <fstream>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/variant.hpp>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 //#define SRUTIL_DELEGATE_PREFERRED_SYNTAX
 #include <srutil/delegate/delegate.hpp> // Use fast SR delegates
@@ -79,7 +79,7 @@ public:
     * @param SimBodies A reference to the list of all simulated bodies.
     * @param Bodies A reference to the list all not simulated bodies.
     */
-    CollisionSolver(boost::shared_ptr< DynamicsSystemType> pDynSys);
+    CollisionSolver(std::shared_ptr< DynamicsSystemType> pDynSys);
 
     ~CollisionSolver();
 

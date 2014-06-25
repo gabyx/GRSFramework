@@ -1,7 +1,7 @@
 #ifndef ContactGraphMPI_hpp
 #define ContactGraphMPI_hpp
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <unordered_map>
 
 #include "TypeDefs.hpp"
@@ -52,8 +52,8 @@ public:
     typedef typename InclusionCommunicatorType::NeighbourMapType NeighbourMapType;
 
 
-    ContactGraph(boost::shared_ptr<DynamicsSystemType> pDynSys);
-    void setInclusionCommunicator(boost::shared_ptr<InclusionCommunicatorType> pInclusionComm);
+    ContactGraph(std::shared_ptr<DynamicsSystemType> pDynSys);
+    void setInclusionCommunicator(std::shared_ptr<InclusionCommunicatorType> pInclusionComm);
 
     ~ContactGraph();
 
@@ -136,10 +136,10 @@ private:
 
     Logging::Log * m_pSolverLog;
 
-    boost::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
+    std::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
     NeighbourMapType * m_pNbDataMap; ///< NeighbourMap to insert remote bodies which have contacts
 
-    boost::shared_ptr<DynamicsSystemType> m_pDynSys;
+    std::shared_ptr<DynamicsSystemType> m_pDynSys;
 
     //std::map<unsigned int, NodeListType> m_nodeMap; //TODO make a map whith each color!
     NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies (ref to m_nodeMap)

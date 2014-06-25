@@ -13,7 +13,6 @@
 #include <fstream>
 #include <cmath>
 
-#include <boost/timer/timer.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -21,6 +20,7 @@
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
+#include "CPUTimer.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 #include CollisionSolver_INCLUDE_FILE
@@ -52,14 +52,14 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
-    MoreauTimeStepper(boost::shared_ptr<DynamicsSystemType> pDynSys,  boost::shared_ptr<StatePoolType>	pSysState);
+    MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys,  std::shared_ptr<StatePoolType>	pSysState);
     ~MoreauTimeStepper();
 
     // The Core Objects ==================================
-    boost::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
-    boost::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
-    boost::shared_ptr<DynamicsSystemType>	  m_pDynSys;
-    boost::shared_ptr<StatePoolType>		  m_pStatePool;
+    std::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
+    std::shared_ptr<InclusionSolverType>  m_pInclusionSolver;
+    std::shared_ptr<DynamicsSystemType>	  m_pDynSys;
+    std::shared_ptr<StatePoolType>		  m_pStatePool;
     // ===================================================
 
     void initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile="");
@@ -75,8 +75,8 @@ public:
     TimeStepperSettings m_Settings;
 
     //Accessed only by Simulation manager, after doOneIteration();
-    boost::shared_ptr<const DynamicsState > getBackStateBuffer();
-    boost::shared_ptr<const DynamicsState > getFrontStateBuffer();
+    std::shared_ptr<const DynamicsState > getBackStateBuffer();
+    std::shared_ptr<const DynamicsState > getFrontStateBuffer();
 
 
     //Performance Time of one Iteration (averaged)
@@ -106,7 +106,7 @@ protected:
     bool m_bFinished;
 
     // Timer for the Performance
-    boost::timer::cpu_timer m_PerformanceTimer;
+    CPUTimer m_PerformanceTimer;
     double m_startTime, m_endTime, m_startTimeCollisionSolver, m_endTimeCollisionSolver, m_startTimeInclusionSolver, m_endTimeInclusionSolver;
 
     // Collision Data file

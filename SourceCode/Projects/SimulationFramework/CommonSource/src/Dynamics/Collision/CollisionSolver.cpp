@@ -1,7 +1,7 @@
 #include "CollisionSolver.hpp"
 
 
-CollisionSolver::CollisionSolver(boost::shared_ptr< DynamicsSystemType> pDynSys):
+CollisionSolver::CollisionSolver(std::shared_ptr< DynamicsSystemType> pDynSys):
     m_SimBodies(pDynSys->m_SimBodies), m_Bodies(pDynSys->m_Bodies),
     m_Collider(&m_collisionSet)
 {

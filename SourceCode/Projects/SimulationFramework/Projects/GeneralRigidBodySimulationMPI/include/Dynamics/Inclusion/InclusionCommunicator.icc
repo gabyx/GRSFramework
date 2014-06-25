@@ -9,9 +9,9 @@
 #include "MPICommunicatorId.hpp"
 
 template<typename TCombo>
-InclusionCommunicator<TCombo>::InclusionCommunicator(boost::shared_ptr< BodyCommunicator> pBodyComm,
-        boost::shared_ptr< DynamicsSystemType> pDynSys ,
-        boost::shared_ptr< ProcessCommunicatorType > pProcComm):
+InclusionCommunicator<TCombo>::InclusionCommunicator(std::shared_ptr< BodyCommunicator> pBodyComm,
+        std::shared_ptr< DynamicsSystemType> pDynSys ,
+        std::shared_ptr< ProcessCommunicatorType > pProcComm):
 
     m_pDynSys(pDynSys),
     m_globalLocal(pDynSys->m_SimBodies),

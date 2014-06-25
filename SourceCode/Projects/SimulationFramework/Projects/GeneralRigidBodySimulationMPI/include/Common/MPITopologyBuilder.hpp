@@ -24,15 +24,14 @@ class TopologyBuilder{
 
         typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
 
-        TopologyBuilder(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                        boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
-                        unsigned int nGlobalSimBodies):
-                            m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator), m_nGlobalSimBodies(nGlobalSimBodies) {
+        TopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
+                        std::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
+                            m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator) {
 
         }
     protected:
-       boost::shared_ptr<DynamicsSystemType>  m_pDynSys;
-       boost::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
+       std::shared_ptr<DynamicsSystemType>  m_pDynSys;
+       std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
 };
 
 class GridTopologyBuilder : public TopologyBuilder {
@@ -45,13 +44,13 @@ class GridTopologyBuilder : public TopologyBuilder {
         DEFINE_MPI_INFORMATION_CONFIG_TYPES
         typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
 
-        GridTopologyBuilder(boost::shared_ptr<DynamicsSystemType> pDynSys,
-                            boost::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
-                            TopologyBuilder(pDynSys, pProcCommunicator)
+        GridTopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
+                            std::shared_ptr<ProcessCommunicatorType > pProcCommunicator, unsigned int nGlobalSimBodies):
+                            TopologyBuilder(pDynSys, pProcCommunicator), m_nGlobalSimBodies(nGlobalSimBodies)
         {}
 
         void rebuildTopology(){
-
+            /*
             // Gather all body center of gravities and common AABB to master rank
             // Compute Inertia tensor where all masses of the points are equal to 1 (gives the tensor for the geometric center)
             buildLocalStuff();
@@ -96,7 +95,7 @@ class GridTopologyBuilder : public TopologyBuilder {
             }else{
                 this->m_pProcCommunicator->sendMessageToRank(m, masterRank, m.m_tag);
             }
-
+            */
         }
 
 
@@ -140,19 +139,19 @@ class GridTopologyBuilder : public TopologyBuilder {
 
         //only master rank
         void buildGrid(){
-
+            /*
             //Calculate principal axis of Theta_G
             Matrix33 Theta_G;
             Utilities::setSymMatrix(Theta_G,m_theta_G_glo);
             EigenSolverSelfAdjoint<Matrix33> eigenSolv(Theta_G);
-            LOG( eigenSolv.eigenvalues();
+            //LOG( eigenSolv.eigenvalues();
             eigenSolv.eigenvectors();
 
             // Expand grid by some percentage
             PREC dmax = m_aabb_glo.maxExtent();
             ASSERTMSG(dmax>=0,"max extend not >=0");
             //m_totalAABB.expand(dmax*0.)
-
+            */
         }
 
 
@@ -169,7 +168,7 @@ class GridTopologyBuilder : public TopologyBuilder {
         };
 
         typename std::unordered_map<RigidBodyIdType, RigidBodyState> m_initStates;
-        typename std::unordered_map<RankIdType,std::vector<RigidBodyIdType> m_bodiesPerRank;
+        typename std::unordered_map<RankIdType,std::vector<RigidBodyIdType> > m_bodiesPerRank;
 
         AABB m_aabb_glo;         ///< Global AABB of point masses
         Vector3 m_r_G__glo;      ///< Global geometric center of all point masses

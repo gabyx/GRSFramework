@@ -4,9 +4,9 @@
 #include <fstream>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/variant.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 //#define SRUTIL_DELEGATE_PREFERRED_SYNTAX
 #include <srutil/delegate/delegate.hpp> // Use fast SR delegates
@@ -82,7 +82,7 @@ public:
     * @param SimBodies A reference to the list of all simulated bodies.
     * @param Bodies A reference to the list all not simulated bodies.
     */
-    CollisionSolver(boost::shared_ptr< DynamicsSystemType> pDynSys);
+    CollisionSolver(std::shared_ptr< DynamicsSystemType> pDynSys);
 
     ~CollisionSolver();
 
@@ -116,7 +116,7 @@ protected:
     typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;           ///< List of all fixed not simulated bodies.
 
 
-    Collider m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
+    ColliderBody m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
     friend class Collider;
 
     Logging::Log *  m_pSolverLog;  ///< Ogre::Log

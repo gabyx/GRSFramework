@@ -34,23 +34,23 @@ public:
     /** @name Only accessed by Simulation Thread.
     * @{
     */
-    boost::shared_ptr<DynamicsState > getSimBuffer();
-    boost::shared_ptr<DynamicsState > advanceSimBuffer(bool & out_changed);
+    std::shared_ptr<DynamicsState > getSimBuffer();
+    std::shared_ptr<DynamicsState > advanceSimBuffer(bool & out_changed);
     /** @} */
 
     /** @name Only accessed by Loader Thread.
     * @{
     */
-    boost::shared_ptr<DynamicsState > getLoadBuffer();
-    boost::shared_ptr<DynamicsState > advanceLoadBuffer(bool & out_changed);
+    std::shared_ptr<DynamicsState > getLoadBuffer();
+    std::shared_ptr<DynamicsState > advanceLoadBuffer(bool & out_changed);
     /** @} */
 
     /** @name Only accessed by Visualization Thread.
     * @{
     */
-    boost::shared_ptr<const DynamicsState > getVisBuffer();
-    boost::shared_ptr<const DynamicsState > updateVisBuffer(bool & out_changed);
-    boost::shared_ptr<const DynamicsState > updateVisBuffer();
+    std::shared_ptr<const DynamicsState > getVisBuffer();
+    std::shared_ptr<const DynamicsState > updateVisBuffer(bool & out_changed);
+    std::shared_ptr<const DynamicsState > updateVisBuffer();
     /** @} */
 
     /** @name Only accessed by if only Visualization Thread runs.
@@ -92,7 +92,7 @@ StateRingPoolVisBackFront::StateRingPoolVisBackFront(const unsigned int nSimBodi
     // Add the 3 state pools, if m_state_pointer is deleted, all elements inside are deleted because of shared_ptr
     for(int i = 0; i < POOL_SIZE; i++) {
         m_pool.push_back(
-            boost::shared_ptr<DynamicsState >(new DynamicsState(nSimBodies))
+            std::shared_ptr<DynamicsState >(new DynamicsState(nSimBodies))
         );
     }
 
@@ -223,7 +223,7 @@ StateRingPoolVisBackFront::~StateRingPoolVisBackFront() {
 
 // ONLY USED IN SIM THREAD
 
-boost::shared_ptr<DynamicsState >
+std::shared_ptr<DynamicsState >
 StateRingPoolVisBackFront::getSimBuffer() {
     //cout << " idx: " << (unsigned int)m_idx[1] << endl;
     return m_pool[m_idx[1]];
@@ -232,7 +232,7 @@ StateRingPoolVisBackFront::getSimBuffer() {
 
 // ONLY USED IN SIM THREAD
 
-boost::shared_ptr< DynamicsState >
+std::shared_ptr< DynamicsState >
 StateRingPoolVisBackFront::advanceSimBuffer(bool & out_changed) {
     boost::mutex::scoped_lock l(m_change_pointer_mutex);
     // calculated next index!
@@ -255,7 +255,7 @@ StateRingPoolVisBackFront::advanceSimBuffer(bool & out_changed) {
 
 // ONLY USED IN VISUALIZATION THREAD
 
-boost::shared_ptr<const DynamicsState >
+std::shared_ptr<const DynamicsState >
 StateRingPoolVisBackFront::updateVisBuffer(bool & out_changed) {
     boost::mutex::scoped_lock l(m_change_pointer_mutex);
 
@@ -275,26 +275,26 @@ StateRingPoolVisBackFront::updateVisBuffer(bool & out_changed) {
 }
 
 
-boost::shared_ptr<const DynamicsState >
+std::shared_ptr<const DynamicsState >
 StateRingPoolVisBackFront::updateVisBuffer() {
     bool out_changed;
     return updateVisBuffer(out_changed);
 }
 
 
-boost::shared_ptr<const DynamicsState > StateRingPoolVisBackFront::getVisBuffer() {
+std::shared_ptr<const DynamicsState > StateRingPoolVisBackFront::getVisBuffer() {
     return m_pool[m_idx[0]];
 }
 
 
 
 
-boost::shared_ptr<DynamicsState > StateRingPoolVisBackFront::getLoadBuffer() {
+std::shared_ptr<DynamicsState > StateRingPoolVisBackFront::getLoadBuffer() {
     return m_pool[m_idx[2]];
 }
 
 
-boost::shared_ptr<DynamicsState > StateRingPoolVisBackFront::advanceLoadBuffer( bool & out_changed ) {
+std::shared_ptr<DynamicsState > StateRingPoolVisBackFront::advanceLoadBuffer( bool & out_changed ) {
     boost::mutex::scoped_lock l(m_change_pointer_mutex);
     // calculated next index!
 

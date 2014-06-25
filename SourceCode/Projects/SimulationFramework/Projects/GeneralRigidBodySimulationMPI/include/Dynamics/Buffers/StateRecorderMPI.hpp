@@ -35,7 +35,7 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    StateRecorderMPI(unsigned int nSimBodies, boost::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> pProcInfo);
+    StateRecorderMPI(unsigned int nSimBodies, std::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> pProcInfo);
     ~StateRecorderMPI();
 
     //Each process writes its stuff at a specific offset
@@ -50,7 +50,7 @@ public:
 
 protected:
 
-    boost::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> m_pProcInfo;
+    std::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> m_pProcInfo;
 
     boost::filesystem::path m_directoryPath; ///< The path where the sim body part file is opened!
 
@@ -75,7 +75,7 @@ protected:
 
 
 StateRecorderMPI::StateRecorderMPI(unsigned int nSimBodies,
-                                   boost::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> pProcInfo):
+                                   std::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> pProcInfo):
     m_nSimBodies(nSimBodies),
     m_pProcInfo(pProcInfo)
 //    ,m_ins(m_writebuffer),

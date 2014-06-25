@@ -81,7 +81,6 @@ SET(COMMON_INC
 #    ${SOURCE_DIR}/include/Common/OgreMeshExtraction.hpp
 #    ${SOURCE_DIR}/include/Common/CommonFunctionsOgre.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
-    ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
     ${SOURCE_DIR}/include/Common/AssertionDebug.hpp
     ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
@@ -98,6 +97,8 @@ SET(COMMON_INC
     ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
     ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp
     ${COMMONSOURCE_DIR}/include/Common/BitCount.hpp
+    ${COMMONSOURCE_DIR}/include/Common/CPUTimer.hpp
+    ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
 )
 SET(COMMON_SRC
 #    ${SOURCE_DIR}/src/Common/OgreMeshExtraction.cpp

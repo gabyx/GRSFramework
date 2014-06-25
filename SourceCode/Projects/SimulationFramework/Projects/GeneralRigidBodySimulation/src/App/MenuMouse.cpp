@@ -1,6 +1,6 @@
 ﻿#include "MenuMouse.hpp"
 
-MenuMouse::MenuMouse(boost::shared_ptr<OgreBites::SdkTrayManager> trayManager, Ogre::String name){
+MenuMouse::MenuMouse(std::shared_ptr<OgreBites::SdkTrayManager> trayManager, Ogre::String name){
 
 	m_pTrayMgr = trayManager;
 	m_Name = name;

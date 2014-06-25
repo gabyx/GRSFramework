@@ -20,7 +20,7 @@ GuiContext::~GuiContext()
 
 bool GuiContext::initBitesTray()
 {
-	m_pTrayMgr = boost::shared_ptr<OgreBites::SdkTrayManager>( new OgreBites::SdkTrayManager("GuiContextTrayMgr",
+	m_pTrayMgr = std::shared_ptr<OgreBites::SdkTrayManager>( new OgreBites::SdkTrayManager("GuiContextTrayMgr",
 		RenderContext::getSingletonPtr()->m_pRenderWnd,
 		InputContext::getSingletonPtr()->getMouse(), this) );
 

@@ -62,7 +62,7 @@ bool RenderContext::initOgre(Ogre::String wndTitle) {
 
     m_pAppLog->logMessage("RenderContext::Render Window initializing...");
     // Render Window ==========================================================================
-    m_pRoot = boost::shared_ptr<Ogre::Root>(new Ogre::Root());
+    m_pRoot = std::shared_ptr<Ogre::Root>(new Ogre::Root());
 
     if(m_pRoot->restoreConfig()) {
     } else if(!m_pRoot->showConfigDialog()) {
@@ -97,7 +97,7 @@ bool RenderContext::initOgre(Ogre::String wndTitle) {
     m_pAppLog->logMessage("RenderContext::Resources initialized...");
 
     // Timer =====================================================================================
-    m_pTimer = boost::shared_ptr<Ogre::Timer>(new Ogre::Timer());
+    m_pTimer = std::shared_ptr<Ogre::Timer>(new Ogre::Timer());
     m_pTimer->reset();
 
 

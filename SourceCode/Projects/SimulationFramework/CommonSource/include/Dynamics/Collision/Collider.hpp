@@ -2,7 +2,7 @@
 #define Collider_hpp
 
 #include "boost/variant.hpp"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "ConfigureFile.hpp"
 
@@ -58,7 +58,7 @@ public:
     }
 
     // Dispatch
-    void operator()(const boost::shared_ptr<const SphereGeometry >  & sphereGeom1) {
+    void operator()(const std::shared_ptr<const SphereGeometry >  & sphereGeom1) {
         overlap(sphereGeom1);
     }
 
@@ -66,7 +66,7 @@ public:
     * @brief If no routine matched for Body to AABB throw error
     */
     template <typename Geom1>
-    inline void operator()(const  boost::shared_ptr<const Geom1> &g1) {
+    inline void operator()(const  std::shared_ptr<const Geom1> &g1) {
         ERRORMSG("ColliderAABB:: collision detection for object-combination "<< typeid(Geom1).name()<<" and AABB not supported!");
     }
 
@@ -81,12 +81,12 @@ private:
 
 
     //Collision function
-    inline void overlap( const boost::shared_ptr<const SphereGeometry >  & sphereGeom1); ///< Sphere/AABB collision
+    inline void overlap( const std::shared_ptr<const SphereGeometry >  & sphereGeom1); ///< Sphere/AABB collision
 };
 
 
 
-void ColliderAABB::overlap(const boost::shared_ptr<const SphereGeometry >  & sphereGeom1) {
+void ColliderAABB::overlap(const std::shared_ptr<const SphereGeometry >  & sphereGeom1) {
     //Intersection test by Thomas Larsson "On Faster Sphere-Box Overlap Testing"
     // Using arvos overlap test because larsons gives false positives!
     PREC d = 0;
@@ -150,7 +150,7 @@ public:
     }
 
     // Dispatch
-    inline void operator()( const boost::shared_ptr<const HalfspaceGeometry >  & halfspace) ///< Calls Sphere/AABB collision detection.
+    inline void operator()( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) ///< Calls Sphere/AABB collision detection.
     {
         intersect(halfspace);
     }
@@ -158,7 +158,7 @@ public:
     * @brief If no routine matched for Body to AABB throw error
     */
     template <typename Geom1>
-    inline void operator()(const  boost::shared_ptr<const Geom1> &g1) {
+    inline void operator()(const  std::shared_ptr<const Geom1> &g1) {
         ERRORMSG("ColliderRay:: collision detection for object-combination "<< typeid(Geom1).name()<<" and Ray not supported!");
     }
 
@@ -173,10 +173,10 @@ private:
     const RigidBodyType* m_pBody1; ///< Shared pointer to the first RigidBodyBase class instance.
 
     //Collision function
-    inline void intersect( const boost::shared_ptr<const HalfspaceGeometry >  & halfspace); ///< Halfspace/Ray intersection
+    inline void intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace); ///< Halfspace/Ray intersection
 };
 
-void ColliderRay::intersect( const boost::shared_ptr<const HalfspaceGeometry >  & halfspace) {
+void ColliderRay::intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) {
 
     PREC nDotRay = halfspace->m_normal.dot(m_ray->m_d);
 	if ( nDotRay == 0.0){
@@ -274,33 +274,33 @@ public:
 
     //For RigidBodies
 
-    void operator()(  const boost::shared_ptr<const SphereGeometry >  & sphereGeom1 ,
-                      const boost::shared_ptr<const SphereGeometry >  & sphereGeom2){
+    void operator()(  const std::shared_ptr<const SphereGeometry >  & sphereGeom1 ,
+                      const std::shared_ptr<const SphereGeometry >  & sphereGeom2){
         collide(sphereGeom1, sphereGeom2);
     }
-    void operator()(  const boost::shared_ptr<const SphereGeometry >  & sphereGeom ,
-                      const boost::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom) {
+    void operator()(  const std::shared_ptr<const SphereGeometry >  & sphereGeom ,
+                      const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom) {
         collide(sphereGeom, halfspaceGeom);
     }
-    void operator()(  const boost::shared_ptr<const BoxGeometry >  & box1 ,
-                      const boost::shared_ptr<const BoxGeometry >  & box2) {
+    void operator()(  const std::shared_ptr<const BoxGeometry >  & box1 ,
+                      const std::shared_ptr<const BoxGeometry >  & box2) {
         collide(box1, box2);
     }
-    void operator()(  const boost::shared_ptr<const BoxGeometry >  & box ,
-                      const boost::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom) {
+    void operator()(  const std::shared_ptr<const BoxGeometry >  & box ,
+                      const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom) {
         collide(box, halfspaceGeom);
     }
-    void operator()(  const boost::shared_ptr<const SphereGeometry >  & sphere ,
-                      const boost::shared_ptr<const MeshGeometry >  & mesh) {
+    void operator()(  const std::shared_ptr<const SphereGeometry >  & sphere ,
+                      const std::shared_ptr<const MeshGeometry >  & mesh) {
         collide(sphere, mesh);
     }
 
     /** If no routine matched try to swap objects. If that fails too, an exception is thrown*/
     template <typename Geom1, typename Geom2>
-    void operator()(const boost::shared_ptr<const Geom1> &g1, const  boost::shared_ptr<const Geom2> &g2) {
+    void operator()(const std::shared_ptr<const Geom1> &g1, const  std::shared_ptr<const Geom2> &g2) {
         m_bObjectsSwapped = true;
         std::swap(m_pBody1,m_pBody2);
-        collide((const boost::shared_ptr<const Geom2> &)g2, (const boost::shared_ptr<const Geom1> &)g1);
+        collide((const std::shared_ptr<const Geom2> &)g2, (const std::shared_ptr<const Geom1> &)g1);
     }
     /** @} */
     // =================================================================================
@@ -323,26 +323,26 @@ private:
     * @brief The collision functions. First geometry belongs to first body, second to second body!
     * @{
     */
-    inline void collide(const boost::shared_ptr< const SphereGeometry >  & sphereGeom1,
-                        const boost::shared_ptr< const SphereGeometry >  & sphereGeom2); ///< Sphere/Sphere collision.
+    inline void collide(const std::shared_ptr< const SphereGeometry >  & sphereGeom1,
+                        const std::shared_ptr< const SphereGeometry >  & sphereGeom2); ///< Sphere/Sphere collision.
 
-    inline void collide(const boost::shared_ptr<const SphereGeometry >  & sphereGeom,
-                        const boost::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom); ///< Sphere/Halfspace collision.
+    inline void collide(const std::shared_ptr<const SphereGeometry >  & sphereGeom,
+                        const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom); ///< Sphere/Halfspace collision.
 
-    inline void collide(const boost::shared_ptr<const BoxGeometry >  & boxA,
-                        const boost::shared_ptr<const BoxGeometry >  & boxB); ///< Box/Box collision.
+    inline void collide(const std::shared_ptr<const BoxGeometry >  & boxA,
+                        const std::shared_ptr<const BoxGeometry >  & boxB); ///< Box/Box collision.
 
-    inline void collide(const boost::shared_ptr<const BoxGeometry >  & boxGeom,
-                        const boost::shared_ptr<const HalfspaceGeometry >  &halfspaceGeom); ///< Box/Halfspace collision.
+    inline void collide(const std::shared_ptr<const BoxGeometry >  & boxGeom,
+                        const std::shared_ptr<const HalfspaceGeometry >  &halfspaceGeom); ///< Box/Halfspace collision.
 
-    inline void collide(const boost::shared_ptr<const SphereGeometry >  & sphereGeom,
-                        const boost::shared_ptr<const MeshGeometry >  & meshGeom); ///< Sphere/Mesh collision.
+    inline void collide(const std::shared_ptr<const SphereGeometry >  & sphereGeom,
+                        const std::shared_ptr<const MeshGeometry >  & meshGeom); ///< Sphere/Mesh collision.
 
 
     /** Exception, to indicate that no collision function could be matched, because its not implemented. */
     template <typename O1, typename O2>
-    inline void collide(const boost::shared_ptr<const O1> & o1,
-                        const boost::shared_ptr<const O2> & o2)
+    inline void collide(const std::shared_ptr<const O1> & o1,
+                        const std::shared_ptr<const O2> & o2)
     {
         ERRORMSG("ColliderBody:: collision detection for object-combination "<< typeid(O1).name()<<" and "<<typeid(O2).name()<<" not supported!");
     }
@@ -358,8 +358,8 @@ private:
 
 // Collision Functions ==============================================================================
 
-void ColliderBody::collide( const boost::shared_ptr< const SphereGeometry >  & sphereGeom1,
-                            const boost::shared_ptr< const SphereGeometry >  & sphereGeom2)
+void ColliderBody::collide( const std::shared_ptr< const SphereGeometry >  & sphereGeom1,
+                            const std::shared_ptr< const SphereGeometry >  & sphereGeom2)
 {
     // Do Collision for sphere to sphere
 
@@ -407,8 +407,8 @@ void ColliderBody::collide( const boost::shared_ptr< const SphereGeometry >  & s
 }
 
 
-void ColliderBody::collide( const boost::shared_ptr<const SphereGeometry >  & sphereGeom,
-                            const boost::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom)
+void ColliderBody::collide( const std::shared_ptr<const SphereGeometry >  & sphereGeom,
+                            const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom)
 {
 
 
@@ -443,14 +443,14 @@ void ColliderBody::collide( const boost::shared_ptr<const SphereGeometry >  & sp
 }
 
 
-void ColliderBody::collide( const boost::shared_ptr<const BoxGeometry >  & boxA,
-                            const boost::shared_ptr<const BoxGeometry >  & boxB) {
+void ColliderBody::collide( const std::shared_ptr<const BoxGeometry >  & boxA,
+                            const std::shared_ptr<const BoxGeometry >  & boxB) {
     // Not implemented yet!
 }
 
 
-void ColliderBody::collide( const boost::shared_ptr<const BoxGeometry >  & boxGeom,
-                            const boost::shared_ptr<const HalfspaceGeometry >  &halfspaceGeom) {
+void ColliderBody::collide( const std::shared_ptr<const BoxGeometry >  & boxGeom,
+                            const std::shared_ptr<const HalfspaceGeometry >  &halfspaceGeom) {
 
 
     // Check all 8 corners against the plane
@@ -497,8 +497,8 @@ void ColliderBody::collide( const boost::shared_ptr<const BoxGeometry >  & boxGe
 
 
 
-void ColliderBody::collide(const boost::shared_ptr<const SphereGeometry >  & sphereGeom,
-                           const boost::shared_ptr<const MeshGeometry >  & meshGeom)
+void ColliderBody::collide(const std::shared_ptr<const SphereGeometry >  & sphereGeom,
+                           const std::shared_ptr<const MeshGeometry >  & meshGeom)
 {
     using namespace MatrixHelpers;
 

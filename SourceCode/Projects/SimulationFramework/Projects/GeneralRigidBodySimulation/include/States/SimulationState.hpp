@@ -5,7 +5,7 @@
 	implementation specific includes
 _________________________________________________________*/
 #include <boost/thread.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
@@ -70,7 +70,7 @@ public:
     boost::function<void (double)> updateSceneFunction; // this function binds to updateScenePlayback() or  updateSceneRealtime()
     void updateSceneRealtime(double timeSinceLastFrame);
 
-    boost::shared_ptr<SimulationManagerGUI >	m_pSimMgr;
+    std::shared_ptr<SimulationManagerGUI >	m_pSimMgr;
 
 private:
 
@@ -80,8 +80,8 @@ private:
 
     Ogre::SceneNode * m_pBaseNode;
 
-    boost::shared_ptr<OrbitCamera>	m_pOrbitCamera;
-    boost::shared_ptr<MenuMouse>	m_pMenuMouse;
+    std::shared_ptr<OrbitCamera>	m_pOrbitCamera;
+    std::shared_ptr<MenuMouse>	m_pMenuMouse;
 
     void switchToPlaybackState();
 
@@ -98,11 +98,11 @@ private:
     unsigned int m_SceneDetailIndex;
     void switchSceneDetailIndex();
 
-    boost::shared_ptr<Ogre::Timer>	m_pTimelineRendering;
+    std::shared_ptr<Ogre::Timer>	m_pTimelineRendering;
 
     double m_lengthScale;
 
-    boost::shared_ptr<OgreBites::SdkTrayManager>	m_pTrayMgr;
+    std::shared_ptr<OgreBites::SdkTrayManager>	m_pTrayMgr;
     OgreBites::ParamsPanel*		m_pPhysicsStatsPanel;
     Ogre::StringVector			m_PhysicsStatsParams;
     Ogre::StringVector			m_pPhysicsStatsValues;

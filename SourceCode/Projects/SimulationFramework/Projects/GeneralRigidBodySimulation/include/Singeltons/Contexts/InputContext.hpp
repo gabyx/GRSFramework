@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <OIS/OISEvents.h>
 #include <OIS/OISInputManager.h>
 #include <OIS/OISKeyboard.h>
