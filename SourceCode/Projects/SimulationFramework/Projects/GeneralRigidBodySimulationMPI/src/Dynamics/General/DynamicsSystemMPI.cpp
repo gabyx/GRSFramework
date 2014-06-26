@@ -6,6 +6,20 @@
 #include "CommonFunctions.hpp"
 #include "RigidBodyFunctions.hpp"
 
+DynamicsSystem::DynamicsSystem(){
+    // set reasonable standart values:
+    m_gravity = 9.81;
+    m_gravityDir = Vector3(0,0,-1);
+
+    m_currentTotEnergy = 0;
+    m_currentPotEnergy= 0;
+    m_currentKinEnergy= 0;
+    m_currentTransKinEnergy= 0;
+    m_currentRotKinEnergy= 0;
+    m_currentSpinNorm= 0;
+}
+
+
 DynamicsSystem::~DynamicsSystem() {
     DECONSTRUCTOR_MESSAGE
 

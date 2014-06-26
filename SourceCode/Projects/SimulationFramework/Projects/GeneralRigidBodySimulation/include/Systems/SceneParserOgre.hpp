@@ -13,32 +13,20 @@ public:
 
     DEFINE_CONFIG_TYPES
 
-    // For simulation manager
+    // For simulation manager, playback manager doesnt set pDynSys, and does not parse Dynamics!
     SceneParserOgre(
         Ogre::SceneNode * baseFrame,
         std::shared_ptr<Ogre::SceneManager> pSceneMgr,
         std::vector<Ogre::SceneNode*> &nodesSimBodies,
         std::vector<Ogre::SceneNode*> &nodesBodies,
-        std::shared_ptr<DynamicsSystemType> pDynSys
-    ) : m_pSceneMgr(pSceneMgr),  m_rSceneNodeSimBodies(nodesSimBodies), m_rSceneNodeBodies(nodesBodies) , SceneParser(pDynSys) {
+        std::shared_ptr<DynamicsSystemType> pDynSys = std::shared_ptr<DynamicsSystemType>())
+    : SceneParser(pDynSys),
+      m_pSceneMgr(pSceneMgr),
+      m_rSceneNodeSimBodies(nodesSimBodies),
+      m_rSceneNodeBodies(nodesBodies),
+      m_BaseFrame(baseFrame)
+    {
         ASSERTMSG(baseFrame != nullptr, "Pointer is nullptr");
-        m_BaseFrame = baseFrame;
-        this->m_bParseDynamics = true;
-        this->m_nSimBodies = 0;
-    }
-
-    // For playback manager
-    SceneParserOgre(
-        Ogre::SceneNode * baseFrame,
-        std::shared_ptr<Ogre::SceneManager> pSceneMgr,
-        std::vector<Ogre::SceneNode*> &nodesSimBodies,
-        std::vector<Ogre::SceneNode*> &nodesBodies
-    )
-        : m_pSceneMgr(pSceneMgr),  m_rSceneNodeSimBodies(nodesSimBodies), m_rSceneNodeBodies(nodesBodies) {
-        ASSERTMSG(baseFrame != nullptr, "Pointer is nullptr");
-        m_BaseFrame = baseFrame;
-        this->m_bParseDynamics = false;
-        this->m_nSimBodies = 0;
     }
 
 protected:
@@ -49,16 +37,16 @@ protected:
         bool shadowsEnabled;
     };
 
-    void processVisualization( ticpp::Node * visualizationNode) {
+    void parseVisualization( ticpp::Node * visualizationNode) {
 
 
         ticpp::Node * meshNode = visualizationNode->FirstChild("Mesh",false);
         if(meshNode){
-            processMesh(meshNode);
+            parseMesh(meshNode);
         }
         else{
             ticpp::Node * planeNode = visualizationNode->FirstChild("Plane",false);
-            processPlane(planeNode);
+            parsePlane(planeNode);
         }
 
 
@@ -66,17 +54,17 @@ protected:
 
 
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
-    void processOtherOptions(const ticpp::Node * rootNode) {
-        LOG(this->m_pSimulationLog,"---> Process MPISettings..."<<std::endl;);
-        processMPISettings(rootNode);
+    void parseOtherOptions(const ticpp::Node * rootNode) {
+        LOG(this->m_pSimulationLog,"---> parse MPISettings..."<<std::endl;);
+        parseMPISettings(rootNode);
 
 
-        processSceneVisualizationSettings(rootNode);
+        parseSceneVisualizationSettings(rootNode);
 
     }
 
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
-    void processMesh(ticpp::Node * meshNode ) {
+    void parseMesh(ticpp::Node * meshNode ) {
 
         static int nodeCounter = 0;
         static int entityCounter = 0;
@@ -87,19 +75,19 @@ protected:
         Vector3 scale;
         if(meshNode->ToElement()->HasAttribute("scaleLikeGeometry")) {
             if(!Utilities::stringToType<bool>(scaleLikeGeometry, meshNode->ToElement()->GetAttribute("scaleLikeGeometry"))) {
-                throw ticpp::Exception("---> String conversion in processMesh: scaleWithGeometry failed");
+                throw ticpp::Exception("---> String conversion in parseMesh: scaleWithGeometry failed");
             }
         }
         if(!scaleLikeGeometry){
             if(!Utilities::stringToVector3<PREC>(scale, meshNode->ToElement()->GetAttribute("scale"))) {
-                throw ticpp::Exception("---> String conversion in processMesh: scale failed");
+                throw ticpp::Exception("---> String conversion in parseMesh: scale failed");
             }
         }
 
 
         ticpp::Node * rendering =  meshNode->FirstChild("Rendering", false);
         RenderSettings renderSettings;
-        processRenderSettings(rendering, renderSettings);
+        parseRenderSettings(rendering, renderSettings);
 
         std::string type = meshNode->ToElement()->GetAttribute("type");
         if( type == "permutate" || type == "uniform") {
@@ -113,7 +101,7 @@ protected:
                 throw ticpp::Exception("---> No Material Node found in Mesh!");
             }
         } else {
-            throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'processMesh' has no implementation in the parser"));
+            throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'parseMesh' has no implementation in the parser"));
         }
 
 
@@ -142,14 +130,14 @@ protected:
                 if(this->m_bodyScalesGroup[i](0)<=0 &&
                    this->m_bodyScalesGroup[i](1)<=0 &&
                    this->m_bodyScalesGroup[i](2)<=0) {
-                    throw ticpp::Exception("---> processMesh:: Scale for Mesh: " + meshName.string() +"is zero or smaller!");
+                    throw ticpp::Exception("---> parseMesh:: Scale for Mesh: " + meshName.string() +"is zero or smaller!");
                 }
                 sceneNodeScale->setScale(this->m_bodyScalesGroup[i](0),this->m_bodyScalesGroup[i](1),this->m_bodyScalesGroup[i](2));
             } else {
                 if(scale(0)<=0 &&
                    scale(1)<=0 &&
                    scale(2)<=0) {
-                    throw ticpp::Exception("---> processMesh:: Scale for Mesh: " + meshName.string() + "is zero or smaller!");
+                    throw ticpp::Exception("---> parseMesh:: Scale for Mesh: " + meshName.string() + "is zero or smaller!");
                 }
                 sceneNodeScale->setScale(scale(0),scale(1),scale(2));
             }
@@ -184,7 +172,7 @@ protected:
 
     }
 
-    void processPlane(ticpp::Node * planeNode ) {
+    void parsePlane(ticpp::Node * planeNode ) {
 
         static int nodeCounter = 0;
         static int entityCounter = 0;
@@ -193,12 +181,12 @@ protected:
         Vector3 scale;
         if(planeNode->ToElement()->HasAttribute("scaleLikeGeometry")) {
             if(!Utilities::stringToType<bool>(scaleLikeGeometry, planeNode->ToElement()->GetAttribute("scaleLikeGeometry"))) {
-                throw ticpp::Exception("---> String conversion in processPlane: scaleWithGeometry failed");
+                throw ticpp::Exception("---> String conversion in parsePlane: scaleWithGeometry failed");
             }
         }
         if(!scaleLikeGeometry){
             if(!Utilities::stringToVector3<PREC>(scale, planeNode->ToElement()->GetAttribute("scale"))) {
-                throw ticpp::Exception("---> String conversion  in processPlane: scale failed");
+                throw ticpp::Exception("---> String conversion  in parsePlane: scale failed");
             }
         }
 
@@ -206,28 +194,28 @@ protected:
         Vector2 subDivs = Vector2::Ones();
         if(planeNode->ToElement()->HasAttribute("subDivisions")) {
             if(!Utilities::stringToVector2<PREC>(subDivs, planeNode->ToElement()->GetAttribute("subDivisions"))) {
-                throw ticpp::Exception("---> String conversion in processPlane: subDivisions failed");
+                throw ticpp::Exception("---> String conversion in parsePlane: subDivisions failed");
             }
         }
 
         Vector3 normal; normal(0)=0; normal(1)=0; normal(2)=1;
         if(planeNode->ToElement()->HasAttribute("normal")) {
             if(!Utilities::stringToVector3<PREC>(normal, planeNode->ToElement()->GetAttribute("normal"))) {
-                throw ticpp::Exception("---> String conversion in processPlane: normal failed");
+                throw ticpp::Exception("---> String conversion in parsePlane: normal failed");
             }
         }
 
         PREC dist=0;
         if(planeNode->ToElement()->HasAttribute("distance")) {
             if(!Utilities::stringToType<PREC>(dist, planeNode->ToElement()->GetAttribute("distance"))) {
-                throw ticpp::Exception("---> String conversion in processPlane: distance failed");
+                throw ticpp::Exception("---> String conversion in parsePlane: distance failed");
             }
         }
 
         Vector2 tile; tile(0)=1; tile(1)=1;
         if(planeNode->ToElement()->HasAttribute("tileTexture")) {
             if(!Utilities::stringToVector2<PREC>(tile, planeNode->ToElement()->GetAttribute("tileTexture"))) {
-                throw ticpp::Exception("---> String conversion in processPlane: tileTexture failed");
+                throw ticpp::Exception("---> String conversion in parsePlane: tileTexture failed");
             }
         }
 
@@ -235,7 +223,7 @@ protected:
 
         ticpp::Node * rendering =  planeNode->FirstChild("Rendering", false);
         RenderSettings renderSettings;
-        processRenderSettings(rendering, renderSettings);
+        parseRenderSettings(rendering, renderSettings);
 
         //Distribution Type
         std::string type = planeNode->ToElement()->GetAttribute("type");
@@ -250,7 +238,7 @@ protected:
                 throw ticpp::Exception("---> No Material Node found in Plane!");
             }
         } else {
-            throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'processPlane' has no implementation in the parser"));
+            throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'parsePlane' has no implementation in the parser"));
         }
 
 
@@ -324,7 +312,7 @@ protected:
 
 
 
-    void processRenderSettings(ticpp::Node * rendering, RenderSettings & settings){
+    void parseRenderSettings(ticpp::Node * rendering, RenderSettings & settings){
 
         settings.attachAxis = false;
         settings.axesSize = 1;
@@ -333,46 +321,46 @@ protected:
             ticpp::Element* renderEl = rendering->ToElement();
             if(renderEl->HasAttribute("attachAxis")) {
                 if(!Utilities::stringToType<bool>(settings.attachAxis, renderEl->GetAttribute("attachAxis"))) {
-                    throw ticpp::Exception("---> String conversion of in processMesh: attachAxis failed");
+                    throw ticpp::Exception("---> String conversion of in parseMesh: attachAxis failed");
                 }
             }
             if(renderEl->HasAttribute("axesSize")) {
                 if(!Utilities::stringToType<double>(settings.axesSize, renderEl->GetAttribute("axesSize"))) {
-                    throw ticpp::Exception("---> String conversion of in processMesh: axesSize failed");
+                    throw ticpp::Exception("---> String conversion of in parseMesh: axesSize failed");
                 }
             }
 
 
             if(renderEl->HasAttribute("shadowsEnabled")) {
                 if(!Utilities::stringToType<bool>(settings.shadowsEnabled, renderEl->GetAttribute("shadowsEnabled"))) {
-                    throw ticpp::Exception("---> String conversion of in processMesh: shadowsEnabled failed");
+                    throw ticpp::Exception("---> String conversion of in parseMesh: shadowsEnabled failed");
                 }
             }
         }
 
     }
 
-    void processMPISettings(const ticpp::Node * rootNode) {
+    void parseMPISettings(const ticpp::Node * rootNode) {
 
         ticpp::Node * mpiSettings = rootNode->FirstChild("MPISettings",false);
         if(mpiSettings) {
 
-            ticpp::Node *topo = mpiSettings->FirstChild("ProcessTopology",true);
+            ticpp::Node *topo = mpiSettings->FirstChild("parseTopology",true);
             ticpp::Element *topoEl = topo->ToElement();
 
             std::string type = topoEl->GetAttribute("type");
             if(type=="grid") {
                 Vector3 minPoint, maxPoint;
                 if(!Utilities::stringToVector3<PREC>(minPoint,  topoEl->GetAttribute("minPoint"))) {
-                    throw ticpp::Exception("---> String conversion in processMPISettings: minPoint failed");
+                    throw ticpp::Exception("---> String conversion in parseMPISettings: minPoint failed");
                 }
                 if(!Utilities::stringToVector3<PREC>(maxPoint,  topoEl->GetAttribute("maxPoint"))) {
-                    throw ticpp::Exception("---> String conversion in processMPISettings: maxPoint failed");
+                    throw ticpp::Exception("---> String conversion in parseMPISettings: maxPoint failed");
                 }
 
                 MyMatrix<unsigned int>::Vector3 dim;
                 if(!Utilities::stringToVector3<unsigned int>(dim,  topoEl->GetAttribute("dimension"))) {
-                    throw ticpp::Exception("---> String conversion in processMPISettings: dimension failed");
+                    throw ticpp::Exception("---> String conversion in parseMPISettings: dimension failed");
                 }
 
                 Vector3 extent;
@@ -468,12 +456,12 @@ protected:
 
 
             } else {
-                throw ticpp::Exception("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
+                throw ticpp::Exception("---> String conversion in MPISettings:parseTopology:type failed: not a valid setting");
             }
         }
 
     }
-    void processSceneVisualizationSettings(const ticpp::Node * rootNode) {
+    void parseSceneVisualizationSettings(const ticpp::Node * rootNode) {
 
         ticpp::Node * sceneVisSettings = rootNode->FirstChild("SceneSettings",false)->FirstChild("Visualization",false);
         if(sceneVisSettings) {

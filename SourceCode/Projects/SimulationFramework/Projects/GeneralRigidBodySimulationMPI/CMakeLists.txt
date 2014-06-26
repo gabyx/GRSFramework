@@ -64,19 +64,10 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
     ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
-    ${COMMONSOURCE_DIR}/include/Common/MeshData.hpp
     ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
     ${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/CartesianGrid.hpp
-    ${COMMONSOURCE_DIR}/include/Common/MakeCoordinateSystem.hpp
-    ${COMMONSOURCE_DIR}/include/Common/VectorToSkewMatrix.hpp
-    ${COMMONSOURCE_DIR}/include/Common/MatrixHelpers.hpp
-    ${COMMONSOURCE_DIR}/include/Common/QuaternionHelpers.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
     ${COMMONSOURCE_DIR}/include/Common/TypenameComparision.hpp
-    ${COMMONSOURCE_DIR}/include/Common/MultiBodySimFile.hpp
-    ${COMMONSOURCE_DIR}/include/Common/MultiBodySimFilePart.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/MultiBodySimFileMPI.hpp
     ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPICommunicatorId.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/MPIMessageTag.hpp
@@ -94,16 +85,21 @@ SET(COMMON_SRC
     ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
     ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
     ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
-    ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFile.cpp
-    ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFilePart.cpp
-    ${PROJECT_SOURCE_DIR}/src/Common/MultiBodySimFileMPI.cpp
     ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
-    ${PROJECT_SOURCE_DIR}/src/Common/CartesianGrid.cpp
     ${COMMONSOURCE_DIR}/src/Common/BitCount.cpp
     
 )
 
 SET(DYNAMICS_INC
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/MultiBodySimFile.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/MultiBodySimFilePart.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MultiBodySimFileMPI.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/MeshData.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/CartesianGrid.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/MakeCoordinateSystem.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/VectorToSkewMatrix.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/MatrixHelpers.hpp
+    ${COMMONSOURCE_DIR}/include/Dynamics/General/QuaternionHelpers.hpp
     ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourMap.hpp
@@ -167,6 +163,10 @@ SET(DYNAMICS_INC
     ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
 )
 SET(DYNAMICS_SRC
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/General/CartesianGrid.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/General/MultiBodySimFile.cpp
+    ${COMMONSOURCE_DIR}/src/Dynamics/General/MultiBodySimFilePart.cpp
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/General/MultiBodySimFileMPI.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Collider.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
     ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/BoxGeometry.cpp

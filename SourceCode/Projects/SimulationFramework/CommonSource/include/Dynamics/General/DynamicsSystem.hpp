@@ -27,7 +27,7 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    DynamicsSystem(){};
+    DynamicsSystem();
     ~DynamicsSystem();
 
     // General related variables

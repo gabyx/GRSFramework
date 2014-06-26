@@ -43,7 +43,7 @@
 
 #include "PrintGeometryDetails.hpp"
 
-
+#include "Range.hpp"
 
 class GetScaleOfGeomVisitor : public boost::static_visitor<> {
 public:
@@ -73,77 +73,47 @@ public:
     DEFINE_CONFIG_TYPES
     typedef DynamicsSystemType::RigidBodyStatesContainerType RigidBodyStatesContainerType;
 
+    typedef Range<RigidBodyIdType> BodyRange;
 
     SceneParser(std::shared_ptr<DynamicsSystemType> pDynSys)
-        : m_pDynSys(pDynSys) {
-
-        m_pSimulationLog = nullptr;
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
-        ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
-
-        m_bParseDynamics = true;
-        m_nSimBodies = 0;
+        : m_pDynSys(pDynSys)
+    {
+        setStandartValues();
     }
 
-    virtual bool parseScene( boost::filesystem::path file ) {
-        using namespace std;
-        m_currentParseFilePath = file;
-        m_currentParseFileDir = m_currentParseFilePath.parent_path();
 
-        m_pSimulationLog->logMessage("---> Parsing Scene...");
-        LOG( m_pSimulationLog, "---> Scene Input file: "  << file.string() <<std::endl; );
+    template<typename BodyRangeType>
+    bool parseScene( const boost::filesystem::path & file,
+                             BodyRangeType&& range,
+                             bool parseDynamicProperties = true,
+                             bool parseSceneSettings = true)
+    {
+        m_parseBodies = true;
+        m_useBodyRange = true;
+        m_bodyRange = std::forward<BodyRangeType>(range);
+        m_parseDynamicProperties = parseDynamicProperties;
+        m_parseSceneSettings = parseSceneSettings;
 
-        if(!boost::filesystem::exists(m_currentParseFilePath)) {
-            ERRORMSG("Scene Input file does not exist!");
+        // If the range of bodies is empty, dont parse bodies and dont use the m_bodyRange
+        if(m_bodyRange.empty() ){
+            m_parseBodies = false;
+            m_useBodyRange = false;
+            m_parseDynamicProperties = false;
         }
+        parseSceneIntern(file);
+    }
 
-
-        //Reset all variables
-        m_globalMaxGroupId = 0;
-        m_nSimBodies = 0;
-        m_nBodies = 0;
-        m_bodyListGroup.clear();
-        m_bodyScalesGroup.clear();
-        m_initStatesGroup.clear();
-
-
-        try {
-            m_xmlDoc.LoadFile(m_currentParseFilePath.string());
-
-            m_pSimulationLog->logMessage("---> File successfully loaded ...");
-
-            m_pSimulationLog->logMessage("---> Try to parse the scene ...");
-
-            // Start off with the gravity!
-            m_xmlRootNode = m_xmlDoc.FirstChild("DynamicsSystem");
-            if(m_xmlRootNode) {
-                ticpp::Node *node = nullptr;
-
-                node = m_xmlRootNode->FirstChild("SceneSettings");
-                processSceneSettings(node);
-
-                node = m_xmlRootNode->FirstChild("SceneObjects");
-                processSceneObjects(node);
-
-                node = m_xmlRootNode->FirstChild("SceneSettings");
-                processSceneSettings2(node);
-
-                processOtherOptions(m_xmlRootNode);
-
-            } else {
-                m_pSimulationLog->logMessage("---> No DynamicsSystem Node found in XML ...");
-                return false;
-            }
-
-        } catch(ticpp::Exception& ex) {
-            LOG(m_pSimulationLog,  "Scene XML error: "  << ex.what() <<std::endl;);
-            ERRORMSG( "Scene XML error: "  << ex.what() <<std::endl );
-        }
-
-
-        //ASSERTMSG(false,"XML parsing...");
-
-        return true;
+    // Parses all bodies
+    bool parseScene( const boost::filesystem::path & file,
+                             bool parseBodies = true,
+                             bool parseDynamicProperties = true,
+                             bool parseSceneSettings = true)
+    {
+        m_useBodyRange = false;
+        m_parseBodies = parseBodies;
+        m_parseDynamicProperties = parseDynamicProperties;
+        m_parseSceneSettings = parseSceneSettings;
+        parseSceneIntern(file);
     }
 
     virtual void cleanUp() {
@@ -171,23 +141,101 @@ public:
 protected:
 
     SceneParser() {
+        setStandartValues();
+    }
+
+    void setStandartValues(){
+
         m_pSimulationLog = nullptr;
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
         ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
-        m_bParseDynamics = false;
+
         m_nSimBodies = 0;
         m_nBodies = 0;
+        m_globalMaxGroupId = 0;
+
+        m_parseDynamicProperties = true;
+        m_parseSceneSettings = true;
+        m_parseBodies = true;
+
     }
 
-    virtual void processOtherOptions(const ticpp::Node *rootNode) {
+    virtual void parseSceneIntern(const boost::filesystem::path & file){
+
+        if(m_parseDynamicProperties && !m_pDynSys){
+            ERRORMSG("You try to parse the dynamics part of the bodies, but m_pDynSys is nullptr!" <<
+                     "Please set it in the appropriate constructor of the SceneParser")
+        }
+
+        using namespace std;
+        m_currentParseFilePath = file;
+        m_currentParseFileDir = m_currentParseFilePath.parent_path();
+
+        LOG( m_pSimulationLog, "---> Parsing Scene..." << std::endl;);
+        LOG( m_pSimulationLog, "---> Scene Input file: "  << file.string() <<std::endl; );
+
+        if(!boost::filesystem::exists(m_currentParseFilePath)) {
+            ERRORMSG("Scene Input file does not exist!");
+        }
+
+
+        //Reset all variables
+        m_globalMaxGroupId = 0;
+        m_nSimBodies = 0;
+        m_nBodies = 0;
+        m_bodyListGroup.clear();
+        m_bodyScalesGroup.clear();
+        m_initStatesGroup.clear();
+
+
+        try {
+            m_xmlDoc.LoadFile(m_currentParseFilePath.string());
+
+            LOG(m_pSimulationLog, "---> File successfully loaded ..."<<std::endl;);
+
+            LOG(m_pSimulationLog, "---> Try to parse the scene ..."<<std::endl;);
+
+            // Start off with the gravity!
+            m_xmlRootNode = m_xmlDoc.FirstChild("DynamicsSystem");
+            if(m_xmlRootNode) {
+                ticpp::Node *node = nullptr;
+
+
+                node = m_xmlRootNode->FirstChild("SceneSettings");
+                parseSceneSettings(node);
+
+                node = m_xmlRootNode->FirstChild("SceneObjects");
+                parseSceneObjects(node);
+
+                node = m_xmlRootNode->FirstChild("SceneSettings");
+                parseSceneSettings2(node);
+
+                parseOtherOptions(m_xmlRootNode);
+
+            } else {
+                LOG(m_pSimulationLog, "---> No DynamicsSystem Node found in XML ..." <<std::endl;);
+                ERRORMSG("---> No DynamicsSystem Node found in XML ..."<<std::endl);
+            }
+
+        } catch(ticpp::Exception& ex) {
+            LOG(m_pSimulationLog,  "Scene XML error: "  << ex.what() <<std::endl);
+            ERRORMSG( "Scene XML error: "  << ex.what() <<std::endl );
+        }
+
+    }
+
+    virtual void parseOtherOptions(const ticpp::Node *rootNode) {
         /* Do nothing, here for derived classes! */
     }
 
-    virtual void processSceneSettings( ticpp::Node *sceneSettings ) {
+    virtual void parseSceneSettings( ticpp::Node *sceneSettings ) {
+        if(!m_parseSceneSettings){
+            LOG(m_pSimulationLog,"---> Skip SceneSettings"<<std::endl;);
+            return;
+        }
+        LOG(m_pSimulationLog,"---> Parse SceneSettings..."<<std::endl;);
 
-        LOG(m_pSimulationLog,"---> Process SceneSettings..."<<std::endl;);
-
-        if(m_bParseDynamics) {
+        if(m_parseDynamicProperties) {
 
             ticpp::Element *gravityElement = sceneSettings->FirstChild("Gravity",true)->ToElement();
             m_pDynSys->m_gravity = gravityElement->GetAttribute<double>("value");
@@ -355,39 +403,39 @@ protected:
             m_pDynSys->setSettings(recorderSettings);
 
             // Parse ContactParameter Map
-            processContactParameterMap(sceneSettings);
+            parseContactParameterMap(sceneSettings);
 
 
-        } // m_bparseDynamics
+        } // m_parseDynamicProperties
 
         // Parse external forces
-        if(m_bParseDynamics) {
-            processExternalForces(sceneSettings);
+        if(m_parseDynamicProperties) {
+            parseExternalForces(sceneSettings);
         }
 
         // Parse Global Geometries (also in playback manager)!
-        processGlobalGeometries(sceneSettings);
+        parseGlobalGeometries(sceneSettings);
 
     }
 
-    virtual void processSceneSettings2( ticpp::Node *sceneSettings ) {
+    virtual void parseSceneSettings2( ticpp::Node *sceneSettings ) {
 
-        LOG(m_pSimulationLog,"---> Process SceneSettings2..."<<std::endl;);
+        LOG(m_pSimulationLog,"---> Parse SceneSettings2..."<<std::endl;);
 
-        if(m_bParseDynamics) {
-            LOG(m_pSimulationLog,"---> Process GlobalInitialCondition..."<<std::endl;);
-            processGlobalInitialCondition(sceneSettings);
+        if(m_parseDynamicProperties) {
+            LOG(m_pSimulationLog,"---> Parse GlobalInitialCondition..."<<std::endl;);
+            parseGlobalInitialCondition(sceneSettings);
         }
     }
 
-    virtual void processContactParameterMap(ticpp::Node *sceneSettings) {
+    virtual void parseContactParameterMap(ticpp::Node *sceneSettings) {
 
 
         ticpp::Node *paramMap = sceneSettings->FirstChild("ContactParameterMap",false);
 
 
         if(paramMap) {
-            LOG(m_pSimulationLog,"---> Process ContactParameterMap..."<<std::endl;);
+            LOG(m_pSimulationLog,"---> Parse ContactParameterMap..."<<std::endl;);
 
             ticpp::Element * element = paramMap->FirstChild("ContactParameterStandard",true)->ToElement();
             if(element) {
@@ -487,7 +535,7 @@ protected:
         }
     }
 
-    virtual void processGlobalGeometries(ticpp::Node *sceneSettings) {
+    virtual void parseGlobalGeometries(ticpp::Node *sceneSettings) {
 
         ticpp::Node *globalGeom = sceneSettings->FirstChild("GlobalGeometries",false);
         if(globalGeom) {
@@ -495,31 +543,31 @@ protected:
             for ( child = child.begin( globalGeom ); child != child.end(); child++ ) {
 
                 if( child->Value() == "Geometry") {
-                    processGeometry( &(*child) , true);
+                    parseGeometry( &(*child) , true);
                 }
             }
         }
     }
 
-    virtual void processExternalForces( ticpp::Node *sceneSettings ) {
+    virtual void parseExternalForces( ticpp::Node *sceneSettings ) {
         ticpp::Node *externalForces = sceneSettings->FirstChild("ExternalForces",false);
         if(externalForces ) {
-            LOG(m_pSimulationLog,"---> Process ExternalForces ..."<<std::endl;);
+            LOG(m_pSimulationLog,"---> Parse ExternalForces ..."<<std::endl;);
             ticpp::Iterator< ticpp::Node > child;
             for ( child = child.begin( externalForces ); child != child.end(); child++ ) {
                 if( child->Value() == "ForceField") {
                     ticpp::Element* elem = (&(*child))->ToElement();
-                    processForceField( elem );
+                    parseForceField( elem );
                 }
             }
         }
     }
 
-    void processForceField( ticpp::Element * forceField) {
+    virtual void parseForceField( ticpp::Element * forceField) {
 
         bool enabled = false;
         if(!Utilities::stringToType<bool>(enabled, forceField->GetAttribute("enabled"))) {
-            throw ticpp::Exception("---> String conversion in processForceField: enable failed");
+            throw ticpp::Exception("---> String conversion in parseForceField: enable failed");
         }
         if(enabled) {
 
@@ -527,11 +575,11 @@ protected:
 
             std::vector<RigidBodyIdType > applyList;
             if( !(apply=="all" || apply=="All" || apply=="ALL" )) {
-                //process all applyTo bodies
+                //parse all applyTo bodies
             } else if (apply=="all" || apply=="All" || apply=="ALL" ) {
                 // do nothing
             } else {
-                throw ticpp::Exception("---> String conversion in processForceField: applyTo failed");
+                throw ticpp::Exception("---> String conversion in parseForceField: applyTo failed");
             }
 
             std::string type = forceField->GetAttribute("type");
@@ -539,43 +587,43 @@ protected:
 
                 unsigned int seed;
                 if(!Utilities::stringToType<unsigned int>(seed, forceField->GetAttribute("seed"))) {
-                    throw ticpp::Exception("---> String conversion in processForceField: seed failed");
+                    throw ticpp::Exception("---> String conversion in parseForceField: seed failed");
                 }
                 PREC boostTime;
                 if(!Utilities::stringToType<PREC>(boostTime, forceField->GetAttribute("boostTime"))) {
-                    throw ticpp::Exception("---> String conversion in processForceField: boostTime failed");
+                    throw ticpp::Exception("---> String conversion in parseForceField: boostTime failed");
                 }
                 PREC pauseTime;
                 if(!Utilities::stringToType<PREC>(pauseTime, forceField->GetAttribute("pauseTime"))) {
-                    throw ticpp::Exception("---> String conversion in processForceField: pauseTime failed");
+                    throw ticpp::Exception("---> String conversion in parseForceField: pauseTime failed");
                 }
 
                 PREC startTime;
                 if(!Utilities::stringToType<PREC>(startTime, forceField->GetAttribute("startTime"))) {
-                    throw ticpp::Exception("---> String conversion in processForceField: startTime failed");
+                    throw ticpp::Exception("---> String conversion in parseForceField: startTime failed");
                 }
 
                 PREC endTime;
                 if(!Utilities::stringToType<PREC>(endTime, forceField->GetAttribute("endTime"))) {
-                    throw ticpp::Exception("---> String conversion in processForceField: endTime failed");
+                    throw ticpp::Exception("---> String conversion in parseForceField: endTime failed");
                 }
                 PREC amplitude;
                 if(!Utilities::stringToType<PREC>(amplitude, forceField->GetAttribute("amplitude"))) {
-                    throw ticpp::Exception("---> String conversion in processForceField: amplitude failed");
+                    throw ticpp::Exception("---> String conversion in parseForceField: amplitude failed");
                 }
 
                 Vector3 boxMin;
                 if(!Utilities::stringToVector3<PREC>(boxMin, forceField->GetAttribute("minPoint"))) {
-                    throw ticpp::Exception("---> String conversion in processForceField: boxMin failed");
+                    throw ticpp::Exception("---> String conversion in parseForceField: boxMin failed");
                 }
                 Vector3 boxMax;
                 if(!Utilities::stringToVector3<PREC>(boxMax, forceField->GetAttribute("maxPoint"))) {
-                    throw ticpp::Exception("---> String conversion in processForceField: boxMax failed");
+                    throw ticpp::Exception("---> String conversion in parseForceField: boxMax failed");
                 }
 
                 bool randomOn;
                 if(!Utilities::stringToType<bool>(randomOn, forceField->GetAttribute("randomOn"))) {
-                    throw ticpp::Exception("---> String conversion in processForceField: randomOn failed");
+                    throw ticpp::Exception("---> String conversion in parseForceField: randomOn failed");
                 }
 
 
@@ -592,12 +640,12 @@ protected:
                     )
                 );
             } else {
-                throw ticpp::Exception("---> String conversion in processForceField: applyTo failed");
+                throw ticpp::Exception("---> String conversion in parseForceField: applyTo failed");
             }
         }
     }
 
-    virtual void processGlobalInitialCondition( ticpp::Node *sceneSettings) {
+    virtual void parseGlobalInitialCondition( ticpp::Node *sceneSettings) {
         ticpp::Node *initCond = sceneSettings->FirstChild("GlobalInitialCondition",false);
         if(initCond) {
             ticpp::Element *elem = initCond->ToElement();
@@ -657,16 +705,19 @@ protected:
     }
 
 
-    virtual void processSceneObjects( ticpp::Node *sceneObjects) {
-
-        LOG(m_pSimulationLog,"---> Process SceneObjects ..."<<std::endl;);
+    virtual void parseSceneObjects( ticpp::Node *sceneObjects) {
+        if(!m_parseBodies){
+            LOG(m_pSimulationLog,"---> Skip SceneObjects"<<std::endl;);
+            return;
+        }
+        LOG(m_pSimulationLog,"---> Parse SceneObjects ..."<<std::endl;);
 
         ticpp::Iterator< ticpp::Node > child;
 
         for ( child = child.begin( sceneObjects ); child != child.end(); child++ ) {
 
             if( child->Value() == "RigidBodies") {
-                processRigidBodies( &(*child) );
+                parseRigidBodies( &(*child) );
             }
 
         }
@@ -677,9 +728,9 @@ protected:
 
     }
 
-    virtual void processRigidBodies( ticpp::Node * rigidbodies ) {
+    virtual void parseRigidBodies( ticpp::Node * rigidbodies ) {
 
-        LOG(m_pSimulationLog,"---> Process RigidBodies ..."<<std::endl;);
+        LOG(m_pSimulationLog,"---> Parse RigidBodies ..."<<std::endl;);
         ticpp::Element* rigidBodiesEl = rigidbodies->ToElement();
 
         //Clear current body list;
@@ -726,19 +777,19 @@ protected:
 
 
         ticpp::Node * geometryNode = rigidbodies->FirstChild("Geometry");
-        processGeometry(geometryNode);
+        parseGeometry(geometryNode);
 
 
 
         ticpp::Node * dynPropNode = rigidbodies->FirstChild("DynamicProperties");
-        processDynamicProperties(dynPropNode);
+        parseDynamicProperties(dynPropNode);
 
 
 
         //Copy the pointers!
 
         if(m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
-            if(m_bParseDynamics) {
+            if(m_parseDynamicProperties) {
                 LOG(m_pSimulationLog,"---> Copy Simulated RigidBody References to DynamicSystem ..."<<std::endl;);
 
                 if(! m_pDynSys->m_SimBodies.addBodies(m_bodyListGroup.begin(),m_bodyListGroup.end())) {
@@ -754,7 +805,7 @@ protected:
             m_nSimBodies += instances;
             m_nBodies += instances;
         } else if(m_eBodiesState == RigidBodyType::BodyState::STATIC) {
-            if(m_bParseDynamics) {
+            if(m_parseDynamicProperties) {
                 LOG(m_pSimulationLog,"---> Copy Static RigidBody References to DynamicSystem ..."<<std::endl;);
 
                 if(! m_pDynSys->m_Bodies.addBodies(m_bodyListGroup.begin(),m_bodyListGroup.end())) {
@@ -773,28 +824,28 @@ protected:
 
 
         ticpp::Node * visualizationNode = rigidbodies->FirstChild("Visualization");
-        processVisualization( visualizationNode);
+        parseVisualization( visualizationNode);
 
     }
 
-    virtual void processGeometry( ticpp::Node * geometryNode, bool addToGlobalGeoms = false) {
-        LOG(m_pSimulationLog,"---> Process Geometry ..."<<std::endl;);
+    virtual void parseGeometry( ticpp::Node * geometryNode, bool addToGlobalGeoms = false) {
+        LOG(m_pSimulationLog,"---> Parse Geometry ..."<<std::endl;);
         if(geometryNode->FirstChild()->Value() == "Sphere") {
-            processSphereGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
+            parseSphereGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
         } else if(geometryNode->FirstChild()->Value() == "Halfspace") {
-            processHalfspaceGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
+            parseHalfspaceGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
         } else if(geometryNode->FirstChild()->Value() == "Mesh") {
-            processMeshGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
+            parseMeshGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
         } else if(geometryNode->FirstChild()->Value() == "Box") {
-            processBoxGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
+            parseBoxGeometry( geometryNode->FirstChild()->ToElement(),  addToGlobalGeoms);
         } else if(geometryNode->FirstChild()->Value() == "GlobalGeomId") {
-            processGlobalGeomId(geometryNode->FirstChild()->ToElement());
+            parseGlobalGeomId(geometryNode->FirstChild()->ToElement());
         } else {
             throw ticpp::Exception("---> The geometry '" + std::string(geometryNode->FirstChild()->Value()) + std::string("' has no implementation in the parser"));
         }
     }
 
-    virtual void processSphereGeometry( ticpp::Element * sphere, bool addToGlobalGeoms = false) {
+    virtual void parseSphereGeometry( ticpp::Element * sphere, bool addToGlobalGeoms = false) {
         std::string type = sphere->GetAttribute("distribute");
         if(type == "uniform") {
 
@@ -827,23 +878,23 @@ protected:
         } else if(type == "random") {
             double minRadius;
             if(!Utilities::stringToType<double>(minRadius,sphere->GetAttribute("minRadius"))) {
-                throw ticpp::Exception("---> String conversion in processSphereGeometry: minRadius failed");
+                throw ticpp::Exception("---> String conversion in parseSphereGeometry: minRadius failed");
             }
             if( minRadius <= 0) {
-                throw ticpp::Exception("---> In processSphereGeometry: minRadius to small!");
+                throw ticpp::Exception("---> In parseSphereGeometry: minRadius to small!");
             }
 
             double maxRadius;
             if(!Utilities::stringToType<double>(maxRadius,sphere->GetAttribute("maxRadius"))) {
-                throw ticpp::Exception("---> String conversion in processSphereGeometry: minRadius failed");
+                throw ticpp::Exception("---> String conversion in parseSphereGeometry: minRadius failed");
             }
             if( maxRadius <= minRadius) {
-                throw ticpp::Exception("---> In processSphereGeometry: maxRadius smaller or equal to minRadius!");
+                throw ticpp::Exception("---> In parseSphereGeometry: maxRadius smaller or equal to minRadius!");
             }
 
             unsigned int seed;
             if(!Utilities::stringToType<unsigned int>(seed,sphere->GetAttribute("seed"))) {
-                throw ticpp::Exception("---> String conversion in processSphereGeometry: seed failed");
+                throw ticpp::Exception("---> String conversion in parseSphereGeometry: seed failed");
             }
 
             typedef boost::mt19937  RNG;
@@ -903,7 +954,7 @@ protected:
 
     }
 
-    virtual void processHalfspaceGeometry( ticpp::Element * halfspace, bool addToGlobalGeoms = false) {
+    virtual void parseHalfspaceGeometry( ticpp::Element * halfspace, bool addToGlobalGeoms = false) {
         std::string type = halfspace->GetAttribute("distribute");
         if(type == "uniform") {
 
@@ -940,7 +991,7 @@ protected:
         }
     }
 
-    virtual void processBoxGeometry( ticpp::Element * box, bool addToGlobalGeoms = false) {
+    virtual void parseBoxGeometry( ticpp::Element * box, bool addToGlobalGeoms = false) {
         std::string type = box->GetAttribute("distribute");
         if(type == "uniform") {
 
@@ -984,7 +1035,7 @@ protected:
     }
 
 
-    virtual void processMeshGeometry( ticpp::Element * mesh, bool addToGlobalGeoms = false) {
+    virtual void parseMeshGeometry( ticpp::Element * mesh, bool addToGlobalGeoms = false) {
 
         std::shared_ptr<MeshGeometry > pMeshGeom;
 
@@ -992,7 +1043,7 @@ protected:
 
         bool bInstantiate;
         if(!Utilities::stringToType<bool>(bInstantiate,mesh->GetAttribute("useInstance"))) {
-            throw ticpp::Exception("---> String conversion in processMeshGeometry: useInstance failed");
+            throw ticpp::Exception("---> String conversion in parseMeshGeometry: useInstance failed");
         }
 
         std::string type = mesh->GetAttribute("distribute");
@@ -1006,35 +1057,35 @@ protected:
 
             Vector3 scale_factor;
             if(!Utilities::stringToVector3<PREC>(scale_factor, mesh->GetAttribute("scale"))) {
-                throw ticpp::Exception("---> String conversion in processMeshGeometry failed: scale");
+                throw ticpp::Exception("---> String conversion in parseMeshGeometry failed: scale");
             }
             if(scale_factor.norm()==0) {
-                throw ticpp::Exception("---> Wrong scale factor (=0) specified in processMeshGeometry!");
+                throw ticpp::Exception("---> Wrong scale factor (=0) specified in parseMeshGeometry!");
             }
 
             Vector3 trans;
             if(!Utilities::stringToVector3<PREC>(trans, mesh->GetAttribute("translation"))) {
-                throw ticpp::Exception("---> String conversion in processMeshGeometry: translation failed: ");
+                throw ticpp::Exception("---> String conversion in parseMeshGeometry: translation failed: ");
             }
 
             Vector3 axis;
             if(!Utilities::stringToVector3<PREC>(axis, mesh->GetAttribute("rotationAxis"))) {
-                throw ticpp::Exception("---> String conversion in processMeshGeometry: rotationAxis failed");
+                throw ticpp::Exception("---> String conversion in parseMeshGeometry: rotationAxis failed");
             }
 
             PREC angle;
 
             if(mesh->HasAttribute("angleDegree")) {
                 if(!Utilities::stringToType<PREC>(angle, mesh->GetAttribute("angleDegree"))) {
-                    throw ticpp::Exception("---> String conversion in processMeshGeometry: angleDegree failed");
+                    throw ticpp::Exception("---> String conversion in parseMeshGeometry: angleDegree failed");
                 }
                 angle = angle / 180 * M_PI;
             } else if(mesh->HasAttribute("angleRadian")) {
                 if(!Utilities::stringToType<PREC>(angle, mesh->GetAttribute("angleRadian"))) {
-                    throw ticpp::Exception("---> String conversion in processMeshGeometry: angleRadian  failed");
+                    throw ticpp::Exception("---> String conversion in parseMeshGeometry: angleRadian  failed");
                 }
             } else {
-                throw ticpp::Exception("---> No angle found in processMeshGeometry");
+                throw ticpp::Exception("---> No angle found in parseMeshGeometry");
             }
 
             Quaternion quat;
@@ -1046,9 +1097,9 @@ protected:
 
             importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
             importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_NORMALS | aiComponent_MESHES);
-            // And have it read the given file with some example postprocessing
+            // And have it read the given file with some example postparseing
             // Usually - if speed is not the most important aspect for you - you'll
-            // propably to request more postprocessing than we do in this example.
+            // propably to request more postparseing than we do in this example.
             const aiScene* scene = importer.ReadFile( fileName.string(),
                                    aiProcess_JoinIdenticalVertices  |
                                    aiProcess_SortByPType |
@@ -1056,7 +1107,7 @@ protected:
 
             // If the import failed, report it
             if(!scene) {
-                throw ticpp::Exception("---> File import failed in processMeshGeometry: for file" + fileName.string() );
+                throw ticpp::Exception("---> File import failed in parseMeshGeometry: for file" + fileName.string() );
             }
 
             MeshData * meshData = new MeshData();
@@ -1071,7 +1122,7 @@ protected:
             if(mesh->HasAttribute("writeToLog")) {
                 bool writeToLog;
                 if(!Utilities::stringToType<bool>(writeToLog, mesh->GetAttribute("writeToLog"))) {
-                    throw ticpp::Exception("---> String conversion in processMeshGeometry: angleDegree failed");
+                    throw ticpp::Exception("---> String conversion in parseMeshGeometry: angleDegree failed");
                 }
                 if(writeToLog) {
                     meshData->writeToLog(fileName.string(), m_pSimulationLog);
@@ -1103,21 +1154,21 @@ protected:
         }
     }
 
-    virtual void processGlobalGeomId( ticpp::Element * globalGeomId ) {
+    virtual void parseGlobalGeomId( ticpp::Element * globalGeomId ) {
 
         std::string distribute = globalGeomId->GetAttribute("distribute");
         if(distribute == "uniform") {
 
             unsigned int id;
             if(!Utilities::stringToType<unsigned int>(id,globalGeomId->GetAttribute("id"))) {
-                throw ticpp::Exception("---> String conversion in processGlobalGeomId: id failed");
+                throw ticpp::Exception("---> String conversion in parseGlobalGeomId: id failed");
             }
 
             typename DynamicsSystemType::GlobalGeometryMapType::iterator it = findGlobalGeomId(id);
             // it->second is the GeometryType in RigidBody
             if(it == this->getGlobalGeometryListRef().end()) {
                 LOG(m_pSimulationLog,"---> Geometry with id: " << id << " not found in global geometry list!" <<std::endl;);
-                throw ticpp::Exception("---> Geometry search in processGlobalGeomId: failed!");
+                throw ticpp::Exception("---> Geometry search in parseGlobalGeomId: failed!");
             }
 
             for(int i=0; i < m_bodyListGroup.size(); i++) {
@@ -1132,11 +1183,11 @@ protected:
 
             unsigned int startId;
             if(!Utilities::stringToType<unsigned int>(startId,globalGeomId->GetAttribute("startId"))) {
-                throw ticpp::Exception("---> String conversion in processGlobalGeomId: startId failed");
+                throw ticpp::Exception("---> String conversion in parseGlobalGeomId: startId failed");
             }
 
             if(startId == 0) {
-                throw ticpp::Exception("---> processGlobalGeomId: a global geometry startId: 0 is not allowed!");
+                throw ticpp::Exception("---> parseGlobalGeomId: a global geometry startId: 0 is not allowed!");
                 // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
             }
 
@@ -1145,8 +1196,8 @@ protected:
                 typename DynamicsSystemType::GlobalGeometryMapType::iterator it = findGlobalGeomId(startId+i);
                 // it->second is the GeometryType in RigidBody
                 if(it == this->getGlobalGeometryListRef().end()) {
-                    LOG(m_pSimulationLog,"---> processGlobalGeomId: Geometry with id: " << startId+i << " not found in global geometry list!" <<std::endl;);
-                    throw ticpp::Exception("---> processGlobalGeomId: Geometry search failed!");
+                    LOG(m_pSimulationLog,"---> parseGlobalGeomId: Geometry with id: " << startId+i << " not found in global geometry list!" <<std::endl;);
+                    throw ticpp::Exception("---> parseGlobalGeomId: Geometry search failed!");
                 }
 
                 GetScaleOfGeomVisitor vis(m_bodyScalesGroup[i]);
@@ -1162,17 +1213,17 @@ protected:
 
             unsigned int startId;
             if(!Utilities::stringToType<unsigned int>(startId,globalGeomId->GetAttribute("startId"))) {
-                throw ticpp::Exception("---> String conversion in processGlobalGeomId: startId failed");
+                throw ticpp::Exception("---> String conversion in parseGlobalGeomId: startId failed");
             }
 
             if(startId == 0) {
-                throw ticpp::Exception("---> processGlobalGeomId: a global geometry startId: 0 is not allowed!");
+                throw ticpp::Exception("---> parseGlobalGeomId: a global geometry startId: 0 is not allowed!");
                 // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
             }
 
             unsigned int endId;
             if(!Utilities::stringToType<unsigned int>(endId,globalGeomId->GetAttribute("endId"))) {
-                throw ticpp::Exception("---> String conversion in processGlobalGeomId: endId failed");
+                throw ticpp::Exception("---> String conversion in parseGlobalGeomId: endId failed");
             }
             if(startId > endId) {
                 throw ticpp::Exception("---> addToGlobalGeomList:  startId > endId  is not allowed!");
@@ -1180,7 +1231,7 @@ protected:
             }
             unsigned int seed;
             if(!Utilities::stringToType<unsigned int>(seed,globalGeomId->GetAttribute("seed"))) {
-                throw ticpp::Exception("---> String conversion in processGlobalGeomId: seed failed");
+                throw ticpp::Exception("---> String conversion in parseGlobalGeomId: seed failed");
             }
 
             typedef boost::mt19937  RNG;
@@ -1195,7 +1246,7 @@ protected:
                 // it->second is the GeometryType in RigidBody
                 if(it == this->getGlobalGeometryListRef().end()) {
                     LOG(m_pSimulationLog,"---> Geometry with id: " << id << " not found in global geometry list!" <<std::endl;);
-                    throw ticpp::Exception("---> Geometry search in processGlobalGeomId: failed!");
+                    throw ticpp::Exception("---> Geometry search in parseGlobalGeomId: failed!");
                 }
 
                 GetScaleOfGeomVisitor vis(m_bodyScalesGroup[i]);
@@ -1257,8 +1308,8 @@ protected:
         }
     }
 
-    virtual void processDynamicProperties( ticpp::Node * dynProp) {
-        LOG(m_pSimulationLog,"---> Process DynamicProperties ..."<<std::endl;);
+    virtual void parseDynamicProperties( ticpp::Node * dynProp) {
+        LOG(m_pSimulationLog,"---> Parse DynamicProperties ..."<<std::endl;);
         ticpp::Element * element = dynProp->FirstChild("DynamicState")->ToElement();
 
 
@@ -1281,18 +1332,18 @@ protected:
         }
 
         if(m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
-            processDynamicPropertiesSimulated(dynProp);
+            parseDynamicPropertiesSimulated(dynProp);
         } else if(m_eBodiesState == RigidBodyType::BodyState::STATIC) {
-            processDynamicPropertiesNotSimulated(dynProp);
+            parseDynamicPropertiesNotSimulated(dynProp);
         }
     }
 
 
-    virtual void processDynamicPropertiesSimulated( ticpp::Node * dynProp) {
+    virtual void parseDynamicPropertiesSimulated( ticpp::Node * dynProp) {
         ticpp::Element *element = nullptr;
         std::string distribute;
 
-        if(m_bParseDynamics) {
+        if(m_parseDynamicProperties) {
             // First allocate a new SolverDate structure
             for(int i=0; i < m_bodyListGroup.size(); i++) {
                 m_bodyListGroup[i]->m_pSolverData = new RigidBodySolverDataType();
@@ -1345,10 +1396,10 @@ protected:
 
         // InitialPosition ============================================================
         ticpp::Node * node = dynProp->FirstChild("InitialCondition",true);
-        processInitialCondition(node,true);
+        parseInitialCondition(node,true);
     }
 
-    virtual void processInitialCondition(ticpp::Node * initCondNode, bool simBodies) {
+    virtual void parseInitialCondition(ticpp::Node * initCondNode, bool simBodies) {
         ticpp::Element *element = nullptr;
         std::string distribute;
 
@@ -1374,15 +1425,15 @@ protected:
             distribute = element->GetAttribute("distribute");
 
             if(distribute == "linear") {
-                processInitialPositionLinear(element);
+                parseInitialPositionLinear(element);
             } else if(distribute == "grid") {
-                processInitialPositionGrid(element);
+                parseInitialPositionGrid(element);
             } else if(distribute == "posaxisangle") {
-                processInitialPositionPosAxisAngle(element);
+                parseInitialPositionPosAxisAngle(element);
             } else if(distribute == "transforms") {
-                processInitialPositionTransforms(element);
+                parseInitialPositionTransforms(element);
             } else if(distribute == "generalized") {
-                //processInitialPositionGeneralized(element);
+                //parseInitialPositionGeneralized(element);
             } else if(distribute == "none") {
                 // does nothing leaves the zero state pushed!
             } else {
@@ -1390,16 +1441,16 @@ protected:
             }
 
             //Initial Velocity
-            if(m_bParseDynamics || simBodies == false) {
+            if(m_parseDynamicProperties || simBodies == false) {
                 ticpp::Node * initVel = initCondNode->FirstChild("InitialVelocity",false);
                 if(initVel) {
                     element = initVel->ToElement();
                     distribute = element->GetAttribute("distribute");
 
                     if(distribute == "transrot") {
-                        processInitialVelocityTransRot(element);
+                        parseInitialVelocityTransRot(element);
                     } else if(distribute == "generalized") {
-                        //processInitialVelocityGeneralized(element);
+                        //parseInitialVelocityGeneralized(element);
                     } else if(distribute == "none") {
                         // does nothing leaves the zero state pushed!
                     } else {
@@ -1416,17 +1467,17 @@ protected:
     }
 
 
-    virtual void processDynamicPropertiesNotSimulated( ticpp::Node * dynProp) {
+    virtual void parseDynamicPropertiesNotSimulated( ticpp::Node * dynProp) {
 
         // InitialPosition ============================================================
         ticpp::Node * node = dynProp->FirstChild("InitialCondition",true);
-        processInitialCondition(node,false);
+        parseInitialCondition(node,false);
 
 
         ticpp::Element *element = nullptr;
         std::string distribute;
 
-        if(m_bParseDynamics) {
+        if(m_parseDynamicProperties) {
             element = dynProp->FirstChild("Material")->ToElement();
             distribute = element->GetAttribute("distribute");
             if(distribute == "uniform") {
@@ -1447,7 +1498,7 @@ protected:
     }
 
 
-    virtual void processInitialPositionLinear(ticpp::Element * initCond) {
+    virtual void parseInitialPositionLinear(ticpp::Element * initCond) {
 
         Vector3 pos;
         if(!Utilities::stringToVector3<PREC>(pos, initCond->GetAttribute("position"))) {
@@ -1482,7 +1533,7 @@ protected:
 
     }
 
-    virtual void processInitialPositionGrid(ticpp::Element * initCond) {
+    virtual void parseInitialPositionGrid(ticpp::Element * initCond) {
 
         Vector3 trans;
         if(!Utilities::stringToVector3<PREC>(trans, initCond->GetAttribute("translation"))) {
@@ -1518,7 +1569,7 @@ protected:
         InitialConditionBodies::setupPositionBodiesGrid(m_initStatesGroup,gridX,gridY,dist,trans,jitter,delta, seed);
     }
 
-//    virtual void processInitialPositionFile(DynamicsState & state, ticpp::Element * initCond) {
+//    virtual void parseInitialPositionFile(DynamicsState & state, ticpp::Element * initCond) {
 //        m_SimBodyInitStates.push_back(DynamicsState((unsigned int)m_bodyListGroup.size()));
 //
 //        boost::filesystem::path name =  initCond->GetAttribute<std::string>("relpath");
@@ -1527,7 +1578,7 @@ protected:
 //        InitialConditionBodies::setupPositionBodiesFromFile(state,filePath);
 //    }
 
-    virtual void processInitialPositionPosAxisAngle(ticpp::Element * initCond) {
+    virtual void parseInitialPositionPosAxisAngle(ticpp::Element * initCond) {
 
         int bodyCounter = 0;
 
@@ -1586,7 +1637,7 @@ protected:
         }
     }
 
-    virtual void processInitialPositionTransforms(ticpp::Element * initCond) {
+    virtual void parseInitialPositionTransforms(ticpp::Element * initCond) {
 
 
 
@@ -1668,7 +1719,7 @@ protected:
 
     }
 
-    virtual void processInitialVelocityTransRot(ticpp::Element * initCond) {
+    virtual void parseInitialVelocityTransRot(ticpp::Element * initCond) {
 
 
         int bodyCounter = 0;
@@ -1721,12 +1772,15 @@ protected:
 
     }
 
-    virtual void processVisualization( ticpp::Node * visualizationNode) {
+    virtual void parseVisualization( ticpp::Node * visualizationNode) {
 
     }
 
-
-    bool m_bParseDynamics; ///< Parse Dynamics stuff or do not. Playback Manager also has this SceneParser but does not need DynamicsStuff.
+    bool m_parseSceneSettings; ///< Parse SceneSettings (default to true)
+    bool m_parseBodies;        ///< Parse Bodies, (default to true)
+    BodyRange m_bodyRange;
+    bool m_useBodyRange;
+    bool m_parseDynamicProperties;     ///< Parse Dynamics stuff or do not. Playback Manager also has this SceneParser but does not need DynamicsStuff.
 
     std::shared_ptr<DynamicsSystemType> m_pDynSys;
 
@@ -1743,13 +1797,13 @@ protected:
     unsigned int m_globalMaxGroupId; // Group Id used to build a unique id!
 
     // Temprary structures for each sub list of rigid bodies
-    typename RigidBodyType::BodyState m_eBodiesState; ///< Used to process a RigidBody Node
-    typename std::vector<RigidBodyType*> m_bodyListGroup; ///< Used to process a RigidBody Node
+    typename RigidBodyType::BodyState m_eBodiesState; ///< Used to parse a RigidBody Node
+    typename std::vector<RigidBodyType*> m_bodyListGroup; ///< Used to parse a RigidBody Node
     std::vector<Vector3> m_bodyScalesGroup;
     RigidBodyStatesContainerType m_initStatesGroup;
 
 
-    RigidBodyStatesContainerType m_initStates; ///< Init states of sim bodies, if  m_bParseDynamics = false
+    RigidBodyStatesContainerType m_initStates; ///< Init states of sim bodies, if  m_parseDynamicProperties = false
 
     typedef std::unordered_map<std::string, std::shared_ptr<MeshGeometry > > ContainerSceneMeshs;
 

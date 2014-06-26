@@ -28,6 +28,52 @@
 #include "MPICommunication.hpp"
 
 
+template<typename Type>
+class Range: public std::vector<Type> {
+	public:
+
+	    Range( const Range & v): std::vector<Type>(v){}
+        Range( const Range && v): std::vector<Type>(std::move(v)){}
+
+		Range( const std::vector<Type> &v)
+		    : std::vector<Type>(v)
+		{
+			std::sort(std::vector<Type>::begin(),std::vector<Type>::end());
+		}
+
+		Range( std::vector<Type> &&v)
+		    : std::vector<Type>(std::move(v))
+		{
+			std::sort(this->begin(),this->end());
+		}
+		Range( const std::pair<Type,Type> & p){
+			unsigned int N= p.second-p.first;
+			this->resize(N);
+			for(Type i=0; i<N; i++){
+				(*this)[i]=p.first+i;
+			}
+		}
+
+
+		class iterator : public std::vector<Type>::iterator{
+			public:
+				iterator(const typename std::vector<Type>::iterator & v)
+                    : std::vector<Type>::iterator(v), m_diffValue(0){}
+
+				iterator(const typename std::vector<Type>::iterator && v)
+                    : std::vector<Type>::iterator(std::move(v)), m_diffValue(0){}
+
+				void setDiffValue(Type v){ m_diffValue=v; }
+				Type getCurrentDiff(){ return *(*this)-m_diffValue;}
+
+			private:
+			Type m_diffValue;
+		};
+
+		iterator begin(){ return iterator(std::vector<Type>::begin());}
+		iterator end(){ return iterator(std::vector<Type>::end());}
+
+};
 
 class SceneParserMPI : public SceneParser {
 public:
@@ -40,7 +86,46 @@ public:
         m_nGlobalSimBodies = 0;
     }
 
-    bool parseScene( boost::filesystem::path file ) {
+
+    template<typename BodyRangeType>
+    bool parseScene( const boost::filesystem::path & file,
+                             BodyRangeType&& range,
+                             bool parseDynamicProperties = true;
+                             bool parseSceneSettings = true,
+                             bool parseProcessTopology = true
+    {
+        m_parseBodies = true;
+        m_useBodyRange = true;
+        m_bodyRange = std::forward<BodyRangeType>(range);
+
+        m_parseDynamicProperties = parseDynamicProperties;
+        m_parseSceneSettings = parseSceneSettings;
+        m_parseProcessTopoplogy = parseProcessTopology;
+
+        // If the range of bodies is empty, dont parse bodies and dont use the m_bodyRange
+        if(m_bodyRange.empty() ){
+            m_parseBodies = false;
+            m_useBodyRange = false;
+            m_parseDynamicProperties = false;
+        }
+        ERROR("Parsing a range of bodies has not been implemented yet")
+        parseSceneIntern(file);
+    }
+
+
+
+
+
+    unsigned int getNumberOfGlobalSimBodies() {
+        return m_nGlobalSimBodies;
+    }
+
+
+protected:
+
+
+    virtual bool parseScene( boost::filesystem::path file)
+    {
         using namespace std;
         m_currentParseFilePath = file;
         m_currentParseFileDir = m_currentParseFilePath.parent_path();
@@ -70,23 +155,20 @@ public:
                 ticpp::Node *node = nullptr;
 
                 node = node = m_xmlRootNode->FirstChild("MPISettings");
-                processMPISettings(node);
+                parseMPISettings(node);
                 m_pSimulationLog->logMessage("---> Parsed MPISettings...");
 
                 node = m_xmlRootNode->FirstChild("SceneSettings");
-                this->processSceneSettings(node);
+                this->parseSceneSettings(node);
                 m_pSimulationLog->logMessage("---> Parsed SceneSettings...");
 
                 node = m_xmlRootNode->FirstChild("SceneObjects");
-                this->processSceneObjects(node);
+                this->parseSceneObjects(node);
                 m_pSimulationLog->logMessage("---> Parsed SceneObjects...");
 
                 node = m_xmlRootNode->FirstChild("SceneSettings");
-                processSceneSettings2(node);
+                parseSceneSettings2(node);
                 m_pSimulationLog->logMessage("---> Parsed SceneSettings (second part)...");
-
-
-
 
             } else {
                 m_pSimulationLog->logMessage("---> No DynamicsSystem Node found in XML ...");
@@ -108,16 +190,7 @@ public:
         return true;
     }
 
-
-    unsigned int getNumberOfGlobalSimBodies() {
-        return m_nGlobalSimBodies;
-    }
-
-
-protected:
-
-
-    void processSceneObjects( ticpp::Node *sceneObjects) {
+    void parseSceneObjects( ticpp::Node *sceneObjects) {
 
         LOG(m_pSimulationLog,"---> Process SceneObjects ..."<<std::endl;);
 
@@ -126,29 +199,29 @@ protected:
         for ( child = child.begin( sceneObjects ); child != child.end(); child++ ) {
 
             if( child->Value() == "RigidBodies") {
-                processRigidBodies( &(*child) );
+                parseRigidBodies( &(*child) );
             }
 
         }
     }
 
-    void processMPISettings( ticpp::Node *mpiSettings ) {
-        ticpp::Element *elem = mpiSettings->FirstChild("ProcessTopology",true)->ToElement();
+    void parseMPISettings( ticpp::Node *mpiSettings ) {
 
+        ticpp::Element *elem = mpiSettings->FirstChild("ProcessTopology",true)->ToElement();
         std::string type = elem->GetAttribute("type");
         if(type=="grid") {
 
             Vector3 minPoint, maxPoint;
             if(!Utilities::stringToVector3<PREC>(minPoint,  elem->GetAttribute("minPoint"))) {
-                throw ticpp::Exception("---> String conversion in processMPISettings: minPoint failed");
+                throw ticpp::Exception("---> String conversion in parseMPISettings: minPoint failed");
             }
             if(!Utilities::stringToVector3<PREC>(maxPoint,  elem->GetAttribute("maxPoint"))) {
-                throw ticpp::Exception("---> String conversion in processMPISettings: maxPoint failed");
+                throw ticpp::Exception("---> String conversion in parseMPISettings: maxPoint failed");
             }
 
             MyMatrix<unsigned int>::Vector3 dim;
             if(!Utilities::stringToVector3<unsigned int>(dim,  elem->GetAttribute("dimension"))) {
-                throw ticpp::Exception("---> String conversion in processMPISettings: dimension failed");
+                throw ticpp::Exception("---> String conversion in parseMPISettings: dimension failed");
             }
             // saftey check
             if(dim(0)*dim(1)*dim(2) != m_pProcCommunicator->getNProcesses()) {
@@ -189,14 +262,7 @@ protected:
         m_pDynSys->setSettings(settIncl);
     }
 
-    virtual void setupInitialConditionBodiesFromFile_imp(boost::filesystem::path relpath, short which, double time){
-
-        InitialConditionBodies::setupInitialConditionBodiesFromFile(relpath,m_pDynSys->m_simBodiesInitStates,time,true,true,which);
-        LOG(m_pSimulationLog,"---> Found time: "<< time << " in " << relpath << std::endl;);
-        m_pDynSys->applyInitStatesToBodies();
-    }
-
-    void processRigidBodies( ticpp::Node * rigidbodies ) {
+    void parseRigidBodies( ticpp::Node * rigidbodies ) {
 
         //Clear current body list;
         ticpp::Element* rigidBodiesEl = rigidbodies->ToElement();
@@ -239,11 +305,11 @@ protected:
 
 
         ticpp::Node * geometryNode = rigidbodies->FirstChild("Geometry");
-        this->processGeometry(geometryNode);
+        this->parseGeometry(geometryNode);
 
 
         ticpp::Node * dynPropNode = rigidbodies->FirstChild("DynamicProperties");
-        this->processDynamicProperties(dynPropNode);
+        this->parseDynamicProperties(dynPropNode);
 
 
         //Copy the pointers!
@@ -298,7 +364,7 @@ protected:
 
 
 //        ticpp::Node * visualizationNode = rigidbodies->FirstChild("Visualization");
-//        this->processVisualization( visualizationNode);
+//        this->parseVisualization( visualizationNode);
 
 
         //Remove all bodies from the sceneparsers intern list!
@@ -338,7 +404,7 @@ protected:
     using SceneParser::m_globalMaxGroupId;
     using SceneParser::m_nSimBodies;
     using SceneParser::m_nBodies;
-    using SceneParser::m_bParseDynamics;
+    using SceneParser::m_parseDynamicProperties;
     using SceneParser::m_pDynSys;
     using SceneParser::m_currentParseFilePath;
     using SceneParser::m_currentParseFileDir;
