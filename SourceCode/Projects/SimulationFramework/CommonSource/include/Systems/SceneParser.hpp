@@ -81,45 +81,56 @@ public:
         setStandartValues();
     }
 
-
+    /**
+    * range is only applied to the groups with the attribute enableSelectiveIds="true"
+    *
+    */
     template<typename BodyRangeType>
     bool parseScene( const boost::filesystem::path & file,
-                             BodyRangeType&& range,
-                             bool parseDynamicProperties = true,
-                             bool parseSceneSettings = true)
+                     BodyRangeType&& range,
+                     bool parseBodiesNonSelGroup = false,
+                     bool parseOnlySimBodies = false,
+                     bool parseDynamicProperties = true,
+                     bool parseSceneSettings = true)
     {
-        m_parseBodies = true;
-        m_useBodyRange = true;
-        m_bodyRange = std::forward<BodyRangeType>(range);
+        m_parseSceneObjects      = true;
+        m_parseSelectiveBodyIds  = true;
+        m_bodyIdRange            = std::forward<BodyRangeType>(range);
+        m_parseBodiesNonSelGroup = parseBodiesNonSelGroup;
+        m_parseOnlySimBodies     = parseOnlySimBodies;
         m_parseDynamicProperties = parseDynamicProperties;
-        m_parseSceneSettings = parseSceneSettings;
 
-        // If the range of bodies is empty, dont parse bodies and dont use the m_bodyRange
-        if(m_bodyRange.empty() ){
-            m_parseBodies = false;
-            m_useBodyRange = false;
-            m_parseDynamicProperties = false;
+        m_parseSceneSettings     = parseSceneSettings;
+
+        // If the range of bodies is empty, dont use it;
+        if(m_bodyIdRange.empty() ){
+            m_parseSelectiveBodyIds = false;
+        }else{
+            m_startRangeIdIt = m_bodyIdRange.begin();
         }
         parseSceneIntern(file);
     }
 
     // Parses all bodies
     bool parseScene( const boost::filesystem::path & file,
-                             bool parseBodies = true,
-                             bool parseDynamicProperties = true,
-                             bool parseSceneSettings = true)
+                     bool parseSceneObjects = true,
+                     bool parseOnlySimBodies = false,
+                     bool parseDynamicProperties = true,
+                     bool parseSceneSettings = true)
     {
-        m_useBodyRange = false;
-        m_parseBodies = parseBodies;
+        m_parseSceneObjects      = parseSceneObjects;
+        m_parseSelectiveBodyIds  = false;
+        m_parseBodiesNonSelGroup = true;
+        m_parseOnlySimBodies     = parseOnlySimBodies;
         m_parseDynamicProperties = parseDynamicProperties;
-        m_parseSceneSettings = parseSceneSettings;
+
+        m_parseSceneSettings     = parseSceneSettings;
         parseSceneIntern(file);
     }
 
     virtual void cleanUp() {
 
         m_bodyListGroup.clear();
-        m_bodyScalesGroup.clear();
         m_initStatesGroup.clear();
 
     }
@@ -156,7 +167,7 @@ protected:
 
         m_parseDynamicProperties = true;
         m_parseSceneSettings = true;
-        m_parseBodies = true;
+        m_parseSceneObjects = true;
 
     }
 
@@ -184,7 +195,6 @@ protected:
         m_nSimBodies = 0;
         m_nBodies = 0;
         m_bodyListGroup.clear();
-        m_bodyScalesGroup.clear();
         m_initStatesGroup.clear();
 
 
@@ -199,7 +209,6 @@ protected:
             m_xmlRootNode = m_xmlDoc.FirstChild("DynamicsSystem");
             if(m_xmlRootNode) {
                 ticpp::Node *node = nullptr;
-
 
                 node = m_xmlRootNode->FirstChild("SceneSettings");
                 parseSceneSettings(node);
@@ -225,7 +234,7 @@ protected:
     }
 
     virtual void parseOtherOptions(const ticpp::Node *rootNode) {
-        /* Do nothing, here for derived classes! */
+        /* Do nothing, only for derived classes! */
     }
 
     virtual void parseSceneSettings( ticpp::Node *sceneSettings ) {
@@ -706,7 +715,7 @@ protected:
 
 
     virtual void parseSceneObjects( ticpp::Node *sceneObjects) {
-        if(!m_parseBodies){
+        if(!m_parseSceneObjects){
             LOG(m_pSimulationLog,"---> Skip SceneObjects"<<std::endl;);
             return;
         }
@@ -736,58 +745,94 @@ protected:
         //Clear current body list;
         m_initStatesGroup.clear();
         m_bodyListGroup.clear();
-        m_bodyScalesGroup.clear();
+
+        // Check if this group has selecitveIdsOnly turned on to load only selective bodies
+        bool hasSelectiveFlag = false;
+        if(rigidBodiesEl->HasAttribute("enableSelectiveIds"){
+           Utilities::stringToType<bool>(hasSelectiveFlag,rigidBodiesEl->GetAttribute("enableSelectiveIds")
+        }
 
         unsigned int instances = rigidbodies->ToElement()->GetAttribute<unsigned int>("instances");
 
-        unsigned int groupId, startIdx;
+        // Determine what DynamicState the group has:
+        ticpp::Node * dynPropNode = rigidbodies->FirstChild("DynamicProperties");
+        parseDynamicState(dynPropNode);
+
         // Determine GroupId (if specified, otherwise maximum)
+        unsigned int groupId;
         if(rigidBodiesEl->HasAttribute("groupId")) {
             groupId = rigidBodiesEl->GetAttribute<unsigned int>("groupId");
+            // Set new m_globalMaxGroupId;
             m_globalMaxGroupId = std::max(m_globalMaxGroupId,groupId);
         } else {
             m_globalMaxGroupId++;
             groupId = m_globalMaxGroupId;
         }
 
-        // Get the startidx for this GroupIds
-        auto it = groupIdToNBodies.find(groupId);
-        if( it == groupIdToNBodies.end()) {
-            groupIdToNBodies[groupId] = 0;
+        // Get the latest body id for this group id
+        unsigned int startBodyNr = 0;
+        auto * currGroupIdToNBodies;
+        auto it = m_groupIdToNBodies.find(groupId);
+        if( it == m_groupIdToNBodies.end()) {
+            currGroupIdToNBodies = &m_groupIdToNBodies[groupId];
+            *currGroupIdToNBodies = 0;
+        }else{
+            *currGroupIdToNBodies = *it;
+            startBodyNr = *currGroupIdToNBodies;
         }
-        startIdx = groupIdToNBodies[groupId];
-        // update the number of bodies
-        groupIdToNBodies[groupId] += instances;
 
-
-        for(int i=0; i<instances; i++) {
-
-
-            //Assign a unique id and allcoacte body
-            typename RigidBodyId::Type id = RigidBodyId::makeId(startIdx+i, groupId);
-            RigidBodyType * temp_ptr = new RigidBodyType(id);
-
-            LOG(m_pSimulationLog,"---> Added RigidBody Instance: "<<RigidBodyId::getBodyIdString(temp_ptr)<<std::endl);
-            m_bodyListGroup.push_back(temp_ptr);
-
-            m_bodyScalesGroup.emplace_back(1,1,1);
+        // Skip group if we can:
+        if( (m_parseBodiesNonSelGroup==false && hasSelectiveFlag==false)
+            || ( m_eBodiesState != RigidBodyType::BodyState::SIMULATED  && parseOnlySimBodies==true)
+            || (m_parseSelectiveBodyIds==true && hasSelectiveFlag==true && m_startRangeIdIt==m_bodyIdRange.end()) // out of m_bodyIdRange, no more id's which could be parsed in
+             ) {
+            // update the number of bodies in this group and skip this group xml node
+            *currGroupIdToNBodies += instances;
+            return;
         }
-        LOG(m_pSimulationLog,"---> Added "<<instances<<" RigidBody Instances..."<<std::endl;);
 
+        // Full id range for this group would be [m_starBodyId , endBodyId ]
+        m_startBodyId = RigidBodyId::makeId(startBodyNr, groupId);
+        RigidBodyIdType endBodyId = RigidBodyId::makeId(startBodyNr+instances-1, groupId);
 
+        if(m_parseSelectiveBodyIds==false || (m_parseBodiesNonSelGroup==true && hasSelectiveFlag==false ){
+            //overwrite range containing all bodies, if we don't parse selective ids, parse all bodies!
+            m_bodyIdRange = std::make_pair(m_startBodyId,endBodyId);
+            m_startRangeIdIt = m_bodyIdRange.begin();
+        }else{
+            // parse group selective , determine start iterator in bodyRange
+            m_startRangeIdIt = std::lower_bound(m_startRangeIdIt,m_bodyIdRange.end(),m_startBodyId);
+            if( m_startRangeIdIt ){ // no ids in the range
+                *currGroupIdToNBodies += instances;
+                return
+            }
+        }
 
+        // Adding bodies in the range =============================
+        // iterator bodyRange till the id is > endBodyId or we are out of the bodyIdRange
+        auto itEnd = m_bodyIdRange.end();
+        m_parsedInstancesGroup = 0;
+        for( auto bodyIdIt = m_startRangeIdIt;
+             (bodyIdIt != itEnd) && ( *bodyIdIt <= endBodyId); bodyIdIt++ )
+        {
+            LOG(m_pSimulationLog,"---> Added RigidBody Instance: "<<RigidBodyId::getBodyIdString(*bodyIdIt)<<std::endl);
+            // Push new body
+            m_bodyListGroup.push_back( {new RigidBodyType(*bodyIdIt), Vector(1,1,1) } );
+
+            m_parsedInstancesGroup++;
+        }
+
+        LOG(m_pSimulationLog,"---> Added "<<m_parsedInstancesGroup<<" RigidBody Instances..."<<std::endl;);
+        // =======================================================
+
+        // Parse Geometry
         ticpp::Node * geometryNode = rigidbodies->FirstChild("Geometry");
         parseGeometry(geometryNode);
 
-
-
-        ticpp::Node * dynPropNode = rigidbodies->FirstChild("DynamicProperties");
+         //Parse DynamicsProperties
         parseDynamicProperties(dynPropNode);
 
-
-
         //Copy the pointers!
-
         if(m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
             if(m_parseDynamicProperties) {
                 LOG(m_pSimulationLog,"---> Copy Simulated RigidBody References to DynamicSystem ..."<<std::endl;);
@@ -819,12 +864,10 @@ protected:
             throw ticpp::Exception("---> Adding only simulated and not simulated objects supported!");
         }
 
-
-
-
-
         ticpp::Node * visualizationNode = rigidbodies->FirstChild("Visualization");
         parseVisualization( visualizationNode);
+        // ===============================================================================================================
+
 
     }
 
@@ -850,12 +893,6 @@ protected:
         if(type == "uniform") {
 
             double radius = sphere->GetAttribute<double>("radius");
-            Vector3 scale;
-            scale(0)=radius;
-            scale(1)=radius;
-            scale(2)=radius;
-
-            std::shared_ptr<SphereGeometry > pSphereGeom = std::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
 
             if(addToGlobalGeoms) {
                 unsigned int id;
@@ -866,13 +903,14 @@ protected:
                     throw ticpp::Exception("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
                     // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
                 }
-                addToGlobalGeomList(id,pSphereGeom);
+                addToGlobalGeomList(id,std::shared_ptr<SphereGeometry >(new SphereGeometry(radius)));
             } else {
-                for(int i=0; i < m_bodyListGroup.size(); i++) {
-                    m_bodyScalesGroup[i] = scale;
-                    LOG(m_pSimulationLog, "\t---> Body id:" << m_bodyListGroup[i]->m_id << ", GeometryType: Sphere" << std::endl);
+                Vector3 scale(radius,radius,radius);
+                for(auto & b : m_bodyListGroup) {
+                    b.m_scale = scale;
+                    LOG(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body->m_id) << ", GeometryType: Sphere" << std::endl);
                     LOG(m_pSimulationLog, "\t\t---> radius: " << radius << std::endl; );
-                    m_bodyListGroup[i]->m_geometry = pSphereGeom;
+                    b.m_body->m_geometry = std::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
                 }
             }
         } else if(type == "random") {
@@ -897,11 +935,9 @@ protected:
                 throw ticpp::Exception("---> String conversion in parseSphereGeometry: seed failed");
             }
 
-            typedef boost::mt19937  RNG;
-            RNG generator(seed);
-            boost::uniform_real<PREC> uniform(minRadius,maxRadius);
-            boost::variate_generator< boost::mt19937 & , boost::uniform_real<PREC> > randomNumber(generator, uniform);
 
+            RandomGenType gen(seed);
+            UniformDistType<PREC> uniform(minRadius,maxRadius);
 
             if(addToGlobalGeoms) {
 
@@ -923,24 +959,27 @@ protected:
                 }
 
                 for(int i = id; i < id + instances; i++) {
-                    double radius = randomNumber();
-                    std::shared_ptr<SphereGeometry > pSphereGeom = std::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
-                    addToGlobalGeomList(i, pSphereGeom);
+                    PREC radius = uni(gen);
+                    addToGlobalGeomList(i, std::shared_ptr<SphereGeometry >(new SphereGeometry(radius)));
                 }
             } else {
 
 
-                for(int i=0; i < m_bodyListGroup.size(); i++) {
-                    double radius = randomNumber();
-                    Vector3 scale;
-                    scale(0)=radius;
-                    scale(1)=radius;
-                    scale(2)=radius;
-                    m_bodyScalesGroup[i] = scale;
-                    std::shared_ptr<SphereGeometry > pSphereGeom = std::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
-                    LOG(m_pSimulationLog, "\t---> Body id:" << m_bodyListGroup[i]->m_id << ", GeometryType: Sphere" << std::endl);
+                RigidBodyIdType diffId = m_startBodyId; // id to generate to correct amount of random values!
+                auto endIt = m_bodyListGroup.end();
+
+                double radius = uni(gen); // generate first value
+                for(auto bodyIt = m_bodyListGroup.begin(); bodyIt != endIt; ++bodyIt) {
+
+                    // Generate the intermediate random values if there are any
+                    radius = genRandomValues(gen,uni,bodyIt->m_body->m_id-diffId); // (id:16 - id:13 = 3 values, 13 is already generated)
+                    diffId = bodyIt->m_body->m_id; // update current diffId;
+
+                    bodyIt->m_scale = Vector3 scale(radius,radius,radius);
+                    LOG(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(bodyIt->m_body->m_id)<< ", GeometryType: Sphere" << std::endl);
                     LOG(m_pSimulationLog, "\t\t---> radius: " << radius << std::endl; );
-                    m_bodyListGroup[i]->m_geometry = pSphereGeom;
+                    bodyIt->m_body->m_geometry = std::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
+
 
                 }
             }
@@ -981,8 +1020,8 @@ protected:
                 }
                 addToGlobalGeomList(id, pHalfspaceGeom);
             } else {
-                for(int i=0; i < m_bodyListGroup.size(); i++) {
-                    m_bodyListGroup[i]->m_geometry = pHalfspaceGeom;
+                for(auto & b  : m_bodyListGroup) {
+                    b.m_body->m_geometry = pHalfspaceGeom;
                 }
             }
 
@@ -1007,10 +1046,7 @@ protected:
 
             std::shared_ptr<BoxGeometry > pBoxGeom = std::shared_ptr<BoxGeometry >(new BoxGeometry(center,extent));
 
-            Vector3 scale;
-            scale(0)=extent(0);
-            scale(1)=extent(1);
-            scale(2)=extent(2);
+            Vector3 scale(extent(0),extent(1),extent(2));
 
             if(addToGlobalGeoms) {
                 unsigned int id;
@@ -1023,9 +1059,9 @@ protected:
                 }
                 addToGlobalGeomList(id, pBoxGeom);
             } else {
-                for(int i=0; i < m_bodyListGroup.size(); i++) {
-                    m_bodyScalesGroup[i] = scale;
-                    m_bodyListGroup[i]->m_geometry = pBoxGeom;
+                 for(auto & b  : m_bodyListGroup) {
+                    b.m_scale = scale;
+                    b.m_body->m_geometry = pBoxGeom;
                 }
             }
 
@@ -1143,9 +1179,9 @@ protected:
                 }
                 addToGlobalGeomList(id, pMeshGeom);
             } else {
-                for(int i=0; i < m_bodyListGroup.size(); i++) {
-                    m_bodyScalesGroup[i] = scale_factor;
-                    m_bodyListGroup[i]->m_geometry = pMeshGeom;
+                 for(auto & b  : m_bodyListGroup) {
+                    b.m_scale = scale_factor;
+                    b.m_body->m_geometry = pMeshGeom;
                 }
             }
 
@@ -1171,11 +1207,11 @@ protected:
                 throw ticpp::Exception("---> Geometry search in parseGlobalGeomId: failed!");
             }
 
-            for(int i=0; i < m_bodyListGroup.size(); i++) {
-                GetScaleOfGeomVisitor vis(m_bodyScalesGroup[i]);
+            for(auto & b : m_bodyListGroup) {
+                GetScaleOfGeomVisitor vis(b.m_scale);
                 boost::apply_visitor(vis, it->second);
-                m_bodyListGroup[i]->m_geometry = it->second;
-                m_bodyListGroup[i]->m_globalGeomId = id;
+                b.m_body->m_geometry = it->second;
+                b.m_body->m_globalGeomId = id;
                 //LOG(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(m_bodyListGroup[i]) << ", GlobalGeomId: " << id <<  std::endl);
             }
 
@@ -1191,7 +1227,7 @@ protected:
                 // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
             }
 
-            for(int i=0; i < m_bodyListGroup.size(); i++) {
+            for(auto & b : m_bodyListGroup) {
                 int id = startId+i;
                 typename DynamicsSystemType::GlobalGeometryMapType::iterator it = findGlobalGeomId(startId+i);
                 // it->second is the GeometryType in RigidBody
@@ -1200,10 +1236,10 @@ protected:
                     throw ticpp::Exception("---> parseGlobalGeomId: Geometry search failed!");
                 }
 
-                GetScaleOfGeomVisitor vis(m_bodyScalesGroup[i]);
+                GetScaleOfGeomVisitor vis(b.m_scale);
                 boost::apply_visitor(vis, it->second);
-                m_bodyListGroup[i]->m_geometry = it->second;
-                m_bodyListGroup[i]->m_globalGeomId = id;
+                b.m_body->m_geometry = it->second;
+                b.m_body->m_globalGeomId = id;
                 LOG(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(m_bodyListGroup[i]) << ", GlobalGeomId: " << id <<  std::endl);
 
             }
@@ -1234,14 +1270,15 @@ protected:
                 throw ticpp::Exception("---> String conversion in parseGlobalGeomId: seed failed");
             }
 
-            typedef boost::mt19937  RNG;
-            RNG generator(seed);
-            boost::uniform_int<unsigned int> uniform(startId,endId);
-            boost::variate_generator< boost::mt19937 & , boost::uniform_int<unsigned int> > randomNumber(generator, uniform);
+            RandomGenType gen(seed);
+            UniformDistType<unsigned int> uni(startId,endId);
 
-            for(int i=0; i < m_bodyListGroup.size(); i++) {
+            RigidBodyIdType diffId = m_startBodyId; // id to generate to correct amount of random values!
+            auto endIt = m_bodyListGroup.end();
+            unsigned int id = uni(gen); // generate first value
+            for(auto bodyIt = m_bodyListGroup.begin(); bodyIt != endIt; ++bodyIt) {
 
-                unsigned int id = randomNumber();
+                id = generateRandomValues(gen,uni,bodyIt->m_body->m_id - diffId);
                 typename DynamicsSystemType::GlobalGeometryMapType::iterator it = findGlobalGeomId(id);
                 // it->second is the GeometryType in RigidBody
                 if(it == this->getGlobalGeometryListRef().end()) {
@@ -1249,10 +1286,10 @@ protected:
                     throw ticpp::Exception("---> Geometry search in parseGlobalGeomId: failed!");
                 }
 
-                GetScaleOfGeomVisitor vis(m_bodyScalesGroup[i]);
+                GetScaleOfGeomVisitor vis(b.m_scale);
                 boost::apply_visitor(vis, it->second);
-                m_bodyListGroup[i]->m_geometry = it->second;
-                m_bodyListGroup[i]->m_globalGeomId = id;
+                b.m_body->m_geometry = it->second;
+                b.m_body->m_globalGeomId = id;
                 LOG(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(m_bodyListGroup[i]) << ", GlobalGeomId: " << id <<  std::endl);
             }
 
@@ -1310,21 +1347,8 @@ protected:
 
     virtual void parseDynamicProperties( ticpp::Node * dynProp) {
         LOG(m_pSimulationLog,"---> Parse DynamicProperties ..."<<std::endl;);
-        ticpp::Element * element = dynProp->FirstChild("DynamicState")->ToElement();
 
-
-
-        std::string type = element->GetAttribute("type");
-        if(type == "simulated") {
-            m_eBodiesState =  RigidBodyType::BodyState::SIMULATED;
-        } else if(type == "not simulated") {
-            m_eBodiesState =  RigidBodyType::BodyState::STATIC;
-        } else if(type == "animated") {
-            m_eBodiesState =  RigidBodyType::BodyState::ANIMATED;
-            throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'DynamicState' has no implementation in the parser"));
-        } else {
-            throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'DynamicState' has no implementation in the parser"));
-        }
+        // DynamicState has already been parsed for the group!
 
         // apply first to all bodies :-)
         for(int i=0; i < m_bodyListGroup.size(); i++) {
@@ -1338,6 +1362,22 @@ protected:
         }
     }
 
+    virtual parseDynamicState(ticpp::Node * dynProp){
+
+        ticpp::Element * element = dynProp->FirstChild("DynamicState")->ToElement();
+        std::string type = element->GetAttribute("type");
+        if(type == "simulated") {
+            m_eBodiesState =  RigidBodyType::BodyState::SIMULATED;
+        } else if(type == "not simulated" || type == "static") {
+            m_eBodiesState =  RigidBodyType::BodyState::STATIC;
+        } else if(type == "animated") {
+            m_eBodiesState =  RigidBodyType::BodyState::ANIMATED;
+            throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'DynamicState' has no implementation in the parser"));
+        } else {
+            throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'DynamicState' has no implementation in the parser"));
+        }
+
+    }
 
     virtual void parseDynamicPropertiesSimulated( ticpp::Node * dynProp) {
         ticpp::Element *element = nullptr;
@@ -1776,11 +1816,25 @@ protected:
 
     }
 
-    bool m_parseSceneSettings; ///< Parse SceneSettings (default to true)
-    bool m_parseBodies;        ///< Parse Bodies, (default to true)
-    BodyRange m_bodyRange;
-    bool m_useBodyRange;
-    bool m_parseDynamicProperties;     ///< Parse Dynamics stuff or do not. Playback Manager also has this SceneParser but does not need DynamicsStuff.
+
+    // Parser Flags =====================================
+    bool m_parseSceneSettings; ///< Parse SceneSettings (default= true)
+
+    // SceneObjects
+    bool m_parseSceneObjects;  ///< Parse SceneObjects, (default= true)
+
+        bool m_parseSelectiveBodyIds;                ///< Use the m_bodyIdRange to only load the selective ids in the group which use enableSelectiveIds="true"
+        bool m_parseBodiesNonSelGroup       ///< Parse all bodies in groups where m_bodyIdRange is not applied (enableSelectiveIds="false) (default= true)
+
+        bool m_parseOnlySimBodies          ///< Parses only simulated bodies (default= false)
+        bool m_parseDynamicProperties;     ///< Parse Dynamics stuff or do not. Playback Manager also has this SceneParser but does not need DynamicsStuff.
+    //More settings
+    // ===================================================
+
+    BodyRange m_bodyIdRange;                        ///< Range of body ids which
+    typename BodyRange::iterator m_startRangeIdIt;  ///< Current iterator which marks the start for the current group inm_bodyIdRange
+    unsigned int m_parsedInstancesGroup;            ///< Number of instances generated in the current group
+    RigidBodyIdType m_startBodyId;                  ///< Start id of the current group smaller or equal to *m_startRangeIdIt
 
     std::shared_ptr<DynamicsSystemType> m_pDynSys;
 
@@ -1793,12 +1847,17 @@ protected:
     std::stringstream logstream;
 
     unsigned int m_nSimBodies, m_nBodies;
-    std::unordered_map<unsigned int,unsigned int> groupIdToNBodies;
+    std::unordered_map<unsigned int,unsigned int> m_groupIdToNBodies;
     unsigned int m_globalMaxGroupId; // Group Id used to build a unique id!
 
-    // Temprary structures for each sub list of rigid bodies
-    typename RigidBodyType::BodyState m_eBodiesState; ///< Used to parse a RigidBody Node
-    typename std::vector<RigidBodyType*> m_bodyListGroup; ///< Used to parse a RigidBody Node
+    // Temprary structures for each sublist (groupid=?) of rigid bodies
+    typename RigidBodyType::BodyState m_eBodiesState;     ///< Used to parse a RigidBody Node
+
+    struct Body{
+        RigidBodyType* m_body = nullptr;
+        Vector3 scale = Vector3(1,1,1);
+    };
+    typename std::vector<Body> m_bodyListGroup; ///< Used to parse a RigidBody Node
     std::vector<Vector3> m_bodyScalesGroup;
     RigidBodyStatesContainerType m_initStatesGroup;
 
@@ -1806,6 +1865,22 @@ protected:
     RigidBodyStatesContainerType m_initStates; ///< Init states of sim bodies, if  m_parseDynamicProperties = false
 
     typedef std::unordered_map<std::string, std::shared_ptr<MeshGeometry > > ContainerSceneMeshs;
+
+
+    // Random Generator
+    typedef std::mt19937  RandomGenType;
+    template<typename T>
+    using UniformDistType = std::uniform_real_distribution<T>
+
+    typename<typename Generator, typename Distribution>
+    PREC genRandomValues(Generator & g, Distribution & d, unsigned int count){
+        PREC ret;
+        for(unsigned int = 0; i<count; ++i){
+            ret = d(g);
+        }
+        return ret;
+    }
+
 
 };
 

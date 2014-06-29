@@ -85,8 +85,6 @@ namespace details{
               t = false;
               return true;
            }
-
-           t = false;
            return false;
         }
     };

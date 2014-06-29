@@ -28,53 +28,6 @@
 #include "MPICommunication.hpp"
 
 
-template<typename Type>
-class Range: public std::vector<Type> {
-	public:
-
-	    Range( const Range & v): std::vector<Type>(v){}
-        Range( const Range && v): std::vector<Type>(std::move(v)){}
-
-		Range( const std::vector<Type> &v)
-		    : std::vector<Type>(v)
-		{
-			std::sort(std::vector<Type>::begin(),std::vector<Type>::end());
-		}
-
-		Range( std::vector<Type> &&v)
-		    : std::vector<Type>(std::move(v))
-		{
-			std::sort(this->begin(),this->end());
-		}
-		Range( const std::pair<Type,Type> & p){
-			unsigned int N= p.second-p.first;
-			this->resize(N);
-			for(Type i=0; i<N; i++){
-				(*this)[i]=p.first+i;
-			}
-		}
-
-
-		class iterator : public std::vector<Type>::iterator{
-			public:
-				iterator(const typename std::vector<Type>::iterator & v)
-                    : std::vector<Type>::iterator(v), m_diffValue(0){}
-
-				iterator(const typename std::vector<Type>::iterator && v)
-                    : std::vector<Type>::iterator(std::move(v)), m_diffValue(0){}
-
-				void setDiffValue(Type v){ m_diffValue=v; }
-				Type getCurrentDiff(){ return *(*this)-m_diffValue;}
-
-			private:
-			Type m_diffValue;
-		};
-
-		iterator begin(){ return iterator(std::vector<Type>::begin());}
-		iterator end(){ return iterator(std::vector<Type>::end());}
-
-};
-
 class SceneParserMPI : public SceneParser {
 public:
 

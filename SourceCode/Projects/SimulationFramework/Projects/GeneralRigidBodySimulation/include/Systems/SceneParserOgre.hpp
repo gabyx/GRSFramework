@@ -345,7 +345,7 @@ protected:
         ticpp::Node * mpiSettings = rootNode->FirstChild("MPISettings",false);
         if(mpiSettings) {
 
-            ticpp::Node *topo = mpiSettings->FirstChild("parseTopology",true);
+            ticpp::Node *topo = mpiSettings->FirstChild("ProcessTopology",true);
             ticpp::Element *topoEl = topo->ToElement();
 
             std::string type = topoEl->GetAttribute("type");
