@@ -1,46 +1,53 @@
 #ifndef InitialConditionBodies_hpp
 #define InitialConditionBodies_hpp
 
+#include <random>
 #include <boost/filesystem.hpp>
 
+#include "CommonFunctions.hpp"
 #include "DynamicsState.hpp"
 #include "MultiBodySimFile.hpp"
 
-#include "boost/random.hpp"
 #include "boost/generator_iterator.hpp"
 
 namespace InitialConditionBodies {
 
 DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-template<typename StateContainerType>
+template<typename BodyDataContainer>
 void setupPositionBodiesLinear(
-    StateContainerType & states,
+    BodyDataContainer & bodyDataCont,
+    RigidBodyIdType startId, // used to appropriatly generate random numbers
     typename DynamicsState::Vector3 pos,
     typename DynamicsState::Vector3 dir,
     double dist, bool jitter, double delta, unsigned int seed){
 
     DEFINE_LAYOUT_CONFIG_TYPES
 
-
     dir.normalize();
     Vector3 jitter_vec, random_vec;
     jitter_vec.setZero();
 
     // Set only m_q, m_u is zero in constructor!
-    double d = 2; //spread around origin with 0.5m
-    unsigned int i = 0;
-    for(auto itState = states.begin(); itState != states.end(); itState++) {
-        auto & state = itState->second;
+    RandomGenType  gen(seed);
+    std::uniform_real_distribution<double> uni(-1.0,1.0);
+    double r;
+    if(jitter){r = uni(gen);}
+
+    auto diffId = startId;
+    unsigned int i; // linear index from the front
+
+    for(auto & b : bodyDataCont) {
+        auto & state = b.m_initState;
+        i = b.m_body->m_id - startId;
         state.m_q.template tail<4>() = Quaternion(1,0,0,0);
 
-        typedef boost::mt19937  RNG;
-        static  RNG generator(seed);
-        static  boost::uniform_real<PREC> uniform(-1.0,1.0);
-        static  boost::variate_generator< boost::mt19937 & , boost::uniform_real<PREC> > randomNumber(generator, uniform);
-
         if(jitter) {
-            random_vec = Vector3(randomNumber(),randomNumber(),randomNumber()); // No uniform distribution!, but does not matter
+
+            r = Utilities::genRandomValues(r,gen,uni, b.m_body->m_id - diffId);
+            diffId = b.m_body->m_id;
+
+            random_vec = Vector3(r,r,r);
             random_vec.normalize();
             random_vec = random_vec.cross(dir);
             random_vec.normalize();
@@ -48,12 +55,12 @@ void setupPositionBodiesLinear(
         }
 
        state.m_q.template head<3>() = pos + dir*dist*i + jitter_vec;
-       i++;
     }
 }
 
-template<typename StateContainerType>
-void setupPositionBodiesGrid(StateContainerType & states,
+template<typename BodyDataContainer>
+void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
+                             RigidBodyIdType startId,
                              unsigned int gDim_x,
                              unsigned int gDim_y,
                              double d,
@@ -66,26 +73,33 @@ void setupPositionBodiesGrid(StateContainerType & states,
 
     Vector3 jitter_vec;
     jitter_vec.setZero();
-    unsigned int i = 0;
-    for(auto itState = states.begin(); itState != states.end(); itState++) {
-        //std::cout << itState->second << std::endl;
-        auto & state = itState->second;
+
+
+    RandomGenType  gen(seed);
+    std::uniform_real_distribution<PREC> uni(-1.0,1.0);
+    double r;
+    if(jitter){r = uni(gen);}
+
+    auto diffId = startId;
+    unsigned int i; // linear index from the front
+    for(auto & b : bodyDataCont) {
+        auto & state = b.m_initState;
+        i = b.m_body->m_id  - startId;
+
         state.m_q.template tail<4>() = Quaternion(1,0,0,0);
         int index_z = (i /(gDim_x*gDim_y));
         int index_y = (i - index_z*(gDim_x*gDim_y)) / gDim_x;
         int index_x = (i - index_z*(gDim_x*gDim_y)- index_y*gDim_x);
 
-        typedef boost::mt19937  RNG;
-        static RNG generator(seed);
-        static boost::uniform_real<PREC> uniform(-1.0,1.0);
-        static boost::variate_generator< boost::mt19937 & , boost::uniform_real<PREC> > randomNumber(generator, uniform);
-
         if(jitter) {
-            jitter_vec = Vector3(randomNumber(),randomNumber(),randomNumber()) * delta; // No uniform distribution!, but does not matter
+
+            r = Utilities::genRandomValues(r,gen,uni,b.m_body->m_id  - diffId);
+            diffId = b.m_body->m_id ;
+
+            jitter_vec = Vector3(r,r,r) * delta;
         }
 
         state.m_q.template head<3>() = Vector3(index_x * d - 0.5*(gDim_x-1)*d, index_y*d - 0.5*(gDim_y-1)*d , index_z*d) + vec_trans + jitter_vec;
-        i++;
     }
 
 }
@@ -93,7 +107,7 @@ void setupPositionBodiesGrid(StateContainerType & states,
 
 template<typename TBodyStateMap>
 bool setupInitialConditionBodiesFromFile(boost::filesystem::path file_path,
-                                         TBodyStateMap & states,
+                                         TBodyStateMap & bodyDataCont,
                                          double & stateTime,
                                          bool readPos = true,
                                          bool readVel = true,
@@ -107,7 +121,7 @@ bool setupInitialConditionBodiesFromFile(boost::filesystem::path file_path,
                         0,true))
     {
         // We only perform an update! -> true
-        if(!simFile.read(states,stateTime,readPos,readVel,which,true)){
+        if(!simFile.read(bodyDataCont,stateTime,readPos,readVel,which,true)){
             failed = true;
         }
         simFile.close();
@@ -135,11 +149,11 @@ template<typename TRigidBody, typename TRigidBodyState>
 inline void applyRigidBodyStateToBody(const TRigidBodyState & rigidBodyState, TRigidBody  * body );
 
 template<typename RigidBodyContainer, typename RigidBodyStatesContainer>
-inline void applyRigidBodyStatesToBodies(RigidBodyContainer & bodies, const RigidBodyStatesContainer & states ){
+inline void applyRigidBodyStatesToBodies(RigidBodyContainer & bodies, const RigidBodyStatesContainer & bodyDataCont ){
 
     for(auto bodyIt = bodies.begin(); bodyIt!= bodies.end(); bodyIt++){
-        auto resIt = states.find((*bodyIt)->m_id);
-        if( resIt == states.end()){
+        auto resIt = bodyDataCont.find((*bodyIt)->m_id);
+        if( resIt == bodyDataCont.end()){
             ERRORMSG(" There is no initial state for sim body id: " << RigidBodyId::getBodyIdString(*bodyIt) << std::endl);
         }
         InitialConditionBodies::applyRigidBodyStateToBody( resIt->second, (*bodyIt) );

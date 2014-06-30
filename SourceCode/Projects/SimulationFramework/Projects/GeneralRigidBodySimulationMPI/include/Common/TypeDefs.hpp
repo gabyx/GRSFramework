@@ -55,6 +55,10 @@ namespace GlobalConfigs{
 
     };
 
+    namespace GeneralConfigs{
+         typedef std::mt19937 RandomGeneratorType;
+    };
+
 
     namespace SolverConfigs{
         typedef MyConfigs::TimeStepperType              TimeStepperType;
@@ -121,7 +125,8 @@ namespace GlobalConfigs{
 #define DEFINE_RIGIDBODY_CONFIG_TYPES \
     typedef typename GlobalConfigs::DynamicSystemConfigs::RigidBodyType          RigidBodyType; \
     typedef typename GlobalConfigs::RigidBodyConfigs::RigidBodySolverDataType    RigidBodySolverDataType; \
-    DEFINE_LAYOUT_CONFIG_TYPES\
+    DEFINE_LAYOUT_CONFIG_TYPES \
+    DEFINE_GENERAL_CONFIG_TYPES
 
 #define DEFINE_LAYOUT_CONFIG_TYPES \
     typedef typename GlobalConfigs::RigidBodyConfigs::LayoutConfigType LayoutConfigType; \
@@ -133,6 +138,10 @@ namespace GlobalConfigs{
 
 #define DEFINE_MPI_INFORMATION_CONFIG_TYPES \
     typedef GlobalConfigs::MPIInformationConfigs::RankIdType RankIdType;
+
+
+#define DEFINE_GENERAL_CONFIG_TYPES \
+    typedef typename GlobalConfigs::GeneralConfigs::RandomGeneratorType RandomGenType;
 
 
 struct MyIOFormat{

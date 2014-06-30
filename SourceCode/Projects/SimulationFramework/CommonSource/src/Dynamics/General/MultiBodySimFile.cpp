@@ -306,10 +306,6 @@ bool  MultiBodySimFile::readHeader() {
             m_errorString << "Binary File, m_nAdditionalBytesPerBody not valid : " << m_nAdditionalBytesPerBody << std::endl;
             return false;
         }
-        if( m_additionalBytesType < 0){
-            m_errorString << "Binary File, additionalBytesType not valid : " << m_additionalBytesType << std::endl;
-            return false;
-        }
 
         // if the body count is zero we dont need to check on the values, so overwrite the values
         if(m_nSimBodies == 0){
@@ -378,5 +374,7 @@ MultiBodySimFile & MultiBodySimFile::operator << (MultiBodySimFile& file){
             m_file_stream.write(&data[0], restBytes);
         }
     }
+
+    return *this;
 }
 

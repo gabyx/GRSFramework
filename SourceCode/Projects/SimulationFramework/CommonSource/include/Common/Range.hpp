@@ -8,11 +8,13 @@
 /**
 * A fast sorted integral range which can be constructed from std::pair or std::set
 */
-template<typename IntType>
+template<typename IntType, typename Allocator = std::allocator<IntType>  >
 class Range{
 	public:
 
-	    typedef std::vector<IntType> RangeType;
+
+
+	    typedef std::vector<IntType,Allocator> RangeType;
 
 	    STATIC_ASSERT2( std::is_integral<IntType>::value , IntType_Needs_to_be_Integeral);
         Range(){};
@@ -43,10 +45,12 @@ class Range{
 		Range(const std::pair<T,T> & p){
 
 		    STATIC_ASSERT2( std::is_integral<T>::value , T_Needs_to_be_Integeral);
+		    unsigned int N;
 		    if(p.second < p.first){
-                p.second = p.first = 0; // leads to empty m_v
+                N = 0; // leads to empty m_v
+		    }else{
+                N = p.second-p.first;
 		    }
-			unsigned int N = p.second-p.first;
 			m_v.resize(N);
 			for(T i=0; i<N; i++){
 				m_v[i]=p.first+i;
@@ -59,8 +63,12 @@ class Range{
 		}
 
 
-		class iterator{
+		class iterator : public std::iterator_traits<typename RangeType::iterator >{
 			public:
+			    typedef std::iterator_traits<typename RangeType::iterator > iterator_traits;
+
+			    iterator():m_diffValue(0){};
+
 				iterator(const typename RangeType::iterator & it)
                     : m_it(it), m_diffValue(0){}
 
@@ -81,13 +89,15 @@ class Range{
                     operator++();
                     return it;
                 }
-                bool operator==(const iterator &rhs) {
-                    return m_it == rhs.m_it;
-                }
 
-                bool operator!=(const iterator &rhs) {
-                    return m_it != rhs.m_it;
-                }
+                bool operator==(const iterator &rhs) {return m_it == rhs.m_it;}
+                bool operator!=(const iterator &rhs) {return m_it != rhs.m_it;}
+
+                typename iterator_traits::difference_type operator-(const iterator & rhs){return m_it - rhs.m_it;}
+                iterator & operator+=( typename iterator_traits::difference_type d){ m_it += d;}
+
+                iterator & operator=(const iterator & rhs) = default;
+                iterator( const iterator & r ) = default;
 
                 IntType operator*() {
                     return *m_it;
@@ -108,6 +118,7 @@ class Range{
         void clear(){
             m_v.clear();
         }
+
 
     private:
         RangeType m_v;

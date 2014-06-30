@@ -107,7 +107,11 @@ protected:
 
         std::stringstream entity_name,node_name;
         LOG(this->m_pSimulationLog, "---> Add all Ogre Mesh Objects"<<std::endl);
-        for(int i=0; i<this->m_bodyListGroup.size(); i++) {
+
+        unsigned int i; // Linear offset form the m_startIdGroup
+        for(auto & b : m_bodyListGroup) {
+            i = b.m_body->m_id - m_startIdGroup;
+
             entity_name.str("");
             node_name.str("");
             entity_name << meshName.filename().string() << std::string("Entity");
@@ -126,13 +130,13 @@ protected:
 
 
             if(scaleLikeGeometry) {
-//                std::cout << "SCALE: " << this->m_bodyScalesGroup[i] <<std::endl;
-                if(this->m_bodyScalesGroup[i](0)<=0 &&
-                   this->m_bodyScalesGroup[i](1)<=0 &&
-                   this->m_bodyScalesGroup[i](2)<=0) {
+//                std::cout << "SCALE: " << b.m_scale <<std::endl;
+                if(b.m_scale(0)<=0 &&
+                   b.m_scale(1)<=0 &&
+                   b.m_scale(2)<=0) {
                     throw ticpp::Exception("---> parseMesh:: Scale for Mesh: " + meshName.string() +"is zero or smaller!");
                 }
-                sceneNodeScale->setScale(this->m_bodyScalesGroup[i](0),this->m_bodyScalesGroup[i](1),this->m_bodyScalesGroup[i](2));
+                sceneNodeScale->setScale(b.m_scale(0),b.m_scale(1),b.m_scale(2));
             } else {
                 if(scale(0)<=0 &&
                    scale(1)<=0 &&
@@ -151,13 +155,14 @@ protected:
                 sceneNodeAxes->attachObject(axisEnt);
             }
 
+
             int matIdx = i % m_materialList.size();
 
             ent->setMaterialName(m_materialList[matIdx]);
 
             //Set initial condition
-            sceneNode->setPosition(this->m_bodyListGroup[i]->m_r_S(0),this->m_bodyListGroup[i]->m_r_S(1),this->m_bodyListGroup[i]->m_r_S(2));
-            sceneNode->setOrientation(this->m_bodyListGroup[i]->m_q_KI(0),this->m_bodyListGroup[i]->m_q_KI(1),this->m_bodyListGroup[i]->m_q_KI(2),this->m_bodyListGroup[i]->m_q_KI(3));
+            sceneNode->setPosition(b.m_body->m_r_S(0),b.m_body->m_r_S(1),b.m_body->m_r_S(2));
+            sceneNode->setOrientation(b.m_body->m_q_KI(0),b.m_body->m_q_KI(1),b.m_body->m_q_KI(2),b.m_body->m_q_KI(3));
 
 
             if( this->m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
@@ -244,7 +249,11 @@ protected:
 
         std::stringstream entity_name,node_name,plane_name;
         LOG(this->m_pSimulationLog, "---> Add all Ogre: Plane Objects"<<std::endl);
-        for(int i=0; i<this->m_bodyListGroup.size(); i++) {
+
+        unsigned int i; // linear offset from m_startIdGroup
+        for(auto & b : m_bodyListGroup) {
+            i = b.m_body->m_id - m_startIdGroup;
+
             entity_name.str("");
             node_name.str("");
             entity_name << "OgrePlane" << std::string("Entity");
@@ -275,7 +284,7 @@ protected:
              Ogre::SceneNode* sceneNode = m_BaseFrame->createChildSceneNode(node_name.str());
             Ogre::SceneNode* sceneNodeScale = sceneNode->createChildSceneNode();
              if(scaleLikeGeometry) {
-                sceneNodeScale->setScale(this->m_bodyScalesGroup[i](0),this->m_bodyScalesGroup[i](1),this->m_bodyScalesGroup[i](2));
+                sceneNodeScale->setScale(b.m_scale(0),b.m_scale(1),b.m_scale(2));
             } else {
                 sceneNodeScale->setScale(scale(0),scale(1),scale(2));
             }
@@ -294,8 +303,8 @@ protected:
             ent->setMaterialName(m_materialList[matIdx]);
 
             //Set initial condition
-            sceneNode->setPosition(this->m_bodyListGroup[i]->m_r_S(0),this->m_bodyListGroup[i]->m_r_S(1),this->m_bodyListGroup[i]->m_r_S(2));
-            sceneNode->setOrientation(this->m_bodyListGroup[i]->m_q_KI(0),this->m_bodyListGroup[i]->m_q_KI(1),this->m_bodyListGroup[i]->m_q_KI(2),this->m_bodyListGroup[i]->m_q_KI(3));
+            sceneNode->setPosition(b.m_body->m_r_S(0),b.m_body->m_r_S(1),b.m_body->m_r_S(2));
+            sceneNode->setOrientation(b.m_body->m_q_KI(0),b.m_body->m_q_KI(1),b.m_body->m_q_KI(2),b.m_body->m_q_KI(3));
 
 
             if( this->m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {

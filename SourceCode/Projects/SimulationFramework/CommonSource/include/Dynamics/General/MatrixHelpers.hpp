@@ -43,6 +43,21 @@ namespace MatrixHelpers{
        return true;
     }
 
+    /**
+    * Set a 3x3 Matrix from 6 values, in = [a_00,a_01,a_02,a_11,a_12,a_22]
+    */
+    template<typename PREC, typename Derived>
+    void setSymMatrix(typename MyMatrix<PREC>::Matrix33 &m , Eigen::EigenBase<Derived> & in){
+        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,6);
+        m(0,0)=in(0);
+        m(0,1)=in(1); m(1,0)=in(1);
+        m(0,2)=in(2); m(2,0)=in(2);
+        m(1,1)=in(3);
+        m(1,2)=in(4); m(2,1)=in(4);
+        m(3,3)=in(5);
+    }
+
+
 
 };
 

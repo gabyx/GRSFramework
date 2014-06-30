@@ -11,31 +11,25 @@ set(SIMULATIONFRAMEWORK_BUILD_NOGUI ON CACHE BOOL "Build the NOGUI version of Si
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_MPI )
 set(SIMULATIONFRAMEWORK_BUILD_MPI OFF CACHE BOOL "Build the MPI version of SimulationFramework")
 
-MARK_AS_ADVANCED( SIMFILECONVERTER_BUILD )
-set(SIMFILECONVERTER_BUILD ON CACHE BOOL "Build the SimFileConverter for the simulation files of the framework")
+MARK_AS_ADVANCED( SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER )
+set(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER ON CACHE BOOL "Build the SimFileConverter for the simulation files of the framework")
 
 
 # Set the makefile build type (only for make file based generators)
 MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )
 set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
 
+IF(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
+        SET(SimulationFrameworkName  "SimulationFramework ${CMAKE_BUILD_TYPE}")
+ENDIF()
 
-
-set(SimulationFrameworkName "SimulationFramework ${CMAKE_CXX_COMPILER_ID}")
-if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
-        set(SimulationFrameworkName  ${SimulationFrameworkName}${CMAKE_BUILD_TYPE})
-endif()
-
+MESSAGE(STATUS "Project name is: " ${SimulationFrameworkName})
 
 #The name of the project ====================================================================
 PROJECT(${SimulationFrameworkName})
 
-MESSAGE(STATUS "Project Name is: " ${SimulationFrameworkName})
-
-
-# If GNU C Compiler set warning lenght to one line for eclipse
+MESSAGE(STATUS "Compiler ID is: " ${CMAKE_CXX_COMPILER_ID})
 IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
-	MESSAGE(STATUS "Compiler ID is: " ${CMAKE_CXX_COMPILER_ID})
 	IF(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 	
 		SET(MYPROJECT_SET_COMPILER_FLAGS_INTERNAL TRUE CACHE INTERNAL "x" FORCE)
@@ -45,44 +39,53 @@ IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
 		
 		set(GCCFILTER_TOOL OFF CACHE BOOL "Use the perl script gccfilter , http://www.mixtion.org/gccfilter/, this tool gets appended to the gcc command" )
 		MARK_AS_ADVANCED(GCCFILTER_TOOL)
-
+    
 	ELSEIF ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
 
 		MESSAGE(STATUS "Setting Values for Clang")
 		SET(MYPROJECT_SET_COMPILER_FLAGS_INTERNAL TRUE CACHE INTERNAL "x" FORCE)
-		SET (CMAKE_C_FLAGS                "-Wall" CACHE STRING "Flags for C Compiler" FORCE)
-		SET (CMAKE_C_FLAGS_DEBUG          "-g" CACHE STRING "Flags for C Compiler for debug builds" FORCE)
-		SET (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for C Compiler for release minsize builds" FORCE)
-		SET (CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for C Compiler for release builds" FORCE)
-		SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for C Compiler for release builds with debug info" FORCE)
+		SET(CMAKE_C_FLAGS                "-Wall" CACHE STRING "Flags for C Compiler" FORCE)
+		SET(CMAKE_C_FLAGS_DEBUG          "-g" CACHE STRING "Flags for C Compiler for debug builds" FORCE)
+		SET(CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for C Compiler for release minsize builds" FORCE)
+		SET(CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for C Compiler for release builds" FORCE)
+		SET(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for C Compiler for release builds with debug info" FORCE)
 
-		#SET (CMAKE_CXX_FLAGS                "-Weverything -Wno-covered-switch -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -Wextra-semi -fdiagnostics-show-template-tree")
-		SET (CMAKE_CXX_FLAGS                "-w" CACHE STRING "Flags for CXX Compiler" FORCE)
-		SET (CMAKE_CXX_FLAGS_DEBUG          "-g" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
-		SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release minsize builds" FORCE)
-		SET (CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release builds" FORCE)
-		SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for CXX Compiler for release builds with debug info" FORCE)
-
+		SET (CMAKE_CXX_FLAGS               "-std=c++11 -ferror-limit=50 -Weverything -Wno-extra-semi -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -fdiagnostics-show-template-tree")
+		#SET(CMAKE_CXX_FLAGS                "std=c++11 -ferror-limit=50 -w" CACHE STRING "Flags for CXX Compiler" FORCE)
+		SET(CMAKE_CXX_FLAGS_DEBUG          "-g" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
+		SET(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release minsize builds" FORCE)
+		SET(CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release builds" FORCE)
+		SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for CXX Compiler for release builds with debug info" FORCE)
+        
+        SET(CMAKE_AR      "/usr/bin/local/llvm-ar" CACHE STRING "archiver" FORCE )
+        SET(CMAKE_LINKER  "/usr/bin/local/llvm-ld" CACHE STRING "linker tool" FORCE )
+        SET(CMAKE_NM      "/usr/bin/local/llvm-nm" CACHE STRING "nm tool" FORCE )
+        SET(CMAKE_OBJDUMP "/usr/bin/local/llvm-objdump" CACHE STRING "objdump tool" FORCE )
+        SET(CMAKE_RANLIB  "/usr/bin/local/llvm-ranlib" CACHE STRING "ranlib tool" FORCE )
+        
 	ENDIF()
 ENDIF()
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/;${CMAKE_MODULE_PATH}")
-message(STATUS "Module path is now set to: " ${CMAKE_MODULE_PATH} )
 
-include(PrintListMacro)
+
+
+SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/;${CMAKE_MODULE_PATH}")
+MESSAGE(STATUS "Module path is now set to: " ${CMAKE_MODULE_PATH} )
+
+INCLUDE(PrintListMacro)
 
 
 #Add some multithreaded build support =====================================================================================================
 MARK_AS_ADVANCED(MULTITHREADED_BUILD)
-set(MULTITHREADED_BUILD 12 CACHE STRING "How many threads are used to build the project")
+SET(MULTITHREADED_BUILD 12 CACHE STRING "How many threads are used to build the project")
 if(MULTITHREADED_BUILD AND NOT MULTITHREADED_BUILD_SET)
-	set(MULTITHREADED_BUILD_SET TRUE CACHE INTERNAL "internal check if we set the multithread stuff already" FORCE)
+	SET(MULTITHREADED_BUILD_SET TRUE CACHE INTERNAL "internal check if we set the multithread stuff already" FORCE)
 	if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
-            set(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM} -j${MULTITHREADED_BUILD}")
-            message(STATUS "Added arguments to CMAKE_BUILD_TOOL: ${CMAKE_MAKE_PROGRAM}")
+            SET(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM} -j${MULTITHREADED_BUILD}")
+            MESSAGE(STATUS "Added arguments to CMAKE_BUILD_TOOL: ${CMAKE_MAKE_PROGRAM}")
     elseif(MSVC)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-      message(STATUS "Added parallel build arguments to CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+      MESSAGE(STATUS "Added parallel build arguments to CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
     endif()
 endif()
 # ========================================================================================================================================
@@ -165,14 +168,14 @@ set(EIGEN_INCLUDE_DIR ${EIGEN3_INCLUDE_DIR})
 # Find Boost ====================================================================================================================================================
 message(STATUS "BOOST_ROOT is set to: $ENV{BOOST_ROOT}")
 if (WIN32 OR APPLE)
-    set(Boost_USE_STATIC_LIBS TRUE)
+    SET(Boost_USE_STATIC_LIBS TRUE)
 else ()
     # Statically linking boost to a dynamic Ogre build doesn't work on Linux 64bit
-    set(Boost_USE_STATIC_LIBS ${OGRE_STATIC})
+    SET(Boost_USE_STATIC_LIBS ${OGRE_STATIC})
 endif ()
 if (APPLE)
     if(OGRE_BUILD_PLATFORM_IPHONE)
-        set(Boost_COMPILER "-xgcc42")
+        SET(Boost_COMPILER "-xgcc42")
     endif()
 endif()
 set(Boost_ADDITIONAL_VERSIONS "1.46" "1.46.0" "1.46.1" "1.45" "1.45.0" "1.44" "1.44.0" "1.42" "1.42.0" "1.41.0" "1.41" "1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37" )
@@ -182,9 +185,9 @@ find_package(Boost COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
 if (NOT Boost_FOUND)
     # Try again with the other type of libs
     if(Boost_USE_STATIC_LIBS)
-        set(Boost_USE_STATIC_LIBS)
+        SET(Boost_USE_STATIC_LIBS)
     else()
-        set(Boost_USE_STATIC_LIBS ON)
+        SET(Boost_USE_STATIC_LIBS ON)
     endif()
     find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} REQUIRED)
 endif()
@@ -277,7 +280,7 @@ if(SIMULATIONFRAMEWORK_BUILD_MPI)
 add_subdirectory(Projects/GeneralRigidBodySimulationMPI)
 endif()
 
-if(SIMFILECONVERTER_BUILD)
+if(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER)
 add_subdirectory(Projects/SimFileConverter)
 endif()
 

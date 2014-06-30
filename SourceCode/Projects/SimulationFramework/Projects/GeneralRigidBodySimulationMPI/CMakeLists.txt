@@ -57,125 +57,51 @@ SET(STATES_SRC
 )
 
 SET(COMMON_INC
-    ${COMMONSOURCE_DIR}/include/Common/CPUTimer.hpp
-    ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/RedirectOutput.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/AssertionDebug.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
-    ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
-    ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
-    ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
-    ${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
-    ${COMMONSOURCE_DIR}/include/Common/TypenameComparision.hpp
-    ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/MPICommunicatorId.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/MPIMessageTag.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/MPIMessages.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/MPIInformation.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/MPICommunication.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/MPITopology.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/MPITopologyBuilder.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/MPISerializationHelpersEigen.hpp
-    ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
-    ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp
-    ${COMMONSOURCE_DIR}/include/Common/BitCount.hpp
 )
 SET(COMMON_SRC
-    ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
-    ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
     ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
-    ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
-    ${COMMONSOURCE_DIR}/src/Common/BitCount.cpp
-    
 )
 
 SET(DYNAMICS_INC
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/MultiBodySimFile.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/MultiBodySimFilePart.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPICommunicatorId.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPIMessageTag.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPIMessages.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPIInformation.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPICommunication.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopology.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopologyBuilder.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPISerializationHelpersEigen.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MultiBodySimFileMPI.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/MeshData.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/CartesianGrid.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/MakeCoordinateSystem.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/VectorToSkewMatrix.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/MatrixHelpers.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/QuaternionHelpers.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourMap.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourDataBodyCommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/BodyInfoMap.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/BodyCommunicator.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodyGarbageCollector.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodySolverDataMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodyMPI.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MoreauTimeStepperMPI.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/AddGyroTermVisitor.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactFrame.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/CollisionSolverMPI.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionFunctions.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/AABB.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/Ray.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/SphereGeometry.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/PlaneGeometry.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameter.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameterMap.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.icc
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitorsMPI.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCONoGMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionCommunicator.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionCommunicator.icc
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/NeighbourDataInclusionCommunication.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettingsMPI.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/FrontBackBuffer.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePool.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePoolVisBackFront.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/SharedBufferPlayback.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderBody.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/StateRecorderMPI.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderProcess.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
 )
 SET(DYNAMICS_SRC
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/CartesianGrid.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/General/MultiBodySimFile.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/General/MultiBodySimFilePart.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/MultiBodySimFileMPI.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Collider.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/BoxGeometry.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/Ray.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactParameterMap.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactModels.cpp
-     ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ConvexSets.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/DynamicsSystemMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/BodyCommunicator.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/CollisionSolverMPI.cpp
@@ -184,16 +110,21 @@ SET(DYNAMICS_SRC
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.cpp
 )
 
-
-
 SET(SYSTEMS_INC
     ${PROJECT_SOURCE_DIR}/include/Systems/SceneParserMPI.hpp
-    ${COMMONSOURCE_DIR}/include/Systems/SceneParser.hpp
-    ${COMMONSOURCE_DIR}/include/Systems/SharedBufferDynSys.hpp
 )
 
 SET(SYSTEMS_SRC
 )
+
+
+# COMMON FILES INCLUDE ====================================================================
+INCLUDE(IncludeModulesSimulationFramework)
+
+INCLUDE_SIMULATION_FRAMEWORK_MPI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${COMMONSOURCE_DIR})
+
+# ===========================================================================================
+
 
 # CUDA SOURCE INCLUDES ====================================================================
 if(SIMULATIONFRAMEWORK_USE_CUDA)
@@ -238,6 +169,8 @@ SET(SOURCE_FILES
     ${DYNAMICS_SRC}
     ${SYSTEMS_SRC}
     ${CUDA_SRC}
+    
+    ${GLOBAL_COMMON_SRC}
 )
 
 SET(INCLUDE_FILES
@@ -249,6 +182,8 @@ SET(INCLUDE_FILES
     ${DYNAMICS_INC}
     ${SYSTEMS_INC}
     ${CUDA_INC}
+    
+    ${GLOBAL_COMMON_INC}
 )
 
 
@@ -256,16 +191,9 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 
 #include directories
 set(INCLUDE_DIRS
-
-    #${NVIDIA_SDK_DIR}/common/inc
-    #${NVIDIA_SDK_DIR}/../shared/inc
     ${Boost_INCLUDE_DIRS}
     ${EIGEN_INCLUDE_DIR}
-#    ${TOON_INCLUDE_DIR}
-#    ${OGRE_INCLUDE_DIRS}
-#    ${OIS_INCLUDE_DIRS}
-    #${CEGUI_INCLUDE_DIR}
-#    ${STLSOFT_INCLUDE_DIR}
+    
     ${TICPP_INCLUDE_DIRS}
     ${COLLISIONLIB_INCLUDE_DIRS}
     ${ASSIMP_INCLUDE_DIRS}
@@ -287,20 +215,7 @@ set(INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/include/States/SimulationManager
     ${PROJECT_SOURCE_DIR}/include/Systems
 
-    ${COMMONSOURCE_DIR}/include/Common
-    ${COMMONSOURCE_DIR}/external/SRDelegates/include/
-    ${COMMONSOURCE_DIR}/external/FastFunc/include/
-    ${COMMONSOURCE_DIR}/external/getoptpp/
-    ${COMMONSOURCE_DIR}/external/getoptpp/src/
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry
-    ${COMMONSOURCE_DIR}/include/Dynamics/General
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion
-    ${COMMONSOURCE_DIR}/include/Systems
-    ${COMMONSOURCE_DIR}/include/Singeltons
-    ${COMMONSOURCE_DIR}/include/States
-    ${COMMONSOURCE_DIR}/include/States/SimulationManager
+    ${GLOBAL_COMMON_INC_DIR}
 
     ${CUDA_COMMON_INCLUDE_DIR}
 )

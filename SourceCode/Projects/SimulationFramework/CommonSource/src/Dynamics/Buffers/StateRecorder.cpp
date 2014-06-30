@@ -68,6 +68,7 @@ bool StateRecorder::createSimFileCopyFromReference(boost::filesystem::path new_f
 
 StateRecorder & StateRecorder::operator << (const DynamicsState* value) {
     m_binarySimFile << (value);
+    return *this;
 }
 
 

@@ -9,6 +9,8 @@
 #ifndef TypeDefs_hpp
 #define TypeDefs_hpp
 
+#include <random>
+
 #include "LayoutConfigDefs.hpp"
 
 
@@ -57,9 +59,13 @@ namespace GlobalConfigs {
 
         typedef CollisionSolver         CollisionSolverType;
 
-        typedef InclusionSolverCONoG       InclusionSolverType;
+        typedef InclusionSolverCONoG    InclusionSolverType;
         typedef InclusionSolverSettings InclusionSolverSettingsType;
 
+    };
+
+    namespace GeneralConfigs{
+         typedef std::mt19937 RandomGeneratorType;
     };
 
     namespace SolverConfigs {
@@ -95,6 +101,8 @@ namespace GlobalConfigs {
 };
 
 
+
+
 #define DEFINE_CONFIG_TYPES \
    DEFINE_SOLVER_CONFIG_TYPES \
 
@@ -120,11 +128,11 @@ namespace GlobalConfigs {
     typedef typename GlobalConfigs::TimeStepperConfigs::DynamicsSystemType                DynamicsSystemType; \
     DEFINE_RIGIDBODY_CONFIG_TYPES \
 
-
 #define DEFINE_RIGIDBODY_CONFIG_TYPES \
     typedef typename GlobalConfigs::DynamicSystemConfigs::RigidBodyType          RigidBodyType; \
     typedef typename GlobalConfigs::RigidBodyConfigs::RigidBodySolverDataType    RigidBodySolverDataType; \
-    DEFINE_LAYOUT_CONFIG_TYPES\
+    DEFINE_LAYOUT_CONFIG_TYPES \
+    DEFINE_GENERAL_CONFIG_TYPES
 
 #define DEFINE_LAYOUT_CONFIG_TYPES \
     typedef typename GlobalConfigs::RigidBodyConfigs::LayoutConfigType LayoutConfigType; \
@@ -133,6 +141,9 @@ namespace GlobalConfigs {
 #define DEFINE_MATRIX_TYPES \
     typedef typename GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC PREC; \
     DEFINE_MATRIX_TYPES_OF( GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC )
+
+#define DEFINE_GENERAL_CONFIG_TYPES \
+    typedef typename GlobalConfigs::GeneralConfigs::RandomGeneratorType RandomGenType;
 
 struct MyIOFormat {
     static Eigen::IOFormat Matlab;

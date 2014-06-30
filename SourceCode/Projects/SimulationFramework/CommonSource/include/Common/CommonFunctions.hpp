@@ -125,15 +125,6 @@ template<typename T> bool stringToType(T & t, const std::string& s){
 
 
 /**
-* @brief This functions returns a uniformally distributed random number:
-* @param low Lower bound of random number.
-* @param high Upper bound of random number.
-* @return Random number in range [low,high]
-*/
-double randd(double low, double high);
-
-
-/**
 * @brief This functions prints a std::vector, onliner :-)
 */
 template<typename Iterator>
@@ -169,21 +160,6 @@ void vec2Vec(const std::vector<PREC> &vec, Eigen::Matrix<PREC,M,1> &V){
 		V[i] = vec[i];
     }
 };
-
-/**
-* Set a 3x3 Matrix from 6 values, in = [a_00,a_01,a_02,a_11,a_12,a_22]
-*/
-template<typename PREC, typename Derived>
-void setSymMatrix(typename MyMatrix<PREC>::Matrix33 &m , Eigen::EigenBase<Derived> & in){
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,6);
-    m(0,0)=in(0);
-    m(0,1)=in(1); m(1,0)=in(1);
-    m(0,2)=in(2); m(2,0)=in(2);
-    m(1,1)=in(3);
-    m(1,2)=in(4); m(2,1)=in(4);
-    m(3,3)=in(5);
-}
-
 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector3.
@@ -437,6 +413,19 @@ template <class PREC> bool stringToVector4(typename MyMatrix<PREC>::Vector4 & ve
 
 	return true;
 }
+
+
+/**
+* Generates count random value and returns the last one.
+*/
+template<typename PREC, typename Generator, typename Distribution>
+PREC genRandomValues(PREC & value, Generator & g, Distribution & d, unsigned int count){
+    for(unsigned int i= 0; i<count; ++i){
+        value = d(g);
+    }
+    return value;
+}
+
 
 };
 

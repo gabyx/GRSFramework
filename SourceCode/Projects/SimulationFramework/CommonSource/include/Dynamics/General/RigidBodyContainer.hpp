@@ -89,7 +89,7 @@ public:
 
     template<typename Iterator>
     bool addBodies(Iterator beginIt, Iterator endIt){
-        for( auto it = beginIt; it!= endIt; it++){
+        for( auto it = beginIt; it!= endIt; ++it){
            auto res =  m_mapByHashedId.insert(*it);
            if( res.second == false){
                 return false;
@@ -101,7 +101,7 @@ public:
     /** Similiar to std::map::insert*/
     inline bool addBody(RigidBodyType* ptr){
         ASSERTMSG(ptr != nullptr, "Null pointer added!")
-        std::pair<typename MapByHashedIdType::iterator,bool> res=  m_mapByHashedId.insert(ptr);
+        std::pair<typename MapByHashedIdType::iterator,bool> res =  m_mapByHashedId.insert(ptr);
         return res.second;
     }
 
