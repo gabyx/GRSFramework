@@ -82,7 +82,7 @@ void StatePoolVisBackFront::resetStatePool(const RigidBodyStateContainerType & s
     state.m_StateType = DynamicsState::NONE;
     state.m_t = 0;
 
-    InitialConditionBodies::applyRigidBodyStatesToDynamicsState(state_init,state);
+    InitialConditionBodies::applyBodyStatesTo(state_init,state);
 
     // Fill in the initial values
     //*m_pool[0] = state;

@@ -2,6 +2,7 @@
 #define DYNAMICS_STATE_HPP
 
 #include <vector>
+#include <unordered_map>
 
 #include "TypeDefs.hpp"
 #include "AssertionDebug.hpp"
@@ -31,14 +32,13 @@ public:
 
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    RigidBodyState() {
-        m_id = 0 ;
+    RigidBodyState(){
+        m_id = 0;
         m_u.setZero();
         m_q.setZero();
     };
 
-    RigidBodyState(const RigidBodyIdType & id) {
-        m_id = id ;
+    RigidBodyState(const RigidBodyIdType & id):m_id(id) {
         m_u.setZero();
         m_q.setZero();
     };
@@ -94,8 +94,10 @@ public:
     typedef std::vector< RigidBodyState > RigidBodyStateListType;
 
     RigidBodyStateListType  m_SimBodyStates; ///< A vector comprising of all rigid body states of the system for simulated objects.
-
     RigidBodyStateListType  m_AniBodyStates; ///< A vector comprising of all rigid body states of the system for animated objects.
+
+    std::unordered_map<RigidBodyIdType, RigidBodyState*> * m_pIdToState;
+    bool m_randomAccess;
 
     RigidBodyStateListType::size_type getNSimBodies() const {return m_SimBodyStates.size();}
 

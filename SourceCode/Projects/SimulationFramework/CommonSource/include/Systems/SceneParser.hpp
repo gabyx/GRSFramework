@@ -1530,7 +1530,7 @@ protected:
 
         for(auto & b: m_bodyListGroup){
             std::cout << b.m_initState.m_q.transpose() << " , " << b.m_initState.m_u.transpose()  << std::endl;
-            InitialConditionBodies::applyRigidBodyStateToBody(b.m_initState,b.m_body);
+            InitialConditionBodies::applyBodyStateTo(b.m_initState,b.m_body);
         }
     }
 

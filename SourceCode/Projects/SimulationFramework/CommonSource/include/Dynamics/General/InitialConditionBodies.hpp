@@ -146,17 +146,17 @@ void setupPositionBodyPosAxisAngle(RigidBodyState & rigibodyState,
 
 // Prototype
 template<typename TRigidBody, typename TRigidBodyState>
-inline void applyRigidBodyStateToBody(const TRigidBodyState & rigidBodyState, TRigidBody  * body );
+inline void applyBodyStateTo(const TRigidBodyState & rigidBodyState, TRigidBody  * body );
 
 template<typename RigidBodyContainer, typename RigidBodyStatesContainer>
-inline void applyRigidBodyStatesToBodies(RigidBodyContainer & bodies, const RigidBodyStatesContainer & states ){
+inline void applyBodyStatesTo(const RigidBodyStatesContainer & states, RigidBodyContainer & bodies ){
 
     for(auto bodyIt = bodies.begin(); bodyIt!= bodies.end(); bodyIt++){
         auto resIt = states.find((*bodyIt)->m_id);
         if( resIt == states.end()){
             ERRORMSG(" There is no initial state for sim body id: " << RigidBodyId::getBodyIdString(*bodyIt) << std::endl);
         }
-        InitialConditionBodies::applyRigidBodyStateToBody( resIt->second, (*bodyIt) );
+        InitialConditionBodies::applyBodyStateTo( resIt->second, (*bodyIt) );
     }
 }
 
@@ -187,28 +187,42 @@ inline void applyRigidBodyStatesToBodies(RigidBodyContainer & bodies, const Rigi
 //}
 
 // Prototype
+
 template<typename TRigidBody, typename TRigidBodyState>
-inline void applyBodyToRigidBodyState( const TRigidBody  * body, TRigidBodyState & rigidBodyState );
+inline void applyBodyTo( const TRigidBody  * body, TRigidBodyState & rigidBodyState ) {
+    rigidBodyState.m_id = body->m_id;
+    rigidBodyState.m_q.template head<3>() = body->m_r_S;
+    rigidBodyState.m_q.template tail<4>() = body->m_q_KI;
+
+    if(body->m_pSolverData) {
+        rigidBodyState.m_u = body->m_pSolverData->m_uBuffer.m_back;
+    } else {
+        ASSERTMSG(false,"Your rigid body has no data in m_pSolverData (for velocity), this operation might be incorret!")
+        rigidBodyState.m_u.setZero();
+    }
+
+}
 
 template<typename TRigidBodyType, typename TRigidBodyList>
-inline void applyBodiesToDynamicsState(const TRigidBodyList & bodies,
-                                       DynamicsState & state ) {
+inline void applyBodiesTo(const TRigidBodyList & bodies,
+                          DynamicsState & state ) {
 
     typedef typename TRigidBodyType::LayoutConfigType LayoutConfigType;
 
-    ASSERTMSG(state.getNSimBodies() == bodies.size(), "Wrong Size" );
+    ASSERTMSG(state.getNSimBodies() == bodies.size(), "Wrong Size" << state.getNSimBodies() <<"!="<< bodies.size()<<std::endl );
     typename  TRigidBodyList::const_iterator bodyIt = bodies.begin();
     typename  DynamicsState::RigidBodyStateListType::iterator stateBodyIt = state.m_SimBodyStates.begin();
 
     for(bodyIt = bodies.begin(); bodyIt != bodies.end() ; bodyIt++) {
         //std::cout << RigidBodyId::getBodyIdString(*bodyIt) << std::cout;
-        applyBodyToRigidBodyState( (*bodyIt), (*stateBodyIt) );
+        ASSERTMSG(stateBodyIt->m_id ==  (*bodyIt)->m_id, "Id not the same:" << stateBodyIt->m_id << "!=" << (*bodyIt)->m_id << std::endl)
+        applyBodyTo( (*bodyIt), (*stateBodyIt) );
         stateBodyIt++;
     }
 }
 
 template<typename RigidBodyStatesContainer>
-inline void applyRigidBodyStatesToDynamicsState(const RigidBodyStatesContainer & states, DynamicsState & d ) {
+inline void applyBodyStatesTo(const RigidBodyStatesContainer & states, DynamicsState & d ) {
 
         ASSERTMSG(states.size() == d.m_SimBodyStates.size() ,
         " applyRigidBodyStatesToDynamicsState:: state_init has size: "
@@ -223,22 +237,7 @@ inline void applyRigidBodyStatesToDynamicsState(const RigidBodyStatesContainer &
 }
 
 template<typename TRigidBody, typename TRigidBodyState>
-inline void applyBodyToRigidBodyState( const TRigidBody  * body, TRigidBodyState & rigidBodyState ) {
-    rigidBodyState.m_id = body->m_id;
-    rigidBodyState.m_q.template head<3>() = body->m_r_S;
-    rigidBodyState.m_q.template tail<4>() = body->m_q_KI;
-
-    if(body->m_pSolverData) {
-        rigidBodyState.m_u = body->m_pSolverData->m_uBuffer.m_back;
-    } else {
-        ASSERTMSG(false,"Your rigid body has no data in m_pSolverData (for velocity), this operation might be incorret!")
-        rigidBodyState.m_u.setZero();
-    }
-
-}
-
-template<typename TRigidBody, typename TRigidBodyState>
-inline void applyRigidBodyStateToBody(const TRigidBodyState & rigidBodyState, TRigidBody  * body ) {
+inline void applyBodyStateTo(const TRigidBodyState & rigidBodyState, TRigidBody  * body ) {
     ASSERTMSG(body->m_id == rigidBodyState.m_id, "Body id is not the same!")
     body->m_r_S = rigidBodyState.m_q.template head<3>();
     body->m_q_KI = rigidBodyState.m_q.template tail<4>();

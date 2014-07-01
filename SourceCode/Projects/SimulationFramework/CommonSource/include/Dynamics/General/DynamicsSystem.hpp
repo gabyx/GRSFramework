@@ -113,11 +113,11 @@ inline void DynamicsSystem::applyInitStatesToBodies(){
 //                    << std::endl << "\t\t---> u: " << it->second.m_u.transpose() << std::endl;
 //                    );
 //    }
-    InitialConditionBodies::applyRigidBodyStatesToBodies(m_SimBodies, m_simBodiesInitStates);
+    InitialConditionBodies::applyBodyStatesTo(m_simBodiesInitStates, m_SimBodies);
 }
 
 inline void DynamicsSystem::applySimBodiesToDynamicsState(DynamicsState & state) {
-    InitialConditionBodies::applyBodiesToDynamicsState<RigidBodyType, RigidBodySimContainerType>(m_SimBodies,state);
+    InitialConditionBodies::applyBodiesTo<RigidBodyType, RigidBodySimContainerType>(m_SimBodies,state);
 }
 
 inline void DynamicsSystem::applyDynamicsStateToSimBodies(const DynamicsState & state) {
