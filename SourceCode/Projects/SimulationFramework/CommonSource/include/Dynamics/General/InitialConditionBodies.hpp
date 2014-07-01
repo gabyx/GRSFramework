@@ -149,11 +149,11 @@ template<typename TRigidBody, typename TRigidBodyState>
 inline void applyRigidBodyStateToBody(const TRigidBodyState & rigidBodyState, TRigidBody  * body );
 
 template<typename RigidBodyContainer, typename RigidBodyStatesContainer>
-inline void applyRigidBodyStatesToBodies(RigidBodyContainer & bodies, const RigidBodyStatesContainer & bodyDataCont ){
+inline void applyRigidBodyStatesToBodies(RigidBodyContainer & bodies, const RigidBodyStatesContainer & states ){
 
     for(auto bodyIt = bodies.begin(); bodyIt!= bodies.end(); bodyIt++){
-        auto resIt = bodyDataCont.find((*bodyIt)->m_id);
-        if( resIt == bodyDataCont.end()){
+        auto resIt = states.find((*bodyIt)->m_id);
+        if( resIt == states.end()){
             ERRORMSG(" There is no initial state for sim body id: " << RigidBodyId::getBodyIdString(*bodyIt) << std::endl);
         }
         InitialConditionBodies::applyRigidBodyStateToBody( resIt->second, (*bodyIt) );
@@ -196,7 +196,7 @@ inline void applyBodiesToDynamicsState(const TRigidBodyList & bodies,
 
     typedef typename TRigidBodyType::LayoutConfigType LayoutConfigType;
 
-    ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
+    ASSERTMSG(state.getNSimBodies() == bodies.size(), "Wrong Size" );
     typename  TRigidBodyList::const_iterator bodyIt = bodies.begin();
     typename  DynamicsState::RigidBodyStateListType::iterator stateBodyIt = state.m_SimBodyStates.begin();
 
@@ -207,6 +207,20 @@ inline void applyBodiesToDynamicsState(const TRigidBodyList & bodies,
     }
 }
 
+template<typename RigidBodyStatesContainer>
+inline void applyRigidBodyStatesToDynamicsState(const RigidBodyStatesContainer & states, DynamicsState & d ) {
+
+        ASSERTMSG(states.size() == d.m_SimBodyStates.size() ,
+        " applyRigidBodyStatesToDynamicsState:: state_init has size: "
+        << states.size() << "instead of " << d.m_SimBodyStates.size())
+
+        // Fill in the initial values
+        for(auto it = states.begin(); it!= states.end(); ++it) {
+            unsigned int bodyNr = RigidBodyId::getBodyNr(it->first);
+            ASSERTMSG(bodyNr < d.m_SimBodyStates.size(), "body nr: " << bodyNr << " out of bound for DynamicState!");
+            d.m_SimBodyStates[bodyNr] =  it->second;
+        }
+}
 
 template<typename TRigidBody, typename TRigidBodyState>
 inline void applyBodyToRigidBodyState( const TRigidBody  * body, TRigidBodyState & rigidBodyState ) {

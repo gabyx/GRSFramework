@@ -55,7 +55,7 @@ protected:
 
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
     void parseOtherOptions(const ticpp::Node * rootNode) {
-        LOG(this->m_pSimulationLog,"---> parse MPISettings..."<<std::endl;);
+        LOG(this->m_pSimulationLog,"---> Parse MPISettings..."<<std::endl;);
         parseMPISettings(rootNode);
 
 
@@ -128,19 +128,14 @@ protected:
             Ogre::SceneNode* sceneNodeScale = sceneNode->createChildSceneNode();
 
 
-
+            std::cout << b.m_scale.transpose() << std::endl;
             if(scaleLikeGeometry) {
-//                std::cout << "SCALE: " << b.m_scale <<std::endl;
-                if(b.m_scale(0)<=0 &&
-                   b.m_scale(1)<=0 &&
-                   b.m_scale(2)<=0) {
+                if(b.m_scale(0)<=0 || b.m_scale(1)<=0 || b.m_scale(2)<=0) {
                     throw ticpp::Exception("---> parseMesh:: Scale for Mesh: " + meshName.string() +"is zero or smaller!");
                 }
                 sceneNodeScale->setScale(b.m_scale(0),b.m_scale(1),b.m_scale(2));
             } else {
-                if(scale(0)<=0 &&
-                   scale(1)<=0 &&
-                   scale(2)<=0) {
+                if(scale(0)<=0 || scale(1)<=0 || scale(2)<=0) {
                     throw ticpp::Exception("---> parseMesh:: Scale for Mesh: " + meshName.string() + "is zero or smaller!");
                 }
                 sceneNodeScale->setScale(scale(0),scale(1),scale(2));
@@ -161,6 +156,7 @@ protected:
             ent->setMaterialName(m_materialList[matIdx]);
 
             //Set initial condition
+            std::cout << b.m_body->m_r_S.transpose() << "," << b.m_body->m_q_KI.transpose() << std::endl;
             sceneNode->setPosition(b.m_body->m_r_S(0),b.m_body->m_r_S(1),b.m_body->m_r_S(2));
             sceneNode->setOrientation(b.m_body->m_q_KI(0),b.m_body->m_q_KI(1),b.m_body->m_q_KI(2),b.m_body->m_q_KI(3));
 

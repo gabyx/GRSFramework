@@ -302,7 +302,8 @@ void MultiBodySimFile::write(double time, const TRigidBodyContainer & bodyList) 
     ASSERTMSG(m_nSimBodies == bodyList.size(),"You try to write "<<bodyList.size()
               <<"bodies into a file which was instanced to hold "<<m_nSimBodies);
     STATIC_ASSERT2((std::is_same<double, typename TRigidBodyContainer::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
-    for(auto it = bodyList.beginOrdered(); it != bodyList.endOrdered(); ++it) {
+    auto itEnd = bodyList.endOrdered();
+    for(auto it = bodyList.beginOrdered(); it != itEnd; ++it) {
         *this << (*it)->m_id;
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
@@ -424,19 +425,18 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
 MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
 
 
-    ASSERTMSG(m_nSimBodies == state->m_nSimBodies,
-              "You try to write "<<state->m_nSimBodies<<"bodies into a file which was instanced to hold "<<m_nSimBodies);
+    ASSERTMSG(m_nSimBodies == state->getNSimBodies(),
+              "You try to write "<<state->getNSimBodies()<<"bodies into a file which was instanced to hold "<<m_nSimBodies);
 
     // write time
     *this << (double)state->m_t;
     // write states
-    for(unsigned int i=0 ; i< state->m_nSimBodies; i++) {
+    for(auto & b : state->m_SimBodyStates) {
         STATIC_ASSERT2((std::is_same<double, typename DynamicsState::PREC>::value),
                        "OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
-
-        *this << state->m_SimBodyStates[i].m_id;
-        IOHelpers::writeBinary(m_file_stream, state->m_SimBodyStates[i].m_q );
-        IOHelpers::writeBinary(m_file_stream, state->m_SimBodyStates[i].m_u );
+        *this << b.m_id;
+        IOHelpers::writeBinary(m_file_stream, b.m_q );
+        IOHelpers::writeBinary(m_file_stream, b.m_u );
 
 //        AddBytes::write<m_additionalBytesType>(m_file_stream);
     }
@@ -448,9 +448,9 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
 
 
 MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState* state ) {
-
-    ASSERTMSG(m_nSimBodies == state->m_nSimBodies,
-              "You try to read "<<m_nSimBodies<<"bodies into a state which was instanced to hold "<<state->m_nSimBodies);
+    auto nSimBodies = state->getNSimBodies();
+    ASSERTMSG(m_nSimBodies == nSimBodies,
+              "You try to read "<<m_nSimBodies<<"bodies into a state which was instanced to hold "<<nSimBodies);
 
     // write time
     *this >> (double &)state->m_t;
@@ -459,7 +459,7 @@ MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState* state ) {
     state->m_StateType = DynamicsState::NONE;
     // write states
     RigidBodyIdType id;
-    for(unsigned int i=0 ; i< state->m_nSimBodies; i++) {
+    for(unsigned int i=0 ; i< nSimBodies; i++) {
 
         //m_file_stream >> state->m_SimBodyStates[i].m_q; //ADL fails
         *this >> id;

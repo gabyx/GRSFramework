@@ -67,9 +67,9 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    DynamicsState(const unsigned int nSimBodies):
-        m_nSimBodies(nSimBodies)
+    DynamicsState(const unsigned int nSimBodies)
     {
+        ASSERTMSG(nSimBodies, "nSimBodies == 0");
         m_t = 0.0;
         m_StateType = NONE;
         m_SimBodyStates.assign(nSimBodies,RigidBodyState());
@@ -77,13 +77,12 @@ public:
 
     ~DynamicsState(){};
 
-    DynamicsState & operator =(const DynamicsState& state){
+    DynamicsState & operator=(const DynamicsState& state){
         m_StateType = state.m_StateType;
         m_t = state.m_t;
-        ASSERTMSG( m_SimBodyStates.size() == state.m_SimBodyStates.size(), "DynamicsState:: Size mismatch!" );
-        for(int i=0; i<state.m_SimBodyStates.size(); i++) {
-            m_SimBodyStates[i] = state.m_SimBodyStates[i];
-        }
+        ASSERTMSG( m_SimBodyStates.size() == state.m_SimBodyStates.size(),
+                  "DynamicsState:: Size mismatch! " << m_SimBodyStates.size() << "!=" <<state.m_SimBodyStates.size() );
+        std::copy(state.m_SimBodyStates.begin(),state.m_SimBodyStates.end(), m_SimBodyStates.begin());
         return *this;
     }
 
@@ -95,9 +94,10 @@ public:
     typedef std::vector< RigidBodyState > RigidBodyStateListType;
 
     RigidBodyStateListType  m_SimBodyStates; ///< A vector comprising of all rigid body states of the system for simulated objects.
+
     RigidBodyStateListType  m_AniBodyStates; ///< A vector comprising of all rigid body states of the system for animated objects.
 
-    const unsigned int m_nSimBodies;
+    RigidBodyStateListType::size_type getNSimBodies() const {return m_SimBodyStates.size();}
 
     enum {NONE = 0, STARTSTATE=1, ENDSTATE = 2} m_StateType;
 };
@@ -112,9 +112,9 @@ void Interpolate::lerp( const RigidBodyState & A, const RigidBodyState & B, Rigi
 
 template<typename PREC>
 void Interpolate::lerp( const DynamicsState & A, const DynamicsState & B, DynamicsState & X, PREC factor) {
-    ASSERTMSG(A.m_nSimBodies == B.m_nSimBodies &&  B.m_nSimBodies == X.m_nSimBodies ,"Wrong number of bodies!");
+    ASSERTMSG(A.m_SimBodyStates.size() == B.m_SimBodyStates.size() &&  B.m_SimBodyStates.size() == X.m_SimBodyStates.size() ,"Wrong number of bodies!");
     X.m_t = X.m_t = A.m_t + factor*(B.m_t - A.m_t);
-    for(int i=0; i<A.m_SimBodyStates.size(); i++) {
+    for(int i=0; i<A.m_SimBodyStates.size(); i++){
         lerp(A.m_SimBodyStates[i],B.m_SimBodyStates[i],X.m_SimBodyStates[i],factor);
     }
 };

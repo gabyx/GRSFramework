@@ -9,6 +9,7 @@
 
 #include "FileManager.hpp"
 
+#include "InitialConditionBodies.hpp"
 
 /**
 * @ingroup StatesAndBuffers
@@ -60,8 +61,7 @@ public:
 protected:
     std::ofstream m_logfile;
 
-    const unsigned int m_nDofu, m_nDofq; // These are the global dimensions of q and u
-    const unsigned int m_nDofuBody, m_nDofqBody, m_nSimBodies; // These are the dimensions for one Obj
+    const unsigned int m_nSimBodies; // These are the dimensions for one Obj
 
 };
 /** @} */
@@ -77,23 +77,12 @@ void StatePoolVisBackFront::resetStatePool(const RigidBodyStateContainerType & s
     m_idx[1] = 0; //back
     m_idx[2] = 0; //vis
 
-
     DynamicsState & state = *m_pool[0];
 
     state.m_StateType = DynamicsState::NONE;
     state.m_t = 0;
 
-    if( state_init.size() != state.m_SimBodyStates.size()) {
-        ERRORMSG(" initializeStatePool:: state_init has size: " << state_init.size() << "instead of " << state.m_SimBodyStates.size());
-    }
-    // Fill in the initial values
-    for(auto it = state_init.begin(); it!= state_init.end(); ++it) {
-        unsigned int bodyNr = RigidBodyId::getBodyNr(it->first);
-        if( bodyNr > state.m_SimBodyStates.size()) {
-            ERRORMSG("body nr: " << bodyNr << " out of bound for DynamicState!")
-        }
-        state.m_SimBodyStates[bodyNr] =  it->second;
-    }
+    InitialConditionBodies::applyRigidBodyStatesToDynamicsState(state_init,state);
 
     // Fill in the initial values
     //*m_pool[0] = state;

@@ -4,11 +4,7 @@
 
 StatePoolVisBackFront::StatePoolVisBackFront(const unsigned int nSimBodies):
 StatePool(3),
-m_nSimBodies(nSimBodies),
-m_nDofqBody(NDOFqBody),
-m_nDofuBody(NDOFuBody),
-m_nDofq(m_nSimBodies * m_nDofqBody),
-m_nDofu(m_nSimBodies * m_nDofuBody)
+m_nSimBodies(nSimBodies)
 {
 
   // Add the 3 state pools, if m_state_pointer is deleted, all elements inside are deleted because of shared_ptr

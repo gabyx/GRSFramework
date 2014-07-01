@@ -79,6 +79,10 @@ public:
     SceneParser(std::shared_ptr<DynamicsSystemType> pDynSys)
         : m_pDynSys(pDynSys)
     {
+        m_pSimulationLog = nullptr;
+        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+        ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
+
         setStandartValues();
     }
 
@@ -96,7 +100,7 @@ public:
         m_parseSceneObjects      = true;
         m_parseSelectiveBodyIds  = true;
         m_bodyIdRange            = std::forward<BodyRangeType>(range);
-        m_parseBodiesNonSelGroup = parseBodiesNonSelGroup;
+        m_parseAllBodiesNonSelGroup = parseBodiesNonSelGroup;
         m_parseOnlySimBodies     = parseOnlySimBodies;
         m_parseDynamicProperties = parseDynamicProperties;
 
@@ -105,9 +109,9 @@ public:
         // If the range of bodies is empty, dont use it;
         if(m_bodyIdRange.empty() ){
             m_parseSelectiveBodyIds = false;
-        }else{
-            m_startRangeIdIt = m_bodyIdRange.begin();
         }
+        m_startRangeIdIt = m_bodyIdRange.begin();
+
         parseSceneIntern(file);
     }
 
@@ -120,7 +124,7 @@ public:
     {
         m_parseSceneObjects      = parseSceneObjects;
         m_parseSelectiveBodyIds  = false;
-        m_parseBodiesNonSelGroup = true;
+        m_parseAllBodiesNonSelGroup = true;
         m_parseOnlySimBodies     = parseOnlySimBodies;
         m_parseDynamicProperties = parseDynamicProperties;
 
@@ -131,7 +135,8 @@ public:
     virtual void cleanUp() {
 
         m_bodyListGroup.clear();
-
+        m_groupIdToNBodies.clear();
+        m_bodyIdRangeTmp.clear();
     }
 
     virtual boost::filesystem::path getParsedSceneFile() {
@@ -155,11 +160,6 @@ protected:
     }
 
     void setStandartValues(){
-
-        m_pSimulationLog = nullptr;
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
-        ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
-
         m_nSimBodies = 0;
         m_nBodies = 0;
         m_globalMaxGroupId = 0;
@@ -167,7 +167,6 @@ protected:
         m_parseDynamicProperties = true;
         m_parseSceneSettings = true;
         m_parseSceneObjects = true;
-
     }
 
     virtual void parseSceneIntern(const boost::filesystem::path & file){
@@ -191,7 +190,7 @@ protected:
         LOG( m_pSimulationLog, "     m_parseSceneSettings: " << m_parseSceneSettings << std::endl <<
                                "     m_parseSelectiveBodyIds: "  << m_parseSelectiveBodyIds << std::endl <<
                                "     m_parseOnlySimBodies: "  << m_parseOnlySimBodies << std::endl <<
-                               "     m_parseBodiesNonSelGroup: "  << m_parseBodiesNonSelGroup << std::endl <<
+                               "     m_parseAllBodiesNonSelGroup: "  << m_parseAllBodiesNonSelGroup << std::endl <<
                                "     m_parseDynamicProperties: "  << m_parseDynamicProperties << std::endl;);
 
         LOG( m_pSimulationLog, "---> Scene Input file: "  << file.string() <<std::endl; );
@@ -206,7 +205,8 @@ protected:
         m_nSimBodies = 0;
         m_nBodies = 0;
         m_bodyListGroup.clear();
-
+        m_groupIdToNBodies.clear();
+        m_bodyIdRangeTmp.clear();
 
         try {
 
@@ -751,8 +751,8 @@ protected:
 
     virtual void parseRigidBodies( ticpp::Node * rigidbodies ) {
 
-        LOG(m_pSimulationLog,"---> Parse RigidBodies ..."<<std::endl;);
         ticpp::Element* rigidBodiesEl = rigidbodies->ToElement();
+        LOG(m_pSimulationLog,"---> Parse RigidBodies, group name: "<< rigidBodiesEl->GetAttribute<std::string>("name",false) << std::endl;);
 
         //Clear current body list;
         m_bodyListGroup.clear();
@@ -793,10 +793,11 @@ protected:
         }
 
         // Skip group if we can:
-        if( (m_parseBodiesNonSelGroup==false && hasSelectiveFlag==false)
-            || ( m_eBodiesState != RigidBodyType::BodyState::SIMULATED  && m_parseOnlySimBodies==true)
-            || (m_parseSelectiveBodyIds==true && hasSelectiveFlag==true && m_startRangeIdIt==m_bodyIdRange.end()) // out of m_bodyIdRange, no more id's which could be parsed in
+        if( (!m_parseAllBodiesNonSelGroup && !hasSelectiveFlag)
+            || ( m_eBodiesState != RigidBodyType::BodyState::SIMULATED  && m_parseOnlySimBodies)
+            || (m_parseSelectiveBodyIds && hasSelectiveFlag && m_startRangeIdIt==m_bodyIdRange.end()) // out of m_bodyIdRange, no more id's which could be parsed in
              ) {
+            LOG(m_pSimulationLog, "Skip Group" << std::endl;)
             // update the number of bodies in this group and skip this group xml node
             *currGroupIdToNBodies += instances;
             return;
@@ -808,28 +809,36 @@ protected:
         LOG(m_pSimulationLog,"---> Group range: [" << RigidBodyId::getBodyIdString(m_startIdGroup)
                              << "," << RigidBodyId::getBodyIdString(endBodyId) << "]" << std::endl;)
 
-        if(m_parseSelectiveBodyIds==false || (m_parseBodiesNonSelGroup==true && hasSelectiveFlag==false )){
-            //overwrite range containing all bodies, if we don't parse selective ids, parse all bodies!
-            LOG(m_pSimulationLog,"---> overwrite selective range... " << std::endl;)
-            m_bodyIdRange = std::make_pair(m_startIdGroup,endBodyId);
-            m_startRangeIdIt = m_bodyIdRange.begin();
-        }else{
-            // parse group selective , determine start iterator in bodyRange
-            m_startRangeIdIt = std::lower_bound(m_startRangeIdIt,m_bodyIdRange.end(),m_startIdGroup);
-            if( m_startRangeIdIt == m_bodyIdRange.end()){ // no ids in the range
+        typename BodyRange::iterator bodyIdIt;
+        bool updateStartRange = false;
+
+        if(m_parseSelectiveBodyIds && hasSelectiveFlag){
+            // parse group selective , determine start iterator in bodyRang
+            m_bodyIdRangePtr = &m_bodyIdRange;
+            m_startRangeIdIt = std::lower_bound(m_startRangeIdIt,m_bodyIdRangePtr->end(),m_startIdGroup);
+            bodyIdIt = m_startRangeIdIt;
+            if( m_startRangeIdIt == m_bodyIdRangePtr->end()){ // no ids in the range
                 *currGroupIdToNBodies += instances;
+                LOG(m_pSimulationLog,"---> No ids in range: skip" << std::endl;)
                 return;
             }
-            LOG(m_pSimulationLog,"--->selective range startId: " <<
+            LOG(m_pSimulationLog,"---> Selective range startId: " <<
                                   RigidBodyId::getBodyIdString(*m_startRangeIdIt) << std::endl;)
+            updateStartRange = true;
+        }else{
+            // parse all bodies;
+            //overwrite range containing all bodies, if we don't parse selective ids, parse all bodies!
+            m_bodyIdRangePtr = &m_bodyIdRangeTmp;
+            m_bodyIdRangeTmp = std::make_pair(m_startIdGroup,endBodyId+1);
+            bodyIdIt = m_bodyIdRangePtr->begin();
+            LOG(m_pSimulationLog,"---> overwrite selective range... " << std::endl;)
         }
 
         // Adding bodies in the range =============================
         // iterator bodyRange till the id is > endBodyId or we are out of the bodyIdRange
-        auto itEnd = m_bodyIdRange.end();
+        auto itEnd = m_bodyIdRangePtr->end();
         m_parsedInstancesGroup = 0;
-        for( auto bodyIdIt = m_startRangeIdIt;
-             (bodyIdIt != itEnd) && ( *bodyIdIt <= endBodyId); bodyIdIt++ )
+        for( /* nothing*/ ; (bodyIdIt != itEnd) && ( *bodyIdIt <= endBodyId); ++bodyIdIt )
         {
             LOG(m_pSimulationLog,"---> Added RigidBody Instance: "<<RigidBodyId::getBodyIdString(*bodyIdIt)<<std::endl);
             // Push new body
@@ -837,6 +846,9 @@ protected:
 
             m_parsedInstancesGroup++;
         }
+
+        // Only update start range for selective parsing;
+        if(updateStartRange){ m_startRangeIdIt = bodyIdIt;}
 
         LOG(m_pSimulationLog,"---> Added "<<m_parsedInstancesGroup<<" RigidBody Instances..."<<std::endl;);
         // =======================================================
@@ -1461,10 +1473,10 @@ protected:
 
         // InitialPosition ============================================================
         ticpp::Node * node = dynProp->FirstChild("InitialCondition",true);
-        parseInitialCondition(node,true);
+        parseInitialCondition(node);
     }
 
-    virtual void parseInitialCondition(ticpp::Node * initCondNode, bool simBodies) {
+    virtual void parseInitialCondition(ticpp::Node * initCondNode) {
         ticpp::Element *element = nullptr;
         std::string distribute;
 
@@ -1494,7 +1506,7 @@ protected:
             }
 
             //Initial Velocity
-            if(m_parseDynamicProperties || simBodies == false) {
+            if(m_parseDynamicProperties && m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
                 ticpp::Node * initVel = initCondNode->FirstChild("InitialVelocity",false);
                 if(initVel) {
                     element = initVel->ToElement();
@@ -1517,6 +1529,7 @@ protected:
         }
 
         for(auto & b: m_bodyListGroup){
+            std::cout << b.m_initState.m_q.transpose() << " , " << b.m_initState.m_u.transpose()  << std::endl;
             InitialConditionBodies::applyRigidBodyStateToBody(b.m_initState,b.m_body);
         }
     }
@@ -1526,7 +1539,7 @@ protected:
 
         // InitialPosition ============================================================
         ticpp::Node * node = dynProp->FirstChild("InitialCondition",true);
-        parseInitialCondition(node,false);
+        parseInitialCondition(node);
 
 
         ticpp::Element *element = nullptr;
@@ -1846,15 +1859,20 @@ protected:
     bool m_parseSceneObjects;  ///< Parse SceneObjects, (default= true)
 
         bool m_parseSelectiveBodyIds;                ///< Use the m_bodyIdRange to only load the selective ids in the group which use enableSelectiveIds="true"
-        bool m_parseBodiesNonSelGroup;       ///< Parse all bodies in groups where m_bodyIdRange is not applied (enableSelectiveIds="false) (default= true)
+        bool m_parseAllBodiesNonSelGroup;       ///< Parse all bodies in groups where m_bodyIdRange is not applied (enableSelectiveIds="false) (default= true)
 
         bool m_parseOnlySimBodies;         ///< Parses only simulated bodies (default= false)
         bool m_parseDynamicProperties;     ///< Parse Dynamics stuff or do not. Playback Manager also has this SceneParser but does not need DynamicsStuff.
     //More settings
     // ===================================================
 
-    BodyRange m_bodyIdRange;                        ///< Range of body ids which
-    typename BodyRange::iterator m_startRangeIdIt;  ///< Current iterator which marks the start for the current group inm_bodyIdRange
+    BodyRange m_bodyIdRangeTmp;                     ///< Range of bodies, temporary for load of all bodies
+
+    BodyRange m_bodyIdRange;                        ///< Range of body ids, original list which is handed to parseScene
+    typename BodyRange::iterator m_startRangeIdIt;  ///< Current iterator which marks the start for the current group in m_bodyIdRange
+
+    BodyRange * m_bodyIdRangePtr;                   ///< Switches between m_bodyIdRangeTmp/m_bodyIdRange, depending on parsing state
+
     unsigned int m_parsedInstancesGroup;            ///< Number of instances generated in the current group
     RigidBodyIdType m_startIdGroup;                  ///< Start id of the current group smaller or equal to *m_startRangeIdIt
 

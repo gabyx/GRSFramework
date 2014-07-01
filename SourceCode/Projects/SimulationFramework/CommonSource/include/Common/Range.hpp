@@ -30,20 +30,22 @@ class Range{
 
         //Constructor for std::vector,
         // if called with rvalue (temporary) it gets moved already into v, then we move again into m_v
-        Range( RangeType v) : m_v(std::move(v)) {  sort(); }
+        Range( RangeType v) : m_v(std::move(v)) {  init(); }
 
         template<typename Iterator>
-        Range(Iterator begin, Iterator end) : m_v(begin,end) {  sort(); }
+        Range(Iterator begin, Iterator end) : m_v(begin,end) {  init(); }
 
         //if called with rvalue (temporary) it gets moved already into v, then we move again into m_v
 		Range & operator=( RangeType v ){
-		    using std::swap;
-            m_v=std::move(v); sort();
+            m_v=std::move(v); init();
 		}
 
+        /*
+        * Constructs a list in the range [p.first, p.second)
+        */
         template<typename T>
 		Range(const std::pair<T,T> & p){
-
+            m_linear = true;
 		    STATIC_ASSERT2( std::is_integral<T>::value , T_Needs_to_be_Integeral);
 		    unsigned int N;
 		    if(p.second < p.first){
@@ -52,8 +54,9 @@ class Range{
                 N = p.second-p.first;
 		    }
 			m_v.resize(N);
-			for(T i=0; i<N; i++){
-				m_v[i]=p.first+i;
+			unsigned int i=0;
+			for(auto & v : m_v){
+				v=p.first+i; ++i;
 			}
 		}
 
@@ -121,10 +124,13 @@ class Range{
 
 
     private:
+        bool m_linear;
         RangeType m_v;
 
-        inline void sort(){
+        inline void init(){
             std::sort(m_v.begin(),m_v.end());
+            ASSERTMSG( std::adjacent_find(m_v.begin(),m_v.end()) == m_v.end() , "Elements in Range<IntType> are not unique!")
+            m_linear = (m_v.size()>0) && ( m_v.size() == (m_v.back()- m_v.front() + 1) );
         }
 };
 

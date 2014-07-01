@@ -90,9 +90,10 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     if(sceneFilePath.empty()) {
         sceneFilePath = "SceneFile.xml";
     }
-    m_pSceneParser->parseScene(sceneFilePath,std::make_pair(1,4));
+    m_pSceneParser->parseScene(sceneFilePath,std::make_pair(RigidBodyId::makeId(1,1),RigidBodyId::makeId(4,1)));
 
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
+    std::cout << " m_nSimBodies: " << m_nSimBodies << std::endl;
     // =====================================================
 
 
@@ -104,7 +105,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     m_pStateRecorder = std::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added StateRecorder... ");
 
-
+    std::cout << "size simbodies: " << m_pDynSys->m_simBodiesInitStates.size() << std::endl;
     m_pSharedBuffer->resetStatePool(m_pDynSys->m_simBodiesInitStates);
     m_pSceneParser->cleanUp(); // Take care this cleans all stuff
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBuffer... ");
