@@ -136,7 +136,7 @@ bool SimulationManagerGUI::writeInitialState() {
     filename += SIM_INIT_FILE_EXTENSION;
     file /= filename;
     if(simFile.openWrite(file,NDOFqBody,NDOFuBody,m_nSimBodies)) {
-        simFile << m_pVisBuffer.get();
+        simFile << m_pVisBuffer;
         simFile.close();
         m_pSimulationLog->logMessage(std::string("Successfully written initial state file to:") + file.string() );
         return true;

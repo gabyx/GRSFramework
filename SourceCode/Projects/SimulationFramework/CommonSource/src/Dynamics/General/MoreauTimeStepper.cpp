@@ -188,14 +188,14 @@ unsigned int MoreauTimeStepper::getIterationCount() {
 
 
 
-std::shared_ptr<const DynamicsState>
+const DynamicsState *
 MoreauTimeStepper::getBackStateBuffer() {
     return m_StateBuffers.m_pBack;
 }
 
 
 
-std::shared_ptr<const DynamicsState>
+const DynamicsState *
 MoreauTimeStepper::getFrontStateBuffer() {
     return m_StateBuffers.m_pFront;
 }
@@ -225,7 +225,7 @@ void MoreauTimeStepper::doOneIteration() {
 
     // If we should load the state from a reference file! Do this here!
     if(m_Settings.m_eSimulateFromReference == TimeStepperSettings::USE_STATES && !m_bFinished) {
-        m_ReferenceSimFile >> m_StateBuffers.m_pFront.get();
+        m_ReferenceSimFile >> m_StateBuffers.m_pFront;
         m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
     }
 

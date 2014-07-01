@@ -67,7 +67,7 @@ private:
 
     void setShadowTechniques();
 
-    std::shared_ptr<const DynamicsState > m_pVisBuffer;
+    const DynamicsState * m_pVisBuffer;
 
     // Accessed only by thread ===================
     void threadRunSimulation();

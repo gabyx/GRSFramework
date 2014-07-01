@@ -33,7 +33,7 @@ public:
     /** @name Only accessed by Simulation Thread.
     * @{
     */
-    typedef FrontBackBuffer<DynamicsState, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
+    typedef FrontBackBuffer<DynamicsState, FrontBackBufferPtrType::NormalPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
 
     FrontBackBufferType getFrontBackBuffer();
     FrontBackBufferType swapFrontBackBuffer();
@@ -42,8 +42,8 @@ public:
     /** @name Only accessed by Visualization Thread.
     * @{
     */
-    std::shared_ptr<const DynamicsState > updateVisBuffer(bool & out_changed);
-    std::shared_ptr<const DynamicsState > updateVisBuffer();
+    const DynamicsState * updateVisBuffer(bool & out_changed);
+    const DynamicsState * updateVisBuffer();
     /** @} */
 
     /** @name Only accessed by if only Visualization Thread runs.

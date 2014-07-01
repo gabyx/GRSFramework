@@ -61,7 +61,7 @@ private:
 
   bool m_bReadFullState;
 
-  std::shared_ptr< DynamicsState > m_state; /**<   This is the actual loader state pointer ;*/
+  DynamicsState * m_state; /**<   This is the actual loader state pointer ;*/
   std::shared_ptr<TStatePool>	m_pStatePool;
 
   std::set<boost::filesystem::path> m_simFileList;
@@ -209,7 +209,7 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
              }
          }else if(current_state== READ_IN){
            i++;
-           m_binarySimFile >> m_state.get();
+           m_binarySimFile >> m_state;
             if(i % 20==0){
                LOG(m_pThreadLog,  "---> File loader buffering state: " << m_state->m_t <<"..."<<std::endl);
            }
@@ -259,7 +259,7 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
                current_state = READ_IN;
             }
          }else if(current_state== READ_IN){
-            m_binarySimFile >> m_state.get();
+            m_binarySimFile >> m_state;
                /*
                LOG(m_pThreadLog,  "Loaded m_t:" << m_state->m_t <<endl;);
                 */

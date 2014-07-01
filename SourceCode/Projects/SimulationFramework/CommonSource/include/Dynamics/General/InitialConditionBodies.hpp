@@ -215,7 +215,7 @@ inline void applyBodiesTo(const TRigidBodyList & bodies,
 
     for(bodyIt = bodies.begin(); bodyIt != bodies.end() ; bodyIt++) {
         //std::cout << RigidBodyId::getBodyIdString(*bodyIt) << std::cout;
-        ASSERTMSG(stateBodyIt->m_id ==  (*bodyIt)->m_id, "Id not the same:" << stateBodyIt->m_id << "!=" << (*bodyIt)->m_id << std::endl)
+        //ASSERTMSG(stateBodyIt->m_id ==  (*bodyIt)->m_id, "Id not the same:" << stateBodyIt->m_id << "!=" << (*bodyIt)->m_id << std::endl)
         applyBodyTo( (*bodyIt), (*stateBodyIt) );
         stateBodyIt++;
     }

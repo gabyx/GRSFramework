@@ -235,7 +235,7 @@ void PlaybackManager::threadRunSimulation() {
     // Wait for vis thread
     m_barrier_start.wait();
 
-    DynamicsState * currentState = m_pSharedBuffer->getSimBuffer().get();
+    DynamicsState * currentState = m_pSharedBuffer->getSimBuffer();
 
     state_time = 0;
     old_state_time =0;
@@ -250,7 +250,7 @@ void PlaybackManager::threadRunSimulation() {
             // Dont sync with timeline,
 
             //Make one step!
-            currentState = m_pSharedBuffer->advanceSimBuffer(bchangedState).get(); // Will move to the initial state at the beginning!
+            currentState = m_pSharedBuffer->advanceSimBuffer(bchangedState); // Will move to the initial state at the beginning!
             if(bchangedState) {
                 state_time = currentState->m_t;
                 deltaT = state_time - old_state_time; // Will be zero at the beginning
@@ -265,7 +265,7 @@ void PlaybackManager::threadRunSimulation() {
             state_time = currentState->m_t;
 
             if ( state_time <= timelineSimulation) {
-                currentState = m_pSharedBuffer->advanceSimBuffer(bchangedState).get();
+                currentState = m_pSharedBuffer->advanceSimBuffer(bchangedState);
             }
         }
 
