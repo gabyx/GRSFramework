@@ -869,7 +869,7 @@ protected:
                 if(!added) {ERRORMSG("Could not add body to m_SimBodies!, some bodies exist already in map!");};
 
             } else {
-                bool added = addAllBodies<false,true>(&m_pDynSys->m_SimBodies, &m_pDynSys->m_simBodiesInitStates);
+                bool added = addAllBodies(&m_initStates); //
                 if(!added) {ERRORMSG("Could not add body to m_SimBodies!, some bodies exist already in map!");};
             }
 
@@ -905,6 +905,14 @@ protected:
             if(addInitState){
                 added &= initStates->emplace(b.m_body->m_id, b.m_initState).second;
             }
+        }
+        return added;
+    }
+    template<typename StateContainer>
+    inline bool addAllBodies(StateContainer * initStates){
+        bool added = true;
+        for( auto & b : m_bodyListGroup){
+            added &= initStates->emplace(b.m_body->m_id, b.m_initState).second;
         }
         return added;
     }
@@ -1529,7 +1537,7 @@ protected:
         }
 
         for(auto & b: m_bodyListGroup){
-            std::cout << b.m_initState.m_q.transpose() << " , " << b.m_initState.m_u.transpose()  << std::endl;
+            std::cout <<"state::" << b.m_initState.m_q.transpose() << " , " << b.m_initState.m_u.transpose()  << std::endl;
             InitialConditionBodies::applyBodyStateTo(b.m_initState,b.m_body);
         }
     }
