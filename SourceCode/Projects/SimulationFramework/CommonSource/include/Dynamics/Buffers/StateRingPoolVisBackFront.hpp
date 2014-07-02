@@ -20,7 +20,7 @@
 * @{
 */
 
-class StateRingPoolVisBackFront : public StatePool {
+class StateRingPoolVisBackFront : public StatePool<DynamicsState> {
 public:
 
     DECLERATIONS_STATEPOOL
@@ -28,29 +28,33 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    StateRingPoolVisBackFront(const unsigned int nSimBodies);
+    typedef DynamicsState StateType;
+
+    template<typename RigidBodyIterator>
+    StateRingPoolVisBackFront(RigidBodyIterator itBegin, RigidBodyIterator itEnd);
+
     ~StateRingPoolVisBackFront();
 
     /** @name Only accessed by Simulation Thread.
     * @{
     */
-    DynamicsState * getSimBuffer();
-    DynamicsState * advanceSimBuffer(bool & out_changed);
+    StateType * getSimBuffer();
+    StateType * advanceSimBuffer(bool & out_changed);
     /** @} */
 
     /** @name Only accessed by Loader Thread.
     * @{
     */
-    DynamicsState * getLoadBuffer();
-    DynamicsState * advanceLoadBuffer(bool & out_changed);
+    StateType * getLoadBuffer();
+    StateType * advanceLoadBuffer(bool & out_changed);
     /** @} */
 
     /** @name Only accessed by Visualization Thread.
     * @{
     */
-    const DynamicsState * getVisBuffer();
-    const DynamicsState * updateVisBuffer(bool & out_changed);
-    const DynamicsState * updateVisBuffer();
+    const StateType * getVisBuffer();
+    const StateType * updateVisBuffer(bool & out_changed);
+    const StateType * updateVisBuffer();
     /** @} */
 
     /** @name Only accessed by if only Visualization Thread runs.
@@ -59,20 +63,9 @@ public:
     template<typename RigidBodyStateContainerType>
     void resetStateRingPool(const RigidBodyStateContainerType & state_init);
     /** @} */
-
-
-//    VectorUBody	getuInit(const unsigned idxObject);
-//    void				setuInit(const VectorUBody & u, const unsigned idxObject);
-//    VectorQBody	getqInit(const unsigned idxObject);
-//    void				setqInit(const VectorQBody & q, const unsigned idxObject);
-
-
 protected:
 
-    const unsigned int m_nSimBodies; // These are the dimensions for one Obj
-
     boost::mutex	m_mutexStateInit; ///< Mutex for the initial state.
-
     std::ofstream m_logfile;
 #define POOL_SIZE 50 ///< The ring pool size, must not exceed 256 and be lower than 3!, because of the integer for the index in the StatePool class.
 };
@@ -80,14 +73,17 @@ protected:
 
 
 
-StateRingPoolVisBackFront::StateRingPoolVisBackFront(const unsigned int nSimBodies):
-    StatePool(3),
-    m_nSimBodies(nSimBodies)
+template<typename RigidBodyIterator>
+StateRingPoolVisBackFront::StateRingPoolVisBackFront(RigidBodyIterator itBegin, RigidBodyIterator itEnd):
+    StatePool(3)
 {
 
     // Add the 3 state pools, if m_state_pointer is deleted, all elements inside are deleted because of shared_ptr
-    for(int i = 0; i < POOL_SIZE; i++) {
-        m_pool.push_back(new DynamicsState(nSimBodies));
+    m_pool.assign(POOL_SIZE, DynamicsState());
+
+    m_pool[0].initSimStates<true>(itBegin,itEnd);
+    for(int i=1;i<POOL_SIZE;i++){
+        m_pool[i] = m_pool[0];
     }
 
     m_idx[0] = 0; // vis
@@ -117,14 +113,13 @@ void StateRingPoolVisBackFront::resetStateRingPool(const RigidBodyStateContainer
     m_idx[1] = 0; // back
     m_idx[2] = 1; // front
 
-    DynamicsState & state = *m_pool[0];
-    state.m_StateType = DynamicsState::NONE;
-    state.m_t = 0;
+    StateType & state = m_pool[0];
+    state.reset();
 
     InitialConditionBodies::applyBodyStatesTo(state_init,state);
 
-    //*(m_pool[0]) = m_state_init; // Assignment operator
-    *(m_pool[1]) = state; // Assignment operator
+    //(m_pool[0]) = m_state_init; // Assignment operator
+    m_pool[1] = state; // Assignment operator
 
 #if LogToFileStateRingPool == 1
     m_logfile << "resetStateRingPool()"<<endl;
@@ -205,16 +200,16 @@ StateRingPoolVisBackFront::~StateRingPoolVisBackFront() {
 
 // ONLY USED IN SIM THREAD
 
-DynamicsState *
+StateRingPoolVisBackFront::StateType *
 StateRingPoolVisBackFront::getSimBuffer() {
     //cout << " idx: " << (unsigned int)m_idx[1] << endl;
-    return m_pool[m_idx[1]];
+    return &m_pool[m_idx[1]];
 }
 
 
 // ONLY USED IN SIM THREAD
 
-DynamicsState *
+StateRingPoolVisBackFront::StateType *
 StateRingPoolVisBackFront::advanceSimBuffer(bool & out_changed) {
     boost::mutex::scoped_lock l(m_change_pointer_mutex);
     // calculated next index!
@@ -223,7 +218,7 @@ StateRingPoolVisBackFront::advanceSimBuffer(bool & out_changed) {
     // advance only if the next index is not the same as the load buffer!
     if( next_index == m_idx[2]) {
         out_changed = false;
-        return m_pool[m_idx[1]];
+        return &m_pool[m_idx[1]];
     }
 
     m_idx[1] = next_index;
@@ -232,18 +227,18 @@ StateRingPoolVisBackFront::advanceSimBuffer(bool & out_changed) {
     m_logfile << "advanceSimBuffer()"<<endl;
     m_logfile << "vis: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t front: \t"<<(unsigned int)m_idx[2]<< endl;
 #endif
-    return m_pool[m_idx[1]];
+    return &m_pool[m_idx[1]];
 }
 
 // ONLY USED IN VISUALIZATION THREAD
 
-const DynamicsState *
+const StateRingPoolVisBackFront::StateType *
 StateRingPoolVisBackFront::updateVisBuffer(bool & out_changed) {
     boost::mutex::scoped_lock l(m_change_pointer_mutex);
 
     if(m_idx[0] == m_idx[1]) {
         out_changed = false;
-        return m_pool[m_idx[0]];
+        return &m_pool[m_idx[0]];
     }
     m_idx[0] = m_idx[1];
     out_changed = true;
@@ -253,30 +248,30 @@ StateRingPoolVisBackFront::updateVisBuffer(bool & out_changed) {
     m_logfile << "vis: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t front: \t"<<(unsigned int)m_idx[2]<< endl;
 #endif
 
-    return m_pool[m_idx[0]];
+    return &m_pool[m_idx[0]];
 }
 
 
-const DynamicsState *
+const StateRingPoolVisBackFront::StateType *
 StateRingPoolVisBackFront::updateVisBuffer() {
     bool out_changed;
     return updateVisBuffer(out_changed);
 }
 
 
-const DynamicsState * StateRingPoolVisBackFront::getVisBuffer() {
-    return m_pool[m_idx[0]];
+const StateRingPoolVisBackFront::StateType * StateRingPoolVisBackFront::getVisBuffer() {
+    return &m_pool[m_idx[0]];
 }
 
 
 
 
-DynamicsState * StateRingPoolVisBackFront::getLoadBuffer() {
-    return m_pool[m_idx[2]];
+StateRingPoolVisBackFront::StateType * StateRingPoolVisBackFront::getLoadBuffer() {
+    return &m_pool[m_idx[2]];
 }
 
 
-DynamicsState * StateRingPoolVisBackFront::advanceLoadBuffer( bool & out_changed ) {
+StateRingPoolVisBackFront::StateType * StateRingPoolVisBackFront::advanceLoadBuffer( bool & out_changed ) {
     boost::mutex::scoped_lock l(m_change_pointer_mutex);
     // calculated next index!
 
@@ -284,7 +279,7 @@ DynamicsState * StateRingPoolVisBackFront::advanceLoadBuffer( bool & out_changed
     // advance only if the next index is not the same as the load buffer!
     if( next_index == m_idx[0]) {
         out_changed = false;
-        return m_pool[m_idx[2]];
+        return &m_pool[m_idx[2]];
     }
 
     m_idx[2] = next_index;
@@ -294,7 +289,7 @@ DynamicsState * StateRingPoolVisBackFront::advanceLoadBuffer( bool & out_changed
     m_logfile << "advanceLoadBuffer()"<<endl;
     m_logfile << "vis: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t front: \t"<<(unsigned int)m_idx[2]<< endl;
 #endif
-    return m_pool[m_idx[2]];
+    return &m_pool[m_idx[2]];
 }
 
 

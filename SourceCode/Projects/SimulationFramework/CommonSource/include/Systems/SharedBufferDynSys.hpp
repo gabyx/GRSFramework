@@ -15,22 +15,14 @@ class SharedBufferDynSys : public StatePoolVisBackFront
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-	//Static and Dynamic allocation of the matrices in the class
-	SharedBufferDynSys(unsigned int nSimBodies):
-        StatePoolVisBackFront(nSimBodies)
-    {
-            //reset();
-    };
+	template<typename RigidBodyIterator>
+    SharedBufferDynSys(RigidBodyIterator itBegin, RigidBodyIterator itEnd):
+        StatePoolVisBackFront(itBegin,itEnd)
+    {};
 
 	~SharedBufferDynSys(){
       DECONSTRUCTOR_MESSAGE
     };
-
-//	void reset(){
-//        this->resetStatePool();
-//    };
 
 private:
 

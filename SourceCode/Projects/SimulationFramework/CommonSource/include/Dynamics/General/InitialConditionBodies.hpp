@@ -39,13 +39,13 @@ void setupPositionBodiesLinear(
 
     for(auto & b : bodyDataCont) {
         auto & state = b.m_initState;
-        i = b.m_body->m_id - startId;
+        i = b.m_initState.m_id - startId;
         state.m_q.template tail<4>() = Quaternion(1,0,0,0);
 
         if(jitter) {
 
-            r = Utilities::genRandomValues(r,gen,uni, b.m_body->m_id - diffId);
-            diffId = b.m_body->m_id;
+            r = Utilities::genRandomValues(r,gen,uni, b.m_initState.m_id - diffId);
+            diffId = b.m_initState.m_id;
 
             random_vec = Vector3(r,r,r);
             random_vec.normalize();
@@ -84,7 +84,7 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
     unsigned int i; // linear index from the front
     for(auto & b : bodyDataCont) {
         auto & state = b.m_initState;
-        i = b.m_body->m_id  - startId;
+        i = b.m_initState.m_id  - startId;
 
         state.m_q.template tail<4>() = Quaternion(1,0,0,0);
         int index_z = (i /(gDim_x*gDim_y));
@@ -93,8 +93,8 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
 
         if(jitter) {
 
-            r = Utilities::genRandomValues(r,gen,uni,b.m_body->m_id  - diffId);
-            diffId = b.m_body->m_id ;
+            r = Utilities::genRandomValues(r,gen,uni,b.m_initState.m_id  - diffId);
+            diffId = b.m_initState.m_id ;
 
             jitter_vec = Vector3(r,r,r) * delta;
         }

@@ -42,16 +42,16 @@ public:
 
     template<typename BodyRangeType>
     bool parseScene( const boost::filesystem::path & file,
-                             BodyRangeType&& range,
-                             bool parseDynamicProperties = true;
-                             bool parseSceneSettings = true,
-                             bool parseProcessTopology = true
+                     BodyRangeType&& range,
+                     bool parseOnlyVisualizationProperties = false;
+                     bool parseSceneSettings = true,
+                     bool parseProcessTopology = true
     {
         m_parseBodies = true;
         m_useBodyRange = true;
         m_bodyRange = std::forward<BodyRangeType>(range);
 
-        m_parseDynamicProperties = parseDynamicProperties;
+        m_parseOnlyVisualizationProperties = parseOnlyVisualizationProperties;
         m_parseSceneSettings = parseSceneSettings;
         m_parseProcessTopoplogy = parseProcessTopology;
 
@@ -59,7 +59,7 @@ public:
         if(m_bodyRange.empty() ){
             m_parseBodies = false;
             m_useBodyRange = false;
-            m_parseDynamicProperties = false;
+            m_parseOnlyVisualizationProperties = false;
         }
         ERROR("Parsing a range of bodies has not been implemented yet")
         parseSceneIntern(file);
@@ -77,7 +77,7 @@ public:
 protected:
 
 
-    virtual bool parseScene( boost::filesystem::path file)
+    bool parseSceneIntern( boost::filesystem::path file)
     {
         using namespace std;
         m_currentParseFilePath = file;
@@ -262,7 +262,7 @@ protected:
 
 
         ticpp::Node * dynPropNode = rigidbodies->FirstChild("DynamicProperties");
-        this->parseDynamicProperties(dynPropNode);
+        this->parseOnlyVisualizationProperties(dynPropNode);
 
 
         //Copy the pointers!
@@ -357,7 +357,7 @@ protected:
     using SceneParser::m_globalMaxGroupId;
     using SceneParser::m_nSimBodies;
     using SceneParser::m_nBodies;
-    using SceneParser::m_parseDynamicProperties;
+    using SceneParser::m_parseOnlyVisualizationProperties;
     using SceneParser::m_pDynSys;
     using SceneParser::m_currentParseFilePath;
     using SceneParser::m_currentParseFileDir;

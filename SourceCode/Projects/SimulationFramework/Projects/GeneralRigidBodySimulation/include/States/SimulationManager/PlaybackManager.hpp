@@ -9,7 +9,7 @@
 
 #include "TypeDefs.hpp"
 
-#include "SceneParserOgre.hpp"
+#include "SceneParserGUI.hpp"
 
 #include "PlaybackLoader.hpp"
 #include "PlaybackManagerBase.hpp"

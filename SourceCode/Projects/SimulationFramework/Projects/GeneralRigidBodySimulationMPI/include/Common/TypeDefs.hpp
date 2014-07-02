@@ -37,10 +37,10 @@ class MoreauTimeStepper;
 class InclusionSolverSettings;
 
 //Try to make framework settings simpler:
-namespace GlobalConfigs{
+struct GlobalConfigs{
 
     // Global definitions used below
-    namespace MyConfigs{
+    struct MyConfigs{
 
         typedef RigidBodyBaseMPI        RigidBodyType;
 
@@ -55,41 +55,41 @@ namespace GlobalConfigs{
 
     };
 
-    namespace GeneralConfigs{
+    struct GeneralConfigs{
          typedef std::mt19937 RandomGeneratorType;
     };
 
 
-    namespace SolverConfigs{
+    struct SolverConfigs{
         typedef MyConfigs::TimeStepperType              TimeStepperType;
     };
 
-    namespace TimeStepperConfigs{
+    struct TimeStepperConfigs{
         typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
         typedef typename MyConfigs::CollisionSolverType          CollisionSolverType;
         typedef typename MyConfigs::InclusionSolverType          InclusionSolverType;
     };
 
-    namespace DynamicSystemConfigs{
+    struct DynamicSystemConfigs{
         typedef typename MyConfigs::RigidBodyType                RigidBodyType;
         typedef typename MyConfigs::InclusionSolverSettingsType      InclusionSolverSettingsType;
     };
 
-    namespace RigidBodyConfigs{
+    struct RigidBodyConfigs{
         typedef LayoutConfig<double, GeneralLayout<7,6> > LayoutConfigType;
         typedef RigidBodySolverDataCONoGMPI RigidBodySolverDataType;
     }
 
 
-    namespace InclusionSolverConfigs{
+    struct InclusionSolverConfigs{
         typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
         typedef typename MyConfigs::InclusionSolverSettingsType  InclusionSolverSettingsType;
     };
-    namespace CollisionSolverConfigs{
+    struct CollisionSolverConfigs{
         typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
     };
 
-    namespace MPIInformationConfigs{
+    struct MPIInformationConfigs{
         typedef unsigned int RankIdType;
     };
 

@@ -131,7 +131,7 @@ SET(DYNAMICS_SRC
 )
 
 SET(SYSTEMS_INC
-    ${PROJECT_SOURCE_DIR}/include/Systems/SceneParserOgre.hpp
+    ${PROJECT_SOURCE_DIR}/include/Systems/SceneParserGUI.hpp
 )
 
 SET(SYSTEMS_SRC

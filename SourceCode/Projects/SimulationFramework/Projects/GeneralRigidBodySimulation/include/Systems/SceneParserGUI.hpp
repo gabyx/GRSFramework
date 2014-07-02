@@ -19,13 +19,33 @@ public:
         std::shared_ptr<Ogre::SceneManager> pSceneMgr,
         std::vector<Ogre::SceneNode*> &nodesSimBodies,
         std::vector<Ogre::SceneNode*> &nodesBodies,
-        std::shared_ptr<DynamicsSystemType> pDynSys = std::shared_ptr<DynamicsSystemType>())
+        std::shared_ptr<DynamicsSystemType> pDynSys = std::shared_ptr<DynamicsSystemType>(nullptr))
     : SceneParser(pDynSys),
       m_pSceneMgr(pSceneMgr),
       m_rSceneNodeSimBodies(nodesSimBodies),
       m_rSceneNodeBodies(nodesBodies),
       m_BaseFrame(baseFrame)
     {
+        // Pointers are now set correctly to the corresponding maps in pDynSys
+        ASSERTMSG(baseFrame != nullptr, "Pointer is nullptr");
+    }
+
+    // For simulation manager, playback manager doesnt set pDynSys, and does not parse Dynamics!
+    SceneParserOgre(
+        Ogre::SceneNode * baseFrame,
+        std::shared_ptr<Ogre::SceneManager> pSceneMgr,
+        std::vector<Ogre::SceneNode*> &nodesSimBodies,
+        std::vector<Ogre::SceneNode*> &nodesBodies)
+    : SceneParser(),
+      m_pSceneMgr(pSceneMgr),
+      m_rSceneNodeSimBodies(nodesSimBodies),
+      m_rSceneNodeBodies(nodesBodies),
+      m_BaseFrame(baseFrame)
+    {
+        // Pointers are now set correctly to the corresponding maps in pDynSys
+        m_pGlobalGeometries = nullptr;
+        m_pInitStates = nullptr;
+
         ASSERTMSG(baseFrame != nullptr, "Pointer is nullptr");
     }
 
@@ -110,7 +130,7 @@ protected:
 
         unsigned int i; // Linear offset form the m_startIdGroup
         for(auto & b : m_bodyListGroup) {
-            i = b.m_body->m_id - m_startIdGroup;
+            i = b.m_initState.m_id - m_startIdGroup;
 
             entity_name.str("");
             node_name.str("");
@@ -248,7 +268,7 @@ protected:
 
         unsigned int i; // linear offset from m_startIdGroup
         for(auto & b : m_bodyListGroup) {
-            i = b.m_body->m_id - m_startIdGroup;
+            i = b.m_initState.m_id - m_startIdGroup;
 
             entity_name.str("");
             node_name.str("");
@@ -480,37 +500,15 @@ protected:
     }
 
 
-    virtual typename DynamicsSystemType::GlobalGeometryMapType::iterator findGlobalGeomId(unsigned int id){
-
-        if( this->m_pDynSys ){
-            return this->m_pDynSys->m_globalGeometries.find(id);
-        }else{
-            return m_globalGeometries.find(id);
-        }
-
-    }
-
-    virtual typename DynamicsSystemType::GlobalGeometryMapType & getGlobalGeometryListRef(){
-        if( this->m_pDynSys ){
-            return this->m_pDynSys->m_globalGeometries;
-        }else{
-            return m_globalGeometries;
-        }
-    }
-
-
 protected:
 
-     std::vector<std::string> m_materialList;
+    std::vector<std::string> m_materialList;
 
     std::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
     Ogre::SceneNode * m_BaseFrame;
     std::vector<Ogre::SceneNode*>	&m_rSceneNodeSimBodies;
     std::vector<Ogre::SceneNode*>	&m_rSceneNodeBodies;
 
-
-    typename DynamicsSystemType::GlobalGeometryMapType m_globalGeometries;
-    typename DynamicsSystemType::ExternalForceListType m_externalForces;
 };
 
 

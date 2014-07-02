@@ -18,22 +18,23 @@
 * gives the state for the back buffer and the first index is the state corresponding to the front buffer.
 * @{
 */
-class StatePoolVisBackFront : public StatePool {
+class StatePoolVisBackFront : public StatePool<DynamicsState> {
 public:
 
     DECLERATIONS_STATEPOOL
-
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    typedef DynamicsState StateType;
 
-    StatePoolVisBackFront(const unsigned int nSimBodies);
+    template<typename RigidBodyIterator>
+    StatePoolVisBackFront(RigidBodyIterator itBegin, RigidBodyIterator itEnd);
+
     ~StatePoolVisBackFront();
 
     /** @name Only accessed by Simulation Thread.
     * @{
     */
-    typedef FrontBackBuffer<DynamicsState, FrontBackBufferPtrType::NormalPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
+    typedef FrontBackBuffer<StateType, FrontBackBufferPtrType::NormalPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
 
     FrontBackBufferType getFrontBackBuffer();
     FrontBackBufferType swapFrontBackBuffer();
@@ -42,8 +43,8 @@ public:
     /** @name Only accessed by Visualization Thread.
     * @{
     */
-    const DynamicsState * updateVisBuffer(bool & out_changed);
-    const DynamicsState * updateVisBuffer();
+    const StateType * updateVisBuffer(bool & out_changed);
+    const StateType * updateVisBuffer();
     /** @} */
 
     /** @name Only accessed by if only Visualization Thread runs.
@@ -53,18 +54,41 @@ public:
     void resetStatePool(const RigidBodyStateContainerType & state_init);
     /** @} */
 
-//    VectorUBody	getuInit(const unsigned idxObject);
-//    void						setuInit(const VectorUBody & u, const unsigned idxObject);
-//    VectorQBody	getqInit(const unsigned idxObject);
-//    void						setqInit(const VectorQBody & q, const unsigned idxObject);
 
 protected:
     std::ofstream m_logfile;
-
-    const unsigned int m_nSimBodies; // These are the dimensions for one Obj
-
 };
 /** @} */
+
+
+template<typename RigidBodyIterator>
+StatePoolVisBackFront::StatePoolVisBackFront(RigidBodyIterator itBegin, RigidBodyIterator itEnd):
+    StatePool(3)
+{
+    // Add the 3 state pools, managed by this class!
+    m_pool.assign(3,StateType());
+
+    m_pool[0].initSimStates<true>(itBegin,itEnd);
+    m_pool[1] = m_pool[0];
+    m_pool[2] = m_pool[0];
+
+    m_idx[0] = 1; //front
+    m_idx[1] = 0; //back
+    m_idx[2] = 0; //vis
+
+    // Init Log
+    boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+    filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
+    if(!boost::filesystem::exists(filePath)) {
+        boost::filesystem::create_directories(filePath);
+    }
+
+    filePath /= "StatePoolVisSimLog.log";
+    m_logfile.open(filePath.string().c_str());
+    m_logfile.clear();
+    m_logfile << "This is the State pool log file: each line describes the actual mode in which the state pool is\n";
+}
+
 
 
 template<typename RigidBodyStateContainerType>
@@ -77,16 +101,14 @@ void StatePoolVisBackFront::resetStatePool(const RigidBodyStateContainerType & s
     m_idx[1] = 0; //back
     m_idx[2] = 0; //vis
 
-    DynamicsState & state = *m_pool[0];
-
-    state.m_StateType = DynamicsState::NONE;
-    state.m_t = 0;
+    StateType & state = m_pool[0];
+    state.reset();
 
     InitialConditionBodies::applyBodyStatesTo(state_init,state);
 
     // Fill in the initial values
-    //*m_pool[0] = state;
-    *m_pool[1] = state;
+    //m_pool[0] = state;
+    m_pool[1] = state;
 
 #if LogToFileStatePool == 1
     m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;

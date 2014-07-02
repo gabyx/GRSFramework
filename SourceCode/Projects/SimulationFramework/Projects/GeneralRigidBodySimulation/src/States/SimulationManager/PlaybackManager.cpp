@@ -119,7 +119,7 @@ bool PlaybackManager::parseScene() {
     }
 
     m_pSceneParser = std::shared_ptr< SceneParserOgre >( new SceneParserOgre( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies) );
-    m_pSceneParser->parseScene(sceneFilePath,true,false,true);
+    m_pSceneParser->parseScene(sceneFilePath,false,true);
 
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
 

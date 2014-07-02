@@ -47,9 +47,9 @@ class MoreauTimeStepper;
 
 
 //Try to make framework settings simpler:
-namespace GlobalConfigs {
+struct GlobalConfigs {
 
-    namespace MyConfigs {
+    struct MyConfigs {
 
         typedef RigidBodyBase           RigidBodyType;
 
@@ -64,37 +64,37 @@ namespace GlobalConfigs {
 
     };
 
-    namespace GeneralConfigs{
+    struct GeneralConfigs{
          typedef std::mt19937 RandomGeneratorType;
     };
 
-    namespace SolverConfigs {
+    struct SolverConfigs {
         typedef MyConfigs::TimeStepperType                       TimeStepperType;
     };
 
-    namespace TimeStepperConfigs {
+    struct TimeStepperConfigs {
         typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
         typedef typename MyConfigs::CollisionSolverType          CollisionSolverType;
         typedef typename MyConfigs::InclusionSolverType          InclusionSolverType;
         typedef StatePoolVisBackFront                            StatePoolType;
     };
 
-    namespace DynamicSystemConfigs {
+    struct DynamicSystemConfigs {
         typedef typename MyConfigs::RigidBodyType                RigidBodyType;
         typedef typename MyConfigs::InclusionSolverSettingsType  InclusionSolverSettingsType;
     };
 
-    namespace RigidBodyConfigs {
+    struct RigidBodyConfigs {
         typedef LayoutConfig<double, GeneralLayout<7,6> >        LayoutConfigType;
         typedef RigidBodySolverDataCONoG                         RigidBodySolverDataType;
-    }
+    };
 
 
-    namespace InclusionSolverConfigs {
+    struct InclusionSolverConfigs {
         typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
         typedef typename MyConfigs::InclusionSolverSettingsType  InclusionSolverSettingsType;
     };
-    namespace CollisionSolverConfigs {
+    struct CollisionSolverConfigs {
         typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
     };
 
@@ -144,6 +144,7 @@ namespace GlobalConfigs {
 
 #define DEFINE_GENERAL_CONFIG_TYPES \
     typedef typename GlobalConfigs::GeneralConfigs::RandomGeneratorType RandomGenType;
+
 
 struct MyIOFormat {
     static Eigen::IOFormat Matlab;

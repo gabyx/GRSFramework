@@ -47,8 +47,8 @@ public:
     typedef RigidBodyContainer RigidBodyContainerType;
     typedef RigidBodyContainerType RigidBodySimContainerType;
     RigidBodySimContainerType m_SimBodies;    // Simulated Objects
-    typedef RigidBodySimContainerType RigidBodyStaticContainer;
-    RigidBodyStaticContainer m_Bodies;    // all not simulated objects
+    typedef RigidBodySimContainerType RigidBodyStaticContainerType;
+    RigidBodyStaticContainerType m_Bodies;    // all not simulated objects
 
     //All initial conditions for all bodies
     //We need an order, which is sorted according to the id!

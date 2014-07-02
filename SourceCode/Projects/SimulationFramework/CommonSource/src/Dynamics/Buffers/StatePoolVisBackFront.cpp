@@ -1,45 +1,11 @@
 #include "StatePoolVisBackFront.hpp"
 
 
-StatePoolVisBackFront::StatePoolVisBackFront(const unsigned int nSimBodies):
-    StatePool(3),
-    m_nSimBodies(nSimBodies) {
-
-    // Add the 3 state pools, managed by this class!
-    m_pool.push_back(new DynamicsState(nSimBodies));
-    m_pool.push_back(new DynamicsState(nSimBodies));
-    m_pool.push_back(new DynamicsState(nSimBodies));
-
-
-    m_idx[0] = 1; //front
-    m_idx[1] = 0; //back
-    m_idx[2] = 0; //vis
-
-
-
-
-    // Init Log
-    boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
-    filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
-    if(!boost::filesystem::exists(filePath)) {
-        boost::filesystem::create_directories(filePath);
-    }
-
-    filePath /= "StatePoolVisSimLog.log";
-    m_logfile.open(filePath.string().c_str());
-    m_logfile.clear();
-    m_logfile << "This is the State pool log file: each line describes the actual mode in which the state pool is\n";
-}
-
 
 
 
 
 StatePoolVisBackFront::~StatePoolVisBackFront() {
-    // Delete the pool
-    for(auto & p : m_pool) {
-        if(p){delete p;}
-    }
     DECONSTRUCTOR_MESSAGE
     m_logfile.close();
 }
@@ -108,7 +74,7 @@ StatePoolVisBackFront::~StatePoolVisBackFront() {
 
 typename StatePoolVisBackFront::FrontBackBufferType
 StatePoolVisBackFront::getFrontBackBuffer() {
-    return FrontBackBufferType(m_pool[m_idx[0]], m_pool[m_idx[1]]);
+    return FrontBackBufferType(&m_pool[m_idx[0]], &m_pool[m_idx[1]]);
 }
 
 // ONLY USED IN SIM THREAD
@@ -122,7 +88,7 @@ StatePoolVisBackFront::swapFrontBackBuffer() {
         m_logfile << "swapFrontBackBuffer()"<<endl;
         m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
 #endif
-        return FrontBackBufferType(m_pool[m_idx[0]], m_pool[m_idx[1]]);
+        return FrontBackBufferType(&m_pool[m_idx[0]], &m_pool[m_idx[1]]);
     }
     int new_front = 3 - m_idx[0] - m_idx[1]; //select the buffer which is currently unused
     m_idx[1] = m_idx[0];
@@ -133,7 +99,7 @@ StatePoolVisBackFront::swapFrontBackBuffer() {
     m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
 #endif
 
-    return FrontBackBufferType(m_pool[m_idx[0]], m_pool[m_idx[1]]);
+    return FrontBackBufferType(&m_pool[m_idx[0]], &m_pool[m_idx[1]]);
 }
 
 // ONLY USED IN VISUALIZATION THREAD
@@ -143,7 +109,7 @@ StatePoolVisBackFront::updateVisBuffer(bool & out_changed) {
     boost::mutex::scoped_lock l(m_change_pointer_mutex);
     if(m_idx[2] == m_idx[1]) {
         out_changed = false;
-        return m_pool[m_idx[2]];
+        return &m_pool[m_idx[2]];
     }
 
     m_idx[2] = m_idx[1];
@@ -154,7 +120,7 @@ StatePoolVisBackFront::updateVisBuffer(bool & out_changed) {
     m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
 #endif
 
-    return m_pool[m_idx[2]];
+    return &m_pool[m_idx[2]];
 }
 
 

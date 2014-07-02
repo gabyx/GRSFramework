@@ -24,12 +24,11 @@ public:
    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-   StateRecorderResampler(const unsigned nSimBodies):
+   template<typename RigidBodyIterator>
+    StateRecorderResampler(const unsigned int nSimBodies):
       StateRecorder(nSimBodies)
    {
-      m_pStateArray.push_back(new DynamicsState(nSimBodies));
-      m_pStateArray.push_back(new DynamicsState(nSimBodies));
-      m_pStateArray.push_back(new DynamicsState(nSimBodies));
+      m_pStateArray.assign(3, DynamicsState());
 
       reset();
       m_fps = 25; // Standart value
@@ -37,21 +36,13 @@ public:
       m_endTime = 1000000;
    };
 
-   ~StateRecorderResampler(){
-      for(int i=0; i< m_pStateArray.size();i++){
-         delete m_pStateArray[i];
-      }
-   };
+   ~StateRecorderResampler(){};
 
    void tryToWrite( const DynamicsState* state, bool bInterpolate){
-
-
       std::stringstream logstream;
-
        /*
        LOG(m_pStateRecorderLog, "Current resample time: " << m_currentResampleTime << "/ "<< m_startTime << " /" << m_endTime;);
        */
-
       if(m_currentResampleTime <= m_endTime){
          *m_pNextState = *state;
          if(state->m_t >= m_currentResampleTime){
@@ -90,9 +81,9 @@ public:
       m_currentResampleTime = m_startTime;
       m_bFirstInsert = true;
 
-      m_pPrevState = m_pStateArray[0];
-      m_pNextState = m_pStateArray[1];
-      m_pLerpState = m_pStateArray[2];
+      m_pPrevState = &m_pStateArray[0];
+      m_pNextState = &m_pStateArray[1];
+      m_pLerpState = &m_pStateArray[2];
    }
 
    void setFolderPath(boost::filesystem::path folderPath){
@@ -100,7 +91,7 @@ public:
    }
 
 private:
-   std::vector< DynamicsState *> m_pStateArray;
+   std::vector< DynamicsState > m_pStateArray;
    DynamicsState * m_pPrevState;
    DynamicsState * m_pNextState;
    DynamicsState * m_pLerpState;

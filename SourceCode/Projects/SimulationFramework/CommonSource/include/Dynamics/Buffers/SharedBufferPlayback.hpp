@@ -18,20 +18,15 @@
 class SharedBufferPlayback : public StateRingPoolVisBackFront {
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    //Static and Dynamic allocation of the matrices in the class
-    SharedBufferPlayback(unsigned int nSimBodies):
-        StateRingPoolVisBackFront(nSimBodies) {
-        //reset();
-    };
+    template<typename RigidBodyIterator>
+    SharedBufferPlayback(RigidBodyIterator itBegin, RigidBodyIterator itEnd):
+        StateRingPoolVisBackFront(itBegin,itEnd)
+    {};
+
     ~SharedBufferPlayback() {
         DECONSTRUCTOR_MESSAGE
     };
-
-//    void	reset() {
-//        StateRingPoolVisBackFront::resetStateRingPool();
-//    };
 
 private:
 

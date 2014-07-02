@@ -17,7 +17,7 @@
 #include "SimulationManagerBase.hpp"
 #include "InputContext.hpp"
 
-#include "SceneParserOgre.hpp"
+#include "SceneParserGUI.hpp"
 
 #include "DynamicCoordinateFrames.hpp"
 

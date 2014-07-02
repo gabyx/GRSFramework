@@ -90,7 +90,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     if(sceneFilePath.empty()) {
         sceneFilePath = "SceneFile.xml";
     }
-    m_pSceneParser->parseScene(sceneFilePath,std::make_pair(RigidBodyId::makeId(1,1),RigidBodyId::makeId(4,1)));
+    m_pSceneParser->parseScene(sceneFilePath,true,std::make_pair(RigidBodyId::makeId(1,1),RigidBodyId::makeId(4,1)));
 
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
     std::cout << " m_nSimBodies: " << m_nSimBodies << std::endl;
