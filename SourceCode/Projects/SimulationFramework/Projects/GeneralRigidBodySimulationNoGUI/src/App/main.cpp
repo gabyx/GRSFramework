@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
     SimulationManager mgr;
 
     mgr.setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
-    mgr.startSim();
+    //mgr.startSim();
 
 
     // Do post processes at the end of the simulation

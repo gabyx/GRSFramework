@@ -156,6 +156,9 @@ set(INCLUDE_DIRS
     
     #Linked Source
     ${SOURCE_DIR}/include/Common
+    
+    ${SOURCE_DIR}/external/pugixml
+    ${SOURCE_DIR}/external/pugixml
 
     ${GLOBAL_COMMON_INC_DIR}
     

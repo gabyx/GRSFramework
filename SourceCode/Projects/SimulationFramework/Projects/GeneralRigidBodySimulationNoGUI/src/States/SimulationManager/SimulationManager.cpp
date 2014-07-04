@@ -69,21 +69,21 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
     m_pDynSys = std::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
 
     // Parse the Scene from XML! ==========================
-    m_pSceneParser = std::shared_ptr< SceneParser >( new SceneParser( m_pDynSys) );
+    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(m_pDynSys) );
     m_pSceneParser->parseScene(sceneFilePath);
 
-    m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
+    //m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_nSimBodies << " Bodies!"  << std::endl;);
     // =====================================================
 
 
-    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys >(new SharedBufferDynSys(m_nSimBodies));
-    m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
-
-
-    m_pStateRecorder = std::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
-
-    m_pSharedBuffer->resetStatePool(m_pDynSys->m_simBodiesInitStates);
+//    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys >(new SharedBufferDynSys(m_nSimBodies));
+//    m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
+//
+//
+//    m_pStateRecorder = std::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
+//
+//    m_pSharedBuffer->resetStatePool(m_pDynSys->m_bodiesInitStates);
 
     m_pSceneParser->cleanUp();
 
@@ -136,7 +136,7 @@ void SimulationManager::writeAllOutput() {
                 // Write Data to CollisionDataFile
                 m_pTimestepper->writeIterationToCollisionDataFile();
                 // Write  State to Sim File
-                m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
+                m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer());
             }
 }
 

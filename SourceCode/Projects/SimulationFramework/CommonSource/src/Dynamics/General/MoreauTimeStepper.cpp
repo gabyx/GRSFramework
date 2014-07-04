@@ -127,7 +127,7 @@ void MoreauTimeStepper::reset() {
 
     m_pSimulationLog->logMessage("---> Reset StatePool...");
 
-    m_pStatePool->resetStatePool(m_pDynSys->m_simBodiesInitStates); // Sets initial values to front and back;
+    m_pStatePool->resetStatePool(m_pDynSys->m_bodiesInitStates); // Sets initial values to front and back;
     m_StateBuffers = m_pStatePool->getFrontBackBuffer();
 
     m_pSimulationLog->logMessage("---> Reset DynamicsSystem...");

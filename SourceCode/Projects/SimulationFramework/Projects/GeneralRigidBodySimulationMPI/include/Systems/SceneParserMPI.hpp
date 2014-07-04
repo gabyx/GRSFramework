@@ -295,7 +295,7 @@ protected:
 //                    << std::endl << "\t\t---> u: " << it->second.m_u.transpose() << std::endl;
 //                    );
 //            }
-            m_pDynSys->m_simBodiesInitStates.insert( m_initStatesGroup.begin(), m_initStatesGroup.end() );
+            m_pDynSys->m_bodiesInitStates.insert( m_initStatesGroup.begin(), m_initStatesGroup.end() );
 
 
 
@@ -337,7 +337,7 @@ protected:
                     LOG(m_pSimulationLog, RigidBodyId::getBodyIdString(*bodyIt));
 
                     // Delete the init state
-                    m_pDynSys->m_simBodiesInitStates.erase((*bodyIt)->m_id);
+                    m_pDynSys->m_bodiesInitStates.erase((*bodyIt)->m_id);
                     // Delete this body immediately!
                     bodyIt = simBodies.deleteBody(bodyIt);
 

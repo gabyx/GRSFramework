@@ -58,7 +58,7 @@ public:
     //All initial conditions for all bodies
     //We need an order, which is sorted according to the id!
     typedef std::map<RigidBodyIdType, RigidBodyState> RigidBodyStatesContainerType;
-    RigidBodyStatesContainerType m_simBodiesInitStates;
+    RigidBodyStatesContainerType m_bodiesInitStates;
 
 
     inline void addSimBodyPtr(RigidBodyType * ptr ) { m_SimBodies.addBody(ptr); }
@@ -118,7 +118,7 @@ protected:
 
 inline void DynamicsSystem::applyInitStatesToBodies(){
     // Apply all init states to the sim bodies
-    InitialConditionBodies::applyRigidBodyStatesToBodies(m_SimBodies, m_simBodiesInitStates);
+    InitialConditionBodies::applyRigidBodyStatesToBodies(m_SimBodies, m_bodiesInitStates);
 }
 
 

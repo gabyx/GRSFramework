@@ -105,8 +105,8 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     m_pStateRecorder = std::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added StateRecorder... ");
 
-    std::cout << "size simbodies: " << m_pDynSys->m_simBodiesInitStates.size() << std::endl;
-    m_pSharedBuffer->resetStatePool(m_pDynSys->m_simBodiesInitStates);
+    std::cout << "size simbodies: " << m_pDynSys->m_bodiesInitStates.size() << std::endl;
+    m_pSharedBuffer->resetStatePool(m_pDynSys->m_bodiesInitStates);
     m_pSceneParser->cleanUp(); // Take care this cleans all stuff
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBuffer... ");
 

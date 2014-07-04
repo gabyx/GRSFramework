@@ -27,6 +27,9 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
+    using TimeStepperSettingsType =  TimeStepperSettings;
+    using RecorderSettingsType    = RecorderSettings;
+
     DynamicsSystem();
     ~DynamicsSystem();
 
@@ -34,26 +37,27 @@ public:
     double m_gravity;
     Vector3 m_gravityDir;
 
-    ContactParameterMap m_ContactParameterMap;
+    using ContactParameterMapType = ContactParameterMap;
+    ContactParameterMapType m_ContactParameterMap;
 
-    typedef ExternalForceList ExternalForceListType;
+    using ExternalForceListType = ExternalForceList;
     ExternalForceListType m_externalForces; ///< Special class of function objects
 
     //All Global Geometries used in the System
-    typedef std::unordered_map< unsigned int /* id */, typename RigidBodyType::GeometryType> GlobalGeometryMapType;
+    using GlobalGeometryMapType =  std::unordered_map< unsigned int /* id */, typename RigidBodyType::GeometryType>;
     GlobalGeometryMapType m_globalGeometries;
 
     // All RigidBodies which are owned by this class!
-    typedef RigidBodyContainer RigidBodyContainerType;
-    typedef RigidBodyContainerType RigidBodySimContainerType;
+    using RigidBodyContainerType = RigidBodyContainer;
+    using RigidBodySimContainerType = RigidBodyContainerType;
     RigidBodySimContainerType m_SimBodies;    // Simulated Objects
-    typedef RigidBodySimContainerType RigidBodyStaticContainerType;
+    using RigidBodyStaticContainerType = RigidBodySimContainerType;
     RigidBodyStaticContainerType m_Bodies;    // all not simulated objects
 
     //All initial conditions for all bodies
     //We need an order, which is sorted according to the id!
-    typedef std::map<RigidBodyIdType, RigidBodyState> RigidBodyStatesContainerType;
-    RigidBodyStatesContainerType m_simBodiesInitStates;
+    using RigidBodyStatesContainerType = std::map<RigidBodyIdType, RigidBodyState>;
+    RigidBodyStatesContainerType m_bodiesInitStates;
 
 
     void initializeLog(Logging::Log* pLog);
@@ -67,15 +71,15 @@ public:
     void doFirstHalfTimeStep(PREC ts, PREC timestep);
     void doSecondHalfTimeStep(PREC te, PREC timestep);
 
-    void getSettings(RecorderSettings & settingsRecorder) const;
-    void getSettings(TimeStepperSettings &settingsTimestepper) const;
+    void getSettings(RecorderSettingsType & settingsRecorder) const;
+    void getSettings(TimeStepperSettingsType &settingsTimestepper) const;
     void getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const;
-    void getSettings(TimeStepperSettings &settingsTimestepper, InclusionSolverSettingsType &settingsInclusionSolver) const;
+    void getSettings(TimeStepperSettingsType &settingsTimestepper, InclusionSolverSettingsType &settingsInclusionSolver) const;
 
-    void setSettings(const RecorderSettings & settingsRecorder);
-    void setSettings(const TimeStepperSettings &settingsTimestepper);
+    void setSettings(const RecorderSettingsType & settingsRecorder);
+    void setSettings(const TimeStepperSettingsType &settingsTimestepper);
     void setSettings(const InclusionSolverSettingsType &settingsInclusionSolver);
-    void setSettings(const TimeStepperSettings &settingsTimestepper, const InclusionSolverSettingsType &settingsInclusionSolver);
+    void setSettings(const TimeStepperSettingsType &settingsTimestepper, const InclusionSolverSettingsType &settingsInclusionSolver);
 
     void reset();
     inline  void afterFirstTimeStep() {};
@@ -89,10 +93,48 @@ public:
     PREC m_currentRotKinEnergy;
     PREC m_currentSpinNorm;
 
+
+public:
+
+     // Create SceneParser Modules
+     template<typename TParser>
+     std::tuple< std::unique_ptr<typename TParser::SettingsModuleType >,
+                 std::unique_ptr<typename TParser::BodyModuleType >,
+                 std::unique_ptr<typename TParser::InitStatesModuleType >,
+                 std::unique_ptr<typename TParser::GlobalGeomModuleType >,
+                 std::unique_ptr<typename TParser::ExternalForcesModuleType >,
+                 std::unique_ptr<typename TParser::ContactParamModuleType>
+              >
+     createParserModules(TParser * p){
+
+        using SettingsModuleType       = typename TParser::SettingsModuleType ;
+        using ContactParamModuleType   = typename TParser::ContactParamModuleType;
+        using GlobalGeomModuleType     = typename TParser::GlobalGeomModuleType ;
+        using InitStatesModuleType     = typename TParser::InitStatesModuleType ;
+        using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
+        using BodyModuleType           = typename TParser::BodyModuleType ;
+        using VisModType               = typename TParser::BodyModuleType::VisModType ;
+
+
+        auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &m_SettingsRecorder,
+                                                                                   &m_SettingsTimestepper,
+                                                                                   &m_SettingsInclusionSolver));
+
+        auto geom = std::unique_ptr<GlobalGeomModuleType >(new GlobalGeomModuleType(p, &m_globalGeometries) );
+
+        auto is = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_bodiesInitStates));
+
+        auto bm = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), std::unique_ptr<VisModType>(nullptr), &m_SimBodies )) ;
+        auto es = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p));
+        auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&m_ContactParameterMap));
+
+        return std::make_tuple(std::move(sett),std::move(bm),std::move(is),std::move(geom),std::move(es),std::move(con));
+     }
+
 protected:
 
-    RecorderSettings m_SettingsRecorder;
-    TimeStepperSettings m_SettingsTimestepper;
+    RecorderSettingsType m_SettingsRecorder;
+    TimeStepperSettingsType m_SettingsTimestepper;
     InclusionSolverSettingsType m_SettingsInclusionSolver;
 
     //Function
@@ -107,13 +149,13 @@ protected:
 
 inline void DynamicsSystem::applyInitStatesToBodies(){
     // Apply all init states to the sim bodies
-//    for(auto it = m_simBodiesInitStates.begin(); it!=m_simBodiesInitStates.end();it++){
+//    for(auto it = m_bodiesInitStates.begin(); it!=m_bodiesInitStates.end();it++){
 //                LOG(&std::cout, "\t---> state id: " << RigidBodyId::getBodyIdString(it->first)
 //                    << std::endl << "\t\t---> q: " << it->second.m_q.transpose()
 //                    << std::endl << "\t\t---> u: " << it->second.m_u.transpose() << std::endl;
 //                    );
 //    }
-    InitialConditionBodies::applyBodyStatesTo(m_simBodiesInitStates, m_SimBodies);
+    InitialConditionBodies::applyBodyStatesTo(m_bodiesInitStates, m_SimBodies);
 }
 
 inline void DynamicsSystem::applySimBodiesToDynamicsState(DynamicsState & state) {
@@ -121,8 +163,7 @@ inline void DynamicsSystem::applySimBodiesToDynamicsState(DynamicsState & state)
 }
 
 inline void DynamicsSystem::applyDynamicsStateToSimBodies(const DynamicsState & state) {
-    ERRORMSG("NOT USED")
-    //InitialConditionBodies::applyDynamicsStateToBodies<RigidBodyType, RigidBodySimContainerType>(state,m_SimBodies);
+    ERRORMSG("NOT USED");
 }
 
 #endif

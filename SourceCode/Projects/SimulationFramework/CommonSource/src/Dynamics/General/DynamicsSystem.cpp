@@ -29,16 +29,16 @@ DynamicsSystem::~DynamicsSystem() {
 };
 
 
-void DynamicsSystem::getSettings(RecorderSettings & settingsRecorder) const {
+void DynamicsSystem::getSettings(RecorderSettingsType & settingsRecorder) const {
     settingsRecorder = m_SettingsRecorder;
 }
-void DynamicsSystem::setSettings(const RecorderSettings & settingsRecorder) {
+void DynamicsSystem::setSettings(const RecorderSettingsType & settingsRecorder) {
     m_SettingsRecorder = settingsRecorder;
 }
-void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper) const {
+void DynamicsSystem::getSettings(TimeStepperSettingsType &settingsTimestepper) const {
     settingsTimestepper = m_SettingsTimestepper;
 }
-void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper){
+void DynamicsSystem::setSettings(const TimeStepperSettingsType &settingsTimestepper){
     m_SettingsTimestepper = settingsTimestepper;
 }
 void DynamicsSystem::getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const {
@@ -47,12 +47,12 @@ void DynamicsSystem::getSettings(InclusionSolverSettingsType &settingsInclusionS
 void DynamicsSystem::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
     m_SettingsInclusionSolver = settingsInclusionSolver;
 }
-void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper,
+void DynamicsSystem::getSettings(TimeStepperSettingsType &settingsTimestepper,
                                  InclusionSolverSettingsType &settingsInclusionSolver) const {
     settingsTimestepper = m_SettingsTimestepper;
     settingsInclusionSolver = m_SettingsInclusionSolver;
 }
-void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper,
+void DynamicsSystem::setSettings(const TimeStepperSettingsType &settingsTimestepper,
                                  const InclusionSolverSettingsType &settingsInclusionSolver) {
     m_SettingsTimestepper = settingsTimestepper;
     m_SettingsInclusionSolver = settingsInclusionSolver;

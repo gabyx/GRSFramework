@@ -2,7 +2,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
     SET(${INC}
         ${COMMONSOURCE_DIR}/include/Singeltons/FileManager.hpp
-        
+
         ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
         ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
         ${COMMONSOURCE_DIR}/include/Common/BitCount.hpp
@@ -14,7 +14,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp
         ${COMMONSOURCE_DIR}/include/Common/CPUTimer.hpp
         ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
-        
+
         ${COMMONSOURCE_DIR}/include/Dynamics/General/LayoutConfigDefs.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/General/MeshData.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/General/MultiBodySimFile.hpp
@@ -66,26 +66,29 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
-        
+
         ${COMMONSOURCE_DIR}/include/Systems/SceneParser.hpp
-    
+
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePool.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePoolVisBackFront.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/SharedBufferPlayback.hpp
-        
+
         ${COMMONSOURCE_DIR}/include/Systems/SharedBufferDynSys.hpp
+        
+        
+        ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
     )
 
 
     SET(${SRC}
         ${COMMONSOURCE_DIR}/src/Singeltons/FileManager.cpp
-        
+
         ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
         ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
         ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
         ${COMMONSOURCE_DIR}/src/Common/BitCount.cpp
-        
+
         ${COMMONSOURCE_DIR}/src/Dynamics/General/MultiBodySimFile.cpp
         ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoG.cpp
         ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCO.cpp
@@ -103,16 +106,20 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ConvexSets.cpp
         ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactModels.cpp
         ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactParameterMap.cpp
-        
+
         ${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StatePoolVisBackFront.cpp
+        
+        
+        ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
     )
 
-    set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} 
+    set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
         ${COMMONSOURCE_DIR}/include/Common
         ${COMMONSOURCE_DIR}/external/SRDelegates/include/
         ${COMMONSOURCE_DIR}/external/FastFunc/include/
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
+        ${COMMONSOURCE_DIR}/external/pugixml/src
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
         ${COMMONSOURCE_DIR}/include/Dynamics/Collision
         ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry
@@ -142,10 +149,10 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
         ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
         ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
-        
+
         ${COMMONSOURCE_DIR}/include/Dynamics/General/MultiBodySimFile.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
-    
+
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
     )
 
@@ -156,7 +163,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/src/Dynamics/General/MultiBodySimFile.cpp
     )
 
-    set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} 
+    set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
     )

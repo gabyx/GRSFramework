@@ -69,7 +69,7 @@ protected:
     std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     std::shared_ptr<DynamicsSystemType>  m_pDynSys;
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;
+    typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
 
     typedef ContactGraph<ContactGraphMode::NoIteration> ContactGraphType;
     ContactGraphType m_ContactGraph;

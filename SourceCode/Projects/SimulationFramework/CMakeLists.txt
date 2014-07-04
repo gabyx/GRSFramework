@@ -284,7 +284,6 @@ if(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER)
 add_subdirectory(Projects/SimFileConverter)
 endif()
 
-add_subdirectory(Projects/SceneParserTest)
 
 
 # Copy Media Files to Project folder
