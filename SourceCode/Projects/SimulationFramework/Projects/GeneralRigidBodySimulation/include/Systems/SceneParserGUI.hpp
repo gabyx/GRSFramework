@@ -8,13 +8,13 @@
 
 #include "MakeCoordinateSystem.hpp"
 
-class SceneParserOgre : public SceneParser {
+class SceneParserGUI : public SceneParser {
 public:
 
     DEFINE_CONFIG_TYPES
 
     // For simulation manager, playback manager doesnt set pDynSys, and does not parse Dynamics!
-    SceneParserOgre(
+    SceneParserGUI(
         Ogre::SceneNode * baseFrame,
         std::shared_ptr<Ogre::SceneManager> pSceneMgr,
         std::vector<Ogre::SceneNode*> &nodesSimBodies,
@@ -31,7 +31,7 @@ public:
     }
 
     // For simulation manager, playback manager doesnt set pDynSys, and does not parse Dynamics!
-    SceneParserOgre(
+    SceneParserGUI(
         Ogre::SceneNode * baseFrame,
         std::shared_ptr<Ogre::SceneManager> pSceneMgr,
         std::vector<Ogre::SceneNode*> &nodesSimBodies,

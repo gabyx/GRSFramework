@@ -35,7 +35,7 @@ IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
 		SET(MYPROJECT_SET_COMPILER_FLAGS_INTERNAL TRUE CACHE INTERNAL "x" FORCE)
 		MESSAGE(STATUS "Setting Values for GNU")
 		SET(CMAKE_C_FLAGS "-fmessage-length=0" CACHE STRING "Flags for C Compiler" FORCE)
-		SET(CMAKE_CXX_FLAGS "-std=c++11 -ftree-vectorize -ftree-vectorizer-verbose=0 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" FORCE)
+		SET(CMAKE_CXX_FLAGS "-std=c++y -ftree-vectorize -ftree-vectorizer-verbose=0 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" FORCE)
 		
 		set(GCCFILTER_TOOL OFF CACHE BOOL "Use the perl script gccfilter , http://www.mixtion.org/gccfilter/, this tool gets appended to the gcc command" )
 		MARK_AS_ADVANCED(GCCFILTER_TOOL)
@@ -50,8 +50,8 @@ IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
 		SET(CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for C Compiler for release builds" FORCE)
 		SET(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for C Compiler for release builds with debug info" FORCE)
 
-		SET (CMAKE_CXX_FLAGS               "-std=c++11 -ferror-limit=50 -Weverything -Wno-extra-semi -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -fdiagnostics-show-template-tree")
-		#SET(CMAKE_CXX_FLAGS                "std=c++11 -ferror-limit=50 -w" CACHE STRING "Flags for CXX Compiler" FORCE)
+		SET (CMAKE_CXX_FLAGS               "-std=c++y -ferror-limit=50 -Weverything -Wno-extra-semi -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -fdiagnostics-show-template-tree")
+		#SET(CMAKE_CXX_FLAGS                "std=c++y -ferror-limit=50 -w" CACHE STRING "Flags for CXX Compiler" FORCE)
 		SET(CMAKE_CXX_FLAGS_DEBUG          "-g" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
 		SET(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release minsize builds" FORCE)
 		SET(CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release builds" FORCE)
@@ -283,6 +283,9 @@ endif()
 if(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER)
 add_subdirectory(Projects/SimFileConverter)
 endif()
+
+add_subdirectory(Projects/SceneParserTest)
+
 
 # Copy Media Files to Project folder
 # message(STATUS "Copying Media Content to " ${CMAKE_BINARY_DIR}/Projects/)

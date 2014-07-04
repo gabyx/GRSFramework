@@ -42,7 +42,7 @@ public:
 
     void setup(boost::filesystem::path sceneFilePath);
 
-    std::shared_ptr< SceneParserOgre > m_pSceneParser;
+    std::shared_ptr< SceneParserGUI > m_pSceneParser;
 
 
     void updateScene(double timeSinceLastFrame);

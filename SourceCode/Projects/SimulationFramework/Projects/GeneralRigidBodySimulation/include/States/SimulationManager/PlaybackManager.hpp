@@ -34,7 +34,7 @@ public:
 
     std::shared_ptr<SharedBufferPlayback >	m_pSharedBuffer;
 
-    std::shared_ptr< SceneParserOgre > m_pSceneParser;
+    std::shared_ptr< SceneParserGUI > m_pSceneParser;
 
     std::shared_ptr< VideoDropper > m_pVideoDropper;
     struct VideoDropSettings {

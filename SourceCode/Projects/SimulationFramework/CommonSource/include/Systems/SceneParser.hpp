@@ -261,6 +261,7 @@ protected:
 
     }
 
+    /// SceneSettings ==============================================================================
     // virtual
     virtual void parseOtherOptions(const ticpp::Node *rootNode) {
         /* Do nothing, only for derived classes! */
@@ -452,7 +453,6 @@ protected:
         parseGlobalGeometries(sceneSettings);
 
     }
-
     virtual void parseSceneSettings2( ticpp::Node *sceneSettings ) {
 
         LOG(m_pSimulationLog,"---> Parse SceneSettings2..."<<std::endl;);
@@ -487,7 +487,6 @@ protected:
 
 
     }
-
     virtual void parseContactParameter(ticpp::Element * contactParam, bool stdMaterial=false){
         typename RigidBodyType::BodyMaterialType material1,material2;
         if(!stdMaterial){
@@ -583,7 +582,6 @@ protected:
             }
         }
     }
-
     virtual void parseExternalForces( ticpp::Node *sceneSettings ) {
         ticpp::Node *externalForces = sceneSettings->FirstChild("ExternalForces",false);
         if(externalForces ) {
@@ -597,7 +595,6 @@ protected:
             }
         }
     }
-
     virtual void parseForceField( ticpp::Element * forceField) {
 
         bool enabled = false;
@@ -729,7 +726,6 @@ protected:
 
         }
     }
-
     virtual void setupInitialConditionBodiesFromFile_imp(boost::filesystem::path relpath, double &time , short which ){
 
         InitialConditionBodies::setupInitialConditionBodiesFromFile(relpath,m_pDynSys->m_simBodiesInitStates,time,true,true,which);
@@ -738,8 +734,9 @@ protected:
         m_pDynSys->applyInitStatesToBodies();
 
     }
+    ///  ============================================================================================
 
-
+    /// SceneObjects ==========================================================================================================
     virtual void parseSceneObjects( ticpp::Node *sceneObjects) {
         if(!m_parseSceneObjects){
             LOG(m_pSimulationLog,"---> Skip SceneObjects"<<std::endl;);
@@ -762,7 +759,6 @@ protected:
         }
 
     }
-
     virtual void parseRigidBodies( ticpp::Node * rigidbodies ) {
 
         ticpp::Element* rigidBodiesEl = rigidbodies->ToElement();
@@ -924,6 +920,7 @@ protected:
         return added;
     }
 
+    /// Geometries ==============================================================================
     virtual void parseGeometry( ticpp::Node * geometryNode, bool addToGlobalGeoms = false) {
 
         ASSERTMSG( (m_parseOnlyVisualizationProperties  && !addToGlobalGeoms) || (!m_parseOnlyVisualizationProperties) ,
@@ -944,7 +941,6 @@ protected:
             throw ticpp::Exception("---> The geometry '" + std::string(geometryNode->FirstChild()->Value()) + std::string("' has no implementation in the parser"));
         }
     }
-
     virtual void parseSphereGeometry( ticpp::Element * sphere, bool addToGlobalGeoms = false) {
         std::string type = sphere->GetAttribute("distribute");
 
@@ -1051,7 +1047,6 @@ protected:
 
 
     }
-
     virtual void parseHalfspaceGeometry( ticpp::Element * halfspace, bool addToGlobalGeoms = false) {
         std::string type = halfspace->GetAttribute("distribute");
         if(type == "uniform") {
@@ -1091,7 +1086,6 @@ protected:
             throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'Halfspace' has no implementation in the parser"));
         }
     }
-
     virtual void parseBoxGeometry( ticpp::Element * box, bool addToGlobalGeoms = false) {
         std::string type = box->GetAttribute("distribute");
         if(type == "uniform") {
@@ -1133,8 +1127,6 @@ protected:
             throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'Box' has no implementation in the parser"));
         }
     }
-
-
     virtual void parseMeshGeometry( ticpp::Element * mesh, bool addToGlobalGeoms = false) {
 
         std::shared_ptr<MeshGeometry > pMeshGeom;
@@ -1255,7 +1247,6 @@ protected:
             throw ticpp::Exception("---> The attribute 'type' '" + type + std::string("' of 'Mesh' has no implementation in the parser"));
         }
     }
-
     virtual void parseGlobalGeomId( ticpp::Element * globalGeomId ) {
 
         std::string distribute = globalGeomId->GetAttribute("distribute");
@@ -1367,6 +1358,7 @@ protected:
 
 
     }
+    ///  ================================================================================ Geometries
 
     typename DynamicsSystemType::GlobalGeometryMapType::iterator findGlobalGeomId(unsigned int id) {
         return m_pGlobalGeometries->find(id);
@@ -1393,19 +1385,7 @@ protected:
 
     }
 
-
-    virtual void fillMeshInfo( Assimp::Importer & importer, const aiScene* scene, MeshData & meshInfo, Vector3 scale_factor, Quaternion quat, Vector3 trans) {
-
-
-
-    }
-
-    virtual void checkFileExists(boost::filesystem::path file) {
-        if( !boost::filesystem::exists(file) ) {
-            throw ticpp::Exception("---> The file ' " + file.string() + "' does not exist!");
-        }
-    }
-
+    /// Dynamic Properties ==============================================================================
     virtual void parseDynamicProperties( ticpp::Node * dynProp) {
         LOG(m_pSimulationLog,"---> Parse DynamicProperties ..."<<std::endl;);
 
@@ -1422,7 +1402,6 @@ protected:
             parseDynamicPropertiesNotSimulated(dynProp);
         }
     }
-
     virtual void parseDynamicState(ticpp::Node * dynProp){
 
         ticpp::Element * element = dynProp->FirstChild("DynamicState")->ToElement();
@@ -1439,7 +1418,6 @@ protected:
         }
 
     }
-
     virtual void parseDynamicPropertiesSimulated( ticpp::Node * dynProp) {
         ticpp::Element *element = nullptr;
         std::string distribute;
@@ -1496,6 +1474,35 @@ protected:
         // InitialPosition ============================================================
         ticpp::Node * node = dynProp->FirstChild("InitialCondition",true);
         parseInitialCondition(node);
+    }
+    virtual void parseDynamicPropertiesNotSimulated( ticpp::Node * dynProp) {
+
+        // InitialPosition ============================================================
+        ticpp::Node * node = dynProp->FirstChild("InitialCondition",true);
+        parseInitialCondition(node);
+
+
+        ticpp::Element *element = nullptr;
+        std::string distribute;
+
+        if(!m_parseOnlyVisualizationProperties) {
+            element = dynProp->FirstChild("Material")->ToElement();
+            distribute = element->GetAttribute("distribute");
+            if(distribute == "uniform") {
+                typename RigidBodyType::BodyMaterialType eMaterial = 0;
+
+                if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(eMaterial, element->GetAttribute("id"))) {
+                    throw ticpp::Exception("---> String conversion in Material: id failed");
+                }
+
+                for(auto & b : m_bodyListGroup) {
+                    b.m_body->m_eMaterial = eMaterial;
+                }
+            } else {
+                throw ticpp::Exception("---> The attribute 'distribute' '" + distribute + std::string("' of 'Material' has no implementation in the parser"));
+            }
+        }
+
     }
 
     virtual void parseInitialCondition(ticpp::Node * initCondNode) {
@@ -1557,39 +1564,6 @@ protected:
             }
         }
     }
-
-
-    virtual void parseDynamicPropertiesNotSimulated( ticpp::Node * dynProp) {
-
-        // InitialPosition ============================================================
-        ticpp::Node * node = dynProp->FirstChild("InitialCondition",true);
-        parseInitialCondition(node);
-
-
-        ticpp::Element *element = nullptr;
-        std::string distribute;
-
-        if(!m_parseOnlyVisualizationProperties) {
-            element = dynProp->FirstChild("Material")->ToElement();
-            distribute = element->GetAttribute("distribute");
-            if(distribute == "uniform") {
-                typename RigidBodyType::BodyMaterialType eMaterial = 0;
-
-                if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(eMaterial, element->GetAttribute("id"))) {
-                    throw ticpp::Exception("---> String conversion in Material: id failed");
-                }
-
-                for(auto & b : m_bodyListGroup) {
-                    b.m_body->m_eMaterial = eMaterial;
-                }
-            } else {
-                throw ticpp::Exception("---> The attribute 'distribute' '" + distribute + std::string("' of 'Material' has no implementation in the parser"));
-            }
-        }
-
-    }
-
-
     virtual void parseInitialPositionLinear(ticpp::Element * initCond) {
 
         Vector3 pos;
@@ -1624,7 +1598,6 @@ protected:
         InitialConditionBodies::setupPositionBodiesLinear(m_bodyListGroup,m_startIdGroup,pos,dir,dist,jitter,delta,seed);
 
     }
-
     virtual void parseInitialPositionGrid(ticpp::Element * initCond) {
 
         Vector3 trans;
@@ -1660,16 +1633,14 @@ protected:
 
         InitialConditionBodies::setupPositionBodiesGrid(m_bodyListGroup,m_startIdGroup,gridX,gridY,dist,trans,jitter,delta, seed);
     }
-
-//    virtual void parseInitialPositionFile(DynamicsState & state, ticpp::Element * initCond) {
+    virtual void parseInitialPositionFile(DynamicsState & state, ticpp::Element * initCond) {
 //        m_SimBodyInitStates.push_back(DynamicsState((unsigned int)m_bodyListGroup.size()));
 //
 //        boost::filesystem::path name =  initCond->GetAttribute<std::string>("relpath");
 //
 //        boost::filesystem::path filePath = m_currentParseFileDir / name;
 //        InitialConditionBodies::setupPositionBodiesFromFile(state,filePath);
-//    }
-
+    }
     virtual void parseInitialPositionPosAxisAngle(ticpp::Element * initCond) {
 
         unsigned int consumedValues = 0;
@@ -1730,7 +1701,6 @@ protected:
             }
         }
     }
-
     virtual void parseInitialPositionTransforms(ticpp::Element * initCond) {
 
         unsigned int consumedValues = 0;
@@ -1814,7 +1784,6 @@ protected:
             }
         }
     }
-
     virtual void parseInitialVelocityTransRot(ticpp::Element * initCond) {
         unsigned int consumedValues = 0;
         Vector3 transDir,rotDir;
@@ -1869,10 +1838,19 @@ protected:
         }
 
     }
+    ///  =============================================================================== Dynamic Properties
 
     // virtual
     virtual void parseVisualization( ticpp::Node * visualizationNode) {
 
+    }
+    ///  ====================================================================================================== SceneObjects
+
+
+    virtual void checkFileExists(boost::filesystem::path file) {
+        if( !boost::filesystem::exists(file) ) {
+            throw ticpp::Exception("---> The file ' " + file.string() + "' does not exist!");
+        }
     }
 
 
