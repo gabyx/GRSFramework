@@ -21,14 +21,24 @@
 #include "TimeStepperSettings.hpp"
 
 
-class DynamicsSystem {
+class DynamicsSystemBase{
+public:
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    using TimeStepperSettingsType      = TimeStepperSettings;
+    using RecorderSettingsType         = RecorderSettings;
+    using ContactParameterMapType      = ContactParameterMap;
+    using ExternalForceListType        = ExternalForceList;
+    using GlobalGeometryMapType        = std::unordered_map< unsigned int, typename RigidBodyType::GeometryType>;
+    using RigidBodyContainerType       = RigidBodyContainer;
+    using RigidBodySimContainerType    = RigidBodyContainerType;
+    using RigidBodyStaticContainerType = RigidBodySimContainerType;
+    using RigidBodyStatesContainerType = std::map<RigidBodyIdType, RigidBodyState>;
+};
+
+class DynamicsSystem : public DynamicsSystemBase{
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-
-    using TimeStepperSettingsType =  TimeStepperSettings;
-    using RecorderSettingsType    = RecorderSettings;
 
     DynamicsSystem();
     ~DynamicsSystem();
@@ -37,26 +47,19 @@ public:
     double m_gravity;
     Vector3 m_gravityDir;
 
-    using ContactParameterMapType = ContactParameterMap;
     ContactParameterMapType m_ContactParameterMap;
-
-    using ExternalForceListType = ExternalForceList;
     ExternalForceListType m_externalForces; ///< Special class of function objects
 
     //All Global Geometries used in the System
-    using GlobalGeometryMapType =  std::unordered_map< unsigned int /* id */, typename RigidBodyType::GeometryType>;
     GlobalGeometryMapType m_globalGeometries;
 
     // All RigidBodies which are owned by this class!
-    using RigidBodyContainerType = RigidBodyContainer;
-    using RigidBodySimContainerType = RigidBodyContainerType;
+
     RigidBodySimContainerType m_SimBodies;    // Simulated Objects
-    using RigidBodyStaticContainerType = RigidBodySimContainerType;
     RigidBodyStaticContainerType m_Bodies;    // all not simulated objects
 
     //All initial conditions for all bodies
     //We need an order, which is sorted according to the id!
-    using RigidBodyStatesContainerType = std::map<RigidBodyIdType, RigidBodyState>;
     RigidBodyStatesContainerType m_bodiesInitStates;
 
 
@@ -101,7 +104,7 @@ public:
      std::tuple< std::unique_ptr<typename TParser::SettingsModuleType >,
                  std::unique_ptr<typename TParser::BodyModuleType >,
                  std::unique_ptr<typename TParser::InitStatesModuleType >,
-                 std::unique_ptr<typename TParser::GlobalGeomModuleType >,
+                 std::unique_ptr<typename TParser::GeometryModuleType >,
                  std::unique_ptr<typename TParser::ExternalForcesModuleType >,
                  std::unique_ptr<typename TParser::ContactParamModuleType>
               >
@@ -109,7 +112,7 @@ public:
 
         using SettingsModuleType       = typename TParser::SettingsModuleType ;
         using ContactParamModuleType   = typename TParser::ContactParamModuleType;
-        using GlobalGeomModuleType     = typename TParser::GlobalGeomModuleType ;
+        using GeometryModuleType       = typename TParser::GeometryModuleType ;
         using InitStatesModuleType     = typename TParser::InitStatesModuleType ;
         using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
         using BodyModuleType           = typename TParser::BodyModuleType ;
@@ -120,12 +123,12 @@ public:
                                                                                    &m_SettingsTimestepper,
                                                                                    &m_SettingsInclusionSolver));
 
-        auto geom = std::unique_ptr<GlobalGeomModuleType >(new GlobalGeomModuleType(p, &m_globalGeometries) );
+        auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &m_globalGeometries) );
 
-        auto is = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_bodiesInitStates));
+        auto is = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_bodiesInitStates, sett.get()));
 
-        auto bm = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), std::unique_ptr<VisModType>(nullptr), &m_SimBodies )) ;
-        auto es = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p));
+        auto bm = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), std::unique_ptr<VisModType>(nullptr), &m_SimBodies, &m_Bodies )) ;
+        auto es = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &m_externalForces));
         auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&m_ContactParameterMap));
 
         return std::make_tuple(std::move(sett),std::move(bm),std::move(is),std::move(geom),std::move(es),std::move(con));
@@ -140,7 +143,6 @@ protected:
     //Function
     //This is a minimal update of F, no checking if constant values are correct
     void updateFMatrix(const Quaternion & q, Matrix43 & F_i);
-
 
     // Log
     Logging::Log*	m_pSolverLog;

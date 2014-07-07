@@ -122,6 +122,10 @@ class Range{
             m_v.clear();
         }
 
+        typename RangeType::size_type size(){
+            return m_v.size();
+        }
+
 
     private:
         bool m_linear;

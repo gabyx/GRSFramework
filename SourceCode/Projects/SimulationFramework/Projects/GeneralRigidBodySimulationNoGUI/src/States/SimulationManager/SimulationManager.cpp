@@ -72,8 +72,8 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
     m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(m_pDynSys) );
     m_pSceneParser->parseScene(sceneFilePath);
 
-    //m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
-    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_nSimBodies << " Bodies!"  << std::endl;);
+    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SimBodies.size()
+        << "simulated & " << m_pDynSys->m_Bodies.size()<<  " static bodies! "  << std::endl;);
     // =====================================================
 
 

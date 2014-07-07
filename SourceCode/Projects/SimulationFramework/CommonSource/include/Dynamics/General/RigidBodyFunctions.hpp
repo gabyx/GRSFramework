@@ -22,8 +22,8 @@ namespace RigidBodyFunctions {
 
         // Massmatrix Inverse
         initMassMatrixInv<TRigidBody>(body);
-        // H_const term
-        body->m_h_term_const.template head<3>() =  (body)->m_mass * gravitiy;
+//        // H_const term
+//        body->m_h_term_const.template head<3>() =  (body)->m_mass * gravitiy;
     }
 
 

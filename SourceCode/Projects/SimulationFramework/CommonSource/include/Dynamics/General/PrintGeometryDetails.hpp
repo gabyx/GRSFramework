@@ -29,11 +29,11 @@ class PrintGeometryDetailsVisitor : public boost::static_visitor<> {
 
 
         void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom)  {
-            LOG(m_pLog, m_prefix << " radius: " <<sphereGeom->m_radius << std::endl);
+            LOG(m_pLog, m_prefix << "Sphere , radius: " <<sphereGeom->m_radius << std::endl);
         }
 
         void operator()(std::shared_ptr<const BoxGeometry > & box)  {
-            LOG(m_pLog, m_prefix << " extent: " <<box->m_extent << std::endl);
+            LOG(m_pLog, m_prefix << "Box,  extent: " <<box->m_extent << std::endl);
         }
 
         void operator()(std::shared_ptr<const MeshGeometry > & mesh)  {

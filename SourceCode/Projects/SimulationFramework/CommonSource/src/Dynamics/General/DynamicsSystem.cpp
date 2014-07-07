@@ -111,7 +111,7 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
         setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
 
         // Add in to h-Term ==========
-        pBody->m_h_term = pBody->m_h_term_const;
+        pBody->m_h_term.setZero();
 
         // Term omega x Theta * omega = if Theta is diagonal : for a Spehere for example!
         AddGyroTermVisitor vis(pBody);

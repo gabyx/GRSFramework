@@ -696,8 +696,6 @@ private:
         serializeEigen(ar,body->m_MassMatrix_diag);
         serializeEigen(ar,body->m_MassMatrixInv_diag);
         serializeEigen(ar,body->m_h_term);
-        serializeEigen(ar,body->m_h_term_const);
-
 
         if(body->m_eState == RigidBodyType::BodyState::SIMULATED) {
 

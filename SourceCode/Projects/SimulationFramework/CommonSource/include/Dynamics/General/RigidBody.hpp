@@ -72,7 +72,7 @@ public:
 
     VectorUBody m_MassMatrix_diag; ///< The mass matrix which is diagonal, \f$ \textrm{diag}(m,m,m, \textrm{diag}({_K}\mathbf{\Theta}_{S})) \f$.
     VectorUBody m_MassMatrixInv_diag;
-    VectorUBody m_h_term, m_h_term_const;
+    VectorUBody m_h_term;
 
     Matrix33 m_A_IK; ///< The transformation matrix \f$ \mathbf{A}_{IK} \f$ from K frame to the I frame which is updated at each timestep.
 
@@ -103,7 +103,6 @@ public:
 
         m_r_S.setZero();
         setQuaternionZero(m_q_KI);
-        m_h_term_const.setZero();
         m_h_term.setZero();
         m_eState = BodyState::STATIC;
         m_eMaterial = 0;
