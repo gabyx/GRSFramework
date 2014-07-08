@@ -59,7 +59,7 @@ private:
     std::shared_ptr< DynamicsSystemType > m_pDynSys;
     // ===========================================
 
-    int m_nSimBodies;
+    unsigned int m_nSimBodies;
 
     // File Paths for one Simulation, always reset ==============================
     boost::filesystem::path m_SimFolderPath;

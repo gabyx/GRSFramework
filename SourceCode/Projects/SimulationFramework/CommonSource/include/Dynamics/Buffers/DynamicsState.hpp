@@ -7,57 +7,15 @@
 #include "TypeDefs.hpp"
 #include "AssertionDebug.hpp"
 
-#include "QuaternionHelpers.hpp"
-#include "RigidBodyId.hpp"
+#include "RigidBodyState.hpp"
 
 //Prototype
-class DynamicsState;
 class DynamicsStateBase;
-class RigidBodyState;
 
 namespace Interpolate {
     template<typename PREC>
-    void lerp( const RigidBodyState & A, const RigidBodyState & B, RigidBodyState & X, PREC factor);
-    template<typename PREC>
     void lerp( const DynamicsStateBase & A, const DynamicsStateBase & B, DynamicsStateBase & X, PREC factor);
 };
-
-
-/**
-* @ingroup StatesAndBuffers
-* @brief This represents a dynamic state of a rigid body.
-*/
-class RigidBodyState {
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    DEFINE_LAYOUT_CONFIG_TYPES
-
-    RigidBodyState(){
-        m_id = 0;
-        m_u.setZero();
-        m_q.setZero();
-    };
-
-    RigidBodyState(const RigidBodyIdType & id):m_id(id) {
-        m_u.setZero();
-        m_q.setZero();
-    };
-
-    RigidBodyState & operator =(const RigidBodyState& state) {
-        m_id = state.m_id;
-        m_u = state.m_u;
-        m_q = state.m_q;
-        return *this;
-    }
-
-    friend void Interpolate::lerp<PREC>( const RigidBodyState & A, const RigidBodyState & B, RigidBodyState & X,PREC factor);
-    RigidBodyIdType m_id;
-    VectorQBody	m_q; ///< These are the generalized coordinates \f$\mathbf{q}\f$ of a rigid body.
-    VectorUBody	m_u; ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
-};
-
-
 
 /**
 * @ingroup StatesAndBuffers
@@ -80,7 +38,7 @@ public:
      *   We use here a linear continous memory since this class acts as a buffer which get written by the simulation and read by the visualization
      */
     RigidBodyStateListType  m_SimBodyStates; ///< A vector comprising of all rigid body states of the system for simulated objects.
-    RigidBodyStateListType  m_AniBodyStates; ///< A vector comprising of all rigid body states of the system for animated objects.
+    //RigidBodyStateListType  m_AniBodyStates; ///< A vector comprising of all rigid body states of the system for animated objects.
 };
 
 class DynamicsState: public DynamicsStateBase{
@@ -96,15 +54,7 @@ public:
 
     ~DynamicsState(){};
 
-    DynamicsState & operator=(const DynamicsState& state){
-        m_StateType = state.m_StateType;
-        m_t = state.m_t;
-        m_randomAccess  = state.m_randomAccess;
-        m_pIdToState    = state.m_pIdToState;
-        m_SimBodyStates = state.m_SimBodyStates;
-        m_AniBodyStates = state.m_AniBodyStates;
-        return *this;
-    }
+    DynamicsState & operator=(const DynamicsState& state) = default;
 
     void reset(){
       m_StateType = DynamicsState::NONE;
@@ -113,13 +63,13 @@ public:
 
     RigidBodyStateListType::size_type getNSimBodies() const {return m_SimBodyStates.size();}
 
-    template<bool resetState, typename RigidBodyIterator>
-    inline void initSimStates(RigidBodyIterator itBegin, RigidBodyIterator itEnd){
-        m_randomAccess = true;
+    template<bool resetState, typename TRigidBodyCont >
+    inline void initSimStates(const TRigidBodyCont & cont){
+        m_randomAccess = true; m_startIdx = 0;
         m_t = 0.0;
         m_StateType = NONE;
 
-        unsigned int nSimBodies = std::distance(itBegin,itEnd);
+        unsigned int nSimBodies = std::distance(cont.begin(),cont.end());
         ASSERTMSG(nSimBodies, "nSimBodies == 0");
         if(resetState){
             m_SimBodyStates.assign(nSimBodies,RigidBodyState());
@@ -127,23 +77,29 @@ public:
             m_SimBodyStates.resize(nSimBodies);
         }
 
-        unsigned int i = 0;
-        for(auto it = itBegin; it!= itEnd;it++){
+        //set startidx
+        auto itEnd = cont.end();
+        //set startidx
+        auto it = cont.begin();
+        m_startIdx = RigidBodyId::getBodyNr(*it);
+        auto sIt = m_SimBodyStates.begin();
+        for(; it!= itEnd;++it){
             // Check for continuity in ids
             auto id = (*it)->m_id;
             if( m_randomAccess && std::next(it)!=itEnd && (*std::next(it))->m_id - (*it)->m_id != 1 ){
                 m_randomAccess=false;
             }
-            m_SimBodyStates[i].m_id = id;
-            m_pIdToState.insert(std::make_pair(id,&m_SimBodyStates[i]));
+            sIt->m_id = id;
+            m_pIdToState.insert(std::make_pair(id,&(*sIt)));
         }
+        std::cout << "Random Access :" << m_randomAccess << std::endl;
     }
 
     /** Access the SimState for a given Id*/
-    RigidBodyState * getSimState(const RigidBodyIdType & id){
+    inline RigidBodyState * getSimState(const RigidBodyIdType & id){
         if(m_randomAccess){
-            auto bodyNr = RigidBodyId::getBodyNr(id);
-            if( bodyNr < m_SimBodyStates.size()){
+            auto bodyNr = RigidBodyId::getBodyNr(id)- m_startIdx;
+            if( bodyNr < m_SimBodyStates.size() && bodyNr>=0){
                 return &m_SimBodyStates[bodyNr];
             }
         }else{
@@ -153,6 +109,81 @@ public:
             }
         }
         return nullptr;
+    }
+
+    template< bool sequenceMatch = false, typename TRigidBodyStatesCont>
+    void applyBodyStates(const TRigidBodyStatesCont & states) {
+
+
+
+        // If both sequence (ids of states and internal mSimBodyStates are in sequenc, we can just simply iterate over all states and apply them
+        if(sequenceMatch){
+            ASSERTMSG(states.size() == m_SimBodyStates.size() , "states container has size: "
+            << states.size() << "instead of " << m_SimBodyStates.size())
+            auto s = states.begin();
+            for(auto & state : m_SimBodyStates){
+                state = s->second;
+                ++s;
+            }
+        }else{
+            // If sequence does not match, either do the random access version or the no random access version
+            // Fill in the initial values
+            if(m_randomAccess){ // fast if we have random access!
+                auto itEnd = states.end();
+                for(auto it = states.begin(); it!=itEnd ; ++it) {
+                    unsigned int bodyNr = RigidBodyId::getBodyNr(it->first) - m_startIdx;
+                    //WARNINGMSG( (bodyNr < m_SimBodyStates.size() && bodyNr>=0) , "body nr: " << bodyNr << " out of bound for DynamicState!");
+                    if( bodyNr < m_SimBodyStates.size() && bodyNr>=0 ){
+                        m_SimBodyStates[bodyNr] =  it->second;
+                    }
+                }
+            }else{
+                auto itEnd = states.end();
+                for(auto it = states.begin(); it!=itEnd ; ++it) {
+                    auto id = m_pIdToState.find(it->first); // find id
+                    if(id!=m_pIdToState.end()){
+                        *id->second = it->second;
+                    }
+                }
+            }
+        }
+    }
+
+    template< bool sequenceMatch = false, typename TRigidBodyCont>
+    inline void applyBodies(const TRigidBodyCont & bodies) {
+
+        ASSERTMSG(m_SimBodyStates.size() == bodies.size(), "Wrong Size" << m_SimBodyStates.size() <<"!="<< bodies.size()<<std::endl );
+
+
+        if(sequenceMatch){
+            auto stateIt = m_SimBodyStates.begin();
+            auto itEnd = bodies.end();
+            for(auto bodyIt = bodies.begin(); bodyIt != itEnd ; ++bodyIt) {
+                stateIt->applyBody(*bodyIt);
+                stateIt++;
+            }
+        }else{
+
+            if(m_randomAccess){
+                auto itEnd = bodies.end();
+                for(auto it = bodies.begin(); it!=itEnd ; ++it) {
+                    unsigned int bodyNr = RigidBodyId::getBodyNr((*it)->m_id) - m_startIdx;
+                    //WARNINGMSG( (bodyNr < m_SimBodyStates.size() && bodyNr>=0) , "body nr: " << bodyNr << " out of bound for DynamicState!");
+                    if( bodyNr < m_SimBodyStates.size() && bodyNr>=0 ){
+                        m_SimBodyStates[bodyNr].applyBody(*it);
+                    }
+                }
+            }else{
+                auto itEnd = bodies.end();
+                for(auto bodyIt = bodies.begin(); bodyIt!=itEnd ; ++bodyIt) {
+                    auto it = m_pIdToState.find((*bodyIt)->m_id); // find id
+                    if(it!=m_pIdToState.end()){
+                        it->second->applyBody(*bodyIt);
+                    }
+                }
+            }
+
+        }
     }
 
     bool hasRandomAccess(){return m_randomAccess;}
@@ -165,16 +196,11 @@ private:
     */
     std::unordered_map<RigidBodyIdType, RigidBodyState*> m_pIdToState;
     bool m_randomAccess;
+    unsigned int m_startIdx; // needed to acces state with operator[z=3] --> 3-m_startIdx = 0 idx
 };
 
 
 namespace Interpolate{
-    template<typename PREC>
-    void lerp( const RigidBodyState & A, const RigidBodyState & B, RigidBodyState & X, PREC factor) {
-        X.m_q = A.m_q + factor*(B.m_q - A.m_q);
-        X.m_u = A.m_u + factor*(B.m_u - A.m_u);
-    };
-
     template<typename PREC>
     void lerp( const DynamicsStateBase & A, const DynamicsStateBase & B, DynamicsStateBase & X, PREC factor) {
         ASSERTMSG(A.m_SimBodyStates.size() == B.m_SimBodyStates.size() &&  B.m_SimBodyStates.size() == X.m_SimBodyStates.size() ,"Wrong number of bodies!");

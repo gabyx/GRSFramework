@@ -60,11 +60,24 @@ public:
 
     GeometryType m_geometry; ///< A boost::variant which takes different geometry shared pointers.
 
-    VectorUBody get_u(){
-        return m_pSolverData->m_uBuffer.m_back;
+    inline VectorUBody get_u() const{
+        if(m_pSolverData){
+            return m_pSolverData->m_uBuffer.m_back;
+        }
+        VectorUBody u; u.setZero();
+        return u;
     }
-    VectorQBody get_q(){
+    inline VectorQBody get_q() const{
         VectorQBody r; r.head<3>() = m_r_S; r.tail<4>() = m_q_KI; return r;
+    }
+
+    template<typename TRigidBodyState>
+    inline void applyBodyState(const TRigidBodyState & s){
+        m_r_S = s.m_q.template head<3>();
+        m_q_KI = s.m_q.template tail<4>();
+        if(m_pSolverData){
+            m_pSolverData->m_uBuffer.m_back = s.m_u;
+        }
     }
 
     PREC m_mass; ///< The rigid body mass \f$m\f$ in \f$ \textrm{[kg]} \f$

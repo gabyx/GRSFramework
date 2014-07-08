@@ -26,8 +26,8 @@ public:
 
     typedef DynamicsState StateType;
 
-    template<typename RigidBodyIterator>
-    StatePoolVisBackFront(RigidBodyIterator itBegin, RigidBodyIterator itEnd);
+    template<typename TRigidBodyCont>
+    StatePoolVisBackFront(const TRigidBodyCont & cont);
 
     ~StatePoolVisBackFront();
 
@@ -61,14 +61,14 @@ protected:
 /** @} */
 
 
-template<typename RigidBodyIterator>
-StatePoolVisBackFront::StatePoolVisBackFront(RigidBodyIterator itBegin, RigidBodyIterator itEnd):
+template<typename TRigidBodyCont>
+StatePoolVisBackFront::StatePoolVisBackFront(const TRigidBodyCont & cont):
     StatePool(3)
 {
     // Add the 3 state pools, managed by this class!
     m_pool.assign(3,StateType());
 
-    m_pool[0].initSimStates<true>(itBegin,itEnd);
+    m_pool[0].initSimStates<true>(cont);
     m_pool[1] = m_pool[0];
     m_pool[2] = m_pool[0];
 
@@ -104,7 +104,7 @@ void StatePoolVisBackFront::resetStatePool(const RigidBodyStateContainerType & s
     StateType & state = m_pool[0];
     state.reset();
 
-    InitialConditionBodies::applyBodyStatesTo(state_init,state);
+    state.applyBodyStates<false>(state_init);
 
     // Fill in the initial values
     //m_pool[0] = state;

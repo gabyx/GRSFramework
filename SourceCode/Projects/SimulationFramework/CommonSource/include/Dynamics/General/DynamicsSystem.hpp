@@ -161,7 +161,7 @@ inline void DynamicsSystem::applyInitStatesToBodies(){
 }
 
 inline void DynamicsSystem::applySimBodiesToDynamicsState(DynamicsState & state) {
-    InitialConditionBodies::applyBodiesTo<RigidBodyType, RigidBodySimContainerType>(m_SimBodies,state);
+    state.applyBodies<true>(m_SimBodies);
 }
 
 inline void DynamicsSystem::applyDynamicsStateToSimBodies(const DynamicsState & state) {

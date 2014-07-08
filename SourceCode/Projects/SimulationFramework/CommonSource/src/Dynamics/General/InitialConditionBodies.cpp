@@ -6,7 +6,7 @@
 #include <cmath>
 
 #include "AssertionDebug.hpp"
-
+#include "QuaternionHelpers.hpp"
 
 
 void InitialConditionBodies::setupPositionBodyPosAxisAngle(RigidBodyState & rigibodyState,

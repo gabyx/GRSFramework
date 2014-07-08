@@ -15,9 +15,9 @@ class SharedBufferDynSys : public StatePoolVisBackFront
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
-	template<typename RigidBodyIterator>
-    SharedBufferDynSys(RigidBodyIterator itBegin, RigidBodyIterator itEnd):
-        StatePoolVisBackFront(itBegin,itEnd)
+	template<typename TRigidBodyCont>
+    SharedBufferDynSys(const TRigidBodyCont & cont):
+        StatePoolVisBackFront(cont)
     {};
 
 	~SharedBufferDynSys(){
