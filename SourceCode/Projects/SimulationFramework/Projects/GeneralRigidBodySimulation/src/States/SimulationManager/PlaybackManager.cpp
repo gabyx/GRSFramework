@@ -23,9 +23,8 @@
 
 PlaybackManager::PlaybackManager(std::shared_ptr<Ogre::SceneManager> pSceneMgr):
     PlaybackManagerBase(),
-    m_nDofqBody(NDOFqBody),
-    m_nDofuBody(NDOFuBody),
-    m_bSetupSuccessful(false) {
+    m_bSetupSuccessful(false)
+{
 
     m_pSimulationLog = nullptr;
 
@@ -52,6 +51,7 @@ PlaybackManager::PlaybackManager(std::shared_ptr<Ogre::SceneManager> pSceneMgr):
     m_pThreadLog->addSink(new Logging::LogSinkCout("PlaybackManager-Cout"));
 #endif
 
+
     m_pSceneMgr = pSceneMgr;
 }
 
@@ -70,27 +70,28 @@ PlaybackManager::~PlaybackManager() {
 
 bool PlaybackManager::setup() {
 
+    m_pDynSys = std::shared_ptr< DynamicsSystemPlayback > (new DynamicsSystemPlayback(m_pSceneMgr));
 
-    m_lengthScale = 100;  // 1m = 100 Ogre units , 1cm -> 1 Ogre Unit
-    m_pBaseNode = m_pSceneMgr->getSceneNode("BaseFrame")->createChildSceneNode("BaseFrameScene");
-    m_pBaseNode->setScale(Ogre::Vector3(1.0,1.0,1.0)*m_lengthScale);
+    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(m_pDynSys) );
 
     // Parse the Scene from XML! ==========================
     if(!parseScene()) {
         m_bSetupSuccessful = false;
         return false;
     }
+    unsigned int nSimBodies = m_pDynSys->m_SceneNodeSimBodies.size();
     // =====================================================
 
     //init shared buffer
     m_pSharedBuffer = std::shared_ptr<SharedBufferPlayback >(
-                          new SharedBufferPlayback(m_nSimBodies)
+                          new SharedBufferPlayback(m_pDynSys->m_SceneNodeSimBodies.begin(),
+                                                   m_pDynSys->m_SceneNodeSimBodies.end())
                       );
-    m_pSharedBuffer->resetStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
+    m_pSharedBuffer->resetStateRingPool(m_pDynSys->m_bodiesInitStates);
 
 
     m_pFileLoader = std::shared_ptr< PlaybackLoader<StateRingPoolVisBackFront > >(
-                        new PlaybackLoader< StateRingPoolVisBackFront >(m_nSimBodies, m_pSharedBuffer)
+                        new PlaybackLoader< StateRingPoolVisBackFront >(nSimBodies, m_pSharedBuffer)
                     );
 
     //Make a videodropper
@@ -98,7 +99,7 @@ bool PlaybackManager::setup() {
     m_pVideoDropper->reset();
 
     //Make a Sim File Resampler
-    m_pStateRecorderResampler = std::shared_ptr<StateRecorderResampler >(new StateRecorderResampler(m_nSimBodies));
+    m_pStateRecorderResampler = std::shared_ptr<StateRecorderResampler >(new StateRecorderResampler(nSimBodies));
     m_pStateRecorderResampler->reset();
 
     m_pVisBuffer = m_pSharedBuffer->getVisBuffer();
@@ -118,10 +119,13 @@ bool PlaybackManager::parseScene() {
         return false;
     }
 
-    m_pSceneParser = std::shared_ptr< SceneParserGUI >( new SceneParserGUI( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies) );
-    m_pSceneParser->parseScene(sceneFilePath,false,true);
+    ParserModules::BodyModuleParserOptions o;
+    o.m_allocateBodies = false;
+    o.m_parseOnlyVisualizationProperties = true;
+    m_pSceneParser->parseScene(sceneFilePath, SceneParserOptions(), o);
 
-    m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
+    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SceneNodeSimBodies.size()
+        << " simulated & " << m_pDynSys->m_SceneNodeBodies.size() <<  " static bodies! "  << std::endl;);
 
     return true;
 }
@@ -162,12 +166,12 @@ void PlaybackManager::updateScene(double timeSinceLastFrame) {
 void PlaybackManager::updateSimBodies() {
     //update objects...
     for(int i=0; i<m_pVisBuffer->m_SimBodyStates.size(); i++) {
-        m_SceneNodeSimBodies[i]->setPosition(
+        m_pDynSys->m_SceneNodeSimBodies[i].m_node->setPosition(
             (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(0),
             (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(1),
             (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(2)
         );
-        m_SceneNodeSimBodies[i]->setOrientation(
+        m_pDynSys->m_SceneNodeSimBodies[i].m_node->setOrientation(
             (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(3),
             (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(4),
             (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(5),
@@ -303,7 +307,7 @@ void PlaybackManager::threadRunSimulation() {
 
 void PlaybackManager::initSimThread() {
 
-    m_pSharedBuffer->resetStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
+    m_pSharedBuffer->resetStateRingPool(m_pDynSys->m_bodiesInitStates);
 
     if(m_SettingsSimThread.m_bVideoDrop) {
         m_pVideoDropper->reset();

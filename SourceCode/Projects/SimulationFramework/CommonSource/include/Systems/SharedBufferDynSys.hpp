@@ -15,9 +15,9 @@ class SharedBufferDynSys : public StatePoolVisBackFront
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
-	template<typename TRigidBodyCont>
-    SharedBufferDynSys(const TRigidBodyCont & cont):
-        StatePoolVisBackFront(cont)
+	template<typename TRigidBodyIterator>
+    SharedBufferDynSys(TRigidBodyIterator beg, TRigidBodyIterator end):
+        StatePoolVisBackFront(beg,end)
     {};
 
 	~SharedBufferDynSys(){

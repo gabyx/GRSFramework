@@ -24,8 +24,8 @@ class StatePoolVisBackFront;
 #define CollisionSolver_INCLUDE_FILE "CollisionSolver.hpp"
 class CollisionSolver;
 
-#define DynamicsSystem_INCLUDE_FILE "DynamicsSystemGUI.hpp"
-class DynamicsSystemGUI;
+#define DynamicsSystem_INCLUDE_FILE "DynamicsSystem.hpp"
+class DynamicsSystem;
 #define InclusionSolverSettings_INCLUDE_FILE    "InclusionSolverSettings.hpp"
 class InclusionSolverSettings;
 
@@ -53,7 +53,7 @@ struct GlobalConfigs {
 
         typedef RigidBodyBase           RigidBodyType;
 
-        typedef DynamicsSystemGUI       DynamicsSystemType;
+        typedef DynamicsSystem      DynamicsSystemType;
 
         typedef MoreauTimeStepper       TimeStepperType;
 

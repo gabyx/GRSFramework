@@ -6,7 +6,7 @@
 #include "RigidBodyFunctions.hpp"
 
 
-DynamicsSystem::DynamicsSystem(){
+DynamicsSystemBase::DynamicsSystemBase(){
     // set reasonable standart values:
     m_gravity = 9.81;
     m_gravityDir = Vector3(0,0,-1);
@@ -19,7 +19,7 @@ DynamicsSystem::DynamicsSystem(){
     m_currentSpinNorm= 0;
 }
 
-DynamicsSystem::~DynamicsSystem() {
+DynamicsSystemBase::~DynamicsSystemBase() {
     DECONSTRUCTOR_MESSAGE
 
     // Delete all RigidBodys
@@ -29,43 +29,43 @@ DynamicsSystem::~DynamicsSystem() {
 };
 
 
-void DynamicsSystem::getSettings(RecorderSettingsType & settingsRecorder) const {
+void DynamicsSystemBase::getSettings(RecorderSettingsType & settingsRecorder) const {
     settingsRecorder = m_SettingsRecorder;
 }
-void DynamicsSystem::setSettings(const RecorderSettingsType & settingsRecorder) {
+void DynamicsSystemBase::setSettings(const RecorderSettingsType & settingsRecorder) {
     m_SettingsRecorder = settingsRecorder;
 }
-void DynamicsSystem::getSettings(TimeStepperSettingsType &settingsTimestepper) const {
+void DynamicsSystemBase::getSettings(TimeStepperSettingsType &settingsTimestepper) const {
     settingsTimestepper = m_SettingsTimestepper;
 }
-void DynamicsSystem::setSettings(const TimeStepperSettingsType &settingsTimestepper){
+void DynamicsSystemBase::setSettings(const TimeStepperSettingsType &settingsTimestepper){
     m_SettingsTimestepper = settingsTimestepper;
 }
-void DynamicsSystem::getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const {
+void DynamicsSystemBase::getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const {
     settingsInclusionSolver = m_SettingsInclusionSolver;
 }
-void DynamicsSystem::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
+void DynamicsSystemBase::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
     m_SettingsInclusionSolver = settingsInclusionSolver;
 }
-void DynamicsSystem::getSettings(TimeStepperSettingsType &settingsTimestepper,
+void DynamicsSystemBase::getSettings(TimeStepperSettingsType &settingsTimestepper,
                                  InclusionSolverSettingsType &settingsInclusionSolver) const {
     settingsTimestepper = m_SettingsTimestepper;
     settingsInclusionSolver = m_SettingsInclusionSolver;
 }
-void DynamicsSystem::setSettings(const TimeStepperSettingsType &settingsTimestepper,
+void DynamicsSystemBase::setSettings(const TimeStepperSettingsType &settingsTimestepper,
                                  const InclusionSolverSettingsType &settingsInclusionSolver) {
     m_SettingsTimestepper = settingsTimestepper;
     m_SettingsInclusionSolver = settingsInclusionSolver;
 }
 
 
-void DynamicsSystem::initializeLog(Logging::Log* pLog) {
+void DynamicsSystemBase::initializeLog(Logging::Log* pLog) {
     m_pSolverLog = pLog;
     ASSERTMSG(m_pSolverLog != nullptr, "Logging::Log: nullptr!");
 }
 
 
-void DynamicsSystem::reset() {
+void DynamicsSystemBase::reset() {
     //reset all external forces
     m_externalForces.reset();
 
@@ -73,7 +73,7 @@ void DynamicsSystem::reset() {
 }
 
 
-void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
+void DynamicsSystemBase::doFirstHalfTimeStep(PREC ts, PREC timestep) {
     using namespace std;
 #if CoutLevelSolver>1
     LOG(m_pSolverLog, "---> doFirstHalfTimeStep(): "<<std::endl;)
@@ -136,7 +136,7 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 }
 
 
-void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
+void DynamicsSystemBase::doSecondHalfTimeStep(PREC te, PREC timestep) {
     using namespace std;
 #if CoutLevelSolver>1
     LOG(m_pSolverLog, "---> doSecondHalfTimeStep(): "<<std::endl;)
@@ -192,12 +192,9 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
         pBody->m_pSolverData->swapBuffer();
         pBody->m_pSolverData->reset();
     }
-
-
-
 }
 
-void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
+void DynamicsSystemBase::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
     static Matrix33 a_tilde = Matrix33::Zero();
 
     F_i.block<1,3>(0,0) = -0.5 * q.tail<3>();
@@ -206,7 +203,7 @@ void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
 }
 
 
-void DynamicsSystem::initMassMatrixAndHTerm() {
+void DynamicsSystemBase::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
 

@@ -148,7 +148,7 @@ void setupPositionBodyPosAxisAngle(RigidBodyState & rigibodyState,
 template<typename RigidBodyContainer, typename RigidBodyStatesContainer>
 inline void applyBodyStatesTo(const RigidBodyStatesContainer & states, RigidBodyContainer & bodies ){
 
-    for(auto bodyIt = bodies.begin(); bodyIt!= bodies.end(); bodyIt++){
+    for(auto bodyIt = bodies.begin(); bodyIt!= bodies.end(); ++bodyIt){
         auto resIt = states.find((*bodyIt)->m_id);
         if( resIt == states.end()){
             ERRORMSG(" There is no initial state for sim body id: " << RigidBodyId::getBodyIdString(*bodyIt) << std::endl);

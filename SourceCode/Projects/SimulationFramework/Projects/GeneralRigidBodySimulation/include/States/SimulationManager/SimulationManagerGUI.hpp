@@ -37,13 +37,9 @@ public:
     std::shared_ptr<SharedBufferDynSys >	    m_pSharedBuffer;
     std::shared_ptr<StateRecorder >		m_pStateRecorder;
 
-    std::vector<Ogre::SceneNode*>	m_SceneNodeSimBodies;
-    std::vector<Ogre::SceneNode*>	m_SceneNodeBodies;
-
     void setup(boost::filesystem::path sceneFilePath);
 
-    std::shared_ptr< SceneParserGUI > m_pSceneParser;
-
+    std::shared_ptr< SceneParserGUI<DynamicsSystemType> > m_pSceneParser;
 
     void updateScene(double timeSinceLastFrame);
     inline void updateSimBodies();

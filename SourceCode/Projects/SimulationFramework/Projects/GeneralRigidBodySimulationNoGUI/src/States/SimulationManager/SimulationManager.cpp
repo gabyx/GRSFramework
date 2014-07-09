@@ -70,20 +70,13 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
 
     // Parse the Scene from XML! ==========================
     m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(m_pDynSys) );
-
-    ParserModules::BodyModuleParserOptions o;
-    o.m_bodyIdRange = std::make_pair(RigidBodyId::makeId(1,1),RigidBodyId::makeId(4,1));
-    m_pSceneParser->parseScene(sceneFilePath,SceneParserOptions(),std::move(o));
-
-
-
+    m_pSceneParser->parseScene(sceneFilePath,SceneParserOptions());
     m_nSimBodies = m_pDynSys->m_SimBodies.size();
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SimBodies.size()
         << " simulated & " << m_pDynSys->m_Bodies.size()<<  " static bodies! "  << std::endl;);
     // =====================================================
 
-
-    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys >(new SharedBufferDynSys(m_pDynSys->m_SimBodies));
+    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys >(new SharedBufferDynSys(m_pDynSys->m_SimBodies.begin(),m_pDynSys->m_SimBodies.end() ));
     m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
 
 

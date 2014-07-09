@@ -63,13 +63,13 @@ public:
 
     RigidBodyStateListType::size_type getNSimBodies() const {return m_SimBodyStates.size();}
 
-    template<bool resetState, typename TRigidBodyCont >
-    inline void initSimStates(const TRigidBodyCont & cont){
+    template<bool resetState, typename TRigidBodyIterator >
+    inline void initSimStates(TRigidBodyIterator beg, TRigidBodyIterator end){
         m_randomAccess = true; m_startIdx = 0;
         m_t = 0.0;
         m_StateType = NONE;
 
-        unsigned int nSimBodies = std::distance(cont.begin(),cont.end());
+        unsigned int nSimBodies = std::distance(beg,end);
         ASSERTMSG(nSimBodies, "nSimBodies == 0");
         if(resetState){
             m_SimBodyStates.assign(nSimBodies,RigidBodyState());
@@ -78,19 +78,18 @@ public:
         }
 
         //set startidx
-        auto itEnd = cont.end();
-        //set startidx
-        auto it = cont.begin();
+        auto it =  beg;
         m_startIdx = RigidBodyId::getBodyNr(*it);
         auto sIt = m_SimBodyStates.begin();
-        for(; it!= itEnd;++it){
+        for(; it!= end; ++it){
             // Check for continuity in ids
             auto id = (*it)->m_id;
-            if( m_randomAccess && std::next(it)!=itEnd && (*std::next(it))->m_id - (*it)->m_id != 1 ){
+            if( m_randomAccess && std::next(it)!=end && (*std::next(it))->m_id - id != 1 ){
                 m_randomAccess=false;
             }
             sIt->m_id = id;
             m_pIdToState.insert(std::make_pair(id,&(*sIt)));
+            ++sIt;
         }
         std::cout << "Random Access :" << m_randomAccess << std::endl;
     }
@@ -158,8 +157,10 @@ public:
         if(sequenceMatch){
             auto stateIt = m_SimBodyStates.begin();
             auto itEnd = bodies.end();
-            for(auto bodyIt = bodies.begin(); bodyIt != itEnd ; ++bodyIt) {
-                stateIt->applyBody(*bodyIt);
+            for(auto it = bodies.begin(); it != itEnd ; ++it) {
+                WARNINGMSG( (*it)->m_id == stateIt->m_id ,"DynamicState:: Sequence (ids) not equal: "
+                           << RigidBodyId::getBodyIdString((*it)->m_id) <<","<< RigidBodyId::getBodyIdString(stateIt->m_id)<< std::endl);
+                stateIt->applyBody(*it);
                 stateIt++;
             }
         }else{
@@ -168,17 +169,23 @@ public:
                 auto itEnd = bodies.end();
                 for(auto it = bodies.begin(); it!=itEnd ; ++it) {
                     unsigned int bodyNr = RigidBodyId::getBodyNr((*it)->m_id) - m_startIdx;
-                    //WARNINGMSG( (bodyNr < m_SimBodyStates.size() && bodyNr>=0) , "body nr: " << bodyNr << " out of bound for DynamicState!");
                     if( bodyNr < m_SimBodyStates.size() && bodyNr>=0 ){
                         m_SimBodyStates[bodyNr].applyBody(*it);
+                        WARNINGMSG( (*it)->m_id == m_SimBodyStates[bodyNr].m_id ,"DynamicState:: Sequence (ids) not equal: "
+                                   << RigidBodyId::getBodyIdString((*it)->m_id) <<","
+                                   << RigidBodyId::getBodyIdString(m_SimBodyStates[bodyNr].m_id) << std::endl);
+                    }else{
+                      WARNINGMSG( (bodyNr < m_SimBodyStates.size() && bodyNr>=0) , "DynamicState:: Body nr: " << bodyNr << " out of bound for DynamicState!");
                     }
                 }
             }else{
                 auto itEnd = bodies.end();
-                for(auto bodyIt = bodies.begin(); bodyIt!=itEnd ; ++bodyIt) {
-                    auto it = m_pIdToState.find((*bodyIt)->m_id); // find id
-                    if(it!=m_pIdToState.end()){
-                        it->second->applyBody(*bodyIt);
+                for(auto it = bodies.begin(); it!=itEnd ; ++it) {
+                    auto z = m_pIdToState.find((*it)->m_id); // find id
+                    if(z!=m_pIdToState.end()){
+                        z->second->applyBody(*it);
+                    }else{
+                        WARNINGMSG( false ,"DynamicState:: No state found for id " << (*it)->m_id << std::endl);
                     }
                 }
             }

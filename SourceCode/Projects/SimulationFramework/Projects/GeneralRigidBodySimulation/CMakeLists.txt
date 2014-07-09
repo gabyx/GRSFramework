@@ -126,8 +126,10 @@ SET(COMMON_SRC
 )
 
 SET(DYNAMICS_INC
+     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemGUI.hpp
 )
 SET(DYNAMICS_SRC
+     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/DynamicsSystemGUI.cpp
 )
 
 SET(SYSTEMS_INC
@@ -228,6 +230,7 @@ set(INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/include/States
     ${PROJECT_SOURCE_DIR}/include/States/SimulationManager
     ${PROJECT_SOURCE_DIR}/include/Systems
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/
 
     ${GLOBAL_COMMON_INC_DIR}
 

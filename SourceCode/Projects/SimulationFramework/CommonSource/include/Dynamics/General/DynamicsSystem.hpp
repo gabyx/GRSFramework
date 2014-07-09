@@ -1,47 +1,53 @@
 ﻿#ifndef DynamicsSystem_hpp
 #define DynamicsSystem_hpp
 
-#include <vector>
 
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
+#include <map>
+#include <unordered_map>
+#include <vector>
+
 #include RigidBody_INCLUDE_FILE
 
 #include "RigidBodyContainer.hpp"
-#include "DynamicsState.hpp"
 #include "ContactParameterMap.hpp"
 #include "ExternalForces.hpp"
-#include "SimpleLogger.hpp"
-
-#include "InitialConditionBodies.hpp"
 
 #include "RecorderSettings.hpp"
 #include InclusionSolverSettings_INCLUDE_FILE
 #include "TimeStepperSettings.hpp"
 
+#include "DynamicsState.hpp"
+#include "RigidBodyState.hpp"
+#include "InitialConditionBodies.hpp"
 
-class DynamicsSystemBase{
-public:
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-    using TimeStepperSettingsType      = TimeStepperSettings;
-    using RecorderSettingsType         = RecorderSettings;
-    using ContactParameterMapType      = ContactParameterMap;
-    using ExternalForceListType        = ExternalForceList;
-    using GlobalGeometryMapType        = std::unordered_map< unsigned int, typename RigidBodyType::GeometryType>;
-    using RigidBodyContainerType       = RigidBodyContainer;
-    using RigidBodySimContainerType    = RigidBodyContainerType;
-    using RigidBodyStaticContainerType = RigidBodySimContainerType;
+/** This is the define for all DynamicsSystem classes
+* It only consists of several types which are essetial.
+*/
+#define  DEFINE_DYNAMICSYSTEM_BASE_TYPES  \
+     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES\
+    using TimeStepperSettingsType      = TimeStepperSettings;\
+    using RecorderSettingsType         = RecorderSettings;\
+    using ContactParameterMapType      = ContactParameterMap;\
+    using ExternalForceListType        = ExternalForceList;\
+    using GlobalGeometryMapType        = std::unordered_map< unsigned int, typename RigidBodyType::GeometryType>;\
+    using RigidBodyContainerType       = RigidBodyContainer;\
+    using RigidBodySimContainerType    = RigidBodyContainerType;\
+    using RigidBodyStaticContainerType = RigidBodySimContainerType;\
     using RigidBodyStatesContainerType = std::map<RigidBodyIdType, RigidBodyState>;
-};
 
-class DynamicsSystem : public DynamicsSystemBase{
+
+class DynamicsSystemBase {
+public:
+
+    DEFINE_DYNAMICSYSTEM_BASE_TYPES
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-
-    DynamicsSystem();
-    ~DynamicsSystem();
+    DynamicsSystemBase();
+    ~DynamicsSystemBase();
 
     // General related variables
     double m_gravity;
@@ -54,7 +60,6 @@ public:
     GlobalGeometryMapType m_globalGeometries;
 
     // All RigidBodies which are owned by this class!
-
     RigidBodySimContainerType m_SimBodies;    // Simulated Objects
     RigidBodyStaticContainerType m_Bodies;    // all not simulated objects
 
@@ -96,44 +101,6 @@ public:
     PREC m_currentRotKinEnergy;
     PREC m_currentSpinNorm;
 
-
-public:
-
-     // Create SceneParser Modules
-     template<typename TParser>
-     std::tuple< std::unique_ptr<typename TParser::SettingsModuleType >,
-                 std::unique_ptr<typename TParser::BodyModuleType >,
-                 std::unique_ptr<typename TParser::InitStatesModuleType >,
-                 std::unique_ptr<typename TParser::GeometryModuleType >,
-                 std::unique_ptr<typename TParser::ExternalForcesModuleType >,
-                 std::unique_ptr<typename TParser::ContactParamModuleType>
-              >
-     createParserModules(TParser * p){
-
-        using SettingsModuleType       = typename TParser::SettingsModuleType ;
-        using ContactParamModuleType   = typename TParser::ContactParamModuleType;
-        using GeometryModuleType       = typename TParser::GeometryModuleType ;
-        using InitStatesModuleType     = typename TParser::InitStatesModuleType ;
-        using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
-        using BodyModuleType           = typename TParser::BodyModuleType ;
-        using VisModType               = typename TParser::BodyModuleType::VisModType ;
-
-
-        auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &m_SettingsRecorder,
-                                                                                   &m_SettingsTimestepper,
-                                                                                   &m_SettingsInclusionSolver));
-
-        auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &m_globalGeometries) );
-
-        auto is = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_bodiesInitStates, sett.get()));
-
-        auto bm = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), std::unique_ptr<VisModType>(nullptr), &m_SimBodies, &m_Bodies )) ;
-        auto es = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &m_externalForces));
-        auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&m_ContactParameterMap));
-
-        return std::make_tuple(std::move(sett),std::move(bm),std::move(is),std::move(geom),std::move(es),std::move(con));
-     }
-
 protected:
 
     RecorderSettingsType m_SettingsRecorder;
@@ -149,23 +116,54 @@ protected:
     std::stringstream logstream;
 };
 
-inline void DynamicsSystem::applyInitStatesToBodies(){
-    // Apply all init states to the sim bodies
-//    for(auto it = m_bodiesInitStates.begin(); it!=m_bodiesInitStates.end();it++){
-//                LOG(&std::cout, "\t---> state id: " << RigidBodyId::getBodyIdString(it->first)
-//                    << std::endl << "\t\t---> q: " << it->second.m_q.transpose()
-//                    << std::endl << "\t\t---> u: " << it->second.m_u.transpose() << std::endl;
-//                    );
-//    }
+
+
+inline void DynamicsSystemBase::applyInitStatesToBodies() {
     InitialConditionBodies::applyBodyStatesTo(m_bodiesInitStates, m_SimBodies);
 }
 
-inline void DynamicsSystem::applySimBodiesToDynamicsState(DynamicsState & state) {
+inline void DynamicsSystemBase::applySimBodiesToDynamicsState(DynamicsState & state) {
     state.applyBodies<true>(m_SimBodies);
 }
 
-inline void DynamicsSystem::applyDynamicsStateToSimBodies(const DynamicsState & state) {
-    ERRORMSG("NOT USED");
-}
+
+class DynamicsSystem : public DynamicsSystemBase {
+public:
+
+    template<typename TParser>
+    std::tuple< std::unique_ptr<typename TParser::SettingsModuleType >,
+        std::unique_ptr<typename TParser::ExternalForcesModuleType >,
+        std::unique_ptr<typename TParser::ContactParamModuleType>,
+        std::unique_ptr<typename TParser::InitStatesModuleType >,
+        std::unique_ptr<typename TParser::BodyModuleType >,
+        std::unique_ptr<typename TParser::GeometryModuleType >,
+        std::unique_ptr<typename TParser::VisModuleType>
+        >
+    createParserModules(TParser * p) {
+
+        using SettingsModuleType       = typename TParser::SettingsModuleType ;
+        using ContactParamModuleType   = typename TParser::ContactParamModuleType;
+        using GeometryModuleType       = typename TParser::GeometryModuleType ;
+        using InitStatesModuleType     = typename TParser::InitStatesModuleType ;
+        using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
+        using BodyModuleType           = typename TParser::BodyModuleType ;
+        using VisModuleType            = typename TParser::VisModuleType ;
+
+
+        auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &this->m_SettingsRecorder,
+                    &this->m_SettingsTimestepper,
+                    &this->m_SettingsInclusionSolver));
+
+        auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &this->m_globalGeometries) );
+
+        auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&this->m_bodiesInitStates, sett.get()));
+        auto vis = std::unique_ptr<VisModuleType>(nullptr); // no visualization needed
+        auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , &this->m_SimBodies, &this->m_Bodies )) ;
+        auto es  = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &this->m_externalForces));
+        auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&this->m_ContactParameterMap));
+
+        return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis));
+    }
+};
 
 #endif

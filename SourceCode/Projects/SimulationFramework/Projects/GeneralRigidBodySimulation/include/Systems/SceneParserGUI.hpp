@@ -8,51 +8,72 @@
 
 #include "MakeCoordinateSystem.hpp"
 
+namespace ParserModules{
+    template<typename TParser>
+    class VisModule {
+    private:
+        DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
+    public:
 
-template<typename TParser>
-class BodyVisModule {
-private:
-    DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
-public:
-    BodyVisModule(ParserType * p, BodyModuleType * b = nullptr){};
-    void parse(){
-        ERRORMSG("This is the standard BodyVisModule which does nothing!");
-    }
+        using RigidBodyGraphicContType = typename DynamicsSystemType::RigidBodyGraphicContType;
+
+        VisModule(ParserType * p, RigidBodyGraphicContType * pSimBodies,
+                  RigidBodyGraphicContType * pBodies, Ogre::SceneNode * pBaseNode, Ogre::SceneManager * pSceneMgr)
+                  : m_parser(p), m_pSimBodies(pSimBodies), m_pBodies(pBodies), m_pBaseNode(pBaseNode), m_pSceneMgr(pSceneMgr)
+        {
+            ASSERTMSG(m_pSceneMgr && m_pBaseNode, "these should not be zero!")
+
+        };
+        void parse(XMLNodeType vis){
+            ERRORMSG("This is the non standart BodyVisModule which does nothing!");
+        }
+    private:
+        RigidBodyGraphicContType * m_pSimBodies;
+        RigidBodyGraphicContType * m_pBodies;
+        Ogre::SceneManager * m_pSceneMgr;
+        Ogre::SceneNode * m_pBaseNode;
+
+        ParserType * m_parser;
+
+    };
 };
 
+/** These module types are defined when there is no derivation from scene parser */
+template<typename TSceneParser>
+struct SceneParserGUIModuleTraits{
+    using SettingsModuleType         = ParserModules::SettingsModule<TSceneParser>;
+    using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<TSceneParser>;
+    using ContactParamModuleType     = ParserModules::ContactParamModule<TSceneParser>;
+    using InitStatesModuleType       = ParserModules::InitStatesModule<TSceneParser> ;
+
+    using BodyModuleType             = ParserModules::BodyModule< TSceneParser > ;
+    using GeometryModuleType         = ParserModules::GeometryModule<TSceneParser>;
+
+    using VisModuleType              = ParserModules::VisModule<TSceneParser>;
+};
 
 template<typename TDynamicsSystem>
-class SceneParserGUI: public SceneParser {
+class SceneParserGUI: public SceneParser<TDynamicsSystem, SceneParserGUIModuleTraits, SceneParserGUI<TDynamicsSystem> > {
+private:
+    using BaseType = SceneParser<TDynamicsSystem, SceneParserGUIModuleTraits, SceneParserGUI<TDynamicsSystem> >;
 public:
     using DynamicsSystemType = TDynamicsSystem;
 
-    // overwrite the BodyModuleType
-    using BodyVisModuleType     = ParserModules::BodyVisModule<SceneParser>;
-    using BodyModuleType        = ParserModules::BodyModule< SceneParser, GlobalGeomModuleType , InitStatesModuleType, BodyVisModuleType > ;
-private:
+    DEFINE_MODULETYPES_AND_FRIENDS(BaseType);
+    DEFINE_PARSER_CONFIG_TYPES_OF_BASE(BaseType);
 
-    friend class ParserModules::SettingsModule<SceneParser>;
-    friend class ParserModules::GlobalGeomModule<SceneParser>;
-    friend class ParserModules::ContactParamModule<SceneParser>;
-
-    friend class ParserModules::InitStatesModule<SceneParser>;
-    friend class ParserModules::BodyVisModule<SceneParser>;
-    friend class ParserModules::BodyModule< SceneParser, GlobalGeomModuleType , InitStatesModuleType, BodyVisModuleType > ;;
-    friend class ParserModules::ExternalForcesModule<SceneParser>;
 
 public:
 
-    SceneParser( std::shared_ptr<DynamicsSystemType> pDynSys):m_pDynSys(pDynSys) {
-        // Get all Modules from DynamicsSystem
-        std::tie(m_pSettingsModule, m_pBodyModule, m_pInitStatesModule, m_pGlobalGeomModule, m_pExternalForcesModule, m_pContactParamModule )
-            = m_pDynSys->template createParserModules<SceneParser>(this);
 
-        // Set log
-        m_pSimulationLog = nullptr;
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
-        ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
-        setStandartValues();
+    SceneParserGUI( std::shared_ptr<DynamicsSystemType> pDynSys): BaseType(pDynSys) {
 
+
+    }
+
+    void dooo(){
+        this->m_pVisModule = std::unique_ptr<VisModuleType>(new VisModuleType(this));
+        this->m_pVisModule->parse(XMLNodeType());
     }
 
 };

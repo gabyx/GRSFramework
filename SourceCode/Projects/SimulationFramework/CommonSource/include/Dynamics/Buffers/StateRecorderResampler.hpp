@@ -24,7 +24,7 @@ public:
    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-   template<typename RigidBodyIterator>
+
     StateRecorderResampler(const unsigned int nSimBodies):
       StateRecorder(nSimBodies)
    {

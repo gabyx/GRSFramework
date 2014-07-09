@@ -155,7 +155,8 @@ void MoreauTimeStepper::reset() {
             //Inject the end state into the front buffer
             m_ReferenceSimFile.getEndState(*m_StateBuffers.m_pFront);
             LOG(m_pSimulationLog,"---> Injected first state of Reference SimFile into StateBuffer"<<std::endl);
-            m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
+            ERRORMSG("apply to bodies not implemented")
+            //m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
         }
 
     }else{
@@ -226,7 +227,8 @@ void MoreauTimeStepper::doOneIteration() {
     // If we should load the state from a reference file! Do this here!
     if(m_Settings.m_eSimulateFromReference == TimeStepperSettings::USE_STATES && !m_bFinished) {
         m_ReferenceSimFile >> m_StateBuffers.m_pFront;
-        m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
+        ERRORMSG("Not implemented")
+        //m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
     }
 
 

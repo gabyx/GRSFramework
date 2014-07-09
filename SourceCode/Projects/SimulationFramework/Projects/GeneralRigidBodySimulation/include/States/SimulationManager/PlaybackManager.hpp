@@ -34,7 +34,10 @@ public:
 
     std::shared_ptr<SharedBufferPlayback >	m_pSharedBuffer;
 
-    std::shared_ptr< SceneParserGUI > m_pSceneParser;
+    std::shared_ptr< DynamicsSystemPlayback > m_pDynSys;
+
+    using SceneParserType =  SceneParserGUI<DynamicsSystemPlayback>;
+    std::shared_ptr< SceneParserType> m_pSceneParser;
 
     std::shared_ptr< VideoDropper > m_pVideoDropper;
     struct VideoDropSettings {
@@ -56,9 +59,6 @@ public:
     // Accessed by grafic thread  ===============
     void updateScene(double timeSinceLastFrame);
     double getSimulationTime(); // used to access the current simulation state time, from the AppState
-
-    std::vector<Ogre::SceneNode*>	m_SceneNodeSimBodies;
-    std::vector<Ogre::SceneNode*>	m_SceneNodeBodies;
 
     void startPlaybackThread();
     void stopPlaybackThread(bool force_stop);
@@ -109,11 +109,6 @@ private:
     // Accessed only by Loader Thread
     std::shared_ptr< PlaybackLoader<StateRingPoolVisBackFront > > m_pFileLoader;
 
-
-    const unsigned int m_nDofuBody, m_nDofqBody; // These are the dimensions for one Obj
-    unsigned int m_nSimBodies;
-    double m_lengthScale;
-    Ogre::SceneNode * m_pBaseNode;
 
 };
 

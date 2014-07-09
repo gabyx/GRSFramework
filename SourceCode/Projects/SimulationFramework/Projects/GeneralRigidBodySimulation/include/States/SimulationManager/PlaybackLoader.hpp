@@ -36,7 +36,7 @@ public:
 
   boost::barrier m_barrier_start;
 
-  const unsigned int m_nSimBodies; // These are the dimensions for one Obj
+  const unsigned int m_nSimBodies;  // only needed for simfile check! //TODO remove from constructor
 
   MultiBodySimFile m_binarySimFile;
 

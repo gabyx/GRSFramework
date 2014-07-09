@@ -58,21 +58,49 @@
 
 #define  DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE  \
     using ParserType = TParser; \
-    using XMLNodeType = typename TParser::XMLNodeType;\
-    using XMLAttributeType = typename TParser::XMLAttributeType;\
+    using XMLNodeType = typename ParserType::XMLNodeType;\
+    using XMLAttributeType = typename ParserType::XMLAttributeType;\
     using DynamicsSystemType = typename ParserType::DynamicsSystemType; \
     using RandomGenType = typename ParserType::RandomGenType; \
     template<typename T> using UniformDistType = typename ParserType::template UniformDistType<T>;\
     \
-    using SettingsModuleType    = typename ParserType::SettingsModuleType;\
-    using GeometryModuleType    = typename ParserType::GeometryModuleType;\
-    using ContactParamModuleType= typename ParserType::ContactParamModuleType;\
+    using SettingsModuleType     = typename ParserType::SettingsModuleType;\
+    using GeometryModuleType     = typename ParserType::GeometryModuleType;\
+    using ContactParamModuleType = typename ParserType::ContactParamModuleType;\
     \
-    using InitStatesModuleType  = typename ParserType::InitStatesModuleType ;\
-    using BodyVisModuleType     = typename ParserType::BodyVisModuleType;\
-    using BodyModuleType        = typename ParserType::BodyModuleType;\
+    using InitStatesModuleType       = typename ParserType::InitStatesModuleType ;\
+    using VisModuleType              = typename ParserType::VisModuleType;\
+    using BodyModuleType             = typename ParserType::BodyModuleType;\
     using ExternalForcesModuleType   = typename ParserType::ExternalForcesModuleType ;\
 
+#define  DEFINE_PARSER_CONFIG_TYPES_OF_BASE( BaseParser ) \
+    using XMLNodeType = typename BaseParser::XMLNodeType;\
+    using XMLAttributeType = typename BaseParser::XMLAttributeType;\
+    using RandomGenType = typename BaseParser::RandomGenType; \
+    template<typename T> using UniformDistType = typename BaseParser::template UniformDistType<T>;\
+
+
+#define DEFINE_MODULETYPES_AND_FRIENDS( _ModuleTraitsType_ )  \
+public: \
+    using SettingsModuleType       = typename _ModuleTraitsType_::SettingsModuleType;\
+    using ExternalForcesModuleType = typename _ModuleTraitsType_::ExternalForcesModuleType;\
+    using ContactParamModuleType   = typename _ModuleTraitsType_::ContactParamModuleType;\
+    using InitStatesModuleType     = typename _ModuleTraitsType_::InitStatesModuleType;\
+\
+    using BodyModuleType           = typename _ModuleTraitsType_::BodyModuleType;\
+    using GeometryModuleType       = typename _ModuleTraitsType_::GeometryModuleType;\
+\
+    using VisModuleType            = typename _ModuleTraitsType_::VisModuleType;\
+protected: \
+    friend typename _ModuleTraitsType_::SettingsModuleType;\
+    friend typename _ModuleTraitsType_::ExternalForcesModuleType;\
+    friend typename _ModuleTraitsType_::ContactParamModuleType;\
+    friend typename _ModuleTraitsType_::InitStatesModuleType;\
+\
+    friend typename _ModuleTraitsType_::BodyModuleType;\
+    friend typename _ModuleTraitsType_::GeometryModuleType;\
+\
+    friend typename _ModuleTraitsType_::VisModuleType;\
 
 class GetScaleOfGeomVisitor : public boost::static_visitor<> {
 
@@ -1070,11 +1098,11 @@ private:
 
 
 template<typename TParser>
-class BodyVisModuleDummy {
+class VisModuleDummy {
 private:
     DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
 public:
-    BodyVisModuleDummy(ParserType * p, BodyModuleType * b) {};
+    VisModuleDummy(ParserType * p, BodyModuleType * b) {};
     void parse(XMLNodeType vis) {
         ERRORMSG("This is the standard BodyVisModule which does nothing!");
     }
@@ -1539,10 +1567,11 @@ struct BodyModuleParserOptions {
     BodyRangeType m_bodyIdRange;       ///< Range of body ids, original list which is handed to parseScene
     bool m_parseAllBodiesNonSelGroup = true;  ///< Parse all bodies in groups where m_bodyIdRange is not applied (enableSelectiveIds="false) (default= true)
     bool m_parseOnlySimBodies = false;         ///< Parses only simulated bodies (default= false)
+    bool m_allocateBodies = true;
+    bool m_parseOnlyVisualizationProperties = false;
 };
 
-template<typename TParser,
-         typename TVisModule>
+template<typename TParser>
 class BodyModule {
 private:
 
@@ -1560,21 +1589,18 @@ private:
 
 public:
 
-    using VisModType = TVisModule ;
-
-    BodyModule(ParserType * p, GeometryModuleType * g,  InitStatesModuleType * is, std::unique_ptr<VisModType> i,
+    BodyModule(ParserType * p, GeometryModuleType * g,  InitStatesModuleType * is, VisModuleType * i,
                RigidBodySimContainerType * simBodies, RigidBodyStaticContainerType * bodies )
-        : m_parser(p), m_pGeomMod(g), m_pVisMod(std::move(i)), m_pInitStatesMod(is), m_pSimBodies(simBodies), m_pBodies(bodies) {
+        : m_parser(p), m_pGeomMod(g), m_pVisMod(i), m_pInitStatesMod(is), m_pSimBodies(simBodies), m_pBodies(bodies) {
             ASSERTMSG(is,"should not be null");
             ASSERTMSG(g,"should not be null");
+            ASSERTMSG(m_allocateBodies || m_parseOnlyVisualizationProperties, " You should not allocate any bodies and parse dynamic properties!")
+
         };
 
 
     void parse(XMLNodeType & sceneObjects){
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> BodyModule: parsing =========================================="<<std::endl;)
-
-        m_parseOnlyVisualizationProperties = (!m_pSimBodies || !m_pBodies)? true : false;
-        m_allocateBodies = !m_parseOnlyVisualizationProperties;
 
         LOGSCLEVEL1( m_parser->m_pSimulationLog, "---> BodyModule Options: " <<std::endl
                         <<"\t parse only simulated bodies:"<<m_parsingOptions.m_parseOnlySimBodies << std::endl
@@ -1598,7 +1624,7 @@ public:
             m_parseSelectiveBodyIds = true;
         }
 
-        m_allocateBodies = pSimBodies ?  true : false;
+
 
         m_startRangeIdIt = m_parsingOptions.m_bodyIdRange.begin();
 
@@ -1931,7 +1957,7 @@ private:
     /// Other Modules
     GeometryModuleType * m_pGeomMod;
     InitStatesModuleType * m_pInitStatesMod;
-    std::unique_ptr<VisModType> m_pVisMod;
+    VisModuleType * m_pVisMod;
 
     RigidBodySimContainerType * pSimBodies;
 
@@ -1947,44 +1973,48 @@ struct SceneParserOptions {
     bool m_parseSceneObjects  = true;  ///< Parse SceneObjects, (default= true)
 };
 
-template<typename TDynamicsSystem>
+
+/** These module types are defined when there is no derivation from scene parser */
+template<typename TSceneParser>
+struct SceneParserModuleTraits{
+    using SettingsModuleType         = ParserModules::SettingsModule<TSceneParser>;
+    using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<TSceneParser>;
+    using ContactParamModuleType     = ParserModules::ContactParamModule<TSceneParser>;
+    using InitStatesModuleType       = ParserModules::InitStatesModule<TSceneParser> ;
+
+    using BodyModuleType             = ParserModules::BodyModule< TSceneParser > ;
+    using GeometryModuleType         = ParserModules::GeometryModule<TSceneParser>;
+
+    using VisModuleType              = ParserModules::VisModuleDummy<TSceneParser>;
+
+};
+
+template<typename TDynamicsSystem, template<typename P> class TModuleTraits = SceneParserModuleTraits, typename TDerived = void >
 class SceneParser {
 public:
     using DynamicsSystemType = TDynamicsSystem;
 
-    using SettingsModuleType    = ParserModules::SettingsModule<SceneParser>;
-    using GeometryModuleType    = ParserModules::GeometryModule<SceneParser>;
-    using ContactParamModuleType= ParserModules::ContactParamModule<SceneParser>;
+    /** Modules defintions
+    * This type traits define the module types of the derived class if any exist , otherwise it defines the standart module types
+    */
+    using DerivedType = typename std::conditional< std::is_same<TDerived,void>::value, SceneParser, TDerived>::type;
+    using ModuleTypeTraits = TModuleTraits<DerivedType>;
+    DEFINE_MODULETYPES_AND_FRIENDS(ModuleTypeTraits)
 
-    using InitStatesModuleType  = ParserModules::InitStatesModule<SceneParser> ;
-    using BodyVisModuleType     = ParserModules::BodyVisModuleDummy<SceneParser>;
-    using BodyModuleType        = ParserModules::BodyModule< SceneParser, BodyVisModuleType > ;
-    using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<SceneParser>;
 
     using XMLNodeType = pugi::xml_node;
     using XMLAttributeType = pugi::xml_attribute;
-
 
     using RandomGenType = typename DynamicsSystemType::RandomGenType;
     template<typename T>
     using UniformDistType = std::uniform_real_distribution<T>;
 
-protected:
-
-    friend class ParserModules::SettingsModule<SceneParser>;
-    friend class ParserModules::GeometryModule<SceneParser>;
-    friend class ParserModules::ContactParamModule<SceneParser>;
-
-    friend class ParserModules::InitStatesModule<SceneParser>;
-    friend class ParserModules::BodyModule< SceneParser, BodyVisModuleType > ;
-    friend class ParserModules::ExternalForcesModule<SceneParser>;
-
 public:
 
     SceneParser( std::shared_ptr<DynamicsSystemType> pDynSys):m_pDynSys(pDynSys) {
         // Get all Modules from DynamicsSystem
-        std::tie(m_pSettingsModule, m_pBodyModule, m_pInitStatesModule, m_pGeometryModule, m_pExternalForcesModule, m_pContactParamModule )
-            = m_pDynSys->template createParserModules<SceneParser>(this);
+        std::tie(m_pSettingsModule, m_pExternalForcesModule, m_pContactParamModule,m_pInitStatesModule, m_pBodyModule, m_pGeometryModule, m_pVisModule)
+            = m_pDynSys->template createParserModules<DerivedType>( static_cast<DerivedType*>(this));
 
         // Set log
         m_pSimulationLog = nullptr;
@@ -2152,8 +2182,8 @@ protected:
     std::unique_ptr< BodyModuleType>           m_pBodyModule;
     std::unique_ptr< InitStatesModuleType>     m_pInitStatesModule;
 
+    std::unique_ptr< VisModuleType>            m_pVisModule;
 };
-
 
 
 

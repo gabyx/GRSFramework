@@ -23,6 +23,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/Dynamics/General/MatrixHelpers.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/General/QuaternionHelpers.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
+        ${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystemBase.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
@@ -65,6 +66,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorder.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
+        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RigidBodyState.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
 
         ${COMMONSOURCE_DIR}/include/Systems/SceneParser.hpp
