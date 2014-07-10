@@ -50,11 +50,18 @@
     if( ! _node_ ){ \
         THROWEXCEPTION("XML Node: " << _nodename_ << " does not exist!");  \
     }
+#define CHECK_XMLATTRIBUTE( _node_ , _nodename_ ) \
+    if( ! _node_ ){ \
+        THROWEXCEPTION("XML Attribute: " << _nodename_ << " does not exist!");  \
+    }
 
 #define GET_XMLCHILDNODE_CHECK( _childnode_ , _childname_ , _node_ ) \
     _childnode_ = _node_.child( _childname_ ); \
     CHECK_XMLNODE( _childnode_ , _childname_)
 
+#define GET_XMLATTRIBUTE_CHECK( _att_ , _attname_ , _node_ ) \
+    _att_ = _node_.attribute( _attname_ ); \
+    CHECK_XMLATTRIBUTE( _att_ , _attname_ )
 
 #define  DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE  \
     using ParserType = TParser; \
@@ -349,7 +356,9 @@ private:
     GlobalGeometryMapType * m_globalGeometries;
 
 public:
-    GeometryModule(ParserType * p, GlobalGeometryMapType * g): m_parser(p),m_globalGeometries(g) {};
+    GeometryModule(ParserType * p, GlobalGeometryMapType * g): m_parser(p),m_globalGeometries(g) {
+        ASSERTMSG(m_globalGeometries, "this should not be null")
+    };
 
     void parseGlobalGeometries(XMLNodeType sceneSettings) {
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== GeometryModule: parsing (GlobalGeometry) ====================="<<std::endl;)
@@ -549,7 +558,7 @@ private:
                 addToGlobalGeomList(id, pHalfspaceGeom);
             } else {
 
-                if(m_bodyListGroup->begin() != m_bodyListGroup->end() && m_bodyListGroup->begin()->m_body != nullptr ) {
+                if(m_bodyListGroup->size() != 0 && m_bodyListGroup->begin()->m_body != nullptr ) {
                     for(auto & b  : *m_bodyListGroup) {
                         b.m_body->m_geometry = pHalfspaceGeom;
                     }
@@ -740,10 +749,11 @@ private:
             for(auto & b : *m_bodyListGroup) {
                 GetScaleOfGeomVisitor vis(b.m_scale);
                 boost::apply_visitor(vis, it->second);
-                b.m_body->m_geometry = it->second;
-                b.m_body->m_globalGeomId = id;
-                LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body) << ", GlobalGeomId: " << id <<  std::endl);
-
+                if(b.m_body){
+                    b.m_body->m_geometry = it->second;
+                    b.m_body->m_globalGeomId = id;
+                    LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body) << ", GlobalGeomId: " << id <<  std::endl);
+                }
             }
 
         } else if(distribute == "linear") {
@@ -768,9 +778,11 @@ private:
 
                 GetScaleOfGeomVisitor vis(b.m_scale);
                 boost::apply_visitor(vis, it->second);
-                b.m_body->m_geometry = it->second;
-                b.m_body->m_globalGeomId = id;
-                LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body) << ", GlobalGeomId: " << id <<  std::endl);
+                if(b.m_body){
+                    b.m_body->m_geometry = it->second;
+                    b.m_body->m_globalGeomId = id;
+                    LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body) << ", GlobalGeomId: " << id <<  std::endl);
+                }
 
             }
 
@@ -817,9 +829,11 @@ private:
 
                 GetScaleOfGeomVisitor vis(b.m_scale);
                 boost::apply_visitor(vis, it->second);
-                b.m_body->m_geometry = it->second;
-                b.m_body->m_globalGeomId = id;
-                LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body) << ", GlobalGeomId: " << id <<  std::endl);
+                if(b.m_body){
+                    b.m_body->m_geometry = it->second;
+                    b.m_body->m_globalGeomId = id;
+                    LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body) << ", GlobalGeomId: " << id <<  std::endl);
+                }
             }
 
 
@@ -1594,19 +1608,21 @@ public:
         : m_parser(p), m_pGeomMod(g), m_pVisMod(i), m_pInitStatesMod(is), m_pSimBodies(simBodies), m_pBodies(bodies) {
             ASSERTMSG(is,"should not be null");
             ASSERTMSG(g,"should not be null");
-            ASSERTMSG(m_allocateBodies || m_parseOnlyVisualizationProperties, " You should not allocate any bodies and parse dynamic properties!")
-
         };
 
 
     void parse(XMLNodeType & sceneObjects){
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> BodyModule: parsing =========================================="<<std::endl;)
 
+        ASSERTMSG(m_parsingOptions.m_allocateBodies || m_parsingOptions.m_parseOnlyVisualizationProperties, " You should not allocate any bodies (m_allocateBodies: "<<m_parsingOptions.m_allocateBodies
+                                                <<" and parse dynamic properties (m_parseOnlyVisualizationProperties: " << m_parsingOptions.m_parseOnlyVisualizationProperties <<
+                                                ")")
+
         LOGSCLEVEL1( m_parser->m_pSimulationLog, "---> BodyModule Options: " <<std::endl
                         <<"\t parse only simulated bodies:"<<m_parsingOptions.m_parseOnlySimBodies << std::endl
                         <<"\t parse all bodies in group with disabled selective ids:"<<m_parsingOptions.m_parseAllBodiesNonSelGroup << std::endl
                         <<"\t parse selective ids: "<< m_parseSelectiveBodyIds << std::endl
-                        <<"\t allocate bodies: "<< m_allocateBodies << std::endl;)
+                        <<"\t allocate bodies: "<< m_parsingOptions.m_allocateBodies << std::endl;)
 
         for ( XMLNodeType & node  : sceneObjects.children("RigidBodies")) {
                 parseRigidBodies(node);
@@ -1685,7 +1701,7 @@ private:
 
         // Skip group if we can:
         if( (!m_parsingOptions.m_parseAllBodiesNonSelGroup && !hasSelectiveFlag)
-            || ( m_eBodiesState != RigidBodyType::BodyState::SIMULATED  && m_parsingOptions.m_parseOnlySimBodies)
+            || ( m_eBodiesState != RigidBodyType::BodyMode::SIMULATED  && m_parsingOptions.m_parseOnlySimBodies)
             || (m_parseSelectiveBodyIds && hasSelectiveFlag && m_startRangeIdIt== m_parsingOptions.m_bodyIdRange.end()) // out of m_bodyIdRange, no more id's which could be parsed in
              ) {
             LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Skip Group" << std::endl;)
@@ -1737,7 +1753,7 @@ private:
         {
             LOGSCLEVEL3(m_parser->m_pSimulationLog,"---> Added RigidBody Instance: "<<RigidBodyId::getBodyIdString(*bodyIdIt)<<std::endl);
             // Push new body
-            if(m_allocateBodies){
+            if(m_parsingOptions.m_allocateBodies){
                 *bodyIt = BodyData(new RigidBodyType(*bodyIdIt), *bodyIdIt, Vector3(1,1,1));
             }else{
                 // add no bodies for visualization stuff, we dont need it!
@@ -1764,13 +1780,13 @@ private:
         parseDynamicProperties(dynPropNode);
 
         //Copy the pointers!
-        if(m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
+        if(m_eBodiesState == RigidBodyType::BodyMode::SIMULATED) {
             LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> Copy Simulated RigidBody References to DynamicSystem ..."<<std::endl;);
             bool added = addAllBodies(m_pSimBodies);
             if(!added) {THROWEXCEPTION("Could not add body to m_SimBodies!, some bodies exist already in map!");};
             m_nSimBodies += m_parsedInstancesGroup;
             m_nBodies += m_parsedInstancesGroup;
-        } else if(m_eBodiesState == RigidBodyType::BodyState::STATIC) {
+        } else if(m_eBodiesState == RigidBodyType::BodyMode::STATIC) {
             LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> Copy Static RigidBody References to DynamicSystem ..."<<std::endl;);
             bool added = addAllBodies(m_pBodies);
             if(!added) {THROWEXCEPTION("Could not add body to m_Bodies!, some bodies exist already in map!");};
@@ -1781,7 +1797,7 @@ private:
 
         XMLNodeType  visualizationNode = rigidbodies.child("Visualization");
         if(m_pVisMod){
-            m_pVisMod->parse(visualizationNode);
+            m_pVisMod->parse(visualizationNode, &m_bodyListGroup, m_startIdGroup, m_eBodiesState );
         }
         // ===============================================================================================================
 
@@ -1792,9 +1808,9 @@ private:
         LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> Parse DynamicProperties ..."<<std::endl;);
 
         // DynamicState has already been parsed for the group!
-        if(m_eBodiesState == RigidBodyType::BodyState::SIMULATED) {
+        if(m_eBodiesState == RigidBodyType::BodyMode::SIMULATED) {
             parseDynamicPropertiesSimulated(dynProp);
-        } else if(m_eBodiesState == RigidBodyType::BodyState::STATIC) {
+        } else if(m_eBodiesState == RigidBodyType::BodyMode::STATIC) {
             parseDynamicPropertiesStatic(dynProp);
         }
     }
@@ -1802,11 +1818,11 @@ private:
 
         std::string type =  dynProp.child("DynamicState").attribute("type").value();
         if(type == "simulated") {
-            m_eBodiesState =  RigidBodyType::BodyState::SIMULATED;
+            m_eBodiesState =  RigidBodyType::BodyMode::SIMULATED;
         } else if(type == "not simulated" || type == "static") {
-            m_eBodiesState =  RigidBodyType::BodyState::STATIC;
+            m_eBodiesState =  RigidBodyType::BodyMode::STATIC;
         } else if(type == "animated") {
-            m_eBodiesState =  RigidBodyType::BodyState::ANIMATED;
+            m_eBodiesState =  RigidBodyType::BodyMode::ANIMATED;
             THROWEXCEPTION("---> The attribute 'type' '" << type << "' of 'DynamicState' has no implementation in the parser");
         } else {
             THROWEXCEPTION("---> The attribute 'type' '" << type << "' of 'DynamicState' has no implementation in the parser");
@@ -1817,7 +1833,7 @@ private:
 
         std::string s;
         XMLNodeType n;
-        if(!m_parseOnlyVisualizationProperties) {
+        if(!m_parsingOptions.m_parseOnlyVisualizationProperties) {
             // First allocate a new SolverDate structure
             for(auto & b : m_bodyListGroup)  {
                 b.m_body->m_pSolverData = new typename RigidBodyType::RigidBodySolverDataType();
@@ -1857,7 +1873,7 @@ private:
 
         // InitialPosition ============================================================
         GET_XMLCHILDNODE_CHECK(n,"InitialCondition",dynProp)
-        bool parseVel = (m_parseOnlyVisualizationProperties)? false : true;
+        bool parseVel = (m_parsingOptions.m_parseOnlyVisualizationProperties)? false : true;
         if(m_pInitStatesMod){
             m_pInitStatesMod->parseInitialCondition(n,&m_bodyListGroup,m_startIdGroup,parseVel);
         }
@@ -1865,7 +1881,7 @@ private:
     }
     void parseDynamicPropertiesStatic( XMLNodeType  dynProp) {
         XMLNodeType n ;
-        if(!m_parseOnlyVisualizationProperties) {
+        if(!m_parsingOptions.m_parseOnlyVisualizationProperties) {
             n = dynProp.child("Material");
             parseMaterial(n);
         }
@@ -1915,9 +1931,7 @@ private:
 
     BodyModuleParserOptions m_parsingOptions;
     using BodyRangeType = typename BodyModuleParserOptions::BodyRangeType;
-
     bool m_parseSelectiveBodyIds;      ///< Use the m_bodyIdRange to only load the selective ids in the group which use enableSelectiveIds="true"
-    bool m_parseOnlyVisualizationProperties;
 
     /// Parsing helpers
     BodyRangeType m_bodyIdRangeTmp;                     ///< Range of bodies, temporary for load of all bodies
@@ -1934,7 +1948,7 @@ private:
     unsigned int m_globalMaxGroupId; // Group Id used to build a unique id!
 
     /// Temprary structures for each sublist (groupid=?) of rigid bodies
-    typename RigidBodyType::BodyState m_eBodiesState;     ///< Used to parse a RigidBody Node
+    typename RigidBodyType::BodyMode m_eBodiesState;     ///< Used to parse a RigidBody Node
 
     struct BodyData {
         BodyData(): m_body(nullptr),m_scale(Vector3(1,1,1)){}
@@ -1951,7 +1965,6 @@ public:
 private:
 
     BodyListType m_bodyListGroup; ///< Used to parse a RigidBody Node
-    bool m_allocateBodies;
 
 
     /// Other Modules
@@ -2147,6 +2160,10 @@ protected:
     virtual void parseSceneSettingsPost( XMLNodeType sceneSettings ) {
         if(m_pInitStatesModule) {
             m_pInitStatesModule->parseGlobalInitialCondition(sceneSettings);
+        }
+
+        if(m_pVisModule){
+            m_pVisModule->parseSceneSettingsPost(sceneSettings);
         }
     }
 

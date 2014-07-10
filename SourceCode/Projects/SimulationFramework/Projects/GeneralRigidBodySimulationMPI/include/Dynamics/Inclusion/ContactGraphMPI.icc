@@ -110,7 +110,7 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
 
 
     // FIRST BODY!
-    if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+    if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
 
         //Add to the neighbour data if remote contact
         if(isRemote.first) {
@@ -139,14 +139,14 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
         computeW<1>( addedNode->m_nodeData);
         //connectNode<1>( addedNode);
 
-    } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::ANIMATED ) {
+    } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
         // Contact goes into xi_N, xi_T
         ASSERTMSG(false,"RigidBody::ANIMATED objects have not been implemented correctly so far!");
     }
 
 
     // SECOND BODY!
-    if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+    if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
 
         //Add to the neighbour data if remote contact
         if(isRemote.second) {
@@ -175,7 +175,7 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
         computeW<2>( addedNode->m_nodeData);
         //connectNode<2>( addedNode);
 
-    } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::ANIMATED ) {
+    } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
         // Contact goes into xi_N, xi_T
         ASSERTMSG(false,"RigidBody::ANIMATED objects have not been implemented correctly so far!");
     }

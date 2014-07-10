@@ -72,9 +72,9 @@ StatePoolVisBackFront::StatePoolVisBackFront(TRigidBodyIterator beg, TRigidBodyI
     m_pool[1] = m_pool[0];
     m_pool[2] = m_pool[0];
 
-    for(auto & s : m_pool[0].m_SimBodyStates){
-        std::cout << RigidBodyId::getBodyIdString(s.m_id) << std::endl;
-    }
+//    for(auto & s : m_pool[0].m_SimBodyStates){
+//        std::cout << RigidBodyId::getBodyIdString(s.m_id) << std::endl;
+//    }
 
     m_idx[0] = 1; //front
     m_idx[1] = 0; //back

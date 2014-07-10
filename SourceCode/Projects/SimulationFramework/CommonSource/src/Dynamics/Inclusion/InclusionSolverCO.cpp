@@ -319,13 +319,13 @@ void InclusionSolverCO::solveInclusionProblem() {
         for( auto & node : nodes){
 
             pBody = node->m_nodeData.m_pCollData->m_pBody1;
-            if( pBody->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( pBody->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 pBody->m_pSolverData->m_uBuffer.m_front +=
                 pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body1 * (*m_P_front).segment<ContactDim>(ContactDim* node->m_nodeNumber);
             }
 
             pBody = node->m_nodeData.m_pCollData->m_pBody2;
-            if( pBody->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( pBody->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 pBody->m_pSolverData->m_uBuffer.m_front +=
                 pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body2 * (*m_P_front).segment<ContactDim>(ContactDim* node->m_nodeNumber);
             }

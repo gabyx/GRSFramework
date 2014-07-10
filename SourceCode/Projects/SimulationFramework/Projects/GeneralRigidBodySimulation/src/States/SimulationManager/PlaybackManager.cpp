@@ -70,7 +70,11 @@ PlaybackManager::~PlaybackManager() {
 
 bool PlaybackManager::setup() {
 
-    m_pDynSys = std::shared_ptr< DynamicsSystemPlayback > (new DynamicsSystemPlayback(m_pSceneMgr));
+    double lengthScale = 100;  // 1m = 100 Ogre units , 1cm -> 1 Ogre Unit
+    m_pBaseNode = m_pSceneMgr->getSceneNode("BaseFrame")->createChildSceneNode("BaseFrameScene");
+    m_pBaseNode->setScale(Ogre::Vector3(1.0,1.0,1.0)*lengthScale);
+
+    m_pDynSys = std::shared_ptr< DynamicsSystemPlayback > (new DynamicsSystemPlayback(m_pSceneMgr,m_pBaseNode));
 
     m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(m_pDynSys) );
 
@@ -84,8 +88,8 @@ bool PlaybackManager::setup() {
 
     //init shared buffer
     m_pSharedBuffer = std::shared_ptr<SharedBufferPlayback >(
-                          new SharedBufferPlayback(m_pDynSys->m_SceneNodeSimBodies.begin(),
-                                                   m_pDynSys->m_SceneNodeSimBodies.end())
+                          new SharedBufferPlayback(m_pDynSys->m_SceneNodeSimBodies.beginKey(),
+                                                   m_pDynSys->m_SceneNodeSimBodies.endKey())
                       );
     m_pSharedBuffer->resetStateRingPool(m_pDynSys->m_bodiesInitStates);
 
@@ -165,18 +169,22 @@ void PlaybackManager::updateScene(double timeSinceLastFrame) {
 
 void PlaybackManager::updateSimBodies() {
     //update objects...
-    for(int i=0; i<m_pVisBuffer->m_SimBodyStates.size(); i++) {
-        m_pDynSys->m_SceneNodeSimBodies[i].m_node->setPosition(
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(0),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(1),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(2)
-        );
-        m_pDynSys->m_SceneNodeSimBodies[i].m_node->setOrientation(
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(3),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(4),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(5),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(6)
-        );
+    static decltype(m_pDynSys->m_SceneNodeSimBodies.begin()) gBodyIt;
+    static decltype(m_pVisBuffer->m_SimBodyStates.begin()) stateIt;
+    static unsigned int size;
+
+    gBodyIt = m_pDynSys->m_SceneNodeSimBodies.begin();
+    stateIt = m_pVisBuffer->m_SimBodyStates.begin();
+
+    size = std::min(m_pDynSys->m_SceneNodeSimBodies.size(),m_pVisBuffer->m_SimBodyStates.size());
+
+    WARNINGMSG( m_pDynSys->m_SceneNodeSimBodies.size() == m_pVisBuffer->m_SimBodyStates.size()
+               , "State Container and SimBodyContainer not the same size: "
+               << m_pVisBuffer->m_SimBodyStates.size() <<"!="<< m_pDynSys->m_SceneNodeSimBodies.size());
+
+    for(unsigned int i=0; i<size;++i) {
+        gBodyIt->applyBodyState(*stateIt);
+        ++gBodyIt;  ++stateIt;
     }
 }
 

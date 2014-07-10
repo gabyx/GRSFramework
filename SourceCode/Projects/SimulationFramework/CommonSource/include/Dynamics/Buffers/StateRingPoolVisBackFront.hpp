@@ -116,7 +116,7 @@ void StateRingPoolVisBackFront::resetStateRingPool(const RigidBodyStateContainer
     StateType & state = m_pool[0];
     state.reset();
 
-    InitialConditionBodies::applyBodyStatesTo(state_init,state);
+    state.applyBodyStates<false>(state_init);
 
     //(m_pool[0]) = m_state_init; // Assignment operator
     m_pool[1] = state; // Assignment operator

@@ -76,7 +76,7 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
         << " simulated & " << m_pDynSys->m_Bodies.size()<<  " static bodies! "  << std::endl;);
     // =====================================================
 
-    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys >(new SharedBufferDynSys(m_pDynSys->m_SimBodies.begin(),m_pDynSys->m_SimBodies.end() ));
+    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys >(new SharedBufferDynSys(m_pDynSys->m_SimBodies.beginKey(),m_pDynSys->m_SimBodies.endKey() ));
     m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
 
 

@@ -40,7 +40,7 @@ public:
 
     typedef RigidBodyBase AbsoluteBaseType; ///< The absolut base type where m_id is defined, for the rigid body container
 
-    enum class BodyState: char {
+    enum class BodyMode: char {
      SIMULATED = 0,
      STATIC = 1,
      ANIMATED = 2,
@@ -99,7 +99,7 @@ public:
     typedef RigidBodyId::Type RigidBodyIdType;
     const RigidBodyIdType m_id; ///< This is the id of the body.
 
-    BodyState m_eState; ///< The state of the body.
+    BodyMode m_eState; ///< The state of the body.
     BodyMaterialType m_eMaterial; ///< The material id.
 
     unsigned char m_flags; ///< Different Flags which can be used during the timestep process, introduces because of MPI
@@ -117,7 +117,7 @@ public:
         m_r_S.setZero();
         setQuaternionZero(m_q_KI);
         m_h_term.setZero();
-        m_eState = BodyState::STATIC;
+        m_eState = BodyMode::STATIC;
         m_eMaterial = 0;
         m_pSolverData = nullptr;
         m_globalGeomId = 0;

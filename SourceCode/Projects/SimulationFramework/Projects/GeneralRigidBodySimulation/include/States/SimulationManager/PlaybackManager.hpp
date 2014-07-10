@@ -74,6 +74,7 @@ private:
     Logging::Log*	m_pThreadLog;
 
     std::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
+    Ogre::SceneNode * m_pBaseNode;
 
     std::string m_KeyListenerName;
 

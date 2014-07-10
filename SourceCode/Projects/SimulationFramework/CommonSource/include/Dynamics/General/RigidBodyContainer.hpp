@@ -1,6 +1,7 @@
 #ifndef RigidBodyList_hpp
 #define RigidBodyList_hpp
 
+#include <boost/iterator/transform_iterator.hpp>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/hashed_index.hpp>
@@ -61,6 +62,13 @@ private:
     MapByInsertionType & m_mapByInsertion;
     MapByOrderedIdType & m_mapByOrderedId;
 
+
+    template <typename Iter>
+    struct KeyGetter : std::unary_function< const typename Iter::value_type, const RigidBodyIdType &>
+    {
+         const RigidBodyIdType & operator()(const typename Iter::value_type & pBody) const{ return pBody->m_id; }
+    };
+
 public:
 
      RigidBodyContainer():
@@ -69,23 +77,32 @@ public:
         m_mapByOrderedId( m_map.get<by_ordered_id>())
     {}
 
+    /** Body iterator ordered by id */
     typedef typename MapByInsertionType::iterator iterator;
     typedef typename MapByInsertionType::const_iterator const_iterator;
-
+    /** Body iterator ordered by insertion */
     typedef typename MapByOrderedIdType::iterator iterator_ordered;
     typedef typename MapByOrderedIdType::const_iterator const_iterator_ordered;
+    /** Key ierator ordered by id */
+    typedef boost::transform_iterator< KeyGetter<iterator>, iterator> key_iterator_ordered;
+    /** Key ierator ordered by insertion */
+    typedef boost::transform_iterator< KeyGetter<iterator>, iterator> key_iterator;
 
-    // Ordered by id
+    /** Get body iterators ordered by id */
     iterator_ordered beginOrdered(){ return m_mapByOrderedId.begin(); }
     iterator_ordered endOrdered(){ return m_mapByOrderedId.end(); }
     const_iterator_ordered beginOrdered() const{ return m_mapByOrderedId.begin(); }
     const_iterator_ordered endOrdered() const { return m_mapByOrderedId.end(); }
 
-    // Ordered by insertion
+    /** Get body Iterators ordered by insertion (random access) */
     iterator begin(){return m_mapByInsertion.begin();}
     iterator end(){return m_mapByInsertion.end();}
     const_iterator begin() const {return m_mapByInsertion.begin();}
     const_iterator end() const {return m_mapByInsertion.end();}
+
+    /** Get key iterators ordered by insertion (random access) */
+    key_iterator beginKey(){ return key_iterator(m_mapByInsertion.begin(), KeyGetter<iterator>());}
+    key_iterator endKey(){return key_iterator(m_mapByInsertion.end(), KeyGetter<iterator>());}
 
     template<typename Iterator>
     bool addBodies(Iterator beginIt, Iterator endIt){

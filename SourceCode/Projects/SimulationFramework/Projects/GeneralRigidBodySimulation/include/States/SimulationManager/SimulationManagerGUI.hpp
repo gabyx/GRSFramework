@@ -38,8 +38,8 @@ public:
     std::shared_ptr<StateRecorder >		m_pStateRecorder;
 
     void setup(boost::filesystem::path sceneFilePath);
-
-    std::shared_ptr< SceneParserGUI<DynamicsSystemType> > m_pSceneParser;
+    using SceneParserType = SceneParserGUI<DynamicsSystemType>;
+    std::shared_ptr< SceneParserType > m_pSceneParser;
 
     void updateScene(double timeSinceLastFrame);
     inline void updateSimBodies();
@@ -60,7 +60,7 @@ public:
 private:
 
     std::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
-
+    Ogre::SceneNode * m_pBaseNode;
     void setShadowTechniques();
 
     const DynamicsState * m_pVisBuffer;
@@ -93,10 +93,6 @@ private:
 
     std::shared_ptr< DynamicsSystemType >		   m_pDynSys;
     // ===========================================
-
-    int m_nSimBodies;
-    double m_lengthScale;
-    Ogre::SceneNode * m_pBaseNode;
 
     bool writeInitialState();
 

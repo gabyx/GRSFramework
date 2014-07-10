@@ -63,8 +63,11 @@ public:
 
     RigidBodyStateListType::size_type getNSimBodies() const {return m_SimBodyStates.size();}
 
-    template<bool resetState, typename TRigidBodyIterator >
-    inline void initSimStates(TRigidBodyIterator beg, TRigidBodyIterator end){
+    /**
+    * Accepts an iterator which iterates through ids of the bodies, operator*() gives RigidBodyIdType!
+    */
+    template<bool resetState, typename TRigidBodyIdIterator >
+    inline void initSimStates(TRigidBodyIdIterator beg, TRigidBodyIdIterator end){
         m_randomAccess = true; m_startIdx = 0;
         m_t = 0.0;
         m_StateType = NONE;
@@ -83,12 +86,11 @@ public:
         auto sIt = m_SimBodyStates.begin();
         for(; it!= end; ++it){
             // Check for continuity in ids
-            auto id = (*it)->m_id;
-            if( m_randomAccess && std::next(it)!=end && (*std::next(it))->m_id - id != 1 ){
+            if( m_randomAccess && std::next(it)!=end && (*std::next(it)) - *it != 1 ){
                 m_randomAccess=false;
             }
-            sIt->m_id = id;
-            m_pIdToState.insert(std::make_pair(id,&(*sIt)));
+            sIt->m_id = *it;
+            m_pIdToState.insert(std::make_pair(*it,&(*sIt)));
             ++sIt;
         }
         std::cout << "Random Access :" << m_randomAccess << std::endl;

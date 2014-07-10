@@ -48,13 +48,13 @@ SET(STATES_SRC
 )
 
 SET(COMMON_INC
-    ${SOURCE_DIR}/include/Common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
     ${SOURCE_DIR}/include/Common/AssertionDebug.hpp
 
 )
 SET(COMMON_SRC
-    ${SOURCE_DIR}/src/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
 )
 
 SET(DYNAMICS_INC
