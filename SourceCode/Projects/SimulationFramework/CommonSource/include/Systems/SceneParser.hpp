@@ -155,6 +155,8 @@ private:
 
 public:
 
+    void cleanUp(){}
+
     TimeStepperSettingsType* getTimeStepperSettings() {
         return m_timestepperSettings;
     }
@@ -356,6 +358,8 @@ private:
     GlobalGeometryMapType * m_globalGeometries;
 
 public:
+    void cleanUp(){}
+
     GeometryModule(ParserType * p, GlobalGeometryMapType * g): m_parser(p),m_globalGeometries(g) {
         ASSERTMSG(m_globalGeometries, "this should not be null")
     };
@@ -871,6 +875,8 @@ private:
     ParserType * m_parser;
 
 public:
+    void cleanUp(){}
+
     ContactParamModule(ParserType * p, ContactParameterMapType * c): m_parser(p), m_contactParams(c) {};
 
     void parse(XMLNodeType sceneSettings) {
@@ -997,7 +1003,10 @@ private:
 
     ParserType * m_parser;
 
+
 public:
+    void cleanUp(){}
+
     ExternalForcesModule(ParserType * p, ExternalForceListType * f): m_parser(p), m_forceList(f) {};
 
     void parse(XMLNodeType sceneSettings) {
@@ -1124,7 +1133,7 @@ private:
     DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
 public:
     VisModuleDummy(ParserType * p, BodyModuleType * b) {};
-
+    void cleanUp(){}
     template<typename... Args>
     void parse(Args&&... args) {
          ERRORMSG("This is the standard BodyVisModule which does nothing! This function should not be called!");
@@ -1155,6 +1164,9 @@ private:
 
 
 public:
+
+    void cleanUp(){}
+
     InitStatesModule(ParserType * p, RigidBodyStatesContainerType * c, SettingsModuleType * s): m_parser(p),m_initStates(c), m_settings(s) {
         ASSERTMSG(m_initStates, "should not be null");
     };
@@ -1621,6 +1633,11 @@ private:
 
 public:
 
+    void cleanUp(){
+        m_groupIdToNBodies.clear();
+        m_bodyListGroup.clear();
+    }
+
     using OptionsType = BodyModuleOptions;
 
     BodyModule(ParserType * p, GeometryModuleType * g,  InitStatesModuleType * is, VisModuleType * i,
@@ -2041,7 +2058,9 @@ public:
     /** Modules defintions
     * This type traits define the module types of the derived class if any exist , otherwise it defines the standart module types
     */
-    using DerivedType = typename std::conditional< std::is_same<TDerived,void>::value, SceneParser, SceneParser>::type;
+    /** This type is injected into the modules, we use this class instead of the derived one, due to the fact that we cannot redefine */
+    using DerivedType = SceneParser; //typename std::conditional< std::is_same<TDerived,void>::value, SceneParser, SceneParser>::type;
+
     using ModuleTypeTraits = TModuleTraits<DerivedType>;
     DEFINE_MODULETYPES_AND_FRIENDS(ModuleTypeTraits)
 
@@ -2082,6 +2101,27 @@ public:
 
     virtual void cleanUp() {
         // Delegate all cleanUp stuff to the modules!
+        if(m_pSettingsModule) {
+            m_pSettingsModule->cleanUp();
+        }
+        if(m_pContactParamModule) {
+            m_pContactParamModule->cleanUp();
+        }
+        if(m_pExternalForcesModule) {
+            m_pExternalForcesModule->cleanUp();
+        }
+        if(m_pGeometryModule) {
+            m_pGeometryModule->cleanUp();
+        }
+        if(m_pBodyModule){
+            m_pBodyModule->cleanUp();
+        }
+        if(m_pInitStatesModule){
+            m_pInitStatesModule->cleanUp();
+        }
+        if(m_pVisModule){
+            m_pVisModule->cleanUp();
+        }
     }
 
     boost::filesystem::path getParsedSceneFile() {
