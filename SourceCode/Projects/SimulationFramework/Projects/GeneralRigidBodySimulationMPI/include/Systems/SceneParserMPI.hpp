@@ -165,15 +165,15 @@ protected:
         if(type=="grid") {
 
             Vector3 minPoint, maxPoint;
-            if(!Utilities::stringToVector3<PREC>(minPoint,  elem->GetAttribute("minPoint"))) {
+            if(!Utilities::stringToVector3(minPoint,  elem->GetAttribute("minPoint"))) {
                 throw ticpp::Exception("---> String conversion in parseMPISettings: minPoint failed");
             }
-            if(!Utilities::stringToVector3<PREC>(maxPoint,  elem->GetAttribute("maxPoint"))) {
+            if(!Utilities::stringToVector3(maxPoint,  elem->GetAttribute("maxPoint"))) {
                 throw ticpp::Exception("---> String conversion in parseMPISettings: maxPoint failed");
             }
 
             MyMatrix<unsigned int>::Vector3 dim;
-            if(!Utilities::stringToVector3<unsigned int>(dim,  elem->GetAttribute("dimension"))) {
+            if(!Utilities::stringToVector3(dim,  elem->GetAttribute("dimension"))) {
                 throw ticpp::Exception("---> String conversion in parseMPISettings: dimension failed");
             }
             // saftey check
@@ -193,7 +193,7 @@ protected:
         // Process special Inclusion solver settings
         elem = mpiSettings->FirstChild("InclusionSolverSettings",true)->ToElement();
         PREC splitNodeUpdateRatio;
-        if(!Utilities::stringToType<PREC>(splitNodeUpdateRatio,  elem->GetAttribute("splitNodeUpdateRatio"))) {
+        if(!Utilities::stringToType(splitNodeUpdateRatio,  elem->GetAttribute("splitNodeUpdateRatio"))) {
                 throw ticpp::Exception("---> String conversion in MPISettings::InclusionSolverSettings: splitNodeUpdateRatio failed");
         }
         if(splitNodeUpdateRatio <= 0){
@@ -201,7 +201,7 @@ protected:
         }
 
         PREC convergenceCheckRatio;
-        if(!Utilities::stringToType<PREC>(convergenceCheckRatio,  elem->GetAttribute("convergenceCheckRatio"))) {
+        if(!Utilities::stringToType(convergenceCheckRatio,  elem->GetAttribute("convergenceCheckRatio"))) {
                 throw ticpp::Exception("---> String conversion in MPISettings::InclusionSolverSettings: convergenceCheckRatio failed");
         }
         if(convergenceCheckRatio <= 0){

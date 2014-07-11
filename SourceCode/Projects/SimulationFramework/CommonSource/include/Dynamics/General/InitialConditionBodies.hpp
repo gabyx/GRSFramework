@@ -153,7 +153,7 @@ inline void applyBodyStatesTo(const RigidBodyStatesContainer & states, RigidBody
         if( resIt == states.end()){
             ERRORMSG(" There is no initial state for sim body id: " << RigidBodyId::getBodyIdString(*bodyIt) << std::endl);
         }
-        (*bodyIt)->applyBodyState(resIt->second);
+        (*bodyIt)->template applyBodyState<true>(resIt->second);
     }
 }
 

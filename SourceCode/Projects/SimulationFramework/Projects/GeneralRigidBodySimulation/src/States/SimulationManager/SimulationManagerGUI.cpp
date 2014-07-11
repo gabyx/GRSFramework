@@ -87,7 +87,11 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     if(sceneFilePath.empty()) {
         sceneFilePath = "SceneFile.xml";
     }
-    m_pSceneParser->parseScene(sceneFilePath);
+
+    typename ParserModules::BodyModuleOptions o;
+    o.m_bodyIdRange = std::make_pair( RigidBodyId::makeId(1,1),  RigidBodyId::makeId(1,4));
+
+    m_pSceneParser->parseScene(sceneFilePath,SceneParserOptions(),o);
 
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SimBodies.size()
         << " simulated & " << m_pDynSys->m_Bodies.size()<<  " static bodies! "  << std::endl;);
@@ -270,12 +274,9 @@ void SimulationManagerGUI::initSimThread() {
     // Get new folder path
     m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_REALTIME);
 
-
-    m_pTimestepper->initLogs(m_SimFolderPath);
-
     m_pTimestepper->reset();
 
-
+    m_pTimestepper->initLogs(m_SimFolderPath);
 
 }
 

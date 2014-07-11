@@ -225,7 +225,10 @@ template <typename PREC> bool stringToVector2( typename MyMatrix<PREC>::Vector2 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector3.
 */
-template <typename PREC> bool stringToVector3( typename MyMatrix<PREC>::Vector3 & vector3, const std::string & s){
+template <typename TVector3> bool stringToVector3( TVector3 & vector3, const std::string & s){
+
+	using PREC =  typename TVector3::Scalar;
+
 	unsigned int i=0, j;
 	PREC number;
 

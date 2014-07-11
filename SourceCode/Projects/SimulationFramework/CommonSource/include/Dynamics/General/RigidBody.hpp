@@ -71,10 +71,15 @@ public:
         VectorQBody r; r.head<3>() = m_r_S; r.tail<4>() = m_q_KI; return r;
     }
 
-    template<typename TRigidBodyState>
+    template<bool setTrafoMatrix = false,typename TRigidBodyState>
     inline void applyBodyState(const TRigidBodyState & s){
         m_r_S = s.m_q.template head<3>();
         m_q_KI = s.m_q.template tail<4>();
+
+        if(setTrafoMatrix ){
+            setRotFromQuaternion(m_q_KI,m_A_IK);
+        }
+
         if(m_pSolverData){
             m_pSolverData->m_uBuffer.m_back = s.m_u;
         }

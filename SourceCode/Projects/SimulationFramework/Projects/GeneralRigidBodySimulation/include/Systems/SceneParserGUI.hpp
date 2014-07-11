@@ -35,7 +35,7 @@ namespace ParserModules{
         ParserType * m_parser;
 
         struct RenderSettings{
-            bool attachAxis =false;
+            bool attachAxis = false;
             double axesSize = 1;
             bool shadowsEnabled = true;
         };
@@ -63,7 +63,7 @@ namespace ParserModules{
             m_startIdGroup = startId;
             m_bodyListGroup = bodyList;
 
-            LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== VisModule: parsing (BodyVisualization)  ======================"<<std::endl;)
+            LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> VisModule: parsing (BodyVisualization)"<<std::endl;)
             XMLNodeType node = vis.child("Mesh");
             if(node){
                 parseMesh(node);
@@ -72,13 +72,11 @@ namespace ParserModules{
                 node = vis.child("Plane");
                 parsePlane(node);
             }
-            LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
-
         }
 
         void parseSceneSettingsPost(XMLNodeType sceneSettings) {
 
-            LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== VisModule: parsing (SceneSettingsPost, MPI/Visualization)  ===="<<std::endl;)
+            LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== VisModule: parsing (SceneSettingsPost, MPI/Visualization)  ==="<<std::endl;)
 
             parseMPISettings(sceneSettings);
             parseSceneVisualizationSettings(sceneSettings);
@@ -102,12 +100,12 @@ namespace ParserModules{
         Vector3 scale;
         att = meshNode.attribute("scaleLikeGeometry");
         if(att) {
-            if(!Utilities::stringToType<bool>(scaleLikeGeometry, att.value())) {
+            if(!Utilities::stringToType(scaleLikeGeometry, att.value())) {
                 THROWEXCEPTION("---> String conversion in parseMesh: scaleWithGeometry failed");
             }
         }
         if(!scaleLikeGeometry){
-            if(!Utilities::stringToVector3<PREC>(scale, meshNode.attribute("scale").value() )) {
+            if(!Utilities::stringToVector3(scale, meshNode.attribute("scale").value() )) {
                 THROWEXCEPTION("---> String conversion in parseMesh: scale failed");
             }
         }
@@ -118,6 +116,8 @@ namespace ParserModules{
         if(rendering){
             parseRenderSettings(rendering, renderSettings);
         }
+        LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> RenderSettings: axis= "<< renderSettings.attachAxis
+                    << " shadows: " << renderSettings.shadowsEnabled << std::endl;)
 
         parseMaterials(meshNode);
 
@@ -198,12 +198,12 @@ namespace ParserModules{
         Vector3 scale;
         att = planeNode.attribute("scaleLikeGeometry");
         if(att) {
-            if(!Utilities::stringToType<bool>(scaleLikeGeometry, att.value())) {
+            if(!Utilities::stringToType(scaleLikeGeometry, att.value())) {
                 THROWEXCEPTION("---> String conversion in parseMesh: scaleWithGeometry failed");
             }
         }
         if(!scaleLikeGeometry){
-            if(!Utilities::stringToVector3<PREC>(scale, planeNode.attribute("scale").value() )) {
+            if(!Utilities::stringToVector3(scale, planeNode.attribute("scale").value() )) {
                 THROWEXCEPTION("---> String conversion in parseMesh: scale failed");
             }
         }
@@ -220,7 +220,7 @@ namespace ParserModules{
         Vector3 normal; normal(0)=0; normal(1)=0; normal(2)=1;
         att = planeNode.attribute("normal");
         if(att) {
-            if(!Utilities::stringToVector3<PREC>(normal, att.value())) {
+            if(!Utilities::stringToVector3(normal, att.value())) {
                 THROWEXCEPTION("---> String conversion in parsePlane: normal failed");
             }
         }
@@ -228,7 +228,7 @@ namespace ParserModules{
         PREC dist=0;
         att = planeNode.attribute("distance");
         if(att) {
-            if(!Utilities::stringToType<PREC>(dist, att.value())) {
+            if(!Utilities::stringToType(dist, att.value())) {
                 THROWEXCEPTION("---> String conversion in parsePlane: distance failed");
             }
         }
@@ -248,6 +248,8 @@ namespace ParserModules{
         if(rendering){
             parseRenderSettings(rendering, renderSettings);
         }
+        LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> RenderSettings: axis= "<< renderSettings.attachAxis
+                    << " shadows: " << renderSettings.shadowsEnabled << std::endl;)
 
         parseMaterials(planeNode);
 
@@ -347,20 +349,20 @@ namespace ParserModules{
         XMLAttributeType att;
         att =rendering.attribute("attachAxis");
         if(att) {
-            if(!Utilities::stringToType<bool>(settings.attachAxis, att.value() )) {
+            if(!Utilities::stringToType(settings.attachAxis, att.value() )) {
                 THROWEXCEPTION("---> String conversion of in parseMesh: attachAxis failed");
             }
         }
         att =rendering.attribute("axesSize");
         if(att) {
-            if(!Utilities::stringToType<double>(settings.axesSize, att.value())) {
+            if(!Utilities::stringToType(settings.axesSize, att.value())) {
                 THROWEXCEPTION("---> String conversion of in parseMesh: axesSize failed");
             }
         }
 
         att = rendering.attribute("shadowsEnabled");
         if(att) {
-            if(!Utilities::stringToType<bool>(settings.shadowsEnabled, att.value())) {
+            if(!Utilities::stringToType(settings.shadowsEnabled, att.value())) {
                 THROWEXCEPTION("---> String conversion of in parseMesh: shadowsEnabled failed");
             }
         }
@@ -377,15 +379,15 @@ namespace ParserModules{
             std::string type = topo.attribute("type").value();
             if(type=="grid") {
                 Vector3 minPoint, maxPoint;
-                if(!Utilities::stringToVector3<PREC>(minPoint,  topo.attribute("minPoint").value() )) {
+                if(!Utilities::stringToVector3(minPoint,  topo.attribute("minPoint").value() )) {
                     THROWEXCEPTION("---> String conversion in parseMPISettings: minPoint failed");
                 }
-                if(!Utilities::stringToVector3<PREC>(maxPoint,  topo.attribute("maxPoint").value())) {
+                if(!Utilities::stringToVector3(maxPoint,  topo.attribute("maxPoint").value())) {
                     THROWEXCEPTION("---> String conversion in parseMPISettings: maxPoint failed");
                 }
 
                 MyMatrix<unsigned int>::Vector3 dim;
-                if(!Utilities::stringToVector3<unsigned int>(dim,  topo.attribute("dimension").value())) {
+                if(!Utilities::stringToVector3(dim,  topo.attribute("dimension").value())) {
                     THROWEXCEPTION("---> String conversion in parseMPISettings: dimension failed");
                 }
 
@@ -494,7 +496,7 @@ namespace ParserModules{
             XMLNodeType scaleNode = sceneVisSettings.child("SceneScale");
             if(scaleNode){
                 double sceneScale;
-                if(!Utilities::stringToType<double>(sceneScale,  scaleNode.attribute("value").value())) {
+                if(!Utilities::stringToType(sceneScale,  scaleNode.attribute("value").value())) {
                     THROWEXCEPTION("---> String conversion in SceneScale: value failed");
                 }
                 m_pBaseNode->setScale(Ogre::Vector3(1,1,1)*sceneScale);
@@ -525,11 +527,9 @@ private:
     using BaseType = SceneParser<TDynamicsSystem, SceneParserGUIModuleTraits, SceneParserGUI<TDynamicsSystem> >;
 public:
     using DynamicsSystemType = TDynamicsSystem;
-
-    DEFINE_MODULETYPES_AND_FRIENDS(BaseType);
-    DEFINE_PARSER_CONFIG_TYPES_OF_BASE(BaseType);
-
-
+//    DEFINE_PARSER_CONFIG_TYPES_OF_BASE(BaseType);
+//
+//    DEFINE_MODULETYPES_AND_FRIENDS(BaseType);
 public:
 
 
@@ -539,8 +539,8 @@ public:
     }
 
     void dooo(){
-        this->m_pVisModule = std::unique_ptr<VisModuleType>(new VisModuleType(this));
-        this->m_pVisModule->parse(XMLNodeType());
+        this->m_pVisModule = std::unique_ptr<typename BaseType::VisModuleType>(new typename BaseType::VisModuleType(this));
+        this->m_pVisModule->parse(typename BaseType::XMLNodeType());
     }
 
 };
@@ -632,12 +632,12 @@ public:
 //        bool scaleLikeGeometry = false;
 //        Vector3 scale;
 //        if(meshNode.attribute("scaleLikeGeometry")) {
-//            if(!Utilities::stringToType<bool>(scaleLikeGeometry, meshNode.attribute("scaleLikeGeometry"))) {
+//            if(!Utilities::stringToType(scaleLikeGeometry, meshNode.attribute("scaleLikeGeometry"))) {
 //                THROWEXCEPTION("---> String conversion in parseMesh: scaleWithGeometry failed");
 //            }
 //        }
 //        if(!scaleLikeGeometry){
-//            if(!Utilities::stringToVector3<PREC>(scale, meshNode.attribute("scale"))) {
+//            if(!Utilities::stringToVector3(scale, meshNode.attribute("scale"))) {
 //                THROWEXCEPTION("---> String conversion in parseMesh: scale failed");
 //            }
 //        }
@@ -739,12 +739,12 @@ public:
 //        bool scaleLikeGeometry = false;
 //        Vector3 scale;
 //        if(planeNode.attribute("scaleLikeGeometry")) {
-//            if(!Utilities::stringToType<bool>(scaleLikeGeometry, planeNode.attribute("scaleLikeGeometry"))) {
+//            if(!Utilities::stringToType(scaleLikeGeometry, planeNode.attribute("scaleLikeGeometry"))) {
 //                THROWEXCEPTION("---> String conversion in parsePlane: scaleWithGeometry failed");
 //            }
 //        }
 //        if(!scaleLikeGeometry){
-//            if(!Utilities::stringToVector3<PREC>(scale, planeNode.attribute("scale"))) {
+//            if(!Utilities::stringToVector3(scale, planeNode.attribute("scale"))) {
 //                THROWEXCEPTION("---> String conversion  in parsePlane: scale failed");
 //            }
 //        }
@@ -759,14 +759,14 @@ public:
 //
 //        Vector3 normal; normal(0)=0; normal(1)=0; normal(2)=1;
 //        if(planeNode.attribute("normal")) {
-//            if(!Utilities::stringToVector3<PREC>(normal, planeNode.attribute("normal"))) {
+//            if(!Utilities::stringToVector3(normal, planeNode.attribute("normal"))) {
 //                THROWEXCEPTION("---> String conversion in parsePlane: normal failed");
 //            }
 //        }
 //
 //        PREC dist=0;
 //        if(planeNode.attribute("distance")) {
-//            if(!Utilities::stringToType<PREC>(dist, planeNode.attribute("distance"))) {
+//            if(!Utilities::stringToType(dist, planeNode.attribute("distance"))) {
 //                THROWEXCEPTION("---> String conversion in parsePlane: distance failed");
 //            }
 //        }
@@ -883,19 +883,19 @@ public:
 //        if(rendering) {
 //            ticpp::Element* renderEl = rendering->ToElement();
 //            if(renderEl.attribute("attachAxis")) {
-//                if(!Utilities::stringToType<bool>(settings.attachAxis, renderEl.attribute("attachAxis"))) {
+//                if(!Utilities::stringToType(settings.attachAxis, renderEl.attribute("attachAxis"))) {
 //                    THROWEXCEPTION("---> String conversion of in parseMesh: attachAxis failed");
 //                }
 //            }
 //            if(renderEl.attribute("axesSize")) {
-//                if(!Utilities::stringToType<double>(settings.axesSize, renderEl.attribute("axesSize"))) {
+//                if(!Utilities::stringToType(settings.axesSize, renderEl.attribute("axesSize"))) {
 //                    THROWEXCEPTION("---> String conversion of in parseMesh: axesSize failed");
 //                }
 //            }
 //
 //
 //            if(renderEl.attribute("shadowsEnabled")) {
-//                if(!Utilities::stringToType<bool>(settings.shadowsEnabled, renderEl.attribute("shadowsEnabled"))) {
+//                if(!Utilities::stringToType(settings.shadowsEnabled, renderEl.attribute("shadowsEnabled"))) {
 //                    THROWEXCEPTION("---> String conversion of in parseMesh: shadowsEnabled failed");
 //                }
 //            }
@@ -914,15 +914,15 @@ public:
 //            std::string type = topoEl.attribute("type");
 //            if(type=="grid") {
 //                Vector3 minPoint, maxPoint;
-//                if(!Utilities::stringToVector3<PREC>(minPoint,  topoEl.attribute("minPoint"))) {
+//                if(!Utilities::stringToVector3(minPoint,  topoEl.attribute("minPoint"))) {
 //                    THROWEXCEPTION("---> String conversion in parseMPISettings: minPoint failed");
 //                }
-//                if(!Utilities::stringToVector3<PREC>(maxPoint,  topoEl.attribute("maxPoint"))) {
+//                if(!Utilities::stringToVector3(maxPoint,  topoEl.attribute("maxPoint"))) {
 //                    THROWEXCEPTION("---> String conversion in parseMPISettings: maxPoint failed");
 //                }
 //
 //                MyMatrix<unsigned int>::Vector3 dim;
-//                if(!Utilities::stringToVector3<unsigned int>(dim,  topoEl.attribute("dimension"))) {
+//                if(!Utilities::stringToVector3(dim,  topoEl.attribute("dimension"))) {
 //                    THROWEXCEPTION("---> String conversion in parseMPISettings: dimension failed");
 //                }
 //

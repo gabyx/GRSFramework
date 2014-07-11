@@ -93,7 +93,7 @@ void InclusionSolverCONoG::reset() {
          LOG(m_pSimulationLog, "---> Initialize FullSorProxVisitor "<<  std::endl;);
          m_pSorProxStepNodeVisitor = new FullSorProxStepNodeVisitor(m_Settings,m_bConverged,m_globalIterationCounter,&m_ContactGraph);
     }else{
-
+         ERRORMSG("InclusionSolverSettings::Method" << m_Settings.m_eMethod << "not implemendet");
     }
 
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor(m_Settings);

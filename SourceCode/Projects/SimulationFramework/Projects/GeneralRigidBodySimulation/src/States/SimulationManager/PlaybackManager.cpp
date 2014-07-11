@@ -123,7 +123,7 @@ bool PlaybackManager::parseScene() {
         return false;
     }
 
-    ParserModules::BodyModuleParserOptions o;
+    ParserModules::BodyModuleOptions o;
     o.m_allocateBodies = false;
     o.m_parseOnlyVisualizationProperties = true;
     m_pSceneParser->parseScene(sceneFilePath, SceneParserOptions(), o);

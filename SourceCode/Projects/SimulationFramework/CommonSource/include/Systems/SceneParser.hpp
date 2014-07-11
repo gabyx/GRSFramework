@@ -175,20 +175,20 @@ public:
             LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> TimeStepperSettings ..." << std::endl;)
             CHECK_XMLNODE(timestepNode,"TimeStepperSettings");
 
-            if(!Utilities::stringToType<PREC>(m_timestepperSettings->m_deltaT, timestepNode.attribute("deltaT").value())) {
+            if(!Utilities::stringToType(m_timestepperSettings->m_deltaT, timestepNode.attribute("deltaT").value())) {
                 THROWEXCEPTION("---> String conversion in SceneSettings: deltaT failed");
             }
             if(m_inclusionSettings) {
                 m_inclusionSettings->m_deltaT = m_timestepperSettings->m_deltaT;
             }
-            if(!Utilities::stringToType<PREC>(m_timestepperSettings->m_endTime, timestepNode.attribute("endTime").value())) {
+            if(!Utilities::stringToType(m_timestepperSettings->m_endTime, timestepNode.attribute("endTime").value())) {
                 THROWEXCEPTION("---> String conversion in SceneSettings: endTime failed");
             }
 
             auto node = timestepNode.child("SimulateFromReference");
             if(node) {
                 bool enabled = false;
-                if(!Utilities::stringToType<bool>(enabled, node.attribute("enabled").value())) {
+                if(!Utilities::stringToType(enabled, node.attribute("enabled").value())) {
                     THROWEXCEPTION("---> String conversion in SimulateFromReference: enable failed");
                 }
                 if(enabled) {
@@ -216,10 +216,10 @@ public:
             auto node = timestepNode.child("InclusionSolverSettings");
             CHECK_XMLNODE(node,"InclusionSolverSettings");
 
-            if(!Utilities::stringToType<PREC>(m_inclusionSettings->m_alphaJORProx, node.attribute("alphaJORProx").value())) {
+            if(!Utilities::stringToType(m_inclusionSettings->m_alphaJORProx, node.attribute("alphaJORProx").value())) {
                 THROWEXCEPTION("---> String conversion in InclusionSolverSettings: alphaJORProx failed");
             }
-            if(!Utilities::stringToType<PREC>(m_inclusionSettings->m_alphaSORProx, node.attribute("alphaSORProx").value())) {
+            if(!Utilities::stringToType(m_inclusionSettings->m_alphaSORProx, node.attribute("alphaSORProx").value())) {
                 THROWEXCEPTION("---> String conversion in InclusionSolverSettings: alphaJORProx failed");
             }
             if(!Utilities::stringToType<unsigned int>(m_inclusionSettings->m_MaxIter, node.attribute("maxIter").value())) {
@@ -255,23 +255,23 @@ public:
                 m_inclusionSettings->m_eConvergenceMethod = InclusionSolverSettingsType::InVelocity;
             }
 
-            if(!Utilities::stringToType<PREC>(m_inclusionSettings->m_AbsTol, node.attribute("absTol").value())) {
+            if(!Utilities::stringToType(m_inclusionSettings->m_AbsTol, node.attribute("absTol").value())) {
                 THROWEXCEPTION("---> String conversion in InclusionSolverSettings: absTol failed");
             }
-            if(!Utilities::stringToType<PREC>(m_inclusionSettings->m_RelTol, node.attribute("relTol").value())) {
+            if(!Utilities::stringToType(m_inclusionSettings->m_RelTol, node.attribute("relTol").value())) {
                 THROWEXCEPTION("---> String conversion in InclusionSolverSettings: relTol failed");
             }
 
             att = node.attribute("computeResidual");
             if(att) {
-                if(!Utilities::stringToType<bool>(m_inclusionSettings->m_bComputeResidual, att.value())) {
+                if(!Utilities::stringToType(m_inclusionSettings->m_bComputeResidual, att.value())) {
                     THROWEXCEPTION("---> String conversion in InclusionSolverSettings: computeResidual failed");
                 }
             }
 
             att = node.attribute("isFiniteCheck");
             if(att) {
-                if(!Utilities::stringToType<bool>(m_inclusionSettings->m_bIsFiniteCheck, att.value())) {
+                if(!Utilities::stringToType(m_inclusionSettings->m_bIsFiniteCheck, att.value())) {
                     THROWEXCEPTION("---> String conversion in InclusionSolverSettings: isFiniteCheck failed");
                 }
             }
@@ -289,13 +289,13 @@ public:
                 THROWEXCEPTION("---> String conversion in InclusionSolverSettings: method failed: not a valid setting");
             }
 
-            if(!Utilities::stringToType<bool>(m_inclusionSettings->m_bUseGPU, node.attribute("useGPU").value())) {
+            if(!Utilities::stringToType(m_inclusionSettings->m_bUseGPU, node.attribute("useGPU").value())) {
                 THROWEXCEPTION("---> String conversion in InclusionSolverSettings: useGPU failed");
             }
 
             att = node.attribute("useGPUID");
             if(att) {
-                if(!Utilities::stringToType<int>(m_inclusionSettings->m_UseGPUDeviceId, att.value())) {
+                if(!Utilities::stringToType(m_inclusionSettings->m_UseGPUDeviceId, att.value())) {
                     THROWEXCEPTION("---> String conversion in InclusionSolverSettings: useGPU failed");
                 }
                 if(m_inclusionSettings->m_UseGPUDeviceId <0) {
@@ -317,7 +317,7 @@ public:
             } else if (method == "everyXTimeStep") {
                 m_recorderSettings->setMode(RecorderSettings::RECORD_EVERY_X_STEP);
                 PREC fps;
-                if(!Utilities::stringToType<double>(fps, node.attribute("statesPerSecond").value())) {
+                if(!Utilities::stringToType(fps, node.attribute("statesPerSecond").value())) {
                     THROWEXCEPTION("---> String conversion in RecorderSettings: statesPerSecond failed");
                 }
                 m_recorderSettings->setEveryXTimestep(fps,m_timestepperSettings->m_deltaT);
@@ -367,7 +367,7 @@ public:
             XMLNodeType globalGeom = sceneSettings.child("GlobalGeometries");
             if(globalGeom) {
                 for (XMLNodeType n : globalGeom.children()) {
-                    parseGeometry(n);
+                    parseGeometry_imp(n);
                 }
             }
         } else {
@@ -377,8 +377,17 @@ public:
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 
+    void parseGeometry( XMLNodeType geometryNode,  BodyListType * bodyList, RigidBodyIdType startId) {
+        LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> GeometryModule: parsing (BodyGeometry)"<<std::endl;)
+        XMLNodeType geom= geometryNode.first_child(); // get the first geometry (sphere, box , mesh ...)
+        CHECK_XMLNODE(geom, "(Sphere/Box/Mesh/Halfspace)");
+        parseGeometry_imp(geom, bodyList, startId);
+    }
 
-    void parseGeometry( XMLNodeType geometryNode,  BodyListType * bodyList=nullptr, RigidBodyIdType startId=0) {
+
+private:
+
+    void parseGeometry_imp( XMLNodeType geometryNode,  BodyListType * bodyList=nullptr, RigidBodyIdType startId=0) {
         m_startIdGroup = startId;
         m_bodyListGroup = bodyList;
         m_addToGlobalGeoms = m_bodyListGroup? false : true;
@@ -404,8 +413,6 @@ public:
     }
 
 
-private:
-
 
     template<typename T>
     void addToGlobalGeomList(unsigned int id,  std::shared_ptr<T> ptr) {
@@ -428,7 +435,7 @@ private:
 
         if(type == "uniform") {
             PREC radius;
-            if(!Utilities::stringToType<PREC>(radius,sphere.attribute("radius").value())) {
+            if(!Utilities::stringToType(radius,sphere.attribute("radius").value())) {
                 THROWEXCEPTION("---> String conversion in addToGlobalGeomList: radius failed");
             }
 
@@ -455,7 +462,7 @@ private:
             }
         } else if(type == "random") {
             double minRadius;
-            if(!Utilities::stringToType<double>(minRadius,sphere.attribute("minRadius").value())) {
+            if(!Utilities::stringToType(minRadius,sphere.attribute("minRadius").value())) {
                 THROWEXCEPTION("---> String conversion in parseSphereGeometry: minRadius failed");
             }
             if( minRadius <= 0) {
@@ -463,7 +470,7 @@ private:
             }
 
             double maxRadius;
-            if(!Utilities::stringToType<double>(maxRadius,sphere.attribute("maxRadius").value())) {
+            if(!Utilities::stringToType(maxRadius,sphere.attribute("maxRadius").value())) {
                 THROWEXCEPTION("---> String conversion in parseSphereGeometry: minRadius failed");
             }
             if( maxRadius <= minRadius) {
@@ -535,12 +542,12 @@ private:
         if(type == "uniform") {
 
             Vector3 n;
-            if(!Utilities::stringToVector3<PREC>(n, halfspace.attribute("normal").value())) {
+            if(!Utilities::stringToVector3(n, halfspace.attribute("normal").value())) {
                 THROWEXCEPTION("---> String conversion in HalfsphereGeometry: normal failed");
             }
 
             Vector3 p;
-            if(!Utilities::stringToVector3<PREC>(p, halfspace.attribute("position").value())) {
+            if(!Utilities::stringToVector3(p, halfspace.attribute("position").value())) {
                 THROWEXCEPTION("---> String conversion in HalfsphereGeometry: position failed");
             }
 
@@ -574,12 +581,12 @@ private:
         if(type == "uniform") {
 
             Vector3 extent;
-            if(!Utilities::stringToVector3<PREC>(extent, box.attribute("extent").value())) {
+            if(!Utilities::stringToVector3(extent, box.attribute("extent").value())) {
                 THROWEXCEPTION("---> String conversion in BoxGeometry: extent failed");
             }
 
             Vector3 center;
-            if(!Utilities::stringToVector3<PREC>(center, box.attribute("center").value())) {
+            if(!Utilities::stringToVector3(center, box.attribute("center").value())) {
                 THROWEXCEPTION("---> String conversion in BoxGeometry: position failed");
             }
 
@@ -617,7 +624,7 @@ private:
         std::string meshName = mesh.attribute("name").value();
 
         bool bInstantiate;
-        if(!Utilities::stringToType<bool>(bInstantiate,mesh.attribute("useInstance").value())) {
+        if(!Utilities::stringToType(bInstantiate,mesh.attribute("useInstance").value())) {
             THROWEXCEPTION("---> String conversion in parseMeshGeometry: useInstance failed");
         }
 
@@ -631,7 +638,7 @@ private:
             m_parser->checkFileExists(fileName);
 
             Vector3 scale_factor;
-            if(!Utilities::stringToVector3<PREC>(scale_factor, mesh.attribute("scale").value())) {
+            if(!Utilities::stringToVector3(scale_factor, mesh.attribute("scale").value())) {
                 THROWEXCEPTION("---> String conversion in parseMeshGeometry failed: scale");
             }
             if(scale_factor.norm()==0) {
@@ -639,24 +646,24 @@ private:
             }
 
             Vector3 trans;
-            if(!Utilities::stringToVector3<PREC>(trans, mesh.attribute("translation").value())) {
+            if(!Utilities::stringToVector3(trans, mesh.attribute("translation").value())) {
                 THROWEXCEPTION("---> String conversion in parseMeshGeometry: translation failed: ");
             }
 
             Vector3 axis;
-            if(!Utilities::stringToVector3<PREC>(axis, mesh.attribute("rotationAxis").value())) {
+            if(!Utilities::stringToVector3(axis, mesh.attribute("rotationAxis").value())) {
                 THROWEXCEPTION("---> String conversion in parseMeshGeometry: rotationAxis failed");
             }
 
             PREC angle;
 
             if(mesh.attribute("angleDegree")) {
-                if(!Utilities::stringToType<PREC>(angle, mesh.attribute("angleDegree").value())) {
+                if(!Utilities::stringToType(angle, mesh.attribute("angleDegree").value())) {
                     THROWEXCEPTION("---> String conversion in parseMeshGeometry: angleDegree failed");
                 }
                 angle = angle / 180 * M_PI;
             } else if(mesh.attribute("angleRadian")) {
-                if(!Utilities::stringToType<PREC>(angle, mesh.attribute("angleRadian").value())) {
+                if(!Utilities::stringToType(angle, mesh.attribute("angleRadian").value())) {
                     THROWEXCEPTION("---> String conversion in parseMeshGeometry: angleRadian  failed");
                 }
             } else {
@@ -696,7 +703,7 @@ private:
 
             if(mesh.attribute("writeToLog")) {
                 bool writeToLog;
-                if(!Utilities::stringToType<bool>(writeToLog, mesh.attribute("writeToLog").value())) {
+                if(!Utilities::stringToType(writeToLog, mesh.attribute("writeToLog").value())) {
                     THROWEXCEPTION("---> String conversion in parseMeshGeometry: angleDegree failed");
                 }
                 if(writeToLog) {
@@ -912,22 +919,22 @@ private:
             PREC mu,epsilonN,epsilonT;
             ContactParameter contactParameter;
 
-            if(!Utilities::stringToType<PREC>(mu, contactParam.attribute("mu").value())) {
+            if(!Utilities::stringToType(mu, contactParam.attribute("mu").value())) {
                 THROWEXCEPTION("---> String conversion in ContactParameter: mu failed");
             }
-            if(!Utilities::stringToType<PREC>(epsilonN, contactParam.attribute("epsilonN").value())) {
+            if(!Utilities::stringToType(epsilonN, contactParam.attribute("epsilonN").value())) {
                 THROWEXCEPTION("---> String conversion in ContactParameter: epsilonN failed");
             }
-            if(!Utilities::stringToType<PREC>(epsilonT, contactParam.attribute("epsilonT").value())) {
+            if(!Utilities::stringToType(epsilonT, contactParam.attribute("epsilonT").value())) {
                 THROWEXCEPTION("---> String conversion in ContactParameter: epsilonT failed");
             }
 
             if(type == "UCFD") {
                 PREC invDampingN, invDampingT;
-                if(!Utilities::stringToType<PREC>(invDampingN, contactParam.attribute("invDampingN").value())) {
+                if(!Utilities::stringToType(invDampingN, contactParam.attribute("invDampingN").value())) {
                     THROWEXCEPTION("---> String conversion in ContactParameter: invDampingN failed");
                 }
-                if(!Utilities::stringToType<PREC>(invDampingT, contactParam.attribute("invDampingT").value())) {
+                if(!Utilities::stringToType(invDampingT, contactParam.attribute("invDampingT").value())) {
                     THROWEXCEPTION("---> String conversion in ContactParameter: invDampingT failed");
                 }
 
@@ -937,17 +944,17 @@ private:
             } else if(type == "UCFDD") {
 
                 PREC invDampingN, gammaMax, epsilon, invDampingTFix;
-                if(!Utilities::stringToType<PREC>(invDampingN, contactParam.attribute("invDampingN").value())) {
+                if(!Utilities::stringToType(invDampingN, contactParam.attribute("invDampingN").value())) {
                     THROWEXCEPTION("---> String conversion in ContactParameter: invDampingN failed");
                 }
 
-                if(!Utilities::stringToType<PREC>(invDampingTFix, contactParam.attribute("invDampingTFix").value())) {
+                if(!Utilities::stringToType(invDampingTFix, contactParam.attribute("invDampingTFix").value())) {
                     THROWEXCEPTION("---> String conversion in ContactParameter: invDampingTFix failed");
                 }
-                if(!Utilities::stringToType<PREC>(gammaMax, contactParam.attribute("gammaMax").value())) {
+                if(!Utilities::stringToType(gammaMax, contactParam.attribute("gammaMax").value())) {
                     THROWEXCEPTION("---> String conversion in ContactParameter: gamma_max failed");
                 }
-                if(!Utilities::stringToType<PREC>(epsilon, contactParam.attribute("epsilon").value())) {
+                if(!Utilities::stringToType(epsilon, contactParam.attribute("epsilon").value())) {
                     THROWEXCEPTION("---> String conversion in ContactParameter: epsilon failed");
                 }
 
@@ -1014,7 +1021,7 @@ private:
     void parseForceField( XMLNodeType forceField) {
 
         bool enabled = false;
-        if(!Utilities::stringToType<bool>(enabled, forceField.attribute("enabled").value())) {
+        if(!Utilities::stringToType(enabled, forceField.attribute("enabled").value())) {
             THROWEXCEPTION("---> String conversion in parseForceField: enable failed");
         }
         if(enabled) {
@@ -1037,39 +1044,39 @@ private:
                     THROWEXCEPTION("---> String conversion in parseForceField: seed failed");
                 }
                 PREC boostTime;
-                if(!Utilities::stringToType<PREC>(boostTime, forceField.attribute("boostTime").value())) {
+                if(!Utilities::stringToType(boostTime, forceField.attribute("boostTime").value())) {
                     THROWEXCEPTION("---> String conversion in parseForceField: boostTime failed");
                 }
                 PREC pauseTime;
-                if(!Utilities::stringToType<PREC>(pauseTime, forceField.attribute("pauseTime").value())) {
+                if(!Utilities::stringToType(pauseTime, forceField.attribute("pauseTime").value())) {
                     THROWEXCEPTION("---> String conversion in parseForceField: pauseTime failed");
                 }
 
                 PREC startTime;
-                if(!Utilities::stringToType<PREC>(startTime, forceField.attribute("startTime").value())) {
+                if(!Utilities::stringToType(startTime, forceField.attribute("startTime").value())) {
                     THROWEXCEPTION("---> String conversion in parseForceField: startTime failed");
                 }
 
                 PREC endTime;
-                if(!Utilities::stringToType<PREC>(endTime, forceField.attribute("endTime").value())) {
+                if(!Utilities::stringToType(endTime, forceField.attribute("endTime").value())) {
                     THROWEXCEPTION("---> String conversion in parseForceField: endTime failed");
                 }
                 PREC amplitude;
-                if(!Utilities::stringToType<PREC>(amplitude, forceField.attribute("amplitude").value())) {
+                if(!Utilities::stringToType(amplitude, forceField.attribute("amplitude").value())) {
                     THROWEXCEPTION("---> String conversion in parseForceField: amplitude failed");
                 }
 
                 Vector3 boxMin;
-                if(!Utilities::stringToVector3<PREC>(boxMin, forceField.attribute("minPoint").value())) {
+                if(!Utilities::stringToVector3(boxMin, forceField.attribute("minPoint").value())) {
                     THROWEXCEPTION("---> String conversion in parseForceField: boxMin failed");
                 }
                 Vector3 boxMax;
-                if(!Utilities::stringToVector3<PREC>(boxMax, forceField.attribute("maxPoint").value())) {
+                if(!Utilities::stringToVector3(boxMax, forceField.attribute("maxPoint").value())) {
                     THROWEXCEPTION("---> String conversion in parseForceField: boxMax failed");
                 }
 
                 bool randomOn;
-                if(!Utilities::stringToType<bool>(randomOn, forceField.attribute("randomOn").value())) {
+                if(!Utilities::stringToType(randomOn, forceField.attribute("randomOn").value())) {
                     THROWEXCEPTION("---> String conversion in parseForceField: randomOn failed");
                 }
 
@@ -1090,11 +1097,11 @@ private:
 
             } else if(type == "gravity") {
                 PREC abs;
-                if(!Utilities::stringToType<PREC>(abs, forceField.attribute("value").value())) {
+                if(!Utilities::stringToType(abs, forceField.attribute("value").value())) {
                     THROWEXCEPTION("---> String conversion in parseForceField: value failed");
                 }
                 Vector3 dir;
-                if(!Utilities::stringToVector3<PREC>(dir, forceField.attribute("direction").value())) {
+                if(!Utilities::stringToVector3(dir, forceField.attribute("direction").value())) {
                     THROWEXCEPTION("---> String conversion in SceneSettings: gravity failed");
                 }
                 dir.normalize();
@@ -1117,8 +1124,14 @@ private:
     DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
 public:
     VisModuleDummy(ParserType * p, BodyModuleType * b) {};
-    void parse(XMLNodeType vis) {
-        ERRORMSG("This is the standard BodyVisModule which does nothing!");
+
+    template<typename... Args>
+    void parse(Args&&... args) {
+         ERRORMSG("This is the standard BodyVisModule which does nothing! This function should not be called!");
+    }
+    template<typename... Args>
+    void parseSceneSettingsPost(Args&&... args) {
+         ERRORMSG("This is the standard BodyVisModule which does nothing! This function should not be called!");
     }
 };
 
@@ -1152,7 +1165,7 @@ public:
         XMLNodeType initCond = sceneSettings.child("GlobalInitialCondition");
         if(initCond) {
             bool enabled = false;
-            if(!Utilities::stringToType<bool>(enabled, initCond.attribute("enabled").value())) {
+            if(!Utilities::stringToType(enabled, initCond.attribute("enabled").value())) {
                 THROWEXCEPTION("---> String conversion in GlobalInitialCondition: enable failed");
             }
             if(enabled) {
@@ -1165,7 +1178,7 @@ public:
                     which = 0;
                 } else if(str == "time" || str =="TIME") {
                     which = 1;
-                    if(!Utilities::stringToType<double>(time, initCond.attribute("time").value())) {
+                    if(!Utilities::stringToType(time, initCond.attribute("time").value())) {
                         THROWEXCEPTION("---> String conversion in GlobalInitialCondition: time failed");
                     }
                 } else {
@@ -1178,7 +1191,7 @@ public:
                 setupInitialConditionBodiesFromFile_imp(relpath, time, which);
 
                 bool useTime = false;
-                if(!Utilities::stringToType<bool>(useTime, initCond.attribute("useTimeToContinue").value())) {
+                if(!Utilities::stringToType(useTime, initCond.attribute("useTimeToContinue").value())) {
                     THROWEXCEPTION("---> String conversion in GlobalInitialCondition: useTimeToContinue failed");
                 }
 
@@ -1196,6 +1209,8 @@ public:
 
     void parseInitialCondition(XMLNodeType initCondNode, BodyListType * bodyList,
                                RigidBodyIdType startId, bool parseVelocity = true , bool addToInitList = true) {
+
+        LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> InitStatesModule: parsing (BodyInitState)"<<std::endl;)
         ASSERTMSG(bodyList, "Should not be null!")
 
         m_bodyListGroup = bodyList;
@@ -1254,13 +1269,16 @@ public:
             LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> InitState:" << b.m_initState.m_q.transpose()
                             << " , " << b.m_initState.m_u.transpose()  << std::endl;)
             if(b.m_body) {
-                b.m_body->applyBodyState(b.m_initState);
+                LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> apply to body" << std::endl;)
+                b.m_body->template applyBodyState<true>(b.m_initState);
             }
             if(addToInitList){
                 added &= m_initStates->emplace(b.m_initState.m_id, b.m_initState).second;
             }
         }
         if(!added && addToInitList) {THROWEXCEPTION("Could not add init state to m_initStates!, some bodies exist already in map!");};
+
+        //LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 
 
@@ -1275,15 +1293,15 @@ private:
     void parseInitialPositionLinear(XMLNodeType initCond) {
 
         Vector3 pos;
-        if(!Utilities::stringToVector3<PREC>(pos, initCond.attribute("position").value())) {
+        if(!Utilities::stringToVector3(pos, initCond.attribute("position").value())) {
             THROWEXCEPTION("---> String conversion in InitialPositionLinear: position Linear failed");
         }
         Vector3 dir;
-        if(!Utilities::stringToVector3<PREC>(dir, initCond.attribute("direction").value())) {
+        if(!Utilities::stringToVector3(dir, initCond.attribute("direction").value())) {
             THROWEXCEPTION("---> String conversion in InitialPositionLinear: direction Linear failed");
         }
         PREC dist;
-        if(!Utilities::stringToType<PREC>(dist, initCond.attribute("distance").value())) {
+        if(!Utilities::stringToType(dist, initCond.attribute("distance").value())) {
             THROWEXCEPTION("---> String conversion in InitialPositionLinear: distance  Linear failed");
         }
         bool jitter;
@@ -1292,7 +1310,7 @@ private:
         }
 
         PREC delta;
-        if(!Utilities::stringToType<PREC>(delta, initCond.attribute("delta").value())) {
+        if(!Utilities::stringToType(delta, initCond.attribute("delta").value())) {
             THROWEXCEPTION("---> String conversion in InitialPositionLinear: delta Linear failed");
         }
 
@@ -1309,19 +1327,19 @@ private:
     void parseInitialPositionGrid(XMLNodeType initCond) {
 
         Vector3 trans;
-        if(!Utilities::stringToVector3<PREC>(trans, initCond.attribute("translation").value())) {
+        if(!Utilities::stringToVector3(trans, initCond.attribute("translation").value())) {
             THROWEXCEPTION("---> String conversion in InitialPositionGrid: translation failed");
         }
         int gridX;
-        if(!Utilities::stringToType<int>(gridX, initCond.attribute("gridSizeX").value())) {
+        if(!Utilities::stringToType(gridX, initCond.attribute("gridSizeX").value())) {
             THROWEXCEPTION("---> String conversion in InitialPositionGrid: gridSizeX failed");
         }
         int gridY;
-        if(!Utilities::stringToType<int>(gridY, initCond.attribute("gridSizeY").value())) {
+        if(!Utilities::stringToType(gridY, initCond.attribute("gridSizeY").value())) {
             THROWEXCEPTION("---> String conversion in InitialPositionGrid: gridSizeY failed");
         }
         PREC dist;
-        if(!Utilities::stringToType<PREC>(dist, initCond.attribute("distance").value())) {
+        if(!Utilities::stringToType(dist, initCond.attribute("distance").value())) {
             THROWEXCEPTION("---> String conversion in InitialPositionGrid: distance failed");
         }
         bool jitter;
@@ -1335,7 +1353,7 @@ private:
             }
         }
         double delta;
-        if(!Utilities::stringToType<double>(delta, initCond.attribute("delta").value())) {
+        if(!Utilities::stringToType(delta, initCond.attribute("delta").value())) {
             THROWEXCEPTION("---> String conversion in InitialPositionGrid: delta failed");
         }
 
@@ -1374,11 +1392,11 @@ private:
             }
 
 
-            if(!Utilities::stringToVector3<PREC>(pos, node.attribute("position").value())) {
+            if(!Utilities::stringToVector3(pos, node.attribute("position").value())) {
                 THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: position failed");
             }
 
-            if(!Utilities::stringToVector3<PREC>(axis, node.attribute("axis").value())) {
+            if(!Utilities::stringToVector3(axis, node.attribute("axis").value())) {
                 THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: axis failed");
             }
 
@@ -1388,14 +1406,14 @@ private:
 
             auto att = node.attribute("angleDegree");
             if(att) {
-                if(!Utilities::stringToType<PREC>(angle, att.value())) {
+                if(!Utilities::stringToType(angle, att.value())) {
                     THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: angleDegree failed");
                 }
                 angle = angle / 180 * M_PI;
             } else {
                 att = node.attribute("angleRadian");
                 if(att){
-                    if(!Utilities::stringToType<PREC>(angle, att.value())) {
+                    if(!Utilities::stringToType(angle, att.value())) {
                         THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: angleRadian failed");
                     }
                 }
@@ -1449,11 +1467,11 @@ private:
             for ( XMLNodeType & transf : initCond.children("Transform")) {
 
                 Vector3 trans;
-                if(!Utilities::stringToVector3<PREC>(trans, transf.attribute("translation").value())) {
+                if(!Utilities::stringToVector3(trans, transf.attribute("translation").value())) {
                     THROWEXCEPTION("---> String conversion in InitialPositionTransforms: translation failed");
                 }
                 Vector3 axis;
-                if(!Utilities::stringToVector3<PREC>(axis, transf.attribute("rotationAxis").value())) {
+                if(!Utilities::stringToVector3(axis, transf.attribute("rotationAxis").value())) {
                     THROWEXCEPTION("---> String conversion in InitialPositionTransforms: rotationAxis failed");
                 }
 
@@ -1464,14 +1482,14 @@ private:
                 PREC angle;
                 auto att = transf.attribute("angleDegree");
                 if(att) {
-                    if(!Utilities::stringToType<PREC>(angle, att.value())) {
+                    if(!Utilities::stringToType(angle, att.value())) {
                         THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: angleDegree failed");
                     }
                     angle = angle / 180 * M_PI;
                 } else {
                     att = transf.attribute("angleRadian");
                     if(att){
-                        if(!Utilities::stringToType<PREC>(angle, att.value())) {
+                        if(!Utilities::stringToType(angle, att.value())) {
                             THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: angleRadian failed");
                         }
                     }
@@ -1529,21 +1547,21 @@ private:
                 continue;
             }
 
-            if(!Utilities::stringToVector3<PREC>(transDir, node.attribute("transDir").value())) {
+            if(!Utilities::stringToVector3(transDir, node.attribute("transDir").value())) {
                 THROWEXCEPTION("---> String conversion in InitialVelocityTransRot: transDir failed");
             }
             transDir.normalize();
 
-            if(!Utilities::stringToType<PREC>(vel, node.attribute("absTransVel").value())) {
+            if(!Utilities::stringToType(vel, node.attribute("absTransVel").value())) {
                 THROWEXCEPTION("---> String conversion in InitialVelocityTransRot: absTransVel failed");
             }
 
-            if(!Utilities::stringToVector3<PREC>(rotDir, node.attribute("rotDir").value())) {
+            if(!Utilities::stringToVector3(rotDir, node.attribute("rotDir").value())) {
                 THROWEXCEPTION("---> String conversion in InitialVelocityTransRot: transDir failed");
             }
             rotDir.normalize();
 
-            if(!Utilities::stringToType<PREC>(rot, node.attribute("absRotVel").value())) {
+            if(!Utilities::stringToType(rot, node.attribute("absRotVel").value())) {
                 THROWEXCEPTION("---> String conversion in InitialVelocityTransRot: absTransVel failed");
             }
 
@@ -1570,12 +1588,12 @@ private:
 
 
 /** SceneParser Options */
-struct BodyModuleParserOptions {
-    BodyModuleParserOptions() = default;
-    BodyModuleParserOptions(const BodyModuleParserOptions& o) = default;
-    BodyModuleParserOptions(BodyModuleParserOptions&& o) = default;
-    BodyModuleParserOptions& operator=(const BodyModuleParserOptions& o) = default;
-    BodyModuleParserOptions& operator=(BodyModuleParserOptions&& o) = default;
+struct BodyModuleOptions {
+    BodyModuleOptions() = default;
+    BodyModuleOptions(const BodyModuleOptions& o) = default;
+    BodyModuleOptions(BodyModuleOptions&& o) = default;
+    BodyModuleOptions& operator=(const BodyModuleOptions& o) = default;
+    BodyModuleOptions& operator=(BodyModuleOptions&& o) = default;
 
     using BodyRangeType = Range<RigidBodyIdType>;
     BodyRangeType m_bodyIdRange;       ///< Range of body ids, original list which is handed to parseScene
@@ -1603,6 +1621,8 @@ private:
 
 public:
 
+    using OptionsType = BodyModuleOptions;
+
     BodyModule(ParserType * p, GeometryModuleType * g,  InitStatesModuleType * is, VisModuleType * i,
                RigidBodySimContainerType * simBodies, RigidBodyStaticContainerType * bodies )
         : m_parser(p), m_pGeomMod(g), m_pVisMod(i), m_pInitStatesMod(is), m_pSimBodies(simBodies), m_pBodies(bodies) {
@@ -1612,7 +1632,7 @@ public:
 
 
     void parse(XMLNodeType & sceneObjects){
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> BodyModule: parsing =========================================="<<std::endl;)
+        LOGSCLEVEL1(m_parser->m_pSimulationLog, "=== BodyModule: parsing ==========================================="<<std::endl;)
 
         ASSERTMSG(m_parsingOptions.m_allocateBodies || m_parsingOptions.m_parseOnlyVisualizationProperties, " You should not allocate any bodies (m_allocateBodies: "<<m_parsingOptions.m_allocateBodies
                                                 <<" and parse dynamic properties (m_parseOnlyVisualizationProperties: " << m_parsingOptions.m_parseOnlyVisualizationProperties <<
@@ -1630,9 +1650,9 @@ public:
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 
-  template<typename TParserOptions>
-    void setParsingOptions(TParserOptions&& o) {
-        m_parsingOptions = std::forward<TParserOptions>(o);
+
+    void setParsingOptions(OptionsType o) {
+        m_parsingOptions = std::move(o);
 
         if(m_parsingOptions.m_bodyIdRange.empty()) {
             m_parseSelectiveBodyIds = false;
@@ -1650,7 +1670,8 @@ private:
 
     void parseRigidBodies( XMLNodeType  rigidbodies ) {
 
-        LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> Parse RigidBodies, group name: "<< rigidbodies.attribute("name").value() << std::endl;);
+        LOGSCLEVEL1(m_parser->m_pSimulationLog,"==================================" << std::endl <<
+                    "---> Parse RigidBodies, group name: "<< rigidbodies.attribute("name").value() << std::endl;);
 
         //Clear current body list;
         m_bodyListGroup.clear();
@@ -1659,7 +1680,7 @@ private:
         bool hasSelectiveFlag = false;
         auto att = rigidbodies.attribute("enableSelectiveIds");
         if(att){
-            if(!Utilities::stringToType<bool>(hasSelectiveFlag, att.value())) {
+            if(!Utilities::stringToType(hasSelectiveFlag, att.value())) {
                     THROWEXCEPTION("---> String conversion in parseRigidBodies: enableSelectiveIds failed");
             }
         }
@@ -1770,8 +1791,8 @@ private:
         // =======================================================
 
         // Parse Geometry
-        XMLNodeType  geometryNode = rigidbodies.child("Geometry").first_child();
-        CHECK_XMLNODE(geometryNode,"Geometry (first node)")
+        XMLNodeType geometryNode;
+        GET_XMLCHILDNODE_CHECK(geometryNode, "Geometry",rigidbodies);
         if(m_pGeomMod){
             m_pGeomMod->parseGeometry(geometryNode, &m_bodyListGroup, m_startIdGroup);
         }
@@ -1802,6 +1823,7 @@ private:
         // ===============================================================================================================
 
 
+        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================" << std::endl;);
     }
 
     void parseDynamicProperties( XMLNodeType  dynProp) {
@@ -1929,8 +1951,8 @@ private:
 
 
 
-    BodyModuleParserOptions m_parsingOptions;
-    using BodyRangeType = typename BodyModuleParserOptions::BodyRangeType;
+    BodyModuleOptions m_parsingOptions;
+    using BodyRangeType = typename BodyModuleOptions::BodyRangeType;
     bool m_parseSelectiveBodyIds;      ///< Use the m_bodyIdRange to only load the selective ids in the group which use enableSelectiveIds="true"
 
     /// Parsing helpers
@@ -2007,20 +2029,23 @@ class SceneParser {
 public:
     using DynamicsSystemType = TDynamicsSystem;
 
-    /** Modules defintions
-    * This type traits define the module types of the derived class if any exist , otherwise it defines the standart module types
-    */
-    using DerivedType = typename std::conditional< std::is_same<TDerived,void>::value, SceneParser, TDerived>::type;
-    using ModuleTypeTraits = TModuleTraits<DerivedType>;
-    DEFINE_MODULETYPES_AND_FRIENDS(ModuleTypeTraits)
-
-
     using XMLNodeType = pugi::xml_node;
     using XMLAttributeType = pugi::xml_attribute;
 
     using RandomGenType = typename DynamicsSystemType::RandomGenType;
     template<typename T>
     using UniformDistType = std::uniform_real_distribution<T>;
+
+
+
+    /** Modules defintions
+    * This type traits define the module types of the derived class if any exist , otherwise it defines the standart module types
+    */
+    using DerivedType = typename std::conditional< std::is_same<TDerived,void>::value, SceneParser, SceneParser>::type;
+    using ModuleTypeTraits = TModuleTraits<DerivedType>;
+    DEFINE_MODULETYPES_AND_FRIENDS(ModuleTypeTraits)
+
+    using BodyModuleOptionsType = typename BodyModuleType::OptionsType;
 
 public:
 
@@ -2040,7 +2065,7 @@ public:
     /**
     * range is only applied to the groups with the attribute enableSelectiveIds="true"
     */
-    template<typename TParserOptions = SceneParserOptions, typename TBodyParserOptions = ParserModules::BodyModuleParserOptions >
+    template<typename TParserOptions = SceneParserOptions, typename TBodyParserOptions = BodyModuleOptionsType >
     bool parseScene( const boost::filesystem::path & file,
                      TParserOptions&& opt = TParserOptions(),
                      TBodyParserOptions&& optBody = TBodyParserOptions()

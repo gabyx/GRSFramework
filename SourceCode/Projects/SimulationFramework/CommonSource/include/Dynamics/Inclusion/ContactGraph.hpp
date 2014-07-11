@@ -366,11 +366,10 @@ public:
 
     void addNode(CollisionData * pCollData) {
 
-        //Take care state, is only q = q_m, u is not set and is zero!
-
         ASSERTMSG(pCollData->m_pBody1 != nullptr && pCollData->m_pBody2 != nullptr, " Bodys are null pointers?");
         //cout << "add node : "<<m_nodeCounter<< " body id:" << RigidBodyId::getBodyIdString(pCollData->m_pBody1) <<" and "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2) <<endl;
-
+//        std::cout <<"b1:" << pCollData->m_pBody1->m_q_KI<< std::endl << pCollData->m_pBody1->m_r_S<< std::endl;;
+//        std::cout <<"b2:" << pCollData->m_pBody2->m_q_KI << std::endl << pCollData->m_pBody2->m_r_S<< std::endl;;;
         //  add a contact node to the graph
         // check to which nodes we need to connect?
         // all nodes (contacts) which are in the BodyContactList (maps bodies -> contacts)
