@@ -215,7 +215,7 @@ namespace ParserModules{
         Vector2 subDivs = Vector2::Ones();
         att = planeNode.attribute("subDivisions");
         if(att) {
-            if(!Utilities::stringToVector2<PREC>(subDivs, att.value())) {
+            if(!Utilities::stringToVector2(subDivs, att.value())) {
                 THROWEXCEPTION("---> String conversion in parsePlane: subDivisions failed");
             }
         }
@@ -239,7 +239,7 @@ namespace ParserModules{
         Vector2 tile; tile(0)=1; tile(1)=1;
         att = planeNode.attribute("tileTexture");
         if(att) {
-            if(!Utilities::stringToVector2<PREC>(tile, att.value())) {
+            if(!Utilities::stringToVector2(tile, att.value())) {
                 THROWEXCEPTION("---> String conversion in parsePlane: tileTexture failed");
             }
         }

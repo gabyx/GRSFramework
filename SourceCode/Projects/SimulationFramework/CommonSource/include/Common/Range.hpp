@@ -47,12 +47,9 @@ class Range{
 		Range(const std::pair<T,T> & p){
             m_linear = true;
 		    STATIC_ASSERT2( std::is_integral<T>::value , T_Needs_to_be_Integeral);
-		    unsigned int N;
-		    if(p.second < p.first){
-                N = 0; // leads to empty m_v
-		    }else{
-                N = p.second-p.first;
-		    }
+		    unsigned int N = p.second-p.first;
+		    if(p.second < p.first){ N = 0;} // leads to empty m_v
+
 			m_v.resize(N);
 			unsigned int i=0;
 			for(auto & v : m_v){
@@ -70,16 +67,13 @@ class Range{
 			public:
 			    typedef std::iterator_traits<typename RangeType::iterator > iterator_traits;
 
-			    iterator():m_diffValue(0){};
+			    iterator(){};
 
 				iterator(const typename RangeType::iterator & it)
-                    : m_it(it), m_diffValue(0){}
+                    : m_it(it){}
 
 				iterator(const typename RangeType::iterator && it)
-                    : m_it(std::move(it)), m_diffValue(0){}
-
-				void setDiffValue(IntType v){ m_diffValue=v; }
-				IntType getCurrentDiff(){ return *m_it-m_diffValue;}
+                    : m_it(std::move(it)){}
 
                 /** pre-increment ++it */
                 iterator & operator++() {
@@ -102,12 +96,11 @@ class Range{
                 iterator & operator=(const iterator & rhs) = default;
                 iterator( const iterator & r ) = default;
 
-                IntType operator*() {
+                IntType & operator*() {
                     return *m_it;
                 }
 
 			private:
-			IntType m_diffValue;
 			typename RangeType::iterator m_it;
 		};
 

@@ -46,7 +46,7 @@ public:
         return s.str();
     };
 
-    inline static Type makeId( unsigned int bodyNr, unsigned int groupNr){
+    inline static Type makeId(  unsigned int groupNr, unsigned int bodyNr){
         Type res = 0;
         res |= (uint64_t)groupNr;
         res <<= 32;

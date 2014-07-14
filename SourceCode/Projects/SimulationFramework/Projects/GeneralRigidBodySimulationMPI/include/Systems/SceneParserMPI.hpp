@@ -250,7 +250,7 @@ protected:
         for(int i=0; i<instances; i++) {
 
 
-            RigidBodyType * temp_ptr = new RigidBodyType(RigidBodyId::makeId(startIdx+i, groupId));
+            RigidBodyType * temp_ptr = new RigidBodyType(RigidBodyId::makeId(groupId,startIdx+i));
             m_bodyListGroup.push_back(temp_ptr);
 
             m_bodyScalesGroup.emplace_back(1,1,1);

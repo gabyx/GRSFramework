@@ -89,9 +89,11 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     }
 
     typename ParserModules::BodyModuleOptions o;
-    o.m_bodyIdRange = std::make_pair( RigidBodyId::makeId(1,1),  RigidBodyId::makeId(1,4));
+    //o.m_bodyIdRange = std::make_pair( RigidBodyId::makeId(1,4),  RigidBodyId::makeId(1,8));
 
-    m_pSceneParser->parseScene(sceneFilePath,SceneParserOptions(),o);
+    //o.m_bodyIdRange = std::make_pair( RigidBodyId::makeId(1,1),  RigidBodyId::makeId(1,4));
+
+    m_pSceneParser->parseScene(sceneFilePath,SceneParserOptions(),std::move(o));
 
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SimBodies.size()
         << " simulated & " << m_pDynSys->m_Bodies.size()<<  " static bodies! "  << std::endl;);

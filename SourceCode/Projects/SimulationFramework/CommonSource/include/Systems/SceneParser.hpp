@@ -373,9 +373,8 @@ private:
         } else if(std::strcmp(geometryNode.name() , "Box")==0) {
             parseBoxGeometry( geometryNode);
 
-        } else if(std::strcmp(geometryNode.name() , "GlobalGeomId")==0) {
+        } else if(std::strcmp(geometryNode.name() , "GlobalGeomId")==0 && !m_addToGlobalGeoms) {
             parseGlobalGeomId(geometryNode);
-
         } else {
             THROWEXCEPTION("---> The geometry '" << geometryNode.name() << "' has no implementation in the parser");
         }
@@ -797,6 +796,8 @@ private:
             for(auto & b: *m_bodyListGroup) {
 
                 id = Utilities::genRandomValues(id,gen,uni,b.m_initState.m_id - diffId);
+                diffId = b.m_initState.m_id;
+
                 auto it = m_globalGeometries->find(id);
                 // it->second is the GeometryType in RigidBody
                 if(it == m_globalGeometries->end()) {
@@ -1018,99 +1019,92 @@ private:
 
     void parseForceField( XMLNodeType forceField) {
 
-        bool enabled = false;
-        if(!Utilities::stringToType(enabled, forceField.attribute("enabled").value())) {
-            THROWEXCEPTION("---> String conversion in parseForceField: enable failed");
+        std::string apply  = forceField.attribute("applyTo").value();
+        //std::vector<RigidBodyIdType > applyList;
+        if( !(apply=="all" || apply=="All" || apply=="ALL" )) {
+            //parse all applyTo bodies
+        } else if (apply=="all" || apply=="All" || apply=="ALL" ) {
+            // do nothing
+        } else {
+            THROWEXCEPTION("---> String conversion in parseForceField: applyTo failed");
         }
-        if(enabled) {
 
-            std::string apply  = forceField.attribute("applyTo").value();
-            //std::vector<RigidBodyIdType > applyList;
-            if( !(apply=="all" || apply=="All" || apply=="ALL" )) {
-                //parse all applyTo bodies
-            } else if (apply=="all" || apply=="All" || apply=="ALL" ) {
-                // do nothing
-            } else {
-                THROWEXCEPTION("---> String conversion in parseForceField: applyTo failed");
+        std::string type = forceField.attribute("type").value();
+        if(type == "spatialspherical-timerandom") {
+
+            unsigned int seed;
+            if(!Utilities::stringToType<unsigned int>(seed, forceField.attribute("seed").value())) {
+                THROWEXCEPTION("---> String conversion in parseForceField: seed failed");
+            }
+            PREC boostTime;
+            if(!Utilities::stringToType(boostTime, forceField.attribute("boostTime").value())) {
+                THROWEXCEPTION("---> String conversion in parseForceField: boostTime failed");
+            }
+            PREC pauseTime;
+            if(!Utilities::stringToType(pauseTime, forceField.attribute("pauseTime").value())) {
+                THROWEXCEPTION("---> String conversion in parseForceField: pauseTime failed");
             }
 
-            std::string type = forceField.attribute("type").value();
-            if(type == "spatialspherical-timerandom") {
-
-                unsigned int seed;
-                if(!Utilities::stringToType<unsigned int>(seed, forceField.attribute("seed").value())) {
-                    THROWEXCEPTION("---> String conversion in parseForceField: seed failed");
-                }
-                PREC boostTime;
-                if(!Utilities::stringToType(boostTime, forceField.attribute("boostTime").value())) {
-                    THROWEXCEPTION("---> String conversion in parseForceField: boostTime failed");
-                }
-                PREC pauseTime;
-                if(!Utilities::stringToType(pauseTime, forceField.attribute("pauseTime").value())) {
-                    THROWEXCEPTION("---> String conversion in parseForceField: pauseTime failed");
-                }
-
-                PREC startTime;
-                if(!Utilities::stringToType(startTime, forceField.attribute("startTime").value())) {
-                    THROWEXCEPTION("---> String conversion in parseForceField: startTime failed");
-                }
-
-                PREC endTime;
-                if(!Utilities::stringToType(endTime, forceField.attribute("endTime").value())) {
-                    THROWEXCEPTION("---> String conversion in parseForceField: endTime failed");
-                }
-                PREC amplitude;
-                if(!Utilities::stringToType(amplitude, forceField.attribute("amplitude").value())) {
-                    THROWEXCEPTION("---> String conversion in parseForceField: amplitude failed");
-                }
-
-                Vector3 boxMin;
-                if(!Utilities::stringToVector3(boxMin, forceField.attribute("minPoint").value())) {
-                    THROWEXCEPTION("---> String conversion in parseForceField: boxMin failed");
-                }
-                Vector3 boxMax;
-                if(!Utilities::stringToVector3(boxMax, forceField.attribute("maxPoint").value())) {
-                    THROWEXCEPTION("---> String conversion in parseForceField: boxMax failed");
-                }
-
-                bool randomOn;
-                if(!Utilities::stringToType(randomOn, forceField.attribute("randomOn").value())) {
-                    THROWEXCEPTION("---> String conversion in parseForceField: randomOn failed");
-                }
-
-
-                m_forceList->addExternalForceCalculation(
-                    new SpatialSphericalTimeRandomForceField(
-                        seed,
-                        boostTime,
-                        pauseTime,
-                        startTime,
-                        endTime,
-                        amplitude,
-                        AABB(boxMin,boxMax),
-                        randomOn
-                    )
-                );
-                LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> added SpatialSphericalTimeRandomForceField ..."<<std::endl;);
-
-            } else if(type == "gravity") {
-                PREC abs;
-                if(!Utilities::stringToType(abs, forceField.attribute("value").value())) {
-                    THROWEXCEPTION("---> String conversion in parseForceField: value failed");
-                }
-                Vector3 dir;
-                if(!Utilities::stringToVector3(dir, forceField.attribute("direction").value())) {
-                    THROWEXCEPTION("---> String conversion in SceneSettings: gravity failed");
-                }
-                dir.normalize();
-                dir *= abs;
-
-                m_forceList->addExternalForceCalculation(new GravityForceField(dir));
-
-                LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> added GravityForceField ..."<<std::endl;);
-            } else {
-                THROWEXCEPTION("---> String conversion in parseForceField: type failed");
+            PREC startTime;
+            if(!Utilities::stringToType(startTime, forceField.attribute("startTime").value())) {
+                THROWEXCEPTION("---> String conversion in parseForceField: startTime failed");
             }
+
+            PREC endTime;
+            if(!Utilities::stringToType(endTime, forceField.attribute("endTime").value())) {
+                THROWEXCEPTION("---> String conversion in parseForceField: endTime failed");
+            }
+            PREC amplitude;
+            if(!Utilities::stringToType(amplitude, forceField.attribute("amplitude").value())) {
+                THROWEXCEPTION("---> String conversion in parseForceField: amplitude failed");
+            }
+
+            Vector3 boxMin;
+            if(!Utilities::stringToVector3(boxMin, forceField.attribute("minPoint").value())) {
+                THROWEXCEPTION("---> String conversion in parseForceField: boxMin failed");
+            }
+            Vector3 boxMax;
+            if(!Utilities::stringToVector3(boxMax, forceField.attribute("maxPoint").value())) {
+                THROWEXCEPTION("---> String conversion in parseForceField: boxMax failed");
+            }
+
+            bool randomOn;
+            if(!Utilities::stringToType(randomOn, forceField.attribute("randomOn").value())) {
+                THROWEXCEPTION("---> String conversion in parseForceField: randomOn failed");
+            }
+
+
+            m_forceList->addExternalForceCalculation(
+                new SpatialSphericalTimeRandomForceField(
+                    seed,
+                    boostTime,
+                    pauseTime,
+                    startTime,
+                    endTime,
+                    amplitude,
+                    AABB(boxMin,boxMax),
+                    randomOn
+                )
+            );
+            LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> added SpatialSphericalTimeRandomForceField ..."<<std::endl;);
+
+        } else if(type == "gravity") {
+            PREC abs;
+            if(!Utilities::stringToType(abs, forceField.attribute("value").value())) {
+                THROWEXCEPTION("---> String conversion in parseForceField: value failed");
+            }
+            Vector3 dir;
+            if(!Utilities::stringToVector3(dir, forceField.attribute("direction").value())) {
+                THROWEXCEPTION("---> String conversion in SceneSettings: gravity failed");
+            }
+            dir.normalize();
+            dir *= abs;
+
+            m_forceList->addExternalForceCalculation(new GravityForceField(dir));
+
+            LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> added GravityForceField ..."<<std::endl;);
+        } else {
+            THROWEXCEPTION("---> String conversion in parseForceField: type failed");
         }
     }
 };
@@ -1371,24 +1365,25 @@ private:
     }
     void parseInitialPositionPosAxisAngle(XMLNodeType initCond) {
 
-        unsigned int consumedValues = 0;
+        unsigned int valueCounter = 0;
         Vector3 pos;
         Vector3 axis;
         PREC angle;
 
         auto bodyIt = m_bodyListGroup->begin();
-        ASSERTMSG(bodyIt != m_bodyListGroup->end(),"no bodies in list");
+        auto itEnd = m_bodyListGroup->end();
+        ASSERTMSG(bodyIt != itEnd, "no bodies in list");
 
         // Iterate over all values in the list
 
         for ( XMLNodeType & node : initCond.children("Value")) {
 
-            if(consumedValues >= m_bodyListGroup->size()) {
+           if(bodyIt==itEnd) {
                 LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionPosAxisAngle: You specified to many transforms, -> neglecting ..."<<std::endl;);
                 break;
-            } else if(consumedValues != bodyIt->m_initState.m_id - m_startIdGroup) {
+            } else if(valueCounter != bodyIt->m_initState.m_id - m_startIdGroup) {
                 // this value does not correspond to the linear offset from the start
-                consumedValues++;
+                valueCounter++;
                 continue;
             }
 
@@ -1424,11 +1419,11 @@ private:
             }
 
             InitialConditionBodies::setupPositionBodyPosAxisAngle( bodyIt->m_initState, pos, axis, angle);
-            ++consumedValues;
+            ++valueCounter;
             ++bodyIt;
         }
 
-        if(consumedValues < m_bodyListGroup->size()) {
+        if(valueCounter < m_bodyListGroup->size()) {
             LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionPosAxisAngle: You specified to little values, -> applying last to all remainig bodies ..."<<std::endl;);
             auto itEnd = m_bodyListGroup->end();
             for(; bodyIt !=  itEnd; ++bodyIt) {
@@ -1438,10 +1433,11 @@ private:
     }
     void parseInitialPositionTransforms(XMLNodeType initCond) {
 
-        unsigned int consumedValues = 0;
+        unsigned int valueCounter = 0;
 
         auto bodyIt = m_bodyListGroup->begin();
-        ASSERTMSG(bodyIt != m_bodyListGroup->end(), "no bodies in list");
+        auto itEnd = m_bodyListGroup->end();
+        ASSERTMSG(bodyIt != itEnd, "no bodies in list");
 
         Quaternion q_KI, q_BK;
         Vector3 I_r_IK, K_r_KB;
@@ -1450,12 +1446,12 @@ private:
         // Iterate over all values in the list
         for ( XMLNodeType & node : initCond.children("Value")) {
 
-            if(consumedValues >= m_bodyListGroup->size()) {
+            if(bodyIt==itEnd) {
                 LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionTransforms: You specified to many transforms, -> neglecting ..."<<std::endl;);
                 break;
-            } else if(consumedValues != bodyIt->m_initState.m_id - m_startIdGroup) {
+            } else if(valueCounter != bodyIt->m_initState.m_id - m_startIdGroup) {
                 // this value does not correspond to the linear offset from the start
-                ++consumedValues;
+                ++valueCounter;
                 continue;
             }
 
@@ -1515,11 +1511,11 @@ private:
             bodyIt->m_initState.m_q.template head<3>() = I_r_IK;
             bodyIt->m_initState.m_q.template tail<4>() = q_KI;
 
-            ++consumedValues;
+            ++valueCounter;
             ++bodyIt;
         }
 
-        if(consumedValues < m_bodyListGroup->size()) {
+        if(valueCounter < m_bodyListGroup->size()) {
             LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionTransforms: You specified to little transforms, -> applying last to all remainig bodies ..."<<std::endl;);
             auto itEnd = m_bodyListGroup->end();
             for(; bodyIt !=  itEnd; ++bodyIt) {
@@ -1529,22 +1525,23 @@ private:
         }
     }
     void parseInitialVelocityTransRot(XMLNodeType initCond) {
-        unsigned int consumedValues = 0;
+        unsigned int valueCounter = 0;
         Vector3 transDir,rotDir;
         PREC rot,vel;
 
         auto bodyIt = m_bodyListGroup->begin();
-        ASSERTMSG(bodyIt != m_bodyListGroup->end(),"no bodies in list");
+        auto itEnd = m_bodyListGroup->end();
+        ASSERTMSG(bodyIt != itEnd, "no bodies in list");
 
         // Iterate over all values in the list
         for ( XMLNodeType & node : initCond.children("Value")) {
 
-            if(consumedValues >= m_bodyListGroup->size()) {
-                LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionTransforms: You specified to many transforms, -> neglecting ..."<<std::endl;);
+            if(bodyIt==itEnd) {
+                LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionTransforms: You specified to many transforms (valueCounter: " <<valueCounter <<"), -> neglecting ..."<<std::endl;);
                 break;
-            } else if(consumedValues != bodyIt->m_initState.m_id - m_startIdGroup) {
+            } else if(valueCounter != bodyIt->m_initState.m_id - m_startIdGroup) {
                 // this value does not correspond to the linear offset from the start
-                ++consumedValues;
+                ++valueCounter;
                 continue;
             }
 
@@ -1569,13 +1566,12 @@ private:
             bodyIt->m_initState.m_u.template head<3>() = transDir*vel;
             bodyIt->m_initState.m_u.template tail<3>() = rotDir*rot;
 
-            ++consumedValues;
+            ++valueCounter;
             ++bodyIt;
         }
 
-        if(consumedValues < m_bodyListGroup->size()) {
+        if(valueCounter < m_bodyListGroup->size()) {
             LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialVelocityTransRot: You specified to little transforms, -> applying last to all remainig bodies ..."<<std::endl;);
-            auto itEnd = m_bodyListGroup->end();
             for(; bodyIt !=  itEnd; ++bodyIt) {
                 bodyIt->m_initState.m_u.template head<3>() = transDir*vel;
                 bodyIt->m_initState.m_u.template tail<3>() = rotDir*rot;
@@ -1636,9 +1632,39 @@ public:
             ASSERTMSG(g,"should not be null");
         };
 
+    void parseModuleOptions(XMLNodeType & sceneObjects){
+        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== BodyModule: parsing (ModuleOptions) ==========================="<<std::endl;)
+
+//        if( !m_parsingOptions.m_bodyIdRange.empty()){
+//            LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> skipping because bodyIdRange is already set!"
+//            return;
+//        }
+//
+//        XMLNodeType selectIds = sceneObjects.child("GlobalSelectiveIds");
+//        if(n){
+//            XMLNodeType n = selectIds.child("Set");
+//            if(n){
+//                std::set<RigidBodyIdType> s;
+//                if(!Utilities::stringToType(s, n.attribute("value").value() )) {
+//                   THROWEXCEPTION("---> String conversion in parseModuleOptions: Set: value failed");
+//                }
+//            }else{
+//                n = selectIds.child("Range");
+//                std::pair<RigidBodyIdType,RigidBodyIdType> r;
+//                if(!Utilities::stringToType(r, n.attribute("value").value() )) {
+//                   THROWEXCEPTION("---> String conversion in parseModuleOptions: Set: value failed");
+//                }
+//
+//            }
+//        }
+
+        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
+    }
+
+
 
     void parse(XMLNodeType & sceneObjects){
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "=== BodyModule: parsing ==========================================="<<std::endl;)
+        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== BodyModule: parsing (SceneObjects) ============================"<<std::endl;)
 
         ASSERTMSG(m_parsingOptions.m_allocateBodies || m_parsingOptions.m_parseOnlyVisualizationProperties, " You should not allocate any bodies (m_allocateBodies: "<<m_parsingOptions.m_allocateBodies
                                                 <<" and parse dynamic properties (m_parseOnlyVisualizationProperties: " << m_parsingOptions.m_parseOnlyVisualizationProperties <<
@@ -1665,8 +1691,6 @@ public:
         } else {
             m_parseSelectiveBodyIds = true;
         }
-
-
 
         m_startRangeIdIt = m_parsingOptions.m_bodyIdRange.begin();
 
@@ -1738,8 +1762,8 @@ private:
         }
 
         // Full id range for this group would be [m_starBodyId , endBodyId ]
-        m_startIdGroup = RigidBodyId::makeId(startBodyNr, groupId);
-        RigidBodyIdType endBodyId = RigidBodyId::makeId(startBodyNr+instances-1, groupId);
+        m_startIdGroup = RigidBodyId::makeId(groupId,startBodyNr);
+        RigidBodyIdType endBodyId = RigidBodyId::makeId(groupId, startBodyNr+instances-1);
         LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> Group range: [" << RigidBodyId::getBodyIdString(m_startIdGroup)
                              << "," << RigidBodyId::getBodyIdString(endBodyId) << "]" << std::endl;)
 
@@ -2215,6 +2239,10 @@ protected:
 
         if(m_pGeometryModule) {
             m_pGeometryModule->parseGlobalGeometries(sceneSettings);
+        }
+
+        if(m_pBodyModule) {
+            m_pBodyModule->parseModuleOptions(sceneSettings);
         }
     }
 
