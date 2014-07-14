@@ -9,10 +9,11 @@
 #include "MakeCoordinateSystem.hpp"
 
 namespace ParserModules{
-    template<typename TParser>
+    template<typename TParserTraits>
     class VisModule {
     private:
-        DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
+        DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
+
 
         DEFINE_MATRIX_TYPES
 
@@ -510,8 +511,20 @@ namespace ParserModules{
 };
 
 /** These module types are defined when there is no derivation from scene parser */
-template<typename TSceneParser>
+template<typename TSceneParser, typename TDynamicsSystem>
 struct SceneParserGUIModuleTraits{
+
+    using ParserType = TSceneParser;
+    using DynamicsSystemType = TDynamicsSystem;
+
+    using XMLNodeType = pugi::xml_node;
+    using XMLAttributeType = pugi::xml_attribute;
+
+    using RandomGenType = typename DynamicsSystemType::RandomGenType;
+    template<typename T>
+    using UniformDistType = std::uniform_real_distribution<T>;
+
+
     using SettingsModuleType         = ParserModules::SettingsModule<TSceneParser>;
     using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<TSceneParser>;
     using ContactParamModuleType     = ParserModules::ContactParamModule<TSceneParser>;
@@ -529,8 +542,8 @@ private:
     using BaseType = SceneParser<TDynamicsSystem, SceneParserGUIModuleTraits, SceneParserGUI<TDynamicsSystem> >;
 public:
     using DynamicsSystemType = TDynamicsSystem;
-    DEFINE_PARSER_CONFIG_TYPES_OF_BASE(BaseType);
-    DEFINE_MODULETYPES_AND_FRIENDS(BaseType);
+//    DEFINE_PARSER_CONFIG_TYPES_OF_BASE(BaseType);
+//    DEFINE_MODULETYPES_AND_FRIENDS(BaseType);
 
 public:
     SceneParserGUI( std::shared_ptr<DynamicsSystemType> pDynSys): BaseType(pDynSys) {}

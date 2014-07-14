@@ -63,22 +63,24 @@
     _att_ = _node_.attribute( _attname_ ); \
     CHECK_XMLATTRIBUTE( _att_ , _attname_ )
 
-#define  DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE  \
-    using ParserType = TParser; \
-    using XMLNodeType = typename ParserType::XMLNodeType;\
-    using XMLAttributeType = typename ParserType::XMLAttributeType;\
-    using DynamicsSystemType = typename ParserType::DynamicsSystemType; \
-    using RandomGenType = typename ParserType::RandomGenType; \
-    template<typename T> using UniformDistType = typename ParserType::template UniformDistType<T>;\
+#define  DEFINE_PARSER_TYPE_TRAITS( TParserTraits )  \
+    using ParserType = typename TParserTraits::ParserType; \
+    using DynamicsSystemType = typename TParserTraits::DynamicsSystemType; \
     \
-    using SettingsModuleType     = typename ParserType::SettingsModuleType;\
-    using GeometryModuleType     = typename ParserType::GeometryModuleType;\
-    using ContactParamModuleType = typename ParserType::ContactParamModuleType;\
+    using XMLNodeType = typename TParserTraits::XMLNodeType;\
+    using XMLAttributeType = typename TParserTraits::XMLAttributeType;\
+    using RandomGenType = typename TParserTraits::RandomGenType; \
+    template<typename T> using UniformDistType = typename TParserTraits::template UniformDistType<T>;\
     \
-    using InitStatesModuleType       = typename ParserType::InitStatesModuleType ;\
-    using VisModuleType              = typename ParserType::VisModuleType;\
-    using BodyModuleType             = typename ParserType::BodyModuleType;\
-    using ExternalForcesModuleType   = typename ParserType::ExternalForcesModuleType ;\
+    using SettingsModuleType     = typename TParserTraits::SettingsModuleType;\
+    using GeometryModuleType     = typename TParserTraits::GeometryModuleType;\
+    using ContactParamModuleType = typename TParserTraits::ContactParamModuleType;\
+    \
+    using InitStatesModuleType       = typename TParserTraits::InitStatesModuleType ;\
+    using VisModuleType              = typename TParserTraits::VisModuleType;\
+    using BodyModuleType             = typename TParserTraits::BodyModuleType;\
+    using ExternalForcesModuleType   = typename TParserTraits::ExternalForcesModuleType ;\
+
 
 #define  DEFINE_PARSER_CONFIG_TYPES_OF_BASE( BaseParser ) \
     using XMLNodeType = typename BaseParser::XMLNodeType;\
@@ -87,27 +89,17 @@
     template<typename T> using UniformDistType = typename BaseParser::template UniformDistType<T>;\
 
 
-#define DEFINE_MODULETYPES_AND_FRIENDS( _ModuleTraitsType_ )  \
-public: \
-    using SettingsModuleType       = typename _ModuleTraitsType_::SettingsModuleType;\
-    using ExternalForcesModuleType = typename _ModuleTraitsType_::ExternalForcesModuleType;\
-    using ContactParamModuleType   = typename _ModuleTraitsType_::ContactParamModuleType;\
-    using InitStatesModuleType     = typename _ModuleTraitsType_::InitStatesModuleType;\
-\
-    using BodyModuleType           = typename _ModuleTraitsType_::BodyModuleType;\
-    using GeometryModuleType       = typename _ModuleTraitsType_::GeometryModuleType;\
-\
-    using VisModuleType            = typename _ModuleTraitsType_::VisModuleType;\
+#define DEFINE_MODULES_AS_FRIENDS( TParserTraits )  \
 protected: \
-    friend typename _ModuleTraitsType_::SettingsModuleType;\
-    friend typename _ModuleTraitsType_::ExternalForcesModuleType;\
-    friend typename _ModuleTraitsType_::ContactParamModuleType;\
-    friend typename _ModuleTraitsType_::InitStatesModuleType;\
+    friend typename TParserTraits::SettingsModuleType;\
+    friend typename TParserTraits::ExternalForcesModuleType;\
+    friend typename TParserTraits::ContactParamModuleType;\
+    friend typename TParserTraits::InitStatesModuleType;\
 \
-    friend typename _ModuleTraitsType_::BodyModuleType;\
-    friend typename _ModuleTraitsType_::GeometryModuleType;\
+    friend typename TParserTraits::BodyModuleType;\
+    friend typename TParserTraits::GeometryModuleType;\
 \
-    friend typename _ModuleTraitsType_::VisModuleType;\
+    friend typename TParserTraits::VisModuleType;\
 
 class GetScaleOfGeomVisitor : public boost::static_visitor<> {
 
@@ -136,11 +128,11 @@ namespace ParserModules {
 
 
 /** Parses TimestepperSettings, InclusionSolverSettings, RecorderSettings */
-template<typename TParser>
+template<typename TParserTraits>
 class SettingsModule {
 private:
 
-    DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
+    DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using RecorderSettingsType        = typename DynamicsSystemType::RecorderSettingsType;
@@ -339,10 +331,10 @@ public:
 
 
 
-template<typename TParser>
+template<typename TParserTraits>
 class GeometryModule {
 private:
-    DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
+    DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using GlobalGeometryMapType = typename DynamicsSystemType::GlobalGeometryMapType;
@@ -860,11 +852,11 @@ private:
 
 };
 
-template<typename TParser>
+template<typename TParserTraits>
 class ContactParamModule {
 private:
 
-    DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
+    DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using ContactParameterMapType = typename DynamicsSystemType::ContactParameterMapType;
@@ -989,11 +981,11 @@ private:
 
 };
 
-template<typename TParser>
+template<typename TParserTraits>
 class ExternalForcesModule {
 private:
 
-    DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
+    DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using ExternalForceListType = typename DynamicsSystemType::ExternalForceListType;
@@ -1127,10 +1119,10 @@ private:
 };
 
 
-template<typename TParser>
+template<typename TParserTraits>
 class VisModuleDummy {
 private:
-    DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
+    DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
 public:
     VisModuleDummy(ParserType * p, BodyModuleType * b) {};
     void cleanUp(){}
@@ -1145,10 +1137,10 @@ public:
 };
 
 
-template<typename TParser>
+template<typename TParserTraits>
 class InitStatesModule {
 private:
-    DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
+    DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using RigidBodyType = typename DynamicsSystemType::RigidBodyType;
@@ -1615,11 +1607,11 @@ struct BodyModuleOptions {
     bool m_parseOnlyVisualizationProperties = false;
 };
 
-template<typename TParser>
+template<typename TParserTraits>
 class BodyModule {
 private:
 
-    DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
+    DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using RigidBodyType = typename DynamicsSystemType::RigidBodyType;
@@ -2026,24 +2018,12 @@ struct SceneParserOptions {
 };
 
 
+
 /** These module types are defined when there is no derivation from scene parser */
-template<typename TSceneParser>
-struct SceneParserModuleTraits{
-    using SettingsModuleType         = ParserModules::SettingsModule<TSceneParser>;
-    using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<TSceneParser>;
-    using ContactParamModuleType     = ParserModules::ContactParamModule<TSceneParser>;
-    using InitStatesModuleType       = ParserModules::InitStatesModule<TSceneParser> ;
+template<typename TSceneParser, typename TDynamicsSystem>
+struct SceneParserTraits{
 
-    using BodyModuleType             = ParserModules::BodyModule< TSceneParser > ;
-    using GeometryModuleType         = ParserModules::GeometryModule<TSceneParser>;
-
-    using VisModuleType              = ParserModules::VisModuleDummy<TSceneParser>;
-
-};
-
-template<typename TDynamicsSystem, template<typename P> class TModuleTraits = SceneParserModuleTraits, typename TDerived = void >
-class SceneParser {
-public:
+    using ParserType = TSceneParser;
     using DynamicsSystemType = TDynamicsSystem;
 
     using XMLNodeType = pugi::xml_node;
@@ -2053,16 +2033,33 @@ public:
     template<typename T>
     using UniformDistType = std::uniform_real_distribution<T>;
 
+    // Module typedefs
+    using SettingsModuleType         = ParserModules::SettingsModule<SceneParserTraits>;
+    using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<SceneParserTraits>;
+    using ContactParamModuleType     = ParserModules::ContactParamModule<SceneParserTraits>;
+    using InitStatesModuleType       = ParserModules::InitStatesModule<SceneParserTraits> ;
 
+    using BodyModuleType             = ParserModules::BodyModule< SceneParserTraits > ;
+    using GeometryModuleType         = ParserModules::GeometryModule<SceneParserTraits>;
+
+    using VisModuleType              = ParserModules::VisModuleDummy<SceneParserTraits>;
+
+};
+
+template<typename TDynamicsSystem, template<typename P, typename D> class TParserTraits = SceneParserTraits, typename TDerived = void >
+class SceneParser {
+public:
 
     /** Modules defintions
     * This type traits define the module types of the derived class if any exist , otherwise it defines the standart module types
     */
     /** This type is injected into the modules, we use this class instead of the derived one, due to the fact that we cannot redefine */
-    using DerivedType = SceneParser; //typename std::conditional< std::is_same<TDerived,void>::value, SceneParser, SceneParser>::type;
+    using DerivedType = typename std::conditional< std::is_same<TDerived,void>::value, SceneParser, SceneParser>::type;
 
-    using ModuleTypeTraits = TModuleTraits<DerivedType>;
-    DEFINE_MODULETYPES_AND_FRIENDS(ModuleTypeTraits)
+    using ParserTraits = TParserTraits<DerivedType, TDynamicsSystem >;
+    DEFINE_PARSER_TYPE_TRAITS(ParserTraits);
+
+    DEFINE_MODULES_AS_FRIENDS(ParserTraits)
 
     using BodyModuleOptionsType = typename BodyModuleType::OptionsType;
 
@@ -2084,13 +2081,13 @@ public:
     /**
     * range is only applied to the groups with the attribute enableSelectiveIds="true"
     */
-    template<typename TParserOptions = SceneParserOptions, typename TBodyParserOptions = BodyModuleOptionsType >
+    template<typename TParserTraitsOptions = SceneParserOptions, typename TBodyParserOptions = BodyModuleOptionsType >
     bool parseScene( const boost::filesystem::path & file,
-                     TParserOptions&& opt = TParserOptions(),
+                     TParserTraitsOptions&& opt = TParserTraitsOptions(),
                      TBodyParserOptions&& optBody = TBodyParserOptions()
                    ) {
         // Forward all settings
-        m_parsingOptions = std::forward<TParserOptions>(opt);
+        m_parsingOptions = std::forward<TParserTraitsOptions>(opt);
 
         if(m_pBodyModule) {
             m_pBodyModule->setParsingOptions(std::forward<TBodyParserOptions>(optBody));
