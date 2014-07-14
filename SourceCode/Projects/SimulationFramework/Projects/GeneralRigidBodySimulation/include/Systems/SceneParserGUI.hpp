@@ -512,7 +512,7 @@ namespace ParserModules{
 
 /** These module types are defined when there is no derivation from scene parser */
 template<typename TSceneParser, typename TDynamicsSystem>
-struct SceneParserGUIModuleTraits{
+struct SceneParserGUITraits{
 
     using ParserType = TSceneParser;
     using DynamicsSystemType = TDynamicsSystem;
@@ -537,13 +537,11 @@ struct SceneParserGUIModuleTraits{
 };
 
 template<typename TDynamicsSystem>
-class SceneParserGUI: public SceneParser<TDynamicsSystem, SceneParserGUIModuleTraits, SceneParserGUI<TDynamicsSystem> > {
+class SceneParserGUI: public SceneParser<TDynamicsSystem, SceneParserGUITraits, SceneParserGUI<TDynamicsSystem> > {
 private:
-    using BaseType = SceneParser<TDynamicsSystem, SceneParserGUIModuleTraits, SceneParserGUI<TDynamicsSystem> >;
+    using BaseType = SceneParser<TDynamicsSystem, SceneParserGUITraits, SceneParserGUI<TDynamicsSystem> >;
 public:
     using DynamicsSystemType = TDynamicsSystem;
-//    DEFINE_PARSER_CONFIG_TYPES_OF_BASE(BaseType);
-//    DEFINE_MODULETYPES_AND_FRIENDS(BaseType);
 
 public:
     SceneParserGUI( std::shared_ptr<DynamicsSystemType> pDynSys): BaseType(pDynSys) {}

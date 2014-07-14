@@ -63,15 +63,18 @@
     _att_ = _node_.attribute( _attname_ ); \
     CHECK_XMLATTRIBUTE( _att_ , _attname_ )
 
-#define  DEFINE_PARSER_TYPE_TRAITS( TParserTraits )  \
+
+#define DEFINE_PARSER_BASE_TYPE_TRAITS( TParserTraits ) \
     using ParserType = typename TParserTraits::ParserType; \
     using DynamicsSystemType = typename TParserTraits::DynamicsSystemType; \
     \
     using XMLNodeType = typename TParserTraits::XMLNodeType;\
     using XMLAttributeType = typename TParserTraits::XMLAttributeType;\
     using RandomGenType = typename TParserTraits::RandomGenType; \
-    template<typename T> using UniformDistType = typename TParserTraits::template UniformDistType<T>;\
-    \
+    template<typename T> using UniformDistType = typename TParserTraits::template UniformDistType<T>;
+
+#define  DEFINE_PARSER_TYPE_TRAITS( TParserTraits )  \
+    DEFINE_PARSER_BASE_TYPE_TRAITS( TParserTraits ) \
     using SettingsModuleType     = typename TParserTraits::SettingsModuleType;\
     using GeometryModuleType     = typename TParserTraits::GeometryModuleType;\
     using ContactParamModuleType = typename TParserTraits::ContactParamModuleType;\
@@ -79,14 +82,7 @@
     using InitStatesModuleType       = typename TParserTraits::InitStatesModuleType ;\
     using VisModuleType              = typename TParserTraits::VisModuleType;\
     using BodyModuleType             = typename TParserTraits::BodyModuleType;\
-    using ExternalForcesModuleType   = typename TParserTraits::ExternalForcesModuleType ;\
-
-
-#define  DEFINE_PARSER_CONFIG_TYPES_OF_BASE( BaseParser ) \
-    using XMLNodeType = typename BaseParser::XMLNodeType;\
-    using XMLAttributeType = typename BaseParser::XMLAttributeType;\
-    using RandomGenType = typename BaseParser::RandomGenType; \
-    template<typename T> using UniformDistType = typename BaseParser::template UniformDistType<T>;\
+    using ExternalForcesModuleType   = typename TParserTraits::ExternalForcesModuleType ;
 
 
 #define DEFINE_MODULES_AS_FRIENDS( TParserTraits )  \
@@ -100,29 +96,6 @@ protected: \
     friend typename TParserTraits::GeometryModuleType;\
 \
     friend typename TParserTraits::VisModuleType;\
-
-class GetScaleOfGeomVisitor : public boost::static_visitor<> {
-
-public:
-
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-
-    GetScaleOfGeomVisitor(Vector3 & scale): m_scale(scale) {};
-
-    void operator()(  std::shared_ptr<const SphereGeometry >  & sphereGeom ) {
-        m_scale.setConstant(sphereGeom->m_radius);
-    }
-    void operator()(  std::shared_ptr<const BoxGeometry >  & boxGeom) {
-        m_scale = boxGeom->m_extent;
-    }
-
-    template<typename T>
-    void operator()(  std::shared_ptr<T>  & ptr) {
-        ERRORMSG("This GetScaleOfGeomVisitor visitor operator() has not been implemented!");
-    }
-
-    Vector3 & m_scale;
-};
 
 namespace ParserModules {
 
@@ -848,6 +821,30 @@ private:
 
     }
     ///  ================================================================================ Geometries
+
+
+    class GetScaleOfGeomVisitor : public boost::static_visitor<> {
+
+    public:
+
+        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+        GetScaleOfGeomVisitor(Vector3 & scale): m_scale(scale) {};
+
+        void operator()(  std::shared_ptr<const SphereGeometry >  & sphereGeom ) {
+            m_scale.setConstant(sphereGeom->m_radius);
+        }
+        void operator()(  std::shared_ptr<const BoxGeometry >  & boxGeom) {
+            m_scale = boxGeom->m_extent;
+        }
+
+        template<typename T>
+        void operator()(  std::shared_ptr<T>  & ptr) {
+            ERRORMSG("This GetScaleOfGeomVisitor visitor operator() has not been implemented!");
+        }
+
+        Vector3 & m_scale;
+    };
 
 
 };
@@ -2018,11 +2015,9 @@ struct SceneParserOptions {
 };
 
 
-
-/** These module types are defined when there is no derivation from scene parser */
+/** The base traits for every scene parser */
 template<typename TSceneParser, typename TDynamicsSystem>
-struct SceneParserTraits{
-
+struct SceneParserBaseTraits{
     using ParserType = TSceneParser;
     using DynamicsSystemType = TDynamicsSystem;
 
@@ -2032,7 +2027,11 @@ struct SceneParserTraits{
     using RandomGenType = typename DynamicsSystemType::RandomGenType;
     template<typename T>
     using UniformDistType = std::uniform_real_distribution<T>;
+};
 
+/** The traits for a standart SceneParser class*/
+template<typename TSceneParser, typename TDynamicsSystem>
+struct SceneParserTraits: public SceneParserBaseTraits<TSceneParser,TDynamicsSystem> {
     // Module typedefs
     using SettingsModuleType         = ParserModules::SettingsModule<SceneParserTraits>;
     using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<SceneParserTraits>;
