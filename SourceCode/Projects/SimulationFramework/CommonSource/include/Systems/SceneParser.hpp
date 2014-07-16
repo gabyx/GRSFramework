@@ -1211,7 +1211,7 @@ public:
                 parseInitialPositionLinear(node);
             } else if(s == "grid") {
                 parseInitialPositionGrid(node);
-            } else if(s == "posaxisangle") {
+            } else if(s == "trafo") {
                 parseInitialPositionPosAxisAngle(node);
             } else if(s == "transforms") {
                 parseInitialPositionTransforms(node);
@@ -1361,8 +1361,8 @@ private:
         ASSERTMSG(bodyIt != itEnd, "no bodies in list");
 
         // Iterate over all values in the list
-
-        for ( XMLNodeType & node : initCond.children("Value")) {
+        XMLNodeType trafo;
+        for ( XMLNodeType & node : initCond.children("Pos")) {
 
            if(bodyIt==itEnd) {
                 LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionPosAxisAngle: You specified to many transforms, -> neglecting ..."<<std::endl;);
@@ -1373,12 +1373,13 @@ private:
                 continue;
             }
 
+            trafo = node.child("Trafo");
 
-            if(!Utilities::stringToVector3(pos, node.attribute("position").value())) {
-                THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: position failed");
+            if(!Utilities::stringToVector3(pos, trafo.attribute("pos").value())) {
+                THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: pos failed");
             }
 
-            if(!Utilities::stringToVector3(axis, node.attribute("axis").value())) {
+            if(!Utilities::stringToVector3(axis, trafo.attribute("axis").value())) {
                 THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: axis failed");
             }
 
@@ -1386,17 +1387,17 @@ private:
                 THROWEXCEPTION("---> Specified wrong axis in InitialPositionPosAxisAngle");
             }
 
-            auto att = node.attribute("angleDegree");
+            auto att = trafo.attribute("deg");
             if(att) {
-                if(!Utilities::stringToType(angle, att.value())) {
-                    THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: angleDegree failed");
+                if(!Utilities::stringToType(trafo, att.value())) {
+                    THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: deg failed");
                 }
                 angle = angle / 180 * M_PI;
             } else {
-                att = node.attribute("angleRadian");
+                att = trafo.attribute("rad");
                 if(att){
-                    if(!Utilities::stringToType(angle, att.value())) {
-                        THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: angleRadian failed");
+                    if(!Utilities::stringToType(trafo, att.value())) {
+                        THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: rad failed");
                     }
                 }
                 else{
@@ -1430,7 +1431,7 @@ private:
         Matrix33 Rot_KI; // Temp
 
         // Iterate over all values in the list
-        for ( XMLNodeType & node : initCond.children("Value")) {
+        for ( XMLNodeType & node : initCond.children("Pos")) {
 
             if(bodyIt==itEnd) {
                 LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionTransforms: You specified to many transforms, -> neglecting ..."<<std::endl;);
@@ -1447,14 +1448,14 @@ private:
 
 
             // Iterate over all transforms an successfully applying the total trasnformation!
-            for ( XMLNodeType & transf : initCond.children("Transform")) {
+            for ( XMLNodeType & transf : initCond.children("Trafo")) {
 
                 Vector3 trans;
-                if(!Utilities::stringToVector3(trans, transf.attribute("translation").value())) {
+                if(!Utilities::stringToVector3(trans, transf.attribute("trans").value())) {
                     THROWEXCEPTION("---> String conversion in InitialPositionTransforms: translation failed");
                 }
                 Vector3 axis;
-                if(!Utilities::stringToVector3(axis, transf.attribute("rotationAxis").value())) {
+                if(!Utilities::stringToVector3(axis, transf.attribute("axis").value())) {
                     THROWEXCEPTION("---> String conversion in InitialPositionTransforms: rotationAxis failed");
                 }
 
@@ -1463,17 +1464,17 @@ private:
                 }
 
                 PREC angle;
-                auto att = transf.attribute("angleDegree");
+                auto att = transf.attribute("deg");
                 if(att) {
                     if(!Utilities::stringToType(angle, att.value())) {
-                        THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: angleDegree failed");
+                        THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: rad failed");
                     }
                     angle = angle / 180 * M_PI;
                 } else {
-                    att = transf.attribute("angleRadian");
+                    att = transf.attribute("rad");
                     if(att){
                         if(!Utilities::stringToType(angle, att.value())) {
-                            THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: angleRadian failed");
+                            THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: deg failed");
                         }
                     }
                     else{
@@ -1520,7 +1521,7 @@ private:
         ASSERTMSG(bodyIt != itEnd, "no bodies in list");
 
         // Iterate over all values in the list
-        for ( XMLNodeType & node : initCond.children("Value")) {
+        for ( XMLNodeType & node : initCond.children("Vel")) {
 
             if(bodyIt==itEnd) {
                 LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionTransforms: You specified to many transforms (valueCounter: " <<valueCounter <<"), -> neglecting ..."<<std::endl;);
@@ -1531,8 +1532,8 @@ private:
                 continue;
             }
 
-            if(!Utilities::stringToVector3(transDir, node.attribute("transDir").value())) {
-                THROWEXCEPTION("---> String conversion in InitialVelocityTransRot: transDir failed");
+            if(!Utilities::stringToVector3(transDir, node.attribute("trans").value())) {
+                THROWEXCEPTION("---> String conversion in InitialVelocityTransRot: trans failed");
             }
             transDir.normalize();
 
