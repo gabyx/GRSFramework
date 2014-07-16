@@ -179,31 +179,49 @@ namespace details {
         };
         return stringToTypeFunctorImpl<-1, PREC, decltype(func) >(func,s);
     }
+
 };
 
 
-template<typename T> bool stringToType(T & t, const std::string& s) {
+template<typename T>
+bool stringToType(T & t, const std::string& s) {
     return details::stringToTypeImpl::convert(t,s);
 }
 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a std::set<T>.
 */
-template <typename T, typename Comp, typename Alloc> bool stringToType( std::set<T,Comp,Alloc> & v, const std::string & s) {
+template <typename T, typename Comp, typename Alloc>
+bool stringToType( std::set<T,Comp,Alloc> & v, const std::string & s) {
     return details::stringToStdSetImpl(v,s);
 }
 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a std::vector<T>.
 */
-template <typename T,typename Alloc> bool stringToType( std::vector<T,Alloc> & v, const std::string & s) {
+template <typename T,typename Alloc>
+bool stringToType( std::vector<T,Alloc> & v, const std::string & s) {
     return details::stringToStdVectorImpl(v,s);
 }
 
 /**
+* @brief Helper to convert a string with three whitespace-seperated numbers into a std::vector<T>.
+*/
+template <typename T>
+bool stringToType( std::pair<T,T> & p, const std::string & s) {
+    typename MyMatrix<T>::Vector2 v;
+    auto r = details::stringToVectorImpl<2>(v,s);
+    p.first = v(0);
+    p.second = v(1);
+    return r;
+}
+
+
+/**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector2.
 */
-template <typename TVector2> bool stringToVector2( TVector2 & v, const std::string & s) {
+template <typename TVector2>
+bool stringToVector2( TVector2 & v, const std::string & s) {
     using PREC = typename TVector2::Scalar;
     STATIC_ASSERT2( (std::is_same< typename MyMatrix<PREC>::Vector2 , TVector2>::value) , "VECTOR_WRONG_TYPE" );
     return details::stringToVectorImpl<2>(v,s);

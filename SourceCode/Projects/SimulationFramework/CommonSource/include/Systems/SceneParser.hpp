@@ -288,7 +288,7 @@ public:
                     THROWEXCEPTION("---> String conversion in RecorderSettings: statesPerSecond failed");
                 }
                 m_recorderSettings->setEveryXTimestep(fps,m_timestepperSettings->m_deltaT);
-            } else if (method == "noOutput" || method=="none" || method=="nothing") {
+            } else if (method == "noOutput") {
                 m_recorderSettings->setMode(RecorderSettings::RECORD_NOTHING);
             } else {
                 THROWEXCEPTION("---> String conversion in RecorderSettings: recorderMode failed: not a valid setting");
@@ -590,11 +590,6 @@ private:
         std::shared_ptr<MeshGeometry > pMeshGeom;
 
         std::string meshName = mesh.attribute("name").value();
-
-        bool bInstantiate;
-        if(!Utilities::stringToType(bInstantiate,mesh.attribute("useInstance").value())) {
-            THROWEXCEPTION("---> String conversion in parseMeshGeometry: useInstance failed");
-        }
 
         std::string type = mesh.attribute("distribute").value();
         if(type == "uniform") {
@@ -1159,45 +1154,36 @@ public:
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> InitStatesModule: parsing (GlobalInitCondition) =============="<<std::endl;)
         XMLNodeType initCond = sceneSettings.child("GlobalInitialCondition");
         if(initCond) {
-            bool enabled = false;
-            if(!Utilities::stringToType(enabled, initCond.attribute("enabled").value())) {
-                THROWEXCEPTION("---> String conversion in GlobalInitialCondition: enable failed");
-            }
-            if(enabled) {
-                double time = -1;
-                short which = 2;
-                std::string str = initCond.attribute("whichState").value();
-                if( str == "end" || str == "END" || str== "End") {
-                    which = 2;
-                } else if(str == "beg" || str == "begin" || str== "BEG" || str == "Beg") {
-                    which = 0;
-                } else if(str == "time" || str =="TIME") {
-                    which = 1;
-                    if(!Utilities::stringToType(time, initCond.attribute("time").value())) {
-                        THROWEXCEPTION("---> String conversion in GlobalInitialCondition: time failed");
-                    }
-                } else {
-                    THROWEXCEPTION("---> String conversion in GlobalInitialCondition: whichState failed");
+            double time = -1;
+            short which = 2;
+            std::string str = initCond.attribute("whichState").value();
+            if( str == "end") {
+                which = 2;
+            } else if(str == "beg") {
+                which = 0;
+            } else if(str == "time") {
+                which = 1;
+                if(!Utilities::stringToType(time, initCond.attribute("time").value())) {
+                    THROWEXCEPTION("---> String conversion in GlobalInitialCondition: time failed");
                 }
-
-                boost::filesystem::path relpath = initCond.attribute("path").value();
-
-
-                setupInitialConditionBodiesFromFile_imp(relpath, time, which);
-
-                bool useTime = false;
-                if(!Utilities::stringToType(useTime, initCond.attribute("useTimeToContinue").value())) {
-                    THROWEXCEPTION("---> String conversion in GlobalInitialCondition: useTimeToContinue failed");
-                }
-
-                // Set the time in the dynamics system timestepper settings
-                if(useTime) {
-                    m_settings->getTimeStepperSettings()->m_startTime = time;
-                }
-
-
+            } else {
+                THROWEXCEPTION("---> String conversion in GlobalInitialCondition: whichState failed");
             }
 
+            boost::filesystem::path relpath = initCond.attribute("file").value();
+
+
+            setupInitialConditionBodiesFromFile_imp(relpath, time, which);
+
+            bool useTime = false;
+            if(!Utilities::stringToType(useTime, initCond.attribute("useTimeToContinue").value())) {
+                THROWEXCEPTION("---> String conversion in GlobalInitialCondition: useTimeToContinue failed");
+            }
+
+            // Set the time in the dynamics system timestepper settings
+            if(useTime) {
+                m_settings->getTimeStepperSettings()->m_startTime = time;
+            }
         }
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
     }
@@ -1635,28 +1621,36 @@ public:
     void parseModuleOptions(XMLNodeType & sceneObjects){
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== BodyModule: parsing (ModuleOptions) ==========================="<<std::endl;)
 
-//        if( !m_parsingOptions.m_bodyIdRange.empty()){
-//            LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> skipping because bodyIdRange is already set!"
-//            return;
-//        }
-//
-//        XMLNodeType selectIds = sceneObjects.child("GlobalSelectiveIds");
-//        if(n){
-//            XMLNodeType n = selectIds.child("Set");
-//            if(n){
-//                std::set<RigidBodyIdType> s;
-//                if(!Utilities::stringToType(s, n.attribute("value").value() )) {
-//                   THROWEXCEPTION("---> String conversion in parseModuleOptions: Set: value failed");
-//                }
-//            }else{
-//                n = selectIds.child("Range");
-//                std::pair<RigidBodyIdType,RigidBodyIdType> r;
-//                if(!Utilities::stringToType(r, n.attribute("value").value() )) {
-//                   THROWEXCEPTION("---> String conversion in parseModuleOptions: Set: value failed");
-//                }
-//
-//            }
-//        }
+        if( !m_parsingOptions.m_bodyIdRange.empty()){
+            LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> skipping because bodyIdRange is already set!" <<std::endl;)
+            return;
+        }
+
+        XMLNodeType selectIds = sceneObjects.child("GlobalSelectiveIds");
+        if(selectIds){
+            XMLNodeType n = selectIds.child("Set");
+            if(n){
+                std::set<RigidBodyIdType> s;
+                if(!Utilities::stringToType(s, n.attribute("value").value() )) {
+                   THROWEXCEPTION("---> String conversion in parseModuleOptions: Set: value failed");
+                }
+                LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Overwrite SelectiveIdRange with Set: [")
+                for(auto & id : s){
+                   LOGSCLEVEL2(m_parser->m_pSimulationLog, id << ",")
+                }
+                LOGSCLEVEL2(m_parser->m_pSimulationLog, "]")
+            }else{
+                n = selectIds.child("Range");
+                std::pair<RigidBodyIdType,RigidBodyIdType> r;
+                if(!Utilities::stringToType(r, n.attribute("value").value() )) {
+                   THROWEXCEPTION("---> String conversion in parseModuleOptions: Set: value failed");
+                }
+                LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Overwrite SelectiveIdRange with Range: [" << r.first << r.second <<"]"<<std::endl;)
+
+            }
+
+
+        }
 
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
     }
