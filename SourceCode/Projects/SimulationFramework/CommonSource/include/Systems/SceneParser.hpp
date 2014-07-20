@@ -1389,14 +1389,14 @@ private:
 
             auto att = trafo.attribute("deg");
             if(att) {
-                if(!Utilities::stringToType(trafo, att.value())) {
+                if(!Utilities::stringToType(angle, att.value())) {
                     THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: deg failed");
                 }
                 angle = angle / 180 * M_PI;
             } else {
                 att = trafo.attribute("rad");
                 if(att){
-                    if(!Utilities::stringToType(trafo, att.value())) {
+                    if(!Utilities::stringToType(angle, att.value())) {
                         THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: rad failed");
                     }
                 }
