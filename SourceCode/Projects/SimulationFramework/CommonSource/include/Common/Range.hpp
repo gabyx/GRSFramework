@@ -17,16 +17,16 @@ class Range{
 	    typedef std::vector<IntType,Allocator> RangeType;
 
 	    STATIC_ASSERT2( std::is_integral<IntType>::value , IntType_Needs_to_be_Integeral);
-        Range(){};
+        Range(): m_linear(false) {};
 
         // default copy cosntructor and assignment operator;
 	    Range( const Range & r ) = default;
 	    Range & operator = ( const Range & r) = default;
 
         // Move constructor
-        Range( Range && r ): m_v(std::move(r.m_v)){}
+        Range( Range && r ) = default;
         // Move assignment
-        Range & operator = ( Range && r ){ m_v = std::move(r.m_v); }
+        Range & operator = ( Range && r ) = default;
 
         //Constructor for std::vector,
         // if called with rvalue (temporary) it gets moved already into v, then we move again into m_v
@@ -61,6 +61,32 @@ class Range{
 		Range & operator=( const std::pair<T,T> & p){
             this->operator=( Range(p) );
 		}
+
+
+		/*
+        * Constructs a list in from the sorted set
+        */
+        template<typename T>
+		Range(const std::set<T> & p){
+		    m_linear = true; // init
+		    STATIC_ASSERT2( std::is_integral<T>::value , T_Needs_to_be_Integeral);
+			m_v.resize(p.size());
+			auto it = p.begin();
+			for(auto & v : m_v){
+				v=*it;
+
+				if(m_linear && std::next(it) != p.end() && *std::next(it) - *it != 1){
+                    m_linear = false;
+				}
+				++it;
+			}
+		}
+
+        template<typename T>
+		Range & operator=( const std::set<T> & p){
+            this->operator=( Range(p) );
+		}
+
 
 
 		class iterator : public std::iterator_traits<typename RangeType::iterator >{
@@ -119,6 +145,7 @@ class Range{
             return m_v.size();
         }
 
+        bool isLinear(){return m_linear;}
 
     private:
         bool m_linear;

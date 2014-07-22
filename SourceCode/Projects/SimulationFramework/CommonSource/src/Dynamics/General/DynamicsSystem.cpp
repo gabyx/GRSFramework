@@ -108,7 +108,7 @@ void DynamicsSystemBase::doFirstHalfTimeStep(PREC ts, PREC timestep) {
         pBody->m_q_KI.normalize();
 
         // Update Transformation A_IK
-        setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
+        QuaternionHelpers::setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
 
         // Add in to h-Term ==========
         pBody->m_h_term.setZero();

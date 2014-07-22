@@ -18,6 +18,7 @@
 */
 /* @{ */
 
+namespace QuaternionHelpers{
 
 //Prototype
 template<class Derived, class DerivedOther>
@@ -30,14 +31,13 @@ void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , Eigen::Matrix
 * @return 3x3 rotation matrix.
 */
 template<typename PREC>
-typename MyMatrix<PREC>::Matrix33 getRotFromQuaternion(const typename MyMatrix<PREC>::Vector4 & quat)
-{
-   //ASSERTMSG(quat.rows() == 4 && quat.cols()==1, "IN: "<< quat.rows()<<","<<quat.cols());
+typename MyMatrix<PREC>::Matrix33 getRotFromQuaternion(const typename MyMatrix<PREC>::Vector4 & quat) {
+    //ASSERTMSG(quat.rows() == 4 && quat.cols()==1, "IN: "<< quat.rows()<<","<<quat.cols());
 
-   typename MyMatrix<PREC>::Matrix33 A;
-	//No check if quaternion is unit...(performance)
-   setRotFromQuaternion(quat,A);
-	return A;
+    typename MyMatrix<PREC>::Matrix33 A;
+    //No check if quaternion is unit...(performance)
+    setRotFromQuaternion(quat,A);
+    return A;
 }
 
 /**
@@ -46,83 +46,110 @@ typename MyMatrix<PREC>::Matrix33 getRotFromQuaternion(const typename MyMatrix<P
 * @param A The output 3x3 rotation matrix.
 */
 template<class Derived, class DerivedOther>
-void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , Eigen::MatrixBase<DerivedOther> &A)
-{
-   typedef typename Derived::Scalar PREC;
-   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
-   EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(DerivedOther,3,3);
-   //ASSERTMSG(quat.rows() == 4 && quat.cols()==1 &&  A.rows() == 3 && A.cols() == 3, "IN: "<< quat.rows()<<","<<quat.cols()<<"; OUT: "<<A.rows()<<","<<A.cols() );
+void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , Eigen::MatrixBase<DerivedOther> &R) {
+    typedef typename Derived::Scalar PREC;
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
+    EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(DerivedOther,3,3);
+    //ASSERTMSG(quat.rows() == 4 && quat.cols()==1 &&  A.rows() == 3 && A.cols() == 3, "IN: "<< quat.rows()<<","<<quat.cols()<<"; OUT: "<<A.rows()<<","<<A.cols() );
 
-	//No check if quaternion is unit...(performance)
-   PREC fTx  = 2.0*quat(1);
-   PREC fTy  = 2.0*quat(2);
-   PREC fTz  = 2.0*quat(3);
-   PREC fTwx = fTx*quat(0);
-   PREC fTwy = fTy*quat(0);
-   PREC fTwz = fTz*quat(0);
-   PREC fTxx = fTx*quat(1);
-   PREC fTxy = fTy*quat(1);
-   PREC fTxz = fTz*quat(1);
-   PREC fTyy = fTy*quat(2);
-   PREC fTyz = fTz*quat(2);
-   PREC fTzz = fTz*quat(3);
+    //No check if quaternion is unit...(performance)
+    PREC fTx  = 2.0*quat(1);
+    PREC fTy  = 2.0*quat(2);
+    PREC fTz  = 2.0*quat(3);
+    PREC fTwx = fTx*quat(0);
+    PREC fTwy = fTy*quat(0);
+    PREC fTwz = fTz*quat(0);
+    PREC fTxx = fTx*quat(1);
+    PREC fTxy = fTy*quat(1);
+    PREC fTxz = fTz*quat(1);
+    PREC fTyy = fTy*quat(2);
+    PREC fTyz = fTz*quat(2);
+    PREC fTzz = fTz*quat(3);
 
-	A(0,0) = 1.0f-(fTyy+fTzz);
-	A(0,1) = fTxy-fTwz;
-	A(0,2) = fTxz+fTwy;
-	A(1,0) = fTxy+fTwz;
-	A(1,1) = 1.0f-(fTxx+fTzz);
-	A(1,2) = fTyz-fTwx;
-	A(2,0) = fTxz-fTwy;
-	A(2,1) = fTyz+fTwx;
-	A(2,2) = 1.0f-(fTxx+fTyy);
+    R(0,0) = 1.0f-(fTyy+fTzz);
+    R(0,1) = fTxy-fTwz;
+    R(0,2) = fTxz+fTwy;
+    R(1,0) = fTxy+fTwz;
+    R(1,1) = 1.0f-(fTxx+fTzz);
+    R(1,2) = fTyz-fTwx;
+    R(2,0) = fTxz-fTwy;
+    R(2,1) = fTyz+fTwx;
+    R(2,2) = 1.0f-(fTxx+fTyy);
 }
 
 template<class Derived, class DerivedOther>
-void setQuaternion(const Eigen::MatrixBase<Derived>& nc_quat , const Eigen::MatrixBase<DerivedOther> & nc_n, const typename Derived::Scalar angleRadian)
-{
-   typedef typename Derived::Scalar PREC;
-   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
-   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(DerivedOther,3);
+void setQuaternion(const Eigen::MatrixBase<Derived>& nc_quat , const Eigen::MatrixBase<DerivedOther> & nc_n, const typename Derived::Scalar angleRadian) {
+    typedef typename Derived::Scalar PREC;
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(DerivedOther,3);
 
-   Eigen::MatrixBase<Derived>& quat = const_cast<Eigen::MatrixBase<Derived>& >( nc_quat);
-   Eigen::MatrixBase<DerivedOther>& n = const_cast<Eigen::MatrixBase<DerivedOther>& >( nc_n);
+    Eigen::MatrixBase<Derived>& quat = const_cast<Eigen::MatrixBase<Derived>& >( nc_quat);
+    Eigen::MatrixBase<DerivedOther>& n = const_cast<Eigen::MatrixBase<DerivedOther>& >( nc_n);
 
-   n.normalize();
+    n.normalize();
 
-   quat(0) = cos(angleRadian/2);
-   quat.template tail<3>() = n * sin(angleRadian/2);
+    quat(0) = cos(angleRadian/2);
+    quat.template tail<3>() = n * sin(angleRadian/2);
 
+}
+
+template<class Derived, class DerivedOther>
+void rotateVector(const Eigen::MatrixBase<Derived>& quat ,
+                  Eigen::MatrixBase<DerivedOther> & v) {
+
+    typedef typename Derived::Scalar PREC;
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(DerivedOther,3);
+    //ASSERTMSG(quat.rows() == 4 && quat.cols()==1 &&  A.rows() == 3 && A.cols() == 3, "IN: "<< quat.rows()<<","<<quat.cols()<<"; OUT: "<<A.rows()<<","<<A.cols() );
+
+    //No check if quaternion is unit...(performance)
+    PREC fTx  = 2.0*quat(1);
+    PREC fTy  = 2.0*quat(2);
+    PREC fTz  = 2.0*quat(3);
+    PREC fTwx = fTx*quat(0);
+    PREC fTwy = fTy*quat(0);
+    PREC fTwz = fTz*quat(0);
+    PREC fTxx = fTx*quat(1);
+    PREC fTxy = fTy*quat(1);
+    PREC fTxz = fTz*quat(1);
+    PREC fTyy = fTy*quat(2);
+    PREC fTyz = fTz*quat(2);
+    PREC fTzz = fTz*quat(3); // 12 mult
+
+    v(0) = (1.0f-(fTyy+fTzz))*v(0)   +   (fTxy-fTwz)*v(1)        +    (fTxz+fTwy)*v(2); // 3mult + 6 add
+    v(1) = (fTxy+fTwz)*v(0)          +   (1.0f-(fTxx+fTzz))*v(1) +    (fTyz-fTwx)*v(2); // 3 mult + 6 add
+    v(2) = (fTxz-fTwy)*v(0)          +   (fTyz+fTwx)*v(1)        +    (1.0f-(fTxx+fTyy))*v(2); // 3 mult + 6 add
+    // total = 21 mult , 18 add
 }
 
 template<class Derived>
-void setQuaternionZero(Eigen::MatrixBase<Derived>& quat)
-{
-   typedef typename Derived::Scalar PREC;
-   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
-   quat(0) = 1;
-   quat(1) = 0;
-   quat(2) = 0;
-   quat(3) = 0;
+void setQuaternionZero(Eigen::MatrixBase<Derived>& quat) {
+    typedef typename Derived::Scalar PREC;
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
+    quat(0) = 1;
+    quat(1) = 0;
+    quat(2) = 0;
+    quat(3) = 0;
 }
+
 
 
 template<class Derived>
-Eigen::Matrix<typename Derived::Scalar,4,1> quatMult(const Eigen::MatrixBase<Derived>& quat1 , const Eigen::MatrixBase<Derived>& quat2)
-{
-   typedef typename Derived::Scalar PREC;
-   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
+Eigen::Matrix<typename Derived::Scalar,4,1> quatMult(const Eigen::MatrixBase<Derived>& quat1 , const Eigen::MatrixBase<Derived>& quat2) {
+    typedef typename Derived::Scalar PREC;
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
 
-   Eigen::Matrix< PREC ,4,1> ret;
+    Eigen::Matrix< PREC ,4,1> ret;
 
-      ret(0) =      quat1(0) * quat2(0) - quat1(1) * quat2(1) - quat1(2) * quat2(2) - quat1(3) * quat2(3);
-      ret(1) =      quat1(0) * quat2(1) + quat1(1) * quat2(0) + quat1(2) * quat2(3) - quat1(3) * quat2(2);
-      ret(2) =      quat1(0) * quat2(2) + quat1(2) * quat2(0) + quat1(3) * quat2(1) - quat1(1) * quat2(3);
-      ret(3) =      quat1(0) * quat2(3) + quat1(3) * quat2(0) + quat1(1) * quat2(2) - quat1(2) * quat2(1);
+    ret(0) =      quat1(0) * quat2(0) - quat1(1) * quat2(1) - quat1(2) * quat2(2) - quat1(3) * quat2(3);
+    ret(1) =      quat1(0) * quat2(1) + quat1(1) * quat2(0) + quat1(2) * quat2(3) - quat1(3) * quat2(2);
+    ret(2) =      quat1(0) * quat2(2) + quat1(2) * quat2(0) + quat1(3) * quat2(1) - quat1(1) * quat2(3);
+    ret(3) =      quat1(0) * quat2(3) + quat1(3) * quat2(0) + quat1(1) * quat2(2) - quat1(2) * quat2(1);
 
-   return ret;
+    return ret;
 }
 
+}; // Quaternion
 
 /* @} */
 #endif

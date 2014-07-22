@@ -38,7 +38,7 @@
 
 #else
     /// SceneParser
-    #define SCENEPARSER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SCENEPARSER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
     #define LOGSC( log , message ) LOG(log,message);
     #define LOGSCLEVEL( level, logptr , message ) LOGLEVEL( level, SCENEPARSER_LOGLEVEL , logptr , message);
     #define LOGSCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;

@@ -68,6 +68,9 @@ public:
     */
     template<bool resetState, typename TRigidBodyIdIterator >
     inline void initSimStates(TRigidBodyIdIterator beg, TRigidBodyIdIterator end){
+
+        if(beg == end){return;}
+
         m_randomAccess = true; m_startIdx = 0;
         m_t = 0.0;
         m_StateType = NONE;

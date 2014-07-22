@@ -69,6 +69,7 @@
     using DynamicsSystemType = typename TParserTraits::DynamicsSystemType; \
     \
     using XMLNodeType = typename TParserTraits::XMLNodeType;\
+    using XMLNodeItType = typename TParserTraits::XMLNodeItType;\
     using XMLAttributeType = typename TParserTraits::XMLAttributeType;\
     using RandomGenType = typename TParserTraits::RandomGenType; \
     template<typename T> using UniformDistType = typename TParserTraits::template UniformDistType<T>;
@@ -278,7 +279,7 @@ public:
             LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> RecorderSettings ..." << std::endl;)
             node = sceneSettings.child("RecorderSettings");
             CHECK_XMLNODE(node,"RecorderSettings");
-            std::string method = node.attribute("recorderMode").value();
+            std::string method = node.attribute("mode").value();
             if(method == "everyTimeStep") {
                 m_recorderSettings->setMode(RecorderSettings::RECORD_EVERY_STEP);
             } else if (method == "everyXTimeStep") {
@@ -634,7 +635,7 @@ private:
             }
 
             Quaternion quat;
-            setQuaternion(quat,axis,angle);
+            QuaternionHelpers::setQuaternion(quat,axis,angle);
 
 
             Assimp::Importer importer;
@@ -1349,10 +1350,11 @@ private:
 //        InitialConditionBodies::setupPositionBodiesFromFile(state,filePath);
         THROWEXCEPTION("Not implemented")
     }
+
     void parseInitialPositionPosAxisAngle(XMLNodeType initCond) {
 
         unsigned int valueCounter = 0;
-        Vector3 pos;
+        Vector3 trans;
         Vector3 axis;
         PREC angle;
 
@@ -1362,21 +1364,30 @@ private:
 
         // Iterate over all values in the list
         XMLNodeType trafo;
-        for ( XMLNodeType & node : initCond.children("Pos")) {
+        auto nodes = initCond.children("Pos");
+        auto itNodeEnd = nodes.end();
+        bool apply = true; //always apply, except at last if we skip it
+        for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode){
 
-           if(bodyIt==itEnd) {
+
+            if(bodyIt==itEnd) {
                 LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionPosAxisAngle: You specified to many transforms, -> neglecting ..."<<std::endl;);
                 break;
             } else if(valueCounter != bodyIt->m_initState.m_id - m_startIdGroup) {
-                // this value does not correspond to the linear offset from the start
-                valueCounter++;
-                continue;
+                // this value does not correspond to the linear offset from the startId
+                if(std::next(itNode) != itNodeEnd){
+                    valueCounter++;
+                    continue;
+                }else{
+                    apply = false;
+                    LOGSCLEVEL3(m_parser->m_pSimulationLog,"---> parsing last state ... "<<std::endl;);
+                }
             }
 
-            trafo = node.child("Trafo");
+            trafo = itNode->child("Trafo");
 
-            if(!Utilities::stringToVector3(pos, trafo.attribute("pos").value())) {
-                THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: pos failed");
+            if(!Utilities::stringToVector3(trans, trafo.attribute("trans").value())) {
+                THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: trans failed");
             }
 
             if(!Utilities::stringToVector3(axis, trafo.attribute("axis").value())) {
@@ -1405,16 +1416,19 @@ private:
                 }
             }
 
-            InitialConditionBodies::setupPositionBodyPosAxisAngle( bodyIt->m_initState, pos, axis, angle);
+            if(apply){
+               InitialConditionBodies::setupPositionBodyPosAxisAngle( bodyIt->m_initState, trans, axis, angle);
+                ++bodyIt;
+            }
+
             ++valueCounter;
-            ++bodyIt;
         }
 
         if(valueCounter < m_bodyListGroup->size()) {
             LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionPosAxisAngle: You specified to little values, -> applying last to all remainig bodies ..."<<std::endl;);
             auto itEnd = m_bodyListGroup->end();
             for(; bodyIt !=  itEnd; ++bodyIt) {
-                InitialConditionBodies::setupPositionBodyPosAxisAngle(bodyIt->m_initState, pos, axis, angle);
+                InitialConditionBodies::setupPositionBodyPosAxisAngle(bodyIt->m_initState, trans, axis, angle);
             }
         }
     }
@@ -1427,34 +1441,39 @@ private:
         ASSERTMSG(bodyIt != itEnd, "no bodies in list");
 
         Quaternion q_KI, q_BK;
-        Vector3 I_r_IK, K_r_KB;
-        Matrix33 Rot_KI; // Temp
+        Vector3 I_r_IK;
 
-        // Iterate over all values in the list
-        for ( XMLNodeType & node : initCond.children("Pos")) {
+        auto nodes = initCond.children("Pos");
+        auto itNodeEnd = nodes.end();
+        bool apply = true; //always apply, except at last if we skip it
+        for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode){
 
             if(bodyIt==itEnd) {
                 LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionTransforms: You specified to many transforms, -> neglecting ..."<<std::endl;);
                 break;
             } else if(valueCounter != bodyIt->m_initState.m_id - m_startIdGroup) {
-                // this value does not correspond to the linear offset from the start
-                ++valueCounter;
-                continue;
+               // this value does not correspond to the linear offset from the startId
+                if(std::next(itNode) != itNodeEnd){
+                    valueCounter++;
+                    continue;
+                }else{
+                    apply = false;
+                    LOGSCLEVEL3(m_parser->m_pSimulationLog,"---> parsing last state ... "<<std::endl;);
+                }
             }
 
-
-            setQuaternionZero(q_KI);
+            QuaternionHelpers::setQuaternionZero(q_KI);
             I_r_IK.setZero();
 
-
             // Iterate over all transforms an successfully applying the total trasnformation!
-            for ( XMLNodeType & transf : initCond.children("Trafo")) {
+            Vector3 trans; Vector3 axis; PREC angle;
+            for ( XMLNodeType & transf : itNode->children("Trafo")) {
 
-                Vector3 trans;
+
                 if(!Utilities::stringToVector3(trans, transf.attribute("trans").value())) {
                     THROWEXCEPTION("---> String conversion in InitialPositionTransforms: translation failed");
                 }
-                Vector3 axis;
+
                 if(!Utilities::stringToVector3(axis, transf.attribute("axis").value())) {
                     THROWEXCEPTION("---> String conversion in InitialPositionTransforms: rotationAxis failed");
                 }
@@ -1463,7 +1482,6 @@ private:
                     THROWEXCEPTION("---> Specified wrong axis in InitialPositionTransforms");
                 }
 
-                PREC angle;
                 auto att = transf.attribute("deg");
                 if(att) {
                     if(!Utilities::stringToType(angle, att.value())) {
@@ -1482,24 +1500,22 @@ private:
                     }
                 }
 
-
-
-
-
-                setQuaternion(q_BK,axis,angle);
-                K_r_KB = trans;
-                Rot_KI = getRotFromQuaternion<PREC>(q_KI);
-                I_r_IK += Rot_KI * K_r_KB; // Transforms like A_IK * A_r_AB;
-                q_KI = quatMult(q_KI,q_BK); // Sequential (aktiv) rotation
+                QuaternionHelpers::setQuaternion(q_BK,axis,angle);
+                QuaternionHelpers::rotateVector(q_KI, trans ); //K_r_KB = trans;
+                I_r_IK +=  trans;  //Rot_KI * K_r_KB; // Transforms like A_IK * K_r_KB;
+                q_KI = QuaternionHelpers::quatMult(q_KI,q_BK); // Sequential (aktiv) rotation
 
             }
 
-            // Apply overall transformation!
-            bodyIt->m_initState.m_q.template head<3>() = I_r_IK;
-            bodyIt->m_initState.m_q.template tail<4>() = q_KI;
+            if(apply){
+                // Apply overall transformation!
+                bodyIt->m_initState.m_q.template head<3>() = I_r_IK;
+                bodyIt->m_initState.m_q.template tail<4>() = q_KI;
+                ++bodyIt;
+            }
 
             ++valueCounter;
-            ++bodyIt;
+
         }
 
         if(valueCounter < m_bodyListGroup->size()) {
@@ -1521,44 +1537,55 @@ private:
         ASSERTMSG(bodyIt != itEnd, "no bodies in list");
 
         // Iterate over all values in the list
-        for ( XMLNodeType & node : initCond.children("Vel")) {
+        auto nodes = initCond.children("Vel");
+        auto itNodeEnd = nodes.end();
+        bool apply = true; //always apply, except at last if we skip it
+        for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode){
 
             if(bodyIt==itEnd) {
-                LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionTransforms: You specified to many transforms (valueCounter: " <<valueCounter <<"), -> neglecting ..."<<std::endl;);
+                LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialVelocityTransRot: You specified to many velocities (size: " <<valueCounter <<"), -> neglecting ..."<<std::endl;);
                 break;
             } else if(valueCounter != bodyIt->m_initState.m_id - m_startIdGroup) {
-                // this value does not correspond to the linear offset from the start
-                ++valueCounter;
-                continue;
+                // this value does not correspond to the linear offset from the startId
+                if(std::next(itNode) != itNodeEnd){
+                    valueCounter++;
+                    continue;
+                }else{
+                    apply = false;
+                    LOGSCLEVEL3(m_parser->m_pSimulationLog,"---> parsing last state ... "<<std::endl;);
+                }
             }
 
-            if(!Utilities::stringToVector3(transDir, node.attribute("trans").value())) {
+            if(!Utilities::stringToVector3(transDir, itNode->attribute("transDir").value())) {
                 THROWEXCEPTION("---> String conversion in InitialVelocityTransRot: trans failed");
             }
             transDir.normalize();
 
-            if(!Utilities::stringToType(vel, node.attribute("absTransVel").value())) {
+            if(!Utilities::stringToType(vel, itNode->attribute("absTransVel").value())) {
                 THROWEXCEPTION("---> String conversion in InitialVelocityTransRot: absTransVel failed");
             }
 
-            if(!Utilities::stringToVector3(rotDir, node.attribute("rotDir").value())) {
+            if(!Utilities::stringToVector3(rotDir, itNode->attribute("rotDir").value())) {
                 THROWEXCEPTION("---> String conversion in InitialVelocityTransRot: transDir failed");
             }
             rotDir.normalize();
 
-            if(!Utilities::stringToType(rot, node.attribute("absRotVel").value())) {
+            if(!Utilities::stringToType(rot, itNode->attribute("absRotVel").value())) {
                 THROWEXCEPTION("---> String conversion in InitialVelocityTransRot: absTransVel failed");
             }
 
-            bodyIt->m_initState.m_u.template head<3>() = transDir*vel;
-            bodyIt->m_initState.m_u.template tail<3>() = rotDir*rot;
+            if(apply){
+                bodyIt->m_initState.m_u.template head<3>() = transDir*vel;
+                bodyIt->m_initState.m_u.template tail<3>() = rotDir*rot;
+                ++bodyIt;
+            }
 
             ++valueCounter;
-            ++bodyIt;
+
         }
 
         if(valueCounter < m_bodyListGroup->size()) {
-            LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialVelocityTransRot: You specified to little transforms, -> applying last to all remainig bodies ..."<<std::endl;);
+            LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialVelocityTransRot: You specified to little velocity states (size: "<<valueCounter <<") -> applying last to all remainig bodies ..."<<std::endl;);
             for(; bodyIt !=  itEnd; ++bodyIt) {
                 bodyIt->m_initState.m_u.template head<3>() = transDir*vel;
                 bodyIt->m_initState.m_u.template tail<3>() = rotDir*rot;
@@ -1631,27 +1658,42 @@ public:
         if(selectIds){
             XMLNodeType n = selectIds.child("Set");
             if(n){
-                std::set<RigidBodyIdType> s;
-                if(!Utilities::stringToType(s, n.attribute("value").value() )) {
+                using SetType = std::set<RigidBodyIdType>;
+                SetType s;
+                typedef Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType> CSPBS;
+
+                if( !Utilities::stringToType<SetType,CSPBS>(s, n.attribute("value").value())  ) {
                    THROWEXCEPTION("---> String conversion in parseModuleOptions: Set: value failed");
                 }
-                LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Overwrite SelectiveIdRange with Set: [")
+                // Overwrite
+                m_parsingOptions.m_bodyIdRange = s;
+
+
+                LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Overwriten SelectiveIdRange with Set: [")
                 for(auto & id : s){
-                   LOGSCLEVEL2(m_parser->m_pSimulationLog, id << ",")
+                   LOGSCLEVEL2(m_parser->m_pSimulationLog, RigidBodyId::getBodyIdString(id) << ",")
                 }
-                LOGSCLEVEL2(m_parser->m_pSimulationLog, "]")
+                LOGSCLEVEL2(m_parser->m_pSimulationLog, " linear: " << m_parsingOptions.m_bodyIdRange.isLinear() <<" ]")
             }else{
                 n = selectIds.child("Range");
-                std::pair<RigidBodyIdType,RigidBodyIdType> r;
-                if(!Utilities::stringToType(r, n.attribute("value").value() )) {
+                using SetType = std::pair<RigidBodyIdType,RigidBodyIdType>;
+                SetType r;
+                typedef Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType> CSPBS;
+                if( !Utilities::stringToType<SetType,CSPBS>(r, n.attribute("value").value())  ){
                    THROWEXCEPTION("---> String conversion in parseModuleOptions: Set: value failed");
                 }
-                LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Overwrite SelectiveIdRange with Range: [" << r.first << r.second <<"]"<<std::endl;)
+                // Overwrite
+                m_parsingOptions.m_bodyIdRange = r;
+                LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Overwrite SelectiveIdRange with Range: [" << RigidBodyId::getBodyIdString(r.first)
+                             <<", " << RigidBodyId::getBodyIdString(r.second) <<", linear: " << m_parsingOptions.m_bodyIdRange.isLinear() <<"]"<<std::endl;)
 
             }
-
-
         }
+
+        if(m_parsingOptions.m_bodyIdRange.size() ){
+            m_parseSelectiveBodyIds = true;
+        }
+
 
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
     }
@@ -1671,6 +1713,9 @@ public:
                         <<"\t parse selective ids: "<< m_parseSelectiveBodyIds << std::endl
                         <<"\t allocate bodies: "<< m_parsingOptions.m_allocateBodies << std::endl;)
 
+        // Init startRangeIterator
+        m_startRangeIdIt = m_parsingOptions.m_bodyIdRange.begin();
+
         for ( XMLNodeType & node  : sceneObjects.children("RigidBodies")) {
                 parseRigidBodies(node);
         }
@@ -1687,8 +1732,6 @@ public:
             m_parseSelectiveBodyIds = true;
         }
 
-        m_startRangeIdIt = m_parsingOptions.m_bodyIdRange.begin();
-
     }
 
 private:
@@ -1697,6 +1740,7 @@ private:
 
         LOGSCLEVEL1(m_parser->m_pSimulationLog,"==================================" << std::endl <<
                     "---> Parse RigidBodies, group name: "<< rigidbodies.attribute("name").value() << std::endl;);
+
 
         //Clear current body list;
         m_bodyListGroup.clear();
@@ -1743,6 +1787,7 @@ private:
         }else{
             currGroupIdToNBodies = &(it->second);
             startBodyNr = *currGroupIdToNBodies;
+            LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Found Group Nr: " <<groupId<< std::endl;)
         }
 
         // Skip group if we can:
@@ -1756,11 +1801,11 @@ private:
             return;
         }
 
-        // Full id range for this group would be [m_starBodyId , endBodyId ]
+        // Full id range for this group would be [m_starBodyId , endIdGroup ]
         m_startIdGroup = RigidBodyId::makeId(groupId,startBodyNr);
-        RigidBodyIdType endBodyId = RigidBodyId::makeId(groupId, startBodyNr+instances-1);
+        RigidBodyIdType endIdGroup = RigidBodyId::makeId(groupId, startBodyNr+instances-1);
         LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> Group range: [" << RigidBodyId::getBodyIdString(m_startIdGroup)
-                             << "," << RigidBodyId::getBodyIdString(endBodyId) << "]" << std::endl;)
+                             << "," << RigidBodyId::getBodyIdString(endIdGroup) << "]" << std::endl;)
 
         typename BodyRangeType::iterator bodyIdIt;
         bool updateStartRange = false;
@@ -1769,44 +1814,49 @@ private:
             // parse group selective , determine start iterator in bodyRang
             m_bodyIdRangePtr = &m_parsingOptions.m_bodyIdRange;
             m_startRangeIdIt = std::lower_bound(m_startRangeIdIt,m_bodyIdRangePtr->end(),m_startIdGroup);
-            bodyIdIt = m_startRangeIdIt;
-            if( m_startRangeIdIt == m_bodyIdRangePtr->end()){ // no ids in the range
+
+            if( m_startRangeIdIt == m_bodyIdRangePtr->end() || *m_startRangeIdIt > endIdGroup){ // no ids in the range
                 *currGroupIdToNBodies += instances;
                 LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> No ids in range: skip" << std::endl;)
                 return;
             }
             LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> Selective range startId: " <<
                                   RigidBodyId::getBodyIdString(*m_startRangeIdIt) << std::endl;)
+
+            bodyIdIt = m_startRangeIdIt;
             updateStartRange = true;
         }else{
             // parse all bodies;
             //overwrite range containing all bodies, if we don't parse selective ids, parse all bodies!
             m_bodyIdRangePtr = &m_bodyIdRangeTmp;
-            m_bodyIdRangeTmp = std::make_pair(m_startIdGroup,endBodyId+1);
+            m_bodyIdRangeTmp = std::make_pair(m_startIdGroup,endIdGroup+1);
             bodyIdIt = m_bodyIdRangePtr->begin();
             LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> overwrite selective range... " << std::endl;)
         }
 
+        //update groupIds
+        *currGroupIdToNBodies += instances;
+
         // Adding bodies in the range =============================
-        // iterator bodyRange till the id is > endBodyId or we are out of the bodyIdRange
+        // iterator bodyRange till the id is > endIdGroup or we are out of the bodyIdRange
         auto itEnd = m_bodyIdRangePtr->end();
         m_parsedInstancesGroup = 0;
 
-        m_bodyListGroup.resize(m_bodyIdRangePtr->size());
+        // Reserve as many bodyDatas as big the (possible) range is
+        m_bodyListGroup.reserve(m_bodyIdRangePtr->size());
+        m_bodyListGroup.clear();
 
-        auto bodyIt = m_bodyListGroup.begin();
-        for( /* nothing*/ ; (bodyIdIt != itEnd) && ( *bodyIdIt <= endBodyId); ++bodyIdIt )
+        for( /* nothing*/ ; (bodyIdIt != itEnd) && ( *bodyIdIt <= endIdGroup); ++bodyIdIt )
         {
             LOGSCLEVEL3(m_parser->m_pSimulationLog,"---> Added RigidBody Instance: "<<RigidBodyId::getBodyIdString(*bodyIdIt)<<std::endl);
             // Push new body
             if(m_parsingOptions.m_allocateBodies){
-                *bodyIt = BodyData(new RigidBodyType(*bodyIdIt), *bodyIdIt, Vector3(1,1,1));
+                m_bodyListGroup.emplace_back(new RigidBodyType(*bodyIdIt), *bodyIdIt, Vector3(1,1,1));
             }else{
                 // add no bodies for visualization stuff, we dont need it!
-                *bodyIt = BodyData( nullptr, *bodyIdIt, Vector3(1,1,1));
+                m_bodyListGroup.emplace_back( nullptr, *bodyIdIt, Vector3(1,1,1));
             }
-            ++m_parsedInstancesGroup;
-            ++bodyIt;
+            ++m_parsedInstancesGroup;;
         }
 
         // Only update start range for selective parsing;
@@ -2041,6 +2091,7 @@ struct SceneParserBaseTraits{
     using DynamicsSystemType = TDynamicsSystem;
 
     using XMLNodeType = pugi::xml_node;
+    using XMLNodeItType = pugi::xml_node_iterator;
     using XMLAttributeType = pugi::xml_attribute;
 
     using RandomGenType = typename DynamicsSystemType::RandomGenType;

@@ -97,6 +97,9 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
 
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SimBodies.size()
         << " simulated & " << m_pDynSys->m_Bodies.size()<<  " static bodies! "  << std::endl;);
+    if(!m_pDynSys->m_SimBodies.size()){
+            ERRORMSG("No simulated bodies added! Please add some!");
+    }
     // =====================================================
 
 
@@ -328,7 +331,7 @@ void SimulationManagerGUI::threadRunRecord() {
 
         cleanUpRecordThread();
     } else {
-
+        m_barrier_start.wait();
     }
 
     setSimThreadRunning(false);

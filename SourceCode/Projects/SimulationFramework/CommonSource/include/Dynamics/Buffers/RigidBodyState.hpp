@@ -34,12 +34,7 @@ public:
         m_q.setZero();
     };
 
-    RigidBodyState & operator =(const RigidBodyState& state) {
-        m_id = state.m_id;
-        m_u = state.m_u;
-        m_q = state.m_q;
-        return *this;
-    }
+    RigidBodyState & operator =(const RigidBodyState& state) = default;
 
     template<typename TRigidBody>
     inline void applyBody( const TRigidBody  * body) {

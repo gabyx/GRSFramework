@@ -512,18 +512,7 @@ namespace ParserModules{
 
 /** These module types are defined when there is no derivation from scene parser */
 template<typename TSceneParser, typename TDynamicsSystem>
-struct SceneParserGUITraits{
-
-    using ParserType = TSceneParser;
-    using DynamicsSystemType = TDynamicsSystem;
-
-    using XMLNodeType = pugi::xml_node;
-    using XMLAttributeType = pugi::xml_attribute;
-
-    using RandomGenType = typename DynamicsSystemType::RandomGenType;
-    template<typename T>
-    using UniformDistType = std::uniform_real_distribution<T>;
-
+struct SceneParserGUITraits : public SceneParserBaseTraits<TSceneParser,TDynamicsSystem>{
 
     using SettingsModuleType         = ParserModules::SettingsModule<TSceneParser>;
     using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<TSceneParser>;

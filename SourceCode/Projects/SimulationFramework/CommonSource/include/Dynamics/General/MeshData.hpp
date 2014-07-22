@@ -87,7 +87,7 @@ public:
 //   };
 
    bool setup( Assimp::Importer & importer, const aiScene* scene, Vector3 scale_factor, Quaternion quat, Vector3 trans){
-    Matrix33 Rot_KI = getRotFromQuaternion<PREC>(quat);
+    Matrix33 Rot_KI = QuaternionHelpers::getRotFromQuaternion<PREC>(quat);
 
 
       if(scene->mNumMeshes >=1){

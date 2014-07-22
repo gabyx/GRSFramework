@@ -77,7 +77,7 @@ public:
         m_q_KI = s.m_q.template tail<4>();
 
         if(setTrafoMatrix ){
-            setRotFromQuaternion(m_q_KI,m_A_IK);
+            QuaternionHelpers::setRotFromQuaternion(m_q_KI,m_A_IK);
         }
 
         if(m_pSolverData){
@@ -120,7 +120,7 @@ public:
         m_A_IK.setIdentity();
 
         m_r_S.setZero();
-        setQuaternionZero(m_q_KI);
+        QuaternionHelpers::setQuaternionZero(m_q_KI);
         m_h_term.setZero();
         m_eState = BodyMode::STATIC;
         m_eMaterial = 0;

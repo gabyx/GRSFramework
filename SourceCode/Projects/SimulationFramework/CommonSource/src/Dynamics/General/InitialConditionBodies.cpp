@@ -15,6 +15,6 @@ void InitialConditionBodies::setupPositionBodyPosAxisAngle(RigidBodyState & rigi
                                                            typename RigidBodyState::PREC angleRadian) {
 
     rigibodyState.m_q.head<3>() = pos;
-    setQuaternion(rigibodyState.m_q.tail<4>(),axis,angleRadian);
+    QuaternionHelpers::setQuaternion(rigibodyState.m_q.tail<4>(),axis,angleRadian);
 }
 

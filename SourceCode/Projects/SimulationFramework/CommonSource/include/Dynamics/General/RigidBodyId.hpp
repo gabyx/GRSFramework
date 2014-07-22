@@ -10,6 +10,7 @@ class RigidBodyId{
 
 public:
     typedef uint64_t Type; ///< [ --- last 32bit is GroupNr --- , --- first 32bit is BodyNr --- ]
+    typedef uint32_t HalfType;
 
     template<typename TRigidBodyType >
     inline static unsigned int getGroupNr(const TRigidBodyType * body){
@@ -57,5 +58,8 @@ public:
 
 /** Definition of the RigidBodyId type */
 typedef RigidBodyId::Type RigidBodyIdType;
+
+/** Definition of the RigidBodyId half type */
+typedef RigidBodyId::HalfType RigidBodyIdHalfType;
 
 #endif
