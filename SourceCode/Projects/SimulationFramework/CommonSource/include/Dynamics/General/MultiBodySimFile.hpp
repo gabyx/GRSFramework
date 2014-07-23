@@ -461,16 +461,15 @@ MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState* state ) {
     RigidBodyIdType id;
     for(unsigned int i=0 ; i< nSimBodies; i++) {
 
-        //m_file_stream >> state->m_SimBodyStates[i].m_q; //ADL fails
         *this >> id;
+        //std::cout<< "MSIMFILE id: " << RigidBodyId::getBodyIdString(id)  << std::endl;
         auto * s = state->getSimState(id);
         if(s){
             IOHelpers::readBinary(m_file_stream,  s->m_q );
-            //std::cout<< state->m_SimBodyStates[i].m_q.transpose()  << std::endl;
+//            std::cout<< "MSIMFILE q: " << s->m_q.transpose()  << std::endl;
             if(m_bReadFullState) {
-                //m_file_stream >> s->m_SimBodyStates[i].m_u;
                 IOHelpers::readBinary(m_file_stream,  s->m_u );
-                //std::cout<< state->m_SimBodyStates[i].m_u.transpose()  << std::endl;
+//                std::cout<< "MSIMFILE u: " << s->m_u.transpose()  << std::endl;
             } else {
                 //Dont read in velocities, its not needed!
                 m_file_stream.seekg(m_nBytesPerUBody,std::ios_base::cur);

@@ -110,6 +110,7 @@
 */
 /* @{ */
 #define OUTPUT_SIMDATA_FILE 1  ///< {0,1} Sets if the System Data file is outputted
+#define OUTPUT_SIMDATAITERATION_FILE 1 ///< {0,1} Sets if the SimDataIteration file is outputted
 #define CALCULATE_COND_OF_G 0     ///< {0,1} Set if the condition of the G matrix is calculated and outputted. Takes alot of time!
 #define CALCULATE_DIAGDOM_OF_G 1  ///< {0,1} Set if the diagonal dominant criteria is calculated, the number shows how many rows are not diagonal dominant!
 #define MEASURE_TIME_PROX 1
@@ -179,7 +180,7 @@
 
 /** @name State Ring Pool */
 /* @{ */
-#define LogToFileStateRingPool 0 ///< {0,1} Set if log is outputted to file or not.
+#define LogToFileStateRingPool 1 ///< {0,1} Set if log is outputted to file or not.
 /* @} */
 
 /** @name State Pool */

@@ -35,94 +35,94 @@ _________________________________________________________*/
 * @brief	Simulation State.
 **/
 
-class PlaybackState : public AppState, OgreBites::SdkTrayListener
-{
+class PlaybackState : public AppState, OgreBites::SdkTrayListener {
 public:
-	PlaybackState();
-	~PlaybackState();
+    PlaybackState();
+    ~PlaybackState();
 
-	DECLARE_APPSTATE_CLASS(PlaybackState);
+    DECLARE_APPSTATE_CLASS(PlaybackState);
 
-	void enter();
-	void setupScene();
-	void exit();
-	bool pause();
-	void resume();
+    void enter();
+    void setupScene();
+    void exit();
+    bool pause();
+    void resume();
 
-	void moveCamera();
-	void getInput();
+    void moveCamera();
+    void getInput();
 
+    void update(double timeSinceLastFrame);
 
-
-	void update(double timeSinceLastFrame);
-
-  boost::function<void (double)> updateSceneFunction; // this function binds to updateScenePlayback() or  updateSceneRealtime()
-  void updateScenePlayback(double timeSinceLastFrame);
-
-   std::shared_ptr<PlaybackManager>	   m_pPlaybackMgr;
+    std::shared_ptr<PlaybackManager>	   m_pPlaybackMgr;
 
 private:
 
-  Ogre::Log * m_pAppLog;
+    Ogre::Log * m_pAppLog;
 
-	void setupParamsPanel();
+    void setupParamsPanel();
 
-	Ogre::SceneNode * m_pBaseNode;                                       ///<Everythin in the Scene, gets deleted when scene reloads!
-   void changeScene();
+    Ogre::SceneNode * m_pBaseNode;                                       ///<Everythin in the Scene, gets deleted when scene reloads!
+    void changeScene();
 
-	std::shared_ptr<OrbitCamera>	m_pOrbitCamera;
-	std::shared_ptr<MenuMouse>	   m_pMenuMouse;
+    std::shared_ptr<OrbitCamera>	m_pOrbitCamera;
+    std::shared_ptr<MenuMouse>	   m_pMenuMouse;
 
-  void switchToSimulationState();
-  enum MouseMode{ CAMERA = 0, MENU } m_eMouseMode;
-  void setMouseMode(bool switchMode);
-
-
-  void setupGUI(); // Setups the playback file list...
-  void updatePlaybackPanel();// Updates the panel
-  enum ActiveMode{PLAYBACK} m_eSimulationActiveMode;
-  void setupActiveModeSelection();
-
-  void updateParamsPanelPlayback();
-
-  unsigned int m_SceneDetailIndex;
-  void switchSceneDetailIndex();
-  void toggleGUI();
+    void switchToSimulationState();
+    enum MouseMode { CAMERA = 0, MENU } m_eMouseMode;
+    void setMouseMode(bool switchMode);
 
 
-	std::shared_ptr<Ogre::Timer>	m_pTimelineRendering;
+    void setupGUI(); // Setups the playback file list...
+    void updatePlaybackPanel();// Updates the panel
+    enum ActiveMode {PLAYBACK} m_eSimulationActiveMode;
+    void setupActiveModeSelection();
 
-	double m_lengthScale;
+    void updateParamsPanelPlayback();
 
-	std::shared_ptr<OgreBites::SdkTrayManager>	m_pTrayMgr;
-	OgreBites::ParamsPanel*		m_pPhysicsStatsPanel;
-	Ogre::StringVector			m_PhysicsStatsParams;
-	Ogre::StringVector			m_pPhysicsStatsValues;
+    unsigned int m_SceneDetailIndex;
+    void switchSceneDetailIndex();
+    void toggleGUI();
 
-  OgreBites::SelectMenu* m_pActiveModeSelectMenu;
-  OgreBites::SelectMenu* m_pPlaybackFiles;
-  OgreBites::Button* m_pPlaybackFilesReload;
-  OgreBites::CheckBox * m_pCheckBoxVideo;
-  OgreBites::CheckBox * m_pCheckBoxSimFile;
-  OgreBites::CheckBox * m_pCheckBoxSimFileInterpolate;
-  OgreBites::Slider * m_pSliderFPS;
-  OgreBites::Slider * m_pSliderStartTime;
-  OgreBites::Slider * m_pSliderEndTime;
 
-  void itemSelected(OgreBites::SelectMenu * menu); // Virtual of SdkTrayListner
-  void checkBoxToggled(OgreBites::CheckBox * box); // Virtual of SdkTrayListener
-  void sliderMoved(OgreBites::Slider * slider); // Virtual of SdkTrayListener
-  void buttonHit(OgreBites::Button * button); // Virtual of SdkTrayListener
+    std::shared_ptr<Ogre::Timer>	m_pTimelineRendering;
 
-  	bool keyPressed(const OIS::KeyEvent &keyEventRef);
-	bool keyReleased(const OIS::KeyEvent &keyEventRef);
+    double m_lengthScale;
 
-	bool mouseMoved(const OIS::MouseEvent &evt){return true;};
-	bool mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id){return true;};
-	bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id){return true;};
+    std::shared_ptr<OgreBites::SdkTrayManager>	m_pTrayMgr;
+    OgreBites::ParamsPanel*		m_pPhysicsStatsPanel;
+    Ogre::StringVector			m_PhysicsStatsParams;
+    Ogre::StringVector			m_pPhysicsStatsValues;
 
-  void switchSimulationMode();
-  void setSimulationMode(int i);
+    OgreBites::SelectMenu* m_pActiveModeSelectMenu;
+    OgreBites::SelectMenu* m_pPlaybackFiles;
+    OgreBites::Button* m_pPlaybackFilesReload;
+    OgreBites::CheckBox * m_pCheckBoxVideo;
+    OgreBites::CheckBox * m_pCheckBoxSimFile;
+    OgreBites::CheckBox * m_pCheckBoxSimFileInterpolate;
+    OgreBites::Slider * m_pSliderFPS;
+    OgreBites::Slider * m_pSliderStartTime;
+    OgreBites::Slider * m_pSliderEndTime;
+
+    void itemSelected(OgreBites::SelectMenu * menu); // Virtual of SdkTrayListner
+    void checkBoxToggled(OgreBites::CheckBox * box); // Virtual of SdkTrayListener
+    void sliderMoved(OgreBites::Slider * slider); // Virtual of SdkTrayListener
+    void buttonHit(OgreBites::Button * button); // Virtual of SdkTrayListener
+
+    bool keyPressed(const OIS::KeyEvent &keyEventRef);
+    bool keyReleased(const OIS::KeyEvent &keyEventRef);
+
+    bool mouseMoved(const OIS::MouseEvent &evt) {
+        return true;
+    };
+    bool mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id) {
+        return true;
+    };
+    bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id) {
+        return true;
+    };
+
+    void switchSimulationMode();
+    void setSimulationMode(int i);
 };
 //=========================================================
 

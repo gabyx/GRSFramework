@@ -28,6 +28,8 @@ public:
 
     DynamicsStateBase():m_t(0.0),m_StateType(NONE){}
 
+    DynamicsStateBase & operator=(const DynamicsStateBase& state) = default;
+
     PREC m_t; ///< The time in seconds
     enum {NONE = 0, STARTSTATE=1, ENDSTATE = 2} m_StateType;
     typedef std::vector< RigidBodyState > RigidBodyStateListType;
@@ -54,7 +56,23 @@ public:
 
     ~DynamicsState(){};
 
-    DynamicsState & operator=(const DynamicsState& state) = default;
+
+    DynamicsState & operator=(const DynamicsState& state){
+        // take care  not to copy the idToState pointer list!
+        if(this != &state){
+            DynamicsStateBase::operator=(state);
+
+            m_randomAccess = state.m_randomAccess;
+            m_startIdx = state.m_startIdx;
+
+            m_pIdToState.clear();
+            // construct a new idToState list:
+            for(auto &s : m_SimBodyStates){
+                m_pIdToState.insert(std::make_pair(s.m_id,&s));
+            }
+        }
+        return *this;
+    }
 
     void reset(){
       m_StateType = DynamicsState::NONE;

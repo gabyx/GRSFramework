@@ -105,14 +105,11 @@ void StatePoolVisBackFront::resetStatePool(const RigidBodyStateContainerType & s
     m_idx[1] = 0; //back
     m_idx[2] = 0; //vis
 
-    StateType & state = m_pool[0];
-    state.reset();
-
-    state.applyBodyStates<false>(state_init);
+    m_pool[0].reset();
+    m_pool[0].applyBodyStates<false>(state_init);
 
     // Fill in the initial values
-    //m_pool[0] = state;
-    m_pool[1] = state;
+    m_pool[1] = m_pool[0];
 
 #if LogToFileStatePool == 1
     m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;

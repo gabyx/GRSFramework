@@ -124,8 +124,8 @@ bool PlaybackManager::parseScene() {
     }
 
     ParserModules::BodyModuleOptions o;
-    o.m_allocateBodies = false;
-    o.m_parseOnlyVisualizationProperties = true;
+    o.m_allocateSimBodies = false;
+    o.m_allocateStaticBodies = false;
     m_pSceneParser->parseScene(sceneFilePath, SceneParserOptions(), o);
 
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SceneNodeSimBodies.size()
@@ -145,9 +145,6 @@ void PlaybackManager::updateScene(double timeSinceLastFrame) {
 
             m_pVisBuffer = m_pSharedBuffer->updateVisBuffer(bStateChanged);
             if(bStateChanged) {
-                /* CLEARLOG(logstream);
-                 logstream << "m_t vis:" << m_pVisBuffer->m_t <<endl;
-                 LOG(m_pThreadLog)*/
                 updateSimBodies();
             }
 
@@ -232,7 +229,7 @@ void PlaybackManager::threadRunSimulation() {
     static bool bchangedState;
     static double timelineSimulation, state_time, old_state_time, deltaT;
 
-    m_pThreadLog->logMessage(" PlaybackManager: SimThread entering...");
+    m_pThreadLog->logMessage("---> PlaybackManager: SimThread entering...");
     setSimThreadRunning(true);
 
     std::stringstream logstream;
@@ -244,13 +241,29 @@ void PlaybackManager::threadRunSimulation() {
     // Wait for loader thread
     m_pFileLoader->m_barrier_start.wait();
 
+    // Update Simbuffer
+    DynamicsState * currentState;
+    bool updated = false;
+    int i = 0;
+//    while(!updated && i < 100){
+//        currentState = m_pSharedBuffer->advanceSimBuffer(updated);
+    currentState = m_pSharedBuffer->getSimBuffer();
+//            for(auto & s : currentState->m_SimBodyStates){
+//                std::cout <<"SimState: "<< RigidBodyId::getBodyIdString(s.m_id) << "," << s.m_q << std::endl;
+//            }
+//        i++;
+//    }
+//    if(!updated){
+//        ERRORMSG("Could not advance sim buffer to first state!")
+//    }else{
+        LOG(m_pThreadLog,"---> PlaybackManager: Advanced sim buffer to first state @ m_t: " << currentState->m_t << std::endl;);
+//    }
+
     // Wait for vis thread
     m_barrier_start.wait();
 
-    DynamicsState * currentState = m_pSharedBuffer->getSimBuffer();
-
     state_time = 0;
-    old_state_time =0;
+    old_state_time = 0;
     bchangedState = false;
     resetTimelineSimulation();
 
@@ -284,13 +297,13 @@ void PlaybackManager::threadRunSimulation() {
         if(bchangedState) {
             if(m_SettingsSimThread.m_bSimFileDrop) { // When the sim buffer has been moved, then ... At the biginning, this moves to the initial state basically!
                 //Do a resampling of the states!
-                LOG(m_pThreadLog, " PlaybackManager: Try to resample state time: " << currentState->m_t<<std::endl;);
+                LOG(m_pThreadLog, "---> PlaybackManager: Try to resample state time: " << currentState->m_t<<std::endl;);
                 m_pStateRecorderResampler->tryToWrite(currentState,m_SettingsSimThread.m_bSimFileDropInterpolate);
             }
 
 
             if(currentState->m_StateType == DynamicsState::ENDSTATE) {
-                LOG(m_pThreadLog, " PlaybackManager: Detected end state at " << currentState->m_t <<" --> leaving..."<<std::endl;);
+                LOG(m_pThreadLog, "---> PlaybackManager: Detected end state at " << currentState->m_t <<" --> leaving..."<<std::endl;);
                 break;
             }
 
@@ -307,7 +320,7 @@ void PlaybackManager::threadRunSimulation() {
 
     cleanUpSimThread();
 
-    m_pThreadLog->logMessage(" PlaybackManager: SimThread leaving...");
+    m_pThreadLog->logMessage("---> PlaybackManager: SimThread leaving...");
     setSimThreadRunning(false);
 
 }

@@ -1212,9 +1212,8 @@ public:
                 parseInitialPositionLinear(node);
             } else if(s == "grid") {
                 parseInitialPositionGrid(node);
-            } else if(s == "trafo") {
-                parseInitialPositionPosAxisAngle(node);
-            } else if(s == "transforms") {
+            }
+            else if(s == "transforms") {
                 parseInitialPositionTransforms(node);
             } else if(s == "generalized") {
                 THROWEXCEPTION("Not yet implemented!");
@@ -1350,88 +1349,6 @@ private:
 //        InitialConditionBodies::setupPositionBodiesFromFile(state,filePath);
         THROWEXCEPTION("Not implemented")
     }
-
-    void parseInitialPositionPosAxisAngle(XMLNodeType initCond) {
-
-        unsigned int valueCounter = 0;
-        Vector3 trans;
-        Vector3 axis;
-        PREC angle;
-
-        auto bodyIt = m_bodyListGroup->begin();
-        auto itEnd = m_bodyListGroup->end();
-        ASSERTMSG(bodyIt != itEnd, "no bodies in list");
-
-        // Iterate over all values in the list
-        XMLNodeType trafo;
-        auto nodes = initCond.children("Pos");
-        auto itNodeEnd = nodes.end();
-        bool apply = true; //always apply, except at last if we skip it
-        for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode){
-
-
-            if(bodyIt==itEnd) {
-                LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionPosAxisAngle: You specified to many transforms, -> neglecting ..."<<std::endl;);
-                break;
-            } else if(valueCounter != bodyIt->m_initState.m_id - m_startIdGroup) {
-                // this value does not correspond to the linear offset from the startId
-                if(std::next(itNode) != itNodeEnd){
-                    valueCounter++;
-                    continue;
-                }else{
-                    apply = false;
-                    LOGSCLEVEL3(m_parser->m_pSimulationLog,"---> parsing last state ... "<<std::endl;);
-                }
-            }
-
-            trafo = itNode->child("Trafo");
-
-            if(!Utilities::stringToVector3(trans, trafo.attribute("trans").value())) {
-                THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: trans failed");
-            }
-
-            if(!Utilities::stringToVector3(axis, trafo.attribute("axis").value())) {
-                THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: axis failed");
-            }
-
-            if( axis.norm() == 0) {
-                THROWEXCEPTION("---> Specified wrong axis in InitialPositionPosAxisAngle");
-            }
-
-            auto att = trafo.attribute("deg");
-            if(att) {
-                if(!Utilities::stringToType(angle, att.value())) {
-                    THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: deg failed");
-                }
-                angle = angle / 180 * M_PI;
-            } else {
-                att = trafo.attribute("rad");
-                if(att){
-                    if(!Utilities::stringToType(angle, att.value())) {
-                        THROWEXCEPTION("---> String conversion in InitialPositionPosAxisAngle: rad failed");
-                    }
-                }
-                else{
-                    THROWEXCEPTION("---> No angle found in InitialPositionPosAxisAngle");
-                }
-            }
-
-            if(apply){
-               InitialConditionBodies::setupPositionBodyPosAxisAngle( bodyIt->m_initState, trans, axis, angle);
-                ++bodyIt;
-            }
-
-            ++valueCounter;
-        }
-
-        if(valueCounter < m_bodyListGroup->size()) {
-            LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionPosAxisAngle: You specified to little values, -> applying last to all remainig bodies ..."<<std::endl;);
-            auto itEnd = m_bodyListGroup->end();
-            for(; bodyIt !=  itEnd; ++bodyIt) {
-                InitialConditionBodies::setupPositionBodyPosAxisAngle(bodyIt->m_initState, trans, axis, angle);
-            }
-        }
-    }
     void parseInitialPositionTransforms(XMLNodeType initCond) {
 
         unsigned int valueCounter = 0;
@@ -1502,8 +1419,11 @@ private:
 
                 QuaternionHelpers::setQuaternion(q_BK,axis,angle);
                 QuaternionHelpers::rotateVector(q_KI, trans ); //K_r_KB = trans;
-                I_r_IK +=  trans;  //Rot_KI * K_r_KB; // Transforms like A_IK * K_r_KB;
-                q_KI = QuaternionHelpers::quatMult(q_KI,q_BK); // Sequential (aktiv) rotation
+                I_r_IK +=  trans;  // + Rot_KI * K_r_KB; // Transforms like A_IK * K_r_KB;
+
+                q_KI = QuaternionHelpers::quatMult(q_KI,q_BK);
+                // Sequential (aktiv) rotation ( A_AB * B_R_2 * A_BA * A_R_1 ) *A_x
+                // is the same like: A_R_1 * B_R_2 (see documentation page)
 
             }
 
@@ -1609,9 +1529,10 @@ struct BodyModuleOptions {
     using BodyRangeType = Range<RigidBodyIdType>;
     BodyRangeType m_bodyIdRange;       ///< Range of body ids, original list which is handed to parseScene
     bool m_parseAllBodiesNonSelGroup = true;  ///< Parse all bodies in groups where m_bodyIdRange is not applied (enableSelectiveIds="false) (default= true)
-    bool m_parseOnlySimBodies = false;         ///< Parses only simulated bodies (default= false)
-    bool m_allocateBodies = true;
-    bool m_parseOnlyVisualizationProperties = false;
+    bool m_parseSimBodies = true;         ///< Parses only simulated bodies (default= false)
+    bool m_parseStaticBodies = true;
+    bool m_allocateSimBodies = true;      ///< if false, does only parse the nodes which do not need the body -> initial condition
+    bool m_allocateStaticBodies = true;   ///< if false, does only parse the nodes which do not need the body -> initial condition
 };
 
 template<typename TParserTraits>
@@ -1703,16 +1624,13 @@ public:
     void parse(XMLNodeType & sceneObjects){
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== BodyModule: parsing (SceneObjects) ============================"<<std::endl;)
 
-        ASSERTMSG(m_parsingOptions.m_allocateBodies || m_parsingOptions.m_parseOnlyVisualizationProperties, " You should not allocate any bodies (m_allocateBodies: "<<m_parsingOptions.m_allocateBodies
-                                                <<" and parse dynamic properties (m_parseOnlyVisualizationProperties: " << m_parsingOptions.m_parseOnlyVisualizationProperties <<
-                                                ")")
-
         LOGSCLEVEL1( m_parser->m_pSimulationLog, "---> BodyModule Options: " <<std::endl
-                        <<"\t parse only simulated bodies:"<<m_parsingOptions.m_parseOnlySimBodies << std::endl
+                        <<"\t parse simulated bodies:"<<m_parsingOptions.m_parseSimBodies << std::endl
+                        <<"\t parse static bodies:"<<m_parsingOptions.m_parseStaticBodies << std::endl
                         <<"\t parse all bodies in group with disabled selective ids:"<<m_parsingOptions.m_parseAllBodiesNonSelGroup << std::endl
                         <<"\t parse selective ids: "<< m_parseSelectiveBodyIds << std::endl
-                        <<"\t allocate bodies: "<< m_parsingOptions.m_allocateBodies << std::endl;)
-
+                        <<"\t allocate simulated bodies: "<< m_parsingOptions.m_allocateSimBodies << std::endl
+                        <<"\t allocate static bodies: "<< m_parsingOptions.m_allocateStaticBodies << std::endl;)
         // Init startRangeIterator
         m_startRangeIdIt = m_parsingOptions.m_bodyIdRange.begin();
 
@@ -1792,7 +1710,8 @@ private:
 
         // Skip group if we can:
         if( (!m_parsingOptions.m_parseAllBodiesNonSelGroup && !hasSelectiveFlag)
-            || ( m_eBodiesState != RigidBodyType::BodyMode::SIMULATED  && m_parsingOptions.m_parseOnlySimBodies)
+            || ( m_eBodiesState == RigidBodyType::BodyMode::SIMULATED  && !m_parsingOptions.m_parseSimBodies)
+            || ( m_eBodiesState == RigidBodyType::BodyMode::STATIC  && !m_parsingOptions.m_parseStaticBodies)
             || (m_parseSelectiveBodyIds && hasSelectiveFlag && m_startRangeIdIt== m_parsingOptions.m_bodyIdRange.end()) // out of m_bodyIdRange, no more id's which could be parsed in
              ) {
             LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Skip Group" << std::endl;)
@@ -1850,7 +1769,8 @@ private:
         {
             LOGSCLEVEL3(m_parser->m_pSimulationLog,"---> Added RigidBody Instance: "<<RigidBodyId::getBodyIdString(*bodyIdIt)<<std::endl);
             // Push new body
-            if(m_parsingOptions.m_allocateBodies){
+            if(   m_parsingOptions.m_allocateSimBodies && m_eBodiesState == RigidBodyType::BodyMode::SIMULATED
+               || m_parsingOptions.m_allocateStaticBodies && m_eBodiesState == RigidBodyType::BodyMode::STATIC ){
                 m_bodyListGroup.emplace_back(new RigidBodyType(*bodyIdIt), *bodyIdIt, Vector3(1,1,1));
             }else{
                 // add no bodies for visualization stuff, we dont need it!
@@ -1930,7 +1850,7 @@ private:
 
         std::string s;
         XMLNodeType n;
-        if(!m_parsingOptions.m_parseOnlyVisualizationProperties) {
+        if(m_parsingOptions.m_allocateSimBodies) {
             // First allocate a new SolverDate structure
             for(auto & b : m_bodyListGroup)  {
                 b.m_body->m_pSolverData = new typename RigidBodyType::RigidBodySolverDataType();
@@ -1970,15 +1890,14 @@ private:
 
         // InitialPosition ============================================================
         GET_XMLCHILDNODE_CHECK(n,"InitialCondition",dynProp)
-        bool parseVel = (m_parsingOptions.m_parseOnlyVisualizationProperties)? false : true;
         if(m_pInitStatesMod){
-            m_pInitStatesMod->parseInitialCondition(n,&m_bodyListGroup,m_startIdGroup,parseVel);
+            m_pInitStatesMod->parseInitialCondition(n,&m_bodyListGroup,m_startIdGroup,true);
         }
 
     }
     void parseDynamicPropertiesStatic( XMLNodeType  dynProp) {
         XMLNodeType n ;
-        if(!m_parsingOptions.m_parseOnlyVisualizationProperties) {
+        if(m_parsingOptions.m_allocateStaticBodies) {
             n = dynProp.child("Material");
             parseMaterial(n);
         }
@@ -2190,6 +2109,7 @@ public:
         }
     }
 
+
     boost::filesystem::path getParsedSceneFile() {
         return m_currentParseFilePath;
     }
@@ -2269,7 +2189,7 @@ protected:
             return;
         }
 
-        LOGSCLEVEL1(m_pSimulationLog,"---> Parse SceneSettings..."<<std::endl;);
+        LOGSCLEVEL1(m_pSimulationLog,"---> Parse Pre SceneSettings..."<<std::endl;);
 
         if(m_pSettingsModule) {
             m_pSettingsModule->parse(sceneSettings);
@@ -2293,6 +2213,14 @@ protected:
     }
 
     virtual void parseSceneSettingsPost( XMLNodeType sceneSettings ) {
+
+        if(!m_parsingOptions.m_parseSceneSettings) {
+            LOGSCLEVEL1(m_pSimulationLog,"---> Skip SceneSettings"<<std::endl;);
+            return;
+        }
+
+        LOGSCLEVEL1(m_pSimulationLog,"---> Parse Post SceneSettings..."<<std::endl;);
+
         if(m_pInitStatesModule) {
             m_pInitStatesModule->parseGlobalInitialCondition(sceneSettings);
         }

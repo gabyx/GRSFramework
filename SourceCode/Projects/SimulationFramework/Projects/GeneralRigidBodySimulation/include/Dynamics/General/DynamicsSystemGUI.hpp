@@ -24,6 +24,7 @@ class RigidBodyGraphics{
         inline void applyBodyState(const TRigidBodyState & s){
             WARNINGMSG(m_id == s.m_id , "Updating non matching ids: " << m_id <<"!="<< s.m_id);
             ASSERTMSG(m_node,"SceneNode is null")
+            //std::cout << "update: " << s.m_q << std::endl;
             m_node->setPosition(s.m_q(0),s.m_q(1),s.m_q(2));
             m_node->setOrientation(s.m_q(3),s.m_q(4),s.m_q(5),s.m_q(6));
         }
@@ -85,7 +86,6 @@ public:
     }
 
     ~DynamicsSystemGUI(){
-        m_pBodiesNode->removeAndDestroyAllChildren();
     }
 
 
@@ -149,9 +149,7 @@ public:
         m_pBodiesNode = pBaseNode->createChildSceneNode("BaseFrameBodies");
     }
 
-    ~DynamicsSystemPlayback(){
-        m_pBodiesNode->removeAndDestroyAllChildren();
-    }
+    ~DynamicsSystemPlayback(){}
 
 
     template<typename TParser>
