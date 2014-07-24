@@ -75,6 +75,7 @@ private:
     typedef typename ProcessCommunicatorType::ProcessInfoType ProcessInfoType;
     std::shared_ptr< ProcessCommunicatorType > m_pProcCommunicator;
 
+
     typedef typename MPILayer::TopologyBuilder  TopologyBuilderType;
     std::shared_ptr< TopologyBuilderType >    m_pTopologyBuilder;
 

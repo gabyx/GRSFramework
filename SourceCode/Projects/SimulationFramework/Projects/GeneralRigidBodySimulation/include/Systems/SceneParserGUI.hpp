@@ -8,87 +8,85 @@
 
 #include "MakeCoordinateSystem.hpp"
 
-namespace ParserModules{
-    template<typename TParserTraits>
-    class VisModule {
-    private:
-        DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
+namespace ParserModules {
+template<typename TParserTraits>
+class VisModule {
+private:
+    DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
 
 
-        DEFINE_MATRIX_TYPES
+    DEFINE_MATRIX_TYPES
 
-        using BodyListType = typename BodyModuleType::BodyListType;
-        using BodyMode = typename DynamicsSystemType::RigidBodyType::BodyMode;
+    using BodyListType = typename BodyModuleType::BodyListType;
+    using BodyMode = typename DynamicsSystemType::RigidBodyType::BodyMode;
 
-        BodyMode m_mode;
-        BodyListType * m_bodyListGroup = nullptr;
-        RigidBodyIdType m_startIdGroup;
+    BodyMode m_mode;
+    BodyListType * m_bodyListGroup = nullptr;
+    RigidBodyIdType m_startIdGroup;
 
-        using RigidBodyGraphicsType = typename DynamicsSystemType::RigidBodyGraphicsType;
-        using RigidBodyGraphicsContType = typename DynamicsSystemType::RigidBodyGraphicsContType;
-        RigidBodyGraphicsContType * m_pSimBodies;
-        RigidBodyGraphicsContType * m_pBodies;
+    using RigidBodyGraphicsType = typename DynamicsSystemType::RigidBodyGraphicsType;
+    using RigidBodyGraphicsContType = typename DynamicsSystemType::RigidBodyGraphicsContType;
+    RigidBodyGraphicsContType * m_pSimBodies;
+    RigidBodyGraphicsContType * m_pBodies;
 
-        Ogre::SceneManager * m_pSceneMgr;
-        Ogre::SceneNode * m_pBaseNode;
-        Ogre::SceneNode * m_pBodiesNode;
+    Ogre::SceneManager * m_pSceneMgr;
+    Ogre::SceneNode * m_pBaseNode;
+    Ogre::SceneNode * m_pBodiesNode;
 
-        ParserType * m_parser;
+    LogType * m_pSimulationLog;
 
-        struct RenderSettings{
-            bool attachAxis = false;
-            double axesSize = 1;
-            bool shadowsEnabled = true;
-        };
+    struct RenderSettings {
+        bool attachAxis = false;
+        double axesSize = 1;
+        bool shadowsEnabled = true;
+    };
 
-        std::vector<std::string> m_materialList;
+    std::vector<std::string> m_materialList;
 
-    public:
+public:
 
-        void cleanUp(){
-            m_materialList.clear();
+    void cleanUp() {
+        m_materialList.clear();
+    }
+
+    VisModule(ParserType * p,
+              RigidBodyGraphicsContType * pSimBodies,
+              RigidBodyGraphicsContType * pBodies,
+              Ogre::SceneNode * pBaseNode,
+              Ogre::SceneNode * pBodiesNode,
+              Ogre::SceneManager * pSceneMgr)
+        : m_pSimulationLog(p->getSimLog()), m_pSimBodies(pSimBodies), m_pBodies(pBodies), m_pBaseNode(pBaseNode), m_pBodiesNode(pBodiesNode), m_pSceneMgr(pSceneMgr) {
+        ASSERTMSG(m_pSceneMgr && m_pBodiesNode, "these should not be zero!")
+
+    };
+
+    void parse(XMLNodeType vis, BodyListType * bodyList, RigidBodyIdType startId, BodyMode mode) {
+        m_mode = mode;
+        m_startIdGroup = startId;
+        m_bodyListGroup = bodyList;
+
+        LOGSCLEVEL1(m_pSimulationLog, "---> VisModule: parsing (BodyVisualization)"<<std::endl;)
+        XMLNodeType node = vis.child("Mesh");
+        if(node) {
+            parseMesh(node);
+        } else {
+            node = vis.child("Plane");
+            parsePlane(node);
         }
+    }
 
-        VisModule(ParserType * p,
-                  RigidBodyGraphicsContType * pSimBodies,
-                  RigidBodyGraphicsContType * pBodies,
-                  Ogre::SceneNode * pBaseNode,
-                  Ogre::SceneNode * pBodiesNode,
-                  Ogre::SceneManager * pSceneMgr)
-                  : m_parser(p), m_pSimBodies(pSimBodies), m_pBodies(pBodies), m_pBaseNode(pBaseNode), m_pBodiesNode(pBodiesNode), m_pSceneMgr(pSceneMgr)
-        {
-            ASSERTMSG(m_pSceneMgr && m_pBodiesNode, "these should not be zero!")
+    void parseSceneSettingsPost(XMLNodeType sceneSettings) {
 
-        };
+        LOGSCLEVEL1(m_pSimulationLog, "==== VisModule: parsing (SceneSettingsPost, MPI/Visualization)  ==="<<std::endl;)
 
-        void parse(XMLNodeType vis, BodyListType * bodyList, RigidBodyIdType startId, BodyMode mode) {
-            m_mode = mode;
-            m_startIdGroup = startId;
-            m_bodyListGroup = bodyList;
+        parseMPISettings(sceneSettings);
+        parseSceneVisualizationSettings(sceneSettings);
 
-            LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> VisModule: parsing (BodyVisualization)"<<std::endl;)
-            XMLNodeType node = vis.child("Mesh");
-            if(node){
-                parseMesh(node);
-            }
-            else{
-                node = vis.child("Plane");
-                parsePlane(node);
-            }
-        }
+        LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
 
-        void parseSceneSettingsPost(XMLNodeType sceneSettings) {
+    }
 
-            LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== VisModule: parsing (SceneSettingsPost, MPI/Visualization)  ==="<<std::endl;)
-
-            parseMPISettings(sceneSettings);
-            parseSceneVisualizationSettings(sceneSettings);
-
-            LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
-
-        }
-
-    private:
+private:
 
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
     void parseMesh(XMLNodeType  meshNode ) {
@@ -107,7 +105,7 @@ namespace ParserModules{
                 THROWEXCEPTION("---> String conversion in parseMesh: scaleWithGeometry failed");
             }
         }
-        if(!scaleLikeGeometry){
+        if(!scaleLikeGeometry) {
             if(!Utilities::stringToVector3(scale, meshNode.attribute("scale").value() )) {
                 THROWEXCEPTION("---> String conversion in parseMesh: scale failed");
             }
@@ -116,17 +114,17 @@ namespace ParserModules{
 
         XMLNodeType  rendering = meshNode.child("Rendering");
         RenderSettings renderSettings;
-        if(rendering){
+        if(rendering) {
             parseRenderSettings(rendering, renderSettings);
         }
-        LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> RenderSettings: axis= "<< renderSettings.attachAxis
+        LOGSCLEVEL1(m_pSimulationLog,"---> RenderSettings: axis= "<< renderSettings.attachAxis
                     << " shadows: " << renderSettings.shadowsEnabled << std::endl;)
 
         parseMaterials(meshNode);
 
 
         std::stringstream entity_name,node_name;
-        LOG(m_parser->m_pSimulationLog, "---> Add all Ogre Mesh Objects"<<std::endl);
+        LOG(m_pSimulationLog, "---> Add all Ogre Mesh Objects"<<std::endl);
 
         unsigned int i; // Linear offset form the m_startIdGroup
         for(auto & b : *m_bodyListGroup) {
@@ -205,7 +203,7 @@ namespace ParserModules{
                 THROWEXCEPTION("---> String conversion in parseMesh: scaleWithGeometry failed");
             }
         }
-        if(!scaleLikeGeometry){
+        if(!scaleLikeGeometry) {
             if(!Utilities::stringToVector3(scale, planeNode.attribute("scale").value() )) {
                 THROWEXCEPTION("---> String conversion in parseMesh: scale failed");
             }
@@ -220,7 +218,10 @@ namespace ParserModules{
             }
         }
 
-        Vector3 normal; normal(0)=0; normal(1)=0; normal(2)=1;
+        Vector3 normal;
+        normal(0)=0;
+        normal(1)=0;
+        normal(2)=1;
         att = planeNode.attribute("normal");
         if(att) {
             if(!Utilities::stringToVector3(normal, att.value())) {
@@ -236,7 +237,9 @@ namespace ParserModules{
             }
         }
 
-        Vector2 tile; tile(0)=1; tile(1)=1;
+        Vector2 tile;
+        tile(0)=1;
+        tile(1)=1;
         att = planeNode.attribute("tileTexture");
         if(att) {
             if(!Utilities::stringToVector2(tile, att.value())) {
@@ -248,17 +251,17 @@ namespace ParserModules{
 
         XMLNodeType  rendering = planeNode.child("Rendering");
         RenderSettings renderSettings;
-        if(rendering){
+        if(rendering) {
             parseRenderSettings(rendering, renderSettings);
         }
-        LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> RenderSettings: axis= "<< renderSettings.attachAxis
+        LOGSCLEVEL1(m_pSimulationLog,"---> RenderSettings: axis= "<< renderSettings.attachAxis
                     << " shadows: " << renderSettings.shadowsEnabled << std::endl;)
 
         parseMaterials(planeNode);
 
 
         std::stringstream entity_name,node_name,plane_name;
-        LOG(m_parser->m_pSimulationLog, "---> Add all Ogre: Plane Objects"<<std::endl);
+        LOGSCLEVEL1(m_pSimulationLog, "---> Add all Ogre: Plane Objects"<<std::endl);
 
         unsigned int i; // linear offset from m_startIdGroup
         for(auto & b : *m_bodyListGroup) {
@@ -285,8 +288,8 @@ namespace ParserModules{
             makeCoordinateSystem<PREC>(normal,v1,v2);
 
             Ogre::MeshManager::getSingleton().createPlane(plane_name.str(),
-            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane,
-            scale(0),scale(1),subDivs(0),subDivs(1),true,1,tile(0),tile(1),Ogre::Vector3(v1(0),v1(1),v1(2)));
+                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane,
+                    scale(0),scale(1),subDivs(0),subDivs(1),true,1,tile(0),tile(1),Ogre::Vector3(v1(0),v1(1),v1(2)));
 
             Ogre::Entity* ent = m_pSceneMgr->createEntity(entity_name.str(),plane_name.str() );
             ent->setCastShadows(renderSettings.shadowsEnabled);
@@ -296,7 +299,7 @@ namespace ParserModules{
 
             RigidBodyGraphicsType rigidBodyGraphics(sceneNode, b.m_initState.m_id);
 
-             if(scaleLikeGeometry) {
+            if(scaleLikeGeometry) {
                 sceneNodeScale->setScale(b.m_scale(0),b.m_scale(1),b.m_scale(2));
             } else {
                 sceneNodeScale->setScale(scale(0),scale(1),scale(2));
@@ -332,7 +335,7 @@ namespace ParserModules{
 
     }
 
-    void parseMaterials(XMLNodeType meshNode){
+    void parseMaterials(XMLNodeType meshNode) {
         std::string type = meshNode.attribute("type").value();
         if( type == "permutate" || type == "uniform") {
             m_materialList.clear();
@@ -348,7 +351,7 @@ namespace ParserModules{
         }
     }
 
-    void parseRenderSettings(XMLNodeType  rendering, RenderSettings & settings){
+    void parseRenderSettings(XMLNodeType  rendering, RenderSettings & settings) {
         XMLAttributeType att;
         att =rendering.attribute("attachAxis");
         if(att) {
@@ -497,7 +500,7 @@ namespace ParserModules{
         if(sceneVisSettings) {
 
             XMLNodeType scaleNode = sceneVisSettings.child("SceneScale");
-            if(scaleNode){
+            if(scaleNode) {
                 double sceneScale;
                 if(!Utilities::stringToType(sceneScale,  scaleNode.attribute("value").value())) {
                     THROWEXCEPTION("---> String conversion in SceneScale: value failed");
@@ -507,22 +510,25 @@ namespace ParserModules{
         }
     }
 
-    };
+};
+
 };
 
 /** These module types are defined when there is no derivation from scene parser */
 template<typename TSceneParser, typename TDynamicsSystem>
-struct SceneParserGUITraits : public SceneParserBaseTraits<TSceneParser,TDynamicsSystem>{
+struct SceneParserGUITraits : public SceneParserBaseTraits<TSceneParser,TDynamicsSystem> {
 
-    using SettingsModuleType         = ParserModules::SettingsModule<TSceneParser>;
-    using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<TSceneParser>;
-    using ContactParamModuleType     = ParserModules::ContactParamModule<TSceneParser>;
-    using InitStatesModuleType       = ParserModules::InitStatesModule<TSceneParser> ;
+    using SettingsModuleType         = ParserModules::SettingsModule<SceneParserGUITraits>;
+    using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<SceneParserGUITraits>;
+    using ContactParamModuleType     = ParserModules::ContactParamModule<SceneParserGUITraits>;
+    using InitStatesModuleType       = ParserModules::InitStatesModule<SceneParserGUITraits> ;
 
-    using BodyModuleType             = ParserModules::BodyModule< TSceneParser > ;
-    using GeometryModuleType         = ParserModules::GeometryModule<TSceneParser>;
+    using BodyModuleType             = ParserModules::BodyModule< SceneParserGUITraits > ;
+    using GeometryModuleType         = ParserModules::GeometryModule<SceneParserGUITraits>;
 
-    using VisModuleType              = ParserModules::VisModule<TSceneParser>;
+    using VisModuleType              = ParserModules::VisModule<SceneParserGUITraits>;
+
+    using MPIModuleType              = ParserModules::MPIModuleDummy<SceneParserGUITraits>;
 };
 
 template<typename TDynamicsSystem>
@@ -533,7 +539,8 @@ public:
     using DynamicsSystemType = TDynamicsSystem;
 
 public:
-    SceneParserGUI( std::shared_ptr<DynamicsSystemType> pDynSys): BaseType(pDynSys) {}
+    template<typename ModuleGeneratorType>
+    SceneParserGUI(ModuleGeneratorType & moduleGen): BaseType(moduleGen){}
 };
 
 

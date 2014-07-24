@@ -79,7 +79,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
 
     // Parse the Scene from XML! ==========================
 
-    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(m_pDynSys) );
+    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(*m_pDynSys) );
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserType... ");
 
 

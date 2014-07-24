@@ -79,13 +79,16 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
     // Parse the Scene from XML! ==========================
 
-    m_pSceneParser = std::shared_ptr< SceneParserMPI >( new SceneParserMPI( m_pDynSys, m_pProcCommunicator ) );
+    m_pSceneParser = std::shared_ptr< SceneParserMPI >( new SceneParserMPI( *m_pDynSys) );
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
     m_pSceneParser->parseScene(sceneFilePathNew);
     m_nGlobalSimBodies = m_pSceneParser->getNumberOfGlobalSimBodies();
     m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
-    LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: SceneParsing finshed: Added "<< m_nSimBodies << " Bodies!" << std::endl;);
+    LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: SceneParsing finished: Added "<< m_nSimBodies << " Bodies!" << std::endl;);
     LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: Global Bodies in Simulation "<< m_nGlobalSimBodies<< " Bodies!" << std::endl;);
+
+    // TopologyBuilder Build Topology
+    //TODO
 
     // Do Safty Check
     // Do a Reduction of all Simbodies, to count if no bodies are missing!
@@ -184,15 +187,6 @@ void SimulationManagerMPI::startSim() {
 
     initSim();
 
-
-
-    //Write first initial value out!
-//    for(auto it = m_pDynSys->m_SimBodies.begin(); it != m_pDynSys->m_SimBodies.end(); it++){
-//        LOG(m_pSimulationLog, "RigidBody Id: " << (*it)->m_id << std::endl;)
-//    }
-
-
-
     if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
         m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(),m_pDynSys->m_SimBodies);
     }
@@ -205,7 +199,6 @@ void SimulationManagerMPI::startSim() {
 
         // Do one iteration
         m_pTimestepper->doOneIteration();
-
 
         writeAllOutput();
 

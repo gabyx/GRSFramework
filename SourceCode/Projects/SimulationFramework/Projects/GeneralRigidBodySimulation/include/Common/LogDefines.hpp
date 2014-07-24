@@ -180,7 +180,7 @@
 
 /** @name State Ring Pool */
 /* @{ */
-#define LogToFileStateRingPool 1 ///< {0,1} Set if log is outputted to file or not.
+#define LogToFileStateRingPool 0 ///< {0,1} Set if log is outputted to file or not.
 /* @} */
 
 /** @name State Pool */

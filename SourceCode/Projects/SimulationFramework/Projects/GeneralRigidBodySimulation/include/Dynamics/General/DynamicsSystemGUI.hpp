@@ -96,7 +96,8 @@ public:
         std::unique_ptr<typename TParser::InitStatesModuleType >,
         std::unique_ptr<typename TParser::BodyModuleType >,
         std::unique_ptr<typename TParser::GeometryModuleType >,
-        std::unique_ptr<typename TParser::VisModuleType>
+        std::unique_ptr<typename TParser::VisModuleType>,
+        std::unique_ptr<typename TParser::MPIModuleType>
         >
     createParserModules(TParser * p) {
 
@@ -107,6 +108,7 @@ public:
         using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
         using BodyModuleType           = typename TParser::BodyModuleType ;
         using VisModuleType            = typename TParser::VisModuleType ;
+        using MPIModuleType            = typename TParser::MPIModuleType ;
 
 
         auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &m_SettingsRecorder,
@@ -121,7 +123,9 @@ public:
         auto es  = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &this->m_externalForces));
         auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&this->m_ContactParameterMap));
 
-        return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis));
+        auto mpi = std::unique_ptr<MPIModuleType>(nullptr);
+
+        return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));
     }
 
 public:
@@ -159,7 +163,8 @@ public:
         std::unique_ptr<typename TParser::InitStatesModuleType >,
         std::unique_ptr<typename TParser::BodyModuleType >,
         std::unique_ptr<typename TParser::GeometryModuleType >,
-        std::unique_ptr<typename TParser::VisModuleType>
+        std::unique_ptr<typename TParser::VisModuleType>,
+        std::unique_ptr<typename TParser::MPIModuleType>
         >
     createParserModules(TParser * p) {
 
@@ -170,6 +175,7 @@ public:
         using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
         using BodyModuleType           = typename TParser::BodyModuleType ;
         using VisModuleType            = typename TParser::VisModuleType ;
+        using MPIModuleType            = typename TParser::MPIModuleType ;
 
 
         auto sett = std::unique_ptr<SettingsModuleType >(nullptr);
@@ -182,7 +188,9 @@ public:
         auto es  = std::unique_ptr<ExternalForcesModuleType >(nullptr);
         auto con = std::unique_ptr<ContactParamModuleType>(nullptr);
 
-        return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis));
+        auto mpi = std::unique_ptr<MPIModuleType>(nullptr);
+
+        return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));
     }
 
     GlobalGeometryMapType m_globalGeometries;

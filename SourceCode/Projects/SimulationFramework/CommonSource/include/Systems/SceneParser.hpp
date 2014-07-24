@@ -68,6 +68,7 @@
     using ParserType = typename TParserTraits::ParserType; \
     using DynamicsSystemType = typename TParserTraits::DynamicsSystemType; \
     \
+    using LogType = typename TParserTraits::LogType; \
     using XMLNodeType = typename TParserTraits::XMLNodeType;\
     using XMLNodeItType = typename TParserTraits::XMLNodeItType;\
     using XMLAttributeType = typename TParserTraits::XMLAttributeType;\
@@ -83,20 +84,22 @@
     using InitStatesModuleType       = typename TParserTraits::InitStatesModuleType ;\
     using VisModuleType              = typename TParserTraits::VisModuleType;\
     using BodyModuleType             = typename TParserTraits::BodyModuleType;\
-    using ExternalForcesModuleType   = typename TParserTraits::ExternalForcesModuleType ;
+    using ExternalForcesModuleType   = typename TParserTraits::ExternalForcesModuleType ; \
+    \
+    using MPIModuleType              = typename TParserTraits::MPIModuleType;\
 
 
-#define DEFINE_MODULES_AS_FRIENDS( TParserTraits )  \
-protected: \
-    friend typename TParserTraits::SettingsModuleType;\
-    friend typename TParserTraits::ExternalForcesModuleType;\
-    friend typename TParserTraits::ContactParamModuleType;\
-    friend typename TParserTraits::InitStatesModuleType;\
-\
-    friend typename TParserTraits::BodyModuleType;\
-    friend typename TParserTraits::GeometryModuleType;\
-\
-    friend typename TParserTraits::VisModuleType;\
+//#define DEFINE_MODULES_AS_FRIENDS( TParserTraits )  \
+//protected: \
+//    friend typename TParserTraits::SettingsModuleType;\
+//    friend typename TParserTraits::ExternalForcesModuleType;\
+//    friend typename TParserTraits::ContactParamModuleType;\
+//    friend typename TParserTraits::InitStatesModuleType;\
+//\
+//    friend typename TParserTraits::BodyModuleType;\
+//    friend typename TParserTraits::GeometryModuleType;\
+//\
+//    friend typename TParserTraits::VisModuleType;\
 
 namespace ParserModules {
 
@@ -104,7 +107,7 @@ namespace ParserModules {
 /** Parses TimestepperSettings, InclusionSolverSettings, RecorderSettings */
 template<typename TParserTraits>
 class SettingsModule {
-private:
+protected:
 
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
     DEFINE_LAYOUT_CONFIG_TYPES
@@ -117,8 +120,8 @@ private:
     TimeStepperSettingsType     * m_timestepperSettings;
     InclusionSolverSettingsType * m_inclusionSettings;
 
+    LogType * m_pSimulationLog;
     ParserType * m_parser;
-
 public:
 
     void cleanUp(){}
@@ -128,11 +131,11 @@ public:
     }
 
     SettingsModule(ParserType * p, RecorderSettingsType * r, TimeStepperSettingsType * t, InclusionSolverSettingsType * i)
-        :m_parser(p),m_recorderSettings(r),m_timestepperSettings(t), m_inclusionSettings(i) {};
+        :m_parser(p),m_pSimulationLog(p->getSimLog()),m_recorderSettings(r),m_timestepperSettings(t), m_inclusionSettings(i) {};
 
     void parse(XMLNodeType sceneSettings) {
 
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== SettingsModule: parsing ======================================"<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "==== SettingsModule: parsing ======================================"<<std::endl;)
 
         XMLNodeType node;
         XMLAttributeType att;
@@ -140,7 +143,7 @@ public:
         XMLNodeType timestepNode = sceneSettings.child("TimeStepperSettings");
 
         if( m_timestepperSettings ) {
-            LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> TimeStepperSettings ..." << std::endl;)
+            LOGSCLEVEL1(m_pSimulationLog,"---> TimeStepperSettings ..." << std::endl;)
             CHECK_XMLNODE(timestepNode,"TimeStepperSettings");
 
             if(!Utilities::stringToType(m_timestepperSettings->m_deltaT, timestepNode.attribute("deltaT").value())) {
@@ -175,12 +178,12 @@ public:
                 }
             }
         } else {
-            SKIPLOGSC(m_parser->m_pSimulationLog, "---> SettingsModule: skipped TimeStepperSettings ..."<<std::endl;)
+            SKIPLOGSC(m_pSimulationLog, "---> SettingsModule: skipped TimeStepperSettings ..."<<std::endl;)
         }
 
 
         if(m_inclusionSettings) {
-            LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> InclusionSolverSettings ..." << std::endl;)
+            LOGSCLEVEL1(m_pSimulationLog,"---> InclusionSolverSettings ..." << std::endl;)
             auto node = timestepNode.child("InclusionSolverSettings");
             CHECK_XMLNODE(node,"InclusionSolverSettings");
 
@@ -271,12 +274,12 @@ public:
                 }
             }
         } else {
-            SKIPLOGSC(m_parser->m_pSimulationLog, "---> SettingsModule: skipped InclusionSolverSettings ..."<<std::endl;)
+            SKIPLOGSC(m_pSimulationLog, "---> SettingsModule: skipped InclusionSolverSettings ..."<<std::endl;)
         }
 
 
         if(m_recorderSettings) {
-            LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> RecorderSettings ..." << std::endl;)
+            LOGSCLEVEL1(m_pSimulationLog,"---> RecorderSettings ..." << std::endl;)
             node = sceneSettings.child("RecorderSettings");
             CHECK_XMLNODE(node,"RecorderSettings");
             std::string method = node.attribute("mode").value();
@@ -296,10 +299,16 @@ public:
             }
 
         } else {
-            SKIPLOGSC(m_parser->m_pSimulationLog, "---> SettingsModule: skipped RecorderSettings ..."<<std::endl;)
+            SKIPLOGSC(m_pSimulationLog, "---> SettingsModule: skipped RecorderSettings ..."<<std::endl;)
         }
 
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
+        this->parseOtherOptions(sceneSettings);
+
+        LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
+    }
+
+    virtual void parseOtherOptions(XMLNodeType sceneSettings) {
+        // This function does nothing!
     }
 };
 
@@ -313,6 +322,7 @@ private:
 
     using GlobalGeometryMapType = typename DynamicsSystemType::GlobalGeometryMapType;
 
+    LogType * m_pSimulationLog;
     ParserType * m_parser;
 
     using BodyListType = typename BodyModuleType::BodyListType;
@@ -326,12 +336,12 @@ private:
 public:
     void cleanUp(){}
 
-    GeometryModule(ParserType * p, GlobalGeometryMapType * g): m_parser(p),m_globalGeometries(g) {
+    GeometryModule(ParserType * p, GlobalGeometryMapType * g): m_parser(p),m_pSimulationLog(p->getSimLog()),m_globalGeometries(g) {
         ASSERTMSG(m_globalGeometries, "this should not be null")
     };
 
     void parseGlobalGeometries(XMLNodeType sceneSettings) {
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== GeometryModule: parsing (GlobalGeometry) ====================="<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "==== GeometryModule: parsing (GlobalGeometry) ====================="<<std::endl;)
 
         if(m_globalGeometries) {
             XMLNodeType globalGeom = sceneSettings.child("GlobalGeometries");
@@ -341,14 +351,14 @@ public:
                 }
             }
         } else {
-            SKIPLOGSC(m_parser->m_pSimulationLog, "---> GeometryModule: skipped GlobalGeometries ..."<<std::endl;)
+            SKIPLOGSC(m_pSimulationLog, "---> GeometryModule: skipped GlobalGeometries ..."<<std::endl;)
         }
 
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 
     void parseGeometry( XMLNodeType geometryNode,  BodyListType * bodyList, RigidBodyIdType startId) {
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> GeometryModule: parsing (BodyGeometry)"<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "---> GeometryModule: parsing (BodyGeometry)"<<std::endl;)
         XMLNodeType geom= geometryNode.first_child(); // get the first geometry (sphere, box , mesh ...)
         CHECK_XMLNODE(geom, "(Sphere/Box/Mesh/Halfspace)");
         parseGeometry_imp(geom, bodyList, startId);
@@ -392,9 +402,9 @@ private:
         }
 
         // Print some details:
-        LOGSCLEVEL2(m_parser->m_pSimulationLog,"\t---> Added GlobalGeomId: " << id;);
+        LOGSCLEVEL2(m_pSimulationLog,"\t---> Added GlobalGeomId: " << id;);
         if(2<=SCENEPARSER_LOGLEVEL){
-            PrintGeometryDetailsVisitor(m_parser->m_pSimulationLog, ret.first->second, ", ");
+            PrintGeometryDetailsVisitor(m_pSimulationLog, ret.first->second, ", ");
         }
     }
 
@@ -422,8 +432,8 @@ private:
                 Vector3 scale(radius,radius,radius);
                 for(auto & b : *m_bodyListGroup) {
                     b.m_scale = scale;
-                    LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_initState.m_id) << ", GeometryType: Sphere" << std::endl);
-                    LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t\t---> radius: " << radius << std::endl; );
+                    LOGSCLEVEL3(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_initState.m_id) << ", GeometryType: Sphere" << std::endl);
+                    LOGSCLEVEL3(m_pSimulationLog, "\t\t---> radius: " << radius << std::endl; );
                     if(b.m_body) {
                         b.m_body->m_geometry = std::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
                     }
@@ -491,8 +501,8 @@ private:
                     diffId = bodyIt->m_initState.m_id; // update current diffId;
 
                     bodyIt->m_scale = Vector3(radius,radius,radius);
-                    LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(bodyIt->m_initState.m_id)<< ", GeometryType: Sphere" << std::endl);
-                    LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t\t---> radius: " << radius << std::endl; );
+                    LOGSCLEVEL3(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(bodyIt->m_initState.m_id)<< ", GeometryType: Sphere" << std::endl);
+                    LOGSCLEVEL3(m_pSimulationLog, "\t\t---> radius: " << radius << std::endl; );
 
                     if(bodyIt->m_body) {
                         bodyIt->m_body->m_geometry = std::shared_ptr<SphereGeometry >(new SphereGeometry(radius));
@@ -671,7 +681,7 @@ private:
                     THROWEXCEPTION("---> String conversion in parseMeshGeometry: angleDegree failed");
                 }
                 if(writeToLog) {
-                    meshData->writeToLog(fileName.string(), m_parser->m_pSimulationLog);
+                    meshData->writeToLog(fileName.string(), m_pSimulationLog);
                 }
             }
 
@@ -723,7 +733,7 @@ private:
                 if(b.m_body){
                     b.m_body->m_geometry = it->second;
                     b.m_body->m_globalGeomId = id;
-                    LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body) << ", GlobalGeomId: " << id <<  std::endl);
+                    LOGSCLEVEL3(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body) << ", GlobalGeomId: " << id <<  std::endl);
                 }
             }
 
@@ -752,7 +762,7 @@ private:
                 if(b.m_body){
                     b.m_body->m_geometry = it->second;
                     b.m_body->m_globalGeomId = id;
-                    LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body) << ", GlobalGeomId: " << id <<  std::endl);
+                    LOGSCLEVEL3(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body) << ", GlobalGeomId: " << id <<  std::endl);
                 }
 
             }
@@ -805,7 +815,7 @@ private:
                 if(b.m_body){
                     b.m_body->m_geometry = it->second;
                     b.m_body->m_globalGeomId = id;
-                    LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body) << ", GlobalGeomId: " << id <<  std::endl);
+                    LOGSCLEVEL3(m_pSimulationLog, "\t---> Body id:" << RigidBodyId::getBodyIdString(b.m_body) << ", GlobalGeomId: " << id <<  std::endl);
                 }
             }
 
@@ -858,19 +868,19 @@ private:
 
     using RigidBodyType = typename DynamicsSystemType::RigidBodyType;
 
-    ParserType * m_parser;
+    LogType * m_pSimulationLog;
 
 public:
     void cleanUp(){}
 
-    ContactParamModule(ParserType * p, ContactParameterMapType * c): m_parser(p), m_contactParams(c) {};
+    ContactParamModule(ParserType * p, ContactParameterMapType * c): m_pSimulationLog(p->getSimLog()), m_contactParams(c) {};
 
     void parse(XMLNodeType sceneSettings) {
 
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> ContactParamModule: parsing =================================="<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "---> ContactParamModule: parsing =================================="<<std::endl;)
 
         if( !m_contactParams ) {
-            SKIPLOGSC(m_parser->m_pSimulationLog, "---> ContactParamModule: skipping ..."<<std::endl;)
+            SKIPLOGSC(m_pSimulationLog, "---> ContactParamModule: skipping ..."<<std::endl;)
             return;
         }
 
@@ -887,7 +897,7 @@ public:
             }
         }
 
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 
 private:
@@ -958,10 +968,10 @@ private:
             }
 
             if(stdMaterial) {
-                LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> Add ContactParameter standart"<<std::endl;);
+                LOGSCLEVEL2(m_pSimulationLog,"---> Add ContactParameter standart"<<std::endl;);
                 m_contactParams->setStandardValues(contactParameter);
             } else {
-                LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> Add ContactParameter standart of id="<<material1<<" to id="<<material2<<std::endl;);
+                LOGSCLEVEL2(m_pSimulationLog,"---> Add ContactParameter standart of id="<<material1<<" to id="<<material2<<std::endl;);
                 if(!m_contactParams->addContactParameter(material1,material2,contactParameter)) {
                     THROWEXCEPTION("---> Add ContactParameter failed");
                 }
@@ -987,16 +997,16 @@ private:
 
     using RigidBodyType = typename DynamicsSystemType::RigidBodyType;
 
-    ParserType * m_parser;
+    LogType * m_pSimulationLog;
 
 
 public:
     void cleanUp(){}
 
-    ExternalForcesModule(ParserType * p, ExternalForceListType * f): m_parser(p), m_forceList(f) {};
+    ExternalForcesModule(ParserType * p, ExternalForceListType * f): m_pSimulationLog(p->getSimLog()), m_forceList(f) {};
 
     void parse(XMLNodeType sceneSettings) {
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== ExternalForcesModule: parsing ================================"<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "==== ExternalForcesModule: parsing ================================"<<std::endl;)
 
         XMLNodeType externalForces = sceneSettings.child("ExternalForces");
         if(externalForces) {
@@ -1006,9 +1016,9 @@ public:
                 }
             }
         } else {
-            SKIPLOGSC(m_parser->m_pSimulationLog, "---> ExternalForcesModule: skipping ..."<<std::endl;)
+            SKIPLOGSC(m_pSimulationLog, "---> ExternalForcesModule: skipping ..."<<std::endl;)
         }
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 
 private:
@@ -1082,7 +1092,7 @@ private:
                     randomOn
                 )
             );
-            LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> added SpatialSphericalTimeRandomForceField ..."<<std::endl;);
+            LOGSCLEVEL2(m_pSimulationLog,"---> added SpatialSphericalTimeRandomForceField ..."<<std::endl;);
 
         } else if(type == "gravity") {
             PREC abs;
@@ -1098,7 +1108,7 @@ private:
 
             m_forceList->addExternalForceCalculation(new GravityForceField(dir));
 
-            LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> added GravityForceField ..."<<std::endl;);
+            LOGSCLEVEL2(m_pSimulationLog,"---> added GravityForceField ..."<<std::endl;);
         } else {
             THROWEXCEPTION("---> String conversion in parseForceField: type failed");
         }
@@ -1135,7 +1145,7 @@ private:
     RigidBodyStatesContainerType * m_initStates;
 
     SettingsModuleType * m_settings;
-    ParserType * m_parser;
+    LogType * m_pSimulationLog;
 
     using BodyListType = typename BodyModuleType::BodyListType;
     BodyListType * m_bodyListGroup;
@@ -1146,13 +1156,13 @@ public:
 
     void cleanUp(){}
 
-    InitStatesModule(ParserType * p, RigidBodyStatesContainerType * c, SettingsModuleType * s): m_parser(p),m_initStates(c), m_settings(s) {
+    InitStatesModule(ParserType * p, RigidBodyStatesContainerType * c, SettingsModuleType * s): m_pSimulationLog(p->getSimLog()),m_initStates(c), m_settings(s) {
         ASSERTMSG(m_initStates, "should not be null");
     };
 
 
     void parseGlobalInitialCondition( XMLNodeType sceneSettings) {
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> InitStatesModule: parsing (GlobalInitCondition) =============="<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "---> InitStatesModule: parsing (GlobalInitCondition) =============="<<std::endl;)
         XMLNodeType initCond = sceneSettings.child("GlobalInitialCondition");
         if(initCond) {
             double time = -1;
@@ -1186,13 +1196,13 @@ public:
                 m_settings->getTimeStepperSettings()->m_startTime = time;
             }
         }
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 
     void parseInitialCondition(XMLNodeType initCondNode, BodyListType * bodyList,
                                RigidBodyIdType startId, bool parseVelocity = true , bool addToInitList = true) {
 
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> InitStatesModule: parsing (BodyInitState)"<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "---> InitStatesModule: parsing (BodyInitState)"<<std::endl;)
         ASSERTMSG(bodyList, "Should not be null!")
 
         m_bodyListGroup = bodyList;
@@ -1247,10 +1257,10 @@ public:
 
         bool added = true;
         for(auto & b: *m_bodyListGroup) {
-            LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> InitState:" << b.m_initState.m_q.transpose()
+            LOGSCLEVEL3(m_pSimulationLog, "\t---> InitState:" << b.m_initState.m_q.transpose()
                             << " , " << b.m_initState.m_u.transpose()  << std::endl;)
             if(b.m_body) {
-                LOGSCLEVEL3(m_parser->m_pSimulationLog, "\t---> apply to body" << std::endl;)
+                LOGSCLEVEL3(m_pSimulationLog, "\t---> apply to body" << std::endl;)
                 b.m_body->template applyBodyState<true>(b.m_initState);
             }
             if(addToInitList){
@@ -1259,7 +1269,7 @@ public:
         }
         if(!added && addToInitList) {THROWEXCEPTION("Could not add init state to m_initStates!, some bodies exist already in map!");};
 
-        //LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
+        //LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 
 
@@ -1267,7 +1277,7 @@ private:
     void setupInitialConditionBodiesFromFile_imp(boost::filesystem::path relpath, double &time , short which ) {
 
         InitialConditionBodies::setupInitialConditionBodiesFromFile(relpath,*m_initStates,time,true,true,which);
-        LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> Found time: "<< time << " in " << relpath << std::endl;);
+        LOGSCLEVEL2(m_pSimulationLog,"---> Found time: "<< time << " in " << relpath << std::endl;);
 
     }
 
@@ -1366,7 +1376,7 @@ private:
         for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode){
 
             if(bodyIt==itEnd) {
-                LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionTransforms: You specified to many transforms, -> neglecting ..."<<std::endl;);
+                LOGSCLEVEL2(m_pSimulationLog,"---> InitialPositionTransforms: You specified to many transforms, -> neglecting ..."<<std::endl;);
                 break;
             } else if(valueCounter != bodyIt->m_initState.m_id - m_startIdGroup) {
                // this value does not correspond to the linear offset from the startId
@@ -1375,7 +1385,7 @@ private:
                     continue;
                 }else{
                     apply = false;
-                    LOGSCLEVEL3(m_parser->m_pSimulationLog,"---> parsing last state ... "<<std::endl;);
+                    LOGSCLEVEL3(m_pSimulationLog,"---> parsing last state ... "<<std::endl;);
                 }
             }
 
@@ -1439,7 +1449,7 @@ private:
         }
 
         if(valueCounter < m_bodyListGroup->size()) {
-            LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialPositionTransforms: You specified to little transforms, -> applying last to all remainig bodies ..."<<std::endl;);
+            LOGSCLEVEL2(m_pSimulationLog,"---> InitialPositionTransforms: You specified to little transforms, -> applying last to all remainig bodies ..."<<std::endl;);
             auto itEnd = m_bodyListGroup->end();
             for(; bodyIt !=  itEnd; ++bodyIt) {
                 bodyIt->m_initState.m_q.template head<3>() = I_r_IK;
@@ -1463,7 +1473,7 @@ private:
         for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode){
 
             if(bodyIt==itEnd) {
-                LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialVelocityTransRot: You specified to many velocities (size: " <<valueCounter <<"), -> neglecting ..."<<std::endl;);
+                LOGSCLEVEL2(m_pSimulationLog,"---> InitialVelocityTransRot: You specified to many velocities (size: " <<valueCounter <<"), -> neglecting ..."<<std::endl;);
                 break;
             } else if(valueCounter != bodyIt->m_initState.m_id - m_startIdGroup) {
                 // this value does not correspond to the linear offset from the startId
@@ -1472,7 +1482,7 @@ private:
                     continue;
                 }else{
                     apply = false;
-                    LOGSCLEVEL3(m_parser->m_pSimulationLog,"---> parsing last state ... "<<std::endl;);
+                    LOGSCLEVEL3(m_pSimulationLog,"---> parsing last state ... "<<std::endl;);
                 }
             }
 
@@ -1505,7 +1515,7 @@ private:
         }
 
         if(valueCounter < m_bodyListGroup->size()) {
-            LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> InitialVelocityTransRot: You specified to little velocity states (size: "<<valueCounter <<") -> applying last to all remainig bodies ..."<<std::endl;);
+            LOGSCLEVEL2(m_pSimulationLog,"---> InitialVelocityTransRot: You specified to little velocity states (size: "<<valueCounter <<") -> applying last to all remainig bodies ..."<<std::endl;);
             for(; bodyIt !=  itEnd; ++bodyIt) {
                 bodyIt->m_initState.m_u.template head<3>() = transDir*vel;
                 bodyIt->m_initState.m_u.template tail<3>() = rotDir*rot;
@@ -1549,7 +1559,7 @@ private:
     RigidBodySimContainerType    * m_pSimBodies = nullptr;
     RigidBodyStaticContainerType * m_pBodies    = nullptr;
 
-    ParserType * m_parser;
+    LogType * m_pSimulationLog;
 
 public:
 
@@ -1562,16 +1572,16 @@ public:
 
     BodyModule(ParserType * p, GeometryModuleType * g,  InitStatesModuleType * is, VisModuleType * i,
                RigidBodySimContainerType * simBodies, RigidBodyStaticContainerType * bodies )
-        : m_parser(p), m_pGeomMod(g), m_pVisMod(i), m_pInitStatesMod(is), m_pSimBodies(simBodies), m_pBodies(bodies) {
+        : m_pSimulationLog(p->getSimLog()), m_pGeomMod(g), m_pVisMod(i), m_pInitStatesMod(is), m_pSimBodies(simBodies), m_pBodies(bodies) {
             ASSERTMSG(is,"should not be null");
             ASSERTMSG(g,"should not be null");
         };
 
     void parseModuleOptions(XMLNodeType & sceneObjects){
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== BodyModule: parsing (ModuleOptions) ==========================="<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "==== BodyModule: parsing (ModuleOptions) ==========================="<<std::endl;)
 
         if( !m_parsingOptions.m_bodyIdRange.empty()){
-            LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> skipping because bodyIdRange is already set!" <<std::endl;)
+            LOGSCLEVEL1(m_pSimulationLog, "---> skipping because bodyIdRange is already set!" <<std::endl;)
             return;
         }
 
@@ -1590,11 +1600,11 @@ public:
                 m_parsingOptions.m_bodyIdRange = s;
 
 
-                LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Overwriten SelectiveIdRange with Set: [")
+                LOGSCLEVEL2(m_pSimulationLog, "---> Overwriten SelectiveIdRange with Set: [")
                 for(auto & id : s){
-                   LOGSCLEVEL2(m_parser->m_pSimulationLog, RigidBodyId::getBodyIdString(id) << ",")
+                   LOGSCLEVEL2(m_pSimulationLog, RigidBodyId::getBodyIdString(id) << ",")
                 }
-                LOGSCLEVEL2(m_parser->m_pSimulationLog, " linear: " << m_parsingOptions.m_bodyIdRange.isLinear() <<" ]")
+                LOGSCLEVEL2(m_pSimulationLog, " linear: " << m_parsingOptions.m_bodyIdRange.isLinear() <<" ]")
             }else{
                 n = selectIds.child("Range");
                 using SetType = std::pair<RigidBodyIdType,RigidBodyIdType>;
@@ -1605,7 +1615,7 @@ public:
                 }
                 // Overwrite
                 m_parsingOptions.m_bodyIdRange = r;
-                LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Overwrite SelectiveIdRange with Range: [" << RigidBodyId::getBodyIdString(r.first)
+                LOGSCLEVEL2(m_pSimulationLog, "---> Overwrite SelectiveIdRange with Range: [" << RigidBodyId::getBodyIdString(r.first)
                              <<", " << RigidBodyId::getBodyIdString(r.second) <<", linear: " << m_parsingOptions.m_bodyIdRange.isLinear() <<"]"<<std::endl;)
 
             }
@@ -1616,15 +1626,15 @@ public:
         }
 
 
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 
 
 
     void parse(XMLNodeType & sceneObjects){
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==== BodyModule: parsing (SceneObjects) ============================"<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "==== BodyModule: parsing (SceneObjects) ============================"<<std::endl;)
 
-        LOGSCLEVEL1( m_parser->m_pSimulationLog, "---> BodyModule Options: " <<std::endl
+        LOGSCLEVEL1( m_pSimulationLog, "---> BodyModule Options: " <<std::endl
                         <<"\t parse simulated bodies:"<<m_parsingOptions.m_parseSimBodies << std::endl
                         <<"\t parse static bodies:"<<m_parsingOptions.m_parseStaticBodies << std::endl
                         <<"\t parse all bodies in group with disabled selective ids:"<<m_parsingOptions.m_parseAllBodiesNonSelGroup << std::endl
@@ -1634,10 +1644,18 @@ public:
         // Init startRangeIterator
         m_startRangeIdIt = m_parsingOptions.m_bodyIdRange.begin();
 
+
+        m_groupIdToNBodies.clear();
+        m_bodyListGroup.clear();
+        m_nSimBodies = 0;
+        m_nStaticBodies = 0;
+        m_nBodies = 0;
+        m_nSpecifiedTotalSimBodies = 0;
+
         for ( XMLNodeType & node  : sceneObjects.children("RigidBodies")) {
                 parseRigidBodies(node);
         }
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================================================="<<std::endl;)
+        LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 
 
@@ -1656,7 +1674,7 @@ private:
 
     void parseRigidBodies( XMLNodeType  rigidbodies ) {
 
-        LOGSCLEVEL1(m_parser->m_pSimulationLog,"==================================" << std::endl <<
+        LOGSCLEVEL1(m_pSimulationLog,"==================================" << std::endl <<
                     "---> Parse RigidBodies, group name: "<< rigidbodies.attribute("name").value() << std::endl;);
 
 
@@ -1705,7 +1723,7 @@ private:
         }else{
             currGroupIdToNBodies = &(it->second);
             startBodyNr = *currGroupIdToNBodies;
-            LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Found Group Nr: " <<groupId<< std::endl;)
+            LOGSCLEVEL2(m_pSimulationLog, "---> Found Group Nr: " <<groupId<< std::endl;)
         }
 
         // Skip group if we can:
@@ -1714,16 +1732,21 @@ private:
             || ( m_eBodiesState == RigidBodyType::BodyMode::STATIC  && !m_parsingOptions.m_parseStaticBodies)
             || (m_parseSelectiveBodyIds && hasSelectiveFlag && m_startRangeIdIt== m_parsingOptions.m_bodyIdRange.end()) // out of m_bodyIdRange, no more id's which could be parsed in
              ) {
-            LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> Skip Group" << std::endl;)
+            LOGSCLEVEL2(m_pSimulationLog, "---> Skip Group" << std::endl;)
             // update the number of bodies in this group and skip this group xml node
+
             *currGroupIdToNBodies += instances;
+            if(m_eBodiesState == RigidBodyType::BodyMode::SIMULATED ){
+                m_nSpecifiedSimBodies += instances;
+            }
+
             return;
         }
 
         // Full id range for this group would be [m_starBodyId , endIdGroup ]
         m_startIdGroup = RigidBodyId::makeId(groupId,startBodyNr);
         RigidBodyIdType endIdGroup = RigidBodyId::makeId(groupId, startBodyNr+instances-1);
-        LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> Group range: [" << RigidBodyId::getBodyIdString(m_startIdGroup)
+        LOGSCLEVEL2(m_pSimulationLog,"---> Group range: [" << RigidBodyId::getBodyIdString(m_startIdGroup)
                              << "," << RigidBodyId::getBodyIdString(endIdGroup) << "]" << std::endl;)
 
         typename BodyRangeType::iterator bodyIdIt;
@@ -1736,10 +1759,10 @@ private:
 
             if( m_startRangeIdIt == m_bodyIdRangePtr->end() || *m_startRangeIdIt > endIdGroup){ // no ids in the range
                 *currGroupIdToNBodies += instances;
-                LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> No ids in range: skip" << std::endl;)
+                LOGSCLEVEL2(m_pSimulationLog,"---> No ids in range: skip" << std::endl;)
                 return;
             }
-            LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> Selective range startId: " <<
+            LOGSCLEVEL2(m_pSimulationLog,"---> Selective range startId: " <<
                                   RigidBodyId::getBodyIdString(*m_startRangeIdIt) << std::endl;)
 
             bodyIdIt = m_startRangeIdIt;
@@ -1750,11 +1773,14 @@ private:
             m_bodyIdRangePtr = &m_bodyIdRangeTmp;
             m_bodyIdRangeTmp = std::make_pair(m_startIdGroup,endIdGroup+1);
             bodyIdIt = m_bodyIdRangePtr->begin();
-            LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> overwrite selective range... " << std::endl;)
+            LOGSCLEVEL2(m_pSimulationLog,"---> overwrite selective range... " << std::endl;)
         }
 
-        //update groupIds
+        //update groupIds and specified sim body counter
         *currGroupIdToNBodies += instances;
+        if(m_eBodiesState == RigidBodyType::BodyMode::SIMULATED ){
+                m_nSpecifiedSimBodies += instances;
+        }
 
         // Adding bodies in the range =============================
         // iterator bodyRange till the id is > endIdGroup or we are out of the bodyIdRange
@@ -1767,7 +1793,7 @@ private:
 
         for( /* nothing*/ ; (bodyIdIt != itEnd) && ( *bodyIdIt <= endIdGroup); ++bodyIdIt )
         {
-            LOGSCLEVEL3(m_parser->m_pSimulationLog,"---> Added RigidBody Instance: "<<RigidBodyId::getBodyIdString(*bodyIdIt)<<std::endl);
+            LOGSCLEVEL3(m_pSimulationLog,"---> Added RigidBody Instance: "<<RigidBodyId::getBodyIdString(*bodyIdIt)<<std::endl);
             // Push new body
             if(   m_parsingOptions.m_allocateSimBodies && m_eBodiesState == RigidBodyType::BodyMode::SIMULATED
                || m_parsingOptions.m_allocateStaticBodies && m_eBodiesState == RigidBodyType::BodyMode::STATIC ){
@@ -1782,7 +1808,7 @@ private:
         // Only update start range for selective parsing;
         if(updateStartRange){ m_startRangeIdIt = bodyIdIt;}
 
-        LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> Added "<<m_parsedInstancesGroup<<" RigidBody Instances..."<<std::endl;);
+        LOGSCLEVEL2(m_pSimulationLog,"---> Added "<<m_parsedInstancesGroup<<" RigidBody Instances..."<<std::endl;);
         // =======================================================
 
         // Parse Geometry
@@ -1797,15 +1823,16 @@ private:
 
         //Copy the pointers!
         if(m_eBodiesState == RigidBodyType::BodyMode::SIMULATED) {
-            LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> Copy Simulated RigidBody References to DynamicSystem ..."<<std::endl;);
+            LOGSCLEVEL1(m_pSimulationLog,"---> Copy Simulated RigidBody References to DynamicSystem ..."<<std::endl;);
             bool added = addAllBodies(m_pSimBodies);
             if(!added) {THROWEXCEPTION("Could not add body to m_SimBodies!, some bodies exist already in map!");};
             m_nSimBodies += m_parsedInstancesGroup;
             m_nBodies += m_parsedInstancesGroup;
         } else if(m_eBodiesState == RigidBodyType::BodyMode::STATIC) {
-            LOGSCLEVEL1(m_parser->m_pSimulationLog,"---> Copy Static RigidBody References to DynamicSystem ..."<<std::endl;);
+            LOGSCLEVEL1(m_pSimulationLog,"---> Copy Static RigidBody References to DynamicSystem ..."<<std::endl;);
             bool added = addAllBodies(m_pBodies);
             if(!added) {THROWEXCEPTION("Could not add body to m_Bodies!, some bodies exist already in map!");};
+            m_nStaticBodies += m_parsedInstancesGroup;
             m_nBodies += m_parsedInstancesGroup;
         } else {
             THROWEXCEPTION("---> Adding only simulated and not simulated objects supported!");
@@ -1818,11 +1845,11 @@ private:
         // ===============================================================================================================
 
 
-        LOGSCLEVEL1(m_parser->m_pSimulationLog, "==================================" << std::endl;);
+        LOGSCLEVEL1(m_pSimulationLog, "==================================" << std::endl;);
     }
 
     void parseDynamicProperties( XMLNodeType  dynProp) {
-        LOGSCLEVEL2(m_parser->m_pSimulationLog,"---> Parse DynamicProperties ..."<<std::endl;);
+        LOGSCLEVEL2(m_pSimulationLog,"---> Parse DynamicProperties ..."<<std::endl;);
 
         // DynamicState has already been parsed for the group!
         if(m_eBodiesState == RigidBodyType::BodyMode::SIMULATED) {
@@ -1958,7 +1985,13 @@ private:
     RigidBodyIdType m_startIdGroup;                  ///< Start id of the current group smaller or equal to *m_startRangeIdIt
 
 
-    unsigned int m_nSimBodies, m_nBodies;
+    // Parsed counts of bodies
+    unsigned int m_nSimBodies
+    unsigned int m_nBodies;
+    unsigned int m_nStaticBodies;
+    // Spcified amount of bodies in the Scene File
+    unsigned int m_nSpecifiedSimBodies;
+
     typedef std::unordered_map<unsigned int,unsigned int> GroupToNBodyType;
     GroupToNBodyType m_groupIdToNBodies;
     unsigned int m_globalMaxGroupId; // Group Id used to build a unique id!
@@ -1993,6 +2026,25 @@ private:
 };
 
 
+template<typename TParserTraits>
+class MPIModuleDummy {
+private:
+    DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
+public:
+    MPIModuleDummy(ParserType * p, BodyModuleType * b) {};
+    void cleanUp(){}
+    template<typename... Args>
+    void parse(Args&&... args) {
+         ERRORMSG("This is the standard MPIModuleDummy which does nothing! This function should not be called!");
+    }
+    template<typename... Args>
+    void parseSceneSettingsPost(Args&&... args) {
+         ERRORMSG("This is the standard MPIModuleDummy which does nothing! This function should not be called!");
+    }
+};
+
+
+
 };
 
 
@@ -2008,6 +2060,8 @@ template<typename TSceneParser, typename TDynamicsSystem>
 struct SceneParserBaseTraits{
     using ParserType = TSceneParser;
     using DynamicsSystemType = TDynamicsSystem;
+
+    using LogType = Logging::Log;
 
     using XMLNodeType = pugi::xml_node;
     using XMLNodeItType = pugi::xml_node_iterator;
@@ -2032,37 +2086,45 @@ struct SceneParserTraits: public SceneParserBaseTraits<TSceneParser,TDynamicsSys
 
     using VisModuleType              = ParserModules::VisModuleDummy<SceneParserTraits>;
 
+    using MPIModuleType              = ParserModules::MPIModuleDummy<SceneParserTraits>;
 };
 
 template<typename TDynamicsSystem, template<typename P, typename D> class TParserTraits = SceneParserTraits, typename TDerived = void >
 class SceneParser {
 public:
 
-    /** Modules defintions
-    * This type traits define the module types of the derived class if any exist , otherwise it defines the standart module types
-    */
-    /** This type is injected into the modules, we use this class instead of the derived one, due to the fact that we cannot redefine */
-    using DerivedType = typename std::conditional< std::is_same<TDerived,void>::value, SceneParser, SceneParser>::type;
+    using DerivedType = typename std::conditional< std::is_same<TDerived,void>::value, SceneParser, TDerived>::type;
 
-    using ParserTraits = TParserTraits<DerivedType, TDynamicsSystem >;
+    /** Modules defintions
+    * This type traits define the module types from TParserTraits
+    * SceneParser is injected into the modules, we use this class instead of the derived one
+    */
+    using ParserForModulesType = SceneParser;
+    using ParserTraits = TParserTraits<ParserForModulesType, TDynamicsSystem >;
     DEFINE_PARSER_TYPE_TRAITS(ParserTraits);
 
-    DEFINE_MODULES_AS_FRIENDS(ParserTraits)
 
     using BodyModuleOptionsType = typename BodyModuleType::OptionsType;
 
 public:
 
-    SceneParser( std::shared_ptr<DynamicsSystemType> pDynSys):m_pDynSys(pDynSys) {
-        // Get all Modules from DynamicsSystem
-        std::tie(m_pSettingsModule, m_pExternalForcesModule, m_pContactParamModule,m_pInitStatesModule, m_pBodyModule, m_pGeometryModule, m_pVisModule)
-            = m_pDynSys->template createParserModules<DerivedType>( static_cast<DerivedType*>(this));
+    template<typename ModuleGeneratorType>
+    SceneParser(ModuleGeneratorType & moduleGen){
 
-        // Set log
         m_pSimulationLog = nullptr;
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
         ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
-        setStandartValues();
+
+        // Get all Modules from the Generator
+        std::tie(m_pSettingsModule,
+                 m_pExternalForcesModule,
+                 m_pContactParamModule,
+                 m_pInitStatesModule,
+                 m_pBodyModule,
+                 m_pGeometryModule,
+                 m_pVisModule,
+                 m_pMPIModule)
+            = moduleGen.template createParserModules<ParserForModulesType>( static_cast<ParserForModulesType*>(this));
 
     }
 
@@ -2119,6 +2181,8 @@ public:
             THROWEXCEPTION("---> The file ' " + file.string() + "' does not exist!");
         }
     }
+
+    LogType * getSimLog(){return m_pSimulationLog;}
 
 protected:
 
@@ -2228,6 +2292,10 @@ protected:
         if(m_pVisModule){
             m_pVisModule->parseSceneSettingsPost(sceneSettings);
         }
+
+        if(m_pMPIModule){
+            m_pMPIModule->parseSceneSettingsPost(sceneSettings);
+        }
     }
 
     virtual void parseSceneObjects( XMLNodeType sceneObjects) {
@@ -2236,11 +2304,9 @@ protected:
         }
     }
 
-    SceneParserOptions m_parsingOptions;
-
-    void setStandartValues() {}
-
     std::shared_ptr<DynamicsSystemType> m_pDynSys;
+
+    SceneParserOptions m_parsingOptions;
 
     boost::filesystem::path m_currentParseFilePath;
     boost::filesystem::path m_currentParseFileDir;
@@ -2250,8 +2316,7 @@ protected:
     pugi::xml_node m_xmlRootNode;
 
     /** Log */
-    Logging::Log * m_pSimulationLog;
-    std::stringstream logstream;
+    LogType * m_pSimulationLog;
 
     /** Modules */
     std::unique_ptr< SettingsModuleType>       m_pSettingsModule;
@@ -2263,6 +2328,8 @@ protected:
     std::unique_ptr< InitStatesModuleType>     m_pInitStatesModule;
 
     std::unique_ptr< VisModuleType>            m_pVisModule;
+
+    std::unique_ptr< MPIModuleType>            m_pMPIModule;
 };
 
 

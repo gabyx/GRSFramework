@@ -70,7 +70,7 @@ private:
 */
 /** @{ */
 
-class CollisionSolver {
+class CollisionSolverMPI {
 public:
 
     DEFINE_COLLISION_SOLVER_CONFIG_TYPES
@@ -82,9 +82,9 @@ public:
     * @param SimBodies A reference to the list of all simulated bodies.
     * @param Bodies A reference to the list all not simulated bodies.
     */
-    CollisionSolver(std::shared_ptr< DynamicsSystemType> pDynSys);
+    CollisionSolverMPI(std::shared_ptr< DynamicsSystemType> pDynSys);
 
-    ~CollisionSolver();
+    ~CollisionSolverMPI();
 
     void initializeLog(Logging::Log* pSolverLog);                          ///< Initializes an Ogre::Log.
     void reset();                                                       ///< Resets the whole Solver. This function is called at the start of the simulation.

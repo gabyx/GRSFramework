@@ -49,10 +49,6 @@ public:
     DynamicsSystemBase();
     ~DynamicsSystemBase();
 
-    // General related variables
-    double m_gravity;
-    Vector3 m_gravityDir;
-
     ContactParameterMapType m_ContactParameterMap;
     ExternalForceListType m_externalForces; ///< Special class of function objects
 
@@ -113,7 +109,6 @@ protected:
 
     // Log
     Logging::Log*	m_pSolverLog;
-    std::stringstream logstream;
 };
 
 
@@ -130,6 +125,7 @@ inline void DynamicsSystemBase::applySimBodiesToDynamicsState(DynamicsState & st
 class DynamicsSystem : public DynamicsSystemBase {
 public:
 
+
     template<typename TParser>
     std::tuple< std::unique_ptr<typename TParser::SettingsModuleType >,
         std::unique_ptr<typename TParser::ExternalForcesModuleType >,
@@ -137,7 +133,8 @@ public:
         std::unique_ptr<typename TParser::InitStatesModuleType >,
         std::unique_ptr<typename TParser::BodyModuleType >,
         std::unique_ptr<typename TParser::GeometryModuleType >,
-        std::unique_ptr<typename TParser::VisModuleType>
+        std::unique_ptr<typename TParser::VisModuleType>,
+        std::unique_ptr<typename TParser::MPIModuleType>
         >
     createParserModules(TParser * p) {
 
@@ -148,7 +145,7 @@ public:
         using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
         using BodyModuleType           = typename TParser::BodyModuleType ;
         using VisModuleType            = typename TParser::VisModuleType ;
-
+        using MPIModuleType            = typename TParser::MPIModuleType ;
 
         auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &this->m_SettingsRecorder,
                     &this->m_SettingsTimestepper,
@@ -162,7 +159,9 @@ public:
         auto es  = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &this->m_externalForces));
         auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&this->m_ContactParameterMap));
 
-        return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis));
+        auto mpi = std::unique_ptr<MPIModuleType>(nullptr);
+
+        return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));
     }
 };
 

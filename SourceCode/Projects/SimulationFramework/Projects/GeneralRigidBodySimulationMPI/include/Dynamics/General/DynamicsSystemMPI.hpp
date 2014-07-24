@@ -19,22 +19,17 @@
 #include InclusionSolverSettings_INCLUDE_FILE
 #include "TimeStepperSettings.hpp"
 
+#include "MPITopologyBuilderSettings.hpp"
 
 
-
-class DynamicsSystem {
+class DynamicsSystemMPI {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-
     DynamicsSystem();
     ~DynamicsSystem();
-
-    // General related variables
-    double m_gravity;
-    Vector3 m_gravityDir;
 
     ContactParameterMap m_ContactParameterMap;
 
@@ -103,15 +98,54 @@ protected:
     TimeStepperSettings m_SettingsTimestepper;
     InclusionSolverSettingsType m_SettingsInclusionSolver;
 
+    TopologyBuilderSettings m_TopologyBuilderSettings;
 
     //Function
     //This is a minimal update of F, no checking if constant values are correct
     void updateFMatrix(const Quaternion & q, Matrix43 & F_i);
 
-
     // Log
     Logging::Log*	m_pSolverLog;
-    std::stringstream logstream;
+
+public:
+
+    template<typename TParser>
+    std::tuple< std::unique_ptr<typename TParser::SettingsModuleType >,
+        std::unique_ptr<typename TParser::ExternalForcesModuleType >,
+        std::unique_ptr<typename TParser::ContactParamModuleType>,
+        std::unique_ptr<typename TParser::InitStatesModuleType >,
+        std::unique_ptr<typename TParser::BodyModuleType >,
+        std::unique_ptr<typename TParser::GeometryModuleType >,
+        std::unique_ptr<typename TParser::VisModuleType>,
+        std::unique_ptr<typename TParser::MPIModuleType>
+        >
+    createParserModules(TParser * p) {
+
+        using SettingsModuleType       = typename TParser::SettingsModuleType ;
+        using ContactParamModuleType   = typename TParser::ContactParamModuleType;
+        using GeometryModuleType       = typename TParser::GeometryModuleType ;
+        using InitStatesModuleType     = typename TParser::InitStatesModuleType ;
+        using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
+        using BodyModuleType           = typename TParser::BodyModuleType ;
+        using VisModuleType            = typename TParser::VisModuleType ;
+        using MPIModuleType            = typename TParser::MPIModuleType ;
+
+        auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &this->m_SettingsRecorder,
+                    &this->m_SettingsTimestepper,
+                    &this->m_SettingsInclusionSolver));
+
+        auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &this->m_globalGeometries) );
+
+        auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&this->m_bodiesInitStates, sett.get()));
+        auto vis = std::unique_ptr<VisModuleType>(nullptr); // no visualization needed
+        auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , &this->m_SimBodies, &this->m_Bodies )) ;
+        auto es  = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &this->m_externalForces));
+        auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&this->m_ContactParameterMap));
+
+        auto mpi = std::unique_ptr<MPIModuleType>(p,bm.get(),&m_TopologyBuilderSettings);
+
+        return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));
+    }
 
 };
 

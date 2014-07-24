@@ -6,10 +6,7 @@
 #include "CommonFunctions.hpp"
 #include "RigidBodyFunctions.hpp"
 
-DynamicsSystem::DynamicsSystem(){
-    // set reasonable standart values:
-    m_gravity = 9.81;
-    m_gravityDir = Vector3(0,0,-1);
+DynamicsSystemMPI::DynamicsSystemMPI(){
 
     m_currentTotEnergy = 0;
     m_currentPotEnergy= 0;
@@ -20,7 +17,7 @@ DynamicsSystem::DynamicsSystem(){
 }
 
 
-DynamicsSystem::~DynamicsSystem() {
+DynamicsSystemMPI::~DynamicsSystemMPI() {
     DECONSTRUCTOR_MESSAGE
 
     // Delete all RigidBodys
@@ -31,50 +28,50 @@ DynamicsSystem::~DynamicsSystem() {
 };
 
 
-void DynamicsSystem::getSettings(RecorderSettings & settingsRecorder) const {
+void DynamicsSystemMPI::getSettings(RecorderSettings & settingsRecorder) const {
     settingsRecorder = m_SettingsRecorder;
 }
-void DynamicsSystem::setSettings(const RecorderSettings & settingsRecorder) {
+void DynamicsSystemMPI::setSettings(const RecorderSettings & settingsRecorder) {
     m_SettingsRecorder = settingsRecorder;
 }
-void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper) const {
+void DynamicsSystemMPI::getSettings(TimeStepperSettings &settingsTimestepper) const {
     settingsTimestepper = m_SettingsTimestepper;
 }
-void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper){
+void DynamicsSystemMPI::setSettings(const TimeStepperSettings &settingsTimestepper){
     m_SettingsTimestepper = settingsTimestepper;
 }
-void DynamicsSystem::getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const {
+void DynamicsSystemMPI::getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const {
     settingsInclusionSolver = m_SettingsInclusionSolver;
 }
-void DynamicsSystem::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
+void DynamicsSystemMPI::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
     m_SettingsInclusionSolver = settingsInclusionSolver;
 }
-void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper,
+void DynamicsSystemMPI::getSettings(TimeStepperSettings &settingsTimestepper,
                                  InclusionSolverSettingsType &settingsInclusionSolver) const {
     settingsTimestepper = m_SettingsTimestepper;
     settingsInclusionSolver = m_SettingsInclusionSolver;
 }
-void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper,
+void DynamicsSystemMPI::setSettings(const TimeStepperSettings &settingsTimestepper,
                                  const InclusionSolverSettingsType &settingsInclusionSolver) {
     m_SettingsTimestepper = settingsTimestepper;
     m_SettingsInclusionSolver = settingsInclusionSolver;
 }
 
 
-void DynamicsSystem::initializeLog(Logging::Log* pLog) {
+void DynamicsSystemMPI::initializeLog(Logging::Log* pLog) {
     m_pSolverLog = pLog;
     ASSERTMSG(m_pSolverLog != nullptr, "Logging::Log: nullptr!");
 }
 
 
-void DynamicsSystem::reset(){
+void DynamicsSystemMPI::reset(){
     //reset all external forces
     m_externalForces.reset();
     initMassMatrixAndHTerm();
 }
 
 
-void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
+void DynamicsSystemMPI::doFirstHalfTimeStep(PREC ts, PREC timestep) {
     using namespace std;
      #if CoutLevelSolver>1
     LOG(m_pSolverLog, "---> doFirstHalfTimeStep(): "<<std::endl;)
@@ -141,7 +138,7 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 }
 
 
-void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
+void DynamicsSystemMPI::doSecondHalfTimeStep(PREC te, PREC timestep) {
     using namespace std;
      #if CoutLevelSolver>1
     LOG(m_pSolverLog, "---> doSecondHalfTimeStep(): "<<std::endl;)
@@ -204,7 +201,7 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
 
 }
 
-void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
+void DynamicsSystemMPI::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
     static Matrix33 a_tilde = Matrix33::Zero();
 
     F_i.block<1,3>(0,0) = -0.5 * q.tail<3>();
@@ -213,12 +210,11 @@ void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
 }
 
 
-void DynamicsSystem::initMassMatrixAndHTerm() {
+void DynamicsSystemMPI::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
 
-    Vector3 gravity = m_gravity * m_gravityDir;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
-        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt, gravity);
+        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt);
     }
 }

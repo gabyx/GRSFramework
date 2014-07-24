@@ -15,14 +15,13 @@
 
 
 #define CollisionSolver_INCLUDE_FILE            "CollisionSolverMPI.hpp"
-class CollisionSolver;
+class CollisionSolverMPI;
 
 #define DynamicsSystem_INCLUDE_FILE             "DynamicsSystemMPI.hpp"
-class DynamicsSystem;
+class DynamicsSystemMPI;
 
 #define InclusionSolver_INCLUDE_FILE            "InclusionSolverCONoGMPI.hpp"
-//class InclusionSolverCO;
-class InclusionSolverCONoG;
+class InclusionSolverCONoGMPI;
 
 #define RigidBody_INCLUDE_FILE                  "RigidBodyMPI.hpp"
 class RigidBodyBaseMPI;
@@ -31,10 +30,10 @@ class RigidBodyBaseMPI;
 class RigidBodySolverDataCONoGMPI;
 
 #define TimeStepper_INCLUDE_FILE                "MoreauTimeStepperMPI.hpp"
-class MoreauTimeStepper;
+class MoreauTimeStepperMPI;
 
 #define InclusionSolverSettings_INCLUDE_FILE    "InclusionSolverSettingsMPI.hpp"
-class InclusionSolverSettings;
+class InclusionSolverSettingsMPI;
 
 //Try to make framework settings simpler:
 struct GlobalConfigs{
@@ -42,16 +41,16 @@ struct GlobalConfigs{
     // Global definitions used below
     struct MyConfigs{
 
-        typedef RigidBodyBaseMPI        RigidBodyType;
+        typedef RigidBodyBaseMPI           RigidBodyType;
 
-        typedef DynamicsSystem          DynamicsSystemType;
+        typedef DynamicsSystemMPI          DynamicsSystemType;
 
-        typedef MoreauTimeStepper       TimeStepperType;
+        typedef MoreauTimeStepperMPI       TimeStepperType;
 
-        typedef CollisionSolver         CollisionSolverType;
+        typedef CollisionSolverMPI         CollisionSolverType;
 
-        typedef InclusionSolverCONoG    InclusionSolverType;
-        typedef InclusionSolverSettings InclusionSolverSettingsType;
+        typedef InclusionSolverCONoGMPI    InclusionSolverType;
+        typedef InclusionSolverSettingsMPI InclusionSolverSettingsType;
 
     };
 
@@ -78,7 +77,7 @@ struct GlobalConfigs{
     struct RigidBodyConfigs{
         typedef LayoutConfig<double, GeneralLayout<7,6> > LayoutConfigType;
         typedef RigidBodySolverDataCONoGMPI RigidBodySolverDataType;
-    }
+    };
 
 
     struct InclusionSolverConfigs{

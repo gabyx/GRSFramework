@@ -207,9 +207,8 @@ void DynamicsSystemBase::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
 
-    Vector3 gravity = m_gravity * m_gravityDir;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
-        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt, gravity);
+        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt);
     }
 }
 

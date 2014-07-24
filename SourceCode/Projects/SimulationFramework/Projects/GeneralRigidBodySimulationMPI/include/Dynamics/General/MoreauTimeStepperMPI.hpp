@@ -1,5 +1,5 @@
 ﻿/*
-*  MoreauTimeStepper.h
+*  MoreauTimeStepperMPI.h
 *  DynamicSystem
 *
 *  Created by Gabriel Nützi on 21.03.10.
@@ -45,7 +45,7 @@
 * @brief The Moreau time stepper.
 */
 
-class MoreauTimeStepper {
+class MoreauTimeStepperMPI {
 public:
 
     DEFINE_TIMESTEPPER_CONFIG_TYPES
@@ -55,9 +55,9 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
-    MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys,
+    MoreauTimeStepperMPI(std::shared_ptr<DynamicsSystemType> pDynSys,
                       std::shared_ptr<ProcessCommunicatorType > pProcCommunicator);
-    ~MoreauTimeStepper();
+    ~MoreauTimeStepperMPI();
 
     // The Core Objects ==================================
     std::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
@@ -129,11 +129,11 @@ protected:
 //=========================================================
 
 /*=========================================================
-definitions of template class MoreauTimeStepper
+definitions of template class MoreauTimeStepperMPI
 _________________________________________________________*/
 
 
-MoreauTimeStepper::MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys,
+MoreauTimeStepperMPI::MoreauTimeStepperMPI(std::shared_ptr<DynamicsSystemType> pDynSys,
                                      std::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
     m_ReferenceSimFile(),
     m_pSolverLog(nullptr),
@@ -159,14 +159,14 @@ MoreauTimeStepper::MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys
 
 
 
-MoreauTimeStepper::~MoreauTimeStepper() {
+MoreauTimeStepperMPI::~MoreauTimeStepperMPI() {
     m_CollisionDataFile.close();
     m_SystemDataFile.close();
     DECONSTRUCTOR_MESSAGE
 };
 
 
-void MoreauTimeStepper::closeAllFiles() {
+void MoreauTimeStepperMPI::closeAllFiles() {
 
     Logging::LogManager::getSingletonPtr()->destroyLog("SolverLog");
     m_pSolverLog = nullptr;
@@ -176,7 +176,7 @@ void MoreauTimeStepper::closeAllFiles() {
 }
 
 
-void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ) {
+void MoreauTimeStepperMPI::initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ) {
 
     // Set new Simfile Path
     m_SimFolderPath = folder_path;
@@ -237,7 +237,7 @@ void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, c
 
 
 
-void MoreauTimeStepper::reset() {
+void MoreauTimeStepperMPI::reset() {
      //set standart values for parameters
     m_IterationCounter = 0;
     m_bIterationFinished = false;
@@ -284,18 +284,18 @@ void MoreauTimeStepper::reset() {
 };
 
 
-MoreauTimeStepper::PREC MoreauTimeStepper::getTimeCurrent() {
+MoreauTimeStepperMPI::PREC MoreauTimeStepperMPI::getTimeCurrent() {
     return m_currentSimulationTime;
 }
 
 
-unsigned int MoreauTimeStepper::getIterationCount() {
+unsigned int MoreauTimeStepperMPI::getIterationCount() {
     return m_IterationCounter;
 }
 
 
 
-void MoreauTimeStepper::doOneIteration() {
+void MoreauTimeStepperMPI::doOneIteration() {
     static std::stringstream logstream;
 
     static int iterations=0; // Average is reset after 1000 Iterations
@@ -443,11 +443,11 @@ void MoreauTimeStepper::doOneIteration() {
 }
 
 
-bool MoreauTimeStepper::finished() {
+bool MoreauTimeStepperMPI::finished() {
     return m_bFinished;
 }
 
-void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
+void MoreauTimeStepperMPI::writeIterationToSystemDataFile(double globalTime) {
 #if OUTPUT_SIMDATA_FILE == 1
     m_SystemDataFile
     << globalTime << "\t"
@@ -462,7 +462,7 @@ void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
 
 #endif
 }
-void MoreauTimeStepper::writeHeaderToSystemDataFile() {
+void MoreauTimeStepperMPI::writeHeaderToSystemDataFile() {
 #if OUTPUT_SIMDATA_FILE == 1
     m_SystemDataFile <<"# "
     << "GlobalTime [s]" << "\t"
@@ -478,7 +478,7 @@ void MoreauTimeStepper::writeHeaderToSystemDataFile() {
 }
 
 
-void MoreauTimeStepper::writeIterationToCollisionDataFile() {
+void MoreauTimeStepperMPI::writeIterationToCollisionDataFile() {
 #if OUTPUT_COLLISIONDATA_FILE == 1
 
     double averageOverlap = 0;
