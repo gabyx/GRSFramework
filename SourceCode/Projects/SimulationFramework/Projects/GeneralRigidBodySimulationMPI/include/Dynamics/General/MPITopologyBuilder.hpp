@@ -36,13 +36,14 @@ class TopologyBuilder{
        std::shared_ptr<DynamicsSystemType>  m_pDynSys;
        std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
 
-    TopologyBuilderType m_type;
+    using TopologyBuilderEnumType = TopologyBuilderEnum;
+    TopologyBuilderEnumType m_type;
 };
 
 
 struct GridBuilderSettings{
     DEFINE_LAYOUT_CONFIG_TYPES
-    GridBuilderSettings(): m_processDim(MyMatrix<unsigned int>::Vector3(1,1,1))
+    GridBuilderSettings(): m_processDim(MyMatrix<unsigned int>::Vector3(1,1,1)){}
     MyMatrix<unsigned int>::Vector3 m_processDim;
 };
 
@@ -62,7 +63,7 @@ class GridTopologyBuilder : public TopologyBuilder {
                             unsigned int nGlobalSimBodies):
                             TopologyBuilder(pDynSys, pProcCommunicator), m_settings(settings), m_nGlobalSimBodies(nGlobalSimBodies)
         {
-            this->m_type = TopologyBuilder::Type::GRIDBUILDER;
+            this->m_type = TopologyBuilderEnumType::GRIDBUILDER;
         }
 
         void rebuildTopology(){
@@ -198,29 +199,8 @@ class GridTopologyBuilder : public TopologyBuilder {
         GridBuilderSettings m_settings;
 };
 
-
-/**
-* Creator functor to make a specific TopologyBuilder!
-*/
-class CreatorTopologyBuilder{
-public:
-    CreatorTopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
-                           std::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
-                           m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator) {}
-
-
-    std::shared_ptr<GridTopologyBuilder> createGridBuilder(GridBuilderSettings settings,
-                                                           unsigned int nGlobalSimBodies){
-        return std::shared_ptr<GridTopologyBuilder>(new GridTopologyBuilder(m_pDynSys,m_pProcCommunicator,settings,nGlobalSimBodies) )
-    }
-
-private:
-    std::shared_ptr<DynamicsSystemType>  m_pDynSys;
-    std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
-};
-
-
 }; //MPILayer
+
 
 #endif
 

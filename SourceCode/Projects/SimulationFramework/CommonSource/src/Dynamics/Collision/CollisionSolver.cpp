@@ -131,7 +131,7 @@ void CollisionSolver::signalContactAdd() {
             // Calculate some Statistics
             m_maxOverlap = std::max(m_maxOverlap,(*colDataIt)->m_overlap);
 
-            m_ContactDelegateList.invokeAll(*colDataIt); // Propagate pointers! they will not be deleted!
+            invokeAllContactDelegates(*colDataIt); // Propagate pointers! they will not be deleted!
 
         }
 

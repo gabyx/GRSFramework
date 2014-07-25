@@ -108,6 +108,12 @@ public:
     inline void write(double time, const TRigidBodyContainer & bodyList);
 
     /**
+    * @brief Writes all bodies from begin to end (Iterator  points to a RigidBody pointer) to the file!
+    */
+    template<typename TBodyIterator>
+    void write(double time, TBodyIterator begin, TBodyIterator end);
+
+    /**
     * @brief Reads in the state at the given time and if the id in states is found, the state with id in states is overwritten.
     * @param which is 0 for begin state, 1 for current state given at time, 2 for end state
     * @param time is the input time if variable which is 1, and the output time if variable which is 0 or 2
@@ -254,7 +260,7 @@ private:
     std::streamsize m_nBytesPerQBody;
     std::streamsize m_nBytesPerUBody;
 
-    // Write mode, Write addditional bytes, not yet implemented, but the type is written in the header
+    // Write addditional bytes, not yet implemented, but the type is written in the header
     unsigned int m_additionalBytesType;
     std::streamsize getAdditionalBytes();
     std::streamsize m_nAdditionalBytesPerBody;
@@ -298,12 +304,20 @@ MultiBodySimFile & MultiBodySimFile::operator>>( T &value ) {
 
 template<typename TRigidBodyContainer>
 void MultiBodySimFile::write(double time, const TRigidBodyContainer & bodyList) {
+    write( time, bodyList.beginOrdered(),bodyList.endOrdered());
+}
+
+template<typename TBodyIterator>
+void MultiBodySimFile::write(double time, TBodyIterator begin, TBodyIterator end) {
     *this << time;
-    ASSERTMSG(m_nSimBodies == bodyList.size(),"You try to write "<<bodyList.size()
+    ASSERTMSG(m_nSimBodies == std::distance(begin,end),"You try to write "<< std::distance(begin,end)
               <<"bodies into a file which was instanced to hold "<<m_nSimBodies);
-    STATIC_ASSERT2((std::is_same<double, typename TRigidBodyContainer::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
-    auto itEnd = bodyList.endOrdered();
-    for(auto it = bodyList.beginOrdered(); it != itEnd; ++it) {
+
+    using BodyType = typename std::remove_reference<decltype(*(*begin))>::type;
+
+    STATIC_ASSERT2((std::is_same<double, typename BodyType::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
+    auto itEnd = end;
+    for(auto it = begin; it != itEnd; ++it) {
         *this << (*it)->m_id;
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
@@ -311,6 +325,7 @@ void MultiBodySimFile::write(double time, const TRigidBodyContainer & bodyList) 
 //        AddBytes::write<m_additionalBytesType>(m_file_stream);
     }
 }
+
 
 
 template<typename TBodyStateMap>

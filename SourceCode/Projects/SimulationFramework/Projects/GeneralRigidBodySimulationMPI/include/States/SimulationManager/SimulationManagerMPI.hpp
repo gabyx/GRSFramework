@@ -64,7 +64,8 @@ private:
 
     std::shared_ptr< StateRecorderType >  m_pStateRecorder;
 
-    std::shared_ptr< SceneParserMPI >     m_pSceneParser;
+    using SceneParserType = SceneParserMPI<DynamicsSystemType>;
+    std::shared_ptr< SceneParserType >     m_pSceneParser;
 
     std::shared_ptr< TimeStepperType >	m_pTimestepper;
     std::shared_ptr< DynamicsSystemType > m_pDynSys;

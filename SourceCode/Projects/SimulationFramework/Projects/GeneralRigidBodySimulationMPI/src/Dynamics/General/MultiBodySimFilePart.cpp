@@ -5,14 +5,16 @@ const char MultiBodySimFilePart::m_simFileSignature[SIM_FILE_PART_SIGNATURE_LENG
 
 // Implementation
 
-MultiBodySimFilePart::MultiBodySimFilePart(unsigned int nDOFqBody, unsigned int nDOFuBody, unsigned int bufferSize)
-    : m_nBytesPerQBody(nDOFqBody*sizeof(double)), m_nBytesPerUBody(nDOFuBody*sizeof(double)) {
-    m_nDOFuBody = nDOFuBody;
-    m_nDOFqBody = nDOFqBody;
-
-    m_nBytes = 0;
-    m_nStates = 0;
-
+MultiBodySimFilePart::MultiBodySimFilePart(unsigned int bufferSize):
+    m_nDOFuBody(0),m_nDOFqBody(0),
+    m_nBytes(0),
+    m_nBytesPerQBody(0),
+    m_nBytesPerUBody(0),
+    m_additionalBytesType(0),
+    m_nAdditionalBytesPerBody(0),
+    m_nStates(0),
+    m_beginOfStates(0)
+{
     m_filePath = boost::filesystem::path();
 
     m_buf_size = bufferSize;
@@ -26,9 +28,34 @@ MultiBodySimFilePart::~MultiBodySimFilePart() {
     delete[] m_Buffer;
 }
 
+/** given m_nDOFqBody, m_nDOFuBody, m_nAdditionalBytesPerBody*/
+void MultiBodySimFilePart::setByteLengths() {
+    m_nBytesPerQBody = m_nDOFqBody*sizeof(double);
+    m_nBytesPerUBody = m_nDOFuBody*sizeof(double);
+
+    m_nBytesPerBody = m_nBytesPerUBody
+                    + m_nBytesPerQBody
+                    + std::streamsize(sizeof(RigidBodyIdType)) + m_nAdditionalBytesPerBody;
+}
 
 
-bool MultiBodySimFilePart::openWrite(const boost::filesystem::path &file_path, bool truncate) {
+bool MultiBodySimFilePart::openWrite(const boost::filesystem::path &file_path,
+                                 unsigned int nDOFqBody,
+                                 unsigned int nDOFuBody,
+                                 bool truncate)
+{
+    if(nDOFqBody == 0 || nDOFuBody == 0){
+        m_errorString << "Wrong openWrite parameters: nDOFqBody:" << nDOFqBody << " nDOFuBody: "<<nDOFuBody <<  std::endl;
+        return false;
+    }
+
+    m_nDOFuBody = nDOFuBody;
+    m_nDOFqBody = nDOFqBody;
+    m_nAdditionalBytesPerBody = 0;
+    m_additionalBytesType = 0;
+
+    setByteLengths();
+
     m_errorString.str("");
 
     close();
@@ -71,11 +98,26 @@ void  MultiBodySimFilePart::writeHeader() {
         *this << m_simFileSignature[i];
     }
 
-    m_beginHeader = m_file_stream.tellp();
-    // The number of states will be written at the end when file is closed!
-    *this << (unsigned int)m_nStates<< (unsigned int)m_nDOFqBody << (unsigned int)m_nDOFuBody; // Precision output is always double!
+   *this << (unsigned int)SIM_FILE_PART_VERSION
+    << (unsigned int)m_nStates // is written at the end!
+    << (unsigned int)m_nDOFqBody
+    << (unsigned int)m_nDOFuBody
+    << (unsigned int)m_additionalBytesType
+    << (unsigned int)m_nAdditionalBytesPerBody;
 
     m_beginOfStates = m_file_stream.tellp();
+}
+
+/** Only for writting*/
+std::streamoff MultiBodySimFilePart::getAdditionalBytes()
+{
+        switch(m_additionalBytesType){
+            case 0:
+                return 0;
+            default:
+                ERRORMSG("Additional Byte Type not implemented");
+        }
+        return 0;
 }
 
 

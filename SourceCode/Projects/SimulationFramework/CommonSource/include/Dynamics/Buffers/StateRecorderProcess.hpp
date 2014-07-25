@@ -65,7 +65,7 @@ protected:
 
 
 StateRecorderProcess::StateRecorderProcess( unsigned int id,  unsigned int bufferSize):
-        m_binarySimFile(LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody, m_bufferSize)
+        m_binarySimFile(m_bufferSize)
 {
 
     m_accessId = id;
@@ -105,7 +105,7 @@ bool StateRecorderProcess::createSimFile(bool truncate){
     file /= s.str();
 
 
-    if(!m_binarySimFile.openWrite(file,truncate)){
+    if(!m_binarySimFile.openWrite(file,LayoutConfigType::LayoutType::NDOFqBody, LayoutConfigType::LayoutType::NDOFuBody,truncate)){
         LOG(m_pSimulationLog,"---> StateRecorderProcess:: Could not open SimFile: " << file.string() << std::endl;);
         LOG(m_pSimulationLog, m_binarySimFile.getErrorString() );
         return false;

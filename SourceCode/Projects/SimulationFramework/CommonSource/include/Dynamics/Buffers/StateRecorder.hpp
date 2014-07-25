@@ -39,7 +39,8 @@ public:
 
     void write(const DynamicsState* value);
 
-    void write(PREC time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList) {
+    template<typename TRigidBodyContainer>
+    void write(PREC time, const TRigidBodyContainer & bodyList) {
         m_binarySimFile.write(time, bodyList);
     }
 

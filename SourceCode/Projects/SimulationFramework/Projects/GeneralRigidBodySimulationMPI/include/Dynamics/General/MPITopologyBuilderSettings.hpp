@@ -6,19 +6,20 @@
 
 namespace MPILayer{
 
-enum class: char TopologyBuilderType{
+enum class TopologyBuilderEnum : char{
     GRIDBUILDER
     /*SuperDuperHexagonBuilder*/
 };
 
 class TopologyBuilderSettings{
-
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    TopologyBuilderType m_type;
+    using TopologyBuilderEnumType = TopologyBuilderEnum;
+    TopologyBuilderEnumType m_type;
 
     //For GridBuilder
-    MyMatrix<unsigned int>::Vector3 m_processDimensions;
+    MyMatrix<unsigned int>::Vector3 m_processDim;
 
 };
 

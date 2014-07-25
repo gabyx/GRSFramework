@@ -13,8 +13,6 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
-#include "DynamicsState.hpp"
-
 #define DECLERATIONS_STATEPOOL \
     using StatePool::m_change_pointer_mutex; \
     using StatePool::m_idx; \

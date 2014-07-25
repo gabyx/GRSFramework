@@ -1650,7 +1650,7 @@ public:
         m_nSimBodies = 0;
         m_nStaticBodies = 0;
         m_nBodies = 0;
-        m_nSpecifiedTotalSimBodies = 0;
+        m_nSpecifiedSimBodies = 0;
 
         for ( XMLNodeType & node  : sceneObjects.children("RigidBodies")) {
                 parseRigidBodies(node);
@@ -1668,6 +1668,10 @@ public:
             m_parseSelectiveBodyIds = true;
         }
 
+    }
+
+    unsigned int getSpecifiedSimBodies(){
+        return m_nSpecifiedSimBodies;
     }
 
 private:
@@ -1986,7 +1990,7 @@ private:
 
 
     // Parsed counts of bodies
-    unsigned int m_nSimBodies
+    unsigned int m_nSimBodies;
     unsigned int m_nBodies;
     unsigned int m_nStaticBodies;
     // Spcified amount of bodies in the Scene File
@@ -2183,6 +2187,13 @@ public:
     }
 
     LogType * getSimLog(){return m_pSimulationLog;}
+
+    unsigned int getSpecifiedSimBodies(){
+        if(m_pBodyModule){
+            return m_pBodyModule->getSpecifiedSimBodies();
+        }
+        return 0;
+    }
 
 protected:
 

@@ -642,7 +642,7 @@ private:
         LOGSZ(m_pSerializerLog, "----->  m_q_KI: " << body->m_q_KI.transpose()<<std::endl;);
 
         if(Archive::is_loading::value) {
-            setRotFromQuaternion(body->m_q_KI , body->m_A_IK);
+            QuaternionHelpers::setRotFromQuaternion(body->m_q_KI , body->m_A_IK);
         }
 
         //Velocity
@@ -685,7 +685,7 @@ private:
         serializeEigen(ar,body->m_r_S);
         serializeEigen(ar,body->m_q_KI);
         if(Archive::is_loading::value) {
-            setRotFromQuaternion(body->m_q_KI , body->m_A_IK);
+            QuaternionHelpers::setRotFromQuaternion(body->m_q_KI , body->m_A_IK);
         }
         LOGSZ(m_pSerializerLog, "----->  m_r_S: " << body->m_r_S.transpose()<<std::endl;);
         LOGSZ(m_pSerializerLog, "----->  m_q_KI: " << body->m_q_KI.transpose()<<std::endl;);

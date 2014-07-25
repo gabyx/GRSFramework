@@ -36,7 +36,7 @@ namespace ContactFeasibilityTableMPI{
 */
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
-    typedef RigidBodyType::BodyState BS;
+    typedef RigidBodyType::BodyMode BS;
 
     // 2D to 1D index with length L (store symetric matrix as 1D array)
     template<char L, char i1, char i2>
@@ -83,7 +83,7 @@ namespace ContactFeasibilityTableMPI{
     template<typename RigidBodyType>
     bool checkFeasibilityOfContact(const RigidBodyType * p1, const RigidBodyType * p2, std::pair<bool,bool> & isRemote ){
         //Define the feasibility table
-        typedef typename RigidBodyType::BodyState BS;
+        typedef typename RigidBodyType::BodyMode BS;
         //printArray(std::cout);
 
         // calculate table index

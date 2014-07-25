@@ -39,7 +39,7 @@
 * @brief The inclusion solver for an ordered problem. Does not assemble G. Iterates over Contact Graph in a SOR fashion!
 */
 
-class InclusionSolverCONoG {
+class InclusionSolverCONoGMPI {
 public:
 
     DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES
@@ -50,11 +50,11 @@ public:
     typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
     typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
 
-    InclusionSolverCONoG(std::shared_ptr< BodyCommunicator >  pBodyComm,
+    InclusionSolverCONoGMPI(std::shared_ptr< BodyCommunicator >  pBodyComm,
                          std::shared_ptr< CollisionSolverType >  pCollisionSolver,
                          std::shared_ptr< DynamicsSystemType> pDynSys,
                          std::shared_ptr< ProcessCommunicatorType > pProcComm);
-    ~InclusionSolverCONoG();
+    ~InclusionSolverCONoGMPI();
 
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
     void reset();
@@ -121,7 +121,7 @@ protected:
 
 
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;
+    typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
 
 
     void integrateAllBodyVelocities();

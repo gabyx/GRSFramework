@@ -74,8 +74,10 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPICommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopology.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopologyBuilder.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopologyBuilderSettings.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPISerializationHelpersEigen.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MultiBodySimFileMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MultiBodySimFilePart.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/CartesianGrid.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourMap.hpp
@@ -102,6 +104,7 @@ SET(DYNAMICS_INC
 SET(DYNAMICS_SRC
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/CartesianGrid.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/MultiBodySimFileMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/General/MultiBodySimFilePart.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/DynamicsSystemMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/BodyCommunicator.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/CollisionSolverMPI.cpp

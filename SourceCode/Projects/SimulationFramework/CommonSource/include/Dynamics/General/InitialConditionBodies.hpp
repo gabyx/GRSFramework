@@ -18,8 +18,8 @@ template<typename BodyDataContainer>
 void setupPositionBodiesLinear(
     BodyDataContainer & bodyDataCont,
     RigidBodyIdType startId, // used to appropriatly generate random numbers
-    typename DynamicsState::Vector3 pos,
-    typename DynamicsState::Vector3 dir,
+    Vector3 pos,
+    Vector3 dir,
     double dist, bool jitter, double delta, unsigned int seed){
 
     DEFINE_LAYOUT_CONFIG_TYPES

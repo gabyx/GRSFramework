@@ -28,10 +28,15 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    DynamicsSystem();
-    ~DynamicsSystem();
+    DynamicsSystemMPI();
+    ~DynamicsSystemMPI();
 
-    ContactParameterMap m_ContactParameterMap;
+    using RecorderSettingsType = RecorderSettings;
+    using TimeStepperSettingsType = TimeStepperSettings;
+    using TopologyBuilderSettingsType = MPILayer::TopologyBuilderSettings;
+
+    using ContactParameterMapType = ContactParameterMap;
+    ContactParameterMapType m_ContactParameterMap;
 
     typedef ExternalForceList ExternalForceListType;
     ExternalForceListType m_externalForces; ///< Special class of function objects
@@ -46,8 +51,8 @@ public:
     RigidBodySimContainerType m_SimBodies;        // simulated objects
     RigidBodySimContainerType m_RemoteSimBodies;  // all remote bodies
 
-    typedef RigidBodySimContainerType RigidBodyStaticContainer;
-    RigidBodyStaticContainer m_Bodies;        // all not simulated objects
+    typedef RigidBodySimContainerType RigidBodyStaticContainerType;
+    RigidBodySimContainerType m_Bodies;        // all not simulated objects
     // ============================================================================
 
     //All initial conditions for all bodies
@@ -97,8 +102,7 @@ protected:
     RecorderSettings m_SettingsRecorder;
     TimeStepperSettings m_SettingsTimestepper;
     InclusionSolverSettingsType m_SettingsInclusionSolver;
-
-    TopologyBuilderSettings m_TopologyBuilderSettings;
+    TopologyBuilderSettingsType m_SettingsTopologyBuilder;
 
     //Function
     //This is a minimal update of F, no checking if constant values are correct
@@ -142,7 +146,7 @@ public:
         auto es  = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &this->m_externalForces));
         auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&this->m_ContactParameterMap));
 
-        auto mpi = std::unique_ptr<MPIModuleType>(p,bm.get(),&m_TopologyBuilderSettings);
+        auto mpi = std::unique_ptr<MPIModuleType>( new MPIModuleType(p,bm.get(),&m_SettingsTopologyBuilder));
 
         return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));
     }
@@ -150,9 +154,9 @@ public:
 };
 
 
-inline void DynamicsSystem::applyInitStatesToBodies(){
+inline void DynamicsSystemMPI::applyInitStatesToBodies(){
     // Apply all init states to the sim bodies
-    InitialConditionBodies::applyRigidBodyStatesToBodies(m_SimBodies, m_bodiesInitStates);
+    InitialConditionBodies::applyBodyStatesTo( m_bodiesInitStates, m_SimBodies);
 }
 
 

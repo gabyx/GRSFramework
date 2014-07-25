@@ -27,8 +27,14 @@ class GravityForceField{
         ~GravityForceField(){}
 
         template<typename TRigidBody>
-        void calculate(TRigidBody * body){
+        inline void calculate(TRigidBody * body){
             body->m_h_term.template head<3>() += body->m_mass * m_gravityAccel;
+        }
+
+        /// Optional function
+        template<typename TRigidBody>
+        inline PREC calcPotEnergy(TRigidBody * body){
+             return -body->m_mass *  body->m_r_S.transpose() * m_gravityAccel;
         }
 
         void setTime(PREC time){};
@@ -73,7 +79,7 @@ class SpatialSphericalTimeRandomForceField{
         }
 
         template<typename TRigidBody>
-        void calculate(TRigidBody * body){
+        inline void calculate(TRigidBody * body){
             if(m_inInterval){
                 ASSERTMSG(body->m_pSolverData, "Solverdata not present!")
                 if(m_ts <= m_boostTime){
@@ -152,6 +158,7 @@ class SpatialSphericalTimeRandomForceField{
 
 #include RigidBody_INCLUDE_FILE
 
+
 class ExternalForceList{
     public:
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
@@ -162,6 +169,7 @@ class ExternalForceList{
         template<typename T>
         void addExternalForceCalculation(T * extForce){
 
+            // std::function copies the temporary functor created here!, this is important!
             m_deleterList.push_back( ExternalForceList::DeleteFunctor<T>(extForce) );
 
             if(extForce->m_addReset){
@@ -175,6 +183,9 @@ class ExternalForceList{
             if(extForce->m_addSetTime){
                 m_setTimeList.push_back( std::bind(&T::setTime, extForce, std::placeholders::_1 ) );
             }
+
+            // add optional function if they exist!
+            addCalcPotEng(extForce);
         }
 
         ~ExternalForceList(){
@@ -191,8 +202,16 @@ class ExternalForceList{
 
         void calculate(RigidBodyType * body){
             for(auto & f : m_calculationList){
-                f(body); // Apply calculation function!
+                f(body); // Apply calculation functions of all external forces!
             }
+        }
+
+        PREC calculatePotEnergy(RigidBodyType * body){
+            PREC r;
+            for(auto & f : m_calcPotEnergyList){
+                r += f(body); // Apply calculation functions of all external forces!
+            }
+            return r;
         }
 
         iterator begin(){return m_calculationList.begin();}
@@ -200,11 +219,12 @@ class ExternalForceList{
 
     private:
         typedef std::vector< std::function<void (RigidBodyType *)> > CalcListType;
-
         CalcListType m_calculationList;
+
         std::vector< std::function<void (void)> > m_resetList;
         std::vector< std::function<void (PREC)> > m_setTimeList;
         std::vector< std::function<void (void)> > m_deleterList;
+
 
         // Must be copy constructable!
         template<typename T>
@@ -215,6 +235,22 @@ class ExternalForceList{
             private:
                 T * _p;
         };
+
+        //Optional functions list
+        typedef std::vector< std::function<PREC (RigidBodyType *)> > CalcPotEnergyListType;
+        CalcPotEnergyListType m_calcPotEnergyList;
+
+        // add optional functions
+        // add potential energy function to the list only if there is an existing function available! (SFINAE)
+        template<typename T>
+        void addCalcPotEng(T* t, typename std::enable_if<
+                           std::is_member_pointer<decltype(&T::template calcPotEnergy<RigidBodyType>)>::value
+                           >::type * = 0)
+        {
+                m_calcPotEnergyList.push_back( std::bind(&T::template calcPotEnergy<RigidBodyType>,t,std::placeholders::_1) );
+        }
+        void addCalcPotEng(...){}
+
 
 };
 

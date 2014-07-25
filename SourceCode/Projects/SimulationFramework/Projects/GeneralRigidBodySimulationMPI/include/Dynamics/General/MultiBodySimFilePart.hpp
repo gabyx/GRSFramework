@@ -26,6 +26,8 @@
 */
 #define SIM_FILE_PART_SIGNATURE {'M','B','S','P'}
 
+#define SIM_FILE_PART_VERSION 2
+
 /**
 * @brief Defines the extentsion of the file.
 */
@@ -46,7 +48,7 @@ class MultiBodySimFilePart {
 public:
 
 
-    MultiBodySimFilePart(unsigned int nDOFqBody, unsigned int nDOFuBody,unsigned int bufferSize = 1<<14);
+    MultiBodySimFilePart(unsigned int bufferSize = 1<<14);
     ~MultiBodySimFilePart();
 
     /**
@@ -60,13 +62,22 @@ public:
     * @param file_path The path to the file to open.
     * @return true if the file is successfully opened and writable and false if not.
     */
-    bool openWrite( const boost::filesystem::path & file_path,  bool truncate = true);
+    bool openWrite(const boost::filesystem::path &file_path,
+                                         unsigned int nDOFqBody,
+                                         unsigned int nDOFuBody,
+                                         bool truncate);
 
     /**
-    * @brief Operator to write all states of the bodies to the file, writes position and velocity!
+    * @brief Write all states of the bodies to the file, writes position and velocity!
     */
-    inline void write(double time, const RigidBodyContainer & bodyList);
+    template<typename TRigidBodyContainer>
+    inline void write(double time, const TRigidBodyContainer & bodyList);
 
+    /**
+    * @brief Writes all bodies from begin to end (Iterator  points to a RigidBody pointer) to the file!
+    */
+    template<typename TBodyIterator>
+    void write(double time, TBodyIterator begin, TBodyIterator end);
 
     /**
     * @brief Closes the .sim file which was opened by an openWrite or openRead command.
@@ -80,6 +91,9 @@ public:
     }
 
 private:
+
+    void setByteLengths();
+
      /**
     * @brief Operator to write a generic value to the file as binary data.
     */
@@ -115,9 +129,15 @@ private:
     std::streampos m_beginOfStates;
 
     unsigned int m_nDOFuBody, m_nDOFqBody, m_nStates;
-    const  std::streamoff m_nBytesPerQBody ;
-    const  std::streamoff m_nBytesPerUBody ;
+    std::streamoff m_nBytesPerBody ;
+    std::streamoff m_nBytesPerQBody ;
+    std::streamoff m_nBytesPerUBody ;
     static const  std::streamoff m_headerLength = (2*sizeof(unsigned int) + SIM_FILE_PART_SIGNATURE_LENGTH*sizeof(char));
+
+    // Write addditional bytes, not yet implemented, but the type is written in the header
+    unsigned int m_additionalBytesType;
+    std::streamsize getAdditionalBytes();
+    std::streamsize m_nAdditionalBytesPerBody;
 
     std::stringstream m_errorString;
 
@@ -150,14 +170,26 @@ MultiBodySimFilePart & MultiBodySimFilePart::operator>>( T &value ) {
     return *this;
 };
 
-void MultiBodySimFilePart::write(double time, const RigidBodyContainer & bodyList){
+template<typename TRigidBodyContainer>
+void MultiBodySimFilePart::write(double time, const TRigidBodyContainer & bodyList){
+    write(time,bodyList.beginOrdered(),bodyList.endOrdered());
+}
+
+
+template<typename TBodyIterator>
+void MultiBodySimFilePart::write(double time, TBodyIterator begin, TBodyIterator end) {
     *this << time;
-    *this << (unsigned int) bodyList.size();
-    STATIC_ASSERT2((std::is_same<double, typename RigidBodyContainer::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
-    for(auto it = bodyList.beginOrdered(); it != bodyList.endOrdered(); ++it){
+    *this << (unsigned int) std::distance(begin,end);
+    using BodyType = typename std::remove_reference<decltype(*(*begin))>::type;
+
+    STATIC_ASSERT2((std::is_same<double, typename BodyType::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
+    auto itEnd = end;
+    for(auto it = begin; it != itEnd; ++it) {
         *this << (*it)->m_id;
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
+
+//        AddBytes::write<m_additionalBytesType>(m_file_stream);
     }
     m_nStates++;
 }

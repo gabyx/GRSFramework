@@ -8,8 +8,6 @@
 
 DynamicsSystemBase::DynamicsSystemBase(){
     // set reasonable standart values:
-    m_gravity = 9.81;
-    m_gravityDir = Vector3(0,0,-1);
 
     m_currentTotEnergy = 0;
     m_currentPotEnergy= 0;
@@ -176,7 +174,7 @@ void DynamicsSystemBase::doSecondHalfTimeStep(PREC te, PREC timestep) {
 
 #if OUTPUT_SIMDATA_FILE == 1
         // Calculate Energy
-        PREC potE = -pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir;
+        PREC potE = m_externalForces.calculatePotEnergy(pBody);
         PREC kinE = 0.5* pBody->m_pSolverData->m_uBuffer.m_front.transpose() * pBody->m_MassMatrix_diag.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front;
         PREC transKinE = 0.5*pBody->m_pSolverData->m_uBuffer.m_front.squaredNorm()*pBody->m_mass;
         m_currentPotEnergy += potE;

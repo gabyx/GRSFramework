@@ -31,8 +31,8 @@ InclusionSolverCO::InclusionSolverCO(std::shared_ptr< CollisionSolverType >  pCo
     }
 
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
-    m_pCollisionSolver->m_ContactDelegateList.addContactDelegate(
-        ContactDelegateList::ContactDelegate::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
+    m_pCollisionSolver->addContactDelegate(
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
     );
 
 

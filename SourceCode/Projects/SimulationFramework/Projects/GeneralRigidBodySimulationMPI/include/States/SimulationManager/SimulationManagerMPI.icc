@@ -9,7 +9,6 @@
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
-#include "DynamicsState.hpp"
 #include "SharedBufferDynSys.hpp"
 #include "StateRecorder.hpp"
 #include "StateRecorderBody.hpp"
@@ -79,16 +78,22 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
     // Parse the Scene from XML! ==========================
 
-    m_pSceneParser = std::shared_ptr< SceneParserMPI >( new SceneParserMPI( *m_pDynSys) );
+    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType( *m_pDynSys) );
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
     m_pSceneParser->parseScene(sceneFilePathNew);
-    m_nGlobalSimBodies = m_pSceneParser->getNumberOfGlobalSimBodies();
-    m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
-    LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: SceneParsing finished: Added "<< m_nSimBodies << " Bodies!" << std::endl;);
+    m_nGlobalSimBodies = m_pSceneParser->getSpecifiedSimBodies();
+    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SimBodies.size()
+        << " simulated & " << m_pDynSys->m_Bodies.size()<<  " static bodies! "  << std::endl;);
     LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: Global Bodies in Simulation "<< m_nGlobalSimBodies<< " Bodies!" << std::endl;);
 
     // TopologyBuilder Build Topology
     //TODO
+    // saftey check
+//            if(dim(0)*dim(1)*dim(2) != m_pProcCommunicator->getNProcesses()) {
+//                LOG(m_pSimulationLog,"---> Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcCommunicator->getNProcesses() <<" Processes"<<std::endl; );
+//                sleep(2);
+//                THROWEXCEPTION("---> You have launched to many processes for the grid!");
+//            }
 
     // Do Safty Check
     // Do a Reduction of all Simbodies, to count if no bodies are missing!

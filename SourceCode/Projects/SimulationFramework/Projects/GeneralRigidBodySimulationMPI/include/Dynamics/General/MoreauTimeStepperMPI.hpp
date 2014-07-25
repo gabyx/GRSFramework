@@ -6,8 +6,8 @@
 *  Copyright 2010 ETH. All rights reserved.
 *
 */
-#ifndef MoreauTimeStepper_hpp
-#define MoreauTimeStepper_hpp
+#ifndef MoreauTimeStepperMPI_hpp
+#define MoreauTimeStepperMPI_hpp
 
 // Includes =================================
 #include <iostream>
@@ -21,8 +21,7 @@
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
-#include "DynamicsState.hpp"
-#include "FrontBackBuffer.hpp"
+
 #include "BinaryFile.hpp"
 #include "MultiBodySimFile.hpp"
 #include "SimpleLogger.hpp"
@@ -152,7 +151,10 @@ MoreauTimeStepperMPI::MoreauTimeStepperMPI(std::shared_ptr<DynamicsSystemType> p
                             new BodyCommunicator(m_pDynSys,  m_pProcCommunicator) );
 
     m_pCollisionSolver = std::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys));
-    m_pInclusionSolver = std::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pBodyCommunicator, m_pCollisionSolver,m_pDynSys, m_pProcCommunicator));
+    m_pInclusionSolver = std::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pBodyCommunicator,
+                                                                                      m_pCollisionSolver,
+                                                                                      m_pDynSys,
+                                                                                      m_pProcCommunicator));
 
 };
 

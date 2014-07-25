@@ -5,6 +5,7 @@
 #include "VectorToSkewMatrix.hpp"
 #include "CommonFunctions.hpp"
 #include "RigidBodyFunctions.hpp"
+#include "QuaternionHelpers.hpp"
 
 DynamicsSystemMPI::DynamicsSystemMPI(){
 
@@ -106,7 +107,7 @@ void DynamicsSystemMPI::doFirstHalfTimeStep(PREC ts, PREC timestep) {
         pBody->m_q_KI.normalize();
 
         // Update Transformation A_IK
-        setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
+        QuaternionHelpers::setRotFromQuaternion(pBody->m_q_KI,  pBody->m_A_IK);
 
         // Add in to h-Term ==========
         pBody->m_h_term.setZero();
@@ -180,7 +181,7 @@ void DynamicsSystemMPI::doSecondHalfTimeStep(PREC te, PREC timestep) {
 #if OUTPUT_SIMDATA_FILE == 1
         // Calculate Energy
        // Calculate Energy
-        PREC potE = -pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir;
+        PREC potE = m_externalForces.calculatePotEnergy(pBody);
         PREC kinE = 0.5* pBody->m_pSolverData->m_uBuffer.m_front.transpose() * pBody->m_MassMatrix_diag.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front;
         PREC transKinE = 0.5*pBody->m_pSolverData->m_uBuffer.m_front.squaredNorm()*pBody->m_mass;
         m_currentPotEnergy += potE;

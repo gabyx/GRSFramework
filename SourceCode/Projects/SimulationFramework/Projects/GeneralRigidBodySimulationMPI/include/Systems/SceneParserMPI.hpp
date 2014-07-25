@@ -3,6 +3,7 @@
 
 #include "SceneParser.hpp"
 
+#include "MPITopologyBuilderSettings.hpp"
 
 namespace ParserModules{
 
@@ -19,14 +20,14 @@ private:
 
 
 public:
-    SettingsModuleGUI(ParserType * p, RecorderSettingsType * r, TimeStepperSettingsType * t, InclusionSolverSettingsType * i)
+    SettingsModuleMPI(ParserType * p, RecorderSettingsType * r, TimeStepperSettingsType * t, InclusionSolverSettingsType * i)
         :SettingsModule<TParserTraits>(p,r,t,i) {};
 
     void parseOtherOptions(XMLNodeType sceneSettings) {
         LOGSCLEVEL1(this->m_pSimulationLog, "==== SettingsModuleMPI: parsing other options ====================="<<std::endl;)
 
         XMLNodeType incSet = sceneSettings.child("MPISettings").child("InclusionSolverSettings");
-        CHECK_XMLNODE(incSet);
+        CHECK_XMLNODE(incSet,"MPISettings/InclusionSolverSettings does not exist");
          // Process special Inclusion solver settings
         PREC splitNodeUpdateRatio;
         if(!Utilities::stringToType(splitNodeUpdateRatio,  incSet.attribute("splitNodeUpdateRatio").value())) {
@@ -59,28 +60,26 @@ private:
 
     LogType * m_pSimulationLog;
 
+    using TopologyBuilderSettingsType = typename DynamicsSystemType::TopologyBuilderSettingsType;
+    TopologyBuilderSettingsType * m_topoSettings;
+
 public:
-    MPIModule(ParserType * p, BodyModuleType * b, ):m_pSimulationLog(p->getSimLog()) {}
+    MPIModule(ParserType * p, BodyModuleType * b, TopologyBuilderSettingsType * t)
+    :m_pSimulationLog(p->getSimLog()), m_topoSettings(t) {}
 
     void parseSceneSettingsPost(XMLNodeType sceneSettings) {
         XMLNodeType procTopo = sceneSettings.child("MPISettings").child("ProcessTopology");
         CHECK_XMLNODE(procTopo,"MPISettings/ProcessTopology does not exist");
 
+        std::string type = procTopo.attribute("type").value();
+
         if(type=="grid") {
 
-            MyMatrix<unsigned int>::Vector3 dim;
-            if(!Utilities::stringToVector3(dim,  procTopo.attribute("dimension"))) {
+            m_topoSettings->m_type = TopologyBuilderSettingsType::TopologyBuilderEnumType::GRIDBUILDER;
+
+            if(!Utilities::stringToVector3(m_topoSettings->m_processDim,  procTopo.attribute("dimension").value())) {
                 THROWEXCEPTION("---> String conversion in parseMPISettings: dimension failed");
             }
-            // saftey check
-            if(dim(0)*dim(1)*dim(2) != m_pProcCommunicator->getNProcesses()) {
-                LOG(m_pSimulationLog,"---> Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcCommunicator->getNProcesses() <<" Processes"<<std::endl; );
-                sleep(2);
-                THROWEXCEPTION("---> You have launched to many processes for the grid!");
-            }
-
-            // Create GridBuilder!
-
 
         } else {
             THROWEXCEPTION("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
@@ -103,7 +102,7 @@ struct SceneParserMPITraits : public SceneParserBaseTraits<TSceneParser,TDynamic
     using BodyModuleType             = ParserModules::BodyModule< SceneParserMPITraits > ;
     using GeometryModuleType         = ParserModules::GeometryModule<SceneParserMPITraits>;
 
-    using VisModuleType              = ParserModules::VisModule<SceneParserMPITraits>;
+    using VisModuleType              = ParserModules::VisModuleDummy<SceneParserMPITraits>;
 
     using MPIModuleType              = ParserModules::MPIModule<SceneParserMPITraits>;
 

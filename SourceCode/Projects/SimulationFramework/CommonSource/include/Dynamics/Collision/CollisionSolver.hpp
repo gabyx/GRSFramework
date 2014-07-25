@@ -8,8 +8,6 @@
 
 #include <memory>
 
-//#define SRUTIL_DELEGATE_PREFERRED_SYNTAX
-#include <srutil/delegate/delegate.hpp> // Use fast SR delegates
 
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
@@ -24,42 +22,7 @@
 
 #include "QuaternionHelpers.hpp"
 
-/**
-* @ingroup Collision
-* @brief Contact Delegate List which is used to store all callbacks which are invoked when a new contact has been found!
-*/
-
-class ContactDelegateList {
-public:
-
-    DEFINE_RIGIDBODY_CONFIG_TYPES
-
-    ContactDelegateList() {
-        m_ContactDelegateList.clear();
-    }
-
-
-    typedef srutil::delegate1<void, CollisionData*  > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
-
-
-    /** Adds a new ContactDelegate which will be invoked during the solveCollision() part.*/
-    void addContactDelegate(const ContactDelegate & cD) {
-        m_ContactDelegateList.push_back(cD);
-    }
-    void invokeAll(CollisionData *pCollData) const {
-        typename std::vector<ContactDelegate>::const_iterator it;
-        for(it = m_ContactDelegateList.begin(); it != m_ContactDelegateList.end(); ++it) {
-            (*it)(pCollData);
-        }
-    }
-
-    inline bool isEmpty() {
-        return m_ContactDelegateList.empty();
-    }
-
-private:
-    std::vector<ContactDelegate> m_ContactDelegateList;
-};
+#include "ContactDelegateSupport.hpp"
 
 /**
 * @ingroup Collision
@@ -67,7 +30,7 @@ private:
 */
 /** @{ */
 
-class CollisionSolver {
+class CollisionSolver : public ContactDelegateSupport{
 public:
 
     DEFINE_COLLISION_SOLVER_CONFIG_TYPES
@@ -105,8 +68,6 @@ protected:
     //class InclusionSolverNT;
     friend class InclusionSolverCO;
     friend class InclusionSolverCONoG;
-
-    ContactDelegateList m_ContactDelegateList;
 
     unsigned int m_expectedNContacts;                                                 ///< Expected number of Contacts.
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;       ///< TODO: Add DynamicsSystem pointer, List of all simulated bodies.

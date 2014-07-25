@@ -154,7 +154,7 @@ public:
                 auto itEnd = states.end();
                 for(auto it = states.begin(); it!=itEnd ; ++it) {
                     unsigned int bodyNr = RigidBodyId::getBodyNr(it->first) - m_startIdx;
-                    //WARNINGMSG( (bodyNr < m_SimBodyStates.size() && bodyNr>=0) , "body nr: " << bodyNr << " out of bound for DynamicState!");
+                    WARNINGMSG( (bodyNr < m_SimBodyStates.size() && bodyNr>=0) , "body nr: " << bodyNr << " out of bound for DynamicState!");
                     if( bodyNr < m_SimBodyStates.size() && bodyNr>=0 ){
                         m_SimBodyStates[bodyNr] =  it->second;
                     }
@@ -165,6 +165,8 @@ public:
                     auto id = m_pIdToState.find(it->first); // find id
                     if(id!=m_pIdToState.end()){
                         *id->second = it->second;
+                    }else{
+                        WARNINGMSG( false , "State with id: " << it->first << " could not be matched to State in DynamicState");
                     }
                 }
             }

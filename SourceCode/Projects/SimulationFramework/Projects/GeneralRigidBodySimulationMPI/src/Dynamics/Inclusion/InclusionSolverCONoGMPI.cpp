@@ -19,7 +19,7 @@
 
 
 
-InclusionSolverCONoG::InclusionSolverCONoG(
+InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(
     std::shared_ptr< BodyCommunicator >  pBodyComm,
     std::shared_ptr< CollisionSolverType >  pCollisionSolver,
     std::shared_ptr< DynamicsSystemType > pDynSys,
@@ -61,20 +61,20 @@ InclusionSolverCONoG::InclusionSolverCONoG(
     m_pInclusionComm->setContactGraph( m_pContactGraph );
 
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
-    m_pCollisionSolver->m_ContactDelegateList.addContactDelegate(
-        ContactDelegateList::ContactDelegate::from_method< ContactGraphType,  &ContactGraphType::addNode>(m_pContactGraph.get())
+    m_pCollisionSolver->addContactDelegate(
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(m_pContactGraph.get())
     );
 }
 
 
-InclusionSolverCONoG::~InclusionSolverCONoG() {
+InclusionSolverCONoGMPI::~InclusionSolverCONoGMPI() {
     delete m_pSorProxStepNodeVisitor;
     delete m_pSorProxInitNodeVisitor;
     delete m_pSorProxStepSplitNodeVisitor;
 }
 
 
-void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::filesystem::path folder_path ) {
+void InclusionSolverCONoGMPI::initializeLog( Logging::Log * pSolverLog,  boost::filesystem::path folder_path ) {
 
     m_pSolverLog = pSolverLog;
 
@@ -90,7 +90,7 @@ void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::fil
 }
 
 
-void InclusionSolverCONoG::reset() {
+void InclusionSolverCONoGMPI::reset() {
 
     m_pDynSys->getSettings(m_Settings);
 
@@ -112,7 +112,7 @@ void InclusionSolverCONoG::reset() {
 }
 
 
-void InclusionSolverCONoG::resetForNextIter() {
+void InclusionSolverCONoGMPI::resetForNextIter() {
 
     m_nContacts = 0;
     m_nSplitBodyNodes = 0;
@@ -128,7 +128,7 @@ void InclusionSolverCONoG::resetForNextIter() {
 
 
 
-void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
+void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) {
 
 #if CoutLevelSolver>1
     LOG(m_pSolverLog,  "---> solveInclusionProblem(): "<< std::endl;);
@@ -226,12 +226,12 @@ void InclusionSolverCONoG::solveInclusionProblem(PREC currentSimulationTime) {
 
 
 
-void InclusionSolverCONoG::doJorProx() {
-    ASSERTMSG(false,"InclusionSolverCONoG:: JOR Prox iteration not implemented!");
+void InclusionSolverCONoGMPI::doJorProx() {
+    ASSERTMSG(false,"InclusionSolverCONoGMPI:: JOR Prox iteration not implemented!");
 }
 
 
-void InclusionSolverCONoG::integrateAllBodyVelocities() {
+void InclusionSolverCONoGMPI::integrateAllBodyVelocities() {
 
 
     for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
@@ -246,7 +246,7 @@ void InclusionSolverCONoG::integrateAllBodyVelocities() {
 
 
 
-void InclusionSolverCONoG::doSorProx() {
+void InclusionSolverCONoGMPI::doSorProx() {
 
 #if CoutLevelSolverWhenContact>2
     LOG(m_pSolverLog, " u_e = [ ");
@@ -295,7 +295,7 @@ void InclusionSolverCONoG::doSorProx() {
 
 
 
-void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
+void InclusionSolverCONoGMPI::initContactGraphForIteration(PREC alpha) {
 
 
 
@@ -334,7 +334,7 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 }
 
 
-void InclusionSolverCONoG::sorProxOverAllNodes() {
+void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
 
     bool doConvergenceCheck;
     // if only local nodes then we do always a convergence check after each global iteration
@@ -476,7 +476,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 }
 
 
-void InclusionSolverCONoG::finalizeSorProx() {
+void InclusionSolverCONoGMPI::finalizeSorProx() {
 
     // Set all weightings of remote and local bodies back to the original!
 #if CoutLevelSolverWhenContact>0
@@ -488,7 +488,7 @@ void InclusionSolverCONoG::finalizeSorProx() {
 
 }
 
-std::string  InclusionSolverCONoG::getIterationStats() {
+std::string  InclusionSolverCONoGMPI::getIterationStats() {
     std::stringstream s;
     s << std::fixed
             << m_bUsedGPU<<"\t"
@@ -508,7 +508,7 @@ std::string  InclusionSolverCONoG::getIterationStats() {
     return s.str();
 }
 
-std::string InclusionSolverCONoG::getStatsHeader() {
+std::string InclusionSolverCONoGMPI::getStatsHeader() {
     std::stringstream s;
     s << "GPUUsed\tnContacts\tnContactsLocal\tnContactsRemote\tnSplitBodyNodes\tnGlobalIterations\tConverged\tIsFinite\tTotalTimeProx [s]\tIterTimeProx [s]\tTotalStateEnergy [J]\tTotalKinEnergy [J]\tTotalRotKinEnergy [J]\tTotalSpinNorm [Nms]";
     return s.str();
