@@ -111,9 +111,9 @@ public:
         using MPIModuleType            = typename TParser::MPIModuleType ;
 
 
-        auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &m_SettingsRecorder,
-                    &m_SettingsTimestepper,
-                    &m_SettingsInclusionSolver));
+        auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &m_settingsRecorder,
+                    &m_settingsTimestepper,
+                    &m_settingsInclusionSolver));
 
         auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &this->m_globalGeometries) );
 

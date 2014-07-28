@@ -73,9 +73,11 @@ public:
     void doFirstHalfTimeStep(PREC ts, PREC timestep);
     void doSecondHalfTimeStep(PREC te, PREC timestep);
 
-    void getSettings(RecorderSettings & settingsRecorder) const;
-    void getSettings(TimeStepperSettings &settingsTimestepper) const;
-    void getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const;
+    const RecorderSettingsType        & getSettingsRecorder() const;
+    const TimeStepperSettingsType     & getSettingsTimeStepper() const;
+    const InclusionSolverSettingsType & getSettingsInclusionSolver() const;
+    const TopologyBuilderSettingsType & getSettingsTopoBuilder() const;
+
     void getSettings(TimeStepperSettings &settingsTimestepper, InclusionSolverSettingsType &settingsInclusionSolver) const;
 
     void setSettings(const RecorderSettings & settingsRecorder);
@@ -99,10 +101,10 @@ public:
 protected:
 
 
-    RecorderSettings m_SettingsRecorder;
-    TimeStepperSettings m_SettingsTimestepper;
-    InclusionSolverSettingsType m_SettingsInclusionSolver;
-    TopologyBuilderSettingsType m_SettingsTopologyBuilder;
+    RecorderSettings m_settingsRecorder;
+    TimeStepperSettings m_settingsTimestepper;
+    InclusionSolverSettingsType m_settingsInclusionSolver;
+    TopologyBuilderSettingsType m_settingsTopologyBuilder;
 
     //Function
     //This is a minimal update of F, no checking if constant values are correct
@@ -134,9 +136,9 @@ public:
         using VisModuleType            = typename TParser::VisModuleType ;
         using MPIModuleType            = typename TParser::MPIModuleType ;
 
-        auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &this->m_SettingsRecorder,
-                    &this->m_SettingsTimestepper,
-                    &this->m_SettingsInclusionSolver));
+        auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &this->m_settingsRecorder,
+                    &this->m_settingsTimestepper,
+                    &this->m_settingsInclusionSolver));
 
         auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &this->m_globalGeometries) );
 
@@ -146,7 +148,7 @@ public:
         auto es  = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &this->m_externalForces));
         auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&this->m_ContactParameterMap));
 
-        auto mpi = std::unique_ptr<MPIModuleType>( new MPIModuleType(p,bm.get(),&m_SettingsTopologyBuilder));
+        auto mpi = std::unique_ptr<MPIModuleType>( new MPIModuleType(p,bm.get(),&m_settingsTopologyBuilder));
 
         return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));
     }

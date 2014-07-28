@@ -26,7 +26,7 @@
 #include "MPIMessages.hpp"
 #include "MPICommunication.hpp"
 
-
+#include "MPITopologyBuilder.hpp"
 
 
 SimulationManagerMPI::SimulationManagerMPI() {
@@ -70,31 +70,45 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
                                                       MPILayer::MPICommunicatorId::SIM_COMM
                                                     )
                                            ));
-    m_pSimulationLog->logMessage("--->SimulationManagerMPI:: Added ProcessCommunicator");
+    m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added ProcessCommunicator");
 
 
     m_pDynSys = std::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
-    m_pSimulationLog->logMessage("--->SimulationManagerMPI:: Added DynamicsSystem");
+    m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added DynamicsSystem");
 
     // Parse the Scene from XML! ==========================
-
     m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType( *m_pDynSys) );
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
-    m_pSceneParser->parseScene(sceneFilePathNew);
+
+    // parsing only static bodies and settings
+    typename SceneParserType::BodyModuleOptionsType o;
+    o.m_parseAllBodiesNonSelGroup = true;
+    o.m_parseSimBodies = false; o.m_allocateSimBodies = false;
+    o.m_parseStaticBodies = true; o.m_allocateStaticBodies = true;
+
+    m_pSceneParser->parseScene(sceneFilePathNew, typename SceneParserType::SceneParserOptionsType(), o);
+
     m_nGlobalSimBodies = m_pSceneParser->getSpecifiedSimBodies();
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SimBodies.size()
         << " simulated & " << m_pDynSys->m_Bodies.size()<<  " static bodies! "  << std::endl;);
     LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: Global Bodies in Simulation "<< m_nGlobalSimBodies<< " Bodies!" << std::endl;);
+    // ====================================================
 
-    // TopologyBuilder Build Topology
-    //TODO
-    // saftey check
-//            if(dim(0)*dim(1)*dim(2) != m_pProcCommunicator->getNProcesses()) {
-//                LOG(m_pSimulationLog,"---> Grid and Process Number do not match!: Grid: ("<< dim.transpose() << ")"<< " with: " << m_pProcCommunicator->getNProcesses() <<" Processes"<<std::endl; );
-//                sleep(2);
-//                THROWEXCEPTION("---> You have launched to many processes for the grid!");
-//            }
+    // TopologyBuilder Build Topology =======================
 
+    if(m_pDynSys->getSettingsTopoBuilder().m_type == MPILayer::TopologyBuilderEnum::GRIDBUILDER){
+
+        auto s = m_pDynSys->getSettingsTopoBuilder().m_gridBuilderSettings;
+        m_pTopologyBuilder = std::shared_ptr< TopologyBuilderType >(
+                                                new MPILayer::GridTopologyBuilder<SceneParserType, ProcessCommunicatorType>
+                                                  (m_pDynSys,m_pProcCommunicator,s,sceneFilePathNew, m_nGlobalSimBodies ) );
+    }else{
+        ERRORMSG("No Topology Builder type instantiated")
+    }
+
+    m_pTopologyBuilder->initTopology();
+    exit(-1);
+    //====================================================
     // Do Safty Check
     // Do a Reduction of all Simbodies, to count if no bodies are missing!
     m_pSimulationLog->logMessage("---> Check number of Bodies in Process:");
@@ -192,7 +206,7 @@ void SimulationManagerMPI::startSim() {
 
     initSim();
 
-    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
+    if(m_pTimestepper->m_settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
         m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(),m_pDynSys->m_SimBodies);
     }
 
@@ -308,7 +322,7 @@ void SimulationManagerMPI::initSim() {
     m_pTimestepper->initLogs(localSimFolderPath);
 
     // Get the actual RecorderSettings
-    m_pDynSys->getSettings(m_RecorderSettings);
+    m_RecorderSettings = m_pDynSys->getSettingsRecorder();
 
 
     m_pTimestepper->reset();

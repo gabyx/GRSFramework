@@ -53,7 +53,7 @@ private:
 
     struct SettingsSimThread {
         double m_EndTime;
-    } m_SettingsSimThread;
+    } m_settingsSimThread;
 
 
     Logging::Log *  m_pSimulationLog;

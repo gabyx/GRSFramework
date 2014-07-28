@@ -66,14 +66,14 @@ public:
     }
 
     void setSettings(const InclusionSolverSettingsType & settings){
-        m_Settings = settings;
+        m_settings = settings;
     }
 
     NeighbourMapType * getNeighbourMap(){return &m_nbDataMap;}
 
 private:
 
-    InclusionSolverSettingsType m_Settings;
+    InclusionSolverSettingsType m_settings;
 
 
     /** Functions are executed in this order in communicateRemoteContacts() */

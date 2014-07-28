@@ -27,33 +27,36 @@ DynamicsSystemBase::~DynamicsSystemBase() {
 };
 
 
-void DynamicsSystemBase::getSettings(RecorderSettingsType & settingsRecorder) const {
-    settingsRecorder = m_SettingsRecorder;
+const DynamicsSystemBase::RecorderSettingsType & DynamicsSystemBase::getSettingsRecorder() const {
+    return m_settingsRecorder;
+}
+const DynamicsSystemBase::TimeStepperSettingsType &
+DynamicsSystemBase::getSettingsTimeStepper() const {
+    return m_settingsTimestepper;
+}
+const DynamicsSystemBase::InclusionSolverSettingsType & DynamicsSystemBase::getSettingsInclusionSolver() const {
+    return m_settingsInclusionSolver;
+}
+
+void DynamicsSystemBase::setSettings(const TimeStepperSettingsType &settingsTimestepper){
+    m_settingsTimestepper = settingsTimestepper;
 }
 void DynamicsSystemBase::setSettings(const RecorderSettingsType & settingsRecorder) {
-    m_SettingsRecorder = settingsRecorder;
-}
-void DynamicsSystemBase::getSettings(TimeStepperSettingsType &settingsTimestepper) const {
-    settingsTimestepper = m_SettingsTimestepper;
-}
-void DynamicsSystemBase::setSettings(const TimeStepperSettingsType &settingsTimestepper){
-    m_SettingsTimestepper = settingsTimestepper;
-}
-void DynamicsSystemBase::getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const {
-    settingsInclusionSolver = m_SettingsInclusionSolver;
+    m_settingsRecorder = settingsRecorder;
 }
 void DynamicsSystemBase::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
-    m_SettingsInclusionSolver = settingsInclusionSolver;
+    m_settingsInclusionSolver = settingsInclusionSolver;
 }
+
 void DynamicsSystemBase::getSettings(TimeStepperSettingsType &settingsTimestepper,
                                  InclusionSolverSettingsType &settingsInclusionSolver) const {
-    settingsTimestepper = m_SettingsTimestepper;
-    settingsInclusionSolver = m_SettingsInclusionSolver;
+    settingsTimestepper = m_settingsTimestepper;
+    settingsInclusionSolver = m_settingsInclusionSolver;
 }
 void DynamicsSystemBase::setSettings(const TimeStepperSettingsType &settingsTimestepper,
                                  const InclusionSolverSettingsType &settingsInclusionSolver) {
-    m_SettingsTimestepper = settingsTimestepper;
-    m_SettingsInclusionSolver = settingsInclusionSolver;
+    m_settingsTimestepper = settingsTimestepper;
+    m_settingsInclusionSolver = settingsInclusionSolver;
 }
 
 

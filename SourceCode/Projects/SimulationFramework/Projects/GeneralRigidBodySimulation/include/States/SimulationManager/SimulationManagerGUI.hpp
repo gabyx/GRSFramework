@@ -80,7 +80,7 @@ private:
     void cleanUpRecordThread();
     struct SettingsSimThread {
         double m_EndTime;
-    } m_SettingsSimThread;
+    } m_settingsSimThread;
 
     void readSharedBuffer();
     void writeSharedBuffer();

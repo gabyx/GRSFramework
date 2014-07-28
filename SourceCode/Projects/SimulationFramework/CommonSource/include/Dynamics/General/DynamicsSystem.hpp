@@ -75,9 +75,10 @@ public:
     void doFirstHalfTimeStep(PREC ts, PREC timestep);
     void doSecondHalfTimeStep(PREC te, PREC timestep);
 
-    void getSettings(RecorderSettingsType & settingsRecorder) const;
-    void getSettings(TimeStepperSettingsType &settingsTimestepper) const;
-    void getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const;
+    const RecorderSettingsType        & getSettingsRecorder() const;
+    const TimeStepperSettingsType     & getSettingsTimeStepper() const;
+    const InclusionSolverSettingsType & getSettingsInclusionSolver() const;
+
     void getSettings(TimeStepperSettingsType &settingsTimestepper, InclusionSolverSettingsType &settingsInclusionSolver) const;
 
     void setSettings(const RecorderSettingsType & settingsRecorder);
@@ -99,9 +100,9 @@ public:
 
 protected:
 
-    RecorderSettingsType m_SettingsRecorder;
-    TimeStepperSettingsType m_SettingsTimestepper;
-    InclusionSolverSettingsType m_SettingsInclusionSolver;
+    RecorderSettingsType m_settingsRecorder;
+    TimeStepperSettingsType m_settingsTimestepper;
+    InclusionSolverSettingsType m_settingsInclusionSolver;
 
     //Function
     //This is a minimal update of F, no checking if constant values are correct
@@ -147,9 +148,9 @@ public:
         using VisModuleType            = typename TParser::VisModuleType ;
         using MPIModuleType            = typename TParser::MPIModuleType ;
 
-        auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &this->m_SettingsRecorder,
-                    &this->m_SettingsTimestepper,
-                    &this->m_SettingsInclusionSolver));
+        auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &this->m_settingsRecorder,
+                    &this->m_settingsTimestepper,
+                    &this->m_settingsInclusionSolver));
 
         auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &this->m_globalGeometries) );
 

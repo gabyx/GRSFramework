@@ -63,7 +63,7 @@ public:
 //    void readFromPercussionPool(unsigned int index, const CollisionData * pCollData, VectorDyn & P_old);
 //    void updatePercussionPool(const VectorDyn & P_old ) ;
 
-    InclusionSolverSettingsType m_Settings;
+    InclusionSolverSettingsType m_settings;
 
     unsigned int getNContacts(){return m_nContacts;}
 

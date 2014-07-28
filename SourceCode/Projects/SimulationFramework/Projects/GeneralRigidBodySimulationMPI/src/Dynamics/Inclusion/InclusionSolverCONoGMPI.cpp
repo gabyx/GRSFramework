@@ -50,9 +50,9 @@ InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(
 
 
     //Make a new Sor Prox Visitor (takes references from these class member)
-    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor<ContactGraphType>(m_Settings,m_bConverged,m_globalIterationCounter);
+    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter);
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>();
-    m_pSorProxStepSplitNodeVisitor = new SorProxStepSplitNodeVisitor<ContactGraphType>(m_Settings,m_bConverged,m_globalIterationCounter);
+    m_pSorProxStepSplitNodeVisitor = new SorProxStepSplitNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter);
 
     m_pInclusionComm = std::shared_ptr<InclusionCommunicatorType >( new InclusionCommunicatorType(pBodyComm, m_pDynSys,  m_pProcComm));
     m_pContactGraph  = std::shared_ptr<ContactGraphType>( new ContactGraphType(pDynSys));
@@ -92,16 +92,16 @@ void InclusionSolverCONoGMPI::initializeLog( Logging::Log * pSolverLog,  boost::
 
 void InclusionSolverCONoGMPI::reset() {
 
-    m_pDynSys->getSettings(m_Settings);
+    m_settings = m_pDynSys->getSettingsInclusionSolver();
 
     resetForNextIter();
 
 #if HAVE_CUDA_SUPPORT == 1
-    LOG(m_pSimulationLog, "---> Try to set GPU Device : "<< m_Settings.m_UseGPUDeviceId << std::endl;);
+    LOG(m_pSimulationLog, "---> Try to set GPU Device : "<< m_settings.m_UseGPUDeviceId << std::endl;);
 
-    CHECK_CUDA(cudaSetDevice(m_Settings.m_UseGPUDeviceId));
+    CHECK_CUDA(cudaSetDevice(m_settings.m_UseGPUDeviceId));
     cudaDeviceProp props;
-    CHECK_CUDA(cudaGetDeviceProperties(&props,m_Settings.m_UseGPUDeviceId));
+    CHECK_CUDA(cudaGetDeviceProperties(&props,m_settings.m_UseGPUDeviceId));
 
     LOG(m_pSimulationLog,  "---> Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
 #endif
@@ -123,7 +123,7 @@ void InclusionSolverCONoGMPI::resetForNextIter() {
     m_pContactGraph->clearGraph();
 
     m_pInclusionComm->reset();
-    m_pInclusionComm->setSettings(m_Settings);
+    m_pInclusionComm->setSettings(m_settings);
 }
 
 
@@ -175,8 +175,8 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
 
         // Solve Inclusion
         // =============================================================================================================
-        if( m_Settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT ||
-            m_Settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL
+        if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT ||
+            m_settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL
              ) {
 
 #if MEASURE_TIME_PROX == 1
@@ -184,20 +184,20 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
             counter.start();
 #endif
 
-            initContactGraphForIteration(m_Settings.m_alphaSORProx);
+            initContactGraphForIteration(m_settings.m_alphaSORProx);
             doSorProx();
 
 #if MEASURE_TIME_PROX == 1
             m_timeProx = counter.elapsedSec();
 #endif
 
-        } else if(m_Settings.m_eMethod == InclusionSolverSettingsType::JOR) {
+        } else if(m_settings.m_eMethod == InclusionSolverSettingsType::JOR) {
             ASSERTMSG(false,"Jor Algorithm has not been implemented yet");
         }else{
             ASSERTMSG(false,"This algorithm has not been implemented yet");
         }
 
-        if(m_Settings.m_bIsFiniteCheck) {
+        if(m_settings.m_bIsFiniteCheck) {
             // TODO CHECK IF finite!
 #if CoutLevelSolverWhenContact>0
             LOG(m_pSolverLog,  "---> Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
@@ -237,7 +237,7 @@ void InclusionSolverCONoGMPI::integrateAllBodyVelocities() {
     for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
         (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()
-                                                        *(*bodyIt)->m_h_term * m_Settings.m_deltaT;
+                                                        *(*bodyIt)->m_h_term * m_settings.m_deltaT;
     }
 
 
@@ -282,9 +282,9 @@ void InclusionSolverCONoGMPI::doSorProx() {
 
         m_globalIterationCounter++;
 
-        if ( (m_bConverged == true || m_globalIterationCounter >= m_Settings.m_MaxIter) && m_globalIterationCounter >= m_Settings.m_MinIter) {
+        if ( (m_bConverged == true || m_globalIterationCounter >= m_settings.m_MaxIter) && m_globalIterationCounter >= m_settings.m_MinIter) {
 #if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_globalIterationCounter <<" / "<<  m_Settings.m_MaxIter<< std::endl;);
+            LOG(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_globalIterationCounter <<" / "<<  m_settings.m_MaxIter<< std::endl;);
 #endif
             break;
         }
@@ -319,14 +319,14 @@ void InclusionSolverCONoGMPI::initContactGraphForIteration(PREC alpha) {
         // All bodies also the ones not in the contact graph...
         // add u_s + M^⁻1*h*deltaT ,  all contact forces initial values have already been applied!
         (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back +
-                (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
+                (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_settings.m_deltaT;
     }
 
     // Set the initial u_0 for the prox iteration for all REMOTE BODIES WITH CONTACTS
     auto & remotesWithContacts = m_pContactGraph->getRemoteBodiesWithContactsListRef();
     for( auto bodyIt = remotesWithContacts.begin(); bodyIt != remotesWithContacts.end(); bodyIt++) {
         (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back +
-                (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_Settings.m_deltaT;
+                (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_settings.m_deltaT;
     }
 
 
@@ -341,16 +341,16 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
     if( m_pContactGraph->isUncoupled() ){
         doConvergenceCheck = true;
     }else{
-        doConvergenceCheck = m_globalIterationCounter % (m_Settings.m_convergenceCheckRatio*m_Settings.m_splitNodeUpdateRatio)  == 0
-                             && m_globalIterationCounter >= m_Settings.m_MinIter;
+        doConvergenceCheck = m_globalIterationCounter % (m_settings.m_convergenceCheckRatio*m_settings.m_splitNodeUpdateRatio)  == 0
+                             && m_globalIterationCounter >= m_settings.m_MinIter;
     }
 
 
     // cache the velocities if convergence check should be done
     if( doConvergenceCheck ) {
 
-        if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity ||
-                m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity) {
+        if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity ||
+                m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity) {
             //For all remote and local bodies
             auto & localWithContacts   = m_pContactGraph->getLocalBodiesWithContactsListRef();
             auto & remotesWithContacts = m_pContactGraph->getRemoteBodiesWithContactsListRef();
@@ -376,7 +376,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
 
     // Do this only after a certain number of iterations!
     if(m_nSplitBodyNodes || m_nRemoteNodes ){
-        if(m_globalIterationCounter % m_Settings.m_splitNodeUpdateRatio == 0 ) {
+        if(m_globalIterationCounter % m_settings.m_splitNodeUpdateRatio == 0 ) {
             // Communicate all remote velocities to neighbour (if nSplitBodies != 0 || remoteNodes != 0)
             m_pInclusionComm->communicateSplitBodyUpdate(m_globalIterationCounter);
 
@@ -394,22 +394,22 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
 
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
-    // (m_Settings.m_convergenceCheckRatio*m_Settings.m_splitNodeUpdateRatio) = local iterations per convergence checks
+    // (m_settings.m_convergenceCheckRatio*m_settings.m_splitNodeUpdateRatio) = local iterations per convergence checks
     if(doConvergenceCheck) {
 
         bool converged;
         auto & localWithContacts   = m_pContactGraph->getLocalBodiesWithContactsListRef();
         auto & remotesWithContacts = m_pContactGraph->getRemoteBodiesWithContactsListRef();
 
-        if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity) {
+        if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity) {
             //Local Bodies
 
             for(auto it = localWithContacts.begin(); it !=localWithContacts.end(); ++it) {
                 //std::cout << "before Criteria"<<std::endl;//std::cout <<"new "<< (*it)->first->m_pSolverData->m_uBuffer.m_front.transpose() << std::endl; //std::cout <<"old "<< (*it)->first->m_pSolverData->m_uBuffer.m_back.transpose() << std::endl;
                 converged = Numerics::cancelCriteriaValue(  (*it)->m_pSolverData->m_uBuffer.m_back,
                                                             (*it)->m_pSolverData->m_uBuffer.m_front,
-                                                            m_Settings.m_AbsTol,
-                                                            m_Settings.m_RelTol);
+                                                            m_settings.m_AbsTol,
+                                                            m_settings.m_RelTol);
                 //std::cout << "after Criteria"<<std::endl;
                 if(!converged) {
                     m_bConverged=false;
@@ -419,7 +419,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
             // Remote Bodies
             if( m_bConverged ) {
                 for(auto it=remotesWithContacts.begin(); it !=remotesWithContacts.end(); ++it) {
-                    converged = Numerics::cancelCriteriaValue(  (*it)->m_pSolverData->m_uBuffer.m_back, (*it)->m_pSolverData->m_uBuffer.m_front,m_Settings.m_AbsTol,m_Settings.m_RelTol);
+                    converged = Numerics::cancelCriteriaValue(  (*it)->m_pSolverData->m_uBuffer.m_back, (*it)->m_pSolverData->m_uBuffer.m_front,m_settings.m_AbsTol,m_settings.m_RelTol);
 
                     if(!converged) {
                         m_bConverged=false;
@@ -432,14 +432,14 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
             LOG(m_pSolverLog, "---> Convergence criteria (InVelocity) converged: "<<  m_bConverged<< std::endl;);
             #endif
 
-        } else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity) {
+        } else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity) {
 
             for(auto it=localWithContacts.begin(); it!=localWithContacts.end(); ++it) {
                 converged = Numerics::cancelCriteriaMatrixNormSq( (*it)->m_pSolverData->m_uBuffer.m_back,
                                                                 (*it)->m_pSolverData->m_uBuffer.m_front,
                                                                 (*it)->m_MassMatrix_diag,
-                                                                m_Settings.m_AbsTol,
-                                                                m_Settings.m_RelTol);
+                                                                m_settings.m_AbsTol,
+                                                                m_settings.m_RelTol);
                 if(!converged) {
                     m_bConverged=false;
                     break;
@@ -450,7 +450,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
             if( m_bConverged ) {
                 for(auto it = remotesWithContacts.begin(); it !=remotesWithContacts.end(); ++it) {
 
-                    converged = Numerics::cancelCriteriaMatrixNormSq( (*it)->m_pSolverData->m_uBuffer.m_back,(*it)->m_pSolverData->m_uBuffer.m_front,(*it)->m_MassMatrix_diag,m_Settings.m_AbsTol,m_Settings.m_RelTol);
+                    converged = Numerics::cancelCriteriaMatrixNormSq( (*it)->m_pSolverData->m_uBuffer.m_back,(*it)->m_pSolverData->m_uBuffer.m_front,(*it)->m_MassMatrix_diag,m_settings.m_AbsTol,m_settings.m_RelTol);
                     if(!converged) { m_bConverged=false; break; }
                 }
             }

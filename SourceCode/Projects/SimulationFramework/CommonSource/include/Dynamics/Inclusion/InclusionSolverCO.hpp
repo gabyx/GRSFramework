@@ -55,7 +55,7 @@ public:
     double m_timeProx, m_proxIterationTime;
 
 
-    InclusionSolverSettingsType m_Settings;
+    InclusionSolverSettingsType m_settings;
 
     unsigned int getNContacts(){return m_nContacts;}
 

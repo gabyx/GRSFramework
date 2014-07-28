@@ -91,7 +91,7 @@ private:
     struct SettingsVisThread {
         bool m_bFirstPass;
         bool m_bVideoDrop;
-    } m_SettingsVisThread;
+    } m_settingsVisThread;
 
     // =========================================
 
@@ -104,7 +104,7 @@ private:
         bool m_bSimFileDrop;
         bool m_bSimFileDropInterpolate;
         bool m_bVideoDrop;
-    } m_SettingsSimThread;
+    } m_settingsSimThread;
     // =========================================
 
     // Accessed only by Loader Thread

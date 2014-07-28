@@ -77,7 +77,8 @@ public:
 
             m_topoSettings->m_type = TopologyBuilderSettingsType::TopologyBuilderEnumType::GRIDBUILDER;
 
-            if(!Utilities::stringToVector3(m_topoSettings->m_processDim,  procTopo.attribute("dimension").value())) {
+            if(!Utilities::stringToVector3(m_topoSettings->m_gridBuilderSettings.m_processDim
+                                           ,  procTopo.attribute("dimension").value())) {
                 THROWEXCEPTION("---> String conversion in parseMPISettings: dimension failed");
             }
 

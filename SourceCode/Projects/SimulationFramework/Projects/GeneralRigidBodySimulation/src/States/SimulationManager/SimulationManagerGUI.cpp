@@ -237,7 +237,7 @@ void SimulationManagerGUI::threadRunSimulation() {
 
     resetTimelineSimulation();
     while(!isSimThreadToBeStopped()) {
-        timelineSimulation = getTimelineSimulation() + m_pTimestepper->m_Settings.m_startTime;
+        timelineSimulation = getTimelineSimulation() + m_pTimestepper->m_settings.m_startTime;
         state_time = m_pTimestepper->getTimeCurrent();
 
         if ( state_time <= timelineSimulation) {
@@ -376,7 +376,7 @@ bool SimulationManagerGUI::initRecordThread() {
     m_SceneFilePath /= filename;
 
     // Get the actual RecorderSettings
-    m_pDynSys->getSettings(m_RecorderSettings);
+    m_RecorderSettings = m_pDynSys->getSettingsRecorder();
 
     //Reset Timestepper!
     m_pSimulationLog->logMessage("---> Reset Timestepper...");
@@ -391,8 +391,8 @@ bool SimulationManagerGUI::initRecordThread() {
     //Open SimState File
     m_pSimulationLog->logMessage("---> Copy SimState.sim to right place...");
     bool fileOK = false;
-    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::CONTINUE) {
-        fileOK = m_pStateRecorder->createSimFileCopyFromReference(m_SimFilePath,m_pTimestepper->m_Settings.m_simStateReferenceFile);
+    if(m_pTimestepper->m_settings.m_eSimulateFromReference == TimeStepperSettings::CONTINUE) {
+        fileOK = m_pStateRecorder->createSimFileCopyFromReference(m_SimFilePath,m_pTimestepper->m_settings.m_simStateReferenceFile);
     } else {
         fileOK = m_pStateRecorder->createSimFile(m_SimFilePath);
     }
@@ -404,16 +404,16 @@ bool SimulationManagerGUI::initRecordThread() {
     // Copy File: SimulationData
     m_pSimulationLog->logMessage("---> Copy SimData.dat to right place...");
     boost::filesystem::path simDataFile;
-    if(!m_pTimestepper->m_Settings.m_simDataReferenceFile.empty()) {
+    if(!m_pTimestepper->m_settings.m_simDataReferenceFile.empty()) {
         ASSERTMSG(false,"HERE IS CODE ZU VERFOLSTÄNDIGEN! FALSCH!")
-        simDataFile = FileManager::getSingletonPtr()->copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_Settings.m_simDataReferenceFile,true);
+        simDataFile = FileManager::getSingletonPtr()->copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_settings.m_simDataReferenceFile,true);
     }
 
     m_pSimulationLog->logMessage("---> Init Timestepper Logs...");
     m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);
 
     // Write first initial value out!
-    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
+    if(m_pTimestepper->m_settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
         m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_SimBodies);
         m_pSimulationLog->logMessage("---> Wrote first initial value to file...");
     }

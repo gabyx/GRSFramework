@@ -73,7 +73,7 @@ public:
     unsigned int getIterationCount();
 
     // Solver Parameters
-    TimeStepperSettings m_Settings;
+    TimeStepperSettings m_settings;
 
     //Accessed only by Simulation manager, after doOneIteration();
     const DynamicsState * getBackStateBuffer();

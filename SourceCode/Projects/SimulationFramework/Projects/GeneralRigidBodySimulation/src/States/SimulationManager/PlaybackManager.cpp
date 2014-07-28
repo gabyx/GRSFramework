@@ -141,20 +141,20 @@ void PlaybackManager::updateScene(double timeSinceLastFrame) {
     std::stringstream logstream;
 
     if (isSimThreadRunning() && m_bSetupSuccessful) {
-        if(!m_SettingsVisThread.m_bFirstPass) {
+        if(!m_settingsVisThread.m_bFirstPass) {
 
             m_pVisBuffer = m_pSharedBuffer->updateVisBuffer(bStateChanged);
             if(bStateChanged) {
                 updateSimBodies();
             }
 
-            if(m_SettingsVisThread.m_bVideoDrop) {
+            if(m_settingsVisThread.m_bVideoDrop) {
                 m_pVideoDropper->tryToDropFrame();
             }
 
         } else { // Only do at the beginning
 
-            m_SettingsVisThread.m_bFirstPass = false;
+            m_settingsVisThread.m_bFirstPass = false;
             // Wait for sim thread! to synchronize
             m_barrier_start.wait();
         }
@@ -198,13 +198,13 @@ double PlaybackManager::getSimulationTime() {
 void PlaybackManager::initBeforeThreads() {
     std::stringstream logstream;
 
-    m_SettingsVisThread.m_bFirstPass = true;
+    m_settingsVisThread.m_bFirstPass = true;
 
     //Set once before the start all values for the video drop!
     m_pVideoDropper->setFPS(m_VideoDropSettings.m_FPS);
-    m_SettingsVisThread.m_bVideoDrop = m_VideoDropSettings.m_bVideoDrop;
-    m_SettingsSimThread.m_bVideoDrop = m_VideoDropSettings.m_bVideoDrop;
-    if(m_SettingsSimThread.m_bVideoDrop) {
+    m_settingsVisThread.m_bVideoDrop = m_VideoDropSettings.m_bVideoDrop;
+    m_settingsSimThread.m_bVideoDrop = m_VideoDropSettings.m_bVideoDrop;
+    if(m_settingsSimThread.m_bVideoDrop) {
         logstream <<"PlaybackManager: Drop Video: "<< "true" << std::endl;
     } else {
         logstream <<"PlaybackManager: Drop Video: "<< "false" << std::endl;
@@ -212,10 +212,10 @@ void PlaybackManager::initBeforeThreads() {
 
     m_pStateRecorderResampler->setFPS(m_VideoDropSettings.m_FPS);
     m_pStateRecorderResampler->setTimeRange(m_SimFileDropSettings.m_startTime,m_SimFileDropSettings.m_endTime);
-    m_SettingsSimThread.m_bSimFileDrop = m_SimFileDropSettings.m_bSimFileDrop;
-    m_SettingsSimThread.m_bSimFileDrop = m_SimFileDropSettings.m_bSimFileDrop;
-    m_SettingsSimThread.m_bSimFileDropInterpolate = m_SimFileDropSettings.m_bSimFileDropInterpolate;
-    if(m_SettingsSimThread.m_bSimFileDrop) {
+    m_settingsSimThread.m_bSimFileDrop = m_SimFileDropSettings.m_bSimFileDrop;
+    m_settingsSimThread.m_bSimFileDrop = m_SimFileDropSettings.m_bSimFileDrop;
+    m_settingsSimThread.m_bSimFileDropInterpolate = m_SimFileDropSettings.m_bSimFileDropInterpolate;
+    if(m_settingsSimThread.m_bSimFileDrop) {
         logstream <<"PlaybackManager: Drop Sim File: "<< "true" << std::endl;
     } else {
         logstream <<"PlaybackManager: Drop Sim File: "<< "false" << std::endl;
@@ -271,7 +271,7 @@ void PlaybackManager::threadRunSimulation() {
         timelineSimulation = getTimelineSimulation();
 
 
-        if(m_SettingsSimThread.m_bVideoDrop) {
+        if(m_settingsSimThread.m_bVideoDrop) {
             // Dont sync with timeline,
 
             //Make one step!
@@ -295,10 +295,10 @@ void PlaybackManager::threadRunSimulation() {
         }
 
         if(bchangedState) {
-            if(m_SettingsSimThread.m_bSimFileDrop) { // When the sim buffer has been moved, then ... At the biginning, this moves to the initial state basically!
+            if(m_settingsSimThread.m_bSimFileDrop) { // When the sim buffer has been moved, then ... At the biginning, this moves to the initial state basically!
                 //Do a resampling of the states!
                 LOG(m_pThreadLog, "---> PlaybackManager: Try to resample state time: " << currentState->m_t<<std::endl;);
-                m_pStateRecorderResampler->tryToWrite(currentState,m_SettingsSimThread.m_bSimFileDropInterpolate);
+                m_pStateRecorderResampler->tryToWrite(currentState,m_settingsSimThread.m_bSimFileDropInterpolate);
             }
 
 
@@ -330,7 +330,7 @@ void PlaybackManager::initSimThread() {
 
     m_pSharedBuffer->resetStateRingPool(m_pDynSys->m_bodiesInitStates);
 
-    if(m_SettingsSimThread.m_bVideoDrop) {
+    if(m_settingsSimThread.m_bVideoDrop) {
         m_pVideoDropper->reset();
 
         // Request new file Paths for all logs from FileManager
@@ -340,7 +340,7 @@ void PlaybackManager::initSimThread() {
         m_pVideoDropper->setFolderPath(videoFolderPath);
     }
 
-    if(m_SettingsSimThread.m_bSimFileDrop) {
+    if(m_settingsSimThread.m_bSimFileDrop) {
 
         //Make FileLoader load the whole state!
         m_pFileLoader->setReadFullState(true);
@@ -365,7 +365,7 @@ void PlaybackManager::initSimThread() {
 
 
 void PlaybackManager::cleanUpSimThread() {
-    if(m_SettingsSimThread.m_bSimFileDrop) {
+    if(m_settingsSimThread.m_bSimFileDrop) {
         m_pStateRecorderResampler->closeAll();
     }
 }

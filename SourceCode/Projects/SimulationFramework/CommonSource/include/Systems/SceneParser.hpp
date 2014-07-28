@@ -1192,7 +1192,7 @@ public:
             }
 
             // Set the time in the dynamics system timestepper settings
-            if(useTime) {
+            if(useTime && m_settings) {
                 m_settings->getTimeStepperSettings()->m_startTime = time;
             }
         }
@@ -1574,7 +1574,6 @@ public:
                RigidBodySimContainerType * simBodies, RigidBodyStaticContainerType * bodies )
         : m_pSimulationLog(p->getSimLog()), m_pGeomMod(g), m_pVisMod(i), m_pInitStatesMod(is), m_pSimBodies(simBodies), m_pBodies(bodies) {
             ASSERTMSG(is,"should not be null");
-            ASSERTMSG(g,"should not be null");
         };
 
     void parseModuleOptions(XMLNodeType & sceneObjects){
@@ -1812,13 +1811,13 @@ private:
         // Only update start range for selective parsing;
         if(updateStartRange){ m_startRangeIdIt = bodyIdIt;}
 
-        LOGSCLEVEL2(m_pSimulationLog,"---> Added "<<m_parsedInstancesGroup<<" RigidBody Instances..."<<std::endl;);
+        LOGSCLEVEL2(m_pSimulationLog,"---> Added "<<m_parsedInstancesGroup<<" RigidBody Ids ..."<<std::endl;);
         // =======================================================
 
         // Parse Geometry
-        XMLNodeType geometryNode;
-        GET_XMLCHILDNODE_CHECK(geometryNode, "Geometry",rigidbodies);
         if(m_pGeomMod){
+            XMLNodeType geometryNode;
+            GET_XMLCHILDNODE_CHECK(geometryNode, "Geometry",rigidbodies);
             m_pGeomMod->parseGeometry(geometryNode, &m_bodyListGroup, m_startIdGroup);
         }
 
@@ -1827,13 +1826,13 @@ private:
 
         //Copy the pointers!
         if(m_eBodiesState == RigidBodyType::BodyMode::SIMULATED) {
-            LOGSCLEVEL1(m_pSimulationLog,"---> Copy Simulated RigidBody References to DynamicSystem ..."<<std::endl;);
+            //LOGSCLEVEL1(m_pSimulationLog,"---> Copy Simulated RigidBody References to DynamicSystem ..."<<std::endl;);
             bool added = addAllBodies(m_pSimBodies);
             if(!added) {THROWEXCEPTION("Could not add body to m_SimBodies!, some bodies exist already in map!");};
             m_nSimBodies += m_parsedInstancesGroup;
             m_nBodies += m_parsedInstancesGroup;
         } else if(m_eBodiesState == RigidBodyType::BodyMode::STATIC) {
-            LOGSCLEVEL1(m_pSimulationLog,"---> Copy Static RigidBody References to DynamicSystem ..."<<std::endl;);
+            //LOGSCLEVEL1(m_pSimulationLog,"---> Copy Static RigidBody References to DynamicSystem ..."<<std::endl;);
             bool added = addAllBodies(m_pBodies);
             if(!added) {THROWEXCEPTION("Could not add body to m_Bodies!, some bodies exist already in map!");};
             m_nStaticBodies += m_parsedInstancesGroup;
@@ -2109,7 +2108,7 @@ public:
 
 
     using BodyModuleOptionsType = typename BodyModuleType::OptionsType;
-
+    using SceneParserOptionsType = SceneParserOptions;
 public:
 
     template<typename ModuleGeneratorType>

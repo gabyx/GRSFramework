@@ -29,33 +29,41 @@ DynamicsSystemMPI::~DynamicsSystemMPI() {
 };
 
 
-void DynamicsSystemMPI::getSettings(RecorderSettings & settingsRecorder) const {
-    settingsRecorder = m_SettingsRecorder;
+
+const DynamicsSystemMPI::RecorderSettingsType & DynamicsSystemMPI::getSettingsRecorder() const {
+    return m_settingsRecorder;
 }
-void DynamicsSystemMPI::setSettings(const RecorderSettings & settingsRecorder) {
-    m_SettingsRecorder = settingsRecorder;
+const DynamicsSystemMPI::TimeStepperSettingsType &
+DynamicsSystemMPI::getSettingsTimeStepper() const {
+    return m_settingsTimestepper;
 }
-void DynamicsSystemMPI::getSettings(TimeStepperSettings &settingsTimestepper) const {
-    settingsTimestepper = m_SettingsTimestepper;
+const DynamicsSystemMPI::InclusionSolverSettingsType & DynamicsSystemMPI::getSettingsInclusionSolver() const {
+    return m_settingsInclusionSolver;
 }
-void DynamicsSystemMPI::setSettings(const TimeStepperSettings &settingsTimestepper){
-    m_SettingsTimestepper = settingsTimestepper;
+
+const DynamicsSystemMPI::TopologyBuilderSettingsType & DynamicsSystemMPI::getSettingsTopoBuilder() const{
+    return m_settingsTopologyBuilder;
 }
-void DynamicsSystemMPI::getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const {
-    settingsInclusionSolver = m_SettingsInclusionSolver;
+
+void DynamicsSystemMPI::setSettings(const TimeStepperSettingsType &settingsTimeStepper){
+    m_settingsTimestepper = settingsTimeStepper;
+}
+void DynamicsSystemMPI::setSettings(const RecorderSettingsType & settingsRecorder) {
+    m_settingsRecorder = settingsRecorder;
 }
 void DynamicsSystemMPI::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
-    m_SettingsInclusionSolver = settingsInclusionSolver;
+    m_settingsInclusionSolver = settingsInclusionSolver;
 }
-void DynamicsSystemMPI::getSettings(TimeStepperSettings &settingsTimestepper,
+
+void DynamicsSystemMPI::getSettings(TimeStepperSettingsType &settingsTimestepper,
                                  InclusionSolverSettingsType &settingsInclusionSolver) const {
-    settingsTimestepper = m_SettingsTimestepper;
-    settingsInclusionSolver = m_SettingsInclusionSolver;
+    settingsTimestepper = m_settingsTimestepper;
+    settingsInclusionSolver = m_settingsInclusionSolver;
 }
-void DynamicsSystemMPI::setSettings(const TimeStepperSettings &settingsTimestepper,
+void DynamicsSystemMPI::setSettings(const TimeStepperSettingsType &settingsTimestepper,
                                  const InclusionSolverSettingsType &settingsInclusionSolver) {
-    m_SettingsTimestepper = settingsTimestepper;
-    m_SettingsInclusionSolver = settingsInclusionSolver;
+    m_settingsTimestepper = settingsTimestepper;
+    m_settingsInclusionSolver = settingsInclusionSolver;
 }
 
 
