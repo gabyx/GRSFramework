@@ -69,7 +69,7 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
     m_pDynSys = std::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
 
     // Parse the Scene from XML! ==========================
-    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(m_pDynSys) );
+    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(*m_pDynSys) );
     m_pSceneParser->parseScene(sceneFilePath,SceneParserOptions());
     m_nSimBodies = m_pDynSys->m_SimBodies.size();
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SimBodies.size()
@@ -160,7 +160,7 @@ bool SimulationManager::initRecordThread() {
 
 
     // Get the actual RecorderSettings
-    m_pDynSys->getSettings(m_RecorderSettings);
+    m_RecorderSettings = m_pDynSys->getSettingsRecorder();
 
     //Reset Timestepper!
     m_pTimestepper->reset();
