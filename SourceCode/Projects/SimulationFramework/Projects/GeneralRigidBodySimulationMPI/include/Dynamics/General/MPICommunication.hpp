@@ -369,6 +369,10 @@ public:
     template<typename T, typename List>
     void receiveMessageFromRanks(T & t, const List & ranks, MPIMessageTag tag ){ receiveMessageFromRanks(t,ranks,tag,this->m_comm);}
 
+    void waitBarrier( MPI_Comm comm ){
+         MPI_Barrier(comm);
+    }
+    inline void waitBarrier(){waitBarrier(this->m_comm);}
 
     /**
     * Inserts/Overwrites a new splitted communicator with id newCommId if color is not -1

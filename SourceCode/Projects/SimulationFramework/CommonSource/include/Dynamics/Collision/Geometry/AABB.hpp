@@ -51,9 +51,9 @@ public:
         m_maxPoint(0) = std::max(m_maxPoint(0),box.m_maxPoint(0));
         m_maxPoint(1) = std::max(m_maxPoint(1),box.m_maxPoint(1));
         m_maxPoint(2) = std::max(m_maxPoint(2),box.m_maxPoint(2));
-        m_minPoint(0) = std::min( m_minPoint(0),box. m_minPoint(0));
-        m_minPoint(1) = std::min( m_minPoint(1),box. m_minPoint(1));
-        m_minPoint(2) = std::min( m_minPoint(2),box. m_minPoint(2));
+        m_minPoint(0) = std::min( m_minPoint(0),box.m_minPoint(0));
+        m_minPoint(1) = std::min( m_minPoint(1),box.m_minPoint(1));
+        m_minPoint(2) = std::min( m_minPoint(2),box.m_minPoint(2));
         return *this;
     };
 

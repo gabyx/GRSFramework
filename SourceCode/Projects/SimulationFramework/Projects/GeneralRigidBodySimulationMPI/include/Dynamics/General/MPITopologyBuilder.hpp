@@ -35,6 +35,7 @@ public:
     }
 
     virtual void initTopology() {};
+    virtual void rebuildTopology() {};
 
     virtual ~TopologyBuilder() {}
 
@@ -79,27 +80,82 @@ public:
     }
 
     void initTopology() {
-        LOGTB(m_pSimulationLog,"---> initialize Topology (Grid) ..." <<std::endl;)
+        LOGTB(m_pSimulationLog,"---> initialize Topology (Grid)" <<std::endl;)
 
         if(this->m_pProcCommunicator->hasMasterRank()) {
 
-            // Parse all initial condition from the scene file
+            // Parse all initial condition from the scene file ================
             SceneParserType parser(*this) ; // this class is the modules generator
             typename SceneParserType::BodyModuleOptionsType o;
             o.m_parseAllBodiesNonSelGroup = true;
             o.m_parseSimBodies = true; o.m_allocateSimBodies = false;
             o.m_parseStaticBodies = false; o.m_allocateStaticBodies = false;
+            // clean init states:
+            m_initStates.clear();
             parser.parseScene(m_sceneFilePath, typename SceneParserType::SceneParserOptionsType(), o);
-            for(auto & i : m_pDynSys->m_bodiesInitStates){
-                std::cout << "state: " << RigidBodyId::getBodyIdString(i.second.m_id )<< " , " << i.second.m_q.transpose() << std::endl;
+
+            if(m_initStates.size() != m_nGlobalSimBodies){
+                ERRORMSG("Parsed to little initial states in scene file: " << m_sceneFilePath << std::endl);
             }
+
+            LOGTBLEVEL3(m_pSimulationLog, "---> parsed states: "<<std::endl;);
+            for(auto & s : m_initStates){
+                // Save mass points
+                m_massPoints_glo.insert(std::make_pair(s.first, MassPoint(s.second,m_nPointsPredictor) ));
+                LOGTBLEVEL3(m_pSimulationLog, "\t\t state: "
+                            << RigidBodyId::getBodyIdString(s.second.m_id )<< " , " << s.second.m_q.transpose() << std::endl;);
+            }
+            // ================================================================
+
+            predictMassPoints();
+
+            // Preprocess for Grid Building =================================================
+            m_r_G_loc.setZero();
+            m_aabb_glo.reset(); // Reset total AABB
+            m_I_theta_G_glo.setZero();
+
+            unsigned int countPoints = 0;
+            for(auto & massPoint : m_massPoints_glo){
+
+                // loop over all prediction points of this mass point
+                for(auto & r_IS : massPoint.second.m_points){
+                    // Global AABB
+                    m_aabb_glo.unite(r_IS);
+                    // Center of masses
+                    m_r_G_glo += r_IS;
+
+                    // Binet Tensor   (mass=1, with reference to Interial System I) calculate only the 6 essential values
+                    m_I_theta_G_glo(0) += r_IS(0)*r_IS(0);
+                    m_I_theta_G_glo(1) += r_IS(0)*r_IS(1);
+                    m_I_theta_G_glo(2) += r_IS(0)*r_IS(2);
+                    m_I_theta_G_glo(3) += r_IS(1)*r_IS(1);
+                    m_I_theta_G_glo(4) += r_IS(1)*r_IS(2);
+                    m_I_theta_G_glo(5) += r_IS(2)*r_IS(2);
+
+                    ++countPoints;
+                }
+            }
+            m_r_G_glo /= countPoints;
+            // Move intertia tensor to center G
+//            m_I_theta_G_glo(0) -= m_r_G_glo(0)*m_r_G_glo(0);
+//            m_I_theta_G_glo(1) -= m_r_G_glo(0)*m_r_G_glo(1);
+//            m_I_theta_G_glo(2) -= m_r_G_glo(0)*m_r_G_glo(2);
+//            m_I_theta_G_glo(3) -= m_r_G_glo(1)*m_r_G_glo(1);
+//            m_I_theta_G_glo(4) -= m_r_G_glo(1)*m_r_G_glo(2);
+//            m_I_theta_G_glo(5) -= m_r_G_glo(2)*m_r_G_glo(2);
+
+
+            // ================================================================
+
+            buildGrid();
+
 
         } else {
             // Do not send data the first time
             // Wait for the grid and initial conditions
         }
 
-        MPI_Barrier();
+        m_pProcCommunicator->waitBarrier();
 
     }
 
@@ -156,31 +212,30 @@ public:
     void buildLocalStuff() {
 
         m_aabb_loc.reset();
-        m_Theta_I_loc.setZero();
         m_r_G_loc.setZero();
+        m_I_theta_loc.setZero();
 
         // we copy all body points into the set m_points_loc
         // and add the number points according to the timesteps the predictor integrator is generating
-        unsigned int nPointsPredictor = 4;
+
 
 
         // calculate geometric center and AABB and also inertia tensor (first with respect to interia frame,
         // then we move it with steiner formula to geometric center)
-        for(auto bodyIt = this->m_pDynSys->m_SimBodies.begin(); bodyIt != this->m_pDynSys->m_SimBodies.end(); bodyIt++) {
+        for(auto & body : m_pDynSys->m_SimBodies) {
 
-            m_aabb_loc.unite((*bodyIt)->m_r_S);
+            m_aabb_loc.unite((body)->m_r_S);
 
-            m_r_G_loc += (*bodyIt)->m_r_S;
+            m_r_G_loc += (body)->m_r_S;
 
             // Binet Tensor (with reference to Interial System I) calculate only the 6 essential values
-#define r_IS  (*bodyIt)->m_r_S
-            // m_Theta_I_loc += r_IS.transpose() * r_IS; (symmetric)
-            m_Theta_I_loc(0) += r_IS(0)*r_IS(0);
-            m_Theta_I_loc(1) += r_IS(0)*r_IS(1);
-            m_Theta_I_loc(2) += r_IS(0)*r_IS(2);
-            m_Theta_I_loc(3) += r_IS(1)*r_IS(1);
-            m_Theta_I_loc(4) += r_IS(1)*r_IS(2);
-            m_Theta_I_loc(5) += r_IS(2)*r_IS(2);
+#define r_IS  (body)->m_r_S
+            m_I_theta_loc(0) += r_IS(0)*r_IS(0);
+            m_I_theta_loc(1) += r_IS(0)*r_IS(1);
+            m_I_theta_loc(2) += r_IS(0)*r_IS(2);
+            m_I_theta_loc(3) += r_IS(1)*r_IS(1);
+            m_I_theta_loc(4) += r_IS(1)*r_IS(2);
+            m_I_theta_loc(5) += r_IS(2)*r_IS(2);
 #undef r_IS
         }
 
@@ -191,21 +246,52 @@ public:
         // Either use Fluidix to quickly approximate a simulation or do a simple integration with only gravity of all point masses, stop if collided with non simulated bodies
     }
 
+
+    void predictMassPoints(){
+        for(auto & massPoint : m_massPoints_glo){
+
+            Vector3 vel = massPoint.second.m_state.getVelocityTrans();
+            auto & points = massPoint.second.m_points;
+
+            // Predict mass points linearly, no collision detection so far with static objects
+            ASSERTMSG(points.size()== m_nPointsPredictor+1, "number of points wrong!")
+            for(unsigned int i = 1; i< m_nPointsPredictor; i++ ){
+                points[i] = points[i-1] + m_deltaT*vel;
+            }
+
+        }
+    }
+
     //only master rank
     void buildGrid() {
-        /*
+
+        LOGTBLEVEL1(m_pSimulationLog, "---> Global center of mass points: " << m_r_G_glo.transpose() << std::endl
+                                      << "---> Global AABB of mass points: min: " << m_aabb_glo.m_minPoint.transpose()
+                                                                       << "max: " << m_aabb_glo.m_maxPoint.transpose() << std::endl
+                                      << "---> Global Binet inertia tensor: " << std::endl
+                                      << "\t\t " << m_I_theta_G_glo(0) << "\t" << m_I_theta_G_glo(1) << "\t" << m_I_theta_G_glo(2) << std::endl
+                                      << "\t\t " << m_I_theta_G_glo(1) << "\t" << m_I_theta_G_glo(3) << "\t" << m_I_theta_G_glo(4) << std::endl
+                                      << "\t\t " << m_I_theta_G_glo(2) << "\t" << m_I_theta_G_glo(4) << "\t" << m_I_theta_G_glo(5) << std::endl;
+                    )
+
         //Calculate principal axis of Theta_G
         Matrix33 Theta_G;
-        Utilities::setSymMatrix(Theta_G,m_theta_G_glo);
-        EigenSolverSelfAdjoint<Matrix33> eigenSolv(Theta_G);
-        //LOG( eigenSolv.eigenvalues();
-        eigenSolv.eigenvectors();
+        MatrixHelpers::setSymMatrix(Theta_G,m_I_theta_G_glo);
+        typename MyMatrixDecomposition::template EigenSolverSelfAdjoint<Matrix33> eigenSolv(Theta_G);
 
-        // Expand grid by some percentage
-        PREC dmax = m_aabb_glo.maxExtent();
-        ASSERTMSG(dmax>=0,"max extend not >=0");
-        //m_totalAABB.expand(dmax*0.)
-        */
+        Matrix33 A_IK = eigenSolv.eigenvectors();
+        LOGTBLEVEL3( m_pSimulationLog, "Eigenvalues: "<<std::endl<< eigenSolv.eigenvalues() <<std::endl; );
+        LOGTBLEVEL3( m_pSimulationLog, "Eigenvectors: "<<std::endl<< A_IK <<std::endl; );
+
+        // Coordinate frame of OOBB
+        if(A_IK(2,2) <= 0){ // if z-Axis is negativ -> *-1
+            A_IK.col(1).swap(A_IK.col(0));
+            A_IK.col(2) *= -1.0;
+        }
+        LOGTBLEVEL3( m_pSimulationLog, "---> Coordinate Frame: "<<std::endl<< A_IK <<std::endl; );
+
+
+
     }
 public:
 
@@ -237,7 +323,7 @@ public:
         auto con = std::unique_ptr<ContactParamModuleType>(nullptr);
         auto mpi = std::unique_ptr<MPIModuleType>( nullptr );
 
-        auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p, &m_pDynSys->m_bodiesInitStates,nullptr ));
+        auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p, &m_initStates,nullptr ));
         auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  nullptr , is.get(), nullptr , nullptr , nullptr )) ;
 
         return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));
@@ -252,22 +338,27 @@ private:
 
     boost::filesystem::path m_sceneFilePath;
 
-    Vector3 m_r_G_loc;       ///< Geometric center of all point masses
-    Vector6 m_Theta_I_loc;  ///< Intertia tensor (classical, not the binet (euler) inertia tensor)
+    Vector3 m_r_G_loc;       ///< Local Geometric center of all point masses
+    Vector6 m_I_theta_loc;   ///< Local Intertia tensor (binet (euler) inertia tensor [a_00,a_01,a_02,a_11,a_12,a_22] ) in intertial frame I
     AABB m_aabb_loc;         ///< Local AABB of point masses
 
     // GLOBAL STUFF =================================================================
     struct MassPoint {
+        MassPoint(const RigidBodyState & s, unsigned int nPoints = 0): m_state(s), m_points(nPoints+1){
+            m_points[0] =  s.getPosition();
+        }
         std::vector<Vector3> m_points; //< For the prediction
         RigidBodyState m_state; // Init Condition of the MassPoint
     };
+    const unsigned int m_nPointsPredictor = 0;
+    const PREC m_deltaT = 0.1;
 
-    typename std::unordered_map<RigidBodyIdType, RigidBodyState> m_initStates;
+    typename DynamicsSystemType::RigidBodyStatesContainerType m_initStates;
     typename std::unordered_map<RankIdType,std::vector<RigidBodyIdType> > m_bodiesPerRank;
 
-    AABB m_aabb_glo;         ///< Global AABB of point masses
-    Vector3 m_r_G__glo;      ///< Global geometric center of all point masses
-    Vector6 m_theta_G_glo;  ///< Global intertia tensor (binet (euler) inertia tensor [a_00,a_01,a_02,a_11,a_12,a_22] )
+    AABB    m_aabb_glo;        ///< Global AABB of point masses
+    Vector3 m_r_G_glo;         ///< Global geometric center ("G") of all point masses
+    Vector6 m_I_theta_G_glo;   ///< Global intertia tensor ( in center point G) (binet (euler) inertia tensor [a_00,a_01,a_02,a_11,a_12,a_22] ) in intertial frame I
 
     std::unordered_map<RankIdType,AABB> m_rankAABBs;
 
