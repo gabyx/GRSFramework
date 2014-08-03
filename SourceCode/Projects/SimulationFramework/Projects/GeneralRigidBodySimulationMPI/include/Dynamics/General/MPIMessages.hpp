@@ -95,19 +95,19 @@ public:
 
     static const MPIMessageTag m_tag = MPIMessageTag::BODY_MESSAGE;
 
-    typedef TNeighbourCommunicator NeighbourCommunicatorType;
-    typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
+    using NeighbourCommunicatorType = TNeighbourCommunicator;
+    using RigidBodyIdType = typename RigidBodyType::RigidBodyIdType                          ;
 
-    typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
-    typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
-    typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
-    typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
-    typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
+    using ProcessCommunicatorType = typename NeighbourCommunicatorType::ProcessCommunicatorType      ;
+    using ProcessInfoType = typename NeighbourCommunicatorType::ProcessInfoType              ;
+    using RankIdType = typename NeighbourCommunicatorType::RankIdType                   ;
+    using ProcessTopologyType = typename NeighbourCommunicatorType::ProcessTopologyType          ;
+    using RigidBodyContainerType = typename NeighbourCommunicatorType::RigidBodyContainerType       ;
 
-    typedef typename RigidBodyType::BodyInfoType                              BodyInfoType;
+    using BodyInfoType = typename RigidBodyType::BodyInfoType                             ;
 
-    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
-    typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
+    using NeighbourDataMapType = typename NeighbourCommunicatorType::NeighbourMapType             ;
+    using NeighbourDataType = typename NeighbourDataMapType::DataType                          ;
 
     NeighbourMessageWrapperBodies(NeighbourCommunicatorType * nc):
         m_nc(nc),
@@ -792,8 +792,8 @@ public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef TNeighbourCommunicator NeighbourCommunicatorType;
-    typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
+    using NeighbourCommunicatorType = TNeighbourCommunicator;
+    using RankIdType = typename NeighbourCommunicatorType::RankIdType                   ;
 
     NeighbourMessageWrapperInclusion(NeighbourCommunicatorType * nc):
         m_nc(nc),
@@ -858,20 +858,20 @@ public:
 
     static const MPIMessageTag m_tag = MPIMessageTag::EXTERNALCONTACTS_MESSAGE;
 
-    typedef TNeighbourCommunicator NeighbourCommunicatorType;
+    using NeighbourCommunicatorType = TNeighbourCommunicator;
 
-    typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
-    typedef typename RigidBodyType::BodyInfoType                              BodyInfoType;
+    using RigidBodyIdType = typename RigidBodyType::RigidBodyIdType                          ;
+    using BodyInfoType = typename RigidBodyType::BodyInfoType                             ;
 
-    typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
-    typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
-    typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
-    typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
-    typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
-    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
-    typedef typename NeighbourCommunicatorType::ContactGraphType              ContactGraphType;
+    using ProcessCommunicatorType = typename NeighbourCommunicatorType::ProcessCommunicatorType      ;
+    using ProcessInfoType = typename NeighbourCommunicatorType::ProcessInfoType              ;
+    using RankIdType = typename NeighbourCommunicatorType::RankIdType                   ;
+    using ProcessTopologyType = typename NeighbourCommunicatorType::ProcessTopologyType          ;
+    using RigidBodyContainerType = typename NeighbourCommunicatorType::RigidBodyContainerType       ;
+    using NeighbourDataMapType = typename NeighbourCommunicatorType::NeighbourMapType             ;
+    using ContactGraphType = typename NeighbourCommunicatorType::ContactGraphType             ;
 
-    typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
+    using NeighbourDataType = typename NeighbourDataMapType::DataType                          ;
 
 
     NeighbourMessageWrapperInclusionContact(NeighbourCommunicatorType * nc):
@@ -996,20 +996,20 @@ public:
 
     static const MPIMessageTag m_tag = MPIMessageTag::SPLITBODYFACTOR_MESSAGE;
 
-    typedef TNeighbourCommunicator NeighbourCommunicatorType;
-    typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
+    using NeighbourCommunicatorType = TNeighbourCommunicator;
+    using RankIdType = typename NeighbourCommunicatorType::RankIdType                   ;
 
-    typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
-    typedef typename RigidBodyType::BodyInfoType                              BodyInfoType;
+    using RigidBodyIdType = typename RigidBodyType::RigidBodyIdType                          ;
+    using BodyInfoType = typename RigidBodyType::BodyInfoType                             ;
 
-    typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
-    typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
-    typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
-    typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
-    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
-    typedef typename NeighbourCommunicatorType::ContactGraphType              ContactGraphType;
+    using ProcessCommunicatorType = typename NeighbourCommunicatorType::ProcessCommunicatorType      ;
+    using ProcessInfoType = typename NeighbourCommunicatorType::ProcessInfoType              ;
+    using ProcessTopologyType = typename NeighbourCommunicatorType::ProcessTopologyType          ;
+    using RigidBodyContainerType = typename NeighbourCommunicatorType::RigidBodyContainerType       ;
+    using NeighbourDataMapType = typename NeighbourCommunicatorType::NeighbourMapType             ;
+    using ContactGraphType = typename NeighbourCommunicatorType::ContactGraphType             ;
 
-    typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
+    using NeighbourDataType = typename NeighbourDataMapType::DataType                          ;
 
 
     NeighbourMessageWrapperInclusionMultiplicity(NeighbourCommunicatorType * nc):
@@ -1161,20 +1161,20 @@ public:
 
     static const MPIMessageTag m_tag = MPIMessageTag::SPLITBODYUPDATE_MESSAGE;
 
-    typedef TNeighbourCommunicator NeighbourCommunicatorType;
-    typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
+    using NeighbourCommunicatorType = TNeighbourCommunicator;
+    using RankIdType = typename NeighbourCommunicatorType::RankIdType                   ;
 
-    typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
-    typedef typename RigidBodyType::BodyInfoType                              BodyInfoType;
+    using RigidBodyIdType = typename RigidBodyType::RigidBodyIdType                          ;
+    using BodyInfoType = typename RigidBodyType::BodyInfoType                             ;
 
-    typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
-    typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
-    typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
-    typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
-    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
-    typedef typename NeighbourCommunicatorType::ContactGraphType              ContactGraphType;
+    using ProcessCommunicatorType = typename NeighbourCommunicatorType::ProcessCommunicatorType      ;
+    using ProcessInfoType = typename NeighbourCommunicatorType::ProcessInfoType              ;
+    using ProcessTopologyType = typename NeighbourCommunicatorType::ProcessTopologyType          ;
+    using RigidBodyContainerType = typename NeighbourCommunicatorType::RigidBodyContainerType       ;
+    using NeighbourDataMapType = typename NeighbourCommunicatorType::NeighbourMapType             ;
+    using ContactGraphType = typename NeighbourCommunicatorType::ContactGraphType             ;
 
-    typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
+    using NeighbourDataType = typename NeighbourDataMapType::DataType                          ;
 
 
     NeighbourMessageWrapperInclusionSplitBodyUpdate(NeighbourCommunicatorType * nc):
@@ -1298,20 +1298,20 @@ public:
 
     static const MPIMessageTag m_tag = MPIMessageTag::SPLITBODYSOLUTION_MESSAGE;
 
-    typedef TNeighbourCommunicator NeighbourCommunicatorType;
-    typedef typename NeighbourCommunicatorType::RankIdType                    RankIdType;
+    using NeighbourCommunicatorType = TNeighbourCommunicator;
+    using RankIdType = typename NeighbourCommunicatorType::RankIdType                   ;
 
-    typedef typename RigidBodyType::RigidBodyIdType                           RigidBodyIdType;
-    typedef typename RigidBodyType::BodyInfoType                              BodyInfoType;
+    using RigidBodyIdType = typename RigidBodyType::RigidBodyIdType                          ;
+    using BodyInfoType = typename RigidBodyType::BodyInfoType                             ;
 
-    typedef typename NeighbourCommunicatorType::ProcessCommunicatorType       ProcessCommunicatorType;
-    typedef typename NeighbourCommunicatorType::ProcessInfoType               ProcessInfoType;
-    typedef typename NeighbourCommunicatorType::ProcessTopologyType           ProcessTopologyType;
-    typedef typename NeighbourCommunicatorType::RigidBodyContainerType        RigidBodyContainerType;
-    typedef typename NeighbourCommunicatorType::NeighbourMapType              NeighbourDataMapType;
-    typedef typename NeighbourCommunicatorType::ContactGraphType              ContactGraphType;
+    using ProcessCommunicatorType = typename NeighbourCommunicatorType::ProcessCommunicatorType      ;
+    using ProcessInfoType = typename NeighbourCommunicatorType::ProcessInfoType              ;
+    using ProcessTopologyType = typename NeighbourCommunicatorType::ProcessTopologyType          ;
+    using RigidBodyContainerType = typename NeighbourCommunicatorType::RigidBodyContainerType       ;
+    using NeighbourDataMapType = typename NeighbourCommunicatorType::NeighbourMapType             ;
+    using ContactGraphType = typename NeighbourCommunicatorType::ContactGraphType             ;
 
-    typedef typename NeighbourDataMapType::DataType                           NeighbourDataType ;
+    using NeighbourDataType = typename NeighbourDataMapType::DataType                          ;
 
 
     NeighbourMessageWrapperInclusionSplitBodySolution(NeighbourCommunicatorType * nc):
@@ -1443,8 +1443,8 @@ public:
 
     static const MPIMessageTag m_tag = MPIMessageTag::TOPOLOGYBUILDER_POINTGATHER;
 
-    typedef TTopologyBuilder TopologyBuilderType;
-    typedef typename TopologyBuilderType::RankIdType  RankIdType;
+    using TopologyBuilderType = TTopologyBuilder;
+    using RankIdType = typename TopologyBuilderType::RankIdType ;
 
     TopologyBuilderMessageWrapperBodies(TopologyBuilderType * topoBuilder):
             m_pTopoBuilder(topoBuilder)

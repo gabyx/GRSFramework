@@ -38,15 +38,15 @@ public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef ContactGraphNodeData NodeDataType;
-    typedef ContactGraphEdgeData EdgeDataType;
-    typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
-    typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
+    using NodeDataType = ContactGraphNodeData;
+    using EdgeDataType = ContactGraphEdgeData;
+    using EdgeType = typename Graph::Edge< NodeDataType, EdgeDataType>;
+    using NodeType = typename Graph::Node< NodeDataType, EdgeDataType>;
 
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType NodeListType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType EdgeListType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
+    using NodeListType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType;
+    using EdgeListType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType;
+    using NodeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType;
+    using EdgeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType;
 
 public:
 
@@ -141,7 +141,7 @@ public:
         return BitCount::count(m_usedContactModels);
     }
 private:
-    typedef typename std::underlying_type<ContactModels::ContactModelEnum>::type ContactModelEnumIntType;
+    using ContactModelEnumIntType = typename std::underlying_type<ContactModels::ContactModelEnum>::type;
     ContactModelEnumIntType m_usedContactModels; ///< Bitflags which mark all used contactmodels
 
     unsigned int m_nLambdas = 0; ///< How many forces we have counted over all nodes
@@ -287,15 +287,15 @@ public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef ContactGraphNodeDataIteration NodeDataType;
-    typedef ContactGraphEdgeData EdgeDataType;
-    typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
-    typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
+    using NodeDataType = ContactGraphNodeDataIteration;
+    using EdgeDataType = ContactGraphEdgeData;
+    using NodeType = typename Graph::Node< NodeDataType, EdgeDataType>;
+    using EdgeType = typename Graph::Edge< NodeDataType, EdgeDataType>;
 
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType NodeListType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType EdgeListType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
+    using NodeListType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType;
+    using EdgeListType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType;
+    using NodeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType;
+    using EdgeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType;
 
     ContactGraph(ContactParameterMap * contactParameterMap):
         m_nodeCounter(0),m_edgeCounter(0),
@@ -444,7 +444,7 @@ public:
     }
 
 private:
-    typedef typename std::underlying_type<ContactModels::ContactModelEnum>::type ContactModelEnumIntType;
+    using ContactModelEnumIntType = typename std::underlying_type<ContactModels::ContactModelEnum>::type;
     ContactModelEnumIntType m_usedContactModels; ///< Bitflags which mark all used contactmodels
 
     bool m_firstIteration;
@@ -626,11 +626,11 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
-    typedef typename ContactGraphType::EdgeType EdgeType;
-    typedef typename ContactGraphType::NodeType NodeType;
+    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
 
 
     SorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
@@ -753,11 +753,11 @@ class ContactSorProxStepNodeVisitor : public SorProxStepNodeVisitor {
 public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
-    typedef typename ContactGraphType::EdgeType EdgeType;
-    typedef typename ContactGraphType::NodeType NodeType;
+    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
 
     ContactSorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
                                   bool & globalConverged,
@@ -1008,11 +1008,11 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
-    typedef typename ContactGraphType::EdgeType EdgeType;
-    typedef typename ContactGraphType::NodeType NodeType;
+    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
 
     FullSorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
                                bool & globalConverged,
@@ -1248,11 +1248,11 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
-    typedef typename ContactGraphType::EdgeType EdgeType;
-    typedef typename ContactGraphType::NodeType NodeType;
+    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
 
     SorProxInitNodeVisitor(const InclusionSolverSettingsType &settings): m_alpha(1), m_settings(settings)
     {}

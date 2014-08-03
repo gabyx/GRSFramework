@@ -18,7 +18,7 @@
       * Abreviations : U_ContactModel
       */
       struct UnilateralContactModel{
-         typedef ConvexSets::RPlus ConvexSet;
+         using ConvexSet = ConvexSets::RPlus;
          static const int nDOFFriction = 0;
       };
 
@@ -28,7 +28,7 @@
       * Abreviations : UCF_ContactModel
       */
       struct UnilateralAndCoulombFrictionContactModel{
-         typedef ConvexSets::RPlusAndDisk ConvexSet;
+         using ConvexSet = ConvexSets::RPlusAndDisk;
          static const int nDOFFriction = 2;
          static const int nFrictionParams = 1; // mu
       };
@@ -39,7 +39,7 @@
       * Abreviations : UCFD_ContactModel
       */
       struct UnilateralAndCoulombFrictionDampedContactModel{
-         typedef ConvexSets::RPlusAndDisk ConvexSet;
+         using ConvexSet = ConvexSets::RPlusAndDisk;
          static const int nDOFFriction = 2;
          static const int nFrictionParams = 1; // mu
          static const int nDampingParams = 2; // d_N normal and d_T tangential
@@ -53,7 +53,7 @@
       * Abreviations : UCFDD_ContactModel
       */
       struct UnilateralAndCoulombFrictionDampingDependendContactModel{
-         typedef ConvexSets::RPlusAndDisk ConvexSet;
+         using ConvexSet = ConvexSets::RPlusAndDisk;
          static const int nDOFFriction = 2;
          static const int nFrictionParams = 1; // mu
          static const int nDampingParams = 4; // d_N normal and gamma_max tangential and epsilon and d_Tfix in the case where lambda_N <= epsilon
@@ -67,7 +67,7 @@
       * Abreviations : UCCF_ContactModel
       */
       struct UnilateralAndCoulombContensouFrictionContactModel{
-         typedef ConvexSets::RPlusAndContensouEllipsoid ConvexSet;
+         using ConvexSet = ConvexSets::RPlusAndContensouEllipsoid;
          static const int nDOFFriction = 3;
          static const int nFrictionParams = 2; // mu, r (?)
       };

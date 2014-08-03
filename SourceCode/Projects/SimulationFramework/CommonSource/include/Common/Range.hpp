@@ -14,7 +14,7 @@ class Range{
 
 
 
-	    typedef std::vector<IntType,Allocator> RangeType;
+	    using RangeType = std::vector<IntType,Allocator>;
 
 	    STATIC_ASSERT2( std::is_integral<IntType>::value , IntType_Needs_to_be_Integeral);
         Range(): m_linear(false) {};
@@ -91,7 +91,7 @@ class Range{
 
 		class iterator : public std::iterator_traits<typename RangeType::iterator >{
 			public:
-			    typedef std::iterator_traits<typename RangeType::iterator > iterator_traits;
+			    using iterator_traits = std::iterator_traits<typename RangeType::iterator >;
 
 			    iterator(){};
 

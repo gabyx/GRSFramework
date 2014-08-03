@@ -29,7 +29,7 @@
 */
 class PercussionPool    {
 public:
-   typedef boost::unordered_map<ContactTag, ContactPercussion, ContactTagHash > PercussionMap;
+   using PercussionMap = boost::unordered_map<ContactTag, ContactPercussion, ContactTagHash >;
 
    DEFINE_LAYOUT_CONFIG_TYPES
 

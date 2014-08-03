@@ -27,17 +27,17 @@ struct GeneralLayout {
 */
 template <typename TPREC, typename TLayout>
 struct LayoutConfig{
-   typedef TPREC PREC;
-   typedef TLayout LayoutType;
+   using PREC = TPREC;
+   using LayoutType = TLayout;
 
-   typedef Eigen::Matrix<PREC, LayoutType::NDOFqBody, LayoutType::NDOFuBody>    MatrixQBodyUBody;
-   typedef Eigen::Matrix<PREC, LayoutType::NDOFqBody, 1>                        VectorQBody;
-   typedef Eigen::Matrix<PREC, LayoutType::NDOFuBody, 1>                        VectorUBody;
+   using MatrixQBodyUBody = Eigen::Matrix<PREC, LayoutType::NDOFqBody, LayoutType::NDOFuBody>   ;
+   using VectorQBody = Eigen::Matrix<PREC, LayoutType::NDOFqBody, 1>                       ;
+   using VectorUBody = Eigen::Matrix<PREC, LayoutType::NDOFuBody, 1>                       ;
 
-   typedef Eigen::Matrix<PREC, LayoutType::NDOFqBody, Eigen::Dynamic >          MatrixQBodyDyn;
-   typedef Eigen::Matrix<PREC, LayoutType::NDOFuBody, Eigen::Dynamic >          MatrixUBodyDyn;
-   typedef Eigen::Matrix<PREC, Eigen::Dynamic, LayoutType::NDOFqBody >          MatrixDynQBody;
-   typedef Eigen::Matrix<PREC, Eigen::Dynamic, LayoutType::NDOFuBody>           MatrixDynUBody;
+   using MatrixQBodyDyn = Eigen::Matrix<PREC, LayoutType::NDOFqBody, Eigen::Dynamic >         ;
+   using MatrixUBodyDyn = Eigen::Matrix<PREC, LayoutType::NDOFuBody, Eigen::Dynamic >         ;
+   using MatrixDynQBody = Eigen::Matrix<PREC, Eigen::Dynamic, LayoutType::NDOFqBody >         ;
+   using MatrixDynUBody = Eigen::Matrix<PREC, Eigen::Dynamic, LayoutType::NDOFuBody>          ;
 
    // Static Vectors/Matrices
    DEFINE_MATRIX_TYPES_OF( PREC );
@@ -50,16 +50,16 @@ struct LayoutConfig{
 * @brief This macro is used to typedef all template arguments in a class with e.g template argument typename â€œLayoutConfigâ€
 */
 #define DEFINE_LAYOUT_CONFIG_TYPES_OF( _LayoutConfigName_ ) \
-   typedef typename _LayoutConfigName_::PREC PREC;             \
+   using PREC = typename _LayoutConfigName_::PREC;             \
    static int const NDOFqBody = _LayoutConfigName_::LayoutType::NDOFqBody; \
    static int const NDOFuBody = _LayoutConfigName_::LayoutType::NDOFuBody; \
-   typedef typename _LayoutConfigName_::VectorQBody VectorQBody;       \
-   typedef typename _LayoutConfigName_::VectorUBody VectorUBody;       \
-   typedef typename _LayoutConfigName_::MatrixQBodyDyn MatrixQBodyDyn;       \
-   typedef typename _LayoutConfigName_::MatrixUBodyDyn MatrixUBodyDyn;       \
-   typedef typename _LayoutConfigName_::MatrixQBodyUBody MatrixQBodyUBody; \
-   typedef typename _LayoutConfigName_::MatrixDynQBody MatrixDynQBody;       \
-   typedef typename _LayoutConfigName_::MatrixDynUBody MatrixDynUBody;       \
+   using VectorQBody = typename _LayoutConfigName_::VectorQBody;       \
+   using VectorUBody = typename _LayoutConfigName_::VectorUBody;       \
+   using MatrixQBodyDyn = typename _LayoutConfigName_::MatrixQBodyDyn;       \
+   using MatrixUBodyDyn = typename _LayoutConfigName_::MatrixUBodyDyn;       \
+   using MatrixQBodyUBody = typename _LayoutConfigName_::MatrixQBodyUBody; \
+   using MatrixDynQBody = typename _LayoutConfigName_::MatrixDynQBody;       \
+   using MatrixDynUBody = typename _LayoutConfigName_::MatrixDynUBody;       \
    DEFINE_MATRIX_TYPES_OF( PREC );
 
 

@@ -67,8 +67,8 @@ private:
     using InListOrInRangeBodyVisitorType = InListOrInRangeVisitor<unsigned int , long long int> ;
 public:
 
-    typedef ListOrRangeTypes<double>         TypesTimeRange;
-    typedef ListOrRangeTypes<unsigned int, long long int>   TypesBodyRange;  // long long int for the range, it can be -1 -1
+    using TypesTimeRange = ListOrRangeTypes<double>        ;
+    using TypesBodyRange = ListOrRangeTypes<unsigned int, long long int>  ;  // long long int for the range, it can be -1 -1
 
 private:
 
@@ -305,7 +305,7 @@ private:
         // Scan all times and sort:
         std::cerr << "---> Scan Time ... " << std::endl;
         double currentTime;
-        typedef std::pair<double,std::streamoff> TimeOffsetType;
+        using TimeOffsetType = std::pair<double,std::streamoff>;
         std::vector< TimeOffsetType > fileTimesAndOff;
         for( std::streamoff stateIdx = 0; stateIdx < fromFile.m_nStates; stateIdx++) {
              fromFile >> currentTime;
@@ -467,7 +467,7 @@ private:
         // Scan all times and sort:
         std::cerr << "---> Scan Time ... " << std::endl;
         double currentTime;
-        typedef std::pair<double,std::streamoff> TimeOffsetType;
+        using TimeOffsetType = std::pair<double,std::streamoff>;
 
         std::vector< TimeOffsetType > fileTimesAndOff;
         for( std::streamoff stateIdx = 0; stateIdx < fromFile.m_nStates; stateIdx++) {

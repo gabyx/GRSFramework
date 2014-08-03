@@ -28,8 +28,8 @@ public:
 
     DEFINE_MATRIX_TYPES
 
-    typedef boost::tuple<double, Vector3 ,unsigned int,unsigned int> ClosestPoint;
-    typedef std::vector< ClosestPoint > ClosestPointSet;
+    using ClosestPoint = boost::tuple<double, Vector3 ,unsigned int,unsigned int>;
+    using ClosestPointSet = std::vector< ClosestPoint >;
 
 
     inline static Vector3 getClosestPoint_PointTriangle(   const Vector3 & I_r_S,

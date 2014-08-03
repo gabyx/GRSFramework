@@ -17,7 +17,7 @@
     using StatePool::m_change_pointer_mutex; \
     using StatePool::m_idx; \
     using StatePool::m_pool; \
-    typedef typename StatePool::atomic_char atomic_char;
+    using atomic_char = typename StatePool::atomic_char;
 
 /**
 * @ingroup StatesAndBuffers
@@ -43,7 +43,7 @@ protected:
 
     boost::mutex    m_change_pointer_mutex; ///< This is the mutex which is used to have a mutual exclusion if the pointers on the buffer changes.
     std::vector<StateType>  m_pool; ///< This is the vector of states which are present in the pool. The subclass implement how many such states are in the pool.
-    typedef volatile unsigned char atomic_char;
+    using atomic_char = volatile unsigned char;
     atomic_char*   m_idx; ///< These are the indices into the pool m_pool. The subclasses handle this indices.
 
 };

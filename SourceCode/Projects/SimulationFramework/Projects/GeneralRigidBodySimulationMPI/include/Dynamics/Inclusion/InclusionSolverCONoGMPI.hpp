@@ -46,9 +46,9 @@ public:
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    typedef typename MPILayer::ProcessCommunicator                                      ProcessCommunicatorType;
-    typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
-    typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
+    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator                                     ;
+    using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType                          ;
+    using ProcessTopologyType = typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType     ;
 
     InclusionSolverCONoGMPI(std::shared_ptr< BodyCommunicator >  pBodyComm,
                          std::shared_ptr< CollisionSolverType >  pCollisionSolver,
@@ -98,22 +98,22 @@ protected:
     /** Circulare template dependency of InclusionCommunicator and ContactGraph
     *   Can be solved with this combo trait class :-)
     *    struct ComboIncGraph {
-    *        typedef InclusionCommunicator<ComboIncGraph> InclusionCommunicatorType;
-    *        typedef ContactGraph<ComboIncGraph> ContactGraphType;
+    *        using InclusionCommunicatorType = InclusionCommunicator<ComboIncGraph>;
+    *        using ContactGraphType = ContactGraph<ComboIncGraph>;
     *    };
     *    Nevertheless, we avoided this here
     */
 
     struct Combo{
-        typedef InclusionCommunicator<Combo> InclusionCommunicatorType;
-        typedef ContactGraph<Combo> ContactGraphType;
+        using InclusionCommunicatorType = InclusionCommunicator<Combo>;
+        using ContactGraphType = ContactGraph<Combo>;
     };
 
 
-    typedef Combo::InclusionCommunicatorType InclusionCommunicatorType;
+    using InclusionCommunicatorType = Combo::InclusionCommunicatorType;
     std::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
 
-    typedef Combo::ContactGraphType ContactGraphType;
+    using ContactGraphType = Combo::ContactGraphType;
     std::shared_ptr<ContactGraphType> m_pContactGraph;
     /// =========================================================================
 

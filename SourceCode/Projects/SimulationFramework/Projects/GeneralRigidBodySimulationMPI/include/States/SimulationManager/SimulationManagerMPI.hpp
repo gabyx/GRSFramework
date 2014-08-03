@@ -58,8 +58,8 @@ private:
 
     Logging::Log *  m_pSimulationLog;
 
-    //typedef StateRecorderBody<DynamicsSystemType> StateRecorderType;
-    typedef StateRecorderMPI StateRecorderType;
+    //using StateRecorderType = StateRecorderBody<DynamicsSystemType>;
+    using StateRecorderType = StateRecorderMPI;
     // ===============================================
 
     std::shared_ptr< StateRecorderType >  m_pStateRecorder;
@@ -72,12 +72,12 @@ private:
     std::shared_ptr< BodyCommunicator >   m_pBodyCommunicator;
 
 
-    typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
-    typedef typename ProcessCommunicatorType::ProcessInfoType ProcessInfoType;
+    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator;
+    using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType;
     std::shared_ptr< ProcessCommunicatorType > m_pProcCommunicator;
 
 
-    typedef typename MPILayer::TopologyBuilder  TopologyBuilderType;
+    using TopologyBuilderType = typename MPILayer::TopologyBuilder ;
     std::shared_ptr< TopologyBuilderType >    m_pTopologyBuilder;
 
     void writeAllOutput();

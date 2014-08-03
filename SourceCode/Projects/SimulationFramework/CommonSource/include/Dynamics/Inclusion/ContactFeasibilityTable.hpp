@@ -36,7 +36,7 @@ namespace ContactFeasibilityTableMPI{
 */
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
-    typedef RigidBodyType::BodyMode BS;
+    using BS = RigidBodyType::BodyMode;
 
     // 2D to 1D index with length L (store symetric matrix as 1D array)
     template<char L, char i1, char i2>
@@ -68,7 +68,7 @@ namespace ContactFeasibilityTableMPI{
         }
     };
     static const size_t size = (2*(size_t)BS::NSTATES* (2*(size_t)BS::NSTATES + 1) / 2);
-    typedef CompileTimeArray::Array<ContactFeasibilityTableMPI_Generator, size > Array;
+    using Array = CompileTimeArray::Array<ContactFeasibilityTableMPI_Generator, size >;
 
     template<typename Stream>
     void printArray(Stream & os){
@@ -83,7 +83,7 @@ namespace ContactFeasibilityTableMPI{
     template<typename RigidBodyType>
     bool checkFeasibilityOfContact(const RigidBodyType * p1, const RigidBodyType * p2, std::pair<bool,bool> & isRemote ){
         //Define the feasibility table
-        typedef typename RigidBodyType::BodyMode BS;
+        using BS = typename RigidBodyType::BodyMode;
         //printArray(std::cout);
 
         // calculate table index

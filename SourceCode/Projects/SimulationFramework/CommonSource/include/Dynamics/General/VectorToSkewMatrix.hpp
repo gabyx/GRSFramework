@@ -24,7 +24,7 @@
 template<typename Derived>
 Eigen::Matrix< typename Derived::Scalar ,3,3> getSkewSymmetricMatrix(const Eigen::MatrixBase<Derived> & v)
 {
-    typedef typename Derived::Scalar PREC;
+    using PREC = typename Derived::Scalar;
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
 
 	 Eigen::Matrix<PREC,3,3> M;

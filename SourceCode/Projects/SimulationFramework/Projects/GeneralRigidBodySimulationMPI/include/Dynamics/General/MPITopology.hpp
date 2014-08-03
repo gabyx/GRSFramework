@@ -19,8 +19,8 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    typedef std::set<RankIdType> NeighbourRanksListType;
-    typedef std::unordered_map<RankIdType, NeighbourRanksListType> AdjacentNeighbourRanksMapType;
+    using NeighbourRanksListType = std::set<RankIdType>;
+    using AdjacentNeighbourRanksMapType = std::unordered_map<RankIdType, NeighbourRanksListType>;
 
     ProcessTopology(){}
 

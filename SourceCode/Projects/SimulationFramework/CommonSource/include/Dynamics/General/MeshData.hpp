@@ -37,10 +37,10 @@ public:
     MeshData(){};
    ~MeshData(){};
 
-   typedef Eigen::Matrix<unsigned int,3,1> MeshIndices;
-   typedef std::vector< MeshIndices > Faces;
-   typedef std::vector< Vector3 > Vertices;
-   typedef std::vector< Vector3 > Normals;
+   using MeshIndices = Eigen::Matrix<unsigned int,3,1>;
+   using Faces = std::vector< MeshIndices >;
+   using Vertices = std::vector< Vector3 >;
+   using Normals = std::vector< Vector3 >;
 
    //Mesh Information in 3D Coordinates in [m] --> scaled!
    Vertices m_Vertices;

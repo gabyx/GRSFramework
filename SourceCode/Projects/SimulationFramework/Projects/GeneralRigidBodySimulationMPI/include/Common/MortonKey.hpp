@@ -11,7 +11,7 @@ template<>
 class MortonKey<uint32_t> {
 
 public:
-    typedef Type uint32_t;
+    using uint32_t = Type;
 
     static Type encodeMorton2(Type x, Type y) {
         return (part1By1(y) << 1) + part1By1(x);
@@ -92,7 +92,7 @@ template<>
 class MortonKey<uint64_t> {
 
 public:
-    typedef Type uint64_t;
+    using uint64_t = Type;
 
     static Type encodeMorton2(Type x, Type y) {
         return (part1By1(y) << 1) + part1By1(x);

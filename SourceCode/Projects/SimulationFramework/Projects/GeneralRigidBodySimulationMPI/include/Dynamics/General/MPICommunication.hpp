@@ -110,9 +110,9 @@ public:
 
     //DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef ProcessInformation ProcessInfoType;
-    typedef ProcessInfoType BaseType;
-    typedef typename ProcessInfoType::RankIdType RankIdType;
+    using ProcessInfoType = ProcessInformation;
+    using BaseType = ProcessInfoType;
+    using RankIdType = typename ProcessInfoType::RankIdType;
 
     /**
     * General communication is done with the communicator comm, but also with other communicators is possible
@@ -431,7 +431,7 @@ private:
 
     /** These are buffers for the asynchronous send of the messages to neighbours to make it a safe MPI program (buffer problem) */
     typedef std::tuple< MessageBinarySerializer, MPI_Request*> SendTupleType;
-    typedef std::unordered_map<RankIdType, SendTupleType> BufferMapType;
+    using BufferMapType = std::unordered_map<RankIdType, SendTupleType>;
     BufferMapType m_sendMessageBuffers;
     std::vector<MPI_Request>                      m_sendRequests; ///< these are the requests, these are pointers!
     std::vector<MPI_Status>                       m_sendStatuses;

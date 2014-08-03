@@ -113,8 +113,8 @@ protected:
 	std::vector<Edge<NodeDataType, EdgeDataType> *> m_edges;
 
 public:
-   typedef Node<NodeDataType, EdgeDataType> NodeType;
-   typedef Edge<NodeDataType, EdgeDataType> EdgeType;
+   using NodeType = Node<NodeDataType, EdgeDataType>;
+   using EdgeType = Edge<NodeDataType, EdgeDataType>;
    typedef std::vector<NodeType* > NodeListType;
    typedef std::vector<EdgeType* > EdgeListType;
    typedef typename std::vector<NodeType* >::iterator NodeListIteratorType;

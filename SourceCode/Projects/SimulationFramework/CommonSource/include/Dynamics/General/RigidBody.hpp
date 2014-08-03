@@ -38,7 +38,7 @@ public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    typedef RigidBodyBase AbsoluteBaseType; ///< The absolut base type where m_id is defined, for the rigid body container
+    using AbsoluteBaseType = RigidBodyBase; ///< The absolut base type where m_id is defined, for the rigid body container
 
     enum class BodyMode: char {
      SIMULATED = 0,
@@ -47,7 +47,7 @@ public:
      NSTATES=3 // Just to have the number of how many states are defined!
     }; ///< Emuration which defines if the object is simulated, animated or not simulated (which means fixed, and does not take part in the dynamics).
 
-    typedef unsigned int BodyMaterialType;
+    using BodyMaterialType = unsigned int;
 
     unsigned int m_globalGeomId; ///< The Id for the global geometry, if this is 0 then the geometry belongs to the body and gets deallocated, otherwise not
 
@@ -101,7 +101,7 @@ public:
     Vector3 m_r_S;     ///< Vector resolved in the I frame from origin to the center of gravity, \f$ \mathbf{r}_S \f$, at time t_s + deltaT/2.
     Quaternion m_q_KI; ///< Quaternion which represents a rotation from I to the K frame, \f$ \tilde{\mathbf{a}}_{KI} \f$,  at time t_s + deltaT/2.
 
-    typedef RigidBodyId::Type RigidBodyIdType;
+    using RigidBodyIdType = RigidBodyId::Type;
     const RigidBodyIdType m_id; ///< This is the id of the body.
 
     BodyMode m_eState; ///< The state of the body.

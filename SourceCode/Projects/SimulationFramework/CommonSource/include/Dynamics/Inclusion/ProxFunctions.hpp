@@ -169,7 +169,7 @@ struct ProxFunction<ConvexSets::Disk> {
     template< typename Derived, typename DerivedOther>
     static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived> & radius,
                                                 const Eigen::MatrixBase<DerivedOther> & y) {
-        typedef typename Derived::Scalar PREC;
+        using PREC = typename Derived::Scalar;
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
         ASSERTMSG(y.rows()%2==0,"wrong size");
@@ -196,7 +196,7 @@ struct ProxFunction<ConvexSets::Disk> {
     static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived> & radius,
                                                 const Eigen::MatrixBase<DerivedOther1> & x,
                                                 const Eigen::MatrixBase<DerivedOther2> & y) {
-        typedef typename Derived::Scalar PREC;
+        using PREC = typename Derived::Scalar;
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther1);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
@@ -288,7 +288,7 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
     template< typename Derived, typename DerivedOther>
     static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived> & scale_factor,
                                                 const Eigen::MatrixBase<DerivedOther> & y) {
-        typedef typename Derived::Scalar PREC;
+        using PREC = typename Derived::Scalar;
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
         ASSERTMSG(y.rows() % 3==0,"wrong size");
@@ -320,7 +320,7 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
     static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived> & scale_factor,
                                                 const Eigen::MatrixBase<DerivedOther1> & x,
                                                 const Eigen::MatrixBase<DerivedOther2> & y) {
-        typedef typename Derived::Scalar PREC;
+        using PREC = typename Derived::Scalar;
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther1);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
@@ -379,7 +379,7 @@ INLINE_PROX_KEYWORD bool cancelCriteriaVector( const Eigen::MatrixBase<Derived>&
         const Eigen::MatrixBase<Derived>& P_T_new ,
         double AbsTol, double RelTol) {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
-    typedef typename Derived::Scalar PREC;
+    using PREC = typename Derived::Scalar;
 
     using std::abs;
     using std::pow;
@@ -419,7 +419,7 @@ INLINE_PROX_KEYWORD bool cancelCriteriaValue(   const Eigen::MatrixBase<Derived>
                                                 const Eigen::MatrixBase<Derived>& P_T_new,
                                                 double AbsTol, double RelTol) {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
-    typedef typename Derived::Scalar PREC;
+    using PREC = typename Derived::Scalar;
 
     using std::abs;
 
@@ -490,7 +490,7 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNorm(  const Eigen::MatrixBase<Deri
     ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
     ASSERTMSG(NormMatrix_diag.rows()==P_old.rows(),"Vectors are not equal lenght!");
 
-    typedef typename Derived::Scalar PRECM;
+    using PRECM = typename Derived::Scalar;
 
     Eigen::Matrix<PRECM,Eigen::Dynamic, 1> diff = P_new - P_old; // Auslöschung!!! hm...
 
@@ -521,7 +521,7 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNormSq(  const Eigen::MatrixBase<De
     ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
     ASSERTMSG(NormMatrix_diag.rows()==P_old.rows(),"Vectors are not equal lenght!");
 
-    typedef typename Derived::Scalar PREC;
+    using PREC = typename Derived::Scalar;
 
     Eigen::Matrix<PREC,Eigen::Dynamic, 1> diff = P_new - P_old; // Auslöschung!!! hm...
 
@@ -550,7 +550,7 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNormSq(  const Eigen::MatrixBase<De
     ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
     ASSERTMSG(NormMatrix_diag.rows()==P_old.rows(),"Vectors are not equal lenght!");
 
-    typedef typename Derived::Scalar PREC;
+    using PREC = typename Derived::Scalar;
 
     Eigen::Matrix<PREC,Eigen::Dynamic, 1> diff = P_new - P_old; // Auslöschung!!! hm...
 
@@ -576,7 +576,7 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNorm(  const Eigen::MatrixBase<Deri
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
     ASSERTMSG(P_old.rows()==P_new.rows()==NormMatrix1_diag.rows()==NormMatrix2.rows()==u_old.rows()==NormMatrix2.cols(),"Vectors are not equal lenght!");
 
-    typedef typename Derived::Scalar PRECM;
+    using PRECM = typename Derived::Scalar;
     //std::cout << " Convergence ENERGY" << std::endl;
     Eigen::Matrix<PRECM,Eigen::Dynamic, 1> diff = P_new - P_old; // Auslöschung!!! hm...
 

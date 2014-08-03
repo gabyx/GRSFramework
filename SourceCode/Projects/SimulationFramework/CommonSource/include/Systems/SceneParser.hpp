@@ -1590,7 +1590,7 @@ public:
             if(n){
                 using SetType = std::set<RigidBodyIdType>;
                 SetType s;
-                typedef Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType> CSPBS;
+                using CSPBS = Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType>;
 
                 if( !Utilities::stringToType<SetType,CSPBS>(s, n.attribute("value").value())  ) {
                    THROWEXCEPTION("---> String conversion in parseModuleOptions: Set: value failed");
@@ -1608,7 +1608,7 @@ public:
                 n = selectIds.child("Range");
                 using SetType = std::pair<RigidBodyIdType,RigidBodyIdType>;
                 SetType r;
-                typedef Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType> CSPBS;
+                using CSPBS = Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType>;
                 if( !Utilities::stringToType<SetType,CSPBS>(r, n.attribute("value").value())  ){
                    THROWEXCEPTION("---> String conversion in parseModuleOptions: Set: value failed");
                 }
@@ -1995,7 +1995,7 @@ private:
     // Spcified amount of bodies in the Scene File
     unsigned int m_nSpecifiedSimBodies;
 
-    typedef std::unordered_map<unsigned int,unsigned int> GroupToNBodyType;
+    using GroupToNBodyType = std::unordered_map<unsigned int,unsigned int>;
     GroupToNBodyType m_groupIdToNBodies;
     unsigned int m_globalMaxGroupId; // Group Id used to build a unique id!
 

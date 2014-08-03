@@ -71,7 +71,7 @@ protected:
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
 
-    typedef ContactGraph<ContactGraphMode::NoIteration> ContactGraphType;
+    using ContactGraphType = ContactGraph<ContactGraphMode::NoIteration>;
     ContactGraphType m_ContactGraph;
 
     // Matrices for solving the inclusion ===========================

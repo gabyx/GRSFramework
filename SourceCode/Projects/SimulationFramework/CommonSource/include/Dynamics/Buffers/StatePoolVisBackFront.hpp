@@ -24,7 +24,7 @@ public:
     DECLERATIONS_STATEPOOL
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    typedef DynamicsState StateType;
+    using StateType = DynamicsState;
 
     template<typename TRigidBodyIterator>
     StatePoolVisBackFront(TRigidBodyIterator beg, TRigidBodyIterator end);
@@ -34,7 +34,7 @@ public:
     /** @name Only accessed by Simulation Thread.
     * @{
     */
-    typedef FrontBackBuffer<StateType, FrontBackBufferPtrType::NormalPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
+    using FrontBackBufferType = FrontBackBuffer<StateType, FrontBackBufferPtrType::NormalPtr, FrontBackBufferMode::BackConst>;
 
     FrontBackBufferType getFrontBackBuffer();
     FrontBackBufferType swapFrontBackBuffer();

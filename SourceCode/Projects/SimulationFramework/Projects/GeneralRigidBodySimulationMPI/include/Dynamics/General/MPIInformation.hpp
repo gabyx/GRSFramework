@@ -19,7 +19,7 @@ class ProcessInformation {
 
 public:
 
-    typedef ProcessTopology ProcessTopologyType;
+    using ProcessTopologyType = ProcessTopology;
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 

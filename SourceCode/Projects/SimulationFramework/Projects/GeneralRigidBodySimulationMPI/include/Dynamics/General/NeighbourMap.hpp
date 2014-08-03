@@ -17,9 +17,9 @@ public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     // Neighbour data definitions
-    typedef TData DataType;
-    typedef std::unordered_map<RankIdType, DataType > Type;
-    typedef typename Type::iterator iterator;
+    using DataType = TData;
+    using Type = std::unordered_map<RankIdType, DataType >;
+    using iterator = typename Type::iterator;
 
     NeighbourMap(RankIdType rank): m_rank(rank){};
 

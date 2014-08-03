@@ -83,14 +83,14 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    typedef typename MPILayer::ProcessCommunicator                                      ProcessCommunicatorType;
-    typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
-    typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
+    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator                                     ;
+    using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType                          ;
+    using ProcessTopologyType = typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType     ;
 
-    typedef typename DynamicsSystemType::RigidBodySimContainerType                      RigidBodyContainerType;
-    typedef typename DynamicsSystemType::GlobalGeometryMapType                          GlobalGeometryMapType;
+    using RigidBodyContainerType = typename DynamicsSystemType::RigidBodySimContainerType                     ;
+    using GlobalGeometryMapType = typename DynamicsSystemType::GlobalGeometryMapType                         ;
 
-    typedef NeighbourMap<NeighbourDataBodyCommunication>     NeighbourMapType;
+    using NeighbourMapType = NeighbourMap<NeighbourDataBodyCommunication>    ;
 
     BodyCommunicator(std::shared_ptr< DynamicsSystemType> pDynSys ,
                      std::shared_ptr< ProcessCommunicatorType > pProcComm);

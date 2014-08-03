@@ -31,25 +31,25 @@ public:
 
 
 
-    typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
+    using RigidBodyIdType = typename RigidBodyType::RigidBodyIdType;
 
-    typedef ContactGraphNodeDataIteration NodeDataType;
-    typedef ContactGraphEdgeData EdgeDataType;
-    typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
-    typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
+    using NodeDataType = ContactGraphNodeDataIteration;
+    using EdgeDataType = ContactGraphEdgeData;
+    using NodeType = typename Graph::Node< NodeDataType, EdgeDataType>;
+    using EdgeType = typename Graph::Edge< NodeDataType, EdgeDataType>;
 
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType NodeListType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType EdgeListType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
+    using NodeListType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType;
+    using EdgeListType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType;
+    using NodeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType;
+    using EdgeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType;
 
-    typedef ContactGraphNodeDataSplitBody SplitBodyNodeDataType;
+    using SplitBodyNodeDataType = ContactGraphNodeDataSplitBody;
     typedef std::unordered_map<RigidBodyIdType, SplitBodyNodeDataType* > SplitBodyNodeDataListType;
 
     enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE, SPLITNODE};
 
-    typedef typename TCombo::InclusionCommunicatorType InclusionCommunicatorType;
-    typedef typename InclusionCommunicatorType::NeighbourMapType NeighbourMapType;
+    using InclusionCommunicatorType = typename TCombo::InclusionCommunicatorType;
+    using NeighbourMapType = typename InclusionCommunicatorType::NeighbourMapType;
 
 
     ContactGraph(std::shared_ptr<DynamicsSystemType> pDynSys);

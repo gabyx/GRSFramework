@@ -69,10 +69,10 @@ public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     // Special temporary remote data for remote-remote contacts
-    typedef TNode NodeType;
-    typedef typename NeighbourDataInclusionCommunication_impl::RemoteDataTemp<NodeType> RemoteDataTempType;
-    typedef std::vector< RemoteDataTempType > RemoteDataTempList;
-    typedef typename RemoteDataTempList::iterator RemoteTempIterator;
+    using NodeType = TNode;
+    using RemoteDataTempType = typename NeighbourDataInclusionCommunication_impl::RemoteDataTemp<NodeType>;
+    using RemoteDataTempList = std::vector< RemoteDataTempType >;
+    using RemoteTempIterator = typename RemoteDataTempList::iterator;
 
 private:
     typedef NeighbourData< NeighbourDataInclusionCommunication_impl::LocalData,
@@ -85,11 +85,11 @@ public:
 
     NeighbourDataInclusionCommunication(const RankIdType &neighbourRank): NeighbourDataDerived(neighbourRank){};
 
-    typedef NeighbourDataDerived::RemoteIterator RemoteIterator;
-    typedef NeighbourDataDerived::LocalIterator LocalIterator;
+    using RemoteIterator = NeighbourDataDerived::RemoteIterator;
+    using LocalIterator = NeighbourDataDerived::LocalIterator;
 
-    typedef NeighbourDataDerived::LocalDataType LocalDataType;
-    typedef NeighbourDataDerived::RemoteDataType RemoteDataType;
+    using LocalDataType = NeighbourDataDerived::LocalDataType;
+    using RemoteDataType = NeighbourDataDerived::RemoteDataType;
 
 
 

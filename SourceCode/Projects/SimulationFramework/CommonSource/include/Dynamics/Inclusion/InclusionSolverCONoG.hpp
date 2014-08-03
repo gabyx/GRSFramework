@@ -85,7 +85,7 @@ protected:
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
+    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
     ContactGraphType m_ContactGraph;
 
     void integrateAllBodyVelocities();

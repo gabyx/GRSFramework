@@ -28,7 +28,7 @@ public:
 class ContactParameterTag {
 public:
 
-    typedef boost::tuples::tuple<unsigned int, unsigned int> ContactParameterTuple;
+    using ContactParameterTuple = boost::tuples::tuple<unsigned int, unsigned int>;
     ContactParameterTag(){ ContactParameterTag(0,0);};
     ContactParameterTag( unsigned int materialid1, unsigned int materialid2);
 
@@ -52,7 +52,7 @@ public:
 
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    typedef boost::unordered_map<ContactParameterTag, ContactParameter, ContactParameterTagHash > ContactParameterMapType;
+    using ContactParameterMapType = boost::unordered_map<ContactParameterTag, ContactParameter, ContactParameterTagHash >;
 
     ContactParameterMap();
 

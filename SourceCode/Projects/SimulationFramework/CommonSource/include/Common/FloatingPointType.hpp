@@ -40,10 +40,10 @@
  
 #include <cstddef>
 #if defined _MSC_VER  // may need to check your VC++ version
-  typedef unsigned __int32 uint32_t;
-  typedef unsigned __int64 uint64_t;
-  typedef __int32 int32_t;
-  typedef __int64 int64_t;
+  using uint32_t = unsigned __int32;
+  using uint64_t = unsigned __int64;
+  using int32_t = __int32;
+  using int64_t = __int64;
 
 #else
   #include <stdint.h>
@@ -63,19 +63,19 @@ namespace
     template <size_t bytes>
     struct TypeWithSize
     {
-        typedef void UInt;
+        using UInt = void;
     };
  
     template <>
     struct TypeWithSize<4>
     {
-        typedef uint32_t UInt;
+        using UInt = uint32_t;
     };
  
     template <>
     struct TypeWithSize<8>
     {
-        typedef uint64_t UInt;
+        using UInt = uint64_t;
     };
 }
 

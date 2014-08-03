@@ -20,11 +20,11 @@
 class DynamicLines : public DynamicRenderable
 {
 public:
-  typedef Ogre::Vector3 Vector3;
-  typedef Ogre::Quaternion Quaternion;
-  typedef Ogre::Camera Camera;
-  typedef Ogre::Real Real;
-  typedef Ogre::RenderOperation::OperationType OperationType;
+  using Vector3 = Ogre::Vector3;
+  using Quaternion = Ogre::Quaternion;
+  using Camera = Ogre::Camera;
+  using Real = Ogre::Real;
+  using OperationType = Ogre::RenderOperation::OperationType;
 
 public:
   /// Constructor - see setOperationType() for description of argument.

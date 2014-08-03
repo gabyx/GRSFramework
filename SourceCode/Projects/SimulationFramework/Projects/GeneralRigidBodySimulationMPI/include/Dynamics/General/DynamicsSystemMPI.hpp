@@ -38,7 +38,7 @@ public:
     using ContactParameterMapType = ContactParameterMap;
     ContactParameterMapType m_ContactParameterMap;
 
-    typedef ExternalForceList ExternalForceListType;
+    using ExternalForceListType = ExternalForceList;
     ExternalForceListType m_externalForces; ///< Special class of function objects
 
     //All Global Geometries used in the System
@@ -46,18 +46,18 @@ public:
     GlobalGeometryMapType m_globalGeometries;
 
     // All global RigidBodies Container for this Process, these bodies which are owned by this class!"============================
-    typedef RigidBodyContainer RigidBodyContainerType;
-    typedef RigidBodyContainer RigidBodySimContainerType;
+    using RigidBodyContainerType = RigidBodyContainer;
+    using RigidBodySimContainerType = RigidBodyContainer;
     RigidBodySimContainerType m_SimBodies;        // simulated objects
     RigidBodySimContainerType m_RemoteSimBodies;  // all remote bodies
 
-    typedef RigidBodySimContainerType RigidBodyStaticContainerType;
+    using RigidBodyStaticContainerType = RigidBodySimContainerType;
     RigidBodySimContainerType m_Bodies;        // all not simulated objects
     // ============================================================================
 
     //All initial conditions for all bodies
     //We need an order, which is sorted according to the id!
-    typedef std::map<RigidBodyIdType, RigidBodyState> RigidBodyStatesContainerType;
+    using RigidBodyStatesContainerType = std::map<RigidBodyIdType, RigidBodyState>;
     RigidBodyStatesContainerType m_bodiesInitStates;
 
 

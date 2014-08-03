@@ -56,7 +56,7 @@ public:
         return m_errorString.str();
     }
 private:
-    typedef typename RigidBodyType::RigidBodyIdType RigidBodyIdType;
+    using RigidBodyIdType = typename RigidBodyType::RigidBodyIdType;
 
     // Communicator which is used to write the file in parallel, this communicator is duplicated from the one inputed
     // This prevents that accidentaly some other synchronization and stuff is

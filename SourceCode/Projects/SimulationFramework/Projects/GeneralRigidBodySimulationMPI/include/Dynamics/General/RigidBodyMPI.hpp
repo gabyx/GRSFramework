@@ -9,8 +9,8 @@
 class RigidBodyBaseMPI: public RigidBodyBase {
 public:
 
-    typedef RigidBodyBase  AbsoluteBaseType; ///< The absolut base type where m_id is defined, for the rigid body container
-    typedef BodyProcessInfo BodyInfoType;
+    using AbsoluteBaseType = RigidBodyBase ; ///< The absolut base type where m_id is defined, for the rigid body container
+    using BodyInfoType = BodyProcessInfo;
 
     RigidBodyBaseMPI(const RigidBodyIdType & id): RigidBodyBase(id), m_pBodyInfo(nullptr){};
     ~RigidBodyBaseMPI(){

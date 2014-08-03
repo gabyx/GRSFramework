@@ -23,9 +23,9 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    typedef std::map<unsigned int, AABB > RankToAABBType;
-    typedef typename ProcessTopologyBase::NeighbourRanksListType NeighbourRanksListType;
-    typedef typename ProcessTopologyBase::AdjacentNeighbourRanksMapType AdjacentNeighbourRanksMapType;
+    using RankToAABBType = std::map<unsigned int, AABB >;
+    using NeighbourRanksListType = typename ProcessTopologyBase::NeighbourRanksListType;
+    using AdjacentNeighbourRanksMapType = typename ProcessTopologyBase::AdjacentNeighbourRanksMapType;
 
     ProcessTopologyGrid(  NeighbourRanksListType & nbRanks, AdjacentNeighbourRanksMapType & adjNbRanks,
                           const Vector3 & minPoint,

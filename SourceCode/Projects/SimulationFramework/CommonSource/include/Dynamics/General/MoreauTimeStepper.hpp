@@ -122,7 +122,7 @@ protected:
     // General Log file
     Logging::Log *m_pSolverLog, *m_pSimulationLog;
 
-    typedef typename StatePoolType::FrontBackBufferType FrontBackBufferType;
+    using FrontBackBufferType = typename StatePoolType::FrontBackBufferType;
     FrontBackBufferType m_StateBuffers;
     //Solver state pool front and back buffer
     void swapStateBuffers();

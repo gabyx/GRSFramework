@@ -49,7 +49,7 @@ public:
 
     DEFINE_TIMESTEPPER_CONFIG_TYPES
 
-    typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
+    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 

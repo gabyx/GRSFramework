@@ -28,7 +28,7 @@ private:
 public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef RigidBodyType::RigidBodyIdType RigidBodyIdType;
+    using RigidBodyIdType = RigidBodyType::RigidBodyIdType;
 
     //This container grants only const access with its iterators with (RigidBodyType* const)
     //So we are able to change these rigidbodies, but cant change the m_id because it is const in the rigidbody class
@@ -55,9 +55,9 @@ private:
 
     MapType m_map;
 
-    typedef  typename MapType::index<by_insertion>::type    MapByInsertionType;
-    typedef  typename MapType::index<by_hashed_id>::type    MapByHashedIdType;
-    typedef  typename MapType::index<by_ordered_id>::type   MapByOrderedIdType;
+    using MapByInsertionType = typename MapType::index<by_insertion>::type   ;
+    using MapByHashedIdType = typename MapType::index<by_hashed_id>::type   ;
+    using MapByOrderedIdType = typename MapType::index<by_ordered_id>::type  ;
     MapByHashedIdType & m_mapByHashedId;
     MapByInsertionType & m_mapByInsertion;
     MapByOrderedIdType & m_mapByOrderedId;
@@ -78,15 +78,15 @@ public:
     {}
 
     /** Body iterator ordered by id */
-    typedef typename MapByInsertionType::iterator iterator;
-    typedef typename MapByInsertionType::const_iterator const_iterator;
+    using iterator = typename MapByInsertionType::iterator;
+    using const_iterator = typename MapByInsertionType::const_iterator;
     /** Body iterator ordered by insertion */
-    typedef typename MapByOrderedIdType::iterator iterator_ordered;
-    typedef typename MapByOrderedIdType::const_iterator const_iterator_ordered;
+    using iterator_ordered = typename MapByOrderedIdType::iterator;
+    using const_iterator_ordered = typename MapByOrderedIdType::const_iterator;
     /** Key ierator ordered by id */
-    typedef boost::transform_iterator< KeyGetter<iterator>, iterator> key_iterator_ordered;
+    using key_iterator_ordered = boost::transform_iterator< KeyGetter<iterator>, iterator>;
     /** Key ierator ordered by insertion */
-    typedef boost::transform_iterator< KeyGetter<iterator>, iterator> key_iterator;
+    using key_iterator = boost::transform_iterator< KeyGetter<iterator>, iterator>;
 
     /** Get body iterators ordered by id */
     iterator_ordered beginOrdered(){ return m_mapByOrderedId.begin(); }

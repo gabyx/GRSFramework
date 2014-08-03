@@ -21,11 +21,11 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef TContactGraph ContactGraphType;
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
-    typedef typename ContactGraphType::EdgeType EdgeType;
-    typedef typename ContactGraphType::NodeType NodeType;
+    using ContactGraphType = TContactGraph;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
 
     SorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
                            bool & globalConverged, const unsigned int & globalIterationNeeded):
@@ -238,10 +238,10 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef TContactGraph ContactGraphType;
+    using ContactGraphType = TContactGraph;
 
 
-    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
 
     SorProxStepSplitNodeVisitor(const InclusionSolverSettingsType &settings, bool & globalConverged, const unsigned int & globalIterationNeeded):
                            m_settings(settings),m_bConverged(globalConverged),
@@ -338,11 +338,11 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef TContactGraph ContactGraphType;
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
-    typedef typename ContactGraphType::EdgeType EdgeType;
-    typedef typename ContactGraphType::NodeType NodeType;
+    using ContactGraphType = TContactGraph;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
 
     SorProxInitNodeVisitor()
     {}
@@ -428,9 +428,9 @@ template<typename TContactGraph>
 class SorProxInitSplitNodeVisitor{
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
-    typedef TContactGraph ContactGraphType;
+    using ContactGraphType = TContactGraph;
 
-    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
 
     SorProxInitSplitNodeVisitor()
     {}
@@ -456,9 +456,9 @@ template<typename TContactGraph>
 class SplitNodeCheckUpdateVisitor{
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
-    typedef TContactGraph ContactGraphType;
+    using ContactGraphType = TContactGraph;
 
-    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
 
     SplitNodeCheckUpdateVisitor()
     {}
@@ -484,9 +484,9 @@ template<typename TContactGraph>
 class SetWeightingLocalBodiesSplitNodeVisitor{
 public:
 
-    typedef TContactGraph ContactGraphType;
+    using ContactGraphType = TContactGraph;
 
-    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
 
     SetWeightingLocalBodiesSplitNodeVisitor(){};
 
@@ -501,9 +501,9 @@ template<typename TContactGraph>
 class ResetWeightingLocalBodiesSplitNodeVisitor{
 public:
 
-    typedef TContactGraph ContactGraphType;
+    using ContactGraphType = TContactGraph;
 
-    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
 
     ResetWeightingLocalBodiesSplitNodeVisitor(){};
 

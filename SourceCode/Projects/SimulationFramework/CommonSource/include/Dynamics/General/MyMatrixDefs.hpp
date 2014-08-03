@@ -21,26 +21,26 @@
 */
 template<typename TPREC>
 struct MyMatrix{
-   typedef TPREC PREC;
+   using PREC = TPREC;
    //Static assigned Matrices
-   typedef Eigen::Matrix<PREC, 4, 4> Matrix44;
-   typedef Eigen::Matrix<PREC, 4, 3> Matrix43;
-   typedef Eigen::Matrix<PREC, 3, 4> Matrix34;
-   typedef Eigen::Matrix<PREC, 3, 3> Matrix33;
-   typedef Eigen::Matrix<PREC, 3, 1> Vector3;
-   typedef Eigen::Matrix<PREC, 2, 1> Vector2;
-   typedef Eigen::Matrix<PREC, 4, 1> Quaternion;
-   typedef Eigen::Matrix<PREC, 4, 1> Vector4;
-   typedef Eigen::Matrix<PREC, 6, 1> Vector6;
-   typedef Eigen::Matrix<PREC, Eigen::Dynamic , 1 >                    VectorDyn;
-   typedef Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic >       MatrixDyn;
-   typedef Eigen::DiagonalMatrix<PREC, Eigen::Dynamic >                MatrixDiagDyn;
-   typedef Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor> MatrixDynRow;
+   using Matrix44 = Eigen::Matrix<PREC, 4, 4>;
+   using Matrix43 = Eigen::Matrix<PREC, 4, 3>;
+   using Matrix34 = Eigen::Matrix<PREC, 3, 4>;
+   using Matrix33 = Eigen::Matrix<PREC, 3, 3>;
+   using Vector3 = Eigen::Matrix<PREC, 3, 1>;
+   using Vector2 = Eigen::Matrix<PREC, 2, 1>;
+   using Quaternion = Eigen::Matrix<PREC, 4, 1>;
+   using Vector4 = Eigen::Matrix<PREC, 4, 1>;
+   using Vector6 = Eigen::Matrix<PREC, 6, 1>;
+   using VectorDyn = Eigen::Matrix<PREC, Eigen::Dynamic , 1 >                   ;
+   using MatrixDyn = Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic >      ;
+   using MatrixDiagDyn = Eigen::DiagonalMatrix<PREC, Eigen::Dynamic >               ;
+   using MatrixDynRow = Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor>;
 
-   typedef Eigen::Transform<PREC,3,Eigen::TransformTraits::Affine> AffineTrafo;
+   using AffineTrafo = Eigen::Transform<PREC,3,Eigen::TransformTraits::Affine>;
 
-   typedef Eigen::SparseMatrix<PREC>    MatrixSparse;       // declares a column-major sparse matrix of type PREC
-   typedef Eigen::Triplet<PREC>         MatrixSparseTriplet;
+   using MatrixSparse = Eigen::SparseMatrix<PREC>   ;       // declares a column-major sparse matrix of type PREC
+   using MatrixSparseTriplet = Eigen::Triplet<PREC>        ;
 
    template<typename EigenType> using MatrixRef = Eigen::Ref<EigenType>;
 
@@ -58,21 +58,21 @@ struct MyMatrixDecomposition{;
 * @brief This macro is used to typedef all custom matrix types which have nothing to do with the system.
 */
 #define DEFINE_MATRIX_TYPES_OF( _PREC_ ) \
-   typedef typename MyMatrix< _PREC_ >::Matrix44 Matrix44; \
-   typedef typename MyMatrix< _PREC_ >::Matrix33 Matrix33; \
-   typedef typename MyMatrix< _PREC_ >::Matrix43 Matrix43; \
-   typedef typename MyMatrix< _PREC_ >::Matrix34 Matrix34; \
-   typedef typename MyMatrix< _PREC_ >::Vector3 Vector3;   \
-   typedef typename MyMatrix< _PREC_ >::Vector2 Vector2;   \
-   typedef typename MyMatrix< _PREC_ >::Vector4 Vector4;   \
-   typedef typename MyMatrix< _PREC_ >::Vector6 Vector6;   \
-   typedef typename MyMatrix< _PREC_ >::Quaternion Quaternion; \
-   typedef typename MyMatrix< _PREC_ >::VectorDyn VectorDyn; \
-   typedef typename MyMatrix< _PREC_ >::MatrixDyn MatrixDyn; \
-   typedef typename MyMatrix< _PREC_ >::MatrixDiagDyn MatrixDiagDyn; \
-   typedef typename MyMatrix< _PREC_ >::MatrixDynRow MatrixDynRow; \
-   typedef typename MyMatrix< _PREC_ >::AffineTrafo AffineTrafo; \
-   typedef typename MyMatrix< _PREC_ >::MatrixSparse MatrixSparse; \
-   typedef typename MyMatrix< _PREC_ >::MatrixSparseTriplet MatrixSparseTriplet;
+   using Matrix44 = typename MyMatrix< _PREC_ >::Matrix44; \
+   using Matrix33 = typename MyMatrix< _PREC_ >::Matrix33; \
+   using Matrix43 = typename MyMatrix< _PREC_ >::Matrix43; \
+   using Matrix34 = typename MyMatrix< _PREC_ >::Matrix34; \
+   using Vector3 = typename MyMatrix< _PREC_ >::Vector3;   \
+   using Vector2 = typename MyMatrix< _PREC_ >::Vector2;   \
+   using Vector4 = typename MyMatrix< _PREC_ >::Vector4;   \
+   using Vector6 = typename MyMatrix< _PREC_ >::Vector6;   \
+   using Quaternion = typename MyMatrix< _PREC_ >::Quaternion; \
+   using VectorDyn = typename MyMatrix< _PREC_ >::VectorDyn; \
+   using MatrixDyn = typename MyMatrix< _PREC_ >::MatrixDyn; \
+   using MatrixDiagDyn = typename MyMatrix< _PREC_ >::MatrixDiagDyn; \
+   using MatrixDynRow = typename MyMatrix< _PREC_ >::MatrixDynRow; \
+   using AffineTrafo = typename MyMatrix< _PREC_ >::AffineTrafo; \
+   using MatrixSparse = typename MyMatrix< _PREC_ >::MatrixSparse; \
+   using MatrixSparseTriplet = typename MyMatrix< _PREC_ >::MatrixSparseTriplet;
 #endif
 

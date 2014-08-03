@@ -47,7 +47,7 @@ typename MyMatrix<PREC>::Matrix33 getRotFromQuaternion(const typename MyMatrix<P
 */
 template<class Derived, class DerivedOther>
 void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , Eigen::MatrixBase<DerivedOther> &R) {
-    typedef typename Derived::Scalar PREC;
+    using PREC = typename Derived::Scalar;
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
     EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(DerivedOther,3,3);
     //ASSERTMSG(quat.rows() == 4 && quat.cols()==1 &&  A.rows() == 3 && A.cols() == 3, "IN: "<< quat.rows()<<","<<quat.cols()<<"; OUT: "<<A.rows()<<","<<A.cols() );
@@ -79,7 +79,7 @@ void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , Eigen::Matrix
 
 template<class Derived, class DerivedOther>
 void setQuaternion(const Eigen::MatrixBase<Derived>& nc_quat , const Eigen::MatrixBase<DerivedOther> & nc_n, const typename Derived::Scalar angleRadian) {
-    typedef typename Derived::Scalar PREC;
+    using PREC = typename Derived::Scalar;
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(DerivedOther,3);
 
@@ -97,7 +97,7 @@ template<class Derived, class DerivedOther>
 void rotateVector(const Eigen::MatrixBase<Derived>& quat ,
                   Eigen::MatrixBase<DerivedOther> & v) {
 
-    typedef typename Derived::Scalar PREC;
+    using PREC = typename Derived::Scalar;
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(DerivedOther,3);
     //ASSERTMSG(quat.rows() == 4 && quat.cols()==1 &&  A.rows() == 3 && A.cols() == 3, "IN: "<< quat.rows()<<","<<quat.cols()<<"; OUT: "<<A.rows()<<","<<A.cols() );
@@ -124,7 +124,7 @@ void rotateVector(const Eigen::MatrixBase<Derived>& quat ,
 
 template<class Derived>
 void setQuaternionZero(Eigen::MatrixBase<Derived>& quat) {
-    typedef typename Derived::Scalar PREC;
+    using PREC = typename Derived::Scalar;
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
     quat(0) = 1;
     quat(1) = 0;
@@ -136,7 +136,7 @@ void setQuaternionZero(Eigen::MatrixBase<Derived>& quat) {
 
 template<class Derived>
 Eigen::Matrix<typename Derived::Scalar,4,1> quatMult(const Eigen::MatrixBase<Derived>& quat1 , const Eigen::MatrixBase<Derived>& quat2) {
-    typedef typename Derived::Scalar PREC;
+    using PREC = typename Derived::Scalar;
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
 
     Eigen::Matrix< PREC ,4,1> ret;

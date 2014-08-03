@@ -161,7 +161,7 @@ inline void applyBodyStatesTo(const RigidBodyStatesContainer & states, RigidBody
 //inline void applyDynamicsStateToBodies(const DynamicsState & state,
 //                                       TRigidBodyList & bodies) {
 //
-//    typedef typename TRigidBodyType::LayoutConfigType LayoutConfigType;
+//    using LayoutConfigType = typename TRigidBodyType::LayoutConfigType;
 //
 //    ASSERTMSG(state.m_nSimBodies == bodies.size(), "Wrong Size" );
 //
@@ -204,7 +204,7 @@ inline void applyBodyStatesTo(const RigidBodyStatesContainer & states, RigidBody
 //inline void applyBodiesTo(const TRigidBodyList & bodies,
 //                          DynamicsState & state ) {
 //
-//    typedef typename TRigidBodyType::LayoutConfigType LayoutConfigType;
+//    using LayoutConfigType = typename TRigidBodyType::LayoutConfigType;
 //
 //    ASSERTMSG(state.getNSimBodies() == bodies.size(), "Wrong Size" << state.getNSimBodies() <<"!="<< bodies.size()<<std::endl );
 //    typename  TRigidBodyList::const_iterator bodyIt = bodies.begin();

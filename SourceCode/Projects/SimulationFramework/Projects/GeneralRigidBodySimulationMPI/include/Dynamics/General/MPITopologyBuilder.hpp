@@ -26,7 +26,7 @@ public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     using TopologyBuilderEnumType = TopologyBuilderEnum;
-    typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
+    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator;
 
     TopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
                     std::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
@@ -60,7 +60,7 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    typedef TProcCommunicator ProcessCommunicatorType;
+    using ProcessCommunicatorType = TProcCommunicator;
     using SceneParserType = TSceneParser;
 
     GridTopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
