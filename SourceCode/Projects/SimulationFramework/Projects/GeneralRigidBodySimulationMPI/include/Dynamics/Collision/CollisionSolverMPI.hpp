@@ -25,44 +25,8 @@
 
 #include "QuaternionHelpers.hpp"
 
-/**
-* @ingroup Collision
-* @brief Contact Delegate List which is used to store all callbacks which are invoked when a new contact has been found!
-*/
+#include "ContactDelegateSupport.hpp"
 
-class ContactDelegateList {
-public:
-
-    DEFINE_RIGIDBODY_CONFIG_TYPES
-
-    ContactDelegateList() {
-        m_ContactDelegateList.clear();
-    }
-
-#ifdef SRUTIL_DELEGATE_PREFERRED_SYNTAX
-    typedef srutil::delegate<void, (CollisionData*) > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
-#else
-    typedef srutil::delegate1<void, CollisionData*  > ContactDelegate; ///< This is the delegate type which is used, when a new contact is found then all delegates are invoked in the list.
-#endif
-
-    /** Adds a new ContactDelegate which will be invoked during the solveCollision() part.*/
-    void addContactDelegate(const ContactDelegate & cD) {
-        m_ContactDelegateList.push_back(cD);
-    }
-    void invokeAll(CollisionData *pCollData) const {
-        typename std::vector<ContactDelegate>::const_iterator it;
-        for(it = m_ContactDelegateList.begin(); it != m_ContactDelegateList.end(); ++it) {
-            (*it)(pCollData);
-        }
-    }
-
-    inline bool isEmpty() {
-        return m_ContactDelegateList.empty();
-    }
-
-private:
-    std::vector<ContactDelegate> m_ContactDelegateList;
-};
 
 /**
 * @ingroup Collision
@@ -70,7 +34,7 @@ private:
 */
 /** @{ */
 
-class CollisionSolver {
+class CollisionSolverMPI : public ContactDelegateSupport{
 public:
 
     DEFINE_COLLISION_SOLVER_CONFIG_TYPES
@@ -82,9 +46,9 @@ public:
     * @param SimBodies A reference to the list of all simulated bodies.
     * @param Bodies A reference to the list all not simulated bodies.
     */
-    CollisionSolver(std::shared_ptr< DynamicsSystemType> pDynSys);
+    CollisionSolverMPI(std::shared_ptr< DynamicsSystemType> pDynSys);
 
-    ~CollisionSolver();
+    ~CollisionSolverMPI();
 
     void initializeLog(Logging::Log* pSolverLog);                          ///< Initializes an Ogre::Log.
     void reset();                                                       ///< Resets the whole Solver. This function is called at the start of the simulation.
@@ -107,13 +71,11 @@ protected:
     friend class InclusionSolverCO;
     friend class InclusionSolverCONoG;
 
-    ContactDelegateList m_ContactDelegateList;
-
     unsigned int m_expectedNContacts;
                           ///< Expected number of Contacts.
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodySimContainerType & m_RemoteSimBodies;
-    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;           ///< List of all fixed not simulated bodies.
+    typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;           ///< List of all fixed not simulated bodies.
 
 
     ColliderBody m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.

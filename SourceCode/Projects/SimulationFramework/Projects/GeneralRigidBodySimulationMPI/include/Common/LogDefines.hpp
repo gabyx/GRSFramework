@@ -21,36 +21,70 @@
 * @brief
 */
 /* @{ */
-#define CLEARLOG logstream.str("");                        ///< Macro to easily write into a Ogre::Log.
-#define LOG( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ;  ///< Macro to easily write into a SimpleLogger::Log.
-#define OGRE_LOG( _logptr_ ) (_logptr_)->logMessage(logstream.str());  ///< Macro to easily write into a Ogre::Log.
+#define LOG( logptr , message )  ( *(logptr) ) << message ;  ///< Macro to easily write into a SimpleLogger::Log.
+#define LOGLEVEL(level,setlevel,logptr,message) if( level <= setlevel ){  LOG(logptr,message); }
 
-// Serializer
+
 #ifndef NDEBUG
   // DEBUG!
-    #define LOGSZ( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+    /// Seriliazer
+    #define LOGSZ( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
 
-    // Body Communicator
-    #define LOGBC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+    /// Body Communicator
+    #define LOGBC( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
 
-    // Inclusion Communicator
-    #define LOGIC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
-    // Process Communicator
-    #define LOGPC( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
+    /// Inclusion Communicator
+    #define LOGIC( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the inclusion communicator part).
+    /// Process Communicator
+    #define LOGPC( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
 
-    //Special for Debugging in Release
-    #define LOGSZSpecial( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
-    #define LOGBCSpecial( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+    /// Special for Debugging in Release
+    #define LOGSZSpecial( logptr , message )  LOG(logptr,message); ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+    #define LOGBCSpecial( logptr , message )  LOG(logptr,message); ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+
+    /// Topology Builder
+    #define TOPOBUILDER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define LOGTB( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the topology builder part).
+    #define LOGTBLEVEL(level, logptr , message) LOGLEVEL(level,TOPOBUILDER_LOGLEVEL,logptr,message);
+    #define LOGTBLEVEL1( logptr , message) LOGTBLEVEL( 1 , logptr , message) ;
+    #define LOGTBLEVEL2( logptr , message) LOGTBLEVEL( 2 , logptr , message) ;
+    #define LOGTBLEVEL3( logptr , message) LOGTBLEVEL( 3 , logptr , message) ;
+
+    /// SceneParser
+    #define SCENEPARSER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define LOGSC(log , message) LOG(log,message);
+    #define LOGSCLEVEL(level, logptr , message) LOGLEVEL(level,SCENEPARSER_LOGLEVEL,logptr,message);
+    #define LOGSCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
+    #define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
+    #define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
+    #define SKIPLOGSC( logptr , message )  LOGSCLEVEL(1,logptr,message);
 
 #else
-    #define LOGSZ( _logptr_ , _message_ )
-    #define LOGBC( _logptr_ , _message_ )
-    #define LOGIC( _logptr_ , _message_ )
-    #define LOGPC( _logptr_ , _message_ )
+    #define LOGSZ( logptr , message )
+    #define LOGBC( logptr , message )
+    #define LOGIC( logptr , message )
+    #define LOGPC( logptr , message )
 
-    //Special for Debugging in Release
-    #define LOGSZSpecial( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
-    #define LOGBCSpecial( _logptr_ , _message_ )  ( * (_logptr_) ) << _message_ ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+    /// Special for Debugging in Release
+    #define LOGSZSpecial( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+    #define LOGBCSpecial( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+
+    /// SceneParser
+    #define SCENEPARSER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define LOGSC(log , message) LOG(log,message);
+    #define LOGSCLEVEL(level, logptr , message) LOGLEVEL(level,SCENEPARSER_LOGLEVEL,logptr,message);
+    #define LOGSCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
+    #define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
+    #define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
+    #define SKIPLOGSC( logptr , message )  LOGSCLEVEL(1,logptr,message);
+
+    /// Topobuilder
+    #define TOPOBUILDER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define LOGTB( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the topology builder part).
+    #define LOGTBLEVEL(level, logptr , message) LOGLEVEL(level,TOPOBUILDER_LOGLEVEL,logptr,message);
+    #define LOGTBLEVEL1( logptr , message) LOGTBLEVEL( 1 , logptr , message) ;
+    #define LOGTBLEVEL2( logptr , message) LOGTBLEVEL( 2 , logptr , message) ;
+    #define LOGTBLEVEL3( logptr , message) LOGTBLEVEL( 3 , logptr , message) ;
 
 #endif
 /* @} */

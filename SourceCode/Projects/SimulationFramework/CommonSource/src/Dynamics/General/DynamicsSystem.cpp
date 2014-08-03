@@ -5,7 +5,19 @@
 #include "CommonFunctions.hpp"
 #include "RigidBodyFunctions.hpp"
 
-DynamicsSystem::~DynamicsSystem() {
+
+DynamicsSystemBase::DynamicsSystemBase(){
+    // set reasonable standart values:
+
+    m_currentTotEnergy = 0;
+    m_currentPotEnergy= 0;
+    m_currentKinEnergy= 0;
+    m_currentTransKinEnergy= 0;
+    m_currentRotKinEnergy= 0;
+    m_currentSpinNorm= 0;
+}
+
+DynamicsSystemBase::~DynamicsSystemBase() {
     DECONSTRUCTOR_MESSAGE
 
     // Delete all RigidBodys
@@ -15,43 +27,46 @@ DynamicsSystem::~DynamicsSystem() {
 };
 
 
-void DynamicsSystem::getSettings(RecorderSettings & settingsRecorder) const {
-    settingsRecorder = m_SettingsRecorder;
+const DynamicsSystemBase::RecorderSettingsType & DynamicsSystemBase::getSettingsRecorder() const {
+    return m_settingsRecorder;
 }
-void DynamicsSystem::setSettings(const RecorderSettings & settingsRecorder) {
-    m_SettingsRecorder = settingsRecorder;
+const DynamicsSystemBase::TimeStepperSettingsType &
+DynamicsSystemBase::getSettingsTimeStepper() const {
+    return m_settingsTimestepper;
 }
-void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper) const {
-    settingsTimestepper = m_SettingsTimestepper;
+const DynamicsSystemBase::InclusionSolverSettingsType & DynamicsSystemBase::getSettingsInclusionSolver() const {
+    return m_settingsInclusionSolver;
 }
-void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper){
-    m_SettingsTimestepper = settingsTimestepper;
+
+void DynamicsSystemBase::setSettings(const TimeStepperSettingsType &settingsTimestepper){
+    m_settingsTimestepper = settingsTimestepper;
 }
-void DynamicsSystem::getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const {
-    settingsInclusionSolver = m_SettingsInclusionSolver;
+void DynamicsSystemBase::setSettings(const RecorderSettingsType & settingsRecorder) {
+    m_settingsRecorder = settingsRecorder;
 }
-void DynamicsSystem::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
-    m_SettingsInclusionSolver = settingsInclusionSolver;
+void DynamicsSystemBase::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
+    m_settingsInclusionSolver = settingsInclusionSolver;
 }
-void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper,
+
+void DynamicsSystemBase::getSettings(TimeStepperSettingsType &settingsTimestepper,
                                  InclusionSolverSettingsType &settingsInclusionSolver) const {
-    settingsTimestepper = m_SettingsTimestepper;
-    settingsInclusionSolver = m_SettingsInclusionSolver;
+    settingsTimestepper = m_settingsTimestepper;
+    settingsInclusionSolver = m_settingsInclusionSolver;
 }
-void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper,
+void DynamicsSystemBase::setSettings(const TimeStepperSettingsType &settingsTimestepper,
                                  const InclusionSolverSettingsType &settingsInclusionSolver) {
-    m_SettingsTimestepper = settingsTimestepper;
-    m_SettingsInclusionSolver = settingsInclusionSolver;
+    m_settingsTimestepper = settingsTimestepper;
+    m_settingsInclusionSolver = settingsInclusionSolver;
 }
 
 
-void DynamicsSystem::initializeLog(Logging::Log* pLog) {
+void DynamicsSystemBase::initializeLog(Logging::Log* pLog) {
     m_pSolverLog = pLog;
     ASSERTMSG(m_pSolverLog != nullptr, "Logging::Log: nullptr!");
 }
 
 
-void DynamicsSystem::reset() {
+void DynamicsSystemBase::reset() {
     //reset all external forces
     m_externalForces.reset();
 
@@ -59,7 +74,7 @@ void DynamicsSystem::reset() {
 }
 
 
-void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
+void DynamicsSystemBase::doFirstHalfTimeStep(PREC ts, PREC timestep) {
     using namespace std;
 #if CoutLevelSolver>1
     LOG(m_pSolverLog, "---> doFirstHalfTimeStep(): "<<std::endl;)
@@ -94,10 +109,10 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
         pBody->m_q_KI.normalize();
 
         // Update Transformation A_IK
-        setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
+        QuaternionHelpers::setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
 
         // Add in to h-Term ==========
-        pBody->m_h_term = pBody->m_h_term_const;
+        pBody->m_h_term.setZero();
 
         // Term omega x Theta * omega = if Theta is diagonal : for a Spehere for example!
         AddGyroTermVisitor vis(pBody);
@@ -122,7 +137,7 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 }
 
 
-void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
+void DynamicsSystemBase::doSecondHalfTimeStep(PREC te, PREC timestep) {
     using namespace std;
 #if CoutLevelSolver>1
     LOG(m_pSolverLog, "---> doSecondHalfTimeStep(): "<<std::endl;)
@@ -162,7 +177,7 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
 
 #if OUTPUT_SIMDATA_FILE == 1
         // Calculate Energy
-        PREC potE = -pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir;
+        PREC potE = m_externalForces.calculatePotEnergy(pBody);
         PREC kinE = 0.5* pBody->m_pSolverData->m_uBuffer.m_front.transpose() * pBody->m_MassMatrix_diag.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front;
         PREC transKinE = 0.5*pBody->m_pSolverData->m_uBuffer.m_front.squaredNorm()*pBody->m_mass;
         m_currentPotEnergy += potE;
@@ -178,12 +193,9 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
         pBody->m_pSolverData->swapBuffer();
         pBody->m_pSolverData->reset();
     }
-
-
-
 }
 
-void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
+void DynamicsSystemBase::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
     static Matrix33 a_tilde = Matrix33::Zero();
 
     F_i.block<1,3>(0,0) = -0.5 * q.tail<3>();
@@ -192,13 +204,12 @@ void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
 }
 
 
-void DynamicsSystem::initMassMatrixAndHTerm() {
+void DynamicsSystemBase::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
 
-    Vector3 gravity = m_gravity * m_gravityDir;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
-        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt, gravity);
+        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt);
     }
 }
 

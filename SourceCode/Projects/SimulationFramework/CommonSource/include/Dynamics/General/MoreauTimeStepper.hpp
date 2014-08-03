@@ -25,6 +25,7 @@
 #include DynamicsSystem_INCLUDE_FILE
 #include CollisionSolver_INCLUDE_FILE
 #include InclusionSolver_INCLUDE_FILE
+#include StatePool_INCLUDE_FILE
 
 #include "DynamicsState.hpp"
 #include "FrontBackBuffer.hpp"
@@ -72,11 +73,11 @@ public:
     unsigned int getIterationCount();
 
     // Solver Parameters
-    TimeStepperSettings m_Settings;
+    TimeStepperSettings m_settings;
 
     //Accessed only by Simulation manager, after doOneIteration();
-    std::shared_ptr<const DynamicsState > getBackStateBuffer();
-    std::shared_ptr<const DynamicsState > getFrontStateBuffer();
+    const DynamicsState * getBackStateBuffer();
+    const DynamicsState * getFrontStateBuffer();
 
 
     //Performance Time of one Iteration (averaged)
@@ -121,7 +122,7 @@ protected:
     // General Log file
     Logging::Log *m_pSolverLog, *m_pSimulationLog;
 
-    typedef FrontBackBuffer<DynamicsState, FrontBackBufferPtrType::SharedPtr, FrontBackBufferMode::BackConst> FrontBackBufferType;
+    using FrontBackBufferType = typename StatePoolType::FrontBackBufferType;
     FrontBackBufferType m_StateBuffers;
     //Solver state pool front and back buffer
     void swapStateBuffers();

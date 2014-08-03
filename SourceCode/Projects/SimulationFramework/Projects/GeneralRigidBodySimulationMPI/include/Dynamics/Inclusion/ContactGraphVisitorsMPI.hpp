@@ -21,15 +21,15 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef TContactGraph ContactGraphType;
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
-    typedef typename ContactGraphType::EdgeType EdgeType;
-    typedef typename ContactGraphType::NodeType NodeType;
+    using ContactGraphType = TContactGraph;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
 
     SorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
                            bool & globalConverged, const unsigned int & globalIterationNeeded):
-            m_Settings(settings),m_bConverged(globalConverged),
+            m_settings(settings),m_bConverged(globalConverged),
             m_globalIterationCounter(globalIterationNeeded)
     {}
 
@@ -46,7 +46,7 @@ public:
 
         #if CoutLevelSolverWhenContact>2
             LOG(m_pSolverLog, "---> SorProx, Normal Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
-             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED){
+             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED){
                LOG(m_pSolverLog, "---> Sim<->Sim Node:"<<  std::endl);
             }
         #endif
@@ -67,11 +67,11 @@ public:
             #endif
 
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_front ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
             }
 
@@ -91,14 +91,14 @@ public:
 #if CoutLevelSolverWhenContact>2
             LOG(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
             LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << nodeData.m_LambdaFront.transpose() << std::endl);
-            if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol)){
+            if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_settings.m_AbsTol, m_settings.m_RelTol)){
               *m_pSolverLog <<"\t---> Lambda converged"<<std::endl;
             }
 #endif
 
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 #if CoutLevelSolverWhenContact>2
 //                    LOG(m_pSolverLog, "\t---> body1.massInv: " << nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.transpose() << std::endl;)
 //                    LOG(m_pSolverLog, "\t---> body1.h_term: " << nodeData.m_pCollData->m_pBody1->m_h_term.transpose() << std::endl;)
@@ -113,9 +113,9 @@ public:
                #endif
 
 
-//                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
-//                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-//                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_Settings.m_AbsTol, m_Settings.m_RelTol);
+//                if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
+//                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
+//                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache1,nodeData.m_u1BufferPtr->m_front,m_settings.m_AbsTol, m_settings.m_RelTol);
 //                        if(!nodeData.m_bConverged ) {
 //                            //converged stays false;
 //                            // Set global Converged = false;
@@ -125,15 +125,15 @@ public:
 //                    } else {
 //                        m_bConverged=false;
 //                    }
-//                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
-//                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
+//                }else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
+//                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
 //                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNormSq(   uCache1,
 //                                                                          nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
 //                                                                          nodeData.m_LambdaBack,
 //                                                                          nodeData.m_LambdaFront,
 //                                                                          nodeData.m_G_ii,
-//                                                                          m_Settings.m_AbsTol,
-//                                                                          m_Settings.m_RelTol);
+//                                                                          m_settings.m_AbsTol,
+//                                                                          m_settings.m_RelTol);
 //                        if(!nodeData.m_bConverged ) {
 //                            //converged stays false;
 //                            // Set global Converged = false;
@@ -146,7 +146,7 @@ public:
 
             }
             // SECOND BODY
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
 
                 #if CoutLevelSolverWhenContact>2
 //                    LOG(m_pSolverLog, "\t---> body1.massInv: " << nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.transpose() << std::endl;)
@@ -162,12 +162,12 @@ public:
                 LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
                 #endif
 
-//                if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
-//                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
+//                if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
+//                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
 //                        nodeData.m_bConverged  = Numerics::cancelCriteriaValue(uCache2,
 //                                                                  nodeData.m_u2BufferPtr->m_front,
-//                                                                  m_Settings.m_AbsTol,
-//                                                                  m_Settings.m_RelTol);
+//                                                                  m_settings.m_AbsTol,
+//                                                                  m_settings.m_RelTol);
 //                        if(!nodeData.m_bConverged ) {
 //                            //converged stays false;
 //                            // Set global Converged = false;
@@ -177,15 +177,15 @@ public:
 //                        m_bConverged=false;
 //                    }
 //
-//                }else if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
-//                    if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
+//                }else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix){
+//                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
 //                        nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNormSq(   uCache2,
 //                                                                          nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
 //                                                                          nodeData.m_LambdaBack,
 //                                                                          nodeData.m_LambdaFront,
 //                                                                          nodeData.m_G_ii,
-//                                                                          m_Settings.m_AbsTol,
-//                                                                          m_Settings.m_RelTol);
+//                                                                          m_settings.m_AbsTol,
+//                                                                          m_settings.m_RelTol);
 //                        if(!nodeData.m_bConverged ) {
 //                            //converged stays false;
 //                            // Set global Converged = false;
@@ -197,9 +197,9 @@ public:
 //                }
             }
 
-//            if(m_Settings.m_eConvergenceMethod == InclusionSolverSettingsType::InLambda) {
-//                if(m_globalIterationCounter >= m_Settings.m_MinIter && m_bConverged) {
-//                    nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_Settings.m_AbsTol, m_Settings.m_RelTol);
+//            if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InLambda) {
+//                if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
+//                    nodeData.m_bConverged = Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_settings.m_AbsTol, m_settings.m_RelTol);
 //                    if(!nodeData.m_bConverged) {
 //                        //converged stays false;
 //                        // Set global Converged = false;
@@ -222,7 +222,7 @@ public:
 
 private:
     Logging::Log * m_pSolverLog;
-    const InclusionSolverSettingsType & m_Settings;
+    const InclusionSolverSettingsType & m_settings;
     bool & m_bConverged; ///< Access to global flag for cancelation criteria
     const unsigned int & m_globalIterationCounter; ///< Access to global iteration counter
 
@@ -238,13 +238,13 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef TContactGraph ContactGraphType;
+    using ContactGraphType = TContactGraph;
 
 
-    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
 
     SorProxStepSplitNodeVisitor(const InclusionSolverSettingsType &settings, bool & globalConverged, const unsigned int & globalIterationNeeded):
-                           m_Settings(settings),m_bConverged(globalConverged),
+                           m_settings(settings),m_bConverged(globalConverged),
                            m_globalIterationCounter(globalIterationNeeded)
     {}
 
@@ -320,7 +320,7 @@ public:
 
 private:
     Logging::Log * m_pSolverLog;
-    const InclusionSolverSettingsType & m_Settings;
+    const InclusionSolverSettingsType & m_settings;
     bool & m_bConverged; ///< Access to global flag for cancelation criteria
     const unsigned int & m_globalIterationCounter; ///< Access to global iteration counter
 
@@ -338,11 +338,11 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef TContactGraph ContactGraphType;
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
-    typedef typename ContactGraphType::EdgeType EdgeType;
-    typedef typename ContactGraphType::NodeType NodeType;
+    using ContactGraphType = TContactGraph;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
 
     SorProxInitNodeVisitor()
     {}
@@ -373,7 +373,7 @@ public:
 
         // u_0 , calculate const b
         // First Body
-        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED) {
+        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED) {
             // m_back contains u_s + M^⁻1*h*deltaT already!
             // add + initial values M^⁻1 W lambda0 from percussion pool
             nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
@@ -383,7 +383,7 @@ public:
             nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
         }
         // SECOND BODY!
-        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
 
             // m_back contains u_s + M^⁻1*h*deltaT already!
             nodeData.m_u2BufferPtr->m_front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack ); /// + initial values M^⁻1 W lambda0 from percussion pool
@@ -428,9 +428,9 @@ template<typename TContactGraph>
 class SorProxInitSplitNodeVisitor{
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
-    typedef TContactGraph ContactGraphType;
+    using ContactGraphType = TContactGraph;
 
-    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
 
     SorProxInitSplitNodeVisitor()
     {}
@@ -456,9 +456,9 @@ template<typename TContactGraph>
 class SplitNodeCheckUpdateVisitor{
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
-    typedef TContactGraph ContactGraphType;
+    using ContactGraphType = TContactGraph;
 
-    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
 
     SplitNodeCheckUpdateVisitor()
     {}
@@ -484,9 +484,9 @@ template<typename TContactGraph>
 class SetWeightingLocalBodiesSplitNodeVisitor{
 public:
 
-    typedef TContactGraph ContactGraphType;
+    using ContactGraphType = TContactGraph;
 
-    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
 
     SetWeightingLocalBodiesSplitNodeVisitor(){};
 
@@ -501,9 +501,9 @@ template<typename TContactGraph>
 class ResetWeightingLocalBodiesSplitNodeVisitor{
 public:
 
-    typedef TContactGraph ContactGraphType;
+    using ContactGraphType = TContactGraph;
 
-    typedef typename ContactGraphType::SplitBodyNodeDataType NodeType;
+    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
 
     ResetWeightingLocalBodiesSplitNodeVisitor(){};
 

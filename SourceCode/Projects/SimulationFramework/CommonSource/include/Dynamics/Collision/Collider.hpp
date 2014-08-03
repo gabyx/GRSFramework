@@ -411,8 +411,6 @@ void ColliderBody::collide( const std::shared_ptr<const SphereGeometry >  & sphe
                             const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom)
 {
 
-
-
     // Do Collision for sphere to halfspace
     Vector3 I_n_plane = m_pBody2->m_A_IK*halfspaceGeom->m_normal;
 

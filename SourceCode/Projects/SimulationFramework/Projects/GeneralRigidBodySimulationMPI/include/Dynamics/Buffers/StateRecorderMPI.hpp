@@ -39,7 +39,8 @@ public:
     ~StateRecorderMPI();
 
     //Each process writes its stuff at a specific offset
-    void write(PREC time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList);
+    template< typename TRigidBodyContainer >
+    void write(PREC time, const TRigidBodyContainer & bodyList);
 
     void setDirectoryPath(boost::filesystem::path dir_path);
 
@@ -134,10 +135,9 @@ void StateRecorderMPI::getSimBodyFileName(std::stringstream & s){
 }
 
 
-void StateRecorderMPI::write(PREC time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList){
-
+template< typename TRigidBodyContainer >
+void StateRecorderMPI::write(PREC time, const TRigidBodyContainer & bodyList){
     m_fh.write(time,bodyList);
-
 }
 
 

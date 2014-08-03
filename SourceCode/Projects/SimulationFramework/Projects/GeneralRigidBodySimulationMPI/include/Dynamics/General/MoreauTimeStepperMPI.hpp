@@ -1,13 +1,13 @@
 ﻿/*
-*  MoreauTimeStepper.h
+*  MoreauTimeStepperMPI.h
 *  DynamicSystem
 *
 *  Created by Gabriel Nützi on 21.03.10.
 *  Copyright 2010 ETH. All rights reserved.
 *
 */
-#ifndef MoreauTimeStepper_hpp
-#define MoreauTimeStepper_hpp
+#ifndef MoreauTimeStepperMPI_hpp
+#define MoreauTimeStepperMPI_hpp
 
 // Includes =================================
 #include <iostream>
@@ -21,8 +21,7 @@
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
-#include "DynamicsState.hpp"
-#include "FrontBackBuffer.hpp"
+
 #include "BinaryFile.hpp"
 #include "MultiBodySimFile.hpp"
 #include "SimpleLogger.hpp"
@@ -45,19 +44,19 @@
 * @brief The Moreau time stepper.
 */
 
-class MoreauTimeStepper {
+class MoreauTimeStepperMPI {
 public:
 
     DEFINE_TIMESTEPPER_CONFIG_TYPES
 
-    typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
+    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
-    MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys,
+    MoreauTimeStepperMPI(std::shared_ptr<DynamicsSystemType> pDynSys,
                       std::shared_ptr<ProcessCommunicatorType > pProcCommunicator);
-    ~MoreauTimeStepper();
+    ~MoreauTimeStepperMPI();
 
     // The Core Objects ==================================
     std::shared_ptr<CollisionSolverType>  m_pCollisionSolver;
@@ -77,7 +76,7 @@ public:
     unsigned int getIterationCount();
 
     // Solver Parameters
-    TimeStepperSettings m_Settings;
+    TimeStepperSettings m_settings;
 
     // General Log file
     Logging::Log *m_pSolverLog, *m_pSimulationLog;
@@ -129,11 +128,11 @@ protected:
 //=========================================================
 
 /*=========================================================
-definitions of template class MoreauTimeStepper
+definitions of template class MoreauTimeStepperMPI
 _________________________________________________________*/
 
 
-MoreauTimeStepper::MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys,
+MoreauTimeStepperMPI::MoreauTimeStepperMPI(std::shared_ptr<DynamicsSystemType> pDynSys,
                                      std::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
     m_ReferenceSimFile(),
     m_pSolverLog(nullptr),
@@ -152,21 +151,24 @@ MoreauTimeStepper::MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys
                             new BodyCommunicator(m_pDynSys,  m_pProcCommunicator) );
 
     m_pCollisionSolver = std::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys));
-    m_pInclusionSolver = std::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pBodyCommunicator, m_pCollisionSolver,m_pDynSys, m_pProcCommunicator));
+    m_pInclusionSolver = std::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pBodyCommunicator,
+                                                                                      m_pCollisionSolver,
+                                                                                      m_pDynSys,
+                                                                                      m_pProcCommunicator));
 
 };
 
 
 
 
-MoreauTimeStepper::~MoreauTimeStepper() {
+MoreauTimeStepperMPI::~MoreauTimeStepperMPI() {
     m_CollisionDataFile.close();
     m_SystemDataFile.close();
     DECONSTRUCTOR_MESSAGE
 };
 
 
-void MoreauTimeStepper::closeAllFiles() {
+void MoreauTimeStepperMPI::closeAllFiles() {
 
     Logging::LogManager::getSingletonPtr()->destroyLog("SolverLog");
     m_pSolverLog = nullptr;
@@ -176,7 +178,7 @@ void MoreauTimeStepper::closeAllFiles() {
 }
 
 
-void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ) {
+void MoreauTimeStepperMPI::initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ) {
 
     // Set new Simfile Path
     m_SimFolderPath = folder_path;
@@ -237,14 +239,14 @@ void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, c
 
 
 
-void MoreauTimeStepper::reset() {
+void MoreauTimeStepperMPI::reset() {
      //set standart values for parameters
     m_IterationCounter = 0;
     m_bIterationFinished = false;
 
     m_pSimulationLog->logMessage("---> Reset DynamicsSystem...");
     m_pDynSys->reset();
-    m_pDynSys->getSettings(m_Settings);
+    m_settings = m_pDynSys->getSettingsTimeStepper();
 
     m_pSimulationLog->logMessage("---> Reset CollisionSolver...");
     m_pCollisionSolver->reset();
@@ -256,16 +258,16 @@ void MoreauTimeStepper::reset() {
     m_AvgTimeForOneIteration = 0;
     m_MaxTimeForOneIteration = 0;
 
-    m_currentSimulationTime = m_Settings.m_startTime;
+    m_currentSimulationTime = m_settings.m_startTime;
 
 
 
-    if(m_Settings.m_eSimulateFromReference != TimeStepperSettings::NONE) {
+    if(m_settings.m_eSimulateFromReference != TimeStepperSettings::NONE) {
 
         //TODO Open all simfiles references for the bodies
-        //LOG(m_pSimulationLog,"---> Opened Reference SimFile: m_Settings.m_simStateReferenceFile"<<std::endl);
+        //LOG(m_pSimulationLog,"---> Opened Reference SimFile: m_settings.m_simStateReferenceFile"<<std::endl);
 
-        if(m_Settings.m_eSimulateFromReference != TimeStepperSettings::CONTINUE) {
+        if(m_settings.m_eSimulateFromReference != TimeStepperSettings::CONTINUE) {
             //Inject the end state into the front buffer
             //TODO
         }
@@ -284,18 +286,18 @@ void MoreauTimeStepper::reset() {
 };
 
 
-MoreauTimeStepper::PREC MoreauTimeStepper::getTimeCurrent() {
+MoreauTimeStepperMPI::PREC MoreauTimeStepperMPI::getTimeCurrent() {
     return m_currentSimulationTime;
 }
 
 
-unsigned int MoreauTimeStepper::getIterationCount() {
+unsigned int MoreauTimeStepperMPI::getIterationCount() {
     return m_IterationCounter;
 }
 
 
 
-void MoreauTimeStepper::doOneIteration() {
+void MoreauTimeStepperMPI::doOneIteration() {
     static std::stringstream logstream;
 
     static int iterations=0; // Average is reset after 1000 Iterations
@@ -316,7 +318,7 @@ void MoreauTimeStepper::doOneIteration() {
     //boost::thread::yield();
 
 #if CoutLevelSolver==1
-     unsigned int when = (m_Settings.m_endTime-m_Settings.m_startTime)/m_Settings.m_deltaT / 10.0;
+     unsigned int when = (m_settings.m_endTime-m_settings.m_startTime)/m_settings.m_deltaT / 10.0;
       if(when<=0){when=1;}
       if(m_IterationCounter % when == 0){
             LOG(m_pSolverLog,"--->  m_t: " << m_currentSimulationTime<<std::endl; );
@@ -331,13 +333,13 @@ void MoreauTimeStepper::doOneIteration() {
     // Middle Time Step for all LOCAL Bodies==============================================
     // Remote bodies belong to other processes which are timestepped
     m_startSimulationTime = m_currentSimulationTime;
-    m_pDynSys->doFirstHalfTimeStep(m_startSimulationTime, m_Settings.m_deltaT/2.0);
+    m_pDynSys->doFirstHalfTimeStep(m_startSimulationTime, m_settings.m_deltaT/2.0);
     // Custom Integration for Inputs
-    m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
+    m_pDynSys->doInputTimeStep(m_settings.m_deltaT/2.0);
     // Custom Calculations after first timestep
     m_pDynSys->afterFirstTimeStep();
 
-    m_currentSimulationTime = m_startSimulationTime + m_Settings.m_deltaT/2.0;
+    m_currentSimulationTime = m_startSimulationTime + m_settings.m_deltaT/2.0;
     // ====================================================================================
 
     m_startBodyCommunication = m_PerformanceTimer.elapsedSec();
@@ -398,10 +400,10 @@ void MoreauTimeStepper::doOneIteration() {
 
     // ===================================================================================
     // Middle Time Step ==================================================================
-    m_currentSimulationTime = m_startSimulationTime + m_Settings.m_deltaT ;
-    m_pDynSys->doSecondHalfTimeStep(m_currentSimulationTime, m_Settings.m_deltaT/2.0);
+    m_currentSimulationTime = m_startSimulationTime + m_settings.m_deltaT ;
+    m_pDynSys->doSecondHalfTimeStep(m_currentSimulationTime, m_settings.m_deltaT/2.0);
     // Custom Integration for Inputs
-    m_pDynSys->doInputTimeStep(m_Settings.m_deltaT/2.0);
+    m_pDynSys->doInputTimeStep(m_settings.m_deltaT/2.0);
     // Custom Calculations after second timestep
     m_pDynSys->afterSecondTimeStep();
     // ====================================================================================
@@ -433,21 +435,21 @@ void MoreauTimeStepper::doOneIteration() {
 #endif
 
     // Check if we can finish the timestepping!
-    if(m_Settings.m_eSimulateFromReference == TimeStepperSettings::USE_STATES ) {
+    if(m_settings.m_eSimulateFromReference == TimeStepperSettings::USE_STATES ) {
         m_bFinished =  !m_ReferenceSimFile.isGood();
     } else {
-        m_bFinished =  m_currentSimulationTime >= m_Settings.m_endTime;
+        m_bFinished =  m_currentSimulationTime >= m_settings.m_endTime;
     }
 
     m_bIterationFinished = true;
 }
 
 
-bool MoreauTimeStepper::finished() {
+bool MoreauTimeStepperMPI::finished() {
     return m_bFinished;
 }
 
-void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
+void MoreauTimeStepperMPI::writeIterationToSystemDataFile(double globalTime) {
 #if OUTPUT_SIMDATA_FILE == 1
     m_SystemDataFile
     << globalTime << "\t"
@@ -462,7 +464,7 @@ void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
 
 #endif
 }
-void MoreauTimeStepper::writeHeaderToSystemDataFile() {
+void MoreauTimeStepperMPI::writeHeaderToSystemDataFile() {
 #if OUTPUT_SIMDATA_FILE == 1
     m_SystemDataFile <<"# "
     << "GlobalTime [s]" << "\t"
@@ -478,7 +480,7 @@ void MoreauTimeStepper::writeHeaderToSystemDataFile() {
 }
 
 
-void MoreauTimeStepper::writeIterationToCollisionDataFile() {
+void MoreauTimeStepperMPI::writeIterationToCollisionDataFile() {
 #if OUTPUT_COLLISIONDATA_FILE == 1
 
     double averageOverlap = 0;

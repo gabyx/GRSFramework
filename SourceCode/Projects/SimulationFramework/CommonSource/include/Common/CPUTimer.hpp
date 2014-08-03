@@ -18,7 +18,7 @@
 class CPUTimer{
 
 public:
-    typedef std::chrono::high_resolution_clock ClockType;
+    using ClockType = std::chrono::high_resolution_clock;
 
     inline void start(){
         m_start = ClockType::now();

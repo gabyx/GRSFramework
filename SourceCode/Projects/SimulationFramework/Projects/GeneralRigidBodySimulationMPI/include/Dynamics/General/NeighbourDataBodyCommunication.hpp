@@ -43,11 +43,11 @@ public:
 
     NeighbourDataBodyCommunication(const RankIdType & neighbourRank): NeighbourDataDerived(neighbourRank){};
 
-    typedef NeighbourDataDerived::RemoteIterator RemoteIterator;
-    typedef NeighbourDataDerived::LocalIterator LocalIterator;
+    using RemoteIterator = NeighbourDataDerived::RemoteIterator;
+    using LocalIterator = NeighbourDataDerived::LocalIterator;
 
-    typedef NeighbourDataDerived::LocalDataType LocalDataType;
-    typedef NeighbourDataDerived::RemoteDataType RemoteDataType;
+    using LocalDataType = NeighbourDataDerived::LocalDataType;
+    using RemoteDataType = NeighbourDataDerived::RemoteDataType;
 
     void clear(){
         ERRORMSG("We should not execute this!");

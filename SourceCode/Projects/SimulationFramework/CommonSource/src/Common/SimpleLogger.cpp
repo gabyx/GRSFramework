@@ -108,8 +108,10 @@ bool Log::removeSink(std::string sink_name) {
     for(it=m_sinkList.begin(); it!=m_sinkList.end(); ++it) {
         if((*it)->getName()==sink_name) {
             it=m_sinkList.erase(it);
+            return true;
         }
     }
+    return false;
 }
 
 std::string Log::getName() {

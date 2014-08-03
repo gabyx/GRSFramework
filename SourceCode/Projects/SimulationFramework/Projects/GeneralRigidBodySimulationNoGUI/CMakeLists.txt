@@ -28,168 +28,53 @@ SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
 
 
 SET( APP_INC
-#    ${SOURCE_DIR}/include/App/App.hpp
-#    ${SOURCE_DIR}/include/App/MenuMouse.hpp
-#    ${SOURCE_DIR}/include/App/OrbitCamera.hpp
 )
 SET( APP_SRC
-#    ${SOURCE_DIR}/src/App/App.cpp
-#    ${SOURCE_DIR}/src/App/MenuMouse.cpp
-#    ${SOURCE_DIR}/src/App/OrbitCamera.cpp
     ${PROJECT_SOURCE_DIR}/src/App/main.cpp
 
 )
 
 SET(SINGELTON_INC
-#    ${SOURCE_DIR}/include/Singeltons/Contexts/GuiContext.hpp
-#    ${SOURCE_DIR}/include/Singeltons/Contexts/InputContext.hpp
-#    ${SOURCE_DIR}/include/Singeltons/Contexts/RenderContext.hpp
-    ${COMMONSOURCE_DIR}/include/Singeltons/FileManager.hpp
 )
 
 SET( SINGELTON_SRC
-#    ${PROJECT_SOURCE_DIR}/src/Singeltons/Contexts/GuiContext.cpp
-#    ${PROJECT_SOURCE_DIR}/src/Singeltons/Contexts/InputContext.cpp
-#    ${PROJECT_SOURCE_DIR}/src/Singeltons/Contexts/RenderContext.cpp
-    ${COMMONSOURCE_DIR}/src/Singeltons/FileManager.cpp
 )
 
 SET( STATES_INC
-#    ${SOURCE_DIR}/include/States/AppState.hpp
-#    ${SOURCE_DIR}/include/States/AppStateManager.hpp
-#    ${SOURCE_DIR}/include/States/SimulationState.hpp
-#    ${SOURCE_DIR}/include/States/PlaybackState.hpp
-#    ${SOURCE_DIR}/include/States/VideoDropper.hpp
-#    ${SOURCE_DIR}/include/States/SimulationManager/SimulationManagerBase.hpp
-    ${COMMONSOURCE_DIR}/include/States/SimulationManager/SimulationManager.hpp
-#    ${SOURCE_DIR}/include/States/SimulationManager/PlaybackManagerBase.hpp
-#    ${SOURCE_DIR}/include/States/SimulationManager/PlaybackManager.hpp
-#    ${SOURCE_DIR}/include/States/SimulationManager/PlaybackManager.icc
-#    ${SOURCE_DIR}/include/States/SimulationManager/PlaybackLoader.hpp
+    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManager.hpp
 )
 SET(STATES_SRC
-    ${COMMONSOURCE_DIR}/src/States/SimulationManager/SimulationManager.cpp
-#    ${SOURCE_DIR}/src/States/AppStateManager.cpp
-#    ${SOURCE_DIR}/src/States/SimulationState.cpp
-#    ${SOURCE_DIR}/src/States/PlaybackState.cpp
-#    ${SOURCE_DIR}/src/States/SimulationManager/SimulationManagerBase.cpp
-#    ${SOURCE_DIR}/src/States/SimulationManager/PlaybackManagerBase.cpp
+    ${PROJECT_SOURCE_DIR}/src/States/SimulationManager/SimulationManager.cpp
 )
 
 SET(COMMON_INC
-    ${SOURCE_DIR}/include/Common/TypeDefs.hpp
-#    ${SOURCE_DIR}/include/Common/OgreMeshExtraction.hpp
-#    ${SOURCE_DIR}/include/Common/CommonFunctionsOgre.hpp
+    ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
     ${SOURCE_DIR}/include/Common/AssertionDebug.hpp
-    ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
-    ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
-    ${COMMONSOURCE_DIR}/include/Common/MeshData.hpp
-    ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
-    ${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
-    ${COMMONSOURCE_DIR}/include/Common/MakeCoordinateSystem.hpp
-    ${COMMONSOURCE_DIR}/include/Common/VectorToSkewMatrix.hpp
-    ${COMMONSOURCE_DIR}/include/Common/MatrixHelpers.hpp
-    ${COMMONSOURCE_DIR}/include/Common/QuaternionHelpers.hpp
-    ${COMMONSOURCE_DIR}/include/Common/TypenameComparision.hpp
-    ${COMMONSOURCE_DIR}/include/Common/MultiBodySimFile.hpp
-    ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
-    ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
-    ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp
-    ${COMMONSOURCE_DIR}/include/Common/BitCount.hpp
-    ${COMMONSOURCE_DIR}/include/Common/CPUTimer.hpp
-    ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
+
 )
 SET(COMMON_SRC
-#    ${SOURCE_DIR}/src/Common/OgreMeshExtraction.cpp
-    ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
-#    ${SOURCE_DIR}/src/Common/CommonFunctionsOgre.cpp
-    ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
-    ${SOURCE_DIR}/src/Common/TypeDefs.cpp
-    ${COMMONSOURCE_DIR}/src/Common/MultiBodySimFile.cpp
-    ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
-    ${COMMONSOURCE_DIR}/src/Common/BitCount.cpp
+    ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
 )
 
 SET(DYNAMICS_INC
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodySolverData.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/MoreauTimeStepper.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/AddGyroTermVisitor.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactFrame.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionFunctions.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionSolver.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/Ray.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/SphereGeometry.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/PlaneGeometry.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameter.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameterMap.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphNodeData.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
-    #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCONoG.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettings.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/FrontBackBuffer.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePool.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePoolVisBackFront.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/SharedBufferPlayback.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorder.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
 )
 SET(DYNAMICS_SRC
-    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoG.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionSolver.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/General/MoreauTimeStepper.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Collider.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StateRecorder.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StatePoolVisBackFront.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystem.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/BoxGeometry.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/Ray.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactParameterMap.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactModels.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ConvexSets.cpp
-    ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCO.cpp
-
 )
 
-
-
 SET(SYSTEMS_INC
-    ${COMMONSOURCE_DIR}/include/Systems/SceneParser.hpp
-#    ${SOURCE_DIR}/include/Systems/SceneParserOgre.hpp
-    ${COMMONSOURCE_DIR}/include/Systems/SharedBufferDynSys.hpp
 )
 
 SET(SYSTEMS_SRC
 )
+
+# COMMON FILES INCLUDE ====================================================================
+INCLUDE(IncludeModulesSimulationFramework)
+
+INCLUDE_SIMULATION_FRAMEWORK_NOGUI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${COMMONSOURCE_DIR})
+PRINTLIST("Global Common src files:" "${GLOBAL_COMMON_SRC}")
+PRINTLIST("Global Common include files:" "${GLOBAL_COMMON_INC}")
+# ===========================================================================================
 
 # CUDA SOURCE INCLUDES ====================================================================
 if(SIMULATIONFRAMEWORK_USE_CUDA)
@@ -234,6 +119,7 @@ SET(SOURCE_FILES
     ${DYNAMICS_SRC}
     ${SYSTEMS_SRC}
     ${CUDA_SRC}
+    ${GLOBAL_COMMON_SRC}
 )
 
 SET(INCLUDE_FILES
@@ -245,6 +131,7 @@ SET(INCLUDE_FILES
     ${DYNAMICS_INC}
     ${SYSTEMS_INC}
     ${CUDA_INC}
+    ${GLOBAL_COMMON_INC}
 )
 
 SET(CMAKE_DEBUG_POSTFIX "_d")
@@ -252,15 +139,8 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 #include directories
 set(INCLUDE_DIRS
 
-    #${NVIDIA_SDK_DIR}/common/inc
-    #${NVIDIA_SDK_DIR}/../shared/inc
     ${Boost_INCLUDE_DIRS}
     ${EIGEN_INCLUDE_DIR}
-#    ${TOON_INCLUDE_DIR}
-#    ${OGRE_INCLUDE_DIRS}
-#    ${OIS_INCLUDE_DIRS}
-    #${CEGUI_INCLUDE_DIR}
-#    ${STLSOFT_INCLUDE_DIR}
     ${TICPP_INCLUDE_DIRS}
     ${COLLISIONLIB_INCLUDE_DIRS}
     ${ASSIMP_INCLUDE_DIRS}
@@ -271,31 +151,17 @@ set(INCLUDE_DIRS
 
     #Only for LogDefines.hpp
     ${PROJECT_SOURCE_DIR}/include/Common # Needs to be previous to {SOURCE_DIR}/include/Common (because there is another LogDefines.hpp
-
+    
+    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/
+    
     #Linked Source
-    #${SOURCE_DIR}/include/App
     ${SOURCE_DIR}/include/Common
-    #${SOURCE_DIR}/include/Singeltons/Contexts
-    #${SOURCE_DIR}/include/Singeltons/
-    #${SOURCE_DIR}/include/States
-    #${SOURCE_DIR}/include/States/SimulationManager
-    #${SOURCE_DIR}/include/Systems
+    
+    ${SOURCE_DIR}/external/pugixml
+    ${SOURCE_DIR}/external/pugixml
 
-    ${COMMONSOURCE_DIR}/include/Common
-    ${COMMONSOURCE_DIR}/external/SRDelegates/include/
-    ${COMMONSOURCE_DIR}/external/FastFunc/include/
-    ${COMMONSOURCE_DIR}/external/getoptpp/
-    ${COMMONSOURCE_DIR}/external/getoptpp/src/
-    ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision
-    ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry
-    ${COMMONSOURCE_DIR}/include/Dynamics/General
-    ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion
-    ${COMMONSOURCE_DIR}/include/Systems
-    ${COMMONSOURCE_DIR}/include/Singeltons
-    ${COMMONSOURCE_DIR}/include/States
-    ${COMMONSOURCE_DIR}/include/States/SimulationManager
-
+    ${GLOBAL_COMMON_INC_DIR}
+    
     ${CUDA_COMMON_INCLUDE_DIR}
 )
 

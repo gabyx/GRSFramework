@@ -33,6 +33,8 @@ public:
 
         virtual void execute() = 0;
 
+        virtual ~PostProcessTask(){};
+
         protected:
 
             friend std::ostream & operator<<(std::ostream & s, const PostProcessTask & p);

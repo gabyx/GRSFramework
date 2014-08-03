@@ -53,29 +53,31 @@ private:
 
     struct SettingsSimThread {
         double m_EndTime;
-    } m_SettingsSimThread;
+    } m_settingsSimThread;
 
 
     Logging::Log *  m_pSimulationLog;
 
-    //typedef StateRecorderBody<DynamicsSystemType> StateRecorderType;
-    typedef StateRecorderMPI StateRecorderType;
+    //using StateRecorderType = StateRecorderBody<DynamicsSystemType>;
+    using StateRecorderType = StateRecorderMPI;
     // ===============================================
 
     std::shared_ptr< StateRecorderType >  m_pStateRecorder;
 
-    std::shared_ptr< SceneParserMPI >     m_pSceneParser;
+    using SceneParserType = SceneParserMPI<DynamicsSystemType>;
+    std::shared_ptr< SceneParserType >     m_pSceneParser;
 
     std::shared_ptr< TimeStepperType >	m_pTimestepper;
     std::shared_ptr< DynamicsSystemType > m_pDynSys;
     std::shared_ptr< BodyCommunicator >   m_pBodyCommunicator;
 
 
-    typedef typename MPILayer::ProcessCommunicator ProcessCommunicatorType;
-    typedef typename ProcessCommunicatorType::ProcessInfoType ProcessInfoType;
+    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator;
+    using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType;
     std::shared_ptr< ProcessCommunicatorType > m_pProcCommunicator;
 
-    typedef typename MPILayer::TopologyBuilder  TopologyBuilderType;
+
+    using TopologyBuilderType = typename MPILayer::TopologyBuilder ;
     std::shared_ptr< TopologyBuilderType >    m_pTopologyBuilder;
 
     void writeAllOutput();

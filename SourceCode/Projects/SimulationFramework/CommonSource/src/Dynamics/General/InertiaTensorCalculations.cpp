@@ -8,7 +8,7 @@ namespace InertiaTensor{
 
    void calculateInertiaTensor( const std::shared_ptr<MyRigidBodyType > & rigidBody)
    {
-      typedef MyLayoutConfigType::PREC PREC;
+      using PREC = MyLayoutConfigType::PREC;
 
       if( std::shared_ptr<SphereGeometry<PREC> > sphereGeom = boost::get<std::shared_ptr<SphereGeometry<PREC> > >(rigidBody->m_geometry)){
          rigidBody->m_K_Theta_S(0) = 2.0/5.0 * rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);

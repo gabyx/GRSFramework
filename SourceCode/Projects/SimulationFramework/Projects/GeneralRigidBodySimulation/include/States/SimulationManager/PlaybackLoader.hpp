@@ -36,7 +36,7 @@ public:
 
   boost::barrier m_barrier_start;
 
-  const unsigned int m_nSimBodies; // These are the dimensions for one Obj
+  const unsigned int m_nSimBodies;  // only needed for simfile check! //TODO remove from constructor
 
   MultiBodySimFile m_binarySimFile;
 
@@ -61,7 +61,7 @@ private:
 
   bool m_bReadFullState;
 
-  std::shared_ptr< DynamicsState > m_state; /**<   This is the actual loader state pointer ;*/
+  DynamicsState * m_state; /**<   This is the actual loader state pointer ;*/
   std::shared_ptr<TStatePool>	m_pStatePool;
 
   std::set<boost::filesystem::path> m_simFileList;
@@ -180,12 +180,12 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
                 if(!loadNextFile()){
                     current_state = EXIT;
                 }else{
-                    LOG(m_pThreadLog, "---> SimFile: " << m_currentFileIndex<<"/"<<m_simFileList.size()<<":" << *m_currentFileIt<<" loaded: Number of States = " << m_binarySimFile.getNStates() << std::endl;);
+                    LOG(m_pThreadLog, "---> SimFile: " << m_currentFileIndex+1<<"/"<<m_simFileList.size()<<":" << *m_currentFileIt<<" loaded: Number of States = " << m_binarySimFile.getNStates() << std::endl;);
                     current_state = READ_IN;
                 }
             }else{
                  // Write end flag to state if that was the last file!
-                LOG(m_pThreadLog,  "---> Write endstate to m_state m_t:" << m_state->m_t <<std::endl;);
+                LOG(m_pThreadLog,  "---> Write end flag to m_state @ m_t: " << m_state->m_t <<std::endl;);
                 m_state->m_StateType = DynamicsState::ENDSTATE;
                 current_state = FINALIZE_AND_BREAK;
             }
@@ -202,17 +202,18 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
             // Moves pointer as long as the buffer is no full
             m_state = m_pStatePool->advanceLoadBuffer(bMovedBuffer);
              if(!bMovedBuffer){
-               current_state=FILE_CHECK;
-               break;
+               current_state = FINALIZE_AND_BREAK;
              }else{
                current_state=READ_IN;
              }
          }else if(current_state== READ_IN){
-           i++;
-           m_binarySimFile >> m_state.get();
-            if(i % 20==0){
-               LOG(m_pThreadLog,  "---> File loader buffering state: " << m_state->m_t <<"..."<<std::endl);
+           if(i == 0){
+                LOG(m_pThreadLog,  "---> Write start flag to m_state @ m_t: " << m_state->m_t <<std::endl;);
+                m_state->m_StateType = DynamicsState::STARTSTATE;
            }
+           m_binarySimFile >> m_state;
+           if(i%20==0){LOG(m_pThreadLog,  "---> File loader buffering (i: " << i << ") @ m_t: " << m_state->m_t <<std::endl);}
+           i++;
            current_state = FILE_CHECK;
          }
          else if(current_state== FINALIZE_AND_BREAK){
@@ -223,9 +224,10 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
       }
       // =========================================================================================
 
-
       // wait for caller thread;
       m_barrier_start.wait();
+
+      current_state = FILE_CHECK;
 
       while(!isLoaderThreadToBeStopped() && current_state != EXIT)
       {
@@ -236,12 +238,12 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
                 if(!loadNextFile()){
                     current_state = EXIT;
                 }else{
-                    LOG(m_pThreadLog, "---> SimFile "<<m_currentFileIndex<<"/"<<m_simFileList.size()<<" loaded: Number of States = " << m_binarySimFile.getNStates() << std::endl;);
+                    LOG(m_pThreadLog, "---> SimFile "<<m_currentFileIndex+1<<"/"<<m_simFileList.size()<<" loaded: Number of States = " << m_binarySimFile.getNStates() << std::endl;);
                     current_state = READ_IN;
                 }
             }else{
                  // Write end flag to state if that was the last file!
-                LOG(m_pThreadLog,  "---> Write endstate to m_state m_t:" << m_state->m_t <<std::endl;);
+                LOG(m_pThreadLog,  "---> Write endstate to m_state m_t: " << m_state->m_t <<std::endl;);
                 m_state->m_StateType = DynamicsState::ENDSTATE;
                 current_state = FINALIZE_AND_BREAK;
             }
@@ -259,7 +261,7 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
                current_state = READ_IN;
             }
          }else if(current_state== READ_IN){
-            m_binarySimFile >> m_state.get();
+            m_binarySimFile >> m_state;
                /*
                LOG(m_pThreadLog,  "Loaded m_t:" << m_state->m_t <<endl;);
                 */

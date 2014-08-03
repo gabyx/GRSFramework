@@ -5,8 +5,20 @@
 #include "VectorToSkewMatrix.hpp"
 #include "CommonFunctions.hpp"
 #include "RigidBodyFunctions.hpp"
+#include "QuaternionHelpers.hpp"
 
-DynamicsSystem::~DynamicsSystem() {
+DynamicsSystemMPI::DynamicsSystemMPI(){
+
+    m_currentTotEnergy = 0;
+    m_currentPotEnergy= 0;
+    m_currentKinEnergy= 0;
+    m_currentTransKinEnergy= 0;
+    m_currentRotKinEnergy= 0;
+    m_currentSpinNorm= 0;
+}
+
+
+DynamicsSystemMPI::~DynamicsSystemMPI() {
     DECONSTRUCTOR_MESSAGE
 
     // Delete all RigidBodys
@@ -17,50 +29,58 @@ DynamicsSystem::~DynamicsSystem() {
 };
 
 
-void DynamicsSystem::getSettings(RecorderSettings & settingsRecorder) const {
-    settingsRecorder = m_SettingsRecorder;
+
+const DynamicsSystemMPI::RecorderSettingsType & DynamicsSystemMPI::getSettingsRecorder() const {
+    return m_settingsRecorder;
 }
-void DynamicsSystem::setSettings(const RecorderSettings & settingsRecorder) {
-    m_SettingsRecorder = settingsRecorder;
+const DynamicsSystemMPI::TimeStepperSettingsType &
+DynamicsSystemMPI::getSettingsTimeStepper() const {
+    return m_settingsTimestepper;
 }
-void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper) const {
-    settingsTimestepper = m_SettingsTimestepper;
+const DynamicsSystemMPI::InclusionSolverSettingsType & DynamicsSystemMPI::getSettingsInclusionSolver() const {
+    return m_settingsInclusionSolver;
 }
-void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper){
-    m_SettingsTimestepper = settingsTimestepper;
+
+const DynamicsSystemMPI::TopologyBuilderSettingsType & DynamicsSystemMPI::getSettingsTopoBuilder() const{
+    return m_settingsTopologyBuilder;
 }
-void DynamicsSystem::getSettings(InclusionSolverSettingsType &settingsInclusionSolver) const {
-    settingsInclusionSolver = m_SettingsInclusionSolver;
+
+void DynamicsSystemMPI::setSettings(const TimeStepperSettingsType &settingsTimeStepper){
+    m_settingsTimestepper = settingsTimeStepper;
 }
-void DynamicsSystem::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
-    m_SettingsInclusionSolver = settingsInclusionSolver;
+void DynamicsSystemMPI::setSettings(const RecorderSettingsType & settingsRecorder) {
+    m_settingsRecorder = settingsRecorder;
 }
-void DynamicsSystem::getSettings(TimeStepperSettings &settingsTimestepper,
+void DynamicsSystemMPI::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
+    m_settingsInclusionSolver = settingsInclusionSolver;
+}
+
+void DynamicsSystemMPI::getSettings(TimeStepperSettingsType &settingsTimestepper,
                                  InclusionSolverSettingsType &settingsInclusionSolver) const {
-    settingsTimestepper = m_SettingsTimestepper;
-    settingsInclusionSolver = m_SettingsInclusionSolver;
+    settingsTimestepper = m_settingsTimestepper;
+    settingsInclusionSolver = m_settingsInclusionSolver;
 }
-void DynamicsSystem::setSettings(const TimeStepperSettings &settingsTimestepper,
+void DynamicsSystemMPI::setSettings(const TimeStepperSettingsType &settingsTimestepper,
                                  const InclusionSolverSettingsType &settingsInclusionSolver) {
-    m_SettingsTimestepper = settingsTimestepper;
-    m_SettingsInclusionSolver = settingsInclusionSolver;
+    m_settingsTimestepper = settingsTimestepper;
+    m_settingsInclusionSolver = settingsInclusionSolver;
 }
 
 
-void DynamicsSystem::initializeLog(Logging::Log* pLog) {
+void DynamicsSystemMPI::initializeLog(Logging::Log* pLog) {
     m_pSolverLog = pLog;
     ASSERTMSG(m_pSolverLog != nullptr, "Logging::Log: nullptr!");
 }
 
 
-void DynamicsSystem::reset(){
+void DynamicsSystemMPI::reset(){
     //reset all external forces
     m_externalForces.reset();
     initMassMatrixAndHTerm();
 }
 
 
-void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
+void DynamicsSystemMPI::doFirstHalfTimeStep(PREC ts, PREC timestep) {
     using namespace std;
      #if CoutLevelSolver>1
     LOG(m_pSolverLog, "---> doFirstHalfTimeStep(): "<<std::endl;)
@@ -95,15 +115,10 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
         pBody->m_q_KI.normalize();
 
         // Update Transformation A_IK
-        setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
+        QuaternionHelpers::setRotFromQuaternion(pBody->m_q_KI,  pBody->m_A_IK);
 
         // Add in to h-Term ==========
-        pBody->m_h_term = pBody->m_h_term_const;
-        #if CoutLevelSolver>2
-        LOG(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
-            << "\t\t--->m_h_term= "  <<pBody->m_h_term.transpose()<<std::endl
-            << "\t\t--->m_MassMatrixInv_diag= "  <<pBody->m_MassMatrixInv_diag.transpose()<<std::endl)
-        #endif
+        pBody->m_h_term.setZero();
         // =========================
         // Term omega x Theta * omega = if Theta is diagonal : for a Spehere for example!
         AddGyroTermVisitor vis(pBody);
@@ -114,6 +129,12 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 
         // Add external forces to h_term
         m_externalForces.calculate(pBody);
+
+        #if CoutLevelSolver>2
+        LOG(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
+            << "\t\t--->m_h_term= "  <<pBody->m_h_term.transpose()<<std::endl
+            << "\t\t--->m_MassMatrixInv_diag= "  <<pBody->m_MassMatrixInv_diag.transpose()<<std::endl)
+        #endif
 
 
 #if CoutLevelSolver>2
@@ -126,7 +147,7 @@ void DynamicsSystem::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 }
 
 
-void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
+void DynamicsSystemMPI::doSecondHalfTimeStep(PREC te, PREC timestep) {
     using namespace std;
      #if CoutLevelSolver>1
     LOG(m_pSolverLog, "---> doSecondHalfTimeStep(): "<<std::endl;)
@@ -168,7 +189,7 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
 #if OUTPUT_SIMDATA_FILE == 1
         // Calculate Energy
        // Calculate Energy
-        PREC potE = -pBody->m_mass *  pBody->m_r_S.transpose() * m_gravity*m_gravityDir;
+        PREC potE = m_externalForces.calculatePotEnergy(pBody);
         PREC kinE = 0.5* pBody->m_pSolverData->m_uBuffer.m_front.transpose() * pBody->m_MassMatrix_diag.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front;
         PREC transKinE = 0.5*pBody->m_pSolverData->m_uBuffer.m_front.squaredNorm()*pBody->m_mass;
         m_currentPotEnergy += potE;
@@ -189,7 +210,7 @@ void DynamicsSystem::doSecondHalfTimeStep(PREC te, PREC timestep) {
 
 }
 
-void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
+void DynamicsSystemMPI::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
     static Matrix33 a_tilde = Matrix33::Zero();
 
     F_i.block<1,3>(0,0) = -0.5 * q.tail<3>();
@@ -198,12 +219,11 @@ void DynamicsSystem::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
 }
 
 
-void DynamicsSystem::initMassMatrixAndHTerm() {
+void DynamicsSystemMPI::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
 
-    Vector3 gravity = m_gravity * m_gravityDir;
     for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
-        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt, gravity);
+        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt);
     }
 }

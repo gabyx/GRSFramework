@@ -21,9 +21,34 @@
 * @brief
 */
 /* @{ */
-#define CLEARLOG logstream.str("");                        ///< Macro to easily write into a Ogre::Log.
-#define LOG( _logptr_ , _message_ )  ( * (_logptr_) ) <<  _message_  ;  ///< Macro to easily write into a Ogre::Log.
-#define OGRE_LOG( _logptr_ ) (_logptr_)->logMessage(logstream.str());  ///< Macro to easily write into a Ogre::Log.
+#define LOG( logptr , message )  ( * (logptr) ) << message ;  ///< Macro to easily write into a SimpleLogger::Log.
+#define LOGLEVEL( level , setlevel , logptr , message) if( level <= setlevel ){  LOG(logptr,message); }
+
+
+#ifndef NDEBUG
+    // DEBUG!
+    /// SceneParser
+    #define SCENEPARSER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define LOGSC( log , message ) LOG(log,message);
+    #define LOGSCLEVEL( level, logptr , message ) LOGLEVEL( level, SCENEPARSER_LOGLEVEL , logptr , message);
+    #define LOGSCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
+    #define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
+    #define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
+    #define SKIPLOGSC( logptr , message )  LOGSCLEVEL( 1 , logptr , message) ;
+
+#else
+    /// SceneParser
+    #define SCENEPARSER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define LOGSC( log , message ) LOG(log,message);
+    #define LOGSCLEVEL( level, logptr , message ) LOGLEVEL( level, SCENEPARSER_LOGLEVEL , logptr , message);
+    #define LOGSCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
+    #define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
+    #define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
+    #define SKIPLOGSC( logptr , message )  LOGSCLEVEL( 1 , logptr , message) ;
+
+#endif
+
+
 /* @} */
 
 
@@ -85,6 +110,7 @@
 */
 /* @{ */
 #define OUTPUT_SIMDATA_FILE 1  ///< {0,1} Sets if the System Data file is outputted
+#define OUTPUT_SIMDATAITERATION_FILE 1 ///< {0,1} Sets if the SimDataIteration file is outputted
 #define CALCULATE_COND_OF_G 0     ///< {0,1} Set if the condition of the G matrix is calculated and outputted. Takes alot of time!
 #define CALCULATE_DIAGDOM_OF_G 1  ///< {0,1} Set if the diagonal dominant criteria is calculated, the number shows how many rows are not diagonal dominant!
 #define MEASURE_TIME_PROX 1

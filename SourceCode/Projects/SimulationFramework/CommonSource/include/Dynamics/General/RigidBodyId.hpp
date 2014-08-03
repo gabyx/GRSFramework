@@ -9,7 +9,8 @@
 class RigidBodyId{
 
 public:
-    typedef uint64_t Type;
+    using Type = uint64_t; ///< [ --- last 32bit is GroupNr --- , --- first 32bit is BodyNr --- ]
+    using HalfType = uint32_t;
 
     template<typename TRigidBodyType >
     inline static unsigned int getGroupNr(const TRigidBodyType * body){
@@ -46,9 +47,9 @@ public:
         return s.str();
     };
 
-    inline static Type makeId( unsigned int bodyNr, unsigned int processNr){
+    inline static Type makeId(  unsigned int groupNr, unsigned int bodyNr){
         Type res = 0;
-        res |= (uint64_t)processNr;
+        res |= (uint64_t)groupNr;
         res <<= 32;
         res |= (uint64_t)bodyNr;
         return res;
@@ -56,6 +57,9 @@ public:
 };
 
 /** Definition of the RigidBodyId type */
-typedef RigidBodyId::Type RigidBodyIdType;
+using RigidBodyIdType = RigidBodyId::Type;
+
+/** Definition of the RigidBodyId half type */
+using RigidBodyIdHalfType = RigidBodyId::HalfType;
 
 #endif

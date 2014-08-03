@@ -63,7 +63,7 @@ public:
 //    void readFromPercussionPool(unsigned int index, const CollisionData * pCollData, VectorDyn & P_old);
 //    void updatePercussionPool(const VectorDyn & P_old ) ;
 
-    InclusionSolverSettingsType m_Settings;
+    InclusionSolverSettingsType m_settings;
 
     unsigned int getNContacts(){return m_nContacts;}
 
@@ -83,9 +83,9 @@ protected:
     std::shared_ptr<DynamicsSystemType>  m_pDynSys;
 
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;
+    typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
+    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
     ContactGraphType m_ContactGraph;
 
     void integrateAllBodyVelocities();

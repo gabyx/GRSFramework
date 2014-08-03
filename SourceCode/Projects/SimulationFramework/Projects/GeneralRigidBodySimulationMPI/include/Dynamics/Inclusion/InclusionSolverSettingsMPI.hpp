@@ -1,5 +1,5 @@
-﻿#ifndef InclusionSolverSettings_hpp
-#define InclusionSolverSettings_hpp
+﻿#ifndef InclusionSolverSettingsMPI_hpp
+#define InclusionSolverSettingsMPI_hpp
 
 #include "TypeDefs.hpp"
 
@@ -10,11 +10,11 @@
 * @ingroup Inclusion
 * @brief The inclusion solver settings.
 */
-struct InclusionSolverSettings
+struct InclusionSolverSettingsMPI
 {
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    InclusionSolverSettings()
+    InclusionSolverSettingsMPI()
     {
       //Standard values
       m_deltaT = 0.001;

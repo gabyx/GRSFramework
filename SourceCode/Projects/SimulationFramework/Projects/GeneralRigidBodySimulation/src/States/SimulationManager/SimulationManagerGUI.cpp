@@ -59,8 +59,6 @@ SimulationManagerGUI::~SimulationManagerGUI() {
     DECONSTRUCTOR_MESSAGE
 
     // Remove all SceneGraph objects!
-
-    m_pBaseNode->removeAndDestroyAllChildren();
     m_pSceneMgr->destroySceneNode(m_pBaseNode);
 
     InputContext::getSingletonPtr()->removeKeyListener(this);
@@ -72,40 +70,49 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
 
     m_pSimulationLog->logMessage("---> SimulationManagerGUI::setup(): ");
 
-    m_lengthScale = 100;  // 1m = 100 Ogre units , 1cm -> 1 Ogre Unit
+    double lengthScale = 100;  // 1m = 100 Ogre units , 1cm -> 1 Ogre Unit
     m_pBaseNode = m_pSceneMgr->getSceneNode("BaseFrame")->createChildSceneNode("BaseFrameScene");
-    m_pBaseNode->setScale(Ogre::Vector3(1.0,1.0,1.0)*m_lengthScale);
+    m_pBaseNode->setScale(Ogre::Vector3(1.0,1.0,1.0)*lengthScale);
 
-
-    m_pDynSys = std::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
+    m_pDynSys = std::shared_ptr< DynamicsSystemType >( new DynamicsSystemType(m_pSceneMgr,m_pBaseNode));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added DynamicsSystemType... ");
 
     // Parse the Scene from XML! ==========================
 
-    m_pSceneParser = std::shared_ptr< SceneParserOgre >( new SceneParserOgre( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies, m_pDynSys) );
-    m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserOgre... ");
+    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(*m_pDynSys) );
+    m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserType... ");
 
 
     LOG(m_pSimulationLog,"---> ScenePath: " << sceneFilePath << std::endl );
     if(sceneFilePath.empty()) {
         sceneFilePath = "SceneFile.xml";
     }
-    m_pSceneParser->parseScene(sceneFilePath);
 
-    m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
+    typename ParserModules::BodyModuleOptions o;
+    //o.m_bodyIdRange = std::make_pair( RigidBodyId::makeId(1,4),  RigidBodyId::makeId(1,8));
+
+    //o.m_bodyIdRange = std::make_pair( RigidBodyId::makeId(1,1),  RigidBodyId::makeId(1,4));
+
+    m_pSceneParser->parseScene(sceneFilePath,SceneParserOptions(),std::move(o));
+
+    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SimBodies.size()
+        << " simulated & " << m_pDynSys->m_Bodies.size()<<  " static bodies! "  << std::endl;);
+    if(!m_pDynSys->m_SimBodies.size()){
+            ERRORMSG("No simulated bodies added! Please add some!");
+    }
     // =====================================================
 
 
-    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys>(new SharedBufferDynSys(m_nSimBodies));
+    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys>(new SharedBufferDynSys( m_pDynSys->m_SimBodies.beginKey(), m_pDynSys->m_SimBodies.endKey() ));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBufferDynSys... ");
     m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added TimeStepperType... ");
 
-    m_pStateRecorder = std::shared_ptr<StateRecorder >(new StateRecorder(m_nSimBodies));
+    m_pStateRecorder = std::shared_ptr<StateRecorder >(new StateRecorder(m_pDynSys->m_SimBodies.size()));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added StateRecorder... ");
 
-
-    m_pSharedBuffer->resetStatePool(m_pDynSys->m_simBodiesInitStates);
+    std::cout << "size simbodies: " << m_pDynSys->m_bodiesInitStates.size() << std::endl;
+    m_pSharedBuffer->resetStatePool(m_pDynSys->m_bodiesInitStates);
     m_pSceneParser->cleanUp(); // Take care this cleans all stuff
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBuffer... ");
 
@@ -117,7 +124,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     enableInput(true);
 
     // Init ContactFrameData for visualization
-    m_dynCoordFrame.reserve(m_nSimBodies*3); // Approx. 3 contacts per body as init guess
+    m_dynCoordFrame.reserve(m_pDynSys->m_SimBodies.size()*3); // Approx. 3 contacts per body as init guess
     m_dynCoordFrame.addToScene(m_pBaseNode, "ContactFrameXAxis", "ContactFrameYAxis", "ContactFrameZAxis");
 
     m_pSimulationLog->logMessage("---> setup finished: ");
@@ -134,8 +141,8 @@ bool SimulationManagerGUI::writeInitialState() {
     std::string filename = SIM_INIT_FILE_PREFIX;
     filename += SIM_INIT_FILE_EXTENSION;
     file /= filename;
-    if(simFile.openWrite(file,NDOFqBody,NDOFuBody,m_nSimBodies)) {
-        simFile << m_pVisBuffer.get();
+    if(simFile.openWrite(file,NDOFqBody,NDOFuBody,m_pDynSys->m_SimBodies.size())) {
+        simFile << m_pVisBuffer;
         simFile.close();
         m_pSimulationLog->logMessage(std::string("Successfully written initial state file to:") + file.string() );
         return true;
@@ -180,20 +187,22 @@ void SimulationManagerGUI::initBeforeThreads() {
 
 void SimulationManagerGUI::updateSimBodies() {
     //update objects...
-    for(int i=0; i<m_pVisBuffer->m_SimBodyStates.size(); i++) {
-        // Check for Nan or Inf
-//        cout << m_pVisBuffer->m_SimBodyStates[i].m_q <<endl;
-        m_SceneNodeSimBodies[i]->setPosition(
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(0),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(1),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(2)
-        );
-        m_SceneNodeSimBodies[i]->setOrientation(
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(3),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(4),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(5),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(6)
-        );
+    static decltype(m_pDynSys->m_SceneNodeSimBodies.begin()) gBodyIt;
+    static decltype(m_pVisBuffer->m_SimBodyStates.begin()) stateIt;
+    static unsigned int size;
+
+    gBodyIt = m_pDynSys->m_SceneNodeSimBodies.begin();
+    stateIt = m_pVisBuffer->m_SimBodyStates.begin();
+
+    size = std::min(m_pDynSys->m_SceneNodeSimBodies.size(),m_pVisBuffer->m_SimBodyStates.size());
+
+    WARNINGMSG(m_pDynSys->m_SceneNodeSimBodies.size() == m_pVisBuffer->m_SimBodyStates.size() ,
+               "State Container and SimBodyContainer not the same size: " << m_pVisBuffer->m_SimBodyStates.size() <<"!="
+               << m_pDynSys->m_SceneNodeSimBodies.size())
+
+    for(unsigned int i=0; i<size;++i) {
+        gBodyIt->applyBodyState(*stateIt);
+        ++gBodyIt;  ++stateIt;
     }
 }
 
@@ -228,7 +237,7 @@ void SimulationManagerGUI::threadRunSimulation() {
 
     resetTimelineSimulation();
     while(!isSimThreadToBeStopped()) {
-        timelineSimulation = getTimelineSimulation() + m_pTimestepper->m_Settings.m_startTime;
+        timelineSimulation = getTimelineSimulation() + m_pTimestepper->m_settings.m_startTime;
         state_time = m_pTimestepper->getTimeCurrent();
 
         if ( state_time <= timelineSimulation) {
@@ -270,12 +279,9 @@ void SimulationManagerGUI::initSimThread() {
     // Get new folder path
     m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_REALTIME);
 
-
-    m_pTimestepper->initLogs(m_SimFolderPath);
-
     m_pTimestepper->reset();
 
-
+    m_pTimestepper->initLogs(m_SimFolderPath);
 
 }
 
@@ -325,7 +331,7 @@ void SimulationManagerGUI::threadRunRecord() {
 
         cleanUpRecordThread();
     } else {
-
+        m_barrier_start.wait();
     }
 
     setSimThreadRunning(false);
@@ -370,7 +376,7 @@ bool SimulationManagerGUI::initRecordThread() {
     m_SceneFilePath /= filename;
 
     // Get the actual RecorderSettings
-    m_pDynSys->getSettings(m_RecorderSettings);
+    m_RecorderSettings = m_pDynSys->getSettingsRecorder();
 
     //Reset Timestepper!
     m_pSimulationLog->logMessage("---> Reset Timestepper...");
@@ -385,8 +391,8 @@ bool SimulationManagerGUI::initRecordThread() {
     //Open SimState File
     m_pSimulationLog->logMessage("---> Copy SimState.sim to right place...");
     bool fileOK = false;
-    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::CONTINUE) {
-        fileOK = m_pStateRecorder->createSimFileCopyFromReference(m_SimFilePath,m_pTimestepper->m_Settings.m_simStateReferenceFile);
+    if(m_pTimestepper->m_settings.m_eSimulateFromReference == TimeStepperSettings::CONTINUE) {
+        fileOK = m_pStateRecorder->createSimFileCopyFromReference(m_SimFilePath,m_pTimestepper->m_settings.m_simStateReferenceFile);
     } else {
         fileOK = m_pStateRecorder->createSimFile(m_SimFilePath);
     }
@@ -398,16 +404,16 @@ bool SimulationManagerGUI::initRecordThread() {
     // Copy File: SimulationData
     m_pSimulationLog->logMessage("---> Copy SimData.dat to right place...");
     boost::filesystem::path simDataFile;
-    if(!m_pTimestepper->m_Settings.m_simDataReferenceFile.empty()) {
+    if(!m_pTimestepper->m_settings.m_simDataReferenceFile.empty()) {
         ASSERTMSG(false,"HERE IS CODE ZU VERFOLSTÄNDIGEN! FALSCH!")
-        simDataFile = FileManager::getSingletonPtr()->copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_Settings.m_simDataReferenceFile,true);
+        simDataFile = FileManager::getSingletonPtr()->copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_settings.m_simDataReferenceFile,true);
     }
 
     m_pSimulationLog->logMessage("---> Init Timestepper Logs...");
     m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);
 
     // Write first initial value out!
-    if(m_pTimestepper->m_Settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
+    if(m_pTimestepper->m_settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
         m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_SimBodies);
         m_pSimulationLog->logMessage("---> Wrote first initial value to file...");
     }

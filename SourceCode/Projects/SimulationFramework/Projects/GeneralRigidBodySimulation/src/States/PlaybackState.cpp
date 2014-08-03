@@ -293,7 +293,7 @@ void PlaybackState::setSimulationMode(int i) {
         m_eSimulationActiveMode = PLAYBACK;
         // Show file panel
         m_pPlaybackFiles->show();
-        updateSceneFunction = boost::bind(&PlaybackState::updateScenePlayback,this,_1);
+
         break;
     }
 }
@@ -466,13 +466,8 @@ void PlaybackState::update(double timeSinceLastFrame) {
     // Update Camera!
     m_pOrbitCamera->update(timeSinceLastFrame);
 
-    // HERE make a function wrapper which calls two different modes for realtime and playback
-    updateSceneFunction(timeSinceLastFrame);
-}
-
-
-void PlaybackState::updateScenePlayback(double timeSinceLastFrame) {
     updateParamsPanelPlayback();
+
     m_pPlaybackMgr->updateScene(timeSinceLastFrame);
 }
 

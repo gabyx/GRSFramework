@@ -38,15 +38,15 @@ public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef ContactGraphNodeData NodeDataType;
-    typedef ContactGraphEdgeData EdgeDataType;
-    typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
-    typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
+    using NodeDataType = ContactGraphNodeData;
+    using EdgeDataType = ContactGraphEdgeData;
+    using EdgeType = typename Graph::Edge< NodeDataType, EdgeDataType>;
+    using NodeType = typename Graph::Node< NodeDataType, EdgeDataType>;
 
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType NodeListType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType EdgeListType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
+    using NodeListType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType;
+    using EdgeListType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType;
+    using NodeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType;
+    using EdgeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType;
 
 public:
 
@@ -94,24 +94,24 @@ public:
         setContactModel(addedNode->m_nodeData);
 
         // FIRST BODY!
-        if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+        if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
 
             computeW<1>( addedNode->m_nodeData);
             connectNode<1>( addedNode);
 
-        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::ANIMATED ) {
+        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
 
 
         // SECOND BODY!
-        if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+        if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
 
             computeW<2>( addedNode->m_nodeData);
             connectNode<2>( addedNode);
 
-        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::ANIMATED ) {
+        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
@@ -141,7 +141,7 @@ public:
         return BitCount::count(m_usedContactModels);
     }
 private:
-    typedef typename std::underlying_type<ContactModels::ContactModelEnum>::type ContactModelEnumIntType;
+    using ContactModelEnumIntType = typename std::underlying_type<ContactModels::ContactModelEnum>::type;
     ContactModelEnumIntType m_usedContactModels; ///< Bitflags which mark all used contactmodels
 
     unsigned int m_nLambdas = 0; ///< How many forces we have counted over all nodes
@@ -287,15 +287,15 @@ public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef ContactGraphNodeDataIteration NodeDataType;
-    typedef ContactGraphEdgeData EdgeDataType;
-    typedef typename Graph::Node< NodeDataType, EdgeDataType> NodeType;
-    typedef typename Graph::Edge< NodeDataType, EdgeDataType> EdgeType;
+    using NodeDataType = ContactGraphNodeDataIteration;
+    using EdgeDataType = ContactGraphEdgeData;
+    using NodeType = typename Graph::Node< NodeDataType, EdgeDataType>;
+    using EdgeType = typename Graph::Edge< NodeDataType, EdgeDataType>;
 
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType NodeListType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType EdgeListType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType NodeListIteratorType;
-    typedef typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType EdgeListIteratorType;
+    using NodeListType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType;
+    using EdgeListType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType;
+    using NodeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType;
+    using EdgeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType;
 
     ContactGraph(ContactParameterMap * contactParameterMap):
         m_nodeCounter(0),m_edgeCounter(0),
@@ -366,11 +366,10 @@ public:
 
     void addNode(CollisionData * pCollData) {
 
-        //Take care state, is only q = q_m, u is not set and is zero!
-
         ASSERTMSG(pCollData->m_pBody1 != nullptr && pCollData->m_pBody2 != nullptr, " Bodys are null pointers?");
         //cout << "add node : "<<m_nodeCounter<< " body id:" << RigidBodyId::getBodyIdString(pCollData->m_pBody1) <<" and "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2) <<endl;
-
+//        std::cout <<"b1:" << pCollData->m_pBody1->m_q_KI<< std::endl << pCollData->m_pBody1->m_r_S<< std::endl;;
+//        std::cout <<"b2:" << pCollData->m_pBody2->m_q_KI << std::endl << pCollData->m_pBody2->m_r_S<< std::endl;;;
         //  add a contact node to the graph
         // check to which nodes we need to connect?
         // all nodes (contacts) which are in the BodyContactList (maps bodies -> contacts)
@@ -384,7 +383,7 @@ public:
         setContactModel(addedNode->m_nodeData);
 
         // FIRST BODY!
-        if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+        if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
 
             //Set Flag that this Body in ContactGraph
             pCollData->m_pBody1->m_pSolverData->m_bInContactGraph = true;
@@ -396,14 +395,14 @@ public:
             computeW<1>( addedNode->m_nodeData);
             connectNode<1>( addedNode);
 
-        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::ANIMATED ) {
+        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
 
 
         // SECOND BODY!
-        if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+        if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
 
             //Set Flag that this Body in ContactGraph
             pCollData->m_pBody2->m_pSolverData->m_bInContactGraph = true;
@@ -415,7 +414,7 @@ public:
             computeW<2>( addedNode->m_nodeData);
             connectNode<2>( addedNode);
 
-        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::ANIMATED ) {
+        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
@@ -445,7 +444,7 @@ public:
     }
 
 private:
-    typedef typename std::underlying_type<ContactModels::ContactModelEnum>::type ContactModelEnumIntType;
+    using ContactModelEnumIntType = typename std::underlying_type<ContactModels::ContactModelEnum>::type;
     ContactModelEnumIntType m_usedContactModels; ///< Bitflags which mark all used contactmodels
 
     bool m_firstIteration;
@@ -627,11 +626,11 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
-    typedef typename ContactGraphType::EdgeType EdgeType;
-    typedef typename ContactGraphType::NodeType NodeType;
+    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
 
 
     SorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
@@ -691,11 +690,11 @@ public:
     void recalculateR(typename ContactGraphType::NodeDataType & nodeData, ContactParameter & contactParameter) {
 
         nodeData.m_G_ii.setZero();
-        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED) {
+        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED) {
             nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
         }
         // SECOND BODY!
-        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
             nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
         }
 
@@ -754,11 +753,11 @@ class ContactSorProxStepNodeVisitor : public SorProxStepNodeVisitor {
 public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
-    typedef typename ContactGraphType::EdgeType EdgeType;
-    typedef typename ContactGraphType::NodeType NodeType;
+    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
 
     ContactSorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
                                   bool & globalConverged,
@@ -779,7 +778,7 @@ public:
 
 #if CoutLevelSolverWhenContact>2
         LOG(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
-        if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED) {
+        if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED) {
             LOG(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
 #endif
@@ -793,11 +792,11 @@ public:
             nodeData.m_LambdaFront = nodeData.m_b;
 
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_front ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
             }
 
@@ -866,7 +865,7 @@ public:
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
             decltype(nodeData.m_LambdaFront) deltaLambda = nodeData.m_LambdaFront - nodeData.m_LambdaBack ;
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
 
                 // Velocity update (wahrscheinlich Auslöschung bei Lambda)
@@ -915,7 +914,7 @@ public:
 
             }
             // SECOND BODY
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
 
                 // Velocity update (wahrscheinlich Auslöschung bei Lambda)
@@ -1009,11 +1008,11 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
-    typedef typename ContactGraphType::EdgeType EdgeType;
-    typedef typename ContactGraphType::NodeType NodeType;
+    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
 
     FullSorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
                                bool & globalConverged,
@@ -1034,7 +1033,7 @@ public:
 
 #if CoutLevelSolverWhenContact>2
         LOG(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
-        if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED) {
+        if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED) {
             LOG(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
 #endif
@@ -1046,12 +1045,12 @@ public:
 
             PREC lambda_N = nodeData.m_b(0);
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
                 lambda_N += nodeData.m_W_body1.transpose().row(0) * uCache1 ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
                 lambda_N += nodeData.m_W_body2.transpose().row(0) * uCache2;
             }
@@ -1070,12 +1069,12 @@ public:
             nodeData.m_LambdaFront(0) = lambda_N;
             PREC deltaLambda_N = lambda_N - nodeData.m_LambdaBack(0); // Delta lambda_N
 
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_u1BufferPtr->m_front = uCache1
                                                   + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() *
                                                   nodeData.m_W_body1.col(0) * deltaLambda_N;
             }
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_u2BufferPtr->m_front = uCache2
                                                   + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() *
                                                   nodeData.m_W_body2.col(0) * deltaLambda_N;
@@ -1087,11 +1086,11 @@ public:
             // Second Tangential direction =============================
             Vector2 lambda_T = nodeData.m_b.tail<2>();
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 lambda_T += nodeData.m_W_body1.transpose().bottomRows<2>() * nodeData.m_u1BufferPtr->m_front ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
                 lambda_T += nodeData.m_W_body2.transpose().bottomRows<2>() * nodeData.m_u2BufferPtr->m_front;
             }
             // Damping
@@ -1111,7 +1110,7 @@ public:
 
 
 
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
 
                 nodeData.m_u1BufferPtr->m_front +=
                     nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1.rightCols<2>() * lambda_T;
@@ -1152,7 +1151,7 @@ public:
                 }
 
             }
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
 
                 nodeData.m_u2BufferPtr->m_front +=
                     nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal()*nodeData.m_W_body2.rightCols<2>() * lambda_T;
@@ -1249,11 +1248,11 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    typedef ContactGraph<ContactGraphMode::ForIteration> ContactGraphType;
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef typename ContactGraphType::EdgeDataType EdgeDataType;
-    typedef typename ContactGraphType::EdgeType EdgeType;
-    typedef typename ContactGraphType::NodeType NodeType;
+    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
 
     SorProxInitNodeVisitor(const InclusionSolverSettingsType &settings): m_alpha(1), m_settings(settings)
     {}
@@ -1282,7 +1281,7 @@ public:
 
             // u_0 , calculate const b
             // First Body
-            if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED) {
+            if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED) {
 
                 // m_front is zero here-> see DynamicsSystem sets it to zero!
                 nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
@@ -1292,7 +1291,7 @@ public:
                 nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
             }
             // SECOND BODY!
-            if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ) {
+            if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
 
                 // m_front is zero here-> see DynamicsSystem sets it to zero!
                 nodeData.m_u2BufferPtr->m_front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack );

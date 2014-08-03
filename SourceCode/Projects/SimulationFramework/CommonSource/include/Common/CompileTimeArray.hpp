@@ -6,7 +6,7 @@
 * @brief http://stackoverflow.com/questions/2978259/programmatically-create-static-arrays-at-compile-time-in-c
 * Usage as: (Generator is a struct which defines a  " generator(size_t i) " function for each index i
 * It needs to be a constexpr! -> Only one line code is accepted!
-* Take care: typedef CompileTimeArray::Array<count, GenA> A;  and  typedef CompileTimeArray::Array<count, GenA> B; somewhere else
+* Take care: using A = CompileTimeArray::Array<count, GenA>;  and  using B = CompileTimeArray::Array<count, GenA>; somewhere else
 * uses the same underlying static array!  Distinguish the arrays by using two different generator structs!
 *
 *    struct specialArray
@@ -22,8 +22,8 @@
 *  struct linearRange : CompileTimeArray::RangeGenerator<0>{};
 * 
 *    const unsigned int count = 10;
-*    typedef CompileTimeArray::Array<count, specialArray> A;
-*	 typedef CompileTimeArray::Array<count, linearRange> B;
+*    using A = CompileTimeArray::Array<count, specialArray>;
+*	 using B = CompileTimeArray::Array<count, linearRange>;
 * 
 *    for (size_t i=0; i<count; ++i)
 *        std::cout << A::values[i] << "\n";

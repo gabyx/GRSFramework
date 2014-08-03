@@ -39,22 +39,22 @@
 * @brief The inclusion solver for an ordered problem. Does not assemble G. Iterates over Contact Graph in a SOR fashion!
 */
 
-class InclusionSolverCONoG {
+class InclusionSolverCONoGMPI {
 public:
 
     DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    typedef typename MPILayer::ProcessCommunicator                                      ProcessCommunicatorType;
-    typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
-    typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
+    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator                                     ;
+    using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType                          ;
+    using ProcessTopologyType = typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType     ;
 
-    InclusionSolverCONoG(std::shared_ptr< BodyCommunicator >  pBodyComm,
+    InclusionSolverCONoGMPI(std::shared_ptr< BodyCommunicator >  pBodyComm,
                          std::shared_ptr< CollisionSolverType >  pCollisionSolver,
                          std::shared_ptr< DynamicsSystemType> pDynSys,
                          std::shared_ptr< ProcessCommunicatorType > pProcComm);
-    ~InclusionSolverCONoG();
+    ~InclusionSolverCONoGMPI();
 
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
     void reset();
@@ -77,7 +77,7 @@ public:
     double m_timeProx, m_proxIterationTime;
 
 
-    InclusionSolverSettingsType m_Settings;
+    InclusionSolverSettingsType m_settings;
 
 
 protected:
@@ -98,22 +98,22 @@ protected:
     /** Circulare template dependency of InclusionCommunicator and ContactGraph
     *   Can be solved with this combo trait class :-)
     *    struct ComboIncGraph {
-    *        typedef InclusionCommunicator<ComboIncGraph> InclusionCommunicatorType;
-    *        typedef ContactGraph<ComboIncGraph> ContactGraphType;
+    *        using InclusionCommunicatorType = InclusionCommunicator<ComboIncGraph>;
+    *        using ContactGraphType = ContactGraph<ComboIncGraph>;
     *    };
     *    Nevertheless, we avoided this here
     */
 
     struct Combo{
-        typedef InclusionCommunicator<Combo> InclusionCommunicatorType;
-        typedef ContactGraph<Combo> ContactGraphType;
+        using InclusionCommunicatorType = InclusionCommunicator<Combo>;
+        using ContactGraphType = ContactGraph<Combo>;
     };
 
 
-    typedef Combo::InclusionCommunicatorType InclusionCommunicatorType;
+    using InclusionCommunicatorType = Combo::InclusionCommunicatorType;
     std::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
 
-    typedef Combo::ContactGraphType ContactGraphType;
+    using ContactGraphType = Combo::ContactGraphType;
     std::shared_ptr<ContactGraphType> m_pContactGraph;
     /// =========================================================================
 
@@ -121,7 +121,7 @@ protected:
 
 
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyStaticContainer & m_Bodies;
+    typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
 
 
     void integrateAllBodyVelocities();

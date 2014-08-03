@@ -16,14 +16,14 @@ public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    typedef TLocalData LocalDataType;
-    typedef TRemoteData RemoteDataType;
+    using LocalDataType = TLocalData;
+    using RemoteDataType = TRemoteData;
 
-    typedef std::unordered_map<typename RigidBodyType::RigidBodyIdType, RemoteDataType > RemoteDataMapType;
-    typedef typename RemoteDataMapType::iterator RemoteIterator;
+    using RemoteDataMapType = std::unordered_map<typename RigidBodyType::RigidBodyIdType, RemoteDataType >;
+    using RemoteIterator = typename RemoteDataMapType::iterator;
 
-    typedef std::unordered_map<typename RigidBodyType::RigidBodyIdType, LocalDataType > LocalDataMapType;
-    typedef typename LocalDataMapType::iterator LocalIterator;
+    using LocalDataMapType = std::unordered_map<typename RigidBodyType::RigidBodyIdType, LocalDataType >;
+    using LocalIterator = typename LocalDataMapType::iterator;
 
 
     NeighbourData(const RankIdType & neighbourRank): m_neighbourRank(neighbourRank){};

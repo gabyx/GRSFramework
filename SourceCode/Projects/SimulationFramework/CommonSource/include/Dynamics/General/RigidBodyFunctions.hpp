@@ -13,8 +13,7 @@ namespace RigidBodyFunctions {
     }
 
     template<typename TRigidBody>
-    void initMassMatrixAndHTerm(TRigidBody * body,
-                                const typename MyMatrix<typename TRigidBody::PREC >::Vector3 & gravitiy)
+    void initMassMatrixAndHTerm(TRigidBody * body)
     {
         //Mass Matrix
         body->m_MassMatrix_diag.template head<3>().setConstant(body->m_mass);
@@ -22,8 +21,7 @@ namespace RigidBodyFunctions {
 
         // Massmatrix Inverse
         initMassMatrixInv<TRigidBody>(body);
-        // H_const term
-        body->m_h_term_const.template head<3>() =  (body)->m_mass * gravitiy;
+
     }
 
 

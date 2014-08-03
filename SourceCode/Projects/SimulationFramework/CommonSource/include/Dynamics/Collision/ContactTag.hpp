@@ -28,7 +28,7 @@ class ContactTagHash : std::unary_function<ContactTag, std::size_t>{
 class ContactTag{
 public:
 
-  typedef boost::tuples::tuple<std::uint64_t, unsigned char, unsigned int, std::uint64_t, unsigned char, unsigned int> ContactTagTuple;
+  using ContactTagTuple = boost::tuples::tuple<std::uint64_t, unsigned char, unsigned int, std::uint64_t, unsigned char, unsigned int>;
 
   ContactTag();
 

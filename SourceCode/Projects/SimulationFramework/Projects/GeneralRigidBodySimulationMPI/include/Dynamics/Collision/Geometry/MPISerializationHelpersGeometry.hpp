@@ -67,8 +67,8 @@ private:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef typename RigidBodyType::GeometryType GeometryType;
-    typedef typename GeometryType::types VariantTypes;
+    using GeometryType = typename RigidBodyType::GeometryType;
+    using VariantTypes = typename GeometryType::types;
 
     GeometryType & m_g;
 
@@ -78,8 +78,8 @@ private:
     template<int N>
     void createGeom_impl(){
 
-        typedef typename boost::mpl::at_c<VariantTypes, N>::type SharedPtrType;
-        typedef typename SharedPtrType::element_type GeomType;
+        using SharedPtrType = typename boost::mpl::at_c<VariantTypes, N>::type;
+        using GeomType = typename SharedPtrType::element_type;
 
         if(N == m_w){
             m_g = SharedPtrType( new GeomType() );

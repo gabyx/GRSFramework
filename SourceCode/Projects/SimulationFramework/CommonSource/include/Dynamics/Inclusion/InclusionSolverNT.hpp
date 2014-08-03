@@ -69,7 +69,7 @@ public:
   void updatePercussionPool(const VectorDyn & P_Nold, const VectorDyn & P_Told ) ;
 
 
-  InclusionSolverSettingsType m_Settings;
+  InclusionSolverSettingsType m_settings;
 
   unsigned int getNObjects();
 
@@ -255,7 +255,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
   m_h += m_h_const;
 
   // Update m_Minv_h_dt
-  m_Minv_h_dt = m_Minv_diag.asDiagonal() * m_h * m_Settings.m_deltaT;
+  m_Minv_h_dt = m_Minv_diag.asDiagonal() * m_h * m_settings.m_deltaT;
 #if CoutLevelSolverWhenContact>2
   LOG(m_pSolverLog, "h= "<< m_h.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
   << "Minv_diag= "<< "diag(" <<m_Minv_diag.transpose().format(MyIOFormat::Matlab) <<");"<<std::endl
@@ -338,7 +338,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
       int id2 = collSet[contactIdx].m_pBody2->m_id;
 
       // Fill the entries for Body 1 =================================================
-      if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::BodyState::SIMULATED ){
+      if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ){
 
         // Contact goes into W_N, W_T
         updateSkewSymmetricMatrix<>( collSet[contactIdx].m_r_S1C1, I_r_SiCi_hat);
@@ -373,14 +373,14 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WT_Minv_h_dt(m_nDofFriction*contactIdx +1)  += w_T_part.dot( m_Minv_h_dt.template segment<NDOFuBody>( id1 * NDOFuBody ) );
 
       }
-      else if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::BodyState::ANIMATED ){
+      else if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ){
         // Contact goes into xi_N, xi_T
 
       }
 
 
       // Fill the entries for Body 2 =================================================
-      if( collSet[contactIdx].m_pBody2->m_eState == RigidBodyType::BodyState::SIMULATED ){
+      if( collSet[contactIdx].m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ){
 
         // Contact goes into W_N, W_T
         updateSkewSymmetricMatrix<>( collSet[contactIdx].m_r_S2C2, I_r_SiCi_hat);
@@ -414,7 +414,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WT_Minv_h_dt(m_nDofFriction*contactIdx + 1) += w_T_part.dot( m_Minv_h_dt.template segment<NDOFuBody>( id2 * NDOFuBody ));
 
       }
-      else if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::BodyState::ANIMATED ){
+      else if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ){
         // Contact goes into xi_N, xi_T
       }
 
@@ -524,9 +524,9 @@ template< typename TInclusionSolverConfig >
 void InclusionSolverNT<TInclusionSolverConfig>::setupRMatrix(PREC alpha){
  // Calculate  R_N, R_T,
    PREC r_T_i ;
-   m_R_N.noalias() =  m_G_NN.diagonal().array().inverse().matrix() * m_Settings.m_alphaSORProx;
+   m_R_N.noalias() =  m_G_NN.diagonal().array().inverse().matrix() * m_settings.m_alphaSORProx;
    for(unsigned int i=0;i<m_nContacts;i++){
-      r_T_i = m_Settings.m_alphaSORProx / (m_G_TT.diagonal().template segment<NDOFFriction>(m_nDofFriction*i)).maxCoeff();
+      r_T_i = m_settings.m_alphaSORProx / (m_G_TT.diagonal().template segment<NDOFFriction>(m_nDofFriction*i)).maxCoeff();
       m_R_T(m_nDofFriction*i) = r_T_i;
       m_R_T(m_nDofFriction*i+1) = r_T_i;
    }
@@ -543,10 +543,10 @@ template< typename TInclusionSolverConfig >
 void InclusionSolverNT<TInclusionSolverConfig>::doJorProx(){
 
    // Calculate  R_N, R_T,
-   setupRMatrix(m_Settings.m_alphaJORProx);
+   setupRMatrix(m_settings.m_alphaJORProx);
 
    // Prox- Iteration
-   while (m_globalIterationCounter < m_Settings.m_MaxIter)
+   while (m_globalIterationCounter < m_settings.m_MaxIter)
    {
       P_N_front.noalias() = P_N_back - m_R_N.asDiagonal() * (m_G_NN * P_N_back + m_G_NT * P_T_back + m_c_N);
       Prox::ProxFunction<ConvexSets::RPlus>::doProxMulti(P_N_front);
@@ -556,7 +556,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::doJorProx(){
       Prox::ProxFunction<ConvexSets::Disk>::doProxMulti(m_mu.asDiagonal() * P_N_front, P_T_front);
 
       //Calculate CancelCriteria
-      m_bConverged = Numerics::cancelCriteriaValue(P_N_back,P_N_front,P_T_back,P_T_front, m_Settings.m_AbsTol, m_Settings.m_RelTol);
+      m_bConverged = Numerics::cancelCriteriaValue(P_N_back,P_N_front,P_T_back,P_T_front, m_settings.m_AbsTol, m_settings.m_RelTol);
 
    #if CoutLevelSolverWhenContact>2
       LOG(m_pSolverLog, "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
@@ -578,10 +578,10 @@ void InclusionSolverNT<TInclusionSolverConfig>::doJorProx(){
 template< typename TInclusionSolverConfig >
 void InclusionSolverNT<TInclusionSolverConfig>::doSorProx(){
 
-   setupRMatrix(m_Settings.m_alphaSORProx);
+   setupRMatrix(m_settings.m_alphaSORProx);
 
    // Prox- Iteration
-   while (m_globalIterationCounter < m_Settings.m_MaxIter)
+   while (m_globalIterationCounter < m_settings.m_MaxIter)
    {
 
       // Copy all values
@@ -609,7 +609,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::doSorProx(){
 
 
       //Calculate CancelCriteria
-      m_bConverged = Numerics::cancelCriteriaValue(P_N_back,P_N_front,P_T_back,P_T_front, m_Settings.m_AbsTol, m_Settings.m_RelTol);
+      m_bConverged = Numerics::cancelCriteriaValue(P_N_back,P_N_front,P_T_back,P_T_front, m_settings.m_AbsTol, m_settings.m_RelTol);
 
 #if CoutLevelSolverWhenContact>2
       LOG(m_pSolverLog, "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl

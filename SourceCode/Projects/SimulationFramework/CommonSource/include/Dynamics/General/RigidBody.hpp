@@ -38,16 +38,16 @@ public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    typedef RigidBodyBase AbsoluteBaseType; ///< The absolut base type where m_id is defined, for the rigid body container
+    using AbsoluteBaseType = RigidBodyBase; ///< The absolut base type where m_id is defined, for the rigid body container
 
-    enum class BodyState: char {
+    enum class BodyMode: char {
      SIMULATED = 0,
      STATIC = 1,
      ANIMATED = 2,
      NSTATES=3 // Just to have the number of how many states are defined!
     }; ///< Emuration which defines if the object is simulated, animated or not simulated (which means fixed, and does not take part in the dynamics).
 
-    typedef unsigned int BodyMaterialType;
+    using BodyMaterialType = unsigned int;
 
     unsigned int m_globalGeomId; ///< The Id for the global geometry, if this is 0 then the geometry belongs to the body and gets deallocated, otherwise not
 
@@ -60,11 +60,29 @@ public:
 
     GeometryType m_geometry; ///< A boost::variant which takes different geometry shared pointers.
 
-    VectorUBody get_u(){
-        return m_pSolverData->m_uBuffer.m_back;
+    inline VectorUBody get_u() const{
+        if(m_pSolverData){
+            return m_pSolverData->m_uBuffer.m_back;
+        }
+        VectorUBody u; u.setZero();
+        return u;
     }
-    VectorQBody get_q(){
+    inline VectorQBody get_q() const{
         VectorQBody r; r.head<3>() = m_r_S; r.tail<4>() = m_q_KI; return r;
+    }
+
+    template<bool setTrafoMatrix = false,typename TRigidBodyState>
+    inline void applyBodyState(const TRigidBodyState & s){
+        m_r_S = s.m_q.template head<3>();
+        m_q_KI = s.m_q.template tail<4>();
+
+        if(setTrafoMatrix ){
+            QuaternionHelpers::setRotFromQuaternion(m_q_KI,m_A_IK);
+        }
+
+        if(m_pSolverData){
+            m_pSolverData->m_uBuffer.m_back = s.m_u;
+        }
     }
 
     PREC m_mass; ///< The rigid body mass \f$m\f$ in \f$ \textrm{[kg]} \f$
@@ -72,7 +90,7 @@ public:
 
     VectorUBody m_MassMatrix_diag; ///< The mass matrix which is diagonal, \f$ \textrm{diag}(m,m,m, \textrm{diag}({_K}\mathbf{\Theta}_{S})) \f$.
     VectorUBody m_MassMatrixInv_diag;
-    VectorUBody m_h_term, m_h_term_const;
+    VectorUBody m_h_term;
 
     Matrix33 m_A_IK; ///< The transformation matrix \f$ \mathbf{A}_{IK} \f$ from K frame to the I frame which is updated at each timestep.
 
@@ -83,10 +101,10 @@ public:
     Vector3 m_r_S;     ///< Vector resolved in the I frame from origin to the center of gravity, \f$ \mathbf{r}_S \f$, at time t_s + deltaT/2.
     Quaternion m_q_KI; ///< Quaternion which represents a rotation from I to the K frame, \f$ \tilde{\mathbf{a}}_{KI} \f$,  at time t_s + deltaT/2.
 
-    typedef RigidBodyId::Type RigidBodyIdType;
+    using RigidBodyIdType = RigidBodyId::Type;
     const RigidBodyIdType m_id; ///< This is the id of the body.
 
-    BodyState m_eState; ///< The state of the body.
+    BodyMode m_eState; ///< The state of the body.
     BodyMaterialType m_eMaterial; ///< The material id.
 
     unsigned char m_flags; ///< Different Flags which can be used during the timestep process, introduces because of MPI
@@ -102,10 +120,9 @@ public:
         m_A_IK.setIdentity();
 
         m_r_S.setZero();
-        setQuaternionZero(m_q_KI);
-        m_h_term_const.setZero();
+        QuaternionHelpers::setQuaternionZero(m_q_KI);
         m_h_term.setZero();
-        m_eState = BodyState::STATIC;
+        m_eState = BodyMode::STATIC;
         m_eMaterial = 0;
         m_pSolverData = nullptr;
         m_globalGeomId = 0;

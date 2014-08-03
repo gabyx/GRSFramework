@@ -23,9 +23,8 @@
 
 PlaybackManager::PlaybackManager(std::shared_ptr<Ogre::SceneManager> pSceneMgr):
     PlaybackManagerBase(),
-    m_nDofqBody(NDOFqBody),
-    m_nDofuBody(NDOFuBody),
-    m_bSetupSuccessful(false) {
+    m_bSetupSuccessful(false)
+{
 
     m_pSimulationLog = nullptr;
 
@@ -52,6 +51,7 @@ PlaybackManager::PlaybackManager(std::shared_ptr<Ogre::SceneManager> pSceneMgr):
     m_pThreadLog->addSink(new Logging::LogSinkCout("PlaybackManager-Cout"));
 #endif
 
+
     m_pSceneMgr = pSceneMgr;
 }
 
@@ -70,27 +70,32 @@ PlaybackManager::~PlaybackManager() {
 
 bool PlaybackManager::setup() {
 
-
-    m_lengthScale = 100;  // 1m = 100 Ogre units , 1cm -> 1 Ogre Unit
+    double lengthScale = 100;  // 1m = 100 Ogre units , 1cm -> 1 Ogre Unit
     m_pBaseNode = m_pSceneMgr->getSceneNode("BaseFrame")->createChildSceneNode("BaseFrameScene");
-    m_pBaseNode->setScale(Ogre::Vector3(1.0,1.0,1.0)*m_lengthScale);
+    m_pBaseNode->setScale(Ogre::Vector3(1.0,1.0,1.0)*lengthScale);
+
+    m_pDynSys = std::shared_ptr< DynamicsSystemPlayback > (new DynamicsSystemPlayback(m_pSceneMgr,m_pBaseNode));
+
+    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(*m_pDynSys) );
 
     // Parse the Scene from XML! ==========================
     if(!parseScene()) {
         m_bSetupSuccessful = false;
         return false;
     }
+    unsigned int nSimBodies = m_pDynSys->m_SceneNodeSimBodies.size();
     // =====================================================
 
     //init shared buffer
     m_pSharedBuffer = std::shared_ptr<SharedBufferPlayback >(
-                          new SharedBufferPlayback(m_nSimBodies)
+                          new SharedBufferPlayback(m_pDynSys->m_SceneNodeSimBodies.beginKey(),
+                                                   m_pDynSys->m_SceneNodeSimBodies.endKey())
                       );
-    m_pSharedBuffer->resetStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
+    m_pSharedBuffer->resetStateRingPool(m_pDynSys->m_bodiesInitStates);
 
 
     m_pFileLoader = std::shared_ptr< PlaybackLoader<StateRingPoolVisBackFront > >(
-                        new PlaybackLoader< StateRingPoolVisBackFront >(m_nSimBodies, m_pSharedBuffer)
+                        new PlaybackLoader< StateRingPoolVisBackFront >(nSimBodies, m_pSharedBuffer)
                     );
 
     //Make a videodropper
@@ -98,7 +103,7 @@ bool PlaybackManager::setup() {
     m_pVideoDropper->reset();
 
     //Make a Sim File Resampler
-    m_pStateRecorderResampler = std::shared_ptr<StateRecorderResampler >(new StateRecorderResampler(m_nSimBodies));
+    m_pStateRecorderResampler = std::shared_ptr<StateRecorderResampler >(new StateRecorderResampler(nSimBodies));
     m_pStateRecorderResampler->reset();
 
     m_pVisBuffer = m_pSharedBuffer->getVisBuffer();
@@ -118,10 +123,13 @@ bool PlaybackManager::parseScene() {
         return false;
     }
 
-    m_pSceneParser = std::shared_ptr< SceneParserOgre >( new SceneParserOgre( m_pBaseNode, m_pSceneMgr,m_SceneNodeSimBodies,m_SceneNodeBodies) );
-    m_pSceneParser->parseScene(sceneFilePath);
+    ParserModules::BodyModuleOptions o;
+    o.m_allocateSimBodies = false;
+    o.m_allocateStaticBodies = false;
+    m_pSceneParser->parseScene(sceneFilePath, SceneParserOptions(), o);
 
-    m_nSimBodies = m_pSceneParser->getNumberOfSimBodies();
+    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SceneNodeSimBodies.size()
+        << " simulated & " << m_pDynSys->m_SceneNodeBodies.size() <<  " static bodies! "  << std::endl;);
 
     return true;
 }
@@ -133,23 +141,20 @@ void PlaybackManager::updateScene(double timeSinceLastFrame) {
     std::stringstream logstream;
 
     if (isSimThreadRunning() && m_bSetupSuccessful) {
-        if(!m_SettingsVisThread.m_bFirstPass) {
+        if(!m_settingsVisThread.m_bFirstPass) {
 
             m_pVisBuffer = m_pSharedBuffer->updateVisBuffer(bStateChanged);
             if(bStateChanged) {
-                /* CLEARLOG(logstream);
-                 logstream << "m_t vis:" << m_pVisBuffer->m_t <<endl;
-                 LOG(m_pThreadLog)*/
                 updateSimBodies();
             }
 
-            if(m_SettingsVisThread.m_bVideoDrop) {
+            if(m_settingsVisThread.m_bVideoDrop) {
                 m_pVideoDropper->tryToDropFrame();
             }
 
         } else { // Only do at the beginning
 
-            m_SettingsVisThread.m_bFirstPass = false;
+            m_settingsVisThread.m_bFirstPass = false;
             // Wait for sim thread! to synchronize
             m_barrier_start.wait();
         }
@@ -161,18 +166,22 @@ void PlaybackManager::updateScene(double timeSinceLastFrame) {
 
 void PlaybackManager::updateSimBodies() {
     //update objects...
-    for(int i=0; i<m_pVisBuffer->m_SimBodyStates.size(); i++) {
-        m_SceneNodeSimBodies[i]->setPosition(
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(0),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(1),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(2)
-        );
-        m_SceneNodeSimBodies[i]->setOrientation(
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(3),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(4),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(5),
-            (Ogre::Real)m_pVisBuffer->m_SimBodyStates[i].m_q(6)
-        );
+    static decltype(m_pDynSys->m_SceneNodeSimBodies.begin()) gBodyIt;
+    static decltype(m_pVisBuffer->m_SimBodyStates.begin()) stateIt;
+    static unsigned int size;
+
+    gBodyIt = m_pDynSys->m_SceneNodeSimBodies.begin();
+    stateIt = m_pVisBuffer->m_SimBodyStates.begin();
+
+    size = std::min(m_pDynSys->m_SceneNodeSimBodies.size(),m_pVisBuffer->m_SimBodyStates.size());
+
+    WARNINGMSG( m_pDynSys->m_SceneNodeSimBodies.size() == m_pVisBuffer->m_SimBodyStates.size()
+               , "State Container and SimBodyContainer not the same size: "
+               << m_pVisBuffer->m_SimBodyStates.size() <<"!="<< m_pDynSys->m_SceneNodeSimBodies.size());
+
+    for(unsigned int i=0; i<size;++i) {
+        gBodyIt->applyBodyState(*stateIt);
+        ++gBodyIt;  ++stateIt;
     }
 }
 
@@ -189,13 +198,13 @@ double PlaybackManager::getSimulationTime() {
 void PlaybackManager::initBeforeThreads() {
     std::stringstream logstream;
 
-    m_SettingsVisThread.m_bFirstPass = true;
+    m_settingsVisThread.m_bFirstPass = true;
 
     //Set once before the start all values for the video drop!
     m_pVideoDropper->setFPS(m_VideoDropSettings.m_FPS);
-    m_SettingsVisThread.m_bVideoDrop = m_VideoDropSettings.m_bVideoDrop;
-    m_SettingsSimThread.m_bVideoDrop = m_VideoDropSettings.m_bVideoDrop;
-    if(m_SettingsSimThread.m_bVideoDrop) {
+    m_settingsVisThread.m_bVideoDrop = m_VideoDropSettings.m_bVideoDrop;
+    m_settingsSimThread.m_bVideoDrop = m_VideoDropSettings.m_bVideoDrop;
+    if(m_settingsSimThread.m_bVideoDrop) {
         logstream <<"PlaybackManager: Drop Video: "<< "true" << std::endl;
     } else {
         logstream <<"PlaybackManager: Drop Video: "<< "false" << std::endl;
@@ -203,10 +212,10 @@ void PlaybackManager::initBeforeThreads() {
 
     m_pStateRecorderResampler->setFPS(m_VideoDropSettings.m_FPS);
     m_pStateRecorderResampler->setTimeRange(m_SimFileDropSettings.m_startTime,m_SimFileDropSettings.m_endTime);
-    m_SettingsSimThread.m_bSimFileDrop = m_SimFileDropSettings.m_bSimFileDrop;
-    m_SettingsSimThread.m_bSimFileDrop = m_SimFileDropSettings.m_bSimFileDrop;
-    m_SettingsSimThread.m_bSimFileDropInterpolate = m_SimFileDropSettings.m_bSimFileDropInterpolate;
-    if(m_SettingsSimThread.m_bSimFileDrop) {
+    m_settingsSimThread.m_bSimFileDrop = m_SimFileDropSettings.m_bSimFileDrop;
+    m_settingsSimThread.m_bSimFileDrop = m_SimFileDropSettings.m_bSimFileDrop;
+    m_settingsSimThread.m_bSimFileDropInterpolate = m_SimFileDropSettings.m_bSimFileDropInterpolate;
+    if(m_settingsSimThread.m_bSimFileDrop) {
         logstream <<"PlaybackManager: Drop Sim File: "<< "true" << std::endl;
     } else {
         logstream <<"PlaybackManager: Drop Sim File: "<< "false" << std::endl;
@@ -220,7 +229,7 @@ void PlaybackManager::threadRunSimulation() {
     static bool bchangedState;
     static double timelineSimulation, state_time, old_state_time, deltaT;
 
-    m_pThreadLog->logMessage(" PlaybackManager: SimThread entering...");
+    m_pThreadLog->logMessage("---> PlaybackManager: SimThread entering...");
     setSimThreadRunning(true);
 
     std::stringstream logstream;
@@ -232,13 +241,29 @@ void PlaybackManager::threadRunSimulation() {
     // Wait for loader thread
     m_pFileLoader->m_barrier_start.wait();
 
+    // Update Simbuffer
+    DynamicsState * currentState;
+    bool updated = false;
+    int i = 0;
+//    while(!updated && i < 100){
+//        currentState = m_pSharedBuffer->advanceSimBuffer(updated);
+    currentState = m_pSharedBuffer->getSimBuffer();
+//            for(auto & s : currentState->m_SimBodyStates){
+//                std::cout <<"SimState: "<< RigidBodyId::getBodyIdString(s.m_id) << "," << s.m_q << std::endl;
+//            }
+//        i++;
+//    }
+//    if(!updated){
+//        ERRORMSG("Could not advance sim buffer to first state!")
+//    }else{
+        LOG(m_pThreadLog,"---> PlaybackManager: Advanced sim buffer to first state @ m_t: " << currentState->m_t << std::endl;);
+//    }
+
     // Wait for vis thread
     m_barrier_start.wait();
 
-    DynamicsState * currentState = m_pSharedBuffer->getSimBuffer().get();
-
     state_time = 0;
-    old_state_time =0;
+    old_state_time = 0;
     bchangedState = false;
     resetTimelineSimulation();
 
@@ -246,11 +271,11 @@ void PlaybackManager::threadRunSimulation() {
         timelineSimulation = getTimelineSimulation();
 
 
-        if(m_SettingsSimThread.m_bVideoDrop) {
+        if(m_settingsSimThread.m_bVideoDrop) {
             // Dont sync with timeline,
 
             //Make one step!
-            currentState = m_pSharedBuffer->advanceSimBuffer(bchangedState).get(); // Will move to the initial state at the beginning!
+            currentState = m_pSharedBuffer->advanceSimBuffer(bchangedState); // Will move to the initial state at the beginning!
             if(bchangedState) {
                 state_time = currentState->m_t;
                 deltaT = state_time - old_state_time; // Will be zero at the beginning
@@ -265,20 +290,20 @@ void PlaybackManager::threadRunSimulation() {
             state_time = currentState->m_t;
 
             if ( state_time <= timelineSimulation) {
-                currentState = m_pSharedBuffer->advanceSimBuffer(bchangedState).get();
+                currentState = m_pSharedBuffer->advanceSimBuffer(bchangedState);
             }
         }
 
         if(bchangedState) {
-            if(m_SettingsSimThread.m_bSimFileDrop) { // When the sim buffer has been moved, then ... At the biginning, this moves to the initial state basically!
+            if(m_settingsSimThread.m_bSimFileDrop) { // When the sim buffer has been moved, then ... At the biginning, this moves to the initial state basically!
                 //Do a resampling of the states!
-                LOG(m_pThreadLog, " PlaybackManager: Try to resample state time: " << currentState->m_t<<std::endl;);
-                m_pStateRecorderResampler->tryToWrite(currentState,m_SettingsSimThread.m_bSimFileDropInterpolate);
+                LOG(m_pThreadLog, "---> PlaybackManager: Try to resample state time: " << currentState->m_t<<std::endl;);
+                m_pStateRecorderResampler->tryToWrite(currentState,m_settingsSimThread.m_bSimFileDropInterpolate);
             }
 
 
             if(currentState->m_StateType == DynamicsState::ENDSTATE) {
-                LOG(m_pThreadLog, " PlaybackManager: Detected end state at " << currentState->m_t <<" --> leaving..."<<std::endl;);
+                LOG(m_pThreadLog, "---> PlaybackManager: Detected end state at " << currentState->m_t <<" --> leaving..."<<std::endl;);
                 break;
             }
 
@@ -295,7 +320,7 @@ void PlaybackManager::threadRunSimulation() {
 
     cleanUpSimThread();
 
-    m_pThreadLog->logMessage(" PlaybackManager: SimThread leaving...");
+    m_pThreadLog->logMessage("---> PlaybackManager: SimThread leaving...");
     setSimThreadRunning(false);
 
 }
@@ -303,9 +328,9 @@ void PlaybackManager::threadRunSimulation() {
 
 void PlaybackManager::initSimThread() {
 
-    m_pSharedBuffer->resetStateRingPool(m_pSceneParser->getInitialConditionSimBodies());
+    m_pSharedBuffer->resetStateRingPool(m_pDynSys->m_bodiesInitStates);
 
-    if(m_SettingsSimThread.m_bVideoDrop) {
+    if(m_settingsSimThread.m_bVideoDrop) {
         m_pVideoDropper->reset();
 
         // Request new file Paths for all logs from FileManager
@@ -315,7 +340,7 @@ void PlaybackManager::initSimThread() {
         m_pVideoDropper->setFolderPath(videoFolderPath);
     }
 
-    if(m_SettingsSimThread.m_bSimFileDrop) {
+    if(m_settingsSimThread.m_bSimFileDrop) {
 
         //Make FileLoader load the whole state!
         m_pFileLoader->setReadFullState(true);
@@ -340,7 +365,7 @@ void PlaybackManager::initSimThread() {
 
 
 void PlaybackManager::cleanUpSimThread() {
-    if(m_SettingsSimThread.m_bSimFileDrop) {
+    if(m_settingsSimThread.m_bSimFileDrop) {
         m_pStateRecorderResampler->closeAll();
     }
 }

@@ -24,9 +24,9 @@
 class ApplicationCLOptions: public Utilities::Singleton<ApplicationCLOptions> {
 public:
 
-    typedef SimFileJoiner::RangeAll RangeAll;
-    typedef SimFileJoiner::TypesTimeRange TypesTimeRange;
-    typedef SimFileJoiner::TypesBodyRange TypesBodyRange;
+    using RangeAll = SimFileJoiner::RangeAll;
+    using TypesTimeRange = SimFileJoiner::TypesTimeRange;
+    using TypesBodyRange = SimFileJoiner::TypesBodyRange;
 
     std::vector<boost::filesystem::path> m_inputFiles;
     boost::filesystem::path m_outputFile;

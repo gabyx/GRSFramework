@@ -1,6 +1,7 @@
 #ifndef RigidBodyList_hpp
 #define RigidBodyList_hpp
 
+#include <boost/iterator/transform_iterator.hpp>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/hashed_index.hpp>
@@ -27,7 +28,7 @@ private:
 public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
-    typedef RigidBodyType::RigidBodyIdType RigidBodyIdType;
+    using RigidBodyIdType = RigidBodyType::RigidBodyIdType;
 
     //This container grants only const access with its iterators with (RigidBodyType* const)
     //So we are able to change these rigidbodies, but cant change the m_id because it is const in the rigidbody class
@@ -54,12 +55,19 @@ private:
 
     MapType m_map;
 
-    typedef  typename MapType::index<by_insertion>::type    MapByInsertionType;
-    typedef  typename MapType::index<by_hashed_id>::type    MapByHashedIdType;
-    typedef  typename MapType::index<by_ordered_id>::type   MapByOrderedIdType;
+    using MapByInsertionType = typename MapType::index<by_insertion>::type   ;
+    using MapByHashedIdType = typename MapType::index<by_hashed_id>::type   ;
+    using MapByOrderedIdType = typename MapType::index<by_ordered_id>::type  ;
     MapByHashedIdType & m_mapByHashedId;
     MapByInsertionType & m_mapByInsertion;
     MapByOrderedIdType & m_mapByOrderedId;
+
+
+    template <typename Iter>
+    struct KeyGetter : std::unary_function< const typename Iter::value_type, const RigidBodyIdType &>
+    {
+         const RigidBodyIdType & operator()(const typename Iter::value_type & pBody) const{ return pBody->m_id; }
+    };
 
 public:
 
@@ -69,27 +77,36 @@ public:
         m_mapByOrderedId( m_map.get<by_ordered_id>())
     {}
 
-    typedef typename MapByInsertionType::iterator iterator;
-    typedef typename MapByInsertionType::const_iterator const_iterator;
+    /** Body iterator ordered by id */
+    using iterator = typename MapByInsertionType::iterator;
+    using const_iterator = typename MapByInsertionType::const_iterator;
+    /** Body iterator ordered by insertion */
+    using iterator_ordered = typename MapByOrderedIdType::iterator;
+    using const_iterator_ordered = typename MapByOrderedIdType::const_iterator;
+    /** Key ierator ordered by id */
+    using key_iterator_ordered = boost::transform_iterator< KeyGetter<iterator>, iterator>;
+    /** Key ierator ordered by insertion */
+    using key_iterator = boost::transform_iterator< KeyGetter<iterator>, iterator>;
 
-    typedef typename MapByOrderedIdType::iterator iterator_ordered;
-    typedef typename MapByOrderedIdType::const_iterator const_iterator_ordered;
-
-    // Ordered by id
+    /** Get body iterators ordered by id */
     iterator_ordered beginOrdered(){ return m_mapByOrderedId.begin(); }
     iterator_ordered endOrdered(){ return m_mapByOrderedId.end(); }
     const_iterator_ordered beginOrdered() const{ return m_mapByOrderedId.begin(); }
     const_iterator_ordered endOrdered() const { return m_mapByOrderedId.end(); }
 
-    // Ordered by insertion
+    /** Get body Iterators ordered by insertion (random access) */
     iterator begin(){return m_mapByInsertion.begin();}
     iterator end(){return m_mapByInsertion.end();}
     const_iterator begin() const {return m_mapByInsertion.begin();}
     const_iterator end() const {return m_mapByInsertion.end();}
 
+    /** Get key iterators ordered by insertion (random access) */
+    key_iterator beginKey(){ return key_iterator(m_mapByInsertion.begin(), KeyGetter<iterator>());}
+    key_iterator endKey(){return key_iterator(m_mapByInsertion.end(), KeyGetter<iterator>());}
+
     template<typename Iterator>
     bool addBodies(Iterator beginIt, Iterator endIt){
-        for( auto it = beginIt; it!= endIt; it++){
+        for( auto it = beginIt; it!= endIt; ++it){
            auto res =  m_mapByHashedId.insert(*it);
            if( res.second == false){
                 return false;
@@ -101,7 +118,7 @@ public:
     /** Similiar to std::map::insert*/
     inline bool addBody(RigidBodyType* ptr){
         ASSERTMSG(ptr != nullptr, "Null pointer added!")
-        std::pair<typename MapByHashedIdType::iterator,bool> res=  m_mapByHashedId.insert(ptr);
+        std::pair<typename MapByHashedIdType::iterator,bool> res =  m_mapByHashedId.insert(ptr);
         return res.second;
     }
 

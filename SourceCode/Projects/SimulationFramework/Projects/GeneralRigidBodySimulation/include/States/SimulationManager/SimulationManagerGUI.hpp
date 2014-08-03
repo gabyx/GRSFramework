@@ -17,7 +17,7 @@
 #include "SimulationManagerBase.hpp"
 #include "InputContext.hpp"
 
-#include "SceneParserOgre.hpp"
+#include "SceneParserGUI.hpp"
 
 #include "DynamicCoordinateFrames.hpp"
 
@@ -37,13 +37,9 @@ public:
     std::shared_ptr<SharedBufferDynSys >	    m_pSharedBuffer;
     std::shared_ptr<StateRecorder >		m_pStateRecorder;
 
-    std::vector<Ogre::SceneNode*>	m_SceneNodeSimBodies;
-    std::vector<Ogre::SceneNode*>	m_SceneNodeBodies;
-
     void setup(boost::filesystem::path sceneFilePath);
-
-    std::shared_ptr< SceneParserOgre > m_pSceneParser;
-
+    using SceneParserType = SceneParserGUI<DynamicsSystemType>;
+    std::shared_ptr< SceneParserType > m_pSceneParser;
 
     void updateScene(double timeSinceLastFrame);
     inline void updateSimBodies();
@@ -64,10 +60,10 @@ public:
 private:
 
     std::shared_ptr<Ogre::SceneManager>	m_pSceneMgr;
-
+    Ogre::SceneNode * m_pBaseNode;
     void setShadowTechniques();
 
-    std::shared_ptr<const DynamicsState > m_pVisBuffer;
+    const DynamicsState * m_pVisBuffer;
 
     // Accessed only by thread ===================
     void threadRunSimulation();
@@ -84,7 +80,7 @@ private:
     void cleanUpRecordThread();
     struct SettingsSimThread {
         double m_EndTime;
-    } m_SettingsSimThread;
+    } m_settingsSimThread;
 
     void readSharedBuffer();
     void writeSharedBuffer();
@@ -97,10 +93,6 @@ private:
 
     std::shared_ptr< DynamicsSystemType >		   m_pDynSys;
     // ===========================================
-
-    int m_nSimBodies;
-    double m_lengthScale;
-    Ogre::SceneNode * m_pBaseNode;
 
     bool writeInitialState();
 

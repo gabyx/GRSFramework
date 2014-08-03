@@ -27,7 +27,7 @@ public:
             bool m_inNeighbourMap;   ///< If this body is contained in the neighbourmap or not!
         };
 
-        typedef std::unordered_map<RankIdType, Flags> RankToFlagsType;
+        using RankToFlagsType = std::unordered_map<RankIdType, Flags>;
         RankToFlagsType m_neighbourRanks; ///< if body is remote: only one rankId has m_inNeighbourMap= true (only in the neighbour data it belongs to)
 
 

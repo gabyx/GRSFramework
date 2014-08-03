@@ -25,17 +25,17 @@ public:
     //Cannot template on this type, template cyclic dependency because ContactGraph also template on InlcusionComm
     // Dont template on InclusionCommunicator and ContactGraph
     // Cannnot typedef more dependent types in ContactGraph, because doing so,
-    typedef typename TCombo::ContactGraphType ContactGraphType;
+    using ContactGraphType = typename TCombo::ContactGraphType;
 
-    typedef typename MPILayer::ProcessCommunicator                                      ProcessCommunicatorType;
-    typedef typename ProcessCommunicatorType::ProcessInfoType                           ProcessInfoType;
-    typedef typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType      ProcessTopologyType;
+    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator                                     ;
+    using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType                          ;
+    using ProcessTopologyType = typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType     ;
 
-    typedef typename DynamicsSystemType::RigidBodySimContainerType                      RigidBodyContainerType;
-    typedef typename DynamicsSystemType::GlobalGeometryMapType                          GlobalGeometryMapType;
+    using RigidBodyContainerType = typename DynamicsSystemType::RigidBodySimContainerType                     ;
+    using GlobalGeometryMapType = typename DynamicsSystemType::GlobalGeometryMapType                         ;
 
-    typedef typename ContactGraphType::NodeDataType NodeDataType;
-    typedef NeighbourMap<NeighbourDataInclusionCommunication<NodeDataType> > NeighbourMapType;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using NeighbourMapType = NeighbourMap<NeighbourDataInclusionCommunication<NodeDataType> >;
 
     InclusionCommunicator(std::shared_ptr< BodyCommunicator> pBodyComm,
                           std::shared_ptr< DynamicsSystemType> pDynSys ,
@@ -66,14 +66,14 @@ public:
     }
 
     void setSettings(const InclusionSolverSettingsType & settings){
-        m_Settings = settings;
+        m_settings = settings;
     }
 
     NeighbourMapType * getNeighbourMap(){return &m_nbDataMap;}
 
 private:
 
-    InclusionSolverSettingsType m_Settings;
+    InclusionSolverSettingsType m_settings;
 
 
     /** Functions are executed in this order in communicateRemoteContacts() */

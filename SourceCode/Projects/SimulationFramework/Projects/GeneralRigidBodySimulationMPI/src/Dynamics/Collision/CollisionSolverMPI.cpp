@@ -3,7 +3,7 @@
 
 #include "PrintGeometryDetails.hpp"
 
-CollisionSolver::CollisionSolver(std::shared_ptr< DynamicsSystemType> pDynSys):
+CollisionSolverMPI::CollisionSolverMPI(std::shared_ptr< DynamicsSystemType> pDynSys):
     m_SimBodies(pDynSys->m_SimBodies), m_Bodies(pDynSys->m_Bodies), m_RemoteSimBodies(pDynSys->m_RemoteSimBodies),
     m_Collider(&m_collisionSet)
 {
@@ -11,20 +11,20 @@ CollisionSolver::CollisionSolver(std::shared_ptr< DynamicsSystemType> pDynSys):
 }
 
 
-CollisionSolver::~CollisionSolver() {
+CollisionSolverMPI::~CollisionSolverMPI() {
     clearCollisionSet();
 }
 
 
 
-void CollisionSolver::initializeLog( Logging::Log* pSolverLog ) {
+void CollisionSolverMPI::initializeLog( Logging::Log* pSolverLog ) {
     m_pSolverLog = pSolverLog;
     ASSERTMSG(m_pSolverLog != nullptr, "Logging::Log: nullptr!");
 }
 
 
 
-void CollisionSolver::reset() {
+void CollisionSolverMPI::reset() {
     clearCollisionSet();
 
     m_expectedNContacts =  m_SimBodies.size() * 3;
@@ -35,7 +35,7 @@ void CollisionSolver::reset() {
 }
 
 
-void CollisionSolver::clearCollisionSet() {
+void CollisionSolverMPI::clearCollisionSet() {
     for( typename CollisionSetType::iterator it = m_collisionSet.begin(); it != m_collisionSet.end(); ++it) {
         delete (*it);
     }
@@ -43,15 +43,15 @@ void CollisionSolver::clearCollisionSet() {
 }
 
 
-const typename CollisionSolver::CollisionSetType &
-CollisionSolver::getCollisionSetRef()
+const typename CollisionSolverMPI::CollisionSetType &
+CollisionSolverMPI::getCollisionSetRef()
 {
     return m_collisionSet;
 }
 
 
 
-void CollisionSolver::solveCollision() {
+void CollisionSolverMPI::solveCollision() {
 
 
     reset();
@@ -141,12 +141,12 @@ void CollisionSolver::solveCollision() {
 }
 
 
-std::string CollisionSolver::getIterationStats() {
+std::string CollisionSolverMPI::getIterationStats() {
     std::stringstream s;
     s << m_maxOverlap;
     return s.str();
 }
-std::string CollisionSolver::getStatsHeader() {
+std::string CollisionSolverMPI::getStatsHeader() {
     std::stringstream s;
     s << "MaxOverlap [m]";
     return s.str();
@@ -154,7 +154,7 @@ std::string CollisionSolver::getStatsHeader() {
 
 
 
-void CollisionSolver::signalContactAdd() {
+void CollisionSolverMPI::signalContactAdd() {
 
     if(m_collisionSet.size()!=0){
 
@@ -173,7 +173,7 @@ void CollisionSolver::signalContactAdd() {
             // Calculate some Statistics
             m_maxOverlap = std::max(m_maxOverlap,(*colDataIt)->m_overlap);
 
-            m_ContactDelegateList.invokeAll(*colDataIt); // Propagate pointers! they will not be deleted!
+            invokeAllContactDelegates(*colDataIt); // Propagate pointers! they will not be deleted!
 
         }
 

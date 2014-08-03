@@ -1,171 +1,195 @@
 
-MACRO(INCLUDE_GAUSS_SEIDEL_CUDA SRC INC INCLUDE_DIRS PATH_TO_MODULES)
+MACRO(INCLUDE_GAUSS_SEIDEL_CUDA SRC INC INCLUDE_DIRS COMMON_SOURCE_DIR)
 set(${INC}
-	${PATH_TO_MODULES}/inc/GaussSeidelGPU/GaussSeidelGPU.hpp
-    ${PATH_TO_MODULES}/inc/GaussSeidelGPU/GaussSeidelTestVariant.hpp
-	${PATH_TO_MODULES}/inc/GaussSeidelGPU/KernelsGaussSeidel.cuh
+	${COMMON_SOURCE_DIR}/inc/GaussSeidelGPU/GaussSeidelGPU.hpp
+    ${COMMON_SOURCE_DIR}/inc/GaussSeidelGPU/GaussSeidelTestVariant.hpp
+	${COMMON_SOURCE_DIR}/inc/GaussSeidelGPU/KernelsGaussSeidel.cuh
 )
 set(${SRC}
-	${PATH_TO_MODULES}/src/GaussSeidelGPU/GaussSeidelGPU.cu
-	${PATH_TO_MODULES}/src/GaussSeidelGPU/GaussSeidelGPU.cpp
+	${COMMON_SOURCE_DIR}/src/GaussSeidelGPU/GaussSeidelGPU.cu
+	${COMMON_SOURCE_DIR}/src/GaussSeidelGPU/GaussSeidelGPU.cpp
 )
-set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/GaussSeidelGPU/)
+set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${COMMON_SOURCE_DIR}/inc/GaussSeidelGPU/)
 endmacro(INCLUDE_GAUSS_SEIDEL_CUDA)
 
 
-MACRO(INCLUDE_PROX_CUDA SRC INC INCLUDE_DIRS PATH_TO_MODULES)
+MACRO(INCLUDE_PROX_CUDA SRC INC INCLUDE_DIRS COMMON_SOURCE_DIR)
 set(${INC}
-	${PATH_TO_MODULES}/inc/ProxGPU/ProxTestVariant.hpp
-	${PATH_TO_MODULES}/inc/ProxGPU/ProxGPU.hpp
-    ${PATH_TO_MODULES}/inc/ProxGPU/ProxKernelSettings.hpp
-    ${PATH_TO_MODULES}/inc/ProxGPU/ProxSettings.hpp
-	${PATH_TO_MODULES}/inc/ProxGPU/KernelsProx.cuh
-    ${PATH_TO_MODULES}/inc/ProxGPU/SorProxGPUVariant.hpp
-    ${PATH_TO_MODULES}/inc/ProxGPU/JorProxGPUVariant.hpp
+	${COMMON_SOURCE_DIR}/inc/ProxGPU/ProxTestVariant.hpp
+	${COMMON_SOURCE_DIR}/inc/ProxGPU/ProxGPU.hpp
+    ${COMMON_SOURCE_DIR}/inc/ProxGPU/ProxKernelSettings.hpp
+    ${COMMON_SOURCE_DIR}/inc/ProxGPU/ProxSettings.hpp
+	${COMMON_SOURCE_DIR}/inc/ProxGPU/KernelsProx.cuh
+    ${COMMON_SOURCE_DIR}/inc/ProxGPU/SorProxGPUVariant.hpp
+    ${COMMON_SOURCE_DIR}/inc/ProxGPU/JorProxGPUVariant.hpp
 )
 set(${SRC}
-	${PATH_TO_MODULES}/src/ProxGPU/ProxGPU.cu
-	${PATH_TO_MODULES}/src/ProxGPU/ProxGPU.cpp
+	${COMMON_SOURCE_DIR}/src/ProxGPU/ProxGPU.cu
+	${COMMON_SOURCE_DIR}/src/ProxGPU/ProxGPU.cpp
 )
-set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/ProxGPU/)
+set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${COMMON_SOURCE_DIR}/inc/ProxGPU/)
 endmacro(INCLUDE_PROX_CUDA)
 
-MACRO(INCLUDE_VECTOR_ADD_CUDA SRC INC INCLUDE_DIRS PATH_TO_MODULES)
+MACRO(INCLUDE_VECTOR_ADD_CUDA SRC INC INCLUDE_DIRS COMMON_SOURCE_DIR)
 set(${INC}
-	${PATH_TO_MODULES}/inc/VectorAddGPU/VectorAddGPU.hpp
-	${PATH_TO_MODULES}/inc/VectorAddGPU/KernelsVectorAdd.cuh
+	${COMMON_SOURCE_DIR}/inc/VectorAddGPU/VectorAddGPU.hpp
+	${COMMON_SOURCE_DIR}/inc/VectorAddGPU/KernelsVectorAdd.cuh
 )
 set(${SRC}
-	${PATH_TO_MODULES}/src/VectorAddGPU/VectorAddGPU.cu
-	${PATH_TO_MODULES}/src/VectorAddGPU/VectorAddGPU.cpp
+	${COMMON_SOURCE_DIR}/src/VectorAddGPU/VectorAddGPU.cu
+	${COMMON_SOURCE_DIR}/src/VectorAddGPU/VectorAddGPU.cpp
 )
-set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/VectorAddGPU/)
+set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${COMMON_SOURCE_DIR}/inc/VectorAddGPU/)
 endmacro(INCLUDE_VECTOR_ADD_CUDA)
 
-MACRO(INCLUDE_MATRIX_MULT_CUDA SRC INC INCLUDE_DIRS PATH_TO_MODULES)
+MACRO(INCLUDE_MATRIX_MULT_CUDA SRC INC INCLUDE_DIRS COMMON_SOURCE_DIR)
 set(${INC}
-	${PATH_TO_MODULES}/inc/MatrixMultGPU/MatrixMultGPU.hpp
-	${PATH_TO_MODULES}/inc/MatrixMultGPU/KernelsMatrixMult.cuh
+	${COMMON_SOURCE_DIR}/inc/MatrixMultGPU/MatrixMultGPU.hpp
+	${COMMON_SOURCE_DIR}/inc/MatrixMultGPU/KernelsMatrixMult.cuh
 )
 set(${SRC}
-	${PATH_TO_MODULES}/src/MatrixMultGPU/MatrixMultGPU.cu
-	${PATH_TO_MODULES}/src/MatrixMultGPU/MatrixMultGPU.cpp
+	${COMMON_SOURCE_DIR}/src/MatrixMultGPU/MatrixMultGPU.cu
+	${COMMON_SOURCE_DIR}/src/MatrixMultGPU/MatrixMultGPU.cpp
 )
-set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/MatrixMultGPU/)
+set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${COMMON_SOURCE_DIR}/inc/MatrixMultGPU/)
 endmacro(INCLUDE_MATRIX_MULT_CUDA)
 
-MACRO(INCLUDE_MATRIX_VECTOR_MULT_CUDA SRC INC INCLUDE_DIRS PATH_TO_MODULES)
+MACRO(INCLUDE_MATRIX_VECTOR_MULT_CUDA SRC INC INCLUDE_DIRS COMMON_SOURCE_DIR)
 set(${INC}
-   ${PATH_TO_MODULES}/inc/MatrixVectorMultGPU/MatrixVectorMultGPU.hpp
-   ${PATH_TO_MODULES}/inc/MatrixVectorMultGPU/MatrixVectorMultTestVariant.hpp
-   ${PATH_TO_MODULES}/inc/MatrixVectorMultGPU/KernelsMatrixVectorMult.cuh
+   ${COMMON_SOURCE_DIR}/inc/MatrixVectorMultGPU/MatrixVectorMultGPU.hpp
+   ${COMMON_SOURCE_DIR}/inc/MatrixVectorMultGPU/MatrixVectorMultTestVariant.hpp
+   ${COMMON_SOURCE_DIR}/inc/MatrixVectorMultGPU/KernelsMatrixVectorMult.cuh
 )
 set(${SRC}
-	${PATH_TO_MODULES}/src/MatrixVectorMultGPU/MatrixVectorMultGPU.cu
-	${PATH_TO_MODULES}/src/MatrixVectorMultGPU/MatrixVectorMultGPU.cpp
+	${COMMON_SOURCE_DIR}/src/MatrixVectorMultGPU/MatrixVectorMultGPU.cu
+	${COMMON_SOURCE_DIR}/src/MatrixVectorMultGPU/MatrixVectorMultGPU.cpp
 )
-set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/MatrixVectorMultGPU/)
+set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${COMMON_SOURCE_DIR}/inc/MatrixVectorMultGPU/)
 endmacro(INCLUDE_MATRIX_VECTOR_MULT_CUDA)
 
-MACRO(INCLUDE_TESTS_CUDA SRC INC INCLUDE_DIRS PATH_TO_MODULES)
+MACRO(INCLUDE_TESTS_CUDA SRC INC INCLUDE_DIRS COMMON_SOURCE_DIR)
 set(${INC}
-   	${PATH_TO_MODULES}/inc/TestsGPU/TestsGPU.hpp
-	${PATH_TO_MODULES}/inc/TestsGPU/KernelsTests.cuh
+   	${COMMON_SOURCE_DIR}/inc/TestsGPU/TestsGPU.hpp
+	${COMMON_SOURCE_DIR}/inc/TestsGPU/KernelsTests.cuh
 )
 set(${SRC}
-	${PATH_TO_MODULES}/src/TestsGPU/TestsGPU.cu
-	${PATH_TO_MODULES}/src/TestsGPU/TestsGPU.cpp
+	${COMMON_SOURCE_DIR}/src/TestsGPU/TestsGPU.cu
+	${COMMON_SOURCE_DIR}/src/TestsGPU/TestsGPU.cpp
 )
-set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/TestsGPU/)
+set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${COMMON_SOURCE_DIR}/inc/TestsGPU/)
 endmacro(INCLUDE_TESTS_CUDA)
 
-MACRO(INCLUDE_GENERAL_CUDA SRC INC INCLUDE_DIRS PATH_TO_MODULES )
+MACRO(INCLUDE_GENERAL_CUDA SRC INC INCLUDE_DIRS COMMON_SOURCE_DIR )
 set(${INC}
 	${PROJECT_BINARY_DIR}/ConfigureFile.hpp
-	${PATH_TO_MODULES}/inc/General/Utilities.hpp
-	${PATH_TO_MODULES}/inc/General/FloatingPointType.hpp
-	${PATH_TO_MODULES}/inc/General/GPUMutex.hpp
-	${PATH_TO_MODULES}/inc/General/TypeTraitsHelper.hpp
-	${PATH_TO_MODULES}/inc/General/StaticAssert.hpp
-	${PATH_TO_MODULES}/inc/General/FlopsCounting.hpp
-    ${PATH_TO_MODULES}/inc/General/AssertionDebug.hpp
-    ${PATH_TO_MODULES}/inc/General/AssertionDebugC.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaEvent.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaTimer.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaAlloc.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaRefcounting.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaDeviceMemory.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaTypeDefs.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaDeviceGroup.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaContextGroup.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaContext.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaDevice.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaException.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaMemSupport.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaMatrixSupport.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaUtilities.hpp
-    ${PATH_TO_MODULES}/inc/General/Exception.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaError.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaMatrix.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaPrint.hpp
+	${COMMON_SOURCE_DIR}/inc/General/Utilities.hpp
+	${COMMON_SOURCE_DIR}/inc/General/FloatingPointType.hpp
+	${COMMON_SOURCE_DIR}/inc/General/GPUMutex.hpp
+	${COMMON_SOURCE_DIR}/inc/General/TypeTraitsHelper.hpp
+	${COMMON_SOURCE_DIR}/inc/General/StaticAssert.hpp
+	${COMMON_SOURCE_DIR}/inc/General/FlopsCounting.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/AssertionDebug.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/AssertionDebugC.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaEvent.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaTimer.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaAlloc.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaRefcounting.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaDeviceMemory.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaTypeDefs.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaDeviceGroup.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaContextGroup.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaContext.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaDevice.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaException.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaMemSupport.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaMatrixSupport.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaUtilities.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/Exception.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaError.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaMatrix.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaPrint.hpp
+    
+    ${COMMON_SOURCE_DIR}/inc/PerformanceTest/PerformanceTest.hpp
+    ${COMMON_SOURCE_DIR}/inc/PerformanceTest/KernelTestMethod.hpp
+    
+    ${COMMON_SOURCE_DIR}/external/pugixml/src/pugixml.hpp
 )
 set(${SRC}
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaCompilerVersion.cu
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaMemSupport.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaDevice.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaDeviceGroup.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaContextGroup.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaContext.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaAlloc.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaUtilities.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaEvent.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaTimer.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaPrint.cpp
-	${PATH_TO_MODULES}/src/General/Utilities.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaCompilerVersion.cu
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaMemSupport.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaDevice.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaDeviceGroup.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaContextGroup.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaContext.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaAlloc.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaUtilities.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaEvent.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaTimer.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaPrint.cpp
+	${COMMON_SOURCE_DIR}/src/General/Utilities.cpp
+    
+    ${COMMON_SOURCE_DIR}/external/pugixml/src/pugixml.cpp
 )
-set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/General/CudaModern ${PATH_TO_MODULES}/inc/General/)
+set(${INCLUDE_DIRS} 
+    ${${INCLUDE_DIRS}} 
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern 
+    ${COMMON_SOURCE_DIR}/inc/General/
+    ${COMMON_SOURCE_DIR}/inc/PerformanceTest/
+    ${COMMON_SOURCE_DIR}/external/pugixml/src/
+)
 endmacro(INCLUDE_GENERAL_CUDA)
 
-MACRO(INCLUDE_GENERAL_EXTERN_CUDA SRC INC INCLUDE_DIRS PATH_TO_MODULES )
+MACRO(INCLUDE_GENERAL_EXTERN_CUDA SRC INC INCLUDE_DIRS COMMON_SOURCE_DIR )
 set(${INC}
-	${PATH_TO_MODULES}/inc/General/Utilities.hpp
-	${PATH_TO_MODULES}/inc/General/FloatingPointType.hpp
-	${PATH_TO_MODULES}/inc/General/TypeTraitsHelper.hpp
-	${PATH_TO_MODULES}/inc/General/GPUMutex.hpp
-	${PATH_TO_MODULES}/inc/General/StaticAssert.hpp
-	${PATH_TO_MODULES}/inc/General/FlopsCounting.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaEvent.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaTimer.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaAlloc.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaRefcounting.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaDeviceMemory.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaDeviceMatrix.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaTypeDefs.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaDeviceGroup.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaContextGroup.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaContext.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaDevice.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaException.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaMemSupport.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaMatrixSupport.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaUtilities.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/Exception.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaError.hpp
-    ${PATH_TO_MODULES}/inc/General/CudaModern/CudaMatrix.hpp
+	${COMMON_SOURCE_DIR}/inc/General/Utilities.hpp
+	${COMMON_SOURCE_DIR}/inc/General/FloatingPointType.hpp
+	${COMMON_SOURCE_DIR}/inc/General/TypeTraitsHelper.hpp
+	${COMMON_SOURCE_DIR}/inc/General/GPUMutex.hpp
+	${COMMON_SOURCE_DIR}/inc/General/StaticAssert.hpp
+	${COMMON_SOURCE_DIR}/inc/General/FlopsCounting.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaEvent.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaTimer.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaAlloc.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaRefcounting.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaDeviceMemory.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaDeviceMatrix.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaTypeDefs.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaDeviceGroup.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaContextGroup.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaContext.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaDevice.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaException.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaMemSupport.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaMatrixSupport.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaUtilities.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/Exception.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaError.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaMatrix.hpp
+    
+    ${COMMON_SOURCE_DIR}/inc/PerformanceTest/PerformanceTest.hpp
+    ${COMMON_SOURCE_DIR}/inc/PerformanceTest/KernelTestMethod.hpp
+    
+    #${COMMON_SOURCE_DIR}/external/pugixml/src/pugixml.hpp
 )
 set(${SRC}
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaCompilerVersion.cu
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaMemSupport.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaDevice.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaDeviceGroup.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaContextGroup.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaContext.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaAlloc.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaUtilities.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaEvent.cpp
-    ${PATH_TO_MODULES}/src/General/CudaModern/CudaTimer.cpp
-	${PATH_TO_MODULES}/src/General/Utilities.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaCompilerVersion.cu
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaMemSupport.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaDevice.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaDeviceGroup.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaContextGroup.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaContext.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaAlloc.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaUtilities.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaEvent.cpp
+    ${COMMON_SOURCE_DIR}/src/General/CudaModern/CudaTimer.cpp
+	${COMMON_SOURCE_DIR}/src/General/Utilities.cpp
+    
+    #${COMMON_SOURCE_DIR}/external/pugixml/src/pugixml.cpp
 )
-set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}} ${PATH_TO_MODULES}/inc/General/)
+set(${INCLUDE_DIRS} 
+    ${${INCLUDE_DIRS}} 
+    ${COMMON_SOURCE_DIR}/inc/General/
+    ${COMMON_SOURCE_DIR}/inc/PerformanceTest/
+)
 endmacro(INCLUDE_GENERAL_EXTERN_CUDA)
 

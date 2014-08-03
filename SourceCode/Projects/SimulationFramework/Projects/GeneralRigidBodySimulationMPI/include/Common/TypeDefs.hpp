@@ -15,14 +15,13 @@
 
 
 #define CollisionSolver_INCLUDE_FILE            "CollisionSolverMPI.hpp"
-class CollisionSolver;
+class CollisionSolverMPI;
 
 #define DynamicsSystem_INCLUDE_FILE             "DynamicsSystemMPI.hpp"
-class DynamicsSystem;
+class DynamicsSystemMPI;
 
 #define InclusionSolver_INCLUDE_FILE            "InclusionSolverCONoGMPI.hpp"
-//class InclusionSolverCO;
-class InclusionSolverCONoG;
+class InclusionSolverCONoGMPI;
 
 #define RigidBody_INCLUDE_FILE                  "RigidBodyMPI.hpp"
 class RigidBodyBaseMPI;
@@ -31,62 +30,66 @@ class RigidBodyBaseMPI;
 class RigidBodySolverDataCONoGMPI;
 
 #define TimeStepper_INCLUDE_FILE                "MoreauTimeStepperMPI.hpp"
-class MoreauTimeStepper;
+class MoreauTimeStepperMPI;
 
 #define InclusionSolverSettings_INCLUDE_FILE    "InclusionSolverSettingsMPI.hpp"
-class InclusionSolverSettings;
+class InclusionSolverSettingsMPI;
 
 //Try to make framework settings simpler:
-namespace GlobalConfigs{
+struct GlobalConfigs{
 
     // Global definitions used below
-    namespace MyConfigs{
+    struct MyConfigs{
 
-        typedef RigidBodyBaseMPI        RigidBodyType;
+        using RigidBodyType = RigidBodyBaseMPI          ;
 
-        typedef DynamicsSystem          DynamicsSystemType;
+        using DynamicsSystemType = DynamicsSystemMPI         ;
 
-        typedef MoreauTimeStepper       TimeStepperType;
+        using TimeStepperType = MoreauTimeStepperMPI      ;
 
-        typedef CollisionSolver         CollisionSolverType;
+        using CollisionSolverType = CollisionSolverMPI        ;
 
-        typedef InclusionSolverCONoG    InclusionSolverType;
-        typedef InclusionSolverSettings InclusionSolverSettingsType;
+        using InclusionSolverType = InclusionSolverCONoGMPI   ;
+        using InclusionSolverSettingsType = InclusionSolverSettingsMPI;
 
     };
 
-
-    namespace SolverConfigs{
-        typedef MyConfigs::TimeStepperType              TimeStepperType;
+    struct GeneralConfigs{
+         using RandomGeneratorType = std::mt19937;
     };
 
-    namespace TimeStepperConfigs{
-        typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
-        typedef typename MyConfigs::CollisionSolverType          CollisionSolverType;
-        typedef typename MyConfigs::InclusionSolverType          InclusionSolverType;
+
+    struct SolverConfigs{
+        using TimeStepperType = MyConfigs::TimeStepperType             ;
     };
 
-    namespace DynamicSystemConfigs{
-        typedef typename MyConfigs::RigidBodyType                RigidBodyType;
-        typedef typename MyConfigs::InclusionSolverSettingsType      InclusionSolverSettingsType;
+    struct TimeStepperConfigs{
+        using DynamicsSystemType = typename MyConfigs::DynamicsSystemType          ;
+        using CollisionSolverType = typename MyConfigs::CollisionSolverType         ;
+        using InclusionSolverType = typename MyConfigs::InclusionSolverType         ;
     };
 
-    namespace RigidBodyConfigs{
-        typedef LayoutConfig<double, GeneralLayout<7,6> > LayoutConfigType;
-        typedef RigidBodySolverDataCONoGMPI RigidBodySolverDataType;
-    }
-
-
-    namespace InclusionSolverConfigs{
-        typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
-        typedef typename MyConfigs::InclusionSolverSettingsType  InclusionSolverSettingsType;
-    };
-    namespace CollisionSolverConfigs{
-        typedef typename MyConfigs::DynamicsSystemType           DynamicsSystemType;
+    struct DynamicSystemConfigs{
+        using RigidBodyType = typename MyConfigs::RigidBodyType               ;
+        using InclusionSolverSettingsType = typename MyConfigs::InclusionSolverSettingsType     ;
     };
 
-    namespace MPIInformationConfigs{
-        typedef unsigned int RankIdType;
+    struct RigidBodyConfigs{
+        using LayoutConfigType = LayoutConfig<double, GeneralLayout<7,6> >;
+        using RigidBodySolverDataType = RigidBodySolverDataCONoGMPI;
+    };
+
+
+    struct InclusionSolverConfigs{
+        using DynamicsSystemType = typename MyConfigs::DynamicsSystemType          ;
+        using InclusionSolverSettingsType = typename MyConfigs::InclusionSolverSettingsType ;
+    };
+    struct CollisionSolverConfigs{
+        using DynamicsSystemType = typename MyConfigs::DynamicsSystemType          ;
+    };
+
+    struct MPIInformationConfigs{
+        using RankIdType = unsigned int;
     };
 
 
@@ -100,46 +103,51 @@ namespace GlobalConfigs{
     DEFINE_TIMESTEPPER_CONFIG_TYPES \
 
 #define DEFINE_TIMESTEPPER_CONFIG_TYPES \
-   typedef typename GlobalConfigs::SolverConfigs::TimeStepperType              TimeStepperType; \
-   typedef typename GlobalConfigs::TimeStepperConfigs::InclusionSolverType     InclusionSolverType;                 \
-   typedef typename GlobalConfigs::TimeStepperConfigs::CollisionSolverType     CollisionSolverType;                 \
+   using TimeStepperType = typename GlobalConfigs::SolverConfigs::TimeStepperType             ; \
+   using InclusionSolverType = typename GlobalConfigs::TimeStepperConfigs::InclusionSolverType    ;                 \
+   using CollisionSolverType = typename GlobalConfigs::TimeStepperConfigs::CollisionSolverType    ;                 \
    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
 
 #define DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES \
-    typedef typename GlobalConfigs::TimeStepperConfigs::CollisionSolverType     CollisionSolverType;                 \
+    using CollisionSolverType = typename GlobalConfigs::TimeStepperConfigs::CollisionSolverType    ;                 \
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
 
 #define DEFINE_COLLISION_SOLVER_CONFIG_TYPES \
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
 
 #define DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
-    typedef typename GlobalConfigs::InclusionSolverConfigs::InclusionSolverSettingsType     InclusionSolverSettingsType; \
-    typedef typename GlobalConfigs::TimeStepperConfigs::DynamicsSystemType                  DynamicsSystemType; \
+    using InclusionSolverSettingsType = typename GlobalConfigs::InclusionSolverConfigs::InclusionSolverSettingsType    ; \
+    using DynamicsSystemType = typename GlobalConfigs::TimeStepperConfigs::DynamicsSystemType                 ; \
     DEFINE_RIGIDBODY_CONFIG_TYPES \
 
 
 #define DEFINE_RIGIDBODY_CONFIG_TYPES \
-    typedef typename GlobalConfigs::DynamicSystemConfigs::RigidBodyType          RigidBodyType; \
-    typedef typename GlobalConfigs::RigidBodyConfigs::RigidBodySolverDataType    RigidBodySolverDataType; \
-    DEFINE_LAYOUT_CONFIG_TYPES\
+    using RigidBodyType = typename GlobalConfigs::DynamicSystemConfigs::RigidBodyType         ; \
+    using RigidBodySolverDataType = typename GlobalConfigs::RigidBodyConfigs::RigidBodySolverDataType   ; \
+    DEFINE_LAYOUT_CONFIG_TYPES \
+    DEFINE_GENERAL_CONFIG_TYPES
 
 #define DEFINE_LAYOUT_CONFIG_TYPES \
-    typedef typename GlobalConfigs::RigidBodyConfigs::LayoutConfigType LayoutConfigType; \
+    using LayoutConfigType = typename GlobalConfigs::RigidBodyConfigs::LayoutConfigType; \
     DEFINE_LAYOUT_CONFIG_TYPES_OF( GlobalConfigs::RigidBodyConfigs::LayoutConfigType )
 
 #define DEFINE_MATRIX_TYPES \
-    typedef typename GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC PREC; \
+    using PREC = typename GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC; \
     DEFINE_MATRIX_TYPES_OF( GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC )
 
 #define DEFINE_MPI_INFORMATION_CONFIG_TYPES \
-    typedef GlobalConfigs::MPIInformationConfigs::RankIdType RankIdType;
+    using RankIdType = GlobalConfigs::MPIInformationConfigs::RankIdType;
+
+
+#define DEFINE_GENERAL_CONFIG_TYPES \
+    using RandomGenType = typename GlobalConfigs::GeneralConfigs::RandomGeneratorType;
 
 
 struct MyIOFormat{
   static Eigen::IOFormat Matlab;
 };
 
-typedef double MeshPREC;
+using MeshPREC = double;
 
 
 
