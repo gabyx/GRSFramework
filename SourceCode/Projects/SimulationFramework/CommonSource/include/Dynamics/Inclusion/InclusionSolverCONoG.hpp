@@ -94,8 +94,8 @@ protected:
 
     #if HAVE_CUDA_SUPPORT == 1
     // Jor Prox GPU Iteration class (only JOR Prox on velocity level)
-        using JorProxGPUModule = JorProxVelocityGPUModule;
-        JorProxGPUModule m_jorProxGPUModule;
+        using JorProxGPUVariantType = JorProxVelocityGPUVariant;
+        JorProxGPUVariantType m_jorProxGPUVariant;
     #endif
 
     void integrateAllBodyVelocities();

@@ -131,9 +131,8 @@ void InclusionSolverCONoGMPI::resetForNextIter() {
 
 void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) {
 
-#if CoutLevelSolver>1
-    LOG(m_pSolverLog,  "---> solveInclusionProblem(): "<< std::endl;);
-#endif
+    LOGSLLEVEL1(m_pSolverLog,  "---> solveInclusionProblem(): "<< std::endl;);
+
 
     // Standart values
     m_currentSimulationTime = currentSimulationTime;
@@ -410,9 +409,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
                 }
             }
 
-            #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "---> Convergence criteria (InVelocity) converged: "<<  m_bConverged<< std::endl;);
-            #endif
+            LOGSLLEVEL2_CONTACT(m_pSolverLog, "---> Convergence criteria (InVelocity) converged: "<<  m_bConverged<< std::endl;);
 
         } else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity) {
 
@@ -437,7 +434,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
                 }
             }
 
-            LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> Convergence criteria (InEnergyVelocity) converged: "<<  m_bConverged<< std::endl;);
+            LOGSLLEVEL2_CONTACT(m_pSolverLog, "---> Convergence criteria (InEnergyVelocity) converged: "<<  m_bConverged<< std::endl;);
 
         }
 

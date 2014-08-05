@@ -76,9 +76,7 @@ void DynamicsSystemBase::reset() {
 
 void DynamicsSystemBase::doFirstHalfTimeStep(PREC ts, PREC timestep) {
     using namespace std;
-#if CoutLevelSolver>1
-    LOG(m_pSolverLog, "---> doFirstHalfTimeStep(): "<<std::endl;)
-#endif
+    LOGSLLEVEL2(m_pSolverLog, "---> doFirstHalfTimeStep(): "<<std::endl;)
 
     static Matrix43 F_i = Matrix43::Zero();
 
@@ -89,12 +87,10 @@ void DynamicsSystemBase::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 
         RigidBodyType * pBody = (*bodyIt);
 
-#if CoutLevelSolver>2
-        LOG(m_pSolverLog, "\t---> Body: "<< RigidBodyId::getBodyIdString(pBody) << std::endl
+        LOGSLLEVEL3(m_pSolverLog, "\t---> Body: "<< RigidBodyId::getBodyIdString(pBody) << std::endl
             << "\t\t--->m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
             << "\t\t--->m_q_s= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl
             << "\t\t--->m_u_s= "  <<pBody->m_pSolverData->m_uBuffer.m_back.transpose()<<std::endl;)
-#endif
         // Update time:
         pBody->m_pSolverData->m_t = ts + timestep;
 
@@ -128,20 +124,18 @@ void DynamicsSystemBase::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 
 
 
-#if CoutLevelSolver>2
-        LOG(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<std::endl
+        LOGSLLEVEL3(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<std::endl
             << "\t\t--->m_t= "  << pBody->m_pSolverData->m_t<<std::endl
             << "\t\t--->m_q_m= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
-#endif
     }
 }
 
 
 void DynamicsSystemBase::doSecondHalfTimeStep(PREC te, PREC timestep) {
     using namespace std;
-#if CoutLevelSolver>1
-    LOG(m_pSolverLog, "---> doSecondHalfTimeStep(): "<<std::endl;)
-#endif
+
+    LOGSLLEVEL2(m_pSolverLog, "---> doSecondHalfTimeStep(): "<<std::endl;)
+
     static Matrix43 F_i = Matrix43::Zero();
 
     m_currentTotEnergy = 0;
@@ -168,12 +162,11 @@ void DynamicsSystemBase::doSecondHalfTimeStep(PREC te, PREC timestep) {
         //Normalize Quaternion
         pBody->m_q_KI.normalize();
 
-#if CoutLevelSolver>2
-        LOG(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
+
+        LOGSLLEVEL3(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
             << "\t\t--->m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
             << "\t\t--->m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl
             << "\t\t--->m_u_e= "  <<pBody->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl;)
-#endif
 
 #if OUTPUT_SIMDATA_FILE == 1
         // Calculate Energy

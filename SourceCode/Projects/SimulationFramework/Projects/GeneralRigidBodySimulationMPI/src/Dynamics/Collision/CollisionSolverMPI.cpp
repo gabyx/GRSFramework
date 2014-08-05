@@ -58,18 +58,13 @@ void CollisionSolverMPI::solveCollision() {
 
     reset();
 
-#if CoutLevelSolver>1
-    LOG(m_pSolverLog, "---> solveCollision(): "<<std::endl;)
-#endif
 
-
+    LOGSLLEVEL2(m_pSolverLog, "---> solveCollision(): "<<std::endl;)
 
     // All objects have been updated...
 
     // Do simple collision detection (SimBodies to SimBodies)
-    #if CoutLevelSolver>1
-        LOG(m_pSolverLog, "\t---> SimBodies to SimBodies "<<std::endl;)
-    #endif
+    LOGSLLEVEL2(m_pSolverLog, "\t---> SimBodies to SimBodies "<<std::endl;)
     if(m_SimBodies.size()){
         for(auto bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
             auto bodyItj = bodyIti;
@@ -84,9 +79,7 @@ void CollisionSolverMPI::solveCollision() {
     }
 
     //// Do simple collision detection (SimBodies to RemoteSimBodies)
-    #if CoutLevelSolver>1
-        LOG(m_pSolverLog, "\t---> SimBodies to RemoteBodies "<<std::endl;)
-    #endif
+    LOGSLLEVEL2(m_pSolverLog, "\t---> SimBodies to RemoteBodies "<<std::endl;)
     for(auto bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
         for(auto bodyItj = m_RemoteSimBodies.begin(); bodyItj != m_RemoteSimBodies.end(); bodyItj++ ) {
             //check for a collision
@@ -97,9 +90,7 @@ void CollisionSolverMPI::solveCollision() {
 
 
     // Do simple collision detection (RemoteSimBodies to RemoteSimBodies, but only different rank!)
-    #if CoutLevelSolver>1
-        LOG(m_pSolverLog, "\t---> RemoteSimBodies to RemoteSimBodies (different rank) "<<std::endl;)
-    #endif
+    LOGSLLEVEL2(m_pSolverLog, "\t---> RemoteSimBodies to RemoteSimBodies (different rank) "<<std::endl;)
     if(m_RemoteSimBodies.size()){
         for(auto bodyIti = m_RemoteSimBodies.begin(); bodyIti != --m_RemoteSimBodies.end(); bodyIti++) {
             auto bodyItj = bodyIti;
@@ -122,9 +113,7 @@ void CollisionSolverMPI::solveCollision() {
     }
 
 
-    #if CoutLevelSolver>1
-        LOG(m_pSolverLog, "\t---> SimBodies to Bodies "<<std::endl;)
-    #endif
+    LOGSLLEVEL2(m_pSolverLog, "\t---> SimBodies to Bodies "<<std::endl;)
     // Do simple collision detection (SimBodies to Bodies)
     for(auto bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
         for(auto bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++) {
@@ -133,9 +122,7 @@ void CollisionSolverMPI::solveCollision() {
         }
     }
 
-    #if CoutLevelSolver>1
-        LOG(m_pSolverLog, "\t---> Collision done "<<std::endl;)
-    #endif
+    LOGSLLEVEL2(m_pSolverLog, "\t---> Collision done "<<std::endl;)
 
     // Signal all found contact
     signalContactAdd();

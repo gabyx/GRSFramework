@@ -392,8 +392,8 @@ public:
             //Link to FrontBackBuffer
             addedNode->m_nodeData.m_u1BufferPtr = & pCollData->m_pBody1->m_pSolverData->m_uBuffer;
 
-            computeW<1>( addedNode->m_nodeData);
-            connectNode<1>( addedNode);
+            this->computeW<1>( addedNode->m_nodeData);
+            this->connectNode<1>( addedNode);
 
         } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
             // Contact goes into xi_N, xi_T
@@ -411,8 +411,8 @@ public:
             //Link to FrontBackBuffer
             addedNode->m_nodeData.m_u2BufferPtr = & pCollData->m_pBody2->m_pSolverData->m_uBuffer;
 
-            computeW<2>( addedNode->m_nodeData);
-            connectNode<2>( addedNode);
+            this->computeW<2>( addedNode->m_nodeData);
+            this->connectNode<2>( addedNode);
 
         } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
             // Contact goes into xi_N, xi_T

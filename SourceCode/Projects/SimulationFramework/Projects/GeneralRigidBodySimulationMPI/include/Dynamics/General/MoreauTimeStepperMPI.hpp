@@ -302,9 +302,8 @@ void MoreauTimeStepperMPI::doOneIteration() {
 
     static int iterations=0; // Average is reset after 1000 Iterations
 
-#if CoutLevelSolver>0
-    LOG(m_pSolverLog, "---> Do one time-step =================================" <<std::endl;);
-#endif
+    LOGSLLEVEL1(m_pSolverLog, "---> Do one time-step =================================" <<std::endl;);
+
 
     m_bIterationFinished = false;
 
@@ -317,7 +316,7 @@ void MoreauTimeStepperMPI::doOneIteration() {
     //Force switch
     //boost::thread::yield();
 
-#if CoutLevelSolver==1
+#if SOLVERLOG_LOGLEVEL == 1
      unsigned int when = (m_settings.m_endTime-m_settings.m_startTime)/m_settings.m_deltaT / 10.0;
       if(when<=0){when=1;}
       if(m_IterationCounter % when == 0){
@@ -325,9 +324,7 @@ void MoreauTimeStepperMPI::doOneIteration() {
       }
 #endif
 
-#if CoutLevelSolver>1
-      LOG(m_pSolverLog,"---> m_t Begin: " << m_currentSimulationTime <<std::endl; );
-#endif
+    LOGSLLEVEL2(m_pSolverLog,"---> m_t Begin: " << m_currentSimulationTime <<std::endl; );
 
     //Calculate Midpoint Rule ============================================================
     // Middle Time Step for all LOCAL Bodies==============================================
@@ -410,9 +407,9 @@ void MoreauTimeStepperMPI::doOneIteration() {
 
 
 
-#if CoutLevelSolver>2
-      LOG(m_pSolverLog,"---> m_t End: " << m_currentSimulationTime <<std::endl );
-#endif
+
+    LOGSLLEVEL3(m_pSolverLog,"---> m_t End: " << m_currentSimulationTime <<std::endl );
+
 
     //Force switch
     //boost::thread::yield();
@@ -429,10 +426,9 @@ void MoreauTimeStepperMPI::doOneIteration() {
         m_MaxTimeForOneIteration = m_AvgTimeForOneIteration;
     }
 
-#if CoutLevelSolver>0
-    LOG( m_pSolverLog,  "---> Iteration Time: "<<std::setprecision(5)<<(m_endTime-m_startTime)<<std::endl
+    LOGSLLEVEL1( m_pSolverLog,  "---> Iteration Time: "<<std::setprecision(5)<<(m_endTime-m_startTime)<<std::endl
     <<  "---> End time-step ====================================" <<std::endl<<std::endl; );
-#endif
+
 
     // Check if we can finish the timestepping!
     if(m_settings.m_eSimulateFromReference == TimeStepperSettings::USE_STATES ) {

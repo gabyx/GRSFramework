@@ -238,10 +238,8 @@ public:
 
         // Calculate the exact values for the billateral split nodes
 
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "---> SorProx, Billateral Node: ====================="<<  std::endl
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Billateral Node: ====================="<<  std::endl
                 << "\t---> local body id: " << RigidBodyId::getBodyIdString(node.m_pBody->m_id) << std::endl);
-        #endif
 
         auto mult = node.getMultiplicity();
 
@@ -328,9 +326,7 @@ public:
 
     void visitNode(NodeType & node){
 
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "---> SorProx, Init Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
-        #endif
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Init Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
 
         typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
 
@@ -371,15 +367,11 @@ public:
         nodeData.m_R_i_inv_diag(1) = r_T;
         nodeData.m_R_i_inv_diag(2) = r_T;
 
-//        #if CoutLevelSolverWhenContact>2
-//            LOG(m_pSolverLog, " nodeData.m_b :"<< nodeData.m_b.transpose() <<std::endl
+//            LOGSLLEVEL3_CONTACT(m_pSolverLog, " nodeData.m_b :"<< nodeData.m_b.transpose() <<std::endl
 //                << " nodeData.m_G_ii :"<<std::endl<< nodeData.m_G_ii <<std::endl
 //                << " nodeData.m_R_i_inv_diag: "<< nodeData.m_R_i_inv_diag.transpose() <<std::endl;);
-//        #endif
 //
-//        #if CoutLevelSolverWhenContact>2
-//            LOG(m_pSolverLog,  " nodeData.m_mu: "<< nodeData.m_mu <<std::endl;);
-//        #endif
+//            LOGSLLEVEL3_CONTACT(m_pSolverLog,  " nodeData.m_mu: "<< nodeData.m_mu <<std::endl;);
 
 
     }

@@ -107,9 +107,9 @@ void InclusionSolverCO::resetPercussionBuffer() {
 
 void InclusionSolverCO::solveInclusionProblem() {
 
-#if CoutLevelSolver>1
-    LOG(m_pSolverLog, " % -> solveInclusionProblem(): "<< std::endl;);
-#endif
+
+    LOGSLLEVEL2(m_pSolverLog, " % -> solveInclusionProblem(): "<< std::endl;);
+
 
 
     // Iterate over all nodes set and assemble the matrices...
@@ -134,9 +134,9 @@ void InclusionSolverCO::solveInclusionProblem() {
 
     if(m_nContacts > 0) {
 
-#if CoutLevelSolver>0
-        LOG(m_pSolverLog, " % nContacts = "<< m_nContacts<< std::endl;);
-#endif
+
+        LOGSLLEVEL1(m_pSolverLog, " % nContacts = "<< m_nContacts<< std::endl;);
+
 
         m_nLambdas = m_ContactGraph.getNLambdas();
         ASSERTMSG(m_ContactGraph.getNContactModelsUsed() == 1, "ContactGraph uses not homogen contact models!")
