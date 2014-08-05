@@ -118,7 +118,7 @@ void StateRingPoolVisBackFront::resetStateRingPool(const RigidBodyStateContainer
 
     m_pool[1] = m_pool[0]; // Assignment operator
 
-#if LogToFileStateRingPool == 1
+#if STATERINGPOOLLOG_TOFILE == 1
     m_logfile << "resetStateRingPool()"<<std::endl;
     m_logfile << "vis: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t front: \t"<<(unsigned int)m_idx[2]<< std::endl;
 #endif
@@ -160,7 +160,7 @@ StateRingPoolVisBackFront::advanceSimBuffer(bool & out_changed) {
     m_idx[1] = next_index;
     out_changed = true;
 
-#if LogToFileStateRingPool == 1
+#if STATERINGPOOLLOG_TOFILE == 1
     m_logfile << "advanceSimBuffer()"<<std::endl;
     m_logfile << "vis: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t front: \t"<<(unsigned int)m_idx[2]<< std::endl;
 #endif
@@ -181,7 +181,7 @@ StateRingPoolVisBackFront::updateVisBuffer(bool & out_changed) {
     m_idx[0] = m_idx[1];
     out_changed = true;
 
-#if LogToFileStateRingPool == 1
+#if STATERINGPOOLLOG_TOFILE == 1
     m_logfile << "updateVisBuffer()"<<std::endl;
     m_logfile << "vis: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t front: \t"<<(unsigned int)m_idx[2]<< std::endl;
 #endif
@@ -223,7 +223,7 @@ StateRingPoolVisBackFront::StateType * StateRingPoolVisBackFront::advanceLoadBuf
     m_idx[2] = next_index;
     out_changed = true;
 
-#if LogToFileStateRingPool == 1
+#if STATERINGPOOLLOG_TOFILE == 1
     m_logfile << "advanceLoadBuffer()"<<std::endl;
     m_logfile << "vis: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t front: \t"<<(unsigned int)m_idx[2]<< std::endl;
 #endif

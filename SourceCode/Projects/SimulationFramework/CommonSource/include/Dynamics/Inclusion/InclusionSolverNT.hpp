@@ -246,9 +246,9 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
                                                                                         DynamicsState * state_e)
 {
 
-#if CoutLevelSolver>0
-  LOG(m_pSolverLog, "---> solveInclusionProblem(): "<< std::endl;);
-#endif
+
+  LOGSLLEVEL1_CONTACT(m_pSolverLog, "---> solveInclusionProblem(): "<< std::endl;);
+
 
 
   // Add constant term to h
@@ -256,11 +256,11 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 
   // Update m_Minv_h_dt
   m_Minv_h_dt = m_Minv_diag.asDiagonal() * m_h * m_settings.m_deltaT;
-#if CoutLevelSolverWhenContact>2
-  LOG(m_pSolverLog, "h= "<< m_h.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+
+  LOGSLLEVEL3_CONTACT(m_pSolverLog, "h= "<< m_h.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
   << "Minv_diag= "<< "diag(" <<m_Minv_diag.transpose().format(MyIOFormat::Matlab) <<");"<<std::endl
   << "Minv_h_dt= "<< m_Minv_h_dt.transpose().format(MyIOFormat::Matlab) <<"';"<<std::endl;);
-#endif
+
 
   // Iterate over Collision set and assemble the matrices...
   std::vector<CollisionData<RigidBodyType> > & collSet = m_pCollisionSolver->m_collisionSet;
@@ -323,13 +323,13 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
     for ( unsigned int contactIdx = 0 ; contactIdx < m_nContacts ; contactIdx++)
     {
 
-#if CoutLevelSolverWhenContact>2
-      LOG(m_pSolverLog,    << "e_x= "<< collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+
+      LOGSLLEVEL3_CONTACT(m_pSolverLog,    << "e_x= "<< collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                            << "e_y= "<< collSet[contactIdx].m_cFrame.m_e_y.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                            << "e_z= "<< collSet[contactIdx].m_cFrame.m_e_z.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                            << collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.dot(collSet[contactIdx].m_cFrame.m_e_y) << collSet[contactIdx].m_cFrame.m_e_y.dot(collSet[contactIdx].m_cFrame.m_e_z) <<std::endl
                            << "r_s1c1="<< collSet[contactIdx].m_r_S1C1.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
-#endif
+
       ASSERTMSG( std::abs(collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.dot(collSet[contactIdx].m_cFrame.m_e_y)) < 1e-3 && std::abs(collSet[contactIdx].m_cFrame.m_e_y.dot(collSet[contactIdx].m_cFrame.m_e_z))< 1e-3, "Vectors not parallel");
 
 
@@ -430,8 +430,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
     }
     // =============================================================================================================
 
-#if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog,   << "W_N= ..."<< std::endl << m_W_N.format(MyIOFormat::Matlab)<<";"<<std::endl
+
+    LOGSLLEVEL3_CONTACT(m_pSolverLog,   << "W_N= ..."<< std::endl << m_W_N.format(MyIOFormat::Matlab)<<";"<<std::endl
                         << "W_T= ..."<< std::endl << m_W_T.format(MyIOFormat::Matlab)<<";"<<std::endl
                         << "mu= "<<"diag("<< m_mu.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl
                         << "I_epsilon_N= " << "diag("<< m_I_epsilon_N.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl
@@ -440,7 +440,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
                         << "WN_uS= "<< m_WT_uS.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                         << "WN_Minv_h_dt= "<< m_WN_Minv_h_dt.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                         << "WT_Minv_h_dt= "<< m_WT_Minv_h_dt.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
-#endif
+
 
     m_G_NN.noalias() = m_W_N.transpose() * m_Minv_diag.asDiagonal() * m_W_N;
     MatrixUDyn tempMinv_WT;
@@ -461,44 +461,44 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 #if CALCULATE_DIAGDOM_OF_G == 1
       m_G_notDiagDominant = (G.diagonal().array() < (G.rowwise().sum()-G.diagonal()).array()).sum();
 #endif
-#if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, "G= ..."<<std::endl<< G.format(MyIOFormat::Matlab)<<";"<<std::endl;);
+
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, "G= ..."<<std::endl<< G.format(MyIOFormat::Matlab)<<";"<<std::endl;);
+
 #endif
-#endif
 
 
 
 
 
-#if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, "G_NN= ..."<< std::endl << m_G_NN.format(MyIOFormat::Matlab)<<";"<<std::endl
+
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, "G_NN= ..."<< std::endl << m_G_NN.format(MyIOFormat::Matlab)<<";"<<std::endl
      << "G_NT= ..."<< std::endl << m_G_NT.format(MyIOFormat::Matlab)<<";"<<std::endl
      << "G_TT= ..."<< std::endl << m_G_TT.format(MyIOFormat::Matlab)<<";"<<std::endl;);
-#endif
+
 
     m_c_N.noalias() = m_WN_Minv_h_dt + m_I_epsilon_N.asDiagonal() * ( m_WN_uS  + m_xi_N);
     m_c_T.noalias() = m_WT_Minv_h_dt + m_I_epsilon_T.asDiagonal() * ( m_WT_uS  + m_xi_T);
 
-#if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, "c_N= " << m_c_N.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, "c_N= " << m_c_N.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                       << "c_T= " << m_c_T.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
-#endif
 
 
 
-#if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, "P_N_back= "<<P_N_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+
+
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, "P_N_back= "<<P_N_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                       << "P_T_back= "<<P_T_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
-#endif
+
 
 
     //doSorProx();
     doJorProx();
 
 
-#if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, "% Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
-#endif
+
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, "% Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
+
 
     // Calculate u_E for each body in the state...
     m_delta_u_E.noalias() = m_Minv_h_dt + m_Minv_diag.asDiagonal() * (m_W_N * P_N_front + m_W_T * P_T_front);
@@ -532,10 +532,10 @@ void InclusionSolverNT<TInclusionSolverConfig>::setupRMatrix(PREC alpha){
    }
 
 
-#if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog,   << "R_N= "<< "diag(" << m_R_N.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl
+
+    LOGSLLEVEL3_CONTACT(m_pSolverLog,   << "R_N= "<< "diag(" << m_R_N.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl
                         << "R_T= "<< "diag(" << m_R_T.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl);
-#endif
+
 
 }
 
@@ -558,10 +558,9 @@ void InclusionSolverNT<TInclusionSolverConfig>::doJorProx(){
       //Calculate CancelCriteria
       m_bConverged = Numerics::cancelCriteriaValue(P_N_back,P_N_front,P_T_back,P_T_front, m_settings.m_AbsTol, m_settings.m_RelTol);
 
-   #if CoutLevelSolverWhenContact>2
-      LOG(m_pSolverLog, "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+
+      LOGSLLEVEL3_CONTACT(m_pSolverLog, "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                         << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;)
-   #endif
 
       m_globalIterationCounter++;
 
@@ -611,10 +610,9 @@ void InclusionSolverNT<TInclusionSolverConfig>::doSorProx(){
       //Calculate CancelCriteria
       m_bConverged = Numerics::cancelCriteriaValue(P_N_back,P_N_front,P_T_back,P_T_front, m_settings.m_AbsTol, m_settings.m_RelTol);
 
-#if CoutLevelSolverWhenContact>2
-      LOG(m_pSolverLog, "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+
+      LOGSLLEVEL3_CONTACT(m_pSolverLog, "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
                         << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
-#endif
 
       m_globalIterationCounter++;
 

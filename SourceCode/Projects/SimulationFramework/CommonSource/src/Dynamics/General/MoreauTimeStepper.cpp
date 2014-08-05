@@ -91,10 +91,10 @@ void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, c
     m_pSolverLog = new Logging::Log("SolverLog");
     Logging::LogManager::getSingletonPtr()->registerLog(m_pSolverLog);
 
-#if LogToFileSolver == 1
+#if SOLVERLOG_TOFILE == 1
     m_pSolverLog->addSink(new Logging::LogSinkFile("SolverLog-File",m_SolverLogFilePath));
 #endif
-#if LogToConsoleSolver == 1
+#if SOLVERLOG_TOCONSOLE == 1
     m_pSolverLog->addSink(new Logging::LogSinkCout("SolverLog-Cout"));
 #endif
 

@@ -776,12 +776,12 @@ public:
         static VectorUBody uCache1,uCache2;
         PREC residual;
 
-#if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
         if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED) {
-            LOG(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
-#endif
+
 
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
                 nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ||
@@ -854,13 +854,13 @@ public:
             // PROX  ====================================================================================================================
             Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle( nodeData.m_contactParameter.m_params[2],nodeData.m_LambdaFront);
 
-#if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
-            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << nodeData.m_LambdaFront.transpose() << std::endl);
+
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_LambdaFront: " << nodeData.m_LambdaFront.transpose() << std::endl);
             if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_settings.m_AbsTol, m_settings.m_RelTol)) {
-                *m_pSolverLog <<"\t---> Lambda converged"<<std::endl;
+                LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> Lambda converged"<<std::endl);
             }
-#endif
+
             // Velocity Updates ====================================================================================================================
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
@@ -876,9 +876,7 @@ public:
                 //doVelocityUpdate<1>(nodeData);
 
 
-#if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
-#endif
+                LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
 
 
                 if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
@@ -924,9 +922,7 @@ public:
                 //Sepcial update (no differences)
                 //doVelocityUpdate<2>(nodeData);
 
-#if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
-#endif
+                LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
 
                 if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
                     if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
@@ -1031,12 +1027,12 @@ public:
         static VectorUBody uCache1,uCache2;
         PREC residual;
 
-#if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
         if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED) {
-            LOG(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
-#endif
+
 
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
                 nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ) {
@@ -1115,9 +1111,8 @@ public:
                 nodeData.m_u1BufferPtr->m_front +=
                     nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1.rightCols<2>() * lambda_T;
 
-#if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
-#endif
+
+                LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
 
                 if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
                     if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
@@ -1156,9 +1151,9 @@ public:
                 nodeData.m_u2BufferPtr->m_front +=
                     nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal()*nodeData.m_W_body2.rightCols<2>() * lambda_T;
 
-#if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
-#endif
+
+                LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
+
 
                 if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
                     if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
@@ -1197,13 +1192,13 @@ public:
             // =========================================================
 
 
-#if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
-            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << nodeData.m_LambdaFront.transpose() << std::endl);
+
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_LambdaFront: " << nodeData.m_LambdaFront.transpose() << std::endl);
             if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_settings.m_AbsTol, m_settings.m_RelTol)) {
-                *m_pSolverLog <<"\t---> Lambda converged"<<std::endl;
+                LOGSLLEVEL3_CONTACT(m_pSolverLog , "\t---> Lambda converged"<<std::endl);
             }
-#endif
+
 
 
 
@@ -1324,15 +1319,15 @@ public:
             nodeData.m_R_i_inv_diag(1) = r_T;
             nodeData.m_R_i_inv_diag(2) = r_T;
 
-#if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t ---> nd.m_b: "<< nodeData.m_b.transpose() <<std::endl
+
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t ---> nd.m_b: "<< nodeData.m_b.transpose() <<std::endl
                 << "\t ---> nd.m_G_ii: "<<std::endl<< nodeData.m_G_ii <<std::endl
                 << "\t ---> nd.m_R_i_inv_diag: "<< nodeData.m_R_i_inv_diag.transpose() <<std::endl;);
-#endif
 
-#if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog,  "\t ---> nd.m_mu: "<< nodeData.m_contactParameter.m_params[2] <<std::endl;);
-#endif
+
+
+            LOGSLLEVEL3_CONTACT(m_pSolverLog,  "\t ---> nd.m_mu: "<< nodeData.m_contactParameter.m_params[2] <<std::endl;);
+
         } else {
             ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
         }

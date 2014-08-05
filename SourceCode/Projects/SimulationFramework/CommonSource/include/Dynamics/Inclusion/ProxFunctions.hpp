@@ -404,9 +404,9 @@ INLINE_PROX_KEYWORD bool cancelCriteriaVector( const Eigen::MatrixBase<Derived>&
         return  true;
     }
 
-#if CoutLevelSolverWhenContact>2
-    //LOG(m_pSolverLog, "Cancel Criterion :" << RelNormP << " < " << NormP * m_settings.m_RelTol + m_settings.m_AbsTol << std::endl;);
-#endif
+
+    //LOGSLLEVEL3_CONTACT(m_pSolverLog, "Cancel Criterion :" << RelNormP << " < " << NormP * m_settings.m_RelTol + m_settings.m_AbsTol << std::endl;);
+
 
     return false;
 }

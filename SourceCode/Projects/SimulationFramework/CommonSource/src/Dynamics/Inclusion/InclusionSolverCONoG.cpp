@@ -19,11 +19,6 @@ InclusionSolverCONoG::InclusionSolverCONoG(std::shared_ptr< CollisionSolverType 
 
     m_pCollisionSolver = pCollisionSolver;
 
-    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
-    m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
-    );
-
     m_nContacts = 0;
 
     m_globalIterationCounter =0;
@@ -55,25 +50,27 @@ void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::fil
     #endif
 
     #if HAVE_CUDA_SUPPORT == 1
-
+        // initialize the cuda jor prox iteration module
     #endif
 }
 
 
 void InclusionSolverCONoG::reset() {
 
-     m_settings = m_pDynSys->getSettingsInclusionSolver();
+    m_settings = m_pDynSys->getSettingsInclusionSolver();
 
     resetForNextIter();
 
+
+    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
+    m_pCollisionSolver->addContactDelegate(
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
+    );
+
+
+
 #if HAVE_CUDA_SUPPORT == 1
-    LOG(m_pSimulationLog, "---> Try to set GPU Device : "<< m_settings.m_UseGPUDeviceId << std::endl;);
-
-    CHECK_CUDA(cudaSetDevice(m_settings.m_UseGPUDeviceId));
-    cudaDeviceProp props;
-    CHECK_CUDA(cudaGetDeviceProperties(&props,m_settings.m_UseGPUDeviceId));
-
-    LOG(m_pSimulationLog,  "---> Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
+    // reset all the cude jor porx iteration modules
 #endif
 
     #if OUTPUT_SIMDATAITERATION_FILE == 1
@@ -142,10 +139,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
     // Solve Inclusion
 
-        #if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog,  "--->  nContacts: "<< m_nContacts <<std::endl;);
-        #endif
-
+        LOGSLLEVEL1_CONTACT(m_pSolverLog,  "--->  nContacts: "<< m_nContacts <<std::endl;);
 
 
         // =============================================================================================================
@@ -158,7 +152,6 @@ void InclusionSolverCONoG::solveInclusionProblem() {
                 counter.start();
             #endif
 
-            initContactGraphForIteration(m_settings.m_alphaSORProx);
             doSorProx();
 
             #if MEASURE_TIME_PROX == 1
@@ -172,9 +165,8 @@ void InclusionSolverCONoG::solveInclusionProblem() {
                 counter.start();
             #endif
 
-            initContactGraphForIteration(m_settings.m_alphaJORProx);
-            ASSERTMSG(false,"Jor Algorithm has not been implemented yet");
-//            doJorProx();
+
+            doJorProx();
 
             #if MEASURE_TIME_PROX == 1
                 m_timeProx = counter.elapsedSec();
@@ -185,14 +177,10 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
         if(m_settings.m_bIsFiniteCheck) {
             // TODO CHECK IF finite!
-            #if CoutLevelSolverWhenContact>0
-                LOG(m_pSolverLog,  "--->  Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
-            #endif
+            LOGSLLEVEL1_CONTACT(m_pSolverLog,  "--->  Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
         }
 
-#if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog,  "---> Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
-#endif
+        LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
     }
 
 }
@@ -200,7 +188,17 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
 
 void InclusionSolverCONoG::doJorProx() {
-    ASSERTMSG(false,"InclusionSolverCONoG:: JOR Prox iteration not implemented!");
+
+#if HAVE_CUDA_SUPPORT
+    #if CoutLevelSolver>1
+    LOG(m_pSolverLog,  "---> using JOR Prox Velocity (GPU): "<< std::endl;);
+    #endif
+
+
+#else
+    ASSERTMSG(false,"InclusionSolverCONoG:: CPU JOR Prox iteration not implemented!");
+    // Jor Prox iteration on CPU will not be implemented as the Full SOR and Contact SOR algorithms are much better!
+#endif
 }
 
 
@@ -238,14 +236,19 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
 void InclusionSolverCONoG::doSorProx() {
 
-    #if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog, "---> u_e = [ ");
-        for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
-            LOG(m_pSolverLog, "\t uBack: " << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
-            LOG(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
-        }
-        LOG(m_pSolverLog, " ]" << std::endl);
+    #if CoutLevelSolver>1
+    LOG(m_pSolverLog,  "---> using SOR Prox Velocity (CPU): "<< std::endl;);
     #endif
+
+    initContactGraphForIteration(m_settings.m_alphaSORProx);
+
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> u_e = [ ");
+        for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uBack: " << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
+        }
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, " ]" << std::endl);
+
 
     // General stupid Prox- Iteration
     while(true) {
@@ -253,29 +256,23 @@ void InclusionSolverCONoG::doSorProx() {
         // Set global flag to true, if it is not converged we set it to false
         m_bConverged = true;
 
-        #if CoutLevelSolverWhenContact>1
-            LOG(m_pSolverLog,"---> Next iteration: "<< m_globalIterationCounter << std::endl);
-        #endif
+        LOGSLLEVEL2_CONTACT(m_pSolverLog,"---> Next iteration: "<< m_globalIterationCounter << std::endl);
 
         // Do one Sor Prox Iteration
         sorProxOverAllNodes();
 
-        #if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog, "---> u_e = [ ");
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> u_e = [ ");
         for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
-            LOG(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
         }
-        LOG(m_pSolverLog, " ]" << std::endl);
-        #endif
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, " ]" << std::endl);
 
 
         m_globalIterationCounter++;
 
         if ( (m_bConverged == true || m_globalIterationCounter >= m_settings.m_MaxIter)
              && m_globalIterationCounter >= m_settings.m_MinIter) {
-            #if CoutLevelSolverWhenContact>0
-                LOG(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_globalIterationCounter <<" / "<<  m_settings.m_MaxIter<< std::endl;);
-            #endif
+                LOGSLLEVEL1_CONTACT(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_globalIterationCounter <<" / "<<  m_settings.m_MaxIter<< std::endl;);
             break;
         }
 

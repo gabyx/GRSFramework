@@ -44,20 +44,10 @@
 
     /// Topology Builder
     #define TOPOBUILDER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define LOGTB( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the topology builder part).
-    #define LOGTBLEVEL(level, logptr , message) LOGLEVEL(level,TOPOBUILDER_LOGLEVEL,logptr,message);
-    #define LOGTBLEVEL1( logptr , message) LOGTBLEVEL( 1 , logptr , message) ;
-    #define LOGTBLEVEL2( logptr , message) LOGTBLEVEL( 2 , logptr , message) ;
-    #define LOGTBLEVEL3( logptr , message) LOGTBLEVEL( 3 , logptr , message) ;
 
     /// SceneParser
     #define SCENEPARSER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define LOGSC(log , message) LOG(log,message);
-    #define LOGSCLEVEL(level, logptr , message) LOGLEVEL(level,SCENEPARSER_LOGLEVEL,logptr,message);
-    #define LOGSCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
-    #define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
-    #define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
-    #define SKIPLOGSC( logptr , message )  LOGSCLEVEL(1,logptr,message);
+
 
 #else
     #define LOGSZ( logptr , message )
@@ -71,22 +61,28 @@
 
     /// SceneParser
     #define SCENEPARSER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define LOGSC(log , message) LOG(log,message);
-    #define LOGSCLEVEL(level, logptr , message) LOGLEVEL(level,SCENEPARSER_LOGLEVEL,logptr,message);
-    #define LOGSCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
-    #define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
-    #define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
-    #define SKIPLOGSC( logptr , message )  LOGSCLEVEL(1,logptr,message);
 
     /// Topobuilder
     #define TOPOBUILDER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define LOGTB( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the topology builder part).
-    #define LOGTBLEVEL(level, logptr , message) LOGLEVEL(level,TOPOBUILDER_LOGLEVEL,logptr,message);
-    #define LOGTBLEVEL1( logptr , message) LOGTBLEVEL( 1 , logptr , message) ;
-    #define LOGTBLEVEL2( logptr , message) LOGTBLEVEL( 2 , logptr , message) ;
-    #define LOGTBLEVEL3( logptr , message) LOGTBLEVEL( 3 , logptr , message) ;
 
 #endif
+
+
+/** TopoBuilder Log Macros */
+#define LOGTB( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the topology builder part).
+#define LOGTBLEVEL(level, logptr , message) LOGLEVEL(level,TOPOBUILDER_LOGLEVEL,logptr,message);
+#define LOGTBLEVEL1( logptr , message) LOGTBLEVEL( 1 , logptr , message) ;
+#define LOGTBLEVEL2( logptr , message) LOGTBLEVEL( 2 , logptr , message) ;
+#define LOGTBLEVEL3( logptr , message) LOGTBLEVEL( 3 , logptr , message) ;
+
+/** SceneParser Log Macros */
+#define LOGSC(log , message) LOG(log,message);
+#define LOGSCLEVEL(level, logptr , message) LOGLEVEL(level,SCENEPARSER_LOGLEVEL,logptr,message);
+#define LOGSCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
+#define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
+#define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
+#define SKIPLOGSC( logptr , message )  LOGSCLEVEL(1,logptr,message);
+
 /* @} */
 
 
@@ -123,17 +119,30 @@
 */
 /* @{ */
 #ifndef NDEBUG
-  // DEBUG!
-  #define CoutLevelSolver 3            ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
-  #define CoutLevelSolverWhenContact 3 ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
-  #define LogToFileSolver 1            ///< {0,1} Determines if logstream is saved into a file.
-  #define LogToConsoleSolver 0         ///< {0,1} Determines if logstream is outputted into console.
+    // DEBUG!
+    #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_TOFILE 1            ///< {0,1} Determines if logstream is saved into a file.
+    #define SOLVERLOG_TOCONSOLE 1         ///< {0,1} Determines if logstream is outputted into console.
 #else
-  #define CoutLevelSolver 1
-  #define CoutLevelSolverWhenContact 1
-  #define LogToFileSolver 1
-  #define LogToConsoleSolver 0
+    #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_TOFILE 1
+    #define SOLVERLOG_TOCONSOLE 0
 #endif
+
+/** Inclusion Solver Log Macros */
+#define LOGSL( log , message ) LOG(log,message);
+#define LOGSLLEVEL( level, logptr , message ) LOGLEVEL( level, SOLVERLOG_LOGLEVEL , logptr , message);
+#define LOGSLLEVEL1( logptr , message) LOGSLLEVEL( 1 , logptr , message) ;
+#define LOGSLLEVEL2( logptr , message) LOGSLLEVEL( 2 , logptr , message) ;
+#define LOGSLLEVEL3( logptr , message) LOGSLLEVEL( 3 , logptr , message) ;
+
+#define LOGSLLEVEL_CONTACT( level, logptr , message ) LOGLEVEL( level, SOLVERLOG_LOGLEVEL_CONTACT , logptr , message);
+#define LOGSLLEVEL1_CONTACT( logptr , message) LOGSLLEVEL( 1 , logptr , message) ;
+#define LOGSLLEVEL2_CONTACT( logptr , message) LOGSLLEVEL( 2 , logptr , message) ;
+#define LOGSLLEVEL3_CONTACT( logptr , message) LOGSLLEVEL( 3 , logptr , message) ;
+
 /* @} */
 
 /** @name System Data file for Record Mode only.

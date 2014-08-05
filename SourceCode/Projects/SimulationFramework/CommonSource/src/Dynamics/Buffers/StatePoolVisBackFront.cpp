@@ -84,7 +84,7 @@ StatePoolVisBackFront::swapFrontBackBuffer() {
     boost::mutex::scoped_lock l(m_change_pointer_mutex);
     if(m_idx[1] != m_idx[2]) {
         std::swap(m_idx[0], m_idx[1]);
-#if LogToFileStatePool == 1
+#if STATEPOOLLOG_TOFILE == 1
         m_logfile << "swapFrontBackBuffer()"<<endl;
         m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
 #endif
@@ -94,7 +94,7 @@ StatePoolVisBackFront::swapFrontBackBuffer() {
     m_idx[1] = m_idx[0];
     m_idx[0] = new_front;
 
-#if LogToFileStatePool == 1
+#if STATEPOOLLOG_TOFILE == 1
     m_logfile << "swapFrontBackBuffer()"<<endl;
     m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
 #endif
@@ -115,7 +115,7 @@ StatePoolVisBackFront::updateVisBuffer(bool & out_changed) {
     m_idx[2] = m_idx[1];
     out_changed = true;
 
-#if LogToFileStatePool == 1
+#if STATEPOOLLOG_TOFILE == 1
     m_logfile << "updateVisBuffer()"<<endl;
     m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
 #endif

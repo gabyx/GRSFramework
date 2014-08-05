@@ -32,6 +32,10 @@ public:
         }
     }
 
+    void removeAllContactDelegates(){
+        m_contactDelegateList.clear();
+    }
+
 private:
     std::vector<ContactDelegateType> m_contactDelegateList;
 };

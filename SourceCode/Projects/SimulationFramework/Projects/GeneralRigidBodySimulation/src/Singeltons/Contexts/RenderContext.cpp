@@ -31,12 +31,12 @@ bool RenderContext::initOgre(Ogre::String wndTitle) {
     }
     filePath /= "OgreLogfile.log";
 
-#if LogToFileOgre == 1
+#if OGRELOG_TOFILE == 1
     m_pOgreLog = Ogre::LogManager::getSingleton().createLog(filePath.string(), true, true, false);
 #else
     m_pOgreLog = Ogre::LogManager::getSingleton().createLog(filePath.string(), true, true, true);
 #endif
-#if LogToConsoleOgre == 1
+#if OGRELOG_TOCONSOLE == 1
     m_pOgreLog->setDebugOutputEnabled(true);
 #else
     m_pOgreLog->setDebugOutputEnabled(false);
@@ -47,12 +47,12 @@ bool RenderContext::initOgre(Ogre::String wndTitle) {
     filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
     filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
     filePath /= "AppLogfile.log";
-#if LogToFileApp == 1
+#if APPLOG_TOFILE == 1
     m_pAppLog = Ogre::LogManager::getSingleton().createLog(filePath.string(),false,true,false);
 #else
     m_pAppLog = Ogre::LogManager::getSingleton().createLog(filePath.string(),false,true,true);
 #endif
-#if LogToConsoleApp == 1
+#if APPLOG_TOCONSOLE == 1
     m_pAppLog->setDebugOutputEnabled(true);
 #else
     m_pAppLog->setDebugOutputEnabled(false);

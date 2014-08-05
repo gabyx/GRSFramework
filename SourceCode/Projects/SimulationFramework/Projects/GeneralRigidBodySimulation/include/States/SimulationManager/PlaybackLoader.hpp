@@ -91,11 +91,11 @@ m_nSimBodies(nSimBodies)
   boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
   filePath /= "PlaybackLoaderThread.log";
-#if LogToFileLoader == 1
+#if FILELOADERLOG_TOFILE == 1
 
   m_pThreadLog->addSink(new Logging::LogSinkFile("PlaybackLoader-File",filePath));
 #endif
-#if LogToConsoleLoader == 1
+#if FILELOADER_TOCONSOLE == 1
   m_pThreadLog->addSink(new Logging::LogSinkCout("PlaybackLoader-Cout"));
 #endif
 

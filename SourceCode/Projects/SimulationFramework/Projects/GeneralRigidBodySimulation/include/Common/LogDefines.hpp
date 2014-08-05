@@ -29,24 +29,18 @@
     // DEBUG!
     /// SceneParser
     #define SCENEPARSER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define LOGSC( log , message ) LOG(log,message);
-    #define LOGSCLEVEL( level, logptr , message ) LOGLEVEL( level, SCENEPARSER_LOGLEVEL , logptr , message);
-    #define LOGSCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
-    #define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
-    #define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
-    #define SKIPLOGSC( logptr , message )  LOGSCLEVEL( 1 , logptr , message) ;
-
 #else
     /// SceneParser
-    #define SCENEPARSER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define LOGSC( log , message ) LOG(log,message);
-    #define LOGSCLEVEL( level, logptr , message ) LOGLEVEL( level, SCENEPARSER_LOGLEVEL , logptr , message);
-    #define LOGSCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
-    #define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
-    #define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
-    #define SKIPLOGSC( logptr , message )  LOGSCLEVEL( 1 , logptr , message) ;
-
+    #define SCENEPARSER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
 #endif
+
+/** SceneParser Log Macros*/
+#define LOGSC( log , message ) LOG(log,message);
+#define LOGSCLEVEL( level, logptr , message ) LOGLEVEL( level, SCENEPARSER_LOGLEVEL , logptr , message);
+#define LOGSCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
+#define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
+#define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
+#define SKIPLOGSC( logptr , message )  LOGSCLEVEL( 1 , logptr , message) ;
 
 
 /* @} */
@@ -92,17 +86,30 @@
 */
 /* @{ */
 #ifndef NDEBUG
-  // DEBUG!
-  #define CoutLevelSolver 3            ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
-  #define CoutLevelSolverWhenContact 3 ///<   0 for Off,  1 for Basics, 2 for Advanced, 3 for Full Output
-  #define LogToFileSolver 1            ///< {0,1} Determines if logstream is saved into a file.
-  #define LogToConsoleSolver 0         ///< {0,1} Determines if logstream is outputted into console.
+    // DEBUG!
+    #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_TOFILE 1            ///< {0,1} Determines if logstream is saved into a file.
+    #define SOLVERLOG_TOCONSOLE 1         ///< {0,1} Determines if logstream is outputted into console.
 #else
-  #define CoutLevelSolver 2
-  #define CoutLevelSolverWhenContact 1
-  #define LogToFileSolver 1
-  #define LogToConsoleSolver 0
+    #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_TOFILE 1
+    #define SOLVERLOG_TOCONSOLE 0
 #endif
+
+/** Inclusion Solver Log Macros */
+#define LOGSL( log , message ) LOG(log,message);
+#define LOGSLLEVEL( level, logptr , message ) LOGLEVEL( level, SOLVERLOG_LOGLEVEL , logptr , message);
+#define LOGSLLEVEL1( logptr , message) LOGSLLEVEL( 1 , logptr , message) ;
+#define LOGSLLEVEL2( logptr , message) LOGSLLEVEL( 2 , logptr , message) ;
+#define LOGSLLEVEL3( logptr , message) LOGSLLEVEL( 3 , logptr , message) ;
+
+#define LOGSLLEVEL_CONTACT( level, logptr , message ) LOGLEVEL( level, SOLVERLOG_LOGLEVEL_CONTACT , logptr , message);
+#define LOGSLLEVEL1_CONTACT( logptr , message) LOGSLLEVEL( 1 , logptr , message) ;
+#define LOGSLLEVEL2_CONTACT( logptr , message) LOGSLLEVEL( 2 , logptr , message) ;
+#define LOGSLLEVEL3_CONTACT( logptr , message) LOGSLLEVEL( 3 , logptr , message) ;
+
 /* @} */
 
 /** @name System Data file for Record Mode only.
@@ -129,16 +136,16 @@
 * @brief  Log file of the Playback Manager.
 */
 /* @{ */
-#define LogToFilePlayback 1      ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsolePlayback 1   ///< {0,1} Set if log is outputted to console or not.
+#define PLAYBACKLOG_TOFILE 1      ///< {0,1} Set if log is outputted to file or not.
+#define PLAYBACKLOG_TOCONSOLE 1   ///< {0,1} Set if log is outputted to console or not.
 /* @} */
 
 /** @name Loader Thread
 * @brief Log file of the Loader Thread which is started during playback.
 */
 /* @{ */
-#define LogToFileLoader 1        ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsoleLoader 1     ///< {0,1} Set if log is outputted to console or not.
+#define FILELOADERLOG_TOFILE 1        ///< {0,1} Set if log is outputted to file or not.
+#define FILELOADER_TOCONSOLE 1     ///< {0,1} Set if log is outputted to console or not.
 /* @} */
 
 
@@ -146,8 +153,8 @@
 * @brief Log File for the Application.
 */
 /* @{ */
-#define LogToFileApp 1     ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsoleApp 1  ///< {0,1} Set if log is outputted to console or not.
+#define APPLOG_TOFILE 1     ///< {0,1} Set if log is outputted to file or not.
+#define APPLOG_TOCONSOLE 1  ///< {0,1} Set if log is outputted to console or not.
 /* @} */
 
 
@@ -155,8 +162,8 @@
 * @brief Ogre File for the Application.
 */
 /* @{ */
-#define LogToFileOgre 1     ///< {0,1} Set if log is outputted to file or not.
-#define LogToConsoleOgre 1  ///< {0,1} Set if log is outputted to console or not.
+#define OGRELOG_TOFILE 1     ///< {0,1} Set if log is outputted to file or not.
+#define OGRELOG_TOCONSOLE 1  ///< {0,1} Set if log is outputted to console or not.
 /* @} */
 
 
@@ -180,12 +187,12 @@
 
 /** @name State Ring Pool */
 /* @{ */
-#define LogToFileStateRingPool 0 ///< {0,1} Set if log is outputted to file or not.
+#define STATERINGPOOLLOG_TOFILE 0 ///< {0,1} Set if log is outputted to file or not.
 /* @} */
 
 /** @name State Pool */
 /* @{ */
-#define LogToFileStatePool 0     ///< {0,1} Set if log is outputted to file or not.
+#define STATEPOOLLOG_TOFILE 0     ///< {0,1} Set if log is outputted to file or not.
 /* @} */
 
 

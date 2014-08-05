@@ -30,12 +30,6 @@ InclusionSolverCO::InclusionSolverCO(std::shared_ptr< CollisionSolverType >  pCo
         ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }
 
-    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
-    m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
-    );
-
-
     m_nContacts = 0;
     m_nLambdas = 0;
 
@@ -63,6 +57,12 @@ void InclusionSolverCO::reset() {
     m_pDynSys->initMassMatrixAndHTerm();  //TODO what does that make here?
 
     resetForNextIter();
+
+    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
+    m_pCollisionSolver->addContactDelegate(
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
+    );
+
 
 #if HAVE_CUDA_SUPPORT == 1
     LOG(m_pSimulationLog, "Try to set GPU Device : "<< m_settings.m_UseGPUDeviceId << std::endl;);
@@ -239,17 +239,11 @@ void InclusionSolverCO::solveInclusionProblem() {
 #endif
 
 
-#if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog,  " G= ..."<< std::endl << m_T.format(MyIOFormat::Matlab)<<";"<<std::endl;);
-#endif
 
-#if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog, " c= " << m_d.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;)
-#endif
+        LOGSLLEVEL3_CONTACT(m_pSolverLog,  " G= ..."<< std::endl << m_T.format(MyIOFormat::Matlab)<<";"<<std::endl;);
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, " c= " << m_d.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;)
+        LOGSLLEVEL2_CONTACT(m_pSolverLog,  " P_back= "<<P_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
 
-#if CoutLevelSolverWhenContact>1
-        LOG(m_pSolverLog,  " P_back= "<<P_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
-#endif
 
 
         if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL) {
@@ -290,9 +284,9 @@ void InclusionSolverCO::solveInclusionProblem() {
             ASSERTMSG(false,"This algorithm has not been implemented yet");
         }
 
-#if CoutLevelSolverWhenContact>1
-        LOG(m_pSolverLog,  " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
-#endif
+
+        LOGSLLEVEL2_CONTACT(m_pSolverLog,  " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+
 
 
         if(m_settings.m_bIsFiniteCheck) {
@@ -301,15 +295,15 @@ void InclusionSolverCO::solveInclusionProblem() {
             } else {
                 m_isFinite = 1;
             }
-#if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog,  " % Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
-#endif
+
+            LOGSLLEVEL1_CONTACT(m_pSolverLog,  " % Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
+
         }
 
 
-#if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog,  " % Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
-#endif
+
+        LOGSLLEVEL1_CONTACT(m_pSolverLog,  " % Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
+
 
         // Add deltaVelocities from lambdas to front velocity
         static VectorUBody delta_u_E;
@@ -347,9 +341,9 @@ void InclusionSolverCO::setupRMatrix(PREC alpha) {
     }
 
 
-#if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, " R= "<< "diag(" << m_R.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl;);
-#endif
+
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, " R= "<< "diag(" << m_R.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl;);
+
 
 }
 
@@ -361,9 +355,9 @@ void InclusionSolverCO::doJorProx() {
     bool goOnGPU = m_nContacts >= m_jorGPUVariant.getTradeoff();
 
     if( m_settings.m_bUseGPU && goOnGPU ) {
-#if CoutLevelSolverWhenContact>0
-        m_pSolverLog->logMessage("---> Using GPU JOR...");
-#endif
+
+        LOGSLLEVEL1_CONTACT(m_pSolverLog,"---> Using GPU JOR...");
+
         m_jorGPUVariant.setSettings(m_settings.m_MaxIter,m_settings.m_AbsTol,m_settings.m_RelTol);
         gpuSuccess = m_jorGPUVariant.runGPUPlain(P_front,m_T,P_back,m_d,m_mu);
         m_globalIterationCounter = m_jorGPUVariant.m_nIterGPU;
@@ -372,9 +366,9 @@ void InclusionSolverCO::doJorProx() {
     }
 
     if( !m_settings.m_bUseGPU || !gpuSuccess || !goOnGPU) {
-#if CoutLevelSolverWhenContact>0
-        m_pSolverLog->logMessage("---> Using CPU JOR...");
-#endif
+
+        LOGSLLEVEL1_CONTACT(m_pSolverLog,"---> Using CPU JOR...");
+
         m_jorGPUVariant.setSettings(m_settings.m_MaxIter,m_settings.m_AbsTol,m_settings.m_RelTol);
         m_jorGPUVariant.runCPUEquivalentPlain(P_front,m_T,P_back,m_d,m_mu);
         m_globalIterationCounter = m_jorGPUVariant.m_nIterCPU;
@@ -385,9 +379,9 @@ void InclusionSolverCO::doJorProx() {
 
 #else
 
-#if CoutLevelSolverWhenContact>0
-    m_pSolverLog->logMessage(" % Using CPU JOR (general)...");
-#endif
+
+    LOGSLLEVEL1_CONTACT(m_pSolverLog, " % Using CPU JOR (general)...");
+
 
     m_bUsedGPU = false;
 
@@ -400,17 +394,17 @@ void InclusionSolverCO::doJorProx() {
         //Calculate CancelCriteria
         m_bConverged = Numerics::cancelCriteriaValue(P_back,P_front, m_settings.m_AbsTol, m_settings.m_RelTol);
 
-#if CoutLevelSolverWhenContact>1
-        LOG(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
-#endif
+
+        LOGSLLEVEL2_CONTACT(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+
 
         m_globalIterationCounter++;
 
         if (m_bConverged == true || m_globalIterationCounter >= m_settings.m_MaxIter) {
 
-#if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog,  " converged = "<<m_bConverged<< "\t"<< "iterations:" <<m_globalIterationCounter <<"/"<<  m_settings.m_MaxIter<< std::endl;);
-#endif
+
+            LOGSLLEVEL1_CONTACT(m_pSolverLog,  " converged = "<<m_bConverged<< "\t"<< "iterations:" <<m_globalIterationCounter <<"/"<<  m_settings.m_MaxIter<< std::endl;);
+
             break;
             // P_front contains newest values
         }
@@ -435,9 +429,9 @@ void InclusionSolverCO::doSorProx() {
     bool goOnGPU = m_nContacts >= m_sorGPUVariant.getTradeoff();
 
     if( m_settings.m_bUseGPU && goOnGPU) {
-        #if CoutLevelSolverWhenContact>0
-                m_pSolverLog->logMessage(" % Using GPU SOR...");
-        #endif
+
+        LOGSLLEVEL1_CONTACT(m_pSolverLog," % Using GPU SOR...");
+
         m_sorGPUVariant.setSettings(m_settings.m_MaxIter,m_settings.m_AbsTol,m_settings.m_RelTol);
         P_back.setZero();
         gpuSuccess = m_sorGPUVariant.runGPUPlain(P_front,m_T,P_back,m_d,m_mu);
@@ -447,9 +441,9 @@ void InclusionSolverCO::doSorProx() {
     }
     if( !m_settings.m_bUseGPU || !gpuSuccess || !goOnGPU) {
 
-        #if CoutLevelSolverWhenContact>0
-                m_pSolverLog->logMessage(" % Using CPU SOR...");
-        #endif
+
+        LOGSLLEVEL1_CONTACT(m_pSolverLog," % Using CPU SOR...");
+
         m_sorGPUVariant.setSettings(m_settings.m_MaxIter,m_settings.m_AbsTol,m_settings.m_RelTol);
         m_sorGPUVariant.runCPUEquivalentPlain(P_front,m_T,P_back,m_d,m_mu);
         m_globalIterationCounter = m_sorGPUVariant.m_nIterCPU;
@@ -459,9 +453,9 @@ void InclusionSolverCO::doSorProx() {
     m_bConverged = (m_globalIterationCounter < m_settings.m_MaxIter)? true : false;
 #else
 
-#if CoutLevelSolverWhenContact>0
-    m_pSolverLog->logMessage(" % Using CPU SOR (general)...");
-#endif
+
+    LOGSLLEVEL1_CONTACT(m_pSolverLog," % Using CPU SOR (general)...");
+
 
     m_bUsedGPU = false;
 
@@ -488,9 +482,9 @@ void InclusionSolverCO::doSorProx() {
 
         }
 
-#if CoutLevelSolverWhenContact>1
-        LOG(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
-#endif
+
+        LOGSLLEVEL2_CONTACT(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+
 
         m_globalIterationCounter++;
 

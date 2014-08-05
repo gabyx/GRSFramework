@@ -44,27 +44,19 @@ public:
         typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
         static VectorDyn uCache1,uCache2;
 
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "---> SorProx, Normal Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Normal Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
              if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED){
-               LOG(m_pSolverLog, "---> Sim<->Sim Node:"<<  std::endl);
+               LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> Sim<->Sim Node:"<<  std::endl);
             }
-        #endif
 
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ) {
 
 
             // Init the prox value
             nodeData.m_LambdaFront = nodeData.m_b;
-            #if CoutLevelSolverWhenContact>2
-//                LOG(m_pSolverLog, "\t---> nd.b: " << nodeData.m_b.transpose() << std::endl);
-            #endif
-
-
-            #if CoutLevelSolverWhenContact>2
-//                LOG(m_pSolverLog, "\t---> nd.W1_T: " <<std::endl<< nodeData.m_W_body1.transpose() << std::endl);
-//                LOG(m_pSolverLog, "\t---> nd.W2_T: " <<std::endl<< nodeData.m_W_body2.transpose() << std::endl);
-            #endif
+//                LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.b: " << nodeData.m_b.transpose() << std::endl);
+//                LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.W1_T: " <<std::endl<< nodeData.m_W_body1.transpose() << std::endl);
+//                LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.W2_T: " <<std::endl<< nodeData.m_W_body2.transpose() << std::endl);
 
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
@@ -75,9 +67,8 @@ public:
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
             }
 
-            #if CoutLevelSolverWhenContact>2
-//                LOG(m_pSolverLog, "\t---> nd.chi: " << nodeData.m_LambdaFront.transpose() << std::endl);
-            #endif
+
+//          LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.chi: " << nodeData.m_LambdaFront.transpose() << std::endl);
 
             nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
             nodeData.m_LambdaFront += nodeData.m_LambdaBack;
@@ -88,29 +79,24 @@ public:
                 nodeData.m_LambdaFront.template head<ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension>()
             );
 
-#if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
-            LOG(m_pSolverLog, "\t---> nd.m_LambdaFront: " << nodeData.m_LambdaFront.transpose() << std::endl);
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_LambdaFront: " << nodeData.m_LambdaFront.transpose() << std::endl);
             if(Numerics::cancelCriteriaValue(nodeData.m_LambdaBack,nodeData.m_LambdaFront,m_settings.m_AbsTol, m_settings.m_RelTol)){
-              *m_pSolverLog <<"\t---> Lambda converged"<<std::endl;
+              LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Lambda converged"<<std::endl);
             }
-#endif
+
 
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
-                #if CoutLevelSolverWhenContact>2
-//                    LOG(m_pSolverLog, "\t---> body1.massInv: " << nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.transpose() << std::endl;)
-//                    LOG(m_pSolverLog, "\t---> body1.h_term: " << nodeData.m_pCollData->m_pBody1->m_h_term.transpose() << std::endl;)
-                #endif
+//                    LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> body1.massInv: " << nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.transpose() << std::endl;)
+//                    LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> body1.h_term: " << nodeData.m_pCollData->m_pBody1->m_h_term.transpose() << std::endl;)
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
                 nodeData.m_u1BufferPtr->m_front = nodeData.m_u1BufferPtr->m_front
                                                   + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal()
                                                   * nodeData.m_W_body1 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
-               #if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
-               #endif
+                LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
 
 
 //                if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
@@ -148,19 +134,15 @@ public:
             // SECOND BODY
             if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
 
-                #if CoutLevelSolverWhenContact>2
-//                    LOG(m_pSolverLog, "\t---> body1.massInv: " << nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.transpose() << std::endl;)
-//                    LOG(m_pSolverLog, "\t---> body1.h_term: " << nodeData.m_pCollData->m_pBody2->m_h_term.transpose() << std::endl;)
-                #endif
+//                    LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> body1.massInv: " << nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.transpose() << std::endl;)
+//                    LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> body1.h_term: " << nodeData.m_pCollData->m_pBody2->m_h_term.transpose() << std::endl;)
 
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
                 nodeData.m_u2BufferPtr->m_front = nodeData.m_u2BufferPtr->m_front
                                                     + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal()
                                                     * nodeData.m_W_body2 * ( nodeData.m_LambdaFront - nodeData.m_LambdaBack );
 
-                #if CoutLevelSolverWhenContact>2
-                LOG(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
-                #endif
+                LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
 
 //                if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal) {
 //                    if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
@@ -263,37 +245,27 @@ public:
 
         auto mult = node.getMultiplicity();
 
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog,"\t---> multiplicity: " << mult << std::endl;)
-        #endif
+            LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> multiplicity: " << mult << std::endl;)
 
 
         // Copy local velocity
         node.m_uBack.template head<NDOFuBody>() = node.m_pBody->m_pSolverData->m_uBuffer.m_front;
 
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog,"\t---> uBack: " << node.m_uBack.transpose() <<std::endl;);
-        #endif
+            LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> uBack: " << node.m_uBack.transpose() <<std::endl;);
 
         // Build gamma = [u0-u1, u1-u2, u2-u3] for multiplicity = 4
         node.m_gamma =   node.m_uBack.head(NDOFuBody*node.m_nConstraints) -
                            node.m_uBack.segment(NDOFuBody, NDOFuBody*node.m_nConstraints);
 
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t---> nd.m_gamma: " << node.m_gamma.transpose() << std::endl;);
-        #endif
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_gamma: " << node.m_gamma.transpose() << std::endl;);
 
         // calculate L⁻¹*gamma = Lambda, where L⁻¹ is the matrix choosen by the multiplicity
-        #if CoutLevelSolverWhenContact>2
-            //LOG(m_pSolverLog, "\t---> nd.LInv: " << std::endl;);
-            //LOG(m_pSolverLog, node.getLInvMatrix() << std::endl;);
-        #endif
+            //LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.LInv: " << std::endl;);
+            //LOGSLLEVEL3_CONTACT(m_pSolverLog, node.getLInvMatrix() << std::endl;);
 
         node.m_deltaLambda = node.getLInvMatrix() *-1*node.m_gamma;
 
-        #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "\t---> nd.m_deltaLambda: " << node.m_deltaLambda.transpose() << std::endl;);
-        #endif
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_deltaLambda: " << node.m_deltaLambda.transpose() << std::endl;);
 
         //Propagate billateral forces to velocities:
         // The sign is contained in the m_multiplicityWeights vector
@@ -307,9 +279,7 @@ public:
         }
         node.m_uFront  +=  node.m_uBack;
 
-        #if CoutLevelSolverWhenContact>2
-//            LOG(m_pSolverLog, "\t---> nd.m_uFront: " << node.m_uFront.transpose() <<std::endl; );
-        #endif
+//            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_uFront: " << node.m_uFront.transpose() <<std::endl; );
 
         // Because we solve this billateral contact directly, we are converged for this node!
         // no change of the flag m_bConverged
@@ -392,10 +362,8 @@ public:
             nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
         }
 
-        #if CoutLevelSolverWhenContact>2
-//            LOG(m_pSolverLog,  " nodeData.m_eps: "<< nodeData.m_eps.transpose() <<std::endl;);
-//            LOG(m_pSolverLog,  " nodeData.m_b: "<< nodeData.m_b.transpose() <<std::endl;);
-        #endif
+//            LOGSLLEVEL3_CONTACT(m_pSolverLog,  " nodeData.m_eps: "<< nodeData.m_eps.transpose() <<std::endl;);
+//            LOGSLLEVEL3_CONTACT(m_pSolverLog,  " nodeData.m_b: "<< nodeData.m_b.transpose() <<std::endl;);
 
         // Calculate R_ii
         nodeData.m_R_i_inv_diag(0) = m_alpha / (nodeData.m_G_ii(0,0));
