@@ -77,7 +77,7 @@ public:
     VectorDyn m_LambdaFront;
 
     VectorDyn m_R_i_inv_diag; // Build over G_ii
-    MatrixDyn m_G_ii; // just for R_ii, and maybee later for better solvers!
+    MatrixDynDyn m_G_ii; // just for R_ii, and maybee later for better solvers!
 
     VectorDyn m_b;
 

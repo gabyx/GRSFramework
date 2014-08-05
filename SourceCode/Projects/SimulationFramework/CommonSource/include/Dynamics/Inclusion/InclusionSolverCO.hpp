@@ -18,7 +18,10 @@
 
 
 
-
+#if HAVE_CUDA_SUPPORT == 1
+#include "JorProxGPUVariant.hpp"
+#include "SorProxGPUVariant.hpp"
+#endif
 
 
 
@@ -72,7 +75,7 @@ protected:
     typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
 
     using ContactGraphType = ContactGraph<ContactGraphMode::NoIteration>;
-    ContactGraphType m_ContactGraph;
+    ContactGraphType m_contactGraph;
 
     // Matrices for solving the inclusion ===========================
     PREC m_nLambdas;
@@ -92,7 +95,7 @@ protected:
     VectorDyn m_P_2;
     // ==========================
 
-    MatrixDyn m_T;
+    MatrixDynDyn m_T;
 
     VectorDyn m_d;
 
@@ -102,9 +105,9 @@ protected:
     inline void setupRMatrix(PREC alpha);
 
 #if HAVE_CUDA_SUPPORT == 1
-    JorProxGPUVariant< JorProxGPUVariantSettingsWrapper<PREC,5,ConvexSets::RPlusAndDisk,true,300,true,10,false, TemplateHelper::Default>, ConvexSets::RPlusAndDisk > m_jorGPUVariant;
+    JorProxGPUVariant< JorProxGPUVariantSettingsWrapper<PREC,5,ConvexSets::RPlusAndDisk,true,300,true,10,false, TypeTraitsHelper::Default>, ConvexSets::RPlusAndDisk > m_jorGPUVariant;
     //SorProxGPUVariant< SorProxGPUVariantSettingsWrapper<PREC,5,ConvexSets::RPlusAndDisk,true,300,true,10,true, RelaxedSorProxKernelSettings<32,ConvexSets::RPlusAndDisk> >,  ConvexSets::RPlusAndDisk > m_sorGPUVariant;
-    SorProxGPUVariant< SorProxGPUVariantSettingsWrapper<PREC,1,ConvexSets::RPlusAndDisk,true,300,true,10,true,  TemplateHelper::Default >,  ConvexSets::RPlusAndDisk > m_sorGPUVariant;
+    SorProxGPUVariant< SorProxGPUVariantSettingsWrapper<PREC,1,ConvexSets::RPlusAndDisk,true,300,true,10,true,  TypeTraitsHelper::Default >,  ConvexSets::RPlusAndDisk > m_sorGPUVariant;
 #endif
 
     inline void doJorProx();

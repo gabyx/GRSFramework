@@ -21,7 +21,8 @@
 
 
 #if HAVE_CUDA_SUPPORT == 1
-// include all cuda modules for the GPU jor prox iteration on velocity level
+// include the  JOR Prox Velocity GPU module
+#include "JORProxVelocityGPUModule.hpp"
 #endif
 
 #include "CPUTimer.hpp"
@@ -86,17 +87,19 @@ protected:
 
     // General CPU Iteration visitors (only SOR Prox on velocity level)
     using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
-    ContactGraphType m_ContactGraph;
+    ContactGraphType m_contactGraph;
     void initContactGraphForIteration(PREC alpha);
     SorProxStepNodeVisitor * m_pSorProxStepNodeVisitor;
     SorProxInitNodeVisitor * m_pSorProxInitNodeVisitor;
+    void doSORProxCPU();
     inline void sorProxOverAllNodes();
 
     #if HAVE_CUDA_SUPPORT == 1
-    // Jor Prox GPU Iteration class (only JOR Prox on velocity level)
-        using JorProxGPUVariantType = JorProxVelocityGPUVariant;
-        JorProxGPUVariantType m_jorProxGPUVariant;
+        // Jor Prox Velocity GPU Module
+        using JorProxGPUModuleType = JorProxVelocityGPUModule;
+        JorProxGPUModuleType m_jorProxGPUModule;
     #endif
+    void doJORProxGPU();
 
     void integrateAllBodyVelocities();
 

@@ -9,7 +9,7 @@ InclusionSolverCONoG::InclusionSolverCONoG(std::shared_ptr< CollisionSolverType 
                                            std::shared_ptr<DynamicsSystemType > pDynSys):
     m_SimBodies(pDynSys->m_SimBodies),
     m_Bodies(pDynSys->m_Bodies),
-    m_ContactGraph(&(pDynSys->m_ContactParameterMap)){
+    m_contactGraph(&(pDynSys->m_ContactParameterMap)){
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
@@ -67,13 +67,14 @@ void InclusionSolverCONoG::reset() {
 #else
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode >(&m_ContactGraph)
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode >(&m_contactGraph)
     );
 #endif
 
 
 #if HAVE_CUDA_SUPPORT == 1
     // reset all the GPU jor porx iteration modules
+    m_jorProxGPUModule.reset();
 #endif
 
     #if OUTPUT_SIMDATAITERATION_FILE == 1
@@ -88,10 +89,10 @@ void InclusionSolverCONoG::reset() {
 
     if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_CONTACT ){
          LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor "<<  std::endl;);
-         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_ContactGraph);
+         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
     }else if( m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_FULL ){
          LOG(m_pSimulationLog, "---> Initialize FullSorProxVisitor "<<  std::endl;);
-         m_pSorProxStepNodeVisitor = new FullSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_ContactGraph);
+         m_pSorProxStepNodeVisitor = new FullSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
     }else{
          ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemendet");
     }
@@ -108,7 +109,7 @@ void InclusionSolverCONoG::resetForNextIter() {
 
     m_bConverged = true;
 
-    m_ContactGraph.clearGraph();
+    m_contactGraph.clearGraph();
 }
 
 
@@ -195,8 +196,6 @@ void InclusionSolverCONoG::doJorProx() {
 #if HAVE_CUDA_SUPPORT
 
     LOGSLLEVEL2(m_pSolverLog,  "---> using JOR Prox Velocity (GPU): "<< std::endl;);
-
-
     // TODO
 
 #else
@@ -218,13 +217,13 @@ void InclusionSolverCONoG::integrateAllBodyVelocities() {
 void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
     // Init Graph for iteration;
-    m_ContactGraph.initForIteration();
+    m_contactGraph.initForIteration();
 
     // Calculates b vector for all nodes, u_0, R_ii, ...
     m_pSorProxInitNodeVisitor->setParams(alpha);
     m_pSorProxStepNodeVisitor->setParams(alpha);
 
-    m_ContactGraph.applyNodeVisitor(*m_pSorProxInitNodeVisitor);
+    m_contactGraph.applyNodeVisitor(*m_pSorProxInitNodeVisitor);
 
 
 
@@ -242,25 +241,53 @@ void InclusionSolverCONoG::doSorProx() {
 
     // Do some decision according to the number of contacts if we use the GPU or the CPU
     #if HAVE_CUDA_SUPPORT
-        gpuSuccess = true;
-        bool goOnGPU = m_nContacts >= m_jorProxGPUVariant.getTradeoff();
+        auto & contactList = m_pCollisionSolver->getCollisionSetRef();
+        bool gpuSuccess = true;
+        bool goOnGPU = m_jorProxGPUModule.getTradeoff(contactList);
+
+        if(goOnGPU){
+
+           doJORProxGPU();
+
+        }else{
+           //add all nodes to the contact graph:
+
+           for(auto & c : contactList){
+                m_contactGraph.addNode(c);
+           }
+           doSORProxCPU();
+        }
 
     #else
 
-    #endif
+       doSORProxCPU();
+
+    #endif // HAVE_CUDA_SUPPORT
 
 
-    LOGSLLEVEL2(m_pSolverLog,  "---> using SOR Prox Velocity (CPU): "<< std::endl;);
+
+}
+
+void InclusionSolverCONoG::doJORProxGPU(){
+    ASSERTMSG(HAVE_CUDA_SUPPORT == 1, "Calling doJORProxGPU without having CUDA Support! This should not happen!")
+    #if HAVE_CUDA_SUPPORT
+    LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> Using JOR Prox Velocity (GPU): "<< std::endl;);
 
 
+
+    #endif // HAVE_CUDA_SUPPORT
+}
+
+void InclusionSolverCONoG::doSORProxCPU(){
+    LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> Using SOR Prox Velocity (CPU): "<< std::endl;);
     initContactGraphForIteration(m_settings.m_alphaSORProx);
 
-        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> u_e = [ ");
-        for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
-            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uBack: " << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
-            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
-        }
-        LOGSLLEVEL3_CONTACT(m_pSolverLog, " ]" << std::endl);
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> u_e = [ ");
+    for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uBack: " << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
+    }
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, " ]" << std::endl);
 
 
     // General stupid Prox- Iteration
@@ -299,7 +326,7 @@ void InclusionSolverCONoG::doSorProx() {
             }
     #endif // OUTPUT_SIMDATAITERATION_FILE
 
-}
+    }
 
 
 void InclusionSolverCONoG::sorProxOverAllNodes() {
@@ -308,10 +335,10 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
 
     // Move over all nodes, and do a sor prox step
-    //m_ContactGraph.shuffleNodesUniformly(1000);
+    //m_contactGraph.shuffleNodesUniformly(1000);
 
-    m_ContactGraph.applyNodeVisitorSpecial(*m_pSorProxStepNodeVisitor);
-    m_maxResidual = m_ContactGraph.m_maxResidual;
+    m_contactGraph.applyNodeVisitorSpecial(*m_pSorProxStepNodeVisitor);
+    m_maxResidual = m_contactGraph.m_maxResidual;
     // Move over all nodes, end of Sor Prox
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
@@ -320,8 +347,8 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity) {
 
-        //std::cout << "Bodies: " << m_ContactGraph.m_simBodiesToContactsList.size() << std::endl;
-        for(auto it=m_ContactGraph.m_simBodiesToContactsList.begin(); it !=m_ContactGraph.m_simBodiesToContactsList.end(); ++it) {
+        //std::cout << "Bodies: " << m_contactGraph.m_simBodiesToContactsList.size() << std::endl;
+        for(auto it=m_contactGraph.m_simBodiesToContactsList.begin(); it !=m_contactGraph.m_simBodiesToContactsList.end(); ++it) {
             if(m_globalIterationCounter >= m_settings.m_MinIter && (m_bConverged || m_settings.m_bComputeResidual) )  {
 
                 converged = Numerics::cancelCriteriaValue(  it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
@@ -345,7 +372,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     }else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity){
 
-        for(auto it=m_ContactGraph.m_simBodiesToContactsList.begin(); it !=m_ContactGraph.m_simBodiesToContactsList.end(); ++it) {
+        for(auto it=m_contactGraph.m_simBodiesToContactsList.begin(); it !=m_contactGraph.m_simBodiesToContactsList.end(); ++it) {
             if(m_globalIterationCounter >= m_settings.m_MinIter && (m_bConverged || m_settings.m_bComputeResidual)) {
 
                 converged = Numerics::cancelCriteriaMatrixNormSq( it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
@@ -369,7 +396,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
         }
     }
 
-    m_ContactGraph.resetAfterOneIteration(m_globalIterationCounter);
+    m_contactGraph.resetAfterOneIteration(m_globalIterationCounter);
 
 }
 

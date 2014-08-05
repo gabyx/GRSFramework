@@ -435,7 +435,6 @@ public:
 
 
     std::unordered_map<const RigidBodyType *, NodeListType > m_simBodiesToContactsList;
-    typedef typename std::unordered_map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIteratorType;
 
     PREC m_maxResidual;
 

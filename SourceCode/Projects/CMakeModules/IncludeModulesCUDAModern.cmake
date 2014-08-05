@@ -162,7 +162,7 @@ set(${INC}
     ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaMemSupport.hpp
     ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaMatrixSupport.hpp
     ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaUtilities.hpp
-    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/Exception.hpp
+    ${COMMON_SOURCE_DIR}/inc/General/Exception.hpp
     ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaError.hpp
     ${COMMON_SOURCE_DIR}/inc/General/CudaModern/CudaMatrix.hpp
     
@@ -188,8 +188,26 @@ set(${SRC}
 )
 set(${INCLUDE_DIRS} 
     ${${INCLUDE_DIRS}} 
+    ${COMMON_SOURCE_DIR}/inc/General/CudaModern/
     ${COMMON_SOURCE_DIR}/inc/General/
     ${COMMON_SOURCE_DIR}/inc/PerformanceTest/
 )
 endmacro(INCLUDE_GENERAL_EXTERN_CUDA)
 
+
+
+# Macros for the JOR Prox Velocity Module
+MACRO(INCLUDE_JORPROX_VELOCITY_MODULE_EXTERN_CUDA SRC INC INCLUDE_DIRS COMMON_SOURCE_DIR )
+set(${SRC}
+	${COMMON_SOURCE_DIR}/src/JORProxVel/JORProxVelocityGPUModule.cpp
+    
+)
+set(${INC}
+    ${COMMON_SOURCE_DIR}/inc/JORProxVel/JORProxVelocityGPUModule.hpp
+    ${COMMON_SOURCE_DIR}/inc/JORProxVel/GPUBufferOffsets.hpp
+)
+set(${INCLUDE_DIRS}
+    ${${INCLUDE_DIRS}}
+    ${COMMON_SOURCE_DIR}/inc/JORProxVel
+)
+ENDMACRO(INCLUDE_JORPROX_VELOCITY_MODULE_EXTERN_CUDA)

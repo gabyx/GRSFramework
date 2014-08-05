@@ -20,7 +20,7 @@ const unsigned int InclusionSolverCO::ContactDim = ContactModels::UnilateralAndC
 InclusionSolverCO::InclusionSolverCO(std::shared_ptr< CollisionSolverType >  pCollisionSolver,
                                      std::shared_ptr<DynamicsSystemType> pDynSys):
     m_SimBodies(pDynSys->m_SimBodies),
-    m_Bodies(pDynSys->m_Bodies), m_ContactGraph(&(pDynSys->m_ContactParameterMap)),
+    m_Bodies(pDynSys->m_Bodies), m_contactGraph(&(pDynSys->m_ContactParameterMap)),
     m_pCollisionSolver(pCollisionSolver),
     m_pDynSys(pDynSys) {
 
@@ -60,7 +60,7 @@ void InclusionSolverCO::reset() {
 
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_contactGraph)
     );
 
 
@@ -87,7 +87,7 @@ void InclusionSolverCO::resetForNextIter() {
     m_G_conditionNumber = 0;
     m_G_notDiagDominant = 0;
 
-    m_ContactGraph.clearGraph();
+    m_contactGraph.clearGraph();
 }
 
 
@@ -113,7 +113,7 @@ void InclusionSolverCO::solveInclusionProblem() {
 
 
     // Iterate over all nodes set and assemble the matrices...
-    typename ContactGraphType::NodeListType & nodes = m_ContactGraph.getNodeList();
+    typename ContactGraphType::NodeListType & nodes = m_contactGraph.getNodeList();
     m_nContacts = (unsigned int)nodes.size();
 
     m_globalIterationCounter = 0;
@@ -138,8 +138,8 @@ void InclusionSolverCO::solveInclusionProblem() {
         LOGSLLEVEL1(m_pSolverLog, " % nContacts = "<< m_nContacts<< std::endl;);
 
 
-        m_nLambdas = m_ContactGraph.getNLambdas();
-        ASSERTMSG(m_ContactGraph.getNContactModelsUsed() == 1, "ContactGraph uses not homogen contact models!")
+        m_nLambdas = m_contactGraph.getNLambdas();
+        ASSERTMSG(m_contactGraph.getNContactModelsUsed() == 1, "ContactGraph uses not homogen contact models!")
 
         if(nodes[0]->m_nodeData.m_contactParameter.m_contactModel != ContactModels::ContactModelEnum::UCF_ContactModel){
             ERRORMSG("The only supported contact model so far is: ContactModels::ContactModelEnum::UCF_ContactModel")
@@ -164,7 +164,7 @@ void InclusionSolverCO::solveInclusionProblem() {
         static const CollisionData * pCollData;
 
         static VectorDyn I_plus_eps(ContactDim);
-        static MatrixDyn G_part(ContactDim,ContactDim);
+        static MatrixDynDyn G_part(ContactDim,ContactDim);
         static const MatrixUBodyDyn * W_j_body;
         static const MatrixUBodyDyn * W_i_body;
         static MatrixDynUBody W_i_bodyT_M_body;

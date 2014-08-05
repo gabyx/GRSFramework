@@ -149,22 +149,25 @@ INCLUDE_SIMULATION_FRAMEWORK_GUI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_CO
 # CUDA SOURCE INCLUDES ====================================================================
 if(SIMULATIONFRAMEWORK_USE_CUDA)
 MESSAGE(ERROR "CUDA does not work, write library to include!")
-INCLUDE(IncludeModulesCUDA)
+INCLUDE(IncludeModulesCUDAModern)
 
 # Configure File for the BUILD!
 string(REPLACE "." "" CUDA_VERSION_INTEGER ${CUDA_VERSION})
 
+# GPU Modules (JOR/SOR Lambda Dense Modules)
 INCLUDE_PROX_CUDA(ProxGPU_SRC ProxGPU_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
 INCLUDE_VECTOR_ADD_CUDA(VectorAddGPU_SRC VectorAddGPU_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
 INCLUDE_MATRIX_VECTOR_MULT_CUDA(MatrixVectorMultGPU_SRC MatrixVectorMultGPU_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
 INCLUDE_GENERAL_EXTERN_CUDA(GeneralCommonFiles_SRC GeneralCommonFiles_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
 
+# GPU Modules (JOR Velocity Modules)
+INCLUDE_JORPROX_VELOCITY_MODULE_EXTERN_CUDA( JorProxVelocity_SRC  JorProxVelocity_INC CUDA_COMMON_INCLUDE_DIR ${CUDA_COMMON_SOURCE_DIR})
 
 SET(CUDA_SRC
-   ${ProxGPU_SRC} ${VectorAddGPU_SRC} ${MatrixVectorMultGPU_SRC} ${GeneralCommonFiles_SRC}
+   ${ProxGPU_SRC} ${VectorAddGPU_SRC} ${MatrixVectorMultGPU_SRC} ${GeneralCommonFiles_SRC} ${JorProxVelocity_SRC}
 )
 SET(CUDA_INC
-   ${ProxGPU_INC} ${VectorAddGPU_INC} ${MatrixVectorMultGPU_INC} ${GeneralCommonFiles_INC}
+   ${ProxGPU_INC} ${VectorAddGPU_INC} ${MatrixVectorMultGPU_INC} ${GeneralCommonFiles_INC} ${JorProxVelocity_INC}
 )
 else()
 # Include nothing

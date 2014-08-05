@@ -16,7 +16,7 @@ class Range{
 
 	    using RangeType = std::vector<IntType,Allocator>;
 
-	    STATIC_ASSERT2( std::is_integral<IntType>::value , IntType_Needs_to_be_Integeral);
+	    STATIC_ASSERTM( std::is_integral<IntType>::value , IntType_Needs_to_be_Integeral );
         Range(): m_linear(false) {};
 
         // default copy cosntructor and assignment operator;
@@ -46,7 +46,7 @@ class Range{
         template<typename T>
 		Range(const std::pair<T,T> & p){
             m_linear = true;
-		    STATIC_ASSERT2( std::is_integral<T>::value , T_Needs_to_be_Integeral);
+		    STATIC_ASSERTM( std::is_integral<T>::value , T_Needs_to_be_Integeral);
 		    unsigned int N = p.second-p.first;
 		    if(p.second < p.first){ N = 0;} // leads to empty m_v
 
@@ -69,7 +69,7 @@ class Range{
         template<typename T>
 		Range(const std::set<T> & p){
 		    m_linear = true; // init
-		    STATIC_ASSERT2( std::is_integral<T>::value , T_Needs_to_be_Integeral);
+		    STATIC_ASSERTM( std::is_integral<T>::value , T_Needs_to_be_Integeral);
 			m_v.resize(p.size());
 			auto it = p.begin();
 			for(auto & v : m_v){

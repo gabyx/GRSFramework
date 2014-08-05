@@ -315,7 +315,7 @@ void MultiBodySimFile::write(double time, TBodyIterator begin, TBodyIterator end
 
     using BodyType = typename std::remove_reference<decltype(*(*begin))>::type;
 
-    STATIC_ASSERT2((std::is_same<double, typename BodyType::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
+    STATIC_ASSERTM((std::is_same<double, typename BodyType::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
     auto itEnd = end;
     for(auto it = begin; it != itEnd; ++it) {
         *this << (*it)->m_id;
@@ -447,7 +447,7 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
     *this << (double)state->m_t;
     // write states
     for(auto & b : state->m_SimBodyStates) {
-        STATIC_ASSERT2((std::is_same<double, typename DynamicsState::PREC>::value),
+        STATIC_ASSERTM((std::is_same<double, typename DynamicsState::PREC>::value),
                        "OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
         *this << b.m_id;
         IOHelpers::writeBinary(m_file_stream, b.m_q );

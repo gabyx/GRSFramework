@@ -121,8 +121,8 @@ protected:
   VectorDyn m_P_T_2;
   // ==========================
 
-  MatrixDynRow m_G_NN, m_G_NT;
-  MatrixDynRow m_G_TT;
+  MatrixDynDynRow m_G_NN, m_G_NT;
+  MatrixDynDynRow m_G_TT;
 
   VectorDyn m_c_N;
   VectorDyn m_c_T;
@@ -449,7 +449,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
     m_G_TT.noalias() = m_W_T.transpose() * tempMinv_WT;
 
 #if CALCULATE_COND_OF_G == 1 || CALCULATE_DIAGDOM_OF_G == 1
-    MatrixDyn G(m_nContacts*3,m_nContacts*3);
+    MatrixDynDyn G(m_nContacts*3,m_nContacts*3);
     G.block(0,0,m_G_NN.rows(),m_G_NN.cols()).noalias() = m_G_NN;
     G.block(0,m_G_NN.cols(),m_G_NT.rows(),m_G_NT.cols()).noalias() = m_G_NT;
     G.block(m_G_NN.rows(),0,m_G_NT.transpose().rows(),m_G_NT.transpose().cols()).noalias() = m_G_NT.transpose();
