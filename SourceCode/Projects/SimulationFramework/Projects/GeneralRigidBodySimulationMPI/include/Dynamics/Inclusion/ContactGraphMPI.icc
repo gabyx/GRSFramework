@@ -115,9 +115,7 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
         //Add to the neighbour data if remote contact
         if(isRemote.first) {
             m_remoteBodiesWithContacts.addBody(pCollData->m_pBody1);
-            #if CoutLevelSolverWhenContact>1
-                LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << std::endl;)
-            #endif
+            LOGSLLEVEL2_CONTACT(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << std::endl;)
             if(addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE)){
                 m_pNbDataMap->getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody1);
                 // if this body is already added it does nothing!
@@ -151,9 +149,7 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
         //Add to the neighbour data if remote contact
         if(isRemote.second) {
             m_remoteBodiesWithContacts.addBody(pCollData->m_pBody2);
-            #if CoutLevelSolverWhenContact>1
-                LOG(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2->m_id) << std::endl;)
-            #endif
+                LOGSLLEVEL2_CONTACT(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2->m_id) << std::endl;)
             if(addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE)){
                 m_pNbDataMap->getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody2);
                 // if this body is already added it does nothing!

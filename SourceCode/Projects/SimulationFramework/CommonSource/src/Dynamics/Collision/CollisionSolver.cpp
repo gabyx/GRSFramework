@@ -26,6 +26,7 @@ void CollisionSolver::reset() {
     // Do a Debug check if sizes match!
     ASSERTMSG( m_SimBodies.size() != 0, "CollisionSolver:: No Bodies added to the system!");
 
+    removeAllContactDelegates();
 
     clearCollisionSet();
 

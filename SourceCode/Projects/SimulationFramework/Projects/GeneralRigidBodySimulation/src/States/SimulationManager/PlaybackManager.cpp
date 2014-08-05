@@ -41,13 +41,13 @@ PlaybackManager::PlaybackManager(std::shared_ptr<Ogre::SceneManager> pSceneMgr):
     // Set the Log Output =========================================================================
     m_pThreadLog = new Logging::Log("PlaybackManagerThreadLog");
 
-#if LogToFilePlayback == 1
+#if PLAYBACKLOG_TOFILE == 1
     boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
     filePath /= "PlaybackManagerThread.log";
     m_pThreadLog->addSink(new Logging::LogSinkFile("PlaybackManager-File",filePath));
 #endif
-#if LogToConsolePlayback == 1
+#if PLAYBACKLOG_TOCONSOLE == 1
     m_pThreadLog->addSink(new Logging::LogSinkCout("PlaybackManager-Cout"));
 #endif
 

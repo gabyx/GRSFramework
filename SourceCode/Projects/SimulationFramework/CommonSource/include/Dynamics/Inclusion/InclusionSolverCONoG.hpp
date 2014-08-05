@@ -84,18 +84,28 @@ protected:
     typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
     typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
 
+    // General CPU Iteration visitors (only SOR Prox on velocity level)
     using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
     ContactGraphType m_ContactGraph;
-
-    void integrateAllBodyVelocities();
     void initContactGraphForIteration(PREC alpha);
-
-    inline void doJorProx();
-
-    inline void doSorProx();
-    inline void sorProxOverAllNodes();
     SorProxStepNodeVisitor * m_pSorProxStepNodeVisitor;
     SorProxInitNodeVisitor * m_pSorProxInitNodeVisitor;
+    inline void sorProxOverAllNodes();
+
+    #if HAVE_CUDA_SUPPORT == 1
+    // Jor Prox GPU Iteration class (only JOR Prox on velocity level)
+        using JorProxGPUModule = JorProxVelocityGPUModule;
+        JorProxGPUModule m_jorProxGPUModule;
+    #endif
+
+    void integrateAllBodyVelocities();
+
+    inline void doJorProx();
+    inline void doSorProx();
+
+
+
+
 
     // Log
     Logging::Log *m_pSolverLog, *m_pSimulationLog;

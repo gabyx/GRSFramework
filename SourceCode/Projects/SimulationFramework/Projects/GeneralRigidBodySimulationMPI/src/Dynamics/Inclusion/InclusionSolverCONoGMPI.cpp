@@ -60,10 +60,6 @@ InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(
     m_pContactGraph->setInclusionCommunicator( m_pInclusionComm );
     m_pInclusionComm->setContactGraph( m_pContactGraph );
 
-    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
-    m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(m_pContactGraph.get())
-    );
 }
 
 
@@ -95,6 +91,11 @@ void InclusionSolverCONoGMPI::reset() {
     m_settings = m_pDynSys->getSettingsInclusionSolver();
 
     resetForNextIter();
+
+    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
+    m_pCollisionSolver->addContactDelegate(
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(m_pContactGraph.get())
+    );
 
 #if HAVE_CUDA_SUPPORT == 1
     LOG(m_pSimulationLog, "---> Try to set GPU Device : "<< m_settings.m_UseGPUDeviceId << std::endl;);
@@ -145,9 +146,7 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
 
 
     // First communicate all remote bodies, which have contacts, to the owner, all processes are involved
-#if CoutLevelSolverWhenContact>1
-    LOG(m_pSolverLog,  "MPI> Communicate Remote Contacts (splitted bodies)" << std::endl; );
-#endif
+    LOGSLLEVEL3_CONTACT(m_pSolverLog,  "MPI> Communicate Remote Contacts (splitted bodies)" << std::endl; );
     m_pInclusionComm->communicateRemoteContacts(m_currentSimulationTime);
 
     // All detected contacts in ths process
@@ -156,13 +155,11 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
     m_nContacts = m_nLocalNodes + m_nRemoteNodes;
     m_nSplitBodyNodes = m_pContactGraph->getNSplitBodyNodes();
 
-#if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog,
+        LOGSLLEVEL1_CONTACT(m_pSolverLog,
             "---> Nodes Local: "<< m_nLocalNodes <<std::endl<<
             "---> Nodes Remote: "<< m_nRemoteNodes <<std::endl<<
             "---> Nodes SplitBodies: "<< m_nSplitBodyNodes <<std::endl;
            );
-#endif
 
     // Integrate all local bodies to u_e
     // u_E = u_S + M^⁻1 * h * deltaT
@@ -199,27 +196,19 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
 
         if(m_settings.m_bIsFiniteCheck) {
             // TODO CHECK IF finite!
-#if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog,  "---> Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
-#endif
+            LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> Solution of Prox Iteration is finite: "<< m_isFinite <<std::endl;);
         }
 
 
-#if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog,  "---> Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
-#endif
-
-#if CoutLevelSolverWhenContact>0
-        LOG(m_pSolverLog,  "---> Finalize Prox " <<std::endl; );
-#endif
+        LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> Prox Iterations needed: "<< m_globalIterationCounter <<std::endl;);
+        LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> Finalize Prox " <<std::endl; );
 
         finalizeSorProx();
     }
 
 
-#if CoutLevelSolverWhenContact>0
-    LOG(m_pSolverLog,  "MPI> Reset All Communicators" <<std::endl;);
-#endif
+    LOGSLLEVEL1_CONTACT(m_pSolverLog,  "MPI> Reset All Communicators" <<std::endl;);
+
     m_pProcComm->deleteAllCommunicators();
 
 }
@@ -248,44 +237,37 @@ void InclusionSolverCONoGMPI::integrateAllBodyVelocities() {
 
 void InclusionSolverCONoGMPI::doSorProx() {
 
-#if CoutLevelSolverWhenContact>2
-    LOG(m_pSolverLog, " u_e = [ ");
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, " u_e = [ ");
     for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
-        LOG(m_pSolverLog, "\t uBack: " << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
-        LOG(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uBack: " << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
     }
-    LOG(m_pSolverLog, " ]" << std::endl);
-#endif
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, " ]" << std::endl);
 
     // General stupid Prox- Iteration
     while(true) {
 
         m_bConverged = true;
 
-#if CoutLevelSolverWhenContact>1
-        LOG(m_pSolverLog,"---> Next iteration: "<< m_globalIterationCounter << std::endl);
-#endif
+        LOGSLLEVEL2_CONTACT(m_pSolverLog,"---> Next iteration: "<< m_globalIterationCounter << std::endl);
 
 
         sorProxOverAllNodes(); // Do one global Sor Prox Iteration
 
 
 
-#if CoutLevelSolverWhenContact>2
-        LOG(m_pSolverLog, " u_e = [ ");
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, " u_e = [ ");
         for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
-            LOG(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
         }
-        LOG(m_pSolverLog, " ]" << std::endl);
-#endif
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, " ]" << std::endl);
 
 
         m_globalIterationCounter++;
 
         if ( (m_bConverged == true || m_globalIterationCounter >= m_settings.m_MaxIter) && m_globalIterationCounter >= m_settings.m_MinIter) {
-#if CoutLevelSolverWhenContact>0
-            LOG(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_globalIterationCounter <<" / "<<  m_settings.m_MaxIter<< std::endl;);
-#endif
+
+            LOGSLLEVEL1_CONTACT(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_globalIterationCounter <<" / "<<  m_settings.m_MaxIter<< std::endl;);
             break;
         }
     }
@@ -455,9 +437,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
                 }
             }
 
-            #if CoutLevelSolverWhenContact>2
-            LOG(m_pSolverLog, "---> Convergence criteria (InEnergyVelocity) converged: "<<  m_bConverged<< std::endl;);
-            #endif
+            LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> Convergence criteria (InEnergyVelocity) converged: "<<  m_bConverged<< std::endl;);
 
         }
 
@@ -479,9 +459,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
 void InclusionSolverCONoGMPI::finalizeSorProx() {
 
     // Set all weightings of remote and local bodies back to the original!
-#if CoutLevelSolverWhenContact>0
-    LOG(m_pSolverLog,  "---> Reset All Weigths" <<std::endl;);
-#endif
+    LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> Reset All Weigths" <<std::endl;);
 
     m_pInclusionComm->resetAllWeightings();
 
