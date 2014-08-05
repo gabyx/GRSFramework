@@ -21,8 +21,7 @@
 
 
 #if HAVE_CUDA_SUPPORT == 1
-#include "JorProxGPUVariant.hpp"
-#include "SorProxGPUVariant.hpp"
+// include all cuda modules for the GPU jor prox iteration on velocity level
 #endif
 
 #include "CPUTimer.hpp"

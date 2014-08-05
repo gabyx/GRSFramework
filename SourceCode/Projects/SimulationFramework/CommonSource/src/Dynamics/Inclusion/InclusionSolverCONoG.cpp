@@ -55,7 +55,7 @@ void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::fil
     #endif
 
     #if HAVE_CUDA_SUPPORT == 1
-
+        // initialize the cuda jor prox iteration module
     #endif
 }
 
@@ -67,13 +67,7 @@ void InclusionSolverCONoG::reset() {
     resetForNextIter();
 
 #if HAVE_CUDA_SUPPORT == 1
-    LOG(m_pSimulationLog, "---> Try to set GPU Device : "<< m_settings.m_UseGPUDeviceId << std::endl;);
-
-    CHECK_CUDA(cudaSetDevice(m_settings.m_UseGPUDeviceId));
-    cudaDeviceProp props;
-    CHECK_CUDA(cudaGetDeviceProperties(&props,m_settings.m_UseGPUDeviceId));
-
-    LOG(m_pSimulationLog,  "---> Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
+    // reset all the cude jor porx iteration modules
 #endif
 
     #if OUTPUT_SIMDATAITERATION_FILE == 1
