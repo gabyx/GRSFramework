@@ -61,16 +61,19 @@ void InclusionSolverCONoG::reset() {
 
     resetForNextIter();
 
-
+#if HAVE_CUDA_SUPPORT == 1
+    //Add no delegate function, instead use the contactData list from the collision solver
+    //to decide if we compute with the GPU (only JOR method) or we build the contact graph on the CPU to use the SOR method
+#else
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode >(&m_ContactGraph)
     );
-
+#endif
 
 
 #if HAVE_CUDA_SUPPORT == 1
-    // reset all the cude jor porx iteration modules
+    // reset all the GPU jor porx iteration modules
 #endif
 
     #if OUTPUT_SIMDATAITERATION_FILE == 1
@@ -112,14 +115,12 @@ void InclusionSolverCONoG::resetForNextIter() {
 
 void InclusionSolverCONoG::solveInclusionProblem() {
 
-#if CoutLevelSolver>1
-    LOG(m_pSolverLog,  "---> solveInclusionProblem(): "<< std::endl;);
-#endif
+
+    LOGSLLEVEL2(m_pSolverLog,  "---> solveInclusionProblem(): "<< std::endl;);
 
 
-    // Iterate over all nodes set and assemble the matrices...
-    typename ContactGraphType::NodeListType & nodes = m_ContactGraph.getNodeList();
-    m_nContacts = (unsigned int)nodes.size();
+    auto & contactDataList = m_pCollisionSolver->getCollisionSetRef();
+    m_nContacts = (unsigned int)contactDataList.size();
 
     // Standart values
     m_globalIterationCounter = 0;
@@ -189,11 +190,14 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
 void InclusionSolverCONoG::doJorProx() {
 
-#if HAVE_CUDA_SUPPORT
-    #if CoutLevelSolver>1
-    LOG(m_pSolverLog,  "---> using JOR Prox Velocity (GPU): "<< std::endl;);
-    #endif
+// If we would have a JOR CPU implementation do some decision here if we use the GPU JOR Prox velocity or the JOR CPU
 
+#if HAVE_CUDA_SUPPORT
+
+    LOGSLLEVEL2(m_pSolverLog,  "---> using JOR Prox Velocity (GPU): "<< std::endl;);
+
+
+    // TODO
 
 #else
     ASSERTMSG(false,"InclusionSolverCONoG:: CPU JOR Prox iteration not implemented!");
@@ -236,9 +240,18 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
 void InclusionSolverCONoG::doSorProx() {
 
-    #if CoutLevelSolver>1
-    LOG(m_pSolverLog,  "---> using SOR Prox Velocity (CPU): "<< std::endl;);
+    // Do some decision according to the number of contacts if we use the GPU or the CPU
+    #if HAVE_CUDA_SUPPORT
+        gpuSuccess = true;
+        bool goOnGPU = m_nContacts >= m_jorProxGPUVariant.getTradeoff();
+
+    #else
+
     #endif
+
+
+    LOGSLLEVEL2(m_pSolverLog,  "---> using SOR Prox Velocity (CPU): "<< std::endl;);
+
 
     initContactGraphForIteration(m_settings.m_alphaSORProx);
 
@@ -255,9 +268,7 @@ void InclusionSolverCONoG::doSorProx() {
 
         // Set global flag to true, if it is not converged we set it to false
         m_bConverged = true;
-
         LOGSLLEVEL2_CONTACT(m_pSolverLog,"---> Next iteration: "<< m_globalIterationCounter << std::endl);
-
         // Do one Sor Prox Iteration
         sorProxOverAllNodes();
 
@@ -267,7 +278,6 @@ void InclusionSolverCONoG::doSorProx() {
         }
         LOGSLLEVEL3_CONTACT(m_pSolverLog, " ]" << std::endl);
 
-
         m_globalIterationCounter++;
 
         if ( (m_bConverged == true || m_globalIterationCounter >= m_settings.m_MaxIter)
@@ -275,7 +285,6 @@ void InclusionSolverCONoG::doSorProx() {
                 LOGSLLEVEL1_CONTACT(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_globalIterationCounter <<" / "<<  m_settings.m_MaxIter<< std::endl;);
             break;
         }
-
         #if OUTPUT_SIMDATAITERATION_FILE == 1
             if(m_bConverged == false && m_globalIterationCounter >= m_settings.m_MinIter){
                 m_iterationDataFile << m_maxResidual << "\t";
