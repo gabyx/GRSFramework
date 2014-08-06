@@ -86,7 +86,7 @@ protected:
     typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
 
     // General CPU Iteration visitors (only SOR Prox on velocity level)
-    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using ContactGraphType = ContactGraphIteration;
     ContactGraphType m_contactGraph;
     void initContactGraphForIteration(PREC alpha);
     SorProxStepNodeVisitor * m_pSorProxStepNodeVisitor;

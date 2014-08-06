@@ -36,11 +36,8 @@ public:
 
     VectorDyn  m_eps;
 
-
     unsigned int m_nodeColor;
-
     const CollisionData * m_pCollData;
-
     ContactParameter m_contactParameter;
 };
 

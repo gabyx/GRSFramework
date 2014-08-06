@@ -51,6 +51,7 @@ void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::fil
 
     #if HAVE_CUDA_SUPPORT == 1
         // initialize the cuda jor prox iteration module
+        m_jorProxGPUModule.initializeLog(m_pSolverLog);
     #endif
 }
 
@@ -62,10 +63,15 @@ void InclusionSolverCONoG::reset() {
     resetForNextIter();
 
 #if HAVE_CUDA_SUPPORT == 1
-    //Add no delegate function, instead use the contactData list from the collision solver
+    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     //to decide if we compute with the GPU (only JOR method) or we build the contact graph on the CPU to use the SOR method
+    // Setups the node only partially!
+    m_pCollisionSolver->addContactDelegate(
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode >(&m_contactGraph)
+    );
 #else
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
+    // Setups the node fully!
     m_pCollisionSolver->addContactDelegate(
         CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode >(&m_contactGraph)
     );
@@ -193,7 +199,7 @@ void InclusionSolverCONoG::doJorProx() {
 
 // If we would have a JOR CPU implementation do some decision here if we use the GPU JOR Prox velocity or the JOR CPU
 
-#if HAVE_CUDA_SUPPORT
+#if HAVE_CUDA_SUPPORT == 1
 
     LOGSLLEVEL2(m_pSolverLog,  "---> using JOR Prox Velocity (GPU): "<< std::endl;);
     // TODO
@@ -240,21 +246,14 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 void InclusionSolverCONoG::doSorProx() {
 
     // Do some decision according to the number of contacts if we use the GPU or the CPU
-    #if HAVE_CUDA_SUPPORT
-        auto & contactList = m_pCollisionSolver->getCollisionSetRef();
+
+    #if HAVE_CUDA_SUPPORT == 1
         bool gpuSuccess = true;
-        bool goOnGPU = m_jorProxGPUModule.getTradeoff(contactList);
+        bool goOnGPU = m_jorProxGPUModule.computeOnGPU(m_pCollisionSolver->getCollisionSetRef().size(), m_contactGraph.m_simBodiesToContactsMap.size());
 
         if(goOnGPU){
-
            doJORProxGPU();
-
         }else{
-           //add all nodes to the contact graph:
-
-           for(auto & c : contactList){
-                m_contactGraph.addNode(c);
-           }
            doSORProxCPU();
         }
 
@@ -270,10 +269,11 @@ void InclusionSolverCONoG::doSorProx() {
 
 void InclusionSolverCONoG::doJORProxGPU(){
     ASSERTMSG(HAVE_CUDA_SUPPORT == 1, "Calling doJORProxGPU without having CUDA Support! This should not happen!")
-    #if HAVE_CUDA_SUPPORT
+
+    #if HAVE_CUDA_SUPPORT == 1
     LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> Using JOR Prox Velocity (GPU): "<< std::endl;);
-
-
+    auto & contactList = m_pCollisionSolver->getCollisionSetRef();
+    m_jorProxGPUModule.initialize(contactList, m_contactGraph.m_simBodiesToContactsMap );
 
     #endif // HAVE_CUDA_SUPPORT
 }
@@ -347,8 +347,8 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity) {
 
-        //std::cout << "Bodies: " << m_contactGraph.m_simBodiesToContactsList.size() << std::endl;
-        for(auto it=m_contactGraph.m_simBodiesToContactsList.begin(); it !=m_contactGraph.m_simBodiesToContactsList.end(); ++it) {
+        //std::cout << "Bodies: " << m_contactGraph.m_simBodiesToContactsMap.size() << std::endl;
+        for(auto it=m_contactGraph.m_simBodiesToContactsMap.begin(); it !=m_contactGraph.m_simBodiesToContactsMap.end(); ++it) {
             if(m_globalIterationCounter >= m_settings.m_MinIter && (m_bConverged || m_settings.m_bComputeResidual) )  {
 
                 converged = Numerics::cancelCriteriaValue(  it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
@@ -372,7 +372,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
 
     }else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity){
 
-        for(auto it=m_contactGraph.m_simBodiesToContactsList.begin(); it !=m_contactGraph.m_simBodiesToContactsList.end(); ++it) {
+        for(auto it=m_contactGraph.m_simBodiesToContactsMap.begin(); it !=m_contactGraph.m_simBodiesToContactsMap.end(); ++it) {
             if(m_globalIterationCounter >= m_settings.m_MinIter && (m_bConverged || m_settings.m_bComputeResidual)) {
 
                 converged = Numerics::cancelCriteriaMatrixNormSq( it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)

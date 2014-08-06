@@ -25,15 +25,10 @@
 #include "VectorToSkewMatrix.hpp"
 #include "ProxFunctions.hpp"
 
-template<typename ContactGraphMode > class ContactGraph;
 
-struct ContactGraphMode {
-    struct NoIteration {};
-    struct ForIteration {};
-};
 
-template <>
-class ContactGraph<ContactGraphMode::NoIteration> : public Graph::GeneralGraph< ContactGraphNodeData,ContactGraphEdgeData > {
+/** Contact Graph which is no meant to be used to iterate over the noced */
+class ContactGraph: public Graph::GeneralGraph< ContactGraphNodeData,ContactGraphEdgeData > {
 public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
@@ -70,7 +65,7 @@ public:
         m_nodeCounter = 0;
         this->m_edges.clear();
         m_edgeCounter = 0;
-        m_simBodiesToContactsList.clear();
+        m_simBodiesToContactsMap.clear();
 
         m_nLambdas = 0;
 
@@ -120,19 +115,17 @@ public:
         m_nodeCounter++;
     }
 
-
     static const MatrixUBodyDyn & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
     }
-
     static const MatrixUBodyDyn * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1 == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
 
 
-    std::unordered_map<const RigidBodyType *, NodeListType > m_simBodiesToContactsList;
+    std::unordered_map<const RigidBodyType *, NodeListType > m_simBodiesToContactsMap;
     typedef typename std::unordered_map<const RigidBodyType *, NodeListType >::iterator  BodyToContactsListIterator;
 
     unsigned int getNLambdas(){return m_nLambdas;}
@@ -248,7 +241,7 @@ private:
         // ===========================================================================
 
         // Get all contacts on this body and connect to them =========================
-        NodeListType & nodeList = m_simBodiesToContactsList[pBody];
+        NodeListType & nodeList = m_simBodiesToContactsMap[pBody];
         //iterate over the nodeList and add edges!
         typename NodeListType::iterator it;
         // if no contacts are already on the body we skip this
@@ -280,8 +273,8 @@ private:
 
 };
 
-template <>
-class ContactGraph<ContactGraphMode::ForIteration> : public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
+/** Contact Graph which can be used to iterate over the nodes */
+class ContactGraphIteration: public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
 public:
 
 
@@ -297,7 +290,7 @@ public:
     using NodeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType;
     using EdgeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType;
 
-    ContactGraph(ContactParameterMap * contactParameterMap):
+    ContactGraphIteration(ContactParameterMap * contactParameterMap):
         m_nodeCounter(0),m_edgeCounter(0),
         m_nodesResSorted1(cFunc),m_nodesResSorted2(cFunc)
     {
@@ -308,7 +301,7 @@ public:
         m_nodesFrontRes = &m_nodesResSorted2;
     }
 
-    ~ContactGraph() {
+    ~ContactGraphIteration() {
         clearGraph();
     }
 
@@ -360,10 +353,11 @@ public:
         m_nodeCounter = 0;
         this->m_edges.clear();
         m_edgeCounter = 0;
-        m_simBodiesToContactsList.clear();
+        m_simBodiesToContactsMap.clear();
 
     }
 
+    template<bool addEdges = true>
     void addNode(CollisionData * pCollData) {
 
         ASSERTMSG(pCollData->m_pBody1 != nullptr && pCollData->m_pBody2 != nullptr, " Bodys are null pointers?");
@@ -379,45 +373,8 @@ public:
         NodeType * addedNode = this->m_nodes.back();
         addedNode->m_nodeData.m_pCollData = pCollData;
 
-        // Compute general parameters for the contact
-        setContactModel(addedNode->m_nodeData);
+        initNode<addEdges>(addedNode);
 
-        // FIRST BODY!
-        if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
-
-            //Set Flag that this Body in ContactGraph
-            pCollData->m_pBody1->m_pSolverData->m_bInContactGraph = true;
-            // Unset the flag when this Node is removed;
-
-            //Link to FrontBackBuffer
-            addedNode->m_nodeData.m_u1BufferPtr = & pCollData->m_pBody1->m_pSolverData->m_uBuffer;
-
-            this->computeW<1>( addedNode->m_nodeData);
-            this->connectNode<1>( addedNode);
-
-        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
-            // Contact goes into xi_N, xi_T
-            ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
-        }
-
-
-        // SECOND BODY!
-        if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
-
-            //Set Flag that this Body in ContactGraph
-            pCollData->m_pBody2->m_pSolverData->m_bInContactGraph = true;
-            // Unset the flag when this Node is removed;
-
-            //Link to FrontBackBuffer
-            addedNode->m_nodeData.m_u2BufferPtr = & pCollData->m_pBody2->m_pSolverData->m_uBuffer;
-
-            this->computeW<2>( addedNode->m_nodeData);
-            this->connectNode<2>( addedNode);
-
-        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
-            // Contact goes into xi_N, xi_T
-            ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
-        }
 
         m_nodeCounter++;
     }
@@ -434,7 +391,7 @@ public:
     }
 
 
-    std::unordered_map<const RigidBodyType *, NodeListType > m_simBodiesToContactsList;
+    std::unordered_map<const RigidBodyType *, NodeListType > m_simBodiesToContactsMap;
 
     PREC m_maxResidual;
 
@@ -452,142 +409,97 @@ private:
     friend class FullSorProxStepNodeVisitor;
 
     void setContactModel(NodeDataType & nodeData) {
+
         // Specify the contact model
         nodeData.m_contactParameter  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,
-                                       nodeData.m_pCollData->m_pBody2->m_eMaterial);
+                                                                                nodeData.m_pCollData->m_pBody2->m_eMaterial);
 
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
                 nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ||
                 nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel
           ) {
-
             // Set flag for the corresponding model
             m_usedContactModels |= 1 << EnumConversion::toIntegral(nodeData.m_contactParameter.m_contactModel);
 
-            const unsigned int dimSet = ContactModels::getLambdaDim(nodeData.m_contactParameter.m_contactModel);
-
-            nodeData.m_chi.setZero(dimSet);
-            nodeData.m_b.setZero(dimSet);
-            nodeData.m_LambdaBack.setZero(dimSet);
-            nodeData.m_LambdaFront.setZero(dimSet);
-            nodeData.m_R_i_inv_diag.setZero(dimSet);
-            nodeData.m_G_ii.setZero(dimSet,dimSet);
-//            nodeData.m_I_plus_eps.setZero(dimSet);
-            nodeData.m_eps.setZero(dimSet);
-            //        nodeData.m_mu.setZero(dimSet);
-            // =========================================================================================================
-
-            nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[0];
-            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[1];
-            nodeData.m_eps(2) = nodeData.m_contactParameter.m_params[1];
-
         } else {
             ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
         }
 
     }
 
-    template<int bodyNr>
-    inline void computeW(NodeDataType & nodeData) {
+    template<bool addEdges = true>
+    inline void initNode(NodeType * pNode){
+        std::cout << " ADDED CONTACT " << std::endl;
+        // Compute general parameters for the contact
+        setContactModel(pNode->m_nodeData);
 
-
-
-        if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel) {
-
-
-            static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
-            static Matrix33 I_Jacobi_2; // this is the second part of the Jacobi;
-            static const CollisionData * pCollData;
-
-            pCollData = nodeData.m_pCollData;
-
-
-
-            if(bodyNr == 1) {
-                //Set matrix size!
-                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
-
-                updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
-                I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
-                // N direction =================================================
-                nodeData.m_W_body1.col(0).template head<3>() = - pCollData->m_cFrame.m_e_z; // I frame
-
-                nodeData.m_W_body1.col(0).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_z;
-
-                // T1 direction =================================================
-                nodeData.m_W_body1.col(1).template head<3>() = - pCollData->m_cFrame.m_e_x; // I frame
-                nodeData.m_W_body1.col(1).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_x;
-
-                // T2 direction =================================================
-                nodeData.m_W_body1.col(2).template head<3>() = - pCollData->m_cFrame.m_e_y; // I frame
-                nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
-            } else {
-                //Set matrix size!
-                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
-
-                updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
-                I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
-                // N direction =================================================
-                nodeData.m_W_body2.col(0).template head<3>() =  pCollData->m_cFrame.m_e_z; // I frame
-                nodeData.m_W_body2.col(0).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_z;
-
-                // T1 direction =================================================
-                nodeData.m_W_body2.col(1).template head<3>() =  pCollData->m_cFrame.m_e_x; // I frame
-                nodeData.m_W_body2.col(1).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_x;
-
-                // T2 direction =================================================
-                nodeData.m_W_body2.col(2).template head<3>() =  pCollData->m_cFrame.m_e_y; // I frame
-                nodeData.m_W_body2.col(2).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
-            }
-        } else {
-            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
+        // FIRST BODY!
+        RigidBodyType * pBody = pNode->m_nodeData.m_pCollData->m_pBody1;
+        if( pBody->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            initNodeBody<1,addEdges>(pNode,pBody);
         }
 
+        // SECOND BODY!
+        pBody = pNode->m_nodeData.m_pCollData->m_pBody2;
+        if( pBody->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+           initNodeBody<2,addEdges>(pNode,pBody);
+        }
     }
 
+    template<int bodyNr, bool addEdges = true>
+    inline void initNodeBody(NodeType * pNode, RigidBodyType * pBody) {
 
-    template<int bodyNr>
-    void connectNode(NodeType * pNode) {
+        // Get all contacts on this body and connect to them (later) =========================
+        std::cout << " ADDED CONTACT " << std::endl;
+        NodeListType & nodeList = m_simBodiesToContactsMap[pBody];
 
-        EdgeType * addedEdge;
-        RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1 : pNode->m_nodeData.m_pCollData->m_pBody2;
+        //Set Flag that this Body in ContactGraph
+        pBody->m_pSolverData->m_bInContactGraph = true;
+        // Unset the flag when this Node is removed;
 
-        // Add self edge! ===========================================================
-        this->m_edges.push_back(new EdgeType(m_edgeCounter));
-        addedEdge = this->m_edges.back();
-        addedEdge->m_edgeData.m_pBody = pBody;
+        //Link to FrontBackBuffer
+        if(bodyNr==1){
+            pNode->m_nodeData.m_u1BufferPtr = & pBody->m_pSolverData->m_uBuffer;
+        }else{
+            pNode->m_nodeData.m_u2BufferPtr = & pBody->m_pSolverData->m_uBuffer;
+        }
 
-        // add links
-        addedEdge->m_startNode = pNode;
-        addedEdge->m_endNode = pNode;
-        addedEdge->m_twinEdge = this->m_edges.back(); // Current we dont need a twin edge, self referencing!
-        // Add the edge to the nodes edge list!
-        pNode->m_edgeList.push_back( addedEdge );
-        m_edgeCounter++;
-        //cout << "add self edge: "<<pNode->m_nodeNumber<<" to "<<pNode->m_nodeNumber<<" body Id:"<< RigidBodyId::getBodyIdString(pBody)<<endl;
-        // ===========================================================================
 
-        // Get all contacts on this body and connect to them =========================
-        NodeListType & nodeList = m_simBodiesToContactsList[pBody];
-        //iterate over the nodeList and add edges!
-        typename NodeListType::iterator it;
-        // if no contacts are already on the body we skip this
-        for(it = nodeList.begin(); it != nodeList.end(); ++it) {
-
+        if( addEdges ){
+            // Add self edge! ===========================================================
+            EdgeType * addedEdge;
             this->m_edges.push_back(new EdgeType(m_edgeCounter));
             addedEdge = this->m_edges.back();
             addedEdge->m_edgeData.m_pBody = pBody;
-            // add link
+
+            // add links
             addedEdge->m_startNode = pNode;
-            addedEdge->m_endNode = (*it);
-            addedEdge->m_twinEdge = addedEdge; // Current we dont need a twin edge, self referencing!
+            addedEdge->m_endNode = pNode;
+            addedEdge->m_twinEdge = this->m_edges.back(); // Current we dont need a twin edge, self referencing!
             // Add the edge to the nodes edge list!
             pNode->m_edgeList.push_back( addedEdge );
-            (*it)->m_edgeList.push_back( addedEdge );
             m_edgeCounter++;
-            //cout << "add edge: "<<pNode->m_nodeNumber<<" to "<<(*it)->m_nodeNumber<<" body Id:"<< RigidBodyId::getBodyIdString(pBody)<<endl;
+            //cout << "add self edge: "<<pNode->m_nodeNumber<<" to "<<pNode->m_nodeNumber<<" body Id:"<< RigidBodyId::getBodyIdString(pBody)<<endl;
+            // ===========================================================================
+
+            // iterate over the nodeList and add edges!
+            // if no contacts are already on the body we skip this
+            auto itEnd = nodeList.end();
+            for(auto it = nodeList.begin(); it != itEnd; ++it) {
+
+                this->m_edges.push_back(new EdgeType(m_edgeCounter));
+                addedEdge = this->m_edges.back();
+                addedEdge->m_edgeData.m_pBody = pBody;
+                // add link
+                addedEdge->m_startNode = pNode;
+                addedEdge->m_endNode = (*it);
+                addedEdge->m_twinEdge = addedEdge; // Current we dont need a twin edge, self referencing!
+                // Add the edge to the nodes edge list!
+                pNode->m_edgeList.push_back( addedEdge );
+                (*it)->m_edgeList.push_back( addedEdge );
+                m_edgeCounter++;
+                //cout << "add edge: "<<pNode->m_nodeNumber<<" to "<<(*it)->m_nodeNumber<<" body Id:"<< RigidBodyId::getBodyIdString(pBody)<<endl;
+            }
         }
 
         // Add new Node to the list;
@@ -625,7 +537,7 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using ContactGraphType = ContactGraphIteration;
     using NodeDataType = typename ContactGraphType::NodeDataType;
     using EdgeDataType = typename ContactGraphType::EdgeDataType;
     using EdgeType = typename ContactGraphType::EdgeType;
@@ -672,7 +584,7 @@ public:
 //        *pUBuffer = pBody->m_pSolverData->m_uBegin + pBody->m_MassMatrixInv_diag.asDiagonal() * pBody->m_h_term * m_settings.m_deltaT;
 //
 //        // Iterate over all nodes and add contribution
-//        auto nodeList = m_pGraph->m_simBodiesToContactsList[pBody];
+//        auto nodeList = m_pGraph->m_simBodiesToContactsMap[pBody];
 //        for(auto it = nodeList.begin(); it!=nodeList.end(); ++it) {
 //            *pUBuffer += pBody->m_MassMatrixInv_diag.asDiagonal() * ContactGraphType::getW_bodyRef((*it)->m_nodeData,pBody) * (*it)->m_nodeData.m_LambdaFront;
 //        }
@@ -752,7 +664,7 @@ class ContactSorProxStepNodeVisitor : public SorProxStepNodeVisitor {
 public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using ContactGraphType = ContactGraphIteration;
     using NodeDataType = typename ContactGraphType::NodeDataType;
     using EdgeDataType = typename ContactGraphType::EdgeDataType;
     using EdgeType = typename ContactGraphType::EdgeType;
@@ -1003,7 +915,7 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using ContactGraphType = ContactGraphIteration;
     using NodeDataType = typename ContactGraphType::NodeDataType;
     using EdgeDataType = typename ContactGraphType::EdgeDataType;
     using EdgeType = typename ContactGraphType::EdgeType;
@@ -1242,7 +1154,7 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
+    using ContactGraphType = ContactGraphIteration;
     using NodeDataType = typename ContactGraphType::NodeDataType;
     using EdgeDataType = typename ContactGraphType::EdgeDataType;
     using EdgeType = typename ContactGraphType::EdgeType;
@@ -1260,12 +1172,98 @@ public:
         m_alpha = alpha;
     }
 
-    void visitNode(NodeType & node) {
-        typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
 
+    template<int bodyNr>
+    inline void computeW_UCF(NodeDataType & nodeData) {
+
+            static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
+            static Matrix33 I_Jacobi_2; // this is the second part of the Jacobi;
+            static const CollisionData * pCollData;
+
+            pCollData = nodeData.m_pCollData;
+
+            if(bodyNr == 1) {
+                //Set matrix size!
+                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
+
+                updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
+                I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
+                // N direction =================================================
+                nodeData.m_W_body1.col(0).template head<3>() = - pCollData->m_cFrame.m_e_z; // I frame
+
+                nodeData.m_W_body1.col(0).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_z;
+
+                // T1 direction =================================================
+                nodeData.m_W_body1.col(1).template head<3>() = - pCollData->m_cFrame.m_e_x; // I frame
+                nodeData.m_W_body1.col(1).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_x;
+
+                // T2 direction =================================================
+                nodeData.m_W_body1.col(2).template head<3>() = - pCollData->m_cFrame.m_e_y; // I frame
+                nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
+            } else {
+                //Set matrix size!
+                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
+
+                updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
+                I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
+                // N direction =================================================
+                nodeData.m_W_body2.col(0).template head<3>() =  pCollData->m_cFrame.m_e_z; // I frame
+                nodeData.m_W_body2.col(0).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_z;
+
+                // T1 direction =================================================
+                nodeData.m_W_body2.col(1).template head<3>() =  pCollData->m_cFrame.m_e_x; // I frame
+                nodeData.m_W_body2.col(1).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_x;
+
+                // T2 direction =================================================
+                nodeData.m_W_body2.col(2).template head<3>() =  pCollData->m_cFrame.m_e_y; // I frame
+                nodeData.m_W_body2.col(2).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
+            }
+    }
+
+
+    void visitNode(NodeType & node) {
+        auto & nodeData = node.m_nodeData;
+
+        // Initialize for UCF Contact models
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
                 nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ||
                 nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel  ) {
+
+
+            const unsigned int dimSet = ContactModels::getLambdaDim(nodeData.m_contactParameter.m_contactModel);
+
+            nodeData.m_chi.setZero(dimSet);
+            nodeData.m_b.setZero(dimSet);
+            nodeData.m_LambdaBack.setZero(dimSet);
+            nodeData.m_LambdaFront.setZero(dimSet);
+            nodeData.m_R_i_inv_diag.setZero(dimSet);
+            nodeData.m_G_ii.setZero(dimSet,dimSet);
+
+            nodeData.m_eps.setZero(dimSet);
+
+            // =========================================================================================================
+
+            // Set epsilon  values
+            nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[0];
+            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[1];
+            nodeData.m_eps(2) = nodeData.m_contactParameter.m_params[1];
+
+
+            // Compute generalized force directions W
+            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED){
+                computeW_UCF<1>(nodeData);
+            }else{
+                // Contact goes into xi_N, xi_T
+                ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
+            }
+            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED){
+                computeW_UCF<2>(nodeData);
+            }else{
+                // Contact goes into xi_N, xi_T
+                ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
+            }
+
+
             // Get lambda from percussion pool otherwise set to zero
             // TODO
             nodeData.m_LambdaBack.setZero();
@@ -1338,6 +1336,7 @@ private:
     PREC m_alpha;
     InclusionSolverSettingsType m_settings;
 };
+
 
 
 
