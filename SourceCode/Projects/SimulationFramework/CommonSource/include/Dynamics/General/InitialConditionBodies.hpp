@@ -176,7 +176,7 @@ inline void applyBodyStatesTo(const RigidBodyStatesContainer & states, RigidBody
 //
 //        applyRigidBodyStateToBody( stateRef, (*bodyIt) );
 //
-//        if( (*bodyIt)->m_eState == TRigidBodyType::BodyMode::SIMULATED) {
+//        if( (*bodyIt)->m_eMode == TRigidBodyType::BodyMode::SIMULATED) {
 //            (*bodyIt)->m_pSolverData->m_t = state.m_t;
 //        }
 //

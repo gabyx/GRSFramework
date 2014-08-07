@@ -13,8 +13,8 @@
 #include "CPUTimer.hpp"
 
 
-const unsigned int InclusionSolverCO::NDOFFriction = ContactModels::UnilateralAndCoulombFrictionContactModel::nDOFFriction;
-const unsigned int InclusionSolverCO::ContactDim = ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension;
+const unsigned int InclusionSolverCO::NDOFFriction = CONTACTMODELTYPE(ContactModels::Enum::UCF)::nDOFFriction;
+const unsigned int InclusionSolverCO::ContactDim = CONTACTMODELTYPE(ContactModels::Enum::UCF)::ConvexSet::Dimension;
 
 
 InclusionSolverCO::InclusionSolverCO(std::shared_ptr< CollisionSolverType >  pCollisionSolver,
@@ -141,8 +141,8 @@ void InclusionSolverCO::solveInclusionProblem() {
         m_nLambdas = m_contactGraph.getNLambdas();
         ASSERTMSG(m_contactGraph.getNContactModelsUsed() == 1, "ContactGraph uses not homogen contact models!")
 
-        if(nodes[0]->m_nodeData.m_contactParameter.m_contactModel != ContactModels::ContactModelEnum::UCF_ContactModel){
-            ERRORMSG("The only supported contact model so far is: ContactModels::ContactModelEnum::UCF_ContactModel")
+        if(nodes[0]->m_nodeData.m_contactParameter.m_contactModel != ContactModels::Enum::UCF){
+            ERRORMSG("The only supported contact model so far is: ContactModels::Enum::UCF")
         }
         // Assign Space for matrices =====================================
         m_mu.resize(nodes.size());
@@ -177,10 +177,11 @@ void InclusionSolverCO::solveInclusionProblem() {
             pCollData = currentContactNode->m_nodeData.m_pCollData;
 
             // Write mu parameters to m_mu
-            m_mu(i) = currentContactNode->m_nodeData.m_contactParameter.m_params[2];
+            using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFD);
+            m_mu(i) = currentContactNode->m_nodeData.m_contactParameter.m_params[CMT::muIdx];
 
-            I_plus_eps(0) = 1+ currentContactNode->m_nodeData.m_contactParameter.m_params[0];
-            I_plus_eps(1) = 1+ currentContactNode->m_nodeData.m_contactParameter.m_params[1];
+            I_plus_eps(0) = 1+ currentContactNode->m_nodeData.m_contactParameter.m_params[CMT::epsNIdx];
+            I_plus_eps(1) = 1+ currentContactNode->m_nodeData.m_contactParameter.m_params[CMT::epsTIdx];
             I_plus_eps(2) = I_plus_eps(1);
 
             // iterate over all edges in current contact to build up G;
@@ -313,13 +314,13 @@ void InclusionSolverCO::solveInclusionProblem() {
         for( auto & node : nodes){
 
             pBody = node->m_nodeData.m_pCollData->m_pBody1;
-            if( pBody->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 pBody->m_pSolverData->m_uBuffer.m_front +=
                 pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body1 * (*m_P_front).segment<ContactDim>(ContactDim* node->m_nodeNumber);
             }
 
             pBody = node->m_nodeData.m_pCollData->m_pBody2;
-            if( pBody->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 pBody->m_pSolverData->m_uBuffer.m_front +=
                 pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body2 * (*m_P_front).segment<ContactDim>(ContactDim* node->m_nodeNumber);
             }

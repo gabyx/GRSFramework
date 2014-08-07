@@ -29,10 +29,7 @@ void CollisionSolver::reset() {
     removeAllContactDelegates();
 
     clearCollisionSet();
-
     m_expectedNContacts =  m_SimBodies.size() * 3;
-
-
     m_maxOverlap = 0;
 
 }
@@ -57,7 +54,9 @@ CollisionSolver::getCollisionSetRef()
 void CollisionSolver::solveCollision() {
 
 
-    reset();
+    clearCollisionSet();
+    m_expectedNContacts =  m_SimBodies.size() * 3;
+    m_maxOverlap = 0;
 
     LOGSLLEVEL2(m_pSolverLog, "---> solveCollision(): "<<std::endl;)
 

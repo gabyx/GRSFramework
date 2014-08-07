@@ -69,12 +69,14 @@ void InclusionSolverCONoG::reset() {
     m_pCollisionSolver->addContactDelegate(
         CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode >(&m_contactGraph)
     );
+    LOG(m_pSimulationLog,  "---> Registered ContactCallback in CollisionSolver for ContactGraph" << std::endl;);
 #else
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     // Setups the node fully!
     m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode >(&m_contactGraph)
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode<true> >(&m_contactGraph)
     );
+    LOG(m_pSimulationLog,  "---> Registered ContactCallback in CollisionSolver for ContactGraph" << std::endl;);
 #endif
 
 
@@ -252,7 +254,8 @@ void InclusionSolverCONoG::doSorProx() {
         bool goOnGPU = m_jorProxGPUModule.computeOnGPU(m_pCollisionSolver->getCollisionSetRef().size(), m_contactGraph.m_simBodiesToContactsMap.size());
 
         if(goOnGPU){
-           doJORProxGPU();
+           //doJORProxGPU();
+           doSORProxCPU();
         }else{
            doSORProxCPU();
         }
@@ -272,8 +275,8 @@ void InclusionSolverCONoG::doJORProxGPU(){
 
     #if HAVE_CUDA_SUPPORT == 1
     LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> Using JOR Prox Velocity (GPU): "<< std::endl;);
-    auto & contactList = m_pCollisionSolver->getCollisionSetRef();
-    m_jorProxGPUModule.initialize(contactList, m_contactGraph.m_simBodiesToContactsMap );
+    auto & nodeList = m_contactGraph.getNodeList();
+    m_jorProxGPUModule.initialize(nodeList, m_contactGraph.m_simBodiesToContactsMap, m_settings.m_alphaJORProx );
 
     #endif // HAVE_CUDA_SUPPORT
 }

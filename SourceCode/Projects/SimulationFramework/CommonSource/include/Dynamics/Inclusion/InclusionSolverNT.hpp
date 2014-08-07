@@ -338,7 +338,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
       int id2 = collSet[contactIdx].m_pBody2->m_id;
 
       // Fill the entries for Body 1 =================================================
-      if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ){
+      if( collSet[contactIdx].m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ){
 
         // Contact goes into W_N, W_T
         updateSkewSymmetricMatrix<>( collSet[contactIdx].m_r_S1C1, I_r_SiCi_hat);
@@ -373,14 +373,14 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WT_Minv_h_dt(m_nDofFriction*contactIdx +1)  += w_T_part.dot( m_Minv_h_dt.template segment<NDOFuBody>( id1 * NDOFuBody ) );
 
       }
-      else if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ){
+      else if( collSet[contactIdx].m_pBody1->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
         // Contact goes into xi_N, xi_T
 
       }
 
 
       // Fill the entries for Body 2 =================================================
-      if( collSet[contactIdx].m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ){
+      if( collSet[contactIdx].m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ){
 
         // Contact goes into W_N, W_T
         updateSkewSymmetricMatrix<>( collSet[contactIdx].m_r_S2C2, I_r_SiCi_hat);
@@ -414,7 +414,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WT_Minv_h_dt(m_nDofFriction*contactIdx + 1) += w_T_part.dot( m_Minv_h_dt.template segment<NDOFuBody>( id2 * NDOFuBody ));
 
       }
-      else if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ){
+      else if( collSet[contactIdx].m_pBody1->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
         // Contact goes into xi_N, xi_T
       }
 

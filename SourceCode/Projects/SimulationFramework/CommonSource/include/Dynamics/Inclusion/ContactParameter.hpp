@@ -8,18 +8,18 @@
 /**
 * @ingroup Contact
 * @brief This is the ContactParameter class, which stores the contact parameters.
-* For  UCF_ContactModel
+* For  UCF
 *    m_params[0];	///< The contact restitution coefficient in normal direction, \f$\epsilon_N\f$.
 *    m_params[1];	///< The contact restitution coefficiend in tangential direction, \f$\epsilon_T\f$.
 *    m_params[2];			///< The friction coefficient, \f$\mu\f$.
 *
-* For  UCFD_ContactModel
+* For  UCFD
 *    m_params[0];	///< The contact restitution coefficient in normal direction, \f$\epsilon_N\f$.
 *    m_params[1];	///< The contact restitution coefficiend in tangential direction, \f$\epsilon_T\f$.
 *    m_params[2];			///< The friction coefficient, \f$\mu\f$.
 *    m_params[3];			///< The inverse damping constant for the unilateral contact \f$dinv_N\f$.
 *    m_params[4];			///< The inverse damping constant for the frictional contact \f$dinv_T\f$.
-* For  UCFDD_ContactModel
+* For  UCFDD
 *    m_params[0];	///< The contact restitution coefficient in normal direction, \f$\epsilon_N\f$.
 *    m_params[1];	///< The contact restitution coefficiend in tangential direction, \f$\epsilon_T\f$.
 *    m_params[2];			///< The friction coefficient, \f$\mu\f$.
@@ -32,11 +32,11 @@ struct ContactParameter{
 
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    ContactParameter(ContactModels::ContactModelEnum e, std::initializer_list<PREC> it ): m_params(it), m_contactModel(e){}
-    ContactParameter(): m_contactModel(ContactModels::ContactModelEnum::UCF_ContactModel), m_params{0.5,0.5,0.3}{}
+    ContactParameter(ContactModels::Enum e, std::initializer_list<PREC> it ): m_params(it), m_contactModel(e){}
+    ContactParameter(): m_contactModel(ContactModels::Enum::UCF), m_params{0.5,0.5,0.3}{}
 
     std::vector<PREC> m_params;
-    ContactModels::ContactModelEnum m_contactModel;
+    ContactModels::Enum m_contactModel;
 
     /** Copy constructors
     * not for ContactParameter a(ContactParameter::create_UCF_ConctactModel(...) );
@@ -77,14 +77,14 @@ struct ContactParameter{
     * the move constructor is called here to init the return value
     */
     static ContactParameter createParams_UCF_ContactModel(PREC epsN, PREC epsT, PREC mu){
-        return ContactParameter(ContactModels::ContactModelEnum::UCF_ContactModel, {epsN,epsT,mu} );
+        return ContactParameter(ContactModels::Enum::UCF, {epsN,epsT,mu} );
     }
 
     static ContactParameter createParams_UCFD_ContactModel(PREC epsN, PREC epsT, PREC mu, PREC dinv_N, PREC dinv_T){
-        return ContactParameter(ContactModels::ContactModelEnum::UCFD_ContactModel, {epsN,epsT,mu,dinv_N,dinv_T} );
+        return ContactParameter(ContactModels::Enum::UCFD, {epsN,epsT,mu,dinv_N,dinv_T} );
     }
     static ContactParameter createParams_UCFDD_ContactModel(PREC epsN, PREC epsT, PREC mu, PREC dinv_N, PREC dinv_TFix, PREC gammaMax, PREC epsilon){
-        return ContactParameter(ContactModels::ContactModelEnum::UCFD_ContactModel, {epsN,epsT,mu,dinv_N,dinv_TFix,gammaMax,epsilon} );
+        return ContactParameter(ContactModels::Enum::UCFD, {epsN,epsT,mu,dinv_N,dinv_TFix,gammaMax,epsilon} );
     }
 
 };

@@ -13,7 +13,7 @@
 #include "CollisionData.hpp"
 
 // This two data classes are used for  m_eContactModel = ContactModels::N_ContactModel,
-//                                      m_eContactModel = ContactModels::UCF_ContactModel,
+//                                      m_eContactModel = ContactModels::UCF,
 //                                      m_eContactModel = ContactModels::UCFC_ContactModel,
 class ContactGraphNodeData {
 public:

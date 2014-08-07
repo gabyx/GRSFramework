@@ -1885,7 +1885,7 @@ private:
             for(auto & b : m_bodyListGroup)  {
                 b.m_body->m_pSolverData = new typename RigidBodyType::RigidBodySolverDataType();
                 // apply first to all bodies :-)
-                b.m_body->m_eState = m_eBodiesState;
+                b.m_body->m_eMode = m_eBodiesState;
             }
 
             // Mass ============================================================

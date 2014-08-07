@@ -89,24 +89,24 @@ public:
         setContactModel(addedNode->m_nodeData);
 
         // FIRST BODY!
-        if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+        if( pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
             computeW<1>( addedNode->m_nodeData);
             connectNode<1>( addedNode);
 
-        } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
+        } else if( pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
 
 
         // SECOND BODY!
-        if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+        if( pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
             computeW<2>( addedNode->m_nodeData);
             connectNode<2>( addedNode);
 
-        } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
+        } else if( pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
             // Contact goes into xi_N, xi_T
             ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
         }
@@ -134,7 +134,7 @@ public:
         return BitCount::count(m_usedContactModels);
     }
 private:
-    using ContactModelEnumIntType = typename std::underlying_type<ContactModels::ContactModelEnum>::type;
+    using ContactModelEnumIntType = typename std::underlying_type<ContactModels::Enum>::type;
     ContactModelEnumIntType m_usedContactModels; ///< Bitflags which mark all used contactmodels
 
     unsigned int m_nLambdas = 0; ///< How many forces we have counted over all nodes
@@ -145,19 +145,20 @@ private:
         nodeData.m_contactParameter  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,
                                        nodeData.m_pCollData->m_pBody2->m_eMaterial);
 
-        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ) {
-
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ) {
+            using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
             // Set flag for the corresponding model
-            m_usedContactModels |= 1 << EnumConversion::toIntegral(ContactModels::ContactModelEnum::UCF_ContactModel);
+            m_usedContactModels |= 1 << EnumConversion::toIntegral(ContactModels::Enum::UCF);
 
-            const unsigned int dimSet = ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension;
+            const unsigned int dimSet = CONTACTMODELTYPE(ContactModels::Enum::UCF)::ConvexSet::Dimension;
             m_nLambdas += dimSet; // Add to counter
 
             nodeData.m_chi.setZero(dimSet);
             nodeData.m_eps.setZero(dimSet);
 
-            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[1];
-            nodeData.m_eps(2) = nodeData.m_contactParameter.m_params[1];
+            nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[CMT::epsNIdx];
+            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[CMT::epsTIdx];
+            nodeData.m_eps(2) = nodeData.m_eps(1);
 
         } else {
             ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
@@ -169,7 +170,7 @@ private:
 
 
 
-        if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel) {
+        if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF) {
 
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
@@ -181,7 +182,7 @@ private:
 
 
             if(bodyNr == 1) {
-                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
+                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -197,7 +198,7 @@ private:
                 nodeData.m_W_body1.col(2).template head<3>() = - pCollData->m_cFrame.m_e_y; // I frame
                 nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
             } else {
-                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
+                nodeData.m_W_body2.setZero(NDOFuBody,ContactModels::getLambdaDim(ContactModels::Enum::UCF));
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -400,7 +401,7 @@ public:
     }
 
 private:
-    using ContactModelEnumIntType = typename std::underlying_type<ContactModels::ContactModelEnum>::type;
+    using ContactModelEnumIntType = typename std::underlying_type<ContactModels::Enum>::type;
     ContactModelEnumIntType m_usedContactModels; ///< Bitflags which mark all used contactmodels
 
     bool m_firstIteration;
@@ -414,12 +415,23 @@ private:
         nodeData.m_contactParameter  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,
                                                                                 nodeData.m_pCollData->m_pBody2->m_eMaterial);
 
-        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
+                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
+                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD
           ) {
             // Set flag for the corresponding model
             m_usedContactModels |= 1 << EnumConversion::toIntegral(nodeData.m_contactParameter.m_contactModel);
+
+            //Set the minmial stuff
+            const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
+            nodeData.m_eps.setZero(dimSet);
+            nodeData.m_chi.setZero(dimSet);
+
+            // Set epsilon  values
+            using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
+            nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[CMT::epsNIdx];
+            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[CMT::epsTIdx];
+            nodeData.m_eps(2) = nodeData.m_eps(1);
 
         } else {
             ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
@@ -429,31 +441,33 @@ private:
 
     template<bool addEdges = true>
     inline void initNode(NodeType * pNode){
-        std::cout << " ADDED CONTACT " << std::endl;
         // Compute general parameters for the contact
         setContactModel(pNode->m_nodeData);
 
         // FIRST BODY!
         RigidBodyType * pBody = pNode->m_nodeData.m_pCollData->m_pBody1;
-        if( pBody->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
-            initNodeBody<1,addEdges>(pNode,pBody);
+        if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            initNodeSimBody<1,addEdges>(pNode,pBody);
+        }else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
+            ERRORMSG("ContactGraph:: Animated body, node init not implemented")
         }
 
         // SECOND BODY!
         pBody = pNode->m_nodeData.m_pCollData->m_pBody2;
-        if( pBody->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
-           initNodeBody<2,addEdges>(pNode,pBody);
+        if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+           initNodeSimBody<2,addEdges>(pNode,pBody);
+        }else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
+           ERRORMSG("ContactGraph:: Animated body, node init not implemented")
         }
     }
 
     template<int bodyNr, bool addEdges = true>
-    inline void initNodeBody(NodeType * pNode, RigidBodyType * pBody) {
+    inline void initNodeSimBody(NodeType * pNode, RigidBodyType * pBody) {
 
         // Get all contacts on this body and connect to them (later) =========================
-        std::cout << " ADDED CONTACT " << std::endl;
         NodeListType & nodeList = m_simBodiesToContactsMap[pBody];
 
-        //Set Flag that this Body in ContactGraph
+        //Set Flag that this Body is in ContactGraph
         pBody->m_pSolverData->m_bInContactGraph = true;
         // Unset the flag when this Node is removed;
 
@@ -592,40 +606,41 @@ public:
 //    }
 
     void setNewDamping(typename ContactGraphType::NodeDataType & nodeData) {
-
-        nodeData.m_contactParameter.m_params[3] = 1e-6;
-        nodeData.m_contactParameter.m_params[4] = 1e-6;
+        using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFD);
+        nodeData.m_contactParameter.m_params[CMT::d_NIdx] = 1e-6;
+        nodeData.m_contactParameter.m_params[CMT::d_TIdx] = 1e-6;
         recalculateR(nodeData, nodeData.m_contactParameter);
     }
 
     void recalculateR(typename ContactGraphType::NodeDataType & nodeData, ContactParameter & contactParameter) {
 
         nodeData.m_G_ii.setZero();
-        if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED) {
+        if(nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
             nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
         }
         // SECOND BODY!
-        if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+        if(nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
             nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
         }
 
 
 
 
-        if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel) {
-            Vector3 dinv(contactParameter.m_params[3], //d_N
-                         contactParameter.m_params[4], //d_T
-                         contactParameter.m_params[4]); //d_T
+        if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD) {
+            using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFD);
+            Vector3 dinv(contactParameter.m_params[CMT::d_NIdx], //d_N
+                         contactParameter.m_params[CMT::d_TIdx], //d_T
+                         contactParameter.m_params[CMT::d_TIdx]); //d_T
             nodeData.m_G_ii.diagonal() += 1.0/m_settings.m_deltaT*dinv;
-        } else if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel) {
-
+        } else if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD) {
+            using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFDD);
             Vector3 dinv;
-            dinv(0) = contactParameter.m_params[3];
+            dinv(0) = contactParameter.m_params[CMT::d_NIdx];
             // if lambda_N <= eps, set damping to d_Tfix
-            if( std::abs(nodeData.m_LambdaBack(0)) <= contactParameter.m_params[6] ) {
-                dinv.tail<2>().setConstant( contactParameter.m_params[4] );
+            if( std::abs(nodeData.m_LambdaBack(0)) <= contactParameter.m_params[CMT::epsIdx] ) {
+                dinv.tail<2>().setConstant( contactParameter.m_params[CMT::d_TfixIdx] );
             } else { //dinvT = gammaMax / (mu *lambdaN)
-                dinv.tail<2>().setConstant( contactParameter.m_params[5] / (contactParameter.m_params[2]*nodeData.m_LambdaBack(0) ) );
+                dinv.tail<2>().setConstant( contactParameter.m_params[CMT::gamma_maxIdx] / (contactParameter.m_params[CMT::muIdx]*nodeData.m_LambdaBack(0) ) );
             }
             nodeData.m_G_ii.diagonal() += 1.0/m_settings.m_deltaT*dinv;
         }
@@ -689,54 +704,54 @@ public:
 
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
-        if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED) {
+        if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
 
 
-        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel  ) {
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
+                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
+                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD  ) {
 
 
             // Init the prox value
             nodeData.m_LambdaFront = nodeData.m_b;
 
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_front ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
             }
 
             // Experimental
             //Relaxation term damper (take care R_i_inv needs to be initialized as well!)
-            if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel) {
-
+            if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD) {
+                using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFD);
                 //Drive damping to zero after some iterations:
                 if (m_globalIterationCounter == 300) {
                     //nodeData.m_contactParameter.m_params[4] = 1e-7;
                 }
 
-                nodeData.m_LambdaFront(0) += nodeData.m_LambdaBack(0) * nodeData.m_contactParameter.m_params[3] / m_settings.m_deltaT;
-                nodeData.m_LambdaFront(1) += nodeData.m_LambdaBack(1) * nodeData.m_contactParameter.m_params[4] / m_settings.m_deltaT;
-                nodeData.m_LambdaFront(2) += nodeData.m_LambdaBack(2) * nodeData.m_contactParameter.m_params[4] / m_settings.m_deltaT;
+                nodeData.m_LambdaFront(0) += nodeData.m_LambdaBack(0) * nodeData.m_contactParameter.m_params[CMT::d_NIdx] / m_settings.m_deltaT;
+                nodeData.m_LambdaFront(1) += nodeData.m_LambdaBack(1) * nodeData.m_contactParameter.m_params[CMT::d_TIdx] / m_settings.m_deltaT;
+                nodeData.m_LambdaFront(2) += nodeData.m_LambdaBack(2) * nodeData.m_contactParameter.m_params[CMT::d_TIdx] / m_settings.m_deltaT;
 
 
-            } else if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel) {
-
+            } else if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD) {
+                using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFDD);
                 recalculateR(nodeData,nodeData.m_contactParameter);
                 // if lambda_N <= eps, set damping to d_Tfix
                 PREC dinvT;
-                if( std::abs(nodeData.m_LambdaBack(0)) <= nodeData.m_contactParameter.m_params[6] ) {
-                    dinvT = nodeData.m_contactParameter.m_params[4];
+                if( std::abs(nodeData.m_LambdaBack(0)) <= nodeData.m_contactParameter.m_params[CMT::epsIdx] ) {
+                    dinvT = nodeData.m_contactParameter.m_params[CMT::d_TfixIdx];
                 } else { //dinvT = gammaMax / (mu *lambdaN)
-                    dinvT = nodeData.m_contactParameter.m_params[5] / (nodeData.m_contactParameter.m_params[2]*nodeData.m_LambdaBack(0) );
+                    dinvT = nodeData.m_contactParameter.m_params[CMT::gamma_maxIdx] / (nodeData.m_contactParameter.m_params[CMT::muIdx]*nodeData.m_LambdaBack(0) );
                 }
 
-                nodeData.m_LambdaFront(0) += nodeData.m_LambdaBack(0) * nodeData.m_contactParameter.m_params[3] / m_settings.m_deltaT;
+                nodeData.m_LambdaFront(0) += nodeData.m_LambdaBack(0) * nodeData.m_contactParameter.m_params[CMT::d_NIdx] / m_settings.m_deltaT;
                 nodeData.m_LambdaFront(1) += nodeData.m_LambdaBack(1) * dinvT / m_settings.m_deltaT;
                 nodeData.m_LambdaFront(2) += nodeData.m_LambdaBack(2) * dinvT / m_settings.m_deltaT;
             }
@@ -776,7 +791,7 @@ public:
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
             decltype(nodeData.m_LambdaFront) deltaLambda = nodeData.m_LambdaFront - nodeData.m_LambdaBack ;
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
 
                 // Velocity update (wahrscheinlich Auslöschung bei Lambda)
@@ -823,7 +838,7 @@ public:
 
             }
             // SECOND BODY
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
 
                 // Velocity update (wahrscheinlich Auslöschung bei Lambda)
@@ -940,31 +955,32 @@ public:
 
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
-        if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED) {
+        if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
 
 
-        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ) {
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
+                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ) {
 
             //First normal direction ===================================
 
             PREC lambda_N = nodeData.m_b(0);
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
                 lambda_N += nodeData.m_W_body1.transpose().row(0) * uCache1 ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
                 lambda_N += nodeData.m_W_body2.transpose().row(0) * uCache2;
             }
 
             // Damping
-            if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel) {
-                lambda_N += nodeData.m_LambdaBack(0) * nodeData.m_contactParameter.m_params[3] / m_settings.m_deltaT;
+            if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD) {
+                using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFD);
+                lambda_N += nodeData.m_LambdaBack(0) * nodeData.m_contactParameter.m_params[CMT::d_NIdx] / m_settings.m_deltaT;
             }
             lambda_N = -nodeData.m_R_i_inv_diag(0) * lambda_N;
             lambda_N += nodeData.m_LambdaBack(0);
@@ -976,12 +992,12 @@ public:
             nodeData.m_LambdaFront(0) = lambda_N;
             PREC deltaLambda_N = lambda_N - nodeData.m_LambdaBack(0); // Delta lambda_N
 
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_u1BufferPtr->m_front = uCache1
                                                   + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() *
                                                   nodeData.m_W_body1.col(0) * deltaLambda_N;
             }
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_u2BufferPtr->m_front = uCache2
                                                   + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() *
                                                   nodeData.m_W_body2.col(0) * deltaLambda_N;
@@ -993,23 +1009,25 @@ public:
             // Second Tangential direction =============================
             Vector2 lambda_T = nodeData.m_b.tail<2>();
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 lambda_T += nodeData.m_W_body1.transpose().bottomRows<2>() * nodeData.m_u1BufferPtr->m_front ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 lambda_T += nodeData.m_W_body2.transpose().bottomRows<2>() * nodeData.m_u2BufferPtr->m_front;
             }
             // Damping
-            if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel) {
-                lambda_T += nodeData.m_LambdaBack.tail<2>() * (nodeData.m_contactParameter.m_params[4] / m_settings.m_deltaT);
+            if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD) {
+                 using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFD);
+                lambda_T += nodeData.m_LambdaBack.tail<2>() * (nodeData.m_contactParameter.m_params[CMT::d_TIdx] / m_settings.m_deltaT);
             }
 
             lambda_T = - (nodeData.m_R_i_inv_diag.tail<2>().asDiagonal() * lambda_T).eval();
             lambda_T += nodeData.m_LambdaBack.tail<2>();
 
             //Prox
-            Prox::ProxFunction<ConvexSets::Disk>::doProxSingle( nodeData.m_contactParameter.m_params[2] * lambda_N, lambda_T );
+            using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFD);
+            Prox::ProxFunction<ConvexSets::Disk>::doProxSingle( nodeData.m_contactParameter.m_params[CMT::muIdx] * lambda_N, lambda_T );
 
             nodeData.m_LambdaFront.tail<2>() =  lambda_T;
 
@@ -1017,7 +1035,7 @@ public:
 
 
 
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 nodeData.m_u1BufferPtr->m_front +=
                     nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1.rightCols<2>() * lambda_T;
@@ -1057,7 +1075,7 @@ public:
                 }
 
             }
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 nodeData.m_u2BufferPtr->m_front +=
                     nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal()*nodeData.m_W_body2.rightCols<2>() * lambda_T;
@@ -1184,7 +1202,7 @@ public:
 
             if(bodyNr == 1) {
                 //Set matrix size!
-                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
+                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -1202,7 +1220,7 @@ public:
                 nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
             } else {
                 //Set matrix size!
-                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
+                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -1225,40 +1243,34 @@ public:
         auto & nodeData = node.m_nodeData;
 
         // Initialize for UCF Contact models
-        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel  ) {
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
+                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
+                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD  ) {
 
 
-            const unsigned int dimSet = ContactModels::getLambdaDim(nodeData.m_contactParameter.m_contactModel);
+            const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
 
-            nodeData.m_chi.setZero(dimSet);
+            // chi and eps was already initialized in contactGraph!
             nodeData.m_b.setZero(dimSet);
             nodeData.m_LambdaBack.setZero(dimSet);
             nodeData.m_LambdaFront.setZero(dimSet);
             nodeData.m_R_i_inv_diag.setZero(dimSet);
             nodeData.m_G_ii.setZero(dimSet,dimSet);
 
-            nodeData.m_eps.setZero(dimSet);
-
             // =========================================================================================================
 
-            // Set epsilon  values
-            nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[0];
-            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[1];
-            nodeData.m_eps(2) = nodeData.m_contactParameter.m_params[1];
-
-
             // Compute generalized force directions W
-            if( nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED){
+            auto state = nodeData.m_pCollData->m_pBody1->m_eMode;
+            if(  state == RigidBodyType::BodyMode::SIMULATED){
                 computeW_UCF<1>(nodeData);
-            }else{
+            }else if(state == RigidBodyType::BodyMode::ANIMATED){
                 // Contact goes into xi_N, xi_T
                 ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
             }
-            if( nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED){
+            state = nodeData.m_pCollData->m_pBody2->m_eMode;
+            if(  state == RigidBodyType::BodyMode::SIMULATED){
                 computeW_UCF<2>(nodeData);
-            }else{
+            }else if(state == RigidBodyType::BodyMode::ANIMATED){
                 // Contact goes into xi_N, xi_T
                 ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
             }
@@ -1273,7 +1285,7 @@ public:
 
             // u_0 , calculate const b
             // First Body
-            if(nodeData.m_pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED) {
+            if(nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
 
                 // m_front is zero here-> see DynamicsSystem sets it to zero!
                 nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
@@ -1283,7 +1295,7 @@ public:
                 nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
             }
             // SECOND BODY!
-            if(nodeData.m_pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if(nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 // m_front is zero here-> see DynamicsSystem sets it to zero!
                 nodeData.m_u2BufferPtr->m_front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack );
@@ -1293,15 +1305,17 @@ public:
                 nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
             }
 
-            if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFD_ContactModel) {
-                Vector3 d(  nodeData.m_contactParameter.m_params[3], //d_N
-                            nodeData.m_contactParameter.m_params[4], //d_T
-                            nodeData.m_contactParameter.m_params[4]); //d_T
+            if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD) {
+                using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFD);
+                Vector3 d(  nodeData.m_contactParameter.m_params[CMT::d_NIdx], //d_N
+                            nodeData.m_contactParameter.m_params[CMT::d_TIdx], //d_T
+                            nodeData.m_contactParameter.m_params[CMT::d_TIdx]);//d_T
                 nodeData.m_G_ii.diagonal() += 1.0/m_settings.m_deltaT*d;
-            } else if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCFDD_ContactModel) {
-                Vector3 d(  nodeData.m_contactParameter.m_params[3], //d_N
-                            nodeData.m_contactParameter.m_params[4], //d_TFix
-                            nodeData.m_contactParameter.m_params[4]); //d_TFix
+            } else if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD) {
+                using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFDD);
+                Vector3 d(  nodeData.m_contactParameter.m_params[CMT::d_NIdx],    //d_N
+                            nodeData.m_contactParameter.m_params[CMT::d_TfixIdx], //d_TFix
+                            nodeData.m_contactParameter.m_params[CMT::d_TfixIdx]);//d_TFix
                 nodeData.m_G_ii.diagonal() += 1.0/m_settings.m_deltaT*d;
             }
 
