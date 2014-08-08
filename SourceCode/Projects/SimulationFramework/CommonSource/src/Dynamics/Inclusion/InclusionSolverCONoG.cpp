@@ -149,7 +149,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
     // Solve Inclusion
 
-        LOGSLLEVEL1_CONTACT(m_pSolverLog,  "--->  nContacts: "<< m_nContacts <<std::endl;);
+        LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> nContacts: "<< m_nContacts <<std::endl;);
 
 
         // =============================================================================================================
@@ -212,11 +212,12 @@ void InclusionSolverCONoG::doJorProx() {
 #endif
 }
 
-
+template<bool onlyNotInContactGraph> // default to false = all bodies
 void InclusionSolverCONoG::integrateAllBodyVelocities() {
-    for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); ++bodyIt) {
-        // All bodies also the ones not in the contact graph...
-        (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_settings.m_deltaT;
+    for( auto & bodyPtr : m_SimBodies){
+        if( (onlyNotInContactGraph && !bodyPtr->m_pSolverData->m_bInContactGraph) || onlyNotInContactGraph == false){
+           bodyPtr->m_pSolverData->m_uBuffer.m_front += bodyPtr->m_pSolverData->m_uBuffer.m_back + bodyPtr->m_MassMatrixInv_diag.asDiagonal()  *  bodyPtr->m_h_term * m_settings.m_deltaT;
+        }
     }
 }
 
@@ -235,13 +236,14 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
 
 
-    // Integrate all bodies!
-    for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); ++bodyIt) {
+    // Integrate all bodies and save m_back, this integration needs to be after applyNode above (because m_back is used !!!) !
+    for(auto & bodyPtr : m_SimBodies) {
         // All bodies also the ones not in the contact graph...
         // add u_s + M^⁻1*h*deltaT ,  all contact forces initial values have already been applied!
-        (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_settings.m_deltaT;
-        (*bodyIt)->m_pSolverData->m_uBuffer.m_back = (*bodyIt)->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
+        bodyPtr->m_pSolverData->m_uBuffer.m_front += bodyPtr->m_pSolverData->m_uBuffer.m_back + bodyPtr->m_MassMatrixInv_diag.asDiagonal()  *  bodyPtr->m_h_term * m_settings.m_deltaT;
+        bodyPtr->m_pSolverData->m_uBuffer.m_back  = bodyPtr->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
     }
+
 }
 
 
@@ -254,8 +256,8 @@ void InclusionSolverCONoG::doSorProx() {
         bool goOnGPU = m_jorProxGPUModule.computeOnGPU(m_pCollisionSolver->getCollisionSetRef().size(), m_contactGraph.m_simBodiesToContactsMap.size());
 
         if(goOnGPU){
-           //doJORProxGPU();
-           doSORProxCPU();
+           doJORProxGPU();
+           //doSORProxCPU();
         }else{
            doSORProxCPU();
         }
@@ -271,14 +273,19 @@ void InclusionSolverCONoG::doSorProx() {
 }
 
 void InclusionSolverCONoG::doJORProxGPU(){
-    ASSERTMSG(HAVE_CUDA_SUPPORT == 1, "Calling doJORProxGPU without having CUDA Support! This should not happen!")
-
     #if HAVE_CUDA_SUPPORT == 1
-    LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> Using JOR Prox Velocity (GPU): "<< std::endl;);
-    auto & nodeList = m_contactGraph.getNodeList();
-    m_jorProxGPUModule.initialize(nodeList, m_contactGraph.m_simBodiesToContactsMap, m_settings.m_alphaJORProx );
+        LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> Using JOR Prox Velocity (GPU): "<< std::endl;);
+        auto & nodeList = m_contactGraph.getNodeList();
 
-    #endif // HAVE_CUDA_SUPPORT
+
+        m_jorProxGPUModule.runOnGPU(nodeList, m_contactGraph.m_simBodiesToContactsMap, m_settings.m_alphaJORProx );
+
+        // Integrate all bodies which have not been in the contact graph:
+        integrateAllBodyVelocities<true>();
+
+    #else
+        ERRORMSG("Calling this function without CUDA Support is wrong!")
+    #endif
 }
 
 void InclusionSolverCONoG::doSORProxCPU(){

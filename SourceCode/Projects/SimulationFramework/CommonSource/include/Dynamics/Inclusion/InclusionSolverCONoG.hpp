@@ -101,6 +101,7 @@ protected:
     #endif
     void doJORProxGPU();
 
+    template<bool onlyNotInContactGraph = false>
     void integrateAllBodyVelocities();
 
     inline void doJorProx();
