@@ -323,7 +323,7 @@ void InclusionSolverCONoG::doSORProxCPU(){
             break;
         }
         #if OUTPUT_SIMDATAITERATION_FILE == 1
-            if(m_bConverged == false && m_globalIterationCounter >= m_settings.m_MinIter){
+            if(m_globalIterationCounter >= m_settings.m_MinIter){
                 m_iterationDataFile << m_maxResidual << "\t";
             }
         #endif // OUTPUT_SIMDATAITERATION_FILE
@@ -331,9 +331,7 @@ void InclusionSolverCONoG::doSORProxCPU(){
 
 
     #if OUTPUT_SIMDATAITERATION_FILE == 1
-            if(m_bConverged == false && m_globalIterationCounter >= m_settings.m_MinIter){
-                m_iterationDataFile << std::endl;
-            }
+        m_iterationDataFile << std::endl;
     #endif // OUTPUT_SIMDATAITERATION_FILE
 
     }
