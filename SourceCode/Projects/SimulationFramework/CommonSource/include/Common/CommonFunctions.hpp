@@ -288,9 +288,24 @@ inline bool stringToVector4( TVector4 & v, const std::string & s) {
 * Generates count random value and returns the last one.
 */
 template<typename PREC, typename Generator, typename Distribution>
-inline PREC genRandomValues(PREC  value, Generator & g, Distribution & d, unsigned int count) {
+inline PREC genRandomValues(Generator & g, Distribution & d, unsigned int count) {
+    PREC value;
     for(unsigned int i= 0; i<count; ++i) {
         value = d(g);
+    }
+    return value;
+}
+
+/**
+* Generates count random vectors and returns the last one.
+*/
+template<typename PREC, typename Generator, typename Distribution>
+inline typename MyMatrix<PREC>::Vector3 genRandomVec(Generator & g, Distribution & d, unsigned int count) {
+    typename MyMatrix<PREC>::Vector3 value;
+    for(unsigned int i= 0; i<count; ++i) {
+        value(0) = d(g);
+        value(1) = d(g);
+        value(2) = d(g);
     }
     return value;
 }

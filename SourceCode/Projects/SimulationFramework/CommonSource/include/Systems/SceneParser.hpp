@@ -492,12 +492,12 @@ private:
 
 
                 RigidBodyIdType diffId = m_startIdGroup; // id to generate to correct amount of random values!
-                double radius = uni(gen); // generate first value
+                PREC radius = uni(gen); // generate first value
                 auto endIt = m_bodyListGroup->end();
                 for(auto bodyIt = m_bodyListGroup->begin(); bodyIt != endIt; ++bodyIt) {
 
                     // Generate the intermediate random values if there are any
-                    radius = Utilities::genRandomValues(radius,gen,uni,bodyIt->m_initState.m_id-diffId); // (id:16 - id:13 = 3 values, 13 is already generated)
+                    radius = Utilities::genRandomValues<PREC>(gen,uni,bodyIt->m_initState.m_id-diffId); // (id:16 - id:13 = 3 values, 13 is already generated)
                     diffId = bodyIt->m_initState.m_id; // update current diffId;
 
                     bodyIt->m_scale = Vector3(radius,radius,radius);
@@ -801,7 +801,7 @@ private:
             unsigned int id = uni(gen); // generate first value
             for(auto & b: *m_bodyListGroup) {
 
-                id = Utilities::genRandomValues(id,gen,uni,b.m_initState.m_id - diffId);
+                id = Utilities::genRandomValues<unsigned int>(gen,uni,b.m_initState.m_id - diffId);
                 diffId = b.m_initState.m_id;
 
                 auto it = m_globalGeometries->find(id);
