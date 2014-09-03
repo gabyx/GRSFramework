@@ -256,6 +256,8 @@ public:
                 m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT;
             } else if (method == "SORFull") {
                 m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_FULL;
+            } else if (method == "SORNormalTangential") {
+                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_NORMAL_TANGENTIAL;
             } else {
                 THROWEXCEPTION("---> String conversion in InclusionSolverSettings: method failed: not a valid setting");
             }
@@ -497,7 +499,7 @@ private:
                 for(auto bodyIt = m_bodyListGroup->begin(); bodyIt != endIt; ++bodyIt) {
 
                     // Generate the intermediate random values if there are any
-                    radius = Utilities::genRandomValues<PREC>(gen,uni,bodyIt->m_initState.m_id-diffId); // (id:16 - id:13 = 3 values, 13 is already generated)
+                    radius = Utilities::genRandomValues<PREC>(radius, gen,uni,bodyIt->m_initState.m_id-diffId); // (id:16 - id:13 = 3 values, 13 is already generated)
                     diffId = bodyIt->m_initState.m_id; // update current diffId;
 
                     bodyIt->m_scale = Vector3(radius,radius,radius);
@@ -513,7 +515,6 @@ private:
         } else {
             THROWEXCEPTION("---> The attribute 'distribute' '" + type + std::string("' of 'Sphere' has no implementation in the parser"));
         }
-
 
     }
     void parseHalfspaceGeometry( XMLNodeType halfspace) {
@@ -724,7 +725,7 @@ private:
             auto it = m_globalGeometries->find(id);
             // it->second is the GeometryType in RigidBody
             if(it == m_globalGeometries->end()) {
-                THROWEXCEPTION("---> Geometry search in parseGlobalGeomId: failed!");
+                THROWEXCEPTION("---> Geometry search in parseGlobalGeomId: failed for id: " << id << std::endl);
             }
 
             for(auto & b : *m_bodyListGroup) {
@@ -754,7 +755,7 @@ private:
                 auto it = m_globalGeometries->find(id);
                 // it->second is the GeometryType in RigidBody
                 if(it == m_globalGeometries->end()) {
-                    THROWEXCEPTION("---> parseGlobalGeomId: Geometry search failed!");
+                    THROWEXCEPTION("---> parseGlobalGeomId: Geometry search failed for id: " << id << std::endl);
                 }
 
                 GetScaleOfGeomVisitor vis(b.m_scale);
@@ -799,15 +800,16 @@ private:
             RigidBodyIdType diffId = m_startIdGroup; // id to generate the correct amount of random values!
 
             unsigned int id = uni(gen); // generate first value
+            std::cout << id << std::endl;
             for(auto & b: *m_bodyListGroup) {
-
-                id = Utilities::genRandomValues<unsigned int>(gen,uni,b.m_initState.m_id - diffId);
+                std::cout << b.m_initState.m_id - diffId << std::endl;
+                id = Utilities::genRandomValues<unsigned int>(id,gen,uni,b.m_initState.m_id - diffId);
                 diffId = b.m_initState.m_id;
 
                 auto it = m_globalGeometries->find(id);
                 // it->second is the GeometryType in RigidBody
                 if(it == m_globalGeometries->end()) {
-                    THROWEXCEPTION("---> Geometry search in parseGlobalGeomId: failed!");
+                    THROWEXCEPTION("---> Geometry search in parseGlobalGeomId: failed for id: " << id << std::endl);
                 }
 
                 GetScaleOfGeomVisitor vis(b.m_scale);

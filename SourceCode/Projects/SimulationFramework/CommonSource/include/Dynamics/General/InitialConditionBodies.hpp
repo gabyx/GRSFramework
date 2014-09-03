@@ -44,7 +44,7 @@ void setupPositionBodiesLinear(
 
         if(jitter) {
 
-            random_vec = Utilities::genRandomVec<PREC>(gen,uni, b.m_initState.m_id - diffId);
+            random_vec = Utilities::genRandomVec<PREC>(random_vec,gen,uni, b.m_initState.m_id - diffId);
             diffId = b.m_initState.m_id;
 
             random_vec = random_vec.cross(dir);
@@ -89,7 +89,7 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
         state.m_q.template head<3>() = Vector3(index_x * d - 0.5*(gDim_x-1)*d, index_y*d - 0.5*(gDim_y-1)*d , index_z*d) + vec_trans;
 
         if(jitter) {
-            random_vec = Utilities::genRandomVec<PREC>(gen,uni, b.m_initState.m_id - diffId);
+            random_vec = Utilities::genRandomVec<PREC>(random_vec,gen,uni, b.m_initState.m_id - diffId);
             diffId = b.m_initState.m_id ;
 
             random_vec.normalize();

@@ -26,12 +26,17 @@ InclusionSolverCONoG::InclusionSolverCONoG(std::shared_ptr< CollisionSolverType 
     m_pDynSys = pDynSys;
 
     m_pSorProxStepNodeVisitor = nullptr;
+    m_pNormalSorProxStepNodeVisitor = nullptr;
+    m_pTangentialSorProxStepNodeVisitor = nullptr;
     m_pSorProxInitNodeVisitor = nullptr;
+
 }
 
 
 InclusionSolverCONoG::~InclusionSolverCONoG(){
     if(m_pSorProxStepNodeVisitor != nullptr ){ delete m_pSorProxStepNodeVisitor;}
+    if(m_pNormalSorProxStepNodeVisitor != nullptr ){ delete m_pNormalSorProxStepNodeVisitor;}
+    if(m_pTangentialSorProxStepNodeVisitor != nullptr ){ delete m_pTangentialSorProxStepNodeVisitor;}
     if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
 }
 
@@ -39,7 +44,14 @@ InclusionSolverCONoG::~InclusionSolverCONoG(){
 void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::filesystem::path folder_path ) {
 
     m_pSolverLog = pSolverLog;
-    m_pSorProxStepNodeVisitor->setLog(m_pSolverLog);
+
+    if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_NORMAL_TANGENTIAL ){
+        m_pNormalSorProxStepNodeVisitor->setLog(m_pSolverLog);
+        m_pTangentialSorProxStepNodeVisitor->setLog(m_pSolverLog);
+    }else{
+        m_pSorProxStepNodeVisitor->setLog(m_pSolverLog);
+    }
+
     m_pSorProxInitNodeVisitor->setLog(m_pSolverLog);
 
     // if we should
@@ -93,6 +105,8 @@ void InclusionSolverCONoG::reset() {
 
      //Make a new Sor Prox Visitor (takes references from these class member)
     if(m_pSorProxStepNodeVisitor != nullptr ){ delete m_pSorProxStepNodeVisitor;}
+    if(m_pNormalSorProxStepNodeVisitor != nullptr ){ delete m_pNormalSorProxStepNodeVisitor;}
+    if(m_pTangentialSorProxStepNodeVisitor != nullptr ){ delete m_pTangentialSorProxStepNodeVisitor;}
     if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
 
     if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_CONTACT ){
@@ -101,8 +115,13 @@ void InclusionSolverCONoG::reset() {
     }else if( m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_FULL ){
          LOG(m_pSimulationLog, "---> Initialize FullSorProxVisitor "<<  std::endl;);
          m_pSorProxStepNodeVisitor = new FullSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
+    }else if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_NORMAL_TANGENTIAL) {
+         m_pSorProxStepNodeVisitor = nullptr;
+         m_pNormalSorProxStepNodeVisitor     = new NormalSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
+         m_pTangentialSorProxStepNodeVisitor = new TangentialSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
+
     }else{
-         ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemendet");
+        ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemendet");
     }
 
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor(m_settings);
@@ -154,9 +173,10 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
         // =============================================================================================================
         if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT ||
-            m_settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL
+            m_settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL ||
+            m_settings.m_eMethod == InclusionSolverSettingsType::SOR_NORMAL_TANGENTIAL
            ) {
-
+#include "InclusionSolverSettings.hpp"
             #if MEASURE_TIME_PROX == 1
                 CPUTimer counter;
                 counter.start();
@@ -228,10 +248,17 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
     // Init Graph for iteration;
     m_contactGraph.initForIteration();
 
-    // Calculates b vector for all nodes, u_0, R_ii, ...
-    m_pSorProxInitNodeVisitor->setParams(alpha);
-    m_pSorProxStepNodeVisitor->setParams(alpha);
 
+    m_pSorProxInitNodeVisitor->setParams(alpha);
+
+     if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_NORMAL_TANGENTIAL ){
+        m_pNormalSorProxStepNodeVisitor->setParams(alpha);
+        m_pTangentialSorProxStepNodeVisitor->setParams(alpha);;
+    }else{
+        m_pSorProxStepNodeVisitor->setParams(alpha);
+    }
+
+    // Calculates b vector for all nodes, u_0, R_ii, ...
     m_contactGraph.applyNodeVisitor(*m_pSorProxInitNodeVisitor);
 
 
@@ -345,7 +372,13 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
     // Move over all nodes, and do a sor prox step
     //m_contactGraph.shuffleNodesUniformly(1000);
 
-    m_contactGraph.applyNodeVisitorSpecial(*m_pSorProxStepNodeVisitor);
+    if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_NORMAL_TANGENTIAL ){
+        m_contactGraph.applyNodeVisitorSpecial(*m_pNormalSorProxStepNodeVisitor);
+        m_contactGraph.applyNodeVisitorSpecial(*m_pTangentialSorProxStepNodeVisitor);
+    }else{
+        m_contactGraph.applyNodeVisitorSpecial(*m_pSorProxStepNodeVisitor);
+    }
+
     m_maxResidual = m_contactGraph.m_maxResidual;
     // Move over all nodes, end of Sor Prox
 

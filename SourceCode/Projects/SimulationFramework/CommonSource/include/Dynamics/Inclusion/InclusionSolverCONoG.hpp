@@ -89,8 +89,16 @@ protected:
     using ContactGraphType = ContactGraphIteration;
     ContactGraphType m_contactGraph;
     void initContactGraphForIteration(PREC alpha);
+
+    // Different visitors for the various SOR implementations
+    // For SOR_FULL, SOR_CONTACT
     SorProxStepNodeVisitor * m_pSorProxStepNodeVisitor;
+    // For SOR_NORMAL_TANGENTIAL
+    NormalSorProxStepNodeVisitor*      m_pNormalSorProxStepNodeVisitor;
+    TangentialSorProxStepNodeVisitor*  m_pTangentialSorProxStepNodeVisitor;
+    // Init Visitor for the contacts
     SorProxInitNodeVisitor * m_pSorProxInitNodeVisitor;
+
     void doSORProxCPU();
     inline void sorProxOverAllNodes();
 

@@ -44,10 +44,13 @@ struct InclusionSolverSettings
     unsigned int m_MinIter;
     PREC m_AbsTol;
     PREC m_RelTol;
+
     /**
-    *  SOR_CONTACT (project contacts consecutively), SOR_FULL (normal direction first, then tangential)
+    *  SOR_CONTACT (project contacts consecutively),
+    *  SOR_FULL (normal direction first, then tangential for each contact)
+    *  SOR_NORMAL_TANGENTIAL (for all contacts normal , then for all contacts tangential (iteratively solve two convex optimization problems) )
     */
-    enum Method{SOR_CONTACT, SOR_FULL, JOR} m_eMethod;
+    enum Method{SOR_CONTACT, SOR_FULL, SOR_NORMAL_TANGENTIAL, JOR} m_eMethod;
     enum Convergence {InLambda,InVelocity, InVelocityLocal, InEnergyVelocity,InEnergyLocalMix} m_eConvergenceMethod;
     bool m_bComputeResidual;
     bool  m_bUseGPU;
