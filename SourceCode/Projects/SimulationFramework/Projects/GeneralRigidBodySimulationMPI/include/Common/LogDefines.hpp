@@ -60,7 +60,7 @@
     #define LOGBCSpecial( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
 
     /// SceneParser
-    #define SCENEPARSER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SCENEPARSER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
 
     /// Topobuilder
     #define TOPOBUILDER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output

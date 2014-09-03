@@ -1188,6 +1188,7 @@ public:
 
             setupInitialConditionBodiesFromFile_imp(relpath, time, which);
 
+
             bool useTime = false;
             if(!Utilities::stringToType(useTime, initCond.attribute("useTimeToContinue").value())) {
                 THROWEXCEPTION("---> String conversion in GlobalInitialCondition: useTimeToContinue failed");

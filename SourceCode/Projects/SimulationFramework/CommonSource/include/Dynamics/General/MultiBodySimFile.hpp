@@ -347,8 +347,8 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
 
     m_file_stream.seekg(m_beginOfStates);
 
-    if(stateTime < 0) {
-        stateTime = 0;
+    if(stateTime < 0.0) {
+        stateTime = 0.0;
     }
 
     if(which == 0) {
@@ -359,7 +359,8 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
         //Scan all states
         for( std::streamoff stateIdx = 0; stateIdx < m_nStates; stateIdx++) {
             *this >> currentTime;
-            if( ( lastTime > stateTime && stateTime <= currentTime )|| stateTime <= 0.0) {
+            //std::cout << "time: " << currentTime << "lastTime: " << lastTime << "stateTime: " << stateTime<< std::endl;
+            if( ( lastTime < stateTime && stateTime <= currentTime )|| stateTime <= 0.0) {
                 timeFound = true;
                 break;
             } else {
