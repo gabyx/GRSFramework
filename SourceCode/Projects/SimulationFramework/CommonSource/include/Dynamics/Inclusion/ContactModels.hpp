@@ -19,11 +19,12 @@
    namespace ContactModels{
 
     enum class Enum : short {
-        U = 0,
-        UCF = 1,
-        UCFD = 2,
-        UCFDD = 3,
-        UCCF = 4
+        U = 0,      /** Unilateral Contact */
+        UCF = 1,    /** Unilateral Contact with Coulomb Friction*/
+        UCFC = 2,   /** Unilateral Contact with Coulomb Friction (Friction Cone as convex set) */
+        UCFD = 3,   /** Unilateral Contact with Coulomb Friction and Damping */
+        UCFDD = 4,  /** Unilateral Contact with Coulomb Friction and Damping (adjusts the slope) */
+        UCCF = 5
     };
 
     template<int T> struct ContactModel;
@@ -48,6 +49,22 @@
     template<>
     struct ContactModel<EnumConversion::toIntegral(Enum::UCF)>{
         using ConvexSet = ConvexSets::RPlusAndDisk;
+        static const int nDOFFriction = 2;
+        static const int nFrictionParams = 1; // mu
+        //Parameter offsets
+        static const int epsNIdx = 0;
+        static const int epsTIdx = 1;
+        static const int muIdx = 2;
+    };
+
+    /*
+    * @brief UnilateralAndCoulombFrictionConeContactModel: This is the friction model for a unilateral contact with spatial coulomb friction.
+    * Abreviations : UCFC
+    */
+    template<>
+
+    struct ContactModel<EnumConversion::toIntegral(Enum::UCFC)>{
+        using ConvexSet = ConvexSets::Cone3D;
         static const int nDOFFriction = 2;
         static const int nFrictionParams = 1; // mu
         //Parameter offsets

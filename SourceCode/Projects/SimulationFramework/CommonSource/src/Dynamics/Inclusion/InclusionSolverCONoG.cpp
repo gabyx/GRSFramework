@@ -109,11 +109,14 @@ void InclusionSolverCONoG::reset() {
     if(m_pTangentialSorProxStepNodeVisitor != nullptr ){ delete m_pTangentialSorProxStepNodeVisitor;}
     if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
 
-    if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_CONTACT ){
-         LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor "<<  std::endl;);
-         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
+    if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_CONTACT_AC ){
+         LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor Alart Curnier "<<  std::endl;);
+         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph,0);
+    }else if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_CONTACT_DS){
+         LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor De Saxe"<<  std::endl;);
+         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph,1);
     }else if( m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_FULL ){
-         LOG(m_pSimulationLog, "---> Initialize FullSorProxVisitor "<<  std::endl;);
+         LOG(m_pSimulationLog, "---> Initialize FullSorProxVisitor Alart Curnier"<<  std::endl;);
          m_pSorProxStepNodeVisitor = new FullSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
     }else if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_NORMAL_TANGENTIAL) {
          m_pSorProxStepNodeVisitor = nullptr;
@@ -172,7 +175,8 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
 
         // =============================================================================================================
-        if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT ||
+        if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_AC ||
+            m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_DS ||
             m_settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL ||
             m_settings.m_eMethod == InclusionSolverSettingsType::SOR_NORMAL_TANGENTIAL
            ) {
@@ -373,7 +377,15 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
     //m_contactGraph.shuffleNodesUniformly(1000);
 
     if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_NORMAL_TANGENTIAL ){
+
+        //Iterate multiple times the normal direction before going to the tangential direction!
+        m_pNormalSorProxStepNodeVisitor->setLastUpdate(false);
+        for(int i = 0;i<4;i++){
+            m_contactGraph.applyNodeVisitorSpecial(*m_pNormalSorProxStepNodeVisitor);
+        }
+        m_pNormalSorProxStepNodeVisitor->setLastUpdate(true);
         m_contactGraph.applyNodeVisitorSpecial(*m_pNormalSorProxStepNodeVisitor);
+
         m_contactGraph.applyNodeVisitorSpecial(*m_pTangentialSorProxStepNodeVisitor);
     }else{
         m_contactGraph.applyNodeVisitorSpecial(*m_pSorProxStepNodeVisitor);

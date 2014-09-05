@@ -43,11 +43,21 @@
 
       /**
       * @brief Convex set for  \f$ C_1 = \mathcal{R}_{+} \f$  and a unit disk \f$ C_2 = \{ x | |x| < 1 \} \f$ .
-      * This function applies for triplets, the first value is proxed onto \f$ C_1 \f$  and the second to values in sequence are proxed on to \f$ C_2 \f$ .
+      * This function applies for triplets, the first value is proxed onto \f$ C_1 \f$
+      * and the second to values in sequence are proxed on to \f$ C_2 \f$ (scaled with an aribtary radius) .
       */
       struct RPlusAndDisk{
          static const int Dimension=3;
       };
+
+      /**
+      * @brief Convex set for a Cone in \f$ \mathcal{R}^3 \f$ with center axis as the x-axis given as
+      * \f$ K = {(x_1,x_2,x_3) \in \mathcal{R}^3 \ | \ \sqrt{(x_2^2 + x_3^2)} \leq \mu x_1 \} \f$ .
+      */
+      struct Cone3D{
+         static const int Dimension=3;
+      };
+
 
       /**
       * @brief Convex set for  \f$ C_1 = \mathcal{R}_{+} \f$  and a Contensou ellipsoid.

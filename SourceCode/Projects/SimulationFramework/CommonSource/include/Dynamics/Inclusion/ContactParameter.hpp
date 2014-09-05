@@ -80,6 +80,10 @@ struct ContactParameter{
         return ContactParameter(ContactModels::Enum::UCF, {epsN,epsT,mu} );
     }
 
+    static ContactParameter createParams_UCFC_ContactModel(PREC epsN, PREC epsT, PREC mu){
+        return ContactParameter(ContactModels::Enum::UCFC, {epsN,epsT,mu} );
+    }
+
     static ContactParameter createParams_UCFD_ContactModel(PREC epsN, PREC epsT, PREC mu, PREC dinv_N, PREC dinv_T){
         return ContactParameter(ContactModels::Enum::UCFD, {epsN,epsT,mu,dinv_N,dinv_T} );
     }

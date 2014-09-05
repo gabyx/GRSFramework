@@ -251,9 +251,13 @@ public:
             if(method == "JOR") {
                 m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::JOR;
             } else if (method == "SOR") {
-                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT;
+                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT_AC;
             } else if (method == "SORContact") {
-                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT;
+                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT_AC;
+            } else if (method == "SORContactAC") {
+                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT_AC;
+            } else if (method == "SORContactDS") {
+                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT_DS;
             } else if (method == "SORFull") {
                 m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_FULL;
             } else if (method == "SORNormalTangential") {
@@ -965,8 +969,10 @@ private:
                 contactParameter = ContactParameter::createParams_UCFDD_ContactModel(epsilonN,epsilonT,mu,
                                    invDampingN,invDampingTFix,
                                    gammaMax,epsilon);
-            } else {
+            } else if(type == "UCF"){
                 contactParameter = ContactParameter::createParams_UCF_ContactModel(epsilonN,epsilonT,mu);
+            }else if(type == "UCFC"){
+                contactParameter = ContactParameter::createParams_UCFC_ContactModel(epsilonN,epsilonT,mu);
             }
 
             if(stdMaterial) {

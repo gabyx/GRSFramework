@@ -239,7 +239,7 @@ void MoreauTimeStepper::doOneIteration() {
       unsigned int when = (m_settings.m_endTime-m_settings.m_startTime)/m_settings.m_deltaT / 10.0;
       if(when<=0){when=1;}
       if(m_IterationCounter % when == 0){
-            LOG(m_pSolverLog,"--->  m_t: " << m_currentSimulationTime<<std::endl; );
+            LOG(m_pSolverLog,"--->  m_tB: " << m_currentSimulationTime<<std::endl; );
       }
 #endif
 

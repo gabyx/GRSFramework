@@ -171,7 +171,8 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
 
         // Solve Inclusion
         // =============================================================================================================
-        if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT ||
+        if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_AC ||
+            m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_DS ||
             m_settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL
              ) {
 

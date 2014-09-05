@@ -275,6 +275,7 @@ private:
 };
 
 /** Contact Graph which can be used to iterate over the nodes */
+// #define RESIDUAL_SORTED_ITERATION   ///< Define this macro here to get a residual sorted iteration for SOR_CONTACT
 class ContactGraphIteration: public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
 public:
 
@@ -292,14 +293,18 @@ public:
     using EdgeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType;
 
     ContactGraphIteration(ContactParameterMap * contactParameterMap):
-        m_nodeCounter(0),m_edgeCounter(0),
-        m_nodesResSorted1(cFunc),m_nodesResSorted2(cFunc)
+        m_nodeCounter(0),m_edgeCounter(0)
+        #ifdef RESIDUAL_SORTED_ITERATION
+        ,m_nodesResSorted1(cFunc),m_nodesResSorted2(cFunc)
+        #endif // RESIDUAL_SORTED_ITERATION
     {
         m_pContactParameterMap = contactParameterMap;
 
+         #ifdef RESIDUAL_SORTED_ITERATION
         // Init front/back
         m_nodesBackRes = &m_nodesResSorted1;
         m_nodesFrontRes = &m_nodesResSorted2;
+        #endif // RESIDUAL_SORTED_ITERATION
     }
 
     ~ContactGraphIteration() {
@@ -307,29 +312,42 @@ public:
     }
 
     void initForIteration() {
+
+        #ifdef RESIDUAL_SORTED_ITERATION
         m_nodesBackRes->clear();
         m_nodesFrontRes->clear();
+        #endif // RESIDUAL_SORTED_ITERATION
+
         m_firstIteration = true;
         m_maxResidual = 0;
     }
 
     template<typename TNodeVisitor>
 	void applyNodeVisitorSpecial(TNodeVisitor & vv){
-	    if( m_firstIteration ){
-            for(auto curr_node = this->m_nodes.begin(); curr_node != this->m_nodes.end(); curr_node++){
-                vv.visitNode(*(*curr_node));
-            }
-            m_firstIteration = false;
-	    }
-	    else{
-            for(auto curr_node = m_nodesBackRes->begin(); curr_node != m_nodesBackRes->end(); curr_node++){
-                vv.visitNode(*curr_node->second);
-            }
-	    }
+
+    #ifdef RESIDUAL_SORTED_ITERATION
+    if( m_firstIteration ){
+        for(auto curr_node = this->m_nodes.begin(); curr_node != this->m_nodes.end(); curr_node++){
+            vv.visitNode(*(*curr_node));
+        }
+        m_firstIteration = false;
+    }
+    else{
+        for(auto curr_node = m_nodesBackRes->begin(); curr_node != m_nodesBackRes->end(); curr_node++){
+            vv.visitNode(*curr_node->second);
+        }
+    }
+    #else // No residual sorted iteration!
+    for(auto curr_node = this->m_nodes.begin(); curr_node != this->m_nodes.end(); curr_node++){
+        vv.visitNode(*(*curr_node));
+    }
+    #endif // RESIDUAL_SORTED_ITERATION
 
 	}
 
     void resetAfterOneIteration(unsigned int globalIterationCounter){
+
+        #ifdef RESIDUAL_SORTED_ITERATION
         // Switch potiner of residual list;
         if( globalIterationCounter % 1 == 0 ){
             auto * t = m_nodesBackRes;
@@ -338,6 +356,7 @@ public:
         }
         // Clear front
         m_nodesFrontRes->clear();
+        #endif // RESIDUAL_SORTED_ITERATION
 
         m_maxResidual = 0;
     }
@@ -416,8 +435,9 @@ private:
                                                                                 nodeData.m_pCollData->m_pBody2->m_eMaterial);
 
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFC  ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD
           ) {
             // Set flag for the corresponding model
             m_usedContactModels |= 1 << EnumConversion::toIntegral(nodeData.m_contactParameter.m_contactModel);
@@ -527,6 +547,10 @@ private:
     unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
 
 
+    #ifdef RESIDUAL_SORTED_ITERATION
+    /** Sorted Nodes by Max Residual ==========================================================
+    * This list is currently not used, because test showed that it does not improve convergence
+    */
     using CType = std::function< bool(std::pair<PREC, NodeType *> const&, std::pair<PREC, NodeType *> const&)>;
 
     CType cFunc = [](std::pair<PREC, NodeType *> const& a,
@@ -539,7 +563,8 @@ private:
     NodeListTypeResidualSorted * m_nodesFrontRes; // The list on which we are inserting (sorted)
     NodeListTypeResidualSorted m_nodesResSorted1;
     NodeListTypeResidualSorted m_nodesResSorted2;
-
+    /** ========================================================================================= */
+    #endif
 };
 
 
@@ -685,11 +710,21 @@ public:
     using EdgeType = typename ContactGraphType::EdgeType;
     using NodeType = typename ContactGraphType::NodeType;
 
+    /**
+    * Methods:
+    * 1 = De Saxé Formulation for the UCF Contact model (prox to cone)
+    * 0 = Alart Curnier Formulation for the UCF Contact model (prox to Rplus , prox to Disk)
+    */
+    unsigned int m_method = 0;
+
     ContactSorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
                                   bool & globalConverged,
                                   const unsigned int & globalIterationNeeded,
-                                  ContactGraphType * graph):
-        SorProxStepNodeVisitor(settings,globalConverged,globalIterationNeeded,graph) {
+                                  ContactGraphType * graph,
+                                  unsigned int method):
+        SorProxStepNodeVisitor(settings,globalConverged,globalIterationNeeded,graph),
+        m_method(method)
+    {
         this->m_delegate = VisitNodeDelegate::from_method<ContactSorProxStepNodeVisitor,
               &ContactSorProxStepNodeVisitor::visitNode>(this);
     }
@@ -710,9 +745,10 @@ public:
 
 
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD  ) {
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD  ) {
 
+            using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
 
             // Init the prox value
             nodeData.m_LambdaFront = nodeData.m_b;
@@ -756,12 +792,6 @@ public:
                 nodeData.m_LambdaFront(2) += nodeData.m_LambdaBack(2) * dinvT / m_settings.m_deltaT;
             }
 
-            nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
-            nodeData.m_LambdaFront += nodeData.m_LambdaBack;
-
-
-
-
             //Prox
             // HACK drive up parameter mu, does not help
 //            PREC mu =  nodeData.m_mu(0);
@@ -777,8 +807,24 @@ public:
 //                mu =  nodeData.m_mu(0);
 //            }
 
-            // PROX  ====================================================================================================================
-            Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle( nodeData.m_contactParameter.m_params[2],nodeData.m_LambdaFront);
+            // PROX  prox(lambda - R_i_inv * gamma) ==================================================================================
+            if(m_method == 1){
+                // De Saxe Formulation
+                // add correction term mu*gammaT to gammaN (for DeSaxce Cone Formulation)
+                nodeData.m_LambdaFront(0) += nodeData.m_contactParameter.m_params[CMT::muIdx]*nodeData.m_LambdaFront.tail<2>().norm();
+                //Multiply R_i_inverse
+                nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
+                nodeData.m_LambdaFront += nodeData.m_LambdaBack;
+                //Prox onto friction cone
+                Prox::ProxFunction<ConvexSets::Cone3D>::doProxSingle( nodeData.m_contactParameter.m_params[CMT::muIdx],nodeData.m_LambdaFront);
+            }else{
+                // Alart Curnier Formulation
+                //Multiply R_i_inverse
+                nodeData.m_LambdaFront = -(nodeData.m_R_i_inv_diag.asDiagonal() * nodeData.m_LambdaFront).eval(); //No alias due to diagonal!!! (if normal matrix multiplication there is aliasing!
+                nodeData.m_LambdaFront += nodeData.m_LambdaBack;
+                //Prox onto R+ and Disk
+                Prox::ProxFunction<ConvexSets::RPlusAndDisk>::doProxSingle( nodeData.m_contactParameter.m_params[CMT::muIdx],nodeData.m_LambdaFront);
+            }
 
 
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_LambdaBack: "  << nodeData.m_LambdaBack.transpose() << std::endl);
@@ -906,7 +952,9 @@ public:
 
 
             // Save residual and insert into front buffer
-            m_pGraph->m_nodesFrontRes->insert(std::make_pair(residual,&node));
+            #ifdef RESIDUAL_SORTED_ITERATION
+                m_pGraph->m_nodesFrontRes->insert(std::make_pair(residual,&node));
+            #endif // RESIDUAL_SORTED_ITERATION
 
             // Swap Lambdas, but dont swap Velocities...
             //nodeData.m_LambdaBack = nodeData.m_LambdaFront; // necessary if we use doVelocityUpdate function!
@@ -1186,6 +1234,10 @@ public:
               &NormalSorProxStepNodeVisitor::visitNode >(this);
     }
 
+    void setLastUpdate(bool b){
+        m_lastUpdate = b;
+    }
+
     void visitNode(NodeType& node) {
         /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
            Then the iteration is not converged somewhere, and we need to wait till the next iteration!
@@ -1202,7 +1254,7 @@ public:
 
 
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ) {
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ) {
 
             //Only normal direction ===================================
 
@@ -1230,7 +1282,7 @@ public:
             Prox::ProxFunction<ConvexSets::RPlus>::doProxSingle( lambda_N, lambda_N );
 
             //Apply to bodies
-            nodeData.m_LambdaFront(0) = lambda_N;
+
             PREC deltaLambda_N = lambda_N - nodeData.m_LambdaBack(0); // Delta lambda_N
 
             if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
@@ -1244,15 +1296,21 @@ public:
                                                   nodeData.m_W_body2.col(0) * deltaLambda_N;
             }
 
-
+            if(m_lastUpdate){
+                nodeData.m_LambdaFront(0) = lambda_N;
+            }else{
+                nodeData.m_LambdaBack(0) = lambda_N;
+            }
             // =========================================================
 
-            // Apply the tangential setp node visitor now
+            // Apply the tangential step node visitor now
 
         } else {
             ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
         }
     }
+
+    bool m_lastUpdate = false;
 
 };
 
@@ -1534,10 +1592,11 @@ public:
 
         // Initialize for UCF Contact models
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD  ) {
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFC ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD  ) {
 
-
+            using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
             const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
 
             // chi and eps was already initialized in contactGraph!
@@ -1611,14 +1670,19 @@ public:
 
             // Calculate R_ii
 
-            // Take also offdiagonal values for lambda_N
-            //nodeData.m_R_i_inv_diag(0) = m_alpha / std::max(std::max(nodeData.m_G_ii(0,0), nodeData.m_mu(0)*nodeData.m_G_ii(0,1)), nodeData.m_mu(0)*nodeData.m_G_ii(0,2));
-            // Take only diagonal
-            nodeData.m_R_i_inv_diag(0) = m_alpha / nodeData.m_G_ii(0,0);
+            // For UCFC Model (cone) we have only one r Parameter!
+            if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFC){
+                nodeData.m_R_i_inv_diag.setConstant( m_alpha / nodeData.m_G_ii.diagonal().maxCoeff() );
+            }else{
+                // Take also offdiagonal values for lambda_N
+                //nodeData.m_R_i_inv_diag(0) = m_alpha / std::max(std::max(nodeData.m_G_ii(0,0), nodeData.m_mu(0)*nodeData.m_G_ii(0,1)), nodeData.m_mu(0)*nodeData.m_G_ii(0,2));
+                // Take only diagonal
+                nodeData.m_R_i_inv_diag(0) = m_alpha / nodeData.m_G_ii(0,0);
+                PREC r_T = m_alpha / (nodeData.m_G_ii.diagonal().tail<2>().maxCoeff());
+                nodeData.m_R_i_inv_diag(1) = r_T;
+                nodeData.m_R_i_inv_diag(2) = r_T;
+            }
 
-            PREC r_T = m_alpha / ((nodeData.m_G_ii.diagonal().tail<2>()).maxCoeff());
-            nodeData.m_R_i_inv_diag(1) = r_T;
-            nodeData.m_R_i_inv_diag(2) = r_T;
 
 
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t ---> nd.m_b: "<< nodeData.m_b.transpose() <<std::endl
@@ -1627,7 +1691,7 @@ public:
 
 
 
-            LOGSLLEVEL3_CONTACT(m_pSolverLog,  "\t ---> nd.m_mu: "<< nodeData.m_contactParameter.m_params[2] <<std::endl;);
+            LOGSLLEVEL3_CONTACT(m_pSolverLog,  "\t ---> nd.m_mu: "<< nodeData.m_contactParameter.m_params[CMT::muIdx] <<std::endl;);
 
         } else {
             ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
