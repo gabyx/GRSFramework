@@ -20,6 +20,7 @@ struct InclusionSolverSettings
       m_deltaT = 0.001;
       m_alphaJORProx = 0.5;
       m_alphaSORProx = 1.2;
+      m_RStrategy = RSTRATEGY_MAX;
       m_MaxIter = 5000;
       m_AbsTol = 1E-7;
       m_RelTol = 1E-7;
@@ -31,15 +32,14 @@ struct InclusionSolverSettings
       m_eConvergenceMethod = InVelocity;
       m_bComputeResidual = false; ///< If true convergence check is done for all contacts/bodies, no break in the loop
 
-      //Experimental
-      //m_dinv = 0; //Inverse Damper Coefficient which acts on the diagonal of G,
-
     }
 
 
     PREC m_deltaT;
+
     PREC m_alphaJORProx;
     PREC m_alphaSORProx;
+    enum RMatrixStrategy{RSTRATEGY_MAX, RSTRATEGY_SUM,RSTRATEGY_SUM2} m_RStrategy;
     unsigned int m_MaxIter;
     unsigned int m_MinIter;
     PREC m_AbsTol;

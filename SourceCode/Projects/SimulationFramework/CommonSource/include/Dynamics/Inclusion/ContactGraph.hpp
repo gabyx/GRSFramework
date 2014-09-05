@@ -434,8 +434,7 @@ private:
         nodeData.m_contactParameter  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,
                                                                                 nodeData.m_pCollData->m_pBody2->m_eMaterial);
 
-        if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
-            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFC  ||
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF  ||
             nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
             nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD
           ) {
@@ -710,20 +709,12 @@ public:
     using EdgeType = typename ContactGraphType::EdgeType;
     using NodeType = typename ContactGraphType::NodeType;
 
-    /**
-    * Methods:
-    * 1 = De Saxé Formulation for the UCF Contact model (prox to cone)
-    * 0 = Alart Curnier Formulation for the UCF Contact model (prox to Rplus , prox to Disk)
-    */
-    unsigned int m_method = 0;
 
     ContactSorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
                                   bool & globalConverged,
                                   const unsigned int & globalIterationNeeded,
-                                  ContactGraphType * graph,
-                                  unsigned int method):
-        SorProxStepNodeVisitor(settings,globalConverged,globalIterationNeeded,graph),
-        m_method(method)
+                                  ContactGraphType * graph):
+        SorProxStepNodeVisitor(settings,globalConverged,globalIterationNeeded,graph)
     {
         this->m_delegate = VisitNodeDelegate::from_method<ContactSorProxStepNodeVisitor,
               &ContactSorProxStepNodeVisitor::visitNode>(this);
@@ -767,9 +758,9 @@ public:
             if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD) {
                 using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFD);
                 //Drive damping to zero after some iterations:
-                if (m_globalIterationCounter == 300) {
+                //if (m_globalIterationCounter == 300) {
                     //nodeData.m_contactParameter.m_params[4] = 1e-7;
-                }
+                //}
 
                 nodeData.m_LambdaFront(0) += nodeData.m_LambdaBack(0) * nodeData.m_contactParameter.m_params[CMT::d_NIdx] / m_settings.m_deltaT;
                 nodeData.m_LambdaFront(1) += nodeData.m_LambdaBack(1) * nodeData.m_contactParameter.m_params[CMT::d_TIdx] / m_settings.m_deltaT;
@@ -808,7 +799,7 @@ public:
 //            }
 
             // PROX  prox(lambda - R_i_inv * gamma) ==================================================================================
-            if(m_method == 1){
+            if(m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_DS){
                 // De Saxe Formulation
                 // add correction term mu*gammaT to gammaN (for DeSaxce Cone Formulation)
                 nodeData.m_LambdaFront(0) += nodeData.m_contactParameter.m_params[CMT::muIdx]*nodeData.m_LambdaFront.tail<2>().norm();
@@ -963,7 +954,7 @@ public:
 
 
         } else {
-            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
+            ERRORMSG(" You specified a contact model which has not been implemented so far!");
         }
     }
 
@@ -1009,7 +1000,7 @@ public:
 
 
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
-                nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ) {
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ) {
 
             //First normal direction ===================================
 
@@ -1205,7 +1196,7 @@ public:
 
 
         } else {
-            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
+            ERRORMSG(" You specified a contact model which has not been implemented so far!");
         }
     }
 
@@ -1306,7 +1297,7 @@ public:
             // Apply the tangential step node visitor now
 
         } else {
-            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
+            ERRORMSG(" You specified a contact model which has not been implemented so far!");
         }
     }
 
@@ -1506,7 +1497,7 @@ public:
 
 
         } else {
-            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
+            ERRORMSG(" You specified a contact model which has not been implemented so far!");
         }
     }
 
@@ -1592,7 +1583,6 @@ public:
 
         // Initialize for UCF Contact models
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
-            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFC ||
             nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
             nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD  ) {
 
@@ -1670,17 +1660,41 @@ public:
 
             // Calculate R_ii
 
-            // For UCFC Model (cone) we have only one r Parameter!
-            if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFC){
-                nodeData.m_R_i_inv_diag.setConstant( m_alpha / nodeData.m_G_ii.diagonal().maxCoeff() );
+            if(m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_DS){
+                // De Saxe Formulation, only one r parameter because friction cone
+                if(m_settings.m_RStrategy == InclusionSolverSettingsType::RSTRATEGY_SUM){
+                   nodeData.m_R_i_inv_diag.setConstant( m_alpha / nodeData.m_G_ii.diagonal().sum() );
+                }
+                else if(m_settings.m_RStrategy == InclusionSolverSettingsType::RSTRATEGY_SUM2){
+                   nodeData.m_R_i_inv_diag.setConstant( m_alpha / (nodeData.m_G_ii.diagonal().sum() *3) );
+                }
+                else if(m_settings.m_RStrategy == InclusionSolverSettingsType::RSTRATEGY_MAX){
+                   nodeData.m_R_i_inv_diag.setConstant( m_alpha / nodeData.m_G_ii.diagonal().maxCoeff() );
+                }else{
+                    ERRORMSG(" You specified a R-Matrix strategy which has not been implemented so far!");
+                }
+
             }else{
-                // Take also offdiagonal values for lambda_N
-                //nodeData.m_R_i_inv_diag(0) = m_alpha / std::max(std::max(nodeData.m_G_ii(0,0), nodeData.m_mu(0)*nodeData.m_G_ii(0,1)), nodeData.m_mu(0)*nodeData.m_G_ii(0,2));
-                // Take only diagonal
-                nodeData.m_R_i_inv_diag(0) = m_alpha / nodeData.m_G_ii(0,0);
-                PREC r_T = m_alpha / (nodeData.m_G_ii.diagonal().tail<2>().maxCoeff());
-                nodeData.m_R_i_inv_diag(1) = r_T;
-                nodeData.m_R_i_inv_diag(2) = r_T;
+                // Alart Curnier Formulation
+                // De Saxe Formulation, only one r parameter because friction cone
+                if(m_settings.m_RStrategy == InclusionSolverSettingsType::RSTRATEGY_SUM){
+
+                   nodeData.m_R_i_inv_diag(0) = m_alpha / nodeData.m_G_ii(0,0);
+                   nodeData.m_R_i_inv_diag.tail<2>().setConstant( m_alpha / nodeData.m_G_ii.diagonal().tail<2>().sum() );
+
+                }else if(m_settings.m_RStrategy == InclusionSolverSettingsType::RSTRATEGY_MAX){
+                    // Take also offdiagonal values for lambda_N
+                    //nodeData.m_R_i_inv_diag(0) = m_alpha / std::max(std::max(nodeData.m_G_ii(0,0), nodeData.m_mu(0)*nodeData.m_G_ii(0,1)), nodeData.m_mu(0)*nodeData.m_G_ii(0,2));
+                    // Take only diagonal
+                    nodeData.m_R_i_inv_diag(0) = m_alpha / nodeData.m_G_ii(0,0);
+                    PREC r_T = m_alpha / (nodeData.m_G_ii.diagonal().tail<2>().maxCoeff());
+                    nodeData.m_R_i_inv_diag(1) = r_T;
+                    nodeData.m_R_i_inv_diag(2) = r_T;
+                }else{
+                    ERRORMSG(" You specified a R-Matrix strategy which has not been implemented so far!");
+                }
+
+
             }
 
 
@@ -1694,7 +1708,7 @@ public:
             LOGSLLEVEL3_CONTACT(m_pSolverLog,  "\t ---> nd.m_mu: "<< nodeData.m_contactParameter.m_params[CMT::muIdx] <<std::endl;);
 
         } else {
-            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
+            ERRORMSG(" You specified a contact model which has not been implemented so far!");
         }
 
     }

@@ -20,6 +20,7 @@ struct InclusionSolverSettingsMPI
       m_deltaT = 0.001;
       m_alphaJORProx = 0.5;
       m_alphaSORProx = 1.2;
+      m_RStrategy = RSTRATEGY_MAX;
       m_MaxIter = 5000;
       m_AbsTol = 1E-7;
       m_RelTol = 1E-7;
@@ -36,6 +37,8 @@ struct InclusionSolverSettingsMPI
 
 
     PREC m_deltaT;
+
+    enum RMatrixStrategy{RSTRATEGY_MAX, RSTRATEGY_SUM,RSTRATEGY_SUM2} m_RStrategy;
     PREC m_alphaJORProx;
     PREC m_alphaSORProx;
 

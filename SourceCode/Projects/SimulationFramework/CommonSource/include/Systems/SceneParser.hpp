@@ -193,6 +193,23 @@ public:
             if(!Utilities::stringToType(m_inclusionSettings->m_alphaSORProx, node.attribute("alphaSORProx").value())) {
                 THROWEXCEPTION("---> String conversion in InclusionSolverSettings: alphaJORProx failed");
             }
+
+            att = node.attribute("matrixRStrategy");
+            if(att) {
+                std::string method = att.value();
+                if(method == "max") {
+                    m_inclusionSettings->m_RStrategy = InclusionSolverSettingsType::RSTRATEGY_MAX;
+                } else if (method == "sum") {
+                    m_inclusionSettings->m_RStrategy = InclusionSolverSettingsType::RSTRATEGY_SUM;
+                } else if (method == "sum2") {
+                    m_inclusionSettings->m_RStrategy = InclusionSolverSettingsType::RSTRATEGY_SUM2;
+                } else {
+                    THROWEXCEPTION("---> String conversion in InclusionSolverSettings: matrixRStrategy failed: not a valid setting");
+                }
+            } else {
+                m_inclusionSettings->m_RStrategy = InclusionSolverSettingsType::RSTRATEGY_MAX;
+            }
+
             if(!Utilities::stringToType<unsigned int>(m_inclusionSettings->m_MaxIter, node.attribute("maxIter").value())) {
                 THROWEXCEPTION("---> String conversion in InclusionSolverSettings: maxIter failed");
             }
@@ -971,8 +988,6 @@ private:
                                    gammaMax,epsilon);
             } else if(type == "UCF"){
                 contactParameter = ContactParameter::createParams_UCF_ContactModel(epsilonN,epsilonT,mu);
-            }else if(type == "UCFC"){
-                contactParameter = ContactParameter::createParams_UCFC_ContactModel(epsilonN,epsilonT,mu);
             }
 
             if(stdMaterial) {

@@ -111,10 +111,10 @@ void InclusionSolverCONoG::reset() {
 
     if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_CONTACT_AC ){
          LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor Alart Curnier "<<  std::endl;);
-         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph,0);
+         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
     }else if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_CONTACT_DS){
          LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor De Saxe"<<  std::endl;);
-         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph,1);
+         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
     }else if( m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_FULL ){
          LOG(m_pSimulationLog, "---> Initialize FullSorProxVisitor Alart Curnier"<<  std::endl;);
          m_pSorProxStepNodeVisitor = new FullSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
