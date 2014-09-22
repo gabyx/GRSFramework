@@ -165,8 +165,8 @@ void InclusionSolverCO::solveInclusionProblem() {
 
         static VectorDyn I_plus_eps(ContactDim);
         static MatrixDynDyn G_part(ContactDim,ContactDim);
-        static const MatrixUBodyDyn * W_j_body;
-        static const MatrixUBodyDyn * W_i_body;
+        static const Eigen::Matrix<PREC,6,3> * W_j_body;
+        static const Eigen::Matrix<PREC,6,3> * W_i_body;
         static MatrixDynUBody W_i_bodyT_M_body;
 
         for (auto & currentContactNode : nodes) {

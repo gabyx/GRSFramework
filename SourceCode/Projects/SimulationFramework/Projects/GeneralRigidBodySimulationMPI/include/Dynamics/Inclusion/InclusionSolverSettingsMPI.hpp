@@ -21,6 +21,7 @@ struct InclusionSolverSettingsMPI
       m_alphaJORProx = 0.5;
       m_alphaSORProx = 1.2;
       m_RStrategy = RSTRATEGY_MAX;
+      m_MinIter = 0;
       m_MaxIter = 5000;
       m_AbsTol = 1E-7;
       m_RelTol = 1E-7;
@@ -29,7 +30,7 @@ struct InclusionSolverSettingsMPI
       m_UseGPUDeviceId = 0;
       m_bIsFiniteCheck = false;
       m_eConvergenceMethod = InVelocity;
-      m_bComputeResidual = false; ///< If true convergence check is done for all contacts/bodies, no break in the loop (does not work yet)
+      m_bComputeResidual = false;
 
       m_splitNodeUpdateRatio = 1;
       m_convergenceCheckRatio = 1;
@@ -57,7 +58,7 @@ struct InclusionSolverSettingsMPI
     */
     enum Method{SOR_CONTACT_AC, SOR_CONTACT_DS, SOR_FULL, SOR_NORMAL_TANGENTIAL, JOR} m_eMethod;
     enum Convergence {InLambda,InVelocity, InVelocityLocal, InEnergyVelocity,InEnergyLocalMix} m_eConvergenceMethod;
-    bool m_bComputeResidual;
+    bool m_bComputeResidual; ///< If true convergence check is done for all contacts/bodies, no break in the loop (does not work yet)
     PREC m_AbsTol;
     PREC m_RelTol;
 

@@ -30,11 +30,11 @@ public:
 
     ContactGraphNodeData(CollisionData * collDataPtr): m_pCollData(collDataPtr) {}
 
-    MatrixUBodyDyn m_W_body1;
-    MatrixUBodyDyn m_W_body2;
-    VectorDyn m_chi;
+    Eigen::Matrix<PREC,6,3> m_W_body1;
+    Eigen::Matrix<PREC,6,3> m_W_body2;
+    Vector3 m_chi;
 
-    VectorDyn  m_eps;
+    Vector3  m_eps;
 
     unsigned int m_nodeColor;
     const CollisionData * m_pCollData;
@@ -70,13 +70,13 @@ public:
     FrontBackBuffer<VectorUBody,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u2BufferPtr; ///< Only valid for Simulated Objects
 
 
-    VectorDyn m_LambdaBack;
-    VectorDyn m_LambdaFront;
+    Vector3 m_LambdaBack;
+    Vector3 m_LambdaFront;
 
-    VectorDyn m_R_i_inv_diag; // Build over G_ii
-    MatrixDynDyn m_G_ii; // just for R_ii, and maybee later for better solvers!
+    Vector3 m_R_i_inv_diag; // Build over G_ii
+    Matrix33 m_G_ii; // just for R_ii, and maybee later for better solvers!
 
-    VectorDyn m_b;
+    Vector3 m_b;
 
     bool m_bConverged; ///< Converged either in LambdaLocal (lambdaNew to lambdaOld), or
 

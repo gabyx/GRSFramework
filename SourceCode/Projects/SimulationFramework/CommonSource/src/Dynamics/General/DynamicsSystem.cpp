@@ -159,6 +159,9 @@ void DynamicsSystemBase::doSecondHalfTimeStep(PREC te, PREC timestep) {
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_front.head<3>();
         pBody->m_q_KI += timestep * F_i * (pBody->m_pSolverData->m_uBegin.tail<3>() + pBody->m_pSolverData->m_uBuffer.m_front.tail<3>());
 
+
+        ASSERTMSG(Utilities::isFinite(pBody->m_pSolverData->m_uBuffer.m_front.tail<3>())," body vel. not finite" );
+
         //Normalize Quaternion
         pBody->m_q_KI.normalize();
 

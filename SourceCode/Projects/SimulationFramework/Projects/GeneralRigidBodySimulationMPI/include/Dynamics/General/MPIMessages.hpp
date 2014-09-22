@@ -663,7 +663,7 @@ private:
     void serializeBodyFull(Archive & ar, RigidBodyType * body) const {
 
         // State
-        ar & body->m_eState;
+        ar & body->m_eMode;
 
         //Material id
         ar & body->m_eMaterial;
@@ -697,7 +697,7 @@ private:
         serializeEigen(ar,body->m_MassMatrixInv_diag);
         serializeEigen(ar,body->m_h_term);
 
-        if(body->m_eState == RigidBodyType::BodyMode::SIMULATED) {
+        if(body->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
 
             //Velocity
             if(Archive::is_loading::value) {

@@ -198,9 +198,9 @@ public:
     void allGather(T value, std::vector<T> & gatheredValues, MPI_Comm comm){
 
         // Assert on std::vector<bool> (bitwise implementation which fails for c array style)
-        STATIC_ASSERT2((!std::is_same<T,bool>::value), "WORKS ONLY FOR non bool")
-        // GCC No support STATIC_ASSERT2(std::is_trivially_copyable<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES")
-        STATIC_ASSERT2(std::is_trivial<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES")
+        STATIC_ASSERTM((!std::is_same<T,bool>::value), "WORKS ONLY FOR non bool");
+        // GCC No support STATIC_ASSERTM(std::is_trivially_copyable<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES")
+        STATIC_ASSERTM(std::is_trivial<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES");
 
         int size;
         MPI_Comm_size(comm,&size);

@@ -156,7 +156,7 @@ private:
     template<int bodyNr>
     inline void computeW(NodeDataType & nodeData) {
 
-        if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel) {
+        if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF) {
 
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
@@ -167,7 +167,7 @@ private:
 
             if(bodyNr == 1) {
                 //Set matrix size!
-                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
+                //nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -184,7 +184,7 @@ private:
                 nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
             } else {
                 //Set matrix size!
-                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
+                //nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );

@@ -347,6 +347,20 @@ void vec2Vec(const std::vector<PREC> &vec, Eigen::Matrix<PREC,M,1> &V) {
 };
 
 
+template<typename Derived>
+inline bool isFinite(const Eigen::MatrixBase<Derived>& x)
+{
+   return ( (x - x).array() == (x - x).array()).all();
+}
+
+
+template<typename Derived>
+inline bool isNaN(const Eigen::MatrixBase<Derived>& x)
+{
+   return ((x.array() == x.array())).all();
+}
+
+
 };
 
 /** @} */

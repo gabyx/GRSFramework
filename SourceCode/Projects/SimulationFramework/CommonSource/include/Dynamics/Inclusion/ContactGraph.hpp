@@ -115,11 +115,11 @@ public:
         m_nodeCounter++;
     }
 
-    static const MatrixUBodyDyn & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    static const Eigen::Matrix<PREC,6,3> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
     }
-    static const MatrixUBodyDyn * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    static const Eigen::Matrix<PREC,6,3> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1 == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
@@ -153,8 +153,8 @@ private:
             const unsigned int dimSet = CONTACTMODELTYPE(ContactModels::Enum::UCF)::ConvexSet::Dimension;
             m_nLambdas += dimSet; // Add to counter
 
-            nodeData.m_chi.setZero(dimSet);
-            nodeData.m_eps.setZero(dimSet);
+            //nodeData.m_chi.setZero(dimSet);
+            //nodeData.m_eps.setZero(dimSet);
 
             nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[CMT::epsNIdx];
             nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[CMT::epsTIdx];
@@ -182,7 +182,7 @@ private:
 
 
             if(bodyNr == 1) {
-                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                //nodeData.m_W_body1.setZero());
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -198,7 +198,7 @@ private:
                 nodeData.m_W_body1.col(2).template head<3>() = - pCollData->m_cFrame.m_e_y; // I frame
                 nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
             } else {
-                nodeData.m_W_body2.setZero(NDOFuBody,ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                //nodeData.m_W_body2.setZero());
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -400,12 +400,12 @@ public:
     }
 
 
-    static const MatrixUBodyDyn & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    static const Eigen::Matrix<PREC,6,3> & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
     }
 
-    static const MatrixUBodyDyn * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
+    static const Eigen::Matrix<PREC,6,3> * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1 == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
@@ -443,8 +443,8 @@ private:
 
             //Set the minmial stuff
             const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
-            nodeData.m_eps.setZero(dimSet);
-            nodeData.m_chi.setZero(dimSet);
+            //nodeData.m_eps.setZero();
+            //nodeData.m_chi.setZero();
 
             // Set epsilon  values
             using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
@@ -1541,7 +1541,7 @@ public:
 
             if(bodyNr == 1) {
                 //Set matrix size!
-                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                //nodeData.m_W_body1.setZero());
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -1559,7 +1559,7 @@ public:
                 nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
             } else {
                 //Set matrix size!
-                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                //nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -1590,11 +1590,11 @@ public:
             const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
 
             // chi and eps was already initialized in contactGraph!
-            nodeData.m_b.setZero(dimSet);
-            nodeData.m_LambdaBack.setZero(dimSet);
-            nodeData.m_LambdaFront.setZero(dimSet);
-            nodeData.m_R_i_inv_diag.setZero(dimSet);
-            nodeData.m_G_ii.setZero(dimSet,dimSet);
+            //nodeData.m_b.setZero(dimSet);
+            nodeData.m_LambdaBack.setZero();
+            nodeData.m_LambdaFront.setZero();
+            //nodeData.m_R_i_inv_diag.setZero(dimSet);
+            //nodeData.m_G_ii.setZero(dimSet,dimSet);
 
             // =========================================================================================================
 

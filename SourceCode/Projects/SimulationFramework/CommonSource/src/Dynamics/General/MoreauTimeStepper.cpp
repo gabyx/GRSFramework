@@ -209,7 +209,8 @@ void MoreauTimeStepper::doOneIteration() {
 
 
 
-    LOGSLLEVEL1(m_pSolverLog, "---> Do one time-step =================================" <<std::endl;);
+    LOGSLLEVEL1(m_pSolverLog, "---> Do one time-step =================================" <<std::endl <<
+                "---> t_S: " << m_currentSimulationTime << std::endl;);
 
 
     m_bIterationFinished = false;

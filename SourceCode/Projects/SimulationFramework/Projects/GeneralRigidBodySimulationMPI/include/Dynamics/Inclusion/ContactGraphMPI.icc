@@ -110,7 +110,7 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
 
 
     // FIRST BODY!
-    if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+    if( pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
         //Add to the neighbour data if remote contact
         if(isRemote.first) {
@@ -137,14 +137,14 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
         computeW<1>( addedNode->m_nodeData);
         //connectNode<1>( addedNode);
 
-    } else if( pCollData->m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
+    } else if( pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
         // Contact goes into xi_N, xi_T
         ASSERTMSG(false,"RigidBody::ANIMATED objects have not been implemented correctly so far!");
     }
 
 
     // SECOND BODY!
-    if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+    if( pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
         //Add to the neighbour data if remote contact
         if(isRemote.second) {
@@ -171,7 +171,7 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
         computeW<2>( addedNode->m_nodeData);
         //connectNode<2>( addedNode);
 
-    } else if( pCollData->m_pBody2->m_eState == RigidBodyType::BodyMode::ANIMATED ) {
+    } else if( pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
         // Contact goes into xi_N, xi_T
         ASSERTMSG(false,"RigidBody::ANIMATED objects have not been implemented correctly so far!");
     }
@@ -208,17 +208,18 @@ void ContactGraph<TCombo>::setContactModel(NodeDataType & nodeData) {
         nodeData.m_contactParameter  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,
                                                                                       nodeData.m_pCollData->m_pBody2->m_eMaterial);
 
-        if( nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel ) {
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ) {
 
-            const unsigned int dimSet = ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension;
+            using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
+            const unsigned int dimSet = CMT::ConvexSet::Dimension;
 
-            nodeData.m_chi.setZero(dimSet);
-            nodeData.m_b.setZero(dimSet);
+//            nodeData.m_chi.setZero(dimSet);
+//            nodeData.m_b.setZero(dimSet);
             nodeData.m_LambdaBack.setZero(dimSet);
             nodeData.m_LambdaFront.setZero(dimSet);
-            nodeData.m_R_i_inv_diag.setZero(dimSet);
-            nodeData.m_G_ii.setZero(dimSet,dimSet);
-            nodeData.m_eps.setZero(dimSet);
+//            nodeData.m_R_i_inv_diag.setZero(dimSet);
+//            nodeData.m_G_ii.setZero(dimSet,dimSet);
+//            nodeData.m_eps.setZero(dimSet);
 
             nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[0];
             nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[1];
