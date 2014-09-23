@@ -1686,12 +1686,12 @@ public:
                     // Take also offdiagonal values for lambda_N
                     //nodeData.m_R_i_inv_diag(0) = m_alpha / std::max(std::max(nodeData.m_G_ii(0,0), nodeData.m_mu(0)*nodeData.m_G_ii(0,1)), nodeData.m_mu(0)*nodeData.m_G_ii(0,2));
                     // Take only diagonal
-                    std::cout << " nodeData.m_G_ii(0,0) " << nodeData.m_G_ii(0,0) << std::endl;
+                    //std::cout << " nodeData.m_G_ii(0,0) " << nodeData.m_G_ii(0,0) << std::endl;
                     nodeData.m_R_i_inv_diag(0) = m_alpha / nodeData.m_G_ii(0,0);
                     PREC r_T = m_alpha / (nodeData.m_G_ii.diagonal().tail<2>().maxCoeff());
                     nodeData.m_R_i_inv_diag(1) = r_T;
                     nodeData.m_R_i_inv_diag(2) = r_T;
-                    std::cout << "R_I: " << nodeData.m_R_i_inv_diag << std::endl;
+
                 }else{
                     ERRORMSG(" You specified a R-Matrix strategy which has not been implemented so far!");
                 }
