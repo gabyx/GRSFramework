@@ -68,6 +68,7 @@ public:
     :m_pSimulationLog(p->getSimLog()), m_topoSettings(t) {}
 
     void parseSceneSettingsPost(XMLNodeType sceneSettings) {
+        LOGSCLEVEL1(this->m_pSimulationLog, "==== ModuleMPI: parsing scene settings ============================"<<std::endl;)
         XMLNodeType procTopo = sceneSettings.child("MPISettings").child("ProcessTopology");
         CHECK_XMLNODE(procTopo,"MPISettings/ProcessTopology does not exist");
 
@@ -85,6 +86,7 @@ public:
         } else {
             THROWEXCEPTION("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
         }
+        LOGSCLEVEL1(this->m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 
 };

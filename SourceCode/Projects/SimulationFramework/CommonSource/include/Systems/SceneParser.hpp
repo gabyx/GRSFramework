@@ -1562,7 +1562,7 @@ struct BodyModuleOptions {
 
     using BodyRangeType = Range<RigidBodyIdType>;
     BodyRangeType m_bodyIdRange;       ///< Range of body ids, original list which is handed to parseScene
-    bool m_parseAllBodiesNonSelGroup = true;  ///< Parse all bodies in groups where m_bodyIdRange is not applied (enableSelectiveIds="false) (default= true)
+    bool m_parseAllBodiesNonSelGroup = true;  ///< Parse all bodies in groups where m_bodyIdRange is not applied (enableSelectiveIds="false") (default= true)
     bool m_parseSimBodies = true;         ///< Parses only simulated bodies (default= false)
     bool m_parseStaticBodies = true;
     bool m_allocateSimBodies = true;      ///< if false, does only parse the nodes which do not need the body -> initial condition

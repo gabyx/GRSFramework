@@ -1695,8 +1695,6 @@ public:
                 }else{
                     ERRORMSG(" You specified a R-Matrix strategy which has not been implemented so far!");
                 }
-
-
             }
 
 

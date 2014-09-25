@@ -257,7 +257,7 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
      if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_NORMAL_TANGENTIAL ){
         m_pNormalSorProxStepNodeVisitor->setParams(alpha);
-        m_pTangentialSorProxStepNodeVisitor->setParams(alpha);;
+        m_pTangentialSorProxStepNodeVisitor->setParams(alpha);
     }else{
         m_pSorProxStepNodeVisitor->setParams(alpha);
     }

@@ -12,6 +12,7 @@
 #include "MPICommunication.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
+#include "Collider.hpp"
 
 #include "MPITopologyBuilderSettings.hpp"
 
@@ -80,7 +81,7 @@ public:
     }
 
     void initTopology() {
-        LOGTB(m_pSimulationLog,"---> initialize Topology (Grid)" <<std::endl;)
+        LOGTB(m_pSimulationLog,"---> GridTopologyBuilder, initialize Topology" <<std::endl;)
 
         if(this->m_pProcCommunicator->hasMasterRank()) {
 
@@ -89,7 +90,7 @@ public:
             typename SceneParserType::BodyModuleOptionsType o;
             o.m_parseAllBodiesNonSelGroup = true;
             o.m_parseSimBodies = true; o.m_allocateSimBodies = false;
-            o.m_parseStaticBodies = false; o.m_allocateStaticBodies = false;
+            o.m_parseStaticBodies = true; o.m_allocateStaticBodies = true;
             // clean init states:
             m_initStates.clear();
             parser.parseScene(m_sceneFilePath, typename SceneParserType::SceneParserOptionsType(), o);
@@ -107,9 +108,12 @@ public:
             }
             // ================================================================
 
-            predictMassPoints();
 
             // Preprocess for Grid Building =================================================
+
+            LOGTBLEVEL3(m_pSimulationLog, "---> predict mass points "<<std::endl;);
+            predictMassPoints();
+
             m_r_G_loc.setZero();
             m_aabb_glo.reset(); // Reset total AABB
             m_I_theta_G_glo.setZero();
@@ -137,12 +141,12 @@ public:
             }
             m_r_G_glo /= countPoints;
             // Move intertia tensor to center G
-//            m_I_theta_G_glo(0) -= m_r_G_glo(0)*m_r_G_glo(0);
-//            m_I_theta_G_glo(1) -= m_r_G_glo(0)*m_r_G_glo(1);
-//            m_I_theta_G_glo(2) -= m_r_G_glo(0)*m_r_G_glo(2);
-//            m_I_theta_G_glo(3) -= m_r_G_glo(1)*m_r_G_glo(1);
-//            m_I_theta_G_glo(4) -= m_r_G_glo(1)*m_r_G_glo(2);
-//            m_I_theta_G_glo(5) -= m_r_G_glo(2)*m_r_G_glo(2);
+            m_I_theta_G_glo(0) -= m_r_G_glo(0)*m_r_G_glo(0)  * countPoints;
+            m_I_theta_G_glo(1) -= m_r_G_glo(0)*m_r_G_glo(1)  * countPoints;
+            m_I_theta_G_glo(2) -= m_r_G_glo(0)*m_r_G_glo(2)  * countPoints;
+            m_I_theta_G_glo(3) -= m_r_G_glo(1)*m_r_G_glo(1)  * countPoints;
+            m_I_theta_G_glo(4) -= m_r_G_glo(1)*m_r_G_glo(2)  * countPoints;
+            m_I_theta_G_glo(5) -= m_r_G_glo(2)*m_r_G_glo(2)  * countPoints;
 
 
             // ================================================================
@@ -248,15 +252,25 @@ public:
 
 
     void predictMassPoints(){
+
+        ColliderPoint pointCollider;
+
+        Vector3 gravity = m_pDynSys->m_externalForces.m_gravityField->getGravity();
+        auto staticBodies = m_pDynSys->m_Bodies;
+
         for(auto & massPoint : m_massPoints_glo){
 
             Vector3 vel = massPoint.second.m_state.getVelocityTrans();
             auto & points = massPoint.second.m_points;
 
-            // Predict mass points linearly, no collision detection so far with static objects
+            // Predict mass points with gravity, no collision detection so far with static objects
+            // r_s(t) = 1/2*g*t^2 + v * t + r_s
             ASSERTMSG(points.size()== m_nPointsPredictor+1, "number of points wrong!")
             for(unsigned int i = 1; i< m_nPointsPredictor; i++ ){
-                points[i] = points[i-1] + m_deltaT*vel;
+                points[i] = points[i-1] + m_deltaT*vel + 0.5*gravity * m_deltaT^2;
+
+                for()
+                if(pointCollider.intersectSimple())
             }
 
         }
@@ -265,6 +279,7 @@ public:
     //only master rank
     void buildGrid() {
 
+        LOGTBLEVEL1(m_pSimulationLog, "---> GridTopologyBuilder, build grid ...");
         LOGTBLEVEL1(m_pSimulationLog, "---> Global center of mass points: " << m_r_G_glo.transpose() << std::endl
                                       << "---> Global AABB of mass points: min: " << m_aabb_glo.m_minPoint.transpose()
                                                                        << "max: " << m_aabb_glo.m_maxPoint.transpose() << std::endl
