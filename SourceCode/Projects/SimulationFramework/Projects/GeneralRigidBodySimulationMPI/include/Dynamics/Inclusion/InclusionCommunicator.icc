@@ -14,7 +14,7 @@ InclusionCommunicator<TCombo>::InclusionCommunicator(std::shared_ptr< BodyCommun
         std::shared_ptr< ProcessCommunicatorType > pProcComm):
 
     m_pDynSys(pDynSys),
-    m_globalLocal(pDynSys->m_SimBodies),
+    m_globalLocal(pDynSys->m_simBodies),
     m_globalRemote(pDynSys->m_RemoteSimBodies),
     m_pProcComm(pProcComm),
     m_pProcTopo(m_pProcComm->getProcTopo()),
@@ -31,11 +31,11 @@ InclusionCommunicator<TCombo>::InclusionCommunicator(std::shared_ptr< BodyCommun
 
     // Initialize all NeighbourDatas
     for(auto rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
-        LOGIC(m_pSimulationLog,"--->InclusionCommunicator: Add neighbour data for process rank: "<<*rankIt<<std::endl;);
+        LOGIC(m_pSimulationLog,"---> InclusionCommunicator: Add neighbour data for process rank: "<<*rankIt<<std::endl;);
         auto res = m_nbDataMap.insert(*rankIt);
         ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << *rankIt);
     }
-    m_pSimulationLog->logMessage("--->InclusionCommunicator: Initialized all NeighbourDatas");
+    m_pSimulationLog->logMessage("---> InclusionCommunicator: Initialized all NeighbourDatas");
 
 
     m_pSimulationLog->logMessage("---> Initialized InclusionCommunicator");
@@ -213,7 +213,7 @@ void InclusionCommunicator<TCombo>::sendContactMessageToNeighbours() {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageContact.setRank(*it);
-        m_pProcComm->sendMessageToNeighbourRank(m_messageContact,*it, m_messageContact.m_tag);
+        m_pProcComm->sendMessageToNeighbourRank_async(m_messageContact,*it, m_messageContact.m_tag);
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
@@ -237,7 +237,7 @@ void InclusionCommunicator<TCombo>::sendBodyMultiplicityMessageToNeighbours() {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageMultiplicity.setRank(*it);
-        m_pProcComm->sendMessageToNeighbourRank(m_messageMultiplicity,*it, m_messageMultiplicity.m_tag );
+        m_pProcComm->sendMessageToNeighbourRank_async(m_messageMultiplicity,*it, m_messageMultiplicity.m_tag );
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
@@ -268,7 +268,7 @@ void InclusionCommunicator<TCombo>::sendUpdateSplitBodiesToNeighbours() {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageSplitBodyUpdate.setRank(*it);
-        m_pProcComm->sendMessageToNeighbourRank(m_messageSplitBodyUpdate,*it, m_messageSplitBodyUpdate.m_tag );
+        m_pProcComm->sendMessageToNeighbourRank_async(m_messageSplitBodyUpdate,*it, m_messageSplitBodyUpdate.m_tag );
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
@@ -299,7 +299,7 @@ void InclusionCommunicator<TCombo>::sendSolutionSplitBodiesToNeighbours() {
         LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageSplitBodySolution.setRank(*it);
-        m_pProcComm->sendMessageToNeighbourRank(m_messageSplitBodySolution,*it, m_messageSplitBodySolution.m_tag );
+        m_pProcComm->sendMessageToNeighbourRank_async(m_messageSplitBodySolution,*it, m_messageSplitBodySolution.m_tag );
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }

@@ -27,7 +27,7 @@ public:
     // Cannnot typedef more dependent types in ContactGraph, because doing so,
     using ContactGraphType = typename TCombo::ContactGraphType;
 
-    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator                                     ;
+    using ProcessCommunicatorType = MPILayer::ProcessCommunicator                                     ;
     using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType                          ;
     using ProcessTopologyType = typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType     ;
 

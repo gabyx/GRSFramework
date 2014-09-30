@@ -216,11 +216,11 @@ public:
     ColliderPoint() {}
 
 
-    /** intersects body with a point.  */
-    bool intersectSimple(const RigidBodyType * pBody1,  Vector3 p){
+    /** intersects body with a point and set to the closest point on body if it intersects!  */
+    bool intersectAndProx(const RigidBodyType * pBody1,  Vector3 & p){
 
         m_pBody1 = pBody1;
-        m_p = p;
+        m_p = &p;
 
         m_bIntersection = false;
         boost::apply_visitor(*this, m_pBody1->m_geometry);
@@ -242,7 +242,7 @@ public:
 
 private:
 
-    Vector3 m_p;
+    Vector3 * m_p;
 
     bool m_bIntersection; ///< Boolean which tells if the intersection test gave a feasible result.
 
@@ -253,7 +253,14 @@ private:
 };
 
 void ColliderPoint::intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) {
-   return halfspace->m_normal.dot(m_p - m_pBody1->m_r_S) <= 0.0;
+    Vector3 I_n = m_pBody1->m_A_IK*halfspace->m_normal;
+    PREC t = I_n.dot(m_pBody1->m_r_S - *m_p) +  halfspace->m_normal.dot(halfspace->m_pos);
+    if( t >= 0.0){
+        m_bIntersection = true;
+        // project onto plane
+        *m_p = t*I_n + *m_p;
+    }
+   return ;
 }
 
 /** @} */

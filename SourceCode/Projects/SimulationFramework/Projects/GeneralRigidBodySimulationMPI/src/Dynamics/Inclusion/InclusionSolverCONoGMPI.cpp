@@ -25,8 +25,8 @@ InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(
     std::shared_ptr< DynamicsSystemType > pDynSys,
     std::shared_ptr< ProcessCommunicatorType > pProcComm
 ):
-    m_SimBodies(pDynSys->m_SimBodies),
-    m_Bodies(pDynSys->m_Bodies),
+    m_simBodies(pDynSys->m_simBodies),
+    m_staticBodies(pDynSys->m_staticBodies),
     m_pDynSys(pDynSys),
     m_pCollisionSolver(pCollisionSolver),
     m_pBodyComm(pBodyComm),
@@ -223,7 +223,7 @@ void InclusionSolverCONoGMPI::doJorProx() {
 void InclusionSolverCONoGMPI::integrateAllBodyVelocities() {
 
 
-    for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
+    for( auto bodyIt = m_simBodies.begin(); bodyIt != m_simBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
         (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()
                                                         *(*bodyIt)->m_h_term * m_settings.m_deltaT;
@@ -238,7 +238,7 @@ void InclusionSolverCONoGMPI::integrateAllBodyVelocities() {
 void InclusionSolverCONoGMPI::doSorProx() {
 
     LOGSLLEVEL3_CONTACT(m_pSolverLog, " u_e = [ ");
-    for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
+    for(auto it = m_simBodies.begin(); it != m_simBodies.end(); ++it) {
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uBack: " << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
     }
@@ -257,7 +257,7 @@ void InclusionSolverCONoGMPI::doSorProx() {
 
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog, " u_e = [ ");
-        for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
+        for(auto it = m_simBodies.begin(); it != m_simBodies.end(); ++it) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
         }
         LOGSLLEVEL3_CONTACT(m_pSolverLog, " ]" << std::endl);
@@ -297,7 +297,7 @@ void InclusionSolverCONoGMPI::initContactGraphForIteration(PREC alpha) {
 
 
     // Set the initial u_0 for the prox iteration in the velocities for LOCAL BODIES!
-    for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
+    for( auto bodyIt = m_simBodies.begin(); bodyIt != m_simBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
         // add u_s + M^⁻1*h*deltaT ,  all contact forces initial values have already been applied!
         (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back +

@@ -49,7 +49,7 @@ public:
 
     DEFINE_TIMESTEPPER_CONFIG_TYPES
 
-    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator;
+    using ProcessCommunicatorType = MPILayer::ProcessCommunicator;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -302,7 +302,8 @@ void MoreauTimeStepperMPI::doOneIteration() {
 
     static int iterations=0; // Average is reset after 1000 Iterations
 
-    LOGSLLEVEL1(m_pSolverLog, "---> Do one time-step =================================" <<std::endl;);
+    LOGSLLEVEL1(m_pSolverLog, "---> Do one time-step =================================" <<std::endl <<
+                "---> t_S: " << m_currentSimulationTime << std::endl;);
 
 
     m_bIterationFinished = false;
@@ -342,6 +343,8 @@ void MoreauTimeStepperMPI::doOneIteration() {
     m_startBodyCommunication = m_PerformanceTimer.elapsedSec();
     m_pBodyCommunicator->communicate(m_currentSimulationTime);
     m_endBodyCommunication = m_PerformanceTimer.elapsedSec();
+
+
 
     /* Communicate all bodies which are in the overlap zone or are out of the processes topology!
 

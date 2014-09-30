@@ -44,7 +44,7 @@ private:
 
     void initSim();
 
-    unsigned int m_nSimBodies, m_nGlobalSimBodies;
+    unsigned int m_nGlobalSimBodies;
 
     RecorderSettings m_RecorderSettings;
 
@@ -72,12 +72,12 @@ private:
     std::shared_ptr< BodyCommunicator >   m_pBodyCommunicator;
 
 
-    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator;
+    using ProcessCommunicatorType = MPILayer::ProcessCommunicator;
     using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType;
     std::shared_ptr< ProcessCommunicatorType > m_pProcCommunicator;
 
 
-    using TopologyBuilderType = typename MPILayer::TopologyBuilder ;
+    using TopologyBuilderType = MPILayer::TopologyBuilder ;
     std::shared_ptr< TopologyBuilderType >    m_pTopologyBuilder;
 
     void writeAllOutput();

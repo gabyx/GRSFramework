@@ -46,7 +46,7 @@ public:
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator                                     ;
+    using ProcessCommunicatorType = MPILayer::ProcessCommunicator                                     ;
     using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType                          ;
     using ProcessTopologyType = typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType     ;
 
@@ -120,8 +120,8 @@ protected:
 
 
 
-    typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
+    typename DynamicsSystemType::RigidBodySimContainerType & m_simBodies;
+    typename DynamicsSystemType::RigidBodyStaticContainerType & m_staticBodies;
 
 
     void integrateAllBodyVelocities();

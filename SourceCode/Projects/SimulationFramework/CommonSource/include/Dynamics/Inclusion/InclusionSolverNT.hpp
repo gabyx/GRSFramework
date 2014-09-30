@@ -80,8 +80,8 @@ protected:
 
   std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
   std::shared_ptr<DynamicsSystemType>  m_pDynSys;
-  std::vector< RigidBodyType* > & m_SimBodies;
-  std::vector< RigidBodyType* > & m_Bodies;
+  std::vector< RigidBodyType* > & m_simBodies;
+  std::vector< RigidBodyType* > & m_staticBodies;
 
 
 
@@ -147,8 +147,8 @@ protected:
 
 template< typename TInclusionSolverConfig >
 InclusionSolverNT<TInclusionSolverConfig>::InclusionSolverNT( std::shared_ptr<CollisionSolverType > pCollisionSolver,  std::shared_ptr<DynamicsSystemType> pDynSys):
-m_SimBodies(pCollisionSolver->m_SimBodies),
-m_Bodies(pCollisionSolver->m_Bodies)
+m_simBodies(pCollisionSolver->m_simBodies),
+m_staticBodies(pCollisionSolver->m_staticBodies)
 {
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
@@ -193,8 +193,8 @@ template< typename TInclusionSolverConfig >
 void InclusionSolverNT<TInclusionSolverConfig>::reset()
 {
   // Do a Debug check if sizes match!
-  ASSERTMSG( m_SimBodies.size() * NDOFuBody == m_nDofu, "InclusionSolverNT:: Error in Dimension of System!");
-  ASSERTMSG( m_SimBodies.size() * NDOFqBody == m_nDofq, "InclusionSolverNT:: Error in Dimension of System!");
+  ASSERTMSG( m_simBodies.size() * NDOFuBody == m_nDofu, "InclusionSolverNT:: Error in Dimension of System!");
+  ASSERTMSG( m_simBodies.size() * NDOFqBody == m_nDofq, "InclusionSolverNT:: Error in Dimension of System!");
 
   m_pDynSys->init_const_hTerm(m_h_const);
   m_pDynSys->init_MassMatrixInv(m_Minv_diag);

@@ -27,7 +27,7 @@ public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     using TopologyBuilderEnumType = TopologyBuilderEnum;
-    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator;
+    using ProcessCommunicatorType = MPILayer::ProcessCommunicator;
 
     TopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
                     std::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
@@ -54,8 +54,9 @@ protected:
 template<typename TSceneParser, typename TProcCommunicator>
 class GridTopologyBuilder : public TopologyBuilder {
 
-    template<typename TTopologyBuilder >
-    friend class TopologyBuilderMessageWrapperBodies;
+
+    friend class TopologyBuilderMessageWrapperBodies<GridTopologyBuilder>;
+    friend class TopologyBuilderMessageWrapperResults<GridTopologyBuilder>;
 
 public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
@@ -70,7 +71,8 @@ public:
                         boost::filesystem::path sceneFilePath,
                         unsigned int nGlobalSimBodies)
         :TopologyBuilder(pDynSys, pProcCommunicator), m_settings(settings),
-        m_nGlobalSimBodies(nGlobalSimBodies),m_sceneFilePath(sceneFilePath)
+        m_nGlobalSimBodies(nGlobalSimBodies),m_sceneFilePath(sceneFilePath),
+        m_messageWrapperResults(this)
     {
         this->m_type = TopologyBuilderEnumType::GRIDBUILDER;
 
@@ -90,7 +92,7 @@ public:
             typename SceneParserType::BodyModuleOptionsType o;
             o.m_parseAllBodiesNonSelGroup = true;
             o.m_parseSimBodies = true; o.m_allocateSimBodies = false;
-            o.m_parseStaticBodies = true; o.m_allocateStaticBodies = true;
+            o.m_parseStaticBodies = false; o.m_allocateStaticBodies = false;
             // clean init states:
             m_initStates.clear();
             parser.parseScene(m_sceneFilePath, typename SceneParserType::SceneParserOptionsType(), o);
@@ -102,7 +104,7 @@ public:
             LOGTBLEVEL3(m_pSimulationLog, "---> parsed states: "<<std::endl;);
             for(auto & s : m_initStates){
                 // Save mass points
-                m_massPoints_glo.insert(std::make_pair(s.first, MassPoint(s.second,m_nPointsPredictor) ));
+                m_massPoints_glo.push_back(MassPoint(&s.second));
                 LOGTBLEVEL3(m_pSimulationLog, "\t\t state: "
                             << RigidBodyId::getBodyIdString(s.second.m_id )<< " , " << s.second.m_q.transpose() << std::endl;);
             }
@@ -111,7 +113,7 @@ public:
 
             // Preprocess for Grid Building =================================================
 
-            LOGTBLEVEL3(m_pSimulationLog, "---> predict mass points "<<std::endl;);
+
             predictMassPoints();
 
             m_r_G_loc.setZero();
@@ -122,7 +124,7 @@ public:
             for(auto & massPoint : m_massPoints_glo){
 
                 // loop over all prediction points of this mass point
-                for(auto & r_IS : massPoint.second.m_points){
+                for(auto & r_IS : massPoint.m_points){
                     // Global AABB
                     m_aabb_glo.unite(r_IS);
                     // Center of masses
@@ -155,11 +157,26 @@ public:
 
 
         } else {
-            // Do not send data the first time
-            // Wait for the grid and initial conditions
+
+            // Receive all results from master;
+            // All initial states get saved in m_pDynSys->m_bodiesInitStates
+            m_pDynSys->m_bodiesInitStates.clear();
+            m_pProcCommunicator->receiveMessageFromRank(m_messageWrapperResults,
+                                                     this->m_pProcCommunicator->getMasterRank(),
+                                                     m_messageWrapperResults.m_tag);
         }
 
-        m_pProcCommunicator->waitBarrier();
+        LOGTBLEVEL3(m_pSimulationLog, "---> States in m_bodiesInitStates: (" << m_pDynSys->m_bodiesInitStates.size()<< ")" <<std::endl;);
+            for(auto & s :  m_pDynSys->m_bodiesInitStates){
+                LOGTBLEVEL3(m_pSimulationLog, "\t\t state: "
+                            << RigidBodyId::getBodyIdString(s.second.m_id )<< " , q: "
+                            << s.second.m_q.transpose() << " u: " << s.second.m_u.transpose() << std::endl;);
+        }
+
+
+
+//        m_pProcCommunicator->waitBarrier();
+//        ERRORMSG("terminate");
 
     }
 
@@ -187,7 +204,7 @@ public:
             std::vector<RankIdType> ranks;
             unsigned int count=0;
             std::generate_n(std::back_inserter(ranks),
-                            this->m_pProcCommunicator->getNProcesses(),
+                            this->m_pProcCommunicator->getNProcesses()-1,
                             [&](){ if(count == masterRank){return (++count)++;}else{return count++;} });
 
             this->m_pProcCommunicator->receiveMessageFromRanks(m, ranks, m.m_tag);
@@ -226,7 +243,7 @@ public:
 
         // calculate geometric center and AABB and also inertia tensor (first with respect to interia frame,
         // then we move it with steiner formula to geometric center)
-        for(auto & body : m_pDynSys->m_SimBodies) {
+        for(auto & body : m_pDynSys->m_simBodies) {
 
             m_aabb_loc.unite((body)->m_r_S);
 
@@ -243,7 +260,7 @@ public:
 #undef r_IS
         }
 
-        m_r_G_loc /= this->m_pDynSys->m_SimBodies.size();
+        m_r_G_loc /= this->m_pDynSys->m_simBodies.size();
         // Move inertia tensor to geometric center (steiner formula) on root!
 
         // Predict Bodies over some steps
@@ -252,37 +269,53 @@ public:
 
 
     void predictMassPoints(){
-
+        LOGTBLEVEL3(m_pSimulationLog, "---> Predict mass points (points: " << m_massPoints_glo.size()<< ")" <<std::endl;);
         ColliderPoint pointCollider;
-
         Vector3 gravity = m_pDynSys->m_externalForces.m_gravityField->getGravity();
-        auto staticBodies = m_pDynSys->m_Bodies;
+        auto & staticBodies = m_pDynSys->m_staticBodies;
 
         for(auto & massPoint : m_massPoints_glo){
 
-            Vector3 vel = massPoint.second.m_state.getVelocityTrans();
-            auto & points = massPoint.second.m_points;
+            Vector3 vel = massPoint.m_state->getVelocityTrans();
+            auto & points = massPoint.m_points;
 
             // Predict mass points with gravity, no collision detection so far with static objects
             // r_s(t) = 1/2*g*t^2 + v * t + r_s
-            ASSERTMSG(points.size()== m_nPointsPredictor+1, "number of points wrong!")
             for(unsigned int i = 1; i< m_nPointsPredictor; i++ ){
-                points[i] = points[i-1] + m_deltaT*vel + 0.5*gravity * m_deltaT^2;
+                points.push_back( points.back() + m_deltaT*vel + 0.5*gravity*m_deltaT*m_deltaT );
 
-                for()
-                if(pointCollider.intersectSimple())
+                // intersect with all static bodies, if intersection abort, point is proxed onto body!
+                bool hitObject = false;
+                for(auto & pBody : staticBodies){
+
+                    if( pointCollider.intersectAndProx(pBody, points.back() ) ){
+                        LOGTBLEVEL3(m_pSimulationLog, "---> hit object " <<std::endl);
+                        hitObject = true;
+                        break;
+                    }
+                }
+
+
+                if(hitObject){
+
+                    break;
+                }
             }
-
+            LOGTBLEVEL3(m_pSimulationLog, "---> body: "
+            <<RigidBodyId::getBodyIdString(massPoint.m_state->m_id) << " last prediction: " << points.back().transpose()  <<std::endl);
         }
     }
 
-    //only master rank
+    //only master rank executes this
     void buildGrid() {
 
-        LOGTBLEVEL1(m_pSimulationLog, "---> GridTopologyBuilder, build grid ...");
+        RankIdType masterRank = m_pProcCommunicator->getMasterRank();
+        ASSERTMSG(masterRank ==  m_pProcCommunicator->getRank(),"wrong rank");
+
+        LOGTBLEVEL1(m_pSimulationLog, "---> GridTopologyBuilder, build grid ..." << std::endl;);
         LOGTBLEVEL1(m_pSimulationLog, "---> Global center of mass points: " << m_r_G_glo.transpose() << std::endl
-                                      << "---> Global AABB of mass points: min: " << m_aabb_glo.m_minPoint.transpose()
-                                                                       << "max: " << m_aabb_glo.m_maxPoint.transpose() << std::endl
+                                      << "---> Global AABB of mass points: min: " << m_aabb_glo.m_minPoint.transpose() << std::endl
+                                      << "                                 max: " << m_aabb_glo.m_maxPoint.transpose() << std::endl
                                       << "---> Global Binet inertia tensor: " << std::endl
                                       << "\t\t " << m_I_theta_G_glo(0) << "\t" << m_I_theta_G_glo(1) << "\t" << m_I_theta_G_glo(2) << std::endl
                                       << "\t\t " << m_I_theta_G_glo(1) << "\t" << m_I_theta_G_glo(3) << "\t" << m_I_theta_G_glo(4) << std::endl
@@ -295,8 +328,13 @@ public:
         typename MyMatrixDecomposition::template EigenSolverSelfAdjoint<Matrix33> eigenSolv(Theta_G);
 
         Matrix33 A_IK = eigenSolv.eigenvectors();
-        LOGTBLEVEL3( m_pSimulationLog, "Eigenvalues: "<<std::endl<< eigenSolv.eigenvalues() <<std::endl; );
-        LOGTBLEVEL3( m_pSimulationLog, "Eigenvectors: "<<std::endl<< A_IK <<std::endl; );
+        LOGTBLEVEL3( m_pSimulationLog, "---> Eigenvalues: "<<std::endl<< eigenSolv.eigenvalues().transpose() <<std::endl; );
+        LOGTBLEVEL3( m_pSimulationLog, "---> Eigenvectors: "<<std::endl<< A_IK <<std::endl; );
+
+//        // Correct A_IK to be as orthogonal as possible, project x onto x-y plane, (for no use so far)
+//        A_IK.col(2).normalize();
+//        A_IK.col(0) -= A_IK.col(2).dot(A_IK.col(0)) * A_IK.col(2); A_IK.col(0).normalize();
+//        A_IK.col(1) = A_IK.col(2).cross(A_IK.col(0));              A_IK.col(1).normalize();
 
         // Coordinate frame of OOBB
         if(A_IK(2,2) <= 0){ // if z-Axis is negativ -> *-1
@@ -304,10 +342,68 @@ public:
             A_IK.col(2) *= -1.0;
         }
         LOGTBLEVEL3( m_pSimulationLog, "---> Coordinate Frame: "<<std::endl<< A_IK <<std::endl; );
+        LOGTBLEVEL3( m_pSimulationLog, "---> A_IK * A_IK^T: "<<std::endl<< A_IK*A_IK.transpose() <<std::endl; );
+
+        LOGTBLEVEL1( m_pSimulationLog, "---> Create ProcessTopologyGrid with min/max: "<<
+                    "[ " << m_aabb_glo.m_minPoint.transpose() << " , " << m_aabb_glo.m_maxPoint.transpose() << "]" << std::endl; );
+        m_pProcCommunicator->createProcTopoGrid(m_aabb_glo.m_minPoint, m_aabb_glo.m_maxPoint,m_settings.m_processDim);
+
+        LOGTBLEVEL3( m_pSimulationLog, "---> Sort bodies " << std::endl;);
+
+        // Sort states acoording to their rank their in!
+        m_bodiesPerRank.clear();
+        m_pDynSys->m_bodiesInitStates.clear();
+        for(auto & state : m_initStates){
+            RankIdType ownerRank;
+            m_pProcCommunicator->getProcTopo()->belongsPointToProcess(state.second.getPosition(),ownerRank);
 
 
+            if(ownerRank == masterRank){
+                // move own body states in dynamic system init states
+                m_pDynSys->m_bodiesInitStates.insert(std::make_pair(state.second.m_id,state.second));
+            }else{
+                // move other body states to a list for sending
+                m_bodiesPerRank[ownerRank].push_back(&state.second);
+            }
+
+        }
+
+        // Log stuff
+        for(auto & s : m_bodiesPerRank){
+            LOGTBLEVEL3( m_pSimulationLog, "\t Bodies for rank " << s.first << " : ");
+            for(auto & state : s.second){
+                LOGTBLEVEL3( m_pSimulationLog, RigidBodyId::getBodyIdString(state->m_id) << " , ");
+            }
+            LOGTBLEVEL3( m_pSimulationLog, std::endl);
+        }
+
+
+        // Send all data to the neighbours ===========================
+        // For each rank r send:
+        // - topology identifier (GRID)
+        // - topology settings (GRID: min,max,dimension)
+        // - send all body ids and initial states for the bodies in rank r
+
+
+        // Fill linear array with all ranks except master
+        std::vector<RankIdType> ranks;
+        unsigned int count=0;
+        std::generate_n(std::back_inserter(ranks), this->m_pProcCommunicator->getNProcesses()-1, [&](){ if(count ==masterRank){return (++count)++;}else{return count++;} });
+
+
+        for(auto rank : ranks){
+            LOGTBLEVEL1( m_pSimulationLog, "---> Sending grid to rank: "<< rank <<std::endl; );
+            m_messageWrapperResults.setRank(rank);
+            m_pProcCommunicator->sendMessageToRank(m_messageWrapperResults,rank, m_messageWrapperResults.m_tag);
+        }
+        // ===========================================================
+
+
+        // Safty check:
+        ASSERTMSG(m_bodiesPerRank.size() == 0,"All states should be sent!");
 
     }
+
 public:
 
     template<typename TParser>
@@ -353,23 +449,24 @@ private:
 
     boost::filesystem::path m_sceneFilePath;
 
+    // LOCAL STUFF ==================================================================
     Vector3 m_r_G_loc;       ///< Local Geometric center of all point masses
     Vector6 m_I_theta_loc;   ///< Local Intertia tensor (binet (euler) inertia tensor [a_00,a_01,a_02,a_11,a_12,a_22] ) in intertial frame I
     AABB m_aabb_loc;         ///< Local AABB of point masses
 
     // GLOBAL STUFF =================================================================
     struct MassPoint {
-        MassPoint(const RigidBodyState & s, unsigned int nPoints = 0): m_state(s), m_points(nPoints+1){
-            m_points[0] =  s.getPosition();
+        MassPoint(const RigidBodyState * s, unsigned int nPoints = 0): m_state(s), m_points(nPoints+1){
+            m_points[0] =  s->getPosition();
         }
-        std::vector<Vector3> m_points; //< For the prediction
-        RigidBodyState m_state; // Init Condition of the MassPoint
+        std::vector<Vector3> m_points; ///< For the prediction
+        const RigidBodyState * m_state; ///< Init Condition of the MassPoint pointing to m_initStates;
     };
-    const unsigned int m_nPointsPredictor = 0;
+    const unsigned int m_nPointsPredictor = 4;
     const PREC m_deltaT = 0.1;
 
     typename DynamicsSystemType::RigidBodyStatesContainerType m_initStates;
-    typename std::unordered_map<RankIdType,std::vector<RigidBodyIdType> > m_bodiesPerRank;
+    typename std::unordered_map<RankIdType, std::vector<const RigidBodyState *> > m_bodiesPerRank; ///< rank to all pointers in m_initStates;
 
     AABB    m_aabb_glo;        ///< Global AABB of point masses
     Vector3 m_r_G_glo;         ///< Global geometric center ("G") of all point masses
@@ -377,10 +474,14 @@ private:
 
     std::unordered_map<RankIdType,AABB> m_rankAABBs;
 
-    std::unordered_map<RigidBodyIdType,MassPoint> m_massPoints_glo; ///< local mass points
+    std::vector<MassPoint> m_massPoints_glo; ///< local mass points
 
     unsigned int m_nGlobalSimBodies; ///< Only for a check with MassPoints
     GridBuilderSettings m_settings;
+
+
+    TopologyBuilderMessageWrapperResults<GridTopologyBuilder> m_messageWrapperResults;
+
 };
 
 }; //MPILayer

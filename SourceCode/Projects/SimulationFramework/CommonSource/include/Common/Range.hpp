@@ -28,7 +28,7 @@ class Range{
         // Move assignment
         Range & operator = ( Range && r ) = default;
 
-        //Constructor for std::vector,
+        //Constructor for RangeType = std::vector,
         // if called with rvalue (temporary) it gets moved already into v, then we move again into m_v
         Range( RangeType v) : m_v(std::move(v)) {  init(); }
 

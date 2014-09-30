@@ -71,11 +71,11 @@ protected:
     friend class InclusionSolverCO;
     friend class InclusionSolverCONoG;
 
-    unsigned int m_expectedNContacts;
-                          ///< Expected number of Contacts.
-    typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
+
+
+    typename DynamicsSystemType::RigidBodySimContainerType & m_simBodies;
     typename DynamicsSystemType::RigidBodySimContainerType & m_RemoteSimBodies;
-    typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;           ///< List of all fixed not simulated bodies.
+    typename DynamicsSystemType::RigidBodyStaticContainerType & m_staticBodies;           ///< List of all fixed not simulated bodies.
 
 
     ColliderBody m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.

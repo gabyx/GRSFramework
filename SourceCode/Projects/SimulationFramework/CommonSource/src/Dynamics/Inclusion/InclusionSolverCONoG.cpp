@@ -7,8 +7,8 @@
 
 InclusionSolverCONoG::InclusionSolverCONoG(std::shared_ptr< CollisionSolverType >  pCollisionSolver,
                                            std::shared_ptr<DynamicsSystemType > pDynSys):
-    m_SimBodies(pDynSys->m_SimBodies),
-    m_Bodies(pDynSys->m_Bodies),
+    m_simBodies(pDynSys->m_simBodies),
+    m_staticBodies(pDynSys->m_staticBodies),
     m_contactGraph(&(pDynSys->m_ContactParameterMap)){
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
@@ -238,7 +238,7 @@ void InclusionSolverCONoG::doJorProx() {
 
 template<bool onlyNotInContactGraph> // default to false = all bodies
 void InclusionSolverCONoG::integrateAllBodyVelocities() {
-    for( auto & bodyPtr : m_SimBodies){
+    for( auto & bodyPtr : m_simBodies){
         if( (onlyNotInContactGraph && !bodyPtr->m_pSolverData->m_bInContactGraph) || onlyNotInContactGraph == false){
            bodyPtr->m_pSolverData->m_uBuffer.m_front += bodyPtr->m_pSolverData->m_uBuffer.m_back + bodyPtr->m_MassMatrixInv_diag.asDiagonal()  *  bodyPtr->m_h_term * m_settings.m_deltaT;
         }
@@ -268,7 +268,7 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
 
     // Integrate all bodies and save m_back, this integration needs to be after applyNode above (because m_back is used !!!) !
-    for(auto & bodyPtr : m_SimBodies) {
+    for(auto & bodyPtr : m_simBodies) {
         // All bodies also the ones not in the contact graph...
         // add u_s + M^⁻1*h*deltaT ,  all contact forces initial values have already been applied!
         bodyPtr->m_pSolverData->m_uBuffer.m_front += bodyPtr->m_pSolverData->m_uBuffer.m_back + bodyPtr->m_MassMatrixInv_diag.asDiagonal()  *  bodyPtr->m_h_term * m_settings.m_deltaT;
@@ -324,7 +324,7 @@ void InclusionSolverCONoG::doSORProxCPU(){
     initContactGraphForIteration(m_settings.m_alphaSORProx);
 
     LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> u_e = [ ");
-    for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
+    for(auto it = m_simBodies.begin(); it != m_simBodies.end(); ++it) {
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uBack: " << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
     }
@@ -341,7 +341,7 @@ void InclusionSolverCONoG::doSORProxCPU(){
         sorProxOverAllNodes();
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> u_e = [ ");
-        for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
+        for(auto it = m_simBodies.begin(); it != m_simBodies.end(); ++it) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
         }
         LOGSLLEVEL3_CONTACT(m_pSolverLog, " ]" << std::endl);

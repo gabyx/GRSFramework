@@ -40,7 +40,7 @@ class GravityForceField{
         void setTime(PREC time){};
         void reset(){};
 
-        Vector3 getGravity();
+        Vector3 getGravity(){ return m_gravityAccel;}
     private:
         Vector3 m_gravityAccel;
 };
@@ -174,7 +174,7 @@ class ExternalForceList{
                 if(m_gravityField){
                     ASSERTMSG(false,"A gravity force field has already been added!")
                 }else{
-                    m_gravityField = extForce;
+                    m_gravityField = reinterpret_cast<GravityForceField*>(extForce);
                 }
             }
 

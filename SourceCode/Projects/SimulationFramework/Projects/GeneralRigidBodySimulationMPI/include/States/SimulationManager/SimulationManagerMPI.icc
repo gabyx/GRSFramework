@@ -76,39 +76,71 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     m_pDynSys = std::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added DynamicsSystem");
 
-    // Parse the Scene from XML! ==========================
+    // Parse the SceneSettings only ==========================
     m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType( *m_pDynSys) );
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
 
-    // parsing only static bodies and settings
-    typename SceneParserType::BodyModuleOptionsType o;
-    o.m_parseAllBodiesNonSelGroup = true;
-    o.m_parseSimBodies = false; o.m_allocateSimBodies = false;
-    o.m_parseStaticBodies = true; o.m_allocateStaticBodies = true;
+    {
+        typename SceneParserType::BodyModuleOptionsType optBody;
+        optBody.m_parseAllBodiesNonSelGroup = true;
+        optBody.m_parseSimBodies = false; optBody.m_allocateSimBodies = false;
+        optBody.m_parseStaticBodies = true; optBody.m_allocateStaticBodies = true;
 
-    m_pSceneParser->parseScene(sceneFilePathNew, typename SceneParserType::SceneParserOptionsType(), o);
+        SceneParserType::SceneParserOptionsType optScene;
+        optScene.m_parseSceneSettings = true;
+        optScene.m_parseSceneObjects = true;
+
+        m_pSceneParser->parseScene(sceneFilePathNew, typename SceneParserType::SceneParserOptionsType(), std::move(optBody)) ;
+    }
 
     m_nGlobalSimBodies = m_pSceneParser->getSpecifiedSimBodies();
-    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SimBodies.size()
-        << " simulated & " << m_pDynSys->m_Bodies.size()<<  " static bodies! "  << std::endl;);
+    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_simBodies.size()
+        << " simulated & " << m_pDynSys->m_staticBodies.size()<<  " static bodies! "  << std::endl;);
     LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: Global Bodies in Simulation "<< m_nGlobalSimBodies<< " Bodies!" << std::endl;);
     // ====================================================
 
-    // TopologyBuilder Build Topology =======================
+    // TopologyBuilder Build Topology =====================
 
     if(m_pDynSys->getSettingsTopoBuilder().m_type == MPILayer::TopologyBuilderEnum::GRIDBUILDER){
 
-        auto s = m_pDynSys->getSettingsTopoBuilder().m_gridBuilderSettings;
         m_pTopologyBuilder = std::shared_ptr< TopologyBuilderType >(
                                                 new MPILayer::GridTopologyBuilder<SceneParserType, ProcessCommunicatorType>
-                                                  (m_pDynSys,m_pProcCommunicator,s,sceneFilePathNew, m_nGlobalSimBodies ) );
+                                                  (m_pDynSys,m_pProcCommunicator, m_pDynSys->getSettingsTopoBuilder().m_gridBuilderSettings
+                                                   ,sceneFilePathNew, m_nGlobalSimBodies ) );
     }else{
         ERRORMSG("No Topology Builder type instantiated")
     }
 
     m_pTopologyBuilder->initTopology();
-    exit(-1);
-    //====================================================
+
+    // Parse the scene objects from the XML, but selectively on the ids in m_pDynSys->bodiesInitStates
+    {
+        typename SceneParserType::BodyModuleOptionsType optBody;
+        optBody.m_parseAllBodiesNonSelGroup = true;
+        optBody.m_parseSimBodies = true; optBody.m_allocateSimBodies = true;
+        optBody.m_parseStaticBodies = false; optBody.m_allocateStaticBodies = false;
+        optBody.m_parseInitialCondition = false;
+
+        std::set<RigidBodyIdType> bodiesToload;
+        for(auto & s: m_pDynSys->m_bodiesInitStates){ bodiesToload.insert(s.second.m_id);}
+        optBody.m_bodyIdRange = std::move(bodiesToload);
+
+        SceneParserType::SceneParserOptionsType optScene;
+        optScene.m_parseSceneSettings = false;
+        optScene.m_parseSceneObjects = true;
+
+        m_pSceneParser->parseScene(sceneFilePathNew, optScene , std::move(optBody));
+
+        // Apply initial states (received from master) to bodies
+        m_pDynSys->applyInitStatesToBodies();
+
+        LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_simBodies.size()
+        << " simulated & " << m_pDynSys->m_staticBodies.size()<<  " static bodies! "  << std::endl;);
+    }
+
+    //=====================================================
+
+
     // Do Safty Check
     // Do a Reduction of all Simbodies, to count if no bodies are missing!
     m_pSimulationLog->logMessage("---> Check number of Bodies in Process:");
@@ -153,7 +185,7 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 void SimulationManagerMPI::checkNumberOfBodiesInProcess() {
 
     int numberOfBodiesInSimulation = 0;
-    int nSimBodies = m_nSimBodies;
+    int nSimBodies = m_pDynSys->m_simBodies.size();
 
     CPUTimer timer;
 
@@ -207,7 +239,7 @@ void SimulationManagerMPI::startSim() {
     initSim();
 
     if(m_pTimestepper->m_settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
-        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(),m_pDynSys->m_SimBodies);
+        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(),m_pDynSys->m_simBodies);
     }
 
 
@@ -255,7 +287,7 @@ void SimulationManagerMPI::writeAllOutput() {
         // wait here for the recorder to finish up
         // m_pStateRecorder->wait(); // waits till the recorder has finished its parallel stuff
 
-        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_SimBodies);
+        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_simBodies);
         // this would then be asynchronous call (copies states internally and writes everything out
     }
 }
@@ -307,7 +339,7 @@ void SimulationManagerMPI::initSim() {
     //m_pStateRecorder->setDirectoryPath(localSimFolderPath);
 
 // Uncomment if StateRecorder is StateRecorderBody
-//    if(!m_pStateRecorder->createSimFiles(m_pDynSys->m_SimBodies,true)) { // Truncate the files, important!
+//    if(!m_pStateRecorder->createSimFiles(m_pDynSys->m_simBodies,true)) { // Truncate the files, important!
 //        LOG(m_pSimulationLog,  "ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl;);
 //        ERRORMSG("ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
 //    }

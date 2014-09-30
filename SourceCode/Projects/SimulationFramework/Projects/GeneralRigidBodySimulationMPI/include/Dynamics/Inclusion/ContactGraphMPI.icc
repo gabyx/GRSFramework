@@ -50,6 +50,9 @@ void ContactGraph<TCombo>::clearGraph() {
     }
 
     m_splittedNodes.clear();
+
+    m_usedContactModels = 0;
+    m_nLambdas = 0;
 }
 template<typename TCombo>
 void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
@@ -204,29 +207,29 @@ std::pair<typename ContactGraph<TCombo>::SplitBodyNodeDataType *, bool> ContactG
 template<typename TCombo>
 void ContactGraph<TCombo>::setContactModel(NodeDataType & nodeData) {
 
-    // Specify the contact model
+     // Specify the contact model
         nodeData.m_contactParameter  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,
-                                                                                      nodeData.m_pCollData->m_pBody2->m_eMaterial);
+                                                                                nodeData.m_pCollData->m_pBody2->m_eMaterial);
 
-        if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ) {
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF  ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD
+          ) {
+            // Set flag for the corresponding model
+            m_usedContactModels |= 1 << EnumConversion::toIntegral(nodeData.m_contactParameter.m_contactModel);
 
+            //Set the minmial stuff
+            const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
+            //nodeData.m_eps.setZero();
+            //nodeData.m_chi.setZero();
+
+            // Set epsilon  values
             using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
-            const unsigned int dimSet = CMT::ConvexSet::Dimension;
-
-//            nodeData.m_chi.setZero(dimSet);
-//            nodeData.m_b.setZero(dimSet);
-            nodeData.m_LambdaBack.setZero(dimSet);
-            nodeData.m_LambdaFront.setZero(dimSet);
-//            nodeData.m_R_i_inv_diag.setZero(dimSet);
-//            nodeData.m_G_ii.setZero(dimSet,dimSet);
-//            nodeData.m_eps.setZero(dimSet);
-
-            nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[0];
-            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[1];
-            nodeData.m_eps(2) = nodeData.m_contactParameter.m_params[1];
+            nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[CMT::epsNIdx];
+            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[CMT::epsTIdx];
+            nodeData.m_eps(2) = nodeData.m_eps(1);
 
         } else {
             ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
         }
-
 }

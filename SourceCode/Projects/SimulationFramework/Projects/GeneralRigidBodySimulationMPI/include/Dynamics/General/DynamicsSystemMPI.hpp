@@ -48,11 +48,11 @@ public:
     // All global RigidBodies Container for this Process, these bodies which are owned by this class!"============================
     using RigidBodyContainerType = RigidBodyContainer;
     using RigidBodySimContainerType = RigidBodyContainer;
-    RigidBodySimContainerType m_SimBodies;        // simulated objects
+    RigidBodySimContainerType m_simBodies;        // simulated objects
     RigidBodySimContainerType m_RemoteSimBodies;  // all remote bodies
 
     using RigidBodyStaticContainerType = RigidBodySimContainerType;
-    RigidBodySimContainerType m_Bodies;        // all not simulated objects
+    RigidBodySimContainerType m_staticBodies;        // all not simulated objects
     // ============================================================================
 
     //All initial conditions for all bodies
@@ -61,8 +61,8 @@ public:
     RigidBodyStatesContainerType m_bodiesInitStates;
 
 
-    inline void addSimBodyPtr(RigidBodyType * ptr ) { m_SimBodies.addBody(ptr); }
-    inline void addBodyPtr(RigidBodyType * ptr ) { m_Bodies.addBody(ptr); }
+    inline void addSimBodyPtr(RigidBodyType * ptr ) { m_simBodies.addBody(ptr); }
+    inline void addBodyPtr(RigidBodyType * ptr ) { m_staticBodies.addBody(ptr); }
 
     void initializeLog(Logging::Log* pLog);
 
@@ -144,7 +144,7 @@ public:
 
         auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&this->m_bodiesInitStates, sett.get()));
         auto vis = std::unique_ptr<VisModuleType>(nullptr); // no visualization needed
-        auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , &this->m_SimBodies, &this->m_Bodies )) ;
+        auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , &this->m_simBodies, &this->m_staticBodies )) ;
         auto es  = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &this->m_externalForces));
         auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&this->m_ContactParameterMap));
 
@@ -158,7 +158,7 @@ public:
 
 inline void DynamicsSystemMPI::applyInitStatesToBodies(){
     // Apply all init states to the sim bodies
-    InitialConditionBodies::applyBodyStatesTo( m_bodiesInitStates, m_SimBodies);
+    InitialConditionBodies::applyBodyStatesTo( m_bodiesInitStates, m_simBodies);
 }
 
 

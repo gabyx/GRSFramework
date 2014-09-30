@@ -351,21 +351,21 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
 /**
 * @brief Spezialisation for a single Prox onto a Cone in \f$ \mathcal{R}^3 \f$ with center axis as the x-axis given as
 * \f$ K = {(x_1,x_2,x_3) \in \mathcal{R}^3 \ | \ \sqrt{(x_2^2 + x_3^2)} \leq \mu x_1 \} \f$ .
-* \f$ \mu \f$ is the slope factor
+* @param slopeFactor Friction coeff. \f$ \mu \f$ is the slope factor
 */
 template<>
 struct ProxFunction<ConvexSets::Cone3D> {
 
     template<typename PREC, typename Derived>
-    static INLINE_PROX_KEYWORD void doProxSingle(const PREC & slope_factor,
+    static INLINE_PROX_KEYWORD void doProxSingle(const PREC & slopeFactor,
                                                  Eigen::MatrixBase<Derived> & y)
     {
             ASSERTMSG(y.rows() % 3==0,"wrong size");
             PREC normT = y.template tail<2>().norm();
 
-            PREC testFricCone = slope_factor*normT + y(0);
+            PREC testFricCone = slopeFactor*normT + y(0);
 
-            if(normT - slope_factor*y(0) <= 0.0){        // In Friction cone, do nothing!
+            if(normT - slopeFactor*y(0) <= 0.0){        // In Friction cone, do nothing!
                 return;
             }else if(testFricCone <= 0.0) { // In polar cone to friction cone, set to zero!
                 y.setZero();
@@ -373,15 +373,14 @@ struct ProxFunction<ConvexSets::Cone3D> {
             }
 
             // else project onto friction cone
-            testFricCone /= (1+slope_factor*slope_factor);
+            testFricCone /= (1+slopeFactor*slopeFactor);
             y(0) = testFricCone;
             y.template tail<2>() /= normT;
-            y.template tail<2>() *= slope_factor*testFricCone;
+            y.template tail<2>() *= slopeFactor*testFricCone;
 
     }
 
 };
-
 
 /** @} */
 };

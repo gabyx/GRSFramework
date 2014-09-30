@@ -73,6 +73,8 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPIInformation.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPICommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopology.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopologyGrid.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopologyVisitors.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopologyBuilder.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopologyBuilderSettings.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPISerializationHelpersEigen.hpp

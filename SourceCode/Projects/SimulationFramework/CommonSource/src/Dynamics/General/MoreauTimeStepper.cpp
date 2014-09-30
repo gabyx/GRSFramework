@@ -142,7 +142,7 @@ void MoreauTimeStepper::reset() {
 
     if(m_settings.m_eSimulateFromReference != TimeStepperSettings::NONE) {
 
-        if(!m_ReferenceSimFile.openRead(m_settings.m_simStateReferenceFile,m_pDynSys->m_SimBodies.size(),true)) {
+        if(!m_ReferenceSimFile.openRead(m_settings.m_simStateReferenceFile,m_pDynSys->m_simBodies.size(),true)) {
             std::stringstream error;
             error << "Could not open file: " << m_settings.m_simStateReferenceFile.string()<<std::endl;
             error << "File errors: " <<std::endl<< m_ReferenceSimFile.getErrorString();

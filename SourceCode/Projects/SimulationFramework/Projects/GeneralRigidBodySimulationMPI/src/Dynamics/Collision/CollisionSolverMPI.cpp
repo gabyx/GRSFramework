@@ -4,10 +4,10 @@
 #include "PrintGeometryDetails.hpp"
 
 CollisionSolverMPI::CollisionSolverMPI(std::shared_ptr< DynamicsSystemType> pDynSys):
-    m_SimBodies(pDynSys->m_SimBodies), m_Bodies(pDynSys->m_Bodies), m_RemoteSimBodies(pDynSys->m_RemoteSimBodies),
+    m_simBodies(pDynSys->m_simBodies), m_staticBodies(pDynSys->m_staticBodies), m_RemoteSimBodies(pDynSys->m_RemoteSimBodies),
     m_Collider(&m_collisionSet)
 {
-    m_expectedNContacts = 300;
+
 }
 
 
@@ -26,12 +26,7 @@ void CollisionSolverMPI::initializeLog( Logging::Log* pSolverLog ) {
 
 void CollisionSolverMPI::reset() {
     clearCollisionSet();
-
     removeAllContactDelegates();
-
-    m_expectedNContacts =  m_SimBodies.size() * 3;
-
-
     m_maxOverlap = 0;
 
 }
@@ -56,20 +51,21 @@ CollisionSolverMPI::getCollisionSetRef()
 void CollisionSolverMPI::solveCollision() {
 
 
-    reset();
+    clearCollisionSet();
+    m_maxOverlap = 0;
 
 
-    LOGSLLEVEL2(m_pSolverLog, "---> solveCollision(): "<<std::endl;)
+    LOGSLLEVEL1(m_pSolverLog, "---> solveCollision(): "<<std::endl;)
 
     // All objects have been updated...
 
     // Do simple collision detection (SimBodies to SimBodies)
     LOGSLLEVEL2(m_pSolverLog, "\t---> SimBodies to SimBodies "<<std::endl;)
-    if(m_SimBodies.size()){
-        for(auto bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
+    if(m_simBodies.size()){
+        for(auto bodyIti = m_simBodies.begin(); bodyIti != --m_simBodies.end(); bodyIti++) {
             auto bodyItj = bodyIti;
             bodyItj++;
-            for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
+            for(; bodyItj != m_simBodies.end(); bodyItj++ ) {
 
                 //check for a collision
                 m_Collider.checkCollision((*bodyIti), (*bodyItj));
@@ -80,7 +76,7 @@ void CollisionSolverMPI::solveCollision() {
 
     //// Do simple collision detection (SimBodies to RemoteSimBodies)
     LOGSLLEVEL2(m_pSolverLog, "\t---> SimBodies to RemoteBodies "<<std::endl;)
-    for(auto bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
+    for(auto bodyIti = m_simBodies.begin(); bodyIti != m_simBodies.end(); bodyIti++) {
         for(auto bodyItj = m_RemoteSimBodies.begin(); bodyItj != m_RemoteSimBodies.end(); bodyItj++ ) {
             //check for a collision
             m_Collider.checkCollision((*bodyIti), (*bodyItj));
@@ -115,8 +111,8 @@ void CollisionSolverMPI::solveCollision() {
 
     LOGSLLEVEL2(m_pSolverLog, "\t---> SimBodies to Bodies "<<std::endl;)
     // Do simple collision detection (SimBodies to Bodies)
-    for(auto bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
-        for(auto bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++) {
+    for(auto bodyIti = m_simBodies.begin(); bodyIti != m_simBodies.end(); bodyIti++) {
+        for(auto bodyItk = m_staticBodies.begin(); bodyItk != m_staticBodies.end(); bodyItk ++) {
                 //check for a collision and signal
                 m_Collider.checkCollision((*bodyIti), (*bodyItk));
         }
@@ -147,20 +143,20 @@ void CollisionSolverMPI::signalContactAdd() {
 
     if(m_collisionSet.size()!=0){
 
-        for( auto colDataIt = m_collisionSet.begin(); colDataIt != m_collisionSet.end(); colDataIt++ ){
+        for( auto & colData : m_collisionSet){
 
-            ASSERTMSG( std::abs((*colDataIt)->m_cFrame.m_e_x.dot((*colDataIt)->m_cFrame.m_e_y)) < 1e-3 &&
-                      std::abs((*colDataIt)->m_cFrame.m_e_y.dot((*colDataIt)->m_cFrame.m_e_z))< 1e-3, "Vectors not orthogonal");
+            ASSERTMSG( std::abs(colData->m_cFrame.m_e_x.dot(colData->m_cFrame.m_e_y)) < 1e-3 &&
+                      std::abs(colData->m_cFrame.m_e_y.dot(colData->m_cFrame.m_e_z))< 1e-3, "Vectors not orthogonal");
 
-            LOGSLLEVEL3_CONTACT(m_pSolverLog,"---> Contact Frame: n: " << (*colDataIt)->m_cFrame.m_e_z.transpose() << std::endl;)
+            LOGSLLEVEL3_CONTACT(m_pSolverLog,"---> Contact Frame: n: " << colData->m_cFrame.m_e_z.transpose() << std::endl;)
 
             //Set contact frame point
-            (*colDataIt)->m_cFrame.m_p = (*colDataIt)->m_pBody1->m_r_S + (*colDataIt)->m_r_S1C1;
+            colData->m_cFrame.m_p = colData->m_pBody1->m_r_S + colData->m_r_S1C1;
 
             // Calculate some Statistics
-            m_maxOverlap = std::max(m_maxOverlap,(*colDataIt)->m_overlap);
+            m_maxOverlap = std::max(m_maxOverlap,colData->m_overlap);
 
-            invokeAllContactDelegates(*colDataIt); // Propagate pointers! they will not be deleted!
+            invokeAllContactDelegates(colData); // Propagate pointers! they will not be deleted!
 
         }
 

@@ -58,6 +58,13 @@
          static const int Dimension=3;
       };
 
+      /**
+      * @brief Convex set for a AABB in \f$ \mathcal{R}^3 \f$ with min and max point
+      */
+      struct AABB{
+         static const int Dimension=3;
+      };
+
 
       /**
       * @brief Convex set for  \f$ C_1 = \mathcal{R}_{+} \f$  and a Contensou ellipsoid.

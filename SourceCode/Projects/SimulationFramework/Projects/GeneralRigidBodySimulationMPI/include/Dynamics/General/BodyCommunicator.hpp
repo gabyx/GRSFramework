@@ -83,7 +83,7 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator                                     ;
+    using ProcessCommunicatorType = MPILayer::ProcessCommunicator                                     ;
     using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType                          ;
     using ProcessTopologyType = typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType     ;
 

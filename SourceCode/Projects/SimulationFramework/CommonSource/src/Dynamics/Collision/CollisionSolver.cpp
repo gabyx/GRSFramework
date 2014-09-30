@@ -2,10 +2,9 @@
 
 
 CollisionSolver::CollisionSolver(std::shared_ptr< DynamicsSystemType> pDynSys):
-    m_SimBodies(pDynSys->m_SimBodies), m_Bodies(pDynSys->m_Bodies),
+    m_simBodies(pDynSys->m_simBodies), m_staticBodies(pDynSys->m_staticBodies),
     m_Collider(&m_collisionSet)
 {
-    m_expectedNContacts = 300;
 }
 
 
@@ -24,12 +23,11 @@ void CollisionSolver::initializeLog( Logging::Log* pSolverLog ) {
 
 void CollisionSolver::reset() {
     // Do a Debug check if sizes match!
-    ASSERTMSG( m_SimBodies.size() != 0, "CollisionSolver:: No Bodies added to the system!");
+    ASSERTMSG( m_simBodies.size() != 0, "CollisionSolver:: No Bodies added to the system!");
 
     removeAllContactDelegates();
 
     clearCollisionSet();
-    m_expectedNContacts =  m_SimBodies.size() * 3;
     m_maxOverlap = 0;
 
 }
@@ -55,7 +53,6 @@ void CollisionSolver::solveCollision() {
 
 
     clearCollisionSet();
-    m_expectedNContacts =  m_SimBodies.size() * 3;
     m_maxOverlap = 0;
 
     LOGSLLEVEL2(m_pSolverLog, "---> solveCollision(): "<<std::endl;)
@@ -66,11 +63,11 @@ void CollisionSolver::solveCollision() {
     //// Do simple collision detection (SimBodies to SimBodies)
     CollisionData * pColData;
 
-    if(m_SimBodies.size()){
-        for(auto bodyIti = m_SimBodies.begin(); bodyIti != --m_SimBodies.end(); bodyIti++) {
+    if(m_simBodies.size()){
+        for(auto bodyIti = m_simBodies.begin(); bodyIti != --m_simBodies.end(); bodyIti++) {
             typename DynamicsSystemType::RigidBodySimContainerType::iterator bodyItj = bodyIti;
             bodyItj++;
-            for(; bodyItj != m_SimBodies.end(); bodyItj++ ) {
+            for(; bodyItj != m_simBodies.end(); bodyItj++ ) {
 
                 //check for a collision
                 m_Collider.checkCollision((*bodyIti), (*bodyItj));
@@ -81,8 +78,8 @@ void CollisionSolver::solveCollision() {
 
 
     // Do simple collision detection (SimBodies to Bodies)
-    for(auto bodyIti = m_SimBodies.begin(); bodyIti != m_SimBodies.end(); bodyIti++) {
-        for(auto bodyItk = m_Bodies.begin(); bodyItk != m_Bodies.end(); bodyItk ++) {
+    for(auto bodyIti = m_simBodies.begin(); bodyIti != m_simBodies.end(); bodyIti++) {
+        for(auto bodyItk = m_staticBodies.begin(); bodyItk != m_staticBodies.end(); bodyItk ++) {
 
                 //check for a collision and signal
                 m_Collider.checkCollision((*bodyIti), (*bodyItk));

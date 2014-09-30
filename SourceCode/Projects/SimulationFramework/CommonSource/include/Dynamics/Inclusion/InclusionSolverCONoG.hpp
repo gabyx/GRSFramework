@@ -82,8 +82,8 @@ protected:
     std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     std::shared_ptr<DynamicsSystemType>  m_pDynSys;
 
-    typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
+    typename DynamicsSystemType::RigidBodySimContainerType & m_simBodies;
+    typename DynamicsSystemType::RigidBodyStaticContainerType & m_staticBodies;
 
     // General CPU Iteration visitors (only SOR Prox on velocity level)
     using ContactGraphType = ContactGraphIteration;

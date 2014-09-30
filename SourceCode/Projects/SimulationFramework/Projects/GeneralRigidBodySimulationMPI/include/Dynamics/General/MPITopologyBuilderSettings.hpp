@@ -17,6 +17,7 @@ struct GridBuilderSettings{
     DEFINE_LAYOUT_CONFIG_TYPES
     GridBuilderSettings(): m_processDim(MyMatrix<unsigned int>::Vector3(1,1,1)){}
     MyMatrix<unsigned int>::Vector3 m_processDim;
+
 };
 
 

@@ -21,8 +21,8 @@ DynamicsSystemBase::~DynamicsSystemBase() {
     DECONSTRUCTOR_MESSAGE
 
     // Delete all RigidBodys
-    m_SimBodies.deleteAllBodies();
-    m_Bodies.deleteAllBodies();
+    m_simBodies.deleteAllBodies();
+    m_staticBodies.deleteAllBodies();
 
 };
 
@@ -83,7 +83,7 @@ void DynamicsSystemBase::doFirstHalfTimeStep(PREC ts, PREC timestep) {
     m_externalForces.setTime(ts+timestep);
 
     // Do timestep for every object
-    for(auto bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
+    for(auto bodyIt = m_simBodies.begin() ; bodyIt != m_simBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
 
@@ -142,7 +142,7 @@ void DynamicsSystemBase::doSecondHalfTimeStep(PREC te, PREC timestep) {
 
     // Do timestep for every object
     typename RigidBodySimContainerType::iterator bodyIt;
-    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
+    for(bodyIt = m_simBodies.begin() ; bodyIt != m_simBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
 
@@ -204,7 +204,7 @@ void DynamicsSystemBase::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
 
-    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
+    for(bodyIt = m_simBodies.begin() ; bodyIt != m_simBodies.end(); bodyIt++) {
         RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt);
     }
 }

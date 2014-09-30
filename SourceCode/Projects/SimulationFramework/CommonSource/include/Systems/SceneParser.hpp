@@ -821,9 +821,9 @@ private:
             RigidBodyIdType diffId = m_startIdGroup; // id to generate the correct amount of random values!
 
             unsigned int id = uni(gen); // generate first value
-            std::cout << id << std::endl;
+            //std::cout << id << std::endl;
             for(auto & b: *m_bodyListGroup) {
-                std::cout << b.m_initState.m_id - diffId << std::endl;
+                //std::cout << b.m_initState.m_id - diffId << std::endl;
                 id = Utilities::genRandomValues<unsigned int>(id,gen,uni,b.m_initState.m_id - diffId);
                 diffId = b.m_initState.m_id;
 
@@ -1565,8 +1565,12 @@ struct BodyModuleOptions {
     bool m_parseAllBodiesNonSelGroup = true;  ///< Parse all bodies in groups where m_bodyIdRange is not applied (enableSelectiveIds="false") (default= true)
     bool m_parseSimBodies = true;         ///< Parses only simulated bodies (default= false)
     bool m_parseStaticBodies = true;
+
+
     bool m_allocateSimBodies = true;      ///< if false, does only parse the nodes which do not need the body -> initial condition
     bool m_allocateStaticBodies = true;   ///< if false, does only parse the nodes which do not need the body -> initial condition
+
+    bool m_parseInitialCondition = true;  ///< if false, the initial conditions are not parsed!
 };
 
 template<typename TParserTraits>
@@ -1780,7 +1784,7 @@ private:
         bool updateStartRange = false;
 
         if(m_parseSelectiveBodyIds && hasSelectiveFlag){
-            // parse group selective , determine start iterator in bodyRang
+            // parse group selective , determine start iterator in bodyRange
             m_bodyIdRangePtr = &m_parsingOptions.m_bodyIdRange;
             m_startRangeIdIt = std::lower_bound(m_startRangeIdIt,m_bodyIdRangePtr->end(),m_startIdGroup);
 
@@ -1852,13 +1856,13 @@ private:
         if(m_eBodiesState == RigidBodyType::BodyMode::SIMULATED) {
             //LOGSCLEVEL1(m_pSimulationLog,"---> Copy Simulated RigidBody References to DynamicSystem ..."<<std::endl;);
             bool added = addAllBodies(m_pSimBodies);
-            if(!added) {THROWEXCEPTION("Could not add body to m_SimBodies!, some bodies exist already in map!");};
+            if(!added) {THROWEXCEPTION("Could not add body to m_simBodies!, some bodies exist already in map!");};
             m_nSimBodies += m_parsedInstancesGroup;
             m_nBodies += m_parsedInstancesGroup;
         } else if(m_eBodiesState == RigidBodyType::BodyMode::STATIC) {
             //LOGSCLEVEL1(m_pSimulationLog,"---> Copy Static RigidBody References to DynamicSystem ..."<<std::endl;);
             bool added = addAllBodies(m_pBodies);
-            if(!added) {THROWEXCEPTION("Could not add body to m_Bodies!, some bodies exist already in map!");};
+            if(!added) {THROWEXCEPTION("Could not add body to m_staticBodies!, some bodies exist already in map!");};
             m_nStaticBodies += m_parsedInstancesGroup;
             m_nBodies += m_parsedInstancesGroup;
         } else {
@@ -1944,7 +1948,7 @@ private:
 
         // InitialPosition ============================================================
         GET_XMLCHILDNODE_CHECK(n,"InitialCondition",dynProp)
-        if(m_pInitStatesMod){
+        if(m_pInitStatesMod && m_parsingOptions.m_parseInitialCondition){
             m_pInitStatesMod->parseInitialCondition(n,&m_bodyListGroup,m_startIdGroup,true);
         }
 
@@ -1959,7 +1963,7 @@ private:
          // InitialPosition ============================================================
         GET_XMLCHILDNODE_CHECK(n,"InitialCondition",dynProp)
         bool parseVel = false;
-        if(m_pInitStatesMod){
+        if(m_pInitStatesMod && m_parsingOptions.m_parseInitialCondition){
             m_pInitStatesMod->parseInitialCondition(n,&m_bodyListGroup,m_startIdGroup,parseVel,false);
         }
 
@@ -2222,6 +2226,8 @@ protected:
 
     bool parseSceneIntern(const boost::filesystem::path & file) {
 
+        LOGSCLEVEL1( m_pSimulationLog, "---> SceneParser parsing: ========================================================" <<
+                    std::endl << "\t file: " << file <<std::endl;);
         LOGSCLEVEL1( m_pSimulationLog, "---> SceneParser Options: " <<std::endl <<
                         "\t parse scene settings:"<<m_parsingOptions.m_parseSceneSettings << std::endl<<
                         "\t parse scene objects:"<<m_parsingOptions.m_parseSceneObjects << std::endl;);
@@ -2276,6 +2282,8 @@ protected:
             LOGSCLEVEL1(m_pSimulationLog,  "Scene XML error: "  << ex.what() <<std::endl);
             ERRORMSG( "Scene XML error: "  << ex.what() );
         }
+
+        LOGSCLEVEL1( m_pSimulationLog, "---> SceneParser finshed =========================================================" << std::endl;);
 
     }
 

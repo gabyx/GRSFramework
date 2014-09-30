@@ -30,11 +30,6 @@ namespace MPILayer {
 
 
 /**
-*    Important struct to define all MPI message tags used in this framework!
-*/
-
-
-/**
 * Composer which serilaizes one message: take care sending bytes and receiving them need to make sure that the same endianess is used in the network!
 */
 class MessageBinarySerializer {
@@ -105,6 +100,19 @@ private:
 };
 
 
+struct SendMessageAndRequest{
+    MessageBinarySerializer m_message;
+    MPI_Request m_req;
+
+    SendMessageAndRequest():m_message(1024*1024){}
+};
+
+
+/**
+* This class handles all process communication and is a layer to all MPI specific details.
+* It normally uses a communicator m_comm which is given to this class, but also other communicators can be used for the
+* communications functions defined here, however the ProcessInformation inheritance is specifically for the m_comm communicator.
+*/
 class ProcessCommunicator : public ProcessInformation{
 public:
 
@@ -134,6 +142,12 @@ public:
         for(auto it = m_communicators.begin(); it!= m_communicators.end(); it++){
             auto error =  MPI_Comm_free( &(it->second) );
             ASSERTMPIERROR(error, "MPI_Comm_free failed in rank: " << this->getRank());
+        }
+
+        for(auto & req : m_sendRequests){
+            auto error = MPI_Request_free(&req);
+            ASSERTMPIERROR(error, "MPI_Request_free failed in rank: " << this->getRank());
+
         }
     }
 
@@ -223,9 +237,9 @@ public:
 
 
 
-    /** Buffered Neighbour Send Begin ===============================================================================*/
+    /** Buffered Neighbour Send Async Begin ===============================================================================*/
     template<typename T>
-    void sendMessageToNeighbourRank(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm ){
+    void sendMessageToNeighbourRank_async(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm ){
         auto it = m_sendMessageBuffers.find(rank);
         ASSERTMSG(it != m_sendMessageBuffers.end(),"No buffer for this rank!, Did you call initializeNeighbourBuffers" );
         // clear the buffer
@@ -235,25 +249,26 @@ public:
 
         message.clear();
         // Serialize the message into the buffer
+        // t.setRank(rank); done outside
         message << t ;
         // Nonblocking Send (we keep the buffer message till the messages have been sent!)
         // If MPI uses buffering, these message might have been sent before the receive has been posted
         // if there is no buffering in MPI we post the sends (leave the buffer existing)
         int error = MPI_Isend( const_cast<char*>(message.data()) , message.size(), message.getMPIDataType(),
                               rank, static_cast<int>(tag), comm, req );
-        ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToNeighbourRank failed!");
+        ASSERTMPIERROR(error,"ProcessCommunicator:: sendMessageToNeighbourRank_async failed!");
 
         // IMPORTANT! Always call a waitForAllNeighbourSends() after this call!!!
     }
     template<typename T>
-    void sendMessageToNeighbourRank(const T & t, RankIdType rank, MPIMessageTag tag ){ sendMessageToNeighbourRank(t,rank,tag,this->m_comm);}
+    void sendMessageToNeighbourRank_async(const T & t, RankIdType rank, MPIMessageTag tag ){ sendMessageToNeighbourRank_async(t,rank,tag,this->m_comm);}
 
     void waitForAllNeighbourSends(){
 
-        LOGPC(m_pSimulationLog,  "--->\t\t Waiting for all sends to complete ..." << std::endl;)
+        LOGPC(m_pSimulationLog,  "--->\t\t Waiting for all sends (neighbour) to complete ..." << std::endl;)
         int error = MPI_Waitall(m_sendRequests.size(), &m_sendRequests[0],&m_sendStatuses[0]);
 
-        ASSERTMPIERROR(error, "ProcessCommunicator:: waiting for sends failed")
+        ASSERTMPIERROR(error, "ProcessCommunicator:: waiting for sends (neighbour) failed")
     }
 
      /** May be called after a process topo has been made in the process info*/
@@ -285,13 +300,16 @@ public:
         }
     }
 
-    /** Buffered Neighbour Send Finished ===============================================================================*/
+    /**===================================================================================================================*/
 
 
+    /** Send Message to Rank Blocking ========================================================================================*/
     template<typename T>
     void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm ){
         m_binary_message.clear();
+
         // Serialize the message into the buffer
+        // t.setRank(rank); done outside
         m_binary_message << t ;
         // Blocking Send
         // If MPI does not use buffering this function might hang if the receive are not posted correctly!
@@ -305,7 +323,87 @@ public:
     inline void sendMessageToRank(const T & t, RankIdType rank, MPIMessageTag tag){
         sendMessageToRank(t,rank,tag,this->m_comm);
     }
+    /** =====================================================================================================================*/
 
+
+    /** Send Message to Rank NonBlocking ========================================================================================*/
+    template<typename T>
+    std::unique_ptr<SendMessageAndRequest>
+    sendMessageToRank_async(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm ){
+        // Make new binary_message
+        std::unique_ptr<SendMessageAndRequest> send_message(new SendMessageAndRequest());
+
+        // t.setRank(rank); done outside
+        send_message->m_message << t;
+
+         // Nonblocking Send (the send_message buffer needs to be kept till the message has been sent!)
+        int error = MPI_Isend( const_cast<char*>(send_message->m_message.data()) , send_message->m_message.size(), send_message->m_message.getMPIDataType(),
+                              rank, static_cast<int>(tag), comm, &send_message->m_req);
+        ASSERTMPIERROR(error,"ProcessCommunicator:: sendBinaryMessageToRank_async failed!");
+
+        return std::move(send_message);
+    }
+
+    template<typename T>
+    inline std::unique_ptr<SendMessageAndRequest>
+    sendMessageToRank_async(const T & t, RankIdType rank, MPIMessageTag tag){
+        return sendMessageToRank_async(t,rank,tag,this->m_comm);
+    }
+
+
+    void waitForAllSends(std::vector< std::unique_ptr<SendMessageAndRequest> > & send_messages){
+
+        LOGPC(m_pSimulationLog,  "--->\t\t Waiting for all sends to complete ..." << std::endl;)
+
+        // copy the stupid request in one continous array!
+        std::vector<MPI_Request> reqs;
+        for(auto & s: send_messages){
+            reqs.push_back(s->m_req);
+        }
+        // make status array
+        std::vector<MPI_Status> s(reqs.size());
+
+        int error = MPI_Waitall(reqs.size(), &reqs[0],&s[0]);
+
+        ASSERTMPIERROR(error, "ProcessCommunicator:: waiting for sends failed")
+    }
+    /** =====================================================================================================================*/
+
+
+    template<typename T>
+    void receiveMessageFromRank(T & t, RankIdType rank, MPIMessageTag tag,  MPI_Comm comm  ){
+
+        // has an entry if a message has already been received for this rank.
+        MPI_Status status;
+        LOGPC(m_pSimulationLog,  "--->\t\t Receiving message from rank: " << rank << std::endl;)
+
+        // Probe for a message!
+        //LOGPC(m_pSimulationLog,  "--->\t\t Waiting for message from neighbour: " << rank << std::endl;)
+        int error = MPI_Probe( rank, static_cast<int>(tag), comm, &status); // Non blocking test if message is there!
+        ASSERTMPIERROR(error,"ProcessCommunicator:: receiveMessageFromRank failed for rank " << rank )
+
+        //Receive the message for this rank!
+        int message_size;
+        MPI_Get_count(&status,m_binary_message.getMPIDataType(),&message_size);
+        m_binary_message.resize(message_size);
+
+        error = MPI_Recv( const_cast<char*>(m_binary_message.data()),
+                              m_binary_message.size(),
+                              m_binary_message.getMPIDataType(),
+                              status.MPI_SOURCE, status.MPI_TAG, comm, &status
+                             );
+        LOGPC(m_pSimulationLog, "--->\t\t Received message from rank: " << rank << " [" << message_size << "b]" << std::endl;)
+        ASSERTMPIERROR(error, "ProcessCommunicator:: receiveMessageFromRanks2 failed for rank "<< rank)
+
+        // Deserialize
+        t.setRank(rank); // Set the rank
+        m_binary_message >> t;
+    };
+
+    template<typename T>
+    inline void receiveMessageFromRank(T & t, RankIdType rank, MPIMessageTag tag){
+        receiveMessageFromRank(t,rank,tag,this->m_comm);
+    }
 
     template<typename T, typename List>
     void receiveMessageFromRanks(T & t,const List & ranks, MPIMessageTag tag,  MPI_Comm comm  ){
@@ -433,7 +531,9 @@ private:
     typedef std::tuple< MessageBinarySerializer, MPI_Request*> SendTupleType;
     using BufferMapType = std::unordered_map<RankIdType, SendTupleType>;
     BufferMapType m_sendMessageBuffers;
-    std::vector<MPI_Request>                      m_sendRequests; ///< these are the requests, these are pointers!
+    std::vector<MPI_Request>                      m_sendRequests; ///< these are the requests,
+                                                                  ///< these are pointers, MPI deallocates the requests when MPI_Wait or similar is called,
+                                                                  ///< do not call MPI_Request_free
     std::vector<MPI_Status>                       m_sendStatuses;
 
     /** These communicators are subject to change during communications, id's are chosen from MPICommunicatorId enumration

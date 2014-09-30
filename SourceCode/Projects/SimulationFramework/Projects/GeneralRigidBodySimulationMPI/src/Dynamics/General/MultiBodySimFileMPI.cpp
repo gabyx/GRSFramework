@@ -112,7 +112,6 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
         boost::archive::binary_oarchive  oa( stream,boost::archive::no_codecvt | boost::archive::no_header); // is initialized third
 
         for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
-            ASSERTMSG((*it)->m_id != RigidBodyIdType(0x0)," ID zero! at time: " << time);
             oa << (*it)->m_id;
             serializeEigen(oa, (*it)->get_q());
             serializeEigen(oa, (*it)->get_u());

@@ -97,13 +97,6 @@ public:
 	//void updateSplitBodyNode(RigidBodyIdType id , RankIdType rank, const VectorUBody & u);
 
 
-
-
-
-//    unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
-//    unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
-
-
     std::pair<SplitBodyNodeDataType *, bool> addSplitBodyNode(RigidBodyType * body, const RankIdType & rank);
 
     inline NodeListType & getLocalNodeListRef(){return m_localNodes;}
@@ -132,9 +125,17 @@ public:
     inline typename DynamicsSystemType::RigidBodyContainerType & getRemoteBodiesWithContactsListRef(){return m_remoteBodiesWithContacts;}
     inline typename DynamicsSystemType::RigidBodyContainerType & getLocalBodiesWithContactsListRef(){return m_localBodiesWithContacts;};
 
+    unsigned int getNContactModelsUsed(){
+        return BitCount::count(m_usedContactModels);
+    }
+
 private:
 
     Logging::Log * m_pSolverLog;
+
+    using ContactModelEnumIntType = typename std::underlying_type<ContactModels::Enum>::type;
+    ContactModelEnumIntType m_usedContactModels = 0; ///< Bitflags which mark all used contactmodels
+
 
     std::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
     NeighbourMapType * m_pNbDataMap; ///< NeighbourMap to insert remote bodies which have contacts

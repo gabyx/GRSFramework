@@ -372,8 +372,8 @@ public:
 //            typename std::vector<RigidBodyType*>::iterator bodyIt;
 //            //LOG(m_pSimulationLog, "---> SIZE: " << m_bodyListGroup.size() << std::endl)
 //            for(bodyIt= m_bodyListGroup.begin(); bodyIt!=m_bodyListGroup.end();  ) {
-//                    if(! m_pDynSys->m_SimBodies.addBody((*bodyIt))){
-//                        ERRORMSG("Could not add body to m_SimBodies! Id: " << RigidBodyId::getBodyIdString(*bodyIt) << " already in map!");
+//                    if(! m_pDynSys->m_simBodies.addBody((*bodyIt))){
+//                        ERRORMSG("Could not add body to m_simBodies! Id: " << RigidBodyId::getBodyIdString(*bodyIt) << " already in map!");
 //                    };
 //
 //                    //LOG(m_pSimulationLog, "---> Added Body with ID: " << RigidBodyId::getBodyIdString(*bodyIt)<< std::endl);
@@ -403,8 +403,8 @@ public:
 //
 //            for(bodyIt= m_bodyListGroup.begin(); bodyIt!=m_bodyListGroup.end(); bodyIt++) {
 //
-//                if(! m_pDynSys->m_Bodies.addBody((*bodyIt))){
-//                        ERRORMSG("Could not add body to m_Bodies! Id: " << RigidBodyId::getBodyIdString(*bodyIt) << " already in map!");
+//                if(! m_pDynSys->m_staticBodies.addBody((*bodyIt))){
+//                        ERRORMSG("Could not add body to m_staticBodies! Id: " << RigidBodyId::getBodyIdString(*bodyIt) << " already in map!");
 //                };
 //
 //                m_nBodies++;
@@ -426,7 +426,7 @@ public:
 //
 //    void filterBodies(){
 //
-//        auto & simBodies = m_pDynSys->m_SimBodies;
+//        auto & simBodies = m_pDynSys->m_simBodies;
 //        LOG(m_pSimulationLog, "---> Reject Body with ID: ")
 //        for(auto bodyIt= simBodies.begin(); bodyIt!=simBodies.end();
 //        /*No incremente because we delete inside the loop invalidating iterators*/ ) {

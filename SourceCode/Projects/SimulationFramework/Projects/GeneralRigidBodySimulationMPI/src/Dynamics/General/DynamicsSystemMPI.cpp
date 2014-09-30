@@ -22,9 +22,9 @@ DynamicsSystemMPI::~DynamicsSystemMPI() {
     DECONSTRUCTOR_MESSAGE
 
     // Delete all RigidBodys
-    m_SimBodies.deleteAllBodies();
+    m_simBodies.deleteAllBodies();
     m_RemoteSimBodies.deleteAllBodies();
-    m_Bodies.deleteAllBodies();
+    m_staticBodies.deleteAllBodies();
 
 };
 
@@ -91,7 +91,7 @@ void DynamicsSystemMPI::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 
     // Do timestep for every object
     typename RigidBodySimContainerType::iterator bodyIt;
-    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
+    for(bodyIt = m_simBodies.begin() ; bodyIt != m_simBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
 
@@ -154,7 +154,7 @@ void DynamicsSystemMPI::doSecondHalfTimeStep(PREC te, PREC timestep) {
     m_currentTotEnergy = 0;
     // Do timestep for every object
     typename RigidBodySimContainerType::iterator  bodyIt;
-    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
+    for(bodyIt = m_simBodies.begin() ; bodyIt != m_simBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
 
@@ -220,7 +220,7 @@ void DynamicsSystemMPI::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
 
-    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
+    for(bodyIt = m_simBodies.begin() ; bodyIt != m_simBodies.end(); bodyIt++) {
         RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt);
     }
 }

@@ -19,8 +19,8 @@ const unsigned int InclusionSolverCO::ContactDim = CONTACTMODELTYPE(ContactModel
 
 InclusionSolverCO::InclusionSolverCO(std::shared_ptr< CollisionSolverType >  pCollisionSolver,
                                      std::shared_ptr<DynamicsSystemType> pDynSys):
-    m_SimBodies(pDynSys->m_SimBodies),
-    m_Bodies(pDynSys->m_Bodies), m_contactGraph(&(pDynSys->m_ContactParameterMap)),
+    m_simBodies(pDynSys->m_simBodies),
+    m_staticBodies(pDynSys->m_staticBodies), m_contactGraph(&(pDynSys->m_ContactParameterMap)),
     m_pCollisionSolver(pCollisionSolver),
     m_pDynSys(pDynSys) {
 
@@ -125,7 +125,7 @@ void InclusionSolverCO::solveInclusionProblem() {
 
     // Update all body velocities
     static RigidBodyType * pBody;
-    for(auto it= m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
+    for(auto it= m_simBodies.begin(); it != m_simBodies.end(); ++it) {
         pBody = *it;
         pBody->m_pSolverData->m_uBuffer.m_front = pBody->m_pSolverData->m_uBuffer.m_back
                                                 + pBody->m_MassMatrixInv_diag.asDiagonal()*pBody->m_h_term * m_settings.m_deltaT;

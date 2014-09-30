@@ -1,6 +1,11 @@
 #ifndef MPIMessageTags_hpp
 #define MPIMessageTags_hpp
 
+/**
+*    Important struct to define all MPI message tags used in this framework!
+*/
+
+
 namespace MPILayer{
     enum class MPIMessageTag: unsigned int {
         GENERICMESSAGE = 1 << 0,
@@ -10,7 +15,8 @@ namespace MPILayer{
         SPLITBODYFACTOR_MESSAGE  = 1 << 4,
         SPLITBODYUPDATE_MESSAGE  = 1 << 5,
         SPLITBODYSOLUTION_MESSAGE = 1<< 6,
-        TOPOLOGYBUILDER_POINTGATHER = 1<<7
+        TOPOLOGYBUILDER_POINTGATHER = 1<<7,
+        TOPOLOGYBUILDER_RESULTS = 1<<8
     };
 };
 

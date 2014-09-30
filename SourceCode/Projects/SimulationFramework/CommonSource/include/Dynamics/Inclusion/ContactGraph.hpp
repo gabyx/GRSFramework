@@ -69,6 +69,7 @@ public:
 
         m_nLambdas = 0;
 
+        m_usedContactModels = 0;
     }
 
     void addNode(CollisionData * pCollData) {
@@ -135,7 +136,7 @@ public:
     }
 private:
     using ContactModelEnumIntType = typename std::underlying_type<ContactModels::Enum>::type;
-    ContactModelEnumIntType m_usedContactModels; ///< Bitflags which mark all used contactmodels
+    ContactModelEnumIntType m_usedContactModels = 0; ///< Bitflags which mark all used contactmodels
 
     unsigned int m_nLambdas = 0; ///< How many forces we have counted over all nodes
 
@@ -374,6 +375,8 @@ public:
         this->m_edges.clear();
         m_edgeCounter = 0;
         m_simBodiesToContactsMap.clear();
+
+        m_usedContactModels = 0;
 
     }
 
