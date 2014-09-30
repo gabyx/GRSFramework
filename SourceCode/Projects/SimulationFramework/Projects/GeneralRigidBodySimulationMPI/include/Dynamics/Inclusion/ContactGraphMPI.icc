@@ -52,7 +52,7 @@ void ContactGraph<TCombo>::clearGraph() {
     m_splittedNodes.clear();
 
     m_usedContactModels = 0;
-    m_nLambdas = 0;
+
 }
 template<typename TCombo>
 void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
@@ -75,15 +75,10 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
 
     // add the pNodeData to the node list
     NodeType * addedNode = new NodeType(m_nodeCounter);
-
     //Add collision data
     addedNode->m_nodeData.m_pCollData = pCollData;
 
-    // Compute general parameters for the contact
-    setContactModel(addedNode->m_nodeData);
-
     // Add to Remote or Local list
-
     bool firstBodyGetSplitted = true; // For remote-remote contact
 
     if(isRemote.first or isRemote.second) {
@@ -111,77 +106,100 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
     }
 
 
+    // Compute general parameters for the contact
+    setContactModel(addedNode->m_nodeData);
 
     // FIRST BODY!
-    if( pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
-
-        //Add to the neighbour data if remote contact
-        if(isRemote.first) {
-            m_remoteBodiesWithContacts.addBody(pCollData->m_pBody1);
-            LOGSLLEVEL2_CONTACT(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << std::endl;)
-            if(addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE)){
-                m_pNbDataMap->getNeighbourData(pCollData->m_pBody1->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody1);
-                // if this body is already added it does nothing!
-            }else{
-                ASSERTMSG(false, "Somthing wrong with node color!")
-            }
-        }else{
-            m_localBodiesWithContacts.addBody(pCollData->m_pBody1);
-        }
-
-
-        //Set Flag that this Body in ContactGraph
-        pCollData->m_pBody1->m_pSolverData->m_bInContactGraph = true;
-        // Unset the flag when this Node is removed;
-
-        //Link to FrontBackBuffer
-        addedNode->m_nodeData.m_u1BufferPtr = & pCollData->m_pBody1->m_pSolverData->m_uBuffer;
-
-        computeW<1>( addedNode->m_nodeData);
-        //connectNode<1>( addedNode);
-
-    } else if( pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
-        // Contact goes into xi_N, xi_T
-        ASSERTMSG(false,"RigidBody::ANIMATED objects have not been implemented correctly so far!");
+    RigidBodyType * pBody = addedNode->m_nodeData.m_pCollData->m_pBody1;
+    if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+        initNodeSimBody<1,false>(addedNode,pBody,isRemote.first);
+    }else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
+        ERRORMSG("ContactGraph:: Animated body, node init not implemented")
     }
 
-
     // SECOND BODY!
-    if( pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
-
-        //Add to the neighbour data if remote contact
-        if(isRemote.second) {
-            m_remoteBodiesWithContacts.addBody(pCollData->m_pBody2);
-                LOGSLLEVEL2_CONTACT(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2->m_id) << std::endl;)
-            if(addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE)){
-                m_pNbDataMap->getNeighbourData(pCollData->m_pBody2->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pCollData->m_pBody2);
-                // if this body is already added it does nothing!
-            }else{
-                ASSERTMSG(false, "Somthing wrong with node color!")
-            }
-
-        }else{
-            m_localBodiesWithContacts.addBody(pCollData->m_pBody2);
-        }
-
-        //Set Flag that this Body in ContactGraph
-        pCollData->m_pBody2->m_pSolverData->m_bInContactGraph = true;
-        // Unset the flag when this Node is removed;
-
-        //Link to FrontBackBuffer
-        addedNode->m_nodeData.m_u2BufferPtr = & pCollData->m_pBody2->m_pSolverData->m_uBuffer;
-
-        computeW<2>( addedNode->m_nodeData);
-        //connectNode<2>( addedNode);
-
-    } else if( pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
-        // Contact goes into xi_N, xi_T
-        ASSERTMSG(false,"RigidBody::ANIMATED objects have not been implemented correctly so far!");
+    pBody = addedNode->m_nodeData.m_pCollData->m_pBody2;
+    if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+       initNodeSimBody<2,false>(addedNode,pBody,isRemote.second);
+    }else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
+       ERRORMSG("ContactGraph:: Animated body, node init not implemented")
     }
 
 
     m_nodeCounter++;
 }
+
+template<typename TCombo>
+template<int bodyNr, bool addEdges>
+void ContactGraph<TCombo>::initNodeSimBody(NodeType * pNode, RigidBodyType * pBody, bool isRemote) {
+
+
+    //Add to the neighbour data if remote contact
+    if(isRemote) {
+        m_remoteBodiesWithContacts.addBody(pBody);
+            LOGSLLEVEL2_CONTACT(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pBody->m_id) << std::endl;)
+        if(pNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE)){
+            m_pNbDataMap->getNeighbourData(pBody->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pBody);
+            // if this body is already added it does nothing!
+        }else{
+            ASSERTMSG(false, "Somthing wrong with node color!")
+        }
+
+    }else{
+        m_localBodiesWithContacts.addBody(pBody);
+    }
+
+    //Set Flag that this Body is in ContactGraph
+    pBody->m_pSolverData->m_bInContactGraph = true;
+    // Unset the flag when this Node is removed;
+
+    //Link to FrontBackBuffer
+    if(bodyNr==1){
+        pNode->m_nodeData.m_u1BufferPtr = & pBody->m_pSolverData->m_uBuffer;
+    }else{
+        pNode->m_nodeData.m_u2BufferPtr = & pBody->m_pSolverData->m_uBuffer;
+    }
+
+
+//    if( addEdges ){
+//        // Add self edge! ===========================================================
+//        EdgeType * addedEdge;
+//        this->m_edges.push_back(new EdgeType(m_edgeCounter));
+//        addedEdge = this->m_edges.back();
+//        addedEdge->m_edgeData.m_pBody = pBody;
+//
+//        // add links
+//        addedEdge->m_startNode = pNode;
+//        addedEdge->m_endNode = pNode;
+//        addedEdge->m_twinEdge = this->m_edges.back(); // Current we dont need a twin edge, self referencing!
+//        // Add the edge to the nodes edge list!
+//        pNode->m_edgeList.push_back( addedEdge );
+//        m_edgeCounter++;
+//        //cout << "add self edge: "<<pNode->m_nodeNumber<<" to "<<pNode->m_nodeNumber<<" body Id:"<< RigidBodyId::getBodyIdString(pBody)<<endl;
+//        // ===========================================================================
+//
+//        // iterate over the nodeList and add edges!
+//        // if no contacts are already on the body we skip this
+//        auto itEnd = nodeList.end();
+//        for(auto it = nodeList.begin(); it != itEnd; ++it) {
+//
+//            this->m_edges.push_back(new EdgeType(m_edgeCounter));
+//            addedEdge = this->m_edges.back();
+//            addedEdge->m_edgeData.m_pBody = pBody;
+//            // add link
+//            addedEdge->m_startNode = pNode;
+//            addedEdge->m_endNode = (*it);
+//            addedEdge->m_twinEdge = addedEdge; // Current we dont need a twin edge, self referencing!
+//            // Add the edge to the nodes edge list!
+//            pNode->m_edgeList.push_back( addedEdge );
+//            (*it)->m_edgeList.push_back( addedEdge );
+//            m_edgeCounter++;
+//            //cout << "add edge: "<<pNode->m_nodeNumber<<" to "<<(*it)->m_nodeNumber<<" body Id:"<< RigidBodyId::getBodyIdString(pBody)<<endl;
+//        }
+//    }
+
+}
+
 
 template<typename TCombo>
 std::pair<typename ContactGraph<TCombo>::SplitBodyNodeDataType *, bool> ContactGraph<TCombo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & rank) {

@@ -48,14 +48,10 @@ InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(
     m_globalIterationCounter =0;
     m_bConverged = true;
 
-
-    //Make a new Sor Prox Visitor (takes references from these class member)
-    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter);
-    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>();
-    m_pSorProxStepSplitNodeVisitor = new SorProxStepSplitNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter);
-
-    m_pInclusionComm = std::shared_ptr<InclusionCommunicatorType >( new InclusionCommunicatorType(pBodyComm, m_pDynSys,  m_pProcComm));
+    // TODO, changing this order results in a not seen NodeDataType by compiler...
     m_pContactGraph  = std::shared_ptr<ContactGraphType>( new ContactGraphType(pDynSys));
+    m_pInclusionComm = std::shared_ptr<InclusionCommunicatorType >( new InclusionCommunicatorType(pBodyComm, m_pDynSys,  m_pProcComm));
+
 
     m_pContactGraph->setInclusionCommunicator( m_pInclusionComm );
     m_pInclusionComm->setContactGraph( m_pContactGraph );
@@ -96,6 +92,18 @@ void InclusionSolverCONoGMPI::reset() {
     m_pCollisionSolver->addContactDelegate(
         CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(m_pContactGraph.get())
     );
+
+
+    if(m_pSorProxStepNodeVisitor != nullptr ){ delete m_pSorProxStepNodeVisitor;}
+    if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
+    if(m_pSorProxStepSplitNodeVisitor != nullptr ){ delete m_pSorProxStepSplitNodeVisitor;}
+
+    //Make a new Sor Prox Visitor (takes references from these class member)
+    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter);
+    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>(m_settings);
+    m_pSorProxStepSplitNodeVisitor = new SorProxStepSplitNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter);
+
+
 
 #if HAVE_CUDA_SUPPORT == 1
     LOG(m_pSimulationLog, "---> Try to set GPU Device : "<< m_settings.m_UseGPUDeviceId << std::endl;);

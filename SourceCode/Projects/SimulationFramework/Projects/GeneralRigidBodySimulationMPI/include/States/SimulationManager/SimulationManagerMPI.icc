@@ -350,13 +350,13 @@ void SimulationManagerMPI::initSim() {
     }
 // ===============================================
 
-
+    m_pTimestepper->reset();
     m_pTimestepper->initLogs(localSimFolderPath);
 
     // Get the actual RecorderSettings
     m_RecorderSettings = m_pDynSys->getSettingsRecorder();
 
 
-    m_pTimestepper->reset();
+
 
 }
