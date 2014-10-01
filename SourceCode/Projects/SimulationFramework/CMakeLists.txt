@@ -146,7 +146,7 @@ if(SIMULATIONFRAMEWORK_USE_CUDA)
 
 else()
 
-	set(CUDA_COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../CudaFramework/CommonSource CACHE PATH "Path to the cuda common source directory!")
+	set(CUDA_COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../CudaModern/CommonSource CACHE PATH "Path to the cuda common source directory!")
 	MARK_AS_ADVANCED(CUDA_COMMON_SOURCE_DIR)
 
 	set(CUDA_SUPPORT 0) #Gets written to the config file!

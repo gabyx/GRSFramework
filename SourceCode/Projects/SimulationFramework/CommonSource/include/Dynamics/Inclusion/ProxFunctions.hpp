@@ -347,6 +347,41 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
 };
 /* @} */
 
+
+/**
+* @brief Spezialisation for a single Prox onto a Cone in \f$ \mathcal{R}^3 \f$ with center axis as the x-axis given as
+* \f$ K = {(x_1,x_2,x_3) \in \mathcal{R}^3 \ | \ \sqrt{(x_2^2 + x_3^2)} \leq \mu x_1 \} \f$ .
+* @param slopeFactor Friction coeff. \f$ \mu \f$ is the slope factor
+*/
+template<>
+struct ProxFunction<ConvexSets::Cone3D> {
+
+    template<typename PREC, typename Derived>
+    static INLINE_PROX_KEYWORD void doProxSingle(const PREC & slopeFactor,
+                                                 Eigen::MatrixBase<Derived> & y)
+    {
+            ASSERTMSG(y.rows() % 3==0,"wrong size");
+            PREC normT = y.template tail<2>().norm();
+
+            PREC testFricCone = slopeFactor*normT + y(0);
+
+            if(normT - slopeFactor*y(0) <= 0.0){        // In Friction cone, do nothing!
+                return;
+            }else if(testFricCone <= 0.0) { // In polar cone to friction cone, set to zero!
+                y.setZero();
+                return;
+            }
+
+            // else project onto friction cone
+            testFricCone /= (1+slopeFactor*slopeFactor);
+            y(0) = testFricCone;
+            y.template tail<2>() /= normT;
+            y.template tail<2>() *= slopeFactor*testFricCone;
+
+    }
+
+};
+
 /** @} */
 };
 
@@ -446,13 +481,16 @@ INLINE_PROX_KEYWORD bool cancelCriteriaValue(   const Eigen::MatrixBase<Derived>
     ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
 
     using std::abs;
+    residual = 0.0;
+    PREC diff = 0.0;
     for(int i=0; i<P_old.size(); i++) {
 //        residual = abs(P_new[i]-P_old[i]) - ( abs(P_old[i]) * RelTol + AbsTol);
 //        if ( residual > 0.0) {
 //            return  false;
 //        }
-        residual = abs(P_new[i]-P_old[i]) ;
-        if ( residual - ( abs(P_old[i]) * RelTol + AbsTol) > 0.0) {
+        diff = abs(P_new[i]-P_old[i]) ;
+        residual = std::max(diff,residual);
+        if ( diff - ( abs(P_old[i]) * RelTol + AbsTol) > 0.0) {
             return  false;
         }
     }

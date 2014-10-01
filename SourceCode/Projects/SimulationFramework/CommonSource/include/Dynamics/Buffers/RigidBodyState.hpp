@@ -57,6 +57,7 @@ public:
     auto getVelocityTrans() -> decltype(m_u.template head<3>()){
         return m_u.template head<3>();
     }
+
     auto getVelocityTrans() const -> decltype(m_u.template head<3>()) {
         return m_u.template head<3>();
     }

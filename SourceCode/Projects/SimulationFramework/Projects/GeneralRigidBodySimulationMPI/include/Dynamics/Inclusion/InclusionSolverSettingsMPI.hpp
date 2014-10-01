@@ -20,15 +20,17 @@ struct InclusionSolverSettingsMPI
       m_deltaT = 0.001;
       m_alphaJORProx = 0.5;
       m_alphaSORProx = 1.2;
+      m_RStrategy = RSTRATEGY_MAX;
+      m_MinIter = 0;
       m_MaxIter = 5000;
       m_AbsTol = 1E-7;
       m_RelTol = 1E-7;
-      m_eMethod = SOR_CONTACT;
+      m_eMethod = SOR_CONTACT_AC;
       m_bUseGPU = false;
       m_UseGPUDeviceId = 0;
       m_bIsFiniteCheck = false;
       m_eConvergenceMethod = InVelocity;
-      m_bComputeResidual = false; ///< If true convergence check is done for all contacts/bodies, no break in the loop (does not work yet)
+      m_bComputeResidual = false;
 
       m_splitNodeUpdateRatio = 1;
       m_convergenceCheckRatio = 1;
@@ -36,6 +38,8 @@ struct InclusionSolverSettingsMPI
 
 
     PREC m_deltaT;
+
+    enum RMatrixStrategy{RSTRATEGY_MAX, RSTRATEGY_SUM,RSTRATEGY_SUM2} m_RStrategy;
     PREC m_alphaJORProx;
     PREC m_alphaSORProx;
 
@@ -45,9 +49,16 @@ struct InclusionSolverSettingsMPI
     unsigned int m_splitNodeUpdateRatio;        ///< Local iterations per remote billateral constraints updates (splitNodes)
     unsigned int m_convergenceCheckRatio;      ///< Billatreal constraints updates (splitNodes)  per convergence checks
 
-    enum Method{SOR_CONTACT, SOR_FULL, JOR} m_eMethod;
+    /**
+    *  SOR_CONTACT_X (project contacts consecutively,
+    *               X=AC : AlartCurnier for UCF Contacts (normal and tangential normal cones),
+    *               X=DS : De Saxe for UCF Contacts (combined normal cone)
+    *  SOR_FULL (AlarCurnier for UCF Contacts, normal direction first, vel. update, then tangential, vel.update, over each contact)
+    *  SOR_NORMAL_TANGENTIAL (for all contacts  first normal , then for all contacts tangential (iteratively solve two convex optimization problems) )
+    */
+    enum Method{SOR_CONTACT_AC, SOR_CONTACT_DS, SOR_FULL, SOR_NORMAL_TANGENTIAL, JOR} m_eMethod;
     enum Convergence {InLambda,InVelocity, InVelocityLocal, InEnergyVelocity,InEnergyLocalMix} m_eConvergenceMethod;
-    bool m_bComputeResidual;
+    bool m_bComputeResidual; ///< If true convergence check is done for all contacts/bodies, no break in the loop (does not work yet)
     PREC m_AbsTol;
     PREC m_RelTol;
 

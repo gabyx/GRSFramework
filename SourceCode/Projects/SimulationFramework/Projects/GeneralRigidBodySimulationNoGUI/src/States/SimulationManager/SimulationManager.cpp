@@ -71,12 +71,12 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
     // Parse the Scene from XML! ==========================
     m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(*m_pDynSys) );
     m_pSceneParser->parseScene(sceneFilePath,SceneParserOptions());
-    m_nSimBodies = m_pDynSys->m_SimBodies.size();
-    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SimBodies.size()
-        << " simulated & " << m_pDynSys->m_Bodies.size()<<  " static bodies! "  << std::endl;);
+    m_nSimBodies = m_pDynSys->m_simBodies.size();
+    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_simBodies.size()
+        << " simulated & " << m_pDynSys->m_staticBodies.size()<<  " static bodies! "  << std::endl;);
     // =====================================================
 
-    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys >(new SharedBufferDynSys(m_pDynSys->m_SimBodies.beginKey(),m_pDynSys->m_SimBodies.endKey() ));
+    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys >(new SharedBufferDynSys(m_pDynSys->m_simBodies.beginKey(),m_pDynSys->m_simBodies.endKey() ));
     m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
 
 
@@ -187,7 +187,7 @@ bool SimulationManager::initRecordThread() {
 
     // Write first initial value out!
     if(m_pTimestepper->m_settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
-        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_SimBodies);
+        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_simBodies);
         m_pSimulationLog->logMessage("---> Wrote first initial value to file...");
     }
 

@@ -28,7 +28,7 @@ namespace TopologyVisitors {
 
             // Implementation for Grid
             inline bool operator()(const MPILayer::ProcessTopologyGrid<ProcessTopologyBase> & topo) {
-                m_neighbourProcessRank = topo.m_grid.getCellNumber(m_point);
+                m_neighbourProcessRank = topo.getCellRank(m_point);
                 if(m_neighbourProcessRank == topo.m_rank) {
                     return true;
                 }

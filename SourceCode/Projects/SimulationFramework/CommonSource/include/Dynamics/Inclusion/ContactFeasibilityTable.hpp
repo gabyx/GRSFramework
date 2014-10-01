@@ -87,8 +87,8 @@ namespace ContactFeasibilityTableMPI{
         //printArray(std::cout);
 
         // calculate table index
-        char i1 = (char)p1->m_eState;
-        char i2 = (char)p1->m_eState;
+        char i1 = (char)p1->m_eMode;
+        char i2 = (char)p1->m_eMode;
 
         // add offset if remote
         isRemote.first = false;

@@ -21,7 +21,8 @@
 
 
 #if HAVE_CUDA_SUPPORT == 1
-// include all cuda modules for the GPU jor prox iteration on velocity level
+// include the  JOR Prox Velocity GPU module
+#include "JORProxVelocityGPUModule.hpp"
 #endif
 
 #include "CPUTimer.hpp"
@@ -81,23 +82,34 @@ protected:
     std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     std::shared_ptr<DynamicsSystemType>  m_pDynSys;
 
-    typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
+    typename DynamicsSystemType::RigidBodySimContainerType & m_simBodies;
+    typename DynamicsSystemType::RigidBodyStaticContainerType & m_staticBodies;
 
     // General CPU Iteration visitors (only SOR Prox on velocity level)
-    using ContactGraphType = ContactGraph<ContactGraphMode::ForIteration>;
-    ContactGraphType m_ContactGraph;
+    using ContactGraphType = ContactGraphIteration;
+    ContactGraphType m_contactGraph;
     void initContactGraphForIteration(PREC alpha);
-    SorProxStepNodeVisitor * m_pSorProxStepNodeVisitor;
-    SorProxInitNodeVisitor * m_pSorProxInitNodeVisitor;
+
+    // Different visitors for the various SOR implementations
+    // For SOR_FULL, SOR_CONTACT
+    SorProxStepNodeVisitor<ContactGraphType> *           m_pSorProxStepNodeVisitor = nullptr;
+    // For SOR_NORMAL_TANGENTIAL
+    NormalSorProxStepNodeVisitor<ContactGraphType>*      m_pNormalSorProxStepNodeVisitor  = nullptr;
+    TangentialSorProxStepNodeVisitor<ContactGraphType>*  m_pTangentialSorProxStepNodeVisitor  = nullptr;
+    // Init Visitor for the contacts
+    SorProxInitNodeVisitor<ContactGraphType>*            m_pSorProxInitNodeVisitor  = nullptr;
+
+    void doSORProxCPU();
     inline void sorProxOverAllNodes();
 
     #if HAVE_CUDA_SUPPORT == 1
-    // Jor Prox GPU Iteration class (only JOR Prox on velocity level)
-        using JorProxGPUVariantType = JorProxVelocityGPUVariant;
-        JorProxGPUVariantType m_jorProxGPUVariant;
+        // Jor Prox Velocity GPU Module
+        using JorProxGPUModuleType = JorProxVelocityGPUModule;
+        JorProxGPUModuleType m_jorProxGPUModule;
     #endif
+    void doJORProxGPU();
 
+    template<bool onlyNotInContactGraph = false>
     void integrateAllBodyVelocities();
 
     inline void doJorProx();
@@ -108,7 +120,8 @@ protected:
 
 
     // Log
-    Logging::Log *m_pSolverLog, *m_pSimulationLog;
+    Logging::Log *m_pSolverLog = nullptr;
+    Logging::Log *m_pSimulationLog = nullptr;
 
     // Residual File
     std::fstream m_iterationDataFile;

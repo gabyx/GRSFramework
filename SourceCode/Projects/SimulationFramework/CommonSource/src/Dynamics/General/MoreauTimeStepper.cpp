@@ -142,7 +142,7 @@ void MoreauTimeStepper::reset() {
 
     if(m_settings.m_eSimulateFromReference != TimeStepperSettings::NONE) {
 
-        if(!m_ReferenceSimFile.openRead(m_settings.m_simStateReferenceFile,m_pDynSys->m_SimBodies.size(),true)) {
+        if(!m_ReferenceSimFile.openRead(m_settings.m_simStateReferenceFile,m_pDynSys->m_simBodies.size(),true)) {
             std::stringstream error;
             error << "Could not open file: " << m_settings.m_simStateReferenceFile.string()<<std::endl;
             error << "File errors: " <<std::endl<< m_ReferenceSimFile.getErrorString();
@@ -209,7 +209,8 @@ void MoreauTimeStepper::doOneIteration() {
 
 
 
-    LOGSLLEVEL1(m_pSolverLog, "---> Do one time-step =================================" <<std::endl;);
+    LOGSLLEVEL1(m_pSolverLog, "---> Do one time-step =================================" <<std::endl <<
+                "---> t_S: " << m_currentSimulationTime << std::endl;);
 
 
     m_bIterationFinished = false;
@@ -239,7 +240,7 @@ void MoreauTimeStepper::doOneIteration() {
       unsigned int when = (m_settings.m_endTime-m_settings.m_startTime)/m_settings.m_deltaT / 10.0;
       if(when<=0){when=1;}
       if(m_IterationCounter % when == 0){
-            LOG(m_pSolverLog,"--->  m_t: " << m_currentSimulationTime<<std::endl; );
+            LOG(m_pSolverLog,"--->  m_tB: " << m_currentSimulationTime<<std::endl; );
       }
 #endif
 

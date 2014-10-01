@@ -39,6 +39,8 @@ class GravityForceField{
 
         void setTime(PREC time){};
         void reset(){};
+
+        Vector3 getGravity(){ return m_gravityAccel;}
     private:
         Vector3 m_gravityAccel;
 };
@@ -81,7 +83,6 @@ class SpatialSphericalTimeRandomForceField{
         template<typename TRigidBody>
         inline void calculate(TRigidBody * body){
             if(m_inInterval){
-                ASSERTMSG(body->m_pSolverData, "Solverdata not present!")
                 if(m_ts <= m_boostTime){
                     Vector3 r = body->m_r_S - m_offset ;
                     r.normalize();
@@ -169,6 +170,14 @@ class ExternalForceList{
         template<typename T>
         void addExternalForceCalculation(T * extForce){
 
+            if(std::is_same<T, GravityForceField>::value){
+                if(m_gravityField){
+                    ASSERTMSG(false,"A gravity force field has already been added!")
+                }else{
+                    m_gravityField = reinterpret_cast<GravityForceField*>(extForce);
+                }
+            }
+
             // std::function copies the temporary functor created here!, this is important!
             m_deleterList.push_back( ExternalForceList::DeleteFunctor<T>(extForce) );
 
@@ -190,6 +199,7 @@ class ExternalForceList{
 
         ~ExternalForceList(){
             for(auto & f : m_deleterList){ f();} // delete all objects
+            m_gravityField = nullptr;
         }
 
         inline void reset(){
@@ -217,7 +227,13 @@ class ExternalForceList{
         iterator begin(){return m_calculationList.begin();}
         iterator end(){return m_calculationList.end();}
 
+        // Special pointer for the special gravity force (if one is added)
+        GravityForceField * m_gravityField = nullptr;
+
     private:
+
+
+
         typedef std::vector< std::function<void (RigidBodyType *)> > CalcListType;
         CalcListType m_calculationList;
 

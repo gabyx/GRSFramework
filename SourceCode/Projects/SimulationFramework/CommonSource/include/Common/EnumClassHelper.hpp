@@ -6,7 +6,7 @@
 namespace EnumConversion{
     /** This function casts any enum class to the underlying type */
     template<typename E>
-    constexpr auto toIntegral(E e) -> typename std::underlying_type<E>::type
+    constexpr auto toIntegral(const E e) -> typename std::underlying_type<E>::type
     {
        return static_cast<typename std::underlying_type<E>::type>(e);
     }

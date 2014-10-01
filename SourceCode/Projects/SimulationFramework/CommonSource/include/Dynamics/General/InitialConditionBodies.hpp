@@ -26,13 +26,11 @@ void setupPositionBodiesLinear(
 
     dir.normalize();
     Vector3 jitter_vec, random_vec;
-    jitter_vec.setZero();
 
     // Set only m_q, m_u is zero in constructor!
     RandomGenType  gen(seed);
     std::uniform_real_distribution<double> uni(-1.0,1.0);
-    double r;
-    if(jitter){r = uni(gen);}
+    if(jitter){ random_vec(0) = uni(gen); random_vec(1) = uni(gen); random_vec(2) = uni(gen);}
 
     auto diffId = startId;
     unsigned int i; // linear index from the front
@@ -42,19 +40,17 @@ void setupPositionBodiesLinear(
         i = b.m_initState.m_id - startId;
         state.m_q.template tail<4>() = Quaternion(1,0,0,0);
 
+        state.m_q.template head<3>() = pos + dir*dist*i + jitter_vec;
+
         if(jitter) {
 
-            r = Utilities::genRandomValues(r,gen,uni, b.m_initState.m_id - diffId);
+            random_vec = Utilities::genRandomVec<PREC>(random_vec,gen,uni, b.m_initState.m_id - diffId);
             diffId = b.m_initState.m_id;
 
-            random_vec = Vector3(r,r,r);
-            random_vec.normalize();
             random_vec = random_vec.cross(dir);
             random_vec.normalize();
-            jitter_vec = random_vec * delta;
+            state.m_q.template head<3>() +=  random_vec * delta;
         }
-
-       state.m_q.template head<3>() = pos + dir*dist*i + jitter_vec;
     }
 }
 
@@ -71,14 +67,12 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
 
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    Vector3 jitter_vec;
-    jitter_vec.setZero();
+    Vector3 random_vec;
 
 
     RandomGenType  gen(seed);
     std::uniform_real_distribution<PREC> uni(-1.0,1.0);
-    double r;
-    if(jitter){r = uni(gen);}
+    if(jitter){ random_vec(0) = uni(gen); random_vec(1) = uni(gen); random_vec(2) = uni(gen);}
 
     auto diffId = startId;
     unsigned int i; // linear index from the front
@@ -91,15 +85,17 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
         int index_y = (i - index_z*(gDim_x*gDim_y)) / gDim_x;
         int index_x = (i - index_z*(gDim_x*gDim_y)- index_y*gDim_x);
 
-        if(jitter) {
 
-            r = Utilities::genRandomValues(r,gen,uni,b.m_initState.m_id  - diffId);
+        state.m_q.template head<3>() = Vector3(index_x * d - 0.5*(gDim_x-1)*d, index_y*d - 0.5*(gDim_y-1)*d , index_z*d) + vec_trans;
+
+        if(jitter) {
+            random_vec = Utilities::genRandomVec<PREC>(random_vec,gen,uni, b.m_initState.m_id - diffId);
             diffId = b.m_initState.m_id ;
 
-            jitter_vec = Vector3(r,r,r) * delta;
+            random_vec.normalize();
+            state.m_q.template head<3>() += random_vec * delta;
         }
 
-        state.m_q.template head<3>() = Vector3(index_x * d - 0.5*(gDim_x-1)*d, index_y*d - 0.5*(gDim_y-1)*d , index_z*d) + vec_trans + jitter_vec;
     }
 
 }
@@ -176,7 +172,7 @@ inline void applyBodyStatesTo(const RigidBodyStatesContainer & states, RigidBody
 //
 //        applyRigidBodyStateToBody( stateRef, (*bodyIt) );
 //
-//        if( (*bodyIt)->m_eState == TRigidBodyType::BodyMode::SIMULATED) {
+//        if( (*bodyIt)->m_eMode == TRigidBodyType::BodyMode::SIMULATED) {
 //            (*bodyIt)->m_pSolverData->m_t = state.m_t;
 //        }
 //

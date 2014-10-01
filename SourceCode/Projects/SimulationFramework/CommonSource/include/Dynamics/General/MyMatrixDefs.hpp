@@ -33,9 +33,9 @@ struct MyMatrix{
    using Vector4 = Eigen::Matrix<PREC, 4, 1>;
    using Vector6 = Eigen::Matrix<PREC, 6, 1>;
    using VectorDyn = Eigen::Matrix<PREC, Eigen::Dynamic , 1 >                   ;
-   using MatrixDyn = Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic >      ;
+   using MatrixDynDyn = Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic >      ;
    using MatrixDiagDyn = Eigen::DiagonalMatrix<PREC, Eigen::Dynamic >               ;
-   using MatrixDynRow = Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor>;
+   using MatrixDynDynRow = Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor>;
 
    using AffineTrafo = Eigen::Transform<PREC,3,Eigen::TransformTraits::Affine>;
 
@@ -68,9 +68,9 @@ struct MyMatrixDecomposition{;
    using Vector6 = typename MyMatrix< _PREC_ >::Vector6;   \
    using Quaternion = typename MyMatrix< _PREC_ >::Quaternion; \
    using VectorDyn = typename MyMatrix< _PREC_ >::VectorDyn; \
-   using MatrixDyn = typename MyMatrix< _PREC_ >::MatrixDyn; \
+   using MatrixDynDyn = typename MyMatrix< _PREC_ >::MatrixDynDyn; \
    using MatrixDiagDyn = typename MyMatrix< _PREC_ >::MatrixDiagDyn; \
-   using MatrixDynRow = typename MyMatrix< _PREC_ >::MatrixDynRow; \
+   using MatrixDynDynRow = typename MyMatrix< _PREC_ >::MatrixDynDynRow; \
    using AffineTrafo = typename MyMatrix< _PREC_ >::AffineTrafo; \
    using MatrixSparse = typename MyMatrix< _PREC_ >::MatrixSparse; \
    using MatrixSparseTriplet = typename MyMatrix< _PREC_ >::MatrixSparseTriplet;

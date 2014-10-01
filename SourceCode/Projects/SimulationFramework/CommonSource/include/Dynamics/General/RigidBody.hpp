@@ -104,10 +104,10 @@ public:
     using RigidBodyIdType = RigidBodyId::Type;
     const RigidBodyIdType m_id; ///< This is the id of the body.
 
-    BodyMode m_eState; ///< The state of the body.
+    BodyMode m_eMode; ///< The state of the body.
     BodyMaterialType m_eMaterial; ///< The material id.
 
-    unsigned char m_flags; ///< Different Flags which can be used during the timestep process, introduces because of MPI
+    unsigned char m_flags; ///< Different Flags which can be used during the timestep process, introduced because of MPI
 
     RigidBodySolverDataType * m_pSolverData; /// Simulated bodies have a solverData. For all others, animated and not simulated this pointer is zero!
 
@@ -122,7 +122,7 @@ public:
         m_r_S.setZero();
         QuaternionHelpers::setQuaternionZero(m_q_KI);
         m_h_term.setZero();
-        m_eState = BodyMode::STATIC;
+        m_eMode = BodyMode::STATIC;
         m_eMaterial = 0;
         m_pSolverData = nullptr;
         m_globalGeomId = 0;

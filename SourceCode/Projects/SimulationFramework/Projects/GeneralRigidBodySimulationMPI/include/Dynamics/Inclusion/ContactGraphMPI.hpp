@@ -8,6 +8,8 @@
 #include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 
+#include "BitCount.hpp"
+
 #include RigidBody_INCLUDE_FILE
 
 #include "GeneralGraph.hpp"
@@ -53,7 +55,7 @@ public:
 
 
     ContactGraph(std::shared_ptr<DynamicsSystemType> pDynSys);
-    void setInclusionCommunicator(std::shared_ptr<InclusionCommunicatorType> pInclusionComm);
+    void setInclusionCommunicator(InclusionCommunicatorType * pInclusionComm);
 
     ~ContactGraph();
 
@@ -61,7 +63,9 @@ public:
     void clearGraph();
     void addNode(CollisionData * pCollData);
 
-
+    void resetAfterOneIteration(unsigned int globalIterationCounter){
+        m_maxResidual = 0;
+    }
 
     inline  const MatrixUBodyDyn & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
@@ -97,13 +101,6 @@ public:
 	//void updateSplitBodyNode(RigidBodyIdType id , RankIdType rank, const VectorUBody & u);
 
 
-
-
-
-//    unsigned int m_nLambdas; ///< The number of all scalar forces in the ContactGraph.
-//    unsigned int m_nFrictionParams; ///< The number of all scalar friction params in the ContactGraph.
-
-
     std::pair<SplitBodyNodeDataType *, bool> addSplitBodyNode(RigidBodyType * body, const RankIdType & rank);
 
     inline NodeListType & getLocalNodeListRef(){return m_localNodes;}
@@ -132,11 +129,22 @@ public:
     inline typename DynamicsSystemType::RigidBodyContainerType & getRemoteBodiesWithContactsListRef(){return m_remoteBodiesWithContacts;}
     inline typename DynamicsSystemType::RigidBodyContainerType & getLocalBodiesWithContactsListRef(){return m_localBodiesWithContacts;};
 
+    unsigned int getNContactModelsUsed(){
+        return BitCount::count(m_usedContactModels);
+    }
+
+
+    PREC m_maxResidual;
+
 private:
 
     Logging::Log * m_pSolverLog;
 
-    std::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
+    using ContactModelEnumIntType = typename std::underlying_type<ContactModels::Enum>::type;
+    ContactModelEnumIntType m_usedContactModels = 0; ///< Bitflags which mark all used contactmodels
+
+
+    InclusionCommunicatorType * m_pInclusionComm;
     NeighbourMapType * m_pNbDataMap; ///< NeighbourMap to insert remote bodies which have contacts
 
     std::shared_ptr<DynamicsSystemType> m_pDynSys;
@@ -151,65 +159,17 @@ private:
     typename DynamicsSystemType::RigidBodyContainerType  m_remoteBodiesWithContacts; ///< This is our storage of all remote bodies which are in the contact graph
     typename DynamicsSystemType::RigidBodyContainerType  m_localBodiesWithContacts;
 
+    template<int bodyNr, bool addEdges = true>
+    void initNodeSimBody(NodeType * pNode, RigidBodyType * pBody,  bool isRemote);
+
     void setContactModel(NodeDataType & nodeData);
-
-    template<int bodyNr>
-    inline void computeW(NodeDataType & nodeData) {
-
-        if(nodeData.m_contactParameter.m_contactModel == ContactModels::ContactModelEnum::UCF_ContactModel) {
-
-
-            static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
-            static Matrix33 I_Jacobi_2; // this is the second part of the Jacobi;
-            static const CollisionData * pCollData;
-
-            pCollData = nodeData.m_pCollData;
-
-            if(bodyNr == 1) {
-                //Set matrix size!
-                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
-
-                updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
-                I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
-                // N direction =================================================
-                nodeData.m_W_body1.col(0).template head<3>() = - pCollData->m_cFrame.m_e_z; // I frame
-                nodeData.m_W_body1.col(0).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_z;
-
-                // T1 direction =================================================
-                nodeData.m_W_body1.col(1).template head<3>() = - pCollData->m_cFrame.m_e_x; // I frame
-                nodeData.m_W_body1.col(1).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_x;
-
-                // T2 direction =================================================
-                nodeData.m_W_body1.col(2).template head<3>() = - pCollData->m_cFrame.m_e_y; // I frame
-                nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
-            } else {
-                //Set matrix size!
-                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension);
-
-                updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
-                I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
-                // N direction =================================================
-                nodeData.m_W_body2.col(0).template head<3>() =  pCollData->m_cFrame.m_e_z; // I frame
-                nodeData.m_W_body2.col(0).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_z;
-
-                // T1 direction =================================================
-                nodeData.m_W_body2.col(1).template head<3>() =  pCollData->m_cFrame.m_e_x; // I frame
-                nodeData.m_W_body2.col(1).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_x;
-
-                // T2 direction =================================================
-                nodeData.m_W_body2.col(2).template head<3>() =  pCollData->m_cFrame.m_e_y; // I frame
-                nodeData.m_W_body2.col(2).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
-            }
-        } else {
-            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
-        }
-
-    }
 
     ContactParameterMap* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 
     unsigned int m_nodeCounter; ///< An node counter, starting at 0.
     unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
+
+
 
 };
 

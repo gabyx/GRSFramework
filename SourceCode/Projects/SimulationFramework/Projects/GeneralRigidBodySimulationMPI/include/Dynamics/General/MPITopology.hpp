@@ -13,6 +13,10 @@
 
 namespace MPILayer {
 
+/**
+* Base class for all Topologies, we avoided virtual function dispatch here (why, not so clear, because of overhead...)
+* A nicer interface would be with dynamic polymorphism instead of using a variant class as member to do the member function dispatch
+*/
 class ProcessTopology {
 public:
 
@@ -30,24 +34,26 @@ public:
     void init(RankIdType rank){m_rank = rank;}
 
     // Main function
-    inline bool belongsPointToProcess(const Vector3 & point, RankIdType &neighbourProcessRank) const {
-        TopologyVisitors::BelongsPointToProcess<ProcessTopology> vis(point,neighbourProcessRank);
+    inline bool belongsPointToProcess(const Vector3 & point, RankIdType &ownerRank) const {
+        TopologyVisitors::BelongsPointToProcess<ProcessTopology> vis(point,ownerRank);
         return m_procTopo.apply_visitor(vis);
     }
 
     inline bool belongsBodyToProcess(const RigidBodyType * body) const {
-        RankIdType nb;
-        return belongsPointToProcess(body->m_r_S,nb);
+        RankIdType ownerRank;
+        return belongsPointToProcess(body->m_r_S,ownerRank);
     }
 
-    inline bool belongsBodyToProcess(const RigidBodyType * body, RankIdType &neighbourProcessRank) const {
-        return belongsPointToProcess(body->m_r_S,neighbourProcessRank);
+    inline bool belongsBodyToProcess(const RigidBodyType * body, RankIdType &ownerRank) const {
+        return belongsPointToProcess(body->m_r_S,ownerRank);
     }
 
     inline bool belongsPointToProcess(const Vector3 & point) const {
-        unsigned int nb;
-        return belongsPointToProcess(point,nb);
+        RankIdType ownerRank;
+        return belongsPointToProcess(point,ownerRank);
     }
+
+
 
     inline bool checkOverlap(   const RigidBodyType * body,
                                 NeighbourRanksListType & neighbourProcessRanks,
@@ -75,8 +81,9 @@ public:
                                    const MyMatrix<unsigned int>::Vector3 & dim,
                                    unsigned int processRank, unsigned int masterRank)
     {
-        // Assign a new Topology
+        // Assign a grid topology
         m_procTopo = ProcessTopologyGrid<ProcessTopology>(m_nbRanks,m_adjNbRanks, minPoint,maxPoint,dim, m_rank , masterRank);
+
     }
 
     private:

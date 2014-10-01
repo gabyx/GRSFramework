@@ -7,6 +7,8 @@
 #include <type_traits>
 #include <fstream>
 
+#include "StaticAssert.hpp"
+
 #include "MultiBodySimFileIOHelpers.hpp"
 
 #include "RigidBodyContainer.hpp"
@@ -135,8 +137,8 @@ private:
     static const  std::streamoff m_headerLength = (2*sizeof(unsigned int) + SIM_FILE_PART_SIGNATURE_LENGTH*sizeof(char));
 
     // Write addditional bytes, not yet implemented, but the type is written in the header
-    unsigned int m_additionalBytesType;
-    std::streamsize getAdditionalBytes();
+    unsigned int m_additionalBytesPerBodyType;
+    std::streamsize getAdditionalBytesPerBody();
     std::streamsize m_nAdditionalBytesPerBody;
 
     std::stringstream m_errorString;
@@ -182,14 +184,15 @@ void MultiBodySimFilePart::write(double time, TBodyIterator begin, TBodyIterator
     *this << (unsigned int) std::distance(begin,end);
     using BodyType = typename std::remove_reference<decltype(*(*begin))>::type;
 
-    STATIC_ASSERT2((std::is_same<double, typename BodyType::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
+    STATIC_ASSERTM((std::is_same<double, typename BodyType::PREC>::value),
+                   "OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!");
     auto itEnd = end;
     for(auto it = begin; it != itEnd; ++it) {
         *this << (*it)->m_id;
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
 
-//        AddBytes::write<m_additionalBytesType>(m_file_stream);
+//        AddBytes::write<m_additionalBytesPerBodyType>(m_file_stream);
     }
     m_nStates++;
 }

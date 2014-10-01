@@ -56,8 +56,8 @@ public:
     GlobalGeometryMapType m_globalGeometries;
 
     // All RigidBodies which are owned by this class!
-    RigidBodySimContainerType m_SimBodies;    // Simulated Objects
-    RigidBodyStaticContainerType m_Bodies;    // all not simulated objects
+    RigidBodySimContainerType m_simBodies;    // Simulated Objects
+    RigidBodyStaticContainerType m_staticBodies;    // all not simulated objects
 
     //All initial conditions for all bodies
     //We need an order, which is sorted according to the id!
@@ -115,11 +115,11 @@ protected:
 
 
 inline void DynamicsSystemBase::applyInitStatesToBodies() {
-    InitialConditionBodies::applyBodyStatesTo(m_bodiesInitStates, m_SimBodies);
+    InitialConditionBodies::applyBodyStatesTo(m_bodiesInitStates, m_simBodies);
 }
 
 inline void DynamicsSystemBase::applySimBodiesToDynamicsState(DynamicsState & state) {
-    state.applyBodies<true>(m_SimBodies);
+    state.applyBodies<true>(m_simBodies);
 }
 
 
@@ -156,7 +156,7 @@ public:
 
         auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&this->m_bodiesInitStates, sett.get()));
         auto vis = std::unique_ptr<VisModuleType>(nullptr); // no visualization needed
-        auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , &this->m_SimBodies, &this->m_Bodies )) ;
+        auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , &this->m_simBodies, &this->m_staticBodies )) ;
         auto es  = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &this->m_externalForces));
         auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&this->m_ContactParameterMap));
 

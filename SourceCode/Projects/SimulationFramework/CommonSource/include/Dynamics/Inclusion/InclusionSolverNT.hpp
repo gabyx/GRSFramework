@@ -80,8 +80,8 @@ protected:
 
   std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
   std::shared_ptr<DynamicsSystemType>  m_pDynSys;
-  std::vector< RigidBodyType* > & m_SimBodies;
-  std::vector< RigidBodyType* > & m_Bodies;
+  std::vector< RigidBodyType* > & m_simBodies;
+  std::vector< RigidBodyType* > & m_staticBodies;
 
 
 
@@ -121,8 +121,8 @@ protected:
   VectorDyn m_P_T_2;
   // ==========================
 
-  MatrixDynRow m_G_NN, m_G_NT;
-  MatrixDynRow m_G_TT;
+  MatrixDynDynRow m_G_NN, m_G_NT;
+  MatrixDynDynRow m_G_TT;
 
   VectorDyn m_c_N;
   VectorDyn m_c_T;
@@ -147,8 +147,8 @@ protected:
 
 template< typename TInclusionSolverConfig >
 InclusionSolverNT<TInclusionSolverConfig>::InclusionSolverNT( std::shared_ptr<CollisionSolverType > pCollisionSolver,  std::shared_ptr<DynamicsSystemType> pDynSys):
-m_SimBodies(pCollisionSolver->m_SimBodies),
-m_Bodies(pCollisionSolver->m_Bodies)
+m_simBodies(pCollisionSolver->m_simBodies),
+m_staticBodies(pCollisionSolver->m_staticBodies)
 {
 
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
@@ -193,8 +193,8 @@ template< typename TInclusionSolverConfig >
 void InclusionSolverNT<TInclusionSolverConfig>::reset()
 {
   // Do a Debug check if sizes match!
-  ASSERTMSG( m_SimBodies.size() * NDOFuBody == m_nDofu, "InclusionSolverNT:: Error in Dimension of System!");
-  ASSERTMSG( m_SimBodies.size() * NDOFqBody == m_nDofq, "InclusionSolverNT:: Error in Dimension of System!");
+  ASSERTMSG( m_simBodies.size() * NDOFuBody == m_nDofu, "InclusionSolverNT:: Error in Dimension of System!");
+  ASSERTMSG( m_simBodies.size() * NDOFqBody == m_nDofq, "InclusionSolverNT:: Error in Dimension of System!");
 
   m_pDynSys->init_const_hTerm(m_h_const);
   m_pDynSys->init_MassMatrixInv(m_Minv_diag);
@@ -338,7 +338,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
       int id2 = collSet[contactIdx].m_pBody2->m_id;
 
       // Fill the entries for Body 1 =================================================
-      if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::BodyMode::SIMULATED ){
+      if( collSet[contactIdx].m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ){
 
         // Contact goes into W_N, W_T
         updateSkewSymmetricMatrix<>( collSet[contactIdx].m_r_S1C1, I_r_SiCi_hat);
@@ -373,14 +373,14 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WT_Minv_h_dt(m_nDofFriction*contactIdx +1)  += w_T_part.dot( m_Minv_h_dt.template segment<NDOFuBody>( id1 * NDOFuBody ) );
 
       }
-      else if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ){
+      else if( collSet[contactIdx].m_pBody1->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
         // Contact goes into xi_N, xi_T
 
       }
 
 
       // Fill the entries for Body 2 =================================================
-      if( collSet[contactIdx].m_pBody2->m_eState == RigidBodyType::BodyMode::SIMULATED ){
+      if( collSet[contactIdx].m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ){
 
         // Contact goes into W_N, W_T
         updateSkewSymmetricMatrix<>( collSet[contactIdx].m_r_S2C2, I_r_SiCi_hat);
@@ -414,7 +414,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WT_Minv_h_dt(m_nDofFriction*contactIdx + 1) += w_T_part.dot( m_Minv_h_dt.template segment<NDOFuBody>( id2 * NDOFuBody ));
 
       }
-      else if( collSet[contactIdx].m_pBody1->m_eState == RigidBodyType::BodyMode::ANIMATED ){
+      else if( collSet[contactIdx].m_pBody1->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
         // Contact goes into xi_N, xi_T
       }
 
@@ -449,7 +449,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
     m_G_TT.noalias() = m_W_T.transpose() * tempMinv_WT;
 
 #if CALCULATE_COND_OF_G == 1 || CALCULATE_DIAGDOM_OF_G == 1
-    MatrixDyn G(m_nContacts*3,m_nContacts*3);
+    MatrixDynDyn G(m_nContacts*3,m_nContacts*3);
     G.block(0,0,m_G_NN.rows(),m_G_NN.cols()).noalias() = m_G_NN;
     G.block(0,m_G_NN.cols(),m_G_NT.rows(),m_G_NT.cols()).noalias() = m_G_NT;
     G.block(m_G_NN.rows(),0,m_G_NT.transpose().rows(),m_G_NT.transpose().cols()).noalias() = m_G_NT.transpose();

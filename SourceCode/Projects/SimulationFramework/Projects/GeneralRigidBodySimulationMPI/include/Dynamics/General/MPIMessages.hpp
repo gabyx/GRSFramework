@@ -323,7 +323,7 @@ private:
         LOGSZSpecial(m_pSerializerLog, "Removal of body @" << body << std::endl; )
 
         ar & body->m_id;
-        ASSERTMSG(body->m_id != RigidBodyIdType(0)," ID zero!");
+        //ASSERTMSG(body->m_id != RigidBodyIdType(0)," ID zero!");
 
         LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
         // remove local from this neighbour structure!
@@ -348,7 +348,7 @@ private:
         // id
         ar & body->m_id;
         LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(body)<<std::endl;);
-        ASSERTMSG(body->m_id != RigidBodyIdType(0)," ID zero!");
+
         // owning rank
 
         ar & m_bodyInfo->m_ownerRank;
@@ -444,7 +444,7 @@ private:
         typename RigidBodyType::RigidBodyIdType id;
         ar & id;
         LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
-        ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
+        //ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
 
         RankIdType owningRank;
         ar & owningRank;
@@ -544,7 +544,7 @@ private:
         typename RigidBodyType::RigidBodyIdType id;
         ar & id;
         LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
-        ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
+        //ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
         // owner rankk
         RankIdType owningRank;
         ar & owningRank;
@@ -621,7 +621,7 @@ private:
         typename RigidBodyType::RigidBodyIdType id;
         ar & id;
         LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
-        ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
+        //ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
         // Go into the neighbour data structure and remove the remote body
         bool res = m_neighbourData->eraseRemoteBodyData(id);
         LOGASSERTMSG(res, m_pSerializerLog, "Could not delete remote body with id: " << RigidBodyId::getBodyIdString(id) << " in neighbour structure rank: " << m_neighbourRank << " !" );
@@ -663,7 +663,7 @@ private:
     void serializeBodyFull(Archive & ar, RigidBodyType * body) const {
 
         // State
-        ar & body->m_eState;
+        ar & body->m_eMode;
 
         //Material id
         ar & body->m_eMaterial;
@@ -697,7 +697,7 @@ private:
         serializeEigen(ar,body->m_MassMatrixInv_diag);
         serializeEigen(ar,body->m_h_term);
 
-        if(body->m_eState == RigidBodyType::BodyMode::SIMULATED) {
+        if(body->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
 
             //Velocity
             if(Archive::is_loading::value) {
@@ -1455,12 +1455,12 @@ public:
     template<class Archive>
     void save(Archive & ar, const unsigned int version) const {
 
-        unsigned int size = m_pTopoBuilder->m_pDynSys->m_SimBodies.size() ;
+        unsigned int size = m_pTopoBuilder->m_pDynSys->m_simBodies.size() ;
         ar & size;
 
         // send all bodie COG's to make master rank build the topology
-        for(auto bodyIt = m_pTopoBuilder->m_pDynSys->m_SimBodies.begin();
-                 bodyIt != m_pTopoBuilder->m_pDynSys->m_SimBodies.end(); bodyIt++){
+        for(auto bodyIt = m_pTopoBuilder->m_pDynSys->m_simBodies.begin();
+                 bodyIt != m_pTopoBuilder->m_pDynSys->m_simBodies.end(); bodyIt++){
 
             ar & (*bodyIt)->m_id;
             //Pos
@@ -1537,6 +1537,99 @@ private:
     TTopologyBuilder * m_pTopoBuilder;
     RankIdType m_rank;
 };
+
+
+template<typename TTopologyBuilder >
+class TopologyBuilderMessageWrapperResults: public boost::serialization::traits< TopologyBuilderMessageWrapperResults<TTopologyBuilder>,
+    boost::serialization::object_serializable,
+        boost::serialization::track_never> {
+public:
+
+    DEFINE_LAYOUT_CONFIG_TYPES
+
+    static const MPIMessageTag m_tag = MPIMessageTag::TOPOLOGYBUILDER_RESULTS;
+
+    using TopologyBuilderType = TTopologyBuilder;
+    using RankIdType = typename TopologyBuilderType::RankIdType ;
+
+    TopologyBuilderMessageWrapperResults(TopologyBuilderType * topoBuilder):
+            m_pTopoBuilder(topoBuilder)
+    {};
+
+
+    // master sends all data to neighbours
+    template<class Archive>
+    void save(Archive & ar, const unsigned int version) const {
+
+        // Send grid data
+        serializeEigen(ar,m_pTopoBuilder->m_aabb_glo.m_minPoint);
+        serializeEigen(ar,m_pTopoBuilder->m_aabb_glo.m_maxPoint);
+        serializeEigen(ar,m_pTopoBuilder->m_settings.m_processDim);
+
+        // Send states of bodies
+        unsigned int nStates = 0;
+        // Get states for this rank if any!
+        auto stateListIt = m_pTopoBuilder->m_bodiesPerRank.find(m_rank);
+        if(stateListIt ==  m_pTopoBuilder->m_bodiesPerRank.end()){
+            ar & nStates;
+        }else{
+            nStates = stateListIt->second.size();
+            ar & nStates;
+            // Serialize states
+            for( auto & state : stateListIt->second){
+                ar & state->m_id;
+                serializeEigen(ar,state->m_q);
+                serializeEigen(ar,state->m_u);
+            }
+
+            // clear the entry for this rank
+            m_pTopoBuilder->m_bodiesPerRank.erase(stateListIt);
+        }
+    }
+
+    // receive broadcast
+    template<class Archive>
+    void load(Archive & ar, const unsigned int version) const {
+
+        Vector3 min,max;
+        MyMatrix<unsigned int>::Vector3 dim;
+        serializeEigen(ar, min);
+        serializeEigen(ar, max);
+        serializeEigen(ar, dim);
+
+        // generate topology
+        m_pTopoBuilder->m_pProcCommunicator->createProcTopoGrid(min,max,dim);
+
+        unsigned int nStates;
+        ar & nStates;
+        RigidBodyIdType id;
+
+        // this does only add the states to the dynamic system, this class is not responsible for clearing it!
+        auto & bodiesInitStates = m_pTopoBuilder->m_pDynSys->m_bodiesInitStates;
+        for(unsigned int i = 0; i< nStates;i++){
+            ar & id;
+            auto res = bodiesInitStates.emplace(id,id);
+            ASSERTMSG(res.second, "Body with id: " << id << " has already been added in list!?");
+            serializeEigen(ar, res.first->second.m_q);
+            serializeEigen(ar , res.first->second.m_u);
+        }
+
+
+
+    }
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER();
+
+    void setRank(const RankIdType & rank){
+        m_rank = rank;
+    }
+
+
+private:
+    TTopologyBuilder * m_pTopoBuilder;
+    RankIdType m_rank;
+};
+
 
 
 

@@ -9,7 +9,7 @@
 
 const char MultiBodySimFileMPI::m_simFileSignature[SIM_FILE_MPI_SIGNATURE_LENGTH] = SIM_FILE_MPI_SIGNATURE;
 
-const std::streamsize MultiBodySimFileMPI::m_nAdditionalBytesPerBody= getAdditionalBytes();
+const std::streamsize MultiBodySimFileMPI::m_nAdditionalBytesPerBody= getAdditionalBytesPerBody();
 
 
 
@@ -19,7 +19,7 @@ MultiBodySimFileMPI::MultiBodySimFileMPI()
         m_nBytesPerState(0),
         m_nBytesPerQBody(0),
         m_nBytesPerUBody(0),
-//        m_additionalBytesType(0),
+//        m_additionalBytesPerBodyType(0),
 //        m_nAdditionalBytesPerBody(0),
         m_nStates(0),
         m_nSimBodies(0)
@@ -64,7 +64,7 @@ void MultiBodySimFileMPI::writeBySharedPtr(double time, const typename DynamicsS
         oa << (*it)->m_id;
         serializeEigen(oa, (*it)->get_q());
         serializeEigen(oa, (*it)->get_u());
-        AddBytes<m_additionalBytesType>::write(oa,*it);
+        AddBytes<m_additionalBytesPerBodyType>::write(oa,*it);
     }
     //Necessary to make stream flush
     stream.flush();
@@ -112,11 +112,10 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
         boost::archive::binary_oarchive  oa( stream,boost::archive::no_codecvt | boost::archive::no_header); // is initialized third
 
         for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
-            ASSERTMSG((*it)->m_id != RigidBodyIdType(0x0)," ID zero! at time: " << time);
             oa << (*it)->m_id;
             serializeEigen(oa, (*it)->get_q());
             serializeEigen(oa, (*it)->get_u());
-            AddBytes<m_additionalBytesType>::write(oa,*it);
+            AddBytes<m_additionalBytesPerBodyType>::write(oa,*it);
         }
         //Necessary to make stream flush
         stream.flush();
@@ -187,11 +186,11 @@ void MultiBodySimFileMPI::writeByOffsets2(double time, const typename DynamicsSy
         boost::archive::binary_oarchive  oa( stream,boost::archive::no_codecvt | boost::archive::no_header); // is initialized third
 
         for(auto it = bodyList.beginOrdered(); it!= bodyList.endOrdered();it++){
-            ASSERTMSG((*it)->m_id != RigidBodyIdType(0x0)," ID zero! at time: " << time);
+            //ASSERTMSG((*it)->m_id != RigidBodyIdType(0x0)," ID zero! at time: " << time);
             oa << (*it)->m_id;
             serializeEigen(oa, (*it)->get_q());
             serializeEigen(oa, (*it)->get_u());
-            AddBytes<m_additionalBytesType>::write(oa,*it);
+            AddBytes<m_additionalBytesPerBodyType>::write(oa,*it);
         }
         //Necessary to make stream flush
         stream.flush();
@@ -265,7 +264,7 @@ void  MultiBodySimFileMPI::writeHeader() {
         memcpy((void*)p,&t,sizeof(t));
         p += sizeof(t);
 
-        t = m_additionalBytesType;
+        t = m_additionalBytesPerBodyType;
         memcpy((void*)p,&t,sizeof(t));
         p += sizeof(t);
 

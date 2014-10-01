@@ -107,6 +107,8 @@ public:
                 for(auto it = svec.begin(); it != svec.end(); ++it){
                     m_localDirs.push_back(*it);
                 }
+            }else{
+                m_localDirs.push_back(m_globalDir);
             }
 
             if( ops >> OptionPresent('p', "post-process")) {

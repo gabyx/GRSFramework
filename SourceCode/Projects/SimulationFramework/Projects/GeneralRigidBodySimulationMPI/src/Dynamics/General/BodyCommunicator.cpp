@@ -5,7 +5,7 @@
 BodyCommunicator::BodyCommunicator(  std::shared_ptr< DynamicsSystemType> pDynSys ,
                                      std::shared_ptr< ProcessCommunicatorType > pProcComm):
             m_pDynSys(pDynSys),
-            m_globalLocal(pDynSys->m_SimBodies),
+            m_globalLocal(pDynSys->m_simBodies),
             m_globalRemote(pDynSys->m_RemoteSimBodies),
             m_globalGeometries(pDynSys->m_globalGeometries),
             m_pProcComm(pProcComm),
@@ -25,11 +25,11 @@ BodyCommunicator::BodyCommunicator(  std::shared_ptr< DynamicsSystemType> pDynSy
 
     // Initialize all NeighbourDatas
     for(auto rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
-        LOGBC(m_pSimulationLog,"--->BodyCommunicator: Add neighbour data for process rank: "<<*rankIt<<std::endl;);
+        LOGBC(m_pSimulationLog,"---> BodyCommunicator: Add neighbour data for process rank: "<<*rankIt<<std::endl;);
         auto res = m_nbDataMap.insert(*rankIt);
         ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << *rankIt);
     }
-    m_pSimulationLog->logMessage("--->BodyCommunicator: Initialized all NeighbourDatas");
+    m_pSimulationLog->logMessage("---> BodyCommunicator: Initialized all NeighbourDatas");
 
     // Fill in all BodyInfos for the local bodies (remote bodies are not considered, there should not be any of those)
     for(auto it = m_globalLocal.begin(); it != m_globalLocal.end(); ++it) {
@@ -202,13 +202,13 @@ void BodyCommunicator::sendMessagesToNeighbours(){
     m_localBodiesToDelete.clear();
 
     //Set flags
-    m_message.setFlags(m_pDynSys->m_SimBodies.size() == 0);
+    m_message.setFlags(m_pDynSys->m_simBodies.size() == 0);
 
     for(typename ProcessTopologyType::NeighbourRanksListType::const_iterator it = m_nbRanks.begin(); it != m_nbRanks.end(); it++){
         LOGBC(m_pSimulationLog,"--->\t\t Send message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_message.setRank(*it);
-        m_pProcComm->sendMessageToNeighbourRank(m_message,*it, m_message.m_tag );
+        m_pProcComm->sendMessageToNeighbourRank_async(m_message,*it, m_message.m_tag );
     }
     LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }

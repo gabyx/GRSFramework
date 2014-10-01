@@ -21,8 +21,8 @@ DynamicsSystemBase::~DynamicsSystemBase() {
     DECONSTRUCTOR_MESSAGE
 
     // Delete all RigidBodys
-    m_SimBodies.deleteAllBodies();
-    m_Bodies.deleteAllBodies();
+    m_simBodies.deleteAllBodies();
+    m_staticBodies.deleteAllBodies();
 
 };
 
@@ -83,7 +83,7 @@ void DynamicsSystemBase::doFirstHalfTimeStep(PREC ts, PREC timestep) {
     m_externalForces.setTime(ts+timestep);
 
     // Do timestep for every object
-    for(auto bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
+    for(auto bodyIt = m_simBodies.begin() ; bodyIt != m_simBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
 
@@ -142,7 +142,7 @@ void DynamicsSystemBase::doSecondHalfTimeStep(PREC te, PREC timestep) {
 
     // Do timestep for every object
     typename RigidBodySimContainerType::iterator bodyIt;
-    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
+    for(bodyIt = m_simBodies.begin() ; bodyIt != m_simBodies.end(); bodyIt++) {
 
         RigidBodyType * pBody = (*bodyIt);
 
@@ -158,6 +158,9 @@ void DynamicsSystemBase::doSecondHalfTimeStep(PREC te, PREC timestep) {
         // Timestep for position;
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_front.head<3>();
         pBody->m_q_KI += timestep * F_i * (pBody->m_pSolverData->m_uBegin.tail<3>() + pBody->m_pSolverData->m_uBuffer.m_front.tail<3>());
+
+
+        ASSERTMSG(Utilities::isFinite(pBody->m_pSolverData->m_uBuffer.m_front.tail<3>())," body vel. not finite" );
 
         //Normalize Quaternion
         pBody->m_q_KI.normalize();
@@ -201,7 +204,7 @@ void DynamicsSystemBase::initMassMatrixAndHTerm() {
     // iterate over all objects and assemble matrix M
     typename RigidBodySimContainerType::iterator bodyIt;
 
-    for(bodyIt = m_SimBodies.begin() ; bodyIt != m_SimBodies.end(); bodyIt++) {
+    for(bodyIt = m_simBodies.begin() ; bodyIt != m_simBodies.end(); bodyIt++) {
         RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt);
     }
 }

@@ -150,7 +150,7 @@ public:
     }
 
     // Dispatch
-    inline void operator()( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) ///< Calls Sphere/AABB collision detection.
+    inline void operator()( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) ///< Calls Halfspace/Ray collision detection.
     {
         intersect(halfspace);
     }
@@ -195,12 +195,75 @@ void ColliderRay::intersect( const std::shared_ptr<const HalfspaceGeometry >  & 
         m_ray->m_maxt = t;
     }else{
         // Fill collision Data;
+        ASSERTMSG(false,"fill collision data here")
     }
 
 }
 
 /** @} */
 
+
+/**
+* @ingroup Collision
+* @brief This is the ColliderPoint class, this functor class handles the collision of different RigidBodies with a point.
+*/
+/** @{ */
+
+class ColliderPoint : public boost::static_visitor<> {
+public:
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    ColliderPoint() {}
+
+
+    /** intersects body with a point and set to the closest point on body if it intersects!  */
+    bool intersectAndProx(const RigidBodyType * pBody1,  Vector3 & p){
+
+        m_pBody1 = pBody1;
+        m_p = &p;
+
+        m_bIntersection = false;
+        boost::apply_visitor(*this, m_pBody1->m_geometry);
+        return m_bIntersection;
+    }
+
+    // Dispatch
+    inline void operator()( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) ///< Calls Halfspace/Point collision detection.
+    {
+        intersect(halfspace);
+    }
+    /**
+    * @brief If no routine matched for Body to AABB throw error
+    */
+    template <typename Geom1>
+    inline void operator()(const  std::shared_ptr<const Geom1> &g1) {
+        ERRORMSG("ColliderRay:: collision detection for object-combination "<< typeid(Geom1).name()<<" and point not supported!");
+    }
+
+private:
+
+    Vector3 * m_p;
+
+    bool m_bIntersection; ///< Boolean which tells if the intersection test gave a feasible result.
+
+    const RigidBodyType* m_pBody1; ///< Shared pointer to the first RigidBodyBase class instance.
+
+    //Collision function
+    inline void intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace); ///< Halfspace/Ray intersection
+};
+
+void ColliderPoint::intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) {
+    Vector3 I_n = m_pBody1->m_A_IK*halfspace->m_normal;
+    PREC t = I_n.dot(m_pBody1->m_r_S - *m_p) +  halfspace->m_normal.dot(halfspace->m_pos);
+    if( t >= 0.0){
+        m_bIntersection = true;
+        // project onto plane
+        *m_p = t*I_n + *m_p;
+    }
+   return ;
+}
+
+/** @} */
 
 
 /**
@@ -254,8 +317,6 @@ public:
     */
 
     void checkCollision(RigidBodyType * pBody1, RigidBodyType * pBody2) {
-        // We know that we are not changing anything inside rigid body!
-        // Otherwise all operators()(const boost::shared_ptr...)
         m_pBody1 = pBody1;
         m_pBody2 = pBody2;
 

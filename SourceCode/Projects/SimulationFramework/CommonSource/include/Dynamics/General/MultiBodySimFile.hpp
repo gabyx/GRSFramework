@@ -260,9 +260,9 @@ private:
     std::streamsize m_nBytesPerQBody;
     std::streamsize m_nBytesPerUBody;
 
-    // Write addditional bytes, not yet implemented, but the type is written in the header
-    unsigned int m_additionalBytesType;
-    std::streamsize getAdditionalBytes();
+    // Write addditional bytes per body, not yet implemented, but the type is written in the header
+    unsigned int m_additionalBytesPerBodyType;
+    std::streamsize getAdditionalBytesPerBody();
     std::streamsize m_nAdditionalBytesPerBody;
 
 
@@ -315,14 +315,14 @@ void MultiBodySimFile::write(double time, TBodyIterator begin, TBodyIterator end
 
     using BodyType = typename std::remove_reference<decltype(*(*begin))>::type;
 
-    STATIC_ASSERT2((std::is_same<double, typename BodyType::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
+    STATIC_ASSERTM((std::is_same<double, typename BodyType::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
     auto itEnd = end;
     for(auto it = begin; it != itEnd; ++it) {
         *this << (*it)->m_id;
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
 
-//        AddBytes::write<m_additionalBytesType>(m_file_stream);
+//        AddBytes::write<m_additionalBytesPerBodyType>(m_file_stream);
     }
 }
 
@@ -347,8 +347,8 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
 
     m_file_stream.seekg(m_beginOfStates);
 
-    if(stateTime < 0) {
-        stateTime = 0;
+    if(stateTime < 0.0) {
+        stateTime = 0.0;
     }
 
     if(which == 0) {
@@ -359,7 +359,8 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
         //Scan all states
         for( std::streamoff stateIdx = 0; stateIdx < m_nStates; stateIdx++) {
             *this >> currentTime;
-            if( ( lastTime > stateTime && stateTime <= currentTime )|| stateTime <= 0.0) {
+            //std::cout << "time: " << currentTime << "lastTime: " << lastTime << "stateTime: " << stateTime<< std::endl;
+            if( ( lastTime < stateTime && stateTime <= currentTime )|| stateTime <= 0.0) {
                 timeFound = true;
                 break;
             } else {
@@ -447,13 +448,13 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
     *this << (double)state->m_t;
     // write states
     for(auto & b : state->m_SimBodyStates) {
-        STATIC_ASSERT2((std::is_same<double, typename DynamicsState::PREC>::value),
+        STATIC_ASSERTM((std::is_same<double, typename DynamicsState::PREC>::value),
                        "OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
         *this << b.m_id;
         IOHelpers::writeBinary(m_file_stream, b.m_q );
         IOHelpers::writeBinary(m_file_stream, b.m_u );
 
-//        AddBytes::write<m_additionalBytesType>(m_file_stream);
+//        AddBytes::write<m_additionalBytesPerBodyType>(m_file_stream);
     }
 
     m_nStates++;

@@ -193,6 +193,23 @@ public:
             if(!Utilities::stringToType(m_inclusionSettings->m_alphaSORProx, node.attribute("alphaSORProx").value())) {
                 THROWEXCEPTION("---> String conversion in InclusionSolverSettings: alphaJORProx failed");
             }
+
+            att = node.attribute("matrixRStrategy");
+            if(att) {
+                std::string method = att.value();
+                if(method == "max") {
+                    m_inclusionSettings->m_RStrategy = InclusionSolverSettingsType::RSTRATEGY_MAX;
+                } else if (method == "sum") {
+                    m_inclusionSettings->m_RStrategy = InclusionSolverSettingsType::RSTRATEGY_SUM;
+                } else if (method == "sum2") {
+                    m_inclusionSettings->m_RStrategy = InclusionSolverSettingsType::RSTRATEGY_SUM2;
+                } else {
+                    THROWEXCEPTION("---> String conversion in InclusionSolverSettings: matrixRStrategy failed: not a valid setting");
+                }
+            } else {
+                m_inclusionSettings->m_RStrategy = InclusionSolverSettingsType::RSTRATEGY_MAX;
+            }
+
             if(!Utilities::stringToType<unsigned int>(m_inclusionSettings->m_MaxIter, node.attribute("maxIter").value())) {
                 THROWEXCEPTION("---> String conversion in InclusionSolverSettings: maxIter failed");
             }
@@ -251,11 +268,17 @@ public:
             if(method == "JOR") {
                 m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::JOR;
             } else if (method == "SOR") {
-                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT;
+                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT_AC;
             } else if (method == "SORContact") {
-                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT;
+                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT_AC;
+            } else if (method == "SORContactAC") {
+                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT_AC;
+            } else if (method == "SORContactDS") {
+                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_CONTACT_DS;
             } else if (method == "SORFull") {
                 m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_FULL;
+            } else if (method == "SORNormalTangential") {
+                m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_NORMAL_TANGENTIAL;
             } else {
                 THROWEXCEPTION("---> String conversion in InclusionSolverSettings: method failed: not a valid setting");
             }
@@ -492,12 +515,12 @@ private:
 
 
                 RigidBodyIdType diffId = m_startIdGroup; // id to generate to correct amount of random values!
-                double radius = uni(gen); // generate first value
+                PREC radius = uni(gen); // generate first value
                 auto endIt = m_bodyListGroup->end();
                 for(auto bodyIt = m_bodyListGroup->begin(); bodyIt != endIt; ++bodyIt) {
 
                     // Generate the intermediate random values if there are any
-                    radius = Utilities::genRandomValues(radius,gen,uni,bodyIt->m_initState.m_id-diffId); // (id:16 - id:13 = 3 values, 13 is already generated)
+                    radius = Utilities::genRandomValues<PREC>(radius, gen,uni,bodyIt->m_initState.m_id-diffId); // (id:16 - id:13 = 3 values, 13 is already generated)
                     diffId = bodyIt->m_initState.m_id; // update current diffId;
 
                     bodyIt->m_scale = Vector3(radius,radius,radius);
@@ -513,7 +536,6 @@ private:
         } else {
             THROWEXCEPTION("---> The attribute 'distribute' '" + type + std::string("' of 'Sphere' has no implementation in the parser"));
         }
-
 
     }
     void parseHalfspaceGeometry( XMLNodeType halfspace) {
@@ -724,7 +746,7 @@ private:
             auto it = m_globalGeometries->find(id);
             // it->second is the GeometryType in RigidBody
             if(it == m_globalGeometries->end()) {
-                THROWEXCEPTION("---> Geometry search in parseGlobalGeomId: failed!");
+                THROWEXCEPTION("---> Geometry search in parseGlobalGeomId: failed for id: " << id << std::endl);
             }
 
             for(auto & b : *m_bodyListGroup) {
@@ -754,7 +776,7 @@ private:
                 auto it = m_globalGeometries->find(id);
                 // it->second is the GeometryType in RigidBody
                 if(it == m_globalGeometries->end()) {
-                    THROWEXCEPTION("---> parseGlobalGeomId: Geometry search failed!");
+                    THROWEXCEPTION("---> parseGlobalGeomId: Geometry search failed for id: " << id << std::endl);
                 }
 
                 GetScaleOfGeomVisitor vis(b.m_scale);
@@ -799,15 +821,16 @@ private:
             RigidBodyIdType diffId = m_startIdGroup; // id to generate the correct amount of random values!
 
             unsigned int id = uni(gen); // generate first value
+            //std::cout << id << std::endl;
             for(auto & b: *m_bodyListGroup) {
-
-                id = Utilities::genRandomValues(id,gen,uni,b.m_initState.m_id - diffId);
+                //std::cout << b.m_initState.m_id - diffId << std::endl;
+                id = Utilities::genRandomValues<unsigned int>(id,gen,uni,b.m_initState.m_id - diffId);
                 diffId = b.m_initState.m_id;
 
                 auto it = m_globalGeometries->find(id);
                 // it->second is the GeometryType in RigidBody
                 if(it == m_globalGeometries->end()) {
-                    THROWEXCEPTION("---> Geometry search in parseGlobalGeomId: failed!");
+                    THROWEXCEPTION("---> Geometry search in parseGlobalGeomId: failed for id: " << id << std::endl);
                 }
 
                 GetScaleOfGeomVisitor vis(b.m_scale);
@@ -963,7 +986,7 @@ private:
                 contactParameter = ContactParameter::createParams_UCFDD_ContactModel(epsilonN,epsilonT,mu,
                                    invDampingN,invDampingTFix,
                                    gammaMax,epsilon);
-            } else {
+            } else if(type == "UCF"){
                 contactParameter = ContactParameter::createParams_UCF_ContactModel(epsilonN,epsilonT,mu);
             }
 
@@ -1185,6 +1208,7 @@ public:
 
 
             setupInitialConditionBodiesFromFile_imp(relpath, time, which);
+
 
             bool useTime = false;
             if(!Utilities::stringToType(useTime, initCond.attribute("useTimeToContinue").value())) {
@@ -1538,11 +1562,15 @@ struct BodyModuleOptions {
 
     using BodyRangeType = Range<RigidBodyIdType>;
     BodyRangeType m_bodyIdRange;       ///< Range of body ids, original list which is handed to parseScene
-    bool m_parseAllBodiesNonSelGroup = true;  ///< Parse all bodies in groups where m_bodyIdRange is not applied (enableSelectiveIds="false) (default= true)
+    bool m_parseAllBodiesNonSelGroup = true;  ///< Parse all bodies in groups where m_bodyIdRange is not applied (enableSelectiveIds="false") (default= true)
     bool m_parseSimBodies = true;         ///< Parses only simulated bodies (default= false)
     bool m_parseStaticBodies = true;
+
+
     bool m_allocateSimBodies = true;      ///< if false, does only parse the nodes which do not need the body -> initial condition
     bool m_allocateStaticBodies = true;   ///< if false, does only parse the nodes which do not need the body -> initial condition
+
+    bool m_parseInitialCondition = true;  ///< if false, the initial conditions are not parsed!
 };
 
 template<typename TParserTraits>
@@ -1756,7 +1784,7 @@ private:
         bool updateStartRange = false;
 
         if(m_parseSelectiveBodyIds && hasSelectiveFlag){
-            // parse group selective , determine start iterator in bodyRang
+            // parse group selective , determine start iterator in bodyRange
             m_bodyIdRangePtr = &m_parsingOptions.m_bodyIdRange;
             m_startRangeIdIt = std::lower_bound(m_startRangeIdIt,m_bodyIdRangePtr->end(),m_startIdGroup);
 
@@ -1828,13 +1856,13 @@ private:
         if(m_eBodiesState == RigidBodyType::BodyMode::SIMULATED) {
             //LOGSCLEVEL1(m_pSimulationLog,"---> Copy Simulated RigidBody References to DynamicSystem ..."<<std::endl;);
             bool added = addAllBodies(m_pSimBodies);
-            if(!added) {THROWEXCEPTION("Could not add body to m_SimBodies!, some bodies exist already in map!");};
+            if(!added) {THROWEXCEPTION("Could not add body to m_simBodies!, some bodies exist already in map!");};
             m_nSimBodies += m_parsedInstancesGroup;
             m_nBodies += m_parsedInstancesGroup;
         } else if(m_eBodiesState == RigidBodyType::BodyMode::STATIC) {
             //LOGSCLEVEL1(m_pSimulationLog,"---> Copy Static RigidBody References to DynamicSystem ..."<<std::endl;);
             bool added = addAllBodies(m_pBodies);
-            if(!added) {THROWEXCEPTION("Could not add body to m_Bodies!, some bodies exist already in map!");};
+            if(!added) {THROWEXCEPTION("Could not add body to m_staticBodies!, some bodies exist already in map!");};
             m_nStaticBodies += m_parsedInstancesGroup;
             m_nBodies += m_parsedInstancesGroup;
         } else {
@@ -1885,7 +1913,7 @@ private:
             for(auto & b : m_bodyListGroup)  {
                 b.m_body->m_pSolverData = new typename RigidBodyType::RigidBodySolverDataType();
                 // apply first to all bodies :-)
-                b.m_body->m_eState = m_eBodiesState;
+                b.m_body->m_eMode = m_eBodiesState;
             }
 
             // Mass ============================================================
@@ -1920,7 +1948,7 @@ private:
 
         // InitialPosition ============================================================
         GET_XMLCHILDNODE_CHECK(n,"InitialCondition",dynProp)
-        if(m_pInitStatesMod){
+        if(m_pInitStatesMod && m_parsingOptions.m_parseInitialCondition){
             m_pInitStatesMod->parseInitialCondition(n,&m_bodyListGroup,m_startIdGroup,true);
         }
 
@@ -1935,7 +1963,7 @@ private:
          // InitialPosition ============================================================
         GET_XMLCHILDNODE_CHECK(n,"InitialCondition",dynProp)
         bool parseVel = false;
-        if(m_pInitStatesMod){
+        if(m_pInitStatesMod && m_parsingOptions.m_parseInitialCondition){
             m_pInitStatesMod->parseInitialCondition(n,&m_bodyListGroup,m_startIdGroup,parseVel,false);
         }
 
@@ -2198,6 +2226,8 @@ protected:
 
     bool parseSceneIntern(const boost::filesystem::path & file) {
 
+        LOGSCLEVEL1( m_pSimulationLog, "---> SceneParser parsing: ========================================================" <<
+                    std::endl << "\t file: " << file <<std::endl;);
         LOGSCLEVEL1( m_pSimulationLog, "---> SceneParser Options: " <<std::endl <<
                         "\t parse scene settings:"<<m_parsingOptions.m_parseSceneSettings << std::endl<<
                         "\t parse scene objects:"<<m_parsingOptions.m_parseSceneObjects << std::endl;);
@@ -2252,6 +2282,8 @@ protected:
             LOGSCLEVEL1(m_pSimulationLog,  "Scene XML error: "  << ex.what() <<std::endl);
             ERRORMSG( "Scene XML error: "  << ex.what() );
         }
+
+        LOGSCLEVEL1( m_pSimulationLog, "---> SceneParser finshed =========================================================" << std::endl;);
 
     }
 

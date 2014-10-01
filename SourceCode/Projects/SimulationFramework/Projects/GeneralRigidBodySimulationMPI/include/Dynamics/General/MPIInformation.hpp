@@ -106,7 +106,7 @@ protected:
 
     ProcessTopology m_procTopo;
 
-    RankIdType m_rank; ///< rank of communicator m_comm
+    RankIdType m_rank;          ///< rank of communicator m_comm
     unsigned int m_nProcesses;  ///< processes in m_comm
     std::string m_name;
 };

@@ -25,8 +25,8 @@ InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(
     std::shared_ptr< DynamicsSystemType > pDynSys,
     std::shared_ptr< ProcessCommunicatorType > pProcComm
 ):
-    m_SimBodies(pDynSys->m_SimBodies),
-    m_Bodies(pDynSys->m_Bodies),
+    m_simBodies(pDynSys->m_simBodies),
+    m_staticBodies(pDynSys->m_staticBodies),
     m_pDynSys(pDynSys),
     m_pCollisionSolver(pCollisionSolver),
     m_pBodyComm(pBodyComm),
@@ -48,14 +48,10 @@ InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(
     m_globalIterationCounter =0;
     m_bConverged = true;
 
+    // TODO, changing this order results in a not seen NodeDataType by compiler...
+    m_pContactGraph  = new ContactGraphType(pDynSys);
+    m_pInclusionComm =  new InclusionCommunicatorType(pBodyComm, m_pDynSys,  m_pProcComm);
 
-    //Make a new Sor Prox Visitor (takes references from these class member)
-    m_pSorProxStepNodeVisitor = new SorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter);
-    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>();
-    m_pSorProxStepSplitNodeVisitor = new SorProxStepSplitNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter);
-
-    m_pInclusionComm = std::shared_ptr<InclusionCommunicatorType >( new InclusionCommunicatorType(pBodyComm, m_pDynSys,  m_pProcComm));
-    m_pContactGraph  = std::shared_ptr<ContactGraphType>( new ContactGraphType(pDynSys));
 
     m_pContactGraph->setInclusionCommunicator( m_pInclusionComm );
     m_pInclusionComm->setContactGraph( m_pContactGraph );
@@ -64,9 +60,14 @@ InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(
 
 
 InclusionSolverCONoGMPI::~InclusionSolverCONoGMPI() {
-    delete m_pSorProxStepNodeVisitor;
-    delete m_pSorProxInitNodeVisitor;
-    delete m_pSorProxStepSplitNodeVisitor;
+    if(m_pSorProxStepNodeVisitor != nullptr ){ delete m_pSorProxStepNodeVisitor;}
+    if(m_pNormalSorProxStepNodeVisitor != nullptr ){ delete m_pNormalSorProxStepNodeVisitor;}
+    if(m_pTangentialSorProxStepNodeVisitor != nullptr ){ delete m_pTangentialSorProxStepNodeVisitor;}
+    if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
+    if(m_pSorProxStepSplitNodeVisitor != nullptr ){ delete m_pSorProxStepSplitNodeVisitor;}
+
+    delete m_pContactGraph;
+    delete m_pInclusionComm;
 }
 
 
@@ -75,8 +76,15 @@ void InclusionSolverCONoGMPI::initializeLog( Logging::Log * pSolverLog,  boost::
     m_pSolverLog = pSolverLog;
 
     m_pContactGraph->setLog(m_pSolverLog);
-    m_pSorProxStepNodeVisitor->setLog(m_pSolverLog);
+
+    if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_NORMAL_TANGENTIAL ){
+        m_pNormalSorProxStepNodeVisitor->setLog(m_pSolverLog);
+        m_pTangentialSorProxStepNodeVisitor->setLog(m_pSolverLog);
+    }else{
+        m_pSorProxStepNodeVisitor->setLog(m_pSolverLog);
+    }
     m_pSorProxInitNodeVisitor->setLog(m_pSolverLog);
+
     m_pSorProxStepSplitNodeVisitor->setLog(m_pSolverLog);
 
 
@@ -94,22 +102,37 @@ void InclusionSolverCONoGMPI::reset() {
 
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(m_pContactGraph.get())
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(m_pContactGraph)
     );
 
-#if HAVE_CUDA_SUPPORT == 1
-    LOG(m_pSimulationLog, "---> Try to set GPU Device : "<< m_settings.m_UseGPUDeviceId << std::endl;);
 
-    CHECK_CUDA(cudaSetDevice(m_settings.m_UseGPUDeviceId));
-    cudaDeviceProp props;
-    CHECK_CUDA(cudaGetDeviceProperties(&props,m_settings.m_UseGPUDeviceId));
+    //Make a new Sor Prox Visitor (takes references from these class member)
+    if(m_pSorProxStepNodeVisitor != nullptr ){ delete m_pSorProxStepNodeVisitor;}
+    if(m_pNormalSorProxStepNodeVisitor != nullptr ){ delete m_pNormalSorProxStepNodeVisitor;}
+    if(m_pTangentialSorProxStepNodeVisitor != nullptr ){ delete m_pTangentialSorProxStepNodeVisitor;}
+    if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
+    if(m_pSorProxStepSplitNodeVisitor != nullptr ){ delete m_pSorProxStepSplitNodeVisitor;}
 
-    LOG(m_pSimulationLog,  "---> Set GPU Device : "<< props.name << ", PCI Bus Id: "<<props.pciBusID << ", PCI Device Id: " << props.pciDeviceID << std::endl;);
-#endif
+    if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_CONTACT_AC ){
+         LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor Alart Curnier "<<  std::endl;);
+         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,m_pContactGraph);
+    }else if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_CONTACT_DS){
+         LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor De Saxe"<<  std::endl;);
+         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,m_pContactGraph);
+    }else if( m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_FULL ){
+         LOG(m_pSimulationLog, "---> Initialize FullSorProxVisitor Alart Curnier"<<  std::endl;);
+         m_pSorProxStepNodeVisitor = new FullSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,m_pContactGraph);
+    }else if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_NORMAL_TANGENTIAL) {
+         m_pSorProxStepNodeVisitor = nullptr;
+         m_pNormalSorProxStepNodeVisitor     = new NormalSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,m_pContactGraph);
+         m_pTangentialSorProxStepNodeVisitor = new TangentialSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,m_pContactGraph);
 
+    }else{
+        ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemendet");
+    }
 
-
-
+    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>(m_settings);
+    m_pSorProxStepSplitNodeVisitor = new SorProxStepSplitNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter);
 }
 
 
@@ -171,7 +194,8 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
 
         // Solve Inclusion
         // =============================================================================================================
-        if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT ||
+        if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_AC ||
+            m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_DS ||
             m_settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL
              ) {
 
@@ -222,7 +246,7 @@ void InclusionSolverCONoGMPI::doJorProx() {
 void InclusionSolverCONoGMPI::integrateAllBodyVelocities() {
 
 
-    for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
+    for( auto bodyIt = m_simBodies.begin(); bodyIt != m_simBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
         (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back + (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()
                                                         *(*bodyIt)->m_h_term * m_settings.m_deltaT;
@@ -237,7 +261,7 @@ void InclusionSolverCONoGMPI::integrateAllBodyVelocities() {
 void InclusionSolverCONoGMPI::doSorProx() {
 
     LOGSLLEVEL3_CONTACT(m_pSolverLog, " u_e = [ ");
-    for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
+    for(auto it = m_simBodies.begin(); it != m_simBodies.end(); ++it) {
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uBack: " << (*it)->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl);
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
     }
@@ -256,7 +280,7 @@ void InclusionSolverCONoGMPI::doSorProx() {
 
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog, " u_e = [ ");
-        for(auto it = m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
+        for(auto it = m_simBodies.begin(); it != m_simBodies.end(); ++it) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t uFront: " <<(*it)->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl);
         }
         LOGSLLEVEL3_CONTACT(m_pSolverLog, " ]" << std::endl);
@@ -278,9 +302,14 @@ void InclusionSolverCONoGMPI::doSorProx() {
 
 void InclusionSolverCONoGMPI::initContactGraphForIteration(PREC alpha) {
 
-
-
     m_pSorProxInitNodeVisitor->setParams(alpha);
+
+    if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_NORMAL_TANGENTIAL ){
+        m_pNormalSorProxStepNodeVisitor->setParams(alpha);
+        m_pTangentialSorProxStepNodeVisitor->setParams(alpha);
+    }else{
+        m_pSorProxStepNodeVisitor->setParams(alpha);
+    }
 
     // Init local nodes
     if(m_nLocalNodes){
@@ -296,7 +325,7 @@ void InclusionSolverCONoGMPI::initContactGraphForIteration(PREC alpha) {
 
 
     // Set the initial u_0 for the prox iteration in the velocities for LOCAL BODIES!
-    for( auto bodyIt = m_SimBodies.begin(); bodyIt != m_SimBodies.end(); bodyIt++) {
+    for( auto bodyIt = m_simBodies.begin(); bodyIt != m_simBodies.end(); bodyIt++) {
         // All bodies also the ones not in the contact graph...
         // add u_s + M^⁻1*h*deltaT ,  all contact forces initial values have already been applied!
         (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back +
@@ -342,6 +371,8 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
             for( auto bodyIt = remotesWithContacts.begin(); bodyIt != remotesWithContacts.end(); bodyIt++) {
                 (*bodyIt)->m_pSolverData->m_uBuffer.m_back = (*bodyIt)->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
             }
+        }else{
+            ERRORMSG("This cancelation criteria has not been implemented")
         }
     }
 
@@ -436,6 +467,8 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
 
             LOGSLLEVEL2_CONTACT(m_pSolverLog, "---> Convergence criteria (InEnergyVelocity) converged: "<<  m_bConverged<< std::endl;);
 
+        }else{
+            ERRORMSG("This cancelation criteria has not been implemented")
         }
 
         // If local contact problem is uncoupled from other processes we do not check for convergence of other processes
@@ -450,6 +483,10 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
     else{
         m_bConverged = false;
     }
+
+    m_pContactGraph->resetAfterOneIteration(m_globalIterationCounter);
+
+
 }
 
 

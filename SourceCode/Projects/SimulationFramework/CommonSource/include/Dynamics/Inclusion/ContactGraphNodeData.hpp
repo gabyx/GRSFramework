@@ -13,7 +13,7 @@
 #include "CollisionData.hpp"
 
 // This two data classes are used for  m_eContactModel = ContactModels::N_ContactModel,
-//                                      m_eContactModel = ContactModels::UCF_ContactModel,
+//                                      m_eContactModel = ContactModels::UCF,
 //                                      m_eContactModel = ContactModels::UCFC_ContactModel,
 class ContactGraphNodeData {
 public:
@@ -36,11 +36,8 @@ public:
 
     VectorDyn  m_eps;
 
-
     unsigned int m_nodeColor;
-
     const CollisionData * m_pCollData;
-
     ContactParameter m_contactParameter;
 };
 
@@ -77,7 +74,7 @@ public:
     VectorDyn m_LambdaFront;
 
     VectorDyn m_R_i_inv_diag; // Build over G_ii
-    MatrixDyn m_G_ii; // just for R_ii, and maybee later for better solvers!
+    MatrixDynDyn m_G_ii; // just for R_ii, and maybee later for better solvers!
 
     VectorDyn m_b;
 

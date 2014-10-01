@@ -95,20 +95,20 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
 
     m_pSceneParser->parseScene(sceneFilePath,SceneParserOptions(),std::move(o));
 
-    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SimBodies.size()
-        << " simulated & " << m_pDynSys->m_Bodies.size()<<  " static bodies! "  << std::endl;);
-    if(!m_pDynSys->m_SimBodies.size()){
+    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_simBodies.size()
+        << " simulated & " << m_pDynSys->m_staticBodies.size()<<  " static bodies! "  << std::endl;);
+    if(!m_pDynSys->m_simBodies.size()){
             ERRORMSG("No simulated bodies added! Please add some!");
     }
     // =====================================================
 
 
-    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys>(new SharedBufferDynSys( m_pDynSys->m_SimBodies.beginKey(), m_pDynSys->m_SimBodies.endKey() ));
+    m_pSharedBuffer = std::shared_ptr<SharedBufferDynSys>(new SharedBufferDynSys( m_pDynSys->m_simBodies.beginKey(), m_pDynSys->m_simBodies.endKey() ));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBufferDynSys... ");
     m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pSharedBuffer) );
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added TimeStepperType... ");
 
-    m_pStateRecorder = std::shared_ptr<StateRecorder >(new StateRecorder(m_pDynSys->m_SimBodies.size()));
+    m_pStateRecorder = std::shared_ptr<StateRecorder >(new StateRecorder(m_pDynSys->m_simBodies.size()));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added StateRecorder... ");
 
     std::cout << "size simbodies: " << m_pDynSys->m_bodiesInitStates.size() << std::endl;
@@ -124,7 +124,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     enableInput(true);
 
     // Init ContactFrameData for visualization
-    m_dynCoordFrame.reserve(m_pDynSys->m_SimBodies.size()*3); // Approx. 3 contacts per body as init guess
+    m_dynCoordFrame.reserve(m_pDynSys->m_simBodies.size()*3); // Approx. 3 contacts per body as init guess
     m_dynCoordFrame.addToScene(m_pBaseNode, "ContactFrameXAxis", "ContactFrameYAxis", "ContactFrameZAxis");
 
     m_pSimulationLog->logMessage("---> setup finished: ");
@@ -141,7 +141,7 @@ bool SimulationManagerGUI::writeInitialState() {
     std::string filename = SIM_INIT_FILE_PREFIX;
     filename += SIM_INIT_FILE_EXTENSION;
     file /= filename;
-    if(simFile.openWrite(file,NDOFqBody,NDOFuBody,m_pDynSys->m_SimBodies.size())) {
+    if(simFile.openWrite(file,NDOFqBody,NDOFuBody,m_pDynSys->m_simBodies.size())) {
         simFile << m_pVisBuffer;
         simFile.close();
         m_pSimulationLog->logMessage(std::string("Successfully written initial state file to:") + file.string() );
@@ -353,7 +353,7 @@ void SimulationManagerGUI::writeAllOutput() {
         m_pTimestepper->writeIterationToCollisionDataFile();
         // Write  State to Sim File
         //m_pStateRecorder->write(m_pTimestepper->getFrontStateBuffer().get());
-        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_SimBodies);
+        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_simBodies);
     }
 }
 
@@ -414,7 +414,7 @@ bool SimulationManagerGUI::initRecordThread() {
 
     // Write first initial value out!
     if(m_pTimestepper->m_settings.m_eSimulateFromReference == TimeStepperSettings::NONE) {
-        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_SimBodies);
+        m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(), m_pDynSys->m_simBodies);
         m_pSimulationLog->logMessage("---> Wrote first initial value to file...");
     }
 

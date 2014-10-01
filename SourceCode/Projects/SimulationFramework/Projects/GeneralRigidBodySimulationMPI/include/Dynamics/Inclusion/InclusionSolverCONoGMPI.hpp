@@ -46,7 +46,7 @@ public:
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    using ProcessCommunicatorType = typename MPILayer::ProcessCommunicator                                     ;
+    using ProcessCommunicatorType = MPILayer::ProcessCommunicator                                     ;
     using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType                          ;
     using ProcessTopologyType = typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType     ;
 
@@ -111,17 +111,17 @@ protected:
 
 
     using InclusionCommunicatorType = Combo::InclusionCommunicatorType;
-    std::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
+    InclusionCommunicatorType * m_pInclusionComm = nullptr;
 
     using ContactGraphType = Combo::ContactGraphType;
-    std::shared_ptr<ContactGraphType> m_pContactGraph;
+    ContactGraphType * m_pContactGraph = nullptr;
     /// =========================================================================
 
 
 
 
-    typename DynamicsSystemType::RigidBodySimContainerType & m_SimBodies;
-    typename DynamicsSystemType::RigidBodyStaticContainerType & m_Bodies;
+    typename DynamicsSystemType::RigidBodySimContainerType & m_simBodies;
+    typename DynamicsSystemType::RigidBodyStaticContainerType & m_staticBodies;
 
 
     void integrateAllBodyVelocities();
@@ -133,12 +133,21 @@ protected:
     inline void sorProxOverAllNodes();
     inline void finalizeSorProx();
 
-    SorProxStepNodeVisitor<ContactGraphType> * m_pSorProxStepNodeVisitor;
-    SorProxInitNodeVisitor<ContactGraphType> * m_pSorProxInitNodeVisitor;
-    SorProxStepSplitNodeVisitor<ContactGraphType> * m_pSorProxStepSplitNodeVisitor;
+    // Different visitors for the various SOR implementations
+    // For SOR_FULL, SOR_CONTACT
+    SorProxStepNodeVisitor<ContactGraphType> *           m_pSorProxStepNodeVisitor = nullptr;
+    // For SOR_NORMAL_TANGENTIAL
+    NormalSorProxStepNodeVisitor<ContactGraphType>*      m_pNormalSorProxStepNodeVisitor  = nullptr;
+    TangentialSorProxStepNodeVisitor<ContactGraphType>*  m_pTangentialSorProxStepNodeVisitor  = nullptr;
+    // Init Visitor for the contacts
+    SorProxInitNodeVisitor<ContactGraphType>*            m_pSorProxInitNodeVisitor  = nullptr;
+
+    SorProxStepSplitNodeVisitor<ContactGraphType> * m_pSorProxStepSplitNodeVisitor  = nullptr;
 
     // Log
-    Logging::Log *m_pSolverLog, *m_pSimulationLog;
+    Logging::Log *m_pSolverLog = nullptr;
+    Logging::Log  *m_pSimulationLog = nullptr;
+
     std::stringstream logstream;
 
 

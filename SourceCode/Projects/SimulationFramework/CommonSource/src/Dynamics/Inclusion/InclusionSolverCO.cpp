@@ -13,14 +13,14 @@
 #include "CPUTimer.hpp"
 
 
-const unsigned int InclusionSolverCO::NDOFFriction = ContactModels::UnilateralAndCoulombFrictionContactModel::nDOFFriction;
-const unsigned int InclusionSolverCO::ContactDim = ContactModels::UnilateralAndCoulombFrictionContactModel::ConvexSet::Dimension;
+const unsigned int InclusionSolverCO::NDOFFriction = CONTACTMODELTYPE(ContactModels::Enum::UCF)::nDOFFriction;
+const unsigned int InclusionSolverCO::ContactDim = CONTACTMODELTYPE(ContactModels::Enum::UCF)::ConvexSet::Dimension;
 
 
 InclusionSolverCO::InclusionSolverCO(std::shared_ptr< CollisionSolverType >  pCollisionSolver,
                                      std::shared_ptr<DynamicsSystemType> pDynSys):
-    m_SimBodies(pDynSys->m_SimBodies),
-    m_Bodies(pDynSys->m_Bodies), m_ContactGraph(&(pDynSys->m_ContactParameterMap)),
+    m_simBodies(pDynSys->m_simBodies),
+    m_staticBodies(pDynSys->m_staticBodies), m_contactGraph(&(pDynSys->m_ContactParameterMap)),
     m_pCollisionSolver(pCollisionSolver),
     m_pDynSys(pDynSys) {
 
@@ -60,7 +60,7 @@ void InclusionSolverCO::reset() {
 
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_ContactGraph)
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(&m_contactGraph)
     );
 
 
@@ -87,7 +87,7 @@ void InclusionSolverCO::resetForNextIter() {
     m_G_conditionNumber = 0;
     m_G_notDiagDominant = 0;
 
-    m_ContactGraph.clearGraph();
+    m_contactGraph.clearGraph();
 }
 
 
@@ -113,7 +113,7 @@ void InclusionSolverCO::solveInclusionProblem() {
 
 
     // Iterate over all nodes set and assemble the matrices...
-    typename ContactGraphType::NodeListType & nodes = m_ContactGraph.getNodeList();
+    typename ContactGraphType::NodeListType & nodes = m_contactGraph.getNodeList();
     m_nContacts = (unsigned int)nodes.size();
 
     m_globalIterationCounter = 0;
@@ -125,7 +125,7 @@ void InclusionSolverCO::solveInclusionProblem() {
 
     // Update all body velocities
     static RigidBodyType * pBody;
-    for(auto it= m_SimBodies.begin(); it != m_SimBodies.end(); ++it) {
+    for(auto it= m_simBodies.begin(); it != m_simBodies.end(); ++it) {
         pBody = *it;
         pBody->m_pSolverData->m_uBuffer.m_front = pBody->m_pSolverData->m_uBuffer.m_back
                                                 + pBody->m_MassMatrixInv_diag.asDiagonal()*pBody->m_h_term * m_settings.m_deltaT;
@@ -138,11 +138,11 @@ void InclusionSolverCO::solveInclusionProblem() {
         LOGSLLEVEL1(m_pSolverLog, " % nContacts = "<< m_nContacts<< std::endl;);
 
 
-        m_nLambdas = m_ContactGraph.getNLambdas();
-        ASSERTMSG(m_ContactGraph.getNContactModelsUsed() == 1, "ContactGraph uses not homogen contact models!")
+        m_nLambdas = m_contactGraph.getNLambdas();
+        ASSERTMSG(m_contactGraph.getNContactModelsUsed() == 1, "ContactGraph uses not homogen contact models!")
 
-        if(nodes[0]->m_nodeData.m_contactParameter.m_contactModel != ContactModels::ContactModelEnum::UCF_ContactModel){
-            ERRORMSG("The only supported contact model so far is: ContactModels::ContactModelEnum::UCF_ContactModel")
+        if(nodes[0]->m_nodeData.m_contactParameter.m_contactModel != ContactModels::Enum::UCF){
+            ERRORMSG("The only supported contact model so far is: ContactModels::Enum::UCF")
         }
         // Assign Space for matrices =====================================
         m_mu.resize(nodes.size());
@@ -164,7 +164,7 @@ void InclusionSolverCO::solveInclusionProblem() {
         static const CollisionData * pCollData;
 
         static VectorDyn I_plus_eps(ContactDim);
-        static MatrixDyn G_part(ContactDim,ContactDim);
+        static MatrixDynDyn G_part(ContactDim,ContactDim);
         static const MatrixUBodyDyn * W_j_body;
         static const MatrixUBodyDyn * W_i_body;
         static MatrixDynUBody W_i_bodyT_M_body;
@@ -177,10 +177,11 @@ void InclusionSolverCO::solveInclusionProblem() {
             pCollData = currentContactNode->m_nodeData.m_pCollData;
 
             // Write mu parameters to m_mu
-            m_mu(i) = currentContactNode->m_nodeData.m_contactParameter.m_params[2];
+            using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
+            m_mu(i) = currentContactNode->m_nodeData.m_contactParameter.m_params[CMT::muIdx];
 
-            I_plus_eps(0) = 1+ currentContactNode->m_nodeData.m_contactParameter.m_params[0];
-            I_plus_eps(1) = 1+ currentContactNode->m_nodeData.m_contactParameter.m_params[1];
+            I_plus_eps(0) = 1+ currentContactNode->m_nodeData.m_contactParameter.m_params[CMT::epsNIdx];
+            I_plus_eps(1) = 1+ currentContactNode->m_nodeData.m_contactParameter.m_params[CMT::epsTIdx];
             I_plus_eps(2) = I_plus_eps(1);
 
             // iterate over all edges in current contact to build up G;
@@ -313,13 +314,13 @@ void InclusionSolverCO::solveInclusionProblem() {
         for( auto & node : nodes){
 
             pBody = node->m_nodeData.m_pCollData->m_pBody1;
-            if( pBody->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 pBody->m_pSolverData->m_uBuffer.m_front +=
                 pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body1 * (*m_P_front).segment<ContactDim>(ContactDim* node->m_nodeNumber);
             }
 
             pBody = node->m_nodeData.m_pCollData->m_pBody2;
-            if( pBody->m_eState == RigidBodyType::BodyMode::SIMULATED ) {
+            if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 pBody->m_pSolverData->m_uBuffer.m_front +=
                 pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body2 * (*m_P_front).segment<ContactDim>(ContactDim* node->m_nodeNumber);
             }
