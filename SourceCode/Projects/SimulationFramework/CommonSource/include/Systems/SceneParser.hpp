@@ -1561,7 +1561,9 @@ struct BodyModuleOptions {
     BodyModuleOptions& operator=(BodyModuleOptions&& o) = default;
 
     using BodyRangeType = Range<RigidBodyIdType>;
-    BodyRangeType m_bodyIdRange;       ///< Range of body ids, original list which is handed to parseScene
+    BodyRangeType m_bodyIdRange;          ///< Range of body ids, original list which is handed to parseScene, this range is only applied to enableSelectiveIds="true"
+    bool m_parseAllIfRangeEmpty = true;
+
     bool m_parseAllBodiesNonSelGroup = true;  ///< Parse all bodies in groups where m_bodyIdRange is not applied (enableSelectiveIds="false") (default= true)
     bool m_parseSimBodies = true;         ///< Parses only simulated bodies (default= false)
     bool m_parseStaticBodies = true;
@@ -1689,7 +1691,7 @@ public:
     void setParsingOptions(OptionsType o) {
         m_parsingOptions = std::move(o);
 
-        if(m_parsingOptions.m_bodyIdRange.empty()) {
+        if(m_parsingOptions.m_bodyIdRange.empty() && m_parsingOptions.m_parseAllIfRangeEmpty) {
             m_parseSelectiveBodyIds = false;
         } else {
             m_parseSelectiveBodyIds = true;
@@ -1799,7 +1801,8 @@ private:
             bodyIdIt = m_startRangeIdIt;
             updateStartRange = true;
         }else{
-            // parse all bodies;
+            // no selective parsing
+            // parse all bodies
             //overwrite range containing all bodies, if we don't parse selective ids, parse all bodies!
             m_bodyIdRangePtr = &m_bodyIdRangeTmp;
             m_bodyIdRangeTmp = std::make_pair(m_startIdGroup,endIdGroup+1);

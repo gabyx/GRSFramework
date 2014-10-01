@@ -87,6 +87,10 @@ public:
 
         if(this->m_pProcCommunicator->hasMasterRank()) {
 
+            if(m_settings.m_processDim(0)*m_settings.m_processDim(1)*m_settings.m_processDim(2) != m_pProcCommunicator->getNProcesses()){
+                ERRORMSG("processDim: " << m_settings.m_processDim << " does not fit "<<m_pProcCommunicator->getNProcesses()<<"processes!");
+            }
+
             // Parse all initial condition from the scene file ================
             SceneParserType parser(*this) ; // this class is the modules generator
             typename SceneParserType::BodyModuleOptionsType o;
@@ -110,51 +114,85 @@ public:
             }
             // ================================================================
 
-
-            // Preprocess for Grid Building =================================================
-
-
-            predictMassPoints();
-
-            m_r_G_loc.setZero();
-            m_aabb_glo.reset(); // Reset total AABB
-            m_I_theta_G_glo.setZero();
-
-            unsigned int countPoints = 0;
-            for(auto & massPoint : m_massPoints_glo){
-
-                // loop over all prediction points of this mass point
-                for(auto & r_IS : massPoint.m_points){
-                    // Global AABB
-                    m_aabb_glo.unite(r_IS);
-                    // Center of masses
-                    m_r_G_glo += r_IS;
-
-                    // Binet Tensor   (mass=1, with reference to Interial System I) calculate only the 6 essential values
-                    m_I_theta_G_glo(0) += r_IS(0)*r_IS(0);
-                    m_I_theta_G_glo(1) += r_IS(0)*r_IS(1);
-                    m_I_theta_G_glo(2) += r_IS(0)*r_IS(2);
-                    m_I_theta_G_glo(3) += r_IS(1)*r_IS(1);
-                    m_I_theta_G_glo(4) += r_IS(1)*r_IS(2);
-                    m_I_theta_G_glo(5) += r_IS(2)*r_IS(2);
-
-                    ++countPoints;
-                }
+            if(m_settings.m_mode == GridBuilderSettings::Mode::STATIC){
+                // build a static grid, set m_aabb_global to settings from scene file.
+                m_aabb_glo.m_minPoint = m_settings.m_minPoint;
+                m_aabb_glo.m_maxPoint = m_settings.m_maxPoint;
             }
-            m_r_G_glo /= countPoints;
-            // Move intertia tensor to center G
-            m_I_theta_G_glo(0) -= m_r_G_glo(0)*m_r_G_glo(0)  * countPoints;
-            m_I_theta_G_glo(1) -= m_r_G_glo(0)*m_r_G_glo(1)  * countPoints;
-            m_I_theta_G_glo(2) -= m_r_G_glo(0)*m_r_G_glo(2)  * countPoints;
-            m_I_theta_G_glo(3) -= m_r_G_glo(1)*m_r_G_glo(1)  * countPoints;
-            m_I_theta_G_glo(4) -= m_r_G_glo(1)*m_r_G_glo(2)  * countPoints;
-            m_I_theta_G_glo(5) -= m_r_G_glo(2)*m_r_G_glo(2)  * countPoints;
+            else{
+                // build a dynamic grid
 
+                // Preprocess for Grid Building =================================================
+                predictMassPoints();
 
-            // ================================================================
+                m_r_G_loc.setZero();
+                m_aabb_glo.reset(); // Reset total AABB
+                m_I_theta_G_glo.setZero();
+
+                unsigned int countPoints = 0;
+                for(auto & massPoint : m_massPoints_glo){
+
+                    // loop over all prediction points of this mass point
+                    for(auto & r_IS : massPoint.m_points){
+                        // Global AABB
+                        m_aabb_glo.unite(r_IS);
+                        // Center of masses
+                        m_r_G_glo += r_IS;
+
+                        // Binet Tensor   (mass=1, with reference to Interial System I) calculate only the 6 essential values
+                        m_I_theta_G_glo(0) += r_IS(0)*r_IS(0);
+                        m_I_theta_G_glo(1) += r_IS(0)*r_IS(1);
+                        m_I_theta_G_glo(2) += r_IS(0)*r_IS(2);
+                        m_I_theta_G_glo(3) += r_IS(1)*r_IS(1);
+                        m_I_theta_G_glo(4) += r_IS(1)*r_IS(2);
+                        m_I_theta_G_glo(5) += r_IS(2)*r_IS(2);
+
+                        ++countPoints;
+                    }
+                }
+                m_r_G_glo /= countPoints;
+                // Move intertia tensor to center G
+                m_I_theta_G_glo(0) -= m_r_G_glo(0)*m_r_G_glo(0)  * countPoints;
+                m_I_theta_G_glo(1) -= m_r_G_glo(0)*m_r_G_glo(1)  * countPoints;
+                m_I_theta_G_glo(2) -= m_r_G_glo(0)*m_r_G_glo(2)  * countPoints;
+                m_I_theta_G_glo(3) -= m_r_G_glo(1)*m_r_G_glo(1)  * countPoints;
+                m_I_theta_G_glo(4) -= m_r_G_glo(1)*m_r_G_glo(2)  * countPoints;
+                m_I_theta_G_glo(5) -= m_r_G_glo(2)*m_r_G_glo(2)  * countPoints;
+
+                 //Calculate principal axis of Theta_G
+                Matrix33 Theta_G;
+                MatrixHelpers::setSymMatrix(Theta_G,m_I_theta_G_glo);
+                typename MyMatrixDecomposition::template EigenSolverSelfAdjoint<Matrix33> eigenSolv(Theta_G);
+
+                Matrix33 A_IK = eigenSolv.eigenvectors();
+                LOGTBLEVEL3( m_pSimulationLog, "---> Eigenvalues: "<<std::endl<< eigenSolv.eigenvalues().transpose() <<std::endl; );
+                LOGTBLEVEL3( m_pSimulationLog, "---> Eigenvectors: "<<std::endl<< A_IK <<std::endl; );
+
+                //        // Correct A_IK to be as orthogonal as possible, project x onto x-y plane, (for no use so far)
+                //        A_IK.col(2).normalize();
+                //        A_IK.col(0) -= A_IK.col(2).dot(A_IK.col(0)) * A_IK.col(2); A_IK.col(0).normalize();
+                //        A_IK.col(1) = A_IK.col(2).cross(A_IK.col(0));              A_IK.col(1).normalize();
+
+                // Coordinate frame of OOBB
+                if(A_IK(2,2) <= 0){ // if z-Axis is negativ -> *-1
+                    A_IK.col(1).swap(A_IK.col(0));
+                    A_IK.col(2) *= -1.0;
+                }
+                LOGTBLEVEL3( m_pSimulationLog, "---> Coordinate Frame: "<<std::endl<< A_IK <<std::endl; );
+                LOGTBLEVEL3( m_pSimulationLog, "---> A_IK * A_IK^T: "<<std::endl<< A_IK*A_IK.transpose() <<std::endl; );
+                LOGTBLEVEL1(m_pSimulationLog, "---> Global center of mass points: " << m_r_G_glo.transpose() << std::endl
+                                      << "---> Global AABB of mass points: min: " << m_aabb_glo.m_minPoint.transpose() << std::endl
+                                      << "                                 max: " << m_aabb_glo.m_maxPoint.transpose() << std::endl
+                                      << "---> Global Binet inertia tensor: " << std::endl
+                                      << "\t\t " << m_I_theta_G_glo(0) << "\t" << m_I_theta_G_glo(1) << "\t" << m_I_theta_G_glo(2) << std::endl
+                                      << "\t\t " << m_I_theta_G_glo(1) << "\t" << m_I_theta_G_glo(3) << "\t" << m_I_theta_G_glo(4) << std::endl
+                                      << "\t\t " << m_I_theta_G_glo(2) << "\t" << m_I_theta_G_glo(4) << "\t" << m_I_theta_G_glo(5) << std::endl;
+                    )
+
+                // ================================================================
+            }
 
             buildGrid();
-
 
         } else {
 
@@ -313,39 +351,11 @@ public:
         ASSERTMSG(masterRank ==  m_pProcCommunicator->getRank(),"wrong rank");
 
         LOGTBLEVEL1(m_pSimulationLog, "---> GridTopologyBuilder, build grid ..." << std::endl;);
-        LOGTBLEVEL1(m_pSimulationLog, "---> Global center of mass points: " << m_r_G_glo.transpose() << std::endl
-                                      << "---> Global AABB of mass points: min: " << m_aabb_glo.m_minPoint.transpose() << std::endl
-                                      << "                                 max: " << m_aabb_glo.m_maxPoint.transpose() << std::endl
-                                      << "---> Global Binet inertia tensor: " << std::endl
-                                      << "\t\t " << m_I_theta_G_glo(0) << "\t" << m_I_theta_G_glo(1) << "\t" << m_I_theta_G_glo(2) << std::endl
-                                      << "\t\t " << m_I_theta_G_glo(1) << "\t" << m_I_theta_G_glo(3) << "\t" << m_I_theta_G_glo(4) << std::endl
-                                      << "\t\t " << m_I_theta_G_glo(2) << "\t" << m_I_theta_G_glo(4) << "\t" << m_I_theta_G_glo(5) << std::endl;
-                    )
-
-        //Calculate principal axis of Theta_G
-        Matrix33 Theta_G;
-        MatrixHelpers::setSymMatrix(Theta_G,m_I_theta_G_glo);
-        typename MyMatrixDecomposition::template EigenSolverSelfAdjoint<Matrix33> eigenSolv(Theta_G);
-
-        Matrix33 A_IK = eigenSolv.eigenvectors();
-        LOGTBLEVEL3( m_pSimulationLog, "---> Eigenvalues: "<<std::endl<< eigenSolv.eigenvalues().transpose() <<std::endl; );
-        LOGTBLEVEL3( m_pSimulationLog, "---> Eigenvectors: "<<std::endl<< A_IK <<std::endl; );
-
-//        // Correct A_IK to be as orthogonal as possible, project x onto x-y plane, (for no use so far)
-//        A_IK.col(2).normalize();
-//        A_IK.col(0) -= A_IK.col(2).dot(A_IK.col(0)) * A_IK.col(2); A_IK.col(0).normalize();
-//        A_IK.col(1) = A_IK.col(2).cross(A_IK.col(0));              A_IK.col(1).normalize();
-
-        // Coordinate frame of OOBB
-        if(A_IK(2,2) <= 0){ // if z-Axis is negativ -> *-1
-            A_IK.col(1).swap(A_IK.col(0));
-            A_IK.col(2) *= -1.0;
-        }
-        LOGTBLEVEL3( m_pSimulationLog, "---> Coordinate Frame: "<<std::endl<< A_IK <<std::endl; );
-        LOGTBLEVEL3( m_pSimulationLog, "---> A_IK * A_IK^T: "<<std::endl<< A_IK*A_IK.transpose() <<std::endl; );
 
         LOGTBLEVEL1( m_pSimulationLog, "---> Create ProcessTopologyGrid with min/max: "<<
-                    "[ " << m_aabb_glo.m_minPoint.transpose() << " , " << m_aabb_glo.m_maxPoint.transpose() << "]" << std::endl; );
+                    "[ " << m_aabb_glo.m_minPoint.transpose() << " , " << m_aabb_glo.m_maxPoint.transpose() << "] and dim: "
+                    "[ " << m_settings.m_processDim.transpose() << "]" << std::endl; );
+
         m_pProcCommunicator->createProcTopoGrid(m_aabb_glo.m_minPoint, m_aabb_glo.m_maxPoint,m_settings.m_processDim);
 
         LOGTBLEVEL3( m_pSimulationLog, "---> Sort bodies " << std::endl;);

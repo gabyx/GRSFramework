@@ -120,14 +120,15 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
         optBody.m_parseSimBodies = true; optBody.m_allocateSimBodies = true;
         optBody.m_parseStaticBodies = false; optBody.m_allocateStaticBodies = false;
         optBody.m_parseInitialCondition = false;
-
-        std::set<RigidBodyIdType> bodiesToload;
-        for(auto & s: m_pDynSys->m_bodiesInitStates){ bodiesToload.insert(s.second.m_id);}
-        optBody.m_bodyIdRange = std::move(bodiesToload);
+        optBody.m_parseAllIfRangeEmpty = false;
 
         SceneParserType::SceneParserOptionsType optScene;
         optScene.m_parseSceneSettings = false;
         optScene.m_parseSceneObjects = true;
+
+        std::set<RigidBodyIdType> bodiesToload;
+        for(auto & s: m_pDynSys->m_bodiesInitStates){ bodiesToload.insert(s.second.m_id);}
+        optBody.m_bodyIdRange = std::move(bodiesToload);
 
         m_pSceneParser->parseScene(sceneFilePathNew, optScene , std::move(optBody));
 

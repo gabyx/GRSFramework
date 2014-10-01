@@ -15,9 +15,13 @@ enum class TopologyBuilderEnum : char{
 
 struct GridBuilderSettings{
     DEFINE_LAYOUT_CONFIG_TYPES
-    GridBuilderSettings(): m_processDim(MyMatrix<unsigned int>::Vector3(1,1,1)){}
+    GridBuilderSettings(): m_processDim(MyMatrix<unsigned int>::Vector3(1,1,1)){
+        m_minPoint.setZero();
+        m_maxPoint.setZero();
+    }
     MyMatrix<unsigned int>::Vector3 m_processDim;
-
+    enum class Mode : short{ STATIC, DYNAMIC} m_mode = Mode::DYNAMIC;
+    Vector3 m_minPoint, m_maxPoint;
 };
 
 

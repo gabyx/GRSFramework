@@ -83,6 +83,28 @@ public:
                 THROWEXCEPTION("---> String conversion in parseMPISettings: dimension failed");
             }
 
+            std::string type = procTopo.attribute("mode").value();
+            if(type=="static") {
+                m_topoSettings->m_gridBuilderSettings.m_mode = MPILayer::GridBuilderSettings::Mode::STATIC;
+                if(!Utilities::stringToVector3(m_topoSettings->m_gridBuilderSettings.m_minPoint
+                                               ,  procTopo.attribute("minPoint").value())) {
+                    THROWEXCEPTION("---> String conversion in parseMPISettings: minPoint failed");
+                }
+                if(!Utilities::stringToVector3(m_topoSettings->m_gridBuilderSettings.m_maxPoint
+                                               ,  procTopo.attribute("maxPoint").value())) {
+                    THROWEXCEPTION("---> String conversion in parseMPISettings: maxPoint failed");
+                }
+
+                if(!(m_topoSettings->m_gridBuilderSettings.m_minPoint.array() < m_topoSettings->m_gridBuilderSettings.m_maxPoint.array()).all()){
+                        THROWEXCEPTION("parseMPISettings: Infeasible min/max points")
+                }
+
+            }else if(type=="dynamic"){
+                m_topoSettings->m_gridBuilderSettings.m_mode = MPILayer::GridBuilderSettings::Mode::DYNAMIC;
+            }else{
+                THROWEXCEPTION("---> String conversion in MPISettings:ProcessTopology:mode failed: not a valid setting");
+            }
+
         } else {
             THROWEXCEPTION("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
         }
