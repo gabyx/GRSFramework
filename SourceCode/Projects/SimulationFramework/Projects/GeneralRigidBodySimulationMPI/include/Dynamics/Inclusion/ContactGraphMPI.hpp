@@ -55,7 +55,7 @@ public:
 
 
     ContactGraph(std::shared_ptr<DynamicsSystemType> pDynSys);
-    void setInclusionCommunicator(std::shared_ptr<InclusionCommunicatorType> pInclusionComm);
+    void setInclusionCommunicator(InclusionCommunicatorType * pInclusionComm);
 
     ~ContactGraph();
 
@@ -63,7 +63,9 @@ public:
     void clearGraph();
     void addNode(CollisionData * pCollData);
 
-
+    void resetAfterOneIteration(unsigned int globalIterationCounter){
+        m_maxResidual = 0;
+    }
 
     inline  const MatrixUBodyDyn & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
         ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
@@ -131,6 +133,9 @@ public:
         return BitCount::count(m_usedContactModels);
     }
 
+
+    PREC m_maxResidual;
+
 private:
 
     Logging::Log * m_pSolverLog;
@@ -139,7 +144,7 @@ private:
     ContactModelEnumIntType m_usedContactModels = 0; ///< Bitflags which mark all used contactmodels
 
 
-    std::shared_ptr<InclusionCommunicatorType> m_pInclusionComm;
+    InclusionCommunicatorType * m_pInclusionComm;
     NeighbourMapType * m_pNbDataMap; ///< NeighbourMap to insert remote bodies which have contacts
 
     std::shared_ptr<DynamicsSystemType> m_pDynSys;
@@ -163,6 +168,8 @@ private:
 
     unsigned int m_nodeCounter; ///< An node counter, starting at 0.
     unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
+
+
 
 };
 

@@ -8,11 +8,12 @@ template<typename TCombo>
 ContactGraph<TCombo>::ContactGraph(std::shared_ptr<DynamicsSystemType> pDynSys):
     m_nodeCounter(0),
     m_edgeCounter(0),
+    m_maxResidual(0),
     m_pDynSys(pDynSys),
     m_pContactParameterMap(&pDynSys->m_ContactParameterMap)
 {}
 template<typename TCombo>
-void ContactGraph<TCombo>::setInclusionCommunicator(std::shared_ptr<InclusionCommunicatorType> pInclusionComm) {
+void ContactGraph<TCombo>::setInclusionCommunicator(InclusionCommunicatorType * pInclusionComm) {
     m_pInclusionComm = pInclusionComm;
     m_pNbDataMap = m_pInclusionComm->getNeighbourMap();
 }
@@ -238,8 +239,8 @@ void ContactGraph<TCombo>::setContactModel(NodeDataType & nodeData) {
 
             //Set the minmial stuff
             const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
-            //nodeData.m_eps.setZero();
-            //nodeData.m_chi.setZero();
+            nodeData.m_eps.setZero(dimSet);
+            nodeData.m_chi.setZero(dimSet);
 
             // Set epsilon  values
             using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);

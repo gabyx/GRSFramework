@@ -47,11 +47,6 @@ public:
 
             //Get all AABB's of this neighbours
             m_nbAABB[ *it ] = getCellAABB(*it);
-//            if(m_rank == 0){
-//                 std::cout <<" rank: " << m_rank << " : " << "aabbrank: "<< *it << " : " <<  m_nbAABB[ *it ].m_minPoint.transpose()
-//            << "," << m_nbAABB[ *it ].m_maxPoint.transpose() << std::endl;
-//            }
-
         }
 
 
@@ -146,7 +141,9 @@ public:
         return v;
     };
 
-
+    /**
+    * Gets the AABB, which extends to infinity for boundary cells!
+    */
     AABB getCellAABB(unsigned int cellRank) const{
 
          MyMatrix<unsigned int>::Vector3 cell_index = getCellIndex(cellRank);
@@ -166,8 +163,7 @@ public:
             }
         }
 
-
-         return AABB(pL,pU);
+        return AABB(pL,pU);
     };
 private:
 

@@ -52,6 +52,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameter.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
+        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitors.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphNodeData.hpp
         #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
         ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp

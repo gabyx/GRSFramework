@@ -9,7 +9,7 @@ MultiBodySimFile::MultiBodySimFile(unsigned int bufferSize):
     m_nBytesPerState(0),
     m_nBytesPerQBody(0),
     m_nBytesPerUBody(0),
-    m_additionalBytesType(0),
+    m_additionalBytesPerBodyType(0),
     m_nAdditionalBytesPerBody(0),
     m_nStates(0),
     m_nSimBodies(0),
@@ -82,9 +82,9 @@ void MultiBodySimFile::setByteLengths() {
 }
 
 /** Only for writting*/
-std::streamoff MultiBodySimFile::getAdditionalBytes()
+std::streamoff MultiBodySimFile::getAdditionalBytesPerBody()
 {
-        switch(m_additionalBytesType){
+        switch(m_additionalBytesPerBodyType){
             case 0:
                 return 0;
             default:
@@ -123,7 +123,7 @@ bool MultiBodySimFile::openWrite_impl(const boost::filesystem::path &file_path,
     m_nDOFuBody = nDOFuBody;
     m_nDOFqBody = nDOFqBody;
     m_nAdditionalBytesPerBody = additionalBytesPerBody;
-    m_additionalBytesType = additionalBytesType;
+    m_additionalBytesPerBodyType = additionalBytesType;
     m_nSimBodies = nSimBodies;
 
     setByteLengths();
@@ -181,7 +181,7 @@ void  MultiBodySimFile::writeHeader() {
     << (unsigned int)m_nSimBodies
     << (unsigned int)m_nDOFqBody
     << (unsigned int)m_nDOFuBody
-    << (unsigned int)m_additionalBytesType
+    << (unsigned int)m_additionalBytesPerBodyType
     << (unsigned int)m_nAdditionalBytesPerBody;
 
     m_beginOfStates = m_file_stream.tellp();
@@ -241,7 +241,7 @@ void MultiBodySimFile::close() {
     m_nBytesPerState=0;
     m_nBytesPerQBody=0;
     m_nBytesPerUBody=0;
-    m_additionalBytesType=0;
+    m_additionalBytesPerBodyType=0;
     m_nAdditionalBytesPerBody=0;
     m_nStates=0;
     m_nSimBodies=0;
@@ -299,7 +299,7 @@ bool  MultiBodySimFile::readHeader() {
             return false;
         }
 
-        *this >> nBodies >> nDofqBody >> nDofuBody >> m_additionalBytesType >> addBytesPerBody;
+        *this >> nBodies >> nDofqBody >> nDofuBody >> m_additionalBytesPerBodyType >> addBytesPerBody;
         m_nAdditionalBytesPerBody = addBytesPerBody;
 
         if( m_nAdditionalBytesPerBody < 0){

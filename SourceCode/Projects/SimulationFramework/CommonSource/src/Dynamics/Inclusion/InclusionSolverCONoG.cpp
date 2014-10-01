@@ -45,7 +45,7 @@ void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::fil
 
     m_pSolverLog = pSolverLog;
 
-    if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_NORMAL_TANGENTIAL ){
+    if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_NORMAL_TANGENTIAL ){
         m_pNormalSorProxStepNodeVisitor->setLog(m_pSolverLog);
         m_pTangentialSorProxStepNodeVisitor->setLog(m_pSolverLog);
     }else{
@@ -109,25 +109,25 @@ void InclusionSolverCONoG::reset() {
     if(m_pTangentialSorProxStepNodeVisitor != nullptr ){ delete m_pTangentialSorProxStepNodeVisitor;}
     if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
 
-    if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_CONTACT_AC ){
+    if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_CONTACT_AC ){
          LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor Alart Curnier "<<  std::endl;);
-         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
-    }else if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_CONTACT_DS){
+         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
+    }else if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_CONTACT_DS){
          LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor De Saxe"<<  std::endl;);
-         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
-    }else if( m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_FULL ){
+         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
+    }else if( m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_FULL ){
          LOG(m_pSimulationLog, "---> Initialize FullSorProxVisitor Alart Curnier"<<  std::endl;);
-         m_pSorProxStepNodeVisitor = new FullSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
-    }else if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_NORMAL_TANGENTIAL) {
+         m_pSorProxStepNodeVisitor = new FullSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
+    }else if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_NORMAL_TANGENTIAL) {
          m_pSorProxStepNodeVisitor = nullptr;
-         m_pNormalSorProxStepNodeVisitor     = new NormalSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
-         m_pTangentialSorProxStepNodeVisitor = new TangentialSorProxStepNodeVisitor(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
+         m_pNormalSorProxStepNodeVisitor     = new NormalSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
+         m_pTangentialSorProxStepNodeVisitor = new TangentialSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
 
     }else{
         ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemendet");
     }
 
-    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor(m_settings);
+    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>(m_settings);
 
 }
 
@@ -255,7 +255,7 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
 
     m_pSorProxInitNodeVisitor->setParams(alpha);
 
-     if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_NORMAL_TANGENTIAL ){
+    if(m_settings.m_eMethod == InclusionSolverSettings::Method::SOR_NORMAL_TANGENTIAL ){
         m_pNormalSorProxStepNodeVisitor->setParams(alpha);
         m_pTangentialSorProxStepNodeVisitor->setParams(alpha);
     }else{

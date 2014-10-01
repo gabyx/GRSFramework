@@ -260,9 +260,9 @@ private:
     std::streamsize m_nBytesPerQBody;
     std::streamsize m_nBytesPerUBody;
 
-    // Write addditional bytes, not yet implemented, but the type is written in the header
-    unsigned int m_additionalBytesType;
-    std::streamsize getAdditionalBytes();
+    // Write addditional bytes per body, not yet implemented, but the type is written in the header
+    unsigned int m_additionalBytesPerBodyType;
+    std::streamsize getAdditionalBytesPerBody();
     std::streamsize m_nAdditionalBytesPerBody;
 
 
@@ -322,7 +322,7 @@ void MultiBodySimFile::write(double time, TBodyIterator begin, TBodyIterator end
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
 
-//        AddBytes::write<m_additionalBytesType>(m_file_stream);
+//        AddBytes::write<m_additionalBytesPerBodyType>(m_file_stream);
     }
 }
 
@@ -454,7 +454,7 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
         IOHelpers::writeBinary(m_file_stream, b.m_q );
         IOHelpers::writeBinary(m_file_stream, b.m_u );
 
-//        AddBytes::write<m_additionalBytesType>(m_file_stream);
+//        AddBytes::write<m_additionalBytesPerBodyType>(m_file_stream);
     }
 
     m_nStates++;

@@ -10,7 +10,7 @@ MultiBodySimFilePart::MultiBodySimFilePart(unsigned int bufferSize):
     m_nBytes(0),
     m_nBytesPerQBody(0),
     m_nBytesPerUBody(0),
-    m_additionalBytesType(0),
+    m_additionalBytesPerBodyType(0),
     m_nAdditionalBytesPerBody(0),
     m_nStates(0),
     m_beginOfStates(0)
@@ -52,7 +52,7 @@ bool MultiBodySimFilePart::openWrite(const boost::filesystem::path &file_path,
     m_nDOFuBody = nDOFuBody;
     m_nDOFqBody = nDOFqBody;
     m_nAdditionalBytesPerBody = 0;
-    m_additionalBytesType = 0;
+    m_additionalBytesPerBodyType = 0;
 
     setByteLengths();
 
@@ -102,16 +102,16 @@ void  MultiBodySimFilePart::writeHeader() {
     << (unsigned int)m_nStates // is written at the end!
     << (unsigned int)m_nDOFqBody
     << (unsigned int)m_nDOFuBody
-    << (unsigned int)m_additionalBytesType
+    << (unsigned int)m_additionalBytesPerBodyType
     << (unsigned int)m_nAdditionalBytesPerBody;
 
     m_beginOfStates = m_file_stream.tellp();
 }
 
 /** Only for writting*/
-std::streamoff MultiBodySimFilePart::getAdditionalBytes()
+std::streamoff MultiBodySimFilePart::getAdditionalBytesPerBody()
 {
-        switch(m_additionalBytesType){
+        switch(m_additionalBytesPerBodyType){
             case 0:
                 return 0;
             default:

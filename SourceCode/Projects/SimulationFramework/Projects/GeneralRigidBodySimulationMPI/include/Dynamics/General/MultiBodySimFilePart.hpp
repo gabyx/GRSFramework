@@ -137,8 +137,8 @@ private:
     static const  std::streamoff m_headerLength = (2*sizeof(unsigned int) + SIM_FILE_PART_SIGNATURE_LENGTH*sizeof(char));
 
     // Write addditional bytes, not yet implemented, but the type is written in the header
-    unsigned int m_additionalBytesType;
-    std::streamsize getAdditionalBytes();
+    unsigned int m_additionalBytesPerBodyType;
+    std::streamsize getAdditionalBytesPerBody();
     std::streamsize m_nAdditionalBytesPerBody;
 
     std::stringstream m_errorString;
@@ -192,7 +192,7 @@ void MultiBodySimFilePart::write(double time, TBodyIterator begin, TBodyIterator
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
 
-//        AddBytes::write<m_additionalBytesType>(m_file_stream);
+//        AddBytes::write<m_additionalBytesPerBodyType>(m_file_stream);
     }
     m_nStates++;
 }

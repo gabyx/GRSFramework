@@ -89,9 +89,9 @@ private:
     std::streamsize m_nBytesPerQBody ;
     std::streamsize m_nBytesPerUBody ;
 
-    static const unsigned int m_additionalBytesType = 1;
-    static constexpr std::streamoff getAdditionalBytes(){
-        return (m_additionalBytesType==1) ? 1*sizeof(RankIdType) : 0 ;
+    static const unsigned int m_additionalBytesPerBodyType = 1;
+    static constexpr std::streamoff getAdditionalBytesPerBody(){
+        return (m_additionalBytesPerBodyType==1) ? 1*sizeof(RankIdType) : 0 ;
     }
     static const  std::streamsize m_nAdditionalBytesPerBody;
 

@@ -92,12 +92,12 @@ protected:
 
     // Different visitors for the various SOR implementations
     // For SOR_FULL, SOR_CONTACT
-    SorProxStepNodeVisitor * m_pSorProxStepNodeVisitor;
+    SorProxStepNodeVisitor<ContactGraphType> *           m_pSorProxStepNodeVisitor = nullptr;
     // For SOR_NORMAL_TANGENTIAL
-    NormalSorProxStepNodeVisitor*      m_pNormalSorProxStepNodeVisitor;
-    TangentialSorProxStepNodeVisitor*  m_pTangentialSorProxStepNodeVisitor;
+    NormalSorProxStepNodeVisitor<ContactGraphType>*      m_pNormalSorProxStepNodeVisitor  = nullptr;
+    TangentialSorProxStepNodeVisitor<ContactGraphType>*  m_pTangentialSorProxStepNodeVisitor  = nullptr;
     // Init Visitor for the contacts
-    SorProxInitNodeVisitor * m_pSorProxInitNodeVisitor;
+    SorProxInitNodeVisitor<ContactGraphType>*            m_pSorProxInitNodeVisitor  = nullptr;
 
     void doSORProxCPU();
     inline void sorProxOverAllNodes();
@@ -120,7 +120,8 @@ protected:
 
 
     // Log
-    Logging::Log *m_pSolverLog, *m_pSimulationLog;
+    Logging::Log *m_pSolverLog = nullptr;
+    Logging::Log *m_pSimulationLog = nullptr;
 
     // Residual File
     std::fstream m_iterationDataFile;

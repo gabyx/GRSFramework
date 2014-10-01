@@ -120,8 +120,8 @@
 /* @{ */
 #ifndef NDEBUG
     // DEBUG!
-    #define SOLVERLOG_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define SOLVERLOG_LOGLEVEL_CONTACT 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_LOGLEVEL_CONTACT 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
     #define SOLVERLOG_TOFILE 1            ///< {0,1} Determines if logstream is saved into a file.
     #define SOLVERLOG_TOCONSOLE 1         ///< {0,1} Determines if logstream is outputted into console.
 #else

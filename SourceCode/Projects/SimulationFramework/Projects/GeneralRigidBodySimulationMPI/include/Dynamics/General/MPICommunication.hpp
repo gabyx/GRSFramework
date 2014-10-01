@@ -143,12 +143,6 @@ public:
             auto error =  MPI_Comm_free( &(it->second) );
             ASSERTMPIERROR(error, "MPI_Comm_free failed in rank: " << this->getRank());
         }
-
-        for(auto & req : m_sendRequests){
-            auto error = MPI_Request_free(&req);
-            ASSERTMPIERROR(error, "MPI_Request_free failed in rank: " << this->getRank());
-
-        }
     }
 
 

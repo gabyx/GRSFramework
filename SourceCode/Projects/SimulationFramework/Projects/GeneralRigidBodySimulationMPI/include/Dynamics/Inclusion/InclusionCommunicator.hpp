@@ -42,7 +42,7 @@ public:
                           std::shared_ptr< ProcessCommunicatorType > pProcComm);
 
 
-    void setContactGraph(std::shared_ptr< ContactGraphType> pGraph){
+    void setContactGraph(ContactGraphType * pGraph){
         m_pContactGraph = pGraph;
     }
 
@@ -111,7 +111,7 @@ private:
 
     std::shared_ptr< DynamicsSystemType >      m_pDynSys;
     std::shared_ptr< ProcessCommunicatorType > m_pProcComm;
-    std::shared_ptr< ContactGraphType >        m_pContactGraph;
+    ContactGraphType *                         m_pContactGraph;
     std::shared_ptr< BodyCommunicator>         m_pBodyComm;
 
     RankIdType m_rank;
