@@ -298,6 +298,9 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
+        ${COMMONSOURCE_DIR}/include/Common
+        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
+        ${COMMONSOURCE_DIR}/include/Dynamics/General
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
     )

@@ -58,6 +58,7 @@ class SimFileJoiner; ///< Friend declaration inside of MultiBodySimFile
 */
 class MultiBodySimFile {
     friend class SimFileJoiner;
+    friend class SimFileResampler;
 public:
 
 
@@ -190,6 +191,24 @@ public:
 
     std::streamsize getBytesPerState() {
         return m_nBytesPerState;
+    }
+
+    std::string getDetails(std::string linePrefix="\t"){
+        std::stringstream s;
+        s <<linePrefix << "Simfile: "<< m_filePath << std::endl
+        << linePrefix << "\t nBytes: " << m_nBytes << std::endl
+        << linePrefix << "\t nSimBodies: " << m_nSimBodies << std::endl
+        << linePrefix << "\t nDOFqBody: "  << m_nDOFqBody << std::endl
+        << linePrefix << "\t nDOFuBody: "  << m_nDOFuBody << std::endl
+        << linePrefix << "\t nStates: " << m_nStates << std::endl
+        << linePrefix << "\t nBytesPerState: " << m_nBytesPerState << std::endl
+        << linePrefix << "\t nBytesPerBody: " << m_nBytesPerBody << std::endl
+        << linePrefix << "\t nBytesPerQBody: " << m_nBytesPerQBody << std::endl
+        << linePrefix << "\t nBytesPerUBody: " << m_nBytesPerUBody << std::endl
+        << linePrefix << "\t addBytesBodyType: " << m_additionalBytesPerBodyType << std::endl
+        << linePrefix << "\t nAdditionalBytesPerBody: " << m_nAdditionalBytesPerBody << std::endl
+        << linePrefix << "\t readFullState: " << m_bReadFullState;
+        return s.str();
     }
 
 private:

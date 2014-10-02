@@ -31,12 +31,18 @@ public:
     std::vector<boost::filesystem::path> m_inputFiles;
     boost::filesystem::path m_outputFile;
 
+    // Joiner
     TypesTimeRange::VariantType m_timeRange;
     TypesBodyRange::VariantType m_bodyRange;
+    // Resampler
+    unsigned int m_stepSize = 1;
+    unsigned int m_startStateIdx = 0;
+    unsigned int m_endStateIdx = std::numeric_limits<unsigned int>::max();
 
     enum class Task: unsigned int{
         UNDEFINED = 0,
-        JOIN = 1
+        JOIN = 1,
+        RESAMPLER = 2
     };
     Task m_task;
 
@@ -53,6 +59,7 @@ public:
 
             if( ops >> OptionPresent('h',"help")) {
                 printHelp();
+                exit(EXIT_SUCCESS);
             }
 
             m_inputFiles.clear();
@@ -85,7 +92,8 @@ public:
                     }
                     m_timeRange = TypesTimeRange::RangeType(range[0],range[1]);
 
-                }else if (ops >> OptionPresent("timelist")) {
+                }
+                else if (ops >> OptionPresent("timelist")) {
                     std::vector<double> range;
                     ops >> Option("timelist",range);
                     if(range.size()==0){
@@ -125,18 +133,58 @@ public:
 
                 ops >> Option('o',"output",m_outputFile);
 
+            }else if(task == "resample"){
+
+                m_task = Task::RESAMPLER;
+
+                    //parse in start,step,end
+                    ops >> Option("stepSize",m_stepSize);
+                    m_stepSize = std::max(m_stepSize,1U);
+
+                    if( ops >> OptionPresent("startIdx")) {
+                        ops >> Option("startIdx",m_startStateIdx);
+                    }
+                    if( ops >> OptionPresent("endIdx")) {
+                        ops >> Option("startIdx",m_endStateIdx);
+                    }
+                    if(m_endStateIdx<=m_startStateIdx){
+                         THROWEXCEPTION("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
+                    }
+
+                ops >> Option('o',"output",m_outputFile);
             }else{
                 printHelp();
                 THROWEXCEPTION("Exception occured in parsing task arg" )
 
             }
 
-
-
+        }
+        catch(GetOpt::ParsingErrorEx ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::InvalidFormatEx ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::OptionNotFoundEx ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::TooManyArgumentsEx ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::TooManyOptionsEx ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::OptionsFileNotFoundEx ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx ex) {
             printHelp();
             THROWEXCEPTION("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
-
         }
 
         if (ops.options_remain()){
@@ -200,21 +248,30 @@ private:
     }
 
     void printHelp() {
-        std::cerr << "Help for the Application:" << std::endl <<"Options:" <<std::endl
+        std::cerr << "Help for the Application: \n Options: \n"
                   << " \t -i|--input <path1> <path2> ... \n"
+                  << " \t [Required] \n"
                   <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim file oaths which are processed \n"
-                  << " \t -t|--task join \n"
+                  << " \t -t|--task join|resample \n"
+                  << " \t [Required] \n"
                   <<            "\t\t This describes the task:\n"
-                  <<            "\t\t\t 'join': Joins the multiple sim files together into one file\n"
-                  <<            "\t\t\t         Takes the two following options:\n"
+                  <<            "\t\t\t 'join': Joins multiple sim files together into one file\n"
+                  <<            "\t\t\t         Takes the following options:\n"
                   <<            "\t\t\t         --bodyrange <start> <end> | --bodylist <id1> <id2> ... \n"
                   <<            "\t\t\t         --timerange <start> <end> | --timelist <t1>  <t2> ... \n"
                   <<            "\t\t\t         Note: for option --bodyrange or --timerange: \n"
-                  <<            "\t\t\t               if end=-1, then all times/bodies are takes! \n"
+                  <<            "\t\t\t               if end=-1, then all times/bodies are taken! \n"
+                  <<            "\t\t\t 'resample': Resample multiple sim files, each after the other\n"
+                  <<            "\t\t\t         Takes the following options:\n"
+                  <<            "\t\t\t         --step <number> \n"
+                  <<            "\t\t\t         --start <stateIdx> --end <stateIdx> \n"
+                  <<            "\t\t\t         Note: option --step needs to be greater than 1, start and end \n"
+                  <<            "\t\t\t               represent state indices in the file.\n"
                   << " \t -o|--output <path>  \n"
+                  << " \t [Required] \n"
                   <<            "\t\t <path>: Specifies the ouput directory path \n"
                   << " \t -h|--help \n"
-                  <<            "\t\t Prints this help" <<std::endl;
+                  <<            "\t\t Prints this help\n";
     }
 };
 
