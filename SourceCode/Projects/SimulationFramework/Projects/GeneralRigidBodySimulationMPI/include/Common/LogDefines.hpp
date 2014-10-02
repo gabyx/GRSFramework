@@ -50,7 +50,7 @@
 
 
 #else
-    #define LOGSZ( logptr , message )
+    #define LOGSZ( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
     #define LOGBC( logptr , message )
     #define LOGIC( logptr , message )
     #define LOGPC( logptr , message )
