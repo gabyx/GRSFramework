@@ -28,6 +28,7 @@ class SimulationManagerMPI {
 public:
 
     DEFINE_CONFIG_TYPES
+    DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     SimulationManagerMPI();
     ~SimulationManagerMPI();
@@ -83,6 +84,7 @@ private:
     void writeAllOutput();
 
     void checkNumberOfBodiesInProcess();
+    void checkOwnerOfBodiesInProcess();
     void getMaxRuntime(PREC runtime);
 };
 

@@ -137,6 +137,8 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
         LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_simBodies.size()
         << " simulated & " << m_pDynSys->m_staticBodies.size()<<  " static bodies! "  << std::endl;);
+
+        checkOwnerOfBodiesInProcess();
     }
 
     //=====================================================
@@ -182,6 +184,17 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 }
 
 
+void SimulationManagerMPI::checkOwnerOfBodiesInProcess() {
+    for(auto & body : m_pDynSys->m_simBodies){
+        RankIdType r;
+        if(!m_pProcCommunicator->getProcTopo()->belongsBodyToProcess(body,r)){
+            ERRORMSG("Body with id: " << body->m_id << " belongs to rank: " << r << "instead of: " << m_pProcCommunicator->getRank()) ;
+        }
+    }
+    m_pProcCommunicator->waitBarrier();
+    sleep(4);
+    exit(-1);
+}
 
 void SimulationManagerMPI::checkNumberOfBodiesInProcess() {
 
