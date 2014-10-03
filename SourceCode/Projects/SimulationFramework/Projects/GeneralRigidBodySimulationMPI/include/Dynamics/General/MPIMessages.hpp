@@ -320,7 +320,7 @@ private:
         // serialize (ONLY LOCAL BODIES)
         // send the id to remove
 
-        LOGSZSpecial(m_pSerializerLog, "Removal of body @" << body << std::endl; )
+        //LOGSZSpecial(m_pSerializerLog, "Removal of body @" << body << std::endl; )
 
         ar & body->m_id;
         //ASSERTMSG(body->m_id != RigidBodyIdType(0)," ID zero!");
