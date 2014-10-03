@@ -192,8 +192,6 @@ void SimulationManagerMPI::checkOwnerOfBodiesInProcess() {
         }
     }
     m_pProcCommunicator->waitBarrier();
-    sleep(4);
-    exit(-1);
 }
 
 void SimulationManagerMPI::checkNumberOfBodiesInProcess() {
