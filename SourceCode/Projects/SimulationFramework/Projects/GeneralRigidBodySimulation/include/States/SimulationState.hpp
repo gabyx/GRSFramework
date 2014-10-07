@@ -97,6 +97,7 @@ private:
 
     unsigned int m_SceneDetailIndex;
     void switchSceneDetailIndex();
+    void toggleMPIVisualization();
 
     std::shared_ptr<Ogre::Timer>	m_pTimelineRendering;
 

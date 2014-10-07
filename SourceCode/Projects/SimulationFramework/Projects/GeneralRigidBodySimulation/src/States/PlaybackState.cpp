@@ -363,6 +363,10 @@ bool PlaybackState::keyPressed(const OIS::KeyEvent &keyEventRef) {
         switchSceneDetailIndex();
         break;
     }
+    case OIS::KC_4: {
+        toggleMPIVisualization();
+        return false;
+    }
     case OIS::KC_ESCAPE: {
         m_pPlaybackMgr->stopPlaybackThread(true);
         this->popAppState();
@@ -441,6 +445,15 @@ void PlaybackState::switchSceneDetailIndex() {
     case 2 :
         m_pOrbitCamera->getCamera()->setPolygonMode(PM_POINTS);
         break;
+    }
+}
+
+void PlaybackState::toggleMPIVisualization() {
+    auto * p =m_pSceneMgr->getManualObject("MPITopoSubGridManual");
+    if(p->isVisible()){
+        p->setVisible(false);
+    }else{
+        p->setVisible(true);
     }
 }
 

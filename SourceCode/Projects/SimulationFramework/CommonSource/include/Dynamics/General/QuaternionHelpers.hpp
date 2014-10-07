@@ -66,15 +66,15 @@ void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , Eigen::Matrix
     PREC fTyz = fTz*quat(2);
     PREC fTzz = fTz*quat(3);
 
-    R(0,0) = 1.0f-(fTyy+fTzz);
+    R(0,0) = 1.0-(fTyy+fTzz);
     R(0,1) = fTxy-fTwz;
     R(0,2) = fTxz+fTwy;
     R(1,0) = fTxy+fTwz;
-    R(1,1) = 1.0f-(fTxx+fTzz);
+    R(1,1) = 1.0-(fTxx+fTzz);
     R(1,2) = fTyz-fTwx;
     R(2,0) = fTxz-fTwy;
     R(2,1) = fTyz+fTwx;
-    R(2,2) = 1.0f-(fTxx+fTyy);
+    R(2,2) = 1.0-(fTxx+fTyy);
 }
 
 template<class Derived, class DerivedOther>
@@ -116,9 +116,9 @@ void rotateVector(const Eigen::MatrixBase<Derived>& quat ,
     PREC fTyz = fTz*quat(2);
     PREC fTzz = fTz*quat(3); // 12 mult
 
-    v(0) = (1.0f-(fTyy+fTzz))*v(0)   +   (fTxy-fTwz)*v(1)        +    (fTxz+fTwy)*v(2); // 3mult + 6 add
-    v(1) = (fTxy+fTwz)*v(0)          +   (1.0f-(fTxx+fTzz))*v(1) +    (fTyz-fTwx)*v(2); // 3 mult + 6 add
-    v(2) = (fTxz-fTwy)*v(0)          +   (fTyz+fTwx)*v(1)        +    (1.0f-(fTxx+fTyy))*v(2); // 3 mult + 6 add
+    v(0) = (1.0-(fTyy+fTzz))*v(0)   +   (fTxy-fTwz)*v(1)        +    (fTxz+fTwy)*v(2); // 3mult + 6 add
+    v(1) = (fTxy+fTwz)*v(0)          +   (1.0-(fTxx+fTzz))*v(1) +    (fTyz-fTwx)*v(2); // 3 mult + 6 add
+    v(2) = (fTxz-fTwy)*v(0)          +   (fTyz+fTwx)*v(1)        +    (1.0-(fTxx+fTyy))*v(2); // 3 mult + 6 add
     // total = 21 mult , 18 add
 }
 

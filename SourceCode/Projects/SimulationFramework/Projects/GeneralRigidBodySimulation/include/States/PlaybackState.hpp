@@ -122,6 +122,7 @@ private:
     };
 
     void switchSimulationMode();
+    void toggleMPIVisualization();
     void setSimulationMode(int i);
 };
 //=========================================================
