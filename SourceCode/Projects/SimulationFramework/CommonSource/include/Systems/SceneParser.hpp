@@ -1342,9 +1342,23 @@ private:
     void parseInitialPositionGrid(XMLNodeType initCond) {
 
         Vector3 trans;
+        Vector3 dirZ(0,0,1);
+        Vector3 dirX(1,0,0);
         if(!Utilities::stringToVector3(trans, initCond.attribute("translation").value())) {
             THROWEXCEPTION("---> String conversion in InitialPositionGrid: translation failed");
         }
+
+        if(initCond.attribute("dirZ")) {
+            if(!Utilities::stringToVector3(dirZ, initCond.attribute("dirZ").value())) {
+                THROWEXCEPTION("---> String conversion in InitialPositionGrid: jitter seed failed");
+            }
+        }
+        if(initCond.attribute("dirX")) {
+            if(!Utilities::stringToVector3(dirX, initCond.attribute("dirX").value())) {
+                THROWEXCEPTION("---> String conversion in InitialPositionGrid: jitter seed failed");
+            }
+        }
+
         int gridX;
         if(!Utilities::stringToType(gridX, initCond.attribute("gridSizeX").value())) {
             THROWEXCEPTION("---> String conversion in InitialPositionGrid: gridSizeX failed");
@@ -1372,7 +1386,7 @@ private:
             THROWEXCEPTION("---> String conversion in InitialPositionGrid: delta failed");
         }
 
-        InitialConditionBodies::setupPositionBodiesGrid(*m_bodyListGroup,m_startIdGroup,gridX,gridY,dist,trans,jitter,delta, seed);
+        InitialConditionBodies::setupPositionBodiesGrid(*m_bodyListGroup,m_startIdGroup,gridX,gridY,dist,trans,jitter,delta, seed, dirZ,dirX);
     }
     void parseInitialPositionFile(DynamicsState & state, XMLNodeType initCond) {
 //        m_SimBodyInitStates.push_back(DynamicsState((unsigned int)m_bodyListGroup->size()));
@@ -1925,11 +1939,20 @@ private:
             if(s == "uniform") {
                 PREC mass;
                 if(!Utilities::stringToType(mass, n.attribute("value").value())) {
-                    THROWEXCEPTION("---> String conversion in Material: id failed");
+                    THROWEXCEPTION("---> String conversion in Mass: value failed");
                 }
                 for(auto & b : m_bodyListGroup) {
                     b.m_body->m_mass = mass;
                 }
+            }else if(s == "homogen"){
+                PREC density;
+                if(!Utilities::stringToType(density, n.attribute("density").value())) {
+                    THROWEXCEPTION("---> String conversion in Mass: density failed");
+                }
+                 for(auto & b : m_bodyListGroup) {
+                    MassComputations::calculateMass(b.m_body,density);
+                 }
+
             } else {
                 THROWEXCEPTION("---> The attribute 'distribute' '" << s << "' of 'Mass' has no implementation in the parser");
             }
@@ -1942,7 +1965,7 @@ private:
             s= dynProp.child("InertiaTensor").attribute("type").value();
             if(s == "homogen") {
                 for(auto & b : m_bodyListGroup) {
-                    InertiaTensor::calculateInertiaTensor(b.m_body);
+                    InertiaTensorComputations::calculateInertiaTensor(b.m_body);
                 }
             } else {
                 THROWEXCEPTION("---> The attribute 'type' '" << s <<"' of 'InertiaTensor' has no implementation in the parser");

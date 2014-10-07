@@ -417,7 +417,7 @@ private:
 
                 std::stringstream name;
                 name.str("");
-                name << "MPITopoSubGridManual-";
+                name << "MPITopoSubGridManual";
                 Ogre::ManualObject *manual = m_pSceneMgr->createManualObject(name.str());
 
                 manual->begin(materialName, Ogre::RenderOperation::OT_LINE_LIST);

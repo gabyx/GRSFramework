@@ -60,15 +60,21 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
                              unsigned int gDim_x,
                              unsigned int gDim_y,
                              double d,
-                             typename DynamicsState::Vector3 vec_trans,
+                             Vector3 vec_trans,
                              bool jitter,
                              double delta,
-                             unsigned int seed){
+                             unsigned int seed,
+                             Vector3 dirZ = Vector3(0,0,1),
+                             Vector3 dirX = Vector3(1,0,0)){
 
     DEFINE_LAYOUT_CONFIG_TYPES
 
     Vector3 random_vec;
+    Matrix33 A_IK;
 
+    A_IK.col(1) = dirZ.cross(dirX); A_IK.col(1).normalize();
+    A_IK.col(2) = dirZ; A_IK.col(2).normalize();
+    A_IK.col(0) = A_IK.col(1).cross(A_IK.col(2)); A_IK.col(0).normalize();
 
     RandomGenType  gen(seed);
     std::uniform_real_distribution<PREC> uni(-1.0,1.0);
@@ -86,7 +92,7 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
         int index_x = (i - index_z*(gDim_x*gDim_y)- index_y*gDim_x);
 
 
-        state.m_q.template head<3>() = Vector3(index_x * d - 0.5*(gDim_x-1)*d, index_y*d - 0.5*(gDim_y-1)*d , index_z*d) + vec_trans;
+        state.m_q.template head<3>() = A_IK * Vector3(index_x * d - 0.5*(gDim_x-1)*d, index_y*d - 0.5*(gDim_y-1)*d , index_z*d) + vec_trans;
 
         if(jitter) {
             random_vec = Utilities::genRandomVec<PREC>(random_vec,gen,uni, b.m_initState.m_id - diffId);

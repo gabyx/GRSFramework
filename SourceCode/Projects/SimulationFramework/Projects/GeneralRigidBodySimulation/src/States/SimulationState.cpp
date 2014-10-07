@@ -243,6 +243,10 @@ bool SimulationState::keyPressed(const OIS::KeyEvent &keyEventRef) {
         setMouseMode(true);
         return false;
     }
+    case OIS::KC_4: {
+        toggleMPIVisualization();
+        return false;
+    }
     case OIS::KC_R: {
         switchSceneDetailIndex();
         break;
@@ -338,6 +342,15 @@ void SimulationState::switchSceneDetailIndex() {
     }
 }
 
+
+void SimulationState::toggleMPIVisualization() {
+    auto * p =m_pSceneMgr->getManualObject("MPITopoSubGridManual");
+    if(p->isVisible()){
+        p->setVisible(false);
+    }else{
+        p->setVisible(true);
+    }
+}
 
 void SimulationState::update(double timeSinceLastFrame) {
     // Update Camera!

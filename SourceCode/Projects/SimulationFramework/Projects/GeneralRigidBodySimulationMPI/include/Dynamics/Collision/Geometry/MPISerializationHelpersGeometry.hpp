@@ -88,6 +88,7 @@ private:
         }
     }
     void createGeom(){
+         //Recursive template
          createGeom_impl< boost::mpl::size<VariantTypes>::value - 1 >();
     }
     template<typename Archive>
