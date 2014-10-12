@@ -1,6 +1,6 @@
 
 
-PROJECT(SimFileConverter)
+PROJECT(Converter)
 
 message(STATUS "==============================Project: ${PROJECT_NAME} ==================================")
 
@@ -33,6 +33,9 @@ SET(COMMON_INC
     
     ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/ApplicationCLOptionsConverter.hpp
+    
+    ${PROJECT_SOURCE_DIR}/include/Converters/SimFileJoiner.hpp
+    ${PROJECT_SOURCE_DIR}/include/Converters/SimFileResampler.hpp
 )
 SET(COMMON_SRC
     ${SOURCE_DIR}/src/Common/TypeDefs.cpp
@@ -78,6 +81,7 @@ set(INCLUDE_DIRS
 
     ${PROJECT_SOURCE_DIR}/include/App
 	${PROJECT_SOURCE_DIR}/include/Common
+    ${PROJECT_SOURCE_DIR}/include/Converters
 
 	${SOURCE_DIR}/include/Common
     

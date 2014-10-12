@@ -21,7 +21,7 @@
 /**
 *  @brief CommandLineOptions for the Application
 */
-class ApplicationCLOptions: public Utilities::Singleton<ApplicationCLOptions> {
+class ApplicationCLOptionsSimConverter: public Utilities::Singleton<ApplicationCLOptionsSimConverter>  {
 public:
 
     using RangeAll = SimFileJoiner::RangeAll;
@@ -34,15 +34,15 @@ public:
     // Joiner
     TypesTimeRange::VariantType m_timeRange;
     TypesBodyRange::VariantType m_bodyRange;
+
     // Resampler
     unsigned int m_stepSize = 1;
     unsigned int m_startStateIdx = 0;
     unsigned int m_endStateIdx = std::numeric_limits<unsigned int>::max();
 
     enum class Task: unsigned int{
-        UNDEFINED = 0,
         JOIN = 1,
-        RESAMPLER = 2
+        RESAMPLE = 2
     };
     Task m_task;
 
@@ -60,18 +60,6 @@ public:
             if( ops >> OptionPresent('h',"help")) {
                 printHelp();
                 exit(EXIT_SUCCESS);
-            }
-
-            m_inputFiles.clear();
-            ops >> Option('i',"input",m_inputFiles);
-            // Clear all empty paths
-            for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); ){
-                    if(it->empty()){
-                        it=m_inputFiles.erase(it);
-                    }
-                    else{
-                        it++;
-                    }
             }
 
             std::string task;
@@ -104,8 +92,6 @@ public:
                     m_timeRange = r;
                 }
 
-
-
                  if( ops >> OptionPresent("bodyrange")) {
                     //parse in all times;
                     std::vector<long long int> range;
@@ -129,13 +115,9 @@ public:
                     m_bodyRange = l;
                 }
 
-
-
-                ops >> Option('o',"output",m_outputFile);
-
             }else if(task == "resample"){
 
-                m_task = Task::RESAMPLER;
+                m_task = Task::RESAMPLE;
 
                     //parse in start,step,end
                     ops >> Option("stepSize",m_stepSize);
@@ -150,14 +132,25 @@ public:
                     if(m_endStateIdx<=m_startStateIdx){
                          THROWEXCEPTION("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
                     }
-
-                ops >> Option('o',"output",m_outputFile);
             }else{
                 printHelp();
-                THROWEXCEPTION("Exception occured in parsing task arg" )
+                THROWEXCEPTION("Exception occured in parsing task arguments" )
 
             }
 
+            m_inputFiles.clear();
+            ops >> Option('i',"input",m_inputFiles);
+            // Clear all empty paths
+            for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); ){
+                    if(it->empty()){
+                        it=m_inputFiles.erase(it);
+                    }
+                    else{
+                        it++;
+                    }
+            }
+
+            ops >> Option('o',"output",m_outputFile);
         }
         catch(GetOpt::ParsingErrorEx ex){
             printHelp();
@@ -202,9 +195,8 @@ public:
         s << " Task Arg: ";
         if(m_task == Task::JOIN){
             s << "join";
-
-            // Print ranges if possible;
-
+        }else if(m_task == Task::RESAMPLE){
+            s << "resample";
         }else{
             s << "undefined";
         }
@@ -226,16 +218,16 @@ public:
 
         }
 
-        if(m_task == Task::JOIN){
-            if(m_outputFile.empty()){
-                printHelp();
-                THROWEXCEPTION( "No output file supplied!" )
-            }
-            if(boost::filesystem::exists(m_outputFile)) {
-                    printHelp();
-                    THROWEXCEPTION( "Input file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
-            }
+
+        if(m_outputFile.empty()){
+            printHelp();
+            THROWEXCEPTION( "No output file supplied!" )
         }
+        if(boost::filesystem::exists(m_outputFile)) {
+                printHelp();
+                THROWEXCEPTION( "Output file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
+        }
+
 
     }
 
@@ -251,7 +243,7 @@ private:
         std::cerr << "Help for the Application: \n Options: \n"
                   << " \t -i|--input <path1> <path2> ... \n"
                   << " \t [Required] \n"
-                  <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim file oaths which are processed \n"
+                  <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim file paths which are processed \n"
                   << " \t -t|--task join|resample \n"
                   << " \t [Required] \n"
                   <<            "\t\t This describes the task:\n"
@@ -269,11 +261,181 @@ private:
                   <<            "\t\t\t               represent state indices in the file.\n"
                   << " \t -o|--output <path>  \n"
                   << " \t [Required] \n"
+                  <<            "\t\t <path>: Specifies the ouput file path \n"
+                  << " \t -h|--help \n"
+                  <<            "\t\t Prints this help\n";
+    }
+};
+
+
+
+
+
+class ApplicationCLOptionsRenderer: public Utilities::Singleton<ApplicationCLOptionsRenderer> {
+public:
+
+
+    std::vector<boost::filesystem::path> m_inputFiles;
+    boost::filesystem::path m_outputFile;
+
+     // RenderConverter
+    boost::filesystem::path m_sceneFile;
+    boost::filesystem::path m_materialFile;
+
+    enum class Renderer: unsigned int{
+        RENDERMAN = 0,
+        LUXRENDER = 1
+    };
+    Renderer m_renderer;
+
+
+    void parseOptions(int argc, char **argv) {
+
+        using namespace GetOpt;
+        GetOpt::GetOpt_pp ops(argc, argv);
+        ops.exceptions_all();
+        try {
+
+            if( ops >> OptionPresent('h',"help")) {
+                printHelp();
+                exit(EXIT_SUCCESS);
+            }
+
+            std::string render;
+            ops >> Option('r',"renderer",render);
+            if(render == "renderman"){
+                m_renderer = Renderer::RENDERMAN;
+            }else if(render == "luxrender"){
+                m_renderer = Renderer::LUXRENDER;
+            }
+
+            ops >> Option('s',"scene", m_sceneFile);
+
+            ops >> Option('o',"output",m_outputFile);
+
+            m_inputFiles.clear();
+            ops >> Option('i',"input",m_inputFiles);
+            // Clear all empty paths
+            for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); ){
+                    if(it->empty()){
+                        it=m_inputFiles.erase(it);
+                    }
+                    else{
+                        it++;
+                    }
+            }
+
+        }
+        catch(GetOpt::ParsingErrorEx ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::InvalidFormatEx ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::OptionNotFoundEx ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::TooManyArgumentsEx ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::TooManyOptionsEx ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::OptionsFileNotFoundEx ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
+        } catch(GetOpt::GetOptEx ex) {
+            printHelp();
+            THROWEXCEPTION("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
+        }
+
+        if (ops.options_remain()){
+            printHelp();
+            THROWEXCEPTION("Some unexpected options where given!" )
+        }
+
+    }
+
+    void printArgs(std::ostream & s){
+        s << " Input Files Arg: ";
+        Utilities::printVector(s, m_inputFiles.begin(), m_inputFiles.end(), std::string(" , "));
+        s << " Scene File Arg: " << m_sceneFile <<std::endl;
+        s << " Output File Arg: " << m_outputFile <<std::endl;
+        s << " Renderer: ";
+        if(m_renderer == Renderer::RENDERMAN){
+            s << "renderman";
+        }else if(m_renderer == Renderer::LUXRENDER){
+            s << "luxrender";
+        }else{
+            s << "undefined";
+        }
+        s<<std::endl;
+    }
+
+    void checkArguments() {
+
+        if(m_inputFiles.empty()) {
+            printHelp();
+            THROWEXCEPTION( "No input files supplied!" )
+        } else {
+            for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
+                if(! boost::filesystem::exists(*it)) {
+                    printHelp();
+                    THROWEXCEPTION( "Input file supplied as argument: " << *it << " does not exist!")
+                }
+            }
+        }
+
+        if(m_sceneFile.empty()){
+            printHelp();
+            THROWEXCEPTION( "No scene file supplied!" )
+        }else if(!boost::filesystem::exists(m_sceneFile)) {
+            printHelp();
+            THROWEXCEPTION( "Scene file supplied as argument: " << m_sceneFile << " does not exist!")
+        }
+
+        if(m_outputFile.empty()){
+            printHelp();
+            THROWEXCEPTION( "No output file supplied!" )
+        }else if(boost::filesystem::exists(m_outputFile)) {
+                printHelp();
+                THROWEXCEPTION( "Output file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
+        }
+
+
+    }
+
+private:
+
+    void printErrorNoArg(std::string arg) {
+        printHelp();
+        THROWEXCEPTION( "Wrong options specified for arguement: '" << arg <<"'")
+        exit(EXIT_FAILURE);
+    }
+
+    void printHelp() {
+        std::cerr << "Help for the Application: \n Options: \n"
+                  << " \t -i|--input <path1> <path2> ... \n"
+                  << " \t [Required] \n"
+                  <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim file paths which are processed \n"
+                  << " \t -r|--renderer renderman|luxrender \n"
+                  << " \t [Required] \n"
+                  << " \t -s|--scene <path>  \n"
+                  << " \t [Required] \n"
+                  <<            "\t\t <path>: Specifies the scene file xml path \n"
+                  << " \t -o|--output <path>  \n"
+                  << " \t [Required] \n"
                   <<            "\t\t <path>: Specifies the ouput directory path \n"
                   << " \t -h|--help \n"
                   <<            "\t\t Prints this help\n";
     }
 };
+
 
 
 

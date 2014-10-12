@@ -280,7 +280,7 @@ add_subdirectory(Projects/GeneralRigidBodySimulationMPI)
 endif()
 
 if(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER)
-add_subdirectory(Projects/SimFileConverter)
+add_subdirectory(Projects/Converter)
 endif()
 
 

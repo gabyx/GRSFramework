@@ -42,17 +42,17 @@ LogSinkFile::LogSinkFile(const std::string & sink_name, boost::filesystem::path 
 
 
     if(filePath.empty()){
-            boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+            filePath = "./Logs";
             filePath /= this->getName() + "fileSink.log";
     }
-    //std::cout << filePath.parent_path() <<std::endl;
-    if(!boost::filesystem::exists(filePath.parent_path())){
+
+    if(filePath.has_parent_path() && !boost::filesystem::exists(filePath.parent_path())){
         boost::filesystem::create_directories(filePath.parent_path());
     }
 
     m_fileStream.open(filePath,std::ios_base::trunc);
     if(!m_fileStream.is_open()) {
-        ASSERTMSG(false,"LogSinkFile: " << this->getName() << " could not be opened at location: " << filePath.string());
+        ERRORMSG("LogSinkFile: " << this->getName() << " could not be opened at location: " << filePath.string());
     }
     m_pOutStream = &m_fileStream;
 };
@@ -142,7 +142,7 @@ LogManager::~LogManager() {
     LogListIteratorType it;
     for(it=m_logList.begin(); it!= m_logList.end(); ++it) {
         if((*it).second) {
-            delete (*it).second; //Delete all sinks!
+            delete (*it).second; //Delete all logs!
         }
     }
 };

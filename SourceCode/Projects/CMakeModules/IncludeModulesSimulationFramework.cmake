@@ -283,7 +283,9 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
         ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
         ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
-
+        ${COMMONSOURCE_DIR}/include/Common/CPUTimer.hpp
+        ${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
+        
         ${COMMONSOURCE_DIR}/include/Dynamics/General/MultiBodySimFile.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
 
@@ -292,8 +294,13 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
 
 
     SET(${SRC}
+    
+        
+    
         ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
         ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
+        ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
+        
         ${COMMONSOURCE_DIR}/src/Dynamics/General/MultiBodySimFile.cpp
     )
 

@@ -128,7 +128,7 @@ private:
 
         unsigned int i; // Linear offset form the m_startIdGroup
         for(auto & b : *m_bodyListGroup) {
-            i = b.m_initState.m_id - m_startIdGroup;
+            i = b.m_id - m_startIdGroup;
 
             entity_name.str("");
             node_name.str("");
@@ -145,7 +145,7 @@ private:
             Ogre::SceneNode* sceneNode = m_pBodiesNode->createChildSceneNode(node_name.str());
             Ogre::SceneNode* sceneNodeScale = sceneNode->createChildSceneNode();
 
-            RigidBodyGraphicsType rigidBodyGraphics(sceneNode, b.m_initState.m_id);
+            RigidBodyGraphicsType rigidBodyGraphics(sceneNode, b.m_id);
 
             //std::cout << b.m_scale.transpose() << std::endl;
             if(scaleLikeGeometry) {
@@ -265,7 +265,7 @@ private:
 
         unsigned int i; // linear offset from m_startIdGroup
         for(auto & b : *m_bodyListGroup) {
-            i = b.m_initState.m_id - m_startIdGroup;
+            i = b.m_id - m_startIdGroup;
 
             entity_name.str("");
             node_name.str("");
@@ -297,7 +297,7 @@ private:
             Ogre::SceneNode* sceneNode = m_pBodiesNode->createChildSceneNode(node_name.str());
             Ogre::SceneNode* sceneNodeScale = sceneNode->createChildSceneNode();
 
-            RigidBodyGraphicsType rigidBodyGraphics(sceneNode, b.m_initState.m_id);
+            RigidBodyGraphicsType rigidBodyGraphics(sceneNode, b.m_id);
 
             if(scaleLikeGeometry) {
                 sceneNodeScale->setScale(b.m_scale(0),b.m_scale(1),b.m_scale(2));

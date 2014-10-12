@@ -14,6 +14,12 @@
 * @brief for SimFileConverter
 */
 /* @{ */
+
+
+#define LOG( logptr , message )  ( *(logptr) ) << message ;  ///< Macro to easily write into a SimpleLogger::Log.
+#define LOGLEVEL(level,setlevel,logptr,message) if( level <= setlevel ){  LOG(logptr,message); }
+
+
 #ifndef NDEBUG
   // DEBUG!
   #define LOGSJ(A){ A } // Output SimfileJoiner

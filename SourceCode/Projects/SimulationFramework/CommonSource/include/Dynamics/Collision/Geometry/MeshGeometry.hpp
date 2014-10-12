@@ -19,6 +19,9 @@
 #include "TypeDefs.hpp"
 #include "TypeDefs.hpp"
 
+
+#include <boost/filesystem.hpp>
+
 #include "MeshData.hpp"
 
 
@@ -141,6 +144,7 @@ public:
         delete m_pMeshData;
     }
 
+    boost::filesystem::path m_filePath;
     MeshData * m_pMeshData;
 
 #if USE_OPCODE == 1
