@@ -17,10 +17,12 @@ private:
 
     DEFINE_MATRIX_TYPES
 
-    using BodyListType = typename BodyModuleType::BodyListType;
-    using BodyMode = typename DynamicsSystemType::RigidBodyType::BodyMode;
+    using StatesGroupType = typename InitStatesModuleType::StatesGroupType;
+    StatesGroupType * m_statesGroup;
 
+    using BodyMode = typename DynamicsSystemType::RigidBodyType::BodyMode;
     BodyMode m_mode;
+    using BodyListType = typename BodyModuleType::BodyListType;
     BodyListType * m_bodyListGroup = nullptr;
     RigidBodyIdType m_startIdGroup;
 
@@ -43,6 +45,9 @@ private:
 
     std::vector<std::string> m_materialList;
 
+    using ScalesList = typename GeometryModuleType::ScalesList;
+    ScalesList m_scalesGroup;
+
 public:
 
     void cleanUp() {
@@ -60,10 +65,11 @@ public:
 
     };
 
-    void parse(XMLNodeType vis, BodyListType * bodyList, RigidBodyIdType startId, BodyMode mode) {
+    void parse(XMLNodeType vis, BodyListType * bodyList, StatesGroupType * states, RigidBodyIdType startId, BodyMode mode) {
         m_mode = mode;
         m_startIdGroup = startId;
         m_bodyListGroup = bodyList;
+        m_statesGroup = states;
 
         LOGSCLEVEL1(m_pSimulationLog, "---> VisModule: parsing (BodyVisualization)"<<std::endl;)
         XMLNodeType node = vis.child("Mesh");
@@ -127,8 +133,10 @@ private:
         LOG(m_pSimulationLog, "---> Add all Ogre Mesh Objects"<<std::endl);
 
         unsigned int i; // Linear offset form the m_startIdGroup
-        for(auto & b : *m_bodyListGroup) {
-            i = b.m_id - m_startIdGroup;
+
+        for(unsigned int bodyIdx = 0; bodyIdx < m_bodyListGroup->size(); ++bodyIdx) {
+            auto id = (*m_bodyListGroup)[bodyIdx].m_id;
+            i = id - m_startIdGroup;
 
             entity_name.str("");
             node_name.str("");
@@ -145,14 +153,14 @@ private:
             Ogre::SceneNode* sceneNode = m_pBodiesNode->createChildSceneNode(node_name.str());
             Ogre::SceneNode* sceneNodeScale = sceneNode->createChildSceneNode();
 
-            RigidBodyGraphicsType rigidBodyGraphics(sceneNode, b.m_id);
+            RigidBodyGraphicsType rigidBodyGraphics(sceneNode, id);
 
-            //std::cout << b.m_scale.transpose() << std::endl;
             if(scaleLikeGeometry) {
-                if(b.m_scale(0)<=0 || b.m_scale(1)<=0 || b.m_scale(2)<=0) {
+                auto & s = m_scalesGroup[bodyIdx];
+                if(s(0)<=0 || s(1)<=0 || s(2)<=0) {
                     THROWEXCEPTION("---> parseMesh:: Scale for Mesh: " + meshName.string() +"is zero or smaller!");
                 }
-                sceneNodeScale->setScale(b.m_scale(0),b.m_scale(1),b.m_scale(2));
+                sceneNodeScale->setScale(s(0),s(1),s(2));
             } else {
                 if(scale(0)<=0 || scale(1)<=0 || scale(2)<=0) {
                     THROWEXCEPTION("---> parseMesh:: Scale for Mesh: " + meshName.string() + "is zero or smaller!");
@@ -175,7 +183,7 @@ private:
             ent->setMaterialName(m_materialList[matIdx]);
 
             //Set initial condition
-            rigidBodyGraphics.applyBodyState( b.m_initState );
+            rigidBodyGraphics.applyBodyState( (*m_statesGroup)[bodyIdx] );
 
 
             if( m_mode == BodyMode::SIMULATED) {
@@ -184,8 +192,8 @@ private:
                 m_pBodies->addBody(rigidBodyGraphics);
             }
 
-            nodeCounter++;
-            entityCounter++;
+            ++nodeCounter;
+            ++entityCounter;
         }
 
     }
@@ -264,6 +272,7 @@ private:
         LOGSCLEVEL1(m_pSimulationLog, "---> Add all Ogre: Plane Objects"<<std::endl);
 
         unsigned int i; // linear offset from m_startIdGroup
+        auto stateIt = m_statesGroup->begin();
         for(auto & b : *m_bodyListGroup) {
             i = b.m_id - m_startIdGroup;
 
@@ -300,7 +309,7 @@ private:
             RigidBodyGraphicsType rigidBodyGraphics(sceneNode, b.m_id);
 
             if(scaleLikeGeometry) {
-                sceneNodeScale->setScale(b.m_scale(0),b.m_scale(1),b.m_scale(2));
+                THROWEXCEPTION("---> parsePlane:: Scale for Plane can not be used from Geometry!");
             } else {
                 sceneNodeScale->setScale(scale(0),scale(1),scale(2));
             }
@@ -320,7 +329,7 @@ private:
 
 
             //Set initial condition
-            rigidBodyGraphics.applyBodyState( b.m_initState );
+            rigidBodyGraphics.applyBodyState( *stateIt );
 
 
             if( m_mode == BodyMode::SIMULATED) {
@@ -329,8 +338,9 @@ private:
                 m_pBodies->addBody(rigidBodyGraphics);
             }
 
-            nodeCounter++;
-            entityCounter++;
+            ++nodeCounter;
+            ++entityCounter;
+            ++stateIt;
         }
 
     }

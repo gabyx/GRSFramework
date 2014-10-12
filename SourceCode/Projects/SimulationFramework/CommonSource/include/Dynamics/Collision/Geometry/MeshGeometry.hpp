@@ -32,13 +32,8 @@ public:
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-
-    MeshGeometry() {
-        m_pMeshData=nullptr;
-    }
-
-    MeshGeometry( MeshData * pMeshData):
-        m_pMeshData(pMeshData) {
+    MeshGeometry( boost::filesystem::path path, MeshData * pMeshData):
+        m_filePath(path), m_pMeshData(pMeshData) {
 
 #if USE_OPCODE == 1
 
@@ -145,7 +140,7 @@ public:
     }
 
     boost::filesystem::path m_filePath;
-    MeshData * m_pMeshData;
+    MeshData * m_pMeshData =  nullptr;
 
 #if USE_OPCODE == 1
     Opcode::Model * m_pOpcodeModel;

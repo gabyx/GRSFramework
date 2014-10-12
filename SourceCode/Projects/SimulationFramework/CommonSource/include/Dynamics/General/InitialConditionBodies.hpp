@@ -87,7 +87,6 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
     unsigned int i; // linear index from the front
     auto stateIt = bodyStates.begin();
     for(auto & b : bodyDataCont) {
-        auto & state = b.m_initState;
         i = b.m_id  - startId;
 
         stateIt->m_q.template tail<4>() = Quaternion(1,0,0,0);
