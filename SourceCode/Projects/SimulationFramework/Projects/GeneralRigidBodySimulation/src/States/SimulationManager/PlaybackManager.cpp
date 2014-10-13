@@ -76,7 +76,8 @@ bool PlaybackManager::setup() {
 
     m_pDynSys = std::shared_ptr< DynamicsSystemPlayback > (new DynamicsSystemPlayback(m_pSceneMgr,m_pBaseNode));
 
-    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(*m_pDynSys) );
+    typename DynamicsSystemPlayback::SceneParserCreator c(m_pDynSys.get());
+    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(c) );
 
     // Parse the Scene from XML! ==========================
     if(!parseScene()) {
@@ -123,10 +124,8 @@ bool PlaybackManager::parseScene() {
         return false;
     }
 
-    ParserModules::BodyModuleOptions o;
-    o.m_allocateSimBodies = false;
-    o.m_allocateStaticBodies = false;
-    m_pSceneParser->parseScene(sceneFilePath, SceneParserOptions(), o);
+
+    m_pSceneParser->parseScene(sceneFilePath);
 
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SceneNodeSimBodies.size()
         << " simulated & " << m_pDynSys->m_SceneNodeBodies.size() <<  " static bodies! "  << std::endl;);

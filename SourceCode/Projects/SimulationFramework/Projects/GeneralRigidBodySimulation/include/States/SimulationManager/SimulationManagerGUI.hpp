@@ -14,6 +14,8 @@
 
 #include "TypeDefs.hpp"
 
+#include DynamicsSystem_INCLUDE_FILE
+
 #include "SimulationManagerBase.hpp"
 #include "InputContext.hpp"
 
@@ -38,7 +40,8 @@ public:
     std::shared_ptr<StateRecorder >		m_pStateRecorder;
 
     void setup(boost::filesystem::path sceneFilePath);
-    using SceneParserType = SceneParserGUI<DynamicsSystemType>;
+    using SceneParserType = SceneParserGUI< DynamicsSystemType,
+                                            DynamicsSystemType::SceneParserCreator::SceneParserTraits >;
     std::shared_ptr< SceneParserType > m_pSceneParser;
 
     void updateScene(double timeSinceLastFrame);

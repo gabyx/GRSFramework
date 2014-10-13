@@ -78,8 +78,8 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added DynamicsSystemType... ");
 
     // Parse the Scene from XML! ==========================
-
-    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(*m_pDynSys) );
+    typename DynamicsSystemType::SceneParserCreator c(m_pDynSys.get());
+    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(c) );
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SceneParserType... ");
 
 
@@ -88,12 +88,11 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
         sceneFilePath = "SceneFile.xml";
     }
 
-    typename ParserModules::BodyModuleOptions o;
+    //typename ParserModules::BodyModuleOptions o;
     //o.m_bodyIdRange = std::make_pair( RigidBodyId::makeId(1,4),  RigidBodyId::makeId(1,8));
-
     //o.m_bodyIdRange = std::make_pair( RigidBodyId::makeId(1,1),  RigidBodyId::makeId(1,4));
 
-    m_pSceneParser->parseScene(sceneFilePath,SceneParserOptions(),std::move(o));
+    m_pSceneParser->parseScene(sceneFilePath);
 
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_simBodies.size()
         << " simulated & " << m_pDynSys->m_staticBodies.size()<<  " static bodies! "  << std::endl;);

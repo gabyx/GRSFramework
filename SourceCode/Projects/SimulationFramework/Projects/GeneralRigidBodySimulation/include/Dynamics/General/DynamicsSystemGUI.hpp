@@ -8,7 +8,10 @@
 
 #include <boost/iterator/transform_iterator.hpp>
 
+
 #include "DynamicsSystem.hpp"
+
+#include "SceneParserGUI.hpp"
 
 #include <Ogre.h>
 
@@ -88,45 +91,67 @@ public:
     ~DynamicsSystemGUI(){
     }
 
+    struct SceneParserCreator{
+        SceneParserCreator( DynamicsSystemGUI * p): m_p(p){}
+        DynamicsSystemGUI * m_p;
 
-    template<typename TParser>
-    std::tuple< std::unique_ptr<typename TParser::SettingsModuleType >,
-        std::unique_ptr<typename TParser::ExternalForcesModuleType >,
-        std::unique_ptr<typename TParser::ContactParamModuleType>,
-        std::unique_ptr<typename TParser::InitStatesModuleType >,
-        std::unique_ptr<typename TParser::BodyModuleType >,
-        std::unique_ptr<typename TParser::GeometryModuleType >,
-        std::unique_ptr<typename TParser::VisModuleType>,
-        std::unique_ptr<typename TParser::MPIModuleType>
-        >
-    createParserModules(TParser * p) {
+        template<typename TSceneParser, typename TDynamicsSystem>
+        struct SceneParserTraits : SceneParserBaseTraits<TSceneParser,TDynamicsSystem> {
+            // Module typedefs
+            using SettingsModuleType         = ParserModules::SettingsModule<SceneParserTraits>;
+            using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<SceneParserTraits>;
+            using ContactParamModuleType     = ParserModules::ContactParamModule<SceneParserTraits>;
+            using InitStatesModuleType       = ParserModules::InitStatesModule<SceneParserTraits> ;
 
-        using SettingsModuleType       = typename TParser::SettingsModuleType ;
-        using ContactParamModuleType   = typename TParser::ContactParamModuleType;
-        using GeometryModuleType       = typename TParser::GeometryModuleType ;
-        using InitStatesModuleType     = typename TParser::InitStatesModuleType ;
-        using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
-        using BodyModuleType           = typename TParser::BodyModuleType ;
-        using VisModuleType            = typename TParser::VisModuleType ;
-        using MPIModuleType            = typename TParser::MPIModuleType ;
+            using BodyMStaticOptions         = ParserModules::BodyModuleStaticOptions<>;
+            using BodyModuleType             = ParserModules::BodyModule< SceneParserTraits, BodyMStaticOptions > ;
+
+            using GeomMStaticOptions         = ParserModules::GeometryModuleStaticOptions<true,true,true,false>;
+            using GeometryModuleType         = ParserModules::GeometryModule<SceneParserTraits,GeomMStaticOptions>;
+
+            using VisModuleType              = ParserModules::VisModule<SceneParserTraits>;
+            using MPIModuleType              = ParserModules::MPIModuleDummy<SceneParserTraits>;
+        };
+
+        template<typename TParser>
+        std::tuple< std::unique_ptr<typename TParser::SettingsModuleType >,
+            std::unique_ptr<typename TParser::ExternalForcesModuleType >,
+            std::unique_ptr<typename TParser::ContactParamModuleType>,
+            std::unique_ptr<typename TParser::InitStatesModuleType >,
+            std::unique_ptr<typename TParser::BodyModuleType >,
+            std::unique_ptr<typename TParser::GeometryModuleType >,
+            std::unique_ptr<typename TParser::VisModuleType>,
+            std::unique_ptr<typename TParser::MPIModuleType>
+            >
+        createParserModules(TParser * p) {
+
+            using SettingsModuleType       = typename TParser::SettingsModuleType ;
+            using ContactParamModuleType   = typename TParser::ContactParamModuleType;
+            using GeometryModuleType       = typename TParser::GeometryModuleType ;
+            using InitStatesModuleType     = typename TParser::InitStatesModuleType ;
+            using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
+            using BodyModuleType           = typename TParser::BodyModuleType ;
+            using VisModuleType            = typename TParser::VisModuleType ;
+            using MPIModuleType            = typename TParser::MPIModuleType ;
 
 
-        auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &m_settingsRecorder,
-                    &m_settingsTimestepper,
-                    &m_settingsInclusionSolver));
+            auto sett = std::unique_ptr<SettingsModuleType >(new SettingsModuleType(p, &m_p->m_settingsRecorder,
+                        &m_p->m_settingsTimestepper,
+                        &m_p->m_settingsInclusionSolver));
 
-        auto vis = std::unique_ptr<VisModuleType>( new VisModuleType(p,&m_SceneNodeSimBodies, &m_SceneNodeBodies, m_pBaseNode, m_pBodiesNode, m_pSceneMgr.get()) );
-        auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &this->m_globalGeometries, vis->getScalesGroup()) ); // geom module needs to track
+            auto vis = std::unique_ptr<VisModuleType>( new VisModuleType(p,&m_p->m_SceneNodeSimBodies, &m_p->m_SceneNodeBodies, m_p->m_pBaseNode, m_p->m_pBodiesNode, m_p->m_pSceneMgr.get()) );
+            auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &m_p->m_globalGeometries, vis->getScalesGroup()) ); // geom module needs to track
 
-        auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&this->m_bodiesInitStates, sett.get()));
-        auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , &this->m_simBodies, &this->m_staticBodies )) ;
-        auto es  = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &this->m_externalForces));
-        auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&this->m_ContactParameterMap));
+            auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_p->m_bodiesInitStates, sett.get()));
+            auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , &m_p->m_simBodies, &m_p->m_staticBodies )) ;
+            auto es  = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &m_p->m_externalForces));
+            auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&m_p->m_ContactParameterMap));
 
-        auto mpi = std::unique_ptr<MPIModuleType>(nullptr);
+            auto mpi = std::unique_ptr<MPIModuleType>(nullptr);
 
-        return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));
-    }
+            return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));
+        }
+    };
 
 public:
     using RigidBodyGraphicsType = RigidBodyGraphics;
@@ -155,43 +180,68 @@ public:
 
     ~DynamicsSystemPlayback(){}
 
+    struct SceneParserCreator{
+        SceneParserCreator( DynamicsSystemPlayback * p): m_p(p){}
+        DynamicsSystemPlayback * m_p;
 
-    template<typename TParser>
-    std::tuple< std::unique_ptr<typename TParser::SettingsModuleType >,
-        std::unique_ptr<typename TParser::ExternalForcesModuleType >,
-        std::unique_ptr<typename TParser::ContactParamModuleType>,
-        std::unique_ptr<typename TParser::InitStatesModuleType >,
-        std::unique_ptr<typename TParser::BodyModuleType >,
-        std::unique_ptr<typename TParser::GeometryModuleType >,
-        std::unique_ptr<typename TParser::VisModuleType>,
-        std::unique_ptr<typename TParser::MPIModuleType>
-        >
-    createParserModules(TParser * p) {
+        template<typename TSceneParser, typename TDynamicsSystem>
+        struct SceneParserTraits : SceneParserBaseTraits<TSceneParser,TDynamicsSystem> {
+            // Module typedefs
+            using SettingsModuleType         = ParserModules::SettingsModule<SceneParserTraits>;
+            using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<SceneParserTraits>;
+            using ContactParamModuleType     = ParserModules::ContactParamModule<SceneParserTraits>;
+            using InitStatesModuleType       = ParserModules::InitStatesModule<SceneParserTraits> ;
 
-        using SettingsModuleType       = typename TParser::SettingsModuleType ;
-        using ContactParamModuleType   = typename TParser::ContactParamModuleType;
-        using GeometryModuleType       = typename TParser::GeometryModuleType ;
-        using InitStatesModuleType     = typename TParser::InitStatesModuleType ;
-        using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
-        using BodyModuleType           = typename TParser::BodyModuleType ;
-        using VisModuleType            = typename TParser::VisModuleType ;
-        using MPIModuleType            = typename TParser::MPIModuleType ;
+            using BodyMStaticOptions         = ParserModules::BodyModuleStaticOptions<true,true,true,true,false,false,true>;
+            using BodyModuleType             = ParserModules::BodyModule< SceneParserTraits, BodyMStaticOptions > ;
+
+            using GeomMStaticOptions         = ParserModules::GeometryModuleStaticOptions<true,true,true,false>;
+            using GeometryModuleType         = ParserModules::GeometryModule<SceneParserTraits,GeomMStaticOptions>;
+
+            using VisModuleType              = ParserModules::VisModule<SceneParserTraits>;
+            using MPIModuleType              = ParserModules::MPIModuleDummy<SceneParserTraits>;
+        };
+
+        template<typename TParser>
+        std::tuple< std::unique_ptr<typename TParser::SettingsModuleType >,
+            std::unique_ptr<typename TParser::ExternalForcesModuleType >,
+            std::unique_ptr<typename TParser::ContactParamModuleType>,
+            std::unique_ptr<typename TParser::InitStatesModuleType >,
+            std::unique_ptr<typename TParser::BodyModuleType >,
+            std::unique_ptr<typename TParser::GeometryModuleType >,
+            std::unique_ptr<typename TParser::VisModuleType>,
+            std::unique_ptr<typename TParser::MPIModuleType>
+            >
+        createParserModules(TParser * p) {
+
+            using SettingsModuleType       = typename TParser::SettingsModuleType ;
+            using ContactParamModuleType   = typename TParser::ContactParamModuleType;
+            using GeometryModuleType       = typename TParser::GeometryModuleType ;
+            using InitStatesModuleType     = typename TParser::InitStatesModuleType ;
+            using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
+            using BodyModuleType           = typename TParser::BodyModuleType ;
+            using VisModuleType            = typename TParser::VisModuleType ;
+            using MPIModuleType            = typename TParser::MPIModuleType ;
 
 
-        auto sett = std::unique_ptr<SettingsModuleType >(nullptr);
+            auto sett = std::unique_ptr<SettingsModuleType >(nullptr);
 
-        auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &m_globalGeometries) );
+            auto vis = std::unique_ptr<VisModuleType>( new VisModuleType(p,&m_p->m_SceneNodeSimBodies, &m_p->m_SceneNodeBodies, m_p->m_pBaseNode, m_p->m_pBodiesNode, m_p->m_pSceneMgr.get()) ); // no visualization needed
+            auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &m_p->m_globalGeometries, vis->getScalesGroup() ) );
 
-        auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_bodiesInitStates, sett.get()));
-        auto vis = std::unique_ptr<VisModuleType>( new VisModuleType(p,&m_SceneNodeSimBodies, &m_SceneNodeBodies, m_pBaseNode, m_pBodiesNode, m_pSceneMgr.get()) ); // no visualization needed
-        auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , nullptr , nullptr )) ;
-        auto es  = std::unique_ptr<ExternalForcesModuleType >(nullptr);
-        auto con = std::unique_ptr<ContactParamModuleType>(nullptr);
+            auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_p->m_bodiesInitStates, sett.get()));
+            auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , nullptr , nullptr )) ;
+            auto es  = std::unique_ptr<ExternalForcesModuleType >(nullptr);
+            auto con = std::unique_ptr<ContactParamModuleType>(nullptr);
 
-        auto mpi = std::unique_ptr<MPIModuleType>(nullptr);
+            auto mpi = std::unique_ptr<MPIModuleType>(nullptr);
 
-        return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));
-    }
+            return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));
+        };
+
+    };
+
+
 
     GlobalGeometryMapType m_globalGeometries;
     RigidBodyStatesContainerType m_bodiesInitStates;
