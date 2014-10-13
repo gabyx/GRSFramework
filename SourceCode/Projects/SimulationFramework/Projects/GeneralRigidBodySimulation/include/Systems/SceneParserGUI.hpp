@@ -1,5 +1,5 @@
-#ifndef SceneParserOgre_hpp
-#define SceneParserOgre_hpp
+#ifndef SceneParserGUI_hpp
+#define SceneParserGUI_hpp
 
 #include <OGRE/Ogre.h>
 #include "AxisObject.hpp"
@@ -529,27 +529,14 @@ private:
 
 };
 
-/** These module types are defined when there is no derivation from scene parser */
-template<typename TSceneParser, typename TDynamicsSystem>
-struct SceneParserGUITraits : public SceneParserBaseTraits<TSceneParser,TDynamicsSystem> {
 
-    using SettingsModuleType         = ParserModules::SettingsModule<SceneParserGUITraits>;
-    using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<SceneParserGUITraits>;
-    using ContactParamModuleType     = ParserModules::ContactParamModule<SceneParserGUITraits>;
-    using InitStatesModuleType       = ParserModules::InitStatesModule<SceneParserGUITraits> ;
-
-    using BodyModuleType             = ParserModules::BodyModule< SceneParserGUITraits > ;
-    using GeometryModuleType         = ParserModules::GeometryModule<SceneParserGUITraits>;
-
-    using VisModuleType              = ParserModules::VisModule<SceneParserGUITraits>;
-
-    using MPIModuleType              = ParserModules::MPIModuleDummy<SceneParserGUITraits>;
-};
-
-template<typename TDynamicsSystem>
-class SceneParserGUI: public SceneParser<TDynamicsSystem, SceneParserGUITraits, SceneParserGUI<TDynamicsSystem> > {
+template<typename TDynamicsSystem,
+         template<typename P, typename D> class TParserTraits>
+class SceneParserGUI: public SceneParser<TDynamicsSystem,
+                                         TParserTraits ,
+                                         SceneParserGUI<TDynamicsSystem,TParserTraits> > {
 private:
-    using BaseType = SceneParser<TDynamicsSystem, SceneParserGUITraits, SceneParserGUI<TDynamicsSystem> >;
+    using BaseType = SceneParser<TDynamicsSystem, TParserTraits, SceneParserGUI<TDynamicsSystem,TParserTraits> >;
 public:
     using DynamicsSystemType = TDynamicsSystem;
 

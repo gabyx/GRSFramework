@@ -36,7 +36,7 @@ public:
 
     std::shared_ptr< DynamicsSystemPlayback > m_pDynSys;
 
-    using SceneParserType =  SceneParserGUI<DynamicsSystemPlayback>;
+    using SceneParserType =  SceneParserGUI<DynamicsSystemPlayback, DynamicsSystemPlayback::SceneParserCreator::SceneParserTraits>;
     std::shared_ptr< SceneParserType> m_pSceneParser;
 
     std::shared_ptr< VideoDropper > m_pVideoDropper;
