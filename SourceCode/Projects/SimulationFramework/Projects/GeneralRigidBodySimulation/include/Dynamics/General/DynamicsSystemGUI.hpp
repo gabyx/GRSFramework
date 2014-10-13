@@ -91,8 +91,8 @@ public:
     ~DynamicsSystemGUI(){
     }
 
-    struct SceneParserCreator{
-        SceneParserCreator( DynamicsSystemGUI * p): m_p(p){}
+    struct ParserModulesCreator{
+        ParserModulesCreator( DynamicsSystemGUI * p): m_p(p){}
         DynamicsSystemGUI * m_p;
 
         template<typename TSceneParser, typename TDynamicsSystem>
@@ -180,8 +180,8 @@ public:
 
     ~DynamicsSystemPlayback(){}
 
-    struct SceneParserCreator{
-        SceneParserCreator( DynamicsSystemPlayback * p): m_p(p){}
+    struct ParserModulesCreator{
+        ParserModulesCreator( DynamicsSystemPlayback * p): m_p(p){}
         DynamicsSystemPlayback * m_p;
 
         template<typename TSceneParser, typename TDynamicsSystem>

@@ -16,20 +16,29 @@
 
 #include "LogDefines.hpp"
 
+#include "SceneParser.hpp"
+
+#include DynamicsSystem_INCLUDE_FILE
 
 
+#include "SphereGeometry.hpp"
+#include "PlaneGeometry.hpp"
+#include "BoxGeometry.hpp"
+#include "MeshGeometry.hpp"
+#include "HalfspaceGeometry.hpp"
 
 class RenderConverter{
 public:
 
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    using RenderEnum = ApplicationCLOptionsRenderer::RendererEnum;
+    using Renderer = typename ApplicationCLOptionsRenderer::Renderer;
 
     void convert( const std::vector<boost::filesystem::path> & inputFiles,
+                  boost::filesystem::path outputFile,
                   boost::filesystem::path sceneFile,
                   boost::filesystem::path materialFile,
-                  boost::filesystem::path outputFile,
-                  RendererEnum renderer)
+                  Renderer renderer)
     {
         m_renderer = renderer;
         m_outputFile = outputFile;
@@ -42,6 +51,8 @@ public:
         LOG(m_log, "---> RenderConverter started:" <<std::endl;);
 
 
+        loadGeometryCollection();
+
         // First open the sim file
         for(auto file : m_inputFiles){
             convertFile(file);
@@ -50,6 +61,19 @@ public:
     }
 
 private:
+
+    DynamicsSystemType m_dynSys;
+
+    void loadGeometryCollection(){
+
+        DynamicsSystemType::ParserModulesCreator c(&m_dynSys);
+
+        using SceneParserType = SceneParser< DynamicsSystemType, DynamicsSystemType::ParserModulesCreator::SceneParserTraits >;
+        SceneParserType parser(c,m_log);
+
+        parser.parseScene(m_sceneFile);
+
+    }
 
     void convertFile(const boost::filesystem::path & f){
         LOG(m_log, "---> Converting file:" << f << std::endl;);
@@ -67,7 +91,7 @@ private:
 
     boost::filesystem::path m_outputFile;
     std::vector<boost::filesystem::path> m_inputFiles;
-    RendererEnum m_renderer;
+    Renderer m_renderer;
 };
 
 #endif // RenderConverter_hpp

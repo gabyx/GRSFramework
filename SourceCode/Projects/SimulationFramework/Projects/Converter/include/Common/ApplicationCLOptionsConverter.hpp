@@ -364,6 +364,7 @@ public:
     void printArgs(std::ostream & s){
         s << " Input Files Arg: ";
         Utilities::printVector(s, m_inputFiles.begin(), m_inputFiles.end(), std::string(" , "));
+        s <<std::endl;
         s << " Scene File Arg: " << m_sceneFile <<std::endl;
         s << " Output File Arg: " << m_outputFile <<std::endl;
         s << " Renderer: ";

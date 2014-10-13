@@ -76,8 +76,8 @@ bool PlaybackManager::setup() {
 
     m_pDynSys = std::shared_ptr< DynamicsSystemPlayback > (new DynamicsSystemPlayback(m_pSceneMgr,m_pBaseNode));
 
-    typename DynamicsSystemPlayback::SceneParserCreator c(m_pDynSys.get());
-    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(c) );
+    typename DynamicsSystemPlayback::ParserModulesCreator c(m_pDynSys.get());
+    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(c, m_pSimulationLog ) );
 
     // Parse the Scene from XML! ==========================
     if(!parseScene()) {

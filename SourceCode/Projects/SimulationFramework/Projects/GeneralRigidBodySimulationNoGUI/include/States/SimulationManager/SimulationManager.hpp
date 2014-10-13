@@ -32,7 +32,7 @@ public:
     void setup(boost::filesystem::path sceneFilePath);
 
     using SceneParserType = SceneParser<DynamicsSystemType,
-                                        DynamicsSystemType::SceneParserCreator::SceneParserTraits >;
+                                        DynamicsSystemType::ParserModulesCreator::SceneParserTraits >;
     std::shared_ptr< SceneParserType > m_pSceneParser;
 
     void startSim();

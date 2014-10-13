@@ -387,7 +387,6 @@ public:
                    GeometryMap * geomMap = nullptr)
         : m_parser(p),m_pSimulationLog(p->getSimLog()),m_globalGeometries(g),
           m_externalScalesGroupCache(scalesGroup), m_externalGeometryCache(geomMap) {
-        ASSERTMSG(m_globalGeometries, "this should not be null")
     };
 
 
@@ -1839,7 +1838,6 @@ public:
     BodyModule(ParserType * p, GeometryModuleType * g,  InitStatesModuleType * is, VisModuleType * i,
                RigidBodySimContainerType * simBodies, RigidBodyStaticContainerType * bodies )
         : m_pSimulationLog(p->getSimLog()), m_pGeomMod(g), m_pVisMod(i), m_pInitStatesMod(is), m_pSimBodies(simBodies), m_pBodies(bodies) {
-        ASSERTMSG(is,"should not be null");
     };
 
     void parseModuleOptions(XMLNodeType & sceneObjects) {
@@ -1927,7 +1925,11 @@ public:
             // Parse Visualization (if not empty)
             XMLNodeType  visualizationNode = node.child("Visualization");
             if(m_pVisMod && visualizationNode) {
-                m_pVisMod->parse(visualizationNode, &m_bodiesGroup, m_pInitStatesMod->getStatesGroup(), m_startIdGroup, m_eBodiesState );
+                if(m_pInitStatesMod){
+                    m_pVisMod->parse(visualizationNode, &m_bodiesGroup, m_pInitStatesMod->getStatesGroup(), m_startIdGroup, m_eBodiesState );
+                }else{
+                    m_pVisMod->parse(visualizationNode, &m_bodiesGroup, nullptr , m_startIdGroup, m_eBodiesState );
+                }
             }
         }
 
@@ -2359,11 +2361,10 @@ public:
     * If a xmlDoc pointer is given, this document is taken
     */
     template<typename ModuleGeneratorType>
-    SceneParser(ModuleGeneratorType & moduleGen) {
+    SceneParser(ModuleGeneratorType & moduleGen, Logging::Log * log) {
 
-        m_pSimulationLog = nullptr;
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
-        ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
+        m_pSimulationLog = log;
+        ASSERTMSG(m_pSimulationLog, "Log pointer is zero!");
 
         // Get all Modules from the Generator
         std::tie(m_pSettingsModule,

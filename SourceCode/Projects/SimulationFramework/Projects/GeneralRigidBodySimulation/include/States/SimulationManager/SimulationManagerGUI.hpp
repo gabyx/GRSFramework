@@ -41,7 +41,7 @@ public:
 
     void setup(boost::filesystem::path sceneFilePath);
     using SceneParserType = SceneParserGUI< DynamicsSystemType,
-                                            DynamicsSystemType::SceneParserCreator::SceneParserTraits >;
+                                            DynamicsSystemType::ParserModulesCreator::SceneParserTraits >;
     std::shared_ptr< SceneParserType > m_pSceneParser;
 
     void updateScene(double timeSinceLastFrame);

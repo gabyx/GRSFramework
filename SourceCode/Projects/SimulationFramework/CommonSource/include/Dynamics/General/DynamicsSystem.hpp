@@ -128,8 +128,8 @@ inline void DynamicsSystemBase::applySimBodiesToDynamicsState(DynamicsState & st
 class DynamicsSystem : public DynamicsSystemBase {
 public:
 
-    struct SceneParserCreator{
-        SceneParserCreator( DynamicsSystem * p): m_p(p){}
+    struct ParserModulesCreator{
+        ParserModulesCreator( DynamicsSystem * p): m_p(p){}
         DynamicsSystem * m_p;
 
         template<typename TSceneParser, typename TDynamicsSystem>

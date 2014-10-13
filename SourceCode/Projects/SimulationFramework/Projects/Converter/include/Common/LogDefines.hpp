@@ -21,11 +21,30 @@
 
 
 #ifndef NDEBUG
-  // DEBUG!
-  #define LOGSJ(A){ A } // Output SimfileJoiner
+    // DEBUG!
+    #define LOGSJ(A){ A } // Output SimfileJoiner
+
+     /// SceneParser
+    #define SCENEPARSER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+
 #else
-  #define LOGSJ(A)
+
+    #define LOGSJ(A)
+
+    /// SceneParser
+    #define SCENEPARSER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+
 #endif
 /* @} */
+
+
+/** SceneParser Log Macros */
+#define LOGSC(log , message) LOG(log,message);
+#define LOGSCLEVEL(level, logptr , message) LOGLEVEL(level,SCENEPARSER_LOGLEVEL,logptr,message);
+#define LOGSCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
+#define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
+#define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
+#define SKIPLOGSC( logptr , message )  LOGSCLEVEL(1,logptr,message);
+
 
 #endif
