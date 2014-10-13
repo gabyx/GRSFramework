@@ -50,8 +50,11 @@ private:
 
 public:
 
+    ScalesList * getScalesGroup(){return &m_scalesGroup;}
+
     void cleanUp() {
         m_materialList.clear();
+        m_scalesGroup.clear();
     }
 
     VisModule(ParserType * p,
@@ -70,6 +73,8 @@ public:
         m_startIdGroup = startId;
         m_bodyListGroup = bodyList;
         m_statesGroup = states;
+
+        ASSERTMSG(bodyList->size() == m_scalesGroup.size(), "The scales list has not been filled, this needs to be done outside of this module!")
 
         LOGSCLEVEL1(m_pSimulationLog, "---> VisModule: parsing (BodyVisualization)"<<std::endl;)
         XMLNodeType node = vis.child("Mesh");

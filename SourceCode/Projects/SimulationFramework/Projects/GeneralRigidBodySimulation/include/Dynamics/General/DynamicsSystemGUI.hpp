@@ -115,10 +115,10 @@ public:
                     &m_settingsTimestepper,
                     &m_settingsInclusionSolver));
 
-        auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &this->m_globalGeometries) );
+        auto vis = std::unique_ptr<VisModuleType>( new VisModuleType(p,&m_SceneNodeSimBodies, &m_SceneNodeBodies, m_pBaseNode, m_pBodiesNode, m_pSceneMgr.get()) );
+        auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &this->m_globalGeometries, vis->getScalesGroup()) ); // geom module needs to track
 
         auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&this->m_bodiesInitStates, sett.get()));
-        auto vis = std::unique_ptr<VisModuleType>( new VisModuleType(p,&m_SceneNodeSimBodies, &m_SceneNodeBodies, m_pBaseNode, m_pBodiesNode, m_pSceneMgr.get()) ); // no visualization needed
         auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , &this->m_simBodies, &this->m_staticBodies )) ;
         auto es  = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &this->m_externalForces));
         auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&this->m_ContactParameterMap));

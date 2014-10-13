@@ -340,7 +340,7 @@ struct GeometryModuleOptions{
     bool m_loadMesh = true; ///< loads the mesh into the MeshGeometry from the file
     bool m_allocateGeometry = true; ///< If false, absolutely no geometries are allocated!
     bool m_cacheGeometry = false;   ///y
-    bool m_cacheScale = true;
+    bool m_cacheScale = false;
 };
 template<typename TParserTraits>
 class GeometryModule {
