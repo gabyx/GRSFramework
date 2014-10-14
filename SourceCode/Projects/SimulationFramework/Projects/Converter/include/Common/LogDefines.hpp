@@ -24,8 +24,11 @@
     // DEBUG!
     #define LOGSJ(A){ A } // Output SimfileJoiner
 
-     /// SceneParser
+    /// SceneParser
     #define SCENEPARSER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+
+    /// RenderConverter
+    #define RENDERCONVERTER_LOGLEVEL 3
 
 #else
 
@@ -33,6 +36,9 @@
 
     /// SceneParser
     #define SCENEPARSER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+
+    /// RenderConverter
+    #define RENDERCONVERTER_LOGLEVEL 1
 
 #endif
 /* @} */
@@ -45,6 +51,14 @@
 #define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
 #define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
 #define SKIPLOGSC( logptr , message )  LOGSCLEVEL(1,logptr,message);
+
+
+/** SceneParser Log Macros */
+#define LOGRC(log , message) LOG(log,message);
+#define LOGRCLEVEL(level, logptr , message) LOGLEVEL(level,RENDERCONVERTER_LOGLEVEL,logptr,message);
+#define LOGRCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
+#define LOGRCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
+#define LOGRCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
 
 
 #endif

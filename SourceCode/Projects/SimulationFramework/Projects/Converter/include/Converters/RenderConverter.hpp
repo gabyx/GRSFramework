@@ -8,24 +8,18 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
+
+#include "LogDefines.hpp"
+
 #include "SimpleLogger.hpp"
 #include "CPUTimer.hpp"
 #include "ProgressBarCL.hpp"
 #include "MultiBodySimFile.hpp"
 
 
-#include "LogDefines.hpp"
-
 #include "SceneParser.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
-
-
-#include "SphereGeometry.hpp"
-#include "PlaneGeometry.hpp"
-#include "BoxGeometry.hpp"
-#include "MeshGeometry.hpp"
-#include "HalfspaceGeometry.hpp"
 
 class RenderConverter{
 public:
@@ -66,6 +60,7 @@ private:
 
     void loadGeometryCollection(){
 
+        LOGRCLEVEL1(m_log, "---> Load Geometries ...")
         DynamicsSystemType::ParserModulesCreator c(&m_dynSys);
 
         using SceneParserType = SceneParser< DynamicsSystemType, DynamicsSystemType::ParserModulesCreator::SceneParserTraits >;
@@ -73,12 +68,13 @@ private:
 
         parser.parseScene(m_sceneFile);
 
+        LOGRCLEVEL1(m_log, "---> Loaded: " << m_dynSys.m_geometryMap.size() << " geometries, "
+                    << m_dynSys.m_scales.size() << " scales, " << m_dynSys.m_visMeshs.size() << " meshs paths" << std::endl;)
+        LOGRCLEVEL1(m_log, "---> Load Geometries finished ")
     }
 
     void convertFile(const boost::filesystem::path & f){
         LOG(m_log, "---> Converting file:" << f << std::endl;);
-
-
 
     }
 

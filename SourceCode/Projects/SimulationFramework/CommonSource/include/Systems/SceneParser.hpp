@@ -387,6 +387,7 @@ public:
                    GeometryMap * geomMap = nullptr)
         : m_parser(p),m_pSimulationLog(p->getSimLog()),m_globalGeometries(g),
           m_externalScalesGroupCache(scalesGroup), m_externalGeometryCache(geomMap) {
+        ASSERTMSG( m_globalGeometries , "GeometryModule needs a globalGeometry pointer!")
     };
 
 
@@ -435,7 +436,6 @@ private:
         if(Options::m_cacheScale && bodyList) {
             m_externalScalesGroupCache->assign(bodyList->size(), Vector3(1,1,1));
         }
-        LOGSCLEVEL3(m_pSimulationLog, "---> m_externalScalesGroupCache: " << m_externalScalesGroupCache->size() <<std::endl;)
 
         if(std::strcmp(geometryNode.name() , "Sphere")==0) {
             parseSphereGeometry(geometryNode);
@@ -1921,16 +1921,6 @@ public:
 
             // Parse Body Group
             parseRigidBodies(node);
-
-            // Parse Visualization (if not empty)
-            XMLNodeType  visualizationNode = node.child("Visualization");
-            if(m_pVisMod && visualizationNode) {
-                if(m_pInitStatesMod){
-                    m_pVisMod->parse(visualizationNode, &m_bodiesGroup, m_pInitStatesMod->getStatesGroup(), m_startIdGroup, m_eBodiesState );
-                }else{
-                    m_pVisMod->parse(visualizationNode, &m_bodiesGroup, nullptr , m_startIdGroup, m_eBodiesState );
-                }
-            }
         }
 
         LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
@@ -2014,7 +2004,7 @@ private:
                 || ( m_eBodiesState == RigidBodyType::BodyMode::STATIC  && !Options::m_parseStaticBodies)
                 || (m_parseSelectiveBodyIds && hasSelectiveFlag && m_startRangeIdIt== m_opts.m_bodyIdRange.end()) // out of m_bodyIdRange, no more id's which could be parsed in
           ) {
-            LOGSCLEVEL2(m_pSimulationLog, "---> Skip Group" << std::endl;)
+            LOGSCLEVEL1(m_pSimulationLog, "---> Skip Group" << std::endl;)
             // update the number of bodies in this group and skip this group xml node
 
             *currGroupIdToNBodies += instances;
@@ -2127,6 +2117,15 @@ private:
         }
         // ===============================================================================================================
 
+        // Parse Visualization (if not empty)
+        XMLNodeType  visualizationNode = rigidbodies.child("Visualization");
+        if(m_pVisMod && visualizationNode) {
+            if(m_pInitStatesMod){
+                m_pVisMod->parse(visualizationNode, &m_bodiesGroup, m_pInitStatesMod->getStatesGroup(), m_startIdGroup, m_eBodiesState );
+            }else{
+                m_pVisMod->parse(visualizationNode, &m_bodiesGroup, nullptr , m_startIdGroup, m_eBodiesState );
+            }
+        }
 
         LOGSCLEVEL1(m_pSimulationLog, "==================================" << std::endl;);
     }

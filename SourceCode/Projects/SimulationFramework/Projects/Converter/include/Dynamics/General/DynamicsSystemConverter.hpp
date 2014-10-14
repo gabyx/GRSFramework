@@ -110,6 +110,7 @@ public:
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+    GlobalGeometryMapType m_globalGeometries;
 
     using GeometryMapType        = std::unordered_map< RigidBodyIdType , typename RigidBodyType::GeometryType>;
     GeometryMapType m_geometryMap;
@@ -132,7 +133,7 @@ public:
             using ContactParamModuleType     = ParserModules::ContactParamModule<SceneParserTraits>;
             using InitStatesModuleType       = ParserModules::InitStatesModule<SceneParserTraits> ;
 
-            using BodyMStaticOptions         = ParserModules::BodyModuleStaticOptions<true,true,true,false,false,false,false>;
+            using BodyMStaticOptions         = ParserModules::BodyModuleStaticOptions<true,true,true,true,false,false,false>;
             using BodyModuleType             = ParserModules::BodyModule< SceneParserTraits, BodyMStaticOptions > ;
 
             using GeomMStaticOptions         = ParserModules::GeometryModuleStaticOptions<false,true,false,true>;
@@ -165,10 +166,10 @@ public:
             using MPIModuleType            = typename TParser::MPIModuleType ;
 
             auto sett = std::unique_ptr<SettingsModuleType >(nullptr);
-            auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, nullptr, nullptr, &m_p->m_geometryMap) );
+            auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &m_p->m_globalGeometries, nullptr, &m_p->m_geometryMap) );
             auto is  = std::unique_ptr<InitStatesModuleType >(nullptr);
             auto vis = std::unique_ptr<VisModuleType>(new VisModuleType(p, &m_p->m_scales, &m_p->m_visMeshs)); // no visualization needed
-            auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  nullptr, nullptr, nullptr , nullptr, nullptr )) ;
+            auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p, geom.get(), nullptr, vis.get() , nullptr, nullptr )) ;
             auto es  = std::unique_ptr<ExternalForcesModuleType >(nullptr);
             auto con = std::unique_ptr<ContactParamModuleType>(nullptr);
 
