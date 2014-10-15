@@ -309,10 +309,6 @@ public:
                 m_renderer = Renderer::LUXRENDER;
             }
 
-            ops >> Option('s',"scene", m_sceneFile);
-
-            ops >> Option('o',"output",m_outputFile);
-
             m_inputFiles.clear();
             ops >> Option('i',"input",m_inputFiles);
             // Clear all empty paths
@@ -324,6 +320,14 @@ public:
                         it++;
                     }
             }
+
+            ops >> Option('s',"scene", m_sceneFile);
+
+            ops >> Option('m',"material", m_materialFile);
+
+            ops >> Option('o',"output",m_outputFile);
+
+
 
         }
         catch(GetOpt::ParsingErrorEx ex){

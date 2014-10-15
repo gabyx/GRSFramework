@@ -11,6 +11,7 @@
 
 #include "DynamicsSystem.hpp"
 #include "SceneParser.hpp"
+#include "MaterialsCollectionParser.hpp"
 
 #include RigidBody_INCLUDE_FILE
 
@@ -103,6 +104,16 @@ private:
 
 };
 
+//class MaterialGenerator{
+//public:
+//    generateMaterial(){}
+//};
+//
+//class MaterialMapperBase{
+//public:
+//    MaterialMapperBase(){};
+//    virtual getMaterial
+//};
 
 class DynamicsSystemConverter {
 public:
@@ -179,6 +190,34 @@ public:
         };
 
     };
+
+
+
+
+    using MaterialsMapType = std::unordered_map<unsigned int, std::string>;
+    MaterialsMapType m_materials;
+
+    struct MatCollParserModulesCreator{
+        MatCollParserModulesCreator( DynamicsSystemConverter * p): m_p(p){}
+        DynamicsSystemConverter * m_p;
+
+        template<typename TSceneParser, typename TDynamicSystem>
+        using MatCollParserTraits = MatCollParserTraits<TSceneParser,TDynamicSystem>;
+
+        template<typename TParser>
+        std::tuple< std::unique_ptr<typename TParser::MaterialsModuleType>>
+        createParserModules(TParser * p) {
+
+            using MaterialsModuleType = typename TParser::MaterialsModuleType;
+            auto mat = std::unique_ptr<MaterialsModuleType >(new MaterialsModuleType(p, &m_p->m_materials));
+
+            return std::make_tuple(std::move(mat));
+        };
+
+    };
+
+
+
 
 };
 

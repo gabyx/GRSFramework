@@ -30,6 +30,9 @@
     /// RenderConverter
     #define RENDERCONVERTER_LOGLEVEL 3
 
+    /// MaterialCollectionParser
+    #define MATERIALCOLLECTIONPARSER_LOGLEVEL 3
+
 #else
 
     #define LOGSJ(A)
@@ -39,6 +42,9 @@
 
     /// RenderConverter
     #define RENDERCONVERTER_LOGLEVEL 1
+
+    /// MaterialCollectionParser
+    #define MATERIALCOLLECTIONPARSER_LOGLEVEL 1
 
 #endif
 /* @} */
@@ -53,12 +59,19 @@
 #define SKIPLOGSC( logptr , message )  LOGSCLEVEL(1,logptr,message);
 
 
-/** SceneParser Log Macros */
+/** RenderConverter Log Macros */
 #define LOGRC(log , message) LOG(log,message);
 #define LOGRCLEVEL(level, logptr , message) LOGLEVEL(level,RENDERCONVERTER_LOGLEVEL,logptr,message);
 #define LOGRCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
 #define LOGRCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
 #define LOGRCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
+
+/** MaterialCollectionParser Log Macros */
+#define LOGMC(log , message) LOG(log,message);
+#define LOGMCLEVEL(level, logptr , message) LOGLEVEL(level,MATERIALCOLLECTIONPARSER_LOGLEVEL,logptr,message);
+#define LOGMCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
+#define LOGMCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
+#define LOGMCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
 
 
 #endif

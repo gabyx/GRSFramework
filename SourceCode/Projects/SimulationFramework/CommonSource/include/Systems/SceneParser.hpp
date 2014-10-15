@@ -45,23 +45,7 @@
 
 #include "Range.hpp"
 
-
-#define CHECK_XMLNODE( _node_ , _nodename_ ) \
-    if( ! _node_ ){ \
-        THROWEXCEPTION("XML Node: " << _nodename_ << " does not exist!");  \
-    }
-#define CHECK_XMLATTRIBUTE( _node_ , _nodename_ ) \
-    if( ! _node_ ){ \
-        THROWEXCEPTION("XML Attribute: " << _nodename_ << " does not exist!");  \
-    }
-
-#define GET_XMLCHILDNODE_CHECK( _childnode_ , _childname_ , _node_ ) \
-    _childnode_ = _node_.child( _childname_ ); \
-    CHECK_XMLNODE( _childnode_ , _childname_)
-
-#define GET_XMLATTRIBUTE_CHECK( _att_ , _attname_ , _node_ ) \
-    _att_ = _node_.attribute( _attname_ ); \
-    CHECK_XMLATTRIBUTE( _att_ , _attname_ )
+#include "XMLMacros.hpp"
 
 
 #define DEFINE_PARSER_BASE_TYPE_TRAITS( TParserTraits ) \
@@ -2394,6 +2378,9 @@ public:
     * Load a file, this does not parse the file, it only loads the DOM tree!
     */
     void loadFile(const boost::filesystem::path & file){
+        if(!boost::filesystem::exists(file)) {
+            ERRORMSG("Scene Input file does not exist!");
+        }
         pugi::xml_parse_result result = m_xmlDoc->load_file(file.c_str());
         if (result) {
             LOGSCLEVEL1(m_pSimulationLog, "---> Loaded XML [" << file.string() << "] without errors!" << std::endl;);
@@ -2522,6 +2509,8 @@ protected:
             THROWEXCEPTION("File name is empty!");
         }
 
+
+
         // Load the file if necessary
         if(file != m_currentParseFilePath) {
             loadFile(file);
@@ -2529,9 +2518,7 @@ protected:
 
         LOGSCLEVEL1( m_pSimulationLog, "---> Scene Input file: "  << file.string() <<std::endl; );
 
-        if(!boost::filesystem::exists(m_currentParseFilePath)) {
-            ERRORMSG("Scene Input file does not exist!");
-        }
+
 
 
         try {

@@ -31,13 +31,17 @@ SET(COMMON_INC
     ${SOURCE_DIR}/include/Common/AssertionDebug.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
-    
+
     ${PROJECT_SOURCE_DIR}/include/Common/ApplicationCLOptionsConverter.hpp
-    
+
     ${PROJECT_SOURCE_DIR}/include/Converters/SimFileJoiner.hpp
     ${PROJECT_SOURCE_DIR}/include/Converters/SimFileResampler.hpp
-    
+
+    ${PROJECT_SOURCE_DIR}/include/Converters/RenderConverter.hpp
+
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemConverter.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MaterialsCollectionParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RenderMaterialMapper.hpp
 )
 SET(COMMON_SRC
     ${SOURCE_DIR}/src/Common/TypeDefs.cpp
@@ -81,9 +85,9 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 set(INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
     ${EIGEN_INCLUDE_DIR}
-    
+
     ${PROJECT_BINARY_DIR}/ConfigFiles/
-    
+
 	${COMMONSOURCE_DIR}/external/getoptpp/
     ${COMMONSOURCE_DIR}/external/getoptpp/src/
 
@@ -91,9 +95,10 @@ set(INCLUDE_DIRS
 	${PROJECT_SOURCE_DIR}/include/Common
     ${PROJECT_SOURCE_DIR}/include/Converters
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/
-    
+
+
 	${SOURCE_DIR}/include/Common
-    
+
     ${GLOBAL_COMMON_INC_DIR}
 
 )

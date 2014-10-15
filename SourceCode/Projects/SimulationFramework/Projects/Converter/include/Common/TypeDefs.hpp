@@ -36,8 +36,11 @@ struct GlobalConfigs{
     };
 
     struct GeneralConfigs{
-         using DynamicsSystemType = typename MyConfigs::DynamicsSystemType  ;
          using RandomGeneratorType = std::mt19937;
+    };
+
+    struct SystemConfig{
+         using DynamicsSystemType = typename MyConfigs::DynamicsSystemType  ;
     };
 
     struct DynamicSystemConfigs{
@@ -50,12 +53,16 @@ struct GlobalConfigs{
         using RigidBodySolverDataType = RigidBodySolverDataCONoG                        ;
     };
 
+    struct MPIInformationConfigs{
+        using RankIdType = unsigned int;
+    };
+
 };
 
 
 #define DEFINE_DYNAMICSSYTEM_CONFIG_TYPES \
     using InclusionSolverSettingsType = typename GlobalConfigs::DynamicSystemConfigs::InclusionSolverSettingsType    ; \
-    using DynamicsSystemType = typename GlobalConfigs::GeneralConfigs::DynamicsSystemType               ; \
+    using DynamicsSystemType = typename GlobalConfigs::SystemConfig::DynamicsSystemType               ; \
     DEFINE_RIGIDBODY_CONFIG_TYPES \
 
 
@@ -77,6 +84,9 @@ struct GlobalConfigs{
 
 #define DEFINE_GENERAL_CONFIG_TYPES \
     using RandomGenType = typename GlobalConfigs::GeneralConfigs::RandomGeneratorType;
+
+#define DEFINE_MPI_INFORMATION_CONFIG_TYPES \
+    using RankIdType = GlobalConfigs::MPIInformationConfigs::RankIdType;
 
 
 struct MyIOFormat{

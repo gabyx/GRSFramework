@@ -12,8 +12,6 @@ template<typename IntType, typename Allocator = std::allocator<IntType>  >
 class Range{
 	public:
 
-
-
 	    using RangeType = std::vector<IntType,Allocator>;
 
 	    STATIC_ASSERTM( std::is_integral<IntType>::value , IntType_Needs_to_be_Integeral );
