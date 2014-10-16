@@ -11,18 +11,20 @@
 
 #include "LayoutConfigDefs.hpp"
 
+#define LogicTypes_INCLUDE_FILE                 "LogicTypes.hpp"
 
-#define DynamicsSystem_INCLUDE_FILE             "DynamicsSystemConverter.hpp"
-class DynamicsSystemConverter;
+#define DynamicsSystem_INCLUDE_FILE             "DynamicsSystem.hpp"
+class DynamicsSystem;
 
 #define InclusionSolverSettings_INCLUDE_FILE    "InclusionSolverSettings.hpp"
 class InclusionSolverSettings;
 
 #define RigidBody_INCLUDE_FILE                  "RigidBody.hpp"
 class RigidBodyBase;
-#define RigidBodySolverData_INCLUDE_FILE "RigidBodySolverData.hpp"
+#define RigidBodySolverData_INCLUDE_FILE        "RigidBodySolverData.hpp"
 class RigidBodySolverDataCONoG;
 
+class RenderConverterData;
 
 //Try to make framework settings simpler:
 struct GlobalConfigs{
@@ -31,7 +33,7 @@ struct GlobalConfigs{
     struct MyConfigs{
 
         using RigidBodyType = RigidBodyBase ;
-        using DynamicsSystemType = DynamicsSystemConverter  ;
+        using DynamicsSystemType = DynamicsSystem  ;
         using InclusionSolverSettingsType = InclusionSolverSettings;
     };
 
@@ -55,6 +57,10 @@ struct GlobalConfigs{
 
     struct MPIInformationConfigs{
         using RankIdType = unsigned int;
+    };
+
+    struct RenderConvertDataConfigs{
+        using RenderConverterDataType = RenderConverterData;
     };
 
 };
@@ -88,6 +94,10 @@ struct GlobalConfigs{
 #define DEFINE_MPI_INFORMATION_CONFIG_TYPES \
     using RankIdType = GlobalConfigs::MPIInformationConfigs::RankIdType;
 
+
+#define DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES \
+    using RenderConverterDataType = typename GlobalConfigs::RenderConvertDataConfigs::RenderConverterDataType               ; \
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
 struct MyIOFormat{
   static Eigen::IOFormat Matlab;

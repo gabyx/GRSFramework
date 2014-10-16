@@ -18,7 +18,7 @@ public:
     const unsigned int m_id;
 
 public:
-    LogicNode(unsigned int id, unsigned int nSockets);
+    LogicNode(unsigned int id);
 
 	virtual ~LogicNode();
 
@@ -48,8 +48,8 @@ public:
 	    auto * t = new LogicSocket<T>(this, true, defaultValue, idx);
 		m_inputs.push_back(t);
 
-		ASSERTMSG(idx < m_sockets.size(),"Node: " << m_id << " idx: " << idx);
-		m_sockets[idx] = t;
+//		ASSERTMSG(idx < m_sockets.size(),"Node: " << m_id << " idx: " << idx);
+//		m_sockets[idx] = t;
 
 	}
 
@@ -60,18 +60,20 @@ public:
 		auto * t = new LogicSocket<T>(this, false, defaultValue, idx);
 		m_outputs.push_back(t);
 
-
-		ASSERTMSG(idx < m_sockets.size(),"Node: " << m_id << " idx: " << idx);
-		m_sockets[idx] = t;
+//		ASSERTMSG(idx < m_sockets.size(),"Node: " << m_id << " idx: " << idx);
+//		m_sockets[idx] = t;
 	}
 
-	template<typename T> LogicSocket<T>* getSocket(int idx);
-	template<typename T> T getSocketValue(int idx);
-	template<typename T> T& getSocketRefValue(int idx);
+	template<typename T> LogicSocket<T>* getISocket(unsigned int idx);
+    template<typename T> LogicSocket<T>* getOSocket(unsigned int idx);
 
+	template<typename T> T getISocketValue(unsigned int idx);
+	template<typename T> T& getISocketRefValue(unsigned int idx);
+    template<typename T> T getOSocketValue(unsigned int idx);
+	template<typename T> T& getOSocketRefValue(unsigned int idx);
 
-	template<typename T>
-	void setSocketValue(int idx, T data);
+	template<typename T> void setISocketValue(unsigned int idx, T data);
+    template<typename T> void setOSocketValue(unsigned int idx, T data);
 
     static void linkTogether(LogicSocketBase * out, LogicSocketBase * in);
 
@@ -87,33 +89,58 @@ protected:
     SocketListType  m_outputs;
     unsigned int    m_priority;
 
-    SocketListType m_sockets;
+    //SocketListType m_sockets;
 };
 
 
 #include "LogicSocket.hpp"
 
+
 template<typename T>
-T LogicNode::getSocketValue(int idx)
+LogicSocket<T>* LogicNode::getISocket(unsigned int idx)
 {
-    return m_sockets[idx]->castToType<T>()->getValue();
+    return m_inputs[idx]->castToType<T>();
+}
+template<typename T>
+LogicSocket<T>* LogicNode::getOSocket(unsigned int idx)
+{
+    return m_outputs[idx]->castToType<T>();
+}
+
+
+template<typename T>
+T LogicNode::getISocketValue(unsigned int idx)
+{
+    return m_inputs[idx]->castToType<T>()->getValue();
+}
+template<typename T>
+T LogicNode::getOSocketValue(unsigned int idx)
+{
+    return m_outputs[idx]->castToType<T>()->getValue();
 }
 
 template<typename T>
-T & LogicNode::getSocketRefValue(int idx)
+T & LogicNode::getISocketRefValue(unsigned int idx)
 {
-    return m_sockets[idx]->castToType<T>()->getRefValue();
+    return m_inputs[idx]->castToType<T>()->getRefValue();
+}
+template<typename T>
+T & LogicNode::getOSocketRefValue(unsigned int idx)
+{
+    return m_outputs[idx]->castToType<T>()->getRefValue();
 }
 
-template<typename T>
-LogicSocket<T>* LogicNode::getSocket(int idx){
-    return m_sockets[idx]->castToType<T>();
-}
+
 
 template<typename T>
-void LogicNode::setSocketValue(int idx, T data)
+void LogicNode::setISocketValue(unsigned int idx, T data)
 {
-    m_sockets[idx]->castToType<T>()->setValue(data);
+    m_inputs[idx]->castToType<T>()->setValue(data);
+}
+template<typename T>
+void LogicNode::setOSocketValue(unsigned int idx, T data)
+{
+    m_outputs[idx]->castToType<T>()->setValue(data);
 }
 
 

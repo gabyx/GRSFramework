@@ -14,6 +14,9 @@
 
 #include "XMLMacros.hpp"
 
+#include "RenderMaterialGenLogic.hpp"
+
+
 #define DEFINE_MATCOLLPARSER_BASE_TYPE_TRAITS( TParserTraits ) \
     using ParserType = typename TParserTraits::ParserType; \
     using CollectionType = typename TParserTraits::CollectionType; \
@@ -27,6 +30,7 @@
 #define  DEFINE_MATCOLPARSER_TYPE_TRAITS( TParserTraits )  \
     DEFINE_MATCOLLPARSER_BASE_TYPE_TRAITS( TParserTraits ) \
     using MaterialsModuleType     = typename TParserTraits::MaterialsModuleType;\
+    using MatGenModuleType     = typename TParserTraits::MatGenModuleType;\
 
 
 namespace MatCollParserModules {
@@ -36,9 +40,9 @@ namespace MatCollParserModules {
     public:
         DEFINE_MATCOLPARSER_TYPE_TRAITS(TParserTraits)
 
-        using MaterialsMapType = typename CollectionType::MaterialsMapType;
+        using MaterialMapType = typename CollectionType::MaterialMapType;
 
-        MaterialsModule(ParserType * p, MaterialsMapType * m):m_parser(p),m_materials(m), m_pLog(p->getLog()) {}
+        MaterialsModule(ParserType * p, MaterialMapType * m):m_parser(p),m_materials(m), m_pLog(p->getLog()) {}
 
         void parse(XMLNodeType & materialNode) {
             auto nodes = materialNode.children("Material");
@@ -49,7 +53,10 @@ namespace MatCollParserModules {
                       THROWEXCEPTION("---> String conversion in Material: id failed");
                  }
                  ASSERTMSG(itNode->value()," String in material id: " << id << "is empty!")
-                 m_materials->emplace(id, itNode->value() );
+
+                 auto s = std::shared_ptr<RenderMaterial>( new RenderMaterial(id,itNode->value()) );
+                 m_materials->emplace(id, s);
+
                  LOGMCLEVEL3(m_pLog,"---> Parsed Material with id: " << id << std::endl;)
             }
         }
@@ -57,11 +64,105 @@ namespace MatCollParserModules {
         void cleanUp() {
         }
 
+        MaterialMapType * getMaterialMap(){return m_materials;}
     private:
         ParserType * m_parser;
         LogType * m_pLog;
-        MaterialsMapType * m_materials;
+        MaterialMapType * m_materials;
     };
+
+
+    template<typename TParserTraits>
+    class MaterialGenerator {
+    public:
+        DEFINE_MATCOLPARSER_TYPE_TRAITS(TParserTraits)
+
+        using MaterialMapType = typename CollectionType::MaterialMapType;
+        using MaterialGenType = typename CollectionType::MaterialGenType;
+
+        MaterialGenerator(ParserType * p, MaterialGenType * g):m_parser(p),m_matGen(g), m_pLog(p->getLog()) {}
+
+        void parse(XMLNodeType & matGenNode, MaterialMapType * materials) {
+
+            m_materials = materials;
+
+            // Add all tools into the execution list!
+            auto nodes = matGenNode.children("Tool");
+            auto itNodeEnd = nodes.end();
+            for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
+
+                 unsigned int id;
+                 if(!Utilities::stringToType(id, itNode->attribute("id").value())) {
+                      THROWEXCEPTION("---> String conversion in Tool: id failed");
+                 }
+
+                 bool isInput = false;
+                 auto att = itNode->attribute("isInput");
+                 if(att){
+                    if(!Utilities::stringToType(isInput, att.value())) {
+                      THROWEXCEPTION("---> String conversion in Tool: isInput failed");
+                    }
+                 }
+
+                 bool isOutput = false;
+                 att = itNode->attribute("isOutput");
+                 if(att){
+                    if(!Utilities::stringToType(isOutput, att.value())) {
+                      THROWEXCEPTION("---> String conversion in Tool: isOutput failed");
+                    }
+                 }
+
+
+                 std::string type = itNode->attribute("type").value();
+                 if(type == "BodyData"){
+                        createToolBodyData(matGenNode,id,isInput,isOutput);
+                 }else if(type == "MaterialLookUp"){
+                        createToolMaterialLookUp(matGenNode,id,isInput,isOutput);
+
+                 }else{
+                        THROWEXCEPTION("---> String conversion in Tool: type not found!"); break;
+                 }
+
+                 LOGMCLEVEL3(m_pLog,"---> Parsed Tool with id: " << id << std::endl;);
+            }
+        }
+
+        void cleanUp() {
+        }
+
+    private:
+
+        void createToolBodyData(XMLNodeType & matGenNode, unsigned int id, bool isInput, bool isOutput){
+
+            auto * node = new LogicNodes::BodyData(id);
+            m_matGen->getExecTree()->addNode(node,isInput,isOutput);
+
+        }
+
+        void createToolMaterialLookUp(XMLNodeType & matGenNode, unsigned int id, bool isInput, bool isOutput){
+
+            // Get default material
+            auto it = m_materials->begin();
+
+            if(it == m_materials->end()){
+                ERRORMSG("No default material found for MaterialLookUp tool!")
+            }
+
+            auto * node = new LogicNodes::LookUpTable<unsigned int,
+                                        std::shared_ptr<RenderMaterial>,
+                                        MaterialMapType >(id,m_materials,it->second);
+
+            m_matGen->getExecTree()->addNode(node,isInput,isOutput);
+
+        }
+
+
+        ParserType * m_parser;
+        LogType * m_pLog;
+        MaterialGenType * m_matGen;
+        MaterialMapType * m_materials;
+    };
+
 };
 
 
@@ -90,6 +191,8 @@ template<typename TSceneParser, typename TCollection>
 struct MatCollParserTraits : MatCollParserBaseTraits<TSceneParser,TCollection> {
     // Module typedefs
     using MaterialsModuleType   = typename MatCollParserModules::MaterialsModule<MatCollParserTraits>;
+
+    using MatGenModuleType   = typename MatCollParserModules::MaterialGenerator<MatCollParserTraits>;
 };
 
 template< typename TCollection, template<typename P, typename C> class TParserTraits = MatCollParserTraits >
@@ -113,6 +216,7 @@ private:
 
     /** Modules */
     std::unique_ptr< MaterialsModuleType >       m_pMaterialsModule;
+    std::unique_ptr< MatGenModuleType >          m_pMaterialGeneratorModule;
 
 public:
 
@@ -125,7 +229,7 @@ public:
         m_pLog = log;
         ASSERTMSG(m_pLog, "Log pointer is zero!");
         // Get all Modules from the Generator
-        std::tie(m_pMaterialsModule) = moduleGen.template createParserModules<ParserForModulesType>( static_cast<ParserForModulesType*>(this));
+        std::tie(m_pMaterialsModule, m_pMaterialGeneratorModule) = moduleGen.template createParserModules<ParserForModulesType>( static_cast<ParserForModulesType*>(this));
     }
 
 
@@ -221,6 +325,11 @@ private:
             XMLNodeType node = m_xmlRootNode.child("Materials");
             if(node && m_pMaterialsModule) {
                 m_pMaterialsModule->parse(node);
+            }
+
+            node = m_xmlRootNode.child("MaterialGenerator");
+            if(node && m_pMaterialGeneratorModule) {
+                m_pMaterialGeneratorModule->parse(node, m_pMaterialsModule->getMaterialMap() );
             }
 
 

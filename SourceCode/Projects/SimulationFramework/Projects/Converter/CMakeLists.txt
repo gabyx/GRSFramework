@@ -38,13 +38,18 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Converters/SimFileResampler.hpp
 
     ${PROJECT_SOURCE_DIR}/include/Converters/RenderConverter.hpp
-
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemConverter.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MaterialsCollectionParser.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RenderMaterialMapper.hpp
+    
+    ${PROJECT_SOURCE_DIR}/include/Logic/LogicTypes.hpp
+    
+    ${PROJECT_SOURCE_DIR}/include/General/RenderConverterData.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/MaterialsCollectionParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RenderMaterialGenLogic.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RenderMaterialGen.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RenderMaterial.hpp
 )
 SET(COMMON_SRC
     ${SOURCE_DIR}/src/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/General/RenderConverterData.cpp
 )
 
 
@@ -94,7 +99,8 @@ set(INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/include/App
 	${PROJECT_SOURCE_DIR}/include/Common
     ${PROJECT_SOURCE_DIR}/include/Converters
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/
+    ${PROJECT_SOURCE_DIR}/include/General/
+    ${PROJECT_SOURCE_DIR}/include/Logic/
 
 
 	${SOURCE_DIR}/include/Common

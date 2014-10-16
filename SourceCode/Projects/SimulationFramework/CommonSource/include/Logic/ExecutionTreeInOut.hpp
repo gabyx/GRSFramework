@@ -10,83 +10,14 @@
 #include "LogicSocket.hpp"
 
 
-template<unsigned int NIN, unsigned int NOUT>
-class DummyLogicNode : public LogicNode {
-public:
-
-    DEFINE_LAYOUT_CONFIG_TYPES;
-
-    DummyLogicNode(unsigned int id) : LogicNode(id, NIN+NOUT) {
-        for(unsigned int i=0; i<NIN; i++) {
-            addISock(0.0);
-        }
-        for(unsigned int i=0; i<NOUT; i++) {
-            addOSock(0.0);
-        }
-    }
-
-    virtual ~DummyLogicNode() {}
-
-    void compute() {
-        double t = 0;
-        for(unsigned int i=0; i<NIN; i++) {
-            t += getSocketValue<double>(i);
-        }
-        std::cout << m_id << ": " << t << std::endl;
-        for(unsigned int i=0; i<NOUT; i++) {
-            setSocketValue(i+NIN,t+1);
-        };
-    }
-
-};
-
-//
-//class SpecialNode : public LogicNode
-//{
-//public:
-//
-//    DEFINE_LAYOUT_CONFIG_TYPES;
-//
-//    using InputTypes  = boost::mpl::vector<double,int,std::string>;
-//    using OutputTypes = boost::mpl::vector<double,int,std::string>;
-//
-//	DummyLogicNode(unsigned int id) : LogicNode(id, NIN+NOUT)
-//	{
-//		for(unsigned int i=0; i<NIN;i++){
-//            addISock(1.0);
-//		}
-//		for(unsigned int i=0; i<NOUT;i++){
-//            addOSock(1.0);
-//		}
-//	}
-//
-//	virtual ~DummyLogicNode() {}
-//
-//	void compute()
-//	{
-//	    double t = 0;
-//	    for(unsigned int i=0; i<NIN;i++){
-//            t += getSocketValue<double>(i);
-//	    }
-//		for(unsigned int i=0; i<NOUT;i++){
-//            setSocketValue(i+NIN,t);
-//	    };
-//	}
-//
-//};
 
 
 
-template<typename TInputNode>
 class ExecutionTreeInOut {
 private:
-    using InputNodeType = TInputNode;
 public:
 
     ExecutionTreeInOut() {
-        // push input node
-        m_inputNode = new InputNodeType(0);
-        addNode(m_inputNode);
     }
 
     ~ExecutionTreeInOut() {
@@ -95,20 +26,18 @@ public:
         }
     }
 
+    void setInputNode(unsigned int id){
+        setInOutNode<true>(id);
+    }
     LogicNode* getInputNode() {
         return m_inputNode;
     };
 
-    void setOutputNode(unsigned int id) {
-        // Set output node
-        auto it = m_nodeMap.find(id);
-        if(it == m_nodeMap.end()) {
-            ERRORMSG("No output node with id: " << id << " found " << std::endl)
-        }
-        m_outputNode = it->second;
+    void setOutputNode(unsigned int id){
+        setInOutNode<false>(id);
     }
-
-    void addNode(LogicNode * node) {
+    void addNode(LogicNode * node, bool isInput = false, bool isOutput = false) {
+        if(isInput && isOutput){ ERRORMSG("Wrong arguements!")}
         auto res = m_nodeMap.emplace(node->m_id, node);
         if(res.second) {
             m_nodes.push_back(node);
@@ -160,6 +89,22 @@ public:
     }
 
 private:
+
+    template<bool input>
+    void setInOutNode(unsigned int id){
+        // Set output node
+        auto it = m_nodeMap.find(id);
+        if(it == m_nodeMap.end()) {
+            ERRORMSG("No output node with id: " << id << " found " << std::endl)
+        }
+        if(input){
+            m_inputNode = it->second;
+        }else{
+            m_outputNode = it->second;
+        }
+
+    }
+
     /**
     * Breath first search: this function returns recursively the priority
     */

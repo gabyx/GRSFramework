@@ -1,5 +1,5 @@
-#ifndef DynamicsSystemConverter_hpp
-#define DynamicsSystemConverter_hpp
+#ifndef RenderConverterData_hpp
+#define RenderConverterData_hpp
 
 
 #include "TypeDefs.hpp"
@@ -9,11 +9,14 @@
 #include <unordered_map>
 #include <vector>
 
-#include "DynamicsSystem.hpp"
-#include "SceneParser.hpp"
-#include "MaterialsCollectionParser.hpp"
+#include "LogicNode.hpp"
 
-#include RigidBody_INCLUDE_FILE
+#include DynamicsSystem_INCLUDE_FILE
+#include "SceneParser.hpp"
+
+#include "RenderMaterial.hpp"
+#include "RenderMaterialGen.hpp"
+#include "MaterialsCollectionParser.hpp"
 
 
 namespace ParserModules {
@@ -104,37 +107,32 @@ private:
 
 };
 
-//class MaterialGenerator{
-//public:
-//    generateMaterial(){}
-//};
-//
-//class MaterialMapperBase{
-//public:
-//    MaterialMapperBase(){};
-//    virtual getMaterial
-//};
 
-class DynamicsSystemConverter {
+
+#define  DEFINE_RENDERCONVERTERDATA_TYPES  \
+    DEFINE_DYNAMICSYSTEM_BASE_TYPES \
+    using GeometryMapType = std::unordered_map< RigidBodyIdType , typename RigidBodyType::GeometryType>; \
+    using ScalesMap = std::unordered_map< RigidBodyIdType ,Vector3 >; \
+    using VisMeshMap = std::unordered_map< RigidBodyIdType , boost::filesystem::path  >; \
+    using MaterialMapType = std::unordered_map<unsigned int, std::shared_ptr<RenderMaterial> >; \
+    using MaterialGenType = RenderMaterialGenerator;
+
+class RenderConverterData {
 public:
-    DEFINE_DYNAMICSYSTEM_BASE_TYPES
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    DEFINE_RENDERCONVERTERDATA_TYPES
 
     GlobalGeometryMapType m_globalGeometries;
 
-    using GeometryMapType        = std::unordered_map< RigidBodyIdType , typename RigidBodyType::GeometryType>;
     GeometryMapType m_geometryMap;
 
-    using ScalesMap = std::unordered_map< RigidBodyIdType ,Vector3 >;
     ScalesMap m_scales;
 
-    using VisMeshMap = std::unordered_map< RigidBodyIdType , boost::filesystem::path  >;
     VisMeshMap m_visMeshs;
 
     struct ParserModulesCreator{
-        ParserModulesCreator( DynamicsSystemConverter * p): m_p(p){}
-        DynamicsSystemConverter * m_p;
+        ParserModulesCreator( RenderConverterData * p): m_p(p){}
+        RenderConverterData * m_p;
 
         template<typename TSceneParser, typename TDynamicsSystem>
         struct SceneParserTraits : SceneParserBaseTraits<TSceneParser,TDynamicsSystem> {
@@ -192,26 +190,30 @@ public:
     };
 
 
-
-
-    using MaterialsMapType = std::unordered_map<unsigned int, std::string>;
-    MaterialsMapType m_materials;
+    MaterialMapType m_materials;
+    MaterialGenType m_materialGen;
 
     struct MatCollParserModulesCreator{
-        MatCollParserModulesCreator( DynamicsSystemConverter * p): m_p(p){}
-        DynamicsSystemConverter * m_p;
+        MatCollParserModulesCreator( RenderConverterData * p): m_p(p){}
+        RenderConverterData * m_p;
 
-        template<typename TSceneParser, typename TDynamicSystem>
-        using MatCollParserTraits = MatCollParserTraits<TSceneParser,TDynamicSystem>;
+        template<typename TSceneParser, typename TCollection>
+        using MatCollParserTraits = MatCollParserTraits<TSceneParser,TCollection>;
 
         template<typename TParser>
-        std::tuple< std::unique_ptr<typename TParser::MaterialsModuleType>>
+        std::tuple< std::unique_ptr<typename TParser::MaterialsModuleType> ,
+                    std::unique_ptr<typename TParser::MatGenModuleType>
+        >
         createParserModules(TParser * p) {
 
             using MaterialsModuleType = typename TParser::MaterialsModuleType;
+            using MatGenModuleType    = typename TParser::MatGenModuleType;
+
             auto mat = std::unique_ptr<MaterialsModuleType >(new MaterialsModuleType(p, &m_p->m_materials));
 
-            return std::make_tuple(std::move(mat));
+            auto matGen = std::unique_ptr<MatGenModuleType >(new MatGenModuleType(p, &m_p->m_materialGen));
+
+            return std::make_tuple(std::move(mat),std::move(matGen));
         };
 
     };

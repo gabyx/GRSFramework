@@ -1,10 +1,10 @@
 #include "LogicNode.hpp"
 #include "LogicSocket.hpp"
 
-LogicNode::LogicNode(unsigned int id, unsigned int nSockets = 2) :
+LogicNode::LogicNode(unsigned int id) :
         m_id(id), m_hasLinks(false), m_priority(0)
 {
-    m_sockets.assign(nSockets,nullptr);
+    //m_sockets.assign(nSockets,nullptr);
 }
 
 LogicNode::~LogicNode()

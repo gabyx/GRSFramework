@@ -12,6 +12,7 @@
 #include "EnumClassHelper.hpp"
 
 #include "LogicCommon.hpp"
+#include LogicTypes_INCLUDE_FILE
 
 class LogicNode;
 template<typename T> class LogicSocket;
@@ -27,19 +28,9 @@ public:
     const unsigned int m_id = 0;
     const unsigned int m_type; ///< The index in the mpl sequence, which type this is!
 
-    using TypeSeq = boost::mpl::vector<double,
-                                       float,
-                                       char,
-                                       short,
-                                       int,
-                                       unsigned int,
-                                       unsigned long,
-                                       unsigned long long,
-                                       std::string,
-                                       Vector3,
-                                       Quaternion,
-                                       VectorQBody,
-                                       VectorUBody>;
+    /** Using an external logic type list */
+    using TypeSeq = LogicTypes::TypeSeq;
+
 
     /**
     * Cast to a LogicSocket<T> *,
@@ -186,49 +177,53 @@ LogicSocket<T>* getSocket(LogicSocketBase* pSock) {
 }
 
 #define ADD_ISOCK( name, value )      \
-	addISock < _ISOCKET_TYPE_##name > ( value );	\
+	addISock < IType##name > ( value );	\
 
 
 #define ADD_OSOCK(name, value)      \
-	addOSock< _OSOCKET_TYPE_##name > (  value );	\
+	addOSock< OType##name > (  value );	\
 
 
 #define SET_ISOCKET_VALUE( name, value )	\
-	setSocketValue< _ISOCKET_TYPE_##name > ( (Inputs::name), (value) )
+	setISocketValue< IType##name > ( (Inputs::name), (value) )
 
 #define SET_OSOCKET_VALUE( name, value )	\
-	setSocketValue< _OSOCKET_TYPE_##name > ( (Outputs::name), (value) )
+	setOSocketValue< OType##name > ( (Outputs::name), (value) )
 
 
 
 #define GET_ISOCKET_VALUE( name )      \
-	getSocketValue< _SOCKET_TYPE_##name > ( (Inputs::name) )
+	getISocketValue< IType##name > ( (Inputs::name) )
 
 #define GET_OSOCKET_VALUE( name )      \
-	getSocketValue< _SOCKET_TYPE_##name > ( (Outputs::name) )
+	getOSocketValue< OType##name > ( (Outputs::name) )
 
 
 #define GET_ISOCKET_REF_VALUE( name )      \
-	getSocketRefValue< _SOCKET_TYPE_##name > ( (Inputs::name) )
+	getISocketRefValue< IType##name > ( (Inputs::name) )
 
 #define GET_OSOCKET_REF_VALUE( name )      \
-	getSocketRefValue< _SOCKET_TYPE_##name > ( (Outputs::name) )
+	getISocketRefValue< OType##name > ( (Outputs::name) )
 
 
 #define GET_ISOCKET( name )      \
-	getSocket< _ISOCKET_TYPE_##name > ( (Inputs::name) )
+	getISocket< IType##name > ( (Inputs::name) )
 
 #define GET_OSOCKET( name )      \
-	getSocket< _OSOCKET_TYPE_##name > ( (Outputs::name) )
+	getOSocket< OType##name > ( (Outputs::name) )
 
 
 #define DECLARE_ISOCKET_TYPE( name, type)	\
-	typedef type _ISOCKET_TYPE_##name;	\
-	inline LogicSocket< type >* get##name() { return getSocket< type > ( (Inputs::name) ); }
+	typedef type IType##name;	\
+	inline LogicSocket< type >* getIn_##name() { \
+	    return getISocket< type >( (Inputs::name) ); \
+    }
 
 #define DECLARE_OSOCKET_TYPE( name, type)	\
-	typedef type _OSOCKET_TYPE_##name;	\
-	inline LogicSocket< type >* get##name() { return getSocket< type > ( (Outputs::name) ); }
+	typedef type OType##name;	\
+	inline LogicSocket< type >* getOut_##name() { \
+        return getOSocket< type >( (Outputs::name) ); \
+	}
 
 
 #endif//_LogicSocket_h_

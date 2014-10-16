@@ -19,14 +19,15 @@
 
 #include "SceneParser.hpp"
 
-#include DynamicsSystem_INCLUDE_FILE
+#include "RenderConverterData.hpp"
+#include "RenderMaterialGen.hpp"
 
-#include "RenderMaterialMapper.hpp"
+#include "DummyNode.hpp"
 
 class RenderConverter {
 public:
 
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES
 
     using Renderer = typename ApplicationCLOptionsRenderer::Renderer;
 
@@ -58,31 +59,30 @@ public:
 
 private:
 
-    DynamicsSystemType m_dynSys;
-    RenderMaterialMapper m_materialMapper;
+    RenderConverterData m_renderData;
 
 
     void loadGeometryCollection() {
 
         LOGRCLEVEL1(m_log, "---> Load Geometries ..." << std::endl;)
-        DynamicsSystemType::ParserModulesCreator c(&m_dynSys);
+        RenderConverterData::ParserModulesCreator c(&m_renderData);
 
-        using SceneParserType = SceneParser< DynamicsSystemType, DynamicsSystemType::ParserModulesCreator::SceneParserTraits >;
+        using SceneParserType = SceneParser< RenderConverterData, RenderConverterData::ParserModulesCreator::SceneParserTraits >;
         SceneParserType parser(c,m_log);
 
         parser.parseScene(m_sceneFile);
 
-        LOGRCLEVEL1(m_log, "---> Loaded: " << m_dynSys.m_geometryMap.size() << " geometries, "
-                    << m_dynSys.m_scales.size() << " scales, " << m_dynSys.m_visMeshs.size() << " meshs paths" << std::endl;)
+        LOGRCLEVEL1(m_log, "---> Loaded: " << m_renderData.m_geometryMap.size() << " geometries, "
+                    << m_renderData.m_scales.size() << " scales, " << m_renderData.m_visMeshs.size() << " meshs paths" << std::endl;)
         LOGRCLEVEL1(m_log, "---> Load Geometries finished " << std::endl;)
     }
 
     void loadMaterialCollection() {
 
         LOGRCLEVEL1(m_log, "---> Load Materials ..." << std::endl;)
-        DynamicsSystemType::MatCollParserModulesCreator c(&m_dynSys);
+        RenderConverterData::MatCollParserModulesCreator c(&m_renderData);
 
-        using MatCollParserType = MaterialsCollectionParser< DynamicsSystemType>;
+        using MatCollParserType = MaterialsCollectionParser< RenderConverterData>;
         MatCollParserType parser(c,m_log);
 
         parser.parse(m_materialFile);
@@ -90,7 +90,8 @@ private:
 
         LOGRCLEVEL1(m_log, "---> Setup Mapper ..." << std::endl;)
 
-        ExecutionTreeInOut<DummyLogicNode<1,1> > m;
+        ExecutionTreeInOut m;
+        LogicNode * n0 = new DummyLogicNode<1,3>(0);
         LogicNode * n1 = new DummyLogicNode<1,3>(1);
         LogicNode * n2 = new DummyLogicNode<2,3>(2);
         LogicNode * n3 = new DummyLogicNode<1,1>(3);
@@ -99,7 +100,7 @@ private:
         LogicNode * n6 = new DummyLogicNode<4,1>(6);
 
         //link
-        LogicNode::linkTogether(m.getInputNode(),0,n1,0);
+        LogicNode::linkTogether(n0,0,n1,0);
 
         LogicNode::linkTogether(n1,0,n2,0);
         LogicNode::linkTogether(n1,1,n3,0);
@@ -116,7 +117,9 @@ private:
 
         // cycle
         //LogicNode::linkTogether(n5,1,n2,1);
-
+        LOGRCLEVEL1(m_log, "---> Setup" << std::endl;)
+        m.addNode(n0);
+        m.setInputNode(0);
         m.addNode(n1);
         m.addNode(n2);
         m.addNode(n3);
@@ -125,11 +128,12 @@ private:
         m.addNode(n6);
 
         m.setOutputNode(6);
+        LOGRCLEVEL1(m_log, "---> Setup" << std::endl;)
         m.setup();
-
+        LOGRCLEVEL1(m_log, "---> Execute" << std::endl;)
         m.execute();
 
-        std::cout << n6->getSocketValue<double>(4) << std::endl;
+        std::cout << n6->getOSocketValue<double>(0) << std::endl;
     }
 
     void convertFile(const boost::filesystem::path & f) {

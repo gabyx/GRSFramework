@@ -248,7 +248,7 @@ struct CommaSeperatedPairBinShift{
     }
 };
 
-template<typename T, typename TypeConverter = StdTypeConverter>
+template<typename T, typename TypeConverter>
 inline bool stringToType(T & t, const std::string& s) {
     return details::stringToTypeDispatch<TypeConverter>(t,s);
 }
