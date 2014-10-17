@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "SceneParser.hpp"
+#include "SceneParserModules.hpp"
 
 #include RigidBody_INCLUDE_FILE
 

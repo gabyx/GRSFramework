@@ -7,11 +7,8 @@
 #include "LogicNode.hpp"
 #include "LookUpTable.hpp"
 
-#include "RenderMaterial.hpp"
-
-#include "RenderConverterData.hpp"
-
 namespace LogicNodes {
+
 
     class BodyData : public LogicNode {
     public:

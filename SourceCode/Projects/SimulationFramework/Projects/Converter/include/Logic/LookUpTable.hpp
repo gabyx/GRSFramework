@@ -17,7 +17,7 @@ namespace LogicNodes{
 
         struct Outputs {
             enum {
-                Value = Inputs::INPUTS_LAST,
+                Value,
                 OUTPUTS_LAST
             };
         };
@@ -34,7 +34,6 @@ namespace LogicNodes{
 
         LookUpTable(unsigned int id, TMap * m, const TValue & d)
             : LogicNode(id), m_map(m), m_default(d) {
-            ASSERTMSG(d, "Default material is null!")
             ADD_ISOCK(Key,TKey());
             ADD_OSOCK(Value,TValue());
         }

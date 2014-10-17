@@ -13,6 +13,9 @@
 
 #include "MultiBodySimFileIOHelpers.hpp"
 
+#include "AdditionalBodyData.hpp"
+
+
 /**
 * @ingroup Common
 * @defgroup MultiBodySimFile
@@ -59,6 +62,9 @@ class SimFileJoiner; ///< Friend declaration inside of MultiBodySimFile
 class MultiBodySimFile {
     friend class SimFileJoiner;
     friend class SimFileResampler;
+
+    friend AdditionalBodyData::Process;
+    friend AdditionalBodyData::ProcessMaterial;
 public:
 
 
@@ -131,6 +137,9 @@ public:
               bool onlyUpdate = true);
 
 
+    template< typename TBodyStateAddList>
+    void read(  TBodyStateAddList & s);
+
     /**
     * @brief Operator to write a state to the file, writes position and velocity!
     */
@@ -160,6 +169,7 @@ public:
     * @brief Dumps all data from file to this sim file.
     */
     MultiBodySimFile & operator << (MultiBodySimFile& file);
+
 
 
     //  /**
@@ -238,6 +248,10 @@ private:
     char * m_Buffer;                                 ///< The buffer.
 
     static const char m_simFileSignature[SIM_FILE_SIGNATURE_LENGTH]; ///< The .sim file header.
+
+
+    inline void readState( RigidBodyState * state);
+    inline void readState( RigidBodyStateAdd * state);
 
     /**
     * @brief Writes the header to the file which has been opened.
@@ -420,23 +434,17 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
             // State found
             if(pState != nullptr ) {
                 // Read in state:
-                IOHelpers::readBinary(m_file_stream, pState->m_q );
-                if(m_bReadFullState) {
-                    IOHelpers::readBinary(m_file_stream, pState->m_u );
-                } else {
-                    m_file_stream.seekg(m_nBytesPerUBody,std::ios_base::cur);
-                }
+                readState(pState);
 
                 updatedStates.insert(id);
 
             } else {
                 // State not found
                 // Jump body (u and q)
-                m_file_stream.seekg( m_nBytesPerQBody+ m_nBytesPerUBody ,std::ios_base::cur);
+                m_file_stream.seekg( m_nBytesPerQBody + m_nBytesPerUBody + m_nAdditionalBytesPerBody ,std::ios_base::cur);
             }
 
-            // Jump additional bytes
-            m_file_stream.seekg(m_nAdditionalBytesPerBody,std::ios_base::cur);
+
         }
 
         m_file_stream.seekg(m_beginOfStates);
@@ -456,6 +464,12 @@ bool MultiBodySimFile::read(TBodyStateMap & states,
     m_errorString << "The time type: " << which << " (time: " <<time <<") was not found" << std::endl;
     return false;
 }
+
+template< typename TBodyStateAddList>
+void MultiBodySimFile::read(  TBodyStateAddList & s){
+
+}
+
 
 MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
 
@@ -498,26 +512,62 @@ MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState* state ) {
 
         *this >> id;
         //std::cout<< "MSIMFILE id: " << RigidBodyId::getBodyIdString(id)  << std::endl;
-        auto * s = state->getSimState(id);
-        if(s){
-            IOHelpers::readBinary(m_file_stream,  s->m_q );
-//            std::cout<< "MSIMFILE q: " << s->m_q.transpose()  << std::endl;
-            if(m_bReadFullState) {
-                IOHelpers::readBinary(m_file_stream,  s->m_u );
-//                std::cout<< "MSIMFILE u: " << s->m_u.transpose()  << std::endl;
-            } else {
-                //Dont read in velocities, its not needed!
-                m_file_stream.seekg(m_nBytesPerUBody,std::ios_base::cur);
-            }
+        auto * pState = state->getSimState(id);
+        if(pState){
+            readState(pState);
         }else{
-            ASSERTMSG(false,"State for body id: " << id << "not found in DynamicsState")
+            ERRORMSG("State for body id: " << id << "not found in DynamicsState")
+            //m_file_stream.seekg(m_nBytesPerQBody+m_nBytesPerUBody+m_nAdditionalBytesPerBody ,std::ios_base::cur);
         }
-
-        // Dont read in additional bytes
-        m_file_stream.seekg(m_nAdditionalBytesPerBody,std::ios_base::cur);
 
     }
     return *this;
+}
+
+
+void MultiBodySimFile::readState( RigidBodyState * s){
+
+    IOHelpers::readBinary(m_file_stream,  s->m_q );
+    // std::cout<< "MSIMFILE q: " << s->m_q.transpose()  << std::endl;
+    if(m_bReadFullState) {
+        IOHelpers::readBinary(m_file_stream,  s->m_u );
+    //  std::cout<< "MSIMFILE u: " << s->m_u.transpose()  << std::endl;
+    } else {
+        //Dont read in velocities, its not needed!
+        m_file_stream.seekg(m_nBytesPerUBody,std::ios_base::cur);
+    }
+
+    // Dont read in additional bytes
+    m_file_stream.seekg(m_nAdditionalBytesPerBody,std::ios_base::cur);
+
+}
+
+void MultiBodySimFile::readState( RigidBodyStateAdd * s){
+
+    IOHelpers::readBinary(m_file_stream,  s->m_q );
+    // std::cout<< "MSIMFILE q: " << s->m_q.transpose()  << std::endl;
+    if(m_bReadFullState) {
+        IOHelpers::readBinary(m_file_stream,  s->m_u );
+    //  std::cout<< "MSIMFILE u: " << s->m_u.transpose()  << std::endl;
+    } else {
+        //Dont read in velocities, its not needed!
+        m_file_stream.seekg(m_nBytesPerUBody,std::ios_base::cur);
+    }
+
+    if(s->m_data){
+        switch(s->m_data->m_type){
+        case AdditionalBodyData::TypeEnum::PROCESS:
+           static_cast<AdditionalBodyData::Process *>(s->m_data)->read(this);
+           break;
+        case AdditionalBodyData::TypeEnum::PROCESS_MATERIAL:
+           static_cast<AdditionalBodyData::ProcessMaterial *>(s->m_data)->read(this);
+           break;
+        }
+    }else{
+        // Dont read in additional bytes
+        m_file_stream.seekg(m_nAdditionalBytesPerBody,std::ios_base::cur);
+    }
+
 }
 
 

@@ -42,6 +42,11 @@ void LogicNode::linkTogether(LogicSocketBase * out, LogicSocketBase * in){
 
 void LogicNode::linkTogether(LogicNode * n1, unsigned int outSocketIdx,
                     LogicNode * n2, unsigned int inSocketIdx){
+
+        if( outSocketIdx >= n1->getOutputs().size() ||  inSocketIdx >= n2->getInputs().size() ){
+            ERRORMSG("Wrong socket indices: outNode: " << n1->m_id << " outS: " << outSocketIdx << " inNode: " << n2->m_id <<" inS: " << inSocketIdx )
+        }
+
         //n1->getOSocket(outSocketIdx)->link(n2->getISocket(inSocketIdx));
         n2->getISocket(inSocketIdx)->link(n1->getOSocket(outSocketIdx));
 }

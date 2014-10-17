@@ -99,12 +99,18 @@ protected:
 template<typename T>
 LogicSocket<T>* LogicNode::getISocket(unsigned int idx)
 {
-    return m_inputs[idx]->castToType<T>();
+    if (idx < m_inputs.size()){
+        return m_inputs[idx]->castToType<T>();
+    }
+    return nullptr;
 }
 template<typename T>
 LogicSocket<T>* LogicNode::getOSocket(unsigned int idx)
 {
-    return m_outputs[idx]->castToType<T>();
+    if (idx < m_outputs.size()){
+        return m_outputs[idx]->castToType<T>();
+    }
+    return nullptr;
 }
 
 

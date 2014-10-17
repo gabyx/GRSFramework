@@ -41,6 +41,7 @@ public:
      */
     RigidBodyStateListType  m_SimBodyStates; ///< A vector comprising of all rigid body states of the system for simulated objects.
     //RigidBodyStateListType  m_AniBodyStates; ///< A vector comprising of all rigid body states of the system for animated objects.
+
 };
 
 class DynamicsState: public DynamicsStateBase{

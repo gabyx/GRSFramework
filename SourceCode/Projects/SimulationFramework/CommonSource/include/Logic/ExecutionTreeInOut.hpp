@@ -44,6 +44,24 @@ public:
         } else {
             ERRORMSG("Node id: " << node->m_id << " already in map");
         }
+
+        if(isInput){
+            m_inputNode = m_nodes.back();
+        }else if(isOutput){
+            m_outputNode = m_nodes.back();
+        }
+
+    }
+
+    void link(unsigned int outNode, unsigned int outSocket,
+              unsigned int inNode, unsigned int inSocket)
+    {
+         auto inNodeIt = m_nodeMap.find(inNode);
+         auto outNodeIt = m_nodeMap.find(outNode);
+         if(inNodeIt == m_nodeMap.end() || outNodeIt == m_nodeMap.end() ){
+            ERRORMSG("In: " << inNode << " or " << outNode << " does not exist!")
+         }
+         LogicNode::linkTogether(outNodeIt->second,outSocket,inNodeIt->second,inSocket);
     }
 
     void execute() {

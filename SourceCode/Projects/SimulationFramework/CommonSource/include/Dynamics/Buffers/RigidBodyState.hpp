@@ -6,11 +6,14 @@
 
 #include "RigidBodyId.hpp"
 
+#include "AdditionalBodyData.hpp"
+
 class RigidBodyState;
 namespace Interpolate {
     template<typename PREC>
     void lerp( const RigidBodyState & A, const RigidBodyState & B, RigidBodyState & X, PREC factor);
 };
+
 
 
 /**
@@ -25,6 +28,7 @@ public:
     RigidBodyIdType m_id;
     VectorQBody	m_q; ///< These are the generalized coordinates \f$\mathbf{q}\f$ of a rigid body.
     VectorUBody	m_u; ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
+
 public:
     RigidBodyState(){
         m_id = 0;
@@ -32,10 +36,15 @@ public:
         m_q.setZero();
     };
 
-    RigidBodyState(const RigidBodyIdType & id):m_id(id) {
+    RigidBodyState(const RigidBodyIdType & id):m_id(id){
         m_u.setZero();
         m_q.setZero();
     };
+
+
+    ~RigidBodyState(){
+
+    }
 
     RigidBodyState & operator =(const RigidBodyState& state) = default;
 
@@ -64,6 +73,24 @@ public:
 
 };
 
+class RigidBodyStateAdd : public RigidBodyState{
+public:
+    RigidBodyStateAdd(): RigidBodyState(), m_data(nullptr) {}
+
+    RigidBodyStateAdd(const RigidBodyIdType & id, AdditionalBodyData::TypeEnum e )
+    : RigidBodyState(id)
+    {
+            m_data = AdditionalBodyData::create(e);
+    }
+
+    AdditionalBodyData::Bytes * m_data = nullptr;
+
+    ~RigidBodyStateAdd(){
+        if(m_data){
+            delete m_data;
+        }
+    }
+};
 
 namespace Interpolate{
     template<typename PREC>

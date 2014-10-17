@@ -9,14 +9,13 @@
 #include <unordered_map>
 #include <vector>
 
-#include "LogicNode.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
-#include "SceneParser.hpp"
+#include "SceneParserModules.hpp"
 
 #include "RenderMaterial.hpp"
 #include "RenderMaterialGen.hpp"
-#include "MaterialsCollectionParser.hpp"
+#include "RenderMaterialParserModules.hpp"
 
 
 namespace ParserModules {
@@ -196,9 +195,6 @@ public:
     struct MatCollParserModulesCreator{
         MatCollParserModulesCreator( RenderConverterData * p): m_p(p){}
         RenderConverterData * m_p;
-
-        template<typename TSceneParser, typename TCollection>
-        using MatCollParserTraits = MatCollParserTraits<TSceneParser,TCollection>;
 
         template<typename TParser>
         std::tuple< std::unique_ptr<typename TParser::MaterialsModuleType> ,

@@ -98,6 +98,10 @@ struct GlobalConfigs {
         using DynamicsSystemType = typename MyConfigs::DynamicsSystemType          ;
     };
 
+    struct MPIInformationConfigs{
+        using RankIdType = unsigned int;
+    };
+
 };
 
 
@@ -141,6 +145,9 @@ struct GlobalConfigs {
 #define DEFINE_MATRIX_TYPES \
     using PREC = typename GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC; \
     DEFINE_MATRIX_TYPES_OF( GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC )
+
+#define DEFINE_MPI_INFORMATION_CONFIG_TYPES \
+    using RankIdType = GlobalConfigs::MPIInformationConfigs::RankIdType;
 
 #define DEFINE_GENERAL_CONFIG_TYPES \
     using RandomGenType = typename GlobalConfigs::GeneralConfigs::RandomGeneratorType;

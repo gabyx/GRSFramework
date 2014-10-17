@@ -40,7 +40,9 @@ public:
     LogicSocket<T> * castToType()
     {
         typedef typename boost::mpl::find<TypeSeq,T>::type iter;
-        ASSERTMSG( this->m_type == iter::pos::value, " Types of sockets do not coincide: " << this->m_type << " and " << iter::pos::value);
+        ASSERTMSG( this->m_type == iter::pos::value,
+                  " Types of sockets do not coincide: " <<
+                  LogicTypes::getTypeName(this->m_type) << " and " << LogicTypes::getTypeName(iter::pos::value) );
         return static_cast< LogicSocket<T> * >(this);
     }
 
@@ -146,34 +148,19 @@ void LogicSocket<T>::setValue(const T& value) {
 
 template<typename T>
 T LogicSocket<T>::getValue() const {
+
     if(m_from) {
-
-        LogicSocket<T>* sock = static_cast<LogicSocket<T>*>(m_from);
-
-        ASSERTMSG(sock , "Types have to match");
-
-        return sock->getValue();
+        return m_from->castToType<T>()->getValue();
     }
-
     return m_data;
 };
 
 template<typename T>
 T & LogicSocket<T>::getRefValue() {
     if(m_from) {
-        LogicSocket<T>* sock = dynamic_cast<LogicSocket<T>*>(m_from);
-
-        ASSERTMSG(sock , "Types have to match");
-
-        return sock->getRefValue();
+        return m_from->castToType<T>()->getRefValue();
     }
-
     return m_data;
-}
-
-template<typename T>
-LogicSocket<T>* getSocket(LogicSocketBase* pSock) {
-    return static_cast<LogicSocket<T>*>(pSock);
 }
 
 #define ADD_ISOCK( name, value )      \

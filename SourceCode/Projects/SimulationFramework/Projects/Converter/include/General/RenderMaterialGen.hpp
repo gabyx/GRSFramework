@@ -5,16 +5,18 @@
 #include "LogDefines.hpp"
 
 #include "ExecutionTreeInOut.hpp"
+#include "RenderMaterial.hpp"
 
-class RenderMaterialGenerator{
+class RenderMaterialGenerator : public ExecutionTreeInOut{
     public:
 
         RenderMaterialGenerator(){}
 
-        ExecutionTreeInOut * getExecTree(){return &m_execTree;}
+        void fillBodyData(){};
 
-    private:
-        ExecutionTreeInOut m_execTree;
+        void generateMaterial(){
+            execute();
+        }
 };
 
 
