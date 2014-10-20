@@ -72,10 +72,10 @@ namespace AdditionalBodyData{
         }
     }
 
-    static constexpr std::streamoff getAdditionalBytesPerBody(unsigned int type){
-        return (type==EnumConversion::toIntegral(TypeEnum::PROCESS)) ? Process::nBytes :
+    static constexpr std::streamoff getAdditionalBytesPerBody(TypeEnum type){
+        return (type == TypeEnum::PROCESS) ? Process::nBytes :
                  (
-                 (type==EnumConversion::toIntegral(TypeEnum::PROCESS_MATERIAL)) ? ProcessMaterial::nBytes  :  0
+                 (type==TypeEnum::PROCESS_MATERIAL) ? ProcessMaterial::nBytes  :  0
                  );
     }
 

@@ -182,7 +182,14 @@ private:
         // Join all states together
         std::cerr << "---> Open new output file at: "  <<  m_oFile << " bodies: " << bodies<< std::endl;
         MultiBodySimFile output;
-        if(!output.openWrite_impl(m_oFile,dofq,dofu, bodies, simFile.m_additionalBytesPerBodyType, simFile.m_nAdditionalBytesPerBody, true)){
+        if(!output.openWrite_impl(m_oFile,
+                                  dofq,
+                                  dofu,
+                                  bodies,
+                                  true,
+                                  simFile.m_additionalBytesPerBodyType,
+                                  simFile.m_nAdditionalBytesPerBody))
+        {
             THROWEXCEPTION(output.getErrorString());
         };
         // Push all simfiles to output
@@ -238,7 +245,7 @@ private:
         // Join states together
         std::cerr << "---> Open new output file at: "  <<  m_oFile << std::endl;
         MultiBodySimFile output;
-        if(!output.openWrite_impl(m_oFile,dofq,dofu, 0, 0, 0, true)){
+        if(!output.openWrite(m_oFile,dofq,dofu,0,true)){
             THROWEXCEPTION(output.getErrorString());
         };
 

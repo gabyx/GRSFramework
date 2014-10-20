@@ -126,7 +126,7 @@ bool setupInitialConditionBodiesFromFile(boost::filesystem::path file_path,
                         0,true))
     {
         // We only perform an update! -> true
-        if(!simFile.read(bodyDataCont,stateTime,readPos,readVel,which,true)){
+        if(!simFile.readSpecific(bodyDataCont,stateTime,readPos,readVel,which,true)){
             failed = true;
         }
         simFile.close();

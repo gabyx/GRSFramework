@@ -115,7 +115,37 @@ void RenderConverter::loadMaterialCollection() {
 void RenderConverter::convertFile(const boost::filesystem::path & f) {
     LOG(m_log, "---> Converting file:" << f << std::endl;);
 
-    std::vector<RigidBodyStateAdd> a;
+    std::vector<RigidBodyStateAdd> states;
 
-    m_simFile.read(a);
+    if(!m_simFile.openRead(f,true)){
+        ERRORMSG("Could not open SimFile at :" << f)
+    }else{
+        LOG(m_log, "---> SimFile Properties:" <<std::endl << m_simFile.getDetails() << std::endl)
+    }
+
+    while(m_simFile.isGood()){
+        double time;
+        m_simFile.read(states,time);
+
+        if(states.size()==0){
+            ERRORMSG("State size is zero!")
+        }
+
+        LOG(m_log, "---> Loaded state at t: " <<time << std::endl;)
+
+        // Produce Render OutputFile for this state
+        for(auto & bs: states){
+
+            m_renderData.m_materialGen.fillInput(&bs);
+
+            std::shared_ptr<RenderMaterial> m = m_renderData.m_materialGen.generateMaterial();
+
+            LOG(m_log, "Render Material: " << m->getMaterialString() << std::endl;)
+
+        }
+
+
+    }
+
+
 }

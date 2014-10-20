@@ -5,7 +5,7 @@
 
     class RenderMaterial{
     public:
-        RenderMaterial(unsigned int id, const std::string & s): m_id(id){}
+        RenderMaterial(unsigned int id, const std::string & s): m_id(id), m_s(s){}
         ~RenderMaterial(){};
 
         void setMaterialString(const std::string & s){m_s = s;}

@@ -106,7 +106,7 @@ public:
 
     }
 
-private:
+protected:
 
     template<bool input>
     void setInOutNode(unsigned int id){

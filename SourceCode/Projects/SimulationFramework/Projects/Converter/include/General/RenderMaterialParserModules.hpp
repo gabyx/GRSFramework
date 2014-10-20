@@ -36,9 +36,9 @@ namespace RenderMatParserModules {
                  if(!Utilities::stringToType(id, itNode->attribute("id").value())) {
                       THROWEXCEPTION("---> String conversion in Material: id failed");
                  }
-                 ASSERTMSG(itNode->value()," String in material id: " << id << "is empty!")
 
-                 auto s = std::shared_ptr<RenderMaterial>( new RenderMaterial(id,itNode->value()) );
+                 ASSERTMSG(itNode->child_value()!=""," String in material id: " << id << "is empty!")
+                 auto s = std::shared_ptr<RenderMaterial>( new RenderMaterial(id,itNode->child_value()) );
                  m_materials->emplace(id, s);
 
                  LOGMCLEVEL3(m_pLog,"---> Parsed Material with id: " << id << std::endl;)
@@ -160,9 +160,11 @@ namespace RenderMatParserModules {
             // Get default material
             auto it = m_materials->begin();
 
+
             if(it == m_materials->end()){
                 ERRORMSG("No default material found for MaterialLookUp tool!")
             }
+            LOGMCLEVEL3(m_pLog, "Default Material set to: " << std::endl << it->second->getMaterialString() << std::endl)
 
             std::string type = matGenNode.attribute("inputType").value();
             if( type == "unsigned int"){

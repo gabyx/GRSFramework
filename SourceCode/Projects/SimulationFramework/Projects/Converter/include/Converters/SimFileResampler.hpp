@@ -69,7 +69,12 @@ private:
 
         std::cerr << "---> Open new output file at: "  <<  m_oFile << std::endl;
         MultiBodySimFile toFile;
-        if(!toFile.openWrite_impl(m_oFile,fromFile.getNDOFq(),fromFile.getNDOFu(), 0, 0, 0, true)){
+        if(!toFile.openWrite_impl(m_oFile,
+                                  fromFile.getNDOFq(),
+                                  fromFile.getNDOFu(),
+                                  0,
+                                  true)
+                                  ){
             THROWEXCEPTION(toFile.getErrorString());
         };
 
