@@ -1,5 +1,5 @@
-#ifndef RenderConverterData_hpp
-#define RenderConverterData_hpp
+#ifndef RenderData_hpp
+#define RenderData_hpp
 
 
 #include "TypeDefs.hpp"
@@ -12,7 +12,7 @@
 #include DynamicsSystem_INCLUDE_FILE
 
 #include "RenderMaterial.hpp"
-#include "RenderMaterialGen.hpp"
+#include "RenderScriptGenerator.hpp"
 
 namespace ParserModules {
 template<typename TParserTraits>
@@ -110,14 +110,14 @@ private:
     using ScalesMap = std::unordered_map< RigidBodyIdType ,Vector3 >; \
     using VisMeshMap = std::unordered_map< RigidBodyIdType , boost::filesystem::path  >; \
     using MaterialMapType = std::unordered_map<unsigned int, RenderMaterial * >; \
-    using MaterialGenType = RenderMaterialGenerator;
+    using RenderScriptGen = RenderScriptGenerator;
 
-class RenderConverterData {
+class RenderData {
 public:
 
     DEFINE_RENDERCONVERTERDATA_TYPES
 
-    ~RenderConverterData(){
+    ~RenderData(){
         // Delete all materials!
         for( auto & m : m_materials){
             delete m.second;
@@ -134,7 +134,7 @@ public:
 
 
     MaterialMapType m_materials;
-    MaterialGenType m_materialGen;
+    RenderScriptGen m_renderScriptGen;
 
 
 };

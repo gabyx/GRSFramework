@@ -1,5 +1,5 @@
-#ifndef RenderConverterDataParserGenerators_hpp
-#define RenderConverterDataParserGenerators_hpp
+#ifndef RenderDataParserGenerators_hpp
+#define RenderDataParserGenerators_hpp
 
 
 #include "TypeDefs.hpp"
@@ -9,14 +9,14 @@
 
 // This file should only be included in compilation units!
 
-class RenderConverterData;
+class RenderData;
 
 #include "SceneParserModules.hpp"
 
-namespace RenderConverterDataParserGenerators {
+namespace RenderDataParserGenerators {
 struct SceneParserGen {
-    SceneParserGen( RenderConverterData * p): m_p(p) {}
-    RenderConverterData * m_p;
+    SceneParserGen( RenderData * p): m_p(p) {}
+    RenderData * m_p;
 
     template<typename TSceneParser, typename TDynamicsSystem>
     struct SceneParserTraits : SceneParserBaseTraits<TSceneParser,TDynamicsSystem> {
@@ -73,8 +73,8 @@ struct SceneParserGen {
 };
 
 struct MaterialsParserGen {
-    MaterialsParserGen( RenderConverterData * p): m_p(p) {}
-    RenderConverterData * m_p;
+    MaterialsParserGen( RenderData * p): m_p(p) {}
+    RenderData * m_p;
 
     template<typename TParser>
     std::tuple< std::unique_ptr<typename TParser::MaterialsModuleType> ,
@@ -87,7 +87,7 @@ struct MaterialsParserGen {
 
         auto mat = std::unique_ptr<MaterialsModuleType >(new MaterialsModuleType(p, &m_p->m_materials));
 
-        auto matGen = std::unique_ptr<MatGenModuleType >(new MatGenModuleType(p, &m_p->m_materialGen,&m_p->m_geometryMap));
+        auto matGen = std::unique_ptr<MatGenModuleType >(new MatGenModuleType(p, &m_p->m_renderScriptGen,&m_p->m_geometryMap));
 
         return std::make_tuple(std::move(mat),std::move(matGen));
     };

@@ -12,7 +12,7 @@
 
 #include "SimFileJoiner.hpp"
 #include "SimFileResampler.hpp"
-#include "RenderConverter.hpp"
+#include "RenderScriptConverter.hpp"
 
 
 int main(int argc, char **argv) {
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
             opts.printArgs(std::cout);
             // End Parsing =================================
 
-            RenderConverter renderConv;
+            RenderScriptConverter renderConv;
             renderConv.convert(opts.m_inputFiles,opts.m_outputFile,opts.m_sceneFile, opts.m_materialFile ,opts.m_renderer);
 
         }else{

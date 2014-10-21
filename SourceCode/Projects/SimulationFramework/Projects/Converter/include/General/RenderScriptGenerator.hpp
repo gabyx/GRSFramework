@@ -1,5 +1,5 @@
-#ifndef  RenderMaterialGenerator_hpp
-#define  RenderMaterialGenerator_hpp
+#ifndef  RenderScriptGenerator_hpp
+#define  RenderScriptGenerator_hpp
 
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
@@ -15,10 +15,10 @@ namespace LogicNodes{
 
 class RenderMaterial;
 
-class RenderMaterialGenerator : public ExecutionTreeInOut{
+class RenderScriptGenerator : public ExecutionTreeInOut{
     public:
 
-        RenderMaterialGenerator(){}
+        RenderScriptGenerator(){}
 
         void fillInput(RigidBodyStateAdd * s);
 
@@ -35,4 +35,4 @@ class RenderMaterialGenerator : public ExecutionTreeInOut{
 };
 
 
-#endif // RenderMaterialGenerator_hpp
+#endif // RenderScriptGenerator_hpp

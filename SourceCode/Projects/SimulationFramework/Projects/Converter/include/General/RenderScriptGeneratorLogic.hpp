@@ -1,5 +1,5 @@
-#ifndef  RenderMaterialGenLogic_hpp
-#define  RenderMaterialGenLogic_hpp
+#ifndef  RenderScriptGeneratorLogic_hpp
+#define  RenderScriptGeneratorLogic_hpp
 
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"

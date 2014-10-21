@@ -1,5 +1,5 @@
-#ifndef RenderMaterialParserModules_hpp
-#define RenderMaterialParserModules_hpp
+#ifndef RenderScriptParserModules_hpp
+#define RenderScriptParserModules_hpp
 
 
 #include <vector>
@@ -12,9 +12,9 @@
 
 #include "AssertionDebug.hpp"
 
-#include "RenderMaterialParserBaseTraits.hpp"
+#include "RenderScriptParserBaseTraits.hpp"
 
-#include "RenderMaterialGenLogic.hpp"
+#include "RenderScriptGeneratorLogic.hpp"
 #include "RenderOutputLogic.hpp"
 
 namespace RenderMatParserModules {
@@ -62,9 +62,9 @@ namespace RenderMatParserModules {
 
         using GeometryMapType = typename CollectionType::GeometryMapType;
         using MaterialMapType = typename CollectionType::MaterialMapType;
-        using MaterialGenType = typename CollectionType::MaterialGenType;
+        using RenderScriptGen = typename CollectionType::RenderScriptGen;
 
-        MaterialGenerator(ParserType * p, MaterialGenType * g, GeometryMapType * geomMap)
+        MaterialGenerator(ParserType * p, RenderScriptGen * g, GeometryMapType * geomMap)
         :m_parser(p),m_matGen(g), m_pLog(p->getLog()), m_geomMap(geomMap) {}
 
         void parse(XMLNodeType & matGenNode, MaterialMapType * materials) {
@@ -194,7 +194,7 @@ namespace RenderMatParserModules {
 
         ParserType * m_parser;
         LogType * m_pLog;
-        MaterialGenType * m_matGen;
+        RenderScriptGen * m_matGen;
         MaterialMapType * m_materials;
         GeometryMapType * m_geomMap;
     };

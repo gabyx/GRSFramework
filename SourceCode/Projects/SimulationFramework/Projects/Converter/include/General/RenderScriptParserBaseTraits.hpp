@@ -1,5 +1,5 @@
-#ifndef RenderMaterialParserBaseTraits_hpp
-#define RenderMaterialParserBaseTraits_hpp
+#ifndef RenderScriptParserBaseTraits_hpp
+#define RenderScriptParserBaseTraits_hpp
 
 #include "SimpleLogger.hpp"
 #include "pugixml.hpp"

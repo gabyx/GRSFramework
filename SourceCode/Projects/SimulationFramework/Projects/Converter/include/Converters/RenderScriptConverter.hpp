@@ -1,5 +1,5 @@
-#ifndef RenderConverter_hpp
-#define RenderConverter_hpp
+#ifndef RenderScriptConverter_hpp
+#define RenderScriptConverter_hpp
 
 #include <iostream>
 #include <iomanip>
@@ -16,9 +16,9 @@
 
 #include "SimpleLogger.hpp"
 #include "MultiBodySimFile.hpp"
-#include "RenderConverterData.hpp"
+#include "RenderData.hpp"
 
-class RenderConverter {
+class RenderScriptConverter {
 public:
 
     DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES
@@ -32,7 +32,7 @@ public:
                   Renderer renderer);
 private:
 
-    RenderConverterData m_renderData;
+    RenderData m_renderData;
 
     void loadGeometryCollection();
     void loadMaterialCollection();
@@ -53,5 +53,5 @@ private:
     unsigned int m_frameCounter;
 };
 
-#endif // RenderConverter_hpp
+#endif // RenderScriptConverter_hpp
 

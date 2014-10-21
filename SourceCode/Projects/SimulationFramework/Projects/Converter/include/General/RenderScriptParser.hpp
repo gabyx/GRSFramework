@@ -1,5 +1,5 @@
-#ifndef RenderMaterialParser_hpp
-#define RenderMaterialParser_hpp
+#ifndef RenderScriptParser_hpp
+#define RenderScriptParser_hpp
 
 #include <vector>
 #include <fstream>
@@ -13,22 +13,22 @@
 #include "AssertionDebug.hpp"
 
 #include "XMLMacros.hpp"
-#include "RenderMaterialParserBaseTraits.hpp"
-#include "RenderMaterialParserModules.hpp"
+#include "RenderScriptParserBaseTraits.hpp"
+#include "RenderScriptParserModules.hpp"
 
-/** The traits for a standart MatCollParser class*/
+/** The traits for a standart RenderScriptParser class*/
 template<typename TSceneParser, typename TCollection>
-struct MatCollParserTraits : RenderMatParserBaseTraits<TSceneParser,TCollection> {
+struct RenderScriptParserTraits : RenderMatParserBaseTraits<TSceneParser,TCollection> {
     // Module typedefs
-    using MaterialsModuleType   = typename RenderMatParserModules::MaterialsModule<MatCollParserTraits>;
-    using MatGenModuleType   = typename RenderMatParserModules::MaterialGenerator<MatCollParserTraits>;
+    using MaterialsModuleType   = typename RenderMatParserModules::MaterialsModule<RenderScriptParserTraits>;
+    using MatGenModuleType   = typename RenderMatParserModules::MaterialGenerator<RenderScriptParserTraits>;
 };
 
-template< typename TCollection, template<typename P, typename C> class TParserTraits = MatCollParserTraits >
-class RenderMaterialParser {
+template< typename TCollection, template<typename P, typename C> class TParserTraits = RenderScriptParserTraits >
+class RenderScriptParser {
 public:
 
-    using ParserForModulesType = RenderMaterialParser;
+    using ParserForModulesType = RenderScriptParser;
     using ParserTraits = TParserTraits<ParserForModulesType, TCollection>;
     DEFINE_MATCOLPARSER_TYPE_TRAITS(ParserTraits);
 private:
@@ -54,7 +54,7 @@ public:
     * If a xmlDoc pointer is given, this document is taken
     */
     template<typename ModuleGeneratorType>
-    RenderMaterialParser(ModuleGeneratorType & moduleGen, Logging::Log * log) {
+    RenderScriptParser(ModuleGeneratorType & moduleGen, Logging::Log * log) {
         m_pLog = log;
         ASSERTMSG(m_pLog, "Log pointer is zero!");
         // Get all Modules from the Generator
@@ -121,7 +121,7 @@ private:
 
     void parseSceneIntern(const boost::filesystem::path & file) {
 
-        LOGMCLEVEL1( m_pLog, "---> RenderMaterialParser parsing: ========================================================" <<
+        LOGMCLEVEL1( m_pLog, "---> RenderScriptParser parsing: ========================================================" <<
                      std::endl << "\t file: " << file <<std::endl;);
 
         LOGMCLEVEL1( m_pLog, "---> Input file: "  << file.string() <<std::endl; );
@@ -167,7 +167,7 @@ private:
             ERRORMSG( "Scene XML error: "  << ex.what() );
         }
 
-        LOGMCLEVEL1( m_pLog, "---> RenderMaterialParser finshed =========================================================" << std::endl;);
+        LOGMCLEVEL1( m_pLog, "---> RenderScriptParser finshed =========================================================" << std::endl;);
 
     }
 

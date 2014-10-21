@@ -37,23 +37,31 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Converters/SimFileJoiner.hpp
     ${PROJECT_SOURCE_DIR}/include/Converters/SimFileResampler.hpp
 
-    ${PROJECT_SOURCE_DIR}/include/Converters/RenderConverter.hpp
+    ${PROJECT_SOURCE_DIR}/include/Converters/RenderScriptConverter.hpp
     
     ${PROJECT_SOURCE_DIR}/include/Logic/LogicTypes.hpp
+    ${PROJECT_SOURCE_DIR}/include/Logic/LookUpTable.hpp
     
-    ${PROJECT_SOURCE_DIR}/include/General/RenderConverterData.hpp
-    ${PROJECT_SOURCE_DIR}/include/General/RenderMaterialParser.hpp
-    ${PROJECT_SOURCE_DIR}/include/General/RenderMaterialParserModules.hpp
-    ${PROJECT_SOURCE_DIR}/include/General/RenderMaterialGenLogic.hpp
-    ${PROJECT_SOURCE_DIR}/include/General/RenderMaterialGen.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RenderData.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RenderDataParserGenerators.hpp
+    
+    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParserBaseTraits.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParserModules.hpp
+    
+    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptGeneratorLogic.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RendermanGeometryWriter.hpp
+    
+    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptGenerator.hpp
+        
+    
     ${PROJECT_SOURCE_DIR}/include/General/RenderMaterial.hpp
 )
 SET(COMMON_SRC
     ${SOURCE_DIR}/src/Common/TypeDefs.cpp
-    ${PROJECT_SOURCE_DIR}/src/Converters/RenderConverter.cpp
-    ${PROJECT_SOURCE_DIR}/src/General/RenderConverterData.cpp
-    
-    ${PROJECT_SOURCE_DIR}/src/General/RenderMaterialGen.cpp
+    ${PROJECT_SOURCE_DIR}/src/Converters/RenderScriptConverter.cpp
+    ${PROJECT_SOURCE_DIR}/src/General/RenderData.cpp
+    ${PROJECT_SOURCE_DIR}/src/General/RenderScriptGenerator.cpp
 )
 
 

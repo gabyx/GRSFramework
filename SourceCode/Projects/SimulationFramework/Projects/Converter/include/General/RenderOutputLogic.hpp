@@ -8,7 +8,7 @@
 #include "LookUpTable.hpp"
 
 #include "RendermanGeometryWriter.hpp"
-#include "RenderConverterData.hpp"
+#include "RenderData.hpp"
 #include "QuaternionHelpers.hpp"
 
 namespace LogicNodes {
@@ -70,7 +70,7 @@ protected:
 class RendermanOutput : public RenderOutput {
 public:
     DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES
-    using GeometryMapType = typename RenderConverterDataType::GeometryMapType;
+    using GeometryMapType = typename RenderDataType::GeometryMapType;
 
     RendermanOutput(unsigned int id, GeometryMapType * geomMap)
         : RenderOutput(id), m_geomMap(geomMap) {

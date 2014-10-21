@@ -7,7 +7,6 @@
 
 #include RigidBody_INCLUDE_FILE
 
-template<
 class RendermanGeometryWriter: public boost::static_visitor<> {
     public:
 
@@ -20,10 +19,17 @@ class RendermanGeometryWriter: public boost::static_visitor<> {
     }
 
     inline void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom) {
-        *m_s << "Sphere " << sphereGeom->m_radius <<" "
-        << -sphereGeom->m_radius  << " "
-        << sphereGeom->m_radius  << " "
-        << " 360"  <<"\n";
+
+// Sphere
+//        *m_s << "Sphere " << sphereGeom->m_radius <<" "
+//        << -sphereGeom->m_radius  << " "
+//        << sphereGeom->m_radius  << " "
+//        << " 360"  <<"\n";
+
+// Points
+          *m_s << "Points \"P\" [0,0]" << " \"width\" ["<<sphereGeom->m_radius <<"]\n";
+
+
     }
 
     inline void operator()(std::shared_ptr<const BoxGeometry > & box)  {

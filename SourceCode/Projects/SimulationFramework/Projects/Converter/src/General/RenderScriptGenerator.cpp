@@ -1,10 +1,10 @@
-#include "RenderMaterialGen.hpp"
+#include "RenderScriptGenerator.hpp"
 
 #include "RenderMaterial.hpp"
-#include "RenderMaterialGenLogic.hpp"
+#include "RenderScriptGeneratorLogic.hpp"
 #include "RenderOutputLogic.hpp"
 
-void RenderMaterialGenerator::fillInput(RigidBodyStateAdd * s) {
+void RenderScriptGenerator::fillInput(RigidBodyStateAdd * s) {
     m_inputNode->setOSocketValue(0,s->m_id);
     m_inputNode->setOSocketValue(1,s->m_q);
     m_inputNode->setOSocketValue(2,s->m_u);
@@ -31,7 +31,7 @@ void RenderMaterialGenerator::fillInput(RigidBodyStateAdd * s) {
     }
 };
 
-void RenderMaterialGenerator::setup() {
+void RenderScriptGenerator::setup() {
     ExecutionTreeInOut::setup();
 
     m_bodyDataNode = dynamic_cast<LogicNodes::BodyData * >(this->getInputNode());
@@ -56,14 +56,14 @@ void RenderMaterialGenerator::setup() {
 
 }
 
-void RenderMaterialGenerator::initFrame(boost::filesystem::path folder, std::string filename, double time)
+void RenderScriptGenerator::initFrame(boost::filesystem::path folder, std::string filename, double time)
 {
      for(auto & n : m_renderOutputNodes){
         n.second->initFrame(folder,filename,time);
      }
 }
 
-std::shared_ptr<RenderMaterial> RenderMaterialGenerator::generateMaterial() {
+std::shared_ptr<RenderMaterial> RenderScriptGenerator::generateMaterial() {
     execute();
     return nullptr;
     //return m_outputNode->getOSocketValue<std::shared_ptr<RenderMaterial> >(0);

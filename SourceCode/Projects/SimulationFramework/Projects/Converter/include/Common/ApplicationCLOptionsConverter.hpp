@@ -278,7 +278,7 @@ public:
     std::vector<boost::filesystem::path> m_inputFiles;
     boost::filesystem::path m_outputFile;
 
-     // RenderConverter
+     // RenderScriptConverter
     boost::filesystem::path m_sceneFile;
     boost::filesystem::path m_materialFile;
 

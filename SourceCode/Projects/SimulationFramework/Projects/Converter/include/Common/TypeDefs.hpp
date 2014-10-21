@@ -24,7 +24,7 @@ class RigidBodyBase;
 #define RigidBodySolverData_INCLUDE_FILE        "RigidBodySolverData.hpp"
 class RigidBodySolverDataCONoG;
 
-class RenderConverterData;
+class RenderData;
 
 //Try to make framework settings simpler:
 struct GlobalConfigs{
@@ -60,7 +60,7 @@ struct GlobalConfigs{
     };
 
     struct RenderConvertDataConfigs{
-        using RenderConverterDataType = RenderConverterData;
+        using RenderDataType = RenderData;
     };
 
 };
@@ -96,7 +96,7 @@ struct GlobalConfigs{
 
 
 #define DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES \
-    using RenderConverterDataType = typename GlobalConfigs::RenderConvertDataConfigs::RenderConverterDataType               ; \
+    using RenderDataType = typename GlobalConfigs::RenderConvertDataConfigs::RenderDataType               ; \
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
 struct MyIOFormat{

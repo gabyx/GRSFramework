@@ -1,19 +1,19 @@
-#include "RenderConverter.hpp"
+#include "RenderScriptConverter.hpp"
 
 #include <string>
 #include "CPUTimer.hpp"
 #include "ProgressBarCL.hpp"
 
 #include "SceneParser.hpp"
-#include "RenderMaterialParser.hpp"
+#include "RenderScriptParser.hpp"
 
-#include "RenderConverterDataParserGenerators.hpp"
+#include "RenderDataParserGenerators.hpp"
 
-#include "RenderMaterialGen.hpp"
+#include "RenderScriptGenerator.hpp"
 
 //#include "DummyNode.hpp"
 
-void RenderConverter::convert( const std::vector<boost::filesystem::path> & inputFiles,
+void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> & inputFiles,
               boost::filesystem::path outputFile,
               boost::filesystem::path sceneFile,
               boost::filesystem::path materialFile,
@@ -23,10 +23,10 @@ void RenderConverter::convert( const std::vector<boost::filesystem::path> & inpu
     m_inputFiles = inputFiles;
     m_sceneFile = sceneFile;
     m_materialFile = materialFile;
-    auto log = outputFile.parent_path() / "RenderConverter.log";
-    m_log = Logging::LogManager::getSingletonPtr()->createLog("RenderConverter",true,true,log);
+    auto log = outputFile.parent_path() / "RenderScriptConverter.log";
+    m_log = Logging::LogManager::getSingletonPtr()->createLog("RenderScriptConverter",true,true,log);
 
-    LOG(m_log, "---> RenderConverter started:" <<std::endl;);
+    LOG(m_log, "---> RenderScriptConverter started:" <<std::endl;);
 
     m_frameCounter = 0;
 
@@ -40,14 +40,14 @@ void RenderConverter::convert( const std::vector<boost::filesystem::path> & inpu
 
 }
 
-void RenderConverter::loadGeometryCollection() {
+void RenderScriptConverter::loadGeometryCollection() {
 
     LOGRCLEVEL1(m_log, "---> Load Geometries ..." << std::endl;)
 
-    using ParserGen = RenderConverterDataParserGenerators::SceneParserGen;
+    using ParserGen = RenderDataParserGenerators::SceneParserGen;
     ParserGen c(&m_renderData);
 
-    using SceneParserType = SceneParser< RenderConverterData, ParserGen::SceneParserTraits >;
+    using SceneParserType = SceneParser< RenderData, ParserGen::SceneParserTraits >;
     SceneParserType parser(c,m_log);
 
     parser.parseScene(m_sceneFile);
@@ -57,22 +57,22 @@ void RenderConverter::loadGeometryCollection() {
     LOGRCLEVEL1(m_log, "---> Load Geometries finished " << std::endl;)
 }
 
-void RenderConverter::loadMaterialCollection() {
+void RenderScriptConverter::loadMaterialCollection() {
 
     LOGRCLEVEL1(m_log, "---> Load Materials ..." << std::endl;)
-    using ParserGen = RenderConverterDataParserGenerators::MaterialsParserGen;
+    using ParserGen = RenderDataParserGenerators::MaterialsParserGen;
     ParserGen c(&m_renderData);
 
 
-    using MatCollParserType = RenderMaterialParser<RenderConverterData /**, StandartTraits*/ >;
-    MatCollParserType parser(c,m_log);
+    using RenderScriptParserType = RenderScriptParser<RenderData /**, StandartTraits*/ >;
+    RenderScriptParserType parser(c,m_log);
 
     parser.parse(m_materialFile);
     LOGRCLEVEL1(m_log, "---> Load Materials finished " << std::endl;)
 
     LOGRCLEVEL1(m_log, "---> Setup Mapper ..." << std::endl;)
-    m_renderData.m_materialGen.setup();
-    m_renderData.m_materialGen.generateMaterial();
+    m_renderData.m_renderScriptGen.setup();
+    m_renderData.m_renderScriptGen.generateMaterial();
 
 //    ExecutionTreeInOut m;
 //    LogicNode * n0 = new DummyLogicNode<1,3>(0);
@@ -119,7 +119,7 @@ void RenderConverter::loadMaterialCollection() {
 //std::cout << n6->getOSocketValue<double>(0) << std::endl;
 }
 
-void RenderConverter::convertFile(const boost::filesystem::path & f) {
+void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
     LOG(m_log, "---> Converting file:" << f << std::endl;);
 
     std::vector<RigidBodyStateAdd> states;
@@ -144,13 +144,13 @@ void RenderConverter::convertFile(const boost::filesystem::path & f) {
 
         // Produce Render OutputFile for this state
         std::string filename = m_outputFile.filename().string() + std::to_string(m_frameCounter);
-        m_renderData.m_materialGen.initFrame(m_outputFile.parent_path(), filename, time );
+        m_renderData.m_renderScriptGen.initFrame(m_outputFile.parent_path(), filename, time );
 
         for(auto & bs: states){
 
-            m_renderData.m_materialGen.fillInput(&bs);
+            m_renderData.m_renderScriptGen.fillInput(&bs);
 
-            m_renderData.m_materialGen.generateMaterial();
+            m_renderData.m_renderScriptGen.generateMaterial();
 
         }
 
