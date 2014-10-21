@@ -17,6 +17,8 @@ class ExecutionTreeInOut {
 private:
 public:
 
+    using OutputNodeMap = std::unordered_map<unsigned int, LogicNode*>;
+
     ExecutionTreeInOut() {
     }
 
@@ -36,6 +38,11 @@ public:
     void setOutputNode(unsigned int id){
         setInOutNode<false>(id);
     }
+
+    OutputNodeMap & getOutputNodes(){
+        return m_outputNodes;
+    }
+
     void addNode(LogicNode * node, bool isInput = false, bool isOutput = false) {
         if(isInput && isOutput){ ERRORMSG("Wrong arguements!")}
         auto res = m_nodeMap.emplace(node->m_id, node);
@@ -46,9 +53,9 @@ public:
         }
 
         if(isInput){
-            m_inputNode = m_nodes.back();
+             setInOutNode<true>(node->m_id);
         }else if(isOutput){
-            m_outputNode = m_nodes.back();
+             setInOutNode<false>(node->m_id);
         }
 
     }
@@ -70,20 +77,21 @@ public:
         }
     }
 
-    void setup() {
+    virtual void setup() {
 
-        if(!m_outputNode) {
+        if(m_outputNodes.size()== 0) {
             ERRORMSG("No output node specified")
         }
 
-
+        // Solve Execution order, do a depth first search for all output nodes which determines an execution order by setting the priority
         m_inputReachable = false;
-        std::unordered_set<unsigned int> nodesCurrDepth;
-        // start recursion
-        solveExecutionOrder(m_outputNode,nodesCurrDepth);
-
+        for(auto & p : m_outputNodes){
+            std::unordered_set<unsigned int> nodesCurrDepth;
+            // start recursion
+            solveExecutionOrder(p.second,nodesCurrDepth);
+        }
         if(!m_inputReachable) {
-            ERRORMSG("Your input node: " << m_inputNode->m_id << " cannot be reached by the output node: " << m_outputNode->m_id)
+            ERRORMSG("Your input node: " << m_inputNode->m_id << " cannot be reached by any output node!")
         }
 
         // Sort all nodes according to priority (asscending) (lowest is most important)
@@ -118,7 +126,7 @@ protected:
         if(input){
             m_inputNode = it->second;
         }else{
-            m_outputNode = it->second;
+            m_outputNodes.emplace(id, it->second);
         }
 
     }
@@ -165,7 +173,7 @@ protected:
     bool m_inputReachable = false;
 
     LogicNode * m_inputNode = nullptr;
-    LogicNode * m_outputNode = nullptr;
+    std::unordered_map<unsigned int, LogicNode *> m_outputNodes;
 
     std::vector<LogicNode*> m_nodes;
     std::unordered_map<unsigned int, LogicNode*> m_nodeMap;

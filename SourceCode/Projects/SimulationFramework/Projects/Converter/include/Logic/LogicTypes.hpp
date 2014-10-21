@@ -24,7 +24,7 @@
                                            Quaternion,
                                            VectorQBody,
                                            VectorUBody,
-                                           std::shared_ptr<RenderMaterial> >;
+                                           RenderMaterial * >;
 
         //TypesErrorString
 
@@ -43,7 +43,7 @@
                                            "Quaternion",
                                            "VectorQBody",
                                            "VectorUBody",
-                                           "std::shared_ptr<RenderMaterial>"};
+                                           "RenderMaterial *"};
             return types[i];
         }
         template<typename T>

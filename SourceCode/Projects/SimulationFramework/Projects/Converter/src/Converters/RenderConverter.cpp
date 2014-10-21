@@ -1,15 +1,17 @@
 #include "RenderConverter.hpp"
 
+#include <string>
 #include "CPUTimer.hpp"
 #include "ProgressBarCL.hpp"
 
 #include "SceneParser.hpp"
-
-
 #include "RenderMaterialParser.hpp"
+
+#include "RenderConverterDataParserGenerators.hpp"
+
 #include "RenderMaterialGen.hpp"
 
-#include "DummyNode.hpp"
+//#include "DummyNode.hpp"
 
 void RenderConverter::convert( const std::vector<boost::filesystem::path> & inputFiles,
               boost::filesystem::path outputFile,
@@ -26,6 +28,7 @@ void RenderConverter::convert( const std::vector<boost::filesystem::path> & inpu
 
     LOG(m_log, "---> RenderConverter started:" <<std::endl;);
 
+    m_frameCounter = 0;
 
     loadGeometryCollection();
     loadMaterialCollection();
@@ -40,9 +43,11 @@ void RenderConverter::convert( const std::vector<boost::filesystem::path> & inpu
 void RenderConverter::loadGeometryCollection() {
 
     LOGRCLEVEL1(m_log, "---> Load Geometries ..." << std::endl;)
-    RenderConverterData::ParserModulesCreator c(&m_renderData);
 
-    using SceneParserType = SceneParser< RenderConverterData, RenderConverterData::ParserModulesCreator::SceneParserTraits >;
+    using ParserGen = RenderConverterDataParserGenerators::SceneParserGen;
+    ParserGen c(&m_renderData);
+
+    using SceneParserType = SceneParser< RenderConverterData, ParserGen::SceneParserTraits >;
     SceneParserType parser(c,m_log);
 
     parser.parseScene(m_sceneFile);
@@ -55,9 +60,11 @@ void RenderConverter::loadGeometryCollection() {
 void RenderConverter::loadMaterialCollection() {
 
     LOGRCLEVEL1(m_log, "---> Load Materials ..." << std::endl;)
-    RenderConverterData::MatCollParserModulesCreator c(&m_renderData);
+    using ParserGen = RenderConverterDataParserGenerators::MaterialsParserGen;
+    ParserGen c(&m_renderData);
 
-    using MatCollParserType = RenderMaterialParser<RenderConverterData>;
+
+    using MatCollParserType = RenderMaterialParser<RenderConverterData /**, StandartTraits*/ >;
     MatCollParserType parser(c,m_log);
 
     parser.parse(m_materialFile);
@@ -124,6 +131,8 @@ void RenderConverter::convertFile(const boost::filesystem::path & f) {
     }
 
     while(m_simFile.isGood()){
+
+        // Write render script for this frame
         double time;
         m_simFile.read(states,time);
 
@@ -134,16 +143,18 @@ void RenderConverter::convertFile(const boost::filesystem::path & f) {
         LOG(m_log, "---> Loaded state at t: " <<time << std::endl;)
 
         // Produce Render OutputFile for this state
+        std::string filename = m_outputFile.filename().string() + std::to_string(m_frameCounter);
+        m_renderData.m_materialGen.initFrame(m_outputFile.parent_path(), filename, time );
+
         for(auto & bs: states){
 
             m_renderData.m_materialGen.fillInput(&bs);
 
-            std::shared_ptr<RenderMaterial> m = m_renderData.m_materialGen.generateMaterial();
-
-            LOG(m_log, "Render Material: " << m->getMaterialString() << std::endl;)
+            m_renderData.m_materialGen.generateMaterial();
 
         }
 
+        m_frameCounter++;
 
     }
 

@@ -52,6 +52,8 @@ SET(COMMON_SRC
     ${SOURCE_DIR}/src/Common/TypeDefs.cpp
     ${PROJECT_SOURCE_DIR}/src/Converters/RenderConverter.cpp
     ${PROJECT_SOURCE_DIR}/src/General/RenderConverterData.cpp
+    
+    ${PROJECT_SOURCE_DIR}/src/General/RenderMaterialGen.cpp
 )
 
 

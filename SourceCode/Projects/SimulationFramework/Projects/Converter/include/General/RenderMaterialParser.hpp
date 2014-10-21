@@ -13,7 +13,7 @@
 #include "AssertionDebug.hpp"
 
 #include "XMLMacros.hpp"
-
+#include "RenderMaterialParserBaseTraits.hpp"
 #include "RenderMaterialParserModules.hpp"
 
 /** The traits for a standart MatCollParser class*/

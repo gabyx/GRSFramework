@@ -13,6 +13,11 @@
         std::string & getMaterialString(){
             return m_s;
         }
+
+        void write(std::stringstream & s){
+            s << m_s << "\n";
+        }
+
     private:
         std::string m_s;
         unsigned int m_id;

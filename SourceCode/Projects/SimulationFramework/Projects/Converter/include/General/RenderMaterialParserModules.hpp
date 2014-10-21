@@ -15,7 +15,7 @@
 #include "RenderMaterialParserBaseTraits.hpp"
 
 #include "RenderMaterialGenLogic.hpp"
-
+#include "RenderOutputLogic.hpp"
 
 namespace RenderMatParserModules {
 
@@ -38,8 +38,7 @@ namespace RenderMatParserModules {
                  }
 
                  ASSERTMSG(itNode->child_value()!=""," String in material id: " << id << "is empty!")
-                 auto s = std::shared_ptr<RenderMaterial>( new RenderMaterial(id,itNode->child_value()) );
-                 m_materials->emplace(id, s);
+                 m_materials->emplace(id, new RenderMaterial(id,itNode->child_value()) );
 
                  LOGMCLEVEL3(m_pLog,"---> Parsed Material with id: " << id << std::endl;)
             }
@@ -61,10 +60,12 @@ namespace RenderMatParserModules {
     public:
         DEFINE_MATCOLPARSER_TYPE_TRAITS(TParserTraits)
 
+        using GeometryMapType = typename CollectionType::GeometryMapType;
         using MaterialMapType = typename CollectionType::MaterialMapType;
         using MaterialGenType = typename CollectionType::MaterialGenType;
 
-        MaterialGenerator(ParserType * p, MaterialGenType * g):m_parser(p),m_matGen(g), m_pLog(p->getLog()) {}
+        MaterialGenerator(ParserType * p, MaterialGenType * g, GeometryMapType * geomMap)
+        :m_parser(p),m_matGen(g), m_pLog(p->getLog()), m_geomMap(geomMap) {}
 
         void parse(XMLNodeType & matGenNode, MaterialMapType * materials) {
 
@@ -79,35 +80,21 @@ namespace RenderMatParserModules {
                  if(!Utilities::stringToType(id, itNode->attribute("id").value())) {
                       THROWEXCEPTION("---> String conversion in Tool: id failed");
                  }
-
-                 bool isInput = false;
-                 auto att = itNode->attribute("isInput");
-                 if(att){
-                    if(!Utilities::stringToType(isInput, att.value())) {
-                      THROWEXCEPTION("---> String conversion in Tool: isInput failed");
-                    }
-                 }
-
-                 bool isOutput = false;
-                 att = itNode->attribute("isOutput");
-                 if(att){
-                    if(!Utilities::stringToType(isOutput, att.value())) {
-                      THROWEXCEPTION("---> String conversion in Tool: isOutput failed");
-                    }
-                 }
-
-
+                 LOGMCLEVEL3(m_pLog,"---> Parsing Tool with id: " << id << std::endl;);
                  std::string type = itNode->attribute("type").value();
-                 if(type == "BodyData"){
-                        createToolBodyData(*itNode,id,isInput,isOutput);
+                 if(type == "BodyDataInput"){
+                        createToolBodyData(*itNode,id);
                  }else if(type == "MaterialLookUp"){
-                        createToolMaterialLookUp(*itNode,id,isInput,isOutput);
-
+                        createToolMaterialLookUp(*itNode,id);
+                 }else if(type == "DisplacementToPosQuat"){
+                        createToolDisplacementToPosQuat(*itNode,id);
+                 }else if(type == "RendermanOutput"){
+                        createToolRendermanOutput(*itNode,id);
                  }else{
                         THROWEXCEPTION("---> String conversion in Tool: type not found!");
                  }
 
-                 LOGMCLEVEL3(m_pLog,"---> Parsed Tool with id: " << id << std::endl;);
+
             }
 
 
@@ -134,11 +121,12 @@ namespace RenderMatParserModules {
                       THROWEXCEPTION("---> String conversion in Tool: id failed");
                  }
 
+                 LOGMCLEVEL3(m_pLog,"---> Linking Tool:  " << outNode << " out: " << outSocket << " ------> "
+                             << inSocket << ":in Tool: " << inNode << std::endl;);
                  // Link the nodes
                  m_matGen->link(outNode,outSocket,inNode,inSocket);
 
-                 LOGMCLEVEL3(m_pLog,"---> Linked Tool:  " << outNode << " out: " << outSocket << " ------> "
-                             << inSocket << ":in Tool: " << inNode << std::endl;);
+
             }
 
         }
@@ -148,14 +136,21 @@ namespace RenderMatParserModules {
 
     private:
 
-        void createToolBodyData(XMLNodeType & matGenNode, unsigned int id, bool isInput, bool isOutput){
+        void createToolBodyData(XMLNodeType & matGenNode, unsigned int id){
 
             auto * node = new LogicNodes::BodyData(id);
-            m_matGen->addNode(node,isInput,isOutput);
+            m_matGen->addNode(node,true,false);
 
         }
 
-        void createToolMaterialLookUp(XMLNodeType & matGenNode, unsigned int id, bool isInput, bool isOutput){
+        void createToolDisplacementToPosQuat(XMLNodeType & matGenNode, unsigned int id){
+
+            auto * node = new LogicNodes::DisplacementToPosQuat(id);
+            m_matGen->addNode(node,false,false);
+
+        }
+
+        void createToolMaterialLookUp(XMLNodeType & matGenNode, unsigned int id){
 
             // Get default material
             auto it = m_materials->begin();
@@ -169,19 +164,19 @@ namespace RenderMatParserModules {
             std::string type = matGenNode.attribute("inputType").value();
             if( type == "unsigned int"){
                 auto * node = new LogicNodes::LookUpTable<unsigned int,
-                                            std::shared_ptr<RenderMaterial>,
+                                            RenderMaterial *,
                                             MaterialMapType >(id,m_materials,it->second);
-                m_matGen->addNode(node,isInput,isOutput);
+                m_matGen->addNode(node,false,false);
             }else if(type =="unsigned long int"){
                 auto * node = new LogicNodes::LookUpTable<unsigned long int,
-                                            std::shared_ptr<RenderMaterial>,
+                                            RenderMaterial *,
                                             MaterialMapType >(id,m_materials,it->second);
-                m_matGen->addNode(node,isInput,isOutput);
+                m_matGen->addNode(node,false,false);
             }else if(type =="unsigned long long int"){
                 auto * node = new LogicNodes::LookUpTable<unsigned long long int,
-                                            std::shared_ptr<RenderMaterial>,
+                                            RenderMaterial *,
                                             MaterialMapType >(id,m_materials,it->second);
-                m_matGen->addNode(node,isInput,isOutput);
+                m_matGen->addNode(node,false,false);
             }else{
                 THROWEXCEPTION("---> String conversion in MaterialLookUp tool: inputType: '" << type << "' not found!");
             }
@@ -190,10 +185,18 @@ namespace RenderMatParserModules {
         }
 
 
+        void createToolRendermanOutput(XMLNodeType & matGenNode, unsigned int id){
+
+            auto * node = new LogicNodes::RendermanOutput(id, m_geomMap);
+            m_matGen->addNode(node,false,true);
+
+        }
+
         ParserType * m_parser;
         LogType * m_pLog;
         MaterialGenType * m_matGen;
         MaterialMapType * m_materials;
+        GeometryMapType * m_geomMap;
     };
 
 };

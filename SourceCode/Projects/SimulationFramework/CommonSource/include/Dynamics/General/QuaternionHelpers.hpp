@@ -22,7 +22,7 @@ namespace QuaternionHelpers{
 
 //Prototype
 template<class Derived, class DerivedOther>
-void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , Eigen::MatrixBase<DerivedOther> &A);
+void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , const Eigen::MatrixBase<DerivedOther> &Rin);
 
 
 /**
@@ -46,7 +46,10 @@ typename MyMatrix<PREC>::Matrix33 getRotFromQuaternion(const typename MyMatrix<P
 * @param A The output 3x3 rotation matrix.
 */
 template<class Derived, class DerivedOther>
-void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , Eigen::MatrixBase<DerivedOther> &R) {
+void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , const Eigen::MatrixBase<DerivedOther> &Rin) {
+
+    Eigen::MatrixBase<DerivedOther> & R = const_cast< Eigen::MatrixBase<DerivedOther>& >(Rin);
+
     using PREC = typename Derived::Scalar;
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
     EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(DerivedOther,3,3);

@@ -49,6 +49,8 @@ private:
     boost::filesystem::path m_outputFile;
     std::vector<boost::filesystem::path> m_inputFiles;
     Renderer m_renderer;
+
+    unsigned int m_frameCounter;
 };
 
 #endif // RenderConverter_hpp

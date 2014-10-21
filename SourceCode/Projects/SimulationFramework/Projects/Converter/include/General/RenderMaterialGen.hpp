@@ -6,48 +6,32 @@
 
 #include "MultiBodySimFile.hpp"
 #include "ExecutionTreeInOut.hpp"
-#include "RenderMaterial.hpp"
+
+
+namespace LogicNodes{
+    class BodyData;
+    class RenderOutput;
+};
+
+class RenderMaterial;
 
 class RenderMaterialGenerator : public ExecutionTreeInOut{
     public:
 
         RenderMaterialGenerator(){}
 
-        void fillInput(RigidBodyStateAdd * s){
-            m_inputNode->setOSocketValue(0,s->m_id);
-            m_inputNode->setOSocketValue(1,s->m_q);
-            m_inputNode->setOSocketValue(2,s->m_u);
+        void fillInput(RigidBodyStateAdd * s);
 
-            if(s->m_data){
-                switch(s->m_data->m_type) {
+        virtual void setup();
 
-                    case AdditionalBodyData::TypeEnum::PROCESS:
-                        {
-                        auto * p = static_cast<AdditionalBodyData::Process *>(s->m_data);
-                        m_inputNode->setOSocketValue(4,p->m_processId);
-                        }
-                        break;
+        std::shared_ptr<RenderMaterial> generateMaterial();
 
-                    case AdditionalBodyData::TypeEnum::PROCESS_MATERIAL:
-                        {
-                        auto * p = static_cast<AdditionalBodyData::ProcessMaterial *>(s->m_data);
-                        m_inputNode->setOSocketValue(3,p->m_materialId);
-                        m_inputNode->setOSocketValue(4,p->m_processId);
-                        }
-                        break;
+        void initFrame(boost::filesystem::path folder, std::string filename, double time);
 
-                    default:
-                        ERRORMSG("Additional bytes could not be filled into input Node!")
-                }
-            }
+    private:
+        LogicNodes::BodyData * m_bodyDataNode = nullptr;
+        std::unordered_map<unsigned int, LogicNodes::RenderOutput *> m_renderOutputNodes;
 
-        };
-
-        std::shared_ptr<RenderMaterial> generateMaterial(){
-            execute();
-
-            return m_outputNode->getOSocketValue<std::shared_ptr<RenderMaterial> >(0);
-        }
 };
 
 
