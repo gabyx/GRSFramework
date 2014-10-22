@@ -10,7 +10,8 @@
 
 namespace LogicNodes{
     class BodyData;
-    class RenderOutput;
+    class FrameData;
+    class RenderScriptWriter;
 };
 
 class RenderMaterial;
@@ -18,19 +19,30 @@ class RenderMaterial;
 class RenderScriptGenerator : public ExecutionTreeInOut{
     public:
 
-        RenderScriptGenerator(){}
+        struct ExecGroups{
+            enum {
+                BODY, /** all nodes which need to update for producing an render output from an input node BodyData*/
+                FRAME, /** all nodes which need to update for producing the inputs for the current frame */
+                NGROUPS
+            };
+        };
 
-        void fillInput(RigidBodyStateAdd * s);
+        RenderScriptGenerator(){};
 
-        virtual void setup();
 
-        std::shared_ptr<RenderMaterial> generateMaterial();
+        void setup();
 
-        void initFrame(boost::filesystem::path folder, std::string filename, double time);
+        void initFrame(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
+        void generateFrameData(RigidBodyStateAdd * s);
+
+        void setFrameData(LogicNodes::FrameData *n){m_frameData = n;};
+        void setBodyData(LogicNodes::BodyData *n){m_bodyDataNode = n;};
 
     private:
         LogicNodes::BodyData * m_bodyDataNode = nullptr;
-        std::unordered_map<unsigned int, LogicNodes::RenderOutput *> m_renderOutputNodes;
+        std::unordered_set<LogicNodes::RenderScriptWriter *> m_scriptWritterNodes;
+
+        LogicNodes::FrameData * m_frameData =  nullptr;
 
 };
 

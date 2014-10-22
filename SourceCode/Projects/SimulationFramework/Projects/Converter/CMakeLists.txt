@@ -49,10 +49,11 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParserBaseTraits.hpp
     ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParserModules.hpp
     
+    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptGenerator.hpp
     ${PROJECT_SOURCE_DIR}/include/General/RenderScriptGeneratorLogic.hpp
     ${PROJECT_SOURCE_DIR}/include/General/RendermanGeometryWriter.hpp
     
-    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptGenerator.hpp
+
         
     
     ${PROJECT_SOURCE_DIR}/include/General/RenderMaterial.hpp

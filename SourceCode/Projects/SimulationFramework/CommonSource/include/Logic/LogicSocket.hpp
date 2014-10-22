@@ -63,10 +63,12 @@ public:
         return m_parent;
     }
 
+    /** Linked means if and input is connected */
     inline bool isLinked() const {
         return m_from != nullptr;
     }
 
+    /** Connected means if output is connected somewhere or if input is connected */
     inline bool isConnected() const {
         return m_connected;
     }

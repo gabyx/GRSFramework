@@ -72,7 +72,6 @@ void RenderScriptConverter::loadMaterialCollection() {
 
     LOGRCLEVEL1(m_log, "---> Setup Mapper ..." << std::endl;)
     m_renderData.m_renderScriptGen.setup();
-    m_renderData.m_renderScriptGen.generateMaterial();
 
 //    ExecutionTreeInOut m;
 //    LogicNode * n0 = new DummyLogicNode<1,3>(0);
@@ -144,13 +143,12 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
 
         // Produce Render OutputFile for this state
         std::string filename = m_outputFile.filename().string() + std::to_string(m_frameCounter);
-        m_renderData.m_renderScriptGen.initFrame(m_outputFile.parent_path(), filename, time );
+
+        m_renderData.m_renderScriptGen.initFrame(m_outputFile.parent_path(), filename, time, m_frameCounter );
 
         for(auto & bs: states){
 
-            m_renderData.m_renderScriptGen.fillInput(&bs);
-
-            m_renderData.m_renderScriptGen.generateMaterial();
+            m_renderData.m_renderScriptGen.generateFrameData(&bs);
 
         }
 

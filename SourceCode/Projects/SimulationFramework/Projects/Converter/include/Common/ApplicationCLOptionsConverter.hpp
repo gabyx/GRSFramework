@@ -276,6 +276,8 @@ public:
 
 
     std::vector<boost::filesystem::path> m_inputFiles;
+
+    bool m_pipeToStdOut = false;
     boost::filesystem::path m_outputFile;
 
      // RenderScriptConverter
@@ -327,7 +329,10 @@ public:
 
             ops >> Option('o',"output",m_outputFile);
 
-
+//            if(m_outputFile == "stdout"){
+//                m_pipeToStdOut = true;
+//                m_outputFile = "";
+//            }
 
         }
         catch(GetOpt::ParsingErrorEx ex){
@@ -379,6 +384,7 @@ public:
         }else{
             s << "undefined";
         }
+        s << " pipeToStdOut: " << m_pipeToStdOut<<std::endl;
         s<<std::endl;
     }
 
@@ -435,7 +441,7 @@ private:
                   <<            "\t\t <path>: Specifies the scene file xml path \n"
                   << " \t -o|--output <path>  \n"
                   << " \t [Required] \n"
-                  <<            "\t\t <path>: Specifies the ouput directory path \n"
+                  <<            "\t\t <path>: Specifies the ouput directory path or \n"
                   << " \t -h|--help \n"
                   <<            "\t\t Prints this help\n";
     }

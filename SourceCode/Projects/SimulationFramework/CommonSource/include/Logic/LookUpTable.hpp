@@ -41,7 +41,7 @@ namespace LogicNodes{
         virtual ~LookUpTable() {
         }
 
-        void compute() {
+        virtual void compute() {
             auto id = GET_ISOCKET_VALUE(Key);
             auto it = m_map->find(id);
 
@@ -51,6 +51,8 @@ namespace LogicNodes{
                 SET_OSOCKET_VALUE(Value, it->second );
             }
         }
+
+        virtual void initialize(){};
 
     private:
         TMap * m_map;

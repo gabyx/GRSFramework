@@ -20,8 +20,8 @@
 template<typename TSceneParser, typename TCollection>
 struct RenderScriptParserTraits : RenderMatParserBaseTraits<TSceneParser,TCollection> {
     // Module typedefs
-    using MaterialsModuleType   = typename RenderMatParserModules::MaterialsModule<RenderScriptParserTraits>;
-    using MatGenModuleType   = typename RenderMatParserModules::MaterialGenerator<RenderScriptParserTraits>;
+    using MaterialsModuleType   = typename RenderScriptParserModules::MaterialsModule<RenderScriptParserTraits>;
+    using MatGenModuleType   = typename RenderScriptParserModules::ScriptGeneratorModule<RenderScriptParserTraits>;
 };
 
 template< typename TCollection, template<typename P, typename C> class TParserTraits = RenderScriptParserTraits >
@@ -148,7 +148,7 @@ private:
 
             LOGMCLEVEL1(m_pLog, "---> Try to parse the file ..."<<std::endl;);
 
-            GET_XMLCHILDNODE_CHECK( m_xmlRootNode, "MaterialsCollection" , (*m_xmlDoc) );
+            GET_XMLCHILDNODE_CHECK( m_xmlRootNode, "Render" , (*m_xmlDoc) );
 
 
             XMLNodeType node = m_xmlRootNode.child("Materials");
@@ -156,7 +156,7 @@ private:
                 m_pMaterialsModule->parse(node);
             }
 
-            node = m_xmlRootNode.child("MaterialGenerator");
+            node = m_xmlRootNode.child("ScriptGenerator");
             if(node && m_pMaterialGeneratorModule) {
                 m_pMaterialGeneratorModule->parse(node, m_pMaterialsModule->getMaterialMap() );
             }

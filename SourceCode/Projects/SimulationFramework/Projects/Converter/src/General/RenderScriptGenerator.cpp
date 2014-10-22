@@ -2,69 +2,86 @@
 
 #include "RenderMaterial.hpp"
 #include "RenderScriptGeneratorLogic.hpp"
-#include "RenderOutputLogic.hpp"
 
-void RenderScriptGenerator::fillInput(RigidBodyStateAdd * s) {
-    m_inputNode->setOSocketValue(0,s->m_id);
-    m_inputNode->setOSocketValue(1,s->m_q);
-    m_inputNode->setOSocketValue(2,s->m_u);
 
-    if(s->m_data) {
-        switch(s->m_data->m_type) {
-
-        case AdditionalBodyData::TypeEnum::PROCESS: {
-            auto * p = static_cast<AdditionalBodyData::Process *>(s->m_data);
-            m_inputNode->setOSocketValue(4,p->m_processId);
-        }
-        break;
-
-        case AdditionalBodyData::TypeEnum::PROCESS_MATERIAL: {
-            auto * p = static_cast<AdditionalBodyData::ProcessMaterial *>(s->m_data);
-            m_inputNode->setOSocketValue(3,p->m_materialId);
-            m_inputNode->setOSocketValue(4,p->m_processId);
-        }
-        break;
-
-        default:
-            ERRORMSG("Additional bytes could not be filled into input Node!")
-        }
-    }
-};
+//void RenderScriptGenerator::addNode( LogicNode * node, bool isInput, bool isOutput)
+//{
+//
+//    if(groupId >= ExecGroups::NGROUPS){
+//        ERRORMSG("Group id: " << groupId << " of node id" << node->m_id << " not a valid group number!" )
+//    }
+//
+//    this->addNode(node,isInput,isOutput);
+//
+//
+//}
+//
+//void RenderScriptGenerator::addNodeToGroup( unsigned int nodeId, unsigned int groupId)
+//
+//    ExecutionTreeInOut::addNodeToGroup(nodeId,groupId);
+//
+//    // if group id = ExecGroups::FRAMEGROUP
+//    if( groupId == ExecGroups::FRAME){
+//        // add this to the frame update list
+//        LogicNodes::RenderScriptWriter * r = dynamic_cast<LogicNodes::RenderScriptWriter * >(n.second);
+//    }
+//
 
 void RenderScriptGenerator::setup() {
     ExecutionTreeInOut::setup();
 
-    m_bodyDataNode = dynamic_cast<LogicNodes::BodyData * >(this->getInputNode());
     if( !m_bodyDataNode  ) {
         ERRORMSG("Execution tree has no input node of type 'BodyData' ")
     }
-
-    m_renderOutputNodes.clear();
-    auto & outNodes = this->getOutputNodes();
-    for(auto & n : outNodes){
-        LogicNodes::RenderOutput * r = dynamic_cast<LogicNodes::RenderOutput * >(n.second);
-        if(!r) {
-            ERRORMSG("Output node id: " << n.first << " is not of type 'RenderOutput = [RendermanOutput]' ")
-        }
-        m_renderOutputNodes.emplace(n.first, r);
+    if( !m_frameData  ) {
+        ERRORMSG("Execution tree has no input node of type 'FrameData' ")
     }
 
-    if( m_renderOutputNodes.size() == 0  ) {
-            ERRORMSG("Execution tree has no output node 'RenderOutput = [RendermanOutput]' ")
+    m_scriptWritterNodes.clear();
+    auto & outNodes = this->getOutputNodes();
+    for(auto & n : outNodes){
+        LogicNodes::RenderScriptWriter * r = dynamic_cast<LogicNodes::RenderScriptWriter * >(n);
+        if(!r) {
+            ERRORMSG("Output node is not of type 'RenderScriptWriter = [RendermanWriter]' ")
+        }
+        m_scriptWritterNodes.emplace(r);
+    }
+
+    if( m_scriptWritterNodes.size() == 0  ) {
+            ERRORMSG("Execution tree has no output node 'RenderScriptWriter = [RendermanWriter]' ")
     }
 
 
 }
 
-void RenderScriptGenerator::initFrame(boost::filesystem::path folder, std::string filename, double time)
+void RenderScriptGenerator::initFrame(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr)
 {
-     for(auto & n : m_renderOutputNodes){
-        n.second->initFrame(folder,filename,time);
+
+     // Set outputs in FrameData
+     if(m_frameData){
+        m_frameData->setOutput(folder,filename,time,frameNr);
+     }else{
+        ERRORMSG("There is no FrameData node present! Please add one!")
+     }
+
+     // Execute all nodes in FRAME group
+     this->execute(ExecGroups::FRAME);
+
+     // Call all render script writters
+     for(auto & n : m_scriptWritterNodes){
+        n->initFrame();
      }
 }
 
-std::shared_ptr<RenderMaterial> RenderScriptGenerator::generateMaterial() {
-    execute();
-    return nullptr;
-    //return m_outputNode->getOSocketValue<std::shared_ptr<RenderMaterial> >(0);
+void RenderScriptGenerator::generateFrameData(RigidBodyStateAdd * s) {
+    // Set body data
+    m_bodyDataNode->setOutputs(s);
+
+    // Execute all nodes in BODY group
+    this->execute(ExecGroups::BODY);
+
+    // Call all render script writters
+     for(auto & n : m_scriptWritterNodes){
+        n->writeBody();
+     }
 }

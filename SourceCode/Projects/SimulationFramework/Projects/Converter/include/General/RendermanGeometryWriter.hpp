@@ -21,13 +21,13 @@ class RendermanGeometryWriter: public boost::static_visitor<> {
     inline void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom) {
 
 // Sphere
-//        *m_s << "Sphere " << sphereGeom->m_radius <<" "
-//        << -sphereGeom->m_radius  << " "
-//        << sphereGeom->m_radius  << " "
-//        << " 360"  <<"\n";
+        *m_s << "Sphere " << sphereGeom->m_radius <<" "
+        << -sphereGeom->m_radius  << " "
+        << sphereGeom->m_radius  << " "
+        << " 360"  <<"\n";
 
 // Points
-          *m_s << "Points \"P\" [0,0]" << " \"width\" ["<<sphereGeom->m_radius <<"]\n";
+          //*m_s << "Points \"P\" [0 0 0]" << " \"width\" ["<<sphereGeom->m_radius <<"]\n";
 
 
     }

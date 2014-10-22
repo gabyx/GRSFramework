@@ -19,6 +19,10 @@
 #include <limits>
 #include <vector>
 
+#include <stdarg.h>  // for va_start, etc
+#include <memory>    // for std::unique_ptr
+
+
 #include "StaticAssert.hpp"
 #include "AssertionDebug.hpp"
 #include "MyMatrixDefs.hpp"
@@ -359,6 +363,10 @@ inline bool isNaN(const Eigen::MatrixBase<Derived>& x)
 {
    return ((x.array() == x.array())).all();
 }
+
+
+/** http://stackoverflow.com/a/8098080/293195 */
+std::string stringFormat(const std::string fmt_str, ... );
 
 
 };
