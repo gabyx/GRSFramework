@@ -142,9 +142,7 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
         LOG(m_log, "---> Loaded state at t: " <<time << std::endl;)
 
         // Produce Render OutputFile for this state
-        std::string filename = m_outputFile.filename().string() + std::to_string(m_frameCounter);
-
-        m_renderData.m_renderScriptGen.initFrame(m_outputFile.parent_path(), filename, time, m_frameCounter );
+        m_renderData.m_renderScriptGen.initFrame(m_outputFile.parent_path(), m_outputFile.filename().string(), time, m_frameCounter );
 
         for(auto & bs: states){
 

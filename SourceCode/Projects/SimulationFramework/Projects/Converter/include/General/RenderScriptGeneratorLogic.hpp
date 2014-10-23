@@ -345,8 +345,8 @@ namespace LogicNodes {
             // Write the begin block of the rib file
             static std::stringstream s;
 
-            s.str("");
             s.clear();
+            s.str("");
             s.seekp(0);
             s.seekg(0);
 
@@ -457,8 +457,7 @@ namespace LogicNodes {
                 // Write to file
                 ASSERTMSG(m_frameFile.good(),"FUCK");
                 m_frameFile << s.rdbuf();
-                m_frameFile.clear();
-//                m_frameFile.flush();
+                //m_frameFile.clear();
             }
         }
 

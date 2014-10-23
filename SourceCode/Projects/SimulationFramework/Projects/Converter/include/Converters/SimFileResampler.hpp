@@ -21,7 +21,8 @@ public:
               boost::filesystem::path outputFile,
               std::streamoff stepSize = 1,
               std::streamoff startStateIdx = 0,
-              std::streamoff endStateIdx = std::numeric_limits<unsigned int>::max()) {
+              std::streamoff endStateIdx = std::numeric_limits<unsigned int>::max(),
+              bool splitStatesIntoFiles = false) {
 
         m_iFiles = inputFiles;
         m_oFile  = outputFile;
@@ -29,8 +30,10 @@ public:
         m_startStateIdx =startStateIdx;
         m_endStateIdx =endStateIdx;
         m_stepSize = stepSize;
+        m_splitStatesIntoFiles = splitStatesIntoFiles;
 
         resample();
+
 
     }
 
@@ -40,6 +43,7 @@ private:
     boost::filesystem::path m_oFile;
 
     std::streamoff m_startStateIdx,  m_endStateIdx, m_stepSize;
+    bool m_splitStatesIntoFiles;
 
     void resample(){
           std::cerr << "---> Execute Resample" << std::endl;
@@ -65,18 +69,14 @@ private:
         std::cerr << fromFile.getDetails() << std::endl;
 
         // Resample
+        std::unique_ptr<MultiBodySimFile> toFile;
 
-
-        std::cerr << "---> Open new output file at: "  <<  m_oFile << std::endl;
-        MultiBodySimFile toFile;
-        if(!toFile.openWrite_impl(m_oFile,
-                                  fromFile.getNDOFq(),
-                                  fromFile.getNDOFu(),
-                                  0,
-                                  true)
-                                  ){
-            THROWEXCEPTION(toFile.getErrorString());
-        };
+        if(!m_splitStatesIntoFiles){
+            std::cerr << "---> Open new output file at: "  <<  m_oFile << std::endl;
+            toFile = openFile(fromFile,m_oFile); // unique ptr
+        }else{
+            std::cerr << "---> Splitting into files at: "  <<  m_oFile << std::endl;
+        }
 
         // Make Buffer
         std::streamsize size = fromFile.m_nBytesPerState; // state size
@@ -85,27 +85,59 @@ private:
 
         // Resample loop
         std::cerr << "---> Resample from: [" << m_startStateIdx << "," <<  m_endStateIdx << "] "  <<  m_oFile << " ";
-        ProgressBarCL<std::streamoff> pBar(std::cerr,"",fromFile.m_nStates-1);
-        pBar.start();
+
         m_endStateIdx = std::min(m_endStateIdx , fromFile.m_nStates - 1);
-        for( std::streamoff stateIdx = m_startStateIdx; stateIdx < fromFile.m_nStates && stateIdx <= m_endStateIdx; stateIdx+=m_stepSize) {
+
+        ProgressBarCL<std::streamoff> pBar(std::cerr,"", m_startStateIdx, m_endStateIdx);
+        pBar.start();
+
+        // Put read pointer to beginning of state
+        fromFile.m_file_stream.seekg( m_startStateIdx * size);
+        for( std::streamoff stateIdx = m_startStateIdx;
+        stateIdx <= m_endStateIdx; stateIdx+=m_stepSize) {
+
+             if(m_splitStatesIntoFiles){
+                auto f = m_oFile.parent_path() / m_oFile.filename().replace_extension("");
+                f += std::to_string(stateIdx);
+                f.replace_extension(m_oFile.extension());
+                toFile = openFile(fromFile,f); // unique ptr
+             }
+
              fromFile.m_file_stream.read(&byteBuffer[0],size);
-             toFile.m_file_stream.write(&byteBuffer[0],size);
+             toFile->m_file_stream.write(&byteBuffer[0],size);
              // Jump over all remaining states
              fromFile.m_file_stream.seekg( size * (m_stepSize-1),std::ios_base::cur);
+
+
              pBar.update(stateIdx);
+
+             if(m_splitStatesIntoFiles){
+                  toFile->close();
+             }
+
         }
+        pBar.update(m_endStateIdx);
         std::cerr << "---> Resample done! " << std::endl;
-
-        // Write header
-        toFile.m_additionalBytesPerBodyType = fromFile.m_additionalBytesPerBodyType;
-        toFile.m_nAdditionalBytesPerBody = fromFile.m_nAdditionalBytesPerBody;
-        toFile.m_nSimBodies = fromFile.m_nSimBodies;
-        toFile.writeHeader();
-
         std::cerr << "---> Close Files!" << std::endl;
         fromFile.close();
-        toFile.close();
+        if(!m_splitStatesIntoFiles){
+            toFile->close();
+        }
+    }
+
+    std::unique_ptr<MultiBodySimFile> openFile(MultiBodySimFile & fromFile, boost::filesystem::path f){
+        std::unique_ptr<MultiBodySimFile> toFile = std::unique_ptr<MultiBodySimFile>(new MultiBodySimFile()) ;
+        if(!toFile->openWrite_impl(   f,
+                                  fromFile.getNDOFq(),
+                                  fromFile.getNDOFu(),
+                                  fromFile.m_nSimBodies,
+                                  true,
+                                  fromFile.m_additionalBytesPerBodyType,
+                                  fromFile.m_nAdditionalBytesPerBody
+                                  )){
+            THROWEXCEPTION(toFile->getErrorString());
+        };
+        return std::move(toFile);
     }
 
 

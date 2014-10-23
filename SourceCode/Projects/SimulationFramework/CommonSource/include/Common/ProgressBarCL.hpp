@@ -11,10 +11,13 @@ public:
 
     ProgressBarCL(std::ostream & s,
                   std::string title,
+                  T start,
                   T end, unsigned int length = 20
                   ):m_oStream(s)
     {
-        m_end=end;
+        m_start = start;
+        m_end   = end;
+
         m_length = length;
         m_title = title;
     }
@@ -22,20 +25,40 @@ public:
     void start(){
         m_current = 0;
         m_oStream << m_title <<" [";
+
+
+
     }
+    //   start                end
+    //    340        341      342  ] // can be continous!
+    //     | ---------|--------|     * this is the rest
+    //     | = | = | = | = | = | (l=1)
+    //       1   2   3   4   5
+    //   c |-------->*
+    // c = 340.8 - 340 = 0.8
+    // i = (end -start) / l
+    // idx = floor(c / i)  = 2 there should be the progress bar
+
     void update(unsigned int counter){
 
-        T idx = std::min( (T)(((double)counter / (double)m_end) * (double)m_length) , m_length-1  );
-
-        if(idx>m_current && m_current < m_length){
-            for(T i = 0; i < idx-m_current; i++ ){
-                m_oStream << "=";
-            }
-            m_current = idx;
+        double c = counter - m_start;
+        double i = (double)(m_end-m_start) / (double)(m_length);
+        unsigned int idx;
+        if(i <= 0.0){
+            idx = m_length;
+        }else{
+            idx = std::floor(c / i) + 1;
+            idx = std::min(idx, m_length);
         }
-        if(m_current == m_length -1){
-            m_oStream << "=]" <<std::endl;
-            m_current = m_length;
+
+        // pop out character till idx
+        while(m_current < idx){
+            m_oStream << "=";
+            m_current++;
+        }
+
+        if(m_current == m_length){
+            m_oStream << "]" << std::endl;
         }
     }
 
@@ -43,10 +66,8 @@ public:
 private:
     std::string m_title;
 
-    T m_current;
-    T m_end;
-    T m_length;
-
+    T m_start, m_end;
+    unsigned int m_length, m_current;
 
     std::ostream & m_oStream;
 };

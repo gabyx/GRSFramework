@@ -39,6 +39,7 @@ public:
     unsigned int m_stepSize = 1;
     unsigned int m_startStateIdx = 0;
     unsigned int m_endStateIdx = std::numeric_limits<unsigned int>::max();
+    bool m_splitIntoFiles = false;
 
     enum class Task: unsigned int{
         JOIN = 1,
@@ -127,9 +128,12 @@ public:
                         ops >> Option("startIdx",m_startStateIdx);
                     }
                     if( ops >> OptionPresent("endIdx")) {
-                        ops >> Option("startIdx",m_endStateIdx);
+                        ops >> Option("endIdx",m_endStateIdx);
                     }
-                    if(m_endStateIdx<=m_startStateIdx){
+                    if( ops >> OptionPresent("split")) {
+                        m_splitIntoFiles = true;
+                    }
+                    if(m_endStateIdx<m_startStateIdx){
                          THROWEXCEPTION("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
                     }
             }else{
@@ -257,8 +261,10 @@ private:
                   <<            "\t\t\t         Takes the following options:\n"
                   <<            "\t\t\t         --step <number> \n"
                   <<            "\t\t\t         --start <stateIdx> --end <stateIdx> \n"
+                  <<            "\t\t\t         --split \n"
                   <<            "\t\t\t         Note: option --step needs to be greater than 1, start and end \n"
                   <<            "\t\t\t               represent state indices in the file.\n"
+                  <<            "\t\t\t               --split splits all states into sucessive files.\n"
                   << " \t -o|--output <path>  \n"
                   << " \t [Required] \n"
                   <<            "\t\t <path>: Specifies the ouput file path \n"

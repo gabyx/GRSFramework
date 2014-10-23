@@ -41,7 +41,9 @@ int main(int argc, char **argv) {
             }else if( opts.m_task == ApplicationCLOptionsSimConverter::Task::RESAMPLE){
                try{
                     SimFileResampler resampler;
-                    resampler.resample(opts.m_inputFiles,opts.m_outputFile, opts.m_stepSize);
+                    resampler.resample(opts.m_inputFiles,opts.m_outputFile,
+                                       opts.m_stepSize, opts.m_startStateIdx, opts.m_endStateIdx,
+                                       opts.m_splitIntoFiles);
                }catch(const Exception & e){
                     std::cerr <<"Exception occured: " <<  e.what() << std::endl;
                     exit(EXIT_FAILURE);
