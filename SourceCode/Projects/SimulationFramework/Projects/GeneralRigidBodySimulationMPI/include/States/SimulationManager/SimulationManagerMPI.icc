@@ -77,26 +77,17 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added DynamicsSystem");
 
     // Parse the SceneSettings only ==========================
-    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType( *m_pDynSys) );
+
+    DynamicsSystemType::ParserModulesCreator c(m_pDynSys.get());
+    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType( c , m_pSimulationLog) );
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
-
-    {
-        typename SceneParserType::BodyModuleOptionsType optBody;
-        optBody.m_parseAllBodiesNonSelGroup = true;
-        optBody.m_parseSimBodies = false; optBody.m_allocateSimBodies = false;
-        optBody.m_parseStaticBodies = true; optBody.m_allocateStaticBodies = true;
-
-        SceneParserType::SceneParserOptionsType optScene;
-        optScene.m_parseSceneSettings = true;
-        optScene.m_parseSceneObjects = true;
-
-        m_pSceneParser->parseScene(sceneFilePathNew, typename SceneParserType::SceneParserOptionsType(), std::move(optBody)) ;
-    }
+    m_pSceneParser->parseScene(sceneFilePathNew) ;
 
     m_nGlobalSimBodies = m_pSceneParser->getSpecifiedSimBodies();
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_simBodies.size()
         << " simulated & " << m_pDynSys->m_staticBodies.size()<<  " static bodies! "  << std::endl;);
     LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: Global Bodies in Simulation "<< m_nGlobalSimBodies<< " Bodies!" << std::endl;);
+
     // ====================================================
 
     // TopologyBuilder Build Topology =====================

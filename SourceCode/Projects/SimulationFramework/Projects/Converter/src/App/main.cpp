@@ -65,9 +65,13 @@ int main(int argc, char **argv) {
             opts.printArgs(std::cout);
             // End Parsing =================================
 
-            RenderScriptConverter renderConv;
-            renderConv.convert(opts.m_inputFiles,opts.m_outputFile,opts.m_sceneFile, opts.m_materialFile ,opts.m_renderer);
-
+            try{
+                RenderScriptConverter renderConv;
+                renderConv.convert(opts.m_inputFiles,opts.m_outputFile,opts.m_sceneFile, opts.m_materialFile ,opts.m_renderer);
+            }catch(const Exception & e){
+                    std::cerr <<"Exception occured: " <<  e.what() << std::endl;
+                    exit(EXIT_FAILURE);
+            }
         }else{
             std::cerr << "Wrong Options: " << argv[1] << std::endl
             << " Help: \n"

@@ -12,6 +12,7 @@
 
 #include <mpi.h>
 
+#include "Exception.hpp"
 #include "LogDefines.hpp"
 
 // This is the MPI version for our Debugging shit =)
@@ -68,9 +69,8 @@
     * Writes in a global file!
 	*/
 #define ERRORMSG( _message_ ) { \
-int rank; MPI_Comm_rank(MPI_COMM_WORLD,&rank); \
-std::cerr << "ERROR in ProcessRank: " << rank << " : " << _message_ << std::endl << " @ " <<  __FILE__ << "(" << __LINE__ << ")" << std::endl; \
-MPI_Abort(MPI_COMM_WORLD, -1); \
+    int rank; MPI_Comm_rank(MPI_COMM_WORLD,&rank); \
+    THROWEXCEPTION("ERROR in ProcessRank: " << rank << " : " << _message_ << std::endl << " @ " <<  __FILE__ << "(" << __LINE__ << ")" << std::endl); \
 }
 
 #define ERRORMSG2( _message1_ , _message2_ ) ERRORMSG( _message1_ << _message2_ )

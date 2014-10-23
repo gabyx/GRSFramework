@@ -542,7 +542,7 @@ public:
 
 public:
     template<typename ModuleGeneratorType>
-    SceneParserGUI(ModuleGeneratorType & moduleGen): BaseType(moduleGen){}
+    SceneParserGUI(ModuleGeneratorType & moduleGen,  Logging::Log * log): BaseType(moduleGen , log){}
 };
 
 

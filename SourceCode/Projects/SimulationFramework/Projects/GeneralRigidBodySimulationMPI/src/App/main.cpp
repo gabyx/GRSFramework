@@ -1,8 +1,10 @@
 #include <iostream>
 #include <csignal>
 #include <string>
+#include <memory>
 
 #include <mpi.h>
+
 
 #include "TypeDefs.hpp"
 #include "ApplicationCLOptions.hpp"
@@ -46,7 +48,7 @@ int main(int argc, char **argv) {
     MPI_Init(&argc, &argv);
 
     // Scope that all stuff is deconstructed before MPI FINALIZE IS CALLED
-    {
+    try{
 
         MPILayer::MPIGlobalCommunicators globalComm;
 
@@ -81,15 +83,15 @@ int main(int argc, char **argv) {
         }
 
         // Rank 0 makes the FileManager first( to ensure that all folders are set up properly)
-        FileManager * fileManager;
+        std::unique_ptr<FileManager> fileManager;
         if(my_rank == 0){
-            fileManager = new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
+            fileManager.reset(new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath)); //Creates path if it does not exist
             MPI_Barrier(MPI_COMM_WORLD);
         }
         else{
             MPI_Barrier(MPI_COMM_WORLD);
             //These do not create paths anymore because rank 0 has already made the stuff
-            fileManager = new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath);
+            fileManager.reset(new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath));
         }
 
         Logging::LogManager logger;
@@ -127,9 +129,10 @@ int main(int argc, char **argv) {
             }
         }
 
-
-        delete fileManager;
-
+    }catch(Exception& ex) {
+        std::cerr << "Exception occured: "  << ex.what() <<std::endl;
+        std::cerr << "Exiting ..." << std::endl;
+        MPI_Abort(MPI_COMM_WORLD,-1);
     } // SCOPE
 
 

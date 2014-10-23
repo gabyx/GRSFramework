@@ -29,9 +29,9 @@ class MeshGeometry {
 public:
 
     DEFINE_MATRIX_TYPES
-
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+    MeshGeometry(): m_pMeshData(nullptr){}
     MeshGeometry( boost::filesystem::path path, MeshData * pMeshData):
         m_filePath(path), m_pMeshData(pMeshData) {
 
@@ -143,11 +143,11 @@ public:
     MeshData * m_pMeshData =  nullptr;
 
 #if USE_OPCODE == 1
-    Opcode::Model * m_pOpcodeModel;
+    Opcode::Model * m_pOpcodeModel =  nullptr;
 #endif
 
 #if USE_OZCOLLIDE == 1
-    ozcollide::AABBTreePoly * m_pTreePoly;
+    ozcollide::AABBTreePoly * m_pTreePoly =  nullptr;
     std::vector<ozcollide::Polygon> m_ozPolys; ///< A set of polygons used in ozcollide, only referenced!
 #endif
 
