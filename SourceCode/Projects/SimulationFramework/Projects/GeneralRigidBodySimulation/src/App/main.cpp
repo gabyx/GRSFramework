@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     // Parsing Input Parameters===================================
     ApplicationCLOptions opts;
     ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
-   // End Parsing =================================
+    // End Parsing =================================
 
 
 	try

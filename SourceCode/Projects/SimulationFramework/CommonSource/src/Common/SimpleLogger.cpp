@@ -12,7 +12,7 @@ void LogSink::operator<<(std::stringstream & s) {
     (*m_pOutStream) << s.rdbuf();
     s.seekg(0,std::ios_base::beg); // Reset because we might reuse this stringstream!
     if(m_pOutStream->fail()) {
-        ASSERTMSG(false,"m_pOutStream has fail()!");
+        ASSERTMSG(false,"m_pOutStream has failed()!");
         m_pOutStream->clear();
     }
     m_pOutStream->flush();
@@ -42,17 +42,17 @@ LogSinkFile::LogSinkFile(const std::string & sink_name, boost::filesystem::path 
 
 
     if(filePath.empty()){
-            boost::filesystem::path filePath = GLOBAL_LOG_FOLDER_DIRECTORY;
+            filePath = "./Logs";
             filePath /= this->getName() + "fileSink.log";
     }
-    //std::cout << filePath.parent_path() <<std::endl;
-    if(!boost::filesystem::exists(filePath.parent_path())){
+
+    if(filePath.has_parent_path() && !boost::filesystem::exists(filePath.parent_path())){
         boost::filesystem::create_directories(filePath.parent_path());
     }
 
-    m_fileStream.open(filePath,std::ios_base::trunc);
+    m_fileStream.open(filePath.string(),std::ofstream::trunc);
     if(!m_fileStream.is_open()) {
-        ASSERTMSG(false,"LogSinkFile: " << this->getName() << " could not be opened at location: " << filePath.string());
+        ERRORMSG("LogSinkFile: " << this->getName() << " could not be opened at location: " << filePath.string());
     }
     m_pOutStream = &m_fileStream;
 };
@@ -76,8 +76,7 @@ LogSinkCout::~LogSinkCout() {
 
 // Log =================================================
 Log::~Log() {
-    // No deletion, each derived class deletes its own pointers and streams!
-    for(int i=0; i<m_sinkList.size(); i++) {
+    for(unsigned int i=0; i<m_sinkList.size(); i++) {
         delete m_sinkList[i];
     }
 };
@@ -92,8 +91,8 @@ void Log::logMessage(std::stringstream & str) {
 
 
 bool Log::addSink(LogSink * sink) {
-    boost::mutex::scoped_lock l(m_busy_mutex);
-    for(int i=0; i<m_sinkList.size(); i++) {
+    std::lock_guard<std::mutex> l(m_busy_mutex);
+    for(unsigned int i=0; i<m_sinkList.size(); i++) {
         if(m_sinkList[i]==sink) {
             return false;
         }
@@ -103,7 +102,7 @@ bool Log::addSink(LogSink * sink) {
 }
 
 bool Log::removeSink(std::string sink_name) {
-    boost::mutex::scoped_lock l(m_busy_mutex);
+    std::lock_guard<std::mutex> l(m_busy_mutex);
     std::vector<LogSink *>::iterator it;
     for(it=m_sinkList.begin(); it!=m_sinkList.end(); ++it) {
         if((*it)->getName()==sink_name) {
@@ -119,7 +118,7 @@ std::string Log::getName() {
 }
 
 // Log::expression =================================================
-Log::expression::expression(Log & _log, std::stringstream *_s) : flag(false), m_log(_log), s(_s) {};
+Log::expression::expression(Log & _log, std::stringstream *_s) : s(_s), flag(false), m_log(_log) {};
 
 // Destructor pushes message!
 Log::expression::~expression() {
@@ -142,7 +141,7 @@ LogManager::~LogManager() {
     LogListIteratorType it;
     for(it=m_logList.begin(); it!= m_logList.end(); ++it) {
         if((*it).second) {
-            delete (*it).second; //Delete all sinks!
+            delete (*it).second; //Delete all logs!
         }
     }
 };
@@ -161,7 +160,7 @@ Log* LogManager::createLog(const std::string & name, bool toConsole, bool toFile
 };
 
 void LogManager::destroyLog(const std::string &name) {
-    boost::mutex::scoped_lock l(m_busy_mutex);
+    std::lock_guard<std::mutex> l(m_busy_mutex);
 
     LogListIteratorType it = m_logList.find(name);
     ASSERTMSG(it != m_logList.end(),"This Log does not exist!");
@@ -176,7 +175,7 @@ void LogManager::destroyLog(const std::string &name) {
 };
 
 void LogManager::destroyLog(const Log * log) {
-    boost::mutex::scoped_lock l(m_busy_mutex);
+    std::lock_guard<std::mutex> l(m_busy_mutex);
     LogListIteratorType it;
     for(it = m_logList.begin(); it != m_logList.end(); it++){
             if(it->second && it->second == log) {
@@ -191,13 +190,13 @@ void LogManager::destroyLog(const Log * log) {
 
 void LogManager::registerLog(Log * log) {
     ASSERTMSG(log != nullptr,"This Log has Null Pointer!");
-    boost::mutex::scoped_lock l(m_busy_mutex);
+    std::lock_guard<std::mutex> l(m_busy_mutex);
     std::pair<LogListIteratorType, bool> res =  m_logList.insert(std::pair<std::string, Log* >(log->getName(), log));
     ASSERTMSG(res.second,"LogSink has already been added! :" << log->getName());
 };
 
 Log * LogManager::getLog(const std::string & name) {
-    boost::mutex::scoped_lock l(m_busy_mutex);
+    std::lock_guard<std::mutex> l(m_busy_mutex);
     LogListIteratorType it = m_logList.find(name);
     ASSERTMSG(it != m_logList.end(),"This Log does not exist!: "<<name);
     ASSERTMSG(it->second != nullptr,"This Log has Null Pointer!: "<<name);
@@ -208,7 +207,7 @@ Log * LogManager::getLog(const std::string & name) {
 };
 
 bool LogManager::existsLog(const std::string & name) {
-    boost::mutex::scoped_lock l(m_busy_mutex);
+    std::lock_guard<std::mutex> l(m_busy_mutex);
     LogListIteratorType it = m_logList.find(name);
     if(it == m_logList.end()){
         return false;

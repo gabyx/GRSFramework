@@ -41,6 +41,7 @@ public:
      */
     RigidBodyStateListType  m_SimBodyStates; ///< A vector comprising of all rigid body states of the system for simulated objects.
     //RigidBodyStateListType  m_AniBodyStates; ///< A vector comprising of all rigid body states of the system for animated objects.
+
 };
 
 class DynamicsState: public DynamicsStateBase{
@@ -121,7 +122,7 @@ public:
     inline RigidBodyState * getSimState(const RigidBodyIdType & id){
         if(m_randomAccess){
             auto bodyNr = RigidBodyId::getBodyNr(id)- m_startIdx;
-            if( bodyNr < m_SimBodyStates.size() && bodyNr>=0){
+            if( bodyNr < m_SimBodyStates.size()){
                 return &m_SimBodyStates[bodyNr];
             }
         }else{

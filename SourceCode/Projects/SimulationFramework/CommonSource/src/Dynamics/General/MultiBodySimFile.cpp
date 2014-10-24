@@ -9,12 +9,12 @@ MultiBodySimFile::MultiBodySimFile(unsigned int bufferSize):
     m_nBytesPerState(0),
     m_nBytesPerQBody(0),
     m_nBytesPerUBody(0),
-    m_additionalBytesPerBodyType(0),
+    m_additionalBytesPerBodyType(AdditionalBodyData::TypeEnum::NOTHING),
     m_nAdditionalBytesPerBody(0),
     m_nStates(0),
     m_nSimBodies(0),
     m_beginOfStates(0),
-    m_bReadFullState(true)
+    m_readVelocities(true)
 {
     m_filePath = boost::filesystem::path();
 
@@ -84,13 +84,7 @@ void MultiBodySimFile::setByteLengths() {
 /** Only for writting*/
 std::streamoff MultiBodySimFile::getAdditionalBytesPerBody()
 {
-        switch(m_additionalBytesPerBodyType){
-            case 0:
-                return 0;
-            default:
-                ERRORMSG("Additional Byte Type not implemented");
-        }
-        return 0;
+        return AdditionalBodyData::getAdditionalBytesPerBody(m_additionalBytesPerBodyType);
 }
 
 bool MultiBodySimFile::openWrite(const boost::filesystem::path &file_path,
@@ -106,7 +100,12 @@ bool MultiBodySimFile::openWrite(const boost::filesystem::path &file_path,
 
     // Determine bytesType, and additional bytes, if necessary
 
-    return openWrite_impl(file_path,nDOFqBody,nDOFuBody,nSimBodies,0,0,truncate);
+    return openWrite_impl(file_path,
+                          nDOFqBody,
+                          nDOFuBody,
+                          nSimBodies,
+                          truncate
+                          );
 }
 
 
@@ -114,9 +113,9 @@ bool MultiBodySimFile::openWrite_impl(const boost::filesystem::path &file_path,
                                  unsigned int nDOFqBody,
                                  unsigned int nDOFuBody,
                                  const unsigned int nSimBodies,
-                                 unsigned int additionalBytesType,
-                                 std::streamsize additionalBytesPerBody,
-                                 bool truncate) {
+                                 bool truncate,
+                                 AdditionalBodyData::TypeEnum additionalBytesType,
+                                 std::streamsize additionalBytesPerBody) {
 
     close();
 
@@ -144,7 +143,7 @@ bool MultiBodySimFile::openWrite_impl(const boost::filesystem::path &file_path,
 
     } else {
         //Here we need to check that, we set the put position exactly at the last state, we might have overhanging bits  because user has cancled and some binary stuff is hanging at the end!!!
-        if(openRead(file_path,nSimBodies)) {
+        if(openRead(file_path,true,nSimBodies)) {
             // Reopen only in write mode!
             m_file_stream.close();
             m_file_stream.clear();
@@ -181,7 +180,7 @@ void  MultiBodySimFile::writeHeader() {
     << (unsigned int)m_nSimBodies
     << (unsigned int)m_nDOFqBody
     << (unsigned int)m_nDOFuBody
-    << (unsigned int)m_additionalBytesPerBodyType
+    << (unsigned int)(EnumConversion::toIntegral(m_additionalBytesPerBodyType))
     << (unsigned int)m_nAdditionalBytesPerBody;
 
     m_beginOfStates = m_file_stream.tellp();
@@ -189,10 +188,10 @@ void  MultiBodySimFile::writeHeader() {
 
 
 bool  MultiBodySimFile::openRead(const boost::filesystem::path &file_path,
+                                 bool readVelocities,
                                  unsigned int nDOFqBody,
                                  unsigned int nDOFuBody,
-                                 unsigned int nSimBodies,
-                                 bool readFullState) {
+                                 unsigned int nSimBodies) {
 
     close();
 
@@ -200,12 +199,13 @@ bool  MultiBodySimFile::openRead(const boost::filesystem::path &file_path,
     m_nDOFuBody = nDOFuBody;
     m_nDOFqBody = nDOFqBody;
     // Set if the read commands are reading the whole state! not only q! also u!
-    m_bReadFullState = readFullState;
+    m_readVelocities = readVelocities;
     m_nSimBodies = nSimBodies;
 
     m_errorString.str("");
 
     m_file_stream.open(file_path.string().c_str(), std::ios_base::binary | std::ios_base::in);
+    //m_file_stream.rdbuf()->pubsetbuf(0, 0);
     m_file_stream.rdbuf()->pubsetbuf(m_Buffer, m_buf_size);
     m_file_stream.sync();
     if(m_file_stream.good()) {
@@ -241,12 +241,12 @@ void MultiBodySimFile::close() {
     m_nBytesPerState=0;
     m_nBytesPerQBody=0;
     m_nBytesPerUBody=0;
-    m_additionalBytesPerBodyType=0;
+    m_additionalBytesPerBodyType=AdditionalBodyData::TypeEnum::NOTHING;
     m_nAdditionalBytesPerBody=0;
     m_nStates=0;
     m_nSimBodies=0;
     m_beginOfStates=0;
-    m_bReadFullState =  true;
+    m_readVelocities =  true;
 
     m_filePath = boost::filesystem::path();
 
@@ -299,7 +299,10 @@ bool  MultiBodySimFile::readHeader() {
             return false;
         }
 
-        *this >> nBodies >> nDofqBody >> nDofuBody >> m_additionalBytesPerBodyType >> addBytesPerBody;
+        unsigned int addType;
+
+        *this >> nBodies >> nDofqBody >> nDofuBody >> addType >> addBytesPerBody;
+        m_additionalBytesPerBodyType = static_cast<AdditionalBodyData::TypeEnum>(addType);
         m_nAdditionalBytesPerBody = addBytesPerBody;
 
         if( m_nAdditionalBytesPerBody < 0){
@@ -319,7 +322,7 @@ bool  MultiBodySimFile::readHeader() {
         }
 
         bool ok;
-        if(m_bReadFullState) {
+        if(m_readVelocities) {
             ok = nBodies == m_nSimBodies && nDofuBody == m_nDOFuBody && nDofqBody == m_nDOFqBody;
         } else {
             ok = nBodies == m_nSimBodies && nDofqBody == m_nDOFqBody;
@@ -330,7 +333,7 @@ bool  MultiBodySimFile::readHeader() {
             return true;
         } else {
             m_errorString <<" Binary file does not correspond to the number of bodies which should be simulated: "<< std::endl
-                          <<" Binary File describes: \tnSimBodies = "<<nBodies<< "\tnDofqBody = "<<nDofqBody<<"\tnDofuBody = " << nDofuBody << std::endl
+                          <<" Binary File describes: \t\tnSimBodies = "<<nBodies<< "\tnDofqBody = "<<nDofqBody<<"\tnDofuBody = " << nDofuBody << std::endl
                           <<" Simulation requests: \t\tnSimBodies = "<<m_nSimBodies<< "\tnDofqBody = "<<m_nDOFqBody<<"\tnDofuBody = " << m_nDOFuBody<<std::endl;
         }
 
@@ -377,4 +380,5 @@ MultiBodySimFile & MultiBodySimFile::operator << (MultiBodySimFile& file){
 
     return *this;
 }
+
 

@@ -47,7 +47,7 @@ public:
         public:
             PostProcessTaskBash(const std::string & name): PostProcessTask(name){}
             void execute(){
-                int r = system( this->m_options[1].c_str());
+                system( this->m_options[1].c_str());
             }
     };
 
@@ -115,43 +115,44 @@ public:
                 std::vector<std::string> svec;
                 ops >> Option('p',"post-process",svec);
 
-                int currentArgIdx = 0;
-                int nextArgIdx = 0;
-                PostProcessTask * p;
-                for(int i = 0; i < svec.size(); i++){
+                unsigned int currentArgIdx = 0;
+                unsigned int nextArgIdx = 0;
+                PostProcessTask * p = nullptr;
+                for(unsigned int i = 0; i < svec.size(); i++){
                     if(svec[i] == "bash"){
                         if(i != nextArgIdx){
-                           std::cerr <<"Postprocess Argument: " << "bash" << " at wrong position!" << std::endl;
-                           printHelp();
+                            printHelp();
+                           THROWEXCEPTION( "Postprocess Argument: " << "bash" << " at wrong position!" << std::endl);
                         }
 
                         // has 2 arguments [int|all] and string which is the bash command!
                        currentArgIdx = i;
                        nextArgIdx = i + 3;
                        if(nextArgIdx-1 >=  svec.size()){
-                           std::cerr <<"Postprocess Argument: " << "bash" << ", two little arguments!" << std::endl;
-                           printHelp();
+                            printHelp();
+                            THROWEXCEPTION("Postprocess Argument: " << "bash" << ", two little arguments!" << std::endl);
+
                        }
                        m_postProcessTasks.push_back(new PostProcessTaskBash("bash"));
                        p = m_postProcessTasks.back();
                     }else if( svec[i] == "copy-local-to"){
                         if(i != nextArgIdx){
-                           std::cerr <<"Postprocess Argument: " << "copy-local-to" << " at wrong position!" << std::endl;
-                           printHelp();
+                            printHelp();
+                            THROWEXCEPTION("Postprocess Argument: " << "copy-local-to" << " at wrong position!" << std::endl)
                         }
 
                         currentArgIdx = i;
                         nextArgIdx = i + 1;
                         if(nextArgIdx-1 >=  svec.size()){
-                           std::cerr <<"Postprocess Argument: " << "copy-local-to" << ", two little arguments!" << std::endl;
-                           printHelp();
+                            printHelp();
+                            THROWEXCEPTION("Postprocess Argument: " << "copy-local-to" << ", two little arguments!" << std::endl);
                         }
                         m_postProcessTasks.push_back(new PostProcessTaskCopyLocalTo("copy-local-to"));
                         p = m_postProcessTasks.back();
                     }else{
                         if(i >= nextArgIdx){
-                            std::cerr <<"Postprocess Argument: " << svec[i] << " not known!" << std::endl;
                             printHelp();
+                            THROWEXCEPTION("Postprocess Argument: " << svec[i] << " not known!" << std::endl);
                         }
                         if(p){
                             p->addOption(i-currentArgIdx-1,svec[i]);
@@ -165,14 +166,38 @@ public:
 
             }
 
-        } catch(GetOpt::GetOptEx ex) {
-            std::cerr <<"Exception occured in parsing CMD args:\n" << std::endl;
+        }
+        catch(GetOpt::ParsingErrorEx & ex){
             printHelp();
+            THROWEXCEPTION("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::InvalidFormatEx & ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::OptionNotFoundEx & ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::TooManyArgumentsEx & ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::TooManyOptionsEx & ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::OptionsFileNotFoundEx & ex){
+            printHelp();
+            THROWEXCEPTION("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
+        } catch(GetOpt::GetOptEx & ex) {
+            printHelp();
+            THROWEXCEPTION("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
-            std::cerr <<"Some unexpected options where given!" << std::endl;
             printHelp();
+            THROWEXCEPTION("Some unexpected options where given!" << std::endl)
         }
 
 
@@ -198,12 +223,12 @@ public:
 
     void checkArguments() {
         if(m_sceneFile.empty()) {
-            std::cerr  << "No scene file (.xml) supplied as argument: -s [SceneFilePath]" << std::endl;
+            THROWEXCEPTION("No scene file (.xml) supplied as argument: -s [SceneFilePath]" << std::endl)
             printHelp();
         } else {
             if(! boost::filesystem::exists(m_sceneFile)) {
-                std::cerr  << "Scene file supplied as argument: " << m_sceneFile << " does not exist!"<< std::endl;
                 printHelp();
+                THROWEXCEPTION("Scene file supplied as argument: " << m_sceneFile << " does not exist!"<< std::endl)
             }
         }
     }
@@ -211,9 +236,8 @@ public:
 private:
 
     void printErrorNoArg(std::string arg) {
-        std::cerr << "Wrong options specified for arguement: '" << arg <<"'"<< std::endl;
         printHelp();
-        exit(-1);
+        THROWEXCEPTION("Wrong options specified for arguement: '" << arg <<"'"<< std::endl)
     }
 
     void printHelp() {
@@ -239,7 +263,6 @@ private:
                   <<            "\t\t\t Copies the local directory which is process specific to another folder at <path> \n"
                   << " \t -h|--help \n"
                   <<            "\t\t Prints this help" <<std::endl;
-        exit(-1);
     }
 };
 

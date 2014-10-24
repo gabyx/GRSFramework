@@ -1,6 +1,6 @@
 
 
-PROJECT(SimFileConverter)
+PROJECT(Converter)
 
 message(STATUS "==============================Project: ${PROJECT_NAME} ==================================")
 
@@ -29,13 +29,40 @@ SET(SOURCE_DIR "${SOURCE_DIR}/../GeneralRigidBodySimulation/")
 SET(COMMON_INC
 
     ${SOURCE_DIR}/include/Common/AssertionDebug.hpp
-    ${SOURCE_DIR}/include/Common/TypeDefs.hpp
-    
+    ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
     ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
+
     ${PROJECT_SOURCE_DIR}/include/Common/ApplicationCLOptionsConverter.hpp
+
+    ${PROJECT_SOURCE_DIR}/include/Converters/SimFileJoiner.hpp
+    ${PROJECT_SOURCE_DIR}/include/Converters/SimFileResampler.hpp
+
+    ${PROJECT_SOURCE_DIR}/include/Converters/RenderScriptConverter.hpp
+    
+    ${PROJECT_SOURCE_DIR}/include/Logic/LogicTypes.hpp
+
+    
+    ${PROJECT_SOURCE_DIR}/include/General/RenderData.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RenderDataParserGenerators.hpp
+    
+    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParserBaseTraits.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParserModules.hpp
+    
+    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptGenerator.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptGeneratorLogic.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RendermanGeometryWriter.hpp
+    
+
+        
+    
+    ${PROJECT_SOURCE_DIR}/include/General/RenderMaterial.hpp
 )
 SET(COMMON_SRC
     ${SOURCE_DIR}/src/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/Converters/RenderScriptConverter.cpp
+    ${PROJECT_SOURCE_DIR}/src/General/RenderData.cpp
+    ${PROJECT_SOURCE_DIR}/src/General/RenderScriptGenerator.cpp
 )
 
 
@@ -45,7 +72,11 @@ INCLUDE(IncludeModulesSimulationFramework)
 INCLUDE_SIMULATION_FRAMEWORK_CONVERTER( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${COMMONSOURCE_DIR})
 
 # ===========================================================================================
-
+# WRITE CONFIGURATION FILE
+configure_file (
+  ${SOURCE_DIR}/include/ConfigFiles/ConfigureFile.hpp.in
+  ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
+)
 #=========================
 
 
@@ -73,14 +104,20 @@ set(INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
     ${EIGEN_INCLUDE_DIR}
 
+    ${PROJECT_BINARY_DIR}/ConfigFiles/
+
 	${COMMONSOURCE_DIR}/external/getoptpp/
     ${COMMONSOURCE_DIR}/external/getoptpp/src/
 
     ${PROJECT_SOURCE_DIR}/include/App
 	${PROJECT_SOURCE_DIR}/include/Common
+    ${PROJECT_SOURCE_DIR}/include/Converters
+    ${PROJECT_SOURCE_DIR}/include/General/
+    ${PROJECT_SOURCE_DIR}/include/Logic/
+
 
 	${SOURCE_DIR}/include/Common
-    
+
     ${GLOBAL_COMMON_INC_DIR}
 
 )

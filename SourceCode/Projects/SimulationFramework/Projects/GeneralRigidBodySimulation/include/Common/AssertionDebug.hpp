@@ -5,11 +5,11 @@
 // Add an Assertion Debuggin!
 
 //#define NDEBUG
-#include <assert.h>
 #include <stdlib.h>
 #include <iostream>
 #include <typeinfo>
 
+#include "Exception.hpp"
 
 #ifndef NDEBUG
 // Debug!
@@ -18,17 +18,13 @@
 	* @param condition The condition which needs to be truem otherwise an assertion is thrown!
 	* @param message The message in form of cout out expression like: "Variable" << i<< "has failed"
 	*/
-    #define ASSERTMSG(condition , message) { if(!(condition)){ std::cerr << "ASSERT FAILED: " << #condition << " : " << message << std::endl << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl; exit(EXIT_FAILURE);} }
-    #define WARNINGMSG(condition , message) { if(!(condition)){ std::cerr << "WARNING: " << #condition << " : " << message << std::endl << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl;} }
-
+    #define ASSERTMSG(condition , message) { if(!(condition)){ ERRORMSG(message) } }
+    #define WARNINGMSG(condition , message) { if(!(condition)){ ERRORMSG(message) } }
 #else
-   #define ASSERTMSG(condition,message) (void)0;
-   #define WARNINGMSG(condition,message) (void)0;
-//   #define ASSERTMSG(condition , message) { if(!(condition)){ std::cerr << "ASSERT FAILED: " << #condition << " @ " <<std::endl<< message << std::endl << __FILE__ << " (" << __LINE__ << ")" << std::endl; abort();} }
-//  #define WARNINGMSG(condition , message) { if(!(condition)){ std::cerr << "WARNING : " << #condition << " @ " <<std::endl<< message << std::endl << __FILE__ << " (" << __LINE__ << ")" << std::endl;} }
-
+   #define ASSERTMSG(condition,message)
+   #define WARNINGMSG(condition,message)
 #endif
 
-   #define ERRORMSG(message) { std::cerr << "ERROR: " << message << std::endl << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl; exit(EXIT_FAILURE); }
+   #define ERRORMSG( message ) THROWEXCEPTION( message )
 
 #endif

@@ -58,7 +58,7 @@ public:
     * @param file_path The path to the file to open.
     * @return true if the file is successfully opened and readable and false if not.
     */
-    //bool openRead( const boost::filesystem::path & file_path,   const unsigned int nSimBodies, bool readFullState = true);
+    //bool openRead( const boost::filesystem::path & file_path,   const unsigned int nSimBodies, bool readVelocities = true);
     /**
     * @brief Opens a .sim file for write only.
     * @param file_path The path to the file to open.

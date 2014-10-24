@@ -76,7 +76,8 @@ bool PlaybackManager::setup() {
 
     m_pDynSys = std::shared_ptr< DynamicsSystemPlayback > (new DynamicsSystemPlayback(m_pSceneMgr,m_pBaseNode));
 
-    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(*m_pDynSys) );
+    typename DynamicsSystemPlayback::ParserModulesCreator c(m_pDynSys.get());
+    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType(c, m_pSimulationLog ) );
 
     // Parse the Scene from XML! ==========================
     if(!parseScene()) {
@@ -123,10 +124,8 @@ bool PlaybackManager::parseScene() {
         return false;
     }
 
-    ParserModules::BodyModuleOptions o;
-    o.m_allocateSimBodies = false;
-    o.m_allocateStaticBodies = false;
-    m_pSceneParser->parseScene(sceneFilePath, SceneParserOptions(), o);
+
+    m_pSceneParser->parseScene(sceneFilePath);
 
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_SceneNodeSimBodies.size()
         << " simulated & " << m_pDynSys->m_SceneNodeBodies.size() <<  " static bodies! "  << std::endl;);
@@ -383,21 +382,9 @@ bool PlaybackManager::keyPressed(const OIS::KeyEvent &e) {
         break;
     case OIS::KC_B:
         togglePauseSimulation();
-    case OIS::KC_UP:
         break;
-    case OIS::KC_DOWN:
-
+    default:
         break;
-    case OIS::KC_LEFT:
-
-        break;
-    case OIS::KC_RIGHT:
-
-        break;
-    case OIS::KC_NUMPAD2:
-
-        break;
-
     }
     return true;
 }
@@ -405,14 +392,8 @@ bool PlaybackManager::keyPressed(const OIS::KeyEvent &e) {
 
 bool PlaybackManager::keyReleased(const OIS::KeyEvent &e) {
     switch (e.key) {
-    case OIS::KC_UP:
-    case OIS::KC_DOWN:
-
-        break;
-    case OIS::KC_LEFT:
-    case OIS::KC_RIGHT:
-
-        break;
+        default:
+            break;
     }
     return true;
 }

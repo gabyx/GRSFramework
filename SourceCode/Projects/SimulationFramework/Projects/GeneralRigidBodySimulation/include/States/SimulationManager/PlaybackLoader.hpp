@@ -59,7 +59,7 @@ private:
   bool m_bThreadToBeStopped;
   bool isLoaderThreadToBeStopped();
 
-  bool m_bReadFullState;
+  bool m_readVelocities;
 
   DynamicsState * m_state; /**<   This is the actual loader state pointer ;*/
   std::shared_ptr<TStatePool>	m_pStatePool;
@@ -100,7 +100,7 @@ m_nSimBodies(nSimBodies)
 #endif
 
   m_bLoaderThreadRunning = false;
-  m_bReadFullState = false;
+  m_readVelocities = false;
   m_pStatePool = pStatePool;
 
 }
@@ -108,7 +108,7 @@ m_nSimBodies(nSimBodies)
 
 template<typename TStatePool>
 void PlaybackLoader<TStatePool>::setReadFullState(bool value){
-   m_bReadFullState = value;
+   m_readVelocities = value;
 }
 
 template<typename TStatePool>
@@ -349,7 +349,7 @@ bool PlaybackLoader<TStatePool>::loadNextFile()
 
         // Try to load the file
         m_binarySimFile.close();
-        if(m_binarySimFile.openRead(*m_currentFileIt,NDOFqBody,NDOFuBody,m_nSimBodies,m_bReadFullState))
+        if(m_binarySimFile.openRead(*m_currentFileIt,NDOFqBody,NDOFuBody,m_nSimBodies,m_readVelocities))
         {
           return true;
         }else{

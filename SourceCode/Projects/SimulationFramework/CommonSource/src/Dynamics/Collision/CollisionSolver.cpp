@@ -61,7 +61,6 @@ void CollisionSolver::solveCollision() {
     // All objects have been updated...
 
     //// Do simple collision detection (SimBodies to SimBodies)
-    CollisionData * pColData;
 
     if(m_simBodies.size()){
         for(auto bodyIti = m_simBodies.begin(); bodyIti != --m_simBodies.end(); bodyIti++) {

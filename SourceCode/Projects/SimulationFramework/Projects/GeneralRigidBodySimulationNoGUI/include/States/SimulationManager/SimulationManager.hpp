@@ -7,6 +7,7 @@
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
+#include DynamicsSystem_INCLUDE_FILE
 #include "SceneParser.hpp"
 
 #include "CPUTimer.hpp"
@@ -30,7 +31,8 @@ public:
     void setup();
     void setup(boost::filesystem::path sceneFilePath);
 
-    using SceneParserType = SceneParser<DynamicsSystemType>;
+    using SceneParserType = SceneParser<DynamicsSystemType,
+                                        DynamicsSystemType::ParserModulesCreator::SceneParserTraits >;
     std::shared_ptr< SceneParserType > m_pSceneParser;
 
     void startSim();

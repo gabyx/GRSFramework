@@ -191,7 +191,6 @@ void InclusionSolverCO::solveInclusionProblem() {
             for(it = currentContactNode->m_edgeList.begin(); it != currentContactNode->m_edgeList.end(); ++it) {
 
                 edgesBody = (*it)->m_edgeData.m_pBody;
-                unsigned int bodyId = edgesBody->m_id;
 
 
 

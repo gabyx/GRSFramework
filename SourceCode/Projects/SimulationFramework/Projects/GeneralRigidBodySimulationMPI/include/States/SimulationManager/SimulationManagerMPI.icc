@@ -15,6 +15,8 @@
 #include "StateRecorderProcess.hpp"
 #include "StateRecorderMPI.hpp"
 
+#include "SceneParserMPI.hpp"
+
 #include TimeStepper_INCLUDE_FILE
 #include DynamicsSystem_INCLUDE_FILE
 
@@ -47,7 +49,7 @@ void SimulationManagerMPI::setup() {
 void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
     //Each Process copies its SceneFile.xml to the folders, that each Process can read its own file (better)
-    boost::filesystem::path sceneFilePathNew = FileManager::getSingletonPtr()->copyFile(sceneFilePath,
+    m_sceneFileParsed = FileManager::getSingletonPtr()->copyFile(sceneFilePath,
             FileManager::getSingletonPtr()->getLocalDirectoryPath());
 
     //Make log!
@@ -77,26 +79,18 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added DynamicsSystem");
 
     // Parse the SceneSettings only ==========================
-    m_pSceneParser = std::shared_ptr< SceneParserType >( new SceneParserType( *m_pDynSys) );
-    m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
-
     {
-        typename SceneParserType::BodyModuleOptionsType optBody;
-        optBody.m_parseAllBodiesNonSelGroup = true;
-        optBody.m_parseSimBodies = false; optBody.m_allocateSimBodies = false;
-        optBody.m_parseStaticBodies = true; optBody.m_allocateStaticBodies = true;
+        DynamicsSystemType::ParserModulesCreator1 c(m_pDynSys.get());
+        using SceneParserType1 = SceneParserMPI<DynamicsSystemType,  DynamicsSystemType::ParserModulesCreator1::SceneParserTraits >;
+        SceneParserType1 parser( c , m_pSimulationLog );
+        m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
+        parser.parseScene(m_sceneFileParsed) ;
 
-        SceneParserType::SceneParserOptionsType optScene;
-        optScene.m_parseSceneSettings = true;
-        optScene.m_parseSceneObjects = true;
-
-        m_pSceneParser->parseScene(sceneFilePathNew, typename SceneParserType::SceneParserOptionsType(), std::move(optBody)) ;
+        m_nGlobalSimBodies = parser.getSpecifiedSimBodies();
+        LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_simBodies.size()
+            << " simulated & " << m_pDynSys->m_staticBodies.size()<<  " static bodies! "  << std::endl;);
+        LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: Global Bodies in Simulation "<< m_nGlobalSimBodies<< " Bodies!" << std::endl;);
     }
-
-    m_nGlobalSimBodies = m_pSceneParser->getSpecifiedSimBodies();
-    LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_simBodies.size()
-        << " simulated & " << m_pDynSys->m_staticBodies.size()<<  " static bodies! "  << std::endl;);
-    LOG(m_pSimulationLog,  "---> SimulationManagerMPI:: Global Bodies in Simulation "<< m_nGlobalSimBodies<< " Bodies!" << std::endl;);
     // ====================================================
 
     // TopologyBuilder Build Topology =====================
@@ -104,9 +98,9 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     if(m_pDynSys->getSettingsTopoBuilder().m_type == MPILayer::TopologyBuilderEnum::GRIDBUILDER){
 
         m_pTopologyBuilder = std::shared_ptr< TopologyBuilderType >(
-                                                new MPILayer::GridTopologyBuilder<SceneParserType, ProcessCommunicatorType>
+                                                new MPILayer::GridTopologyBuilder<ProcessCommunicatorType>
                                                   (m_pDynSys,m_pProcCommunicator, m_pDynSys->getSettingsTopoBuilder().m_gridBuilderSettings
-                                                   ,sceneFilePathNew, m_nGlobalSimBodies ) );
+                                                   ,m_sceneFileParsed, m_nGlobalSimBodies ) );
     }else{
         ERRORMSG("No Topology Builder type instantiated")
     }
@@ -115,22 +109,20 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
     // Parse the scene objects from the XML, but selectively on the ids in m_pDynSys->bodiesInitStates
     {
-        typename SceneParserType::BodyModuleOptionsType optBody;
-        optBody.m_parseAllBodiesNonSelGroup = true;
-        optBody.m_parseSimBodies = true; optBody.m_allocateSimBodies = true;
-        optBody.m_parseStaticBodies = false; optBody.m_allocateStaticBodies = false;
-        optBody.m_parseInitialCondition = false;
-        optBody.m_parseAllIfRangeEmpty = false;
+        DynamicsSystemType::ParserModulesCreator2 c(m_pDynSys.get());
+        using SceneParserType2 = SceneParserMPI<DynamicsSystemType, DynamicsSystemType::ParserModulesCreator2::SceneParserTraits >;
+        SceneParserType2 parser( c , m_pSimulationLog );
 
-        SceneParserType::SceneParserOptionsType optScene;
+        SceneParserType2::SceneParserDynamicOptionsType optScene;
         optScene.m_parseSceneSettings = false;
         optScene.m_parseSceneObjects = true;
 
+        SceneParserType2::BodyModuleDynamicOptionsType optBodyM;
         std::set<RigidBodyIdType> bodiesToload;
         for(auto & s: m_pDynSys->m_bodiesInitStates){ bodiesToload.insert(s.second.m_id);}
-        optBody.m_bodyIdRange = std::move(bodiesToload);
+        optBodyM.m_bodyIdRange = std::move(bodiesToload);
 
-        m_pSceneParser->parseScene(sceneFilePathNew, optScene , std::move(optBody));
+        parser.parseScene(m_sceneFileParsed, optScene , std::move(optBodyM));
 
         // Apply initial states (received from master) to bodies
         m_pDynSys->applyInitStatesToBodies();
@@ -323,7 +315,7 @@ void SimulationManagerMPI::initSim() {
         sceneFilePath /= filename;
 
         LOG(m_pSimulationLog,"---> Copy parsed scene file to: " << sceneFilePath <<std::endl;)
-        FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),sceneFilePath,true);
+        FileManager::getSingletonPtr()->copyFile(m_sceneFileParsed,sceneFilePath,true);
 
         // Need to broadcast the filename of the actual folder
         // Broadcast: m_SimFolderPath

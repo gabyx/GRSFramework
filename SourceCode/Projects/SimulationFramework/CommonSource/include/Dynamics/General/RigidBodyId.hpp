@@ -13,25 +13,25 @@ public:
     using HalfType = uint32_t;
 
     template<typename TRigidBodyType >
-    inline static unsigned int getGroupNr(const TRigidBodyType * body){
+    inline static HalfType getGroupNr(const TRigidBodyType * body){
         Type id = body->m_id;
-        id >>= 32;
-        return *(reinterpret_cast<unsigned int *>(&(id)));
+        id >>= sizeof(HalfType)*8;
+        return reinterpret_cast<HalfType &>(id);
     };
 
     template<typename TRigidBodyType >
-    inline static unsigned int getBodyNr(const TRigidBodyType * body){
-        return *(reinterpret_cast<const unsigned int *>(&(body->m_id)));
+    inline static HalfType getBodyNr(const TRigidBodyType * body){
+        return reinterpret_cast<const HalfType &>(body->m_id);
     };
 
-    inline static unsigned int getGroupNr(const Type & id){
+    inline static HalfType getGroupNr(const Type & id){
         Type id2 = id;
-        id2 >>= 32;
-        return *(reinterpret_cast<unsigned int *>(&(id2)));
+        id2 >>= sizeof(HalfType)*8;
+        return reinterpret_cast<HalfType &>(id2);
     };
 
-    inline static unsigned int getBodyNr(const Type & id){
-        return *(reinterpret_cast<const unsigned int *>(&(id)));
+    inline static HalfType getBodyNr(const Type & id){
+        return reinterpret_cast<const HalfType &>(id);
     };
 
     template<typename TRigidBodyType >

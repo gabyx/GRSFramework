@@ -1,16 +1,15 @@
 #ifndef SimpleLogger_hpp
 #define SimpleLogger_hpp
 
-#include <iostream>
+#include <fstream>
+#include <vector>
 #include <unordered_map>
 #include <string>
 #include <sstream>
+#include <mutex>
 
 #include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
-#include <boost/thread.hpp>
-#include "LogDefines.hpp"
 #include "AssertionDebug.hpp"
 #include "Singleton.hpp"
 
@@ -39,7 +38,7 @@ public:
 
 class LogSinkFile : public LogSink {
 private:
-    boost::filesystem::ofstream m_fileStream;
+    std::ofstream m_fileStream;
 public:
     LogSinkFile(const std::string & sink_name, boost::filesystem::path filePath = "" );
     ~LogSinkFile();
@@ -51,12 +50,14 @@ public:
     ~LogSinkCout();
 };
 
-
+/**
+* Log class which owns multiple sinks and deletes them in dtor!
+*/
 class Log {
 protected:
 
     std::string m_logName;
-    boost::mutex m_busy_mutex;
+    std::mutex m_busy_mutex;
 
     // Can have multiple streams!
     std::vector<LogSink *> m_sinkList;
@@ -64,7 +65,7 @@ protected:
     // Push stringstream to all sinks!
 
     void writeOut(std::stringstream & s){
-        boost::mutex::scoped_lock l(m_busy_mutex);
+        std::lock_guard<std::mutex> l(m_busy_mutex);
         std::vector<LogSink *>::iterator it;
         for(it=m_sinkList.begin(); it != m_sinkList.end(); ++it) {
             (*(*it)) << s;
@@ -80,7 +81,7 @@ public:
 
     template<typename T>
     void logMessage(const T & str){
-        boost::mutex::scoped_lock l(m_busy_mutex);
+        std::lock_guard<std::mutex> l(m_busy_mutex);
         std::vector<LogSink *>::iterator it;
         for(it=m_sinkList.begin(); it != m_sinkList.end(); ++it) {
             (*(*it)) << str;
@@ -141,14 +142,16 @@ public:
 
 
 
-
+/**
+* LogManager class which owns all registered logs and deletes them in dtor !
+*/
 class LogManager : public Utilities::Singleton<LogManager> {
 private:
     typedef std::unordered_map<std::string, Log *> LogListType;
     typedef std::unordered_map<std::string, Log *>::iterator LogListIteratorType;
     LogListType m_logList;
 
-    boost::mutex m_busy_mutex;
+    std::mutex m_busy_mutex;
 
 public:
 

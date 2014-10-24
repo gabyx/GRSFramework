@@ -98,6 +98,10 @@ struct GlobalConfigs {
         using DynamicsSystemType = typename MyConfigs::DynamicsSystemType          ;
     };
 
+    struct MPIInformationConfigs{
+        using RankIdType = unsigned int;
+    };
+
 };
 
 
@@ -144,6 +148,10 @@ struct GlobalConfigs {
 
 #define DEFINE_GENERAL_CONFIG_TYPES \
     using RandomGenType = typename GlobalConfigs::GeneralConfigs::RandomGeneratorType;
+
+#define DEFINE_MPI_INFORMATION_CONFIG_TYPES \
+    using RankIdType = GlobalConfigs::MPIInformationConfigs::RankIdType;
+
 
 
 struct MyIOFormat {

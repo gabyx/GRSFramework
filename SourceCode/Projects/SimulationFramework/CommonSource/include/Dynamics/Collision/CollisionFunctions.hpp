@@ -72,7 +72,7 @@ public:
         unsigned int type; unsigned int id;
         bool validContact;
         int faceNr=0;
-        double maxOverlap=0;
+
         for(faceIt = mesh.m_Faces.begin(); faceIt != mesh.m_Faces.end(); ++faceIt) {
             // Check each face!
             vertex0 = mesh.m_Vertices[(*faceIt)(0)];
@@ -92,11 +92,11 @@ public:
 //                std::cout <<"Collision with faceNr" <<faceNr <<":" << vertex0.transpose() <<std::endl;
                 validContact = true;
                 for(unsigned int j=0; j<pointSet.size(); j++) {
-                    Vector3 p1 = pointSet[j].get<1>();
+                    //Vector3 p1 = pointSet[j].get<1>();
                     //std::cout <<"Cos : "<< acos( pointSet[j].get<1>().dot( I_r_SC )) << "<" << (5.0/180.0*M_PI)<<std::endl;
 //                    std::cout << "p1:" << p1 <<std::endl;
 //                    std::cout << "I_r_SC:" << I_r_SC <<std::endl;
-                    double angle = std::acos( p1.dot( I_r_SC ) /(p1.norm() * normI_r_SC ));
+                    //double angle = std::acos( p1.dot( I_r_SC ) /(p1.norm() * normI_r_SC ));
 //                                        std::cout << "Angle: " <<angle<< std::endl;
 //                    if( angle  < (10.0/180.0*M_PI)) {
 //                        validContact=false;
