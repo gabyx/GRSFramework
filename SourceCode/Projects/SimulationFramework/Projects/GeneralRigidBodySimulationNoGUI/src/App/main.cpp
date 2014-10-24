@@ -55,7 +55,15 @@ int main(int argc, char **argv) {
         }
 
     }catch(Exception& ex) {
-        std::cerr << "Exception occured: "  << ex.what() <<std::endl;
+        std::cerr << "Exception occured in process rank: "  << ex.what() <<std::endl;
+        std::cerr << "Exiting ..." << std::endl;
+        exit(EXIT_FAILURE);
+    }catch(std::exception & ex){
+        std::cerr << "std::exception occured: "  << ex.what() <<std::endl;
+        std::cerr << "Exiting ..." << std::endl;
+        exit(EXIT_FAILURE);
+    }catch(...){
+        std::cerr << "Unknown exception occured!" <<std::endl;
         std::cerr << "Exiting ..." << std::endl;
         exit(EXIT_FAILURE);
     }

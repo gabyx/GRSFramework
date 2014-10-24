@@ -50,11 +50,11 @@ public:
 
    void print(){
       std::cout << "MeshData:: " <<std::endl<<"Vertices : "<<std::endl;
-      for (int i=0;i<m_Vertices.size();i++){
+      for (unsigned int i=0;i<m_Vertices.size();i++){
          std::cout <<i<<": "<<m_Vertices[i] <<std::endl;
       }
       std::cout << "Faces (Indices) & Normals : "<<std::endl;
-      for (int i=0;i<m_Faces.size();i++){
+      for (unsigned int i=0;i<m_Faces.size();i++){
          std::cout <<i<<": "<<m_Faces[i] <<  "\t n:"<<m_Normals[i] <<std::endl;
       }
    };
@@ -174,11 +174,11 @@ public:
       using std::cout;
 
       logmessage << "---> MeshData:: "<<name<<std::endl<<"\t Vertices : "<<std::endl;
-      for (int i=0;i<m_Vertices.size();i++){
+      for (unsigned int i=0;i<m_Vertices.size();i++){
          logmessage <<"\t\t Vertex "<< i<<": "<<m_Vertices[i].transpose() <<endl;
       }
       logmessage << " \t Faces (Indices) & Normals : "<<endl;
-      for (int i=0;i<m_Faces.size();i++){
+      for (unsigned int i=0;i<m_Faces.size();i++){
          logmessage <<"\t\t Face "<<i<<": "<<m_Faces[i].transpose() <<  "\t n:"<<m_Normals[i].transpose() <<std::endl;
       }
       plog->logMessage(logmessage.str());

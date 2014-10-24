@@ -58,6 +58,7 @@ class Range{
         template<typename T>
 		Range & operator=( const std::pair<T,T> & p){
             this->operator=( Range(p) );
+            return *this;
 		}
 
 
@@ -115,7 +116,7 @@ class Range{
                 bool operator!=(const iterator &rhs) {return m_it != rhs.m_it;}
 
                 typename iterator_traits::difference_type operator-(const iterator & rhs){return m_it - rhs.m_it;}
-                iterator & operator+=( typename iterator_traits::difference_type d){ m_it += d;}
+                iterator & operator+=( typename iterator_traits::difference_type d){ m_it += d; return *this;}
 
                 iterator & operator=(const iterator & rhs) = default;
                 iterator( const iterator & r ) = default;

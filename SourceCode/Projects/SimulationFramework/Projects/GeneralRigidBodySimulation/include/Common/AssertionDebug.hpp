@@ -25,6 +25,6 @@
    #define WARNINGMSG(condition,message)
 #endif
 
-   #define ERRORMSG(message) { THROWEXCEPTION(message) }
+   #define ERRORMSG( message ) THROWEXCEPTION( message )
 
 #endif

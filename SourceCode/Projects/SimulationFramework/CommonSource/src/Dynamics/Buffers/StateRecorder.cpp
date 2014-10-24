@@ -41,10 +41,11 @@ bool StateRecorder::createSimFileCopyFromReference(boost::filesystem::path new_f
 
     MultiBodySimFile tmpFile;
     bool fileOK = tmpFile.openRead(ref_file_path,
+                                   false,
                                    LayoutConfigType::LayoutType::NDOFqBody,
                                    LayoutConfigType::LayoutType::NDOFuBody,
-                                   m_nSimBodies,
-                                   false); //Open file to see if this file fits our simulation!!
+                                   m_nSimBodies
+                                   ); //Open file to see if this file fits our simulation!!
     tmpFile.close();
 
     if(fileOK) {

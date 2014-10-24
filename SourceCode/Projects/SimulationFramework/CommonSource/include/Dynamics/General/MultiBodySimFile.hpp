@@ -140,7 +140,7 @@ public:
                      bool readVel= true,
                      short which = 2,
                      bool onlyUpdate = true) {
-        readSpecific_impl(states,stateTime,readPos,readVel,which,onlyUpdate);
+        return readSpecific_impl(states,stateTime,readPos,readVel,which,onlyUpdate);
     }
 
 
@@ -204,7 +204,7 @@ public:
     unsigned int getNSimBodies() {
         return m_nSimBodies;
     }
-    unsigned int getNStates() {
+    std::streamsize getNStates() {
         return m_nStates;
     }
 
@@ -248,10 +248,10 @@ private:
              >
     bool readSpecific_impl(C & states,
                    double & stateTime,
-                   bool readPos = true,
-                   bool readVel= true,
-                   short which = 2,
-                   bool onlyUpdate = true);
+                   bool readPos,
+                   bool readVel,
+                   short which,
+                   bool onlyUpdate);
 
     template< typename C,
               typename std::enable_if< ContainerTags::is_container(*static_cast<C*>(0)), int >::type = 0,
@@ -548,6 +548,7 @@ bool MultiBodySimFile::readSpecific_impl(C & states,
     m_file_stream.seekg(m_beginOfStates);
 
     m_errorString << "The time type: " << which << " (time: " <<time <<") was not found" << std::endl;
+
     return false;
 }
 

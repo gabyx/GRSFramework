@@ -41,6 +41,26 @@
 
 namespace ParserModules {
 
+class  DummyModule{
+public:
+    DummyModule(const char * type) {
+       ERRORMSG("This is a standart dummy module: " << type << "which does nothing!" <<
+                " This function should not be called!");
+    };
+
+    void cleanUp() {}
+
+    template<typename... Args>
+    void parse(Args&&... args){}
+    template<typename... Args>
+    void parseOtherOptions(Args&&... args) {}
+    template<typename... Args>
+    void parseSceneSettingsPost(Args&&... args) {}
+    template<typename... Args>
+    void parseSceneSettingsPre(Args&&... args) {}
+};
+
+
 
 /** Parses TimestepperSettings, InclusionSolverSettings, RecorderSettings */
 template<typename TParserTraits>
@@ -51,7 +71,9 @@ protected:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using RecorderSettingsType        = typename DynamicsSystemType::RecorderSettingsType;
+public:
     using TimeStepperSettingsType     = typename DynamicsSystemType::TimeStepperSettingsType;
+protected:
     using InclusionSolverSettingsType = typename DynamicsSystemType::InclusionSolverSettingsType;
 
     RecorderSettingsType        * m_recorderSettings;
@@ -63,10 +85,6 @@ protected:
 public:
 
     void cleanUp() {}
-
-    TimeStepperSettingsType* getTimeStepperSettings() {
-        return m_timestepperSettings;
-    }
 
     SettingsModule(ParserType * p, RecorderSettingsType * r, TimeStepperSettingsType * t, InclusionSolverSettingsType * i)
         :m_parser(p),m_pSimulationLog(p->getSimLog()),m_recorderSettings(r),m_timestepperSettings(t), m_inclusionSettings(i) {};
@@ -271,7 +289,27 @@ public:
     virtual void parseOtherOptions(XMLNodeType sceneSettings) {
         // This function does nothing!
     }
+
+    void setTimeStepperSettings(PREC startTime){
+        m_timestepperSettings->m_startTime = startTime;
+    }
 };
+
+
+template<typename TParserTraits>
+class SettingsModuleDummy : public DummyModule{
+public:
+
+    using TimeStepperSettingsType = void;
+
+    template<typename... Args>
+    SettingsModuleDummy(Args&&... args) : DummyModule("SettingsModule") {}
+
+    template<typename... Args>
+    void setTimeStepperSettings(Args&&... args){}
+};
+
+
 
 template<bool loadMesh = true, bool allocateGeometry = true, bool cacheScale = false, bool cacheGeometry = false>
 struct GeometryModuleStaticOptions {
@@ -970,6 +1008,20 @@ private:
 
 };
 
+
+template<typename TParserTraits>
+class GeometryModuleDummy : public DummyModule{
+public:
+    template<typename... Args>
+    GeometryModuleDummy(Args&&... args) : DummyModule("GeometryModule") {}
+
+    template<typename... Args>
+    void parseGlobalGeometries(Args&&... args){}
+    template<typename... Args>
+    void parseGeometry(Args&&... args){}
+};
+
+
 template<typename TParserTraits>
 class ContactParamModule {
 private:
@@ -1098,6 +1150,14 @@ private:
     }
 
 };
+
+template<typename TParserTraits>
+class ContactParamModuleDummy : public DummyModule{
+public:
+    template<typename... Args>
+    ContactParamModuleDummy(Args&&... args) : DummyModule("ContactParamModule") {}
+};
+
 
 template<typename TParserTraits>
 class ExternalForcesModule {
@@ -1229,23 +1289,24 @@ private:
     }
 };
 
+template<typename TParserTraits>
+class ExternalForcesModuleDummy : public DummyModule{
+public:
+    template<typename... Args>
+    ExternalForcesModuleDummy(Args&&... args) : DummyModule("ExternalForcesModule") {}
+};
+
 
 template<typename TParserTraits>
-class VisModuleDummy {
-private:
-    DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
+class VisModuleDummy : public DummyModule {
 public:
-    VisModuleDummy(ParserType * p, BodyModuleType * b) {};
-    void cleanUp() {}
     template<typename... Args>
-    void parse(Args&&... args) {
-        ERRORMSG("This is the standard BodyVisModule which does nothing! This function should not be called!");
-    }
+    VisModuleDummy(Args&&... args) : DummyModule("VisModule") {};
+
     template<typename... Args>
-    void parseSceneSettingsPost(Args&&... args) {
-        ERRORMSG("This is the standard BodyVisModule which does nothing! This function should not be called!");
-    }
+    void parseSceneSettingsPost(Args&&... args) {}
 };
+
 
 
 template<typename TParserTraits>
@@ -1312,7 +1373,7 @@ public:
 
             // Set the time in the dynamics system timestepper settings
             if(useTime && m_settings) {
-                m_settings->getTimeStepperSettings()->m_startTime = time;
+                m_settings->setTimeStepperSettings(time);
             }
         }
         LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
@@ -1330,6 +1391,10 @@ public:
         // make state list as big as body list and reset to zero
         m_statesGroup.clear();
         m_statesGroup.resize(m_bodiesGroup->size());
+        // set all ids for the states:
+        for(unsigned int i = 0 ; i < m_bodiesGroup->size(); i++){
+            m_statesGroup[i].m_id = (*m_bodiesGroup)[i].m_id;
+        }
 
         std::string distribute;
         XMLNodeType node;
@@ -1380,7 +1445,7 @@ public:
         bool added = true;
         auto itState = m_statesGroup.begin();
         for(auto & b: *m_bodiesGroup) {
-            LOGSCLEVEL3(m_pSimulationLog, "\t---> InitState:" << itState->m_q.transpose() << " , " <<  itState->m_u.transpose()  << std::endl;)
+            LOGSCLEVEL3(m_pSimulationLog, "\t---> InitState id: " << itState->m_id <<": "<< itState->m_q.transpose() << " , " <<  itState->m_u.transpose()  << std::endl;)
             if(b.m_body) {
                 LOGSCLEVEL3(m_pSimulationLog, "\t---> apply to body" << std::endl;)
                 b.m_body->template applyBodyState<true>( *itState);
@@ -1660,6 +1725,18 @@ private:
 
     }
 
+};
+
+template<typename TParserTraits>
+class InitStatesModuleDummy : public DummyModule{
+public:
+    template<typename... Args>
+    InitStatesModuleDummy(Args&&... args) : DummyModule("InitStatesModule") {}
+
+    template<typename... Args>
+    void parseGlobalInitialCondition(Args&&... args){}
+    template<typename... Args>
+    void parseInitialCondition(Args&&... args){}
 };
 
 
@@ -2003,11 +2080,11 @@ private:
         m_bodiesGroup.clear();
 
         for( /* nothing*/ ; (bodyIdIt != itEnd) && ( *bodyIdIt <= endIdGroup); ++bodyIdIt ) {
-            LOGSCLEVEL3(m_pSimulationLog,"---> Added RigidBody Instance: "<<RigidBodyId::getBodyIdString(*bodyIdIt)<<std::endl);
             // Push new body
-            if(   Options::m_allocateSimBodies && m_eBodiesState == RigidBodyType::BodyMode::SIMULATED
-                    || Options::m_allocateStaticBodies && m_eBodiesState == RigidBodyType::BodyMode::STATIC ) {
+            if(   (Options::m_allocateSimBodies && m_eBodiesState == RigidBodyType::BodyMode::SIMULATED)
+                    || (Options::m_allocateStaticBodies && m_eBodiesState == RigidBodyType::BodyMode::STATIC) ) {
                 m_bodiesGroup.emplace_back(new RigidBodyType(*bodyIdIt), *bodyIdIt);
+                LOGSCLEVEL3(m_pSimulationLog,"---> Added RigidBody Instance: "<<RigidBodyId::getBodyIdString(*bodyIdIt)<<std::endl);
             } else {
                 // add no bodies for visualization stuff, we dont need it!
                 m_bodiesGroup.emplace_back( nullptr, *bodyIdIt);
@@ -2200,22 +2277,25 @@ private:
     }
 };
 
+template<typename TParserTraits>
+class BodyModuleDummy : public DummyModule{
+public:
+    template<typename... Args>
+    BodyModuleDummy(Args&&... args) : DummyModule("BodyModule") {}
+
+    template<typename... Args>
+    void parseModuleOptions(Args&&... args){}
+    template<typename... Args>
+    void setParsingOptions(Args&&... args){}
+    unsigned int getSpecifiedSimBodies(){return 0;}
+};
+
 
 template<typename TParserTraits>
-class MPIModuleDummy {
-private:
-    DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
+class MPIModuleDummy : public DummyModule {
 public:
-    MPIModuleDummy(ParserType * p, BodyModuleType * b) {};
-    void cleanUp() {}
     template<typename... Args>
-    void parse(Args&&... args) {
-        ERRORMSG("This is the standard MPIModuleDummy which does nothing! This function should not be called!");
-    }
-    template<typename... Args>
-    void parseSceneSettingsPost(Args&&... args) {
-        ERRORMSG("This is the standard MPIModuleDummy which does nothing! This function should not be called!");
-    }
+    MPIModuleDummy(Args&&... args) : DummyModule("BodyModule") {}
 };
 
 

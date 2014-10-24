@@ -40,7 +40,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/Converters/RenderScriptConverter.hpp
     
     ${PROJECT_SOURCE_DIR}/include/Logic/LogicTypes.hpp
-    ${PROJECT_SOURCE_DIR}/include/Logic/LookUpTable.hpp
+
     
     ${PROJECT_SOURCE_DIR}/include/General/RenderData.hpp
     ${PROJECT_SOURCE_DIR}/include/General/RenderDataParserGenerators.hpp

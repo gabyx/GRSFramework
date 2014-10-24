@@ -361,6 +361,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/include/Logic/LogicCommon.hpp
         ${COMMONSOURCE_DIR}/include/Logic/LogicNode.hpp
         ${COMMONSOURCE_DIR}/include/Logic/LogicSocket.hpp
+        ${COMMONSOURCE_DIR}/include/Logic/LookUpTable.hpp
         ${COMMONSOURCE_DIR}/include/Logic/ExecutionTreeInOut.hpp
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp

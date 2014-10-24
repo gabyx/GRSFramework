@@ -122,7 +122,7 @@ public:
     inline RigidBodyState * getSimState(const RigidBodyIdType & id){
         if(m_randomAccess){
             auto bodyNr = RigidBodyId::getBodyNr(id)- m_startIdx;
-            if( bodyNr < m_SimBodyStates.size() && bodyNr>=0){
+            if( bodyNr < m_SimBodyStates.size()){
                 return &m_SimBodyStates[bodyNr];
             }
         }else{

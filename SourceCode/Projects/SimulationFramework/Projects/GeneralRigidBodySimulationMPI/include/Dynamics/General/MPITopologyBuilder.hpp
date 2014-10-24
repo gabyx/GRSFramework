@@ -8,8 +8,10 @@
 #include "LogDefines.hpp"
 
 #include "MPIMessages.hpp"
-
 #include "MPICommunication.hpp"
+
+#include "SceneParserMPI.hpp"
+#include "SceneParserModulesCreatorTB.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 #include "Collider.hpp"
@@ -51,7 +53,7 @@ protected:
 };
 
 
-template<typename TSceneParser, typename TProcCommunicator>
+template<typename TProcCommunicator>
 class GridTopologyBuilder : public TopologyBuilder {
 
 
@@ -63,7 +65,10 @@ public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     using ProcessCommunicatorType = TProcCommunicator;
-    using SceneParserType = TSceneParser;
+
+    using RigidBodyStatesContainerType = typename DynamicsSystemType::RigidBodyStatesContainerType;
+    using RigidBodySimContainerType = typename DynamicsSystemType::RigidBodySimContainerType ;
+    using RigidBodyStaticContainerType = typename DynamicsSystemType::RigidBodyStaticContainerType ;
 
     GridTopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
                         std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
@@ -92,17 +97,15 @@ public:
             }
 
             // Parse all initial condition from the scene file ================
-            SceneParserType parser(*this) ; // this class is the modules generator
-            typename SceneParserType::BodyModuleOptionsType o;
-            o.m_parseAllBodiesNonSelGroup = true;
-            o.m_parseSimBodies = true; o.m_allocateSimBodies = false;
-            o.m_parseStaticBodies = false; o.m_allocateStaticBodies = false;
+            ParserModulesCreatorTopoBuilder<GridTopologyBuilder> c(this);
+            SceneParserMPI<GridTopologyBuilder, ParserModulesCreatorTopoBuilder<GridTopologyBuilder>::template SceneParserTraits> parser(c, m_pSimulationLog) ; // this class is the modules generator
+
             // clean init states:
             m_initStates.clear();
-            parser.parseScene(m_sceneFilePath, typename SceneParserType::SceneParserOptionsType(), o);
+            parser.parseScene(m_sceneFilePath);
 
             if(m_initStates.size() != m_nGlobalSimBodies){
-                ERRORMSG("Parsed to little initial states in scene file: " << m_sceneFilePath << std::endl);
+                ERRORMSG("Parsed to little initial states in scene file: " << m_sceneFilePath << " states: " << m_initStates.size() << "globalSimBodies: " << m_nGlobalSimBodies <<std::endl);
             }
 
             LOGTBLEVEL3(m_pSimulationLog, "---> parsed states: "<<std::endl;);
@@ -416,44 +419,10 @@ public:
 
 public:
 
-    template<typename TParser>
-    std::tuple< std::unique_ptr<typename TParser::SettingsModuleType >,
-        std::unique_ptr<typename TParser::ExternalForcesModuleType >,
-        std::unique_ptr<typename TParser::ContactParamModuleType>,
-        std::unique_ptr<typename TParser::InitStatesModuleType >,
-        std::unique_ptr<typename TParser::BodyModuleType >,
-        std::unique_ptr<typename TParser::GeometryModuleType >,
-        std::unique_ptr<typename TParser::VisModuleType>,
-        std::unique_ptr<typename TParser::MPIModuleType>
-        >
-    createParserModules(TParser * p) {
-
-        using SettingsModuleType       = typename TParser::SettingsModuleType ;
-        using ContactParamModuleType   = typename TParser::ContactParamModuleType;
-        using GeometryModuleType       = typename TParser::GeometryModuleType ;
-        using InitStatesModuleType     = typename TParser::InitStatesModuleType ;
-        using ExternalForcesModuleType = typename TParser::ExternalForcesModuleType ;
-        using BodyModuleType           = typename TParser::BodyModuleType ;
-        using VisModuleType            = typename TParser::VisModuleType ;
-        using MPIModuleType            = typename TParser::MPIModuleType ;
-
-        auto sett = std::unique_ptr<SettingsModuleType >(nullptr);
-        auto geom = std::unique_ptr<GeometryModuleType >(nullptr);
-        auto vis = std::unique_ptr<VisModuleType>(nullptr);
-        auto es  = std::unique_ptr<ExternalForcesModuleType >(nullptr);
-        auto con = std::unique_ptr<ContactParamModuleType>(nullptr);
-        auto mpi = std::unique_ptr<MPIModuleType>( nullptr );
-
-        auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p, &m_initStates,nullptr ));
-        auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  nullptr , is.get(), nullptr , nullptr , nullptr )) ;
-
-        return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));
-    }
-
 
 private:
 
-
+    template< typename > friend struct ParserModulesCreatorTopoBuilder;
 
     Logging::Log * m_pSimulationLog;
 
@@ -475,7 +444,7 @@ private:
     const unsigned int m_nPointsPredictor = 4;
     const PREC m_deltaT = 0.1;
 
-    typename DynamicsSystemType::RigidBodyStatesContainerType m_initStates;
+    RigidBodyStatesContainerType m_initStates;
     typename std::unordered_map<RankIdType, std::vector<const RigidBodyState *> > m_bodiesPerRank; ///< rank to all pointers in m_initStates;
 
     AABB    m_aabb_glo;        ///< Global AABB of point masses

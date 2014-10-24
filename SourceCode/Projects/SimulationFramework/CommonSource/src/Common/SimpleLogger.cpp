@@ -76,7 +76,7 @@ LogSinkCout::~LogSinkCout() {
 
 // Log =================================================
 Log::~Log() {
-    for(int i=0; i<m_sinkList.size(); i++) {
+    for(unsigned int i=0; i<m_sinkList.size(); i++) {
         delete m_sinkList[i];
     }
 };
@@ -92,7 +92,7 @@ void Log::logMessage(std::stringstream & str) {
 
 bool Log::addSink(LogSink * sink) {
     std::lock_guard<std::mutex> l(m_busy_mutex);
-    for(int i=0; i<m_sinkList.size(); i++) {
+    for(unsigned int i=0; i<m_sinkList.size(); i++) {
         if(m_sinkList[i]==sink) {
             return false;
         }
@@ -118,7 +118,7 @@ std::string Log::getName() {
 }
 
 // Log::expression =================================================
-Log::expression::expression(Log & _log, std::stringstream *_s) : flag(false), m_log(_log), s(_s) {};
+Log::expression::expression(Log & _log, std::stringstream *_s) : s(_s), flag(false), m_log(_log) {};
 
 // Destructor pushes message!
 Log::expression::~expression() {

@@ -156,30 +156,30 @@ public:
 
             ops >> Option('o',"output",m_outputFile);
         }
-        catch(GetOpt::ParsingErrorEx ex){
+        catch(GetOpt::ParsingErrorEx & ex){
             printHelp();
             THROWEXCEPTION("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
-        catch(GetOpt::InvalidFormatEx ex){
+        catch(GetOpt::InvalidFormatEx & ex){
             printHelp();
             THROWEXCEPTION("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
-        catch(GetOpt::OptionNotFoundEx ex){
+        catch(GetOpt::OptionNotFoundEx & ex){
             printHelp();
             THROWEXCEPTION("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
-        catch(GetOpt::TooManyArgumentsEx ex){
+        catch(GetOpt::TooManyArgumentsEx & ex){
             printHelp();
             THROWEXCEPTION("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
-        catch(GetOpt::TooManyOptionsEx ex){
+        catch(GetOpt::TooManyOptionsEx & ex){
             printHelp();
             THROWEXCEPTION("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx ex){
             printHelp();
             THROWEXCEPTION("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
-        } catch(GetOpt::GetOptEx ex) {
+        } catch(GetOpt::GetOptEx & ex) {
             printHelp();
             THROWEXCEPTION("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
@@ -341,30 +341,30 @@ public:
 //            }
 
         }
-        catch(GetOpt::ParsingErrorEx ex){
+        catch(GetOpt::ParsingErrorEx & ex){
             printHelp();
             THROWEXCEPTION("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
-        catch(GetOpt::InvalidFormatEx ex){
+        catch(GetOpt::InvalidFormatEx & ex){
             printHelp();
             THROWEXCEPTION("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
-        catch(GetOpt::OptionNotFoundEx ex){
+        catch(GetOpt::OptionNotFoundEx & ex){
             printHelp();
             THROWEXCEPTION("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
-        catch(GetOpt::TooManyArgumentsEx ex){
+        catch(GetOpt::TooManyArgumentsEx & ex){
             printHelp();
             THROWEXCEPTION("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
-        catch(GetOpt::TooManyOptionsEx ex){
+        catch(GetOpt::TooManyOptionsEx & ex){
             printHelp();
             THROWEXCEPTION("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
-        catch(GetOpt::OptionsFileNotFoundEx ex){
+        catch(GetOpt::OptionsFileNotFoundEx & ex){
             printHelp();
             THROWEXCEPTION("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
-        } catch(GetOpt::GetOptEx ex) {
+        } catch(GetOpt::GetOptEx & ex) {
             printHelp();
             THROWEXCEPTION("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
@@ -432,7 +432,6 @@ private:
     void printErrorNoArg(std::string arg) {
         printHelp();
         THROWEXCEPTION( "Wrong options specified for arguement: '" << arg <<"'")
-        exit(EXIT_FAILURE);
     }
 
     void printHelp() {

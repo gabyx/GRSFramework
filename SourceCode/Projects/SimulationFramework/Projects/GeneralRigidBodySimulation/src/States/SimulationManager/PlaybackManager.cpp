@@ -382,21 +382,9 @@ bool PlaybackManager::keyPressed(const OIS::KeyEvent &e) {
         break;
     case OIS::KC_B:
         togglePauseSimulation();
-    case OIS::KC_UP:
         break;
-    case OIS::KC_DOWN:
-
+    default:
         break;
-    case OIS::KC_LEFT:
-
-        break;
-    case OIS::KC_RIGHT:
-
-        break;
-    case OIS::KC_NUMPAD2:
-
-        break;
-
     }
     return true;
 }
@@ -404,14 +392,8 @@ bool PlaybackManager::keyPressed(const OIS::KeyEvent &e) {
 
 bool PlaybackManager::keyReleased(const OIS::KeyEvent &e) {
     switch (e.key) {
-    case OIS::KC_UP:
-    case OIS::KC_DOWN:
-
-        break;
-    case OIS::KC_LEFT:
-    case OIS::KC_RIGHT:
-
-        break;
+        default:
+            break;
     }
     return true;
 }

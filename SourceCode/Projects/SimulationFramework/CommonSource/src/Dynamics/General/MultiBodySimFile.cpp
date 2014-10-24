@@ -143,7 +143,7 @@ bool MultiBodySimFile::openWrite_impl(const boost::filesystem::path &file_path,
 
     } else {
         //Here we need to check that, we set the put position exactly at the last state, we might have overhanging bits  because user has cancled and some binary stuff is hanging at the end!!!
-        if(openRead(file_path,nSimBodies)) {
+        if(openRead(file_path,true,nSimBodies)) {
             // Reopen only in write mode!
             m_file_stream.close();
             m_file_stream.clear();
@@ -333,7 +333,7 @@ bool  MultiBodySimFile::readHeader() {
             return true;
         } else {
             m_errorString <<" Binary file does not correspond to the number of bodies which should be simulated: "<< std::endl
-                          <<" Binary File describes: \tnSimBodies = "<<nBodies<< "\tnDofqBody = "<<nDofqBody<<"\tnDofuBody = " << nDofuBody << std::endl
+                          <<" Binary File describes: \t\tnSimBodies = "<<nBodies<< "\tnDofqBody = "<<nDofqBody<<"\tnDofuBody = " << nDofuBody << std::endl
                           <<" Simulation requests: \t\tnSimBodies = "<<m_nSimBodies<< "\tnDofqBody = "<<m_nDOFqBody<<"\tnDofuBody = " << m_nDOFuBody<<std::endl;
         }
 

@@ -9,8 +9,6 @@
 #include "LogDefines.hpp"
 #include "TypeDefs.hpp"
 
-#include "SceneParserMPI.hpp"
-
 #include "MPIInformation.hpp"
 #include "MPICommunication.hpp"
 #include "MPITopologyBuilder.hpp"
@@ -65,9 +63,6 @@ private:
 
     std::shared_ptr< StateRecorderType >  m_pStateRecorder;
 
-    using SceneParserType = SceneParserMPI<DynamicsSystemType>;
-    std::shared_ptr< SceneParserType >     m_pSceneParser;
-
     std::shared_ptr< TimeStepperType >	m_pTimestepper;
     std::shared_ptr< DynamicsSystemType > m_pDynSys;
     std::shared_ptr< BodyCommunicator >   m_pBodyCommunicator;
@@ -86,6 +81,8 @@ private:
     void checkNumberOfBodiesInProcess();
     void checkOwnerOfBodiesInProcess();
     void getMaxRuntime(PREC runtime);
+
+    boost::filesystem::path m_sceneFileParsed;
 };
 
 

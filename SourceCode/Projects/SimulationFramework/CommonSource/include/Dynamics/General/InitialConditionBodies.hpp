@@ -34,11 +34,12 @@ void setupPositionBodiesLinear(
     if(jitter){ random_vec(0) = uni(gen); random_vec(1) = uni(gen); random_vec(2) = uni(gen);}
 
     auto diffId = startId;
-    unsigned int i; // linear index from the front
 
     auto stateIt = bodyStates.begin();
     for(auto & b : bodyDataCont) {
-        i = b.m_id - startId;
+
+        ASSERTMSG(RigidBodyId::getGroupNr(b.m_id) == RigidBodyId::getGroupNr(startId),"Wrong group")
+        auto i = RigidBodyId::getBodyNr(b.m_id) - RigidBodyId::getBodyNr(startId); // linear index from the front
         stateIt->m_q.template tail<4>() = Quaternion(1,0,0,0);
 
         stateIt->m_q.template head<3>() = pos + dir*dist*i + jitter_vec;
@@ -84,10 +85,13 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
     if(jitter){ random_vec(0) = uni(gen); random_vec(1) = uni(gen); random_vec(2) = uni(gen);}
 
     auto diffId = startId;
-    unsigned int i; // linear index from the front
+
+
+
     auto stateIt = bodyStates.begin();
     for(auto & b : bodyDataCont) {
-        i = b.m_id  - startId;
+        ASSERTMSG(RigidBodyId::getGroupNr(b.m_id) == RigidBodyId::getGroupNr(startId),"Wrong group")
+        auto i = RigidBodyId::getBodyNr(b.m_id) - RigidBodyId::getBodyNr(startId); // linear index from the front
 
         stateIt->m_q.template tail<4>() = Quaternion(1,0,0,0);
         int index_z = (i /(gDim_x*gDim_y));
@@ -119,26 +123,19 @@ bool setupInitialConditionBodiesFromFile(boost::filesystem::path file_path,
                                          short which = 2){
 
     MultiBodySimFile simFile;
-    bool failed = false;
     if(simFile.openRead(file_path,
+                        true,
                         DynamicsState::LayoutConfigType::LayoutType::NDOFqBody,
                         DynamicsState::LayoutConfigType::LayoutType::NDOFuBody,
-                        0,true))
+                        0))
     {
-        // We only perform an update! -> true
-        if(!simFile.readSpecific(bodyDataCont,stateTime,readPos,readVel,which,true)){
-            failed = true;
+        if(simFile.readSpecific(bodyDataCont,stateTime,readPos,readVel,which,true)){
+            simFile.close();
+            return true;
         }
-        simFile.close();
-    }else{
-        failed = true;
     }
 
-    if(!failed){
-        return true;
-    }
-
-    ERRORMSG("setupInitialConditionBodiesFromFile:: failed: " << "path: " << file_path << " error:" << simFile.getErrorString())
+    ERRORMSG("setupInitialConditionBodiesFromFile:: failed: " << "path: " << file_path << " error:" << simFile.getErrorString());
     return false;
 }
 

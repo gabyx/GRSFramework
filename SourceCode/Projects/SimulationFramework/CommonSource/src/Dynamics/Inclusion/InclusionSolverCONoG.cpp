@@ -428,9 +428,6 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
         for(auto it=m_contactGraph.m_simBodiesToContactsMap.begin(); it !=m_contactGraph.m_simBodiesToContactsMap.end(); ++it) {
             if(m_globalIterationCounter >= m_settings.m_MinIter && (m_bConverged || m_settings.m_bComputeResidual)) {
 
-
-                auto T_k =
-
                 converged = Numerics::cancelCriteriaMatrixNormSq( it->first->m_pSolverData->m_uBuffer.m_back, // these are the old values (got switched)
                                                                 it->first->m_pSolverData->m_uBuffer.m_front, // these are the new values (got switched)
                                                                 it->first->m_MassMatrix_diag,

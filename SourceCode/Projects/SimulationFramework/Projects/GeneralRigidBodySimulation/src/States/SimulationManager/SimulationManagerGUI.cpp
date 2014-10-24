@@ -472,23 +472,10 @@ bool SimulationManagerGUI::keyPressed(const OIS::KeyEvent &e) {
     case OIS::KC_F:
         toggleShowContactFrames();
         break;
-    case OIS::KC_UP:
-        break;
-    case OIS::KC_DOWN:
-
-        break;
-    case OIS::KC_LEFT:
-
-        break;
-    case OIS::KC_RIGHT:
-
-        break;
-    case OIS::KC_NUMPAD2:
-
-        break;
-
     case OIS::KC_I:
         writeInitialState();
+        break;
+    default:
         break;
     }
     return true;
@@ -497,13 +484,7 @@ bool SimulationManagerGUI::keyPressed(const OIS::KeyEvent &e) {
 
 bool SimulationManagerGUI::keyReleased(const OIS::KeyEvent &e) {
     switch (e.key) {
-    case OIS::KC_UP:
-    case OIS::KC_DOWN:
-
-        break;
-    case OIS::KC_LEFT:
-    case OIS::KC_RIGHT:
-
+    default:
         break;
     }
     return true;

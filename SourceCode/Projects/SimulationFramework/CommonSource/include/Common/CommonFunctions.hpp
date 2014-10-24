@@ -291,8 +291,8 @@ inline bool stringToVector4( TVector4 & v, const std::string & s) {
 /**
 * Generates count random value and returns the last one.
 */
-template<typename PREC, typename Generator, typename Distribution>
-inline PREC genRandomValues(PREC value, Generator & g, Distribution & d, unsigned int count) {
+template<typename PREC, typename Generator, typename Distribution, typename Integral>
+inline PREC genRandomValues(PREC value, Generator & g, Distribution & d,Integral count) {
     for(unsigned int i= 0; i<count; ++i) {
         value = d(g);
     }
@@ -302,8 +302,8 @@ inline PREC genRandomValues(PREC value, Generator & g, Distribution & d, unsigne
 /**
 * Generates count random vectors and returns the last one.
 */
-template<typename PREC, typename Generator, typename Distribution>
-inline typename MyMatrix<PREC>::Vector3 genRandomVec(typename MyMatrix<PREC>::Vector3 value, Generator & g, Distribution & d, unsigned int count) {
+template<typename PREC, typename Generator, typename Distribution, typename Integral>
+inline typename MyMatrix<PREC>::Vector3 genRandomVec(typename MyMatrix<PREC>::Vector3 value, Generator & g, Distribution & d, Integral count) {
     for(unsigned int i= 0; i<count; ++i) {
         value(0) = d(g);
         value(1) = d(g);

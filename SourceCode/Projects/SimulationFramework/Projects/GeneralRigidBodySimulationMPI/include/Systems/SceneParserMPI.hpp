@@ -23,10 +23,10 @@ struct SceneParserMPITraits : public SceneParserBaseTraits<TSceneParser,TDynamic
 
 };
 
-template<typename TDynamicsSystem>
-class SceneParserMPI: public SceneParser<TDynamicsSystem, SceneParserMPITraits, SceneParserMPI<TDynamicsSystem> > {
+template<typename TDynamicsSystem, template<typename P, typename D> class TParserTraits = SceneParserMPITraits>
+class SceneParserMPI: public SceneParser<TDynamicsSystem, TParserTraits , SceneParserMPI<TDynamicsSystem> > {
 private:
-    using BaseType = SceneParser<TDynamicsSystem, SceneParserMPITraits, SceneParserMPI<TDynamicsSystem> >;
+    using BaseType = SceneParser<TDynamicsSystem, TParserTraits, SceneParserMPI<TDynamicsSystem> >;
 public:
     using DynamicsSystemType = TDynamicsSystem;
 

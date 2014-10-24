@@ -59,8 +59,8 @@ public:
     using ParserTraits = TParserTraits<ParserForModulesType, TDynamicsSystem >;
     DEFINE_PARSER_TYPE_TRAITS(ParserTraits);
 
-
-    using BodyModuleDynamicOptionsType = typename BodyModuleType::DynamicOptionsType;
+    using SceneParserDynamicOptionsType = SceneParserDynamicOptions;
+    using BodyModuleDynamicOptionsType  = typename BodyModuleType::DynamicOptionsType;
 public:
 
     /**
@@ -140,6 +140,8 @@ public:
         }
 
         parseSceneIntern(file);
+
+        return true;
     }
 
 
@@ -242,32 +244,21 @@ protected:
 
         LOGSCLEVEL1( m_pSimulationLog, "---> Scene Input file: "  << file.string() <<std::endl; );
 
+        LOGSCLEVEL1(m_pSimulationLog, "---> Try to parse the scene ..."<<std::endl;);
 
+        GET_XMLCHILDNODE_CHECK( m_xmlRootNode, "DynamicsSystem" , (*m_xmlDoc) );
 
+        XMLNodeType node;
+        GET_XMLCHILDNODE_CHECK( node , "SceneSettings",  m_xmlRootNode);
+        parseSceneSettingsPre(node);
 
-        try {
+        node = m_xmlRootNode.child("SceneObjects");
+        parseSceneObjects(node);
 
-            LOGSCLEVEL1(m_pSimulationLog, "---> Try to parse the scene ..."<<std::endl;);
+        node = m_xmlRootNode.child("SceneSettings");
+        parseSceneSettingsPost(node);
 
-            GET_XMLCHILDNODE_CHECK( m_xmlRootNode, "DynamicsSystem" , (*m_xmlDoc) );
-
-            XMLNodeType node;
-            GET_XMLCHILDNODE_CHECK( node , "SceneSettings",  m_xmlRootNode);
-            parseSceneSettingsPre(node);
-
-            node = m_xmlRootNode.child("SceneObjects");
-            parseSceneObjects(node);
-
-            node = m_xmlRootNode.child("SceneSettings");
-            parseSceneSettingsPost(node);
-
-            //parseOtherOptions(m_xmlRootNode);
-
-
-        } catch(Exception& ex) {
-            LOGSCLEVEL1(m_pSimulationLog,  "Scene XML error: "  << ex.what() <<std::endl);
-            ERRORMSG( "Scene XML error: "  << ex.what() );
-        }
+        //parseOtherOptions(m_xmlRootNode);
 
         LOGSCLEVEL1( m_pSimulationLog, "---> SceneParser finshed =========================================================" << std::endl;);
 
@@ -334,7 +325,7 @@ protected:
 
     std::shared_ptr<DynamicsSystemType> m_pDynSys;
 
-    SceneParserDynamicOptions m_opts;
+    SceneParserDynamicOptionsType m_opts;
 
     boost::filesystem::path m_currentParseFilePath;
     boost::filesystem::path m_currentParseFileDir;
