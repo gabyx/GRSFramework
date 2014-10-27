@@ -144,6 +144,7 @@ public:
 
         template <typename T>
         expression operator<<(const T & t) {
+            m_flag = false;
             if(m_lastWasEndl){m_s << LOGGING_TIMESPACES;}
             m_s << t; // Push message
             return expression(m_log , m_s);
@@ -154,7 +155,7 @@ public:
 
     private:
         std::stringstream &m_s;
-        bool m_flag; // When flag is false, the flush gets executed in dtor!
+        bool m_flag; // When flag is true, the flush gets executed in dtor!
         bool m_lastWasEndl;
         Log & m_log;
     };
