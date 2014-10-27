@@ -118,25 +118,37 @@ std::string Log::getName() {
 }
 
 // Log::expression =================================================
-Log::expression::expression(Log & _log, std::stringstream *_s) : s(_s), flag(false), m_log(_log) {};
+Log::expression::expression(Log & _log, std::stringstream &_s, bool lastWasEndl)
+: m_s(_s), m_flag(false), m_lastWasEndl(lastWasEndl), m_log(_log) {};
 
 // Destructor pushes message!
 Log::expression::~expression() {
-    if(flag==false) {
-        m_log.writeOut(*s); //Push string stream to log
-        delete s;
+    if(m_flag==false) {
+        m_log.writeOut(m_s); //Push string stream to log
     }
 }
 
 // For std::endl;
 Log::expression Log::expression::operator<<( std::ostream&(*f)(std::ostream&) ) {
-    this->flag = true;
-    *(this->s) << f; // Apply the manipulator to the stream
-    return expression(this->m_log , this->s);
+    m_flag = true;
+    m_s << f; // Apply the manipulator to the stream
+
+    if(f == static_cast<std::ostream&(&)(std::ostream&)>(std::endl)){
+            // push time if timer set
+            //if(this->m_log.m_time){ this->s << LOGGING_TIMESPACES;}
+           return expression(m_log , m_s, true);
+    }
+
+    return expression(m_log , m_s);
 }
 
 
 // LogManager =======================================================
+
+LogManager::LogManager() {
+    m_globalClock.start();
+}
+
 LogManager::~LogManager() {
     LogListIteratorType it;
     for(it=m_logList.begin(); it!= m_logList.end(); ++it) {
@@ -146,8 +158,13 @@ LogManager::~LogManager() {
     }
 };
 
-Log* LogManager::createLog(const std::string & name, bool toConsole, bool toFile, boost::filesystem::path filePath) {
+Log* LogManager::createLog(const std::string & name, bool toConsole, bool toFile, boost::filesystem::path filePath, bool useTimer) {
     Log * pLog = new Log(name);
+
+    if(useTimer){
+        pLog->setTimer(&m_globalClock);
+    }
+
     if(toConsole) {
         pLog->addSink(new LogSinkCout(name + std::string("-CoutSink")));
 
@@ -188,9 +205,14 @@ void LogManager::destroyLog(const Log * log) {
     ASSERTMSG(it != m_logList.end(),"This Log does not exist!");
 };
 
-void LogManager::registerLog(Log * log) {
+void LogManager::registerLog(Log * log, bool useTimer) {
     ASSERTMSG(log != nullptr,"This Log has Null Pointer!");
     std::lock_guard<std::mutex> l(m_busy_mutex);
+
+    if(useTimer){
+        log->setTimer(&m_globalClock);
+    }
+
     std::pair<LogListIteratorType, bool> res =  m_logList.insert(std::pair<std::string, Log* >(log->getName(), log));
     ASSERTMSG(res.second,"LogSink has already been added! :" << log->getName());
 };

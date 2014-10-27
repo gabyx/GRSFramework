@@ -34,7 +34,7 @@ public:
         for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
             unsigned int id;
             if(!Utilities::stringToType(id, itNode->attribute("id").value())) {
-                THROWEXCEPTION("---> String conversion in Material: id failed");
+                ERRORMSG("---> String conversion in Material: id failed");
             }
 
             ASSERTMSG(itNode->child_value()!=""," String in material id: " << id << "is empty!")
@@ -82,7 +82,7 @@ public:
 
             unsigned int id;
             if(!Utilities::stringToType(id, itNode->attribute("id").value())) {
-                THROWEXCEPTION("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Tool: id failed");
             }
             LOGMCLEVEL3(m_pLog,"---> Parsing Tool with id: " << id << std::endl;);
             std::string type = itNode->attribute("type").value();
@@ -99,7 +99,7 @@ public:
             } else if(type == "RendermanWriter") {
                 createToolRendermanOutput(*itNode,id);
             } else {
-                THROWEXCEPTION("---> String conversion in Tool: type not found!");
+                ERRORMSG("---> String conversion in Tool: type not found!");
             }
 
 
@@ -113,20 +113,20 @@ public:
 
             unsigned int outNode;
             if(!Utilities::stringToType(outNode, itNode->attribute("outNode").value())) {
-                THROWEXCEPTION("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Tool: id failed");
             }
             unsigned int outSocket;
             if(!Utilities::stringToType(outSocket, itNode->attribute("outSocket").value())) {
-                THROWEXCEPTION("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Tool: id failed");
             }
 
             unsigned int inNode;
             if(!Utilities::stringToType(inNode, itNode->attribute("inNode").value())) {
-                THROWEXCEPTION("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Tool: id failed");
             }
             unsigned int inSocket;
             if(!Utilities::stringToType(inSocket, itNode->attribute("inSocket").value())) {
-                THROWEXCEPTION("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Tool: id failed");
             }
 
             LOGMCLEVEL3(m_pLog,"---> Linking Tool:  " << outNode << " out: " << outSocket << " ------> "
@@ -149,7 +149,7 @@ private:
         ( t == #typeName ){ using T = type; \
         T tt; \
         if(!Utilities::stringToType(tt, matGenNode.attribute("value").value())) { \
-            THROWEXCEPTION("---> String conversion in Constant tool: value failed"); \
+            ERRORMSG("---> String conversion in Constant tool: value failed"); \
         } \
         n = new LogicNodes::ConstantNode<T>(id,tt); \
         } \
@@ -176,7 +176,7 @@ private:
                 using T = std::string;
                 T tt = matGenNode.attribute("value").value();
                 if(tt.empty()){
-                    THROWEXCEPTION("---> String conversion in Constant tool: value failed"); \
+                    ERRORMSG("---> String conversion in Constant tool: value failed"); \
                 }
                 n = new LogicNodes::ConstantNode<T>(id,tt);
             }
@@ -184,12 +184,12 @@ private:
                 using T = boost::filesystem::path;
                 std::string tt = matGenNode.attribute("value").value();
                 if(tt.empty()){
-                    THROWEXCEPTION("---> String conversion in Constant tool: value failed"); \
+                    ERRORMSG("---> String conversion in Constant tool: value failed"); \
                 }
                 n = new LogicNodes::ConstantNode<T>(id,tt);
             }
             else{
-                THROWEXCEPTION("---> String conversion in Constant tool: outputType: '" << t << "' not found!");
+                ERRORMSG("---> String conversion in Constant tool: outputType: '" << t << "' not found!");
             }
 
             m_renderScriptGen->addNode(n,false,false);
@@ -203,7 +203,7 @@ private:
                 }else if(gid == "Frame"){
                     m_renderScriptGen->addNodeToGroup(id, ExecGroups::FRAME);
                 }else{
-                    THROWEXCEPTION("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
+                    ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
                 }
             }
     }
@@ -236,7 +236,7 @@ private:
 
         unsigned int defaultMaterialId;
         if(!Utilities::stringToType(defaultMaterialId, matGenNode.attribute("defaultMaterialId").value())) {
-            THROWEXCEPTION("---> String conversion in MaterialLookUp tool: defaultMaterialId failed");
+            ERRORMSG("---> String conversion in MaterialLookUp tool: defaultMaterialId failed");
         }
 
         // Get default material
@@ -264,7 +264,7 @@ private:
                                                         RenderMaterial *,
                                                         MaterialMapType >(id,m_materials,it->second);
         } else {
-            THROWEXCEPTION("---> String conversion in MaterialLookUp tool: inputType: '" << type << "' not found!");
+            ERRORMSG("---> String conversion in MaterialLookUp tool: inputType: '" << type << "' not found!");
         }
 
          m_renderScriptGen->addNode(node,false,false);
@@ -280,13 +280,13 @@ private:
         att = matGenNode.attribute("pipeToSubprocess");
         if(att) {
             if(!Utilities::stringToType(pipe, att.value())) {
-                THROWEXCEPTION("---> String conversion in RendermanWriter tool: pipeToSubprocess failed");
+                ERRORMSG("---> String conversion in RendermanWriter tool: pipeToSubprocess failed");
             }
 
             if( pipe ) {
                 command = matGenNode.attribute("command").value();
                 if(command.empty()) {
-                    THROWEXCEPTION("---> String conversion in RendermanWriter tool: command failed");
+                    ERRORMSG("---> String conversion in RendermanWriter tool: command failed");
                 }
             }
 

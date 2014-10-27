@@ -113,12 +113,12 @@ private:
         att = meshNode.attribute("scaleLikeGeometry");
         if(att) {
             if(!Utilities::stringToType(scaleLikeGeometry, att.value())) {
-                THROWEXCEPTION("---> String conversion in parseMesh: scaleWithGeometry failed");
+                ERRORMSG("---> String conversion in parseMesh: scaleWithGeometry failed");
             }
         }
         if(!scaleLikeGeometry) {
             if(!Utilities::stringToVector3(scale, meshNode.attribute("scale").value() )) {
-                THROWEXCEPTION("---> String conversion in parseMesh: scale failed");
+                ERRORMSG("---> String conversion in parseMesh: scale failed");
             }
         }
 
@@ -163,12 +163,12 @@ private:
             if(scaleLikeGeometry) {
                 auto & s = m_scalesGroup[bodyIdx];
                 if(s(0)<=0 || s(1)<=0 || s(2)<=0) {
-                    THROWEXCEPTION("---> parseMesh:: Scale for Mesh: " + meshName.string() +"is zero or smaller!");
+                    ERRORMSG("---> parseMesh:: Scale for Mesh: " + meshName.string() +"is zero or smaller!");
                 }
                 sceneNodeScale->setScale(s(0),s(1),s(2));
             } else {
                 if(scale(0)<=0 || scale(1)<=0 || scale(2)<=0) {
-                    THROWEXCEPTION("---> parseMesh:: Scale for Mesh: " + meshName.string() + "is zero or smaller!");
+                    ERRORMSG("---> parseMesh:: Scale for Mesh: " + meshName.string() + "is zero or smaller!");
                 }
                 sceneNodeScale->setScale(scale(0),scale(1),scale(2));
             }
@@ -213,12 +213,12 @@ private:
         att = planeNode.attribute("scaleLikeGeometry");
         if(att) {
             if(!Utilities::stringToType(scaleLikeGeometry, att.value())) {
-                THROWEXCEPTION("---> String conversion in parseMesh: scaleWithGeometry failed");
+                ERRORMSG("---> String conversion in parseMesh: scaleWithGeometry failed");
             }
         }
         if(!scaleLikeGeometry) {
             if(!Utilities::stringToVector3(scale, planeNode.attribute("scale").value() )) {
-                THROWEXCEPTION("---> String conversion in parseMesh: scale failed");
+                ERRORMSG("---> String conversion in parseMesh: scale failed");
             }
         }
 
@@ -227,7 +227,7 @@ private:
         att = planeNode.attribute("subDivisions");
         if(att) {
             if(!Utilities::stringToVector2(subDivs, att.value())) {
-                THROWEXCEPTION("---> String conversion in parsePlane: subDivisions failed");
+                ERRORMSG("---> String conversion in parsePlane: subDivisions failed");
             }
         }
 
@@ -238,7 +238,7 @@ private:
         att = planeNode.attribute("normal");
         if(att) {
             if(!Utilities::stringToVector3(normal, att.value())) {
-                THROWEXCEPTION("---> String conversion in parsePlane: normal failed");
+                ERRORMSG("---> String conversion in parsePlane: normal failed");
             }
         }
 
@@ -246,7 +246,7 @@ private:
         att = planeNode.attribute("distance");
         if(att) {
             if(!Utilities::stringToType(dist, att.value())) {
-                THROWEXCEPTION("---> String conversion in parsePlane: distance failed");
+                ERRORMSG("---> String conversion in parsePlane: distance failed");
             }
         }
 
@@ -256,7 +256,7 @@ private:
         att = planeNode.attribute("tileTexture");
         if(att) {
             if(!Utilities::stringToVector2(tile, att.value())) {
-                THROWEXCEPTION("---> String conversion in parsePlane: tileTexture failed");
+                ERRORMSG("---> String conversion in parsePlane: tileTexture failed");
             }
         }
 
@@ -314,7 +314,7 @@ private:
             RigidBodyGraphicsType rigidBodyGraphics(sceneNode, b.m_id);
 
             if(scaleLikeGeometry) {
-                THROWEXCEPTION("---> parsePlane:: Scale for Plane can not be used from Geometry!");
+                ERRORMSG("---> parsePlane:: Scale for Plane can not be used from Geometry!");
             } else {
                 sceneNodeScale->setScale(scale(0),scale(1),scale(2));
             }
@@ -359,10 +359,10 @@ private:
                 m_materialList.emplace_back(n.attribute("name").value());
             }
             if(m_materialList.empty()) {
-                THROWEXCEPTION("---> No Material Node found in Mesh!");
+                ERRORMSG("---> No Material Node found in Mesh!");
             }
         } else {
-            THROWEXCEPTION("---> The attribute 'type' '" << type << "' of 'parseMesh' has no implementation in the parser");
+            ERRORMSG("---> The attribute 'type' '" << type << "' of 'parseMesh' has no implementation in the parser");
         }
     }
 
@@ -371,20 +371,20 @@ private:
         att =rendering.attribute("attachAxis");
         if(att) {
             if(!Utilities::stringToType(settings.attachAxis, att.value() )) {
-                THROWEXCEPTION("---> String conversion of in parseMesh: attachAxis failed");
+                ERRORMSG("---> String conversion of in parseMesh: attachAxis failed");
             }
         }
         att =rendering.attribute("axesSize");
         if(att) {
             if(!Utilities::stringToType(settings.axesSize, att.value())) {
-                THROWEXCEPTION("---> String conversion of in parseMesh: axesSize failed");
+                ERRORMSG("---> String conversion of in parseMesh: axesSize failed");
             }
         }
 
         att = rendering.attribute("shadowsEnabled");
         if(att) {
             if(!Utilities::stringToType(settings.shadowsEnabled, att.value())) {
-                THROWEXCEPTION("---> String conversion of in parseMesh: shadowsEnabled failed");
+                ERRORMSG("---> String conversion of in parseMesh: shadowsEnabled failed");
             }
         }
     }
@@ -401,15 +401,15 @@ private:
             if(type=="grid") {
                 Vector3 minPoint, maxPoint;
                 if(!Utilities::stringToVector3(minPoint,  topo.attribute("minPoint").value() )) {
-                    THROWEXCEPTION("---> String conversion in parseMPISettings: minPoint failed");
+                    ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
                 }
                 if(!Utilities::stringToVector3(maxPoint,  topo.attribute("maxPoint").value())) {
-                    THROWEXCEPTION("---> String conversion in parseMPISettings: maxPoint failed");
+                    ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
                 }
 
                 MyMatrix<unsigned int>::Vector3 dim;
                 if(!Utilities::stringToVector3(dim,  topo.attribute("dimension").value())) {
-                    THROWEXCEPTION("---> String conversion in parseMPISettings: dimension failed");
+                    ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
                 }
 
                 Vector3 extent;
@@ -504,7 +504,7 @@ private:
 
 
             } else {
-                THROWEXCEPTION("---> String conversion in MPISettings:parseTopology:type failed: not a valid setting");
+                ERRORMSG("---> String conversion in MPISettings:parseTopology:type failed: not a valid setting");
             }
         }
 
@@ -518,7 +518,7 @@ private:
             if(scaleNode) {
                 double sceneScale;
                 if(!Utilities::stringToType(sceneScale,  scaleNode.attribute("value").value())) {
-                    THROWEXCEPTION("---> String conversion in SceneScale: value failed");
+                    ERRORMSG("---> String conversion in SceneScale: value failed");
                 }
                 m_pBaseNode->setScale(Ogre::Vector3(1,1,1)*sceneScale);
             }

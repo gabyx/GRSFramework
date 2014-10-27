@@ -93,7 +93,7 @@ public:
         m_currentParseFilePath = file;
         m_currentParseFileDir = m_currentParseFileDir = m_currentParseFilePath.parent_path();
         if(xmlDoc){
-            THROWEXCEPTION("XML Document pointer is null!")
+            ERRORMSG("XML Document pointer is null!")
         }
         m_xmlDoc = xmlDoc;
     }
@@ -109,7 +109,7 @@ public:
         if (result) {
             LOGSCLEVEL1(m_pSimulationLog, "---> Loaded XML [" << file.string() << "] without errors!" << std::endl;);
         } else {
-            THROWEXCEPTION( "Loaded XML [" << file.string() << "] with errors!" << std::endl
+            ERRORMSG( "Loaded XML [" << file.string() << "] with errors!" << std::endl
                             << "Error description: " << result.description() << std::endl
                             << "Error offset: " << result.offset )
         }
@@ -177,7 +177,7 @@ public:
 
     void checkFileExists(boost::filesystem::path file) {
         if( !boost::filesystem::exists(file) ) {
-            THROWEXCEPTION("---> The file ' " + file.string() + "' does not exist!");
+            ERRORMSG("---> The file ' " + file.string() + "' does not exist!");
         }
     }
 
@@ -232,7 +232,7 @@ protected:
             m_xmlDoc = std::shared_ptr<pugi::xml_document>( new pugi::xml_document() );
         }
         if( file.empty() ){
-            THROWEXCEPTION("File name is empty!");
+            ERRORMSG("File name is empty!");
         }
 
 
@@ -262,6 +262,7 @@ protected:
 
         LOGSCLEVEL1( m_pSimulationLog, "---> SceneParser finshed =========================================================" << std::endl;);
 
+        return true;
     }
 
 

@@ -73,12 +73,12 @@ private:
         att = node.attribute("scaleLikeGeometry");
         if(att) {
             if(!Utilities::stringToType(scaleLikeGeometry, att.value())) {
-                THROWEXCEPTION("---> String conversion in parseMesh: scaleWithGeometry failed");
+                ERRORMSG("---> String conversion in parseMesh: scaleWithGeometry failed");
             }
         }
         if(!scaleLikeGeometry) {
             if(!Utilities::stringToVector3(scale, node.attribute("scale").value() )) {
-                THROWEXCEPTION("---> String conversion in parseMesh: scale failed");
+                ERRORMSG("---> String conversion in parseMesh: scale failed");
             }
             for(auto & b : *m_bodyListGroup) {
                 m_scalesMap->emplace( b.m_id , scale);

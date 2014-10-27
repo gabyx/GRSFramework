@@ -151,16 +151,16 @@ private:
         unsigned int i = 0;
 
         if(m_iFiles.size() <1) {
-            THROWEXCEPTION("To little input files specified!")
+            ERRORMSG("To little input files specified!")
         }
 
         for(auto it=m_iFiles.begin(); it!=m_iFiles.end(); it++) {
 
             if(*it == m_oFile){
-                THROWEXCEPTION("Input/Output Files are the same!")
+                ERRORMSG("Input/Output Files are the same!")
             }
             if(!simFile.openRead(*it)) {
-                THROWEXCEPTION(simFile.getErrorString());
+                ERRORMSG(simFile.getErrorString());
             };
             if(i == 0) {
                 dofq = simFile.getNDOFq();
@@ -169,7 +169,7 @@ private:
                 bState = simFile.getBytesPerState();
             }
             if(i != 0 && (simFile.getNSimBodies() != bodies || simFile.getBytesPerState() != bState )) {
-                THROWEXCEPTION("Number of bodies: " << simFile.getNSimBodies() << " , bytesPerState: "
+                ERRORMSG("Number of bodies: " << simFile.getNSimBodies() << " , bytesPerState: "
                                << simFile.getBytesPerState() << " of file: "
                                << *it << " do not match bodies: " << bodies << " , bytesPerState: "
                                << bState <<" of first file!");
@@ -190,12 +190,12 @@ private:
                                   simFile.m_additionalBytesPerBodyType,
                                   simFile.m_nAdditionalBytesPerBody))
         {
-            THROWEXCEPTION(output.getErrorString());
+            ERRORMSG(output.getErrorString());
         };
         // Push all simfiles to output
         for(auto it=m_iFiles.begin(); it!=m_iFiles.end(); it++) {
             if(!simFile.openRead(*it)) {
-                THROWEXCEPTION(simFile.getErrorString());
+                ERRORMSG(simFile.getErrorString());
             };
             output << simFile;
         }
@@ -215,12 +215,12 @@ private:
         unsigned int i = 0;
 
         if(m_iFiles.size() <1) {
-            THROWEXCEPTION("To little input files specified!")
+            ERRORMSG("To little input files specified!")
         }
 
         for(auto it=m_iFiles.begin(); it!=m_iFiles.end(); it++) {
             if(!simFile.openRead(*it)) {
-                THROWEXCEPTION(simFile.getErrorString());
+                ERRORMSG(simFile.getErrorString());
             };
             if(i == 0) {
                 dofq = simFile.getNDOFq();
@@ -229,7 +229,7 @@ private:
                 bState = simFile.getBytesPerState();
             }
             if(i != 0 && (simFile.getNSimBodies() != bodies || simFile.getBytesPerState() != bState )) {
-                THROWEXCEPTION("Number of bodies: " << simFile.getNSimBodies() << " , bytesPerState: "
+                ERRORMSG("Number of bodies: " << simFile.getNSimBodies() << " , bytesPerState: "
                                << simFile.getBytesPerState() << " of file: "
                                << *it << " do not match bodies: " << bodies << " , bytesPerState: "
                                << bState <<" of first file!");
@@ -246,7 +246,7 @@ private:
         std::cerr << "---> Open new output file at: "  <<  m_oFile << std::endl;
         MultiBodySimFile output;
         if(!output.openWrite(m_oFile,dofq,dofu,0,true)){
-            THROWEXCEPTION(output.getErrorString());
+            ERRORMSG(output.getErrorString());
         };
 
         // Push all simfiles to output
@@ -260,7 +260,7 @@ private:
             auto currentMatchedTime = timeList.begin();
             for(auto it=m_iFiles.begin(); it!=m_iFiles.end(); it++) {
                 if(!simFile.openRead(*it)) {
-                    THROWEXCEPTION(simFile.getErrorString());
+                    ERRORMSG(simFile.getErrorString());
                 };
 
                 std::cerr << "---> Process File: " << *it << std::endl;
@@ -279,7 +279,7 @@ private:
 
             for(auto it=m_iFiles.begin(); it!=m_iFiles.end(); it++) {
                 if(!simFile.openRead(*it)) {
-                    THROWEXCEPTION(simFile.getErrorString());
+                    ERRORMSG(simFile.getErrorString());
                 };
 
                 std::cerr << "---> Process File: " << *it << std::endl;
@@ -304,7 +304,7 @@ private:
         std::cerr << std::setprecision(9) ;
 
         if( !toFile.m_file_stream.good() || !fromFile.m_file_stream.good()) {
-            THROWEXCEPTION("Some filestreams are not valid!")
+            ERRORMSG("Some filestreams are not valid!")
         }
 
         if( lastMatchedTime == timeList.end()){
@@ -344,7 +344,7 @@ private:
         fromFile.m_file_stream.seekg(fromFile.m_beginOfStates);
 
         if( fileTimesAndOff.size() == 0){
-            THROWEXCEPTION("No times in file found!")
+            ERRORMSG("No times in file found!")
         }
 
         // Match the timeList list
@@ -439,7 +439,7 @@ private:
 
             if(!firstRun){
                 if(bodyCounter != initBodyCounter){
-                     THROWEXCEPTION("At time :" << currentTime << " only " <<
+                     ERRORMSG("At time :" << currentTime << " only " <<
                                      bodyCounter << " bodies found, instead of " << initBodyCounter << " as in first found state!")
                 }
             }else{
@@ -471,7 +471,7 @@ private:
 
 
         if( !toFile.m_file_stream.good() || !fromFile.m_file_stream.good()) {
-            THROWEXCEPTION("Some filestreams are not valid!")
+            ERRORMSG("Some filestreams are not valid!")
         }
 
         //loop over all times if time is in the range, extract all body ids and add to the
@@ -508,7 +508,7 @@ private:
         }
 
         if( lastTimeWritten > fileTimesAndOff.rbegin()->first ){ // max fileTime needs to be greater then lastTimeWritten
-            THROWEXCEPTION("last time written: " << lastTimeWritten << " is greater then max file time: " << fileTimesAndOff.rbegin()->first)
+            ERRORMSG("last time written: " << lastTimeWritten << " is greater then max file time: " << fileTimesAndOff.rbegin()->first)
         }
 
         // get startit (gibt nicht end zurück, da end file Time grösser als lastTimeWritten)
@@ -577,7 +577,7 @@ private:
 
             if(!firstRun){
                 if(bodyCounter != initBodyCounter){
-                     THROWEXCEPTION("At time :" << currentTime << " only " <<
+                     ERRORMSG("At time :" << currentTime << " only " <<
                                      bodyCounter << " bodies found, instead of " << initBodyCounter << " as in first found state!")
                 }
             }else{

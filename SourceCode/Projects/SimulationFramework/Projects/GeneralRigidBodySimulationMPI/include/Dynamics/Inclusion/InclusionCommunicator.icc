@@ -152,7 +152,7 @@ void InclusionCommunicator<TCombo>::buildCommunicatorGroups() {
         }else{
             groupId = 0;
         }
-        LOGBC(m_pSimulationLog,"MPI> Split Communicator for Convergence Gathering"<<std::endl;)
+        LOGIC(m_pSimulationLog,"MPI> Split Communicator for Convergence Gathering"<<std::endl;)
         m_pProcComm->generateCommunicatorSplitAndOverwrite(MPILayer::MPICommunicatorId::INCLUSION_CONVERGENCE_COMM, groupId);
 
 }
@@ -160,14 +160,14 @@ void InclusionCommunicator<TCombo>::buildCommunicatorGroups() {
 template<typename TCombo>
 bool InclusionCommunicator<TCombo>::communicateConvergence(bool converged) {
 
-    LOGBC(m_pSimulationLog,"MPI> Gather convergence flags..."<<std::endl;)
+    LOGIC(m_pSimulationLog,"MPI> Gather convergence flags..."<<std::endl;)
     std::vector<char> convergedGather;
     m_pProcComm->allGather((char)converged,convergedGather, MPILayer::MPICommunicatorId::INCLUSION_CONVERGENCE_COMM);
 
     //Utilities::printVectorNoCopy(*m_pSimulationLog,convergedGather.begin(),convergedGather.end(),",");
 
     for(auto it = convergedGather.begin(); it != convergedGather.end(); it++){
-        LOGBC(m_pSimulationLog, bool(*it) << std::endl;)
+        LOGIC(m_pSimulationLog, bool(*it) << std::endl;)
     }
 
     // Sum up all boolean values and decide if all neighbours converged?
@@ -175,11 +175,11 @@ bool InclusionCommunicator<TCombo>::communicateConvergence(bool converged) {
     for(auto it = convergedGather.begin(); it!= convergedGather.end(); it++){
         converged = converged && *it;
         if(!converged){
-                LOGBC(m_pSimulationLog,"MPI> not converged"<<std::endl;)
+                LOGIC(m_pSimulationLog,"MPI> not converged"<<std::endl;)
                 return false;
         }
     }
-    LOGBC(m_pSimulationLog,"MPI> converged!"<<std::endl;)
+    LOGIC(m_pSimulationLog,"MPI> converged!"<<std::endl;)
     return true;
 }
 
@@ -210,12 +210,12 @@ void InclusionCommunicator<TCombo>::sendContactMessageToNeighbours() {
 
 
     for(auto it = m_nbRanks.begin(); it != m_nbRanks.end(); ++it) {
-        LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
+        LOGIC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageContact.setRank(*it);
         m_pProcComm->sendMessageToNeighbourRank_async(m_messageContact,*it, m_messageContact.m_tag);
     }
-    LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
+    LOGIC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
 template<typename TCombo>
 void InclusionCommunicator<TCombo>::receiveContactMessagesFromNeighbours() {
@@ -234,12 +234,12 @@ void InclusionCommunicator<TCombo>::sendBodyMultiplicityMessageToNeighbours() {
 
 
     for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); ++it) {
-        LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
+        LOGIC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageMultiplicity.setRank(*it);
         m_pProcComm->sendMessageToNeighbourRank_async(m_messageMultiplicity,*it, m_messageMultiplicity.m_tag );
     }
-    LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
+    LOGIC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
 
 template<typename TCombo>
@@ -265,12 +265,12 @@ void InclusionCommunicator<TCombo>::sendUpdateSplitBodiesToNeighbours() {
     m_messageSplitBodyUpdate.setStep(m_globalIterationNumber);
 
     for(auto it = m_nbRanksSendRecvRemote.begin(); it != m_nbRanksSendRecvRemote.end(); ++it) {
-        LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
+        LOGIC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageSplitBodyUpdate.setRank(*it);
         m_pProcComm->sendMessageToNeighbourRank_async(m_messageSplitBodyUpdate,*it, m_messageSplitBodyUpdate.m_tag );
     }
-    LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
+    LOGIC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
 
 template<typename TCombo>
@@ -296,12 +296,12 @@ void InclusionCommunicator<TCombo>::sendSolutionSplitBodiesToNeighbours() {
     m_messageSplitBodySolution.setStep(m_globalIterationNumber);
 
     for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); ++it) {
-        LOGBC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
+        LOGIC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
         m_messageSplitBodySolution.setRank(*it);
         m_pProcComm->sendMessageToNeighbourRank_async(m_messageSplitBodySolution,*it, m_messageSplitBodySolution.m_tag );
     }
-    LOGBC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
+    LOGIC(m_pSimulationLog,"MPI>\t Send finished!"<<std::endl;)
 }
 
 template<typename TCombo>
