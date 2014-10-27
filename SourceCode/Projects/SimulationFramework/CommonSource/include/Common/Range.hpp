@@ -84,6 +84,7 @@ class Range{
         template<typename T>
 		Range & operator=( const std::set<T> & p){
             this->operator=( Range(p) );
+            return *this;
 		}
 
 

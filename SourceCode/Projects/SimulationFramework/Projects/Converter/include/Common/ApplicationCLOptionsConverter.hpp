@@ -76,7 +76,7 @@ public:
                     if(range.size()!=2 || (range[1]!=-1 && range[1]<0) || (range[0]!=-1 && range[0]<0) ||
                        (range[1] != -1  && range[1] < range[0])
                        ){
-                        THROWEXCEPTION("Exception occured in parsing timerange: range.size()" )
+                        ERRORMSG("Exception occured in parsing timerange: range.size()" )
                         printHelp();
                     }
                     m_timeRange = TypesTimeRange::RangeType(range[0],range[1]);
@@ -86,7 +86,7 @@ public:
                     std::vector<double> range;
                     ops >> Option("timelist",range);
                     if(range.size()==0){
-                        THROWEXCEPTION("Exception occured in parsing timelist: range.size()" )
+                        ERRORMSG("Exception occured in parsing timelist: range.size()" )
                         printHelp();
                     }
                     TypesTimeRange::ListType r(range.begin(), range.end());
@@ -100,7 +100,7 @@ public:
                     if(range.size()!=2 || (range[1]!=-1 && range[1]<0) || (range[0]!=-1 && range[0]<0) ||
                        (range[1] != -1  && range[1] < range[0]) ){
                         printHelp();
-                        THROWEXCEPTION("Exception occured in parsing bodyrange: range.size()" )
+                        ERRORMSG("Exception occured in parsing bodyrange: range.size()" )
                     }
                     m_bodyRange = TypesBodyRange::RangeType(range[0],range[1]);
 
@@ -109,7 +109,7 @@ public:
                     ops >> Option("bodylist",range);
                     if(range.size()==0){
                         printHelp();
-                        THROWEXCEPTION("Exception occured in parsing bodylist: range.size()" )
+                        ERRORMSG("Exception occured in parsing bodylist: range.size()" )
 
                     }
                     TypesBodyRange::ListType l(range.begin(), range.end());
@@ -134,11 +134,11 @@ public:
                         m_splitIntoFiles = true;
                     }
                     if(m_endStateIdx<m_startStateIdx){
-                         THROWEXCEPTION("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
+                         ERRORMSG("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
                     }
             }else{
                 printHelp();
-                THROWEXCEPTION("Exception occured in parsing task arguments" )
+                ERRORMSG("Exception occured in parsing task arguments" )
 
             }
 
@@ -158,35 +158,35 @@ public:
         }
         catch(GetOpt::ParsingErrorEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::InvalidFormatEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionNotFoundEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyArgumentsEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyOptionsEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx & ex) {
             printHelp();
-            THROWEXCEPTION("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
             printHelp();
-            THROWEXCEPTION("Some unexpected options where given!" )
+            ERRORMSG("Some unexpected options where given!" )
         }
 
     }
@@ -211,12 +211,12 @@ public:
 
         if(m_inputFiles.empty()) {
             printHelp();
-            THROWEXCEPTION( "No input files supplied!" )
+            ERRORMSG( "No input files supplied!" )
         } else {
             for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
                 if(! boost::filesystem::exists(*it)) {
                     printHelp();
-                    THROWEXCEPTION( "Input file supplied as argument: " << *it << " does not exist!")
+                    ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
                 }
             }
 
@@ -225,11 +225,11 @@ public:
 
         if(m_outputFile.empty()){
             printHelp();
-            THROWEXCEPTION( "No output file supplied!" )
+            ERRORMSG( "No output file supplied!" )
         }
         if(boost::filesystem::exists(m_outputFile)) {
                 printHelp();
-                THROWEXCEPTION( "Output file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
+                ERRORMSG( "Output file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
         }
 
 
@@ -239,7 +239,7 @@ private:
 
     void printErrorNoArg(std::string arg) {
         printHelp();
-        THROWEXCEPTION( "Wrong options specified for arguement: '" << arg <<"'")
+        ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
         exit(EXIT_FAILURE);
     }
 
@@ -343,35 +343,35 @@ public:
         }
         catch(GetOpt::ParsingErrorEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::InvalidFormatEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionNotFoundEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyArgumentsEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyOptionsEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx & ex) {
             printHelp();
-            THROWEXCEPTION("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
             printHelp();
-            THROWEXCEPTION("Some unexpected options where given!" )
+            ERRORMSG("Some unexpected options where given!" )
         }
 
     }
@@ -398,30 +398,30 @@ public:
 
         if(m_inputFiles.empty()) {
             printHelp();
-            THROWEXCEPTION( "No input files supplied!" )
+            ERRORMSG( "No input files supplied!" )
         } else {
             for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
                 if(! boost::filesystem::exists(*it)) {
                     printHelp();
-                    THROWEXCEPTION( "Input file supplied as argument: " << *it << " does not exist!")
+                    ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
                 }
             }
         }
 
         if(m_sceneFile.empty()){
             printHelp();
-            THROWEXCEPTION( "No scene file supplied!" )
+            ERRORMSG( "No scene file supplied!" )
         }else if(!boost::filesystem::exists(m_sceneFile)) {
             printHelp();
-            THROWEXCEPTION( "Scene file supplied as argument: " << m_sceneFile << " does not exist!")
+            ERRORMSG( "Scene file supplied as argument: " << m_sceneFile << " does not exist!")
         }
 
         if(m_outputFile.empty()){
             printHelp();
-            THROWEXCEPTION( "No output file supplied!" )
+            ERRORMSG( "No output file supplied!" )
         }else if(boost::filesystem::exists(m_outputFile)) {
                 printHelp();
-                THROWEXCEPTION( "Output file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
+                ERRORMSG( "Output file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
         }
 
 
@@ -431,7 +431,7 @@ private:
 
     void printErrorNoArg(std::string arg) {
         printHelp();
-        THROWEXCEPTION( "Wrong options specified for arguement: '" << arg <<"'")
+        ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
     }
 
     void printHelp() {

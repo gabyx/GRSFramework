@@ -47,6 +47,7 @@ public:
         public:
             PostProcessTaskBash(const std::string & name): PostProcessTask(name){}
             void execute(){
+
                 system( this->m_options[1].c_str());
             }
     };
@@ -122,7 +123,7 @@ public:
                     if(svec[i] == "bash"){
                         if(i != nextArgIdx){
                             printHelp();
-                           THROWEXCEPTION( "Postprocess Argument: " << "bash" << " at wrong position!" << std::endl);
+                           ERRORMSG( "Postprocess Argument: " << "bash" << " at wrong position!" << std::endl);
                         }
 
                         // has 2 arguments [int|all] and string which is the bash command!
@@ -130,7 +131,7 @@ public:
                        nextArgIdx = i + 3;
                        if(nextArgIdx-1 >=  svec.size()){
                             printHelp();
-                            THROWEXCEPTION("Postprocess Argument: " << "bash" << ", two little arguments!" << std::endl);
+                            ERRORMSG("Postprocess Argument: " << "bash" << ", two little arguments!" << std::endl);
 
                        }
                        m_postProcessTasks.push_back(new PostProcessTaskBash("bash"));
@@ -138,21 +139,21 @@ public:
                     }else if( svec[i] == "copy-local-to"){
                         if(i != nextArgIdx){
                             printHelp();
-                            THROWEXCEPTION("Postprocess Argument: " << "copy-local-to" << " at wrong position!" << std::endl)
+                            ERRORMSG("Postprocess Argument: " << "copy-local-to" << " at wrong position!" << std::endl)
                         }
 
                         currentArgIdx = i;
                         nextArgIdx = i + 1;
                         if(nextArgIdx-1 >=  svec.size()){
                             printHelp();
-                            THROWEXCEPTION("Postprocess Argument: " << "copy-local-to" << ", two little arguments!" << std::endl);
+                            ERRORMSG("Postprocess Argument: " << "copy-local-to" << ", two little arguments!" << std::endl);
                         }
                         m_postProcessTasks.push_back(new PostProcessTaskCopyLocalTo("copy-local-to"));
                         p = m_postProcessTasks.back();
                     }else{
                         if(i >= nextArgIdx){
                             printHelp();
-                            THROWEXCEPTION("Postprocess Argument: " << svec[i] << " not known!" << std::endl);
+                            ERRORMSG("Postprocess Argument: " << svec[i] << " not known!" << std::endl);
                         }
                         if(p){
                             p->addOption(i-currentArgIdx-1,svec[i]);
@@ -169,35 +170,35 @@ public:
         }
         catch(GetOpt::ParsingErrorEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::InvalidFormatEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionNotFoundEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyArgumentsEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyOptionsEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx & ex){
             printHelp();
-            THROWEXCEPTION("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx & ex) {
             printHelp();
-            THROWEXCEPTION("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
+            ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
             printHelp();
-            THROWEXCEPTION("Some unexpected options where given!" << std::endl)
+            ERRORMSG("Some unexpected options where given!" << std::endl)
         }
 
 
@@ -223,12 +224,12 @@ public:
 
     void checkArguments() {
         if(m_sceneFile.empty()) {
-            THROWEXCEPTION("No scene file (.xml) supplied as argument: -s [SceneFilePath]" << std::endl)
+            ERRORMSG("No scene file (.xml) supplied as argument: -s [SceneFilePath]" << std::endl)
             printHelp();
         } else {
             if(! boost::filesystem::exists(m_sceneFile)) {
                 printHelp();
-                THROWEXCEPTION("Scene file supplied as argument: " << m_sceneFile << " does not exist!"<< std::endl)
+                ERRORMSG("Scene file supplied as argument: " << m_sceneFile << " does not exist!"<< std::endl)
             }
         }
     }
@@ -237,7 +238,7 @@ private:
 
     void printErrorNoArg(std::string arg) {
         printHelp();
-        THROWEXCEPTION("Wrong options specified for arguement: '" << arg <<"'"<< std::endl)
+        ERRORMSG("Wrong options specified for arguement: '" << arg <<"'"<< std::endl)
     }
 
     void printHelp() {

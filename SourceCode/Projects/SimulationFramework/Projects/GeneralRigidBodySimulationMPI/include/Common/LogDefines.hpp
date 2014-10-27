@@ -39,21 +39,21 @@
     #define LOGPC( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
 
     /// Special for Debugging in Release
-    #define LOGSZSpecial( logptr , message )  LOG(logptr,message); ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
-    #define LOGBCSpecial( logptr , message )  LOG(logptr,message); ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+    #define LOGSZSpecial( logptr , message )  //LOG(logptr,message); ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+    #define LOGBCSpecial( logptr , message )  //LOG(logptr,message); ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
 
     /// Topology Builder
-    #define TOPOBUILDER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define TOPOBUILDER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
 
     /// SceneParser
-    #define SCENEPARSER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SCENEPARSER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
 
 
 #else
     #define LOGSZ( logptr , message )  ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
-    #define LOGBC( logptr , message )
-    #define LOGIC( logptr , message )
-    #define LOGPC( logptr , message )
+    #define LOGBC( logptr , message )  LOG(logptr,message) ;
+    #define LOGIC( logptr , message )  LOG(logptr,message) ;
+    #define LOGPC( logptr , message )  LOG(logptr,message)
 
     /// Special for Debugging in Release
     #define LOGSZSpecial( logptr , message )   ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
@@ -123,7 +123,7 @@
     #define SOLVERLOG_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
     #define SOLVERLOG_LOGLEVEL_CONTACT 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
     #define SOLVERLOG_TOFILE 1            ///< {0,1} Determines if logstream is saved into a file.
-    #define SOLVERLOG_TOCONSOLE 1         ///< {0,1} Determines if logstream is outputted into console.
+    #define SOLVERLOG_TOCONSOLE 0         ///< {0,1} Determines if logstream is outputted into console.
 #else
     #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
     #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output

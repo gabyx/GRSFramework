@@ -32,6 +32,11 @@ public:
     inline double elapsedSec(){
         return std::chrono::duration<double,std::ratio<1> >(ClockType::now()-m_start).count();
     }
+    /** returns elapsed time in minutes*/
+    inline double elapsedMin(){
+        return std::chrono::duration<double,std::ratio<60> >(ClockType::now()-m_start).count();
+    }
+
     /** returns elapsed time in millisecond*/
     inline double elapsedMilliSec(){
          return std::chrono::duration<double,std::milli>(ClockType::now()-m_start).count();

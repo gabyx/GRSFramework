@@ -86,7 +86,7 @@ public:
         m_currentParseFilePath = file;
         m_currentParseFileDir = m_currentParseFileDir = m_currentParseFilePath.parent_path();
         if(xmlDoc){
-            THROWEXCEPTION("XML Document pointer is null!")
+            ERRORMSG("XML Document pointer is null!")
         }
         m_xmlDoc = xmlDoc;
     }
@@ -96,13 +96,13 @@ public:
     */
     void loadFile(const boost::filesystem::path & file) {
         if(!boost::filesystem::exists(file)) {
-            THROWEXCEPTION("Scene Input file does not exist!");
+            ERRORMSG("Scene Input file does not exist!");
         }
         pugi::xml_parse_result result = m_xmlDoc->load_file(file.c_str());
         if (result) {
             LOGMCLEVEL1(m_pLog, "---> Loaded XML [" << file.string() << "] without errors!" << std::endl;);
         } else {
-            THROWEXCEPTION( "Loaded XML [" << file.string() << "] with errors!" << std::endl
+            ERRORMSG( "Loaded XML [" << file.string() << "] with errors!" << std::endl
                             << "Error description: " << result.description() << std::endl
                             << "Error offset: " << result.offset )
         }
@@ -115,7 +115,7 @@ private:
 
     void checkFileExists(boost::filesystem::path file) {
         if( !boost::filesystem::exists(file) ) {
-            THROWEXCEPTION("---> The file ' " + file.string() + "' does not exist!");
+            ERRORMSG("---> The file ' " + file.string() + "' does not exist!");
         }
     }
 
@@ -136,7 +136,7 @@ private:
             m_xmlDoc = std::shared_ptr<pugi::xml_document>( new pugi::xml_document() );
         }
         if( file.empty() ){
-            THROWEXCEPTION("File name is empty!");
+            ERRORMSG("File name is empty!");
         }
 
         // Load the file if necessary

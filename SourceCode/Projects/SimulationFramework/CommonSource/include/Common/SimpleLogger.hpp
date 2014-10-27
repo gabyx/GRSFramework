@@ -10,11 +10,16 @@
 
 #include <boost/filesystem.hpp>
 
+#include "CPUTimer.hpp"
+#include "CommonFunctions.hpp"
+
 #include "AssertionDebug.hpp"
 #include "Singleton.hpp"
 
 namespace Logging {
 
+#define LOGGING_TIMEFORMAT "%8.3f::"
+#define LOGGING_TIMESPACES "        ::"
 
 class LogSink {
 protected:
@@ -56,6 +61,8 @@ public:
 class Log {
 protected:
 
+    CPUTimer * m_time = nullptr; ///< A timer which can be set from outside!
+
     std::string m_logName;
     std::mutex m_busy_mutex;
 
@@ -72,6 +79,8 @@ protected:
         }
     };
 
+    std::stringstream m_s; ///< Temporary stringstream;
+
     friend class expression;
 
 public:
@@ -84,6 +93,7 @@ public:
         std::lock_guard<std::mutex> l(m_busy_mutex);
         std::vector<LogSink *>::iterator it;
         for(it=m_sinkList.begin(); it != m_sinkList.end(); ++it) {
+            if(m_time){ (*(*it)) << Utilities::stringFormat(LOGGING_TIMEFORMAT,m_time->elapsedMin());}
             (*(*it)) << str;
             (*(*it)) << std::endl;
         }
@@ -91,6 +101,7 @@ public:
 
     void logMessage(std::stringstream & str);
 
+    inline void setTimer(CPUTimer * time=nullptr){ m_time = time;}
 
     bool addSink(LogSink * sink);
     bool removeSink(std::string sink_name);
@@ -102,39 +113,49 @@ public:
     template<typename T>
     Log::expression operator<<(const T & t) {
         // makes a chain of temporarys and writes all into a string stream and then writes all out!
-        std::stringstream * s=new std::stringstream();
-        *s << t; // Push first value into stream;
-        return Log::expression(*this, s);
+        m_s.str("");
+
+        // push time if timer set
+        if(m_time){ m_s << Utilities::stringFormat(LOGGING_TIMEFORMAT,m_time->elapsedMin());}
+
+        m_s << t; // Push first value into stream;
+        return Log::expression(*this, m_s);
     };
 
     Log::expression operator<<(std::ostream&(*f)(std::ostream&) ) {
         // makes a chain of temporarys and writes all into a string stream and then writes all out!
-        std::stringstream * s=new std::stringstream();
-        *s << f; // Push first value into stream;
-        return Log::expression(*this, s);
+        m_s.str("");
+        m_s << f; // Push first value into stream;
+
+        if(f == static_cast<std::ostream&(&)(std::ostream&)>(std::endl)){
+            // push time if timer set
+            //if(m_time){ m_s << Utilities::stringFormat(LOGGING_TIMEFORMAT,m_time->elapsedMin());}
+        }
+        return Log::expression(*this, m_s);
     };
 
     // Expression to write all " myLogSink << a << b << c " first into a stringstream and the flush!
     class expression {
     public:
 
-        expression(Log & _log, std::stringstream *_s);
+        expression(Log & _log, std::stringstream &_s, bool lastWasEndl = false);
         // Destructor pushes message!
         ~expression();
 
         template <typename T>
         expression operator<<(const T & t) {
-            this->flag = true;
-            *(this->s) << t; // Push message
-            return expression(this->m_log , this->s);
+            if(m_lastWasEndl){m_s << LOGGING_TIMESPACES;}
+            m_s << t; // Push message
+            return expression(m_log , m_s);
         };
 
         // For std::endl;
         expression operator<<( std::ostream&(*f)(std::ostream&) );
 
     private:
-        std::stringstream *s;
-        bool flag; // When flag is false, the flush gets executed in deconstructor!
+        std::stringstream &m_s;
+        bool m_flag; // When flag is false, the flush gets executed in dtor!
+        bool m_lastWasEndl;
         Log & m_log;
     };
 
@@ -152,23 +173,32 @@ private:
     LogListType m_logList;
 
     std::mutex m_busy_mutex;
+    CPUTimer m_globalClock;
 
 public:
 
+
+
+    LogManager();
     ~LogManager();
 
-    Log* createLog(const std::string & name, bool toConsole, bool toFile, boost::filesystem::path filePath);
+    Log* createLog(const std::string & name,
+                   bool toConsole,
+                   bool toFile,
+                   boost::filesystem::path filePath,
+                   bool useTimer = true);
 
     void destroyLog(const std::string &name);
     void destroyLog(const Log * log);
 
-    void registerLog(Log * log);
+    void registerLog(Log * log, bool useTimer = true);
 
     Log * getLog(const std::string & name);
     bool  existsLog(const std::string & name);
 };
 
 };
+
 
 #endif
 
