@@ -148,7 +148,7 @@ bool MultiBodySimFile::openWrite_impl(const boost::filesystem::path &file_path,
             m_file_stream.close();
             m_file_stream.clear();
             //TODO Why here ::in mode?? Reason?
-            m_file_stream.open(file_path.string().c_str() , (std::ios_base::binary | std::ios_base::out  | std::ios_base::in ) );
+            m_file_stream.open(file_path.string().c_str() , (std::ios_base::binary | std::ios_base::out) );
             m_file_stream.rdbuf()->pubsetbuf(m_Buffer, m_buf_size);
             if(m_file_stream.good()) {
                 //Set the put pointer!
