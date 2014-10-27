@@ -199,7 +199,7 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
             }
          }
          else if(current_state== MOVE_POINTER){
-            // Moves pointer as long as the buffer is no full
+            // Moves pointer as long as the buffer is not full
             m_state = m_pStatePool->advanceLoadBuffer(bMovedBuffer);
              if(!bMovedBuffer){
                current_state = FINALIZE_AND_BREAK;
@@ -227,7 +227,10 @@ void PlaybackLoader<TStatePool>::runLoaderThread()
       // wait for caller thread;
       m_barrier_start.wait();
 
-      current_state = FILE_CHECK;
+      // If something failed in the buffering!
+      if(current_state != EXIT){
+         current_state = FILE_CHECK;
+      }
 
       while(!isLoaderThreadToBeStopped() && current_state != EXIT)
       {
@@ -349,12 +352,12 @@ bool PlaybackLoader<TStatePool>::loadNextFile()
 
         // Try to load the file
         m_binarySimFile.close();
-        if(m_binarySimFile.openRead(*m_currentFileIt,NDOFqBody,NDOFuBody,m_nSimBodies,m_readVelocities))
+        if(m_binarySimFile.openRead(*m_currentFileIt,m_readVelocities,NDOFqBody,NDOFuBody,m_nSimBodies))
         {
           return true;
         }else{
-           LOG(m_pThreadLog, "---> PlaybackLoader:: Could not open file: " << m_currentFileIt->string()
-               << std::endl << "---> File errors: " <<std::endl<< m_binarySimFile.getErrorString(););
+           LOG(m_pThreadLog,"PlaybackLoader:: Could not open file: " << m_currentFileIt->string()
+               << std::endl << "---> File errors: " <<std::endl<< m_binarySimFile.getErrorString());
         }
       }
       else{
