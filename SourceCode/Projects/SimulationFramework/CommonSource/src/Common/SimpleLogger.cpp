@@ -119,18 +119,18 @@ std::string Log::getName() {
 
 // Log::expression =================================================
 Log::expression::expression(Log & _log, std::stringstream &_s, bool lastWasEndl)
-: m_s(_s), m_flag(false), m_lastWasEndl(lastWasEndl), m_log(_log) {};
+: m_s(_s), m_flag(true), m_lastWasEndl(lastWasEndl), m_log(_log) {};
 
 // Destructor pushes message!
 Log::expression::~expression() {
-    if(m_flag==false) {
+    if(m_flag==true) {
         m_log.writeOut(m_s); //Push string stream to log
     }
 }
 
 // For std::endl;
 Log::expression Log::expression::operator<<( std::ostream&(*f)(std::ostream&) ) {
-    m_flag = true;
+    m_flag = false;
     m_s << f; // Apply the manipulator to the stream
 
     if(f == static_cast<std::ostream&(&)(std::ostream&)>(std::endl)){

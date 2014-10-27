@@ -168,7 +168,7 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
 
 
     // First communicate all remote bodies, which have contacts, to the owner, all processes are involved
-    LOGSLLEVEL3_CONTACT(m_pSolverLog,  "MPI> Communicate Remote Contacts (splitted bodies)" << std::endl; );
+    LOGSLLEVEL2_CONTACT(m_pSolverLog,  "MPI> Communicate Remote Contacts (splitted bodies)" << std::endl; );
     m_pInclusionComm->communicateRemoteContacts(m_currentSimulationTime);
 
     // All detected contacts in ths process
