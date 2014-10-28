@@ -22,7 +22,7 @@ LogicNode::~LogicNode()
 
 LogicSocketBase* LogicNode::getISocket(unsigned int index)
 {
-    if (index >= 0 && index < m_inputs.size())
+    if (index < m_inputs.size())
         return m_inputs.at(index);
     return nullptr;
 }
@@ -30,23 +30,29 @@ LogicSocketBase* LogicNode::getISocket(unsigned int index)
 
 LogicSocketBase* LogicNode::getOSocket(unsigned int index)
 {
-    if (index >= 0 && index < m_outputs.size())
+    if (index < m_outputs.size())
         return m_outputs.at(index);
     return nullptr;
 }
 
-void LogicNode::linkTogether(LogicSocketBase * out, LogicSocketBase * in){
-        //out->link(in);
-        in->link(out); // tell the input where to get the value from!
-}
+void LogicNode::makeGetLink(LogicNode * outN, unsigned int outS,
+                            LogicNode * inN,  unsigned int inS){
 
-void LogicNode::linkTogether(LogicNode * n1, unsigned int outSocketIdx,
-                    LogicNode * n2, unsigned int inSocketIdx){
-
-        if( outSocketIdx >= n1->getOutputs().size() ||  inSocketIdx >= n2->getInputs().size() ){
-            ERRORMSG("Wrong socket indices: outNode: " << n1->m_id << " outS: " << outSocketIdx << " inNode: " << n2->m_id <<" inS: " << inSocketIdx )
+        if( outS >= outN->getOutputs().size() ||  inS >= inN->getInputs().size() ){
+            ERRORMSG("Wrong socket indices: outNode: " << outN->m_id << " outS: " << outS << " inNode: " << inN->m_id <<" inS: " << inS )
         }
 
-        //n1->getOSocket(outSocketIdx)->link(n2->getISocket(inSocketIdx));
-        n2->getISocket(inSocketIdx)->link(n1->getOSocket(outSocketIdx));
+        inN->getOSocket(inS)->link(outN->getISocket(outS));
 }
+
+void LogicNode::makeWriteLink(LogicNode * outN, unsigned int outS,
+                              LogicNode * inN,  unsigned int inS){
+
+        if( outS >= outN->getOutputs().size() ||  inS >= inN->getInputs().size() ){
+            ERRORMSG("Wrong socket indices: outNode: " << outN->m_id << " outS: " << outS << " inNode: " << inN->m_id <<" inS: " << inS )
+        }
+
+        outN->getOSocket(outS)->link(inN->getISocket(inS));
+
+}
+

@@ -195,6 +195,74 @@ namespace LogicNodes {
         }
     };
 
+    template<typename IndexType>
+    class ColorList : public LogicNode {
+    public:
+
+        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+        struct Inputs {
+            enum {
+                Index,
+                INPUTS_LAST
+            };
+        };
+
+        struct Outputs {
+            enum {
+                Color,
+                OUTPUTS_LAST
+            };
+        };
+
+        enum {
+            N_INPUTS  = Inputs::INPUTS_LAST,
+            N_OUTPUTS = Outputs::OUTPUTS_LAST,
+            N_SOCKETS = N_INPUTS + N_OUTPUTS
+        };
+
+        DECLARE_ISOCKET_TYPE(Index, IndexType );
+        DECLARE_OSOCKET_TYPE(Color, Vector3 );
+
+        ColorList(unsigned int id, unsigned int seed, unsigned int nColors, double amplitude = 1.0) : LogicNode(id) {
+            ADD_ISOCK(Index,0);
+            ADD_OSOCK(Color,Vector3(0.5,0.5,0.5));
+
+            RandomGenType  gen(seed);
+            std::uniform_real_distribution<double> uni(0.0,amplitude);
+
+            if(nColors==0){
+                ERRORMSG("nColors needs to be > 0")
+            }
+
+            for(unsigned int i=0; i<nColors;i++){
+                m_colors.push_back( Vector3( uni(gen), uni(gen), uni(gen) ) );
+            }
+
+        }
+
+        ColorList(unsigned int id, std::vector<Vector3> colors) : LogicNode(id) {
+            ADD_ISOCK(Index,0);
+            ADD_OSOCK(Color,Vector3(0.5,0.5,0.5));
+
+            m_colors = std::move(colors);
+        }
+
+        ~ColorList(){}
+
+        // No initialization
+
+        void compute() {
+            // Get the indexed color (modulo the size of the list)
+            IndexType index = GET_ISOCKET_REF_VALUE(Index) % m_colors.size();
+            SET_OSOCKET_VALUE(Color,  m_colors[index] );
+        }
+
+    private:
+        std::vector<Vector3> m_colors;
+    };
+
+
 
 
     class RenderScriptWriter : public LogicNode {

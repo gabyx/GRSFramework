@@ -75,13 +75,16 @@ public:
 	template<typename T> void setISocketValue(unsigned int idx, T data);
     template<typename T> void setOSocketValue(unsigned int idx, T data);
 
-    static void linkTogether(LogicSocketBase * out, LogicSocketBase * in);
-
     /**
-    * Links together an output with an input. The output contains the data
+    * Links together an output with an input. Get the data from output from the input
     */
-    static void linkTogether(LogicNode * n1, unsigned int outSocketIdx,
-                             LogicNode * n2, unsigned int inSocketIdx);
+    static void makeGetLink(LogicNode * outN, unsigned int outS,
+                            LogicNode * inN,  unsigned int inS);
+    /**
+    * Links together an output with an input. Write the data from output to the input
+    */
+    static void makeWriteLink(LogicNode * outN, unsigned int outS,
+                              LogicNode * inN,  unsigned int inS);
 
 protected:
     bool            m_hasLinks;
