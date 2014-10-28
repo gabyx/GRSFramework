@@ -56,7 +56,7 @@ private:
     MapType m_map;
 
     using MapByInsertionType = typename MapType::index<by_insertion>::type   ;
-    using MapByHashedIdType = typename MapType::index<by_hashed_id>::type   ;
+    using MapByHashedIdType  = typename MapType::index<by_hashed_id>::type   ;
     using MapByOrderedIdType = typename MapType::index<by_ordered_id>::type  ;
     MapByHashedIdType & m_mapByHashedId;
     MapByInsertionType & m_mapByInsertion;
@@ -131,8 +131,9 @@ public:
     iterator deleteBody(iterator it){
         if(it != this->end()){
             ASSERTMSG(*it != nullptr, " Pointer in map is null!")
-            delete *it; // Delete body!
-            it = m_mapByInsertion.erase(it);
+            auto * body = *it; // save ptr
+            it = m_mapByInsertion.erase(it); // delete in map (might rehash, so we are not allowed to delete the body above!)
+            delete body;
         }
         return it;
     }
@@ -145,8 +146,9 @@ public:
         typename MapByHashedIdType::iterator it = m_mapByHashedId.find(id);
         if(it != m_mapByHashedId.end()){
             ASSERTMSG(*it != nullptr, " Pointer in map is null!")
-            delete *it; // Delete body!
-            m_mapByHashedId.erase(it);
+            auto * body = *it; // save ptr
+            m_mapByHashedId.erase(it); // delete in map (might rehash, so we are not allowed to delete the body above!)
+            delete body;
             return true;
         }
         return false;
@@ -182,32 +184,6 @@ public:
     }
 
 };
-
-//template<typename TIterator, typename TRigidBody>
-//class RigidBodyWrapperIterator{
-//public:
-//    RigidBodyWrapperIterator(TIterator & it): m_bodyIt(it){};
-//
-//    typename TRigidBody::VectorQBody get_q();
-//    typename TRigidBody::VectorUBody get_u();
-//
-//    TIterator & m_bodyIt;
-//};
-
-//template<typename TRigidBodyContainer>
-//class RigidBodyContainerWrapper{
-//public:
-//    RigidBodyContainerWrapper( TRigidBodyContainer & ref ): m_ref(ref){}
-//
-//    TRigidBodyContainer::iterator begin(){
-//        return ref.begin();
-//    }
-//
-//    TRigidBodyContainer::iterator end(){
-//        return ref.end();
-//    }
-//
-//};
 
 
 
