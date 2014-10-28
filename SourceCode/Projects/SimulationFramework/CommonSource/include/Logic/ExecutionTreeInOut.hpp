@@ -112,14 +112,14 @@ public:
 
     /** Execute group */
     virtual void execute(unsigned int groupId) {
-        for(auto & n : m_groupNodes[groupId]) {
+        for(auto & n : m_groupExecList[groupId]) {
             n->compute();
         }
     }
 
     /** Execute all groups */
     virtual void executeAll() {
-        for(auto &  g : m_groupNodes){
+        for(auto &  g : m_groupExecList){
             for(auto & n : g.second) {
                 n->compute();
             }
@@ -128,7 +128,7 @@ public:
 
     /** Init all groups */
     virtual void initializeAll() {
-        for(auto &  g : m_groupNodes){
+        for(auto &  g : m_groupExecList){
             for(auto & n : g.second) {
                 n->initialize();
             }
@@ -153,6 +153,7 @@ public:
                  { l.push_back(n); });
 
             s.solve(l, l);
+
         }
 
         // Check if input is reachable from all outputs
@@ -205,6 +206,7 @@ protected:
                     std::cout << n->m_id <<": " << n->getPriority()<<std::endl;
                 }
             std::cout << "===" <<std::endl;
+
         }
 
     private:

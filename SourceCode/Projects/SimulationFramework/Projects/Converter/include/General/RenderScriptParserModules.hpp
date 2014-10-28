@@ -92,8 +92,12 @@ public:
                 createToolFrameData(*itNode,id);
             } else if(type == "MaterialLookUp") {
                 createToolMaterialLookUp(*itNode,id);
+            } else if(type == "MatteMaterial") {
+                createToolMatteMaterial(*itNode,id);
             } else if(type == "ColorList") {
-                //createToolColorList(*itNode,id);
+                createToolColorList(*itNode,id);
+            } else if(type == "SimpleFunction") {
+                createToolSimpleFunction(*itNode,id);
             } else if(type == "DisplacementToPosQuat") {
                 createToolDisplacementToPosQuat(*itNode,id);
             }else if(type == "Constant"){
@@ -115,24 +119,24 @@ public:
 
             unsigned int outNode;
             if(!Utilities::stringToType(outNode, itNode->attribute("outNode").value())) {
-                ERRORMSG("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Get: outNode failed");
             }
             unsigned int outSocket;
             if(!Utilities::stringToType(outSocket, itNode->attribute("outSocket").value())) {
-                ERRORMSG("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Get: outSocket failed");
             }
 
             unsigned int fromNode;
             if(!Utilities::stringToType(fromNode, itNode->attribute("fromNode").value())) {
-                ERRORMSG("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Get: fromNode failed");
             }
             unsigned int fromSocket;
             if(!Utilities::stringToType(fromSocket, itNode->attribute("fromSocket").value())) {
-                ERRORMSG("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Get: fromSocket failed");
             }
 
-            LOGMCLEVEL3(m_pLog,"---> Linking Tool: Get " << outNode << " out: " << outSocket << " --from--> "
-                        << fromSocket << ":in Tool: " << fromNode << std::endl;);
+            LOGMCLEVEL3(m_pLog,"---> Linking Tool: Get " << outNode << " socket: " << outSocket << " --from--> "
+                        << fromNode << " socket: " << fromSocket <<  std::endl;);
             // Link the nodes
             m_renderScriptGen->makeGetLink(outNode,outSocket,fromNode,fromSocket);
 
@@ -146,24 +150,24 @@ public:
 
             unsigned int outNode;
             if(!Utilities::stringToType(outNode, itNode->attribute("outNode").value())) {
-                ERRORMSG("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Write: outNode failed");
             }
             unsigned int outSocket;
             if(!Utilities::stringToType(outSocket, itNode->attribute("outSocket").value())) {
-                ERRORMSG("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Write: outSocket failed");
             }
 
             unsigned int toNode;
             if(!Utilities::stringToType(toNode, itNode->attribute("toNode").value())) {
-                ERRORMSG("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Write: toNode failed");
             }
             unsigned int toSocket;
             if(!Utilities::stringToType(toSocket, itNode->attribute("toSocket").value())) {
-                ERRORMSG("---> String conversion in Tool: id failed");
+                ERRORMSG("---> String conversion in Write: toSocket failed");
             }
 
-            LOGMCLEVEL3(m_pLog,"---> Linking Tool: Write " << outNode << " out: " << outSocket << " ---to---> "
-                        << toSocket << ":in Tool: " << toNode << std::endl;);
+            LOGMCLEVEL3(m_pLog,"---> Linking Tool: Write from" << outNode << " socket: " << outSocket << " ---to---> "
+                        << "to: " << toNode << " socket: "<< toSocket << std::endl;);
             // Link the nodes
             m_renderScriptGen->makeWriteLink(outNode,outSocket,toNode,toSocket);
 
@@ -226,10 +230,7 @@ private:
 
             m_renderScriptGen->addNode(n,false,false);
 
-            XMLAttributeType att;
-            att = matGenNode.attribute("groupId");
-            if(att) {
-                std::string gid = att.value();
+                std::string gid = matGenNode.attribute("groupId").value();
                 if(gid == "Body"){
                     m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
                 }else if(gid == "Frame"){
@@ -237,9 +238,169 @@ private:
                 }else{
                     ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
                 }
-            }
     }
 
+    #define DEFINE_MAKESimpleFunc \
+        n = new LogicNodes::SimpleFunction<T1,T2>(id,inputs,expressionString);
+
+
+    #define DEFINE_SIMPLEFUNCTION_S2(type, typeName) \
+        ( t2 == #typeName ){ using T2 = type; \
+                DEFINE_MAKESimpleFunc \
+        }
+
+    #define DEFINE_SIMPLEFUNCTION_S(type) DEFINE_SIMPLEFUNCTION_S2(type,type)
+
+    #define DEFINE_SIMPLEFUNCTION2(type, typeName) \
+        ( t1 == #typeName ){ using T1 = type; \
+                std::string t2 = matGenNode.attribute("outputType").value(); \
+                if(t2.empty()){ \
+                    using T2 = T1;  \
+                    DEFINE_MAKESimpleFunc \
+                } \
+                if DEFINE_SIMPLEFUNCTION_S(float)  \
+                else if DEFINE_SIMPLEFUNCTION_S(double) \
+                else if DEFINE_SIMPLEFUNCTION_S(bool) \
+                else if DEFINE_SIMPLEFUNCTION_S(char) \
+                else if DEFINE_SIMPLEFUNCTION_S(short) \
+                else if DEFINE_SIMPLEFUNCTION_S(int) \
+                else if DEFINE_SIMPLEFUNCTION_S(long int) \
+                else if DEFINE_SIMPLEFUNCTION_S(unsigned char) \
+                else if DEFINE_SIMPLEFUNCTION_S(unsigned short) \
+                else if DEFINE_SIMPLEFUNCTION_S(unsigned int) \
+                else if DEFINE_SIMPLEFUNCTION_S(unsigned long int) \
+                else{ \
+                    ERRORMSG("---> String conversion in SimpleFunction tool: outputType: '" << t2 << "' not found!");  \
+                } \
+        }
+
+    #define DEFINE_SIMPLEFUNCTION(type) DEFINE_SIMPLEFUNCTION2(type,type)
+
+    void createToolSimpleFunction(XMLNodeType & matGenNode, unsigned int id){
+
+            XMLAttributeType att;
+            att = matGenNode.attribute("inputs");
+            unsigned int inputs = 1;
+            if(att) {
+                if(!Utilities::stringToType(inputs, matGenNode.attribute("inputs").value())) {
+                    ERRORMSG("---> String conversion in tool: inputs failed");
+                }
+            }
+
+            std::string expressionString = matGenNode.attribute("expression").value();
+
+            std::string t1 = matGenNode.attribute("inputType").value();
+            LogicNode * n;
+            if DEFINE_SIMPLEFUNCTION(float)
+            else if DEFINE_SIMPLEFUNCTION(double)
+            else if DEFINE_SIMPLEFUNCTION(bool)
+            else if DEFINE_SIMPLEFUNCTION(char)
+            else if DEFINE_SIMPLEFUNCTION(short)
+            else if DEFINE_SIMPLEFUNCTION(int)
+            else if DEFINE_SIMPLEFUNCTION(long int)
+            //else if DEFINE_SIMPLEFUNCTION(long long int)
+            else if DEFINE_SIMPLEFUNCTION(unsigned char)
+            else if DEFINE_SIMPLEFUNCTION(unsigned short)
+            else if DEFINE_SIMPLEFUNCTION(unsigned int)
+            else if DEFINE_SIMPLEFUNCTION(unsigned long int)
+            //else if DEFINE_SIMPLEFUNCTION(unsigned long long int)
+            else{
+                ERRORMSG("---> String conversion in SimpleFunction tool: inputType: '" << t1 << "' not found!");
+            }
+
+            m_renderScriptGen->addNode(n,false,false);
+
+
+                std::string gid = matGenNode.attribute("groupId").value();
+                if(gid == "Body"){
+                    m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
+                }else if(gid == "Frame"){
+                    m_renderScriptGen->addNodeToGroup(id, ExecGroups::FRAME);
+                }else{
+                    ERRORMSG("---> String conversion in SimpleFunction tool: groupId: '" << gid << "' not found!");
+                }
+    }
+
+     #define DEFINE_MAKEColorList \
+        std::string g = matGenNode.attribute("generate").value(); \
+        if(g=="random"){ \
+            unsigned int seed; \
+            if(!Utilities::stringToType(seed, matGenNode.attribute("seed").value())) { \
+                ERRORMSG("---> String conversion in ColorList tool: seed failed"); \
+            } \
+            unsigned int count; \
+            if(!Utilities::stringToType(count, matGenNode.attribute("count").value())) { \
+                ERRORMSG("---> String conversion in ColorList tool: count failed"); \
+            } \
+            double amp; \
+            if(!Utilities::stringToType(amp, matGenNode.attribute("amp").value())) { \
+                ERRORMSG("---> String conversion in ColorList tool: amp failed"); \
+            } \
+            if(count==0){ \
+                ERRORMSG("---> String conversion in ColorList tool: count == 0") \
+            } \
+            n = new LogicNodes::ColorList<T>(id,count,seed,amp);\
+        }else{ \
+            ERRORMSG("---> String conversion in ColorList tool: generator failed"); \
+        }
+
+
+
+    #define DEFINE_ColorList2(type, typeName) \
+        ( t1 == #typeName ){ using T = type; \
+                DEFINE_MAKEColorList \
+        } \
+
+    #define DEFINE_ColorList(type) DEFINE_ColorList2(type,type)
+
+    void createToolColorList(XMLNodeType & matGenNode, unsigned int id){
+
+            std::string t = matGenNode.attribute("generate").value();
+            if(t=="random"){
+            unsigned int seed;
+            if(!Utilities::stringToType(seed, matGenNode.attribute("seed").value())) {
+                ERRORMSG("---> String conversion in ColorList tool: seed failed");
+            }
+            unsigned int count;
+            if(!Utilities::stringToType(count, matGenNode.attribute("count").value())) {
+                ERRORMSG("---> String conversion in ColorList tool: count failed");
+            }
+            double amp;
+            if(!Utilities::stringToType(amp, matGenNode.attribute("amp").value())) {
+                ERRORMSG("---> String conversion in ColorList tool: amp failed");
+            }
+            if(count==0){
+                ERRORMSG("---> String conversion in ColorList tool: count == 0")
+            }
+            }else{
+                ERRORMSG("---> String conversion in ColorList tool: generator failed");
+            }
+
+            std::string t1 = matGenNode.attribute("inputType").value();
+            LogicNode * n;
+            if DEFINE_ColorList(char)
+            else if DEFINE_ColorList(short)
+            else if DEFINE_ColorList(int)
+            else if DEFINE_ColorList(long int)
+            else if DEFINE_ColorList(long long int)
+            else if DEFINE_ColorList(unsigned char)
+            else if DEFINE_ColorList(unsigned short)
+            else if DEFINE_ColorList(unsigned int)
+            else if DEFINE_ColorList(unsigned long int)
+            else if DEFINE_ColorList(unsigned long long int)
+            else{
+                ERRORMSG("---> String conversion in Constant tool: inputType: '" << t1 << "' not found!");
+            }
+
+            m_renderScriptGen->addNode(n,false,false);
+            m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
+    }
+
+    void createToolMatteMaterial(XMLNodeType & matGenNode, unsigned int id) {
+        auto * node = new LogicNodes::MatteMaterial(id);
+        m_renderScriptGen->addNode(node,false,false);
+        m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
+    }
 
     void createToolFrameData(XMLNodeType & matGenNode, unsigned int id) {
         auto * node = new LogicNodes::FrameData(id);

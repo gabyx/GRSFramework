@@ -42,7 +42,7 @@ void LogicNode::makeGetLink(LogicNode * outN, unsigned int outS,
             ERRORMSG("Wrong socket indices: outNode: " << outN->m_id << " outS: " << outS << " inNode: " << inN->m_id <<" inS: " << inS )
         }
 
-        inN->getOSocket(inS)->link(outN->getISocket(outS));
+        inN->getISocket(inS)->link(outN->getOSocket(outS));
 }
 
 void LogicNode::makeWriteLink(LogicNode * outN, unsigned int outS,

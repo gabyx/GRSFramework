@@ -398,6 +398,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/src/Logic/LogicSocket.cpp
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
+        
+        ${COMMONSOURCE_DIR}/external/exprtk/exprtk.hpp
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
@@ -407,6 +409,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
+        
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
         ${COMMONSOURCE_DIR}/include/Dynamics/Collision
         ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry
@@ -416,7 +419,9 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/include/Singeltons
         ${COMMONSOURCE_DIR}/include/States     
         
-        ${COMMONSOURCE_DIR}/include/Logic/   
+        ${COMMONSOURCE_DIR}/include/Logic/ 
+        
+        ${COMMONSOURCE_DIR}/external/exprtk/  
     )
 endmacro(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER)
 
