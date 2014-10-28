@@ -320,8 +320,6 @@ private:
         // serialize (ONLY LOCAL BODIES)
         // send the id to remove
 
-        //LOGSZSpecial(m_pSerializerLog, "Removal of body @" << body << std::endl; )
-
         ar & body->m_id;
         //ASSERTMSG(body->m_id != RigidBodyIdType(0)," ID zero!");
 
@@ -632,6 +630,7 @@ private:
         LOGASSERTMSG(res, m_pSerializerLog, "Could not delete remote body with id: " << RigidBodyId::getBodyIdString(id) << " in neighbour structure rank: " << m_neighbourRank << " !" );
 
         // Remove and delete from global list, deletes also the body info data
+        LOGSZSpecial(m_pSerializerLog, "--->\t Deleting body with id: "<< RigidBodyId::getBodyIdString(id) << std::endl;)
         res = m_nc->m_globalRemote.deleteBody(id);
         LOGASSERTMSG( res == true, m_pSerializerLog, "Remote Body with id: " << RigidBodyId::getBodyIdString(id) << " could not be deleted in m_globalRemote!");
 

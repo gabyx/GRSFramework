@@ -127,17 +127,6 @@ public:
         return m_mapByHashedId.erase(ptr->m_id); // Returns size_type integer
     }
 
-    /** Similiar to std::map::erase, but also deletes the underlying body*/
-    iterator deleteBody(iterator it){
-        if(it != this->end()){
-            ASSERTMSG(*it != nullptr, " Pointer in map is null!")
-            auto * body = *it; // save ptr
-            it = m_mapByInsertion.erase(it); // delete in map (might rehash, so we are not allowed to delete the body above!)
-            delete body;
-        }
-        return it;
-    }
-
     bool deleteBody(RigidBodyType* ptr){
         return deleteBody(ptr->m_id);
     }
@@ -145,7 +134,7 @@ public:
     bool deleteBody(RigidBodyIdType const & id){
         typename MapByHashedIdType::iterator it = m_mapByHashedId.find(id);
         if(it != m_mapByHashedId.end()){
-            ASSERTMSG(*it != nullptr, " Pointer in map is null!")
+            ASSERTMSG(*it != nullptr, " Pointer of body: " << id << " in map is null!")
             auto * body = *it; // save ptr
             m_mapByHashedId.erase(it); // delete in map (might rehash, so we are not allowed to delete the body above!)
             delete body;

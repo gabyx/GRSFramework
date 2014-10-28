@@ -92,6 +92,8 @@ public:
                 createToolFrameData(*itNode,id);
             } else if(type == "MaterialLookUp") {
                 createToolMaterialLookUp(*itNode,id);
+            } else if(type == "ColorList") {
+                //createToolColorList(*itNode,id);
             } else if(type == "DisplacementToPosQuat") {
                 createToolDisplacementToPosQuat(*itNode,id);
             }else if(type == "Constant"){
@@ -106,8 +108,8 @@ public:
         }
 
 
-        // Add all links
-        nodes = matGenNode.children("Link");
+        // Add all Getter links
+        nodes = matGenNode.children("Get");
         itNodeEnd = nodes.end();
         for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
 
@@ -120,20 +122,50 @@ public:
                 ERRORMSG("---> String conversion in Tool: id failed");
             }
 
-            unsigned int inNode;
-            if(!Utilities::stringToType(inNode, itNode->attribute("inNode").value())) {
+            unsigned int fromNode;
+            if(!Utilities::stringToType(fromNode, itNode->attribute("fromNode").value())) {
                 ERRORMSG("---> String conversion in Tool: id failed");
             }
-            unsigned int inSocket;
-            if(!Utilities::stringToType(inSocket, itNode->attribute("inSocket").value())) {
+            unsigned int fromSocket;
+            if(!Utilities::stringToType(fromSocket, itNode->attribute("fromSocket").value())) {
                 ERRORMSG("---> String conversion in Tool: id failed");
             }
 
-            LOGMCLEVEL3(m_pLog,"---> Linking Tool:  " << outNode << " out: " << outSocket << " ------> "
-                        << inSocket << ":in Tool: " << inNode << std::endl;);
+            LOGMCLEVEL3(m_pLog,"---> Linking Tool: Get " << outNode << " out: " << outSocket << " --from--> "
+                        << fromSocket << ":in Tool: " << fromNode << std::endl;);
             // Link the nodes
-            m_renderScriptGen->link(outNode,outSocket,inNode,inSocket);
+            m_renderScriptGen->makeGetLink(outNode,outSocket,fromNode,fromSocket);
 
+
+        }
+
+         // Add all Writer links
+        nodes = matGenNode.children("Write");
+        itNodeEnd = nodes.end();
+        for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
+
+            unsigned int outNode;
+            if(!Utilities::stringToType(outNode, itNode->attribute("outNode").value())) {
+                ERRORMSG("---> String conversion in Tool: id failed");
+            }
+            unsigned int outSocket;
+            if(!Utilities::stringToType(outSocket, itNode->attribute("outSocket").value())) {
+                ERRORMSG("---> String conversion in Tool: id failed");
+            }
+
+            unsigned int toNode;
+            if(!Utilities::stringToType(toNode, itNode->attribute("toNode").value())) {
+                ERRORMSG("---> String conversion in Tool: id failed");
+            }
+            unsigned int toSocket;
+            if(!Utilities::stringToType(toSocket, itNode->attribute("toSocket").value())) {
+                ERRORMSG("---> String conversion in Tool: id failed");
+            }
+
+            LOGMCLEVEL3(m_pLog,"---> Linking Tool: Write " << outNode << " out: " << outSocket << " ---to---> "
+                        << toSocket << ":in Tool: " << toNode << std::endl;);
+            // Link the nodes
+            m_renderScriptGen->makeWriteLink(outNode,outSocket,toNode,toSocket);
 
         }
 

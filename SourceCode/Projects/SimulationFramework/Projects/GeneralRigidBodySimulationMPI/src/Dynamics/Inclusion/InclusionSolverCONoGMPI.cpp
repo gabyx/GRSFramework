@@ -414,8 +414,8 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
         auto & remotesWithContacts = m_pContactGraph->getRemoteBodiesWithContactsListRef();
 
         if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocity) {
-            //Local Bodies
 
+            //Local Bodies
             for(auto it = localWithContacts.begin(); it !=localWithContacts.end(); ++it) {
                 //std::cout << "before Criteria"<<std::endl;//std::cout <<"new "<< (*it)->first->m_pSolverData->m_uBuffer.m_front.transpose() << std::endl; //std::cout <<"old "<< (*it)->first->m_pSolverData->m_uBuffer.m_back.transpose() << std::endl;
                 converged = Numerics::cancelCriteriaValue(  (*it)->m_pSolverData->m_uBuffer.m_back,
@@ -443,7 +443,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
             LOGSLLEVEL2_CONTACT(m_pSolverLog, "---> Convergence criteria (InVelocity) converged: "<<  m_bConverged<< std::endl;);
 
         } else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyVelocity) {
-
+            //Local Bodies
             for(auto it=localWithContacts.begin(); it!=localWithContacts.end(); ++it) {
                 converged = Numerics::cancelCriteriaMatrixNormSq( (*it)->m_pSolverData->m_uBuffer.m_back,
                                                                 (*it)->m_pSolverData->m_uBuffer.m_front,

@@ -80,15 +80,26 @@ public:
         }
     }
 
-    virtual void link(unsigned int outNode, unsigned int outSocket,
-              unsigned int inNode, unsigned int inSocket)
+    virtual void makeGetLink(unsigned int outN, unsigned int outS,
+                             unsigned int inN, unsigned int inS)
     {
-         auto inNodeIt = m_nodeMap.find(inNode);
-         auto outNodeIt = m_nodeMap.find(outNode);
-         if(inNodeIt == m_nodeMap.end() || outNodeIt == m_nodeMap.end() ){
-            ERRORMSG("In: " << inNode << " or " << outNode << " does not exist!")
+         auto outNit = m_nodeMap.find(outN);
+         auto inNit = m_nodeMap.find(inN);
+         if(outNit == m_nodeMap.end() || inNit == m_nodeMap.end() ){
+            ERRORMSG("Node: " << outN << " or " << inN << " does not exist!")
          }
-         LogicNode::linkTogether(outNodeIt->second,outSocket,inNodeIt->second,inSocket);
+         LogicNode::makeGetLink(outNit->second,outS,inNit->second,inS);
+    }
+
+    virtual void makeWriteLink(unsigned int outN, unsigned int outS,
+                               unsigned int inN, unsigned int inS)
+    {
+         auto outNit = m_nodeMap.find(outN);
+         auto inNit = m_nodeMap.find(inN);
+         if(outNit == m_nodeMap.end() || inNit == m_nodeMap.end() ){
+            ERRORMSG("Node: " << outN << " or " << inN << " does not exist!")
+         }
+         LogicNode::makeWriteLink(outNit->second,outS,inNit->second,inS);
     }
 
 
