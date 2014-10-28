@@ -58,13 +58,13 @@ void BodyCommunicator::communicate(PREC currentSimTime){
         RigidBodyType * body = (*it);
 
 
-        LOGBC(m_pSimulationLog,"--->\t\t Reset neighbours flags..."<<std::endl;)
+        //LOGBC(m_pSimulationLog,"--->\t\t Reset neighbours flags..."<<std::endl;)
         body->m_pBodyInfo->resetNeighbourFlags(); // Reset the overlap flag to false! (addLocalBodyExclusive uses this assumption!)
 
         //Check overlapping processes
         //TODO (We should return a map of cellNUmbers -> To Rank (any cell which has no rank
         bool overlapsOwnProcess;
-        LOGBC(m_pSimulationLog,"--->\t\t Overlap Test..."<<std::endl;)
+        //LOGBC(m_pSimulationLog,"--->\t\t Overlap Test..."<<std::endl;)
         bool overlapsNeighbours = m_pProcTopo->checkOverlap(body, neighbours, overlapsOwnProcess);
 
 
@@ -73,7 +73,7 @@ void BodyCommunicator::communicate(PREC currentSimTime){
 
 
         // Insert this body into the underlying structure for all nieghbours exclusively! (if no overlap, it is removed everywhere)
-        LOGBC(m_pSimulationLog,"--->\t\t Add neighbours exclusively..."<<std::endl;)
+        //LOGBC(m_pSimulationLog,"--->\t\t Add neighbours exclusively..."<<std::endl;)
         addLocalBodyExclusiveToNeighbourMap(body,neighbours);
 //        m_nbDataMap.addLocalBodyExclusive(body,neighbours);
 
@@ -84,7 +84,6 @@ void BodyCommunicator::communicate(PREC currentSimTime){
         //Check if belonging rank is in the neighbours or our own
         if(ownerRank != m_rank){
             if( m_nbRanks.find(ownerRank) == m_nbRanks.end() ){
-                LOGBC(m_pSimulationLog,"--->\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<"This is not good as we cannot send any message to some other rank other then a neighbour!");
                 ERRORMSG("---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<"This is not good as we cannot send any message to some other rank other then a neighbour!");
             }
         LOGBC(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" has owner rank: "<< (ownerRank) << ", proccess rank: " << m_pProcComm->getRank()<<std::endl;)
@@ -229,11 +228,11 @@ void BodyCommunicator::receiveMessagesFromNeighbours(){
 void BodyCommunicator::cleanUp(){
     LOGBC(m_pSimulationLog,"--->\t CleanUp Routine " <<std::endl;)
     //Delete all bodies in the list
-    for(auto it = m_localBodiesToDelete.begin(); it != m_localBodiesToDelete.end(); it++){
+    for(auto it = m_localBodiesToDelete.begin(); it != m_localBodiesToDelete.end(); ++it){
         RigidBodyType * body = *it;
 
 
-        LOGASSERTMSG((*it)->m_pBodyInfo->m_isRemote == false , m_pSimulationLog , "Local body to delete is not a local body?!" );
+        LOGASSERTMSG((*it)->m_pBodyInfo->m_isRemote == false , m_pSimulationLog , "Body to delete is not a local body?!" );
 
         for( auto rankIt = (*it)->m_pBodyInfo->m_neighbourRanks.begin(); rankIt != (*it)->m_pBodyInfo->m_neighbourRanks.end(); rankIt++){
             if( rankIt->second.m_inNeighbourMap == true ){
