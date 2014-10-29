@@ -36,7 +36,7 @@ IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
 		MESSAGE(STATUS "Setting Values for GNU")
 		SET(CMAKE_C_FLAGS "-fmessage-length=0" CACHE STRING "Flags for C Compiler" FORCE)
 		SET(CMAKE_CXX_FLAGS "-std=c++11 -ftree-vectorize -ftree-vectorizer-verbose=0 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" FORCE)
-		
+		SET(CMAKE_CXX_FLAGS_DEBUG          "-g -fsanitize=address" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
 		set(GCCFILTER_TOOL OFF CACHE BOOL "Use the perl script gccfilter , http://www.mixtion.org/gccfilter/, this tool gets appended to the gcc command" )
 		MARK_AS_ADVANCED(GCCFILTER_TOOL)
     

@@ -242,9 +242,6 @@ void BodyCommunicator::cleanUp(){
                 LOGASSERTMSG( res,  m_pSimulationLog , "This local body with id: " << RigidBodyId::getBodyIdString(body)<< " could not be deleted in neighbour data rank: " << rankIt->first);
             }
         }
-        // body tries to delete this also, but does not matter
-        delete body->m_pBodyInfo;
-
         LOGBC(m_pSimulationLog,"--->\t Deleting body with id: "<< RigidBodyId::getBodyIdString(body) <<"@" << body << std::endl;)
 
         bool res = m_globalLocal.deleteBody(body);
