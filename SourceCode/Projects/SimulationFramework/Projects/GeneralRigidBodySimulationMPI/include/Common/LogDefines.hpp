@@ -27,20 +27,20 @@
 
 #ifndef NDEBUG
   // DEBUG!
-    /// Seriliazer
-    #define LOGSZ( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
 
     /// Body Communicator
     #define LOGBC( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+    /// Seriliazer
+    #define LOGBC_SZ( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+
 
     /// Inclusion Communicator
     #define LOGIC( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the inclusion communicator part).
+     /// Seriliazer
+    #define LOGIC_SZ( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+
     /// Process Communicator
     #define LOGPC( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
-
-    /// Special for Debugging in Release
-    #define LOGSZSpecial( logptr , message )  LOG(logptr,message); ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
-    #define LOGBCSpecial( logptr , message )  LOG(logptr,message); ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
 
     /// Topology Builder
     #define TOPOBUILDER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
@@ -50,14 +50,13 @@
 
 
 #else
-    #define LOGSZ( logptr , message )  ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
-    #define LOGBC( logptr , message )  LOG(logptr,message) ;
-    #define LOGIC( logptr , message )  LOG(logptr,message) ;
-    #define LOGPC( logptr , message )  LOG(logptr,message)
+    #define LOGBC( logptr , message )     LOG(logptr,message) ;
+    #define LOGBC_SZ( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
 
-    /// Special for Debugging in Release
-    #define LOGSZSpecial( logptr , message ) LOG(logptr,message)  ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
-    #define LOGBCSpecial( logptr , message ) LOG(logptr,message)  ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+    #define LOGIC( logptr , message )     LOG(logptr,message) ;
+    #define LOGIC_SZ( logptr , message )  /// LOG(logptr,message) ;
+
+    #define LOGPC( logptr , message )  LOG(logptr,message)
 
     /// SceneParser
     #define SCENEPARSER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output

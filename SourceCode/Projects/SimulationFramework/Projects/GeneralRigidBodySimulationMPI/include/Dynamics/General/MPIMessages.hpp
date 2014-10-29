@@ -204,10 +204,10 @@ public:
         ar & size;
 
         if(size>0) {
-            LOGSZ(m_pSerializerLog, "BodyComm=================================================================================="<< std::endl;)
-            LOGSZ(m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
-            LOGSZ(m_pSerializerLog, "---> Timestamp: "<<  m_nc->m_currentSimTime << std::endl;);
-            LOGSZ(m_pSerializerLog, "---> Size: "<<  size << std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "BodyComm=================================================================================="<< std::endl;)
+            LOGBC_SZ(m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "---> Timestamp: "<<  m_nc->m_currentSimTime << std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "---> Size: "<<  size << std::endl;);
         }
         //Loop over all localBodies in this NeighbourData
         int i = 0;
@@ -222,23 +222,23 @@ public:
             if(it->second.m_commStatus == NeighbourDataType::LocalDataType::SEND_NOTIFICATION) {
                 flag = SubMessageFlag::NOTIFICATION;
                 ar & flag;
-                LOGSZ(m_pSerializerLog, "---> NotifictionSTART: " << i<<std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "---> NotifictionSTART: " << i<<std::endl;);
                 saveNotificationOrUpdate(ar, it->second.m_pBody, flag );
-                LOGSZ(m_pSerializerLog, "---> NotifictionEND: "<<std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "---> NotifictionEND: "<<std::endl;);
 
             } else if (it->second.m_commStatus == NeighbourDataType::LocalDataType::SEND_UPDATE) {
                 flag = SubMessageFlag::UPDATE;
                 ar & flag;
-                LOGSZ(m_pSerializerLog, "---> UpdateSTART: " << i<<std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "---> UpdateSTART: " << i<<std::endl;);
                 saveNotificationOrUpdate(ar, it->second.m_pBody, flag);
-                LOGSZ(m_pSerializerLog, "---> UpdateEND: "<<std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "---> UpdateEND: "<<std::endl;);
 
             } else if (it->second.m_commStatus == NeighbourDataType::LocalDataType::SEND_REMOVE) {
                 flag = SubMessageFlag::REMOVAL;
                 ar & flag;
-                LOGSZ(m_pSerializerLog, "---> RemovalSTART: " << i<<std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "---> RemovalSTART: " << i<<std::endl;);
                 saveRemoval(ar, it->second.m_pBody);
-                LOGSZ(m_pSerializerLog, "---> RemovalEND: "<<std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "---> RemovalEND: "<<std::endl;);
             }
 
             i++;
@@ -272,10 +272,10 @@ public:
             ar & size;
 
             if(size>0) {
-                LOGSZ(m_pSerializerLog, "BodyComm=================================================================================="<< std::endl;)
-                LOGSZ(m_pSerializerLog, "DESERIALIZE Message from neighbour rank: " << m_neighbourRank << std::endl;);
-                LOGSZ(m_pSerializerLog, "---> Timestamp: "<<  simulationTime << std::endl;);
-                LOGSZ(m_pSerializerLog, "---> Size: "<<  size << std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "BodyComm=================================================================================="<< std::endl;)
+                LOGBC_SZ(m_pSerializerLog, "DESERIALIZE Message from neighbour rank: " << m_neighbourRank << std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "---> Timestamp: "<<  simulationTime << std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "---> Size: "<<  size << std::endl;);
             }
 
             m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
@@ -288,21 +288,21 @@ public:
                 SubMessageFlag flag;
                 ar & flag;
                 if(flag == SubMessageFlag::NOTIFICATION) {
-                    LOGSZ(m_pSerializerLog, "---> NotifactionSTART: " << i<<std::endl;);
+                    LOGBC_SZ(m_pSerializerLog, "---> NotifactionSTART: " << i<<std::endl;);
                     loadNotification(ar);
-                    LOGSZ(m_pSerializerLog, "---> NotifactionEND: "<<std::endl;);
+                    LOGBC_SZ(m_pSerializerLog, "---> NotifactionEND: "<<std::endl;);
 
                 } else if (flag == SubMessageFlag::UPDATE) {
-                    LOGSZ(m_pSerializerLog, "---> UpdateSTART: " << i<<std::endl;);
+                    LOGBC_SZ(m_pSerializerLog, "---> UpdateSTART: " << i<<std::endl;);
                     loadUpdate(ar);
-                    LOGSZ(m_pSerializerLog, "---> UpdateEND: "<<std::endl;);
+                    LOGBC_SZ(m_pSerializerLog, "---> UpdateEND: "<<std::endl;);
 
                 } else if (flag == SubMessageFlag::REMOVAL) {
-                    LOGSZ(m_pSerializerLog, "---> RemovalSTART: " << i<<std::endl;);
+                    LOGBC_SZ(m_pSerializerLog, "---> RemovalSTART: " << i<<std::endl;);
                     loadRemoval(ar);
-                    LOGSZ(m_pSerializerLog, "---> RemovalEND: "<<std::endl;);
+                    LOGBC_SZ(m_pSerializerLog, "---> RemovalEND: "<<std::endl;);
                 } else {
-                    LOGSZ(m_pSerializerLog, "---> Received WRONG FLAG: "<< (int)flag << std::endl;);
+                    LOGBC_SZ(m_pSerializerLog, "---> Received WRONG FLAG: "<< (int)flag << std::endl;);
                     LOGASSERTMSG( false, m_pSerializerLog, "Wrong flag received!")
                 }
             }
@@ -323,7 +323,7 @@ private:
         ar & body->m_id;
         //ASSERTMSG(body->m_id != RigidBodyIdType(0)," ID zero!");
 
-        LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(body) <<std::endl;);
         // remove local from this neighbour structure!
         bool res = m_neighbourData->eraseLocalBodyData(body);
         LOGASSERTMSG(res, m_pSerializerLog, "Could not delete local body with id: " << RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << m_neighbourRank << " !" );
@@ -350,21 +350,21 @@ private:
 
         // id
         ar & body->m_id;
-        LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(body)<<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(body)<<std::endl;);
 
         // owning rank
 
         ar & m_bodyInfo->m_ownerRank;
-        LOGSZ(m_pSerializerLog, "-----> owning rank: " << m_bodyInfo->m_ownerRank<<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> owning rank: " << m_bodyInfo->m_ownerRank<<std::endl;);
 
         if(flag == SubMessageFlag::NOTIFICATION) {
-            LOGSZ(m_pSerializerLog, "-----> Serialize body (full)... "<< std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "-----> Serialize body (full)... "<< std::endl;);
             serializeBodyFull(ar,body);
-            LOGSZ(m_pSerializerLog, "-----> Serialize body (full): finished" << std::endl);
+            LOGBC_SZ(m_pSerializerLog, "-----> Serialize body (full): finished" << std::endl);
         } else if(flag == SubMessageFlag::UPDATE) {
-            LOGSZ(m_pSerializerLog, "-----> Serialize body (update)... "<< std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "-----> Serialize body (update)... "<< std::endl;);
             serializeBodyUpdate(ar,body);
-            LOGSZ(m_pSerializerLog, "-----> Serialize body (update): finished " << std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "-----> Serialize body (update): finished " << std::endl;);
         } else {
             ERRORMSG("flag not recognized!")
         }
@@ -378,14 +378,14 @@ private:
 
             // send extended dynamic stuff (h vector) which is important for the neighbour which overtakes this body!
             if(flag == SubMessageFlag::UPDATE) {
-                //LOGSZ(m_pSerializerLog, "-----> Send h_term: " << body->m_h_term << std::endl;);
+                //LOGBC_SZ(m_pSerializerLog, "-----> Send h_term: " << body->m_h_term << std::endl;);
                 serializeAdditionalDynamicsProperties(ar,body);
             }
 
             // FROM LOCAL to REMOTE!
             if( m_bodyInfo->m_overlapsThisRank) { // if it still overlaps our rank
                 //Move local body to remote global list
-                LOGSZ(m_pSerializerLog, "-----> Changing LOCAL body to REMOTE in neighbour structure rank: " << m_neighbourRank << std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "-----> Changing LOCAL body to REMOTE in neighbour structure rank: " << m_neighbourRank << std::endl;);
                 bool res = m_nc->m_globalRemote.addBody(body);
                 LOGASSERTMSG(res, m_pSerializerLog, "Could not add body with id: " << RigidBodyId::getBodyIdString(body->m_id) << "in global remote list")
 
@@ -409,11 +409,11 @@ private:
             } else {
                 // FROM LOCAL to REMOVE!
                 // If it does not overlap anymore, it gets deleted by the delete list in BodyCommunicator
-                LOGSZ(m_pSerializerLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" marked for deletion after send!" <<std::endl;)
+                LOGBC_SZ(m_pSerializerLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" marked for deletion after send!" <<std::endl;)
                 m_nc->m_localBodiesToDelete.insert(body);
 
                 //Remove this local from this neighbour structure!
-                LOGSZ(m_pSerializerLog, "-----> Deleting LOCAL body in neighbour structure rank: " << m_neighbourRank << std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "-----> Deleting LOCAL body in neighbour structure rank: " << m_neighbourRank << std::endl;);
                 bool res = m_neighbourData->eraseLocalBodyData(body);
                 LOGASSERTMSG( res == true, m_pSerializerLog, "Could not delete local body with id: " << RigidBodyId::getBodyIdString(body->m_id) <<"in neighbour structure rank: " << m_neighbourRank << "!");
 
@@ -424,7 +424,7 @@ private:
 
         } else if(m_bodyInfo->m_ownerRank != m_nc->m_rank) { // if owner rank is not the sending neighbour and  not our rank!
             //Remove this local from this neighbour structure!
-            LOGSZ(m_pSerializerLog, "-----> Deleting LOCAL body in neighbour structure rank: " << m_neighbourRank << std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "-----> Deleting LOCAL body in neighbour structure rank: " << m_neighbourRank << std::endl;);
             bool res = m_neighbourData->eraseLocalBodyData(body);
             LOGASSERTMSG( res == true, m_pSerializerLog, "Could not delete local body with id: " << RigidBodyId::getBodyIdString(body->m_id) <<"in neighbour structure rank: " << m_neighbourRank << "!");
 
@@ -446,36 +446,36 @@ private:
         // deserialize
         typename RigidBodyType::RigidBodyIdType id;
         ar & id;
-        LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
         //ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
 
         RankIdType owningRank;
         ar & owningRank;
-        LOGSZ(m_pSerializerLog, "-----> owning rank: " << owningRank<<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> owning rank: " << owningRank<<std::endl;);
 
 
         // normal update
-        LOGSZ(m_pSerializerLog, "-----> Deserialize body (update)... "<<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> Deserialize body (update)... "<<std::endl;);
         auto * remoteData = m_neighbourData->getRemoteBodyData(id);
         LOGASSERTMSG( remoteData, m_pSerializerLog, "There exists no RemoteData for body with id: " << RigidBodyId::getBodyIdString(id) << " for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
         LOGASSERTMSG( m_nc->m_globalRemote.find(id) != m_nc->m_globalRemote.end(), m_pSerializerLog, "m_globalRemote does not contain body with id: " << RigidBodyId::getBodyIdString(id) << " in process rank: " << m_nc->m_rank << "!");
 
         RigidBodyType * body = remoteData->m_pBody;
         serializeBodyUpdate(ar,body);
-        LOGSZ(m_pSerializerLog, "-----> Deserialize body (update): finished "  <<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> Deserialize body (update): finished "  <<std::endl;);
 
         // Set flag that we received update
         body->m_pBodyInfo->m_receivedUpdate = true;
 
         // NEW BODY FROM REMOTE  to  LOCAL!!!
         if(owningRank == m_nc->m_rank) { // if the body is now our local body!
-            LOGSZ(m_pSerializerLog, "-----> Changing REMOTE to LOCAL" <<std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "-----> Changing REMOTE to LOCAL" <<std::endl;);
 
             std::set<RankIdType> overlappingNeighbours; // these are only the common neighbours between m_neighbourRank and m_nc->m_rank
             ar & overlappingNeighbours; // all ranks where the body overlaps
 
             serializeAdditionalDynamicsProperties(ar,body);
-            //LOGSZ(m_pSerializerLog, "-----> GOT h_term: " << body->m_h_term << std::endl;);
+            //LOGBC_SZ(m_pSerializerLog, "-----> GOT h_term: " << body->m_h_term << std::endl;);
 
             // Move the remote body to the locale ones and delete in remotes
             m_nc->m_globalRemote.removeBody(body);
@@ -512,13 +512,13 @@ private:
             }
 
             // Notify all delegates which registered about the new local (StateRecorder)
-            LOGSZ(m_pSerializerLog, "-----> Invoke delegates for new LOCAL" <<std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "-----> Invoke delegates for new LOCAL" <<std::endl;);
             m_nc->invokeAllAddBodyLocal(body);
 
 
             // FROM REMOTE to REMOTE
         } else if(owningRank != m_neighbourRank) { // if the body is not owned anymore by the sending process but by another of our neighbours (hoppfully)
-            LOGSZ(m_pSerializerLog, "-----> Changing remote body to REMOTE" <<std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "-----> Changing remote body to REMOTE" <<std::endl;);
             LOGASSERTMSG(  m_nc->m_nbRanks.find(owningRank) != m_nc->m_nbRanks.end(), m_pSerializerLog, "Owner Rank: " << owningRank << " for body with id: "
                            <<RigidBodyId::getBodyIdString(id) << " is no neighbour in process rank: " << m_nc->m_rank << "!")
 
@@ -546,12 +546,12 @@ private:
         //id
         typename RigidBodyType::RigidBodyIdType id;
         ar & id;
-        LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
         //ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
         // owner rankk
         RankIdType owningRank;
         ar & owningRank;
-        LOGSZ(m_pSerializerLog, "-----> owning rank: " << owningRank<<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> owning rank: " << owningRank<<std::endl;);
 
 
         // normal update (make a new body!)
@@ -561,13 +561,13 @@ private:
         //MAKE NEW BODY!!!
         RigidBodyType * body = new RigidBodyType(id);
 
-        LOGSZ(m_pSerializerLog, "-----> Deserialize body (full): ... "<< std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> Deserialize body (full): ... "<< std::endl;);
         serializeBodyFull(ar,body);
-        LOGSZ(m_pSerializerLog, "-----> Deserialize body (full): finished " << std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> Deserialize body (full): finished " << std::endl;);
 
         if(owningRank == m_nc->m_rank) {
             // This is a new LOCAL body
-            LOGSZ(m_pSerializerLog, "-----> New body as LOCAL" <<std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "-----> New body as LOCAL" <<std::endl;);
             std::set<RankIdType> overlappingNeighbours; // these are only the common neighbours between m_neighbourRank and m_nc->m_rank
             ar & overlappingNeighbours; // all ranks where the body overlaps
 
@@ -595,14 +595,14 @@ private:
 
 
             // Notify all delegates which registered about the new local
-            LOGSZ(m_pSerializerLog, "-----> Invoke delegates for new LOCAL" <<std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "-----> Invoke delegates for new LOCAL" <<std::endl;);
             m_nc->invokeAllAddBodyLocal(body);
 
 
         } else {
             // This is a new remote body!
             LOGASSERTMSG(  m_nc->m_nbRanks.find(owningRank) != m_nc->m_nbRanks.end(), m_pSerializerLog, "Owner Rank: " << owningRank << " for body with id: "<<RigidBodyId::getBodyIdString(id) << " is no neighbour in process rank: " << m_nc->m_rank << "!")
-            LOGSZ(m_pSerializerLog, "-----> New body as REMOTE" <<std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "-----> New body as REMOTE" <<std::endl;);
             // add in global
             m_nc->m_globalRemote.addBody(body);
 
@@ -623,14 +623,14 @@ private:
         // deserialize (ONLY REMOTE BODIES)
         typename RigidBodyType::RigidBodyIdType id;
         ar & id;
-        LOGSZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) <<std::endl;);
         //ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
         // Go into the neighbour data structure and remove the remote body
         bool res = m_neighbourData->eraseRemoteBodyData(id);
         LOGASSERTMSG(res, m_pSerializerLog, "Could not delete remote body with id: " << RigidBodyId::getBodyIdString(id) << " in neighbour structure rank: " << m_neighbourRank << " !" );
 
         // Remove and delete from global list, deletes also the body info data
-        LOGSZSpecial(m_pSerializerLog, "--->\t Deleting body with id: "<< RigidBodyId::getBodyIdString(id) << std::endl;)
+        LOGBC_SZ(m_pSerializerLog, "--->\t Deleting body with id: "<< RigidBodyId::getBodyIdString(id) << std::endl;)
         res = m_nc->m_globalRemote.deleteBody(id);
         LOGASSERTMSG( res == true, m_pSerializerLog, "Remote Body with id: " << RigidBodyId::getBodyIdString(id) << " could not be deleted in m_globalRemote!");
 
@@ -642,8 +642,8 @@ private:
         //Position
         serializeEigen(ar,body->m_r_S);
         serializeEigen(ar,body->m_q_KI);
-        LOGSZ(m_pSerializerLog, "----->  m_r_S: " << body->m_r_S.transpose()<<std::endl;);
-        LOGSZ(m_pSerializerLog, "----->  m_q_KI: " << body->m_q_KI.transpose()<<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "----->  m_r_S: " << body->m_r_S.transpose()<<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "----->  m_q_KI: " << body->m_q_KI.transpose()<<std::endl;);
 
         if(Archive::is_loading::value) {
             QuaternionHelpers::setRotFromQuaternion(body->m_q_KI , body->m_A_IK);
@@ -659,8 +659,8 @@ private:
         serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
 
         ar & body->m_pSolverData->m_t;
-        LOGSZ(m_pSerializerLog, "----->  m_t: " << body->m_pSolverData->m_t <<std::endl;);
-        LOGSZ(m_pSerializerLog, "----->  m_uBuffer.m_back: " << body->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "----->  m_t: " << body->m_pSolverData->m_t <<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "----->  m_uBuffer.m_back: " << body->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl;);
     }
 
     template<class Archive>
@@ -683,7 +683,7 @@ private:
                 body->m_geometry = m_nc->m_globalGeometries.find(body->m_globalGeomId)->second;
             }
         }
-        LOGSZ(m_pSerializerLog, "-----> global geometry id: " << body->m_globalGeomId <<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> global geometry id: " << body->m_globalGeomId <<std::endl;);
 
         //Position
         serializeEigen(ar,body->m_r_S);
@@ -691,8 +691,8 @@ private:
         if(Archive::is_loading::value) {
             QuaternionHelpers::setRotFromQuaternion(body->m_q_KI , body->m_A_IK);
         }
-        LOGSZ(m_pSerializerLog, "----->  m_r_S: " << body->m_r_S.transpose()<<std::endl;);
-        LOGSZ(m_pSerializerLog, "----->  m_q_KI: " << body->m_q_KI.transpose()<<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "----->  m_r_S: " << body->m_r_S.transpose()<<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "----->  m_q_KI: " << body->m_q_KI.transpose()<<std::endl;);
 
         // Other Dynamics Stuff
         ar & body->m_mass;
@@ -720,8 +720,8 @@ private:
             }
 
             ar & body->m_pSolverData->m_t;
-            LOGSZ(m_pSerializerLog, "----->  m_t: " << body->m_pSolverData->m_t <<std::endl;);
-            LOGSZ(m_pSerializerLog, "----->  m_uBuffer.m_back: " << body->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "----->  m_t: " << body->m_pSolverData->m_t <<std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "----->  m_uBuffer.m_back: " << body->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl;);
         } else {
             if(Archive::is_loading::value) {
                 ERRORMSG("Deserializing a not simulated body should not happen?");
@@ -743,19 +743,19 @@ private:
         std::set<RankIdType> overlappingNeighbours; // set of ranks where this body overlaps for m_neighbourRank!
         const typename ProcessTopologyType::NeighbourRanksListType & adjRanks = m_nc->m_pProcTopo->getAdjacentNeighbourRanks(m_neighbourRank);
 
-        LOGSZ(m_pSerializerLog, "-----> overlappingNeigbours: "<<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "-----> overlappingNeigbours: "<<std::endl;);
         for( auto it =  m_bodyInfo->m_neighbourRanks.begin(); it != m_bodyInfo->m_neighbourRanks.end(); ++it) {
             if(it->second.m_overlaps == true && adjRanks.find(it->first) != adjRanks.end() ) {
                 // this body overlaps a rank which is adjacent to m_neighbourRank
                 overlappingNeighbours.insert(it->first);
 
-                LOGSZ(m_pSerializerLog, "-------> " << it->first <<std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "-------> " << it->first <<std::endl;);
             }
         }
 
         if( m_bodyInfo->m_overlapsThisRank) {
             overlappingNeighbours.insert(m_nc->m_rank);
-            LOGSZ(m_pSerializerLog, "-------> own: " << m_nc->m_rank <<std::endl;);
+            LOGBC_SZ(m_pSerializerLog, "-------> own: " << m_nc->m_rank <<std::endl;);
         }
 
         //serialize the set
@@ -767,7 +767,7 @@ private:
     void serializeGeom(Archive & ar, RigidBodyType * body) const {
         // take care this serialization replaces any shared_ptr if body->m_geometry is already filled!
         //ERRORMSG("Serialize Full GEOM")
-        LOGSZ(m_pSerializerLog,  "-----> Serializing full geometry!"<<std::endl;)
+        LOGBC_SZ(m_pSerializerLog,  "-----> Serializing full geometry!"<<std::endl;)
 
         GeomSerialization gs(body->m_geometry);
         ar & gs;
@@ -906,13 +906,13 @@ public:
         ar & size;
 
         if(size>0) {
-            LOGIC(this->m_pSerializerLog, "InclusionComm-Contact=============================================================================="<< std::endl;)
-            LOGIC(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "InclusionComm-Contact=============================================================================="<< std::endl;)
+            LOGIC_SZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
-            LOGIC(this->m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
             for(auto it = m_neighbourData->remoteBegin(); it != m_neighbourData->remoteEnd(); ++it) {
                 ar & (it->first); //m_id, all these bodies have remote contacts
-                LOGIC(this->m_pSerializerLog, "---->  body id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl;);
+                LOGIC_SZ(this->m_pSerializerLog, "---->  body id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl;);
             }
 
             // Add this rank to the sending list for further communication
@@ -937,10 +937,10 @@ public:
         ar & size;
 
         if(size>0) {
-            LOGIC(this->m_pSerializerLog, "InclusionComm-Contact=============================================================================="<< std::endl;)
-            LOGIC(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "InclusionComm-Contact=============================================================================="<< std::endl;)
+            LOGIC_SZ(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
-            LOGIC(this->m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "---> # Remote Bodies (with Contacts): " << size << std::endl;);
 
             // Update m_neighbourData;
             m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
@@ -948,7 +948,7 @@ public:
             for(unsigned int i = 0; i < size ; i++) {
                 RigidBodyIdType id;
                 ar & id; // get all unique ids!
-                LOGIC(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl;);
+                LOGIC_SZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl;);
 
                 auto * localData = this->m_nc->m_pBodyComm->getNeighbourMap()->getNeighbourData(this->m_neighbourRank)->getLocalBodyData(id);
                 LOGASSERTMSG(localData, this->m_pSerializerLog, "There is no bodydata for local body id: " << RigidBodyId::getBodyIdString(id)
@@ -967,7 +967,7 @@ public:
 
                 //Connect local body data (for sending and receiving updates later) to this splitBodyNode
                 pairAddLocal.first->m_pSplitBodyNode = pairRes.first;
-                LOGIC(this->m_pSerializerLog, "----> added rank: " << this->m_neighbourRank << " to SplitBodyNode for body id: "<< RigidBodyId::getBodyIdString(id) << std::endl);
+                LOGIC_SZ(this->m_pSerializerLog, "----> added rank: " << this->m_neighbourRank << " to SplitBodyNode for body id: "<< RigidBodyId::getBodyIdString(id) << std::endl);
 
                 // Add this rank to the receving list for further communication
                 this->m_nc->m_nbRanksSendRecvLocal.insert( this->m_neighbourRank );
@@ -1041,10 +1041,10 @@ public:
         ar & size;
 
         if(size>0) {
-            LOGIC(this->m_pSerializerLog, "InclusionComm-Multiplicity=============================================================================="<< std::endl;)
-            LOGIC(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "InclusionComm-Multiplicity=============================================================================="<< std::endl;)
+            LOGIC_SZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
-            LOGIC(this->m_pSerializerLog, "---> # Local Split Bodies (with external Contacts): " << size << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "---> # Local Split Bodies (with external Contacts): " << size << std::endl;);
             for(auto it = m_neighbourData->localBegin(); it != m_neighbourData->localEnd(); ++it) {
                 LOGASSERTMSG(it->second.m_pSplitBodyNode, this->m_pSerializerLog, "m_pSplitBodyNode is null for body id: "
                              << RigidBodyId::getBodyIdString(it->first) <<std::endl)
@@ -1053,7 +1053,7 @@ public:
                 PREC multiplicityWeight;
                 it->second.m_pSplitBodyNode->getMultiplicityAndWeight(this->m_neighbourRank, multiplicity, multiplicityWeight );
 
-                LOGIC(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl <<
+                LOGIC_SZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl <<
                       "----> multiplicity: " << multiplicity <<std::endl <<
                       "----> multiplicityWeight: " <<multiplicityWeight<<std::endl <<
                       "----> h_term: " << it->second.m_pBody->m_h_term.transpose() <<std::endl;)
@@ -1084,10 +1084,10 @@ public:
         ar & size;
 
         if(size>0) {
-            LOGIC(this->m_pSerializerLog, "InclusionComm-Multiplicity=============================================================================="<< std::endl;)
-            LOGIC(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "InclusionComm-Multiplicity=============================================================================="<< std::endl;)
+            LOGIC_SZ(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
-            LOGIC(this->m_pSerializerLog, "---> # Remote SplitBodies: " << size << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "---> # Remote SplitBodies: " << size << std::endl;);
 
             // Update m_neighbourData;
             m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
@@ -1123,7 +1123,7 @@ public:
                 //Set new h_term;
                 remoteBody->m_h_term = h_term;
 
-                LOGIC(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
+                LOGIC_SZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
                       "----> multiplicity: " << multiplicity <<std::endl <<
                       "----> multiplicityWeight: " <<multiplicityWeight<<std::endl<<
                       "----> h_term current: " << h_term.transpose() << std::endl;  );
@@ -1131,7 +1131,7 @@ public:
                 // Apply weighting factors
                 // Turn this remote into a split body
                 // Scale the inverse mass matrix, and h_term
-                LOGIC(this->m_pSerializerLog, "----> change weighting for remote body" <<std::endl;);
+                LOGIC_SZ(this->m_pSerializerLog, "----> change weighting for remote body" <<std::endl;);
                 RigidBodyFunctions::changeBodyToSplitWeighting( remoteBody, multiplicity, multiplicityWeight);
 
 
@@ -1210,10 +1210,10 @@ public:
         ar & size;
 
         if(size>0) {
-            LOGIC(this->m_pSerializerLog, "InclusionComm-SplitBodyUpdate=============================================================================="<< std::endl;)
-            LOGIC(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "InclusionComm-SplitBodyUpdate=============================================================================="<< std::endl;)
+            LOGIC_SZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
-            LOGIC(this->m_pSerializerLog, "---> # Remote SplitBody Updates: " << size << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "---> # Remote SplitBody Updates: " << size << std::endl;);
 
             for(auto it = m_neighbourData->remoteBegin(); it != m_neighbourData->remoteEnd(); it++){
                 ar & it->first; // id
@@ -1223,7 +1223,7 @@ public:
 
                 serializeEigen(ar,it->second.m_pBody->m_pSolverData->m_uBuffer.m_front); // front velocity
 
-                LOGIC(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl <<
+                LOGIC_SZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl <<
                           "----> uFront: " << it->second.m_pBody->m_pSolverData->m_uBuffer.m_front.transpose() <<std::endl)
             }
         }
@@ -1255,10 +1255,10 @@ public:
         ar & size;
 
         if(size>0) {
-            LOGIC(this->m_pSerializerLog, "InclusionComm-SplitBodyUpdate=============================================================================="<< std::endl;)
-            LOGIC(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "InclusionComm-SplitBodyUpdate=============================================================================="<< std::endl;)
+            LOGIC_SZ(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
-            LOGIC(this->m_pSerializerLog, "---> # Local SplitBody Updates: " << size << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "---> # Local SplitBody Updates: " << size << std::endl;);
 
             RigidBodyIdType id;
             VectorUBody u;
@@ -1272,7 +1272,7 @@ public:
                              << RigidBodyId::getBodyIdString(id) << "is not in this neighbour rank: " << this->m_neighbourRank)
 
                 localBodyData->m_pSplitBodyNode->updateVelocity(this->m_neighbourRank,u);
-                LOGIC(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
+                LOGIC_SZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
                           "----> uFront: " << u.transpose() <<std::endl)
             }
         }
@@ -1349,8 +1349,8 @@ public:
         ar & size;
 
         if(size>0) {
-            LOGIC(this->m_pSerializerLog, "InclusionComm-SplitBodySolution=============================================================================="<< std::endl;)
-            LOGIC(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "InclusionComm-SplitBodySolution=============================================================================="<< std::endl;)
+            LOGIC_SZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
             for(auto it = m_neighbourData->localBegin(); it != m_neighbourData->localEnd(); it++){
                 ar & it->first; // id
@@ -1363,7 +1363,7 @@ public:
                 // which is the local bodies new front velocity
                 serializeEigen(ar,it->second.m_pBody->m_pSolverData->m_uBuffer.m_front); // front velocity
 
-                LOGIC(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl <<
+                LOGIC_SZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString((it->first)) << std::endl <<
                           "----> uFront: " << it->second.m_pBody->m_pSolverData->m_uBuffer.m_front.transpose() <<std::endl)
             }
         }
@@ -1395,10 +1395,10 @@ public:
         ar & size;
 
         if(size>0) {
-            LOGIC(this->m_pSerializerLog, "InclusionComm-SplitBodySolution=============================================================================="<< std::endl;)
-            LOGIC(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "InclusionComm-SplitBodySolution=============================================================================="<< std::endl;)
+            LOGIC_SZ(this->m_pSerializerLog, "DESERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
-            LOGIC(this->m_pSerializerLog, "---> # Remote SplitBodies Solutions: " << size << std::endl;);
+            LOGIC_SZ(this->m_pSerializerLog, "---> # Remote SplitBodies Solutions: " << size << std::endl;);
 
             RigidBodyIdType id;
             VectorUBody u;
@@ -1415,7 +1415,7 @@ public:
 
                 remoteBodyData->m_pBody->m_pSolverData->m_uBuffer.m_front = u;
 
-                LOGIC(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
+                LOGIC_SZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<
                           "----> uFront: " << u.transpose() <<std::endl)
             }
         }

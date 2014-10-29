@@ -245,7 +245,7 @@ void BodyCommunicator::cleanUp(){
         // body tries to delete this also, but does not matter
         delete body->m_pBodyInfo;
 
-        LOGBCSpecial(m_pSimulationLog,"--->\t Deleting body with id: "<< RigidBodyId::getBodyIdString(body) <<"@" << body << std::endl;)
+        LOGBC(m_pSimulationLog,"--->\t Deleting body with id: "<< RigidBodyId::getBodyIdString(body) <<"@" << body << std::endl;)
 
         bool res = m_globalLocal.deleteBody(body);
         LOGASSERTMSG( res == true, m_pSimulationLog , "Remote Body with id: " << RigidBodyId::getBodyIdString(body)<< " could not be deleted in m_globalRemote!");
