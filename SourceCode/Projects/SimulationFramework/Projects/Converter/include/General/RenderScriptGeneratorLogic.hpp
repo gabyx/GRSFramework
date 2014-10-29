@@ -4,10 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <exprtk.hpp>
+
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
-#include "LogicTypes.hpp"
+#include LogicTypes_INCLUDE_FILE
 #include "LogicNode.hpp"
 
 #include "ConstantNode.hpp"
@@ -128,7 +130,8 @@ namespace LogicNodes {
 
                 case AdditionalBodyData::TypeEnum::PROCESS: {
                     auto * p = static_cast<AdditionalBodyData::Process *>(s->m_data);
-                    SET_OSOCKET_VALUE(MaterialId,p->m_processId);
+                    //std::cout << p->m_processId << std::endl;
+                    SET_OSOCKET_VALUE(ProcessId,p->m_processId);
                 }
                 break;
 
@@ -195,6 +198,61 @@ namespace LogicNodes {
         }
     };
 
+    template<typename InType, typename OutType = InType>
+    class SimpleFunction : public LogicNode {
+    private:
+        using ParserT = double;
+        using  expression_t = exprtk::expression<ParserT> ;
+        exprtk::symbol_table<ParserT> m_symbol_table;
+        expression_t m_expression;
+        exprtk::parser<ParserT> m_parser;
+
+        unsigned int m_inputs;
+    public:
+
+        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+         struct Outputs {
+            enum {
+                Out,
+                OUTPUTS_LAST
+            };
+        };
+
+        DECLARE_OSOCKET_TYPE(Out, OutType );
+
+        SimpleFunction(unsigned int id, unsigned int inputs, std::string exprString) : LogicNode(id) {
+            m_inputs = inputs;
+            for(unsigned int i = 0; i < m_inputs; i++){
+                addISock<InType>(InType());
+                //std::cout <<"Variables: " << std::string("in")+std::to_string(i) << std::endl;
+                m_symbol_table.create_variable(std::string("in")+std::to_string(i));
+            }
+
+            ADD_OSOCK(Out,OutType());
+
+            m_expression.register_symbol_table(m_symbol_table);
+
+            m_parser.compile(exprString,m_expression);
+
+        }
+
+        ~SimpleFunction(){}
+
+        // No initialization
+
+        void compute() {
+            for(unsigned int i = 0; i < m_inputs; i++){
+                m_symbol_table.get_variable(std::string("in")+std::to_string(i))->ref() =
+                static_cast<ParserT>(getISocketRefValue<InType>(i));
+            }
+            //std::cout << "Value: " << m_expression.value() << std::endl;
+            SET_OSOCKET_VALUE(Out,static_cast<OutType>(m_expression.value()));
+        }
+
+    };
+
+
     template<typename IndexType>
     class ColorList : public LogicNode {
     public:
@@ -203,6 +261,7 @@ namespace LogicNodes {
 
         struct Inputs {
             enum {
+                Enable,
                 Index,
                 INPUTS_LAST
             };
@@ -221,10 +280,13 @@ namespace LogicNodes {
             N_SOCKETS = N_INPUTS + N_OUTPUTS
         };
 
+        DECLARE_ISOCKET_TYPE(Enable, bool );
         DECLARE_ISOCKET_TYPE(Index, IndexType );
         DECLARE_OSOCKET_TYPE(Color, Vector3 );
 
-        ColorList(unsigned int id, unsigned int seed, unsigned int nColors, double amplitude = 1.0) : LogicNode(id) {
+        ColorList(unsigned int id, unsigned int nColors, unsigned int seed, double amplitude = 1.0) : LogicNode(id) {
+
+            ADD_ISOCK(Enable,true);
             ADD_ISOCK(Index,0);
             ADD_OSOCK(Color,Vector3(0.5,0.5,0.5));
 
@@ -242,6 +304,7 @@ namespace LogicNodes {
         }
 
         ColorList(unsigned int id, std::vector<Vector3> colors) : LogicNode(id) {
+            ADD_ISOCK(Enable,true);
             ADD_ISOCK(Index,0);
             ADD_OSOCK(Color,Vector3(0.5,0.5,0.5));
 
@@ -253,9 +316,12 @@ namespace LogicNodes {
         // No initialization
 
         void compute() {
-            // Get the indexed color (modulo the size of the list)
-            IndexType index = GET_ISOCKET_REF_VALUE(Index) % m_colors.size();
-            SET_OSOCKET_VALUE(Color,  m_colors[index] );
+            if(GET_ISOCKET_REF_VALUE(Enable)){
+                // Get the indexed color (modulo the size of the list)
+                IndexType index = GET_ISOCKET_REF_VALUE(Index) % m_colors.size();
+                //std::cout << GET_ISOCKET_REF_VALUE(Index) << std::endl;
+                SET_OSOCKET_VALUE(Color,  m_colors[index] );
+            }
         }
 
     private:
@@ -263,6 +329,60 @@ namespace LogicNodes {
     };
 
 
+    class MatteMaterial: public LogicNode {
+    public:
+
+        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+        struct Inputs {
+            enum {
+                Enable,
+                Color,
+                INPUTS_LAST
+            };
+        };
+
+        struct Outputs {
+            enum {
+                Material,
+                OUTPUTS_LAST
+            };
+        };
+
+        enum {
+            N_INPUTS  = Inputs::INPUTS_LAST,
+            N_OUTPUTS = Outputs::OUTPUTS_LAST - Inputs::INPUTS_LAST,
+            N_SOCKETS = N_INPUTS + N_OUTPUTS
+        };
+        using RenderMaterialPtr = RenderMaterial*;
+        DECLARE_ISOCKET_TYPE(Enable, bool );
+        DECLARE_ISOCKET_TYPE(Color, Vector3 );
+        DECLARE_OSOCKET_TYPE(Material, RenderMaterialPtr );
+
+        MatteMaterial(unsigned int id) : LogicNode(id) {
+            ADD_ISOCK(Enable,true);
+            ADD_ISOCK(Color,Vector3(0.5,0.5,0.5));
+            ADD_OSOCK(Material,nullptr);
+        }
+
+        virtual ~MatteMaterial() {
+
+        }
+
+        virtual void compute(){
+            if(GET_ISOCKET_REF_VALUE(Enable)){
+                Vector3 & c = GET_ISOCKET_REF_VALUE(Color);
+                std::string s = "Color [" + std::to_string(c(0)) + " " + std::to_string(c(1)) + " " + std::to_string(c(2)) + "]\n";
+                s.append("Surface \"matte\" \"float Kd\" [1.0] \"float Ka\" [1.0]");
+                m_material.setMaterialString( s );
+                SET_OSOCKET_VALUE(Material, &m_material);
+            }
+        }
+        virtual void initialize(){}
+
+    private:
+        RenderMaterial m_material;
+    };
 
 
     class RenderScriptWriter : public LogicNode {
@@ -429,7 +549,12 @@ namespace LogicNodes {
                 ERRORMSG("Geometry for body id: " << id << " not found!")
             }
               // Write the material
-            GET_ISOCKET_REF_VALUE(Material)->write(s);
+            if(GET_ISOCKET_REF_VALUE(Material) == nullptr){
+                WARNINGMSG(false,"No material pointer in input at RendermanWriter!")
+            }
+            else{
+                    GET_ISOCKET_REF_VALUE(Material)->write(s);
+            }
             // Write the geometry
             m_geomWriter.setStream(&s);
             geomIt->second.apply_visitor(m_geomWriter);

@@ -14,6 +14,7 @@
 
         using TypeSeq = boost::mpl::vector<double,
                                            float,
+                                           bool,
                                            char,
                                            short,
                                            int,
@@ -38,6 +39,7 @@
 
             static const char* types[] = { "double",
                                            "float",
+                                           "bool",
                                            "char",
                                            "short",
                                            "int",

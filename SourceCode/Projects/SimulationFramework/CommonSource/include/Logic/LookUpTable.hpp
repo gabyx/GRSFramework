@@ -10,6 +10,7 @@ namespace LogicNodes{
 
         struct Inputs {
             enum {
+                Enable,
                 Key,
                 INPUTS_LAST
             };
@@ -28,12 +29,14 @@ namespace LogicNodes{
             N_SOCKETS = N_INPUTS + N_OUTPUTS
         };
 
+        DECLARE_ISOCKET_TYPE(Enable, bool );
         DECLARE_ISOCKET_TYPE(Key, TKey );
         DECLARE_OSOCKET_TYPE(Value, TValue );
 
 
         LookUpTable(unsigned int id, TMap * m, const TValue & d)
             : LogicNode(id), m_map(m), m_default(d) {
+            ADD_ISOCK(Enable,true);
             ADD_ISOCK(Key,TKey());
             ADD_OSOCK(Value,TValue());
         }
@@ -42,13 +45,16 @@ namespace LogicNodes{
         }
 
         virtual void compute() {
-            auto id = GET_ISOCKET_VALUE(Key);
-            auto it = m_map->find(id);
+            if(GET_ISOCKET_REF_VALUE(Enable)){
+                //std::cout << "Value Key: " << GET_ISOCKET_VALUE(Key) << std::endl;
+                auto id = GET_ISOCKET_VALUE(Key);
+                auto it = m_map->find(id);
 
-            if(it == m_map->end()) {
-                SET_OSOCKET_VALUE(Value, m_default);
-            } else {
-                SET_OSOCKET_VALUE(Value, it->second );
+                if(it == m_map->end()) {
+                    SET_OSOCKET_VALUE(Value, m_default);
+                } else {
+                    SET_OSOCKET_VALUE(Value, it->second );
+                }
             }
         }
 

@@ -10,7 +10,8 @@ void LogicSocketBase::link(LogicSocketBase *fsock)
 	if(!fsock){
         ERRORMSG("Socket to link to is null!");
 	}
-	if(!this->m_type == fsock->m_type){
+
+	if(!(this->m_type == fsock->m_type)){
         ERRORMSG( " Types of sockets do not coincide: " <<
                   LogicTypes::getTypeName(this->m_type) << " and " << LogicTypes::getTypeName(fsock->m_type) );
 	}

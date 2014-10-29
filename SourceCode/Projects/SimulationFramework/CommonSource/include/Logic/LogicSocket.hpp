@@ -114,7 +114,7 @@ public:
     }
 
     LogicSocket(LogicNode* par, bool isInput, T defaultValue, unsigned int id)
-        : LogicSocketBase(iter::pos::value,par, isInput, id), m_data(defaultValue) {
+        : LogicSocketBase(iter::pos::value, par, isInput, id), m_data(defaultValue) {
     }
 
     void setValue(const T& value);
