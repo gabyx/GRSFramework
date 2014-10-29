@@ -119,6 +119,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
         ${COMMONSOURCE_DIR}/include/Common
+        ${COMMONSOURCE_DIR}/external/tinyformat/
         ${COMMONSOURCE_DIR}/external/SRDelegates/include/
         ${COMMONSOURCE_DIR}/external/FastFunc/include/
         ${COMMONSOURCE_DIR}/external/getoptpp/
@@ -260,6 +261,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
         ${COMMONSOURCE_DIR}/include/Common
+        ${COMMONSOURCE_DIR}/external/tinyformat/
         ${COMMONSOURCE_DIR}/external/SRDelegates/include/
         ${COMMONSOURCE_DIR}/external/FastFunc/include/
         ${COMMONSOURCE_DIR}/external/getoptpp/
@@ -404,6 +406,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
         ${COMMONSOURCE_DIR}/include/Common
+        ${COMMONSOURCE_DIR}/external/tinyformat/
         ${COMMONSOURCE_DIR}/external/SRDelegates/include/
         ${COMMONSOURCE_DIR}/external/FastFunc/include/
         ${COMMONSOURCE_DIR}/external/getoptpp/
