@@ -7,17 +7,37 @@
 
 namespace LogicNodes{
 
-    template<typename T>
     class StringFormatNode: public LogicNode {
+
+    private:
+        // Visitor
+        struct VisitorConv{
+            std::stringstream m_s;
+            std::string * m_f = nullptr;
+
+
+            void reset(){
+                m_s.str("");
+            }
+
+            void setFormat(std::string * s){
+                m_f = s;
+            }
+
+            template<typename T>
+            void operator()(LogicSocket<T> * n){
+                m_s << Utilities::stringFormat(*m_f,n->getValue()) ;
+            }
+
+//            template<typename T>
+//            void operator()(LogicSocket<T> * n){
+//                ERRORMSG("Cannot convert input of type: " << LogicTypes::getTypeName<T>() + " to string, not implemented!" );
+//            }
+
+        };
+
     public:
 
-        struct Inputs {
-            enum {
-                In,
-                Format,
-                INPUTS_LAST
-            };
-        };
 
         struct Outputs {
             enum {
@@ -27,27 +47,37 @@ namespace LogicNodes{
         };
 
         enum {
-            N_INPUTS  = Inputs::INPUTS_LAST,
-            N_OUTPUTS = Outputs::OUTPUTS_LAST - Inputs::INPUTS_LAST,
-            N_SOCKETS = N_INPUTS + N_OUTPUTS
+            N_OUTPUTS = Outputs::OUTPUTS_LAST
         };
 
-        DECLARE_ISOCKET_TYPE(In, T );
-        DECLARE_ISOCKET_TYPE(Format, std::string );
         DECLARE_OSOCKET_TYPE(String, std::string );
 
-
-        StringFormatNode(unsigned int id, std::string format) : LogicNode(id) {
-            ADD_ISOCK(In,T());
-            ADD_ISOCK(Format,format);
+        StringFormatNode(unsigned int id) : LogicNode(id) {
             ADD_OSOCK(String,"");
         }
 
         virtual ~StringFormatNode() {
         }
 
+        template<typename T>
+        void addInputAndFormatSocket(std::string format, T def = T()){
+            addISock<T>(def);
+            addISock<std::string>(format);
+        }
+
         virtual void compute(){
-            SET_OSOCKET_VALUE(String, Utilities::stringFormat( GET_ISOCKET_REF_VALUE(Format), GET_ISOCKET_REF_VALUE(In) ) );
+            static VisitorConv conv;
+
+            conv.reset();
+
+            //Iterate over all inputs and apply converter visitor
+            auto & inList =  getInputs();
+            for(unsigned int i=0; i <inList.size(); i=i+2){
+                conv.setFormat(  &getISocketRefValue<std::string>(i+1) );
+                inList[i]->applyVisitor(conv);
+            }
+            std::cout << conv.m_s.str() << std::endl;
+            SET_OSOCKET_VALUE(String, conv.m_s.str() );
         }
         virtual void initialize(){}
     };
