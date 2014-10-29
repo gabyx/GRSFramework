@@ -12,6 +12,7 @@
 #include LogicTypes_INCLUDE_FILE
 #include "LogicNode.hpp"
 
+#include "StringFormatNode.hpp"
 #include "ConstantNode.hpp"
 #include "LookUpTable.hpp"
 

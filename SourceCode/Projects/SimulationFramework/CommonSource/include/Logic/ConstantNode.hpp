@@ -1,5 +1,5 @@
-#ifndef MultiTypeNode_hpp
-#define  MultiTypeNode_hpp
+#ifndef ConstantNode_hpp
+#define  ConstantNode_hpp
 
 #include "LogicNode.hpp"
 
@@ -43,6 +43,6 @@ namespace LogicNodes{
     };
 };
 
-#endif // MultiTypeNode_hpp
+#endif // ConstantNode_hpp
 
 
