@@ -12,7 +12,7 @@
 #include "EnumClassHelper.hpp"
 
 #include "LogicCommon.hpp"
-#include LogicTypes_INCLUDE_FILE
+
 
 class LogicNode;
 template<typename T> class LogicSocket;
@@ -44,6 +44,12 @@ public:
                   " Types of sockets do not coincide: " <<
                   LogicTypes::getTypeName(this->m_type) << " and " << LogicTypes::getTypeName(iter::pos::value) );
         return static_cast< LogicSocket<T> * >(this);
+    }
+
+    template<typename TVisitor>
+    void applyVisitor(TVisitor & visitor){
+        // implement switch statement in LogicTypes
+        LOGICSOCKET_APPLY_VISITOR_SWITCH;
     }
 
     LogicSocketBase(unsigned int type)

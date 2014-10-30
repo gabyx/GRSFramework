@@ -400,9 +400,10 @@ namespace LogicNodes {
 
                 FileHeader,
                 FileFooter,
+                RenderSettings,
                 FrameSettings,
                 CameraSettings,
-                RenderSettings,
+                LightSettings,
 
                 Time,
                 FrameNr,
@@ -433,9 +434,10 @@ namespace LogicNodes {
 
         DECLARE_ISOCKET_TYPE(FileHeader, std::string );
         DECLARE_ISOCKET_TYPE(FileFooter,   std::string );
+        DECLARE_ISOCKET_TYPE(RenderSettings, std::string );
         DECLARE_ISOCKET_TYPE(FrameSettings, std::string );
         DECLARE_ISOCKET_TYPE(CameraSettings, std::string );
-        DECLARE_ISOCKET_TYPE(RenderSettings, std::string );
+        DECLARE_ISOCKET_TYPE(LightSettings, std::string );
 
         DECLARE_ISOCKET_TYPE(Time, double );
         DECLARE_ISOCKET_TYPE(FrameNr, unsigned int );
@@ -451,11 +453,12 @@ namespace LogicNodes {
             ADD_ISOCK(Material,nullptr);
 
             // Per Frame
-            ADD_ISOCK(FileHeader,"");
-            ADD_ISOCK(FileFooter,"");
-            ADD_ISOCK(FrameSettings,"");
-            ADD_ISOCK(CameraSettings,"");
-            ADD_ISOCK(RenderSettings,"");
+            ADD_ISOCK(FileHeader,std::string());
+            ADD_ISOCK(FileFooter,std::string());
+            ADD_ISOCK(RenderSettings,std::string());
+            ADD_ISOCK(FrameSettings,std::string());
+            ADD_ISOCK(CameraSettings,std::string());
+            ADD_ISOCK(LightSettings,std::string());
 
             // FrameData
             ADD_ISOCK(Time,0.0);
@@ -514,11 +517,13 @@ namespace LogicNodes {
 
         void writeFrameStart(){
             std::stringstream s;
-            s << "FrameBegin\n";
+            s << "FrameBegin " << GET_ISOCKET_REF_VALUE(FrameNr) << "\n";
             writeFrameSettings(s);
             writeRenderSettings(s);
             writeCamera(s);
             s << "WorldBegin\n";
+            writeLightSettings(s);
+            //std::cout << "s: " << s.str()<< std::endl;
             dumpStream(s);
         }
         void writeFrameEnd(){
@@ -638,6 +643,9 @@ namespace LogicNodes {
         void writeCamera(std::stringstream & s){
             s << GET_ISOCKET_REF_VALUE(CameraSettings);
         }
+        void writeLightSettings(std::stringstream & s){
+            s << GET_ISOCKET_REF_VALUE(LightSettings);
+        }
         void writeRenderSettings(std::stringstream & s){
             s << GET_ISOCKET_REF_VALUE(RenderSettings);
         }
@@ -649,9 +657,9 @@ namespace LogicNodes {
             }
             else{
                 // Write to file
-                ASSERTMSG(m_frameFile.good(),"FUCK");
                 m_frameFile << s.rdbuf();
-                //m_frameFile.clear();
+                //ASSERTMSG(m_frameFile.good(),"FUCK"); // stream will fail because s can contain nothing, therefore clear()
+                m_frameFile.clear();
             }
         }
 

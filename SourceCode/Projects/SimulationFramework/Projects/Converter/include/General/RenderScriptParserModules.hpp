@@ -14,6 +14,7 @@
 
 #include "RenderScriptParserBaseTraits.hpp"
 
+#include "RenderScriptGenerator.hpp"
 #include "RenderScriptGeneratorLogic.hpp"
 
 
@@ -64,7 +65,7 @@ public:
 
     using GeometryMapType = typename CollectionType::GeometryMapType;
     using MaterialMapType = typename CollectionType::MaterialMapType;
-    using RenderScriptGen = typename CollectionType::RenderScriptGen;
+    using RenderScriptGen = RenderScriptGenerator;
 
     using ExecGroups = typename RenderScriptGen::ExecGroups;
 
@@ -98,6 +99,8 @@ public:
                 createToolColorList(*itNode,id);
             } else if(type == "SimpleFunction") {
                 createToolSimpleFunction(*itNode,id);
+            } else if(type == "StringFormat") {
+                createToolStringFormat(*itNode,id);
             } else if(type == "DisplacementToPosQuat") {
                 createToolDisplacementToPosQuat(*itNode,id);
             }else if(type == "Constant"){
@@ -229,6 +232,60 @@ private:
             }
 
             m_renderScriptGen->addNode(n,false,false);
+
+                std::string gid = matGenNode.attribute("groupId").value();
+                if(gid == "Body"){
+                    m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
+                }else if(gid == "Frame"){
+                    m_renderScriptGen->addNodeToGroup(id, ExecGroups::FRAME);
+                }else{
+                    ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
+                }
+    }
+
+    #define ADD_STRINGFORMAT_SOCKET2(type, typeName) \
+        ( t == #typeName ){ \
+            using T = type; \
+            node->addInput<T>(); \
+        } \
+
+    #define ADD_STRINGFORMAT_SOCKET(type) ADD_STRINGFORMAT_SOCKET2(type,type)
+
+    void createToolStringFormat(XMLNodeType & matGenNode, unsigned int id){
+
+            std::string format = matGenNode.attribute("format").value();
+            if(format.empty()){
+                ERRORMSG("---> String conversion in StringFormat tool: format: not defined!");
+            }
+            LogicNodes::StringFormatNode * node = new LogicNodes::StringFormatNode(id,format);
+
+             // Add all format Sockets links
+            auto nodes = matGenNode.children("InputFormat");
+            auto itNodeEnd = nodes.end();
+            for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
+
+
+                std::string t = itNode->attribute("type").value();
+
+                if ADD_STRINGFORMAT_SOCKET(float)
+                else if ADD_STRINGFORMAT_SOCKET(double)
+                else if ADD_STRINGFORMAT_SOCKET(char)
+                else if ADD_STRINGFORMAT_SOCKET(short)
+                else if ADD_STRINGFORMAT_SOCKET(int)
+                else if ADD_STRINGFORMAT_SOCKET(long int)
+                else if ADD_STRINGFORMAT_SOCKET(long long int)
+                else if ADD_STRINGFORMAT_SOCKET(unsigned char)
+                else if ADD_STRINGFORMAT_SOCKET(unsigned short)
+                else if ADD_STRINGFORMAT_SOCKET(unsigned int)
+                else if ADD_STRINGFORMAT_SOCKET(unsigned long int)
+                else if ADD_STRINGFORMAT_SOCKET(unsigned long long int)
+                else if ADD_STRINGFORMAT_SOCKET2(std::string,string)
+                else{
+                    ERRORMSG("---> String conversion in Constant tool: outputType: '" << t << "' not found!");
+                }
+            }
+
+            m_renderScriptGen->addNode(node,false,false);
 
                 std::string gid = matGenNode.attribute("groupId").value();
                 if(gid == "Body"){

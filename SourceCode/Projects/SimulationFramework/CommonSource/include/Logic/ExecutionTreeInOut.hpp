@@ -170,6 +170,21 @@ public:
 
     }
 
+
+    std::string getExecutionOrderInfo(std::string suffix="\t\t"){
+        // Print execution order
+        std::stringstream s;
+        for(auto &g : m_groupExecList){
+            s << suffix << "Execution order for group id: " <<g.first << std::endl;
+            s << suffix << "NodeId\t|\tPriority  "<< std::endl;
+                for(auto n : g.second){
+                    s << suffix << Utilities::stringFormat("%4i \t|\t %4i", n->m_id , n->getPriority()) <<std::endl;
+                }
+            s << suffix << "==============================" <<std::endl;
+        }
+        return s.str();
+    }
+
 protected:
 
     class ExecutionOrderSolver{
@@ -199,13 +214,6 @@ protected:
             for(auto n : orderedNodes) {
                 n->setPriority( -n->getPriority() + maxPrio);
             }
-
-            // Print execution order
-            std::cout << "Execution order:" <<std::endl;
-                for(auto n : orderedNodes){
-                    std::cout << n->m_id <<": " << n->getPriority()<<std::endl;
-                }
-            std::cout << "===" <<std::endl;
 
         }
 

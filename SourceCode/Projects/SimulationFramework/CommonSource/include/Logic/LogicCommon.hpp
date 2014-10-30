@@ -4,6 +4,10 @@
 
 #include <vector>
 
+#include "TypeDefs.hpp"
+
+#include LogicTypes_INCLUDE_FILE
+
 class LogicSocketBase;
 
 namespace LogicSocketCommon{

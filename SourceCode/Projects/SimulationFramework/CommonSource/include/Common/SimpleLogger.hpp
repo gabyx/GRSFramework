@@ -41,11 +41,20 @@ public:
     virtual ~LogSink();
 };
 
+/** File Sink which does not roll itself, LogManager needs to do this!, defaultRollSize default to 5 MiB */
 class LogSinkFile : public LogSink {
 private:
+    static const std::streamsize defaultRollSize = 1<<20;
+
     std::ofstream m_fileStream;
+    std::streamsize m_rollSize = 0; ///< maximum size of file when the file should be rolled
 public:
-    LogSinkFile(const std::string & sink_name, boost::filesystem::path filePath = "" );
+    LogSinkFile(const std::string & sink_name, boost::filesystem::path filePath = "",
+                std::streamsize  rollSize =  defaultRollSize);
+
+    /** Rolls to the start of the file if limit rollSize or internal m_rollSize is reached */
+    void doRollToStart(std::streamsize rollSize = 0);
+    std::streampos getCurrentWritePosition();
     ~LogSinkFile();
 };
 
@@ -103,6 +112,7 @@ public:
 
     inline void setTimer(CPUTimer * time=nullptr){ m_time = time;}
 
+    const std::vector<LogSink *> & getSinks(){ return m_sinkList;}
     bool addSink(LogSink * sink);
     bool removeSink(std::string sink_name);
 
@@ -196,6 +206,10 @@ public:
 
     Log * getLog(const std::string & name);
     bool  existsLog(const std::string & name);
+
+    /** Checks all FileSinks and set the write pointer to the beginning if rollSize is exceeded */
+    void rollAllLogs(std::streamsize rollSize = 0);
+
 };
 
 };

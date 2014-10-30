@@ -22,9 +22,7 @@
 #include <stdarg.h>  // for va_start, etc
 #include <memory>    // for std::unique_ptr
 
-
-#define TINYFORMAT_ERROR
-#include <tinyformat.h>
+#include "TinyFormatInclude.hpp"
 
 #include "StaticAssert.hpp"
 #include "AssertionDebug.hpp"
