@@ -92,7 +92,7 @@ private:
         pBar.start();
 
         // Put read pointer to beginning of state
-        fromFile.m_file_stream.seekg( m_startStateIdx * size);
+        fromFile.m_file_stream.seekg( m_startStateIdx * size,std::ios_base::cur);
         for( std::streamoff stateIdx = m_startStateIdx;
         stateIdx <= m_endStateIdx; stateIdx+=m_stepSize) {
 
@@ -104,6 +104,7 @@ private:
              }
 
              fromFile.m_file_stream.read(&byteBuffer[0],size);
+             //std::cout << "t: " <<  *reinterpret_cast<double*>(&byteBuffer[0]) << std::endl;
              toFile->m_file_stream.write(&byteBuffer[0],size);
              // Jump over all remaining states
              fromFile.m_file_stream.seekg( size * (m_stepSize-1),std::ios_base::cur);

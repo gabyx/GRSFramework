@@ -71,6 +71,7 @@ void RenderScriptConverter::loadMaterialCollection() {
     LOGRCLEVEL1(m_log, "---> Load Materials finished " << std::endl;)
 
     LOGRCLEVEL1(m_log, "---> Setup Mapper ..." << std::endl;)
+    m_renderData.m_renderScriptGen.setLog(m_log);
     m_renderData.m_renderScriptGen.setup();
 
 //    ExecutionTreeInOut m;

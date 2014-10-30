@@ -1,6 +1,7 @@
 #ifndef StringFormatNode_hpp
 #define StringFormatNode_hpp
 
+#include "TinyFormatInclude.hpp"
 #include "CommonFunctions.hpp"
 
 #include "LogicNode.hpp"
@@ -10,34 +11,78 @@ namespace LogicNodes{
     class StringFormatNode: public LogicNode {
 
     private:
-        // Visitor
-        struct VisitorConv{
-            std::stringstream m_s;
-            std::string * m_f = nullptr;
 
-
-            void reset(){
-                m_s.str("");
+    /** Light-weight argument storage which can be passed to tfm::vformat function to format with the format string */
+    class VFormatList
+    {
+        public:
+            /**
+                Two versions of add(), to avoid copying and storing the value where possible.
+            */
+            template<typename T>
+            void add(const T& value)
+            {
+                m_argList.emplace_back(value);
             }
 
-            void setFormat(std::string * s){
-                m_f = s;
+            /** save interal as we have received an universal reference, but only rvalue reference binds to this overload
+            *   as we have an overload for lvalue references
+            */
+            template<typename T>
+            void add(const T&& value)
+            {
+                m_argStore.emplace_back(new AnyT<T>(std::move(value)) );
+                const T& storedValue = static_cast<AnyT<T>&>(*m_argStore.back()).value;
+                m_argList.emplace_back(storedValue);
             }
+
+            /** Cast to FormatList */
+            operator tfm::FormatList()
+            {
+                return tfm::FormatList(m_argList.data(), m_argList.size());
+            }
+
+            /** Clear all arguments  (deletes all allocated memory) */
+            void clear(){
+                m_argList.clear();
+                m_argStore.clear();
+            }
+
+        private:
+            struct Any { };
 
             template<typename T>
-            void operator()(LogicSocket<T> * n){
-                m_s << Utilities::stringFormat(*m_f,n->getValue()) ;
-            }
+            struct AnyT : Any
+            {
+                T value;
+                AnyT(const T& value) : value(value) { }
+            };
 
-//            template<typename T>
-//            void operator()(LogicSocket<T> * n){
-//                ERRORMSG("Cannot convert input of type: " << LogicTypes::getTypeName<T>() + " to string, not implemented!" );
-//            }
+            std::vector<tfm::detail::FormatArg> m_argList;
+            std::vector<std::unique_ptr<Any>> m_argStore;
+    };
 
-        };
+
+    // Visitor for adding to Format List
+    struct FormatListAdder{
+        FormatListAdder(VFormatList & formatList): m_fList(formatList) {}
+
+        template<typename T>
+        void operator()(LogicSocket<T> * n){
+            m_fList.add(n->getValue());
+        }
+
+        VFormatList & m_fList;
+    };
 
     public:
 
+        struct Inputs {
+            enum {
+                Format,
+                INPUTS_LAST
+            };
+        };
 
         struct Outputs {
             enum {
@@ -46,13 +91,16 @@ namespace LogicNodes{
             };
         };
 
-        enum {
-            N_OUTPUTS = Outputs::OUTPUTS_LAST
+         enum {
+            N_INPUTS  = Inputs::INPUTS_LAST,
+            N_OUTPUTS = Outputs::OUTPUTS_LAST,
         };
 
+        DECLARE_ISOCKET_TYPE(Format, std::string );
         DECLARE_OSOCKET_TYPE(String, std::string );
 
-        StringFormatNode(unsigned int id) : LogicNode(id) {
+        StringFormatNode(unsigned int id, std::string format) : LogicNode(id) {
+            ADD_ISOCK(Format,format);
             ADD_OSOCK(String,"");
         }
 
@@ -60,26 +108,37 @@ namespace LogicNodes{
         }
 
         template<typename T>
-        void addInputAndFormatSocket(std::string format, T def = T()){
-            addISock<T>(def);
-            addISock<std::string>(format);
+        void addInput( T value = T() ){
+             addISock<T>(value);
         }
 
         virtual void compute(){
-            static VisitorConv conv;
+            static std::stringstream s;
+            static FormatListAdder adder(m_formatList);
 
-            conv.reset();
+            s.str("");
+            m_formatList.clear();
 
-            //Iterate over all inputs and apply converter visitor
+            //Iterate over all inputs and add to format_list with visitor
             auto & inList =  getInputs();
-            for(unsigned int i=0; i <inList.size(); i=i+2){
-                conv.setFormat(  &getISocketRefValue<std::string>(i+1) );
-                inList[i]->applyVisitor(conv);
+            for(unsigned int i=1; i <inList.size(); i=i++){
+                inList[i]->applyVisitor(adder);
             }
-            std::cout << conv.m_s.str() << std::endl;
-            SET_OSOCKET_VALUE(String, conv.m_s.str() );
+            //std::cout << conv.m_s.str() << std::endl;
+
+            // Convert the format string with the format list
+            try{
+                tfm::vformat(s, GET_ISOCKET_REF_VALUE(Format).c_str(), m_formatList);
+            }catch(...){
+                ERRORMSG("Conversion of string in tool " << this->m_id << " failed!")
+            }
+
+            SET_OSOCKET_VALUE(String, s.str());
         }
         virtual void initialize(){}
+
+        private:
+        VFormatList m_formatList;
     };
 };
 

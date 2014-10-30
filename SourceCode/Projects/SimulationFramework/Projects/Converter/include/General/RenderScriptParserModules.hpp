@@ -245,21 +245,25 @@ private:
     #define ADD_STRINGFORMAT_SOCKET2(type, typeName) \
         ( t == #typeName ){ \
             using T = type; \
-            node->addInputAndFormatSocket<T>(format); \
+            node->addInput<T>(); \
         } \
 
     #define ADD_STRINGFORMAT_SOCKET(type) ADD_STRINGFORMAT_SOCKET2(type,type)
 
     void createToolStringFormat(XMLNodeType & matGenNode, unsigned int id){
 
-            LogicNodes::StringFormatNode * node = new LogicNodes::StringFormatNode(id);
+            std::string format = matGenNode.attribute("format").value();
+            if(format.empty()){
+                ERRORMSG("---> String conversion in StringFormat tool: format: not defined!");
+            }
+            LogicNodes::StringFormatNode * node = new LogicNodes::StringFormatNode(id,format);
 
              // Add all format Sockets links
             auto nodes = matGenNode.children("InputFormat");
             auto itNodeEnd = nodes.end();
             for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
 
-                std::string format = itNode->attribute("format").value();
+
                 std::string t = itNode->attribute("type").value();
 
                 if ADD_STRINGFORMAT_SOCKET(float)

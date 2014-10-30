@@ -29,6 +29,7 @@ class RenderScriptGenerator : public ExecutionTreeInOut{
 
         RenderScriptGenerator(){};
 
+        void setLog(Logging::Log * log){ m_log = log };
 
         void setup();
 
@@ -44,6 +45,7 @@ class RenderScriptGenerator : public ExecutionTreeInOut{
 
         LogicNodes::FrameData * m_frameData =  nullptr;
 
+        Logging::Log * m_log = nullptr;
 };
 
 
