@@ -36,10 +36,14 @@ LogSink::~LogSink() {
 
 
 
-// LogSinkFile =================================================
-LogSinkFile::LogSinkFile(const std::string & sink_name, boost::filesystem::path filePath): LogSink(sink_name) {
+/**
+*   maxSize = 0:
+*/
+LogSinkFile::LogSinkFile(const std::string & sink_name,
+                         boost::filesystem::path filePath,
+                         std::streamsize rollSize): LogSink(sink_name) {
 
-
+    m_rollSize = rollSize;
 
     if(filePath.empty()){
             filePath = "./Logs";
@@ -56,6 +60,26 @@ LogSinkFile::LogSinkFile(const std::string & sink_name, boost::filesystem::path 
     }
     m_pOutStream = &m_fileStream;
 };
+
+std::streampos LogSinkFile::getCurrentWritePosition(){
+    return m_fileStream.tellp();
+}
+
+
+void LogSinkFile::doRollToStart(std::streamsize rollSize){
+    std::streamsize usedRollSize = m_rollSize;
+    // use external rollsize if not zero
+    if(rollSize>0){
+        usedRollSize = rollSize;
+    }
+
+    if( getCurrentWritePosition() >= usedRollSize){
+            // do reset write pointer
+            m_fileStream << "ROLL TO BEGIN" << std::endl;
+            m_fileStream.seekp(0);
+    }
+}
+
 LogSinkFile::~LogSinkFile() {
     //std::cout <<"Delete LogSinkFile:"<<std::endl;
     m_fileStream.flush();
@@ -235,5 +259,24 @@ bool LogManager::existsLog(const std::string & name) {
         return false;
     }
     return true;
+};
+
+void LogManager::rollAllLogs(std::streamsize rollSize) {
+    std::lock_guard<std::mutex> l(m_busy_mutex);
+
+    // if rollSize = 0, each file is treated seperately
+    // if rollSize > 0, this size is used for all files
+
+    for(auto & l : m_logList){
+
+        auto & sinks = l.second->getSinks();
+        for(auto &s : sinks){
+            Logging::LogSinkFile* f = dynamic_cast<Logging::LogSinkFile*>(s);
+            if(f){
+                f->doRollToStart(rollSize);
+            }
+        }
+
+    }
 };
 

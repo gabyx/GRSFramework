@@ -14,6 +14,7 @@
 
 #include "RenderScriptParserBaseTraits.hpp"
 
+#include "RenderScriptGenerator.hpp"
 #include "RenderScriptGeneratorLogic.hpp"
 
 
@@ -64,7 +65,7 @@ public:
 
     using GeometryMapType = typename CollectionType::GeometryMapType;
     using MaterialMapType = typename CollectionType::MaterialMapType;
-    using RenderScriptGen = typename CollectionType::RenderScriptGen;
+    using RenderScriptGen = RenderScriptGenerator;
 
     using ExecGroups = typename RenderScriptGen::ExecGroups;
 

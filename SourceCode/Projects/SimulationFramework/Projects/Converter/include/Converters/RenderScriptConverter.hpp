@@ -17,6 +17,7 @@
 #include "SimpleLogger.hpp"
 #include "MultiBodySimFile.hpp"
 #include "RenderData.hpp"
+#include "RenderScriptGenerator.hpp"
 
 class RenderScriptConverter {
 public:
@@ -30,9 +31,13 @@ public:
                   boost::filesystem::path sceneFile,
                   boost::filesystem::path materialFile,
                   Renderer renderer);
+
+    using RenderScriptGen = RenderScriptGenerator;
+
 private:
 
     RenderData m_renderData;
+    RenderScriptGen m_renderScriptGen;
 
     void loadGeometryCollection();
     void loadMaterialCollection();

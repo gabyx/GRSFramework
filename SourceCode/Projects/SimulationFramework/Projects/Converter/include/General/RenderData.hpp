@@ -12,7 +12,7 @@
 #include DynamicsSystem_INCLUDE_FILE
 
 #include "RenderMaterial.hpp"
-#include "RenderScriptGenerator.hpp"
+
 
 namespace ParserModules {
 template<typename TParserTraits>
@@ -102,15 +102,12 @@ private:
 
 };
 
-
-
 #define  DEFINE_RENDERCONVERTERDATA_TYPES  \
     DEFINE_DYNAMICSYSTEM_BASE_TYPES \
     using GeometryMapType = std::unordered_map< RigidBodyIdType , typename RigidBodyType::GeometryType>; \
     using ScalesMap = std::unordered_map< RigidBodyIdType ,Vector3 >; \
     using VisMeshMap = std::unordered_map< RigidBodyIdType , boost::filesystem::path  >; \
     using MaterialMapType = std::unordered_map<unsigned int, RenderMaterial * >; \
-    using RenderScriptGen = RenderScriptGenerator;
 
 class RenderData {
 public:
@@ -134,8 +131,6 @@ public:
 
 
     MaterialMapType m_materials;
-    RenderScriptGen m_renderScriptGen;
-
 
 };
 

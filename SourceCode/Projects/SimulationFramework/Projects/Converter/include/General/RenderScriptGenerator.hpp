@@ -3,6 +3,7 @@
 
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
+#include "SimpleLogger.hpp"
 
 #include "MultiBodySimFile.hpp"
 #include "ExecutionTreeInOut.hpp"
@@ -29,7 +30,7 @@ class RenderScriptGenerator : public ExecutionTreeInOut{
 
         RenderScriptGenerator(){};
 
-        void setLog(Logging::Log * log){ m_log = log };
+        void setLog(Logging::Log * log){ m_log = log; }
 
         void setup();
 

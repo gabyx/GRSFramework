@@ -263,6 +263,10 @@ void SimulationManagerMPI::startSim() {
             LOG(m_pSimulationLog, "---> SimulationManager: Timestepper finished, needed: " << runtime << " sec. , exit..."<< std::endl );
             break;
         }
+
+
+        // Roll all registered log files
+        Logging::LogManager::getSingletonPtr()->rollAllLogs();
     }
 
     m_pTimestepper->closeAllFiles();

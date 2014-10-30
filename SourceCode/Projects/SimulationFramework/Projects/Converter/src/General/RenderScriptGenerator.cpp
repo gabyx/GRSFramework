@@ -4,31 +4,12 @@
 #include "RenderScriptGeneratorLogic.hpp"
 
 
-//void RenderScriptGenerator::addNode( LogicNode * node, bool isInput, bool isOutput)
-//{
-//
-//    if(groupId >= ExecGroups::NGROUPS){
-//        ERRORMSG("Group id: " << groupId << " of node id" << node->m_id << " not a valid group number!" )
-//    }
-//
-//    this->addNode(node,isInput,isOutput);
-//
-//
-//}
-//
-//void RenderScriptGenerator::addNodeToGroup( unsigned int nodeId, unsigned int groupId)
-//
-//    ExecutionTreeInOut::addNodeToGroup(nodeId,groupId);
-//
-//    // if group id = ExecGroups::FRAMEGROUP
-//    if( groupId == ExecGroups::FRAME){
-//        // add this to the frame update list
-//        LogicNodes::RenderScriptWriter * r = dynamic_cast<LogicNodes::RenderScriptWriter * >(n.second);
-//    }
-//
-
 void RenderScriptGenerator::setup() {
+
+
     ExecutionTreeInOut::setup();
+
+    LOG(m_log, this->getExecutionOrderInfo() );
 
     if( !m_bodyDataNode  ) {
         ERRORMSG("Execution tree has no input node of type 'BodyData' ")

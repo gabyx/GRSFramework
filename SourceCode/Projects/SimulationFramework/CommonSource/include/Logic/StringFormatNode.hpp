@@ -121,10 +121,10 @@ namespace LogicNodes{
 
             //Iterate over all inputs and add to format_list with visitor
             auto & inList =  getInputs();
-            for(unsigned int i=1; i <inList.size(); i=i++){
+            for(unsigned int i=1; i <inList.size(); i++){
                 inList[i]->applyVisitor(adder);
             }
-            //std::cout << conv.m_s.str() << std::endl;
+
 
             // Convert the format string with the format list
             try{
@@ -132,7 +132,6 @@ namespace LogicNodes{
             }catch(...){
                 ERRORMSG("Conversion of string in tool " << this->m_id << " failed!")
             }
-
             SET_OSOCKET_VALUE(String, s.str());
         }
         virtual void initialize(){}
