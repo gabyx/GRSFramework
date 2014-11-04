@@ -172,10 +172,12 @@ T & LogicSocket<T>::getRefValue() {
 }
 
 #define ADD_ISOCK( name, value )      \
+    ASSERTMSG(Inputs::name == this->m_inputs.size(), " Wrong order for Input: " << Inputs::name) \
 	addISock < IType##name > ( value );	\
 
 
 #define ADD_OSOCK(name, value)      \
+    ASSERTMSG(Outputs::name == this->m_outputs.size(), " Wrong order for Output: " << Outputs::name) \
 	addOSock< OType##name > (  value );	\
 
 
@@ -198,7 +200,7 @@ T & LogicSocket<T>::getRefValue() {
 	getISocketRefValue< IType##name > ( (Inputs::name) )
 
 #define GET_OSOCKET_REF_VALUE( name )      \
-	getISocketRefValue< OType##name > ( (Outputs::name) )
+	getOSocketRefValue< OType##name > ( (Outputs::name) )
 
 
 #define GET_ISOCKET( name )      \

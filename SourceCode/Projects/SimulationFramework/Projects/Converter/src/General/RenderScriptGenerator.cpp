@@ -54,6 +54,13 @@ void RenderScriptGenerator::initFrame(boost::filesystem::path folder, std::strin
      }
 }
 
+void RenderScriptGenerator::finalizeFrame(){
+    // Call all render script writters
+     for(auto & n : m_scriptWritterNodes){
+        n->finalizeFrame();
+     }
+}
+
 void RenderScriptGenerator::generateFrameData(RigidBodyStateAdd * s) {
     // Set body data
     m_bodyDataNode->setOutputs(s);

@@ -245,7 +245,7 @@ private:
         // Join states together
         std::cerr << "---> Open new output file at: "  <<  m_oFile << std::endl;
         MultiBodySimFile output;
-        if(!output.openWrite(m_oFile,dofq,dofu,0,true)){
+        if(!output.openWrite_impl(m_oFile,dofq,dofu,0,true)){
             ERRORMSG(output.getErrorString());
         };
 

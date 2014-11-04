@@ -15,8 +15,8 @@
 #include "RenderScriptConverter.hpp"
 
 
-void printHelpAndExit(){
-     std::cerr << "Wrong Options: " << argv[1] << std::endl
+void printHelpAndExit(std::string o=""){
+     std::cerr << "Wrong Options: '" << o <<"'"<< std::endl
             << " Help: \n"
             << "    converter sim      [-h|--help]        : Sim File Converter\n"
             << "    converter renderer [-h|--help]        : Sim File / Scene to Renderfile Converter" << std::endl;
@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
                     exit(EXIT_FAILURE);
             }
         }else{
-           printHelpAndExit();
+           printHelpAndExit(std::string(argv[1]));
         }
     }else{
         printHelpAndExit();

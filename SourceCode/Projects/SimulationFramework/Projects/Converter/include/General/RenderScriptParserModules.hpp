@@ -61,6 +61,7 @@ private:
 template<typename TParserTraits>
 class ScriptGeneratorModule {
 public:
+    DEFINE_LAYOUT_CONFIG_TYPES
     DEFINE_MATCOLPARSER_TYPE_TRAITS(TParserTraits)
 
     using GeometryMapType = typename CollectionType::GeometryMapType;
@@ -97,18 +98,24 @@ public:
                 createToolMatteMaterial(*itNode,id);
             } else if(type == "ColorList") {
                 createToolColorList(*itNode,id);
+            } else if(type == "ColorGradient") {
+                createToolColorGradient(*itNode,id);
             } else if(type == "SimpleFunction") {
                 createToolSimpleFunction(*itNode,id);
             } else if(type == "StringFormat") {
                 createToolStringFormat(*itNode,id);
             } else if(type == "DisplacementToPosQuat") {
                 createToolDisplacementToPosQuat(*itNode,id);
+            } else if(type == "VelocityToVelRot") {
+                createToolVelocityToVelRot(*itNode,id);
+            }else if(type == "Norm") {
+                createToolNorm(*itNode,id);
             }else if(type == "Constant"){
                 createToolConstant(*itNode,id);
             } else if(type == "RendermanWriter") {
                 createToolRendermanOutput(*itNode,id);
             } else {
-                ERRORMSG("---> String conversion in Tool: type not found!");
+                ERRORMSG("---> String conversion in Tool: type: " << type <<" not found!");
             }
 
 
@@ -241,6 +248,33 @@ private:
                 }else{
                     ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
                 }
+    }
+
+    #define DEFINE_NORM2(type, typeName) \
+        ( t == #typeName ){ using T = type; \
+        n = new LogicNodes::NormNode<T>(id); \
+        } \
+
+    #define DEFINE_NORM(type) DEFINE_NORM2(type,type)
+    void createToolNorm(XMLNodeType & matGenNode, unsigned int id){
+
+            std::string t = matGenNode.attribute("inputType").value();
+            LogicNode * n;
+            if DEFINE_NORM(Vector3)
+            else{
+                ERRORMSG("---> String conversion in Constant tool: outputType: '" << t << "' not found!");
+            }
+
+            m_renderScriptGen->addNode(n,false,false);
+
+            std::string gid = matGenNode.attribute("groupId").value();
+            if(gid == "Body"){
+                m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
+            }else if(gid == "Frame"){
+                m_renderScriptGen->addNodeToGroup(id, ExecGroups::FRAME);
+            }else{
+                ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
+            }
     }
 
     #define ADD_STRINGFORMAT_SOCKET2(type, typeName) \
@@ -453,6 +487,50 @@ private:
             m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
     }
 
+    void createToolColorGradient(XMLNodeType & matGenNode, unsigned int id){
+
+
+            double min;
+            if(!Utilities::stringToType(min, matGenNode.attribute("min").value())) {
+                ERRORMSG("---> String conversion in ColorList tool: amp failed");
+            }
+            double max;
+            if(!Utilities::stringToType(max, matGenNode.attribute("max").value())) {
+                ERRORMSG("---> String conversion in ColorList tool: amp failed");
+            }
+            if(min>=max){
+                ERRORMSG("---> String conversion in ColorGradient tool: min/max not feasible!");
+            }
+
+            LogicNodes::ColorGradientNode * n = new LogicNodes::ColorGradientNode(id,min,max);
+
+            // Add all format Sockets links
+            auto nodes = matGenNode.children("Color");
+            auto itNodeEnd = nodes.end();
+            bool noColors = true;
+            for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
+
+                noColors = false;
+
+                Vector3 rgb;
+                if(!Utilities::stringToVector3(rgb, itNode->attribute("rgb").value())) {
+                    ERRORMSG("---> String conversion in ColorGradient tool: rgb failed");
+                }
+                PREC value;
+                if(!Utilities::stringToType(value, itNode->attribute("value").value())) {
+                    ERRORMSG("---> String conversion in ColorGradient tool: value failed");
+                }
+                n->addColorPoint(rgb,value);
+            }
+            if(noColors){
+                n->createDefaultHeatMapGradient();
+            }
+
+            m_renderScriptGen->addNode(n,false,false);
+            m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
+    }
+
+
     void createToolMatteMaterial(XMLNodeType & matGenNode, unsigned int id) {
         auto * node = new LogicNodes::MatteMaterial(id);
         m_renderScriptGen->addNode(node,false,false);
@@ -476,6 +554,14 @@ private:
     void createToolDisplacementToPosQuat(XMLNodeType & matGenNode, unsigned int id) {
 
         auto * node = new LogicNodes::DisplacementToPosQuat(id);
+        m_renderScriptGen->addNode(node,false,false);
+        m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
+
+    }
+
+    void createToolVelocityToVelRot(XMLNodeType & matGenNode, unsigned int id) {
+
+        auto * node = new LogicNodes::VelocityToVelRot(id);
         m_renderScriptGen->addNode(node,false,false);
         m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
 

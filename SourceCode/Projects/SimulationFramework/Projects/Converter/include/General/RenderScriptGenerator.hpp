@@ -35,6 +35,7 @@ class RenderScriptGenerator : public ExecutionTreeInOut{
         void setup();
 
         void initFrame(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
+        void finalizeFrame();
         void generateFrameData(RigidBodyStateAdd * s);
 
         void setFrameData(LogicNodes::FrameData *n){m_frameData = n;};
