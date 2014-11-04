@@ -14,6 +14,7 @@
 
 #include "StringFormatNode.hpp"
 #include "ConstantNode.hpp"
+#include "NormNode.hpp"
 #include "LookUpTable.hpp"
 
 #include "RigidBodyState.hpp"
@@ -21,6 +22,8 @@
 #include "RendermanGeometryWriter.hpp"
 #include "RenderData.hpp"
 #include "QuaternionHelpers.hpp"
+
+#include "ColorGradient.hpp"
 
 namespace LogicNodes {
 
@@ -199,6 +202,55 @@ namespace LogicNodes {
         }
     };
 
+    class VelocityToVelRot : public LogicNode {
+    public:
+
+        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+        DEFINE_MPI_INFORMATION_CONFIG_TYPES;
+
+        struct Inputs {
+            enum {
+                Vel,
+                INPUTS_LAST
+            };
+        };
+
+        struct Outputs {
+            enum {
+                TransVel,
+                RotVel,
+                OUTPUTS_LAST
+            };
+        };
+
+        enum {
+            N_INPUTS  = Inputs::INPUTS_LAST,
+            N_OUTPUTS = Outputs::OUTPUTS_LAST,
+            N_SOCKETS = N_INPUTS + N_OUTPUTS
+        };
+
+        DECLARE_ISOCKET_TYPE(Vel, VectorUBody );
+        DECLARE_OSOCKET_TYPE(TransVel, Vector3 );
+        DECLARE_OSOCKET_TYPE(RotVel, Vector3 );
+
+        VelocityToVelRot(unsigned int id) : LogicNode(id) {
+            ADD_ISOCK(Vel,VectorUBody());
+            ADD_OSOCK(TransVel,Vector3(0,0,0));
+            ADD_OSOCK(RotVel, Vector3(0,0,0));
+        }
+
+        ~VelocityToVelRot() {}
+
+        // No initialization
+
+        void compute() {
+            // convert displacement q into position and quaternion
+            SET_OSOCKET_VALUE(TransVel,  GET_ISOCKET_REF_VALUE(Vel).head<3>() );
+            SET_OSOCKET_VALUE(RotVel,  GET_ISOCKET_REF_VALUE(Vel).tail<3>() );
+        }
+    };
+
+
     template<typename InType, typename OutType = InType>
     class SimpleFunction : public LogicNode {
     private:
@@ -330,6 +382,61 @@ namespace LogicNodes {
     };
 
 
+    class ColorGradientNode: public LogicNode, public ColorGradient {
+    public:
+
+        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+        struct Inputs {
+            enum {
+                Enable,
+                Value,
+                INPUTS_LAST
+            };
+        };
+
+        struct Outputs {
+            enum {
+                Color,
+                OUTPUTS_LAST
+            };
+        };
+
+        enum {
+            N_INPUTS  = Inputs::INPUTS_LAST,
+            N_OUTPUTS = Outputs::OUTPUTS_LAST,
+            N_SOCKETS = N_INPUTS + N_OUTPUTS
+        };
+
+        DECLARE_ISOCKET_TYPE(Enable, bool );
+        DECLARE_ISOCKET_TYPE(Value, double );
+        DECLARE_OSOCKET_TYPE(Color, Vector3 );
+
+        ColorGradientNode(unsigned int id, PREC min, PREC max) : LogicNode(id), m_min(min), m_max(max) {
+
+            ADD_ISOCK(Enable,true);
+            ADD_ISOCK(Value,0);
+            ADD_OSOCK(Color,Vector3(0.5,0.5,0.5));
+        }
+        ~ColorGradientNode(){}
+
+        // No initialization
+
+        void compute() {
+            if(GET_ISOCKET_REF_VALUE(Enable)){
+                PREC index = (GET_ISOCKET_REF_VALUE(Value) - m_min)/(m_max-m_min);
+                index = std::max(std::min(1.0,index),0.0);
+                //std::cout <<GET_ISOCKET_REF_VALUE(Value) << std::endl;
+                this->getColorAtValue(index,GET_OSOCKET_REF_VALUE(Color));
+            }
+        }
+    private:
+
+        PREC m_min, m_max;
+
+    };
+
+
     class MatteMaterial: public LogicNode {
     public:
 
@@ -374,7 +481,7 @@ namespace LogicNodes {
             if(GET_ISOCKET_REF_VALUE(Enable)){
                 Vector3 & c = GET_ISOCKET_REF_VALUE(Color);
                 std::string s = "Color [" + std::to_string(c(0)) + " " + std::to_string(c(1)) + " " + std::to_string(c(2)) + "]\n";
-                s.append("Surface \"matte\" \"float Kd\" [1.0] \"float Ka\" [1.0]");
+                s.append("Surface \"matte\" \"float Kd\" [1.0] \"float Ka\" [1.0]\nAttribute \"visibility\" \"transmission\" 1");
                 m_material.setMaterialString( s );
                 SET_OSOCKET_VALUE(Material, &m_material);
             }
@@ -403,7 +510,9 @@ namespace LogicNodes {
                 RenderSettings,
                 FrameSettings,
                 CameraSettings,
-                LightSettings,
+                WorldSettings,
+                BodyBegin,
+                BodyEnd,
 
                 Time,
                 FrameNr,
@@ -437,7 +546,9 @@ namespace LogicNodes {
         DECLARE_ISOCKET_TYPE(RenderSettings, std::string );
         DECLARE_ISOCKET_TYPE(FrameSettings, std::string );
         DECLARE_ISOCKET_TYPE(CameraSettings, std::string );
-        DECLARE_ISOCKET_TYPE(LightSettings, std::string );
+        DECLARE_ISOCKET_TYPE(WorldSettings, std::string );
+        DECLARE_ISOCKET_TYPE(BodyBegin, std::string );
+        DECLARE_ISOCKET_TYPE(BodyEnd, std::string );
 
         DECLARE_ISOCKET_TYPE(Time, double );
         DECLARE_ISOCKET_TYPE(FrameNr, unsigned int );
@@ -458,7 +569,9 @@ namespace LogicNodes {
             ADD_ISOCK(RenderSettings,std::string());
             ADD_ISOCK(FrameSettings,std::string());
             ADD_ISOCK(CameraSettings,std::string());
-            ADD_ISOCK(LightSettings,std::string());
+            ADD_ISOCK(WorldSettings,std::string());
+            ADD_ISOCK(BodyBegin,std::string());
+            ADD_ISOCK(BodyEnd,std::string());
 
             // FrameData
             ADD_ISOCK(Time,0.0);
@@ -471,13 +584,16 @@ namespace LogicNodes {
         virtual void writeHeader() = 0;
         virtual void writeFrameStart() = 0;
 
+        virtual void writeBodyBegin() = 0;
         virtual void writeBody() = 0;
+        virtual void writeBodyEnd() = 0;
 
         virtual void writeFrameEnd() = 0;
         virtual void writeFooter() = 0;
 
 
         virtual void initFrame() = 0;
+        virtual void finalizeFrame() = 0;
 
         virtual ~RenderScriptWriter(){};
         void compute() {ERRORMSG("Should not be evaluated!")};
@@ -501,53 +617,47 @@ namespace LogicNodes {
         }
 
         virtual ~RendermanWriter() {
-            m_frameFile.close();
+
+            if(m_pipeToSubProcess){
+                if(m_subprocess){
+                pclose(m_subprocess);
+                }
+            }else{
+                m_frameFile.close();
+            }
         }
 
         void writeHeader(){
-            std::stringstream s;
-            s << GET_ISOCKET_REF_VALUE(FileHeader);
-            dumpStream(s);
+            m_s << GET_ISOCKET_REF_VALUE(FileHeader);
         }
         void writeFooter(){
-            std::stringstream s;
-            s << GET_ISOCKET_REF_VALUE(FileFooter);
-            dumpStream(s);
+            m_s << GET_ISOCKET_REF_VALUE(FileFooter);
         }
 
         void writeFrameStart(){
-            std::stringstream s;
-            s << "FrameBegin " << GET_ISOCKET_REF_VALUE(FrameNr) << "\n";
-            writeFrameSettings(s);
-            writeRenderSettings(s);
-            writeCamera(s);
-            s << "WorldBegin\n";
-            writeLightSettings(s);
+            m_s << "FrameBegin " << GET_ISOCKET_REF_VALUE(FrameNr) << "\n";
+            writeFrameSettings();
+            writeRenderSettings();
+            writeCamera();
+            m_s << "WorldBegin\n";
+            writeWorldSettings();
+            writeBodyBegin();
             //std::cout << "s: " << s.str()<< std::endl;
-            dumpStream(s);
         }
         void writeFrameEnd(){
-            std::stringstream s;
-            s << "WorldEnd\nFrameEnd\n";
-            dumpStream(s);
+            writeBodyEnd();
+            m_s << "WorldEnd\nFrameEnd\n";
         }
 
+        void writeBodyBegin(){
+            m_s << GET_ISOCKET_REF_VALUE(BodyBegin);
+        }
         void writeBody(){
 
-            // Fill into
-
-            // Write the begin block of the rib file
-            static std::stringstream s;
-
-            s.clear();
-            s.str("");
-            s.seekp(0);
-            s.seekg(0);
-
-            s << "AttributeBegin\n";
+            m_s << "AttributeBegin\n";
 
             // Write position and quaternion
-            writePosQuat(s);
+            writePosQuat(m_s);
             // First get the id of the body then
             RigidBodyIdType & id = GET_ISOCKET_REF_VALUE(BodyId);
             auto geomIt = m_geomMap->find( id );
@@ -559,19 +669,25 @@ namespace LogicNodes {
                 WARNINGMSG(false,"No material pointer in input at RendermanWriter!")
             }
             else{
-                    GET_ISOCKET_REF_VALUE(Material)->write(s);
+                    GET_ISOCKET_REF_VALUE(Material)->write(m_s);
             }
             // Write the geometry
-            m_geomWriter.setStream(&s);
+            m_geomWriter.setStream(&m_s);
             geomIt->second.apply_visitor(m_geomWriter);
 
             // finish
-            s << "AttributeEnd\n";
+            m_s << "AttributeEnd\n";
 
-            dumpStream(s);
+            dumpStream();
+        }
+
+        void writeBodyEnd(){
+            m_s << GET_ISOCKET_REF_VALUE(BodyEnd);
         }
 
         void initFrame() {
+
+            m_s.str("");
 
             if( !GET_ISOCKET(Folder)->isConnected() ||
                 !GET_ISOCKET(Name)->isConnected() ||
@@ -580,17 +696,24 @@ namespace LogicNodes {
                 ERRORMSG("RendermanWriter::initFrame --> one of Folder,Name,Time,FrameNr sockets not connected to any FrameData node!")
             }
 
-            // finish last frame
-            if(isFileOpen()){
-               writeFrameEnd();
-               writeFooter();
-            }
             // open new frame
             openNewFile();
 
             // write init
             writeHeader();
             writeFrameStart();
+            dumpStream();
+        }
+
+        void finalizeFrame(){
+            // finish last frame
+            if(isFileOpen()){
+               writeFrameEnd();
+               writeFooter();
+               dumpStream();
+            }
+
+            closeFile();
         }
 
     protected:
@@ -619,7 +742,6 @@ namespace LogicNodes {
 
             }else{
                 //open file
-                m_frameFile.close();
                 m_frameFile.open(p.string(),std::ios::trunc | std::ios::out);
                 if(!m_frameFile.is_open()) {
                     ERRORMSG("Render frame at : " << p << " could not be opened!")
@@ -628,80 +750,108 @@ namespace LogicNodes {
                 m_frameFile << "# Frame for t: " << GET_ISOCKET_REF_VALUE(Time) << "\n";
             }
         }
+        void closeFile(){
+            if(m_pipeToSubProcess){
+                if(m_subprocess){
+                    pclose(m_subprocess);
+                    m_subprocess = nullptr;
+                }
+            }else{
+                m_frameFile.close();
+            }
+        }
 
         bool isFileOpen(){
             if(m_pipeToSubProcess){
-                return  m_subprocess;
+                return m_subprocess;
             }else{
                 return m_frameFile.is_open();
             }
         }
 
-        void writeFrameSettings(std::stringstream & s){
-            s << GET_ISOCKET_REF_VALUE(FrameSettings);
+        void writeFrameSettings(){
+            m_s << GET_ISOCKET_REF_VALUE(FrameSettings);
         }
-        void writeCamera(std::stringstream & s){
-            s << GET_ISOCKET_REF_VALUE(CameraSettings);
+        void writeCamera(){
+            m_s << GET_ISOCKET_REF_VALUE(CameraSettings);
         }
-        void writeLightSettings(std::stringstream & s){
-            s << GET_ISOCKET_REF_VALUE(LightSettings);
+        void writeWorldSettings(){
+            m_s << GET_ISOCKET_REF_VALUE(WorldSettings);
         }
-        void writeRenderSettings(std::stringstream & s){
-            s << GET_ISOCKET_REF_VALUE(RenderSettings);
+        void writeRenderSettings(){
+            m_s << GET_ISOCKET_REF_VALUE(RenderSettings);
         }
 
-        void dumpStream(std::stringstream & s){
+        void dumpStream(){
             if(m_pipeToSubProcess){
                 // Write to subprocess
-                fputs(s.str().c_str(),m_subprocess);
+                fputs(m_s.str().c_str(),m_subprocess);
             }
             else{
                 // Write to file
-                m_frameFile << s.rdbuf();
+                m_frameFile << m_s.rdbuf();
                 //ASSERTMSG(m_frameFile.good(),"FUCK"); // stream will fail because s can contain nothing, therefore clear()
                 m_frameFile.clear();
             }
+            m_s.clear();
+            m_s.str("");
+            m_s.seekp(0);
+            m_s.seekg(0);
         }
 
-        GeometryMapType * m_geomMap;
+        GeometryMapType * m_geomMap = nullptr;
 
+        std::stringstream m_s;
         std::fstream m_frameFile;
 
         bool m_pipeToSubProcess;
         std::string m_suffix;
         std::string m_command;
-        FILE * m_subprocess;
+        FILE * m_subprocess =nullptr;
 
         RendermanGeometryWriter m_geomWriter;
 
-        void writeBeginHeader(){};
-        void writeEndHeader(){};
-        void writeCamera(){};
+
+        // Homogenous Transform
+        // y = R * x + t = [ R , t ;
+        //                  0 , 1 ] * [x ; 1]
+        // Renderman uses left multiplying homogenous matrices to transform points:
+        // That means (' means transpose):
+        // y' =  [x' , 1] * [ R1' , 0 ;  *  [ R2' , 0 ; = R2' * (x' * R1' +  t1')  + t2'
+        //                    t1' , 1 ]       t2' , 1 ]
+        //
+        // Scale 1 1 -1
+        // Translate 0 0 -3
+        // Rotate -45 1 0 0
+        // ===>   [x',1] * scale(1,1,-1) * translate(0,0,-3) * rotate(-45, 1,0,0) = [y',1]
+
+        // Renderman stores matrices in row-major order!
 
         void writePosQuat(std::stringstream & s) {
             static Matrix44 T = Matrix44::Identity();
 
             QuaternionHelpers::setRotFromQuaternion(GET_ISOCKET_REF_VALUE(BodyOrientation), T.block<3,3>(0,0) );
-            T.col(3).head<3>() = GET_ISOCKET_REF_VALUE(BodyPosition);
-              s << "Transform ["
+            T.row(3).head<3>() = GET_ISOCKET_REF_VALUE(BodyPosition);
+              s << "ConcatTransform ["
+
               << T(0,0) << " "
-              << T(1,0) << " "
-              << T(2,0) << " "
-              << T(3,0) << " "
-
               << T(0,1) << " "
-              << T(1,1) << " "
-              << T(2,1) << " "
-              << T(3,1) << " "
-
               << T(0,2) << " "
-              << T(1,2) << " "
-              << T(2,2) << " "
-              << T(3,2) << " "
-
               << T(0,3) << " "
+
+              << T(1,0) << " "
+              << T(1,1) << " "
+              << T(1,2) << " "
               << T(1,3) << " "
+
+              << T(2,0) << " "
+              << T(2,1) << " "
+              << T(2,2) << " "
               << T(2,3) << " "
+
+              << T(3,0) << " "
+              << T(3,1) << " "
+              << T(3,2) << " "
               << T(3,3) << "]\n";
         };
 

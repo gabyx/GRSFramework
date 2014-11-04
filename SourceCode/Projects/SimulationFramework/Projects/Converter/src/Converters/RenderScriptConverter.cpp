@@ -130,6 +130,12 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
         LOG(m_log, "---> SimFile Properties:" <<std::endl << m_simFile.getDetails() << std::endl)
     }
 
+    CPUTimer timer;
+    timer.start();
+
+    PREC start = 0,avgInitFrameTime = 0, avgStateTime = 0;
+    unsigned int bodyCounter = 0;
+
     while(m_simFile.isGood()){
 
         // Write render script for this frame
@@ -143,17 +149,28 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
         LOG(m_log, "---> Loaded state at t: " <<time << std::endl;)
 
         // Produce Render OutputFile for this state
+        start = timer.elapsedMilliSec();
         m_renderScriptGen.initFrame(m_outputFile.parent_path(), m_outputFile.filename().string(), time, m_frameCounter );
+        avgInitFrameTime += timer.elapsedMilliSec() - start;
+
+        start = timer.elapsedMilliSec();
+
 
         for(auto & bs: states){
-
             m_renderScriptGen.generateFrameData(&bs);
-
+            bodyCounter++;
         }
 
+        avgStateTime += timer.elapsedMilliSec() - start;
+
+
+        m_renderScriptGen.finalizeFrame();
         m_frameCounter++;
 
     }
 
+    LOG(m_log, "---> Converter Speed:" <<std::endl
+        << "Avg. Init Frame Time: " << (avgInitFrameTime / m_frameCounter) << " ms" <<std::endl
+        << "Avg. State Time: " << (avgStateTime / bodyCounter) << " ms" <<std::endl;)
 
 }
