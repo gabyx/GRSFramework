@@ -43,7 +43,7 @@ SET(COMMON_INC
 
     
     ${PROJECT_SOURCE_DIR}/include/General/RenderData.hpp
-    ${PROJECT_SOURCE_DIR}/include/General/RenderDataParserGenerators.hpp
+    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParserGenerators.hpp
     
     ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParser.hpp
     ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParserBaseTraits.hpp
