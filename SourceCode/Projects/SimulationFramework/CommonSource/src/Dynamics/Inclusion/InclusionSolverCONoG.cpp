@@ -104,10 +104,10 @@ void InclusionSolverCONoG::reset() {
 
 
      //Make a new Sor Prox Visitor (takes references from these class member)
-    if(m_pSorProxStepNodeVisitor != nullptr ){ delete m_pSorProxStepNodeVisitor;}
-    if(m_pNormalSorProxStepNodeVisitor != nullptr ){ delete m_pNormalSorProxStepNodeVisitor;}
-    if(m_pTangentialSorProxStepNodeVisitor != nullptr ){ delete m_pTangentialSorProxStepNodeVisitor;}
-    if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
+    if(m_pSorProxStepNodeVisitor != nullptr ){ delete m_pSorProxStepNodeVisitor; m_pSorProxStepNodeVisitor = nullptr;}
+    if(m_pNormalSorProxStepNodeVisitor != nullptr ){ delete m_pNormalSorProxStepNodeVisitor; m_pNormalSorProxStepNodeVisitor = nullptr;}
+    if(m_pTangentialSorProxStepNodeVisitor != nullptr ){ delete m_pTangentialSorProxStepNodeVisitor; m_pTangentialSorProxStepNodeVisitor = nullptr;}
+    if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor; m_pSorProxInitNodeVisitor = nullptr;}
 
     if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_CONTACT ){
 

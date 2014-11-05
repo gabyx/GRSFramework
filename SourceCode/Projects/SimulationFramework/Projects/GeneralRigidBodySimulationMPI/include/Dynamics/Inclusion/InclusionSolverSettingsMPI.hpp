@@ -25,7 +25,7 @@ struct InclusionSolverSettingsMPI
       m_MaxIter = 5000;
       m_AbsTol = 1E-7;
       m_RelTol = 1E-7;
-      m_eMethod = SOR_CONTACT_AC;
+      m_eMethod = SOR_CONTACT;
       m_bUseGPU = false;
       m_UseGPUDeviceId = 0;
       m_bIsFiniteCheck = false;
@@ -59,7 +59,7 @@ struct InclusionSolverSettingsMPI
 
     /**             X=AC : AlartCurnier for UCF Contacts (normal and tangential normal cones),
     *               X=DS : De Saxe for UCF Contacts (combined normal cone) */
-    enum SubMethodUCF{DS,AC} m_eSubMethodUCF;
+    enum SubMethodUCF{UCF_DS,UCF_AC} m_eSubMethodUCF;
 
     /** Drift Correction by adding deltaGap/(deltaT/2) to the normal inclusion
     *   This should only be used with eps_n = 0! otherwise impact law is destroyed with MoreauTimeStepper

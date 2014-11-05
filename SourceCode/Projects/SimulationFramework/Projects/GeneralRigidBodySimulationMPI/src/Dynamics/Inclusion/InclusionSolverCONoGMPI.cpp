@@ -107,18 +107,21 @@ void InclusionSolverCONoGMPI::reset() {
 
 
     //Make a new Sor Prox Visitor (takes references from these class member)
-    if(m_pSorProxStepNodeVisitor != nullptr ){ delete m_pSorProxStepNodeVisitor;}
-    if(m_pNormalSorProxStepNodeVisitor != nullptr ){ delete m_pNormalSorProxStepNodeVisitor;}
-    if(m_pTangentialSorProxStepNodeVisitor != nullptr ){ delete m_pTangentialSorProxStepNodeVisitor;}
-    if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
-    if(m_pSorProxStepSplitNodeVisitor != nullptr ){ delete m_pSorProxStepSplitNodeVisitor;}
+    if(m_pSorProxStepNodeVisitor != nullptr ){ delete m_pSorProxStepNodeVisitor; m_pSorProxStepNodeVisitor = nullptr;}
+    if(m_pNormalSorProxStepNodeVisitor != nullptr ){ delete m_pNormalSorProxStepNodeVisitor; m_pNormalSorProxStepNodeVisitor = nullptr;}
+    if(m_pTangentialSorProxStepNodeVisitor != nullptr ){ delete m_pTangentialSorProxStepNodeVisitor; m_pTangentialSorProxStepNodeVisitor = nullptr;}
+    if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor; m_pSorProxInitNodeVisitor = nullptr;}
+    if(m_pSorProxStepSplitNodeVisitor != nullptr ){ delete m_pSorProxStepSplitNodeVisitor; m_pSorProxStepSplitNodeVisitor = nullptr;}
 
-    if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_CONTACT_AC ){
-         LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor Alart Curnier "<<  std::endl;);
+    if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_CONTACT ){
+
+         if(m_settings.m_eSubMethodUCF == InclusionSolverSettingsType::SubMethodUCF::UCF_AC){
+            LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor Alart Curnier "<<  std::endl;);
+         }else if(m_settings.m_eSubMethodUCF == InclusionSolverSettingsType::SubMethodUCF::UCF_DS){
+
+         }
          m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,m_pContactGraph);
-    }else if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_CONTACT_DS){
-         LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor De Saxe"<<  std::endl;);
-         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,m_pContactGraph);
+
     }else if( m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_FULL ){
          LOG(m_pSimulationLog, "---> Initialize FullSorProxVisitor Alart Curnier"<<  std::endl;);
          m_pSorProxStepNodeVisitor = new FullSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,m_pContactGraph);
@@ -194,8 +197,7 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
 
         // Solve Inclusion
         // =============================================================================================================
-        if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_AC ||
-            m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_DS ||
+        if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT ||
             m_settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL
              ) {
 
