@@ -30,7 +30,7 @@ MultiBodySimFile::~MultiBodySimFile() {
 }
 
 
-bool MultiBodySimFile::isGood() {
+bool MultiBodySimFile::isGood(){
     if(m_file_stream.good()) {
         if( (m_nBytes - m_file_stream.tellg() ) >= ( m_nBytesPerState )  ) {
             return true;
@@ -40,31 +40,43 @@ bool MultiBodySimFile::isGood() {
 }
 
 
-bool MultiBodySimFile::writeOutAllStateTimes() {
+std::vector<double> MultiBodySimFile::getTimeList(){
+
+    std::vector<double> times;
+
+    m_file_stream.seekg(m_beginOfStates);
+    double t;
+    while(isGood()) {
+        *this >> (double &)t;
+        times.push_back(t);
+        m_file_stream.seekg(m_nBytesPerState - sizeof(double),std::ios::cur);
+    }
+    m_file_stream.seekg(m_beginOfStates);
+
+    return std::move(times);
+}
+
+
+bool MultiBodySimFile::writeTimeListToFile(const boost::filesystem::path & f){
+
     using namespace std;
     m_errorString.str("");
+    std::ofstream file;
+    file.open(f.string(), std::ios::trunc | std::ios::out);
 
-    std::fstream file;
-    file.close();
-    boost::filesystem::path new_path = m_filePath.parent_path();
-    new_path /= "SimFileInfo.txt";
-    file.open(new_path.string().c_str(), std::ios::trunc | std::ios::out);
+    auto times = getTimeList();
+
     if(file.good()) {
         file << "# Simfile Information for Path: " << m_filePath.string() <<endl;
 
         m_file_stream.seekg(m_beginOfStates);
         file << "# The following state times are in the sim file: " << m_filePath.string() <<endl;
-        while(isGood()) {
-            double t;
-            *this >> (double &)t;
-            file << "m_t: " << t <<endl;
-            m_file_stream.seekg(m_nBytesPerState - sizeof(double),ios_base::cur);
+        for(auto t : times){
+            file << t << std::endl;
         }
         file.close();
         return true;
     }
-
-    m_errorString << "Could not open text file: " << new_path.string()<< std::endl;
 
     return false;
 }

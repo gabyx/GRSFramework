@@ -19,9 +19,9 @@ class SimFileResampler{
 public:
      void resample(const std::vector<boost::filesystem::path> & inputFiles,
               boost::filesystem::path outputFile,
-              std::streamoff stepSize = 1,
-              std::streamoff startStateIdx = 0,
-              std::streamoff endStateIdx = std::numeric_limits<unsigned int>::max(),
+              std::streamsize stepSize = 1,
+              std::streamsize startStateIdx = 0,
+              std::streamsize endStateIdx = std::numeric_limits<std::streamsize>::max(),
               bool splitStatesIntoFiles = false) {
 
         m_iFiles = inputFiles;
@@ -42,7 +42,7 @@ private:
     std::vector<boost::filesystem::path>  m_iFiles;
     boost::filesystem::path m_oFile;
 
-    std::streamoff m_startStateIdx,  m_endStateIdx, m_stepSize;
+    std::streamsize m_startStateIdx,  m_endStateIdx, m_stepSize;
     bool m_splitStatesIntoFiles;
 
     void resample(){

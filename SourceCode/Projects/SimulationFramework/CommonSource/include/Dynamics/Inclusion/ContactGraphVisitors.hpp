@@ -209,6 +209,8 @@ public:
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
             }
 
+
+
             // Experimental
             //Relaxation term damper (take care R_i_inv needs to be initialized as well!)
             if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD) {
@@ -255,7 +257,7 @@ public:
 //            }
 
             // PROX  prox(lambda - R_i_inv * gamma) ==================================================================================
-            if(m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_DS){
+            if(m_settings.m_eSubMethodUCF == InclusionSolverSettingsType::UCF_DS){
                 // De Saxe Formulation
                 // add correction term mu*gammaT to gammaN (for DeSaxce Cone Formulation)
                 nodeData.m_LambdaFront(0) += nodeData.m_contactParameter.m_params[CMT::muIdx]*nodeData.m_LambdaFront.template tail<2>().norm();
@@ -1085,6 +1087,12 @@ public:
                 nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
             }
 
+            // add deltaGap / deltaT * 2 * alpha
+            if(m_settings.m_useDriftCorrectionGap){
+                nodeData.m_b(0) = -1*nodeData.m_pCollData->m_overlap / m_settings.m_deltaT * 2.0 * m_settings.m_driftCorrectionGapAlpha;
+            }
+
+
             if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD) {
                 using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFD);
                 Vector3 d(  nodeData.m_contactParameter.m_params[CMT::d_NIdx], //d_N
@@ -1101,7 +1109,7 @@ public:
 
             // Calculate R_ii
 
-            if(m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_DS){
+            if(m_settings.m_eSubMethodUCF == InclusionSolverSettingsType::UCF_DS){
                 // De Saxe Formulation, only one r parameter because friction cone
                 if(m_settings.m_RStrategy == InclusionSolverSettingsType::RSTRATEGY_SUM){
                    nodeData.m_R_i_inv_diag.setConstant( m_alpha / nodeData.m_G_ii.diagonal().sum() );

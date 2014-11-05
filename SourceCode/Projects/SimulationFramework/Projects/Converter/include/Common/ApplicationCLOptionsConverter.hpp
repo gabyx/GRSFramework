@@ -244,7 +244,7 @@ private:
     }
 
     void printHelp() {
-        std::cerr << "Help for the Application: \n Options: \n"
+        std::cerr << "Help for the Application Sim: \n Options: \n"
                   << " \t -i|--input <path1> <path2> ... \n"
                   << " \t [Required] \n"
                   <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim file paths which are processed \n"
@@ -272,6 +272,149 @@ private:
                   <<            "\t\t Prints this help\n";
     }
 };
+
+
+/**
+*  @brief CommandLineOptions for the Application
+*/
+class ApplicationCLOptionsSimInfo: public Utilities::Singleton<ApplicationCLOptionsSimConverter>  {
+public:
+    bool m_skipFirstState = true;
+    unsigned int m_stepSize = 1;
+    unsigned int m_startStateIdx = 0;
+    unsigned int m_endStateIdx = std::numeric_limits<unsigned int>::max();
+
+    std::vector<boost::filesystem::path> m_inputFiles;
+
+    void parseOptions(int argc, char **argv) {
+
+
+        using namespace GetOpt;
+        GetOpt::GetOpt_pp ops(argc, argv);
+        ops.exceptions_all();
+        try {
+
+            if( ops >> OptionPresent('h',"help")) {
+                printHelp();
+                exit(EXIT_SUCCESS);
+            }
+
+            m_inputFiles.clear();
+            ops >> Option('i',"input",m_inputFiles);
+            // Clear all empty paths
+            for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); ){
+                    if(it->empty()){
+                        it=m_inputFiles.erase(it);
+                    }
+                    else{
+                        it++;
+                    }
+            }
+
+          //parse in start,step,end
+            if( ops >> OptionPresent("stepSize")) {
+                ops >> Option("stepSize",m_stepSize);
+                m_stepSize = std::max(m_stepSize,1U);
+            }
+
+            if( ops >> OptionPresent("startIdx")) {
+                ops >> Option("startIdx",m_startStateIdx);
+            }
+
+            if( ops >> OptionPresent("endIdx")) {
+                ops >> Option("endIdx",m_endStateIdx);
+            }
+
+            if( ops >> OptionPresent("skipFirstState")) {
+                ops >> Option("skipFirstState",m_skipFirstState);
+            }
+
+            if(m_endStateIdx<m_startStateIdx){
+                 ERRORMSG("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
+            }
+
+
+
+        }
+        catch(GetOpt::ParsingErrorEx & ex){
+            printHelp();
+            ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::InvalidFormatEx & ex){
+            printHelp();
+            ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::OptionNotFoundEx & ex){
+            printHelp();
+            ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::TooManyArgumentsEx & ex){
+            printHelp();
+            ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::TooManyOptionsEx & ex){
+            printHelp();
+            ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
+        }
+        catch(GetOpt::OptionsFileNotFoundEx ex){
+            printHelp();
+            ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
+        } catch(GetOpt::GetOptEx & ex) {
+            printHelp();
+            ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
+        }
+
+        if (ops.options_remain()){
+            printHelp();
+            ERRORMSG("Some unexpected options where given!" )
+        }
+
+    }
+
+    void printArgs(std::ostream & s){
+        s << " Input Files Arg: ";
+        Utilities::printVector(s, m_inputFiles.begin(), m_inputFiles.end(), std::string(" , "));
+        s<<std::endl;
+    }
+
+    void checkArguments() {
+
+        if(m_inputFiles.empty()) {
+            printHelp();
+            ERRORMSG( "No input files supplied!" )
+        } else {
+            for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
+                if(! boost::filesystem::exists(*it)) {
+                    printHelp();
+                    ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
+                }
+            }
+
+        }
+    }
+
+private:
+
+    void printErrorNoArg(std::string arg) {
+        printHelp();
+        ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
+        exit(EXIT_FAILURE);
+    }
+
+    void printHelp() {
+        std::cerr << "Help for the Application SimInfo: \n Options: \n"
+                  << " \t -i|--input <path1> <path2> ... \n"
+                  << " \t [Required] \n"
+                  <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim file paths which are processed \n"
+                  << "\t  --stepSize <number> \n"
+                  << "\t  --startIdx <number> --endIdx <number> \n"
+                  << "\t  --skipFirstState \n"
+                  << "\t  Note: option --step needs to be greater than 1, start and end \n"
+                  << "\t                 represent state indices in the file.\n"
+                  << "\t               --skipFirstState skips all first states after the first file. Indices startIdx, endIdx are counted with respect to this flag\n";
+    }
+};
+
 
 
 
@@ -435,7 +578,7 @@ private:
     }
 
     void printHelp() {
-        std::cerr << "Help for the Application: \n Options: \n"
+        std::cerr << "Help for the Application Renderer: \n Options: \n"
                   << " \t -i|--input <path1> <path2> ... \n"
                   << " \t [Required] \n"
                   <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim file paths which are processed \n"

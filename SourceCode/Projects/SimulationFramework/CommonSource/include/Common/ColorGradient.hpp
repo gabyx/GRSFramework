@@ -48,7 +48,7 @@ public:
     void createDefaultHeatMapGradient() {
         m_color.clear();
         m_color.push_back(ColorPoint(Vector3(0, 0, 1),   0.0f));      // Blue.
-        m_color.push_back(ColorPoint(Vector3(0, 1, 1),    0.25f));     // Cyan.
+        m_color.push_back(ColorPoint(Vector3(0, 1, 1),    0.25f));    // Cyan.
         m_color.push_back(ColorPoint(Vector3(0, 1, 0),   0.5f));      // Green.
         m_color.push_back(ColorPoint(Vector3(1, 1, 0),   0.75f));     // Yellow.
         m_color.push_back(ColorPoint(Vector3(1, 0, 0),   1.0f));      // Red.
