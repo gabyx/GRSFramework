@@ -62,6 +62,7 @@
                     LOGICSOCKET_CASE_SWITCH(10) \
                     LOGICSOCKET_CASE_SWITCH(11) \
                     LOGICSOCKET_CASE_SWITCH(12) \
+                    LOGICSOCKET_CASE_SWITCH(13) \
                     LOGICSOCKET_CASE_SWITCH(14) \
                     LOGICSOCKET_CASE_SWITCH(15) \
                     LOGICSOCKET_CASE_SWITCH(16) \
@@ -69,7 +70,7 @@
                     LOGICSOCKET_CASE_SWITCH(18) \
                     LOGICSOCKET_CASE_SWITCH(19) \
                 default: \
-                    ERRORMSG("TYPE not implemented in switch statement"); \
+                    ERRORMSG("TYPE: "<< this->m_type <<" not implemented in switch statement"); \
                 }; \
 
 

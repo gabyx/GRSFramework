@@ -49,14 +49,24 @@ struct InclusionSolverSettingsMPI
     unsigned int m_splitNodeUpdateRatio;        ///< Local iterations per remote billateral constraints updates (splitNodes)
     unsigned int m_convergenceCheckRatio;      ///< Billatreal constraints updates (splitNodes)  per convergence checks
 
+
     /**
-    *  SOR_CONTACT_X (project contacts consecutively,
-    *               X=AC : AlartCurnier for UCF Contacts (normal and tangential normal cones),
-    *               X=DS : De Saxe for UCF Contacts (combined normal cone)
-    *  SOR_FULL (AlarCurnier for UCF Contacts, normal direction first, vel. update, then tangential, vel.update, over each contact)
+    *  SOR_CONTACT (project contacts consecutively)
+    *  SOR_FULL ( normal direction first, vel. update, then tangential, vel.update, over each contact)
     *  SOR_NORMAL_TANGENTIAL (for all contacts  first normal , then for all contacts tangential (iteratively solve two convex optimization problems) )
     */
-    enum Method{SOR_CONTACT_AC, SOR_CONTACT_DS, SOR_FULL, SOR_NORMAL_TANGENTIAL, JOR} m_eMethod;
+    enum Method{SOR_CONTACT, SOR_FULL, SOR_NORMAL_TANGENTIAL, JOR} m_eMethod;
+
+    /**             X=AC : AlartCurnier for UCF Contacts (normal and tangential normal cones),
+    *               X=DS : De Saxe for UCF Contacts (combined normal cone) */
+    enum SubMethodUCF{DS,AC} m_eSubMethodUCF;
+
+    /** Drift Correction by adding deltaGap/(deltaT/2) to the normal inclusion
+    *   This should only be used with eps_n = 0! otherwise impact law is destroyed with MoreauTimeStepper
+    */
+    bool m_useDriftCorrectionGap;
+    PREC m_driftCorrectionGapAlpha;
+
     enum Convergence {InLambda,InVelocity, InVelocityLocal, InEnergyVelocity,InEnergyLocalMix} m_eConvergenceMethod;
     bool m_bComputeResidual; ///< If true convergence check is done for all contacts/bodies, no break in the loop (does not work yet)
     PREC m_AbsTol;

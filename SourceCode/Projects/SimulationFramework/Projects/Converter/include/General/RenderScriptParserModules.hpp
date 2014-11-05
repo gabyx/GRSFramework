@@ -14,10 +14,6 @@
 
 #include "RenderScriptParserBaseTraits.hpp"
 
-#include "RenderScriptGenerator.hpp"
-#include "RenderScriptGeneratorLogic.hpp"
-
-
 namespace RenderScriptParserModules {
 
 template<typename TParserTraits>
@@ -57,6 +53,18 @@ private:
     MaterialMapType * m_materials;
 };
 
+};
+
+
+#include "SimpleFunction.hpp"
+#include "StringFormatNode.hpp"
+#include "ConstantNode.hpp"
+#include "NormNode.hpp"
+#include "LookUpTable.hpp"
+#include "RenderScriptGeneratorLogic.hpp"
+#include "RenderScriptGenerator.hpp"
+
+namespace RenderScriptParserModules {
 
 template<typename TParserTraits>
 class ScriptGeneratorModule {

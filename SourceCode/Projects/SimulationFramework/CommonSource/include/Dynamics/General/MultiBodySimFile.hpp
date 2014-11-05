@@ -111,7 +111,7 @@ public:
     */
     bool isGood();
 
-    bool writeOutAllStateTimes();
+    bool writeTimeListToFile(const boost::filesystem::path & f);
 
     /**
     * @brief Write all states of the bodies to the file, writes position and velocity!
@@ -190,29 +190,31 @@ public:
     */
     inline void getEndState(DynamicsState& state);
 
-    std::string getErrorString() {
-        m_errorString << " strerror: " << std::strerror(errno) <<std::endl;
+    std::string getErrorString(){
+        m_errorString << " strerror: " << std::strerror(errno) << std::endl;
         return m_errorString.str();
     }
 
-    unsigned int getNDOFq() {
+    unsigned int getNDOFq() const {
         return m_nDOFqBody;
     }
-    unsigned int getNDOFu() {
+    unsigned int getNDOFu() const {
         return m_nDOFuBody;
     }
-    unsigned int getNSimBodies() {
+    unsigned int getNSimBodies() const {
         return m_nSimBodies;
     }
-    std::streamsize getNStates() {
+    std::streamsize getNStates() const{
         return m_nStates;
     }
 
-    std::streamsize getBytesPerState() {
+    std::streamsize getBytesPerState() const{
         return m_nBytesPerState;
     }
 
-    std::string getDetails(std::string linePrefix="\t") {
+    std::vector<double> getTimeList();
+
+    std::string getDetails(bool timeList = false, std::string linePrefix="\t"){
         std::stringstream s;
         s <<linePrefix << "Simfile: "<< m_filePath << std::endl
           << linePrefix << "\t nBytes: " << m_nBytes << std::endl
@@ -226,7 +228,21 @@ public:
           << linePrefix << "\t nBytesPerUBody: " << m_nBytesPerUBody << std::endl
           << linePrefix << "\t addBytesBodyType: " << EnumConversion::toIntegral(m_additionalBytesPerBodyType) << std::endl
           << linePrefix << "\t nAdditionalBytesPerBody: " << m_nAdditionalBytesPerBody << std::endl
-          << linePrefix << "\t readVelocities: " << m_readVelocities;
+          << linePrefix << "\t readVelocities: " << m_readVelocities << std::endl;
+
+          if(timeList){
+            s << "\t TimeList: [ ";
+            auto times = getTimeList();
+            if(times.size()>2){
+                s << times[0] << "," << times[1] << ", ... , " << times.back();
+            }else if(times.size()==2){
+                s << times[0] << "," << times[1] ;
+            }else if(times.size()==1){
+                s << times[0];
+            }
+            s  << " ]" << std::endl;
+          }
+
         return s.str();
     }
 
@@ -615,6 +631,8 @@ void MultiBodySimFile::readBodyStateAdd( RigidBodyStateAdd * s) {
             break;
         case AdditionalBodyData::TypeEnum::PROCESS_MATERIAL:
             static_cast<AdditionalBodyData::ProcessMaterial *>(s->m_data)->read(this);
+            break;
+        case AdditionalBodyData::TypeEnum::NOTHING:
             break;
         default:
             ERRORMSG("Additional bytes could not be read!")

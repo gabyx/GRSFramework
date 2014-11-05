@@ -109,12 +109,15 @@ void InclusionSolverCONoG::reset() {
     if(m_pTangentialSorProxStepNodeVisitor != nullptr ){ delete m_pTangentialSorProxStepNodeVisitor;}
     if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
 
-    if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_CONTACT_AC ){
-         LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor Alart Curnier "<<  std::endl;);
+    if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_CONTACT ){
+
+         if(m_settings.m_eSubMethodUCF == InclusionSolverSettingsType::SubMethodUCF::UCF_AC){
+            LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor Alart Curnier "<<  std::endl;);
+         }else if(m_settings.m_eSubMethodUCF == InclusionSolverSettingsType::SubMethodUCF::UCF_DS){
+
+         }
          m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
-    }else if(m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_CONTACT_DS){
-         LOG(m_pSimulationLog, "---> Initialize ContactSorProxVisitor De Saxe"<<  std::endl;);
-         m_pSorProxStepNodeVisitor = new ContactSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
+
     }else if( m_settings.m_eMethod == InclusionSolverSettingsType::Method::SOR_FULL ){
          LOG(m_pSimulationLog, "---> Initialize FullSorProxVisitor Alart Curnier"<<  std::endl;);
          m_pSorProxStepNodeVisitor = new FullSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
@@ -175,8 +178,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
 
         // =============================================================================================================
-        if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_AC ||
-            m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT_DS ||
+        if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT ||
             m_settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL ||
             m_settings.m_eMethod == InclusionSolverSettingsType::SOR_NORMAL_TANGENTIAL
            ) {
