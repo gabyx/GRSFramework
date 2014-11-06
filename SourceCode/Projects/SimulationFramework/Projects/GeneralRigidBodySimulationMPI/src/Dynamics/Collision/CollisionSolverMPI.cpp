@@ -100,8 +100,6 @@ void CollisionSolverMPI::solveCollision() {
 
                 if((*bodyIti)->m_pBodyInfo->m_ownerRank !=  (*bodyItj)->m_pBodyInfo->m_ownerRank){
 
-
-
                     m_Collider.checkCollision((*bodyIti), (*bodyItj));
                 }
             }

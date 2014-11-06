@@ -164,6 +164,18 @@
 /* @} */
 
 
+/** @name MPI Saftey Checks.
+* @brief
+*/
+/* @{ */
+#ifndef NDEBUG
+    //DEBUG!
+    #define SAFETY_CHECK_SPLITBODYUPDATE
+#else
+
+#endif
+/* @} */
+
 
 /** @name  Deconstructor and Constructor Macros
 * @brief Deconstructor and Constructor Macros to Debug correct dealloction of objects.
