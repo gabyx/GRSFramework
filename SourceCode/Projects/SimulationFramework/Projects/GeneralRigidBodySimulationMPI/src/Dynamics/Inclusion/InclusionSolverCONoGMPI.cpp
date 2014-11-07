@@ -367,11 +367,11 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
             auto & localWithContacts   = m_pContactGraph->getLocalBodiesWithContactsListRef();
             auto & remotesWithContacts = m_pContactGraph->getRemoteBodiesWithContactsListRef();
 
-            for( auto bodyIt = localWithContacts.begin(); bodyIt != localWithContacts.end(); bodyIt++) {
-                (*bodyIt)->m_pSolverData->m_uBuffer.m_back = (*bodyIt)->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
+            for( auto & body : localWithContacts) {
+                body->m_pSolverData->m_uBuffer.m_back = body->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
             }
-            for( auto bodyIt = remotesWithContacts.begin(); bodyIt != remotesWithContacts.end(); bodyIt++) {
-                (*bodyIt)->m_pSolverData->m_uBuffer.m_back = (*bodyIt)->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
+            for( auto & body : remotesWithContacts) {
+                body->m_pSolverData->m_uBuffer.m_back = body->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
             }
         }else{
             ERRORMSG("This cancelation criteria has not been implemented")
@@ -394,9 +394,12 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
             // Communicate all remote velocities to neighbour (if nSplitBodies != 0 || remoteNodes != 0)
             m_pInclusionComm->communicateSplitBodyUpdate(m_globalIterationCounter);
 
+
             // Safety test if all updates have been received!
-            SplitNodeCheckUpdateVisitor<ContactGraphType> v;
-            m_pContactGraph->applyNodeVisitorSplitBody(v);
+            #ifdef SAFETY_CHECK_SPLITBODYUPDATE
+                SplitNodeCheckUpdateVisitor<ContactGraphType> v;
+                m_pContactGraph->applyNodeVisitorSplitBody(v);
+            #endif
             // Move over all split body nodes and solve the billateral constraint directly
             //(if nSplitBodies != 0)
             m_pContactGraph->applyNodeVisitorSplitBody(*m_pSorProxStepSplitNodeVisitor);
