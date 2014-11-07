@@ -824,9 +824,7 @@ public:
     */
     void setRank( RankIdType neigbourRank) {
         m_neighbourRank = neigbourRank;
-        if(!m_initialized) {
-            m_initialized = true;
-        }
+        m_initialized = true;
     }
 
     void setTime(RigidBodyType::PREC time){
@@ -898,7 +896,7 @@ public:
         m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
         LOGASSERTMSG( m_neighbourData, this->m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: " << this->m_nc->m_rank << "!");
 
-        ar & this->m_time;
+        ar & this->m_time; //NOT_ESSENTIAL
 
         //Serialize all remote body ids which have contact
         unsigned int size = m_neighbourData->sizeRemote();
@@ -1045,7 +1043,9 @@ public:
             LOGIC_SZ(this->m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << this->m_neighbourRank << std::endl;);
 
             LOGIC_SZ(this->m_pSerializerLog, "---> # Local Split Bodies (with external Contacts): " << size << std::endl;);
-            for(auto it = m_neighbourData->localBegin(); it != m_neighbourData->localEnd(); ++it) {
+
+            auto itEnd = m_neighbourData->localEnd();
+            for(auto it = m_neighbourData->localBegin(); it != itEnd; ++it) {
                 LOGASSERTMSG(it->second.m_pSplitBodyNode, this->m_pSerializerLog, "m_pSplitBodyNode is null for body id: "
                              << RigidBodyId::getBodyIdString(it->first) <<std::endl)
 
@@ -1057,9 +1057,9 @@ public:
                       "----> multiplicity: " << multiplicity <<std::endl <<
                       "----> multiplicityWeight: " <<multiplicityWeight<<std::endl <<
                       "----> h_term: " << it->second.m_pBody->m_h_term.transpose() <<std::endl;)
-                ar & (it->first);
+                ar & (it->first);  // body id
                 ar & multiplicity; // multiplicity
-                ar & multiplicityWeight;
+                ar & multiplicityWeight; //weight
                 serializeEigen(ar,it->second.m_pBody->m_h_term); // send the current h_term , mass matrix is already in the remote on the neighbour
             }
         } else {
@@ -1120,7 +1120,7 @@ public:
                              << this->m_neighbourRank << " is not remote!");
 
 
-                //Set new h_term;
+                //Set current h_term;
                 remoteBody->m_h_term = h_term;
 
                 LOGIC_SZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl <<

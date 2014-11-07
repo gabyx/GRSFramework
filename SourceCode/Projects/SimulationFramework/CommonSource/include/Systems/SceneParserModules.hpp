@@ -258,9 +258,10 @@ public:
                 if(!Utilities::stringToType(m_inclusionSettings->m_useDriftCorrectionGap, att.value())) {
                     ERRORMSG("---> String conversion in InclusionSolverSettings: driftCorrectionGap failed");
                 }
-
-                if(!Utilities::stringToType(m_inclusionSettings->m_driftCorrectionGapAlpha, node.attribute("driftCorrectionGapAlpha").value())) {
-                    ERRORMSG("---> String conversion in InclusionSolverSettings: driftCorrectionGapAlpha failed");
+                if(m_inclusionSettings->m_useDriftCorrectionGap){
+                    if(!Utilities::stringToType(m_inclusionSettings->m_driftCorrectionGapAlpha, node.attribute("driftCorrectionGapAlpha").value())) {
+                        ERRORMSG("---> String conversion in InclusionSolverSettings: driftCorrectionGapAlpha failed");
+                    }
                 }
             }
 
