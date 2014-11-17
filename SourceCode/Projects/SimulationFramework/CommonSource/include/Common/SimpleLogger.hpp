@@ -92,6 +92,8 @@ protected:
 
     friend class expression;
 
+    bool m_newLine = true; ///< Markes the state where we are at a new beginning of a line -> push time
+
 public:
 
     virtual ~Log();
@@ -126,9 +128,9 @@ public:
         m_s.str("");
 
         // push time if timer set
-        if(m_time){ m_s << Utilities::stringFormat(LOGGING_TIMEFORMAT,m_time->elapsedMin());}
-
+        if(m_time && m_newLine){ m_s << Utilities::stringFormat(LOGGING_TIMEFORMAT,m_time->elapsedMin());}
         m_s << t; // Push first value into stream;
+
         return Log::expression(*this, m_s);
     };
 
@@ -138,8 +140,7 @@ public:
         m_s << f; // Push first value into stream;
 
         if(f == static_cast<std::ostream&(&)(std::ostream&)>(std::endl)){
-            // push time if timer set
-            //if(m_time){ m_s << Utilities::stringFormat(LOGGING_TIMEFORMAT,m_time->elapsedMin());}
+            return Log::expression(*this, m_s, true);
         }
         return Log::expression(*this, m_s);
     };
@@ -153,19 +154,19 @@ public:
         ~expression();
 
         template <typename T>
-        expression operator<<(const T & t) {
-            m_flag = false;
-            if(m_lastWasEndl){m_s << LOGGING_TIMESPACES;}
+        expression &  operator<<(const T & t) {
+//            m_flag = false;
+            if(m_lastWasEndl && m_log.m_time){ m_s << LOGGING_TIMESPACES;}
             m_s << t; // Push message
-            return expression(m_log , m_s);
+            m_lastWasEndl = false;
+            return *this;
         };
 
         // For std::endl;
-        expression operator<<( std::ostream&(*f)(std::ostream&) );
+        expression & operator<<( std::ostream&(*f)(std::ostream&) );
 
     private:
         std::stringstream &m_s;
-        bool m_flag; // When flag is true, the flush gets executed in dtor!
         bool m_lastWasEndl;
         Log & m_log;
     };

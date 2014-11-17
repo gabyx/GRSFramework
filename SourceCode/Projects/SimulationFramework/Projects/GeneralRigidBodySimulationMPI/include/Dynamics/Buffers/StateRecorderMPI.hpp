@@ -84,14 +84,14 @@ StateRecorderMPI::StateRecorderMPI(unsigned int nSimBodies,
 //    m_oa( m_stream,boost::archive::no_codecvt | boost::archive::no_header)
 {
     //Check if LogManager is available
-    Logging::LogManager * manager = Logging::LogManager::getSingletonPtr();
-    m_pSimulationLog = manager->getLog("SimulationLog");
+    Logging::LogManager & manager = Logging::LogManager::getSingleton();
+    m_pSimulationLog = manager.getLog("SimulationLog");
     if(!m_pSimulationLog) {
         // Log does not exist make a new standart log!
-        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+        boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "StateRecorderLog.log";
-        m_pSimulationLog = manager->createLog("StateRecorderLog",true,true,filePath);
+        m_pSimulationLog = manager.createLog("StateRecorderLog",true,true,filePath);
     }
 
 }

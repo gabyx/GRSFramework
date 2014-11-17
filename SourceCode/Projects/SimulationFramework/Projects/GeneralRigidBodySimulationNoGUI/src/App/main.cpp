@@ -18,10 +18,10 @@ int main(int argc, char **argv) {
     try{
         // Parsing Input Parameters===================================
         ApplicationCLOptions opts;
-        ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
+        ApplicationCLOptions::getSingleton().parseOptions(argc,argv);
 
-        ApplicationCLOptions::getSingletonPtr()->checkArguments();
-        ApplicationCLOptions::getSingletonPtr()->printArgs(std::cout);
+        ApplicationCLOptions::getSingleton().checkArguments();
+        ApplicationCLOptions::getSingleton().printArgs(std::cout);
         // End Parsing =================================
 
         //Create singleton logger
@@ -31,23 +31,23 @@ int main(int argc, char **argv) {
         processFolder <<  PROCESS_FOLDER_PREFIX;
         boost::filesystem::path localDirPath;
 
-        localDirPath = ApplicationCLOptions::getSingletonPtr()->m_localDirs[0];
+        localDirPath = ApplicationCLOptions::getSingleton().m_localDirs[0];
         localDirPath /= processFolder.str();
 
 
         // Process static global members! (Singletons)
-        FileManager fileManger(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
+        FileManager fileManger(ApplicationCLOptions::getSingleton().m_globalDir, localDirPath); //Creates path if it does not exist
 
 
         SimulationManager mgr;
 
-        mgr.setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
+        mgr.setup(ApplicationCLOptions::getSingleton().m_sceneFile);
         mgr.startSim();
 
 
         // Do post processes at the end of the simulation
         //TODO
-        auto & tasks = ApplicationCLOptions::getSingletonPtr()->m_postProcessTasks;
+        auto & tasks = ApplicationCLOptions::getSingleton().m_postProcessTasks;
         for(auto it = tasks.begin(); it != tasks.end(); it++){
             if((*it)->getName() == "bash"){
                 (*it)->execute();

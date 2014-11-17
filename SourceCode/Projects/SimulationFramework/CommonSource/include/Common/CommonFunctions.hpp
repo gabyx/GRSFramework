@@ -52,6 +52,7 @@ inline bool operator == (const char* a, const std::string & b) {
 }
 
 
+// Prototypes
 struct StdTypeConverter{};
 template<typename T, typename TypeConverter = StdTypeConverter> bool stringToType(T & t, const std::string& s);
 
@@ -73,7 +74,7 @@ namespace details {
         typename std::enable_if< std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
         convert(T& t, const std::string& s) {
             //this is a huge times faster then the below stringstream stuff;
-            return StringConversion::toNumber(t,s);
+            return StringConversion::toType(t,s);
             //std::istringstream iss(s);
             //return !(iss >> t).fail();
         }
@@ -287,6 +288,18 @@ inline bool stringToVector4( TVector4 & v, const std::string & s) {
     //STATIC_ASSERTM( (std::is_same< typename MyMatrix<PREC>::Vector4 , TVector4>::value), "VECTOR_WRONG_TYPE" );
     return details::stringToVectorImpl<4>(v,s);
 }
+
+
+/**
+* @brief Convert Type to string if ostream operator << is supported
+*/
+template<typename T>
+std::string  typeToString(const T & t){
+    std::stringstream ss;
+    ss << t;
+    return ss.str(); // return copy of the string;
+}
+
 
 
 /**

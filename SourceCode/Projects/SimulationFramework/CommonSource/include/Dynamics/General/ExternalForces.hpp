@@ -227,12 +227,12 @@ class ExternalForceList{
         iterator begin(){return m_calculationList.begin();}
         iterator end(){return m_calculationList.end();}
 
-        // Special pointer for the special gravity force (if one is added)
-        GravityForceField * m_gravityField = nullptr;
+        GravityForceField * getGravityField(){return m_gravityField;}
 
     private:
 
-
+         // Special pointer for the special gravity force (if one is added)
+        GravityForceField * m_gravityField = nullptr;
 
         typedef std::vector< std::function<void (RigidBodyType *)> > CalcListType;
         CalcListType m_calculationList;

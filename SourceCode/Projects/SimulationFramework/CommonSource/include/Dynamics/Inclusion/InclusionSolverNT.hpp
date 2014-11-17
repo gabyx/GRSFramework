@@ -151,8 +151,8 @@ m_simBodies(pCollisionSolver->m_simBodies),
 m_staticBodies(pCollisionSolver->m_staticBodies)
 {
 
-    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
         ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }
@@ -257,9 +257,9 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
   // Update m_Minv_h_dt
   m_Minv_h_dt = m_Minv_diag.asDiagonal() * m_h * m_settings.m_deltaT;
 
-  LOGSLLEVEL3_CONTACT(m_pSolverLog, "h= "<< m_h.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
-  << "Minv_diag= "<< "diag(" <<m_Minv_diag.transpose().format(MyIOFormat::Matlab) <<");"<<std::endl
-  << "Minv_h_dt= "<< m_Minv_h_dt.transpose().format(MyIOFormat::Matlab) <<"';"<<std::endl;);
+  LOGSLLEVEL3_CONTACT(m_pSolverLog, "h= "<< m_h.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl
+  << "Minv_diag= "<< "diag(" <<m_Minv_diag.transpose().format(MyMatrixIOFormat::Matlab) <<");"<<std::endl
+  << "Minv_h_dt= "<< m_Minv_h_dt.transpose().format(MyMatrixIOFormat::Matlab) <<"';"<<std::endl;);
 
 
   // Iterate over Collision set and assemble the matrices...
@@ -324,11 +324,11 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
     {
 
 
-      LOGSLLEVEL3_CONTACT(m_pSolverLog,    << "e_x= "<< collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
-                           << "e_y= "<< collSet[contactIdx].m_cFrame.m_e_y.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
-                           << "e_z= "<< collSet[contactIdx].m_cFrame.m_e_z.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
+      LOGSLLEVEL3_CONTACT(m_pSolverLog,    << "e_x= "<< collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl
+                           << "e_y= "<< collSet[contactIdx].m_cFrame.m_e_y.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl
+                           << "e_z= "<< collSet[contactIdx].m_cFrame.m_e_z.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl
                            << collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.dot(collSet[contactIdx].m_cFrame.m_e_y) << collSet[contactIdx].m_cFrame.m_e_y.dot(collSet[contactIdx].m_cFrame.m_e_z) <<std::endl
-                           << "r_s1c1="<< collSet[contactIdx].m_r_S1C1.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+                           << "r_s1c1="<< collSet[contactIdx].m_r_S1C1.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;);
 
       ASSERTMSG( std::abs(collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.dot(collSet[contactIdx].m_cFrame.m_e_y)) < 1e-3 && std::abs(collSet[contactIdx].m_cFrame.m_e_y.dot(collSet[contactIdx].m_cFrame.m_e_z))< 1e-3, "Vectors not parallel");
 
@@ -431,15 +431,15 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
     // =============================================================================================================
 
 
-    LOGSLLEVEL3_CONTACT(m_pSolverLog,   << "W_N= ..."<< std::endl << m_W_N.format(MyIOFormat::Matlab)<<";"<<std::endl
-                        << "W_T= ..."<< std::endl << m_W_T.format(MyIOFormat::Matlab)<<";"<<std::endl
-                        << "mu= "<<"diag("<< m_mu.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl
-                        << "I_epsilon_N= " << "diag("<< m_I_epsilon_N.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl
-                        << "I_epsilon_T= " << "diag("<< m_I_epsilon_T.transpose().format(MyIOFormat::Matlab)<<");"<<std::endl
-                        << "WT_uS= "<< m_WN_uS.transpose().format(MyIOFormat::Matlab)<<std::endl
-                        << "WN_uS= "<< m_WT_uS.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
-                        << "WN_Minv_h_dt= "<< m_WN_Minv_h_dt.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
-                        << "WT_Minv_h_dt= "<< m_WT_Minv_h_dt.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+    LOGSLLEVEL3_CONTACT(m_pSolverLog,   << "W_N= ..."<< std::endl << m_W_N.format(MyMatrixIOFormat::Matlab)<<";"<<std::endl
+                        << "W_T= ..."<< std::endl << m_W_T.format(MyMatrixIOFormat::Matlab)<<";"<<std::endl
+                        << "mu= "<<"diag("<< m_mu.transpose().format(MyMatrixIOFormat::Matlab)<<");"<<std::endl
+                        << "I_epsilon_N= " << "diag("<< m_I_epsilon_N.transpose().format(MyMatrixIOFormat::Matlab)<<");"<<std::endl
+                        << "I_epsilon_T= " << "diag("<< m_I_epsilon_T.transpose().format(MyMatrixIOFormat::Matlab)<<");"<<std::endl
+                        << "WT_uS= "<< m_WN_uS.transpose().format(MyMatrixIOFormat::Matlab)<<std::endl
+                        << "WN_uS= "<< m_WT_uS.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl
+                        << "WN_Minv_h_dt= "<< m_WN_Minv_h_dt.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl
+                        << "WT_Minv_h_dt= "<< m_WT_Minv_h_dt.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;);
 
 
     m_G_NN.noalias() = m_W_N.transpose() * m_Minv_diag.asDiagonal() * m_W_N;
@@ -462,7 +462,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
       m_G_notDiagDominant = (G.diagonal().array() < (G.rowwise().sum()-G.diagonal()).array()).sum();
 #endif
 
-    LOGSLLEVEL3_CONTACT(m_pSolverLog, "G= ..."<<std::endl<< G.format(MyIOFormat::Matlab)<<";"<<std::endl;);
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, "G= ..."<<std::endl<< G.format(MyMatrixIOFormat::Matlab)<<";"<<std::endl;);
 
 #endif
 
@@ -471,24 +471,24 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
 
 
 
-    LOGSLLEVEL3_CONTACT(m_pSolverLog, "G_NN= ..."<< std::endl << m_G_NN.format(MyIOFormat::Matlab)<<";"<<std::endl
-     << "G_NT= ..."<< std::endl << m_G_NT.format(MyIOFormat::Matlab)<<";"<<std::endl
-     << "G_TT= ..."<< std::endl << m_G_TT.format(MyIOFormat::Matlab)<<";"<<std::endl;);
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, "G_NN= ..."<< std::endl << m_G_NN.format(MyMatrixIOFormat::Matlab)<<";"<<std::endl
+     << "G_NT= ..."<< std::endl << m_G_NT.format(MyMatrixIOFormat::Matlab)<<";"<<std::endl
+     << "G_TT= ..."<< std::endl << m_G_TT.format(MyMatrixIOFormat::Matlab)<<";"<<std::endl;);
 
 
     m_c_N.noalias() = m_WN_Minv_h_dt + m_I_epsilon_N.asDiagonal() * ( m_WN_uS  + m_xi_N);
     m_c_T.noalias() = m_WT_Minv_h_dt + m_I_epsilon_T.asDiagonal() * ( m_WT_uS  + m_xi_T);
 
 
-    LOGSLLEVEL3_CONTACT(m_pSolverLog, "c_N= " << m_c_N.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
-                      << "c_T= " << m_c_T.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, "c_N= " << m_c_N.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl
+                      << "c_T= " << m_c_T.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;);
 
 
 
 
 
-    LOGSLLEVEL3_CONTACT(m_pSolverLog, "P_N_back= "<<P_N_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
-                      << "P_T_back= "<<P_T_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, "P_N_back= "<<P_N_back.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl
+                      << "P_T_back= "<<P_T_back.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;);
 
 
 
@@ -533,8 +533,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::setupRMatrix(PREC alpha){
 
 
 
-    LOGSLLEVEL3_CONTACT(m_pSolverLog,   << "R_N= "<< "diag(" << m_R_N.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl
-                        << "R_T= "<< "diag(" << m_R_T.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl);
+    LOGSLLEVEL3_CONTACT(m_pSolverLog,   << "R_N= "<< "diag(" << m_R_N.transpose().format(MyMatrixIOFormat::Matlab)<<"');"<<std::endl
+                        << "R_T= "<< "diag(" << m_R_T.transpose().format(MyMatrixIOFormat::Matlab)<<"');"<<std::endl);
 
 
 }
@@ -559,8 +559,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::doJorProx(){
       m_bConverged = Numerics::cancelCriteriaValue(P_N_back,P_N_front,P_T_back,P_T_front, m_settings.m_AbsTol, m_settings.m_RelTol);
 
 
-      LOGSLLEVEL3_CONTACT(m_pSolverLog, "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
-                        << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;)
+      LOGSLLEVEL3_CONTACT(m_pSolverLog, "P_N_front= "<<P_N_front.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl
+                        << "P_T_front= "<<P_T_front.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;)
 
       m_globalIterationCounter++;
 
@@ -611,8 +611,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::doSorProx(){
       m_bConverged = Numerics::cancelCriteriaValue(P_N_back,P_N_front,P_T_back,P_T_front, m_settings.m_AbsTol, m_settings.m_RelTol);
 
 
-      LOGSLLEVEL3_CONTACT(m_pSolverLog, "P_N_front= "<<P_N_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl
-                        << "P_T_front= "<<P_T_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+      LOGSLLEVEL3_CONTACT(m_pSolverLog, "P_N_front= "<<P_N_front.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl
+                        << "P_T_front= "<<P_T_front.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;);
 
       m_globalIterationCounter++;
 

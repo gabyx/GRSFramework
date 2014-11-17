@@ -18,8 +18,8 @@ _________________________________________________________*/
 MoreauTimeStepper::MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys,  std::shared_ptr<StatePoolType>	pSysState)
 {
 
-    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
         ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }
@@ -51,7 +51,7 @@ MoreauTimeStepper::~MoreauTimeStepper() {
 
 void MoreauTimeStepper::closeAllFiles() {
 
-    Logging::LogManager::getSingletonPtr()->destroyLog("SolverLog");
+    Logging::LogManager::getSingleton().destroyLog("SolverLog");
     m_pSolverLog = nullptr;
 
     m_CollisionDataFile.close();
@@ -89,7 +89,7 @@ void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, c
     // Set up all Logs;
 
     m_pSolverLog = new Logging::Log("SolverLog");
-    Logging::LogManager::getSingletonPtr()->registerLog(m_pSolverLog);
+    Logging::LogManager::getSingleton().registerLog(m_pSolverLog);
 
 #if SOLVERLOG_TOFILE == 1
     m_pSolverLog->addSink(new Logging::LogSinkFile("SolverLog-File",m_SolverLogFilePath));

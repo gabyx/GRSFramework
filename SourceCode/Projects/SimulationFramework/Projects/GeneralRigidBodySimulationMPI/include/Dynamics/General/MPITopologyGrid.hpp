@@ -28,11 +28,13 @@ public:
     using AdjacentNeighbourRanksMapType = typename ProcessTopologyBase::AdjacentNeighbourRanksMapType;
 
     ProcessTopologyGrid(  NeighbourRanksListType & nbRanks, AdjacentNeighbourRanksMapType & adjNbRanks,
-                          const Vector3 & minPoint,
-                          const Vector3 & maxPoint,
+                          RankIdType processRank, unsigned int masterRank,
+                          const AABB & aabb,
                           const MyMatrix<unsigned int>::Vector3 & dim,
-                          RankIdType processRank, unsigned int masterRank):
-    m_rank(processRank), CartesianGrid<NoCellData>(minPoint,maxPoint, dim),
+                          bool aligned = true,
+                          const Matrix33 & A_IK = Matrix33::Identity()
+                          ):
+    m_rank(processRank), CartesianGrid<NoCellData>(aabb, dim), m_A_IK(A_IK),
     m_cellNumberingStart(masterRank)
     {
        m_rank = processRank;
@@ -165,7 +167,36 @@ public:
 
         return AABB(pL,pU);
     };
+
+    bool checkOverlap(const RigidBodyType * body, NeighbourRanksListType & neighbourProcessRanks, bool & overlapsOwnRank){
+        if(m_axisAligned){
+            return checkOverlapImpl(m_ColliderAABB,neighbourProcessRanks, overlapsOwnRank, body);
+        }
+        else{
+            return checkOverlapImpl(m_ColliderOOBB,neighbourProcessRanks, overlapsOwnRank, body, m_A_IK );
+        }
+    }
+
+
 private:
+
+    template<typename Collider, typename... AddArgs >
+    inline bool checkOverlapImpl(Collider & collider,
+                                 NeighbourRanksListType & neighbourProcessRanks,
+                                 bool & overlapsOwnRank,
+                                 const RigidBodyType * body,
+                                 AddArgs... args)
+    {
+            // Check neighbour AABB
+            for(auto it = m_nbAABB.begin(); it != m_nbAABB.end(); it++) {
+                if( collider.checkOverlap(body,it->second, args...) ) {
+                    neighbourProcessRanks.insert(it->first);
+                }
+            }
+            // Check own AABB
+            overlapsOwnRank = collider.checkOverlap(body, m_aabb, args...);
+            return neighbourProcessRanks.size() > 0;
+    }
 
     unsigned int m_cellNumberingStart;
 
@@ -174,11 +205,14 @@ private:
 
     RankIdType m_rank; ///< Own rank;
 
-    RankToAABBType m_nbAABB; ///< Neighbour AABB
-    AABB m_aabb; ///< Own AABB of this process
+    RankToAABBType m_nbAABB; ///< Neighbour AABB in frame G
+    AABB m_aabb; ///< Own AABB of this process in frame G
 
+    bool m_axisAligned = true;
+    Matrix33 m_A_IK ; ///< The grid can be rotated, this is the transformation matrix from grid frame K to intertia frame I
 
-    ColliderAABB m_Collider;
+    ColliderAABB m_ColliderAABB;
+    ColliderOOBB m_ColliderOOBB;
 };
 
 }; //MPILayer

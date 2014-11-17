@@ -64,32 +64,32 @@ void AppStateManager::start(std::shared_ptr<RenderAppState> state)
 	pushAppState(state);
 
 #ifdef _DEBUG
-	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("Start main loop...");
+	RenderContext::getSingleton().m_pAppLog->logMessage("Start main loop...");
 #endif
 
 //! @todo	is unsigned long (integer) the right type for "timeSinceLastFrame"?
 	double timeSinceLastFrame = 1;
 	double startTime = 0;
 
-	RenderContext::getSingletonPtr()->m_pRenderWnd->resetStatistics();
+	RenderContext::getSingleton().m_pRenderWnd->resetStatistics();
 
-	while(!m_bShutdown && !RenderContext::getSingletonPtr()->isOgreToBeShutDown())
+	while(!m_bShutdown && !RenderContext::getSingleton().isOgreToBeShutDown())
 	{
-		if(RenderContext::getSingletonPtr()->m_pRenderWnd->isClosed())m_bShutdown = true;
+		if(RenderContext::getSingleton().m_pRenderWnd->isClosed())m_bShutdown = true;
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 		Ogre::WindowEventUtilities::messagePump();
 #endif
-		if(RenderContext::getSingletonPtr()->m_pRenderWnd->isActive())
+		if(RenderContext::getSingleton().m_pRenderWnd->isActive())
 		{
-      startTime = (double)RenderContext::getSingletonPtr()->m_pTimer->getMicrosecondsCPU() * 1.0e-6;
+      startTime = (double)RenderContext::getSingleton().m_pTimer->getMicrosecondsCPU() * 1.0e-6;
 
 			m_ActiveStateStack.back()->update(timeSinceLastFrame);
 
-			RenderContext::getSingletonPtr()->updateOgre(timeSinceLastFrame);
-			RenderContext::getSingletonPtr()->m_pRoot->renderOneFrame();
+			RenderContext::getSingleton().updateOgre(timeSinceLastFrame);
+			RenderContext::getSingleton().m_pRoot->renderOneFrame();
 
-			timeSinceLastFrame = (double)RenderContext::getSingletonPtr()->m_pTimer->getMicrosecondsCPU()*1.0e-6 - startTime;
+			timeSinceLastFrame = (double)RenderContext::getSingleton().m_pTimer->getMicrosecondsCPU()*1.0e-6 - startTime;
 		}
 		else
 		{
@@ -98,8 +98,8 @@ void AppStateManager::start(std::shared_ptr<RenderAppState> state)
 	}
 
 #ifdef _DEBUG
-	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("Main loop quit");
-	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("Shutdown OGRE...");
+	RenderContext::getSingleton().m_pAppLog->logMessage("Main loop quit");
+	RenderContext::getSingleton().m_pAppLog->logMessage("Shutdown OGRE...");
 #endif
 }
 
@@ -110,18 +110,18 @@ void AppStateManager::start(std::shared_ptr<AppState> state)
 	pushAppState(state);
 
 
-	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("AppStateManager::start(AppState* state) .. Start render loop");
+	RenderContext::getSingleton().m_pAppLog->logMessage("AppStateManager::start(AppState* state) .. Start render loop");
 
 
 //! @todo	is unsigned long (integer) the right type for "timeSinceLastFrame"?
   double timeSinceLastFrame = 1;
   double startTime = 0;
 
-	RenderContext::getSingletonPtr()->m_pRenderWnd->resetStatistics();
+	RenderContext::getSingleton().m_pRenderWnd->resetStatistics();
 
-	while(!m_bShutdown && !RenderContext::getSingletonPtr()->isOgreToBeShutDown())
+	while(!m_bShutdown && !RenderContext::getSingleton().isOgreToBeShutDown())
 	{
-		if(RenderContext::getSingletonPtr()->m_pRenderWnd->isClosed())
+		if(RenderContext::getSingleton().m_pRenderWnd->isClosed())
 			m_bShutdown = true;
 
 //#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
@@ -129,25 +129,25 @@ void AppStateManager::start(std::shared_ptr<AppState> state)
 //#endif
 
 
-		if(RenderContext::getSingletonPtr()->m_pRenderWnd->isActive())
+		if(RenderContext::getSingleton().m_pRenderWnd->isActive())
 		{
-			startTime = (double)RenderContext::getSingletonPtr()->m_pTimer->getMicrosecondsCPU() * 1.0e-6;
+			startTime = (double)RenderContext::getSingleton().m_pTimer->getMicrosecondsCPU() * 1.0e-6;
 
-         InputContext::getSingletonPtr()->capture(); //Possible that it kills all app states!
+         InputContext::getSingleton().capture(); //Possible that it kills all app states!
 
          if(!m_ActiveStateStack.empty()){
 			   m_ActiveStateStack.back()->update(timeSinceLastFrame);
          }
 
 
-			RenderContext::getSingletonPtr()->updateOgre(timeSinceLastFrame);
+			RenderContext::getSingleton().updateOgre(timeSinceLastFrame);
 
 			if (GuiContext::getSingletonPtr())
-				GuiContext::getSingletonPtr()->updateGuiContext(timeSinceLastFrame);
+				GuiContext::getSingleton().updateGuiContext(timeSinceLastFrame);
 
-			RenderContext::getSingletonPtr()->m_pRoot->renderOneFrame();
+			RenderContext::getSingleton().m_pRoot->renderOneFrame();
 
-			timeSinceLastFrame = (double)RenderContext::getSingletonPtr()->m_pTimer->getMicrosecondsCPU()*1.0e-6 - startTime;
+			timeSinceLastFrame = (double)RenderContext::getSingleton().m_pTimer->getMicrosecondsCPU()*1.0e-6 - startTime;
 		}
 		else
 		{
@@ -157,7 +157,7 @@ void AppStateManager::start(std::shared_ptr<AppState> state)
 	}
 
 
-	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("AppStateManager::start(AppState* state) .. Quit render loop / Shutdown OGRE");
+	RenderContext::getSingleton().m_pAppLog->logMessage("AppStateManager::start(AppState* state) .. Quit render loop / Shutdown OGRE");
 
 }
 
@@ -238,14 +238,14 @@ void AppStateManager::shutdown()
 
 void AppStateManager::init(std::shared_ptr<RenderAppState> state)
 {
-	RenderContext::getSingletonPtr()->m_pRenderWnd->resetStatistics();
+	RenderContext::getSingleton().m_pRenderWnd->resetStatistics();
 }
 
 
 void AppStateManager::init(std::shared_ptr<AppState> state)
 {
-//	InputContext::getSingletonPtr()->addKeyListener(state.get(),"AppStateManager::KeyListener");
-//	InputContext::getSingletonPtr()->addMouseListener(state.get(),"AppStateManager::MouseListener");
+//	InputContext::getSingleton().addKeyListener(state.get(),"AppStateManager::KeyListener");
+//	InputContext::getSingleton().addMouseListener(state.get(),"AppStateManager::MouseListener");
 
-	RenderContext::getSingletonPtr()->m_pRenderWnd->resetStatistics();
+	RenderContext::getSingleton().m_pRenderWnd->resetStatistics();
 }

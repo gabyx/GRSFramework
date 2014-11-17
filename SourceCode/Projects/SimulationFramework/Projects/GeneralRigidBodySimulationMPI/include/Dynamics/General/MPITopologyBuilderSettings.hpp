@@ -16,12 +16,27 @@ enum class TopologyBuilderEnum : char{
 struct GridBuilderSettings{
     DEFINE_LAYOUT_CONFIG_TYPES
     GridBuilderSettings(): m_processDim(MyMatrix<unsigned int>::Vector3(1,1,1)){
-        m_minPoint.setZero();
-        m_maxPoint.setZero();
+        m_aabb.reset();
+        m_A_IK = Matrix33::Identity();
     }
-    MyMatrix<unsigned int>::Vector3 m_processDim;
+    using ProcessDimType = MyMatrix<unsigned int>::Vector3;
+    ProcessDimType m_processDim;
+
     enum class Mode : short{ STATIC, DYNAMIC} m_mode = Mode::DYNAMIC;
-    Vector3 m_minPoint, m_maxPoint;
+
+    /**
+    *   PREDEFINED: Take values from below!
+    *   ALIGNED: fit AABB
+    *   BINET_TENSOR: fit to frame of Eigenvalue decomposition of BinetTensor,
+    *   MVBB: Minimum Volume Bounding Box
+    */
+
+    enum class BuildMode : short{ PREDEFINED , ALIGNED, BINET_TENSOR, MVBB} m_buildMode = BuildMode::MVBB;
+
+    // OOBB or AABB
+    AABB m_aabb; ///< used values for predefined values
+    bool m_aligned = true;
+    Matrix33 m_A_IK;
 };
 
 
@@ -34,6 +49,15 @@ public:
 
 
     GridBuilderSettings  m_gridBuilderSettings;
+
+    struct RebuildSettings{
+        unsigned int m_rebuildingCheckEachXTimeStep = 10;
+        enum class Policy{ NOTHING, BODY_LIMIT } m_policy = Policy::NOTHING;
+
+        // Body Limit Policy
+        unsigned int m_bodyLimit = 500;
+
+    } m_rebuildSettings;
 
 };
 

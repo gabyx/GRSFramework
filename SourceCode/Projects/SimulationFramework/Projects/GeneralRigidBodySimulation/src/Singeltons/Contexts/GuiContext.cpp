@@ -21,8 +21,8 @@ GuiContext::~GuiContext()
 bool GuiContext::initBitesTray()
 {
 	m_pTrayMgr = std::shared_ptr<OgreBites::SdkTrayManager>( new OgreBites::SdkTrayManager("GuiContextTrayMgr",
-		RenderContext::getSingletonPtr()->m_pRenderWnd,
-		InputContext::getSingletonPtr()->getMouse(), this) );
+		RenderContext::getSingleton().m_pRenderWnd,
+		InputContext::getSingleton().getMouse(), this) );
 
     m_pTrayMgr->showFrameStats(OgreBites::TL_BOTTOMLEFT);
 /**

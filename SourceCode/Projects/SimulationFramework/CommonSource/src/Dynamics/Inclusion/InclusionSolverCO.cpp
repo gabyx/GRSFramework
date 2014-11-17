@@ -24,8 +24,8 @@ InclusionSolverCO::InclusionSolverCO(std::shared_ptr< CollisionSolverType >  pCo
     m_pCollisionSolver(pCollisionSolver),
     m_pDynSys(pDynSys) {
 
-    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
         ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }
@@ -240,9 +240,9 @@ void InclusionSolverCO::solveInclusionProblem() {
 
 
 
-        LOGSLLEVEL3_CONTACT(m_pSolverLog,  " G= ..."<< std::endl << m_T.format(MyIOFormat::Matlab)<<";"<<std::endl;);
-        LOGSLLEVEL3_CONTACT(m_pSolverLog, " c= " << m_d.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;)
-        LOGSLLEVEL2_CONTACT(m_pSolverLog,  " P_back= "<<P_back.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+        LOGSLLEVEL3_CONTACT(m_pSolverLog,  " G= ..."<< std::endl << m_T.format(MyMatrixIOFormat::Matlab)<<";"<<std::endl;);
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, " c= " << m_d.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;)
+        LOGSLLEVEL2_CONTACT(m_pSolverLog,  " P_back= "<<P_back.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;);
 
 
 
@@ -285,7 +285,7 @@ void InclusionSolverCO::solveInclusionProblem() {
         }
 
 
-        LOGSLLEVEL2_CONTACT(m_pSolverLog,  " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+        LOGSLLEVEL2_CONTACT(m_pSolverLog,  " P_front= "<<P_front.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;);
 
 
 
@@ -342,7 +342,7 @@ void InclusionSolverCO::setupRMatrix(PREC alpha) {
 
 
 
-    LOGSLLEVEL3_CONTACT(m_pSolverLog, " R= "<< "diag(" << m_R.transpose().format(MyIOFormat::Matlab)<<"');"<<std::endl;);
+    LOGSLLEVEL3_CONTACT(m_pSolverLog, " R= "<< "diag(" << m_R.transpose().format(MyMatrixIOFormat::Matlab)<<"');"<<std::endl;);
 
 
 }
@@ -395,7 +395,7 @@ void InclusionSolverCO::doJorProx() {
         m_bConverged = Numerics::cancelCriteriaValue(P_back,P_front, m_settings.m_AbsTol, m_settings.m_RelTol);
 
 
-        LOGSLLEVEL2_CONTACT(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+        LOGSLLEVEL2_CONTACT(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;);
 
 
         m_globalIterationCounter++;
@@ -483,7 +483,7 @@ void InclusionSolverCO::doSorProx() {
         }
 
 
-        LOGSLLEVEL2_CONTACT(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyIOFormat::Matlab)<<"';"<<std::endl;);
+        LOGSLLEVEL2_CONTACT(m_pSolverLog, " P_front= "<<P_front.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;);
 
 
         m_globalIterationCounter++;

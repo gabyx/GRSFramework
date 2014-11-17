@@ -88,7 +88,7 @@ m_nSimBodies(nSimBodies)
   m_pThreadLog = new Logging::Log("PlaybackLoaderThreadLog");
 
 
-  boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+  boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
   filePath /= "PlaybackLoaderThread.log";
 #if FILELOADERLOG_TOFILE == 1
@@ -150,7 +150,7 @@ void PlaybackLoader<TStatePool>::initLoaderThread()
 {
 
     // Set the sim file list to the actual current simfolder of the FileManager
-    m_simFileList = FileManager::getSingletonPtr()->getPathsSimFilesOfCurrentSimFolder();
+    m_simFileList = FileManager::getSingleton().getPathsSimFilesOfCurrentSimFolder();
     m_currentFileIt = m_simFileList.begin();
     m_currentFileIndex = -1;
 }

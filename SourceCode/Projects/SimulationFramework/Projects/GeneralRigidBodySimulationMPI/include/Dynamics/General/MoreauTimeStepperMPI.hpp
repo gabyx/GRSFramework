@@ -50,12 +50,14 @@ public:
     DEFINE_TIMESTEPPER_CONFIG_TYPES
 
     using ProcessCommunicatorType = MPILayer::ProcessCommunicator;
+    using TopologyBuilderType = MPILayer::TopologyBuilder;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 
     MoreauTimeStepperMPI(std::shared_ptr<DynamicsSystemType> pDynSys,
-                      std::shared_ptr<ProcessCommunicatorType > pProcCommunicator);
+                         std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
+                         std::shared_ptr<TopologyBuilderType> pTopologyBuilder);
     ~MoreauTimeStepperMPI();
 
     // The Core Objects ==================================
@@ -64,6 +66,7 @@ public:
     std::shared_ptr<DynamicsSystemType>	m_pDynSys;
     std::shared_ptr<ProcessCommunicatorType > m_pProcCommunicator;
     std::shared_ptr<BodyCommunicator > m_pBodyCommunicator;
+    std::shared_ptr<TopologyBuilderType > m_pTopologyBuilder;
     // ===================================================
 
     void initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile="");
@@ -132,16 +135,17 @@ definitions of template class MoreauTimeStepperMPI
 _________________________________________________________*/
 
 
-MoreauTimeStepperMPI::MoreauTimeStepperMPI(std::shared_ptr<DynamicsSystemType> pDynSys,
-                                     std::shared_ptr<ProcessCommunicatorType > pProcCommunicator):
+MoreauTimeStepperMPI::MoreauTimeStepperMPI( std::shared_ptr<DynamicsSystemType> pDynSys,
+                                            std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
+                                            std::shared_ptr<TopologyBuilderType> pTopologyBuilder):
     m_ReferenceSimFile(),
     m_pSolverLog(nullptr),
     m_pDynSys(pDynSys),
-    m_pProcCommunicator(pProcCommunicator) {
+    m_pProcCommunicator(pProcCommunicator), m_pTopologyBuilder(pTopologyBuilder) {
 
 
-    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
         ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }
@@ -170,7 +174,7 @@ MoreauTimeStepperMPI::~MoreauTimeStepperMPI() {
 
 void MoreauTimeStepperMPI::closeAllFiles() {
 
-    Logging::LogManager::getSingletonPtr()->destroyLog("SolverLog");
+    Logging::LogManager::getSingleton().destroyLog("SolverLog");
     m_pSolverLog = nullptr;
 
     m_CollisionDataFile.close();
@@ -208,7 +212,7 @@ void MoreauTimeStepperMPI::initLogs(  const boost::filesystem::path &folder_path
     // Set up all Logs;
 
     m_pSolverLog = new Logging::Log("SolverLog");
-    Logging::LogManager::getSingletonPtr()->registerLog(m_pSolverLog);
+    Logging::LogManager::getSingleton().registerLog(m_pSolverLog);
 
 #if SOLVERLOG_TOFILE == 1
     m_pSolverLog->addSink(new Logging::LogSinkFile("SolverLog-File",m_SolverLogFilePath));
@@ -252,6 +256,9 @@ void MoreauTimeStepperMPI::reset() {
     m_pCollisionSolver->reset();
 
     m_pSimulationLog->logMessage("---> Reset InclusionSolver...");
+    m_pInclusionSolver->reset();
+
+        m_pSimulationLog->logMessage("---> Reset InclusionSolver...");
     m_pInclusionSolver->reset();
 
 
@@ -327,6 +334,11 @@ void MoreauTimeStepperMPI::doOneIteration() {
 
     LOGSLLEVEL2(m_pSolverLog,"---> m_t Begin: " << m_currentSimulationTime <<std::endl; );
 
+
+    // Topology Rebuilder
+    m_pTopologyBuilder->checkAndRebuild(m_IterationCounter,m_currentSimulationTime);
+
+
     //Calculate Midpoint Rule ============================================================
     // Middle Time Step for all LOCAL Bodies==============================================
     // Remote bodies belong to other processes which are timestepped
@@ -394,8 +406,6 @@ void MoreauTimeStepperMPI::doOneIteration() {
     m_pInclusionSolver->solveInclusionProblem(m_currentSimulationTime);
     m_endTimeInclusionSolver = m_PerformanceTimer.elapsedSec();
 
-    //boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
-    //boost::thread::yield();
 
 
     // ===================================================================================

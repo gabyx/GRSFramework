@@ -37,11 +37,43 @@
 */
 /** @{ */
 
-class ColliderAABB : public boost::static_visitor<> {
+class ColliderAABBBase{
 public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-    ColliderAABB(): m_bOverlapTest(false),m_bOverlap(false) {}
+protected:
+
+    const AABB * m_aabb = nullptr;
+
+    bool m_bOverlapTest = false;                        ///< Boolean to decide if we only do overlap test or the whole collision output
+    bool m_bOverlap = false;                            ///< Boolean which tells if the collision detection catched an overlap in the last call
+
+    const RigidBodyType* m_pBody1 = nullptr; ///< Shared pointer to the first RigidBodyBase class instance.
+
+public:
+    inline bool overlapSphere(const Vector3 & p, PREC radius, const AABB & aabb){
+        // Intersection test by Thomas Larsson "On Faster Sphere-Box Overlap Testing"
+        // Using arvos overlap test because larsons gives false positives!
+        PREC d = 0;
+        PREC e,c;
+        PREC r = radius;
+        for(int i=0; i<3; i++) {
+            c = p(i);
+            e = std::max(aabb.m_minPoint(i)-c, 0.0) + std::max( c -  aabb.m_maxPoint(i) ,0.0);
+            d = d + e*e;
+        }
+        if(d > r*r) {
+            return false;
+        }
+        return true;
+    }
+};
+
+class ColliderAABB : protected ColliderAABBBase, public boost::static_visitor<> {
+public:
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    ColliderAABB(){}
 
     bool checkOverlap(const RigidBodyType * pBody1, const AABB & aabb) {
 
@@ -59,7 +91,7 @@ public:
 
     // Dispatch
     void operator()(const std::shared_ptr<const SphereGeometry >  & sphereGeom1) {
-        overlap(sphereGeom1);
+        m_bOverlap = overlapSphere(m_pBody1->m_r_S, sphereGeom1->m_radius, *m_aabb);
     }
 
     /**
@@ -70,44 +102,58 @@ public:
         ERRORMSG("ColliderAABB:: collision detection for object-combination "<< typeid(Geom1).name()<<" and AABB not supported!");
     }
 
+
+};
+
+
+/** @} */
+
+/**
+* @ingroup Collision
+* @brief This is the ColliderOOBB class, this functor class handles the collision of different RigidBodies with an OOBB.
+* It only does overlap test and not a full collision test!
+*/
+/** @{ */
+
+class ColliderOOBB : protected ColliderAABBBase, public boost::static_visitor<> {
+public:
+    /**
+    * Here aabb is in coordinates of frame K!
+    */
+    bool checkOverlap(const RigidBodyType * pBody1, const AABB & aabb, const Matrix33 & A_IK) {
+
+        m_pBody1 = pBody1;
+        m_bOverlapTest = true;
+        m_bOverlap = false;
+        m_aabb = &aabb;
+        m_A_IK = &A_IK;
+
+        m_pBody1->m_geometry.apply_visitor(*this);
+        return m_bOverlap;
+    }
+
+    // Dispatch
+    void operator()(const std::shared_ptr<const SphereGeometry >  & sphereGeom1) {
+        // Transform the point of the body into frame K
+        Vector3 p = m_A_IK->transpose() * m_pBody1->m_r_S;
+        m_bOverlap = overlapSphere(p, sphereGeom1->m_radius, *m_aabb);
+    }
+
+    /**
+    * @brief If no routine matched for Body to OOBB throw error
+    */
+    template <typename Geom1>
+    inline void operator()(const  std::shared_ptr<const Geom1> &g1) {
+        ERRORMSG("ColliderAABB:: collision detection for object-combination "<< typeid(Geom1).name()<<" and AABB not supported!");
+    }
+
 private:
-
-    const AABB * m_aabb;
-
-    bool m_bOverlapTest;                        ///< Boolean to decide if we only do overlap test or the whole collision output
-    bool m_bOverlap;                            ///< Boolean which tells if the collision detection catched an overlap in the last call
-
-    const RigidBodyType* m_pBody1; ///< Shared pointer to the first RigidBodyBase class instance.
-
-
-    //Collision function
-    inline void overlap( const std::shared_ptr<const SphereGeometry >  & sphereGeom1); ///< Sphere/AABB collision
+    const Matrix33 * m_A_IK; ///< Transformation from frame K to frame I where the body coordinates are represented in
 };
 
 
 
-void ColliderAABB::overlap(const std::shared_ptr<const SphereGeometry >  & sphereGeom1) {
-    //Intersection test by Thomas Larsson "On Faster Sphere-Box Overlap Testing"
-    // Using arvos overlap test because larsons gives false positives!
-    PREC d = 0;
-    PREC e,c;
-    PREC r = sphereGeom1->m_radius;
-    m_bOverlap = false;
-    for(int i=0; i<3; i++) {
-        c = m_pBody1->m_r_S(i);
-        e = std::max(m_aabb->m_minPoint(i)-c, 0.0) + std::max( c -  m_aabb->m_maxPoint(i) ,0.0);
-        d = d + e*e;
-    }
-    if(d > r*r) {
-        return;
-    }
-    m_bOverlap = true;
-}
-
 /** @} */
-
-
-
 
 /**
 * @ingroup Collision

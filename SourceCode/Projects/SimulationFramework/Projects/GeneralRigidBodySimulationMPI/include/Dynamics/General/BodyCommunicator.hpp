@@ -99,6 +99,9 @@ public:
 
     }
 
+    /** Reinitializes all neighbour ranks and data structures */
+    void reset();
+
     void communicate(PREC currentSimTime);
 
     NeighbourMapType * getNeighbourMap(){return &m_nbDataMap;}

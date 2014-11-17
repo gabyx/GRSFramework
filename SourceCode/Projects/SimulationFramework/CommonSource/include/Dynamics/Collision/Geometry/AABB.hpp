@@ -20,12 +20,12 @@ public:
 
     void reset(){
         // Violating the constraint min<max for making a completey empty box!
-        m_minPoint(0) = std::numeric_limits<double>::max();
-        m_maxPoint(0) = std::numeric_limits<double>::min();
-        m_minPoint(1) = std::numeric_limits<double>::max();
-        m_maxPoint(1) = std::numeric_limits<double>::min();
-        m_minPoint(2) = std::numeric_limits<double>::max();
-        m_maxPoint(2) = std::numeric_limits<double>::min();
+        m_minPoint(0) = std::numeric_limits<PREC>::max();
+        m_maxPoint(0) = std::numeric_limits<PREC>::min();
+        m_minPoint(1) = std::numeric_limits<PREC>::max();
+        m_maxPoint(1) = std::numeric_limits<PREC>::min();
+        m_minPoint(2) = std::numeric_limits<PREC>::max();
+        m_maxPoint(2) = std::numeric_limits<PREC>::min();
     }
 
     AABB( const Vector3 &p) {
@@ -125,6 +125,9 @@ public:
                    p(2) >= m_minPoint(2) && p(2) <= m_maxPoint(2));
     };
 
+    bool isEmpty() const {
+        return m_maxPoint(0) <= m_minPoint(0) || m_maxPoint(1) <= m_minPoint(1) || m_maxPoint(2) <= m_minPoint(2);
+    }
 
     void expand(PREC d) {
         ASSERTMSG(d>=0,"d>=0")

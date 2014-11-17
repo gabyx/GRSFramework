@@ -14,7 +14,7 @@ bool MenuMouse::mouseMoved(const OIS::MouseEvent &evt)
 {
 	if (m_pTrayMgr->injectMouseMove(evt)) return true;
 
-	
+
 	return true;
 }
 
@@ -37,12 +37,12 @@ bool MenuMouse::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 
 
 void MenuMouse::setActive(){
-	InputContext::getSingletonPtr()->addKeyListener(this, m_Name);
-	InputContext::getSingletonPtr()->addMouseListener(this, m_Name);
+	InputContext::getSingleton().addKeyListener(this, m_Name);
+	InputContext::getSingleton().addMouseListener(this, m_Name);
 
 }
 void MenuMouse::setInactive(){
-	InputContext::getSingletonPtr()->removeKeyListener(this);
-	InputContext::getSingletonPtr()->removeMouseListener(this);
+	InputContext::getSingleton().removeKeyListener(this);
+	InputContext::getSingleton().removeMouseListener(this);
 
 }

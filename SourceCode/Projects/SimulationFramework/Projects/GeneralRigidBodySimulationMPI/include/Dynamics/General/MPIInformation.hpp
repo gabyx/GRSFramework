@@ -66,11 +66,13 @@ public:
         m_name = name;
     };
 
-    void createProcTopoGrid(const Vector3 & minPoint,
-                            const Vector3 & maxPoint,
-                            const MyMatrix<unsigned int>::Vector3 & dim){
-        m_procTopo.createProcessTopologyGrid(minPoint,maxPoint,dim, m_rank, MPILayer::ProcessInformation::MASTER_RANK  );
-    }
+    void createProcTopoGrid(const AABB & aabb,
+                            const MyMatrix<unsigned int>::Vector3 & dim,
+                            bool aligned = true,
+                            const Matrix33 & A_IK = Matrix33::Identity()){
+
+        m_procTopo.createProcessTopologyGrid(m_rank, MPILayer::ProcessInformation::MASTER_RANK ,
+                                             aabb,dim, aligned, A_IK  );    }
 
     ProcessTopology* getProcTopo(){
         return &m_procTopo;
@@ -87,7 +89,7 @@ protected:
         int v;
 
         // get world rank
-        MPI_Comm comm = MPIGlobalCommunicators::getSingletonPtr()->getCommunicator(MPILayer::MPICommunicatorId::WORLD_COMM);
+        MPI_Comm comm = MPIGlobalCommunicators::getSingleton().getCommunicator(MPILayer::MPICommunicatorId::WORLD_COMM);
         MPI_Comm_rank(comm,&v);
         std::stringstream s;
         s << "SimProcess_"<<v;

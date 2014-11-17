@@ -143,9 +143,6 @@ struct GlobalConfigs{
     using RandomGenType = typename GlobalConfigs::GeneralConfigs::RandomGeneratorType;
 
 
-struct MyIOFormat{
-  static Eigen::IOFormat Matlab;
-};
 
 using MeshPREC = double;
 

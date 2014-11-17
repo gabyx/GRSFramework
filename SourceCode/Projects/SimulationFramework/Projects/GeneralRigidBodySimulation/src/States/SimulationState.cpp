@@ -20,7 +20,7 @@ SimulationState::SimulationState() {
     m_eSimulationActiveMode = REALTIME;
 
 
-    m_pAppLog = RenderContext::getSingletonPtr()->m_pAppLog;
+    m_pAppLog = RenderContext::getSingleton().m_pAppLog;
 
 }
 
@@ -34,16 +34,16 @@ void SimulationState::enter() {
     m_pAppLog->logMessage("Entering SimulationState...");
 
     m_pAppLog->logMessage("Creating Ogre::SceneManager...");
-    m_pSceneMgr = std::shared_ptr<Ogre::SceneManager>( RenderContext::getSingletonPtr()->m_pRoot->createSceneManager(ST_GENERIC, "SimulationStateSceneMgr"), OgreSceneManagerDeleter());
+    m_pSceneMgr = std::shared_ptr<Ogre::SceneManager>( RenderContext::getSingleton().m_pRoot->createSceneManager(ST_GENERIC, "SimulationStateSceneMgr"), OgreSceneManagerDeleter());
     setupScene();
 
     m_pAppLog->logMessage("Adding InputContext...");
-    InputContext::getSingletonPtr()->addKeyListener(this,"SimulationState::KeyListener");
+    InputContext::getSingleton().addKeyListener(this,"SimulationState::KeyListener");
 
     m_pAppLog->logMessage("Adding OgreBites::SdkTrayManager...");
     m_pTrayMgr = std::shared_ptr< OgreBites::SdkTrayManager>(new OgreBites::SdkTrayManager("SimulationStateTray",
-                 RenderContext::getSingletonPtr()->m_pRenderWnd,
-                 InputContext::getSingletonPtr()->getMouse(), this));
+                 RenderContext::getSingleton().m_pRenderWnd,
+                 InputContext::getSingleton().getMouse(), this));
 
     m_pAppLog->logMessage("Adding MenuMouse...");
     m_pMenuMouse = std::shared_ptr< MenuMouse >(new MenuMouse(m_pTrayMgr,"MenuMouse"));
@@ -59,7 +59,7 @@ void SimulationState::enter() {
     // Setup the Simulation Manager with the loaded system;
     m_pAppLog->logMessage("Adding SimulationManagerGUI...");
     m_pSimMgr  = std::shared_ptr<SimulationManagerGUI > (new SimulationManagerGUI(m_pSceneMgr));
-    m_pSimMgr->setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
+    m_pSimMgr->setup(ApplicationCLOptions::getSingleton().m_sceneFile);
 
     updateSceneFunction = boost::bind(&SimulationState::updateSceneRealtime,this,_1);
 
@@ -77,7 +77,7 @@ bool SimulationState::pause() {
     m_pMenuMouse->setInactive();
     m_pTrayMgr->hideAll();
 
-    InputContext::getSingletonPtr()->removeKeyListener(this);
+    InputContext::getSingleton().removeKeyListener(this);
     m_pSimMgr->enableInput(false);
     return true;
 }
@@ -90,7 +90,7 @@ void SimulationState::resume() {
     m_pOrbitCamera->setActive();
     m_pTrayMgr->showAll();
 
-    InputContext::getSingletonPtr()->addKeyListener(this,"SimulationState::KeyListener");
+    InputContext::getSingleton().addKeyListener(this,"SimulationState::KeyListener");
     m_pSimMgr->enableInput(true);
 }
 
@@ -119,7 +119,7 @@ void SimulationState::exit() {
     //Delete Timer
     m_pTimelineRendering.reset();
 
-    InputContext::getSingletonPtr()->removeKeyListener(this);
+    InputContext::getSingleton().removeKeyListener(this);
 }
 
 

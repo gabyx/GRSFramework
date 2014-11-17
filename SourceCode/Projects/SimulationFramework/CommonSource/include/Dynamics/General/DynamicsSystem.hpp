@@ -38,6 +38,7 @@
     using RigidBodyContainerType       = RigidBodyContainer;\
     using RigidBodySimContainerType    = RigidBodyContainerType;\
     using RigidBodyStaticContainerType = RigidBodySimContainerType;\
+    using RigidBodyStatesVectorType = std::vector<RigidBodyState>; \
     using RigidBodyStatesContainerType = std::map<RigidBodyIdType, RigidBodyState>;
 
 

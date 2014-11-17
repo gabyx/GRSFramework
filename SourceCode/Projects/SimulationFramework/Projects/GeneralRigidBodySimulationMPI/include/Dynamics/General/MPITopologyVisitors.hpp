@@ -54,18 +54,8 @@ namespace TopologyVisitors {
 
         // Implementation for Grid
         inline bool operator()(MPILayer::ProcessTopologyGrid<ProcessTopologyBase> & topo) {
-            // Check neighbour AABB
             m_neighbourProcessRanks.clear();
-            for(auto it = topo.m_nbAABB.begin(); it != topo.m_nbAABB.end(); it++) {
-                if( topo.m_Collider.checkOverlap(m_body,it->second) ) {
-                    m_neighbourProcessRanks.insert(it->first);
-                }
-            }
-
-            // Check own AABB
-            m_overlapsOwnProcess = topo.m_Collider.checkOverlap(m_body, topo.m_aabb);
-
-            return m_neighbourProcessRanks.size() > 0;
+            return topo.checkOverlap(m_body,m_neighbourProcessRanks,m_overlapsOwnProcess);
         }
 
         inline bool operator()(const boost::blank & b) {

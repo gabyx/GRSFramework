@@ -91,7 +91,7 @@ StateRingPoolVisBackFront::StateRingPoolVisBackFront(RigidBodyIterator itBegin, 
     m_idx[2] = 1; // front
 
     // Init Log
-    boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+    boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
     filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
     if(!boost::filesystem::exists(filePath)) {
         boost::filesystem::create_directories(filePath);

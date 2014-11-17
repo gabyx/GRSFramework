@@ -28,13 +28,13 @@ PlaybackManager::PlaybackManager(std::shared_ptr<Ogre::SceneManager> pSceneMgr):
 
     m_pSimulationLog = nullptr;
 
-    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
-        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+        boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
+        m_pSimulationLog = Logging::LogManager::getSingleton().createLog("SimulationLog",true,true,filePath);
         m_pSimulationLog->logMessage("---> Creating SimulationManager...");
     }
 
@@ -42,7 +42,7 @@ PlaybackManager::PlaybackManager(std::shared_ptr<Ogre::SceneManager> pSceneMgr):
     m_pThreadLog = new Logging::Log("PlaybackManagerThreadLog");
 
 #if PLAYBACKLOG_TOFILE == 1
-    boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+    boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
     filePath /= "PlaybackManagerThread.log";
     m_pThreadLog->addSink(new Logging::LogSinkFile("PlaybackManager-File",filePath));
@@ -64,7 +64,7 @@ PlaybackManager::~PlaybackManager() {
     // delete Log!
     delete m_pThreadLog;
 
-    InputContext::getSingletonPtr()->removeKeyListener(this);
+    InputContext::getSingleton().removeKeyListener(this);
 }
 
 
@@ -334,7 +334,7 @@ void PlaybackManager::initSimThread() {
 
         // Request new file Paths for all logs from FileManager
         // Get new folder path
-        boost::filesystem::path videoFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(VIDEO_FOLDER_PATH,VIDEO_FOLDER_PREFIX);
+        boost::filesystem::path videoFolderPath = FileManager::getSingleton().getNewSimFolderPath(VIDEO_FOLDER_PATH,VIDEO_FOLDER_PREFIX);
 
         m_pVideoDropper->setFolderPath(videoFolderPath);
     }
@@ -345,7 +345,7 @@ void PlaybackManager::initSimThread() {
         m_pFileLoader->setReadFullState(true);
         m_pStateRecorderResampler->reset();
 
-        boost::filesystem::path resampleFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RESAMPLE);
+        boost::filesystem::path resampleFolderPath = FileManager::getSingleton().getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RESAMPLE);
         boost::filesystem::path file_path = resampleFolderPath;
         std::string filename = SIM_FILE_PREFIX;
         filename += SIM_FILE_EXTENSION;
@@ -354,7 +354,7 @@ void PlaybackManager::initSimThread() {
             m_pSimulationLog->logMessage("---> Could not create sim file!");
             ASSERTMSG(false,"Could not create sim file!");
         };
-        FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),resampleFolderPath,true);
+        FileManager::getSingleton().copyFile(m_pSceneParser->getParsedSceneFile(),resampleFolderPath,true);
     } else {
         //Make Fileloader load only q!
         m_pFileLoader->setReadFullState(true); // This makes things faster, because of buffering i think, first thought "false" would give better results which does not!
@@ -445,10 +445,10 @@ void PlaybackManager::cancelAllWaits() {
 void PlaybackManager::enableInput(bool value) {
     if(value) {
         // add some key,mouse listener to change the input
-        InputContext::getSingletonPtr()->addKeyListener(this,m_KeyListenerName);
+        InputContext::getSingleton().addKeyListener(this,m_KeyListenerName);
     } else {
         // add some key,mouse listener to change the input
-        InputContext::getSingletonPtr()->removeKeyListener(this);
+        InputContext::getSingleton().removeKeyListener(this);
     }
 }
 

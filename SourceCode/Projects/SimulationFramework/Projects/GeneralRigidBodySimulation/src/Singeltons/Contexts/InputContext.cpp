@@ -69,7 +69,7 @@ bool InputContext::initialise() {
         std::ostringstream windowHndStr;
 
         // Get window handle
-        RenderContext::getSingletonPtr()->m_pRenderWnd->getCustomAttribute( "WINDOW", &windowHnd );
+        RenderContext::getSingleton().m_pRenderWnd->getCustomAttribute( "WINDOW", &windowHnd );
 
         // Fill parameter list
         windowHndStr << (unsigned int) windowHnd;
@@ -119,7 +119,7 @@ bool InputContext::initialise() {
             // Get window size
             unsigned int width, height, depth;
             int left, top;
-            RenderContext::getSingletonPtr()->m_pRenderWnd->getMetrics( width, height, depth, left, top );
+            RenderContext::getSingleton().m_pRenderWnd->getMetrics( width, height, depth, left, top );
 
             // Set mouse region
             this->setWindowExtents( width, height );

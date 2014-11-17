@@ -143,27 +143,24 @@ std::string Log::getName() {
 
 // Log::expression =================================================
 Log::expression::expression(Log & _log, std::stringstream &_s, bool lastWasEndl)
-: m_s(_s), m_flag(true), m_lastWasEndl(lastWasEndl), m_log(_log) {};
+: m_s(_s), /*m_flag(true), */m_lastWasEndl(lastWasEndl), m_log(_log) {};
 
 // Destructor pushes message!
 Log::expression::~expression() {
-    if(m_flag==true) {
         m_log.writeOut(m_s); //Push string stream to log
-    }
+        // if last pushed stuff was an endl then the log starts with a new line!
+        m_log.m_newLine = m_lastWasEndl;
 }
 
 // For std::endl;
-Log::expression Log::expression::operator<<( std::ostream&(*f)(std::ostream&) ) {
-    m_flag = false;
+Log::expression &  Log::expression::operator<<( std::ostream&(*f)(std::ostream&) ) {
     m_s << f; // Apply the manipulator to the stream
 
     if(f == static_cast<std::ostream&(&)(std::ostream&)>(std::endl)){
-            // push time if timer set
-            //if(this->m_log.m_time){ this->s << LOGGING_TIMESPACES;}
-           return expression(m_log , m_s, true);
+           m_lastWasEndl = true;
     }
 
-    return expression(m_log , m_s);
+    return *this;
 }
 
 

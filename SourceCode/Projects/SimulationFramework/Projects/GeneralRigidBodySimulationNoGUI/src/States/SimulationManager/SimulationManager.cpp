@@ -36,13 +36,13 @@ SimulationManager::SimulationManager() {
 
     m_pSimulationLog = nullptr;
 
-    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
-        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+        boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",true,true,filePath);
+        m_pSimulationLog = Logging::LogManager::getSingleton().createLog("SimulationLog",true,true,filePath);
         m_pSimulationLog->logMessage("---> Creating SimulationManager...");
     }
 
@@ -144,7 +144,7 @@ void SimulationManager::writeAllOutput() {
 
 bool SimulationManager::initRecordThread() {
     // Get new folder path
-    m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
+    m_SimFolderPath = FileManager::getSingleton().getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
 
     // Sim file path
     m_SimFilePath = m_SimFolderPath;
@@ -157,7 +157,7 @@ bool SimulationManager::initRecordThread() {
     filename += ".xml";
     m_SceneFilePath /= filename;
 
-    FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),m_SceneFilePath,true);
+    FileManager::getSingleton().copyFile(m_pSceneParser->getParsedSceneFile(),m_SceneFilePath,true);
 
 
     // Get the actual RecorderSettings
@@ -182,7 +182,7 @@ bool SimulationManager::initRecordThread() {
     boost::filesystem::path simDataFile;
     if(!m_pTimestepper->m_settings.m_simDataReferenceFile.empty()){
          ASSERTMSG(false,"HERE IS CODE ZU VERVOLLSTÄNDIGEN! FALSCH!")
-         simDataFile = FileManager::getSingletonPtr()->copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_settings.m_simDataReferenceFile,true);
+         simDataFile = FileManager::getSingleton().copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_settings.m_simDataReferenceFile,true);
     }
     m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);
 

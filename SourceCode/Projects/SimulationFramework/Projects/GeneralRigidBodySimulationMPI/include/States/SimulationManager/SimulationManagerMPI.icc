@@ -49,18 +49,18 @@ void SimulationManagerMPI::setup() {
 void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
     //Each Process copies its SceneFile.xml to the folders, that each Process can read its own file (better)
-    m_sceneFileParsed = FileManager::getSingletonPtr()->copyFile(sceneFilePath,
-            FileManager::getSingletonPtr()->getLocalDirectoryPath());
+    m_sceneFileParsed = FileManager::getSingleton().copyFile(sceneFilePath,
+            FileManager::getSingleton().getLocalDirectoryPath());
 
     //Make log!
     m_pSimulationLog = nullptr;
-    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
-        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+        boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",SIMULATION_LOG_TO_CONSOLE,true,filePath);
+        m_pSimulationLog = Logging::LogManager::getSingleton().createLog("SimulationLog",SIMULATION_LOG_TO_CONSOLE,true,filePath);
     }
 
     m_pSimulationLog->logMessage("---> SimulationManagerMPI::setup(): ");
@@ -68,7 +68,7 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     // MPI Process Commnunicator
 
     m_pProcCommunicator = std::shared_ptr<ProcessCommunicatorType >(new ProcessCommunicatorType(
-                                                    MPILayer::MPIGlobalCommunicators::getSingletonPtr()->getCommunicator(
+                                                    MPILayer::MPIGlobalCommunicators::getSingleton().getCommunicator(
                                                       MPILayer::MPICommunicatorId::SIM_COMM
                                                     )
                                            ));
@@ -78,7 +78,7 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     m_pDynSys = std::shared_ptr< DynamicsSystemType >( new DynamicsSystemType());
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added DynamicsSystem");
 
-    // Parse the SceneSettings only ==========================
+    // Parse the SceneSettings and Static Bodies only ==========================
     {
         DynamicsSystemType::ParserModulesCreator1 c(m_pDynSys.get());
         using SceneParserType1 = SceneParserMPI<DynamicsSystemType,  DynamicsSystemType::ParserModulesCreator1::SceneParserTraits >;
@@ -93,61 +93,27 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     }
     // ====================================================
 
-    // TopologyBuilder Build Topology =====================
-
-    if(m_pDynSys->getSettingsTopoBuilder().m_type == MPILayer::TopologyBuilderEnum::GRIDBUILDER){
+    // TopologyBuilder ====================
+    auto & topoSettings = m_pDynSys->getSettingsTopoBuilder();
+    if(topoSettings.m_type == MPILayer::TopologyBuilderEnum::GRIDBUILDER){
 
         m_pTopologyBuilder = std::shared_ptr< TopologyBuilderType >(
                                                 new MPILayer::GridTopologyBuilder<ProcessCommunicatorType>
-                                                  (m_pDynSys,m_pProcCommunicator, m_pDynSys->getSettingsTopoBuilder().m_gridBuilderSettings
-                                                   ,m_sceneFileParsed, m_nGlobalSimBodies ) );
+                                                  (m_pDynSys,m_pProcCommunicator,
+                                                   topoSettings.m_rebuildSettings,
+                                                   topoSettings.m_gridBuilderSettings,
+                                                   m_sceneFileParsed, m_nGlobalSimBodies ) );
+        m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added GridTopologyBuilder");
     }else{
         ERRORMSG("No Topology Builder type instantiated")
     }
-
-    m_pTopologyBuilder->initTopology();
-
-    // Parse the scene objects from the XML, but selectively on the ids in m_pDynSys->bodiesInitStates
-    {
-        DynamicsSystemType::ParserModulesCreator2 c(m_pDynSys.get());
-        using SceneParserType2 = SceneParserMPI<DynamicsSystemType, DynamicsSystemType::ParserModulesCreator2::SceneParserTraits >;
-        SceneParserType2 parser( c , m_pSimulationLog );
-
-        SceneParserType2::SceneParserDynamicOptionsType optScene;
-        optScene.m_parseSceneSettings = false;
-        optScene.m_parseSceneObjects = true;
-
-        SceneParserType2::BodyModuleDynamicOptionsType optBodyM;
-        std::set<RigidBodyIdType> bodiesToload;
-        for(auto & s: m_pDynSys->m_bodiesInitStates){ bodiesToload.insert(s.second.m_id);}
-        optBodyM.m_bodyIdRange = std::move(bodiesToload);
-
-        parser.parseScene(m_sceneFileParsed, optScene , std::move(optBodyM));
-
-        // Apply initial states (received from master) to bodies
-        m_pDynSys->applyInitStatesToBodies();
-
-        LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_simBodies.size()
-        << " simulated & " << m_pDynSys->m_staticBodies.size()<<  " static bodies! "  << std::endl;);
-
-        checkOwnerOfBodiesInProcess();
-    }
-
-    //=====================================================
-
-
-    // Do Safty Check
-    // Do a Reduction of all Simbodies, to count if no bodies are missing!
-    m_pSimulationLog->logMessage("---> Check number of Bodies in Process:");
-    checkNumberOfBodiesInProcess();
-
-    // =====================================================
 
     //Uncomment if StateRecorderType = StateRecorderBodys
     //m_pStateRecorder  =  std::shared_ptr<StateRecorderType >(new StateRecorderType(true,m_pProcCommunicator->getProcInfo()->getRank()));
 
     m_pStateRecorder  =  std::shared_ptr<StateRecorderType >(new StateRecorderType(m_nGlobalSimBodies,
                                                                 std::static_pointer_cast<ProcessCommunicatorType::ProcessInfoType>(m_pProcCommunicator)));
+    m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added StateRecorder");
     // =====================================================
 
 
@@ -167,10 +133,8 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     //as along as there is the SimMgrMpi there is a NbCommunicator and a StatRecorder, so no problem
     // ===============================================
 
-    m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pProcCommunicator) );
-
-    m_pSimulationLog->logMessage("---> Initialize ProcessCommunicator buffers...");
-    m_pProcCommunicator->initializeNeighbourBuffers();
+    m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pProcCommunicator, m_pTopologyBuilder) );
+    m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added TimeStepper");
 
     m_pSimulationLog->logMessage("---> SimulationManagerMPI::setup() finished!");
 }
@@ -266,7 +230,7 @@ void SimulationManagerMPI::startSim() {
 
 
         // Roll all registered log files
-        Logging::LogManager::getSingletonPtr()->rollAllLogs();
+        Logging::LogManager::getSingleton().rollAllLogs();
     }
 
     m_pTimestepper->closeAllFiles();
@@ -304,12 +268,12 @@ void SimulationManagerMPI::writeAllOutput() {
 void SimulationManagerMPI::initSim() {
 
 
-    MPILayer::GenericMessage1<boost::filesystem::path> message;
+    MPILayer::GenericMessage<boost::filesystem::path> message;
 
     if(m_pProcCommunicator->hasMasterRank()) { // Only master process
         // Get new sim folder path relative to global directory
 
-        m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
+        m_SimFolderPath = FileManager::getSingleton().getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
 
         LOG(m_pSimulationLog,"MPI> Broadcast new simulation directory: "<< m_SimFolderPath <<std::endl;);
 
@@ -319,23 +283,23 @@ void SimulationManagerMPI::initSim() {
         sceneFilePath /= filename;
 
         LOG(m_pSimulationLog,"---> Copy parsed scene file to: " << sceneFilePath <<std::endl;)
-        FileManager::getSingletonPtr()->copyFile(m_sceneFileParsed,sceneFilePath,true);
+        FileManager::getSingleton().copyFile(m_sceneFileParsed,sceneFilePath,true);
 
         // Need to broadcast the filename of the actual folder
         // Broadcast: m_SimFolderPath
 
-        message.m_data.get<0>() = m_SimFolderPath;
+        std::get<0>(message.m_data) = m_SimFolderPath;
 
         m_pProcCommunicator->sendBroadcast(message);
     } else { // All other processes
 
         m_pProcCommunicator->receiveBroadcast(message, m_pProcCommunicator->getMasterRank());
-        m_SimFolderPath = message.m_data.get<0>();
+        m_SimFolderPath = std::get<0>(message.m_data);
         LOG(m_pSimulationLog,"MPI> Received new simulation directory: "<< m_SimFolderPath <<std::endl;);
     }
 
     // Create same folder name in Local Process Directory, to save all data...
-    boost::filesystem::path localSimFolderPath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+    boost::filesystem::path localSimFolderPath = FileManager::getSingleton().getLocalDirectoryPath();
     localSimFolderPath /= m_SimFolderPath.filename();
     if(!boost::filesystem::create_directories(localSimFolderPath)) {
         LOG(m_pSimulationLog,  "ERROR:---> Could not create directory: " << localSimFolderPath.string() << std::endl;);
@@ -346,18 +310,19 @@ void SimulationManagerMPI::initSim() {
     m_pStateRecorder->setDirectoryPath(m_SimFolderPath); // If StateRecorder is StateRecorderBody or StateRecorderMPI
     //m_pStateRecorder->setDirectoryPath(localSimFolderPath);
 
-// Uncomment if StateRecorder is StateRecorderBody
-//    if(!m_pStateRecorder->createSimFiles(m_pDynSys->m_simBodies,true)) { // Truncate the files, important!
-//        LOG(m_pSimulationLog,  "ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl;);
-//        ERRORMSG("ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
-//    }
+    // Uncomment if StateRecorder is StateRecorderBody
+    //    if(!m_pStateRecorder->createSimFiles(m_pDynSys->m_simBodies,true)) { // Truncate the files, important!
+    //        LOG(m_pSimulationLog,  "ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl;);
+    //        ERRORMSG("ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
+    //    }
 
     if(!m_pStateRecorder->createSimFile(true)) { // Truncate the files, important!
         LOG(m_pSimulationLog,  "ERROR:---> Could not open SimFilePart: " << localSimFolderPath.string() << std::endl;);
         ERRORMSG("ERROR:---> Could not open SimFilePart: " << localSimFolderPath.string() << std::endl)
     }
-// ===============================================
+    // ===============================================
 
+    // Reset TimeStepper
     m_pTimestepper->reset();
     m_pTimestepper->initLogs(localSimFolderPath);
 
@@ -365,6 +330,47 @@ void SimulationManagerMPI::initSim() {
     m_RecorderSettings = m_pDynSys->getSettingsRecorder();
 
 
+    // Init Topology and load all sim bodies
+    m_pTopologyBuilder->initLogs(localSimFolderPath);
+    m_pTopologyBuilder->initTopology();
 
+    // Parse the scene objects from the XML, but selectively on the ids in m_pDynSys->bodiesInitStates
+    {
+        DynamicsSystemType::ParserModulesCreator2 c(m_pDynSys.get());
+        using SceneParserType2 = SceneParserMPI<DynamicsSystemType, DynamicsSystemType::ParserModulesCreator2::SceneParserTraits >;
+        SceneParserType2 parser( c , m_pSimulationLog );
+
+        SceneParserType2::SceneParserDynamicOptionsType optScene;
+        optScene.m_parseSceneSettings = false;
+        optScene.m_parseSceneObjects = true;
+
+        SceneParserType2::BodyModuleDynamicOptionsType optBodyM;
+        std::set<RigidBodyIdType> bodiesToload;
+        for(auto & s: m_pDynSys->m_bodiesInitStates){ bodiesToload.insert(s.second.m_id);}
+        optBodyM.m_bodyIdRange = std::move(bodiesToload);
+
+        parser.parseScene(m_sceneFileParsed, optScene , std::move(optBodyM));
+
+        // Apply initial states (received from master) to bodies
+        m_pDynSys->applyInitStatesToBodies();
+
+        LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_simBodies.size()
+        << " simulated & " << m_pDynSys->m_staticBodies.size()<<  " static bodies! "  << std::endl;);
+
+        checkOwnerOfBodiesInProcess();
+    }
+
+    //=====================================================
+
+
+    // Do Safty Check
+    // Do a Reduction of all Simbodies, to count if no bodies are missing!
+    m_pSimulationLog->logMessage("---> Check number of Bodies in Process:");
+    checkNumberOfBodiesInProcess();
+    // =====================================================
+
+
+    m_pSimulationLog->logMessage("---> Initialize ProcessCommunicator buffers...");
+    m_pProcCommunicator->initializeNeighbourBuffers();
 
 }

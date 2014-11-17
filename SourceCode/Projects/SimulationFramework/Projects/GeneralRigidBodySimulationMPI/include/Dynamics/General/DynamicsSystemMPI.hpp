@@ -62,6 +62,7 @@ public:
     //All initial conditions for all bodies
     //We need an order, which is sorted according to the id!
     using RigidBodyStatesContainerType = std::map<RigidBodyIdType, RigidBodyState>;
+    using RigidBodyStatesVectorType = std::vector<RigidBodyState>;
     RigidBodyStatesContainerType m_bodiesInitStates;
 
 

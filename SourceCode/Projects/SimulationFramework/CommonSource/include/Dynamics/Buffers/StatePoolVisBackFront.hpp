@@ -81,7 +81,7 @@ StatePoolVisBackFront::StatePoolVisBackFront(TRigidBodyIterator beg, TRigidBodyI
     m_idx[2] = 0; //vis
 
     // Init Log
-    boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+    boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
     filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
     if(!boost::filesystem::exists(filePath)) {
         boost::filesystem::create_directories(filePath);

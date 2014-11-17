@@ -19,6 +19,8 @@
 
 #include "AssertionDebug.hpp"
 
+#include "ContainerTag.hpp"
+
 #include "RigidBodyId.hpp"
 #include "ContactParameter.hpp"
 #include "MeshGeometry.hpp"
@@ -1346,7 +1348,7 @@ private:
 
     using RigidBodyType = typename DynamicsSystemType::RigidBodyType;
     using RigidBodyStatesContainerType = typename DynamicsSystemType::RigidBodyStatesContainerType;
-    RigidBodyStatesContainerType * m_initStates;
+    RigidBodyStatesContainerType * m_initStates = nullptr;
 
     SettingsModuleType * m_settings;
     LogType * m_pSimulationLog;
@@ -1365,9 +1367,8 @@ public:
     void cleanUp() {}
 
     InitStatesModule(ParserType * p, RigidBodyStatesContainerType * c, SettingsModuleType * s): m_pSimulationLog(p->getSimLog()),m_initStates(c), m_settings(s) {
-        ASSERTMSG(m_initStates, "should not be null");
+        ASSERTMSG(m_initStates, "one of boths should not be null");
     };
-
 
     void parseGlobalInitialCondition( XMLNodeType sceneSettings) {
         LOGSCLEVEL1(m_pSimulationLog, "---> InitStatesModule: parsing (GlobalInitCondition) =============="<<std::endl;)
@@ -1491,6 +1492,10 @@ public:
         //LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 
+
+    void addState(RigidBodyIdType id, RigidBodyState & state){
+
+    }
 
     StatesGroupType * getStatesGroup() {
         return &m_statesGroup;
@@ -1753,6 +1758,18 @@ private:
         }
 
     }
+
+//    // Insert for all associative containers with an emplace function
+//    template<template C, typename std::enable_if< ContainerTags::is_associative(*static_cast<C*>(0)), int >::type  = 0 >
+//    bool addState(C & cont, RigidBodyIdType id, RigidBodyState & state){
+//        return cont.emplace(id,state).second;
+//    }
+//    // Insert for containers with an emplace_back function (all not associative containers)
+//    template<template C, typename std::enable_if< ! ContainerTags::is_associative(*static_cast<C*>(0)), int >::type  = 0 >
+//    bool addState(C & cont, RigidBodyIdType id, RigidBodyState & state){
+//        cont.emplace_back(state);
+//        return true;
+//    }
 
 };
 

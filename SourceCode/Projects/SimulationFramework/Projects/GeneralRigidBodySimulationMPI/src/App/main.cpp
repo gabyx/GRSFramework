@@ -11,6 +11,8 @@
 #include "FileManager.hpp"
 #include "SimpleLogger.hpp"
 #include "RedirectOutput.hpp"
+
+#include "MPIDataTypes.hpp"
 #include "SimulationManagerMPI.hpp"
 
 // Define the function to be called when ctrl-c (SIGINT) signal is sent to process
@@ -37,7 +39,13 @@ void signal_callback_handler(int signum)
 
 
 void start( int argc, char **argv ){
+
+        // Setup global communicators
         MPILayer::MPIGlobalCommunicators globalComm;
+
+        // Setup global types and commit them
+        MPILayer::DataTypes::commitAll();
+        MPILayer::ReduceFunctions::createAll();
 
          // Add the process rank to the Global File Path for this Process...
         int my_rank;
@@ -47,10 +55,10 @@ void start( int argc, char **argv ){
 
         // Parsing Input Parameters===================================
         ApplicationCLOptions opts;
-        ApplicationCLOptions::getSingletonPtr()->parseOptions(argc,argv);
-        ApplicationCLOptions::getSingletonPtr()->checkArguments();
+        ApplicationCLOptions::getSingleton().parseOptions(argc,argv);
+        ApplicationCLOptions::getSingleton().checkArguments();
         if(my_rank == 0){
-            ApplicationCLOptions::getSingletonPtr()->printArgs(std::cout);
+            ApplicationCLOptions::getSingleton().printArgs(std::cout);
         }
         // End Parsing =================================
 
@@ -61,26 +69,26 @@ void start( int argc, char **argv ){
 
         //Calculate the directory where the processes have theis local dir
         {
-            unsigned int groups = nProcesses / ApplicationCLOptions::getSingletonPtr()->m_localDirs.size();
-            unsigned int index = std::min( (unsigned int)(my_rank/ groups), (unsigned int)ApplicationCLOptions::getSingletonPtr()->m_localDirs.size()-1);
-            localDirPath = ApplicationCLOptions::getSingletonPtr()->m_localDirs[index];
+            unsigned int groups = nProcesses / ApplicationCLOptions::getSingleton().m_localDirs.size();
+            unsigned int index = std::min( (unsigned int)(my_rank/ groups), (unsigned int)ApplicationCLOptions::getSingleton().m_localDirs.size()-1);
+            localDirPath = ApplicationCLOptions::getSingleton().m_localDirs[index];
             localDirPath /= processFolder.str();
         }
 
         // Rank 0 makes the FileManager first( to ensure that all folders are set up properly)
         std::unique_ptr<FileManager> fileManager;
         if(my_rank == 0){
-            fileManager.reset(new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath)); //Creates path if it does not exist
+            fileManager.reset(new FileManager(ApplicationCLOptions::getSingleton().m_globalDir, localDirPath)); //Creates path if it does not exist
             MPI_Barrier(MPI_COMM_WORLD);
         }
         else{
             MPI_Barrier(MPI_COMM_WORLD);
             //These do not create paths anymore because rank 0 has already made the stuff
-            fileManager.reset(new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath));
+            fileManager.reset(new FileManager(ApplicationCLOptions::getSingleton().m_globalDir, localDirPath));
         }
 
         // Redirect std::cerr to Global file:
-        boost::filesystem::path file = FileManager::getSingletonPtr()->getGlobalDirectoryPath();
+        boost::filesystem::path file = FileManager::getSingleton().getGlobalDirectoryPath();
         std::stringstream name;
         name << "MPIError_Rank" << my_rank << ".log";
         file /= name.str();
@@ -94,11 +102,11 @@ void start( int argc, char **argv ){
             Logging::LogManager logger;
 
             // Construct the communicator for the Simulation
-            MPILayer::MPIGlobalCommunicators::getSingletonPtr()->addCommunicator(MPILayer::MPICommunicatorId::SIM_COMM,MPI_COMM_WORLD);
+            MPILayer::MPIGlobalCommunicators::getSingleton().addCommunicator(MPILayer::MPICommunicatorId::SIM_COMM,MPI_COMM_WORLD);
 
             // Only Simulation Processes enter this region:
                 SimulationManagerMPI mgr;
-                mgr.setup(ApplicationCLOptions::getSingletonPtr()->m_sceneFile);
+                mgr.setup(ApplicationCLOptions::getSingleton().m_sceneFile);
                 mgr.startSim();
             // =============================================
 
@@ -109,7 +117,7 @@ void start( int argc, char **argv ){
 
            // Do post processes at the end of the simulation
             //TODO
-            auto & tasks = ApplicationCLOptions::getSingletonPtr()->m_postProcessTasks;
+            auto & tasks = ApplicationCLOptions::getSingleton().m_postProcessTasks;
             for(auto it = tasks.begin(); it != tasks.end(); it++){
                 if((*it)->getName() == "bash"){
                     (*it)->execute();
@@ -132,6 +140,10 @@ void start( int argc, char **argv ){
             std::cerr << "Exiting ..." << std::endl;
             MPI_Abort(MPI_COMM_WORLD,-1);
         }
+
+        MPILayer::ReduceFunctions::freeAll();
+        MPILayer::DataTypes::freeAll();
+
 }
 
 int main(int argc, char **argv) {

@@ -9,19 +9,30 @@ BodyCommunicator::BodyCommunicator(  std::shared_ptr< DynamicsSystemType> pDynSy
             m_globalRemote(pDynSys->m_RemoteSimBodies),
             m_globalGeometries(pDynSys->m_globalGeometries),
             m_pProcComm(pProcComm),
-            m_pProcTopo(m_pProcComm->getProcTopo()),
             m_nbDataMap(m_pProcComm->getRank()),
             m_rank(m_pProcComm->getRank()),
-            m_nbRanks(m_pProcComm->getProcTopo()->getNeighbourRanks()),
             m_message(this)
 {
 
 
-    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
         ERRORMSG("SimulationLog does not yet exist? Did you create it?")
     }
+
+
+}
+
+void BodyCommunicator::reset(){
+
+
+    m_pProcTopo =  m_pProcComm->getProcTopo();
+    m_nbRanks   =  m_pProcComm->getProcTopo()->getNeighbourRanks();
+
+    // Clear Neighbour Map
+    m_nbDataMap.clear();
+
 
     // Initialize all NeighbourDatas
     for(auto rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {

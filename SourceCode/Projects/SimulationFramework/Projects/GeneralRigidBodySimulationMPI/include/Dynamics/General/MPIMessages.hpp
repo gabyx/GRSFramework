@@ -46,42 +46,37 @@ void serialize(Archive& ar, boost::filesystem::path & p,
 
 namespace MPILayer {
 
-//#define CONCAT(a,b) a ## b
-//
-//#define SERIALIZE_TUPLE_ELEMS(z,nargs,unused) \
-//        ar  &  m_data.template get< nargs >();\
 
-//#define GENERATE_GENERICMESSAGE_CLASS(z,nargs,unused) \
-
-
-template<typename T1>
-class GenericMessage1 {
+template<typename... T1>
+class GenericMessage {
 public:
+	using Tuple = std::tuple<T1...>;
+    static const std::size_t TupleSize = std::tuple_size<Tuple>::value;
+
+    /** Universal reference: This class can also hold references in the tuple */
+    template<typename... T>
+    GenericMessage(T&&... args): m_data( std::forward<T>(args)... ){}
 
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version) {
-        ar & m_data.template get<0>();
+        serialize_imp< 0 >(ar,version);
     }
 
-    boost::tuple<T1> m_data;
-};
-
-template<typename T1, typename T2>
-class GenericMessage2 {
-public:
-
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int version) {
-        ar & m_data.template get<0>();
-        ar & m_data.template get<1>();
+    template<std::size_t N, class Archive>
+    typename std::enable_if< (N < TupleSize-1 )>::type
+    serialize_imp(Archive & ar, const unsigned int version) {
+        ar & std::get<N>(m_data);
+        serialize_imp<N+1, Archive>(ar,version);
     }
 
-    boost::tuple<T1,T2> m_data;
+    template<std::size_t N, class Archive>
+    typename std::enable_if< N == TupleSize-1  >::type
+    serialize_imp(Archive & ar, const unsigned int version) {
+         ar & std::get<N>(m_data);
+    }
+
+    Tuple m_data;
 };
-
-//BOOST_PP_REPEAT_FROM_TO(2,3,GENERATE_GENERICMESSAGE_CLASS,nothing);
-
-
 
 
 template<typename TNeighbourCommunicator >
@@ -115,19 +110,19 @@ public:
         m_neighbourData(nullptr),
         m_bodyInfo(nullptr) {
 
-        if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-            m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+        if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+            m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
         } else {
             ERRORMSG("SimulationLog does not yet exist? Did you create it?")
         }
 
-        if(Logging::LogManager::getSingletonPtr()->existsLog("MPISerializerLog")) {
-            m_pSerializerLog =  Logging::LogManager::getSingletonPtr()->getLog("MPISerializerLog");
+        if(Logging::LogManager::getSingleton().existsLog("MPISerializerLog")) {
+            m_pSerializerLog =  Logging::LogManager::getSingleton().getLog("MPISerializerLog");
         } else {
-            boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+            boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
             filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
             filePath /= "MPISerializer.log";
-            m_pSerializerLog = Logging::LogManager::getSingletonPtr()->createLog("MPISerializerLog",false,true,filePath);
+            m_pSerializerLog = Logging::LogManager::getSingleton().createLog("MPISerializerLog",false,true,filePath);
         }
     };
 
@@ -803,19 +798,19 @@ public:
         m_nc(nc),
         m_initialized(false) {
 
-        if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-            m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+        if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+            m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
         } else {
             ERRORMSG("SimulationLog does not yet exist? Did you create it?")
         }
 
-        if(Logging::LogManager::getSingletonPtr()->existsLog("MPISerializerLog")) {
-            m_pSerializerLog =  Logging::LogManager::getSingletonPtr()->getLog("MPISerializerLog");
+        if(Logging::LogManager::getSingleton().existsLog("MPISerializerLog")) {
+            m_pSerializerLog =  Logging::LogManager::getSingleton().getLog("MPISerializerLog");
         } else {
-            boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+            boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
             filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
             filePath /= "MPISerializer.log";
-            m_pSerializerLog = Logging::LogManager::getSingletonPtr()->createLog("MPISerializerLog",false,true,filePath);
+            m_pSerializerLog = Logging::LogManager::getSingleton().createLog("MPISerializerLog",false,true,filePath);
         }
     };
 
@@ -1448,6 +1443,7 @@ public:
     static const MPIMessageTag m_tag = MPIMessageTag::TOPOLOGYBUILDER_POINTGATHER;
 
     using TopologyBuilderType = TTopologyBuilder;
+    using SettingsType = typename TopologyBuilderType::SettingsType;
     using RankIdType = typename TopologyBuilderType::RankIdType ;
 
     TopologyBuilderMessageWrapperBodies(TopologyBuilderType * topoBuilder):
@@ -1459,34 +1455,45 @@ public:
     template<class Archive>
     void save(Archive & ar, const unsigned int version) const {
 
-        unsigned int size = m_pTopoBuilder->m_pDynSys->m_simBodies.size() ;
+        unsigned int size = m_pTopoBuilder->m_initStates.size() ;
         ar & size;
 
-        // send all bodie COG's to make master rank build the topology
-        for(auto bodyIt = m_pTopoBuilder->m_pDynSys->m_simBodies.begin();
-                 bodyIt != m_pTopoBuilder->m_pDynSys->m_simBodies.end(); bodyIt++){
-
-            ar & (*bodyIt)->m_id;
-            //Pos
-            serializeEigen(ar,(*bodyIt)->m_r_S);
-            serializeEigen(ar,(*bodyIt)->m_q_IK);
+        // send all bodies state to master rank which build the topology
+        for(auto & state :  m_pTopoBuilder->m_initStates ){
+            ar & state.second.m_id;
+            // Displacement
+            serializeEigen(ar,state.second.m_q);
             //Velocity
-//            LOGASSERTMSG( (*bodyIt)->m_pSolverData, m_pSerializerLog, "No SolverData present in body with id: "<< RigidBodyId::getBodyIdString((*bodyIt)) << "!");
-            serializeEigen(ar,(*bodyIt)->m_pSolverData->m_uBuffer.m_back);
+            serializeEigen(ar,state.second.m_u);
         }
 
-        // AABB
-        ar & m_pTopoBuilder->m_aabb_loc;
-        // Theta
-        serializeEigen(ar,m_pTopoBuilder->m_Theta_G_loc);
-        // r_G
-        serializeEigen(ar,m_pTopoBuilder->m_r_G_loc);
 
-
-
+        // if BINET_TENSOR
+        if(m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
+            // Local Theta
+            serializeEigen(ar,m_pTopoBuilder->m_I_theta_loc);
+            // Local Center point
+            ar & m_pTopoBuilder->m_countPoints_loc;
+            serializeEigen(ar,m_pTopoBuilder->m_r_G_loc);
+        }
+        else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::ALIGNED ){
+            // Local AABB
+            ar & m_pTopoBuilder->m_I_aabb_loc;
+        }
     }
 
-    // receive broadcast
+    // Master reset
+    void resetBeforLoad(){
+        // Binet
+        m_pTopoBuilder->m_I_theta_G_glo.setZero();
+        m_pTopoBuilder->m_countPoints_glo = 0;
+        m_pTopoBuilder->m_r_G_glo.setZero();
+        // Aligned
+        m_pTopoBuilder->m_rankAABBs.clear();
+
+        m_pTopoBuilder->m_aabb_glo.reset();
+    }
+
     template<class Archive>
     void load(Archive & ar, const unsigned int version) const {
 
@@ -1500,33 +1507,49 @@ public:
         for(unsigned int i = 0; i < size; i++){
             ar & id;
             // Pos/Vel
-            auto massPointRes = m_pTopoBuilder->m_massPoints_glo.emplace(id);
-            serializeEigen(ar, massPointRes.first->m_initState.m_q);
-            serializeEigen(ar, massPointRes.first->m_initState.m_u);
-            // First point push
-            massPointRes.first->m_points.push_back(massPointRes.first->m_initState.m_q.template head<3>());
+
+            auto res = m_pTopoBuilder->m_initStates.emplace(std::piecewise_construct,
+                                                            std::make_tuple(id) ,
+                                                            std::make_tuple(id));
+
+            m_pTopoBuilder->m_massPoints_glo.emplace_back(&res.first->second); // link new masspoint to state
+            auto & back = m_pTopoBuilder->m_massPoints_glo.back();
+
+            serializeEigen(ar, back.m_state->m_q);
+            serializeEigen(ar, back.m_state->m_u);
         }
 
 
-        //AABB
-        // Insert a AABB
-        auto insertedAABB = m_pTopoBuilder->m_rankAABBs.emplace_back(m_rank);
-        ar & (*insertedAABB.first);
 
-        // Theta_I
-        // Add Theta to the global one
-        Vector6 theta;
-        serializeEigen(ar,theta);
-        m_pTopoBuilder->m_Theta_G_glo += theta;
 
-        // r_G
-        // add to global r_G (massen gewichtung, masse=1)
-        Vector3 r_G;
-        serializeEigen(ar,r_G);
-        m_pTopoBuilder->m_r_G_glo += size*r_G;
 
-        // unite with total AABB
-        m_pTopoBuilder->m_aabb_glo += *insertedAABB.first;
+        // Binet Tensor
+        if(m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
+            // Theta in I frame
+            // Add Theta to the global one
+            Vector6 theta; serializeEigen(ar,theta);
+            m_pTopoBuilder->m_I_theta_G_glo += theta;
+
+            // r_G
+            // add to global r_G (massen gewichtung, masse=1)
+            Vector3 r_G;
+            unsigned int countPoints;
+            ar & countPoints; // get number of local pred. points
+            // add to global predicted points
+            m_pTopoBuilder->m_countPoints_glo += countPoints;
+            serializeEigen(ar,r_G);
+            m_pTopoBuilder->m_r_G_glo += countPoints*r_G;
+        }else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::ALIGNED ){
+
+            // Insert a AABB
+            auto insertedAABB = m_pTopoBuilder->m_rankAABBs.emplace(std::piecewise_construct,
+                                                                    std::make_tuple(m_rank) ,
+                                                                    std::make_tuple() );
+            // Get AABB
+            ar & insertedAABB.first->second;
+            // unite with total AABB
+            m_pTopoBuilder->m_aabb_glo += insertedAABB.first->second;
+        }
 
     }
 
@@ -1541,6 +1564,36 @@ private:
     TTopologyBuilder * m_pTopoBuilder;
     RankIdType m_rank;
 };
+
+
+template<typename TTopologyBuilder >
+class TopologyBuilderMessageWrapperOrientation : public boost::serialization::traits< TopologyBuilderMessageWrapperBodies<TTopologyBuilder>,
+    boost::serialization::object_serializable,
+        boost::serialization::track_never> {
+public:
+
+    DEFINE_LAYOUT_CONFIG_TYPES
+
+    static const MPIMessageTag m_tag = MPIMessageTag::TOPOLOGYBUILDER_POINTGATHER;
+
+    using TopologyBuilderType = TTopologyBuilder;
+    using RankIdType = typename TopologyBuilderType::RankIdType ;
+
+    TopologyBuilderMessageWrapperOrientation(TopologyBuilderType * topoBuilder):
+            m_pTopoBuilder(topoBuilder)
+    {};
+
+    // master sends orientation / ranks receive it
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) const {
+        serializeEigen(ar,m_pTopoBuilder->m_A_IK);
+    }
+
+private:
+    TTopologyBuilder * m_pTopoBuilder;
+    RankIdType m_rank;
+};
+
 
 
 template<typename TTopologyBuilder >
@@ -1566,9 +1619,14 @@ public:
     void save(Archive & ar, const unsigned int version) const {
 
         // Send grid data
-        serializeEigen(ar,m_pTopoBuilder->m_aabb_glo.m_minPoint);
-        serializeEigen(ar,m_pTopoBuilder->m_aabb_glo.m_maxPoint);
+        ar & m_pTopoBuilder->m_aabb_glo;
         serializeEigen(ar,m_pTopoBuilder->m_settings.m_processDim);
+
+        ar & m_pTopoBuilder->m_settings.m_aligned;
+
+        if( m_pTopoBuilder->m_settings.m_aligned){
+            serializeEigen(ar,m_pTopoBuilder->m_A_IK);
+        }
 
         // Send states of bodies
         unsigned int nStates = 0;
@@ -1591,18 +1649,23 @@ public:
         }
     }
 
-    // receive broadcast
+    // receive broadcast all ranks except master
+    void resetBeforLoad(){
+        m_pTopoBuilder->m_pDynSys->m_bodiesInitStates.clear();
+    }
     template<class Archive>
     void load(Archive & ar, const unsigned int version) const {
 
-        Vector3 min,max;
-        MyMatrix<unsigned int>::Vector3 dim;
-        serializeEigen(ar, min);
-        serializeEigen(ar, max);
-        serializeEigen(ar, dim);
+        // Recv grid data
+        ar & m_pTopoBuilder->m_aabb_glo;
+        serializeEigen(ar,m_pTopoBuilder->m_settings.m_processDim);
 
-        // generate topology
-        m_pTopoBuilder->m_pProcCommunicator->createProcTopoGrid(min,max,dim);
+        ar & m_pTopoBuilder->m_settings.m_aligned;
+
+        if( m_pTopoBuilder->m_settings.m_aligned){
+            serializeEigen(ar,m_pTopoBuilder->m_A_IK);
+        }
+
 
         unsigned int nStates;
         ar & nStates;
@@ -1617,9 +1680,6 @@ public:
             serializeEigen(ar, res.first->second.m_q);
             serializeEigen(ar , res.first->second.m_u);
         }
-
-
-
     }
 
     BOOST_SERIALIZATION_SPLIT_MEMBER();

@@ -39,13 +39,13 @@ SimulationManagerGUI::SimulationManagerGUI(std::shared_ptr<Ogre::SceneManager> p
 
     m_pSimulationLog = nullptr;
 
-    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
-        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+        boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "SimulationLog.log";
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->createLog("SimulationLog",SIMULATION_LOG_TO_CONSOLE,true,filePath);
+        m_pSimulationLog = Logging::LogManager::getSingleton().createLog("SimulationLog",SIMULATION_LOG_TO_CONSOLE,true,filePath);
         m_pSimulationLog->logMessage("---> Creating SimulationManagerGUI...");
     }
 
@@ -61,7 +61,7 @@ SimulationManagerGUI::~SimulationManagerGUI() {
     // Remove all SceneGraph objects!
     m_pSceneMgr->destroySceneNode(m_pBaseNode);
 
-    InputContext::getSingletonPtr()->removeKeyListener(this);
+    InputContext::getSingleton().removeKeyListener(this);
 
 }
 
@@ -110,7 +110,6 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     m_pStateRecorder = std::shared_ptr<StateRecorder >(new StateRecorder(m_pDynSys->m_simBodies.size()));
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added StateRecorder... ");
 
-    std::cout << "size simbodies: " << m_pDynSys->m_bodiesInitStates.size() << std::endl;
     m_pSharedBuffer->resetStatePool(m_pDynSys->m_bodiesInitStates);
     m_pSceneParser->cleanUp(); // Take care this cleans all stuff
     m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Added SharedBuffer... ");
@@ -135,7 +134,7 @@ bool SimulationManagerGUI::writeInitialState() {
     MultiBodySimFile simFile;
     // Request new file Paths for all logs from FileManager
     // Get new folder path
-    boost::filesystem::path file = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_INIT);
+    boost::filesystem::path file = FileManager::getSingleton().getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_INIT);
 
     std::string filename = SIM_INIT_FILE_PREFIX;
     filename += SIM_INIT_FILE_EXTENSION;
@@ -276,7 +275,7 @@ void SimulationManagerGUI::initSimThread() {
 
     // Request new file Paths for all logs from FileManager
     // Get new folder path
-    m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_REALTIME);
+    m_SimFolderPath = FileManager::getSingleton().getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_REALTIME);
 
     m_pTimestepper->reset();
 
@@ -361,7 +360,7 @@ void SimulationManagerGUI::writeAllOutput() {
 
 bool SimulationManagerGUI::initRecordThread() {
     // Get new folder path
-    m_SimFolderPath = FileManager::getSingletonPtr()->getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
+    m_SimFolderPath = FileManager::getSingleton().getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
 
     // Sim file path
     m_SimFilePath = m_SimFolderPath;
@@ -384,7 +383,7 @@ bool SimulationManagerGUI::initRecordThread() {
 
     // Copy Scene File
     m_pSimulationLog->logMessage("---> Copy SceneFile to right place...");
-    FileManager::getSingletonPtr()->copyFile(m_pSceneParser->getParsedSceneFile(),m_SceneFilePath,true);
+    FileManager::getSingleton().copyFile(m_pSceneParser->getParsedSceneFile(),m_SceneFilePath,true);
 
     //Copy SimeState file, if necessary
     //Open SimState File
@@ -405,7 +404,7 @@ bool SimulationManagerGUI::initRecordThread() {
     boost::filesystem::path simDataFile;
     if(!m_pTimestepper->m_settings.m_simDataReferenceFile.empty()) {
         ASSERTMSG(false,"HERE IS CODE ZU VERFOLSTÄNDIGEN! FALSCH!")
-        simDataFile = FileManager::getSingletonPtr()->copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_settings.m_simDataReferenceFile,true);
+        simDataFile = FileManager::getSingleton().copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_settings.m_simDataReferenceFile,true);
     }
 
     m_pSimulationLog->logMessage("---> Init Timestepper Logs...");
@@ -545,10 +544,10 @@ void SimulationManagerGUI::stopSimThread(Threads threadToStop, bool force_stop) 
 void SimulationManagerGUI::enableInput(bool value) {
     if(value) {
         // add some key,mouse listener to change the input
-        InputContext::getSingletonPtr()->addKeyListener(this,m_KeyListenerName);
+        InputContext::getSingleton().addKeyListener(this,m_KeyListenerName);
     } else {
         // remove key,mouse listener to change the input
-        InputContext::getSingletonPtr()->removeKeyListener(this);
+        InputContext::getSingleton().removeKeyListener(this);
     }
 }
 

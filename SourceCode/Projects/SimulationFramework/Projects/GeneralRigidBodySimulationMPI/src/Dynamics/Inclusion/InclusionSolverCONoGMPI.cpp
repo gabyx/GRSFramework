@@ -33,8 +33,8 @@ InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(
     m_pProcComm(pProcComm),
     m_nbRanks(m_pProcComm->getProcTopo()->getNeighbourRanks()) {
 
-    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
         ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }

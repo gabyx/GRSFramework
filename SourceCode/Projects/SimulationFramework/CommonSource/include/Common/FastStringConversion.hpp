@@ -17,7 +17,7 @@ namespace detail{
 // integral implementation
 template<typename T>
 typename std::enable_if< std::is_integral<T>::value ,bool>::type
-toNumber(T & r , const char *p) {
+toType(T & r , const char *p) {
     r = 0;
 
     // Skip leading white space, if any.
@@ -57,7 +57,7 @@ toNumber(T & r , const char *p) {
 // double,float implementation
 template<typename T>
 typename std::enable_if< std::is_floating_point<T>::value ,bool>::type
-toNumber(T & r, const char *p) {
+toType(T & r, const char *p) {
 
     // Skip leading white space, if any.
     while (white_space(*p) ) {
@@ -163,14 +163,14 @@ toNumber(T & r, const char *p) {
 
 
 template<typename T>
-inline bool toNumber(T & r, const std::string & s ){
-    return detail::toNumber( r, s.c_str());
+inline bool toType(T & r, const std::string & s ){
+    return detail::toType( r, s.c_str());
 }
 
 //Sepcial for boolean values
-inline bool toNumber(bool & t, const std::string& s) {
+inline bool toType(bool & t, const std::string& s) {
         char a;
-        if( detail::toNumber(a, s.c_str()) ) {
+        if( detail::toType(a, s.c_str()) ) {
             if(a) {
                 t = true; return true;
             } else {

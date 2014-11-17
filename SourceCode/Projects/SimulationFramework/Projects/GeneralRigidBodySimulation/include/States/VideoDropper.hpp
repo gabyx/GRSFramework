@@ -40,7 +40,7 @@ public:
 
          if(drop){
             dryloop = 5;
-         } 
+         }
       }else if(dryloop == 1){
           dropFrame();
           signalFrameDropped();
@@ -64,7 +64,7 @@ public:
    void addToCurrentTime(double addTime){
       boost::mutex::scoped_lock l(m_mutex);
       m_currentTime += addTime;
-      if( m_currentTime * m_fps >= 1 || m_currentTime == 0.0){ // if more then one frame goes into the timespan 
+      if( m_currentTime * m_fps >= 1 || m_currentTime == 0.0){ // if more then one frame goes into the timespan
          m_bDropFrame = true;
       }
    }
@@ -113,7 +113,7 @@ private:
       filename << SIM_VIDEO_PREFIX <<m_nFramesDropped<<".tga";
       boost::filesystem::path file = m_folderPath;
       file /=  filename.str();
-      RenderContext::getSingletonPtr()->m_pRenderWnd->writeContentsToFile(file.string());
+      RenderContext::getSingleton().m_pRenderWnd->writeContentsToFile(file.string());
       //Sleep(560);
    }
 };

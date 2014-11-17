@@ -21,8 +21,7 @@ public:
 
     CartesianGrid();
 
-    CartesianGrid(const Vector3 & minPoint,
-                  const Vector3 & maxPoint,
+    CartesianGrid(const AABB & aabb,
                   const MyMatrix<unsigned int>::Vector3 & dim);
     ~CartesianGrid();
 
@@ -66,13 +65,11 @@ CartesianGrid<TCellData>::~CartesianGrid() {
 };
 
 template<typename TCellData>
-CartesianGrid<TCellData>::CartesianGrid(const Vector3 & minPoint,
-                                        const Vector3 & maxPoint,
+CartesianGrid<TCellData>::CartesianGrid(const AABB & aabb,
                                         const MyMatrix<unsigned int>::Vector3 & dim) {
     ASSERTMSG(dim(0)*dim(1)*dim(2) != 0, "Dimension zero: " << dim)
-    ASSERTMSG( maxPoint(0) > minPoint(0) && maxPoint(1) > minPoint(1) && maxPoint(2) > minPoint(2), "CartesianGrid, wrongly initialized: maxPoint < minPoint");
-    m_Box.m_minPoint = minPoint;
-    m_Box.m_maxPoint = maxPoint;
+    ASSERTMSG( aabb.isEmpty() == false, "CartesianGrid, wrongly initialized: maxPoint < minPoint");
+    m_Box = aabb;
     m_dim = dim;
 
     m_dxyz.array() = m_Box.extent().array() / dim.array().cast<PREC>();

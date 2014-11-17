@@ -41,10 +41,12 @@ public:
         m_q.setZero();
     };
 
-
-    ~RigidBodyState(){
-
+    template<typename TRigidBody>
+    RigidBodyState( const TRigidBody  * body){
+        applyBody(body);
     }
+
+    ~RigidBodyState(){}
 
     RigidBodyState & operator =(const RigidBodyState& state) = default;
 

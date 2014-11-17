@@ -4,7 +4,7 @@
 #include "AssertionDebug.hpp"
 
 /**
-        \brief Singelton Class: You need to construct the singelton object (subclass of this singelton class) on the heap with new, once!
+        \brief Singelton Class: You need to construct the singelton object (subclass of this singelton class) on the heap with new, or on the stack globally once!
 **/
 
 namespace Utilities{
@@ -36,10 +36,8 @@ public:
         ASSERTMSG( ms_Singleton ,"ms_Singleton == 0 : " << typeid(*ms_Singleton).name());
         return ( *ms_Singleton );
     }
-    static T* getSingletonPtr( void ) {
-        ASSERTMSG( ms_Singleton ,"ms_Singleton == 0 : " << typeid(*ms_Singleton).name());
-        return ms_Singleton;
-    }
+
+
 };
 
 template<typename T> T* Singleton<T>::ms_Singleton = 0;

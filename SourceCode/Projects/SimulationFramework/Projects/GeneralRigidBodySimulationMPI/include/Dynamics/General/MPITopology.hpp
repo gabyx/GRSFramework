@@ -76,13 +76,19 @@ public:
         return m_adjNbRanks.find(neighbourRank)->second;
     }
 
-    void createProcessTopologyGrid(const Vector3 & minPoint,
-                                   const Vector3 & maxPoint,
+    void createProcessTopologyGrid(unsigned int processRank, unsigned int masterRank,
+                                   const AABB & aabb,
                                    const MyMatrix<unsigned int>::Vector3 & dim,
-                                   unsigned int processRank, unsigned int masterRank)
+                                   bool aligned = true,
+                                   const Matrix33 & A_IK = Matrix33::Identity()
+                                   )
     {
         // Assign a grid topology
-        m_procTopo = ProcessTopologyGrid<ProcessTopology>(m_nbRanks,m_adjNbRanks, minPoint,maxPoint,dim, m_rank , masterRank);
+        m_procTopo = ProcessTopologyGrid<ProcessTopology>(m_nbRanks,m_adjNbRanks,
+                                                          m_rank , masterRank,
+                                                          aabb,dim,
+                                                          aligned,
+                                                          A_IK);
 
     }
 

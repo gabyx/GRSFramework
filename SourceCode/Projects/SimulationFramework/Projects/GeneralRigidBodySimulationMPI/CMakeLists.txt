@@ -70,6 +70,7 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPICommunicatorId.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPIMessageTag.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPIMessages.hpp
+    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPIDataTypes.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPIInformation.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPICommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopology.hpp
@@ -113,6 +114,7 @@ SET(DYNAMICS_SRC
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoGMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/ContactGraphNodeDataMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.cpp
+    ${PROJECT_SOURCE_DIR}/src/Dynamics/General/MPIDataTypes.cpp
 )
 
 SET(SYSTEMS_INC

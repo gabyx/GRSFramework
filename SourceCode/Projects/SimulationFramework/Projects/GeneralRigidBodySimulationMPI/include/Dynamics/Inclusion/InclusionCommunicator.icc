@@ -8,6 +8,9 @@
 
 #include "MPICommunicatorId.hpp"
 
+#include <functional>
+#include <numeric>
+
 template<typename TCombo>
 InclusionCommunicator<TCombo>::InclusionCommunicator(std::shared_ptr< BodyCommunicator> pBodyComm,
         std::shared_ptr< DynamicsSystemType> pDynSys ,
@@ -23,8 +26,8 @@ InclusionCommunicator<TCombo>::InclusionCommunicator(std::shared_ptr< BodyCommun
     m_rank(m_pProcComm->getRank()),
     m_nbRanks(m_pProcComm->getProcTopo()->getNeighbourRanks()),
     m_messageContact(this),m_messageMultiplicity(this), m_messageSplitBodyUpdate(this), m_messageSplitBodySolution(this) {
-    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
         ERRORMSG("SimulationLog does not yet exist? Did you create it?")
     }
@@ -160,27 +163,27 @@ void InclusionCommunicator<TCombo>::buildCommunicatorGroups() {
 template<typename TCombo>
 bool InclusionCommunicator<TCombo>::communicateConvergence(bool converged) {
 
-    LOGIC(m_pSimulationLog,"MPI> Gather convergence flags..."<<std::endl;)
+    LOGIC(m_pSimulationLog,"MPI> Gather convergence flags: "<<std::endl;)
     std::vector<char> convergedGather;
     m_pProcComm->allGather((char)converged,convergedGather, MPILayer::MPICommunicatorId::INCLUSION_CONVERGENCE_COMM);
 
     //Utilities::printVectorNoCopy(*m_pSimulationLog,convergedGather.begin(),convergedGather.end(),",");
 
     for(auto it = convergedGather.begin(); it != convergedGather.end(); it++){
-        LOGIC(m_pSimulationLog, bool(*it) << std::endl;)
+        LOGIC(m_pSimulationLog, bool(*it))
     }
+    LOGIC(m_pSimulationLog, std::endl;)
 
-    // Sum up all boolean values and decide if all neighbours converged?
-    converged = true;
-    for(auto it = convergedGather.begin(); it!= convergedGather.end(); it++){
-        converged = converged && *it;
-        if(!converged){
-                LOGIC(m_pSimulationLog,"MPI> not converged"<<std::endl;)
-                return false;
-        }
+
+     // Sum up all boolean values and decide if all neighbours rebuild?
+    converged = std::accumulate(convergedGather.begin(), convergedGather.end() , true, std::logical_and<char>() );
+
+    if(converged){
+         LOGIC(m_pSimulationLog,"MPI> converged!"<<std::endl;)
+    }else{
+         LOGIC(m_pSimulationLog,"MPI> not converged"<<std::endl;)
     }
-    LOGIC(m_pSimulationLog,"MPI> converged!"<<std::endl;)
-    return true;
+    return converged;
 }
 
 

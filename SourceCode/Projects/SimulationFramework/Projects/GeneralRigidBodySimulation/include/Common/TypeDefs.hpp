@@ -154,10 +154,6 @@ struct GlobalConfigs {
 
 
 
-struct MyIOFormat {
-    static Eigen::IOFormat Matlab;
-};
-
 using MeshPREC = double;
 
 

@@ -24,7 +24,7 @@ void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> 
     m_sceneFile = sceneFile;
     m_materialFile = materialFile;
     auto log = outputFile.parent_path() / "RenderScriptConverter.log";
-    m_log = Logging::LogManager::getSingletonPtr()->createLog("RenderScriptConverter",true,true,log);
+    m_log = Logging::LogManager::getSingleton().createLog("RenderScriptConverter",true,true,log);
 
     LOG(m_log, "---> RenderScriptConverter started:" <<std::endl;);
 

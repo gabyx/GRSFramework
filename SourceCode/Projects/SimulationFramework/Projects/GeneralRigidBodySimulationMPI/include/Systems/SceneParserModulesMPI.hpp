@@ -29,18 +29,18 @@ public:
          // Process special Inclusion solver settings
         PREC splitNodeUpdateRatio;
         if(!Utilities::stringToType(splitNodeUpdateRatio,  incSet.attribute("splitNodeUpdateRatio").value())) {
-                THROWEXCEPTION("---> String conversion in MPISettings::InclusionSolverSettings: splitNodeUpdateRatio failed");
+                ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: splitNodeUpdateRatio failed");
         }
         if(splitNodeUpdateRatio <= 0){
-            THROWEXCEPTION("---> MPISettings::InclusionSolverSettings: splitNodeUpdateRatio <= 0");
+            ERRORMSG("---> MPISettings::InclusionSolverSettings: splitNodeUpdateRatio <= 0");
         }
 
         PREC convergenceCheckRatio;
         if(!Utilities::stringToType(convergenceCheckRatio,  incSet.attribute("convergenceCheckRatio").value())) {
-                THROWEXCEPTION("---> String conversion in MPISettings::InclusionSolverSettings: convergenceCheckRatio failed");
+                ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: convergenceCheckRatio failed");
         }
         if(convergenceCheckRatio <= 0){
-            THROWEXCEPTION("---> MPISettings::InclusionSolverSettings: convergenceCheckRatio <= 0");
+            ERRORMSG("---> MPISettings::InclusionSolverSettings: convergenceCheckRatio <= 0");
         }
 
         this->m_inclusionSettings->m_splitNodeUpdateRatio = splitNodeUpdateRatio;
@@ -78,33 +78,64 @@ public:
 
             if(!Utilities::stringToVector3(m_topoSettings->m_gridBuilderSettings.m_processDim
                                            ,  procTopo.attribute("dimension").value())) {
-                THROWEXCEPTION("---> String conversion in parseMPISettings: dimension failed");
+                ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
             }
 
             std::string type = procTopo.attribute("mode").value();
             if(type=="static") {
                 m_topoSettings->m_gridBuilderSettings.m_mode = MPILayer::GridBuilderSettings::Mode::STATIC;
-                if(!Utilities::stringToVector3(m_topoSettings->m_gridBuilderSettings.m_minPoint
-                                               ,  procTopo.attribute("minPoint").value())) {
-                    THROWEXCEPTION("---> String conversion in parseMPISettings: minPoint failed");
-                }
-                if(!Utilities::stringToVector3(m_topoSettings->m_gridBuilderSettings.m_maxPoint
-                                               ,  procTopo.attribute("maxPoint").value())) {
-                    THROWEXCEPTION("---> String conversion in parseMPISettings: maxPoint failed");
-                }
-
-                if(!(m_topoSettings->m_gridBuilderSettings.m_minPoint.array() < m_topoSettings->m_gridBuilderSettings.m_maxPoint.array()).all()){
-                        THROWEXCEPTION("parseMPISettings: Infeasible min/max points")
-                }
 
             }else if(type=="dynamic"){
                 m_topoSettings->m_gridBuilderSettings.m_mode = MPILayer::GridBuilderSettings::Mode::DYNAMIC;
             }else{
-                THROWEXCEPTION("---> String conversion in MPISettings:ProcessTopology:mode failed: not a valid setting");
+                ERRORMSG("---> String conversion in MPISettings:ProcessTopology:mode failed: not a valid setting");
             }
 
+            type = procTopo.attribute("buildMode").value();
+            if(type=="Predefined") {
+
+                m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::BINET_TENSOR;
+
+                if(!Utilities::stringToType(m_topoSettings->m_gridBuilderSettings.m_aligned,
+                                            procTopo.attribute("aligned").value())) {
+                    ERRORMSG("---> String conversion in parseMPISettings: aligned failed");
+                }
+
+                if(m_topoSettings->m_gridBuilderSettings.m_aligned == false){
+                    ERRORMSG("Parse in here a rotation matrix: not implemented!")
+                }
+                Vector3 minPoint;
+                if(!Utilities::stringToVector3(minPoint
+                                               ,  procTopo.attribute("minPoint").value())) {
+                    ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
+                }
+                Vector3 maxPoint;
+                if(!Utilities::stringToVector3(maxPoint
+                                               ,  procTopo.attribute("maxPoint").value())) {
+                    ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
+                }
+                m_topoSettings->m_gridBuilderSettings.m_aabb += minPoint;
+                m_topoSettings->m_gridBuilderSettings.m_aabb += maxPoint;
+
+                if(m_topoSettings->m_gridBuilderSettings.m_aabb.isEmpty()){
+                    ERRORMSG("parseMPISettings: Infeasible min/max points");
+                }
+
+            }
+            else if(type=="BinetTensor") {
+                m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::BINET_TENSOR;
+            }else if(type=="MinimalVolumeBoundingBox" || type=="MVBB"){
+                m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::MVBB;
+            }else if(type=="Aligned"){
+                m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::ALIGNED;
+            }else{
+                ERRORMSG("---> String conversion in MPISettings:ProcessTopology:buildMode failed: not a valid setting");
+            }
+
+
+
         } else {
-            THROWEXCEPTION("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
+            ERRORMSG("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
         }
         LOGSCLEVEL1(this->m_pSimulationLog, "==================================================================="<<std::endl;)
     }

@@ -45,8 +45,8 @@ void serialize(Archive & ar, SphereGeometry & g, const unsigned int version) {
 template<class Archive>
 void serialize(Archive & ar, AABB & g, const unsigned int version) {
 
-    serializeEigen(ar & g.m_minPoint);
-    serializeEigen(ar & g.m_maxPoint);
+    serializeEigen(ar , g.m_minPoint);
+    serializeEigen(ar , g.m_maxPoint);
 
 }
 

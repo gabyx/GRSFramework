@@ -99,9 +99,6 @@ struct GlobalConfigs{
     using RenderDataType = typename GlobalConfigs::RenderConvertDataConfigs::RenderDataType               ; \
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-struct MyIOFormat{
-  static Eigen::IOFormat Matlab;
-};
 
 using MeshPREC = double;
 

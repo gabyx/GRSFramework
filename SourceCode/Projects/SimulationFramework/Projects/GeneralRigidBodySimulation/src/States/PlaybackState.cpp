@@ -19,7 +19,7 @@ PlaybackState::PlaybackState() {
     m_eMouseMode = CAMERA;
     m_eSimulationActiveMode = PLAYBACK;
 
-    m_pAppLog = RenderContext::getSingletonPtr()->m_pAppLog;
+    m_pAppLog = RenderContext::getSingleton().m_pAppLog;
 
 
 }
@@ -33,16 +33,16 @@ void PlaybackState::enter() {
 
     m_pAppLog->logMessage("---> Entering PlaybackState...");
 
-    m_pSceneMgr = std::shared_ptr<Ogre::SceneManager>( RenderContext::getSingletonPtr()->m_pRoot->createSceneManager(ST_GENERIC, "PlaybackStateSceneMgr"), OgreSceneManagerDeleter());
+    m_pSceneMgr = std::shared_ptr<Ogre::SceneManager>( RenderContext::getSingleton().m_pRoot->createSceneManager(ST_GENERIC, "PlaybackStateSceneMgr"), OgreSceneManagerDeleter());
     setupScene();
 
 
-    InputContext::getSingletonPtr()->addKeyListener(this,"PlaybackState::KeyListener");
-    InputContext::getSingletonPtr()->addMouseListener(this,"PlaybackState::MouseListener");
+    InputContext::getSingleton().addKeyListener(this,"PlaybackState::KeyListener");
+    InputContext::getSingleton().addMouseListener(this,"PlaybackState::MouseListener");
 
     m_pTrayMgr = std::shared_ptr< OgreBites::SdkTrayManager>(new OgreBites::SdkTrayManager("PlaybackStateTray",
-                 RenderContext::getSingletonPtr()->m_pRenderWnd,
-                 InputContext::getSingletonPtr()->getMouse(), this));
+                 RenderContext::getSingleton().m_pRenderWnd,
+                 InputContext::getSingleton().getMouse(), this));
     m_pTrayMgr->hideBackdrop();
 
     m_pMenuMouse = std::shared_ptr< MenuMouse >(new MenuMouse(m_pTrayMgr,"MenuMouse"));
@@ -72,8 +72,8 @@ bool PlaybackState::pause() {
     m_pMenuMouse->setInactive();
     m_pTrayMgr->hideAll();
 
-    InputContext::getSingletonPtr()->removeKeyListener(this);
-    InputContext::getSingletonPtr()->removeMouseListener(this);
+    InputContext::getSingleton().removeKeyListener(this);
+    InputContext::getSingleton().removeMouseListener(this);
     m_pPlaybackMgr->enableInput(false);
     return true;
 }
@@ -85,8 +85,8 @@ void PlaybackState::resume() {
     setMouseMode(false);
     m_pTrayMgr->showAll();
 
-    InputContext::getSingletonPtr()->addKeyListener(this,"PlaybackState::KeyListener");
-    InputContext::getSingletonPtr()->addMouseListener(this,"PlaybackState::MouseListener");
+    InputContext::getSingleton().addKeyListener(this,"PlaybackState::KeyListener");
+    InputContext::getSingleton().addMouseListener(this,"PlaybackState::MouseListener");
     m_pPlaybackMgr->enableInput(true);
 }
 
@@ -114,8 +114,8 @@ void PlaybackState::exit() {
     //Delete Timer
     m_pTimelineRendering.reset();
 
-    InputContext::getSingletonPtr()->removeKeyListener(this);
-    InputContext::getSingletonPtr()->removeMouseListener(this);
+    InputContext::getSingleton().removeKeyListener(this);
+    InputContext::getSingleton().removeMouseListener(this);
 }
 
 
@@ -183,8 +183,8 @@ void PlaybackState::setupGUI() {
 }
 void PlaybackState::updatePlaybackPanel() {
 
-    FileManager::getSingletonPtr()->updateFileList(SIMULATION_FOLDER_PATH,true);
-    auto pathMap = FileManager::getSingletonPtr()->getSimFolderList();
+    FileManager::getSingleton().updateFileList(SIMULATION_FOLDER_PATH,true);
+    auto pathMap = FileManager::getSingleton().getSimFolderList();
 
 //    m_pAppLog->logMessage("---> SimFolders are: ");
 //    Utilities::printVectorNoCopy(*m_pAppLog , pathMap.begin(),pathMap.end(),",");
@@ -249,7 +249,7 @@ void PlaybackState::itemSelected(OgreBites::SelectMenu * menu) {
 
         Ogre::DisplayString str = menu->getSelectedItem();
         std::string str_utf8 = str.asUTF8();
-        FileManager::getSingletonPtr()->setPathCurrentSimFolder(str_utf8);
+        FileManager::getSingleton().setPathCurrentSimFolder(str_utf8);
         changeScene();
 
     } else if( menu == m_pActiveModeSelectMenu) {

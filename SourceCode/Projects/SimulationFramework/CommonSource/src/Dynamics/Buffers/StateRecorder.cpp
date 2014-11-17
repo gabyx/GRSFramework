@@ -5,14 +5,14 @@ StateRecorder::StateRecorder(const unsigned int nSimBodies){
     m_nSimBodies = nSimBodies;
 
     //Check if LogManager is available
-    Logging::LogManager * manager = Logging::LogManager::getSingletonPtr();
-    m_pSimulationLog = manager->getLog("SimulationLog");
+    Logging::LogManager & manager = Logging::LogManager::getSingleton();
+    m_pSimulationLog = manager.getLog("SimulationLog");
     if(!m_pSimulationLog) {
         // Log does not exist make a new standart log!
-        boost::filesystem::path filePath = FileManager::getSingletonPtr()->getLocalDirectoryPath();
+        boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
         filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
         filePath /= "StateRecorderLog.log";
-        m_pSimulationLog = manager->createLog("StateRecorderLog",true,true,filePath);
+        m_pSimulationLog = manager.createLog("StateRecorderLog",true,true,filePath);
     }
 
 }
@@ -50,7 +50,7 @@ bool StateRecorder::createSimFileCopyFromReference(boost::filesystem::path new_f
 
     if(fileOK) {
         m_pSimulationLog->logMessage("---> Copy file:" + ref_file_path.string() + " to: " + new_file_path.string());
-        FileManager::getSingletonPtr()->copyFile(ref_file_path,new_file_path,true);
+        FileManager::getSingleton().copyFile(ref_file_path,new_file_path,true);
 
         m_pSimulationLog->logMessage("---> Record and append to Sim file at: " + new_file_path.string());
         if(m_binarySimFile.openWrite(new_file_path,

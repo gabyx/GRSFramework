@@ -22,6 +22,7 @@
 #include "StaticAssert.hpp"
 #include "TypeDefs.hpp"
 
+#include "MPIDataTypes.hpp"
 #include "MPIInformation.hpp"
 #include "MPIMessageTag.hpp"
 #include "MPICommunicatorId.hpp"
@@ -129,8 +130,8 @@ public:
         ProcessInformation(comm),
         m_binary_message(1024*1024)
     {
-        if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-            m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+        if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+            m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
         } else {
             ERRORMSG("SimulationLog does not yet exist? Did you create it?")
         }
@@ -147,20 +148,20 @@ public:
 
 
     template<typename T>
-    void sendBroadcast(const T & t, RankIdType rootRank, MPI_Comm comm){
+    void sendBroadcast(const T & t, MPI_Comm comm){
         m_binary_message.clear();
         m_binary_message << t ;
         int size = m_binary_message.size();
-        int error = MPI_Bcast(&(size), 1 , MPI_INT, rootRank, comm); // First send size, because we cannot probe on the other side!! Collective Communication
+        int error = MPI_Bcast(&(size), 1 , MPI_INT, m_rank , comm); // First send size, because we cannot probe on the other side!! Collective Communication
         ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcastT1 failed!");
         MPI_Bcast(const_cast<char*>(m_binary_message.data()),
                   m_binary_message.size(),
                   m_binary_message.getMPIDataType(),
-                  rootRank, comm);
+                  m_rank, comm);
         ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcastT2 failed!");
     };
     template<typename T>
-    inline void sendBroadcast(T & t){sendBroadcast(t,this->m_rank, this->m_comm);}
+    inline void sendBroadcast(T & t){sendBroadcast(t, this->m_comm);}
 
     template<typename T>
     void receiveBroadcast(T & t, RankIdType rootRank, MPI_Comm comm) {
@@ -178,14 +179,14 @@ public:
     inline void receiveBroadcast(T & t, RankIdType rootRank){receiveBroadcast(t,rootRank,this->m_comm);}
 
 
-    void sendBroadcast(const std::string & t, RankIdType rootRank,  MPI_Comm comm){
+    void sendBroadcast(const std::string & t,  MPI_Comm comm){
         int size = t.size();
-        int error = MPI_Bcast(&(size), 1 , MPI_INT, rootRank, comm); // First send size, because we cannot probe on the other side!! Collective Communication
+        int error = MPI_Bcast(&(size), 1 , MPI_INT, m_rank, comm); // First send size, because we cannot probe on the other side!! Collective Communication
         ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcast1 failed!");
-        MPI_Bcast(const_cast<char*>(t.data()), t.size(), MPI_CHAR, rootRank, comm);
+        MPI_Bcast(const_cast<char*>(t.data()), t.size(), MPI_CHAR, m_rank, comm);
         ASSERTMPIERROR(error,"ProcessCommunicator:: sendBroadcast2 failed!");
     };
-    inline void sendBroadcast(const std::string & t){sendBroadcast(t,this->m_rank, this->m_comm);}
+    inline void sendBroadcast(const std::string & t){sendBroadcast(t, this->m_comm);}
 
 
     void receiveBroadcast(std::string & t, RankIdType rootRank, MPI_Comm comm) {
@@ -219,8 +220,10 @@ public:
         int error = MPI_Allgather(&value,sizeof(T),MPI_BYTE, p , sizeof(T), MPI_BYTE, comm);
         ASSERTMPIERROR(error, "ProcessCommunicator:: allGather failed");
     }
+
     template<typename T>
     void allGather(T value, std::vector<T> & gatheredValues){ allGather(value,gatheredValues,m_comm); }
+
     template<typename T>
     inline void allGather(T value, std::vector<T> & gatheredValues, MPICommunicatorId id){
         auto it = m_communicators.find(static_cast<unsigned int>(id));
@@ -228,6 +231,26 @@ public:
         allGather(value,gatheredValues,it->second);
     }
 
+
+    /** Reduction Operations */
+    template<typename T>
+    void reduce(T & value, MPI_Op op, RankIdType rootRank, MPI_Comm comm){
+        MPI_Reduce(MPILayer::DataTypes::getDataTypeBuffer(value), nullptr ,1, MPILayer::DataTypes::getDataType<T>(), op, rootRank, comm);
+    }
+    template<typename T>
+    void reduce(T & value, MPI_Op op, RankIdType rootRank){
+            reduce(value,op,rootRank,m_comm);
+    }
+
+    template<typename T>
+    void reduce(T & value, T &reducedValue, MPI_Op op, MPI_Comm comm){
+        MPI_Reduce(MPILayer::DataTypes::getDataTypeBuffer(value),
+                   MPILayer::DataTypes::getDataTypeBuffer(reducedValue) , 1, MPILayer::DataTypes::getDataType<T>(), op, m_rank, comm);
+    }
+    template<typename T>
+    void reduce(T & value,T &reducedValue, MPI_Op op){
+            reduce(value,reducedValue,op,m_comm);
+    }
 
 
 
@@ -323,7 +346,7 @@ public:
     /** Send Message to Rank NonBlocking ========================================================================================*/
     template<typename T>
     std::unique_ptr<SendMessageAndRequest>
-    sendMessageToRank_async(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm ){
+    sendMessageToRank_async(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm  ){
         // Make new binary_message
         std::unique_ptr<SendMessageAndRequest> send_message(new SendMessageAndRequest());
 
@@ -365,7 +388,7 @@ public:
 
 
     template<typename T>
-    void receiveMessageFromRank(T & t, RankIdType rank, MPIMessageTag tag,  MPI_Comm comm  ){
+    void receiveMessageFromRank(T & t, RankIdType rank, MPIMessageTag tag,  MPI_Comm comm){
 
         // has an entry if a message has already been received for this rank.
         MPI_Status status;
@@ -400,7 +423,7 @@ public:
     }
 
     template<typename T, typename List>
-    void receiveMessageFromRanks(T & t,const List & ranks, MPIMessageTag tag,  MPI_Comm comm  ){
+    void receiveMessageFromRanks(T & t,const List & ranks, MPIMessageTag tag,  MPI_Comm comm){
         STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );
 
         if(ranks.size() == 0){return;};

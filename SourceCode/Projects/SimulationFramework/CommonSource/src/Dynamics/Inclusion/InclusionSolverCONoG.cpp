@@ -11,8 +11,8 @@ InclusionSolverCONoG::InclusionSolverCONoG(std::shared_ptr< CollisionSolverType 
     m_staticBodies(pDynSys->m_staticBodies),
     m_contactGraph(&(pDynSys->m_ContactParameterMap)){
 
-    if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
-        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
         ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }

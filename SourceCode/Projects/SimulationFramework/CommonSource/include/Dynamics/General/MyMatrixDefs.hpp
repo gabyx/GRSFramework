@@ -44,6 +44,8 @@ struct MyMatrix{
 
    template<typename EigenType> using MatrixRef = Eigen::Ref<EigenType>;
 
+   template<typename EigenType> using MatrixMap = Eigen::Map<EigenType>;
+
 };
 
 
@@ -53,6 +55,13 @@ struct MyMatrixDecomposition{;
     using EigenSolverSelfAdjoint = Eigen::SelfAdjointEigenSolver<TMatrix> ;
 
 };
+
+struct MyMatrixIOFormat {
+    static Eigen::IOFormat Matlab;
+    static Eigen::IOFormat CommaSep;
+    static Eigen::IOFormat SpaceSep;
+};
+
 
 /**
 * @brief This macro is used to typedef all custom matrix types which have nothing to do with the system.

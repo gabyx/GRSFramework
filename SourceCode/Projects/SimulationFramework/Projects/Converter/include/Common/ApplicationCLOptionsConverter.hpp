@@ -279,7 +279,7 @@ private:
 */
 class ApplicationCLOptionsSimInfo: public Utilities::Singleton<ApplicationCLOptionsSimConverter>  {
 public:
-    bool m_skipFirstState = true;
+    bool m_skipFirstState = false;
     unsigned int m_stepSize = 1;
     unsigned int m_startStateIdx = 0;
     unsigned int m_endStateIdx = std::numeric_limits<unsigned int>::max();
@@ -326,7 +326,7 @@ public:
             }
 
             if( ops >> OptionPresent("skipFirstState")) {
-                ops >> Option("skipFirstState",m_skipFirstState);
+                m_skipFirstState = true;
             }
 
             if(m_endStateIdx<m_startStateIdx){

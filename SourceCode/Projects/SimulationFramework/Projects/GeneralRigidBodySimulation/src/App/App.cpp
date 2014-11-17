@@ -16,15 +16,6 @@ App::App()
 App::~App()
 {
   DECONSTRUCTOR_MESSAGE
-
-    m_pAppStateManager.reset();
-
-    delete FileManager::getSingletonPtr();
-    delete Logging::LogManager::getSingletonPtr();
-
-	delete GuiContext::getSingletonPtr();
-	delete InputContext::getSingletonPtr();
-	delete RenderContext::getSingletonPtr();
 }
 
 
@@ -35,33 +26,34 @@ void App::startApp()
     processFolder << PROCESS_FOLDER_PREFIX << 0;
     boost::filesystem::path localDirPath;
 
-    localDirPath = ApplicationCLOptions::getSingletonPtr()->m_localDirs[0];
+    localDirPath = ApplicationCLOptions::getSingleton().m_localDirs[0];
     localDirPath /= processFolder.str();
-    new FileManager(ApplicationCLOptions::getSingletonPtr()->m_globalDir, localDirPath); //Creates path if it does not exist
 
-    new Logging::LogManager;
+    FileManager fileManager(ApplicationCLOptions::getSingleton().m_globalDir, localDirPath); //Creates path if it does not exist
 
-	new RenderContext;
+    Logging::LogManager logManager;
 
-	if(!RenderContext::getSingletonPtr()->initOgre("RigidBodySimulation v1.0"))
+	RenderContext renderContext;
+
+	if(!RenderContext::getSingleton().initOgre("RigidBodySimulation v1.0"))
 		return;
-	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("RenderContext initialized!");
+	RenderContext::getSingleton().m_pAppLog->logMessage("RenderContext initialized!");
 
 	m_bShutdown = false;
 
 	m_pAppStateManager = std::shared_ptr<AppStateManager>( new AppStateManager());
 
 
-	new InputContext;
-	if(!InputContext::getSingletonPtr()->initialise())
+	InputContext inputContext;
+	if(!InputContext::getSingleton().initialise())
 		return;
-	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("InputContext initialized!");
+	RenderContext::getSingleton().m_pAppLog->logMessage("InputContext initialized!");
 
 
-	new GuiContext;
-	if(!GuiContext::getSingletonPtr()->initBitesTray())
+	GuiContext guiContext;
+	if(!GuiContext::getSingleton().initBitesTray())
 		return;
-	RenderContext::getSingletonPtr()->m_pAppLog->logMessage("GuiContext initialized!");
+	RenderContext::getSingleton().m_pAppLog->logMessage("GuiContext initialized!");
 
 
 
@@ -75,5 +67,7 @@ void App::startApp()
    //m_pAppStateManager->pushAppState(appPlayback);
 
    m_pAppStateManager->start(appSim);
+
+   m_pAppStateManager.reset();
 
 }
