@@ -6,9 +6,6 @@
 
 template<typename TCombo>
 ContactGraph<TCombo>::ContactGraph(std::shared_ptr<DynamicsSystemType> pDynSys):
-    m_nodeCounter(0),
-    m_edgeCounter(0),
-    m_maxResidual(0),
     m_pDynSys(pDynSys),
     m_pContactParameterMap(&pDynSys->m_ContactParameterMap)
 {}
@@ -27,17 +24,13 @@ void ContactGraph<TCombo>::setLog(Logging::Log * solverLog) {
 }
 template<typename TCombo>
 void ContactGraph<TCombo>::clearGraph() {
+
     // This deletes all nodes, edges
     // cleanup allocated memory
-    for(auto n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
-        delete (*n_it);
-    for(auto e_it = this->m_edges.begin(); e_it != this->m_edges.end(); e_it++)
-        delete (*e_it);
-    //cout << "clear graph"<<endl;
-    this->m_nodes.clear();
-    m_nodeCounter = 0;
-    this->m_edges.clear();
+    deleteNodesAndEdges();
+
     m_edgeCounter = 0;
+    m_nodeCounter = 0;
 
     //clear own lists
     m_localNodes.clear();
@@ -46,13 +39,13 @@ void ContactGraph<TCombo>::clearGraph() {
     m_localBodiesWithContacts.clear();
     m_remoteBodiesWithContacts.clear();
 
-    for(auto n_it = m_splittedNodes.begin(); n_it != m_splittedNodes.end(); n_it++) {
-        delete (n_it->second);
+    for(auto & n : m_splittedNodes) {
+        delete (n.second);
     }
-
     m_splittedNodes.clear();
 
     m_usedContactModels = 0;
+    m_maxResidual = 0;
 
 }
 template<typename TCombo>
@@ -72,7 +65,6 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
     bool feasible = ContactFeasibilityTableMPI::checkFeasibilityOfContact(pCollData->m_pBody1, pCollData->m_pBody2 , isRemote );
     LOGASSERTMSG(feasible, m_pSolverLog, "Contact not feasible between body:  id1: "
                  <<RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << " and id2: " <<RigidBodyId::getBodyIdString(pCollData->m_pBody2->m_id) )
-
 
     // add the pNodeData to the node list
     NodeType * addedNode = new NodeType(m_nodeCounter);

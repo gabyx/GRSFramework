@@ -131,6 +131,17 @@ public:
 			delete (*e_it);
 	}
 
+    void deleteNodesAndEdges(){
+
+        for(auto n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); n_it++)
+            delete (*n_it);
+        for(auto e_it = this->m_edges.begin(); e_it != this->m_edges.end(); e_it++)
+            delete (*e_it);
+
+        this->m_nodes.clear();
+        this->m_edges.clear();
+	}
+
    unsigned int getNumNodes(){return m_nodes.size();};
    unsigned int getNumEdges(){return m_edges.size();};
 

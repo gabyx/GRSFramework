@@ -22,6 +22,7 @@
 #include "ContainerTag.hpp"
 
 #include "RigidBodyId.hpp"
+#include "RigidBodyFunctions.hpp"
 #include "ContactParameter.hpp"
 #include "MeshGeometry.hpp"
 #include "ExternalForces.hpp"
@@ -2252,6 +2253,9 @@ private:
                 ERRORMSG("---> The attribute 'distribute' '" << s << "' of 'Mass' has no implementation in the parser");
             }
 
+
+            // ==================================================================
+
             // Material
             XMLNodeType n = dynProp.child("Material");
             parseMaterial(n);
@@ -2265,6 +2269,12 @@ private:
             } else {
                 ERRORMSG("---> The attribute 'type' '" << s <<"' of 'InertiaTensor' has no implementation in the parser");
             }
+
+            // Set Massmatrix
+            for(auto & b : m_bodiesGroup) {
+                RigidBodyFunctions::initMassMatrix(b.m_body);
+            }
+
         }
 
         // InitialPosition ============================================================

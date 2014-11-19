@@ -53,6 +53,10 @@ public:
         }
     }
 
+    inline void clear(){
+        m_nbDataMap.clear();
+    }
+
 private:
     RankIdType m_rank;
     Type m_nbDataMap;

@@ -26,12 +26,8 @@ template<typename TCombo>
 class ContactGraph : public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
 public:
 
-
-
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-
-
 
     using RigidBodyIdType = typename RigidBodyType::RigidBodyIdType;
 
@@ -80,21 +76,21 @@ public:
     //Local Visitor
     template<typename TNodeVisitor>
 	void applyNodeVisitorLocal(TNodeVisitor & vv){
-		for(auto curr_node = m_localNodes.begin(); curr_node != m_localNodes.end(); curr_node++)
-			vv.visitNode(*(*curr_node));
+		for(auto & node : m_localNodes)
+			vv.visitNode(*(node));
 	}
 	//Remote Visitor
     template<typename TNodeVisitor>
 	void applyNodeVisitorRemote(TNodeVisitor & vv){
-		for(auto curr_node = m_remoteNodes.begin(); curr_node != m_remoteNodes.end(); curr_node++)
-			vv.visitNode(*(*curr_node));
+		for(auto & node : m_remoteNodes)
+			vv.visitNode(*(node));
 	}
 
 	//Remote Visitor
     template<typename TNodeVisitor>
 	void applyNodeVisitorSplitBody(TNodeVisitor & vv){
-		for(auto curr_node = m_splittedNodes.begin(); curr_node != m_splittedNodes.end(); curr_node++){
-           vv.visitNode(*(curr_node->second));
+		for(auto & node : m_splittedNodes){
+          vv.visitNode(*(node.second));
 		}
 	}
 
@@ -134,7 +130,7 @@ public:
     }
 
 
-    PREC m_maxResidual;
+    PREC m_maxResidual = 0;
 
 private:
 
@@ -165,8 +161,8 @@ private:
 
     ContactParameterMap* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 
-    unsigned int m_nodeCounter; ///< An node counter, starting at 0.
-    unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
+    unsigned int m_nodeCounter = 0; ///< An node counter, starting at 0.
+    unsigned int m_edgeCounter = 0; ///< An edge counter, starting at 0.
 
 
 

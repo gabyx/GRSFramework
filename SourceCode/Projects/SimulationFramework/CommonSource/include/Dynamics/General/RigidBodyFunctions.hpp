@@ -13,7 +13,7 @@ namespace RigidBodyFunctions {
     }
 
     template<typename TRigidBody>
-    void initMassMatrixAndHTerm(TRigidBody * body)
+    void initMassMatrix(TRigidBody * body)
     {
         //Mass Matrix
         body->m_MassMatrix_diag.template head<3>().setConstant(body->m_mass);

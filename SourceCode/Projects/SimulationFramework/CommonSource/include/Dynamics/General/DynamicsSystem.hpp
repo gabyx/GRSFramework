@@ -66,14 +66,11 @@ public:
     //We need an order, which is sorted according to the id!
     RigidBodyStatesContainerType m_bodiesInitStates;
 
-
     void initializeLog(Logging::Log* pLog);
 
     inline void applyInitStatesToBodies();
     inline void applySimBodiesToDynamicsState(DynamicsState & state);
     inline void applyDynamicsStateToSimBodies(const DynamicsState & state);
-
-    void initMassMatrixAndHTerm(); // MassMatrix is const
 
     void doFirstHalfTimeStep(PREC ts, PREC timestep);
     void doSecondHalfTimeStep(PREC te, PREC timestep);

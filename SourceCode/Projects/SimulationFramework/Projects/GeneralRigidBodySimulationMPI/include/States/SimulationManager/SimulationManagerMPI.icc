@@ -210,18 +210,29 @@ void SimulationManagerMPI::startSim() {
         m_pStateRecorder->write(m_pTimestepper->getTimeCurrent(),m_pDynSys->m_simBodies);
     }
 
-
     PREC runtime;
     m_globalTimer.start();
 
     while(1){
 
-        // Do one iteration
+        // If rebuild happens, reset TimeStepper accordingly! ====================================
+        bool rebuild = m_pTopologyBuilder->checkAndRebuild(m_pTimestepper->getIterationCount(),
+                                                           m_pTimestepper->getTimeCurrent());
+        if(rebuild){
+            // Reload Scene
+            m_pSimulationLog->logMessage("---> Reload SceneObjects ...");
+            reloadScene();
+             // Reset TimeStepper
+            m_pSimulationLog->logMessage("---> Reset TimeStepper Topology ...");
+            m_pTimestepper->resetTopology();
+        }
+
+        // Do one time step =====================================================================
         m_pTimestepper->doOneIteration();
 
         writeAllOutput();
 
-        // Check if simulation can be aborted!
+        // Check if simulation can be aborted! ==================================================
         if(m_pTimestepper->finished()) {
             runtime = m_globalTimer.elapsedSec();
             LOG(m_pSimulationLog, "---> SimulationManager: Timestepper finished, needed: " << runtime << " sec. , exit..."<< std::endl );
@@ -229,14 +240,14 @@ void SimulationManagerMPI::startSim() {
         }
 
 
-        // Roll all registered log files
+        // Roll all registered log files ========================================================
         Logging::LogManager::getSingleton().rollAllLogs();
     }
 
     m_pTimestepper->closeAllFiles();
     m_pStateRecorder->closeAll();
 
-    // MPI Communicat times, get the max runtime
+    // MPI Communicat times, get the max runtime ====================================
     getMaxRuntime(runtime);
 
 
@@ -267,32 +278,25 @@ void SimulationManagerMPI::writeAllOutput() {
 
 void SimulationManagerMPI::initSim() {
 
-
     MPILayer::GenericMessage<boost::filesystem::path> message;
-
     if(m_pProcCommunicator->hasMasterRank()) { // Only master process
         // Get new sim folder path relative to global directory
-
         m_SimFolderPath = FileManager::getSingleton().getNewSimFolderPath(SIMULATION_FOLDER_PATH,SIM_FOLDER_PREFIX_RECORD);
 
         LOG(m_pSimulationLog,"MPI> Broadcast new simulation directory: "<< m_SimFolderPath <<std::endl;);
-
         boost::filesystem::path sceneFilePath = m_SimFolderPath;
         std::string filename = SIM_SCENE_FILE_NAME;
-        filename += ".xml";
-        sceneFilePath /= filename;
+        filename += ".xml"; sceneFilePath /= filename;
 
         LOG(m_pSimulationLog,"---> Copy parsed scene file to: " << sceneFilePath <<std::endl;)
         FileManager::getSingleton().copyFile(m_sceneFileParsed,sceneFilePath,true);
 
         // Need to broadcast the filename of the actual folder
         // Broadcast: m_SimFolderPath
-
         std::get<0>(message.m_data) = m_SimFolderPath;
-
         m_pProcCommunicator->sendBroadcast(message);
-    } else { // All other processes
 
+    } else { // All other processes
         m_pProcCommunicator->receiveBroadcast(message, m_pProcCommunicator->getMasterRank());
         m_SimFolderPath = std::get<0>(message.m_data);
         LOG(m_pSimulationLog,"MPI> Received new simulation directory: "<< m_SimFolderPath <<std::endl;);
@@ -307,24 +311,13 @@ void SimulationManagerMPI::initSim() {
     }
 
 
-    m_pStateRecorder->setDirectoryPath(m_SimFolderPath); // If StateRecorder is StateRecorderBody or StateRecorderMPI
-    //m_pStateRecorder->setDirectoryPath(localSimFolderPath);
-
-    // Uncomment if StateRecorder is StateRecorderBody
-    //    if(!m_pStateRecorder->createSimFiles(m_pDynSys->m_simBodies,true)) { // Truncate the files, important!
-    //        LOG(m_pSimulationLog,  "ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl;);
-    //        ERRORMSG("ERROR:---> Could not open all SimFiles: " << m_SimFolderPath.string() << std::endl)
-    //    }
+    m_pStateRecorder->setDirectoryPath(m_SimFolderPath);
 
     if(!m_pStateRecorder->createSimFile(true)) { // Truncate the files, important!
         LOG(m_pSimulationLog,  "ERROR:---> Could not open SimFilePart: " << localSimFolderPath.string() << std::endl;);
         ERRORMSG("ERROR:---> Could not open SimFilePart: " << localSimFolderPath.string() << std::endl)
     }
     // ===============================================
-
-    // Reset TimeStepper
-    m_pTimestepper->reset();
-    m_pTimestepper->initLogs(localSimFolderPath);
 
     // Get the actual RecorderSettings
     m_RecorderSettings = m_pDynSys->getSettingsRecorder();
@@ -333,6 +326,24 @@ void SimulationManagerMPI::initSim() {
     // Init Topology and load all sim bodies
     m_pTopologyBuilder->initLogs(localSimFolderPath);
     m_pTopologyBuilder->initTopology();
+
+    // Reload Scene
+    m_pSimulationLog->logMessage("---> Reload SceneObjects ...");
+    reloadScene();
+
+    m_pSimulationLog->logMessage("---> Initialize ProcessCommunicator buffers...");
+    m_pProcCommunicator->initializeNeighbourBuffers();
+
+     // Reset TimeStepper
+    m_pTimestepper->reset();
+    m_pTimestepper->initLogs(localSimFolderPath);
+
+}
+
+void SimulationManagerMPI::reloadScene() {
+
+    LOG(m_pSimulationLog,"---> Clear all remote/local bodies in DynamicsSystem" <<std::endl;)
+    m_pDynSys->deleteSimBodies();
 
     // Parse the scene objects from the XML, but selectively on the ids in m_pDynSys->bodiesInitStates
     {
@@ -368,9 +379,5 @@ void SimulationManagerMPI::initSim() {
     m_pSimulationLog->logMessage("---> Check number of Bodies in Process:");
     checkNumberOfBodiesInProcess();
     // =====================================================
-
-
-    m_pSimulationLog->logMessage("---> Initialize ProcessCommunicator buffers...");
-    m_pProcCommunicator->initializeNeighbourBuffers();
 
 }

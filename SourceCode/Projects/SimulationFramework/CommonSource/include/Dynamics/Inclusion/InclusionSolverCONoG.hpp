@@ -46,7 +46,7 @@ public:
 
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
     void reset();
-    void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
+    void resetForNextTimestep(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
     void solveInclusionProblem();
 
 
@@ -77,7 +77,6 @@ protected:
     bool m_bUsedGPU;
     double m_timeProx, m_proxIterationTime;
 
-    unsigned int m_nExpectedContacts;
 
     std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     std::shared_ptr<DynamicsSystemType>  m_pDynSys;

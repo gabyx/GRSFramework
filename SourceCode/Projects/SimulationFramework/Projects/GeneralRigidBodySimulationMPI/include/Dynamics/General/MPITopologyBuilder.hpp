@@ -56,11 +56,12 @@ public:
 
     bool checkAndRebuild(unsigned int timeStep, PREC currentTime){
         // Check each X timestep
-        if( timeStep % m_rebuildSettings.m_rebuildingCheckEachXTimeStep){
+        if( timeStep!= 0 && timeStep % m_rebuildSettings.m_rebuildingCheckEachXTimeStep == 0){
 
             if(m_rebuildSettings.m_policy == RebuildSettings::Policy::NOTHING){
 
-                //this->rebuildTopology(currentTime);
+                this->rebuildTopology(currentTime);
+                return true;
 
             }else if(m_rebuildSettings.m_policy == RebuildSettings::Policy::BODY_LIMIT){
 
@@ -73,17 +74,20 @@ public:
 
                 if(rebuild){
                     this->rebuildTopology(currentTime);
+                    return true;
                 }
+
             }
         }
+        return false;
     };
 
     void initLogs(boost::filesystem::path localSimFolderPath){
         m_localSimFolderPath = localSimFolderPath;
     }
 
-    virtual void initTopology(PREC currentTime = 0) {};
-    virtual void rebuildTopology(PREC currentTime) {};
+    virtual void initTopology(PREC currentTime = 0) = 0;
+    virtual void rebuildTopology(PREC currentTime) = 0;
 
     virtual ~TopologyBuilder() {}
 
@@ -93,19 +97,21 @@ protected:
          // Synchronize rebuilding over all processes by communication
         LOGTBLEVEL1(m_pSimulationLog,"MPI> Gather topology rebuild flags: "<<std::endl;)
         std::vector<char> rebuildGather;
-        m_pProcCommunicator->allGather((char)rebuild,rebuildGather, MPILayer::MPICommunicatorId::SIM_COMM);
+        char r = rebuild? 1 : 0;
+        m_pProcCommunicator->allGather( r ,rebuildGather, MPILayer::MPICommunicatorId::SIM_COMM);
 
         if( TOPOBUILDER_LOGLEVEL > 2){
             Utilities::printVectorNoCopy(*m_pSimulationLog,rebuildGather.begin(),rebuildGather.end(),",");
         }
 
         // Sum up all boolean values and decide if all neighbours rebuild?
-        rebuild = std::accumulate(rebuildGather.begin(), rebuildGather.end() , true, std::logical_and<char>() );
-        if(rebuild){
+        unsigned int n = std::accumulate(rebuildGather.begin(), rebuildGather.end() , 0, std::plus<char>() );
+        if(n>=0){ // if one or more process wants to rebuild then rebuild!
             LOGTBLEVEL1(m_pSimulationLog,"MPI> Rebuild accepted!"<<std::endl;)
+            return true;
         }
 
-        return rebuild;
+        return false;
     }
 
     std::shared_ptr<DynamicsSystemType>  m_pDynSys;
@@ -123,6 +129,7 @@ protected:
 template<typename TProcCommunicator>
 class GridTopologyBuilder : public TopologyBuilder {
 
+    friend class ParserModulesCreatorTopoBuilder<GridTopologyBuilder>;
 
     friend class TopologyBuilderMessageWrapperBodies<GridTopologyBuilder>;
     friend class TopologyBuilderMessageWrapperResults<GridTopologyBuilder>;
@@ -244,7 +251,7 @@ public:
 
 
     void initTopology(PREC currentTime = 0) {
-        LOGTB(m_pSimulationLog,"---> GridTopologyBuilder, initialize Topology" <<std::endl;)
+        LOGTB(m_pSimulationLog,"---> GridTopoBuilder: initialize Topology" <<std::endl;)
 
         // increment number of built topologies
         m_currentTime = currentTime;
@@ -269,7 +276,7 @@ public:
                 ERRORMSG("Parsed to little initial states in scene file: " << m_sceneFilePath << " states: " << m_initStates.size() << "globalSimBodies: " << m_nGlobalSimBodies <<std::endl);
             }
 
-            LOGTBLEVEL3(m_pSimulationLog, "---> parsed states: "<<std::endl;);
+            LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: parsed states: "<<std::endl;);
             m_massPoints_glo.clear();
             for(auto & s : m_initStates){
                 // Save mass points
@@ -325,10 +332,15 @@ public:
                 }
             }
 
+             // Write grid data to file
+            #ifdef TOPOLOGY_BUILDER_WRITE_GRID
+            writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs);
+            #endif
+
             buildGrid();
             sendGrid(masterRank);
-
             cleanUpGlobal();
+            cleanUpLocal();
 
         } else {
 
@@ -343,7 +355,7 @@ public:
             cleanUpLocal();
         }
 
-        LOGTBLEVEL3(m_pSimulationLog, "---> States in m_bodiesInitStates: (" << m_pDynSys->m_bodiesInitStates.size()<< ")" <<std::endl;);
+        LOGTBLEVEL1(m_pSimulationLog, "---> GridTopoBuilder: States in m_bodiesInitStates: (" << m_pDynSys->m_bodiesInitStates.size()<< ")" <<std::endl;);
             for(auto & s :  m_pDynSys->m_bodiesInitStates){
                 LOGTBLEVEL3(m_pSimulationLog, "\t\t state: "
                             << RigidBodyId::getBodyIdString(s.second.m_id )<< " , q: "
@@ -354,6 +366,165 @@ public:
 
 //        m_pProcCommunicator->waitBarrier();
 //        ERRORMSG("terminate");
+
+    }
+
+    void rebuildTopology(PREC currentTime) {
+
+        LOGTB(m_pSimulationLog,"---> GridTopologyBuilder: rebuild Topology" <<std::endl;)
+
+
+
+
+        // increment number of built topologies
+        ++m_builtTopologies;
+        m_currentTime = currentTime;
+
+        // Gather all body center of gravities and common AABB to master rank
+        // Compute Inertia tensor where all masses of the points are equal to 1 (gives the tensor for the geometric center)
+        buildLocalStuff();
+
+
+        LOGTB(m_pSimulationLog,"---> GridTopoBuilder: Clear all init states in DynamicsSystem" <<std::endl;)
+        m_pDynSys->m_bodiesInitStates.clear();
+
+        RankIdType masterRank = this->m_pProcCommunicator->getMasterRank();
+        if(this->m_pProcCommunicator->hasMasterRank()){
+
+            // For sending
+            m_bodiesPerRank.clear();
+            m_rankAABBs.clear();
+
+
+            // Receive Messages
+            // Fill linear array with all ranks except master
+            std::vector<RankIdType> ranks;
+            unsigned int count=0;
+            std::generate_n(std::back_inserter(ranks),
+                            this->m_pProcCommunicator->getNProcesses()-1,
+                            [&](){ if(count == masterRank){return (++count)++;}else{return count++;} });
+
+            m_messageBodies.resetBeforLoad(); // Resets all variables for the appropriate build method in this class
+            this->m_pProcCommunicator->receiveMessageFromRanks(m_messageBodies, ranks, m_messageBodies.m_tag);
+
+            //Check if number of masspoints received is equal to the total in the simulation
+            if(m_nGlobalSimBodies != m_massPoints_glo.size() + m_massPoints_loc.size()){
+                ERRORMSG("m_nGlobalSimBodies: " << m_nGlobalSimBodies << "not equal to" <<  m_massPoints_glo.size() + m_massPoints_loc.size() <<std::endl);
+            }
+
+
+
+            if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::ALIGNED){
+                    m_A_IK.setIdentity();
+                     //add own AABB to global
+                    m_aabb_glo += m_I_aabb_loc;
+                    m_aligned = true;
+            }
+            else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
+
+                // Add our own center and weight it
+                m_r_G_glo += m_r_G_loc * m_countPoints_loc;
+                m_countPoints_glo += m_countPoints_loc;
+                m_r_G_glo /= m_countPoints_glo;
+
+                // Add our own tensor
+                m_I_theta_G_glo += m_I_theta_loc;
+                // Shift global to center!
+                shiftBinetTensor(m_I_theta_G_glo,m_r_G_glo,m_countPoints_glo);
+
+                solveOrientation(m_A_IK,m_I_theta_G_glo);
+                collaborativeSolveExtent<true>(masterRank);
+                m_aligned = false;
+
+            }else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::MVBB){
+
+                // Predict our local and global massPoints
+                m_points_glo.clear();
+                predictMassPoints(m_massPoints_loc, m_points_glo );
+                predictMassPoints(m_massPoints_glo, m_points_glo );
+
+                makeMVBB(m_points_glo, m_A_IK, m_aabb_glo);
+
+                m_aligned = false;
+            }
+
+             // Write grid data to file
+            #ifdef TOPOLOGY_BUILDER_WRITE_GRID
+            writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs);
+            #endif
+
+            buildGrid();
+            sendGrid(masterRank);
+            cleanUpGlobal();
+            cleanUpLocal();
+
+        }else{
+
+
+
+            this->m_pProcCommunicator->sendMessageToRank(m_messageBodies, masterRank, m_messageBodies.m_tag);
+
+            if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
+                collaborativeSolveExtent<false>(masterRank);
+            }
+
+            // Receive Grid results from master;
+            // All initial states get saved in m_pDynSys->m_bodiesInitStates
+            m_messageWrapperResults.resetBeforLoad();
+            m_pProcCommunicator->receiveMessageFromRank( m_messageWrapperResults,
+                                                         masterRank,
+                                                         m_messageWrapperResults.m_tag);
+
+            buildGrid();
+            cleanUpLocal();
+        }
+
+        LOGTBLEVEL1(m_pSimulationLog, "---> GridTopoBuilder: States in m_bodiesInitStates: (" << m_pDynSys->m_bodiesInitStates.size()<< ")" <<std::endl;);
+            for(auto & s :  m_pDynSys->m_bodiesInitStates){
+                LOGTBLEVEL3(m_pSimulationLog, "\t\t state: "
+                            << RigidBodyId::getBodyIdString(s.second.m_id )<< " , q: "
+                            << s.second.m_q.transpose() << " u: " << s.second.m_u.transpose() << std::endl;);
+        }
+
+    }
+
+    void buildLocalStuff() {
+
+        // we copy all body points into the set m_initStates
+        m_initStates.clear();
+        m_massPoints_loc.clear();
+        unsigned int i = 0;
+        for(auto & body : m_pDynSys->m_simBodies){
+            auto res = m_initStates.emplace(body->m_id,body); // add new state
+            //applyBody(body); //add state
+            m_massPoints_loc.emplace_back( &(res.first->second) );
+            LOGTBLEVEL3(m_pSimulationLog, "\t\t state: " << RigidBodyId::getBodyIdString(body->m_id )<< " , " <<  res.first->second.m_q.transpose() << std::endl;);
+            ++i;
+        }
+
+        if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
+
+            // Predict masspoints over some timesteps (simple)
+            m_points_loc.clear();
+            predictMassPoints(m_massPoints_loc, m_points_loc);
+
+            m_countPoints_loc = buildCenterPoint(m_massPoints_loc,m_r_G_loc);
+            buildBinetTensor<false>(m_massPoints_loc,m_I_theta_loc);
+            // Move inertia tensor to geometric center G (steiner formula) on root process!
+            computeExtent<true>(m_massPoints_loc,m_I_aabb_loc);
+        }else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::ALIGNED){
+
+            // Predict masspoints over some timesteps (simple)
+            m_points_loc.clear();
+            predictMassPoints(m_massPoints_loc, m_points_loc);
+            computeExtent<true>(m_massPoints_loc,m_I_aabb_loc);
+
+        }else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::MVBB){
+
+        }else{
+            ERRORMSG("This should not happen! Undefined BuildMode in Rebuilding")
+        }
+
 
     }
 
@@ -385,8 +556,8 @@ public:
         if(aabb.isEmpty()){
             ERRORMSG("Box is empty")
         }
-        LOGTBLEVEL3( m_pSimulationLog, "---> Coordinate Frame: "<<std::endl<< A_IK <<std::endl; );
-        LOGTBLEVEL3( m_pSimulationLog, "---> A_IK * A_IK^T: "<<std::endl<< A_IK*A_IK.transpose() <<std::endl; );
+        LOGTBLEVEL3( m_pSimulationLog, "---> GridTopoBuilder: Coordinate Frame: "<<std::endl<< A_IK <<std::endl; );
+        LOGTBLEVEL3( m_pSimulationLog, "---> GridTopoBuilder: A_IK * A_IK^T: "<<std::endl<< A_IK*A_IK.transpose() <<std::endl; );
     }
 
     void solveOrientation(Matrix33 & A_IK, const Vector6 & theta_G){
@@ -395,7 +566,7 @@ public:
         MatrixHelpers::setSymMatrix(Theta_G,theta_G);
 
 
-        LOGTBLEVEL3( m_pSimulationLog, "---> Global Binet inertia tensor: " << std::endl
+        LOGTBLEVEL3( m_pSimulationLog, "---> GridTopoBuilder: Global Binet inertia tensor: " << std::endl
                       << "\t\t " << m_I_theta_G_glo(0) << "\t" << m_I_theta_G_glo(1) << "\t" << m_I_theta_G_glo(2) << std::endl
                       << "\t\t " << m_I_theta_G_glo(1) << "\t" << m_I_theta_G_glo(3) << "\t" << m_I_theta_G_glo(4) << std::endl
                       << "\t\t " << m_I_theta_G_glo(2) << "\t" << m_I_theta_G_glo(4) << "\t" << m_I_theta_G_glo(5) << std::endl;)
@@ -403,8 +574,8 @@ public:
         typename MyMatrixDecomposition::template EigenSolverSelfAdjoint<Matrix33> eigenSolv(Theta_G);
 
         A_IK = eigenSolv.eigenvectors();
-        LOGTBLEVEL3( m_pSimulationLog, "---> Eigenvalues: "<<std::endl<< eigenSolv.eigenvalues().transpose() <<std::endl; );
-        LOGTBLEVEL3( m_pSimulationLog, "---> Eigenvectors: "<<std::endl<< A_IK <<std::endl; );
+        LOGTBLEVEL3( m_pSimulationLog, "---> GridTopoBuilder: Eigenvalues: "<<std::endl<< eigenSolv.eigenvalues().transpose() <<std::endl; );
+        LOGTBLEVEL3( m_pSimulationLog, "---> GridTopoBuilder: Eigenvectors: "<<std::endl<< A_IK <<std::endl; );
 
         //        // Correct A_IK to be as orthogonal as possible, project x onto x-y plane, (for no use so far)
         //        A_IK.col(2).normalize();
@@ -416,119 +587,17 @@ public:
             A_IK.col(1).swap(A_IK.col(0));
             A_IK.col(2) *= -1.0;
         }
-        LOGTBLEVEL3( m_pSimulationLog, "---> Coordinate Frame: "<<std::endl<< A_IK <<std::endl; );
-        LOGTBLEVEL3( m_pSimulationLog, "---> A_IK * A_IK^T: "<<std::endl<< A_IK*A_IK.transpose() <<std::endl; );
-    }
-
-    void rebuildTopology(PREC currentTime) {
-
-        LOGTB(m_pSimulationLog,"---> GridTopologyBuilder, rebuild Topology" <<std::endl;)
-
-
-        // increment number of built topologies
-        ++m_builtTopologies;
-        m_currentTime = currentTime;
-
-        // Gather all body center of gravities and common AABB to master rank
-        // Compute Inertia tensor where all masses of the points are equal to 1 (gives the tensor for the geometric center)
-        buildLocalStuff();
-
-
-
-        RankIdType masterRank = this->m_pProcCommunicator->getMasterRank();
-        if(this->m_pProcCommunicator->hasMasterRank()){
-
-            // For sending
-            m_bodiesPerRank.clear();
-            m_rankAABBs.clear();
-
-
-            // Receive Messages
-            // Fill linear array with all ranks except master
-            std::vector<RankIdType> ranks;
-            unsigned int count=0;
-            std::generate_n(std::back_inserter(ranks),
-                            this->m_pProcCommunicator->getNProcesses()-1,
-                            [&](){ if(count == masterRank){return (++count)++;}else{return count++;} });
-
-            m_messageBodies.resetBeforLoad(); // Resets all variables for the appropriate build method in this class
-            this->m_pProcCommunicator->receiveMessageFromRanks(m_messageBodies, ranks, m_messageBodies.m_tag);
-
-            //Check if number of masspoints received is equal to the total in the simulation
-            if(m_nGlobalSimBodies != m_massPoints_glo.size()){
-                ERRORMSG("m_nGlobalSimBodies: " << m_nGlobalSimBodies << "not equal to" << m_massPoints_glo.size() <<std::endl);
-            }
-
-
-
-            if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::ALIGNED){
-
-                     //add own AABB to global
-                    m_aabb_glo += m_I_aabb_loc;
-                    computeExtent<true>(m_massPoints_glo,m_aabb_glo);
-                    m_aligned = true;
-            }
-            else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
-
-                //add own center
-
-                // Add our own center and weight it
-                m_r_G_glo += m_r_G_loc * m_countPoints_loc;
-                m_countPoints_glo += m_countPoints_loc;
-                m_r_G_glo /= m_countPoints_glo;
-
-                // Add our own tensor
-                m_I_theta_G_glo += m_I_theta_loc;
-                // Shift global to center!
-                shiftBinetTensor(m_I_theta_G_glo,m_r_G_glo,m_countPoints_glo);
-
-                solveOrientation(m_A_IK,m_I_theta_G_glo);
-                collaborativeSolveExtent<true>(masterRank);
-                m_aligned = false;
-
-            }else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::MVBB){
-
-                // Predict local and global massPoints
-                predictMassPoints(m_massPoints_loc, m_points_glo );
-                predictMassPoints(m_massPoints_glo, m_points_glo );
-
-
-                makeMVBB(m_points_glo, m_A_IK, m_aabb_glo);
-
-                m_aligned = false;
-            }
-
-            buildGrid();
-            sendGrid(masterRank);
-            cleanUpGlobal();
-
-
-        }else{
-
-
-
-            this->m_pProcCommunicator->sendMessageToRank(m_messageBodies, masterRank, m_messageBodies.m_tag);
-
-            if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
-                collaborativeSolveExtent<false>(masterRank);
-            }
-
-            // Receive Grid results from master;
-            // All initial states get saved in m_pDynSys->m_bodiesInitStates
-            m_messageWrapperResults.resetBeforLoad();
-            m_pProcCommunicator->receiveMessageFromRank( m_messageWrapperResults,
-                                                         masterRank,
-                                                         m_messageWrapperResults.m_tag);
-
-            buildGrid();
-            cleanUpLocal();
-        }
+        LOGTBLEVEL3( m_pSimulationLog, "--->GridTopologyBuilder: Coordinate Frame: "<<std::endl<< A_IK <<std::endl; );
+        LOGTBLEVEL3( m_pSimulationLog, "--->GridTopologyBuilder: x*y,y*z,z*x: "<<
+                    A_IK.col(0).dot(A_IK.col(1)) <<", "<<
+                    A_IK.col(1).dot(A_IK.col(2)) <<", "<<
+                    A_IK.col(2).dot(A_IK.col(0))  <<std::endl; );
     }
 
     template<bool isRoot>
     void collaborativeSolveExtent(RankIdType masterRank){
 
-        LOGTBLEVEL3(m_pSimulationLog, "---> Solve extent collaborative ");
+        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Solve extent collaborative ");
         // Get orientation
         if(isRoot){
             // broadcast orientation
@@ -537,10 +606,10 @@ public:
             m_pProcCommunicator->receiveBroadcast(m_messageOrient,masterRank);
         }
 
-       LOGTBLEVEL3(m_pSimulationLog, "---> Compute extent locally ");
+       LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Compute extent locally ");
        computeExtent(m_massPoints_loc, m_K_aabb_loc, m_A_IK);
 
-       LOGTBLEVEL3(m_pSimulationLog, "---> Do reduction with local extents");
+       LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Do reduction with local extents");
         // Do a reduction of min and max values of the AABBs in K frame
         if(isRoot){ // ROOT
             m_pProcCommunicator->reduce(m_K_aabb_loc.m_minPoint, m_aabb_glo.m_minPoint, MPILayer::ReduceFunctions::MinVector3);
@@ -554,7 +623,7 @@ public:
 
     template<bool aligned = false>
     void computeExtent(const std::vector<MassPoint> & massPoints, AABB & aabb, const Matrix33 & A_IK = Matrix33::Identity()){
-        LOGTBLEVEL3(m_pSimulationLog, "---> Compute extent ..." << std::endl;);
+        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Compute extent ..." << std::endl;);
         // Calculate min max
         aabb.reset();
         Vector3 t;
@@ -572,42 +641,13 @@ public:
         }
     }
 
-    void buildLocalStuff() {
-
-        // we copy all body points into the set m_initStates
-        m_initStates.clear();
-        unsigned int i = 0;
-        for(auto & body : m_pDynSys->m_simBodies){
-            auto res = m_initStates.emplace(body->m_id,body); // add new state
-            //applyBody(body); //add state
-            m_massPoints_loc.emplace_back( &(res.first->second) );
-            LOGTBLEVEL3(m_pSimulationLog, "\t\t state: " << RigidBodyId::getBodyIdString(body->m_id )<< " , " <<  res.first->second.m_q.transpose() << std::endl;);
-            ++i;
-        }
-
-        if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
-
-            // Predict masspoints over some timesteps (simple)
-            predictMassPoints(m_massPoints_loc, m_points_loc);
-
-            m_countPoints_loc = buildCenterPoint(m_massPoints_loc,m_r_G_loc);
-            buildBinetTensor<false>(m_massPoints_loc,m_I_theta_loc);
-            // Move inertia tensor to geometric center G (steiner formula) on root process!
-            computeExtent<true>(m_massPoints_loc,m_I_aabb_loc);
-        }
-
-
-
-    }
-
-
 
     // Predict Bodies over some steps
     // Either use Fluidix to quickly approximate a simulation or
     // do a simple integration with only gravity of all point masses, stop if collided with non simulated bodies
     void predictMassPoints(std::vector<MassPoint> & massPoints,
                            std::vector<Vector3> & predictedPoints){
-        LOGTBLEVEL3(m_pSimulationLog, "---> Predict mass points (points: " << massPoints.size()<< ")" <<std::endl;);
+        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Predict mass points (points: " << massPoints.size()<< ")" <<std::endl;);
         ColliderPoint pointCollider;
 
         auto * gravityField = m_pDynSys->m_externalForces.getGravityField();
@@ -641,7 +681,7 @@ public:
                 for(auto & pBody : staticBodies){
 
                     if( pointCollider.intersectAndProx(pBody, predictedPoints.back() ) ){
-                        LOGTBLEVEL3(m_pSimulationLog, "---> hit object " <<std::endl);
+                        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: hit object " <<std::endl);
                         hitObject = true;
                         break;
                     }
@@ -653,14 +693,14 @@ public:
 
             }
 
-            LOGTBLEVEL3(m_pSimulationLog, "---> body: "
+            LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: body: "
             <<RigidBodyId::getBodyIdString(massPoint.m_state->m_id) << " last prediction: " << predictedPoints.back().transpose()  <<std::endl);
         }
     }
 
     unsigned int buildCenterPoint( const std::vector<MassPoint> & massPoints,
                                    Vector3 & center){
-         LOGTBLEVEL3(m_pSimulationLog, "---> Build center point ..."<< std::endl;);
+         LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Build center point ..."<< std::endl;);
         unsigned int countPoints = 0;
         center.setZero();
         for(auto & massPoint : massPoints){
@@ -682,7 +722,7 @@ public:
     unsigned int buildBinetTensor( const std::vector<MassPoint> & massPoints,
                                    Vector6 & I_theta_G,
                                    const Vector3 & I_r_IG = Vector3::Zero()){
-         LOGTBLEVEL3(m_pSimulationLog, "---> Build binet tensor ..."<< std::endl;);
+         LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Build Binet Tensor ..."<< std::endl;);
         unsigned int countPoints = 0;
         I_theta_G.setZero();
         for(auto & massPoint : massPoints){
@@ -719,13 +759,13 @@ public:
 
     void buildGrid(){
 
-        LOGTBLEVEL1(m_pSimulationLog, "---> GridTopologyBuilder, build grid ..." << std::endl;);
+        LOGTBLEVEL1(m_pSimulationLog, "---> GridTopoBuilder: GridTopologyBuilder, build grid ..." << std::endl;);
 
             if(m_settings.m_mode == GridBuilderSettings::Mode::STATIC){
-                LOGTBLEVEL1( m_pSimulationLog, "---> Create ProcessTopologyGrid Static: " << std::endl;)
+                LOGTBLEVEL1( m_pSimulationLog, "---> GridTopoBuilder: Create ProcessTopologyGrid Static: " << std::endl;)
             }
             else{
-                LOGTBLEVEL1( m_pSimulationLog, "---> Create ProcessTopologyGrid Dynamic: "<< std::endl;)
+                LOGTBLEVEL1( m_pSimulationLog, "---> GridTopoBuilder: Create ProcessTopologyGrid Dynamic: "<< std::endl;)
             }
 
             if(  m_settings.m_buildMode == GridBuilderSettings::BuildMode::ALIGNED){
@@ -752,11 +792,9 @@ public:
                                                     m_aligned,
                                                     m_A_IK);
 
+            LOGTBLEVEL1( m_pSimulationLog,"---> GridTopoBuilder: Initialize ProcessCommunicator buffers..." << std::endl);
+            m_pProcCommunicator->initializeNeighbourBuffers();
 
-            // Write grid data to file
-            #ifdef TOPOLOGY_BUILDER_WRITE_GRID
-            writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs);
-            #endif
     }
 
     //only master rank executes this
@@ -779,7 +817,7 @@ public:
 
 
         for(auto rank : ranks){
-            LOGTBLEVEL1( m_pSimulationLog, "---> Sending grid to rank: "<< rank <<std::endl; );
+            LOGTBLEVEL1( m_pSimulationLog, "---> GridTopoBuilder: Sending grid to rank: "<< rank <<std::endl; );
             m_messageWrapperResults.setRank(rank);
             m_pProcCommunicator->sendMessageToRank(m_messageWrapperResults,rank, m_messageWrapperResults.m_tag);
         }
@@ -792,7 +830,7 @@ public:
 
     // master sorts bodies
     void sortBodies(RankIdType masterRank ){
-        LOGTBLEVEL3( m_pSimulationLog, "---> Sort bodies " << std::endl;);
+        LOGTBLEVEL3( m_pSimulationLog, "---> GridTopoBuilder: Sort bodies " << std::endl;);
 
         // Sort states acoording to their rank their in!
         m_bodiesPerRank.clear();
@@ -842,22 +880,17 @@ public:
         pugi::xml_document dataXML;
         std::stringstream xml("<TopologyBuilder type=\"Grid\" buildMode=\"\" >"
                                     "<Description>"
-                                        "A_IK is tranformation matrix, which transforms points from Frame K to Frame I"
-                                        "AABB is in K Frame"
-                                        "AABBList contains all AABBs from all ranks "
+                                        "A_IK is tranformation matrix, which transforms points from Frame K to Frame I\n"
+                                        "AABB is in K Frame\n"
+                                        "AABBList contains all AABBs from all ranks\n"
                                     "</Description>"
                                     "<Time value=\"\" />"
-                                    "<AABBList>"
-                                    "</AABBList>"
+                                    "<AABBList />"
                                     "<Grid aligned=\"\" >"
-                                        "<Dimension>"
-                                        "</Dimension>"
-                                        "<MinPoint>"
-                                        "</MinPoint>"
-                                        "<MaxPoint>"
-                                        "</MaxPoint>"
-                                        "<A_IK>"
-                                        "</A_IK>"
+                                        "<Dimension/>"
+                                        "<MinPoint/>"
+                                        "<MaxPoint/>"
+                                        "<A_IK/>"
                                     "</Grid>"
                                 "</TopologyBuilder>");
 
@@ -870,7 +903,6 @@ public:
         XMLNodeType node;
         static const auto  XMLStringNodeType = pugi::node_pcdata;
         XMLNodeType root =  dataXML.child("TopologyBuilder");
-
 
 
         std::string buildMode ="nothing";
@@ -893,24 +925,24 @@ public:
         node.attribute("value").set_value( std::to_string(currentTime).c_str() );
 
         node = root.first_element_by_path("./Grid/MinPoint");
-        node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(aabb.m_minPoint).c_str() );
+        node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(aabb.m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() );
 
         node = root.first_element_by_path("./Grid/MaxPoint");
-        node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(aabb.m_maxPoint).c_str() );
+        node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(aabb.m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() );
 
         node = root.first_element_by_path("./Grid/A_IK");
-        node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(A_IK).c_str() );
+        node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(A_IK.format(MyMatrixIOFormat::SpaceSep)).c_str() );
 
         node = root.first_element_by_path("./Grid/Dimension");
-        node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(dim).c_str() );
+        node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(dim.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() );
 
         node = root.first_element_by_path("./Grid/AABBList");
         std::stringstream ss;
         for(auto & aabbIt : rankToAABB){
 
             ss << aabbIt.first
-            << " " << aabbIt.second.m_minPoint.format(MyMatrixIOFormat::SpaceSep)
-            << " " << aabbIt.second.m_maxPoint.format(MyMatrixIOFormat::SpaceSep)
+            << " " << aabbIt.second.m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep)
+            << " " << aabbIt.second.m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)
             << std::endl;
 
         }

@@ -18,19 +18,34 @@ InclusionCommunicator<TCombo>::InclusionCommunicator(std::shared_ptr< BodyCommun
 
     m_pDynSys(pDynSys),
     m_globalLocal(pDynSys->m_simBodies),
-    m_globalRemote(pDynSys->m_RemoteSimBodies),
+    m_globalRemote(pDynSys->m_remoteSimBodies),
     m_pProcComm(pProcComm),
-    m_pProcTopo(m_pProcComm->getProcTopo()),
     m_pBodyComm(pBodyComm),
     m_nbDataMap(m_pProcComm->getRank()),
     m_rank(m_pProcComm->getRank()),
-    m_nbRanks(m_pProcComm->getProcTopo()->getNeighbourRanks()),
     m_messageContact(this),m_messageMultiplicity(this), m_messageSplitBodyUpdate(this), m_messageSplitBodySolution(this) {
+
     if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
         ERRORMSG("SimulationLog does not yet exist? Did you create it?")
     }
+}
+
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::reset(){
+    resetTopology();
+}
+
+template<typename TCombo>
+void InclusionCommunicator<TCombo>::resetTopology(){
+
+
+    m_pProcTopo =  m_pProcComm->getProcTopo();
+    m_nbRanks   =  m_pProcComm->getProcTopo()->getNeighbourRanks();
+
+    // Clear Neighbour Map
+    m_nbDataMap.clear();
 
     // Initialize all NeighbourDatas
     for(auto rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
@@ -43,6 +58,8 @@ InclusionCommunicator<TCombo>::InclusionCommunicator(std::shared_ptr< BodyCommun
 
     m_pSimulationLog->logMessage("---> Initialized InclusionCommunicator");
 }
+
+
 template<typename TCombo>
 void InclusionCommunicator<TCombo>::communicateRemoteContacts(PREC currentSimulationTime) {
 

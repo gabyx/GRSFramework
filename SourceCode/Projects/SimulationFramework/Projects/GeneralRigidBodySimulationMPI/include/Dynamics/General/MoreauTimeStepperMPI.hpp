@@ -73,6 +73,7 @@ public:
     void closeAllFiles();
 
     void reset();
+    void resetTopology();
     void doOneIteration();
 
     PREC getTimeCurrent();
@@ -252,13 +253,13 @@ void MoreauTimeStepperMPI::reset() {
     m_pDynSys->reset();
     m_settings = m_pDynSys->getSettingsTimeStepper();
 
+    m_pSimulationLog->logMessage("---> Reset BodyCommunicator...");
+    m_pBodyCommunicator->reset();
+
     m_pSimulationLog->logMessage("---> Reset CollisionSolver...");
     m_pCollisionSolver->reset();
 
     m_pSimulationLog->logMessage("---> Reset InclusionSolver...");
-    m_pInclusionSolver->reset();
-
-        m_pSimulationLog->logMessage("---> Reset InclusionSolver...");
     m_pInclusionSolver->reset();
 
 
@@ -291,6 +292,20 @@ void MoreauTimeStepperMPI::reset() {
 
     m_PerformanceTimer.start();
 };
+
+
+void MoreauTimeStepperMPI::resetTopology() {
+
+    m_pSimulationLog->logMessage("---> Reset BodyCommunicator...");
+    m_pBodyCommunicator->resetTopology();
+
+    m_pSimulationLog->logMessage("---> Reset CollisionSolver...");
+    m_pCollisionSolver->resetTopology();
+
+    m_pSimulationLog->logMessage("---> Reset InclusionSolver..");
+    m_pInclusionSolver->resetTopology();
+};
+
 
 
 MoreauTimeStepperMPI::PREC MoreauTimeStepperMPI::getTimeCurrent() {
@@ -333,10 +348,6 @@ void MoreauTimeStepperMPI::doOneIteration() {
 #endif
 
     LOGSLLEVEL2(m_pSolverLog,"---> m_t Begin: " << m_currentSimulationTime <<std::endl; );
-
-
-    // Topology Rebuilder
-    m_pTopologyBuilder->checkAndRebuild(m_IterationCounter,m_currentSimulationTime);
 
 
     //Calculate Midpoint Rule ============================================================
@@ -393,7 +404,7 @@ void MoreauTimeStepperMPI::doOneIteration() {
     */
 
 
-    m_pInclusionSolver->resetForNextIter(); // Clears the contact graph and other inclusion related stuff!
+    m_pInclusionSolver->resetForNextTimestep(); // Clears the contact graph and other inclusion related stuff!
 
     // Solve Collision
     m_startTimeCollisionSolver = m_PerformanceTimer.elapsedSec();

@@ -84,7 +84,7 @@ template<typename TCellData>
 MyMatrix<unsigned int>::Vector3 CartesianGrid<TCellData>::getCellIndex(const Vector3 & point) const {
     ASSERTMSG(m_Box.inside(point),"Point: " << point << " is not inside the Grid!");
     MyMatrix<unsigned int>::Vector3 v;
-    v.array() =  (((point - m_Box.m_minPoint).array()) / m_dxyz.array()).cast<unsigned int>();
+    v.array() =  (((point - m_Box.m_minPoint).array()) / m_dxyz.array()).template cast<unsigned int>();
     ASSERTMSG( ( (v(0) >=0 && v(0) < m_dim(0)) && (v(1) >=0 && v(1) < m_dim(1)) && (v(2) >=0 && v(2) < m_dim(2)) ),
               "Index: " << v << " is out of bound" )
     return v;
@@ -95,7 +95,7 @@ MyMatrix<unsigned int>::Vector3 CartesianGrid<TCellData>::getCellIndexClosest(co
 
     // calculate index normally and then project it into the feasible grid.
     MyMatrix<int64_t>::Vector3 v;
-    v.array() =  (((point - m_Box.m_minPoint).array()) / m_dxyz.array()).cast<int64_t>();
+    v.array() =  (((point - m_Box.m_minPoint).array()) / m_dxyz.array()).template cast<int64_t>();
 
     // prox  index to feasible range (cartesian prox)
     v(0) = std::max(   std::min( int64_t(m_dim(0)-1), v(0)),  0L   );

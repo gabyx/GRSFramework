@@ -15,9 +15,17 @@ MARK_AS_ADVANCED( SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER )
 set(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER ON CACHE BOOL "Build the SimFileConverter for the simulation files of the framework")
 
 
-# Set the makefile build type (only for make file based generators)
+#Detect Build Type if Debug appears in CMAKE_BINARY_DIR path
 MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )
-set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
+STRING(REGEX MATCH ".*(Debug|debug).*" DEBUG_MATCH ${CMAKE_BINARY_DIR} )
+if(DEBUG_MATCH)
+    MESSAGE(WARNING "MATCHED")
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "The build type for makefile based generators")
+ELSE()
+    MESSAGE(WARNING "NOT MATCHED")
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
+ENDIF()
+
 
 IF(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
         SET(SimulationFrameworkName  "SimulationFramework ${CMAKE_BUILD_TYPE}")
@@ -50,9 +58,9 @@ IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
 		SET(CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for C Compiler for release builds" FORCE)
 		SET(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for C Compiler for release builds with debug info" FORCE)
 
-		SET (CMAKE_CXX_FLAGS             "-std=c++11 -ferror-limit=50 -Weverything -Wno-extra-semi -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -fdiagnostics-show-template-tree -Wno-c++98 -Wno-c++98-compat-pedantic -Wno-deprecated" CACHE STRING "" FORCE)
-		#SET(CMAKE_CXX_FLAGS                "std=c++y -ferror-limit=50 -w" CACHE STRING "Flags for CXX Compiler" FORCE)
-		SET(CMAKE_CXX_FLAGS_DEBUG          "-g" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
+        #SET (CMAKE_CXX_FLAGS             "-std=c++11 -ferror-limit=50 -Weverything -Wno-extra-semi -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -fdiagnostics-show-template-tree -Wno-c++98 -Wno-c++98-compat-pedantic -Wno-deprecated" CACHE STRING "" FORCE)
+		SET(CMAKE_CXX_FLAGS                "-std=c++11 -ferror-limit=50 -w" CACHE STRING "Flags for CXX Compiler" FORCE)
+		SET(CMAKE_CXX_FLAGS_DEBUG          "-g -fsanitize=leak -fsanitize=address" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
 		SET(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release minsize builds" FORCE)
 		SET(CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release builds" FORCE)
 		SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for CXX Compiler for release builds with debug info" FORCE)

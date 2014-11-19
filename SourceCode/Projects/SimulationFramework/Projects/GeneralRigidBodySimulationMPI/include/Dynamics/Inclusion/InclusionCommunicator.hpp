@@ -49,7 +49,8 @@ public:
 
     ~InclusionCommunicator(){}
 
-
+    void reset();
+    void resetTopology();
 
     void communicateRemoteContacts(PREC currentSimulationTime);
     void communicateSplitBodyUpdate(unsigned int globalIterationNumber);
@@ -61,7 +62,7 @@ public:
 
     void resetAllWeightings();
 
-    void reset(){
+    void resetForNextTimestep(){
         m_nbDataMap.emptyAllNeighbourData();
     }
 
@@ -117,7 +118,7 @@ private:
     RankIdType m_rank;
 
     ProcessTopologyType * m_pProcTopo;
-    const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
+    typename ProcessTopologyType::NeighbourRanksListType m_nbRanks;
 
     std::set<RankIdType> m_nbRanksSendRecvRemote;
     /** If rank is in this set then there are remote bodies: send Velocities to rank,

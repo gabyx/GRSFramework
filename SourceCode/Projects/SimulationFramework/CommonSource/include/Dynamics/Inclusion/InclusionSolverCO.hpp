@@ -43,7 +43,7 @@ public:
 
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
     void reset();
-    void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
+    void resetForNextTimestep(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
     void solveInclusionProblem();
 
     std::string getIterationStats();

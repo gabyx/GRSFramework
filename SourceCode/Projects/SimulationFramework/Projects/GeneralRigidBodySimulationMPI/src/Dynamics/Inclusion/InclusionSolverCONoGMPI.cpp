@@ -30,8 +30,7 @@ InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(
     m_pDynSys(pDynSys),
     m_pCollisionSolver(pCollisionSolver),
     m_pBodyComm(pBodyComm),
-    m_pProcComm(pProcComm),
-    m_nbRanks(m_pProcComm->getProcTopo()->getNeighbourRanks()) {
+    m_pProcComm(pProcComm){
 
     if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
@@ -93,12 +92,15 @@ void InclusionSolverCONoGMPI::initializeLog( Logging::Log * pSolverLog,  boost::
 #endif
 }
 
+void InclusionSolverCONoGMPI::resetTopology(){
+      m_pInclusionComm->resetTopology();
+      resetForNextTimestep();
+}
+
 
 void InclusionSolverCONoGMPI::reset() {
 
     m_settings = m_pDynSys->getSettingsInclusionSolver();
-
-    resetForNextIter();
 
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     m_pCollisionSolver->addContactDelegate(
@@ -131,26 +133,29 @@ void InclusionSolverCONoGMPI::reset() {
          m_pTangentialSorProxStepNodeVisitor = new TangentialSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,m_pContactGraph);
 
     }else{
-        ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemendet");
+        ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemented");
     }
 
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>(m_settings);
     m_pSorProxStepSplitNodeVisitor = new SorProxStepSplitNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter);
+
+    m_pInclusionComm->setSettings(m_settings);
+
+    resetForNextTimestep();
+
+    resetTopology();
 }
 
-
-void InclusionSolverCONoGMPI::resetForNextIter() {
+void InclusionSolverCONoGMPI::resetForNextTimestep() {
 
     m_nContacts = 0;
     m_nSplitBodyNodes = 0;
     m_globalIterationCounter = 0;
-
     m_bConverged = true;
 
     m_pContactGraph->clearGraph();
 
-    m_pInclusionComm->reset();
-    m_pInclusionComm->setSettings(m_settings);
+    m_pInclusionComm->resetForNextTimestep();
 }
 
 

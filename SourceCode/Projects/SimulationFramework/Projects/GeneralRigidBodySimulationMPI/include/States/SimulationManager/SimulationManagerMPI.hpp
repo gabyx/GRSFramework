@@ -42,6 +42,7 @@ private:
     CPUTimer m_globalTimer;
 
     void initSim();
+    void reloadScene();
 
     unsigned int m_nGlobalSimBodies;
 

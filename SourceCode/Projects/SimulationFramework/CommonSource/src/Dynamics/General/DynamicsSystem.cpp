@@ -69,8 +69,6 @@ void DynamicsSystemBase::initializeLog(Logging::Log* pLog) {
 void DynamicsSystemBase::reset() {
     //reset all external forces
     m_externalForces.reset();
-
-    initMassMatrixAndHTerm();
 }
 
 
@@ -199,13 +197,4 @@ void DynamicsSystemBase::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
     F_i.block<3,3>(1,0) = 0.5 * ( Matrix33::Identity() * q(0) + a_tilde );
 }
 
-
-void DynamicsSystemBase::initMassMatrixAndHTerm() {
-    // iterate over all objects and assemble matrix M
-    typename RigidBodySimContainerType::iterator bodyIt;
-
-    for(bodyIt = m_simBodies.begin() ; bodyIt != m_simBodies.end(); bodyIt++) {
-        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt);
-    }
-}
 

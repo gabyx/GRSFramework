@@ -58,7 +58,8 @@ public:
 
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
     void reset();
-    void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
+    void resetTopology();
+    void resetForNextTimestep(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
     void solveInclusionProblem(PREC currentSimulationTime);
 
 
@@ -85,9 +86,7 @@ protected:
     //MPI Stuff
     std::shared_ptr< ProcessCommunicatorType > m_pProcComm;
     std::shared_ptr< ProcessInfoType > m_pProcInfo;
-    const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
-
-    unsigned int m_nExpectedContacts;
+//    const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
 
     std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     std::shared_ptr<DynamicsSystemType>  m_pDynSys;

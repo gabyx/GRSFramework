@@ -1468,8 +1468,13 @@ public:
         }
 
 
+
+
+
         // if BINET_TENSOR
         if(m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
+            // Local AABB
+            ar & m_pTopoBuilder->m_I_aabb_loc;
             // Local Theta
             serializeEigen(ar,m_pTopoBuilder->m_I_theta_loc);
             // Local Center point
@@ -1479,7 +1484,10 @@ public:
         else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::ALIGNED ){
             // Local AABB
             ar & m_pTopoBuilder->m_I_aabb_loc;
+        }else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::MVBB ){
+
         }
+
     }
 
     // Master reset
@@ -1522,9 +1530,14 @@ public:
 
 
 
-
         // Binet Tensor
         if(m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
+
+            // Insert a AABB
+            auto insertedAABB = m_pTopoBuilder->m_rankAABBs.emplace(std::piecewise_construct, std::make_tuple(m_rank),std::make_tuple() );
+            // Get AABB
+            ar & insertedAABB.first->second;
+
             // Theta in I frame
             // Add Theta to the global one
             Vector6 theta; serializeEigen(ar,theta);
@@ -1540,14 +1553,12 @@ public:
             serializeEigen(ar,r_G);
             m_pTopoBuilder->m_r_G_glo += countPoints*r_G;
         }else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::ALIGNED ){
-
             // Insert a AABB
-            auto insertedAABB = m_pTopoBuilder->m_rankAABBs.emplace(std::piecewise_construct,
-                                                                    std::make_tuple(m_rank) ,
-                                                                    std::make_tuple() );
+            auto insertedAABB = m_pTopoBuilder->m_rankAABBs.emplace(std::piecewise_construct, std::make_tuple(m_rank),std::make_tuple() );
             // Get AABB
             ar & insertedAABB.first->second;
-            // unite with total AABB
+
+            // unite local AABB with total AABB
             m_pTopoBuilder->m_aabb_glo += insertedAABB.first->second;
         }
 

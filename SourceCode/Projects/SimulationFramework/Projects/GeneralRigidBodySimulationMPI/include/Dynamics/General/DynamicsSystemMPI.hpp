@@ -53,7 +53,9 @@ public:
     using RigidBodyContainerType = RigidBodyContainer;
     using RigidBodySimContainerType = RigidBodyContainer;
     RigidBodySimContainerType m_simBodies;        // simulated objects
-    RigidBodySimContainerType m_RemoteSimBodies;  // all remote bodies
+    RigidBodySimContainerType m_remoteSimBodies;  // all remote bodies
+
+    void deleteSimBodies(); ///< deletes all local and remote bodies, static bodies are not considered!
 
     using RigidBodyStaticContainerType = RigidBodySimContainerType;
     RigidBodySimContainerType m_staticBodies;        // all not simulated objects
@@ -70,8 +72,6 @@ public:
     inline void addBodyPtr(RigidBodyType * ptr ) { m_staticBodies.addBody(ptr); }
 
     void initializeLog(Logging::Log* pLog);
-
-    void initMassMatrixAndHTerm();
 
     void applyInitStatesToBodies();
 

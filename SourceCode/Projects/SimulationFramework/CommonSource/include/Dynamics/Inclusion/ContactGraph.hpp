@@ -43,8 +43,7 @@ public:
 
 public:
 
-    ContactGraph(ContactParameterMap * contactParameterMap):
-        m_nodeCounter(0),m_edgeCounter(0),m_nLambdas(0) {
+    ContactGraph(ContactParameterMap * contactParameterMap){
         m_pContactParameterMap = contactParameterMap;
     }
     ~ContactGraph() {
@@ -294,10 +293,9 @@ public:
     using NodeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType;
     using EdgeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType;
 
-    ContactGraphIteration(ContactParameterMap * contactParameterMap):
-        m_nodeCounter(0),m_edgeCounter(0)
+    ContactGraphIteration(ContactParameterMap * contactParameterMap)
         #ifdef RESIDUAL_SORTED_ITERATION
-        ,m_nodesResSorted1(cFunc),m_nodesResSorted2(cFunc)
+        :m_nodesResSorted1(cFunc),m_nodesResSorted2(cFunc)
         #endif // RESIDUAL_SORTED_ITERATION
     {
         m_pContactParameterMap = contactParameterMap;
@@ -366,19 +364,15 @@ public:
     void clearGraph() {
         // This deletes all nodes, edges, and decrements the reference counts for the nodedata and edgedata
         // cleanup allocated memory
-        for(auto n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); ++n_it)
-            delete (*n_it);
-        for(auto e_it = this->m_edges.begin(); e_it != this->m_edges.end(); ++e_it)
-            delete (*e_it);
-        //cout << "clear graph"<<endl;
-        this->m_nodes.clear();
-        m_nodeCounter = 0;
-        this->m_edges.clear();
+        deleteNodesAndEdges();
+
         m_edgeCounter = 0;
+        m_nodeCounter = 0;
+
         m_simBodiesToContactsMap.clear();
 
         m_usedContactModels = 0;
-
+        m_maxResidual = 0.0;
     }
 
     template<bool addEdges = true>
@@ -417,7 +411,7 @@ public:
 
     std::unordered_map<const RigidBodyType *, NodeListType > m_simBodiesToContactsMap;
 
-    PREC m_maxResidual;
+    PREC m_maxResidual = 0.0;
 
     unsigned int getNContactModelsUsed(){
         return BitCount::count<ContactModelEnumIntType>(m_usedContactModels);
@@ -427,9 +421,7 @@ private:
     using ContactModelEnumIntType = typename std::underlying_type<ContactModels::Enum>::type;
     ContactModelEnumIntType m_usedContactModels; ///< Bitflags which mark all used contactmodels
 
-    bool m_firstIteration;
-
-
+    bool m_firstIteration = true;
 
     void setContactModel(NodeDataType & nodeData) {
 
@@ -544,8 +536,8 @@ private:
 
     ContactParameterMap* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 
-    unsigned int m_nodeCounter; ///< An node counter, starting at 0.
-    unsigned int m_edgeCounter; ///< An edge counter, starting at 0.
+    unsigned int m_nodeCounter = 0; ///< An node counter, starting at 0.
+    unsigned int m_edgeCounter = 0; ///< An edge counter, starting at 0.
 
 
     #ifdef RESIDUAL_SORTED_ITERATION

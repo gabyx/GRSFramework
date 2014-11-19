@@ -4,7 +4,7 @@
 #include "PrintGeometryDetails.hpp"
 
 CollisionSolverMPI::CollisionSolverMPI(std::shared_ptr< DynamicsSystemType> pDynSys):
-    m_simBodies(pDynSys->m_simBodies), m_staticBodies(pDynSys->m_staticBodies), m_RemoteSimBodies(pDynSys->m_RemoteSimBodies),
+    m_simBodies(pDynSys->m_simBodies), m_staticBodies(pDynSys->m_staticBodies), m_remoteSimBodies(pDynSys->m_remoteSimBodies),
     m_Collider(&m_collisionSet)
 {
 
@@ -28,7 +28,11 @@ void CollisionSolverMPI::reset() {
     clearCollisionSet();
     removeAllContactDelegates();
     m_maxOverlap = 0;
+}
 
+void CollisionSolverMPI::resetTopology() {
+    clearCollisionSet();
+    m_maxOverlap = 0;
 }
 
 
@@ -77,7 +81,7 @@ void CollisionSolverMPI::solveCollision() {
     //// Do simple collision detection (SimBodies to RemoteSimBodies)
     LOGSLLEVEL2(m_pSolverLog, "\t---> SimBodies to RemoteBodies "<<std::endl;)
     for(auto bodyIti = m_simBodies.begin(); bodyIti != m_simBodies.end(); bodyIti++) {
-        for(auto bodyItj = m_RemoteSimBodies.begin(); bodyItj != m_RemoteSimBodies.end(); bodyItj++ ) {
+        for(auto bodyItj = m_remoteSimBodies.begin(); bodyItj != m_remoteSimBodies.end(); bodyItj++ ) {
             //check for a collision
             m_Collider.checkCollision((*bodyIti), (*bodyItj));
 
@@ -87,11 +91,11 @@ void CollisionSolverMPI::solveCollision() {
 
     // Do simple collision detection (RemoteSimBodies to RemoteSimBodies, but only different rank!)
     LOGSLLEVEL2(m_pSolverLog, "\t---> RemoteSimBodies to RemoteSimBodies (different rank) "<<std::endl;)
-    if(m_RemoteSimBodies.size()){
-        for(auto bodyIti = m_RemoteSimBodies.begin(); bodyIti != --m_RemoteSimBodies.end(); bodyIti++) {
+    if(m_remoteSimBodies.size()){
+        for(auto bodyIti = m_remoteSimBodies.begin(); bodyIti != --m_remoteSimBodies.end(); bodyIti++) {
             auto bodyItj = bodyIti;
             bodyItj++;
-            for(; bodyItj != m_RemoteSimBodies.end(); bodyItj++ ) {
+            for(; bodyItj != m_remoteSimBodies.end(); bodyItj++ ) {
 
                 //check for a collision
 

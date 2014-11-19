@@ -6,7 +6,7 @@ BodyCommunicator::BodyCommunicator(  std::shared_ptr< DynamicsSystemType> pDynSy
                                      std::shared_ptr< ProcessCommunicatorType > pProcComm):
             m_pDynSys(pDynSys),
             m_globalLocal(pDynSys->m_simBodies),
-            m_globalRemote(pDynSys->m_RemoteSimBodies),
+            m_globalRemote(pDynSys->m_remoteSimBodies),
             m_globalGeometries(pDynSys->m_globalGeometries),
             m_pProcComm(pProcComm),
             m_nbDataMap(m_pProcComm->getRank()),
@@ -25,6 +25,10 @@ BodyCommunicator::BodyCommunicator(  std::shared_ptr< DynamicsSystemType> pDynSy
 }
 
 void BodyCommunicator::reset(){
+     resetTopology();
+}
+
+void BodyCommunicator::resetTopology(){
 
 
     m_pProcTopo =  m_pProcComm->getProcTopo();
@@ -32,7 +36,6 @@ void BodyCommunicator::reset(){
 
     // Clear Neighbour Map
     m_nbDataMap.clear();
-
 
     // Initialize all NeighbourDatas
     for(auto rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
@@ -45,6 +48,9 @@ void BodyCommunicator::reset(){
     // Fill in all BodyInfos for the local bodies (remote bodies are not considered, there should not be any of those)
     for(auto it = m_globalLocal.begin(); it != m_globalLocal.end(); ++it) {
         ASSERTMSG(m_pProcTopo->belongsBodyToProcess(*it), "Body with id: "<< RigidBodyId::getBodyIdString(*it) <<" does not belong to process? How did you initialize your bodies?")
+        if( (*it)->m_pBodyInfo ){
+            delete (*it)->m_pBodyInfo;
+        }
         (*it)->m_pBodyInfo = new RigidBodyType::BodyInfoType(m_rank);
     }
 
@@ -95,7 +101,8 @@ void BodyCommunicator::communicate(PREC currentSimTime){
         //Check if belonging rank is in the neighbours or our own
         if(ownerRank != m_rank){
             if( m_nbRanks.find(ownerRank) == m_nbRanks.end() ){
-                ERRORMSG("---> Body with id: " << RigidBodyId::getBodyIdString(body) <<" belongs to no neighbour!, "<<"This is not good as we cannot send any message to some other rank other then a neighbour!");
+                ERRORMSG("---> Body with id: " << RigidBodyId::getBodyIdString(body)
+                         <<" belongs to no neighbour, ownerRank: " << ownerRank << " pos: " << body->m_r_S );
             }
         LOGBC(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" has owner rank: "<< (ownerRank) << ", proccess rank: " << m_pProcComm->getRank()<<std::endl;)
         }

@@ -99,8 +99,9 @@ public:
 
     }
 
-    /** Reinitializes all neighbour ranks and data structures */
     void reset();
+    /** Reinitializes all neighbour ranks and data structures */
+    void resetTopology();
 
     void communicate(PREC currentSimTime);
 
@@ -142,7 +143,7 @@ private:
     RankIdType m_rank;
 
     ProcessTopologyType * m_pProcTopo;
-    const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
+    typename ProcessTopologyType::NeighbourRanksListType m_nbRanks;
     typename ProcessTopologyType::NeighbourRanksListType m_nbRanksEmpty; // All neighbours with no simulated bodies
 
     RigidBodyContainerType & m_globalRemote;

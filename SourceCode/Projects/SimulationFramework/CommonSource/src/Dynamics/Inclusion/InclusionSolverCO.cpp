@@ -54,9 +54,8 @@ void InclusionSolverCO::reset() {
 
     m_settings = m_pDynSys->getSettingsInclusionSolver();
 
-    m_pDynSys->initMassMatrixAndHTerm();  //TODO what does that make here?
 
-    resetForNextIter();
+    resetForNextTimestep();
 
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     m_pCollisionSolver->addContactDelegate(
@@ -78,7 +77,7 @@ void InclusionSolverCO::reset() {
 }
 
 
-void InclusionSolverCO::resetForNextIter() {
+void InclusionSolverCO::resetForNextTimestep() {
     m_nContacts = 0;
     m_nLambdas = 0;
 

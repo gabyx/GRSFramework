@@ -72,7 +72,7 @@ void InclusionSolverCONoG::reset() {
 
     m_settings = m_pDynSys->getSettingsInclusionSolver();
 
-    resetForNextIter();
+    resetForNextTimestep();
 
 #if HAVE_CUDA_SUPPORT == 1
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
@@ -135,13 +135,12 @@ void InclusionSolverCONoG::reset() {
 }
 
 
-void InclusionSolverCONoG::resetForNextIter() {
+void InclusionSolverCONoG::resetForNextTimestep() {
 
     m_nContacts = 0;
+    m_isFinite = -1;
     m_globalIterationCounter =0;
-
     m_bConverged = true;
-
     m_contactGraph.clearGraph();
 }
 

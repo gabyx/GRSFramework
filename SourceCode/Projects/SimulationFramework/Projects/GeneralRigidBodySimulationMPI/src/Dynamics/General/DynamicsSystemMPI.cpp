@@ -23,7 +23,7 @@ DynamicsSystemMPI::~DynamicsSystemMPI() {
 
     // Delete all RigidBodys
     m_simBodies.deleteAllBodies();
-    m_RemoteSimBodies.deleteAllBodies();
+    m_remoteSimBodies.deleteAllBodies();
     m_staticBodies.deleteAllBodies();
 
 };
@@ -76,9 +76,14 @@ void DynamicsSystemMPI::initializeLog(Logging::Log* pLog) {
 void DynamicsSystemMPI::reset(){
     //reset all external forces
     m_externalForces.reset();
-    initMassMatrixAndHTerm();
 }
 
+
+void DynamicsSystemMPI::deleteSimBodies()
+{
+     m_simBodies.deleteAllBodies();
+     m_remoteSimBodies.deleteAllBodies();
+}
 
 void DynamicsSystemMPI::doFirstHalfTimeStep(PREC ts, PREC timestep) {
     using namespace std;
@@ -213,14 +218,4 @@ void DynamicsSystemMPI::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
     F_i.block<1,3>(0,0) = -0.5 * q.tail<3>();
     updateSkewSymmetricMatrix<>(q.tail<3>(), a_tilde );
     F_i.block<3,3>(1,0) = 0.5 * ( Matrix33::Identity() * q(0) + a_tilde );
-}
-
-
-void DynamicsSystemMPI::initMassMatrixAndHTerm() {
-    // iterate over all objects and assemble matrix M
-    typename RigidBodySimContainerType::iterator bodyIt;
-
-    for(bodyIt = m_simBodies.begin() ; bodyIt != m_simBodies.end(); bodyIt++) {
-        RigidBodyFunctions::initMassMatrixAndHTerm( *bodyIt);
-    }
 }

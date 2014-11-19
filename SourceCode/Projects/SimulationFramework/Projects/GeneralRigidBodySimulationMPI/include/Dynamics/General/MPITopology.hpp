@@ -97,7 +97,7 @@ public:
     boost::variant<boost::blank, ProcessTopologyGrid<ProcessTopology> > m_procTopo;
     RankIdType m_rank;
 
-    // These values are set with call by references in the specific implementation classes
+    // These values are set by the create Functions for different topologies
     NeighbourRanksListType  m_nbRanks;           ///< Neighbour ranks
     AdjacentNeighbourRanksMapType  m_adjNbRanks; ///< Adjacent ranks between m_rank and each neighbour
 

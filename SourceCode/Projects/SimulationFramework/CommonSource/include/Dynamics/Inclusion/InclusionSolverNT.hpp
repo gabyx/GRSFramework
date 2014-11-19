@@ -42,7 +42,7 @@ public:
 
   void initializeLog(Logging::Log* pSolverLog);
   void reset();
-  void resetForNextIter(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
+  void resetForNextTimestep(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
   void solveInclusionProblem( const DynamicsState * state_s,
     const DynamicsState * state_m,
     DynamicsState * state_e);
@@ -203,7 +203,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::reset()
 }
 
 template< typename TInclusionSolverConfig >
-void InclusionSolverNT<TInclusionSolverConfig>::resetForNextIter()
+void InclusionSolverNT<TInclusionSolverConfig>::resetForNextTimestep()
 {
   m_h.setZero();
   m_nContacts = 0;

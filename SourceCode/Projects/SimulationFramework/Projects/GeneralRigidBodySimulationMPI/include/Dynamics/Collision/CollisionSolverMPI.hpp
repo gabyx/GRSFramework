@@ -50,8 +50,9 @@ public:
 
     ~CollisionSolverMPI();
 
-    void initializeLog(Logging::Log* pSolverLog);                          ///< Initializes an Ogre::Log.
+    void initializeLog(Logging::Log* pSolverLog);                       ///< Initializes an Ogre::Log.
     void reset();                                                       ///< Resets the whole Solver. This function is called at the start of the simulation.
+    void resetTopology();
     void solveCollision();    ///< Main routine which solves the collision for all bodies.
 
 
@@ -74,7 +75,7 @@ protected:
 
 
     typename DynamicsSystemType::RigidBodySimContainerType & m_simBodies;
-    typename DynamicsSystemType::RigidBodySimContainerType & m_RemoteSimBodies;
+    typename DynamicsSystemType::RigidBodySimContainerType & m_remoteSimBodies;
     typename DynamicsSystemType::RigidBodyStaticContainerType & m_staticBodies;           ///< List of all fixed not simulated bodies.
 
 
