@@ -47,6 +47,20 @@ inline void makeCoordinateSystem(      typename MyMatrix<PREC>::Vector3 &v1,
 
 };
 
+
+template<typename PREC>
+inline bool checkOrthogonality(typename MyMatrix<PREC>::Vector3 &v1,
+                               typename MyMatrix<PREC>::Vector3 &v2,
+                               typename MyMatrix<PREC>::Vector3 &v3,
+                               PREC eps = 1e-6)
+{
+
+    if(v1.dot(v2) <= eps && v2.dot(v3) <= eps && v3.dot(v1) <= eps){
+        return true;
+    }
+    return false;
+}
+
 /* @} */
 
 #endif

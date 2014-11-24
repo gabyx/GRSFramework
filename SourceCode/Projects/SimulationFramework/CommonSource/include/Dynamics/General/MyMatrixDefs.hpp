@@ -38,6 +38,7 @@ struct MyMatrix{
    using MatrixDynDynRow = Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor>;
 
    using AffineTrafo = Eigen::Transform<PREC,3,Eigen::TransformTraits::Affine>;
+   using AffineTrafo2d = Eigen::Transform<PREC,2,Eigen::TransformTraits::Affine>;
 
    using MatrixSparse = Eigen::SparseMatrix<PREC>   ;       // declares a column-major sparse matrix of type PREC
    using MatrixSparseTriplet = Eigen::Triplet<PREC>        ;
@@ -81,6 +82,7 @@ struct MyMatrixIOFormat {
    using MatrixDiagDyn = typename MyMatrix< _PREC_ >::MatrixDiagDyn; \
    using MatrixDynDynRow = typename MyMatrix< _PREC_ >::MatrixDynDynRow; \
    using AffineTrafo = typename MyMatrix< _PREC_ >::AffineTrafo; \
+   using AffineTrafo2d = typename MyMatrix< _PREC_ >::AffineTrafo2d; \
    using MatrixSparse = typename MyMatrix< _PREC_ >::MatrixSparse; \
    using MatrixSparseTriplet = typename MyMatrix< _PREC_ >::MatrixSparseTriplet;
 #endif

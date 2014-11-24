@@ -2253,7 +2253,7 @@ gdiam_bbox   gdiam_mvbb_optimize( gdiam_point  * start, int  size,
 {
     gdiam_bbox  bb_tmp;
 
-    //printf( "gdiam_mvbb_optimize called\n" );
+    printf( "gdiam_mvbb_optimize called\n" );
 
     for  ( int  ind = 0; ind < times; ind++ ) {
         ProjPointSet  pps;
@@ -2341,8 +2341,8 @@ static void  try_direction( gdiam_bbox  & bb,
     if  ( ( x_coef == 0 )  &&  ( y_coef == 0 )
           &&  ( z_coef == 0 ) )
         return;
-    //printf( "trying: (%d, %d, %d)\n",
-    //        x_coef, y_coef, z_coef );
+    printf( "trying: (%d, %d, %d)\n",
+            x_coef, y_coef, z_coef );
     //fflush( stdout );
     gdiam_point_t  new_dir;
     bb.combine( new_dir, x_coef, y_coef, z_coef );

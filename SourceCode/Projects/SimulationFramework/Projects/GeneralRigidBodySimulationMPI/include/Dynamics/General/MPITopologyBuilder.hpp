@@ -530,6 +530,14 @@ public:
 
     // Compute Minimum Bounding Box with GDIAM source code
     void makeMVBB(std::vector<Vector3> & points, Matrix33 & A_IK, AABB & aabb ){
+
+        LOGTBLEVEL3(m_pSimulationLog, "Points MVBB \n:");
+        for(auto & p: points){
+             LOGTBLEVEL3(m_pSimulationLog, p.transpose().format(MyMatrixIOFormat::SpaceSep) << "\n");
+        }
+         LOGTBLEVEL3(m_pSimulationLog, std::endl;);
+
+
         PREC * p = points.data()->data();
         unsigned int num = points.size();
         GDIAM::gdiam_bbox box = GDIAM::gdiam_approx_mvbb_grid_sample(p,num,5,400);
@@ -677,19 +685,19 @@ public:
                 massPoint.m_numPoints += 1;
 
                 // intersect with all static bodies, if intersection abort, point is proxed onto body!
-                bool hitObject = false;
-                for(auto & pBody : staticBodies){
-
-                    if( pointCollider.intersectAndProx(pBody, predictedPoints.back() ) ){
-                        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: hit object " <<std::endl);
-                        hitObject = true;
-                        break;
-                    }
-                }
-
-                if(hitObject){
-                    break;
-                }
+//                bool hitObject = false;
+//                for(auto & pBody : staticBodies){
+//
+//                    if( pointCollider.intersectAndProx(pBody, predictedPoints.back() ) ){
+//                        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: hit object " <<std::endl);
+//                        hitObject = true;
+//                        break;
+//                    }
+//                }
+//
+//                if(hitObject){
+//                    break;
+//                }
 
             }
 

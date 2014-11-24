@@ -489,8 +489,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
         #${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
         #${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/AABB.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/Ray.hpp
+        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/AABB.hpp
+        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/Ray.hpp
         #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/SphereGeometry.hpp
         #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/PlaneGeometry.hpp
         #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
