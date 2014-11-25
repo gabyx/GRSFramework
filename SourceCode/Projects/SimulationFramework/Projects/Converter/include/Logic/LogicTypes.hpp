@@ -42,7 +42,7 @@
             case N: \
                 { \
                 typedef typename boost::mpl::at_c<TypeSeq, N >::type Type; \
-                visitor( static_cast< LogicSocket<Type> *>(this) ); \
+                visitor( castToType<Type>() ); \
                 } \
             break; \
 
