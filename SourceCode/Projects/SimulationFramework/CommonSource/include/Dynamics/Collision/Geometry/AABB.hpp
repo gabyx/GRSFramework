@@ -28,6 +28,7 @@ public:
         m_maxPoint(2) = std::numeric_limits<PREC>::min();
     }
 
+
     AABB( const Vector3 &p) {
         m_minPoint = p;
         m_maxPoint = p;
@@ -89,14 +90,6 @@ public:
         return *this;
     };
 
-    Vector3 extent() const{
-        return m_maxPoint - m_minPoint;
-    };
-
-    PREC maxExtent() const{
-        return (m_maxPoint - m_minPoint).maxCoeff();
-    };
-
     AABB & transform(const AffineTrafo & M) {
 
         AABB ret( M*(Vector3( m_minPoint(0), m_minPoint(1), m_minPoint(2))));
@@ -125,23 +118,31 @@ public:
                    p(2) >= m_minPoint(2) && p(2) <= m_maxPoint(2));
     };
 
-    bool isEmpty() const {
+    inline Vector3 extent() const{
+        return m_maxPoint - m_minPoint;
+    };
+
+    inline PREC maxExtent() const{
+        return (m_maxPoint - m_minPoint).maxCoeff();
+    };
+
+    inline bool isEmpty() const {
         return m_maxPoint(0) <= m_minPoint(0) || m_maxPoint(1) <= m_minPoint(1) || m_maxPoint(2) <= m_minPoint(2);
     }
 
-    void expand(PREC d) {
+    inline void expand(PREC d) {
         ASSERTMSG(d>=0,"d>=0")
         m_minPoint -= Vector3(d,d,d);
         m_maxPoint += Vector3(d,d,d);
     };
 
-    void expand(Vector3 d) {
+    inline void expand(Vector3 d) {
         ASSERTMSG(d(0)>=0 && d(1)>=0 && d(2)>=0,"d>=0")
         m_minPoint -= d;
         m_maxPoint += d;
     };
 
-    PREC volume() const {
+    inline PREC volume() const {
         Vector3 d = m_maxPoint- m_minPoint;
         return d(0) * d(1) * d(2);
     };

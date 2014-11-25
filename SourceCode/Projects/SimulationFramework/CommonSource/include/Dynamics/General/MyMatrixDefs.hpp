@@ -27,9 +27,10 @@ struct MyMatrix{
    using Matrix43 = Eigen::Matrix<PREC, 4, 3>;
    using Matrix34 = Eigen::Matrix<PREC, 3, 4>;
    using Matrix33 = Eigen::Matrix<PREC, 3, 3>;
+   using Matrix22 = Eigen::Matrix<PREC, 2, 2>;
    using Vector3 = Eigen::Matrix<PREC, 3, 1>;
    using Vector2 = Eigen::Matrix<PREC, 2, 1>;
-   using Quaternion = Eigen::Matrix<PREC, 4, 1>;
+   using Quaternion = Eigen::Quaternion<PREC>;
    using Vector4 = Eigen::Matrix<PREC, 4, 1>;
    using Vector6 = Eigen::Matrix<PREC, 6, 1>;
    using VectorDyn = Eigen::Matrix<PREC, Eigen::Dynamic , 1 >                   ;
@@ -70,6 +71,7 @@ struct MyMatrixIOFormat {
 #define DEFINE_MATRIX_TYPES_OF( _PREC_ ) \
    using Matrix44 = typename MyMatrix< _PREC_ >::Matrix44; \
    using Matrix33 = typename MyMatrix< _PREC_ >::Matrix33; \
+   using Matrix22 = typename MyMatrix< _PREC_ >::Matrix22; \
    using Matrix43 = typename MyMatrix< _PREC_ >::Matrix43; \
    using Matrix34 = typename MyMatrix< _PREC_ >::Matrix34; \
    using Vector3 = typename MyMatrix< _PREC_ >::Vector3;   \
