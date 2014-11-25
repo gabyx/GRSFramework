@@ -72,8 +72,8 @@ public:
     template<typename T> T getOSocketValue(unsigned int idx);
 	template<typename T> T& getOSocketRefValue(unsigned int idx);
 
-	template<typename T> void setISocketValue(unsigned int idx, T data);
-    template<typename T> void setOSocketValue(unsigned int idx, T data);
+	template<typename T, typename TIn> void setISocketValue(unsigned int idx, const TIn & data);
+    template<typename T, typename TIn> void setOSocketValue(unsigned int idx, const TIn & data);
 
     /**
     * Links together an output with an input. Get the data from output from the input
@@ -141,13 +141,13 @@ T & LogicNode::getOSocketRefValue(unsigned int idx)
 
 
 
-template<typename T>
-void LogicNode::setISocketValue(unsigned int idx, T data)
+template<typename T, typename TIn>
+void LogicNode::setISocketValue(unsigned int idx, const TIn & data)
 {
     m_inputs[idx]->castToType<T>()->setValue(data);
 }
-template<typename T>
-void LogicNode::setOSocketValue(unsigned int idx, T data)
+template<typename T, typename TIn>
+void LogicNode::setOSocketValue(unsigned int idx, const TIn & data)
 {
     m_outputs[idx]->castToType<T>()->setValue(data);
 }

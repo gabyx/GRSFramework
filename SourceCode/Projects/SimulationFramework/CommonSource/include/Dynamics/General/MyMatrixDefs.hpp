@@ -30,7 +30,7 @@ struct MyMatrix{
    using Matrix22 = Eigen::Matrix<PREC, 2, 2>;
    using Vector3 = Eigen::Matrix<PREC, 3, 1>;
    using Vector2 = Eigen::Matrix<PREC, 2, 1>;
-   using Quaternion = Eigen::Matrix<PREC, 4, 1>;
+   using Quaternion = Eigen::Quaternion<PREC>;
    using Vector4 = Eigen::Matrix<PREC, 4, 1>;
    using Vector6 = Eigen::Matrix<PREC, 6, 1>;
    using VectorDyn = Eigen::Matrix<PREC, Eigen::Dynamic , 1 >                   ;

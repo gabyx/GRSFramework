@@ -1,6 +1,9 @@
 #ifndef StringFormatNode_hpp
 #define StringFormatNode_hpp
 
+#include <type_traits>
+#include <boost/mpl/contains.hpp>
+
 #include "TinyFormatInclude.hpp"
 #include "CommonFunctions.hpp"
 
@@ -67,7 +70,21 @@ namespace LogicNodes{
     struct FormatListAdder{
         FormatListAdder(VFormatList & formatList): m_fList(formatList) {}
 
-        template<typename T>
+        // Only overload the types which can be used with the StringFormater
+        // Types which are not in TypeSeqBasic
+        template<typename T,
+                 typename std::enable_if< ! boost::mpl::contains< typename LogicTypes::TypeSeqBasic, T>::type::value
+                                        >::type * = nullptr
+                >
+        void operator()(LogicSocket<T> * n){
+            ERRORMSG("Type: " << LogicTypes::getTypeName<T>() << " cannot be used in StringFormatNode!");
+        }
+
+        // Types which are in TypeSeqBasic
+        template<typename T,
+                 typename std::enable_if<  boost::mpl::contains< typename LogicTypes::TypeSeqBasic, T >::type::value
+                                        >::type * = nullptr
+                >
         void operator()(LogicSocket<T> * n){
             m_fList.add(n->getValue());
         }
