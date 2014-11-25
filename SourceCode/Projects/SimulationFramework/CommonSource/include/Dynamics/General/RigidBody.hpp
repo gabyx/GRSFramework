@@ -68,7 +68,7 @@ public:
         return u;
     }
     inline VectorQBody get_q() const{
-        VectorQBody r; r.head<3>() = m_r_S; r.tail<4>() = m_q_KI; return r;
+        VectorQBody r; r.head<3>() = m_r_S; r.tail<4>() = m_q_KI.coeffs(); return r;
     }
 
     template<bool setTrafoMatrix = false,typename TRigidBodyState>
@@ -77,7 +77,8 @@ public:
         m_q_KI = s.m_q.template tail<4>();
 
         if(setTrafoMatrix ){
-            QuaternionHelpers::setRotFromQuaternion(m_q_KI,m_A_IK);
+            //QuaternionHelpers::setRotFromQuaternion(m_q_KI,m_A_IK);
+            m_A_IK = m_q_KI.matrix();
         }
 
         if(m_pSolverData){
@@ -120,7 +121,7 @@ public:
         m_A_IK.setIdentity();
 
         m_r_S.setZero();
-        QuaternionHelpers::setQuaternionZero(m_q_KI);
+        m_q_KI.setIdentity();//QuaternionHelpers::setQuaternionZero(m_q_KI);
         m_h_term.setZero();
         m_eMode = BodyMode::STATIC;
         m_eMaterial = 0;

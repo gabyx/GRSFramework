@@ -87,7 +87,7 @@ void DynamicsSystemBase::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 
         LOGSLLEVEL3(m_pSolverLog, "\t---> Body: "<< RigidBodyId::getBodyIdString(pBody) << std::endl
             << "\t\t--->m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
-            << "\t\t--->m_q_s= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl
+            << "\t\t--->m_q_s= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.coeffs().transpose()<<std::endl
             << "\t\t--->m_u_s= "  <<pBody->m_pSolverData->m_uBuffer.m_back.transpose()<<std::endl;)
         // Update time:
         pBody->m_pSolverData->m_t = ts + timestep;
@@ -97,13 +97,13 @@ void DynamicsSystemBase::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 
         // Timestep for position;
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_back.head<3>();
-        pBody->m_q_KI += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_back.tail<3>();
+        pBody->m_q_KI.coeffs() += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_back.tail<3>();
 
         //Normalize Quaternion
         pBody->m_q_KI.normalize();
 
         // Update Transformation A_IK
-        QuaternionHelpers::setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
+         pBody->m_A_IK = pBody->m_q_KI.matrix();//QuaternionHelpers::setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
 
         // Add in to h-Term ==========
         pBody->m_h_term.setZero();
@@ -124,7 +124,7 @@ void DynamicsSystemBase::doFirstHalfTimeStep(PREC ts, PREC timestep) {
 
         LOGSLLEVEL3(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<std::endl
             << "\t\t--->m_t= "  << pBody->m_pSolverData->m_t<<std::endl
-            << "\t\t--->m_q_m= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl;)
+            << "\t\t--->m_q_m= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.coeffs().transpose()<<std::endl;)
     }
 }
 
@@ -155,7 +155,7 @@ void DynamicsSystemBase::doSecondHalfTimeStep(PREC te, PREC timestep) {
 
         // Timestep for position;
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_front.head<3>();
-        pBody->m_q_KI += timestep * F_i * (pBody->m_pSolverData->m_uBegin.tail<3>() + pBody->m_pSolverData->m_uBuffer.m_front.tail<3>());
+        pBody->m_q_KI.coeffs() += timestep * F_i * (pBody->m_pSolverData->m_uBegin.tail<3>() + pBody->m_pSolverData->m_uBuffer.m_front.tail<3>());
 
 
         ASSERTMSG(Utilities::isFinite(pBody->m_pSolverData->m_uBuffer.m_front.tail<3>())," body vel. not finite" );
@@ -166,7 +166,7 @@ void DynamicsSystemBase::doSecondHalfTimeStep(PREC te, PREC timestep) {
 
         LOGSLLEVEL3(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
             << "\t\t--->m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
-            << "\t\t--->m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.transpose()<<std::endl
+            << "\t\t--->m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.coeffs().transpose()<<std::endl
             << "\t\t--->m_u_e= "  <<pBody->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl;)
 
 #if OUTPUT_SIMDATA_FILE == 1
@@ -192,9 +192,9 @@ void DynamicsSystemBase::doSecondHalfTimeStep(PREC te, PREC timestep) {
 void DynamicsSystemBase::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
     static Matrix33 a_tilde = Matrix33::Zero();
 
-    F_i.block<1,3>(0,0) = -0.5 * q.tail<3>();
-    updateSkewSymmetricMatrix<>(q.tail<3>(), a_tilde );
-    F_i.block<3,3>(1,0) = 0.5 * ( Matrix33::Identity() * q(0) + a_tilde );
+    F_i.block<1,3>(0,0) = -0.5 * q.vec();
+    updateSkewSymmetricMatrix<>(q.vec(), a_tilde );
+    F_i.block<3,3>(1,0) = 0.5 * ( Matrix33::Identity() * q.w() + a_tilde );
 }
 
 

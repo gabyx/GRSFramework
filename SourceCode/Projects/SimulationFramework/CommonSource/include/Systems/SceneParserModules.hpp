@@ -770,7 +770,7 @@ private:
                 }
 
                 Quaternion quat;
-                QuaternionHelpers::setQuaternion(quat,axis,angle);
+                QuaternionHelpers::setQuaternion(quat.coeffs(),axis,angle);
 
 
                 Assimp::Importer importer;
@@ -1627,7 +1627,7 @@ private:
                 continue;
             }
 
-            QuaternionHelpers::setQuaternionZero(q_KI);
+            q_KI.setIdentity();//QuaternionHelpers::setQuaternionZero(q_KI);
             I_r_IK.setZero();
 
             // Iterate over all transforms an successfully applying the total trasnformation!
@@ -1666,11 +1666,11 @@ private:
                     }
                 }
 
-                QuaternionHelpers::setQuaternion(q_BK,axis,angle);
-                QuaternionHelpers::rotateVector(q_KI, trans ); //K_r_KB = trans;
+                QuaternionHelpers::setQuaternion(q_BK.coeffs(),axis,angle);
+                trans=q_KI*trans;//QuaternionHelpers::rotateVector(q_KI, trans ); //K_r_KB = trans;
                 I_r_IK +=  trans;  // + Rot_KI * K_r_KB; // Transforms like A_IK * K_r_KB;
 
-                q_KI = QuaternionHelpers::quatMult(q_KI,q_BK);
+                q_KI = q_KI*q_BK;//QuaternionHelpers::quatMult(q_KI,q_BK);
                 // Sequential (aktiv) rotation ( A_AB * B_R_2 * A_BA * A_R_1 ) *A_x
                 // is the same like: A_R_1 * B_R_2 (see documentation page)
 
@@ -1678,7 +1678,7 @@ private:
 
             // Apply overall transformation!
             stateIt->m_q.template head<3>() = I_r_IK;
-            stateIt->m_q.template tail<4>() = q_KI;
+            stateIt->m_q.template tail<4>() = q_KI.coeffs();
 
             ++bodyIt;
             ++stateIt; // next body, next state
@@ -1690,7 +1690,7 @@ private:
             LOGSCLEVEL2(m_pSimulationLog,"---> InitialPositionTransforms: You specified to little transforms, -> applying last to all remainig bodies ..."<<std::endl;);
             for(; bodyIt != itEnd; ++bodyIt) {
                 stateIt->m_q.template head<3>() = I_r_IK;
-                stateIt->m_q.template tail<4>() = q_KI;
+                stateIt->m_q.template tail<4>() = q_KI.coeffs();
                 ++stateIt;
             }
         }

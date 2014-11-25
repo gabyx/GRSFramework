@@ -40,7 +40,7 @@ void setupPositionBodiesLinear(
 
         ASSERTMSG(RigidBodyId::getGroupNr(b.m_id) == RigidBodyId::getGroupNr(startId),"Wrong group")
         auto i = RigidBodyId::getBodyNr(b.m_id) - RigidBodyId::getBodyNr(startId); // linear index from the front
-        stateIt->m_q.template tail<4>() = Quaternion(1,0,0,0);
+        stateIt->m_q.template tail<4>() = Quaternion(1,0,0,0).coeffs();
 
         stateIt->m_q.template head<3>() = pos + dir*dist*i + jitter_vec;
 
@@ -93,7 +93,7 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
         ASSERTMSG(RigidBodyId::getGroupNr(b.m_id) == RigidBodyId::getGroupNr(startId),"Wrong group")
         auto i = RigidBodyId::getBodyNr(b.m_id) - RigidBodyId::getBodyNr(startId); // linear index from the front
 
-        stateIt->m_q.template tail<4>() = Quaternion(1,0,0,0);
+        stateIt->m_q.template tail<4>() = Quaternion(1,0,0,0).coeffs();
         int index_z = (i /(gDim_x*gDim_y));
         int index_y = (i - index_z*(gDim_x*gDim_y)) / gDim_x;
         int index_x = (i - index_z*(gDim_x*gDim_y)- index_y*gDim_x);
