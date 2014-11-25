@@ -52,6 +52,7 @@ public:
         LOGICSOCKET_APPLY_VISITOR_SWITCH;
     }
 
+
     LogicSocketBase(unsigned int type)
         : m_type(type), m_id(0), m_isInput(true), m_from(nullptr), m_connected(false), m_parent(nullptr) {
     }
