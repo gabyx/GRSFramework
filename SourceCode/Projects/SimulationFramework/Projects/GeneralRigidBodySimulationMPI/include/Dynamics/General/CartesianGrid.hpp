@@ -22,25 +22,25 @@ public:
     CartesianGrid();
 
     CartesianGrid(const AABB & aabb,
-                  const MyMatrix<unsigned int>::Vector3 & dim);
+                  const MyMatrix<unsigned int>::Array3 & dim);
     ~CartesianGrid();
 
 
 
     /** Get cell index */
-    MyMatrix<unsigned int>::Vector3 getCellIndex(const Vector3 & point) const;
-    MyMatrix<unsigned int>::Vector3 getCellIndexClosest(const Vector3 & point) const;
+    MyMatrix<unsigned int>::Array3 getCellIndex(const Vector3 & point) const;
+    MyMatrix<unsigned int>::Array3 getCellIndexClosest(const Vector3 & point) const;
 
     /** Get cell data  */
     TCellData * getCellData(const Vector3 & point) const;
-    TCellData * getCellData(const MyMatrix<unsigned int>::Vector3 & index) const;
+    TCellData * getCellData(const MyMatrix<unsigned int>::Array3 & index) const;
 
 protected:
 
 
-
-    Vector3 m_dxyz;
-    MyMatrix<unsigned int>::Vector3 m_dim;
+    Array3 m_dxyzInv;
+    Array3 m_dxyz;
+    MyMatrix<unsigned int>::Array3 m_dim;
 
     AABB m_Box;
 
@@ -66,13 +66,14 @@ CartesianGrid<TCellData>::~CartesianGrid() {
 
 template<typename TCellData>
 CartesianGrid<TCellData>::CartesianGrid(const AABB & aabb,
-                                        const MyMatrix<unsigned int>::Vector3 & dim) {
+                                        const MyMatrix<unsigned int>::Array3 & dim) {
     ASSERTMSG(dim(0)*dim(1)*dim(2) != 0, "Dimension zero: " << dim)
     ASSERTMSG( aabb.isEmpty() == false, "CartesianGrid, wrongly initialized: maxPoint < minPoint");
     m_Box = aabb;
     m_dim = dim;
 
-    m_dxyz.array() = m_Box.extent().array() / dim.array().cast<PREC>();
+    m_dxyz = m_Box.extent() / dim.cast<PREC>();
+    m_dxyzInv = m_dxyz.inverse();
 
     if(! std::is_same<TCellData,NoCellData>::value){
         m_cellData.resize(m_dim(0)*m_dim(1)*m_dim(2));
@@ -81,26 +82,29 @@ CartesianGrid<TCellData>::CartesianGrid(const AABB & aabb,
 };
 
 template<typename TCellData>
-MyMatrix<unsigned int>::Vector3 CartesianGrid<TCellData>::getCellIndex(const Vector3 & point) const {
+MyMatrix<unsigned int>::Array3 CartesianGrid<TCellData>::getCellIndex(const Vector3 & point) const {
+
     ASSERTMSG(m_Box.inside(point),"Point: " << point << " is not inside the Grid!");
-    MyMatrix<unsigned int>::Vector3 v;
-    v.array() =  (((point - m_Box.m_minPoint).array()) / m_dxyz.array()).template cast<unsigned int>();
-    ASSERTMSG( ( (v(0) >=0 && v(0) < m_dim(0)) && (v(1) >=0 && v(1) < m_dim(1)) && (v(2) >=0 && v(2) < m_dim(2)) ),
-              "Index: " << v << " is out of bound" )
+
+    // calculate index normally and then project it into the feasible grid.
+    MyMatrix<unsigned int>::Array3 v;
+    v = (((point - m_Box.m_minPoint).array()) * m_dxyzInv).template cast<unsigned int>();
+
     return v;
 };
 
 template<typename TCellData>
-MyMatrix<unsigned int>::Vector3 CartesianGrid<TCellData>::getCellIndexClosest(const Vector3 & point) const {
+MyMatrix<unsigned int>::Array3 CartesianGrid<TCellData>::getCellIndexClosest(const Vector3 & point) const {
+    typedef long long int LongInt;
 
     // calculate index normally and then project it into the feasible grid.
-    MyMatrix<int64_t>::Vector3 v;
-    v.array() =  (((point - m_Box.m_minPoint).array()) / m_dxyz.array()).template cast<int64_t>();
+    MyMatrix<LongInt>::Array3 v;
+    v =  (((point - m_Box.m_minPoint).array()) * m_dxyzInv).template cast<LongInt>();
 
     // prox  index to feasible range (cartesian prox)
-    v(0) = std::max(   std::min( int64_t(m_dim(0)-1), v(0)),  0L   );
-    v(1) = std::max(   std::min( int64_t(m_dim(1)-1), v(1)),  0L   );
-    v(2) = std::max(   std::min( int64_t(m_dim(2)-1), v(2)),  0L   );
+    v(0) = std::max(   std::min( LongInt(m_dim(0)-1), v(0)),  0LL   );
+    v(1) = std::max(   std::min( LongInt(m_dim(1)-1), v(1)),  0LL   );
+    v(2) = std::max(   std::min( LongInt(m_dim(2)-1), v(2)),  0LL   );
 
     return v.cast<unsigned int>();
 };
@@ -116,7 +120,7 @@ TCellData * CartesianGrid<TCellData>::getCellData(const Vector3 & point) const {
 };
 
 template<typename TCellData>
-TCellData* CartesianGrid<TCellData>::getCellData(const MyMatrix<unsigned int>::Vector3 & index) const {
+TCellData* CartesianGrid<TCellData>::getCellData(const MyMatrix<unsigned int>::Array3 & index) const {
     if(std::is_same<TCellData,NoCellData>::value){
         return nullptr;
     }else{

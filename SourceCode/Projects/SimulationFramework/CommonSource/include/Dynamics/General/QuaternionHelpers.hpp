@@ -80,21 +80,21 @@ void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , const Eigen::
     R(2,2) = 1.0-(fTxx+fTyy);
 }
 
-template<class Derived, class DerivedOther>
-void setQuaternion(const Eigen::MatrixBase<Derived>& nc_quat , const Eigen::MatrixBase<DerivedOther> & nc_n, const typename Derived::Scalar angleRadian) {
-    using PREC = typename Derived::Scalar;
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(DerivedOther,3);
-
-    Eigen::MatrixBase<Derived>& quat = const_cast<Eigen::MatrixBase<Derived>& >( nc_quat);
-    Eigen::MatrixBase<DerivedOther>& n = const_cast<Eigen::MatrixBase<DerivedOther>& >( nc_n);
-
-    n.normalize();
-
-    quat(0) = cos(angleRadian/2);
-    quat.template tail<3>() = n * sin(angleRadian/2);
-
-}
+//template<class Derived, class DerivedOther>
+//void setQuaternion(const Eigen::MatrixBase<Derived>& nc_quat , const Eigen::MatrixBase<DerivedOther> & nc_n, const typename Derived::Scalar angleRadian) {
+//    using PREC = typename Derived::Scalar;
+//    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
+//    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(DerivedOther,3);
+//
+//    Eigen::MatrixBase<Derived>& quat = const_cast<Eigen::MatrixBase<Derived>& >( nc_quat);
+//    Eigen::MatrixBase<DerivedOther>& n = const_cast<Eigen::MatrixBase<DerivedOther>& >( nc_n);
+//
+//    n.normalize();
+//
+//    quat(0) = cos(angleRadian/2);
+//    quat.template tail<3>() = n * sin(angleRadian/2);
+//
+//}
 
 template<class Derived, class DerivedOther>
 void rotateVector(const Eigen::MatrixBase<Derived>& quat ,

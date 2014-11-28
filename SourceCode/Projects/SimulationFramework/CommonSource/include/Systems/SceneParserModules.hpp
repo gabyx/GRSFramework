@@ -769,8 +769,7 @@ private:
                     ERRORMSG("---> No angle found in parseMeshGeometry");
                 }
 
-                Quaternion quat;
-                QuaternionHelpers::setQuaternion(quat.coeffs(),axis,angle);
+                Quaternion quat(AngleAxis(angle,axis));
 
 
                 Assimp::Importer importer;
@@ -1666,7 +1665,7 @@ private:
                     }
                 }
 
-                QuaternionHelpers::setQuaternion(q_BK.coeffs(),axis,angle);
+                q_BK = AngleAxis(angle,axis);
                 trans=q_KI*trans;//QuaternionHelpers::rotateVector(q_KI, trans ); //K_r_KB = trans;
                 I_r_IK +=  trans;  // + Rot_KI * K_r_KB; // Transforms like A_IK * K_r_KB;
 
@@ -1677,8 +1676,7 @@ private:
             }
 
             // Apply overall transformation!
-            stateIt->m_q.template head<3>() = I_r_IK;
-            stateIt->m_q.template tail<4>() = q_KI.coeffs();
+            stateIt->setDisplacement(I_r_IK,q_KI);
 
             ++bodyIt;
             ++stateIt; // next body, next state
@@ -1689,8 +1687,7 @@ private:
         if(bodyIt != itEnd && bodyIt != m_bodiesGroup->begin()) {
             LOGSCLEVEL2(m_pSimulationLog,"---> InitialPositionTransforms: You specified to little transforms, -> applying last to all remainig bodies ..."<<std::endl;);
             for(; bodyIt != itEnd; ++bodyIt) {
-                stateIt->m_q.template head<3>() = I_r_IK;
-                stateIt->m_q.template tail<4>() = q_KI.coeffs();
+                stateIt->setDisplacement(I_r_IK,q_KI);
                 ++stateIt;
             }
         }
@@ -1739,8 +1736,7 @@ private:
             }
 
 
-            stateIt->m_u.template head<3>() = transDir*vel;
-            stateIt->m_u.template tail<3>() = rotDir*rot;
+            stateIt->setVelocity(transDir*vel,rotDir*rot);
 
             ++bodyIt;
             ++stateIt; // next body, next state
@@ -1752,8 +1748,7 @@ private:
         if(bodyIt != itEnd && bodyIt != m_bodiesGroup->begin()) {
             LOGSCLEVEL2(m_pSimulationLog,"---> InitialPositionTransforms: You specified to little transforms, -> applying last to all remainig bodies ..."<<std::endl;);
             for(; bodyIt != itEnd; ++bodyIt) {
-                stateIt->m_u.template head<3>() = transDir*vel;
-                stateIt->m_u.template tail<3>() = rotDir*rot;
+                stateIt->setVelocity(transDir*vel,rotDir*rot);
                 ++stateIt;
             }
         }

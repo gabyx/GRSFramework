@@ -496,7 +496,7 @@ void ColliderBody::collide( const std::shared_ptr< const SphereGeometry >  & sph
 
         m_pColData->m_cFrame.m_e_z = dist / d;
         // Coordinate system belongs to first body!
-        makeCoordinateSystem<PREC>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
+        CoordinateSystem::makeCoordinateSystem(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
         m_pColData->m_overlap = (sphereGeom1->m_radius + sphereGeom2->m_radius) - d;
         m_pColData->m_r_S1C1 =   m_pColData->m_cFrame.m_e_z * (sphereGeom1->m_radius - m_pColData->m_overlap/2);
@@ -531,7 +531,7 @@ void ColliderBody::collide( const std::shared_ptr<const SphereGeometry >  & sphe
         m_pColData->m_overlap = overlap;
         // Coordinate system belongs to first body!
         m_pColData->m_cFrame.m_e_z = - I_n_plane ;
-        makeCoordinateSystem<PREC>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
+        CoordinateSystem::makeCoordinateSystem(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
         m_pColData->m_r_S1C1 = (sphereGeom->m_radius - overlap/2) * m_pColData->m_cFrame.m_e_z ;
         m_pColData->m_r_S2C2 = ( m_pBody1->m_r_S + m_pColData->m_r_S1C1 ) - m_pBody2->m_r_S;
@@ -584,7 +584,7 @@ void ColliderBody::collide( const std::shared_ptr<const BoxGeometry >  & boxGeom
             m_pColData->m_overlap = overlap;
             // Coordinate system belongs to first body!
             m_pColData->m_cFrame.m_e_z = - I_n_plane ;
-            makeCoordinateSystem<PREC>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
+            CoordinateSystem::makeCoordinateSystem(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
             m_pColData->m_r_S1C1 = r_SC1;
             m_pColData->m_r_S2C2 = r_SC2;
@@ -730,7 +730,7 @@ void ColliderBody::collide(const std::shared_ptr<const SphereGeometry >  & spher
         m_pColData->m_overlap = temporarySet[j].get<0>();
         // Coordinate system belongs to first body!
         m_pColData->m_cFrame.m_e_z = temporarySet[j].get<1>(); //needs not to be normalized
-        makeCoordinateSystem<PREC>(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
+        CoordinateSystem::makeCoordinateSystem(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
         m_pColData->m_r_S1C1 = ( sphereGeom->m_radius - m_pColData->m_overlap/2) * m_pColData->m_cFrame.m_e_z ;
         m_pColData->m_r_S2C2 = ( m_pBody1->m_r_S + m_pColData->m_r_S1C1 ) - m_pBody2->m_r_S;

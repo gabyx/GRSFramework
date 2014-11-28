@@ -118,8 +118,8 @@ public:
                    p(2) >= m_minPoint(2) && p(2) <= m_maxPoint(2));
     };
 
-    inline Vector3 extent() const{
-        return m_maxPoint - m_minPoint;
+    inline Array3 extent() const{
+        return (m_maxPoint - m_minPoint).array();
     };
 
     inline PREC maxExtent() const{
@@ -223,8 +223,8 @@ public:
         return *this;
     };
 
-    Vector2 extent() const{
-        return m_maxPoint - m_minPoint;
+    Array2 extent() const{
+        return (m_maxPoint - m_minPoint).array();
     };
 
     PREC maxExtent() const{

@@ -105,6 +105,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StateRecorder.cpp
         ${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StatePoolVisBackFront.cpp
         ${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystem.cpp
+        ${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystemBase.cpp
         ${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
         ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
         ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
@@ -173,7 +174,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/Dynamics/General/MatrixHelpers.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/General/QuaternionHelpers.hpp
         #${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystemBase.hpp
+        ${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystemBase.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
         ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
         #${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
@@ -252,6 +253,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         #${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StateRecorder.cpp
         #${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StatePoolVisBackFront.cpp
         #${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystem.cpp
+        ${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystemBase.cpp
         ${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
         ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
         ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
@@ -413,7 +415,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/src/Logic/LogicSocket.cpp
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
-        #${COMMONSOURCE_DIR}/external/libgdiam/gdiam.cpp
         
         ${COMMONSOURCE_DIR}/external/exprtk/exprtk.hpp
     )
@@ -529,7 +530,10 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
-        ${COMMONSOURCE_DIR}/external/libgdiam/gdiam.hpp
+        #${COMMONSOURCE_DIR}/external/libgdiam/gdiam.hpp
+        
+        ${COMMONSOURCE_DIR}/external/diameter/EstimateDiameter.hpp
+        
     )
 
 
@@ -564,7 +568,13 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
+        
         ${COMMONSOURCE_DIR}/external/libgdiam/gdiam.cpp
+        
+        ${COMMONSOURCE_DIR}/external/diameter/EstimateDiameter.cpp
+        ${COMMONSOURCE_DIR}/external/diameter/diameterUtils/alloc.cpp
+        ${COMMONSOURCE_DIR}/external/diameter/diameterUtils/util.cpp
+        ${COMMONSOURCE_DIR}/external/diameter/diameterUtils/rand.cpp
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
@@ -576,6 +586,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
         ${COMMONSOURCE_DIR}/external/libgdiam/
+        ${COMMONSOURCE_DIR}/external/diameter/
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
         ${COMMONSOURCE_DIR}/include/Dynamics/Collision
         ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry

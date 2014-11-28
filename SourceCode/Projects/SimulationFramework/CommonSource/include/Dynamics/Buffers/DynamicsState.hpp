@@ -32,7 +32,7 @@ public:
 
     PREC m_t; ///< The time in seconds
     enum {NONE = 0, STARTSTATE=1, ENDSTATE = 2} m_StateType;
-    using RigidBodyStateListType = std::vector< RigidBodyState >;
+    using RigidBodyStateListType = StdVecAligned< RigidBodyState >;
 
     friend void Interpolate::lerp<PREC>( const DynamicsStateBase & A, const DynamicsStateBase & B, DynamicsStateBase & X, PREC factor);
 

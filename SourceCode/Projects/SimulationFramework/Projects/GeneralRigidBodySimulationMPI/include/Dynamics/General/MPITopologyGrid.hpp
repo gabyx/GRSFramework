@@ -30,7 +30,7 @@ public:
     ProcessTopologyGrid(  NeighbourRanksListType & nbRanks, AdjacentNeighbourRanksMapType & adjNbRanks,
                           RankIdType processRank, unsigned int masterRank,
                           const AABB & aabb,
-                          const MyMatrix<unsigned int>::Vector3 & dim,
+                          const MyMatrix<unsigned int>::Array3 & dim,
                           bool aligned = true,
                           const Matrix33 & A_IK = Matrix33::Identity()
                           ):
@@ -63,10 +63,10 @@ public:
 
 
     unsigned int getCellRank(const Vector3 & point) const {
-        MyMatrix<unsigned int>::Vector3 v = CartesianGrid<NoCellData>::getCellIndexClosest(point);
+        MyMatrix<unsigned int>::Array3 v = CartesianGrid<NoCellData>::getCellIndexClosest(point);
         return getCellRank(v);
     };
-    unsigned int getCellRank(const MyMatrix<unsigned int>::Vector3 & v) const {
+    unsigned int getCellRank(const MyMatrix<unsigned int>::Array3 & v) const {
         ASSERTMSG( ( (v(0) >=0 && v(0) < m_dim(0)) && (v(1) >=0 && v(1) < m_dim(1)) && (v(2) >=0 && v(2) < m_dim(2)) ),
                   "Index: " << v << " is out of bound" )
 
@@ -86,9 +86,9 @@ public:
                   && cellRank >= m_cellNumberingStart,
                   "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
 
-        MyMatrix<unsigned int>::Vector3 cell_index = getCellIndex(cellRank);
+        MyMatrix<unsigned int>::Array3 cell_index = getCellIndex(cellRank);
 
-        MyMatrix<unsigned int>::Vector3 ind;
+        MyMatrix<unsigned int>::Array3 ind;
 
         for(int i=0; i<26; i++) {
             ind(0) = m_nbIndicesOff[i*3+0] + cell_index(0);
@@ -122,13 +122,13 @@ public:
         return intersec;
     };
 
-    MyMatrix<unsigned int>::Vector3 getCellIndex(unsigned int cellRank) const{
+    MyMatrix<unsigned int>::Array3 getCellIndex(unsigned int cellRank) const{
 
         ASSERTMSG(cellRank < m_dim(0)*m_dim(1)*m_dim(2) + m_cellNumberingStart
                   && cellRank >= m_cellNumberingStart,
                   "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
 
-        MyMatrix<unsigned int>::Vector3 v;
+        MyMatrix<unsigned int>::Array3 v;
         unsigned int cellNumberTemp;
 
         cellNumberTemp = cellRank;
@@ -148,7 +148,7 @@ public:
     */
     AABB getCellAABB(unsigned int cellRank) const{
 
-         MyMatrix<unsigned int>::Vector3 cell_index = getCellIndex(cellRank);
+         MyMatrix<unsigned int>::Array3 cell_index = getCellIndex(cellRank);
          Vector3 pL = cell_index.array().cast<PREC>() * m_dxyz.array();
          pL += m_Box.m_minPoint;
          Vector3 pU = (cell_index.array()+1).cast<PREC>()  * m_dxyz.array();

@@ -23,7 +23,6 @@ void setupPositionBodiesLinear(
     Vector3 dir,
     double dist, bool jitter, double delta, unsigned int seed){
 
-    DEFINE_LAYOUT_CONFIG_TYPES
 
     dir.normalize();
     Vector3 jitter_vec, random_vec;
@@ -40,9 +39,8 @@ void setupPositionBodiesLinear(
 
         ASSERTMSG(RigidBodyId::getGroupNr(b.m_id) == RigidBodyId::getGroupNr(startId),"Wrong group")
         auto i = RigidBodyId::getBodyNr(b.m_id) - RigidBodyId::getBodyNr(startId); // linear index from the front
-        stateIt->m_q.template tail<4>() = Quaternion(1,0,0,0).coeffs();
 
-        stateIt->m_q.template head<3>() = pos + dir*dist*i + jitter_vec;
+        stateIt->setDisplacement(pos + dir*dist*i + jitter_vec, Quaternion(1,0,0,0));
 
         if(jitter) {
 
@@ -51,7 +49,7 @@ void setupPositionBodiesLinear(
 
             random_vec = random_vec.cross(dir);
             random_vec.normalize();
-            stateIt->m_q.template head<3>() +=  random_vec * delta;
+            stateIt->getPosition() +=  random_vec * delta;
         }
         ++stateIt;
     }
@@ -71,7 +69,6 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
                              Vector3 dirZ = Vector3(0,0,1),
                              Vector3 dirX = Vector3(1,0,0)){
 
-    DEFINE_LAYOUT_CONFIG_TYPES
 
     Vector3 random_vec;
     Matrix33 A_IK;
@@ -93,20 +90,20 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
         ASSERTMSG(RigidBodyId::getGroupNr(b.m_id) == RigidBodyId::getGroupNr(startId),"Wrong group")
         auto i = RigidBodyId::getBodyNr(b.m_id) - RigidBodyId::getBodyNr(startId); // linear index from the front
 
-        stateIt->m_q.template tail<4>() = Quaternion(1,0,0,0).coeffs();
         int index_z = (i /(gDim_x*gDim_y));
         int index_y = (i - index_z*(gDim_x*gDim_y)) / gDim_x;
         int index_x = (i - index_z*(gDim_x*gDim_y)- index_y*gDim_x);
 
-
-        stateIt->m_q.template head<3>() = A_IK * Vector3(index_x * d - 0.5*(gDim_x-1)*d, index_y*d - 0.5*(gDim_y-1)*d , index_z*d) + vec_trans;
+        stateIt->setDisplacement(
+                    A_IK * Vector3(index_x * d - 0.5*(gDim_x-1)*d, index_y*d - 0.5*(gDim_y-1)*d , index_z*d) + vec_trans,
+                    Quaternion(1,0,0,0));
 
         if(jitter) {
             random_vec = Utilities::genRandomVec<PREC>(random_vec,gen,uni, b.m_id - diffId);
             diffId = b.m_id ;
 
             random_vec.normalize();
-            stateIt->m_q.template head<3>() += random_vec * delta;
+            stateIt->getPosition() += random_vec * delta;
         }
         ++stateIt;
     }
@@ -140,11 +137,11 @@ bool setupInitialConditionBodiesFromFile(boost::filesystem::path file_path,
 }
 
 
-void setupPositionBodyPosAxisAngle(RigidBodyState & rigibodyState,
-                                   const typename RigidBodyState::Vector3 & pos,
-                                   typename RigidBodyState::Vector3 & axis,
-                                   typename RigidBodyState::PREC angleRadian);
-
+//void setupPositionBodyPosAxisAngle(RigidBodyState & rigibodyState,
+//                                   const typename RigidBodyState::Vector3 & pos,
+//                                   typename RigidBodyState::Vector3 & axis,
+//                                   typename RigidBodyState::PREC angleRadian);
+//
 
 
 template<typename RigidBodyContainer, typename RigidBodyStatesContainer>
