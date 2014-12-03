@@ -9,6 +9,11 @@
 #ifndef MyMatrixDefs_hpp
 #define MyMatrixDefs_hpp
 
+//#define EIGEN_DONT_VECTORIZE
+//#define EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT
+
+#include <vector>
+#include <map>
 #include <Eigen/StdVector>
 
 
@@ -55,7 +60,7 @@ struct MyMatrix {
     template<typename EigenType> using MatrixMap = Eigen::Map<EigenType>;
 
 
-    // Sepcial STL vectors where the type is 16byte aligned
+    // Special STL vectors where the type is 16byte aligned
     template<typename Type >
     using StdVecAligned = std::vector<Type, Eigen::aligned_allocator<Type> >;
 

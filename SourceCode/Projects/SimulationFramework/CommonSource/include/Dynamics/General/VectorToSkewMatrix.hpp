@@ -9,11 +9,9 @@
 #ifndef VectorToSkewMatrix_hpp
 #define VectorToSkewMatrix_hpp
 
-#include <Eigen/Dense>
-
 /**
 * @ingroup Common
-* @defgroup VectorToSkewMatrix Vector To Skew Matrix Conversion */ 
+* @defgroup VectorToSkewMatrix Vector To Skew Matrix Conversion */
 /** @{ */
 
 /**

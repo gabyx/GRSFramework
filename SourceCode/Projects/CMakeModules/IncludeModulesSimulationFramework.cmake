@@ -534,6 +534,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         
         ${COMMONSOURCE_DIR}/external/diameter/EstimateDiameter.hpp
         
+        ${COMMONSOURCE_DIR}/external/geometrypredicates/GeometryPredicates.hpp
+        
     )
 
 
@@ -568,7 +570,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
-        
+        ${COMMONSOURCE_DIR}/external/geometrypredicates/GeometryPredicates.cpp
         ${COMMONSOURCE_DIR}/external/libgdiam/gdiam.cpp
         
         ${COMMONSOURCE_DIR}/external/diameter/EstimateDiameter.cpp
@@ -585,6 +587,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
+        ${COMMONSOURCE_DIR}/external/geometrypredicates/
         ${COMMONSOURCE_DIR}/external/libgdiam/
         ${COMMONSOURCE_DIR}/external/diameter/
         ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
