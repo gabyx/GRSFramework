@@ -14,7 +14,7 @@
 
 #include <vector>
 #include <map>
-#include <Eigen/StdVector>
+//#include <Eigen/StdVector>
 
 
 #include <Eigen/Dense>
@@ -45,9 +45,16 @@ struct MyMatrix {
     using Vector4 = Eigen::Matrix<PREC, 4, 1>;
     using Vector6 = Eigen::Matrix<PREC, 6, 1>;
     using VectorDyn = Eigen::Matrix<PREC, Eigen::Dynamic , 1 >                   ;
+
+
     using MatrixDynDyn = Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic >      ;
     using MatrixDiagDyn = Eigen::DiagonalMatrix<PREC, Eigen::Dynamic >               ;
     using MatrixDynDynRow = Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor>;
+
+    template<unsigned int M>
+    using MatrixStatDyn = Eigen::Matrix<PREC, M, Eigen::Dynamic >;
+    template<unsigned int N>
+    using MatrixDynStat = Eigen::Matrix<PREC, Eigen::Dynamic, N >;
 
     using AffineTrafo = Eigen::Transform<PREC,3,Eigen::TransformTraits::Affine>;
     using AffineTrafo2d = Eigen::Transform<PREC,2,Eigen::TransformTraits::Affine>;
@@ -55,20 +62,28 @@ struct MyMatrix {
     using MatrixSparse = Eigen::SparseMatrix<PREC>   ;       // declares a column-major sparse matrix of type PREC
     using MatrixSparseTriplet = Eigen::Triplet<PREC>        ;
 
+
+    template<typename Derived> using MatrixBase = Eigen::MatrixBase<Derived>;
+    template<typename Derived> using ArrayBase  = Eigen::ArrayBase<Derived>;
+
+    template<typename Derived>                 using MatrixBDynDyn  = Eigen::Block<Derived>;
+    template<typename Derived, unsigned int M> using MatrixBStatDyn = Eigen::Block<Derived,M>;
+    template<typename Derived, unsigned int N> using MatrixBDynStat = Eigen::Block<Derived,Eigen::Dynamic,N>;
+
     template<typename EigenType> using MatrixRef = Eigen::Ref<EigenType>;
 
     template<typename EigenType> using MatrixMap = Eigen::Map<EigenType>;
 
 
-    // Special STL vectors where the type is 16byte aligned
-    template<typename Type >
-    using StdVecAligned = std::vector<Type, Eigen::aligned_allocator<Type> >;
+
 
     // Sepcial STL map where the type is 16byte aligned
     template<typename Key, typename Type, typename Comp = std::less<Key> >
     using StdMapAligned = std::map<Key, Type, Comp, Eigen::aligned_allocator<std::pair<const Key, Type> > >;
 
-
+     // Special STL vectors where the type is 16byte aligned
+    template<typename Type >
+    using StdVecAligned = std::vector<Type, Eigen::aligned_allocator<Type> >;
 
     // Special Array types;
     using Array3 = Eigen::Array<PREC, 3, 1>;
@@ -109,6 +124,17 @@ struct MyMatrixIOFormat {
    using MatrixDynDyn = typename MyMatrix< _PREC_ >::MatrixDynDyn; \
    using MatrixDiagDyn = typename MyMatrix< _PREC_ >::MatrixDiagDyn; \
    using MatrixDynDynRow = typename MyMatrix< _PREC_ >::MatrixDynDynRow; \
+   \
+   template<unsigned int M> using MatrixStatDyn = typename MyMatrix< _PREC_ >::template MatrixStatDyn<M>; \
+   template<unsigned int N> using MatrixDynStat = typename MyMatrix< _PREC_ >::template MatrixDynStat<N>; \
+   \
+   template<typename Derived> using MatrixBase = typename MyMatrix< _PREC_ >::template MatrixBase<Derived>; \
+   template<typename Derived> using ArrayBase  = typename MyMatrix< _PREC_ >::template ArrayBase<Derived>; \
+   \
+   template<typename Derived> using MatrixBDynDyn = typename MyMatrix< _PREC_ >::template MatrixBDynDyn<Derived>; \
+   template<typename Derived, unsigned int N> using MatrixBDynStat = typename MyMatrix< _PREC_ >::template MatrixBDynStat<Derived,N>; \
+   template<typename Derived, unsigned int M> using MatrixBStatDyn = typename MyMatrix< _PREC_ >::template MatrixBStatDyn<Derived,M>; \
+   \
    using AffineTrafo = typename MyMatrix< _PREC_ >::AffineTrafo; \
    using AffineTrafo2d = typename MyMatrix< _PREC_ >::AffineTrafo2d; \
    using MatrixSparse = typename MyMatrix< _PREC_ >::MatrixSparse; \
