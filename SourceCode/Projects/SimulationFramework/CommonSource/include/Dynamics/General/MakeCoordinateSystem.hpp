@@ -26,10 +26,6 @@ inline void makeCoordinateSystem(      Vector3 &v1,
                                        Vector3 &v2,
                                        Vector3 &v3)
 {
-   /*ASSERTMSG(  v1.rows() == 3 && v1.cols()==1 &&
-               v2.rows() == 3 && v2.cols() == 1 &&
-               v3.rows() == 3 && v3.cols() == 1
-               , "IN: "<< v1.rows()<<","<<v1.cols()<<" OUT: "<< v2.rows()<<","<<v2.cols()<<"/"<<v3.rows()<<","<<v3.cols() );*/
 
    using std::abs;
    using std::sqrt;
