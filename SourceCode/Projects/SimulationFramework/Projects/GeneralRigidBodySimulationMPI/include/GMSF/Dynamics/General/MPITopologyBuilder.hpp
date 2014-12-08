@@ -9,22 +9,22 @@
 #include <functional>
 #include <numeric>
 
-#include "AssertionDebug.hpp"
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "FileManager.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
 
-#include "MPIMessages.hpp"
-#include "MPICommunication.hpp"
+#include "GMSF/Dynamics/General/MPIMessages.hpp"
+#include "GMSF/Dynamics/General/MPICommunication.hpp"
 
-#include "SceneParserMPI.hpp"
-#include "SceneParserModulesCreatorTB.hpp"
+#include "GMSF/Systems/SceneParserMPI.hpp"
+#include "GMSF/Systems/SceneParserModulesCreatorTB.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
-#include "Collider.hpp"
+#include "GMSF/Dynamics/Collision/Collider.hpp"
 
-#include "MPITopologyBuilderSettings.hpp"
+#include "GMSF/Dynamics/General/MPITopologyBuilderSettings.hpp"
 
 namespace MPILayer {
 

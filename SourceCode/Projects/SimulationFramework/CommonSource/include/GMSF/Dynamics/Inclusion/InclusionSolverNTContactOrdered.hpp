@@ -5,22 +5,22 @@
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Dense>
 #include <Eigen/SVD>
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "CollisionSolver.hpp"
-#include "RigidBody.hpp"
+#include "GMSF/Dynamics/Collision/CollisionSolver.hpp"
+#include "GMSF/Dynamics/General/RigidBody.hpp"
 
-#include "PercussionPool.hpp"
+#include "GMSF/Dynamics/Inclusion/PercussionPool.hpp"
 
-#include "VectorToSkewMatrix.hpp"
+#include "GMSF/Dynamics/General/VectorToSkewMatrix.hpp"
 
-#include "ProxFunctions.hpp"
+#include "GMSF/Dynamics/Inclusion/ProxFunctions.hpp"
 
-#include "InclusionSolverSettings.hpp"
+#include "GMSF/Dynamics/Inclusion/InclusionSolverSettings.hpp"
 
-#include "LogDefines.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 #ifndef USE_PERCUSSION_POOL
 #define USE_PERCUSSION_POOL 0

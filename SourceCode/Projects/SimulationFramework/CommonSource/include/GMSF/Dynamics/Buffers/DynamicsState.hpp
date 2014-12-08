@@ -4,10 +4,10 @@
 #include <vector>
 #include <unordered_map>
 
-#include "TypeDefs.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "RigidBodyState.hpp"
+#include "GMSF/Dynamics/Buffers/RigidBodyState.hpp"
 
 //Prototype
 class DynamicsStateBase;

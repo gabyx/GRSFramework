@@ -5,8 +5,8 @@
 #include <list>
 #include <type_traits>
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 
 

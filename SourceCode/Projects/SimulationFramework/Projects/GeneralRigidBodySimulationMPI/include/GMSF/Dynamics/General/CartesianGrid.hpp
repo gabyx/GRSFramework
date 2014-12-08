@@ -1,11 +1,11 @@
 #ifndef GMSF_Dynamics_General_CartesianGrid_hpp
 #define GMSF_Dynamics_General_CartesianGrid_hpp
 
-#include "AssertionDebug.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 #include <set>
-#include "AABB.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/AABB.hpp"
 
 
 

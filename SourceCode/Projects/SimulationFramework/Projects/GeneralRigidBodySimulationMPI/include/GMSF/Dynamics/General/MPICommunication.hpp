@@ -18,14 +18,14 @@
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/version.hpp>
 
-#include "AssertionDebug.hpp"
-#include "StaticAssert.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/StaticAssert.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "MPIDataTypes.hpp"
-#include "MPIInformation.hpp"
-#include "MPIMessageTag.hpp"
-#include "MPICommunicatorId.hpp"
+#include "GMSF/Dynamics/General/MPIDataTypes.hpp"
+#include "GMSF/Dynamics/General/MPIInformation.hpp"
+#include "GMSF/Dynamics/General/MPIMessageTag.hpp"
+#include "GMSF/Dynamics/General/MPICommunicatorId.hpp"
 
 namespace MPILayer {
 

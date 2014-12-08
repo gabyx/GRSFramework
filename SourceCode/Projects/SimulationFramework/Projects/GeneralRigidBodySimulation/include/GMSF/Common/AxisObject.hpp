@@ -1,7 +1,7 @@
 //
 //
 //
-//    Filename : AxisObject.hpp
+//    Filename : GMSF/Common/AxisObject.hpp
 
 #ifndef GMSF_Common_AxisObject_hpp
 #define GMSF_Common_AxisObject_hpp

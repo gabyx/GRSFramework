@@ -5,7 +5,7 @@
 
 #include <boost/thread.hpp>
 
-#include "DynamicLines.hpp"
+#include "GMSF/Common/DynamicLines.hpp"
 
 class DynamicCoordinateFrames{
 public:

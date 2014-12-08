@@ -24,10 +24,10 @@
 
 #include "TinyFormatInclude.hpp"
 
-#include "StaticAssert.hpp"
-#include "AssertionDebug.hpp"
-#include "MyMatrixDefs.hpp"
-#include "FastStringConversion.hpp"
+#include "GMSF/Common/StaticAssert.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Dynamics/General/MyMatrixDefs.hpp"
+#include "GMSF/Common/FastStringConversion.hpp"
 
 namespace Utilities {
 

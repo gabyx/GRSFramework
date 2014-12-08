@@ -1,7 +1,7 @@
 #ifndef GMSF_Dynamics_General_TimeStepperSettings_hpp
 #define GMSF_Dynamics_General_TimeStepperSettings_hpp
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 #include <boost/filesystem.hpp>
 

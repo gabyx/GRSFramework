@@ -1,16 +1,16 @@
 #ifndef GMSF_Dynamics_Inclusion_ContactGraphVisitorsMPI_hpp
 #define GMSF_Dynamics_Inclusion_ContactGraphVisitorsMPI_hpp
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "SimpleLogger.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
-#include "ContactModels.hpp"
-#include "ProxFunctions.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactModels.hpp"
+#include "GMSF/Dynamics/Inclusion/ProxFunctions.hpp"
 #include InclusionSolverSettings_INCLUDE_FILE
 
-#include "ContactGraphVisitors.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactGraphVisitors.hpp"
 
 /**
 @brief Visitor for class ContactGraph
@@ -152,7 +152,7 @@ public:
 };
 
 
-#include "RigidBodyFunctionsMPI.hpp"
+#include "GMSF/Dynamics/General/RigidBodyFunctionsMPI.hpp"
 
 
 template<typename TContactGraph>

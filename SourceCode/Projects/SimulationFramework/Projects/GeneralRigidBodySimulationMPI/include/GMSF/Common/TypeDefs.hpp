@@ -1,5 +1,5 @@
 ﻿/*
- *  TypeDefs.hpp
+ *  GMSF/Common/TypeDefs.hpp
  *
  *  Created by Gabriel Nützi on 21.03.10.
  *  Copyright 2010 ETH. All rights reserved.
@@ -9,30 +9,30 @@
 #ifndef GMSF_Common_TypeDefs_hpp
 #define GMSF_Common_TypeDefs_hpp
 
-#include "LayoutConfigDefs.hpp"
+#include "GMSF/Dynamics/General/LayoutConfigDefs.hpp"
 
 
 
 
-#define CollisionSolver_INCLUDE_FILE            "CollisionSolverMPI.hpp"
+#define CollisionSolver_INCLUDE_FILE            "GMSF/Dynamics/Collision/CollisionSolverMPI.hpp"
 class CollisionSolverMPI;
 
-#define DynamicsSystem_INCLUDE_FILE             "DynamicsSystemMPI.hpp"
+#define DynamicsSystem_INCLUDE_FILE             "GMSF/Dynamics/General/DynamicsSystemMPI.hpp"
 class DynamicsSystemMPI;
 
-#define InclusionSolver_INCLUDE_FILE            "InclusionSolverCONoGMPI.hpp"
+#define InclusionSolver_INCLUDE_FILE            "GMSF/Dynamics/Inclusion/InclusionSolverCONoGMPI.hpp"
 class InclusionSolverCONoGMPI;
 
-#define RigidBody_INCLUDE_FILE                  "RigidBodyMPI.hpp"
+#define RigidBody_INCLUDE_FILE                  "GMSF/Dynamics/General/RigidBodyMPI.hpp"
 class RigidBodyBaseMPI;
 
-#define RigidBodySolverData_INCLUDE_FILE        "RigidBodySolverDataMPI.hpp"
+#define RigidBodySolverData_INCLUDE_FILE        "GMSF/Dynamics/General/RigidBodySolverDataMPI.hpp"
 class RigidBodySolverDataCONoGMPI;
 
-#define TimeStepper_INCLUDE_FILE                "MoreauTimeStepperMPI.hpp"
+#define TimeStepper_INCLUDE_FILE                "GMSF/Dynamics/General/MoreauTimeStepperMPI.hpp"
 class MoreauTimeStepperMPI;
 
-#define InclusionSolverSettings_INCLUDE_FILE    "InclusionSolverSettingsMPI.hpp"
+#define InclusionSolverSettings_INCLUDE_FILE    "GMSF/Dynamics/Inclusion/InclusionSolverSettingsMPI.hpp"
 class InclusionSolverSettingsMPI;
 
 //Try to make framework settings simpler:

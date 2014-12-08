@@ -14,32 +14,32 @@
 #include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "ContainerTag.hpp"
+#include "GMSF/Common/ContainerTag.hpp"
 
-#include "RigidBodyId.hpp"
-#include "RigidBodyFunctions.hpp"
-#include "ContactParameter.hpp"
-#include "MeshGeometry.hpp"
-#include "ExternalForces.hpp"
-#include "CommonFunctions.hpp"
-#include "QuaternionHelpers.hpp"
-#include "InertiaTensorCalculations.hpp"
-#include "InitialConditionBodies.hpp"
+#include "GMSF/Dynamics/General/RigidBodyId.hpp"
+#include "GMSF/Dynamics/General/RigidBodyFunctions.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactParameter.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/MeshGeometry.hpp"
+#include "GMSF/Dynamics/General/ExternalForces.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
+#include "GMSF/Dynamics/General/QuaternionHelpers.hpp"
+#include "GMSF/Dynamics/General/InertiaTensorCalculations.hpp"
+#include "GMSF/Dynamics/General/InitialConditionBodies.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
-#include "TimeStepperSettings.hpp"
-#include "RecorderSettings.hpp"
+#include "GMSF/Dynamics/General/TimeStepperSettings.hpp"
+#include "GMSF/Dynamics/Buffers/RecorderSettings.hpp"
 
-#include "PrintGeometryDetails.hpp"
-#include "Range.hpp"
-#include "XMLMacros.hpp"
+#include "GMSF/Dynamics/General/PrintGeometryDetails.hpp"
+#include "GMSF/Common/Range.hpp"
+#include "GMSF/Common/XMLMacros.hpp"
 
-#include "SceneParserBaseTraits.hpp"
+#include "GMSF/Systems/SceneParserBaseTraits.hpp"
 
 
 namespace ParserModules {

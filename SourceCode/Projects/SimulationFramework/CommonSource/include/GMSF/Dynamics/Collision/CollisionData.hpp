@@ -1,5 +1,5 @@
 ﻿/*
- *  CollisionData.hpp
+ *  GMSF/Dynamics/Collision/CollisionData.hpp
  *
  *  Created by Gabriel Nützi on 19.03.10.
  *  Copyright 2010 -. All rights reserved.
@@ -19,10 +19,10 @@
 #include <boost/any.hpp>
 
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "ContactFrame.hpp"
-#include "ContactTag.hpp"
+#include "GMSF/Dynamics/Collision/ContactFrame.hpp"
+#include "GMSF/Dynamics/Collision/ContactTag.hpp"
 
 /**
 * @ingroup Collision

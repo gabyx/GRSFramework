@@ -6,22 +6,22 @@
 #include <srutil/delegate/delegate.hpp> // Use fast SR delegates
 
 /** Contact Graph */
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "BitCount.hpp"
-#include "BitRepresentation.hpp"
-#include "EnumClassHelper.hpp"
+#include "GMSF/Common/BitCount.hpp"
+#include "GMSF/Common/BitRepresentation.hpp"
+#include "GMSF/Common/EnumClassHelper.hpp"
 
-#include "GeneralGraph.hpp"
-#include "CollisionData.hpp"
-#include "ContactParameterMap.hpp"
+#include "GMSF/Dynamics/Inclusion/GeneralGraph.hpp"
+#include "GMSF/Dynamics/Collision/CollisionData.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactParameterMap.hpp"
 
-#include "ContactModels.hpp"
-#include "ContactGraphNodeData.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactModels.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactGraphNodeData.hpp"
 
-#include "ContactGraphVisitors.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactGraphVisitors.hpp"
 
 
 

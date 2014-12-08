@@ -1,5 +1,5 @@
 
-#include "StateRecorder.hpp"
+#include "GMSF/Dynamics/Buffers/StateRecorder.hpp"
 
 StateRecorder::StateRecorder(const unsigned int nSimBodies){
     m_nSimBodies = nSimBodies;

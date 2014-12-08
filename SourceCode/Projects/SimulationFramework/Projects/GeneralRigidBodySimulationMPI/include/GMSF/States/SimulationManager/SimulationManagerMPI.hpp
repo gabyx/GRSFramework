@@ -6,15 +6,15 @@
 #include <memory>
 #include <boost/filesystem.hpp>
 
-#include "LogDefines.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "MPIInformation.hpp"
-#include "MPICommunication.hpp"
-#include "MPITopologyBuilder.hpp"
-#include "BodyCommunicator.hpp"
+#include "GMSF/Dynamics/General/MPIInformation.hpp"
+#include "GMSF/Dynamics/General/MPICommunication.hpp"
+#include "GMSF/Dynamics/General/MPITopologyBuilder.hpp"
+#include "GMSF/Dynamics/General/BodyCommunicator.hpp"
 
-#include "CPUTimer.hpp"
+#include "GMSF/Common/CPUTimer.hpp"
 
 class StateRecorder;
 class StateRecorderBody;
@@ -88,7 +88,7 @@ private:
 
 
 // Implementation
-#include "SimulationManagerMPI.icc"
+#include "GMSF/States/SimulationManager/SimulationManagerMPI.icc"
 
 
 #endif // SimulationManagerMPI_HPP

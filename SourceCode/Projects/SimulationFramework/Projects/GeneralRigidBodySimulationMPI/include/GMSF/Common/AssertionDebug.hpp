@@ -12,8 +12,8 @@
 
 #include <mpi.h>
 
-#include "Exception.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/Exception.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 // This is the MPI version for our Debugging shit =)
 

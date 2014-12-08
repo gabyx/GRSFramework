@@ -1,5 +1,5 @@
 /*
- *  LayoutConfigDefs.hpp
+ *  GMSF/Dynamics/General/LayoutConfigDefs.hpp
  *
  *  Created by Gabriel NÃ¼tzi on 21.03.10.
  *  Copyright 2010 ETH. All rights reserved.
@@ -10,7 +10,7 @@
 #define GMSF_Dynamics_General_LayoutConfigDefs_hpp
 
 
-#include "MyMatrixDefs.hpp"
+#include "GMSF/Dynamics/General/MyMatrixDefs.hpp"
 
 /**
 * @brief A dynamic layout specialization.

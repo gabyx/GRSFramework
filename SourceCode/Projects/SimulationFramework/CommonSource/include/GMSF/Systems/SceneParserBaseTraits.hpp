@@ -2,7 +2,7 @@
 #define GMSF_Systems_SceneParserBaseTraits_hpp
 
 
-#include "SimpleLogger.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 #include "pugixml.hpp"
 
 

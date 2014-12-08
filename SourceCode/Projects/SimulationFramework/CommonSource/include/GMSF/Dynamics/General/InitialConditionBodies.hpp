@@ -4,9 +4,9 @@
 #include <random>
 #include <boost/filesystem.hpp>
 
-#include "CommonFunctions.hpp"
-#include "DynamicsState.hpp"
-#include "MultiBodySimFile.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
+#include "GMSF/Dynamics/Buffers/DynamicsState.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFile.hpp"
 
 #include "boost/generator_iterator.hpp"
 

@@ -2,11 +2,11 @@
 #define GMSF_Dynamics_General_DynamicsSystem_hpp
 
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "DynamicsSystemBase.hpp"
-#include "SceneParserModules.hpp"
+#include "GMSF/Dynamics/General/DynamicsSystemBase.hpp"
+#include "GMSF/Systems/SceneParserModules.hpp"
 
 
 class DynamicsSystem : public DynamicsSystemBase {

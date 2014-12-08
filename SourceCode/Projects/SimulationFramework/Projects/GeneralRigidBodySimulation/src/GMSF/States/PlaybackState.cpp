@@ -1,11 +1,11 @@
-﻿#include "PlaybackState.hpp"
+﻿#include "GMSF/States/PlaybackState.hpp"
 
-#include "SimulationManagerGUI.hpp"
-#include "PlaybackManager.hpp"
+#include "GMSF/States/SimulationManager/SimulationManagerGUI.hpp"
+#include "GMSF/States/SimulationManager/PlaybackManager.hpp"
 
-#include "FileManager.hpp"
-#include "OgreSceneManagerDeleter.hpp"
-#include "SimulationManagerGUI.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
+#include "GMSF/Common/OgreSceneManagerDeleter.hpp"
+#include "GMSF/States/SimulationManager/SimulationManagerGUI.hpp"
 
 
 using namespace Ogre;

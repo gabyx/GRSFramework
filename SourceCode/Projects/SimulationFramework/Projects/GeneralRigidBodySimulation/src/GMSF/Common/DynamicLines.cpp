@@ -6,7 +6,7 @@
  *
  */
 
-#include "DynamicLines.hpp"
+#include "GMSF/Common/DynamicLines.hpp"
 
 /// Includes =================================
 #include <Ogre.h>

@@ -11,7 +11,7 @@
 #include <OIS/OISMouse.h>
 
 #include <OGRE/OgreSingleton.h>
-#include "Contexts/RenderContext.hpp"
+#include "GMSF/Singeltons/Contexts/RenderContext.hpp"
 
 
 /**

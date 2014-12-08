@@ -2,8 +2,8 @@
 #define RenderData_hpp
 
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 #include <map>
 #include <unordered_map>
@@ -11,7 +11,7 @@
 
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "RenderMaterial.hpp"
+#include "GMSF/General/RenderMaterial.hpp"
 
 
 namespace ParserModules {

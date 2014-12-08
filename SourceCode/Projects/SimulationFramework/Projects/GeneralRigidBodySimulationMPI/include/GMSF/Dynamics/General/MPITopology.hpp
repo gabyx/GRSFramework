@@ -3,13 +3,13 @@
 
 #include <mpi.h>
 
-#include "AssertionDebug.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-//#include "MPIInformation.hpp"
+//#include "GMSF/Dynamics/General/MPIInformation.hpp"
 
-#include "MPITopologyGrid.hpp"
-#include "MPITopologyVisitors.hpp"
+#include "GMSF/Dynamics/General/MPITopologyGrid.hpp"
+#include "GMSF/Dynamics/General/MPITopologyVisitors.hpp"
 
 namespace MPILayer {
 

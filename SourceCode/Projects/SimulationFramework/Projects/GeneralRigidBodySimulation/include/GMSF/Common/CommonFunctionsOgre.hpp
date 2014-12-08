@@ -6,8 +6,8 @@
 
 #include <OGRE/Ogre.h>
 
-#include "MyMatrixDefs.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Dynamics/General/MyMatrixDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 
 namespace OgreUtilities {

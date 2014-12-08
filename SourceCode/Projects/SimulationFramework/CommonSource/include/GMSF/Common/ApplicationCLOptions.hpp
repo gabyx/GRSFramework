@@ -9,8 +9,8 @@
 #include <getoptpp/getopt_pp_standalone.h>
 
 
-#include "Singleton.hpp"
-#include "CommonFunctions.hpp"
+#include "GMSF/Common/Singleton.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
 
 
 

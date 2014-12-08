@@ -3,30 +3,30 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "LogDefines.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "SimulationManagerGUI.hpp"
+#include "GMSF/States/SimulationManager/SimulationManagerGUI.hpp"
 
-#include <RenderContext.hpp>
+#include <GMSF/Singeltons/Contexts/RenderContext.hpp>
 
-#include "DynamicsState.hpp"
-#include "SharedBufferDynSys.hpp"
-#include "StateRecorder.hpp"
+#include "GMSF/Dynamics/Buffers/DynamicsState.hpp"
+#include "GMSF/Systems/SharedBufferDynSys.hpp"
+#include "GMSF/Dynamics/Buffers/StateRecorder.hpp"
 
 
 #include TimeStepper_INCLUDE_FILE
-//#include "InclusionSolverNT.hpp"
-//#include "InclusionSolverCO.hpp"
-#include "InclusionSolverCONoG.hpp"
+//#include "GMSF/Dynamics/Inclusion/InclusionSolverNT.hpp"
+//#include "GMSF/Dynamics/Inclusion/InclusionSolverCO.hpp"
+#include "GMSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "CommonFunctions.hpp"
-#include "QuaternionHelpers.hpp"
-#include "OgreMeshExtraction.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
+#include "GMSF/Dynamics/General/QuaternionHelpers.hpp"
+#include "GMSF/Common/OgreMeshExtraction.hpp"
 
-#include "FileManager.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
 
 
 using namespace std;

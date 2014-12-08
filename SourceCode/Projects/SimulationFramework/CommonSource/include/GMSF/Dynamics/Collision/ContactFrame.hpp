@@ -1,8 +1,8 @@
 #ifndef GMSF_Dynamics_Collision_ContactFrame_hpp
 #define GMSF_Dynamics_Collision_ContactFrame_hpp
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 class ContactFrame{
 public:

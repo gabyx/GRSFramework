@@ -1,7 +1,7 @@
 
-#include "InertiaTensorCalculations.hpp"
+#include "GMSF/Dynamics/General/InertiaTensorCalculations.hpp"
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 namespace InertiaTensor{
 

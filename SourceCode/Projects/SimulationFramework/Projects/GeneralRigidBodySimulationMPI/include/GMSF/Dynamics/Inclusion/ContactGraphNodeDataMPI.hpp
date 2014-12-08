@@ -4,13 +4,13 @@
 #include <vector>
 #include <unordered_map>
 
-#include "TypeDefs.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 
-#include "RigidBodyId.hpp"
+#include "GMSF/Dynamics/General/RigidBodyId.hpp"
 
-#include "ContactGraphNodeData.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactGraphNodeData.hpp"
 
 class ContactGraphNodeDataSplitBody {
 public:

@@ -1,16 +1,16 @@
 #include <iostream>
 #include <string>
 
-#include "Exception.hpp"
+#include "GMSF/Common/Exception.hpp"
 
-#include "LogDefines.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "ApplicationCLOptions.hpp"
-#include "FileManager.hpp"
-#include "SimpleLogger.hpp"
+#include "GMSF/Common/ApplicationCLOptions.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
-#include "SimulationManager.hpp"
+#include "GMSF/States/SimulationManager/SimulationManager.hpp"
 
 
 int main(int argc, char **argv) {

@@ -17,13 +17,13 @@ _________________________________________________________*/
 #include <OIS/OISMouse.h>
 #include <SdkTrays.h>
 
-#include "AppState.hpp"
-#include "AppStateManager.hpp"
-#include "SimulationManagerGUI.hpp"
-#include "InputContext.hpp"
-#include "GuiContext.hpp"
-#include "OrbitCamera.hpp"
-#include "MenuMouse.hpp"
+#include "GMSF/States/AppState.hpp"
+#include "GMSF/States/AppStateManager.hpp"
+#include "GMSF/States/SimulationManager/SimulationManagerGUI.hpp"
+#include "GMSF/Singeltons/Contexts/InputContext.hpp"
+#include "GMSF/Singeltons/Contexts/GuiContext.hpp"
+#include "GMSF/App/OrbitCamera.hpp"
+#include "GMSF/App/MenuMouse.hpp"
 //=========================================================
 
 /*=========================================================

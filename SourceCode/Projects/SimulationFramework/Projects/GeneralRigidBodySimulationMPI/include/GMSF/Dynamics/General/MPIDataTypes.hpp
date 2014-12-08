@@ -3,8 +3,8 @@
 
 #include <mpi.h>
 
-#include "TypeDefs.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 /**
 *    Important struct to define all MPI message tags used in this framework!

@@ -2,8 +2,8 @@
 #define GMSF_Logic_LogicNode_hpp
 
 #include <vector>
-#include "AssertionDebug.hpp"
-#include "LogicCommon.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Logic/LogicCommon.hpp"
 
 class LogicSocketBase;
 template<typename T> class LogicSocket;
@@ -96,7 +96,7 @@ protected:
 };
 
 
-#include "LogicSocket.hpp"
+#include "GMSF/Logic/LogicSocket.hpp"
 
 
 template<typename T>

@@ -5,13 +5,13 @@ definitions of template class MoreauTimeStepper
 _________________________________________________________*/
 #include <iostream>
 
-#include "MoreauTimeStepper.hpp"
+#include "GMSF/Dynamics/General/MoreauTimeStepper.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 #include InclusionSolver_INCLUDE_FILE
 #include StatePool_INCLUDE_FILE
 
-#include "LogDefines.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 
 

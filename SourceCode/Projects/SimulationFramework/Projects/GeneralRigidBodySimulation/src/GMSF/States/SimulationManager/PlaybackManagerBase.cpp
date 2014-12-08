@@ -1,9 +1,9 @@
-#include "PlaybackManagerBase.hpp"
+#include "GMSF/States/SimulationManager/PlaybackManagerBase.hpp"
 
 #include <fstream>
 
-#include "InputContext.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Singeltons/Contexts/InputContext.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 
 PlaybackManagerBase::PlaybackManagerBase():

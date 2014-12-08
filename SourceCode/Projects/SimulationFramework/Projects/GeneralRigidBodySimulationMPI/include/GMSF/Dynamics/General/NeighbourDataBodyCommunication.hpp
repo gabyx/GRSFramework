@@ -1,9 +1,9 @@
 #ifndef GMSF_Dynamics_General_NeighbourDataBodyCommunication_hpp
 #define GMSF_Dynamics_General_NeighbourDataBodyCommunication_hpp
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "NeighbourData.hpp"
+#include "GMSF/Dynamics/General/NeighbourData.hpp"
 
 /**
 * @brief This class is used in the NeighbourMap class as data structure for the general communication of bodies

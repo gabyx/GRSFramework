@@ -4,19 +4,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 #include LogicTypes_INCLUDE_FILE
-#include "LogicNode.hpp"
+#include "GMSF/Logic/LogicNode.hpp"
 
-#include "RigidBodyState.hpp"
+#include "GMSF/Dynamics/Buffers/RigidBodyState.hpp"
 
-#include "RendermanGeometryWriter.hpp"
-#include "RenderData.hpp"
-#include "QuaternionHelpers.hpp"
+#include "GMSF/General/RendermanGeometryWriter.hpp"
+#include "GMSF/General/RenderData.hpp"
+#include "GMSF/Dynamics/General/QuaternionHelpers.hpp"
 
-#include "ColorGradient.hpp"
+#include "GMSF/Common/ColorGradient.hpp"
 
 namespace LogicNodes {
 

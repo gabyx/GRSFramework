@@ -9,12 +9,12 @@
 #include <boost/multi_index/tag.hpp>
 #include <boost/multi_index/key_extractors.hpp>
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 #include RigidBody_INCLUDE_FILE
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 
 class RigidBodyContainer {

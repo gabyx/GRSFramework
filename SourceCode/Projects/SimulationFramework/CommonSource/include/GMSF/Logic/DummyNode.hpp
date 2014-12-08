@@ -1,7 +1,7 @@
 #ifndef GMSF_Logic_DummyNode_hpp
 #define GMSF_Logic_DummyNode_hpp
 
-#include "LogicNode.hpp"
+#include "GMSF/Logic/LogicNode.hpp"
 
 template<unsigned int NIN, unsigned int NOUT>
 class DummyLogicNode : public LogicNode {

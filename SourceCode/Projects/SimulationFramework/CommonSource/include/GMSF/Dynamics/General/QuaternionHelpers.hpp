@@ -10,7 +10,7 @@
 #define GMSF_Dynamics_General_QuaternionHelpers_hpp
 
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 /**
 * @ingroup Common

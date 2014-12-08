@@ -1,7 +1,7 @@
 #ifndef GMSF_Logic_ConstantNode_hpp
 #define GMSF_Logic_ConstantNode_hpp
 
-#include "LogicNode.hpp"
+#include "GMSF/Logic/LogicNode.hpp"
 
 namespace LogicNodes{
 

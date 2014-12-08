@@ -11,20 +11,20 @@
 #include <boost/serialization/split_member.hpp>
 
 
-#include "AssertionDebug.hpp"
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
-#include "MPIMessageTag.hpp"
-#include "MPISerializationHelpersEigen.hpp"
-#include "MPISerializationHelpersGeometry.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Dynamics/General/MPIMessageTag.hpp"
+#include "GMSF/Dynamics/General/MPISerializationHelpersEigen.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp"
 
-#include "FileManager.hpp"
-#include "SimpleLogger.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
-#include "QuaternionHelpers.hpp"
+#include "GMSF/Dynamics/General/QuaternionHelpers.hpp"
 
 
-#include "RigidBodyFunctionsMPI.hpp"
+#include "GMSF/Dynamics/General/RigidBodyFunctionsMPI.hpp"
 
 
 namespace boost {

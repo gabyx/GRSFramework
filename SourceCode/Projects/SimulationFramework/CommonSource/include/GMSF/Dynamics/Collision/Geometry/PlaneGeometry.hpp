@@ -1,7 +1,7 @@
 ﻿#ifndef GMSF_Dynamics_Collision_Geometry_PlaneGeometry_hpp
 #define GMSF_Dynamics_Collision_Geometry_PlaneGeometry_hpp
 
-#include <TypeDefs.hpp>
+#include <GMSF/Common/TypeDefs.hpp>
 
 #include <boost/serialization/access.hpp>
 

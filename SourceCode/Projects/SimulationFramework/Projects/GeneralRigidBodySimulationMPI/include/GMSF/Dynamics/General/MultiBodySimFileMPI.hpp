@@ -9,15 +9,15 @@
 
 #include <boost/filesystem.hpp>
 
-#include "TypeDefs.hpp"
-#include "StaticAssert.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/StaticAssert.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 
 
-#include "CommonFunctions.hpp"
-#include "MPISerializationHelpersEigen.hpp"
-#include "MultiBodySimFileIOHelpers.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
+#include "GMSF/Dynamics/General/MPISerializationHelpersEigen.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFileIOHelpers.hpp"
 
 #define SIM_FILE_MPI_SIGNATURE_LENGTH 4
 #define SIM_FILE_MPI_SIGNATURE {'M','B','S','F'}

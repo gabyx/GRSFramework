@@ -11,7 +11,7 @@
 
 
 #include <Ogre.h>
-#include <MeshData.hpp>
+#include <GMSF/Dynamics/General/MeshData.hpp>
 
 /**
 * @ingroup Common

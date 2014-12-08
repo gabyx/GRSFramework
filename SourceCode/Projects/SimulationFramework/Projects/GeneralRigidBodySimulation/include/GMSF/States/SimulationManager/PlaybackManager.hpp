@@ -7,17 +7,17 @@
 #include <OIS/OISJoyStick.h>
 #include <OIS/OISMouse.h>
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "SceneParserGUI.hpp"
+#include "GMSF/Systems/SceneParserGUI.hpp"
 
-#include "PlaybackLoader.hpp"
-#include "PlaybackManagerBase.hpp"
-#include "InputContext.hpp"
-#include "DynamicsState.hpp"
+#include "GMSF/States/SimulationManager/PlaybackLoader.hpp"
+#include "GMSF/States/SimulationManager/PlaybackManagerBase.hpp"
+#include "GMSF/Singeltons/Contexts/InputContext.hpp"
+#include "GMSF/Dynamics/Buffers/DynamicsState.hpp"
 
-#include "VideoDropper.hpp"
-#include "StateRecorderResampler.hpp"
+#include "GMSF/States/VideoDropper.hpp"
+#include "GMSF/Dynamics/Buffers/StateRecorderResampler.hpp"
 
 class StateRingPoolVisBackFront;
 template< typename TStatePool> class PlaybackLoader;

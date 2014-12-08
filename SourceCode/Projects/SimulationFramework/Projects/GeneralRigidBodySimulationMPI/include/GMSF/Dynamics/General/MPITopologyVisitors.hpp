@@ -1,10 +1,10 @@
 #ifndef GMSF_Dynamics_General_MPITopologyVisitors_hpp
 #define GMSF_Dynamics_General_MPITopologyVisitors_hpp
 
-#include "AssertionDebug.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-//#include "MPITopologyGrid.hpp"
+//#include "GMSF/Dynamics/General/MPITopologyGrid.hpp"
 
 
 

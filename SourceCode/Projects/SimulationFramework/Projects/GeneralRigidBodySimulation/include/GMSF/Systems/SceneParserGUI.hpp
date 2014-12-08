@@ -2,11 +2,11 @@
 #define GMSF_Systems_SceneParserGUI_hpp
 
 #include <OGRE/Ogre.h>
-#include "AxisObject.hpp"
+#include "GMSF/Common/AxisObject.hpp"
 
-#include "SceneParser.hpp"
+#include "GMSF/Systems/SceneParser.hpp"
 
-#include "MakeCoordinateSystem.hpp"
+#include "GMSF/Dynamics/General/MakeCoordinateSystem.hpp"
 
 namespace ParserModules {
 template<typename TParserTraits>

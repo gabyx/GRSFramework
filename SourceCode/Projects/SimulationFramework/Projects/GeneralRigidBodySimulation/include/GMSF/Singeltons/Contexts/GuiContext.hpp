@@ -5,8 +5,8 @@
 #include <memory>
 #include <OISMouse.h>
 #include <SdkTrays.h>
-#include "Contexts/RenderContext.hpp"
-#include "Contexts/InputContext.hpp"
+#include "GMSF/Singeltons/Contexts/RenderContext.hpp"
+#include "GMSF/Singeltons/Contexts/InputContext.hpp"
 
 
 /**

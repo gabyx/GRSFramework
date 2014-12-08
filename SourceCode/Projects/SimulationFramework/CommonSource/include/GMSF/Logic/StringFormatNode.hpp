@@ -5,9 +5,9 @@
 #include <boost/mpl/contains.hpp>
 
 #include "TinyFormatInclude.hpp"
-#include "CommonFunctions.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
 
-#include "LogicNode.hpp"
+#include "GMSF/Logic/LogicNode.hpp"
 
 namespace LogicNodes{
 

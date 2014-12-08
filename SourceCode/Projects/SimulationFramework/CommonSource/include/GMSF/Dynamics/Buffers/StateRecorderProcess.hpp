@@ -9,17 +9,17 @@
 
 #include <unordered_map>
 
-#include "LogDefines.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "FileManager.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
 
-#include "CommonFunctions.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
 
-#include "MultiBodySimFilePart.hpp"
-#include "SimpleLogger.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFilePart.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
-#include "GetFileDescriptorInfo.hpp"
+#include "GMSF/Common/GetFileDescriptorInfo.hpp"
 
 
 /**

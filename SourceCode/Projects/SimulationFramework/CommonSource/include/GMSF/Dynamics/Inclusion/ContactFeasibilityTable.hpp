@@ -1,8 +1,8 @@
 #ifndef GMSF_Dynamics_Inclusion_ContactFeasibilityTable_hpp
 #define GMSF_Dynamics_Inclusion_ContactFeasibilityTable_hpp
 
-#include "AssertionDebug.hpp"
-#include "CompileTimeArray.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/CompileTimeArray.hpp"
 
 /**
 * @ingroup Inclusion

@@ -5,19 +5,19 @@
 #include <boost/serialization/split_member.hpp>
 #include <boost/mpl/at.hpp>
 
-#include "TypeDefs.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 #include RigidBody_INCLUDE_FILE
 
-#include "AABB.hpp"
-#include "SphereGeometry.hpp"
-#include "PlaneGeometry.hpp"
-#include "HalfspaceGeometry.hpp"
-#include "BoxGeometry.hpp"
-#include "MeshGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/AABB.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/SphereGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/PlaneGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/BoxGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/MeshGeometry.hpp"
 
-#include "MPISerializationHelpersEigen.hpp"
+#include "GMSF/Dynamics/General/MPISerializationHelpersEigen.hpp"
 
 namespace boost {
 namespace serialization {

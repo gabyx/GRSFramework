@@ -1,19 +1,19 @@
 #ifndef GMSF_Dynamics_Buffers_StateRecorderResampler_hpp
 #define GMSF_Dynamics_Buffers_StateRecorderResampler_hpp
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 #include <vector>
 
-#include "RenderContext.hpp"
+#include "GMSF/Singeltons/Contexts/RenderContext.hpp"
 
-#include "StateRecorder.hpp"
+#include "GMSF/Dynamics/Buffers/StateRecorder.hpp"
 
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
 
-#include "DynamicsState.hpp"
+#include "GMSF/Dynamics/Buffers/DynamicsState.hpp"
 
 /**
 * @brief only used in sim thread to resample and drop a new sim file if the option is selected in playback! Not mutex locks or something else!

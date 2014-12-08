@@ -5,14 +5,14 @@
 
 
 
-#include "LogDefines.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "SimulationManager.hpp"
+#include "GMSF/States/SimulationManager/SimulationManager.hpp"
 
-#include "DynamicsState.hpp"
-#include "SharedBufferDynSys.hpp"
-#include "StateRecorder.hpp"
+#include "GMSF/Dynamics/Buffers/DynamicsState.hpp"
+#include "GMSF/Systems/SharedBufferDynSys.hpp"
+#include "GMSF/Dynamics/Buffers/StateRecorder.hpp"
 
 // HIER ALL Includes welche man für diesen Manager braucht, welche getemplatet sind mit einem
 // Config, unterhalb in den Subclassen müssen diese nicht mehr hinzugefügt werden?
@@ -21,11 +21,11 @@
 #include InclusionSolver_INCLUDE_FILE
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "CommonFunctions.hpp"
-#include "QuaternionHelpers.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
+#include "GMSF/Dynamics/General/QuaternionHelpers.hpp"
 
-#include "FileManager.hpp"
-#include "CPUTimer.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
+#include "GMSF/Common/CPUTimer.hpp"
 
 
 using namespace std;

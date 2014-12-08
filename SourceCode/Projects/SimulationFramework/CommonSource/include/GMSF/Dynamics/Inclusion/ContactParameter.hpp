@@ -1,9 +1,9 @@
 ﻿#ifndef GMSF_Dynamics_Inclusion_ContactParameter_hpp
 #define GMSF_Dynamics_Inclusion_ContactParameter_hpp
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "ContactModels.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactModels.hpp"
 
 /**
 * @ingroup Contact

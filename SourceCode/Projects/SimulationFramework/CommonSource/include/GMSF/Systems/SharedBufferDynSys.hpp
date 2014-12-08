@@ -3,11 +3,11 @@
 #define GMSF_Systems_SharedBufferDynSys_hpp
 
 #include <boost/thread.hpp>
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "StatePoolVisBackFront.hpp"
+#include "GMSF/Dynamics/Buffers/StatePoolVisBackFront.hpp"
 
 
 class SharedBufferDynSys : public StatePoolVisBackFront

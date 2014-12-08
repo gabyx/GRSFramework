@@ -9,9 +9,9 @@
 #include <boost/random.hpp>
 #include <boost/generator_iterator.hpp>
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "AABB.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/AABB.hpp"
 
 
 class GravityForceField{

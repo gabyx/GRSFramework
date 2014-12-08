@@ -5,10 +5,10 @@
 #include <boost/thread.hpp>
 #include <memory>
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 #include <boost/filesystem.hpp>
 
-#include "CPUTimer.hpp"
+#include "GMSF/Common/CPUTimer.hpp"
 
 class SimulationManagerBase
 {

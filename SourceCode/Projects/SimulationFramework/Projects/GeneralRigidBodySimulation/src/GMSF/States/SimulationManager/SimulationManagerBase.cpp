@@ -1,9 +1,9 @@
-﻿#include "SimulationManagerBase.hpp"
+﻿#include "GMSF/States/SimulationManager/SimulationManagerBase.hpp"
 
 #include <fstream>
 
-#include "InputContext.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Singeltons/Contexts/InputContext.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 
 

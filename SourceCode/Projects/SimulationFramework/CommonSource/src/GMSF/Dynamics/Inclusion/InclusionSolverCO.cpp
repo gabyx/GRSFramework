@@ -1,16 +1,16 @@
 
-#include "InclusionSolverCO.hpp"
+#include "GMSF/Dynamics/Inclusion/InclusionSolverCO.hpp"
 
-#include "MatrixHelpers.hpp"
-#include "VectorToSkewMatrix.hpp"
-#include "ProxFunctions.hpp"
+#include "GMSF/Dynamics/General/MatrixHelpers.hpp"
+#include "GMSF/Dynamics/General/VectorToSkewMatrix.hpp"
+#include "GMSF/Dynamics/Inclusion/ProxFunctions.hpp"
 
 #if HAVE_CUDA_SUPPORT == 1
 #include "JorProxGPUVariant.hpp"
 #include "SorProxGPUVariant.hpp"
 #endif
 
-#include "CPUTimer.hpp"
+#include "GMSF/Common/CPUTimer.hpp"
 
 
 const unsigned int InclusionSolverCO::NDOFFriction = CONTACTMODELTYPE(ContactModels::Enum::UCF)::nDOFFriction;

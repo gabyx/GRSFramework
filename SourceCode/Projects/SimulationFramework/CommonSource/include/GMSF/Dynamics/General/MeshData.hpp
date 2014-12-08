@@ -1,5 +1,5 @@
 ﻿/*
-*  MeshData.hpp
+*  GMSF/Dynamics/General/MeshData.hpp
 *
 *  Created by Gabriel Nützi on 19.03.10.
 *  Copyright 2010 -. All rights reserved.
@@ -19,10 +19,10 @@
 #include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "SimpleLogger.hpp"
-#include "QuaternionHelpers.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
+#include "GMSF/Dynamics/General/QuaternionHelpers.hpp"
 
 ///==========================================
 

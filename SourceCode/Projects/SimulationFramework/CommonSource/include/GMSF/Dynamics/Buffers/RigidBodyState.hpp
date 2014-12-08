@@ -1,12 +1,12 @@
 #ifndef GMSF_Dynamics_Buffers_RigidBodyState_hpp
 #define GMSF_Dynamics_Buffers_RigidBodyState_hpp
 
-#include "TypeDefs.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "RigidBodyId.hpp"
+#include "GMSF/Dynamics/General/RigidBodyId.hpp"
 
-#include "AdditionalBodyData.hpp"
+#include "GMSF/Dynamics/General/AdditionalBodyData.hpp"
 
 class RigidBodyState;
 namespace Interpolate {

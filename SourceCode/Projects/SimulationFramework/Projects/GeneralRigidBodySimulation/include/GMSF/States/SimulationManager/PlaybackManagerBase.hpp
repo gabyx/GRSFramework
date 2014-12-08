@@ -10,9 +10,9 @@
 #include <OIS/OISJoyStick.h>
 #include <OIS/OISMouse.h>
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "CPUTimer.hpp"
+#include "GMSF/Common/CPUTimer.hpp"
 
 class PlaybackManagerBase {
 public:

@@ -5,13 +5,13 @@
 #include <boost/mpl/find.hpp>
 #include <boost/mpl/vector.hpp>
 
-#include "StaticAssert.hpp"
-#include "AssertionDebug.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/StaticAssert.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "EnumClassHelper.hpp"
+#include "GMSF/Common/EnumClassHelper.hpp"
 
-#include "LogicCommon.hpp"
+#include "GMSF/Logic/LogicCommon.hpp"
 
 
 class LogicNode;
@@ -138,7 +138,7 @@ private:
 
 
 
-#include "LogicNode.hpp"
+#include "GMSF/Logic/LogicNode.hpp"
 
 template<typename T>
 template<typename TIn>

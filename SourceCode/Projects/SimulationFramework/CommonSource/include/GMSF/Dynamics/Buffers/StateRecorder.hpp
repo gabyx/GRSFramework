@@ -3,15 +3,15 @@
 
 #include <string>
 
-#include "FileManager.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "CommonFunctions.hpp"
-#include "DynamicsState.hpp"
-#include "LogDefines.hpp"
-#include "MultiBodySimFile.hpp"
-#include "SimpleLogger.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
+#include "GMSF/Dynamics/Buffers/DynamicsState.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFile.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 

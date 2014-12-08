@@ -8,16 +8,16 @@
 
 #include "ConfigureFile.hpp"
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 #include CollisionSolver_INCLUDE_FILE
-#include "PercussionPool.hpp"
+#include "GMSF/Dynamics/Inclusion/PercussionPool.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
-#include "ContactGraph.hpp"
-#include "SimpleLogger.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactGraph.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
 
 #if HAVE_CUDA_SUPPORT == 1
@@ -25,7 +25,7 @@
 #include "JORProxVelocityGPUModule.hpp"
 #endif
 
-#include "CPUTimer.hpp"
+#include "GMSF/Common/CPUTimer.hpp"
 
 
 

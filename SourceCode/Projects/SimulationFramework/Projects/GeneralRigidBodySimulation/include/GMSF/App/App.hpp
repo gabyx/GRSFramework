@@ -1,5 +1,5 @@
 ﻿/*
- *  App.hpp
+ *  GMSF/App/App.hpp
  *
  *  Created by Gabriel Nützi on 21.03.10.
  *  Copyright 2010 ETH. All rights reserved.
@@ -13,16 +13,16 @@
 // Includes =================================
 #include <memory>
 
-#include "SimulationState.hpp"
-#include "PlaybackState.hpp"
-#include "FileManager.hpp"
-#include "Contexts/InputContext.hpp"
-#include "Contexts/GuiContext.hpp"
-#include "Contexts/RenderContext.hpp"
+#include "GMSF/States/SimulationState.hpp"
+#include "GMSF/States/PlaybackState.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
+#include "GMSF/Singeltons/Contexts/InputContext.hpp"
+#include "GMSF/Singeltons/Contexts/GuiContext.hpp"
+#include "GMSF/Singeltons/Contexts/RenderContext.hpp"
 
-#include "AppStateManager.hpp"
+#include "GMSF/States/AppStateManager.hpp"
 
-#include "LogDefines.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 // ===========================================
 
 

@@ -1,7 +1,7 @@
 #ifndef GMSF_Dynamics_Collision_Geometry_BoxGeometry_hpp
 #define GMSF_Dynamics_Collision_Geometry_BoxGeometry_hpp
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 #include <boost/serialization/access.hpp>
 
 class BoxGeometry {

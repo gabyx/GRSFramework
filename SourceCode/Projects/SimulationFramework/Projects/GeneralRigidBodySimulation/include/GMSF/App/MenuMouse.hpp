@@ -1,5 +1,5 @@
 ﻿/*
- *  MenuMouse.hpp
+ *  GMSF/App/MenuMouse.hpp
  *
  *  Created by Gabriel Nützi on 21.03.10.
  *  Copyright 2010 ETH. All rights reserved.
@@ -23,7 +23,7 @@
 #include <OIS/OISMouse.h>
 #include <SdkTrays.h>
 
-#include <Contexts/InputContext.hpp>
+#include "GMSF/Singeltons/Contexts/InputContext.hpp"
 // ==========================================
 
 //

@@ -3,14 +3,14 @@
 
 #include <memory>
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 
-#include "XMLMacros.hpp"
-#include "SceneParserModules.hpp"
+#include "GMSF/Common/XMLMacros.hpp"
+#include "GMSF/Systems/SceneParserModules.hpp"
 
 
 /** The traits for a standart SceneParser class*/

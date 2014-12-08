@@ -10,9 +10,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
-#include "Singleton.hpp"
+#include "GMSF/Common/Singleton.hpp"
 
-#include "CommonFunctions.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
 
 /**
 * @ingroup Singeltons

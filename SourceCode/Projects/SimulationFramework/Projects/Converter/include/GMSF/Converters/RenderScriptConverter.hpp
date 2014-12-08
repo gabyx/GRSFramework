@@ -9,15 +9,15 @@
 
 #include <boost/filesystem.hpp>
 
-#include "LogDefines.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "ApplicationCLOptionsConverter.hpp"
+#include "GMSF/Common/ApplicationCLOptionsConverter.hpp"
 
-#include "SimpleLogger.hpp"
-#include "MultiBodySimFile.hpp"
-#include "RenderData.hpp"
-#include "RenderScriptGenerator.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFile.hpp"
+#include "GMSF/General/RenderData.hpp"
+#include "GMSF/General/RenderScriptGenerator.hpp"
 
 class RenderScriptConverter {
 public:

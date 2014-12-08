@@ -2,14 +2,14 @@
 #define GMSF_Dynamics_Buffers_StatePoolVisBackFront_hpp
 
 
-#include "LogDefines.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "StatePool.hpp"
-#include "FrontBackBuffer.hpp"
+#include "GMSF/Dynamics/Buffers/StatePool.hpp"
+#include "GMSF/Dynamics/Buffers/FrontBackBuffer.hpp"
 
-#include "FileManager.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
 
-#include "InitialConditionBodies.hpp"
+#include "GMSF/Dynamics/General/InitialConditionBodies.hpp"
 
 /**
 * @ingroup StatesAndBuffers

@@ -1,7 +1,7 @@
 #ifndef GMSF_Logic_LookUpTable_hpp
 #define GMSF_Logic_LookUpTable_hpp
 
-#include "LogicNode.hpp"
+#include "GMSF/Logic/LogicNode.hpp"
 
 namespace LogicNodes{
     template<typename TKey, typename TValue, typename TMap>

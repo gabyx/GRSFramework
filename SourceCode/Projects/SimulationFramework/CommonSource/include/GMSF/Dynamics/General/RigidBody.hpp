@@ -7,22 +7,22 @@
 
 #include <sstream>
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "RigidBodyId.hpp"
+#include "GMSF/Dynamics/General/RigidBodyId.hpp"
 
-#include "MeshData.hpp"
+#include "GMSF/Dynamics/General/MeshData.hpp"
 
-#include "SphereGeometry.hpp"
-#include "PlaneGeometry.hpp"
-#include "HalfspaceGeometry.hpp"
-#include "BoxGeometry.hpp"
-#include "MeshGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/SphereGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/PlaneGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/BoxGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/MeshGeometry.hpp"
 
-#include "FrontBackBuffer.hpp"
+#include "GMSF/Dynamics/Buffers/FrontBackBuffer.hpp"
 
-#include "QuaternionHelpers.hpp"
+#include "GMSF/Dynamics/General/QuaternionHelpers.hpp"
 
 #include RigidBodySolverData_INCLUDE_FILE
 

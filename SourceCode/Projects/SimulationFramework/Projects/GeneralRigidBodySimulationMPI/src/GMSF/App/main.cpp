@@ -6,14 +6,14 @@
 #include <mpi.h>
 
 
-#include "TypeDefs.hpp"
-#include "ApplicationCLOptions.hpp"
-#include "FileManager.hpp"
-#include "SimpleLogger.hpp"
-#include "RedirectOutput.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/ApplicationCLOptions.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
+#include "GMSF/Common/RedirectOutput.hpp"
 
-#include "MPIDataTypes.hpp"
-#include "SimulationManagerMPI.hpp"
+#include "GMSF/Dynamics/General/MPIDataTypes.hpp"
+#include "GMSF/States/SimulationManager/SimulationManagerMPI.hpp"
 
 // Define the function to be called when ctrl-c (SIGINT) signal is sent to process
 void signal_callback_handler(int signum)

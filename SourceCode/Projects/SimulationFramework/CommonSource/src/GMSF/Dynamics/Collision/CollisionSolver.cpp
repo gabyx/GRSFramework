@@ -1,4 +1,4 @@
-#include "CollisionSolver.hpp"
+#include "GMSF/Dynamics/Collision/CollisionSolver.hpp"
 
 
 CollisionSolver::CollisionSolver(std::shared_ptr< DynamicsSystemType> pDynSys):

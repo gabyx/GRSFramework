@@ -1,8 +1,8 @@
-#include "InclusionSolverCONoG.hpp"
+#include "GMSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp"
 
-#include "MatrixHelpers.hpp"
-#include "VectorToSkewMatrix.hpp"
-#include "ProxFunctions.hpp"
+#include "GMSF/Dynamics/General/MatrixHelpers.hpp"
+#include "GMSF/Dynamics/General/VectorToSkewMatrix.hpp"
+#include "GMSF/Dynamics/Inclusion/ProxFunctions.hpp"
 
 
 InclusionSolverCONoG::InclusionSolverCONoG(std::shared_ptr< CollisionSolverType >  pCollisionSolver,
@@ -181,7 +181,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
             m_settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL ||
             m_settings.m_eMethod == InclusionSolverSettingsType::SOR_NORMAL_TANGENTIAL
            ) {
-#include "InclusionSolverSettings.hpp"
+#include "GMSF/Dynamics/Inclusion/InclusionSolverSettings.hpp"
             #if MEASURE_TIME_PROX == 1
                 CPUTimer counter;
                 counter.start();

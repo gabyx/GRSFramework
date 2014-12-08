@@ -3,21 +3,21 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "PlaybackManager.hpp"
+#include "GMSF/States/SimulationManager/PlaybackManager.hpp"
 
-#include <RenderContext.hpp>
-#include "SharedBufferPlayback.hpp"
-#include "CommonFunctions.hpp"
-#include "QuaternionHelpers.hpp"
-#include "OgreMeshExtraction.hpp"
+#include <GMSF/Singeltons/Contexts/RenderContext.hpp>
+#include "GMSF/Dynamics/Buffers/SharedBufferPlayback.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
+#include "GMSF/Dynamics/General/QuaternionHelpers.hpp"
+#include "GMSF/Common/OgreMeshExtraction.hpp"
 
-#include "SharedBufferPlayback.hpp"
-#include "PlaybackLoader.hpp"
+#include "GMSF/Dynamics/Buffers/SharedBufferPlayback.hpp"
+#include "GMSF/States/SimulationManager/PlaybackLoader.hpp"
 
-#include "FileManager.hpp"
-#include "MultiBodySimFile.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFile.hpp"
 
-#include "LogDefines.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 
 

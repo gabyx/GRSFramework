@@ -2,12 +2,12 @@
 #define GMSF_Dynamics_Buffers_SharedBufferPlayback_hpp
 
 #include <boost/thread.hpp>
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "StateRingPoolVisBackFront.hpp"
+#include "GMSF/Dynamics/Buffers/StateRingPoolVisBackFront.hpp"
 
 
 /**

@@ -16,24 +16,24 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "CPUTimer.hpp"
+#include "GMSF/Common/CPUTimer.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 #include CollisionSolver_INCLUDE_FILE
 #include InclusionSolver_INCLUDE_FILE
 #include StatePool_INCLUDE_FILE
 
-#include "DynamicsState.hpp"
-#include "FrontBackBuffer.hpp"
-#include "BinaryFile.hpp"
-#include "MultiBodySimFile.hpp"
-#include "SimpleLogger.hpp"
+#include "GMSF/Dynamics/Buffers/DynamicsState.hpp"
+#include "GMSF/Dynamics/Buffers/FrontBackBuffer.hpp"
+#include "GMSF/Common/BinaryFile.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFile.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
-#include "TimeStepperSettings.hpp"
+#include "GMSF/Dynamics/General/TimeStepperSettings.hpp"
 
 
 //===========================================

@@ -2,10 +2,10 @@
 #ifndef GMSF_Dynamics_General_AdditionalBodyData_hpp
 #define GMSF_Dynamics_General_AdditionalBodyData_hpp
 
-#include "TypeDefs.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "EnumClassHelper.hpp"
+#include "GMSF/Common/EnumClassHelper.hpp"
 
 namespace AdditionalBodyData{
 

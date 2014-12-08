@@ -1,10 +1,10 @@
 #ifndef GMSF_States_VideoDropper_hpp
 #define GMSF_States_VideoDropper_hpp
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "RenderContext.hpp"
+#include "GMSF/Singeltons/Contexts/RenderContext.hpp"
 
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>

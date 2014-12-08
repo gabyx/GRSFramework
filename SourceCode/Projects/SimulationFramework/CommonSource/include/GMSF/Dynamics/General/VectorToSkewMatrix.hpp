@@ -1,5 +1,5 @@
 ﻿/*
- *  VectorToSkewMatrix.hpp
+ *  GMSF/Dynamics/General/VectorToSkewMatrix.hpp
  *
  *  Created by Gabriel Nützi on 21.03.10.
  *  Copyright 2010 ETH. All rights reserved.

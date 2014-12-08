@@ -1,5 +1,5 @@
 /*
- *  TypeDefs.hpp
+ *  GMSF/Common/TypeDefs.hpp
  *
  *  Created by Gabriel Nützi on 21.03.10.
  *  Copyright 2010 ETH. All rights reserved.
@@ -11,36 +11,36 @@
 
 #include <random>
 
-#include "LayoutConfigDefs.hpp"
+#include "GMSF/Dynamics/General/LayoutConfigDefs.hpp"
 
 
 
 /// Forward declarations , includes and the GlobalConfig typed need to match!
 
 
-#define StatePool_INCLUDE_FILE "StatePoolVisBackFront.hpp"
+#define StatePool_INCLUDE_FILE "GMSF/Dynamics/Buffers/StatePoolVisBackFront.hpp"
 class StatePoolVisBackFront;
 
-#define CollisionSolver_INCLUDE_FILE "CollisionSolver.hpp"
+#define CollisionSolver_INCLUDE_FILE "GMSF/Dynamics/Collision/CollisionSolver.hpp"
 class CollisionSolver;
 
-#define DynamicsSystem_INCLUDE_FILE "DynamicsSystem.hpp"
+#define DynamicsSystem_INCLUDE_FILE "GMSF/Dynamics/General/DynamicsSystem.hpp"
 class DynamicsSystem;
-#define InclusionSolverSettings_INCLUDE_FILE    "InclusionSolverSettings.hpp"
+#define InclusionSolverSettings_INCLUDE_FILE    "GMSF/Dynamics/Inclusion/InclusionSolverSettings.hpp"
 class InclusionSolverSettings;
 
-//#define InclusionSolver_INCLUDE_FILE "InclusionSolverCO.hpp"
+//#define InclusionSolver_INCLUDE_FILE "GMSF/Dynamics/Inclusion/InclusionSolverCO.hpp"
 //class InclusionSolverCO;
-#define InclusionSolver_INCLUDE_FILE "InclusionSolverCONoG.hpp"
+#define InclusionSolver_INCLUDE_FILE "GMSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp"
 class InclusionSolverCONoG;
 
-#define RigidBody_INCLUDE_FILE "RigidBody.hpp"
+#define RigidBody_INCLUDE_FILE "GMSF/Dynamics/General/RigidBody.hpp"
 class RigidBodyBase;
 
-#define RigidBodySolverData_INCLUDE_FILE "RigidBodySolverData.hpp"
+#define RigidBodySolverData_INCLUDE_FILE "GMSF/Dynamics/General/RigidBodySolverData.hpp"
 class RigidBodySolverDataCONoG;
 
-#define TimeStepper_INCLUDE_FILE "MoreauTimeStepper.hpp"
+#define TimeStepper_INCLUDE_FILE "GMSF/Dynamics/General/MoreauTimeStepper.hpp"
 class MoreauTimeStepper;
 
 

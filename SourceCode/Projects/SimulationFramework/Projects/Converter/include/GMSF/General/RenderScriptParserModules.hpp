@@ -7,12 +7,12 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "RenderScriptParserBaseTraits.hpp"
+#include "GMSF/General/RenderScriptParserBaseTraits.hpp"
 
 namespace RenderScriptParserModules {
 
@@ -56,13 +56,13 @@ private:
 };
 
 
-#include "SimpleFunction.hpp"
-#include "StringFormatNode.hpp"
-#include "ConstantNode.hpp"
-#include "NormNode.hpp"
-#include "LookUpTable.hpp"
-#include "RenderScriptGeneratorLogic.hpp"
-#include "RenderScriptGenerator.hpp"
+#include "GMSF/Logic/SimpleFunction.hpp"
+#include "GMSF/Logic/StringFormatNode.hpp"
+#include "GMSF/Logic/ConstantNode.hpp"
+#include "GMSF/Logic/NormNode.hpp"
+#include "GMSF/Logic/LookUpTable.hpp"
+#include "GMSF/General/RenderScriptGeneratorLogic.hpp"
+#include "GMSF/General/RenderScriptGenerator.hpp"
 
 namespace RenderScriptParserModules {
 

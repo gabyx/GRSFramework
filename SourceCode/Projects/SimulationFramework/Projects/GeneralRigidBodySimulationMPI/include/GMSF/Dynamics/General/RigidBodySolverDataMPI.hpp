@@ -1,9 +1,9 @@
 #ifndef GMSF_Dynamics_General_RigidBodySolverDataMPI_hpp
 #define GMSF_Dynamics_General_RigidBodySolverDataMPI_hpp
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "RigidBodySolverData.hpp"
+#include "GMSF/Dynamics/General/RigidBodySolverData.hpp"
 
 /** Class with  Data Structure for the Solver! */
 class RigidBodySolverDataCONoGMPI : public RigidBodySolverDataCONoG {

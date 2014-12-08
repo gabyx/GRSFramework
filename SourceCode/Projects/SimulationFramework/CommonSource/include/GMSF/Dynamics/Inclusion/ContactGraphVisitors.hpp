@@ -1,13 +1,13 @@
 #ifndef GMSF_Dynamics_Inclusion_ContactGraphVisitors_hpp
 #define GMSF_Dynamics_Inclusion_ContactGraphVisitors_hpp
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
 
-#include "VectorToSkewMatrix.hpp"
-#include "ProxFunctions.hpp"
+#include "GMSF/Dynamics/General/VectorToSkewMatrix.hpp"
+#include "GMSF/Dynamics/Inclusion/ProxFunctions.hpp"
 
 /**
 @brief Visitor for class ContactGraph<TRigidBody,ContactGraphMode::ForIteration>

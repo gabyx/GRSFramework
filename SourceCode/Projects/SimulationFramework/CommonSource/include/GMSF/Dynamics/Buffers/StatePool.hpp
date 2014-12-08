@@ -9,9 +9,9 @@
 #include <Eigen/Core>
 
 
-#include "AssertionDebug.hpp"
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 #define DECLERATIONS_STATEPOOL \
     using StatePool::m_change_pointer_mutex; \

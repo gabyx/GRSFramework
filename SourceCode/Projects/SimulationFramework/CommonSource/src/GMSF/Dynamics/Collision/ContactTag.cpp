@@ -1,4 +1,4 @@
-﻿#include "ContactTag.hpp"
+﻿#include "GMSF/Dynamics/Collision/ContactTag.hpp"
 
 ContactTag::ContactTag(){
    m_tag = boost::make_tuple(0, 0, 0, 0, 0, 0);

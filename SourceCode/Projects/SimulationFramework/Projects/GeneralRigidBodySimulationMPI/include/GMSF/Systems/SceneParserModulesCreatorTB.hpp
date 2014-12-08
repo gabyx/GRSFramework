@@ -2,7 +2,7 @@
 #define GMSF_Systems_SceneParserModulesCreatorTB_hpp
 
 
-#include "SceneParserModulesMPI.hpp"
+#include "GMSF/Systems/SceneParserModulesMPI.hpp"
 
 
 template< typename TTopoBuilder >

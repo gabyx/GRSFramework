@@ -6,8 +6,8 @@
 
 #include <boost/mpl/vector.hpp>
 
-#include "LogicNode.hpp"
-#include "LogicSocket.hpp"
+#include "GMSF/Logic/LogicNode.hpp"
+#include "GMSF/Logic/LogicSocket.hpp"
 
 
 

@@ -2,8 +2,8 @@
 #define RenderScriptParserGenerators_hpp
 
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 #include <memory>
 
@@ -12,7 +12,7 @@
 class RenderData;
 
 
-#include "SceneParserModules.hpp"
+#include "GMSF/Systems/SceneParserModules.hpp"
 
 namespace RenderScriptParserGenerators {
     struct SceneParserGen {

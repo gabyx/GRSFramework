@@ -2,9 +2,9 @@
 #define GMSF_Dynamics_Inclusion_NeighbourDataInclusionCommunication_hpp
 
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "NeighbourData.hpp"
+#include "GMSF/Dynamics/General/NeighbourData.hpp"
 
 class ContactGraphNodeDataSplitBody;
 

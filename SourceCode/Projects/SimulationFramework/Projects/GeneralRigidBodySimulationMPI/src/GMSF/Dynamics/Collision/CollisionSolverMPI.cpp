@@ -1,7 +1,7 @@
 
-#include "CollisionSolverMPI.hpp"
+#include "GMSF/Dynamics/Collision/CollisionSolverMPI.hpp"
 
-#include "PrintGeometryDetails.hpp"
+#include "GMSF/Dynamics/General/PrintGeometryDetails.hpp"
 
 CollisionSolverMPI::CollisionSolverMPI(std::shared_ptr< DynamicsSystemType> pDynSys):
     m_simBodies(pDynSys->m_simBodies), m_staticBodies(pDynSys->m_staticBodies), m_remoteSimBodies(pDynSys->m_remoteSimBodies),

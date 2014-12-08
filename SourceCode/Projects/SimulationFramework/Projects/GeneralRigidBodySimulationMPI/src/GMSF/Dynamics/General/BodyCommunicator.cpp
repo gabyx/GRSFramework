@@ -1,6 +1,6 @@
-#include "BodyCommunicator.hpp"
+#include "GMSF/Dynamics/General/BodyCommunicator.hpp"
 
-#include "MPIMessageTag.hpp"
+#include "GMSF/Dynamics/General/MPIMessageTag.hpp"
 
 BodyCommunicator::BodyCommunicator(  std::shared_ptr< DynamicsSystemType> pDynSys ,
                                      std::shared_ptr< ProcessCommunicatorType > pProcComm):

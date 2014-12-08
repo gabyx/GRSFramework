@@ -9,17 +9,17 @@
 
 #include <unordered_map>
 
-#include "LogDefines.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "FileManager.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
 
-#include "CommonFunctions.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
 
-#include "MultiBodySimFile.hpp"
-#include "SimpleLogger.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFile.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
-#include "GetFileDescriptorInfo.hpp"
+#include "GMSF/Common/GetFileDescriptorInfo.hpp"
 
 
 #define SIM_FILE_ACCESS_LOG_EXTENSION ".dat" ///< File extension for the access log file.

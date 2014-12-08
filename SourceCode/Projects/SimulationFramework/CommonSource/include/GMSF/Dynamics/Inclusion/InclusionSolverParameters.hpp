@@ -1,7 +1,7 @@
 #ifndef GMSF_Dynamics_Inclusion_InclusionSolverParameters_hpp
 #define GMSF_Dynamics_Inclusion_InclusionSolverParameters_hpp
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 #include "InclusionSolverModels.hpp"
 

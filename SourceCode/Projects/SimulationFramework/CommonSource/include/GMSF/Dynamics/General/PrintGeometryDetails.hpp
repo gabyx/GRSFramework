@@ -4,16 +4,16 @@
 
 #include <boost/variant.hpp>
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "AssertionDebug.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "SimpleLogger.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
-#include "SphereGeometry.hpp"
-#include "BoxGeometry.hpp"
-#include "HalfspaceGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/SphereGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/BoxGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp"
 
 class PrintGeometryDetailsVisitor : public boost::static_visitor<> {
     public:

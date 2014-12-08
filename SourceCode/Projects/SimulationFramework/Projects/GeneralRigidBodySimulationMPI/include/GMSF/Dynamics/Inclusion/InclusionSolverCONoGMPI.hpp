@@ -8,31 +8,31 @@
 
 #include <memory>
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 
 #include CollisionSolver_INCLUDE_FILE
-//#include "PercussionPool.hpp"
+//#include "GMSF/Dynamics/Inclusion/PercussionPool.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
 
-#include "SimpleLogger.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
-#include "MPICommunication.hpp"
+#include "GMSF/Dynamics/General/MPICommunication.hpp"
 
-#include "BodyCommunicator.hpp"
+#include "GMSF/Dynamics/General/BodyCommunicator.hpp"
 
-#include "InclusionCommunicator.hpp"
+#include "GMSF/Dynamics/Inclusion/InclusionCommunicator.hpp"
 // those two include each other (forwarding)
-#include "ContactGraphMPI.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactGraphMPI.hpp"
 
-#include "ContactGraphVisitorsMPI.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactGraphVisitorsMPI.hpp"
 
 
-#include "CPUTimer.hpp"
+#include "GMSF/Common/CPUTimer.hpp"
 
 /**
 * @ingroup Inclusion

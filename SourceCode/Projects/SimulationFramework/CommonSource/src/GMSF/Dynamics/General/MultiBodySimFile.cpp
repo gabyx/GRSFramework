@@ -1,4 +1,4 @@
-#include "MultiBodySimFile.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFile.hpp"
 
 
 const char MultiBodySimFile::m_simFileSignature[SIM_FILE_SIGNATURE_LENGTH] = SIM_FILE_SIGNATURE;

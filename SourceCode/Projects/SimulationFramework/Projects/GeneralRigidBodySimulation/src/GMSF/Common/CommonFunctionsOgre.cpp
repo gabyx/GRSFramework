@@ -6,7 +6,7 @@
  *
  */
 
-#include <CommonFunctionsOgre.hpp>
+#include <GMSF/Common/CommonFunctionsOgre.hpp>
 
 
 Ogre::StringVector OgreUtilities::convertToOgreStringVector(const std::vector<std::string> & strings) {

@@ -3,7 +3,7 @@
 
 #include <exprtk.hpp>
 
-#include "LogicNode.hpp"
+#include "GMSF/Logic/LogicNode.hpp"
 
 namespace LogicNodes {
 

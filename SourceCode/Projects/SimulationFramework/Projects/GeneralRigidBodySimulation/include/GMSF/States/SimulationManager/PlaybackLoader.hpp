@@ -7,10 +7,10 @@
 #include <boost/filesystem.hpp>
 #include <memory>
 
-#include "DynamicsState.hpp"
-#include "MultiBodySimFile.hpp"
+#include "GMSF/Dynamics/Buffers/DynamicsState.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFile.hpp"
 
-#include "SimpleLogger.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
 /**
 * @ingroup SimulationManager
@@ -72,7 +72,7 @@ private:
 // Implementation
 
 
-#include "FileManager.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
 
 template<typename TStatePool>
 PlaybackLoader<TStatePool>::~PlaybackLoader()

@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 #include LogicTypes_INCLUDE_FILE
 

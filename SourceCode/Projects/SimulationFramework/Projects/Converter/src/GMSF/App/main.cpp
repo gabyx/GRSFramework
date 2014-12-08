@@ -1,19 +1,19 @@
 #include <iostream>
 #include <string>
 
-#include "LogDefines.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "Exception.hpp"
+#include "GMSF/Common/Exception.hpp"
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "ApplicationCLOptionsConverter.hpp"
+#include "GMSF/Common/ApplicationCLOptionsConverter.hpp"
 
-#include "SimFileInfo.hpp"
-#include "SimFileJoiner.hpp"
-#include "SimFileResampler.hpp"
-#include "RenderScriptConverter.hpp"
+#include "GMSF/Converters/SimFileInfo.hpp"
+#include "GMSF/Converters/SimFileJoiner.hpp"
+#include "GMSF/Converters/SimFileResampler.hpp"
+#include "GMSF/Converters/RenderScriptConverter.hpp"
 
 
 void printHelpAndExit(std::string o=""){

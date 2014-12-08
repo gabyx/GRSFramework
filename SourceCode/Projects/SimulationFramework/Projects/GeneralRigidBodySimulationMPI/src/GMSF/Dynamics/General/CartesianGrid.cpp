@@ -1,2 +1,2 @@
-#include "CartesianGrid.hpp"
+#include "GMSF/Dynamics/General/CartesianGrid.hpp"
 

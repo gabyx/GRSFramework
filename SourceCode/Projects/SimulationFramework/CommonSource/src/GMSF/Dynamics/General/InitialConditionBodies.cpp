@@ -1,12 +1,12 @@
 
-#include "TypeDefs.hpp"
-#include "InitialConditionBodies.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Dynamics/General/InitialConditionBodies.hpp"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "AssertionDebug.hpp"
-#include "QuaternionHelpers.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Dynamics/General/QuaternionHelpers.hpp"
 
 
 //void InitialConditionBodies::setupPositionBodyPosAxisAngle(RigidBodyState & rigibodyState,

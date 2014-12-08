@@ -6,11 +6,11 @@
  *
  */
 
- #include <OrbitCamera.hpp>
+ #include <GMSF/App/OrbitCamera.hpp>
 
-#include "InputContext.hpp"
+#include "GMSF/Singeltons/Contexts/InputContext.hpp"
 
-#include "LogDefines.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 using namespace Ogre;
 using namespace std;

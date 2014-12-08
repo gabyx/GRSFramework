@@ -1,7 +1,7 @@
 ﻿#ifndef GMSF_Dynamics_Inclusion_InclusionSolverSettingsMPI_hpp
 #define GMSF_Dynamics_Inclusion_InclusionSolverSettingsMPI_hpp
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 
 #define USE_PERCUSSION_POOL 0

@@ -3,10 +3,10 @@
 #define GMSF_Dynamics_Inclusion_ContactModels_hpp
 
 
-#include "ConvexSets.hpp"
+#include "GMSF/Dynamics/Inclusion/ConvexSets.hpp"
 
 
-#include "EnumClassHelper.hpp"
+#include "GMSF/Common/EnumClassHelper.hpp"
 
 
 #define CONTACTMODELTYPE( _EnumType_ ) ContactModels::ContactModel< EnumConversion::toIntegral( _EnumType_ ) >

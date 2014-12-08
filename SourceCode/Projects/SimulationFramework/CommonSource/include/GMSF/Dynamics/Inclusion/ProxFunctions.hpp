@@ -1,5 +1,5 @@
 ﻿/*
-*  ProxFunctions.hpp
+*  GMSF/Dynamics/Inclusion/ProxFunctions.hpp
 *
 *  Created by Gabriel Nützi on 21.03.10.
 *  Copyright 2010 ETH. All rights reserved.
@@ -12,10 +12,10 @@
 #include <iostream>
 #include <iomanip>
 
-#include "TypeDefs.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "ConvexSets.hpp"
+#include "GMSF/Dynamics/Inclusion/ConvexSets.hpp"
 
 
 #define INLINE_PROX 1

@@ -4,7 +4,7 @@
 
 #include <unordered_map>
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 #include RigidBody_INCLUDE_FILE
 

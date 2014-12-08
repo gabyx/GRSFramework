@@ -12,16 +12,16 @@
 #include <OIS/OISMouse.h>
 
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "SimulationManagerBase.hpp"
-#include "InputContext.hpp"
+#include "GMSF/States/SimulationManager/SimulationManagerBase.hpp"
+#include "GMSF/Singeltons/Contexts/InputContext.hpp"
 
-#include "SceneParserGUI.hpp"
+#include "GMSF/Systems/SceneParserGUI.hpp"
 
-#include "DynamicCoordinateFrames.hpp"
+#include "GMSF/Common/DynamicCoordinateFrames.hpp"
 
 class DynamicsState;
 class StateRecorder;

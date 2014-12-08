@@ -3,15 +3,15 @@
 
 #include <vector>
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 #include <boost/iterator/transform_iterator.hpp>
 
 
-#include "DynamicsSystem.hpp"
+#include "GMSF/Dynamics/General/DynamicsSystem.hpp"
 
-#include "SceneParserGUI.hpp"
+#include "GMSF/Systems/SceneParserGUI.hpp"
 
 #include <Ogre.h>
 

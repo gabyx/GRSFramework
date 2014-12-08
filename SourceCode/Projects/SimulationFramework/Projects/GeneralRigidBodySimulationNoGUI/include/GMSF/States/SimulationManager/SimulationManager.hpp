@@ -4,13 +4,13 @@
 #include <memory>
 #include <boost/filesystem.hpp>
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
-#include "SceneParser.hpp"
+#include "GMSF/Systems/SceneParser.hpp"
 
-#include "CPUTimer.hpp"
+#include "GMSF/Common/CPUTimer.hpp"
 
 class DynamicsState;
 class StateRecorder;

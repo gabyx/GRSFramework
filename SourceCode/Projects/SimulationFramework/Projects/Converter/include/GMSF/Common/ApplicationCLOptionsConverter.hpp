@@ -10,13 +10,13 @@
 #include <boost/filesystem.hpp>
 #include <getoptpp/getopt_pp_standalone.h>
 
-#include "AssertionDebug.hpp"
-#include "Singleton.hpp"
-#include "CommonFunctions.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/Singleton.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
 
-#include "Exception.hpp"
+#include "GMSF/Common/Exception.hpp"
 
-#include "SimFileJoiner.hpp"
+#include "GMSF/Converters/SimFileJoiner.hpp"
 
 /**
 *  @brief CommandLineOptions for the Application

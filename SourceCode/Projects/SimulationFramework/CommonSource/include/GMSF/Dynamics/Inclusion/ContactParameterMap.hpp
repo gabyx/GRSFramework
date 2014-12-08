@@ -8,9 +8,9 @@
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "ContactParameter.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactParameter.hpp"
 
 /**
 * @ingroup Contact

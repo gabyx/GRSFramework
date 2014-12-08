@@ -1,17 +1,17 @@
 #ifndef GMSF_Dynamics_Inclusion_InclusionCommunicator_hpp
 #define GMSF_Dynamics_Inclusion_InclusionCommunicator_hpp
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 
-#include "MPICommunication.hpp"
-#include "BodyCommunicator.hpp"
+#include "GMSF/Dynamics/General/MPICommunication.hpp"
+#include "GMSF/Dynamics/General/BodyCommunicator.hpp"
 
-#include "NeighbourMap.hpp"
-#include "NeighbourDataInclusionCommunication.hpp"
+#include "GMSF/Dynamics/General/NeighbourMap.hpp"
+#include "GMSF/Dynamics/Inclusion/NeighbourDataInclusionCommunication.hpp"
 
-#include "MPIMessages.hpp"
+#include "GMSF/Dynamics/General/MPIMessages.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
 
@@ -139,7 +139,7 @@ private:
 };
 
 
-#include "InclusionCommunicator.icc"
+#include "GMSF/Dynamics/Inclusion/InclusionCommunicator.icc"
 
 
 #endif

@@ -10,11 +10,11 @@
 
 #include <boost/filesystem.hpp>
 
-#include "CPUTimer.hpp"
-#include "CommonFunctions.hpp"
+#include "GMSF/Common/CPUTimer.hpp"
+#include "GMSF/Common/CommonFunctions.hpp"
 
-#include "AssertionDebug.hpp"
-#include "Singleton.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/Singleton.hpp"
 
 namespace Logging {
 

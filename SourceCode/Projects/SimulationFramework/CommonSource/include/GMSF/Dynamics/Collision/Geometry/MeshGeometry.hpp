@@ -5,7 +5,7 @@
 #include <boost/serialization/access.hpp>
 
 #include "ConfigureFile.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 #if USE_OPCODE == 1
 #include <Opcode.h>
@@ -16,13 +16,13 @@
 #endif
 #endif
 
-#include "TypeDefs.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 
 #include <boost/filesystem.hpp>
 
-#include "MeshData.hpp"
+#include "GMSF/Dynamics/General/MeshData.hpp"
 
 
 class MeshGeometry {

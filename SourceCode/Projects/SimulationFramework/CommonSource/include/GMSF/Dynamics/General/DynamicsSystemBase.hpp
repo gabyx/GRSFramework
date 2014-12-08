@@ -2,8 +2,8 @@
 #define GMSF_Dynamics_General_DynamicsSystemBase_hpp
 
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 #include <map>
 #include <unordered_map>
@@ -11,17 +11,17 @@
 
 #include RigidBody_INCLUDE_FILE
 
-#include "RigidBodyContainer.hpp"
-#include "ContactParameterMap.hpp"
-#include "ExternalForces.hpp"
+#include "GMSF/Dynamics/General/RigidBodyContainer.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactParameterMap.hpp"
+#include "GMSF/Dynamics/General/ExternalForces.hpp"
 
-#include "RecorderSettings.hpp"
+#include "GMSF/Dynamics/Buffers/RecorderSettings.hpp"
 #include InclusionSolverSettings_INCLUDE_FILE
-#include "TimeStepperSettings.hpp"
+#include "GMSF/Dynamics/General/TimeStepperSettings.hpp"
 
-#include "DynamicsState.hpp"
-#include "RigidBodyState.hpp"
-#include "InitialConditionBodies.hpp"
+#include "GMSF/Dynamics/Buffers/DynamicsState.hpp"
+#include "GMSF/Dynamics/Buffers/RigidBodyState.hpp"
+#include "GMSF/Dynamics/General/InitialConditionBodies.hpp"
 
 /** This is the define for all DynamicsSystem classes
 * It only consists of several types which are essetial.

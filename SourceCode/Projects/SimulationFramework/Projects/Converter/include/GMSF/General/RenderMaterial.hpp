@@ -1,7 +1,7 @@
     #ifndef RenderMaterial_hpp
     #define RenderMaterial_hpp
 
-    #include "TypeDefs.hpp"
+    #include "GMSF/Common/TypeDefs.hpp"
 
     class RenderMaterial{
     public:

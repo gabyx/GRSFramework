@@ -1,7 +1,7 @@
-#include "RenderScriptGenerator.hpp"
+#include "GMSF/General/RenderScriptGenerator.hpp"
 
-#include "RenderMaterial.hpp"
-#include "RenderScriptGeneratorLogic.hpp"
+#include "GMSF/General/RenderMaterial.hpp"
+#include "GMSF/General/RenderScriptGeneratorLogic.hpp"
 
 
 void RenderScriptGenerator::setup() {

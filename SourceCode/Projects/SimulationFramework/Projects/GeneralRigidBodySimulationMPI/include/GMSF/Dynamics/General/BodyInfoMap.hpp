@@ -1,7 +1,7 @@
 #ifndef GMSF_Dynamics_General_BodyInfoMap_hpp
 #define GMSF_Dynamics_General_BodyInfoMap_hpp
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 class BodyProcessInfo{
 public:

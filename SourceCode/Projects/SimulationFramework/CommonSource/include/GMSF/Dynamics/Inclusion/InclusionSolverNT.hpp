@@ -5,22 +5,22 @@
 #include <fstream>
 #include <memory>
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "CollisionData.hpp"
+#include "GMSF/Dynamics/Collision/CollisionData.hpp"
 
-#include "ContactParameterMap.hpp"
-#include "PercussionPool.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactParameterMap.hpp"
+#include "GMSF/Dynamics/Inclusion/PercussionPool.hpp"
 
-#include "VectorToSkewMatrix.hpp"
+#include "GMSF/Dynamics/General/VectorToSkewMatrix.hpp"
 
-#include "ProxFunctions.hpp"
+#include "GMSF/Dynamics/Inclusion/ProxFunctions.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
 
-#include "LogDefines.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 
 

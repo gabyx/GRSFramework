@@ -6,8 +6,8 @@
 
 #include "ConfigureFile.hpp"
 
-#include "TypeDefs.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 #if USE_OPCODE == 1
 #include <Opcode.h>
@@ -19,14 +19,14 @@
 #endif
 
 #include RigidBody_INCLUDE_FILE
-#include "Ray.hpp"
-#include "AABB.hpp"
-#include "CollisionData.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/Ray.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/AABB.hpp"
+#include "GMSF/Dynamics/Collision/CollisionData.hpp"
 
-#include "QuaternionHelpers.hpp"
-#include "MatrixHelpers.hpp"
-#include "MakeCoordinateSystem.hpp"
-#include "CollisionFunctions.hpp"
+#include "GMSF/Dynamics/General/QuaternionHelpers.hpp"
+#include "GMSF/Dynamics/General/MatrixHelpers.hpp"
+#include "GMSF/Dynamics/General/MakeCoordinateSystem.hpp"
+#include "GMSF/Dynamics/Collision/CollisionFunctions.hpp"
 
 
 

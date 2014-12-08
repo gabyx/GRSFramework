@@ -2,8 +2,8 @@
 #define GMSF_Dynamics_General_BodyCommunicator_hpp
 
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 
 #include <srutil/delegate/delegate.hpp> // Use fast SR delegates
@@ -11,11 +11,11 @@
 
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "NeighbourMap.hpp"
-#include "NeighbourDataBodyCommunication.hpp"
+#include "GMSF/Dynamics/General/NeighbourMap.hpp"
+#include "GMSF/Dynamics/General/NeighbourDataBodyCommunication.hpp"
 
-#include "MPICommunication.hpp"
-#include "MPIMessages.hpp"
+#include "GMSF/Dynamics/General/MPICommunication.hpp"
+#include "GMSF/Dynamics/General/MPIMessages.hpp"
 
 class RigidBodyAddRemoveNotificator {
 public:

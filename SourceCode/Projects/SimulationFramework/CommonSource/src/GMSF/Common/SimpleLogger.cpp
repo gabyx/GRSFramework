@@ -1,4 +1,4 @@
-#include "SimpleLogger.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
 
 using namespace Logging;

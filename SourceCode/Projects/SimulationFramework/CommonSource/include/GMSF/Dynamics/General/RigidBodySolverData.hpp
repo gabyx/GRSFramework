@@ -1,7 +1,7 @@
 #ifndef GMSF_Dynamics_General_RigidBodySolverData_hpp
 #define GMSF_Dynamics_General_RigidBodySolverData_hpp
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 class RigidBodySolverData{
     public:

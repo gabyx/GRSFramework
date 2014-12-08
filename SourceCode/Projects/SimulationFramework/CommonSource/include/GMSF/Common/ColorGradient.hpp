@@ -3,7 +3,7 @@
 
 
 #include <vector>
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 class ColorGradient {
 private:

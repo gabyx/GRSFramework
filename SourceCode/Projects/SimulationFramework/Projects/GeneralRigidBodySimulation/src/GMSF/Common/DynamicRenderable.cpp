@@ -6,7 +6,7 @@
  *
  */
 
-#include "DynamicRenderable.hpp"
+#include "GMSF/Common/DynamicRenderable.hpp"
 
 /// Includes =================================
 #include <OgreCamera.h>

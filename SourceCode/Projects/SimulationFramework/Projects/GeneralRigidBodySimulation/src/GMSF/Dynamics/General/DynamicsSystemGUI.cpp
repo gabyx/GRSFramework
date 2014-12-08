@@ -1,2 +1,2 @@
-#include "DynamicsSystemGUI.hpp"
+#include "GMSF/Dynamics/General/DynamicsSystemGUI.hpp"
 

@@ -9,20 +9,20 @@
 #include <memory>
 
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "ContactFrame.hpp"
-#include "CollisionData.hpp"
-#include "Collider.hpp"
-#include "SimpleLogger.hpp"
+#include "GMSF/Dynamics/Collision/ContactFrame.hpp"
+#include "GMSF/Dynamics/Collision/CollisionData.hpp"
+#include "GMSF/Dynamics/Collision/Collider.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
-#include "QuaternionHelpers.hpp"
+#include "GMSF/Dynamics/General/QuaternionHelpers.hpp"
 
-#include "ContactDelegateSupport.hpp"
+#include "GMSF/Dynamics/Collision/ContactDelegateSupport.hpp"
 
 /**
 * @ingroup Collision

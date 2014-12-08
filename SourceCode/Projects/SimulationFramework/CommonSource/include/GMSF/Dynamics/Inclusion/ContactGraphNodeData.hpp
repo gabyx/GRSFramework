@@ -2,15 +2,15 @@
 #define GMSF_Dynamics_Inclusion_ContactGraphNodeData_hpp
 
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 
-#include "ContactParameter.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactParameter.hpp"
 
-#include "FrontBackBuffer.hpp"
-#include "CollisionData.hpp"
+#include "GMSF/Dynamics/Buffers/FrontBackBuffer.hpp"
+#include "GMSF/Dynamics/Collision/CollisionData.hpp"
 
 // This two data classes are used for  m_eContactModel = ContactModels::N_ContactModel,
 //                                      m_eContactModel = ContactModels::UCF,

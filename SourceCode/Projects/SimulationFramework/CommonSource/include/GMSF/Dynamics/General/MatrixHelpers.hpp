@@ -11,7 +11,7 @@
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 /**
 * @ingroup Common

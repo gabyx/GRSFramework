@@ -3,14 +3,14 @@
 
 #include <mpi.h>
 
-#include "AssertionDebug.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "CartesianGrid.hpp"
+#include "GMSF/Dynamics/General/CartesianGrid.hpp"
 
-//#include "Collider.hpp"
-#include "MPIGlobalCommunicators.hpp"
-#include "MPITopology.hpp"
+//#include "GMSF/Dynamics/Collision/Collider.hpp"
+#include "GMSF/Singeltons/MPIGlobalCommunicators.hpp"
+#include "GMSF/Dynamics/General/MPITopology.hpp"
 
 namespace MPILayer {
 

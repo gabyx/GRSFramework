@@ -2,16 +2,16 @@
 #define GMSF_Dynamics_General_MultiBodySimFilePart_hpp
 
 #include <boost/filesystem.hpp>
-#include <StaticAssert.hpp>
+#include <GMSF/Common/StaticAssert.hpp>
 
 #include <type_traits>
 #include <fstream>
 
-#include "StaticAssert.hpp"
+#include "GMSF/Common/StaticAssert.hpp"
 
-#include "MultiBodySimFileIOHelpers.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFileIOHelpers.hpp"
 
-#include "RigidBodyContainer.hpp"
+#include "GMSF/Dynamics/General/RigidBodyContainer.hpp"
 
 /**
 * @ingroup Common

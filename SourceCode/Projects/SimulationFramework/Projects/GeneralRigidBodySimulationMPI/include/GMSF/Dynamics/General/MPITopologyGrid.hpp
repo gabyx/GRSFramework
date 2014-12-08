@@ -1,18 +1,18 @@
 #ifndef GMSF_Dynamics_General_MPITopologyGrid_hpp
 #define GMSF_Dynamics_General_MPITopologyGrid_hpp
 
-#include "AssertionDebug.hpp"
-#include "TypeDefs.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 #include <boost/variant.hpp>
 #include <vector>
 #include <map>
 
-#include "CartesianGrid.hpp"
-#include "AABB.hpp"
-#include "Collider.hpp"
+#include "GMSF/Dynamics/General/CartesianGrid.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/AABB.hpp"
+#include "GMSF/Dynamics/Collision/Collider.hpp"
 
-#include "MPITopologyVisitors.hpp"
+#include "GMSF/Dynamics/General/MPITopologyVisitors.hpp"
 
 namespace MPILayer{
 

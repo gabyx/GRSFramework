@@ -1,5 +1,5 @@
 /*
-*  ConvexSets.hpp
+*  GMSF/Dynamics/Inclusion/ConvexSets.hpp
 *
 *  Created by Gabriel Nützi on 21.03.10.
 *  Copyright 2010 ETH. All rights reserved.

@@ -1,8 +1,8 @@
-﻿#include "Contexts/InputContext.hpp"
-#include "LogDefines.hpp"
+﻿#include "GMSF/Singeltons/Contexts/InputContext.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "AssertionDebug.hpp"
-#include "foreach_macro.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/foreach_macro.hpp"
 
 
 

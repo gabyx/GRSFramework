@@ -4,14 +4,14 @@
 
 #include <boost/variant.hpp>
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "AssertionDebug.hpp"
-#include "StaticAssert.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/StaticAssert.hpp"
 
-#include "SphereGeometry.hpp"
-#include "BoxGeometry.hpp"
-#include "HalfspaceGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/SphereGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/BoxGeometry.hpp"
+#include "GMSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp"
 
 namespace InertiaTensorComputations{
 

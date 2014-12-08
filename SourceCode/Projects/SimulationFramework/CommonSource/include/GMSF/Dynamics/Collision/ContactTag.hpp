@@ -7,7 +7,7 @@
 #include <boost/functional/hash.hpp>
 
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 class ContactTag;
 

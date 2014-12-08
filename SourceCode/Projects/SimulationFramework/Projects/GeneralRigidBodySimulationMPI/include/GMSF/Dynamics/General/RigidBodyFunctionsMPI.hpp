@@ -2,9 +2,9 @@
 #define GMSF_Dynamics_General_RigidBodyFunctionsMPI_hpp
 
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "RigidBodyFunctions.hpp"
+#include "GMSF/Dynamics/General/RigidBodyFunctions.hpp"
 
 namespace RigidBodyFunctions {
 

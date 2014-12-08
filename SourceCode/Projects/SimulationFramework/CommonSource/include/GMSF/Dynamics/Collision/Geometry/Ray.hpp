@@ -2,7 +2,7 @@
 #define GMSF_Dynamics_Collision_Geometry_Ray_hpp
 
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 
 class Ray {

@@ -5,16 +5,16 @@
 #include <fstream>
 #include <memory>
 
-#include "AssertionDebug.hpp"
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 #include "ConfigureFile.hpp"
 
-#include "CollisionSolver.hpp"
+#include "GMSF/Dynamics/Collision/CollisionSolver.hpp"
 #include InclusionSolverSettings_INCLUDE_FILE
-#include "ContactGraph.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactGraph.hpp"
 
-#include "SimpleLogger.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
 
 

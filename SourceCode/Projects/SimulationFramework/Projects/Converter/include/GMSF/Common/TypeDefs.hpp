@@ -1,5 +1,5 @@
 /*
- *  TypeDefs.hpp
+ *  GMSF/Common/TypeDefs.hpp
  *
  *  Created by Gabriel Nützi on 21.03.10.
  *  Copyright 2010 ETH. All rights reserved.
@@ -9,19 +9,19 @@
 #ifndef TypeDefs_hpp
 #define TypeDefs_hpp
 
-#include "LayoutConfigDefs.hpp"
+#include "GMSF/Dynamics/General/LayoutConfigDefs.hpp"
 
-#define LogicTypes_INCLUDE_FILE                 "LogicTypes.hpp"
+#define LogicTypes_INCLUDE_FILE                 "GMSF/Logic/LogicTypes.hpp"
 
-#define DynamicsSystem_INCLUDE_FILE             "DynamicsSystem.hpp"
+#define DynamicsSystem_INCLUDE_FILE             "GMSF/Dynamics/General/DynamicsSystem.hpp"
 class DynamicsSystem;
 
-#define InclusionSolverSettings_INCLUDE_FILE    "InclusionSolverSettings.hpp"
+#define InclusionSolverSettings_INCLUDE_FILE    "GMSF/Dynamics/Inclusion/InclusionSolverSettings.hpp"
 class InclusionSolverSettings;
 
-#define RigidBody_INCLUDE_FILE                  "RigidBody.hpp"
+#define RigidBody_INCLUDE_FILE                  "GMSF/Dynamics/General/RigidBody.hpp"
 class RigidBodyBase;
-#define RigidBodySolverData_INCLUDE_FILE        "RigidBodySolverData.hpp"
+#define RigidBodySolverData_INCLUDE_FILE        "GMSF/Dynamics/General/RigidBodySolverData.hpp"
 class RigidBodySolverDataCONoG;
 
 class RenderData;

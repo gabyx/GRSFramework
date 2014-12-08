@@ -1,17 +1,17 @@
-#include "RenderScriptConverter.hpp"
+#include "GMSF/Converters/RenderScriptConverter.hpp"
 
 #include <string>
-#include "CPUTimer.hpp"
-#include "ProgressBarCL.hpp"
+#include "GMSF/Common/CPUTimer.hpp"
+#include "GMSF/Common/ProgressBarCL.hpp"
 
-#include "SceneParser.hpp"
-#include "RenderScriptParser.hpp"
+#include "GMSF/Systems/SceneParser.hpp"
+#include "GMSF/General/RenderScriptParser.hpp"
 
-#include "RenderScriptParserGenerators.hpp"
+#include "GMSF/General/RenderScriptParserGenerators.hpp"
 
-#include "RenderScriptGenerator.hpp"
+#include "GMSF/General/RenderScriptGenerator.hpp"
 
-//#include "DummyNode.hpp"
+//#include "GMSF/Logic/DummyNode.hpp"
 
 void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> & inputFiles,
               boost::filesystem::path outputFile,

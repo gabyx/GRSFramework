@@ -1,5 +1,5 @@
 /*
- *  CollisionFunctions.hpp
+ *  GMSF/Dynamics/Collision/CollisionFunctions.hpp
  *
  *  Created by Gabriel Nützi on 21.03.10.
  *  Copyright 2010 ETH. All rights reserved.
@@ -13,9 +13,9 @@
 #include <vector>
 #include "boost/tuple/tuple.hpp"
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "MeshData.hpp"
+#include "GMSF/Dynamics/General/MeshData.hpp"
 
 /**
 * @brief Collision helper functions for the Collider!

@@ -3,13 +3,13 @@
 
 #include <boost/filesystem.hpp>
 
-#include "AssertionDebug.hpp"
-#include "FileManager.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
 
-#include "StatePool.hpp"
-#include "FrontBackBuffer.hpp"
+#include "GMSF/Dynamics/Buffers/StatePool.hpp"
+#include "GMSF/Dynamics/Buffers/FrontBackBuffer.hpp"
 
-#include "LogDefines.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 
 /**

@@ -8,11 +8,11 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
-#include "ProgressBarCL.hpp"
-#include "MultiBodySimFile.hpp"
+#include "GMSF/Common/ProgressBarCL.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFile.hpp"
 
 
-#include "LogDefines.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 
 class SimFileJoiner {

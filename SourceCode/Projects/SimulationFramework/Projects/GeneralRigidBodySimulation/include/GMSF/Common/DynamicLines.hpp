@@ -14,7 +14,7 @@
 #include <vector>
 #include <Ogre.h>
 
-#include "DynamicRenderable.hpp"
+#include "GMSF/Common/DynamicRenderable.hpp"
 /// ==========================================
 
 class DynamicLines : public DynamicRenderable

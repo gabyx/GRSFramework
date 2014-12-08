@@ -1,9 +1,9 @@
-﻿#include "FileManager.hpp"
+﻿#include "GMSF/Singeltons/FileManager.hpp"
 
 
-#include "LogDefines.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "MultiBodySimFile.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFile.hpp"
 
 //=========================================================
 

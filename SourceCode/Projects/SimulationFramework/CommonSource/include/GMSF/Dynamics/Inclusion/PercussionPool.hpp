@@ -5,10 +5,10 @@
 #include <boost/unordered_map.hpp>
 #include <vector>
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
-#include "ContactTag.hpp"
-#include "ContactPercussion.hpp"
+#include "GMSF/Dynamics/Collision/ContactTag.hpp"
+#include "GMSF/Dynamics/Collision/ContactPercussion.hpp"
 
 
 

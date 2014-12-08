@@ -3,8 +3,8 @@
 
 #include <mpi.h>
 
-#include "Singleton.hpp"
-#include "MPICommunicatorId.hpp"
+#include "GMSF/Common/Singleton.hpp"
+#include "GMSF/Dynamics/General/MPICommunicatorId.hpp"
 
 namespace MPILayer{
 /**

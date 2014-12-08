@@ -3,7 +3,7 @@
 
 #include <type_traits>
 
-#include "StaticAssert.hpp"
+#include "GMSF/Common/StaticAssert.hpp"
 
 /**
 * A fast sorted integral range which can be constructed from std::pair or std::set

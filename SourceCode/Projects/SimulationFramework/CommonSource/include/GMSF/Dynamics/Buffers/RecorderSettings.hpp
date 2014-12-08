@@ -1,7 +1,7 @@
 #ifndef GMSF_Dynamics_Buffers_RecorderSettings_hpp
 #define GMSF_Dynamics_Buffers_RecorderSettings_hpp
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 
 /**

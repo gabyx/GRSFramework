@@ -30,7 +30,7 @@ SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
 SET( APP_INC
 )
 SET( APP_SRC
-    ${PROJECT_SOURCE_DIR}/src/App/main.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/App/main.cpp
 
 )
 
@@ -41,20 +41,20 @@ SET( SINGELTON_SRC
 )
 
 SET( STATES_INC
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManager.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/States/SimulationManager/SimulationManager.hpp
 )
 SET(STATES_SRC
-    ${PROJECT_SOURCE_DIR}/src/States/SimulationManager/SimulationManager.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/States/SimulationManager/SimulationManager.cpp
 )
 
 SET(COMMON_INC
-    ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
-    ${SOURCE_DIR}/include/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/LogDefines.hpp
+    ${SOURCE_DIR}/include/GMSF/Common/AssertionDebug.hpp
 
 )
 SET(COMMON_SRC
-    ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/Common/TypeDefs.cpp
 )
 
 SET(DYNAMICS_INC
@@ -109,7 +109,7 @@ endif()
 
 # WRITE CONFIGURATION FILE
 configure_file (
-  ${SOURCE_DIR}/include/ConfigFiles/ConfigureFile.hpp.in
+  ${SOURCE_DIR}/include/GMSF/ConfigFiles/ConfigureFile.hpp.in
   ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
 )
 # =======================
@@ -150,15 +150,8 @@ set(INCLUDE_DIRS
 
     ${PROJECT_BINARY_DIR}/ConfigFiles/
 
-    ${PROJECT_SOURCE_DIR}/include/App
-
-    #Only for LogDefines.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common # Needs to be previous to {SOURCE_DIR}/include/Common (because there is another LogDefines.hpp
-    
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/
-    
-    #Linked Source
-    ${SOURCE_DIR}/include/Common
+    ${PROJECT_SOURCE_DIR}/include/
+    ${SOURCE_DIR}/include/
     
     ${SOURCE_DIR}/external/pugixml
     ${SOURCE_DIR}/external/pugixml

@@ -7,14 +7,14 @@
 #include <boost/filesystem.hpp>
 #include "pugixml.hpp"
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "XMLMacros.hpp"
-#include "RenderScriptParserBaseTraits.hpp"
-#include "RenderScriptParserModules.hpp"
+#include "GMSF/Common/XMLMacros.hpp"
+#include "GMSF/General/RenderScriptParserBaseTraits.hpp"
+#include "GMSF/General/RenderScriptParserModules.hpp"
 
 /** The traits for a standart RenderScriptParser class*/
 template<typename TSceneParser, typename TCollection>

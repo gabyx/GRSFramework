@@ -1,12 +1,12 @@
 #ifndef  RenderScriptGenerator_hpp
 #define  RenderScriptGenerator_hpp
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
-#include "SimpleLogger.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 
-#include "MultiBodySimFile.hpp"
-#include "ExecutionTreeInOut.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFile.hpp"
+#include "GMSF/Logic/ExecutionTreeInOut.hpp"
 
 
 namespace LogicNodes{

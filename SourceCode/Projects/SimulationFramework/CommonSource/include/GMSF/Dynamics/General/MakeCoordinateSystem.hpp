@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#include "TypeDefs.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
 
 namespace CoordinateSystem {
 

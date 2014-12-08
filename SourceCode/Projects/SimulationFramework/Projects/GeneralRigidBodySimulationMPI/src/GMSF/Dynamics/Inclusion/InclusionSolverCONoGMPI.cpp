@@ -1,15 +1,15 @@
-#include "InclusionSolverCONoGMPI.hpp"
+#include "GMSF/Dynamics/Inclusion/InclusionSolverCONoGMPI.hpp"
 
-//#include "InclusionCommunicator.hpp"
+//#include "GMSF/Dynamics/Inclusion/InclusionCommunicator.hpp"
 // those two include each other (forwarding)
-//#include "ContactGraphMPI.hpp"
+//#include "GMSF/Dynamics/Inclusion/ContactGraphMPI.hpp"
 
 
 #include "ConfigureFile.hpp"
 
-#include "MatrixHelpers.hpp"
-#include "VectorToSkewMatrix.hpp"
-#include "ProxFunctions.hpp"
+#include "GMSF/Dynamics/General/MatrixHelpers.hpp"
+#include "GMSF/Dynamics/General/VectorToSkewMatrix.hpp"
+#include "GMSF/Dynamics/Inclusion/ProxFunctions.hpp"
 
 #if HAVE_CUDA_SUPPORT == 1
 #include "JorProxGPUVariant.hpp"

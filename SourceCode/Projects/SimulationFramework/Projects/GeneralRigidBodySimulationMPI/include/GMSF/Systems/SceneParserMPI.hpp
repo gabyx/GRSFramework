@@ -1,9 +1,9 @@
 #ifndef GMSF_Systems_SceneParserMPI_hpp
 #define GMSF_Systems_SceneParserMPI_hpp
 
-#include "SceneParser.hpp"
+#include "GMSF/Systems/SceneParser.hpp"
 
-#include "SceneParserModulesMPI.hpp"
+#include "GMSF/Systems/SceneParserModulesMPI.hpp"
 
 /** These module types are defined when there is no derivation from scene parser */
 template<typename TSceneParser, typename TDynamicsSystem>

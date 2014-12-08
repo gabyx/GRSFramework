@@ -1,7 +1,7 @@
 #ifndef GMSF_Common_Singleton_hpp
 #define GMSF_Common_Singleton_hpp
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 /**
         \brief Singelton Class: You need to construct the singelton object (subclass of this singelton class) on the heap with new, or on the stack globally once!

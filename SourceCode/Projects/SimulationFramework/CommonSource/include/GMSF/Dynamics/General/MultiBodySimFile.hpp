@@ -7,15 +7,15 @@
 
 #include <boost/filesystem.hpp>
 
-#include "ContainerTag.hpp"
+#include "GMSF/Common/ContainerTag.hpp"
 
-#include "StaticAssert.hpp"
-#include "RigidBodyId.hpp"
-#include "DynamicsState.hpp"
+#include "GMSF/Common/StaticAssert.hpp"
+#include "GMSF/Dynamics/General/RigidBodyId.hpp"
+#include "GMSF/Dynamics/Buffers/DynamicsState.hpp"
 
-#include "MultiBodySimFileIOHelpers.hpp"
+#include "GMSF/Dynamics/General/MultiBodySimFileIOHelpers.hpp"
 
-#include "AdditionalBodyData.hpp"
+#include "GMSF/Dynamics/General/AdditionalBodyData.hpp"
 
 
 /**

@@ -4,22 +4,22 @@
 #include <memory>
 #include <unordered_map>
 
-#include "TypeDefs.hpp"
-#include "LogDefines.hpp"
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/TypeDefs.hpp"
+#include "GMSF/Common/LogDefines.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
-#include "BitCount.hpp"
+#include "GMSF/Common/BitCount.hpp"
 
 #include RigidBody_INCLUDE_FILE
 
-#include "GeneralGraph.hpp"
-#include "CollisionData.hpp"
-#include "ContactModels.hpp"
-#include "ContactParameterMap.hpp"
-#include "ContactGraphNodeDataMPI.hpp"
+#include "GMSF/Dynamics/Inclusion/GeneralGraph.hpp"
+#include "GMSF/Dynamics/Collision/CollisionData.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactModels.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactParameterMap.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
-#include "VectorToSkewMatrix.hpp"
+#include "GMSF/Dynamics/General/VectorToSkewMatrix.hpp"
 
 
 template<typename TCombo>
@@ -169,6 +169,6 @@ private:
 };
 
 
-#include "ContactGraphMPI.icc"
+#include "GMSF/Dynamics/Inclusion/ContactGraphMPI.icc"
 
 #endif

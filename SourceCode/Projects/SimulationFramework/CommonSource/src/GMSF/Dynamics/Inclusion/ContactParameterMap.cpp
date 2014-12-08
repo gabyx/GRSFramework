@@ -1,6 +1,6 @@
-#include "ContactParameterMap.hpp"
+#include "GMSF/Dynamics/Inclusion/ContactParameterMap.hpp"
 
-#include "AssertionDebug.hpp"
+#include "GMSF/Common/AssertionDebug.hpp"
 
 
 ContactParameterTag::ContactParameterTag( unsigned int materialid1, unsigned int materialid2){

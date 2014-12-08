@@ -1,7 +1,7 @@
 #ifndef RenderScriptParserBaseTraits_hpp
 #define RenderScriptParserBaseTraits_hpp
 
-#include "SimpleLogger.hpp"
+#include "GMSF/Common/SimpleLogger.hpp"
 #include "pugixml.hpp"
 
 #define DEFINE_MATCOLLPARSER_BASE_TYPE_TRAITS( TParserTraits ) \

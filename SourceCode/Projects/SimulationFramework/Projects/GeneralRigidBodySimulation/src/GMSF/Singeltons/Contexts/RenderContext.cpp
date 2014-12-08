@@ -1,9 +1,9 @@
-﻿#include "Contexts/RenderContext.hpp"
+﻿#include "GMSF/Singeltons/Contexts/RenderContext.hpp"
 
 #include <boost/filesystem.hpp>
 
-#include "FileManager.hpp"
-#include "LogDefines.hpp"
+#include "GMSF/Singeltons/FileManager.hpp"
+#include "GMSF/Common/LogDefines.hpp"
 
 //=========================================================
 

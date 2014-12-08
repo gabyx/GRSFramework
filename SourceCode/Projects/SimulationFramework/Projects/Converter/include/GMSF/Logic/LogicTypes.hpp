@@ -10,9 +10,9 @@
 
     #include <boost/filesystem.hpp>
 
-    #include "TypeDefs.hpp"
+    #include "GMSF/Common/TypeDefs.hpp"
 
-    #include "RenderMaterial.hpp"
+    #include "GMSF/General/RenderMaterial.hpp"
 
     namespace LogicTypes{
 

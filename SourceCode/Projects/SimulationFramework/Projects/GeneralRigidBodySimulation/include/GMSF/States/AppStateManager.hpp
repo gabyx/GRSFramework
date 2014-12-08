@@ -5,9 +5,9 @@
 	implemenation specific includes
 _________________________________________________________*/
 
-#include "AppState.hpp"
-#include "Contexts/InputContext.hpp"
-#include "Contexts/GuiContext.hpp"
+#include "GMSF/States/AppState.hpp"
+#include "GMSF/Singeltons/Contexts/InputContext.hpp"
+#include "GMSF/Singeltons/Contexts/GuiContext.hpp"
 #include <OgreWindowEventUtilities.h>
 //=========================================================
 
