@@ -15,11 +15,11 @@ enum class TopologyBuilderEnum : char{
 
 struct GridBuilderSettings{
     DEFINE_LAYOUT_CONFIG_TYPES
-    GridBuilderSettings(): m_processDim(MyMatrix<unsigned int>::Vector3(1,1,1)){
+    GridBuilderSettings(): m_processDim(MyMatrix<unsigned int>::Array3(1,1,1)){
         m_aabb.reset();
         m_A_IK = Matrix33::Identity();
     }
-    using ProcessDimType = MyMatrix<unsigned int>::Vector3;
+    using ProcessDimType = MyMatrix<unsigned int>::Array3;
     ProcessDimType m_processDim;
 
     enum class Mode : short{ STATIC, DYNAMIC} m_mode = Mode::DYNAMIC;

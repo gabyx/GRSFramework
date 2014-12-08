@@ -1176,11 +1176,11 @@ gdiam_bbox   gdiam_approx_const_mvbb( gdiam_point  * start, int  size,
 {
     //gdiam_real  diam;
     GPointPair  pair, pair_2;
-
+    printf(" Approx Diam \n" );
     GTreeDiamAlg  * pAlg = new  GTreeDiamAlg( start, size, UDM_SIMPLE );
     pAlg->compute_by_heap( eps );
 
-    pair = pAlg->getDiameter();
+    pair = pAlg->getDiameter(); // FIRST FROM GRID APPROX DIAM
 
     /* Comput ethe resulting diameter */
     gdiam_point_t  dir, dir_2, dir_3;
@@ -1192,11 +1192,11 @@ gdiam_bbox   gdiam_approx_const_mvbb( gdiam_point  * start, int  size,
 
     //    printf( "Before computing second direction!\n" );
     //fflush( stdout );
-    pAlg->compute_by_heap_proj( eps, dir );
+    pAlg->compute_by_heap_proj( eps, dir );  // PROJECT POINTS INTO THE APPROX DIAM
     //printf( "second direction computed!\n" );
     //fflush( stdout );
 
-    pair_2 = pAlg->getDiameter();
+    pair_2 = pAlg->getDiameter(); // GET EXACT DIAM in DIRECTION
     dir_2[ 0 ] = pair_2.p[ 0 ] - pair_2.q[ 0 ];
     dir_2[ 1 ] = pair_2.p[ 1 ] - pair_2.q[ 1 ];
     dir_2[ 2 ] = pair_2.p[ 2 ] - pair_2.q[ 2 ];
@@ -2253,7 +2253,7 @@ gdiam_bbox   gdiam_mvbb_optimize( gdiam_point  * start, int  size,
 {
     gdiam_bbox  bb_tmp;
 
-    printf( "gdiam_mvbb_optimize called\n" );
+    //printf( "gdiam_mvbb_optimize called\n" );
 
     for  ( int  ind = 0; ind < times; ind++ ) {
         ProjPointSet  pps;
@@ -2341,8 +2341,8 @@ static void  try_direction( gdiam_bbox  & bb,
     if  ( ( x_coef == 0 )  &&  ( y_coef == 0 )
           &&  ( z_coef == 0 ) )
         return;
-    printf( "trying: (%d, %d, %d)\n",
-            x_coef, y_coef, z_coef );
+    //printf( "trying: (%d, %d, %d)\n",
+            //x_coef, y_coef, z_coef );
     //fflush( stdout );
     gdiam_point_t  new_dir;
     bb.combine( new_dir, x_coef, y_coef, z_coef );

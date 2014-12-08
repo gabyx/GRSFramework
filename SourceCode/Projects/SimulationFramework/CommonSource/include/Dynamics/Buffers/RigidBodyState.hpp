@@ -57,20 +57,41 @@ public:
         m_u  = body->get_u();
     }
 
+    void setDisplacement(const Vector3 & pos, const Quaternion & q){
+        m_q.template head<3>() = pos;
+        m_q.template tail<4>() = q.coeffs();
+    }
+
+    void setVelocity(const Vector3 & trans, const Vector3 & omega){
+        m_u.template head<3>() = trans;
+        m_u.template tail<3>() = omega;
+    }
+
     auto getPosition() -> decltype(m_q.template head<3>()) {
         return m_q.template head<3>();
     }
-
-    auto getPosition() const -> decltype(m_q.template head<3>()) {
+    auto getPosition() const -> const decltype(m_q.template head<3>()) & {
         return m_q.template head<3>();
     }
 
-    auto getVelocityTrans() -> decltype(m_u.template head<3>()){
-        return m_u.template head<3>();
+    auto getRotation() -> decltype(m_q.template tail<4>()) {
+        return m_q.template tail<4>();
+    }
+    auto getRotation() const -> const decltype(m_q.template tail<4>()) & {
+        return m_q.template tail<4>();
     }
 
-    auto getVelocityTrans() const -> decltype(m_u.template head<3>()) {
+    auto getVelocityTrans() -> decltype(m_u.template head<3>()) {
         return m_u.template head<3>();
+    }
+    auto getVelocityTrans() const -> decltype(m_u.template head<3>()) & {
+        return m_u.template head<3>();
+    }
+    auto  getVelocityRot() -> decltype(m_u.template tail<3>()){
+        return m_u.template tail<3>();
+    }
+     auto  getVelocityRot() const -> const decltype(m_u.template tail<3>()) &{
+        return m_u.template tail<3>();
     }
 
 };

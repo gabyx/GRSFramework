@@ -636,12 +636,12 @@ private:
     void serializeBodyUpdate(Archive & ar, RigidBodyType * body) const {
         //Position
         serializeEigen(ar,body->m_r_S);
-        serializeEigen(ar,body->m_q_KI);
+        serializeEigen(ar,body->m_q_KI.coeffs());
         LOGBC_SZ(m_pSerializerLog, "----->  m_r_S: " << body->m_r_S.transpose()<<std::endl;);
-        LOGBC_SZ(m_pSerializerLog, "----->  m_q_KI: " << body->m_q_KI.transpose()<<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "----->  m_q_KI: " << body->m_q_KI.coeffs().transpose()<<std::endl;);
 
         if(Archive::is_loading::value) {
-            QuaternionHelpers::setRotFromQuaternion(body->m_q_KI , body->m_A_IK);
+           body->m_A_IK =  body->m_q_KI.matrix(); //QuaternionHelpers::setRotFromQuaternion(body->m_q_KI , body->m_A_IK);
         }
 
         //Velocity
@@ -682,12 +682,12 @@ private:
 
         //Position
         serializeEigen(ar,body->m_r_S);
-        serializeEigen(ar,body->m_q_KI);
+        serializeEigen(ar,body->m_q_KI.coeffs());
         if(Archive::is_loading::value) {
-            QuaternionHelpers::setRotFromQuaternion(body->m_q_KI , body->m_A_IK);
+            body->m_A_IK =  body->m_q_KI.matrix();//QuaternionHelpers::setRotFromQuaternion(body->m_q_KI , body->m_A_IK);
         }
         LOGBC_SZ(m_pSerializerLog, "----->  m_r_S: " << body->m_r_S.transpose()<<std::endl;);
-        LOGBC_SZ(m_pSerializerLog, "----->  m_q_KI: " << body->m_q_KI.transpose()<<std::endl;);
+        LOGBC_SZ(m_pSerializerLog, "----->  m_q_KI: " << body->m_q_KI.coeffs().transpose()<<std::endl;);
 
         // Other Dynamics Stuff
         ar & body->m_mass;

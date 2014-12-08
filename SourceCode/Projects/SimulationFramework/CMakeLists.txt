@@ -26,9 +26,9 @@ ELSE()
     set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
 ENDIF()
 
-
+SET(SimulationFrameworkName "SimulationFramework")
 IF(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
-        SET(SimulationFrameworkName  "SimulationFramework ${CMAKE_BUILD_TYPE}")
+        SET(SimulationFrameworkName  ${SimulationFrameworkName} ${CMAKE_BUILD_TYPE}")
 ENDIF()
 
 MESSAGE(STATUS "Project name is: " ${SimulationFrameworkName})

@@ -136,6 +136,9 @@ class GridTopologyBuilder : public TopologyBuilder {
     friend class TopologyBuilderMessageWrapperOrientation<GridTopologyBuilder>;
 
 public:
+
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 

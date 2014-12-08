@@ -18,6 +18,7 @@ class GravityForceField{
     public:
 
         DEFINE_LAYOUT_CONFIG_TYPES
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         static const bool m_addCalculate = true;
         static const bool m_addSetTime = false;
@@ -50,7 +51,7 @@ class GravityForceField{
 
 class SpatialSphericalTimeRandomForceField{
     public:
-
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         DEFINE_LAYOUT_CONFIG_TYPES
 
         static const bool m_addCalculate = true; // Decide if we add a calculate(...) as a function pointer in the ExternalForceList.

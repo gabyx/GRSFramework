@@ -91,6 +91,10 @@ public:
     ~DynamicsSystemGUI(){
     }
 
+    inline  void afterFirstTimeStep() {};
+    inline  void afterSecondTimeStep() {};
+    void doInputTimeStep(PREC T) {};
+
     struct ParserModulesCreator{
         ParserModulesCreator( DynamicsSystemGUI * p): m_p(p){}
         DynamicsSystemGUI * m_p;

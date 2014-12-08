@@ -1,122 +1,45 @@
 ﻿#ifndef DynamicsSystemMPI_hpp
 #define DynamicsSystemMPI_hpp
 
-#include <vector>
-#include <list>
-
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"
 
 #include "SceneParserModules.hpp"
 #include "SceneParserModulesMPI.hpp"
 
-#include RigidBody_INCLUDE_FILE
-
-#include "RigidBodyContainer.hpp"
-#include "ContactParameterMap.hpp"
-#include "SimpleLogger.hpp"
-#include "ExternalForces.hpp"
-
-#include "InitialConditionBodies.hpp"
-
-#include "RecorderSettings.hpp"
-#include InclusionSolverSettings_INCLUDE_FILE
-#include "TimeStepperSettings.hpp"
+#include "DynamicsSystemBase.hpp"
 
 #include "MPITopologyBuilderSettings.hpp"
 
 
-class DynamicsSystemMPI {
+class DynamicsSystemMPI : public DynamicsSystemBase{
 public:
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    DEFINE_DYNAMICSYSTEM_BASE_TYPES
 
     DynamicsSystemMPI();
     ~DynamicsSystemMPI();
 
-    using RecorderSettingsType = RecorderSettings;
-    using TimeStepperSettingsType = TimeStepperSettings;
     using TopologyBuilderSettingsType = MPILayer::TopologyBuilderSettings;
 
-    using ContactParameterMapType = ContactParameterMap;
-    ContactParameterMapType m_ContactParameterMap;
-
-    using ExternalForceListType = ExternalForceList;
-    ExternalForceListType m_externalForces; ///< Special class of function objects
-
-    //All Global Geometries used in the System
-    typedef std::unordered_map< unsigned int /* id */, typename RigidBodyType::GeometryType> GlobalGeometryMapType;
-    GlobalGeometryMapType m_globalGeometries;
-
-    // All global RigidBodies Container for this Process, these bodies which are owned by this class!"============================
-    using RigidBodyContainerType = RigidBodyContainer;
-    using RigidBodySimContainerType = RigidBodyContainer;
-    RigidBodySimContainerType m_simBodies;        // simulated objects
     RigidBodySimContainerType m_remoteSimBodies;  // all remote bodies
 
     void deleteSimBodies(); ///< deletes all local and remote bodies, static bodies are not considered!
 
-    using RigidBodyStaticContainerType = RigidBodySimContainerType;
-    RigidBodySimContainerType m_staticBodies;        // all not simulated objects
-    // ============================================================================
-
-    //All initial conditions for all bodies
-    //We need an order, which is sorted according to the id!
-    using RigidBodyStatesContainerType = std::map<RigidBodyIdType, RigidBodyState>;
-    using RigidBodyStatesVectorType = std::vector<RigidBodyState>;
-    RigidBodyStatesContainerType m_bodiesInitStates;
-
-
     inline void addSimBodyPtr(RigidBodyType * ptr ) { m_simBodies.addBody(ptr); }
     inline void addBodyPtr(RigidBodyType * ptr ) { m_staticBodies.addBody(ptr); }
 
-    void initializeLog(Logging::Log* pLog);
-
-    void applyInitStatesToBodies();
-
-    void doFirstHalfTimeStep(PREC ts, PREC timestep);
-    void doSecondHalfTimeStep(PREC te, PREC timestep);
-
-    const RecorderSettingsType        & getSettingsRecorder() const;
-    const TimeStepperSettingsType     & getSettingsTimeStepper() const;
-    const InclusionSolverSettingsType & getSettingsInclusionSolver() const;
     const TopologyBuilderSettingsType & getSettingsTopoBuilder() const;
 
-    void getSettings(TimeStepperSettings &settingsTimestepper, InclusionSolverSettingsType &settingsInclusionSolver) const;
-
-    void setSettings(const RecorderSettings & settingsRecorder);
-    void setSettings(const TimeStepperSettings &settingsTimestepper);
-    void setSettings(const InclusionSolverSettingsType &settingsInclusionSolver);
-    void setSettings(const TimeStepperSettings &settingsTimestepper, const InclusionSolverSettingsType &settingsInclusionSolver);
-
-
-    void reset();
     inline  void afterFirstTimeStep() {};
     inline  void afterSecondTimeStep() {};
     void doInputTimeStep(PREC T) {};
 
-    PREC m_currentTotEnergy;
-    PREC m_currentPotEnergy;
-    PREC m_currentKinEnergy;
-    PREC m_currentTransKinEnergy;
-    PREC m_currentRotKinEnergy;
-    PREC m_currentSpinNorm;
-
 protected:
 
-
-    RecorderSettings m_settingsRecorder;
-    TimeStepperSettings m_settingsTimestepper;
-    InclusionSolverSettingsType m_settingsInclusionSolver;
     TopologyBuilderSettingsType m_settingsTopologyBuilder;
-
-    //Function
-    //This is a minimal update of F, no checking if constant values are correct
-    void updateFMatrix(const Quaternion & q, Matrix43 & F_i);
-
-    // Log
-    Logging::Log*	m_pSolverLog;
 
 public:
 
@@ -267,12 +190,6 @@ public:
      };
 
 };
-
-
-inline void DynamicsSystemMPI::applyInitStatesToBodies(){
-    // Apply all init states to the sim bodies
-    InitialConditionBodies::applyBodyStatesTo( m_bodiesInitStates, m_simBodies);
-}
 
 
 #endif

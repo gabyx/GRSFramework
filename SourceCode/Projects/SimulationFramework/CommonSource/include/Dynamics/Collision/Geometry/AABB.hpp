@@ -118,8 +118,8 @@ public:
                    p(2) >= m_minPoint(2) && p(2) <= m_maxPoint(2));
     };
 
-    inline Vector3 extent() const{
-        return m_maxPoint - m_minPoint;
+    inline Array3 extent() const{
+        return (m_maxPoint - m_minPoint).array();
     };
 
     inline PREC maxExtent() const{
@@ -181,7 +181,9 @@ public:
         m_maxPoint = Vector2(std::max(l(0),u(0)),std::max(l(1),u(1)));
     };
 
-    AABB2d& unite(const Vector2 &p) {
+    template<typename Derived>
+    AABB2d& unite(const MatrixBase<Derived> &p) {
+        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,2);
         m_maxPoint(0) = std::max(m_maxPoint(0),p(0));
         m_maxPoint(1) = std::max(m_maxPoint(1),p(1));
         m_minPoint(0) = std::min( m_minPoint(0),p(0));
@@ -223,8 +225,8 @@ public:
         return *this;
     };
 
-    Vector2 extent() const{
-        return m_maxPoint - m_minPoint;
+    Array2 extent() const{
+        return (m_maxPoint - m_minPoint).array();
     };
 
     PREC maxExtent() const{

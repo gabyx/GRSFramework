@@ -348,7 +348,8 @@ void printVectorNoCopy(Stream & ostr, const Iterator & itBegin, const Iterator &
 * @brief Converts a std::vector with column vectors from Eigen into a Eigen Matrix.
 */
 template <class PREC, std::size_t M, std::size_t N>
-void vec2Mat(const std::vector<Eigen::Matrix<PREC,M,1> > &vec, Eigen::Matrix<PREC,M,N> &A) {
+void vec2Mat(const typename MyMatrix<PREC>::template StdVecAligned<Eigen::Matrix<PREC,M,1> > &vec,
+             Eigen::Matrix<PREC,M,N> &A) {
     for(int i=0; i<vec.size(); i++) {
         A.col(i) = vec[i];
     }

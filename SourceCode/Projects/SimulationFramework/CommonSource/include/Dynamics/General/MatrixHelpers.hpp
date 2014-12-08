@@ -9,8 +9,6 @@
 #ifndef MatrixHelpers_hpp
 #define MatrixHelpers_hpp
 
-#include <Eigen/Dense>
-
 #include <boost/math/special_functions/fpclassify.hpp>
 
 #include "TypeDefs.hpp"

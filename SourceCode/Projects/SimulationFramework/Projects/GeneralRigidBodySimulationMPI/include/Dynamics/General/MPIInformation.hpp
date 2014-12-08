@@ -67,7 +67,7 @@ public:
     };
 
     void createProcTopoGrid(const AABB & aabb,
-                            const MyMatrix<unsigned int>::Vector3 & dim,
+                            const MyMatrix<unsigned int>::Array3 & dim,
                             bool aligned = true,
                             const Matrix33 & A_IK = Matrix33::Identity()){
 

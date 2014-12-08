@@ -19,7 +19,7 @@ class ContactGraphNodeData {
 public:
 
     DEFINE_LAYOUT_CONFIG_TYPES
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    // EIGEN_MAKE_ALIGNED_OPERATOR_NEW not required
 
     ContactGraphNodeData(): m_pCollData(nullptr) {
         m_W_body1.setZero();
@@ -46,7 +46,7 @@ class ContactGraphNodeDataIteration : public ContactGraphNodeData {
 public:
 
     DEFINE_LAYOUT_CONFIG_TYPES
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    // EIGEN_MAKE_ALIGNED_OPERATOR_NEW not required
 
     ContactGraphNodeDataIteration()
     {
@@ -100,7 +100,6 @@ class ContactGraphEdgeData {
 public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     ContactGraphEdgeData(): m_pBody(nullptr) {};
 

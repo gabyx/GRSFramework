@@ -6,6 +6,8 @@
     #include <boost/mpl/at.hpp>
     #include <boost/mpl/find.hpp>
     #include <boost/mpl/vector.hpp>
+    #include <boost/mpl/joint_view.hpp>
+
     #include <boost/filesystem.hpp>
 
     #include "TypeDefs.hpp"
@@ -16,27 +18,50 @@
 
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-        // TypeSequence
-        using TypeSeq = boost::mpl::vector<double,
-                                           float,
-                                           bool,
-                                           char,
-                                           short,
-                                           int,
-                                           long int,
-                                           long long int,
-                                           unsigned char,
-                                           unsigned short,
-                                           unsigned int,
-                                           unsigned long int,
-                                           unsigned long long int,
-                                           std::string,
-                                           boost::filesystem::path,
-                                           Vector3,
-                                           Quaternion,
-                                           VectorQBody,
-                                           VectorUBody,
-                                           RenderMaterial * >;
+        // The basic types
+        using TypeSeqBasic = boost::mpl::vector<double,
+                                               float,
+                                               bool,
+                                               char,
+                                               short,
+                                               int,
+                                               long int,
+                                               long long int,
+                                               unsigned char,
+                                               unsigned short,
+                                               unsigned int,
+                                               unsigned long int,
+                                               unsigned long long int,
+                                               std::string,
+                                               boost::filesystem::path>;
+
+        // Custom types
+        using TypeSeq = boost::mpl::vector<
+                                                    double,
+                                                    float,
+                                                    bool,
+                                                    char,
+                                                    short,
+                                                    int,
+                                                    long int,
+                                                    long long int,
+                                                    unsigned char,
+                                                    unsigned short,
+                                                    unsigned int,
+                                                    unsigned long int,
+                                                    unsigned long long int,
+                                                    std::string,
+                                                    boost::filesystem::path,
+                                                    Vector3,
+                                                    Quaternion,
+                                                    VectorQBody,
+                                                    VectorUBody,
+                                                    RenderMaterial * >;
+
+//       // The total type sequence!
+//       // TypeSequence for the template parameter T in LogicSocket<T>
+//       using TypeSeq = typename boost::mpl::joint_view< TypeSeqBasic , TypeSeqCustom>::type;
+
 
         #define LOGICSOCKET_CASE_SWITCH( N ) \
             case N: \

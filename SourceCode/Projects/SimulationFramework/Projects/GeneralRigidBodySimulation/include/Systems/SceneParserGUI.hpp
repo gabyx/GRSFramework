@@ -299,7 +299,7 @@ private:
 
             // Do some calculation becaus eOgre nees a correct UpVector ...
             Vector3 v1,v2;
-            makeCoordinateSystem<PREC>(normal,v1,v2);
+            CoordinateSystem::makeCoordinateSystem(normal,v1,v2);
 
             Ogre::MeshManager::getSingleton().createPlane(plane_name.str(),
                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane,
@@ -407,7 +407,7 @@ private:
                     ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
                 }
 
-                MyMatrix<unsigned int>::Vector3 dim;
+                MyMatrix<unsigned int>::Array3 dim;
                 if(!Utilities::stringToVector3(dim,  topo.attribute("dimension").value())) {
                     ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
                 }

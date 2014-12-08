@@ -768,7 +768,7 @@ namespace LogicNodes {
         void writePosQuat(std::stringstream & s) {
             static Matrix44 T = Matrix44::Identity();
 
-            QuaternionHelpers::setRotFromQuaternion(GET_ISOCKET_REF_VALUE(BodyOrientation), T.block<3,3>(0,0) );
+            T.block<3,3>(0,0) = GET_ISOCKET_REF_VALUE(BodyOrientation).matrix();
             T.row(3).head<3>() = GET_ISOCKET_REF_VALUE(BodyPosition);
               s << "ConcatTransform ["
 

@@ -5,6 +5,10 @@
 
 #include "TypeDefs.hpp"
 
+namespace CoordinateSystem {
+
+DEFINE_LAYOUT_CONFIG_TYPES
+
 /**
 * @ingroup Common
 * @defgroup MakeCoordinateSystem Make Coordinate System
@@ -17,15 +21,11 @@
 * @param v2 The first orthogonal output 3x1 vector.
 * @param v2 The second orthogonal output 3x1 vector.
 */
-template<typename PREC>
-inline void makeCoordinateSystem(      typename MyMatrix<PREC>::Vector3 &v1,
-                                       typename MyMatrix<PREC>::Vector3 &v2,
-                                       typename MyMatrix<PREC>::Vector3 &v3)
+
+inline void makeCoordinateSystem(      Vector3 &v1,
+                                       Vector3 &v2,
+                                       Vector3 &v3)
 {
-   /*ASSERTMSG(  v1.rows() == 3 && v1.cols()==1 &&
-               v2.rows() == 3 && v2.cols() == 1 &&
-               v3.rows() == 3 && v3.cols() == 1
-               , "IN: "<< v1.rows()<<","<<v1.cols()<<" OUT: "<< v2.rows()<<","<<v2.cols()<<"/"<<v3.rows()<<","<<v3.cols() );*/
 
    using std::abs;
    using std::sqrt;
@@ -48,10 +48,24 @@ inline void makeCoordinateSystem(      typename MyMatrix<PREC>::Vector3 &v1,
 };
 
 
-template<typename PREC>
-inline bool checkOrthogonality(typename MyMatrix<PREC>::Vector3 &v1,
-                               typename MyMatrix<PREC>::Vector3 &v2,
-                               typename MyMatrix<PREC>::Vector3 &v3,
+inline void makeZAxisUp(Matrix33 & A_IK){
+        // Make the z-Axis the axis which has the greatest z-component
+
+        if(A_IK(0,2) > A_IK(1,2) && A_IK(0,2) > A_IK(2,2)){
+           // x Axis becomes new z-Axis [x,y,z] -> [y,z,x]
+           A_IK.col(0).swap(A_IK.col(2));
+           A_IK.col(0).swap(A_IK.col(1));
+        }else if(A_IK(1,2) > A_IK(0,2) && A_IK(1,2) > A_IK(2,2)){
+            // y Axis becomes new z-Axis [x,y,z] -> [y,z,y]
+           A_IK.col(0).swap(A_IK.col(2));
+           A_IK.col(1).swap(A_IK.col(2));
+        }
+}
+
+
+inline bool checkOrthogonality(Vector3 &v1,
+                               Vector3 &v2,
+                               Vector3 &v3,
                                PREC eps = 1e-6)
 {
 
@@ -62,5 +76,7 @@ inline bool checkOrthogonality(typename MyMatrix<PREC>::Vector3 &v1,
 }
 
 /* @} */
+
+};
 
 #endif

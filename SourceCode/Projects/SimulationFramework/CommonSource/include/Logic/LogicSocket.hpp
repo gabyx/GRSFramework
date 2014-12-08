@@ -124,7 +124,8 @@ public:
         : LogicSocketBase(iter::pos::value, par, isInput, id), m_data(defaultValue) {
     }
 
-    void setValue(const T& value);
+    template<typename TIn>
+    void setValue(const TIn & value);
     T getValue() const;
 
     T& getRefValue();
@@ -140,7 +141,8 @@ private:
 #include "LogicNode.hpp"
 
 template<typename T>
-void LogicSocket<T>::setValue(const T& value) {
+template<typename TIn>
+void LogicSocket<T>::setValue(const TIn& value) {
     if(!m_isInput) {
         // set all "to" sockets
         for(auto & s : m_to) {
@@ -183,10 +185,10 @@ T & LogicSocket<T>::getRefValue() {
 
 
 #define SET_ISOCKET_VALUE( name, value )	\
-	setISocketValue< IType##name > ( (Inputs::name), (value) )
+	setISocketValue< IType##name > ( (Inputs::name), value )
 
 #define SET_OSOCKET_VALUE( name, value )	\
-	setOSocketValue< OType##name > ( (Outputs::name), (value) )
+	setOSocketValue< OType##name > ( (Outputs::name), value )
 
 
 

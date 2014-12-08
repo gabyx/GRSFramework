@@ -10,6 +10,7 @@ class HalfspaceGeometry : public PlaneGeometry {
 public:
 
     DEFINE_MATRIX_TYPES
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     HalfspaceGeometry(): PlaneGeometry() {};
     HalfspaceGeometry( const Vector3 & n, const Vector3 & p ): PlaneGeometry(n,p){};
