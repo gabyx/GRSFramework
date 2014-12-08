@@ -1,5 +1,5 @@
-#ifndef GMSF_Converters_RenderScriptConverter_hpp
-#define GMSF_Converters_RenderScriptConverter_hpp
+#ifndef RenderScriptConverter_hpp
+#define RenderScriptConverter_hpp
 
 #include <iostream>
 #include <iomanip>

@@ -1,5 +1,5 @@
-#ifndef GMSF_General_RenderMaterial_hpp
-#define GMSF_General_RenderMaterial_hpp
+    #ifndef RenderMaterial_hpp
+    #define RenderMaterial_hpp
 
     #include "TypeDefs.hpp"
 

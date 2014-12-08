@@ -1,5 +1,5 @@
-#ifndef GMSF_General_RenderScriptParserModules_hpp
-#define GMSF_General_RenderScriptParserModules_hpp
+#ifndef RenderScriptParserModules_hpp
+#define RenderScriptParserModules_hpp
 
 
 #include <vector>

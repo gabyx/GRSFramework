@@ -1,5 +1,5 @@
-#ifndef GMSF_General_RenderScriptParserBaseTraits_hpp
-#define GMSF_General_RenderScriptParserBaseTraits_hpp
+#ifndef RenderScriptParserBaseTraits_hpp
+#define RenderScriptParserBaseTraits_hpp
 
 #include "SimpleLogger.hpp"
 #include "pugixml.hpp"

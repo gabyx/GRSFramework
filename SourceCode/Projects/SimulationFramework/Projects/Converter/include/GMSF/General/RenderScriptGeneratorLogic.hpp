@@ -1,5 +1,5 @@
-#ifndef GMSF_General_RenderScriptGeneratorLogic_hpp
-#define GMSF_General_RenderScriptGeneratorLogic_hpp
+#ifndef  RenderScriptGeneratorLogic_hpp
+#define  RenderScriptGeneratorLogic_hpp
 
 #include <stdio.h>
 #include <stdlib.h>

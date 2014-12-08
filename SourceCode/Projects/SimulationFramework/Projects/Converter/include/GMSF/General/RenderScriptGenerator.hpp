@@ -1,5 +1,5 @@
-#ifndef GMSF_General_RenderScriptGenerator_hpp
-#define GMSF_General_RenderScriptGenerator_hpp
+#ifndef  RenderScriptGenerator_hpp
+#define  RenderScriptGenerator_hpp
 
 #include "TypeDefs.hpp"
 #include "LogDefines.hpp"

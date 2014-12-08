@@ -1,5 +1,5 @@
-#ifndef GMSF_General_RenderScriptParserGenerators_hpp
-#define GMSF_General_RenderScriptParserGenerators_hpp
+#ifndef RenderScriptParserGenerators_hpp
+#define RenderScriptParserGenerators_hpp
 
 
 #include "TypeDefs.hpp"

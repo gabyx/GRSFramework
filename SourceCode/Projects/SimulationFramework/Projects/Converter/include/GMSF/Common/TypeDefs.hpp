@@ -4,8 +4,10 @@
  *  Created by Gabriel Nützi on 21.03.10.
  *  Copyright 2010 ETH. All rights reserved.
  *
- */#ifndef GMSF_Common_TypeDefs_hpp
-#define GMSF_Common_TypeDefs_hpp
+ */
+
+#ifndef TypeDefs_hpp
+#define TypeDefs_hpp
 
 #include "LayoutConfigDefs.hpp"
 

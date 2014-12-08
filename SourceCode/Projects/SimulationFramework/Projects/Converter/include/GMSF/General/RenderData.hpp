@@ -1,5 +1,5 @@
-#ifndef GMSF_General_RenderData_hpp
-#define GMSF_General_RenderData_hpp
+#ifndef RenderData_hpp
+#define RenderData_hpp
 
 
 #include "TypeDefs.hpp"

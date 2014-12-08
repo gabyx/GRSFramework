@@ -4,8 +4,10 @@
  *  Created by Gabriel Nützi on 21.03.10.
  *  Copyright 2010 ETH. All rights reserved.
  *
- */#ifndef GMSF_Common_LogDefines_hpp
-#define GMSF_Common_LogDefines_hpp
+ */
+
+#ifndef LogDefines_hpp
+#define LogDefines_hpp
 
 
 /** @name Global Log Macros

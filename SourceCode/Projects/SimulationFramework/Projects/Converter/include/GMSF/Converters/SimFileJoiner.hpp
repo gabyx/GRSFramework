@@ -1,5 +1,5 @@
-#ifndef GMSF_Converters_SimFileJoiner_hpp
-#define GMSF_Converters_SimFileJoiner_hpp
+#ifndef SimFileJoiner_hpp
+#define SimFileJoiner_hpp
 
 #include <iostream>
 #include <iomanip>

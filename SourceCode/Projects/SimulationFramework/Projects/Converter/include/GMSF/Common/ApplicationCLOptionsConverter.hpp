@@ -1,5 +1,5 @@
-#ifndef GMSF_Common_ApplicationCLOptionsConverter_hpp
-#define GMSF_Common_ApplicationCLOptionsConverter_hpp
+#ifndef ApplicationCLOptionsConverter_hpp
+#define ApplicationCLOptionsConverter_hpp
 
 
 #include <string>
