@@ -60,80 +60,80 @@ endif()
 SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
 
 SET( APP_INC
-    ${PROJECT_SOURCE_DIR}/include/App/App.hpp
-    ${PROJECT_SOURCE_DIR}/include/App/MenuMouse.hpp
-    ${PROJECT_SOURCE_DIR}/include/App/OrbitCamera.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/App/App.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/App/MenuMouse.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/App/OrbitCamera.hpp
 )
 SET( APP_SRC
-    ${PROJECT_SOURCE_DIR}/src/App/App.cpp
-    ${PROJECT_SOURCE_DIR}/src/App/MenuMouse.cpp
-    ${PROJECT_SOURCE_DIR}/src/App/OrbitCamera.cpp
-    ${PROJECT_SOURCE_DIR}/src/App/main.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/App/App.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/App/MenuMouse.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/App/OrbitCamera.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/App/main.cpp
 
 )
 
 SET(SINGELTON_INC
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts/GuiContext.hpp
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts/InputContext.hpp
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts/RenderContext.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Singeltons/Contexts/GuiContext.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Singeltons/Contexts/InputContext.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Singeltons/Contexts/RenderContext.hpp
 )
 
 SET( SINGELTON_SRC
-    ${PROJECT_SOURCE_DIR}/src/Singeltons/Contexts/GuiContext.cpp
-    ${PROJECT_SOURCE_DIR}/src/Singeltons/Contexts/InputContext.cpp
-    ${PROJECT_SOURCE_DIR}/src/Singeltons/Contexts/RenderContext.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/Singeltons/Contexts/GuiContext.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/Singeltons/Contexts/InputContext.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/Singeltons/Contexts/RenderContext.cpp
 )
 
 SET( STATES_INC
-    ${PROJECT_SOURCE_DIR}/include/States/AppState.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/AppStateManager.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationState.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/PlaybackState.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/VideoDropper.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManagerBase.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManagerGUI.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackManagerBase.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackManager.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackLoader.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/States/AppState.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/States/AppStateManager.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/States/SimulationState.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/States/PlaybackState.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/States/VideoDropper.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/States/SimulationManager/SimulationManagerBase.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/States/SimulationManager/SimulationManagerGUI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/States/SimulationManager/PlaybackManagerBase.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/States/SimulationManager/PlaybackManager.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/States/SimulationManager/PlaybackLoader.hpp
 )
 SET(STATES_SRC
-    ${PROJECT_SOURCE_DIR}/src/States/SimulationManager/PlaybackManager.cpp
-    ${PROJECT_SOURCE_DIR}/src/States/SimulationManager/SimulationManagerGUI.cpp
-    ${PROJECT_SOURCE_DIR}/src/States/AppStateManager.cpp
-    ${PROJECT_SOURCE_DIR}/src/States/SimulationState.cpp
-    ${PROJECT_SOURCE_DIR}/src/States/PlaybackState.cpp
-    ${PROJECT_SOURCE_DIR}/src/States/SimulationManager/SimulationManagerBase.cpp
-    ${PROJECT_SOURCE_DIR}/src/States/SimulationManager/PlaybackManagerBase.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/States/SimulationManager/PlaybackManager.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/States/SimulationManager/SimulationManagerGUI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/States/AppStateManager.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/States/SimulationState.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/States/PlaybackState.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/States/SimulationManager/SimulationManagerBase.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/States/SimulationManager/PlaybackManagerBase.cpp
 )
 
 SET(COMMON_INC
-    ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/OgreMeshExtraction.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/AxisObject.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/DynamicLines.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/DynamicRenderable.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/CommonFunctionsOgre.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/OgreMeshExtraction.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/AxisObject.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/DynamicLines.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/DynamicRenderable.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/CommonFunctionsOgre.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/LogDefines.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/AssertionDebug.hpp
 )
 SET(COMMON_SRC
-    ${PROJECT_SOURCE_DIR}/src/Common/OgreMeshExtraction.cpp
-    ${PROJECT_SOURCE_DIR}/src/Common/AxisObject.cpp
-    ${PROJECT_SOURCE_DIR}/src/Common/DynamicLines.cpp
-    ${PROJECT_SOURCE_DIR}/src/Common/DynamicRenderable.cpp
-    ${PROJECT_SOURCE_DIR}/src/Common/CommonFunctionsOgre.cpp
-    ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/Common/OgreMeshExtraction.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/Common/AxisObject.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/Common/DynamicLines.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/Common/DynamicRenderable.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/Common/CommonFunctionsOgre.cpp
+    ${PROJECT_SOURCE_DIR}/src/GMSF/Common/TypeDefs.cpp
 )
 
 SET(DYNAMICS_INC
-     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemGUI.hpp
+     ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/DynamicsSystemGUI.hpp
 )
 SET(DYNAMICS_SRC
-     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/DynamicsSystemGUI.cpp
+     ${PROJECT_SOURCE_DIR}/src/GMSF/Dynamics/General/DynamicsSystemGUI.cpp
 )
 
 SET(SYSTEMS_INC
-    ${PROJECT_SOURCE_DIR}/include/Systems/SceneParserGUI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GMSF/Systems/SceneParserGUI.hpp
 )
 
 SET(SYSTEMS_SRC
@@ -177,7 +177,7 @@ endif()
 
 # WRITE CONFIGURATION FILE
 configure_file (
-  ${PROJECT_SOURCE_DIR}/include/ConfigFiles/ConfigureFile.hpp.in
+  ${PROJECT_SOURCE_DIR}/include/GMSF/ConfigFiles/ConfigureFile.hpp.in
   ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
 )
 #=========================
@@ -226,17 +226,9 @@ set(INCLUDE_DIRS
 
 
     ${PROJECT_BINARY_DIR}/ConfigFiles/
-    ${PROJECT_SOURCE_DIR}/include/App
-    ${PROJECT_SOURCE_DIR}/include/Common
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/
-    ${PROJECT_SOURCE_DIR}/include/States
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager
-    ${PROJECT_SOURCE_DIR}/include/Systems
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/
+    ${PROJECT_SOURCE_DIR}/include/
 
     ${GLOBAL_COMMON_INC_DIR}
-
 
     ${CUDA_COMMON_INCLUDE_DIR}
 )

@@ -1,0 +1,246 @@
+
+#include "GMSF/Dynamics/Inclusion/ContactGraphMPI.hpp"
+
+
+#include "GMSF/Dynamics/Inclusion/ContactFeasibilityTable.hpp"
+
+template<typename TCombo>
+ContactGraph<TCombo>::ContactGraph(std::shared_ptr<DynamicsSystemType> pDynSys):
+    m_pDynSys(pDynSys),
+    m_pContactParameterMap(&pDynSys->m_ContactParameterMap)
+{}
+template<typename TCombo>
+void ContactGraph<TCombo>::setInclusionCommunicator(InclusionCommunicatorType * pInclusionComm) {
+    m_pInclusionComm = pInclusionComm;
+    m_pNbDataMap = m_pInclusionComm->getNeighbourMap();
+}
+template<typename TCombo>
+ContactGraph<TCombo>::~ContactGraph() {
+    clearGraph();
+}
+template<typename TCombo>
+void ContactGraph<TCombo>::setLog(Logging::Log * solverLog) {
+    m_pSolverLog = solverLog;
+}
+template<typename TCombo>
+void ContactGraph<TCombo>::clearGraph() {
+
+    // This deletes all nodes, edges
+    // cleanup allocated memory
+    deleteNodesAndEdges();
+
+    m_edgeCounter = 0;
+    m_nodeCounter = 0;
+
+    //clear own lists
+    m_localNodes.clear();
+    m_remoteNodes.clear();
+
+    m_localBodiesWithContacts.clear();
+    m_remoteBodiesWithContacts.clear();
+
+    for(auto & n : m_splittedNodes) {
+        delete (n.second);
+    }
+    m_splittedNodes.clear();
+
+    m_usedContactModels = 0;
+    m_maxResidual = 0;
+
+}
+template<typename TCombo>
+void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
+
+
+    ASSERTMSG(pCollData->m_pBody1 != nullptr && pCollData->m_pBody2 != nullptr, " Bodys are null pointers?");
+    //cout << "add node : "<<m_nodeCounter<< " body id:" << RigidBodyId::getBodyIdString(pCollData->m_pBody1) <<" and "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2) <<endl;
+
+    //  add a contact node to the graph
+    // check to which nodes we need to connect?
+    // all nodes (contacts) which are in the BodyContactList (maps bodies -> contacts)
+
+    // Check that contact is Local-Local or Remote-Local or Local-Remote
+    // So Fail if Remote-Remote
+    std::pair<bool,bool> isRemote;
+    bool feasible = ContactFeasibilityTableMPI::checkFeasibilityOfContact(pCollData->m_pBody1, pCollData->m_pBody2 , isRemote );
+    LOGASSERTMSG(feasible, m_pSolverLog, "Contact not feasible between body:  id1: "
+                 <<RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << " and id2: " <<RigidBodyId::getBodyIdString(pCollData->m_pBody2->m_id) )
+
+    // add the pNodeData to the node list
+    NodeType * addedNode = new NodeType(m_nodeCounter);
+    //Add collision data
+    addedNode->m_nodeData.m_pCollData = pCollData;
+
+    // Add to Remote or Local list
+    bool firstBodyGetSplitted = true; // For remote-remote contact
+
+    if(isRemote.first or isRemote.second) {
+        //Remote - Remote or Remote-Local Contacts
+
+        if(!isRemote.first or !isRemote.second){
+            // Remote-Local or Remote-Remote
+            //set the node color
+            addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
+            m_remoteNodes.push_back(addedNode); // Add to remote list
+            this->m_nodes.push_back(addedNode); // Add to general list
+        }else{
+            //Remote-Remote contact
+            addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
+            m_remoteNodes.push_back(addedNode); // Add to remote list
+            this->m_nodes.push_back(addedNode); // Add to general list
+        }
+
+    } else {
+        // Local - Local Contacts
+        //set the node color
+        addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::LOCALNODE);
+        m_localNodes.push_back(addedNode);
+        this->m_nodes.push_back(addedNode);
+    }
+
+
+    // Compute general parameters for the contact
+    setContactModel(addedNode->m_nodeData);
+
+    // FIRST BODY!
+    RigidBodyType * pBody = addedNode->m_nodeData.m_pCollData->m_pBody1;
+    if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+        initNodeSimBody<1,false>(addedNode,pBody,isRemote.first);
+    }else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
+        ERRORMSG("ContactGraph:: Animated body, node init not implemented")
+    }
+
+    // SECOND BODY!
+    pBody = addedNode->m_nodeData.m_pCollData->m_pBody2;
+    if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+       initNodeSimBody<2,false>(addedNode,pBody,isRemote.second);
+    }else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
+       ERRORMSG("ContactGraph:: Animated body, node init not implemented")
+    }
+
+
+    m_nodeCounter++;
+}
+
+template<typename TCombo>
+template<int bodyNr, bool addEdges>
+void ContactGraph<TCombo>::initNodeSimBody(NodeType * pNode, RigidBodyType * pBody, bool isRemote) {
+
+
+    //Add to the neighbour data if remote contact
+    if(isRemote) {
+        m_remoteBodiesWithContacts.addBody(pBody);
+            LOGSLLEVEL2_CONTACT(m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pBody->m_id) << std::endl;)
+        if(pNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE)){
+            m_pNbDataMap->getNeighbourData(pBody->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pBody);
+            // if this body is already added it does nothing!
+        }else{
+            ASSERTMSG(false, "Somthing wrong with node color!")
+        }
+
+    }else{
+        m_localBodiesWithContacts.addBody(pBody);
+    }
+
+    //Set Flag that this Body is in ContactGraph
+    pBody->m_pSolverData->m_bInContactGraph = true;
+    // Unset the flag when this Node is removed;
+
+    //Link to FrontBackBuffer
+    if(bodyNr==1){
+        pNode->m_nodeData.m_u1BufferPtr = & pBody->m_pSolverData->m_uBuffer;
+    }else{
+        pNode->m_nodeData.m_u2BufferPtr = & pBody->m_pSolverData->m_uBuffer;
+    }
+
+
+//    if( addEdges ){
+//        // Add self edge! ===========================================================
+//        EdgeType * addedEdge;
+//        this->m_edges.push_back(new EdgeType(m_edgeCounter));
+//        addedEdge = this->m_edges.back();
+//        addedEdge->m_edgeData.m_pBody = pBody;
+//
+//        // add links
+//        addedEdge->m_startNode = pNode;
+//        addedEdge->m_endNode = pNode;
+//        addedEdge->m_twinEdge = this->m_edges.back(); // Current we dont need a twin edge, self referencing!
+//        // Add the edge to the nodes edge list!
+//        pNode->m_edgeList.push_back( addedEdge );
+//        m_edgeCounter++;
+//        //cout << "add self edge: "<<pNode->m_nodeNumber<<" to "<<pNode->m_nodeNumber<<" body Id:"<< RigidBodyId::getBodyIdString(pBody)<<endl;
+//        // ===========================================================================
+//
+//        // iterate over the nodeList and add edges!
+//        // if no contacts are already on the body we skip this
+//        auto itEnd = nodeList.end();
+//        for(auto it = nodeList.begin(); it != itEnd; ++it) {
+//
+//            this->m_edges.push_back(new EdgeType(m_edgeCounter));
+//            addedEdge = this->m_edges.back();
+//            addedEdge->m_edgeData.m_pBody = pBody;
+//            // add link
+//            addedEdge->m_startNode = pNode;
+//            addedEdge->m_endNode = (*it);
+//            addedEdge->m_twinEdge = addedEdge; // Current we dont need a twin edge, self referencing!
+//            // Add the edge to the nodes edge list!
+//            pNode->m_edgeList.push_back( addedEdge );
+//            (*it)->m_edgeList.push_back( addedEdge );
+//            m_edgeCounter++;
+//            //cout << "add edge: "<<pNode->m_nodeNumber<<" to "<<(*it)->m_nodeNumber<<" body Id:"<< RigidBodyId::getBodyIdString(pBody)<<endl;
+//        }
+//    }
+
+}
+
+
+template<typename TCombo>
+std::pair<typename ContactGraph<TCombo>::SplitBodyNodeDataType *, bool> ContactGraph<TCombo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & rank) {
+
+    auto pairRes = m_splittedNodes.insert(
+                       SplitBodyNodeDataListType::value_type(body->m_id, (SplitBodyNodeDataType*) nullptr )
+                   );
+
+    if(pairRes.second) {
+        //if insered set the new pointer
+        pairRes.first->second = new SplitBodyNodeDataType(body);
+    }
+
+    LOGASSERTMSG(pairRes.first->second,m_pSolverLog, "SplitBodyNode pointer of body " << RigidBodyId::getBodyIdString(body->m_id) << " is zero!")
+    //Set rank
+    bool added = pairRes.first->second->addRank(rank);
+    LOGASSERTMSG(added,m_pSolverLog, "Rank could not been added to SplitBodyNode with id: " << RigidBodyId::getBodyIdString(body->m_id))
+
+    return std::pair<SplitBodyNodeDataType *, bool>(pairRes.first->second, pairRes.second);
+}
+
+
+template<typename TCombo>
+void ContactGraph<TCombo>::setContactModel(NodeDataType & nodeData) {
+
+     // Specify the contact model
+        nodeData.m_contactParameter  = m_pContactParameterMap->getContactParams(nodeData.m_pCollData->m_pBody1->m_eMaterial,
+                                                                                nodeData.m_pCollData->m_pBody2->m_eMaterial);
+
+        if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF  ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD ||
+            nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFDD
+          ) {
+            // Set flag for the corresponding model
+            m_usedContactModels |= 1 << EnumConversion::toIntegral(nodeData.m_contactParameter.m_contactModel);
+
+            //Set the minmial stuff
+            const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
+            nodeData.m_eps.setZero(dimSet);
+            nodeData.m_chi.setZero(dimSet);
+
+            // Set epsilon  values
+            using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
+            nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[CMT::epsNIdx];
+            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[CMT::epsTIdx];
+            nodeData.m_eps(2) = nodeData.m_eps(1);
+
+        } else {
+            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
+        }
+}

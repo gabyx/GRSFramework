@@ -1,85 +1,85 @@
 MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
     SET(${INC}
-        ${COMMONSOURCE_DIR}/include/Singeltons/FileManager.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Singeltons/FileManager.hpp
 
-        ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
-        ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
-        ${COMMONSOURCE_DIR}/include/Common/BitCount.hpp
-        ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
-        ${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
-        ${COMMONSOURCE_DIR}/include/Common/TypenameComparision.hpp
-        ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
-        ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
-        ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp
-        ${COMMONSOURCE_DIR}/include/Common/CPUTimer.hpp
-        ${COMMONSOURCE_DIR}/include/Common/XMLMacros.hpp
-        ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/PlatformDefines.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/CommonFunctions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/BitCount.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/Singleton.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/SimpleLogger.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/TypenameComparision.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/BinaryFile.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/ApplicationCLOptions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/Delegates.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/CPUTimer.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/XMLMacros.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/foreach_macro.hpp
         
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MyMatrixDefs.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/LayoutConfigDefs.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MeshData.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MultiBodySimFile.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MakeCoordinateSystem.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/VectorToSkewMatrix.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MatrixHelpers.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/QuaternionHelpers.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystemBase.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodySolverData.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MoreauTimeStepper.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/AddGyroTermVisitor.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactFrame.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionSolver.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionFunctions.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/AABB.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/Ray.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/SphereGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/PlaneGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameterMap.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameter.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitors.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphNodeData.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCONoG.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettings.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/FrontBackBuffer.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorder.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RigidBodyState.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MyMatrixDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/LayoutConfigDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MeshData.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MultiBodySimFile.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MakeCoordinateSystem.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/VectorToSkewMatrix.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MatrixHelpers.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/QuaternionHelpers.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/DynamicsSystem.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/DynamicsSystemBase.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/ExternalForces.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodyId.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBody.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodySolverData.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodyContainer.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MoreauTimeStepper.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/TimeStepperSettings.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/InitialConditionBodies.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/InertiaTensorCalculations.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/AddGyroTermVisitor.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/ContactFrame.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionData.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionSolver.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionFunctions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Collider.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/ContactTag.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/ContactPercussion.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/AABB.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/Ray.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/PlaneGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/BoxGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/MeshGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactParameterMap.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactParameter.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactModels.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraph.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphVisitors.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphNodeData.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/GeneralGraph.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/PercussionPool.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverNT.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverCO.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ProxFunctions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ConvexSets.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverSettings.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/FrontBackBuffer.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRecorder.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRecorderResampler.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/DynamicsState.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/RigidBodyState.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/RecorderSettings.hpp
 
-        ${COMMONSOURCE_DIR}/include/Systems/SceneParser.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Systems/SceneParser.hpp
 
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePool.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePoolVisBackFront.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/SharedBufferPlayback.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StatePool.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StatePoolVisBackFront.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/SharedBufferPlayback.hpp
 
-        ${COMMONSOURCE_DIR}/include/Systems/SharedBufferDynSys.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Systems/SharedBufferDynSys.hpp
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
@@ -88,34 +88,34 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
 
     SET(${SRC}
-        ${COMMONSOURCE_DIR}/src/Singeltons/FileManager.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Singeltons/FileManager.cpp
 
-        ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
-        ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
-        ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
-        ${COMMONSOURCE_DIR}/src/Common/BitCount.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/MyMatrixDefs.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/CommonFunctions.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/SimpleLogger.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/ApplicationCLOptions.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/BitCount.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/MyMatrixDefs.cpp
 
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/MultiBodySimFile.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoG.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCO.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionSolver.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/MoreauTimeStepper.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Collider.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StateRecorder.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StatePoolVisBackFront.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystem.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystemBase.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/BoxGeometry.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/Ray.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ConvexSets.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactModels.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactParameterMap.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/MultiBodySimFile.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/InclusionSolverCONoG.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/InclusionSolverCO.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/CollisionSolver.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/MoreauTimeStepper.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/Collider.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Buffers/StateRecorder.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Buffers/StatePoolVisBackFront.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/DynamicsSystem.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/DynamicsSystemBase.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/InitialConditionBodies.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/CollisionData.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/ContactTag.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/Geometry/BoxGeometry.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/Geometry/Ray.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ConvexSets.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ContactModels.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ContactParameterMap.cpp
 
-        ${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StatePoolVisBackFront.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Buffers/StatePoolVisBackFront.cpp
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
@@ -123,7 +123,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
-        ${COMMONSOURCE_DIR}/include/Common
+        ${COMMONSOURCE_DIR}/include/
         ${COMMONSOURCE_DIR}/external/tinyformat/
         ${COMMONSOURCE_DIR}/external/SRDelegates/include/
         ${COMMONSOURCE_DIR}/external/FastFunc/include/
@@ -131,14 +131,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
         ${COMMONSOURCE_DIR}/external/libgdiam/
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry
-        ${COMMONSOURCE_DIR}/include/Dynamics/General
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion
-        ${COMMONSOURCE_DIR}/include/Systems
-        ${COMMONSOURCE_DIR}/include/Singeltons
-        ${COMMONSOURCE_DIR}/include/States
     )
 endmacro(INCLUDE_SIMULATION_FRAMEWORK_GUI)
 
@@ -150,84 +142,84 @@ endmacro(INCLUDE_SIMULATION_FRAMEWORK_NOGUI)
 MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
     
     SET(${INC}
-        ${COMMONSOURCE_DIR}/include/Singeltons/FileManager.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Singeltons/FileManager.hpp
 
-        ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
-        ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
-        ${COMMONSOURCE_DIR}/include/Common/BitCount.hpp
-        ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
-        ${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
-        ${COMMONSOURCE_DIR}/include/Common/TypenameComparision.hpp
-        ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
-        ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
-        ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp
-        ${COMMONSOURCE_DIR}/include/Common/CPUTimer.hpp
-        ${COMMONSOURCE_DIR}/include/Common/XMLMacros.hpp
-        ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/PlatformDefines.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/CommonFunctions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/BitCount.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/Singleton.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/SimpleLogger.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/TypenameComparision.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/BinaryFile.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/ApplicationCLOptions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/Delegates.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/CPUTimer.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/XMLMacros.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/foreach_macro.hpp
         
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MyMatrixDefs.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/LayoutConfigDefs.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MeshData.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MultiBodySimFile.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MakeCoordinateSystem.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/VectorToSkewMatrix.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MatrixHelpers.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/QuaternionHelpers.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystemBase.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodySolverData.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/General/MoreauTimeStepper.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/AddGyroTermVisitor.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactFrame.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionSolver.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionFunctions.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/AABB.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/Ray.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/SphereGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/PlaneGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameterMap.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameter.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphNodeData.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCONoG.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettings.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/FrontBackBuffer.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorder.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RigidBodyState.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MyMatrixDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/LayoutConfigDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MeshData.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MultiBodySimFile.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MakeCoordinateSystem.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/VectorToSkewMatrix.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MatrixHelpers.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/QuaternionHelpers.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/DynamicsSystem.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/DynamicsSystemBase.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/ExternalForces.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodyId.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBody.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodySolverData.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodyContainer.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MoreauTimeStepper.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/TimeStepperSettings.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/InitialConditionBodies.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/InertiaTensorCalculations.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/AddGyroTermVisitor.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/ContactFrame.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionData.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionSolver.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionFunctions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Collider.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/ContactTag.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/ContactPercussion.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/AABB.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/Ray.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/PlaneGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/BoxGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/MeshGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactParameterMap.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactParameter.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactModels.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraph.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphNodeData.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/GeneralGraph.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/PercussionPool.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverNT.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverCO.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ProxFunctions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ConvexSets.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverSettings.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/FrontBackBuffer.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRecorder.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRecorderResampler.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/DynamicsState.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/RigidBodyState.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/RecorderSettings.hpp
 
-        ${COMMONSOURCE_DIR}/include/Systems/SceneParser.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Systems/SceneParser.hpp
 
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePool.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePoolVisBackFront.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/SharedBufferPlayback.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StatePool.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StatePoolVisBackFront.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/SharedBufferPlayback.hpp
 
-        ${COMMONSOURCE_DIR}/include/Systems/SharedBufferDynSys.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Systems/SharedBufferDynSys.hpp
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
@@ -236,34 +228,34 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
 
     SET(${SRC}
-        ${COMMONSOURCE_DIR}/src/Singeltons/FileManager.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Singeltons/FileManager.cpp
 
-        ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
-        ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
-        ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
-        ${COMMONSOURCE_DIR}/src/Common/BitCount.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/CommonFunctions.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/SimpleLogger.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/ApplicationCLOptions.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/BitCount.cpp
         
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/MyMatrixDefs.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/MultiBodySimFile.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoG.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCO.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionSolver.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/General/MoreauTimeStepper.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Collider.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StateRecorder.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StatePoolVisBackFront.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystem.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystemBase.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/BoxGeometry.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/Ray.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ConvexSets.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactModels.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactParameterMap.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/MyMatrixDefs.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/MultiBodySimFile.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/InclusionSolverCONoG.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/InclusionSolverCO.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/CollisionSolver.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/MoreauTimeStepper.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/Collider.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Buffers/StateRecorder.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Buffers/StatePoolVisBackFront.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/DynamicsSystem.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/DynamicsSystemBase.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/InitialConditionBodies.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/CollisionData.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/ContactTag.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/Geometry/BoxGeometry.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/Geometry/Ray.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ConvexSets.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ContactModels.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ContactParameterMap.cpp
 
-        #${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StatePoolVisBackFront.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Buffers/StatePoolVisBackFront.cpp
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
@@ -271,7 +263,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
-        ${COMMONSOURCE_DIR}/include/Common
+        ${COMMONSOURCE_DIR}/include/
         ${COMMONSOURCE_DIR}/external/tinyformat/
         ${COMMONSOURCE_DIR}/external/SRDelegates/include/
         ${COMMONSOURCE_DIR}/external/FastFunc/include/
@@ -279,105 +271,97 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
         ${COMMONSOURCE_DIR}/external/libgdiam/
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry
-        ${COMMONSOURCE_DIR}/include/Dynamics/General
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion
-        ${COMMONSOURCE_DIR}/include/Systems
-        ${COMMONSOURCE_DIR}/include/Singeltons
-        ${COMMONSOURCE_DIR}/include/States
     )
 endmacro(INCLUDE_SIMULATION_FRAMEWORK_MPI)
 
 MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
     SET(${INC}
-        ${COMMONSOURCE_DIR}/include/Singeltons/FileManager.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Singeltons/FileManager.hpp
 
-        ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
-        ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
-        ${COMMONSOURCE_DIR}/include/Common/BitCount.hpp
-        ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
-        ${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
-        ${COMMONSOURCE_DIR}/include/Common/TypenameComparision.hpp
-        ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
-        ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
-        ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp
-        ${COMMONSOURCE_DIR}/include/Common/CPUTimer.hpp
-        ${COMMONSOURCE_DIR}/include/Common/XMLMacros.hpp
-        ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/PlatformDefines.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/CommonFunctions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/BitCount.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/Singleton.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/SimpleLogger.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/TypenameComparision.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/BinaryFile.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/ApplicationCLOptions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/Delegates.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/CPUTimer.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/XMLMacros.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/foreach_macro.hpp
         
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MyMatrixDefs.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/LayoutConfigDefs.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MeshData.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MultiBodySimFile.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MakeCoordinateSystem.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/VectorToSkewMatrix.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MatrixHelpers.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/QuaternionHelpers.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystemBase.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodySolverData.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/General/MoreauTimeStepper.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/AddGyroTermVisitor.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactFrame.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionSolver.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionFunctions.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/AABB.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/Ray.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/SphereGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/PlaneGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameterMap.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameter.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphNodeData.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCONoG.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettings.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/FrontBackBuffer.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorder.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RigidBodyState.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MyMatrixDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/LayoutConfigDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MeshData.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MultiBodySimFile.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MakeCoordinateSystem.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/VectorToSkewMatrix.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MatrixHelpers.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/QuaternionHelpers.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/DynamicsSystem.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/DynamicsSystemBase.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/ExternalForces.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodyId.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBody.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodySolverData.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodyContainer.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MoreauTimeStepper.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/TimeStepperSettings.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/InitialConditionBodies.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/InertiaTensorCalculations.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/AddGyroTermVisitor.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/ContactFrame.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionData.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionSolver.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionFunctions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Collider.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/ContactTag.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/ContactPercussion.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/AABB.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/Ray.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/PlaneGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/BoxGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/MeshGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactParameterMap.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactParameter.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactModels.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraph.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphNodeData.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/GeneralGraph.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/PercussionPool.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverNT.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverCO.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ProxFunctions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ConvexSets.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverSettings.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/FrontBackBuffer.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRecorder.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRecorderResampler.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/DynamicsState.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/RigidBodyState.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/RecorderSettings.hpp
 
         
 
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePool.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePoolVisBackFront.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers/SharedBufferPlayback.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StatePool.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StatePoolVisBackFront.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/SharedBufferPlayback.hpp
         
-        ${COMMONSOURCE_DIR}/include/Systems/SceneParser.hpp
-        ${COMMONSOURCE_DIR}/include/Systems/SharedBufferDynSys.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Systems/SceneParser.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Systems/SharedBufferDynSys.hpp
         
-        ${COMMONSOURCE_DIR}/include/Logic/LogicCommon.hpp
-        ${COMMONSOURCE_DIR}/include/Logic/LogicNode.hpp
-        ${COMMONSOURCE_DIR}/include/Logic/LogicSocket.hpp
-        ${COMMONSOURCE_DIR}/include/Logic/LookUpTable.hpp
-        ${COMMONSOURCE_DIR}/include/Logic/ExecutionTreeInOut.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Logic/LogicCommon.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Logic/LogicNode.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Logic/LogicSocket.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Logic/LookUpTable.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Logic/ExecutionTreeInOut.hpp
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
         #${COMMONSOURCE_DIR}/external/libgdiam/gdiam.hpp
@@ -385,34 +369,34 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
 
 
     SET(${SRC}
-        #${COMMONSOURCE_DIR}/src/Singeltons/FileManager.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Singeltons/FileManager.cpp
 
-        ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
-        ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
-        ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
-        #${COMMONSOURCE_DIR}/src/Common/BitCount.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/CommonFunctions.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/SimpleLogger.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/ApplicationCLOptions.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Common/BitCount.cpp
         
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/MyMatrixDefs.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/MultiBodySimFile.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoG.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCO.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionSolver.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/General/MoreauTimeStepper.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Collision/Collider.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StateRecorder.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StatePoolVisBackFront.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystem.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/BoxGeometry.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/Ray.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ConvexSets.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactModels.cpp
-        ${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactParameterMap.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/MyMatrixDefs.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/MultiBodySimFile.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/InclusionSolverCONoG.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/InclusionSolverCO.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/CollisionSolver.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/MoreauTimeStepper.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/Collider.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Buffers/StateRecorder.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Buffers/StatePoolVisBackFront.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/DynamicsSystem.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/InitialConditionBodies.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/CollisionData.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/ContactTag.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/Geometry/BoxGeometry.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/Geometry/Ray.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ConvexSets.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ContactModels.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ContactParameterMap.cpp
         
-        ${COMMONSOURCE_DIR}/src/Logic/LogicNode.cpp
-        ${COMMONSOURCE_DIR}/src/Logic/LogicSocket.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Logic/LogicNode.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Logic/LogicSocket.cpp
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
         
@@ -420,7 +404,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
-        ${COMMONSOURCE_DIR}/include/Common
+        ${COMMONSOURCE_DIR}/include/
         ${COMMONSOURCE_DIR}/external/tinyformat/
         ${COMMONSOURCE_DIR}/external/SRDelegates/include/
         ${COMMONSOURCE_DIR}/external/FastFunc/include/
@@ -428,17 +412,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
         ${COMMONSOURCE_DIR}/external/libgdiam/
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry
-        ${COMMONSOURCE_DIR}/include/Dynamics/General
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion
-        ${COMMONSOURCE_DIR}/include/Systems
-        ${COMMONSOURCE_DIR}/include/Singeltons
-        ${COMMONSOURCE_DIR}/include/States     
-        
-        ${COMMONSOURCE_DIR}/include/Logic/ 
-        
         ${COMMONSOURCE_DIR}/external/exprtk/  
     )
 endmacro(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER)
@@ -448,85 +421,85 @@ endmacro(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER)
 MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
     SET(${INC}
-        ${COMMONSOURCE_DIR}/include/Singeltons/FileManager.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Singeltons/FileManager.hpp
 
-        ${COMMONSOURCE_DIR}/include/Common/PlatformDefines.hpp
-        ${COMMONSOURCE_DIR}/include/Common/CommonFunctions.hpp
-        ${COMMONSOURCE_DIR}/include/Common/BitCount.hpp
-        ${COMMONSOURCE_DIR}/include/Common/Singleton.hpp
-        ${COMMONSOURCE_DIR}/include/Common/SimpleLogger.hpp
-        ${COMMONSOURCE_DIR}/include/Common/TypenameComparision.hpp
-        ${COMMONSOURCE_DIR}/include/Common/BinaryFile.hpp
-        ${COMMONSOURCE_DIR}/include/Common/ApplicationCLOptions.hpp
-        ${COMMONSOURCE_DIR}/include/Common/Delegates.hpp
-        ${COMMONSOURCE_DIR}/include/Common/CPUTimer.hpp
-        ${COMMONSOURCE_DIR}/include/Common/XMLMacros.hpp
-        ${COMMONSOURCE_DIR}/include/Common/foreach_macro.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/PlatformDefines.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/CommonFunctions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/BitCount.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/Singleton.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/SimpleLogger.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/TypenameComparision.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/BinaryFile.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/ApplicationCLOptions.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/Delegates.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/CPUTimer.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/XMLMacros.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Common/foreach_macro.hpp
         
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MyMatrixDefs.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/LayoutConfigDefs.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MeshData.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MultiBodySimFile.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MakeCoordinateSystem.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/VectorToSkewMatrix.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MatrixHelpers.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/QuaternionHelpers.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystem.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/DynamicsSystemBase.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/ExternalForces.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyId.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBody.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodySolverData.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/RigidBodyContainer.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/MoreauTimeStepper.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/TimeStepperSettings.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/InitialConditionBodies.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/InertiaTensorCalculations.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/General/AddGyroTermVisitor.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactFrame.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionData.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionSolver.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/CollisionFunctions.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Collider.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactTag.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/ContactPercussion.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/AABB.hpp
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/Ray.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/SphereGeometry.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/PlaneGeometry.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/BoxGeometry.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/MeshGeometry.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameterMap.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactParameter.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactModels.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraph.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitors.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphNodeData.hpp
-        ##${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/GeneralGraph.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/PercussionPool.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverNT.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCO.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCONoG.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ProxFunctions.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/ConvexSets.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettings.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/FrontBackBuffer.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorder.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRecorderResampler.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/DynamicsState.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RigidBodyState.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/RecorderSettings.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MyMatrixDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/LayoutConfigDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MeshData.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MultiBodySimFile.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MakeCoordinateSystem.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/VectorToSkewMatrix.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MatrixHelpers.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/QuaternionHelpers.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/DynamicsSystem.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/DynamicsSystemBase.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/ExternalForces.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodyId.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBody.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodySolverData.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodyContainer.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/MoreauTimeStepper.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/TimeStepperSettings.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/InitialConditionBodies.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/InertiaTensorCalculations.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/General/AddGyroTermVisitor.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/ContactFrame.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionData.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionSolver.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionFunctions.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Collider.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/ContactTag.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/ContactPercussion.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/AABB.hpp
+        ${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/Ray.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/PlaneGeometry.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/BoxGeometry.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/MeshGeometry.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactParameterMap.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactParameter.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactModels.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraph.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphVisitors.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphNodeData.hpp
+        ##${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/GeneralGraph.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/PercussionPool.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverNT.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverCO.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ProxFunctions.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ConvexSets.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverSettings.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/FrontBackBuffer.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRecorder.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRecorderResampler.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/DynamicsState.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/RigidBodyState.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/RecorderSettings.hpp
 
-        #${COMMONSOURCE_DIR}/include/Systems/SceneParser.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Systems/SceneParser.hpp
 
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePool.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StatePoolVisBackFront.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
-        #${COMMONSOURCE_DIR}/include/Dynamics/Buffers/SharedBufferPlayback.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StatePool.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StatePoolVisBackFront.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRingPoolVisBackFront.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Dynamics/Buffers/SharedBufferPlayback.hpp
 
-        #${COMMONSOURCE_DIR}/include/Systems/SharedBufferDynSys.hpp
+        #${COMMONSOURCE_DIR}/include/GMSF/Systems/SharedBufferDynSys.hpp
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
@@ -540,33 +513,33 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
 
 
     SET(${SRC}
-        ${COMMONSOURCE_DIR}/src/Singeltons/FileManager.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Singeltons/FileManager.cpp
 
-        ${COMMONSOURCE_DIR}/src/Common/CommonFunctions.cpp
-        ${COMMONSOURCE_DIR}/src/Common/SimpleLogger.cpp
-        ${COMMONSOURCE_DIR}/src/Common/ApplicationCLOptions.cpp
-        ${COMMONSOURCE_DIR}/src/Common/BitCount.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/CommonFunctions.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/SimpleLogger.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/ApplicationCLOptions.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Common/BitCount.cpp
         
-        ${COMMONSOURCE_DIR}/src/Dynamics/General/MyMatrixDefs.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/General/MultiBodySimFile.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoG.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCO.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionSolver.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/General/MoreauTimeStepper.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Collision/Collider.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StateRecorder.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StatePoolVisBackFront.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/General/DynamicsSystem.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/General/InitialConditionBodies.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Collision/CollisionData.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Collision/ContactTag.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/BoxGeometry.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Collision/Geometry/Ray.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ConvexSets.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactModels.cpp
-        #${COMMONSOURCE_DIR}/src/Dynamics/Inclusion/ContactParameterMap.cpp
+        ${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/MyMatrixDefs.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/MultiBodySimFile.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/InclusionSolverCONoG.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/InclusionSolverCO.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/CollisionSolver.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/MoreauTimeStepper.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/Collider.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Buffers/StateRecorder.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Buffers/StatePoolVisBackFront.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/DynamicsSystem.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/General/InitialConditionBodies.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/CollisionData.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/ContactTag.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/Geometry/BoxGeometry.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Collision/Geometry/Ray.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ConvexSets.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ContactModels.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ContactParameterMap.cpp
 
-        #${COMMONSOURCE_DIR}/src/Dynamics/Buffers/StatePoolVisBackFront.cpp
+        #${COMMONSOURCE_DIR}/src/GMSF/Dynamics/Buffers/StatePoolVisBackFront.cpp
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
@@ -580,7 +553,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
-        ${COMMONSOURCE_DIR}/include/Common
+        ${COMMONSOURCE_DIR}/include/
         ${COMMONSOURCE_DIR}/external/tinyformat/
         ${COMMONSOURCE_DIR}/external/SRDelegates/include/
         ${COMMONSOURCE_DIR}/external/FastFunc/include/
@@ -590,14 +563,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         ${COMMONSOURCE_DIR}/external/geometrypredicates/
         ${COMMONSOURCE_DIR}/external/libgdiam/
         ${COMMONSOURCE_DIR}/external/diameter/
-        ${COMMONSOURCE_DIR}/include/Dynamics/Buffers
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision
-        ${COMMONSOURCE_DIR}/include/Dynamics/Collision/Geometry
-        ${COMMONSOURCE_DIR}/include/Dynamics/General
-        ${COMMONSOURCE_DIR}/include/Dynamics/Inclusion
-        ${COMMONSOURCE_DIR}/include/Systems
-        ${COMMONSOURCE_DIR}/include/Singeltons
-        ${COMMONSOURCE_DIR}/include/States
+
     )
 endmacro(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST)
 

@@ -28,7 +28,7 @@ ENDIF()
 
 SET(SimulationFrameworkName "SimulationFramework")
 IF(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
-        SET(SimulationFrameworkName  ${SimulationFrameworkName} ${CMAKE_BUILD_TYPE}")
+        SET(SimulationFrameworkName  "${SimulationFrameworkName}-${CMAKE_BUILD_TYPE}")
 ENDIF()
 
 MESSAGE(STATUS "Project name is: " ${SimulationFrameworkName})
