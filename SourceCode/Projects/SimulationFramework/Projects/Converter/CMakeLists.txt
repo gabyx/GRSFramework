@@ -20,7 +20,7 @@ SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
 SET( APP_INC
 )
 SET( APP_SRC
-    ${PROJECT_SOURCE_DIR}/src/GMSF/App/main.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/App/main.cpp
 )
 
 SET(SOURCE_DIR "${SOURCE_DIR}/../GeneralRigidBodySimulation/")
@@ -28,41 +28,41 @@ SET(SOURCE_DIR "${SOURCE_DIR}/../GeneralRigidBodySimulation/")
 
 SET(COMMON_INC
 
-    ${SOURCE_DIR}/include/GMSF/Common/AssertionDebug.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/LogDefines.hpp
+    ${SOURCE_DIR}/include/GRSF/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/LogDefines.hpp
 
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/ApplicationCLOptionsConverter.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/ApplicationCLOptionsConverter.hpp
 
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Converters/SimFileJoiner.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Converters/SimFileResampler.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/SimFileJoiner.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/SimFileResampler.hpp
 
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Converters/RenderScriptConverter.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/RenderScriptConverter.hpp
     
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Logic/LogicTypes.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Logic/LogicTypes.hpp
 
     
-    ${PROJECT_SOURCE_DIR}/include/GMSF/General/RenderData.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/General/RenderScriptParserGenerators.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderData.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParserGenerators.hpp
     
-    ${PROJECT_SOURCE_DIR}/include/GMSF/General/RenderScriptParser.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/General/RenderScriptParserBaseTraits.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/General/RenderScriptParserModules.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParserBaseTraits.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParserModules.hpp
     
-    ${PROJECT_SOURCE_DIR}/include/GMSF/General/RenderScriptGenerator.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/General/RenderScriptGeneratorLogic.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/General/RendermanGeometryWriter.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptGenerator.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptGeneratorLogic.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RendermanGeometryWriter.hpp
     
 
         
     
-    ${PROJECT_SOURCE_DIR}/include/GMSF/General/RenderMaterial.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderMaterial.hpp
 )
 SET(COMMON_SRC
-    ${SOURCE_DIR}/src/GMSF/Common/TypeDefs.cpp
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Converters/RenderScriptConverter.cpp
-    ${PROJECT_SOURCE_DIR}/src/GMSF/General/RenderData.cpp
-    ${PROJECT_SOURCE_DIR}/src/GMSF/General/RenderScriptGenerator.cpp
+    ${SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/RenderScriptConverter.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderData.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderScriptGenerator.cpp
 )
 
 
@@ -74,7 +74,7 @@ INCLUDE_SIMULATION_FRAMEWORK_CONVERTER( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLO
 # ===========================================================================================
 # WRITE CONFIGURATION FILE
 configure_file (
-  ${SOURCE_DIR}/include/GMSF/ConfigFiles/ConfigureFile.hpp.in
+  ${SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
   ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
 )
 #=========================

@@ -76,8 +76,8 @@ ENDIF()
 
 
 
-
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/;${CMAKE_MODULE_PATH}")
+SET(MODULE_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/" )
+SET(CMAKE_MODULE_PATH "${MODULE_FOLDER};${CMAKE_MODULE_PATH}")
 MESSAGE(STATUS "Module path is now set to: " ${CMAKE_MODULE_PATH} )
 
 INCLUDE(PrintListMacro)
@@ -262,18 +262,16 @@ SET(USE_OZCOLLIDE 0)
 endif()
 
 
-
-
-
 # DEFINE if we should use the GPU for the simulation or not!
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MYPROJECT_CXX_FLAGS}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MYPROJECT_CXX_FLAGS}")
 MESSAGE(STATUS "Added ${MYPROJECT_CXX_FLAGS} to CMAKE_CXX and CMAKE_C_FLAGS: ${CMAKE_CXX_FLAGS} and ${CMAKE_C_FLAGS}")
 
 #set common includes for all projects which need them
-
-
 set(COMMONSOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CommonSource")
+
+
+
 
 if(SIMULATIONFRAMEWORK_BUILD_GUI)
 add_subdirectory(Projects/GeneralRigidBodySimulation)
@@ -292,13 +290,13 @@ add_subdirectory(Projects/Converter)
 endif()
 
 
-
-# Copy Media Files to Project folder
-# message(STATUS "Copying Media Content to " ${CMAKE_BINARY_DIR}/Projects/)
-# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Projects/media DESTINATION ${CMAKE_BINARY_DIR}/Projects/)
-
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Projects/media
-        DESTINATION ${CMAKE_BINARY_DIR}/Projects/
-        CONFIGURATIONS Debug Release
+## Copy Media Files to Project folder
+add_custom_target(
+    AddMediaFilesToBuildFolder
+    COMMAND 
+          ${CMAKE_COMMAND}
+          -DFiles=${CMAKE_CURRENT_SOURCE_DIR}/Projects/media
+          -DDestination=${CMAKE_BINARY_DIR}/Projects/
+          -P ${MODULE_FOLDER}/CopyFiles.cmake
 )
 

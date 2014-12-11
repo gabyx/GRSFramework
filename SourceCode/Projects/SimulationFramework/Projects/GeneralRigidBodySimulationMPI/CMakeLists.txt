@@ -22,103 +22,91 @@ set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
 
 
-#Set Source Code (its in the GeneralRigidBodySimulation Folder)
-SET(SOURCE_DIR "${PROJECT_SOURCE_DIR}/../GeneralRigidBodySimulation/")
-
-SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
-
-
-
-
-
-
 SET( APP_INC
 )
 SET( APP_SRC
-    ${PROJECT_SOURCE_DIR}/src/GMSF/App/main.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/App/main.cpp
 )
 
-SET(SOURCE_DIR "${SOURCE_DIR}/../GeneralRigidBodySimulation/")
-
 SET(SINGELTON_INC
-    ${COMMONSOURCE_DIR}/include/GMSF/Singeltons/FileManager.hpp
+    ${COMMONSOURCE_DIR}/include/GRSF/Singeltons/FileManager.hpp
 )
 
 SET( SINGELTON_SRC
-    ${COMMONSOURCE_DIR}/src/GMSF/Singeltons/FileManager.cpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Singeltons/MPIGlobalCommunicators.hpp
+    ${COMMONSOURCE_DIR}/src/GRSF/Singeltons/FileManager.cpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Singeltons/MPIGlobalCommunicators.hpp
 )
 
 SET( STATES_INC
-    ${PROJECT_SOURCE_DIR}/include/GMSF/States/SimulationManager/SimulationManagerMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/States/SimulationManager/SimulationManagerMPI.icc
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/SimulationManagerMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/SimulationManagerMPI.icc
 )
 SET(STATES_SRC
 )
 
 SET(COMMON_INC
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/RedirectOutput.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/AssertionDebug.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/LogDefines.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/RedirectOutput.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/LogDefines.hpp
 )
 SET(COMMON_SRC
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
 )
 
 SET(DYNAMICS_INC
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MPICommunicatorId.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MPIMessageTag.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MPIMessages.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MPIDataTypes.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MPIInformation.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MPICommunication.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MPITopology.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MPITopologyGrid.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MPITopologyVisitors.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MPITopologyBuilder.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MPITopologyBuilderSettings.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MPISerializationHelpersEigen.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MultiBodySimFileMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MultiBodySimFilePart.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/CartesianGrid.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/DynamicsSystemMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/NeighbourMap.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/NeighbourDataBodyCommunication.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/BodyInfoMap.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/BodyCommunicator.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodyGarbageCollector.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodySolverDataMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/RigidBodyMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/General/MoreauTimeStepperMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/Collision/CollisionSolverMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphMPI.icc
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/Inclusion/ContactGraphVisitorsMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverCONoGMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionCommunicator.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionCommunicator.icc
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/Inclusion/NeighbourDataInclusionCommunication.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/Inclusion/InclusionSolverSettingsMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Dynamics/Buffers/StateRecorderMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPICommunicatorId.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPIMessageTag.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPIMessages.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPIDataTypes.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPIInformation.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPICommunication.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopology.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyGrid.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyVisitors.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyBuilder.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyBuilderSettings.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPISerializationHelpersEigen.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MultiBodySimFileMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MultiBodySimFilePart.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/CartesianGrid.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/DynamicsSystemMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/NeighbourMap.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/NeighbourDataBodyCommunication.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/BodyInfoMap.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/BodyCommunicator.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodyGarbageCollector.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodySolverDataMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodyMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MoreauTimeStepperMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionSolverMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphMPI.icc
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphVisitorsMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCONoGMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionCommunicator.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionCommunicator.icc
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/NeighbourDataInclusionCommunication.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverSettingsMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Buffers/StateRecorderMPI.hpp
 )
 SET(DYNAMICS_SRC
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Dynamics/General/CartesianGrid.cpp
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Dynamics/General/MultiBodySimFileMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Dynamics/General/MultiBodySimFilePart.cpp
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Dynamics/General/DynamicsSystemMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Dynamics/General/BodyCommunicator.cpp
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Dynamics/Collision/CollisionSolverMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Dynamics/Inclusion/InclusionSolverCONoGMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Dynamics/Inclusion/ContactGraphNodeDataMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.cpp
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Dynamics/General/MPIDataTypes.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/CartesianGrid.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFileMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFilePart.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/DynamicsSystemMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/BodyCommunicator.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/Collision/CollisionSolverMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCONoGMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/Inclusion/ContactGraphNodeDataMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/MPIDataTypes.cpp
 )
 
 SET(SYSTEMS_INC
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Systems/SceneParserMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Systems/SceneParserMPI.hpp
 )
 
 SET(SYSTEMS_SRC
@@ -161,9 +149,10 @@ endif()
 
 
 # WRITE CONFIGURATION FILE
+SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
 configure_file (
-  ${PROJECT_SOURCE_DIR}/include/GMSF/ConfigFiles/ConfigureFile.hpp.in
-  ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
+  ${PROJECT_SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
+  ${CONFIG_INC}
 )
 #=========================
 
@@ -207,8 +196,7 @@ set(INCLUDE_DIRS
     ${MPI_CXX_INCLUDE_PATH}
 
 
-    ${PROJECT_BINARY_DIR}/ConfigFiles/
-
+    ${PROJECT_BINARY_DIR}/include/
     ${PROJECT_SOURCE_DIR}/include/
 
     ${GLOBAL_COMMON_INC_DIR}

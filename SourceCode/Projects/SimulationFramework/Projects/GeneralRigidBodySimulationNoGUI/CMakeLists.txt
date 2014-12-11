@@ -20,17 +20,10 @@ include(PrintListMacro)
 SET(SOURCE_DIR "${PROJECT_SOURCE_DIR}/../GeneralRigidBodySimulation/")
 
 
-
-SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
-
-
-
-
-
 SET( APP_INC
 )
 SET( APP_SRC
-    ${PROJECT_SOURCE_DIR}/src/GMSF/App/main.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/App/main.cpp
 
 )
 
@@ -41,20 +34,20 @@ SET( SINGELTON_SRC
 )
 
 SET( STATES_INC
-    ${PROJECT_SOURCE_DIR}/include/GMSF/States/SimulationManager/SimulationManager.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/SimulationManager.hpp
 )
 SET(STATES_SRC
-    ${PROJECT_SOURCE_DIR}/src/GMSF/States/SimulationManager/SimulationManager.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationManager/SimulationManager.cpp
 )
 
 SET(COMMON_INC
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/GMSF/Common/LogDefines.hpp
-    ${SOURCE_DIR}/include/GMSF/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/LogDefines.hpp
+    ${SOURCE_DIR}/include/GRSF/Common/AssertionDebug.hpp
 
 )
 SET(COMMON_SRC
-    ${PROJECT_SOURCE_DIR}/src/GMSF/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
 )
 
 SET(DYNAMICS_INC
@@ -108,11 +101,12 @@ endif()
 
 
 # WRITE CONFIGURATION FILE
+SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
 configure_file (
-  ${SOURCE_DIR}/include/GMSF/ConfigFiles/ConfigureFile.hpp.in
-  ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
+  ${SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
+  ${CONFIG_INC}
 )
-# =======================
+#=========================
 
 SET(SOURCE_FILES
     ${APP_SRC}
