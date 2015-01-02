@@ -16,8 +16,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/GRSF/Common/XMLMacros.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/foreach_macro.hpp
         
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MyMatrixDefs.hpp
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/LayoutConfigDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MyMatrixTypeDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/LayoutConfigTypeDefs.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MeshData.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MultiBodySimFile.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MakeCoordinateSystem.hpp
@@ -83,7 +83,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
-        ${COMMONSOURCE_DIR}/external/libgdiam/gdiam.hpp
     )
 
 
@@ -94,7 +93,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/src/GRSF/Common/SimpleLogger.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/ApplicationCLOptions.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/BitCount.cpp
-        ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MyMatrixDefs.cpp
+        ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MyMatrixTypeDefs.cpp
 
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFile.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCONoG.cpp
@@ -119,7 +118,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
-        ${COMMONSOURCE_DIR}/external/libgdiam/gdiam.cpp
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
@@ -130,7 +128,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
-        ${COMMONSOURCE_DIR}/external/libgdiam/
     )
 endmacro(INCLUDE_SIMULATION_FRAMEWORK_GUI)
 
@@ -157,8 +154,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/GRSF/Common/XMLMacros.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/foreach_macro.hpp
         
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MyMatrixDefs.hpp
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/LayoutConfigDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MyMatrixTypeDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/LayoutConfigTypeDefs.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MeshData.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MultiBodySimFile.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MakeCoordinateSystem.hpp
@@ -223,7 +220,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
-        ${COMMONSOURCE_DIR}/external/libgdiam/gdiam.hpp
     )
 
 
@@ -235,7 +231,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/src/GRSF/Common/ApplicationCLOptions.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/BitCount.cpp
         
-        ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MyMatrixDefs.cpp
+        ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MyMatrixTypeDefs.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFile.cpp
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCONoG.cpp
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCO.cpp
@@ -259,7 +255,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
-        ${COMMONSOURCE_DIR}/external/libgdiam/gdiam.cpp
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
@@ -270,7 +265,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
-        ${COMMONSOURCE_DIR}/external/libgdiam/
+
     )
 endmacro(INCLUDE_SIMULATION_FRAMEWORK_MPI)
 
@@ -292,8 +287,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/include/GRSF/Common/XMLMacros.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/foreach_macro.hpp
         
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MyMatrixDefs.hpp
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/LayoutConfigDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MyMatrixTypeDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/LayoutConfigTypeDefs.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MeshData.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MultiBodySimFile.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MakeCoordinateSystem.hpp
@@ -364,7 +359,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/include/GRSF/Logic/ExecutionTreeInOut.hpp
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
-        #${COMMONSOURCE_DIR}/external/libgdiam/gdiam.hpp
+
     )
 
 
@@ -376,7 +371,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/src/GRSF/Common/ApplicationCLOptions.cpp
         #${COMMONSOURCE_DIR}/src/GRSF/Common/BitCount.cpp
         
-        ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MyMatrixDefs.cpp
+        ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MyMatrixTypeDefs.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFile.cpp
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCONoG.cpp
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCO.cpp
@@ -411,7 +406,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
-        ${COMMONSOURCE_DIR}/external/libgdiam/
         ${COMMONSOURCE_DIR}/external/exprtk/  
     )
 endmacro(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER)
@@ -436,8 +430,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         ${COMMONSOURCE_DIR}/include/GRSF/Common/XMLMacros.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/foreach_macro.hpp
         
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MyMatrixDefs.hpp
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/LayoutConfigDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MyMatrixTypeDefs.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/LayoutConfigTypeDefs.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MeshData.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MultiBodySimFile.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MakeCoordinateSystem.hpp
@@ -503,11 +497,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
-        #${COMMONSOURCE_DIR}/external/libgdiam/gdiam.hpp
-        
-        ${COMMONSOURCE_DIR}/external/diameter/EstimateDiameter.hpp
-        
-        ${COMMONSOURCE_DIR}/external/geometrypredicates/GeometryPredicates.hpp
         
     )
 
@@ -520,7 +509,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         ${COMMONSOURCE_DIR}/src/GRSF/Common/ApplicationCLOptions.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/BitCount.cpp
         
-        ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MyMatrixDefs.cpp
+        ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MyMatrixTypeDefs.cpp
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFile.cpp
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCONoG.cpp
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCO.cpp
@@ -543,13 +532,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
-        ${COMMONSOURCE_DIR}/external/geometrypredicates/GeometryPredicates.cpp
-        ${COMMONSOURCE_DIR}/external/libgdiam/gdiam.cpp
-        
-        ${COMMONSOURCE_DIR}/external/diameter/EstimateDiameter.cpp
-        ${COMMONSOURCE_DIR}/external/diameter/diameterUtils/alloc.cpp
-        ${COMMONSOURCE_DIR}/external/diameter/diameterUtils/util.cpp
-        ${COMMONSOURCE_DIR}/external/diameter/diameterUtils/rand.cpp
+
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
@@ -560,9 +543,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
-        ${COMMONSOURCE_DIR}/external/geometrypredicates/
-        ${COMMONSOURCE_DIR}/external/libgdiam/
-        ${COMMONSOURCE_DIR}/external/diameter/
 
     )
 endmacro(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST)

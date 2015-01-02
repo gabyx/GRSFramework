@@ -6,11 +6,11 @@
  *
  */
 
-#ifndef TypeDefs_hpp
-#define TypeDefs_hpp
+#ifndef GRSF_Common_TypeDefs_hpp
+#define GRSF_Common_TypeDefs_hpp
 
 #include "GRSF/ConfigFiles/ConfigureFile.hpp"
-#include "GRSF/Dynamics/General/LayoutConfigDefs.hpp"
+#include "GRSF/Dynamics/General/LayoutConfigTypeDefs.hpp"
 
 #define LogicTypes_INCLUDE_FILE                 "GRSF/Logic/LogicTypes.hpp"
 

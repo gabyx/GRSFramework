@@ -174,6 +174,27 @@ else()
 endif()
 # ===========================================================================================
 
+#Configure ApproxMVBB =======================================================================
+include(${ApproxMVBB_CMAKE_DIR}/DefineApproxMVBBSources.cmake)
+
+#write config file for this source code
+#set(ApproxMVBB_USE_DIFFERENT_HEADERS TRUE)
+#set(ApproxMVBB_AssertionDebug_INCLUDE_FILE     "ApproxMVBB/Common//AssertionDebug.hpp")
+#set(ApproxMVBB_Exception_INCLUDE_FILE          "ApproxMVBB/Common//Exception.hpp")
+#set(ApproxMVBB_Platform_INCLUDE_FILE           "ApproxMVBB/Common/Platform.hpp")
+#set(ApproxMVBB_StaticAssert_INCLUDE_FILE       "ApproxMVBB/Common/StaticAssert.hpp")
+#set(ApproxMVBB_TypeDefs_INCLUDE_FILE           "ApproxMVBB/Common/TypeDefs.hpp" )
+#set(ApproxMVBB_MyMatrixTypeDefs_INCLUDE_FILE   "ApproxMVBBWrapper/Common/MyMatrixTypeDefs.hpp")
+#set(ApproxMVBB_AABB_INCLUDE_FILE               "GRSF/Dynamics/Collision/Geometry/AABB.hpp")
+#set(ApproxMVBB_OOBB_INCLUDE_FILE               "GRSF/Dynamics/Collision/Geometry/OOBB.hpp" )
+
+# Define all MVBB Source files
+INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC 
+                                ApproxMVBB_INC 
+                                ApproxMVBB_INC_DIRS 
+                                ApproxMVBB_DEPENDING_TARGETS
+                                ${ApproxMVBB_ROOT_DIR} ${PROJECT_BINARY_DIR} )
+# ===========================================================================================
 
 # WRITE CONFIGURATION FILE
 SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
@@ -193,6 +214,8 @@ SET(SOURCE_FILES
     ${SYSTEMS_SRC}
     ${CUDA_SRC}
     ${GLOBAL_COMMON_SRC}
+    
+    ${ApproxMVBB_SRC}
 )
 
 SET(INCLUDE_FILES
@@ -205,6 +228,8 @@ SET(INCLUDE_FILES
     ${SYSTEMS_INC}
     ${CUDA_INC}
     ${GLOBAL_COMMON_INC}
+    
+    ${ApproxMVBB_INC}
 )
 
 
@@ -232,10 +257,12 @@ set(INCLUDE_DIRS
     ${GLOBAL_COMMON_INC_DIR}
 
     ${CUDA_COMMON_INCLUDE_DIR}
+    
+    ${ApproxMVBB_INC_DIRS}
 )
 
 include_directories(${INCLUDE_DIRS})
-PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
+#PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
 
 
 
@@ -251,34 +278,16 @@ PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 
-set(LINK_LIBS ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${Boost_LIBRARIES} ${CUDA_cublas_LIBRARY} ${TICPP_LIBRARIES} ${COLLISIONLIB_LIBRARIES} ${ASSIMP_LIBRARIES})
+set(LINK_LIBS 
+    ${OGRE_LIBRARIES} 
+    ${OIS_LIBRARIES} 
+    ${Boost_LIBRARIES} 
+    ${CUDA_cublas_LIBRARY}
+    ${TICPP_LIBRARIES} 
+    ${COLLISIONLIB_LIBRARIES} 
+    ${ASSIMP_LIBRARIES}
+)
 PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
-
-
-source_group("Source Files\\App" FILES ${APP_SRC})
-source_group("Source Files\\Singeltons" FILES ${SINGELTON_SRC})
-source_group("Source Files\\States" FILES ${STATES_SRC})
-source_group("Source Files\\Common" FILES ${COMMON_SRC})
-source_group("Source Files\\Dynamics" FILES ${DYNAMICS_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\Prox" FILES ${ProxGPU_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\VectorAdd" FILES ${VectorAddGPU_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\MatrixVectorMult" FILES ${MatrixVectorMultGPU_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\General" FILES ${GeneralCommonFiles_SRC})
-source_group("Source Files\\Systems" FILES ${SYSTEMS_SRC})
-
-source_group("Header Files\\ConfigFiles" FILES ${CONFIG_INC})
-source_group("Header Files\\App" FILES ${APP_INC})
-source_group("Header Files\\Singeltons" FILES ${SINGELTON_INC})
-source_group("Header Files\\States" FILES ${STATES_INC})
-source_group("Header Files\\Common" FILES ${COMMON_INC})
-source_group("Header Files\\Dynamics" FILES ${DYNAMICS_INC})
-source_group("Header Files\\Dynamics\\Cuda\\Prox" FILES ${ProxGPU_INC})
-source_group("Header Files\\Dynamics\\Cuda\\VectorAdd" FILES ${VectorAddGPU_INC})
-source_group("Header Files\\Dynamics\\Cuda\\MatrixVectorMult" FILES ${MatrixVectorMultGPU_INC})
-source_group("Header Files\\Dynamics\\Cuda\\General" FILES ${GeneralCommonFiles_INC})
-source_group("Header Files\\Systems" FILES ${SYSTEMS_INC})
-
-
 
 
 message(STATUS "Add executable:...")
@@ -290,54 +299,22 @@ endif()
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/
     RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
     RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
 )
 
 # Add dependency such that the media files get copied!
-add_dependencies(${PROJECT_NAME}  AddMediaFilesToBuildFolder)
+add_dependencies(${PROJECT_NAME}  AddMediaFilesToBuildFolder ${ApproxMVBB_DEPENDING_TARGETS})
 
-# Add target for Resources Release and Debug
+# Add target for copying Resources Release and Debug
 SET(ResourceDir ${CMAKE_CURRENT_SOURCE_DIR}/resources)
-if($<CONFIG:debug>)
-    file(GLOB ResourceFiles RELATIVE "resources/debug" "*.cfg")
-    SET(ResourceDest ${PROJECT_BINARY_DIR}/bin/Debug)
-else()
-    file(GLOB ResourceFiles RELATIVE "resources/release" "*.cfg" )
-    SET(ResourceDest ${PROJECT_BINARY_DIR}/bin/Release)
-endif()
-message(STATUS "ResourceDir" ${ResourceDir})
-message(STATUS "ResourceFiles" ${ResourceFiles})
-
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND 
           ${CMAKE_COMMAND}
-          -DFiles=${ResourceFiles}
-          -DDestination=${ResourceDest}
+          -DFolder=$<$<CONFIG:debug>:${ResourceDir}/debug>$<$<CONFIG:release>:${ResourceDir}/release>
+          -DDestination=$<$<CONFIG:debug>:${PROJECT_BINARY_DIR}/bin/Debug>$<$<CONFIG:release>:${PROJECT_BINARY_DIR}/bin/Release>
           -P ${MODULE_FOLDER}/CopyFiles.cmake
 )
-
-
-#if(UNIX)
-
-    #file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/unix/plugins.cfg
-        #${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
-              ##  ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        #${CMAKE_CURRENT_SOURCE_DIR}/resources/release/unix/ogre.cfg
-        #DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        #CONFIGURATIONS Release
-    #)
-    #file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/unix/plugins.cfg
-        #${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
-              ##  ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        #${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/unix/ogre.cfg
-        #DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        #CONFIGURATIONS Debug
-    #)
-
-#else()
-    #MESSAGE(ERROR "File copy rule is only supported for UNIX, please write your own copy for the platform")
-#endif()
-
 
 message(STATUS "=========================================================================")

@@ -71,10 +71,6 @@ public:
     void resetTopology();
     void doOneIteration();
 
-    // General Log file
-    Logging::Log *m_pSolverLog, *m_pSimulationLog;
-
-
     inline void writeIterationToSystemDataFile(PREC globalTime);
     inline void writeHeaderToSystemDataFile();
     inline void writeIterationToCollisionDataFile();
@@ -153,7 +149,7 @@ void MoreauTimeStepperMPI::reset() {
     m_pSimulationLog->logMessage("---> Reset BodyCommunicator...");
     m_pBodyCommunicator->reset();
 
-    MoreauTimeStepperBase::reset();
+    MoreauTimeStepperBase::reset_impl();
 
 };
 

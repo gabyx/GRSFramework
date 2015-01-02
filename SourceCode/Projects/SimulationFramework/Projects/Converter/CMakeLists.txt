@@ -117,7 +117,7 @@ set(INCLUDE_DIRS
 )
 
 include_directories(${INCLUDE_DIRS})
-PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
+#PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
 
 
 
@@ -126,12 +126,12 @@ set(LINK_DIRS
     ${Boost_LIBRARY_DIRS}
 )
 link_directories(${LINK_DIRS})
-PRINTLIST( "Link directories are:" "${LINK_DIRS}")
+#PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 
 set(LINK_LIBS ${Boost_LIBRARIES})
-PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
+#PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
 source_group("Source Files\\App" FILES ${APP_SRC})
@@ -150,8 +150,9 @@ target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 
 SET(INSTALL_DIR_PROJECT ${PROJECT_BINARY_DIR}/bin/)
 set_target_properties(${PROJECT_NAME} PROPERTIES
-RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
-RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
 )
 
 

@@ -4,7 +4,6 @@
 #include "boost/variant.hpp"
 #include <memory>
 
-
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
 

@@ -10,7 +10,7 @@
 #define GRSF_Dynamics_General_LayoutConfigDefs_hpp
 
 
-#include "GRSF/Dynamics/General/MyMatrixDefs.hpp"
+#include "GRSF/Dynamics/General/MyMatrixTypeDefs.hpp"
 
 /**
 * @brief A dynamic layout specialization.

@@ -3,13 +3,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_GUI )
-set(SIMULATIONFRAMEWORK_BUILD_GUI OFF CACHE BOOL "Build the GUI version of SimulationFramework")
+set(SIMULATIONFRAMEWORK_BUILD_GUI ON CACHE BOOL "Build the GUI version of SimulationFramework")
 
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_NOGUI )
 set(SIMULATIONFRAMEWORK_BUILD_NOGUI ON CACHE BOOL "Build the NOGUI version of SimulationFramework")
 
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_MPI )
-set(SIMULATIONFRAMEWORK_BUILD_MPI OFF CACHE BOOL "Build the MPI version of SimulationFramework")
+set(SIMULATIONFRAMEWORK_BUILD_MPI ON CACHE BOOL "Build the MPI version of SimulationFramework")
 
 MARK_AS_ADVANCED( SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER )
 set(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER ON CACHE BOOL "Build the SimFileConverter for the simulation files of the framework")
@@ -19,10 +19,10 @@ set(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER ON CACHE BOOL "Build the SimFileConve
 MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )
 STRING(REGEX MATCH ".*(Debug|debug).*" DEBUG_MATCH ${CMAKE_BINARY_DIR} )
 if(DEBUG_MATCH)
-    MESSAGE(WARNING "MATCHED")
+    MESSAGE(WARNING "Matched Debug build!")
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "The build type for makefile based generators")
 ELSE()
-    MESSAGE(WARNING "NOT MATCHED")
+    MESSAGE(WARNING "Matched Release build!")
     set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
 ENDIF()
 
@@ -77,26 +77,29 @@ ENDIF()
 
 
 SET(MODULE_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/" )
-SET(CMAKE_MODULE_PATH "${MODULE_FOLDER};${CMAKE_MODULE_PATH}")
+SET(CMAKE_MODULE_PATH ${MODULE_FOLDER} ${CMAKE_MODULE_PATH})
 MESSAGE(STATUS "Module path is now set to: " ${CMAKE_MODULE_PATH} )
 
 INCLUDE(PrintListMacro)
 
-
 #Add some multithreaded build support =====================================================================================================
 MARK_AS_ADVANCED(MULTITHREADED_BUILD)
-SET(MULTITHREADED_BUILD 12 CACHE STRING "How many threads are used to build the project")
-if(MULTITHREADED_BUILD AND NOT MULTITHREADED_BUILD_SET)
-	SET(MULTITHREADED_BUILD_SET TRUE CACHE INTERNAL "internal check if we set the multithread stuff already" FORCE)
+SET(MULTITHREADED_BUILD ON CACHE BOOL "Parallel build with as many threads as possible!")
+if(MULTITHREADED_BUILD)
 	if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
-            SET(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM} -j${MULTITHREADED_BUILD}")
-            MESSAGE(STATUS "Added arguments to CMAKE_BUILD_TOOL: ${CMAKE_MAKE_PROGRAM}")
+             file(COPY ${MODULE_FOLDER}/parallelmake.sh DESTINATION ${PROJECT_BINARY_DIR}
+                FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+                NO_SOURCE_PERMISSIONS
+            )
+            SET(CMAKE_MAKE_PROGRAM "${PROJECT_BINARY_DIR}/parallelmake.sh")
+            MESSAGE(STATUS "Set make program to ${PROJECT_BINARY_DIR}/parallelmake.sh")
     elseif(MSVC)
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" "/MP")
       MESSAGE(STATUS "Added parallel build arguments to CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
     endif()
 endif()
 # ========================================================================================================================================
+
 
 #Find GCCFilter Tool
 if(GCCFILTER_TOOL)
@@ -214,10 +217,18 @@ endif()
 # ===============================================================================================================================================================
 
 # Searching Assimp ==================================
-FIND_PACKAGE(Assimp REQUIRED 3)
+find_package(Assimp 3 REQUIRED)
 # ===================================================
 
+# Searching ApproxMVBB Source ==================================
 
+# to link against ApproxMVBB
+#find_package(ApproxMVBB)   
+
+# to include all source into the project
+set(ApproxMVBB_SEARCH_PATH "./../../../../ApproxMVBB" CACHE STRING "ApproxMVBB Repo Dir")
+find_package(ApproxMVBBSource REQUIRED)  
+# ===================================================
 
 # Searching OZCollide or OPCODE (COLLISION LIBRARY) ==================================
 SET(MYPROJECT_COLLISION_LIBRARY "none" CACHE STRING "Choose between 'ozcollide' and 'opcode' for the collision detection...")
@@ -290,13 +301,26 @@ add_subdirectory(Projects/Converter)
 endif()
 
 
-## Copy Media Files to Project folder
+## Copy Media Files to Project folder (unix symlink, other copy)
+if(${UNIX})  
 add_custom_target(
     AddMediaFilesToBuildFolder
     COMMAND 
           ${CMAKE_COMMAND}
-          -DFiles=${CMAKE_CURRENT_SOURCE_DIR}/Projects/media
-          -DDestination=${CMAKE_BINARY_DIR}/Projects/
-          -P ${MODULE_FOLDER}/CopyFiles.cmake
+          -E
+          create_symlink
+          "${CMAKE_CURRENT_SOURCE_DIR}/Projects/media"
+          "${CMAKE_BINARY_DIR}/Projects/media"
 )
+else()
+add_custom_target(
+    AddMediaFilesToBuildFolder
+    COMMAND 
+          ${CMAKE_COMMAND}
+          -E
+          copy_directory
+          "${CMAKE_CURRENT_SOURCE_DIR}/Projects/media"
+          "${CMAKE_BINARY_DIR}/Projects/media"
+)
+endif()
 

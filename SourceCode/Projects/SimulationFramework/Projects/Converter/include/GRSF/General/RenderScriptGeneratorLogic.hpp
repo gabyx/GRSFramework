@@ -250,6 +250,8 @@ namespace LogicNodes {
 
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
+        using Vector3Vec = StdVecAligned<Vector3>;
+
         struct Inputs {
             enum {
                 Enable,

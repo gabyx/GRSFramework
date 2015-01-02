@@ -81,7 +81,8 @@ protected:
 //  }
 
 private:
-  std::vector<Vector3> mPoints;
+  using Vector3Vec = std::vector<Vector3>;
+  Vector3Vec mPoints;
   bool mDirty;
 };
 

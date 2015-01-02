@@ -6,7 +6,7 @@
 
 #include <OGRE/Ogre.h>
 
-#include "GRSF/Dynamics/General/MyMatrixDefs.hpp"
+#include "GRSF/Dynamics/General/MyMatrixTypeDefs.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
 
 

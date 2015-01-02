@@ -1,4 +1,4 @@
-﻿#include "GRSF/Dynamics/General/MyMatrixDefs.hpp"
+﻿#include "GRSF/Dynamics/General/MyMatrixTypeDefs.hpp"
 
 Eigen::IOFormat MyMatrixIOFormat::Matlab(Eigen::FullPrecision, 0, ", ", ";\n", "", "", "[", "]");
 Eigen::IOFormat MyMatrixIOFormat::CommaSep(Eigen::FullPrecision, Eigen::DontAlignCols, ", ", "\n", "", "", "", "");

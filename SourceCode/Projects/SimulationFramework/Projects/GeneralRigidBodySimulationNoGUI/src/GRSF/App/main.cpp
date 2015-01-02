@@ -12,6 +12,8 @@
 
 #include "GRSF/States/SimulationManager/SimulationManager.hpp"
 
+#include "ApproxMVBB/ComputeApproxMVBB.hpp"
+#include "GRSF/Dynamics/Collision/Geometry/OOBB.hpp"
 
 int main(int argc, char **argv) {
 

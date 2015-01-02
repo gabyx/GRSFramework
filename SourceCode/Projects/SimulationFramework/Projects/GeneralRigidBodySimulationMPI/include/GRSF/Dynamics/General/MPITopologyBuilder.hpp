@@ -3,7 +3,6 @@
 
 #include <mpi.h>
 
-#include <gdiam.hpp>
 #include <pugixml.hpp>
 
 #include <functional>
@@ -25,6 +24,10 @@
 #include "GRSF/Dynamics/Collision/Collider.hpp"
 
 #include "GRSF/Dynamics/General/MPITopologyBuilderSettings.hpp"
+
+#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
+#include "GRSF/Dynamics/Collision/Geometry/OOBB.hpp"
+#include "ApproxMVBB/ComputeApproxMVBB.hpp"
 
 namespace MPILayer {
 
@@ -152,7 +155,7 @@ public:
 private:
 
     template< typename > friend struct ParserModulesCreatorTopoBuilder;
-
+    using Vector3Vec = StdVecAligned<Vector3>;
 
 
     boost::filesystem::path m_sceneFilePath;
@@ -160,7 +163,7 @@ private:
     struct MassPoint {
         MassPoint(const RigidBodyState * s): m_state(s){}
 
-        std::vector<Vector3> * m_points = nullptr;
+        Vector3Vec * m_points = nullptr;
         unsigned int m_pointIdx = 0;
         unsigned int m_numPoints = 0;
 
@@ -176,7 +179,7 @@ private:
 
     AABB m_I_aabb_loc;         ///< Local AABB of point masses
     std::vector<MassPoint> m_massPoints_loc; ///< local mass points
-    std::vector<Vector3> m_points_loc; /// point cloud of all predicted mass points
+    Vector3Vec m_points_loc; /// point cloud of all predicted mass points
     unsigned int m_countPoints_loc = 0;
 
 
@@ -186,7 +189,7 @@ private:
 
     // GLOBAL STUFF =================================================================
 
-    const unsigned int m_nPointsPredictor = 4;
+    const unsigned int m_nPointsPredictor = 10;
     const PREC m_deltaT = 0.1;
 
 
@@ -204,7 +207,7 @@ private:
     std::unordered_map<RankIdType,AABB> m_rankAABBs;
     unsigned int m_countPoints_glo = 0;
     std::vector<MassPoint> m_massPoints_glo; ///< global mass points
-    std::vector<Vector3> m_points_glo; /// point cloud of all predicted mass points
+    Vector3Vec m_points_glo; /// point cloud of all predicted mass points
 
     unsigned int m_nGlobalSimBodies = 0; ///< Only for a check with MassPoints
 
@@ -337,7 +340,7 @@ public:
 
              // Write grid data to file
             #ifdef TOPOLOGY_BUILDER_WRITE_GRID
-            writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs);
+            writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,&m_points_glo);
             #endif
 
             buildGrid();
@@ -453,7 +456,7 @@ public:
 
              // Write grid data to file
             #ifdef TOPOLOGY_BUILDER_WRITE_GRID
-            writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs);
+            writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,&m_points_glo);
             #endif
 
             buildGrid();
@@ -531,38 +534,33 @@ public:
 
     }
 
-    // Compute Minimum Bounding Box with GDIAM source code
-    void makeMVBB(std::vector<Vector3> & points, Matrix33 & A_IK, AABB & aabb ){
+    // Compute Minimum Bounding Box with ApproxMVBB source code
+    void makeMVBB(Vector3Vec & points, Matrix33 & A_IK, AABB & aabb ){
 
         LOGTBLEVEL3(m_pSimulationLog, "Points MVBB \n:");
+        m_aabb_glo.reset();
         for(auto & p: points){
+             m_aabb_glo.unite(p);
              LOGTBLEVEL3(m_pSimulationLog, p.transpose().format(MyMatrixIOFormat::SpaceSep) << "\n");
         }
          LOGTBLEVEL3(m_pSimulationLog, std::endl;);
 
-
-        PREC * p = points.data()->data();
-        unsigned int num = points.size();
-        GDIAM::gdiam_bbox box = GDIAM::gdiam_approx_mvbb_grid_sample(p,num,5,400);
-
-        // Set A_IK
-        A_IK.col(0) =  MyMatrix<PREC>::MatrixMap<Vector3>(box.get_dir(0));
-        A_IK.col(1) =  MyMatrix<PREC>::MatrixMap<Vector3>(box.get_dir(1));
-        A_IK.col(2) =  MyMatrix<PREC>::MatrixMap<Vector3>(box.get_dir(2));
-
-        // get min max points according to frame I
-        Vector3 p1; //min in I Frame
-        Vector3 p2; //max in I Frame
-        box.get_vertex(0,0,0,&p1(0),&p1(1),&p1(2));
-        box.get_vertex(1,1,1,&p2(0),&p2(1),&p2(2));
-
-         // Swap Z-Axis that it is pointing upwards
-        if(A_IK(2,2) <= 0){ // if z-Axis is negativ -> *-1
-           A_IK.col(1).swap(A_IK.col(0));
-            A_IK.col(2) *= -1.0;
+        // Map points in std::vector to matrix
+        if(sizeof(Vector3) != 3*sizeof(PREC)){
+            ERRORMSG("There is padding inside Vector3 which is not allowed here")
         }
 
-        aabb = AABB(A_IK.transpose() * p1, A_IK.transpose() * p2);
+        MatrixMap<const ApproxMVBB::Matrix3Dyn> p(points.data()->data(), 3, points.size());
+
+        PREC epsilon = 0.01*m_aabb_glo.extent().matrix().norm(); // percentage of the approximate extent of the point cloud
+        OOBB oobb = ApproxMVBB::approximateMVBB(p,epsilon,400,5,0,6);
+
+        // Set A_IK
+        A_IK = oobb.m_q_KI.matrix();
+
+        // set min/max in K frame
+        aabb.m_minPoint = oobb.m_minPoint;
+        aabb.m_maxPoint = oobb.m_maxPoint;
 
         if(aabb.isEmpty()){
             ERRORMSG("Box is empty")
@@ -657,7 +655,7 @@ public:
     // Either use Fluidix to quickly approximate a simulation or
     // do a simple integration with only gravity of all point masses, stop if collided with non simulated bodies
     void predictMassPoints(std::vector<MassPoint> & massPoints,
-                           std::vector<Vector3> & predictedPoints){
+                           Vector3Vec & predictedPoints){
         LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Predict mass points (points: " << massPoints.size()<< ")" <<std::endl;);
         ColliderPoint pointCollider;
 
@@ -688,19 +686,19 @@ public:
                 massPoint.m_numPoints += 1;
 
                 // intersect with all static bodies, if intersection abort, point is proxed onto body!
-//                bool hitObject = false;
-//                for(auto & pBody : staticBodies){
-//
-//                    if( pointCollider.intersectAndProx(pBody, predictedPoints.back() ) ){
-//                        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: hit object " <<std::endl);
-//                        hitObject = true;
-//                        break;
-//                    }
-//                }
-//
-//                if(hitObject){
-//                    break;
-//                }
+                bool hitObject = false;
+                for(auto & pBody : staticBodies){
+
+                    if( pointCollider.intersectAndProx(pBody, predictedPoints.back() ) ){
+                        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: hit object " <<std::endl);
+                        hitObject = true;
+                        break;
+                    }
+                }
+
+                if(hitObject){
+                    break;
+                }
 
             }
 
@@ -878,7 +876,9 @@ public:
                        const typename GridBuilderSettings::ProcessDimType & dim,
                        bool aligned,
                        const Matrix33 & A_IK,
-                       const std::unordered_map<RankIdType,AABB> & rankToAABB)
+                       const std::unordered_map<RankIdType,AABB> & rankToAABB,
+                       Vector3Vec * points = nullptr
+                       )
     {
         boost::filesystem::path filePath = m_localSimFolderPath;
 
@@ -903,6 +903,7 @@ public:
                                         "<MaxPoint/>"
                                         "<A_IK/>"
                                     "</Grid>"
+                                    "<Points/>"
                                 "</TopologyBuilder>");
 
         bool r = dataXML.load(xml);
@@ -958,6 +959,17 @@ public:
 
         }
         node.append_child(XMLStringNodeType).set_value( ss.str().c_str() );
+
+        // Write points
+        if(points){
+            ss.str("");
+            node = root.first_element_by_path("./Points");
+            std::cout << "Points: " << points->size() << std::endl;
+            for(auto & p : *points){
+                ss << p.transpose().format(MyMatrixIOFormat::SpaceSep) << std::endl;
+            }
+            node.append_child(XMLStringNodeType).set_value( ss.str().c_str() );
+        }
 
         dataXML.save_file(filePath.c_str(),"    ");
     }

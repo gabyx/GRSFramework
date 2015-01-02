@@ -24,9 +24,10 @@
 
 #include "TinyFormatInclude.hpp"
 
+#include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/StaticAssert.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Dynamics/General/MyMatrixDefs.hpp"
+
 #include "GRSF/Common/FastStringConversion.hpp"
 
 namespace Utilities {
