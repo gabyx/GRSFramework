@@ -29,7 +29,7 @@ class RigidBodyGraphics{
             ASSERTMSG(m_node,"SceneNode is null")
             //std::cout << "update: " << s.m_q << std::endl;
             m_node->setPosition(s.m_q(0),s.m_q(1),s.m_q(2));
-            m_node->setOrientation(s.m_q(3),s.m_q(4),s.m_q(5),s.m_q(6));
+            m_node->setOrientation(s.m_q(6),s.m_q(3),s.m_q(4),s.m_q(5));
         }
 };
 
