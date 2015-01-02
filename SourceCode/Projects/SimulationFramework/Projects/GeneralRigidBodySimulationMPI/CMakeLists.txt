@@ -22,101 +22,91 @@ set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
 
 
-#Set Source Code (its in the GeneralRigidBodySimulation Folder)
-SET(SOURCE_DIR "${PROJECT_SOURCE_DIR}/../GeneralRigidBodySimulation/")
-
-SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
-
-
-
-
-
-
 SET( APP_INC
 )
 SET( APP_SRC
-    ${PROJECT_SOURCE_DIR}/src/App/main.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/App/main.cpp
 )
 
-SET(SOURCE_DIR "${SOURCE_DIR}/../GeneralRigidBodySimulation/")
-
 SET(SINGELTON_INC
-    ${COMMONSOURCE_DIR}/include/Singeltons/FileManager.hpp
+    ${COMMONSOURCE_DIR}/include/GRSF/Singeltons/FileManager.hpp
 )
 
 SET( SINGELTON_SRC
-    ${COMMONSOURCE_DIR}/src/Singeltons/FileManager.cpp
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/MPIGlobalCommunicators.hpp
+    ${COMMONSOURCE_DIR}/src/GRSF/Singeltons/FileManager.cpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Singeltons/MPIGlobalCommunicators.hpp
 )
 
 SET( STATES_INC
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManagerMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManagerMPI.icc
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/SimulationManagerMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/SimulationManagerMPI.icc
 )
 SET(STATES_SRC
 )
 
 SET(COMMON_INC
-    ${PROJECT_SOURCE_DIR}/include/Common/RedirectOutput.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/AssertionDebug.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/RedirectOutput.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/LogDefines.hpp
 )
 SET(COMMON_SRC
-    ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
 )
 
 SET(DYNAMICS_INC
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPICommunicatorId.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPIMessageTag.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPIMessages.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPIInformation.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPICommunication.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopology.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopologyGrid.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopologyVisitors.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopologyBuilder.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPITopologyBuilderSettings.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MPISerializationHelpersEigen.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MultiBodySimFileMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MultiBodySimFilePart.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/CartesianGrid.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourMap.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/NeighbourDataBodyCommunication.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/BodyInfoMap.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/BodyCommunicator.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodyGarbageCollector.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodySolverDataMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/RigidBodyMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/MoreauTimeStepperMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/CollisionSolverMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphMPI.icc
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/ContactGraphVisitorsMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverCONoGMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionCommunicator.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionCommunicator.icc
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/NeighbourDataInclusionCommunication.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion/InclusionSolverSettingsMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers/StateRecorderMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPICommunicatorId.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPIMessageTag.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPIMessages.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPIDataTypes.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPIInformation.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPICommunication.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopology.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyGrid.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyVisitors.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyBuilder.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyBuilderSettings.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPISerializationHelpersEigen.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MultiBodySimFileMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MultiBodySimFilePart.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/CartesianGrid.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/DynamicsSystemMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/NeighbourMap.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/NeighbourDataBodyCommunication.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/BodyInfoMap.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/BodyCommunicator.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodyGarbageCollector.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodySolverDataMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodyMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MoreauTimeStepperMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionSolverMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphMPI.icc
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphVisitorsMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCONoGMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionCommunicator.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionCommunicator.icc
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/NeighbourDataInclusionCommunication.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverSettingsMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Buffers/StateRecorderMPI.hpp
 )
 SET(DYNAMICS_SRC
-    ${PROJECT_SOURCE_DIR}/src/Dynamics/General/CartesianGrid.cpp
-    ${PROJECT_SOURCE_DIR}/src/Dynamics/General/MultiBodySimFileMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/Dynamics/General/MultiBodySimFilePart.cpp
-    ${PROJECT_SOURCE_DIR}/src/Dynamics/General/DynamicsSystemMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/Dynamics/General/BodyCommunicator.cpp
-    ${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/CollisionSolverMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/InclusionSolverCONoGMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/Dynamics/Inclusion/ContactGraphNodeDataMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/CartesianGrid.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFileMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFilePart.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/DynamicsSystemMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/BodyCommunicator.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/Collision/CollisionSolverMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCONoGMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/Inclusion/ContactGraphNodeDataMPI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/MPIDataTypes.cpp
 )
 
 SET(SYSTEMS_INC
-    ${PROJECT_SOURCE_DIR}/include/Systems/SceneParserMPI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Systems/SceneParserMPI.hpp
 )
 
 SET(SYSTEMS_SRC
@@ -157,11 +147,34 @@ else()
 endif()
 # ===========================================================================================
 
+#Configure ApproxMVBB =======================================================================
+include(${ApproxMVBB_CMAKE_DIR}/DefineApproxMVBBSources.cmake)
+#write config file for this source code
+#set(ApproxMVBB_USE_DIFFERENT_HEADERS TRUE)
+#set(ApproxMVBB_AssertionDebug_INCLUDE_FILE     "ApproxMVBB/Common//AssertionDebug.hpp")
+#set(ApproxMVBB_Exception_INCLUDE_FILE          "ApproxMVBB/Common//Exception.hpp")
+#set(ApproxMVBB_Platform_INCLUDE_FILE           "ApproxMVBB/Common/Platform.hpp")
+#set(ApproxMVBB_StaticAssert_INCLUDE_FILE       "ApproxMVBB/Common/StaticAssert.hpp")
+#set(ApproxMVBB_TypeDefs_INCLUDE_FILE           "ApproxMVBB/Common/TypeDefs.hpp" )
+#set(ApproxMVBB_MyMatrixTypeDefs_INCLUDE_FILE   "ApproxMVBBWrapper/Common/MyMatrixTypeDefs.hpp")
+#set(ApproxMVBB_AABB_INCLUDE_FILE               "GRSF/Dynamics/Collision/Geometry/AABB.hpp")
+#set(ApproxMVBB_OOBB_INCLUDE_FILE               "GRSF/Dynamics/Collision/Geometry/OOBB.hpp" )
+
+# Define all MVBB Source files   
+INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC 
+                                ApproxMVBB_INC 
+                                ApproxMVBB_INC_DIRS 
+                                ApproxMVBB_DEPENDING_TARGETS
+                                ${ApproxMVBB_ROOT_DIR} ${PROJECT_BINARY_DIR})
+
+# ===========================================================================================
+
 
 # WRITE CONFIGURATION FILE
+SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
 configure_file (
-  ${PROJECT_SOURCE_DIR}/include/ConfigFiles/ConfigureFile.hpp.in
-  ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
+  ${PROJECT_SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
+  ${CONFIG_INC}
 )
 #=========================
 
@@ -176,6 +189,7 @@ SET(SOURCE_FILES
     ${CUDA_SRC}
     
     ${GLOBAL_COMMON_SRC}
+    ${ApproxMVBB_SRC}
 )
 
 SET(INCLUDE_FILES
@@ -189,6 +203,7 @@ SET(INCLUDE_FILES
     ${CUDA_INC}
     
     ${GLOBAL_COMMON_INC}
+    ${ApproxMVBB_INC}
 )
 
 
@@ -205,28 +220,18 @@ set(INCLUDE_DIRS
     ${MPI_CXX_INCLUDE_PATH}
 
 
-    ${PROJECT_BINARY_DIR}/ConfigFiles/
-
-    ${PROJECT_SOURCE_DIR}/include/App
-    ${PROJECT_SOURCE_DIR}/include/Common
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Buffers
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Collision/Geometry
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/Inclusion
-    ${PROJECT_SOURCE_DIR}/include/States
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager
-    ${PROJECT_SOURCE_DIR}/include/Systems
+    ${PROJECT_BINARY_DIR}/include/
+    ${PROJECT_SOURCE_DIR}/include/
 
     ${GLOBAL_COMMON_INC_DIR}
 
     ${CUDA_COMMON_INCLUDE_DIR}
+    
+    ${ApproxMVBB_INC_DIRS}
 )
 
 include_directories(${INCLUDE_DIRS})
-PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
+#PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
 
 
 
@@ -235,36 +240,17 @@ set(LINK_DIRS
     ${Boost_LIBRARY_DIRS}
 )
 link_directories(${LINK_DIRS})
-PRINTLIST( "Link directories are:" "${LINK_DIRS}")
+#PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 
-set(LINK_LIBS ${Boost_LIBRARIES} ${CUDA_cublas_LIBRARY} ${TICPP_LIBRARIES} ${COLLISIONLIB_LIBRARIES} ${ASSIMP_LIBRARIES}   ${MPI_CXX_LIBRARIES})
-PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
-
-
-#source_group("Source Files\\App" FILES ${APP_SRC})
-source_group("Source Files\\Singeltons" FILES ${SINGELTON_SRC})
-source_group("Source Files\\States" FILES ${STATES_SRC})
-source_group("Source Files\\Common" FILES ${COMMON_SRC})
-source_group("Source Files\\Dynamics" FILES ${DYNAMICS_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\Prox" FILES ${ProxGPU_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\VectorAdd" FILES ${VectorAddGPU_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\MatrixVectorMult" FILES ${MatrixVectorMultGPU_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\General" FILES ${GeneralCommonFiles_SRC})
-source_group("Source Files\\Systems" FILES ${SYSTEMS_SRC})
-
-source_group("Header Files\\ConfigFiles" FILES ${CONFIG_INC})
-#source_group("Header Files\\App" FILES ${APP_INC})
-source_group("Header Files\\Singeltons" FILES ${SINGELTON_INC})
-source_group("Header Files\\States" FILES ${STATES_INC})
-source_group("Header Files\\Common" FILES ${COMMON_INC})
-source_group("Header Files\\Dynamics" FILES ${DYNAMICS_INC})
-source_group("Header Files\\Dynamics\\Cuda\\Prox" FILES ${ProxGPU_INC})
-source_group("Header Files\\Dynamics\\Cuda\\VectorAdd" FILES ${VectorAddGPU_INC})
-source_group("Header Files\\Dynamics\\Cuda\\MatrixVectorMult" FILES ${MatrixVectorMultGPU_INC})
-source_group("Header Files\\Dynamics\\Cuda\\General" FILES ${GeneralCommonFiles_INC})
-source_group("Header Files\\Systems" FILES ${SYSTEMS_INC})
+set(LINK_LIBS   ${Boost_LIBRARIES} 
+                ${CUDA_cublas_LIBRARY} 
+                ${COLLISIONLIB_LIBRARIES} 
+                ${ASSIMP_LIBRARIES}  
+                ${ApproxMVBB_LIBRARIES} 
+                ${MPI_CXX_LIBRARIES})
+#PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
 
@@ -274,86 +260,24 @@ CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES})
 else()
 ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES})
 endif()
+
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
-
-
-SET(INSTALL_DIR_PROJECT ${PROJECT_BINARY_DIR}/bin/)
 set_target_properties(${PROJECT_NAME} PROPERTIES
-RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
-RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
 )
 
+ADD_DEPENDENCIES(${PROJECT_NAME} ${ApproxMVBB_DEPENDING_TARGETS})
 
-# Install all files
-if(WIN32)
-
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-#       CONFIGURATIONS Debug)
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
-#       CONFIGURATIONS Release)
-
-
-    #install(FILES
-                #${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        #DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        #CONFIGURATIONS Release
-    #)
-    #install(FILES
-                #${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        #DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        #CONFIGURATIONS Debug
-    #)
-
-    install(FILES
-        ${COLLISIONLIB_REL}
-        ${ASSIMP_REL}
-        DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        CONFIGURATIONS Release
-    )
-
-    install(FILES
-        ${COLLISIONLIB_DBG}
-        ${ASSIMP_DBG}
-        DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        CONFIGURATIONS Debug
-    )
-
-   # as of sdk 1.7.2 we need to copy the boost dll's as well
-   # because they're not linked statically (it worked with 1.7.1 though)
-   install(FILES ${Boost_DATE_TIME_LIBRARY_RELEASE}
-      ${Boost_THREAD_LIBRARY_RELEASE}
-      DESTINATION ${INSTALL_DIR_PROJECT}/Release
-      CONFIGURATIONS Release
-   )
-   install(FILES ${Boost_DATE_TIME_LIBRARY_DEBUG}
-      ${Boost_THREAD_LIBRARY_DEBUG}
-      DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-      CONFIGURATIONS Debug
-   )
-
-endif(WIN32)
-
-if(UNIX)
-
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-#       CONFIGURATIONS Debug)
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
-#       CONFIGURATIONS Release)
-
-
-    #install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-    #    DESTINATION ${INSTALL_DIR_PROJECT}/Release
-    #    CONFIGURATIONS Release
-   # )
-    #install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-    #    DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-    #    CONFIGURATIONS Debug
-    #)
-
-endif(UNIX)
+# Add target for copying Resources Release and Debug
+SET(ResourceDir ${CMAKE_CURRENT_SOURCE_DIR}/resources)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND 
+          ${CMAKE_COMMAND}
+          -DFolder=$<$<CONFIG:debug>:${ResourceDir}/debug>$<$<CONFIG:release>:${ResourceDir}/release>
+          -DDestination=$<$<CONFIG:debug>:${PROJECT_BINARY_DIR}/bin/Debug>$<$<CONFIG:release>:${PROJECT_BINARY_DIR}/bin/Release>
+          -P ${MODULE_FOLDER}/CopyFiles.cmake
+)
 
 message(STATUS "=========================================================================")

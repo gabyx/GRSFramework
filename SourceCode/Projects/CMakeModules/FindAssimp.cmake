@@ -42,7 +42,7 @@ getenv_path(ASSIMP_HOME)
 set(ASSIMP_PREFIX_PATH ${ASSIMP_HOME} ${ENV_ASSIMP_HOME} /usr/local /usr/local/include /usr/local/lib /usr/include /usr/lib /usr/local/include/assimp /usr/include/assimp /usr/lib/assimp /usr/local/lib/assimp)
 
 create_search_paths(ASSIMP)
-PRINTLIST("Search path:" "${ASSIMP_INC_SEARCH_PATH}")
+#PRINTLIST("Search path:" "${ASSIMP_INC_SEARCH_PATH}")
 
 # redo search if prefix path changed
 clear_if_changed(ASSIMP_PREFIX_PATH
@@ -88,6 +88,6 @@ set(ASSIMP_LIBRARIES ${ASSIMP_LIBRARIES} ${ZLIB_LIBRARIES})
 include(FindPackageHandleStandardArgs)
 ## handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE
 ## if all listed variables are TRUE
-find_package_handle_standard_args(ASSIMP DEFAULT_MSG ASSIMP_LIBRARY ASSIMP_INCLUDE_DIR)
+find_package_handle_standard_args(Assimp DEFAULT_MSG ASSIMP_LIBRARY ASSIMP_INCLUDE_DIR)
 
 

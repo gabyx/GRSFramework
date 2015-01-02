@@ -20,7 +20,7 @@ SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
 SET( APP_INC
 )
 SET( APP_SRC
-    ${PROJECT_SOURCE_DIR}/src/App/main.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/App/main.cpp
 )
 
 SET(SOURCE_DIR "${SOURCE_DIR}/../GeneralRigidBodySimulation/")
@@ -28,41 +28,41 @@ SET(SOURCE_DIR "${SOURCE_DIR}/../GeneralRigidBodySimulation/")
 
 SET(COMMON_INC
 
-    ${SOURCE_DIR}/include/Common/AssertionDebug.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
+    ${SOURCE_DIR}/include/GRSF/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/LogDefines.hpp
 
-    ${PROJECT_SOURCE_DIR}/include/Common/ApplicationCLOptionsConverter.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/ApplicationCLOptionsConverter.hpp
 
-    ${PROJECT_SOURCE_DIR}/include/Converters/SimFileJoiner.hpp
-    ${PROJECT_SOURCE_DIR}/include/Converters/SimFileResampler.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/SimFileJoiner.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/SimFileResampler.hpp
 
-    ${PROJECT_SOURCE_DIR}/include/Converters/RenderScriptConverter.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/RenderScriptConverter.hpp
     
-    ${PROJECT_SOURCE_DIR}/include/Logic/LogicTypes.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Logic/LogicTypes.hpp
 
     
-    ${PROJECT_SOURCE_DIR}/include/General/RenderData.hpp
-    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParserGenerators.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderData.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParserGenerators.hpp
     
-    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParser.hpp
-    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParserBaseTraits.hpp
-    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptParserModules.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParserBaseTraits.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParserModules.hpp
     
-    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptGenerator.hpp
-    ${PROJECT_SOURCE_DIR}/include/General/RenderScriptGeneratorLogic.hpp
-    ${PROJECT_SOURCE_DIR}/include/General/RendermanGeometryWriter.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptGenerator.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptGeneratorLogic.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RendermanGeometryWriter.hpp
     
 
         
     
-    ${PROJECT_SOURCE_DIR}/include/General/RenderMaterial.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderMaterial.hpp
 )
 SET(COMMON_SRC
-    ${SOURCE_DIR}/src/Common/TypeDefs.cpp
-    ${PROJECT_SOURCE_DIR}/src/Converters/RenderScriptConverter.cpp
-    ${PROJECT_SOURCE_DIR}/src/General/RenderData.cpp
-    ${PROJECT_SOURCE_DIR}/src/General/RenderScriptGenerator.cpp
+    ${SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/RenderScriptConverter.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderData.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderScriptGenerator.cpp
 )
 
 
@@ -74,7 +74,7 @@ INCLUDE_SIMULATION_FRAMEWORK_CONVERTER( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLO
 # ===========================================================================================
 # WRITE CONFIGURATION FILE
 configure_file (
-  ${SOURCE_DIR}/include/ConfigFiles/ConfigureFile.hpp.in
+  ${SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
   ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
 )
 #=========================
@@ -109,21 +109,15 @@ set(INCLUDE_DIRS
 	${COMMONSOURCE_DIR}/external/getoptpp/
     ${COMMONSOURCE_DIR}/external/getoptpp/src/
 
-    ${PROJECT_SOURCE_DIR}/include/App
-	${PROJECT_SOURCE_DIR}/include/Common
-    ${PROJECT_SOURCE_DIR}/include/Converters
-    ${PROJECT_SOURCE_DIR}/include/General/
-    ${PROJECT_SOURCE_DIR}/include/Logic/
-
-
-	${SOURCE_DIR}/include/Common
+    ${PROJECT_SOURCE_DIR}/include/
+    ${SOURCE_DIR}/include/
 
     ${GLOBAL_COMMON_INC_DIR}
 
 )
 
 include_directories(${INCLUDE_DIRS})
-PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
+#PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
 
 
 
@@ -132,12 +126,12 @@ set(LINK_DIRS
     ${Boost_LIBRARY_DIRS}
 )
 link_directories(${LINK_DIRS})
-PRINTLIST( "Link directories are:" "${LINK_DIRS}")
+#PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 
 set(LINK_LIBS ${Boost_LIBRARIES})
-PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
+#PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
 source_group("Source Files\\App" FILES ${APP_SRC})
@@ -156,8 +150,9 @@ target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 
 SET(INSTALL_DIR_PROJECT ${PROJECT_BINARY_DIR}/bin/)
 set_target_properties(${PROJECT_NAME} PROPERTIES
-RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
-RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
 )
 
 

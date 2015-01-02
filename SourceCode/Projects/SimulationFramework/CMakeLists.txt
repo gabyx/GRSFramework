@@ -3,24 +3,32 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_GUI )
-set(SIMULATIONFRAMEWORK_BUILD_GUI OFF CACHE BOOL "Build the GUI version of SimulationFramework")
+set(SIMULATIONFRAMEWORK_BUILD_GUI ON CACHE BOOL "Build the GUI version of SimulationFramework")
 
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_NOGUI )
 set(SIMULATIONFRAMEWORK_BUILD_NOGUI ON CACHE BOOL "Build the NOGUI version of SimulationFramework")
 
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_MPI )
-set(SIMULATIONFRAMEWORK_BUILD_MPI OFF CACHE BOOL "Build the MPI version of SimulationFramework")
+set(SIMULATIONFRAMEWORK_BUILD_MPI ON CACHE BOOL "Build the MPI version of SimulationFramework")
 
 MARK_AS_ADVANCED( SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER )
 set(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER ON CACHE BOOL "Build the SimFileConverter for the simulation files of the framework")
 
 
-# Set the makefile build type (only for make file based generators)
+#Detect Build Type if Debug appears in CMAKE_BINARY_DIR path
 MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )
-set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
+STRING(REGEX MATCH ".*(Debug|debug).*" DEBUG_MATCH ${CMAKE_BINARY_DIR} )
+if(DEBUG_MATCH)
+    MESSAGE(WARNING "Matched Debug build!")
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "The build type for makefile based generators")
+ELSE()
+    MESSAGE(WARNING "Matched Release build!")
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
+ENDIF()
 
+SET(SimulationFrameworkName "SimulationFramework")
 IF(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
-        SET(SimulationFrameworkName  "SimulationFramework ${CMAKE_BUILD_TYPE}")
+        SET(SimulationFrameworkName  "${SimulationFrameworkName}-${CMAKE_BUILD_TYPE}")
 ENDIF()
 
 MESSAGE(STATUS "Project name is: " ${SimulationFrameworkName})
@@ -50,9 +58,9 @@ IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
 		SET(CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for C Compiler for release builds" FORCE)
 		SET(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for C Compiler for release builds with debug info" FORCE)
 
-		SET (CMAKE_CXX_FLAGS             "-std=c++11 -ferror-limit=50 -Weverything -Wno-extra-semi -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -fdiagnostics-show-template-tree -Wno-c++98 -Wno-c++98-compat-pedantic -Wno-deprecated" CACHE STRING "" FORCE)
-		#SET(CMAKE_CXX_FLAGS                "std=c++y -ferror-limit=50 -w" CACHE STRING "Flags for CXX Compiler" FORCE)
-		SET(CMAKE_CXX_FLAGS_DEBUG          "-g" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
+        #SET (CMAKE_CXX_FLAGS             "-std=c++11 -ferror-limit=50 -Weverything -Wno-extra-semi -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -fdiagnostics-show-template-tree -Wno-c++98 -Wno-c++98-compat-pedantic -Wno-deprecated" CACHE STRING "" FORCE)
+		SET(CMAKE_CXX_FLAGS                "-std=c++11 -ferror-limit=50 -w" CACHE STRING "Flags for CXX Compiler" FORCE)
+		SET(CMAKE_CXX_FLAGS_DEBUG          "-g -fsanitize=leak -fsanitize=address" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
 		SET(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release minsize builds" FORCE)
 		SET(CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release builds" FORCE)
 		SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for CXX Compiler for release builds with debug info" FORCE)
@@ -68,27 +76,30 @@ ENDIF()
 
 
 
-
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/;${CMAKE_MODULE_PATH}")
+SET(MODULE_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/" )
+SET(CMAKE_MODULE_PATH ${MODULE_FOLDER} ${CMAKE_MODULE_PATH})
 MESSAGE(STATUS "Module path is now set to: " ${CMAKE_MODULE_PATH} )
 
 INCLUDE(PrintListMacro)
 
-
 #Add some multithreaded build support =====================================================================================================
 MARK_AS_ADVANCED(MULTITHREADED_BUILD)
-SET(MULTITHREADED_BUILD 12 CACHE STRING "How many threads are used to build the project")
-if(MULTITHREADED_BUILD AND NOT MULTITHREADED_BUILD_SET)
-	SET(MULTITHREADED_BUILD_SET TRUE CACHE INTERNAL "internal check if we set the multithread stuff already" FORCE)
+SET(MULTITHREADED_BUILD ON CACHE BOOL "Parallel build with as many threads as possible!")
+if(MULTITHREADED_BUILD)
 	if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
-            SET(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM} -j${MULTITHREADED_BUILD}")
-            MESSAGE(STATUS "Added arguments to CMAKE_BUILD_TOOL: ${CMAKE_MAKE_PROGRAM}")
+             file(COPY ${MODULE_FOLDER}/parallelmake.sh DESTINATION ${PROJECT_BINARY_DIR}
+                FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+                NO_SOURCE_PERMISSIONS
+            )
+            SET(CMAKE_MAKE_PROGRAM "${PROJECT_BINARY_DIR}/parallelmake.sh")
+            MESSAGE(STATUS "Set make program to ${PROJECT_BINARY_DIR}/parallelmake.sh")
     elseif(MSVC)
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" "/MP")
       MESSAGE(STATUS "Added parallel build arguments to CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
     endif()
 endif()
 # ========================================================================================================================================
+
 
 #Find GCCFilter Tool
 if(GCCFILTER_TOOL)
@@ -206,10 +217,18 @@ endif()
 # ===============================================================================================================================================================
 
 # Searching Assimp ==================================
-FIND_PACKAGE(Assimp REQUIRED 3)
+find_package(Assimp 3 REQUIRED)
 # ===================================================
 
+# Searching ApproxMVBB Source ==================================
 
+# to link against ApproxMVBB
+#find_package(ApproxMVBB)   
+
+# to include all source into the project
+set(ApproxMVBB_SEARCH_PATH "./../../../../ApproxMVBB" CACHE STRING "ApproxMVBB Repo Dir")
+find_package(ApproxMVBBSource REQUIRED)  
+# ===================================================
 
 # Searching OZCollide or OPCODE (COLLISION LIBRARY) ==================================
 SET(MYPROJECT_COLLISION_LIBRARY "none" CACHE STRING "Choose between 'ozcollide' and 'opcode' for the collision detection...")
@@ -254,18 +273,16 @@ SET(USE_OZCOLLIDE 0)
 endif()
 
 
-
-
-
 # DEFINE if we should use the GPU for the simulation or not!
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MYPROJECT_CXX_FLAGS}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MYPROJECT_CXX_FLAGS}")
 MESSAGE(STATUS "Added ${MYPROJECT_CXX_FLAGS} to CMAKE_CXX and CMAKE_C_FLAGS: ${CMAKE_CXX_FLAGS} and ${CMAKE_C_FLAGS}")
 
 #set common includes for all projects which need them
-
-
 set(COMMONSOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CommonSource")
+
+
+
 
 if(SIMULATIONFRAMEWORK_BUILD_GUI)
 add_subdirectory(Projects/GeneralRigidBodySimulation)
@@ -284,13 +301,26 @@ add_subdirectory(Projects/Converter)
 endif()
 
 
-
-# Copy Media Files to Project folder
-# message(STATUS "Copying Media Content to " ${CMAKE_BINARY_DIR}/Projects/)
-# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Projects/media DESTINATION ${CMAKE_BINARY_DIR}/Projects/)
-
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Projects/media
-        DESTINATION ${CMAKE_BINARY_DIR}/Projects/
-        CONFIGURATIONS Debug Release
+## Copy Media Files to Project folder (unix symlink, other copy)
+if(${UNIX})  
+add_custom_target(
+    AddMediaFilesToBuildFolder
+    COMMAND 
+          ${CMAKE_COMMAND}
+          -E
+          create_symlink
+          "${CMAKE_CURRENT_SOURCE_DIR}/Projects/media"
+          "${CMAKE_BINARY_DIR}/Projects/media"
 )
+else()
+add_custom_target(
+    AddMediaFilesToBuildFolder
+    COMMAND 
+          ${CMAKE_COMMAND}
+          -E
+          copy_directory
+          "${CMAKE_CURRENT_SOURCE_DIR}/Projects/media"
+          "${CMAKE_BINARY_DIR}/Projects/media"
+)
+endif()
 

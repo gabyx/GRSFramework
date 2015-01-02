@@ -20,17 +20,10 @@ include(PrintListMacro)
 SET(SOURCE_DIR "${PROJECT_SOURCE_DIR}/../GeneralRigidBodySimulation/")
 
 
-
-SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
-
-
-
-
-
 SET( APP_INC
 )
 SET( APP_SRC
-    ${PROJECT_SOURCE_DIR}/src/App/main.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/App/main.cpp
 
 )
 
@@ -41,20 +34,20 @@ SET( SINGELTON_SRC
 )
 
 SET( STATES_INC
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManager.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/SimulationManager.hpp
 )
 SET(STATES_SRC
-    ${PROJECT_SOURCE_DIR}/src/States/SimulationManager/SimulationManager.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationManager/SimulationManager.cpp
 )
 
 SET(COMMON_INC
-    ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
-    ${SOURCE_DIR}/include/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/LogDefines.hpp
+    ${SOURCE_DIR}/include/GRSF/Common/AssertionDebug.hpp
 
 )
 SET(COMMON_SRC
-    ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
 )
 
 SET(DYNAMICS_INC
@@ -72,8 +65,8 @@ SET(SYSTEMS_SRC
 INCLUDE(IncludeModulesSimulationFramework)
 
 INCLUDE_SIMULATION_FRAMEWORK_NOGUI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${COMMONSOURCE_DIR})
-PRINTLIST("Global Common src files:" "${GLOBAL_COMMON_SRC}")
-PRINTLIST("Global Common include files:" "${GLOBAL_COMMON_INC}")
+#PRINTLIST("Global Common src files:" "${GLOBAL_COMMON_SRC}")
+#PRINTLIST("Global Common include files:" "${GLOBAL_COMMON_INC}")
 # ===========================================================================================
 
 # CUDA SOURCE INCLUDES ====================================================================
@@ -106,13 +99,37 @@ else()
 endif()
 # ===========================================================================================
 
+#Configure ApproxMVBB =======================================================================
+include(${ApproxMVBB_CMAKE_DIR}/DefineApproxMVBBSources.cmake)
+
+#write config file for this source code
+#set(ApproxMVBB_USE_DIFFERENT_HEADERS TRUE)
+#set(ApproxMVBB_AssertionDebug_INCLUDE_FILE     "ApproxMVBB/Common//AssertionDebug.hpp")
+#set(ApproxMVBB_Exception_INCLUDE_FILE          "ApproxMVBB/Common//Exception.hpp")
+#set(ApproxMVBB_Platform_INCLUDE_FILE           "ApproxMVBB/Common/Platform.hpp")
+#set(ApproxMVBB_StaticAssert_INCLUDE_FILE       "ApproxMVBB/Common/StaticAssert.hpp")
+#set(ApproxMVBB_TypeDefs_INCLUDE_FILE           "ApproxMVBB/Common/TypeDefs.hpp" )
+#set(ApproxMVBB_MyMatrixTypeDefs_INCLUDE_FILE   "ApproxMVBBWrapper/Common/MyMatrixTypeDefs.hpp")
+#set(ApproxMVBB_AABB_INCLUDE_FILE               "GRSF/Dynamics/Collision/Geometry/AABB.hpp")
+#set(ApproxMVBB_OOBB_INCLUDE_FILE               "GRSF/Dynamics/Collision/Geometry/OOBB.hpp" )
+
+# Define all MVBB Source files
+INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC 
+                                ApproxMVBB_INC 
+                                ApproxMVBB_INC_DIRS 
+                                ApproxMVBB_DEPENDING_TARGETS 
+                                ${ApproxMVBB_ROOT_DIR} ${PROJECT_BINARY_DIR})
+
+# ===========================================================================================
+
 
 # WRITE CONFIGURATION FILE
+SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
 configure_file (
-  ${SOURCE_DIR}/include/ConfigFiles/ConfigureFile.hpp.in
-  ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
+  ${SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
+  ${CONFIG_INC}
 )
-# =======================
+#=========================
 
 SET(SOURCE_FILES
     ${APP_SRC}
@@ -123,6 +140,8 @@ SET(SOURCE_FILES
     ${SYSTEMS_SRC}
     ${CUDA_SRC}
     ${GLOBAL_COMMON_SRC}
+    
+    ${ApproxMVBB_SRC}
 )
 
 SET(INCLUDE_FILES
@@ -135,6 +154,8 @@ SET(INCLUDE_FILES
     ${SYSTEMS_INC}
     ${CUDA_INC}
     ${GLOBAL_COMMON_INC}
+    
+    ${ApproxMVBB_INC}
 )
 
 SET(CMAKE_DEBUG_POSTFIX "_d")
@@ -148,28 +169,18 @@ set(INCLUDE_DIRS
     ${COLLISIONLIB_INCLUDE_DIRS}
     ${ASSIMP_INCLUDE_DIRS}
 
-    ${PROJECT_BINARY_DIR}/ConfigFiles/
-
-    ${PROJECT_SOURCE_DIR}/include/App
-
-    #Only for LogDefines.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common # Needs to be previous to {SOURCE_DIR}/include/Common (because there is another LogDefines.hpp
     
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/
-    
-    #Linked Source
-    ${SOURCE_DIR}/include/Common
-    
-    ${SOURCE_DIR}/external/pugixml
-    ${SOURCE_DIR}/external/pugixml
-
+    ${PROJECT_BINARY_DIR}/include/
+    ${PROJECT_SOURCE_DIR}/include/
+    ${SOURCE_DIR}/include/
     ${GLOBAL_COMMON_INC_DIR}
-    
     ${CUDA_COMMON_INCLUDE_DIR}
+    
+    ${ApproxMVBB_INC_DIRS}
 )
 
 include_directories(${INCLUDE_DIRS})
-PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
+#PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
 
 
 
@@ -178,12 +189,17 @@ set(LINK_DIRS
     ${Boost_LIBRARY_DIRS}
 )
 link_directories(${LINK_DIRS})
-PRINTLIST( "Link directories are:" "${LINK_DIRS}")
+#PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 
-set(LINK_LIBS ${Boost_LIBRARIES} ${CUDA_cublas_LIBRARY} ${TICPP_LIBRARIES} ${COLLISIONLIB_LIBRARIES} ${ASSIMP_LIBRARIES})
-PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
+set(LINK_LIBS ${Boost_LIBRARIES} 
+                ${CUDA_cublas_LIBRARY} 
+                ${COLLISIONLIB_LIBRARIES} 
+                ${ASSIMP_LIBRARIES} 
+                ${ApproxMVBB_LIBRARIES}
+)
+#PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
 #source_group("Source Files\\App" FILES ${APP_SRC})
@@ -219,84 +235,18 @@ ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} )
 endif()
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 
+ADD_DEPENDENCIES(${PROJECT_NAME} ${ApproxMVBB_DEPENDING_TARGETS})
 
-SET(INSTALL_DIR_PROJECT ${PROJECT_BINARY_DIR}/bin/)
-set_target_properties(${PROJECT_NAME} PROPERTIES
-RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
-RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
+# Add target for copying Resources Release and Debug
+
+# Add target for copying Resources Release and Debug
+SET(ResourceDir ${CMAKE_CURRENT_SOURCE_DIR}/resources)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND 
+          ${CMAKE_COMMAND}
+          -DFolder=$<$<CONFIG:debug>:${ResourceDir}/debug>$<$<CONFIG:release>:${ResourceDir}/release>
+          -DDestination=$<$<CONFIG:debug>:${PROJECT_BINARY_DIR}/bin/Debug>$<$<CONFIG:release>:${PROJECT_BINARY_DIR}/bin/Release>
+          -P ${MODULE_FOLDER}/CopyFiles.cmake
 )
-
-
-# Install all files
-if(WIN32)
-
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-#       CONFIGURATIONS Debug)
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
-#       CONFIGURATIONS Release)
-
-
-    #install(FILES
-                #${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        #DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        #CONFIGURATIONS Release
-    #)
-    #install(FILES
-                #${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        #DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        #CONFIGURATIONS Debug
-    #)
-
-    install(FILES
-        ${COLLISIONLIB_REL}
-        ${ASSIMP_REL}
-        DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        CONFIGURATIONS Release
-    )
-
-    install(FILES
-        ${COLLISIONLIB_DBG}
-        ${ASSIMP_DBG}
-        DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        CONFIGURATIONS Debug
-    )
-
-   # as of sdk 1.7.2 we need to copy the boost dll's as well
-   # because they're not linked statically (it worked with 1.7.1 though)
-   install(FILES ${Boost_DATE_TIME_LIBRARY_RELEASE}
-      ${Boost_THREAD_LIBRARY_RELEASE}
-      DESTINATION ${INSTALL_DIR_PROJECT}/Release
-      CONFIGURATIONS Release
-   )
-   install(FILES ${Boost_DATE_TIME_LIBRARY_DEBUG}
-      ${Boost_THREAD_LIBRARY_DEBUG}
-      DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-      CONFIGURATIONS Debug
-   )
-
-endif(WIN32)
-
-if(UNIX)
-
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-#       CONFIGURATIONS Debug)
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
-#       CONFIGURATIONS Release)
-
-
-    #install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        #DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        #CONFIGURATIONS Release
-    #)
-    #install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        #DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        #CONFIGURATIONS Debug
-    #)
-
-endif(UNIX)
 
 message(STATUS "=========================================================================")

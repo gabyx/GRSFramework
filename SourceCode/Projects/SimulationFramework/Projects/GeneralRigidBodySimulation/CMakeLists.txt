@@ -57,83 +57,83 @@ endif()
 
 #Set Source Code
 
-SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
+
 
 SET( APP_INC
-    ${PROJECT_SOURCE_DIR}/include/App/App.hpp
-    ${PROJECT_SOURCE_DIR}/include/App/MenuMouse.hpp
-    ${PROJECT_SOURCE_DIR}/include/App/OrbitCamera.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/App/App.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/App/MenuMouse.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/App/OrbitCamera.hpp
 )
 SET( APP_SRC
-    ${PROJECT_SOURCE_DIR}/src/App/App.cpp
-    ${PROJECT_SOURCE_DIR}/src/App/MenuMouse.cpp
-    ${PROJECT_SOURCE_DIR}/src/App/OrbitCamera.cpp
-    ${PROJECT_SOURCE_DIR}/src/App/main.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/App/App.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/App/MenuMouse.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/App/OrbitCamera.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/App/main.cpp
 
 )
 
 SET(SINGELTON_INC
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts/GuiContext.hpp
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts/InputContext.hpp
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts/RenderContext.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Singeltons/Contexts/GuiContext.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Singeltons/Contexts/InputContext.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Singeltons/Contexts/RenderContext.hpp
 )
 
 SET( SINGELTON_SRC
-    ${PROJECT_SOURCE_DIR}/src/Singeltons/Contexts/GuiContext.cpp
-    ${PROJECT_SOURCE_DIR}/src/Singeltons/Contexts/InputContext.cpp
-    ${PROJECT_SOURCE_DIR}/src/Singeltons/Contexts/RenderContext.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Singeltons/Contexts/GuiContext.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Singeltons/Contexts/InputContext.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Singeltons/Contexts/RenderContext.cpp
 )
 
 SET( STATES_INC
-    ${PROJECT_SOURCE_DIR}/include/States/AppState.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/AppStateManager.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationState.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/PlaybackState.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/VideoDropper.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManagerBase.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/SimulationManagerGUI.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackManagerBase.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackManager.hpp
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager/PlaybackLoader.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/AppState.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/AppStateManager.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationState.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/PlaybackState.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/VideoDropper.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/SimulationManagerBase.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/SimulationManagerGUI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/PlaybackManagerBase.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/PlaybackManager.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/PlaybackLoader.hpp
 )
 SET(STATES_SRC
-    ${PROJECT_SOURCE_DIR}/src/States/SimulationManager/PlaybackManager.cpp
-    ${PROJECT_SOURCE_DIR}/src/States/SimulationManager/SimulationManagerGUI.cpp
-    ${PROJECT_SOURCE_DIR}/src/States/AppStateManager.cpp
-    ${PROJECT_SOURCE_DIR}/src/States/SimulationState.cpp
-    ${PROJECT_SOURCE_DIR}/src/States/PlaybackState.cpp
-    ${PROJECT_SOURCE_DIR}/src/States/SimulationManager/SimulationManagerBase.cpp
-    ${PROJECT_SOURCE_DIR}/src/States/SimulationManager/PlaybackManagerBase.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationManager/PlaybackManager.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationManager/SimulationManagerGUI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/States/AppStateManager.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationState.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/States/PlaybackState.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationManager/SimulationManagerBase.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationManager/PlaybackManagerBase.cpp
 )
 
 SET(COMMON_INC
-    ${PROJECT_SOURCE_DIR}/include/Common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/OgreMeshExtraction.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/AxisObject.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/DynamicLines.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/DynamicRenderable.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/CommonFunctionsOgre.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/LogDefines.hpp
-    ${PROJECT_SOURCE_DIR}/include/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/OgreMeshExtraction.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/AxisObject.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/DynamicLines.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/DynamicRenderable.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/CommonFunctionsOgre.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/LogDefines.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/AssertionDebug.hpp
 )
 SET(COMMON_SRC
-    ${PROJECT_SOURCE_DIR}/src/Common/OgreMeshExtraction.cpp
-    ${PROJECT_SOURCE_DIR}/src/Common/AxisObject.cpp
-    ${PROJECT_SOURCE_DIR}/src/Common/DynamicLines.cpp
-    ${PROJECT_SOURCE_DIR}/src/Common/DynamicRenderable.cpp
-    ${PROJECT_SOURCE_DIR}/src/Common/CommonFunctionsOgre.cpp
-    ${PROJECT_SOURCE_DIR}/src/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/OgreMeshExtraction.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/AxisObject.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/DynamicLines.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/DynamicRenderable.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/CommonFunctionsOgre.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
 )
 
 SET(DYNAMICS_INC
-     ${PROJECT_SOURCE_DIR}/include/Dynamics/General/DynamicsSystemGUI.hpp
+     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/DynamicsSystemGUI.hpp
 )
 SET(DYNAMICS_SRC
-     ${PROJECT_SOURCE_DIR}/src/Dynamics/General/DynamicsSystemGUI.cpp
+     ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/DynamicsSystemGUI.cpp
 )
 
 SET(SYSTEMS_INC
-    ${PROJECT_SOURCE_DIR}/include/Systems/SceneParserGUI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Systems/SceneParserGUI.hpp
 )
 
 SET(SYSTEMS_SRC
@@ -174,11 +174,33 @@ else()
 endif()
 # ===========================================================================================
 
+#Configure ApproxMVBB =======================================================================
+include(${ApproxMVBB_CMAKE_DIR}/DefineApproxMVBBSources.cmake)
+
+#write config file for this source code
+#set(ApproxMVBB_USE_DIFFERENT_HEADERS TRUE)
+#set(ApproxMVBB_AssertionDebug_INCLUDE_FILE     "ApproxMVBB/Common//AssertionDebug.hpp")
+#set(ApproxMVBB_Exception_INCLUDE_FILE          "ApproxMVBB/Common//Exception.hpp")
+#set(ApproxMVBB_Platform_INCLUDE_FILE           "ApproxMVBB/Common/Platform.hpp")
+#set(ApproxMVBB_StaticAssert_INCLUDE_FILE       "ApproxMVBB/Common/StaticAssert.hpp")
+#set(ApproxMVBB_TypeDefs_INCLUDE_FILE           "ApproxMVBB/Common/TypeDefs.hpp" )
+#set(ApproxMVBB_MyMatrixTypeDefs_INCLUDE_FILE   "ApproxMVBBWrapper/Common/MyMatrixTypeDefs.hpp")
+#set(ApproxMVBB_AABB_INCLUDE_FILE               "GRSF/Dynamics/Collision/Geometry/AABB.hpp")
+#set(ApproxMVBB_OOBB_INCLUDE_FILE               "GRSF/Dynamics/Collision/Geometry/OOBB.hpp" )
+
+# Define all MVBB Source files
+INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC 
+                                ApproxMVBB_INC 
+                                ApproxMVBB_INC_DIRS 
+                                ApproxMVBB_DEPENDING_TARGETS
+                                ${ApproxMVBB_ROOT_DIR} ${PROJECT_BINARY_DIR} )
+# ===========================================================================================
 
 # WRITE CONFIGURATION FILE
+SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
 configure_file (
-  ${PROJECT_SOURCE_DIR}/include/ConfigFiles/ConfigureFile.hpp.in
-  ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
+  ${PROJECT_SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
+  ${CONFIG_INC}
 )
 #=========================
 
@@ -192,6 +214,8 @@ SET(SOURCE_FILES
     ${SYSTEMS_SRC}
     ${CUDA_SRC}
     ${GLOBAL_COMMON_SRC}
+    
+    ${ApproxMVBB_SRC}
 )
 
 SET(INCLUDE_FILES
@@ -204,6 +228,8 @@ SET(INCLUDE_FILES
     ${SYSTEMS_INC}
     ${CUDA_INC}
     ${GLOBAL_COMMON_INC}
+    
+    ${ApproxMVBB_INC}
 )
 
 
@@ -225,24 +251,18 @@ set(INCLUDE_DIRS
     ${COLLISIONLIB_INCLUDE_DIRS}
 
 
-    ${PROJECT_BINARY_DIR}/ConfigFiles/
-    ${PROJECT_SOURCE_DIR}/include/App
-    ${PROJECT_SOURCE_DIR}/include/Common
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/Contexts
-    ${PROJECT_SOURCE_DIR}/include/Singeltons/
-    ${PROJECT_SOURCE_DIR}/include/States
-    ${PROJECT_SOURCE_DIR}/include/States/SimulationManager
-    ${PROJECT_SOURCE_DIR}/include/Systems
-    ${PROJECT_SOURCE_DIR}/include/Dynamics/General/
+    ${PROJECT_BINARY_DIR}/include/
+    ${PROJECT_SOURCE_DIR}/include/
 
     ${GLOBAL_COMMON_INC_DIR}
 
-
     ${CUDA_COMMON_INCLUDE_DIR}
+    
+    ${ApproxMVBB_INC_DIRS}
 )
 
 include_directories(${INCLUDE_DIRS})
-PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
+#PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
 
 
 
@@ -258,34 +278,16 @@ PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 
-set(LINK_LIBS ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${Boost_LIBRARIES} ${CUDA_cublas_LIBRARY} ${TICPP_LIBRARIES} ${COLLISIONLIB_LIBRARIES} ${ASSIMP_LIBRARIES})
+set(LINK_LIBS 
+    ${OGRE_LIBRARIES} 
+    ${OIS_LIBRARIES} 
+    ${Boost_LIBRARIES} 
+    ${CUDA_cublas_LIBRARY}
+    ${TICPP_LIBRARIES} 
+    ${COLLISIONLIB_LIBRARIES} 
+    ${ASSIMP_LIBRARIES}
+)
 PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
-
-
-source_group("Source Files\\App" FILES ${APP_SRC})
-source_group("Source Files\\Singeltons" FILES ${SINGELTON_SRC})
-source_group("Source Files\\States" FILES ${STATES_SRC})
-source_group("Source Files\\Common" FILES ${COMMON_SRC})
-source_group("Source Files\\Dynamics" FILES ${DYNAMICS_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\Prox" FILES ${ProxGPU_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\VectorAdd" FILES ${VectorAddGPU_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\MatrixVectorMult" FILES ${MatrixVectorMultGPU_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\General" FILES ${GeneralCommonFiles_SRC})
-source_group("Source Files\\Systems" FILES ${SYSTEMS_SRC})
-
-source_group("Header Files\\ConfigFiles" FILES ${CONFIG_INC})
-source_group("Header Files\\App" FILES ${APP_INC})
-source_group("Header Files\\Singeltons" FILES ${SINGELTON_INC})
-source_group("Header Files\\States" FILES ${STATES_INC})
-source_group("Header Files\\Common" FILES ${COMMON_INC})
-source_group("Header Files\\Dynamics" FILES ${DYNAMICS_INC})
-source_group("Header Files\\Dynamics\\Cuda\\Prox" FILES ${ProxGPU_INC})
-source_group("Header Files\\Dynamics\\Cuda\\VectorAdd" FILES ${VectorAddGPU_INC})
-source_group("Header Files\\Dynamics\\Cuda\\MatrixVectorMult" FILES ${MatrixVectorMultGPU_INC})
-source_group("Header Files\\Dynamics\\Cuda\\General" FILES ${GeneralCommonFiles_INC})
-source_group("Header Files\\Systems" FILES ${SYSTEMS_INC})
-
-
 
 
 message(STATUS "Add executable:...")
@@ -296,104 +298,23 @@ ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} )
 endif()
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 
-
-SET(INSTALL_DIR_PROJECT ${PROJECT_BINARY_DIR}/bin/)
 set_target_properties(${PROJECT_NAME} PROPERTIES
-RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
-RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
 )
 
+# Add dependency such that the media files get copied!
+add_dependencies(${PROJECT_NAME}  AddMediaFilesToBuildFolder ${ApproxMVBB_DEPENDING_TARGETS})
 
-# Install all files
-if(WIN32)
-
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-#       CONFIGURATIONS Debug)
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
-#       CONFIGURATIONS Release)
-
-
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/plugins.cfg
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
-                #${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/ogre.cfg
-        DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        CONFIGURATIONS Release
-    )
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/plugins.cfg
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
-               # ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/ogre.cfg
-        DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        CONFIGURATIONS Debug
-    )
-
-    install(FILES ${OGRE_BINARY_REL}
-        ${OGRE_RenderSystem_Direct3D11_REL}
-        ${OGRE_RenderSystem_Direct3D10_REL}
-        ${OGRE_RenderSystem_Direct3D9_REL}
-        ${OGRE_RenderSystem_GL_REL}
-        ${OIS_BINARY_REL}
-        ${OPCODE_REL}
-        ${ASSIMP_REL}
-        DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        CONFIGURATIONS Release
-    )
-
-    install(FILES ${OGRE_BINARY_DBG}
-        ${OGRE_RenderSystem_Direct3D11_DBG}
-        ${OGRE_RenderSystem_Direct3D10_DBG}
-        ${OGRE_RenderSystem_Direct3D9_DBG}
-        ${OGRE_RenderSystem_GL_DBG}
-        ${OIS_BINARY_DBG}
-        ${OPCODE_DBG}
-        ${ASSIMP_DBG}
-        DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        CONFIGURATIONS Debug
-    )
-
-   # as of sdk 1.7.2 we need to copy the boost dll's as well
-   # because they're not linked statically (it worked with 1.7.1 though)
-   install(FILES ${Boost_DATE_TIME_LIBRARY_RELEASE}
-      ${Boost_THREAD_LIBRARY_RELEASE}
-      DESTINATION ${INSTALL_DIR_PROJECT}/Release
-      CONFIGURATIONS Release
-   )
-   install(FILES ${Boost_DATE_TIME_LIBRARY_DEBUG}
-      ${Boost_THREAD_LIBRARY_DEBUG}
-      DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-      CONFIGURATIONS Debug
-   )
-
-endif(WIN32)
-
-if(UNIX)
-
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-#       CONFIGURATIONS Debug)
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
-#       CONFIGURATIONS Release)
-
-
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/unix/plugins.cfg
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
-              #  ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/release/unix/ogre.cfg
-        DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        CONFIGURATIONS Release
-    )
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/unix/plugins.cfg
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/resources.cfg
-              #  ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/debug/unix/ogre.cfg
-        DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        CONFIGURATIONS Debug
-    )
-
-endif(UNIX)
+# Add target for copying Resources Release and Debug
+SET(ResourceDir ${CMAKE_CURRENT_SOURCE_DIR}/resources)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND 
+          ${CMAKE_COMMAND}
+          -DFolder=$<$<CONFIG:debug>:${ResourceDir}/debug>$<$<CONFIG:release>:${ResourceDir}/release>
+          -DDestination=$<$<CONFIG:debug>:${PROJECT_BINARY_DIR}/bin/Debug>$<$<CONFIG:release>:${PROJECT_BINARY_DIR}/bin/Release>
+          -P ${MODULE_FOLDER}/CopyFiles.cmake
+)
 
 message(STATUS "=========================================================================")
