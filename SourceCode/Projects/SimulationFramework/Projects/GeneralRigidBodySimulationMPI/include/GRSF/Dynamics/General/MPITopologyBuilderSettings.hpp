@@ -7,6 +7,7 @@
 namespace MPILayer{
 
 
+
 enum class TopologyBuilderEnum : char{
     GRIDBUILDER
     /*SuperDuperHexagonBuilder*/
@@ -21,8 +22,6 @@ struct GridBuilderSettings{
     }
     using ProcessDimType = MyMatrix<unsigned int>::Array3;
     ProcessDimType m_processDim;
-
-    enum class Mode : short{ STATIC, DYNAMIC} m_mode = Mode::DYNAMIC;
 
     /**
     *   PREDEFINED: Take values from below!
@@ -47,12 +46,15 @@ public:
     using TopologyBuilderEnumType = TopologyBuilderEnum;
     TopologyBuilderEnumType m_type;
 
-
     GridBuilderSettings  m_gridBuilderSettings;
 
     struct RebuildSettings{
-        unsigned int m_rebuildingCheckEachXTimeStep = 10;
-        enum class Policy{ NOTHING, BODY_LIMIT } m_policy = Policy::NOTHING;
+
+        enum class Mode : short{ STATIC, DYNAMIC} m_mode = Mode::DYNAMIC;
+
+        /** Dynamic Settings */
+        unsigned int m_policyCheckEachXTimeStep = 10;
+        enum class Policy{ ALWAYS_REBUILD, BODY_LIMIT } m_policy = Policy::ALWAYS_REBUILD;
 
         // Body Limit Policy
         unsigned int m_bodyLimit = 500;

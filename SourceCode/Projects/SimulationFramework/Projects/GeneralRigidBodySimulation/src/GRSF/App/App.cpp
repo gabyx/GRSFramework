@@ -4,23 +4,16 @@
 
 #include "GRSF/Common/ApplicationCLOptions.hpp"
 
-App::App()
-{
-	m_bShutdown			= false;
-
-
-
+App::App() {
 }
 
 
-App::~App()
-{
-  DECONSTRUCTOR_MESSAGE
+App::~App() {
+    DECONSTRUCTOR_MESSAGE
 }
 
 
-void App::startApp()
-{
+void App::startApp() {
 
     std::stringstream processFolder;
     processFolder << PROCESS_FOLDER_PREFIX << 0;
@@ -33,41 +26,34 @@ void App::startApp()
 
     Logging::LogManager logManager;
 
-	RenderContext renderContext;
+    RenderContext renderContext;
+    if(!RenderContext::getSingleton().initOgre("RigidBodySimulation v1.0"))
+        return;
+    RenderContext::getSingleton().m_pAppLog->logMessage("RenderContext initialized!");
 
-	if(!RenderContext::getSingleton().initOgre("RigidBodySimulation v1.0"))
-		return;
-	RenderContext::getSingleton().m_pAppLog->logMessage("RenderContext initialized!");
+    InputContext inputContext;
+    if(!InputContext::getSingleton().initialise())
+        return;
+    RenderContext::getSingleton().m_pAppLog->logMessage("InputContext initialized!");
 
-	m_bShutdown = false;
-
-	m_pAppStateManager = std::shared_ptr<AppStateManager>( new AppStateManager());
-
-
-	InputContext inputContext;
-	if(!InputContext::getSingleton().initialise())
-		return;
-	RenderContext::getSingleton().m_pAppLog->logMessage("InputContext initialized!");
-
-
-	GuiContext guiContext;
-	if(!GuiContext::getSingleton().initBitesTray())
-		return;
-	RenderContext::getSingleton().m_pAppLog->logMessage("GuiContext initialized!");
+    GuiContext guiContext;
+    if(!GuiContext::getSingleton().initBitesTray())
+        return;
+    RenderContext::getSingleton().m_pAppLog->logMessage("GuiContext initialized!");
 
 
+    std::shared_ptr<AppStateManager> pAppStateManager = std::shared_ptr<AppStateManager>( new AppStateManager());
+    SimulationState::create(pAppStateManager, "SimulationState");
+    PlaybackState::create(pAppStateManager, "PlaybackState");
 
-   SimulationState::create(m_pAppStateManager, "SimulationState");
-   PlaybackState::create(m_pAppStateManager, "PlaybackState");
+    std::shared_ptr<AppState> appSim = std::dynamic_pointer_cast<AppState>(pAppStateManager->findAppStateByName("SimulationState"));
+    //std::shared_ptr<AppState> appPlayback = boost::dynamic_pointer_cast<AppState>(pAppStateManager->findAppStateByName("PlaybackState"));
 
-   std::shared_ptr<AppState> appSim = std::dynamic_pointer_cast<AppState>(m_pAppStateManager->findAppStateByName("SimulationState"));
-   //std::shared_ptr<AppState> appPlayback = boost::dynamic_pointer_cast<AppState>(m_pAppStateManager->findAppStateByName("PlaybackState"));
+    pAppStateManager->pushAppState(appSim);
+    //pAppStateManager->pushAppState(appPlayback);
 
-   m_pAppStateManager->pushAppState(appSim);
-   //m_pAppStateManager->pushAppState(appPlayback);
+    pAppStateManager->start(appSim);
 
-   m_pAppStateManager->start(appSim);
-
-   m_pAppStateManager.reset();
+    pAppStateManager.reset();
 
 }

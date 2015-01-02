@@ -59,9 +59,9 @@ public:
 
     bool checkAndRebuild(unsigned int timeStep, PREC currentTime){
         // Check each X timestep
-        if( timeStep!= 0 && timeStep % m_rebuildSettings.m_rebuildingCheckEachXTimeStep == 0){
+        if( timeStep!= 0 && timeStep % m_rebuildSettings.m_policyCheckEachXTimeStep == 0){
 
-            if(m_rebuildSettings.m_policy == RebuildSettings::Policy::NOTHING){
+            if(m_rebuildSettings.m_policy == RebuildSettings::Policy::ALWAYS_REBUILD){
 
                 this->rebuildTopology(currentTime);
                 return true;
@@ -109,11 +109,12 @@ protected:
 
         // Sum up all boolean values and decide if all neighbours rebuild?
         unsigned int n = std::accumulate(rebuildGather.begin(), rebuildGather.end() , 0, std::plus<char>() );
+        LOGTBLEVEL1(m_pSimulationLog,"MPI> n="<<n<<" processes want to rebuild!"<<std::endl;)
         if(n>=0){ // if one or more process wants to rebuild then rebuild!
             LOGTBLEVEL1(m_pSimulationLog,"MPI> Rebuild accepted!"<<std::endl;)
             return true;
         }
-
+        LOGTBLEVEL1(m_pSimulationLog,"MPI> Rebuild not accepted!"<<std::endl;)
         return false;
     }
 
@@ -555,6 +556,8 @@ public:
         PREC epsilon = 0.01*m_aabb_glo.extent().matrix().norm(); // percentage of the approximate extent of the point cloud
         OOBB oobb = ApproxMVBB::approximateMVBB(p,epsilon,400,5,0,6);
 
+        oobb.expandZeroExtent(0.1);
+
         // Set A_IK
         A_IK = oobb.m_q_KI.matrix();
 
@@ -770,7 +773,7 @@ public:
 
         LOGTBLEVEL1(m_pSimulationLog, "---> GridTopoBuilder: GridTopologyBuilder, build grid ..." << std::endl;);
 
-            if(m_settings.m_mode == GridBuilderSettings::Mode::STATIC){
+            if(m_rebuildSettings.m_mode == RebuildSettings::Mode::STATIC){
                 LOGTBLEVEL1( m_pSimulationLog, "---> GridTopoBuilder: Create ProcessTopologyGrid Static: " << std::endl;)
             }
             else{

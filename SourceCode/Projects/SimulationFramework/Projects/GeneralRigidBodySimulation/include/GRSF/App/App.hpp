@@ -48,10 +48,6 @@ public:
 	void startApp(); ///< Starts the Application.
 
 private:
-
-	std::shared_ptr<AppStateManager>	m_pAppStateManager; ///< The AppStateManager which handles all AppStates in a queue.
-
-	bool						m_bShutdown; 				///< Bool to indicate that the App should be shutdown.
 };
 //=========================================================
 

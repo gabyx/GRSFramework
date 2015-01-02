@@ -394,8 +394,8 @@ private:
         XMLNodeType  mpiSettings = sceneSettings.child("MPISettings");
         if(mpiSettings) {
 
-            XMLNodeType topo;
-            GET_XMLCHILDNODE_CHECK(topo,"ProcessTopology",mpiSettings );
+            XMLNodeType topo = mpiSettings.child("ProcessTopology").child("Topology");
+            CHECK_XMLNODE(topo,"ProcessTopology/Topology");
 
             std::string type = topo.attribute("type").value();
             if(type=="grid") {
