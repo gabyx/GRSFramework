@@ -32,6 +32,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodySolverData.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodyContainer.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MoreauTimeStepper.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/TimeStepperBase.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/TimeStepperSettings.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/InitialConditionBodies.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/InertiaTensorCalculations.hpp
@@ -170,6 +171,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodySolverData.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodyContainer.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MoreauTimeStepper.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/TimeStepperBase.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/TimeStepperSettings.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/InitialConditionBodies.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/InertiaTensorCalculations.hpp
@@ -303,6 +305,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodySolverData.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodyContainer.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MoreauTimeStepper.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/TimeStepperBase.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/TimeStepperSettings.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/InitialConditionBodies.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/InertiaTensorCalculations.hpp
@@ -446,6 +449,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodySolverData.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodyContainer.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MoreauTimeStepper.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/TimeStepperBase.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/TimeStepperSettings.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/InitialConditionBodies.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/InertiaTensorCalculations.hpp
