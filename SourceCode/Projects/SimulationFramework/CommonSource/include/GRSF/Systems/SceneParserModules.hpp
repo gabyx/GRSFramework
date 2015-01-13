@@ -216,6 +216,14 @@ public:
                 }
             }
 
+            att = node.attribute("computeTotalOverlap");
+            if(att) {
+                if(!Utilities::stringToType(m_inclusionSettings->m_computeTotalOverlap, att.value())) {
+                    ERRORMSG("---> String conversion in InclusionSolverSettings: computeTotalOverlap failed");
+                }
+            }
+
+
             att = node.attribute("isFiniteCheck");
             if(att) {
                 if(!Utilities::stringToType(m_inclusionSettings->m_bIsFiniteCheck, att.value())) {

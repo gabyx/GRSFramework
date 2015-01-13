@@ -6,7 +6,6 @@ _________________________________________________________*/
 #include <iostream>
 
 #include "GRSF/Dynamics/General/MoreauTimeStepper.hpp"
-
 #include "GRSF/Common/LogDefines.hpp"
 
 

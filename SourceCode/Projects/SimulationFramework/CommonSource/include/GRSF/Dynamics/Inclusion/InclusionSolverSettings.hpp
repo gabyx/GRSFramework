@@ -36,9 +36,8 @@ struct InclusionSolverSettings
 
       m_eConvergenceMethod = InVelocity;
       m_bComputeResidual = false;
-
+      m_computeTotalOverlap = false;
     }
-
 
     PREC m_deltaT;
 
@@ -67,11 +66,14 @@ struct InclusionSolverSettings
     bool m_useDriftCorrectionGap;
     PREC m_driftCorrectionGapAlpha;
 
+    /** Compute Total Overlap */
+    bool m_computeTotalOverlap;
+
 
     enum Convergence {InLambda,InVelocity, InVelocityLocal, InEnergyVelocity,InEnergyLocalMix} m_eConvergenceMethod;
     bool m_bComputeResidual; ///< If true convergence check is done for all contacts/bodies, no break in the loop
     bool  m_bUseGPU;
-    int m_UseGPUDeviceId;
+    unsigned int m_UseGPUDeviceId;
     bool m_bIsFiniteCheck;
 
 };
