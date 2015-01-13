@@ -13,7 +13,7 @@ _________________________________________________________*/
 
 MoreauTimeStepper::MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys,
                                      std::shared_ptr<StatePoolType>	pSysState)
-    :MoreauTimeStepperBase<MoreauTimeStepper,MoreauTimeStepperTraits>(pDynSys)
+    :TimeStepperBase<MoreauTimeStepper,MoreauTimeStepperTraits>(pDynSys)
 {
     m_pCollisionSolver = std::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys));
     m_pInclusionSolver = std::shared_ptr<InclusionSolverType>(new InclusionSolverType(m_pCollisionSolver,m_pDynSys));
@@ -30,12 +30,12 @@ MoreauTimeStepper::~MoreauTimeStepper() {
 
 
 void MoreauTimeStepper::closeAllFiles() {
-    MoreauTimeStepperBase::closeAllFiles_impl();
+    TimeStepperBase::closeAllFiles_impl();
 }
 
 
 void MoreauTimeStepper::initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ) {
-    MoreauTimeStepperBase::initLogs_impl(folder_path,simDataFile);
+    TimeStepperBase::initLogs_impl(folder_path,simDataFile);
     writeHeaderToSystemDataFile();
 }
 
@@ -75,7 +75,7 @@ void MoreauTimeStepper::reset() {
 
     //m_ReferenceSimFile.writeOutAllStateTimes();
 
-    MoreauTimeStepperBase::reset_impl();
+    TimeStepperBase::reset_impl();
 
 
 };
