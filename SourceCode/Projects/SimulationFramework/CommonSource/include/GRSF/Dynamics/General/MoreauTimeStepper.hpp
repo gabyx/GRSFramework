@@ -18,7 +18,7 @@
 #include "GRSF/Common/AssertionDebug.hpp"
 
 #include "GRSF/Dynamics/General/TimeStepperSettings.hpp"
-#include "GRSF/Dynamics/General/MoreauTimeStepperBase.hpp"
+#include "GRSF/Dynamics/General/TimeStepperBase.hpp"
 #include StatePool_INCLUDE_FILE
 
 #include "GRSF/Dynamics/Buffers/DynamicsState.hpp"
@@ -37,7 +37,7 @@ struct MoreauTimeStepperTraits{
     using TimeStepperSettingsType = TimeStepperSettings;
 };
 
-class MoreauTimeStepper: public MoreauTimeStepperBase<MoreauTimeStepper,MoreauTimeStepperTraits> {
+class MoreauTimeStepper: public TimeStepperBase<MoreauTimeStepper,MoreauTimeStepperTraits> {
 public:
 
     DEFINE_TIMESTEPPER_CONFIG_TYPES

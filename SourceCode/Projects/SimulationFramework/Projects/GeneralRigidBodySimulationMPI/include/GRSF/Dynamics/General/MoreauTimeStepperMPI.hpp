@@ -21,7 +21,7 @@
 #include "GRSF/Common/LogDefines.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
 
-#include "GRSF/Dynamics/General/MoreauTimeStepperBase.hpp"
+#include "GRSF/Dynamics/General/TimeStepperBase.hpp"
 
 #include "GRSF/Dynamics/General/MPICommunication.hpp"
 #include "GRSF/Dynamics/General/BodyCommunicator.hpp"
@@ -42,7 +42,7 @@ struct MoreauTimeStepperMPITraits{
     using TimeStepperSettingsType = TimeStepperSettings;
 };
 
-class MoreauTimeStepperMPI : public MoreauTimeStepperBase<MoreauTimeStepperMPI,MoreauTimeStepperMPITraits> {
+class MoreauTimeStepperMPI : public TimeStepperBase<MoreauTimeStepperMPI,MoreauTimeStepperMPITraits> {
 public:
 
     DEFINE_TIMESTEPPER_CONFIG_TYPES
