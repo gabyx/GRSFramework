@@ -8,10 +8,13 @@ class RigidBodySolverData{
 
         DEFINE_LAYOUT_CONFIG_TYPES
 
-        RigidBodySolverData(): m_t(0){};
+        RigidBodySolverData(): m_t(0), m_overlapTotal(0) {};
 
         ///< The actual time, which belongs to FrontBuffer and m_r_S and I_q_IK
         PREC m_t;
+
+        ///< Total amount of overlap  (Sum of all 0.5*g_i (if sim to sim) or g_i (if sim to static), g_i : gap function)
+        PREC m_overlapTotal;
 };
 
 

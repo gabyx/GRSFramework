@@ -91,7 +91,7 @@ protected:
 MoreauTimeStepperMPI::MoreauTimeStepperMPI( std::shared_ptr<DynamicsSystemType> pDynSys,
                                             std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
                                             std::shared_ptr<TopologyBuilderType> pTopologyBuilder):
-    MoreauTimeStepperBase<MoreauTimeStepperMPI, MoreauTimeStepperMPITraits>(pDynSys),
+    TimeStepperBase<MoreauTimeStepperMPI, MoreauTimeStepperMPITraits>(pDynSys),
     m_pProcCommunicator(pProcCommunicator), m_pTopologyBuilder(pTopologyBuilder) {
 
 
@@ -115,13 +115,13 @@ MoreauTimeStepperMPI::~MoreauTimeStepperMPI() {
 
 
 void MoreauTimeStepperMPI::closeAllFiles() {
-    MoreauTimeStepperBase::closeAllFiles_impl();
+    TimeStepperBase::closeAllFiles_impl();
 }
 
 
 void MoreauTimeStepperMPI::initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ) {
 
-   MoreauTimeStepperBase::initLogs_impl(folder_path,simDataFile);
+   TimeStepperBase::initLogs_impl(folder_path,simDataFile);
    writeHeaderToSystemDataFile();
 
 }
@@ -149,7 +149,7 @@ void MoreauTimeStepperMPI::reset() {
     m_pSimulationLog->logMessage("---> Reset BodyCommunicator...");
     m_pBodyCommunicator->reset();
 
-    MoreauTimeStepperBase::reset_impl();
+    TimeStepperBase::reset_impl();
 
 };
 

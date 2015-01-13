@@ -160,8 +160,12 @@ void TimeStepperBase<TDerived,TTraits>::doFirstHalfTimeStep(PREC ts, PREC timest
             << "\t\t--->m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
             << "\t\t--->m_q_s= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.coeffs().transpose()<<std::endl
             << "\t\t--->m_u_s= "  <<pBody->m_pSolverData->m_uBuffer.m_back.transpose()<<std::endl;)
+
         // Update time:
         pBody->m_pSolverData->m_t = ts + timestep;
+
+        // Erase overlapTotal
+        pBody->m_pSolverData->m_overlapTotal = 0;
 
         // Set F for this object:
         updateFMatrix(pBody->m_q_KI, F_i);

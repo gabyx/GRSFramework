@@ -1027,6 +1027,11 @@ public:
 
     void visitNode(NodeType & node) {
         auto & nodeData = node.m_nodeData;
+        auto *pCollData = nodeData.m_pCollData;
+
+        if( m_settings.m_computeTotalOverlap){
+            computeTotalOverlap(pCollData);
+        }
 
         // Initialize for UCF Contact models
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
@@ -1043,14 +1048,14 @@ public:
             nodeData.m_G_ii.setZero(dimSet,dimSet);
 
             // Compute generalized force directions W
-            auto state = nodeData.m_pCollData->m_pBody1->m_eMode;
+            auto state = pCollData->m_pBody1->m_eMode;
             if(  state == RigidBodyType::BodyMode::SIMULATED){
                 computeW_UCF<1>(nodeData);
             }else if(state == RigidBodyType::BodyMode::ANIMATED){
                 // Contact goes into xi_N, xi_T
                 ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
             }
-            state = nodeData.m_pCollData->m_pBody2->m_eMode;
+            state = pCollData->m_pBody2->m_eMode;
             if(  state == RigidBodyType::BodyMode::SIMULATED){
                 computeW_UCF<2>(nodeData);
             }else if(state == RigidBodyType::BodyMode::ANIMATED){
@@ -1067,29 +1072,29 @@ public:
 
             // u_0 , calculate const b
             // First Body
-            if(nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+            if(pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
 
                 // m_front is zero here-> see DynamicsSystem sets it to zero!
-                nodeData.m_u1BufferPtr->m_front +=  nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
+                nodeData.m_u1BufferPtr->m_front +=  pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
                 /// + initial values M^⁻1 W lambda0 from percussion pool
 
                 nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_back /* m_u_s */ ;
-                nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
+                nodeData.m_G_ii += nodeData.m_W_body1.transpose() * pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
             }
             // SECOND BODY!
-            if(nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if(pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 // m_front is zero here-> see DynamicsSystem sets it to zero!
-                nodeData.m_u2BufferPtr->m_front +=   nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack );
+                nodeData.m_u2BufferPtr->m_front +=   pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack );
                 /// + initial values M^⁻1 W lambda0 from percussion pool
 
                 nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() *  nodeData.m_u2BufferPtr->m_back;
-                nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
+                nodeData.m_G_ii += nodeData.m_W_body2.transpose() * pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
             }
 
             // add deltaGap / deltaT * 2 * alpha
             if(m_settings.m_useDriftCorrectionGap){
-                nodeData.m_b(0) = -1*nodeData.m_pCollData->m_overlap / m_settings.m_deltaT * 2.0 * m_settings.m_driftCorrectionGapAlpha;
+                nodeData.m_b(0) = -1*pCollData->m_overlap / m_settings.m_deltaT * 2.0 * m_settings.m_driftCorrectionGapAlpha;
             }
 
 
@@ -1162,7 +1167,27 @@ public:
 
     }
 
+
 private:
+
+    template<typename CollDataType>
+    inline void computeTotalOverlap(CollDataType * pColData){
+        if(pColData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+           pColData->m_pBody1->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
+        }else{
+           // if static or animated add overlap to other body (which needs to be simualated!)
+           ASSERTMSG(pColData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
+           pColData->m_pBody2->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
+        }
+
+        if(pColData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+           pColData->m_pBody2->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
+        }else{
+           ASSERTMSG(pColData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
+           pColData->m_pBody1->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
+        }
+    }
+
     Logging::Log * m_pSolverLog;
     PREC m_alpha;
     InclusionSolverSettingsType m_settings;

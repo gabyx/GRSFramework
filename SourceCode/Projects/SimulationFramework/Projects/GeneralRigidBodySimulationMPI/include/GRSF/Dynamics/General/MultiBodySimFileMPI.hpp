@@ -26,6 +26,44 @@
 
 #define SIM_FILE_MPI_EXTENSION ".sim"
 
+
+/** Function template to add the specific bytes per body */
+template<unsigned int type> struct AddBytes;
+
+template<>
+struct AddBytes<2>{
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    DEFINE_MPI_INFORMATION_CONFIG_TYPES
+    static const std::streamoff m_bytes = sizeof(RankIdType) + sizeof(PREC);
+
+    template<typename Archive, typename TRigidBody >
+    inline static void write(Archive & oa, TRigidBody *body) {
+        oa << body->m_pBodyInfo->m_ownerRank; // write owner rank
+        oa << body->m_pSolverData->m_overlapTotal; // write totalOverlap
+    }
+};
+
+template<>
+struct AddBytes<1>{
+    DEFINE_MPI_INFORMATION_CONFIG_TYPES
+    static const std::streamoff m_bytes = sizeof(RankIdType);
+
+    template<typename Archive, typename TRigidBody >
+    inline static void write(Archive & oa, TRigidBody *body) {
+        oa << body->m_pBodyInfo->m_ownerRank; // write owner rank
+    }
+};
+
+template<>
+struct AddBytes<0>{
+    static const std::streamoff m_bytes = 0;
+    template<typename Archive, typename TRigidBody >
+    inline static void write(Archive  & oa, TRigidBody *body) {
+        return;
+    }
+};
+
+
 class MultiBodySimFileMPI {
 public:
 
@@ -89,9 +127,9 @@ private:
     std::streamsize m_nBytesPerQBody ;
     std::streamsize m_nBytesPerUBody ;
 
-    static const unsigned int m_additionalBytesPerBodyType = 1;
+    static const unsigned int m_additionalBytesPerBodyType = 2;
     static constexpr std::streamoff getAdditionalBytesPerBody(){
-        return (m_additionalBytesPerBodyType==1) ? 1*sizeof(RankIdType) : 0 ;
+        return AddBytes<m_additionalBytesPerBodyType>::m_bytes;
     }
     static const  std::streamsize m_nAdditionalBytesPerBody;
 
@@ -118,25 +156,6 @@ private:
         return true;
     }
 
-};
-
-/** Function template to add the spcific bytes */
-template<unsigned int type> struct AddBytes;
-
-template<>
-struct AddBytes<1>{
-    template<typename Archive, typename TRigidBody >
-    static void write(Archive & oa, TRigidBody *body) {
-        oa << body->m_pBodyInfo->m_ownerRank; // write owner rank
-    }
-};
-
-template<>
-struct AddBytes<0>{
-    template<typename Archive, typename TRigidBody >
-    static void write(Archive  & oa, TRigidBody *body) {
-        return;
-    }
 };
 
 
