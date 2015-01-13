@@ -71,11 +71,23 @@ INCLUDE(IncludeModulesSimulationFramework)
 
 INCLUDE_SIMULATION_FRAMEWORK_CONVERTER( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${COMMONSOURCE_DIR})
 
+#Configure ApproxMVBB =======================================================================
+include(${ApproxMVBB_CMAKE_DIR}/DefineApproxMVBBSources.cmake)
+# Define all MVBB Source files
+INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC 
+                                ApproxMVBB_INC 
+                                ApproxMVBB_INC_DIRS 
+                                ApproxMVBB_DEPENDING_TARGETS
+                                ${ApproxMVBB_ROOT_DIR} ${PROJECT_BINARY_DIR} )
+# ===========================================================================================
+
+
 # ===========================================================================================
 # WRITE CONFIGURATION FILE
+SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
 configure_file (
   ${SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
-  ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp
+  ${CONFIG_INC}
 )
 #=========================
 
@@ -86,6 +98,8 @@ SET(SOURCE_FILES
     ${DYNAMICS_SRC}
     ${CUDA_SRC}
     ${GLOBAL_COMMON_SRC}
+    
+    ${ApproxMVBB_SRC}
 )
 
 SET(INCLUDE_FILES
@@ -94,6 +108,8 @@ SET(INCLUDE_FILES
     ${DYNAMICS_INC}
     ${CUDA_INC}
     ${GLOBAL_COMMON_INC}
+    
+    ${ApproxMVBB_INC}
 )
 
 
@@ -104,13 +120,13 @@ set(INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
     ${EIGEN_INCLUDE_DIR}
 
-    ${PROJECT_BINARY_DIR}/ConfigFiles/
-
-	${COMMONSOURCE_DIR}/external/getoptpp/
-    ${COMMONSOURCE_DIR}/external/getoptpp/src/
-
+    ${PROJECT_BINARY_DIR}/include/
     ${PROJECT_SOURCE_DIR}/include/
     ${SOURCE_DIR}/include/
+    
+    ${GLOBAL_COMMON_INC_DIR}
+    
+    ${ApproxMVBB_INC_DIRS}
 
     ${GLOBAL_COMMON_INC_DIR}
 
@@ -129,18 +145,8 @@ link_directories(${LINK_DIRS})
 #PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
-
 set(LINK_LIBS ${Boost_LIBRARIES})
 #PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
-
-
-source_group("Source Files\\App" FILES ${APP_SRC})
-source_group("Source Files\\Common" FILES ${COMMON_SRC})
-source_group("Source Files\\Dynamics" FILES ${DYNAMICS_SRC})
-
-source_group("Header Files\\App" FILES ${APP_INC})
-source_group("Header Files\\Common" FILES ${COMMON_INC})
-source_group("Header Files\\Dynamics" FILES ${DYNAMICS_INC})
 
 
 message(STATUS "Add executable:...")
@@ -155,77 +161,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
 )
 
+add_dependencies(${PROJECT_NAME}  ${ApproxMVBB_DEPENDING_TARGETS})
 
-# Install all files
-if(WIN32)
-
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-#       CONFIGURATIONS Debug)
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
-#       CONFIGURATIONS Release)
-
-
-    #install(FILES
-                #${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        #DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        #CONFIGURATIONS Release
-    #)
-    #install(FILES
-                #${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-        #DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        #CONFIGURATIONS Debug
-    #)
-
-    #install(FILES
-        #${COLLISIONLIB_REL}
-        #${ASSIMP_REL}
-        #DESTINATION ${INSTALL_DIR_PROJECT}/Release
-        #CONFIGURATIONS Release
-    #)
-
-    #install(FILES
-        #${COLLISIONLIB_DBG}
-        #${ASSIMP_DBG}
-        #DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-        #CONFIGURATIONS Debug
-    #)
-
-   # as of sdk 1.7.2 we need to copy the boost dll's as well
-   # because they're not linked statically (it worked with 1.7.1 though)
-   #install(FILES ${Boost_DATE_TIME_LIBRARY_RELEASE}
-      #${Boost_THREAD_LIBRARY_RELEASE}
-      #DESTINATION ${INSTALL_DIR_PROJECT}/Release
-      #CONFIGURATIONS Release
-   #)
-   #install(FILES ${Boost_DATE_TIME_LIBRARY_DEBUG}
-      #${Boost_THREAD_LIBRARY_DEBUG}
-      #DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-      #CONFIGURATIONS Debug
-   #)
-
-endif(WIN32)
-
-if(UNIX)
-
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-#       CONFIGURATIONS Debug)
-#   install(TARGETS ${PROJECT_NAME}
-#       RUNTIME DESTINATION ${INSTALL_DIR_PROJECT}/Release
-#       CONFIGURATIONS Release)
-
-
-    #install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-    #    DESTINATION ${INSTALL_DIR_PROJECT}/Release
-    #    CONFIGURATIONS Release
-   # )
-    #install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/install/SceneFile.xml
-    #    DESTINATION ${INSTALL_DIR_PROJECT}/Debug
-    #    CONFIGURATIONS Debug
-    #)
-
-endif(UNIX)
 
 message(STATUS "=========================================================================")
