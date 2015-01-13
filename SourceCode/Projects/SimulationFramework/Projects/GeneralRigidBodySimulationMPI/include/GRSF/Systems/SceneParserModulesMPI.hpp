@@ -3,7 +3,7 @@
 
 #include "GRSF/Dynamics/General/MPITopologyBuilderSettings.hpp"
 
-namespace ParserModules{
+namespace ParserModules {
 
 template<typename TParserTraits>
 class SettingsModuleMPI : public SettingsModule<TParserTraits> {
@@ -26,20 +26,20 @@ public:
 
         XMLNodeType incSet = sceneSettings.child("MPISettings").child("InclusionSolverSettings");
         CHECK_XMLNODE(incSet,"MPISettings/InclusionSolverSettings does not exist");
-         // Process special Inclusion solver settings
+        // Process special Inclusion solver settings
         PREC splitNodeUpdateRatio;
         if(!Utilities::stringToType(splitNodeUpdateRatio,  incSet.attribute("splitNodeUpdateRatio").value())) {
-                ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: splitNodeUpdateRatio failed");
+            ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: splitNodeUpdateRatio failed");
         }
-        if(splitNodeUpdateRatio <= 0){
+        if(splitNodeUpdateRatio <= 0) {
             ERRORMSG("---> MPISettings::InclusionSolverSettings: splitNodeUpdateRatio <= 0");
         }
 
         PREC convergenceCheckRatio;
         if(!Utilities::stringToType(convergenceCheckRatio,  incSet.attribute("convergenceCheckRatio").value())) {
-                ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: convergenceCheckRatio failed");
+            ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: convergenceCheckRatio failed");
         }
-        if(convergenceCheckRatio <= 0){
+        if(convergenceCheckRatio <= 0) {
             ERRORMSG("---> MPISettings::InclusionSolverSettings: convergenceCheckRatio <= 0");
         }
 
@@ -63,14 +63,55 @@ private:
 
 public:
     MPIModule(ParserType * p, BodyModuleType * b, TopologyBuilderSettingsType * t)
-    :m_pSimulationLog(p->getSimLog()), m_topoSettings(t) {}
+        :m_pSimulationLog(p->getSimLog()), m_topoSettings(t) {}
 
     void parseSceneSettingsPost(XMLNodeType sceneSettings) {
         LOGSCLEVEL1(this->m_pSimulationLog, "==== ModuleMPI: parsing scene settings ============================"<<std::endl;)
         XMLNodeType procTopo = sceneSettings.child("MPISettings").child("ProcessTopology");
         CHECK_XMLNODE(procTopo,"MPISettings/ProcessTopology does not exist");
 
-        std::string type = procTopo.attribute("type").value();
+
+
+        std::string type = procTopo.attribute("mode").value();
+        if(type=="static") {
+
+            m_topoSettings->m_rebuildSettings.m_mode = TopologyBuilderSettingsType::RebuildSettings::Mode::STATIC;
+
+        } else if(type=="dynamic") {
+
+            m_topoSettings->m_rebuildSettings.m_mode = TopologyBuilderSettingsType::RebuildSettings::Mode::DYNAMIC;
+
+            unsigned int policyCheck = 1;
+            if(!Utilities::stringToType(policyCheck, procTopo.attribute("policyCheckEveryXTimeStep").value())) {
+                ERRORMSG("---> String conversion in MPISettings::ProcessTopology: policyCheckEveryXTimeStep failed");
+            }
+            m_topoSettings->m_rebuildSettings.m_policyCheckEachXTimeStep = policyCheck;
+
+            type = procTopo.attribute("policy").value();
+            if(type=="alwaysRebuild") {
+
+                m_topoSettings->m_rebuildSettings.m_policy = TopologyBuilderSettingsType::RebuildSettings::Policy::ALWAYS_REBUILD;
+
+            } else if(type=="bodyLimit") {
+
+                m_topoSettings->m_rebuildSettings.m_policy = TopologyBuilderSettingsType::RebuildSettings::Policy::BODY_LIMIT;
+                unsigned int bodyLimit = 1;
+                if(!Utilities::stringToType(bodyLimit, procTopo.attribute("bodyLimit").value())) {
+                    ERRORMSG("---> String conversion in MPISettings::ProcessTopology: bodyLimit failed");
+                }
+                m_topoSettings->m_rebuildSettings.m_bodyLimit = bodyLimit;
+
+            } else {
+                ERRORMSG("---> String conversion in MPISettings:ProcessTopology: policy failed: not a valid setting");
+            }
+
+        } else {
+            ERRORMSG("---> String conversion in MPISettings:ProcessTopology: mode failed: not a valid setting");
+        }
+
+        procTopo = procTopo.child("Topology");
+        CHECK_XMLNODE(procTopo,"MPISettings/ProcessTopology/Topology does not exist");
+        type = procTopo.attribute("type").value();
 
         if(type=="grid") {
 
@@ -81,18 +122,8 @@ public:
                 ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
             }
 
-            std::string type = procTopo.attribute("mode").value();
-            if(type=="static") {
-                m_topoSettings->m_gridBuilderSettings.m_mode = MPILayer::GridBuilderSettings::Mode::STATIC;
-
-            }else if(type=="dynamic"){
-                m_topoSettings->m_gridBuilderSettings.m_mode = MPILayer::GridBuilderSettings::Mode::DYNAMIC;
-            }else{
-                ERRORMSG("---> String conversion in MPISettings:ProcessTopology:mode failed: not a valid setting");
-            }
-
             type = procTopo.attribute("buildMode").value();
-            if(type=="Predefined") {
+            if(type=="Predefined" || type=="predefined") {
 
                 m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::BINET_TENSOR;
 
@@ -101,7 +132,7 @@ public:
                     ERRORMSG("---> String conversion in parseMPISettings: aligned failed");
                 }
 
-                if(m_topoSettings->m_gridBuilderSettings.m_aligned == false){
+                if(m_topoSettings->m_gridBuilderSettings.m_aligned == false) {
                     ERRORMSG("Parse in here a rotation matrix: not implemented!")
                 }
                 Vector3 minPoint;
@@ -117,26 +148,30 @@ public:
                 m_topoSettings->m_gridBuilderSettings.m_aabb += minPoint;
                 m_topoSettings->m_gridBuilderSettings.m_aabb += maxPoint;
 
-                if(m_topoSettings->m_gridBuilderSettings.m_aabb.isEmpty()){
+                if(m_topoSettings->m_gridBuilderSettings.m_aabb.isEmpty()) {
                     ERRORMSG("parseMPISettings: Infeasible min/max points");
                 }
 
-            }
-            else if(type=="BinetTensor") {
+                if(m_topoSettings->m_rebuildSettings.m_mode == TopologyBuilderSettingsType::RebuildSettings::Mode::DYNAMIC){
+                    ERRORMSG("---> You defined a predefined grid as topology and using dynamic rebuilding! You should not do this!")
+                }
+
+            } else if(type=="BinetTensor") {
                 m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::BINET_TENSOR;
-            }else if(type=="MinimalVolumeBoundingBox" || type=="MVBB"){
+            } else if(type=="MinimalVolumeBoundingBox" || type=="MVBB") {
                 m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::MVBB;
-            }else if(type=="Aligned" || type =="AABB"){
+            } else if(type=="Aligned" || type =="AABB") {
                 m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::ALIGNED;
-            }else{
+            } else {
                 ERRORMSG("---> String conversion in MPISettings:ProcessTopology:buildMode failed: not a valid setting");
             }
 
-
-
         } else {
-            ERRORMSG("---> String conversion in MPISettings:ProcessTopology:type failed: not a valid setting");
+            ERRORMSG("---> String conversion in MPISettings:ProcessTopology: type failed: not a valid setting");
         }
+
+
+
         LOGSCLEVEL1(this->m_pSimulationLog, "==================================================================="<<std::endl;)
     }
 

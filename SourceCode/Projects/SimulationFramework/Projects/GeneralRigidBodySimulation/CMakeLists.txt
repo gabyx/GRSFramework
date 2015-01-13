@@ -304,7 +304,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
 )
 
-# Add dependency such that the media files get copied!
+# Add dependency 
 add_dependencies(${PROJECT_NAME}  AddMediaFilesToBuildFolder ${ApproxMVBB_DEPENDING_TARGETS})
 
 # Add target for copying Resources Release and Debug
