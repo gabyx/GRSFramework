@@ -1,0 +1,273 @@
+
+#include "GRSF/Dynamics/General/AddGyroTermVisitor.hpp"
+
+#include InclusionSolver_INCLUDE_FILE
+#include CollisionSolver_INCLUDE_FILE
+#include DynamicsSystem_INCLUDE_FILE
+
+template<typename TDerived, typename TTraits>
+TimeStepperBase<TDerived,TTraits>::TimeStepperBase(std::shared_ptr<DynamicsSystemType> pDynSys)
+{
+
+    if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
+        m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
+    } else {
+        ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
+    }
+    m_pSolverLog = nullptr;
+
+    m_pDynSys = pDynSys;
+};
+
+
+
+template<typename TDerived, typename TTraits>
+TimeStepperBase<TDerived,TTraits>::~TimeStepperBase() {
+    closeAllFiles_impl();
+    DECONSTRUCTOR_MESSAGE
+};
+
+template<typename TDerived, typename TTraits>
+void TimeStepperBase<TDerived,TTraits>::closeAllFiles() {
+    closeAllFiles();
+    // Call derived reset();
+    static_cast<Derived*>(this)->closeAllFiles();
+}
+
+template<typename TDerived, typename TTraits>
+void TimeStepperBase<TDerived,TTraits>::closeAllFiles_impl() {
+
+    Logging::LogManager::getSingleton().destroyLog(m_pSolverLog);
+
+    m_CollisionDataFile.close();
+    m_SystemDataFile.close();
+}
+
+template<typename TDerived, typename TTraits>
+void TimeStepperBase<TDerived,TTraits>::initLogs(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ) {
+    initLogs_impl(folder_path,simDataFile);
+    // Call derived reset();
+    static_cast<Derived*>(this)->initLogs(folder_path,simDataFile);
+}
+
+
+template<typename TDerived, typename TTraits>
+void TimeStepperBase<TDerived,TTraits>::initLogs_impl(  const boost::filesystem::path &folder_path, const boost::filesystem::path &simDataFile  ) {
+
+    // Set new Simfile Path
+    m_SimFolderPath = folder_path;
+    std::string filename;
+
+    // Set new SystemDataFile path (construct new if string is empty)
+    if(simDataFile.empty()) {
+        m_SystemDataFilePath = m_SimFolderPath;
+        filename = SYSTEM_DATA_FILE_PREFIX;
+        filename += ".dat";
+        m_SystemDataFilePath /= filename;
+    }
+
+    // Set new CollisionDataFile path
+    m_CollisionDataFilePath = m_SimFolderPath;
+    filename = COLLISION_DATA_FILE_PREFIX;
+    filename += ".dat";
+    m_CollisionDataFilePath /= filename;
+
+    // Set new SolverFile path
+    m_SolverLogFilePath = m_SimFolderPath;
+    filename = SOLVER_LOG_FILE_PREFIX;
+    filename += ".log";
+    m_SolverLogFilePath /= filename;
+
+
+    // Set up all Logs;
+    if(m_pSolverLog){
+        Logging::LogManager::getSingleton().destroyLog(m_pSolverLog);
+    }
+    m_pSolverLog = new Logging::Log("SolverLog");
+    Logging::LogManager::getSingleton().registerLog(m_pSolverLog);
+
+#if SOLVERLOG_TOFILE == 1
+    m_pSolverLog->addSink(new Logging::LogSinkFile("SolverLog-File",m_SolverLogFilePath));
+#endif
+#if SOLVERLOG_TOCONSOLE == 1
+    m_pSolverLog->addSink(new Logging::LogSinkCout("SolverLog-Cout"));
+#endif
+
+    m_pDynSys->initializeLog(m_pSolverLog);
+    m_pInclusionSolver->initializeLog(m_pSolverLog,m_SimFolderPath);
+    m_pCollisionSolver->initializeLog(m_pSolverLog);
+
+    // SystemDataFile
+#if OUTPUT_SIMDATA_FILE == 1
+    m_SystemDataFile.close();
+    m_SystemDataFile.open(m_SystemDataFilePath.string(), std::ios_base::app | std::ios_base::out);
+    m_SystemDataFile.clear();
+#endif
+
+    // CollisionDataFile
+#if OUTPUT_COLLISIONDATA_FILE == 1
+    m_CollisionDataFile.open(m_CollisionDataFilePath.string(),std::ios::binary | std::ios::out);
+#endif
+};
+
+
+template<typename TDerived, typename TTraits>
+void TimeStepperBase<TDerived,TTraits>::reset() {
+    reset_impl();
+    // Call derived reset();
+    static_cast<Derived*>(this)->reset();
+};
+
+template<typename TDerived, typename TTraits>
+void TimeStepperBase<TDerived,TTraits>::reset_impl(){
+    //set standart values for parameters
+    m_PerformanceTimer.start();
+    m_AvgTimeForOneIteration = 0;
+    m_MaxTimeForOneIteration = 0;
+    m_IterationCounter = 0;
+    m_bFinished = false;
+    m_bIterationFinished = false;
+    m_currentSimulationTime = m_settings.m_startTime;
+
+    m_pSimulationLog->logMessage("---> Reset DynamicsSystem...");
+    m_pDynSys->reset();
+    m_settings = m_pDynSys->getSettingsTimeStepper();
+
+    m_pSimulationLog->logMessage("---> Reset CollisionSolver...");
+    m_pCollisionSolver->reset();
+
+    m_pSimulationLog->logMessage("---> Reset InclusionSolver...");
+    m_pInclusionSolver->reset();
+
+};
+
+
+template<typename TDerived, typename TTraits>
+void TimeStepperBase<TDerived,TTraits>::doFirstHalfTimeStep(PREC ts, PREC timestep) {
+    using namespace std;
+    LOGSLLEVEL2(m_pSolverLog, "---> doFirstHalfTimeStep(): "<<std::endl;)
+
+    static Matrix43 F_i = Matrix43::Zero();
+
+    m_pDynSys->m_externalForces.setTime(ts+timestep);
+
+    auto itEnd = m_pDynSys->m_simBodies.end();
+    for(auto bodyIt =  m_pDynSys->m_simBodies.begin(); bodyIt !=itEnd; ++bodyIt) {
+
+        RigidBodyType * pBody = (*bodyIt);
+
+        LOGSLLEVEL3(m_pSolverLog, "\t---> Body: "<< RigidBodyId::getBodyIdString(pBody) << std::endl
+            << "\t\t--->m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
+            << "\t\t--->m_q_s= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.coeffs().transpose()<<std::endl
+            << "\t\t--->m_u_s= "  <<pBody->m_pSolverData->m_uBuffer.m_back.transpose()<<std::endl;)
+        // Update time:
+        pBody->m_pSolverData->m_t = ts + timestep;
+
+        // Set F for this object:
+        updateFMatrix(pBody->m_q_KI, F_i);
+
+        // Timestep for position;
+        pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_back.template head<3>();
+        pBody->m_q_KI.coeffs() += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_back.template tail<3>();
+
+        //Normalize Quaternion
+        pBody->m_q_KI.normalize();
+
+        // Update Transformation A_IK
+         pBody->m_A_IK = pBody->m_q_KI.matrix();//QuaternionHelpers::setRotFromQuaternion<>(pBody->m_q_KI,  pBody->m_A_IK);
+
+        // Add in to h-Term ==========
+        pBody->m_h_term.setZero();
+
+        // Term omega x Theta * omega = if Theta is diagonal : for a Spehere for example!
+        AddGyroTermVisitor vis(pBody);
+
+        // =========================
+
+        // Add in to Mass Matrix
+        // Mass Matrix is Constant!
+        // =================
+
+        // Add external forces to h_term
+        m_pDynSys->m_externalForces.calculate(pBody);
+
+
+
+        LOGSLLEVEL3(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<std::endl
+            << "\t\t--->m_t= "  << pBody->m_pSolverData->m_t<<std::endl
+            << "\t\t--->m_q_m= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.coeffs().transpose()<<std::endl;)
+    }
+}
+
+template<typename TDerived, typename TTraits>
+void TimeStepperBase<TDerived,TTraits>::doSecondHalfTimeStep(PREC te, PREC timestep) {
+    using namespace std;
+
+    LOGSLLEVEL2(m_pSolverLog, "---> doSecondHalfTimeStep(): "<<std::endl;)
+
+    static Matrix43 F_i = Matrix43::Zero();
+
+    m_pDynSys->resetEnergy();
+
+    // Do timestep for every object
+    auto itEnd = m_pDynSys->m_simBodies.end();
+    for(auto bodyIt =  m_pDynSys->m_simBodies.begin(); bodyIt !=itEnd; ++bodyIt) {
+
+        RigidBodyType * pBody = (*bodyIt);
+
+        // Update time:
+        pBody->m_pSolverData->m_t = te;
+
+        // We do this: Symmetric update q_E = q_B + deltaT * F(q_M)(u_E+u_B)/2 (only influences rotation)
+        // Original Moreau update    q_E = q_B + deltaT * F(q_M)u_E/2  + F(q_B) u_B/2
+
+        // Set F(q_m) for this object:
+        updateFMatrix(pBody->m_q_KI, F_i);
+
+        // Timestep for position;
+        pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_front.template head<3>();
+        pBody->m_q_KI.coeffs() += timestep * F_i * (pBody->m_pSolverData->m_uBegin.template tail<3>() + pBody->m_pSolverData->m_uBuffer.m_front.template tail<3>());
+
+
+        ASSERTMSG(Utilities::isFinite(pBody->m_pSolverData->m_uBuffer.m_front.template tail<3>())," body vel. not finite" );
+
+        //Normalize Quaternion
+        pBody->m_q_KI.normalize();
+
+
+        LOGSLLEVEL3(m_pSolverLog, "\t--->Body: "<< RigidBodyId::getBodyIdString(pBody) <<"-----"<< std::endl
+            << "\t\t--->m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
+            << "\t\t--->m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.coeffs().transpose()<<std::endl
+            << "\t\t--->m_u_e= "  <<pBody->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl;)
+
+#if OUTPUT_SIMDATA_FILE == 1
+        // Calculate Energy
+        PREC potE = m_pDynSys->m_externalForces.calculatePotEnergy(pBody);
+        PREC kinE = 0.5* pBody->m_pSolverData->m_uBuffer.m_front.transpose() * pBody->m_MassMatrix_diag.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front;
+        PREC transKinE = 0.5*pBody->m_pSolverData->m_uBuffer.m_front.squaredNorm()*pBody->m_mass;
+        m_pDynSys->m_currentPotEnergy += potE;
+        m_pDynSys->m_currentKinEnergy += kinE;
+        m_pDynSys->m_currentTransKinEnergy += transKinE;
+        m_pDynSys->m_currentRotKinEnergy += kinE - transKinE;
+        m_pDynSys->m_currentTotEnergy += kinE + potE;
+        m_pDynSys->m_currentSpinNorm = (pBody->m_K_Theta_S.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front.template tail<3>()).norm();
+#endif
+
+
+        // Swap uBuffer and reset Front
+        pBody->m_pSolverData->swapBuffer();
+        pBody->m_pSolverData->reset();
+    }
+}
+template<typename TDerived, typename TTraits>
+void TimeStepperBase<TDerived,TTraits>::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
+    static Matrix33 a_tilde = Matrix33::Zero();
+
+    F_i.block<1,3>(3,0) = -0.5 * q.vec();
+    updateSkewSymmetricMatrix<>(q.vec(), a_tilde );
+    F_i.block<3,3>(0,0) = 0.5 * ( Matrix33::Identity() * q.w() + a_tilde );
+}
+
+
+
+
