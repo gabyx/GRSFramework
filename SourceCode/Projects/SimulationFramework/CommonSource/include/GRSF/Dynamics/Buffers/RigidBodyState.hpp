@@ -70,28 +70,28 @@ public:
     auto getPosition() -> decltype(m_q.template head<3>()) {
         return m_q.template head<3>();
     }
-    auto getPosition() const -> const decltype(m_q.template head<3>()) & {
+    auto getPosition() const -> const decltype(m_q.template head<3>()){
         return m_q.template head<3>();
     }
 
     auto getRotation() -> decltype(m_q.template tail<4>()) {
         return m_q.template tail<4>();
     }
-    auto getRotation() const -> const decltype(m_q.template tail<4>()) & {
+    auto getRotation() const -> const decltype(m_q.template tail<4>()) {
         return m_q.template tail<4>();
     }
 
     auto getVelocityTrans() -> decltype(m_u.template head<3>()) {
         return m_u.template head<3>();
     }
-    auto getVelocityTrans() const -> decltype(m_u.template head<3>()) & {
+    auto getVelocityTrans() const -> const decltype(m_u.template head<3>()) {
         return m_u.template head<3>();
     }
     auto  getVelocityRot() -> decltype(m_u.template tail<3>()){
         return m_u.template tail<3>();
     }
-     auto  getVelocityRot() const -> const decltype(m_u.template tail<3>()) &{
-        return m_u.template tail<3>();
+    auto  getVelocityRot() const -> const decltype(m_u.template tail<3>()){
+       return m_u.template tail<3>();
     }
 
 };

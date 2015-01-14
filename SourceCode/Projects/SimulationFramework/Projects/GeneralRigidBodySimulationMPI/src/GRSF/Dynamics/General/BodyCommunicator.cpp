@@ -233,6 +233,8 @@ void BodyCommunicator::sendMessagesToNeighbours(){
 
 void BodyCommunicator::receiveMessagesFromNeighbours(){
     LOGBC(m_pSimulationLog,"MPI>\t Receive all messages (BODY_MESSAGE) from neighbours!"<<std::endl;)
+    if(m_nbRanks.size() == 0){return;}
+
     // set the rank of the receiving message automatically! inside the function!
     m_pProcComm->receiveMessageFromRanks(m_message, m_nbRanks, m_message.m_tag);
     LOGBC(m_pSimulationLog,"MPI>\t Receive finished!"<<std::endl;)

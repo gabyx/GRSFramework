@@ -43,11 +43,13 @@ public:
     using ProcessCommunicatorType = MPILayer::ProcessCommunicator;
 
     using RebuildSettings = TopologyBuilderSettings::RebuildSettings;
+    using MassPointPredSettings = TopologyBuilderSettings::MassPointPredSettings;
+
 
     TopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
                     std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
-                    RebuildSettings rebuildSettings ):
-        m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator), m_rebuildSettings(rebuildSettings) {
+                    RebuildSettings rebuildSettings, MassPointPredSettings massPointPredSettings ):
+        m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator), m_rebuildSettings(rebuildSettings), m_massPointPredSettings(massPointPredSettings) {
 
         m_pSimulationLog = nullptr;
         m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
@@ -124,6 +126,7 @@ protected:
 
     TopologyBuilderEnumType m_type;
     RebuildSettings m_rebuildSettings;
+    MassPointPredSettings m_massPointPredSettings;
 
     Logging::Log * m_pSimulationLog;
     boost::filesystem::path m_localSimFolderPath;
@@ -168,7 +171,7 @@ private:
         unsigned int m_pointIdx = 0;
         unsigned int m_numPoints = 0;
 
-        const RigidBodyState * m_state; ///< Init Condition of the MassPoint pointing to m_initStates;
+        const RigidBodyState * m_state = nullptr; ///< Init Condition of the MassPoint pointing to m_initStates;
     };
 
     // LOCAL STUFF ==================================================================
@@ -189,9 +192,6 @@ private:
     RigidBodyStatesContainerType m_initStates;
 
     // GLOBAL STUFF =================================================================
-
-    const unsigned int m_nPointsPredictor = 10;
-    const PREC m_deltaT = 0.1;
 
 
     typename std::unordered_map<RankIdType, std::vector<const RigidBodyState *> > m_bodiesPerRank; ///< rank to all pointers in m_initStates;
@@ -224,10 +224,11 @@ public:
     GridTopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
                         std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
                         TopologyBuilderSettings::RebuildSettings rebuildSettings,
+                        TopologyBuilderSettings::MassPointPredSettings massPointPredSettings,
                         SettingsType settings,
                         boost::filesystem::path sceneFilePath,
                         unsigned int nGlobalSimBodies)
-        :TopologyBuilder(pDynSys, pProcCommunicator,rebuildSettings), m_settings(settings),
+        :TopologyBuilder(pDynSys, pProcCommunicator,rebuildSettings,massPointPredSettings), m_settings(settings),
         m_nGlobalSimBodies(nGlobalSimBodies),m_sceneFilePath(sceneFilePath),
         m_messageWrapperResults(this),m_messageOrient(this),m_messageBodies(this)
     {
@@ -283,13 +284,14 @@ public:
                 ERRORMSG("Parsed to little initial states in scene file: " << m_sceneFilePath << " states: " << m_initStates.size() << "globalSimBodies: " << m_nGlobalSimBodies <<std::endl);
             }
 
-            LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: parsed states: "<<std::endl;);
+            LOGTBLEVEL2(m_pSimulationLog, "---> GridTopoBuilder: parsed states: "<<std::endl;);
             m_massPoints_glo.clear();
             for(auto & s : m_initStates){
                 // Save mass points
                 m_massPoints_glo.emplace_back( &s.second );
-                LOGTBLEVEL3(m_pSimulationLog, "\t\t state: "
+                LOGTBLEVEL3(m_pSimulationLog, "\t\t state @"<<&s.second <<" : "
                             << RigidBodyId::getBodyIdString(s.second.m_id )<< " , " << s.second.m_q.transpose() << std::endl;);
+
             }
             // ================================================================
 
@@ -329,7 +331,7 @@ public:
                     m_aligned = false;
                 }
                 else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::MVBB){
-
+                    m_points_glo.clear();
                     predictMassPoints(m_massPoints_glo, m_points_glo );
 
                     makeMVBB(m_points_glo, m_A_IK, m_aabb_glo);
@@ -338,6 +340,9 @@ public:
 
                 }
             }
+
+            // Finally expand grid,
+            m_aabb_glo.expandZeroExtent(0.1);
 
              // Write grid data to file
             #ifdef TOPOLOGY_BUILDER_WRITE_GRID
@@ -455,6 +460,9 @@ public:
                 m_aligned = false;
             }
 
+            // Finally expand grid,
+            m_aabb_glo.expandZeroExtent(0.1);
+
              // Write grid data to file
             #ifdef TOPOLOGY_BUILDER_WRITE_GRID
             writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,&m_points_glo);
@@ -500,13 +508,12 @@ public:
         // we copy all body points into the set m_initStates
         m_initStates.clear();
         m_massPoints_loc.clear();
-        unsigned int i = 0;
+
         for(auto & body : m_pDynSys->m_simBodies){
             auto res = m_initStates.emplace(body->m_id,body); // add new state
             //applyBody(body); //add state
-            m_massPoints_loc.emplace_back( &(res.first->second) );
+            m_massPoints_loc.emplace_back( &(res.first->second) ); // pointer stays valid also if rehash of m_initStates
             LOGTBLEVEL3(m_pSimulationLog, "\t\t state: " << RigidBodyId::getBodyIdString(body->m_id )<< " , " <<  res.first->second.m_q.transpose() << std::endl;);
-            ++i;
         }
 
         if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
@@ -555,8 +562,6 @@ public:
 
         PREC epsilon = 0.01*m_aabb_glo.extent().matrix().norm(); // percentage of the approximate extent of the point cloud
         OOBB oobb = ApproxMVBB::approximateMVBB(p,epsilon,400,5,0,6);
-
-        oobb.expandZeroExtent(0.1);
 
         // Set A_IK
         A_IK = oobb.m_q_KI.matrix();
@@ -659,8 +664,12 @@ public:
     // do a simple integration with only gravity of all point masses, stop if collided with non simulated bodies
     void predictMassPoints(std::vector<MassPoint> & massPoints,
                            Vector3Vec & predictedPoints){
-        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Predict mass points (points: " << massPoints.size()<< ")" <<std::endl;);
+
+
         ColliderPoint pointCollider;
+
+        PREC dT = m_massPointPredSettings.m_deltaT;
+        unsigned int nPoints = m_massPointPredSettings.m_nPoints;
 
         auto * gravityField = m_pDynSys->m_externalForces.getGravityField();
         Vector3 gravity = Vector3::Zero();
@@ -677,15 +686,18 @@ public:
             massPoint.m_points = &predictedPoints;
             massPoint.m_pointIdx = predictedPoints.size();  // link index of the predicted points
             massPoint.m_numPoints = 1; // set number of points
+
             predictedPoints.push_back(massPoint.m_state->getPosition());
 
             Vector3 vel = massPoint.m_state->getVelocityTrans();
 
             // Predict mass points with gravity, no collision detection so far with static objects
             // r_s(t) = 1/2*g*t^2 + v * t + r_s
-            for(unsigned int i = 0; i< m_nPointsPredictor; i++ ){
+            for(unsigned int i = 0; i <nPoints; i++ ){
 
-                predictedPoints.push_back( predictedPoints.back() + m_deltaT*vel + 0.5*gravity*m_deltaT*m_deltaT );
+                predictedPoints.push_back( predictedPoints.back() + dT * vel + 0.5*gravity*dT*dT );
+                vel +=  gravity*dT;
+
                 massPoint.m_numPoints += 1;
 
                 // intersect with all static bodies, if intersection abort, point is proxed onto body!
@@ -708,6 +720,8 @@ public:
             LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: body: "
             <<RigidBodyId::getBodyIdString(massPoint.m_state->m_id) << " last prediction: " << predictedPoints.back().transpose()  <<std::endl);
         }
+
+        LOGTBLEVEL2(m_pSimulationLog, "---> GridTopoBuilder: Predicted mass points: " << predictedPoints.size() << std::endl;);
     }
 
     unsigned int buildCenterPoint( const std::vector<MassPoint> & massPoints,
@@ -791,6 +805,7 @@ public:
             }else{
                 ERRORMSG("No BUILD implemented!")
             }
+
 
 
             LOGTBLEVEL1( m_pSimulationLog,

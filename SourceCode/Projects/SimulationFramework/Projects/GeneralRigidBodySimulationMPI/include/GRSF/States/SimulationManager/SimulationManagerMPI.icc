@@ -101,6 +101,7 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
                                                 new MPILayer::GridTopologyBuilder<ProcessCommunicatorType>
                                                   (m_pDynSys,m_pProcCommunicator,
                                                    topoSettings.m_rebuildSettings,
+                                                   topoSettings.m_massPointPredSettings,
                                                    topoSettings.m_gridBuilderSettings,
                                                    m_sceneFileParsed, m_nGlobalSimBodies ) );
         m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added GridTopologyBuilder");
