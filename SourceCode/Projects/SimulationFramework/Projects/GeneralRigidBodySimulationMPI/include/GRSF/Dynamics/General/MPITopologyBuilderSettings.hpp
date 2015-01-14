@@ -61,6 +61,15 @@ public:
 
     } m_rebuildSettings;
 
+
+    struct MassPointPredSettings{
+        MassPointPredSettings(): m_deltaT(0.1){}
+
+        unsigned int m_nPoints = 5;
+        PREC m_deltaT;
+
+    } m_massPointPredSettings;
+
 };
 
 };

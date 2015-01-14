@@ -239,6 +239,8 @@ void InclusionCommunicator<TCombo>::sendContactMessageToNeighbours() {
 }
 template<typename TCombo>
 void InclusionCommunicator<TCombo>::receiveContactMessagesFromNeighbours() {
+    if(m_nbRanks.size() == 0){return;}
+
     LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (EXTERNALCONTACTS_MESSAGE) from neighbours!"<<std::endl;)
     // set the rank of the receiving message automatically! inside the function!
     m_pProcComm->receiveMessageFromRanks(m_messageContact, m_nbRanks, m_messageContact.m_tag );
@@ -250,9 +252,6 @@ void InclusionCommunicator<TCombo>::receiveContactMessagesFromNeighbours() {
 template<typename TCombo>
 void InclusionCommunicator<TCombo>::sendBodyMultiplicityMessageToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYFACTOR_MESSAGE) to neighbours!"<<std::endl;)
-
-
-
     for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); ++it) {
         LOGIC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
@@ -265,6 +264,7 @@ void InclusionCommunicator<TCombo>::sendBodyMultiplicityMessageToNeighbours() {
 template<typename TCombo>
 void InclusionCommunicator<TCombo>::recvBodyMultiplicityMessageFromNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (SPLITBODYFACTOR_MESSAGE) from neighbours!"<<std::endl;)
+    if(m_nbRanksSendRecvRemote.size() == 0){return;}
     // set the rank of the receiving message automatically! inside the function!
     // m_nbRanksSendRecvRem#ote.erase(m_nbRanksSendRecvRemote.begin()); with this in, it obviously hangs!!
     // so the code is correct! all messages get received
@@ -281,9 +281,7 @@ template<typename TCombo>
 void InclusionCommunicator<TCombo>::sendUpdateSplitBodiesToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYUPDATE_MESSAGE) to neighbours!"<<std::endl;)
 
-
     m_messageSplitBodyUpdate.setStep(m_globalIterationNumber);
-
     for(auto it = m_nbRanksSendRecvRemote.begin(); it != m_nbRanksSendRecvRemote.end(); ++it) {
         LOGIC(m_pSimulationLog,"--->\t\t Send contact message to neighbours with rank: "<< *it <<std::endl;)
         // Instanciate a MessageWrapper which contains a boost::serialization function!
@@ -296,6 +294,7 @@ void InclusionCommunicator<TCombo>::sendUpdateSplitBodiesToNeighbours() {
 template<typename TCombo>
 void InclusionCommunicator<TCombo>::recvUpdateSplitBodiesFromNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (SPLITBODYUPDATE_MESSAGE) from neighbours!"<<std::endl;)
+    if(m_nbRanksSendRecvLocal.size() == 0){return;}
     // set the rank of the receiving message automatically! inside the function!
     // m_nbRanksSendRecv##Remote.erase(m_nbRanksSendRecvRemote.begin()); with this in, it obviously hangs!!
     // so the code is correct! all messages get received
@@ -311,8 +310,6 @@ void InclusionCommunicator<TCombo>::recvUpdateSplitBodiesFromNeighbours() {
 template<typename TCombo>
 void InclusionCommunicator<TCombo>::sendSolutionSplitBodiesToNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Send message (SPLITBODYSOLUTION_MESSAGE) to neighbours!"<<std::endl;)
-
-
     m_messageSplitBodySolution.setStep(m_globalIterationNumber);
 
     for(auto it = m_nbRanksSendRecvLocal.begin(); it != m_nbRanksSendRecvLocal.end(); ++it) {
@@ -327,6 +324,7 @@ void InclusionCommunicator<TCombo>::sendSolutionSplitBodiesToNeighbours() {
 template<typename TCombo>
 void InclusionCommunicator<TCombo>::recvSolutionSplitBodiesFromNeighbours() {
     LOGIC(m_pSimulationLog,"MPI>\t Receive all messages (SPLITBODYSOLUTION_MESSAGE) from neighbours!"<<std::endl;)
+    if(m_nbRanksSendRecvRemote.size() == 0){return;}
     // set the rank of the receiving message automatically! inside the function!
     // m_nbRanksSendRecvRem#ote.erase(m_nbRanksSendRecvRemote.begin()); with this in, it obviously hangs!!
     // so the code is correct! all messages get received

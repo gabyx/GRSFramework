@@ -109,26 +109,26 @@ public:
             ERRORMSG("---> String conversion in MPISettings:ProcessTopology: mode failed: not a valid setting");
         }
 
-        procTopo = procTopo.child("Topology");
+        XMLNodeType topo = procTopo.child("Topology");
         CHECK_XMLNODE(procTopo,"MPISettings/ProcessTopology/Topology does not exist");
-        type = procTopo.attribute("type").value();
+        type = topo.attribute("type").value();
 
         if(type=="grid") {
 
             m_topoSettings->m_type = TopologyBuilderSettingsType::TopologyBuilderEnumType::GRIDBUILDER;
 
             if(!Utilities::stringToVector3(m_topoSettings->m_gridBuilderSettings.m_processDim
-                                           ,  procTopo.attribute("dimension").value())) {
+                                           ,  topo.attribute("dimension").value())) {
                 ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
             }
 
-            type = procTopo.attribute("buildMode").value();
+            type = topo.attribute("buildMode").value();
             if(type=="Predefined" || type=="predefined") {
 
                 m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::BINET_TENSOR;
 
                 if(!Utilities::stringToType(m_topoSettings->m_gridBuilderSettings.m_aligned,
-                                            procTopo.attribute("aligned").value())) {
+                                            topo.attribute("aligned").value())) {
                     ERRORMSG("---> String conversion in parseMPISettings: aligned failed");
                 }
 
@@ -137,12 +137,12 @@ public:
                 }
                 Vector3 minPoint;
                 if(!Utilities::stringToVector3(minPoint
-                                               ,  procTopo.attribute("minPoint").value())) {
+                                               ,  topo.attribute("minPoint").value())) {
                     ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
                 }
                 Vector3 maxPoint;
                 if(!Utilities::stringToVector3(maxPoint
-                                               ,  procTopo.attribute("maxPoint").value())) {
+                                               ,  topo.attribute("maxPoint").value())) {
                     ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
                 }
                 m_topoSettings->m_gridBuilderSettings.m_aabb += minPoint;
@@ -171,6 +171,21 @@ public:
         }
 
 
+        XMLNodeType massP = procTopo.child("MassPointPrediction");
+        if(massP){
+
+            unsigned int points = 5;
+            if(!Utilities::stringToType(points, massP.attribute("nPoints").value())) {
+                ERRORMSG("---> String conversion in MPISettings::ProcessTopology: nPoints failed");
+            }
+            m_topoSettings->m_massPointPredSettings.m_nPoints = points;
+
+            PREC deltaT = 0.1;
+            if(!Utilities::stringToType(deltaT, massP.attribute("deltaT").value())) {
+                ERRORMSG("---> String conversion in MPISettings::ProcessTopology: nPoints failed");
+            }
+            m_topoSettings->m_massPointPredSettings.m_deltaT = deltaT;
+        }
 
         LOGSCLEVEL1(this->m_pSimulationLog, "==================================================================="<<std::endl;)
     }
