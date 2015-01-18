@@ -64,7 +64,7 @@ void MultiBodySimFileMPI::writeBySharedPtr(double time, const typename DynamicsS
         oa << (*it)->m_id;
         serializeEigen(oa, (*it)->get_q());
         serializeEigen(oa, (*it)->get_u());
-        AddBytes<m_additionalBytesPerBodyType>::write(oa,*it);
+        AdditionalBodyData::write<EnumConversion::toIntegral(m_additionalBytesPerBodyType)>(oa,*it);
     }
     //Necessary to make stream flush
     stream.flush();
@@ -115,7 +115,7 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
             oa << (*it)->m_id;
             serializeEigen(oa, (*it)->get_q());
             serializeEigen(oa, (*it)->get_u());
-            AddBytes<m_additionalBytesPerBodyType>::write(oa,*it);
+            AdditionalBodyData::write<EnumConversion::toIntegral(m_additionalBytesPerBodyType)>(oa,*it);
         }
         //Necessary to make stream flush
         stream.flush();
@@ -190,7 +190,7 @@ void MultiBodySimFileMPI::writeByOffsets2(double time, const typename DynamicsSy
             oa << (*it)->m_id;
             serializeEigen(oa, (*it)->get_q());
             serializeEigen(oa, (*it)->get_u());
-            AddBytes<m_additionalBytesPerBodyType>::write(oa,*it);
+            AdditionalBodyData::write<EnumConversion::toIntegral(m_additionalBytesPerBodyType)>(oa,*it);
         }
         //Necessary to make stream flush
         stream.flush();
@@ -264,7 +264,7 @@ void  MultiBodySimFileMPI::writeHeader() {
         memcpy((void*)p,&t,sizeof(t));
         p += sizeof(t);
 
-        t = m_additionalBytesPerBodyType;
+        t = EnumConversion::toIntegral(m_additionalBytesPerBodyType);
         memcpy((void*)p,&t,sizeof(t));
         p += sizeof(t);
 

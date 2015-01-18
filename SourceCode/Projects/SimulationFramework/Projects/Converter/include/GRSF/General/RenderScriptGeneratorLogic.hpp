@@ -21,6 +21,7 @@
 namespace LogicNodes {
 
 
+
     class FrameData: public LogicNode  {
     public:
 
@@ -68,6 +69,9 @@ namespace LogicNodes {
         ~FrameData(){}
     };
 
+
+    namespace ABD = AdditionalBodyData;
+
     class BodyData : public LogicNode {
     public:
 
@@ -87,6 +91,7 @@ namespace LogicNodes {
                 Velocity,
                 MaterialId,
                 ProcessId,
+                OverlapTotal,
                 OUTPUTS_LAST
             };
         };
@@ -102,6 +107,7 @@ namespace LogicNodes {
         DECLARE_OSOCKET_TYPE(Velocity, VectorUBody );
         DECLARE_OSOCKET_TYPE(MaterialId, unsigned int );
         DECLARE_OSOCKET_TYPE(ProcessId, RankIdType );
+        DECLARE_OSOCKET_TYPE(OverlapTotal, PREC );
 
         BodyData(unsigned int id) : LogicNode(id) {
             ADD_OSOCK(BodyId,0);
@@ -109,7 +115,7 @@ namespace LogicNodes {
             ADD_OSOCK(Velocity,VectorUBody());
             ADD_OSOCK(MaterialId,0);
             ADD_OSOCK(ProcessId,0);
-
+            ADD_OSOCK(OverlapTotal,0.0);
         }
 
         ~BodyData(){}
@@ -118,32 +124,45 @@ namespace LogicNodes {
         // No compute function
 
         void setOutputs(RigidBodyStateAdd * s) {
+
+            static AddBytesVisitor vis(this);
+
             SET_OSOCKET_VALUE(BodyId,s->m_id);
             SET_OSOCKET_VALUE(Displacement,s->m_q);
             SET_OSOCKET_VALUE(Velocity,s->m_u);
 
             if(s->m_data) {
-                switch(s->m_data->m_type) {
-
-                case AdditionalBodyData::TypeEnum::PROCESS: {
-                    auto * p = static_cast<AdditionalBodyData::Process *>(s->m_data);
-                    //std::cout << p->m_processId << std::endl;
-                    SET_OSOCKET_VALUE(ProcessId,p->m_processId);
-                }
-                break;
-
-                case AdditionalBodyData::TypeEnum::PROCESS_MATERIAL: {
-                    auto * p = static_cast<AdditionalBodyData::ProcessMaterial *>(s->m_data);
-                    SET_OSOCKET_VALUE(MaterialId,p->m_materialId);
-                    SET_OSOCKET_VALUE(ProcessId,p->m_processId);
-                }
-                break;
-
-                default:
-                    ERRORMSG("Additional bytes could not be filled into input Node!")
-                }
+                s->m_data->applyVisitor(vis);
             }
         }
+    private:
+
+        struct AddBytesVisitor{
+            AddBytesVisitor(BodyData * p): m_p(p){};
+
+            void operator()(ABD::AddBytes<EnumConversion::toIntegral(ABD::TypeEnum::PROCESS)> * add){
+                 SET_OSOCKET_VALUE_PTR(m_p,ProcessId,add->m_processId);
+            }
+            void operator()(ABD::AddBytes<EnumConversion::toIntegral(ABD::TypeEnum::PROCESS_MATERIAL)> * add){
+                 SET_OSOCKET_VALUE_PTR(m_p,ProcessId, add->m_processId);
+                 SET_OSOCKET_VALUE_PTR(m_p,MaterialId,add->m_materialId);
+            }
+            void operator()(ABD::AddBytes<EnumConversion::toIntegral(ABD::TypeEnum::PROCESS_MATERIAL_OVERLAP)> * add){
+                 SET_OSOCKET_VALUE_PTR(m_p,ProcessId, add->m_processId);
+                 SET_OSOCKET_VALUE_PTR(m_p,MaterialId,add->m_materialId);
+                 SET_OSOCKET_VALUE_PTR(m_p,OverlapTotal,add->m_overlapTotal);
+            }
+            void operator()(ABD::AddBytes<EnumConversion::toIntegral(ABD::TypeEnum::PROCESS_OVERLAP)> * add){
+                 SET_OSOCKET_VALUE_PTR(m_p,ProcessId,   add->m_processId);
+                 SET_OSOCKET_VALUE_PTR(m_p,OverlapTotal,add->m_overlapTotal);
+            }
+            template<typename T>
+            void operator()(T * p){
+                 ERRORMSG("Additional bytes could not be filled into input Node!")
+            }
+
+            BodyData * m_p;
+        };
 
     };
 

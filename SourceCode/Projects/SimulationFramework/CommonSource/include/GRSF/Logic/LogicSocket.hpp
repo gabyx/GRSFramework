@@ -184,34 +184,44 @@ T & LogicSocket<T>::getRefValue() {
 	addOSock< OType##name > (  value );	\
 
 
+#define SET_ISOCKET_VALUE_PTR(ptr, name, value )	\
+	ptr->setISocketValue< IType##name > ( (Inputs::name), value )
+#define SET_OSOCKET_VALUE_PTR(ptr, name, value )	\
+	ptr->setOSocketValue< OType##name > ( (Outputs::name), value )
 #define SET_ISOCKET_VALUE( name, value )	\
-	setISocketValue< IType##name > ( (Inputs::name), value )
-
+	SET_ISOCKET_VALUE_PTR(this,name,value)
 #define SET_OSOCKET_VALUE( name, value )	\
-	setOSocketValue< OType##name > ( (Outputs::name), value )
+	SET_OSOCKET_VALUE_PTR(this,name,value)
 
 
 
+#define GET_ISOCKET_VALUE_PTR( ptr, name )      \
+	ptr->getISocketValue< IType##name > ( (Inputs::name) )
+#define GET_OSOCKET_VALUE_PTR( name )      \
+	ptr->getOSocketValue< OType##name > ( (Outputs::name) )
 #define GET_ISOCKET_VALUE( name )      \
-	getISocketValue< IType##name > ( (Inputs::name) )
-
+	GET_ISOCKET_VALUE_PTR(this,name)
 #define GET_OSOCKET_VALUE( name )      \
-	getOSocketValue< OType##name > ( (Outputs::name) )
+	GET_OSOCKET_VALUE_PTR(this,name)
 
 
-#define GET_ISOCKET_REF_VALUE( name )      \
+#define GET_ISOCKET_REF_VALUE_PTR(ptr, name )      \
 	getISocketRefValue< IType##name > ( (Inputs::name) )
-
-#define GET_OSOCKET_REF_VALUE( name )      \
+#define GET_OSOCKET_REF_VALUE_PTR(ptr, name )      \
 	getOSocketRefValue< OType##name > ( (Outputs::name) )
+#define GET_ISOCKET_REF_VALUE( name )      \
+	GET_ISOCKET_REF_VALUE_PTR(this,name)
+#define GET_OSOCKET_REF_VALUE( name )      \
+	GET_OSOCKET_REF_VALUE_PTR(this,name)
 
-
-#define GET_ISOCKET( name )      \
+#define GET_ISOCKET_PTR( ptr, name )      \
 	getISocket< IType##name > ( (Inputs::name) )
-
-#define GET_OSOCKET( name )      \
+#define GET_OSOCKET_PTR( ptr, name )      \
 	getOSocket< OType##name > ( (Outputs::name) )
-
+#define GET_ISOCKET( name )      \
+	GET_ISOCKET_PTR(this,name)
+#define GET_OSOCKET( name )      \
+	GET_OSOCKET_PTR(this,name)
 
 #define DECLARE_ISOCKET_TYPE( name, type)	\
 	typedef type IType##name;	\
