@@ -19,7 +19,8 @@ namespace AdditionalBodyData{
         PROCESS = 1,
         PROCESS_MATERIAL = 2,
         PROCESS_MATERIAL_OVERLAP = 3,
-        PROCESS_OVERLAP = 4
+        PROCESS_OVERLAP = 4,
+        PROCESS_MATERIAL_OVERLAP_GLOBGEOMID = 5
     };
 
     template<unsigned int Type> class AddBytes;
@@ -36,44 +37,41 @@ namespace AdditionalBodyData{
         friend class AdditionalBodyData::AddBytes<1>; \
         friend class AdditionalBodyData::AddBytes<2>; \
         friend class AdditionalBodyData::AddBytes<3>; \
-        friend class AdditionalBodyData::AddBytes<4>;
+        friend class AdditionalBodyData::AddBytes<4>; \
+        friend class AdditionalBodyData::AddBytes<5>;
+
+    #define ADDBYTES_SWITCH_CASE(N, _function_ , _args_... )\
+            case N: \
+                static_cast<AdditionalBodyData::AddBytes<N>* >(this)->_function_( _args_ ); \
+                break;
 
     #define ADDBYTES_SWITCH(_type_ , _function_ , _args_...)  \
         switch( EnumConversion::toIntegral(_type_) ) { \
             case 0: /*Nothing*/ \
                 break; \
-            case 1: \
-                static_cast<AdditionalBodyData::AddBytes<1>* >(this)->_function_( _args_ ); \
-                break; \
-            case 2: \
-                static_cast<AdditionalBodyData::AddBytes<2>* >(this)->_function_( _args_ ); \
-                break; \
-            case 3: \
-                static_cast<AdditionalBodyData::AddBytes<3>* >(this)->_function_( _args_ ); \
-                break; \
-            case 4: \
-                static_cast<AdditionalBodyData::AddBytes<4>* >(this)->_function_( _args_ ); \
-                break; \
+            ADDBYTES_SWITCH_CASE(1,_function_, _args_) \
+            ADDBYTES_SWITCH_CASE(2,_function_, _args_) \
+            ADDBYTES_SWITCH_CASE(3,_function_, _args_) \
+            ADDBYTES_SWITCH_CASE(4,_function_, _args_) \
+            ADDBYTES_SWITCH_CASE(5,_function_, _args_) \
             default: \
                 ERRORMSG("No function call " #_function_ " for type " << EnumConversion::toIntegral(_type_) ); \
         }
+
+    #define ADDBYTES_STATICSWITCH_CASE(N, _function_ , _args_...)\
+            case N: \
+                AdditionalBodyData::AddBytes<N>::_function_( _args_ ); \
+                break; \
 
     #define ADDBYTES_STATICSWITCH( _type_ , _function_ , _args_...)  \
         switch( EnumConversion::toIntegral(_type_) ) { \
             case 0: /*Nothing*/ \
                 break; \
-            case 1: \
-                AdditionalBodyData::AddBytes<1>::_function_( _args_ ); \
-                break; \
-            case 2: \
-                AdditionalBodyData::AddBytes<2>::_function_( _args_ ); \
-                break; \
-            case 3: \
-                AdditionalBodyData::AddBytes<3>::_function_( _args_ ); \
-                break; \
-             case 4: \
-                AdditionalBodyData::AddBytes<4>::_function_( _args_ ); \
-                break; \
+            ADDBYTES_STATICSWITCH_CASE(1, _function_ , _args_ ) \
+            ADDBYTES_STATICSWITCH_CASE(2, _function_ , _args_ ) \
+            ADDBYTES_STATICSWITCH_CASE(3, _function_ , _args_ ) \
+            ADDBYTES_STATICSWITCH_CASE(4, _function_ , _args_ ) \
+            ADDBYTES_STATICSWITCH_CASE(5, _function_ , _args_ ) \
             default: \
                 ERRORMSG("No function call " #_function_ " for type " << EnumConversion::toIntegral(_type_) ); \
         }
@@ -145,12 +143,14 @@ namespace AdditionalBodyData{
     class AddBytes<EnumConversion::toIntegral(TypeEnum::PROCESS_MATERIAL)> : public Bytes{
     public:
 
-        static const unsigned int nBytes = sizeof(RankIdType) + sizeof(unsigned int);
+
 
         AddBytes(): Bytes(BytesTraits<AddBytes>::m_type){}
         ~AddBytes(){}
         RankIdType m_processId;
-        unsigned int m_materialId;
+        typename RigidBodyType::BodyMaterialType  m_materialId;
+
+        static const unsigned int nBytes = sizeof(RankIdType) + sizeof(RigidBodyType::BodyMaterialType);
 
         template<typename Stream>
         void read(Stream & s){
@@ -170,13 +170,14 @@ namespace AdditionalBodyData{
     class AddBytes<EnumConversion::toIntegral(TypeEnum::PROCESS_MATERIAL_OVERLAP)>: public Bytes{
     public:
 
-        static const unsigned int nBytes = sizeof(RankIdType) + sizeof(unsigned int) + sizeof(PREC);
 
         AddBytes(): Bytes(BytesTraits<AddBytes>::m_type){}
         ~AddBytes(){}
         RankIdType m_processId;
         typename RigidBodyType::BodyMaterialType m_materialId;
         PREC m_overlapTotal;
+
+        static const unsigned int nBytes = sizeof(RankIdType) + sizeof(RigidBodyType::BodyMaterialType) + sizeof(PREC);
 
         template<typename Stream>
         void read(Stream & s){
@@ -198,12 +199,13 @@ namespace AdditionalBodyData{
     class AddBytes<EnumConversion::toIntegral(TypeEnum::PROCESS_OVERLAP)>: public Bytes{
     public:
 
-        static const unsigned int nBytes = sizeof(RankIdType) + sizeof(unsigned int) + sizeof(PREC);
 
         AddBytes(): Bytes(BytesTraits<AddBytes>::m_type){}
         ~AddBytes(){}
         RankIdType m_processId;
         PREC m_overlapTotal;
+
+        static const unsigned int nBytes = sizeof(RankIdType) + sizeof(PREC);
 
         template<typename Stream>
         void read(Stream & s){
@@ -215,6 +217,39 @@ namespace AdditionalBodyData{
         inline static void write(Archive & oa, TRigidBody *body) {
             oa << body->m_pBodyInfo->m_ownerRank; // write owner rank
             oa << body->m_pSolverData->m_overlapTotal; // write totalOverlap
+        }
+    };
+
+    // Type 5
+    template<>
+    class AddBytes<EnumConversion::toIntegral(TypeEnum::PROCESS_MATERIAL_OVERLAP_GLOBGEOMID)>: public Bytes{
+    public:
+
+
+        AddBytes(): Bytes(BytesTraits<AddBytes>::m_type){}
+        ~AddBytes(){}
+        RankIdType m_processId;
+        typename RigidBodyType::BodyMaterialType m_materialId;
+        typename RigidBodyType::GlobalGeomIdType m_geomId;
+        PREC m_overlapTotal;
+
+        static const unsigned int nBytes = sizeof(RankIdType) + sizeof(RigidBodyType::BodyMaterialType)
+                                            + sizeof(PREC) + sizeof(RigidBodyType::GlobalGeomIdType);
+
+        template<typename Stream>
+        void read(Stream & s){
+            s >> m_processId;
+            s >> m_materialId;
+            s >> m_overlapTotal;
+            s >> m_geomId;
+        }
+
+        template<typename Archive, typename TRigidBody >
+        inline static void write(Archive & oa, TRigidBody *body) {
+            oa << body->m_pBodyInfo->m_ownerRank; // write owner rank
+            oa << body->m_eMaterial; // write material id
+            oa << body->m_pSolverData->m_overlapTotal; // write totalOverlap
+            oa << body->m_globalGeomId; // write geomId
         }
     };
 

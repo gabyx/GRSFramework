@@ -431,6 +431,11 @@ public:
                      //add own AABB to global
                     m_aabb_glo += m_I_aabb_loc;
                     m_aligned = true;
+
+                    // DEBUG (predict points anyway, not needed! to check in file)
+                    m_points_glo.clear();
+                    predictMassPoints(m_massPoints_loc, m_points_glo );
+                    predictMassPoints(m_massPoints_glo, m_points_glo );
             }
             else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
 
@@ -669,6 +674,7 @@ public:
         ColliderPoint pointCollider;
 
         PREC dT = m_massPointPredSettings.m_deltaT;
+
         unsigned int nPoints = m_massPointPredSettings.m_nPoints;
 
         auto * gravityField = m_pDynSys->m_externalForces.getGravityField();
@@ -690,7 +696,6 @@ public:
             predictedPoints.push_back(massPoint.m_state->getPosition());
 
             Vector3 vel = massPoint.m_state->getVelocityTrans();
-
             // Predict mass points with gravity, no collision detection so far with static objects
             // r_s(t) = 1/2*g*t^2 + v * t + r_s
             for(unsigned int i = 0; i <nPoints; i++ ){
@@ -982,7 +987,6 @@ public:
         if(points){
             ss.str("");
             node = root.first_element_by_path("./Points");
-            std::cout << "Points: " << points->size() << std::endl;
             for(auto & p : *points){
                 ss << p.transpose().format(MyMatrixIOFormat::SpaceSep) << std::endl;
             }

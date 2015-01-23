@@ -7,7 +7,7 @@
 #include <deque>
 #include <initializer_list>
 #include "GRSF/Common/Singleton.hpp"
-
+#include "GRSF/Common/AssertionDebug.hpp"
 
 /**
 *  @brief Signal Handling for the Application
@@ -15,90 +15,114 @@
 class ApplicationSignalHandler: public Utilities::Singleton<ApplicationSignalHandler> {
 public:
 
-    ApplicationSignalHandler(std::initializer_list<int> signals){
-        // register all signals with the global handler
-        for(auto s : signals){ signal(s, ApplicationSignalHandler::globalDispatcher); }
-    }
+    using FuncType = std::function<void(void)>;
 
-    struct CallBackWrapper{
-        std::function<bool(void)> m_func;
 
-        inline bool operator()(){
-            return m_func();
+    class CallBackWrapper{
+    public:
+
+        CallBackWrapper(const FuncType & f , const std::string & name): m_func(f), m_name(name)
+        {}
+
+        inline void operator()() const{
+            m_func();
         }
-        inline bool operator==
-        struct Hasher{
-            std::size_t operator()(CallBackWrapper & c){
-                return getAddress(c.m_func);
-            }
-        };
+
+        inline bool operator==(const CallBackWrapper & callback) const{
+            return m_name == callback.m_name;
+        }
+
+        inline bool operator==(const std::string & name) const{
+            return m_name == name;
+        }
+
+        std::string getName() const {return m_name;}
+
+    private:
+        FuncType m_func;
+        std::string m_name;
     };
 
     using CallbackType = CallBackWrapper;
 
-    void registerSignalCallback(int signal, CallbackType & callBack ){
-        auto address = getAddress(callBack);
-
-        auto & addresses = m_signalHandlersAddresses[signal];
-        auto & callbacks = m_signalHandlers[signal];
-
-        auto it = addresses.find(address);
-        if(it == addresses.end()){
-            addresses.insert(callBack);
-            callbacks.push_front(callBack);
-        }else{
-            ERRORMSG("This signal: " << signal <<" with callback @" << getAddress(callBack) << " is already registered!")
+    ApplicationSignalHandler(std::initializer_list<int> signals){
+        // register all signals with the global handler
+        for(auto s : signals){
+            signal(s, ApplicationSignalHandler::globalDispatcher);
+            m_signalHandlers.emplace(s,std::deque<CallbackType>{});
         }
     }
 
-    void unregisterSignalCallback(int signal, CallbackType & callBack ){
+
+    void registerCallback(int signal, const FuncType & callBack, const std::string & name ){
+        CallbackType c(callBack,name);
+
+        auto callBacksIt = m_signalHandlers.find(signal);
+        if(callBacksIt == m_signalHandlers.end()){
+            ERRORMSG("You cannot register signal type: " << signal << " because not added to SignalHandler at instantiation!")
+        }
+        auto & callBacks = callBacksIt->second;
+        auto callbackIt  = std::find( callBacks.begin(), callBacks.end(), name); // find already exiting callback
+        if(callbackIt == callBacks.end()){
+            callBacks.push_front(c);
+        }else{
+            ERRORMSG("This signal: " << signal <<" with callback name" << c.getName() << " is already registered!")
+        }
+    }
+
+    void unregisterCallback(int signal, const std::string & name){
+
         auto it = m_signalHandlers.find(signal);
         if(it != m_signalHandlers.end()){
-            auto c = it->second.find(callBack);
-            if(c!=it->second.end()){
-                it->second.erase(c);
+            auto & callBacks = it->second;
+            auto callbackIt  = std::find( callBacks.begin(), callBacks.end(), name); // find already existing callback
+            if(callbackIt != callBacks.end()){
+                callBacks.erase(callbackIt);
             }else{
-                ERRORMSG("Could not unregister signal handler with signal: " << signal << getAddress(callBack))
+                ERRORMSG("No callback: " << name << " to unregister!")
             }
         }else{
-            ERRORMSG("Could not unregister signal handler with signal: " << signal << getAddress(callBack))
+            ERRORMSG("No callbacks for signal: " << signal << " because not added to SignalHandler at instantiation!")
         }
     }
 
+    /** trys to unregisters from all signals */
+    void unregisterCallback( const std::string & name){
 
+        for (auto & sH : m_signalHandlers){
+            auto & callBacks = sH.second;
+            auto callbackIt  = std::find( callBacks.begin(), callBacks.end(), name ); // find already existing callback
+            if(callbackIt != callBacks.end()){
+                callBacks.erase(callbackIt);
+            }
+        }
+    }
 
 private:
 
-    static size_t getAddress(std::function<bool(void)> f) {
-        typedef bool (fnType)(void);
-        fnType ** fnPointer = f.template target<fnType*>();
-        return (size_t) *fnPointer;
-    }
 
     static void globalDispatcher(int signum){
 
         ApplicationSignalHandler & s = ApplicationSignalHandler::getSingleton();
-
-        bool signalHandled = false;
+        bool noCallBack = false;
         // Catched signal
         // Handling all signals and dispatching to the registered signal handlers
         auto it = s.m_signalHandlers.find(signum);
         if(it!=s.m_signalHandlers.end()){
-            for( auto & callBack : it->second){  // loop over all callbacks till one handles the signal!
-                if(callBack()){
-                    signalHandled = true;
-                    break;
-                };
-            }
-        }
 
-       std::cerr << "---> Caught signal: " << signum << " which was not handled by the application! Exit!" << std::endl;
-       exit(EXIT_FAILURE);
+            if(it->second.size()==0){
+                WARNINGMSG(false, "---> Caught signal: " << signum << " which was not handled by the application, because no call back for this signal)!" );
+            }else{
+                for( auto & callBack : it->second){  // loop over all callbacks
+                    callBack();
+                }
+            }
+        }else{
+            WARNINGMSG(false,"---> Caught signal: " << signum << " which was not handled by the application because signal not registered!");
+        }
     }
 
     std::unordered_map<int, std::deque<CallbackType> > m_signalHandlers;
-
-    std::unordered_map<int, std::unordered_set<size_t> > m_signalHandlersAddresses;
 };
 
 
