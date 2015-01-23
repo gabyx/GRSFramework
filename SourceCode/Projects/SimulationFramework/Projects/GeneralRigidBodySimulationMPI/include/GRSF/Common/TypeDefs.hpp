@@ -60,7 +60,6 @@ struct GlobalConfigs{
          using RandomGeneratorType = std::mt19937;
     };
 
-
     struct SolverConfigs{
         using TimeStepperType = MyConfigs::TimeStepperType             ;
     };

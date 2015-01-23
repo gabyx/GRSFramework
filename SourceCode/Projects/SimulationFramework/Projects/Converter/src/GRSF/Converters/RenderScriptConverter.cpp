@@ -1,6 +1,9 @@
 #include "GRSF/Converters/RenderScriptConverter.hpp"
 
 #include <string>
+
+#include "GRSF/Common/ApplicationSignalHandler.hpp"
+
 #include "GRSF/Common/CPUTimer.hpp"
 #include "GRSF/Common/ProgressBarCL.hpp"
 
@@ -122,6 +125,10 @@ void RenderScriptConverter::loadMaterialCollection() {
 void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
     LOG(m_log, "---> Converting file:" << f << std::endl;);
 
+    m_abort = false;
+    ApplicationSignalHandler::getSingleton().registerCallback(SIGINT,
+                        std::bind( &RenderScriptConverter::callbackAbort, this), "QuitRender");
+
     std::vector<RigidBodyStateAdd> states;
 
     if(!m_simFile.openRead(f,true)){
@@ -133,34 +140,34 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
     CPUTimer timer;
     timer.start();
 
-    PREC start = 0,avgInitFrameTime = 0, avgStateTime = 0;
+    PREC start = 0,avgInitFrameTime = 0, avgStateTime = 0, avgStateLoadTime = 0;
     unsigned int bodyCounter = 0;
 
-    while(m_simFile.isGood()){
+
+    while(m_simFile.isGood() && !m_abort){
 
         // Write render script for this frame
         double time;
+        start = timer.elapsedMilliSec();
         m_simFile.read(states,time);
 
         if(states.size()==0){
             ERRORMSG("State size is zero!")
         }
-
         LOG(m_log, "---> Loaded state at t: " <<time << std::endl;)
+        avgStateLoadTime +=  timer.elapsedMilliSec() - start;
 
         // Produce Render OutputFile for this state
         start = timer.elapsedMilliSec();
         m_renderScriptGen.initFrame(m_outputFile.parent_path(), m_outputFile.filename().string(), time, m_frameCounter );
         avgInitFrameTime += timer.elapsedMilliSec() - start;
 
+
         start = timer.elapsedMilliSec();
-
-
         for(auto & bs: states){
             m_renderScriptGen.generateFrameData(&bs);
             bodyCounter++;
         }
-
         avgStateTime += timer.elapsedMilliSec() - start;
 
 
@@ -169,8 +176,11 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
 
     }
 
-    LOG(m_log, "---> Converter Speed:" <<std::endl
-        << "Avg. Init Frame Time: " << (avgInitFrameTime / m_frameCounter) << " ms" <<std::endl
-        << "Avg. State Time: " << (avgStateTime / bodyCounter) << " ms" <<std::endl;)
+      LOG(m_log, "---> Converter Speed:" <<std::endl
+        << "Avg. Load State Time / Frame: "   << (avgStateLoadTime / m_frameCounter) << " ms" <<std::endl
+        << "Avg. Init Frame Time / Frame: "   << (avgInitFrameTime / m_frameCounter) << " ms" <<std::endl
+        << "Avg. State Time / Body: " << (avgStateTime / (m_frameCounter * bodyCounter)) << " ms" <<std::endl;)
+
+    ApplicationSignalHandler::getSingleton().unregisterCallback(SIGINT,"QuitRender");
 
 }

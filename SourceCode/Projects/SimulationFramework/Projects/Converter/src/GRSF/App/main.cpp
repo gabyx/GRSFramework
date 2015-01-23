@@ -9,6 +9,7 @@
 #include "GRSF/Common/AssertionDebug.hpp"
 
 #include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
+#include "GRSF/Common/ApplicationSignalHandler.hpp"
 
 #include "GRSF/Converters/SimFileInfo.hpp"
 #include "GRSF/Converters/SimFileJoiner.hpp"
@@ -25,8 +26,11 @@ void printHelpAndExit(std::string o=""){
             exit(EXIT_FAILURE);
 }
 
+
+
 int main(int argc, char **argv) {
 
+    ApplicationSignalHandler sigHandler( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} );
 
     if(argc > 1){
         if(std::string(argv[1]) == "sim"){

@@ -66,9 +66,7 @@ class SimFileResampler;
 class MultiBodySimFile {
     friend class SimFileJoiner;
     friend class SimFileResampler;
-
-    friend AdditionalBodyData::Process;
-    friend AdditionalBodyData::ProcessMaterial;
+    MAKE_ADDITIONALBODYDATA_FRIEND
 public:
 
 
@@ -277,6 +275,7 @@ private:
 
     template<bool skipAddBytes = true>
     inline void readBodyState( RigidBodyState * state);
+
 
     inline void readBodyStateAdd( RigidBodyStateAdd * state);
 
@@ -615,7 +614,7 @@ void MultiBodySimFile::readBodyStateAdd( RigidBodyStateAdd * s) {
 
     readBodyState<false>(s);
 
-    // Construct new additional Data of it does not match
+    // Construct new additional Data if it does not match
     if(s->m_data) {
         if(s->m_data->m_type != m_additionalBytesPerBodyType) {
             delete s->m_data;
@@ -625,19 +624,7 @@ void MultiBodySimFile::readBodyStateAdd( RigidBodyStateAdd * s) {
         s->m_data = AdditionalBodyData::create(m_additionalBytesPerBodyType);
     }
 
-    switch(m_additionalBytesPerBodyType) {
-        case AdditionalBodyData::TypeEnum::PROCESS:
-            static_cast<AdditionalBodyData::Process *>(s->m_data)->read(this);
-            break;
-        case AdditionalBodyData::TypeEnum::PROCESS_MATERIAL:
-            static_cast<AdditionalBodyData::ProcessMaterial *>(s->m_data)->read(this);
-            break;
-        case AdditionalBodyData::TypeEnum::NOTHING:
-            break;
-        default:
-            ERRORMSG("Additional bytes could not be read!")
-    }
-
+    s->m_data->read(*this);
 }
 
 

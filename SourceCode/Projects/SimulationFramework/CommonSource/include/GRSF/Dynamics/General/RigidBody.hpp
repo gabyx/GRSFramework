@@ -48,7 +48,8 @@ public:
 
     using BodyMaterialType = unsigned int;
 
-    unsigned int m_globalGeomId; ///< The Id for the global geometry, if this is 0 then the geometry belongs to the body and gets deallocated, otherwise not
+    using GlobalGeomIdType = unsigned int;
+    GlobalGeomIdType m_globalGeomId; ///< The Id for the global geometry, if this is 0 then the geometry belongs to the body and gets deallocated, otherwise not
 
     typedef boost::variant<
       std::shared_ptr<const SphereGeometry >,

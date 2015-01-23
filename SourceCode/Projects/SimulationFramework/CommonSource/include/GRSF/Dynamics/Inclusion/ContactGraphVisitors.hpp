@@ -1173,19 +1173,21 @@ private:
     template<typename CollDataType>
     inline void computeTotalOverlap(CollDataType * pColData){
         if(pColData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
-           pColData->m_pBody1->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
-        }else{
-           // if static or animated add overlap to other body (which needs to be simualated!)
-           ASSERTMSG(pColData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
-           pColData->m_pBody2->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
+           pColData->m_pBody1->m_pSolverData->m_overlapTotal +=  /*0.5**/pColData->m_overlap;
         }
+//        else{
+//           // if static or animated add overlap to other body (which needs to be simualated!)
+//           ASSERTMSG(pColData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
+//           pColData->m_pBody2->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
+//        }
 
         if(pColData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
-           pColData->m_pBody2->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
-        }else{
-           ASSERTMSG(pColData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
-           pColData->m_pBody1->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
+           pColData->m_pBody2->m_pSolverData->m_overlapTotal +=  /*0.5**/pColData->m_overlap;
         }
+//        else{
+//           ASSERTMSG(pColData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
+//           pColData->m_pBody1->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
+//        }
     }
 
     Logging::Log * m_pSolverLog;

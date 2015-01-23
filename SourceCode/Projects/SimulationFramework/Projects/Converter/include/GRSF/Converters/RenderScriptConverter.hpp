@@ -56,6 +56,9 @@ private:
     Renderer m_renderer;
 
     unsigned int m_frameCounter;
+
+    bool m_abort;
+    void callbackAbort(){ m_abort = true; LOG(m_log, "---> Quitting ...:" <<std::endl);}
 };
 
 #endif // RenderScriptConverter_hpp

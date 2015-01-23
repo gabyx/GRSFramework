@@ -1,5 +1,5 @@
 #include <iostream>
-#include <csignal>
+
 #include <string>
 #include <memory>
 
@@ -7,6 +7,7 @@
 
 
 #include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/Common/ApplicationSignalHandler.hpp"
 #include "GRSF/Common/ApplicationCLOptions.hpp"
 #include "GRSF/Singeltons/FileManager.hpp"
 #include "GRSF/Common/SimpleLogger.hpp"
@@ -30,7 +31,7 @@ void signal_callback_handler(int signum)
        case SIGUSR1:
             signal = "SIGUSR1"; break;
        case SIGUSR2:
-            signal = "SIGUSR2"; break;
+            signal = "SIGUSR2"; break;  // This signal is to tell that the runtime limit is about to expire
    }
 
    std::cerr << "---> Caught signal: " << signal << " in signal handler! Exiting..." << std::endl;
@@ -148,11 +149,7 @@ void start( int argc, char **argv ){
 
 int main(int argc, char **argv) {
 
-
-    signal(SIGINT, signal_callback_handler);
-    signal(SIGTERM, signal_callback_handler);
-    signal(SIGUSR1, signal_callback_handler);
-    signal(SIGUSR2, signal_callback_handler);
+    ApplicationSignalHandler sigHandler( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} );
 
     // Start MPI =================================
     MPI_Init(&argc, &argv);

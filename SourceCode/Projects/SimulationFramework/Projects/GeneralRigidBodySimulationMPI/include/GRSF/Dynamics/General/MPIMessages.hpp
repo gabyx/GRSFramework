@@ -1512,7 +1512,7 @@ public:
         ar & size;
         // States
         RigidBodyIdType id;
-        for(unsigned int i = 0; i < size; i++){
+        for(unsigned int i = 0; i < size; ++i){
             ar & id;
             // Pos/Vel
 
@@ -1534,7 +1534,7 @@ public:
         if(m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
 
             // Insert a AABB
-            auto insertedAABB = m_pTopoBuilder->m_rankAABBs.emplace(std::piecewise_construct, std::make_tuple(m_rank),std::make_tuple() );
+            auto insertedAABB = m_pTopoBuilder->m_rankAABBs.emplace(std::piecewise_construct, std::make_tuple(m_rank), std::make_tuple() );
             // Get AABB
             ar & insertedAABB.first->second;
 

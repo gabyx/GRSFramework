@@ -16,8 +16,10 @@
 
 
 #include "GRSF/Common/CommonFunctions.hpp"
+
 #include "GRSF/Dynamics/General/MPISerializationHelpersEigen.hpp"
 #include "GRSF/Dynamics/General/MultiBodySimFileIOHelpers.hpp"
+#include "GRSF/Dynamics/General/AdditionalBodyData.hpp"
 
 #define SIM_FILE_MPI_SIGNATURE_LENGTH 4
 #define SIM_FILE_MPI_SIGNATURE {'M','B','S','F'}
@@ -25,43 +27,6 @@
 #define SIM_FILE_MPI_VERSION 2
 
 #define SIM_FILE_MPI_EXTENSION ".sim"
-
-
-/** Function template to add the specific bytes per body */
-template<unsigned int type> struct AddBytes;
-
-template<>
-struct AddBytes<2>{
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-    DEFINE_MPI_INFORMATION_CONFIG_TYPES
-    static const std::streamoff m_bytes = sizeof(RankIdType) + sizeof(PREC);
-
-    template<typename Archive, typename TRigidBody >
-    inline static void write(Archive & oa, TRigidBody *body) {
-        oa << body->m_pBodyInfo->m_ownerRank; // write owner rank
-        oa << body->m_pSolverData->m_overlapTotal; // write totalOverlap
-    }
-};
-
-template<>
-struct AddBytes<1>{
-    DEFINE_MPI_INFORMATION_CONFIG_TYPES
-    static const std::streamoff m_bytes = sizeof(RankIdType);
-
-    template<typename Archive, typename TRigidBody >
-    inline static void write(Archive & oa, TRigidBody *body) {
-        oa << body->m_pBodyInfo->m_ownerRank; // write owner rank
-    }
-};
-
-template<>
-struct AddBytes<0>{
-    static const std::streamoff m_bytes = 0;
-    template<typename Archive, typename TRigidBody >
-    inline static void write(Archive  & oa, TRigidBody *body) {
-        return;
-    }
-};
 
 
 class MultiBodySimFileMPI {
@@ -127,9 +92,9 @@ private:
     std::streamsize m_nBytesPerQBody ;
     std::streamsize m_nBytesPerUBody ;
 
-    static const unsigned int m_additionalBytesPerBodyType = 2;
+    static const typename AdditionalBodyData::TypeEnum m_additionalBytesPerBodyType = AdditionalBodyData::TypeEnum::PROCESS_MATERIAL_OVERLAP;
     static constexpr std::streamoff getAdditionalBytesPerBody(){
-        return AddBytes<m_additionalBytesPerBodyType>::m_bytes;
+        return AdditionalBodyData::getAdditionalBytesPerBody(m_additionalBytesPerBodyType);
     }
     static const  std::streamsize m_nAdditionalBytesPerBody;
 
