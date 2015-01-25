@@ -341,15 +341,14 @@ public:
                 }
             }
 
-            // Finally expand grid,
-            m_aabb_glo.expandZeroExtent(0.1);
+            adjustGrid();
 
              // Write grid data to file
             #ifdef TOPOLOGY_BUILDER_WRITE_GRID
             writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,&m_points_glo);
             #endif
 
-            buildGrid();
+            buildTopo();
             sendGrid(masterRank);
             cleanUpGlobal();
             cleanUpLocal();
@@ -363,7 +362,7 @@ public:
                                                      this->m_pProcCommunicator->getMasterRank(),
                                                      m_messageWrapperResults.m_tag);
 
-            buildGrid();
+            buildTopo();
             cleanUpLocal();
         }
 
@@ -465,15 +464,14 @@ public:
                 m_aligned = false;
             }
 
-            // Finally expand grid,
-            m_aabb_glo.expandZeroExtent(0.1);
+            adjustGrid();
 
              // Write grid data to file
             #ifdef TOPOLOGY_BUILDER_WRITE_GRID
             writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,&m_points_glo);
             #endif
 
-            buildGrid();
+            buildTopo();
             sendGrid(masterRank);
             cleanUpGlobal();
             cleanUpLocal();
@@ -495,7 +493,7 @@ public:
                                                          masterRank,
                                                          m_messageWrapperResults.m_tag);
 
-            buildGrid();
+            buildTopo();
             cleanUpLocal();
         }
 
@@ -505,6 +503,39 @@ public:
                             << RigidBodyId::getBodyIdString(s.second.m_id )<< " , q: "
                             << s.second.m_q.transpose() << " u: " << s.second.m_u.transpose() << std::endl;);
         }
+
+    }
+
+    void adjustGrid(){
+
+        Array3 e = m_aabb_glo.extent();
+
+        // Sort process dim according to extent (if needed)
+        if(m_settings.m_matchProcessDimToExtent){
+            // Sort processDim
+            SettingsType::ProcessDimType procDim = m_settings.m_processDim;
+            std::sort(procDim.data(),procDim.data() + procDim.size());
+            // Get max extent idx
+
+            Array3::Index minIdx;
+            e.minCoeff(&minIdx);
+            // set max proc dim for max extent
+            m_settings.m_processDim(minIdx) = procDim(0);
+            // set proc dim for remaining
+            unsigned int i1 = (minIdx+1)%3;
+            unsigned int i2 = (minIdx+2)%3;
+            if( e(i1) <= e(i2) ){
+                m_settings.m_processDim(i1) = procDim(1);
+                m_settings.m_processDim(i2) = procDim(2);
+            }else{
+                m_settings.m_processDim(i1) = procDim(2);
+                m_settings.m_processDim(i2) = procDim(1);
+            }
+        }
+
+        // Adjust box to minimal box size = max procDim* min_gridSize,
+        Array3 limits = m_settings.m_processDim.cast<PREC>() * m_settings.m_minGridSize;
+        m_aabb_glo.expandToMinExtentAbsolute( limits );
 
     }
 
@@ -788,7 +819,7 @@ public:
             I_theta_G(5) -= I_r_IG(2)*I_r_IG(2)  * scalar;
     }
 
-    void buildGrid(){
+    void buildTopo(){
 
         LOGTBLEVEL1(m_pSimulationLog, "---> GridTopoBuilder: GridTopologyBuilder, build grid ..." << std::endl;);
 
@@ -818,7 +849,8 @@ public:
                             "\t min/max: "<<
                             " [ " << m_aabb_glo.m_minPoint.transpose() << " , " << m_aabb_glo.m_maxPoint.transpose() << "]" << std::endl <<
                             "\t A_IK: \n" << m_A_IK << std::endl <<
-                            "\t dim: " << "[ " << m_settings.m_processDim.transpose() << "]" << std::endl; );
+                            "\t dim: " << "[ " << m_settings.m_processDim.transpose() << "]" << std::endl <<
+                            "\t extent: " << "[ " << m_aabb_glo.extent().transpose() << "]" << std::endl;);
             m_pProcCommunicator->createProcTopoGrid(m_aabb_glo,
                                                     m_settings.m_processDim,
                                                     m_aligned,
