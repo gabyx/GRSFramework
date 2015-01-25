@@ -23,6 +23,14 @@ struct GridBuilderSettings{
     using ProcessDimType = MyMatrix<unsigned int>::Array3;
     ProcessDimType m_processDim;
 
+    bool m_matchProcessDimToExtent = true;
+
+    /** Minimal grid dimension depends basically on the shapes simualated:
+    * max_i diam(body_i) <= min gridSize_x, gridSize_y, gridSize_z $
+    */
+    PREC m_minGridSize = 1e-3;
+
+
     /**
     *   PREDEFINED: Take values from below!
     *   ALIGNED: fit AABB

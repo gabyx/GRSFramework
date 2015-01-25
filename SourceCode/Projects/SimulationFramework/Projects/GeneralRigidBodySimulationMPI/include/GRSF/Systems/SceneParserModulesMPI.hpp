@@ -122,6 +122,17 @@ public:
                 ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
             }
 
+            XMLAttributeType att = topo.attribute("matchProcessDimToExtent");
+            bool matchProcessDimToExtent = true;
+            if(att) {
+               if(!Utilities::stringToType(matchProcessDimToExtent, att.value())) {
+                    ERRORMSG("---> String conversion in MPISettings::ProcessTopology: matchProcessDimToExtent failed");
+               }
+            }
+            m_topoSettings->m_gridBuilderSettings.m_matchProcessDimToExtent = matchProcessDimToExtent;
+
+
+
             type = topo.attribute("buildMode").value();
             if(type=="Predefined" || type=="predefined") {
 
@@ -165,6 +176,14 @@ public:
             } else {
                 ERRORMSG("---> String conversion in MPISettings:ProcessTopology:buildMode failed: not a valid setting");
             }
+
+
+            PREC minGridSize = 0;
+            if(!Utilities::stringToType(minGridSize, topo.attribute("minGridSize").value())) {
+                ERRORMSG("---> String conversion in MPISettings::ProcessTopology: minGridSize failed");
+            }
+            m_topoSettings->m_gridBuilderSettings.m_minGridSize = minGridSize;
+
 
         } else {
             ERRORMSG("---> String conversion in MPISettings:ProcessTopology: type failed: not a valid setting");
