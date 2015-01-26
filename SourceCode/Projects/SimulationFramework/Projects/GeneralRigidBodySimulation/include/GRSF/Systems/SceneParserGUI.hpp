@@ -3,6 +3,7 @@
 
 #include <OGRE/Ogre.h>
 #include "GRSF/Common/AxisObject.hpp"
+#include "GRSF/Common/OgrePointCloud.hpp"
 
 #include "GRSF/Systems/SceneParser.hpp"
 
@@ -82,7 +83,12 @@ public:
             parseMesh(node);
         } else {
             node = vis.child("Plane");
-            parsePlane(node);
+            if(node){
+                parsePlane(node);
+            }else{
+                node = vis.child("PointCloud");
+                parsePointCloud(node);
+            }
         }
     }
 
@@ -202,6 +208,91 @@ private:
         }
 
     }
+
+    void parsePointCloud(XMLNodeType  pcloudNode ) {
+
+        static int nodeCounter = 0;
+        std::stringstream node_name;
+
+        XMLAttributeType att;
+
+        Vector3 scale;
+        if(!Utilities::stringToVector3(scale,pcloudNode.attribute("scale").value() )) {
+            ERRORMSG("---> String conversion in parsePointCloud: scale failed");
+        }
+
+        Vector4 color;
+        att = pcloudNode.attribute("color");
+        if(att){
+            if(!Utilities::stringToVector4(color,att.value() )) {
+                ERRORMSG("---> String conversion in parsePointCloud: scale failed");
+            }
+        }
+
+        enum RenderMode
+  {
+    RM_POINTS,
+    RM_SQUARES,
+    RM_FLAT_SQUARES,
+    RM_SPHERES,
+    RM_TILES,
+    RM_BOXES,
+  };
+        std::string rm;
+        OgrePointCloud::RenderMode renderMode;
+        att = pcloudNode.attribute("renderMode");
+        if(att){
+            rm = att.value();
+            if(rm == "points" ){ renderMode = OgrePointCloud::RM_POINTS; }
+            else if(rm == "spheres" ) {renderMode = OgrePointCloud::RM_SPHERES; }
+            else if(rm == "flatSquares" ) {renderMode = OgrePointCloud::RM_FLAT_SQUARES; }
+            else if(rm == "squares" ) {renderMode = OgrePointCloud::RM_SQUARES; }
+            else if(rm == "tiles" ) {renderMode = OgrePointCloud::RM_TILES; }
+            else if(rm == "boxes" ) {renderMode = OgrePointCloud::RM_BOXES; }
+        }
+
+        node_name.str("");
+        node_name << "PointCloud" << nodeCounter++;
+
+        // Add Scene node for points
+        Ogre::SceneNode* sceneNode = m_pBodiesNode->createChildSceneNode(node_name.str());
+        // Add point cloud
+        OgrePointCloud * pc = new OgrePointCloud();
+        pc->setDimensions(scale(0),scale(1),scale(2));
+        pc->setRenderMode(renderMode);
+        sceneNode->attachObject(pc);
+
+
+        std::vector<OgrePointCloud::Point> points(m_bodyListGroup->size());
+
+        auto stateIt = m_statesGroup->begin();
+        unsigned int i; // linear offset from m_startIdGroup
+
+        unsigned int bodyCounter = 0;
+        for(auto & b : *m_bodyListGroup){
+            //i = b.m_id - m_startIdGroup;  // not yet needed
+
+            RigidBodyGraphicsType rigidBodyGraphics(sceneNode, b.m_id);
+            rigidBodyGraphics.setPointCloud(pc,bodyCounter); // each
+
+            points[bodyCounter].position.x = stateIt->m_q(0);
+            points[bodyCounter].position.x = stateIt->m_q(1);
+            points[bodyCounter].position.x = stateIt->m_q(2);
+            points[bodyCounter].color = Ogre::ColourValue(color(0),color(1),color(2),color(3));
+
+            if( m_mode == BodyMode::SIMULATED) {
+                m_pSimBodies->addBody(rigidBodyGraphics);
+            } else if( m_mode == BodyMode::STATIC) {
+                m_pBodies->addBody(rigidBodyGraphics);
+            }
+            ++stateIt; ++bodyCounter;
+        }
+
+        // Add empty points to point cloud
+        pc->addPoints(points.data(),points.size());
+
+    }
+
 
     void parsePlane(XMLNodeType  planeNode ) {
         XMLAttributeType att;

@@ -8,6 +8,7 @@
 
 #include <boost/iterator/transform_iterator.hpp>
 
+#include "GRSF/Common/OgrePointCloud.hpp"
 
 #include "GRSF/Dynamics/General/DynamicsSystem.hpp"
 
@@ -20,16 +21,34 @@ class RigidBodyGraphics{
     public:
         RigidBodyGraphics(): m_node(nullptr),m_id(0){}
         RigidBodyGraphics(Ogre::SceneNode* n , const RigidBodyIdType & id): m_node(n),m_id(id){}
-        Ogre::SceneNode* m_node;
+        Ogre::SceneNode* m_node = nullptr;
+
+        OgrePointCloud * m_pointCloud = nullptr;
+        unsigned int m_pointIdx = 0;
+
+        void setPointCloud(OgrePointCloud * pc, unsigned int idx){
+            m_pointCloud =  pc;
+            m_pointIdx   =  idx;
+        }
+
+
         RigidBodyIdType m_id;
 
         template<typename TRigidBodyState>
         inline void applyBodyState(const TRigidBodyState & s){
             WARNINGMSG(m_id == s.m_id , "Updating non matching ids: " << m_id <<"!="<< s.m_id);
             ASSERTMSG(m_node,"SceneNode is null")
-            //std::cout << "update: " << s.m_q << std::endl;
-            m_node->setPosition(s.m_q(0),s.m_q(1),s.m_q(2));
-            m_node->setOrientation(s.m_q(6),s.m_q(3),s.m_q(4),s.m_q(5));
+            if(m_pointCloud){
+
+                auto & p = m_pointCloud->getPoint(m_pointIdx);
+                p.position.x = s.m_q(0);
+                p.position.y = s.m_q(1);
+                p.position.z = s.m_q(2);
+
+            }else{
+                m_node->setPosition(s.m_q(0),s.m_q(1),s.m_q(2));
+                m_node->setOrientation(s.m_q(6),s.m_q(3),s.m_q(4),s.m_q(5));
+            }
         }
 };
 

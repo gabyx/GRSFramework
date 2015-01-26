@@ -112,6 +112,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/GRSF/Common/AxisObject.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Common/DynamicLines.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Common/DynamicRenderable.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/OgrePointCloud.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Common/CommonFunctionsOgre.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Common/LogDefines.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Common/AssertionDebug.hpp
@@ -121,6 +122,7 @@ SET(COMMON_SRC
     ${PROJECT_SOURCE_DIR}/src/GRSF/Common/AxisObject.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/Common/DynamicLines.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/Common/DynamicRenderable.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/OgrePointCloud.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/Common/CommonFunctionsOgre.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
 )
