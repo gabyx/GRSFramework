@@ -92,7 +92,7 @@ private:
     std::streamsize m_nBytesPerQBody ;
     std::streamsize m_nBytesPerUBody ;
 
-    static const typename AdditionalBodyData::TypeEnum m_additionalBytesPerBodyType = AdditionalBodyData::TypeEnum::PROCESS_MATERIAL_OVERLAP;
+    static const typename AdditionalBodyData::TypeEnum m_additionalBytesPerBodyType = AdditionalBodyData::TypeEnum::PROCESS_MATERIAL_OVERLAP_GLOBGEOMID;
     static constexpr std::streamoff getAdditionalBytesPerBody(){
         return AdditionalBodyData::getAdditionalBytesPerBody(m_additionalBytesPerBodyType);
     }
