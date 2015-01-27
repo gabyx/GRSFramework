@@ -512,14 +512,15 @@ public:
 
         // Sort process dim according to extent (if needed)
         if(m_settings.m_matchProcessDimToExtent){
-            // Sort processDim
+            // Sort processDim ascending
             SettingsType::ProcessDimType procDim = m_settings.m_processDim;
             std::sort(procDim.data(),procDim.data() + procDim.size());
-            // Get max extent idx
 
+            // Get min extent idx
             Array3::Index minIdx;
             e.minCoeff(&minIdx);
-            // set max proc dim for max extent
+
+            // set min proc dim for min extent
             m_settings.m_processDim(minIdx) = procDim(0);
             // set proc dim for remaining
             unsigned int i1 = (minIdx+1)%3;
@@ -533,10 +534,9 @@ public:
             }
         }
 
-        // Adjust box to minimal box size = max procDim* min_gridSize,
+        //Adjust box to minimal box size =  procDim* min_gridSize,
         Array3 limits = m_settings.m_processDim.cast<PREC>() * m_settings.m_minGridSize;
         m_aabb_glo.expandToMinExtentAbsolute( limits );
-
     }
 
     void buildLocalStuff() {
@@ -741,9 +741,8 @@ public:
                 for(auto & pBody : staticBodies){
 
                     if( pointCollider.intersectAndProx(pBody, predictedPoints.back() ) ){
-                        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: hit object " <<std::endl);
                         hitObject = true;
-                        break;
+                        // dont break, prox to all static objects, (corners are tricky!)
                     }
                 }
 

@@ -298,6 +298,7 @@ private:
 
 void ColliderPoint::intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) {
     Vector3 I_n = m_pBody1->m_A_IK*halfspace->m_normal;
+    //t = n * r_PS ( P=point, S=center of plane ), if t>=0 intersect!
     PREC t = I_n.dot(m_pBody1->m_r_S - *m_p) +  halfspace->m_normal.dot(halfspace->m_pos);
     if( t >= 0.0){
         m_bIntersection = true;

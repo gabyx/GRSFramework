@@ -276,8 +276,8 @@ private:
             rigidBodyGraphics.setPointCloud(pc,bodyCounter); // each
 
             points[bodyCounter].position.x = stateIt->m_q(0);
-            points[bodyCounter].position.x = stateIt->m_q(1);
-            points[bodyCounter].position.x = stateIt->m_q(2);
+            points[bodyCounter].position.y = stateIt->m_q(1);
+            points[bodyCounter].position.z = stateIt->m_q(2);
             points[bodyCounter].color = Ogre::ColourValue(color(0),color(1),color(2),color(3));
 
             if( m_mode == BodyMode::SIMULATED) {
