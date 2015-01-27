@@ -343,9 +343,14 @@ public:
 
             adjustGrid();
 
-             // Write grid data to file
+            // Write grid data to file
             #ifdef TOPOLOGY_BUILDER_WRITE_GRID
-            writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,&m_points_glo);
+                #ifdef TOPOLOGY_BUILDER_WRITE_PREDICTED_POINTS
+                    auto * p = &m_points_glo;
+                #else
+                    auto * p = nullptr;
+                #endif
+                writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,p);
             #endif
 
             buildTopo();
@@ -377,7 +382,7 @@ public:
 
 //        m_pProcCommunicator->waitBarrier();
 //        ERRORMSG("terminate");
-
+        LOGTB(m_pSimulationLog,"---> GridTopoBuilder: init topology finished!" <<std::endl;)
     }
 
     void rebuildTopology(PREC currentTime) {
@@ -466,9 +471,14 @@ public:
 
             adjustGrid();
 
-             // Write grid data to file
+            // Write grid data to file
             #ifdef TOPOLOGY_BUILDER_WRITE_GRID
-            writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,&m_points_glo);
+                #ifdef TOPOLOGY_BUILDER_WRITE_PREDICTED_POINTS
+                    auto * p = &m_points_glo;
+                #else
+                    auto * p = nullptr;
+                #endif
+                writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,p);
             #endif
 
             buildTopo();
@@ -504,6 +514,7 @@ public:
                             << s.second.m_q.transpose() << " u: " << s.second.m_u.transpose() << std::endl;);
         }
 
+        LOGTB(m_pSimulationLog,"---> GridTopoBuilder: rebuild topology finished!" <<std::endl;)
     }
 
     void adjustGrid(){
