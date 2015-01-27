@@ -88,14 +88,17 @@
     }
 
 #else
-	#define ASSERTMPIERROR( error_code , message ) { \
-        if(error_code != MPI_SUCCESS){  \
-            char * string; \
-            int length; \
-            MPI_Error_string( error_code , string, &length ); \
-            ERRORMSG2( string , message ); \
-        } \
-    }
+	#define ASSERTMPIERROR( error_code , message );
+
+//    #define ASSERTMPIERROR( error_code , message ) { \
+//        if(error_code != MPI_SUCCESS){  \
+//            char * string; \
+//            int length; \
+//            MPI_Error_string( error_code , string, &length ); \
+//            ERRORMSG2( string , message ); \
+//        } \
+//    }
+
 #endif
 
 
