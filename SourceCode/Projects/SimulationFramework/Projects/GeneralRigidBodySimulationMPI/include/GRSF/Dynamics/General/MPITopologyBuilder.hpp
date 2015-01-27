@@ -348,7 +348,7 @@ public:
                 #ifdef TOPOLOGY_BUILDER_WRITE_PREDICTED_POINTS
                     auto * p = &m_points_glo;
                 #else
-                    auto * p = nullptr;
+                    decltype(&m_points_glo) p = nullptr;
                 #endif
                 writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,p);
             #endif
@@ -476,7 +476,7 @@ public:
                 #ifdef TOPOLOGY_BUILDER_WRITE_PREDICTED_POINTS
                     auto * p = &m_points_glo;
                 #else
-                    auto * p = nullptr;
+                    decltype(&m_points_glo) p = nullptr;
                 #endif
                 writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,p);
             #endif
