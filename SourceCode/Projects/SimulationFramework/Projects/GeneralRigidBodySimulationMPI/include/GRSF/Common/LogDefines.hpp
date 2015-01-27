@@ -58,13 +58,13 @@
     #define LOGIC( logptr , message )     //LOG(logptr,message) ;
     #define LOGIC_SZ( logptr , message )  /// LOG(logptr,message) ;
 
-    #define LOGPC( logptr , message )  //LOG(logptr,message)
+    #define LOGPC( logptr , message )  LOG(logptr,message)
 
     /// SceneParser
     #define SCENEPARSER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
 
     /// Topobuilder
-    #define TOPOBUILDER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define TOPOBUILDER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
     #define TOPOLOGY_BUILDER_WRITE_GRID
     //#define TOPOLOGY_BUILDER_WRITE_PREDICTED_POINTS
 
