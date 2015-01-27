@@ -1403,7 +1403,6 @@ public:
 
             setupInitialConditionBodiesFromFile_imp(relpath, time, which);
 
-
             bool useTime = false;
             if(!Utilities::stringToType(useTime, initCond.attribute("useTimeToContinue").value())) {
                 ERRORMSG("---> String conversion in GlobalInitialCondition: useTimeToContinue failed");
@@ -1513,7 +1512,7 @@ private:
     void setupInitialConditionBodiesFromFile_imp(boost::filesystem::path relpath, double &time , short which ) {
 
         InitialConditionBodies::setupInitialConditionBodiesFromFile(relpath,*m_initStates,time,true,true,which);
-        LOGSCLEVEL2(m_pSimulationLog,"---> Found time: "<< time << " in " << relpath << std::endl;);
+        LOGSCLEVEL2(m_pSimulationLog,"\t---> Found time: "<< time << " in " << relpath << std::endl;);
 
     }
 
