@@ -15,15 +15,12 @@ const std::streamsize MultiBodySimFileMPI::m_nAdditionalBytesPerBody= getAdditio
 
 MultiBodySimFileMPI::MultiBodySimFileMPI()
     :   m_nDOFuBody(0),m_nDOFqBody(0),
-//        m_nBytes(0),
         m_nBytesPerState(0),
         m_nBytesPerQBody(0),
         m_nBytesPerUBody(0),
-//        m_additionalBytesPerBodyType(0),
-//        m_nAdditionalBytesPerBody(0),
         m_nStates(0),
         m_nSimBodies(0)
-//        m_beginOfStates(0)
+
 {
 
     m_filePath = boost::filesystem::path();

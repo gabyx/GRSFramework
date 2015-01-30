@@ -131,7 +131,7 @@ bool setupInitialConditionBodiesFromFile(boost::filesystem::path file_path,
             return true;
         }
     }
-
+    simFile.close();
     ERRORMSG("setupInitialConditionBodiesFromFile:: failed: " << "path: " << file_path << " error:" << simFile.getErrorString());
     return false;
 }
