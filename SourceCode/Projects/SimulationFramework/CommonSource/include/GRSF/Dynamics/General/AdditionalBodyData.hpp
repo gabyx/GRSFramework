@@ -92,6 +92,7 @@ namespace AdditionalBodyData{
                 ADDBYTES_VISITOR_CASE_SWITCH(2) \
                 ADDBYTES_VISITOR_CASE_SWITCH(3) \
                 ADDBYTES_VISITOR_CASE_SWITCH(4) \
+                ADDBYTES_VISITOR_CASE_SWITCH(5) \
             default: \
                 ERRORMSG("TYPE: "<< EnumConversion::toIntegral(this->m_type)<<" not implemented in switch statement"); \
             }; \
@@ -230,8 +231,8 @@ namespace AdditionalBodyData{
         ~AddBytes(){}
         RankIdType m_processId;
         typename RigidBodyType::BodyMaterialType m_materialId;
-        typename RigidBodyType::GlobalGeomIdType m_geomId;
         PREC m_overlapTotal;
+        typename RigidBodyType::GlobalGeomIdType m_geomId;
 
         static const unsigned int nBytes = sizeof(RankIdType) + sizeof(RigidBodyType::BodyMaterialType)
                                             + sizeof(PREC) + sizeof(RigidBodyType::GlobalGeomIdType);
@@ -281,6 +282,8 @@ namespace AdditionalBodyData{
                 return new AddBytes<3>();
             case 4:
                 return new AddBytes<4>();
+            case 5:
+                return new AddBytes<5>();
             default:
                 ERRORMSG("This type " << EnumConversion::toIntegral(type) << " construction is not implemented!")
         }
@@ -294,7 +297,13 @@ namespace AdditionalBodyData{
                 (
                     (EnumConversion::toIntegral(type)==2) ? AddBytes<2>::nBytes :
                         (
-                            (EnumConversion::toIntegral(type)==3) ? AddBytes<3>::nBytes : 0
+                            (EnumConversion::toIntegral(type)==3) ? AddBytes<3>::nBytes :
+                                (
+                                    (EnumConversion::toIntegral(type)==4) ? AddBytes<4>::nBytes :
+                                        (
+                                            (EnumConversion::toIntegral(type)==5) ? AddBytes<5>::nBytes : 0
+                                         )
+                                )
                         )
                 );
 

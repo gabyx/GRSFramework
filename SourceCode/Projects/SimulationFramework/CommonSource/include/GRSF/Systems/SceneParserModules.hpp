@@ -1462,7 +1462,8 @@ public:
             }
 
             // Set the time in the dynamics system timestepper settings
-            if(useTime && m_settings) {
+            if(useTime){
+                if(!m_settings) { ERRORMSG("---> In GlobalInitialCondition: useTimeToContinue = true, but cannot set timestepper settings!");}
                 m_settings->setTimeStepperSettings(time);
             }
         }
