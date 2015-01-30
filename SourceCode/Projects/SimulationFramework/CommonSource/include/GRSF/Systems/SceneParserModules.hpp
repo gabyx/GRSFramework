@@ -550,8 +550,8 @@ private:
             RandomGenType gen(seed);
             std::unique_ptr<UniformDistType<PREC> > uniform;
             std::unique_ptr<rtnorm::truncated_normal_distribution<PREC> > truncNormal;
-
             std::function<PREC(void)> sampleGen;
+
             std::string generator = sphere.attribute("generator").value();
             if(generator == "truncnormal"){
                 // Normal truncated
