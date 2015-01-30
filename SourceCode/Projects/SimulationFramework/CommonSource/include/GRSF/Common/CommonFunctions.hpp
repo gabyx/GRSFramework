@@ -307,9 +307,22 @@ std::string  typeToString(const T & t){
 * Generates count random value and returns the last one.
 */
 template<typename PREC, typename Generator, typename Distribution, typename Integral>
-inline PREC genRandomValues(PREC value, Generator & g, Distribution & d,Integral count) {
+inline PREC genRandomValues(PREC value, Generator & g, Distribution & d, Integral count) {
+    STATIC_ASSERT(std::is_unsigned<Integral>::value)
     for(unsigned int i= 0; i<count; ++i) {
         value = d(g);
+    }
+    return value;
+}
+
+/**
+* Generates count random value and returns the last one.
+*/
+template<typename PREC, typename Functor, typename Integral>
+inline PREC genRandomValues(PREC value, Functor & f, Integral count) {
+    STATIC_ASSERT(std::is_unsigned<Integral>::value)
+    for(unsigned int i= 0; i<count; ++i) {
+        value = f();
     }
     return value;
 }
@@ -319,6 +332,7 @@ inline PREC genRandomValues(PREC value, Generator & g, Distribution & d,Integral
 */
 template<typename PREC, typename Generator, typename Distribution, typename Integral>
 inline typename MyMatrix<PREC>::Vector3 genRandomVec(typename MyMatrix<PREC>::Vector3 value, Generator & g, Distribution & d, Integral count) {
+    STATIC_ASSERT(std::is_unsigned<Integral>::value)
     for(unsigned int i= 0; i<count; ++i) {
         value(0) = d(g);
         value(1) = d(g);

@@ -33,6 +33,8 @@ struct SceneParserBaseTraits {
     using RandomGenType = typename DynamicsSystemType::RandomGenType;
     template<typename T>
     using UniformDistType = std::uniform_real_distribution<T>;
+    template<typename T>
+    using NormalDistType  = std::normal_distribution<T>;
 };
 
 

@@ -1,0 +1,23 @@
+PSEUDORANDOM NUMBERS FROM A TRUNCATED GAUSSIAN DITRIBUTION
+
+This program has been tested on Unix based system.
+
+# DEPENDS
+
+-> Gnu compiler gcc/g++ >= 4.2.1
+-> Gnu Scientific Library (http://www.gnu.org/software/gsl/)
+
+# COMPILE
+
+To compile the given example, open a shell and type :
+
+----------------
+ make
+----------------
+
+To clean files, just type :
+
+----------------
+make clean
+----------------
+

@@ -10,6 +10,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <rtnorm/rtnorm.hpp>
+
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
@@ -489,6 +491,7 @@ private:
 
     /// Geometries ==============================================================================
     void parseSphereGeometry( XMLNodeType sphere) {
+        XMLAttributeType att;
         std::string type = sphere.attribute("distribute").value();
 
         if(type == "uniform") {
@@ -536,21 +539,7 @@ private:
                 }
             }
         } else if(type == "random") {
-            double minRadius;
-            if(!Utilities::stringToType(minRadius,sphere.attribute("minRadius").value())) {
-                ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
-            }
-            if( minRadius <= 0) {
-                ERRORMSG("---> In parseSphereGeometry: minRadius to small!");
-            }
 
-            double maxRadius;
-            if(!Utilities::stringToType(maxRadius,sphere.attribute("maxRadius").value())) {
-                ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
-            }
-            if( maxRadius <= minRadius) {
-                ERRORMSG("---> In parseSphereGeometry: maxRadius smaller or equal to minRadius!");
-            }
 
             unsigned int seed;
             if(!Utilities::stringToType<unsigned int>(seed,sphere.attribute("seed").value())) {
@@ -559,7 +548,71 @@ private:
 
 
             RandomGenType gen(seed);
-            UniformDistType<PREC> uni(minRadius,maxRadius);
+            std::unique_ptr<UniformDistType<PREC> > uniform;
+            std::unique_ptr<rtnorm::truncated_normal_distribution<PREC> > truncNormal;
+
+            std::function<PREC(void)> sampleGen;
+            std::string generator = sphere.attribute("generator").value();
+            if(generator == "truncnormal"){
+                // Normal truncated
+                PREC mean;
+                if(!Utilities::stringToType(mean,sphere.attribute("mean").value())) {
+                    ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
+                }
+                if( mean <= 0) {
+                    ERRORMSG("---> In parseSphereGeometry: mean to small!");
+                }
+
+                PREC var;
+                if(!Utilities::stringToType(var,sphere.attribute("variance").value())) {
+                    ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
+                }
+                if( var <= 0) {
+                    ERRORMSG("---> In parseSphereGeometry: var to small!");
+                }
+
+                PREC minRadius;
+                if(!Utilities::stringToType(minRadius,sphere.attribute("minRadius").value())) {
+                    ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
+                }
+                if( minRadius <= 0) {
+                    ERRORMSG("---> In parseSphereGeometry: minRadius to small!");
+                }
+
+                PREC maxRadius;
+                if(!Utilities::stringToType(maxRadius,sphere.attribute("maxRadius").value())) {
+                    ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
+                }
+                if( maxRadius <= minRadius) {
+                    ERRORMSG("---> In parseSphereGeometry: maxRadius smaller or equal to minRadius!");
+                }
+
+                truncNormal.reset( new rtnorm::truncated_normal_distribution<PREC>(mean,var,minRadius,maxRadius));
+                sampleGen = [&]()-> PREC{ return (*truncNormal)(gen);};
+
+            }else{
+                // Uniform
+                PREC minRadius;
+                if(!Utilities::stringToType(minRadius,sphere.attribute("minRadius").value())) {
+                    ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
+                }
+                if( minRadius <= 0) {
+                    ERRORMSG("---> In parseSphereGeometry: minRadius to small!");
+                }
+
+                PREC maxRadius;
+                if(!Utilities::stringToType(maxRadius,sphere.attribute("maxRadius").value())) {
+                    ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
+                }
+                if( maxRadius <= minRadius) {
+                    ERRORMSG("---> In parseSphereGeometry: maxRadius smaller or equal to minRadius!");
+                }
+                uniform.reset( new UniformDistType<PREC>(minRadius,maxRadius));
+                sampleGen = [&]()-> PREC{ return (*uniform)(gen);};
+            }
+
+
+
 
             if(m_addToGlobalGeoms && Options::m_allocateGeometry) {
 
@@ -581,7 +634,7 @@ private:
                 }
 
                 for(int i = id; i < id + instances; i++) {
-                    PREC radius = uni(gen);
+                    PREC radius = sampleGen();
                     if(Options::m_cacheScale) {
                         m_scalesGlobal.emplace(i,Vector3(radius,radius,radius));
                     }
@@ -591,13 +644,13 @@ private:
 
 
                 RigidBodyIdType diffId = m_startIdGroup; // id to generate to correct amount of random values!
-                PREC radius = uni(gen); // generate first value
+                PREC radius = sampleGen(); // generate first value
 
                 unsigned int bodyIdx = 0;
                 for(auto & b : *m_bodiesGroup) {
 
                     // Generate the intermediate random values if there are any
-                    radius = Utilities::genRandomValues<PREC>(radius, gen,uni,b.m_id-diffId); // (id:16 - id:13 = 3 values, 13 is already generated)
+                    radius = Utilities::genRandomValues<PREC>(radius, sampleGen,b.m_id-diffId); // (id:16 - id:13 = 3 values, 13 is already generated)
                     diffId = b.m_id; // update current diffId;
 
 
