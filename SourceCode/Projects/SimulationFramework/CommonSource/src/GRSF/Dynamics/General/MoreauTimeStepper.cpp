@@ -94,7 +94,7 @@ MoreauTimeStepper::getFrontStateBuffer() {
 }
 
 
-void MoreauTimeStepper::doOneIteration() {
+void MoreauTimeStepper::doTimeStep() {
     static int iterations=0; // Average is reset after 1000 Iterations
 
 

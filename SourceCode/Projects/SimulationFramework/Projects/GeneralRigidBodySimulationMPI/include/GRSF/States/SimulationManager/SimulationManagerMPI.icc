@@ -229,7 +229,7 @@ void SimulationManagerMPI::startSim() {
         }
 
         // Do one time step =====================================================================
-        m_pTimestepper->doOneIteration();
+        m_pTimestepper->doTimeStep();
 
         writeAllOutput();
 
