@@ -69,7 +69,7 @@ public:
 
     void reset();
     void resetTopology();
-    void doOneIteration();
+    void doTimeStep();
 
     inline void writeIterationToSystemDataFile(PREC globalTime);
     inline void writeHeaderToSystemDataFile();
@@ -168,7 +168,7 @@ void MoreauTimeStepperMPI::resetTopology() {
 
 
 
-void MoreauTimeStepperMPI::doOneIteration() {
+void MoreauTimeStepperMPI::doTimeStep() {
 
     static int iterations=0; // Average is reset after 1000 Iterations
 

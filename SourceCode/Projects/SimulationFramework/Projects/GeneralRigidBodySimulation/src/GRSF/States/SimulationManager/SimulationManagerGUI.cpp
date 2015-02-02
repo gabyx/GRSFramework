@@ -242,7 +242,7 @@ void SimulationManagerGUI::threadRunSimulation() {
             // Read all inputs
             readSharedBuffer();
             // Do one iteration
-            m_pTimestepper->doOneIteration();
+            m_pTimestepper->doTimeStep();
             // TODO: after this call the vis buffer is new (will be rendered,
             // but the shared buffer is not yet synchronized)
 
@@ -311,7 +311,7 @@ void SimulationManagerGUI::threadRunRecord() {
             // Read all inputs
             readSharedBuffer();
             // Do one iteration
-            m_pTimestepper->doOneIteration();
+            m_pTimestepper->doTimeStep();
             // TODO: after this call the vis buffer is new (will be rendered,
             // but the shared buffer is not yet synchronized)
 

@@ -106,7 +106,7 @@ void SimulationManager::threadRunRecord() {
         while(1) {
 
             // Do one iteration
-            m_pTimestepper->doOneIteration();
+            m_pTimestepper->doTimeStep();
 
             writeAllOutput();
 

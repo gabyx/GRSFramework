@@ -53,7 +53,7 @@ public:
     void closeAllFiles();
 
     void reset();
-    void doOneIteration();
+    void doTimeStep();
 
     //Accessed only by Simulation manager, after doOneIteration();
     const DynamicsState * getBackStateBuffer();
