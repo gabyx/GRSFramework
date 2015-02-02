@@ -115,6 +115,14 @@ namespace AdditionalBodyData{
     };
 
 
+    // Type 0 , Nothing
+    template<>
+    class AddBytes<EnumConversion::toIntegral(TypeEnum::NOTHING)> : public Bytes{
+        public:
+        static const unsigned int nBytes = 0;
+        AddBytes(): Bytes( BytesTraits<AddBytes>::m_type ){}
+        ~AddBytes(){}
+    };
 
     // Type 1
     template<>
@@ -235,7 +243,7 @@ namespace AdditionalBodyData{
         typename RigidBodyType::GlobalGeomIdType m_geomId;
 
         static const unsigned int nBytes = sizeof(RankIdType) + sizeof(RigidBodyType::BodyMaterialType)
-                                            + sizeof(PREC) + sizeof(RigidBodyType::GlobalGeomIdType);
+                                           + sizeof(PREC) + sizeof(RigidBodyType::GlobalGeomIdType);
 
         template<typename Stream>
         void read(Stream & s){
@@ -273,7 +281,7 @@ namespace AdditionalBodyData{
     inline Bytes * create(TypeEnum type){
         switch(EnumConversion::toIntegral(type)){
             case 0:
-                return nullptr;
+                return new AddBytes<0>();
             case 1:
                 return new AddBytes<1>();
             case 2:
@@ -290,18 +298,36 @@ namespace AdditionalBodyData{
         return nullptr;
     }
 
+    /** Construct new additional Data if it does not match */
+    inline Bytes* createNew(Bytes* data, TypeEnum type){
+
+        if(data) {
+            if(data->m_type != type) {
+                delete data;
+                data = AdditionalBodyData::create(type);
+            }
+        } else {
+           data = AdditionalBodyData::create(type);
+        }
+        return data;
+    }
+
+
     /** Get the number of bytes of a certain AddBytes spezialization*/
     static constexpr std::streamoff getAdditionalBytesPerBody(TypeEnum type){
         return
-             (EnumConversion::toIntegral(type)==1) ? AddBytes<1>::nBytes  :
+             (EnumConversion::toIntegral(type)==0) ? AddBytes<0>::nBytes  :
                 (
-                    (EnumConversion::toIntegral(type)==2) ? AddBytes<2>::nBytes :
+                    (EnumConversion::toIntegral(type)==1) ? AddBytes<1>::nBytes :
                         (
-                            (EnumConversion::toIntegral(type)==3) ? AddBytes<3>::nBytes :
+                            (EnumConversion::toIntegral(type)==2) ? AddBytes<2>::nBytes :
                                 (
-                                    (EnumConversion::toIntegral(type)==4) ? AddBytes<4>::nBytes :
+                                    (EnumConversion::toIntegral(type)==3) ? AddBytes<3>::nBytes :
                                         (
-                                            (EnumConversion::toIntegral(type)==5) ? AddBytes<5>::nBytes : 0
+                                            (EnumConversion::toIntegral(type)==4) ? AddBytes<4>::nBytes :
+                                                (
+                                                    (EnumConversion::toIntegral(type)==5) ? AddBytes<5>::nBytes : 0
+                                                 )
                                          )
                                 )
                         )

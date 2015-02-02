@@ -151,7 +151,7 @@ public:
 
     using ProcessCommunicatorType = TProcCommunicator;
 
-    using RigidBodyStatesContainerType = std::unordered_map<RigidBodyIdType,RigidBodyState>;
+    using RigidBodyStatesContainerType = typename DynamicsSystemType::RigidBodyStatesContainerType;
     using RigidBodySimContainerType = typename DynamicsSystemType::RigidBodySimContainerType ;
     using RigidBodyStaticContainerType = typename DynamicsSystemType::RigidBodyStaticContainerType ;
 
@@ -274,7 +274,7 @@ public:
 
             // Parse all initial condition from the scene file ================
             ParserModulesCreatorTopoBuilder<GridTopologyBuilder> c(this);
-            SceneParserMPI<GridTopologyBuilder, ParserModulesCreatorTopoBuilder<GridTopologyBuilder>::template SceneParserTraits> parser(c, m_pSimulationLog) ; // this class is the modules generator
+            SceneParserMPI<DynamicsSystemType, ParserModulesCreatorTopoBuilder<GridTopologyBuilder>::template SceneParserTraits> parser(c, m_pSimulationLog) ; // this class is the modules generator
 
             // clean init states:
             m_initStates.clear();

@@ -541,7 +541,7 @@ bool MultiBodySimFile::readSpecific_impl(C & states,
 
             } else {
                 // State not found
-                // Jump body (u and q)
+                // Jump body (u and q and additional Data)
                 m_file_stream.seekg( m_nBytesPerQBody + m_nBytesPerUBody + m_nAdditionalBytesPerBody ,std::ios_base::cur);
             }
 
@@ -614,15 +614,7 @@ void MultiBodySimFile::readBodyStateAdd( RigidBodyStateAdd * s) {
 
     readBodyState<false>(s);
 
-    // Construct new additional Data if it does not match
-    if(s->m_data) {
-        if(s->m_data->m_type != m_additionalBytesPerBodyType) {
-            delete s->m_data;
-            s->m_data = AdditionalBodyData::create(m_additionalBytesPerBodyType);
-        }
-    } else {
-        s->m_data = AdditionalBodyData::create(m_additionalBytesPerBodyType);
-    }
+    s->m_data = AdditionalBodyData::createNew(s->m_data,m_additionalBytesPerBodyType);
 
     s->m_data->read(*this);
 }

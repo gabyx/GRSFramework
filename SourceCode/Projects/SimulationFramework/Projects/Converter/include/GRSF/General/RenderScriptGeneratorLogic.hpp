@@ -92,6 +92,7 @@ namespace LogicNodes {
                 MaterialId,
                 ProcessId,
                 OverlapTotal,
+                GeomId,
                 OUTPUTS_LAST
             };
         };
@@ -108,6 +109,7 @@ namespace LogicNodes {
         DECLARE_OSOCKET_TYPE(MaterialId, unsigned int );
         DECLARE_OSOCKET_TYPE(ProcessId, RankIdType );
         DECLARE_OSOCKET_TYPE(OverlapTotal, PREC );
+        DECLARE_OSOCKET_TYPE(GeomId, unsigned int );
 
         BodyData(unsigned int id) : LogicNode(id) {
             ADD_OSOCK(BodyId,0);
@@ -116,6 +118,7 @@ namespace LogicNodes {
             ADD_OSOCK(MaterialId,0);
             ADD_OSOCK(ProcessId,0);
             ADD_OSOCK(OverlapTotal,0.0);
+            ADD_OSOCK(GeomId,0);
         }
 
         ~BodyData(){}
@@ -126,7 +129,6 @@ namespace LogicNodes {
         void setOutputs(RigidBodyStateAdd * s) {
 
             static AddBytesVisitor vis(this);
-
             SET_OSOCKET_VALUE(BodyId,s->m_id);
             SET_OSOCKET_VALUE(Displacement,s->m_q);
             SET_OSOCKET_VALUE(Velocity,s->m_u);
@@ -151,6 +153,12 @@ namespace LogicNodes {
                  SET_OSOCKET_VALUE_PTR(m_p,ProcessId, add->m_processId);
                  SET_OSOCKET_VALUE_PTR(m_p,MaterialId,add->m_materialId);
                  SET_OSOCKET_VALUE_PTR(m_p,OverlapTotal,add->m_overlapTotal);
+            }
+            void operator()(ABD::AddBytes<EnumConversion::toIntegral(ABD::TypeEnum::PROCESS_MATERIAL_OVERLAP_GLOBGEOMID)> * add){
+                 SET_OSOCKET_VALUE_PTR(m_p,ProcessId, add->m_processId);
+                 SET_OSOCKET_VALUE_PTR(m_p,MaterialId,add->m_materialId);
+                 SET_OSOCKET_VALUE_PTR(m_p,OverlapTotal,add->m_overlapTotal);
+                 SET_OSOCKET_VALUE_PTR(m_p,GeomId,add->m_geomId);
             }
             void operator()(ABD::AddBytes<EnumConversion::toIntegral(ABD::TypeEnum::PROCESS_OVERLAP)> * add){
                  SET_OSOCKET_VALUE_PTR(m_p,ProcessId,   add->m_processId);
@@ -621,7 +629,7 @@ namespace LogicNodes {
             RigidBodyIdType & id = GET_ISOCKET_REF_VALUE(BodyId);
             auto geomIt = m_geomMap->find( id );
             if( geomIt == m_geomMap->end() ) {
-                ERRORMSG("Geometry for body id: " << id << " not found!")
+                ERRORMSG("Geometry for body id: " << RigidBodyId::getBodyIdString(id) << " not found!")
             }
               // Write the material
             if(GET_ISOCKET_REF_VALUE(Material) == nullptr){

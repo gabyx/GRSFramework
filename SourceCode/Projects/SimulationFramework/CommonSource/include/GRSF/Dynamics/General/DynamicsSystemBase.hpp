@@ -37,7 +37,7 @@
     using RigidBodySimContainerType    = RigidBodyContainerType;\
     using RigidBodyStaticContainerType = RigidBodySimContainerType;\
     using RigidBodyStatesVectorType    = StdVecAligned<RigidBodyState>; \
-    using RigidBodyStatesContainerType = StdMapAligned<RigidBodyIdType, RigidBodyState>;
+    using RigidBodyStatesContainerType = StdUMapAligned<RigidBodyIdType, RigidBodyState>;
 
 
 class DynamicsSystemBase {
@@ -95,12 +95,12 @@ public:
     PREC m_currentRotKinEnergy;
     PREC m_currentSpinNorm;
 
-protected:
 
     RecorderSettingsType m_settingsRecorder;
     TimeStepperSettingsType m_settingsTimestepper;
     InclusionSolverSettingsType m_settingsInclusionSolver;
 
+protected:
 
     // Log
     Logging::Log*	m_pSolverLog;

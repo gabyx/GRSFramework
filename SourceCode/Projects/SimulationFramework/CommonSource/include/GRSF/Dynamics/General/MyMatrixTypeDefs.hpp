@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <map>
+#include <unordered_map>
 //#include <Eigen/StdVector>
 
 
@@ -81,6 +82,10 @@ struct MyMatrix {
     template<typename Key, typename Type, typename Comp = std::less<Key> >
     using StdMapAligned = std::map<Key, Type, Comp, Eigen::aligned_allocator<std::pair<const Key, Type> > >;
 
+    // Sepcial STL map where the type is 16byte aligned
+    template<typename Key, typename Type, typename Hash = std::hash<Key>, typename Pred = std::equal_to<Key> >
+    using StdUMapAligned = std::unordered_map<Key, Type, Hash, Pred, Eigen::aligned_allocator<std::pair<const Key, Type> > >;
+
      // Special STL vectors where the type is 16byte aligned
     template<typename Type >
     using StdVecAligned = std::vector<Type, Eigen::aligned_allocator<Type> >;
@@ -145,6 +150,8 @@ struct MyMatrixIOFormat {
    template<typename EigenType> using StdVecAligned = typename MyMatrix< _PREC_ >::template StdVecAligned< EigenType >; \
    template<typename Key, typename EigenType> \
    using StdMapAligned = typename MyMatrix< _PREC_ >::template StdMapAligned<Key, EigenType >; \
+   template<typename Key, typename EigenType> \
+   using StdUMapAligned = typename MyMatrix< _PREC_ >::template StdUMapAligned<Key, EigenType >; \
    \
    using Array3 = typename MyMatrix< _PREC_ >::Array3;   \
    using Array2 = typename MyMatrix< _PREC_ >::Array2;
