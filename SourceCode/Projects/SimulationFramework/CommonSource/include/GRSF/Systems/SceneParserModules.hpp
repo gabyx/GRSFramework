@@ -1411,7 +1411,9 @@ private:
     using RigidBodyStatesContainerType = typename DynamicsSystemType::RigidBodyStatesContainerType;
     RigidBodyStatesContainerType * m_initStates = nullptr;
 
-    SettingsModuleType * m_settings;
+    using TimeStepperSettingsType = typename DynamicsSystemType::TimeStepperSettingsType;
+    TimeStepperSettingsType * m_timeStepperSettings;
+
     LogType * m_pSimulationLog;
 
     using BodyListType = typename BodyModuleType::BodyListType;
@@ -1427,7 +1429,7 @@ public:
 
     void cleanUp() {}
 
-    InitStatesModule(ParserType * p, RigidBodyStatesContainerType * c, SettingsModuleType * s): m_pSimulationLog(p->getSimLog()),m_initStates(c), m_settings(s) {
+    InitStatesModule(ParserType * p, RigidBodyStatesContainerType * c, TimeStepperSettingsType * s): m_pSimulationLog(p->getSimLog()),m_initStates(c), m_timeStepperSettings(s) {
         ASSERTMSG(m_initStates, "one of boths should not be null");
     };
 
@@ -1463,8 +1465,8 @@ public:
 
             // Set the time in the dynamics system timestepper settings
             if(useTime){
-                if(!m_settings) { ERRORMSG("---> In GlobalInitialCondition: useTimeToContinue = true, but cannot set timestepper settings!");}
-                m_settings->setTimeStepperSettings(time);
+                if(!m_timeStepperSettings) { ERRORMSG("---> In GlobalInitialCondition: useTimeToContinue = true, but cannot set timestepper settings!");}
+                m_timeStepperSettings->m_startTime = time;
             }
         }
         LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)

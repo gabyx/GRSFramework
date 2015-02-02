@@ -54,7 +54,17 @@ public:
             parseMesh(node);
         } else {
             node = vis.child("Plane");
-            parseScale(node);
+            if(node){
+                parseScale(node);
+            }else{
+                node = vis.child("PointCloud");
+                if(node){
+                    parseScale(node);
+                }else{
+                    ERRORMSG("---> Node type Mesh/Plane/PointCloud not found!");
+                }
+
+            }
         }
     }
 

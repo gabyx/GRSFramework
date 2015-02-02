@@ -165,7 +165,7 @@ public:
             auto vis = std::unique_ptr<VisModuleType>( new VisModuleType(p,&m_p->m_SceneNodeSimBodies, &m_p->m_SceneNodeBodies, m_p->m_pBaseNode, m_p->m_pBodiesNode, m_p->m_pSceneMgr.get()) );
             auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &m_p->m_globalGeometries, vis->getScalesGroup()) ); // geom module needs to track
 
-            auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_p->m_bodiesInitStates, sett.get()));
+            auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_p->m_bodiesInitStates, &m_p->m_settingsTimestepper));
             auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , &m_p->m_simBodies, &m_p->m_staticBodies )) ;
             auto es  = std::unique_ptr<ExternalForcesModuleType >(new ExternalForcesModuleType(p, &m_p->m_externalForces));
             auto con = std::unique_ptr<ContactParamModuleType>(new ContactParamModuleType(p,&m_p->m_ContactParameterMap));
