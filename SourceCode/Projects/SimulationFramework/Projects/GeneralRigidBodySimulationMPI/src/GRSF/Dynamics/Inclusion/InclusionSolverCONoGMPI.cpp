@@ -151,6 +151,9 @@ void InclusionSolverCONoGMPI::resetForNextTimestep() {
     m_globalIterationCounter = 0;
     m_bConverged = true;
 
+    m_avgIterTimeProxLocalRemoteNodes = 0;
+    m_avgIterTimeProxSplitNodes = 0;
+
     m_pContactGraph->clearGraph();
 
     m_pInclusionComm->resetForNextTimestep();
@@ -203,8 +206,7 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
         if( m_settings.m_eMethod == InclusionSolverSettingsType::SOR_CONTACT ||
             m_settings.m_eMethod == InclusionSolverSettingsType::SOR_FULL
              ) {
-
-#if MEASURE_TIME_PROX == 1
+#ifdef MEASURE_TIME_PROX
             CPUTimer counter;
             counter.start();
 #endif
@@ -212,7 +214,7 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
             initContactGraphForIteration(m_settings.m_alphaSORProx);
             doSorProx();
 
-#if MEASURE_TIME_PROX == 1
+#ifdef MEASURE_TIME_PROX
             m_timeProx = counter.elapsedSec();
 #endif
 
@@ -381,6 +383,10 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
         }
     }
 
+    {
+    #ifdef MEASURE_TIME_PROX_DETAIL
+        START_TIMER(start)
+    #endif
     // Move over all local nodes, and do a sor prox step
     if(m_nLocalNodes){
         m_pContactGraph->applyNodeVisitorLocal(*m_pSorProxStepNodeVisitor);
@@ -389,8 +395,16 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
     if(m_nRemoteNodes){
         m_pContactGraph->applyNodeVisitorRemote(*m_pSorProxStepNodeVisitor);
     }
+    #ifdef MEASURE_TIME_PROX_DETAIL
+        STOP_TIMER_SEC(time,start);
+        m_avgIterTimeProxLocalRemoteNodes = ( time + m_avgIterTimeProxLocalRemoteNodes*m_globalIterationCounter) / (m_globalIterationCounter+1);
+    #endif
+    }
 
-
+    {
+    #ifdef MEASURE_TIME_PROX_DETAIL
+        START_TIMER(start)
+    #endif
     // Do this only after a certain number of iterations!
     if(m_nSplitBodyNodes || m_nRemoteNodes ){
         if(m_globalIterationCounter % m_settings.m_splitNodeUpdateRatio == 0 ) {
@@ -411,7 +425,11 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
             m_pInclusionComm->communicateSplitBodySolution(m_globalIterationCounter);
         }
     }
-
+    #ifdef MEASURE_TIME_PROX_DETAIL
+        STOP_TIMER_SEC(time,start);
+        m_avgIterTimeProxSplitNodes = ( time + m_avgIterTimeProxSplitNodes*m_globalIterationCounter) / (m_globalIterationCounter+1);
+    #endif
+    }
 
     // Apply convergence criteria (Velocity) over all bodies which are in the ContactGraph
     // (m_settings.m_convergenceCheckRatio*m_settings.m_splitNodeUpdateRatio) = local iterations per convergence checks
@@ -524,12 +542,14 @@ std::string  InclusionSolverCONoGMPI::getIterationStats() {
             << m_pDynSys->m_currentTotEnergy<<"\t"
             << m_pDynSys->m_currentKinEnergy<<"\t"
             << m_pDynSys->m_currentRotKinEnergy<<"\t"
-            << m_pDynSys->m_currentSpinNorm;
+            << m_pDynSys->m_currentSpinNorm<<"\t"
+            << m_avgIterTimeProxLocalRemoteNodes<<"\t"
+            << m_avgIterTimeProxSplitNodes;
     return s.str();
 }
 
 std::string InclusionSolverCONoGMPI::getStatsHeader() {
     std::stringstream s;
-    s << "GPUUsed\tnContacts\tnContactsLocal\tnContactsRemote\tnSplitBodyNodes\tnGlobalIterations\tConverged\tIsFinite\tTotalTimeProx [s]\tIterTimeProx [s]\tTotalStateEnergy [J]\tTotalKinEnergy [J]\tTotalRotKinEnergy [J]\tTotalSpinNorm [Nms]";
+    s << "GPUUsed\tnContacts\tnContactsLocal\tnContactsRemote\tnSplitBodyNodes\tnGlobalIterations\tConverged\tIsFinite\tTotalTimeProx [s]\tIterTimeProx [s]\tTotalStateEnergy [J]\tTotalKinEnergy [J]\tTotalRotKinEnergy [J]\tTotalSpinNorm [Nms]\tAvgTimeProxLocalRemoteNodes [s]\tAvgTimeProxSplitNodes [s]";
     return s.str();
 }

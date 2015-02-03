@@ -150,7 +150,8 @@ protected:
     std::stringstream logstream;
 
 
-
+    PREC m_avgIterTimeProxLocalRemoteNodes;
+    PREC m_avgIterTimeProxSplitNodes;
 
 };
 

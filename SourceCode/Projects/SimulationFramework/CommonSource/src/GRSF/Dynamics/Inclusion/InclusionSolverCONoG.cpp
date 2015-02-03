@@ -55,7 +55,7 @@ void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::fil
     m_pSorProxInitNodeVisitor->setLog(m_pSolverLog);
 
     // if we should
-    #if OUTPUT_SIMDATAITERATION_FILE == 1
+    #ifdef OUTPUT_SIMDATAITERATION_FILE
         boost::filesystem::path file = folder_path / "SimDataIteration.dat";
         LOG(m_pSimulationLog, "---> Open SimDataIteration file : "<< file<< std::endl;)
         m_iterationDataFile.open(file.string(), std::ios::trunc | std::ios::out);
@@ -97,7 +97,7 @@ void InclusionSolverCONoG::reset() {
     m_jorProxGPUModule.reset();
 #endif
 
-    #if OUTPUT_SIMDATAITERATION_FILE == 1
+    #ifdef OUTPUT_SIMDATAITERATION_FILE
     LOG(m_pSimulationLog,  "---> Close IterationDataFile" << std::endl;);
     m_iterationDataFile.close();
     #endif
@@ -182,20 +182,20 @@ void InclusionSolverCONoG::solveInclusionProblem() {
             m_settings.m_eMethod == InclusionSolverSettingsType::SOR_NORMAL_TANGENTIAL
            ) {
 #include "GRSF/Dynamics/Inclusion/InclusionSolverSettings.hpp"
-            #if MEASURE_TIME_PROX == 1
+            #ifdef MEASURE_TIME_PROX
                 CPUTimer counter;
                 counter.start();
             #endif
 
             doSorProx();
 
-            #if MEASURE_TIME_PROX == 1
+            #ifdef MEASURE_TIME_PROX
                 m_timeProx = counter.elapsedSec();
             #endif
 
         } else if(m_settings.m_eMethod == InclusionSolverSettingsType::JOR) {
 
-            #if MEASURE_TIME_PROX == 1
+            #ifdef MEASURE_TIME_PROX
                 CPUTimer counter;
                 counter.start();
             #endif
@@ -203,7 +203,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
 
             doJorProx();
 
-            #if MEASURE_TIME_PROX == 1
+            #ifdef MEASURE_TIME_PROX
                 m_timeProx = counter.elapsedSec();
             #endif
         }else{
@@ -354,7 +354,7 @@ void InclusionSolverCONoG::doSORProxCPU(){
                 LOGSLLEVEL1_CONTACT(m_pSolverLog, "---> converged = "<<m_bConverged<< "\t"<< "iterations: " <<m_globalIterationCounter <<" / "<<  m_settings.m_MaxIter<< std::endl;);
             break;
         }
-        #if OUTPUT_SIMDATAITERATION_FILE == 1
+        #ifdef OUTPUT_SIMDATAITERATION_FILE
             if(m_globalIterationCounter >= m_settings.m_MinIter){
                 m_iterationDataFile << m_maxResidual << "\t";
             }
@@ -362,7 +362,7 @@ void InclusionSolverCONoG::doSORProxCPU(){
     }
 
 
-    #if OUTPUT_SIMDATAITERATION_FILE == 1
+    ##ifdef OUTPUT_SIMDATAITERATION_FILE
         m_iterationDataFile << std::endl;
     #endif // OUTPUT_SIMDATAITERATION_FILE
 
