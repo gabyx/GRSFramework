@@ -129,12 +129,14 @@ void TimeStepperBase<TDerived,TTraits>::reset_impl(){
     m_bIterationFinished = false;
 
 
-    m_currentSimulationTime = m_settings.m_startTime;
-    std::cout << "---> Reset m_currentSimulationTime  = " << m_currentSimulationTime << std::endl;
+
 
     m_pSimulationLog->logMessage("---> Reset DynamicsSystem...");
     m_pDynSys->reset();
+
     m_settings = m_pDynSys->getSettingsTimeStepper();
+    m_currentSimulationTime = m_settings.m_startTime;
+    std::cout << "---> Reset m_currentSimulationTime  = " << m_currentSimulationTime << std::endl;
 
     m_pSimulationLog->logMessage("---> Reset CollisionSolver...");
     m_pCollisionSolver->reset();

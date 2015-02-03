@@ -362,7 +362,7 @@ void InclusionSolverCONoG::doSORProxCPU(){
     }
 
 
-    ##ifdef OUTPUT_SIMDATAITERATION_FILE
+    #ifdef OUTPUT_SIMDATAITERATION_FILE
         m_iterationDataFile << std::endl;
     #endif // OUTPUT_SIMDATAITERATION_FILE
 

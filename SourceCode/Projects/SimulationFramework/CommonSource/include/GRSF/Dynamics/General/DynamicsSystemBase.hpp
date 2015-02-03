@@ -74,16 +74,12 @@ public:
     }
 
 
-    const RecorderSettingsType        & getSettingsRecorder() const;
-    const TimeStepperSettingsType     & getSettingsTimeStepper() const;
-    const InclusionSolverSettingsType & getSettingsInclusionSolver() const;
 
-    void getSettings(TimeStepperSettingsType &settingsTimestepper, InclusionSolverSettingsType &settingsInclusionSolver) const;
+    inline const RecorderSettingsType & getSettingsRecorder() { return m_settingsRecorder;}
+    inline const TimeStepperSettingsType & getSettingsTimeStepper() {return m_settingsTimestepper;}
+    inline const InclusionSolverSettingsType & getSettingsInclusionSolver() { return m_settingsInclusionSolver;}
 
-    void setSettings(const RecorderSettingsType & settingsRecorder);
-    void setSettings(const TimeStepperSettingsType &settingsTimestepper);
-    void setSettings(const InclusionSolverSettingsType &settingsInclusionSolver);
-    void setSettings(const TimeStepperSettingsType &settingsTimestepper, const InclusionSolverSettingsType &settingsInclusionSolver);
+    inline void setStartTime(PREC startTime){ m_settingsTimestepper.m_startTime = startTime;}
 
     void reset();
     void resetEnergy();
@@ -96,11 +92,11 @@ public:
     PREC m_currentSpinNorm;
 
 
+protected:
+
     RecorderSettingsType m_settingsRecorder;
     TimeStepperSettingsType m_settingsTimestepper;
     InclusionSolverSettingsType m_settingsInclusionSolver;
-
-protected:
 
     // Log
     Logging::Log*	m_pSolverLog;
