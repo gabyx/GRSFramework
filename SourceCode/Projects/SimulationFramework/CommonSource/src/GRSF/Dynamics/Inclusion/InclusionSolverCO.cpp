@@ -252,14 +252,14 @@ void InclusionSolverCO::solveInclusionProblem() {
             m_T.diagonal().array() += 1 ;
             m_d.noalias() = (-m_R).asDiagonal()*m_d;
 
-#if MEASURE_TIME_PROX == 1
+#ifdef MEASURE_TIME_PROX
             CPUTimer counter;
             counter.start();
 #endif
 
             doSorProx();
 
-#if MEASURE_TIME_PROX == 1
+#ifdef MEASURE_TIME_PROX
             m_timeProx = counter.elapsedSec();
 #endif
         } else if(m_settings.m_eMethod == InclusionSolverSettingsType::JOR) {
@@ -269,14 +269,14 @@ void InclusionSolverCO::solveInclusionProblem() {
             m_T.diagonal().array() += 1 ;
             m_d.noalias() = (-m_R).asDiagonal()*m_d;
 
-#if MEASURE_TIME_PROX == 1
+#ifdef MEASURE_TIME_PROX
             CPUTimer counter;
             counter.start();
 #endif
 
             doJorProx();
 
-#if MEASURE_TIME_PROX == 1
+#ifdef MEASURE_TIME_PROX
             m_timeProx = counter.elapsedSec();
 #endif
         }else{

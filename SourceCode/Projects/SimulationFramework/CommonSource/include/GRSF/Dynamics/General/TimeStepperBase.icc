@@ -98,14 +98,14 @@ void TimeStepperBase<TDerived,TTraits>::initLogs_impl(  const boost::filesystem:
     m_pCollisionSolver->initializeLog(m_pSolverLog);
 
     // SystemDataFile
-#if OUTPUT_SIMDATA_FILE == 1
+#ifdef OUTPUT_SIMDATA_FILE
     m_SystemDataFile.close();
     m_SystemDataFile.open(m_SystemDataFilePath.string(), std::ios_base::app | std::ios_base::out);
     m_SystemDataFile.clear();
 #endif
 
     // CollisionDataFile
-#if OUTPUT_COLLISIONDATA_FILE == 1
+#ifdef OUTPUT_COLLISIONDATA_FILE
     m_CollisionDataFile.open(m_CollisionDataFilePath.string(),std::ios::binary | std::ios::out);
 #endif
 };
@@ -247,7 +247,7 @@ void TimeStepperBase<TDerived,TTraits>::doSecondHalfTimeStep(PREC te, PREC times
             << "\t\t--->m_q_e= "  <<pBody->m_r_S.transpose() << "\t"<<pBody->m_q_KI.coeffs().transpose()<<std::endl
             << "\t\t--->m_u_e= "  <<pBody->m_pSolverData->m_uBuffer.m_front.transpose()<<std::endl;)
 
-#if OUTPUT_SIMDATA_FILE == 1
+#ifdef OUTPUT_SIMDATA_FILE
         // Calculate Energy
         PREC potE = m_pDynSys->m_externalForces.calculatePotEnergy(pBody);
         PREC kinE = 0.5* pBody->m_pSolverData->m_uBuffer.m_front.transpose() * pBody->m_MassMatrix_diag.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front;

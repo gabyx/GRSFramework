@@ -79,7 +79,7 @@ protected:
 };
 
 void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
-#if OUTPUT_SIMDATA_FILE == 1
+#ifdef OUTPUT_SIMDATA_FILE
 
     m_SystemDataFile << std::fixed
     << globalTime << "\t"
@@ -88,13 +88,14 @@ void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
     << (m_endTimeCollisionSolver-m_startTimeCollisionSolver) <<"\t"
     << (m_endTimeInclusionSolver-m_startTimeInclusionSolver) <<"\t"
     << m_AvgTimeForOneIteration <<"\t"
+    << m_pDynSys->m_simBodies.size() <<"\t"
     << m_pCollisionSolver->getIterationStats() << "\t"
     << m_pInclusionSolver->getIterationStats() << std::endl;
 #endif
 }
 
 void MoreauTimeStepper::writeHeaderToSystemDataFile() {
-#if OUTPUT_SIMDATA_FILE == 1
+#ifdef OUTPUT_SIMDATA_FILE
     m_SystemDataFile <<"# "
     << "GlobalTime [s]" << "\t"
     << "SimulationTime [s]" <<"\t"
@@ -102,6 +103,7 @@ void MoreauTimeStepper::writeHeaderToSystemDataFile() {
     << "CollisionTime [s]" <<"\t"
     << "InclusionTime [s]" <<"\t"
     << "AvgIterTime [s]" <<"\t"
+    << "nSimBodies" <<"\t"
     << m_pCollisionSolver->getStatsHeader() << "\t"
     << m_pInclusionSolver->getStatsHeader() << std::endl;
 #endif

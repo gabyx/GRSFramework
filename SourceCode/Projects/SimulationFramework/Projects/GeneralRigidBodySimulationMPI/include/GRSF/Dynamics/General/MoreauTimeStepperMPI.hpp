@@ -313,7 +313,7 @@ void MoreauTimeStepperMPI::doTimeStep() {
 }
 
 void MoreauTimeStepperMPI::writeIterationToSystemDataFile(double globalTime) {
-#if OUTPUT_SIMDATA_FILE == 1
+#ifdef OUTPUT_SIMDATA_FILE
     m_SystemDataFile
     << globalTime << "\t"
     << m_startSimulationTime <<"\t"
@@ -322,13 +322,15 @@ void MoreauTimeStepperMPI::writeIterationToSystemDataFile(double globalTime) {
     << (m_endTimeInclusionSolver-m_startTimeInclusionSolver) <<"\t"
     << (m_endBodyCommunication -  m_startBodyCommunication) << "\t"
     << m_AvgTimeForOneIteration <<"\t"
+    << m_pDynSys->m_simBodies.size() <<"\t"
+    << m_pDynSys->m_remoteSimBodies.size() <<"\t"
     << m_pCollisionSolver->getIterationStats() << "\t"
     << m_pInclusionSolver->getIterationStats() << std::endl;
 
 #endif
 }
 void MoreauTimeStepperMPI::writeHeaderToSystemDataFile() {
-#if OUTPUT_SIMDATA_FILE == 1
+#ifdef OUTPUT_SIMDATA_FILE
     m_SystemDataFile <<"# "
     << "GlobalTime [s]" << "\t"
     << "SimulationTime [s]" <<"\t"
@@ -337,6 +339,8 @@ void MoreauTimeStepperMPI::writeHeaderToSystemDataFile() {
     << "InclusionTime [s]" <<"\t"
     << "BodyCommunicationTime [s]" << "\t"
     << "AvgIterTime [s]" <<"\t"
+    << "SimBodies" <<"\t"
+    << "RemoteBodies" <<"\t"
     << m_pCollisionSolver->getStatsHeader() << "\t"
     << m_pInclusionSolver->getStatsHeader() << std::endl;
 #endif
