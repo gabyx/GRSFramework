@@ -187,9 +187,17 @@ private:
     unsigned int m_countPoints_loc = 0;
 
 
+
     // GLOBAL/LOCAL STUFF ===========================================================
     // references into this container remain valid, unordered_map, even if rehash
-    RigidBodyStatesContainerType m_initStates;
+    RigidBodyStatesContainerType m_initStates; ///< All states received from all processes
+
+    // Scene parser parses the initial time into this struct from global init condition
+    struct TimeStepperSettings{ PREC m_startTime = 0;};
+public:
+    using TimeStepperSettingsType = TimeStepperSettings;
+private:
+    TimeStepperSettingsType m_timeStepperSettings;
 
     // GLOBAL STUFF =================================================================
 
@@ -261,6 +269,9 @@ public:
     void initTopology(PREC currentTime = 0) {
         LOGTB(m_pSimulationLog,"---> GridTopoBuilder: initialize Topology" <<std::endl;)
 
+        // get initial startTime which was parsed in ( gets overwritten by global initial condition if specified to continue from)
+        m_timeStepperSettings.m_startTime = m_pDynSys->getSettingsTimeStepper().m_startTime;
+
         // increment number of built topologies
         m_currentTime = currentTime;
         ++m_builtTopologies;
@@ -272,9 +283,9 @@ public:
                 ERRORMSG("processDim: " << m_settings.m_processDim << " does not fit "<<m_pProcCommunicator->getNProcesses()<<"processes!");
             }
 
-            // Parse all initial condition from the scene file ================
+            // Parse all initial condition from the scene file (global initial condition is read too)
             ParserModulesCreatorTopoBuilder<GridTopologyBuilder> c(this);
-            SceneParserMPI<DynamicsSystemType, ParserModulesCreatorTopoBuilder<GridTopologyBuilder>::template SceneParserTraits> parser(c, m_pSimulationLog) ; // this class is the modules generator
+            SceneParserMPI<GridTopologyBuilder, ParserModulesCreatorTopoBuilder<GridTopologyBuilder>::template SceneParserTraits> parser(c, m_pSimulationLog) ; // this class is the modules generator
 
             // clean init states:
             m_initStates.clear();
@@ -293,7 +304,7 @@ public:
                             << RigidBodyId::getBodyIdString(s.second.m_id )<< " , " << s.second.m_q.transpose() << std::endl;);
 
             }
-            // ================================================================
+
 
 
             if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::PREDEFINED){
@@ -380,8 +391,10 @@ public:
 
 
 
-//        m_pProcCommunicator->waitBarrier();
-//        ERRORMSG("terminate");
+        // Write m_startTime to TimeStepperSettings in DynamicsSystem (if it stayed the same , it does not matter)
+        m_pDynSys->setStartTime( m_timeStepperSettings.m_startTime);
+
+
         LOGTB(m_pSimulationLog,"---> GridTopoBuilder: init topology finished!" <<std::endl;)
     }
 

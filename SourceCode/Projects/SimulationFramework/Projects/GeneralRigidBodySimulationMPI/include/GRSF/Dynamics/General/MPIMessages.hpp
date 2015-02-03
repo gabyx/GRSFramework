@@ -1639,7 +1639,10 @@ public:
             serializeEigen(ar,m_pTopoBuilder->m_A_IK);
         }
 
-        // Send states of bodies
+        // Send states of bodies and the initial time
+
+        ar & m_pTopoBuilder->m_timeStepperSettings.m_startTime;
+
         unsigned int nStates = 0;
         // Get states for this rank if any!
         auto stateListIt = m_pTopoBuilder->m_bodiesPerRank.find(m_rank);
@@ -1677,7 +1680,10 @@ public:
             serializeEigen(ar,m_pTopoBuilder->m_A_IK);
         }
 
+        // Load time
+        ar & m_pTopoBuilder->m_timeStepperSettings.m_startTime;
 
+        // Load states
         unsigned int nStates;
         ar & nStates;
         RigidBodyIdType id;

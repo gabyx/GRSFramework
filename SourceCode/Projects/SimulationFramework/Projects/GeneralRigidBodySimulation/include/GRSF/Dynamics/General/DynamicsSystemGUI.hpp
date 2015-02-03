@@ -252,7 +252,7 @@ public:
             auto vis = std::unique_ptr<VisModuleType>( new VisModuleType(p,&m_p->m_SceneNodeSimBodies, &m_p->m_SceneNodeBodies, m_p->m_pBaseNode, m_p->m_pBodiesNode, m_p->m_pSceneMgr.get()) ); // no visualization needed
             auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &m_p->m_globalGeometries, vis->getScalesGroup() ) );
 
-            auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_p->m_bodiesInitStates, sett.get()));
+            auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_p->m_bodiesInitStates, nullptr ));
             auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  geom.get(), is.get(), vis.get() , nullptr , nullptr )) ;
             auto es  = std::unique_ptr<ExternalForcesModuleType >(nullptr);
             auto con = std::unique_ptr<ContactParamModuleType>(nullptr);

@@ -70,7 +70,7 @@ struct ParserModulesCreatorTopoBuilder{
         auto con = std::unique_ptr<ContactParamModuleType>(nullptr);
         auto mpi = std::unique_ptr<MPIModuleType>( nullptr );
 
-        auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p, &m_p->m_initStates,&m_p->m_pDynSys->m_settingsTimestepper ));
+        auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p, &m_p->m_initStates, &m_p->m_timeStepperSettings ));
         auto bm  = std::unique_ptr<BodyModuleType>(new BodyModuleType(p,  nullptr , is.get(), nullptr , nullptr , nullptr )) ;
 
         return std::make_tuple(std::move(sett),std::move(es),std::move(con),std::move(is),std::move(bm),std::move(geom),std::move(vis),std::move(mpi));

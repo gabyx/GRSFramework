@@ -20,40 +20,6 @@ DynamicsSystemBase::~DynamicsSystemBase() {
 
 };
 
-
-const DynamicsSystemBase::RecorderSettingsType & DynamicsSystemBase::getSettingsRecorder() const {
-    return m_settingsRecorder;
-}
-const DynamicsSystemBase::TimeStepperSettingsType &
-DynamicsSystemBase::getSettingsTimeStepper() const {
-    return m_settingsTimestepper;
-}
-const DynamicsSystemBase::InclusionSolverSettingsType & DynamicsSystemBase::getSettingsInclusionSolver() const {
-    return m_settingsInclusionSolver;
-}
-
-void DynamicsSystemBase::setSettings(const TimeStepperSettingsType &settingsTimestepper){
-    m_settingsTimestepper = settingsTimestepper;
-}
-void DynamicsSystemBase::setSettings(const RecorderSettingsType & settingsRecorder) {
-    m_settingsRecorder = settingsRecorder;
-}
-void DynamicsSystemBase::setSettings(const InclusionSolverSettingsType &settingsInclusionSolver){
-    m_settingsInclusionSolver = settingsInclusionSolver;
-}
-
-void DynamicsSystemBase::getSettings(TimeStepperSettingsType &settingsTimestepper,
-                                 InclusionSolverSettingsType &settingsInclusionSolver) const {
-    settingsTimestepper = m_settingsTimestepper;
-    settingsInclusionSolver = m_settingsInclusionSolver;
-}
-void DynamicsSystemBase::setSettings(const TimeStepperSettingsType &settingsTimestepper,
-                                 const InclusionSolverSettingsType &settingsInclusionSolver) {
-    m_settingsTimestepper = settingsTimestepper;
-    m_settingsInclusionSolver = settingsInclusionSolver;
-}
-
-
 void DynamicsSystemBase::initializeLog(Logging::Log* pLog) {
     m_pSolverLog = pLog;
     ASSERTMSG(m_pSolverLog != nullptr, "Logging::Log: nullptr!");
