@@ -23,7 +23,7 @@
         UCF = 1,    /** Unilateral Contact with Coulomb Friction*/
         UCFD = 2,   /** Unilateral Contact with Coulomb Friction and Damping */
         UCFDD = 3,  /** Unilateral Contact with Coulomb Friction and Damping (adjusts the slope) */
-        UCCF = 4
+        UCCF = 4    /** Unilateral Contact with Coulomb Contensou Friction (not yet implemented) */
     };
 
     template<int T> struct ContactModel;
@@ -33,7 +33,6 @@
     * Abreviations : U
     */
     template<>
-
     struct ContactModel< EnumConversion::template toIntegral(Enum::U)>{
         using ConvexSet = ConvexSets::RPlus;
         static const int nDOFFriction = 0;

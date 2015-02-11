@@ -152,7 +152,7 @@ void MoreauTimeStepper::doTimeStep() {
     m_currentSimulationTime = m_startSimulationTime + m_settings.m_deltaT/2.0;
     // ====================================================================================
 
-    m_pInclusionSolver->resetForNextTimestep(); // Clears the contact graph!
+    m_pInclusionSolver->resetForNextTimestep(m_IterationCounter); // Clears the contact graph!
 
     // Solve Collision
     m_startTimeCollisionSolver = m_PerformanceTimer.elapsedSec();

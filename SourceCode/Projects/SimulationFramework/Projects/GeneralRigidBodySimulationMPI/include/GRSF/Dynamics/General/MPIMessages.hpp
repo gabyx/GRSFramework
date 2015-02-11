@@ -1633,9 +1633,9 @@ public:
         ar & m_pTopoBuilder->m_aabb_glo;
         serializeEigen(ar,m_pTopoBuilder->m_settings.m_processDim);
 
-        ar & m_pTopoBuilder->m_settings.m_aligned;
+        ar & m_pTopoBuilder->m_aligned;
 
-        if( m_pTopoBuilder->m_settings.m_aligned){
+        if( m_pTopoBuilder->m_aligned){
             serializeEigen(ar,m_pTopoBuilder->m_A_IK);
         }
 
@@ -1672,11 +1672,11 @@ public:
 
         // Recv grid data
         ar & m_pTopoBuilder->m_aabb_glo;
-        serializeEigen(ar,m_pTopoBuilder->m_settings.m_processDim);
+        serializeEigen(ar,m_pTopoBuilder->m_processDim);
 
-        ar & m_pTopoBuilder->m_settings.m_aligned;
+        ar & m_pTopoBuilder->m_aligned;
 
-        if( m_pTopoBuilder->m_settings.m_aligned){
+        if( m_pTopoBuilder->m_aligned){
             serializeEigen(ar,m_pTopoBuilder->m_A_IK);
         }
 

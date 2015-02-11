@@ -387,8 +387,8 @@ public:
         // all nodes (contacts) which are in the BodyContactList (maps bodies -> contacts)
 
         // add the pNodeData to the node list
-        this->m_nodes.push_back( new NodeType(m_nodeCounter));
-        NodeType * addedNode = this->m_nodes.back();
+        NodeType * addedNode = new NodeType(m_nodeCounter);
+        this->m_nodes.push_back(addedNode);
         addedNode->m_nodeData.m_pCollData = pCollData;
 
         initNode<addEdges>(addedNode);

@@ -8,6 +8,7 @@
 
 
 #include "GRSF/Dynamics/Inclusion/ContactParameter.hpp"
+#include "GRSF/Dynamics/Inclusion/ContactPercussion.hpp"
 
 #include "GRSF/Dynamics/Buffers/FrontBackBuffer.hpp"
 #include "GRSF/Dynamics/Collision/CollisionData.hpp"
@@ -21,14 +22,14 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
     // EIGEN_MAKE_ALIGNED_OPERATOR_NEW not required
 
-    ContactGraphNodeData(): m_pCollData(nullptr) {
+    ContactGraphNodeData(): m_pCollData(nullptr), m_cache(nullptr) {
         m_W_body1.setZero();
         m_W_body2.setZero();
         m_chi.setZero();
         m_eps.setZero();
     }
 
-    ContactGraphNodeData(CollisionData * collDataPtr): m_pCollData(collDataPtr) {}
+    ContactGraphNodeData(CollisionData * collDataPtr): m_pCollData(collDataPtr), m_cache(nullptr) {}
 
     MatrixUBodyDyn m_W_body1;
     MatrixUBodyDyn m_W_body2;
@@ -39,6 +40,8 @@ public:
     unsigned int m_nodeColor;
     const CollisionData * m_pCollData;
     ContactParameter m_contactParameter;
+
+    ContactPercussion * m_cache;
 };
 
 
@@ -90,7 +93,6 @@ public:
     void swapLambdas() {
         m_LambdaBack.swap(m_LambdaFront);
     };
-
 };
 
 /*

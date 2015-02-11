@@ -62,7 +62,7 @@ public:
 
   ContactParameterMap<RigidBodyType> m_ContactParameterMap;
 
-  PercussionPool<LayoutConfigType> m_PercussionPool;
+  PercussionPool<LayoutConfigType> m_percussionPool;
 
   void reservePercussionPoolSpace(unsigned int nExpectedContacts);
   void readFromPercussionPool(unsigned int index, VectorDyn & P_Nold, VectorDyn & P_Told);
@@ -237,7 +237,7 @@ template< typename TInclusionSolverConfig >
 void InclusionSolverNT<TInclusionSolverConfig>::reservePercussionPoolSpace( unsigned int nExpectedContacts )
 {
    m_nExpectedContacts = nExpectedContacts;
-   m_PercussionPool.rehashPercussionPool(m_nExpectedContacts);
+   m_percussionPool.rehashPercussionPool(m_nExpectedContacts);
 }
 
 template< typename TInclusionSolverConfig >
@@ -633,11 +633,11 @@ void InclusionSolverNT<TInclusionSolverConfig>::updatePercussionPool(const Vecto
        P_contact(0) = P_Nold(i);
        P_contact(1) = P_Told(NDOFFriction*i);
        P_contact(2) = P_Told(NDOFFriction*i+1);
-       m_PercussionPool.setPercussion(i,P_contact);
+       m_percussionPool.setPercussion(i,P_contact);
     }
 
-    m_PercussionPool.clearUsedPercussionList();
-    m_PercussionPool.removeUnusedPercussions();
+    m_percussionPool.clearUsedPercussionList();
+    m_percussionPool.removeUnusedPercussions();
 }
 
 
@@ -645,7 +645,7 @@ template< typename TInclusionSolverConfig >
 void  InclusionSolverNT<TInclusionSolverConfig>::readFromPercussionPool(unsigned int index, VectorDyn & P_Nold, VectorDyn & P_Told)
 {
    static VectorDyn P_contact(NDOFFriction+1);
-   m_PercussionPool.getPercussion(m_pCollisionSolver->m_collisionSet[index].m_ContactTag,P_contact);
+   m_percussionPool.getPercussion(m_pCollisionSolver->m_collisionSet[index].m_contactTag,P_contact);
    P_Nold(index) = P_contact(0);
    P_Told(NDOFFriction*index) =   P_contact(1);
    P_Told(NDOFFriction*index+1) = P_contact(2);

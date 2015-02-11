@@ -199,8 +199,10 @@ public:
 private:
     TimeStepperSettingsType m_timeStepperSettings;
 
-    // GLOBAL STUFF =================================================================
+    using SettingsType = GridBuilderSettings;
+    const SettingsType m_settings;
 
+    // GLOBAL STUFF =================================================================
 
     typename std::unordered_map<RankIdType, std::vector<const RigidBodyState *> > m_bodiesPerRank; ///< rank to all pointers in m_initStates;
 
@@ -213,6 +215,8 @@ private:
     AABB  m_aabb_glo;       ///< Min/Max of OOBB fit around points in frame K (OOBB) or I (AABB)
     Matrix33 m_A_IK;        ///< Transformation of OOBB cordinate frame K (oriented bounding box of point cloud) to intertia fram I
 
+    SettingsType::ProcessDimType m_processDim; ///< The current process dim size
+
     std::unordered_map<RankIdType,AABB> m_rankAABBs;
     unsigned int m_countPoints_glo = 0;
     std::vector<MassPoint> m_massPoints_glo; ///< global mass points
@@ -220,8 +224,6 @@ private:
 
     unsigned int m_nGlobalSimBodies = 0; ///< Only for a check with MassPoints
 
-    using SettingsType = GridBuilderSettings;
-    SettingsType m_settings;
 
 
     TopologyBuilderMessageWrapperResults<GridTopologyBuilder> m_messageWrapperResults;
@@ -268,6 +270,8 @@ public:
 
     void initTopology(PREC currentTime = 0) {
         LOGTB(m_pSimulationLog,"---> GridTopoBuilder: initialize Topology" <<std::endl;)
+
+        START_TIMER(startTopoTime)
 
         // get initial startTime which was parsed in ( gets overwritten by global initial condition if specified to continue from)
         m_timeStepperSettings.m_startTime = m_pDynSys->getSettingsTimeStepper().m_startTime;
@@ -354,6 +358,10 @@ public:
 
             adjustGrid();
 
+            buildTopo();
+            sendGrid(masterRank);
+
+            STOP_TIMER_SEC(buildTime, startTopoTime)
             // Write grid data to file
             #ifdef TOPOLOGY_BUILDER_WRITE_GRID
                 #ifdef TOPOLOGY_BUILDER_WRITE_PREDICTED_POINTS
@@ -361,11 +369,10 @@ public:
                 #else
                     decltype(&m_points_glo) p = nullptr;
                 #endif
-                writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,p);
+                writeGridInfo(m_currentTime,buildTime,m_aabb_glo,m_processDim,m_aligned,m_A_IK,m_rankAABBs,p);
             #endif
 
-            buildTopo();
-            sendGrid(masterRank);
+
             cleanUpGlobal();
             cleanUpLocal();
 
@@ -402,7 +409,7 @@ public:
 
         LOGTB(m_pSimulationLog,"---> GridTopologyBuilder: rebuild Topology" <<std::endl;)
 
-
+        START_TIMER(startTopoTime)
 
 
         // increment number of built topologies
@@ -484,6 +491,11 @@ public:
 
             adjustGrid();
 
+
+            buildTopo();
+            sendGrid(masterRank);
+
+            STOP_TIMER_SEC(buildTime, startTopoTime)
             // Write grid data to file
             #ifdef TOPOLOGY_BUILDER_WRITE_GRID
                 #ifdef TOPOLOGY_BUILDER_WRITE_PREDICTED_POINTS
@@ -491,11 +503,9 @@ public:
                 #else
                     decltype(&m_points_glo) p = nullptr;
                 #endif
-                writeGridInfo(m_currentTime,m_aabb_glo,m_settings.m_processDim,m_aligned,m_A_IK,m_rankAABBs,p);
+                writeGridInfo(m_currentTime,buildTime,m_aabb_glo,m_processDim,m_aligned,m_A_IK,m_rankAABBs,p);
             #endif
 
-            buildTopo();
-            sendGrid(masterRank);
             cleanUpGlobal();
             cleanUpLocal();
 
@@ -528,16 +538,20 @@ public:
         }
 
         LOGTB(m_pSimulationLog,"---> GridTopoBuilder: rebuild topology finished!" <<std::endl;)
+
     }
 
     void adjustGrid(){
+
+        // Copy processDim size from initial settings:
+        m_processDim = m_settings.m_processDim;
 
         Array3 e = m_aabb_glo.extent();
 
         // Sort process dim according to extent (if needed)
         if(m_settings.m_matchProcessDimToExtent){
-            // Sort processDim ascending
-            SettingsType::ProcessDimType procDim = m_settings.m_processDim;
+            // Sort procDim ascending
+            auto procDim = m_processDim;
             std::sort(procDim.data(),procDim.data() + procDim.size());
 
             // Get min extent idx
@@ -545,21 +559,21 @@ public:
             e.minCoeff(&minIdx);
 
             // set min proc dim for min extent
-            m_settings.m_processDim(minIdx) = procDim(0);
+            m_processDim(minIdx) = procDim(0);
             // set proc dim for remaining
             unsigned int i1 = (minIdx+1)%3;
             unsigned int i2 = (minIdx+2)%3;
             if( e(i1) <= e(i2) ){
-                m_settings.m_processDim(i1) = procDim(1);
-                m_settings.m_processDim(i2) = procDim(2);
+                m_processDim(i1) = procDim(1);
+                m_processDim(i2) = procDim(2);
             }else{
-                m_settings.m_processDim(i1) = procDim(2);
-                m_settings.m_processDim(i2) = procDim(1);
+                m_processDim(i1) = procDim(2);
+                m_processDim(i2) = procDim(1);
             }
         }
 
-        //Adjust box to minimal box size =  procDim* min_gridSize,
-        Array3 limits = m_settings.m_processDim.cast<PREC>() * m_settings.m_minGridSize;
+        //Adjust box to minimal box size =  procDim * min_gridSize,
+        Array3 limits = m_processDim.cast<PREC>() * m_settings.m_minGridSize;
         m_aabb_glo.expandToMinExtentAbsolute( limits );
     }
 
@@ -866,16 +880,15 @@ public:
             }
 
 
-
             LOGTBLEVEL1( m_pSimulationLog,
-                            "\t aligned: "<< m_settings.m_aligned << std::endl <<
+                            "\t aligned: "<< m_aligned << std::endl <<
                             "\t min/max: "<<
                             " [ " << m_aabb_glo.m_minPoint.transpose() << " , " << m_aabb_glo.m_maxPoint.transpose() << "]" << std::endl <<
                             "\t A_IK: \n" << m_A_IK << std::endl <<
-                            "\t dim: " << "[ " << m_settings.m_processDim.transpose() << "]" << std::endl <<
+                            "\t dim: " << "[ " << m_processDim.transpose() << "]" << std::endl <<
                             "\t extent: " << "[ " << m_aabb_glo.extent().transpose() << "]" << std::endl;);
             m_pProcCommunicator->createProcTopoGrid(m_aabb_glo,
-                                                    m_settings.m_processDim,
+                                                    m_processDim,
                                                     m_aligned,
                                                     m_A_IK);
 
@@ -949,7 +962,7 @@ public:
     }
 
 
-    void writeGridInfo(PREC currentTime,
+    void writeGridInfo(PREC currentTime, PREC buildTime,
                        const AABB & aabb,
                        const typename GridBuilderSettings::ProcessDimType & dim,
                        bool aligned,
@@ -972,8 +985,11 @@ public:
                                         "A_IK is tranformation matrix, which transforms points from Frame K to Frame I\n"
                                         "AABB is in K Frame\n"
                                         "AABBList contains all AABBs from all ranks\n"
+                                        "Time is the current simulation time\n"
+                                        "BuiltTime is the elapsed time to build the topology\n"
                                     "</Description>"
                                     "<Time value=\"\" />"
+                                    "<BuiltTime value=\"\" />"
                                     "<AABBList />"
                                     "<Grid aligned=\"\" >"
                                         "<Dimension/>"
@@ -1013,6 +1029,9 @@ public:
 
         node = root.first_element_by_path("./Time");
         node.attribute("value").set_value( std::to_string(currentTime).c_str() );
+
+        node = root.first_element_by_path("./BuiltTime");
+        node.attribute("value").set_value( std::to_string(buildTime).c_str() );
 
         node = root.first_element_by_path("./Grid/MinPoint");
         node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(aabb.m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() );

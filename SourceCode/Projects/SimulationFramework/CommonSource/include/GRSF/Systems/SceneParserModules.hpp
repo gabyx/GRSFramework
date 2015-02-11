@@ -225,6 +225,13 @@ public:
                 }
             }
 
+            att = node.attribute("usePercussionCache");
+            if(att) {
+                if(!Utilities::stringToType(m_inclusionSettings->m_usePercussionCache, att.value())) {
+                    ERRORMSG("---> String conversion in InclusionSolverSettings: usePercussionCache failed");
+                }
+            }
+
 
             att = node.attribute("isFiniteCheck");
             if(att) {
