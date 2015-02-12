@@ -46,26 +46,19 @@ public:
     ContactGraph(ContactParameterMap * contactParameterMap){
         m_pContactParameterMap = contactParameterMap;
     }
-    ~ContactGraph() {
-        clearGraph();
-    }
+    ~ContactGraph() {}
 
     void clearGraph() {
-        // This deletes all nodes, edges, and decrements the reference counts for the nodedata and edgedata
-        // cleanup allocated memory
-        for(auto n_it = this->m_nodes.begin(); n_it != this->m_nodes.end(); ++n_it)
-            delete (*n_it);
-        for(auto e_it = this->m_edges.begin(); e_it != this->m_edges.end(); ++e_it)
-            delete (*e_it);
-        //cout << "clear graph"<<endl;
-        this->m_nodes.clear();
+
+        // This clears all nodes, edges, and decrements the reference counts for the nodedata and edgedata
+        GeneralGraph::clearGraph();
+
         m_nodeCounter = 0;
-        this->m_edges.clear();
         m_edgeCounter = 0;
+
         m_simBodiesToContactsMap.clear();
 
         m_nLambdas = 0;
-
         m_usedContactModels = 0;
     }
 
@@ -79,8 +72,8 @@ public:
         // all nodes (contacts) which are in the BodyContactList (maps bodies -> contacts)
 
         // add the pNodeData to the node list
-        this->m_nodes.push_back( new NodeType(m_nodeCounter));
-        NodeType * addedNode = this->m_nodes.back();
+
+        NodeType * addedNode = GeneralGraph::addNode(m_nodeCounter);
         addedNode->m_nodeData.m_pCollData = pCollData;
 
         // Compute general parameters for the contact
@@ -228,14 +221,13 @@ private:
         RigidBodyType * pBody = (bodyNr==1)? pNode->m_nodeData.m_pCollData->m_pBody1 : pNode->m_nodeData.m_pCollData->m_pBody2;
 
         // Add self edge! ===========================================================
-        this->m_edges.push_back(new EdgeType(m_edgeCounter));
-        addedEdge = this->m_edges.back();
+        addedEdge = this->addEdge(m_edgeCounter);
         addedEdge->m_edgeData.m_pBody = pBody;
 
         // add links
         addedEdge->m_startNode = pNode;
         addedEdge->m_endNode = pNode;
-        addedEdge->m_twinEdge = this->m_edges.back(); // Current we dont need a twin edge, self referencing!
+        addedEdge->m_twinEdge = addedEdge; // Current we dont need a twin edge, self referencing!
         // Add the edge to the nodes edge list!
         pNode->m_edgeList.push_back( addedEdge );
         m_edgeCounter++;
@@ -249,8 +241,7 @@ private:
         // if no contacts are already on the body we skip this
         for(it = nodeList.begin(); it != nodeList.end(); ++it) {
 
-            this->m_edges.push_back(new EdgeType(m_edgeCounter));
-            addedEdge = this->m_edges.back();
+            addedEdge = this->addEdge(m_edgeCounter);
             addedEdge->m_edgeData.m_pBody = pBody;
             // add link
             addedEdge->m_startNode = pNode;
@@ -364,7 +355,7 @@ public:
     void clearGraph() {
         // This deletes all nodes, edges, and decrements the reference counts for the nodedata and edgedata
         // cleanup allocated memory
-        deleteNodesAndEdges();
+        GeneralGraph::clearGraph();
 
         m_edgeCounter = 0;
         m_nodeCounter = 0;
@@ -387,8 +378,7 @@ public:
         // all nodes (contacts) which are in the BodyContactList (maps bodies -> contacts)
 
         // add the pNodeData to the node list
-        NodeType * addedNode = new NodeType(m_nodeCounter);
-        this->m_nodes.push_back(addedNode);
+        NodeType * addedNode = GeneralGraph::addNode(m_nodeCounter);
         addedNode->m_nodeData.m_pCollData = pCollData;
 
         initNode<addEdges>(addedNode);
@@ -494,9 +484,7 @@ private:
 
         if( addEdges ){
             // Add self edge! ===========================================================
-            EdgeType * addedEdge;
-            this->m_edges.push_back(new EdgeType(m_edgeCounter));
-            addedEdge = this->m_edges.back();
+            EdgeType * addedEdge = this->addEdge(m_edgeCounter);
             addedEdge->m_edgeData.m_pBody = pBody;
 
             // add links
@@ -514,8 +502,7 @@ private:
             auto itEnd = nodeList.end();
             for(auto it = nodeList.begin(); it != itEnd; ++it) {
 
-                this->m_edges.push_back(new EdgeType(m_edgeCounter));
-                addedEdge = this->m_edges.back();
+                addedEdge = this->addEdge(m_edgeCounter);
                 addedEdge->m_edgeData.m_pBody = pBody;
                 // add link
                 addedEdge->m_startNode = pNode;

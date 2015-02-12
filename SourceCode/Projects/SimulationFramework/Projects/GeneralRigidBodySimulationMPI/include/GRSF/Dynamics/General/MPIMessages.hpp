@@ -668,7 +668,6 @@ private:
         ar & body->m_eMaterial;
 
         //Geometry
-
         ar & body->m_globalGeomId;
         if( body->m_globalGeomId == 0) {
             //This geometry is not a global one! serialize too!
@@ -761,9 +760,7 @@ private:
     template<class Archive>
     void serializeGeom(Archive & ar, RigidBodyType * body) const {
         // take care this serialization replaces any shared_ptr if body->m_geometry is already filled!
-        //ERRORMSG("Serialize Full GEOM")
         LOGBC_SZ(m_pSerializerLog,  "-----> Serializing full geometry!"<<std::endl;)
-
         GeomSerialization gs(body->m_geometry);
         ar & gs;
     }

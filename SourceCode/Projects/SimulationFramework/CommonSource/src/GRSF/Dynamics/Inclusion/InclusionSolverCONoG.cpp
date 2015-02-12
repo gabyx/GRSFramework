@@ -74,22 +74,12 @@ void InclusionSolverCONoG::reset() {
 
     resetForNextTimestep();
 
-#if HAVE_CUDA_SUPPORT == 1
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
-    //to decide if we compute with the GPU (only JOR method) or we build the contact graph on the CPU to use the SOR method
     // Setups the node only partially!
     m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode >(&m_contactGraph)
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode<false> >(&m_contactGraph)
     );
     LOG(m_pSimulationLog,  "---> Registered ContactCallback in CollisionSolver for ContactGraph" << std::endl;);
-#else
-    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
-    // Setups the node fully!
-    m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode<true> >(&m_contactGraph)
-    );
-    LOG(m_pSimulationLog,  "---> Registered ContactCallback in CollisionSolver for ContactGraph" << std::endl;);
-#endif
 
 
 #if HAVE_CUDA_SUPPORT == 1
@@ -140,6 +130,10 @@ void InclusionSolverCONoG::reset() {
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>(m_settings,m_percussionPool);
 
 
+    // Reserve Contacts (nodes and edges)
+    m_contactGraph.reserveNodes(m_settings.m_reserveContacts);
+    // No edge setup
+    //m_contactGraph.reserveEdges(m_settings.m_reserveContacts*4);
 
 }
 
