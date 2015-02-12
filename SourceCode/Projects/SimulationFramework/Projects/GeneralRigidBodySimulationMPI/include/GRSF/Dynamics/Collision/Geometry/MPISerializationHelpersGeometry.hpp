@@ -82,7 +82,7 @@ private:
         using GeomType = typename SharedPtrType::element_type;
 
         if(N == m_w){
-            m_g = SharedPtrType( new GeomType() );
+            m_g = SharedPtrType( new GeomType() ); // replaces the shared_ptr which destructs the hold object in m_g
         }else{
             createGeom_impl<N-1>();
         }

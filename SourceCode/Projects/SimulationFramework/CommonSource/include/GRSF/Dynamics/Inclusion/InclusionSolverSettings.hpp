@@ -69,6 +69,9 @@ struct InclusionSolverSettings
     /** Use percussion cache to speed up the prox iteration if possible */
     bool m_usePercussionCache;
 
+    /** Contact Graph reserve space **/
+    unsigned int m_reserveContacts = 1000;
+
     /** Compute Total Overlap */
     bool m_computeTotalOverlap;
 
