@@ -175,9 +175,14 @@ void TimeStepperBase<TDerived,TTraits>::doFirstHalfTimeStep(PREC ts, PREC timest
         // Set F for this object:
         updateFMatrix(pBody->m_q_KI, F_i);
 
+        // Save the quaternion beginning state (for second half timestep)
+        pBody->m_pSolverData->m_q_IK_beg =  pBody->m_q_KI;
+        pBody->m_pSolverData->m_K_omega_IK_beg = pBody->m_pSolverData->m_uBuffer.m_back.template tail<3>();
+
         // Timestep for position;
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_back.template head<3>();
-        pBody->m_q_KI.coeffs() += timestep * F_i * pBody->m_pSolverData->m_uBuffer.m_back.template tail<3>();
+        pBody->m_q_KI.coeffs() += timestep * F_i * pBody->m_pSolverData->m_K_omega_IK_beg;
+
 
         //Normalize Quaternion
         pBody->m_q_KI.normalize();
@@ -227,15 +232,18 @@ void TimeStepperBase<TDerived,TTraits>::doSecondHalfTimeStep(PREC te, PREC times
         // Update time:
         pBody->m_pSolverData->m_t = te;
 
-        // We do this: Symmetric update q_E = q_B + deltaT * F(q_M)(u_E+u_B)/2 (only influences rotation)
-        // Original Moreau update    q_E = q_B + deltaT * F(q_M)u_E/2  + F(q_B) u_B/2
+        // A symmetric update 1        q_E = q_M + deltaT/2   * F(q_M)(u_E    + u_B)/2    (only influences rotation)
+        // A symmetric update 2        q_E = q_B + deltaT     * F(q_M)(u_E    + u_B)/2    (only influences rotation)
+        // we do this because it is closed to the form of Michael Moeller which is retaining the quatnernion unit constraint
+        // Original Moreau update      q_E = q_B + deltaT/2   * (F(q_M) u_E  + F(q_B) u_B)
 
         // Set F(q_m) for this object:
         updateFMatrix(pBody->m_q_KI, F_i);
 
         // Timestep for position;
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_front.template head<3>();
-        pBody->m_q_KI.coeffs() += timestep * F_i * (pBody->m_pSolverData->m_uBegin.template tail<3>() + pBody->m_pSolverData->m_uBuffer.m_front.template tail<3>());
+        pBody->m_q_KI.coeffs() = pBody->m_pSolverData->m_q_IK_beg
+                                 + timestep * F_i * (pBody->m_pSolverData->m_K_omega_IK_beg + pBody->m_pSolverData->m_uBuffer.m_front.template tail<3>());
 
 
         ASSERTMSG(Utilities::isFinite(pBody->m_pSolverData->m_uBuffer.m_front.template tail<3>())," body vel. not finite" );
