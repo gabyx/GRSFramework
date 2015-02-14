@@ -1,106 +1,197 @@
 ﻿#ifndef GRSF_Dynamics_Inclusion_PercussionPool_hpp
 #define GRSF_Dynamics_Inclusion_PercussionPool_hpp
 
-#include <utility>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <vector>
 
 #include "GRSF/Common/TypeDefs.hpp"
 
 #include "GRSF/Dynamics/Collision/ContactTag.hpp"
-#include "GRSF/Dynamics/Collision/ContactPercussion.hpp"
+#include "GRSF/Dynamics/Inclusion/ContactPercussion.hpp"
 
 
-
-/** Usage:
-
-   ...
-   getPercussion();  sets used flag = true
-   removeUnusedPercussions() removes all used flag = false
-   ... (prox)
-   setPercussion(); sets used flag = false;
-   clearUsedPercussionList();
-   ...
-*/
+struct PercussionPoolSettings {
+    unsigned int m_cacheUnusedMaxSteps = 1; ///< Amount of times the unused percussions are cached
+};
 
 /**
 * @ingroup Inclusion
 * @brief Percussion Pool.
 */
-class PercussionPool    {
+class PercussionPool{
 public:
-   using PercussionMap = boost::unordered_map<ContactTag, ContactPercussion, ContactTagHash >;
 
-   DEFINE_LAYOUT_CONFIG_TYPES
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-   PercussionPool(){
+    using PercussionMap = std::unordered_map<ContactTag, ContactPercussion * , ContactTagHash >;
 
-   }
+    PercussionPool(const PercussionPoolSettings & settings = PercussionPoolSettings() )
+    :m_settings(settings), m_usedPercussions(0)
+    {}
 
-   void rehashPercussionPool(unsigned int n){
-      m_PercussionMap.rehash(n);
-   }
+    ~PercussionPool(){
+        for(auto & s : m_percussionMap){
+            delete s.second;
+        }
+    }
 
-   void removeUnusedPercussions(){
-//       unsigned int size1 = m_PercussionMap.size();
-      //cout << "Removing percussion...: " << m_PercussionMap.size() <<endl ;
-      typename PercussionMap::iterator it;
-      it = m_PercussionMap.begin();
-      while(it != m_PercussionMap.end()){
-         if(it->second.m_bUsed == false){ // the percussion was not used in the last iteration
-            it = m_PercussionMap.erase(it); // it points to the next element!
-         }else{ // the percussion was used in the last iteration, so reset flag = not used
-            it->second.m_bUsed = false;
-            it++;
-         }
-      }
-//      std::cout << "Removed percussion: "<< size1 - m_PercussionMap.size()  <<std::endl;
-   }
+    void reset(unsigned int counter = 0) {
+        m_percussionMap.clear();
+        m_usedPercussions = 0;
+    }
 
-   void clearUsedPercussionList(){
-      m_usedPercussionList.clear();
-   }
+    void rehash(unsigned int n) {
+        //pointers and references stay valid!
+        m_percussionMap.rehash(n);
+    }
 
-   void getPercussion(const ContactTag & tag, VectorDyn & P_old) {
-      static typename std::pair<ContactTag, ContactPercussion > new_value(ContactTag(), ContactPercussion(P_old.rows()) );  // Standart constructor, Percussion = zero
-      new_value.first = tag;
 
-      // try to insert a new one!
-      std::pair<typename PercussionMap::iterator, bool> result =  m_PercussionMap.insert(new_value);
-//      if(result.second == false){
-//        std::cout << "Took Precussion with" << result.first->second.m_P <<std::endl;
-//      }
-      // If inserted the new values are set to zero!
-      // If not inserted the new values are the found ones in the map!
-      ASSERTMSG(result.first->second.m_P.rows() == P_old.rows(), "Something went wrong you found a contact which has not the same dimension as the one you want to initialize!");
-      P_old = result.first->second.m_P;
+    void cleanUpAfterTimeStep(unsigned int counter = 0) {
+        if(counter % m_settings.m_cacheUnusedMaxSteps == 0){
+            resetPercussions<true>();
+        }else{
+            resetPercussions<false>();
+        }
 
-      // Set  used flag
-      result.first->second.m_bUsed = true;
-      // Fill in into the list
-      m_usedPercussionList.push_back(result.first);
-   }
+    }
 
-   void setPercussion(unsigned int index, const VectorDyn & P_new) {
-      ASSERTMSG(index < m_usedPercussionList.size(),"Error: False index!");
+    /** Gets a percussion if this pool provides one, if forceCache is true then if the percussion does not exist one is created!
+    * @return Pointer to a percussion (nullptr or valid) and a bool indicating if this percussion can be used to initialize!
+    */
+    template <bool forceCache = true>
+    inline std::pair<ContactPercussion *, bool> getPercussion(const ContactTag & tag,
+                                                              unsigned int dim) {
 
-      typename PercussionMap::iterator it = m_usedPercussionList[index];
+        // See if there is a percussion in the cache otherwise insert an empty pointer
+        ContactPercussion* & p = m_percussionMap.emplace(tag,nullptr).first->second;
 
-      ASSERTMSG(it->second.m_P.rows() == P_new.rows(), "Something went wrong you want to set a contact which has not the same dimension as the one you want to initialize!");
-      it->second.m_P = P_new;
+        if( p == nullptr ){ // no cached value we cannot use it
 
-//       std::cout << "Set Precussion with" << P_new.transpose() <<std::endl;
+            if(forceCache){
+                // set the pointer in the map to a new percussion
+                p = new ContactPercussion{dim,true};
+                return std::make_pair(p,false);
 
-   }
+            }else{
+                return std::make_pair(nullptr,false);
+            }
 
-   unsigned int getPoolSize(){
-      return (unsigned int)m_PercussionMap.size();
-   }
+        }else{ // there is a cached value, see if we can use it
+               if(p->m_used){
+                    WARNINGMSG(false, "Percussion with tag already used!")
+               }
+               p->m_used = true;
+               ++m_usedPercussions;
+               return std::make_pair(p,true);
+        }
+    }
+
+    std::size_t size(){
+        return m_percussionMap.size();
+    }
+
+    std::pair<std::size_t, PREC> getUsage(){
+        std::size_t s = m_percussionMap.size();
+        return std::make_pair( s ,  s? (double)m_usedPercussions / (double)s : 0 );
+    }
 
 private:
-   PercussionMap m_PercussionMap; // The percussion map!
 
-   std::vector<typename PercussionMap::iterator> m_usedPercussionList; // used to quickly access the elements which where used, to be able to write back the percussions after Prox
+    template<bool removeUnused>
+    void resetPercussions() {
+        auto it = m_percussionMap.begin();
+        while(it != m_percussionMap.end()) {
+            ContactPercussion * p = it->second;
+            if(p->m_used == false && removeUnused) { // if not used in the last iteration and removal, remove it
+                // delete percussion
+                delete p;
+                it = m_percussionMap.erase(it);
+            } else { // reset all to used to not used for next iteration
+                p->m_used = false;
+                it++;
+            }
+        }
+        m_usedPercussions = 0;
+    }
+
+    PercussionPoolSettings m_settings;
+    std::size_t m_usedPercussions; ///< Counter for used percussions
+    PercussionMap m_percussionMap; ///< The percussion map!
+};
+
+
+/**
+@brief Visitor for class ContactGraph<TRigidBody,ContactGraphMode::ForIteration>
+*/
+template<typename TContactGraph>
+class LambdaInitLogic{
+public:
+
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    using ContactGraphType = TContactGraph;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
+
+    LambdaInitLogic( PercussionPool * pool): m_pool(pool){}
+
+    inline void reset(){ m_updatedNodes = 0;}
+
+    template<typename NodeDataType>
+    inline void initLambda(NodeDataType & nodeData, unsigned int dim) {
+            // Init LambdaBack
+            bool initialized = false;
+            if(m_pool){
+                auto pair = m_pool->getPercussion<true>(nodeData.m_pCollData->m_contactTag, dim);
+                if(pair.second){ // we can use this cache value!
+                    nodeData.m_LambdaBack =  pair.first->m_Lambda;
+                }
+                initialized = pair.second;
+            }
+
+            // Default value for lambda
+            if(!initialized){
+                nodeData.m_LambdaBack.setZero(dim);
+            }
+
+            nodeData.m_LambdaFront.setZero(dim);
+    }
+
+private:
+    unsigned int m_updatedNodes = 0;
+    PercussionPool * m_pool;
+};
+
+
+
+/**
+@brief Visitor for class ContactGraph<TRigidBody,ContactGraphMode::ForIteration>
+*/
+template<typename TContactGraph>
+class CachePercussionNodeVisitor{
+public:
+
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    using ContactGraphType = TContactGraph;
+    using NodeDataType = typename ContactGraphType::NodeDataType;
+    using EdgeDataType = typename ContactGraphType::EdgeDataType;
+    using EdgeType = typename ContactGraphType::EdgeType;
+    using NodeType = typename ContactGraphType::NodeType;
+
+    CachePercussionNodeVisitor( PercussionPool * pool): m_pool(pool){}
+
+    inline void visitNode(NodeType & node) {
+        auto & nodeData = node.m_nodeData;
+        if(nodeData.m_cache){
+            nodeData.m_cache->m_Lambda = nodeData.m_LambdaBack;
+        }
+    }
+
+private:
+    PercussionPool * m_pool;
 };
 
 

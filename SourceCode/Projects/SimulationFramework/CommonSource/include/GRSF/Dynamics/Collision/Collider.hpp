@@ -507,7 +507,7 @@ void ColliderBody::collide( const std::shared_ptr< const SphereGeometry >  & sph
         m_pColData->m_pBody2 = const_cast<RigidBodyType *>(m_pBody2);
 
         // set Contact Tag
-        m_pColData->m_ContactTag = makeContactTag<RigidBodyType>(m_pBody1,0,0,m_pBody2,0,0);
+        m_pColData->m_contactTag.set(m_pBody1->m_id,0,0,m_pBody2->m_id,0,0);
 
     }
 }
@@ -540,7 +540,7 @@ void ColliderBody::collide( const std::shared_ptr<const SphereGeometry >  & sphe
         m_pColData->m_pBody2 = const_cast<RigidBodyType *>(m_pBody2);
 
         // set Contact Tag
-        m_pColData->m_ContactTag = makeContactTag<RigidBodyType>(m_pBody1,0,0,m_pBody2,0,0);
+        m_pColData->m_contactTag.set(m_pBody1->m_id,0,0,m_pBody2->m_id,0,0);
 
     }
 
@@ -593,7 +593,7 @@ void ColliderBody::collide( const std::shared_ptr<const BoxGeometry >  & boxGeom
             m_pColData->m_pBody2 = const_cast<RigidBodyType *>(m_pBody2);
 
             // set Contact Tag
-            m_pColData->m_ContactTag = makeContactTag<RigidBodyType>(m_pBody1,0,0,m_pBody2,0,0);
+            m_pColData->m_contactTag.set(m_pBody1->m_id,0,0,m_pBody2->m_id,0,0);
 
         }
     }
@@ -739,7 +739,8 @@ void ColliderBody::collide(const std::shared_ptr<const SphereGeometry >  & spher
         m_pColData->m_pBody2 = const_cast<RigidBodyType *>(m_pBody2);
 
         // set Contact Tag
-        m_pColData->m_ContactTag = makeContactTag<RigidBodyType>(m_pBody1,0,0,m_pBody2,temporarySet[j].get<2>(),temporarySet[j].get<3>());
+        m_pColData->m_contactTag.set(m_pBody1->m_id,0,0,m_pBody2->m_id,temporarySet[j].get<2>(),temporarySet[j].get<3>());
+
     }
 
 }

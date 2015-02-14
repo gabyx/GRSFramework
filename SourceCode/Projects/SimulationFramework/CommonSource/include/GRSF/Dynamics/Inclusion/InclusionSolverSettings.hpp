@@ -4,8 +4,6 @@
 #include "GRSF/Common/TypeDefs.hpp"
 
 
-#define USE_PERCUSSION_POOL 0
-
 /**
 * @ingroup Inclusion
 * @brief The inclusion solver settings.
@@ -37,13 +35,15 @@ struct InclusionSolverSettings
       m_eConvergenceMethod = InVelocity;
       m_bComputeResidual = false;
       m_computeTotalOverlap = false;
+
+      m_usePercussionCache = false;
     }
 
-    PREC m_deltaT;
+    PREC m_deltaT; ///< Timestep delta time, needs to be the same as in the TimeStepper settings!
 
     PREC m_alphaJORProx;
     PREC m_alphaSORProx;
-    enum RMatrixStrategy{RSTRATEGY_MAX, RSTRATEGY_SUM,RSTRATEGY_SUM2} m_RStrategy;
+    enum RMatrixStrategy{RSTRATEGY_MAX, RSTRATEGY_SUM, RSTRATEGY_SUM2} m_RStrategy;
     unsigned int m_MaxIter;
     unsigned int m_MinIter;
     PREC m_AbsTol;
@@ -65,6 +65,12 @@ struct InclusionSolverSettings
     */
     bool m_useDriftCorrectionGap;
     PREC m_driftCorrectionGapAlpha;
+
+    /** Use percussion cache to speed up the prox iteration if possible */
+    bool m_usePercussionCache;
+
+    /** Contact Graph reserve space **/
+    unsigned int m_reserveContacts = 1000;
 
     /** Compute Total Overlap */
     bool m_computeTotalOverlap;

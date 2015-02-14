@@ -225,6 +225,20 @@ public:
                 }
             }
 
+            att = node.attribute("usePercussionCache");
+            if(att) {
+                if(!Utilities::stringToType(m_inclusionSettings->m_usePercussionCache, att.value())) {
+                    ERRORMSG("---> String conversion in InclusionSolverSettings: usePercussionCache failed");
+                }
+            }
+
+            att = node.attribute("reserveContacts");
+            if(att) {
+                if(!Utilities::stringToType(m_inclusionSettings->m_reserveContacts, att.value())) {
+                    ERRORMSG("---> String conversion in InclusionSolverSettings: reserveContacts failed");
+                }
+            }
+
 
             att = node.attribute("isFiniteCheck");
             if(att) {
@@ -483,8 +497,8 @@ private:
         }
 
         // Print some details:
-        LOGSCLEVEL2(m_pSimulationLog,"\t---> Added GlobalGeomId: " << id;);
-        if(2<=SCENEPARSER_LOGLEVEL) {
+        LOGSCLEVEL3(m_pSimulationLog,"\t---> Added GlobalGeomId: " << id;);
+        if(3<=SCENEPARSER_LOGLEVEL) {
             PrintGeometryDetailsVisitor(m_pSimulationLog, ret.first->second, ", ");
         }
     }
@@ -550,10 +564,11 @@ private:
             RandomGenType gen(seed);
             std::unique_ptr<UniformDistType<PREC> > uniform;
             std::unique_ptr<rtnorm::truncated_normal_distribution<PREC> > truncNormal;
+            std::unique_ptr<std::piecewise_constant_distribution<PREC> > piecewConst;
             std::function<PREC(void)> sampleGen;
 
             std::string generator = sphere.attribute("generator").value();
-            if(generator == "truncnormal"){
+            if(generator == "truncated-normal"){
                 // Normal truncated
                 PREC mean;
                 if(!Utilities::stringToType(mean,sphere.attribute("mean").value())) {
@@ -589,6 +604,26 @@ private:
 
                 truncNormal.reset( new rtnorm::truncated_normal_distribution<PREC>(mean,var,minRadius,maxRadius));
                 sampleGen = [&]()-> PREC{ return (*truncNormal)(gen);};
+            }else if(generator == "piecewise-const"){
+
+                    GET_XMLATTRIBUTE_CHECK(att, "weights", sphere);
+                    std::vector<PREC> weightsVec;
+
+                    if(!Utilities::stringToType(weightsVec,att.value())) {
+                        ERRORMSG("---> String conversion in parseSphereGeometry: weights failed");
+                    }
+
+
+                    GET_XMLATTRIBUTE_CHECK(att, "intervals", sphere);
+                    std::vector<PREC> intervalsVec;
+
+                    if(!Utilities::stringToType(intervalsVec,att.value())) {
+                        ERRORMSG("---> String conversion in parseSphereGeometry: intervals failed");
+                    }
+
+                    piecewConst.reset(new std::piecewise_constant_distribution<PREC>(
+                                        intervalsVec.begin(), intervalsVec.end(), weightsVec.begin()   ) );
+                    sampleGen = [&]()-> PREC{ return (*piecewConst)(gen);};
 
             }else{
                 // Uniform
@@ -1976,7 +2011,7 @@ public:
                 SetType s;
                 using CSPBS = Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType>;
 
-                if( !Utilities::stringToType<SetType,CSPBS>(s, n.attribute("value").value())  ) {
+                if( !Utilities::stringToType<SetType,CSPBS>(s, n.value() )  ) {
                     ERRORMSG("---> String conversion in parseModuleOptions: Set: value failed");
                 }
                 // Overwrite
@@ -1993,7 +2028,7 @@ public:
                 using SetType = std::pair<RigidBodyIdType,RigidBodyIdType>;
                 SetType r;
                 using CSPBS = Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType>;
-                if( !Utilities::stringToType<SetType,CSPBS>(r, n.attribute("value").value())  ) {
+                if( !Utilities::stringToType<SetType,CSPBS>(r,  n.value() )  ) {
                     ERRORMSG("---> String conversion in parseModuleOptions: Set: value failed");
                 }
                 // Overwrite

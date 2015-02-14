@@ -5,7 +5,7 @@
 #include "GRSF/Common/LogDefines.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
-
+#include "GRSF/Dynamics/Inclusion/PercussionPool.hpp"
 #include "GRSF/Dynamics/General/VectorToSkewMatrix.hpp"
 #include "GRSF/Dynamics/Inclusion/ProxFunctions.hpp"
 
@@ -964,8 +964,14 @@ public:
     using EdgeType = typename ContactGraphType::EdgeType;
     using NodeType = typename ContactGraphType::NodeType;
 
-    SorProxInitNodeVisitor(const InclusionSolverSettingsType &settings): m_alpha(1), m_settings(settings)
-    {}
+    using LambdaInit = LambdaInitLogic<ContactGraphType>;
+
+    SorProxInitNodeVisitor(const InclusionSolverSettingsType &settings, PercussionPool * pool = nullptr)
+    : m_alpha(1), m_settings(settings), m_lambdaInit(pool)
+    {
+    }
+
+    ~SorProxInitNodeVisitor(){}
 
     void setLog(Logging::Log * solverLog) {
         m_pSolverLog = solverLog;
@@ -1042,8 +1048,10 @@ public:
             const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
 
             nodeData.m_b.setZero(dimSet);
-            nodeData.m_LambdaBack.setZero(dimSet);
-            nodeData.m_LambdaFront.setZero(dimSet);
+
+            // Init LambdaBack (PercussionPool logic, or default values)
+            m_lambdaInit.initLambda(nodeData,dimSet);
+
             nodeData.m_R_i_inv_diag.setZero(dimSet);
             nodeData.m_G_ii.setZero(dimSet,dimSet);
 
@@ -1063,9 +1071,6 @@ public:
                 ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
             }
 
-            // Get lambda from percussion pool otherwise set to zero
-            // TODO
-            nodeData.m_LambdaBack.setZero();
 
             // (1+e)*xi -> b
             nodeData.m_b = (nodeData.m_eps.array() + 1).matrix().asDiagonal() * nodeData.m_chi;
@@ -1193,6 +1198,9 @@ private:
     Logging::Log * m_pSolverLog;
     PREC m_alpha;
     InclusionSolverSettingsType m_settings;
+
+    LambdaInit m_lambdaInit;
+
 };
 
 #endif // ContactGraphVisitors_hpp

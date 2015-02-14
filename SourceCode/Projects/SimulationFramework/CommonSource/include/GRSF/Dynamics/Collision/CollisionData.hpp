@@ -64,7 +64,7 @@ public:
   Vector3 m_r_S1C1, m_r_S2C2;
   /** @} */
 
-  ContactTag m_ContactTag; ///< A tag classifying this contact pair. This is used to identify the contact for Percussion Caching.
+  ContactTag m_contactTag; ///< A tag classifying this contact pair. This is used to identify the contact for Percussion Caching.
 
 };
 /** @} */

@@ -25,11 +25,6 @@ InclusionSolverCONoG::InclusionSolverCONoG(std::shared_ptr< CollisionSolverType 
     m_bConverged = true;
     m_pDynSys = pDynSys;
 
-    m_pSorProxStepNodeVisitor = nullptr;
-    m_pNormalSorProxStepNodeVisitor = nullptr;
-    m_pTangentialSorProxStepNodeVisitor = nullptr;
-    m_pSorProxInitNodeVisitor = nullptr;
-
 }
 
 
@@ -38,6 +33,11 @@ InclusionSolverCONoG::~InclusionSolverCONoG(){
     if(m_pNormalSorProxStepNodeVisitor != nullptr ){ delete m_pNormalSorProxStepNodeVisitor;}
     if(m_pTangentialSorProxStepNodeVisitor != nullptr ){ delete m_pTangentialSorProxStepNodeVisitor;}
     if(m_pSorProxInitNodeVisitor != nullptr ){ delete m_pSorProxInitNodeVisitor;}
+    if(m_percussionPool){
+        delete m_percussionPool;
+        delete m_pCachePercussionVisitor;
+    }
+
 }
 
 
@@ -74,22 +74,12 @@ void InclusionSolverCONoG::reset() {
 
     resetForNextTimestep();
 
-#if HAVE_CUDA_SUPPORT == 1
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
-    //to decide if we compute with the GPU (only JOR method) or we build the contact graph on the CPU to use the SOR method
     // Setups the node only partially!
     m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode >(&m_contactGraph)
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode<false> >(&m_contactGraph)
     );
     LOG(m_pSimulationLog,  "---> Registered ContactCallback in CollisionSolver for ContactGraph" << std::endl;);
-#else
-    //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
-    // Setups the node fully!
-    m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode<true> >(&m_contactGraph)
-    );
-    LOG(m_pSimulationLog,  "---> Registered ContactCallback in CollisionSolver for ContactGraph" << std::endl;);
-#endif
 
 
 #if HAVE_CUDA_SUPPORT == 1
@@ -130,18 +120,37 @@ void InclusionSolverCONoG::reset() {
         ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemendet");
     }
 
-    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>(m_settings);
+    if(m_percussionPool){ delete m_percussionPool;}
+    if(m_settings.m_usePercussionCache){
+        LOG(m_pSimulationLog, "---> Initialize PercussionPool"<<  std::endl;);
+        m_percussionPool = new PercussionPool();
+        m_pCachePercussionVisitor = new CachePercussionNodeVisitor<ContactGraphType>(m_percussionPool);
+    }
+
+    m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>(m_settings,m_percussionPool);
+
+
+    // Reserve Contacts (nodes and edges)
+    m_contactGraph.reserveNodes(m_settings.m_reserveContacts);
+    // No edge setup
+    //m_contactGraph.reserveEdges(m_settings.m_reserveContacts*4);
 
 }
 
 
-void InclusionSolverCONoG::resetForNextTimestep() {
+void InclusionSolverCONoG::resetForNextTimestep(unsigned int timeStepCounter) {
 
     m_nContacts = 0;
     m_isFinite = -1;
     m_globalIterationCounter =0;
     m_bConverged = true;
+
+
     m_contactGraph.clearGraph();
+
+    if(m_percussionPool){
+        m_percussionPool->cleanUpAfterTimeStep(timeStepCounter);
+    }
 }
 
 
@@ -392,6 +401,12 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
         m_contactGraph.applyNodeVisitorSpecial(*m_pSorProxStepNodeVisitor);
     }
 
+
+    if(m_pCachePercussionVisitor){
+        m_contactGraph.applyNodeVisitorSpecial(*m_pCachePercussionVisitor);
+    }
+
+
     m_maxResidual = m_contactGraph.m_maxResidual;
     // Move over all nodes, end of Sor Prox
 
@@ -471,9 +486,28 @@ std::string  InclusionSolverCONoG::getIterationStats() {
     << m_pDynSys->m_currentKinEnergy<<"\t"
     << m_pDynSys->m_currentRotKinEnergy<<"\t"
     << m_pDynSys->m_currentSpinNorm;
+
+    if(m_percussionPool){
+        auto u = m_percussionPool->getUsage();
+        s <<"\t" << u.first <<"\t"<<u.second;
+    }else{
+        s <<"\t" << 0.0 <<"\t" <<  0.0 ;
+    }
+
     return s.str();
 }
 
 std::string InclusionSolverCONoG::getStatsHeader() {
-    return std::string("GPUUsed\tnContacts\tnGlobalIterations\tConverged\tIsFinite\tTotalTimeProx [s]\tIterTimeProx [s]\tTotalStateEnergy [J]\tTotalKinEnergy [J]\tTotalRotKinEnergy [J]\tTotalSpinNorm [Nms]");
+    return std::string("GPUUsed\t"
+                       "nContacts\t"
+                       "nGlobalIterations\t"
+                       "Converged\tIsFinite\t"
+                       "TotalTimeProx [s]\t"
+                       "IterTimeProx [s]\t"
+                       "TotalStateEnergy [J]\t"
+                       "TotalKinEnergy [J]\t"
+                       "TotalRotKinEnergy [J]\t"
+                       "TotalSpinNorm [Nms]\t"
+                       "PrecussionPoolSize\t"
+                       "PercussionPoolUsage [%]");
 }

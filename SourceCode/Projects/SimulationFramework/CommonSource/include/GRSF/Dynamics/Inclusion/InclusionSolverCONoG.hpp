@@ -45,22 +45,13 @@ public:
 
     void initializeLog( Logging::Log* pSolverLog, boost::filesystem::path folder_path );
     void reset();
-    void resetForNextTimestep(); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
+    void resetForNextTimestep(unsigned int timeStepCounter = 0); // Is called each iteration in the timestepper, so that the InclusionSolver is able to reset matrices which are dynamically added to during the iteration! (like, h term)
     void solveInclusionProblem();
 
 
     std::string getIterationStats();
     std::string getStatsHeader();
 
-
-
-
-
-    PercussionPool m_PercussionPool;
-
-//    void reservePercussionPoolSpace(unsigned int nExpectedContacts);
-//    void readFromPercussionPool(unsigned int index, const CollisionData * pCollData, VectorDyn & P_old);
-//    void updatePercussionPool(const VectorDyn & P_old ) ;
 
     InclusionSolverSettingsType m_settings;
 
@@ -114,8 +105,8 @@ protected:
     inline void doSorProx();
 
 
-
-
+    PercussionPool * m_percussionPool = nullptr;
+    CachePercussionNodeVisitor<ContactGraphType> * m_pCachePercussionVisitor = nullptr;;
 
     // Log
     Logging::Log *m_pSolverLog = nullptr;

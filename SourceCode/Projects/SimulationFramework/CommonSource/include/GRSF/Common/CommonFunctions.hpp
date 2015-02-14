@@ -54,197 +54,203 @@ inline bool operator == (const char* a, const std::string & b) {
 
 
 // Prototypes
-struct StdTypeConverter{};
+struct StdTypeConverter {};
 template<typename T, typename TypeConverter = StdTypeConverter> bool stringToType(T & t, const std::string& s);
 
 
 
 namespace details {
-    namespace stringToTypeImpl {
+namespace stringToTypeImpl {
 
 
-        /**
-        * This is the standard type converter function
-        * @brief This functions casts a string into the template specific type.
-        * @param t The ouput where the casted string is put into.
-        * @param s The string to cast.
-        * @return true if conversion worked, false if not.
-        */
-        template<typename T,typename TypeConverter>
-        inline
-        typename std::enable_if< std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
-        convert(T& t, const std::string& s) {
-            //this is a huge times faster then the below stringstream stuff;
-            return StringConversion::toType(t,s);
-            //std::istringstream iss(s);
-            //return !(iss >> t).fail();
+/**
+* This is the standard type converter function
+* @brief This functions casts a string into the template specific type.
+* @param t The ouput where the casted string is put into.
+* @param s The string to cast.
+* @return true if conversion worked, false if not.
+*/
+template<typename T,typename TypeConverter>
+inline
+typename std::enable_if< std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
+convert(T& t, const std::string& s) {
+    //this is a huge times faster then the below stringstream stuff;
+    return StringConversion::toType(t,s);
+    //std::istringstream iss(s);
+    //return !(iss >> t).fail();
+}
+/**
+* This is the custom type converter function, which takes the TypeConverter to convert the string into the type
+*/
+template<typename T,typename TypeConverter>
+inline
+typename std::enable_if< !std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
+convert(T& t, const std::string& s) {
+    return TypeConverter::convert(t,s);
+}
+};
+
+
+/**
+* @brief Helper to convert a string with whitespace-seperated numbers into numbers and passes it to the Functor.
+* N=-1, loops till the end of the string and extracts as many numbers as possible
+*/
+template <int N, typename PREC, typename Functor, typename TypeConverter>
+bool stringToTypeFunctorImpl( Functor & f, const std::string & s) {
+
+    unsigned int i=0, j;
+    PREC number;
+    if(s.empty()) {
+        return false;
+    }
+
+
+    unsigned int l = s.size();
+    unsigned int extVal = 0;
+    while(extVal < N || N==-1) {
+        if(i>=l) {
+            return (N==-1) ?  true :  false; // if we parse till the end, return true if we hit the end
         }
-        /**
-        * This is the custom type converter function, which takes the TypeConverter type to convert the string into the type
-        */
-        template<typename T,typename TypeConverter>
-        inline
-        typename std::enable_if< !std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
-        convert(T& t, const std::string& s) {
-            return TypeConverter::convert(t,s);
-        }
-    };
-
-
-    /**
-    * @brief Helper to convert a string with whitespace-seperated numbers into numbers and passes it to the Functor.
-    * N=-1, loops till the end of the string and extracts as many numbers as possible
-    */
-    template <int N, typename PREC, typename Functor, typename TypeConverter>
-    bool stringToTypeFunctorImpl( Functor & f, const std::string & s) {
-
-            unsigned int i=0, j;
-            PREC number;
-            if(s.empty()) {
-                return false;
-            }
-
-
-            unsigned int l = s.size();
-            unsigned int extVal = 0;
-            while(extVal < N || N==-1) {
-                if(i>=l) {
-                    return (N==-1) ?  true :  false; // if we parse till the end, return true if we hit the end
-                }
-                // Skip white spaces
-                while(s[i]==' ') {
-                    i++;
-                    if(i >= l) {
-                        return (N==-1) ?  true :  false; // if we parse till the end, return true if we hit the end
-                    }
-                }
-                // determine range of valid character
-                j=i;
-                while(s[j]!=' ') {
-                    j++;
-                    if(j >= l) {
-                        break;
-                    }
-                }
-                // extract substring and convert
-                if(!stringToType<PREC,TypeConverter>(number,s.substr(i,j-i))) {
-                    return false;
-                }
-                //std::cout << "number:" << number << std::endl;
-                f(extVal,number);
-                i = j;
-                extVal++;
-            }
-            return true;
-    };
-
-    /**
-    * @brief Helper to convert a string with whitespace-seperated numbers into numbers in a vector (operator() needs to available).
-    * N=-1, loops till the end of the string and extracts as many numbers as possible
-    */
-    template <unsigned int N, typename TVector, typename TypeConverter = StdTypeConverter>
-    inline bool stringToVectorImpl( TVector & v, const std::string & s) {
-
-        unsigned int i=0, j;
-        using PREC = typename TVector::Scalar;
-        PREC number;
-        if(s.empty()) {
-            return false;
-        }
-
-        unsigned int l = s.size();
-        unsigned int extVal = 0;
-        while(extVal < N || N==-1) {
-
-            if(i>=l) {
+        // Skip white spaces
+        while(s[i]==' ') {
+            i++;
+            if(i >= l) {
                 return (N==-1) ?  true :  false; // if we parse till the end, return true if we hit the end
             }
-            // Skip whit spaces
-            while(s[i]==' ') {
-                i++;
-                if(i >= l) {
-                    return (N==-1) ?  true :  false; // if we parse till the end, return true if we hit the end
-                }
-            }
-            // determine range of valid character
-            j=i;
-            while(s[j]!=' ') {
-                j++;
-                if(j >= l) {
-                    break;
-                }
-            }
-            // extract substring and convert
-            if(!stringToType<PREC,TypeConverter>(number,s.substr(i,j-i))) {
-                return false;
-            }
-            v(extVal) = number;
-            i = j;
-            extVal++;
         }
-        return true;
+        // determine range of valid character
+        j=i;
+        while(s[j]!=' ') {
+            j++;
+            if(j >= l) {
+                break;
+            }
+        }
+        // extract substring and convert
+        if(!stringToType<PREC,TypeConverter>(number,s.substr(i,j-i))) {
+            return false;
+        }
+        //std::cout << "number:" << number << std::endl;
+        f(extVal,number);
+        i = j;
+        extVal++;
+    }
+    return true;
+};
+
+/**
+* @brief Helper to convert a string with whitespace-seperated numbers into numbers in a vector (operator() needs to available).
+* N=-1, loops till the end of the string and extracts as many numbers as possible
+*/
+template <unsigned int N, typename TVector, typename TypeConverter = StdTypeConverter>
+inline bool stringToVectorImpl( TVector & v, const std::string & s) {
+
+    unsigned int i=0, j;
+    using PREC = typename TVector::Scalar;
+    PREC number;
+    if(s.empty()) {
+        return false;
     }
 
-    /** Standart dispatch for single types: double,floats, int*/
-    template <typename TypeConverter, typename T>
-    inline bool stringToTypeDispatch( T & t, const std::string & s){
-        return stringToTypeImpl::convert<T,TypeConverter>(t,s);
-    }
+    unsigned int l = s.size();
+    unsigned int extVal = 0;
+    while(extVal < N || N==-1) {
 
-    /** Custom dispatch for container types: std::set<T> */
-    template <typename TypeConverter, typename T, typename Comp, typename Alloc>
-    inline bool stringToTypeDispatch( std::set<T,Comp,Alloc> & m,
-                                    const std::string & s) {
-        std::function<void(unsigned int,T)> func = [&](unsigned int i, T n) {
-            m.insert(n);
-        };
-        return stringToTypeFunctorImpl< -1, T, decltype(func),TypeConverter >(func,s);
+        if(i>=l) {
+            return (N==-1) ?  true :  false; // if we parse till the end, return true if we hit the end
+        }
+        // Skip whit spaces
+        while(s[i]==' ') {
+            i++;
+            if(i >= l) {
+                return (N==-1) ?  true :  false; // if we parse till the end, return true if we hit the end
+            }
+        }
+        // determine range of valid character
+        j=i;
+        while(s[j]!=' ') {
+            j++;
+            if(j >= l) {
+                break;
+            }
+        }
+        // extract substring and convert
+        if(!stringToType<PREC,TypeConverter>(number,s.substr(i,j-i))) {
+            return false;
+        }
+        v(extVal) = number;
+        i = j;
+        extVal++;
     }
-    /** Custom dispatch for container types: std::vector<T> */
-    template <typename TypeConverter, typename T, typename Alloc>
-    inline bool stringToTypeDispatch( std::vector<T,Alloc> & v,
-                                       const std::string & s) {
-        auto func = [&](unsigned int i, T n) {
-            v.push_back(n);
-        };
-        return stringToTypeFunctorImpl<-1, T, decltype(func), TypeConverter >(func,s);
-    }
+    return true;
+}
 
-     /** Custom dispatch for container types: std::pair<T> */
-    template <typename TypeConverter, typename T>
-    inline bool stringToTypeDispatch( std::pair<T,T> & v,
-                                       const std::string & s) {
-        auto func = [&](unsigned int i, T n) {
-            i==0? v.first = n: v.second = n;
-        };
-        return stringToTypeFunctorImpl<2, T, decltype(func), TypeConverter >(func,s);
-    }
+/** Standart dispatch for single types: double,floats, int*/
+template <typename TypeConverter, typename T>
+inline bool stringToTypeDispatch( T & t, const std::string & s) {
+    return stringToTypeImpl::convert<T,TypeConverter>(t,s);
+}
+
+/** Custom dispatch for container types: std::set<T> */
+template <typename TypeConverter, typename T, typename Comp, typename Alloc>
+inline bool stringToTypeDispatch( std::set<T,Comp,Alloc> & m,
+                                  const std::string & s) {
+    std::function<void(unsigned int,T)> func = [&](unsigned int i, T n) {
+        m.insert(n);
+    };
+    return stringToTypeFunctorImpl< -1, T, decltype(func),TypeConverter >(func,s);
+}
+/** Custom dispatch for container types: std::vector<T> */
+template <typename TypeConverter, typename T, typename Alloc>
+inline bool stringToTypeDispatch( std::vector<T,Alloc> & v,
+                                  const std::string & s) {
+    auto func = [&](unsigned int i, T n) {
+        v.push_back(n);
+    };
+    return stringToTypeFunctorImpl<-1, T, decltype(func), TypeConverter >(func,s);
+}
+
+/** Custom dispatch for container types: std::pair<T> */
+template <typename TypeConverter, typename T>
+inline bool stringToTypeDispatch( std::pair<T,T> & v,
+                                  const std::string & s) {
+    auto func = [&](unsigned int i, T n) {
+        i==0? v.first = n: v.second = n;
+    };
+    return stringToTypeFunctorImpl<2, T, decltype(func), TypeConverter >(func,s);
+}
 
 };
 
 /**
-* This functor extracts two comma-seperated values (nowhitespaces) , e.g "3,1" and converts it
+* This functor extracts two comma-seperated values (nowhitespaces)
+* e.g "3,1" and converts it into a value T, 3 first half bits , 1 second half bits
 */
 template<typename T, typename THalf>
-struct CommaSeperatedPairBinShift{
+struct CommaSeperatedPairBinShift {
     STATIC_ASSERTM( ( sizeof(T) / sizeof(THalf) == 2) , "THalf should contain half the bytes of T");
     STATIC_ASSERTM( std::is_integral<T>::value && std::is_integral<T>::value, "Needs to be integral")
-    inline static bool convert(T& t, const std::string& s){
+    inline static bool convert(T& t, const std::string& s) {
 //        std::cout << "convert format:" <<std::endl;
-        if(s.empty()) { return false;}
+        if(s.empty()) {
+            return false;
+        }
         t = 0;
         THalf temp;
         unsigned int l = s.size();
 
         // search the comma
         unsigned int i = s.find(',');
-        if(i==0 || i == l-1){ return false;} // ',' is at the beginning!
+        if(i==0 || i == l-1) {
+            return false;   // ',' is at the beginning!
+        }
         //extract first number
         if(!details::stringToTypeImpl::convert<THalf,StdTypeConverter>(temp,s.substr(0,i))) {
             return false;
         }
         //
-        t |= static_cast<T>(temp); t <<= sizeof(THalf)*8;
+        t |= static_cast<T>(temp);
+        t <<= sizeof(THalf)*8;
 
         //exctract second number
         if(!details::stringToTypeImpl::convert<THalf,StdTypeConverter>(temp,s.substr(i+1,std::string::npos))) {
@@ -295,7 +301,7 @@ inline bool stringToVector4( TVector4 & v, const std::string & s) {
 * @brief Convert Type to string if ostream operator << is supported
 */
 template<typename T>
-std::string  typeToString(const T & t){
+std::string  typeToString(const T & t) {
     std::stringstream ss;
     ss << t;
     return ss.str(); // return copy of the string;
@@ -382,24 +388,22 @@ void vec2Vec(const std::vector<PREC> &vec, Eigen::Matrix<PREC,M,1> &V) {
 
 
 template<typename Derived>
-inline bool isFinite(const Eigen::MatrixBase<Derived>& x)
-{
-   return ( (x - x).array() == (x - x).array()).all();
+inline bool isFinite(const Eigen::MatrixBase<Derived>& x) {
+    return ( (x - x).array() == (x - x).array()).all();
 }
 
 
 template<typename Derived>
-inline bool isNaN(const Eigen::MatrixBase<Derived>& x)
-{
-   return ((x.array() == x.array())).all();
+inline bool isNaN(const Eigen::MatrixBase<Derived>& x) {
+    return ((x.array() == x.array())).all();
 }
 
 
 
 
 
-    template<typename... Args>
-    std::string stringFormat(const std::string fmt_str, const Args&... args) {
+template<typename... Args>
+std::string stringFormat(const std::string fmt_str, const Args&... args) {
 
     /** http://stackoverflow.com/a/8098080/293195 */
     //    int final_n, n = ((int)fmt_str.size()) * 2; /* reserve 2 times as much as the length of the fmt_str */
@@ -419,8 +423,8 @@ inline bool isNaN(const Eigen::MatrixBase<Derived>& x)
     //    }
     //    return std::string(formatted.get());
 
-          return tfm::format(fmt_str.c_str(), args...);
-    }
+    return tfm::format(fmt_str.c_str(), args...);
+}
 
 
 };
