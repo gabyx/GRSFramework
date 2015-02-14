@@ -170,8 +170,6 @@ private:
     unsigned int m_nodeCounter = 0; ///< An node counter, starting at 0.
     unsigned int m_edgeCounter = 0; ///< An edge counter, starting at 0.
 
-
-
 };
 
 
