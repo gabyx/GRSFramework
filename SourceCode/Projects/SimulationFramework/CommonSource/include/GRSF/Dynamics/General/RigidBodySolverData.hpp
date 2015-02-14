@@ -36,8 +36,8 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData {
 
     bool m_bInContactGraph; ///< Flag which determines if this body is in the contact graph!
 
-    Vector3    m_I_r_S;       ///< Position (omega) at beginning of timestep, important to save this for timestep update in timestepper!
-    Quaternion m_q_IK;      ///< Quaternion at beginning of timestep, important to save this for timestep update in timestepper!
+    Vector3    m_K_omega_IK_beg;    ///< Angular velocity (omega) at beginning of timestep, important to save this for timestep update in timestepper!
+    Quaternion m_q_IK_beg;          ///< Quaternion at beginning of timestep, important to save this for timestep update in timestepper!
 
     /** Pointers into the right Front BackBuffer for the velocity which get iteratet in the InclusionSolverCONoG
     * The back buffer is the velocity before the prox iteration (over all nodes)

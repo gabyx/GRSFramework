@@ -27,7 +27,7 @@ void ContactGraph<TCombo>::clearGraph() {
 
     // This deletes all nodes, edges
     // cleanup allocated memory
-    deleteNodesAndEdges();
+    GeneralGraph::clearGraph();
 
     m_edgeCounter = 0;
     m_nodeCounter = 0;

@@ -692,7 +692,9 @@ private:
         ar & body->m_mass;
         serializeEigen(ar,body->m_K_Theta_S);
         serializeEigen(ar,body->m_MassMatrix_diag);
-        serializeEigen(ar,body->m_MassMatrixInv_diag);
+        if(Archive::is_loading::value) {
+            body->m_MassMatrixInv_diag = body->m_MassMatrix_diag.array().inverse();
+        }
         serializeEigen(ar,body->m_h_term);
 
         if(body->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
@@ -708,9 +710,11 @@ private:
             LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "There is no SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "! ?");
             serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
 
-            //m_uBegin is initialized when receiving!
+            serializeEigen(ar,body->m_pSolverData->m_q_IK_beg.coeffs());
+
+            //m_K_omega_IK_beg needs to be initialized when receiving!
             if(Archive::is_loading::value) {
-                body->m_pSolverData->m_uBegin = body->m_pSolverData->m_uBuffer.m_back;
+                body->m_pSolverData->m_K_omega_IK_beg = body->m_pSolverData->m_uBuffer.m_back.tail<3>();
             }
 
             ar & body->m_pSolverData->m_t;
@@ -1628,7 +1632,7 @@ public:
 
         // Send grid data
         ar & m_pTopoBuilder->m_aabb_glo;
-        serializeEigen(ar,m_pTopoBuilder->m_settings.m_processDim);
+        serializeEigen(ar,m_pTopoBuilder->m_processDim);
 
         ar & m_pTopoBuilder->m_aligned;
 
