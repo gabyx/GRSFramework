@@ -42,7 +42,9 @@ public:
     using EdgeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType;
 
     using SplitBodyNodeDataType = ContactGraphNodeDataSplitBody;
-    typedef std::unordered_map<RigidBodyIdType, SplitBodyNodeDataType* > SplitBodyNodeDataListType;
+
+    using SplitBodyNodeDataListType = std::unordered_map<RigidBodyIdType, SplitBodyNodeDataType* >;
+    using SplitBodyNodeDataStorageType  = std::vector< SplitBodyNodeDataType>;
 
     enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE, SPLITNODE};
 
@@ -89,13 +91,16 @@ public:
 	//Remote Visitor
     template<typename TNodeVisitor>
 	void applyNodeVisitorSplitBody(TNodeVisitor & vv){
-		for(auto & node : m_splittedNodes){
-          vv.visitNode(*(node.second));
+		for(auto & node : m_splittedNodesStorage){
+          vv.visitNode(node);
 		}
 	}
 
 	//void updateSplitBodyNode(RigidBodyIdType id , RankIdType rank, const VectorUBody & u);
 
+    inline void reserveSplitNodes(unsigned int n){
+        m_splittedNodesStorage.reserve(n);
+    }
 
     std::pair<SplitBodyNodeDataType *, bool> addSplitBodyNode(RigidBodyType * body, const RankIdType & rank);
 
@@ -149,7 +154,8 @@ private:
     NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies (ref to m_nodeMap)
     NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies (ref to m_nodeMap)
 
-    SplitBodyNodeDataListType m_splittedNodes; ///< These are the billateral nodes between the splitted bodies in the contact graph
+    SplitBodyNodeDataListType    m_splittedNodes;        ///< These are the billateral nodes between the splitted bodies in the contact graph
+    SplitBodyNodeDataStorageType m_splittedNodesStorage; ///< Storage for billateral nodes
 
     typename DynamicsSystemType::RigidBodyContainerType  m_remoteBodiesWithContacts; ///< This is our storage of all remote bodies which are in the contact graph
     typename DynamicsSystemType::RigidBodyContainerType  m_localBodiesWithContacts;

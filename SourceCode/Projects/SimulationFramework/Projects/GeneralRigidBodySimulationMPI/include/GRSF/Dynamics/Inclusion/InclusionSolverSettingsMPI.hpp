@@ -20,6 +20,9 @@ struct InclusionSolverSettingsMPI : InclusionSolverSettings
       m_convergenceCheckRatio = 1;
     }
 
+    /** Contact Graph reserve space for split nodes**/
+    unsigned int m_reserveSplitNodes = 2000;
+
     unsigned int m_splitNodeUpdateRatio;       ///< Local iterations per remote billateral constraints updates (splitNodes)
     unsigned int m_convergenceCheckRatio;      ///< Billatreal constraints updates (splitNodes)  per convergence checks
 

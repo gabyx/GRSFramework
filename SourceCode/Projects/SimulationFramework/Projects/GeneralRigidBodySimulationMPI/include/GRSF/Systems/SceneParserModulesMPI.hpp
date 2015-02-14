@@ -27,24 +27,21 @@ public:
         XMLNodeType incSet = sceneSettings.child("MPISettings").child("InclusionSolverSettings");
         CHECK_XMLNODE(incSet,"MPISettings/InclusionSolverSettings does not exist");
         // Process special Inclusion solver settings
-        PREC splitNodeUpdateRatio;
-        if(!Utilities::stringToType(splitNodeUpdateRatio,  incSet.attribute("splitNodeUpdateRatio").value())) {
+
+        if(!Utilities::stringToType(this->m_inclusionSettings->m_splitNodeUpdateRatio,  incSet.attribute("splitNodeUpdateRatio").value())) {
             ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: splitNodeUpdateRatio failed");
         }
-        if(splitNodeUpdateRatio <= 0) {
-            ERRORMSG("---> MPISettings::InclusionSolverSettings: splitNodeUpdateRatio <= 0");
-        }
-
-        PREC convergenceCheckRatio;
-        if(!Utilities::stringToType(convergenceCheckRatio,  incSet.attribute("convergenceCheckRatio").value())) {
+        if(!Utilities::stringToType(this->m_inclusionSettings->m_convergenceCheckRatio,  incSet.attribute("convergenceCheckRatio").value())) {
             ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: convergenceCheckRatio failed");
         }
-        if(convergenceCheckRatio <= 0) {
-            ERRORMSG("---> MPISettings::InclusionSolverSettings: convergenceCheckRatio <= 0");
+
+        XMLAttributeType att = incSet.attribute("reserveSplitNodes");
+        if(att) {
+            if(!Utilities::stringToType(this->m_inclusionSettings->m_reserveSplitNodes, att.value())) {
+                ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: m_reserveSplitNodes failed");
+            }
         }
 
-        this->m_inclusionSettings->m_splitNodeUpdateRatio = splitNodeUpdateRatio;
-        this->m_inclusionSettings->m_convergenceCheckRatio = convergenceCheckRatio;
 
         LOGSCLEVEL1(this->m_pSimulationLog, "==================================================================="<<std::endl;)
     }

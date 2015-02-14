@@ -25,9 +25,7 @@ void ContactGraph<TCombo>::setLog(Logging::Log * solverLog) {
 template<typename TCombo>
 void ContactGraph<TCombo>::clearGraph() {
 
-    // This deletes all nodes, edges
-    // cleanup allocated memory
-    deleteNodesAndEdges();
+    GeneralGraph::clearGraph();
 
     m_edgeCounter = 0;
     m_nodeCounter = 0;
@@ -39,9 +37,7 @@ void ContactGraph<TCombo>::clearGraph() {
     m_localBodiesWithContacts.clear();
     m_remoteBodiesWithContacts.clear();
 
-    for(auto & n : m_splittedNodes) {
-        delete (n.second);
-    }
+    m_splittedNodesStorage.clear();
     m_splittedNodes.clear();
 
     m_usedContactModels = 0;
@@ -67,7 +63,7 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
                  <<RigidBodyId::getBodyIdString(pCollData->m_pBody1->m_id) << " and id2: " <<RigidBodyId::getBodyIdString(pCollData->m_pBody2->m_id) )
 
     // add the pNodeData to the node list
-    NodeType * addedNode = new NodeType(m_nodeCounter);
+    NodeType * addedNode = GeneralGraph::addNode(m_nodeCounter);
     //Add collision data
     addedNode->m_nodeData.m_pCollData = pCollData;
 
@@ -195,15 +191,17 @@ void ContactGraph<TCombo>::initNodeSimBody(NodeType * pNode, RigidBodyType * pBo
 
 
 template<typename TCombo>
-std::pair<typename ContactGraph<TCombo>::SplitBodyNodeDataType *, bool> ContactGraph<TCombo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & rank) {
+std::pair<typename ContactGraph<TCombo>::SplitBodyNodeDataType *, bool>
+ContactGraph<TCombo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & rank) {
 
     auto pairRes = m_splittedNodes.insert(
                        SplitBodyNodeDataListType::value_type(body->m_id, (SplitBodyNodeDataType*) nullptr )
                    );
 
     if(pairRes.second) {
-        //if insered set the new pointer
-        pairRes.first->second = new SplitBodyNodeDataType(body);
+        //if inserted set the new pointer
+        m_splittedNodesStorage.emplace_back(body);
+        pairRes.first->second = &m_splittedNodesStorage.back();
     }
 
     LOGASSERTMSG(pairRes.first->second,m_pSolverLog, "SplitBodyNode pointer of body " << RigidBodyId::getBodyIdString(body->m_id) << " is zero!")
