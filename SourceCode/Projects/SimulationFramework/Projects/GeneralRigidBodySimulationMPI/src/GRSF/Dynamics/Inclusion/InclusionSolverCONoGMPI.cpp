@@ -144,8 +144,12 @@ void InclusionSolverCONoGMPI::reset() {
     resetTopology();
 
     // Reserve Contacts (nodes and edges)
+    LOG(m_pSimulationLog, "reserve nodes: " << m_settings.m_reserveContacts << std::endl;)
     m_pContactGraph->reserveNodes(m_settings.m_reserveContacts);
+    LOG(m_pSimulationLog, "reserve splitnodes: " << m_settings.m_reserveSplitNodes << std::endl;)
     m_pContactGraph->reserveSplitNodes(m_settings.m_reserveSplitNodes);
+     LOG(m_pSimulationLog, "reserved nodes!!" << std::endl;)
+
 }
 
 void InclusionSolverCONoGMPI::resetForNextTimestep() {
