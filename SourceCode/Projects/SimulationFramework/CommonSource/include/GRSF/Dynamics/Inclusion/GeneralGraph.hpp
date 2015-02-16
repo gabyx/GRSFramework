@@ -139,7 +139,10 @@ public:
         m_nodes.clear();
         m_edges.clear();
 
-        m_nodesStorage.clear(); // a clever implemetation of the standart should only give free the memory!
+        // a clever implemetation of the standart should only give free the memory!
+        // since we have nodedata class which itself allocates memory dynamically (eigen)
+        // clear() calls the deconstructor and
+        m_nodesStorage.clear();
         m_edgesStorage.clear();
     }
 
@@ -185,16 +188,14 @@ public:
 
     template<typename TNodeVisitor>
     void applyNodeVisitor(TNodeVisitor & vv) {
-        for(auto curr_node = m_nodes.begin(); curr_node != m_nodes.end(); curr_node++)
-            // (*(*curr_node)).template acceptVisitor<TNodeVisitor>(vv);
-            vv.visitNode(*(*curr_node));
+        for(auto & curr_node : m_nodes)
+            vv.visitNode(*curr_node);
     }
 
     template<typename TEdgeVisitor>
     void applyEdgeVisitor(TEdgeVisitor & hev) {
-        for(auto curr_he = m_edges.begin(); curr_he != m_edges.end(); curr_he++)
-            // (*(*curr_he)).template acceptVisitor<TEdgeVisitor>(hev);
-            hev.visitEdge(*(*curr_he));
+        for(auto & curr_he : m_edges)
+            hev.visitEdge(*curr_he);
     }
 
     void shuffleNodesUniformly(const unsigned int loops) {

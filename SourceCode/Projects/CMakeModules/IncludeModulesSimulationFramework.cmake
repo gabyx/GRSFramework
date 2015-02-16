@@ -43,7 +43,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionFunctions.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Collider.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactTag.hpp
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactPercussion.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/AABB.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/Ray.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
@@ -60,6 +59,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/GeneralGraph.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/PercussionPool.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactPercussion.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverNT.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCO.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp
@@ -184,7 +184,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionFunctions.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Collider.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactTag.hpp
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactPercussion.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/AABB.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/Ray.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
@@ -199,6 +198,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphNodeData.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/GeneralGraph.hpp
+        #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactPercussion.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/PercussionPool.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverNT.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCO.hpp
@@ -320,7 +320,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionFunctions.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Collider.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactTag.hpp
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactPercussion.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/AABB.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/Ray.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
@@ -335,6 +334,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphNodeData.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/GeneralGraph.hpp
+        #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactPercussion.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/PercussionPool.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverNT.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCO.hpp
@@ -466,7 +466,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionFunctions.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Collider.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactTag.hpp
-        #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactPercussion.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/AABB.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/Ray.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
@@ -483,6 +482,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         ##${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/GeneralGraph.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/PercussionPool.hpp
+        #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactPercussion.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverNT.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCO.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp

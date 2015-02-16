@@ -43,7 +43,7 @@ public:
 
     using SplitBodyNodeDataType = ContactGraphNodeDataSplitBody;
 
-    using SplitBodyNodeDataListType = std::unordered_map<RigidBodyIdType, SplitBodyNodeDataType* >;
+    using SplitBodyNodeDataMapType = std::unordered_map<RigidBodyIdType, SplitBodyNodeDataType* >;
     using SplitBodyNodeDataStorageType  = std::vector< SplitBodyNodeDataType>;
 
     enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE, SPLITNODE};
@@ -96,8 +96,6 @@ public:
 		}
 	}
 
-	//void updateSplitBodyNode(RigidBodyIdType id , RankIdType rank, const VectorUBody & u);
-
     inline void reserveSplitNodes(unsigned int n){
         m_splittedNodesStorage.reserve(n);
     }
@@ -106,7 +104,7 @@ public:
 
     inline NodeListType & getLocalNodeListRef(){return m_localNodes;}
     inline NodeListType & getRemoteNodeListRef(){return m_remoteNodes;}
-    inline SplitBodyNodeDataListType & getSplitBodyNodeListRef(){return m_splittedNodes;}
+    inline SplitBodyNodeDataMapType & getSplitBodyNodeListRef(){return m_splittedNodes;}
 
     /**
     * @brief Return true if the current contact problem is uncoupled from other processes
@@ -154,7 +152,7 @@ private:
     NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies (ref to m_nodeMap)
     NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies (ref to m_nodeMap)
 
-    SplitBodyNodeDataListType    m_splittedNodes;        ///< These are the billateral nodes between the splitted bodies in the contact graph
+    SplitBodyNodeDataMapType    m_splittedNodes;        ///< These are the billateral nodes between the splitted bodies in the contact graph
     SplitBodyNodeDataStorageType m_splittedNodesStorage; ///< Storage for billateral nodes
 
     typename DynamicsSystemType::RigidBodyContainerType  m_remoteBodiesWithContacts; ///< This is our storage of all remote bodies which are in the contact graph

@@ -78,12 +78,10 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
             //set the node color
             addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
             m_remoteNodes.push_back(addedNode); // Add to remote list
-            this->m_nodes.push_back(addedNode); // Add to general list
         }else{
             //Remote-Remote contact
             addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::REMOTENODE);
             m_remoteNodes.push_back(addedNode); // Add to remote list
-            this->m_nodes.push_back(addedNode); // Add to general list
         }
 
     } else {
@@ -91,7 +89,6 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
         //set the node color
         addedNode->m_nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::LOCALNODE);
         m_localNodes.push_back(addedNode);
-        this->m_nodes.push_back(addedNode);
     }
 
 
@@ -194,8 +191,8 @@ template<typename TCombo>
 std::pair<typename ContactGraph<TCombo>::SplitBodyNodeDataType *, bool>
 ContactGraph<TCombo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & rank) {
 
-    auto pairRes = m_splittedNodes.insert(
-                       SplitBodyNodeDataListType::value_type(body->m_id, (SplitBodyNodeDataType*) nullptr )
+    auto pairRes = m_splittedNodes.emplace(
+                       SplitBodyNodeDataMapType::value_type(body->m_id, (SplitBodyNodeDataType*) nullptr )
                    );
 
     if(pairRes.second) {
