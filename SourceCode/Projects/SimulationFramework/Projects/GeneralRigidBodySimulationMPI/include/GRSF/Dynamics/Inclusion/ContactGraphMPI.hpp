@@ -75,20 +75,20 @@ public:
         return (nodeData.m_pCollData->m_pBody1 == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
     }
 
-    //Local Visitor
+    /**Local Visitor*/
     template<typename TNodeVisitor>
 	void applyNodeVisitorLocal(TNodeVisitor & vv){
 		for(auto & node : m_localNodes)
 			vv.visitNode(*(node));
 	}
-	//Remote Visitor
+	/** RemoteNode Visitor*/
     template<typename TNodeVisitor>
 	void applyNodeVisitorRemote(TNodeVisitor & vv){
 		for(auto & node : m_remoteNodes)
 			vv.visitNode(*(node));
 	}
 
-	//Remote Visitor
+	/**SplitNode Visitor*/
     template<typename TNodeVisitor>
 	void applyNodeVisitorSplitBody(TNodeVisitor & vv){
 		for(auto & node : m_splittedNodesStorage){
@@ -152,7 +152,7 @@ private:
     NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies (ref to m_nodeMap)
     NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies (ref to m_nodeMap)
 
-    SplitBodyNodeDataMapType    m_splittedNodes;        ///< These are the billateral nodes between the splitted bodies in the contact graph
+    SplitBodyNodeDataMapType     m_splittedNodes;        ///< These are the billateral nodes between the splitted bodies in the contact graph
     SplitBodyNodeDataStorageType m_splittedNodesStorage; ///< Storage for billateral nodes
 
     typename DynamicsSystemType::RigidBodyContainerType  m_remoteBodiesWithContacts; ///< This is our storage of all remote bodies which are in the contact graph
