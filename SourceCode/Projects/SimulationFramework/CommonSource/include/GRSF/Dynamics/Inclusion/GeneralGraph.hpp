@@ -112,9 +112,6 @@ protected:
     std::vector<Node<NodeDataType, EdgeDataType> *> m_nodes;
     std::vector<Edge<NodeDataType, EdgeDataType> *> m_edges;
 
-    std::vector<Node<NodeDataType, EdgeDataType> > m_nodesStorage;
-    std::vector<Edge<NodeDataType, EdgeDataType> > m_edgesStorage;
-
 public:
     using NodeType = Node<NodeDataType, EdgeDataType>;
     using EdgeType = Edge<NodeDataType, EdgeDataType>;
@@ -131,42 +128,40 @@ public:
     void shrinkToFit(){
         m_nodes.shrink_to_fit();
         m_edges.shrink_to_fit();
-        m_nodesStorage.shrink_to_fit();
-        m_edgesStorage.shrink_to_fit();
     }
 
     void clearGraph() {
+
+        for(auto & p : m_nodes){
+            delete p;
+        }
         m_nodes.clear();
+
+        for(auto & p : m_edges){
+            delete p;
+        }
         m_edges.clear();
 
-        // a clever implemetation of the standart should only give free the memory!
-        // since we have nodedata class which itself allocates memory dynamically (eigen)
-        // clear() calls the deconstructor and
-        m_nodesStorage.clear();
-        m_edgesStorage.clear();
+
     }
 
     void reserveNodes(unsigned int n){
         m_nodes.reserve(n);
-        m_nodesStorage.reserve(n);
     }
 
     void reserveEdges(unsigned int n){
         m_edges.reserve(n);
-        m_edgesStorage.reserve(n);
     }
 
     template<typename... T>
     NodeType * addNode( T &&... t) {
-        m_nodesStorage.emplace_back(std::forward<T>(t)...);
-        auto * p = &m_nodesStorage.back();
+        NodeType * p = new NodeType(std::forward<T>(t)...);
         m_nodes.emplace_back(p);
         return p;
     }
     template<typename... T>
     EdgeType * addEdge( T &&... t) {
-        m_edgesStorage.emplace_back(std::forward<T>(t)...);
-        auto * p = &m_edgesStorage.back();
+        EdgeType * p = new EdgeType(std::forward<T>(t)...);
         m_edges.emplace_back(p);
         return p;
     }
