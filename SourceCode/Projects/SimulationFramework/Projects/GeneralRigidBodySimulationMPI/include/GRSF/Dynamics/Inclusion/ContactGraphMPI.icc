@@ -25,8 +25,6 @@ void ContactGraph<TCombo>::setLog(Logging::Log * solverLog) {
 template<typename TCombo>
 void ContactGraph<TCombo>::clearGraph() {
 
-    GeneralGraph::clearGraph();
-
     m_edgeCounter = 0;
     m_nodeCounter = 0;
 
@@ -37,11 +35,16 @@ void ContactGraph<TCombo>::clearGraph() {
     m_localBodiesWithContacts.clear();
     m_remoteBodiesWithContacts.clear();
 
-    m_splittedNodesStorage.clear();
+
+    for(auto & p : m_splittedNodes){
+        delete p.second;
+    }
     m_splittedNodes.clear();
 
     m_usedContactModels = 0;
     m_maxResidual = 0;
+
+    GeneralGraph::clearGraph();
 
 }
 template<typename TCombo>
@@ -197,8 +200,7 @@ ContactGraph<TCombo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & 
 
     if(pairRes.second) {
         //if inserted set the new pointer
-        m_splittedNodesStorage.emplace_back(body);
-        pairRes.first->second = &m_splittedNodesStorage.back();
+        pairRes.first->second = new SplitBodyNodeDataType(body);
     }
 
     LOGASSERTMSG(pairRes.first->second,m_pSolverLog, "SplitBodyNode pointer of body " << RigidBodyId::getBodyIdString(body->m_id) << " is zero!")
