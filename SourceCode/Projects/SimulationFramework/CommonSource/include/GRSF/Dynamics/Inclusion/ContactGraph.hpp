@@ -329,8 +329,8 @@ public:
         }
     }
     #else // No residual sorted iteration!
-    for(auto curr_node = this->m_nodes.begin(); curr_node != this->m_nodes.end(); curr_node++){
-        vv.visitNode(*(*curr_node));
+    for(auto & curr_node : m_nodes){
+        vv.visitNode(*curr_node);
     }
     #endif // RESIDUAL_SORTED_ITERATION
 
