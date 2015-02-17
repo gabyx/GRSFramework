@@ -131,7 +131,7 @@ void ContactGraph<TCombo>::initNodeSimBody(NodeType * pNode, RigidBodyType * pBo
             m_pNbDataMap->getNeighbourData(pBody->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pBody);
             // if this body is already added it does nothing!
         }else{
-            ASSERTMSG(false, "Somthing wrong with node color!")
+            ERRORMSG("Somthing wrong with node color!")
         }
 
     }else{
@@ -238,6 +238,6 @@ void ContactGraph<TCombo>::setContactModel(NodeDataType & nodeData) {
             nodeData.m_eps(2) = nodeData.m_eps(1);
 
         } else {
-            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
+            ERRORMSG(" You specified a contact model which has not been implemented so far!");
         }
 }
