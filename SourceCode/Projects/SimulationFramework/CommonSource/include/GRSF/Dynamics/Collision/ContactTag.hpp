@@ -6,7 +6,7 @@
 #include <GRSF/Common/TypeDefs.hpp>
 #include "GRSF/Common/AssertionDebug.hpp"
 
-#include "GRSF/Common/TupleHash.hpp"
+#include "GRSF/Common/TupleHelper.hpp"
 
 #include "GRSF/Dynamics/General/RigidBodyId.hpp"
 
@@ -58,7 +58,7 @@ private:
 class ContactTagHash : std::unary_function<ContactTag, std::size_t>{
 public:
     std::size_t operator()(ContactTag const& c) const {
-        TupleHash::hash<ContactTag::ContactTagTuple> hasher;
+        TupleHash<ContactTag::ContactTagTuple> hasher;
         return hasher(c.m_tag);
     }
 };

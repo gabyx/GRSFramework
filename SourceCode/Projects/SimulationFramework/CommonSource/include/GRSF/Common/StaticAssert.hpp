@@ -29,7 +29,7 @@
 #else
 
     #define STATIC_ASSERT( B ) BOOST_STATIC_ASSERT( (B) );
-    #define STATIC_ASSERTM( B ,COMMENT) STATIC_ASSERT( (B) );
+    #define STATIC_ASSERTM( B ,COMMENT) BOOST_STATIC_ASSERT_MSG( (B), COMMENT );
 
 #endif
 
