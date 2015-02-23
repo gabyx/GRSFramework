@@ -1491,7 +1491,7 @@ public:
             boost::filesystem::path relpath = initCond.attribute("file").value();
 
 
-            bool readVelocities = false;
+            bool readVelocities = true;
             auto att = initCond.attribute("readVelocities");
             if(att){
                 if(!Utilities::stringToType(readVelocities, att.value())) {
