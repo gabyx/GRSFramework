@@ -12,7 +12,7 @@
 
 #include "GRSF/Dynamics/Inclusion/ContactParameter.hpp"
 
-#include "GRSF/Common/TupleHash.hpp"
+#include "GRSF/Common/TupleHelper.hpp"
 
 #include RigidBody_INCLUDE_FILE
 
@@ -47,7 +47,7 @@ private:
 class ContactParameterTagHash : std::unary_function<ContactParameterTag, std::size_t> {
 public:
     std::size_t operator()(ContactParameterTag const& c) const{
-            TupleHash::hash<typename ContactParameterTag::Tuple> hasher;
+            TupleHash<typename ContactParameterTag::Tuple> hasher;
             return hasher(c.m_tag);
     }
 };

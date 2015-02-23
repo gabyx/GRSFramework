@@ -273,7 +273,7 @@ private:
               >
     void read_impl(  C & states, double & time);
 
-    template<bool skipAddBytes = true>
+    template<bool readVelocity = true, bool skipAddBytes = true>
     inline void readBodyState( RigidBodyState * state);
 
 
@@ -535,7 +535,12 @@ bool MultiBodySimFile::readSpecific_impl(C & states,
             // State found
             if(pState != nullptr ) {
                 // Read in state:
-                readBodyState<>(pState);
+
+                if(readVel){
+                    readBodyState<true>(pState);
+                }else{
+                    readBodyState<false>(pState);
+                }
 
                 updatedStates.insert(id);
 
@@ -592,12 +597,12 @@ void MultiBodySimFile::read_impl(  C & states, double &time) {
 
 }
 
-template<bool skipAddBytes>
+template<bool readVelocity, bool skipAddBytes>
 void MultiBodySimFile::readBodyState( RigidBodyState * s) {
 
     IOHelpers::readBinary(m_file_stream,  s->m_q );
     // std::cout<< "MSIMFILE q: " << s->m_q.transpose()  << std::endl;
-    if(m_readVelocities) {
+    if(readVelocity) {
         IOHelpers::readBinary(m_file_stream,  s->m_u );
         //  std::cout<< "MSIMFILE u: " << s->m_u.transpose()  << std::endl;
     } else {
@@ -612,7 +617,7 @@ void MultiBodySimFile::readBodyState( RigidBodyState * s) {
 
 void MultiBodySimFile::readBodyStateAdd( RigidBodyStateAdd * s) {
 
-    readBodyState<false>(s);
+    readBodyState<true,false>(s);
 
     s->m_data = AdditionalBodyData::createNew(s->m_data,m_additionalBytesPerBodyType);
 
