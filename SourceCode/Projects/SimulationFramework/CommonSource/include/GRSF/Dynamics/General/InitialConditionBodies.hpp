@@ -83,8 +83,6 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
 
     auto diffId = startId;
 
-
-
     auto stateIt = bodyStates.begin();
     for(auto & b : bodyDataCont) {
         ASSERTMSG(RigidBodyId::getGroupNr(b.m_id) == RigidBodyId::getGroupNr(startId),"Wrong group")

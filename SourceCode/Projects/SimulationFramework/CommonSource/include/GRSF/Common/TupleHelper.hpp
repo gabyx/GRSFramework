@@ -59,20 +59,22 @@ struct TupleVisit{
     template<typename TupleType,
              unsigned int Idx = std::tuple_size<TupleType>::value -1 ,
              typename Visitor,
-             typename std::enable_if< (Idx > 0), void*>::type = nullptr
+             typename std::enable_if< (Idx > 0), void*>::type = nullptr,
+             typename std::enable_if< (std::tuple_size<TupleType>::value != 0), void*>::type = nullptr
                      >
-    static void dispatch(Visitor & v, TupleType & t) {
+    static void dispatch(Visitor && v, TupleType & t) {
         auto & c = std::get<Idx>(t);
         v(c);
-        TupleVisit::dispatch<TupleType,Idx-1>(v,t);
+        TupleVisit::dispatch<TupleType,Idx-1>(std::forward<Visitor>(v),t);
     }
 
     template<typename TupleType,
-             unsigned int Idx,
+             unsigned int Idx = std::tuple_size<TupleType>::value -1,
              typename Visitor,
-             typename std::enable_if< Idx == 0, void*>::type = nullptr
+             typename std::enable_if< Idx == 0, void*>::type = nullptr,
+             typename std::enable_if< (std::tuple_size<TupleType>::value != 0), void*>::type = nullptr
              >
-    static void dispatch(Visitor & v, TupleType & t) {
+    static void dispatch(Visitor && v, TupleType & t) {
         auto & c = std::get<Idx>(t);
         v(c);
     }

@@ -134,7 +134,8 @@ protected:
 
     // Different visitors for the various SOR implementations
     // For SOR_FULL, SOR_CONTACT
-    SorProxStepNodeVisitor<ContactGraphType> *           m_pSorProxStepNodeVisitor = nullptr;
+    ContactSorProxStepNodeVisitor<ContactGraphType> *           m_pContactSorProxStepNodeVisitor = nullptr;
+    FullSorProxStepNodeVisitor<ContactGraphType> *       m_pFullSorProxStepNodeVisitor = nullptr;
     // For SOR_NORMAL_TANGENTIAL
     NormalSorProxStepNodeVisitor<ContactGraphType>*      m_pNormalSorProxStepNodeVisitor  = nullptr;
     TangentialSorProxStepNodeVisitor<ContactGraphType>*  m_pTangentialSorProxStepNodeVisitor  = nullptr;

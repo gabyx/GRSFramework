@@ -75,13 +75,14 @@ protected:
     typename DynamicsSystemType::RigidBodyStaticContainerType & m_staticBodies;
 
     // General CPU Iteration visitors (only SOR Prox on velocity level)
-    using ContactGraphType = ContactGraphIteration;
+    using ContactGraphType = ContactGraph;
     ContactGraphType m_contactGraph;
     void initContactGraphForIteration(PREC alpha);
 
     // Different visitors for the various SOR implementations
     // For SOR_FULL, SOR_CONTACT
-    SorProxStepNodeVisitor<ContactGraphType> *           m_pSorProxStepNodeVisitor = nullptr;
+    ContactSorProxStepNodeVisitor<ContactGraphType> *    m_pContactSorProxStepNodeVisitor = nullptr;
+    FullSorProxStepNodeVisitor<ContactGraphType> *       m_pFullSorProxStepNodeVisitor = nullptr;
     // For SOR_NORMAL_TANGENTIAL
     NormalSorProxStepNodeVisitor<ContactGraphType>*      m_pNormalSorProxStepNodeVisitor  = nullptr;
     TangentialSorProxStepNodeVisitor<ContactGraphType>*  m_pTangentialSorProxStepNodeVisitor  = nullptr;
