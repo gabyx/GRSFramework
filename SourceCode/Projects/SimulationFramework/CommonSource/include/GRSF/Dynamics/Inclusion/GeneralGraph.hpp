@@ -70,10 +70,8 @@ struct GraphTraitsSymmetric {
     using toLinearIdx = metaAdd::toLinearIdxSym<R,C,N>;
 
     template<typename TTNodeData>
-    using getNodeDataIdx = meta::eval<metaAdd::getIdx<TTNodeData,NodeDataTypes> >;
+    using getNodeDataIdx = meta::eval<meta::find_index<TTNodeData,NodeDataTypes> >;
 
-    template<typename TTEdgeData>
-    using getEdgeDataIdx = meta::eval<metaAdd::getIdx<TTEdgeData,EdgeDataTypes>>;
 
     /** build map , node data to all output edge data types (without void) */
     template<typename NodeData>
@@ -82,7 +80,7 @@ struct GraphTraitsSymmetric {
         meta::transform<
         meta::as_list<meta::make_index_sequence< nNodes >>,
         meta::compose<
-        meta::bind_back<meta::quote<meta::list_element>,  EdgeDataTypesOrig>,
+        meta::bind_back<meta::quote<meta::at>,  EdgeDataTypesOrig>,
         meta::bind_back<meta::bind_front<meta::quote<toLinearIdx>, getNodeDataIdx<NodeData> >, meta::size_t<nNodes> >
         >
         >>;
@@ -94,7 +92,7 @@ struct GraphTraitsSymmetric {
         meta::transform<
         meta::as_list<meta::make_index_sequence< nNodes >>,
         meta::compose<
-        meta::bind_back<meta::quote<meta::list_element>,  EdgeDataTypesOrig>,
+        meta::bind_back<meta::quote<meta::at>,  EdgeDataTypesOrig>,
         meta::bind_back<meta::quote<toLinearIdx>,  getNodeDataIdx<NodeData> , meta::size_t<nNodes> >
         >
         >>;
@@ -136,7 +134,7 @@ struct GraphTraitsSymmetric {
 
         // macro for boost repeat (z= repetition dimension?? = unused,  N = counter, data = unused )
 #define SWITCH_CASE( z, N, data ) \
-            case N: v( *static_cast< meta::list_element< meta::size_t<N>,Types> * >(p)); break;
+            case N: v( *static_cast< meta::at< meta::size_t<N>,Types> * >(p)); break;
 
 #define GENERATE_SWITCH(N) \
             template<typename Types> \
@@ -231,8 +229,10 @@ public:
 
     using EdgeDataType  = TEdgeData;
 
-    Edge(const std::size_t & i)
-        : EdgeBase<Traits>( metaAdd::getIdx<EdgeDataType, typename Traits::EdgeDataTypes >::value ), m_id(i)
+    template<typename... T>
+    Edge(const std::size_t & i, T &&... t)
+        : EdgeBase<Traits>( meta::find_index<EdgeDataType, typename Traits::EdgeDataTypes >::value )
+        ,  m_data(std::forward<T>(t)...), m_id(i)
     {}
 
     inline std::size_t getId(){ return m_id;}
@@ -306,31 +306,31 @@ public:
 public:
     inline void clearConnections() {
         ClearConnections c;
-        TupleVisit::dispatch(c,m_edgesIn);
-        TupleVisit::dispatch(c,m_edgesOut);
+        TupleVisit::visit(c,m_edgesIn);
+        TupleVisit::visit(c,m_edgesOut);
     }
 
     template<typename T>
     void addEdgeIn(T * e) {
-        using Idx = metaAdd::getIdx<typename T::EdgeDataType, InEdgeDataTypes>;
+        using Idx = meta::find_index<typename T::EdgeDataType, InEdgeDataTypes>;
         std::get< Idx::type::value >(m_edgesIn).push_back(e);
     }
 
     template<typename T>
     void addEdgeOut(T * e) {
-        using Idx = metaAdd::getIdx<typename T::EdgeDataType, OutEdgeDataTypes>;
+        using Idx = meta::find_index<typename T::EdgeDataType, OutEdgeDataTypes>;
         std::get< Idx::type::value >(m_edgesOut).push_back(e);
     }
 
     template<typename Visitor>
     void visitInEdges(Visitor && v) {
         EdgeDispatcher<Visitor> e( std::forward<Visitor>(v));
-        TupleVisit::dispatch(e,m_edgesIn);
+        TupleVisit::visit(e,m_edgesIn);
     }
     template<typename Visitor>
     void visitOutEdges(Visitor && v) {
         EdgeDispatcher<Visitor> e( std::forward<Visitor>(v) ) ;
-        TupleVisit::dispatch(e,m_edgesOut);
+        TupleVisit::visit(e,m_edgesOut);
     }
 
 private:
@@ -366,8 +366,10 @@ public:
     using NodeDataType = TNodeData;
     using Traits = TTraits;
 
-    Node(const std::size_t & i):
-        NodeBase<Traits>( metaAdd::getIdx<NodeDataType, typename Traits::NodeDataTypes >::value ), m_id(i)
+    template<typename... T>
+    Node(const std::size_t & i, T &&... t)
+    : NodeBase<Traits>( meta::find_index<NodeDataType, typename Traits::NodeDataTypes >::value )
+    , m_data(std::forward<T>(t)...), m_id(i)
     {}
 
     inline std::size_t getId(){ return m_id;}
@@ -410,9 +412,9 @@ public:
                                                                             meta::quote<EdgeStorageType> >;
 
     template<typename TNodeData>
-    using toNodeStorageType  =  meta::eval<std::tuple_element< metaAdd::getIdx<TNodeData,NodeDataTypes>::value , NodeStorageTuple  >>;
+    using toNodeStorageType  =  meta::eval<std::tuple_element< meta::find_index<TNodeData,NodeDataTypes>::value , NodeStorageTuple  >>;
     template<typename TEdgeData>
-    using toEdgeStorageType  =  meta::eval<std::tuple_element< metaAdd::getIdx<TEdgeData,EdgeDataTypes>::value , EdgeStorageTuple  >>;
+    using toEdgeStorageType  =  meta::eval<std::tuple_element< meta::find_index<TEdgeData,EdgeDataTypes>::value , EdgeStorageTuple  >>;
 
 protected:
 
@@ -450,13 +452,13 @@ protected:
     /** Get reference of the storage for a node type N */
     template<typename TNodeData>
     auto getNodeStorageRef() -> toNodeStorageType<TNodeData> &  {
-        return std::get< metaAdd::getIdx< TNodeData, NodeDataTypes >::value >(m_nodeStorage); // get container
+        return std::get< meta::find_index< TNodeData, NodeDataTypes >::value >(m_nodeStorage); // get container
     }
 
     /** Get reference of the storage for a node type N */
     template<typename TEdgeData >
     auto getEdgeStorageRef() -> toEdgeStorageType<TEdgeData> &  {
-        return std::get< metaAdd::getIdx< TEdgeData, EdgeDataTypes >::value >(m_edgeStorage); // get container
+        return std::get< meta::find_index< TEdgeData, EdgeDataTypes >::value >(m_edgeStorage); // get container
     }
 
 
@@ -465,7 +467,7 @@ public:
     ~GeneralGraph() {}
 
     void clear() {
-        TupleVisit::dispatch(ClearStorages{},m_nodeStorage);
+        TupleVisit::visit(ClearStorages{},m_nodeStorage);
     }
 
     template<typename TNodeData>
@@ -479,11 +481,11 @@ public:
     }
 
     void deleteNodes() {
-        TupleVisit::dispatch(DeleteStorage{},m_nodeStorage);
+        TupleVisit::visit(DeleteStorage{},m_nodeStorage);
     }
 
     void deleteEdges() {
-        TupleVisit::dispatch(DeleteStorage{},m_edgeStorage);
+        TupleVisit::visit(DeleteStorage{},m_edgeStorage);
     }
 
     void deleteAll() {
@@ -507,12 +509,11 @@ public:
     }
 
     /** Visit all nodes */
-    template<typename Visitor>
+    template<typename... NodeDataType, typename Visitor>
     void visitNodes(Visitor && v) {
         NodeDispatcher<Visitor> n( std::forward<Visitor>(v) );
-        TupleVisit::dispatch(n,m_nodeStorage);
+        TupleVisit::visit< toNodeStorageType<NodeDataType>... >(n,m_nodeStorage);
     }
-
 
     template<typename TNodeData>
     void shuffleNodesUniformly() {

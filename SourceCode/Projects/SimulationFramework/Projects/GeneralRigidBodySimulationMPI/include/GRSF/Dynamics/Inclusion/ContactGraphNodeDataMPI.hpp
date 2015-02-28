@@ -12,6 +12,7 @@
 
 #include "GRSF/Dynamics/Inclusion/ContactGraphNodeData.hpp"
 
+
 class ContactGraphNodeDataSplitBody {
 public:
 
@@ -19,15 +20,29 @@ public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    ContactGraphNodeDataSplitBody(RigidBodyType * body): m_pBody(body),m_nConstraints(0) {
+    ContactGraphNodeDataSplitBody(){};
+    ~ContactGraphNodeDataSplitBody(){};
 
-    };
 
-    ~ContactGraphNodeDataSplitBody() {};
+    inline void initialize(RigidBodyType * body){
+        m_pBody = body;
+        m_nConstraints = 0;
+        m_partRanks.clear();
+    }
+
+    inline void initData(){
+        auto mult = getMultiplicity();
+        m_multiplicityWeights.setConstant(mult,1.0/mult);
+
+        m_uBack.setZero(NDOFuBody*mult);
+        m_uFront.setZero(NDOFuBody*mult);
+        m_deltaLambda.setZero( NDOFuBody * m_nConstraints);
+        m_gamma.setZero(m_nConstraints*NDOFuBody);
+    }
 
     bool addRank(const RankIdType & rank) {
 
-        auto pairRes = m_partRanks.insert( std::make_pair(rank,  Flags(m_partRanks.size()+1) ) );
+        auto pairRes = m_partRanks.emplace( rank,  Flags(m_partRanks.size()+1) );
 
         m_nConstraints +=1; //Increase lambda by 1 (one more constraint)
 
@@ -47,6 +62,7 @@ public:
         mult = getMultiplicity();
         auto it = m_partRanks.find(rank);
         ASSERTMSG(it!=m_partRanks.end(), "Requested a weight for a non participating rank "<< rank << std::endl);
+        ASSERTMSG(m_multiplicityWeights.size()>0,"FUCK")
         multWeight = m_multiplicityWeights(it->second.m_splitBodyIdx); // First weight belongs to local owner
     }
 
@@ -76,7 +92,7 @@ public:
     VectorDyn m_multiplicityWeights;
 
 
-    RigidBodyType * m_pBody;
+    RigidBodyType * m_pBody = nullptr;
 
     /** These values get set from all remotes*/
     VectorDyn m_uBack;  ///                            Local Velocity-------*

@@ -109,7 +109,7 @@ void InclusionSolverCONoGMPI::reset() {
 
     //Add a delegate function in the Contact Graph, which add the new Contact given by the CollisionSolver
     m_pCollisionSolver->addContactDelegate(
-        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode>(m_pContactGraph)
+        CollisionSolverType::ContactDelegateType::from_method< ContactGraphType,  &ContactGraphType::addNode<false> >(m_pContactGraph)
     );
 
 
@@ -152,8 +152,8 @@ void InclusionSolverCONoGMPI::reset() {
     resetTopology();
 
     // Reserve Contacts (nodes and edges)
-    m_pContactGraph->reserveNodes(m_settings.m_reserveContacts);
-    m_pContactGraph->reserveSplitNodes(m_settings.m_reserveSplitNodes);
+    m_pContactGraph->reserveNodes(m_settings.m_reserveContacts, m_settings.m_reserveSplitNodes);
+
 }
 
 void InclusionSolverCONoGMPI::resetForNextTimestep() {
@@ -340,12 +340,8 @@ void InclusionSolverCONoGMPI::initContactGraphForIteration(PREC alpha) {
 
 
     // Init local nodes
-    if(m_nLocalNodes){
-        m_pContactGraph->applyNodeVisitorLocal(*m_pSorProxInitNodeVisitor);
-    }
-    // Init Remote nodes
-    if(m_nRemoteNodes){
-        m_pContactGraph->applyNodeVisitorRemote(*m_pSorProxInitNodeVisitor);
+    if(m_nLocalNodes || m_nRemoteNodes){
+        m_pContactGraph->visitNormalNodes(*m_pSorProxInitNodeVisitor);
     }
 
     // Init SplitBodyNodes has already been done during communication!
@@ -408,48 +404,25 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
     #ifdef MEASURE_TIME_PROX_DETAIL
         START_TIMER(start)
     #endif
-    // Move over all local nodes, and do a sor prox step
-    if(m_nLocalNodes){
+    // Move over all local/remote nodes, and do a sor prox step
+    if(m_nLocalNodes || m_nRemoteNodes){
        switch(m_settings.m_eMethod){
         case InclusionSolverSettingsType::Method::SOR_NORMAL_TANGENTIAL:
             //Iterate multiple times the normal direction before going to the tangential direction!
             m_pNormalSorProxStepNodeVisitor->setLastUpdate(false);
             for(int i = 0;i<4;i++){
-                m_contactGraph.applyNodeVisitorLocal(*m_pNormalSorProxStepNodeVisitor);
+                m_pContactGraph->visitNormalNodes(*m_pNormalSorProxStepNodeVisitor);
             }
             m_pNormalSorProxStepNodeVisitor->setLastUpdate(true);
-            m_contactGraph.applyNodeVisitorLocal(*m_pNormalSorProxStepNodeVisitor);
+            m_pContactGraph->visitNormalNodes(*m_pNormalSorProxStepNodeVisitor);
 
-            m_contactGraph.applyNodeVisitorLocal(*m_pTangentialSorProxStepNodeVisitor);
+            m_pContactGraph->visitNormalNodes(*m_pTangentialSorProxStepNodeVisitor);
             break;
         case InclusionSolverSettingsType::Method::SOR_FULL:
-            m_contactGraph.applyNodeVisitorLocal(*m_pFullSorProxStepNodeVisitor);
+            m_pContactGraph->visitNormalNodes(*m_pFullSorProxStepNodeVisitor);
             break;
         case InclusionSolverSettingsType::Method::SOR_CONTACT:
-            m_contactGraph.applyNodeVisitorLocal(*m_pContactSorProxStepNodeVisitor);
-            break;
-        default:
-            ERRORMSG(" Visitor method not defined for visitor: " << EnumConversion::toIntegral(m_settings.m_eMethod));
-        }
-    }
-    // Move over all remote nodes, and do a sor prox step
-    if(m_nRemoteNodes){
-        switch(m_settings.m_eMethod){
-        case InclusionSolverSettingsType::Method::SOR_NORMAL_TANGENTIAL:
-            //Iterate multiple times the normal direction before going to the tangential direction!
-            m_pNormalSorProxStepNodeVisitor->setLastUpdate(false);
-            for(int i = 0;i<4;i++){
-                m_contactGraph.applyNodeVisitorRemote(*m_pNormalSorProxStepNodeVisitor);
-            }
-            m_pNormalSorProxStepNodeVisitor->setLastUpdate(true);
-            m_contactGraph.applyNodeVisitorRemote(*m_pNormalSorProxStepNodeVisitor);
-            m_contactGraph.applyNodeVisitorRemote(*m_pTangentialSorProxStepNodeVisitor);
-            break;
-        case InclusionSolverSettingsType::Method::SOR_FULL:
-            m_contactGraph.applyNodeVisitorRemote(*m_pFullSorProxStepNodeVisitor);
-            break;
-        case InclusionSolverSettingsType::Method::SOR_CONTACT:
-            m_contactGraph.applyNodeVisitorRemote(*m_pContactSorProxStepNodeVisitor);
+            m_pContactGraph->visitNormalNodes(*m_pContactSorProxStepNodeVisitor);
             break;
         default:
             ERRORMSG(" Visitor method not defined for visitor: " << EnumConversion::toIntegral(m_settings.m_eMethod));
@@ -477,11 +450,11 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
             // Safety test if all updates have been received!
             #ifdef SAFETY_CHECK_SPLITBODYUPDATE
                 SplitNodeCheckUpdateVisitor<ContactGraphType> v;
-                m_pContactGraph->applyNodeVisitorSplitBody(v);
+                m_pContactGraph->visitSplitNodes(v);
             #endif
             // Move over all split body nodes and solve the billateral constraint directly
             //(if nSplitBodies != 0)
-            m_pContactGraph->applyNodeVisitorSplitBody(*m_pSorProxStepSplitNodeVisitor);
+            m_pContactGraph->visitSplitNodes(*m_pSorProxStepSplitNodeVisitor);
             // Communicate all local solved split body velocities
             //(if nSplitBodies != 0 || remoteNodes != 0)
             m_pInclusionComm->communicateSplitBodySolution(m_globalIterationCounter);

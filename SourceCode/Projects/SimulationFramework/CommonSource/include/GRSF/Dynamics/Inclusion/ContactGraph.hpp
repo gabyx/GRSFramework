@@ -155,19 +155,8 @@ public:
         m_nodeCounter++;
     }
 
-
-//    static const MatrixUBodyDyn & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
-//        ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
-//        return (nodeData.m_pCollData->m_pBody1 == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
-//    }
-//
-//    static const MatrixUBodyDyn * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
-//        ASSERTMSG( nodeData.m_pCollData->m_pBody1 == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
-//        return (nodeData.m_pCollData->m_pBody1 == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
-//    }
-
-    using BodyNodeStorageType = std::vector< Graph::NodeBase<Traits>* >;
-    using SimBodyToNodeMap = std::unordered_map<const RigidBodyType *, BodyNodeStorageType >;
+    using NodeListType = std::vector< Graph::NodeBase<Traits>* >;
+    using SimBodyToNodeMap = std::unordered_map<const RigidBodyType *, NodeListType >;
     SimBodyToNodeMap m_simBodiesToContactsMap;
 
     unsigned int getNContactModelsUsed() {
@@ -182,8 +171,8 @@ private:
 
     ContactParameterMap* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 
-    unsigned int m_nodeCounter = 0; ///< An node counter, starting at 0.
-    unsigned int m_edgeCounter = 0; ///< An edge counter, starting at 0.
+    std::size_t m_nodeCounter = 0; ///< An node counter, starting at 0.
+    std::size_t m_edgeCounter = 0; ///< An edge counter, starting at 0.
 
     bool m_firstIteration = true;
     PREC m_maxResidual = 0.0;
@@ -219,7 +208,7 @@ private:
         NodeDataInit m_nodeDataInit;
         ContactGraph * m_p = nullptr;
 
-        template<bool addEdges = true, typename TNode, typename TCollData, typename TContactParams>
+        template<bool addEdges, typename TNode, typename TCollData, typename TContactParams>
         void apply(TNode * pNode,
                    TCollData * pCollData ,
                    TContactParams & contactParams) {
@@ -234,10 +223,7 @@ private:
             // FIRST BODY!
             RigidBodyType * pBody = pCollData->m_pBody1;
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
-
-                auto & nodeList = m_p->m_simBodiesToContactsMap[pBody];
-                initNodeSimBody<1,addEdges>(pNode,nodeData,pBody,nodeList);
-
+                initNodeSimBody<1,addEdges>(pNode,nodeData,pBody);
             } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
                 ERRORMSG("ContactGraph:: Animated body, node init not implemented")
             }
@@ -245,10 +231,7 @@ private:
             // SECOND BODY!
             pBody = pCollData->m_pBody2;
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
-
-                auto & nodeList = m_p->m_simBodiesToContactsMap[pBody];
-                initNodeSimBody<2,addEdges>(pNode,nodeData,pBody,nodeList);
-
+                initNodeSimBody<2,addEdges>(pNode,nodeData,pBody);
             } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
                 ERRORMSG("ContactGraph:: Animated body, node init not implemented")
             }
@@ -264,11 +247,10 @@ private:
             TEdge * m_p;
         };
 
-        template<int bodyNr, bool addEdges = true, typename TNode , typename TNodeData, typename TNodeList>
+        template<int bodyNr, bool addEdges, typename TNode , typename TNodeData>
         void initNodeSimBody(TNode * pNode,
                              TNodeData & nodeData,
-                             RigidBodyType * pBody,
-                             TNodeList & nodesOnBody) {
+                             RigidBodyType * pBody) {
 
             //Set Flag that this Body is in ContactGraph
             pBody->m_pSolverData->m_bInContactGraph = true;
@@ -280,6 +262,9 @@ private:
             } else {
                 nodeData.m_u2BufferPtr = & pBody->m_pSolverData->m_uBuffer;
             }
+
+
+            auto & nodesOnBody = m_p->m_simBodiesToContactsMap[pBody];
 
             if( addEdges ) {
                 // Add self edge! ===========================================================

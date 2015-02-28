@@ -22,15 +22,6 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
     // EIGEN_MAKE_ALIGNED_OPERATOR_NEW not required
 
-    ContactGraphNodeData(): m_pCollData(nullptr), m_cache(nullptr) {
-        m_W_body1.setZero();
-        m_W_body2.setZero();
-        m_chi.setZero();
-        m_eps.setZero();
-    }
-
-    ContactGraphNodeData(CollisionData * collDataPtr): m_pCollData(collDataPtr), m_cache(nullptr) {}
-
     MatrixUBodyDyn m_W_body1;
     MatrixUBodyDyn m_W_body2;
     VectorDyn m_chi;
@@ -38,10 +29,10 @@ public:
     VectorDyn  m_eps;
 
     unsigned int m_nodeColor;
-    const CollisionData * m_pCollData;
+    const CollisionData * m_pCollData = nullptr;
     ContactParameter m_contactParameter;
 
-    ContactPercussion * m_cache;
+    ContactPercussion * m_cache = nullptr;
 };
 
 
@@ -49,29 +40,18 @@ class ContactGraphNodeDataIteration : public ContactGraphNodeData {
 public:
 
     DEFINE_LAYOUT_CONFIG_TYPES
-    // EIGEN_MAKE_ALIGNED_OPERATOR_NEW not required
+    // EIGEN_MAKE_ALIGNED_OPERATOR_NEW not required because sizes are dynamic
 
     ContactGraphNodeDataIteration()
     {
-        m_LambdaBack.setZero();
-        m_LambdaFront.setZero();
-
-        m_b.setZero();
-
         m_u1BufferPtr = nullptr; ///< Points to the velocity buffer only if the body is simulated
         m_u2BufferPtr = nullptr; ///< Points to the velocity buffer only if the body is simulated
-
         m_bConverged = false; ///< Flag if convergence criteria is fulfilled, either InVelocityLocal, InLambda, InEnergyMix (with Lambda, and G_ii)
     }
 
 
-    ~ContactGraphNodeDataIteration(){
-
-    }
-
     FrontBackBuffer<VectorUBody,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
     FrontBackBuffer<VectorUBody,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u2BufferPtr; ///< Only valid for Simulated Objects
-
 
     VectorDyn m_LambdaBack;
     VectorDyn m_LambdaFront;
@@ -84,9 +64,7 @@ public:
     bool m_bConverged; ///< Converged either in LambdaLocal (lambdaNew to lambdaOld), or
 
    void swapVelocities() {
-
         if(m_u1BufferPtr){ m_u1BufferPtr->m_back.swap(m_u1BufferPtr->m_front); }
-
         if(m_u2BufferPtr){m_u2BufferPtr->m_back.swap(m_u2BufferPtr->m_front); }
     };
 

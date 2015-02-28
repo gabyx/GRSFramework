@@ -61,7 +61,7 @@ namespace NeighbourDataInclusionCommunication_impl{
 * @brief This class is used in the NeighbourMap class as data structure for the communication in the inclusion solver
 */
 
-template<typename TNode>
+//template<typename TNode>
 class NeighbourDataInclusionCommunication:  public NeighbourData< NeighbourDataInclusionCommunication_impl::LocalData,
                                                                   NeighbourDataInclusionCommunication_impl::RemoteData>
 {
@@ -69,16 +69,15 @@ public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     // Special temporary remote data for remote-remote contacts
-    using NodeType = TNode;
-    using RemoteDataTempType = typename NeighbourDataInclusionCommunication_impl::RemoteDataTemp<NodeType>;
-    using RemoteDataTempList = std::vector< RemoteDataTempType >;
-    using RemoteTempIterator = typename RemoteDataTempList::iterator;
+//    using NodeType = TNode;
+//    using RemoteDataTempType = typename NeighbourDataInclusionCommunication_impl::RemoteDataTemp<NodeType>;
+//    using RemoteDataTempList = std::vector< RemoteDataTempType >;
 
 private:
     typedef NeighbourData< NeighbourDataInclusionCommunication_impl::LocalData,
                            NeighbourDataInclusionCommunication_impl::RemoteData> NeighbourDataDerived;
 
-    RemoteDataTempList m_remoteDataTempList;
+//    RemoteDataTempList m_remoteDataTempList;
 
 
 public:
@@ -92,19 +91,17 @@ public:
     using RemoteDataType = NeighbourDataDerived::RemoteDataType;
 
 
+//    template<typename ...Args>
+//    inline RemoteDataTempType* addRemoteDataTemp(Args &&... t){
+//        // <iterator,bool>
+//        m_remoteDataTempList.push_back( RemoteDataTempType( std::forward<Args>(t)... ) );
+//        return &m_remoteDataTempList.back();
+//    }
+//
+//    inline unsigned int sizeRemoteTemp(){ return m_remoteDataTempList.size();}
 
-
-    template<typename ...Args>
-    inline RemoteDataTempType* addRemoteDataTemp(Args &&... t){
-        // <iterator,bool>
-        m_remoteDataTempList.push_back( RemoteDataTempType( std::forward<Args>(t)... ) );
-        return &m_remoteDataTempList.back();
-    }
-
-    inline unsigned int sizeRemoteTemp(){ return m_remoteDataTempList.size();}
-
-    inline RemoteTempIterator remoteTempBegin(){ return m_remoteDataTempList.begin(); }
-    inline RemoteTempIterator remoteTempEnd(){   return m_remoteDataTempList.end(); }
+//    inline RemoteTempIterator remoteTempBegin(){ return m_remoteDataTempList.begin(); }
+//    inline RemoteTempIterator remoteTempEnd(){   return m_remoteDataTempList.end(); }
 };
 
 
