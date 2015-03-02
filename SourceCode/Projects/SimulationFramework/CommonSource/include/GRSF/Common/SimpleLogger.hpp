@@ -200,8 +200,8 @@ public:
                    boost::filesystem::path filePath,
                    bool useTimer = true);
 
-    void destroyLog(const std::string &name);
-    void destroyLog(Log * & log);
+    bool destroyLog(const std::string &name);
+    bool destroyLog(Log * & log);
 
     void registerLog(Log * log, bool useTimer = true);
 

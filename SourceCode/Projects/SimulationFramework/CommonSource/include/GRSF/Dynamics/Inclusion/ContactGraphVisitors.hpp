@@ -974,7 +974,7 @@ public:
 
             if(bodyNr == 1) {
                 //Set matrix size!
-                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                //nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -992,7 +992,7 @@ public:
                 nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
             } else {
                 //Set matrix size!
-                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                //nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -1027,12 +1027,12 @@ public:
             using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
             const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
 
-            nodeData.m_b.setZero(dimSet);
+            //nodeData.m_b.setZero(dimSet);
 
             // Init LambdaBack (PercussionPool logic, or default values)
             m_lambdaInit.initLambda(nodeData,dimSet);
 
-            nodeData.m_R_i_inv_diag.setZero(dimSet);
+            //nodeData.m_R_i_inv_diag.setZero(dimSet);
             nodeData.m_G_ii.setZero(dimSet,dimSet);
 
             // Compute generalized force directions W

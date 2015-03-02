@@ -25,7 +25,7 @@
 
 
 using ContactGraphTraits = Graph::GraphTraitsSymmetric<
-                           meta::list<ContactGraphNodeDataIteration> ,
+                           meta::list<ContactGraphNodeDataUCF> ,
                            meta::list<ContactGraphEdgeData>
                            >;
 
@@ -38,7 +38,7 @@ public:
 
     DEFINE_CONTACT_GRAPH_VISITORS_AS_FRIEND
 
-    using UCFNodeDataType = ContactGraphNodeDataIteration;
+    using UCFNodeDataType = ContactGraphNodeDataUCF;
     using CommonEdgeDataType = ContactGraphEdgeData;
 
     ContactGraph(ContactParameterMap * contactParameterMap)
@@ -190,8 +190,8 @@ private:
 
         void apply(UCFNodeDataType & nodeData) {
             const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
-            nodeData.m_eps.setZero(dimSet);
-            nodeData.m_chi.setZero(dimSet);
+            //nodeData.m_eps.setZero(dimSet);
+            //nodeData.m_chi.setZero(dimSet);
 
             // Set epsilon  values
             using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);

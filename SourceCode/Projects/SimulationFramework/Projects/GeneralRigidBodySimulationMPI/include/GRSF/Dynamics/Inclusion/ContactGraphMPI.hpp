@@ -24,7 +24,7 @@
 
 
 using ContactGraphTraits = Graph::GraphTraitsSymmetric<
-                           meta::list<ContactGraphNodeDataIteration, ContactGraphNodeDataSplitBody> ,
+                           meta::list<ContactGraphNodeDataUCF, ContactGraphNodeDataSplitBody> ,
                            meta::list<ContactGraphEdgeData,void,void>
                            >;
 
@@ -40,7 +40,7 @@ public:
     using RigidBodyContainerType = typename DynamicsSystemType::RigidBodyContainerType;
     using RigidBodyIdType = typename RigidBodyType::RigidBodyIdType;
 
-    using UCFNodeDataType       = ContactGraphNodeDataIteration;
+    using UCFNodeDataType       = ContactGraphNodeDataUCF;
     using SplitBodyNodeDataType = ContactGraphNodeDataSplitBody;
     using CommonEdgeDataType = ContactGraphEdgeData;
 
@@ -150,8 +150,8 @@ private:
 
         void apply(UCFNodeDataType & nodeData) {
             const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
-            nodeData.m_eps.setZero(dimSet);
-            nodeData.m_chi.setZero(dimSet);
+            //nodeData.m_eps.setZero(dimSet);
+            //nodeData.m_chi.setZero(dimSet);
 
             // Set epsilon  values
             using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
