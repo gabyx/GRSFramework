@@ -187,8 +187,11 @@ void InclusionSolverCONoG::solveInclusionProblem() {
     }
     else{
 
-    // Solve Inclusion
 
+        // Drift correction step
+
+
+        // Solve Inclusion
         LOGSLLEVEL1_CONTACT(m_pSolverLog,  "---> nContacts: "<< m_nContacts <<std::endl;);
 
 

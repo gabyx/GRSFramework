@@ -89,6 +89,7 @@ protected:
     void doFirstHalfTimeStep(PREC ts, PREC timestep);
     void doSecondHalfTimeStep(PREC te, PREC timestep);
 
+    void resetForNextIteration();
 
     //This is a minimal update of F, no checking if constant values are correct
     void updateFMatrix(const Quaternion & q, Matrix43 & F_i);

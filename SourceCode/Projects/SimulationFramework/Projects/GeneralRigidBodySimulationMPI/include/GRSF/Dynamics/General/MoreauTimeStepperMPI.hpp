@@ -277,14 +277,13 @@ void MoreauTimeStepperMPI::doTimeStep() {
     afterSecondTimeStep();
     // ====================================================================================
 
+    // reset/swap solverData, statistic stuff
+    resetForNextIteration();
+    m_pInclusionSolver->resetForNextTimestep(); // Clears the contact graph!
 
 
 
     LOGSLLEVEL3(m_pSolverLog,"---> m_t End: " << m_currentSimulationTime <<std::endl );
-
-
-    //Force switch
-    //boost::thread::yield();
 
     m_endTime = m_PerformanceTimer.elapsedSec();
 
