@@ -159,6 +159,7 @@ void MoreauTimeStepper::doTimeStep() {
     m_pCollisionSolver->solveCollision();
     m_endTimeCollisionSolver =   m_PerformanceTimer.elapsedSec();
 
+
     //Solve Contact Problem
     //boost::thread::yield();
     m_startTimeInclusionSolver = m_PerformanceTimer.elapsedSec();

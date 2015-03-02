@@ -353,7 +353,7 @@ void InclusionSolverCONoG::doSORProxCPU(){
     LOGSLLEVEL3_CONTACT(m_pSolverLog, " ]" << std::endl);
 
 
-    // General stupid Prox- Iteration
+    // General stupid Prox- Iteration loop
     while(true) {
 
         // Set global flag to true, if it is not converged we set it to false
