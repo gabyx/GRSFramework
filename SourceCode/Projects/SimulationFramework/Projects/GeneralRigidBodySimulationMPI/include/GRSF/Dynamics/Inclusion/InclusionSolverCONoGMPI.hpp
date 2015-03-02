@@ -134,18 +134,19 @@ protected:
 
     // Different visitors for the various SOR implementations
     // For SOR_FULL, SOR_CONTACT
-    SorProxStepNodeVisitor<ContactGraphType> *           m_pSorProxStepNodeVisitor = nullptr;
+    ContactSorProxStepNodeVisitor<ContactGraphType> *    m_pContactSorProxStepNodeVisitor = nullptr;
+    FullSorProxStepNodeVisitor<ContactGraphType> *       m_pFullSorProxStepNodeVisitor = nullptr;
     // For SOR_NORMAL_TANGENTIAL
     NormalSorProxStepNodeVisitor<ContactGraphType>*      m_pNormalSorProxStepNodeVisitor  = nullptr;
     TangentialSorProxStepNodeVisitor<ContactGraphType>*  m_pTangentialSorProxStepNodeVisitor  = nullptr;
     // Init Visitor for the contacts
     SorProxInitNodeVisitor<ContactGraphType>*            m_pSorProxInitNodeVisitor  = nullptr;
 
-    SorProxStepSplitNodeVisitor<ContactGraphType> * m_pSorProxStepSplitNodeVisitor  = nullptr;
+    SorProxStepSplitNodeVisitor<ContactGraphType> *      m_pSorProxStepSplitNodeVisitor  = nullptr;
 
     // Log
     Logging::Log *m_pSolverLog = nullptr;
-    Logging::Log  *m_pSimulationLog = nullptr;
+    Logging::Log *m_pSimulationLog = nullptr;
 
     std::stringstream logstream;
 

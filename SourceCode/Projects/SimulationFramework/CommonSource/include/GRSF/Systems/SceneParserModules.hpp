@@ -1491,12 +1491,23 @@ public:
             boost::filesystem::path relpath = initCond.attribute("file").value();
 
 
-            setupInitialConditionBodiesFromFile_imp(relpath, time, which);
+            bool readVelocities = true;
+            auto att = initCond.attribute("readVelocities");
+            if(att){
+                if(!Utilities::stringToType(readVelocities, att.value())) {
+                    ERRORMSG("---> String conversion in GlobalInitialCondition: readVelocities failed");
+                }
+            };
+
+
+            setupInitialConditionBodiesFromFile_imp(relpath, time, which, readVelocities);
 
             bool useTime = false;
             if(!Utilities::stringToType(useTime, initCond.attribute("useTimeToContinue").value())) {
                 ERRORMSG("---> String conversion in GlobalInitialCondition: useTimeToContinue failed");
             }
+
+
 
             // Set the time in the dynamics system timestepper settings
             if(useTime){
@@ -1600,9 +1611,9 @@ public:
     };
 
 private:
-    void setupInitialConditionBodiesFromFile_imp(boost::filesystem::path relpath, double &time , short which ) {
+    void setupInitialConditionBodiesFromFile_imp(boost::filesystem::path relpath, double &time , short which, bool readVelocities ) {
 
-        InitialConditionBodies::setupInitialConditionBodiesFromFile(relpath,*m_initStates,time,true,true,which);
+        InitialConditionBodies::setupInitialConditionBodiesFromFile(relpath,*m_initStates,time,true,readVelocities,which);
         LOGSCLEVEL2(m_pSimulationLog,"\t---> Found time: "<< time << " in " << relpath << std::endl;);
 
     }

@@ -130,10 +130,6 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using ContactGraphType = TContactGraph;
-    using NodeDataType = typename ContactGraphType::NodeDataType;
-    using EdgeDataType = typename ContactGraphType::EdgeDataType;
-    using EdgeType = typename ContactGraphType::EdgeType;
-    using NodeType = typename ContactGraphType::NodeType;
 
     LambdaInitLogic( PercussionPool * pool): m_pool(pool){}
 
@@ -176,15 +172,15 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using ContactGraphType = TContactGraph;
-    using NodeDataType = typename ContactGraphType::NodeDataType;
-    using EdgeDataType = typename ContactGraphType::EdgeDataType;
-    using EdgeType = typename ContactGraphType::EdgeType;
-    using NodeType = typename ContactGraphType::NodeType;
+    using UCFNodeDataType = typename ContactGraphType::UCFNodeDataType;
+    using CommonEdgeDataType = typename ContactGraphType::CommonEdgeDataType;
+
 
     CachePercussionNodeVisitor( PercussionPool * pool): m_pool(pool){}
 
-    inline void visitNode(NodeType & node) {
-        auto & nodeData = node.m_nodeData;
+    template<typename TNode>
+    inline void operator()(TNode & node) {
+        auto & nodeData = node.getData();
         if(nodeData.m_cache){
             nodeData.m_cache->m_Lambda = nodeData.m_LambdaBack;
         }

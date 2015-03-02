@@ -115,7 +115,7 @@ public:
             m_pIdToState.insert(std::make_pair(*it,&(*sIt)));
             ++sIt;
         }
-        std::cout << "Random Access :" << m_randomAccess << std::endl;
+        //std::cout << "Random Access :" << m_randomAccess << std::endl;
     }
 
     /** Access the SimState for a given Id*/

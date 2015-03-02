@@ -57,6 +57,9 @@ struct MyMatrix {
     template<unsigned int N>
     using MatrixDynStat = Eigen::Matrix<PREC, Eigen::Dynamic, N >;
 
+    template<unsigned int M, unsigned int N>
+    using MatrixStatStat = Eigen::Matrix<PREC, M, N >;
+
     using AffineTrafo = Eigen::Transform<PREC,3,Eigen::TransformTraits::Affine>;
     using AffineTrafo2d = Eigen::Transform<PREC,2,Eigen::TransformTraits::Affine>;
 
@@ -132,6 +135,7 @@ struct MyMatrixIOFormat {
    \
    template<unsigned int M> using MatrixStatDyn = typename MyMatrix< _PREC_ >::template MatrixStatDyn<M>; \
    template<unsigned int N> using MatrixDynStat = typename MyMatrix< _PREC_ >::template MatrixDynStat<N>; \
+   template<unsigned int M,unsigned int N> using MatrixStatStat = typename MyMatrix< _PREC_ >::template MatrixStatStat<M,N>; \
    \
    template<typename Derived> using MatrixBase = typename MyMatrix< _PREC_ >::template MatrixBase<Derived>; \
    template<typename Derived> using ArrayBase  = typename MyMatrix< _PREC_ >::template ArrayBase<Derived>; \

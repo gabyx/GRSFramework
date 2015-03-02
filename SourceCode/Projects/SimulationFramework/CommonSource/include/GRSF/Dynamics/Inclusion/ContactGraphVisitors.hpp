@@ -9,6 +9,8 @@
 #include "GRSF/Dynamics/General/VectorToSkewMatrix.hpp"
 #include "GRSF/Dynamics/Inclusion/ProxFunctions.hpp"
 
+
+
 /**
 @brief Visitor for class ContactGraph<TRigidBody,ContactGraphMode::ForIteration>
 */
@@ -19,10 +21,9 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using ContactGraphType = TContactGraph;
-    using NodeDataType = typename ContactGraphType::NodeDataType;
-    using EdgeDataType = typename ContactGraphType::EdgeDataType;
-    using EdgeType = typename ContactGraphType::EdgeType;
-    using NodeType = typename ContactGraphType::NodeType;
+
+    using UCFNodeDataType    = typename ContactGraphType::UCFNodeDataType;
+    using CommonEdgeDataType = typename ContactGraphType::CommonEdgeDataType;
 
 
     SorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
@@ -34,10 +35,6 @@ public:
         m_pGraph(graph)
     {}
 
-
-    inline void visitNode(NodeType & node) {
-        m_delegate(node);
-    }
 
     void setLog(Logging::Log * solverLog) {
         m_pSolverLog = solverLog;
@@ -72,14 +69,14 @@ public:
 //
 //    }
 
-    void setNewDamping(typename ContactGraphType::NodeDataType & nodeData) {
+    void setNewDamping(UCFNodeDataType & nodeData) {
         using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCFD);
         nodeData.m_contactParameter.m_params[CMT::d_NIdx] = 1e-6;
         nodeData.m_contactParameter.m_params[CMT::d_TIdx] = 1e-6;
         recalculateR(nodeData, nodeData.m_contactParameter);
     }
 
-    void recalculateR(typename ContactGraphType::NodeDataType & nodeData, ContactParameter & contactParameter) {
+    void recalculateR(UCFNodeDataType & nodeData, ContactParameter & contactParameter) {
 
         nodeData.m_G_ii.setZero();
         if(nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
@@ -122,9 +119,6 @@ public:
         nodeData.m_R_i_inv_diag(2) = r_T;
     }
 
-
-    // Function delegate to make class visitable
-    typedef srutil::delegate1<void,NodeType &> VisitNodeDelegate;
 protected:
     Logging::Log * m_pSolverLog = nullptr;
     PREC m_alpha;
@@ -134,23 +128,16 @@ protected:
 
     ContactGraphType * m_pGraph = nullptr;
 
-
-    VisitNodeDelegate m_delegate;
-
 };
 
 #define DEFINE_SORPROXSTEPNODE_BASE \
     using Base = SorProxStepNodeVisitor<TContactGraph>; \
     using ContactGraphType = typename Base::ContactGraphType;\
-    using NodeDataType = typename Base::NodeDataType;\
-    using EdgeDataType = typename Base::EdgeDataType;\
-    using EdgeType = typename Base::EdgeType;\
-    using NodeType = typename Base::NodeType;\
-    using VisitNodeDelegate = typename Base::VisitNodeDelegate;\
+    using UCFNodeDataType = typename Base::UCFNodeDataType;\
+    using CommonEdgeDataType = typename Base::CommonEdgeDataType;\
     using Base::m_pSolverLog;\
     using Base::m_settings;\
     using Base::m_pGraph;\
-    using Base::m_delegate;\
     using Base::m_globalIterationCounter;\
     using Base::m_alpha;\
     using Base::m_bConverged;
@@ -165,27 +152,25 @@ public:
 
     DEFINE_SORPROXSTEPNODE_BASE
 
-
     ContactSorProxStepNodeVisitor(const InclusionSolverSettingsType &settings,
                                   bool & globalConverged,
                                   const unsigned int & globalIterationNeeded,
                                   ContactGraphType * graph):
         Base(settings,globalConverged,globalIterationNeeded,graph)
     {
-        this->m_delegate = VisitNodeDelegate::template from_method<
-              ContactSorProxStepNodeVisitor , &ContactSorProxStepNodeVisitor::visitNode >(this);
     }
 
-    void visitNode(NodeType& node) {
+    template<typename TNode >
+    void operator()(TNode & node) {
         /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
            Then the iteration is not converged somewhere, and we need to wait till the next iteration!
         */
-        typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
+        auto & nodeData = node.getData();
         static VectorUBody uCache1,uCache2;
         PREC residual;
 
 
-        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.getId() <<"====================="<<  std::endl);
         if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
@@ -409,8 +394,6 @@ public:
             //nodeData.m_LambdaBack = nodeData.m_LambdaFront; // necessary if we use doVelocityUpdate function!
             nodeData.swapLambdas(); // faster only switch pointers
 
-
-
         } else {
             ERRORMSG(" You specified a contact model which has not been implemented so far!");
         }
@@ -433,21 +416,20 @@ public:
                                bool & globalConverged,
                                const unsigned int & globalIterationNeeded,
                                ContactGraphType * graph):
-        Base(settings,globalConverged,globalIterationNeeded,graph) {
-        this->m_delegate = VisitNodeDelegate::template from_method<  FullSorProxStepNodeVisitor,
-              &FullSorProxStepNodeVisitor::visitNode>(this);
-    }
+        Base(settings,globalConverged,globalIterationNeeded,graph)
+    {}
 
-    void visitNode(NodeType& node) {
+    template<typename TNode >
+    void operator()(TNode & node) {
         /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
            Then the iteration is not converged somewhere, and we need to wait till the next iteration!
         */
-        typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
+        auto & nodeData = node.getData();
         static VectorUBody uCache1,uCache2;
         PREC residual;
 
 
-        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.getId() <<"====================="<<  std::endl);
         if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
@@ -670,26 +652,26 @@ public:
                                bool & globalConverged,
                                const unsigned int & globalIterationNeeded,
                                ContactGraphType * graph):
-        Base(settings,globalConverged,globalIterationNeeded,graph) {
-        this->m_delegate = VisitNodeDelegate::template from_method<  NormalSorProxStepNodeVisitor,
-              &NormalSorProxStepNodeVisitor::visitNode >(this);
-    }
+        Base(settings,globalConverged,globalIterationNeeded,graph)
+    {}
 
     void setLastUpdate(bool b){
         m_lastUpdate = b;
     }
 
-    void visitNode(NodeType& node) {
+    template<typename TNode>
+    void operator()(TNode& node) {
         /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
            Then the iteration is not converged somewhere, and we need to wait till the next iteration!
         */
-        typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
+        auto & nodeData = node.getData();
         static VectorUBody uCache1,uCache2;
         PREC residual;
 
 
-        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
-        if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.getId() <<"====================="<<  std::endl);
+        if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED
+            &&  nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
 
@@ -769,21 +751,20 @@ public:
                                bool & globalConverged,
                                const unsigned int & globalIterationNeeded,
                                ContactGraphType * graph):
-        Base(settings,globalConverged,globalIterationNeeded,graph) {
-        this->m_delegate = VisitNodeDelegate::template from_method<  TangentialSorProxStepNodeVisitor,
-              &TangentialSorProxStepNodeVisitor::visitNode>(this);
-    }
+        Base(settings,globalConverged,globalIterationNeeded,graph)
+    {}
 
-    void visitNode(NodeType& node) {
+    template<typename TNode>
+    void operator()(TNode& node) {
         /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
            Then the iteration is not converged somewhere, and we need to wait till the next iteration!
         */
-        typename ContactGraphType::NodeDataType & nodeData = node.m_nodeData;
+        auto & nodeData = node.getData();
         static VectorUBody uCache1,uCache2;
         PREC residual;
 
 
-        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.m_nodeNumber <<"====================="<<  std::endl);
+        LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.getId() <<"====================="<<  std::endl);
         if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
@@ -959,10 +940,9 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using ContactGraphType = TContactGraph;
-    using NodeDataType = typename ContactGraphType::NodeDataType;
-    using EdgeDataType = typename ContactGraphType::EdgeDataType;
-    using EdgeType = typename ContactGraphType::EdgeType;
-    using NodeType = typename ContactGraphType::NodeType;
+    using UCFNodeDataType = typename ContactGraphType::UCFNodeDataType;
+    using CommonEdgeDataType = typename ContactGraphType::CommonEdgeDataType;
+
 
     using LambdaInit = LambdaInitLogic<ContactGraphType>;
 
@@ -984,7 +964,7 @@ public:
 
 
     template<int bodyNr>
-    inline void computeW_UCF(NodeDataType & nodeData) {
+    inline void computeW_UCF(UCFNodeDataType & nodeData) {
 
             static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
             static Matrix33 I_Jacobi_2; // this is the second part of the Jacobi;
@@ -994,7 +974,7 @@ public:
 
             if(bodyNr == 1) {
                 //Set matrix size!
-                nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                //nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -1012,7 +992,7 @@ public:
                 nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
             } else {
                 //Set matrix size!
-                nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                //nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
 
                 updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
                 I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
@@ -1030,9 +1010,9 @@ public:
             }
     }
 
-
-    void visitNode(NodeType & node) {
-        auto & nodeData = node.m_nodeData;
+    template<typename TNode>
+    void operator()(TNode & node) {
+        auto & nodeData = node.getData();
         auto *pCollData = nodeData.m_pCollData;
 
         if( m_settings.m_computeTotalOverlap){
@@ -1047,12 +1027,12 @@ public:
             using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
             const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
 
-            nodeData.m_b.setZero(dimSet);
+            //nodeData.m_b.setZero(dimSet);
 
             // Init LambdaBack (PercussionPool logic, or default values)
             m_lambdaInit.initLambda(nodeData,dimSet);
 
-            nodeData.m_R_i_inv_diag.setZero(dimSet);
+            //nodeData.m_R_i_inv_diag.setZero(dimSet);
             nodeData.m_G_ii.setZero(dimSet,dimSet);
 
             // Compute generalized force directions W
@@ -1180,19 +1160,19 @@ private:
         if(pColData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
            pColData->m_pBody1->m_pSolverData->m_overlapTotal +=  /*0.5**/pColData->m_overlap;
         }
-//        else{
-//           // if static or animated add overlap to other body (which needs to be simualated!)
-//           ASSERTMSG(pColData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
-//           pColData->m_pBody2->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
-//        }
+        //        else{
+        //           // if static or animated add overlap to other body (which needs to be simualated!)
+        //           ASSERTMSG(pColData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
+        //           pColData->m_pBody2->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
+        //        }
 
         if(pColData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
            pColData->m_pBody2->m_pSolverData->m_overlapTotal +=  /*0.5**/pColData->m_overlap;
         }
-//        else{
-//           ASSERTMSG(pColData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
-//           pColData->m_pBody1->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
-//        }
+        //        else{
+        //           ASSERTMSG(pColData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
+        //           pColData->m_pBody1->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
+        //        }
     }
 
     Logging::Log * m_pSolverLog;
@@ -1202,5 +1182,16 @@ private:
     LambdaInit m_lambdaInit;
 
 };
+
+
+
+/** Macro to define visitors as friend */
+#define DEFINE_CONTACT_GRAPH_VISITORS_AS_FRIEND \
+    template<typename TContactGraph> friend class SorProxStepNodeVisitor; \
+    template<typename TContactGraph> friend class ContactSorProxStepNodeVisitor; \
+    template<typename TContactGraph> friend class FullSorProxStepNodeVisitor; \
+    template<typename TContactGraph> friend class NormalSorProxStepNodeVisitor; \
+    template<typename TContactGraph> friend class TangentialSorProxStepNodeVisitor; \
+    template<typename TContactGraph> friend class SorProxInitNodeVisitor;
 
 #endif // ContactGraphVisitors_hpp

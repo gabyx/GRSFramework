@@ -2,7 +2,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
     SET(${INC}
         ${COMMONSOURCE_DIR}/include/GRSF/Singeltons/FileManager.hpp
-
+        
+        ${COMMONSOURCE_DIR}/include/GRSF/Common/DemangleTypes.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/PlatformDefines.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/CommonFunctions.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/BitCount.hpp
@@ -43,7 +44,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionFunctions.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Collider.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactTag.hpp
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactPercussion.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/AABB.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/Ray.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
@@ -60,6 +60,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/GeneralGraph.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/PercussionPool.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactPercussion.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverNT.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCO.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp
@@ -84,13 +85,15 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         
         
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
+        ${COMMONSOURCE_DIR}/external/meta/include/meta/meta.hpp
         ${COMMONSOURCE_DIR}/external/rtnorm/rtnorm.hpp
     )
 
 
     SET(${SRC}
         ${COMMONSOURCE_DIR}/src/GRSF/Singeltons/FileManager.cpp
-
+        
+        ${COMMONSOURCE_DIR}/src/GRSF/Common/DemangleTypes.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/CommonFunctions.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/SimpleLogger.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/ApplicationCLOptions.cpp
@@ -99,7 +102,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFile.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCONoG.cpp
-        ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCO.cpp
+        #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCO.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Collision/CollisionSolver.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MoreauTimeStepper.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Collision/Collider.cpp
@@ -130,6 +133,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
+        ${COMMONSOURCE_DIR}/external/meta/include/
         ${COMMONSOURCE_DIR}/external/
     )
 endmacro(INCLUDE_SIMULATION_FRAMEWORK_GUI)
@@ -143,7 +147,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
     
     SET(${INC}
         ${COMMONSOURCE_DIR}/include/GRSF/Singeltons/FileManager.hpp
-
+        
+        ${COMMONSOURCE_DIR}/include/GRSF/Common/DemangleTypes.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/PlatformDefines.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/CommonFunctions.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/BitCount.hpp
@@ -184,7 +189,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionFunctions.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Collider.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactTag.hpp
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactPercussion.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/AABB.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/Ray.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
@@ -199,6 +203,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphNodeData.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/GeneralGraph.hpp
+        #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactPercussion.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/PercussionPool.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverNT.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCO.hpp
@@ -222,7 +227,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
         ${COMMONSOURCE_DIR}/include/GRSF/Systems/SharedBufferDynSys.hpp
         
-        
+        ${COMMONSOURCE_DIR}/external/meta/include/meta/meta.hpp
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
         ${COMMONSOURCE_DIR}/external/rtnorm/rtnorm.hpp
     )
@@ -230,7 +235,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
     SET(${SRC}
         ${COMMONSOURCE_DIR}/src/GRSF/Singeltons/FileManager.cpp
-
+        
+        ${COMMONSOURCE_DIR}/src/GRSF/Common/DemangleTypes.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/CommonFunctions.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/SimpleLogger.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/ApplicationCLOptions.cpp
@@ -270,6 +276,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
+        ${COMMONSOURCE_DIR}/external/meta/include/
         ${COMMONSOURCE_DIR}/external/
 
     )
@@ -279,7 +286,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
 
     SET(${INC}
         ${COMMONSOURCE_DIR}/include/GRSF/Singeltons/FileManager.hpp
-
+    
+        ${COMMONSOURCE_DIR}/include/GRSF/Common/DemangleTypes.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/PlatformDefines.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/CommonFunctions.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/BitCount.hpp
@@ -320,7 +328,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionFunctions.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Collider.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactTag.hpp
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactPercussion.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/AABB.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/Ray.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
@@ -335,6 +342,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphNodeData.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/GeneralGraph.hpp
+        #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactPercussion.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/PercussionPool.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverNT.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCO.hpp
@@ -365,6 +373,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/include/GRSF/Logic/LookUpTable.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Logic/ExecutionTreeInOut.hpp
         
+        ${COMMONSOURCE_DIR}/external/meta/include/meta/meta.hpp
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
         ${COMMONSOURCE_DIR}/external/rtnorm/rtnorm.hpp
         ${COMMONSOURCE_DIR}/external/exprtk/exprtk.hpp
@@ -373,7 +382,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
 
     SET(${SRC}
         #${COMMONSOURCE_DIR}/src/GRSF/Singeltons/FileManager.cpp
-
+        
+        ${COMMONSOURCE_DIR}/src/GRSF/Common/DemangleTypes.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/CommonFunctions.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/SimpleLogger.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/ApplicationCLOptions.cpp
@@ -414,6 +424,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
+        ${COMMONSOURCE_DIR}/external/meta/include/
         ${COMMONSOURCE_DIR}/external/exprtk/
         ${COMMONSOURCE_DIR}/external/ 
     )
@@ -425,7 +436,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
 
     SET(${INC}
         ${COMMONSOURCE_DIR}/include/GRSF/Singeltons/FileManager.hpp
-
+        
+        ${COMMONSOURCE_DIR}/include/GRSF/Common/DemangleTypes.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/PlatformDefines.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/CommonFunctions.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/BitCount.hpp
@@ -466,7 +478,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionFunctions.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Collider.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactTag.hpp
-        #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactPercussion.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/AABB.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/Ray.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
@@ -483,6 +494,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         ##${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphVisitors.hpp not yet made!
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/GeneralGraph.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/PercussionPool.hpp
+        #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactPercussion.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverNT.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCO.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp
@@ -505,7 +517,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
 
         #${COMMONSOURCE_DIR}/include/GRSF/Systems/SharedBufferDynSys.hpp
         
-        
+        ${COMMONSOURCE_DIR}/external/meta/include/meta/meta.hpp
         ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
         ${COMMONSOURCE_DIR}/external/rtnorm/rtnorm.hpp
     )
@@ -513,7 +525,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
 
     SET(${SRC}
         ${COMMONSOURCE_DIR}/src/GRSF/Singeltons/FileManager.cpp
-
+        
+        ${COMMONSOURCE_DIR}/src/GRSF/Common/DemangleTypes.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/CommonFunctions.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/SimpleLogger.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Common/ApplicationCLOptions.cpp
@@ -554,6 +567,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
         ${COMMONSOURCE_DIR}/external/pugixml/src
+        ${COMMONSOURCE_DIR}/external/meta/include/
         ${COMMONSOURCE_DIR}/external/
 
     )

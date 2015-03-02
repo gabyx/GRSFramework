@@ -17,38 +17,39 @@
 #include "GRSF/Dynamics/Inclusion/ContactModels.hpp"
 #include "GRSF/Dynamics/Inclusion/ContactParameterMap.hpp"
 #include "GRSF/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp"
+#include "GRSF/Dynamics/Inclusion/ContactGraphVisitors.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
 #include "GRSF/Dynamics/General/VectorToSkewMatrix.hpp"
 
 
+using ContactGraphTraits = Graph::GraphTraitsSymmetric<
+                           meta::list<ContactGraphNodeDataUCF, ContactGraphNodeDataSplitBody> ,
+                           meta::list<ContactGraphEdgeData,void,void>
+                           >;
+
 template<typename TCombo>
-class ContactGraph : public Graph::GeneralGraph< ContactGraphNodeDataIteration,ContactGraphEdgeData > {
+class ContactGraph : public Graph::GeneralGraph< ContactGraphTraits > {
 public:
 
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
+    DEFINE_CONTACT_GRAPH_VISITORS_AS_FRIEND
+
+    using RigidBodyContainerType = typename DynamicsSystemType::RigidBodyContainerType;
     using RigidBodyIdType = typename RigidBodyType::RigidBodyIdType;
 
-    using NodeDataType = ContactGraphNodeDataIteration;
-    using EdgeDataType = ContactGraphEdgeData;
-    using NodeType = typename Graph::Node< NodeDataType, EdgeDataType>;
-    using EdgeType = typename Graph::Edge< NodeDataType, EdgeDataType>;
-
-    using NodeListType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListType;
-    using EdgeListType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListType;
-    using NodeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::NodeListIteratorType;
-    using EdgeListIteratorType = typename Graph::GeneralGraph< NodeDataType,EdgeDataType >::EdgeListIteratorType;
-
+    using UCFNodeDataType       = ContactGraphNodeDataUCF;
     using SplitBodyNodeDataType = ContactGraphNodeDataSplitBody;
-    typedef std::unordered_map<RigidBodyIdType, SplitBodyNodeDataType* > SplitBodyNodeDataListType;
+    using CommonEdgeDataType = ContactGraphEdgeData;
 
-    enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE, SPLITNODE};
+    using SplitBodyNodeDataMapType = std::unordered_map<RigidBodyIdType, SplitBodyNodeDataType* >;
 
     using InclusionCommunicatorType = typename TCombo::InclusionCommunicatorType;
-    using NeighbourMapType = typename InclusionCommunicatorType::NeighbourMapType;
+    using NeighbourMapType          = typename InclusionCommunicatorType::NeighbourMapType;
 
+    enum class NodeColor: unsigned short {LOCALNODE, REMOTENODE, SPLITNODE};
 
     ContactGraph(std::shared_ptr<DynamicsSystemType> pDynSys);
     void setInclusionCommunicator(InclusionCommunicatorType * pInclusionComm);
@@ -57,81 +58,64 @@ public:
 
     void setLog(Logging::Log * solverLog);
     void clearGraph();
+
+    template<bool addEdges>
     void addNode(CollisionData * pCollData);
 
     void resetAfterOneIteration(unsigned int globalIterationCounter){
         m_maxResidual = 0;
     }
 
-    inline  const MatrixUBodyDyn & getW_bodyRef(NodeDataType& nodeData, const RigidBodyType * pBody) {
-        ASSERTMSG( nodeData.m_pCollData->m_pBody1  == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
-        return (nodeData.m_pCollData->m_pBody1 == pBody)?  (nodeData.m_W_body1) :  (nodeData.m_W_body2);
-    }
-
-    inline  const MatrixUBodyDyn * getW_body(NodeDataType& nodeData, const RigidBodyType * pBody) {
-        ASSERTMSG( nodeData.m_pCollData->m_pBody1 == pBody || nodeData.m_pCollData->m_pBody2  == pBody, " Something wrong with this node, does not contain the pointer: pBody!");
-        return (nodeData.m_pCollData->m_pBody1 == pBody)?  &(nodeData.m_W_body1) :  &(nodeData.m_W_body2);
-    }
-
-    //Local Visitor
-    template<typename TNodeVisitor>
-	void applyNodeVisitorLocal(TNodeVisitor & vv){
-		for(auto & node : m_localNodes)
-			vv.visitNode(*(node));
-	}
-	//Remote Visitor
-    template<typename TNodeVisitor>
-	void applyNodeVisitorRemote(TNodeVisitor & vv){
-		for(auto & node : m_remoteNodes)
-			vv.visitNode(*(node));
-	}
-
-	//Remote Visitor
-    template<typename TNodeVisitor>
-	void applyNodeVisitorSplitBody(TNodeVisitor & vv){
-		for(auto & node : m_splittedNodes){
-          vv.visitNode(*(node.second));
-		}
-	}
-
-	//void updateSplitBodyNode(RigidBodyIdType id , RankIdType rank, const VectorUBody & u);
-
-
     std::pair<SplitBodyNodeDataType *, bool> addSplitBodyNode(RigidBodyType * body, const RankIdType & rank);
 
-    inline NodeListType & getLocalNodeListRef(){return m_localNodes;}
-    inline NodeListType & getRemoteNodeListRef(){return m_remoteNodes;}
-    inline SplitBodyNodeDataListType & getSplitBodyNodeListRef(){return m_splittedNodes;}
+    inline SplitBodyNodeDataMapType & getSplitBodyNodeListRef(){return m_splittedNodes;}
 
     /**
     * @brief Return true if the current contact problem is uncoupled from other processes
     */
     inline bool isUncoupled(){
-        return (m_localNodes.size() >= 0
-                && m_remoteNodes.size() == 0
-                && m_splittedNodes.size() == 0 );
+        return (m_nodeCounterLocal >= 0
+                && m_nodeCounterRemote == 0
+                && m_nodeCounterSplitBody == 0 );
     }
 
     inline bool hasNoNodes(){
-        return (m_localNodes.size() == 0
-                && m_remoteNodes.size() == 0
-                && m_splittedNodes.size() == 0 );
+        return (m_nodeCounterLocal == 0
+                && m_nodeCounterRemote == 0
+                && m_nodeCounterSplitBody == 0 );
     }
 
-    inline typename NodeListType::size_type getNLocalNodes(){return m_localNodes.size();}
-    inline typename NodeListType::size_type getNRemoteNodes(){return m_remoteNodes.size();}
-    inline typename NodeListType::size_type getNSplitBodyNodes(){return m_splittedNodes.size();}
+    inline std::size_t getNLocalNodes(){return m_nodeCounterLocal;}
+    inline std::size_t getNRemoteNodes(){return m_nodeCounterRemote;}
+    inline std::size_t getNSplitBodyNodes(){return m_nodeCounterSplitBody;}
 
-    inline typename DynamicsSystemType::RigidBodyContainerType & getRemoteBodiesWithContactsListRef(){return m_remoteBodiesWithContacts;}
-    inline typename DynamicsSystemType::RigidBodyContainerType & getLocalBodiesWithContactsListRef(){return m_localBodiesWithContacts;};
+    inline RigidBodyContainerType & getRemoteBodiesWithContactsListRef(){return m_remoteBodiesWithContacts;}
+    inline RigidBodyContainerType & getLocalBodiesWithContactsListRef(){return m_localBodiesWithContacts;};
 
     unsigned int getNContactModelsUsed(){
         return BitCount::count(m_usedContactModels);
     }
 
 
-    PREC m_maxResidual = 0;
+    inline PREC getMaxResidual() {
+        return m_maxResidual;
+    }
 
+    inline void reserveNodes(std::size_t nodes, std::size_t splitbodyNodes){
+        GeneralGraph::reserveNodes<UCFNodeDataType>(nodes);
+        GeneralGraph::reserveNodes<SplitBodyNodeDataType>(splitbodyNodes);
+    }
+
+
+    template<typename Visitor>
+    void visitNormalNodes(Visitor && v) {
+        this->visitNodes<UCFNodeDataType>(v);
+    }
+
+    template<typename Visitor>
+    void visitSplitNodes(Visitor && v) {
+        this->visitNodes<SplitBodyNodeDataType>(v);
+    }
 private:
 
     Logging::Log * m_pSolverLog;
@@ -139,32 +123,222 @@ private:
     using ContactModelEnumIntType = typename std::underlying_type<ContactModels::Enum>::type;
     ContactModelEnumIntType m_usedContactModels = 0; ///< Bitflags which mark all used contactmodels
 
+    bool m_firstIteration = true;
+    PREC m_maxResidual = 0.0;
 
     InclusionCommunicatorType * m_pInclusionComm;
     NeighbourMapType * m_pNbDataMap; ///< NeighbourMap to insert remote bodies which have contacts
 
     std::shared_ptr<DynamicsSystemType> m_pDynSys;
 
-    //std::map<unsigned int, NodeListType> m_nodeMap; //TODO make a map whith each color!
-    NodeListType m_remoteNodes; ///< These are the contact nodes which lie on the remote bodies (ref to m_nodeMap)
-    NodeListType m_localNodes;  ///< These are the contact nodes which lie on the local bodies (ref to m_nodeMap)
+    SplitBodyNodeDataMapType     m_splittedNodes;        ///< These are the billateral nodes between the splitted bodies in the contact graph
 
-    SplitBodyNodeDataListType m_splittedNodes; ///< These are the billateral nodes between the splitted bodies in the contact graph
+    RigidBodyContainerType  m_remoteBodiesWithContacts; ///< This is our storage of all remote bodies which are in the contact graph
+    RigidBodyContainerType  m_localBodiesWithContacts;
 
-    typename DynamicsSystemType::RigidBodyContainerType  m_remoteBodiesWithContacts; ///< This is our storage of all remote bodies which are in the contact graph
-    typename DynamicsSystemType::RigidBodyContainerType  m_localBodiesWithContacts;
+    using NodeListType = std::vector< Graph::NodeBase<Traits>* >;
+    using SimBodyToNodeMap = std::unordered_map<const RigidBodyType *, NodeListType >;
+    SimBodyToNodeMap m_simBodiesToContactsMap;
 
-    template<int bodyNr, bool addEdges = true>
-    void initNodeSimBody(NodeType * pNode, RigidBodyType * pBody,  bool isRemote);
+    friend struct NodeDataInit;
+    friend struct NodeInit;
 
-    void setContactModel(NodeDataType & nodeData);
+    struct NodeDataInit {
+
+        NodeDataInit(ContactGraph * p): m_p(p) {}
+        ContactGraph * m_p = nullptr;
+
+        void apply(UCFNodeDataType & nodeData) {
+            const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
+            //nodeData.m_eps.setZero(dimSet);
+            //nodeData.m_chi.setZero(dimSet);
+
+            // Set epsilon  values
+            using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
+            nodeData.m_eps(0) = nodeData.m_contactParameter.m_params[CMT::epsNIdx];
+            nodeData.m_eps(1) = nodeData.m_contactParameter.m_params[CMT::epsTIdx];
+            nodeData.m_eps(2) = nodeData.m_eps(1);
+        }
+
+    };
+    struct NodeInit {
+
+        NodeInit(ContactGraph * p): m_p(p), m_nodeDataInit(p) {}
+
+        NodeDataInit m_nodeDataInit;
+        ContactGraph * m_p = nullptr;
+
+        template<bool addEdges, typename TNode, typename TCollData, typename TContactParams, typename TRemotePair>
+        void apply(TNode * pNode,
+                   TCollData * pCollData ,
+                   TContactParams & contactParams,
+                   TRemotePair & isRemote) {
+
+            auto & nodeData = pNode->getData();
+
+            nodeData.m_pCollData = pCollData;
+            nodeData.m_contactParameter = contactParams;
+
+
+            if(isRemote.first or isRemote.second) {
+                //Remote - Remote or Remote-Local Contacts
+
+                if(!isRemote.first or !isRemote.second){
+                    // Remote-Local or Remote-Remote
+                    //set the node color
+                    nodeData.m_nodeColor = EnumConversion::toIntegral(NodeColor::REMOTENODE);
+
+                }else{
+                    //Remote-Remote contact
+                    nodeData.m_nodeColor = EnumConversion::toIntegral(NodeColor::REMOTENODE);
+                }
+                ++m_p->m_nodeCounterRemote;
+
+            } else {
+                // Local - Local Contacts
+                //set the node color
+                nodeData.m_nodeColor = static_cast<unsigned int>(NodeColor::LOCALNODE);
+                ++m_p->m_nodeCounterLocal;
+            }
+
+
+            m_nodeDataInit.apply(nodeData);
+
+            // FIRST BODY!
+            RigidBodyType * pBody = pCollData->m_pBody1;
+            if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+                initNodeSimBody<1,addEdges>(pNode,nodeData,pBody,isRemote.first);
+            } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
+                ERRORMSG("ContactGraph:: Animated body, node init not implemented")
+            }
+
+            // SECOND BODY!
+            pBody = pCollData->m_pBody2;
+            if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+                initNodeSimBody<2,addEdges>(pNode,nodeData,pBody,isRemote.second);
+            } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
+                ERRORMSG("ContactGraph:: Animated body, node init not implemented")
+            }
+
+        }
+
+        template<typename TEdge>
+        struct AddEdgeIn {
+
+
+            template<typename TNode>
+            inline void operator()(TNode & node) {
+                dispatch<typename TNode::NodeDataType>::apply(node,m_p);
+            }
+            // In general do nothing! (Partial spezialization works in nested classes, full spezialization doesnt -> dummy)
+            template<typename NodeDataType, typename Dummy = void>
+            struct dispatch{
+                template<typename TNode>
+                static inline void apply(TNode & node, TEdge * e){}
+            };
+
+            // Only add edge to UCFNodeDataTypes, others are set to void in GraphTraits and no edge is supported
+            template<typename Dummy>
+            struct dispatch<UCFNodeDataType,Dummy>{
+                template<typename TNode>
+                static inline void apply(TNode & node, TEdge * e){
+                    node.addEdgeIn(e);
+                }
+            };
+
+            TEdge * m_p;
+        };
+
+        template<int bodyNr, bool addEdges, typename TNode , typename TNodeData>
+        void initNodeSimBody(TNode * pNode,
+                             TNodeData & nodeData,
+                             RigidBodyType * pBody,
+                             bool isRemote) {
+
+
+            // Add to the corresponding bodyWithContacts list
+            if(isRemote) {
+
+                LOGSLLEVEL2_CONTACT(m_p->m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pBody->m_id) << std::endl;)
+
+                //Add to the neighbour data if remote contact
+                if(nodeData.m_nodeColor = EnumConversion::toIntegral(NodeColor::REMOTENODE)){
+                    m_p->m_pNbDataMap->getNeighbourData(pBody->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pBody);
+                    // if this body is already added it does nothing!
+                }else{
+                    ERRORMSG("Something wrong with node color!")
+                }
+
+                m_p->m_remoteBodiesWithContacts.addBody(pBody);
+
+            }else{
+                m_p->m_localBodiesWithContacts.addBody(pBody);
+            }
+
+
+            //Set Flag that this Body is in ContactGraph
+            pBody->m_pSolverData->m_bInContactGraph = true;
+            // Unset the flag when this Node is removed;
+
+            //Link to FrontBackBuffer
+            if(bodyNr==1) {
+                nodeData.m_u1BufferPtr = & pBody->m_pSolverData->m_uBuffer;
+            } else {
+                nodeData.m_u2BufferPtr = & pBody->m_pSolverData->m_uBuffer;
+            }
+
+            if( addEdges ) {
+
+                auto & nodesOnBody = m_p->m_simBodiesToContactsMap[pBody];
+
+                // Add self edge! ===========================================================
+                auto * addedEdge = m_p->insertEdge<CommonEdgeDataType>().first;
+                addedEdge->getData().m_pBody = pBody;
+
+                // add links
+                addedEdge->setStartNode(pNode);
+                addedEdge->setEndNode(pNode);
+                addedEdge->setTwinEdge(addedEdge); // Current we dont need a twin edge, self referencing!
+                // Add the edge to the nodes edge list!
+                pNode->addEdgeOut( addedEdge );
+                m_p->m_edgeCounter++;
+                // ===========================================================================
+
+                // iterate over the nodeList and add edges!
+                // if no contacts are already on the body we skip this
+                for(auto & pN : nodesOnBody) {
+
+                    addedEdge = m_p->insertEdge<CommonEdgeDataType>().first;
+                    addedEdge->getData().m_pBody = pBody;
+                    // add link
+                    addedEdge->setStartNode(pNode);
+                    addedEdge->setEndNode(pN);
+                    addedEdge->setTwinEdge(addedEdge); // Current we dont need a twin edge, self referencing!
+                    // Add the edge to the nodes edge list!
+                    pNode->addEdgeOut( addedEdge );
+                    pN->visit( AddEdgeIn<typename  std::remove_pointer<decltype(addedEdge)>::type> {addedEdge} );
+
+                    m_p->m_edgeCounter++;
+                }
+
+                // Add new Node to the list;
+                nodesOnBody.push_back(pNode);
+            }
+
+
+        }
+
+    };
 
     ContactParameterMap* m_pContactParameterMap; ///< A contact parameter map which is used to get the parameters for one contact.
 
-    unsigned int m_nodeCounter = 0; ///< An node counter, starting at 0.
-    unsigned int m_edgeCounter = 0; ///< An edge counter, starting at 0.
+    std::size_t m_nodeCounter = 0; ///< An node counter, starting at 0.
 
+    std::size_t m_nodeCounterLocal = 0; ///< An node counter, starting at 0.
+    std::size_t m_nodeCounterRemote = 0; ///< An node counter, starting at 0.
+    std::size_t m_nodeCounterSplitBody = 0; ///< An node counter, starting at 0.
 
+    std::size_t m_edgeCounter = 0; ///< An edge counter, starting at 0.
 
 };
 
