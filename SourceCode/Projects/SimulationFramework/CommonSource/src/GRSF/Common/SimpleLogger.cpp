@@ -1,5 +1,6 @@
 #include "GRSF/Common/SimpleLogger.hpp"
 
+#include "GRSF/Common/LogDefines.hpp"
 
 using namespace Logging;
 
@@ -173,6 +174,7 @@ LogManager::LogManager() {
 }
 
 LogManager::~LogManager() {
+    DECONSTRUCTOR_MESSAGE
     for(auto & p : m_logList) {
         if(p.second) {
             delete p.second; //Delete all logs!
@@ -221,7 +223,7 @@ bool LogManager::destroyLog(const std::string &name) {
 
 bool LogManager::destroyLog(Log * & log) {
     if(!log){
-        ERRORMSG("This Log has Null Pointer!");
+        return false;
     }
 
     std::lock_guard<std::mutex> l(m_busy_mutex);
