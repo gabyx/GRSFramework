@@ -39,25 +39,30 @@ public:
 class ContactGraphNodeDataUCF : public ContactGraphNodeDataUCFBase {
 public:
 
-    DEFINE_LAYOUT_CONFIG_TYPES
+    DEFINE_RIGIDBODY_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    ContactGraphNodeDataUCF()
+    ContactGraphNodeDataUCF()/*:
+        m_LambdaBack(m_LambdaBack_internal.data()),
+        m_LambdaFront(m_LambdaFront_internal.data())*/
     {
         m_u1BufferPtr = nullptr; ///< Points to the velocity buffer only if the body is simulated
         m_u2BufferPtr = nullptr; ///< Points to the velocity buffer only if the body is simulated
         m_bConverged = false; ///< Flag if convergence criteria is fulfilled, either InVelocityLocal, InLambda, InEnergyMix (with Lambda, and G_ii)
+
     }
 
 
-    FrontBackBuffer<VectorUBody,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
-    FrontBackBuffer<VectorUBody,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> * m_u2BufferPtr; ///< Only valid for Simulated Objects
+    typename RigidBodyType::BodySolverDataType::VelocityBufferType * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
+    typename RigidBodyType::BodySolverDataType::VelocityBufferType * m_u2BufferPtr; ///< Only valid for Simulated Objects
 
     Vector3 m_LambdaBack;
     Vector3 m_LambdaFront;
+    //    MatrixMap<Vector3> m_LambdaBack; // Uncomment for faster swap with MatrixMap
+    //    MatrixMap<Vector3> m_LambdaFront;
 
-    Vector3 m_R_i_inv_diag; // Build over G_ii
-    Matrix33 m_G_ii; // just for R_ii, and maybee later for better solvers!
+    Vector3  m_R_i_inv_diag; // Build over G_ii
+    Matrix33 m_G_ii;        // just for R_ii, and maybee later for better solvers!
 
     Vector3 m_b;
 
@@ -65,12 +70,18 @@ public:
 
    void swapVelocities() {
         if(m_u1BufferPtr){ m_u1BufferPtr->m_back.swap(m_u1BufferPtr->m_front); }
-        if(m_u2BufferPtr){m_u2BufferPtr->m_back.swap(m_u2BufferPtr->m_front); }
+        if(m_u2BufferPtr){ m_u2BufferPtr->m_back.swap(m_u2BufferPtr->m_front); }
     };
 
     void swapLambdas() {
         m_LambdaBack.swap(m_LambdaFront);
     };
+
+private:
+
+//    Vector3 m_LambdaBack_internal;
+//    Vector3 m_LambdaFront_internal;
+
 };
 
 /*
@@ -87,5 +98,20 @@ public:
 
 
 };
+
+
+class ContactGraphNodeDataDriftCorrector{
+public:
+
+    DEFINE_LAYOUT_CONFIG_TYPES
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW // not required
+
+    VectorUBody  m_W_body1;
+    VectorUBody  m_W_body2;
+    PREC m_chi;
+
+    const CollisionData * m_pCollData = nullptr;
+};
+
 
 #endif

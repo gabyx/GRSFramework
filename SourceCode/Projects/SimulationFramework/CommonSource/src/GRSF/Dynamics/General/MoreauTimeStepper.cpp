@@ -180,6 +180,9 @@ void MoreauTimeStepper::doTimeStep() {
     afterSecondTimeStep();
     // ====================================================================================
 
+
+    //m_pInclusionSolver->doDriftCorrection();
+
     // reset/swap solverData, statistic stuff
     resetForNextIteration();
     m_pInclusionSolver->resetForNextTimestep(m_IterationCounter); // Clears the contact graph!

@@ -77,7 +77,7 @@ struct GlobalConfigs{
 
     struct RigidBodyConfigs{
         using LayoutConfigType = LayoutConfig<double, GeneralLayout<7,6> >;
-        using RigidBodySolverDataType = RigidBodySolverDataCONoGMPI;
+        using BodySolverDataType = RigidBodySolverDataCONoGMPI;
     };
 
 
@@ -124,7 +124,7 @@ struct GlobalConfigs{
 
 #define DEFINE_RIGIDBODY_CONFIG_TYPES \
     using RigidBodyType = typename GlobalConfigs::DynamicSystemConfigs::RigidBodyType         ; \
-    using RigidBodySolverDataType = typename GlobalConfigs::RigidBodyConfigs::RigidBodySolverDataType   ; \
+    using BodySolverDataType = typename GlobalConfigs::RigidBodyConfigs::BodySolverDataType   ; \
     DEFINE_LAYOUT_CONFIG_TYPES \
     DEFINE_GENERAL_CONFIG_TYPES
 

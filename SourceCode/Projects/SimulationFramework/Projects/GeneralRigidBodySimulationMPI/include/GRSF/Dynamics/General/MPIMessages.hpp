@@ -702,7 +702,7 @@ private:
             //Velocity
             if(Archive::is_loading::value) {
                 if(body->m_pSolverData == nullptr) {
-                    body->m_pSolverData = new typename RigidBodyType::RigidBodySolverDataType();
+                    body->m_pSolverData = new typename RigidBodyType::BodySolverDataType();
                 } else {
                     ERRORMSG("There is a SolverData already present in body with id: " << body->m_id);
                 }
