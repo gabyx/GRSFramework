@@ -220,10 +220,14 @@ bool LogManager::destroyLog(const std::string &name) {
 };
 
 bool LogManager::destroyLog(Log * & log) {
+    if(!log){
+        ERRORMSG("This Log has Null Pointer!");
+    }
+
     std::lock_guard<std::mutex> l(m_busy_mutex);
     LogListIteratorType it;
     for(it = m_logList.begin(); it != m_logList.end(); it++){
-        if(it->second && it->second == log) {
+        if(it->second == log) {
             delete it->second; // Delete Log
             log = nullptr;
             // Remove from list;
@@ -236,9 +240,10 @@ bool LogManager::destroyLog(Log * & log) {
 };
 
 void LogManager::registerLog(Log * log, bool useTimer){
-    ASSERTMSG(log != nullptr,"This Log has Null Pointer!");
+    if(!log){
+        ERRORMSG("This Log has Null Pointer!");
+    }
     std::lock_guard<std::mutex> l(m_busy_mutex);
-
     if(useTimer){
         log->setTimer(&m_globalClock);
     }
