@@ -152,8 +152,6 @@ void MoreauTimeStepper::doTimeStep() {
     m_currentSimulationTime = m_startSimulationTime + m_settings.m_deltaT/2.0;
     // ====================================================================================
 
-    m_pInclusionSolver->resetForNextTimestep(m_IterationCounter); // Clears the contact graph!
-
     // Solve Collision
     m_startTimeCollisionSolver = m_PerformanceTimer.elapsedSec();
     m_pCollisionSolver->solveCollision();
@@ -181,6 +179,13 @@ void MoreauTimeStepper::doTimeStep() {
     // Custom Calculations after second timestep
     afterSecondTimeStep();
     // ====================================================================================
+
+
+    //m_pInclusionSolver->doDriftCorrection();
+
+    // reset/swap solverData, statistic stuff
+    resetForNextIteration();
+    m_pInclusionSolver->resetForNextTimestep(m_IterationCounter); // Clears the contact graph!
 
 
     // Apply all rigid body local states to the Front buffer and set the time!

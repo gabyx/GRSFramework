@@ -110,7 +110,7 @@ public:
 
     unsigned char m_flags; ///< Different Flags which can be used during the timestep process, introduced because of MPI
 
-    RigidBodySolverDataType * m_pSolverData; /// Simulated bodies have a solverData. For all others, animated and not simulated this pointer is zero!
+    BodySolverDataType * m_pSolverData; /// Simulated bodies have a solverData. For all others, animated and not simulated this pointer is zero!
 
 
     RigidBodyBase(const RigidBodyIdType & id): m_id(id){

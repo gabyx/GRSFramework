@@ -149,10 +149,10 @@ public:
 
             // Default value for lambda
             if(!initialized){
-                nodeData.m_LambdaBack.setZero(dim);
+                nodeData.m_LambdaBack.setZero();
             }
 
-            nodeData.m_LambdaFront.setZero(dim);
+            nodeData.m_LambdaFront.setZero();
     }
 
 private:

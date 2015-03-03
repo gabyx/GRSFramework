@@ -105,9 +105,13 @@ protected:
     inline void doJorProx();
     inline void doSorProx();
 
-
+    // Percussion cache
     PercussionPool * m_percussionPool = nullptr;
-    CachePercussionNodeVisitor<ContactGraphType> * m_pCachePercussionVisitor = nullptr;;
+    CachePercussionNodeVisitor<ContactGraphType> * m_pCachePercussionVisitor = nullptr;
+
+    // Drift Corrector
+    //DriftCorrector
+
 
     // Log
     Logging::Log *m_pSolverLog = nullptr;

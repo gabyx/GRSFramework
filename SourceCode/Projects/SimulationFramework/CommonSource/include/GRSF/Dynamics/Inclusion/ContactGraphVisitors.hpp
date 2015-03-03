@@ -270,7 +270,7 @@ public:
             // Velocity Updates ====================================================================================================================
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
-            decltype(nodeData.m_LambdaFront) deltaLambda = nodeData.m_LambdaFront - nodeData.m_LambdaBack ;
+            Vector3 deltaLambda = nodeData.m_LambdaFront - nodeData.m_LambdaBack ;
             if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
 
