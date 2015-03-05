@@ -70,6 +70,7 @@ namespace LogicNodes {
     };
 
 
+
     namespace ABD = AdditionalBodyData;
 
     class BodyData : public LogicNode {

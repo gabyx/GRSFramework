@@ -61,6 +61,7 @@ private:
 #include "GRSF/Logic/ConstantNode.hpp"
 #include "GRSF/Logic/NormNode.hpp"
 #include "GRSF/Logic/LookUpTable.hpp"
+#include "GRSF/Logic/LineWriter.hpp"
 #include "GRSF/General/RenderScriptGeneratorLogic.hpp"
 #include "GRSF/General/RenderScriptGenerator.hpp"
 
@@ -112,6 +113,8 @@ public:
                 createToolSimpleFunction(*itNode,id);
             } else if(type == "StringFormat") {
                 createToolStringFormat(*itNode,id);
+            } else if(type == "LineWriter") {
+                createToolLineWriter(*itNode,id);
             } else if(type == "DisplacementToPosQuat") {
                 createToolDisplacementToPosQuat(*itNode,id);
             } else if(type == "VelocityToVelRot") {
@@ -322,6 +325,7 @@ private:
                 else if ADD_STRINGFORMAT_SOCKET(unsigned long int)
                 else if ADD_STRINGFORMAT_SOCKET(unsigned long long int)
                 else if ADD_STRINGFORMAT_SOCKET2(std::string,string)
+                else if ADD_STRINGFORMAT_SOCKET2(boost::filesystem::path,path)
                 else{
                     ERRORMSG("---> String conversion in Constant tool: outputType: '" << t << "' not found!");
                 }
@@ -419,6 +423,53 @@ private:
                     ERRORMSG("---> String conversion in SimpleFunction tool: groupId: '" << gid << "' not found!");
                 }
     }
+
+    #define DEFINE_LINEWRITER2(type, typeName) \
+        ( t == #typeName ){ using T = type; \
+            std::string file = matGenNode.attribute("file").value(); \
+            if(file.empty()){ \
+                    ERRORMSG("---> String conversion in LineWriter file: " << file << " failed!")\
+            }\
+            n = new LogicNodes::LineWriter<T>(id,file); \
+        } \
+
+    #define DEFINE_LINEWRITER(type) DEFINE_LINEWRITER2(type,type)
+
+    void createToolLineWriter(XMLNodeType & matGenNode, unsigned int id){
+
+            std::string t = matGenNode.attribute("inputType").value();
+
+            LogicNode * n;
+            if DEFINE_LINEWRITER(float)
+            else if DEFINE_LINEWRITER(double)
+            else if DEFINE_LINEWRITER(char)
+            else if DEFINE_LINEWRITER(short)
+            else if DEFINE_LINEWRITER(int)
+            else if DEFINE_LINEWRITER(long int)
+            else if DEFINE_LINEWRITER(long long int)
+            else if DEFINE_LINEWRITER(unsigned char)
+            else if DEFINE_LINEWRITER(unsigned short)
+            else if DEFINE_LINEWRITER(unsigned int)
+            else if DEFINE_LINEWRITER(unsigned long int)
+            else if DEFINE_LINEWRITER(unsigned long long int)
+            else if DEFINE_LINEWRITER2(std::string,string)
+            else if DEFINE_LINEWRITER2(boost::filesystem::path,path)
+            else{
+                ERRORMSG("---> String conversion in Constant tool: inputType: '" << t << "' not found!");
+            }
+
+            m_renderScriptGen->addNode(n,false,false);
+
+            std::string gid = matGenNode.attribute("groupId").value();
+            if(gid == "Body"){
+                m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
+            }else if(gid == "Frame"){
+                m_renderScriptGen->addNodeToGroup(id, ExecGroups::FRAME);
+            }else{
+                ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
+            }
+    }
+
 
      #define DEFINE_MAKEColorList \
         std::string g = matGenNode.attribute("generate").value(); \
@@ -650,6 +701,28 @@ private:
 };
 
 };
+
+#undef DEFINE_CONSTANT
+#undef DEFINE_CONSTANT2
+
+#undef DEFINE_NORM
+#undef DEFINE_NORM2
+
+#undef ADD_STRINGFORMAT_SOCKET2
+#undef ADD_STRINGFORMAT_SOCKET
+
+#undef DEFINE_MAKESimpleFunc
+#undef DEFINE_SIMPLEFUNCTION_S2
+#undef DEFINE_SIMPLEFUNCTION_S
+#undef DEFINE_SIMPLEFUNCTION
+
+#undef DEFINE_LINEWRITER2
+#undef DEFINE_LINEWRITER
+
+
+#undef DEFINE_MAKEColorList
+#undef DEFINE_ColorList2
+#undef DEFINE_ColorList
 
 #endif
 

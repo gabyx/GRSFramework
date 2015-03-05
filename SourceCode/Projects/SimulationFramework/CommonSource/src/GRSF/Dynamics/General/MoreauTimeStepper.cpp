@@ -164,9 +164,6 @@ void MoreauTimeStepper::doTimeStep() {
     m_pInclusionSolver->solveInclusionProblem();
     m_endTimeInclusionSolver = m_PerformanceTimer.elapsedSec();
 
-    //boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
-    //boost::thread::yield();
-
 
     // ===================================================================================
 

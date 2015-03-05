@@ -96,8 +96,10 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
 
     LOG(m_pSimulationLog,  "---> Scene parsing finshed: Added "<< m_pDynSys->m_simBodies.size()
         << " simulated & " << m_pDynSys->m_staticBodies.size()<<  " static bodies! "  << std::endl;);
+    LOG(m_pSimulationLog, "---> \t" << m_pSceneParser->getBodyModule()->getStatistics() << std::endl;);
+
     if(!m_pDynSys->m_simBodies.size()){
-            ERRORMSG("No simulated bodies added! Please add some!");
+        ERRORMSG("No simulated bodies added! Please add some!");
     }
     // =====================================================
 
