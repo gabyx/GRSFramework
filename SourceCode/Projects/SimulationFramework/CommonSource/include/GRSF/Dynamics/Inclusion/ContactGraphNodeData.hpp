@@ -6,6 +6,7 @@
 #include "GRSF/Common/LogDefines.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
 
+#include RigidBodySolverData_INCLUDE_FILE
 
 #include "GRSF/Dynamics/Inclusion/ContactParameter.hpp"
 #include "GRSF/Dynamics/Inclusion/ContactPercussion.hpp"
@@ -53,8 +54,8 @@ public:
     }
 
 
-    typename RigidBodyType::BodySolverDataType::VelocityBufferType * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
-    typename RigidBodyType::BodySolverDataType::VelocityBufferType * m_u2BufferPtr; ///< Only valid for Simulated Objects
+    typename BodySolverDataType::VelocityBufferType * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
+    typename BodySolverDataType::VelocityBufferType * m_u2BufferPtr; ///< Only valid for Simulated Objects
 
     Vector3 m_LambdaBack;
     Vector3 m_LambdaFront;

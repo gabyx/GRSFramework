@@ -55,6 +55,7 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData {
         //        VectorUBody m_front_internal;
         //        VectorUBody m_back_internal;
     };
+
     using VelocityBufferType = VelocityBuffer;
     VelocityBufferType m_uBuffer;
 
