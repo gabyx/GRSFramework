@@ -89,6 +89,12 @@ namespace LogicNodes{
             m_fList.add(n->getValue());
         }
 
+        // Types which are in TypeSeqBasic
+        void operator()(LogicSocket<boost::filesystem::path> * n){
+            m_fList.add(n->getValue().string());
+        }
+
+
         VFormatList & m_fList;
     };
 
@@ -116,7 +122,7 @@ namespace LogicNodes{
         DECLARE_ISOCKET_TYPE(Format, std::string );
         DECLARE_OSOCKET_TYPE(String, std::string );
 
-        StringFormatNode(unsigned int id, std::string format) : LogicNode(id) {
+        StringFormatNode(unsigned int id, std::string format) : LogicNode(id), m_adder(m_formatList) {
             ADD_ISOCK(Format,format);
             ADD_OSOCK(String,"");
         }
@@ -130,31 +136,33 @@ namespace LogicNodes{
         }
 
         virtual void compute(){
-            static std::stringstream s;
-            static FormatListAdder adder(m_formatList);
 
-            s.str("");
+            m_s.str("");
             m_formatList.clear();
 
             //Iterate over all inputs and add to format_list with visitor
             auto & inList =  getInputs();
             for(unsigned int i=1; i <inList.size(); i++){
-                inList[i]->applyVisitor(adder);
+                inList[i]->applyVisitor(m_adder);
             }
 
 
             // Convert the format string with the format list
             try{
-                tfm::vformat(s, GET_ISOCKET_REF_VALUE(Format).c_str(), m_formatList);
+                tfm::vformat(m_s, GET_ISOCKET_REF_VALUE(Format).c_str(), m_formatList);
             }catch(...){
                 ERRORMSG("Conversion of string in tool " << this->m_id << " failed!")
             }
-            SET_OSOCKET_VALUE(String, s.str());
+            SET_OSOCKET_VALUE(String, m_s.str());
         }
         virtual void initialize(){}
 
         private:
         VFormatList m_formatList;
+        FormatListAdder m_adder;
+
+        protected:
+        std::stringstream m_s;
     };
 };
 

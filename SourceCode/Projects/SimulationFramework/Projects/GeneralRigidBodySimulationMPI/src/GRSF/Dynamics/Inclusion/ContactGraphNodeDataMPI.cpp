@@ -22,8 +22,7 @@ namespace LMatrixGenerator{
 
 };
 
-// needed whitespace here----*
-#define BOOST_PP_LOCAL_LIMITS (2, 8)
+
 
 #define FUNC_PREFIX \
     LMatrixGenerator::generate_LInvMatrix_Multiplicity_
@@ -31,12 +30,16 @@ namespace LMatrixGenerator{
 #define GENERATE_FUNCTION_NAME(n) \
     APPLY( BOOST_PP_CAT(FUNC_PREFIX , n ) , v );
 
-
+// Macro Loop: What macro to call in the loop
 #define BOOST_PP_LOCAL_MACRO(n) \
     v.clear(); \
     GENERATE_FUNCTION_NAME(n) \
     LInv.push_back( MatrixSparse( (n-1)*NDOFuBody , (n-1)*NDOFuBody  ) ); \
     LInv.back().setFromTriplets(v.begin(),v.end()); \
+
+// Macro Loop: do the job form 0 to 8
+// needed whitespace here----*
+#define BOOST_PP_LOCAL_LIMITS (2, 8)
 
 //Constructor for the LMatrices
 ContactGraphNodeDataSplitBody::LInvMatrices::LInvMatrices(){
@@ -44,6 +47,7 @@ ContactGraphNodeDataSplitBody::LInvMatrices::LInvMatrices(){
     //Generate Matrix
     std::vector<MatrixSparseTriplet> v;
 
+    // Macro Loop: execute the macro loop
     #include BOOST_PP_LOCAL_ITERATE()
 
 
@@ -70,7 +74,8 @@ ContactGraphNodeDataSplitBody::LInvMatrices::LInvMatrices(){
 ContactGraphNodeDataSplitBody::LInvMatrices ContactGraphNodeDataSplitBody::m_LInvMatrices;
 
 
-
+#undef FUNC_PREFIX
+#undef APPLY
 #undef BOOST_PP_LOCAL_LIMITS
 #undef GENERATE_FUNCTION_NAME
 #undef BOOST_PP_LOCAL_MACRO

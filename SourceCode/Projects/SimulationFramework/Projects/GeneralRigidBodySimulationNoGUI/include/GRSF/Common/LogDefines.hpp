@@ -83,8 +83,8 @@
     // DEBUG!
     #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
     #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define SOLVERLOG_TOFILE 1            ///< {0,1} Determines if logstream is saved into a file.
-    #define SOLVERLOG_TOCONSOLE 1         ///< {0,1} Determines if logstream is outputted into console.
+    #define SOLVERLOG_TOFILE 0            ///< {0,1} Determines if logstream is saved into a file.
+    #define SOLVERLOG_TOCONSOLE 0         ///< {0,1} Determines if logstream is outputted into console.
 #else
     #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
     #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output

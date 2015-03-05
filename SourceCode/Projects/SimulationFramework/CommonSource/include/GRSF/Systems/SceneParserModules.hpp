@@ -606,11 +606,11 @@ private:
                 sampleGen = [&]()-> PREC{ return (*truncNormal)(gen);};
             }else if(generator == "piecewise-const"){
 
-                    GET_XMLATTRIBUTE_CHECK(att, "weights", sphere);
+                    GET_XMLATTRIBUTE_CHECK(att, "densities", sphere);
                     std::vector<PREC> weightsVec;
 
                     if(!Utilities::stringToType(weightsVec,att.value())) {
-                        ERRORMSG("---> String conversion in parseSphereGeometry: weights failed");
+                        ERRORMSG("---> String conversion in parseSphereGeometry: densities failed");
                     }
 
 
@@ -619,6 +619,16 @@ private:
 
                     if(!Utilities::stringToType(intervalsVec,att.value())) {
                         ERRORMSG("---> String conversion in parseSphereGeometry: intervals failed");
+                    }
+
+                    // piecewise needs weights (see : http://en.cppreference.com/w/cpp/numeric/random/piecewise_constant_distribution)
+                    // Take care, we specified densities!! the value of the probability density in each interval
+                    // set sum of weights to 1
+                    if( intervalsVec.size() <= weightsVec.size()){
+                            ERRORMSG("---> intervals and densities have wrong sizes!")
+                    }
+                    for(unsigned int i=0;i<weightsVec.size();i++){
+                        weightsVec[i] = weightsVec[i]*(intervalsVec[i+1]-intervalsVec[i]);
                     }
 
                     piecewConst.reset(new std::piecewise_constant_distribution<PREC>(
@@ -1985,6 +1995,8 @@ public:
     using BodyListType   = std::vector<BodyData>;
 private:
 
+    unsigned int m_groupId = 0; ///< The group id of the current parsing group
+
     BodyListType   m_bodiesGroup; ///< Used to parse a RigidBody Node
 
     /// Other Modules
@@ -1993,6 +2005,9 @@ private:
     VisModuleType * m_pVisMod;
 
     RigidBodySimContainerType * pSimBodies;
+
+    /// Some statistics
+    std::map<unsigned int, PREC> m_totalMassGroup;
 
 public:
 
@@ -2004,6 +2019,7 @@ public:
     BodyModule(ParserType * p, GeometryModuleType * g,  InitStatesModuleType * is, VisModuleType * i,
                RigidBodySimContainerType * simBodies, RigidBodyStaticContainerType * bodies )
         : m_pSimulationLog(p->getSimLog()), m_pGeomMod(g), m_pVisMod(i), m_pInitStatesMod(is), m_pSimBodies(simBodies), m_pBodies(bodies) {
+
     };
 
     void parseModuleOptions(XMLNodeType & sceneObjects) {
@@ -2082,6 +2098,8 @@ public:
         m_nBodies = 0;
         m_nSpecifiedSimBodies = 0;
 
+        // Reset statistic values
+        m_totalMassGroup.clear();
 
         for ( XMLNodeType & node  : sceneObjects.children("RigidBodies")) {
 
@@ -2108,6 +2126,15 @@ public:
         return m_nSpecifiedSimBodies;
     }
 
+    std::string getStatistics(const std::string & suffix = "\t"){
+        std::stringstream s;
+        s <<suffix<< "BodyModule Statistics: " << std::endl
+          <<suffix<< "\tGroup Mass (id,[kg]):";
+        for( auto &p:m_totalMassGroup ){
+            s << " (" << p.first << "," << p.second << ") " << std::endl;
+        }
+        return s.str();
+    }
 private:
 
     void parseRigidBodies( XMLNodeType  rigidbodies ) {
@@ -2138,30 +2165,30 @@ private:
         parseDynamicState(dynPropNode);
 
         // Determine GroupId (if specified, otherwise maximum)
-        unsigned int groupId;
         att = rigidbodies.attribute("groupId");
         if(att) {
-            if(!Utilities::stringToType<unsigned int>(groupId, att.value())) {
+            if(!Utilities::stringToType<unsigned int>(m_groupId, att.value())) {
                 ERRORMSG("---> String conversion in parseRigidBodies: groupId failed");
             }
             // Set new m_globalMaxGroupId;
-            m_globalMaxGroupId = std::max(m_globalMaxGroupId,groupId);
+            m_globalMaxGroupId = std::max(m_globalMaxGroupId,m_groupId);
         } else {
             m_globalMaxGroupId++;
-            groupId = m_globalMaxGroupId;
+            m_groupId = m_globalMaxGroupId;
         }
+
 
         // Get the latest body id for this group id
         unsigned int startBodyNr = 0;
         typename GroupToNBodyType::mapped_type * currGroupIdToNBodies;
-        auto it = m_groupIdToNBodies.find(groupId);
+        auto it = m_groupIdToNBodies.find(m_groupId);
         if( it == m_groupIdToNBodies.end()) {
-            currGroupIdToNBodies = &m_groupIdToNBodies[groupId];
+            currGroupIdToNBodies = &m_groupIdToNBodies[m_groupId];
             *currGroupIdToNBodies = 0;
         } else {
             currGroupIdToNBodies = &(it->second);
             startBodyNr = *currGroupIdToNBodies;
-            LOGSCLEVEL2(m_pSimulationLog, "---> Found Group Nr: " <<groupId<< std::endl;)
+            LOGSCLEVEL2(m_pSimulationLog, "---> Found Group Nr: " <<m_groupId<< std::endl;)
         }
 
         // Skip group if we can:
@@ -2182,8 +2209,8 @@ private:
         }
 
         // Full id range for this group would be [m_starBodyId , endIdGroup ]
-        m_startIdGroup = RigidBodyId::makeId(groupId,startBodyNr);
-        RigidBodyIdType endIdGroup = RigidBodyId::makeId(groupId, startBodyNr+instances-1);
+        m_startIdGroup = RigidBodyId::makeId(m_groupId,startBodyNr);
+        RigidBodyIdType endIdGroup = RigidBodyId::makeId(m_groupId, startBodyNr+instances-1);
         LOGSCLEVEL2(m_pSimulationLog,"---> Group range: [" << RigidBodyId::getBodyIdString(m_startIdGroup)
                     << "," << RigidBodyId::getBodyIdString(endIdGroup) << "]" << std::endl;)
 
@@ -2323,12 +2350,15 @@ private:
     }
     void parseDynamicPropertiesSimulated( XMLNodeType  dynProp) {
 
+        // Statistics
+        PREC & groupMass = m_totalMassGroup[m_groupId];
+        std::cout << "groupMass: " << groupMass << std::endl;
         std::string s;
         XMLNodeType n;
         if(Options::m_allocateSimBodies) {
             // First allocate a new SolverDate structure
             for(auto & b : m_bodiesGroup)  {
-                b.m_body->m_pSolverData = new typename RigidBodyType::RigidBodySolverDataType();
+                b.m_body->m_pSolverData = new typename RigidBodyType::BodySolverDataType();
                 // apply first to all bodies :-)
                 b.m_body->m_eMode = m_eBodiesState;
             }
@@ -2344,6 +2374,7 @@ private:
                 for(auto & b : m_bodiesGroup) {
                     b.m_body->m_mass = mass;
                 }
+                groupMass += m_bodiesGroup.size() * mass;
             } else if(s == "homogen") {
                 PREC density;
                 if(!Utilities::stringToType(density, n.attribute("density").value())) {
@@ -2351,6 +2382,7 @@ private:
                 }
                 for(auto & b : m_bodiesGroup) {
                     MassComputations::calculateMass(b.m_body,density);
+                    groupMass += b.m_body->m_mass;
                 }
 
             } else {

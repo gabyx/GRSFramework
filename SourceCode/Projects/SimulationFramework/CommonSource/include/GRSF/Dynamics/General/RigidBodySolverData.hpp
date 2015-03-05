@@ -39,11 +39,24 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData {
     Vector3    m_K_omega_IK_beg;    ///< Angular velocity (omega) at beginning of timestep, important to save this for timestep update in timestepper!
     Quaternion m_q_IK_beg;          ///< Quaternion at beginning of timestep, important to save this for timestep update in timestepper!
 
-    /** Pointers into the right Front BackBuffer for the velocity which get iteratet in the InclusionSolverCONoG
+    /** Velocity buffer which is iterateted in the InclusionSolverCONoG
     * The back buffer is the velocity before the prox iteration (over all nodes)
     * The front buffer is the velocity which is used to during ONE prox iteration
     */
-    FrontBackBuffer<VectorUBody,FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst> m_uBuffer;
+    class VelocityBuffer{
+    public:
+        VelocityBuffer()/*: m_front(m_front_internal.data()), m_back(m_back_internal.data()) */{}
+        //        MatrixMap<VectorUBody> m_front;
+        //        MatrixMap<VectorUBody> m_back;
+        VectorUBody m_front;
+        VectorUBody m_back;
+    private:
+        // Uncomment for faster switch!
+        //        VectorUBody m_front_internal;
+        //        VectorUBody m_back_internal;
+    };
+    using VelocityBufferType = VelocityBuffer;
+    VelocityBufferType m_uBuffer;
 
 
     void swapBuffer(){

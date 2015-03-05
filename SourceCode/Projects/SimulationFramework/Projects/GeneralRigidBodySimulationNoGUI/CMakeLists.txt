@@ -237,7 +237,12 @@ target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 
 ADD_DEPENDENCIES(${PROJECT_NAME} ${ApproxMVBB_DEPENDING_TARGETS})
 
-# Add target for copying Resources Release and Debug
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
+)
+
 
 # Add target for copying Resources Release and Debug
 SET(ResourceDir ${CMAKE_CURRENT_SOURCE_DIR}/resources)

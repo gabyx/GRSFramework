@@ -155,10 +155,7 @@ void TimeStepperBase<TDerived,TTraits>::doFirstHalfTimeStep(PREC ts, PREC timest
 
     m_pDynSys->m_externalForces.setTime(ts+timestep);
 
-    auto itEnd = m_pDynSys->m_simBodies.end();
-    for(auto bodyIt =  m_pDynSys->m_simBodies.begin(); bodyIt !=itEnd; ++bodyIt) {
-
-        RigidBodyType * pBody = (*bodyIt);
+    for(auto & pBody : m_pDynSys->m_simBodies) {
 
         LOGSLLEVEL3(m_pSolverLog, "\t---> Body: "<< RigidBodyId::getBodyIdString(pBody) << std::endl
             << "\t\t--->m_t= "  <<pBody->m_pSolverData->m_t<<std::endl
@@ -218,20 +215,15 @@ void TimeStepperBase<TDerived,TTraits>::doSecondHalfTimeStep(PREC te, PREC times
 
     static Matrix43 F_i = Matrix43::Zero();
 
-    m_pDynSys->resetEnergy();
-
     // Do timestep for every object
-    auto itEnd = m_pDynSys->m_simBodies.end();
-    for(auto bodyIt =  m_pDynSys->m_simBodies.begin(); bodyIt !=itEnd; ++bodyIt) {
-
-        RigidBodyType * pBody = (*bodyIt);
+    for(auto & pBody : m_pDynSys->m_simBodies) {
 
         // Update time:
         pBody->m_pSolverData->m_t = te;
 
         // A symmetric update 1        q_E = q_M + deltaT/2   * F(q_M)(u_E    + u_B)/2    (only influences rotation)
         // A symmetric update 2        q_E = q_B + deltaT     * F(q_M)(u_E    + u_B)/2    (only influences rotation)
-        // we do this because it is closed to the form of Michael Moeller which is retaining the quatnernion unit constraint
+        // we do this (sym. upd. 2)because it is closed to the form of Michael Moeller which is retaining the quatnernion unit constraint
         // Original Moreau update      q_E = q_B + deltaT/2   * (F(q_M) u_E  + F(q_B) u_B)
 
         // Set F(q_m) for this object:
@@ -267,12 +259,24 @@ void TimeStepperBase<TDerived,TTraits>::doSecondHalfTimeStep(PREC te, PREC times
         m_pDynSys->m_currentSpinNorm = (pBody->m_K_Theta_S.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front.template tail<3>()).norm();
 #endif
 
-
-        // Swap uBuffer and reset Front
-        pBody->m_pSolverData->swapBuffer();
-        pBody->m_pSolverData->reset();
     }
 }
+
+
+
+
+template<typename TDerived, typename TTraits>
+void TimeStepperBase<TDerived,TTraits>::resetForNextIteration(){
+
+        m_pDynSys->resetEnergy();
+
+        for(auto & pBody : m_pDynSys->m_simBodies) {
+            // Swap uBuffer and reset Front
+            pBody->m_pSolverData->swapBuffer();
+            pBody->m_pSolverData->reset();
+        }
+}
+
 template<typename TDerived, typename TTraits>
 void TimeStepperBase<TDerived,TTraits>::updateFMatrix(const Quaternion & q, Matrix43 & F_i) {
     static Matrix33 a_tilde = Matrix33::Zero();

@@ -74,4 +74,22 @@
 #define LOGMCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
 
 
+
+
+/** @name  Deconstructor and Constructor Macros
+* @brief Deconstructor and Constructor Macros to Debug correct dealloction of objects.
+*/
+/* @{ */
+#ifndef NDEBUG
+#define DECONSTRUCTOR_MESSAGE \
+ std::cout << "Destructor: "<< typeid(*this).name()  <<" , @ : "<< this << std::endl;
+#define CONSTRUCTOR_MESSAGE \
+  std::cout << "Constructor: "<< typeid(*this).name()  <<" , @ : "<< this << std::endl;;
+#else
+  #define DECONSTRUCTOR_MESSAGE
+  #define CONSTRUCTOR_MESSAGE
+#endif
+/* @} */
+
+
 #endif

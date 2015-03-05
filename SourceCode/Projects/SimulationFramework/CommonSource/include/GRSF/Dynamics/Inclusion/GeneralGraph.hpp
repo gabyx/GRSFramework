@@ -2,211 +2,528 @@
 #define GRSF_Dynamics_Inclusion_GeneralGraph_hpp
 
 
-#include <cmath>
-#include <assert.h>
-#include <list>
-#include <vector>
-#include <map>
-#include <string>
-#include <memory>
-#include <utility>
-#include <algorithm>
-#include <random>
+
+#include <boost/preprocessor/iteration/local.hpp>
+#include <boost/preprocessor/cat.hpp>
+
+#include "GRSF/Common/StaticAssert.hpp"
+#include "GRSF/Common/DemangleTypes.hpp"
+#include "GRSF/Common/MetaHelper.hpp"
+#include "GRSF/Common/TupleHelper.hpp"
+#include "GRSF/Common/LinearReusableStorage.hpp"
 
 namespace Graph {
 
-// prototypes
-template <typename NodeDataType, typename EdgeDataType> class Node;
-template <typename NodeDataType, typename EdgeDataType> class Edge;
-template <typename NodeDataType, typename EdgeDataType> class GeneralGraph;
+
+template<typename TEdgeData, typename TTraits>
+class Edge;
+
+template<typename TEdgeData, typename TTraits>
+class Node;
+
+template<typename TTraits>
+class NodeBase;
+template<typename TTraits>
+class EdgeBase;
+
+/** Traits to construct a graph which has N unique node types (NodeDataTypes) and E edge types (EdgeDataTypes)
+*   such that ((N+1)*N)/2 = E, which means the upper triangular part of the node to edge type correlation table is fully filled
+*
+*    nodeDataTypes = meta::list<A, B, C>;
+*    edgeDataTypes = meta::list<E_aa, E_ab, E_ac, E_bb, E_bc, E_cc>;
+*
+*      +------+------+------+
+*      |  A   |  B   |  C   |
+*    +----------------------+
+*    | |      |      |      |
+*    |A| E_aa | E_ab | E_ac |
+*    | | 1--- | 2--- | 3--- |
+*    +----------------------+
+*    | |      |      |      |
+*    |B| E_ab | E_bb | E_bc |
+*    | |      | 4--- | 5--- |
+*    +----------------------+
+*    | |      |      |      |
+*    |C| E_ac | E_bc | E_cc |
+*    | |      |      | 6--- |
+*    +-+------+------+------+
+*
+*   The edge data types can also contain void where you would not like to have any storage associated with it
+*   Setting certain entries to void results in no storage support for this kind of type in the corresponding node
+*/
+template<typename TNodeData, typename TEdgeData>
+struct GraphTraitsSymmetric {
+
+    using NodeDataTypes = meta::unique<TNodeData>;
+    using EdgeDataTypesOrig = TEdgeData;
+    using EdgeDataTypes = metaAdd::remove<void,TEdgeData>;
+
+    static const int nNodes = NodeDataTypes::size();
+    static const int nEdgesOrig = EdgeDataTypesOrig::size();
+    static const int nEdges = EdgeDataTypes::size();
+
+    static_assert( (nNodes*(nNodes+1))/2 == nEdgesOrig ,"Number of edges e not equal to nodes n, ((n+1)*n)/2 = e!");
+
+    template<std::size_t R, std::size_t C, std::size_t N>
+    using toLinearIdx_c = metaAdd::toLinearIdxSym_c<R,C,N>;
+    template<typename R, typename C, typename N>
+    using toLinearIdx = metaAdd::toLinearIdxSym<R,C,N>;
+
+    template<typename TTNodeData>
+    using getNodeDataIdx = meta::eval<meta::find_index<TTNodeData,NodeDataTypes> >;
 
 
-/* Node Structures */
-// We dont need to derive from this class! We do it with a templated acceptNode
-//template <typename NodeDataType, typename EdgeDataType>
-//class NodeVisitor {
-//public:
-//	virtual void visitNode(Node<NodeDataType, EdgeDataType>&) = 0;
-//};
+    /** build map , node data to all output edge data types (without void) */
+    template<typename NodeData>
+    using outEdgesForNode =
+        metaAdd::remove<void,
+        meta::transform<
+        meta::as_list<meta::make_index_sequence< nNodes >>,
+        meta::compose<
+        meta::bind_back<meta::quote<meta::at>,  EdgeDataTypesOrig>,
+        meta::bind_back<meta::bind_front<meta::quote<toLinearIdx>, getNodeDataIdx<NodeData> >, meta::size_t<nNodes> >
+        >
+        >>;
+
+    /** build map , node data to all input edge data types (without void) */
+    template<typename NodeData>
+    using inEdgesForNode =
+        metaAdd::remove<void,
+        meta::transform<
+        meta::as_list<meta::make_index_sequence< nNodes >>,
+        meta::compose<
+        meta::bind_back<meta::quote<meta::at>,  EdgeDataTypesOrig>,
+        meta::bind_back<meta::quote<toLinearIdx>,  getNodeDataIdx<NodeData> , meta::size_t<nNodes> >
+        >
+        >>;
 
 
-template <typename NodeDataType, typename EdgeDataType>
-class Node {
+    template<typename T>
+    using EdgeStorageType = LinearReusableStorage<T>;
+    template<typename T>
+    using NodeStorageType = LinearReusableStorage<T>;
 
-public:
-    // edge list
-    std::vector<Edge<NodeDataType, EdgeDataType> *> m_edgeList;
+    template<typename TTEdgeData>
+    using toEdge = Edge<TTEdgeData,GraphTraitsSymmetric>;
 
-    friend class GeneralGraph<NodeDataType, EdgeDataType>;
-public:
+    template<typename TTNodeData>
+    using toNode = Node<TTNodeData,GraphTraitsSymmetric>;
 
-    Node() : m_nodeNumber(-1) {};
-    Node(unsigned int vN) : m_nodeNumber(vN) {};
+    using EdgeTypes = meta::transform< EdgeDataTypes, meta::quote<toEdge> >;
+    using NodeTypes = meta::transform< NodeDataTypes, meta::quote<toNode> >;
 
-    // node data
-    const unsigned int m_nodeNumber;
-    NodeDataType m_nodeData;
 
-    // visitor dispatch
-    //	template<typename TVisitor>
-    //	void acceptVisitor(TVisitor & vv) {
-    //		vv.visitNode(*this);
-    //	}
+    /** Make a meta::list< Container< F<Item1>> , Container< F<Item2>>, ... >  */
+    template<typename List, typename F, typename Container = meta::quote<std::vector> >
+    using makeTupleContainer = meta::apply_list<
+                               meta::quote<std::tuple>,
+                               meta::transform<
+                               List,
+                               meta::compose<
+                               Container,
+                               F
+                               >
+                               >
+                               >;
+
+
+    struct details {
+
+        template<unsigned int N, typename Types>
+        struct castAndVisit;
+
+        // macro for boost repeat (z= repetition dimension?? = unused,  N = counter, data = unused )
+#define SWITCH_CASE( z, N, data ) \
+            case N: v( *static_cast< meta::at< meta::size_t<N>,Types> * >(p)); break;
+
+#define GENERATE_SWITCH(N) \
+            template<typename Types> \
+            struct castAndVisit<N,Types> { \
+                template<typename T, typename Visitor> \
+                static inline void apply(const std::size_t & id, T * p, Visitor && v ){ \
+                    switch(id){\
+                        BOOST_PP_REPEAT(N,SWITCH_CASE,~) \
+                        default: ERRORMSG("Tried to cast type: " << demangle::type<T>() << " to wrong id: " << id ); break; \
+                    }\
+                }\
+            }; \
+
+#define BOOST_PP_LOCAL_MACRO(N) GENERATE_SWITCH(N)
+
+        // Macro Loop: do the job form 0 to 10
+        // needed whitespace here----*
+#define BOOST_PP_LOCAL_LIMITS (1,10)
+
+
+        // execute the switch macro loop
+#include BOOST_PP_LOCAL_ITERATE()
+
+        // undef all macro madness
+#undef BOOST_PP_LOCAL_LIMITS
+#undef BOOST_PP_LOCAL_MACRO
+#undef GENERATE_SWITCH
+#undef SWITCH_CASE
+    };
+
+    /** Cast and visitor switch, from base class to the corresponding type */
+    template<typename Visitor>
+    inline static void castAndVisitNodes(const std::size_t &id, NodeBase<GraphTraitsSymmetric> * p, Visitor && v ) {
+        static const auto N = NodeTypes::size();
+        details::template castAndVisit< N, NodeTypes >::template apply(id, p, std::forward<Visitor>(v));
+    }
+
+    /** Cast and visitor switch, from base class to the corresponding type */
+    template<typename Visitor>
+    inline static void castAndVisitEdges(const std::size_t &id, EdgeBase<GraphTraitsSymmetric> * p, Visitor && v ) {
+        static const auto N = EdgeTypes::size();
+        details::template castAndVisit< N , EdgeTypes >::template apply(id, p, std::forward<Visitor>(v));
+    }
+
 };
 
 
 
-/* Edge Structures */
-// We dont need to derive from this class! We do it with a templated acceptNode
-//template <typename NodeDataType, typename EdgeDataType>
-//class EdgeVisitor {
-//public:
-//	virtual void visitEdge(Edge<NodeDataType, EdgeDataType>&) = 0;
-//};
-
-template <typename NodeDataType, typename EdgeDataType>
-class Edge {
+template<typename TTraits>
+class NodeBase {
 public:
+    using Traits = TTraits;
+    NodeBase(const std::size_t & t): m_type(t) {}
 
+    template<typename Visitor>
+    void visit(Visitor && v) { // Universal reference (binds to temporaries and lvalues)
+        // cast to the specific type and visit ( like boost::variant type switch )
+        Traits::castAndVisitNodes(m_type,this,std::forward<Visitor>(v));
+    }
 
-    // graph structure
-    Node<NodeDataType, EdgeDataType> *m_startNode;
-    Node<NodeDataType, EdgeDataType> *m_endNode;
-    Edge<NodeDataType, EdgeDataType> *m_twinEdge;
+private:
+    const std::size_t m_type;
+};
 
-    // friends
-    friend class Graph::GeneralGraph<NodeDataType, EdgeDataType>;
-    friend class Graph::Node<NodeDataType, EdgeDataType>;
+template<typename TTraits>
+class EdgeBase {
 public:
-    Edge() : m_startNode(nullptr), m_endNode(nullptr), m_twinEdge(nullptr), m_edgeNumber(0) {};
-    Edge(unsigned int eN) : m_startNode(nullptr), m_endNode(nullptr), m_twinEdge(nullptr), m_edgeNumber(eN) {};
+    using Traits = TTraits;
 
-    /* Node<NodeDataType, EdgeDataType> * getStartNode(){return m_startNode;}
-     Node<NodeDataType, EdgeDataType> * getEndNode(){return m_endNode;}
-     Edge<NodeDataType, EdgeDataType> * getTwinEdge(){return m_twinEdge;}
+    EdgeBase(const std::size_t & t): m_type(t) {}
 
-     void setNodes( Node<NodeDataType, EdgeDataType> * sN, Node<NodeDataType, EdgeDataType> * eN, Edge<NodeDataType, EdgeDataType> * tE){
-        m_startNode = sN;
-        m_endNode = eN;
-        m_twinEdge = tE;
-     }
-    */
+    template<typename Visitor>
+    void visit(Visitor && v) { // Universal reference (binds to temporaries and lvalues)
+        // cast to the specific type and visit ( like boost::variant type switch )
+        Traits::castAndVisitNodes(m_type,this,std::forward<Visitor>(v));
+    }
 
-    const unsigned int m_edgeNumber;
-    EdgeDataType m_edgeData;
-
-    // visitor dispatch
-    //	template<typename TVisitor>
-    //	void acceptVisitor(TVisitor & ev) {
-    //		ev.visitEdge(*this);
-    //	}
+private:
+    const std::size_t m_type;
 };
 
 
 
-/** GeneralGraph */
-template <typename NodeDataType, typename EdgeDataType>
+template<typename TEdgeData, typename TTraits  >
+class Edge: public EdgeBase<TTraits> {
+public:
+    using Traits = TTraits;
+
+    using StartNodeType = NodeBase<Traits>;
+    using EndNodeType   = NodeBase<Traits>;
+    using TwinEdgeType  = Edge;
+
+    using EdgeDataType  = TEdgeData;
+
+    template<typename... T>
+    Edge(const std::size_t & i, T &&... t)
+        : EdgeBase<Traits>( meta::find_index<EdgeDataType, typename Traits::EdgeDataTypes >::value )
+        ,  m_data(std::forward<T>(t)...), m_id(i)
+    {}
+
+    inline std::size_t getId(){ return m_id;}
+
+    inline EdgeDataType & getData() {
+        return m_data;
+    }
+
+    template<typename Visitor>
+    void visit(Visitor && v) {
+        v(*this);
+    }
+
+    void clear() {
+        m_startNode = nullptr;
+        m_endNode   = nullptr;
+        m_twinEdge  = nullptr;
+    }
+
+    inline void setStartNode(StartNodeType * p) {
+        m_startNode = p;
+    }
+    inline void setEndNode(EndNodeType * p) {
+        m_endNode = p;
+    }
+    inline void setTwinEdge(TwinEdgeType * p) {
+        m_twinEdge = p;
+    }
+
+    inline StartNodeType* getStartNode() {
+        return m_startNode;
+    }
+    inline EndNodeType*   getEndNode() {
+        return m_endNode;
+    }
+    inline TwinEdgeType*  getTwinEdge() {
+        return m_twinEdge;
+    }
+
+private:
+
+    StartNodeType   * m_startNode = nullptr;
+    EndNodeType     * m_endNode   = nullptr;
+    TwinEdgeType        * m_twinEdge  = nullptr;
+
+    EdgeDataType m_data;
+    const std::size_t m_id;
+};
+
+template< typename TNodeData, typename TTraits>
+class NodeEdgeSupport {
+public:
+    using NodeDataType = TNodeData;
+    using Traits = TTraits;
+
+    using OutEdgeDataTypes = meta::unique< typename Traits::template outEdgesForNode<NodeDataType> >;
+    using OutEdgeStoragesTypes = typename Traits::template makeTupleContainer< OutEdgeDataTypes,
+            meta::compose<
+                meta::quote<metaAdd::addPointer>,
+                meta::quote<Traits::template toEdge>
+                >
+            >;
+
+    using InEdgeDataTypes  = meta::unique< typename Traits::template inEdgesForNode<NodeDataType> >;
+    using InEdgeStoragesTypes  = typename Traits::template makeTupleContainer< InEdgeDataTypes,
+            meta::compose<
+                meta::quote<metaAdd::addPointer>,
+                meta::quote<Traits::template toEdge>
+                >
+            >;
+public:
+    inline void clearConnections() {
+        ClearConnections c;
+        TupleVisit::visit(c,m_edgesIn);
+        TupleVisit::visit(c,m_edgesOut);
+    }
+
+    template<typename T>
+    void addEdgeIn(T * e) {
+        using Idx = meta::find_index<typename T::EdgeDataType, InEdgeDataTypes>;
+        std::get< Idx::type::value >(m_edgesIn).push_back(e);
+    }
+
+    template<typename T>
+    void addEdgeOut(T * e) {
+        using Idx = meta::find_index<typename T::EdgeDataType, OutEdgeDataTypes>;
+        std::get< Idx::type::value >(m_edgesOut).push_back(e);
+    }
+
+    template<typename Visitor>
+    void visitInEdges(Visitor && v) {
+        EdgeDispatcher<Visitor> e( std::forward<Visitor>(v));
+        TupleVisit::visit(e,m_edgesIn);
+    }
+    template<typename Visitor>
+    void visitOutEdges(Visitor && v) {
+        EdgeDispatcher<Visitor> e( std::forward<Visitor>(v) ) ;
+        TupleVisit::visit(e,m_edgesOut);
+    }
+
+private:
+
+    OutEdgeStoragesTypes m_edgesOut;
+    InEdgeStoragesTypes  m_edgesIn;
+
+    struct ClearConnections {
+        template<typename TStorage>
+        inline void operator()(TStorage & t) {
+            t.clear();
+        }
+    };
+
+    /** EdgeStorageVisitor: Visit all edges, moves over all storages and then loops through all edges calling the visitor */
+    template<typename Visitor>
+    struct EdgeDispatcher {
+        EdgeDispatcher(Visitor && n): m_n(n) {}
+        template<typename TStorage>
+        inline void operator()(TStorage & t) {
+            for(auto & e : t) {
+                m_n(*e);
+            }
+        }
+        Visitor & m_n;
+    };
+
+};
+
+template<typename TNodeData, typename TTraits>
+class Node: public NodeBase<TTraits> , public NodeEdgeSupport<TNodeData,TTraits> {
+public:
+    using NodeDataType = TNodeData;
+    using Traits = TTraits;
+
+    template<typename... T>
+    Node(const std::size_t & i, T &&... t)
+    : NodeBase<Traits>( meta::find_index<NodeDataType, typename Traits::NodeDataTypes >::value )
+    , m_data(std::forward<T>(t)...), m_id(i)
+    {}
+
+    inline std::size_t getId(){ return m_id;}
+
+    inline NodeDataType & getData() {
+        return m_data;
+    }
+
+    inline void clear() {
+        NodeEdgeSupport<TNodeData,TTraits>::clearConnections();
+    }
+
+private:
+    NodeDataType m_data;
+    const std::size_t  m_id;
+};
+
+
+
+template<typename GraphTraits>
 class GeneralGraph {
+public:
+
+    using Traits = GraphTraits;
+    using NodeDataTypes  = typename Traits::NodeDataTypes;
+    using EdgeDataTypes  = typename Traits::EdgeDataTypes;
+
+    template<typename TEdge>
+    using EdgeStorageType = typename Traits::template EdgeStorageType<TEdge>;
+    template<typename TNode>
+    using NodeStorageType = typename Traits::template NodeStorageType<TNode>;
+
+
+    using NodeStorageTuple = typename Traits::template makeTupleContainer< NodeDataTypes,
+                                                                            meta::quote<Traits::template toNode>,
+                                                                            meta::quote<NodeStorageType> >;
+
+    using EdgeStorageTuple = typename Traits::template makeTupleContainer< meta::unique<EdgeDataTypes>,
+                                                                            meta::quote<Traits::template toEdge>,
+                                                                            meta::quote<EdgeStorageType> >;
+
+    template<typename TNodeData>
+    using toNodeStorageType  =  meta::eval<std::tuple_element< meta::find_index<TNodeData,NodeDataTypes>::value , NodeStorageTuple  >>;
+    template<typename TEdgeData>
+    using toEdgeStorageType  =  meta::eval<std::tuple_element< meta::find_index<TEdgeData,EdgeDataTypes>::value , EdgeStorageTuple  >>;
 
 protected:
-    std::vector<Node<NodeDataType, EdgeDataType> *> m_nodes;
-    std::vector<Edge<NodeDataType, EdgeDataType> *> m_edges;
+
+    NodeStorageTuple m_nodeStorage;
+    EdgeStorageTuple m_edgeStorage;
+
+    /** Node Dispatcher: Moves visitor over all storages, and applies the visitor to the storage */
+    template<typename NodeVisitor>
+    struct NodeDispatcher {
+
+        NodeDispatcher(NodeVisitor && n): m_n(n) {}
+        template<typename TStorage>
+        inline void operator()(TStorage & t) {
+            t.visit(m_n);
+        }
+
+        NodeVisitor && m_n;
+    };
+
+    /** Storage visitor: Delete all nodes */
+    struct DeleteStorage {
+        template<typename TStorage>
+        void operator()(TStorage & t) {
+            t.deleteAll();
+        }
+    };
+    /** Storage visitor: Clear all storages */
+    struct ClearStorages {
+        template<typename TStorage>
+        void operator()(TStorage & t) {
+            t.clear();
+        }
+    };
+
+    /** Get reference of the storage for a node type N */
+    template<typename TNodeData>
+    auto getNodeStorageRef() -> toNodeStorageType<TNodeData> &  {
+        return std::get< meta::find_index< TNodeData, NodeDataTypes >::value >(m_nodeStorage); // get container
+    }
+
+    /** Get reference of the storage for a node type N */
+    template<typename TEdgeData >
+    auto getEdgeStorageRef() -> toEdgeStorageType<TEdgeData> &  {
+        return std::get< meta::find_index< TEdgeData, EdgeDataTypes >::value >(m_edgeStorage); // get container
+    }
+
 
 public:
-    using NodeType = Node<NodeDataType, EdgeDataType>;
-    using EdgeType = Edge<NodeDataType, EdgeDataType>;
 
-    typedef std::vector<NodeType* > NodeListType;
-    typedef std::vector<EdgeType* > EdgeListType;
-    typedef typename std::vector<NodeType* >::iterator NodeListIteratorType;
-    typedef typename std::vector<EdgeType* >::iterator EdgeListIteratorType;
+    ~GeneralGraph() {}
 
-
-    GeneralGraph() {};
-    ~GeneralGraph() {};
-
-    void shrinkToFit(){
-        m_nodes.shrink_to_fit();
-        m_edges.shrink_to_fit();
+    void clear() {
+        TupleVisit::visit(ClearStorages{},m_nodeStorage);
     }
 
-    void clearGraph() {
-
-        for(auto & p : m_nodes){
-            delete p;
-        }
-        m_nodes.clear();
-
-        for(auto & p : m_edges){
-            delete p;
-        }
-        m_edges.clear();
-
-
+    template<typename TNodeData>
+    void reserveNodes(std::size_t nodes) {
+        getNodeStorageRef<TNodeData>().reserve(nodes);
     }
 
-    void reserveNodes(unsigned int n){
-        m_nodes.reserve(n);
+    template<typename TEdgeData>
+    void reserveEdges(std::size_t edges) {
+        getEdgeStorageRef<TEdgeData>().reserve(edges);
     }
 
-    void reserveEdges(unsigned int n){
-        m_edges.reserve(n);
+    void deleteNodes() {
+        TupleVisit::visit(DeleteStorage{},m_nodeStorage);
     }
 
-    template<typename... T>
-    NodeType * addNode( T &&... t) {
-        NodeType * p = new NodeType(std::forward<T>(t)...);
-        m_nodes.emplace_back(p);
-        return p;
-    }
-    template<typename... T>
-    EdgeType * addEdge( T &&... t) {
-        EdgeType * p = new EdgeType(std::forward<T>(t)...);
-        m_edges.emplace_back(p);
-        return p;
+    void deleteEdges() {
+        TupleVisit::visit(DeleteStorage{},m_edgeStorage);
     }
 
-    unsigned int getNumNodes() {
-        return m_nodes.size();
-    };
-    unsigned int getNumEdges() {
-        return m_edges.size();
-    };
-
-
-    NodeListType & getNodeList() {
-        return m_nodes;
-    };
-    EdgeListType & getEdgeList() {
-        return m_edges;
-    };
-
-    template<typename TNodeVisitor>
-    void applyNodeVisitor(TNodeVisitor & vv) {
-        for(auto & curr_node : m_nodes)
-            vv.visitNode(*curr_node);
+    void deleteAll() {
+        deleteNodes();
+        deleteEdges();
     }
 
-    template<typename TEdgeVisitor>
-    void applyEdgeVisitor(TEdgeVisitor & hev) {
-        for(auto & curr_he : m_edges)
-            hev.visitEdge(*curr_he);
+    template<typename TNodeData>
+    auto getNode(std::size_t i) -> decltype( getNodeStorageRef<TNodeData>().getNode(i) ) {
+        return getNodeStorageRef<TNodeData>().getNode(i);
     }
 
-    void shuffleNodesUniformly(const unsigned int loops) {
-        static std::default_random_engine g;
-        std::uniform_int_distribution<unsigned int> r(0,m_nodes.size()-1);
-        static NodeType * p1;
-
-        for(auto it = m_nodes.begin(); it != m_nodes.end(); ++it ) {
-            //swap the pointers
-            p1 = *it;
-            NodeType* & p2 = m_nodes[r(g)];
-            *it = p2;
-            p2 = p1;
-        }
+    template<typename TNodeData, typename... T>
+    std::pair< typename Traits::template toNode<TNodeData> *, bool> insertNode(T &&... t) {
+        return getNodeStorageRef<TNodeData>().insert(std::forward<T>(t)...);
     }
+
+    template<typename TEdgeData, typename... T>
+    std::pair<typename Traits::template toEdge<TEdgeData> *, bool> insertEdge(T &&... t) {
+        return getEdgeStorageRef<TEdgeData>().insert(std::forward<T>(t)...);
+    }
+
+    /** Visit all nodes */
+    template<typename... NodeDataType, typename Visitor>
+    void visitNodes(Visitor && v) {
+        NodeDispatcher<Visitor> n( std::forward<Visitor>(v) );
+        TupleVisit::visit< toNodeStorageType<NodeDataType>... >(n,m_nodeStorage);
+    }
+
+    template<typename TNodeData>
+    void shuffleNodesUniformly() {
+        auto nodeStorage = getNodeStorageRef<TNodeData>();
+        nodeStorage.shuffleUniformly();
+    }
+
 };
+
+
 
 }; // Namespace Graph
 

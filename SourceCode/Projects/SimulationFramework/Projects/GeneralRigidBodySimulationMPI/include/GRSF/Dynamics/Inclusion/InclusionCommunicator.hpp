@@ -34,8 +34,8 @@ public:
     using RigidBodyContainerType = typename DynamicsSystemType::RigidBodySimContainerType                     ;
     using GlobalGeometryMapType = typename DynamicsSystemType::GlobalGeometryMapType                         ;
 
-    using NodeDataType = typename ContactGraphType::NodeDataType;
-    using NeighbourMapType = NeighbourMap<NeighbourDataInclusionCommunication<NodeDataType> >;
+    //using NodeDataType = typename ContactGraphType::NodeDataType;
+    using NeighbourMapType = NeighbourMap<NeighbourDataInclusionCommunication/*<NodeDataType> */>;
 
     InclusionCommunicator(std::shared_ptr< BodyCommunicator> pBodyComm,
                           std::shared_ptr< DynamicsSystemType> pDynSys ,

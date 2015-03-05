@@ -1,5 +1,6 @@
 #include "GRSF/Common/SimpleLogger.hpp"
 
+#include "GRSF/Common/LogDefines.hpp"
 
 using namespace Logging;
 
@@ -32,6 +33,7 @@ LogSink::LogSink(const std::string & name): m_sinkName(name), m_pOutStream(nullp
 LogSink::~LogSink() {
     /* Derived class deletes the stuff */
     //std::cout <<"Delete SINK:"<<std::endl;
+    m_pOutStream = nullptr;
 };
 
 
@@ -130,6 +132,7 @@ bool Log::removeSink(std::string sink_name) {
     std::vector<LogSink *>::iterator it;
     for(it=m_sinkList.begin(); it!=m_sinkList.end(); ++it) {
         if((*it)->getName()==sink_name) {
+            delete *it;
             it=m_sinkList.erase(it);
             return true;
         }
@@ -171,10 +174,10 @@ LogManager::LogManager() {
 }
 
 LogManager::~LogManager() {
-    LogListIteratorType it;
-    for(it=m_logList.begin(); it!= m_logList.end(); ++it) {
-        if((*it).second) {
-            delete (*it).second; //Delete all logs!
+    DECONSTRUCTOR_MESSAGE
+    for(auto & p : m_logList) {
+        if(p.second) {
+            delete p.second; //Delete all logs!
         }
     }
 };
@@ -187,21 +190,25 @@ Log* LogManager::createLog(const std::string & name, bool toConsole, bool toFile
     }
 
     if(toConsole) {
-        pLog->addSink(new LogSinkCout(name + std::string("-CoutSink")));
-
+        if(! pLog->addSink(new LogSinkCout(name + std::string("-CoutSink")))){
+            ERRORMSG("Error in adding CoutSink to Log: " << name );
+        };
     }
     if(toFile) {
-        pLog->addSink(new LogSinkFile(name + std::string("-FileSink"),filePath));
+        if(! pLog->addSink(new LogSinkFile(name + std::string("-FileSink"),filePath))){
+            ERRORMSG("Error in adding FileSink to Log: " << name );
+        };
     }
     registerLog(pLog);
     return pLog;
 };
 
-void LogManager::destroyLog(const std::string &name) {
+bool LogManager::destroyLog(const std::string &name) {
     std::lock_guard<std::mutex> l(m_busy_mutex);
 
     LogListIteratorType it = m_logList.find(name);
-    ASSERTMSG(it != m_logList.end(),"This Log does not exist!");
+    ASSERTMSG(it == m_logList.end(),"This Log does not exist!");
+
     if( it != m_logList.end() ) {
         ASSERTMSG(it->second != nullptr,"This Log has Null Pointer!");
         if(it->second) {
@@ -209,28 +216,36 @@ void LogManager::destroyLog(const std::string &name) {
         }
         // Remove from list;
         m_logList.erase(it);
+        return true;
     }
+    return false;
 };
 
-void LogManager::destroyLog(Log * & log) {
+bool LogManager::destroyLog(Log * & log) {
+    if(!log){
+        return false;
+    }
+
     std::lock_guard<std::mutex> l(m_busy_mutex);
     LogListIteratorType it;
     for(it = m_logList.begin(); it != m_logList.end(); it++){
-            if(it->second && it->second == log) {
-                delete it->second; // Delete Log
-                log = nullptr;
-            }
+        if(it->second == log) {
+            delete it->second; // Delete Log
+            log = nullptr;
             // Remove from list;
             m_logList.erase(it);
-            return;
+            return true;
+        }
     }
-    ASSERTMSG(it != m_logList.end(),"This Log does not exist!");
+    ASSERTMSG(it == m_logList.end(),"This Log does not exist!");
+    return false;
 };
 
-void LogManager::registerLog(Log * log, bool useTimer) {
-    ASSERTMSG(log != nullptr,"This Log has Null Pointer!");
+void LogManager::registerLog(Log * log, bool useTimer){
+    if(!log){
+        ERRORMSG("This Log has Null Pointer!");
+    }
     std::lock_guard<std::mutex> l(m_busy_mutex);
-
     if(useTimer){
         log->setTimer(&m_globalClock);
     }

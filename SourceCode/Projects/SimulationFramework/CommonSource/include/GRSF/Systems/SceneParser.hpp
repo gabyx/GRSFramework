@@ -193,28 +193,28 @@ public:
     }
 
     GeometryModuleType * getGeometryModule() {
-        return m_pGeometryModule;
+        return m_pGeometryModule.get();
     }
     SettingsModuleType * getSettingsModule() {
-        return m_pSettingsModule;
+        return m_pSettingsModule.get();
     }
     ExternalForcesModuleType * getExternalForcesModule() {
-        return m_pExternalForcesModule;
+        return m_pExternalForcesModule.get();
     }
     ContactParamModuleType * getContactParamModule() {
-        return m_pContactParamModule;
+        return m_pContactParamModule.get();
     }
     BodyModuleType * getBodyModule() {
-        return m_pBodyModule;
+        return m_pBodyModule.get();
     }
     InitStatesModuleType * getInitStatesModule() {
-        return m_pInitStatesModule;
+        return m_pInitStatesModule.get();
     }
     VisModuleType * getVisModule() {
-        return m_pVisModule;
+        return m_pVisModule.get();
     }
     MPIModuleType * getMPIModule() {
-        return m_pMPIModule;
+        return m_pMPIModule.get();
     }
 
 protected:

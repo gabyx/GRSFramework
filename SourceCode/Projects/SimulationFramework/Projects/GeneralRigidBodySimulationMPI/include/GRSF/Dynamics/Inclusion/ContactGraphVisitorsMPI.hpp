@@ -24,18 +24,23 @@ public:
     using ContactGraphType = TContactGraph;
 
 
-    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
+    using NodeDataType = typename ContactGraphType::SplitBodyNodeDataType;
 
     SorProxStepSplitNodeVisitor(const InclusionSolverSettingsType &settings, bool & globalConverged, const unsigned int & globalIterationNeeded):
                            m_settings(settings),m_bConverged(globalConverged),
                            m_globalIterationCounter(globalIterationNeeded)
     {}
 
+    template<typename TNode>
+    inline void operator()(TNode & node){
+        dispatch(node.getData());
+    }
+
     void setLog(Logging::Log * solverLog){
         m_pSolverLog = solverLog;
     }
 
-    void visitNode(NodeType& node){
+    void dispatch(NodeDataType& node){
 
         // Calculate the exact values for the billateral split nodes
 
@@ -105,20 +110,15 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
     using ContactGraphType = TContactGraph;
 
-    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
+    using NodeDataType = typename ContactGraphType::SplitBodyNodeDataType;
 
-    SorProxInitSplitNodeVisitor()
-    {}
+    template<typename TNode>
+    void operator()(TNode & node){
+        dispatch(node.getData());
+    }
 
-    void visitNode(NodeType& node){
-
-        auto mult = node.getMultiplicity();
-        node.m_multiplicityWeights.setConstant(mult,1.0/mult);
-
-        node.m_uBack.setZero(NDOFuBody*mult);
-        node.m_uFront.setZero(NDOFuBody*mult);
-        node.m_deltaLambda.setZero( NDOFuBody * node.m_nConstraints);
-        node.m_gamma.setZero(node.m_nConstraints*NDOFuBody);
+    void dispatch(NodeDataType& nodeData){
+        nodeData.initData();
     }
 
 };
@@ -133,12 +133,17 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
     using ContactGraphType = TContactGraph;
 
-    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
+    using NodeDataType = typename ContactGraphType::SplitBodyNodeDataType;
 
     SplitNodeCheckUpdateVisitor()
     {}
 
-    void visitNode(NodeType& node){
+    template<typename TNode>
+    void operator()(TNode & node){
+        dispatch(node.getData());
+    }
+
+    inline void dispatch(NodeDataType& node){
         for( auto it = node.m_partRanks.begin(); it != node.m_partRanks.end(); ++it){
             if(it->second.m_bGotUpdate == false){
                 ERRORMSG("Rank: " << it->first << " in SplitNode for body id: "
@@ -161,12 +166,16 @@ public:
 
     using ContactGraphType = TContactGraph;
 
-    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
+    using NodeDataType = typename ContactGraphType::SplitBodyNodeDataType;
 
     SetWeightingLocalBodiesSplitNodeVisitor(){};
 
+    template<typename TNode>
+    inline void operator()(TNode & node){
+        dispatch(node.getData());
+    }
 
-    inline void visitNode(NodeType& node){
+    inline void dispatch(NodeDataType& node){
         auto mult = node.getMultiplicity();
         RigidBodyFunctions::changeBodyToSplitWeighting(node.m_pBody, mult, node.m_multiplicityWeights(0));
     }
@@ -178,11 +187,16 @@ public:
 
     using ContactGraphType = TContactGraph;
 
-    using NodeType = typename ContactGraphType::SplitBodyNodeDataType;
+    using NodeDataType = typename ContactGraphType::SplitBodyNodeDataType;
 
     ResetWeightingLocalBodiesSplitNodeVisitor(){};
 
-    inline void visitNode(NodeType& node){
+    template<typename TNode>
+    inline void operator()(TNode & node){
+        dispatch(node.getData());
+    }
+
+    inline void dispatch(NodeDataType& node){
         RigidBodyFunctions::changeBodyToNormalWeighting(node.m_pBody);
     }
 };

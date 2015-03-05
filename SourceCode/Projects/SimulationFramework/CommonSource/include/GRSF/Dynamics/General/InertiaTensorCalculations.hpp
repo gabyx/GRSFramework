@@ -81,8 +81,8 @@ namespace MassComputations{
         }
 
         void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom)  {
-            auto r = sphereGeom->m_radius*sphereGeom->m_radius;
-            m_rigidBody->m_mass =  r*r*r*4.0/3.0*M_PI * m_density;
+            PREC d = 2*sphereGeom->m_radius;
+            m_rigidBody->m_mass = d*d*d/3.0*M_PI_2*m_density;
         }
 
         void operator()(std::shared_ptr<const BoxGeometry > & box)  {

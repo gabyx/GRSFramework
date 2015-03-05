@@ -30,17 +30,23 @@ struct LayoutConfig{
    using PREC = TPREC;
    using LayoutType = TLayout;
 
-   using MatrixQBodyUBody = Eigen::Matrix<PREC, LayoutType::NDOFqBody, LayoutType::NDOFuBody>   ;
-   using VectorQBody = Eigen::Matrix<PREC, LayoutType::NDOFqBody, 1>                       ;
-   using VectorUBody = Eigen::Matrix<PREC, LayoutType::NDOFuBody, 1>                       ;
-
-   using MatrixQBodyDyn = Eigen::Matrix<PREC, LayoutType::NDOFqBody, Eigen::Dynamic >         ;
-   using MatrixUBodyDyn = Eigen::Matrix<PREC, LayoutType::NDOFuBody, Eigen::Dynamic >         ;
-   using MatrixDynQBody = Eigen::Matrix<PREC, Eigen::Dynamic, LayoutType::NDOFqBody >         ;
-   using MatrixDynUBody = Eigen::Matrix<PREC, Eigen::Dynamic, LayoutType::NDOFuBody>          ;
 
    // Static Vectors/Matrices
    DEFINE_MATRIX_TYPES_OF( PREC );
+
+   using MatrixQBodyUBody = MatrixStatStat< LayoutType::NDOFqBody, LayoutType::NDOFuBody>   ;
+   using VectorQBody = MatrixStatStat< LayoutType::NDOFqBody, 1>                       ;
+   using VectorUBody = MatrixStatStat< LayoutType::NDOFuBody, 1>                       ;
+
+   using MatrixQBodyDyn = MatrixStatDyn< LayoutType::NDOFqBody>         ;
+   using MatrixUBodyDyn = MatrixStatDyn< LayoutType::NDOFuBody>         ;
+   using MatrixDynQBody = MatrixDynStat< LayoutType::NDOFqBody >         ;
+   using MatrixDynUBody = MatrixDynStat< LayoutType::NDOFuBody>          ;
+
+
+   using MatrixUBody3 = MatrixStatStat<LayoutType::NDOFuBody,3>;
+   using MatrixQBody3 = MatrixStatStat<LayoutType::NDOFqBody,3>;
+
 
 };
 
@@ -50,7 +56,8 @@ struct LayoutConfig{
 * @brief This macro is used to typedef all template arguments in a class with e.g template argument typename â€œLayoutConfigâ€
 */
 #define DEFINE_LAYOUT_CONFIG_TYPES_OF( _LayoutConfigName_ ) \
-   using PREC = typename _LayoutConfigName_::PREC;             \
+   using PREC = typename _LayoutConfigName_::PREC;    \
+   DEFINE_MATRIX_TYPES_OF( PREC ); \
    static int const NDOFqBody = _LayoutConfigName_::LayoutType::NDOFqBody; \
    static int const NDOFuBody = _LayoutConfigName_::LayoutType::NDOFuBody; \
    using VectorQBody = typename _LayoutConfigName_::VectorQBody;       \
@@ -60,7 +67,7 @@ struct LayoutConfig{
    using MatrixQBodyUBody = typename _LayoutConfigName_::MatrixQBodyUBody; \
    using MatrixDynQBody = typename _LayoutConfigName_::MatrixDynQBody;       \
    using MatrixDynUBody = typename _LayoutConfigName_::MatrixDynUBody;       \
-   DEFINE_MATRIX_TYPES_OF( PREC );
-
+   using MatrixUBody3 = typename _LayoutConfigName_::MatrixUBody3;       \
+   using MatrixQBody3 = typename _LayoutConfigName_::MatrixQBody3;       \
 
 #endif
