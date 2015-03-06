@@ -2352,14 +2352,14 @@ private:
 
         // Statistics
         PREC & groupMass = m_totalMassGroup[m_groupId];
-        std::cout << "groupMass: " << groupMass << std::endl;
+
         std::string s;
         XMLNodeType n;
         if(Options::m_allocateSimBodies) {
             // First allocate a new SolverDate structure
             for(auto & b : m_bodiesGroup)  {
                 b.m_body->m_pSolverData = new typename RigidBodyType::BodySolverDataType();
-                // apply first to all bodies :-)
+                // apply first to all bodies
                 b.m_body->m_eMode = m_eBodiesState;
             }
 

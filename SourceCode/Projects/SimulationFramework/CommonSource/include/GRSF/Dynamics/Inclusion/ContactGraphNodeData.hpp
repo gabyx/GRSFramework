@@ -97,7 +97,6 @@ public:
 
     RigidBodyType * m_pBody; // Tells to which body this edges belongs!
 
-
 };
 
 
