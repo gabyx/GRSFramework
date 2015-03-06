@@ -191,7 +191,7 @@ private:
         void apply(UCFNodeDataType & nodeData) {
             const unsigned int dimSet = ContactModels::getLambdaDim(ContactModels::Enum::UCF);
             //nodeData.m_eps.setZero(dimSet);
-            //nodeData.m_chi.setZero(dimSet);
+            nodeData.m_chi.setZero(dimSet);
 
             // Set epsilon  values
             using CMT = typename CONTACTMODELTYPE(ContactModels::Enum::UCF);
