@@ -30,9 +30,9 @@ namespace InertiaTensorComputations{
 
 
         void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom)  {
-            m_rigidBody->m_K_Theta_S(0) = 2.0/5.0 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
-            m_rigidBody->m_K_Theta_S(1) = 2.0/5.0 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
-            m_rigidBody->m_K_Theta_S(2) = 2.0/5.0 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
+            m_rigidBody->m_K_Theta_S(0) = 0.4 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
+            m_rigidBody->m_K_Theta_S(1) = 0.4 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
+            m_rigidBody->m_K_Theta_S(2) = 0.4 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
         }
 
         void operator()(std::shared_ptr<const BoxGeometry > & box)  {
