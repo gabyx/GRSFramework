@@ -5,10 +5,14 @@
 
 #include RigidBody_INCLUDE_FILE
 
+
+template<typename TRigidBody>
 class AddGyroTermVisitor : public boost::static_visitor<> {
 public:
 
-    DEFINE_RIGIDBODY_CONFIG_TYPES
+    DEFINE_LAYOUT_CONFIG_TYPES
+    using RigidBodyType = TRigidBody;
+    DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 
     AddGyroTermVisitor(RigidBodyType * body):
     m_rigidBody(body)
@@ -17,7 +21,7 @@ public:
     }
 
 
-    inline void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom) {
+    inline void operator()(SphereGeomPtrType & sphereGeom) {
         return;
     }
 
@@ -36,8 +40,8 @@ public:
     private:
 
     inline void addGyroTerm(){
-        Vector3 K_omega_IK = m_rigidBody->m_pSolverData->m_uBuffer.m_back.tail<3>();
-        m_rigidBody->m_h_term.tail<3>() -= K_omega_IK.cross((m_rigidBody->m_K_Theta_S.asDiagonal() * K_omega_IK).eval());
+        Vector3 K_omega_IK = m_rigidBody->m_pSolverData->m_uBuffer.m_back.template tail<3>();
+        m_rigidBody->m_h_term.template tail<3>() -= K_omega_IK.cross((m_rigidBody->m_K_Theta_S.asDiagonal() * K_omega_IK).eval());
     }
 
     RigidBodyType * m_rigidBody;

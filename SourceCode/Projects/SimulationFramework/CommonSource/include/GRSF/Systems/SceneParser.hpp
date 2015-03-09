@@ -235,8 +235,6 @@ protected:
             ERRORMSG("File name is empty!");
         }
 
-
-
         // Load the file if necessary
         if(file != m_currentParseFilePath) {
             loadFile(file);

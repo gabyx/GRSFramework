@@ -11,19 +11,12 @@
 #include "GRSF/Common/LogDefines.hpp"
 
 #include "GRSF/Dynamics/General/RigidBodyId.hpp"
-
-
-#include "GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/PlaneGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/BoxGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/MeshGeometry.hpp"
-
 #include "GRSF/Dynamics/Buffers/FrontBackBuffer.hpp"
-
 #include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
 
+#include "GRSF/Dynamics/Collision/Geometries.hpp"
 #include RigidBodySolverData_INCLUDE_FILE
+
 
 /**
 * @ingroup DynamicsGeneral
@@ -35,6 +28,7 @@ class RigidBodyBase{
 public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     using AbsoluteBaseType = RigidBodyBase; ///< The absolut base type where m_id is defined, for the rigid body container
@@ -51,11 +45,15 @@ public:
     using GlobalGeomIdType = unsigned int;
     GlobalGeomIdType m_globalGeomId; ///< The Id for the global geometry, if this is 0 then the geometry belongs to the body and gets deallocated, otherwise not
 
+
+    /** Define Geometry Ptr Types */
+    using SphereGeomPtrType     = std::shared_ptr<const SphereGeometry >;
+    using HalfspaceGeomPtrType  = std::shared_ptr<const HalfspaceGeometry>;
+    using BoxGeomPtrType        = std::shared_ptr<const BoxGeometry >;
+    using MeshPtrType           = std::shared_ptr<const MeshGeometry >;
+
     typedef boost::variant<
-      std::shared_ptr<const SphereGeometry >,
-      std::shared_ptr<const HalfspaceGeometry > ,
-      std::shared_ptr<const BoxGeometry >,
-      std::shared_ptr<const MeshGeometry >
+      SphereGeomPtrType, HalfspaceGeomPtrType , BoxGeomPtrType, MeshPtrType
     > GeometryType;
 
     GeometryType m_geometry; ///< A boost::variant which takes different geometry shared pointers.
