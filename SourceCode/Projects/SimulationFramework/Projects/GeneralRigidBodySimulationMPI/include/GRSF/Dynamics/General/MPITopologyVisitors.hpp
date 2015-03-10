@@ -35,7 +35,8 @@ namespace TopologyVisitors {
                 return false;
             }
             inline bool operator()(const boost::blank & b) {
-                ASSERTMSG(false,"Topo is not initialized!");
+                ERRORMSG("Topo is not initialized!");
+                return false;
             }
         private:
             const Vector3 & m_point;
@@ -59,7 +60,8 @@ namespace TopologyVisitors {
         }
 
         inline bool operator()(const boost::blank & b) {
-            ASSERTMSG(false,"Topo is not initialized!");
+            ERRORMSG("Topo is not initialized!");
+            return false;
         }
     private:
         const typename ProcessTopologyBase::RigidBodyType * m_body;

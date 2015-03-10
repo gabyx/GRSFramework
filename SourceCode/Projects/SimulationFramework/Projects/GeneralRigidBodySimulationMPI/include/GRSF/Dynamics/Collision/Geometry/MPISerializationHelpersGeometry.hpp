@@ -66,6 +66,7 @@ class GeomSerialization{
 private:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
+    DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 
     using GeometryType = typename RigidBodyType::GeometryType;
     using VariantTypes = typename GeometryType::types;

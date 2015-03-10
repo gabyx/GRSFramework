@@ -205,7 +205,7 @@ private:
             m_nodeDataInit.apply(nodeData);
 
             // FIRST BODY!
-            RigidBodyType * pBody = pCollData->m_pBody1;
+            RigidBodyType * pBody = pCollData->m_pBody[0];
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 initNodeSimBody<1,addEdges>(pNode,nodeData,pBody,isRemote.first);
             } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
@@ -213,7 +213,7 @@ private:
             }
 
             // SECOND BODY!
-            pBody = pCollData->m_pBody2;
+            pBody = pCollData->m_pBody[1];
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 initNodeSimBody<2,addEdges>(pNode,nodeData,pBody,isRemote.second);
             } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
@@ -262,7 +262,7 @@ private:
                 LOGSLLEVEL2_CONTACT(m_p->m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pBody->m_id) << std::endl;)
 
                 //Add to the neighbour data if remote contact
-                if(nodeData.m_nodeColor = EnumConversion::toIntegral(NodeColor::REMOTENODE)){
+                if(nodeData.m_nodeColor == EnumConversion::toIntegral(NodeColor::REMOTENODE)){
                     m_p->m_pNbDataMap->getNeighbourData(pBody->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pBody);
                     // if this body is already added it does nothing!
                 }else{
@@ -282,9 +282,9 @@ private:
 
             //Link to FrontBackBuffer
             if(bodyNr==1) {
-                nodeData.m_u1BufferPtr = & pBody->m_pSolverData->m_uBuffer;
+                nodeData.m_uBufferPtr[0] = & pBody->m_pSolverData->m_uBuffer;
             } else {
-                nodeData.m_u2BufferPtr = & pBody->m_pSolverData->m_uBuffer;
+                nodeData.m_uBufferPtr[1] = & pBody->m_pSolverData->m_uBuffer;
             }
 
             if( addEdges ) {
