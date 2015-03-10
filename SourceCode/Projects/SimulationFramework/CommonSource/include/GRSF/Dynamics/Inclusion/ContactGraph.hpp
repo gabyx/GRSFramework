@@ -258,9 +258,9 @@ private:
 
             //Link to FrontBackBuffer
             if(bodyNr==1) {
-                nodeData.m_u1BufferPtr = & pBody->m_pSolverData->m_uBuffer;
+                nodeData.m_uBufferPtr[0] = & pBody->m_pSolverData->m_uBuffer;
             } else {
-                nodeData.m_u2BufferPtr = & pBody->m_pSolverData->m_uBuffer;
+                nodeData.m_uBufferPtr[1] = & pBody->m_pSolverData->m_uBuffer;
             }
 
 
