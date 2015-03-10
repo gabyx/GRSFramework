@@ -23,8 +23,7 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW // not required
 
-    MatrixUBody3 m_W_body1;
-    MatrixUBody3 m_W_body2;
+    MatrixUBody3 m_W_body[2];
     Vector3 m_chi;
 
     Vector3  m_eps;
@@ -105,8 +104,7 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW // not required
 
-    VectorUBody  m_W_body1;
-    VectorUBody  m_W_body2;
+    VectorUBody  m_W_body[2];
     PREC m_chi;
 
     const CollisionData * m_pCollData = nullptr;

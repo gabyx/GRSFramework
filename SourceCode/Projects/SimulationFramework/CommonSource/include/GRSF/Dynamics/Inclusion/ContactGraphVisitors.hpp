@@ -80,11 +80,11 @@ public:
 
         nodeData.m_G_ii.setZero();
         if(nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
-            nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
+            nodeData.m_G_ii += nodeData.m_W_body[0].transpose() * nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body[0] ;
         }
         // SECOND BODY!
         if(nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
-            nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
+            nodeData.m_G_ii += nodeData.m_W_body[1].transpose() * nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body[1] ;
         }
 
 
@@ -187,11 +187,11 @@ public:
 
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
-                nodeData.m_LambdaFront += nodeData.m_W_body1.transpose() * nodeData.m_uBufferPtr[0]->m_front ;
+                nodeData.m_LambdaFront += nodeData.m_W_body[0].transpose() * nodeData.m_uBufferPtr[0]->m_front ;
             }
             // SECOND BODY!
             if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
-                nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_uBufferPtr[1]->m_front;
+                nodeData.m_LambdaFront += nodeData.m_W_body[1].transpose() * nodeData.m_uBufferPtr[1]->m_front;
             }
 
 
@@ -276,7 +276,7 @@ public:
 
                 // Velocity update (wahrscheinlich Auslöschung bei Lambda)
                 nodeData.m_uBufferPtr[0]->m_front = uCache1
-                                                  + nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * deltaLambda;
+                                                  + nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body[0] * deltaLambda;
 
                 //Sepcial update (no differences)
                 //doVelocityUpdate<1>(nodeData);
@@ -323,7 +323,7 @@ public:
 
                 // Velocity update (wahrscheinlich Auslöschung bei Lambda)
                 nodeData.m_uBufferPtr[1]->m_front = uCache2
-                                                  + nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * deltaLambda ;
+                                                  + nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body[1] * deltaLambda ;
 
                 //Sepcial update (no differences)
                 //doVelocityUpdate<2>(nodeData);
@@ -444,12 +444,12 @@ public:
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache1 = nodeData.m_uBufferPtr[0]->m_front;
-                lambda_N += nodeData.m_W_body1.transpose().row(0) * uCache1 ;
+                lambda_N += nodeData.m_W_body[0].transpose().row(0) * uCache1 ;
             }
             // SECOND BODY!
             if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache2 = nodeData.m_uBufferPtr[1]->m_front;
-                lambda_N += nodeData.m_W_body2.transpose().row(0) * uCache2;
+                lambda_N += nodeData.m_W_body[1].transpose().row(0) * uCache2;
             }
 
             // Damping
@@ -470,12 +470,12 @@ public:
             if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_uBufferPtr[0]->m_front = uCache1
                                                   + nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() *
-                                                  nodeData.m_W_body1.col(0) * deltaLambda_N;
+                                                  nodeData.m_W_body[0].col(0) * deltaLambda_N;
             }
             if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_uBufferPtr[1]->m_front = uCache2
                                                   + nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() *
-                                                  nodeData.m_W_body2.col(0) * deltaLambda_N;
+                                                  nodeData.m_W_body[1].col(0) * deltaLambda_N;
             }
 
 
@@ -485,11 +485,11 @@ public:
             Vector2 lambda_T = nodeData.m_b.template tail<2>();
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
-                lambda_T += nodeData.m_W_body1.transpose().template bottomRows<2>() * nodeData.m_uBufferPtr[0]->m_front ;
+                lambda_T += nodeData.m_W_body[0].transpose().template bottomRows<2>() * nodeData.m_uBufferPtr[0]->m_front ;
             }
             // SECOND BODY!
             if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
-                lambda_T += nodeData.m_W_body2.transpose().template bottomRows<2>() * nodeData.m_uBufferPtr[1]->m_front;
+                lambda_T += nodeData.m_W_body[1].transpose().template bottomRows<2>() * nodeData.m_uBufferPtr[1]->m_front;
             }
             // Damping
             if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD) {
@@ -513,7 +513,7 @@ public:
             if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 nodeData.m_uBufferPtr[0]->m_front +=
-                    nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1.template rightCols<2>() * lambda_T;
+                    nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body[0].template rightCols<2>() * lambda_T;
 
 
                 LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_uBufferPtr[0]->m_front.transpose() << std::endl);
@@ -553,7 +553,7 @@ public:
             if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 nodeData.m_uBufferPtr[1]->m_front +=
-                    nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal()*nodeData.m_W_body2.template rightCols<2>() * lambda_T;
+                    nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal()*nodeData.m_W_body[1].template rightCols<2>() * lambda_T;
 
 
                 LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_uBufferPtr[1]->m_front.transpose() << std::endl);
@@ -685,12 +685,12 @@ public:
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache1 = nodeData.m_uBufferPtr[0]->m_front;
-                lambda_N += nodeData.m_W_body1.transpose().row(0) * uCache1 ;
+                lambda_N += nodeData.m_W_body[0].transpose().row(0) * uCache1 ;
             }
             // SECOND BODY!
             if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache2 = nodeData.m_uBufferPtr[1]->m_front;
-                lambda_N += nodeData.m_W_body2.transpose().row(0) * uCache2;
+                lambda_N += nodeData.m_W_body[1].transpose().row(0) * uCache2;
             }
 
             // Damping
@@ -711,12 +711,12 @@ public:
             if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_uBufferPtr[0]->m_front = uCache1
                                                   + nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() *
-                                                  nodeData.m_W_body1.col(0) * deltaLambda_N;
+                                                  nodeData.m_W_body[0].col(0) * deltaLambda_N;
             }
             if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_uBufferPtr[1]->m_front = uCache2
                                                   + nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() *
-                                                  nodeData.m_W_body2.col(0) * deltaLambda_N;
+                                                  nodeData.m_W_body[1].col(0) * deltaLambda_N;
             }
 
             if(m_lastUpdate){
@@ -778,11 +778,11 @@ public:
             Vector2 lambda_T = nodeData.m_b.template tail<2>();
             // FIRST BODY!
             if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
-                lambda_T += nodeData.m_W_body1.transpose().template bottomRows<2>() * nodeData.m_uBufferPtr[0]->m_front ;
+                lambda_T += nodeData.m_W_body[0].transpose().template bottomRows<2>() * nodeData.m_uBufferPtr[0]->m_front ;
             }
             // SECOND BODY!
             if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
-                lambda_T += nodeData.m_W_body2.transpose().template bottomRows<2>() * nodeData.m_uBufferPtr[1]->m_front;
+                lambda_T += nodeData.m_W_body[1].transpose().template bottomRows<2>() * nodeData.m_uBufferPtr[1]->m_front;
             }
             // Damping
             if(nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCFD) {
@@ -805,7 +805,7 @@ public:
             if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 nodeData.m_uBufferPtr[0]->m_front +=
-                    nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1.template rightCols<2>() * lambda_T;
+                    nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body[0].template rightCols<2>() * lambda_T;
 
 
                 LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_uBufferPtr[0]->m_front.transpose() << std::endl);
@@ -845,7 +845,7 @@ public:
             if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 nodeData.m_uBufferPtr[1]->m_front +=
-                    nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal()*nodeData.m_W_body2.template rightCols<2>() * lambda_T;
+                    nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal()*nodeData.m_W_body[1].template rightCols<2>() * lambda_T;
 
 
                 LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_uBufferPtr[1]->m_front.transpose() << std::endl);
@@ -996,34 +996,34 @@ public:
         inline void operator()(GeometryPtrType & g){
             if(bodyNr == 1) {
                 //Set matrix size!
-                //nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                //nodeData.m_W_body[0].setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
                 m_rotJacobi.set(m_pCollData->m_pBody[0], m_pCollData->m_r_SC[0]);
                 // N direction =================================================
-                m_pNodeData->m_W_body1.col(0).template head<3>() = - m_pCollData->m_cFrame.m_e_z; // I frame
-                m_pNodeData->m_W_body1.col(0).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_z;
+                m_pNodeData->m_W_body[0].col(0).template head<3>() = - m_pCollData->m_cFrame.m_e_z; // I frame
+                m_pNodeData->m_W_body[0].col(0).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_z;
 
                 // T1 direction =================================================
-                m_pNodeData->m_W_body1.col(1).template head<3>() = - m_pCollData->m_cFrame.m_e_x; // I frame
-                m_pNodeData->m_W_body1.col(1).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_x;
+                m_pNodeData->m_W_body[0].col(1).template head<3>() = - m_pCollData->m_cFrame.m_e_x; // I frame
+                m_pNodeData->m_W_body[0].col(1).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_x;
 
                 // T2 direction =================================================
-                m_pNodeData->m_W_body1.col(2).template head<3>() = - m_pCollData->m_cFrame.m_e_y; // I frame
-                m_pNodeData->m_W_body1.col(2).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_y;
+                m_pNodeData->m_W_body[0].col(2).template head<3>() = - m_pCollData->m_cFrame.m_e_y; // I frame
+                m_pNodeData->m_W_body[0].col(2).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_y;
             } else {
                 //Set matrix size!
-                //m_pNodeData->m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                //m_pNodeData->m_W_body[1].setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
                 m_rotJacobi.set(m_pCollData->m_pBody[1], m_pCollData->m_r_SC[1]);
                 // N direction =================================================
-                m_pNodeData->m_W_body2.col(0).template head<3>() =  m_pCollData->m_cFrame.m_e_z; // I frame
-                m_pNodeData->m_W_body2.col(0).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_z;
+                m_pNodeData->m_W_body[1].col(0).template head<3>() =  m_pCollData->m_cFrame.m_e_z; // I frame
+                m_pNodeData->m_W_body[1].col(0).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_z;
 
                 // T1 direction =================================================
-                m_pNodeData->m_W_body2.col(1).template head<3>() =  m_pCollData->m_cFrame.m_e_x; // I frame
-                m_pNodeData->m_W_body2.col(1).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_x;
+                m_pNodeData->m_W_body[1].col(1).template head<3>() =  m_pCollData->m_cFrame.m_e_x; // I frame
+                m_pNodeData->m_W_body[1].col(1).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_x;
 
                 // T2 direction =================================================
-                m_pNodeData->m_W_body2.col(2).template head<3>() =  m_pCollData->m_cFrame.m_e_y; // I frame
-                m_pNodeData->m_W_body2.col(2).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_y;
+                m_pNodeData->m_W_body[1].col(2).template head<3>() =  m_pCollData->m_cFrame.m_e_y; // I frame
+                m_pNodeData->m_W_body[1].col(2).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_y;
             }
         }
 
@@ -1031,34 +1031,34 @@ public:
         inline void operator()(SphereGeomPtrType & g){
             if(bodyNr == 1) {
                 //Set matrix size!
-                //m_pNodeData->m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                //m_pNodeData->m_W_body[0].setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
                 m_rotJacobi.set(m_pCollData->m_pBody[0], m_pCollData->m_r_SC[0]);
                 // N direction =================================================
-                m_pNodeData->m_W_body1.col(0).template head<3>() = - m_pCollData->m_cFrame.m_e_z; // I frame
-                m_pNodeData->m_W_body1.col(0).template tail<3>().setZero(); ///< sepzial operation here: m_I_JacobiT_rot * contact normal = 0;
+                m_pNodeData->m_W_body[0].col(0).template head<3>() = - m_pCollData->m_cFrame.m_e_z; // I frame
+                m_pNodeData->m_W_body[0].col(0).template tail<3>().setZero(); ///< sepzial operation here: m_I_JacobiT_rot * contact normal = 0;
 
                 // T1 direction =================================================
-                m_pNodeData->m_W_body1.col(1).template head<3>() = - m_pCollData->m_cFrame.m_e_x; // I frame
-                m_pNodeData->m_W_body1.col(1).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_x;
+                m_pNodeData->m_W_body[0].col(1).template head<3>() = - m_pCollData->m_cFrame.m_e_x; // I frame
+                m_pNodeData->m_W_body[0].col(1).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_x;
 
                 // T2 direction =================================================
-                m_pNodeData->m_W_body1.col(2).template head<3>() = - m_pCollData->m_cFrame.m_e_y; // I frame
-                m_pNodeData->m_W_body1.col(2).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_y;
+                m_pNodeData->m_W_body[0].col(2).template head<3>() = - m_pCollData->m_cFrame.m_e_y; // I frame
+                m_pNodeData->m_W_body[0].col(2).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_y;
             } else {
                 //Set matrix size!
-                //m_pNodeData->m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                //m_pNodeData->m_W_body[1].setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
                 m_rotJacobi.set(m_pCollData->m_pBody[1], m_pCollData->m_r_SC[1]);
                 // N direction =================================================
-                m_pNodeData->m_W_body2.col(0).template head<3>() =  m_pCollData->m_cFrame.m_e_z; // I frame
-                m_pNodeData->m_W_body2.col(0).template tail<3>().setZero(); ///< sepzial operation here: m_I_JacobiT_rot * contact normal = 0;
+                m_pNodeData->m_W_body[1].col(0).template head<3>() =  m_pCollData->m_cFrame.m_e_z; // I frame
+                m_pNodeData->m_W_body[1].col(0).template tail<3>().setZero(); ///< sepzial operation here: m_I_JacobiT_rot * contact normal = 0;
 
                 // T1 direction =================================================
-                m_pNodeData->m_W_body2.col(1).template head<3>() =  m_pCollData->m_cFrame.m_e_x; // I frame
-                m_pNodeData->m_W_body2.col(1).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_x;
+                m_pNodeData->m_W_body[1].col(1).template head<3>() =  m_pCollData->m_cFrame.m_e_x; // I frame
+                m_pNodeData->m_W_body[1].col(1).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_x;
 
                 // T2 direction =================================================
-                m_pNodeData->m_W_body2.col(2).template head<3>() =  m_pCollData->m_cFrame.m_e_y; // I frame
-                m_pNodeData->m_W_body2.col(2).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_y;
+                m_pNodeData->m_W_body[1].col(2).template head<3>() =  m_pCollData->m_cFrame.m_e_y; // I frame
+                m_pNodeData->m_W_body[1].col(2).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_y;
             }
         }
 
@@ -1119,21 +1119,21 @@ public:
             if(pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
 
                 // m_front is zero here-> see DynamicsSystem sets it to zero!
-                nodeData.m_uBufferPtr[0]->m_front +=  pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
+                nodeData.m_uBufferPtr[0]->m_front +=  pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body[0] * nodeData.m_LambdaBack );
                 /// + initial values M^⁻1 W lambda0 from percussion pool
 
-                nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body1.transpose() * nodeData.m_uBufferPtr[0]->m_back /* m_u_s */ ;
-                nodeData.m_G_ii += nodeData.m_W_body1.transpose() * pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
+                nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body[0].transpose() * nodeData.m_uBufferPtr[0]->m_back /* m_u_s */ ;
+                nodeData.m_G_ii += nodeData.m_W_body[0].transpose() * pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body[0] ;
             }
             // SECOND BODY!
             if(pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 // m_front is zero here-> see DynamicsSystem sets it to zero!
-                nodeData.m_uBufferPtr[1]->m_front +=   pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack );
+                nodeData.m_uBufferPtr[1]->m_front +=   pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body[1] * nodeData.m_LambdaBack );
                 /// + initial values M^⁻1 W lambda0 from percussion pool
 
-                nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() *  nodeData.m_uBufferPtr[1]->m_back;
-                nodeData.m_G_ii += nodeData.m_W_body2.transpose() * pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
+                nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body[1].transpose() *  nodeData.m_uBufferPtr[1]->m_back;
+                nodeData.m_G_ii += nodeData.m_W_body[1].transpose() * pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body[1] ;
             }
 
             // add deltaGap / deltaT * 2 * alpha
