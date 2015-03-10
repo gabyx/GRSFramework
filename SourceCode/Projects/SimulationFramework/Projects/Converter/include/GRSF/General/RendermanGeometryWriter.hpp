@@ -11,6 +11,7 @@ class RendermanGeometryWriter: public boost::static_visitor<> {
     public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
+    DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 
     RendermanGeometryWriter(){}
 
@@ -18,7 +19,7 @@ class RendermanGeometryWriter: public boost::static_visitor<> {
         m_s = s;
     }
 
-    inline void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom) {
+    inline void operator()(SphereGeomPtrType & sphereGeom) {
 
 // Sphere
         *m_s << "Sphere " << sphereGeom->m_radius <<" "

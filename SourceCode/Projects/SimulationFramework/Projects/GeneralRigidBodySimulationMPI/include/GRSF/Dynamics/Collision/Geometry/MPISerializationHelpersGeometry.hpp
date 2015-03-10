@@ -94,7 +94,7 @@ private:
     template<typename Archive>
     struct GeomVis: public boost::static_visitor<>{
         GeomVis(Archive & ar): m_ar(ar){};
-        void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom)  {
+        void operator()(SphereGeomPtrType & sphereGeom)  {
             m_ar & const_cast<SphereGeometry&>(*sphereGeom);
         }
         void operator()(std::shared_ptr<const BoxGeometry > & box)  {

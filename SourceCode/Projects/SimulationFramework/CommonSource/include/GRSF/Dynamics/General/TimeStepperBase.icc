@@ -188,8 +188,8 @@ void TimeStepperBase<TDerived,TTraits>::doFirstHalfTimeStep(PREC ts, PREC timest
         // Add in to h-Term ==========
         pBody->m_h_term.setZero();
 
-        // Term omega x Theta * omega = if Theta is diagonal : for a Spehere for example!
-        AddGyroTermVisitor vis(pBody);
+        // Term omega x Theta * omega = 0 if Theta is a*I_3  for a Spehere for example!
+        AddGyroTermVisitor<RigidBodyType> vis(pBody);
 
         // =========================
 

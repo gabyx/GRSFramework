@@ -17,10 +17,8 @@
 #endif
 
 #include RigidBody_INCLUDE_FILE
-#include "GRSF/Dynamics/Collision/Geometry/Ray.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
-#include "GRSF/Dynamics/Collision/CollisionData.hpp"
 
+#include "GRSF/Dynamics/Collision/CollisionData.hpp"
 #include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
 #include "GRSF/Dynamics/General/MatrixHelpers.hpp"
 #include "GRSF/Dynamics/General/MakeCoordinateSystem.hpp"
@@ -38,7 +36,7 @@
 class ColliderAABBBase{
 public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-
+    DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 protected:
 
     const AABB * m_aabb = nullptr;
@@ -70,6 +68,7 @@ public:
 class ColliderAABB : protected ColliderAABBBase, public boost::static_visitor<> {
 public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 
     ColliderAABB(){}
 
@@ -88,7 +87,7 @@ public:
     }
 
     // Dispatch
-    void operator()(const std::shared_ptr<const SphereGeometry >  & sphereGeom1) {
+    void operator()(const SphereGeomPtrType  & sphereGeom1) {
         m_bOverlap = overlapSphere(m_pBody1->m_r_S, sphereGeom1->m_radius, *m_aabb);
     }
 
@@ -131,7 +130,7 @@ public:
     }
 
     // Dispatch
-    void operator()(const std::shared_ptr<const SphereGeometry >  & sphereGeom1) {
+    void operator()(const SphereGeomPtrType  & sphereGeom1) {
         // Transform the point of the body into frame K
         Vector3 p = m_A_IK->transpose() * m_pBody1->m_r_S;
         m_bOverlap = overlapSphere(p, sphereGeom1->m_radius, *m_aabb);
@@ -162,7 +161,7 @@ private:
 class ColliderRay : public boost::static_visitor<> {
 public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-
+    DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
     ColliderRay() {}
 
     /** Intersects body with a ray. If there is a intersection collData is filled and ray is not changed!
@@ -323,7 +322,7 @@ class ColliderBody : public boost::static_visitor<> {
 public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-
+    DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
     typedef std::vector<CollisionData* > CollisionSetType;
 
     /**
@@ -380,11 +379,11 @@ public:
 
     //For RigidBodies
 
-    void operator()(  const std::shared_ptr<const SphereGeometry >  & sphereGeom1 ,
-                      const std::shared_ptr<const SphereGeometry >  & sphereGeom2){
+    void operator()(  const SphereGeomPtrType  & sphereGeom1 ,
+                      const SphereGeomPtrType  & sphereGeom2){
         collide(sphereGeom1, sphereGeom2);
     }
-    void operator()(  const std::shared_ptr<const SphereGeometry >  & sphereGeom ,
+    void operator()(  const SphereGeomPtrType  & sphereGeom ,
                       const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom) {
         collide(sphereGeom, halfspaceGeom);
     }
@@ -396,7 +395,7 @@ public:
                       const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom) {
         collide(box, halfspaceGeom);
     }
-    void operator()(  const std::shared_ptr<const SphereGeometry >  & sphere ,
+    void operator()(  const SphereGeomPtrType  & sphere ,
                       const std::shared_ptr<const MeshGeometry >  & mesh) {
         collide(sphere, mesh);
     }
@@ -429,10 +428,10 @@ private:
     * @brief The collision functions. First geometry belongs to first body, second to second body!
     * @{
     */
-    inline void collide(const std::shared_ptr< const SphereGeometry >  & sphereGeom1,
-                        const std::shared_ptr< const SphereGeometry >  & sphereGeom2); ///< Sphere/Sphere collision.
+    inline void collide(const SphereGeomPtrType  & sphereGeom1,
+                        const SphereGeomPtrType  & sphereGeom2); ///< Sphere/Sphere collision.
 
-    inline void collide(const std::shared_ptr<const SphereGeometry >  & sphereGeom,
+    inline void collide(const SphereGeomPtrType  & sphereGeom,
                         const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom); ///< Sphere/Halfspace collision.
 
     inline void collide(const std::shared_ptr<const BoxGeometry >  & boxA,
@@ -441,7 +440,7 @@ private:
     inline void collide(const std::shared_ptr<const BoxGeometry >  & boxGeom,
                         const std::shared_ptr<const HalfspaceGeometry >  &halfspaceGeom); ///< Box/Halfspace collision.
 
-    inline void collide(const std::shared_ptr<const SphereGeometry >  & sphereGeom,
+    inline void collide(const SphereGeomPtrType  & sphereGeom,
                         const std::shared_ptr<const MeshGeometry >  & meshGeom); ///< Sphere/Mesh collision.
 
 
@@ -464,8 +463,8 @@ private:
 
 // Collision Functions ==============================================================================
 
-void ColliderBody::collide( const std::shared_ptr< const SphereGeometry >  & sphereGeom1,
-                            const std::shared_ptr< const SphereGeometry >  & sphereGeom2)
+void ColliderBody::collide( const SphereGeomPtrType  & sphereGeom1,
+                            const SphereGeomPtrType  & sphereGeom2)
 {
     // Do Collision for sphere to sphere
 
@@ -513,7 +512,7 @@ void ColliderBody::collide( const std::shared_ptr< const SphereGeometry >  & sph
 }
 
 
-void ColliderBody::collide( const std::shared_ptr<const SphereGeometry >  & sphereGeom,
+void ColliderBody::collide( const SphereGeomPtrType  & sphereGeom,
                             const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom)
 {
 
@@ -601,7 +600,7 @@ void ColliderBody::collide( const std::shared_ptr<const BoxGeometry >  & boxGeom
 
 
 
-void ColliderBody::collide(const std::shared_ptr<const SphereGeometry >  & sphereGeom,
+void ColliderBody::collide(const SphereGeomPtrType  & sphereGeom,
                            const std::shared_ptr<const MeshGeometry >  & meshGeom)
 {
     using namespace MatrixHelpers;

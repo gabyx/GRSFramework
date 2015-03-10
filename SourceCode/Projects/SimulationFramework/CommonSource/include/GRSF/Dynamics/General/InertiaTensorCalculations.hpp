@@ -9,9 +9,8 @@
 #include "GRSF/Common/AssertionDebug.hpp"
 #include "GRSF/Common/StaticAssert.hpp"
 
-#include "GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/BoxGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp"
+#include "GRSF/Dynamics/Collision/Geometries.hpp"
+
 
 namespace InertiaTensorComputations{
 
@@ -22,6 +21,8 @@ namespace InertiaTensorComputations{
 
         using RigidBodyType = TRigidBody;
 
+        DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
+
         CalculateInertiaTensorVisitor(RigidBodyType * body):
         m_rigidBody(body)
         {
@@ -29,7 +30,7 @@ namespace InertiaTensorComputations{
         }
 
 
-        void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom)  {
+        void operator()(SphereGeomPtrType & sphereGeom)  {
             m_rigidBody->m_K_Theta_S(0) = 0.4 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
             m_rigidBody->m_K_Theta_S(1) = 0.4 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
             m_rigidBody->m_K_Theta_S(2) = 0.4 * m_rigidBody->m_mass * (sphereGeom->m_radius*sphereGeom->m_radius);
@@ -72,6 +73,7 @@ namespace MassComputations{
     public:
 
         using RigidBodyType = TRigidBody;
+        DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
         using PREC = typename RigidBodyType::PREC;
 
         CalculateMassVisitor(RigidBodyType * body, PREC density):
@@ -80,7 +82,7 @@ namespace MassComputations{
             boost::apply_visitor(*this, m_rigidBody->m_geometry);
         }
 
-        void operator()(std::shared_ptr<const SphereGeometry > & sphereGeom)  {
+        void operator()(SphereGeomPtrType & sphereGeom)  {
             PREC d = 2*sphereGeom->m_radius;
             m_rigidBody->m_mass = d*d*d/3.0*M_PI_2*m_density;
         }

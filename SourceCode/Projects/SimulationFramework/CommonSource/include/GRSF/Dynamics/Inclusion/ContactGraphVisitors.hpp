@@ -947,9 +947,8 @@ public:
     using LambdaInit = LambdaInitLogic<ContactGraphType>;
 
     SorProxInitNodeVisitor(const InclusionSolverSettingsType &settings, PercussionPool * pool = nullptr)
-    : m_alpha(1), m_settings(settings), m_lambdaInit(pool)
-    {
-    }
+    : m_alpha(1), m_settings(settings), m_lambdaInit(pool), m_compW_body1(m_rotJacobi), m_compW_body2(m_rotJacobi)
+    {}
 
     ~SorProxInitNodeVisitor(){}
 
@@ -963,52 +962,112 @@ public:
     }
 
 
+    class GetRotJacobi{
+        private:
+        Matrix33 m_I_r_SiCi_hat;
+        public:
+        GetRotJacobi(){ m_I_r_SiCi_hat.setZero();}
+        Matrix33 m_I_JacobiT_rot; ///< this is the transpose rotational part of the Jacobi;
+
+        template<typename RigidBodyType>
+        void set(RigidBodyType * body, const Vector3 & I_r_SC){
+            updateSkewSymmetricMatrix<>( I_r_SC, m_I_r_SiCi_hat);
+            m_I_JacobiT_rot =  body->m_A_IK.transpose() * m_I_r_SiCi_hat;
+        }
+    };
+
     template<int bodyNr>
-    inline void computeW_UCF(UCFNodeDataType & nodeData) {
+    class ComputeW_UCF : public boost::static_visitor<void> {
+        public:
+        DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
+        ComputeW_UCF(GetRotJacobi & jacobi): m_rotJacobi(jacobi){}
 
-            static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
-            static Matrix33 I_Jacobi_2; // this is the second part of the Jacobi;
-            static const CollisionData * pCollData;
+        void compute(UCFNodeDataType & nodeData) {
+            m_pNodeData = &nodeData;
+            m_pCollData = nodeData.m_pCollData;
+            if(bodyNr==1){
+                m_pCollData->m_pBody1->m_geometry.apply_visitor(*this);
+            }else{
+                m_pCollData->m_pBody2->m_geometry.apply_visitor(*this);
+            }
+        }
 
-            pCollData = nodeData.m_pCollData;
-
+        template<typename GeometryPtrType>
+        inline void operator()(GeometryPtrType & g){
             if(bodyNr == 1) {
                 //Set matrix size!
                 //nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
-
-                updateSkewSymmetricMatrix<>( pCollData->m_r_S1C1, I_r_SiCi_hat);
-                I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
+                m_rotJacobi.set(m_pCollData->m_pBody1, m_pCollData->m_r_S1C1);
                 // N direction =================================================
-                nodeData.m_W_body1.col(0).template head<3>() = - pCollData->m_cFrame.m_e_z; // I frame
-
-                nodeData.m_W_body1.col(0).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_z;
+                m_pNodeData->m_W_body1.col(0).template head<3>() = - m_pCollData->m_cFrame.m_e_z; // I frame
+                m_pNodeData->m_W_body1.col(0).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_z;
 
                 // T1 direction =================================================
-                nodeData.m_W_body1.col(1).template head<3>() = - pCollData->m_cFrame.m_e_x; // I frame
-                nodeData.m_W_body1.col(1).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_x;
+                m_pNodeData->m_W_body1.col(1).template head<3>() = - m_pCollData->m_cFrame.m_e_x; // I frame
+                m_pNodeData->m_W_body1.col(1).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_x;
 
                 // T2 direction =================================================
-                nodeData.m_W_body1.col(2).template head<3>() = - pCollData->m_cFrame.m_e_y; // I frame
-                nodeData.m_W_body1.col(2).template tail<3>() = - I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
+                m_pNodeData->m_W_body1.col(2).template head<3>() = - m_pCollData->m_cFrame.m_e_y; // I frame
+                m_pNodeData->m_W_body1.col(2).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_y;
             } else {
                 //Set matrix size!
-                //nodeData.m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
-
-                updateSkewSymmetricMatrix<>( pCollData->m_r_S2C2, I_r_SiCi_hat);
-                I_Jacobi_2 = ( nodeData.m_pCollData->m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
+                //m_pNodeData->m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                m_rotJacobi.set(m_pCollData->m_pBody2, m_pCollData->m_r_S2C2);
                 // N direction =================================================
-                nodeData.m_W_body2.col(0).template head<3>() =  pCollData->m_cFrame.m_e_z; // I frame
-                nodeData.m_W_body2.col(0).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_z;
+                m_pNodeData->m_W_body2.col(0).template head<3>() =  m_pCollData->m_cFrame.m_e_z; // I frame
+                m_pNodeData->m_W_body2.col(0).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_z;
 
                 // T1 direction =================================================
-                nodeData.m_W_body2.col(1).template head<3>() =  pCollData->m_cFrame.m_e_x; // I frame
-                nodeData.m_W_body2.col(1).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_x;
+                m_pNodeData->m_W_body2.col(1).template head<3>() =  m_pCollData->m_cFrame.m_e_x; // I frame
+                m_pNodeData->m_W_body2.col(1).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_x;
 
                 // T2 direction =================================================
-                nodeData.m_W_body2.col(2).template head<3>() =  pCollData->m_cFrame.m_e_y; // I frame
-                nodeData.m_W_body2.col(2).template tail<3>() =  I_Jacobi_2 * pCollData->m_cFrame.m_e_y;
+                m_pNodeData->m_W_body2.col(2).template head<3>() =  m_pCollData->m_cFrame.m_e_y; // I frame
+                m_pNodeData->m_W_body2.col(2).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_y;
             }
-    }
+        }
+
+        /** Special overload for sphere geometries, where the normal always points through the center of gravity */
+        inline void operator()(SphereGeomPtrType & g){
+            if(bodyNr == 1) {
+                //Set matrix size!
+                //m_pNodeData->m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                m_rotJacobi.set(m_pCollData->m_pBody1, m_pCollData->m_r_S1C1);
+                // N direction =================================================
+                m_pNodeData->m_W_body1.col(0).template head<3>() = - m_pCollData->m_cFrame.m_e_z; // I frame
+                m_pNodeData->m_W_body1.col(0).template tail<3>().setZero(); ///< sepzial operation here: m_I_JacobiT_rot * contact normal = 0;
+
+                // T1 direction =================================================
+                m_pNodeData->m_W_body1.col(1).template head<3>() = - m_pCollData->m_cFrame.m_e_x; // I frame
+                m_pNodeData->m_W_body1.col(1).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_x;
+
+                // T2 direction =================================================
+                m_pNodeData->m_W_body1.col(2).template head<3>() = - m_pCollData->m_cFrame.m_e_y; // I frame
+                m_pNodeData->m_W_body1.col(2).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_y;
+            } else {
+                //Set matrix size!
+                //m_pNodeData->m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
+                m_rotJacobi.set(m_pCollData->m_pBody2, m_pCollData->m_r_S2C2);
+                // N direction =================================================
+                m_pNodeData->m_W_body2.col(0).template head<3>() =  m_pCollData->m_cFrame.m_e_z; // I frame
+                m_pNodeData->m_W_body2.col(0).template tail<3>().setZero(); ///< sepzial operation here: m_I_JacobiT_rot * contact normal = 0;
+
+                // T1 direction =================================================
+                m_pNodeData->m_W_body2.col(1).template head<3>() =  m_pCollData->m_cFrame.m_e_x; // I frame
+                m_pNodeData->m_W_body2.col(1).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_x;
+
+                // T2 direction =================================================
+                m_pNodeData->m_W_body2.col(2).template head<3>() =  m_pCollData->m_cFrame.m_e_y; // I frame
+                m_pNodeData->m_W_body2.col(2).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_y;
+            }
+        }
+
+        private:
+
+        const CollisionData * m_pCollData =  nullptr;
+        UCFNodeDataType * m_pNodeData = nullptr ;
+        GetRotJacobi & m_rotJacobi;
+    };
 
     template<typename TNode>
     void operator()(TNode & node) {
@@ -1038,14 +1097,14 @@ public:
             // Compute generalized force directions W
             auto state = pCollData->m_pBody1->m_eMode;
             if(  state == RigidBodyType::BodyMode::SIMULATED){
-                computeW_UCF<1>(nodeData);
+                m_compW_body1.compute(nodeData);
             }else if(state == RigidBodyType::BodyMode::ANIMATED){
                 // Contact goes into xi_N, xi_T
                 ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
             }
             state = pCollData->m_pBody2->m_eMode;
             if(  state == RigidBodyType::BodyMode::SIMULATED){
-                computeW_UCF<2>(nodeData);
+                m_compW_body2.compute(nodeData);
             }else if(state == RigidBodyType::BodyMode::ANIMATED){
                 // Contact goes into xi_N, xi_T
                 ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
@@ -1178,6 +1237,11 @@ private:
     Logging::Log * m_pSolverLog;
     PREC m_alpha;
     InclusionSolverSettingsType m_settings;
+
+
+    GetRotJacobi m_rotJacobi;
+    ComputeW_UCF<1> m_compW_body1;
+    ComputeW_UCF<2> m_compW_body2;
 
     LambdaInit m_lambdaInit;
 
