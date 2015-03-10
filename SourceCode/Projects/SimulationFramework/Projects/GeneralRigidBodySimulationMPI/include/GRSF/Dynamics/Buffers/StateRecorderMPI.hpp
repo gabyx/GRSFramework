@@ -144,6 +144,7 @@ void StateRecorderMPI::write(PREC time, const TRigidBodyContainer & bodyList){
 
 bool StateRecorderMPI::closeAll(){
    m_fh.close();
+   return true;
 }
 
 #endif

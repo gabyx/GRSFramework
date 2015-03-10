@@ -262,7 +262,7 @@ private:
                 LOGSLLEVEL2_CONTACT(m_p->m_pSolverLog,"\t---> Remote body id: "<< RigidBodyId::getBodyIdString(pBody->m_id) << std::endl;)
 
                 //Add to the neighbour data if remote contact
-                if(nodeData.m_nodeColor = EnumConversion::toIntegral(NodeColor::REMOTENODE)){
+                if(nodeData.m_nodeColor == EnumConversion::toIntegral(NodeColor::REMOTENODE)){
                     m_p->m_pNbDataMap->getNeighbourData(pBody->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pBody);
                     // if this body is already added it does nothing!
                 }else{

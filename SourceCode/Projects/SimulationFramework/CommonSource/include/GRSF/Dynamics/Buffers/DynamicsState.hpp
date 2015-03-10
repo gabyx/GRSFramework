@@ -155,8 +155,8 @@ public:
                 auto itEnd = states.end();
                 for(auto it = states.begin(); it!=itEnd ; ++it) {
                     unsigned int bodyNr = RigidBodyId::getBodyNr(it->first) - m_startIdx;
-                    WARNINGMSG( (bodyNr < m_SimBodyStates.size() && bodyNr>=0) , "body nr: " << bodyNr << " out of bound for DynamicState!");
-                    if( bodyNr < m_SimBodyStates.size() && bodyNr>=0 ){
+                    WARNINGMSG( (bodyNr < m_SimBodyStates.size()) , "body nr: " << bodyNr << " out of bound for DynamicState!");
+                    if( bodyNr < m_SimBodyStates.size()){
                         m_SimBodyStates[bodyNr] =  it->second;
                     }
                 }
@@ -195,13 +195,13 @@ public:
                 auto itEnd = bodies.end();
                 for(auto it = bodies.begin(); it!=itEnd ; ++it) {
                     unsigned int bodyNr = RigidBodyId::getBodyNr((*it)->m_id) - m_startIdx;
-                    if( bodyNr < m_SimBodyStates.size() && bodyNr>=0 ){
+                    if( bodyNr < m_SimBodyStates.size()){
                         m_SimBodyStates[bodyNr].applyBody(*it);
                         WARNINGMSG( (*it)->m_id == m_SimBodyStates[bodyNr].m_id ,"DynamicState:: Sequence (ids) not equal: "
                                    << RigidBodyId::getBodyIdString((*it)->m_id) <<","
                                    << RigidBodyId::getBodyIdString(m_SimBodyStates[bodyNr].m_id) << std::endl);
                     }else{
-                      WARNINGMSG( (bodyNr < m_SimBodyStates.size() && bodyNr>=0) , "DynamicState:: Body nr: " << bodyNr << " out of bound for DynamicState!");
+                      WARNINGMSG( (bodyNr < m_SimBodyStates.size()) , "DynamicState:: Body nr: " << bodyNr << " out of bound for DynamicState!");
                     }
                 }
             }else{

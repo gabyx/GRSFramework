@@ -112,7 +112,7 @@ protected:
         // Sum up all boolean values and decide if all neighbours rebuild?
         unsigned int n = std::accumulate(rebuildGather.begin(), rebuildGather.end() , 0, std::plus<char>() );
         LOGTBLEVEL1(m_pSimulationLog,"MPI> n="<<n<<" processes want to rebuild!"<<std::endl;)
-        if(n>=0){ // if one or more process wants to rebuild then rebuild!
+        if(n>0){ // if one or more process wants to rebuild then rebuild!
             LOGTBLEVEL1(m_pSimulationLog,"MPI> Rebuild accepted!"<<std::endl;)
             return true;
         }

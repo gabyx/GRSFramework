@@ -567,7 +567,7 @@ bool MultiBodySimFile::readSpecific_impl(C & states,
 
     m_file_stream.seekg(m_beginOfStates);
 
-    m_errorString << "The time type: " << which << " (time: " <<time <<") was not found" << std::endl;
+    m_errorString << "The time type: " << which << " (time: " <<stateTime <<") was not found" << std::endl;
 
     return false;
 }

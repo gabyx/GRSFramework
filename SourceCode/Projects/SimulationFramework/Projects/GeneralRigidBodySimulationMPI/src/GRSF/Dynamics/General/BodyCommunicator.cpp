@@ -185,7 +185,7 @@ void BodyCommunicator::addLocalBodyExclusiveToNeighbourMap(RigidBodyType * body,
 
             if(localData->m_commStatus == NeighbourMapType::DataType::LocalDataType::SEND_UPDATE){
                 localData->m_commStatus = NeighbourMapType::DataType::LocalDataType::SEND_REMOVE;
-            }else if (localData->m_commStatus = NeighbourMapType::DataType::LocalDataType::SEND_NOTIFICATION){
+            }else if (localData->m_commStatus == NeighbourMapType::DataType::LocalDataType::SEND_NOTIFICATION){
                 // Falls notification
             }
         }
@@ -206,7 +206,7 @@ bool BodyCommunicator::checkReceiveForRemotes(){
             m_ok = false;
         }else{
            // Set to false for next iteration!
-           (*it)->m_pBodyInfo->m_receivedUpdate == false;
+           (*it)->m_pBodyInfo->m_receivedUpdate = false;
         }
     }
     return m_ok;

@@ -27,7 +27,7 @@
 *    m_params[4];			///< The fixed inverse damping constant for the frictional contact \f$dinv_{TFix}\f$ if \f$|lambda_N| \leq epsilon\f$
 *    m_params[5];			///< The maximum slipping velocity for frictional contact. \f$dinv_T = gamma_{max} / (\mu lambda_N) \f$
 *    m_params[6];           ///< The epsilon to determine when to set the fixed damping constant \f$ dinv_TFix \f$
-/** @{ */
+* @{ */
 struct ContactParameter{
 
     DEFINE_LAYOUT_CONFIG_TYPES
