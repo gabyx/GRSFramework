@@ -44,7 +44,7 @@ protected:
     bool m_bOverlapTest = false;                        ///< Boolean to decide if we only do overlap test or the whole collision output
     bool m_bOverlap = false;                            ///< Boolean which tells if the collision detection catched an overlap in the last call
 
-    const RigidBodyType* m_pBody1 = nullptr; ///< Shared pointer to the first RigidBodyBase class instance.
+    const RigidBodyType* m_pBody = nullptr; ///< Shared pointer to the first RigidBodyBase class instance.
 
 public:
     inline bool overlapSphere(const Vector3 & p, PREC radius, const AABB & aabb){
@@ -76,19 +76,19 @@ public:
 
         // We know that we are not changing anything inside rigid body!
         // Otherwise all operators()(const boost::shared_ptr...)
-        m_pBody1 = pBody1;
+        m_pBody = pBody1;
 
         m_bOverlapTest = true;
         m_bOverlap = false;
 
         m_aabb = &aabb;
-        boost::apply_visitor(*this, m_pBody1->m_geometry);
+        boost::apply_visitor(*this, m_pBody->m_geometry);
         return m_bOverlap;
     }
 
     // Dispatch
     void operator()(const SphereGeomPtrType  & sphereGeom1) {
-        m_bOverlap = overlapSphere(m_pBody1->m_r_S, sphereGeom1->m_radius, *m_aabb);
+        m_bOverlap = overlapSphere(m_pBody->m_r_S, sphereGeom1->m_radius, *m_aabb);
     }
 
     /**
@@ -119,20 +119,20 @@ public:
     */
     bool checkOverlap(const RigidBodyType * pBody1, const AABB & aabb, const Matrix33 & A_IK) {
 
-        m_pBody1 = pBody1;
+        m_pBody = pBody1;
         m_bOverlapTest = true;
         m_bOverlap = false;
         m_aabb = &aabb;
         m_A_IK = &A_IK;
 
-        m_pBody1->m_geometry.apply_visitor(*this);
+        m_pBody->m_geometry.apply_visitor(*this);
         return m_bOverlap;
     }
 
     // Dispatch
     void operator()(const SphereGeomPtrType  & sphereGeom1) {
         // Transform the point of the body into frame K
-        Vector3 p = m_A_IK->transpose() * m_pBody1->m_r_S;
+        Vector3 p = m_A_IK->transpose() * m_pBody->m_r_S;
         m_bOverlap = overlapSphere(p, sphereGeom1->m_radius, *m_aabb);
     }
 
@@ -170,7 +170,7 @@ public:
     std::pair<bool,PREC> intersect(const RigidBodyType * pBody1, Ray & ray, CollisionData & collData){
          m_bIntersectionSimple = false;
 
-         m_pBody1 = pBody1;
+         m_pBody[0] = pBody1;
          m_ray = &ray;
          m_pCollData = &collData;
 
@@ -182,13 +182,13 @@ public:
 
         // parameter t in [0,infinity]
 
-        m_pBody1 = pBody1;
+        m_pBody[0] = pBody1;
         m_ray = &ray;
 
         m_bIntersectionSimple = true;
         m_bIntersection = false;
 
-        boost::apply_visitor(*this, m_pBody1->m_geometry);
+        boost::apply_visitor(*this, m_pBody[0]->m_geometry);
         return m_bIntersection;
     }
 
@@ -213,7 +213,7 @@ private:
     bool m_bIntersectionSimple;
     bool m_bIntersection; ///< Boolean which tells if the intersection test gave a feasible result.
 
-    const RigidBodyType* m_pBody1; ///< Shared pointer to the first RigidBodyBase class instance.
+    const RigidBodyType* m_pBody[0]; ///< Shared pointer to the first RigidBodyBase class instance.
 
     //Collision function
     inline void intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace); ///< Halfspace/Ray intersection
@@ -227,7 +227,7 @@ void ColliderRay::intersect( const std::shared_ptr<const HalfspaceGeometry >  & 
 		return;
 	}
 
-	PREC t = halfspace->m_normal.dot(m_pBody1->m_r_S - m_ray->m_p) / nDotRay;
+	PREC t = halfspace->m_normal.dot(m_pBody[0]->m_r_S - m_ray->m_p) / nDotRay;
 
     if( t <m_ray->m_mint || t > m_ray->m_maxt ){
              m_bIntersection = false;
@@ -262,11 +262,11 @@ public:
     /** intersects body with a point and set to the closest point on body if it intersects!  */
     bool intersectAndProx(const RigidBodyType * pBody1,  Vector3 & p){
 
-        m_pBody1 = pBody1;
+        m_pBody[0] = pBody1;
         m_p = &p;
 
         m_bIntersection = false;
-        boost::apply_visitor(*this, m_pBody1->m_geometry);
+        boost::apply_visitor(*this, m_pBody[0]->m_geometry);
         return m_bIntersection;
     }
 
@@ -289,16 +289,16 @@ private:
 
     bool m_bIntersection; ///< Boolean which tells if the intersection test gave a feasible result.
 
-    const RigidBodyType* m_pBody1; ///< Shared pointer to the first RigidBodyBase class instance.
+    const RigidBodyType* m_pBody[0]; ///< Shared pointer to the first RigidBodyBase class instance.
 
     //Collision function
     inline void intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace); ///< Halfspace/Ray intersection
 };
 
 void ColliderPoint::intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) {
-    Vector3 I_n = m_pBody1->m_A_IK*halfspace->m_normal;
+    Vector3 I_n = m_pBody[0]->m_A_IK*halfspace->m_normal;
     //t = n * r_PS ( P=point, S=center of plane ), if t>=0 intersect!
-    PREC t = I_n.dot(m_pBody1->m_r_S - *m_p) +  halfspace->m_normal.dot(halfspace->m_pos);
+    PREC t = I_n.dot(m_pBody[0]->m_r_S - *m_p) +  halfspace->m_normal.dot(halfspace->m_pos);
     if( t >= 0.0){
         m_bIntersection = true;
         // project onto plane
@@ -361,13 +361,13 @@ public:
     */
 
     void checkCollision(RigidBodyType * pBody1, RigidBodyType * pBody2) {
-        m_pBody1 = pBody1;
-        m_pBody2 = pBody2;
+        m_pBody[0] = pBody1;
+        m_pBody[1] = pBody2;
 
-        ASSERTMSG(m_pBody1 != m_pBody2, "Are you sure you want to checkCollision between the same objects?");
+        ASSERTMSG(m_pBody[0] != m_pBody[1], "Are you sure you want to checkCollision between the same objects?");
         m_bObjectsSwapped = false;
 
-        boost::apply_visitor(*this, m_pBody1->m_geometry, m_pBody2->m_geometry);
+        boost::apply_visitor(*this, m_pBody[0]->m_geometry, m_pBody[1]->m_geometry);
     }
 
     /**
@@ -404,7 +404,7 @@ public:
     template <typename Geom1, typename Geom2>
     void operator()(const std::shared_ptr<const Geom1> &g1, const  std::shared_ptr<const Geom2> &g2) {
         m_bObjectsSwapped = true;
-        std::swap(m_pBody1,m_pBody2);
+        std::swap(m_pBody[0],m_pBody[1]);
         collide((const std::shared_ptr<const Geom2> &)g2, (const std::shared_ptr<const Geom1> &)g1);
     }
     /** @} */
@@ -412,8 +412,7 @@ public:
 
 
 private:
-    const RigidBodyType* m_pBody1; ///< Shared pointer to the first RigidBodyBase class instance.
-    const RigidBodyType* m_pBody2; ///< Shared pointer to the second RigidBodyBase class instance.
+    const RigidBodyType* m_pBody[2]; ///< Shared pointer to the first RigidBodyBase class instance.
 
     boost::variant<const AABB *> otherGeoms; ///< Used for other intersection tests
 
@@ -468,7 +467,7 @@ void ColliderBody::collide( const SphereGeomPtrType  & sphereGeom1,
 {
     // Do Collision for sphere to sphere
 
-    Vector3 dist = m_pBody2->m_r_S - m_pBody1->m_r_S; // I frame
+    Vector3 dist = m_pBody[1]->m_r_S - m_pBody[0]->m_r_S; // I frame
 
     PREC dsqr = dist.dot(dist);
     PREC rsqr = (sphereGeom1->m_radius + sphereGeom2->m_radius);
@@ -497,16 +496,16 @@ void ColliderBody::collide( const SphereGeomPtrType  & sphereGeom1,
         CoordinateSystem::makeCoordinateSystem(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
         m_pColData->m_overlap = (sphereGeom1->m_radius + sphereGeom2->m_radius) - d;
-        m_pColData->m_r_S1C1 =   m_pColData->m_cFrame.m_e_z * (sphereGeom1->m_radius - m_pColData->m_overlap/2);
-        m_pColData->m_r_S2C2 =  -m_pColData->m_cFrame.m_e_z * (sphereGeom2->m_radius - m_pColData->m_overlap/2);
+        m_pColData->m_r_SC[0] =   m_pColData->m_cFrame.m_e_z * (sphereGeom1->m_radius - m_pColData->m_overlap/2);
+        m_pColData->m_r_SC[1] =  -m_pColData->m_cFrame.m_e_z * (sphereGeom2->m_radius - m_pColData->m_overlap/2);
 
 
         // Set pointers
-        m_pColData->m_pBody1 = const_cast<RigidBodyType *>(m_pBody1);
-        m_pColData->m_pBody2 = const_cast<RigidBodyType *>(m_pBody2);
+        m_pColData->m_pBody[0] = const_cast<RigidBodyType *>(m_pBody[0]);
+        m_pColData->m_pBody[1] = const_cast<RigidBodyType *>(m_pBody[1]);
 
         // set Contact Tag
-        m_pColData->m_contactTag.set(m_pBody1->m_id,0,0,m_pBody2->m_id,0,0);
+        m_pColData->m_contactTag.set(m_pBody[0]->m_id,0,0,m_pBody[1]->m_id,0,0);
 
     }
 }
@@ -517,9 +516,9 @@ void ColliderBody::collide( const SphereGeomPtrType  & sphereGeom,
 {
 
     // Do Collision for sphere to halfspace
-    Vector3 I_n_plane = m_pBody2->m_A_IK*halfspaceGeom->m_normal;
+    Vector3 I_n_plane = m_pBody[1]->m_A_IK*halfspaceGeom->m_normal;
 
-    double overlap = sphereGeom->m_radius - (m_pBody1->m_r_S - (  m_pBody2->m_A_IK * halfspaceGeom->m_pos  +  m_pBody2->m_r_S  )).dot( I_n_plane ) ;
+    double overlap = sphereGeom->m_radius - (m_pBody[0]->m_r_S - (  m_pBody[1]->m_A_IK * halfspaceGeom->m_pos  +  m_pBody[1]->m_r_S  )).dot( I_n_plane ) ;
 
     if(overlap >=0) {
         //We have a collision
@@ -531,15 +530,15 @@ void ColliderBody::collide( const SphereGeomPtrType  & sphereGeom,
         m_pColData->m_cFrame.m_e_z = - I_n_plane ;
         CoordinateSystem::makeCoordinateSystem(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
-        m_pColData->m_r_S1C1 = (sphereGeom->m_radius - overlap/2) * m_pColData->m_cFrame.m_e_z ;
-        m_pColData->m_r_S2C2 = ( m_pBody1->m_r_S + m_pColData->m_r_S1C1 ) - m_pBody2->m_r_S;
+        m_pColData->m_r_SC[0] = (sphereGeom->m_radius - overlap/2) * m_pColData->m_cFrame.m_e_z ;
+        m_pColData->m_r_SC[1] = ( m_pBody[0]->m_r_S + m_pColData->m_r_SC[0] ) - m_pBody[1]->m_r_S;
 
         // Set pointers
-        m_pColData->m_pBody1 = const_cast<RigidBodyType *>(m_pBody1);
-        m_pColData->m_pBody2 = const_cast<RigidBodyType *>(m_pBody2);
+        m_pColData->m_pBody[0] = const_cast<RigidBodyType *>(m_pBody[0]);
+        m_pColData->m_pBody[1] = const_cast<RigidBodyType *>(m_pBody[1]);
 
         // set Contact Tag
-        m_pColData->m_contactTag.set(m_pBody1->m_id,0,0,m_pBody2->m_id,0,0);
+        m_pColData->m_contactTag.set(m_pBody[0]->m_id,0,0,m_pBody[1]->m_id,0,0);
 
     }
 
@@ -558,18 +557,18 @@ void ColliderBody::collide( const std::shared_ptr<const BoxGeometry >  & boxGeom
 
     // Check all 8 corners against the plane
 
-    Vector3 I_n_plane = m_pBody2->m_A_IK*halfspaceGeom->m_normal;
+    Vector3 I_n_plane = m_pBody[1]->m_A_IK*halfspaceGeom->m_normal;
 
     Vector3 r_SC1,r_SC2, temp1,temp2;
-    temp1 = m_pBody1->m_A_IK*(boxGeom->m_center);
-    temp2 = (m_pBody1->m_r_S) - (m_pBody2->m_r_S);
+    temp1 = m_pBody[0]->m_A_IK*(boxGeom->m_center);
+    temp2 = (m_pBody[0]->m_r_S) - (m_pBody[1]->m_r_S);
 
     double d = halfspaceGeom->m_normal.dot(halfspaceGeom->m_pos);
 //            std::cout << "d:" << d << std::endl;
 //            std::cout << "temp1:" << temp1  << std::endl;
     for(int i=0; i<8; i++) {
 //                std::cout << boxGeom->getPoint(i) <<std::endl;
-        r_SC1 = temp1 + m_pBody1->m_A_IK*(boxGeom->getPoint(i));
+        r_SC1 = temp1 + m_pBody[0]->m_A_IK*(boxGeom->getPoint(i));
         r_SC2 = r_SC1+temp2;
 
         double overlap = d - ( r_SC2 ).dot( I_n_plane ) ;
@@ -584,15 +583,15 @@ void ColliderBody::collide( const std::shared_ptr<const BoxGeometry >  & boxGeom
             m_pColData->m_cFrame.m_e_z = - I_n_plane ;
             CoordinateSystem::makeCoordinateSystem(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
-            m_pColData->m_r_S1C1 = r_SC1;
-            m_pColData->m_r_S2C2 = r_SC2;
+            m_pColData->m_r_SC[0] = r_SC1;
+            m_pColData->m_r_SC[1] = r_SC2;
 
             // Set pointers
-            m_pColData->m_pBody1 = const_cast<RigidBodyType *>(m_pBody1);
-            m_pColData->m_pBody2 = const_cast<RigidBodyType *>(m_pBody2);
+            m_pColData->m_pBody[0] = const_cast<RigidBodyType *>(m_pBody[0]);
+            m_pColData->m_pBody[1] = const_cast<RigidBodyType *>(m_pBody[1]);
 
             // set Contact Tag
-            m_pColData->m_contactTag.set(m_pBody1->m_id,0,0,m_pBody2->m_id,0,0);
+            m_pColData->m_contactTag.set(m_pBody[0]->m_id,0,0,m_pBody[1]->m_id,0,0);
 
         }
     }
@@ -707,11 +706,11 @@ void ColliderBody::collide(const SphereGeomPtrType  & sphereGeom,
 //            temporarySet);
 
     //point with maximum overlap
-    CollisionFunctions::getClosestPointInRadius_PointMesh(   m_pBody1->m_r_S,
+    CollisionFunctions::getClosestPointInRadius_PointMesh(   m_pBody[0]->m_r_S,
             sphereGeom->m_radius,
             *meshGeom->m_pMeshData,
-            m_pBody2->m_r_S,
-            m_pBody2->m_A_IK,
+            m_pBody[1]->m_r_S,
+            m_pBody[1]->m_A_IK,
             temporarySet);
 #endif
 
@@ -730,15 +729,15 @@ void ColliderBody::collide(const SphereGeomPtrType  & sphereGeom,
         m_pColData->m_cFrame.m_e_z = temporarySet[j].get<1>(); //needs not to be normalized
         CoordinateSystem::makeCoordinateSystem(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
-        m_pColData->m_r_S1C1 = ( sphereGeom->m_radius - m_pColData->m_overlap/2) * m_pColData->m_cFrame.m_e_z ;
-        m_pColData->m_r_S2C2 = ( m_pBody1->m_r_S + m_pColData->m_r_S1C1 ) - m_pBody2->m_r_S;
+        m_pColData->m_r_SC[0] = ( sphereGeom->m_radius - m_pColData->m_overlap/2) * m_pColData->m_cFrame.m_e_z ;
+        m_pColData->m_r_SC[1] = ( m_pBody[0]->m_r_S + m_pColData->m_r_SC[0] ) - m_pBody[1]->m_r_S;
 
         // Set pointers
-        m_pColData->m_pBody1 = const_cast<RigidBodyType *>(m_pBody1);
-        m_pColData->m_pBody2 = const_cast<RigidBodyType *>(m_pBody2);
+        m_pColData->m_pBody[0] = const_cast<RigidBodyType *>(m_pBody[0]);
+        m_pColData->m_pBody[1] = const_cast<RigidBodyType *>(m_pBody[1]);
 
         // set Contact Tag
-        m_pColData->m_contactTag.set(m_pBody1->m_id,0,0,m_pBody2->m_id,temporarySet[j].get<2>(),temporarySet[j].get<3>());
+        m_pColData->m_contactTag.set(m_pBody[0]->m_id,0,0,m_pBody[1]->m_id,temporarySet[j].get<2>(),temporarySet[j].get<3>());
 
     }
 

@@ -308,16 +308,16 @@ void InclusionSolverCO::solveInclusionProblem() {
 
         for( auto & node : nodes){
 
-            pBody = node->m_nodeData.m_pCollData->m_pBody1;
+            pBody = node->m_nodeData.m_pCollData->m_pBody[0];
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 pBody->m_pSolverData->m_uBuffer.m_front +=
-                pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body1 * (*m_P_front).segment<ContactDim>(ContactDim* node->m_nodeNumber);
+                pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body[0] * (*m_P_front).segment<ContactDim>(ContactDim* node->m_nodeNumber);
             }
 
-            pBody = node->m_nodeData.m_pCollData->m_pBody2;
+            pBody = node->m_nodeData.m_pCollData->m_pBody[1];
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 pBody->m_pSolverData->m_uBuffer.m_front +=
-                pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body2 * (*m_P_front).segment<ContactDim>(ContactDim* node->m_nodeNumber);
+                pBody->m_MassMatrixInv_diag.asDiagonal() * node->m_nodeData.m_W_body[1] * (*m_P_front).segment<ContactDim>(ContactDim* node->m_nodeNumber);
             }
 
         }

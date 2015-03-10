@@ -23,8 +23,7 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW // not required
 
-    MatrixUBody3 m_W_body1;
-    MatrixUBody3 m_W_body2;
+    MatrixUBody3 m_W_body[2];
     Vector3 m_chi;
 
     Vector3  m_eps;
@@ -47,15 +46,14 @@ public:
         m_LambdaBack(m_LambdaBack_internal.data()),
         m_LambdaFront(m_LambdaFront_internal.data())*/
     {
-        m_u1BufferPtr = nullptr; ///< Points to the velocity buffer only if the body is simulated
-        m_u2BufferPtr = nullptr; ///< Points to the velocity buffer only if the body is simulated
+        m_uBufferPtr[0] = nullptr; ///< Points to the velocity buffer only if the body is simulated
+        m_uBufferPtr[1] = nullptr; ///< Points to the velocity buffer only if the body is simulated
         m_bConverged = false; ///< Flag if convergence criteria is fulfilled, either InVelocityLocal, InLambda, InEnergyMix (with Lambda, and G_ii)
 
     }
 
 
-    typename BodySolverDataType::VelocityBufferType * m_u1BufferPtr; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
-    typename BodySolverDataType::VelocityBufferType * m_u2BufferPtr; ///< Only valid for Simulated Objects
+    typename BodySolverDataType::VelocityBufferType * m_uBufferPtr[2]; ///< Pointers into the right Front BackBuffer for bodies 1 and 2
 
     Vector3 m_LambdaBack;
     Vector3 m_LambdaFront;
@@ -70,8 +68,8 @@ public:
     bool m_bConverged; ///< Converged either in LambdaLocal (lambdaNew to lambdaOld), or
 
    void swapVelocities() {
-        if(m_u1BufferPtr){ m_u1BufferPtr->m_back.swap(m_u1BufferPtr->m_front); }
-        if(m_u2BufferPtr){ m_u2BufferPtr->m_back.swap(m_u2BufferPtr->m_front); }
+        if(m_uBufferPtr[0]){ m_uBufferPtr[0]->m_back.swap(m_uBufferPtr[0]->m_front); }
+        if(m_uBufferPtr[1]){ m_uBufferPtr[1]->m_back.swap(m_uBufferPtr[1]->m_front); }
     };
 
     void swapLambdas() {
@@ -106,8 +104,7 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW // not required
 
-    VectorUBody  m_W_body1;
-    VectorUBody  m_W_body2;
+    VectorUBody  m_W_body[2];
     PREC m_chi;
 
     const CollisionData * m_pCollData = nullptr;

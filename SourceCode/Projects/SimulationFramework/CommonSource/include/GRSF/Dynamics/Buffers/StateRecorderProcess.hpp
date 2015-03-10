@@ -51,11 +51,10 @@ protected:
 
     Logging::Log * m_pSimulationLog;
 
-    MultiBodySimFilePart m_binarySimFile;
-
     unsigned int m_accessId;
-
     unsigned long long m_bufferSize;
+
+    MultiBodySimFilePart m_binarySimFile;
 
 };
 
@@ -65,11 +64,8 @@ protected:
 
 
 StateRecorderProcess::StateRecorderProcess( unsigned int id,  unsigned int bufferSize):
-        m_binarySimFile(m_bufferSize)
+     m_accessId(id), m_bufferSize(bufferSize), m_binarySimFile(m_bufferSize)
 {
-
-    m_accessId = id;
-    m_bufferSize = bufferSize;
 
     //Check if LogManager is available
     Logging::LogManager & manager = Logging::LogManager::getSingleton();
