@@ -205,7 +205,7 @@ private:
             m_nodeDataInit.apply(nodeData);
 
             // FIRST BODY!
-            RigidBodyType * pBody = pCollData->m_pBody1;
+            RigidBodyType * pBody = pCollData->m_pBody[0];
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 initNodeSimBody<1,addEdges>(pNode,nodeData,pBody,isRemote.first);
             } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
@@ -213,7 +213,7 @@ private:
             }
 
             // SECOND BODY!
-            pBody = pCollData->m_pBody2;
+            pBody = pCollData->m_pBody[1];
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 initNodeSimBody<2,addEdges>(pNode,nodeData,pBody,isRemote.second);
             } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {

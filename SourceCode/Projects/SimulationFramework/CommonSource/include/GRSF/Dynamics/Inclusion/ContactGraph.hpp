@@ -125,17 +125,17 @@ public:
 
         static NodeInit nodeInit(this);
 
-        ASSERTMSG(pCollData->m_pBody1 != nullptr && pCollData->m_pBody2 != nullptr, " Bodys are null pointers?");
-        // cout << "add node : "<<m_nodeCounter<< " body id:" << RigidBodyId::getBodyIdString(pCollData->m_pBody1) <<" and "<< RigidBodyId::getBodyIdString(pCollData->m_pBody2) <<endl;
-        // std::cout <<"b1:" << pCollData->m_pBody1->m_q_KI<< std::endl << pCollData->m_pBody1->m_r_S<< std::endl;;
-        // std::cout <<"b2:" << pCollData->m_pBody2->m_q_KI << std::endl << pCollData->m_pBody2->m_r_S<< std::endl;;;
+        ASSERTMSG(pCollData->m_pBody[0] != nullptr && pCollData->m_pBody[1] != nullptr, " Bodys are null pointers?");
+        // cout << "add node : "<<m_nodeCounter<< " body id:" << RigidBodyId::getBodyIdString(pCollData->m_pBody[0]) <<" and "<< RigidBodyId::getBodyIdString(pCollData->m_pBody[1]) <<endl;
+        // std::cout <<"b1:" << pCollData->m_pBody[0]->m_q_KI<< std::endl << pCollData->m_pBody[0]->m_r_S<< std::endl;;
+        // std::cout <<"b2:" << pCollData->m_pBody[1]->m_q_KI << std::endl << pCollData->m_pBody[1]->m_r_S<< std::endl;;;
         //  add a contact node to the graph
         // check to which nodes we need to connect?
         // all nodes (contacts) which are in the BodyContactList (maps bodies -> contacts)
 
         // get contact parameters
-        auto & contactParams = m_pContactParameterMap->getContactParams(pCollData->m_pBody1->m_eMaterial,
-                               pCollData->m_pBody2->m_eMaterial);
+        auto & contactParams = m_pContactParameterMap->getContactParams(pCollData->m_pBody[0]->m_eMaterial,
+                               pCollData->m_pBody[1]->m_eMaterial);
 
         // Set flag for the corresponding model
         m_usedContactModels |= 1 << EnumConversion::toIntegral(contactParams.m_contactModel);
@@ -221,7 +221,7 @@ private:
             m_nodeDataInit.apply(nodeData);
 
             // FIRST BODY!
-            RigidBodyType * pBody = pCollData->m_pBody1;
+            RigidBodyType * pBody = pCollData->m_pBody[0];
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 initNodeSimBody<1,addEdges>(pNode,nodeData,pBody);
             } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
@@ -229,7 +229,7 @@ private:
             }
 
             // SECOND BODY!
-            pBody = pCollData->m_pBody2;
+            pBody = pCollData->m_pBody[1];
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 initNodeSimBody<2,addEdges>(pNode,nodeData,pBody);
             } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {

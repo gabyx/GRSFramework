@@ -328,21 +328,21 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
                            << "e_y= "<< collSet[contactIdx].m_cFrame.m_e_y.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl
                            << "e_z= "<< collSet[contactIdx].m_cFrame.m_e_z.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl
                            << collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.dot(collSet[contactIdx].m_cFrame.m_e_y) << collSet[contactIdx].m_cFrame.m_e_y.dot(collSet[contactIdx].m_cFrame.m_e_z) <<std::endl
-                           << "r_s1c1="<< collSet[contactIdx].m_r_S1C1.transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;);
+                           << "r_s1c1="<< collSet[contactIdx].m_r_SC[0].transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;);
 
       ASSERTMSG( std::abs(collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.dot(collSet[contactIdx].m_cFrame.m_e_y)) < 1e-3 && std::abs(collSet[contactIdx].m_cFrame.m_e_y.dot(collSet[contactIdx].m_cFrame.m_e_z))< 1e-3, "Vectors not parallel");
 
 
 
-      int id1 = collSet[contactIdx].m_pBody1->m_id;
-      int id2 = collSet[contactIdx].m_pBody2->m_id;
+      int id1 = collSet[contactIdx].m_pBody[0]->m_id;
+      int id2 = collSet[contactIdx].m_pBody[1]->m_id;
 
       // Fill the entries for Body 1 =================================================
-      if( collSet[contactIdx].m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ){
+      if( collSet[contactIdx].m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ){
 
         // Contact goes into W_N, W_T
-        updateSkewSymmetricMatrix<>( collSet[contactIdx].m_r_S1C1, I_r_SiCi_hat);
-        I_Jacobi_2 = ( collSet[contactIdx].m_pBody1->m_A_IK.transpose() * I_r_SiCi_hat );
+        updateSkewSymmetricMatrix<>( collSet[contactIdx].m_r_SC[0], I_r_SiCi_hat);
+        I_Jacobi_2 = ( collSet[contactIdx].m_pBody[0]->m_A_IK.transpose() * I_r_SiCi_hat );
 
         // N direction =================================================
         w_N_part.template head<3>() = - collSet[contactIdx].m_cFrame.m_e_z; // I frame
@@ -373,18 +373,18 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WT_Minv_h_dt(m_nDofFriction*contactIdx +1)  += w_T_part.dot( m_Minv_h_dt.template segment<NDOFuBody>( id1 * NDOFuBody ) );
 
       }
-      else if( collSet[contactIdx].m_pBody1->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
+      else if( collSet[contactIdx].m_pBody[0]->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
         // Contact goes into xi_N, xi_T
 
       }
 
 
       // Fill the entries for Body 2 =================================================
-      if( collSet[contactIdx].m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ){
+      if( collSet[contactIdx].m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ){
 
         // Contact goes into W_N, W_T
-        updateSkewSymmetricMatrix<>( collSet[contactIdx].m_r_S2C2, I_r_SiCi_hat);
-        I_Jacobi_2 = ( collSet[contactIdx].m_pBody2->m_A_IK.transpose() * I_r_SiCi_hat );
+        updateSkewSymmetricMatrix<>( collSet[contactIdx].m_r_SC[1], I_r_SiCi_hat);
+        I_Jacobi_2 = ( collSet[contactIdx].m_pBody[1]->m_A_IK.transpose() * I_r_SiCi_hat );
 
         // N direction =================================================
         w_N_part.template head<3>() =  collSet[contactIdx].m_cFrame.m_e_z;
@@ -414,12 +414,12 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WT_Minv_h_dt(m_nDofFriction*contactIdx + 1) += w_T_part.dot( m_Minv_h_dt.template segment<NDOFuBody>( id2 * NDOFuBody ));
 
       }
-      else if( collSet[contactIdx].m_pBody1->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
+      else if( collSet[contactIdx].m_pBody[0]->m_eMode == RigidBodyType::BodyMode::ANIMATED ){
         // Contact goes into xi_N, xi_T
       }
 
       // Get the ContactParameter and fill the parameters
-      ContactParameter<LayoutConfigType> & params  = m_ContactParameterMap.getContactParams(collSet[contactIdx].m_pBody1->m_eMaterial,collSet[contactIdx].m_pBody2->m_eMaterial);
+      ContactParameter<LayoutConfigType> & params  = m_ContactParameterMap.getContactParams(collSet[contactIdx].m_pBody[0]->m_eMaterial,collSet[contactIdx].m_pBody[1]->m_eMaterial);
       m_mu(contactIdx)                              = params.m_mu;
       m_I_epsilon_N(contactIdx)                     = 1 + params.m_epsilon_N;
       m_I_epsilon_T(m_nDofFriction*contactIdx)      = 1 + params.m_epsilon_T;

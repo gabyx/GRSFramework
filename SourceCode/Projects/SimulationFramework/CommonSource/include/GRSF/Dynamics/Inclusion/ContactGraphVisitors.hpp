@@ -52,10 +52,10 @@ public:
 //
 //        if(B==1) {
 //            pUBuffer = &nodeData.m_u1BufferPtr->m_front;
-//            pBody = nodeData.m_pCollData->m_pBody1;
+//            pBody = nodeData.m_pCollData->m_pBody[0];
 //        } else {
 //            pUBuffer = &nodeData.m_u2BufferPtr->m_front;
-//            pBody = nodeData.m_pCollData->m_pBody2;
+//            pBody = nodeData.m_pCollData->m_pBody[1];
 //        }
 //
 //        // u_S + Minv *h * deltaT
@@ -79,12 +79,12 @@ public:
     void recalculateR(UCFNodeDataType & nodeData, ContactParameter & contactParameter) {
 
         nodeData.m_G_ii.setZero();
-        if(nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
-            nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
+        if(nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+            nodeData.m_G_ii += nodeData.m_W_body1.transpose() * nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
         }
         // SECOND BODY!
-        if(nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
-            nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
+        if(nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            nodeData.m_G_ii += nodeData.m_W_body2.transpose() * nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
         }
 
 
@@ -171,7 +171,7 @@ public:
 
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.getId() <<"====================="<<  std::endl);
-        if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+        if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
 
@@ -186,11 +186,11 @@ public:
             nodeData.m_LambdaFront = nodeData.m_b;
 
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_front ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_LambdaFront += nodeData.m_W_body2.transpose() * nodeData.m_u2BufferPtr->m_front;
             }
 
@@ -271,12 +271,12 @@ public:
             // u_k+1 = u_k + M^-1 W (lambda_k+1 - lambda_k)
             // FIRST BODY!
             Vector3 deltaLambda = nodeData.m_LambdaFront - nodeData.m_LambdaBack ;
-            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
 
                 // Velocity update (wahrscheinlich Auslöschung bei Lambda)
                 nodeData.m_u1BufferPtr->m_front = uCache1
-                                                  + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * deltaLambda;
+                                                  + nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 * deltaLambda;
 
                 //Sepcial update (no differences)
                 //doVelocityUpdate<1>(nodeData);
@@ -300,7 +300,7 @@ public:
                 } else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix) {
                     if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(      uCache1,
-                                                 nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
+                                                 nodeData.m_pCollData->m_pBody[0]->m_MassMatrix_diag,
                                                  nodeData.m_LambdaBack,
                                                  nodeData.m_LambdaFront,
                                                  nodeData.m_G_ii,
@@ -318,12 +318,12 @@ public:
 
             }
             // SECOND BODY
-            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
 
                 // Velocity update (wahrscheinlich Auslöschung bei Lambda)
                 nodeData.m_u2BufferPtr->m_front = uCache2
-                                                  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * deltaLambda ;
+                                                  + nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 * deltaLambda ;
 
                 //Sepcial update (no differences)
                 //doVelocityUpdate<2>(nodeData);
@@ -348,7 +348,7 @@ public:
                 } else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix) {
                     if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
-                                                 nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
+                                                 nodeData.m_pCollData->m_pBody[1]->m_MassMatrix_diag,
                                                  nodeData.m_LambdaBack,
                                                  nodeData.m_LambdaFront,
                                                  nodeData.m_G_ii,
@@ -430,7 +430,7 @@ public:
 
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.getId() <<"====================="<<  std::endl);
-        if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+        if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
 
@@ -442,12 +442,12 @@ public:
 
             PREC lambda_N = nodeData.m_b(0);
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
                 lambda_N += nodeData.m_W_body1.transpose().row(0) * uCache1 ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
                 lambda_N += nodeData.m_W_body2.transpose().row(0) * uCache2;
             }
@@ -467,14 +467,14 @@ public:
             nodeData.m_LambdaFront(0) = lambda_N;
             PREC deltaLambda_N = lambda_N - nodeData.m_LambdaBack(0); // Delta lambda_N
 
-            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_u1BufferPtr->m_front = uCache1
-                                                  + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() *
+                                                  + nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() *
                                                   nodeData.m_W_body1.col(0) * deltaLambda_N;
             }
-            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_u2BufferPtr->m_front = uCache2
-                                                  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() *
+                                                  + nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() *
                                                   nodeData.m_W_body2.col(0) * deltaLambda_N;
             }
 
@@ -484,11 +484,11 @@ public:
             // Second Tangential direction =============================
             Vector2 lambda_T = nodeData.m_b.template tail<2>();
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 lambda_T += nodeData.m_W_body1.transpose().template bottomRows<2>() * nodeData.m_u1BufferPtr->m_front ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 lambda_T += nodeData.m_W_body2.transpose().template bottomRows<2>() * nodeData.m_u2BufferPtr->m_front;
             }
             // Damping
@@ -510,10 +510,10 @@ public:
 
 
 
-            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 nodeData.m_u1BufferPtr->m_front +=
-                    nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1.template rightCols<2>() * lambda_T;
+                    nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1.template rightCols<2>() * lambda_T;
 
 
                 LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
@@ -533,7 +533,7 @@ public:
                 } else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix) {
                     if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(      uCache1,
-                                                 nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
+                                                 nodeData.m_pCollData->m_pBody[0]->m_MassMatrix_diag,
                                                  nodeData.m_LambdaBack,
                                                  nodeData.m_LambdaFront,
                                                  nodeData.m_G_ii,
@@ -550,10 +550,10 @@ public:
                 }
 
             }
-            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 nodeData.m_u2BufferPtr->m_front +=
-                    nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal()*nodeData.m_W_body2.template rightCols<2>() * lambda_T;
+                    nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal()*nodeData.m_W_body2.template rightCols<2>() * lambda_T;
 
 
                 LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
@@ -577,7 +577,7 @@ public:
                 } else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix) {
                     if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
-                                                 nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
+                                                 nodeData.m_pCollData->m_pBody[1]->m_MassMatrix_diag,
                                                  nodeData.m_LambdaBack,
                                                  nodeData.m_LambdaFront,
                                                  nodeData.m_G_ii,
@@ -670,8 +670,8 @@ public:
 
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.getId() <<"====================="<<  std::endl);
-        if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED
-            &&  nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+        if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED
+            &&  nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
 
@@ -683,12 +683,12 @@ public:
 
             PREC lambda_N = nodeData.m_b(0);
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache1 = nodeData.m_u1BufferPtr->m_front;
                 lambda_N += nodeData.m_W_body1.transpose().row(0) * uCache1 ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 uCache2 = nodeData.m_u2BufferPtr->m_front;
                 lambda_N += nodeData.m_W_body2.transpose().row(0) * uCache2;
             }
@@ -708,14 +708,14 @@ public:
 
             PREC deltaLambda_N = lambda_N - nodeData.m_LambdaBack(0); // Delta lambda_N
 
-            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_u1BufferPtr->m_front = uCache1
-                                                  + nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() *
+                                                  + nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() *
                                                   nodeData.m_W_body1.col(0) * deltaLambda_N;
             }
-            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 nodeData.m_u2BufferPtr->m_front = uCache2
-                                                  + nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() *
+                                                  + nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() *
                                                   nodeData.m_W_body2.col(0) * deltaLambda_N;
             }
 
@@ -765,7 +765,7 @@ public:
 
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Node: " << node.getId() <<"====================="<<  std::endl);
-        if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+        if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED  &&  nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
             LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> Sim<->Sim Node:"<<  std::endl);
         }
 
@@ -777,11 +777,11 @@ public:
             // Second Tangential direction =============================
             Vector2 lambda_T = nodeData.m_b.template tail<2>();
             // FIRST BODY!
-            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 lambda_T += nodeData.m_W_body1.transpose().template bottomRows<2>() * nodeData.m_u1BufferPtr->m_front ;
             }
             // SECOND BODY!
-            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 lambda_T += nodeData.m_W_body2.transpose().template bottomRows<2>() * nodeData.m_u2BufferPtr->m_front;
             }
             // Damping
@@ -802,10 +802,10 @@ public:
             lambda_T = lambda_T - nodeData.m_LambdaBack.template tail<2>(); // Delta lambda_T
 
 
-            if( nodeData.m_pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 nodeData.m_u1BufferPtr->m_front +=
-                    nodeData.m_pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1.template rightCols<2>() * lambda_T;
+                    nodeData.m_pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1.template rightCols<2>() * lambda_T;
 
 
                 LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u1Front: " << nodeData.m_u1BufferPtr->m_front.transpose() << std::endl);
@@ -825,7 +825,7 @@ public:
                 } else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix) {
                     if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(      uCache1,
-                                                 nodeData.m_pCollData->m_pBody1->m_MassMatrix_diag,
+                                                 nodeData.m_pCollData->m_pBody[0]->m_MassMatrix_diag,
                                                  nodeData.m_LambdaBack,
                                                  nodeData.m_LambdaFront,
                                                  nodeData.m_G_ii,
@@ -842,10 +842,10 @@ public:
                 }
 
             }
-            if( nodeData.m_pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if( nodeData.m_pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 nodeData.m_u2BufferPtr->m_front +=
-                    nodeData.m_pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal()*nodeData.m_W_body2.template rightCols<2>() * lambda_T;
+                    nodeData.m_pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal()*nodeData.m_W_body2.template rightCols<2>() * lambda_T;
 
 
                 LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> nd.u2Front: " << nodeData.m_u2BufferPtr->m_front.transpose() << std::endl);
@@ -869,7 +869,7 @@ public:
                 } else if(m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InEnergyLocalMix) {
                     if(m_globalIterationCounter >= m_settings.m_MinIter && m_bConverged) {
                         nodeData.m_bConverged  = Numerics::cancelCriteriaMatrixNorm(   uCache2,
-                                                 nodeData.m_pCollData->m_pBody2->m_MassMatrix_diag,
+                                                 nodeData.m_pCollData->m_pBody[1]->m_MassMatrix_diag,
                                                  nodeData.m_LambdaBack,
                                                  nodeData.m_LambdaFront,
                                                  nodeData.m_G_ii,
@@ -986,9 +986,9 @@ public:
             m_pNodeData = &nodeData;
             m_pCollData = nodeData.m_pCollData;
             if(bodyNr==1){
-                m_pCollData->m_pBody1->m_geometry.apply_visitor(*this);
+                m_pCollData->m_pBody[0]->m_geometry.apply_visitor(*this);
             }else{
-                m_pCollData->m_pBody2->m_geometry.apply_visitor(*this);
+                m_pCollData->m_pBody[1]->m_geometry.apply_visitor(*this);
             }
         }
 
@@ -997,7 +997,7 @@ public:
             if(bodyNr == 1) {
                 //Set matrix size!
                 //nodeData.m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
-                m_rotJacobi.set(m_pCollData->m_pBody1, m_pCollData->m_r_S1C1);
+                m_rotJacobi.set(m_pCollData->m_pBody[0], m_pCollData->m_r_SC[0]);
                 // N direction =================================================
                 m_pNodeData->m_W_body1.col(0).template head<3>() = - m_pCollData->m_cFrame.m_e_z; // I frame
                 m_pNodeData->m_W_body1.col(0).template tail<3>() = - m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_z;
@@ -1012,7 +1012,7 @@ public:
             } else {
                 //Set matrix size!
                 //m_pNodeData->m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
-                m_rotJacobi.set(m_pCollData->m_pBody2, m_pCollData->m_r_S2C2);
+                m_rotJacobi.set(m_pCollData->m_pBody[1], m_pCollData->m_r_SC[1]);
                 // N direction =================================================
                 m_pNodeData->m_W_body2.col(0).template head<3>() =  m_pCollData->m_cFrame.m_e_z; // I frame
                 m_pNodeData->m_W_body2.col(0).template tail<3>() =  m_rotJacobi.m_I_JacobiT_rot * m_pCollData->m_cFrame.m_e_z;
@@ -1032,7 +1032,7 @@ public:
             if(bodyNr == 1) {
                 //Set matrix size!
                 //m_pNodeData->m_W_body1.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
-                m_rotJacobi.set(m_pCollData->m_pBody1, m_pCollData->m_r_S1C1);
+                m_rotJacobi.set(m_pCollData->m_pBody[0], m_pCollData->m_r_SC[0]);
                 // N direction =================================================
                 m_pNodeData->m_W_body1.col(0).template head<3>() = - m_pCollData->m_cFrame.m_e_z; // I frame
                 m_pNodeData->m_W_body1.col(0).template tail<3>().setZero(); ///< sepzial operation here: m_I_JacobiT_rot * contact normal = 0;
@@ -1047,7 +1047,7 @@ public:
             } else {
                 //Set matrix size!
                 //m_pNodeData->m_W_body2.setZero(NDOFuBody, ContactModels::getLambdaDim(ContactModels::Enum::UCF));
-                m_rotJacobi.set(m_pCollData->m_pBody2, m_pCollData->m_r_S2C2);
+                m_rotJacobi.set(m_pCollData->m_pBody[1], m_pCollData->m_r_SC[1]);
                 // N direction =================================================
                 m_pNodeData->m_W_body2.col(0).template head<3>() =  m_pCollData->m_cFrame.m_e_z; // I frame
                 m_pNodeData->m_W_body2.col(0).template tail<3>().setZero(); ///< sepzial operation here: m_I_JacobiT_rot * contact normal = 0;
@@ -1095,14 +1095,14 @@ public:
             nodeData.m_G_ii.setZero(dimSet,dimSet);
 
             // Compute generalized force directions W
-            auto state = pCollData->m_pBody1->m_eMode;
+            auto state = pCollData->m_pBody[0]->m_eMode;
             if(  state == RigidBodyType::BodyMode::SIMULATED){
                 m_compW_body1.compute(nodeData);
             }else if(state == RigidBodyType::BodyMode::ANIMATED){
                 // Contact goes into xi_N, xi_T
                 ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
             }
-            state = pCollData->m_pBody2->m_eMode;
+            state = pCollData->m_pBody[1]->m_eMode;
             if(  state == RigidBodyType::BodyMode::SIMULATED){
                 m_compW_body2.compute(nodeData);
             }else if(state == RigidBodyType::BodyMode::ANIMATED){
@@ -1116,24 +1116,24 @@ public:
 
             // u_0 , calculate const b
             // First Body
-            if(pCollData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+            if(pCollData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
 
                 // m_front is zero here-> see DynamicsSystem sets it to zero!
-                nodeData.m_u1BufferPtr->m_front +=  pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
+                nodeData.m_u1BufferPtr->m_front +=  pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body1 * nodeData.m_LambdaBack );
                 /// + initial values M^⁻1 W lambda0 from percussion pool
 
                 nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body1.transpose() * nodeData.m_u1BufferPtr->m_back /* m_u_s */ ;
-                nodeData.m_G_ii += nodeData.m_W_body1.transpose() * pCollData->m_pBody1->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
+                nodeData.m_G_ii += nodeData.m_W_body1.transpose() * pCollData->m_pBody[0]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body1 ;
             }
             // SECOND BODY!
-            if(pCollData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
+            if(pCollData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
 
                 // m_front is zero here-> see DynamicsSystem sets it to zero!
-                nodeData.m_u2BufferPtr->m_front +=   pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack );
+                nodeData.m_u2BufferPtr->m_front +=   pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body2 * nodeData.m_LambdaBack );
                 /// + initial values M^⁻1 W lambda0 from percussion pool
 
                 nodeData.m_b += nodeData.m_eps.asDiagonal() * nodeData.m_W_body2.transpose() *  nodeData.m_u2BufferPtr->m_back;
-                nodeData.m_G_ii += nodeData.m_W_body2.transpose() * pCollData->m_pBody2->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
+                nodeData.m_G_ii += nodeData.m_W_body2.transpose() * pCollData->m_pBody[1]->m_MassMatrixInv_diag.asDiagonal() * nodeData.m_W_body2 ;
             }
 
             // add deltaGap / deltaT * 2 * alpha
@@ -1216,21 +1216,21 @@ private:
 
     template<typename CollDataType>
     inline void computeTotalOverlap(CollDataType * pColData){
-        if(pColData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
-           pColData->m_pBody1->m_pSolverData->m_overlapTotal +=  /*0.5**/pColData->m_overlap;
+        if(pColData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+           pColData->m_pBody[0]->m_pSolverData->m_overlapTotal +=  /*0.5**/pColData->m_overlap;
         }
         //        else{
         //           // if static or animated add overlap to other body (which needs to be simualated!)
-        //           ASSERTMSG(pColData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
-        //           pColData->m_pBody2->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
+        //           ASSERTMSG(pColData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
+        //           pColData->m_pBody[1]->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
         //        }
 
-        if(pColData->m_pBody2->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
-           pColData->m_pBody2->m_pSolverData->m_overlapTotal +=  /*0.5**/pColData->m_overlap;
+        if(pColData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+           pColData->m_pBody[1]->m_pSolverData->m_overlapTotal +=  /*0.5**/pColData->m_overlap;
         }
         //        else{
-        //           ASSERTMSG(pColData->m_pBody1->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
-        //           pColData->m_pBody1->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
+        //           ASSERTMSG(pColData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
+        //           pColData->m_pBody[0]->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
         //        }
     }
 

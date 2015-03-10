@@ -153,7 +153,7 @@ void CollisionSolverMPI::signalContactAdd() {
             LOGSLLEVEL3_CONTACT(m_pSolverLog,"---> Contact Frame: n: " << colData->m_cFrame.m_e_z.transpose() << std::endl;)
 
             //Set contact frame point
-            colData->m_cFrame.m_p = colData->m_pBody1->m_r_S + colData->m_r_S1C1;
+            colData->m_cFrame.m_p = colData->m_pBody[0]->m_r_S + colData->m_r_SC[0];
 
             // Calculate some Statistics
             m_maxOverlap = std::max(m_maxOverlap,colData->m_overlap);
