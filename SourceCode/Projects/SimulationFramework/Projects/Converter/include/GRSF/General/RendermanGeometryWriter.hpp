@@ -11,6 +11,7 @@ class RendermanGeometryWriter: public boost::static_visitor<> {
     public:
 
     DEFINE_RIGIDBODY_CONFIG_TYPES
+    DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 
     RendermanGeometryWriter(){}
 
