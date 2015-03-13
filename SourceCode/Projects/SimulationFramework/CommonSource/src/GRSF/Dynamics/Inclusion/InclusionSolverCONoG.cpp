@@ -56,6 +56,9 @@ void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::fil
             break;
         case InclusionSolverSettingsType::Method::SOR_CONTACT:
             m_pContactSorProxStepNodeVisitor->setLog(m_pSolverLog);
+             break;
+        default:
+            ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemented");
     }
 
     m_pSorProxInitNodeVisitor->setLog(m_pSolverLog);

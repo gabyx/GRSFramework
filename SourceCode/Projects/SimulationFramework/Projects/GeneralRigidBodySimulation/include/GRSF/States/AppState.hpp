@@ -55,8 +55,6 @@ public:
 
 	static void create(std::shared_ptr<AppStateListener> parent, const Ogre::String name){};
 
-	void destroy(){delete this;}
-
 	virtual void enter(void) = 0;
 	virtual void exit(void) = 0;
 	virtual bool pause(void){return false;}
@@ -64,6 +62,8 @@ public:
 	virtual void update(double timeSinceLastFrame) = 0;
 
 	std::shared_ptr<Ogre::SceneManager>		m_pSceneMgr;
+
+	virtual ~RenderAppState(){};
 protected:
 
    bool m_bEntered;
