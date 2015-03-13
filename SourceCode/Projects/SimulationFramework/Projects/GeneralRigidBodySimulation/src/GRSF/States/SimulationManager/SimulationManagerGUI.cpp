@@ -565,6 +565,7 @@ void SimulationManagerGUI::toggleShowContactFrames(){
         m_pSimulationLog->logMessage("---> SimulationManagerGUI:: Show ContactFrames: True");
         m_bShowContactFrames = true;
     }
+    m_dynCoordFrame.setVisible(m_bShowContactFrames);
 }
 
 

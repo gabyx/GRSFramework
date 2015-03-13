@@ -24,6 +24,10 @@ public:
         m_zAxis.reserve(nFrames*2);
     }
 
+    void setVisible(bool value, bool cascade = true){
+        m_dynCoordFrameNode->setVisible(value,cascade);
+    }
+
     void addToScene(Ogre::SceneNode * baseFrame,
                     std::string xAxisMat = "BaseWhiteNoLighting",
                     std::string yAxisMat = "BaseWhiteNoLighting",
