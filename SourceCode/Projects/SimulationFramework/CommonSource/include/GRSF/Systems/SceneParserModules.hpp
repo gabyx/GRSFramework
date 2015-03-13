@@ -320,11 +320,29 @@ public:
                 m_recorderSettings->setMode(RecorderSettings::RECORD_EVERY_STEP);
             } else if (method == "everyXTimeStep") {
                 m_recorderSettings->setMode(RecorderSettings::RECORD_EVERY_X_STEP);
-                PREC fps;
-                if(!Utilities::stringToType(fps, node.attribute("statesPerSecond").value())) {
-                    ERRORMSG("---> String conversion in RecorderSettings: statesPerSecond failed");
+
+
+                att = node.attribute("everyXStep");
+                if(att){
+                    PREC everyXStep;
+                    if(!Utilities::stringToType(everyXStep, att.value())) {
+                            ERRORMSG("---> String conversion in RecorderSettings: statesPerSecond failed");
+                    }
+                    m_recorderSettings->setEveryXTimestep(everyXStep);
+                }else{
+                    att = node.attribute("statesPerSecond");
+                    if(att){
+                        PREC fps;
+                        if(!Utilities::stringToType(fps, att.value())) {
+                            ERRORMSG("---> String conversion in RecorderSettings: statesPerSecond failed");
+                        }
+                        m_recorderSettings->setEveryXTimestep(fps,m_timestepperSettings->m_deltaT);
+                    }else{
+                        ERRORMSG("---> String conversion in RecorderSettings: everyXTimeStep failed: everyXStep (dominant) nor statesPerSecond present")
+                    }
                 }
-                m_recorderSettings->setEveryXTimestep(fps,m_timestepperSettings->m_deltaT);
+
+
             } else if (method == "noOutput") {
                 m_recorderSettings->setMode(RecorderSettings::RECORD_NOTHING);
             } else {

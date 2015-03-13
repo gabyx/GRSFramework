@@ -25,7 +25,7 @@ public:
 
     bool outputCheck(unsigned int iterationCount){
         if(m_eMode == RECORD_EVERY_X_STEP){
-        //std:: cout << iterationCount <<","<<m_recordEveryXTimestep<<std::endl;
+            //std:: cout << iterationCount <<","<<m_recordEveryXTimestep<<std::endl;
              if (iterationCount % m_recordEveryXTimestep == 0){
                 return true;
              }
@@ -45,6 +45,10 @@ public:
 
     RecorderMode & getMode(){
         return m_eMode;
+    }
+
+    void setEveryXTimestep(PREC everyXStep){
+        m_recordEveryXTimestep = everyXStep;
     }
 
     void setEveryXTimestep(PREC stepsPerSecond, PREC timeStep){
