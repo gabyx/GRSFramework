@@ -135,9 +135,10 @@ void MoreauTimeStepper::doTimeStep() {
 #endif
 
 
-      LOGSLLEVEL3(m_pSolverLog,"---> m_tB: " << m_currentSimulationTime <<std::endl; );
+    LOGSLLEVEL3(m_pSolverLog,"---> m_tB: " << m_currentSimulationTime <<std::endl; );
 
-
+    // Reset everything
+    resetForNextIteration();
 
     //Calculate Midpoint Rule ============================================================
     // Middle Time Step ==================================================================
@@ -179,10 +180,6 @@ void MoreauTimeStepper::doTimeStep() {
 
 
     //m_pInclusionSolver->doDriftCorrection();
-
-    // reset/swap solverData, statistic stuff
-    resetForNextIteration();
-    m_pInclusionSolver->resetForNextTimestep(m_IterationCounter); // Clears the contact graph!
 
 
     // Apply all rigid body local states to the Front buffer and set the time!
