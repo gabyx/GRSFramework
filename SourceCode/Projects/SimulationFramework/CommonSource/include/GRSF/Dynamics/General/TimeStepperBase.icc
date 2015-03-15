@@ -259,6 +259,10 @@ void TimeStepperBase<TDerived,TTraits>::doSecondHalfTimeStep(PREC te, PREC times
         m_pDynSys->m_currentSpinNorm = (pBody->m_K_Theta_S.asDiagonal() * pBody->m_pSolverData->m_uBuffer.m_front.template tail<3>()).norm();
 #endif
 
+        // Swap front / back velocity buffer
+        pBody->m_pSolverData->swapBuffer();
+        pBody->m_pSolverData->reset();
+
     }
 }
 
@@ -267,14 +271,9 @@ void TimeStepperBase<TDerived,TTraits>::doSecondHalfTimeStep(PREC te, PREC times
 
 template<typename TDerived, typename TTraits>
 void TimeStepperBase<TDerived,TTraits>::resetForNextIteration(){
-
         m_pDynSys->resetEnergy();
-
-        for(auto & pBody : m_pDynSys->m_simBodies) {
-            // Swap uBuffer and reset Front
-            pBody->m_pSolverData->swapBuffer();
-            pBody->m_pSolverData->reset();
-        }
+        // Clears the contact graph and other inclusion related stuff!
+        m_pInclusionSolver->resetForNextTimestep();
 }
 
 template<typename TDerived, typename TTraits>

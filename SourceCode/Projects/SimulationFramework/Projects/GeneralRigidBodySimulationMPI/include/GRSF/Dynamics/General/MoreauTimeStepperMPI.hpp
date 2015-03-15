@@ -197,6 +197,8 @@ void MoreauTimeStepperMPI::doTimeStep() {
 
     LOGSLLEVEL2(m_pSolverLog,"---> m_t Begin: " << m_currentSimulationTime <<std::endl; );
 
+    // Reset everything
+    resetForNextIteration();
 
     //Calculate Midpoint Rule ============================================================
     // Middle Time Step for all LOCAL Bodies==============================================
@@ -251,9 +253,6 @@ void MoreauTimeStepperMPI::doTimeStep() {
          if we receive a new (local or remote) body, add it either to the remote or local list depending on what it is, check if the body belongs to our topology
     */
 
-
-    m_pInclusionSolver->resetForNextTimestep(); // Clears the contact graph and other inclusion related stuff!
-
     // Solve Collision
     m_startTimeCollisionSolver = m_PerformanceTimer.elapsedSec();
     m_pCollisionSolver->solveCollision();
@@ -276,10 +275,6 @@ void MoreauTimeStepperMPI::doTimeStep() {
     // Custom Calculations after second timestep
     afterSecondTimeStep();
     // ====================================================================================
-
-    // reset/swap solverData, statistic stuff
-    resetForNextIteration();
-    m_pInclusionSolver->resetForNextTimestep(); // Clears the contact graph!
 
 
 
