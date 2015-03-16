@@ -11,9 +11,7 @@
 
 #include "GRSF/Common/SimpleLogger.hpp"
 
-#include "GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/BoxGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp"
+#include "GRSF/Dynamics/Collision/Geometries.hpp"
 
 class PrintGeometryDetailsVisitor : public boost::static_visitor<> {
     public:
@@ -37,12 +35,15 @@ class PrintGeometryDetailsVisitor : public boost::static_visitor<> {
         }
 
         void operator()(std::shared_ptr<const MeshGeometry > & mesh)  {
-            ASSERTMSG(false,"MeshGeometry PrintDetails: This has not been implemented yet!");
+            ERRORMSG("MeshGeometry PrintDetails: This has not been implemented yet!");
+        }
+        void operator()(std::shared_ptr<const CapsuleGeometry > & mesh)  {
+            ERRORMSG("CapsuleGeometry PrintDetails: This has not been implemented yet!");
         }
 
         void operator()(std::shared_ptr<const HalfspaceGeometry > & halfspace)  {
             //This has not been implemented yet!
-            ASSERTMSG(false,"HalfspaceGeometry PrintDetails: This has not been implemented yet!");
+            ERRORMSG("HalfspaceGeometry PrintDetails: This has not been implemented yet!");
         }
 
         private:

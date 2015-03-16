@@ -484,20 +484,18 @@ private:
         if(Options::m_cacheScale && bodyList) {
             m_externalScalesGroupCache->assign(bodyList->size(), Vector3(1,1,1));
         }
-
-        if(std::strcmp(geometryNode.name() , "Sphere")==0) {
+        std::string n = geometryNode.name();
+        if(n == "Sphere") {
             parseSphereGeometry(geometryNode);
-
-        } else if(std::strcmp(geometryNode.name() , "Halfspace")==0) {
+        } else if(n == "Halfspace") {
             parseHalfspaceGeometry( geometryNode);
-
-        } else if(std::strcmp(geometryNode.name() , "Mesh")==0) {
+        } else if( n == "Mesh"){
             parseMeshGeometry( geometryNode);
-
-        } else if(std::strcmp(geometryNode.name() , "Box")==0) {
+        } else if(n== "Box") {
             parseBoxGeometry( geometryNode);
-
-        } else if(std::strcmp(geometryNode.name() , "GlobalGeomId")==0 && !m_addToGlobalGeoms) {
+        } else if(n== "Capsule") {
+            parseCapsuleGeometry( geometryNode);
+        } else if(n=="GlobalGeomId" && !m_addToGlobalGeoms) {
             parseGlobalGeomId(geometryNode);
         } else {
             ERRORMSG("---> The geometry '" << geometryNode.name() << "' has no implementation in the parser");
@@ -751,10 +749,12 @@ private:
                 ERRORMSG("---> String conversion in HalfsphereGeometry: normal failed");
             }
 
+            /* (not needed so far)
             Vector3 p;
             if(!Utilities::stringToVector3(p, halfspace.attribute("position").value())) {
                 ERRORMSG("---> String conversion in HalfsphereGeometry: position failed");
             }
+            */
 
 
             if(m_addToGlobalGeoms && Options::m_allocateGeometry) {
@@ -767,11 +767,11 @@ private:
                     // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
                 }
                 //no scale (here)
-                addToGlobalGeomList(id, std::shared_ptr<HalfspaceGeometry >(new HalfspaceGeometry(n,p)));
+                addToGlobalGeomList(id, std::shared_ptr<HalfspaceGeometry >(new HalfspaceGeometry(n/*,p*/)));
             } else {
 
                 if(Options::m_allocateGeometry) {
-                    auto s = std::shared_ptr<HalfspaceGeometry >(new HalfspaceGeometry(n,p));
+                    auto s = std::shared_ptr<HalfspaceGeometry >(new HalfspaceGeometry(n/*,p*/));
                     for(auto & b : *m_bodiesGroup) {
                         // no scale (here)
                         if(b.m_body) {
@@ -788,6 +788,72 @@ private:
             ERRORMSG("---> The attribute 'type' '" + type + std::string("' of 'Halfspace' has no implementation in the parser"));
         }
     }
+     void parseCapsuleGeometry( XMLNodeType capsule) {
+        std::string type = capsule.attribute("distribute").value();
+        if(type == "uniform") {
+
+            Vector3 n;
+            if(!Utilities::stringToVector3(n, capsule.attribute("normal").value())) {
+                ERRORMSG("---> String conversion in HalfsphereGeometry: normal failed");
+            }
+
+            /* (not needed so far)
+            Vector3 p;
+            if(!Utilities::stringToVector3(p, capsule.attribute("position").value())) {
+                ERRORMSG("---> String conversion in HalfsphereGeometry: position failed");
+            }
+            */
+
+            // Uniform
+            PREC radius;
+            if(!Utilities::stringToType(radius,capsule.attribute("radius").value())) {
+                ERRORMSG("---> String conversion in parseCapsuleGeometry: radius failed");
+            }
+            if( radius <= 0) {
+                ERRORMSG("---> In parseCapsuleGeometry: radius to small!");
+            }
+
+            PREC length;
+            if(!Utilities::stringToType(length,capsule.attribute("length").value())) {
+                ERRORMSG("---> String conversion in parseCapsuleGeometry: length failed");
+            }
+            if( length <= 0) {
+                ERRORMSG("---> In parseCapsuleGeometry: length to small!");
+            }
+
+
+            if(m_addToGlobalGeoms && Options::m_allocateGeometry) {
+                unsigned int id;
+                if(!Utilities::stringToType<unsigned int>(id,capsule.attribute("id").value())) {
+                    ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
+                }
+                if(id == 0) {
+                    ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
+                    // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
+                }
+                //no scale (here)
+                addToGlobalGeomList(id, std::shared_ptr<CapsuleGeometry >(new CapsuleGeometry(/*,p*/n,length,radius)));
+            } else {
+
+                if(Options::m_allocateGeometry) {
+                    auto s = std::shared_ptr<CapsuleGeometry >(new CapsuleGeometry(/*,p*/n,length,radius));
+                    for(auto & b : *m_bodiesGroup) {
+                        // no scale (here)
+                        if(b.m_body) {
+                            b.m_body->m_geometry = s;
+                        }
+                        if(Options::m_cacheGeometry) {
+                            m_externalGeometryCache->emplace(b.m_id,s);
+                        }
+                    }
+                }
+            }
+
+        } else {
+            ERRORMSG("---> The attribute 'type' '" + type + std::string("' of 'Capsule' has no implementation in the parser"));
+        }
+    }
+
     void parseBoxGeometry( XMLNodeType box) {
         std::string type = box.attribute("distribute").value();
         if(type == "uniform") {
@@ -884,7 +950,7 @@ private:
                     if(!Utilities::stringToType(angle, mesh.attribute("angleDegree").value())) {
                         ERRORMSG("---> String conversion in parseMeshGeometry: angleDegree failed");
                     }
-                    angle = angle / 180 * M_PI;
+                    angle = angle / 180.0 * M_PI;
                 } else if(mesh.attribute("angleRadian")) {
                     if(!Utilities::stringToType(angle, mesh.attribute("angleRadian").value())) {
                         ERRORMSG("---> String conversion in parseMeshGeometry: angleRadian  failed");
@@ -893,6 +959,7 @@ private:
                     ERRORMSG("---> No angle found in parseMeshGeometry");
                 }
 
+                axis.normalize();
                 Quaternion quat(AngleAxis(angle,axis));
 
 
@@ -1790,7 +1857,7 @@ private:
                     if(!Utilities::stringToType(angle, att.value())) {
                         ERRORMSG("---> String conversion in InitialPositionPosAxisAngle: rad failed");
                     }
-                    angle = angle / 180 * M_PI;
+                    angle = angle / 180.0 * M_PI;
                 } else {
                     att = transf.attribute("rad");
                     if(att) {
@@ -1801,7 +1868,7 @@ private:
                         ERRORMSG("---> No angle found in InitialPositionPosAxisAngle");
                     }
                 }
-
+                axis.normalize();
                 q_BK = AngleAxis(angle,axis);
                 trans=q_KI*trans;//QuaternionHelpers::rotateVector(q_KI, trans ); //K_r_KB = trans;
                 I_r_IK +=  trans;  // + Rot_KI * K_r_KB; // Transforms like A_IK * K_r_KB;

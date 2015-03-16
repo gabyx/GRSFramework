@@ -298,7 +298,7 @@ private:
 void ColliderPoint::intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) {
     Vector3 I_n = m_pBody[0]->m_A_IK*halfspace->m_normal;
     //t = n * r_PS ( P=point, S=center of plane ), if t>=0 intersect!
-    PREC t = I_n.dot(m_pBody[0]->m_r_S - *m_p) +  halfspace->m_normal.dot(halfspace->m_pos);
+    PREC t = I_n.dot(m_pBody[0]->m_r_S - *m_p) /*+  halfspace->m_normal.dot(halfspace->m_pos)*/;
     if( t >= 0.0){
         m_bIntersection = true;
         // project onto plane
@@ -381,23 +381,27 @@ public:
 
     void operator()(  const SphereGeomPtrType  & sphereGeom1 ,
                       const SphereGeomPtrType  & sphereGeom2){
-        collide(sphereGeom1, sphereGeom2);
+        collide(sphereGeom1.get(), sphereGeom2.get());
     }
     void operator()(  const SphereGeomPtrType  & sphereGeom ,
                       const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom) {
-        collide(sphereGeom, halfspaceGeom);
+        collide(sphereGeom.get(), halfspaceGeom.get());
+    }
+    void operator()(  const SphereGeomPtrType  & sphereGeom ,
+                      const std::shared_ptr<const CapsuleGeometry >  & capsuleGeom) {
+        collide(sphereGeom.get(), capsuleGeom.get());
     }
     void operator()(  const std::shared_ptr<const BoxGeometry >  & box1 ,
                       const std::shared_ptr<const BoxGeometry >  & box2) {
-        collide(box1, box2);
+        collide(box1.get(), box2.get());
     }
     void operator()(  const std::shared_ptr<const BoxGeometry >  & box ,
                       const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom) {
-        collide(box, halfspaceGeom);
+        collide(box.get(), halfspaceGeom.get());
     }
     void operator()(  const SphereGeomPtrType  & sphere ,
                       const std::shared_ptr<const MeshGeometry >  & mesh) {
-        collide(sphere, mesh);
+        collide(sphere.get(), mesh.get());
     }
 
     /** If no routine matched try to swap objects. If that fails too, an exception is thrown*/
@@ -427,20 +431,24 @@ private:
     * @brief The collision functions. First geometry belongs to first body, second to second body!
     * @{
     */
-    inline void collide(const SphereGeomPtrType  & sphereGeom1,
-                        const SphereGeomPtrType  & sphereGeom2); ///< Sphere/Sphere collision.
+    inline void collide(const SphereGeometry * sphereGeom1,
+                        const SphereGeometry * sphereGeom2); ///< Sphere/Sphere collision.
+    inline void collideSphereSphere(PREC r1, PREC r2, const Vector3 &c1, const Vector3 &c2);
 
-    inline void collide(const SphereGeomPtrType  & sphereGeom,
-                        const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom); ///< Sphere/Halfspace collision.
+    inline void collide(const SphereGeometry * sphereGeom,
+                        const HalfspaceGeometry *  halfspaceGeom); ///< Sphere/Halfspace collision.
 
-    inline void collide(const std::shared_ptr<const BoxGeometry >  & boxA,
-                        const std::shared_ptr<const BoxGeometry >  & boxB); ///< Box/Box collision.
+    inline void collide(const SphereGeometry *  sphereGeom,
+                        const CapsuleGeometry * capsuleGeom); ///< Sphere/Capsule collision.
 
-    inline void collide(const std::shared_ptr<const BoxGeometry >  & boxGeom,
-                        const std::shared_ptr<const HalfspaceGeometry >  &halfspaceGeom); ///< Box/Halfspace collision.
+    inline void collide(const BoxGeometry  * boxA,
+                        const BoxGeometry  * boxB); ///< Box/Box collision.
 
-    inline void collide(const SphereGeomPtrType  & sphereGeom,
-                        const std::shared_ptr<const MeshGeometry >  & meshGeom); ///< Sphere/Mesh collision.
+    inline void collide(const BoxGeometry  * boxGeom,
+                        const HalfspaceGeometry *  halfspaceGeom); ///< Box/Halfspace collision.
+
+    inline void collide(const SphereGeometry  * sphereGeom,
+                        const MeshGeometry *  meshGeom); ///< Sphere/Mesh collision.
 
 
     /** Exception, to indicate that no collision function could be matched, because its not implemented. */
@@ -462,15 +470,21 @@ private:
 
 // Collision Functions ==============================================================================
 
-void ColliderBody::collide( const SphereGeomPtrType  & sphereGeom1,
-                            const SphereGeomPtrType  & sphereGeom2)
+void ColliderBody::collide( const SphereGeometry * sphereGeom1,
+                            const SphereGeometry * sphereGeom2)
 {
     // Do Collision for sphere to sphere
+    collideSphereSphere(sphereGeom1->m_radius, sphereGeom2->m_radius,m_pBody[0]->m_r_S, m_pBody[1]->m_r_S);
+}
 
-    Vector3 dist = m_pBody[1]->m_r_S - m_pBody[0]->m_r_S; // I frame
+/*
+* Implementation of sphere-sphere collision, vectors of the centers c1 and c2 need to be in the same frame!
+*/
+void ColliderBody::collideSphereSphere(PREC r1, PREC r2, const Vector3 &c1, const Vector3 &c2){
 
+    Vector3 dist = c2 - c1; // I frame
     PREC dsqr = dist.dot(dist);
-    PREC rsqr = (sphereGeom1->m_radius + sphereGeom2->m_radius);
+    PREC rsqr = (r1 + r2);
     rsqr     *= rsqr;
 
     if(dsqr < rsqr) {
@@ -495,9 +509,9 @@ void ColliderBody::collide( const SphereGeomPtrType  & sphereGeom1,
         // Coordinate system belongs to first body!
         CoordinateSystem::makeCoordinateSystem(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
-        m_pColData->m_overlap = (sphereGeom1->m_radius + sphereGeom2->m_radius) - d;
-        m_pColData->m_r_SC[0] =   m_pColData->m_cFrame.m_e_z * (sphereGeom1->m_radius - m_pColData->m_overlap/2);
-        m_pColData->m_r_SC[1] =  -m_pColData->m_cFrame.m_e_z * (sphereGeom2->m_radius - m_pColData->m_overlap/2);
+        m_pColData->m_overlap = (r1 + r2) - d;
+        m_pColData->m_r_SC[0] =   m_pColData->m_cFrame.m_e_z * (r1 - m_pColData->m_overlap/2);
+        m_pColData->m_r_SC[1] =  -m_pColData->m_cFrame.m_e_z * (r2 - m_pColData->m_overlap/2);
 
 
         // Set pointers
@@ -511,14 +525,14 @@ void ColliderBody::collide( const SphereGeomPtrType  & sphereGeom1,
 }
 
 
-void ColliderBody::collide( const SphereGeomPtrType  & sphereGeom,
-                            const std::shared_ptr<const HalfspaceGeometry >  & halfspaceGeom)
+void ColliderBody::collide( const SphereGeometry * sphereGeom,
+                            const HalfspaceGeometry * halfspaceGeom)
 {
 
     // Do Collision for sphere to halfspace
     Vector3 I_n_plane = m_pBody[1]->m_A_IK*halfspaceGeom->m_normal;
 
-    double overlap = sphereGeom->m_radius - (m_pBody[0]->m_r_S - (  m_pBody[1]->m_A_IK * halfspaceGeom->m_pos  +  m_pBody[1]->m_r_S  )).dot( I_n_plane ) ;
+    double overlap = sphereGeom->m_radius - (m_pBody[0]->m_r_S - (  /*m_pBody[1]->m_A_IK * halfspaceGeom->m_pos  +*/  m_pBody[1]->m_r_S  )).dot( I_n_plane ) ;
 
     if(overlap >=0) {
         //We have a collision
@@ -544,15 +558,52 @@ void ColliderBody::collide( const SphereGeomPtrType  & sphereGeom,
 
 }
 
+/*!\brief Contact generation between a Sphere and a Capsule.
+ * In case of a contact between a sphere and a capsule, a single contact point is generated.
+ * This contact point is calculated by first estimating a sphere within the capsule whose
+ * center of mass is on the centerline of the capsule and closest to the center of mass of
+ * the colliding sphere. After this, a sphere-sphere collision is performed between the
+ * capsule representation and the colliding sphere.
+ */
+void ColliderBody::collide(const SphereGeometry *  sphereGeom,
+                           const CapsuleGeometry * capsuleGeom)
+{
 
-void ColliderBody::collide( const std::shared_ptr<const BoxGeometry >  & boxA,
-                            const std::shared_ptr<const BoxGeometry >  & boxB) {
+       const PREC halfL( 0.5*capsuleGeom->m_length );  // Half cylinder length
+
+
+       // Calculating the component in the normal direction of the sphere in the frame K of the capsule
+       // sphere->m_r_S - capsule->m_r_S  projecting onto the transformed normal in the I frame
+       Vector3 I_normal(m_pBody[1]->m_A_IK*capsuleGeom->m_normal);
+       PREC z = I_normal.dot(m_pBody[0]->m_r_S - m_pBody[1]->m_r_S);
+
+
+       // Calculation the center of the sphere representing the capsule
+       // limit the capsule representing sphere to the interval [-halfL, halfL]
+       if( z > halfL ) {
+          z = halfL;
+       }
+       else if( z < -halfL ) {
+          z = -halfL;
+       }
+
+       I_normal = m_pBody[1]->m_r_S + z*I_normal;
+
+       // Performing a sphere-sphere collision between the colliding sphere and the
+       // capsule representation
+       collideSphereSphere(sphereGeom->m_radius,capsuleGeom->m_radius, m_pBody[0]->m_r_S, I_normal);
+}
+
+
+
+void ColliderBody::collide( const BoxGeometry * boxA,
+                            const BoxGeometry * boxB) {
     // Not implemented yet!
 }
 
 
-void ColliderBody::collide( const std::shared_ptr<const BoxGeometry >  & boxGeom,
-                            const std::shared_ptr<const HalfspaceGeometry >  &halfspaceGeom) {
+void ColliderBody::collide( const BoxGeometry * boxGeom,
+                            const HalfspaceGeometry * halfspaceGeom) {
 
 
     // Check all 8 corners against the plane
@@ -563,15 +614,13 @@ void ColliderBody::collide( const std::shared_ptr<const BoxGeometry >  & boxGeom
     temp1 = m_pBody[0]->m_A_IK*(boxGeom->m_center);
     temp2 = (m_pBody[0]->m_r_S) - (m_pBody[1]->m_r_S);
 
-    double d = halfspaceGeom->m_normal.dot(halfspaceGeom->m_pos);
-//            std::cout << "d:" << d << std::endl;
-//            std::cout << "temp1:" << temp1  << std::endl;
+
     for(int i=0; i<8; i++) {
-//                std::cout << boxGeom->getPoint(i) <<std::endl;
+
         r_SC1 = temp1 + m_pBody[0]->m_A_IK*(boxGeom->getPoint(i));
         r_SC2 = r_SC1+temp2;
 
-        double overlap = d - ( r_SC2 ).dot( I_n_plane ) ;
+        double overlap = /*halfspaceGeom->m_normal.dot(halfspaceGeom->m_pos)*/ - ( r_SC2 ).dot( I_n_plane ) ;
         if(overlap >=0) {
             //We have a collision
             m_pColData = new CollisionData();
@@ -599,8 +648,8 @@ void ColliderBody::collide( const std::shared_ptr<const BoxGeometry >  & boxGeom
 
 
 
-void ColliderBody::collide(const SphereGeomPtrType  & sphereGeom,
-                           const std::shared_ptr<const MeshGeometry >  & meshGeom)
+void ColliderBody::collide(const SphereGeometry  * sphereGeom,
+                           const MeshGeometry * meshGeom)
 {
     using namespace MatrixHelpers;
 

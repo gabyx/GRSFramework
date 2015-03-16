@@ -12,12 +12,12 @@ public:
 
     PlaneGeometry() {
         m_normal.setZero();
-        m_pos.setZero();
+        /*m_pos.setZero();*/
     }
-    PlaneGeometry( const Vector3 & n, const Vector3 & p ):m_normal(n), m_pos(p) {}
+    PlaneGeometry( const Vector3 & n/*, const Vector3 & p*/ ):m_normal(n)/*, m_pos(p)*/ {}
 
     Vector3 m_normal; // in K frame
-    Vector3 m_pos;    // in K frame
+    /*Vector3 m_pos;*/    // in K frame (not needed)
 
 protected:
 

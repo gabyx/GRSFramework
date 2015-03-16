@@ -7,6 +7,8 @@
 #include "GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp"
 #include "GRSF/Dynamics/Collision/Geometry/BoxGeometry.hpp"
 #include "GRSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp"
+#include "GRSF/Dynamics/Collision/Geometry/CapsuleGeometry.hpp"
+
 #include "GRSF/Dynamics/Collision/Geometry/MeshGeometry.hpp"
 
 
