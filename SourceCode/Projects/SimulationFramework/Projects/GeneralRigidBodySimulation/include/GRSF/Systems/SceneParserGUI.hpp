@@ -78,17 +78,22 @@ public:
         ASSERTMSG(bodyList->size() == m_scalesGroup.size(), "The scales list has not been filled, this needs to be done outside of this module!")
 
         LOGSCLEVEL1(m_pSimulationLog, "---> VisModule: parsing (BodyVisualization)"<<std::endl;)
-        XMLNodeType node = vis.child("Mesh");
-        if(node) {
+        XMLNodeType node = vis.first_child();
+        std::string n = node.name();
+        if(n=="Plane"){
+            parsePlane(node);
+        }
+        else if(n == "PointCloud"){
+            parsePointCloud(node);
+        }
+        else if(n == "Mesh"){
             parseMesh(node);
-        } else {
-            node = vis.child("Plane");
-            if(node){
-                parsePlane(node);
-            }else{
-                node = vis.child("PointCloud");
-                parsePointCloud(node);
-            }
+        }
+        else if(n == "Capsule"){
+             parseCapsule(node);
+        }
+        else{
+            ERRORMSG("Visualization for type: " << n << " not implemented!")
         }
     }
 
@@ -108,8 +113,8 @@ private:
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
     void parseMesh(XMLNodeType  meshNode ) {
         XMLAttributeType att;
-        static int nodeCounter = 0;
-        static int entityCounter = 0;
+//        static int nodeCounter = 0;
+//        static int entityCounter = 0;
 
         GET_XMLATTRIBUTE_CHECK(att,"file",meshNode);
         boost::filesystem::path meshName = att.value();
@@ -149,19 +154,10 @@ private:
             auto id = (*m_bodyListGroup)[bodyIdx].m_id;
             i = id - m_startIdGroup;
 
-            entity_name.str("");
-            node_name.str("");
-            entity_name << meshName.filename().string() << std::string("Entity");
-            node_name << meshName.filename().string() << std::string("Node");
-            entity_name << entityCounter;
-            node_name<< nodeCounter;
 
-            //TODO m_pSceneMgr->createInstancedGeometry();
-
-
-            Ogre::Entity* ent = m_pSceneMgr->createEntity(entity_name.str(), meshName.string() );
+            Ogre::Entity* ent = m_pSceneMgr->createEntity( meshName.string() );
             ent->setCastShadows(renderSettings.shadowsEnabled);
-            Ogre::SceneNode* sceneNode = m_pBodiesNode->createChildSceneNode(node_name.str());
+            Ogre::SceneNode* sceneNode = m_pBodiesNode->createChildSceneNode();
             Ogre::SceneNode* sceneNodeScale = sceneNode->createChildSceneNode();
 
             RigidBodyGraphicsType rigidBodyGraphics(sceneNode, id);
@@ -181,15 +177,15 @@ private:
             sceneNodeScale->attachObject(ent);
 
             if(renderSettings.attachAxis) {
-                Ogre::SceneNode* sceneNodeAxes = sceneNode->createChildSceneNode(entity_name.str() + "Axes");
-                Ogre::Entity* axisEnt = m_pSceneMgr->createEntity(entity_name.str() + "AxesEnt","axes.mesh" );
+                Ogre::SceneNode* sceneNodeAxes = sceneNode->createChildSceneNode();
+                Ogre::Entity* axisEnt = m_pSceneMgr->createEntity("axes.mesh" );
                 //Ogre::MovableObject * axisEnt= AxisObject().createAxis(m_pSceneMgr.get(),entity_name.str() + "Axes",100);
                 sceneNodeAxes->setScale(renderSettings.axesSize,renderSettings.axesSize,renderSettings.axesSize);
                 sceneNodeAxes->attachObject(axisEnt);
             }
 
 
-            int matIdx = i % m_materialList.size();
+            unsigned int matIdx = i % m_materialList.size();
 
             ent->setMaterialName(m_materialList[matIdx]);
 
@@ -203,11 +199,130 @@ private:
                 m_pBodies->addBody(rigidBodyGraphics);
             }
 
-            ++nodeCounter;
-            ++entityCounter;
+//            ++nodeCounter;
+//            ++entityCounter;
         }
 
     }
+
+
+
+    // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
+    void parseCapsule(XMLNodeType  capsule ) {
+        XMLAttributeType att;
+
+        GET_XMLATTRIBUTE_CHECK(att,"fileZylinder",capsule);
+        boost::filesystem::path fileZyl = att.value();
+
+        GET_XMLATTRIBUTE_CHECK(att,"fileCap",capsule);
+        boost::filesystem::path fileCap = att.value();
+
+        bool scaleLikeGeometry = false;
+        PREC radius, length;
+        att = capsule.attribute("scaleLikeGeometry");
+        if(att) {
+            if(!Utilities::stringToType(scaleLikeGeometry, att.value())) {
+                ERRORMSG("---> String conversion in parseCapsule: scaleWithGeometry failed");
+            }
+        }
+        if(!scaleLikeGeometry) {
+            if(!Utilities::stringToType(radius, capsule.attribute("radius").value() )) {
+                ERRORMSG("---> String conversion in parseCapsule: scaleXY failed");
+            }
+            if(!Utilities::stringToType(length, capsule.attribute("length").value() )) {
+                ERRORMSG("---> String conversion in parseCapsule: scaleZ failed");
+            }
+        }
+
+
+        XMLNodeType  rendering = capsule.child("Rendering");
+        RenderSettings renderSettings;
+        if(rendering) {
+            parseRenderSettings(rendering, renderSettings);
+        }
+        LOGSCLEVEL1(m_pSimulationLog,"---> RenderSettings: axis= "<< renderSettings.attachAxis
+                    << " shadows: " << renderSettings.shadowsEnabled << std::endl;)
+
+        parseMaterials(capsule);
+
+
+        std::stringstream entity_name,node_name;
+        LOG(m_pSimulationLog, "---> Add Ogre Capsule Objects"<<std::endl);
+
+        unsigned int i; // Linear offset form the m_startIdGroup
+
+        for(unsigned int bodyIdx = 0; bodyIdx < m_bodyListGroup->size(); ++bodyIdx) {
+            auto id = (*m_bodyListGroup)[bodyIdx].m_id;
+            i = id - m_startIdGroup;
+
+            Ogre::Entity* entZyl = m_pSceneMgr->createEntity(/*entity_name.str(),*/ fileZyl.string() );
+            Ogre::Entity* entCap1 = m_pSceneMgr->createEntity(/*entity_name.str(),*/ fileCap.string() );
+            Ogre::Entity* entCap2 = m_pSceneMgr->createEntity(/*entity_name.str(),*/ fileCap.string() );
+            entZyl->setCastShadows(renderSettings.shadowsEnabled);
+            entCap1->setCastShadows(renderSettings.shadowsEnabled);
+            entCap2->setCastShadows(renderSettings.shadowsEnabled);
+
+            Ogre::SceneNode* sceneNode = m_pBodiesNode->createChildSceneNode(/*node_name.str()*/);
+            RigidBodyGraphicsType rigidBodyGraphics(sceneNode, id);
+
+            Ogre::SceneNode* sceneNodeZyl = sceneNode->createChildSceneNode();
+            sceneNodeZyl->attachObject(entZyl);
+            Ogre::SceneNode* sceneNodeCap1 = sceneNode->createChildSceneNode();
+            sceneNodeCap1->attachObject(entCap1);
+            Ogre::SceneNode* sceneNodeCap2 = sceneNode->createChildSceneNode();
+            sceneNodeCap2->attachObject(entCap2);
+
+            if(scaleLikeGeometry) {
+                auto & s = m_scalesGroup[bodyIdx];
+                if(s(0)<=0 || s(1)<=0 || s(2)<=0) {
+                    ERRORMSG("---> parseCapsule:: Scale for Mesh: " << fileZyl.string() << ", " << fileCap.string() << " is zero or smaller!");
+                }
+                sceneNodeZyl->setScale(s(0),s(1),s(2));
+                sceneNodeCap1->setScale(s(0),s(1),s(2));
+                sceneNodeCap2->setScale(s(0),s(1),s(2));
+            } else {
+                if( radius<=0 || length <=0)  {
+                    ERRORMSG("---> parseCapsule:: radius or length for Mesh: " << fileZyl.string() << ", " << fileCap.string() << "is zero or smaller!");
+                }
+                sceneNodeZyl->setScale(radius,radius,length);
+                sceneNodeCap1->setScale(radius,radius,radius);
+                sceneNodeCap2->setScale(radius,radius,radius);
+
+                sceneNodeCap1->setPosition(0,0,0.5*length);
+                sceneNodeCap2->setPosition(0,0,-0.5*length);
+                sceneNodeCap2->setOrientation(Ogre::Quaternion(Ogre::Radian(M_PI),Ogre::Vector3(1,0,0) ));
+            }
+
+            if(renderSettings.attachAxis) {
+                Ogre::SceneNode* sceneNodeAxes = sceneNode->createChildSceneNode();
+                Ogre::Entity* axisEnt = m_pSceneMgr->createEntity("axes.mesh");
+                //Ogre::MovableObject * axisEnt= AxisObject().createAxis(m_pSceneMgr.get(),entity_name.str() + "Axes",100);
+                sceneNodeAxes->setScale(renderSettings.axesSize,renderSettings.axesSize,renderSettings.axesSize);
+                sceneNodeAxes->attachObject(axisEnt);
+            }
+
+
+            unsigned int matIdx = i % m_materialList.size();
+
+            entZyl->setMaterialName(m_materialList[matIdx]);
+            entCap1->setMaterialName(m_materialList[matIdx]);
+            entCap2->setMaterialName(m_materialList[matIdx]);
+
+            //Set initial condition
+            rigidBodyGraphics.applyBodyState( (*m_statesGroup)[bodyIdx] );
+
+
+            if( m_mode == BodyMode::SIMULATED) {
+                m_pSimBodies->addBody(rigidBodyGraphics);
+            } else if( m_mode == BodyMode::STATIC) {
+                m_pBodies->addBody(rigidBodyGraphics);
+            }
+        }
+
+    }
+
+
+
 
     void parsePointCloud(XMLNodeType  pcloudNode ) {
 

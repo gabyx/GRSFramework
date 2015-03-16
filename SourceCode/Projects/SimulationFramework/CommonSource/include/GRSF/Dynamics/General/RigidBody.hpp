@@ -50,10 +50,11 @@ public:
     using SphereGeomPtrType     = std::shared_ptr<const SphereGeometry >;
     using HalfspaceGeomPtrType  = std::shared_ptr<const HalfspaceGeometry>;
     using BoxGeomPtrType        = std::shared_ptr<const BoxGeometry >;
+    using CapsuleGeomPtrType    = std::shared_ptr<const CapsuleGeometry >;
     using MeshPtrType           = std::shared_ptr<const MeshGeometry >;
 
     typedef boost::variant<
-      SphereGeomPtrType, HalfspaceGeomPtrType , BoxGeomPtrType, MeshPtrType
+      SphereGeomPtrType, HalfspaceGeomPtrType , BoxGeomPtrType, MeshPtrType, CapsuleGeomPtrType
     > GeometryType;
 
     GeometryType m_geometry; ///< A boost::variant which takes different geometry shared pointers.

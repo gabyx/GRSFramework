@@ -37,6 +37,10 @@ public:
         addGyroTerm();
     }
 
+    inline void operator()(std::shared_ptr<const CapsuleGeometry > & halfspace) {
+        addGyroTerm();
+    }
+
     private:
 
     inline void addGyroTerm(){
