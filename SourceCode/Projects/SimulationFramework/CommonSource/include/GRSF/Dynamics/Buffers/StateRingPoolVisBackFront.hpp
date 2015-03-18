@@ -67,7 +67,7 @@ protected:
 
     boost::mutex	m_mutexStateInit; ///< Mutex for the initial state.
     std::ofstream m_logfile;
-#define POOL_SIZE 50 ///< The ring pool size, must not exceed 256 and be lower than 3!, because of the integer for the index in the StatePool class.
+    static const unsigned int m_ringPoolSize = 8; ///< The ring pool size, must not exceed 256 and be lower than 3!, because of the integer for the index in the StatePool class.
 };
 /** @} */
 
@@ -79,10 +79,10 @@ StateRingPoolVisBackFront::StateRingPoolVisBackFront(RigidBodyIterator itBegin, 
 {
 
     // Add the 3 state pools, if m_state_pointer is deleted, all elements inside are deleted because of shared_ptr
-    m_pool.assign(POOL_SIZE, DynamicsState());
+    m_pool.assign(m_ringPoolSize, DynamicsState());
 
     m_pool[0].initSimStates<true>(itBegin,itEnd);
-    for(int i=1;i<POOL_SIZE;i++){
+    for(int i=1;i<m_ringPoolSize;i++){
         m_pool[i] = m_pool[0];
     }
 
@@ -150,7 +150,7 @@ StateRingPoolVisBackFront::advanceSimBuffer(bool & out_changed) {
     boost::mutex::scoped_lock l(m_change_pointer_mutex);
     // calculated next index!
 
-    atomic_char next_index = (m_idx[1] + 1) % POOL_SIZE;
+    atomic_char next_index = (m_idx[1] + 1) % m_ringPoolSize;
     // advance only if the next index is not the same as the load buffer!
     if( next_index == m_idx[2]) {
         out_changed = false;
@@ -213,7 +213,7 @@ StateRingPoolVisBackFront::StateType * StateRingPoolVisBackFront::advanceLoadBuf
     boost::mutex::scoped_lock l(m_change_pointer_mutex);
     // calculated next index!
 
-    atomic_char next_index = (m_idx[2] + 1) % POOL_SIZE;
+    atomic_char next_index = (m_idx[2] + 1) % m_ringPoolSize;
     // advance only if the next index is not the same as the load buffer!
     if( next_index == m_idx[0]) {
         out_changed = false;
