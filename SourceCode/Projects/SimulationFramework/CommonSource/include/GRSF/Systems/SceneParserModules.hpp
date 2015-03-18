@@ -909,7 +909,7 @@ private:
         }
     }
     void parseMeshGeometry( XMLNodeType mesh) {
-
+        XMLAttributeType  att;
         std::shared_ptr<MeshGeometry > pMeshGeom;
 
         std::string meshName = mesh.attribute("name").value();
@@ -925,39 +925,53 @@ private:
 
             MeshData * meshData =  nullptr;
 
-            Vector3 scale_factor;
-            if(!Utilities::stringToVector3(scale_factor, mesh.attribute("scale").value())) {
-                ERRORMSG("---> String conversion in parseMeshGeometry failed: scale");
-            }
-            if(scale_factor.norm()==0) {
-                ERRORMSG("---> Wrong scale factor (=0) specified in parseMeshGeometry!");
+            Vector3 scale_factor(1.0,1.0,1.0);
+            att = mesh.attribute("scale");
+            if(att){
+                if(!Utilities::stringToVector3(scale_factor, att.value())) {
+                    ERRORMSG("---> String conversion in parseMeshGeometry failed: scale");
+                }
+                if(scale_factor.norm()==0) {
+                    ERRORMSG("---> Wrong scale factor (=0) specified in parseMeshGeometry!");
+                }
             }
 
             if(Options::m_loadMesh) {
-                Vector3 trans;
-                if(!Utilities::stringToVector3(trans, mesh.attribute("translation").value())) {
-                    ERRORMSG("---> String conversion in parseMeshGeometry: translation failed: ");
-                }
-
-                Vector3 axis;
-                if(!Utilities::stringToVector3(axis, mesh.attribute("rotationAxis").value())) {
-                    ERRORMSG("---> String conversion in parseMeshGeometry: rotationAxis failed");
-                }
-
-                PREC angle;
-
-                if(mesh.attribute("angleDegree")) {
-                    if(!Utilities::stringToType(angle, mesh.attribute("angleDegree").value())) {
-                        ERRORMSG("---> String conversion in parseMeshGeometry: angleDegree failed");
+                Vector3 trans(0,0,0);
+                att = mesh.attribute("trans");
+                if(att){
+                    if(!Utilities::stringToVector3(trans,att.value())) {
+                        ERRORMSG("---> String conversion in parseMeshGeometry: trans failed: ");
                     }
-                    angle = angle / 180.0 * M_PI;
-                } else if(mesh.attribute("angleRadian")) {
-                    if(!Utilities::stringToType(angle, mesh.attribute("angleRadian").value())) {
-                        ERRORMSG("---> String conversion in parseMeshGeometry: angleRadian  failed");
-                    }
-                } else {
-                    ERRORMSG("---> No angle found in parseMeshGeometry");
                 }
+
+                PREC angle = 0.0;
+                Vector3 axis(1.0,0,0);
+                att = mesh.attribute("rotAxis");
+                if(att){
+                    if(!Utilities::stringToVector3(axis, att.value())) {
+                        ERRORMSG("---> String conversion in parseMeshGeometry: rotAxis failed");
+                    }
+
+
+                    att = mesh.attribute("deg");
+                    if(att) {
+                        if(!Utilities::stringToType(angle, att.value())) {
+                            ERRORMSG("---> String conversion in parseMeshGeometry: deg failed");
+                        }
+                        angle = angle / 180.0 * M_PI;
+                    } else{
+                        att = mesh.attribute("rad");
+                        if(att){
+                            if(!Utilities::stringToType(angle, mesh.attribute("rad").value())) {
+                                ERRORMSG("---> String conversion in parseMeshGeometry: rad  failed");
+                            }
+                        }else{
+                            ERRORMSG("---> No angle (deg/rad) found in parseMeshGeometry (rotAxis specified!)");
+                        }
+                    }
+                }
+
 
                 axis.normalize();
                 Quaternion quat(AngleAxis(angle,axis));

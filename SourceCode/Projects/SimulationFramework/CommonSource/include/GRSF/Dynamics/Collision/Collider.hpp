@@ -33,7 +33,7 @@
 */
 /** @{ */
 
-class ColliderAABBBase{
+class ColliderAABBBase {
 public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
@@ -47,7 +47,7 @@ protected:
     const RigidBodyType* m_pBody = nullptr; ///< Shared pointer to the first RigidBodyBase class instance.
 
 public:
-    inline bool overlapSphere(const Vector3 & p, PREC radius, const AABB & aabb){
+    inline bool overlapSphere(const Vector3 & p, PREC radius, const AABB & aabb) {
         // Intersection test by Thomas Larsson "On Faster Sphere-Box Overlap Testing"
         // Using arvos overlap test because larsons gives false positives!
         PREC d = 0;
@@ -70,7 +70,7 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 
-    ColliderAABB(){}
+    ColliderAABB() {}
 
     bool checkOverlap(const RigidBodyType * pBody1, const AABB & aabb) {
 
@@ -167,35 +167,34 @@ public:
     /** Intersects body with a ray. If there is a intersection collData is filled and ray is not changed!
     *   @return a pair which indicates if a intersection is found and if found the new line parameter t!
     */
-    std::pair<bool,PREC> intersect(const RigidBodyType * pBody1, Ray & ray, CollisionData & collData){
-         m_bIntersectionSimple = false;
+    std::pair<bool,PREC> intersect(const RigidBodyType * pBody1, Ray & ray, CollisionData & collData) {
+        m_bIntersectionSimple = false;
 
-         m_pBody[0] = pBody1;
-         m_ray = &ray;
-         m_pCollData = &collData;
+        m_pBody = pBody1;
+        m_ray = &ray;
+        m_pCollData = &collData;
 
-         ERRORMSG("ColliderRay:: not implemented")
+        ERRORMSG("ColliderRay:: not implemented")
     }
 
     /** intersects body with a ray. If a new intersection is found, the new line parameter is set in the reference ray! */
-    bool intersectSimple(const RigidBodyType * pBody1, Ray & ray){
+    bool intersectSimple(const RigidBodyType * pBody1, Ray & ray) {
 
         // parameter t in [0,infinity]
 
-        m_pBody[0] = pBody1;
+        m_pBody = pBody1;
         m_ray = &ray;
 
         m_bIntersectionSimple = true;
         m_bIntersection = false;
 
-        boost::apply_visitor(*this, m_pBody[0]->m_geometry);
+        boost::apply_visitor(*this, m_pBody->m_geometry);
         return m_bIntersection;
     }
 
     // Dispatch
-    inline void operator()( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) ///< Calls Halfspace/Ray collision detection.
-    {
-        intersect(halfspace);
+    inline void operator()( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) { ///< Calls Halfspace/Ray collision detection.
+        intersect(halfspace.get());
     }
     /**
     * @brief If no routine matched for Body to AABB throw error
@@ -213,30 +212,30 @@ private:
     bool m_bIntersectionSimple;
     bool m_bIntersection; ///< Boolean which tells if the intersection test gave a feasible result.
 
-    const RigidBodyType* m_pBody[0]; ///< Shared pointer to the first RigidBodyBase class instance.
+    const RigidBodyType* m_pBody; ///< Shared pointer to the first RigidBodyBase class instance.
 
     //Collision function
-    inline void intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace); ///< Halfspace/Ray intersection
+    inline void intersect( const HalfspaceGeometry * halfspace); ///< Halfspace/Ray intersection
 };
 
-void ColliderRay::intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) {
+void ColliderRay::intersect( const HalfspaceGeometry * halfspace) {
 
     PREC nDotRay = halfspace->m_normal.dot(m_ray->m_d);
-	if ( nDotRay == 0.0){
+    if ( nDotRay == 0.0) {
         m_bIntersection = false;
-		return;
-	}
-
-	PREC t = halfspace->m_normal.dot(m_pBody[0]->m_r_S - m_ray->m_p) / nDotRay;
-
-    if( t <m_ray->m_mint || t > m_ray->m_maxt ){
-             m_bIntersection = false;
-             return;
+        return;
     }
 
-    if( m_bIntersectionSimple ){
+    PREC t = halfspace->m_normal.dot(m_pBody->m_r_S - m_ray->m_p) / nDotRay;
+
+    if( t <m_ray->m_mint || t > m_ray->m_maxt ) {
+        m_bIntersection = false;
+        return;
+    }
+
+    if( m_bIntersectionSimple ) {
         m_ray->m_maxt = t;
-    }else{
+    } else {
         // Fill collision Data;
         ASSERTMSG(false,"fill collision data here")
     }
@@ -260,27 +259,43 @@ public:
 
 
     /** intersects body with a point and set to the closest point on body if it intersects!  */
-    bool intersectAndProx(const RigidBodyType * pBody1,  Vector3 & p){
+    bool intersectAndProx(const RigidBodyType * pBody1,  Vector3 & p) {
 
-        m_pBody[0] = pBody1;
+        m_pBody = pBody1;
         m_p = &p;
 
         m_bIntersection = false;
-        boost::apply_visitor(*this, m_pBody[0]->m_geometry);
+        boost::apply_visitor(*this, m_pBody->m_geometry);
         return m_bIntersection;
     }
 
     // Dispatch
-    inline void operator()( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) ///< Calls Halfspace/Point collision detection.
-    {
-        intersect(halfspace);
+    inline void operator()( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) { ///< Calls Halfspace/Point collision detection.
+        Vector3 n = m_pBody->m_A_IK * halfspace->m_normal;
+        m_bIntersection = CollisionFunctions::collideHalfspacePointAndProx( n, m_pBody->m_r_S, *m_p);
     }
+
+    inline void operator()( const std::shared_ptr<const SphereGeometry >  & sphere) { ///< Calls Halfspace/Point collision detection.
+        m_bIntersection =  CollisionFunctions::collideSpherePointAndProx(m_pBody->m_r_S, sphere->m_radius, *m_p);
+    }
+
+    inline void operator()( const std::shared_ptr<const CapsuleGeometry >  & capsule) { ///< Calls Capsule/Point collision detection.
+        const CapsuleGeometry * caps = capsule.get();
+        Vector3 n = m_pBody->m_A_IK * caps->m_normal;
+        m_bIntersection =  CollisionFunctions::collideCapsulePointAndProx(m_pBody->m_r_S, n ,caps->m_length, caps->m_radius, *m_p);
+    }
+
+    inline void operator()( const std::shared_ptr<const MeshGeometry >  & mesh) {
+        ASSERTMSG(false,"Mesh-Point collision detection has not been implemented")
+        m_bIntersection = false;
+    }
+
     /**
     * @brief If no routine matched for Body to AABB throw error
     */
     template <typename Geom1>
     inline void operator()(const  std::shared_ptr<const Geom1> &g1) {
-        ERRORMSG("ColliderRay:: collision detection for object-combination "<< typeid(Geom1).name()<<" and point not supported!");
+        ERRORMSG("ColliderPoint:: collision detection for object-combination "<< typeid(Geom1).name()<<" and point not supported!");
     }
 
 private:
@@ -289,23 +304,11 @@ private:
 
     bool m_bIntersection; ///< Boolean which tells if the intersection test gave a feasible result.
 
-    const RigidBodyType* m_pBody[0]; ///< Shared pointer to the first RigidBodyBase class instance.
+    const RigidBodyType* m_pBody; ///< Shared pointer to the first RigidBodyBase class instance.
 
-    //Collision function
-    inline void intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace); ///< Halfspace/Ray intersection
 };
 
-void ColliderPoint::intersect( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) {
-    Vector3 I_n = m_pBody[0]->m_A_IK*halfspace->m_normal;
-    //t = n * r_PS ( P=point, S=center of plane ), if t>=0 intersect!
-    PREC t = I_n.dot(m_pBody[0]->m_r_S - *m_p) /*+  halfspace->m_normal.dot(halfspace->m_pos)*/;
-    if( t >= 0.0){
-        m_bIntersection = true;
-        // project onto plane
-        *m_p = t*I_n + *m_p;
-    }
-   return ;
-}
+
 
 /** @} */
 
@@ -345,7 +348,7 @@ public:
     ~ColliderBody() {
         if(m_bDeleteColSet) {
             // Clear all entries
-            for( auto it = m_pColSet->begin(); it != m_pColSet->end(); ++it){
+            for( auto it = m_pColSet->begin(); it != m_pColSet->end(); ++it) {
                 delete (*it);
             }
             m_pColSet->clear();
@@ -380,7 +383,7 @@ public:
     //For RigidBodies
 
     void operator()(  const SphereGeomPtrType  & sphereGeom1 ,
-                      const SphereGeomPtrType  & sphereGeom2){
+                      const SphereGeomPtrType  & sphereGeom2) {
         collide(sphereGeom1.get(), sphereGeom2.get());
     }
     void operator()(  const SphereGeomPtrType  & sphereGeom ,
@@ -454,8 +457,7 @@ private:
     /** Exception, to indicate that no collision function could be matched, because its not implemented. */
     template <typename O1, typename O2>
     inline void collide(const std::shared_ptr<const O1> & o1,
-                        const std::shared_ptr<const O2> & o2)
-    {
+                        const std::shared_ptr<const O2> & o2) {
         ERRORMSG("ColliderBody:: collision detection for object-combination "<< typeid(O1).name()<<" and "<<typeid(O2).name()<<" not supported!");
     }
 
@@ -471,8 +473,7 @@ private:
 // Collision Functions ==============================================================================
 
 void ColliderBody::collide( const SphereGeometry * sphereGeom1,
-                            const SphereGeometry * sphereGeom2)
-{
+                            const SphereGeometry * sphereGeom2) {
     // Do Collision for sphere to sphere
     collideSphereSphere(sphereGeom1->m_radius, sphereGeom2->m_radius,m_pBody[0]->m_r_S, m_pBody[1]->m_r_S);
 }
@@ -480,10 +481,10 @@ void ColliderBody::collide( const SphereGeometry * sphereGeom1,
 /*
 * Implementation of sphere-sphere collision, vectors of the centers c1 and c2 need to be in the same frame!
 */
-void ColliderBody::collideSphereSphere(PREC r1, PREC r2, const Vector3 &c1, const Vector3 &c2){
+void ColliderBody::collideSphereSphere(PREC r1, PREC r2, const Vector3 &c1, const Vector3 &c2) {
 
     Vector3 dist = c2 - c1; // I frame
-    PREC dsqr = dist.dot(dist);
+    PREC dsqr = dist.squaredNorm();
     PREC rsqr = (r1 + r2);
     rsqr     *= rsqr;
 
@@ -496,20 +497,17 @@ void ColliderBody::collideSphereSphere(PREC r1, PREC r2, const Vector3 &c1, cons
         //if the spheres are practically concentric just choose a random direction
         //to avoid division by zero
         if(dsqr < std::numeric_limits<PREC>::epsilon()) {
-            dsqr = 1.0;
-            dist(0) = 0.0;
-            dist(1) = 0.0;
-            dist(2) = 1.0;
-
+            dsqr = 0.0;
+            m_pColData->m_cFrame.m_e_z = Vector3(0,0,1.0);
+        }else{
+            dsqr = sqrt(dsqr);
+            m_pColData->m_cFrame.m_e_z = (1.0 / dsqr) * dist;
         }
-        //we have a collision
-        PREC d = sqrt(dsqr);
-
-        m_pColData->m_cFrame.m_e_z = dist / d;
+        // dsqr is now the distance!
         // Coordinate system belongs to first body!
         CoordinateSystem::makeCoordinateSystem(m_pColData->m_cFrame.m_e_z,m_pColData->m_cFrame.m_e_x,m_pColData->m_cFrame.m_e_y);
 
-        m_pColData->m_overlap = (r1 + r2) - d;
+        m_pColData->m_overlap = (r1 + r2) - dsqr;
         m_pColData->m_r_SC[0] =   m_pColData->m_cFrame.m_e_z * (r1 - m_pColData->m_overlap/2);
         m_pColData->m_r_SC[1] =  -m_pColData->m_cFrame.m_e_z * (r2 - m_pColData->m_overlap/2);
 
@@ -526,8 +524,7 @@ void ColliderBody::collideSphereSphere(PREC r1, PREC r2, const Vector3 &c1, cons
 
 
 void ColliderBody::collide( const SphereGeometry * sphereGeom,
-                            const HalfspaceGeometry * halfspaceGeom)
-{
+                            const HalfspaceGeometry * halfspaceGeom) {
 
     // Do Collision for sphere to halfspace
     Vector3 I_n_plane = m_pBody[1]->m_A_IK*halfspaceGeom->m_normal;
@@ -566,32 +563,30 @@ void ColliderBody::collide( const SphereGeometry * sphereGeom,
  * capsule representation and the colliding sphere.
  */
 void ColliderBody::collide(const SphereGeometry *  sphereGeom,
-                           const CapsuleGeometry * capsuleGeom)
-{
+                           const CapsuleGeometry * capsuleGeom) {
 
-       const PREC halfL( 0.5*capsuleGeom->m_length );  // Half cylinder length
-
-
-       // Calculating the component in the normal direction of the sphere in the frame K of the capsule
-       // sphere->m_r_S - capsule->m_r_S  projecting onto the transformed normal in the I frame
-       Vector3 I_normal(m_pBody[1]->m_A_IK*capsuleGeom->m_normal);
-       PREC z = I_normal.dot(m_pBody[0]->m_r_S - m_pBody[1]->m_r_S);
+    const PREC halfL( 0.5*capsuleGeom->m_length );  // Half cylinder length
 
 
-       // Calculation the center of the sphere representing the capsule
-       // limit the capsule representing sphere to the interval [-halfL, halfL]
-       if( z > halfL ) {
-          z = halfL;
-       }
-       else if( z < -halfL ) {
-          z = -halfL;
-       }
+    // Calculating the component in the normal direction of the sphere in the frame K of the capsule
+    // sphere->m_r_S - capsule->m_r_S  projecting onto the transformed normal in the I frame
+    Vector3 I_normal(m_pBody[1]->m_A_IK*capsuleGeom->m_normal);
+    PREC z = I_normal.dot(m_pBody[0]->m_r_S - m_pBody[1]->m_r_S);
 
-       I_normal = m_pBody[1]->m_r_S + z*I_normal;
 
-       // Performing a sphere-sphere collision between the colliding sphere and the
-       // capsule representation
-       collideSphereSphere(sphereGeom->m_radius,capsuleGeom->m_radius, m_pBody[0]->m_r_S, I_normal);
+    // Calculation the center of the sphere representing the capsule
+    // limit the capsule representing sphere to the interval [-halfL, halfL]
+    if( z > halfL ) {
+        z = halfL;
+    } else if( z < -halfL ) {
+        z = -halfL;
+    }
+
+    I_normal = m_pBody[1]->m_r_S + z*I_normal;
+
+    // Performing a sphere-sphere collision between the colliding sphere and the
+    // capsule representation
+    collideSphereSphere(sphereGeom->m_radius,capsuleGeom->m_radius, m_pBody[0]->m_r_S, I_normal);
 }
 
 
@@ -649,8 +644,7 @@ void ColliderBody::collide( const BoxGeometry * boxGeom,
 
 
 void ColliderBody::collide(const SphereGeometry  * sphereGeom,
-                           const MeshGeometry * meshGeom)
-{
+                           const MeshGeometry * meshGeom) {
     using namespace MatrixHelpers;
 
 #if USE_OPCODE == 1

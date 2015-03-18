@@ -10,12 +10,7 @@
 
 #include RigidBody_INCLUDE_FILE
 
-#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/PlaneGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/BoxGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/MeshGeometry.hpp"
+#include "GRSF/Dynamics/Collision/Geometries.hpp"
 
 #include "GRSF/Dynamics/General/MPISerializationHelpersEigen.hpp"
 
@@ -32,7 +27,7 @@ template<class Archive>
 void serialize(Archive & ar, HalfspaceGeometry & g, const unsigned int version) {
 
     serializeEigen(ar,g.m_normal);
-    serializeEigen(ar,g.m_pos);
+    /*serializeEigen(ar,g.m_pos);*/
 }
 
 template<class Archive>
@@ -40,6 +35,14 @@ void serialize(Archive & ar, SphereGeometry & g, const unsigned int version) {
 
     ar & g.m_radius;
 
+}
+
+template<class Archive>
+void serialize(Archive & ar, CapsuleGeometry & g, const unsigned int version) {
+
+    ar & g.m_radius;
+    ar & g.m_length;
+    serializeEigen(ar,g.m_normal);
 }
 
 template<class Archive>
@@ -95,17 +98,20 @@ private:
     template<typename Archive>
     struct GeomVis: public boost::static_visitor<>{
         GeomVis(Archive & ar): m_ar(ar){};
-        void operator()(SphereGeomPtrType & sphereGeom)  {
+        inline void operator()(SphereGeomPtrType & sphereGeom)  {
             m_ar & const_cast<SphereGeometry&>(*sphereGeom);
         }
-        void operator()(std::shared_ptr<const BoxGeometry > & box)  {
+        inline void operator()(std::shared_ptr<const BoxGeometry > & box)  {
             m_ar & const_cast<BoxGeometry&>(*box);
         }
-        void operator()(std::shared_ptr<const MeshGeometry > & mesh)  {
+        inline void operator()(std::shared_ptr<const MeshGeometry > & mesh)  {
             m_ar & const_cast<MeshGeometry&>(*mesh);
         }
-        void operator()(std::shared_ptr<const HalfspaceGeometry > & halfspace)  {
+        inline void operator()(std::shared_ptr<const HalfspaceGeometry > & halfspace)  {
             m_ar & const_cast<HalfspaceGeometry&>(*halfspace);
+        }
+        inline void operator()(std::shared_ptr<const CapsuleGeometry > & capsule)  {
+            m_ar & const_cast<CapsuleGeometry&>(*capsule);
         }
         Archive & m_ar;
     };

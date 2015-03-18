@@ -164,12 +164,12 @@ private:
 
             if(scaleLikeGeometry) {
                 auto & s = m_scalesGroup[bodyIdx];
-                if(s(0)<=0 || s(1)<=0 || s(2)<=0) {
+                if(s(0)==0 || s(1)==0 || s(2)==0) {
                     ERRORMSG("---> parseMesh:: Scale for Mesh: " + meshName.string() +"is zero or smaller!");
                 }
                 sceneNodeScale->setScale(s(0),s(1),s(2));
             } else {
-                if(scale(0)<=0 || scale(1)<=0 || scale(2)<=0) {
+                if(scale(0)==0 || scale(1)==0 || scale(2)==0) {
                     ERRORMSG("---> parseMesh:: Scale for Mesh: " + meshName.string() + "is zero or smaller!");
                 }
                 sceneNodeScale->setScale(scale(0),scale(1),scale(2));
