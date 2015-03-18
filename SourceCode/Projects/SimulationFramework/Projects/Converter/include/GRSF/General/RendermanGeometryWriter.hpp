@@ -33,17 +33,11 @@ class RendermanGeometryWriter: public boost::static_visitor<> {
 
     }
 
-    inline void operator()(std::shared_ptr<const BoxGeometry > & box)  {
+    template<typename T>
+    inline void operator()(T & m)  {
         ERRORMSG("Not implemented")
     }
 
-    inline void operator()(std::shared_ptr<const MeshGeometry > & box) {
-        ERRORMSG("Not implemented")
-    }
-
-    inline void operator()(std::shared_ptr<const HalfspaceGeometry > & halfspace) {
-        ERRORMSG("Not implemented")
-    }
 
     private:
     std::stringstream * m_s;
