@@ -34,7 +34,7 @@ public:
                           bool aligned = true,
                           const Matrix33 & A_IK = Matrix33::Identity()
                           ):
-    m_rank(processRank), CartesianGrid<NoCellData>(aabb, dim), m_A_IK(A_IK),
+    m_rank(processRank), CartesianGrid<NoCellData>(aabb, dim), m_A_IK(A_IK), m_axisAligned(aligned)
     m_cellNumberingStart(masterRank)
     {
        m_rank = processRank;
@@ -54,8 +54,6 @@ public:
 
         //Get AABB of own rank!
         m_aabb = getCellAABB(m_rank);
-
-
 
     };
 
@@ -208,7 +206,7 @@ private:
     RankToAABBType m_nbAABB; ///< Neighbour AABB in frame G
     AABB m_aabb; ///< Own AABB of this process in frame G
 
-    bool m_axisAligned = true;
+    bool m_axisAligned;
     Matrix33 m_A_IK ; ///< The grid can be rotated, this is the transformation matrix from grid frame K to intertia frame I
 
     ColliderAABB m_ColliderAABB;
