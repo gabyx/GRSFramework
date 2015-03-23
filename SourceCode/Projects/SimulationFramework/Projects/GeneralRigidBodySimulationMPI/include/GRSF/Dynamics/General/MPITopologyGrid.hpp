@@ -34,7 +34,7 @@ public:
                           bool aligned = true,
                           const Matrix33 & A_IK = Matrix33::Identity()
                           ):
-    m_rank(processRank), CartesianGrid<NoCellData>(aabb, dim), m_A_IK(A_IK), m_axisAligned(aligned)
+    m_rank(processRank), CartesianGrid<NoCellData>(aabb, dim), m_A_IK(A_IK), m_axisAligned(aligned),
     m_cellNumberingStart(masterRank)
     {
        m_rank = processRank;
