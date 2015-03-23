@@ -45,7 +45,7 @@ public:
         for( auto it = nbRanks.begin(); it!=nbRanks.end(); it++){
 
             //Initialize adjacent neighbour ranks to m_nbRanks for this neighbour *it
-           adjNbRanks[*it] = getCommonNeighbourCells(nbRanks, *it);
+            adjNbRanks[*it] = getCommonNeighbourCells(nbRanks, *it);
 
             //Get all AABB's of this neighbours
             m_nbAABB[ *it ] = getCellAABB(*it);
@@ -60,8 +60,13 @@ public:
 
 
 
-    unsigned int getCellRank(const Vector3 & point) const {
-        MyMatrix<unsigned int>::Array3 v = CartesianGrid<NoCellData>::getCellIndexClosest(point);
+    unsigned int getCellRank(const Vector3 & I_point) const {
+        MyMatrix<unsigned int>::Array3 v;
+        if(m_axisAligned){
+             v = CartesianGrid<NoCellData>::getCellIndexClosest(I_point);
+        }else{
+             v = CartesianGrid<NoCellData>::getCellIndexClosest(m_A_IK.transpose()*I_point);
+        }
         return getCellRank(v);
     };
     unsigned int getCellRank(const MyMatrix<unsigned int>::Array3 & v) const {
