@@ -321,12 +321,13 @@ private:
 */
 /** @{ */
 
+template<typename TCollisionSet>
 class ColliderBody : public boost::static_visitor<> {
 public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
-    typedef std::vector<CollisionData* > CollisionSetType;
+    using CollisionSetType = TCollisionSet;
 
     /**
     * @brief The collider constructor which takes a reference to an existing collision set.
@@ -347,12 +348,6 @@ public:
 
     ~ColliderBody() {
         if(m_bDeleteColSet) {
-            // Clear all entries
-            for( auto it = m_pColSet->begin(); it != m_pColSet->end(); ++it) {
-                delete (*it);
-            }
-            m_pColSet->clear();
-
             delete m_pColSet;
         }
     }
@@ -471,8 +466,8 @@ private:
 
 
 // Collision Functions ==============================================================================
-
-void ColliderBody::collide( const SphereGeometry * sphereGeom1,
+template<typename TCollisionSet>
+void ColliderBody<TCollisionSet>::collide( const SphereGeometry * sphereGeom1,
                             const SphereGeometry * sphereGeom2) {
     // Do Collision for sphere to sphere
     collideSphereSphere(sphereGeom1->m_radius, sphereGeom2->m_radius,m_pBody[0]->m_r_S, m_pBody[1]->m_r_S);
@@ -481,7 +476,8 @@ void ColliderBody::collide( const SphereGeometry * sphereGeom1,
 /*
 * Implementation of sphere-sphere collision, vectors of the centers c1 and c2 need to be in the same frame!
 */
-void ColliderBody::collideSphereSphere(PREC r1, PREC r2, const Vector3 &c1, const Vector3 &c2) {
+template<typename TCollisionSet>
+void ColliderBody<TCollisionSet>::collideSphereSphere(PREC r1, PREC r2, const Vector3 &c1, const Vector3 &c2) {
 
     Vector3 dist = c2 - c1; // I frame
     PREC dsqr = dist.squaredNorm();
@@ -491,8 +487,7 @@ void ColliderBody::collideSphereSphere(PREC r1, PREC r2, const Vector3 &c1, cons
     if(dsqr < rsqr) {
 
         //We have a collision
-        m_pColData = new CollisionData();
-        m_pColSet->push_back( m_pColData );
+        m_pColData = m_pColSet->insert().first;
 
         //if the spheres are practically concentric just choose a random direction
         //to avoid division by zero
@@ -523,7 +518,8 @@ void ColliderBody::collideSphereSphere(PREC r1, PREC r2, const Vector3 &c1, cons
 }
 
 
-void ColliderBody::collide( const SphereGeometry * sphereGeom,
+template<typename TCollisionSet>
+void ColliderBody<TCollisionSet>::collide( const SphereGeometry * sphereGeom,
                             const HalfspaceGeometry * halfspaceGeom) {
 
     // Do Collision for sphere to halfspace
@@ -533,8 +529,8 @@ void ColliderBody::collide( const SphereGeometry * sphereGeom,
 
     if(overlap >=0) {
         //We have a collision
-        m_pColData = new CollisionData();
-        m_pColSet->push_back( m_pColData );
+        m_pColData = m_pColSet->insert().first;
+
 
         m_pColData->m_overlap = overlap;
         // Coordinate system belongs to first body!
@@ -562,7 +558,8 @@ void ColliderBody::collide( const SphereGeometry * sphereGeom,
  * the colliding sphere. After this, a sphere-sphere collision is performed between the
  * capsule representation and the colliding sphere.
  */
-void ColliderBody::collide(const SphereGeometry *  sphereGeom,
+template<typename TCollisionSet>
+void ColliderBody<TCollisionSet>::collide(const SphereGeometry *  sphereGeom,
                            const CapsuleGeometry * capsuleGeom) {
 
     const PREC halfL( 0.5*capsuleGeom->m_length );  // Half cylinder length
@@ -591,13 +588,15 @@ void ColliderBody::collide(const SphereGeometry *  sphereGeom,
 
 
 
-void ColliderBody::collide( const BoxGeometry * boxA,
+template<typename TCollisionSet>
+void ColliderBody<TCollisionSet>::collide( const BoxGeometry * boxA,
                             const BoxGeometry * boxB) {
     // Not implemented yet!
 }
 
 
-void ColliderBody::collide( const BoxGeometry * boxGeom,
+template<typename TCollisionSet>
+void ColliderBody<TCollisionSet>::collide( const BoxGeometry * boxGeom,
                             const HalfspaceGeometry * halfspaceGeom) {
 
 
@@ -618,8 +617,8 @@ void ColliderBody::collide( const BoxGeometry * boxGeom,
         double overlap = /*halfspaceGeom->m_normal.dot(halfspaceGeom->m_pos)*/ - ( r_SC2 ).dot( I_n_plane ) ;
         if(overlap >=0) {
             //We have a collision
-            m_pColData = new CollisionData();
-            m_pColSet->push_back( m_pColData );
+            m_pColData = m_pColSet->insert().first;
+
 
 
             m_pColData->m_overlap = overlap;
@@ -643,7 +642,8 @@ void ColliderBody::collide( const BoxGeometry * boxGeom,
 
 
 
-void ColliderBody::collide(const SphereGeometry  * sphereGeom,
+template<typename TCollisionSet>
+void ColliderBody<TCollisionSet>::collide(const SphereGeometry  * sphereGeom,
                            const MeshGeometry * meshGeom) {
     using namespace MatrixHelpers;
 
@@ -764,8 +764,9 @@ void ColliderBody::collide(const SphereGeometry  * sphereGeom,
 
     // Signal all remaining contacts int the temporary set!
     for(unsigned int j=0; j<temporarySet.size(); j++) {
-        m_pColData = new CollisionData();
-        m_pColSet->push_back( m_pColData );
+
+        m_pColData = m_pColSet->insert().first;
+
 
         m_pColData->m_overlap = temporarySet[j].get<0>();
         // Coordinate system belongs to first body!

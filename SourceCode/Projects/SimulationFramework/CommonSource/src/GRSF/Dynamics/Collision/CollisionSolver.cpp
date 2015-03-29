@@ -34,9 +34,6 @@ void CollisionSolver::reset() {
 
 
 void CollisionSolver::clearCollisionSet() {
-    for( typename CollisionSetType::iterator it = m_collisionSet.begin(); it != m_collisionSet.end(); ++it) {
-        delete (*it);
-    }
     m_collisionSet.clear();
 }
 
@@ -109,22 +106,20 @@ void CollisionSolver::signalContactAdd() {
 
     if(m_collisionSet.size()!=0){
 
-        for( auto colDataIt = m_collisionSet.begin(); colDataIt != m_collisionSet.end(); colDataIt++ ){
+        for( auto colDataPtr : m_collisionSet){
 
-            ASSERTMSG( std::abs((*colDataIt)->m_cFrame.m_e_x.dot((*colDataIt)->m_cFrame.m_e_y)) < 1e-3 &&
-                      std::abs((*colDataIt)->m_cFrame.m_e_y.dot((*colDataIt)->m_cFrame.m_e_z))< 1e-3, "Vectors not orthogonal");
+            ASSERTMSG( std::abs(colDataPtr->m_cFrame.m_e_x.dot(colDataPtr->m_cFrame.m_e_y)) < 1e-3 &&
+                      std::abs(colDataPtr->m_cFrame.m_e_y.dot(colDataPtr->m_cFrame.m_e_z))< 1e-3, "Vectors not orthogonal");
 
-            LOGSLLEVEL3_CONTACT(m_pSolverLog,"---> Contact Frame: n: " << (*colDataIt)->m_cFrame.m_e_z.transpose() << std::endl;)
+            LOGSLLEVEL3_CONTACT(m_pSolverLog,"---> Contact Frame: n: " << colDataPtr->m_cFrame.m_e_z.transpose() << std::endl;)
 
             //Set contact frame point
-            (*colDataIt)->m_cFrame.m_p = (*colDataIt)->m_pBody[0]->m_r_S + (*colDataIt)->m_r_SC[0];
+            colDataPtr->m_cFrame.m_p = colDataPtr->m_pBody[0]->m_r_S + colDataPtr->m_r_SC[0];
 
             // Calculate some Statistics
-            m_maxOverlap = std::max(m_maxOverlap,(*colDataIt)->m_overlap);
+            m_maxOverlap = std::max(m_maxOverlap,colDataPtr->m_overlap);
 
-            invokeAllContactDelegates(*colDataIt); // Propagate pointers! they will not be deleted!
-
+            invokeAllContactDelegates(colDataPtr); // Propagate pointers! they will not be deleted!
         }
-
     }
 }
