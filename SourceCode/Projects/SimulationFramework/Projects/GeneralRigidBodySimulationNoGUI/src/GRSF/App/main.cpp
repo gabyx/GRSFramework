@@ -5,7 +5,7 @@
 
 #include "GRSF/Common/LogDefines.hpp"
 #include "GRSF/Common/TypeDefs.hpp"
-
+#include "GRSF/Common/ApplicationSignalHandler.hpp"
 #include "GRSF/Common/ApplicationCLOptions.hpp"
 #include "GRSF/Singeltons/FileManager.hpp"
 #include "GRSF/Common/SimpleLogger.hpp"
@@ -15,7 +15,16 @@
 #include "ApproxMVBB/ComputeApproxMVBB.hpp"
 #include "GRSF/Dynamics/Collision/Geometry/OOBB.hpp"
 
+void callBackSIGINT(){
+    std::cerr << "Caught signal SIGINT --> exit ..." << std::endl;
+    exit(EXIT_FAILURE);
+}
+
 int main(int argc, char **argv) {
+
+    ApplicationSignalHandler sigHandler( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} );
+    sigHandler.registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
+
 
     try{
         // Parsing Input Parameters===================================
@@ -33,26 +42,25 @@ int main(int argc, char **argv) {
         processFolder <<  PROCESS_FOLDER_PREFIX;
         boost::filesystem::path localDirPath;
 
-        localDirPath = ApplicationCLOptions::getSingleton().m_localDirs[0];
+        localDirPath = ApplicationCLOptions::getSingleton().getLocalDirs()[0];
         localDirPath /= processFolder.str();
 
 
         // Process static global members! (Singletons)
-        FileManager fileManger(ApplicationCLOptions::getSingleton().m_globalDir, localDirPath); //Creates path if it does not exist
+        FileManager fileManger(ApplicationCLOptions::getSingleton().getGlobalDir(), localDirPath); //Creates path if it does not exist
 
 
         SimulationManager mgr;
 
-        mgr.setup(ApplicationCLOptions::getSingleton().m_sceneFile);
+        mgr.setup(ApplicationCLOptions::getSingleton().getSceneFile());
         mgr.startSim();
 
 
         // Do post processes at the end of the simulation
         //TODO
-        auto & tasks = ApplicationCLOptions::getSingleton().m_postProcessTasks;
-        for(auto it = tasks.begin(); it != tasks.end(); it++){
-            if((*it)->getName() == "bash"){
-                (*it)->execute();
+        for(auto & t : ApplicationCLOptions::getSingleton().getPostProcessTasks()){
+            if(t->getName() == "bash"){
+                t->execute();
             }
         }
 

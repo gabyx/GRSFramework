@@ -51,7 +51,7 @@ void RenderScriptConverter::loadGeometryCollection() {
     ParserGen c(&m_renderData);
 
     using SceneParserType = SceneParser< RenderData, ParserGen::SceneParserTraits >;
-    SceneParserType parser(c,m_log);
+    SceneParserType parser(c,m_log, );
 
     parser.parseScene(m_sceneFile);
 
@@ -68,7 +68,7 @@ void RenderScriptConverter::loadMaterialCollection() {
 
 
     using RenderScriptParserType = RenderScriptParser<RenderData /**, StandartTraits*/ >;
-    RenderScriptParserType parser(c,m_log);
+    RenderScriptParserType parser(c,m_log,ApplicationCLOptions::getSingleton().getMediaDir());
 
     parser.parse(m_materialFile);
     LOGRCLEVEL1(m_log, "---> Load Materials finished " << std::endl;)

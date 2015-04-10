@@ -12,6 +12,7 @@
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"
 
+#include "GRSF/Common/ApplicationCLOptions.hpp"
 #include "GRSF/Singeltons/FileManager.hpp"
 
 #include "GRSF/Dynamics/General/MPIMessages.hpp"
@@ -289,7 +290,8 @@ public:
 
             // Parse all initial condition from the scene file (global initial condition is read too)
             ParserModulesCreatorTopoBuilder<GridTopologyBuilder> c(this);
-            SceneParserMPI<GridTopologyBuilder, ParserModulesCreatorTopoBuilder<GridTopologyBuilder>::template SceneParserTraits> parser(c, m_pSimulationLog) ; // this class is the modules generator
+            SceneParserMPI<GridTopologyBuilder, ParserModulesCreatorTopoBuilder<GridTopologyBuilder>::template SceneParserTraits> parser(c, m_pSimulationLog,
+                                                                                                                                        ApplicationCLOptions::getSingleton().getMediaDir()) ; // this class is the modules generator
 
             // clean init states:
             m_initStates.clear();

@@ -59,7 +59,7 @@ void SimulationState::enter() {
     // Setup the Simulation Manager with the loaded system;
     m_pAppLog->logMessage("Adding SimulationManagerGUI...");
     m_pSimMgr  = std::shared_ptr<SimulationManagerGUI > (new SimulationManagerGUI(m_pSceneMgr));
-    m_pSimMgr->setup(ApplicationCLOptions::getSingleton().m_sceneFile);
+    m_pSimMgr->setup(ApplicationCLOptions::getSingleton().getSceneFile());
 
     updateSceneFunction = boost::bind(&SimulationState::updateSceneRealtime,this,_1);
 

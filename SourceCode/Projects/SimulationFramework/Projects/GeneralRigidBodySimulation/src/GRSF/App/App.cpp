@@ -19,10 +19,10 @@ void App::startApp() {
     processFolder << PROCESS_FOLDER_PREFIX << 0;
     boost::filesystem::path localDirPath;
 
-    localDirPath = ApplicationCLOptions::getSingleton().m_localDirs[0];
+    localDirPath = ApplicationCLOptions::getSingleton().getLocalDirs()[0];
     localDirPath /= processFolder.str();
 
-    FileManager fileManager(ApplicationCLOptions::getSingleton().m_globalDir, localDirPath); //Creates path if it does not exist
+    FileManager fileManager(ApplicationCLOptions::getSingleton().getGlobalDir(), localDirPath); //Creates path if it does not exist
 
     Logging::LogManager logManager;
 

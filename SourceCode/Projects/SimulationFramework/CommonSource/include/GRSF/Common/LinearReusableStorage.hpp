@@ -43,7 +43,14 @@ public:
         return m_storage.begin();
     }
 
+    inline typename StorageType::const_iterator begin() const{
+        return m_storage.begin();
+    }
+
     inline typename StorageType::iterator end(){
+        return m_storage.end();
+    }
+    inline typename StorageType::const_iterator end() const{
         return m_storage.end();
     }
 

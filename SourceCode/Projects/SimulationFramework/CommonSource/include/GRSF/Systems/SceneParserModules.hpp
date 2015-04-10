@@ -921,6 +921,7 @@ private:
             // First make an meshinformatino structure
 
             boost::filesystem::path fileName =  mesh.attribute("file").value();
+            m_parser->makeFullMediaPath(fileName);
             m_parser->checkFileExists(fileName);
 
             MeshData * meshData =  nullptr;

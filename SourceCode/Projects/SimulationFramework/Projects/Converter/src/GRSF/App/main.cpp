@@ -26,11 +26,15 @@ void printHelpAndExit(std::string o=""){
             exit(EXIT_FAILURE);
 }
 
-
+void callBackSIGINT(){
+    std::cerr << " exit ..." << std::endl;
+    exit(EXIT_FAILURE);
+}
 
 int main(int argc, char **argv) {
 
     ApplicationSignalHandler sigHandler( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} );
+    sigHandler.registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
 
     if(argc > 1){
         if(std::string(argv[1]) == "sim"){

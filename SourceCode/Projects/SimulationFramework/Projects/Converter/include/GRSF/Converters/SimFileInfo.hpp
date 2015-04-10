@@ -68,7 +68,7 @@ private:
         startStateIdx += skipFirstState? 1 : 0;
 
         std::streamoff statesFile = fromFile.getNStates();
-        states += statesFile - skipFirstState? 1 : 0;
+        states += statesFile - (skipFirstState? 1 : 0);
 
         if(startStateIdx >= statesFile){
             s << "\t Resample Info: no resample" << std::endl;

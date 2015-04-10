@@ -18,20 +18,27 @@
 *  @brief CommandLineOptions for the Application
 */
 class ApplicationCLOptions: public Utilities::Singleton<ApplicationCLOptions> {
-public:
+private:
+
+    std::vector<boost::filesystem::path> m_localDirs;
+    boost::filesystem::path m_globalDir = "./";
+    boost::filesystem::path m_mediaDir = "./";
+    boost::filesystem::path m_sceneFile;
+
+    public:
 
 
     class PostProcessTask{
         public:
         PostProcessTask(const std::string & name):m_name(name){};
 
-        std::string getName(){return m_name;}
+        std::string getName() const {return m_name;}
 
         virtual void addOption(unsigned int index, const std::string &option){
             m_options[index] = option;
         }
 
-        virtual void execute() = 0;
+        virtual void execute() const  = 0;
 
         virtual ~PostProcessTask(){};
 
@@ -46,8 +53,8 @@ public:
     class PostProcessTaskBash : public PostProcessTask{
         public:
             PostProcessTaskBash(const std::string & name): PostProcessTask(name){}
-            void execute(){
-                 int ret = system( this->m_options[1].c_str());
+            void execute() const{
+                 int ret = system( this->m_options.at(1).c_str());
             }
     };
 
@@ -57,21 +64,11 @@ public:
             void addOption(unsigned int index, const std::string &option){
 
             }
-            virtual void execute(){
+            virtual void execute() const{
 
             }
     };
 
-
-    std::vector<boost::filesystem::path> m_localDirs;
-    boost::filesystem::path m_globalDir = "./";
-    boost::filesystem::path m_sceneFile;
-
-    // If I would like to have some posst process tasks going on afterwards
-    // Like bash command and so one
-    // This is not needed sofar in MPI mode, because I can do this with mpirun -npernode 1 command and so on which lets me postprocess files
-    // per node on the cluster or
-    std::vector<PostProcessTask *> m_postProcessTasks;
 
     ~ApplicationCLOptions(){
         for(auto it = m_postProcessTasks.begin(); it != m_postProcessTasks.end(); ++it){
@@ -79,6 +76,12 @@ public:
         }
     }
 
+    inline const std::vector<boost::filesystem::path> & getLocalDirs(){ return m_localDirs;}
+    inline const boost::filesystem::path & getGlobalDir(){ return m_globalDir;}
+    inline const boost::filesystem::path & getMediaDir(){ return m_mediaDir;}
+    inline const boost::filesystem::path & getSceneFile(){ return m_sceneFile;}
+
+    inline const std::vector<const PostProcessTask *> & getPostProcessTasks(){ return m_postProcessTasks;}
 
     void parseOptions(int argc, char **argv) {
         using namespace GetOpt;
@@ -111,6 +114,11 @@ public:
                 m_localDirs.push_back(m_globalDir);
             }
 
+            if( ops >> OptionPresent('m',"media-path")) {
+                ops >> Option('m',"media-path",s);
+                m_mediaDir = boost::filesystem::path(s);
+            }
+
             if( ops >> OptionPresent('p', "post-process")) {
                 std::vector<std::string> svec;
                 ops >> Option('p',"post-process",svec);
@@ -133,8 +141,8 @@ public:
                             ERRORMSG("Postprocess Argument: " << "bash" << ", two little arguments!" << std::endl);
 
                        }
-                       m_postProcessTasks.push_back(new PostProcessTaskBash("bash"));
-                       p = m_postProcessTasks.back();
+                       p = new PostProcessTaskBash("bash");
+                       m_postProcessTasks.push_back(p);
                     }else if( svec[i] == "copy-local-to"){
                         if(i != nextArgIdx){
                             printHelp();
@@ -147,8 +155,8 @@ public:
                             printHelp();
                             ERRORMSG("Postprocess Argument: " << "copy-local-to" << ", two little arguments!" << std::endl);
                         }
-                        m_postProcessTasks.push_back(new PostProcessTaskCopyLocalTo("copy-local-to"));
-                        p = m_postProcessTasks.back();
+                        p = new PostProcessTaskCopyLocalTo("copy-local-to");
+                        m_postProcessTasks.push_back(p);
                     }else{
                         if(i >= nextArgIdx){
                             printHelp();
@@ -209,11 +217,13 @@ public:
     }
 
     void printArgs(std::ostream & s){
-        s << " SceneFile Arg: " << m_sceneFile <<std::endl;
-        s << " GlobalFilePath Arg: " << m_globalDir <<std::endl;
-        s << " LocalFilePaths Args: ";
+        s << "---> Program Arguments::" << std::endl;
+        s << "     SceneFile: \t\t" << m_sceneFile <<std::endl;
+        s << "     GlobalFilePath: \t\t" << m_globalDir <<std::endl;
+        s << "     LocalFilePaths: \t\t";
         Utilities::printVector(s, m_localDirs.begin(), m_localDirs.end(), std::string(" "));
         s << std::endl;
+        s << "     MediaFilePath: \t\t" << m_mediaDir <<std::endl;
 
         for(auto it = m_postProcessTasks.begin(); it != m_postProcessTasks.end(); ++it){
             s << *(*it);
@@ -231,9 +241,22 @@ public:
                 ERRORMSG("Scene file supplied as argument: " << m_sceneFile << " does not exist!"<< std::endl)
             }
         }
+
+         if(! boost::filesystem::exists(m_mediaDir)) {
+                printHelp();
+                ERRORMSG("Media directory supplied as argument: " << m_mediaDir << " does not exist!"<< std::endl)
+         }
+
     }
 
 private:
+
+    // If I would like to have some posst process tasks going on afterwards
+    // Like bash command and so one
+    // This is not needed sofar in MPI mode, because I can do this with mpirun -npernode 1 command and so on which lets me postprocess files
+    // per node on the cluster or
+    std::vector<const PostProcessTask *> m_postProcessTasks;
+
 
     void printErrorNoArg(std::string arg) {
         printHelp();
@@ -246,13 +269,18 @@ private:
                   <<            "\t\t <SceneFilePath>: is a .xml file path for the scene, essential \n"
                   <<            "\t\t for CLI version, in GUI version: \"SceneFile.xml\" is the default file \n"
                   << " \t -g|--global-path <GlobalDirectoryPath> (optional) \n"
-                  <<            "\t\t <GlobalDirectoryPath>: is the global directory path. (no slash at the end, boost::create_directory bug!)\n"
+                  <<            "\t\t <GlobalDirectoryPath>: is the global directory path. (no slash at the end)\n"
+                  <<            "\t\t if not specified the media directory is './' .\n"
                   << " \t -l|--local-path <LocalDirectoryPath> (optional) \n"
                   <<            "\t\t <LocalDirectoryPath>: is the local directory for each processes output, \n"
                   <<            "\t\t if not specified the local directory is the same as the global directory.\n"
                   <<            "\t\t (no slash at the end, boost::create_directory bug!)\n"
                   <<            "\t\t This can also be a list of directories (space delimited), which is \n"
                   <<            "\t\t distributed linearly over all participating processes.\n"
+                  << " \t -m|--media-path <MediaDirectoryPath> (optional) \n"
+                  <<            "\t\t <MediaDirectoryPath>: is the base directory for all media files (.obj, .mesh) \n"
+                  <<            "\t\t which is used for relative file names in the scene file <SceneFilePath>. (no slash at the end)\n"
+                  <<            "\t\t if not specified the media directory is './' .\n"
                   << " \t -p|--post-process bash|copy-local-to (optional) \n"
                   <<            "\t\t Various post process task which can be launched ath the end of the simulation:\n"
                   <<            "\t\t bash <int>|all <command> \n"

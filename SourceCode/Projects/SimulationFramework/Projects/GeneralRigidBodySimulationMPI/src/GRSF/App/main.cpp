@@ -16,28 +16,6 @@
 #include "GRSF/Dynamics/General/MPIDataTypes.hpp"
 #include "GRSF/States/SimulationManager/SimulationManagerMPI.hpp"
 
-// Define the function to be called when ctrl-c (SIGINT) signal is sent to process
-void signal_callback_handler(int signum)
-{
-   // Cleanup and close up stuff here
-   // Terminate program
-   std::string signal;
-
-   switch(signum){
-       case SIGINT:
-            signal = "SIGINT";  break;
-       case SIGTERM:
-            signal = "SIGTERM"; break;
-       case SIGUSR1:
-            signal = "SIGUSR1"; break;
-       case SIGUSR2:
-            signal = "SIGUSR2"; break;  // This signal is to tell that the runtime limit is about to expire
-   }
-
-   std::cerr << "---> Caught signal: " << signal << " in signal handler! Exiting..." << std::endl;
-   exit(EXIT_FAILURE);
-}
-
 
 void start( int argc, char **argv ){
 
@@ -70,22 +48,23 @@ void start( int argc, char **argv ){
 
         //Calculate the directory where the processes have theis local dir
         {
-            unsigned int groups = nProcesses / ApplicationCLOptions::getSingleton().m_localDirs.size();
-            unsigned int index = std::min( (unsigned int)(my_rank/ groups), (unsigned int)ApplicationCLOptions::getSingleton().m_localDirs.size()-1);
-            localDirPath = ApplicationCLOptions::getSingleton().m_localDirs[index];
+            auto & localDirs = ApplicationCLOptions::getSingleton().getLocalDirs();
+            unsigned int groups = nProcesses / localDirs.size();
+            unsigned int index = std::min( (unsigned int)(my_rank/ groups), (unsigned int)localDirs.size()-1);
+            localDirPath = localDirs[index];
             localDirPath /= processFolder.str();
         }
 
         // Rank 0 makes the FileManager first( to ensure that all folders are set up properly)
         std::unique_ptr<FileManager> fileManager;
         if(my_rank == 0){
-            fileManager.reset(new FileManager(ApplicationCLOptions::getSingleton().m_globalDir, localDirPath)); //Creates path if it does not exist
+            fileManager.reset(new FileManager(ApplicationCLOptions::getSingleton().getGlobalDir(), localDirPath)); //Creates path if it does not exist
             MPI_Barrier(MPI_COMM_WORLD);
         }
         else{
             MPI_Barrier(MPI_COMM_WORLD);
             //These do not create paths anymore because rank 0 has already made the stuff
-            fileManager.reset(new FileManager(ApplicationCLOptions::getSingleton().m_globalDir, localDirPath));
+            fileManager.reset(new FileManager(ApplicationCLOptions::getSingleton().getGlobalDir(), localDirPath));
         }
 
         // Redirect std::cerr to Global file:
@@ -107,7 +86,7 @@ void start( int argc, char **argv ){
 
             // Only Simulation Processes enter this region:
                 SimulationManagerMPI mgr;
-                mgr.setup(ApplicationCLOptions::getSingleton().m_sceneFile);
+                mgr.setup(ApplicationCLOptions::getSingleton().getSceneFile());
                 mgr.startSim();
             // =============================================
 
@@ -118,10 +97,9 @@ void start( int argc, char **argv ){
 
            // Do post processes at the end of the simulation
             //TODO
-            auto & tasks = ApplicationCLOptions::getSingleton().m_postProcessTasks;
-            for(auto it = tasks.begin(); it != tasks.end(); it++){
-                if((*it)->getName() == "bash"){
-                    (*it)->execute();
+            for(auto & t : ApplicationCLOptions::getSingleton().getPostProcessTasks()){
+                if(t->getName() == "bash"){
+                    t->execute();
                 }
             }
 
@@ -147,9 +125,15 @@ void start( int argc, char **argv ){
 
 }
 
+void callBackSIGINT(){
+    std::cerr << "Caught signal SIGINT --> exit ..." << std::endl;
+    exit(EXIT_FAILURE);
+}
+
 int main(int argc, char **argv) {
 
     ApplicationSignalHandler sigHandler( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} );
+    sigHandler.registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
 
     // Start MPI =================================
     MPI_Init(&argc, &argv);

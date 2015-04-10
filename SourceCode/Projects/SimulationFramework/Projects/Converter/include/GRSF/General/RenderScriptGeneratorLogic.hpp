@@ -701,8 +701,14 @@ namespace LogicNodes {
                     pclose(m_subprocess);
                 }
                 std::string f = p.string() + m_suffix;
-                std::string c = Utilities::stringFormat(m_command,f.c_str());
-
+                std::string c;
+                try{
+                    c = Utilities::stringFormat(m_command,f.c_str());
+                }
+                catch(...){
+                    // if we could not format the command with the file, dont do anything
+                    c = m_command;
+                }
                 m_subprocess = popen( c.c_str() ,"w");
                 if(!m_subprocess){
                     ERRORMSG("Subprocess not opened!");
