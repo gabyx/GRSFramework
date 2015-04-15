@@ -984,9 +984,9 @@ public:
         pugi::xml_document dataXML;
         std::stringstream xml("<TopologyBuilder type=\"Grid\" buildMode=\"\" >"
                                     "<Description>"
-                                        "A_IK is tranformation matrix, which transforms points from Frame K to Frame I\n"
+                                        "A_IK is tranformation matrix, which transforms points from frame K to frame I\n"
                                         "AABB is in K Frame\n"
-                                        "AABBList contains all AABBs from all ranks\n"
+                                        "AABBList contains all AABBs from all ranks in frame I\n"
                                         "Time is the current simulation time\n"
                                         "BuiltTime is the elapsed time to build the topology\n"
                                     "</Description>"
@@ -1009,7 +1009,7 @@ public:
 
         using XMLNodeType = pugi::xml_node;
         XMLNodeType node;
-        static const auto  XMLStringNodeType = pugi::node_pcdata;
+        static const auto  nodePCData = pugi::node_pcdata;
         XMLNodeType root =  dataXML.child("TopologyBuilder");
 
 
@@ -1027,27 +1027,29 @@ public:
 
         root.attribute("buildMode").set_value(buildMode.c_str()) ;
 
-        root.first_element_by_path("./Grid").attribute("aligned").set_value( aligned );
-
         node = root.first_element_by_path("./Time");
         node.attribute("value").set_value( std::to_string(currentTime).c_str() );
 
         node = root.first_element_by_path("./BuiltTime");
         node.attribute("value").set_value( std::to_string(buildTime).c_str() );
 
-        node = root.first_element_by_path("./Grid/MinPoint");
-        node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(aabb.m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() );
+        auto gridN = root.first_element_by_path("./Grid");
 
-        node = root.first_element_by_path("./Grid/MaxPoint");
-        node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(aabb.m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() );
+        gridN.attribute("aligned").set_value( aligned );
 
-        node = root.first_element_by_path("./Grid/A_IK");
-        node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(A_IK.format(MyMatrixIOFormat::SpaceSep)).c_str() );
+        node = gridN.first_element_by_path("./MinPoint");
+        node.append_child(nodePCData).set_value( Utilities::typeToString(aabb.m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() );
 
-        node = root.first_element_by_path("./Grid/Dimension");
-        node.append_child(XMLStringNodeType).set_value( Utilities::typeToString(dim.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() );
+        node = gridN.first_element_by_path("./MaxPoint");
+        node.append_child(nodePCData).set_value( Utilities::typeToString(aabb.m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() );
 
-        node = root.first_element_by_path("./Grid/AABBList");
+        node = gridN.first_element_by_path("./A_IK");
+        node.append_child(nodePCData).set_value( Utilities::typeToString(A_IK.format(MyMatrixIOFormat::SpaceSep)).c_str() );
+
+        node = gridN.first_element_by_path("./Dimension");
+        node.append_child(nodePCData).set_value( Utilities::typeToString(dim.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() );
+
+        node = gridN.first_element_by_path("./AABBList");
         std::stringstream ss;
         for(auto & aabbIt : rankToAABB){
 
@@ -1057,7 +1059,7 @@ public:
             << std::endl;
 
         }
-        node.append_child(XMLStringNodeType).set_value( ss.str().c_str() );
+        node.append_child(nodePCData).set_value( ss.str().c_str() );
 
         // Write points
         if(points){
@@ -1066,7 +1068,7 @@ public:
             for(auto & p : *points){
                 ss << p.transpose().format(MyMatrixIOFormat::SpaceSep) << std::endl;
             }
-            node.append_child(XMLStringNodeType).set_value( ss.str().c_str() );
+            node.append_child(nodePCData).set_value( ss.str().c_str() );
         }
 
         dataXML.save_file(filePath.c_str(),"    ");
