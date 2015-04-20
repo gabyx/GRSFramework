@@ -41,12 +41,12 @@ namespace details{
         return details::is_associative_container_impl(&c);
     }
 
-    template <typename C>
-    constexpr auto is_sequence(C const& c)
-        -> decltype(details::is_associative_container_impl(&c))
-    {
-        return details::is_associative_container_impl(&c);
-    }
+    //template <typename C>
+    //constexpr auto is_sequence(C const& c)
+        //-> decltype(details::is_associative_container_impl(&c))
+    //{
+        //return details::is_associative_container_impl(&c);
+    //}
 
 };
 
