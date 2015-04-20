@@ -41,7 +41,7 @@ struct GridBuilderSettings{
     enum class BuildMode : short{ PREDEFINED , ALIGNED, BINET_TENSOR, MVBB} m_buildMode = BuildMode::MVBB;
 
     // OOBB or AABB
-    AABB m_aabb; ///< used values for predefined values
+    AABB3d m_aabb; ///< used values for predefined values
     bool m_aligned = true;
     Matrix33 m_A_IK;
 };

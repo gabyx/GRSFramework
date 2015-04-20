@@ -21,7 +21,7 @@ public:
 
     CartesianGrid();
 
-    CartesianGrid(const AABB & aabb,
+    CartesianGrid(const AABB3d & aabb,
                   const MyMatrix<unsigned int>::Array3 & dim);
     ~CartesianGrid();
 
@@ -42,7 +42,7 @@ protected:
     Array3 m_dxyz;
     MyMatrix<unsigned int>::Array3 m_dim;
 
-    AABB m_Box;
+    AABB3d m_Box;
 
     std::vector<TCellData> m_cellData;
 
@@ -65,7 +65,7 @@ CartesianGrid<TCellData>::~CartesianGrid() {
 };
 
 template<typename TCellData>
-CartesianGrid<TCellData>::CartesianGrid(const AABB & aabb,
+CartesianGrid<TCellData>::CartesianGrid(const AABB3d & aabb,
                                         const MyMatrix<unsigned int>::Array3 & dim) {
     ASSERTMSG(dim(0)*dim(1)*dim(2) != 0, "Dimension zero: " << dim)
     ASSERTMSG( aabb.isEmpty() == false, "CartesianGrid, wrongly initialized: maxPoint < minPoint");

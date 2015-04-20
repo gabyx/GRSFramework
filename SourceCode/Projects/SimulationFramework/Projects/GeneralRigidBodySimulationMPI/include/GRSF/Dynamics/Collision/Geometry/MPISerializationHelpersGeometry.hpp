@@ -46,7 +46,7 @@ void serialize(Archive & ar, CapsuleGeometry & g, const unsigned int version) {
 }
 
 template<class Archive>
-void serialize(Archive & ar, AABB & g, const unsigned int version) {
+void serialize(Archive & ar, AABB3d & g, const unsigned int version) {
 
     serializeEigen(ar , g.m_minPoint);
     serializeEigen(ar , g.m_maxPoint);

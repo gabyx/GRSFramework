@@ -77,7 +77,7 @@ public:
     }
 
     void createProcessTopologyGrid(unsigned int processRank, unsigned int masterRank,
-                                   const AABB & aabb,
+                                   const AABB3d & aabb,
                                    const MyMatrix<unsigned int>::Array3 & dim,
                                    bool aligned = true,
                                    const Matrix33 & A_IK = Matrix33::Identity()

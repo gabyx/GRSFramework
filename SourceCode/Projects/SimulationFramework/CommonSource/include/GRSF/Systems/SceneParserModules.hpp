@@ -1497,7 +1497,7 @@ private:
                     startTime,
                     endTime,
                     amplitude,
-                    AABB(boxMin,boxMax),
+                    AABB3d(boxMin,boxMax),
                     randomOn
                 )
             );

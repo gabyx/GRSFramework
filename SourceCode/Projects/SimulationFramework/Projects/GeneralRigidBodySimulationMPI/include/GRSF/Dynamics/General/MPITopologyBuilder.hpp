@@ -180,9 +180,9 @@ private:
     // For Binet Tensor
     Vector3 m_r_G_loc;       ///< Local Geometric center of all point masses
     Vector6 m_I_theta_loc;   ///< Local intertia tensor (binet tensor in center I) [ a_00,a_01,a_02,a_11,a_12,a_22] ) in intertial frame I
-    AABB m_K_aabb_loc; ///< Local AABB in K Frame (oriented bounding box) , collaboratively solve the m_K_aabb_glo
+    AABB3d m_K_aabb_loc; ///< Local AABB in K Frame (oriented bounding box) , collaboratively solve the m_K_aabb_glo
 
-    AABB m_I_aabb_loc;         ///< Local AABB of point masses
+    AABB3d m_I_aabb_loc;         ///< Local AABB of point masses
     std::vector<MassPoint> m_massPoints_loc; ///< local mass points
     Vector3Vec m_points_loc; /// point cloud of all predicted mass points
     unsigned int m_countPoints_loc = 0;
@@ -213,12 +213,12 @@ private:
 
     //Final Bounding Box
     bool m_aligned;         ///< aligned = AABB, otherwise OOBB
-    AABB  m_aabb_glo;       ///< Min/Max of OOBB fit around points in frame K (OOBB) or I (AABB)
+    AABB3d  m_aabb_glo;       ///< Min/Max of OOBB fit around points in frame K (OOBB) or I (AABB)
     Matrix33 m_A_IK;        ///< Transformation of OOBB cordinate frame K (oriented bounding box of point cloud) to intertia fram I
 
     SettingsType::ProcessDimType m_processDim; ///< The current process dim size
 
-    std::unordered_map<RankIdType,AABB> m_rankAABBs;
+    std::unordered_map<RankIdType,AABB3d> m_rankAABBs;
     unsigned int m_countPoints_glo = 0;
     std::vector<MassPoint> m_massPoints_glo; ///< global mass points
     Vector3Vec m_points_glo; /// point cloud of all predicted mass points
@@ -619,7 +619,7 @@ public:
     }
 
     // Compute Minimum Bounding Box with ApproxMVBB source code
-    void makeMVBB(Vector3Vec & points, Matrix33 & A_IK, AABB & aabb ){
+    void makeMVBB(Vector3Vec & points, Matrix33 & A_IK, AABB3d & aabb ){
 
         LOGTBLEVEL3(m_pSimulationLog, "Points MVBB \n:");
         m_aabb_glo.reset();
@@ -715,7 +715,7 @@ public:
     }
 
     template<bool aligned = false>
-    void computeExtent(const std::vector<MassPoint> & massPoints, AABB & aabb, const Matrix33 & A_IK = Matrix33::Identity()){
+    void computeExtent(const std::vector<MassPoint> & massPoints, AABB3d & aabb, const Matrix33 & A_IK = Matrix33::Identity()){
         LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Compute extent ..." << std::endl;);
         // Calculate min max
         aabb.reset();
@@ -965,11 +965,11 @@ public:
 
 
     void writeGridInfo(PREC currentTime, PREC buildTime,
-                       const AABB & aabb,
+                       const AABB3d & aabb,
                        const typename GridBuilderSettings::ProcessDimType & dim,
                        bool aligned,
                        const Matrix33 & A_IK,
-                       const std::unordered_map<RankIdType,AABB> & rankToAABB,
+                       const std::unordered_map<RankIdType,AABB3d> & rankToAABB,
                        Vector3Vec * points = nullptr
                        )
     {

@@ -39,7 +39,7 @@ public:
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 protected:
 
-    const AABB * m_aabb = nullptr;
+    const AABB3d * m_aabb = nullptr;
 
     bool m_bOverlapTest = false;                        ///< Boolean to decide if we only do overlap test or the whole collision output
     bool m_bOverlap = false;                            ///< Boolean which tells if the collision detection catched an overlap in the last call
@@ -47,7 +47,7 @@ protected:
     const RigidBodyType* m_pBody = nullptr; ///< Shared pointer to the first RigidBodyBase class instance.
 
 public:
-    inline bool overlapSphere(const Vector3 & p, PREC radius, const AABB & aabb) {
+    inline bool overlapSphere(const Vector3 & p, PREC radius, const AABB3d & aabb) {
         // Intersection test by Thomas Larsson "On Faster Sphere-Box Overlap Testing"
         // Using arvos overlap test because larsons gives false positives!
         PREC d = 0;
@@ -72,7 +72,7 @@ public:
 
     ColliderAABB() {}
 
-    bool checkOverlap(const RigidBodyType * pBody1, const AABB & aabb) {
+    bool checkOverlap(const RigidBodyType * pBody1, const AABB3d & aabb) {
 
         // We know that we are not changing anything inside rigid body!
         // Otherwise all operators()(const boost::shared_ptr...)
@@ -117,7 +117,7 @@ public:
     /**
     * Here aabb is in coordinates of frame K!
     */
-    bool checkOverlap(const RigidBodyType * pBody1, const AABB & aabb, const Matrix33 & A_IK) {
+    bool checkOverlap(const RigidBodyType * pBody1, const AABB3d & aabb, const Matrix33 & A_IK) {
 
         m_pBody = pBody1;
         m_bOverlapTest = true;
@@ -416,7 +416,7 @@ public:
 private:
     const RigidBodyType* m_pBody[2]; ///< Shared pointer to the first RigidBodyBase class instance.
 
-    boost::variant<const AABB *> otherGeoms; ///< Used for other intersection tests
+    boost::variant<const AABB3d *> otherGeoms; ///< Used for other intersection tests
 
 
 

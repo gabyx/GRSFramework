@@ -23,13 +23,13 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    using RankToAABBType = std::map<unsigned int, AABB >;
+    using RankToAABBType = std::map<unsigned int, AABB3d >;
     using NeighbourRanksListType = typename ProcessTopologyBase::NeighbourRanksListType;
     using AdjacentNeighbourRanksMapType = typename ProcessTopologyBase::AdjacentNeighbourRanksMapType;
 
     ProcessTopologyGrid(  NeighbourRanksListType & nbRanks, AdjacentNeighbourRanksMapType & adjNbRanks,
                           RankIdType processRank, unsigned int masterRank,
-                          const AABB & aabb,
+                          const AABB3d & aabb,
                           const MyMatrix<unsigned int>::Array3 & dim,
                           bool aligned = true,
                           const Matrix33 & A_IK = Matrix33::Identity()
@@ -146,7 +146,7 @@ public:
     /**
     * Gets the AABB, which extends to infinity for boundary cells!
     */
-    AABB getCellAABB(unsigned int cellRank) const{
+    AABB3d getCellAABB(unsigned int cellRank) const{
 
          MyMatrix<unsigned int>::Array3 cell_index = getCellIndex(cellRank);
          Vector3 pL = cell_index.array().cast<PREC>() * m_dxyz.array();
@@ -165,7 +165,7 @@ public:
             }
         }
 
-        return AABB(pL,pU);
+        return AABB3d(pL,pU);
     };
 
     bool checkOverlap(const RigidBodyType * body, NeighbourRanksListType & neighbourProcessRanks, bool & overlapsOwnRank){
@@ -206,7 +206,7 @@ private:
     RankIdType m_rank; ///< Own rank;
 
     RankToAABBType m_nbAABB; ///< Neighbour AABB in frame G
-    AABB m_aabb; ///< Own AABB of this process in frame G
+    AABB3d m_aabb; ///< Own AABB of this process in frame G
 
     bool m_axisAligned = true;
     Matrix33 m_A_IK ; ///< The grid can be rotated, this is the transformation matrix from grid frame K to intertia frame I
