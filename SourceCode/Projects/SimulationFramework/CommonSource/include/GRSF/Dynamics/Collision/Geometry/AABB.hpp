@@ -8,6 +8,9 @@
 
 #include "ApproxMVBB/AABB.hpp"
 
+template<unsigned int D>
+using AABB = ApproxMVBB::AABB<D>;
+
 using AABB3d = ApproxMVBB::AABB3d;
 using AABB2d = ApproxMVBB::AABB2d;
 

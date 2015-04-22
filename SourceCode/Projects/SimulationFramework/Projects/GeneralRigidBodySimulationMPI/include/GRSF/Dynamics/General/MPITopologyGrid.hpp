@@ -149,23 +149,21 @@ public:
     AABB3d getCellAABB(unsigned int cellRank) const{
 
          MyMatrix<unsigned int>::Array3 cell_index = getCellIndex(cellRank);
-         Vector3 pL = cell_index.array().cast<PREC>() * m_dxyz.array();
-         pL += m_Box.m_minPoint;
-         Vector3 pU = (cell_index.array()+1).cast<PREC>()  * m_dxyz.array();
-         pU += m_Box.m_minPoint;
-
+         AABB3d ret(m_Box.m_minPoint);
+         ret.m_minPoint += cell_index.array().cast<PREC>()     * m_dxyz.array();
+         ret.m_maxPoint += (cell_index.array()+1).cast<PREC>() * m_dxyz.array();
 
         //Expand AABB each axis to max/min if this rank is a boundary cell!
         for(short i = 0;i<3;i++){
             if(cell_index(i) == m_dim(i)-1){
-                pU(i) = std::numeric_limits<PREC>::max();
+                ret.expandToMaximumExtent<false>(i);
             }
             if( cell_index(i) == 0 ){
-                pL(i) = std::numeric_limits<PREC>::lowest();
+                ret.expandToMaximumExtent<true>(i);
             }
         }
 
-        return AABB3d(pL,pU);
+        return ret;
     };
 
     bool checkOverlap(const RigidBodyType * body, NeighbourRanksListType & neighbourProcessRanks, bool & overlapsOwnRank){
