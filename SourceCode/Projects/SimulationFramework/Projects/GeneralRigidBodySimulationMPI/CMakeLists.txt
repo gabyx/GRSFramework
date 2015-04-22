@@ -69,7 +69,6 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPISerializationHelpersEigen.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MultiBodySimFileMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MultiBodySimFilePart.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/CartesianGrid.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/DynamicsSystemMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/NeighbourMap.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/NeighbourDataBodyCommunication.hpp
@@ -93,7 +92,6 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Buffers/StateRecorderMPI.hpp
 )
 SET(DYNAMICS_SRC
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/CartesianGrid.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFileMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFilePart.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/DynamicsSystemMPI.cpp
