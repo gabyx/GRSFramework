@@ -40,11 +40,32 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
+    using RigidBodyStatesContainerType = typename DynamicsSystemType::RigidBodyStatesContainerType;
+    using RigidBodySimContainerType = typename DynamicsSystemType::RigidBodySimContainerType ;
+    using RigidBodyStaticContainerType = typename DynamicsSystemType::RigidBodyStaticContainerType ;
+
     using TopologyBuilderEnumType = TopologyBuilderEnum;
     using ProcessCommunicatorType = MPILayer::ProcessCommunicator;
 
     using RebuildSettings = TopologyBuilderSettings::RebuildSettings;
     using MassPointPredSettings = TopologyBuilderSettings::MassPointPredSettings;
+
+    using Vector3Vec = StdVecAligned<Vector3>;
+    struct MassPoint {
+        MassPoint(const RigidBodyState * s): m_state(s){}
+
+        Vector3Vec * m_points = nullptr;
+        unsigned int m_pointIdx = 0;
+        unsigned int m_numPoints = 0;
+
+        const RigidBodyState * m_state = nullptr; ///< Init Condition of the MassPoint pointing to m_initStates;
+    };
+
+
+    // GLOBAL/LOCAL STUFF ===========================================================
+    // references into this container remain valid, unordered_map, even if rehash
+    RigidBodyStatesContainerType m_initStates; ///< All states received from all processes
+    // ==============================================================================
 
 
     TopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
@@ -121,6 +142,71 @@ protected:
         return false;
     }
 
+
+     // Predict Bodies over some steps
+    // Either use Fluidix to quickly approximate a simulation or
+    // do a simple integration with only gravity of all point masses, stop if collided with non simulated bodies
+    void predictMassPoints(std::vector<MassPoint> & massPoints,
+                           Vector3Vec & predictedPoints){
+
+
+        ColliderPoint pointCollider;
+
+        PREC dT = m_massPointPredSettings.m_deltaT;
+
+        unsigned int nPoints = m_massPointPredSettings.m_nPoints;
+
+        auto * gravityField = m_pDynSys->m_externalForces.getGravityField();
+        Vector3 gravity = Vector3::Zero();
+        if( gravityField ){
+            gravity= gravityField->getGravity();
+        }
+
+        auto & staticBodies = m_pDynSys->m_staticBodies;
+
+        for(auto & massPoint : massPoints){
+
+            ASSERTMSG(massPoint.m_state,"State null");
+
+            massPoint.m_points = &predictedPoints;
+            massPoint.m_pointIdx = predictedPoints.size();  // link index of the predicted points
+            massPoint.m_numPoints = 1; // set number of points
+
+            predictedPoints.push_back(massPoint.m_state->getPosition());
+
+            Vector3 vel = massPoint.m_state->getVelocityTrans();
+            // Predict mass points with gravity, no collision detection so far with static objects
+            // r_s(t) = 1/2*g*t^2 + v * t + r_s
+            for(unsigned int i = 0; i <nPoints; i++ ){
+
+                predictedPoints.push_back( predictedPoints.back() + dT * vel + 0.5*gravity*dT*dT );
+                vel +=  gravity*dT;
+
+                massPoint.m_numPoints += 1;
+
+                // intersect with all static bodies, if intersection abort, point is proxed onto body!
+                bool hitObject = false;
+                for(auto & pBody : staticBodies){
+
+                    if( pointCollider.intersectAndProx(pBody, predictedPoints.back() ) ){
+                        hitObject = true;
+                        // dont break, prox to all static objects, (corners are tricky!)
+                    }
+                }
+
+                if(hitObject){
+                    break;
+                }
+
+            }
+
+            LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: body: "
+            <<RigidBodyId::getBodyIdString(massPoint.m_state->m_id) << " last prediction: " << predictedPoints.back().transpose()  <<std::endl);
+        }
+
+        LOGTBLEVEL2(m_pSimulationLog, "---> GridTopoBuilder: Predicted mass points: " << predictedPoints.size() << std::endl;);
+    }
+
     std::shared_ptr<DynamicsSystemType>  m_pDynSys;
     std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
 
@@ -152,28 +238,11 @@ public:
 
     using ProcessCommunicatorType = TProcCommunicator;
 
-    using RigidBodyStatesContainerType = typename DynamicsSystemType::RigidBodyStatesContainerType;
-    using RigidBodySimContainerType = typename DynamicsSystemType::RigidBodySimContainerType ;
-    using RigidBodyStaticContainerType = typename DynamicsSystemType::RigidBodyStaticContainerType ;
-
-
 private:
 
     template< typename > friend struct ParserModulesCreatorTopoBuilder;
-    using Vector3Vec = StdVecAligned<Vector3>;
-
 
     boost::filesystem::path m_sceneFilePath;
-
-    struct MassPoint {
-        MassPoint(const RigidBodyState * s): m_state(s){}
-
-        Vector3Vec * m_points = nullptr;
-        unsigned int m_pointIdx = 0;
-        unsigned int m_numPoints = 0;
-
-        const RigidBodyState * m_state = nullptr; ///< Init Condition of the MassPoint pointing to m_initStates;
-    };
 
     // LOCAL STUFF ==================================================================
 
@@ -186,12 +255,10 @@ private:
     std::vector<MassPoint> m_massPoints_loc; ///< local mass points
     Vector3Vec m_points_loc; /// point cloud of all predicted mass points
     unsigned int m_countPoints_loc = 0;
+    // ==============================================================================
 
 
 
-    // GLOBAL/LOCAL STUFF ===========================================================
-    // references into this container remain valid, unordered_map, even if rehash
-    RigidBodyStatesContainerType m_initStates; ///< All states received from all processes
 
     // Scene parser parses the initial time into this struct from global init condition
     struct TimeStepperSettings{ PREC m_startTime = 0;};
@@ -213,7 +280,7 @@ private:
 
     //Final Bounding Box
     bool m_aligned;         ///< aligned = AABB, otherwise OOBB
-    AABB3d  m_aabb_glo;       ///< Min/Max of OOBB fit around points in frame K (OOBB) or I (AABB)
+    AABB3d  m_aabb_glo;     ///< Min/Max of OOBB fit around points in frame K (OOBB) or I (AABB)
     Matrix33 m_A_IK;        ///< Transformation of OOBB cordinate frame K (oriented bounding box of point cloud) to intertia fram I
 
     SettingsType::ProcessDimType m_processDim; ///< The current process dim size
@@ -221,11 +288,10 @@ private:
     std::unordered_map<RankIdType,AABB3d> m_rankAABBs;
     unsigned int m_countPoints_glo = 0;
     std::vector<MassPoint> m_massPoints_glo; ///< global mass points
-    Vector3Vec m_points_glo; /// point cloud of all predicted mass points
+    Vector3Vec m_points_glo;                 /// point cloud of all predicted mass points
 
     unsigned int m_nGlobalSimBodies = 0; ///< Only for a check with MassPoints
-
-
+    // =============================================================================
 
     TopologyBuilderMessageWrapperResults<GridTopologyBuilder> m_messageWrapperResults;
     TopologyBuilderMessageWrapperOrientation<GridTopologyBuilder> m_messageOrient;
@@ -735,69 +801,7 @@ public:
     }
 
 
-    // Predict Bodies over some steps
-    // Either use Fluidix to quickly approximate a simulation or
-    // do a simple integration with only gravity of all point masses, stop if collided with non simulated bodies
-    void predictMassPoints(std::vector<MassPoint> & massPoints,
-                           Vector3Vec & predictedPoints){
 
-
-        ColliderPoint pointCollider;
-
-        PREC dT = m_massPointPredSettings.m_deltaT;
-
-        unsigned int nPoints = m_massPointPredSettings.m_nPoints;
-
-        auto * gravityField = m_pDynSys->m_externalForces.getGravityField();
-        Vector3 gravity = Vector3::Zero();
-        if( gravityField ){
-            gravity= gravityField->getGravity();
-        }
-
-        auto & staticBodies = m_pDynSys->m_staticBodies;
-
-        for(auto & massPoint : massPoints){
-
-            ASSERTMSG(massPoint.m_state,"State null");
-
-            massPoint.m_points = &predictedPoints;
-            massPoint.m_pointIdx = predictedPoints.size();  // link index of the predicted points
-            massPoint.m_numPoints = 1; // set number of points
-
-            predictedPoints.push_back(massPoint.m_state->getPosition());
-
-            Vector3 vel = massPoint.m_state->getVelocityTrans();
-            // Predict mass points with gravity, no collision detection so far with static objects
-            // r_s(t) = 1/2*g*t^2 + v * t + r_s
-            for(unsigned int i = 0; i <nPoints; i++ ){
-
-                predictedPoints.push_back( predictedPoints.back() + dT * vel + 0.5*gravity*dT*dT );
-                vel +=  gravity*dT;
-
-                massPoint.m_numPoints += 1;
-
-                // intersect with all static bodies, if intersection abort, point is proxed onto body!
-                bool hitObject = false;
-                for(auto & pBody : staticBodies){
-
-                    if( pointCollider.intersectAndProx(pBody, predictedPoints.back() ) ){
-                        hitObject = true;
-                        // dont break, prox to all static objects, (corners are tricky!)
-                    }
-                }
-
-                if(hitObject){
-                    break;
-                }
-
-            }
-
-            LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: body: "
-            <<RigidBodyId::getBodyIdString(massPoint.m_state->m_id) << " last prediction: " << predictedPoints.back().transpose()  <<std::endl);
-        }
-
-        LOGTBLEVEL2(m_pSimulationLog, "---> GridTopoBuilder: Predicted mass points: " << predictedPoints.size() << std::endl;);
-    }
 
     unsigned int buildCenterPoint( const std::vector<MassPoint> & massPoints,
                                    Vector3 & center){

@@ -150,16 +150,16 @@ public:
 
          MyMatrix<unsigned int>::Array3 cell_index = getCellIndex(cellRank);
          AABB3d ret(m_Box.m_minPoint);
-         ret.m_minPoint += cell_index.array().cast<PREC>()     * m_dxyz.array();
-         ret.m_maxPoint += (cell_index.array()+1).cast<PREC>() * m_dxyz.array();
+         ret.m_minPoint.array() += cell_index.array().cast<PREC>()     * m_dxyz.array();
+         ret.m_maxPoint.array() += (cell_index.array()+1).cast<PREC>() * m_dxyz.array();
 
         //Expand AABB each axis to max/min if this rank is a boundary cell!
         for(short i = 0;i<3;i++){
             if(cell_index(i) == m_dim(i)-1){
-                ret.expandToMaximumExtent<false>(i);
+                ret.expandToMaxExtent<false>(i);
             }
             if( cell_index(i) == 0 ){
-                ret.expandToMaximumExtent<true>(i);
+                ret.expandToMaxExtent<true>(i);
             }
         }
 
