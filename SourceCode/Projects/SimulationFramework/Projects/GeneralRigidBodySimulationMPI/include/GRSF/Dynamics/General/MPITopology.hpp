@@ -9,6 +9,7 @@
 //#include "GRSF/Dynamics/General/MPIInformation.hpp"
 
 #include "GRSF/Dynamics/General/MPITopologyGrid.hpp"
+#include "GRSF/Dynamics/General/MPITopologyKdTree.hpp"
 #include "GRSF/Dynamics/General/MPITopologyVisitors.hpp"
 
 namespace MPILayer {
@@ -25,6 +26,19 @@ public:
 
     using NeighbourRanksListType = std::set<RankIdType>;
     using AdjacentNeighbourRanksMapType = std::unordered_map<RankIdType, NeighbourRanksListType>;
+
+    private:
+        /** Delete visitor for the variant */
+        struct Deleter: public boost::static_visitor<void>{
+            template<typename T>
+            inline void operator()(T * t) const
+            {
+                delete t;
+            }
+            inline void operator()(boost::blank & b) const{}
+        };
+
+    public:
 
     ProcessTopology(){}
 
@@ -84,7 +98,9 @@ public:
                                    )
     {
         // Assign a grid topology
-        m_procTopo = ProcessTopologyGrid<ProcessTopology>(m_nbRanks,m_adjNbRanks,
+        Deleter d;
+        m_procTopo.apply_visitor(d);
+        m_procTopo = new ProcessTopologyGrid<ProcessTopology>(m_nbRanks,m_adjNbRanks,
                                                           m_rank , masterRank,
                                                           aabb,dim,
                                                           aligned,
@@ -92,9 +108,36 @@ public:
 
     }
 
+    template<typename Tree>
+    void createProcessTopologyKdTree(unsigned int processRank,
+                                      unsigned int masterRank,
+                                      const Tree & tree,
+                                      const AABB3d & aabb,
+                                      bool aligned = true,
+                                      const Matrix33 & A_IK = Matrix33::Identity()
+
+                                       )
+    {
+        // Assign a kdTree topology
+        Deleter d;
+        m_procTopo.apply_visitor(d);
+        m_procTopo = new ProcessTopologyKdTree<ProcessTopology>(  m_nbRanks,m_adjNbRanks,
+                                                              m_rank , masterRank,
+                                                              tree,
+                                                              aabb,
+                                                              aligned,
+                                                              A_IK
+                                                              );
+
+    }
+
     private:
 
-    boost::variant<boost::blank, ProcessTopologyGrid<ProcessTopology> > m_procTopo;
+    boost::variant<boost::blank,
+                    ProcessTopologyGrid<ProcessTopology>  * ,
+                    ProcessTopologyKdTree<ProcessTopology> *
+                > m_procTopo;
+
     RankIdType m_rank;
 
     // These values are set by the create Functions for different topologies

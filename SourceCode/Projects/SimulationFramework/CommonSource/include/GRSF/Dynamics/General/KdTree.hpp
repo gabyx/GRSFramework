@@ -7,15 +7,17 @@
 #include <memory>
 #include <deque>
 #include <tuple>
+#include <unordered_set>
 #include <utility>
+
 #include <fstream>
 
 #include <pugixml.hpp>
-#include <meta.hpp>
 
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
 #include "GRSF/Common/StaticAssert.hpp"
+#include "GRSF/Common/MetaHelper.hpp"
 #include "GRSF/Common/DemangleTypes.hpp"
 #include "GRSF/Common/EnumClassHelper.hpp"
 #include "GRSF/Common/CommonFunctions.hpp"
@@ -26,15 +28,15 @@ namespace KdTree {
 
 DEFINE_LAYOUT_CONFIG_TYPES
 
+
+
 using DefaultPointListType = std::vector<Vector3 * >;
 
 
-#define DEFINE_KDTREE_TYPES( __Traits__ )  \
+#define DEFINE_KDTREE_BASETYPES( __Traits__ )  \
     using NodeDataType = typename __Traits__::NodeDataType; \
     static const unsigned int Dimension = __Traits__::NodeDataType::Dimension; \
     using NodeType = typename __Traits__::NodeType; \
-    using SplitHeuristicType = typename __Traits__::SplitHeuristicType; \
-    //using SplitAxisType = typename __Traits__::SplitAxisType; \
 
 
 /* Dereference is No-Op for non-pointer types*/
@@ -65,6 +67,8 @@ public:
     using value_type    = typename PointListType::value_type;
     //STATIC_ASSERTM(std::is_pointer<value_type>::value, "The value of the point list needs to be a pointer" )
     using iterator      = typename PointListType::iterator;
+    using const_iterator= typename PointListType::const_iterator;
+
     using Deref = PointDeref<value_type>;
 
     /** Constructor for the root node, which owns the pointer list
@@ -95,13 +99,23 @@ public:
         return ret;
     }
 
-    iterator begin() {
+    iterator begin(){
         return m_begin;
     }
 
     iterator end() {
         return m_end;
     }
+
+
+    const_iterator begin() const{
+        return m_begin;
+    }
+
+    const_iterator end() const{
+        return m_end;
+    }
+
 
     std::size_t size() const {
         return std::distance(m_begin,m_end);
@@ -133,7 +147,7 @@ public:
     LinearQualityEvaluator(PREC s = 1.0, PREC p = 1.0, PREC e = 1.0):
         m_weightSplitRatio(s), m_weightPointRatio(p), m_weightMinMaxExtentRatio(e) {}
 
-    inline PREC setLevel(unsigned int level) {
+    inline void setLevel(unsigned int level) {
         /* set parameters for tree level dependent (here not used)*/
     };
 
@@ -158,7 +172,7 @@ template< typename TQualityEvaluator, typename Traits >
 class SplitHeuristicPointData {
 public:
 
-    DEFINE_KDTREE_TYPES( Traits )
+    DEFINE_KDTREE_BASETYPES( Traits )
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using PointListType = typename NodeDataType::PointListType;
@@ -244,7 +258,7 @@ public:
     *   node data types if a split happened otherwise (nullptr)
     */
     std::pair<NodeDataType *, NodeDataType * >
-    doSplit(NodeType * node) {
+    doSplit(NodeType * node, SplitAxisType & splitAxis, PREC & splitPosition) {
 
         ++m_splitCalls;
 
@@ -349,9 +363,9 @@ public:
 
             computeStatistics();
 
-            // Finally set the position and axis in the node!
-            node->setSplitPosition(m_bestSplitPosition);
-            node->setSplitAxis(m_bestSplitAxis);
+            // Finally set the position and axis and return
+            splitAxis = m_bestSplitAxis;
+            splitPosition = m_bestSplitPosition;
             return data->split(m_bestSplitRightIt);
         }
 
@@ -363,8 +377,6 @@ public:
 
 
 private:
-
-
 
     /** Compute the split position and maybe the splitAxis */
     bool computeSplitPosition(NodeType * node,
@@ -577,42 +589,224 @@ private:
 
 };
 
-template<typename Traits> class TreeSimple;
-template<typename Traits> class Tree;
+template<typename T> class TreeBase;
 
-/** So far this class is not working for N != 3, since the AABB<Dimension> class needs to be high-dimensional too!
-TODO
-*/
-template<typename Traits>
-class TreeNode {
+template<typename TDerivedNode, unsigned int Dimension>
+class TreeNodeBase {
 private:
-    friend class TreeSimple<Traits>;
-    friend class Tree<Traits>;
+    template<typename D, unsigned int Dim>
+    friend class TreeNodeBase; ///< all classes are friends (even the ones with other dimension, which results in compilation error
 public:
-    DEFINE_KDTREE_TYPES( Traits )
+
+    using DerivedNode = TDerivedNode;
+
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using  SplitAxisType = char;
     STATIC_ASSERT( Dimension <= std::numeric_limits<char>::max());
 
+    TreeNodeBase(std::size_t idx, const AABB<Dimension> & aabb, unsigned int treeLevel = 0)
+            : m_idx(idx), m_aabb(aabb),  m_treeLevel(treeLevel), m_child{nullptr,nullptr}
+    {}
+
+    ~TreeNodeBase(){};
+
+    /** Copy from node
+    *   Childs are not deep copied (since the node does not own the childs)
+    *   Values of the child pointers \p n are left uninitialized.
+    *   The tree class is responsible for copying the childs accordingly.
+    */
+    template<typename Derived>
+    TreeNodeBase(const TreeNodeBase<Derived,Dimension> & n):
+        m_idx(n.m_idx),m_aabb(n.m_aabb),m_treeLevel(n.m_treeLevel),
+        m_splitAxis(n.m_splitAxis),m_splitPosition(n.m_splitPosition),
+        m_child{nullptr,nullptr}
+    {
+    }
+    /** Move from node */
+    template<typename Derived>
+    TreeNodeBase(TreeNodeBase<Derived,Dimension> && n):
+        m_idx(std::move(n.m_idx)), m_treeLevel(n.m_treeLevel),
+        m_aabb(std::move(n.m_aabb)),m_splitAxis(std::move(n.m_splitAxis)),
+        m_splitPosition(std::move(n.m_splitPosition))
+    {
+    }
+
+    inline DerivedNode * leftNode() {
+        return m_child[0];
+    }
+    inline const DerivedNode * leftNode() const {
+        return m_child[0];
+    }
+
+    inline DerivedNode * rightNode() {
+        return m_child[1];
+    }
+    inline const DerivedNode * rightNode()const {
+        return m_child[1];
+    }
+
+    inline AABB<Dimension> & aabb() {
+        return m_aabb;
+    }
+    inline const AABB<Dimension> & aabb() const {
+        return m_aabb;
+    }
+
+    inline bool hasLeftChildren() const{
+        return m_child[0];
+    }
+    inline bool hasChildren() const{
+        return m_child[0] && m_child[1];
+    }
+
+    inline bool isLeaf() const{
+        return (m_splitAxis < 0);
+    }
+
+    inline std::size_t getIdx() const {
+        return m_idx;
+    }
+
+    inline void setSplitAxis(SplitAxisType splitAxis) {
+        m_splitAxis= splitAxis ;
+    }
+    inline void setSplitPosition(PREC splitPos) {
+        m_splitPosition= splitPos ;
+    }
+
+    inline SplitAxisType getSplitAxis() const{
+        return m_splitAxis ;
+    }
+    inline PREC getSplitPosition() const{
+        return m_splitPosition;
+    }
+    inline PREC getSplitRatio() const{
+        return (m_splitPosition - m_aabb.m_minPoint(m_splitAxis) )
+                / (m_aabb.m_maxPoint(m_splitAxis)-m_aabb.m_minPoint(m_splitAxis));
+    }
+
+    inline unsigned int getLevel() const{
+        return m_treeLevel;
+    }
+
+protected:
+
+    TreeNodeBase(std::size_t idx, const AABB<Dimension> & aabb, SplitAxisType axis, PREC splitPos)
+            : m_idx(idx), m_aabb(aabb), m_splitAxis(axis), m_splitPosition(splitPos)
+    {}
+
+    std::size_t m_idx = std::numeric_limits<std::size_t>::max();   ///< node index
+    unsigned int m_treeLevel = 0;
+    AABB<Dimension> m_aabb;
+    SplitAxisType m_splitAxis = -1; ///< smaller than zero to indicate leaf node!
+    PREC m_splitPosition = 0.0;
+    /** Child Nodes */
+    std::array<DerivedNode *,2> m_child{nullptr ,nullptr}; ///< The child nodes, these objects are not owned by this node!
+};
+
+template<typename Traits>
+class TreeNode;
+
+template<typename TTraits>
+class TreeNodeSimple : public TreeNodeBase<TreeNodeSimple<TTraits>,TTraits::Dimension>{
+public:
+    using Traits = TTraits;
+    using Base = TreeNodeBase<TreeNodeSimple<TTraits>,TTraits::Dimension>;
+private:
+    using Base::m_idx;
+    using Base::m_aabb;
+    using Base::m_splitAxis;
+    using Base::m_splitPosition;
+    using Base::m_child;
+
+    template<typename T>
+    friend class TreeBase;
+
+
+public:
+
+    DEFINE_KDTREE_BASETYPES( Traits )
+
+    TreeNodeSimple(std::size_t idx, const AABB<Dimension> & aabb): Base(idx,aabb){}
+    TreeNodeSimple(TreeNodeSimple&& t): Base(std::move(t)){}
+    TreeNodeSimple(const TreeNodeSimple& t): Base(t){}
+
+    /** Copy values from TreeNode<T>, only Base class does copy */
+    template<typename T>
+    TreeNodeSimple(const TreeNode<T> & t): Base(t)
+    {}
+
+};
+
+/** Default class used for TreeNodeSimple and TreeSimpleTraits*/
+template<unsigned int Dim = 3>
+struct NoData{
+    static const unsigned int Dimension = Dim;
+};
+
+
+template<typename TTraits>
+class TreeNode : public TreeNodeBase<TreeNode<TTraits>,TTraits::Dimension>{
+public:
+    using Traits = TTraits;
+    using Base = TreeNodeBase<TreeNode<TTraits>,TTraits::Dimension>;
+private:
+
+    using Base::m_idx;
+    using Base::m_aabb;
+    using Base::m_splitAxis;
+    using Base::m_splitPosition;
+    using Base::m_child;
+
+    template<typename T>
+    friend class TreeBase;
+
+    template<typename T>
+    friend class TreeNodeSimple;
+
+public:
+
+    DEFINE_KDTREE_BASETYPES( Traits )
+    using SplitAxisType = typename Base::SplitAxisType;
+
     struct BoundaryInformation {
         TreeNode* m_nodes[Dimension][2] = {{nullptr}}; ///< min/max pointers , if nullptr its an outside boundary
     };
 
-    TreeNode(
-            std::size_t idx,
-            AABB<Dimension> aabb,
-            NodeDataType * data,
-            unsigned int treeLevel = 0,
-            SplitAxisType splitAxis = -1, /* always a leaf */
-            PREC splitPosition = 0.0)
-        : m_idx(idx), m_aabb(aabb),m_splitAxis(splitAxis), m_treeLevel(treeLevel),
-          m_splitPosition(splitPosition), m_data(data), m_bound(new BoundaryInformation{}) {
-    }
+    TreeNode(std::size_t idx, const AABB<Dimension> & aabb, NodeDataType * data, unsigned int treeLevel = 0)
+        : Base(idx,aabb,treeLevel), m_data(data), m_bound(new BoundaryInformation{})
+    {}
 
     ~TreeNode() {
         cleanUp();
     };
+
+    /** Copy from node
+    *   childs are not deep copied (since the node does not own the childs)
+    *   the child pointers have the same values as the node \p n.
+    *   The tree class is responsible for copying the childs accordingly.
+    */
+    TreeNode(const TreeNode & n): Base(n)
+    {
+        if(n.m_bound){
+            m_bound = new BoundaryInformation(*n.m_bound);
+        }
+        if(n.m_data){
+            m_data = new NodeDataType(*n.m_data);
+        }
+    }
+
+    /** Move from node */
+    TreeNode(TreeNode && n): Base(std::move(n)),
+        m_bound(n.m_bound),
+        m_data(n.m_data)
+    {
+        n.m_bound = nullptr;
+        n.m_data = nullptr;
+    }
+
+
 
     void setBoundaryInfo(const BoundaryInformation & b) {
         if(!m_bound) {
@@ -621,22 +815,6 @@ public:
         *m_bound = b;
     }
 
-
-    inline TreeNode * leftNode() {
-        return m_child[0];
-    }
-    inline const TreeNode * leftNode() const {
-        return m_child[0];
-    }
-
-    inline TreeNode * rightNode() {
-        return m_child[1];
-    }
-    inline const TreeNode * rightNode()const {
-        return m_child[1];
-    }
-
-
     inline NodeDataType * data() {
         return m_data;
     };
@@ -644,27 +822,29 @@ public:
         return m_data;
     };
 
-    /** Splits the node into two new nodes by the splitting position*/
-    bool split(SplitHeuristicType & s) {
+    /** Splits the node into two new nodes by the splitting position
+    * The ownership of the left and right nodes is the caller of this function!
+    */
+    template<typename TSplitHeuristic>
+    bool split(TSplitHeuristic & s) {
 
-        auto pLR = s.doSplit(this);
+        auto pLR = s.doSplit(this, m_splitAxis, m_splitPosition);
 
         if(pLR.first == nullptr) { // split has failed!
             return false;
         }
-
 
         // Split aabb and make left and right
         // left (idx for next child if tree is complete binary tree, then idx = 2*idx+1 for left child)
         AABB<Dimension> t(m_aabb);
         PREC v = t.m_maxPoint(m_splitAxis);
         t.m_maxPoint(m_splitAxis) = m_splitPosition;
-        m_child[0] = new TreeNode(2*m_idx+1,t,pLR.first,  m_treeLevel+1);
+        m_child[0] = new TreeNode(2*m_idx+1,t,pLR.first,  this->m_treeLevel+1);
 
         // right
         t.m_maxPoint(m_splitAxis) = v; //restore
         t.m_minPoint(m_splitAxis) = m_splitPosition;
-        m_child[1] = new TreeNode(2*m_idx+2,t,pLR.second, m_treeLevel+1);
+        m_child[1] = new TreeNode(2*m_idx+2,t,pLR.second, this->m_treeLevel+1);
 
         // Set Boundary Information
         BoundaryInformation b = *m_bound;
@@ -676,8 +856,8 @@ public:
         b.m_nodes[m_splitAxis][0] = m_child[0]; // right changes pointer at min value
         m_child[1]->setBoundaryInfo(b);
 
-        // clean up own node:
-        if(m_treeLevel != 0) {
+        // clean up own node if it is not the root node on level 0
+        if(this->m_treeLevel != 0) {
             cleanUp();
         }
 
@@ -776,53 +956,6 @@ public:
 
     }
 
-    inline AABB<Dimension> & aabb() {
-        return m_aabb;
-    }
-    inline const AABB<Dimension> & aabb() const {
-        return m_aabb;
-    }
-
-    inline bool hasLeftChildren() const{
-        return m_child[0];
-    }
-    inline bool hasChildren() const{
-        return m_child[0] && m_child[1];
-    }
-
-    inline bool isLeaf() const{
-        return (m_splitAxis < 0);
-    }
-
-//    inline void setIdx(std::size_t idx) {
-//        m_idx=idx;
-//    }
-    inline std::size_t getIdx() const {
-        return m_idx;
-    }
-
-    inline void setSplitAxis(SplitAxisType splitAxis) {
-        m_splitAxis= splitAxis ;
-    }
-    inline void setSplitPosition(PREC splitPos) {
-        m_splitPosition= splitPos ;
-    }
-
-    inline SplitAxisType getSplitAxis() const{
-        return m_splitAxis ;
-    }
-    inline PREC getSplitPosition() const{
-        return m_splitPosition;
-    }
-    inline PREC getSplitRatio() const{
-        return (m_splitPosition - m_aabb.m_minPoint(m_splitAxis) )
-                / (m_aabb.m_maxPoint(m_splitAxis)-m_aabb.m_minPoint(m_splitAxis));
-    }
-
-    inline unsigned int getLevel() const{
-        return m_treeLevel;
-    }
-
     void cleanUp(bool data = true, bool bounds = true) {
         if(data && m_data) {
             delete m_data;
@@ -833,52 +966,95 @@ public:
             m_bound = nullptr;
         }
     }
-    template<typename T>
-    void writeXML(T * rootNode) {
-
-    }
 
 private:
-    std::size_t m_idx = std::numeric_limits<std::size_t>::max();   ///< leaf node index (only sensfull for leaf nodes)
-    unsigned int m_treeLevel = 0; ///< root level is 0
-    AABB<Dimension> m_aabb;
-
     /** Boundary information which is nullptr for non-leaf nodes */
     BoundaryInformation * m_bound = nullptr;
 
     NodeDataType* m_data = nullptr;
-
-    SplitAxisType m_splitAxis = -1; ///< smaller than zero to indicate leaf node!
-    PREC m_splitPosition = 0.0;
-    /** Child Nodes */
-    TreeNode * m_child[2] = {nullptr ,nullptr};
 };
 
 
-
-template<typename TNodeData = PointData<>,
-        template<typename...> class TSplitHeuristic = meta::bind_front< meta::quote<SplitHeuristicPointData>, LinearQualityEvaluator>::template apply
-        >
-struct TreeTraits {
-
-    using NodeDataType = TNodeData;
-    static const unsigned int Dimension = NodeDataType::Dimension;
-    using NodeType = TreeNode<TreeTraits>;
-    using SplitHeuristicType = TSplitHeuristic<TreeTraits>;
-};
-
-
-template<typename Traits = TreeTraits<> >
-class TreeSimple{
+template<typename Traits>
+class TreeBase{
+private:
+    template<typename T>
+    friend class TreeBase;
 public:
 
-    DEFINE_KDTREE_TYPES( Traits )
+    DEFINE_KDTREE_BASETYPES( Traits )
 
-    TreeSimple(){}
+    using LeafMapType = std::unordered_map<std::size_t, NodeType *>;
+    using NodeContainerType = std::vector<NodeType *>;
 
-    ~TreeSimple(){
-       resetTree();
+    TreeBase(){}
+
+    TreeBase(TreeBase && t)
+        : m_nodes(std::move(t.m_nodes)), m_leafs( std::move(t.m_leafs) ), m_root(t.m_root)
+    {
+        t.m_root = nullptr;
+        t.m_nodes.clear();
+        t.m_leafs.clear();
     }
+
+    TreeBase(const TreeBase & t){
+        copyFrom(t);
+    }
+
+    template<typename T>
+    explicit TreeBase(const TreeBase<T> & t){
+        copyFrom(t);
+    }
+
+    template<typename T>
+    void copyFrom(const TreeBase<T> & tree){
+
+        using CNodeType = typename TreeBase<T>::NodeType;
+
+        if(!tree.m_root){
+            return;
+        }
+
+        this->m_nodes.reserve(tree.m_nodes.size());
+        this->m_leafs.reserve(tree.m_leafs.size());
+
+        std::deque< std::pair<NodeType** ,CNodeType * > > l; // first = to pointer reference, second = from;
+
+        l.emplace_back( std::make_pair(&this->m_root, tree.m_root) );
+
+        while(!l.empty()){
+            auto & t = l.front();
+
+            (*t.first) = new NodeType(*t.second); // copy from node, childs are uninitialized
+            this->m_nodes.emplace_back( *t.first );
+
+            if(t.second->isLeaf()){
+                this->m_leafs.emplace((*t.first)->getIdx(),*t.first);
+
+            }else{
+
+                if(t.second->m_child[0]){
+                    l.emplace_back( std::make_pair(&(*t.first)->m_child[0],t.second->m_child[0]) );
+                }
+
+                if(t.second->m_child[1]){
+                    l.emplace_back( std::make_pair(&(*t.first)->m_child[1],t.second->m_child[1])  );
+                }
+
+            }
+
+            l.pop_front();
+        }
+
+    }
+
+    protected:
+        ~TreeBase(){
+            resetTree();
+        }; ///< Prohibit the use of this base polymophically
+    public:
+
+
     /** Built a tree from a node map and links
     * \p c   is a associative container of nodes with type \tp NodeType where the key type is std::size_t and
     * value type is a pointe to type NodeType. The tree owns the pointers afterwards!
@@ -889,11 +1065,23 @@ public:
     template<typename NodeMap, typename NodeToChildMap>
     void build( NodeType * root, NodeMap & c , NodeToChildMap & links){
 
+            resetTree();
+            m_leafs.clear();
+            m_nodes.clear();
+            m_nodes.reserve(c.size());
+            m_nodes.assign(c.begin(),c.end());
+
+            for(auto * n: m_nodes){
+                if(n->isLeaf()){
+                    m_leafs.push_back(n);
+                }
+            }
+
             if( c.find(root->getIdx()) == c.end()){
                 ERRORMSG("Root node not in NodeMap!")
             }
 
-            resetTree();
+
 
             std::unordered_set<std::size_t> hasParent;
             // first link all nodes together
@@ -929,10 +1117,14 @@ public:
     }
 
     void resetTree(){
-        if(m_root){
-            deleteRecursively(m_root);
-            m_root = nullptr;
+        for(auto * n: this->m_nodes){
+            delete n;
         }
+        // root node is also in node list!
+        this->m_root= nullptr;
+
+        m_leafs.clear();
+        m_nodes.clear();
     }
 
     /** Get cell index of the leaf which owns point \p point
@@ -957,309 +1149,152 @@ public:
         return currentNode;
     }
 
+    const NodeType * getLeaf(const std::size_t & index) const{
+        auto it = m_leafs.find(index);
+        if(it == m_leafs.end()){
+            return nullptr;
+        }
+        return it->second;
+    }
+
+    inline  const LeafMapType & getLeafs(){
+        return m_leafs;
+    }
+
+    inline  const NodeContainerType & getNodes(){
+        return m_nodes;
+    }
+
+
+    /** Clean up the nodes.
+    * Parameter are perfectly forwarded to NodeType::cleanUp(...)
+    */
+    template<typename... T>
+    void cleanUp(T && ... t) {
+        for(auto * p : m_nodes) {
+            p->cleanUp(std::forward<T>(t)...);
+        }
+    }
+
+    std::tuple<std::size_t, std::size_t >
+    getStatistics(){
+        return std::make_tuple(m_nodes.size(),m_leafs.size());
+    }
+
+
+     /** Enumerate nodes (continously, leafs first, then non-leafs */
+    void enumerateNodes(){
+
+        std::size_t leafIdx = 0;
+
+        for(auto * n : this->m_nodes){
+            if(n->isLeaf()){
+                n->m_idx=leafIdx++;
+                this->m_leafs.emplace(n->m_idx,n);
+            }
+        }
+        std::size_t nonleafIdx = this->m_leafs.size();
+
+        for(auto * n : this->m_nodes){
+            if(!n->isLeaf()){
+                n->m_idx = nonleafIdx++;
+            }
+        }
+    }
 protected:
 
-    void deleteRecursively(const NodeType* n){
-        if(n){
-            auto * l = n->leftNode();
-            auto * r = n->rightNode();
-            if(l){ deleteRecursively(l); }
-            if(r){ deleteRecursively(r); }
-        }
-        delete n;
-    }
+    LeafMapType m_leafs; ///< Only leaf nodes (idx to node)
+    NodeContainerType m_nodes; ///< All nodes
 
     NodeType * m_root = nullptr;     ///< Root node
 };
 
-/** Standart Class to build a kd-tree */
-template<typename Traits = TreeTraits<> >
-class Tree : protected TreeSimple<Traits> {
 
+
+template<
+            typename TNodeData = NoData<>,
+            template<typename...> class  TNode = TreeNode
+        >
+struct TreeSimpleTraits {
+
+    struct BaseTraits{
+        using NodeDataType = TNodeData;
+        static const unsigned int Dimension = NodeDataType::Dimension;
+        using NodeType = TNode<BaseTraits>;
+    };
+
+};
+
+
+///** Standart Class to build a kd-tree */
+template<typename TTraits = TreeSimpleTraits<> >
+class TreeSimple : public TreeBase<typename TTraits::BaseTraits> {
 public:
-    using Base = TreeSimple<Traits>;
-    DEFINE_KDTREE_TYPES( Traits )
 
-    Tree() {}
-    ~Tree() {
-        resetTree();
-    }
+    using Traits = TTraits;
+    using BaseTraits = typename TTraits::BaseTraits;
+    using Base = TreeBase<typename TTraits::BaseTraits>;
 
-    void resetTree(){
-        m_leafs.clear();
-        resetStatistics();
+    DEFINE_KDTREE_BASETYPES(BaseTraits)
 
-        for(auto * n: m_nodes){
-            delete n;
-        }
-        m_nodes.clear();
-        this->m_root = nullptr;
-
-        Base::resetTree();
-    }
-
-    /** Builds a new Tree with the SplitHeurstic */
-    template<bool computeStatistics = true>
-    void build(const AABB<Dimension> & aabb, std::unique_ptr<NodeDataType> data,
-            unsigned int maxTreeDepth = 50,
-            unsigned int maxLeafs = std::numeric_limits<unsigned int>::max()) {
-
-        resetTree();
-        m_heuristic.resetStatistics();
-
-        m_maxTreeDepth = maxTreeDepth;
-        m_maxLeafs = maxLeafs;
+    /** Move constructor to move from SimpleTree */
+    TreeSimple( TreeSimple && tree): Base(tree){}
+    /** Copy the tree */
+    TreeSimple( const TreeSimple & tree): Base(tree){}
 
 
-        if((aabb.extent() <= 0.0).any()) {
-            ERRORMSG("AABB given has wrong extent!");
-        }
-        this->m_root = new NodeType(0,aabb,data.release());
-
-        std::deque<NodeType*> splitList; // Breath first splitting
-        splitList.push_back(this->m_root);
-        m_nodes.push_back(this->m_root);
-
-        bool nodeSplitted;
-
-        auto end = splitList.end();
-        auto it  = splitList.begin();
-
-        m_treeDepth = 0;
-        unsigned int nNodesLevelCurr = 1; // number of nodes in list of current level
-        unsigned int nNodesLevelNext = 0; // number of nodes in list (after the current nodes with next level)
-
-        unsigned int nLeafs = 1;
-//        unsigned int nodeIdx = 0; // root node has idx = 0;
-
-        auto greaterData = [](const NodeType * a, const NodeType * b) {
-            return a->data()->size() > b->data()->size() ;
-        };
-
-        while( !splitList.empty()) {
+    /** Copy from a TreeBase with any kind of traits if possible
+    * The underlying Traits::NodeType has a copy constructor for T::NodeType!
+    */
+    template<typename T>
+    explicit TreeSimple( const TreeBase<T> & tree): Base(tree)
+    {}
 
 
-            auto * f = splitList.front();
-
-            // first check if number of nodes at curr level is zero
-            if(nNodesLevelCurr==0) {
-                std::cout << "Tree Level: " << m_treeDepth << " done, added childs: " << nNodesLevelNext << std::endl;
-                ++m_treeDepth;
-
-                std::swap(nNodesLevelCurr, nNodesLevelNext);
-
-                // may be sort the child nodes in splitList according to their data size
-                // (slow for big trees) std::sort(splitList.begin(),splitList.end(),greaterData);
-
-                f = splitList.front();
-                //std::cout << "biggest leaf size: " << splitList.front()->data()->size() << std::endl;
-            }
-
-            if(m_treeDepth+1 <= m_maxTreeDepth && nLeafs < m_maxLeafs) {
-
-                // try to split the nodes in the  list
-                nodeSplitted = f->split(m_heuristic);
-
-                if(nodeSplitted) {
-                    auto * l = f->leftNode();
-                    auto * r = f->rightNode();
-                    splitList.emplace_back(l); // add to front
-                    splitList.emplace_back(r);// add to front
-
-                    // Push to total list
-                    m_nodes.emplace_back(l);
-                    m_nodes.emplace_back(r);
-
-                    nNodesLevelNext+=2;
-                    ++nLeafs; // each split adds one leaf
-
-                } else {
-                    // this is a leaf node, save in leaf list (later in enumerateNodes):
-                    //std::cout << "leaf size: " << f->data()->size() << ",";
-                }
-
-                // add to node statistic:
-                if(computeStatistics) {
-                    addToNodeStatistics(f);
-                }
-
-            } else {
-                // depth level reached
-                // add to node statistics
-                if(computeStatistics) {
-                    addToNodeStatistics(f);
-                }
-
-            }
-            --nNodesLevelCurr;
-            // pop node at the front
-            splitList.pop_front();
-        }
-
-        // enumerate nodes new (firsts leafs then all other nodes)
-        enumerateNodes();
-
-        if(computeStatistics) {
-            averageStatistics();
-        }
-    }
-
-
-    /** Deletes the data and bounds in each node if specified */
-    void cleanUp(bool data = true, bool bounds = true) {
-        if(!data && !bounds) {
-            return;
-        }
-        for(auto * p : m_nodes) {
-            p->cleanUp(data,bounds);
-        }
-    }
-
-    template<typename... T>
-    void initSplitHeuristic(T &&... t) {
-        m_heuristic.init(std::forward<T>(t)...);
-    }
-
-    template<bool safetyCheck = true>
-    std::unordered_map<std::size_t, std::unordered_set<std::size_t> >
-    buildLeafNeighbours(PREC minExtent) {
-        if(!this->m_root) {
-            ERRORMSG("There is not root node! KdTree not built!")
-        }
-
-        // Get all leaf neighbour indices for each leaf node!
-        // To do this, we traverse the leaf list and for each leaf l
-        // we determine in each direction of the kd-Tree in R^n (if 3D, 3 directions)
-        // for "min" and "max" the corresponding leafs in the subtrees given by
-        // the boundary information in the leaf node:
-        // e.g. for the "max" direction in x for one leaf, we traverse the  subtree of the boundary
-        // information in "max" x direction
-        // for "max" we always take the left node  (is the one which is closer to our max x boundary)
-        // for "min" we always take the right node (is the one which is closer to our min x boundary)
-        // in this way we get all candidate leaf nodes (which share the same split axis with split position s)
-        // which need still to be checked if they are neighbours
-        // this is done by checking if the boundary subspace with the corresponding axis set to the split position s
-        // (space without the axis which is checked, e.g y-z space, with x = s)
-        // against the current leaf nodes boundary subspace
-        // (which is thickened up by the amount of the minimal leaf node extent size,
-        // important because its not clear what should count as a neighbout or what not)
-        // if this neighbour n subspace overlaps the thickened leaf node subspace then this node is
-        // considered as a neighbour for leaf l, (and also neighbour n has l as neighbour obviously)
-        // If the tree is build with the same min_extent size as the thickening in this step here, then it should work
-        // since the tree has all extents striclty greater then min_extent, and here
-        // to avoid to many nodes to be classified as neighbours (trivial example, min_extent grid)
-
-        // each leaf gets a
-        std::unordered_map<std::size_t, std::unordered_set<std::size_t> > leafToNeighbourIdx;
-
-        // iterate over all leafs
-        for(auto & p: m_leafs) {
-            p.second->getNeighbourLeafsIdx(leafToNeighbourIdx, minExtent);
-        }
-
-        // Do safety check in debug mode
-        if(safetyCheck){
-            safetyCheckNeighbours(leafToNeighbourIdx,minExtent);
-        }
-
-
-        return leafToNeighbourIdx;
-    }
-
+    ~TreeSimple(){}
 
     /** Returns tuple with values
     * (number of leafs, avg. leaf data size, min. leaf data size, max. leaf data size)
     */
-    std::tuple<unsigned int, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, PREC, PREC>
+    std::tuple<std::size_t, std::size_t>
     getStatistics() {
-        return std::make_tuple(m_treeDepth,
-                m_nodes.size(),
-                m_leafs.size(),
-                m_avgLeafSize,
-                m_minLeafDataSize,
-                m_maxLeafDataSize,
-                m_minLeafExtent,
-                m_maxLeafExtent);
+        return std::tuple_cat(
+                Base::getStatistics()
+                );
     }
 
     std::string getStatisticsString() {
         std::stringstream s;
         auto t = getStatistics();
-        std::string h = m_heuristic.getStatisticsString();
         s << "Tree Stats: "
-                << "\n\t tree level : " << std::get<0>(t)
-                << "\n\t nodes      : " << std::get<1>(t)
-                << "\n\t leafs      : " << std::get<2>(t)
-                << "\n\t avg. leaf data size : " << std::get<3>(t)
-                << "\n\t min. leaf data size : " << std::get<4>(t)
-                << "\n\t max. leaf data size : " << std::get<5>(t)
-                << "\n\t min. leaf extent    : " << std::get<6>(t)
-                << "\n\t max. leaf extent    : " << std::get<7>(t)
-                << "\nSplitHeuristics Stats: \n"
-                << h << std::endl;
-
+                << "\n\t nodes      : " << std::get<0>(t)
+                << "\n\t leafs      : " << std::get<1>(t)
+                << std::endl;
         return s.str();
     }
 
-    void saveToXML(const boost::filesystem::path & folder = "./") {
+
+    using XMLNodeType = pugi::xml_node;
+    void saveToXML(XMLNodeType root) {
+        static const auto nodePCData = pugi::node_pcdata;
+
         std::stringstream ss;
-
-        if(!this->m_root) {
-            ERRORMSG("No root node in kdTree!")
-        }
-
-        boost::filesystem::path filePath = folder;
-
-        std::string filename = "TopologyInfo_1";
-        filePath /= filename + ".xml";
-
-        // Open XML and write structure!
-        pugi::xml_document dataXML;
-        std::stringstream xml("<TopologyBuilder type=\"KdTree\" buildMode=\"\" >"
-                "<Description>"
-                "A_IK is tranformation matrix, which transforms points from frame K to frame I\n"
-                "AABBList contains all AABBs from all ranks in frame I\n"
-                "Time is the current simulation time\n"
-                "BuiltTime is the elapsed time to build the topology\n"
-                "AABBTree contains the tree without the leafs\n"
-                "</Description>"
-                "<Time value=\"0\" />"
-                "<BuiltTime value=\"0\" />"
-                "<AABBList />"
-                "<KdTree aligned=\"\">"
-                "<Root/>"
-                "<Leafs/>"
-                "<AABBTree/>"
-                "<A_IK/>"
-                "</KdTree>"
-                "<Points/>"
-                "</TopologyBuilder>");
-
-        bool res = dataXML.load(xml);
-        ASSERTMSG(res,"Could not load initial xml data file");
-
-        // Write data
-
-        using XMLNodeType = pugi::xml_node;
         XMLNodeType node;
-        static const auto  nodePCData = pugi::node_pcdata;
-        XMLNodeType root =  dataXML.child("TopologyBuilder");
+        XMLNodeType kdTreeNode = root.append_child("KdTree");
 
-        XMLNodeType kdTreeNode = root.first_element_by_path("./KdTree");
+        kdTreeNode.append_attribute("aligned").set_value( true );
 
-        kdTreeNode.attribute("aligned").set_value( true );
-
-        XMLNodeType r = kdTreeNode.child("Root");
+        XMLNodeType r = kdTreeNode.append_child("Root");
         XMLNodeType aabb = r.append_child("AABB");
         ss.str("");
         ss << Utilities::typeToString(this->m_root->aabb().m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() <<" "
-                << Utilities::typeToString(this->m_root->aabb().m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() << "\n";
+           << Utilities::typeToString(this->m_root->aabb().m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() << "\n";
         aabb.append_child(nodePCData).set_value(ss.str().c_str());
 
         // Save leafs
-        XMLNodeType leafs = kdTreeNode.child("Leafs");
+        XMLNodeType leafs = kdTreeNode.append_child("Leafs");
         unsigned int level = 0;
-        for(auto & p: m_leafs) {
+        for(auto & p: this->m_leafs) {
             auto * l = p.second;
             XMLNodeType node = leafs.append_child("Leaf");
             node.append_attribute("level").set_value(l->getLevel());
@@ -1267,19 +1302,12 @@ public:
             aabb = node.append_child("AABB");
             ss.str("");
             ss << Utilities::typeToString(l->aabb().m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() <<" "
-                    << Utilities::typeToString(l->aabb().m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() << "\n";
+               << Utilities::typeToString(l->aabb().m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() << "\n";
             aabb.append_child(nodePCData).set_value(ss.str().c_str());
-
-            node = node.append_child("Points");
-//            ss.str("");
-//            for(auto * p : *(l->data())){
-//                ss << p->transpose().format(MyMatrixIOFormat::SpaceSep) << std::endl;
-//            }
-            //node.append_child(nodePCData).set_value( ss.str().c_str() );
         }
 
         // Save AABB tree (breath first)
-        XMLNodeType aabbTree = kdTreeNode.child("AABBTree");
+        XMLNodeType aabbTree = kdTreeNode.append_child("AABBTree");
         std::deque<NodeType*> q; // Breath first queue
 
         q.push_back(this->m_root);
@@ -1325,57 +1353,84 @@ public:
             aabb.append_child(nodePCData).set_value( s.c_str() );
         }
 
-
-        // Write A_IK (as quaternion)
-        node = kdTreeNode.child("A_IK");
-        node.append_child(nodePCData).set_value( Utilities::typeToString(Matrix33::Identity().format(MyMatrixIOFormat::SpaceSep)).c_str() );
-
-        //Write all points if data is available
-//        if(m_root->data()){
-//            auto node = root.child("Points");
-//            node.append_child(nodePCData).set_value( m_root->data()->getPointString().c_str() );
-//        }
-
-        dataXML.save_file(filePath.c_str(),"    ");
     }
 
-    template<typename Derived>
-    inline const NodeType * getLeaf(const MatrixBase<Derived> & point) const{
-        return Base::getLeaf(point);
-    }
 
-    const NodeType * getLeaf(const std::size_t & index) const{
-        auto it = m_leafs.find(index);
-        if(it == m_leafs.end()){
-            return nullptr;
-        }
-        return it->second;
-    }
-
-private:
+};
 
 
-    SplitHeuristicType m_heuristic;
+template<typename Traits>
+using SplitHeuristicPointDataDefault =   meta::apply<meta::bind_front<
+                                                meta::quote<SplitHeuristicPointData>,
+                                                LinearQualityEvaluator
+                                                >, Traits>;
 
-    std::unordered_map<std::size_t, NodeType *> m_leafs; ///< Only leaf nodes (idx to node)
-    std::vector<NodeType *> m_nodes; ///< All nodes
 
-    unsigned int m_maxTreeDepth = 50;
-    unsigned int m_maxLeafs = std::numeric_limits<unsigned int>::max();
+template<
+            typename TNodeData = PointData<>,
+            template<typename...> class TSplitHeuristic = SplitHeuristicPointDataDefault,
+            template<typename...> class  TNode = TreeNode
+        >
+struct TreeTraits {
 
-    /** Statistics ========================*/
+    struct BaseTraits{
+        using NodeDataType = TNodeData;
+        static const unsigned int Dimension = NodeDataType::Dimension;
+        using NodeType           = TNode<BaseTraits>;
+    };
+
+    using SplitHeuristicType = TSplitHeuristic<BaseTraits>;
+
+
+};
+
+
+
+class TreeStatistics{
+public:
+    TreeStatistics(){reset();}
+    TreeStatistics(const TreeStatistics & s) = default;
+
+    bool m_computedTreeStats;
     unsigned int m_treeDepth;
     PREC m_avgSplitPercentage;
     /** Min/Max Extent for Leafs */
     PREC m_minLeafExtent;
     PREC m_maxLeafExtent;
     /** Data Sizes for Leafs*/
-    std::size_t m_avgLeafSize;
+    PREC m_avgLeafSize;
     std::size_t m_minLeafDataSize;
     std::size_t m_maxLeafDataSize;
 
+    /** Leaf Neighbour stats */
+    bool m_computedNeighbourStats;
+    std::size_t m_minNeighbours;
+    std::size_t m_maxNeighbours;
+    PREC m_avgNeighbours;
 
-    void addToNodeStatistics(NodeType * n) {
+    void reset(){
+        m_computedTreeStats = false;
+        m_treeDepth = 0;
+        m_avgSplitPercentage = 0.0;
+        m_minLeafExtent = std::numeric_limits<PREC>::max();
+        m_maxLeafExtent = 0.0;
+        m_avgLeafSize = 0;
+        m_minLeafDataSize = std::numeric_limits<std::size_t>::max();
+        m_maxLeafDataSize = 0;
+
+        m_computedNeighbourStats = false;
+        m_minNeighbours = std::numeric_limits<std::size_t>::max();
+        m_maxNeighbours = 0;
+        m_avgNeighbours = 0;
+    }
+
+    void average(unsigned int nodes, unsigned int leafs) {
+        m_avgLeafSize /= nodes;
+        m_avgSplitPercentage /= nodes - leafs;
+    }
+
+    template<typename TNode>
+    void addNode(TNode * n) {
         if(n->isLeaf()) {
             auto s = n->data()->size();
             m_avgLeafSize += s;
@@ -1386,71 +1441,447 @@ private:
         }
     }
 
-    void averageStatistics() {
-        m_avgLeafSize /= m_leafs.size();
-        m_avgSplitPercentage /= m_nodes.size() - m_leafs.size();
+};
+
+
+/** Standart Class to build a kd-tree
+*/
+template<typename TTraits = TreeTraits<> >
+class Tree : public TreeBase<typename TTraits::BaseTraits> {
+private:
+
+    template<typename T>
+    friend class Tree;
+
+public:
+
+    using Traits = TTraits;
+    using BaseTraits = typename TTraits::BaseTraits;
+    using Base = TreeBase<typename TTraits::BaseTraits>;
+    DEFINE_KDTREE_BASETYPES(BaseTraits)
+
+    using SplitHeuristicType = typename Traits::SplitHeuristicType;
+
+    Tree(){}
+    ~Tree(){}
+
+    /** Move constructor */
+    Tree( Tree && tree)
+        : Base(std::move(tree)),
+          m_heuristic(std::move(tree.m_heuristic)),
+          m_statistics(std::move(tree.m_statistics)),
+          m_maxLeafs(tree.m_maxLeafs), m_maxTreeDepth(tree.m_maxTreeDepth)
+    {
+        tree.resetStatistics();
+    };
+
+    /** Copies the tree */
+    Tree( const Tree & tree): Base(tree),
+          m_heuristic(tree.m_heuristic),
+          m_statistics(tree.m_statistics),
+          m_maxLeafs(tree.m_maxLeafs), m_maxTreeDepth(tree.m_maxTreeDepth)
+    {}
+    /** Copies the tree with different traits */
+    template<typename T>
+    explicit Tree( const Tree<T> & tree): Base(tree),
+          m_statistics(tree.m_statistics),
+          m_maxLeafs(tree.m_maxLeafs), m_maxTreeDepth(tree.m_maxTreeDepth)
+    {}
+
+    /** Copies the tree if the underlying NodeType has a function NodeType(const TTree::NodeType & n)
+    *  This tree needs to be a friend of TTree::NodeType to successfully copy the nodes!
+    */
+    template<typename TTree>
+    Tree( const TTree & tree): Base(tree){};
+
+
+
+    Tree & operator=(const Tree & t) = delete;
+
+    void resetTree(){
+        resetStatistics();
+        Base::resetTree();
     }
+
+    /** Builds a new Tree with the SplitHeurstic */
+    template<bool computeStatistics = true>
+    void build(const AABB<Dimension> & aabb, std::unique_ptr<NodeDataType> data,
+            unsigned int maxTreeDepth = 50,
+            unsigned int maxLeafs = std::numeric_limits<unsigned int>::max()) {
+
+        resetTree();
+
+
+        m_statistics.m_computedTreeStats = computeStatistics;
+        m_maxTreeDepth = maxTreeDepth;
+        m_maxLeafs = maxLeafs;
+
+
+        if((aabb.extent() <= 0.0).any()) {
+            ERRORMSG("AABB given has wrong extent!");
+        }
+        this->m_root = new NodeType(0,aabb,data.release());
+
+        std::deque<NodeType*> splitList; // Breath first splitting
+        splitList.push_back(this->m_root);
+        this->m_nodes.push_back(this->m_root);
+
+        bool nodeSplitted;
+
+        auto end = splitList.end();
+        auto it  = splitList.begin();
+
+        m_statistics.m_treeDepth = 0;
+        unsigned int nNodesLevelCurr = 1; // number of nodes in list of current level
+        unsigned int nNodesLevelNext = 0; // number of nodes in list (after the current nodes with next level)
+
+        unsigned int nLeafs = 1;
+//        unsigned int nodeIdx = 0; // root node has idx = 0;
+
+        auto greaterData = [](const NodeType * a, const NodeType * b) {
+            return a->data()->size() > b->data()->size() ;
+        };
+
+        while( !splitList.empty()) {
+
+
+            auto * f = splitList.front();
+
+            // first check if number of nodes at curr level is zero
+            if(nNodesLevelCurr==0) {
+                std::cout << "Tree Level: " << m_statistics.m_treeDepth << " done, added childs: " << nNodesLevelNext << std::endl;
+                ++m_statistics.m_treeDepth;
+
+                std::swap(nNodesLevelCurr, nNodesLevelNext);
+
+                // may be sort the child nodes in splitList according to their data size
+                // (slow for big trees) std::sort(splitList.begin(),splitList.end(),greaterData);
+
+                f = splitList.front();
+                //std::cout << "biggest leaf size: " << splitList.front()->data()->size() << std::endl;
+            }
+
+            if(m_statistics.m_treeDepth+1 <= m_maxTreeDepth && nLeafs < m_maxLeafs) {
+
+                // try to split the nodes in the  list
+                nodeSplitted = f->split(m_heuristic);
+
+                if(nodeSplitted) {
+                    auto * l = f->leftNode();
+                    auto * r = f->rightNode();
+                    splitList.emplace_back(l); // add to front
+                    splitList.emplace_back(r);// add to front
+
+                    // Push to total list
+                    this->m_nodes.emplace_back(l);
+                    this->m_nodes.emplace_back(r);
+
+                    nNodesLevelNext+=2;
+                    ++nLeafs; // each split adds one leaf
+
+                } else {
+                    // this is a leaf node, save in leaf list (later in enumerateNodes):
+                    //std::cout << "leaf size: " << f->data()->size() << ",";
+                }
+
+                // add to node statistic:
+                if(computeStatistics) {
+                    m_statistics.addNode(f);
+                }
+
+            } else {
+                // depth level reached
+                // add to node statistics
+                if(computeStatistics) {
+                    m_statistics.addNode(f);
+                }
+
+            }
+            --nNodesLevelCurr;
+            // pop node at the front
+            splitList.pop_front();
+        }
+
+        // enumerate nodes new (firsts leafs then all other nodes)
+        this->enumerateNodes();
+
+        if(computeStatistics) {
+            averageStatistics();
+        }
+    }
+
+    template<typename... T>
+    void initSplitHeuristic(T &&... t) {
+        m_heuristic.init(std::forward<T>(t)...);
+    }
+
+    template<bool computeStatistics = true, bool safetyCheck = true>
+    std::unordered_map<std::size_t, std::unordered_set<std::size_t> >
+    buildLeafNeighboursAutomatic(){
+        if(!m_statistics.m_computedTreeStats){
+            ERRORMSG("You did not compute statistics for this tree while constructing it!")
+        }
+        buildLeafNeighbours<computeStatistics,safetyCheck>(m_statistics.m_minLeafExtent);
+    }
+
+    template<bool computeStatistics = true, bool safetyCheck = true>
+    std::unordered_map<std::size_t, std::unordered_set<std::size_t> >
+    buildLeafNeighbours(PREC minExtent) {
+        if(!this->m_root) {
+            ERRORMSG("There is not root node! KdTree not built!")
+        }
+
+        m_statistics.m_computedNeighbourStats = computeStatistics;
+
+        // Get all leaf neighbour indices for each leaf node!
+        // To do this, we traverse the leaf list and for each leaf l
+        // we determine in each direction of the kd-Tree in R^n (if 3D, 3 directions)
+        // for "min" and "max" the corresponding leafs in the subtrees given by
+        // the boundary information in the leaf node:
+        // e.g. for the "max" direction in x for one leaf, we traverse the  subtree of the boundary
+        // information in "max" x direction
+        // for "max" we always take the left node  (is the one which is closer to our max x boundary)
+        // for "min" we always take the right node (is the one which is closer to our min x boundary)
+        // in this way we get all candidate leaf nodes (which share the same split axis with split position s)
+        // which need still to be checked if they are neighbours
+        // this is done by checking if the boundary subspace with the corresponding axis set to the split position s
+        // (space without the axis which is checked, e.g y-z space, with x = s)
+        // against the current leaf nodes boundary subspace
+        // (which is thickened up by the amount of the minimal leaf node extent size,
+        // important because its not clear what should count as a neighbout or what not)
+        // if this neighbour n subspace overlaps the thickened leaf node subspace then this node is
+        // considered as a neighbour for leaf l, (and also neighbour n has l as neighbour obviously)
+        // If the tree is build with the same min_extent size as the thickening in this step here, then it should work
+        // since the tree has all extents striclty greater then min_extent, and here
+        // to avoid to many nodes to be classified as neighbours (trivial example, min_extent grid)
+
+        // each leaf gets a
+        std::unordered_map<std::size_t, std::unordered_set<std::size_t> > leafToNeighbourIdx;
+
+        // iterate over all leafs
+        for(auto & p: this->m_leafs) {
+            p.second->getNeighbourLeafsIdx(leafToNeighbourIdx, minExtent);
+        }
+
+        // Do safety check in debug mode
+        if(safetyCheck){
+            safetyCheckNeighbours(leafToNeighbourIdx,minExtent);
+        }
+
+        // Compute statistics
+        if(computeStatistics){
+            m_statistics.m_minNeighbours = std::numeric_limits<std::size_t>::max();
+            m_statistics.m_maxNeighbours = 0;
+            m_statistics.m_avgNeighbours = 0;
+
+            for(auto & n: leafToNeighbourIdx) {
+                m_statistics.m_avgNeighbours += n.second.size();
+                m_statistics.m_minNeighbours = std::min(m_statistics.m_minNeighbours,n.second.size());
+                m_statistics.m_maxNeighbours = std::max(m_statistics.m_maxNeighbours,n.second.size());
+
+            }
+            m_statistics.m_avgNeighbours /= leafToNeighbourIdx.size();
+        }
+
+        return leafToNeighbourIdx;
+    }
+
+
+    /** Returns tuple with values
+    * (number of leafs, avg. leaf data size, min. leaf data size, max. leaf data size)
+    */
+    std::tuple<std::size_t, std::size_t, std::size_t, PREC, std::size_t, std::size_t, PREC, PREC,std::size_t,std::size_t,PREC>
+    getStatistics() {
+        return std::tuple_cat(
+                Base::getStatistics(),
+                std::make_tuple(
+                m_statistics.m_treeDepth,
+                m_statistics.m_avgLeafSize,
+                m_statistics.m_minLeafDataSize,
+                m_statistics.m_maxLeafDataSize,
+                m_statistics.m_minLeafExtent,
+                m_statistics.m_maxLeafExtent,
+                m_statistics.m_minNeighbours,
+                m_statistics.m_maxNeighbours,
+                m_statistics.m_avgNeighbours)
+                );
+    }
+
+    std::string getStatisticsString() {
+        std::stringstream s;
+        auto t = getStatistics();
+        std::string h = m_heuristic.getStatisticsString();
+        s << "Tree Stats: "
+                << "\n\t nodes      : " << std::get<0>(t)
+                << "\n\t leafs      : " << std::get<1>(t)
+                << "\n\t tree level : " << std::get<2>(t)
+                << "\n\t avg. leaf data size : " << std::get<3>(t)
+                << "\n\t min. leaf data size : " << std::get<4>(t)
+                << "\n\t max. leaf data size : " << std::get<5>(t)
+                << "\n\t min. leaf extent    : " << std::get<6>(t)
+                << "\n\t max. leaf extent    : " << std::get<7>(t)
+                << "\nSplitHeuristics Stats: \n"
+                << h
+                << "\nNeighbour Stats (if computed): \n"
+                << "\n\t min. leaf neighbours    : " << std::get<8>(t)
+                << "\n\t max. leaf neighbours    : " << std::get<9>(t)
+                << "\n\t avg. leaf neighbours    : " << std::get<10>(t) << std::endl;
+
+        return s.str();
+    }
+
+    using XMLNodeType = pugi::xml_node;
+
+    void saveToXML(XMLNodeType root) {
+        static const auto nodePCData = pugi::node_pcdata;
+
+        std::stringstream ss;
+        XMLNodeType node;
+        XMLNodeType kdTreeNode = root.append_child("KdTree");
+
+        kdTreeNode.attribute("aligned").set_value( true );
+
+        XMLNodeType r = kdTreeNode.child("Root");
+        XMLNodeType aabb = r.append_child("AABB");
+        ss.str("");
+        ss << Utilities::typeToString(this->m_root->aabb().m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() <<" "
+                << Utilities::typeToString(this->m_root->aabb().m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() << "\n";
+        aabb.append_child(nodePCData).set_value(ss.str().c_str());
+
+        // Save leafs
+        XMLNodeType leafs = kdTreeNode.append_child("Leafs");
+        unsigned int level = 0;
+        for(auto & p: this->m_leafs) {
+            auto * l = p.second;
+            XMLNodeType node = leafs.append_child("Leaf");
+            node.append_attribute("level").set_value(l->getLevel());
+            node.append_attribute("idx").set_value(std::to_string(l->getIdx()).c_str());
+            aabb = node.append_child("AABB");
+            ss.str("");
+            ss << Utilities::typeToString(l->aabb().m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() <<" "
+                    << Utilities::typeToString(l->aabb().m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() << "\n";
+            aabb.append_child(nodePCData).set_value(ss.str().c_str());
+
+            node = node.append_child("Points");
+//            ss.str("");
+//            for(auto * p : *(l->data())){
+//                ss << p->transpose().format(MyMatrixIOFormat::SpaceSep) << std::endl;
+//            }
+            //node.append_child(nodePCData).set_value( ss.str().c_str() );
+        }
+
+        // Save AABB tree (breath first)
+        XMLNodeType aabbTree = kdTreeNode.append_child("AABBTree");
+        std::deque<NodeType*> q; // Breath first queue
+
+        q.push_back(this->m_root);
+        unsigned int currLevel = this->m_root->getLevel();
+        ss.str("");
+        while(q.size()>0) {
+            // Write stuff of f if not leaf
+            auto * f = q.front();
+
+            if(f->getLevel() > currLevel) {
+                // write new string
+                aabb = aabbTree.append_child("AABBSubTree");
+                aabb.append_attribute("level").set_value(currLevel);
+                aabb.append_child(nodePCData).set_value( ss.str().c_str() );
+                // update to next level
+                currLevel = f->getLevel();
+                ss.str("");
+            }
+
+            if(!f->isLeaf()) {
+                ss << Utilities::typeToString(f->aabb().m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() <<" "
+                        << Utilities::typeToString(f->aabb().m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() << "\n";
+            }
+
+            // push the left/right
+            auto * n = f->leftNode();
+            if(n) {
+                q.push_back(n);
+            }
+            n = f->rightNode();
+            if(n) {
+                q.push_back(n);
+            }
+
+            q.pop_front();
+        }
+
+        // write last string
+        auto s = ss.str();
+        if(!s.empty()) {
+            aabb = aabbTree.append_child("AABBSubTree");
+            aabb.append_attribute("level").set_value(currLevel);
+            aabb.append_child(nodePCData).set_value( s.c_str() );
+        }
+
+    }
+
+
+
+private:
+
+
+    SplitHeuristicType m_heuristic;
+
+    unsigned int m_maxTreeDepth = 50;
+    unsigned int m_maxLeafs = std::numeric_limits<unsigned int>::max();
+
+    /** Statistics ========================*/
+    TreeStatistics m_statistics;
+
 
     void resetStatistics() {
-        m_treeDepth = 0;
-        m_avgSplitPercentage = 0.0;
-        m_minLeafExtent = std::numeric_limits<PREC>::max();
-        m_maxLeafExtent = 0.0;
-        m_avgLeafSize = 0;
-        m_minLeafDataSize = std::numeric_limits<std::size_t>::max();
-        m_maxLeafDataSize = 0;
+        m_statistics.reset();
+        m_heuristic.resetStatistics();
+    }
+    void averageStatistics(){
+        m_statistics.average(this->m_nodes.size(),this->m_leafs.size());
     }
 
-    /** Enumerate nodes (continously, leafs first, then non-leafs */
-    void enumerateNodes(){
-
-        std::size_t leafIdx = 0;
-
-        for(auto * n : m_nodes){
-            if(n->isLeaf()){
-                n->m_idx=leafIdx++;
-                m_leafs.emplace(n->m_idx,n);
-            }
-        }
-        std::size_t nonleafIdx = m_leafs.size();
-
-        for(auto * n : m_nodes){
-            if(!n->isLeaf()){
-                n->m_idx = nonleafIdx++;
-            }
-        }
-    }
 
     /** Safety check for neighbour list */
     template<typename NeighbourMap>
     void safetyCheckNeighbours(const NeighbourMap & n, PREC minExtent) {
 
-        if(n.size() != m_leafs.size()){
+        if(n.size() != this->m_leafs.size()){
             ERRORMSG("Safety check for neighbours failed!: size")
         }
 
         bool ok = true;
-        for(auto & p:  m_leafs){
+        for(auto & p:  this->m_leafs){
             auto * l = p.second;
             // Check leaf l
             AABB<Dimension> t = l->aabb();
             t.expand(minExtent);
-            // check against neighbours
-            auto it = n.find(p.first);
+
+            // check against neighbours ( if all neighbours really overlap )
+            auto it = n.find(p.first); // get neighbours for this leaf
             if(it == n.end()){
-                ERRORMSG("Safety check for neighbours failed!: find")
+                ERRORMSG("Safety check: Leaf idx" << p.first << " not in neighbour map!")
             }
 
             for(const auto & idx : it->second ){
-                if(m_leafs.find(idx) == m_leafs.end()){
-                    ERRORMSG("Safety check for neighbours failed!: find idx")
+                if(this->m_leafs.find(idx) == this->m_leafs.end()){
+                    ERRORMSG("Safety check: Neighbour idx" << idx << " not in leafs map!")
                 }
-                ok &= t.overlaps( m_leafs[idx]->aabb() );
+                // check if this neighbour overlaps
+                if( ! t.overlaps( this->m_leafs[idx]->aabb() ) ){
+                    ERRORMSG("Safety check: Leaf idx: " << idx << " does not overlap " << p.first)
+                }
+                // check if this neighbours also has this leaf as neighbour
+                auto nIt = n.find(idx);
+                if(nIt == n.end()){
+                    ERRORMSG("Safety check: Neighbour idx" << idx << " not in neighbour map!")
+                }
+                if(nIt->second.find(p.first) == nIt->second.end() ){
+                     ERRORMSG("Safety check: Neighbour idx" << idx   << " does not have leaf idx: " << p.first << " as neighbour")
+                }
             }
         }
-        if(!ok){
-            ERRORMSG("Safety check for neighbours failed!: ok")
-        }
+
     }
 };
 

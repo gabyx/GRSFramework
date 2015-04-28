@@ -48,7 +48,7 @@ public:
     DEFINE_TIMESTEPPER_CONFIG_TYPES
 
     using ProcessCommunicatorType = MPILayer::ProcessCommunicator;
-    using TopologyBuilderType = MPILayer::TopologyBuilder;
+    using TopologyBuilderType = MPILayer::TopologyBuilder<ProcessCommunicatorType>;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 

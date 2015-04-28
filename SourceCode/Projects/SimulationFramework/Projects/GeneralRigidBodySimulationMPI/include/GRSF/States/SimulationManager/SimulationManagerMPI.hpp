@@ -74,7 +74,7 @@ private:
     std::shared_ptr< ProcessCommunicatorType > m_pProcCommunicator;
 
 
-    using TopologyBuilderType = MPILayer::TopologyBuilder ;
+    using TopologyBuilderType = MPILayer::TopologyBuilder<ProcessCommunicatorType> ;
     std::shared_ptr< TopologyBuilderType >    m_pTopologyBuilder;
 
     void writeAllOutput();

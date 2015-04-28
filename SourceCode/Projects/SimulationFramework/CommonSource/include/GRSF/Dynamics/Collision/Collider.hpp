@@ -39,15 +39,15 @@ public:
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 protected:
 
-    const AABB3d * m_aabb = nullptr;
+    mutable const AABB3d * m_aabb = nullptr;
 
-    bool m_bOverlapTest = false;                        ///< Boolean to decide if we only do overlap test or the whole collision output
-    bool m_bOverlap = false;                            ///< Boolean which tells if the collision detection catched an overlap in the last call
+    mutable bool m_bOverlapTest = false;                        ///< Boolean to decide if we only do overlap test or the whole collision output
+    mutable bool m_bOverlap = false;                            ///< Boolean which tells if the collision detection catched an overlap in the last call
 
-    const RigidBodyType* m_pBody = nullptr; ///< Shared pointer to the first RigidBodyBase class instance.
+    mutable const RigidBodyType* m_pBody = nullptr; ///< Shared pointer to the first RigidBodyBase class instance.
 
 public:
-    inline bool overlapSphere(const Vector3 & p, PREC radius, const AABB3d & aabb) {
+    inline bool overlapSphere(const Vector3 & p, PREC radius, const AABB3d & aabb) const{
         // Intersection test by Thomas Larsson "On Faster Sphere-Box Overlap Testing"
         // Using arvos overlap test because larsons gives false positives!
         PREC d = 0;
@@ -72,7 +72,7 @@ public:
 
     ColliderAABB() {}
 
-    bool checkOverlap(const RigidBodyType * pBody1, const AABB3d & aabb) {
+    bool checkOverlap(const RigidBodyType * pBody1, const AABB3d & aabb) const {
 
         // We know that we are not changing anything inside rigid body!
         // Otherwise all operators()(const boost::shared_ptr...)
@@ -87,7 +87,7 @@ public:
     }
 
     // Dispatch
-    void operator()(const SphereGeomPtrType  & sphereGeom1) {
+    void operator()(const SphereGeomPtrType  & sphereGeom1) const{
         m_bOverlap = overlapSphere(m_pBody->m_r_S, sphereGeom1->m_radius, *m_aabb);
     }
 
@@ -95,7 +95,7 @@ public:
     * @brief If no routine matched for Body to AABB throw error
     */
     template <typename Geom1>
-    inline void operator()(const  std::shared_ptr<const Geom1> &g1) {
+    inline void operator()(const  std::shared_ptr<const Geom1> &g1) const {
         ERRORMSG("ColliderAABB:: collision detection for object-combination "<< typeid(Geom1).name()<<" and AABB not supported!");
     }
 
@@ -117,7 +117,7 @@ public:
     /**
     * Here aabb is in coordinates of frame K!
     */
-    bool checkOverlap(const RigidBodyType * pBody1, const AABB3d & aabb, const Matrix33 & A_IK) {
+    bool checkOverlap(const RigidBodyType * pBody1, const AABB3d & aabb, const Matrix33 & A_IK) const {
 
         m_pBody = pBody1;
         m_bOverlapTest = true;
@@ -130,7 +130,7 @@ public:
     }
 
     // Dispatch
-    void operator()(const SphereGeomPtrType  & sphereGeom1) {
+    void operator()(const SphereGeomPtrType  & sphereGeom1) const {
         // Transform the point of the body into frame K
         Vector3 p = m_A_IK->transpose() * m_pBody->m_r_S;
         m_bOverlap = overlapSphere(p, sphereGeom1->m_radius, *m_aabb);
@@ -140,12 +140,12 @@ public:
     * @brief If no routine matched for Body to OOBB throw error
     */
     template <typename Geom1>
-    inline void operator()(const  std::shared_ptr<const Geom1> &g1) {
+    inline void operator()(const  std::shared_ptr<const Geom1> &g1) const {
         ERRORMSG("ColliderAABB:: collision detection for object-combination "<< typeid(Geom1).name()<<" and AABB not supported!");
     }
 
 private:
-    const Matrix33 * m_A_IK; ///< Transformation from frame K to frame I where the body coordinates are represented in
+    mutable const Matrix33 * m_A_IK; ///< Transformation from frame K to frame I where the body coordinates are represented in
 };
 
 
