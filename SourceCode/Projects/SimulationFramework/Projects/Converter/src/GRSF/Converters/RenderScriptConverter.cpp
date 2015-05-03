@@ -4,6 +4,8 @@
 
 #include "GRSF/Common/ApplicationSignalHandler.hpp"
 
+#include "GRSF/Common/ApplicationCLOptions.hpp"
+
 #include "GRSF/Common/CPUTimer.hpp"
 #include "GRSF/Common/ProgressBarCL.hpp"
 
@@ -19,13 +21,13 @@
 void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> & inputFiles,
               boost::filesystem::path outputFile,
               boost::filesystem::path sceneFile,
-              boost::filesystem::path materialFile,
+              boost::filesystem::path logicFile,
               Renderer renderer) {
     m_renderer = renderer;
     m_outputFile = outputFile;
     m_inputFiles = inputFiles;
     m_sceneFile = sceneFile;
-    m_materialFile = materialFile;
+    m_logicFile = logicFile;
     auto log = outputFile.parent_path() / "RenderScriptConverter.log";
     m_log = Logging::LogManager::getSingleton().createLog("RenderScriptConverter",true,true,log);
 
@@ -51,7 +53,7 @@ void RenderScriptConverter::loadGeometryCollection() {
     ParserGen c(&m_renderData);
 
     using SceneParserType = SceneParser< RenderData, ParserGen::SceneParserTraits >;
-    SceneParserType parser(c,m_log, );
+    SceneParserType parser(c,m_log, ApplicationCLOptions::getSingleton().getMediaDir() );
 
     parser.parseScene(m_sceneFile);
 
@@ -68,9 +70,9 @@ void RenderScriptConverter::loadMaterialCollection() {
 
 
     using RenderScriptParserType = RenderScriptParser<RenderData /**, StandartTraits*/ >;
-    RenderScriptParserType parser(c,m_log,ApplicationCLOptions::getSingleton().getMediaDir());
+    RenderScriptParserType parser(c,m_log);
 
-    parser.parse(m_materialFile);
+    parser.parse(m_logicFile);
     LOGRCLEVEL1(m_log, "---> Load Materials finished " << std::endl;)
 
     LOGRCLEVEL1(m_log, "---> Setup Mapper ..." << std::endl;)
@@ -134,7 +136,7 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
     if(!m_simFile.openRead(f,true)){
         ERRORMSG("Could not open SimFile at :" << f)
     }else{
-        LOG(m_log, "---> SimFile Properties:" <<std::endl << m_simFile.getDetails() << std::endl)
+        LOG(m_log, "---> SimFile Properties:" <<std::endl << m_simFile.getDetails().getString() << std::endl)
     }
 
     CPUTimer timer;

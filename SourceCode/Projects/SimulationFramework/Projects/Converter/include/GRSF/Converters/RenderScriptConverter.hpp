@@ -48,7 +48,7 @@ private:
 
     Logging::Log * m_log;
 
-    boost::filesystem::path m_materialFile;
+    boost::filesystem::path m_logicFile;
     boost::filesystem::path m_sceneFile;
 
     boost::filesystem::path m_outputFile;

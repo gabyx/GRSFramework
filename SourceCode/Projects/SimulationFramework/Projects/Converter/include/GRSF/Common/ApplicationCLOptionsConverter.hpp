@@ -36,7 +36,7 @@ public:
     TypesBodyRange::VariantType m_bodyRange;
 
     // Resampler
-    unsigned int m_stepSize = 1;
+    unsigned int m_increment = 1;
     unsigned int m_startStateIdx = 0;
     unsigned int m_endStateIdx = std::numeric_limits<unsigned int>::max();
     bool m_splitIntoFiles = false;
@@ -121,8 +121,8 @@ public:
                 m_task = Task::RESAMPLE;
 
                     //parse in start,step,end
-                    ops >> Option("stepSize",m_stepSize);
-                    m_stepSize = std::max(m_stepSize,1U);
+                    ops >> Option("increment",m_increment);
+                    m_increment = std::max(m_increment,1U);
 
                     if( ops >> OptionPresent("startIdx")) {
                         ops >> Option("startIdx",m_startStateIdx);
@@ -259,7 +259,7 @@ private:
                   <<            "\t\t\t               if end=-1, then all times/bodies are taken! \n"
                   <<            "\t\t\t 'resample': Resample multiple sim files, each after the other\n"
                   <<            "\t\t\t         Takes the following options:\n"
-                  <<            "\t\t\t         --stepSize <number> \n"
+                  <<            "\t\t\t         --increment <number> \n"
                   <<            "\t\t\t         --startIdx <number> --endIdx <number> \n"
                   <<            "\t\t\t         --split \n"
                   <<            "\t\t\t         Note: option --step needs to be greater than 1, start and end \n"
@@ -279,8 +279,11 @@ private:
 */
 class ApplicationCLOptionsSimInfo: public Utilities::Singleton<ApplicationCLOptionsSimConverter>  {
 public:
+
+    bool m_prettyPrint = false;
+
     bool m_skipFirstState = false;
-    unsigned int m_stepSize = 1;
+    unsigned int m_increment = 1;
     unsigned int m_startStateIdx = 0;
     unsigned int m_endStateIdx = std::numeric_limits<unsigned int>::max();
 
@@ -311,29 +314,28 @@ public:
                     }
             }
 
-          //parse in start,step,end
-            if( ops >> OptionPresent("stepSize")) {
-                ops >> Option("stepSize",m_stepSize);
-                m_stepSize = std::max(m_stepSize,1U);
+            if( ops >> OptionPresent("increment") ){
+                ops >> Option("increment",m_increment);
+                m_increment = std::max(m_increment,1U);
             }
 
             if( ops >> OptionPresent("startIdx")) {
                 ops >> Option("startIdx",m_startStateIdx);
             }
-
             if( ops >> OptionPresent("endIdx")) {
                 ops >> Option("endIdx",m_endStateIdx);
+            }
+            if(m_endStateIdx<m_startStateIdx){
+                 ERRORMSG("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
             }
 
             if( ops >> OptionPresent("skipFirstState")) {
                 m_skipFirstState = true;
             }
 
-            if(m_endStateIdx<m_startStateIdx){
-                 ERRORMSG("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
+            if( ops >> OptionPresent("prettyPrint")) {
+                m_prettyPrint = true;
             }
-
-
 
         }
         catch(GetOpt::ParsingErrorEx & ex){
@@ -403,15 +405,22 @@ private:
 
     void printHelp() {
         std::cerr << "Help for the Application SimInfo: \n Options: \n"
-                  << " \t -i|--input <path1> <path2> ... \n"
-                  << " \t [Required] \n"
-                  <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim file paths which are processed \n"
-                  << "\t  --stepSize <number> \n"
-                  << "\t  --startIdx <number> --endIdx <number> \n"
-                  << "\t  --skipFirstState \n"
-                  << "\t  Note: option --step needs to be greater than 1, start and end \n"
-                  << "\t                 represent state indices in the file.\n"
-                  << "\t               --skipFirstState skips all first states after the first file. Indices startIdx, endIdx are counted with respect to this flag\n";
+                  << "\t -i|--input <path1> <path2> ... \n"
+                  <<    "\t\t [Required] \n"
+                  <<    "\t\t <path1> <path2> ... : These are multiple space delimited input sim file paths which are processed \n"
+                  << "\t --increment <number> \n"
+                  << "\t --startIdx <number> \n"
+                  << "\t --endIdx <number> \n"
+                  << "\t --skipFirstState \n"
+                  <<    "\t\t Note: These --startIdx, --endIdx, --increment can be used\n"
+                  <<    "\t\t       to track the resample ranges over multiple sim files.\n"
+                  <<    "\t\t       --increment needs to be greater than 1, start and end \n"
+                  <<    "\t\t       represent state indices in the file.\n"
+                  <<    "\t\t       --skipFirstState skips all first states after the first\n"
+                  <<    "\t\t       file. Indices startIdx, endIdx are counted with respect\n"
+                  <<    "\t\t       to this flag\n"
+                  << "\t -x|--prettyPrint \n"
+                  <<    "\t\t Outputs nice formatted strings rather than XML \n";
     }
 };
 
@@ -431,7 +440,8 @@ public:
 
      // RenderScriptConverter
     boost::filesystem::path m_sceneFile;
-    boost::filesystem::path m_materialFile;
+    boost::filesystem::path m_mediaDir ="./";
+    boost::filesystem::path m_converterLogicFile;
 
     enum class Renderer: unsigned int{
         RENDERMAN = 0,
@@ -474,7 +484,12 @@ public:
 
             ops >> Option('s',"scene", m_sceneFile);
 
-            ops >> Option('m',"material", m_materialFile);
+
+            if( ops >> OptionPresent('m',"media-path")) {
+                ops >> Option('m',"media-path",m_mediaDir);
+            }
+
+            ops >> Option('c',"converterLogic", m_converterLogicFile);
 
             ops >> Option('o',"output",m_outputFile);
 
@@ -581,12 +596,20 @@ private:
         std::cerr << "Help for the Application Renderer: \n Options: \n"
                   << " \t -i|--input <path1> <path2> ... \n"
                   << " \t [Required] \n"
-                  <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim file paths which are processed \n"
+                  <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim (.sim) file paths which are processed \n"
                   << " \t -r|--renderer renderman|luxrender \n"
                   << " \t [Required] \n"
                   << " \t -s|--scene <path>  \n"
                   << " \t [Required] \n"
                   <<            "\t\t <path>: Specifies the scene file xml path \n"
+                  << " \t -c|--converterLogic <path>  \n"
+                  << " \t [Required] \n"
+                  <<            "\t\t <path>: Specifies the converter logic file xml path \n"
+                  << " \t -m|--media-path <path> (optional) \n"
+                  <<            "\t\t <path>: is the base directory for all media files (.obj, .mesh) \n"
+                  <<            "\t\t which is used for relative file names in the scene file <SceneFilePath>. (no slash at the end)\n"
+                  <<            "\t\t if not specified the media directory is './' .\n"
+
                   << " \t -o|--output <path>  \n"
                   << " \t [Required] \n"
                   <<            "\t\t <path>: Specifies the ouput directory path or \n"
