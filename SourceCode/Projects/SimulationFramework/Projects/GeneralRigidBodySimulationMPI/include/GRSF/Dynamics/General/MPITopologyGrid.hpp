@@ -14,6 +14,8 @@
 #include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
 #include "GRSF/Dynamics/Collision/Collider.hpp"
 
+#include "GRSF/Dynamics/General/MPITopologyVisitors.hpp"
+
 namespace MPILayer {
 
 template< typename ProcessTopologyBase>
@@ -28,15 +30,16 @@ public:
     using AdjacentNeighbourRanksMapType = typename ProcessTopologyBase::AdjacentNeighbourRanksMapType;
 
     ProcessTopologyGrid(  NeighbourRanksListType & nbRanks, AdjacentNeighbourRanksMapType & adjNbRanks,
-            RankIdType processRank, unsigned int masterRank,
-            const AABB3d & aabb,
-            const MyMatrix<unsigned int>::Array3 & dim,
-            bool aligned = true,
-            const Matrix33 & A_IK = Matrix33::Identity()
-                       ):
-        m_rank(processRank), CartesianGrid<NoCellData>(aabb, dim), m_A_IK(A_IK),
-        m_cellNumberingStart(masterRank) {
-        m_rank = processRank;
+                          RankIdType processRank, unsigned int masterRank,
+            			  const AABB3d & aabb,
+                          const MyMatrix<unsigned int>::Array3 & dim,
+                          bool aligned = true,
+                          const Matrix33 & A_IK = Matrix33::Identity()
+                          ):
+    m_rank(processRank), CartesianGrid<NoCellData>(aabb, dim), m_A_IK(A_IK), m_axisAligned(aligned),
+    m_cellNumberingStart(masterRank)
+    {
+       m_rank = processRank;
 
         //Initialize neighbours
         nbRanks = getCellNeighbours(m_rank);
@@ -55,15 +58,18 @@ public:
         //Get AABB of own rank!
         m_aabb = getCellAABB(m_rank);
 
-
-
     };
 
 
     RankIdType getRank() const{return m_rank;}
 
-    unsigned int getCellRank(const Vector3 & point) const {
-        MyMatrix<unsigned int>::Array3 v = CartesianGrid<NoCellData>::getCellIndexClosest(point);
+    unsigned int getCellRank(const Vector3 & I_point) const {
+        MyMatrix<unsigned int>::Array3 v;
+        if(m_axisAligned){
+             v = CartesianGrid<NoCellData>::getCellIndexClosest(I_point);
+        }else{
+             v = CartesianGrid<NoCellData>::getCellIndexClosest(m_A_IK.transpose()*I_point);
+        }
         return getCellRank(v);
     };
     unsigned int getCellRank(const MyMatrix<unsigned int>::Array3 & v) const {
