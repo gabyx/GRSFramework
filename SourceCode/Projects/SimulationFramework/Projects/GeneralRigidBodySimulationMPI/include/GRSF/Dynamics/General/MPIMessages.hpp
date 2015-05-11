@@ -1629,7 +1629,7 @@ public:
 
         ar & m_pTopoBuilder->m_aligned;
 
-        if( m_pTopoBuilder->m_aligned){
+        if(!m_pTopoBuilder->m_aligned){
             serializeEigen(ar,m_pTopoBuilder->m_A_IK);
         }
 
@@ -1669,7 +1669,7 @@ public:
 
         ar & m_pTopoBuilder->m_aligned;
 
-        if( m_pTopoBuilder->m_aligned){
+        if( !m_pTopoBuilder->m_aligned){
             serializeEigen(ar,m_pTopoBuilder->m_A_IK);
         }
 

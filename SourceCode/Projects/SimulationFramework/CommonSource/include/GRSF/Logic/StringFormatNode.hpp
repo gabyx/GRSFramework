@@ -5,6 +5,7 @@
 #include <boost/mpl/contains.hpp>
 
 #include "TinyFormatInclude.hpp"
+#include "GRSF/Common/DemangleTypes.hpp"
 #include "GRSF/Common/CommonFunctions.hpp"
 
 #include "GRSF/Logic/LogicNode.hpp"
@@ -22,21 +23,27 @@ namespace LogicNodes{
             /**
                 Two versions of add(), to avoid copying and storing the value where possible.
             */
-            template<typename T>
+            template<typename T,
+                    typename std::enable_if<std::is_lvalue_reference<T&>::value>::type* = nullptr
+                    >
             void add(const T& value)
             {
+                //std::cout << "added reference" << std::endl;
                 m_argList.emplace_back(value);
             }
 
             /** save interal as we have received an universal reference, but only rvalue reference binds to this overload
             *   as we have an overload for lvalue references
             */
-            template<typename T>
-            void add(const T&& value)
+            template<typename T,
+                    typename std::enable_if<std::is_rvalue_reference<T&&>::value>::type* = nullptr
+                    >
+            void add(T && value)
             {
-                m_argStore.emplace_back(new AnyT<T>(std::move(value)) );
-                const T& storedValue = static_cast<AnyT<T>&>(*m_argStore.back()).value;
-                m_argList.emplace_back(storedValue);
+                //std::cout << "copied" << std::endl;
+                auto * p = new AnyT<T>(value);
+                m_argStore.emplace_back( p );
+                m_argList.emplace_back(p->value);
             }
 
             /** Cast to FormatList */
@@ -52,13 +59,16 @@ namespace LogicNodes{
             }
 
         private:
-            struct Any { };
+            struct Any {
+                virtual ~Any(){};
+            };
 
             template<typename T>
             struct AnyT : Any
             {
                 T value;
-                AnyT(const T& value) : value(value) { }
+                AnyT(const T& value) : value(value) {}
+                ~AnyT(){}
             };
 
             std::vector<tfm::detail::FormatArg> m_argList;
@@ -86,12 +96,14 @@ namespace LogicNodes{
                                         >::type * = nullptr
                 >
         void operator()(LogicSocket<T> * n){
-            m_fList.add(n->getValue());
+            //std::cout << "value: " <<n->getValue()<< std::endl;
+            m_fList.add(n->getRefValue());
         }
 
         // Types which are in TypeSeqBasic
         void operator()(LogicSocket<boost::filesystem::path> * n){
-            m_fList.add(n->getValue().string());
+            //std::cout << "value path: " <<n->getValue()<< std::endl;
+            m_fList.add(n->getRefValue().string());
         }
 
 
@@ -139,7 +151,7 @@ namespace LogicNodes{
 
             m_s.str("");
             m_formatList.clear();
-
+            //std::cout << "Format" << std::endl;
             //Iterate over all inputs and add to format_list with visitor
             auto & inList =  getInputs();
             for(unsigned int i=1; i <inList.size(); i++){
@@ -153,7 +165,9 @@ namespace LogicNodes{
             }catch(...){
                 ERRORMSG("Conversion of string in tool " << this->m_id << " failed!")
             }
+
             SET_OSOCKET_VALUE(String, m_s.str());
+            //std::cout <<" Formated: " << m_s.str() << std::endl;
         }
         virtual void initialize(){}
 

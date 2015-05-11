@@ -35,9 +35,14 @@ void RenderScriptGenerator::setup() {
 
 }
 
-void RenderScriptGenerator::initFrame(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr)
+void RenderScriptGenerator::initFrame(boost::filesystem::path folder,
+                                      std::string filename,
+                                      double time,
+                                      unsigned int frameNr)
 {
-
+     if(filename.empty()){
+        filename = "Frame";
+     }
      // Set outputs in FrameData
      if(m_frameData){
         m_frameData->setOutput(folder,filename,time,frameNr);

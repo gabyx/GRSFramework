@@ -42,13 +42,15 @@ private:
     void loadGeometryCollection();
     void loadMaterialCollection();
 
-    void convertFile(const boost::filesystem::path & f);
+    /** \p uuid string is a hash for the file path to identify each frame where it came from!*/
+    void convertFile(const boost::filesystem::path & f,
+                     const std::string uuidString = "" );
 
     MultiBodySimFile m_simFile;
 
     Logging::Log * m_log;
 
-    boost::filesystem::path m_materialFile;
+    boost::filesystem::path m_logicFile;
     boost::filesystem::path m_sceneFile;
 
     boost::filesystem::path m_outputFile;

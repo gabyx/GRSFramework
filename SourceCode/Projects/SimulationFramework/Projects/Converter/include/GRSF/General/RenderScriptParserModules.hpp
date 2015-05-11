@@ -671,7 +671,6 @@ private:
         XMLAttributeType att;
         bool pipe = false;
         std::string command ="";
-        std::string suffix ="";
         att = matGenNode.attribute("pipeToSubprocess");
         if(att) {
             if(!Utilities::stringToType(pipe, att.value())) {
@@ -685,11 +684,9 @@ private:
                 }
             }
 
-            suffix = matGenNode.attribute("suffix").value();
-
         }
 
-        auto * node = new LogicNodes::RendermanWriter(id, m_geomMap,pipe,command,suffix);
+        auto * node = new LogicNodes::RendermanWriter(id, m_geomMap,pipe,command);
         m_renderScriptGen->addNode(node,false,true);
     }
 

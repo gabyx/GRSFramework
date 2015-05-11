@@ -174,7 +174,7 @@ private:
                                << *it << " do not match bodies: " << bodies << " , bytesPerState: "
                                << bState <<" of first file!");
             }
-            std::cerr << simFile.getDetails() << std::endl;
+            std::cerr << simFile.getDetails().getString() << std::endl;
             simFile.close();
             i++;
         }
@@ -235,7 +235,7 @@ private:
                                << bState <<" of first file!");
             }
 
-            std::cerr << simFile.getDetails() << std::endl;
+            std::cerr << simFile.getDetails().getString() << std::endl;
             simFile.close();
             i++;
         }

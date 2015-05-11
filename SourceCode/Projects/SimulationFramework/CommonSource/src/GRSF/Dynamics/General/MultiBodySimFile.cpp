@@ -40,9 +40,9 @@ bool MultiBodySimFile::isGood(){
 }
 
 
-std::vector<double> MultiBodySimFile::getTimeList(){
+MultiBodySimFile::TimeListType MultiBodySimFile::getTimeList(){
 
-    std::vector<double> times;
+    TimeListType times;
 
     m_file_stream.seekg(m_beginOfStates);
     double t;
@@ -392,5 +392,3 @@ MultiBodySimFile & MultiBodySimFile::operator << (MultiBodySimFile& file){
 
     return *this;
 }
-
-
