@@ -4,6 +4,8 @@
 
 #include "GRSF/Common/ApplicationSignalHandler.hpp"
 
+#include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
+
 #include "GRSF/Common/CPUTimer.hpp"
 #include "GRSF/Common/ProgressBarCL.hpp"
 
@@ -19,13 +21,13 @@
 void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> & inputFiles,
               boost::filesystem::path outputFile,
               boost::filesystem::path sceneFile,
-              boost::filesystem::path materialFile,
+              boost::filesystem::path logicFile,
               Renderer renderer) {
     m_renderer = renderer;
     m_outputFile = outputFile;
     m_inputFiles = inputFiles;
     m_sceneFile = sceneFile;
-    m_materialFile = materialFile;
+    m_logicFile = logicFile;
     auto log = outputFile.parent_path() / "RenderScriptConverter.log";
     m_log = Logging::LogManager::getSingleton().createLog("RenderScriptConverter",true,true,log);
 
@@ -51,7 +53,7 @@ void RenderScriptConverter::loadGeometryCollection() {
     ParserGen c(&m_renderData);
 
     using SceneParserType = SceneParser< RenderData, ParserGen::SceneParserTraits >;
-    SceneParserType parser(c,m_log);
+    SceneParserType parser(c,m_log, ApplicationCLOptionsRenderer::getSingleton().getMediaDir() );
 
     parser.parseScene(m_sceneFile);
 
@@ -70,7 +72,7 @@ void RenderScriptConverter::loadMaterialCollection() {
     using RenderScriptParserType = RenderScriptParser<RenderData /**, StandartTraits*/ >;
     RenderScriptParserType parser(c,m_log);
 
-    parser.parse(m_materialFile);
+    parser.parse(m_logicFile);
     LOGRCLEVEL1(m_log, "---> Load Materials finished " << std::endl;)
 
     LOGRCLEVEL1(m_log, "---> Setup Mapper ..." << std::endl;)
@@ -122,7 +124,8 @@ void RenderScriptConverter::loadMaterialCollection() {
     //std::cout << n6->getOSocketValue<double>(0) << std::endl;
 }
 
-void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
+void RenderScriptConverter::convertFile(const boost::filesystem::path & f,
+                                        const std::string uuidString) {
     LOG(m_log, "---> Converting file:" << f << std::endl;);
 
     m_abort = false;
@@ -134,7 +137,7 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
     if(!m_simFile.openRead(f,true)){
         ERRORMSG("Could not open SimFile at :" << f)
     }else{
-        LOG(m_log, "---> SimFile Properties:" <<std::endl << m_simFile.getDetails() << std::endl)
+        LOG(m_log, "---> SimFile Properties:" <<std::endl << m_simFile.getDetails().getString() << std::endl)
     }
 
     CPUTimer timer;
@@ -143,6 +146,13 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
     PREC start = 0,avgInitFrameTime = 0, avgStateTime = 0, avgStateLoadTime = 0;
     unsigned int bodyCounter = 0;
 
+    std::string fileName =  m_outputFile.filename().string();
+    if(fileName.empty()){
+        fileName = "Frame";
+    }
+    if(!uuidString.empty()){
+        fileName += "-id-"+uuidString;
+    }
 
     while(m_simFile.isGood() && !m_abort){
 
@@ -159,7 +169,7 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f) {
 
         // Produce Render OutputFile for this state
         start = timer.elapsedMilliSec();
-        m_renderScriptGen.initFrame(m_outputFile.parent_path(), m_outputFile.filename().string(), time, m_frameCounter );
+        m_renderScriptGen.initFrame(m_outputFile.parent_path(), fileName + tinyformat::format("-f-%06i",m_frameCounter) , time, m_frameCounter );
         avgInitFrameTime += timer.elapsedMilliSec() - start;
 
 

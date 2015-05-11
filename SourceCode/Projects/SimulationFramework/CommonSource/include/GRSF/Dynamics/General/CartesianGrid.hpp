@@ -11,26 +11,27 @@
 
 struct NoCellData {};
 
-template<typename TCellData = NoCellData>
+template<typename TCellData = NoCellData, typename TSize = unsigned int>
 class CartesianGrid {
-    DEFINE_MATRIX_TYPES
-public:
 
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    DEFINE_MATRIX_TYPES
+    using Array3Int = typename MyMatrix<TSize>::Array3;
 
     CartesianGrid();
 
-    CartesianGrid(const AABB & aabb,
-                  const MyMatrix<unsigned int>::Array3 & dim);
+    CartesianGrid(const AABB3d & aabb,
+                  const Array3Int & dim);
     ~CartesianGrid();
 
 
 
     /** Get cell index */
     template<typename Derived>
-    MyMatrix<unsigned int>::Array3 getCellIndex(const MatrixBase<Derived> & I_point) const;
+    Array3Int getCellIndex(const MatrixBase<Derived> & I_point) const;
     template<typename Derived>
-    MyMatrix<unsigned int>::Array3 getCellIndexClosest(const MatrixBase<Derived> & I_point) const;
+    Array3Int getCellIndexClosest(const MatrixBase<Derived> & I_point) const;
 
     /** Get cell data  */
     template<typename Derived>
@@ -43,9 +44,9 @@ protected:
 
     Array3 m_dxyzInv;
     Array3 m_dxyz;
-    MyMatrix<unsigned int>::Array3 m_dim;
+    Array3Int m_dim;
 
-    AABB m_Box; ///< AABB in frame I
+    AABB3d m_Box;
 
     std::vector<TCellData> m_cellData;
 
@@ -57,25 +58,25 @@ private:
 
 
 
-template<typename TCellData>
-CartesianGrid<TCellData>::CartesianGrid() {
+template<typename TCellData, typename TSize>
+CartesianGrid<TCellData,TSize>::CartesianGrid() {
     m_dxyz.setZero();
     m_dim.setZero();
 };
 
-template<typename TCellData>
-CartesianGrid<TCellData>::~CartesianGrid() {
+template<typename TCellData, typename TSize>
+CartesianGrid<TCellData,TSize>::~CartesianGrid() {
 };
 
-template<typename TCellData>
-CartesianGrid<TCellData>::CartesianGrid(const AABB & aabb,
-                                        const MyMatrix<unsigned int>::Array3 & dim) {
+template<typename TCellData, typename TSize>
+CartesianGrid<TCellData,TSize>::CartesianGrid(const AABB3d & aabb,
+                                        const Array3Int & dim) {
     ASSERTMSG(dim(0)*dim(1)*dim(2) != 0, "Dimension zero: " << dim)
     ASSERTMSG( aabb.isEmpty() == false, "CartesianGrid, wrongly initialized: maxPoint < minPoint");
     m_Box = aabb;
     m_dim = dim;
 
-    m_dxyz = m_Box.extent() / dim.cast<PREC>();
+    m_dxyz = m_Box.extent() / dim.template cast<PREC>();
     m_dxyzInv = m_dxyz.inverse();
 
     if(! std::is_same<TCellData,NoCellData>::value){
@@ -84,23 +85,25 @@ CartesianGrid<TCellData>::CartesianGrid(const AABB & aabb,
 
 };
 
-template<typename TCellData>
+template<typename TCellData, typename TSize>
 template<typename Derived>
-MyMatrix<unsigned int>::Array3 CartesianGrid<TCellData>::getCellIndex(const MatrixBase<Derived> & I_point) const {
+typename CartesianGrid<TCellData,TSize>::Array3Int
+CartesianGrid<TCellData>::getCellIndex(const MatrixBase<Derived> & I_point) const {
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
 
-    ASSERTMSG(m_Box.inside(I_point),"Point: " << I_point << " is not inside the Grid!");
+    ASSERTMSG(m_Box.overlaps(I_point),"Point: " << I_point << " is not inside the Grid!");
 
     // calculate index normally and then project it into the feasible grid.
-    MyMatrix<unsigned int>::Array3 v;
-    v = (((I_point - m_Box.m_minPoint).array()) * m_dxyzInv).template cast<unsigned int>();
+    Array3Int v;
+    v = (((I_point - m_Box.m_minPoint).array()) * m_dxyzInv).template cast<TSize>();
 
     return v;
 };
 
-template<typename TCellData>
+template<typename TCellData, typename TSize>
 template<typename Derived>
-MyMatrix<unsigned int>::Array3 CartesianGrid<TCellData>::getCellIndexClosest(const MatrixBase<Derived> & I_point) const {
+typename CartesianGrid<TCellData,TSize>::Array3Int
+CartesianGrid<TCellData>::getCellIndexClosest(const MatrixBase<Derived> & I_point) const {
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
 
     typedef long long int LongInt;
@@ -114,10 +117,10 @@ MyMatrix<unsigned int>::Array3 CartesianGrid<TCellData>::getCellIndexClosest(con
     v(1) = std::max(   std::min( LongInt(m_dim(1)-1), v(1)),  0LL   );
     v(2) = std::max(   std::min( LongInt(m_dim(2)-1), v(2)),  0LL   );
 
-    return v.cast<unsigned int>();
+    return v.cast<TSize>();
 };
 
-template<typename TCellData>
+template<typename TCellData, typename TSize>
 template<typename Derived>
 TCellData * CartesianGrid<TCellData>::getCellData(const MatrixBase<Derived> & I_point) const {
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
@@ -130,7 +133,7 @@ TCellData * CartesianGrid<TCellData>::getCellData(const MatrixBase<Derived> & I_
     }
 };
 
-template<typename TCellData>
+template<typename TCellData, typename TSize>
 template<typename Derived>
 TCellData* CartesianGrid<TCellData>::getCellData(const ArrayBase<Derived> & index) const {
     STATIC_ASSERT( std::is_integral<typename Derived::Scalar>::value );
@@ -148,8 +151,8 @@ TCellData* CartesianGrid<TCellData>::getCellData(const ArrayBase<Derived> & inde
 
 
 
-template<typename TCellData>
-char CartesianGrid<TCellData>::m_nbIndicesOff[26*3] = {
+template<typename TCellData, typename TSize>
+char CartesianGrid<TCellData,TSize>::m_nbIndicesOff[26*3] = {
     1,0,0,
     1,0,1,
     1,0,-1,

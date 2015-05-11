@@ -577,10 +577,8 @@ namespace LogicNodes {
 
         RendermanWriter(unsigned int id, GeometryMapType * geomMap,
                         bool pipeToSubprocess = false,
-                        std::string command="",
-                        std::string suffix="" )
-            : RenderScriptWriter(id), m_geomMap(geomMap), m_pipeToSubProcess(pipeToSubprocess), m_command(command),
-            m_suffix(suffix)
+                        std::string command="")
+            : RenderScriptWriter(id), m_geomMap(geomMap), m_pipeToSubProcess(pipeToSubprocess), m_command(command)
         {
         }
 
@@ -691,8 +689,7 @@ namespace LogicNodes {
         void openNewFile(){
 
             // open new RIB file at this path and name
-            std::string n = GET_ISOCKET_REF_VALUE(Name) + std::to_string(GET_ISOCKET_VALUE(FrameNr)) + ".rib";
-            boost::filesystem::path p = GET_ISOCKET_REF_VALUE(Folder) / n;
+            boost::filesystem::path p = GET_ISOCKET_REF_VALUE(Folder) / ( GET_ISOCKET_REF_VALUE(Name) + ".rib" );
 
 
             if(m_pipeToSubProcess){
@@ -700,9 +697,15 @@ namespace LogicNodes {
                 if(m_subprocess){
                     pclose(m_subprocess);
                 }
-                std::string f = p.string() + m_suffix;
-                std::string c = Utilities::stringFormat(m_command,f.c_str());
-
+                std::string f = p.string();
+                std::string c;
+                try{
+                    c = Utilities::stringFormat(m_command,f.c_str());
+                }
+                catch(...){
+                    // if we could not format the command with the file, dont do anything
+                    c = m_command;
+                }
                 m_subprocess = popen( c.c_str() ,"w");
                 if(!m_subprocess){
                     ERRORMSG("Subprocess not opened!");
@@ -773,7 +776,6 @@ namespace LogicNodes {
         std::fstream m_frameFile;
 
         bool m_pipeToSubProcess;
-        std::string m_suffix;
         std::string m_command;
         FILE * m_subprocess =nullptr;
 

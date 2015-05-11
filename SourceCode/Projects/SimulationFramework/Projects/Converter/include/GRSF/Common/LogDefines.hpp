@@ -25,7 +25,7 @@
     #define LOGSJ(A){ A } // Output SimfileJoiner
 
     /// SceneParser
-    #define SCENEPARSER_LOGLEVEL 3  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SCENEPARSER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
 
     /// RenderScriptConverter
     #define RENDERCONVERTER_LOGLEVEL 3

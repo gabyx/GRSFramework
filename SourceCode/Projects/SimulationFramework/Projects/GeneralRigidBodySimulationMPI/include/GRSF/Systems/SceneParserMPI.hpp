@@ -32,7 +32,9 @@ public:
 
 public:
     template<typename ModuleGeneratorType>
-    SceneParserMPI(ModuleGeneratorType & moduleGen, Logging::Log * log): BaseType(moduleGen, log){
+    SceneParserMPI(ModuleGeneratorType & moduleGen,
+                   Logging::Log * log,
+                   const boost::filesystem::path & mediaDir): BaseType(moduleGen, log, mediaDir){
 
     }
 };

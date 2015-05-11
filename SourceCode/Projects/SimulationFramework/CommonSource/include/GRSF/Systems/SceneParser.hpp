@@ -65,11 +65,13 @@ public:
 
     /**
     * Constructor takes a module function which constructs all modules.
-    * If a xmlDoc pointer is given, this document is taken
     */
     template<typename ModuleGeneratorType>
-    SceneParser(ModuleGeneratorType & moduleGen, Logging::Log * log) {
-
+    SceneParser(ModuleGeneratorType & moduleGen,
+                Logging::Log * log,
+                const boost::filesystem::path & mediaDir)
+        :m_pSimulationLog(log), m_mediaDir(mediaDir)
+    {
         m_pSimulationLog = log;
         ASSERTMSG(m_pSimulationLog, "Log pointer is zero!");
 
@@ -178,6 +180,13 @@ public:
     void checkFileExists(boost::filesystem::path file) {
         if( !boost::filesystem::exists(file) ) {
             ERRORMSG("---> The file ' " + file.string() + "' does not exist!");
+        }
+    }
+
+    /** If the file path is a relative path, prepend the media directory path*/
+    void makeFullMediaPath(boost::filesystem::path & file) {
+        if(file.is_relative()) {
+            file = m_mediaDir / file;
         }
     }
 
@@ -328,6 +337,9 @@ protected:
 
     boost::filesystem::path m_currentParseFilePath;
     boost::filesystem::path m_currentParseFileDir;
+
+    /** Media Directory */
+    boost::filesystem::path m_mediaDir;
 
     /** XML Declarations */
     std::shared_ptr<pugi::xml_document> m_xmlDoc;

@@ -294,12 +294,12 @@ public:
             ERRORMSG("initializeNeighbourBuffers:: ProcessTopology is not created!")
         }else{
 
-            typename ProcessInfoType::ProcessTopologyType::NeighbourRanksListType ranks = this->getProcTopo()->getNeighbourRanks();
+            const typename ProcessInfoType::ProcessTopologyType::NeighbourRanksListType & ranks = this->getProcTopo()->getNeighbourRanks();
             m_sendStatuses.clear();
             m_sendRequests.clear();
             m_sendMessageBuffers.clear();
 
-            // Reserve space , if not the vector might reallocate itself!!!
+            // Reserve space , such that the vector does not reallocate itself!!!
             m_sendRequests.reserve(ranks.size());
             for(auto it = ranks.begin(); it != ranks.end(); it++){
                 //this takes advantage of move semantics in MessageBinarySerializer

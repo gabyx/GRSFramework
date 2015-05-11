@@ -82,7 +82,7 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     {
         DynamicsSystemType::ParserModulesCreator1 c(m_pDynSys.get());
         using SceneParserType1 = SceneParserMPI<DynamicsSystemType,  DynamicsSystemType::ParserModulesCreator1::SceneParserTraits >;
-        SceneParserType1 parser( c , m_pSimulationLog );
+        SceneParserType1 parser( c , m_pSimulationLog ,  ApplicationCLOptions::getSingleton().getMediaDir() );
         m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added SceneParser and parse Scene");
         parser.parseScene(m_sceneFileParsed) ;
 
@@ -350,7 +350,7 @@ void SimulationManagerMPI::reloadScene() {
     {
         DynamicsSystemType::ParserModulesCreator2 c(m_pDynSys.get());
         using SceneParserType2 = SceneParserMPI<DynamicsSystemType, DynamicsSystemType::ParserModulesCreator2::SceneParserTraits >;
-        SceneParserType2 parser( c , m_pSimulationLog );
+        SceneParserType2 parser( c , m_pSimulationLog,  ApplicationCLOptions::getSingleton().getMediaDir());
 
         SceneParserType2::SceneParserDynamicOptionsType optScene;
         optScene.m_parseSceneSettings = false;

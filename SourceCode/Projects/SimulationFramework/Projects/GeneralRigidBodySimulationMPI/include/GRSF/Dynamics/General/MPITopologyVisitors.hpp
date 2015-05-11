@@ -11,10 +11,9 @@
 namespace MPILayer {
 
 template <typename ProcessTopologyBase> class ProcessTopologyGrid;
+template <typename ProcessTopologyBase> class ProcessTopologyKdTree;
 
 namespace TopologyVisitors {
-
-
 
     template<typename ProcessTopologyBase>
     class BelongsPointToProcess : public boost::static_visitor<bool> {
@@ -27,13 +26,23 @@ namespace TopologyVisitors {
             {}
 
             // Implementation for Grid
-            inline bool operator()(const MPILayer::ProcessTopologyGrid<ProcessTopologyBase> & topo) {
-                m_neighbourProcessRank = topo.getCellRank(m_point);
-                if(m_neighbourProcessRank == topo.m_rank) {
+            inline bool operator()(const MPILayer::ProcessTopologyGrid<ProcessTopologyBase> * topo) {
+                m_neighbourProcessRank = topo->getCellRank(m_point);
+                if(m_neighbourProcessRank == topo->getRank()) {
                     return true;
                 }
                 return false;
             }
+
+             // Implementation for KdTree
+            inline bool operator()(const MPILayer::ProcessTopologyKdTree<ProcessTopologyBase> * topo) {
+                m_neighbourProcessRank = topo->getCellRank(m_point);
+                if(m_neighbourProcessRank == topo->getRank()) {
+                    return true;
+                }
+                return false;
+            }
+
             inline bool operator()(const boost::blank & b) {
                 ERRORMSG("Topo is not initialized!");
                 return false;
@@ -54,9 +63,15 @@ namespace TopologyVisitors {
         {}
 
         // Implementation for Grid
-        inline bool operator()(MPILayer::ProcessTopologyGrid<ProcessTopologyBase> & topo) {
+        inline bool operator()(const MPILayer::ProcessTopologyGrid<ProcessTopologyBase> * topo) {
             m_neighbourProcessRanks.clear();
-            return topo.checkOverlap(m_body,m_neighbourProcessRanks,m_overlapsOwnProcess);
+            return topo->checkOverlap(m_body,m_neighbourProcessRanks,m_overlapsOwnProcess);
+        }
+
+        // Implementation for KdTree
+        inline bool operator()(const MPILayer::ProcessTopologyKdTree<ProcessTopologyBase> * topo) {
+            m_neighbourProcessRanks.clear();
+            return topo->checkOverlap(m_body,m_neighbourProcessRanks,m_overlapsOwnProcess);
         }
 
         inline bool operator()(const boost::blank & b) {

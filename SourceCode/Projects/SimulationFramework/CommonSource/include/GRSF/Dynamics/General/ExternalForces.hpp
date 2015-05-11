@@ -64,7 +64,7 @@ class SpatialSphericalTimeRandomForceField{
                                            PREC startTime,
                                            PREC endTime,
                                            PREC amplitude,
-                                           AABB randomBox,
+                                           AABB3d randomBox,
                                            bool randomOn
                                            ):
             m_boostTime(boostTime),
@@ -151,7 +151,7 @@ class SpatialSphericalTimeRandomForceField{
         PREC m_boostTime, m_pauseTime, m_amplitude, m_t, m_ts, m_startTime, m_endTime;
         Vector3 m_offset;
         bool m_newPos, m_randomOn, m_inInterval;
-        AABB m_randomBox;
+        AABB3d m_randomBox;
         unsigned int m_seed ;
 
 

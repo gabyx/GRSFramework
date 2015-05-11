@@ -22,6 +22,7 @@
 #include "GRSF/Dynamics/Collision/CollisionData.hpp"
 #include "GRSF/Dynamics/Collision/Collider.hpp"
 #include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/Common/LinearReusableStorage.hpp"
 
 #include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
 
@@ -39,7 +40,7 @@ public:
 
     DEFINE_COLLISION_SOLVER_CONFIG_TYPES
 
-    typedef typename std::vector< CollisionData * > CollisionSetType;
+    using CollisionSetType = LinearReusableStorage<CollisionData> ;
 
     /**
     * @brief Constructor for the collision solver.
@@ -79,7 +80,7 @@ protected:
     typename DynamicsSystemType::RigidBodyStaticContainerType & m_staticBodies;           ///< List of all fixed not simulated bodies.
 
 
-    ColliderBody m_Collider;                                               ///< The collider class, which is used as a functor which handles the different collisions.
+    ColliderBody<CollisionSetType> m_Collider;                                              ///< The collider class, which is used as a functor which handles the different collisions.
     friend class Collider;
 
     Logging::Log *  m_pSolverLog;  ///< Ogre::Log

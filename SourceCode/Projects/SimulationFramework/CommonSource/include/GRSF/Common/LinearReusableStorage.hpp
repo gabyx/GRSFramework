@@ -14,12 +14,13 @@ template<typename TElement>
 class LinearReusableStorage {
 public:
     using ElementType = TElement;
+    using StorageType = std::vector<ElementType *>;
 
     ~LinearReusableStorage() {
         deleteAll();
     };
 
-    inline std::size_t size(){ return m_storage.size();}
+    inline std::size_t size() const{ return m_storage.size();}
 
     template<typename... T>
     std::pair<ElementType *,bool> insert(T &&... t) {
@@ -36,6 +37,21 @@ public:
         }
         ++m_insertIdx;
         return std::make_pair(p,inserted);
+    }
+
+    inline typename StorageType::iterator begin(){
+        return m_storage.begin();
+    }
+
+    inline typename StorageType::const_iterator begin() const{
+        return m_storage.begin();
+    }
+
+    inline typename StorageType::iterator end(){
+        return m_storage.end();
+    }
+    inline typename StorageType::const_iterator end() const{
+        return m_storage.end();
     }
 
     void clear() {
@@ -84,7 +100,7 @@ public:
         return m_storage[i];
     }
 
-    inline ElementType * getNode(std::size_t i){
+    inline ElementType * getElement(std::size_t i){
         return m_storage[i];
     }
 
@@ -112,7 +128,7 @@ private:
         }
     };
 
-    std::vector<ElementType *> m_storage;
+    StorageType m_storage;
     // Take care, if you want to switch this to a value-type all returned pointer in insertNode
     // are invalidate if reallocation happens
 

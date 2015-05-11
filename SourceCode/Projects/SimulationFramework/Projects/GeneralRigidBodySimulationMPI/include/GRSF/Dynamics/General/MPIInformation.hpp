@@ -66,7 +66,7 @@ public:
         m_name = name;
     };
 
-    void createProcTopoGrid(const AABB & aabb,
+    void createProcTopoGrid(const AABB3d & aabb,
                             const MyMatrix<unsigned int>::Array3 & dim,
                             bool aligned = true,
                             const Matrix33 & A_IK = Matrix33::Identity()){

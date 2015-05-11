@@ -36,15 +36,23 @@ public:
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+    CollisionData(std::size_t & index) {
+        clear();
+    }; ///< Constructor which sets all members to zero.
+
     CollisionData() {
-        m_r_SC[0].setZero();
-        m_r_SC[1].setZero();
-        m_overlap=0;
+         clear();
     }; ///< Constructor which sets all members to zero.
 
     ~CollisionData() {};
 
-    RigidBodyType *  m_pBody[2]; ///< Two RigidBody pointers of the first and second RigidBody at this contact point.
+    inline void clear(){
+        m_r_SC[0].setZero();
+        m_r_SC[1].setZero();
+        m_overlap=0;
+    };
+
+    RigidBodyType *  m_pBody[2] = {nullptr,nullptr}; ///< Two RigidBody pointers of the first and second RigidBody at this contact point.
     PREC m_overlap; ///< The overlap distance in the normal direction.
 
     /**

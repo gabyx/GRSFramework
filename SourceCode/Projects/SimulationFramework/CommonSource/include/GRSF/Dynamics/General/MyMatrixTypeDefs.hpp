@@ -60,6 +60,9 @@ struct MyMatrix {
     template<unsigned int M, unsigned int N>
     using MatrixStatStat = Eigen::Matrix<PREC, M, N >;
 
+    template<unsigned int M>
+    using VectorStat = Eigen::Matrix<PREC, M, 1 >;
+
     using AffineTrafo = Eigen::Transform<PREC,3,Eigen::TransformTraits::Affine>;
     using AffineTrafo2d = Eigen::Transform<PREC,2,Eigen::TransformTraits::Affine>;
 
@@ -68,7 +71,7 @@ struct MyMatrix {
 
 
     template<typename Derived> using MatrixBase = Eigen::MatrixBase<Derived>;
-    template<typename Derived> using ArrayBase  = Eigen::ArrayBase<Derived>;
+
 
     template<typename Derived>                 using MatrixBDynDyn  = Eigen::Block<Derived>;
     template<typename Derived, unsigned int M> using MatrixBStatDyn = Eigen::Block<Derived,M>;
@@ -94,6 +97,16 @@ struct MyMatrix {
     using StdVecAligned = std::vector<Type, Eigen::aligned_allocator<Type> >;
 
     // Special Array types;
+    template<typename Derived> using ArrayBase  = Eigen::ArrayBase<Derived>;
+    template<unsigned int M>
+    using ArrayStatDyn = Eigen::Array<PREC, M, Eigen::Dynamic >;
+    template<unsigned int N>
+    using ArrayDynStat = Eigen::Array<PREC, Eigen::Dynamic, N >;
+    template<unsigned int M, unsigned int N>
+    using ArrayStatStat = Eigen::Array<PREC, M, N >;
+    template<unsigned int M>
+    using ArrayStat = Eigen::Array<PREC, M,1>;
+
     using Array3 = Eigen::Array<PREC, 3, 1>;
     using Array2 = Eigen::Array<PREC, 2, 1>;
 };
@@ -136,9 +149,9 @@ struct MyMatrixIOFormat {
    template<unsigned int M> using MatrixStatDyn = typename MyMatrix< _PREC_ >::template MatrixStatDyn<M>; \
    template<unsigned int N> using MatrixDynStat = typename MyMatrix< _PREC_ >::template MatrixDynStat<N>; \
    template<unsigned int M,unsigned int N> using MatrixStatStat = typename MyMatrix< _PREC_ >::template MatrixStatStat<M,N>; \
+   template<unsigned int M> using VectorStat = typename MyMatrix< _PREC_ >::template VectorStat<M>; \
    \
    template<typename Derived> using MatrixBase = typename MyMatrix< _PREC_ >::template MatrixBase<Derived>; \
-   template<typename Derived> using ArrayBase  = typename MyMatrix< _PREC_ >::template ArrayBase<Derived>; \
    \
    template<typename Derived> using MatrixBDynDyn = typename MyMatrix< _PREC_ >::template MatrixBDynDyn<Derived>; \
    template<typename Derived, unsigned int N> using MatrixBDynStat = typename MyMatrix< _PREC_ >::template MatrixBDynStat<Derived,N>; \
@@ -157,6 +170,11 @@ struct MyMatrixIOFormat {
    template<typename Key, typename EigenType> \
    using StdUMapAligned = typename MyMatrix< _PREC_ >::template StdUMapAligned<Key, EigenType >; \
    \
+   template<typename Derived> using ArrayBase  = typename MyMatrix< _PREC_ >::template ArrayBase<Derived>; \
+   template<unsigned int M> using ArrayStatDyn = typename MyMatrix< _PREC_ >::template ArrayStatDyn<M>; \
+   template<unsigned int N> using ArrayDynStat = typename MyMatrix< _PREC_ >::template ArrayDynStat<N>; \
+   template<unsigned int M,unsigned int N> using ArrayStatStat = typename MyMatrix< _PREC_ >::template ArrayStatStat<M,N>; \
+   template<unsigned int M> using ArrayStat = typename MyMatrix< _PREC_ >::template ArrayStat<M>; \
    using Array3 = typename MyMatrix< _PREC_ >::Array3;   \
    using Array2 = typename MyMatrix< _PREC_ >::Array2;
 #endif

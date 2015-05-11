@@ -188,7 +188,7 @@ public:
     */
     inline void getEndState(DynamicsState& state);
 
-    std::string getErrorString(){
+    inline std::string getErrorString(){
         m_errorString << " strerror: " << std::strerror(errno) << std::endl;
         return m_errorString.str();
     }
@@ -210,38 +210,95 @@ public:
         return m_nBytesPerState;
     }
 
-    std::vector<double> getTimeList();
+    using TimeListType = std::vector<double>;
+    TimeListType getTimeList();
 
-    std::string getDetails(bool timeList = false, std::string linePrefix="\t"){
-        std::stringstream s;
-        s <<linePrefix << "Simfile: "<< m_filePath << std::endl
-          << linePrefix << "\t nBytes: " << m_nBytes << std::endl
-          << linePrefix << "\t nSimBodies: " << m_nSimBodies << std::endl
-          << linePrefix << "\t nDOFqBody: "  << m_nDOFqBody << std::endl
-          << linePrefix << "\t nDOFuBody: "  << m_nDOFuBody << std::endl
-          << linePrefix << "\t nStates: " << m_nStates << std::endl
-          << linePrefix << "\t nBytesPerState: " << m_nBytesPerState << std::endl
-          << linePrefix << "\t nBytesPerBody: " << m_nBytesPerBody << std::endl
-          << linePrefix << "\t nBytesPerQBody: " << m_nBytesPerQBody << std::endl
-          << linePrefix << "\t nBytesPerUBody: " << m_nBytesPerUBody << std::endl
-          << linePrefix << "\t addBytesBodyType: " << EnumConversion::toIntegral(m_additionalBytesPerBodyType) << std::endl
-          << linePrefix << "\t nAdditionalBytesPerBody: " << m_nAdditionalBytesPerBody << std::endl
-          << linePrefix << "\t readVelocities: " << m_readVelocities << std::endl;
+    /** Simple structure to return from getDetails() */
+    struct Details{
+        std::streamsize m_nBytes;
+        std::streamsize m_nStates;
+        boost::filesystem::path m_filePath;
+        std::streamsize m_headerLength;
+        std::streamsize m_nBytesPerState;
+        unsigned int m_nSimBodies;
+        unsigned int m_nDOFuBody, m_nDOFqBody;
+        std::streamsize m_nBytesPerQBody;
+        std::streamsize m_nBytesPerUBody;
+        std::streamsize m_nBytesPerBody;
+        typename AdditionalBodyData::TypeEnum m_additionalBytesPerBodyType;
+        std::streamsize m_nAdditionalBytesPerBody;
+        bool m_readVelocities;
+        TimeListType m_times;
 
-          if(timeList){
-            s << "\t TimeList: [ ";
-            auto times = getTimeList();
-            if(times.size()>2){
-                s << times[0] << "," << times[1] << ", ... , " << times.back();
-            }else if(times.size()==2){
-                s << times[0] << "," << times[1] ;
-            }else if(times.size()==1){
-                s << times[0];
+        inline std::string getString(std::string linePrefix="\t"){
+            std::stringstream s;
+            s <<linePrefix << "Simfile: "<< m_filePath << std::endl
+              << linePrefix << "\t nBytes: " << m_nBytes << std::endl
+              << linePrefix << "\t nSimBodies: " << m_nSimBodies << std::endl
+              << linePrefix << "\t nDOFqBody: "  << m_nDOFqBody << std::endl
+              << linePrefix << "\t nDOFuBody: "  << m_nDOFuBody << std::endl
+              << linePrefix << "\t nStates: " << m_nStates << std::endl
+              << linePrefix << "\t nBytesPerState: " << m_nBytesPerState << std::endl
+              << linePrefix << "\t nBytesPerBody: " << m_nBytesPerBody << std::endl
+              << linePrefix << "\t nBytesPerQBody: " << m_nBytesPerQBody << std::endl
+              << linePrefix << "\t nBytesPerUBody: " << m_nBytesPerUBody << std::endl
+              << linePrefix << "\t addBytesBodyType: " << EnumConversion::toIntegral(m_additionalBytesPerBodyType) << std::endl
+              << linePrefix << "\t nAdditionalBytesPerBody: " << m_nAdditionalBytesPerBody << std::endl
+              << linePrefix << "\t readVelocities: " << m_readVelocities << std::endl
+              << linePrefix<< "\t TimeList: [ ";
+
+            if(m_times.size()>2){
+                s << m_times[0] << "," << m_times[1] << ", ... , " << m_times.back();
+            }else if(m_times.size()==2){
+                s << m_times[0] << "," << m_times[1] ;
+            }else if(m_times.size()==1){
+                s << m_times[0];
             }
             s  << " ]" << std::endl;
-          }
+            return s.str();
+        }
 
-        return s.str();
+         /** Appends the details to the XML node for the sim files */
+        template<typename XMLNodeType>
+        XMLNodeType addXML(XMLNodeType & node, bool timeList = false){
+             auto s = node.append_child("SimFile");
+             s.append_attribute("path").set_value(m_filePath.string().c_str());
+             s.append_attribute("nBytes").set_value((long long int)m_nBytes);
+             s.append_attribute("nSimBodies").set_value((long long int)m_nSimBodies);
+             s.append_attribute("nDOFqBody").set_value((long long int)m_nDOFqBody);
+             s.append_attribute("nDOFuBody").set_value((long long int)m_nDOFuBody);
+             s.append_attribute("nStates").set_value((long long int)m_nStates);
+             s.append_attribute("nBytesPerState").set_value((long long int)m_nBytesPerState);
+             s.append_attribute("nBytesPerBody").set_value((long long int)m_nBytesPerBody);
+             s.append_attribute("nBytesPerQBody").set_value((long long int)m_nBytesPerQBody);
+             s.append_attribute("nBytesPerUBody").set_value((long long int)m_nBytesPerUBody);
+             s.append_attribute("addBytesBodyType").set_value(EnumConversion::toIntegral(m_additionalBytesPerBodyType));
+             s.append_attribute("nAdditionalBytesPerBody").set_value((long long int)m_nAdditionalBytesPerBody);
+             s.append_attribute("readVelocities").set_value(m_readVelocities);
+
+            auto t = s.append_attribute("timeList");
+            std::stringstream ss;
+            if(!m_times.empty()){
+                auto l = m_times.size()-1;
+                for(std::size_t i = 0; i<l;++i){
+                    ss << m_times[i] << ",";
+                }
+                ss << m_times[l];
+            }
+            t.set_value(ss.str().c_str());
+
+            return s;
+        }
+    };
+
+    inline Details getDetails(bool timeList = false){
+        Details d{m_nBytes,m_nStates,m_filePath,m_headerLength,m_nBytesPerState,m_nSimBodies,m_nDOFuBody,
+                  m_nDOFqBody,m_nBytesPerQBody,m_nBytesPerUBody,
+                  m_nBytesPerBody,m_additionalBytesPerBodyType,m_nAdditionalBytesPerBody,m_readVelocities};
+        if(timeList){
+            d.m_times = getTimeList(); // moves assign list
+        }
+        return d;
     }
 
 private:

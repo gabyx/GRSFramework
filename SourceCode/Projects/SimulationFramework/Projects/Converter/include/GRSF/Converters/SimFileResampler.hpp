@@ -66,7 +66,7 @@ private:
             ERRORMSG(fromFile.getErrorString());
         };
 
-        std::cerr << fromFile.getDetails() << std::endl;
+        std::cerr << fromFile.getDetails().getString() << std::endl;
 
         // Resample
         std::unique_ptr<MultiBodySimFile> toFile;
