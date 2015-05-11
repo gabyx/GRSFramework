@@ -31,10 +31,17 @@ void callBackSIGINT(){
     exit(EXIT_FAILURE);
 }
 
+void callBackSIGPIPE(){
+    std::cerr << " Pipe error: exit ..." << std::endl;
+    exit(EXIT_FAILURE);
+}
+
 int main(int argc, char **argv) {
 
-    ApplicationSignalHandler sigHandler( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} );
+    ApplicationSignalHandler sigHandler( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2,SIGPIPE} );
     sigHandler.registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
+    sigHandler.registerCallback(SIGPIPE,callBackSIGPIPE,"callBackSIGPIPE");
+
 
     if(argc > 1){
         if(std::string(argv[1]) == "sim"){
@@ -110,7 +117,7 @@ int main(int argc, char **argv) {
 
             try{
                 RenderScriptConverter renderConv;
-                renderConv.convert(opts.m_inputFiles,opts.m_outputFile,opts.m_sceneFile, opts.m_converterLogicFile ,opts.m_renderer);
+                renderConv.convert(opts.getInputFiles(),opts.getOutputFile(),opts.getSceneFile(), opts.getConverterLogicFile() ,opts.getRenderer());
             }catch(const Exception & e){
                     std::cerr <<"Exception occured: " <<  e.what() << std::endl;
                     exit(EXIT_FAILURE);

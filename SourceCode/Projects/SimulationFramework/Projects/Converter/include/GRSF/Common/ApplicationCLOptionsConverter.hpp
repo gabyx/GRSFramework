@@ -277,7 +277,7 @@ private:
 /**
 *  @brief CommandLineOptions for the Application
 */
-class ApplicationCLOptionsSimInfo: public Utilities::Singleton<ApplicationCLOptionsSimConverter>  {
+class ApplicationCLOptionsSimInfo: public Utilities::Singleton<ApplicationCLOptionsSimInfo>  {
 public:
 
     bool m_prettyPrint = false;
@@ -431,6 +431,11 @@ private:
 
 class ApplicationCLOptionsRenderer: public Utilities::Singleton<ApplicationCLOptionsRenderer> {
 public:
+    enum class Renderer: unsigned int{
+        RENDERMAN = 0,
+        LUXRENDER = 1
+    };
+private:
 
 
     std::vector<boost::filesystem::path> m_inputFiles;
@@ -443,11 +448,10 @@ public:
     boost::filesystem::path m_mediaDir ="./";
     boost::filesystem::path m_converterLogicFile;
 
-    enum class Renderer: unsigned int{
-        RENDERMAN = 0,
-        LUXRENDER = 1
-    };
+
     Renderer m_renderer;
+
+public:
 
 
     void parseOptions(int argc, char **argv) {
@@ -584,6 +588,15 @@ public:
 
 
     }
+
+    inline const std::vector<boost::filesystem::path> & getInputFiles(){ return m_inputFiles;}
+    inline const boost::filesystem::path & getMediaDir(){ return m_mediaDir;}
+    inline const boost::filesystem::path & getOutputFile(){ return m_outputFile;}
+    inline const boost::filesystem::path & getConverterLogicFile(){ return m_converterLogicFile;}
+    inline const boost::filesystem::path & getSceneFile(){ return m_sceneFile;}
+    inline Renderer getRenderer(){ return m_renderer;}
+
+    inline bool pipeToStdOut(){ return m_pipeToStdOut;}
 
 private:
 
