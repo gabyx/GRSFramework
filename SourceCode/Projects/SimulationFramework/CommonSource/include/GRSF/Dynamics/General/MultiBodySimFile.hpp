@@ -107,7 +107,7 @@ public:
     * @brief Checks if there are still dynamics states to read or not.
     * @return true if there are still dynamics states to read, false if the file end has been reached.
     */
-    bool isGood();
+    inline bool isGood();
 
     bool writeTimeListToFile(const boost::filesystem::path & f);
 
@@ -177,7 +177,8 @@ public:
     */
     MultiBodySimFile & operator << (MultiBodySimFile& file);
 
-
+    /** Moves the read pointer \p off states in the direction specified by \p way  (analog to std::fstream::seekg)*/
+    inline void seekgStates(std::streamoff off, std::ios_base::seekdir way = std::ios_base::cur);
 
     //  /**
     //  * @brief Gets the state at the time t.
@@ -281,7 +282,7 @@ public:
             if(!m_times.empty()){
                 auto l = m_times.size()-1;
                 for(std::size_t i = 0; i<l;++i){
-                    ss << m_times[i] << ",";
+                    ss << m_times[i] << " ";
                 }
                 ss << m_times[l];
             }
@@ -653,6 +654,50 @@ void MultiBodySimFile::read_impl(  C & states, double &time) {
 
 
 }
+
+void MultiBodySimFile::seekgStates(std::streamoff off, std::ios_base::seekdir way){
+    switch(way){
+        case std::ios_base::cur:
+            // streamsize and streamoff are both signed!
+            m_file_stream.seekg(m_nBytesPerState*off,way);
+            break;
+        case std::ios_base::beg:
+            off *= m_nBytesPerState;
+            if(off>=0){
+               m_file_stream.seekg(m_beginOfStates);
+               m_file_stream.seekg(off,std::ios_base::cur);
+            }else{
+               m_file_stream.setstate(std::ios_base::failbit);
+            }
+            break;
+
+        case std::ios_base::end :
+            // check if off is negative !
+            if(off<=0){
+                off = (m_nStates-1 + off)*m_nBytesPerState;
+                m_file_stream.seekg(m_beginOfStates);
+                m_file_stream.seekg(off ,std::ios_base::cur);
+            }else{
+               m_file_stream.setstate(std::ios_base::failbit);
+            }
+            break;
+        default:
+            break;
+    }
+    return;
+}
+
+bool MultiBodySimFile::isGood(){
+    if(m_file_stream.good()) {
+        // check if a state can still be read, and if we are not inside header!
+        auto g = m_file_stream.tellg();
+        if( (m_nBytes - g ) >=  m_nBytesPerState && g >= m_headerLength ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 template<bool readVelocity, bool skipAddBytes>
 void MultiBodySimFile::readBodyState( RigidBodyState * s) {

@@ -2,11 +2,14 @@
 
 #include <string>
 
+
+
 #include "GRSF/Common/ApplicationSignalHandler.hpp"
 
 #include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
 
 #include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/Common/CommonFunctions.hpp"
 #include "GRSF/Common/ProgressBarCL.hpp"
 
 #include "GRSF/Systems/SceneParser.hpp"
@@ -33,14 +36,54 @@ void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> 
 
     LOG(m_log, "---> RenderScriptConverter started:" <<std::endl;);
 
+    // global framecounter
     m_frameCounter = 0;
 
     loadGeometryCollection();
     loadMaterialCollection();
 
-    // First open the sim file
+    // First open the sim file (if .sim extension)
+    // if .xml extension (then this is the process file where each simfile and frame index is stored)
+
+    unsigned int fileIdx = 0;
     for(auto file : m_inputFiles) {
-        convertFile(file);
+
+
+        if(file.extension() == ".xml"){
+
+            // open the xml
+            pugi::xml_document xmlDoc;
+            xmlDoc.load_file(file.string().c_str());
+            auto node = xmlDoc.child("Converter");
+            if(!node){
+                ERRORMSG("Xml file: " << file << " contains no 'Converter' node!" )
+            }
+
+            StateIndicesType stateIndices;
+            for(auto n : node.children("File")){
+                stateIndices.clear();
+                std::string uuid = n.attribute("uuid").value();
+                std::string path = n.attribute("path").value();
+
+                // parse frame index list (assumed to be sorted! otherwise exception in converFile)
+                std::string s = n.attribute("stateIndices").value();
+                if(!s.empty()){
+                    if( !Utilities::stringToType<StateIndicesType>(stateIndices,s)  ) {
+                        ERRORMSG("---> String conversion to obtain stateIndices failed!");
+                    }
+                }else{
+                    ERRORMSG("---> No stateIndices given for file: " << path << " in xml: " << file)
+                }
+
+                convertFile(path,uuid,std::move(stateIndices));
+            }
+
+        }else{
+            // try to convert sim file
+            convertFile(file, std::to_string(fileIdx) );
+        }
+
+        ++fileIdx;
     }
 
 }
@@ -125,7 +168,8 @@ void RenderScriptConverter::loadMaterialCollection() {
 }
 
 void RenderScriptConverter::convertFile(const boost::filesystem::path & f,
-                                        const std::string uuidString) {
+                                        const std::string uuidString,
+                                        StateIndicesType stateIndices) {
     LOG(m_log, "---> Converting file:" << f << std::endl;);
 
     m_abort = false;
@@ -146,13 +190,21 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f,
     PREC start = 0,avgInitFrameTime = 0, avgStateTime = 0, avgStateLoadTime = 0;
     unsigned int bodyCounter = 0;
 
+    // Format file name
     std::string fileName =  m_outputFile.filename().string();
     if(fileName.empty()){
         fileName = "Frame";
     }
-    if(!uuidString.empty()){
-        fileName += "-id-"+uuidString;
+    fileName += "-id-"+uuidString;
+
+    typename StateIndicesType::value_type currentStateIdx = 0;
+    auto itStateIdx = stateIndices.begin();
+    // Jump at beginning of first state
+    if( !stateIndices.empty() && *itStateIdx > 0 ){
+        currentStateIdx = *itStateIdx;
+        m_simFile.seekgStates(currentStateIdx);
     }
+
 
     while(m_simFile.isGood() && !m_abort){
 
@@ -169,7 +221,7 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f,
 
         // Produce Render OutputFile for this state
         start = timer.elapsedMilliSec();
-        m_renderScriptGen.initFrame(m_outputFile.parent_path(), fileName + tinyformat::format("-f-%06i",m_frameCounter) , time, m_frameCounter );
+        m_renderScriptGen.initFrame(m_outputFile.parent_path(), fileName + tinyformat::format("-s-%06i",currentStateIdx) , time, m_frameCounter );
         avgInitFrameTime += timer.elapsedMilliSec() - start;
 
 
@@ -184,12 +236,37 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f,
         m_renderScriptGen.finalizeFrame();
         m_frameCounter++;
 
+        // skip to next stateIdx if we have indices
+        if(!stateIndices.empty()){
+            if(++itStateIdx != stateIndices.end()){
+                if(*itStateIdx < 0 || *itStateIdx == currentStateIdx){
+                    ERRORMSG("Negative or same as privious state idx: " << *itStateIdx << " in xml for file: " << f)
+                }
+                // skip difference
+                m_simFile.seekgStates(*itStateIdx - currentStateIdx -1);
+                currentStateIdx = *itStateIdx;
+            }else{
+                m_abort = true;
+            }
+        }else{
+            //otherwise dont skip, but update stateIdx
+            ++currentStateIdx;
+        }
+
+    }
+
+    if(!stateIndices.empty()){
+        if(itStateIdx != stateIndices.end()){
+            LOG(m_log, "---> Warning: Reading simfile: "
+                << f << " became invalid before all state inidices have been converted" << std::endl)
+        }
     }
 
       LOG(m_log, "---> Converter Speed:" <<std::endl
-        << "Avg. Load State Time / Frame: "   << (avgStateLoadTime / m_frameCounter) << " ms" <<std::endl
-        << "Avg. Init Frame Time / Frame: "   << (avgInitFrameTime / m_frameCounter) << " ms" <<std::endl
-        << "Avg. State Time / Body: " << (avgStateTime / (m_frameCounter * bodyCounter)) << " ms" <<std::endl;)
+        << "Avg. Load State  / Frame: "   << (avgStateLoadTime / m_frameCounter) << " ms" <<std::endl
+        << "Avg. Init Frame  / Frame: "   << (avgInitFrameTime / m_frameCounter) << " ms" <<std::endl
+        << "Avg. State  / Body: " << (avgStateTime / (m_frameCounter * bodyCounter)) << " ms" <<std::endl
+        << "Avg. State : " << (avgStateTime / m_frameCounter) << " ms" <<std::endl;)
 
     ApplicationSignalHandler::getSingleton().unregisterCallback(SIGINT,"QuitRender");
 

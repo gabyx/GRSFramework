@@ -148,7 +148,7 @@ private:
 
             LOGMCLEVEL1(m_pLog, "---> Try to parse the file ..."<<std::endl;);
 
-            GET_XMLCHILDNODE_CHECK( m_xmlRootNode, "Render" , (*m_xmlDoc) );
+            GET_XMLCHILDNODE_CHECK( m_xmlRootNode, "Renderer" , (*m_xmlDoc) );
 
 
             XMLNodeType node = m_xmlRootNode.child("Materials");
@@ -156,7 +156,7 @@ private:
                 m_pMaterialsModule->parse(node);
             }
 
-            node = m_xmlRootNode.child("ScriptGenerator");
+            node = m_xmlRootNode.child("Logic");
             if(node && m_pMaterialGeneratorModule) {
                 m_pMaterialGeneratorModule->parse(node, m_pMaterialsModule->getMaterialMap() );
             }
