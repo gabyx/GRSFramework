@@ -35,6 +35,9 @@
                                                std::string,
                                                boost::filesystem::path>;
 
+        // All string assignable types, without conversion!
+        using TypeSeqStringAssignable = boost::mpl::vector<std::string, boost::filesystem::path>;
+
         // Custom types
         using TypeSeq = boost::mpl::vector<
                                                     double,
@@ -57,6 +60,8 @@
                                                     VectorQBody,
                                                     VectorUBody,
                                                     RenderMaterial * >;
+
+
 
 //       // The total type sequence!
 //       // TypeSequence for the template parameter T in LogicSocket<T>

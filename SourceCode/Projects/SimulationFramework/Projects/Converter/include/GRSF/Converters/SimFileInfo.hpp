@@ -98,15 +98,14 @@ public:
         // Track the startStateIdx for each file to resample
         // Skip all first states in all files except the first file,
         // we need to skip this because its the same state as the last files end state
-        std::streamsize states = 0;
 
         bool skip = skipFirstState;
         for(auto & i : inputFiles){
             if(skip){
-                addInfoFile(d,i, states, increment, startStateIdx, endStateIdx, !skipFirstState, withTimeList );
+                addInfoFile(d,i, increment, startStateIdx, endStateIdx, !skipFirstState, withTimeList );
                 skip = false;
             }else{
-                addInfoFile(d,i, states, increment, startStateIdx, endStateIdx, skipFirstState, withTimeList );
+                addInfoFile(d,i, increment, startStateIdx, endStateIdx, skipFirstState, withTimeList );
             }
         }
     }
@@ -115,41 +114,52 @@ private:
 
     void addInfoFile(DetailsList & detailList,
                         boost::filesystem::path f,
-                        std::streamsize & states,
-                        const std::streamsize increment,
-                        std::streamsize & startStateIdx,
-                        const std::streamsize endStateIdx,
+//                        std::streamsize & states,
+                        const std::streamoff increment,
+                        std::streamoff & startStateIdx,
+                        std::streamoff & endStateIdx,
                         const bool skipFirstState,
                         bool withTimeList = true)
     {
         MultiBodySimFile fromFile;
-
         if(!fromFile.openRead(f)) {
             ERRORMSG(fromFile.getErrorString());
         };
 
+
         auto details = fromFile.getDetails(withTimeList);
 
+        if (startStateIdx >= endStateIdx){
+             detailList.emplace_back( std::make_pair(details,ResampleInfo{startStateIdx, startStateIdx,  0}) );
+             return;
+        }
+
         startStateIdx += skipFirstState? 1 : 0;
+        endStateIdx   += skipFirstState? 1 : 0;
 
         std::streamoff statesFile = fromFile.getNStates();
-        states += statesFile - (skipFirstState? 1 : 0); // accumulate total states
+//        states += statesFile - (skipFirstState? 1 : 0); // accumulate total states
 
         if(startStateIdx >= statesFile){
             // Resample Info: no resample
             startStateIdx -= statesFile; // skip this file subtract the number of states of this file
+            endStateIdx   -= statesFile;
             detailList.emplace_back( std::make_pair(details,ResampleInfo{startStateIdx, startStateIdx,  0}) );
-        }else{
+        }
+        else{
 
-            if ( endStateIdx >= states){
-                detailList.emplace_back( std::make_pair(details, ResampleInfo{startStateIdx, -1,  increment}) );
-            }else{
+            if ( endStateIdx < statesFile){
                 detailList.emplace_back( std::make_pair(details, ResampleInfo{startStateIdx, endStateIdx,  increment}));
+                endStateIdx = 0;
+
+            }else{
+                detailList.emplace_back( std::make_pair(details, ResampleInfo{startStateIdx, -1,  increment}) );
+                endStateIdx -= statesFile;
             }
 
             // compute carry over for next state
-            auto n = (states - startStateIdx) ; // how many states
-            startStateIdx = (( n  + increment-1 ) / increment) * increment  - n;
+            startStateIdx = (statesFile - startStateIdx) % increment ; // how many states
+//            startStateIdx = (( n  + increment-1 ) / increment) * increment  - n;
             // (( n  + increment-1 ) / increment)  = ceil ( n / increment) = how many states we took
         }
 
