@@ -133,7 +133,7 @@ public:
             type = topo.attribute("buildMode").value();
             if(type=="Predefined" || type=="predefined") {
 
-                m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::BINET_TENSOR;
+                m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::PREDEFINED;
 
                 if(!Utilities::stringToType(m_topoSettings->m_gridBuilderSettings.m_aligned,
                                             topo.attribute("aligned").value())) {

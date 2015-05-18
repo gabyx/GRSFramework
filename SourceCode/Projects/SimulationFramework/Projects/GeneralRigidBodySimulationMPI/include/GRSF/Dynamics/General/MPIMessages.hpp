@@ -1468,10 +1468,6 @@ public:
             serializeEigen(ar,state.second.m_u);
         }
 
-
-
-
-
         // if BINET_TENSOR
         if(m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
             // Local AABB
@@ -1527,9 +1523,6 @@ public:
             serializeEigen(ar, back.m_state->m_q);
             serializeEigen(ar, back.m_state->m_u);
         }
-
-
-
 
         // Binet Tensor
         if(m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
@@ -1665,9 +1658,8 @@ public:
     }
 
     // receive broadcast all ranks except master
-    void resetBeforLoad(){
-        m_pTopoBuilder->m_pDynSys->m_bodiesInitStates.clear();
-    }
+    void resetBeforLoad(){}
+
     template<class Archive>
     void load(Archive & ar, const unsigned int version) const {
 

@@ -33,30 +33,6 @@
 
 namespace MPILayer {
 
-#define DEFINE_TOPOLOGYBUILDER_BASE_TYPES( _Base_ ) \
-    using RigidBodyStatesContainerType = typename _Base_::RigidBodyStatesContainerType; \
-    using RigidBodySimContainerType    = typename _Base_::RigidBodySimContainerType ; \
-    using RigidBodyStaticContainerType = typename _Base_::RigidBodyStaticContainerType ; \
-    \
-    using TopologyBuilderEnumType = typename _Base_::TopologyBuilderEnumType; \
-    using ProcessCommunicatorType = typename _Base_::ProcessCommunicatorType; \
-    \
-    using RebuildSettingsType       = typename _Base_::RebuildSettingsType; \
-    using MassPointPredSettingsType = typename _Base_::MassPointPredSettingsType; \
-    \
-    using Vector3Vec = typename _Base_::Vector3Vec; \
-    using MassPoint = typename _Base_::MassPoint;  \
-    \
-    using _Base_::m_pSimulationLog; \
-    using _Base_::m_initStates; \
-    using _Base_::m_pDynSys; \
-    using _Base_::m_pProcCommunicator; \
-    using _Base_::m_currentTime; \
-    using _Base_::m_builtTopologies; \
-    using _Base_::m_localSimFolderPath; \
-    using _Base_::m_type; \
-    using _Base_::m_rebuildSettings; \
-    using _Base_::m_massPointPredSettings;
 
 template<typename TProcCommunicator>
 class TopologyBuilder {
@@ -66,51 +42,29 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    using RigidBodyStatesContainerType = typename DynamicsSystemType::RigidBodyStatesContainerType;
-    using RigidBodySimContainerType    = typename DynamicsSystemType::RigidBodySimContainerType ;
-    using RigidBodyStaticContainerType = typename DynamicsSystemType::RigidBodyStaticContainerType ;
-
     using TopologyBuilderEnumType = TopologyBuilderEnum;
     using ProcessCommunicatorType = TProcCommunicator;
 
-    using RebuildSettingsType       = TopologyBuilderSettings::RebuildSettings;
-    using MassPointPredSettingsType = TopologyBuilderSettings::MassPointPredSettings;
+    using RebuildSettingsType     = TopologyBuilderSettings::RebuildSettings;
 
-    using Vector3Vec = StdVecAligned<Vector3>;
-
-    struct MassPoint {
-        MassPoint(const RigidBodyState * s): m_state(s){}
-
-        Vector3Vec * m_points = nullptr;
-        unsigned int m_pointIdx = 0;
-        unsigned int m_numPoints = 0;
-
-        const RigidBodyState * m_state = nullptr; ///< Init Condition of the MassPoint pointing to m_initStates;
-    };
-
-
-    // GLOBAL/LOCAL STUFF ===========================================================
-    // references into this container remain valid, unordered_map, even if rehash
-    RigidBodyStatesContainerType m_initStates; ///< All states received from all processes
-    // ==============================================================================
-
-
-    TopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
+    TopologyBuilder(TopologyBuilderEnumType type,
+                    std::shared_ptr<DynamicsSystemType> pDynSys,
                     std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
-                    RebuildSettingsType rebuildSettings, MassPointPredSettingsType massPointPredSettings ):
-        m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator), m_rebuildSettings(rebuildSettings), m_massPointPredSettings(massPointPredSettings) {
-
+                    RebuildSettingsType rebuildSettings)
+        :m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator), m_rebuildSettings(rebuildSettings)
+    {
         m_pSimulationLog = nullptr;
         m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
         ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
     }
 
-    PREC m_currentTime;
-    unsigned int m_builtTopologies = 0;
-
     bool checkAndRebuild(unsigned int timeStep, PREC currentTime){
         // Check each X timestep
-        if( timeStep!= 0 && timeStep % m_rebuildSettings.m_policyCheckEachXTimeStep == 0){
+        if(  m_rebuildSettings.m_mode == RebuildSettingsType::Mode::DYNAMIC &&
+             timeStep!= 0 &&
+            (timeStep % m_rebuildSettings.m_policyCheckEachXTimeStep) == 0
+           )
+        {
 
             if(m_rebuildSettings.m_policy == RebuildSettingsType::Policy::ALWAYS_REBUILD){
 
@@ -170,11 +124,77 @@ protected:
     }
 
 
+
+    std::shared_ptr<DynamicsSystemType>      m_pDynSys;
+    std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
+
+    PREC m_currentTime;
+    unsigned int m_builtTopologies = 0;
+
+    TopologyBuilderEnumType   m_type;
+    RebuildSettingsType       m_rebuildSettings;
+
+    Logging::Log * m_pSimulationLog;
+    boost::filesystem::path m_localSimFolderPath;
+};
+
+
+#define DEFINE_TOPOLOGYBUILDER_BASE_TYPES( _Base_ ) \
+    public: \
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES  \
+    DEFINE_MPI_INFORMATION_CONFIG_TYPES \
+    using RigidBodyStatesContainerType = typename DynamicsSystemType::RigidBodyStatesContainerType; \
+    using RigidBodySimContainerType    = typename DynamicsSystemType::RigidBodySimContainerType ; \
+    using RigidBodyStaticContainerType = typename DynamicsSystemType::RigidBodyStaticContainerType ; \
+    \
+    using TopologyBuilderEnumType = typename _Base_::TopologyBuilderEnumType; \
+    using ProcessCommunicatorType = typename _Base_::ProcessCommunicatorType; \
+    \
+    protected: \
+    using RebuildSettingsType       = typename _Base_::RebuildSettingsType;    \
+    using _Base_::m_pSimulationLog; \
+    using _Base_::m_pDynSys; \
+    using _Base_::m_pProcCommunicator; \
+    using _Base_::m_currentTime; \
+    using _Base_::m_builtTopologies; \
+    using _Base_::m_localSimFolderPath; \
+    using _Base_::m_type; \
+    using _Base_::m_rebuildSettings; \
+
+class MassPointPrediction{
+public:
+
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    using MassPointPredSettingsType = TopologyBuilderSettings::MassPointPredSettings;
+
+    using Vector3Vec = StdVecAligned<Vector3>;
+
+    struct MassPoint {
+        MassPoint(const RigidBodyState * s): m_state(s){}
+
+        Vector3Vec * m_points = nullptr;
+        unsigned int m_pointIdx = 0;
+        unsigned int m_numPoints = 0;
+
+        const RigidBodyState * m_state = nullptr; ///< Init Condition of the MassPoint pointing to m_initStates;
+    };
+    using MassPointType = MassPoint;
+
+protected:
+    MassPointPredSettingsType m_massPointPredSettings;
+
+public:
+    MassPointPrediction(const MassPointPredSettingsType & settings): m_massPointPredSettings(settings){}
+
     /** Predict Bodies over some steps
     * Either use Fluidix to quickly approximate a simulation or
     * do a simple integration with only gravity of all point masses, stop if collided with non simulated bodies
     */
-    void predictMassPoints(std::vector<MassPoint> & massPoints,
+    template<typename TExternalForceList, typename TRigidBodyContainer>
+    void predictMassPoints(std::vector<MassPointType> & massPoints,
+                           const TExternalForceList & forceList,
+                           const TRigidBodyContainer & staticBodies,
                            Vector3Vec & predictedPoints){
 
 
@@ -184,13 +204,11 @@ protected:
 
         unsigned int nPoints = m_massPointPredSettings.m_nPoints;
 
-        auto * gravityField = m_pDynSys->m_externalForces.getGravityField();
+        auto * gravityField = forceList.getGravityField();
         Vector3 gravity = Vector3::Zero();
         if( gravityField ){
             gravity= gravityField->getGravity();
         }
-
-        auto & staticBodies = m_pDynSys->m_staticBodies;
 
         for(auto & massPoint : massPoints){
 
@@ -227,13 +245,104 @@ protected:
                 }
 
             }
-
-            LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: body: "
-            <<RigidBodyId::getBodyIdString(massPoint.m_state->m_id) << " last prediction: " << predictedPoints.back().transpose()  <<std::endl);
+//
+//            LOGTBLEVEL3(m_pSimulationLog, "---> TopoBuilder: body: "
+//            <<RigidBodyId::getBodyIdString(massPoint.m_state->m_id) << " last prediction: " << predictedPoints.back().transpose()  <<std::endl);
         }
 
-        LOGTBLEVEL2(m_pSimulationLog, "---> GridTopoBuilder: Predicted mass points: " << predictedPoints.size() << std::endl;);
+//        LOGTBLEVEL2(m_pSimulationLog, "---> TopoBuilder: Predicted mass points: " << predictedPoints.size() << std::endl;);
     }
+
+};
+
+
+#define DEFINE_MASSPOINTPREDICTION_TYPES \
+    using MassPointPredSettingsType = typename MassPointPrediction::MassPointPredSettingsType; \
+    using MassPointType = typename MassPointPrediction::MassPoint; \
+    using Vector3Vec = typename MassPointPrediction::Vector3Vec; \
+
+
+
+
+template<typename TProcCommunicator, typename TSetting >
+class GridTopologyBuilderBase : public TopologyBuilder<TProcCommunicator> {
+public:
+    using TopoBase = TopologyBuilder<TProcCommunicator>;
+    DEFINE_TOPOLOGYBUILDER_BASE_TYPES(TopoBase)
+
+public:
+    using SettingsType = TSetting;
+    DEFINE_MASSPOINTPREDICTION_TYPES
+     /** TimeStepper Settings which need to be communicated */
+    struct TimeStepperSettings{ PREC m_startTime = 0;};
+    using TimeStepperSettingsType = TimeStepperSettings;
+
+protected:
+
+    friend class TopologyBuilderMessageWrapperOrientation<GridTopologyBuilderBase>;
+    friend class TopologyBuilderMessageWrapperBodies<GridTopologyBuilderBase>;
+
+    /** Messages for sending/receiving bodies and solving extent collaboratively (Binet Tensor) */
+    TopologyBuilderMessageWrapperOrientation<GridTopologyBuilderBase>   m_messageOrient;
+    TopologyBuilderMessageWrapperBodies<GridTopologyBuilderBase>        m_messageBodies;
+
+    /** Scene file currently simulated */
+    boost::filesystem::path m_sceneFilePath; ///< The parsed scene file for the initial topology
+
+    /** Grid Settings for the building process*/
+    const SettingsType m_settings;
+
+    /** LOCAL STUFF (non-master ranks) ============================================= */
+    // For Binet Tensor
+    Vector3 m_r_G_loc;       ///< Local Geometric center of all point masses
+    Vector6 m_I_theta_loc;   ///< Local intertia tensor (binet tensor in center I) [ a_00,a_01,a_02,a_11,a_12,a_22] ) in intertial frame I
+    AABB3d m_K_aabb_loc; ///< Local AABB in K Frame (oriented bounding box) , collaboratively solve the m_K_aabb_glo
+
+    AABB3d m_I_aabb_loc;         ///< Local AABB of point masses
+    std::vector<MassPointType> m_massPoints_loc; ///< local mass points
+    Vector3Vec m_points_loc; /// point cloud of all predicted mass points
+    unsigned int m_countPoints_loc = 0;
+    /** ============================================================================ */
+
+    /** GLOBAL STUFF (master rank only) ============================================ */
+    typename std::unordered_map<RankIdType, std::vector<const RigidBodyState *> > m_bodiesPerRank; ///< rank to all pointers in m_initStates;
+
+    // For Binet Tensor
+    Vector3 m_r_G_glo;         ///< Global geometric center ("G") of all point masses
+    Vector6 m_I_theta_G_glo;   ///< Global intertia tensor (binet tensor in center point G) [a_00,a_01,a_02,a_11,a_12,a_22] ) in intertial frame I
+
+    //Final Bounding Box
+    bool m_aligned;         ///< aligned = AABB, otherwise OOBB
+    AABB3d  m_aabb_glo;     ///< Min/Max of OOBB fit around points in frame K (OOBB) or I (AABB)
+    Matrix33 m_A_IK;        ///< Transformation of OOBB cordinate frame K (oriented bounding box of point cloud) to intertia fram I
+
+    std::unordered_map<RankIdType,AABB3d> m_rankAABBs;
+
+    std::vector<MassPointType> m_massPoints_glo; ///< global mass points
+    Vector3Vec m_points_glo;                 /// point cloud of all predicted mass points
+    unsigned int m_countPoints_glo = 0;
+
+    // references into this container remain valid, unordered_map, even if rehash
+    RigidBodyStatesContainerType m_initStates; ///< All states received from all processes
+
+    TimeStepperSettingsType m_timeStepperSettings;
+    /** ============================================================================ */
+
+    MassPointPrediction m_massPointPrediction;
+
+protected:
+
+
+    template<typename... T>
+    GridTopologyBuilderBase(const SettingsType & setting,
+                            const MassPointPredSettingsType & massSettings,
+                            boost::filesystem::path sceneFile,
+                            T &&... t
+                            )
+    : TopoBase(std::forward<T>(t)...),
+      m_massPointPrediction(massSettings), m_settings(setting),
+      m_sceneFilePath(sceneFile), m_messageOrient(this),m_messageBodies(this)
+    {}
 
     /** Compute Minimum Bounding Box with ApproxMVBB source code */
     void makeMVBB(const Vector3Vec & I_points, Matrix33 & A_IK, AABB3d & K_aabb ){
@@ -270,7 +379,7 @@ protected:
     }
 
     template<bool aligned = false>
-    void computeExtent(const std::vector<MassPoint> & massPoints,
+    void computeExtent(const std::vector<MassPointType> & massPoints,
                        AABB3d & aabb,
                        const Matrix33 & A_IK = Matrix33::Identity()){
         LOGTBLEVEL3(m_pSimulationLog, "---> TopoBuilder: Compute extent ..." << std::endl;);
@@ -292,11 +401,9 @@ protected:
     }
 
 
-
-
-    unsigned int buildCenterPoint( const std::vector<MassPoint> & massPoints,
+    unsigned int buildCenterPoint( const std::vector<MassPointType> & massPoints,
                                    Vector3 & center){
-         LOGTBLEVEL3(m_pSimulationLog, "---> TopoBuilder: Build center point ..."<< std::endl;);
+        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilderBase: Build center point ..."<< std::endl;);
         unsigned int countPoints = 0;
         center.setZero();
         for(auto & massPoint : massPoints){
@@ -315,7 +422,7 @@ protected:
 
 
     template<bool shift = true>
-    unsigned int buildBinetTensor( const std::vector<MassPoint> & massPoints,
+    unsigned int buildBinetTensor( const std::vector<MassPointType> & massPoints,
                                    Vector6 & I_theta_G,
                                    const Vector3 & I_r_IG = Vector3::Zero()){
         LOGTBLEVEL3(m_pSimulationLog, "---> TopoBuilder: Build Binet Tensor ..."<< std::endl;);
@@ -360,7 +467,7 @@ protected:
         MatrixHelpers::setSymMatrix(Theta_G,theta_G);
 
 
-        LOGTBLEVEL3( m_pSimulationLog, "---> TopoBuilder: Global Binet inertia tensor: " << std::endl
+        LOGTBLEVEL3( m_pSimulationLog, "---> GridTopoBuilderBase: Global Binet inertia tensor: " << std::endl
                       << "\t\t " << theta_G(0) << "\t" << theta_G(1) << "\t" << theta_G(2) << std::endl
                       << "\t\t " << theta_G(1) << "\t" << theta_G(3) << "\t" << theta_G(4) << std::endl
                       << "\t\t " << theta_G(2) << "\t" << theta_G(4) << "\t" << theta_G(5) << std::endl;)
@@ -368,8 +475,8 @@ protected:
         typename MyMatrixDecomposition::template EigenSolverSelfAdjoint<Matrix33> eigenSolv(Theta_G);
 
         A_IK = eigenSolv.eigenvectors();
-        LOGTBLEVEL3( m_pSimulationLog, "---> TopoBuilder: Eigenvalues: "<<std::endl<< eigenSolv.eigenvalues().transpose() <<std::endl; );
-        LOGTBLEVEL3( m_pSimulationLog, "---> TopoBuilder: Eigenvectors: "<<std::endl<< A_IK <<std::endl; );
+        LOGTBLEVEL3( m_pSimulationLog, "---> GridTopoBuilderBase: Eigenvalues: "<<std::endl<< eigenSolv.eigenvalues().transpose() <<std::endl; );
+        LOGTBLEVEL3( m_pSimulationLog, "---> GridTopoBuilderBase: Eigenvectors: "<<std::endl<< A_IK <<std::endl; );
 
         //        // Correct A_IK to be as orthogonal as possible, project x onto x-y plane, (for no use so far)
         //        A_IK.col(2).normalize();
@@ -381,11 +488,38 @@ protected:
             A_IK.col(1).swap(A_IK.col(0));
             A_IK.col(2) *= -1.0;
         }
-        LOGTBLEVEL3( m_pSimulationLog, "--->TopologyBuilder: Coordinate Frame: "<<std::endl<< A_IK <<std::endl; );
-        LOGTBLEVEL3( m_pSimulationLog, "--->TopologyBuilder: x*y,y*z,z*x: "<<
+        LOGTBLEVEL3( m_pSimulationLog, "--->GridTopoBuilderBase: Coordinate Frame: "<<std::endl<< A_IK <<std::endl; );
+        LOGTBLEVEL3( m_pSimulationLog, "--->GridTopoBuilderBase: x*y,y*z,z*x: "<<
                     A_IK.col(0).dot(A_IK.col(1)) <<", "<<
                     A_IK.col(1).dot(A_IK.col(2)) <<", "<<
                     A_IK.col(2).dot(A_IK.col(0))  <<std::endl; );
+    }
+
+    template<bool isRoot>
+    void collaborativeSolveExtent(RankIdType masterRank){
+
+        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilderBase: Solve extent collaborative ");
+        // Get orientation
+        if(isRoot){
+            // broadcast orientation
+            m_pProcCommunicator->sendBroadcast(m_messageOrient);
+        }else{
+            m_pProcCommunicator->receiveBroadcast(m_messageOrient,masterRank);
+        }
+
+       LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilderBase: Compute extent locally ");
+       this->computeExtent(m_massPoints_loc, m_K_aabb_loc, m_A_IK);
+
+       LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilderBase: Do reduction with local extents");
+        // Do a reduction of min and max values of the AABBs in K frame
+        if(isRoot){ // ROOT
+            m_pProcCommunicator->reduce(m_K_aabb_loc.m_minPoint, m_aabb_glo.m_minPoint, MPILayer::ReduceFunctions::MinVector3);
+            m_pProcCommunicator->reduce(m_K_aabb_loc.m_maxPoint, m_aabb_glo.m_maxPoint, MPILayer::ReduceFunctions::MaxVector3);
+        }else{ //All others
+            m_pProcCommunicator->reduce(m_K_aabb_loc.m_minPoint, MPILayer::ReduceFunctions::MinVector3, masterRank);
+            m_pProcCommunicator->reduce(m_K_aabb_loc.m_maxPoint, MPILayer::ReduceFunctions::MaxVector3, masterRank);
+        }
+
     }
 
     inline void cleanUpLocal(){
@@ -395,94 +529,199 @@ protected:
         m_initStates.clear();
     }
 
-    std::shared_ptr<DynamicsSystemType>      m_pDynSys;
-    std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
+    void initMakeBoundingBoxGlobal(RankIdType masterRank){
+        if(m_settings.m_buildMode == SettingsType::BuildMode::PREDEFINED){
+            // build a static grid, set m_aabb_glo to settings from scene file.
+            if(m_settings.m_aligned){
+                m_aabb_glo = m_settings.m_aabb;
+                m_A_IK.setIdentity();
+                m_aligned = true;
+            }else{
+                m_aabb_glo = m_settings.m_aabb;
+                m_A_IK = m_settings.m_A_IK;
+                m_aligned = false;
+            }
+        }
+        else if(m_settings.m_buildMode == SettingsType::BuildMode::ALIGNED){
+                m_A_IK.setIdentity();
+                m_points_glo.clear();
+                m_massPointPrediction.predictMassPoints(m_massPoints_glo,m_pDynSys->m_externalForces, m_pDynSys->m_staticBodies, m_points_glo );
+                this->template computeExtent<true>(m_massPoints_glo,m_aabb_glo);
+                m_aligned = true;
+
+        }else if(m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
+
+                // Process for Grid Building with Binet Inertia Tensor  =================================================
+                m_points_glo.clear();
+                m_massPointPrediction.predictMassPoints(m_massPoints_glo,m_pDynSys->m_externalForces, m_pDynSys->m_staticBodies, m_points_glo );
+                m_countPoints_glo = this->buildCenterPoint(m_massPoints_glo,m_r_G_glo);
+                this->template buildBinetTensor(m_massPoints_glo,m_I_theta_G_glo, m_r_G_glo);
+                this->solveOrientation(m_A_IK,m_I_theta_G_glo);
+                this->template computeExtent(m_massPoints_glo,m_aabb_glo,m_A_IK);
+                m_aligned = false;
+        }
+        else if(m_settings.m_buildMode == SettingsType::BuildMode::MVBB){
+                m_points_glo.clear();
+                m_massPointPrediction.predictMassPoints(m_massPoints_glo,m_pDynSys->m_externalForces, m_pDynSys->m_staticBodies, m_points_glo );
+
+                this->makeMVBB(m_points_glo, m_A_IK, m_aabb_glo);
+
+                m_aligned = false;
+
+        }else{
+            ERRORMSG("Built type: " << EnumConversion::toIntegral(m_settings.m_buildMode) << " not supported! ")
+        }
+    }
+
+    void rebuildMakeBoundingBoxGlobal( RankIdType masterRank){
+
+        if(m_settings.m_buildMode == SettingsType::BuildMode::ALIGNED){
+                    m_A_IK.setIdentity();
+                     //add own AABB to global
+                    m_aabb_glo += m_I_aabb_loc;
+                    m_aligned = true;
+
+                    // DEBUG (predict points anyway, not needed! to check in file)
+                    m_points_glo.clear();
+                    m_massPointPrediction.predictMassPoints(m_massPoints_loc,m_pDynSys->m_externalForces, m_pDynSys->m_staticBodies, m_points_glo );
+                    m_massPointPrediction.predictMassPoints(m_massPoints_glo,m_pDynSys->m_externalForces, m_pDynSys->m_staticBodies, m_points_glo );
+        }
+        else if(m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
+
+            // Add our own center and weight it
+            m_r_G_glo += m_r_G_loc * m_countPoints_loc;
+            m_countPoints_glo += m_countPoints_loc;
+            m_r_G_glo /= m_countPoints_glo;
+
+            // Add our own tensor
+            m_I_theta_G_glo += m_I_theta_loc;
+            // Shift global to center!
+            this->shiftBinetTensor(m_I_theta_G_glo,m_r_G_glo,m_countPoints_glo);
+
+            this->solveOrientation(m_A_IK,m_I_theta_G_glo);
+            this->collaborativeSolveExtent<true>(masterRank);
+            m_aligned = false;
+
+        }else if(m_settings.m_buildMode == SettingsType::BuildMode::MVBB){
+
+            // Predict our local and global massPoints
+            m_points_glo.clear();
+            m_massPointPrediction.predictMassPoints(m_massPoints_loc,m_pDynSys->m_externalForces, m_pDynSys->m_staticBodies, m_points_glo );
+            m_massPointPrediction.predictMassPoints(m_massPoints_glo,m_pDynSys->m_externalForces, m_pDynSys->m_staticBodies, m_points_glo );
+
+            this->makeMVBB(m_points_glo, m_A_IK, m_aabb_glo);
+
+            m_aligned = false;
+        }
+    }
+
+    void rebuildMakeBoundingBoxLocal_PreSend() {
+
+        // we copy all body points into the set m_initStates
+        m_initStates.clear();
+        m_massPoints_loc.clear();
+
+        for(auto & body : m_pDynSys->m_simBodies){
+            auto res = m_initStates.emplace(body->m_id,body); // add new state
+            //applyBody(body); //add state
+            m_massPoints_loc.emplace_back( &(res.first->second) ); // pointer stays valid also if rehash of m_initStates
+            LOGTBLEVEL3(m_pSimulationLog, "\t\t state: " << RigidBodyId::getBodyIdString(body->m_id )<< " , " <<  res.first->second.m_q.transpose() << std::endl;);
+        }
+
+        if(m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
+
+            // Predict masspoints over some timesteps (simple)
+            m_points_loc.clear();
+            m_massPointPrediction.predictMassPoints(m_massPoints_loc, m_pDynSys->m_externalForces, m_pDynSys->m_staticBodies, m_points_loc);
+
+            m_countPoints_loc = this->buildCenterPoint(m_massPoints_loc,m_r_G_loc);
+            this->template buildBinetTensor<false>(m_massPoints_loc,m_I_theta_loc);
+            // Move inertia tensor to geometric center G (steiner formula) on root process!
+            this->template computeExtent<true>(m_massPoints_loc,m_I_aabb_loc);
+        }else if(m_settings.m_buildMode == SettingsType::BuildMode::ALIGNED){
+
+            // Predict masspoints over some timesteps (simple)
+            m_points_loc.clear();
+            m_massPointPrediction.predictMassPoints(m_massPoints_loc, m_pDynSys->m_externalForces, m_pDynSys->m_staticBodies, m_points_loc);
+            this->template computeExtent<true>(m_massPoints_loc,m_I_aabb_loc);
+
+        }else if(m_settings.m_buildMode == SettingsType::BuildMode::MVBB){
+
+        }else{
+            ERRORMSG("This should not happen! Undefined BuildMode in Rebuilding")
+        }
+    }
+
+    void rebuildMakeBoundingBoxLocal_PostSend(RankIdType masterRank) {
+        if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
+            this->template collaborativeSolveExtent<false>(masterRank);
+        }
+    }
 
 
-    TopologyBuilderEnumType   m_type;
-    RebuildSettingsType       m_rebuildSettings;
-    MassPointPredSettingsType m_massPointPredSettings;
-
-    Logging::Log * m_pSimulationLog;
-    boost::filesystem::path m_localSimFolderPath;
 };
+
+#define DEFINE_TOPOLOGYBUILDERGRID_BASE_TYPES( _Base_ ) \
+    \
+    public: \
+    DEFINE_TOPOLOGYBUILDER_BASE_TYPES( _Base_::TopoBase ) \
+    DEFINE_MASSPOINTPREDICTION_TYPES \
+    public: \
+    using SettingsType = typename _Base_::SettingsType;\
+    using TimeStepperSettingsType = typename _Base_::TimeStepperSettingsType; \
+    \
+    private: \
+    using _Base_::m_sceneFilePath;\
+    using _Base_::m_settings;\
+    /*LOCAL*/\
+    using _Base_::m_messageOrient; \
+    using _Base_::m_messageBodies; \
+    \
+    using _Base_::m_r_G_loc;\
+    using _Base_::m_I_theta_loc;\
+    using _Base_::m_K_aabb_loc;\
+    using _Base_::m_I_aabb_loc;\
+    using _Base_::m_massPoints_loc;\
+    using _Base_::m_points_loc;\
+    using _Base_::m_countPoints_loc;\
+    /*GLOBAL*/ \
+    using _Base_::m_bodiesPerRank;\
+    \
+    using _Base_::m_r_G_glo;\
+    using _Base_::m_I_theta_G_glo;\
+    using _Base_::m_aligned;\
+    using _Base_::m_aabb_glo;\
+    using _Base_::m_A_IK; \
+    using _Base_::m_rankAABBs;\
+    using _Base_::m_massPoints_glo;\
+    using _Base_::m_points_glo;\
+    using _Base_::m_countPoints_glo;\
+    \
+    using _Base_::m_initStates;\
+    using _Base_::m_timeStepperSettings;\
+
 
 
 template<typename TProcCommunicator>
-class GridTopologyBuilder : public TopologyBuilder<TProcCommunicator> {
+class GridTopologyBuilder : public GridTopologyBuilderBase<TProcCommunicator,GridBuilderSettings>  {
+
+public:
+    using GridBase = GridTopologyBuilderBase<TProcCommunicator,GridBuilderSettings>;
+    DEFINE_TOPOLOGYBUILDERGRID_BASE_TYPES(GridBase)
+
+private:
 
     friend class ParserModulesCreatorTopoBuilder<GridTopologyBuilder>;
-
-    friend class TopologyBuilderMessageWrapperBodies<GridTopologyBuilder>;
     friend class TopologyBuilderMessageWrapperResults<GridTopologyBuilder>;
-    friend class TopologyBuilderMessageWrapperOrientation<GridTopologyBuilder>;
-
-public:
-
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-    DEFINE_MPI_INFORMATION_CONFIG_TYPES
-    using Base = TopologyBuilder<TProcCommunicator>;
-
-    DEFINE_TOPOLOGYBUILDER_BASE_TYPES(Base)
-
-
-
-private:
-
-    template< typename > friend struct ParserModulesCreatorTopoBuilder;
-
-    boost::filesystem::path m_sceneFilePath;
-
-    // LOCAL STUFF ==================================================================
-
-    // For Binet Tensor
-    Vector3 m_r_G_loc;       ///< Local Geometric center of all point masses
-    Vector6 m_I_theta_loc;   ///< Local intertia tensor (binet tensor in center I) [ a_00,a_01,a_02,a_11,a_12,a_22] ) in intertial frame I
-    AABB3d m_K_aabb_loc; ///< Local AABB in K Frame (oriented bounding box) , collaboratively solve the m_K_aabb_glo
-
-    AABB3d m_I_aabb_loc;         ///< Local AABB of point masses
-    std::vector<MassPoint> m_massPoints_loc; ///< local mass points
-    Vector3Vec m_points_loc; /// point cloud of all predicted mass points
-    unsigned int m_countPoints_loc = 0;
-    // ==============================================================================
-
-    // Scene parser parses the initial time into this struct from global init condition
-    struct TimeStepperSettings{ PREC m_startTime = 0;};
-public:
-    using TimeStepperSettingsType = TimeStepperSettings;
-private:
-    TimeStepperSettingsType m_timeStepperSettings;
-
-    using SettingsType = GridBuilderSettings;
-    const SettingsType m_settings;
-
-    // GLOBAL STUFF =================================================================
-
-    typename std::unordered_map<RankIdType, std::vector<const RigidBodyState *> > m_bodiesPerRank; ///< rank to all pointers in m_initStates;
-
-    // For Binet Tensor
-    Vector3 m_r_G_glo;         ///< Global geometric center ("G") of all point masses
-    Vector6 m_I_theta_G_glo;   ///< Global intertia tensor (binet tensor in center point G) [a_00,a_01,a_02,a_11,a_12,a_22] ) in intertial frame I
-
-    //Final Bounding Box
-    bool m_aligned;         ///< aligned = AABB, otherwise OOBB
-    AABB3d  m_aabb_glo;     ///< Min/Max of OOBB fit around points in frame K (OOBB) or I (AABB)
-    Matrix33 m_A_IK;        ///< Transformation of OOBB cordinate frame K (oriented bounding box of point cloud) to intertia fram I
-
-    SettingsType::ProcessDimType m_processDim; ///< The current process dim size
-
-    std::unordered_map<RankIdType,AABB3d> m_rankAABBs;
-    unsigned int m_countPoints_glo = 0;
-    std::vector<MassPoint> m_massPoints_glo; ///< global mass points
-    Vector3Vec m_points_glo;                 /// point cloud of all predicted mass points
 
     unsigned int m_nGlobalSimBodies = 0; ///< Only for a check with MassPoints
-    // =============================================================================
 
-    TopologyBuilderMessageWrapperResults<GridTopologyBuilder> m_messageWrapperResults;
-    TopologyBuilderMessageWrapperOrientation<GridTopologyBuilder> m_messageOrient;
-    TopologyBuilderMessageWrapperBodies<GridTopologyBuilder> m_messageBodies;
+    /** GLOBAL STUFF ================================================================ */
+    typename SettingsType::ProcessDimType m_processDim; ///< The current process dim size
+    /** ============================================================================= */
+
+    TopologyBuilderMessageWrapperResults<GridTopologyBuilder>   m_messageWrapperResults;
+
 public:
 
     GridTopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
@@ -492,34 +731,11 @@ public:
                         const SettingsType & settings,
                         boost::filesystem::path sceneFilePath,
                         unsigned int nGlobalSimBodies)
-        :Base(pDynSys, pProcCommunicator,rebuildSettings,massPointPredSettings), m_settings(settings),
-        m_nGlobalSimBodies(nGlobalSimBodies),m_sceneFilePath(sceneFilePath),
-        m_messageWrapperResults(this),m_messageOrient(this),m_messageBodies(this)
-    {
-        this->m_type = TopologyBuilderEnumType::GRIDBUILDER;
-
-    }
-
-    void cleanUpGlobal(){
-        Base::cleanUpGlobal();
-        // Clean up;
-        m_countPoints_glo = 0;
-        m_massPoints_glo.clear();
-        m_points_glo.clear();
-        m_bodiesPerRank.clear();
-
-        m_rankAABBs.clear();
-
-    }
-
-    void cleanUpLocal(){
-        Base::cleanUpLocal();
-        // Clean up;
-        m_countPoints_loc = 0;
-        m_massPoints_loc.clear();
-        m_points_loc.clear();
-    }
-
+        :GridBase(settings,massPointPredSettings,sceneFilePath,
+                  TopologyBuilderEnumType::GRIDBUILDER, pDynSys, pProcCommunicator,rebuildSettings),
+         m_nGlobalSimBodies(nGlobalSimBodies),
+         m_messageWrapperResults(this)
+    {}
 
     void initTopology(PREC currentTime = 0) {
         LOGTB(m_pSimulationLog,"---> GridTopoBuilder: initialize Topology" <<std::endl;)
@@ -563,47 +779,7 @@ public:
 
             }
 
-            if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::PREDEFINED){
-                // build a static grid, set m_aabb_glo to settings from scene file.
-                if(m_settings.m_aligned){
-                    m_aabb_glo = m_settings.m_aabb;
-                    m_A_IK.setIdentity();
-                    m_aligned = true;
-                }else{
-                    m_aabb_glo = m_settings.m_aabb;
-                    m_A_IK = m_settings.m_A_IK;
-                    m_aligned = false;
-                }
-            }
-            else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::ALIGNED){
-                    m_A_IK.setIdentity();
-                    m_points_glo.clear();
-                    this->predictMassPoints(m_massPoints_glo, m_points_glo );
-                    this->template computeExtent<true>(m_massPoints_glo,m_aabb_glo);
-                    m_aligned = true;
-
-            }else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
-
-                    // Process for Grid Building with Binet Inertia Tensor  =================================================
-                    m_points_glo.clear();
-                    this->predictMassPoints(m_massPoints_glo, m_points_glo );
-                    m_countPoints_glo = this->buildCenterPoint(m_massPoints_glo,m_r_G_glo);
-                    this->template buildBinetTensor(m_massPoints_glo,m_I_theta_G_glo, m_r_G_glo);
-                    this->solveOrientation(m_A_IK,m_I_theta_G_glo);
-                    this->template computeExtent(m_massPoints_glo,m_aabb_glo,m_A_IK);
-                    m_aligned = false;
-            }
-            else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::MVBB){
-                    m_points_glo.clear();
-                    this->predictMassPoints(m_massPoints_glo, m_points_glo );
-
-                    this->makeMVBB(m_points_glo, m_A_IK, m_aabb_glo);
-
-                    m_aligned = false;
-
-            }else{
-                ERRORMSG("Built type: " << EnumConversion::toIntegral(m_settings.m_buildMode) << " not supported! ")
-            }
+            this->initMakeBoundingBoxGlobal(masterRank);
 
             adjustGrid();
 
@@ -667,7 +843,8 @@ public:
 
         // Gather all body center of gravities and common AABB to master rank
         // Compute Inertia tensor where all masses of the points are equal to 1 (gives the tensor for the geometric center)
-        buildLocalStuff();
+        // Compute local stuff on each rank
+        this->rebuildMakeBoundingBoxLocal_PreSend();
 
 
         LOGTB(m_pSimulationLog,"---> GridTopoBuilder: Clear all init states in DynamicsSystem" <<std::endl;)
@@ -698,48 +875,9 @@ public:
             }
 
 
-
-            if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::ALIGNED){
-                    m_A_IK.setIdentity();
-                     //add own AABB to global
-                    m_aabb_glo += m_I_aabb_loc;
-                    m_aligned = true;
-
-                    // DEBUG (predict points anyway, not needed! to check in file)
-                    m_points_glo.clear();
-                    this->predictMassPoints(m_massPoints_loc, m_points_glo );
-                    this->predictMassPoints(m_massPoints_glo, m_points_glo );
-            }
-            else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
-
-                // Add our own center and weight it
-                m_r_G_glo += m_r_G_loc * m_countPoints_loc;
-                m_countPoints_glo += m_countPoints_loc;
-                m_r_G_glo /= m_countPoints_glo;
-
-                // Add our own tensor
-                m_I_theta_G_glo += m_I_theta_loc;
-                // Shift global to center!
-                this->shiftBinetTensor(m_I_theta_G_glo,m_r_G_glo,m_countPoints_glo);
-
-                this->solveOrientation(m_A_IK,m_I_theta_G_glo);
-                this->collaborativeSolveExtent<true>(masterRank);
-                m_aligned = false;
-
-            }else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::MVBB){
-
-                // Predict our local and global massPoints
-                m_points_glo.clear();
-                this->predictMassPoints(m_massPoints_loc, m_points_glo );
-                this->predictMassPoints(m_massPoints_glo, m_points_glo );
-
-                this->makeMVBB(m_points_glo, m_A_IK, m_aabb_glo);
-
-                m_aligned = false;
-            }
+            this->rebuildMakeBoundingBoxGlobal(masterRank);
 
             adjustGrid();
-
 
             buildTopo();
             sendGrid(masterRank);
@@ -761,12 +899,9 @@ public:
         }else{
 
 
-
             this->m_pProcCommunicator->sendMessageToRank(m_messageBodies, masterRank, m_messageBodies.m_tag);
 
-            if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
-                collaborativeSolveExtent<false>(masterRank);
-            }
+            this->rebuildMakeBoundingBoxLocal_PostSend(masterRank);
 
             // Receive Grid results from master;
             // All initial states get saved in m_pDynSys->m_bodiesInitStates
@@ -789,6 +924,17 @@ public:
         LOGTB(m_pSimulationLog,"---> GridTopoBuilder: rebuild topology finished!" <<std::endl;)
 
     }
+
+private:
+
+    void cleanUpGlobal(){
+        GridBase::cleanUpGlobal();
+    }
+
+    void cleanUpLocal(){
+        GridBase::cleanUpLocal();
+    }
+
 
     void adjustGrid(){
 
@@ -822,76 +968,8 @@ public:
         }
 
         //Adjust box to minimal box size =  procDim * min_gridSize,
-        Array3 limits = m_processDim.cast<PREC>() * m_settings.m_minGridSize;
+        Array3 limits = m_processDim.template cast<PREC>() * m_settings.m_minGridSize;
         m_aabb_glo.expandToMinExtentAbsolute( limits );
-    }
-
-    void buildLocalStuff() {
-
-        // we copy all body points into the set m_initStates
-        m_initStates.clear();
-        m_massPoints_loc.clear();
-
-        for(auto & body : m_pDynSys->m_simBodies){
-            auto res = m_initStates.emplace(body->m_id,body); // add new state
-            //applyBody(body); //add state
-            m_massPoints_loc.emplace_back( &(res.first->second) ); // pointer stays valid also if rehash of m_initStates
-            LOGTBLEVEL3(m_pSimulationLog, "\t\t state: " << RigidBodyId::getBodyIdString(body->m_id )<< " , " <<  res.first->second.m_q.transpose() << std::endl;);
-        }
-
-        if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
-
-            // Predict masspoints over some timesteps (simple)
-            m_points_loc.clear();
-            this->predictMassPoints(m_massPoints_loc, m_points_loc);
-
-            m_countPoints_loc = this->buildCenterPoint(m_massPoints_loc,m_r_G_loc);
-            this->template buildBinetTensor<false>(m_massPoints_loc,m_I_theta_loc);
-            // Move inertia tensor to geometric center G (steiner formula) on root process!
-            this->template computeExtent<true>(m_massPoints_loc,m_I_aabb_loc);
-        }else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::ALIGNED){
-
-            // Predict masspoints over some timesteps (simple)
-            m_points_loc.clear();
-            this->template predictMassPoints(m_massPoints_loc, m_points_loc);
-            this->template computeExtent<true>(m_massPoints_loc,m_I_aabb_loc);
-
-        }else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::MVBB){
-
-        }else{
-            ERRORMSG("This should not happen! Undefined BuildMode in Rebuilding")
-        }
-
-
-    }
-
-
-
-    template<bool isRoot>
-    void collaborativeSolveExtent(RankIdType masterRank){
-
-        LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Solve extent collaborative ");
-        // Get orientation
-        if(isRoot){
-            // broadcast orientation
-            m_pProcCommunicator->sendBroadcast(m_messageOrient);
-        }else{
-            m_pProcCommunicator->receiveBroadcast(m_messageOrient,masterRank);
-        }
-
-       LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Compute extent locally ");
-       this->computeExtent(m_massPoints_loc, m_K_aabb_loc, m_A_IK);
-
-       LOGTBLEVEL3(m_pSimulationLog, "---> GridTopoBuilder: Do reduction with local extents");
-        // Do a reduction of min and max values of the AABBs in K frame
-        if(isRoot){ // ROOT
-            m_pProcCommunicator->reduce(m_K_aabb_loc.m_minPoint, m_aabb_glo.m_minPoint, MPILayer::ReduceFunctions::MinVector3);
-            m_pProcCommunicator->reduce(m_K_aabb_loc.m_maxPoint, m_aabb_glo.m_maxPoint, MPILayer::ReduceFunctions::MaxVector3);
-        }else{ //All others
-            m_pProcCommunicator->reduce(m_K_aabb_loc.m_minPoint, MPILayer::ReduceFunctions::MinVector3, masterRank);
-            m_pProcCommunicator->reduce(m_K_aabb_loc.m_maxPoint, MPILayer::ReduceFunctions::MaxVector3, masterRank);
-        }
-
     }
 
     void buildTopo(){
@@ -1114,80 +1192,35 @@ public:
 
 
 template<typename TProcCommunicator>
-class KdTreeTopologyBuilder : public TopologyBuilder<TProcCommunicator> {
-
-    friend class ParserModulesCreatorTopoBuilder<KdTreeTopologyBuilder>;
-
-    friend class TopologyBuilderMessageWrapperBodies<KdTreeTopologyBuilder>;
-    //friend class TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder>;
-    friend class TopologyBuilderMessageWrapperOrientation<KdTreeTopologyBuilder>;
+class KdTreeTopologyBuilder : public GridTopologyBuilderBase<TProcCommunicator, KdTreeBuilderSettings> {
+public:
+    using GridBase = GridTopologyBuilderBase<TProcCommunicator, KdTreeBuilderSettings>;
+    DEFINE_TOPOLOGYBUILDERGRID_BASE_TYPES(GridBase)
 
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-    DEFINE_MPI_INFORMATION_CONFIG_TYPES
-
-    using Base = TopologyBuilder<TProcCommunicator>;
-    DEFINE_TOPOLOGYBUILDER_BASE_TYPES(Base)
-
 
     using Tree       = KdTree::Tree< KdTree::TreeTraits<> >;             ///< Standart kdTree is already setup to use std::vector<Vector3 *>
     using TreeSimple = KdTree::TreeSimple< KdTree::TreeSimpleTraits<> >; ///< Standart simple kdTree is already setup to use std::vector<Vector3 *>
 
 private:
 
-    template< typename > friend struct ParserModulesCreatorTopoBuilder;
-
-    boost::filesystem::path m_sceneFilePath;
-
-    // LOCAL STUFF ==================================================================
-
-    // For Binet Tensor
-//    Vector3 m_r_G_loc;       ///< Local Geometric center of all point masses
-//    Vector6 m_I_theta_loc;   ///< Local intertia tensor (binet tensor in center I) [ a_00,a_01,a_02,a_11,a_12,a_22] ) in intertial frame I
-//    AABB3d m_K_aabb_loc;     ///< Local AABB in K Frame (oriented bounding box) , collaboratively solve the m_K_aabb_glo
-//
-    AABB3d m_I_aabb_loc;         ///< Local AABB of point masses
-    std::vector<MassPoint> m_massPoints_loc; ///< local mass points
-    Vector3Vec m_points_loc; /// point cloud of all predicted mass points
-    //unsigned int m_countPoints_loc = 0;
-
-    // ==============================================================================
+    friend class ParserModulesCreatorTopoBuilder<KdTreeTopologyBuilder>;
+    //friend class TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder>;
 
 
-    // Scene parser parses the initial time into this struct from global init condition
-    struct TimeStepperSettings{ PREC m_startTime = 0;};
-public:
-    using TimeStepperSettingsType = TimeStepperSettings;
 private:
-    TimeStepperSettingsType m_timeStepperSettings;
-
-    using SettingsType = KdTreeBuilderSettings;
-    const SettingsType m_settings;
-
-    // GLOBAL STUFF =================================================================
-    typename std::unordered_map<RankIdType, std::vector<const RigidBodyState *> > m_bodiesPerRank; ///< rank to all pointers in m_initStates;
-
-    //Final Bounding Box
-    bool m_aligned;         ///< aligned = AABB, otherwise OOBB
-    AABB3d  m_aabb_glo;     ///< Min/Max of OOBB fit around points in frame K (OOBB) or I (AABB)
-    Matrix33 m_A_IK;        ///< Transformation of OOBB cordinate frame K (oriented bounding box of point cloud) to intertia fram I
-
-    std::unique_ptr<TreeSimple> m_kdTree_glo;  ///< The global kdTree which is used internally for the master rank to construct the tree
-
-    unsigned int m_processes; ///< The number of processes int the kdTree (the number of leafs in the tree)
-
-    std::unordered_map<RankIdType,AABB3d> m_rankAABBs;
-    //unsigned int m_countPoints_glo = 0;
-    std::vector<MassPoint> m_massPoints_glo; ///< global mass points
-    Vector3Vec m_points_glo;                 /// point cloud of all predicted mass points
 
     unsigned int m_nGlobalSimBodies = 0; ///< Only for a check with MassPoints
-    // =============================================================================
+
+    /** GLOBAL STUFF ================================================================ */
+    unsigned int m_processes;
+    std::unique_ptr<TreeSimple> m_kdTree_glo;
+    /** ============================================================================= */
 
     //TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder> m_messageWrapperResults;
-//    TopologyBuilderMessageWrapperOrientation<KdTreeTopologyBuilder> m_messageOrient;
-    TopologyBuilderMessageWrapperBodies<KdTreeTopologyBuilder> m_messageBodies;
+
+
+
 public:
 
     KdTreeTopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
@@ -1197,34 +1230,13 @@ public:
                         const SettingsType & settings,
                         boost::filesystem::path sceneFilePath,
                         unsigned int nGlobalSimBodies)
-        :Base(pDynSys, pProcCommunicator,rebuildSettings,massPointPredSettings), m_settings(settings),
-        m_nGlobalSimBodies(nGlobalSimBodies),m_sceneFilePath(sceneFilePath),
-        /*m_messageWrapperResults(this),m_messageOrient(this),*/m_messageBodies(this)
+        :GridBase(settings,massPointPredSettings, sceneFilePath,
+                  TopologyBuilderEnumType::KDTREEBUILDER, pDynSys, pProcCommunicator,rebuildSettings),
+         m_nGlobalSimBodies(nGlobalSimBodies)
+        /*m_messageWrapperResults(this)*/
     {
-        this->m_type = TopologyBuilderEnumType::GRIDBUILDER;
-
     }
 
-    void cleanUpGlobal(){
-
-        // Clean up;
-//        m_countPoints_glo = 0;
-        m_massPoints_glo.clear();
-        m_points_glo.clear();
-        m_bodiesPerRank.clear();
-        m_initStates.clear();
-        m_rankAABBs.clear();
-
-    }
-
-    void cleanUpLocal(){
-
-        // Clean up;
-//        m_countPoints_loc = 0;
-        m_massPoints_loc.clear();
-        m_initStates.clear();
-        m_points_loc.clear();
-    }
 
 
     void initTopology(PREC currentTime = 0) {
@@ -1269,55 +1281,7 @@ public:
 
             }
 
-
-
-            if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::PREDEFINED){
-                // build a static grid, set m_aabb_glo to settings from scene file.
-                if(m_settings.m_aligned){
-                    m_aabb_glo = m_settings.m_aabb;
-                    m_A_IK.setIdentity();
-                    m_aligned = true;
-                }else{
-                    m_aabb_glo = m_settings.m_aabb;
-                    m_A_IK = m_settings.m_A_IK;
-                    m_aligned = false;
-                }
-            }
-            else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::ALIGNED){
-                    m_A_IK.setIdentity();
-                    m_points_glo.clear();
-                    this->predictMassPoints(m_massPoints_glo, m_points_glo );
-                    this->computeExtent<true>(m_massPoints_glo,m_aabb_glo);
-                    m_aligned = true;
-            }
-//            else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR){
-//
-//                    // Process for Grid Building with Binet Inertia Tensor  =================================================
-//                    m_points_glo.clear();
-//                    predictMassPoints(m_massPoints_glo, m_points_glo );
-//                    m_countPoints_glo = buildCenterPoint(m_massPoints_glo,m_r_G_glo);
-//                    buildBinetTensor(m_massPoints_glo,m_I_theta_G_glo, m_r_G_glo);
-//                    solveOrientation(m_A_IK,m_I_theta_G_glo);
-//                    computeExtent(m_massPoints_glo,m_aabb_glo,m_A_IK);
-//                    m_aligned = false;
-//            }
-            else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::MVBB){
-                    m_points_glo.clear();
-                    this->predictMassPoints(m_massPoints_glo, m_points_glo );
-
-                    this->makeMVBB(m_points_glo, m_A_IK, m_aabb_glo);
-
-                    // transform all points to K frame (for KdTree)
-                    auto s = m_points_glo.size();
-                    for(auto & v : m_points_glo ){
-                        v = m_A_IK * v;
-                    }
-
-                    m_aligned = false;
-
-            }else{
-                ERRORMSG("Built type: " << m_settings.m_buildMode << " not supported! ")
-            }
+            this->initMakeBoundingBoxGlobal(m_settings,masterRank);
 
             buildKdTree();
 
@@ -1380,10 +1344,7 @@ public:
         ++m_builtTopologies;
         m_currentTime = currentTime;
 
-        // Gather all body center of gravities and common AABB to master rank
-        // Compute Inertia tensor where all masses of the points are equal to 1 (gives the tensor for the geometric center)
-        buildLocalStuff();
-
+        this->rebuildMakeBoundingBoxLocal_PreSend();
 
         LOGTB(m_pSimulationLog,"---> KdTreeTopoBuilder: Clear all init states in DynamicsSystem" <<std::endl;)
         m_pDynSys->m_bodiesInitStates.clear();
@@ -1413,46 +1374,7 @@ public:
             }
 
 
-
-            if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::ALIGNED){
-                    m_A_IK.setIdentity();
-                     //add own AABB to global
-                    m_aabb_glo += m_I_aabb_loc;
-                    m_aligned = true;
-
-                    // DEBUG (predict points anyway, not needed! to check in file)
-                    m_points_glo.clear();
-                    predictMassPoints(m_massPoints_loc, m_points_glo );
-                    predictMassPoints(m_massPoints_glo, m_points_glo );
-            }
-//            else if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::BINET_TENSOR){
-//
-//                // Add our own center and weight it
-//                m_r_G_glo += m_r_G_loc * m_countPoints_loc;
-//                m_countPoints_glo += m_countPoints_loc;
-//                m_r_G_glo /= m_countPoints_glo;
-//
-//                // Add our own tensor
-//                m_I_theta_G_glo += m_I_theta_loc;
-//                // Shift global to center!
-//                shiftBinetTensor(m_I_theta_G_glo,m_r_G_glo,m_countPoints_glo);
-//
-//                solveOrientation(m_A_IK,m_I_theta_G_glo);
-//                collaborativeSolveExtent<true>(masterRank);
-//                m_aligned = false;
-//
-//            }
-            else if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::MVBB){
-
-                // Predict our local and global massPoints
-                m_points_glo.clear();
-                predictMassPoints(m_massPoints_loc, m_points_glo );
-                predictMassPoints(m_massPoints_glo, m_points_glo );
-
-                makeMVBB(m_points_glo, m_A_IK, m_aabb_glo);
-
-                m_aligned = false;
-            }
+            this->rebuildMakeBoundingBoxGlobal(m_settings,masterRank);
 
             buildKdTree();
 
@@ -1479,9 +1401,7 @@ public:
 
             this->m_pProcCommunicator->sendMessageToRank(m_messageBodies, masterRank, m_messageBodies.m_tag);
 //TODO
-//            if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::BINET_TENSOR){
-//                collaborativeSolveExtent<false>(masterRank);
-//            }
+//          this->rebuildMakeBoundingBoxLocal_PreSend();
 
             // Receive Grid results from master;
             // All initial states get saved in m_pDynSys->m_bodiesInitStates
@@ -1506,44 +1426,14 @@ public:
 
     }
 
-    void buildLocalStuff() {
+private:
 
-        // we copy all body points into the set m_initStates
-        m_initStates.clear();
-        m_massPoints_loc.clear();
+    void cleanUpGlobal(){
+        GridBase::cleanUpGlobal();
+    }
 
-        for(auto & body : m_pDynSys->m_simBodies){
-            auto res = m_initStates.emplace(body->m_id,body); // add new state
-            //applyBody(body); //add state
-            m_massPoints_loc.emplace_back( &(res.first->second) ); // pointer stays valid also if rehash of m_initStates
-            LOGTBLEVEL3(m_pSimulationLog, "\t\t state: " << RigidBodyId::getBodyIdString(body->m_id )<< " , " <<  res.first->second.m_q.transpose() << std::endl;);
-        }
-
-//        if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::BINET_TENSOR){
-//
-//            // Predict masspoints over some timesteps (simple)
-//            m_points_loc.clear();
-//            predictMassPoints(m_massPoints_loc, m_points_loc);
-//
-//            m_countPoints_loc = buildCenterPoint(m_massPoints_loc,m_r_G_loc);
-//            buildBinetTensor<false>(m_massPoints_loc,m_I_theta_loc);
-//            // Move inertia tensor to geometric center G (steiner formula) on root process!
-//            computeExtent<true>(m_massPoints_loc,m_I_aabb_loc);
-//        }else
-        if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::ALIGNED){
-
-            // Predict masspoints over some timesteps (simple)
-            m_points_loc.clear();
-            this->predictMassPoints(m_massPoints_loc, m_points_loc);
-            this->computeExtent<true>(m_massPoints_loc,m_I_aabb_loc);
-
-        }else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::MVBB){
-
-        }else{
-            ERRORMSG("This should not happen! Undefined BuildMode in Rebuilding")
-        }
-
-
+    void cleanUpLocal(){
+        GridBase::cleanUpLocal();
     }
 
     void buildKdTree(){
