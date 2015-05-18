@@ -9,8 +9,8 @@ namespace MPILayer{
 
 
 enum class TopologyBuilderEnum : char{
-    GRIDBUILDER
-    /*SuperDuperHexagonBuilder*/
+    GRIDBUILDER,
+    KDTREEBUILDER
 };
 
 
@@ -117,9 +117,8 @@ public:
 
 
     struct MassPointPredSettings{
-        MassPointPredSettings(): m_deltaT(0.1){}
         unsigned int m_nPoints = 5;
-        PREC m_deltaT;
+        PREC m_deltaT = 0.1;
     };
 
 //    inline RebuildSettings & rebuildSettings(){ return m_rebuildSettings;}

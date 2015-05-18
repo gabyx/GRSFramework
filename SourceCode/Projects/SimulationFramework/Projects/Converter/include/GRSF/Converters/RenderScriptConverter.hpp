@@ -7,6 +7,8 @@
 #include <map>
 #include <vector>
 
+#include <pugixml.hpp>
+
 #include <boost/filesystem.hpp>
 
 #include "GRSF/Common/LogDefines.hpp"
@@ -24,6 +26,11 @@ public:
 
     DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES
 
+    using XMLNodeType = pugi::xml_node;
+    using XMLNodeItType = pugi::xml_node_iterator;
+    using XMLAttributeType = pugi::xml_attribute;
+
+
     using Renderer = typename ApplicationCLOptionsRenderer::Renderer;
 
     void convert( const std::vector<boost::filesystem::path> & inputFiles,
@@ -36,6 +43,8 @@ public:
 
 private:
 
+    using StateIndicesType = std::vector< std::streamoff >;
+
     RenderData m_renderData;
     RenderScriptGen m_renderScriptGen;
 
@@ -44,7 +53,10 @@ private:
 
     /** \p uuid string is a hash for the file path to identify each frame where it came from!*/
     void convertFile(const boost::filesystem::path & f,
-                     const std::string uuidString = "" );
+                     const std::string uuidString ,
+                     StateIndicesType stateIndices = {} );
+
+
 
     MultiBodySimFile m_simFile;
 

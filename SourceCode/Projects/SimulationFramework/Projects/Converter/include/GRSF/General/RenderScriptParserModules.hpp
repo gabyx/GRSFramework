@@ -82,12 +82,12 @@ public:
     ScriptGeneratorModule(ParserType * p, RenderScriptGen * g, GeometryMapType * geomMap)
         :m_parser(p),m_renderScriptGen(g), m_pLog(p->getLog()), m_geomMap(geomMap) {}
 
-    void parse(XMLNodeType & matGenNode, MaterialMapType * materials) {
+    void parse(XMLNodeType & genNode, MaterialMapType * materials) {
 
         m_materials = materials;
 
         // Add all tools into the execution list!
-        auto nodes = matGenNode.children("Tool");
+        auto nodes = genNode.children("Tool");
         auto itNodeEnd = nodes.end();
         for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
 
@@ -134,7 +134,7 @@ public:
 
 
         // Add all Getter links
-        nodes = matGenNode.children("Get");
+        nodes = genNode.children("Get");
         itNodeEnd = nodes.end();
         for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
 
@@ -165,7 +165,7 @@ public:
         }
 
          // Add all Writer links
-        nodes = matGenNode.children("Write");
+        nodes = genNode.children("Write");
         itNodeEnd = nodes.end();
         for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
 
@@ -205,7 +205,7 @@ private:
     #define DEFINE_CONSTANT2(type, typeName) \
         ( t == #typeName ){ using T = type; \
         T tt; \
-        if(!Utilities::stringToType(tt, matGenNode.attribute("value").value())) { \
+        if(!Utilities::stringToType(tt, genNode.attribute("value").value())) { \
             ERRORMSG("---> String conversion in Constant tool: value failed"); \
         } \
         n = new LogicNodes::ConstantNode<T>(id,tt); \
@@ -213,9 +213,9 @@ private:
 
     #define DEFINE_CONSTANT(type) DEFINE_CONSTANT2(type,type)
 
-    void createToolConstant(XMLNodeType & matGenNode, unsigned int id){
+    void createToolConstant(XMLNodeType & genNode, unsigned int id){
 
-            std::string t = matGenNode.attribute("outputType").value();
+            std::string t = genNode.attribute("outputType").value();
             LogicNode * n;
             if DEFINE_CONSTANT(float)
             else if DEFINE_CONSTANT(double)
@@ -231,7 +231,7 @@ private:
             else if DEFINE_CONSTANT(unsigned long long int)
             else if ( t == "string" ){
                 using T = std::string;
-                T tt = matGenNode.attribute("value").value();
+                T tt = genNode.attribute("value").value();
                 if(tt.empty()){
                     ERRORMSG("---> String conversion in Constant tool: value failed"); \
                 }
@@ -239,7 +239,7 @@ private:
             }
             else if ( t == "path" ){
                 using T = boost::filesystem::path;
-                std::string tt = matGenNode.attribute("value").value();
+                std::string tt = genNode.attribute("value").value();
                 if(tt.empty()){
                     ERRORMSG("---> String conversion in Constant tool: value failed"); \
                 }
@@ -251,7 +251,7 @@ private:
 
             m_renderScriptGen->addNode(n,false,false);
 
-                std::string gid = matGenNode.attribute("groupId").value();
+                std::string gid = genNode.attribute("groupId").value();
                 if(gid == "Body"){
                     m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
                 }else if(gid == "Frame"){
@@ -267,9 +267,9 @@ private:
         } \
 
     #define DEFINE_NORM(type) DEFINE_NORM2(type,type)
-    void createToolNorm(XMLNodeType & matGenNode, unsigned int id){
+    void createToolNorm(XMLNodeType & genNode, unsigned int id){
 
-            std::string t = matGenNode.attribute("inputType").value();
+            std::string t = genNode.attribute("inputType").value();
             LogicNode * n;
             if DEFINE_NORM(Vector3)
             else{
@@ -278,7 +278,7 @@ private:
 
             m_renderScriptGen->addNode(n,false,false);
 
-            std::string gid = matGenNode.attribute("groupId").value();
+            std::string gid = genNode.attribute("groupId").value();
             if(gid == "Body"){
                 m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
             }else if(gid == "Frame"){
@@ -288,52 +288,69 @@ private:
             }
     }
 
-    #define ADD_STRINGFORMAT_SOCKET2(type, typeName) \
+    #define ADD_STRINGFORMAT_SOCKET2(type, typeName, _InOROut_ ) \
         ( t == #typeName ){ \
             using T = type; \
-            node->addInput<T>(); \
-        } \
+            node->add ## _InOROut_<T>(); \
+        }
 
-    #define ADD_STRINGFORMAT_SOCKET(type) ADD_STRINGFORMAT_SOCKET2(type,type)
+    #define ADD_STRINGFORMAT_SOCKET2_IN(type, typeName ) ADD_STRINGFORMAT_SOCKET2(type,typeName, Input)
+    #define ADD_STRINGFORMAT_SOCKET2_OUT(type, typeName ) ADD_STRINGFORMAT_SOCKET2(type,typeName, Output)
 
-    void createToolStringFormat(XMLNodeType & matGenNode, unsigned int id){
+    #define ADD_STRINGFORMAT_SOCKET(type, _InOROut_ ) ADD_STRINGFORMAT_SOCKET2(type,type, _InOROut_ )
+    #define ADD_STRINGFORMAT_SOCKET_IN(type) ADD_STRINGFORMAT_SOCKET2(type,type, Input )
+    #define ADD_STRINGFORMAT_SOCKET_OUT(type) ADD_STRINGFORMAT_SOCKET2(type,type, Output )
 
-            std::string format = matGenNode.attribute("format").value();
+    void createToolStringFormat(XMLNodeType & genNode, unsigned int id){
+
+            std::string format = genNode.attribute("format").value();
             if(format.empty()){
                 ERRORMSG("---> String conversion in StringFormat tool: format: not defined!");
             }
             LogicNodes::StringFormatNode * node = new LogicNodes::StringFormatNode(id,format);
 
              // Add all format Sockets links
-            auto nodes = matGenNode.children("InputFormat");
-            auto itNodeEnd = nodes.end();
-            for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
+            for (auto & n : genNode.children("InputFormat")) {
+                std::string t = n.attribute("type").value();
 
-
-                std::string t = itNode->attribute("type").value();
-
-                if ADD_STRINGFORMAT_SOCKET(float)
-                else if ADD_STRINGFORMAT_SOCKET(double)
-                else if ADD_STRINGFORMAT_SOCKET(char)
-                else if ADD_STRINGFORMAT_SOCKET(short)
-                else if ADD_STRINGFORMAT_SOCKET(int)
-                else if ADD_STRINGFORMAT_SOCKET(long int)
-                else if ADD_STRINGFORMAT_SOCKET(long long int)
-                else if ADD_STRINGFORMAT_SOCKET(unsigned char)
-                else if ADD_STRINGFORMAT_SOCKET(unsigned short)
-                else if ADD_STRINGFORMAT_SOCKET(unsigned int)
-                else if ADD_STRINGFORMAT_SOCKET(unsigned long int)
-                else if ADD_STRINGFORMAT_SOCKET(unsigned long long int)
-                else if ADD_STRINGFORMAT_SOCKET2(std::string,string)
-                else if ADD_STRINGFORMAT_SOCKET2(boost::filesystem::path,path)
+                if ADD_STRINGFORMAT_SOCKET_IN(float)
+                else if ADD_STRINGFORMAT_SOCKET_IN(double)
+                else if ADD_STRINGFORMAT_SOCKET_IN(char)
+                else if ADD_STRINGFORMAT_SOCKET_IN(short)
+                else if ADD_STRINGFORMAT_SOCKET_IN(int)
+                else if ADD_STRINGFORMAT_SOCKET_IN(long int)
+                else if ADD_STRINGFORMAT_SOCKET_IN(long long int)
+                else if ADD_STRINGFORMAT_SOCKET_IN(unsigned char)
+                else if ADD_STRINGFORMAT_SOCKET_IN(unsigned short)
+                else if ADD_STRINGFORMAT_SOCKET_IN(unsigned int)
+                else if ADD_STRINGFORMAT_SOCKET_IN(unsigned long int)
+                else if ADD_STRINGFORMAT_SOCKET_IN(unsigned long long int)
+                else if ADD_STRINGFORMAT_SOCKET2_IN(std::string,string)
+                else if ADD_STRINGFORMAT_SOCKET2_IN(boost::filesystem::path,path)
                 else{
-                    ERRORMSG("---> String conversion in Constant tool: outputType: '" << t << "' not found!");
+                    ERRORMSG("---> String conversion in Constant tool: InputFormat: '" << t << "' not found!");
                 }
+            }
+            unsigned int outs = 0;
+            for (auto & n : genNode.children("OutputFormat")) {
+
+                std::string t = n.attribute("type").value();
+
+                if ADD_STRINGFORMAT_SOCKET2_OUT(std::string,string)
+                else if ADD_STRINGFORMAT_SOCKET2_OUT(boost::filesystem::path,path)
+                else{
+                    ERRORMSG("---> String conversion in Constant tool: OutputFormat: '" << t << "' not found!");
+                }
+                ++outs;
+            }
+            if(outs == 0){
+                // Add standart string output
+                node->addOutput<std::string>();
             }
 
             m_renderScriptGen->addNode(node,false,false);
 
-                std::string gid = matGenNode.attribute("groupId").value();
+                std::string gid = genNode.attribute("groupId").value();
                 if(gid == "Body"){
                     m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
                 }else if(gid == "Frame"){
@@ -356,7 +373,7 @@ private:
 
     #define DEFINE_SIMPLEFUNCTION2(type, typeName) \
         ( t1 == #typeName ){ using T1 = type; \
-                std::string t2 = matGenNode.attribute("outputType").value(); \
+                std::string t2 = genNode.attribute("outputType").value(); \
                 if(t2.empty()){ \
                     using T2 = T1;  \
                     DEFINE_MAKESimpleFunc \
@@ -379,20 +396,20 @@ private:
 
     #define DEFINE_SIMPLEFUNCTION(type) DEFINE_SIMPLEFUNCTION2(type,type)
 
-    void createToolSimpleFunction(XMLNodeType & matGenNode, unsigned int id){
+    void createToolSimpleFunction(XMLNodeType & genNode, unsigned int id){
 
             XMLAttributeType att;
-            att = matGenNode.attribute("inputs");
+            att = genNode.attribute("inputs");
             unsigned int inputs = 1;
             if(att) {
-                if(!Utilities::stringToType(inputs, matGenNode.attribute("inputs").value())) {
-                    ERRORMSG("---> String conversion in tool: inputs failed");
+                if(!Utilities::stringToType(inputs, genNode.attribute("inputs").value())) {
+                    ERRORMSG("---> String conversion in SimpleFunction tool: inputs failed");
                 }
             }
 
-            std::string expressionString = matGenNode.attribute("expression").value();
+            std::string expressionString = genNode.attribute("expression").value();
 
-            std::string t1 = matGenNode.attribute("inputType").value();
+            std::string t1 = genNode.attribute("inputType").value();
             LogicNode * n;
             if DEFINE_SIMPLEFUNCTION(float)
             else if DEFINE_SIMPLEFUNCTION(double)
@@ -414,7 +431,7 @@ private:
             m_renderScriptGen->addNode(n,false,false);
 
 
-                std::string gid = matGenNode.attribute("groupId").value();
+                std::string gid = genNode.attribute("groupId").value();
                 if(gid == "Body"){
                     m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
                 }else if(gid == "Frame"){
@@ -425,19 +442,32 @@ private:
     }
 
     #define DEFINE_LINEWRITER2(type, typeName) \
-        ( t == #typeName ){ using T = type; \
-            std::string file = matGenNode.attribute("file").value(); \
-            if(file.empty()){ \
-                    ERRORMSG("---> String conversion in LineWriter file: " << file << " failed!")\
+        ( t == #typeName ){ \
+            using T = type; \
+            XMLAttributeType att; \
+            bool truncate = true; \
+            att = genNode.attribute("truncate"); \
+            if(att){ \
+                if(!Utilities::stringToType(truncate, att.value())) { \
+                    ERRORMSG("---> String conversion in LineWriter tool: inputs failed"); \
+                }\
             }\
-            n = new LogicNodes::LineWriter<T>(id,file); \
-        } \
+            std::string file;\
+            att = genNode.attribute("file");\
+            if(att) {\
+                file = genNode.attribute("file").value(); \
+                if(file.empty()){ \
+                    ERRORMSG("---> String conversion in LineWriter tool file: " << file << " failed!")\
+                }\
+            }\
+            n = new LogicNodes::LineWriter<T>(id,file,truncate); \
+        }
 
     #define DEFINE_LINEWRITER(type) DEFINE_LINEWRITER2(type,type)
 
-    void createToolLineWriter(XMLNodeType & matGenNode, unsigned int id){
+    void createToolLineWriter(XMLNodeType & genNode, unsigned int id){
 
-            std::string t = matGenNode.attribute("inputType").value();
+            std::string t = genNode.attribute("inputType").value();
 
             LogicNode * n;
             if DEFINE_LINEWRITER(float)
@@ -460,7 +490,7 @@ private:
 
             m_renderScriptGen->addNode(n,false,false);
 
-            std::string gid = matGenNode.attribute("groupId").value();
+            std::string gid = genNode.attribute("groupId").value();
             if(gid == "Body"){
                 m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
             }else if(gid == "Frame"){
@@ -472,18 +502,18 @@ private:
 
 
      #define DEFINE_MAKEColorList \
-        std::string g = matGenNode.attribute("generate").value(); \
+        std::string g = genNode.attribute("generate").value(); \
         if(g=="random"){ \
             unsigned int seed; \
-            if(!Utilities::stringToType(seed, matGenNode.attribute("seed").value())) { \
+            if(!Utilities::stringToType(seed, genNode.attribute("seed").value())) { \
                 ERRORMSG("---> String conversion in ColorList tool: seed failed"); \
             } \
             unsigned int count; \
-            if(!Utilities::stringToType(count, matGenNode.attribute("count").value())) { \
+            if(!Utilities::stringToType(count, genNode.attribute("count").value())) { \
                 ERRORMSG("---> String conversion in ColorList tool: count failed"); \
             } \
             double amp; \
-            if(!Utilities::stringToType(amp, matGenNode.attribute("amp").value())) { \
+            if(!Utilities::stringToType(amp, genNode.attribute("amp").value())) { \
                 ERRORMSG("---> String conversion in ColorList tool: amp failed"); \
             } \
             if(count==0){ \
@@ -503,20 +533,20 @@ private:
 
     #define DEFINE_ColorList(type) DEFINE_ColorList2(type,type)
 
-    void createToolColorList(XMLNodeType & matGenNode, unsigned int id){
+    void createToolColorList(XMLNodeType & genNode, unsigned int id){
 
-            std::string t = matGenNode.attribute("generate").value();
+            std::string t = genNode.attribute("generate").value();
             if(t=="random"){
             unsigned int seed;
-            if(!Utilities::stringToType(seed, matGenNode.attribute("seed").value())) {
+            if(!Utilities::stringToType(seed, genNode.attribute("seed").value())) {
                 ERRORMSG("---> String conversion in ColorList tool: seed failed");
             }
             unsigned int count;
-            if(!Utilities::stringToType(count, matGenNode.attribute("count").value())) {
+            if(!Utilities::stringToType(count, genNode.attribute("count").value())) {
                 ERRORMSG("---> String conversion in ColorList tool: count failed");
             }
             double amp;
-            if(!Utilities::stringToType(amp, matGenNode.attribute("amp").value())) {
+            if(!Utilities::stringToType(amp, genNode.attribute("amp").value())) {
                 ERRORMSG("---> String conversion in ColorList tool: amp failed");
             }
             if(count==0){
@@ -526,7 +556,7 @@ private:
                 ERRORMSG("---> String conversion in ColorList tool: generator failed");
             }
 
-            std::string t1 = matGenNode.attribute("inputType").value();
+            std::string t1 = genNode.attribute("inputType").value();
             LogicNode * n;
             if DEFINE_ColorList(char)
             else if DEFINE_ColorList(short)
@@ -546,15 +576,15 @@ private:
             m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
     }
 
-    void createToolColorGradient(XMLNodeType & matGenNode, unsigned int id){
+    void createToolColorGradient(XMLNodeType & genNode, unsigned int id){
 
 
             double min;
-            if(!Utilities::stringToType(min, matGenNode.attribute("min").value())) {
+            if(!Utilities::stringToType(min, genNode.attribute("min").value())) {
                 ERRORMSG("---> String conversion in ColorList tool: amp failed");
             }
             double max;
-            if(!Utilities::stringToType(max, matGenNode.attribute("max").value())) {
+            if(!Utilities::stringToType(max, genNode.attribute("max").value())) {
                 ERRORMSG("---> String conversion in ColorList tool: amp failed");
             }
             if(min>=max){
@@ -564,7 +594,7 @@ private:
             LogicNodes::ColorGradientNode * n = new LogicNodes::ColorGradientNode(id,min,max);
 
             // Add all format Sockets links
-            auto nodes = matGenNode.children("Color");
+            auto nodes = genNode.children("Color");
             auto itNodeEnd = nodes.end();
             bool noColors = true;
             for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
@@ -590,27 +620,27 @@ private:
     }
 
 
-    void createToolMatteMaterial(XMLNodeType & matGenNode, unsigned int id) {
+    void createToolMatteMaterial(XMLNodeType & genNode, unsigned int id) {
         auto * node = new LogicNodes::MatteMaterial(id);
         m_renderScriptGen->addNode(node,false,false);
         m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
     }
 
-    void createToolFrameData(XMLNodeType & matGenNode, unsigned int id) {
+    void createToolFrameData(XMLNodeType & genNode, unsigned int id) {
         auto * node = new LogicNodes::FrameData(id);
         m_renderScriptGen->addNode(node,true,false);
         m_renderScriptGen->addNodeToGroup(id,ExecGroups::FRAME);
         m_renderScriptGen->setFrameData(node);
     }
 
-    void createToolBodyData(XMLNodeType & matGenNode, unsigned int id) {
+    void createToolBodyData(XMLNodeType & genNode, unsigned int id) {
         auto * node = new LogicNodes::BodyData(id);
         m_renderScriptGen->addNode(node,true,false);
         m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
         m_renderScriptGen->setBodyData(node);
     }
 
-    void createToolDisplacementToPosQuat(XMLNodeType & matGenNode, unsigned int id) {
+    void createToolDisplacementToPosQuat(XMLNodeType & genNode, unsigned int id) {
 
         auto * node = new LogicNodes::DisplacementToPosQuat(id);
         m_renderScriptGen->addNode(node,false,false);
@@ -618,7 +648,7 @@ private:
 
     }
 
-    void createToolVelocityToVelRot(XMLNodeType & matGenNode, unsigned int id) {
+    void createToolVelocityToVelRot(XMLNodeType & genNode, unsigned int id) {
 
         auto * node = new LogicNodes::VelocityToVelRot(id);
         m_renderScriptGen->addNode(node,false,false);
@@ -626,11 +656,11 @@ private:
 
     }
 
-    void createToolMaterialLookUp(XMLNodeType & matGenNode, unsigned int id) {
+    void createToolMaterialLookUp(XMLNodeType & genNode, unsigned int id) {
 
 
         unsigned int defaultMaterialId;
-        if(!Utilities::stringToType(defaultMaterialId, matGenNode.attribute("defaultMaterialId").value())) {
+        if(!Utilities::stringToType(defaultMaterialId, genNode.attribute("defaultMaterialId").value())) {
             ERRORMSG("---> String conversion in MaterialLookUp tool: defaultMaterialId failed");
         }
 
@@ -644,7 +674,7 @@ private:
         }
         LOGMCLEVEL3(m_pLog, "Default Material set to: " << std::endl << it->second->getMaterialString() << std::endl)
 
-        std::string type = matGenNode.attribute("inputType").value();
+        std::string type = genNode.attribute("inputType").value();
         LogicNode * node = nullptr;
         if( type == "unsigned int") {
              node = new LogicNodes::LookUpTable<unsigned int,
@@ -667,18 +697,18 @@ private:
     }
 
 
-    void createToolRendermanOutput(XMLNodeType & matGenNode, unsigned int id) {
+    void createToolRendermanOutput(XMLNodeType & genNode, unsigned int id) {
         XMLAttributeType att;
         bool pipe = false;
         std::string command ="";
-        att = matGenNode.attribute("pipeToSubprocess");
+        att = genNode.attribute("pipeToSubprocess");
         if(att) {
             if(!Utilities::stringToType(pipe, att.value())) {
                 ERRORMSG("---> String conversion in RendermanWriter tool: pipeToSubprocess failed");
             }
 
             if( pipe ) {
-                command = matGenNode.attribute("command").value();
+                command = genNode.attribute("command").value();
                 if(command.empty()) {
                     ERRORMSG("---> String conversion in RendermanWriter tool: command failed");
                 }
@@ -707,6 +737,10 @@ private:
 
 #undef ADD_STRINGFORMAT_SOCKET2
 #undef ADD_STRINGFORMAT_SOCKET
+#undef ADD_STRINGFORMAT_SOCKET2_IN
+#undef ADD_STRINGFORMAT_SOCKET2_OUT
+#undef ADD_STRINGFORMAT_SOCKET_IN
+#undef ADD_STRINGFORMAT_SOCKET_OUT
 
 #undef DEFINE_MAKESimpleFunc
 #undef DEFINE_SIMPLEFUNCTION_S2

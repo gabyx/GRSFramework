@@ -748,7 +748,7 @@ public:
 
 public:
     template<typename ModuleGeneratorType>
-    SceneParserGUI(ModuleGeneratorType & moduleGen,  Logging::Log * log): BaseType(moduleGen , log){}
+    SceneParserGUI(ModuleGeneratorType & moduleGen,  Logging::Log * log, const boost::filesystem::path & mediaDir): BaseType(moduleGen , log, mediaDir){}
 };
 
 

@@ -28,20 +28,20 @@ class GravityForceField{
         ~GravityForceField(){}
 
         template<typename TRigidBody>
-        inline void calculate(TRigidBody * body){
+        inline void calculate(TRigidBody * body) const{
             body->m_h_term.template head<3>() += body->m_mass * m_gravityAccel;
         }
 
         /// Optional function
         template<typename TRigidBody>
-        inline PREC calcPotEnergy(TRigidBody * body){
+        inline PREC calcPotEnergy(TRigidBody * body) const {
              return -body->m_mass *  body->m_r_S.transpose() * m_gravityAccel;
         }
 
         void setTime(PREC time){};
         void reset(){};
 
-        Vector3 getGravity(){ return m_gravityAccel;}
+        Vector3 getGravity() const{ return m_gravityAccel;}
     private:
         Vector3 m_gravityAccel;
 };
@@ -82,7 +82,7 @@ class SpatialSphericalTimeRandomForceField{
         }
 
         template<typename TRigidBody>
-        inline void calculate(TRigidBody * body){
+        inline void calculate(TRigidBody * body) const{
             if(m_inInterval){
                 if(m_ts <= m_boostTime){
                     Vector3 r = body->m_r_S - m_offset ;
@@ -211,13 +211,13 @@ class ExternalForceList{
             for(auto & f : m_setTimeList){f(time);} // setTime
         }
 
-        void calculate(RigidBodyType * body){
+        void calculate(RigidBodyType * body) const{
             for(auto & f : m_calculationList){
                 f(body); // Apply calculation functions of all external forces!
             }
         }
 
-        PREC calculatePotEnergy(RigidBodyType * body){
+        PREC calculatePotEnergy(RigidBodyType * body) const{
             PREC r;
             for(auto & f : m_calcPotEnergyList){
                 r += f(body); // Apply calculation functions of all external forces!
@@ -228,7 +228,7 @@ class ExternalForceList{
         iterator begin(){return m_calculationList.begin();}
         iterator end(){return m_calculationList.end();}
 
-        GravityForceField * getGravityField(){return m_gravityField;}
+        const GravityForceField * getGravityField() const {return m_gravityField;}
 
     private:
 

@@ -96,7 +96,8 @@ int main(int argc, char **argv) {
                                                 opts.m_startStateIdx,
                                                 opts.m_endStateIdx,
                                                 opts.m_skipFirstState,
-                                                opts.m_prettyPrint );
+                                                opts.m_prettyPrint,
+                                                !opts.m_noTimeList );
 
            }catch(const Exception & e){
                 std::cerr <<"Exception occured: " <<  e.what() << std::endl;

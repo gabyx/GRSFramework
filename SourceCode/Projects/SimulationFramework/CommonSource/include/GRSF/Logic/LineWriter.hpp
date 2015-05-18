@@ -12,6 +12,7 @@ namespace LogicNodes{
 
         struct Inputs {
             enum {
+                File,
                 Value,
                 INPUTS_LAST
             };
@@ -29,32 +30,49 @@ namespace LogicNodes{
             N_SOCKETS = N_INPUTS + N_OUTPUTS
         };
 
-
+        DECLARE_ISOCKET_TYPE(File, boost::filesystem::path );
         DECLARE_ISOCKET_TYPE(Value, TValue );
 
-        LineWriter(unsigned int id,const boost::filesystem::path & scriptPath):
-            LogicNode(id), m_scriptPath(scriptPath)
+
+        LineWriter(unsigned int id,const boost::filesystem::path filePath = "", bool truncate = true):
+            LogicNode(id), m_truncate(truncate)
         {
-            if(boost::filesystem::exists(m_scriptPath)) {
-                ERRORMSG("Output script file LineWriter at: " << m_scriptPath << " exists!")
-            }
-
-            m_script.open(m_scriptPath.string(), std::ios::trunc);
-
-            if(! m_script.good()){
-                ERRORMSG("Output script file LineWriter at: " << m_scriptPath << " could not be opened!")
-            }
+            ADD_ISOCK(File,filePath);
             ADD_ISOCK(Value,TValue());
         }
 
         void compute() {
-            m_script << GET_ISOCKET_VALUE(Value) << std::endl;
+            if( GET_ISOCKET_VALUE(File) != m_openedFile || !m_file.is_open() ){
+                m_openedFile = GET_ISOCKET_VALUE(File);
+                openFile(m_openedFile);
+            }
+            m_file << GET_ISOCKET_VALUE(Value) << std::endl;
         }
 
-        ~LineWriter(){}
+        void openFile(const boost::filesystem::path & f){
+            // file path has changes, close file and open new one
+            if(m_file.is_open()){
+                m_file.close();
+            }
+            if(m_truncate){
+                m_file.open(f.string(), std::ios::trunc);
+            }else{
+                m_file.open(f.string(), std::ios::app);
+            }
+            if(! m_file.good()){
+                ERRORMSG("Output script file LineWriter at: " << f << " could not be opened!")
+            }
+        }
+
+        ~LineWriter(){
+            if(m_file.is_open()){
+                m_file.close();
+            }
+        }
     private:
-        boost::filesystem::path m_scriptPath;
-        std::ofstream m_script;
+        boost::filesystem::path m_openedFile = "";
+        std::ofstream m_file;
+        bool m_truncate = true;
     };
 
 };

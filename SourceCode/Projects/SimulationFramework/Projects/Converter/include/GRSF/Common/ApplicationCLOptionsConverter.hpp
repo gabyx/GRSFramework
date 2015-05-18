@@ -281,7 +281,7 @@ class ApplicationCLOptionsSimInfo: public Utilities::Singleton<ApplicationCLOpti
 public:
 
     bool m_prettyPrint = false;
-
+    bool m_noTimeList  = false;
     bool m_skipFirstState = false;
     unsigned int m_increment = 1;
     unsigned int m_startStateIdx = 0;
@@ -333,8 +333,12 @@ public:
                 m_skipFirstState = true;
             }
 
-            if( ops >> OptionPresent("prettyPrint")) {
+            if( ops >> OptionPresent('x',"prettyPrint")) {
                 m_prettyPrint = true;
+            }
+
+            if( ops >> OptionPresent('t',"noTimeList")) {
+                m_noTimeList = true;
             }
 
         }
@@ -411,7 +415,7 @@ private:
                   << "\t --increment <number> \n"
                   << "\t --startIdx <number> \n"
                   << "\t --endIdx <number> \n"
-                  << "\t --skipFirstState \n"
+                  << "\t -s|--skipFirstState \n"
                   <<    "\t\t Note: These --startIdx, --endIdx, --increment can be used\n"
                   <<    "\t\t       to track the resample ranges over multiple sim files.\n"
                   <<    "\t\t       --increment needs to be greater than 1, start and end \n"
@@ -420,7 +424,9 @@ private:
                   <<    "\t\t       file. Indices startIdx, endIdx are counted with respect\n"
                   <<    "\t\t       to this flag\n"
                   << "\t -x|--prettyPrint \n"
-                  <<    "\t\t Outputs nice formatted strings rather than XML \n";
+                  <<    "\t\t Outputs nice formatted strings rather than XML \n"
+                  << "\t -t|--noTimeList \n"
+                  <<    "\t\t Outputs no time information \n";
     }
 };
 

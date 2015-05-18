@@ -30,14 +30,6 @@ MultiBodySimFile::~MultiBodySimFile() {
 }
 
 
-bool MultiBodySimFile::isGood(){
-    if(m_file_stream.good()) {
-        if( (m_nBytes - m_file_stream.tellg() ) >= ( m_nBytesPerState )  ) {
-            return true;
-        }
-    }
-    return false;
-}
 
 
 MultiBodySimFile::TimeListType MultiBodySimFile::getTimeList(){
