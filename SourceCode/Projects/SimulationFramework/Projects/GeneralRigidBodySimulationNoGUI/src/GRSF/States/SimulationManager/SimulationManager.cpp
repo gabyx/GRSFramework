@@ -7,7 +7,7 @@
 
 #include "GRSF/Common/LogDefines.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
-
+#include "GRSF/Common/ApplicationCLOptions.hpp"
 #include "GRSF/States/SimulationManager/SimulationManager.hpp"
 
 #include "GRSF/Dynamics/Buffers/DynamicsState.hpp"

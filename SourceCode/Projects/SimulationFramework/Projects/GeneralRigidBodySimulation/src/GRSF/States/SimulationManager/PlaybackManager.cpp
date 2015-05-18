@@ -3,6 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include "GRSF/Common/ApplicationCLOptions.hpp"
 #include "GRSF/States/SimulationManager/PlaybackManager.hpp"
 
 #include <GRSF/Singeltons/Contexts/RenderContext.hpp>

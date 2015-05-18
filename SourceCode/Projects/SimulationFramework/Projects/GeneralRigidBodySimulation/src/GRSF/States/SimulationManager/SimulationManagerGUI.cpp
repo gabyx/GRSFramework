@@ -6,6 +6,7 @@
 #include "GRSF/Common/LogDefines.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
 
+#include "GRSF/Common/ApplicationCLOptions.hpp"
 #include "GRSF/States/SimulationManager/SimulationManagerGUI.hpp"
 
 #include <GRSF/Singeltons/Contexts/RenderContext.hpp>

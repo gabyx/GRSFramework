@@ -586,7 +586,7 @@ bool MultiBodySimFile::readSpecific_impl(C & states,
                     pState = nullptr;
                 }
             } else {
-                auto res = states[id];
+                auto & res = states[id];
                 pState = &res;
             }
 
