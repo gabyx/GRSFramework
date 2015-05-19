@@ -414,6 +414,8 @@ namespace LogicNodes {
             enum {
                 Enable,
                 Color,
+                Ka,
+                Kd,
                 INPUTS_LAST
             };
         };
@@ -433,24 +435,143 @@ namespace LogicNodes {
         using RenderMaterialPtr = RenderMaterial*;
         DECLARE_ISOCKET_TYPE(Enable, bool );
         DECLARE_ISOCKET_TYPE(Color, Vector3 );
+        DECLARE_ISOCKET_TYPE(Ka, double);
+        DECLARE_ISOCKET_TYPE(Kd, double);
         DECLARE_OSOCKET_TYPE(Material, RenderMaterialPtr );
 
-        MatteMaterial(unsigned int id) : LogicNode(id) {
+        MatteMaterial(unsigned int id, const Vector3 & color = Vector3(0.5,0.5,0.5),
+                      double ka = 1.0, double kd = 1.0 ) : LogicNode(id) {
             ADD_ISOCK(Enable,true);
-            ADD_ISOCK(Color,Vector3(0.5,0.5,0.5));
+            ADD_ISOCK(Color,color);
+            ADD_ISOCK(Ka,ka);
+            ADD_ISOCK(Kd,kd);
             ADD_OSOCK(Material,nullptr);
         }
 
         virtual ~MatteMaterial() {
 
         }
+        virtual void compute(){
+            if(GET_ISOCKET_REF_VALUE(Enable)){
+                m_material.clear();
+                m_material << "Color [" << GET_ISOCKET_REF_VALUE(Color).format(MyMatrixIOFormat::SpaceSep) << "]\n"
+                     << "Surface \"matte\" \"float Kd\" [" << std::to_string(GET_ISOCKET_REF_VALUE(Kd)) << "] \"float Ka\" ["
+                     << std::to_string(GET_ISOCKET_REF_VALUE(Ka)) << " ]\nAttribute \"visibility\" \"transmission\" 1";
+
+                SET_OSOCKET_VALUE(Material, &m_material);
+            }
+        }
+        virtual void initialize(){}
+
+    private:
+        RenderMaterial m_material;
+    };
+
+    class BxdfDisneyMaterial: public LogicNode {
+    public:
+
+        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+        struct Inputs {
+            enum {
+                Enable,
+                BaseColor,
+                EmitColor,
+                SubsurfaceColor,
+                Subsurface,
+                Metallic,
+                Specular,
+                SpecularTint,
+                Roughness,
+                Anisotropic,
+                Sheen,
+                SheenTint,
+                Clearcoat,
+                ClearcoatGloss,
+                INPUTS_LAST
+            };
+        };
+
+        struct Outputs {
+            enum {
+                Material,
+                OUTPUTS_LAST
+            };
+        };
+
+        enum {
+            N_INPUTS  = Inputs::INPUTS_LAST,
+            N_OUTPUTS = Outputs::OUTPUTS_LAST - Inputs::INPUTS_LAST,
+            N_SOCKETS = N_INPUTS + N_OUTPUTS
+        };
+        using RenderMaterialPtr = RenderMaterial*;
+        DECLARE_ISOCKET_TYPE(Enable, bool );
+        DECLARE_ISOCKET_TYPE(BaseColor, Vector3 );
+        DECLARE_ISOCKET_TYPE(EmitColor, Vector3);
+        DECLARE_ISOCKET_TYPE(SubsurfaceColor, Vector3);
+        DECLARE_ISOCKET_TYPE(Subsurface, double);
+        DECLARE_ISOCKET_TYPE(Metallic, double);
+        DECLARE_ISOCKET_TYPE(Specular, double);
+        DECLARE_ISOCKET_TYPE(SpecularTint, double);
+        DECLARE_ISOCKET_TYPE(Roughness, double);
+        DECLARE_ISOCKET_TYPE(Anisotropic, double);
+        DECLARE_ISOCKET_TYPE(Sheen, double);
+        DECLARE_ISOCKET_TYPE(SheenTint, double);
+        DECLARE_ISOCKET_TYPE(Clearcoat, double );
+        DECLARE_ISOCKET_TYPE(ClearcoatGloss, double );
+
+        DECLARE_OSOCKET_TYPE(Material, RenderMaterialPtr );
+
+        BxdfDisneyMaterial(unsigned int id,
+                      const Vector3 & baseColor = Vector3(0.5,0.5,0.5),
+                      const Vector3 & emitColor = Vector3(0.0,0.0,0.0),
+                      const Vector3 & subsurfaceColor = Vector3(0.0,0.0,0.0),
+                      double subsurface = 0.0,
+                      double metallic = 0.0,
+                      double specular = 0.5,
+                      double specularTint = 0.0,
+                      double roughness = 0.25,
+                      double anisotropic = 0.0,
+                      double sheen = 0.0,
+                      double sheenTint = 0.5,
+                      double clearcoat = 0.0,
+                      double clearcoatGloss = 1.0) : LogicNode(id) {
+            ADD_ISOCK(Enable,true);
+            ADD_ISOCK(BaseColor,baseColor);
+            ADD_ISOCK(EmitColor,emitColor);
+            ADD_ISOCK(SubsurfaceColor,subsurfaceColor);
+            ADD_ISOCK(Subsurface,subsurface);
+            ADD_ISOCK(Metallic,metallic);
+            ADD_ISOCK(Specular,specular);
+            ADD_ISOCK(SpecularTint,specularTint);
+            ADD_ISOCK(Roughness,roughness);
+            ADD_ISOCK(Anisotropic,anisotropic);
+            ADD_ISOCK(Sheen,sheen);
+            ADD_ISOCK(SheenTint,sheenTint);
+            ADD_ISOCK(Clearcoat,clearcoat);
+            ADD_ISOCK(ClearcoatGloss,clearcoatGloss);
+            ADD_OSOCK(Material,nullptr);
+        }
+
+        virtual ~BxdfDisneyMaterial(){}
 
         virtual void compute(){
             if(GET_ISOCKET_REF_VALUE(Enable)){
-                Vector3 & c = GET_ISOCKET_REF_VALUE(Color);
-                std::string s = "Color [" + std::to_string(c(0)) + " " + std::to_string(c(1)) + " " + std::to_string(c(2)) + "]\n";
-                s.append("Surface \"matte\" \"float Kd\" [1.0] \"float Ka\" [1.0]\nAttribute \"visibility\" \"transmission\" 1");
-                m_material.setMaterialString( s );
+                m_material.clear();
+                m_material << "Bxdf \"PxrDisney\" \"0\" "
+                          <<" \"color baseColor\" [" << GET_ISOCKET_REF_VALUE(BaseColor).transpose().format(MyMatrixIOFormat::SpaceSep) << "]"
+                          <<" \"color emitColor\" [" << GET_ISOCKET_REF_VALUE(EmitColor).transpose().format(MyMatrixIOFormat::SpaceSep) << "]"
+                          <<" \"color subsurfaceColor\" [" << GET_ISOCKET_REF_VALUE(SubsurfaceColor).transpose().format(MyMatrixIOFormat::SpaceSep) << "]"
+                          <<" \"float subsurface\" [" << GET_ISOCKET_REF_VALUE(Subsurface) << "]"
+                          <<" \"float metallic\" ["  << GET_ISOCKET_REF_VALUE(Metallic)<< "]"
+                          <<" \"float specular\" ["  << GET_ISOCKET_REF_VALUE(Specular)<< "]"
+                          <<" \"float specularTint\" [" << GET_ISOCKET_REF_VALUE(SpecularTint) << "]"
+                          <<" \"float roughness\" ["  << GET_ISOCKET_REF_VALUE(Roughness)<< "]"
+                          <<" \"float anisotropic\" ["  << GET_ISOCKET_REF_VALUE(Anisotropic)<< "]"
+                          <<" \"float sheen\" ["  << GET_ISOCKET_REF_VALUE(Sheen)<< "]"
+                          <<" \"float sheenTint\" ["  << GET_ISOCKET_REF_VALUE(SheenTint)<< "]"
+                          <<" \"float clearcoat\" ["  << GET_ISOCKET_REF_VALUE(Clearcoat)<< "]"
+                          <<" \"float clearcoatGloss\" [" << GET_ISOCKET_REF_VALUE(ClearcoatGloss)<< "]";
                 SET_OSOCKET_VALUE(Material, &m_material);
             }
         }

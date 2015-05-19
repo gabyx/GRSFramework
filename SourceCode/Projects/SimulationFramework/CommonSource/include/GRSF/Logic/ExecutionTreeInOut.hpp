@@ -224,7 +224,7 @@ protected:
         */
 
         unsigned int solveRec( LogicNode* node,
-                                             std::unordered_set<unsigned int> & nodesCurrDepth) {
+                               std::unordered_set<unsigned int> & nodesCurrDepth) {
 
             nodesCurrDepth.insert(node->m_id);
 
