@@ -1534,6 +1534,62 @@ public:
 };
 
 
+/** The central submodule for any VisModule which is used to only parse the scale */
+struct VisSubModuleScale{
+    DEFINE_LAYOUT_CONFIG_TYPES
+    template<typename XMLNodeType>
+    static inline std::pair<bool,Vector3> parseScale(const XMLNodeType & visNode, const std::string & name){
+
+        bool scaleLikeGeometry = false;
+        Vector3 scale;
+
+        auto att = visNode.attribute("scaleLikeGeometry");
+        if(att) {
+            if(!Utilities::stringToType(scaleLikeGeometry, att.value())) {
+                ERRORMSG("---> String conversion in parseScale: scaleWithGeometry failed");
+            }
+        }
+
+        if(!scaleLikeGeometry) {
+            if( name == "Plane" || name == "PointCloud" || name == "Mesh"){
+
+                if(!Utilities::stringToVector3(scale, visNode.attribute("scale").value() )) {
+                    ERRORMSG("---> String conversion in parseScale: scale failed");
+                }
+
+            }else if( name == "Capsule" ){
+                PREC l,r;
+
+                if(!Utilities::stringToType(l, visNode.attribute("length").value() )) {
+                    ERRORMSG("---> String conversion in parseScale: length failed");
+                }
+                if(!Utilities::stringToType(r, visNode.attribute("radius").value() )) {
+                    ERRORMSG("---> String conversion in parseScale: radius failed");
+                }
+
+                scale(0) = r;
+                scale(1) = r;
+                scale(2) = l;
+            }
+            else{
+                ERRORMSG("---> Node type Mesh/Plane/PointCloud/Capsule not found: " << name);
+            }
+
+            if( !(scale.array() >=0).all() ){
+                ERRORMSG("---> parseScale:: scale: " << scale << " has wrong size for type: " << name);
+            }
+
+        }
+        return std::make_pair(scaleLikeGeometry,scale);
+    }
+
+    template<typename XMLNodeType>
+    static inline std::pair<bool,Vector3> parseScale(const XMLNodeType & visNode){
+        std::string n = visNode.name();
+        return parseScale(visNode,n);
+    }
+};
+
 template<typename TParserTraits>
 class VisModuleDummy : public DummyModule {
 public:

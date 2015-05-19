@@ -9,6 +9,8 @@
 
 #include "GRSF/Dynamics/General/MakeCoordinateSystem.hpp"
 
+
+
 namespace ParserModules {
 template<typename TParserTraits>
 class VisModule {
@@ -49,6 +51,8 @@ private:
     using ScalesList = typename GeometryModuleType::ScalesList;
     ScalesList m_scalesGroup;
 
+    Vector3 m_currScale;
+    bool m_currScaleLikeGeom;
 public:
 
     ScalesList * getScalesGroup(){return &m_scalesGroup;}
@@ -80,6 +84,11 @@ public:
         LOGSCLEVEL1(m_pSimulationLog, "---> VisModule: parsing (BodyVisualization)"<<std::endl;)
         XMLNodeType node = vis.first_child();
         std::string n = node.name();
+
+        auto p = VisSubModuleScale::parseScale(node,n);
+        m_currScaleLikeGeom = p.first;
+        m_currScale = p.second;
+
         if(n=="Plane"){
             parsePlane(node);
         }
@@ -119,21 +128,6 @@ private:
         GET_XMLATTRIBUTE_CHECK(att,"file",meshNode);
         boost::filesystem::path meshName = att.value();
 
-        bool scaleLikeGeometry = false;
-        Vector3 scale;
-        att = meshNode.attribute("scaleLikeGeometry");
-        if(att) {
-            if(!Utilities::stringToType(scaleLikeGeometry, att.value())) {
-                ERRORMSG("---> String conversion in parseMesh: scaleWithGeometry failed");
-            }
-        }
-        if(!scaleLikeGeometry) {
-            if(!Utilities::stringToVector3(scale, meshNode.attribute("scale").value() )) {
-                ERRORMSG("---> String conversion in parseMesh: scale failed");
-            }
-        }
-
-
         XMLNodeType  rendering = meshNode.child("Rendering");
         RenderSettings renderSettings;
         if(rendering) {
@@ -162,17 +156,17 @@ private:
 
             RigidBodyGraphicsType rigidBodyGraphics(sceneNode, id);
 
-            if(scaleLikeGeometry) {
+            if(m_currScaleLikeGeom) {
                 auto & s = m_scalesGroup[bodyIdx];
                 if(s(0)==0 || s(1)==0 || s(2)==0) {
                     ERRORMSG("---> parseMesh:: Scale for Mesh: " + meshName.string() +"is zero or smaller!");
                 }
                 sceneNodeScale->setScale(s(0),s(1),s(2));
             } else {
-                if(scale(0)==0 || scale(1)==0 || scale(2)==0) {
+                if(m_currScale(0)==0 || m_currScale(1)==0 || m_currScale(2)==0) {
                     ERRORMSG("---> parseMesh:: Scale for Mesh: " + meshName.string() + "is zero or smaller!");
                 }
-                sceneNodeScale->setScale(scale(0),scale(1),scale(2));
+                sceneNodeScale->setScale(m_currScale(0),m_currScale(1),m_currScale(2));
             }
             sceneNodeScale->attachObject(ent);
 
@@ -217,23 +211,6 @@ private:
         GET_XMLATTRIBUTE_CHECK(att,"fileCap",capsule);
         boost::filesystem::path fileCap = att.value();
 
-        bool scaleLikeGeometry = false;
-        PREC radius, length;
-        att = capsule.attribute("scaleLikeGeometry");
-        if(att) {
-            if(!Utilities::stringToType(scaleLikeGeometry, att.value())) {
-                ERRORMSG("---> String conversion in parseCapsule: scaleWithGeometry failed");
-            }
-        }
-        if(!scaleLikeGeometry) {
-            if(!Utilities::stringToType(radius, capsule.attribute("radius").value() )) {
-                ERRORMSG("---> String conversion in parseCapsule: scaleXY failed");
-            }
-            if(!Utilities::stringToType(length, capsule.attribute("length").value() )) {
-                ERRORMSG("---> String conversion in parseCapsule: scaleZ failed");
-            }
-        }
-
 
         XMLNodeType  rendering = capsule.child("Rendering");
         RenderSettings renderSettings;
@@ -272,7 +249,7 @@ private:
             Ogre::SceneNode* sceneNodeCap2 = sceneNode->createChildSceneNode();
             sceneNodeCap2->attachObject(entCap2);
 
-            if(scaleLikeGeometry) {
+            if(m_currScaleLikeGeom) {
                 auto & s = m_scalesGroup[bodyIdx];
                 if(s(0)<=0 || s(1)<=0 || s(2)<=0) {
                     ERRORMSG("---> parseCapsule:: Scale for Mesh: " << fileZyl.string() << ", " << fileCap.string() << " is zero or smaller!");
@@ -281,15 +258,13 @@ private:
                 sceneNodeCap1->setScale(s(0),s(1),s(2));
                 sceneNodeCap2->setScale(s(0),s(1),s(2));
             } else {
-                if( radius<=0 || length <=0)  {
-                    ERRORMSG("---> parseCapsule:: radius or length for Mesh: " << fileZyl.string() << ", " << fileCap.string() << "is zero or smaller!");
-                }
-                sceneNodeZyl->setScale(radius,radius,length);
-                sceneNodeCap1->setScale(radius,radius,radius);
-                sceneNodeCap2->setScale(radius,radius,radius);
 
-                sceneNodeCap1->setPosition(0,0,0.5*length);
-                sceneNodeCap2->setPosition(0,0,-0.5*length);
+                sceneNodeZyl->setScale(m_currScale(0),m_currScale(1),m_currScale(2));
+                sceneNodeCap1->setScale(m_currScale(0),m_currScale(1),std::min(m_currScale(0),m_currScale(1)));
+                sceneNodeCap2->setScale(m_currScale(0),m_currScale(1),std::min(m_currScale(0),m_currScale(1)));
+
+                sceneNodeCap1->setPosition(0,0,0.5*m_currScale(2));
+                sceneNodeCap2->setPosition(0,0,-0.5*m_currScale(2));
                 sceneNodeCap2->setOrientation(Ogre::Quaternion(Ogre::Radian(M_PI),Ogre::Vector3(1,0,0) ));
             }
 
@@ -331,11 +306,6 @@ private:
 
         XMLAttributeType att;
 
-        Vector3 scale;
-        if(!Utilities::stringToVector3(scale,pcloudNode.attribute("scale").value() )) {
-            ERRORMSG("---> String conversion in parsePointCloud: scale failed");
-        }
-
         Vector4 color;
         att = pcloudNode.attribute("color");
         if(att){
@@ -373,7 +343,7 @@ private:
         Ogre::SceneNode* sceneNode = m_pBodiesNode->createChildSceneNode(node_name.str());
         // Add point cloud
         OgrePointCloud * pc = new OgrePointCloud();
-        pc->setDimensions(scale(0),scale(1),scale(2));
+        pc->setDimensions(m_currScale(0),m_currScale(1),m_currScale(2));
         pc->setRenderMode(renderMode);
         sceneNode->attachObject(pc);
 
@@ -413,20 +383,6 @@ private:
         XMLAttributeType att;
         static int nodeCounter = 0;
         static int entityCounter = 0;
-
-        bool scaleLikeGeometry = false;
-        Vector3 scale;
-        att = planeNode.attribute("scaleLikeGeometry");
-        if(att) {
-            if(!Utilities::stringToType(scaleLikeGeometry, att.value())) {
-                ERRORMSG("---> String conversion in parseMesh: scaleWithGeometry failed");
-            }
-        }
-        if(!scaleLikeGeometry) {
-            if(!Utilities::stringToVector3(scale, planeNode.attribute("scale").value() )) {
-                ERRORMSG("---> String conversion in parseMesh: scale failed");
-            }
-        }
 
 
         Vector2 subDivs = Vector2::Ones();
@@ -509,7 +465,7 @@ private:
 
             Ogre::MeshManager::getSingleton().createPlane(plane_name.str(),
                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane,
-                    scale(0),scale(1),subDivs(0),subDivs(1),true,1,tile(0),tile(1),Ogre::Vector3(v1(0),v1(1),v1(2)));
+                    m_currScale(0),m_currScale(1),subDivs(0),subDivs(1),true,1,tile(0),tile(1),Ogre::Vector3(v1(0),v1(1),v1(2)));
 
             Ogre::Entity* ent = m_pSceneMgr->createEntity(entity_name.str(),plane_name.str() );
             ent->setCastShadows(renderSettings.shadowsEnabled);
@@ -519,10 +475,10 @@ private:
 
             RigidBodyGraphicsType rigidBodyGraphics(sceneNode, b.m_id);
 
-            if(scaleLikeGeometry) {
+            if(m_currScaleLikeGeom) {
                 ERRORMSG("---> parsePlane:: Scale for Plane can not be used from Geometry!");
             } else {
-                sceneNodeScale->setScale(scale(0),scale(1),scale(2));
+                sceneNodeScale->setScale(m_currScale(0),m_currScale(1),m_currScale(2));
             }
             sceneNodeScale->attachObject(ent);
 
