@@ -24,6 +24,7 @@ class RenderScriptGenerator : public ExecutionTreeInOut{
             enum {
                 BODY, /** all nodes which need to update for producing an render output from an input node BodyData*/
                 FRAME, /** all nodes which need to update for producing the inputs for the current frame */
+
                 NGROUPS
             };
         };

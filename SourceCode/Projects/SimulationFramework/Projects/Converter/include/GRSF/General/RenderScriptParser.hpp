@@ -18,10 +18,10 @@
 
 /** The traits for a standart RenderScriptParser class*/
 template<typename TSceneParser, typename TCollection>
-struct RenderScriptParserTraits : RenderMatParserBaseTraits<TSceneParser,TCollection> {
+struct RenderScriptParserTraits : RenderScriptParserBaseTraits<TSceneParser,TCollection> {
     // Module typedefs
     using MaterialsModuleType   = typename RenderScriptParserModules::MaterialsModule<RenderScriptParserTraits>;
-    using MatGenModuleType   = typename RenderScriptParserModules::ScriptGeneratorModule<RenderScriptParserTraits>;
+    using ScriptGenModuleType   = typename RenderScriptParserModules::ScriptGeneratorModule<RenderScriptParserTraits>;
 };
 
 template< typename TCollection, template<typename P, typename C> class TParserTraits = RenderScriptParserTraits >
@@ -30,7 +30,7 @@ public:
 
     using ParserForModulesType = RenderScriptParser;
     using ParserTraits = TParserTraits<ParserForModulesType, TCollection>;
-    DEFINE_MATCOLPARSER_TYPE_TRAITS(ParserTraits);
+    DEFINE_RENDERSCRIPTPARSER_TYPE_TRAITS(ParserTraits);
 private:
 
     boost::filesystem::path m_currentParseFilePath;
@@ -45,7 +45,7 @@ private:
 
     /** Modules */
     std::unique_ptr< MaterialsModuleType >       m_pMaterialsModule;
-    std::unique_ptr< MatGenModuleType >          m_pMaterialGeneratorModule;
+    std::unique_ptr< ScriptGenModuleType >       m_pScriptGenModule;
 
 public:
 
@@ -58,7 +58,7 @@ public:
         m_pLog = log;
         ASSERTMSG(m_pLog, "Log pointer is zero!");
         // Get all Modules from the Generator
-        std::tie(m_pMaterialsModule, m_pMaterialGeneratorModule) = moduleGen.template createParserModules<ParserForModulesType>( static_cast<ParserForModulesType*>(this));
+        std::tie(m_pMaterialsModule, m_pScriptGenModule) = moduleGen.template createParserModules<ParserForModulesType>( static_cast<ParserForModulesType*>(this));
     }
 
 
@@ -157,8 +157,8 @@ private:
             }
 
             node = m_xmlRootNode.child("Logic");
-            if(node && m_pMaterialGeneratorModule) {
-                m_pMaterialGeneratorModule->parse(node, m_pMaterialsModule->getMaterialMap() );
+            if(node && m_pScriptGenModule) {
+                m_pScriptGenModule->parse(node, m_pMaterialsModule->getMaterialMap() );
             }
 
 

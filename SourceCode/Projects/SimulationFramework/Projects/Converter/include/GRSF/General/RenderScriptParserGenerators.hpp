@@ -84,16 +84,16 @@ namespace RenderScriptParserGenerators {
 
         template<typename TParser>
         std::tuple< std::unique_ptr<typename TParser::MaterialsModuleType> ,
-            std::unique_ptr<typename TParser::MatGenModuleType>
+            std::unique_ptr<typename TParser::ScriptGenModuleType>
             >
         createParserModules(TParser * p) {
 
             using MaterialsModuleType = typename TParser::MaterialsModuleType;
-            using MatGenModuleType    = typename TParser::MatGenModuleType;
+            using ScriptGenModuleType    = typename TParser::ScriptGenModuleType;
 
             auto mat = std::unique_ptr<MaterialsModuleType >(new MaterialsModuleType(p, &m_p->m_materials));
 
-            auto matGen = std::unique_ptr<MatGenModuleType >(new MatGenModuleType(p, m_g, &m_p->m_geometryMap));
+            auto matGen = std::unique_ptr<ScriptGenModuleType >(new ScriptGenModuleType(p, m_g, &m_p->m_geometryMap));
 
             return std::make_tuple(std::move(mat),std::move(matGen));
         };

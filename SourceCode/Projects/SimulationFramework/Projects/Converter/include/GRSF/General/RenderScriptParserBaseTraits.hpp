@@ -4,7 +4,7 @@
 #include "GRSF/Common/SimpleLogger.hpp"
 #include "pugixml.hpp"
 
-#define DEFINE_MATCOLLPARSER_BASE_TYPE_TRAITS( TParserTraits ) \
+#define DEFINE_RENDERSCRIPTPARSER_BASE_TYPE_TRAITS( TParserTraits ) \
     using ParserType = typename TParserTraits::ParserType; \
     using CollectionType = typename TParserTraits::CollectionType; \
     using LogType = typename TParserTraits::LogType; \
@@ -16,7 +16,7 @@
 
 /** The base traits for every MaterialsCollectionParser parser */
 template<typename TSceneParser, typename TCollection>
-struct RenderMatParserBaseTraits {
+struct RenderScriptParserBaseTraits {
 
 
     using CollectionType = TCollection;
@@ -35,10 +35,10 @@ struct RenderMatParserBaseTraits {
 
 
 
-#define  DEFINE_MATCOLPARSER_TYPE_TRAITS( TParserTraits )  \
-    DEFINE_MATCOLLPARSER_BASE_TYPE_TRAITS( TParserTraits ) \
+#define  DEFINE_RENDERSCRIPTPARSER_TYPE_TRAITS( TParserTraits )  \
+    DEFINE_RENDERSCRIPTPARSER_BASE_TYPE_TRAITS( TParserTraits ) \
     using MaterialsModuleType     = typename TParserTraits::MaterialsModuleType;\
-    using MatGenModuleType     = typename TParserTraits::MatGenModuleType;\
+    using ScriptGenModuleType     = typename TParserTraits::ScriptGenModuleType;\
 
 
 #endif

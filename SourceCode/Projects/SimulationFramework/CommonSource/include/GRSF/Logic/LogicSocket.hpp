@@ -88,11 +88,14 @@ protected:
 
     bool m_isInput;
 
-    // from socket to 'this' (used to link an input socket with an output socket)
-    // Only one makes sense
+    /** from socket to 'this' (used to link an input socket with an output socket)
+    *  incoming edges: only one makes sense
+    */
     LogicSocketBase* m_from;
 
-    // from 'this' to sockets (used to link an output socket with one or more than one input socket)
+    /** from 'this' to sockets (used to link an output socket with one or more than one input socket)
+    *   outgoing edges
+    */
     SocketListType m_to;
 
 private:

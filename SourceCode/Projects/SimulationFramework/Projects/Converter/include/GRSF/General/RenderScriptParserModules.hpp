@@ -19,7 +19,7 @@ namespace RenderScriptParserModules {
 template<typename TParserTraits>
 class MaterialsModule {
 public:
-    DEFINE_MATCOLPARSER_TYPE_TRAITS(TParserTraits)
+    DEFINE_RENDERSCRIPTPARSER_TYPE_TRAITS(TParserTraits)
 
     using MaterialMapType = typename CollectionType::MaterialMapType;
 
@@ -71,7 +71,7 @@ template<typename TParserTraits>
 class ScriptGeneratorModule {
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
-    DEFINE_MATCOLPARSER_TYPE_TRAITS(TParserTraits)
+    DEFINE_RENDERSCRIPTPARSER_TYPE_TRAITS(TParserTraits)
 
     using GeometryMapType = typename CollectionType::GeometryMapType;
     using MaterialMapType = typename CollectionType::MaterialMapType;
@@ -105,6 +105,8 @@ public:
                 createToolMaterialLookUp(*itNode,id);
             } else if(type == "MatteMaterial") {
                 createToolMatteMaterial(*itNode,id);
+            } else if(type == "BxdfDisneyMaterial") {
+                createToolBxdfDisneyMaterial(*itNode,id);
             } else if(type == "ColorList") {
                 createToolColorList(*itNode,id);
             } else if(type == "ColorGradient") {
@@ -201,6 +203,22 @@ public:
 
 private:
 
+    /** Adds the tool to the groupId, if not specified it is added to the BODY group */
+    void addNodeToGroup(XMLNodeType & genNode, unsigned int id){
+        auto att = genNode.attribute("groupId");
+        if( att ){
+            std::string gid = att.value();
+            if(gid == "Body"){
+                m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
+            }else if(gid == "Frame"){
+                m_renderScriptGen->addNodeToGroup(id, ExecGroups::FRAME);
+            }else{
+                ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
+            }
+        }else{
+            m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
+        }
+    }
 
     #define DEFINE_CONSTANT2(type, typeName) \
         ( t == #typeName ){ using T = type; \
@@ -251,14 +269,7 @@ private:
 
             m_renderScriptGen->addNode(n,false,false);
 
-                std::string gid = genNode.attribute("groupId").value();
-                if(gid == "Body"){
-                    m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
-                }else if(gid == "Frame"){
-                    m_renderScriptGen->addNodeToGroup(id, ExecGroups::FRAME);
-                }else{
-                    ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
-                }
+            addNodeToGroup(genNode,id);
     }
 
     #define DEFINE_NORM2(type, typeName) \
@@ -278,14 +289,7 @@ private:
 
             m_renderScriptGen->addNode(n,false,false);
 
-            std::string gid = genNode.attribute("groupId").value();
-            if(gid == "Body"){
-                m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
-            }else if(gid == "Frame"){
-                m_renderScriptGen->addNodeToGroup(id, ExecGroups::FRAME);
-            }else{
-                ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
-            }
+            addNodeToGroup(genNode,id);
     }
 
     #define ADD_STRINGFORMAT_SOCKET2(type, typeName, _InOROut_ ) \
@@ -350,14 +354,7 @@ private:
 
             m_renderScriptGen->addNode(node,false,false);
 
-                std::string gid = genNode.attribute("groupId").value();
-                if(gid == "Body"){
-                    m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
-                }else if(gid == "Frame"){
-                    m_renderScriptGen->addNodeToGroup(id, ExecGroups::FRAME);
-                }else{
-                    ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
-                }
+            addNodeToGroup(genNode,id);
     }
 
     #define DEFINE_MAKESimpleFunc \
@@ -430,15 +427,7 @@ private:
 
             m_renderScriptGen->addNode(n,false,false);
 
-
-                std::string gid = genNode.attribute("groupId").value();
-                if(gid == "Body"){
-                    m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
-                }else if(gid == "Frame"){
-                    m_renderScriptGen->addNodeToGroup(id, ExecGroups::FRAME);
-                }else{
-                    ERRORMSG("---> String conversion in SimpleFunction tool: groupId: '" << gid << "' not found!");
-                }
+            addNodeToGroup(genNode,id);
     }
 
     #define DEFINE_LINEWRITER2(type, typeName) \
@@ -490,14 +479,8 @@ private:
 
             m_renderScriptGen->addNode(n,false,false);
 
-            std::string gid = genNode.attribute("groupId").value();
-            if(gid == "Body"){
-                m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
-            }else if(gid == "Frame"){
-                m_renderScriptGen->addNodeToGroup(id, ExecGroups::FRAME);
-            }else{
-                ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
-            }
+            addNodeToGroup(genNode,id);
+
     }
 
 
@@ -573,7 +556,7 @@ private:
             }
 
             m_renderScriptGen->addNode(n,false,false);
-            m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
+            addNodeToGroup(genNode,id);
     }
 
     void createToolColorGradient(XMLNodeType & genNode, unsigned int id){
@@ -616,12 +599,18 @@ private:
             }
 
             m_renderScriptGen->addNode(n,false,false);
-            m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
+            addNodeToGroup(genNode,id);
     }
 
 
     void createToolMatteMaterial(XMLNodeType & genNode, unsigned int id) {
         auto * node = new LogicNodes::MatteMaterial(id);
+        m_renderScriptGen->addNode(node,false,false);
+        m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
+    }
+
+    void createToolBxdfDisneyMaterial(XMLNodeType & genNode, unsigned int id) {
+        auto * node = new LogicNodes::BxdfDisneyMaterial(id);
         m_renderScriptGen->addNode(node,false,false);
         m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
     }
@@ -672,7 +661,7 @@ private:
         if(it == m_materials->end()) {
             ERRORMSG("No default material found for MaterialLookUp tool!")
         }
-        LOGMCLEVEL3(m_pLog, "Default Material set to: " << std::endl << it->second->getMaterialString() << std::endl)
+        LOGMCLEVEL3(m_pLog, "Default Material set to: " << std::endl << it->second->str() << std::endl)
 
         std::string type = genNode.attribute("inputType").value();
         LogicNode * node = nullptr;
@@ -693,7 +682,7 @@ private:
         }
 
          m_renderScriptGen->addNode(node,false,false);
-         m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
+         addNodeToGroup(genNode,id);
     }
 
 
