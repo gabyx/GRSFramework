@@ -48,11 +48,11 @@ public:
 
         LOGSCLEVEL1(m_pSimulationLog, "---> VisModuleConverter: parsing (BodyVisualization)"<<std::endl;)
         XMLNodeType node = vis.first_child();
-
-        if( node.name() == "Mesh"){
+        std::string n = node.name();
+        if( n == "Mesh"){
                 parseScale(node);
                 parseMesh(node);
-        }else if( node.name() == "Plane" || node.name() == "Capsule" || node.name() == "PointCloud"){
+        }else if( n== "Plane" || n == "Capsule" || n == "PointCloud"){
             parseScale(node);
         }
         else{
