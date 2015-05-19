@@ -50,13 +50,13 @@ public:
         XMLNodeType node = vis.first_child();
         std::string n = node.name();
         if( n == "Mesh"){
-                parseScale(node);
-                parseMesh(node);
-        }else if( n== "Plane" || n == "Capsule" || n == "PointCloud"){
-            parseScale(node);
+            parseMesh(node);
         }
-        else{
-            ERRORMSG("---> Node type Mesh/Plane/PointCloud/Capsule not found: " << node.name());
+
+        auto p = VisSubModuleScale::parseScale(node,n);
+
+        for(auto & b : *m_bodyListGroup) {
+            m_scalesMap->emplace( b.m_id , p.second );
         }
     }
 
@@ -68,26 +68,7 @@ public:
     void cleanUp(){};
 
 private:
-    void parseScale(XMLNodeType node){
-        XMLAttributeType att;
-        bool scaleLikeGeometry = false;
-        Vector3 scale;
-        att = node.attribute("scaleLikeGeometry");
-        if(att) {
-            if(!Utilities::stringToType(scaleLikeGeometry, att.value())) {
-                ERRORMSG("---> String conversion in parseMesh: scaleWithGeometry failed");
-            }
-        }
-        if(!scaleLikeGeometry) {
-            if(!Utilities::stringToVector3(scale, node.attribute("scale").value() )) {
-                ERRORMSG("---> String conversion in parseMesh: scale failed");
-            }
-            for(auto & b : *m_bodyListGroup) {
-                m_scalesMap->emplace( b.m_id , scale);
-            }
 
-        }
-    }
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
     void parseMesh(XMLNodeType  meshNode ) {
         XMLAttributeType att;
