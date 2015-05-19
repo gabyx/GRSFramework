@@ -56,7 +56,7 @@ public:
             parseScale(node);
         }
         else{
-            ERRORMSG("---> Node type Mesh/Plane/PointCloud/Capsule not found!");
+            ERRORMSG("---> Node type Mesh/Plane/PointCloud/Capsule not found: " << node.name());
         }
     }
 
