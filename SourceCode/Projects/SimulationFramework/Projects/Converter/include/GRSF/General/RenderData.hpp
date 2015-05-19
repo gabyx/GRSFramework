@@ -47,24 +47,16 @@ public:
         m_bodyListGroup = bodyList;
 
         LOGSCLEVEL1(m_pSimulationLog, "---> VisModuleConverter: parsing (BodyVisualization)"<<std::endl;)
-        XMLNodeType node = vis.child("Mesh");
+        XMLNodeType node = vis.first_child();
 
-        if(node) {
-            parseScale(node);
-            parseMesh(node);
-        } else {
-            node = vis.child("Plane");
-            if(node){
+        if( node.name() == "Mesh"){
                 parseScale(node);
-            }else{
-                node = vis.child("PointCloud");
-                if(node){
-                    parseScale(node);
-                }else{
-                    ERRORMSG("---> Node type Mesh/Plane/PointCloud not found!");
-                }
-
-            }
+                parseMesh(node);
+        }else if( node.name() == "Plane" || node.name() == "Capsule" || node.name() == "PointCloud"){
+            parseScale(node);
+        }
+        else{
+            ERRORMSG("---> Node type Mesh/Plane/PointCloud/Capsule not found!");
         }
     }
 
