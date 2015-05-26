@@ -208,6 +208,7 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f,
 
     while(m_simFile.isGood() && !m_abort){
 
+
         // Write render script for this frame
         double time;
         start = timer.elapsedMilliSec();
@@ -234,7 +235,7 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f,
 
 
         m_renderScriptGen.finalizeFrame();
-        m_frameCounter++;
+
 
         // skip to next stateIdx if we have indices
         if(!stateIndices.empty()){
@@ -253,6 +254,7 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f,
             ++currentStateIdx;
         }
 
+        m_frameCounter++;
     }
 
     if(!stateIndices.empty()){
