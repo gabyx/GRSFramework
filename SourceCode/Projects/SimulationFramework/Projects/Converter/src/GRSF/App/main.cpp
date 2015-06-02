@@ -118,7 +118,13 @@ int main(int argc, char **argv) {
 
             try{
                 RenderScriptConverter renderConv;
-                renderConv.convert(opts.getInputFiles(),opts.getOutputFile(),opts.getSceneFile(), opts.getConverterLogicFile() ,opts.getRenderer());
+                renderConv.convert(opts.getInputFiles(),
+                                   opts.getOutputFile(),
+                                   opts.getOutputDir(),
+                                   opts.getSceneFile(),
+                                   opts.getConverterLogicFile() ,
+                                   opts.getRenderer());
+
             }catch(const Exception & e){
                     std::cerr <<"Exception occured: " <<  e.what() << std::endl;
                     exit(EXIT_FAILURE);

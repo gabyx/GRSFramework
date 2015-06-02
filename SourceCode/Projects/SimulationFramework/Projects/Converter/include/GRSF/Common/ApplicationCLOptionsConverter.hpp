@@ -192,11 +192,11 @@ public:
     }
 
     void printArgs(std::ostream & s){
-        s << " Input Files Arg: ";
+        s << "---> Input Files Arg: \n\t";
         Utilities::printVector(s, m_inputFiles.begin(), m_inputFiles.end(), std::string(" , "));
         s << std::endl;
-        s << " Output File Arg: " << m_outputFile <<std::endl;
-        s << " Task Arg: ";
+        s << "\t Output File Arg: " << m_outputFile <<std::endl;
+        s << "\t Task Arg: ";
         if(m_task == Task::JOIN){
             s << "join";
         }else if(m_task == Task::RESAMPLE){
@@ -378,7 +378,7 @@ public:
     }
 
     void printArgs(std::ostream & s){
-        s << " Input Files Arg: ";
+        s << "---> Input Files Arg: \n\t";
         Utilities::printVector(s, m_inputFiles.begin(), m_inputFiles.end(), std::string(" , "));
         s<<std::endl;
     }
@@ -446,7 +446,7 @@ private:
 
     std::vector<boost::filesystem::path> m_inputFiles;
 
-    bool m_pipeToStdOut = false;
+    boost::filesystem::path m_outputDir;
     boost::filesystem::path m_outputFile;
 
      // RenderScriptConverter
@@ -477,7 +477,7 @@ public:
             if(render == "renderman"){
                 m_renderer = Renderer::RENDERMAN;
             }else if(render == "luxrender"){
-                m_renderer = Renderer::LUXRENDER;
+                ERRORMSG("Luxrender is not supported at the moment!")
             }
 
             m_inputFiles.clear();
@@ -501,12 +501,13 @@ public:
 
             ops >> Option('c',"converterLogic", m_converterLogicFile);
 
-            ops >> Option('o',"output",m_outputFile);
+            if(ops >> OptionPresent('o',"outputFile")){
+                ops >> Option('o',"outputFile",m_outputFile);
+            }
 
-//            if(m_outputFile == "stdout"){
-//                m_pipeToStdOut = true;
-//                m_outputFile = "";
-//            }
+            if(ops >> OptionPresent('l',"")){
+                ops >> Option('l',"outputDir",m_outputFile);
+            }
 
         }
         catch(GetOpt::ParsingErrorEx & ex){
@@ -545,12 +546,13 @@ public:
     }
 
     void printArgs(std::ostream & s){
-        s << " Input Files Arg: ";
+        s << "---> Input Files Arg: ";
         Utilities::printVector(s, m_inputFiles.begin(), m_inputFiles.end(), std::string(" , "));
         s <<std::endl;
-        s << " Scene File Arg: " << m_sceneFile <<std::endl;
-        s << " Output File Arg: " << m_outputFile <<std::endl;
-        s << " Renderer: ";
+        s << "\tScene File Arg: " << m_sceneFile <<std::endl;
+        s << "\tOutput File Arg: " << m_outputFile <<std::endl;
+        s << "\tOutput Dir Arg: " << m_outputDir <<std::endl;
+        s << "\tRenderer: ";
         if(m_renderer == Renderer::RENDERMAN){
             s << "renderman";
         }else if(m_renderer == Renderer::LUXRENDER){
@@ -558,7 +560,6 @@ public:
         }else{
             s << "undefined";
         }
-        s << " pipeToStdOut: " << m_pipeToStdOut<<std::endl;
         s<<std::endl;
     }
 
@@ -584,25 +585,25 @@ public:
             ERRORMSG( "Scene file supplied as argument: " << m_sceneFile << " does not exist!")
         }
 
-        if(m_outputFile.empty()){
-            printHelp();
-            ERRORMSG( "No output file supplied!" )
-        }else if(boost::filesystem::exists(m_outputFile)) {
-                printHelp();
-                ERRORMSG( "Output file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
+        if(!boost::filesystem::exists(m_mediaDir)) {
+            ERRORMSG( "Media directory " << m_mediaDir << " does not exist!" )
         }
 
-
+        if(!m_outputDir.empty()){
+            if(boost::filesystem::exists(m_outputDir)) {
+                printHelp();
+                ERRORMSG( "Output directory supplied as argument: " << m_outputDir << " does not exist!")
+            }
+        }
     }
 
     inline const std::vector<boost::filesystem::path> & getInputFiles(){ return m_inputFiles;}
     inline const boost::filesystem::path & getMediaDir(){ return m_mediaDir;}
     inline const boost::filesystem::path & getOutputFile(){ return m_outputFile;}
+    inline const boost::filesystem::path & getOutputDir(){ return m_outputDir;}
     inline const boost::filesystem::path & getConverterLogicFile(){ return m_converterLogicFile;}
     inline const boost::filesystem::path & getSceneFile(){ return m_sceneFile;}
     inline Renderer getRenderer(){ return m_renderer;}
-
-    inline bool pipeToStdOut(){ return m_pipeToStdOut;}
 
 private:
 
@@ -615,25 +616,36 @@ private:
         std::cerr << "Help for the Application Renderer: \n Options: \n"
                   << " \t -i|--input <path1> <path2> ... \n"
                   << " \t [Required] \n"
-                  <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim (.sim) file paths which are processed \n"
+                  <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim (.sim)\n"
+                  <<            "\t\t file paths which are processed. \n"
                   << " \t -r|--renderer renderman|luxrender \n"
+                  << " \t\t luxrender output is not supported yet!, renderman means any renderman interface byte\n"
+                  << " \t\t stream (RIB) compliant renderer."
                   << " \t [Required] \n"
                   << " \t -s|--scene <path>  \n"
                   << " \t [Required] \n"
-                  <<            "\t\t <path>: Specifies the scene file xml path \n"
+                  <<            "\t\t <path>: Specifies the scene file xml path to use for converting. \n"
                   << " \t -c|--converterLogic <path>  \n"
                   << " \t [Required] \n"
-                  <<            "\t\t <path>: Specifies the converter logic file xml path \n"
-                  << " \t -m|--media-path <path> (optional) \n"
+                  <<            "\t\t <path>: Specifies the converter logic file xml path. \n"
+                  << " \t -m|--media-path <path> \n"
+                  << " \t [Optional] \n"
                   <<            "\t\t <path>: is the base directory for all media files (.obj, .mesh) \n"
                   <<            "\t\t which is used for relative file names in the scene file <SceneFilePath>. (no slash at the end)\n"
                   <<            "\t\t if not specified the media directory is './' .\n"
 
-                  << " \t -o|--output <path>  \n"
-                  << " \t [Required] \n"
-                  <<            "\t\t <path>: Specifies the ouput directory path or \n"
+                  << " \t -o|--outputFile <path>  \n"
+                  << " \t [Optional] \n"
+                  <<            "\t\t <path>: Specifies the ouput base file path used for each state.\n"
+                  <<            "\t\t For relative file paths , the --outputDir file paths is appended if given.\n"
+                  <<            "\t\t Example: -o dir1/dir2/outFrame is used to initialized the FrameData source node.\n"
+                  <<            "\t\t since it is not a absolute path, the --outputDir path is appenden if given!.\n"
+                  << " \t -l|--outputDir <path>  \n"
+                  << " \t [Optional] \n"
+                  <<            "\t\t <path>: Specifies the local output directory path which is added to the \n"
+                  <<            "\t\t --outputFile file path if it is relative. The default value is the execution directory. \n"
                   << " \t -h|--help \n"
-                  <<            "\t\t Prints this help\n";
+                  <<            "\t\t Prints this help.\n";
     }
 };
 
