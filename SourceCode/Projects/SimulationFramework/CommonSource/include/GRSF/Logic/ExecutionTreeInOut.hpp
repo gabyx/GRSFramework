@@ -220,7 +220,7 @@ protected:
     private:
 
         /**
-        * Breath first search: this function returns recursively the priority
+        * Depth first search: this function returns recursively the priority
         */
 
         unsigned int solveRec( LogicNode* node,

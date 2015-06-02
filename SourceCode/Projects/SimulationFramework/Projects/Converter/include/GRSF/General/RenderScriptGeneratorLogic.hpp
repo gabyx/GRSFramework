@@ -596,12 +596,8 @@ namespace LogicNodes {
 
                 FileHeader,
                 FileFooter,
-                RenderSettings,
-                FrameSettings,
-                CameraSettings,
-                WorldSettings,
-                BodyBegin,
-                BodyEnd,
+                BodiesBegin,
+                BodiesEnd,
 
                 Time,
                 FrameNr,
@@ -632,12 +628,8 @@ namespace LogicNodes {
 
         DECLARE_ISOCKET_TYPE(FileHeader, std::string );
         DECLARE_ISOCKET_TYPE(FileFooter,   std::string );
-        DECLARE_ISOCKET_TYPE(RenderSettings, std::string );
-        DECLARE_ISOCKET_TYPE(FrameSettings, std::string );
-        DECLARE_ISOCKET_TYPE(CameraSettings, std::string );
-        DECLARE_ISOCKET_TYPE(WorldSettings, std::string );
-        DECLARE_ISOCKET_TYPE(BodyBegin, std::string );
-        DECLARE_ISOCKET_TYPE(BodyEnd, std::string );
+        DECLARE_ISOCKET_TYPE(BodiesBegin, std::string );
+        DECLARE_ISOCKET_TYPE(BodiesEnd, std::string );
 
         DECLARE_ISOCKET_TYPE(Time, double );
         DECLARE_ISOCKET_TYPE(FrameNr, unsigned int );
@@ -655,12 +647,8 @@ namespace LogicNodes {
             // Per Frame
             ADD_ISOCK(FileHeader,std::string());
             ADD_ISOCK(FileFooter,std::string());
-            ADD_ISOCK(RenderSettings,std::string());
-            ADD_ISOCK(FrameSettings,std::string());
-            ADD_ISOCK(CameraSettings,std::string());
-            ADD_ISOCK(WorldSettings,std::string());
-            ADD_ISOCK(BodyBegin,std::string());
-            ADD_ISOCK(BodyEnd,std::string());
+            ADD_ISOCK(BodiesBegin,std::string());
+            ADD_ISOCK(BodiesEnd,std::string());
 
             // FrameData
             ADD_ISOCK(Time,0.0);
@@ -671,13 +659,11 @@ namespace LogicNodes {
         }
 
         virtual void writeHeader() = 0;
-        virtual void writeFrameStart() = 0;
 
-        virtual void writeBodyBegin() = 0;
+        virtual void writeBodiesBegin() = 0;
         virtual void writeBody() = 0;
-        virtual void writeBodyEnd() = 0;
+        virtual void writeBodiesEnd() = 0;
 
-        virtual void writeFrameEnd() = 0;
         virtual void writeFooter() = 0;
 
 
@@ -721,23 +707,8 @@ namespace LogicNodes {
             m_s << GET_ISOCKET_REF_VALUE(FileFooter);
         }
 
-        void writeFrameStart(){
-            m_s << "FrameBegin " << GET_ISOCKET_REF_VALUE(FrameNr) << "\n";
-            writeFrameSettings();
-            writeRenderSettings();
-            writeCamera();
-            m_s << "WorldBegin\n";
-            writeWorldSettings();
-            writeBodyBegin();
-            //std::cout << "s: " << s.str()<< std::endl;
-        }
-        void writeFrameEnd(){
-            writeBodyEnd();
-            m_s << "WorldEnd\nFrameEnd\n";
-        }
-
-        void writeBodyBegin(){
-            m_s << GET_ISOCKET_REF_VALUE(BodyBegin);
+        void writeBodiesBegin(){
+            m_s << GET_ISOCKET_REF_VALUE(BodiesBegin);
         }
         void writeBody(){
 
@@ -768,8 +739,8 @@ namespace LogicNodes {
             dumpStream();
         }
 
-        void writeBodyEnd(){
-            m_s << GET_ISOCKET_REF_VALUE(BodyEnd);
+        void writeBodiesEnd(){
+            m_s << GET_ISOCKET_REF_VALUE(BodiesEnd);
         }
 
         void initFrame() {
@@ -788,14 +759,14 @@ namespace LogicNodes {
 
             // write init
             writeHeader();
-            writeFrameStart();
+            writeBodiesBegin();
             dumpStream();
         }
 
         void finalizeFrame(){
             // finish last frame
             if(isFileOpen()){
-               writeFrameEnd();
+               writeBodiesEnd();
                writeFooter();
                dumpStream();
             }
@@ -810,7 +781,13 @@ namespace LogicNodes {
         void openNewFile(){
 
             // open new RIB file at this path and name
-            boost::filesystem::path p = GET_ISOCKET_REF_VALUE(Folder) / ( GET_ISOCKET_REF_VALUE(Name) + ".rib" );
+
+            boost::filesystem::path f = GET_ISOCKET_REF_VALUE(Name);
+            if(f.extension() != ".rib" ){
+                f += ".rib";
+            }
+
+            boost::filesystem::path p = GET_ISOCKET_REF_VALUE(Folder) / f ;
 
 
             if(m_pipeToSubProcess){
@@ -859,19 +836,6 @@ namespace LogicNodes {
             }else{
                 return m_frameFile.is_open();
             }
-        }
-
-        void writeFrameSettings(){
-            m_s << GET_ISOCKET_REF_VALUE(FrameSettings);
-        }
-        void writeCamera(){
-            m_s << GET_ISOCKET_REF_VALUE(CameraSettings);
-        }
-        void writeWorldSettings(){
-            m_s << GET_ISOCKET_REF_VALUE(WorldSettings);
-        }
-        void writeRenderSettings(){
-            m_s << GET_ISOCKET_REF_VALUE(RenderSettings);
         }
 
         void dumpStream(){

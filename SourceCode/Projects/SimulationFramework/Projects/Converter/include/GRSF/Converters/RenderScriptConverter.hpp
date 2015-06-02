@@ -35,6 +35,7 @@ public:
 
     void convert( const std::vector<boost::filesystem::path> & inputFiles,
                   boost::filesystem::path outputFile,
+                  boost::filesystem::path outputDir,
                   boost::filesystem::path sceneFile,
                   boost::filesystem::path materialFile,
                   Renderer renderer);
@@ -43,7 +44,14 @@ public:
 
 private:
 
-    using StateIndicesType = std::vector< std::streamoff >;
+    using StateIdxType = std::streamoff;
+    struct StateIndex{
+        StateIdxType m_idx;
+        unsigned int m_frameIdx;
+        boost::filesystem::path m_outputFile;
+    };
+
+    using StateIndicesType = std::vector< StateIndex >;
 
     RenderData m_renderData;
     RenderScriptGen m_renderScriptGen;
@@ -66,6 +74,8 @@ private:
     boost::filesystem::path m_sceneFile;
 
     boost::filesystem::path m_outputFile;
+    boost::filesystem::path m_outputDir;
+
     std::vector<boost::filesystem::path> m_inputFiles;
     Renderer m_renderer;
 

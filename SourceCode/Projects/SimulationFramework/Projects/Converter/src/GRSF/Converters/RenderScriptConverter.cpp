@@ -23,11 +23,13 @@
 
 void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> & inputFiles,
               boost::filesystem::path outputFile,
+              boost::filesystem::path outputDir,
               boost::filesystem::path sceneFile,
               boost::filesystem::path logicFile,
               Renderer renderer) {
     m_renderer = renderer;
     m_outputFile = outputFile;
+    m_outputDir  = m_outputDir;
     m_inputFiles = inputFiles;
     m_sceneFile = sceneFile;
     m_logicFile = logicFile;
@@ -56,7 +58,7 @@ void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> 
             xmlDoc.load_file(file.string().c_str());
             auto node = xmlDoc.child("Converter");
             if(!node){
-                ERRORMSG("Xml file: " << file << " contains no 'Converter' node!" )
+                ERRORMSG("XML file: " << file << " contains no 'Converter' node!" )
             }
 
             StateIndicesType stateIndices;
@@ -65,16 +67,30 @@ void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> 
                 std::string uuid = n.attribute("uuid").value();
                 std::string path = n.attribute("path").value();
 
-                // parse frame index list (assumed to be sorted! otherwise exception in converFile)
-                std::string s = n.attribute("stateIndices").value();
-                if(!s.empty()){
-                    if( !Utilities::stringToType<StateIndicesType>(stateIndices,s)  ) {
-                        ERRORMSG("---> String conversion to obtain stateIndices failed!");
-                    }
-                }else{
-                    ERRORMSG("---> No stateIndices given for file: " << path << " in xml: " << file)
-                }
+                // parse frame index list (assumed to be sorted! otherwise exception in convertFile)
+                StateIdxType idx;
+                unsigned int frameIdx;
+                boost::filesystem::path outputFile;
+                for(auto s : n.children("State")){
 
+                    if( !Utilities::stringToType(idx, s.attribute("idx").value() )  ) {
+                            ERRORMSG("---> String conversion to obtain state id failed!");
+                    }
+
+                    if( !Utilities::stringToType(frameIdx, s.attribute("frameIdx").value() )  ) {
+                            ERRORMSG("---> String conversion to obtain state id failed!");
+                    }
+
+                    outputFile = "";
+                    auto att = s.attribute("outputFile");
+                    if( att ) {
+                       outputFile = att.value();
+                    }
+
+                    // add to list
+                    stateIndices.push_back( StateIndex{idx,frameIdx,outputFile});
+                }
+                LOG(m_log,"---> Parsed " << stateIndices.size() << " state from XML: " << file.filename() << std::endl;)
                 convertFile(path,uuid,std::move(stateIndices));
             }
 
@@ -169,7 +185,8 @@ void RenderScriptConverter::loadMaterialCollection() {
 
 void RenderScriptConverter::convertFile(const boost::filesystem::path & f,
                                         const std::string uuidString,
-                                        StateIndicesType stateIndices) {
+                                        StateIndicesType stateIndices
+                                        ) {
     LOG(m_log, "---> Converting file:" << f << std::endl;);
 
     m_abort = false;
@@ -190,38 +207,70 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f,
     PREC start = 0,avgInitFrameTime = 0, avgStateTime = 0, avgStateLoadTime = 0;
     unsigned int bodyCounter = 0;
 
-    // Format file name
-    std::string fileName =  m_outputFile.filename().string();
-    if(fileName.empty()){
-        fileName = "Frame";
-    }
-    fileName += "-id-"+uuidString;
 
-    typename StateIndicesType::value_type currentStateIdx = 0;
+    StateIdxType currentStateIdx = 0;
     auto itStateIdx = stateIndices.begin();
     // Jump at beginning of first state
-    if( !stateIndices.empty() && *itStateIdx > 0 ){
-        currentStateIdx = *itStateIdx;
+    if( !stateIndices.empty() && itStateIdx->m_idx > 0 ){
+        currentStateIdx = itStateIdx->m_idx;
         m_simFile.seekgStates(currentStateIdx);
     }
 
 
+
     while(m_simFile.isGood() && !m_abort){
 
-        // Write render script for this frame
+        std::string outputName;
+        boost::filesystem::path outputDir = "./";
+
+        // produce render output file for this state
+
+        // load state
         double time;
         start = timer.elapsedMilliSec();
         m_simFile.read(states,time);
+        avgStateLoadTime +=  timer.elapsedMilliSec() - start;
 
         if(states.size()==0){
             ERRORMSG("State size is zero!")
         }
         LOG(m_log, "---> Loaded state at t: " <<time << std::endl;)
-        avgStateLoadTime +=  timer.elapsedMilliSec() - start;
 
-        // Produce Render OutputFile for this state
+        // set frame name and output dir
+        // if function argument is given take this
+        if(!m_outputDir.empty()){
+            outputDir  = m_outputDir;
+        }
+        // set output file name for this state,
+        if( m_outputFile.empty() && !stateIndices.empty() && !itStateIdx->m_outputFile.empty() ){
+            // we have a file path given and no function argument, take from state
+            if( !itStateIdx->m_outputFile.has_filename()){
+                ERRORMSG(" State idx: " << itStateIdx->m_idx << " has no correct filename!")
+            }
+            outputDir  /= itStateIdx->m_outputFile.parent_path();
+            outputName = itStateIdx->m_outputFile.filename().string();
+        }else{
+            // format default file name otherwise (if there is no file path in xml or function argument is given)
+            std::string baseFilename =  m_outputFile.filename().string();
+            if( baseFilename.empty()){
+                baseFilename = "Frame";
+            }
+            outputDir  /= m_outputFile.parent_path();
+            outputName = baseFilename +"-id-"+uuidString + "-s-" + std::to_string(m_frameCounter);
+        }
+
+        // set frame idx (if we have a list set it from the list, other wise default)
+        unsigned int frameIdx = m_frameCounter;
+        if( !stateIndices.empty()){
+            frameIdx = itStateIdx->m_frameIdx;
+
+        }
+
+        LOG(m_log, "---> Init frame with: \n\toutputDir: " << outputDir
+            << "\n\tframeName: " << outputName << "\n\tframeIdx: " << frameIdx << "\n\ttime: " << time << std::endl;)
+
         start = timer.elapsedMilliSec();
-        m_renderScriptGen.initFrame(m_outputFile.parent_path(), fileName + tinyformat::format("-s-%06i",currentStateIdx) , time, m_frameCounter );
+        m_renderScriptGen.initFrame(outputDir, outputName , time, frameIdx );
         avgInitFrameTime += timer.elapsedMilliSec() - start;
 
 
@@ -234,17 +283,16 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f,
 
 
         m_renderScriptGen.finalizeFrame();
-        m_frameCounter++;
 
         // skip to next stateIdx if we have indices
         if(!stateIndices.empty()){
             if(++itStateIdx != stateIndices.end()){
-                if(*itStateIdx < 0 || *itStateIdx == currentStateIdx){
-                    ERRORMSG("Negative or same as privious state idx: " << *itStateIdx << " in xml for file: " << f)
+                if(itStateIdx->m_idx < 0 || itStateIdx->m_idx == currentStateIdx){
+                    ERRORMSG("Negative or same as privious state idx: " << itStateIdx->m_idx << " in xml for file: " << f)
                 }
                 // skip difference
-                m_simFile.seekgStates(*itStateIdx - currentStateIdx -1);
-                currentStateIdx = *itStateIdx;
+                m_simFile.seekgStates(itStateIdx->m_idx - currentStateIdx -1);
+                currentStateIdx = itStateIdx->m_idx;
             }else{
                 m_abort = true;
             }
@@ -253,6 +301,7 @@ void RenderScriptConverter::convertFile(const boost::filesystem::path & f,
             ++currentStateIdx;
         }
 
+        m_frameCounter++;
     }
 
     if(!stateIndices.empty()){
