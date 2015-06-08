@@ -65,7 +65,12 @@ void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> 
             for(auto n : node.children("File")){
                 stateIndices.clear();
                 std::string uuid = n.attribute("uuid").value();
-                std::string path = n.attribute("path").value();
+                boost::filesystem::path path = n.attribute("simFile").value();
+
+                if(path.empty()){
+                    LOG(m_log,"---> No simFile path given, skip this file!" << std::endl;)
+                    continue;
+                }
 
                 // parse frame index list (assumed to be sorted! otherwise exception in convertFile)
                 StateIdxType idx;
@@ -73,7 +78,7 @@ void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> 
                 boost::filesystem::path outputFile;
                 for(auto s : n.children("State")){
 
-                    if( !Utilities::stringToType(idx, s.attribute("idx").value() )  ) {
+                    if( !Utilities::stringToType(idx, s.attribute("stateIdx").value() )  ) {
                             ERRORMSG("---> String conversion to obtain state id failed!");
                     }
 
@@ -90,7 +95,7 @@ void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> 
                     // add to list
                     stateIndices.push_back( StateIndex{idx,frameIdx,outputFile});
                 }
-                LOG(m_log,"---> Parsed " << stateIndices.size() << " state from XML: " << file.filename() << std::endl;)
+                LOG(m_log,"---> Parsed " << stateIndices.size() << " state for file: " << path << from XML: " << file.filename() << std::endl;)
                 if( stateIndices.size() > 0){
                     convertFile(path,uuid,std::move(stateIndices));
                 }else{
