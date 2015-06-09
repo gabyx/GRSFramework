@@ -95,7 +95,7 @@ void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> 
                     // add to list
                     stateIndices.push_back( StateIndex{idx,frameIdx,outputFile});
                 }
-                LOG(m_log,"---> Parsed " << stateIndices.size() << " state for file: " << path << from XML: " << file.filename() << std::endl;)
+                LOG(m_log,"---> Parsed " << stateIndices.size() << " state for file: " << path << "from XML: " << file.filename() << std::endl;)
                 if( stateIndices.size() > 0){
                     convertFile(path,uuid,std::move(stateIndices));
                 }else{
