@@ -5,6 +5,8 @@
 #include <type_traits>
 #include <initializer_list>
 #include <memory>
+#include <algorithm>
+#include <queue>
 #include <deque>
 #include <tuple>
 #include <unordered_set>
@@ -39,6 +41,7 @@ using DefaultPointListType = std::vector<Vector3 * >;
     using NodeType = typename __Traits__::NodeType; \
 
 
+
 /* Dereference is No-Op for non-pointer types*/
 template<typename T>
 struct PointDeref {
@@ -54,6 +57,16 @@ struct PointDeref<T*> {
     }
 };
 
+
+struct EuclideanSqNorm{
+    template <typename Derived>
+    static
+    typename Derived::Scalar apply( const MatrixBase<Derived> & p){
+        return p.squaredNorm();
+    }
+};
+
+
 /** Standart class for the node data type in the Tree */
 template<unsigned int Dim = 3, typename TPointList = DefaultPointListType >
 class PointData {
@@ -65,11 +78,27 @@ public:
 
     using PointListType = TPointList; /** linear in memory!*/
     using value_type    = typename PointListType::value_type;
-    //STATIC_ASSERTM(std::is_pointer<value_type>::value, "The value of the point list needs to be a pointer" )
+    using PointType     = typename std::remove_pointer<value_type>::type;
     using iterator      = typename PointListType::iterator;
     using const_iterator= typename PointListType::const_iterator;
 
     using Deref = PointDeref<value_type>;
+
+    template<typename Norm = EuclideanSqNorm>
+    struct DistanceComp{
+        DistanceComp(){
+            m_ref.setZero();
+        }
+        DistanceComp( const PointType & ref ): m_ref(ref){}
+
+        bool operator()(const value_type & p1, const value_type & p2){
+            return Norm::apply(m_ref - Deref::get(p1)) <
+                   Norm::apply(m_ref - Deref::get(p2));
+        }
+        PointType m_ref;
+    };
+
+
 
     /** Constructor for the root node, which owns the pointer list
      *  All child nodes don't set m_points internally
@@ -99,7 +128,7 @@ public:
         return ret;
     }
 
-    iterator begin(){
+    iterator begin() {
         return m_begin;
     }
 
@@ -108,11 +137,11 @@ public:
     }
 
 
-    const_iterator begin() const{
+    const_iterator begin() const {
         return m_begin;
     }
 
-    const_iterator end() const{
+    const_iterator end() const {
         return m_end;
     }
 
@@ -191,7 +220,8 @@ public:
     using SplitAxisType = typename NodeType::SplitAxisType;
 
     using PointDataType = NodeDataType;
-    using value_type  = typename PointDataType::value_type;
+    using value_type = typename PointDataType::value_type;
+    using PointType  = typename PointDataType::PointType ;
     using iterator  = typename PointDataType::iterator;
     using Deref = typename PointDataType::Deref;
 
@@ -606,10 +636,10 @@ public:
     STATIC_ASSERT( Dimension <= std::numeric_limits<char>::max());
 
     TreeNodeBase(std::size_t idx, const AABB<Dimension> & aabb, unsigned int treeLevel = 0)
-            : m_idx(idx), m_aabb(aabb),  m_treeLevel(treeLevel), m_child{nullptr,nullptr}
-    {}
+        : m_idx(idx), m_aabb(aabb),  m_treeLevel(treeLevel), m_child{nullptr,nullptr} {
+    }
 
-    ~TreeNodeBase(){};
+    ~TreeNodeBase() {};
 
     /** Copy from node
     *   Childs are not deep copied (since the node does not own the childs)
@@ -620,16 +650,14 @@ public:
     TreeNodeBase(const TreeNodeBase<Derived,Dimension> & n):
         m_idx(n.m_idx),m_aabb(n.m_aabb),m_treeLevel(n.m_treeLevel),
         m_splitAxis(n.m_splitAxis),m_splitPosition(n.m_splitPosition),
-        m_child{nullptr,nullptr}
-    {
+        m_child{nullptr,nullptr} {
     }
     /** Move from node */
     template<typename Derived>
     TreeNodeBase(TreeNodeBase<Derived,Dimension> && n):
         m_idx(std::move(n.m_idx)), m_treeLevel(n.m_treeLevel),
         m_aabb(std::move(n.m_aabb)),m_splitAxis(std::move(n.m_splitAxis)),
-        m_splitPosition(std::move(n.m_splitPosition))
-    {
+        m_splitPosition(std::move(n.m_splitPosition)) {
     }
 
     inline DerivedNode * leftNode() {
@@ -653,14 +681,14 @@ public:
         return m_aabb;
     }
 
-    inline bool hasLeftChildren() const{
+    inline bool hasLeftChildren() const {
         return m_child[0];
     }
-    inline bool hasChildren() const{
+    inline bool hasChildren() const {
         return m_child[0] && m_child[1];
     }
 
-    inline bool isLeaf() const{
+    inline bool isLeaf() const {
         return (m_splitAxis < 0);
     }
 
@@ -675,26 +703,26 @@ public:
         m_splitPosition= splitPos ;
     }
 
-    inline SplitAxisType getSplitAxis() const{
+    inline SplitAxisType getSplitAxis() const {
         return m_splitAxis ;
     }
-    inline PREC getSplitPosition() const{
+    inline PREC getSplitPosition() const {
         return m_splitPosition;
     }
-    inline PREC getSplitRatio() const{
+    inline PREC getSplitRatio() const {
         return (m_splitPosition - m_aabb.m_minPoint(m_splitAxis) )
                 / (m_aabb.m_maxPoint(m_splitAxis)-m_aabb.m_minPoint(m_splitAxis));
     }
 
-    inline unsigned int getLevel() const{
+    inline unsigned int getLevel() const {
         return m_treeLevel;
     }
 
 protected:
 
     TreeNodeBase(std::size_t idx, const AABB<Dimension> & aabb, SplitAxisType axis, PREC splitPos)
-            : m_idx(idx), m_aabb(aabb), m_splitAxis(axis), m_splitPosition(splitPos)
-    {}
+        : m_idx(idx), m_aabb(aabb), m_splitAxis(axis), m_splitPosition(splitPos) {
+    }
 
     std::size_t m_idx = std::numeric_limits<std::size_t>::max();   ///< node index
     unsigned int m_treeLevel = 0;
@@ -702,14 +730,14 @@ protected:
     SplitAxisType m_splitAxis = -1; ///< smaller than zero to indicate leaf node!
     PREC m_splitPosition = 0.0;
     /** Child Nodes */
-    std::array<DerivedNode *,2> m_child{nullptr ,nullptr}; ///< The child nodes, these objects are not owned by this node!
+    std::array<DerivedNode *,2> m_child{nullptr,nullptr};  ///< The child nodes, these objects are not owned by this node!
 };
 
 template<typename Traits>
 class TreeNode;
 
 template<typename TTraits>
-class TreeNodeSimple : public TreeNodeBase<TreeNodeSimple<TTraits>,TTraits::Dimension>{
+class TreeNodeSimple : public TreeNodeBase<TreeNodeSimple<TTraits>,TTraits::Dimension> {
 public:
     using Traits = TTraits;
     using Base = TreeNodeBase<TreeNodeSimple<TTraits>,TTraits::Dimension>;
@@ -728,26 +756,26 @@ public:
 
     DEFINE_KDTREE_BASETYPES( Traits )
 
-    TreeNodeSimple(std::size_t idx, const AABB<Dimension> & aabb): Base(idx,aabb){}
-    TreeNodeSimple(TreeNodeSimple&& t): Base(std::move(t)){}
-    TreeNodeSimple(const TreeNodeSimple& t): Base(t){}
+    TreeNodeSimple(std::size_t idx, const AABB<Dimension> & aabb): Base(idx,aabb) {}
+    TreeNodeSimple(TreeNodeSimple&& t): Base(std::move(t)) {}
+    TreeNodeSimple(const TreeNodeSimple& t): Base(t) {}
 
     /** Copy values from TreeNode<T>, only Base class does copy */
     template<typename T>
-    TreeNodeSimple(const TreeNode<T> & t): Base(t)
-    {}
+    TreeNodeSimple(const TreeNode<T> & t): Base(t) {
+    }
 
 };
 
 /** Default class used for TreeNodeSimple and TreeSimpleTraits*/
 template<unsigned int Dim = 3>
-struct NoData{
+struct NoData {
     static const unsigned int Dimension = Dim;
 };
 
 
 template<typename TTraits>
-class TreeNode : public TreeNodeBase<TreeNode<TTraits>,TTraits::Dimension>{
+class TreeNode : public TreeNodeBase<TreeNode<TTraits>,TTraits::Dimension> {
 public:
     using Traits = TTraits;
     using Base = TreeNodeBase<TreeNode<TTraits>,TTraits::Dimension>;
@@ -763,6 +791,9 @@ private:
     friend class TreeBase;
 
     template<typename T>
+    friend class Tree;
+
+    template<typename T>
     friend class TreeNodeSimple;
 
 public:
@@ -775,8 +806,8 @@ public:
     };
 
     TreeNode(std::size_t idx, const AABB<Dimension> & aabb, NodeDataType * data, unsigned int treeLevel = 0)
-        : Base(idx,aabb,treeLevel), m_data(data), m_bound(new BoundaryInformation{})
-    {}
+        : Base(idx,aabb,treeLevel), m_data(data), m_bound(new BoundaryInformation{}) {
+    }
 
     ~TreeNode() {
         cleanUp();
@@ -787,12 +818,11 @@ public:
     *   the child pointers have the same values as the node \p n.
     *   The tree class is responsible for copying the childs accordingly.
     */
-    TreeNode(const TreeNode & n): Base(n)
-    {
-        if(n.m_bound){
+    TreeNode(const TreeNode & n): Base(n) {
+        if(n.m_bound) {
             m_bound = new BoundaryInformation(*n.m_bound);
         }
-        if(n.m_data){
+        if(n.m_data) {
             m_data = new NodeDataType(*n.m_data);
         }
     }
@@ -800,8 +830,7 @@ public:
     /** Move from node */
     TreeNode(TreeNode && n): Base(std::move(n)),
         m_bound(n.m_bound),
-        m_data(n.m_data)
-    {
+        m_data(n.m_data) {
         n.m_bound = nullptr;
         n.m_data = nullptr;
     }
@@ -976,7 +1005,7 @@ private:
 
 
 template<typename Traits>
-class TreeBase{
+class TreeBase {
 private:
     template<typename T>
     friend class TreeBase;
@@ -987,57 +1016,56 @@ public:
     using LeafMapType = std::unordered_map<std::size_t, NodeType *>;
     using NodeContainerType = std::vector<NodeType *>;
 
-    TreeBase(){}
+    TreeBase() {}
 
     TreeBase(TreeBase && t)
-        : m_nodes(std::move(t.m_nodes)), m_leafs( std::move(t.m_leafs) ), m_root(t.m_root)
-    {
+        : m_nodes(std::move(t.m_nodes)), m_leafs( std::move(t.m_leafs) ), m_root(t.m_root) {
         t.m_root = nullptr;
         t.m_nodes.clear();
         t.m_leafs.clear();
     }
 
-    TreeBase(const TreeBase & t){
+    TreeBase(const TreeBase & t) {
         copyFrom(t);
     }
 
     template<typename T>
-    explicit TreeBase(const TreeBase<T> & t){
+    explicit TreeBase(const TreeBase<T> & t) {
         copyFrom(t);
     }
 
     template<typename T>
-    void copyFrom(const TreeBase<T> & tree){
+    void copyFrom(const TreeBase<T> & tree) {
 
         using CNodeType = typename TreeBase<T>::NodeType;
 
-        if(!tree.m_root){
+        if(!tree.m_root) {
             return;
         }
 
         this->m_nodes.reserve(tree.m_nodes.size());
         this->m_leafs.reserve(tree.m_leafs.size());
 
-        std::deque< std::pair<NodeType** ,CNodeType * > > l; // first = to pointer reference, second = from;
+        std::deque< std::pair<NodeType**,CNodeType * > > l;  // first = to pointer reference, second = from;
 
         l.emplace_back( std::make_pair(&this->m_root, tree.m_root) );
 
-        while(!l.empty()){
+        while(!l.empty()) {
             auto & t = l.front();
 
             (*t.first) = new NodeType(*t.second); // copy from node, childs are uninitialized
             this->m_nodes.emplace_back( *t.first );
 
-            if(t.second->isLeaf()){
+            if(t.second->isLeaf()) {
                 this->m_leafs.emplace((*t.first)->getIdx(),*t.first);
 
-            }else{
+            } else {
 
-                if(t.second->m_child[0]){
+                if(t.second->m_child[0]) {
                     l.emplace_back( std::make_pair(&(*t.first)->m_child[0],t.second->m_child[0]) );
                 }
 
-                if(t.second->m_child[1]){
+                if(t.second->m_child[1]) {
                     l.emplace_back( std::make_pair(&(*t.first)->m_child[1],t.second->m_child[1])  );
                 }
 
@@ -1048,11 +1076,11 @@ public:
 
     }
 
-    protected:
-        ~TreeBase(){
-            resetTree();
-        }; ///< Prohibit the use of this base polymophically
-    public:
+protected:
+    ~TreeBase() {
+        resetTree();
+    }; ///< Prohibit the use of this base polymophically
+public:
 
 
     /** Built a tree from a node map and links
@@ -1063,61 +1091,61 @@ public:
     * for left and right child node indices in the map \p c.
     */
     template<typename NodeMap, typename NodeToChildMap>
-    void build( NodeType * root, NodeMap & c , NodeToChildMap & links){
+    void build( NodeType * root, NodeMap & c, NodeToChildMap & links) {
 
-            resetTree();
-            m_leafs.clear();
-            m_nodes.clear();
-            m_nodes.reserve(c.size());
-            m_nodes.assign(c.begin(),c.end());
+        resetTree();
+        m_leafs.clear();
+        m_nodes.clear();
+        m_nodes.reserve(c.size());
+        m_nodes.assign(c.begin(),c.end());
 
-            for(auto * n: m_nodes){
-                if(n->isLeaf()){
-                    m_leafs.push_back(n);
-                }
+        for(auto * n: m_nodes) {
+            if(n->isLeaf()) {
+                m_leafs.push_back(n);
+            }
+        }
+
+        if( c.find(root->getIdx()) == c.end()) {
+            ERRORMSG("Root node not in NodeMap!")
+        }
+
+
+
+        std::unordered_set<std::size_t> hasParent;
+        // first link all nodes together
+        auto itE = c.end();
+        for(auto & l : links) { // first idx, second pair<idxL,idxR>
+            auto it  = c.find(l.first);
+            auto itL = c.find(l.second.first);
+            auto itR = c.find(l.second.second);
+
+            if(it==itE || itL==itE || itR==itE) {
+                ERRORMSG("Link at node idx: " << l.first << " wrong!")
             }
 
-            if( c.find(root->getIdx()) == c.end()){
-                ERRORMSG("Root node not in NodeMap!")
+            if(!hasParent.emplace(l.second.first).second) {
+                ERRORMSG("Node idx: " << l.second.first << "has already a parent!")
+            };
+            if(!hasParent.emplace(l.second.second).second) {
+                ERRORMSG("Node idx: " << l.second.first << "has already a parent!")
+            };
+            if( !it->second || !itL->second || !itR->second) {
+                ERRORMSG("Ptr for link zero")
             }
+            it->second->m_child[0] = itL->second; // link left
+            it->second->m_child[1] = itR->second; // link right
+        }
 
+        if(hasParent.size() != c.size()-1) {
+            ERRORMSG("Tree needs to have N nodes, with one root, which gives N-1 parents!")
+        }
 
-
-            std::unordered_set<std::size_t> hasParent;
-            // first link all nodes together
-            auto itE = c.end();
-            for(auto & l : links){ // first idx, second pair<idxL,idxR>
-                auto it  = c.find(l.first);
-                auto itL = c.find(l.second.first);
-                auto itR = c.find(l.second.second);
-
-                if(it==itE || itL==itE || itR==itE){
-                    ERRORMSG("Link at node idx: " << l.first << " wrong!")
-                }
-
-                if(!hasParent.emplace(l.second.first).second){
-                    ERRORMSG("Node idx: " << l.second.first << "has already a parent!")
-                };
-                if(!hasParent.emplace(l.second.second).second){
-                    ERRORMSG("Node idx: " << l.second.first << "has already a parent!")
-                };
-                if( !it->second || !itL->second || !itR->second){
-                    ERRORMSG("Ptr for link zero")
-                }
-                it->second->m_child[0] = itL->second; // link left
-                it->second->m_child[1] = itR->second; // link right
-            }
-
-            if(hasParent.size() != c.size()-1){
-                ERRORMSG("Tree needs to have N nodes, with one root, which gives N-1 parents!")
-            }
-
-            // Save root as it is a valid binary tree
-            m_root = root;
+        // Save root as it is a valid binary tree
+        m_root = root;
     }
 
-    void resetTree(){
-        for(auto * n: this->m_nodes){
+    void resetTree() {
+        for(auto * n: this->m_nodes) {
             delete n;
         }
         // root node is also in node list!
@@ -1132,36 +1160,36 @@ public:
     * Points outside the roots AABB box, are naturally project to the most outer leaf automatically.
     */
     template<typename Derived>
-    const NodeType * getLeaf(const MatrixBase<Derived> & point) const{
+    const NodeType * getLeaf(const MatrixBase<Derived> & point) const {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,Dimension);
         // Recursively traverse tree to find the leaf which contains the point
         ASSERTMSG(m_root, "Tree is not built!")
         const NodeType * currentNode = m_root;
 
-        while(!currentNode->isLeaf()){
+        while(!currentNode->isLeaf()) {
             // all points greater or equal to the splitPosition belong to the right node
-            if(point(currentNode->getSplitAxis()) >= currentNode->getSplitPosition()){
+            if(point(currentNode->getSplitAxis()) >= currentNode->getSplitPosition()) {
                 currentNode = currentNode->rightNode();
-            }else{
+            } else {
                 currentNode = currentNode->leftNode();
             }
         }
         return currentNode;
     }
 
-    const NodeType * getLeaf(const std::size_t & index) const{
+    const NodeType * getLeaf(const std::size_t & index) const {
         auto it = m_leafs.find(index);
-        if(it == m_leafs.end()){
+        if(it == m_leafs.end()) {
             return nullptr;
         }
         return it->second;
     }
 
-    inline  const LeafMapType & getLeafs(){
+    inline  const LeafMapType & getLeafs() {
         return m_leafs;
     }
 
-    inline  const NodeContainerType & getNodes(){
+    inline  const NodeContainerType & getNodes() {
         return m_nodes;
     }
 
@@ -1177,26 +1205,26 @@ public:
     }
 
     std::tuple<std::size_t, std::size_t >
-    getStatistics(){
+    getStatistics() {
         return std::make_tuple(m_nodes.size(),m_leafs.size());
     }
 
 
-     /** Enumerate nodes (continously, leafs first, then non-leafs */
-    void enumerateNodes(){
+    /** Enumerate nodes (continously, leafs first, then non-leafs */
+    void enumerateNodes() {
 
         std::size_t leafIdx = 0;
 
-        for(auto * n : this->m_nodes){
-            if(n->isLeaf()){
+        for(auto * n : this->m_nodes) {
+            if(n->isLeaf()) {
                 n->m_idx=leafIdx++;
                 this->m_leafs.emplace(n->m_idx,n);
             }
         }
         std::size_t nonleafIdx = this->m_leafs.size();
 
-        for(auto * n : this->m_nodes){
-            if(!n->isLeaf()){
+        for(auto * n : this->m_nodes) {
+            if(!n->isLeaf()) {
                 n->m_idx = nonleafIdx++;
             }
         }
@@ -1212,12 +1240,12 @@ protected:
 
 
 template<
-            typename TNodeData = NoData<>,
-            template<typename...> class  TNode = TreeNode
+        typename TNodeData = NoData<>,
+        template<typename...> class  TNode = TreeNode
         >
 struct TreeSimpleTraits {
 
-    struct BaseTraits{
+    struct BaseTraits {
         using NodeDataType = TNodeData;
         static const unsigned int Dimension = NodeDataType::Dimension;
         using NodeType = TNode<BaseTraits>;
@@ -1238,20 +1266,20 @@ public:
     DEFINE_KDTREE_BASETYPES(BaseTraits)
 
     /** Move constructor to move from SimpleTree */
-    TreeSimple( TreeSimple && tree): Base(tree){}
+    TreeSimple( TreeSimple && tree): Base(tree) {}
     /** Copy the tree */
-    TreeSimple( const TreeSimple & tree): Base(tree){}
+    TreeSimple( const TreeSimple & tree): Base(tree) {}
 
 
     /** Copy from a TreeBase with any kind of traits if possible
     * The underlying Traits::NodeType has a copy constructor for T::NodeType!
     */
     template<typename T>
-    explicit TreeSimple( const TreeBase<T> & tree): Base(tree)
-    {}
+    explicit TreeSimple( const TreeBase<T> & tree): Base(tree) {
+    }
 
 
-    ~TreeSimple(){}
+    ~TreeSimple() {}
 
     /** Returns tuple with values
     * (number of leafs, avg. leaf data size, min. leaf data size, max. leaf data size)
@@ -1288,7 +1316,7 @@ public:
         XMLNodeType aabb = r.append_child("AABB");
         ss.str("");
         ss << Utilities::typeToString(this->m_root->aabb().m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() <<" "
-           << Utilities::typeToString(this->m_root->aabb().m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() << "\n";
+                << Utilities::typeToString(this->m_root->aabb().m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() << "\n";
         aabb.append_child(nodePCData).set_value(ss.str().c_str());
 
         // Save leafs
@@ -1302,7 +1330,7 @@ public:
             aabb = node.append_child("AABB");
             ss.str("");
             ss << Utilities::typeToString(l->aabb().m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() <<" "
-               << Utilities::typeToString(l->aabb().m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() << "\n";
+                    << Utilities::typeToString(l->aabb().m_maxPoint.transpose().format(MyMatrixIOFormat::SpaceSep)).c_str() << "\n";
             aabb.append_child(nodePCData).set_value(ss.str().c_str());
         }
 
@@ -1361,19 +1389,19 @@ public:
 
 template<typename Traits>
 using SplitHeuristicPointDataDefault =   meta::apply<meta::bind_front<
-                                                meta::quote<SplitHeuristicPointData>,
-                                                LinearQualityEvaluator
-                                                >, Traits>;
+        meta::quote<SplitHeuristicPointData>,
+        LinearQualityEvaluator
+        >, Traits>;
 
 
 template<
-            typename TNodeData = PointData<>,
-            template<typename...> class TSplitHeuristic = SplitHeuristicPointDataDefault,
-            template<typename...> class  TNode = TreeNode
+        typename TNodeData = PointData<>,
+        template<typename...> class TSplitHeuristic = SplitHeuristicPointDataDefault,
+        template<typename...> class  TNode = TreeNode
         >
 struct TreeTraits {
 
-    struct BaseTraits{
+    struct BaseTraits {
         using NodeDataType = TNodeData;
         static const unsigned int Dimension = NodeDataType::Dimension;
         using NodeType           = TNode<BaseTraits>;
@@ -1386,9 +1414,11 @@ struct TreeTraits {
 
 
 
-class TreeStatistics{
+class TreeStatistics {
 public:
-    TreeStatistics(){reset();}
+    TreeStatistics() {
+        reset();
+    }
     TreeStatistics(const TreeStatistics & s) = default;
 
     bool m_computedTreeStats;
@@ -1408,7 +1438,7 @@ public:
     std::size_t m_maxNeighbours;
     PREC m_avgNeighbours;
 
-    void reset(){
+    void reset() {
         m_computedTreeStats = false;
         m_treeDepth = 0;
         m_avgSplitPercentage = 0.0;
@@ -1462,43 +1492,42 @@ public:
 
     using SplitHeuristicType = typename Traits::SplitHeuristicType;
 
-    Tree(){}
-    ~Tree(){}
+    Tree() {}
+    ~Tree() {}
 
     /** Move constructor */
     Tree( Tree && tree)
         : Base(std::move(tree)),
           m_heuristic(std::move(tree.m_heuristic)),
           m_statistics(std::move(tree.m_statistics)),
-          m_maxLeafs(tree.m_maxLeafs), m_maxTreeDepth(tree.m_maxTreeDepth)
-    {
+          m_maxLeafs(tree.m_maxLeafs), m_maxTreeDepth(tree.m_maxTreeDepth) {
         tree.resetStatistics();
     };
 
     /** Copies the tree */
     Tree( const Tree & tree): Base(tree),
-          m_heuristic(tree.m_heuristic),
-          m_statistics(tree.m_statistics),
-          m_maxLeafs(tree.m_maxLeafs), m_maxTreeDepth(tree.m_maxTreeDepth)
-    {}
+        m_heuristic(tree.m_heuristic),
+        m_statistics(tree.m_statistics),
+        m_maxLeafs(tree.m_maxLeafs), m_maxTreeDepth(tree.m_maxTreeDepth) {
+    }
     /** Copies the tree with different traits */
     template<typename T>
     explicit Tree( const Tree<T> & tree): Base(tree),
-          m_statistics(tree.m_statistics),
-          m_maxLeafs(tree.m_maxLeafs), m_maxTreeDepth(tree.m_maxTreeDepth)
-    {}
+        m_statistics(tree.m_statistics),
+        m_maxLeafs(tree.m_maxLeafs), m_maxTreeDepth(tree.m_maxTreeDepth) {
+    }
 
     /** Copies the tree if the underlying NodeType has a function NodeType(const TTree::NodeType & n)
     *  This tree needs to be a friend of TTree::NodeType to successfully copy the nodes!
     */
     template<typename TTree>
-    Tree( const TTree & tree): Base(tree){};
+    Tree( const TTree & tree): Base(tree) {};
 
 
 
     Tree & operator=(const Tree & t) = delete;
 
-    void resetTree(){
+    void resetTree() {
         resetStatistics();
         Base::resetTree();
     }
@@ -1617,8 +1646,8 @@ public:
 
     template<bool computeStatistics = true, bool safetyCheck = true>
     std::unordered_map<std::size_t, std::unordered_set<std::size_t> >
-    buildLeafNeighboursAutomatic(){
-        if(!m_statistics.m_computedTreeStats){
+    buildLeafNeighboursAutomatic() {
+        if(!m_statistics.m_computedTreeStats) {
             ERRORMSG("You did not compute statistics for this tree while constructing it!")
         }
         buildLeafNeighbours<computeStatistics,safetyCheck>(m_statistics.m_minLeafExtent);
@@ -1664,12 +1693,12 @@ public:
         }
 
         // Do safety check in debug mode
-        if(safetyCheck){
+        if(safetyCheck) {
             safetyCheckNeighbours(leafToNeighbourIdx,minExtent);
         }
 
         // Compute statistics
-        if(computeStatistics){
+        if(computeStatistics) {
             m_statistics.m_minNeighbours = std::numeric_limits<std::size_t>::max();
             m_statistics.m_maxNeighbours = 0;
             m_statistics.m_avgNeighbours = 0;
@@ -1687,6 +1716,198 @@ public:
     }
 
 
+    struct ParentInfo {
+        ParentInfo( NodeType* p, bool l=false,bool r = false): m_parent(p), childVisited{l,r} {}
+        NodeType* m_parent;
+        bool childVisited[2];
+    };
+
+
+    template<typename Derived, typename NormSq = EuclideanSqNorm>
+    std::priority_queue<typename NodeDataType::value_type,
+                        std::vector<typename NodeDataType::value_type>,
+                        typename NodeDataType::template DistanceComp<NormSq>
+                        >
+    getKNearestNeighbours(const MatrixBase<Derived> & point, std::size_t k) const {
+
+        using PrioQueueType = std::priority_queue<typename NodeDataType::value_type,
+                        std::vector<typename NodeDataType::value_type>,
+                        typename NodeDataType::template DistanceComp<NormSq>
+                        >;
+
+        if(!this->m_root || k == 0){
+            return PrioQueueType{};
+        }
+
+        // distance comperator
+        typename NodeDataType::template DistanceComp<NormSq> distComp{point};
+
+        // get leaf node and parent stack
+        std::vector< ParentInfo > parents;
+
+        NodeType * currNode = this->m_root;
+        while(!currNode->isLeaf()) {
+
+            // all points greater or equal to the splitPosition belong to the right node
+            if(point(currNode->getSplitAxis()) >= currNode->getSplitPosition()) {
+                parents.emplace_back( currNode, false,true );
+                currNode = currNode->rightNode();
+            } else {
+                parents.emplace_back( currNode, true,false );
+                currNode = currNode->leftNode();
+            }
+        }
+        ASSERTMSG(currNode, "currNode is nullptr!")
+        // Initial node =======================================
+        // find the initial closest points, store at max k of it
+        auto data = currNode->data();
+        auto mid = (k>=data->size())? data->end() : data->begin()+k;
+        std::nth_element(data->begin(), mid , data->end(),distComp);
+        // make priority queue from k closests elements...
+        PrioQueueType kNearest(data->begin(),mid,distComp);
+
+        PREC maxNormSq = (kNearest.size()>0)? NormSq::apply( NodeDataType::Deref::get(kNearest.top()) ) : 0.0 ;
+
+        // mark child as visited
+        if(parents.size()>0){
+            parents.back().childVisited[ currNode == parents.back().m_parent->m_child[0] ? 0 : 1 ] = true;
+        }
+        // =====================================================
+
+
+
+        bool finished = false;
+        //bool moveUp = true;
+        PREC d = 0;
+        PREC p_x = 0;
+        ParentInfo * currParentInfo = nullptr;
+        while(parents.size()>0) {
+
+                currParentInfo = &parents.back();
+                //std::cout << "kSize: " << kNearest.size() << std::endl;
+                ASSERTMSG(currNode, "currNode is nullptr!")
+
+                if( !currNode->isLeaf()) {
+
+                    // this is no leaf
+                    if (!currParentInfo->childVisited[0]) {
+                        // left not visited
+                        // we processed this child
+                        currParentInfo->childVisited[0] = true; // set parents flag
+
+                        bool visit = false;
+                        if( kNearest.size() >= k){
+                            // compute distance to split Axis
+                            p_x = point(currParentInfo->m_parent->m_splitAxis);
+                            d =  currParentInfo->m_parent->m_splitPosition - p_x ;
+                            if( d > 0){
+                                // ref point is left of split axis
+                                visit = true;
+                            }
+                            else{
+                                // ref point is right of split axis
+                                d = std::abs(d);
+                                if( d*d < maxNormSq){
+                                    visit = true;
+                                }
+                            }
+                        }else{
+                            // we dont have enough points yet so explore independ of norm ball
+                            visit = true;
+                        }
+                        if(visit){
+                            //std::cout << " visit " << std::endl;
+                            // maxNorm ball overlaps left side or to little points
+                            // visit left side!
+                            currNode = currParentInfo->m_parent->m_child[0];
+                            if (!currNode->isLeaf()){
+                                 // add to parent
+                                 parents.emplace_back(currNode);
+                            }
+                        }
+
+                        continue;
+
+                    }else if (!currParentInfo->childVisited[1]){
+                        // right not visited
+                        // we processed this child
+                        currParentInfo->childVisited[1] = true; // set parents flag
+
+                        bool visit = false;
+                        if( kNearest.size() >= k){
+                            p_x = point(currParentInfo->m_parent->m_splitAxis);
+                            d =  currParentInfo->m_parent->m_splitPosition - p_x ;
+                            if( d > 0){
+                                // ref point is left of split axis
+                                d = std::abs(d);
+                                if( d*d <= maxNormSq){
+                                    visit = true;
+                                }
+                            }
+                            else{
+                                // ref point is right of split axis
+                                visit = true;
+                            }
+                        }else{
+                            visit = true;
+                        }
+
+                        if(visit){
+                            //std::cout << " visit " << std::endl;
+                            // maxNorm ball overlaps right side or to little points!
+                            // visit right side!
+                            currNode = currParentInfo->m_parent->m_child[1];
+                            if (!currNode->isLeaf()){
+                                 // add to parent
+                                 parents.emplace_back( currNode );
+                            }
+                        }
+                        continue;
+                    }
+//                  else{
+//                     we have have visted both, fall through ->
+//                  }
+
+                }else{
+                    // this is a leaf
+                    // get at least k nearst  points in this leaf and merge with kNearest list
+                    data = currNode->data();
+                    if(data->size()>0){
+                        // make [beg, mid) such that dist(beg,mid) == k and all items s in [beg,mid)
+                        // -> distComp(s) < distComp(mid)
+                        auto e = data->end();
+                        auto mid = (k>=data->size())?  e : data->begin()+k;
+                        std::nth_element(data->begin(), mid ,  e ,distComp);
+
+                        // update list kNearst
+                        auto it = data->begin();
+                        for( ;it != mid; ++it){
+                            kNearest.push(*it);
+                            if( kNearest.size() > k){
+                                kNearest.pop(); // keeping the size to k-nearest
+                            }
+                        }
+                        // update max norm
+                        maxNormSq = NormSq::apply( NodeDataType::Deref::get(kNearest.top()) );
+                        //std::cout << "maxNorm: " << maxNormSq << std::endl;
+                    }
+
+                    // finished with this leaf, travel up!
+                    currNode = currParentInfo->m_parent;
+                    continue;
+                }
+                ASSERTMSG( parents.back().childVisited[0] &&  parents.back().childVisited[1] ,"!")
+                // if we fall through here we pop parent and move a level up!
+                parents.pop_back(); // last one is this nonleaf, pop it
+                if (parents.size()>0){
+                    currNode = parents.back().m_parent;
+                }
+        }
+
+        // return kNearst
+        return kNearest;
+    }
+
     /** Returns tuple with values
     * (number of leafs, avg. leaf data size, min. leaf data size, max. leaf data size)
     */
@@ -1695,15 +1916,15 @@ public:
         return std::tuple_cat(
                 Base::getStatistics(),
                 std::make_tuple(
-                m_statistics.m_treeDepth,
-                m_statistics.m_avgLeafSize,
-                m_statistics.m_minLeafDataSize,
-                m_statistics.m_maxLeafDataSize,
-                m_statistics.m_minLeafExtent,
-                m_statistics.m_maxLeafExtent,
-                m_statistics.m_minNeighbours,
-                m_statistics.m_maxNeighbours,
-                m_statistics.m_avgNeighbours)
+                        m_statistics.m_treeDepth,
+                        m_statistics.m_avgLeafSize,
+                        m_statistics.m_minLeafDataSize,
+                        m_statistics.m_maxLeafDataSize,
+                        m_statistics.m_minLeafExtent,
+                        m_statistics.m_maxLeafExtent,
+                        m_statistics.m_minNeighbours,
+                        m_statistics.m_maxNeighbours,
+                        m_statistics.m_avgNeighbours)
                 );
     }
 
@@ -1837,7 +2058,7 @@ private:
         m_statistics.reset();
         m_heuristic.resetStatistics();
     }
-    void averageStatistics(){
+    void averageStatistics() {
         m_statistics.average(this->m_nodes.size(),this->m_leafs.size());
     }
 
@@ -1846,12 +2067,12 @@ private:
     template<typename NeighbourMap>
     void safetyCheckNeighbours(const NeighbourMap & n, PREC minExtent) {
 
-        if(n.size() != this->m_leafs.size()){
+        if(n.size() != this->m_leafs.size()) {
             ERRORMSG("Safety check for neighbours failed!: size")
         }
 
         bool ok = true;
-        for(auto & p:  this->m_leafs){
+        for(auto & p:  this->m_leafs) {
             auto * l = p.second;
             // Check leaf l
             AABB<Dimension> t = l->aabb();
@@ -1859,25 +2080,25 @@ private:
 
             // check against neighbours ( if all neighbours really overlap )
             auto it = n.find(p.first); // get neighbours for this leaf
-            if(it == n.end()){
+            if(it == n.end()) {
                 ERRORMSG("Safety check: Leaf idx" << p.first << " not in neighbour map!")
             }
 
-            for(const auto & idx : it->second ){
-                if(this->m_leafs.find(idx) == this->m_leafs.end()){
+            for(const auto & idx : it->second ) {
+                if(this->m_leafs.find(idx) == this->m_leafs.end()) {
                     ERRORMSG("Safety check: Neighbour idx" << idx << " not in leafs map!")
                 }
                 // check if this neighbour overlaps
-                if( ! t.overlaps( this->m_leafs[idx]->aabb() ) ){
+                if( ! t.overlaps( this->m_leafs[idx]->aabb() ) ) {
                     ERRORMSG("Safety check: Leaf idx: " << idx << " does not overlap " << p.first)
                 }
                 // check if this neighbours also has this leaf as neighbour
                 auto nIt = n.find(idx);
-                if(nIt == n.end()){
+                if(nIt == n.end()) {
                     ERRORMSG("Safety check: Neighbour idx" << idx << " not in neighbour map!")
                 }
-                if(nIt->second.find(p.first) == nIt->second.end() ){
-                     ERRORMSG("Safety check: Neighbour idx" << idx   << " does not have leaf idx: " << p.first << " as neighbour")
+                if(nIt->second.find(p.first) == nIt->second.end() ) {
+                    ERRORMSG("Safety check: Neighbour idx" << idx   << " does not have leaf idx: " << p.first << " as neighbour")
                 }
             }
         }

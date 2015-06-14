@@ -541,7 +541,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         ${COMMONSOURCE_DIR}/src/GRSF/Common/BitCount.cpp
         
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MyMatrixTypeDefs.cpp
-        #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFile.cpp
+        ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/MultiBodySimFile.cpp
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCONoG.cpp
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCO.cpp
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Collision/CollisionSolver.cpp

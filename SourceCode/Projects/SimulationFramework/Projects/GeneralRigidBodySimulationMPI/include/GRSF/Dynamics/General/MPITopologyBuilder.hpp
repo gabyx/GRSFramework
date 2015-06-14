@@ -938,6 +938,10 @@ private:
 
     void adjustGrid(){
 
+        // Make histogram over the axis (either "x?y?z?" or "maxExtent"
+        if(!m_settings.m_cropToHistogramm.empty()){
+
+
         // Copy processDim size from initial settings:
         m_processDim = m_settings.m_processDim;
 
@@ -970,6 +974,11 @@ private:
         //Adjust box to minimal box size =  procDim * min_gridSize,
         Array3 limits = m_processDim.template cast<PREC>() * m_settings.m_minGridSize;
         m_aabb_glo.expandToMinExtentAbsolute( limits );
+
+
+
+
+
     }
 
     void buildTopo(){

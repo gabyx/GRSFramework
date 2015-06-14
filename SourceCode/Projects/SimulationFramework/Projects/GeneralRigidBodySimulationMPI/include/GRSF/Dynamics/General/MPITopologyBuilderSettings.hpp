@@ -43,6 +43,11 @@ struct GridBuilderSettings{
     AABB3d m_aabb; ///< used values for predefined values
     bool m_aligned = true;
     Matrix33 m_A_IK;
+
+    /** Crop bounding box extent such that a percentage of the points is included measured
+    *   around the geometric center of the points. This can be done with all axes "x?y?z?"
+    * or  with maximal extent only "maxExtent" */
+    std::string m_cropToHistogramm = "";
 };
 
 
