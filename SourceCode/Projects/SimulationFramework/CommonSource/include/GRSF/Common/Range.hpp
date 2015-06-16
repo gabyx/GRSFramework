@@ -8,7 +8,7 @@
 /**
 * A fast sorted integral range which can be constructed from std::pair or std::set
 */
-template<typename IntType, typename Allocator = std::allocator<IntType>  >
+template<typename IntType = unsigned int, typename Allocator = std::allocator<IntType>  >
 class Range{
 	public:
 
@@ -87,6 +87,8 @@ class Range{
             return *this;
 		}
 
+
+        IntType & operator[](std::size_t idx){ return m_v[idx];}
 
 
 		class iterator : public std::iterator_traits<typename RangeType::iterator >{

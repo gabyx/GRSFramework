@@ -41,13 +41,14 @@ namespace details{
         return details::is_associative_container_impl(&c);
     }
 
-    //template <typename C>
-    //constexpr auto is_sequence(C const& c)
-        //-> decltype(details::is_associative_container_impl(&c))
-    //{
-        //return details::is_associative_container_impl(&c);
-    //}
+    template<typename C>
+    using IteratorCategoryOf = typename std::iterator_traits<typename C::iterator>::iterator_category;
 
+    template<typename C>
+    using has_randomAccessIterator = std::is_base_of<std::random_access_iterator_tag, IteratorCategoryOf<C> >;
+    
+    template<typename C>
+    using has_bidirectionalIterator = std::is_base_of<std::bidirectional_iterator_tag, IteratorCategoryOf<C> >;
 };
 
 
