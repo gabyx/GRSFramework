@@ -19,6 +19,7 @@
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
 #include "GRSF/Common/StaticAssert.hpp"
+#include "GRSF/Common/ContainerTag.hpp"
 #include "GRSF/Common/MetaHelper.hpp"
 #include "GRSF/Common/DemangleTypes.hpp"
 #include "GRSF/Common/EnumClassHelper.hpp"
@@ -42,23 +43,8 @@ using DefaultPointListType = std::vector<Vector3 * >;
 
 
 
-/* Dereference is No-Op for non-pointer types*/
-template<typename T>
-struct PointDeref {
-    inline static T & get(T & t) {
-        return t;
-    }
-};
-/* Dereference the pointer for pointer types*/
-template<typename T>
-struct PointDeref<T*> {
-    inline static T & get(T* t) {
-        return *t;
-    }
-};
 
-
-struct EuclideanSqNorm{
+struct EuclideanDistSq{
     template <typename Derived>
     static
     typename Derived::Scalar apply( const MatrixBase<Derived> & p){
@@ -67,34 +53,101 @@ struct EuclideanSqNorm{
 };
 
 
+template<unsigned int Dim = 3,
+         typename TPoint = Vector3,
+         typename TValue = Vector3 *,
+         typename TPointGetter = void
+>
+class DefaultPointDataTraits{
+public:
+    static const unsigned int Dimension = Dim;
+    using PointType     = TPoint;
+    using value_type    = TValue;
+    using PointListType = StdVecAligned<TValue>;
+
+    using iterator      = typename PointListType::iterator;
+    using const_iterator= typename PointListType::const_iterator;
+
+private:
+    private:
+    /* Standart Point Getter (T = value_type no ptr) */
+    template<typename T>
+    struct PointGetterImpl {
+        inline static PointType & get(T & t) {
+            return t;
+        }
+        inline static const PointType & get(const T & t) {
+            return t;
+        }
+    };
+
+    template<typename TT>
+    struct PointGetterImpl<TT*> {
+        inline static PointType & get(TT * t) {
+            return *t;
+        }
+        inline static const PointType & get(const TT * t) {
+            return *t;
+        }
+    };
+
+//    struct OutlierFlagImpl{
+//        template<typename T>
+//        static inline constexpr isOutlier(T & t){
+//            return false;
+//        }
+//        template<typename T>
+//        static inline constexpr markAsOutlier(T & t){
+//            return;
+//        }
+//    };
+
+public:
+    /** The getter which turns a value_type into the PointType */
+    using PointGetter   = typename std::conditional< std::is_same<TPointGetter,void>::value,
+                                                     PointGetterImpl<value_type>,
+                                                     TPointGetter>::type;
+
+//    /** The functor which provides isOutlier,markAsOutlier capabilities
+//    using OulierFlagFunc= typename std::conditional< std::is_same<TOutlierFlagFunc,void>::value,
+//                                                     OutlierFlagImpl,
+//                                                     TOutlierFlagFunc>::type;
+
+};
+
 /** Standart class for the node data type in the Tree */
-template<unsigned int Dim = 3, typename TPointList = DefaultPointListType >
+template<typename TTraits = DefaultPointDataTraits<> >
 class PointData {
 public:
 
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    static const unsigned int Dimension = Dim;
+    using Traits        = TTraits;
+    static const unsigned int Dimension = Traits::Dimension;
+    using PointType     = typename Traits::PointType;
+    using PointListType = typename Traits::PointListType; /** linear in memory!*/
+    using value_type    = typename Traits::value_type;
+    using iterator      = typename Traits::iterator;
+    using const_iterator= typename Traits::const_iterator;
+    using PointGetter   = typename Traits::PointGetter;
 
-    using PointListType = TPointList; /** linear in memory!*/
-    using value_type    = typename PointListType::value_type;
-    using PointType     = typename std::remove_pointer<value_type>::type;
-    using iterator      = typename PointListType::iterator;
-    using const_iterator= typename PointListType::const_iterator;
-
-    using Deref = PointDeref<value_type>;
-
-    template<typename Norm = EuclideanSqNorm>
+    template<typename DistSq = EuclideanDistSq>
     struct DistanceComp{
         DistanceComp(){
             m_ref.setZero();
         }
-        DistanceComp( const PointType & ref ): m_ref(ref){}
+        template<typename TPoint>
+        DistanceComp( const TPoint & ref ): m_ref(ref){}
 
-        bool operator()(const value_type & p1, const value_type & p2){
-            return Norm::apply(m_ref - Deref::get(p1)) <
-                   Norm::apply(m_ref - Deref::get(p2));
+        inline bool operator()(const value_type & p1, const value_type & p2){
+            return DistSq::apply(m_ref - PointGetter::get(p1)) <
+                   DistSq::apply(m_ref - PointGetter::get(p2));
         }
+
+        inline PREC operator()(const value_type & p1){
+            return DistSq::apply(m_ref - PointGetter::get(p1));
+        }
+
         PointType m_ref;
     };
 
@@ -102,11 +155,16 @@ public:
 
     /** Constructor for the root node, which owns the pointer list
      *  All child nodes don't set m_points internally
+     *  \p points can be nullptr, such that kdTree is not responsible for the points!
      */
-    PointData(iterator begin, iterator end, std::unique_ptr<PointListType> points)
-        : m_begin(begin), m_end(end), m_points(std::move(points)) {};
+    PointData(iterator begin, iterator end, std::unique_ptr<PointListType> points = nullptr)
+        : m_begin(begin), m_end(end), m_points(points.release()) {};
 
-
+    ~PointData(){
+        if(m_points){
+            delete m_points;
+        }
+    }
     /** Splits the data into two new node datas if the split heuristics wants a split */
     std::pair<PointData *, PointData * >
     split(iterator splitRightIt) const {
@@ -122,7 +180,7 @@ public:
         PREC ret = 0.0;
 
         for(auto & pPoint : *this) {
-            ret += Deref::get(pPoint)(axis);
+            ret += PointGetter::get(pPoint)(axis);
         }
         ret /= size();
         return ret;
@@ -153,7 +211,7 @@ public:
     std::string getPointString() {
         std::stringstream ss;
         for(auto & pPoint : *this) {
-            ss << Deref::get(pPoint).transpose().format(MyMatrixIOFormat::SpaceSep) << std::endl;
+            ss << PointGetter::get(pPoint).transpose().format(MyMatrixIOFormat::SpaceSep) << std::endl;
         }
         return ss.str();
     }
@@ -161,11 +219,8 @@ public:
 private:
     iterator m_begin,m_end; ///< The actual range of m_points which this node contains
 
-    /** Constructor used internally, which is used not for the root node */
-    PointData(iterator begin, iterator end)
-        : m_begin(begin), m_end(end), m_points(nullptr) {};
-
-    std::unique_ptr<PointListType> m_points;
+    /** Owned pointer to the points which is deleted in Ctor (if not nullptr) */
+    PointListType* m_points = nullptr;
 };
 
 
@@ -204,8 +259,12 @@ public:
     DEFINE_KDTREE_BASETYPES( Traits )
     DEFINE_LAYOUT_CONFIG_TYPES
 
+    using PointDataType = NodeDataType;
     using PointListType = typename NodeDataType::PointListType;
-    STATIC_ASSERT( (std::is_same< PointData<Dimension,PointListType>, NodeDataType >::value) )
+    using PointType  = typename PointDataType::PointType ;
+    using value_type = typename PointDataType::value_type;
+    using iterator  = typename PointDataType::iterator;
+    using PointGetter = typename PointDataType::PointGetter;
 
     enum class Method : char { MIDPOINT, MEDIAN, GEOMETRIC_MEAN };
 
@@ -219,11 +278,6 @@ public:
 
     using SplitAxisType = typename NodeType::SplitAxisType;
 
-    using PointDataType = NodeDataType;
-    using value_type = typename PointDataType::value_type;
-    using PointType  = typename PointDataType::PointType ;
-    using iterator  = typename PointDataType::iterator;
-    using Deref = typename PointDataType::Deref;
 
     SplitHeuristicPointData() : m_methods{Method::MIDPOINT}, m_searchCriteria(SearchCriteria::FIND_BEST) {
         for(SplitAxisType i = 0; i < Dimension; i++) {
@@ -233,7 +287,7 @@ public:
     }
 
     void init(const std::initializer_list<Method>  m,
-            unsigned int allowSplitAboveMinPoints = 100,
+            unsigned int allowSplitAboveNPoints = 100,
             PREC minExtent = 0.0,
             SearchCriteria searchCriteria = SearchCriteria::FIND_BEST,
             const QualityEvaluator & qualityEval = QualityEvaluator(),
@@ -243,7 +297,7 @@ public:
         if(m_methods.size()==0) {
             ERRORMSG("No methods for splitting given!")
         }
-        m_allowSplitAboveMinPoints = allowSplitAboveMinPoints;
+        m_allowSplitAboveNPoints = allowSplitAboveNPoints;
         m_minExtent = minExtent;
         if( m_minExtent < 0) {
             ERRORMSG("Minimal extent has wrong value!")
@@ -295,7 +349,7 @@ public:
         auto * data = node->data();
 
         // No split for to little points or extent to small!
-        if(data->size() <= m_allowSplitAboveMinPoints) {
+        if(data->size() <= m_allowSplitAboveNPoints) {
             return std::make_pair(nullptr,nullptr);
         }
 
@@ -371,19 +425,19 @@ public:
                 case Method::GEOMETRIC_MEAN:
                 case Method::MIDPOINT: {
                     auto leftPredicate = [&](const value_type & a) {
-                        return Deref::get(a)(m_bestSplitAxis) < m_bestSplitPosition;
+                        return PointGetter::get(a)(m_bestSplitAxis) < m_bestSplitPosition;
                     };
                     m_bestSplitRightIt = std::partition(data->begin(), data->end(), leftPredicate );
                     break;
                 }
                 case Method::MEDIAN: {
                     auto less = [&](const value_type & a, const value_type & b) {
-                        return Deref::get(a)(m_bestSplitAxis) < Deref::get(b)(m_bestSplitAxis);
+                        return PointGetter::get(a)(m_bestSplitAxis) < PointGetter::get(b)(m_bestSplitAxis);
                     };
                     std::nth_element(data->begin(), m_bestSplitRightIt, data->end(), less );
-                    m_bestSplitPosition = Deref::get(*(m_bestSplitRightIt))(m_bestSplitAxis);
+                    m_bestSplitPosition = PointGetter::get(*(m_bestSplitRightIt))(m_bestSplitAxis);
                     auto leftPredicate = [&](const value_type & a) {
-                        return Deref::get(a)(m_bestSplitAxis) < m_bestSplitPosition;
+                        return PointGetter::get(a)(m_bestSplitAxis) < m_bestSplitPosition;
                     };
                     m_bestSplitRightIt = std::partition(data->begin(),m_bestSplitRightIt, leftPredicate);
                     break;
@@ -436,12 +490,12 @@ private:
             m_splitRightIt = beg + data->size()/2; // split position is the median!
 
             auto less = [&](const value_type & a, const value_type & b) {
-                return Deref::get(a)(m_splitAxis) < Deref::get(b)(m_splitAxis);
+                return PointGetter::get(a)(m_splitAxis) < PointGetter::get(b)(m_splitAxis);
             };
             // [5, 5, 1, 5, 6, 7, 9, 5] example for [beg ... end]
             // partition such that:  left points(m_splitAxis) <= nth element (splitRightIt) <= right points(m_splitAxis)
             std::nth_element(beg, m_splitRightIt, data->end(), less );
-            m_splitPosition = Deref::get(*(m_splitRightIt))(m_splitAxis); // TODO make transform iterator to avoid Deref::geterence here!
+            m_splitPosition = PointGetter::get(*(m_splitRightIt))(m_splitAxis); // TODO make transform iterator to avoid PointGetter::geterence here!
 
             if(!checkPosition(aabb)) {
                 return false;
@@ -454,7 +508,7 @@ private:
             // move left points which are equal to nth element to the right!
 
             auto leftPredicate = [&](const value_type & a) {
-                return Deref::get(a)(m_splitAxis) < m_splitPosition;
+                return PointGetter::get(a)(m_splitAxis) < m_splitPosition;
             };
             m_splitRightIt = std::partition(beg,m_splitRightIt, leftPredicate);
             // it could happen that the list now looks [1 5 5 5 5 5 6 9 7]
@@ -526,8 +580,8 @@ private:
 
     inline PREC computePointRatio(NodeDataType * data) {
         PREC n = 0.0;
-        for(auto * p: *data) {
-            if(Deref::get(p)(m_splitAxis) < m_splitPosition) {
+        for(auto & p: *data) {
+            if(PointGetter::get(p)(m_splitAxis) < m_splitPosition) {
                 n+=1.0;
             }
         }
@@ -614,7 +668,7 @@ private:
     std::vector<Method> m_methods;
     SearchCriteria m_searchCriteria;
 
-    std::size_t m_allowSplitAboveMinPoints = 100;
+    std::size_t m_allowSplitAboveNPoints = 100;
     PREC m_minExtent = 0.0;
 
 };
@@ -995,6 +1049,8 @@ public:
             m_bound = nullptr;
         }
     }
+
+    std::size_t size(){ return (m_data)? m_data->size() : 0;}
 
 private:
     /** Boundary information which is nullptr for non-leaf nodes */
@@ -1715,41 +1771,142 @@ public:
         return leafToNeighbourIdx;
     }
 
-
+    /** K-Nearst neighbour search ===================================================*/
     struct ParentInfo {
         ParentInfo( NodeType* p, bool l=false,bool r = false): m_parent(p), childVisited{l,r} {}
         NodeType* m_parent;
         bool childVisited[2];
     };
 
+    private:
 
-    template<typename Derived, typename NormSq = EuclideanSqNorm>
-    std::priority_queue<typename NodeDataType::value_type,
-                        std::vector<typename NodeDataType::value_type>,
-                        typename NodeDataType::template DistanceComp<NormSq>
-                        >
-    getKNearestNeighbours(const MatrixBase<Derived> & point, std::size_t k) const {
+        /** Priority queue adapter, to let the comperator be changed on the fly!
+        *   This is usefull if we call getKNearestNeighbours lots of times.
+        *   and want to update the comperator in between.
+        */
+        template <typename Container, typename Compare>
+        class KNearestPrioQueue : public std::priority_queue<typename NodeDataType::value_type ,Container,Compare> {
+        public:
 
-        using PrioQueueType = std::priority_queue<typename NodeDataType::value_type,
-                        std::vector<typename NodeDataType::value_type>,
-                        typename NodeDataType::template DistanceComp<NormSq>
-                        >;
+            using value_type = typename Container::value_type;
+
+            STATIC_ASSERT((std::is_same< value_type,typename NodeDataType::value_type>::value));
+
+            using Base = std::priority_queue<typename NodeDataType::value_type ,Container,Compare>;
+
+            using iterator = typename Container::iterator;
+            using reverse_iterator = typename Container::reverse_iterator;
+
+            Container &getContainer() { return this->c; }
+            Compare   &getComperator()  { return this->comp; }
+
+            iterator begin(){return this->c.begin();}
+            iterator end(){return this->c.end();}
+
+            reverse_iterator rbegin(){return this->c.rbegin();}
+            reverse_iterator rend(){return this->c.rend();}
+
+            KNearestPrioQueue(std::size_t maxSize): m_maxSize(maxSize){
+                 this->c.reserve(m_maxSize);
+            }
+
+            inline void clear(){
+                this->clear();
+            }
+
+            inline void push( const typename Base::value_type & v){
+                if (this->size() < m_maxSize){
+                    Base::push(v);
+                }else if( this->comp(v,this->top())  ){
+                    Base::pop();
+                    Base::push(v);
+                }
+            }
+
+            template<typename It>
+            inline void push(It beg, It end){
+                It it = beg;
+                auto s = this->size();
+                while(s < m_maxSize && it!=end){
+                    Base::push(*it);
+                    ++it; ++s;
+                }
+                while(it!=end){
+                    // if *it < top -> insert
+                    if( this->comp(*it,this->top()) ){
+                        Base::pop();
+                        Base::push(*it);
+                    }
+                    ++it;
+                }
+            }
+
+            /** Replace total container with new elements */
+            template<typename Iterator>
+            void replace(Iterator begin, Iterator end){
+                    this->c.clear();
+                    this->c.insert(this->c.begin(),begin, end);
+                    std::make_heap(this->c.begin(), this->c.end(), this->comp );
+            }
+
+            std::size_t maxSize(){return m_maxSize;}
+
+        private:
+            std::size_t m_maxSize;
+        };
+
+    public:
+
+    template<typename TDistSq = EuclideanDistSq,
+             typename TContainer = StdVecAligned<typename NodeDataType::value_type>
+            >
+    struct KNNTraits{
+        using DistSqType     = EuclideanDistSq;
+        using ContainerType  = TContainer;
+        using DistCompType = typename NodeDataType::template DistanceComp<DistSqType>;
+        using PrioQueue      = KNearestPrioQueue<
+                                        ContainerType,
+                                        DistCompType
+                                  >;
+    };
+
+    private:
+
+        template<typename T> struct isKNNTraits;
+        template<typename N, typename C>
+        struct isKNNTraits< KNNTraits<N,C> >{
+            static const bool value = true;
+        };
+
+    public:
+
+    template<typename TKNNTraits>
+    void getKNearestNeighbours( typename TKNNTraits::PrioQueue & kNearest) const {
+
+        STATIC_ASSERT( isKNNTraits<TKNNTraits>::value )
+
+        auto k = kNearest.maxSize();
 
         if(!this->m_root || k == 0){
-            return PrioQueueType{};
+            return;
         }
 
         // distance comperator
-        typename NodeDataType::template DistanceComp<NormSq> distComp{point};
+        using DistSqType = typename TKNNTraits::DistSqType;
+        typename TKNNTraits::DistCompType & distComp = kNearest.getComperator();
+        // reference point is distComp.m_ref
 
-        // get leaf node and parent stack
+        // Debug set, will be optimized away in release
+        std::set<NodeType*> visitedLeafs;
+
+        // Get leaf node and parent stack by traversing down the tree
         std::vector< ParentInfo > parents;
+        parents.reserve(m_statistics.m_treeDepth);
 
         NodeType * currNode = this->m_root;
         while(!currNode->isLeaf()) {
-
             // all points greater or equal to the splitPosition belong to the right node
-            if(point(currNode->getSplitAxis()) >= currNode->getSplitPosition()) {
+            if(distComp.m_ref(currNode->m_splitAxis) >= currNode->m_splitPosition) {
                 parents.emplace_back( currNode, false,true );
                 currNode = currNode->rightNode();
             } else {
@@ -1764,27 +1921,25 @@ public:
         auto mid = (k>=data->size())? data->end() : data->begin()+k;
         std::nth_element(data->begin(), mid , data->end(),distComp);
         // make priority queue from k closests elements...
-        PrioQueueType kNearest(data->begin(),mid,distComp);
+        kNearest.replace(data->begin(),mid);
 
-        PREC maxNormSq = (kNearest.size()>0)? NormSq::apply( NodeDataType::Deref::get(kNearest.top()) ) : 0.0 ;
+        PREC maxDistSq = (kNearest.size()>0)? distComp(kNearest.top()) : 0.0 ;
 
         // mark child as visited
         if(parents.size()>0){
             parents.back().childVisited[ currNode == parents.back().m_parent->m_child[0] ? 0 : 1 ] = true;
+            currNode = parents.back().m_parent;
         }
+
         // =====================================================
 
-
-
+        // Move up the tree, always visiting the all childs which overlap the norm ball
         bool finished = false;
-        //bool moveUp = true;
-        PREC d = 0;
-        PREC p_x = 0;
+        PREC d = 0.0;
         ParentInfo * currParentInfo = nullptr;
         while(parents.size()>0) {
 
                 currParentInfo = &parents.back();
-                //std::cout << "kSize: " << kNearest.size() << std::endl;
                 ASSERTMSG(currNode, "currNode is nullptr!")
 
                 if( !currNode->isLeaf()) {
@@ -1795,35 +1950,25 @@ public:
                         // we processed this child
                         currParentInfo->childVisited[0] = true; // set parents flag
 
-                        bool visit = false;
                         if( kNearest.size() >= k){
                             // compute distance to split Axis
-                            p_x = point(currParentInfo->m_parent->m_splitAxis);
-                            d =  currParentInfo->m_parent->m_splitPosition - p_x ;
-                            if( d > 0){
-                                // ref point is left of split axis
-                                visit = true;
-                            }
-                            else{
+                            d = currParentInfo->m_parent->m_splitPosition - distComp.m_ref(currParentInfo->m_parent->m_splitAxis);
+                            if(d<=0.0){
                                 // ref point is right of split axis
-                                d = std::abs(d);
-                                if( d*d < maxNormSq){
-                                    visit = true;
+                                if( d*d >= maxDistSq){
+                                    continue; // no overlap
                                 }
                             }
-                        }else{
-                            // we dont have enough points yet so explore independ of norm ball
-                            visit = true;
+                            // ref point is left of split axis
                         }
-                        if(visit){
-                            //std::cout << " visit " << std::endl;
-                            // maxNorm ball overlaps left side or to little points
-                            // visit left side!
-                            currNode = currParentInfo->m_parent->m_child[0];
-                            if (!currNode->isLeaf()){
-                                 // add to parent
-                                 parents.emplace_back(currNode);
-                            }
+                        // we dont have enough points yet so explore independ of norm ball
+
+                        // maxNorm ball overlaps left side or to little points
+                        // visit left side!
+                        currNode = currParentInfo->m_parent->m_child[0];
+                        if (!currNode->isLeaf()){
+                             // add to parent
+                             parents.emplace_back(currNode);
                         }
 
                         continue;
@@ -1833,69 +1978,67 @@ public:
                         // we processed this child
                         currParentInfo->childVisited[1] = true; // set parents flag
 
-                        bool visit = false;
                         if( kNearest.size() >= k){
-                            p_x = point(currParentInfo->m_parent->m_splitAxis);
-                            d =  currParentInfo->m_parent->m_splitPosition - p_x ;
+                            d = currParentInfo->m_parent->m_splitPosition - distComp.m_ref(currParentInfo->m_parent->m_splitAxis);
                             if( d > 0){
                                 // ref point is left of split axis
-                                d = std::abs(d);
-                                if( d*d <= maxNormSq){
-                                    visit = true;
+                                if( d*d > maxDistSq){
+                                    continue; // no overlap
                                 }
                             }
-                            else{
-                                // ref point is right of split axis
-                                visit = true;
-                            }
-                        }else{
-                            visit = true;
                         }
 
-                        if(visit){
-                            //std::cout << " visit " << std::endl;
-                            // maxNorm ball overlaps right side or to little points!
-                            // visit right side!
-                            currNode = currParentInfo->m_parent->m_child[1];
-                            if (!currNode->isLeaf()){
-                                 // add to parent
-                                 parents.emplace_back( currNode );
-                            }
+                        // maxNorm ball overlaps right side or to little points!
+                        // visit right side!
+                        currNode = currParentInfo->m_parent->m_child[1];
+                        if (!currNode->isLeaf()){
+                             // add to parent
+                             parents.emplace_back( currNode );
                         }
                         continue;
                     }
-//                  else{
-//                     we have have visted both, fall through ->
-//                  }
+                    // we have have visted both, fall through ->
 
                 }else{
+
+                    ASSERTMSG(visitedLeafs.insert(currNode).second,"leaf has already been visited!")
                     // this is a leaf
                     // get at least k nearst  points in this leaf and merge with kNearest list
-                    data = currNode->data();
-                    if(data->size()>0){
-                        // make [beg, mid) such that dist(beg,mid) == k and all items s in [beg,mid)
-                        // -> distComp(s) < distComp(mid)
-                        auto e = data->end();
-                        auto mid = (k>=data->size())?  e : data->begin()+k;
-                        std::nth_element(data->begin(), mid ,  e ,distComp);
 
-                        // update list kNearst
-                        auto it = data->begin();
-                        for( ;it != mid; ++it){
-                            kNearest.push(*it);
-                            if( kNearest.size() > k){
-                                kNearest.pop(); // keeping the size to k-nearest
-                            }
-                        }
+                    if(currNode->size()>0){
+                        data = currNode->data();
+// first implementation
+//                        // make [beg, mid) such that dist(beg,mid) == k and all items s in [beg,mid)
+//                        // -> distComp(s) < distComp(mid)
+//                        auto mid = (k>=data->size())?  data->end() : data->begin()+k;
+//                        std::nth_element(data->begin(), mid ,  data->end() ,distComp);
+//
+//                        // update list kNearst
+//                        auto it = data->begin(); auto s = kNearest.size();
+//                        // push in till size is k if possible
+//                        while(it!=mid && s < k){
+//                            kNearest.push(*it);
+//                            ++it; ++s;
+//                        }
+//                        // push rest if possible (size is already k, so keep it)
+//                        while(it!=mid){
+//                            kNearest.push(*it);
+//                            kNearest.pop();
+//                            ++it;
+//                        }
+
+// second implementation
+
+                        kNearest.push(data->begin(),data->end());
                         // update max norm
-                        maxNormSq = NormSq::apply( NodeDataType::Deref::get(kNearest.top()) );
-                        //std::cout << "maxNorm: " << maxNormSq << std::endl;
+                        maxDistSq = distComp(kNearest.top());
                     }
 
                     // finished with this leaf, travel up!
                     currNode = currParentInfo->m_parent;
                     continue;
                 }
+
                 ASSERTMSG( parents.back().childVisited[0] &&  parents.back().childVisited[1] ,"!")
                 // if we fall through here we pop parent and move a level up!
                 parents.pop_back(); // last one is this nonleaf, pop it
@@ -1903,10 +2046,9 @@ public:
                     currNode = parents.back().m_parent;
                 }
         }
-
-        // return kNearst
-        return kNearest;
     }
+
+    /** =============================================================================*/
 
     /** Returns tuple with values
     * (number of leafs, avg. leaf data size, min. leaf data size, max. leaf data size)
@@ -2105,6 +2247,188 @@ private:
 
     }
 };
+
+
+
+
+//    template<unsigned int Dim = 3,
+//         typename TPoint = Vector3,
+//         typename TValue = Vector3 *,
+//         typename TPointGetter = void,
+//         typename TIndexGetter = void,
+//    >
+//    class DefaultPointDataTraits : public KdTree::DefaultPointDataTraits<Dim,TPoint,TValue,TPointGetter>{
+//        public:
+//
+//    private:
+//
+//        /* Standart Index Getter (T = value_type no ptr) */
+//        template<typename T>
+//        struct IndexGetterImpl {
+//            inline static const PointType & get(const T & t) {
+//                return t.m_idx;
+//            }
+//        };
+//
+//        template<typename TT>
+//        struct IndexGetterImpl<TT*> {
+//            inline static const PointType & get(const TT * t) {
+//                return t->m_idx;
+//            }
+//        };
+//    public:
+//         /** The getter which turns a value_type into the PointType */
+//         using IndexGetter   = typename std::conditional< std::is_same<TIndexGetter,void>::value,
+//                                                         IndexGetterImpl<value_type>,
+//                                                         TIndexGetter>::type;
+//
+//    } ;
+
+    template<typename TTraits = KdTree::DefaultPointDataTraits<> >
+    class NearestNeighbourFilter{
+        public:
+
+        using PointDataTraits = TTraits;
+        static const unsigned int Dim = PointDataTraits::Dimension;
+        using PointType = typename PointDataTraits::PointType;
+        using PointGetter = typename PointDataTraits::PointGetter;
+
+        using Tree = KdTree::Tree< KdTree::TreeTraits<
+                                            KdTree::PointData<PointDataTraits>
+                                        >
+                                    >;
+        using SplitHeuristicType = typename Tree::SplitHeuristicType;
+        using NodeDataType = typename Tree::NodeDataType;
+
+        /** CTor */
+        NearestNeighbourFilter(std::size_t kNeighboursMean = 20 ,
+                                      std::size_t stdDevMult=1 ):
+            m_kNeighboursMean(kNeighboursMean), m_stdDevMult(stdDevMult)
+        {}
+
+        /** Filter function */
+        template<typename Container,
+                 typename DistSq = EuclideanDistSq,
+                 typename = typename std::enable_if<ContainerTags::has_randomAccessIterator<Container>::value>::type
+                >
+        void filter(Container & points,
+                    const AABB<Dim> & aabb,
+                    Container & output,
+                    bool invert=false){
+
+            STATIC_ASSERTM( (std::is_same< typename Container::value_type,
+                                          typename PointDataTraits::value_type>::value),
+                            "Container value_type needs to be the same as value_type of PointDataTraits!")
+
+            // Make kdTree;
+            Tree tree;
+
+            typename SplitHeuristicType::QualityEvaluator e(0.0, /* splitratio (maximized by MidPoint) */
+                                                            2.0, /* pointratio (maximized by MEDIAN)*/
+                                                            1.0);/* extentratio (maximized by MidPoint)*/
+
+            PREC minExtent = 0.0; // box extents are bigger than this!
+            PREC allowSplitAboveNPoints = 20;
+            tree.initSplitHeuristic( std::initializer_list<typename SplitHeuristicType::Method> {
+                                        SplitHeuristicType::Method::MEDIAN,
+                                        /*SplitHeuristicType::Method::GEOMETRIC_MEAN,*/
+                                        SplitHeuristicType::Method::MIDPOINT
+                                    },
+                                    allowSplitAboveNPoints, minExtent,
+                                    SplitHeuristicType::SearchCriteria::FIND_BEST, e,
+                                    0.0, 0.0, 0.1);
+
+            auto rootData = std::unique_ptr<NodeDataType>(new NodeDataType(points.begin(),points.end()));
+            unsigned int inf = std::numeric_limits<unsigned int>::max();
+            tree.build(aabb,std::move(rootData), inf /*max tree depth*/, inf /*max leafs*/);
+
+
+            // Start filtering =======================================
+            using KNNTraits = typename Tree::template KNNTraits<DistSq>;
+            typename KNNTraits::PrioQueue kNearest(m_kNeighboursMean);
+            typename KNNTraits::DistCompType & compDist = kNearest.getComperator();
+
+            // reserve space for all nearest distances (we basically analyse the histogram of the nearst distances)
+            std::vector<PREC> nearestDists;
+            nearestDists.assign(points.size(),0.0);
+
+            std::size_t validPoints = 0;
+
+            auto nPoints = points.size();
+            for(std::size_t i = 0; i < nPoints; ++i){
+                //std::cout << "i: " << i << std::endl;
+                //  Get the kNearest neighbours
+                kNearest.getComperator().m_ref = PointGetter::get(points[i]);
+                tree.template getKNearestNeighbours<KNNTraits>(m_kNeighboursMean, kNearest);
+
+                // compute sample mean and standart deviation of the sample
+                PREC sum = 0.0;
+                if( kNearest.size() > 0){
+
+                    for(auto &p: kNearest){
+                        sum += std::sqrt(compDist(p));
+                    }
+                    sum /= kNearest.size();
+
+                    nearestDists[i] = sum;
+                    ++validPoints;
+                }
+
+            }
+
+            // compute mean and standart deviation
+            PREC sum   = 0.0;
+            PREC sumSq = 0.0;
+            for (std::size_t i = 0; i < nPoints; ++i)
+            {
+                sum   += nearestDists[i];
+                sumSq += nearestDists[i] * nearestDists[i];
+            }
+            PREC mean = sum / validPoints;
+            PREC stdDev = std::sqrt(  (sumSq - sum*sum/validPoints) / validPoints );
+
+
+            PREC distanceThreshold = mean + m_stdDevMult * stdDev; // a distance that is bigger than this signals an outlier
+
+            // move over all points and build new list (without outliers)
+            output.resize(points.size());
+            std::size_t nPointsOut = 0;
+            if(invert){
+                for(std::size_t i = 0; i < nPoints; ++i){
+                    if (nearestDists[i] < distanceThreshold){
+                        // no outlier add to list
+                        output[nPointsOut] = points[i];
+                        ++nPointsOut;
+                    }
+                }
+            }else{
+                for(std::size_t i = 0; i < nPoints; ++i){
+                    if (nearestDists[i] >= distanceThreshold){
+                        // outlier add to list
+                        output[nPointsOut] = points[i];
+                        ++nPointsOut;
+                    }
+                }
+            }
+            output.resize(nPointsOut);
+
+            // =======================================================
+
+        }
+
+        private:
+
+        /** How many neighbours points are search for one point to classify to build the mean neighbour distance */
+        std::size_t m_kNeighboursMean = 20;
+        /** The multiplier for the standart deviation,
+        * if the distance of the point to classify is > \p stdDevMult * stdDevDist + meanDist,
+        * then the point is classfied as an outlier.
+        */
+        std::size_t m_stdDevMult= 1;
+
+
+
+    };
 
 };
 
