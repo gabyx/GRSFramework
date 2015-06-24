@@ -8,8 +8,8 @@
 #include <vector>
 #include <map>
 
+#include "ApproxMVBB/KdTree.hpp"
 
-#include "GRSF/Dynamics/General/KdTree.hpp"
 #include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
 #include "GRSF/Dynamics/Collision/Collider.hpp"
 
@@ -28,7 +28,7 @@ public:
     using NeighbourRanksListType = typename ProcessTopologyBase::NeighbourRanksListType;
     using AdjacentNeighbourRanksMapType = typename ProcessTopologyBase::AdjacentNeighbourRanksMapType;
 
-    using TreeType = KdTree::TreeSimple<>;
+    using TreeType = ApproxMVBB::KdTree::TreeSimple<>;
 
     ProcessTopologyKdTree(  NeighbourRanksListType & nbRanks, AdjacentNeighbourRanksMapType & adjNbRanks,
                             RankIdType processRank, unsigned int masterRank,

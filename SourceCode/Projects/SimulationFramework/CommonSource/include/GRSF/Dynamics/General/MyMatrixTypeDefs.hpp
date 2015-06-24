@@ -72,9 +72,11 @@ struct MyMatrix {
 
     template<typename Derived> using MatrixBase = Eigen::MatrixBase<Derived>;
 
+    template<typename Derived>                 using VectorBDyn     = Eigen::VectorBlock<Derived,Eigen::Dynamic>;
+    template<typename Derived, unsigned int M> using VectorBStat    = Eigen::VectorBlock<Derived,M>;
 
     template<typename Derived>                 using MatrixBDynDyn  = Eigen::Block<Derived>;
-    template<typename Derived, unsigned int M> using MatrixBStatDyn = Eigen::Block<Derived,M>;
+    template<typename Derived, unsigned int M> using MatrixBStatDyn = Eigen::Block<Derived,M, Eigen::Dynamic>;
     template<typename Derived, unsigned int N> using MatrixBDynStat = Eigen::Block<Derived,Eigen::Dynamic,N>;
 
     template<typename EigenType> using MatrixRef = Eigen::Ref<EigenType>;
@@ -152,6 +154,9 @@ struct MyMatrixIOFormat {
    template<unsigned int M> using VectorStat = typename MyMatrix< _PREC_ >::template VectorStat<M>; \
    \
    template<typename Derived> using MatrixBase = typename MyMatrix< _PREC_ >::template MatrixBase<Derived>; \
+   \
+   template<typename Derived> using VectorBDyn = typename MyMatrix< _PREC_ >::template VectorBDyn<Derived>; \
+   template<typename Derived,unsigned int M> using VectorBStat = typename MyMatrix< _PREC_ >::template VectorBStat<Derived,M>; \
    \
    template<typename Derived> using MatrixBDynDyn = typename MyMatrix< _PREC_ >::template MatrixBDynDyn<Derived>; \
    template<typename Derived, unsigned int N> using MatrixBDynStat = typename MyMatrix< _PREC_ >::template MatrixBDynStat<Derived,N>; \

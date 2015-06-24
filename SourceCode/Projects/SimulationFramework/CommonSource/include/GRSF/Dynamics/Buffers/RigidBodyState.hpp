@@ -25,9 +25,13 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_LAYOUT_CONFIG_TYPES
     friend void Interpolate::lerp<PREC>( const RigidBodyState & A, const RigidBodyState & B, RigidBodyState & X,PREC factor);
-    RigidBodyIdType m_id;
-    VectorQBody	m_q; ///< These are the generalized coordinates \f$\mathbf{q}\f$ of a rigid body.
-    VectorUBody	m_u; ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
+
+    using DisplacementType = VectorQBody;
+    using VelocityType     = VectorUBody;
+
+    RigidBodyIdType     m_id;
+    DisplacementType	m_q; ///< These are the generalized coordinates \f$\mathbf{q}\f$ of a rigid body.
+    VelocityType    	m_u; ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
 
 public:
     RigidBodyState(){
@@ -116,6 +120,9 @@ public:
 };
 
 namespace Interpolate{
+    /** This is a simple interpolation, might be wrong for certain displacement, velocity types.
+        Especially quaternions... -> which should use slerp https://en.wikipedia.org/wiki/Slerp
+     */
     template<typename PREC>
     void lerp( const RigidBodyState & A, const RigidBodyState & B, RigidBodyState & X, PREC factor) {
         X.m_q = A.m_q + factor*(B.m_q - A.m_q);

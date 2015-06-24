@@ -155,10 +155,6 @@ struct GlobalConfigs {
 
 
 
-using MeshPREC = double;
-
-
-
 
 #endif
 

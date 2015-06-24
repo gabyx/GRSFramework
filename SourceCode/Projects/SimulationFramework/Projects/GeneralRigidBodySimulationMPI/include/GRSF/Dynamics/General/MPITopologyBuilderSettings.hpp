@@ -44,10 +44,6 @@ struct GridBuilderSettings{
     bool m_aligned = true;
     Matrix33 m_A_IK;
 
-    /** Crop bounding box extent such that a percentage of the points is included measured
-    *   around the geometric center of the points. This can be done with all axes "x?y?z?"
-    * or  with maximal extent only "maxExtent" */
-    std::string m_cropToHistogramm = "";
 };
 
 
@@ -87,26 +83,7 @@ public:
 
     using TopologyBuilderEnumType = TopologyBuilderEnum;
 
-//
-//    inline TopologyBuilderEnumType & type(){ return m_type;}
-//    inline const TopologyBuilderEnumType & type() const { return m_type;}
-//
-//    inline GridBuilderSettings & gridBuilderSettings(){
-//        return m_gridBuilderSettings;
-//    }
-//    inline const GridBuilderSettings & gridBuilderSettings() const {
-//        return m_gridBuilderSettings;
-//    }
-//
-//    inline KdTreeBuilderSettings & kdTreeBuilderSettings(){
-//        return m_kdTreeBuilderSettings;
-//    }
-//    inline const KdTreeBuilderSettings & kdTreeBuilderSettings() const {
-//        return m_kdTreeBuilderSettings;
-//    }
-//
-
-
+    /** Rebuilder Settings */
     struct RebuildSettings{
 
         enum class Mode : short{ STATIC, DYNAMIC} m_mode = Mode::DYNAMIC;
@@ -118,29 +95,46 @@ public:
         // Body Limit Policy
         unsigned int m_bodyLimit = 500;
 
+        /** Do local computations, if it is possible for the given topology computations
+        *   For example: BINET_TENSOR, ALIGNED can compute the prediction and tensor locally and then assemble the
+        *   total results on the master.
+        *   For MVBB , local computations are not possible
+        */
+        bool m_doLocalComputations = true;
+
     };
 
-
+    /** Mass point prediction */
     struct MassPointPredSettings{
         unsigned int m_nPoints = 5;
         PREC m_deltaT = 0.1;
     };
 
-//    inline RebuildSettings & rebuildSettings(){ return m_rebuildSettings;}
-//    inline const RebuildSettings & rebuildSettings() const { return m_rebuildSettings;}
-//
-//    inline MassPointPredSettings & massPointPredSettings(){ return m_massPointPredSettings;}
-//    inline const MassPointPredSettings & massPointPredSettings() const { return m_massPointPredSettings;}
+    /** Outlier Filtering of Point Cloud*/
+    struct OutlierFilterSettings{
+        bool m_enabled = false;
+        unsigned int m_kNNMean = 20;
+        unsigned int m_stdDevMult = 4;
+        unsigned int m_allowSplitAbove = 10; // kdTree settings
+    };
+
+
 
 public:
 
     TopologyBuilderEnumType m_type;
 
-    GridBuilderSettings    m_gridBuilderSettings;
-    KdTreeBuilderSettings  m_kdTreeBuilderSettings;
+    GridBuilderSettings         m_gridBuilderSettings;
+    KdTreeBuilderSettings       m_kdTreeBuilderSettings;
 
-    RebuildSettings m_rebuildSettings;
-    MassPointPredSettings m_massPointPredSettings;
+    RebuildSettings             m_rebuildSettings;
+
+    /**   If this filter is enabled, m_rebuildSettings::m_doLocalComputations = false!
+          during rebuilding.
+    */
+    OutlierFilterSettings       m_globalOutlierFilterSettings;
+
+    MassPointPredSettings       m_massPointPredSettings;
 
 };
 
