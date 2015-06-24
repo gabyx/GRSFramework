@@ -2,8 +2,10 @@
 #define GRSF_Systems_SceneParserBaseTraits_hpp
 
 
+#include <pugixml.hpp>
+
 #include "GRSF/Common/SimpleLogger.hpp"
-#include "pugixml.hpp"
+
 
 
 #define DEFINE_PARSER_BASE_TYPE_TRAITS( TParserTraits ) \

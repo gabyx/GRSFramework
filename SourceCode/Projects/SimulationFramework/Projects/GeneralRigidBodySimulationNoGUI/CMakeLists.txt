@@ -165,10 +165,11 @@ set(INCLUDE_DIRS
 
     ${Boost_INCLUDE_DIRS}
     ${EIGEN_INCLUDE_DIR}
-    ${TICPP_INCLUDE_DIRS}
     ${COLLISIONLIB_INCLUDE_DIRS}
     ${ASSIMP_INCLUDE_DIRS}
-
+    ${PUGIXML_INCLUDE_DIR}
+    ${Meta_INCLUDE_DIR}
+    
     
     ${PROJECT_BINARY_DIR}/include/
     ${PROJECT_SOURCE_DIR}/include/
@@ -177,6 +178,7 @@ set(INCLUDE_DIRS
     ${CUDA_COMMON_INCLUDE_DIR}
     
     ${ApproxMVBB_INC_DIRS}
+
 )
 
 include_directories(${INCLUDE_DIRS})
@@ -198,6 +200,7 @@ set(LINK_LIBS ${Boost_LIBRARIES}
                 ${COLLISIONLIB_LIBRARIES} 
                 ${ASSIMP_LIBRARIES} 
                 ${ApproxMVBB_LIBRARIES}
+                ${PUGIXML_LIBRARIES} 
 )
 #PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 

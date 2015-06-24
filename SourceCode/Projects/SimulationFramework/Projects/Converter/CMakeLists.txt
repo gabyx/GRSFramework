@@ -119,7 +119,9 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 set(INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
     ${EIGEN_INCLUDE_DIR}
-
+    ${PUGIXML_INCLUDE_DIR}
+    ${Meta_INCLUDE_DIR}
+    
     ${PROJECT_BINARY_DIR}/include/
     ${PROJECT_SOURCE_DIR}/include/
     ${SOURCE_DIR}/include/
@@ -127,8 +129,6 @@ set(INCLUDE_DIRS
     ${GLOBAL_COMMON_INC_DIR}
     
     ${ApproxMVBB_INC_DIRS}
-
-    ${GLOBAL_COMMON_INC_DIR}
 
 )
 
@@ -145,7 +145,7 @@ link_directories(${LINK_DIRS})
 #PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
-set(LINK_LIBS ${Boost_LIBRARIES})
+set(LINK_LIBS ${Boost_LIBRARIES} ${PUGIXML_LIBRARIES} )
 #PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 

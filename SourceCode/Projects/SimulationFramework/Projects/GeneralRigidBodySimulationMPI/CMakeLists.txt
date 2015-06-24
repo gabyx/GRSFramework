@@ -211,10 +211,10 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 set(INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
     ${EIGEN_INCLUDE_DIR}
-    
-    ${TICPP_INCLUDE_DIRS}
     ${COLLISIONLIB_INCLUDE_DIRS}
     ${ASSIMP_INCLUDE_DIRS}
+    ${PUGIXML_INCLUDE_DIR}
+    ${Meta_INCLUDE_DIR}
     ${MPI_CXX_INCLUDE_PATH}
 
 
@@ -246,8 +246,10 @@ set(LINK_LIBS   ${Boost_LIBRARIES}
                 ${CUDA_cublas_LIBRARY} 
                 ${COLLISIONLIB_LIBRARIES} 
                 ${ASSIMP_LIBRARIES}  
+                ${MPI_CXX_LIBRARIES}
+                ${PUGIXML_LIBRARIES}
                 ${ApproxMVBB_LIBRARIES} 
-                ${MPI_CXX_LIBRARIES})
+                )
 #PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
