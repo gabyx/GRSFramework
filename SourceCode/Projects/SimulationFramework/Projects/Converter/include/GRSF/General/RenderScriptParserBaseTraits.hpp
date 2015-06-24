@@ -2,7 +2,7 @@
 #define RenderScriptParserBaseTraits_hpp
 
 #include "GRSF/Common/SimpleLogger.hpp"
-#include "pugixml.hpp"
+#include <pugixml.hpp>
 
 #define DEFINE_RENDERSCRIPTPARSER_BASE_TYPE_TRAITS( TParserTraits ) \
     using ParserType = typename TParserTraits::ParserType; \

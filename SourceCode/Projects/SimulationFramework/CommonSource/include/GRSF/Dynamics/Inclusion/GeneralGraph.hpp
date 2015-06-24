@@ -70,32 +70,35 @@ struct GraphTraitsSymmetric {
     using toLinearIdx = metaAdd::toLinearIdxSym<R,C,N>;
 
     template<typename TTNodeData>
-    using getNodeDataIdx = meta::eval<meta::find_index<TTNodeData,NodeDataTypes> >;
+    using getNodeDataIdx = meta::eval<meta::find_index<NodeDataTypes,TTNodeData> >;
 
 
     /** build map , node data to all output edge data types (without void) */
     template<typename NodeData>
     using outEdgesForNode =
         metaAdd::remove<void,
-        meta::transform<
-        meta::as_list<meta::make_index_sequence< nNodes >>,
-        meta::compose<
-        meta::bind_back<meta::quote<meta::at>,  EdgeDataTypesOrig>,
-        meta::bind_back<meta::bind_front<meta::quote<toLinearIdx>, getNodeDataIdx<NodeData> >, meta::size_t<nNodes> >
-        >
-        >>;
+            meta::transform<
+                meta::as_list<meta::make_index_sequence< nNodes > >,
+                    meta::compose<
+                        meta::bind_front<meta::quote<meta::at>,  EdgeDataTypesOrig>,
+                        meta::bind_back<meta::bind_front<meta::quote<toLinearIdx>, getNodeDataIdx<NodeData> >, meta::size_t<nNodes>
+                    >
+                >
+            >
+        >;
 
     /** build map , node data to all input edge data types (without void) */
     template<typename NodeData>
     using inEdgesForNode =
         metaAdd::remove<void,
-        meta::transform<
-        meta::as_list<meta::make_index_sequence< nNodes >>,
-        meta::compose<
-        meta::bind_back<meta::quote<meta::at>,  EdgeDataTypesOrig>,
-        meta::bind_back<meta::quote<toLinearIdx>,  getNodeDataIdx<NodeData> , meta::size_t<nNodes> >
-        >
-        >>;
+            meta::transform<
+                meta::as_list<meta::make_index_sequence< nNodes > >,
+                meta::compose<
+                    meta::bind_front<meta::quote<meta::at>,  EdgeDataTypesOrig>,
+                    meta::bind_back<meta::quote<toLinearIdx>,  getNodeDataIdx<NodeData> , meta::size_t<nNodes> >
+                >
+            >
+        >;
 
 
     template<typename T>
@@ -116,14 +119,14 @@ struct GraphTraitsSymmetric {
     /** Make a meta::list< Container< F<Item1>> , Container< F<Item2>>, ... >  */
     template<typename List, typename F, typename Container = meta::quote<std::vector> >
     using makeTupleContainer = meta::apply_list<
-                               meta::quote<std::tuple>,
-                               meta::transform<
-                               List,
-                               meta::compose<
-                               Container,
-                               F
-                               >
-                               >
+                                   meta::quote<std::tuple>,
+                                       meta::transform<
+                                       List,
+                                       meta::compose<
+                                           Container,
+                                           F
+                                       >
+                                   >
                                >;
 
 
@@ -134,7 +137,7 @@ struct GraphTraitsSymmetric {
 
         // macro for boost repeat (z= repetition dimension?? = unused,  N = counter, data = unused )
 #define SWITCH_CASE( z, N, data ) \
-            case N: v( *static_cast< meta::at< meta::size_t<N>,Types> * >(p)); break;
+            case N: v( *static_cast< meta::at<Types,meta::size_t<N> > * >(p)); break;
 
 #define GENERATE_SWITCH(N) \
             template<typename Types> \
@@ -231,7 +234,7 @@ public:
 
     template<typename... T>
     Edge(const std::size_t & i, T &&... t)
-        : EdgeBase<Traits>( meta::find_index<EdgeDataType, typename Traits::EdgeDataTypes >::value )
+        : EdgeBase<Traits>( meta::find_index<typename Traits::EdgeDataTypes, EdgeDataType >::value )
         ,  m_data(std::forward<T>(t)...), m_id(i)
     {}
 
@@ -312,13 +315,13 @@ public:
 
     template<typename T>
     void addEdgeIn(T * e) {
-        using Idx = meta::find_index<typename T::EdgeDataType, InEdgeDataTypes>;
+        using Idx = meta::find_index<InEdgeDataTypes, typename T::EdgeDataType>;
         std::get< Idx::type::value >(m_edgesIn).push_back(e);
     }
 
     template<typename T>
     void addEdgeOut(T * e) {
-        using Idx = meta::find_index<typename T::EdgeDataType, OutEdgeDataTypes>;
+        using Idx = meta::find_index< OutEdgeDataTypes, typename T::EdgeDataType>;
         std::get< Idx::type::value >(m_edgesOut).push_back(e);
     }
 
@@ -368,7 +371,7 @@ public:
 
     template<typename... T>
     Node(const std::size_t & i, T &&... t)
-    : NodeBase<Traits>( meta::find_index<NodeDataType, typename Traits::NodeDataTypes >::value )
+    : NodeBase<Traits>( meta::find_index<typename Traits::NodeDataTypes, NodeDataType >::value )
     , m_data(std::forward<T>(t)...), m_id(i)
     {}
 
@@ -412,9 +415,9 @@ public:
                                                                             meta::quote<EdgeStorageType> >;
 
     template<typename TNodeData>
-    using toNodeStorageType  =  meta::eval<std::tuple_element< meta::find_index<TNodeData,NodeDataTypes>::value , NodeStorageTuple  >>;
+    using toNodeStorageType  =  meta::eval<std::tuple_element< meta::find_index<NodeDataTypes,TNodeData>::value , NodeStorageTuple  >>;
     template<typename TEdgeData>
-    using toEdgeStorageType  =  meta::eval<std::tuple_element< meta::find_index<TEdgeData,EdgeDataTypes>::value , EdgeStorageTuple  >>;
+    using toEdgeStorageType  =  meta::eval<std::tuple_element< meta::find_index<EdgeDataTypes,TEdgeData>::value , EdgeStorageTuple  >>;
 
 protected:
 
@@ -452,13 +455,13 @@ protected:
     /** Get reference of the storage for a node type N */
     template<typename TNodeData>
     auto getNodeStorageRef() -> toNodeStorageType<TNodeData> &  {
-        return std::get< meta::find_index< TNodeData, NodeDataTypes >::value >(m_nodeStorage); // get container
+        return std::get< meta::find_index< NodeDataTypes, TNodeData >::value >(m_nodeStorage); // get container
     }
 
     /** Get reference of the storage for a node type N */
     template<typename TEdgeData >
     auto getEdgeStorageRef() -> toEdgeStorageType<TEdgeData> &  {
-        return std::get< meta::find_index< TEdgeData, EdgeDataTypes >::value >(m_edgeStorage); // get container
+        return std::get< meta::find_index< EdgeDataTypes, TEdgeData >::value >(m_edgeStorage); // get container
     }
 
 

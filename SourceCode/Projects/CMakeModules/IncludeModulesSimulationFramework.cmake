@@ -85,9 +85,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
         ${COMMONSOURCE_DIR}/include/GRSF/Systems/SharedBufferDynSys.hpp
         
-        
-        ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
-        ${COMMONSOURCE_DIR}/external/meta/include/meta/meta.hpp
         ${COMMONSOURCE_DIR}/external/rtnorm/rtnorm.hpp
     )
 
@@ -123,8 +120,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Buffers/StatePoolVisBackFront.cpp
         
-        
-        ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
@@ -134,8 +129,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_GUI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/external/FastFunc/include/
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
-        ${COMMONSOURCE_DIR}/external/pugixml/src
-        ${COMMONSOURCE_DIR}/external/meta/include/
         ${COMMONSOURCE_DIR}/external/
     )
 endmacro(INCLUDE_SIMULATION_FRAMEWORK_GUI)
@@ -231,8 +224,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
 
         ${COMMONSOURCE_DIR}/include/GRSF/Systems/SharedBufferDynSys.hpp
         
-        ${COMMONSOURCE_DIR}/external/meta/include/meta/meta.hpp
-        ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
         ${COMMONSOURCE_DIR}/external/rtnorm/rtnorm.hpp
     )
 
@@ -267,9 +258,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/ContactParameterMap.cpp
 
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Buffers/StatePoolVisBackFront.cpp
-        
-        
-        ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
+    
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
@@ -279,8 +268,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/external/FastFunc/include/
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
-        ${COMMONSOURCE_DIR}/external/pugixml/src
-        ${COMMONSOURCE_DIR}/external/meta/include/
         ${COMMONSOURCE_DIR}/external/
 
     )
@@ -379,8 +366,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/include/GRSF/Logic/LookUpTable.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Logic/ExecutionTreeInOut.hpp
         
-        ${COMMONSOURCE_DIR}/external/meta/include/meta/meta.hpp
-        ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
         ${COMMONSOURCE_DIR}/external/rtnorm/rtnorm.hpp
         ${COMMONSOURCE_DIR}/external/exprtk/exprtk.hpp
     )
@@ -417,9 +402,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/src/GRSF/Logic/LogicNode.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Logic/LogicSocket.cpp
         
-        ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
-        
-        
     )
 
     set(${INCLUDE_DIRS} ${${INCLUDE_DIRS}}
@@ -429,8 +411,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_CONVERTER SRC INC INCLUDE_DIRS COMMONSOURCE_D
         ${COMMONSOURCE_DIR}/external/FastFunc/include/
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
-        ${COMMONSOURCE_DIR}/external/pugixml/src
-        ${COMMONSOURCE_DIR}/external/meta/include/
         ${COMMONSOURCE_DIR}/external/exprtk/
         ${COMMONSOURCE_DIR}/external/ 
     )
@@ -524,9 +504,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Buffers/SharedBufferPlayback.hpp
 
         #${COMMONSOURCE_DIR}/include/GRSF/Systems/SharedBufferDynSys.hpp
-        
-        ${COMMONSOURCE_DIR}/external/meta/include/meta/meta.hpp
-        ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.hpp
+
+
         ${COMMONSOURCE_DIR}/external/rtnorm/rtnorm.hpp
     )
 
@@ -560,9 +539,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Inclusion/ContactParameterMap.cpp
 
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Buffers/StatePoolVisBackFront.cpp
-        
-        
-        ${COMMONSOURCE_DIR}/external/pugixml/src/pugixml.cpp
+
         
 
     )
@@ -574,8 +551,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST SRC INC INCLUDE_DIRS COMMONSOURCE_
         ${COMMONSOURCE_DIR}/external/FastFunc/include/
         ${COMMONSOURCE_DIR}/external/getoptpp/
         ${COMMONSOURCE_DIR}/external/getoptpp/src/
-        ${COMMONSOURCE_DIR}/external/pugixml/src
-        ${COMMONSOURCE_DIR}/external/meta/include/
         ${COMMONSOURCE_DIR}/external/
 
     )

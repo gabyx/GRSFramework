@@ -5,7 +5,7 @@
 #include <fstream>
 
 #include <boost/filesystem.hpp>
-#include "pugixml.hpp"
+#include <pugixml.hpp>
 
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"
