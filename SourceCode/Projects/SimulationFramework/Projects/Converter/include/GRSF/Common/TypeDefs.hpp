@@ -101,9 +101,6 @@ struct GlobalConfigs{
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
 
-using MeshPREC = double;
-
-
 
 
 #endif

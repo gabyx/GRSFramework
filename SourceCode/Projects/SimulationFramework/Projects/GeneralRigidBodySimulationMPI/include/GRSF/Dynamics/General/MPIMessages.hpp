@@ -1546,6 +1546,7 @@ public:
             m_pTopoBuilder->m_countPoints_glo += countPoints;
             serializeEigen(ar,r_G);
             m_pTopoBuilder->m_r_G_glo += countPoints*r_G;
+
         }else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::ALIGNED ){
             // Insert a AABB
             auto insertedAABB = m_pTopoBuilder->m_rankAABBs.emplace(std::piecewise_construct, std::make_tuple(m_rank),std::make_tuple() );

@@ -155,12 +155,6 @@ struct GlobalConfigs {
     using RandomGenType = typename GlobalConfigs::GeneralConfigs::RandomGeneratorType;
 
 
-
-using MeshPREC = double;
-
-
-
-
 #endif
 
 

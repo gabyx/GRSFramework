@@ -192,15 +192,38 @@ public:
 
             unsigned int points = 5;
             if(!Utilities::stringToType(points, massP.attribute("nPoints").value())) {
-                ERRORMSG("---> String conversion in MPISettings::ProcessTopology: nPoints failed");
+                ERRORMSG("---> String conversion in MPISettings::ProcessTopology:MassPointPrediction nPoints failed");
             }
             m_topoSettings->m_massPointPredSettings.m_nPoints = points;
 
             PREC deltaT = 0.1;
             if(!Utilities::stringToType(deltaT, massP.attribute("deltaT").value())) {
-                ERRORMSG("---> String conversion in MPISettings::ProcessTopology: nPoints failed");
+                ERRORMSG("---> String conversion in MPISettings::ProcessTopology:MassPointPrediction nPoints failed");
             }
             m_topoSettings->m_massPointPredSettings.m_deltaT = deltaT;
+        }
+
+        XMLNodeType outlier = procTopo.child("GlobalOutlierFilter");
+        if(outlier){
+
+            unsigned int a;
+            if(!Utilities::stringToType(a, outlier.attribute("kNNMean").value())) {
+                ERRORMSG("---> String conversion in MPISettings::ProcessTopology:GlobalOutlierFilter kNNMean failed");
+            }
+            m_topoSettings->m_globalOutlierFilterSettings.m_kNNMean = a;
+
+            PREC b;
+            if(!Utilities::stringToType(b, outlier.attribute("stdDeviationMult").value())) {
+                ERRORMSG("---> String conversion in MPISettings::ProcessTopology:GlobalOutlierFilter stdDeviationMult failed");
+            }
+            m_topoSettings->m_globalOutlierFilterSettings.m_stdDevMult = b;
+
+
+            if(!Utilities::stringToType(a, outlier.attribute("allowSplitAbove").value())) {
+                ERRORMSG("---> String conversion in MPISettings::ProcessTopology:GlobalOutlierFilter allowSplitAbove failed");
+            }
+
+            m_topoSettings->m_globalOutlierFilterSettings.m_enabled = true;
         }
 
         LOGSCLEVEL1(this->m_pSimulationLog, "==================================================================="<<std::endl;)
