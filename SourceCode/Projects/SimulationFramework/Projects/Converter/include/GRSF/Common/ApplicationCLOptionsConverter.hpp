@@ -341,6 +341,7 @@ public:
                 m_noTimeList = true;
             }
 
+
         }
         catch(GetOpt::ParsingErrorEx & ex){
             printHelp();
