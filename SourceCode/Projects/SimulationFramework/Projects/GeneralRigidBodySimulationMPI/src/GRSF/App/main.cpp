@@ -132,6 +132,7 @@ void callBackSIGINT(){
 
 int main(int argc, char **argv) {
 
+
     ApplicationSignalHandler sigHandler( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} );
     sigHandler.registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
 
