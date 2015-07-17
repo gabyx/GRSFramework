@@ -60,7 +60,7 @@ public:
         m_xAxis.clear();
         m_yAxis.clear();
         m_zAxis.clear();
-        for(TIterator it = itBegin; it != itEnd; it++){
+        for(TIterator it = itBegin; it != itEnd; ++it){
             m_xAxis.addPoint((*it)->m_cFrame.m_p(0),
                              (*it)->m_cFrame.m_p(1),
                              (*it)->m_cFrame.m_p(2));

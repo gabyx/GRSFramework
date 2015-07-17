@@ -36,10 +36,6 @@ public:
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    CollisionData(std::size_t & index) {
-        clear();
-    }; ///< Constructor which sets all members to zero.
-
     CollisionData() {
          clear();
     }; ///< Constructor which sets all members to zero.

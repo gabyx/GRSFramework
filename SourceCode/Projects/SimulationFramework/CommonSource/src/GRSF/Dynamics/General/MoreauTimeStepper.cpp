@@ -208,7 +208,7 @@ void MoreauTimeStepper::doTimeStep() {
     }
 
 
-    LOGSLLEVEL1( m_pSolverLog,  "---> Iteration Time: "<<std::setprecision(5)<<(m_endTime-m_startTime)<<std::endl
+    LOGSLLEVEL1( m_pSolverLog,  "---> Iteration Time: "<<std::setprecision(5)<<(m_endTime-m_startTime)<< "[sec]" << std::endl
      <<  "---> End time-step ====================================" <<std::endl<<std::endl; );
 
 

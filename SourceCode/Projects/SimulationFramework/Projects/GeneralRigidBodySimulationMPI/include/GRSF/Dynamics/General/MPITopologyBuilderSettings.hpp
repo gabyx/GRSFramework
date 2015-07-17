@@ -33,7 +33,8 @@ struct GridBuilderSettings{
     /**
     *   PREDEFINED: Take values from below!
     *   ALIGNED: fit AABB
-    *   BINET_TENSOR: fit to frame of Eigenvalue decomposition of BinetTensor,
+    *   BINET_TENSOR: make OOBB in coordinate system of eigenvectors of the
+                      BinetTensor (or principal componente analysis),
     *   MVBB: Minimum Volume Bounding Box
     */
 
