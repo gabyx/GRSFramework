@@ -272,7 +272,7 @@ public:
     // Dispatch
     inline void operator()( const std::shared_ptr<const HalfspaceGeometry >  & halfspace) { ///< Calls Halfspace/Point collision detection.
         Vector3 n = m_pBody->m_A_IK * halfspace->m_normal;
-        m_bIntersection = CollisionFunctions::collideHalfspacePointAndProx( n, m_pBody->m_r_S, *m_p);
+        m_bIntersection = CollisionFunctions::collideHalfspacePointAndProx(m_pBody->m_r_S, n, *m_p);
     }
 
     inline void operator()( const std::shared_ptr<const SphereGeometry >  & sphere) { ///< Calls Halfspace/Point collision detection.
@@ -487,7 +487,8 @@ void ColliderBody<TCollisionSet>::collideSphereSphere(PREC r1, PREC r2, const Ve
     if(dsqr < rsqr) {
 
         //We have a collision
-        m_pColData = m_pColSet->insert().first;
+        m_pColSet->emplace_back();
+        m_pColData = m_pColSet->back();
 
         //if the spheres are practically concentric just choose a random direction
         //to avoid division by zero
@@ -529,7 +530,8 @@ void ColliderBody<TCollisionSet>::collide( const SphereGeometry * sphereGeom,
 
     if(overlap >=0) {
         //We have a collision
-        m_pColData = m_pColSet->insert().first;
+        m_pColSet->emplace_back();
+        m_pColData = m_pColSet->back();
 
 
         m_pColData->m_overlap = overlap;
@@ -617,7 +619,8 @@ void ColliderBody<TCollisionSet>::collide( const BoxGeometry * boxGeom,
         double overlap = /*halfspaceGeom->m_normal.dot(halfspaceGeom->m_pos)*/ - ( r_SC2 ).dot( I_n_plane ) ;
         if(overlap >=0) {
             //We have a collision
-            m_pColData = m_pColSet->insert().first;
+            m_pColSet->emplace_back();
+            m_pColData = m_pColSet->back();
 
 
 
@@ -765,7 +768,8 @@ void ColliderBody<TCollisionSet>::collide(const SphereGeometry  * sphereGeom,
     // Signal all remaining contacts int the temporary set!
     for(unsigned int j=0; j<temporarySet.size(); j++) {
 
-        m_pColData = m_pColSet->insert().first;
+        m_pColSet->emplace_back();
+        m_pColData = m_pColSet->back();
 
 
         m_pColData->m_overlap = temporarySet[j].get<0>();
