@@ -9,7 +9,7 @@
 #ifndef GRSF_Dynamics_General_LayoutConfigDefs_hpp
 #define GRSF_Dynamics_General_LayoutConfigDefs_hpp
 
-
+#include "GRSF/Dynamics/General/MyContainerTypeDefs.hpp"
 #include "GRSF/Dynamics/General/MyMatrixTypeDefs.hpp"
 
 /**
@@ -30,7 +30,6 @@ struct LayoutConfig{
    using PREC = TPREC;
    using LayoutType = TLayout;
 
-
    // Static Vectors/Matrices
    DEFINE_MATRIX_TYPES_OF( PREC );
 
@@ -50,13 +49,12 @@ struct LayoutConfig{
 
 };
 
-
-
 /**
 * @brief This macro is used to typedef all template arguments in a class with e.g template argument typename â€œLayoutConfigâ€
 */
 #define DEFINE_LAYOUT_CONFIG_TYPES_OF( _LayoutConfigName_ ) \
    using PREC = typename _LayoutConfigName_::PREC;    \
+   DEFINE_CONTAINER_TYPES \
    DEFINE_MATRIX_TYPES_OF( PREC ); \
    static int const NDOFqBody = _LayoutConfigName_::LayoutType::NDOFqBody; \
    static int const NDOFuBody = _LayoutConfigName_::LayoutType::NDOFuBody; \

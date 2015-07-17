@@ -83,21 +83,6 @@ struct MyMatrix {
 
     template<typename EigenType> using MatrixMap = Eigen::Map<EigenType>;
 
-
-
-
-    // Sepcial STL map where the type is 16byte aligned
-    template<typename Key, typename Type, typename Comp = std::less<Key> >
-    using StdMapAligned = std::map<Key, Type, Comp, Eigen::aligned_allocator<std::pair<const Key, Type> > >;
-
-    // Sepcial STL map where the type is 16byte aligned
-    template<typename Key, typename Type, typename Hash = std::hash<Key>, typename Pred = std::equal_to<Key> >
-    using StdUMapAligned = std::unordered_map<Key, Type, Hash, Pred, Eigen::aligned_allocator<std::pair<const Key, Type> > >;
-
-     // Special STL vectors where the type is 16byte aligned
-    template<typename Type >
-    using StdVecAligned = std::vector<Type, Eigen::aligned_allocator<Type> >;
-
     // Special Array types;
     template<typename Derived> using ArrayBase  = Eigen::ArrayBase<Derived>;
     template<unsigned int M>
@@ -112,7 +97,6 @@ struct MyMatrix {
     using Array3 = Eigen::Array<PREC, 3, 1>;
     using Array2 = Eigen::Array<PREC, 2, 1>;
 };
-
 
 struct MyMatrixDecomposition {
 
@@ -169,11 +153,6 @@ struct MyMatrixIOFormat {
    \
    template<typename EigenType> using MatrixRef = typename MyMatrix< _PREC_ >::template MatrixRef< EigenType >; \
    template<typename EigenType> using MatrixMap = typename MyMatrix< _PREC_ >::template MatrixMap< EigenType >; \
-   template<typename EigenType> using StdVecAligned = typename MyMatrix< _PREC_ >::template StdVecAligned< EigenType >; \
-   template<typename Key, typename EigenType> \
-   using StdMapAligned = typename MyMatrix< _PREC_ >::template StdMapAligned<Key, EigenType >; \
-   template<typename Key, typename EigenType> \
-   using StdUMapAligned = typename MyMatrix< _PREC_ >::template StdUMapAligned<Key, EigenType >; \
    \
    template<typename Derived> using ArrayBase  = typename MyMatrix< _PREC_ >::template ArrayBase<Derived>; \
    template<unsigned int M> using ArrayStatDyn = typename MyMatrix< _PREC_ >::template ArrayStatDyn<M>; \

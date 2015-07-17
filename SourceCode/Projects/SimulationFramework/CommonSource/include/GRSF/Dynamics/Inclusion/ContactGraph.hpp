@@ -145,7 +145,7 @@ public:
                 contactParams.m_contactModel == ContactModels::Enum::UCFD ||
                 contactParams.m_contactModel == ContactModels::Enum::UCFDD) {
             // add the pNodeData to the node list
-            auto * addedNode = this->insertNode<UCFNodeDataType>().first;
+            auto * addedNode = this->emplaceNodeBack<UCFNodeDataType>(m_nodeCounter);
             nodeInit.apply<addEdges>(addedNode, pCollData, contactParams);
 
         } else {
@@ -268,7 +268,7 @@ private:
 
             if( addEdges ) {
                 // Add self edge! ===========================================================
-                auto * addedEdge = m_p->insertEdge<CommonEdgeDataType>().first;
+                auto * addedEdge = m_p->emplaceEdgeBack<CommonEdgeDataType>(m_p->m_edgeCounter);
                 addedEdge->getData().m_pBody = pBody;
 
                 // add links
@@ -284,7 +284,7 @@ private:
                 // if no contacts are already on the body we skip this
                 for(auto & pN : nodesOnBody) {
 
-                    addedEdge = m_p->insertEdge<CommonEdgeDataType>().first;
+                    addedEdge = m_p->emplaceEdgeBack<CommonEdgeDataType>(m_p->m_edgeCounter);
                     addedEdge->getData().m_pBody = pBody;
                     // add link
                     addedEdge->setStartNode(pNode);

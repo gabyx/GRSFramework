@@ -180,7 +180,7 @@ private:
             nodeData.m_contactParameter = contactParams;
 
 
-            if(isRemote.first or isRemote.second) {
+            if(isRemote.first || isRemote.second) {
                 //Remote - Remote or Remote-Local Contacts
 
                 if(!isRemote.first or !isRemote.second){
@@ -292,7 +292,7 @@ private:
                 auto & nodesOnBody = m_p->m_simBodiesToContactsMap[pBody];
 
                 // Add self edge! ===========================================================
-                auto * addedEdge = m_p->insertEdge<CommonEdgeDataType>().first;
+                auto * addedEdge = m_p->emplaceEdgeBack<CommonEdgeDataType>(m_p->m_edgeCounter);
                 addedEdge->getData().m_pBody = pBody;
 
                 // add links
@@ -308,7 +308,7 @@ private:
                 // if no contacts are already on the body we skip this
                 for(auto & pN : nodesOnBody) {
 
-                    addedEdge = m_p->insertEdge<CommonEdgeDataType>().first;
+                    addedEdge = m_p->emplaceEdgeBack<CommonEdgeDataType>(m_p->m_edgeCounter);
                     addedEdge->getData().m_pBody = pBody;
                     // add link
                     addedEdge->setStartNode(pNode);

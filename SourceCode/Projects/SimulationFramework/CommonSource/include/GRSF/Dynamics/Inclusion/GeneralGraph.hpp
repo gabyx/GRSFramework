@@ -116,7 +116,7 @@ struct GraphTraitsSymmetric {
     using NodeTypes = meta::transform< NodeDataTypes, meta::quote<toNode> >;
 
 
-    /** Make a meta::list< Container< F<Item1>> , Container< F<Item2>>, ... >  */
+    /** Make a meta::list< Container< F<Item1> > , Container< F<Item2> >, ... >  */
     template<typename List, typename F, typename Container = meta::quote<std::vector> >
     using makeTupleContainer = meta::apply_list<
                                    meta::quote<std::tuple>,
@@ -502,13 +502,13 @@ public:
     }
 
     template<typename TNodeData, typename... T>
-    std::pair< typename Traits::template toNode<TNodeData> *, bool> insertNode(T &&... t) {
-        return getNodeStorageRef<TNodeData>().insert(std::forward<T>(t)...);
+    typename Traits::template toNode<TNodeData> * emplaceNodeBack(T &&... t) {
+        return getNodeStorageRef<TNodeData>().emplace_back(std::forward<T>(t)...);
     }
 
     template<typename TEdgeData, typename... T>
-    std::pair<typename Traits::template toEdge<TEdgeData> *, bool> insertEdge(T &&... t) {
-        return getEdgeStorageRef<TEdgeData>().insert(std::forward<T>(t)...);
+    typename Traits::template toEdge<TEdgeData> * emplaceEdgeBack(T &&... t) {
+        return getEdgeStorageRef<TEdgeData>().emplace_back(std::forward<T>(t)...);
     }
 
     /** Visit all nodes */

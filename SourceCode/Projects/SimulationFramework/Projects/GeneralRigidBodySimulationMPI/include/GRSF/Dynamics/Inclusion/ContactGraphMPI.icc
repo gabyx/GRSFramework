@@ -81,7 +81,7 @@ void ContactGraph<TCombo>::addNode(CollisionData * pCollData) {
         contactParams.m_contactModel == ContactModels::Enum::UCFDD) {
 
         // add the pNodeData to the node list
-        auto * addedNode = this->insertNode<UCFNodeDataType>().first;
+        auto * addedNode = this->emplaceNodeBack<UCFNodeDataType>(m_nodeCounter);
         nodeInit.template apply<addEdges>(addedNode, pCollData, contactParams,isRemote);
 
     } else {
@@ -100,7 +100,7 @@ ContactGraph<TCombo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & 
 
     if(pairRes.second) {
         //if inserted set the new pointer
-        auto * sbN = this->insertNode<SplitBodyNodeDataType>().first;
+        auto * sbN = this->emplaceNodeBack<SplitBodyNodeDataType>(m_nodeCounterSplitBody);
         pRef = &sbN->getData();
         pRef->initialize(body);
         ++m_nodeCounterSplitBody;
