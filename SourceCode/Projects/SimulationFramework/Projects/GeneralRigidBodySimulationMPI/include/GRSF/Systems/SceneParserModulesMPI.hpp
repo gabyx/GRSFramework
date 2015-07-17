@@ -78,6 +78,15 @@ public:
 
             m_topoSettings->m_rebuildSettings.m_mode = TopologyBuilderSettingsType::RebuildSettings::Mode::DYNAMIC;
 
+            XMLAttributeType att = procTopo.attribute("doLocalComputations");
+            if( att ){
+                bool doLocalComputations;
+                if(!Utilities::stringToType(doLocalComputations, att.value())) {
+                    ERRORMSG("---> String conversion in MPISettings::ProcessTopology: doLocalComputations failed");
+                }
+                m_topoSettings->m_rebuildSettings.m_doLocalComputations = doLocalComputations;
+            }
+
             unsigned int policyCheck = 1;
             if(!Utilities::stringToType(policyCheck, procTopo.attribute("policyCheckEveryXTimeStep").value())) {
                 ERRORMSG("---> String conversion in MPISettings::ProcessTopology: policyCheckEveryXTimeStep failed");

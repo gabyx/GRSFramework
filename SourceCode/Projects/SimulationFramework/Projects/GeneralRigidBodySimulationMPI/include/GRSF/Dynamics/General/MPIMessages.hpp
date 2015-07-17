@@ -1468,35 +1468,28 @@ public:
             serializeEigen(ar,state.second.m_u);
         }
 
-        // if BINET_TENSOR
-        if(m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
-            // Local AABB
-            ar & m_pTopoBuilder->m_I_aabb_loc;
-            // Local Theta
-            serializeEigen(ar,m_pTopoBuilder->m_I_theta_loc);
-            // Local Center point
-            ar & m_pTopoBuilder->m_countPoints_loc;
-            serializeEigen(ar,m_pTopoBuilder->m_r_G_loc);
+        // only sed additional stuff if we did local computations!
+        if( m_pTopoBuilder->m_doComputations_loc){
+            // if BINET_TENSOR
+            if(m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
+                // Local Theta (still in point I: m_I_theta_I)
+                serializeEigen(ar,m_pTopoBuilder->m_I_theta_G);
+                // Local Center point
+                ar & m_pTopoBuilder->m_countPoints;
+                serializeEigen(ar,m_pTopoBuilder->m_r_G);
+            }
+            else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::ALIGNED ){
+                // Local AABB
+                ar & m_pTopoBuilder->m_aabb;
+            }else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::MVBB ){
+                ERRORMSG("Local computations should be off for MVVB build mode!")
+            }
         }
-        else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::ALIGNED ){
-            // Local AABB
-            ar & m_pTopoBuilder->m_I_aabb_loc;
-        }else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::MVBB ){
-
-        }
-
     }
 
-    // Master reset
+    // master reset
     void resetBeforLoad(){
-        // Binet
-        m_pTopoBuilder->m_I_theta_G_glo.setZero();
-        m_pTopoBuilder->m_countPoints_glo = 0;
-        m_pTopoBuilder->m_r_G_glo.setZero();
-        // Aligned
-        m_pTopoBuilder->m_rankAABBs.clear();
 
-        m_pTopoBuilder->m_aabb_glo.reset();
     }
 
     template<class Archive>
@@ -1517,46 +1510,45 @@ public:
                                                             std::make_tuple(id) ,
                                                             std::make_tuple(id));
 
-            m_pTopoBuilder->m_massPoints_glo.emplace_back(&res.first->second); // link new masspoint to state
-            auto & back = m_pTopoBuilder->m_massPoints_glo.back();
+            m_pTopoBuilder->m_massPoints.emplace_back(&res.first->second); // link new masspoint to state
+            auto & back = m_pTopoBuilder->m_massPoints.back();
 
             serializeEigen(ar, back.m_state->m_q);
             serializeEigen(ar, back.m_state->m_u);
         }
 
-        // Binet Tensor
-        if(m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
+        if( m_pTopoBuilder->m_doComputations_loc){
+            // Binet Tensor
+            if(m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR){
 
-            // Insert a AABB
-            auto insertedAABB = m_pTopoBuilder->m_rankAABBs.emplace(std::piecewise_construct, std::make_tuple(m_rank), std::make_tuple() );
-            // Get AABB
-            ar & insertedAABB.first->second;
+                // Theta in I frame
+                // Add Theta to the global one
+                Vector6 theta; serializeEigen(ar,theta);
+                m_pTopoBuilder->m_I_theta_G += theta;
 
-            // Theta in I frame
-            // Add Theta to the global one
-            Vector6 theta; serializeEigen(ar,theta);
-            m_pTopoBuilder->m_I_theta_G_glo += theta;
+                unsigned int countPoints;
+                ar & countPoints; // get number of local pred. points
+                // add to global predicted points
+                m_pTopoBuilder->m_countPoints += countPoints;
 
-            // r_G
-            // add to global r_G (massen gewichtung, masse=1)
-            Vector3 r_G;
-            unsigned int countPoints;
-            ar & countPoints; // get number of local pred. points
-            // add to global predicted points
-            m_pTopoBuilder->m_countPoints_glo += countPoints;
-            serializeEigen(ar,r_G);
-            m_pTopoBuilder->m_r_G_glo += countPoints*r_G;
+                // add to global center (we receive, r_G * count_points)
+                Vector3 r_G;
+                serializeEigen(ar,r_G);
+                m_pTopoBuilder->m_r_G += r_G;
 
-        }else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::ALIGNED ){
-            // Insert a AABB
-            auto insertedAABB = m_pTopoBuilder->m_rankAABBs.emplace(std::piecewise_construct, std::make_tuple(m_rank),std::make_tuple() );
-            // Get AABB
-            ar & insertedAABB.first->second;
+            }else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::ALIGNED ){
+                // Insert a AABB
+                auto insertedAABB = m_pTopoBuilder->m_rankAABBs.emplace(std::piecewise_construct, std::make_tuple(m_rank),std::make_tuple() );
+                // Get AABB
+                ar & insertedAABB.first->second;
 
-            // unite local AABB with total AABB
-            m_pTopoBuilder->m_aabb_glo += insertedAABB.first->second;
+                // unite local AABB with total AABB
+                m_pTopoBuilder->m_aabb += insertedAABB.first->second;
+
+            }else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::MVBB ){
+                ERRORMSG("Local computations should be off for MVVB build mode!")
+            }
         }
-
     }
 
     BOOST_SERIALIZATION_SPLIT_MEMBER();
@@ -1625,7 +1617,7 @@ public:
     void save(Archive & ar, const unsigned int version) const {
 
         // Send grid data
-        ar & m_pTopoBuilder->m_aabb_glo;
+        ar & m_pTopoBuilder->m_aabb;
         serializeEigen(ar,m_pTopoBuilder->m_processDim);
 
         ar & m_pTopoBuilder->m_aligned;
@@ -1665,13 +1657,15 @@ public:
     void load(Archive & ar, const unsigned int version) const {
 
         // Recv grid data
-        ar & m_pTopoBuilder->m_aabb_glo;
+        ar & m_pTopoBuilder->m_aabb;
         serializeEigen(ar,m_pTopoBuilder->m_processDim);
 
         ar & m_pTopoBuilder->m_aligned;
 
         if( !m_pTopoBuilder->m_aligned){
             serializeEigen(ar,m_pTopoBuilder->m_A_IK);
+        }else{
+            m_pTopoBuilder->m_A_IK.setIdentity();
         }
 
         // Load time
