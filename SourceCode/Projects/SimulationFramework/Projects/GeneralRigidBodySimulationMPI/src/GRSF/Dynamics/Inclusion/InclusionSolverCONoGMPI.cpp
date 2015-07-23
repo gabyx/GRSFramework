@@ -578,6 +578,7 @@ std::string  InclusionSolverCONoGMPI::getIterationStats() {
             << m_timeProx<<"\t"
             << m_proxIterationTime<<"\t"
             << m_pDynSys->m_currentTotEnergy<<"\t"
+            << m_pDynSys->m_currentPotEnergy<<"\t"
             << m_pDynSys->m_currentKinEnergy<<"\t"
             << m_pDynSys->m_currentRotKinEnergy<<"\t"
             << m_pDynSys->m_currentSpinNorm<<"\t"
@@ -588,6 +589,22 @@ std::string  InclusionSolverCONoGMPI::getIterationStats() {
 
 std::string InclusionSolverCONoGMPI::getStatsHeader() {
     std::stringstream s;
-    s << "GPUUsed\tnContacts\tnContactsLocal\tnContactsRemote\tnSplitBodyNodes\tnGlobalIterations\tConverged\tIsFinite\tTotalTimeProx [s]\tIterTimeProx [s]\tTotalStateEnergy [J]\tTotalKinEnergy [J]\tTotalRotKinEnergy [J]\tTotalSpinNorm [Nms]\tAvgTimeProxLocalRemoteNodes [s]\tAvgTimeProxSplitNodes [s]";
+    s << "GPUUsed\t"
+         "nContacts\t"
+         "nContactsLocal\t"
+         "nContactsRemote\t"
+         "nSplitBodyNodes\t"
+         "nGlobalIterations\t"
+         "Converged\t"
+         "IsFinite\t"
+         "TotalTimeProx [s]\t"
+         "IterTimeProx [s]\t"
+         "TotalStateEnergy [J]\t"
+         "TotalPotEnergy [J]\t"
+         "TotalKinEnergy [J]\t"
+         "TotalRotKinEnergy [J]\t"
+         "TotalSpinNorm [Nms]\t"
+         "AvgTimeProxLocalRemoteNodes [s]\t"
+         "AvgTimeProxSplitNodes [s]";
     return s.str();
 }

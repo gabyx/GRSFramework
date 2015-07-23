@@ -506,6 +506,7 @@ std::string  InclusionSolverCONoG::getIterationStats() {
     << m_timeProx<<"\t"
     << m_proxIterationTime<<"\t"
     << m_pDynSys->m_currentTotEnergy<<"\t"
+    << m_pDynSys->m_currentPotEnergy<<"\t"
     << m_pDynSys->m_currentKinEnergy<<"\t"
     << m_pDynSys->m_currentRotKinEnergy<<"\t"
     << m_pDynSys->m_currentSpinNorm;
@@ -528,6 +529,7 @@ std::string InclusionSolverCONoG::getStatsHeader() {
                        "TotalTimeProx [s]\t"
                        "IterTimeProx [s]\t"
                        "TotalStateEnergy [J]\t"
+                       "TotalPotEnergy [J]\t"
                        "TotalKinEnergy [J]\t"
                        "TotalRotKinEnergy [J]\t"
                        "TotalSpinNorm [Nms]\t"
