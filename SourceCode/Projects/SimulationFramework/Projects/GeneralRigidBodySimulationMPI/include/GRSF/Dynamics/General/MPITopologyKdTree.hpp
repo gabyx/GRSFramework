@@ -211,7 +211,7 @@ private:
     unsigned int m_cellNumberingStart;
 
     RankIdType m_rank; ///< Own rank;
-    AABB3d m_aabb; ///< Own AABB of this process in frame G
+    AABB3d m_aabb; ///< Own AABB of this process in frame K
 
     bool m_axisAligned = true;
     Matrix33 m_A_IK ; ///< The grid can be rotated, this is the transformation matrix from grid frame K to intertia frame I

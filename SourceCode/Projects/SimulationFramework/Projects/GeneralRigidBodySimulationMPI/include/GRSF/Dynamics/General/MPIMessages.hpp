@@ -1596,7 +1596,7 @@ private:
 
 template<typename TTopologyBuilder >
 class TopologyBuilderMessageWrapperResults: public boost::serialization::traits< TopologyBuilderMessageWrapperResults<TTopologyBuilder>,
-    boost::serialization::object_serializable,
+        boost::serialization::object_serializable,
         boost::serialization::track_never> {
 public:
 

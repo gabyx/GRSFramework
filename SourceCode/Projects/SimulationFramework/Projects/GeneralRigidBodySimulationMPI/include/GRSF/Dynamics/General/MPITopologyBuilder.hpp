@@ -1258,9 +1258,9 @@ private: \
                     "\t dim: " << "[ " << m_processDim.transpose() << "]" << std::endl <<
                     "\t extent: " << "[ " << m_aabb.extent().transpose() << "]" << std::endl;);
             m_pProcCommunicator->createProcTopoGrid(m_aabb,
-                    m_processDim,
-                    m_aligned,
-                    m_A_IK);
+                                                    m_processDim,
+                                                    m_aligned,
+                                                    m_A_IK);
 
             LOGTBLEVEL1( m_pSimulationLog,"---> GridTopoBuilder: Initialize ProcessCommunicator buffers..." << std::endl);
             m_pProcCommunicator->initializeNeighbourBuffers();
@@ -1476,13 +1476,14 @@ private: \
     public:
 
         KdTreeTopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
-        std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
-        const TopologyBuilderSettings::RebuildSettings & rebuildSettings,
-        const TopologyBuilderSettings::MassPointPredSettings & massPointPredSettings,
-        const SettingsType & settings,
-        boost::filesystem::path sceneFilePath,
-        unsigned int nGlobalSimBodies)
-            :Base(settings,massPointPredSettings, sceneFilePath,
+                                std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
+                                const TopologyBuilderSettings::RebuildSettings & rebuildSettings,
+                                const TopologyBuilderSettings::MassPointPredSettings & massPointPredSettings,
+                                const OutlierFilterSettingsType & globalOutlierFilterSettings,
+                                const SettingsType & settings,
+                                boost::filesystem::path sceneFilePath,
+                                unsigned int nGlobalSimBodies)
+            :Base(settings,massPointPredSettings, globalOutlierFilterSettings, sceneFilePath,
             TopologyBuilderEnumType::KDTREEBUILDER, pDynSys, pProcCommunicator,rebuildSettings),
              m_nGlobalSimBodies(nGlobalSimBodies)
              /*m_messageWrapperResults(this)*/
@@ -1525,6 +1526,7 @@ private: \
 
                 LOGTBLEVEL2(m_pSimulationLog, "---> KdTreeTopoBuilder: parsed states: "<<std::endl;);
                 m_massPoints.clear();
+                m_massPoints.reserve(m_initStates.size());
                 for(auto & s : m_initStates) {
                     // Save mass points
                     m_massPoints.emplace_back( &s.second );
@@ -1533,7 +1535,7 @@ private: \
 
                 }
 
-                this->initMakeBoundingBoxGlobal(m_settings,masterRank);
+                this->initMakeBoundingBoxGlobal(masterRank);
 
                 buildKdTree();
 
@@ -1589,7 +1591,7 @@ private: \
             ++m_builtTopologies;
             m_currentTime = currentTime;
 
-            this->rebuildMakeBoundingBoxLocal_PreSend();
+
 
             LOGTB(m_pSimulationLog,"---> KdTreeTopoBuilder: Clear all init states in DynamicsSystem" <<std::endl;)
             m_pDynSys->m_bodiesInitStates.clear();
@@ -1597,7 +1599,8 @@ private: \
             RankIdType masterRank = this->m_pProcCommunicator->getMasterRank();
             if(this->m_pProcCommunicator->hasMasterRank()) {
 
-                // For sending
+                // compute local stuff for the corresponding build method
+                this->template rebuildMakeBoundingBoxLocal_PreSend<true>(masterRank);
 
                 // Receive Messages
                 // Fill linear array with all ranks except master
@@ -1622,7 +1625,7 @@ private: \
                 }
 
 
-                this->rebuildMakeBoundingBoxGlobal(m_settings,masterRank);
+                this->rebuildMakeBoundingBoxGlobal(masterRank);
 
                 buildKdTree();
 
@@ -1639,7 +1642,8 @@ private: \
 
             } else {
 
-
+                // compute local stuff for the corresponding build method
+                this->template rebuildMakeBoundingBoxLocal_PreSend<false>(masterRank);
 
                 this->m_pProcCommunicator->sendMessageToRank(m_messageBodies, masterRank, m_messageBodies.m_tag);
                 //TODO
@@ -1686,28 +1690,35 @@ private: \
             static const unsigned int Dimension = NodeDataType::Dimension;
             using PointListType = NodeDataType::PointListType;
 
+            // transform the points if not aligned into the aabbs frame
+            if(!this->m_aligned){
+                for(auto & v : m_predPoints){
+                    v = this->m_A_IK.transpose()*v;
+                }
+            }
+
             // make pointer list
             auto s = m_predPoints.size();
             PointListType * vec ( new PointListType(s) );
             for(std::size_t i= 0; i<s; ++i) {
                 (*vec)[i] = &m_predPoints[i];
             }
-            ERRORMSG("DID I TRANSFORM THE POINTS INTO THE KDTREE? OOBB?")
+
 
             typename SplitHeuristicType::QualityEvaluator e(0.0, /* splitratio (maximized by MidPoint) */
                     2.0, /* pointratio (maximized by MEDIAN)*/
                     2.0);/* extentratio (maximized by MidPoint)*/
             Tree kdTree;
             kdTree.initSplitHeuristic( std::initializer_list<SplitHeuristicType::Method> {
-                SplitHeuristicType::Method::MEDIAN
-                /*SplitHeuristicType::Method::GEOMETRIC_MEAN,
-                  SplitHeuristicType::Method::MIDPOINT*/
-            },
-            m_settings.m_minPointsForSplit,
-            m_settings.m_minCellSize,
-            SplitHeuristicType::SearchCriteria::FIND_BEST,
-            e,
-            0.0, 0.0, 0.1);
+                                            SplitHeuristicType::Method::MEDIAN
+                                            /*SplitHeuristicType::Method::GEOMETRIC_MEAN,
+                                              SplitHeuristicType::Method::MIDPOINT*/
+                                        },
+                                        m_settings.m_minPointsForSplit,
+                                        m_settings.m_minCellSize,
+                                        SplitHeuristicType::SearchCriteria::FIND_BEST,
+                                        e,
+                                        0.0, 0.0, 0.1);
 
             auto rootData = std::unique_ptr<NodeDataType>(new NodeDataType(vec->begin(),vec->end(),
                     std::unique_ptr<PointListType>(vec) ));
@@ -1746,9 +1757,9 @@ private: \
             } else if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::PREDEFINED) {
                 LOGTBLEVEL1( m_pSimulationLog, "\t buildMode: PREDEFINED" << std::endl );
             }
-            //            else if (m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::BINET_TENSOR){
-            //                 LOGTBLEVEL1( m_pSimulationLog,"\t buildMode: BINET" << std::endl);
-            //            }
+            else if (m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::BINET_TENSOR){
+                 LOGTBLEVEL1( m_pSimulationLog,"\t buildMode: BINET" << std::endl);
+            }
             else if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::MVBB) {
                 LOGTBLEVEL1( m_pSimulationLog,"\t buildMode: MVBB" << std::endl);
             } else {
@@ -1764,9 +1775,9 @@ private: \
                     "\t processes: " << m_processes << std::endl <<
                     "\t extent: " << "[ " << m_aabb.extent().transpose() << "]" << std::endl;);
             m_pProcCommunicator->createProcTopoKdTree(  std::move(m_kdTree_glo),
-                    m_aabb,
-                    m_aligned,
-                    m_A_IK);
+                                                        m_aabb,
+                                                        m_aligned,
+                                                        m_A_IK);
 
             LOGTBLEVEL1( m_pSimulationLog,"---> KdTreeTopoBuilder: Initialize ProcessCommunicator buffers..." << std::endl);
             m_pProcCommunicator->initializeNeighbourBuffers();
@@ -1810,7 +1821,7 @@ private: \
             ASSERTMSG(m_bodiesPerRank.size() == 0,"All states should be sent!");
         }
 
-// master sorts bodies
+        // master sorts bodies
         void sortBodies(RankIdType masterRank ) {
             LOGTBLEVEL3( m_pSimulationLog, "---> KdTreeTopoBuilder: Sort bodies " << std::endl;);
 
@@ -1897,13 +1908,13 @@ private: \
 
             std::string buildMode ="nothing";
 
-            if(  m_settings.m_buildMode == GridBuilderSettings::BuildMode::ALIGNED) {
+            if(  m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::ALIGNED) {
                 buildMode="Aligned";
-            } else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::PREDEFINED) {
+            } else if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::PREDEFINED) {
                 buildMode="Predefined";
-            } else if (m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR) {
+            } else if (m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::BINET_TENSOR) {
                 buildMode="BinetTensor";
-            } else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::MVBB) {
+            } else if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::MVBB) {
                 buildMode="MVBB";
             }
             root.attribute("buildMode").set_value(buildMode.c_str()) ;

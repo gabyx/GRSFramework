@@ -106,6 +106,18 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
                                                    topoSettings.m_gridBuilderSettings,
                                                    m_sceneFileParsed, m_nGlobalSimBodies ) );
         m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added GridTopologyBuilder");
+    }
+    else if(topoSettings.m_type == MPILayer::TopologyBuilderEnum::KDTREEBUILDER){
+
+        m_pTopologyBuilder = std::shared_ptr< TopologyBuilderType >(
+                                                new MPILayer::KdTreeTopologyBuilder<ProcessCommunicatorType>
+                                                  (m_pDynSys,m_pProcCommunicator,
+                                                   topoSettings.m_rebuildSettings,
+                                                   topoSettings.m_massPointPredSettings,
+                                                   topoSettings.m_globalOutlierFilterSettings,
+                                                   topoSettings.m_kdTreeBuilderSettings,
+                                                   m_sceneFileParsed, m_nGlobalSimBodies ) );
+        m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added KdTreeTopologyBuilder");
     }else{
         ERRORMSG("No Topology Builder type instantiated")
     }

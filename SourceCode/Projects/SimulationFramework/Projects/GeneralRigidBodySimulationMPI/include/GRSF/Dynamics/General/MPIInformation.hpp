@@ -66,13 +66,16 @@ public:
         m_name = name;
     };
 
-    void createProcTopoGrid(const AABB3d & aabb,
-                            const MyMatrix<unsigned int>::Array3 & dim,
-                            bool aligned = true,
-                            const Matrix33 & A_IK = Matrix33::Identity()){
+    template<typename... T>
+    void createProcTopoGrid(T &&... t){
+        m_procTopo.createProcessTopologyGrid(m_rank, MPILayer::ProcessInformation::MASTER_RANK , std::forward<T>(t)...  );
+    }
 
-        m_procTopo.createProcessTopologyGrid(m_rank, MPILayer::ProcessInformation::MASTER_RANK ,
-                                             aabb,dim, aligned, A_IK  );    }
+    template<typename... T>
+    void createProcTopoKdTree(T &&... t){
+        m_procTopo.createProcessTopologyKdTree(m_rank, MPILayer::ProcessInformation::MASTER_RANK , std::forward<T>(t)...  );
+    }
+
 
     ProcessTopology* getProcTopo(){
         return &m_procTopo;

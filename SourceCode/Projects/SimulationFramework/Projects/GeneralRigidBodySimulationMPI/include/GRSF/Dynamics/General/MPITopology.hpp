@@ -111,7 +111,7 @@ public:
     template<typename Tree>
     void createProcessTopologyKdTree(unsigned int processRank,
                                       unsigned int masterRank,
-                                      const Tree & tree,
+                                      std::unique_ptr<Tree> tree,
                                       const AABB3d & aabb,
                                       bool aligned = true,
                                       const Matrix33 & A_IK = Matrix33::Identity()
@@ -122,12 +122,12 @@ public:
         Deleter d;
         m_procTopo.apply_visitor(d);
         m_procTopo = new ProcessTopologyKdTree<ProcessTopology>(  m_nbRanks,m_adjNbRanks,
-                                                              m_rank , masterRank,
-                                                              tree,
-                                                              aabb,
-                                                              aligned,
-                                                              A_IK
-                                                              );
+                                                                  m_rank , masterRank,
+                                                                  std::move(tree),
+                                                                  aabb,
+                                                                  aligned,
+                                                                  A_IK
+                                                                  );
 
     }
 

@@ -62,13 +62,17 @@ struct KdTreeBuilderSettings{
     PREC m_minCellSize = 1e-3;
     PREC m_minPointsForSplit = 10;
     unsigned int m_maxTreeDepth = 5000; ///< Huge such that this is not a constraint for stopping
+
     /**
     *   PREDEFINED: Take values from below!
     *   ALIGNED: fit AABB
+    *   BINET_TENSOR: make OOBB in coordinate system of eigenvectors of the
+                      BinetTensor (or principal componente analysis),
     *   MVBB: Minimum Volume Bounding Box
     */
 
-    enum class BuildMode : short{ PREDEFINED , ALIGNED, MVBB} m_buildMode = BuildMode::MVBB;
+
+    enum class BuildMode : short{ PREDEFINED , ALIGNED,  BINET_TENSOR, MVBB} m_buildMode = BuildMode::MVBB;
 
     // OOBB or AABB
     AABB3d m_aabb; ///< used values for predefined values
