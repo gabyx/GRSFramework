@@ -30,7 +30,7 @@ public:
     using AdjacentNeighbourRanksMapType = typename ProcessTopologyBase::AdjacentNeighbourRanksMapType;
 
     ProcessTopologyGrid(  NeighbourRanksListType & nbRanks, AdjacentNeighbourRanksMapType & adjNbRanks,
-                          RankIdType processRank, unsigned int masterRank,
+                          RankIdType processRank, RankIdType masterRank,
             			  const AABB3d & aabb,
                           const MyMatrix<unsigned int>::Array3 & dim,
                           bool aligned = true,
@@ -190,7 +190,7 @@ private:
                                     NeighbourRanksListType & neighbourProcessRanks,
                                     bool & overlapsOwnRank,
                                     const RigidBodyType * body,
-                                    AddArgs... args) const
+                                    AddArgs &... args) const
     {
         // Check neighbour AABB
         for(auto it = m_nbAABB.begin(); it != m_nbAABB.end(); it++) {

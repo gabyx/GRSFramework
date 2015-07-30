@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_MPISerializationHelpersEigen_hpp
-#define GRSF_Dynamics_General_MPISerializationHelpersEigen_hpp
+#ifndef GRSF_Dynamics_General_SerializationHelpersEigen_hpp
+#define GRSF_Dynamics_General_SerializationHelpersEigen_hpp
 
 #include <Eigen/Dense>
 #include <boost/serialization/array.hpp>
@@ -89,4 +89,4 @@ namespace boost{
     } // namespace serialization
 } // namespace boost
 
-#endif // MPISerializationHelpersEigen_hpp
+#endif

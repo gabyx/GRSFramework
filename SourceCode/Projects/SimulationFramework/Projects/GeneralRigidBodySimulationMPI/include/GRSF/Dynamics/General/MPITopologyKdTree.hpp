@@ -8,7 +8,7 @@
 #include <vector>
 #include <map>
 
-#include "ApproxMVBB/KdTree.hpp"
+#include "GRSF/Dynamics/General/KdTree.hpp"
 
 #include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
 #include "GRSF/Dynamics/Collision/Collider.hpp"
@@ -24,37 +24,68 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    using RankToAABBType = std::map<unsigned int, AABB3d >;
+    using RankToAABBType = std::map<RankIdType, AABB3d >;
     using NeighbourRanksListType = typename ProcessTopologyBase::NeighbourRanksListType;
     using AdjacentNeighbourRanksMapType = typename ProcessTopologyBase::AdjacentNeighbourRanksMapType;
 
-    using TreeType = ApproxMVBB::KdTree::TreeSimple<>;
+    using TreeType = KdTree::TreeSimpleS<>;
+    using NodeType = typename TreeType::NodeType;
+    using LeafNeighbourMapType = typename TreeType::LeafNeighbourMapType ;
+
 
     ProcessTopologyKdTree(  NeighbourRanksListType & nbRanks, AdjacentNeighbourRanksMapType & adjNbRanks,
-                            RankIdType processRank, unsigned int masterRank,
+                            RankIdType processRank, RankIdType masterRank,
                             std::unique_ptr<TreeType> tree,
+                            const LeafNeighbourMapType & neighbours,
                             const AABB3d & aabb,
-                            bool aligned = true,
+                            bool aligned,
                             const Matrix33 & A_IK = Matrix33::Identity())
-            : m_rank(processRank), m_A_IK(A_IK), m_cellNumberingStart(masterRank), m_kdTree(tree.release())
-        {
+            : m_rank(processRank), m_A_IK(A_IK), m_kdTree(tree.release())
+    {
 
-//        //Initialize neighbours
-//        nbRanks = getCellNeighbours(m_rank);
-//
-//        adjNbRanks.clear();
-//        for( auto it = nbRanks.begin(); it!=nbRanks.end(); it++) {
-//
-//            //Initialize adjacent neighbour ranks to m_nbRanks for this neighbour *it
-//            adjNbRanks[*it] = getCommonNeighbourCells(nbRanks, *it);
-//
-//            //Get all AABB's of this neighbours
-//            m_nbAABB[ *it ] = getCellAABB(*it);
-//        }
-//
-//
-//        //Get AABB of own rank!
-//        m_aabb = getCellAABB(m_rank);
+        // insert our neighbours
+        auto it = neighbours.find(processRank);
+        if(it == neighbours.end()){
+            ERRORMSG("neighbours does not contain an entry for rank: " << processRank );
+        }
+        nbRanks.insert(it->second.begin(),it->second.end());
+
+        // get adj neighbours
+        for( auto it = nbRanks.begin(); it!=nbRanks.end(); ++it) {
+            //Initialize adjacent neighbour ranks to m_nbRanks for this neighbours[*it]$
+            auto itN = neighbours.find(*it);
+             if(itN == neighbours.end()){
+                ERRORMSG("neighbours does not contain an entry for rank: " << *it );
+            }
+            adjNbRanks.emplace(*it, getCommonNeighbourCells(nbRanks, itN->second) );
+        }
+
+        // get our aabb
+        m_leaf = tree->getLeaf(m_rank);
+        if(!m_leaf){
+            ERRORMSG("Trying to get leaf node for our rank: " << m_rank << " failed!")
+        }
+
+        // adjust kdTree
+        // TODO (unlink childs which corresponds to subtrees we never need to check because the leafs subtree are not neighbours)
+        // not essential for correct algorithm
+
+        // get lowest common ancestors of all boundary subtrees
+        auto bndIt = m_leaf->getBoundaries().begin();
+        m_lcaBoundary = nullptr;
+        while( bndIt != m_leaf->getBoundaries().end()){
+            if(m_lcaBoundary == nullptr){
+                m_lcaBoundary = *bndIt;
+            }
+            else if( *bndIt != nullptr ){
+                m_lcaBoundary = m_kdTree->getLowestCommonAncestor(m_lcaBoundary, *bndIt);
+            }
+            ++bndIt;
+        }
+
+        if(m_lcaBoundary == nullptr){
+            ERRORMSG("Lowest common ancestor failed!");
+        }
 
     };
 
@@ -71,152 +102,64 @@ public:
     RankIdType getRank() const{return m_rank;}
 
     unsigned int getCellRank(const Vector3 & point) const {
-//        MyMatrix<unsigned int>::Array3 v = CartesianGrid<NoCellData>::getCellIndexClosest(point);
-//        return getCellRank(v);
-    };
-    unsigned int getCellRank(const MyMatrix<unsigned int>::Array3 & v) const {
-//        ASSERTMSG( ( (v(0) >=0 && v(0) < m_dim(0)) && (v(1) >=0 && v(1) < m_dim(1)) && (v(2) >=0 && v(2) < m_dim(2)) ),
-//                "Index: " << v << " is out of bound" )
-//
-//        unsigned int cellRank = v(0) + v(1)*m_dim(0) + v(2) *(m_dim(0)*m_dim(1)) + m_cellNumberingStart;
-//
-//        ASSERTMSG(cellRank < m_dim(0)*m_dim(1)*m_dim(2) + m_cellNumberingStart
-//                && cellRank >= m_cellNumberingStart,
-//                "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
-//        return cellRank;
+        auto * leaf = m_kdTree->getLeaf(point);
+        ASSERTMSG(leaf,"This should never be nullptr!");
+        return leaf->getIdx();
     };
 
-
-    std::set<unsigned int> getCellNeighbours(unsigned int cellRank) const {
-//        std::set<unsigned int> v;
-//        // cellRank zero indexed
-//        ASSERTMSG(cellRank < m_dim(0)*m_dim(1)*m_dim(2) + m_cellNumberingStart
-//                && cellRank >= m_cellNumberingStart,
-//                "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
-//
-//        MyMatrix<unsigned int>::Array3 cell_index = getCellIndex(cellRank);
-//
-//        MyMatrix<unsigned int>::Array3 ind;
-//
-//        for(int i=0; i<26; i++) {
-//            ind(0) = m_nbIndicesOff[i*3+0] + cell_index(0);
-//            ind(1) = m_nbIndicesOff[i*3+1] + cell_index(1);
-//            ind(2) = m_nbIndicesOff[i*3+2] + cell_index(2);
-//
-//            if( ( ind(0) >=0 &&  ind(0) < m_dim(0)) &&
-//                    ( ind(1) >=0 &&  ind(1) < m_dim(1)) &&
-//                    ( ind(2) >=0 &&  ind(2) < m_dim(2)) ) {
-//                // Add neighbour
-//                std::pair< typename std::set<unsigned int>::iterator, bool> res =
-//                        v.insert(getCellRank(ind));
-//                ASSERTMSG(res.second,"This neighbour number: "<< getCellRank(ind) << " for cell number: "<< cellRank <<" alreads exists!");
-//            }
-//
-//        }
-//        return v;
-    };
-
-    /**
-    * Gets the common cells between all cellNumbers and the neighbours of cell number cellNumber2
-    */
-    std::set<unsigned int> getCommonNeighbourCells(const std::set<unsigned int> & cellNumbers,unsigned int cellNumber2) const {
-        std::set<unsigned int> nbRanks ;/*= getCellNeigbours(cellNumber2);*/
-
-        std::set<unsigned int> intersec;
-//        // intersect nbRanks with cellNumbers
-//        std::set_intersection(cellNumbers.begin(),cellNumbers.end(),nbRanks.begin(),nbRanks.end(),
-//                std::inserter(intersec,intersec.begin()));
-
-        return intersec;
-    };
-
-    MyMatrix<unsigned int>::Array3 getCellIndex(unsigned int cellRank) const {
-//
-//        ASSERTMSG(cellRank < m_dim(0)*m_dim(1)*m_dim(2) + m_cellNumberingStart
-//                && cellRank >= m_cellNumberingStart,
-//                "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
-
-        MyMatrix<unsigned int>::Array3 v;
-//        unsigned int cellNumberTemp;
-//
-//        cellNumberTemp = cellRank;
-//        v(2) = cellNumberTemp / (m_dim(0)*m_dim(1));
-//
-//        cellNumberTemp -= v(2)*(m_dim(0)*m_dim(1));
-//        v(1) = cellNumberTemp / (m_dim(0));
-//
-//        cellNumberTemp -= v(1)*(m_dim(0));
-//        v(0) = cellNumberTemp;
-
-        return v;
-    };
-
-    /**
-    * Gets the AABB, which extends to infinity for boundary cells!
-    */
-    AABB3d getCellAABB(unsigned int cellRank) const {
-
-//        MyMatrix<unsigned int>::Array3 cell_index = getCellIndex(cellRank);
-        AABB3d ret;/*(m_Box.m_minPoint);*/
-//        ret.m_minPoint.array() += cell_index.array().cast<PREC>()     * m_dxyz.array();
-//        ret.m_maxPoint.array() += (cell_index.array()+1).cast<PREC>() * m_dxyz.array();
-//
-//        //Expand AABB each axis to max/min if this rank is a boundary cell!
-//        for(short i = 0; i<3; i++) {
-//            if(cell_index(i) == m_dim(i)-1) {
-//                ret.expandToMaxExtent<false>(i);
-//            }
-//            if( cell_index(i) == 0 ) {
-//                ret.expandToMaxExtent<true>(i);
-//            }
-//        }
-
-        return ret;
-    };
 
     bool checkOverlap(const RigidBodyType * body,
                       NeighbourRanksListType & neighbourProcessRanks,
                       bool & overlapsOwnRank) const {
-//        if(m_axisAligned) {
-//            return checkOverlapImpl(m_ColliderAABB,neighbourProcessRanks, overlapsOwnRank, body);
-//        } else {
-//            return checkOverlapImpl(m_ColliderOOBB,neighbourProcessRanks, overlapsOwnRank, body, m_A_IK );
-//        }
-return true;
+        if(m_axisAligned) {
+
+            m_colliderKdTree.checkOverlap(neighbourProcessRanks, m_lcaBoundary, body);
+            overlapsOwnRank = m_colliderKdTree.checkOverlapNode(body,m_leaf);
+
+        } else {
+            m_colliderKdTree.checkOverlap(neighbourProcessRanks, m_lcaBoundary, body, m_A_IK );
+            overlapsOwnRank = m_colliderKdTree.checkOverlapNode(body,m_leaf, m_A_IK);
+        }
+
+        return neighbourProcessRanks.size() > 0;
     }
+
 
 
 private:
 
-//    template<typename Collider, typename... AddArgs >
-//    inline bool checkOverlapImpl(Collider & collider,
-//            NeighbourRanksListType & neighbourProcessRanks,
-//            bool & overlapsOwnRank,
-//            const RigidBodyType * body,
-//            AddArgs... args) {
-//        // Check neighbour AABB
-//        for(auto it = m_nbAABB.begin(); it != m_nbAABB.end(); it++) {
-//            if( collider.checkOverlap(body,it->second, args...) ) {
-//                neighbourProcessRanks.insert(it->first);
-//            }
-//        }
-//        // Check own AABB
-//        overlapsOwnRank = collider.checkOverlap(body, m_aabb, args...);
-//        return neighbourProcessRanks.size() > 0;
-//    }
+    /**
+    * Gets the common cells between all cellNumbers and the neighbours of cell number cellNumber2
+    */
+
+    inline typename AdjacentNeighbourRanksMapType::mapped_type
+    getCommonNeighbourCells(const NeighbourRanksListType & neighboursOurRanks,
+                            const typename LeafNeighbourMapType::mapped_type & neighboursOtherRank) const {
+
+        typename AdjacentNeighbourRanksMapType::mapped_type intersec;
+        // intersect nbRanks with cellNumbers
+        std::set_intersection(neighboursOurRanks.begin(), neighboursOurRanks.end(),
+                              neighboursOtherRank.begin(),neighboursOtherRank.end(),
+                std::inserter(intersec,intersec.begin()));
+
+        return intersec;
+    };
 
     template<typename T> friend class TopologyVisitors::BelongsPointToProcess;
     template<typename T> friend class TopologyVisitors::CheckOverlap;
 
-    unsigned int m_cellNumberingStart;
-
     RankIdType m_rank; ///< Own rank;
-    AABB3d m_aabb; ///< Own AABB of this process in frame K
 
     bool m_axisAligned = true;
     Matrix33 m_A_IK ; ///< The grid can be rotated, this is the transformation matrix from grid frame K to intertia frame I
 
+
     TreeType * m_kdTree;
+    const NodeType * m_leaf; ///< This ranks leaf pointer
+    const NodeType * m_lcaBoundary;
+
+    ColliderKdTree<TreeType> m_colliderKdTree;
+
 };
 
 

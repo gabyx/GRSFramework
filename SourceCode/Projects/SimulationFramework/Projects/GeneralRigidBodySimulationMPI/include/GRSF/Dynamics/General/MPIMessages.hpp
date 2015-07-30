@@ -8,15 +8,23 @@
 #include <boost/serialization/level.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/set.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/unordered_map.hpp>
+#include <boost/serialization/unordered_set.hpp>
+
 #include <boost/serialization/split_member.hpp>
 
 
 #include "GRSF/Common/AssertionDebug.hpp"
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"
+
+#include "GRSF/Common/SfinaeMacros.hpp"
+
 #include "GRSF/Dynamics/General/MPIMessageTag.hpp"
-#include "GRSF/Dynamics/General/MPISerializationHelpersEigen.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp"
+#include "GRSF/Dynamics/General/SerializationHelpersEigen.hpp"
+#include "GRSF/Common/SerializationHelpersTuple.hpp"
+#include "GRSF/Dynamics/Collision/SerializationHelpersGeometries.hpp"
 
 #include "GRSF/Singeltons/FileManager.hpp"
 #include "GRSF/Common/SimpleLogger.hpp"
@@ -28,20 +36,20 @@
 
 
 namespace boost {
-namespace serialization {
+    namespace serialization {
 
-template<class Archive >
-void serialize(Archive& ar, boost::filesystem::path & p,
-               const unsigned int version) {
-    boost::filesystem::path::string_type s;
-    if(Archive::is_saving::value)
-        s = p.string();
-    ar & s;
-    if(Archive::is_loading::value)
-        p = s;
-}
+        template<class Archive >
+        void serialize(Archive& ar, boost::filesystem::path & p,
+                       const unsigned int version) {
+            boost::filesystem::path::string_type s;
+            if(Archive::is_saving::value)
+                s = p.string();
+            ar & s;
+            if(Archive::is_loading::value)
+                p = s;
+        }
 
-};
+    };
 };
 
 namespace MPILayer {
@@ -1592,7 +1600,14 @@ private:
     RankIdType m_rank;
 };
 
+}; // MPILayer
 
+/** We need the forward declarations of the topobuilder to correctly switch in this message */
+
+#include "GRSF/Dynamics/General/MPITopologyBuilder_fwd.hpp"
+#include "GRSF/Dynamics/General/SerializationHelpersKdTree.hpp"
+
+namespace MPILayer{
 
 template<typename TTopologyBuilder >
 class TopologyBuilderMessageWrapperResults: public boost::serialization::traits< TopologyBuilderMessageWrapperResults<TTopologyBuilder>,
@@ -1616,15 +1631,7 @@ public:
     template<class Archive>
     void save(Archive & ar, const unsigned int version) const {
 
-        // Send grid data
-        ar & m_pTopoBuilder->m_aabb;
-        serializeEigen(ar,m_pTopoBuilder->m_processDim);
-
-        ar & m_pTopoBuilder->m_aligned;
-
-        if(!m_pTopoBuilder->m_aligned){
-            serializeEigen(ar,m_pTopoBuilder->m_A_IK);
-        }
+        saveTopoData<TopologyBuilderType>(ar);
 
         // Send states of bodies and the initial time
 
@@ -1650,12 +1657,29 @@ public:
         }
     }
 
-    // receive broadcast all ranks except master
-    void resetBeforLoad(){}
 
-    template<class Archive>
-    void load(Archive & ar, const unsigned int version) const {
 
+    /** Send/Recv Grid topology data (SFINAE)*/
+    template<typename TopoType,
+             typename Archive,
+             SFINAE_ENABLE_IF( MPILayer::isGridTopoBuilder<TopoType>::value)
+            >
+    void saveTopoData(Archive & ar) const{
+        // Send grid data
+        ar & m_pTopoBuilder->m_aabb;
+        serializeEigen(ar,m_pTopoBuilder->m_processDim);
+
+        ar & m_pTopoBuilder->m_aligned;
+
+        if(!m_pTopoBuilder->m_aligned){
+            serializeEigen(ar,m_pTopoBuilder->m_A_IK);
+        }
+    }
+    template<typename TopoType,
+             typename Archive,
+             SFINAE_ENABLE_IF( MPILayer::isGridTopoBuilder<TopoType>::value)
+    >
+    void loadTopoData(Archive & ar) const{
         // Recv grid data
         ar & m_pTopoBuilder->m_aabb;
         serializeEigen(ar,m_pTopoBuilder->m_processDim);
@@ -1667,6 +1691,51 @@ public:
         }else{
             m_pTopoBuilder->m_A_IK.setIdentity();
         }
+    }
+
+    /** Send/Recv KdTree topology data (SFINAE)*/
+    template<typename TopoType,
+             typename Archive,
+             SFINAE_ENABLE_IF( MPILayer::isKdTreeTopoBuilder<TopoType>::value)
+    >
+    void saveTopoData(Archive & ar) const{
+        // save kdTree
+        using T = typename TopoType::TreeSimpleType;
+        KdTreeSerializer<T> ser(*m_pTopoBuilder->m_kdTree_glo);
+        ar << ser;
+
+        // save neighbours
+        ar & m_pTopoBuilder->m_neighbours;
+
+
+    }
+    template<typename TopoType,
+             typename Archive,
+             SFINAE_ENABLE_IF( MPILayer::isKdTreeTopoBuilder<TopoType>::value)
+    >
+    void loadTopoData(Archive & ar) const{
+        // load kdTree
+        using T = typename TopoType::TreeSimpleType;
+
+        m_pTopoBuilder->m_kdTree_glo.reset( new T() ); // make new empty Tree
+
+        KdTreeSerializer<T> ser(*m_pTopoBuilder->m_kdTree_glo);
+        ar >> ser;
+
+        // load neighbours
+        m_pTopoBuilder->m_neighbours.clear();
+        ar & m_pTopoBuilder->m_neighbours;
+    }
+
+
+
+    // receive broadcast all ranks except master
+    void resetBeforLoad(){}
+
+    template<class Archive>
+    void load(Archive & ar, const unsigned int version) const {
+
+        loadTopoData<TopologyBuilderType>(ar);
 
         // Load time
         ar & m_pTopoBuilder->m_timeStepperSettings.m_startTime;

@@ -157,6 +157,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/GRSF/Common/XMLMacros.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Common/foreach_macro.hpp
         
+        ${COMMONSOURCE_DIR}/include/GRSF/Common/SerializationHelpersTuple.hpp
+        
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MyMatrixTypeDefs.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/LayoutConfigTypeDefs.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MeshData.hpp
@@ -179,13 +181,17 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/TimeStepperSettings.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/InitialConditionBodies.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/InertiaTensorCalculations.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/SerializationHelpersEigen.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/SerializationHelpersKdTree.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/AddGyroTermVisitor.hpp
+        
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactFrame.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionData.hpp
         #${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionSolver.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionFunctions.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Collider.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/ContactTag.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/SerializationHelpersGeometries.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/AABB.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/Ray.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp
@@ -193,6 +199,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/BoxGeometry.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/MeshGeometry.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp
+        
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactParameterMap.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactParameter.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactModels.hpp
@@ -249,6 +256,8 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         #${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/DynamicsSystem.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/DynamicsSystemBase.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/General/InitialConditionBodies.cpp
+        
+        ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Collision/SerializationHelpersGeometries.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Collision/CollisionData.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Collision/ContactTag.cpp
         ${COMMONSOURCE_DIR}/src/GRSF/Dynamics/Collision/Geometry/BoxGeometry.cpp

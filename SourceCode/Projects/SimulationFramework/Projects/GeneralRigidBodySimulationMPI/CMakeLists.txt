@@ -63,10 +63,11 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPICommunication.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopology.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyGrid.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyKdTree.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyVisitors.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyBuilder.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPITopologyBuilderSettings.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MPISerializationHelpersEigen.hpp
+
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MultiBodySimFileMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MultiBodySimFilePart.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/DynamicsSystemMPI.hpp
@@ -79,7 +80,7 @@ SET(DYNAMICS_INC
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/RigidBodyMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/MoreauTimeStepperMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Collision/CollisionSolverMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp
+
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphMPI.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphMPI.icc
     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp
@@ -99,7 +100,7 @@ SET(DYNAMICS_SRC
     ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/Collision/CollisionSolverMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/Inclusion/InclusionSolverCONoGMPI.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/Inclusion/ContactGraphNodeDataMPI.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.cpp
+
     ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/MPIDataTypes.cpp
 )
 

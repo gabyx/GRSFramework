@@ -1,43 +1,43 @@
-#ifndef GRSF_Dynamics_Collision_Geometry_MPISerializationHelpersGeometry_hpp
-#define GRSF_Dynamics_Collision_Geometry_MPISerializationHelpersGeometry_hpp
+#ifndef GRSF_Dynamics_Collision_Geometry_SerializationHelpersGeometries_hpp
+#define GRSF_Dynamics_Collision_Geometry_SerializationHelpersGeometries_hpp
 
 #include <boost/variant.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/mpl/at.hpp>
 
 #include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/Common/StaticAssert.hpp"
 
 #include RigidBody_INCLUDE_FILE
 
 #include "GRSF/Dynamics/Collision/Geometries.hpp"
 
-#include "GRSF/Dynamics/General/MPISerializationHelpersEigen.hpp"
+#include "GRSF/Dynamics/General/SerializationHelpersEigen.hpp"
 
 namespace boost {
 namespace serialization {
 
-template<class Archive>
+template<typename Archive>
 void serialize(Archive & ar, BoxGeometry & g, const unsigned int version) {
     serializeEigen(ar,g.m_extent);
     serializeEigen(ar,g.m_center);
 }
 
-template<class Archive>
+template<typename Archive>
 void serialize(Archive & ar, HalfspaceGeometry & g, const unsigned int version) {
 
     serializeEigen(ar,g.m_normal);
     /*serializeEigen(ar,g.m_pos);*/
 }
 
-template<class Archive>
+template<typename Archive>
 void serialize(Archive & ar, SphereGeometry & g, const unsigned int version) {
 
     ar & g.m_radius;
 
 }
 
-template<class Archive>
+template<typename Archive>
 void serialize(Archive & ar, CapsuleGeometry & g, const unsigned int version) {
 
     ar & g.m_radius;
@@ -45,8 +45,8 @@ void serialize(Archive & ar, CapsuleGeometry & g, const unsigned int version) {
     serializeEigen(ar,g.m_normal);
 }
 
-template<class Archive>
-void serialize(Archive & ar, AABB3d & g, const unsigned int version) {
+template<typename Archive, unsigned int N>
+void serialize(Archive & ar, AABB<N> & g, const unsigned int version) {
 
     serializeEigen(ar , g.m_minPoint);
     serializeEigen(ar , g.m_maxPoint);
@@ -54,11 +54,13 @@ void serialize(Archive & ar, AABB3d & g, const unsigned int version) {
 }
 
 
-template<class Archive>
+template<typename Archive>
 void serialize(Archive & ar, MeshGeometry & g, const unsigned int version) {
 
     ERRORMSG("No implementation for MeshGeometry serialization!");
+
 }
+
 };
 };
 

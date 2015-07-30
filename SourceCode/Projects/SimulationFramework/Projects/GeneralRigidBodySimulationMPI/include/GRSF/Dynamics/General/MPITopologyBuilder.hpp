@@ -32,6 +32,7 @@
 #include "GRSF/Dynamics/General/KdTree.hpp"
 #include "ApproxMVBB/ComputeApproxMVBB.hpp"
 
+
 namespace MPILayer {
 
 
@@ -389,6 +390,8 @@ protected: \
         using TimeStepperSettingsType = TimeStepperSettings;
 
     protected:
+
+
 
         friend class TopologyBuilderMessageWrapperOrientation<GridTopologyBuilderBase>;
         friend class TopologyBuilderMessageWrapperBodies<GridTopologyBuilderBase>;
@@ -864,7 +867,7 @@ protected: \
         }
 
         void rebuildMakeBoundingBoxLocal_PostSend(RankIdType masterRank) {
-            if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR && m_doComputations_loc) {
+            if(m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR && m_doComputations_loc) {
                 this->template collaborativeSolveExtent<false>(masterRank,m_aabb);
             }
         }
@@ -1222,7 +1225,7 @@ private: \
             }
 
             //Adjust box to minimal box size =  procDim * min_gridSize,
-            Array3 limits = m_processDim.template cast<PREC>() * m_settings.m_minGridSize;
+            Array3 limits = m_processDim.template cast<PREC>() * m_settings.m_minCellSize;
             m_aabb.expandToMinExtentAbsolute( limits );
 
         }
@@ -1451,13 +1454,13 @@ private: \
 
     public:
 
-        using Tree       = KdTree::Tree< KdTree::TreeTraits<> >;             ///< Standart kdTree is already setup to use std::vector<Vector3 *>
-        using TreeSimple = KdTree::TreeSimple< KdTree::TreeSimpleTraits<> >; ///< Standart simple kdTree is already setup to use std::vector<Vector3 *>
+        using TreeType       = KdTree::Tree< KdTree::TreeTraits<> >;              ///< Standart kdTree is already setup to use std::vector<Vector3 *>
+        using TreeSimpleType = KdTree::TreeSimpleS<>; ///< Standart serializable simple kdTree is already setup to use std::vector<Vector3 *>
 
     private:
 
         friend class ParserModulesCreatorTopoBuilder<KdTreeTopologyBuilder>;
-        //friend class TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder>;
+        friend class TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder>;
 
 
     private:
@@ -1466,10 +1469,13 @@ private: \
 
         /** GLOBAL STUFF ================================================================ */
         unsigned int m_processes;
-        std::unique_ptr<TreeSimple> m_kdTree_glo;
+        std::unique_ptr<TreeSimpleType> m_kdTree_glo;
+
+        using LeafNeighbourMapType =  typename TreeType::LeafNeighbourMapType;
+        LeafNeighbourMapType m_neighbours;
         /** ============================================================================= */
 
-        //TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder> m_messageWrapperResults;
+        TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder> m_messageWrapperResults;
 
 
 
@@ -1485,8 +1491,8 @@ private: \
                                 unsigned int nGlobalSimBodies)
             :Base(settings,massPointPredSettings, globalOutlierFilterSettings, sceneFilePath,
             TopologyBuilderEnumType::KDTREEBUILDER, pDynSys, pProcCommunicator,rebuildSettings),
-             m_nGlobalSimBodies(nGlobalSimBodies)
-             /*m_messageWrapperResults(this)*/
+             m_nGlobalSimBodies(nGlobalSimBodies),
+             m_messageWrapperResults(this)
         {
         }
 
@@ -1507,9 +1513,6 @@ private: \
             RankIdType masterRank = this->m_pProcCommunicator->getMasterRank();
             if(this->m_pProcCommunicator->hasMasterRank()) {
 
-                if(m_settings.m_processes != m_pProcCommunicator->getNProcesses()) {
-                    ERRORMSG("processes: " << m_settings.m_processes << " does not fit "<<m_pProcCommunicator->getNProcesses()<<"processes!");
-                }
 
                 // Parse all initial condition from the scene file (global initial condition is read too)
                 ParserModulesCreatorTopoBuilder<KdTreeTopologyBuilder> c(this);
@@ -1540,7 +1543,7 @@ private: \
                 buildKdTree();
 
                 buildTopo();
-                sendGrid(masterRank);
+                sendKdTree(masterRank);
 
                 STOP_TIMER_SEC(buildTime, startTopoTime)
 
@@ -1554,11 +1557,10 @@ private: \
 
                 // Receive all results from master;
                 // All initial states get saved in m_pDynSys->m_bodiesInitStates
-                //TODO
-                //            m_messageWrapperResults.resetBeforLoad();
-                //            m_pProcCommunicator->receiveMessageFromRank(m_messageWrapperResults,
-                //                                                     this->m_pProcCommunicator->getMasterRank(),
-                //                                                     m_messageWrapperResults.m_tag);
+                m_messageWrapperResults.resetBeforLoad();
+                m_pProcCommunicator->receiveMessageFromRank(m_messageWrapperResults,
+                                                         this->m_pProcCommunicator->getMasterRank(),
+                                                         m_messageWrapperResults.m_tag);
 
                 buildTopo();
                 cleanUpLocal();
@@ -1630,7 +1632,7 @@ private: \
                 buildKdTree();
 
                 buildTopo();
-                sendGrid(masterRank);
+                sendKdTree(masterRank);
 
                 STOP_TIMER_SEC(buildTime, startTopoTime)
 
@@ -1646,16 +1648,10 @@ private: \
                 this->template rebuildMakeBoundingBoxLocal_PreSend<false>(masterRank);
 
                 this->m_pProcCommunicator->sendMessageToRank(m_messageBodies, masterRank, m_messageBodies.m_tag);
-                //TODO
-                //          this->rebuildMakeBoundingBoxLocal_PreSend();
 
-                // Receive Grid results from master;
-                // All initial states get saved in m_pDynSys->m_bodiesInitStates
-                //TODO
-                //            m_messageWrapperResults.resetBeforLoad();
-                //            m_pProcCommunicator->receiveMessageFromRank( m_messageWrapperResults,
-                //                                                         masterRank,
-                //                                                         m_messageWrapperResults.m_tag);
+                this->rebuildMakeBoundingBoxLocal_PostSend(masterRank);
+
+                receiveKdTree(masterRank);
 
                 buildTopo();
                 cleanUpLocal();
@@ -1684,9 +1680,9 @@ private: \
 
         void buildKdTree() {
 
-            using SplitHeuristicType = Tree::SplitHeuristicType;
-            using NodeType = Tree::NodeType;
-            using NodeDataType = Tree::NodeDataType;
+            using SplitHeuristicType = TreeType::SplitHeuristicType;
+            using NodeType = TreeType::NodeType;
+            using NodeDataType = TreeType::NodeDataType;
             static const unsigned int Dimension = NodeDataType::Dimension;
             using PointListType = NodeDataType::PointListType;
 
@@ -1708,7 +1704,7 @@ private: \
             typename SplitHeuristicType::QualityEvaluator e(0.0, /* splitratio (maximized by MidPoint) */
                     2.0, /* pointratio (maximized by MEDIAN)*/
                     2.0);/* extentratio (maximized by MidPoint)*/
-            Tree kdTree;
+            TreeType kdTree;
             kdTree.initSplitHeuristic( std::initializer_list<SplitHeuristicType::Method> {
                                             SplitHeuristicType::Method::MEDIAN
                                             /*SplitHeuristicType::Method::GEOMETRIC_MEAN,
@@ -1718,15 +1714,22 @@ private: \
                                         m_settings.m_minCellSize,
                                         SplitHeuristicType::SearchCriteria::FIND_BEST,
                                         e,
-                                        0.0, 0.0, 0.1);
+                                        0.0, 0.0, 0.0);
 
             auto rootData = std::unique_ptr<NodeDataType>(new NodeDataType(vec->begin(),vec->end(),
                     std::unique_ptr<PointListType>(vec) ));
 
-            kdTree.build(m_aabb,std::move(rootData), m_settings.m_maxTreeDepth, m_settings.m_processes);
+            LOGTBLEVEL1(m_pSimulationLog, "---> KdTreeTopoBuilder: Building KdTree with : "
+                        << "minP: " << this->m_aabb.m_minPoint.transpose() << " maxP: " << this->m_aabb.m_maxPoint.transpose() << std::endl
+                        << "points: " << vec->size() << std::endl
+                        )
+
+            kdTree.build(m_aabb,std::move(rootData), m_settings.m_maxTreeDepth, m_pProcCommunicator->getNProcesses());
 
             // build the neighbours according to statistics
-            //TODO m_leafNeighbour = kdTree.buildLeafNeighboursAutomatic();
+            m_neighbours = kdTree.buildLeafNeighbours(m_settings.m_minCellSize);
+
+            LOGTBLEVEL1(m_pSimulationLog,kdTree.getStatisticsString())
 
             m_processes = kdTree.getLeafs().size();
 
@@ -1738,7 +1741,7 @@ private: \
             }
 
             // move global kdTree to a local simple version
-            m_kdTree_glo.reset(new TreeSimple{kdTree});
+            m_kdTree_glo.reset(new TreeSimpleType{kdTree});
 
         }
 
@@ -1775,6 +1778,7 @@ private: \
                     "\t processes: " << m_processes << std::endl <<
                     "\t extent: " << "[ " << m_aabb.extent().transpose() << "]" << std::endl;);
             m_pProcCommunicator->createProcTopoKdTree(  std::move(m_kdTree_glo),
+                                                        m_neighbours,
                                                         m_aabb,
                                                         m_aligned,
                                                         m_A_IK);
@@ -1785,7 +1789,7 @@ private: \
         }
 
         //only master rank executes this
-        void sendGrid(RankIdType masterRank) {
+        void sendKdTree(RankIdType masterRank) {
 
 
             sortBodies(masterRank);
@@ -1808,17 +1812,25 @@ private: \
                 }
             });
 
-            // TODO
-            //        for(auto rank : ranks){
-            //            LOGTBLEVEL1( m_pSimulationLog, "---> KdTreeTopoBuilder: Sending grid to rank: "<< rank <<std::endl; );
-            //            m_messageWrapperResults.setRank(rank);
-            //            m_pProcCommunicator->sendMessageToRank(m_messageWrapperResults,rank, m_messageWrapperResults.m_tag);
-            //        }
+            for(auto rank : ranks){
+                LOGTBLEVEL1( m_pSimulationLog, "---> KdTreeTopoBuilder: Sending grid to rank: "<< rank <<std::endl; );
+                m_messageWrapperResults.setRank(rank);
+                m_pProcCommunicator->sendMessageToRank(m_messageWrapperResults,rank, m_messageWrapperResults.m_tag);
+            }
             // ===========================================================
 
 
             // Safty check:
             ASSERTMSG(m_bodiesPerRank.size() == 0,"All states should be sent!");
+        }
+
+        void receiveKdTree(RankIdType masterRank){
+            // Receive kdTree results from master;
+            // All initial states get saved in m_pDynSys->m_bodiesInitStates
+            m_messageWrapperResults.resetBeforLoad();
+            m_pProcCommunicator->receiveMessageFromRank( m_messageWrapperResults,
+                                                         masterRank,
+                                                         m_messageWrapperResults.m_tag);
         }
 
         // master sorts bodies

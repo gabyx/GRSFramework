@@ -27,7 +27,7 @@ struct GridBuilderSettings{
     /** Minimal grid dimension depends basically on the shapes simualated:
     * max_i diam(body_i) <= min gridSize_x, gridSize_y, gridSize_z $
     */
-    PREC m_minGridSize = 1e-3;
+    PREC m_minCellSize = 1e-3;
 
 
     /**
@@ -54,14 +54,16 @@ struct KdTreeBuilderSettings{
 
     KdTreeBuilderSettings(): m_A_IK(Matrix33::Identity()){}
 
-    unsigned int m_processes = 1;
-
     /** Minimal grid dimension depends basically on the shapes simualated:
     * max_i diam(body_i) <= min gridSize_x, gridSize_y, gridSize_z $
     */
     PREC m_minCellSize = 1e-3;
     PREC m_minPointsForSplit = 10;
     unsigned int m_maxTreeDepth = 5000; ///< Huge such that this is not a constraint for stopping
+
+    PREC m_minSplitRatio = 0.0;
+    PREC m_minPointRatio = 0.0;
+    PREC m_minExtentRatio = 0.0;
 
     /**
     *   PREDEFINED: Take values from below!

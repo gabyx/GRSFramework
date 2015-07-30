@@ -90,44 +90,39 @@ public:
         return m_adjNbRanks.find(neighbourRank)->second;
     }
 
-    void createProcessTopologyGrid(unsigned int processRank, unsigned int masterRank,
-                                   const AABB3d & aabb,
+    template<typename... T>
+    void createProcessTopologyGrid(RankIdType processRank, RankIdType masterRank,
+                                   T&&... args
+                                   /*const AABB3d & aabb,
                                    const MyMatrix<unsigned int>::Array3 & dim,
                                    bool aligned = true,
-                                   const Matrix33 & A_IK = Matrix33::Identity()
+                                   const Matrix33 & A_IK = Matrix33::Identity()*/
                                    )
     {
         // Assign a grid topology
         Deleter d;
         m_procTopo.apply_visitor(d);
-        m_procTopo = new ProcessTopologyGrid<ProcessTopology>(m_nbRanks,m_adjNbRanks,
-                                                          m_rank , masterRank,
-                                                          aabb,dim,
-                                                          aligned,
-                                                          A_IK);
+        m_procTopo = new ProcessTopologyGrid<ProcessTopology>(m_nbRanks,m_adjNbRanks, processRank, masterRank,
+                                                              std::forward<T>(args)...);
 
     }
 
-    template<typename Tree>
-    void createProcessTopologyKdTree(unsigned int processRank,
-                                      unsigned int masterRank,
-                                      std::unique_ptr<Tree> tree,
+    template<typename... T>
+    void createProcessTopologyKdTree( RankIdType processRank,
+                                      RankIdType masterRank,
+                                      T&&...  args
+                                      /*std::unique_ptr<Tree> tree,
+                                      LeafNeighbourMapType & neighbours,
                                       const AABB3d & aabb,
-                                      bool aligned = true,
-                                      const Matrix33 & A_IK = Matrix33::Identity()
-
+                                      bool aligned ,
+                                      const Matrix33 & A_IK = Matrix33::Identity()*/
                                        )
     {
         // Assign a kdTree topology
         Deleter d;
         m_procTopo.apply_visitor(d);
-        m_procTopo = new ProcessTopologyKdTree<ProcessTopology>(  m_nbRanks,m_adjNbRanks,
-                                                                  m_rank , masterRank,
-                                                                  std::move(tree),
-                                                                  aabb,
-                                                                  aligned,
-                                                                  A_IK
-                                                                  );
+        m_procTopo = new ProcessTopologyKdTree<ProcessTopology>(m_nbRanks,m_adjNbRanks, processRank, masterRank,
+                                                                std::forward<T>(args)...);
 
     }
 
