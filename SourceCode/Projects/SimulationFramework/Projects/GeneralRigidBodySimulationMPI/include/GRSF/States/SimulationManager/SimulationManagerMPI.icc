@@ -179,7 +179,7 @@ void SimulationManagerMPI::checkNumberOfBodiesInProcess() {
     if(m_pProcCommunicator->hasMasterRank()) {
         LOG(m_pSimulationLog,  "MPI> Allreduce needed: " << elapsed <<"sec."<<std::endl; );
 
-        if(numberOfBodiesInSimulation != m_nGlobalSimBodies) {
+        if( static_cast<unsigned int>(numberOfBodiesInSimulation) != m_nGlobalSimBodies) {
             LOG(m_pSimulationLog,  "ERROR:---> Body check NOT successful! : "<< numberOfBodiesInSimulation <<"!="<< m_nGlobalSimBodies<< std::endl;);
             ERRORMSG("Body check Not successfull");
         }
@@ -212,9 +212,6 @@ void SimulationManagerMPI::getMaxRuntime(PREC runtime){
 
 void SimulationManagerMPI::startSim() {
 
-
-
-    static double timelineSimulation;
 
     m_pSimulationLog->logMessage("---> SimulationManager: Simulation entering...");
 

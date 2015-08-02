@@ -22,37 +22,34 @@ template<typename Tree> class KdTreeSerializer;
 namespace ApproxMVBB{
     namespace KdTree {
 
-        /*
-
         /** Inherit from TreeSimple and add some serialization */
         template<
             typename TTraits
         >
-        class TreeNodeSimpleS : public TreeNodeSimple<TTraits,TreeNodeSimpleS<TTraits> >
+        class NodeSimpleS : public NodeSimple<TTraits,NodeSimpleS<TTraits> >
         {
             public:
 
             using Traits = TTraits;
-            using Base = TreeNodeSimple<TTraits,TreeNodeSimpleS<TTraits> >;
+            using Base = NodeSimple<TTraits,NodeSimpleS<TTraits> >;
 
             template<typename Tree>
             friend class ::KdTreeSerializer;
 
-            TreeNodeSimpleS(): Base() {}
+            NodeSimpleS(): Base() {}
 
             /** Copy from a Tree TTree if possible*/
             template< typename TNode>
-            explicit TreeNodeSimpleS( TNode && node): Base( std::forward<TNode>(node) )
+            explicit NodeSimpleS( TNode && node): Base( std::forward<TNode>(node) )
             {}
 
 
         };
 
-        /*
 
         /** Inherit from TreeSimple and add some serialization */
         template<
-            typename TTraits = TreeSimpleTraits<KdTree::NoData<3>, KdTree::TreeNodeSimpleS >
+            typename TTraits = TreeSimpleTraits<KdTree::NoData<3>, KdTree::NodeSimpleS >
         >
         class TreeSimpleS : public TreeSimple<TTraits>
         {

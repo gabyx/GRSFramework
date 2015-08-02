@@ -6,32 +6,28 @@
 
 
 
-class RigidBodyId{
+namespace RigidBodyId{
 
-public:
+
     using Type = uint64_t; ///< [ --- last 32bit is GroupNr --- , --- first 32bit is BodyNr --- ]
     using HalfType = uint32_t;
 
     template<typename TRigidBodyType >
     inline static HalfType getGroupNr(const TRigidBodyType * body){
-        Type id = body->m_id;
-        id >>= sizeof(HalfType)*8;
-        return reinterpret_cast<HalfType &>(id);
+        return static_cast<HalfType>(body->m_id >> sizeof(HalfType)*8);
     };
 
     template<typename TRigidBodyType >
     inline static HalfType getBodyNr(const TRigidBodyType * body){
-        return reinterpret_cast<const HalfType &>(body->m_id);
+        return static_cast<HalfType>(body->m_id);
     };
 
     inline static HalfType getGroupNr(const Type & id){
-        Type id2 = id;
-        id2 >>= sizeof(HalfType)*8;
-        return reinterpret_cast<HalfType &>(id2);
+        return static_cast<HalfType>(id >> sizeof(HalfType)*8);
     };
 
     inline static HalfType getBodyNr(const Type & id){
-        return reinterpret_cast<const HalfType &>(id);
+        return static_cast<HalfType>(id);
     };
 
     template<typename TRigidBodyType >
@@ -47,13 +43,14 @@ public:
         return s.str();
     };
 
-    inline static Type makeId(  unsigned int groupNr, unsigned int bodyNr){
+    inline static Type makeId(  HalfType groupNr, HalfType bodyNr){
         Type res = 0;
         res |= (uint64_t)groupNr;
         res <<= 32;
         res |= (uint64_t)bodyNr;
         return res;
     };
+
 };
 
 /** Definition of the RigidBodyId type */

@@ -36,8 +36,9 @@ public:
                           bool aligned = true,
                           const Matrix33 & A_IK = Matrix33::Identity()
                           ):
-    CartesianGrid<NoCellData>(aabb, dim), m_rank(processRank), m_A_IK(A_IK), m_axisAligned(aligned),
-    m_cellNumberingStart(masterRank)
+    CartesianGrid<NoCellData>(aabb, dim),
+    m_cellNumberingStart(masterRank), m_rank(processRank),
+    m_axisAligned(aligned), m_A_IK(A_IK)
     {
        m_rank = processRank;
 
@@ -162,10 +163,10 @@ public:
         //Expand AABB each axis to max/min if this rank is a boundary cell!
         for(short i = 0; i<3; i++) {
             if(cell_index(i) == m_dim(i)-1) {
-                ret.expandToMaxExtent<false>(i);
+                ret.expandToMaxExtent<true>(i);
             }
             if( cell_index(i) == 0 ) {
-                ret.expandToMaxExtent<true>(i);
+                ret.expandToMaxExtent<false>(i);
             }
         }
 

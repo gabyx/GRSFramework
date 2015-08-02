@@ -84,15 +84,16 @@ public:
 protected:
 
     //MPI Stuff
-    std::shared_ptr< ProcessCommunicatorType > m_pProcComm;
-    std::shared_ptr< ProcessInfoType > m_pProcInfo;
+
 //    const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
 
-    std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     std::shared_ptr<DynamicsSystemType>  m_pDynSys;
+    std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
 
     std::shared_ptr<BodyCommunicator>  m_pBodyComm;
 
+    std::shared_ptr< ProcessCommunicatorType > m_pProcComm;
+    //std::shared_ptr< ProcessInfoType > m_pProcInfo;
 
     /** Circulare template dependency of InclusionCommunicator and ContactGraph
     *   Can be solved with this combo trait class :-)

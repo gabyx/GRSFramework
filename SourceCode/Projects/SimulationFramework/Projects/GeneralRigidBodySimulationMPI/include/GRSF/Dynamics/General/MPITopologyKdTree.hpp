@@ -30,18 +30,23 @@ public:
 
     using TreeType = KdTree::TreeSimpleS<>;
     using NodeType = typename TreeType::NodeType;
+    using BoundaryInfoType = typename NodeType::BoundaryInfoType;
     using LeafNeighbourMapType = typename TreeType::LeafNeighbourMapType ;
 
 
     ProcessTopologyKdTree(  NeighbourRanksListType & nbRanks, AdjacentNeighbourRanksMapType & adjNbRanks,
                             RankIdType processRank, RankIdType masterRank,
-                            std::unique_ptr<TreeType> tree,
+                            std::shared_ptr<TreeType> tree,
                             const LeafNeighbourMapType & neighbours,
                             const AABB3d & aabb,
                             bool aligned,
                             const Matrix33 & A_IK = Matrix33::Identity())
-            : m_rank(processRank), m_A_IK(A_IK), m_kdTree(tree.release())
+            : m_rank(processRank), m_axisAligned(aligned), m_A_IK(A_IK), m_kdTree(tree.get()), m_kdTreeRefCount(tree)
     {
+
+        if(!m_kdTree){
+            ERRORMSG("KdTree is nullptr")
+        }
 
         // insert our neighbours
         auto it = neighbours.find(processRank);
@@ -51,17 +56,17 @@ public:
         nbRanks.insert(it->second.begin(),it->second.end());
 
         // get adj neighbours
-        for( auto it = nbRanks.begin(); it!=nbRanks.end(); ++it) {
+        for( auto & rank :  nbRanks) {
             //Initialize adjacent neighbour ranks to m_nbRanks for this neighbours[*it]$
-            auto itN = neighbours.find(*it);
+            auto itN = neighbours.find(rank);
              if(itN == neighbours.end()){
-                ERRORMSG("neighbours does not contain an entry for rank: " << *it );
+                ERRORMSG("neighbours does not contain an entry for rank: " << rank );
             }
-            adjNbRanks.emplace(*it, getCommonNeighbourCells(nbRanks, itN->second) );
+            adjNbRanks.emplace(rank, getCommonNeighbourCells(nbRanks, itN->second) );
         }
 
         // get our aabb
-        m_leaf = tree->getLeaf(m_rank);
+        m_leaf = m_kdTree->getLeaf(m_rank);
         if(!m_leaf){
             ERRORMSG("Trying to get leaf node for our rank: " << m_rank << " failed!")
         }
@@ -69,42 +74,48 @@ public:
         // adjust kdTree
         // TODO (unlink childs which corresponds to subtrees we never need to check because the leafs subtree are not neighbours)
         // not essential for correct algorithm
+        // but we leave the leafs which are not part of our neighbours as is, such that error messages contain these idx values
+        // if a body overlaps into a neighbour which is not part of ours
 
-        // get lowest common ancestors of all boundary subtrees
+        // the kdTree is already filling the whole space
+        // no need to expand!
+
+
+        // get lowest common ancestors of all boundary subtrees, including our own leaf node
+        // the lca node is the node we start from for collision detection
         auto bndIt = m_leaf->getBoundaries().begin();
-        m_lcaBoundary = nullptr;
+        m_lcaBoundary = m_leaf;
         while( bndIt != m_leaf->getBoundaries().end()){
-            if(m_lcaBoundary == nullptr){
-                m_lcaBoundary = *bndIt;
-            }
-            else if( *bndIt != nullptr ){
+            if( *bndIt != nullptr ){
                 m_lcaBoundary = m_kdTree->getLowestCommonAncestor(m_lcaBoundary, *bndIt);
             }
             ++bndIt;
         }
-
+        // if m_leaf = root node or , the lca becomes nullptr which is not good,
+        // we set it to the root node, this means we only have one leaf = 1 process = root node
         if(m_lcaBoundary == nullptr){
-            ERRORMSG("Lowest common ancestor failed!");
+           m_lcaBoundary = m_kdTree->getRootNode();
         }
+
+        // collider should not add m_leaf in the results list over the overlap check
+        m_colliderKdTree.setNonAddedLeaf(m_leaf);
 
     };
 
-    ProcessTopologyKdTree( ProcessTopologyKdTree && p): m_kdTree(p.m_kdTree) {
-        p.m_kdTree = nullptr;
-    }
-
-    ~ProcessTopologyKdTree(){
-        if(m_kdTree){
-            delete m_kdTree;
-        }
-    }
+    ~ProcessTopologyKdTree(){}
 
     RankIdType getRank() const{return m_rank;}
 
-    unsigned int getCellRank(const Vector3 & point) const {
-        auto * leaf = m_kdTree->getLeaf(point);
-        ASSERTMSG(leaf,"This should never be nullptr!");
-        return leaf->getIdx();
+    RankIdType getCellRank(const Vector3 & I_point) const {
+        if(m_axisAligned) {
+            auto * leaf = m_kdTree->getLeaf(I_point);
+            ASSERTMSG(leaf,"This should never be nullptr!");
+            return leaf->getIdx();
+        }else{
+            auto * leaf = m_kdTree->getLeaf(m_A_IK.transpose()*I_point);
+            ASSERTMSG(leaf,"This should never be nullptr!");
+            return leaf->getIdx();
+        }
     };
 
 
@@ -112,13 +123,9 @@ public:
                       NeighbourRanksListType & neighbourProcessRanks,
                       bool & overlapsOwnRank) const {
         if(m_axisAligned) {
-
-            m_colliderKdTree.checkOverlap(neighbourProcessRanks, m_lcaBoundary, body);
-            overlapsOwnRank = m_colliderKdTree.checkOverlapNode(body,m_leaf);
-
+            overlapsOwnRank = m_colliderKdTree.checkOverlap(neighbourProcessRanks, m_lcaBoundary, body);
         } else {
-            m_colliderKdTree.checkOverlap(neighbourProcessRanks, m_lcaBoundary, body, m_A_IK );
-            overlapsOwnRank = m_colliderKdTree.checkOverlapNode(body,m_leaf, m_A_IK);
+            overlapsOwnRank = m_colliderKdTree.checkOverlap(neighbourProcessRanks, m_lcaBoundary, body, m_A_IK);
         }
 
         return neighbourProcessRanks.size() > 0;
@@ -154,9 +161,12 @@ private:
     Matrix33 m_A_IK ; ///< The grid can be rotated, this is the transformation matrix from grid frame K to intertia frame I
 
 
-    TreeType * m_kdTree;
-    const NodeType * m_leaf; ///< This ranks leaf pointer
-    const NodeType * m_lcaBoundary;
+    TreeType * m_kdTree = nullptr;      ///< The kdTree
+    const NodeType * m_leaf = nullptr; ///< This ranks leaf pointer
+    const NodeType * m_lcaBoundary = nullptr;
+
+    std::shared_ptr<TreeType> m_kdTreeRefCount; ///< only a stupid temporary to correctly hold the resource!
+
 
     ColliderKdTree<TreeType> m_colliderKdTree;
 

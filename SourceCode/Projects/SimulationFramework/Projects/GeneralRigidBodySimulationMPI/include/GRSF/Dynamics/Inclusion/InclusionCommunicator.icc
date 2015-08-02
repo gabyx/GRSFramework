@@ -13,17 +13,19 @@
 
 template<typename TCombo>
 InclusionCommunicator<TCombo>::InclusionCommunicator(std::shared_ptr< BodyCommunicator> pBodyComm,
-        std::shared_ptr< DynamicsSystemType> pDynSys ,
-        std::shared_ptr< ProcessCommunicatorType > pProcComm):
+                                                     std::shared_ptr< DynamicsSystemType> pDynSys ,
+                                                     std::shared_ptr< ProcessCommunicatorType > pProcComm):
 
+    m_messageContact(this),m_messageMultiplicity(this),
+    m_messageSplitBodyUpdate(this), m_messageSplitBodySolution(this),
     m_pDynSys(pDynSys),
-    m_globalLocal(pDynSys->m_simBodies),
-    m_globalRemote(pDynSys->m_remoteSimBodies),
     m_pProcComm(pProcComm),
     m_pBodyComm(pBodyComm),
-    m_nbDataMap(m_pProcComm->getRank()),
     m_rank(m_pProcComm->getRank()),
-    m_messageContact(this),m_messageMultiplicity(this), m_messageSplitBodyUpdate(this), m_messageSplitBodySolution(this) {
+    m_globalLocal(pDynSys->m_simBodies),
+    m_globalRemote(pDynSys->m_remoteSimBodies),
+    m_nbDataMap(m_pProcComm->getRank())
+    {
 
     if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");

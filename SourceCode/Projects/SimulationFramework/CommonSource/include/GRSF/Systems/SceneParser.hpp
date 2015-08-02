@@ -70,7 +70,7 @@ public:
     SceneParser(ModuleGeneratorType & moduleGen,
                 Logging::Log * log,
                 const boost::filesystem::path & mediaDir)
-        :m_pSimulationLog(log), m_mediaDir(mediaDir)
+        :  m_mediaDir(mediaDir), m_pSimulationLog(log)
     {
         m_pSimulationLog = log;
         ASSERTMSG(m_pSimulationLog, "Log pointer is zero!");

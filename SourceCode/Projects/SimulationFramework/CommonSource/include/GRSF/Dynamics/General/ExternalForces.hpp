@@ -71,7 +71,8 @@ class SpatialSphericalTimeRandomForceField{
             m_pauseTime(pauseTime),
             m_startTime(startTime),
             m_endTime(endTime),
-            m_seed(seed), m_amplitude(amplitude), m_randomBox(randomBox), m_randomOn(randomOn)
+            m_amplitude(amplitude), m_randomBox(randomBox), m_randomOn(randomOn),
+            m_seed(seed)
         {
             m_randomG = nullptr;
             reset();
@@ -148,10 +149,10 @@ class SpatialSphericalTimeRandomForceField{
         SpatialSphericalTimeRandomForceField(const SpatialSphericalTimeRandomForceField &);
 
         boost::variate_generator< boost::mt19937 , boost::uniform_real<PREC> > * m_randomG;
-        PREC m_boostTime, m_pauseTime, m_amplitude, m_t, m_ts, m_startTime, m_endTime;
+        PREC m_boostTime, m_pauseTime,  m_startTime, m_endTime, m_amplitude, m_t, m_ts;
         Vector3 m_offset;
-        bool m_newPos, m_randomOn, m_inInterval;
         AABB3d m_randomBox;
+        bool m_newPos, m_randomOn, m_inInterval;
         unsigned int m_seed ;
 
 

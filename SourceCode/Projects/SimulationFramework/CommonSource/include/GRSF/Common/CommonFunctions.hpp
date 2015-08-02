@@ -106,7 +106,7 @@ bool stringToTypeFunctorImpl( Functor & f, const std::string & s) {
 
 
     unsigned int l = s.size();
-    unsigned int extVal = 0;
+    int extVal = 0;
     while(extVal < N || N==-1) {
         if(i>=l) {
             return (N==-1) ?  true :  false; // if we parse till the end, return true if we hit the end
@@ -271,7 +271,6 @@ inline bool stringToType(T & t, const std::string& s) {
 */
 template <typename TVector2>
 inline bool stringToVector2( TVector2 & v, const std::string & s) {
-    using PREC = typename TVector2::Scalar;
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TVector2,2);
     return details::stringToVectorImpl<2>(v,s);
 }
@@ -281,7 +280,6 @@ inline bool stringToVector2( TVector2 & v, const std::string & s) {
 */
 template <typename TVector3>
 inline bool stringToVector3( TVector3 & v, const std::string & s) {
-    using PREC = typename TVector3::Scalar;
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TVector3,3);
     return details::stringToVectorImpl<3>(v,s);
 }
@@ -291,7 +289,6 @@ inline bool stringToVector3( TVector3 & v, const std::string & s) {
 */
 template <typename TVector4>
 inline bool stringToVector4( TVector4 & v, const std::string & s) {
-    using PREC = typename TVector4::Scalar;
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TVector4,4);
     return details::stringToVectorImpl<4>(v,s);
 }

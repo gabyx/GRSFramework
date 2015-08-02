@@ -34,7 +34,7 @@ namespace boost{
 };
 
 /** Serialization of a KdTree,
- *  Currently only KdTree::TreeSimpleS in combination with KdTree::TreeNodeSimpleS
+ *  Currently only KdTree::TreeSimpleS in combination with KdTree::NodeSimpleS
  *  is made for serialization since , private members are all accesible.
  *  Wrapping into this class, and sending this to an archive, serializes the tree!
  */
@@ -73,20 +73,20 @@ class KdTreeSerializer: public boost::serialization::traits< KdTreeSerializer<Tr
         struct NodeSerializer;
 
         template<typename Traits>
-        struct NodeSerializer< KdTree::TreeNodeSimpleS<Traits> >{
+        struct NodeSerializer< KdTree::NodeSimpleS<Traits> >{
 
             std::vector<IndexType> m_boundaries; // only for loading!
 
-            using NodeType = typename KdTree::TreeNodeSimpleS<Traits>;
+            using NodeType = typename KdTree::NodeSimpleS<Traits>;
             using BoundaryInfoType = typename NodeType::BoundaryInfoType;
 
             NodeSerializer(){}
-            NodeSerializer(std::size_t nLeafs){
-                m_boundaries.reserve(nLeafs);
+            NodeSerializer(std::size_t nNodes, std::size_t nLeafs){
+                m_boundaries.reserve(nLeafs*(BoundaryInfoType::size+1));
             }
 
             template<typename Archive>
-            void save(Archive & ar, KdTree::TreeNodeSimpleS<Traits> & treeN) const
+            void save(Archive & ar, KdTree::NodeSimpleS<Traits> & treeN) const
             {
                 static IndexType s;
                 ar & treeN.m_idx;
@@ -95,7 +95,9 @@ class KdTreeSerializer: public boost::serialization::traits< KdTreeSerializer<Tr
                 ar & treeN.m_treeLevel;
                 ar & treeN.m_aabb;
 
-                // serialize boundary indices only if leaf
+                // serialize only leaf boundaries!
+                // TODO instead of sending, recalculate aabb and bounds after receiving
+
                 bool isLeaf = treeN.isLeaf();
                 ar & isLeaf;
                 if(isLeaf){
@@ -107,7 +109,7 @@ class KdTreeSerializer: public boost::serialization::traits< KdTreeSerializer<Tr
             }
 
             template<typename Archive>
-            void load(Archive & ar, KdTree::TreeNodeSimpleS<Traits> & treeN)
+            void load(Archive & ar, KdTree::NodeSimpleS<Traits> & treeN)
             {
 
                 ar & treeN.m_idx;
@@ -164,7 +166,7 @@ class KdTreeSerializer: public boost::serialization::traits< KdTreeSerializer<Tr
         {
 
             using NodeType = typename KdTree::TreeSimpleS<Traits>::NodeType;
-            using BoundaryInfoType = typename NodeType::BoundaryInfoType;
+            //using BoundaryInfoType = typename NodeType::BoundaryInfoType;
             IndexType s;
 
             // saving
@@ -222,7 +224,7 @@ class KdTreeSerializer: public boost::serialization::traits< KdTreeSerializer<Tr
         {
 
             using NodeType = typename KdTree::TreeSimpleS<Traits>::NodeType;
-            using BoundaryInfoType = typename NodeType::BoundaryInfoType;
+            //using BoundaryInfoType = typename NodeType::BoundaryInfoType;
 
             ASSERTMSG(tree.m_root==nullptr, "Root node needs to be nullptr for loading!")
 
@@ -236,7 +238,7 @@ class KdTreeSerializer: public boost::serialization::traits< KdTreeSerializer<Tr
             // setup nodes
             tree.m_nodes.reserve(nodes);
 
-            NodeSerializer<NodeType> nodeSer(leafs);
+            NodeSerializer<NodeType> nodeSer(nodes,leafs);
 
             NodeType * node;
             for(IndexType i=0; i<nodes;++i){

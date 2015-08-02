@@ -53,7 +53,7 @@ namespace MPILayer {
                 std::shared_ptr<DynamicsSystemType> pDynSys,
                 std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
                 RebuildSettingsType rebuildSettings)
-            : m_type(type), m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator), m_rebuildSettings(rebuildSettings),
+            : m_type(type),  m_rebuildSettings(rebuildSettings), m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator),
               m_pSimulationLog(nullptr) {
             m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
             ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
@@ -124,15 +124,14 @@ namespace MPILayer {
         }
 
 
-
-        std::shared_ptr<DynamicsSystemType>      m_pDynSys;
-        std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
-
         PREC m_currentTime;
         unsigned int m_builtTopologies = 0;
 
         const TopologyBuilderEnumType   m_type;
         const RebuildSettingsType       m_rebuildSettings;
+
+        std::shared_ptr<DynamicsSystemType>      m_pDynSys;
+        std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
 
         Logging::Log * m_pSimulationLog;
         boost::filesystem::path m_localSimFolderPath;
@@ -460,8 +459,12 @@ protected: \
                 T &&... t
                                )
             : TopoBase(std::forward<T>(t)...),
-              m_settings(setting), m_massPointPrediction(massSettings), m_globalOutlierFilter(globalFilterSettings),
-              m_sceneFilePath(sceneFile), m_messageOrient(this),m_messageBodies(this) {
+              m_messageOrient(this),
+              m_messageBodies(this) ,
+              m_sceneFilePath(sceneFile), m_settings(setting),
+               m_massPointPrediction(massSettings),
+              m_globalOutlierFilter(globalFilterSettings)
+              {
 
         }
 
@@ -1327,8 +1330,9 @@ private: \
             m_bodiesPerRank.clear();
             m_pDynSys->m_bodiesInitStates.clear();
 
+            RankIdType ownerRank;
             for(auto & p : m_initStates) {
-                RankIdType ownerRank;
+
                 m_pProcCommunicator->getProcTopo()->belongsPointToProcess(p.second.getPosition(),ownerRank);
 
                 if(ownerRank == masterRank) {
@@ -1469,7 +1473,8 @@ private: \
 
         /** GLOBAL STUFF ================================================================ */
         unsigned int m_processes;
-        std::unique_ptr<TreeSimpleType> m_kdTree_glo;
+        std::unique_ptr<TreeType> m_kdTree_temp;
+        std::shared_ptr<TreeSimpleType> m_kdTree_glo;
 
         using LeafNeighbourMapType =  typename TreeType::LeafNeighbourMapType;
         LeafNeighbourMapType m_neighbours;
@@ -1561,6 +1566,7 @@ private: \
                 m_pProcCommunicator->receiveMessageFromRank(m_messageWrapperResults,
                                                          this->m_pProcCommunicator->getMasterRank(),
                                                          m_messageWrapperResults.m_tag);
+
 
                 buildTopo();
                 cleanUpLocal();
@@ -1672,6 +1678,9 @@ private: \
 
         void cleanUpGlobal() {
             Base::cleanUpGlobal();
+
+            m_kdTree_temp.reset();
+
         }
 
         void cleanUpLocal() {
@@ -1683,7 +1692,8 @@ private: \
             using SplitHeuristicType = TreeType::SplitHeuristicType;
             using NodeType = TreeType::NodeType;
             using NodeDataType = TreeType::NodeDataType;
-            static const unsigned int Dimension = NodeDataType::Dimension;
+            using BoundaryInfoType = typename NodeType::BoundaryInfoType;
+            // static const unsigned int Dimension = NodeDataType::Dimension;
             using PointListType = NodeDataType::PointListType;
 
             // transform the points if not aligned into the aabbs frame
@@ -1704,8 +1714,10 @@ private: \
             typename SplitHeuristicType::QualityEvaluator e(0.0, /* splitratio (maximized by MidPoint) */
                     2.0, /* pointratio (maximized by MEDIAN)*/
                     2.0);/* extentratio (maximized by MidPoint)*/
-            TreeType kdTree;
-            kdTree.initSplitHeuristic( std::initializer_list<SplitHeuristicType::Method> {
+
+            m_kdTree_temp.reset(new TreeType());
+
+            m_kdTree_temp->initSplitHeuristic( std::initializer_list<SplitHeuristicType::Method> {
                                             SplitHeuristicType::Method::MEDIAN
                                             /*SplitHeuristicType::Method::GEOMETRIC_MEAN,
                                               SplitHeuristicType::Method::MIDPOINT*/
@@ -1724,14 +1736,14 @@ private: \
                         << "points: " << vec->size() << std::endl
                         )
 
-            kdTree.build(m_aabb,std::move(rootData), m_settings.m_maxTreeDepth, m_pProcCommunicator->getNProcesses());
+            m_kdTree_temp->build(m_aabb,std::move(rootData), m_settings.m_maxTreeDepth, m_pProcCommunicator->getNProcesses());
 
             // build the neighbours according to statistics
-            m_neighbours = kdTree.buildLeafNeighbours(m_settings.m_minCellSize);
+            m_neighbours = m_kdTree_temp->buildLeafNeighbours(m_settings.m_minCellSize);
 
-            LOGTBLEVEL1(m_pSimulationLog,kdTree.getStatisticsString())
+            LOGTBLEVEL1(m_pSimulationLog,m_kdTree_temp->getStatisticsString())
 
-            m_processes = kdTree.getLeafs().size();
+            m_processes = m_kdTree_temp->getLeafs().size();
 
             // TODO
             // If we found less processes which need to continue the simulation,
@@ -1740,9 +1752,26 @@ private: \
                 ERRORMSG("KdTree could only determine " << m_processes << " processes but " << m_pProcCommunicator->getNProcesses() << " are needed!")
             }
 
-            // move global kdTree to a local simple version
-            m_kdTree_glo.reset(new TreeSimpleType{kdTree});
+            // copy global kdTree to a simple version
+            m_kdTree_glo.reset(new TreeSimpleType{*m_kdTree_temp});
 
+            // make simple version filling the whole space for sharing
+            for(auto * n : m_kdTree_glo->getNodes() ){
+                auto & bounds = n->getBoundaries();
+                for(std::size_t i=0;i< TreeType::Dimension; ++i){
+
+                    if( bounds.at(i,0) == nullptr ){
+                        // boundary at minimum -> extent to max
+                        n->aabb().expandToMaxExtent<0>(i);
+                    }
+
+                    if( bounds.at(i,1) == nullptr ){
+                        // boundary at maximum -> extent to lowest
+                        n->aabb().expandToMaxExtent<1>(i);
+                    }
+
+                }
+            }
         }
 
         void buildTopo() {
@@ -1777,7 +1806,7 @@ private: \
                     "\t A_IK: \n" << m_A_IK << std::endl <<
                     "\t processes: " << m_processes << std::endl <<
                     "\t extent: " << "[ " << m_aabb.extent().transpose() << "]" << std::endl;);
-            m_pProcCommunicator->createProcTopoKdTree(  std::move(m_kdTree_glo),
+            m_pProcCommunicator->createProcTopoKdTree(  m_kdTree_glo,
                                                         m_neighbours,
                                                         m_aabb,
                                                         m_aligned,
@@ -1841,8 +1870,9 @@ private: \
             m_bodiesPerRank.clear();
             m_pDynSys->m_bodiesInitStates.clear();
 
+            RankIdType ownerRank;
             for(auto & p : m_initStates) {
-                RankIdType ownerRank;
+
                 m_pProcCommunicator->getProcTopo()->belongsPointToProcess(p.second.getPosition(),ownerRank);
 
                 if(ownerRank == masterRank) {
@@ -1852,7 +1882,6 @@ private: \
                     // move other body states to a list for sending
                     m_bodiesPerRank[ownerRank].push_back(&p.second);
                 }
-
             }
 
             // Log stuff
@@ -1914,7 +1943,7 @@ private: \
 
             using XMLNodeType = pugi::xml_node;
             XMLNodeType node;
-            static const auto  nodePCData = pugi::node_pcdata;
+            //static const auto  nodePCData = pugi::node_pcdata;
             XMLNodeType root =  dataXML.child("TopologyBuilder");
 
 
@@ -1935,7 +1964,7 @@ private: \
             Base::template writeTopoInfo<writeAABBList,writePoints,writeHistogram>(root,currentTime,buildTime);
 
             // Write kdTree
-            m_kdTree_glo->appendToXML(root);
+            m_kdTree_temp->appendToXML(root,m_aligned,m_A_IK);
 
             dataXML.save_file(filePath.c_str(),"    ");
         }

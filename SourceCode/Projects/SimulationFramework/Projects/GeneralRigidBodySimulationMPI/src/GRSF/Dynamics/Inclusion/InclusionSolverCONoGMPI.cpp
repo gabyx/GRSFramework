@@ -23,12 +23,12 @@ InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(
     std::shared_ptr< DynamicsSystemType > pDynSys,
     std::shared_ptr< ProcessCommunicatorType > pProcComm
 ):
-    m_simBodies(pDynSys->m_simBodies),
-    m_staticBodies(pDynSys->m_staticBodies),
     m_pDynSys(pDynSys),
     m_pCollisionSolver(pCollisionSolver),
     m_pBodyComm(pBodyComm),
-    m_pProcComm(pProcComm){
+    m_pProcComm(pProcComm),
+    m_simBodies(pDynSys->m_simBodies),
+    m_staticBodies(pDynSys->m_staticBodies){
 
     if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");

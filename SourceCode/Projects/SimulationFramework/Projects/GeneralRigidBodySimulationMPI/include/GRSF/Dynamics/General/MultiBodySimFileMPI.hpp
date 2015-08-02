@@ -64,8 +64,8 @@ private:
     // Communicator which is used to write the file in parallel, this communicator is duplicated from the one inputed
     // This prevents that accidentaly some other synchronization and stuff is
     MPI_Comm m_comm;
-    int m_rank; // rank in the communicator;
-    int m_processes;
+    RankIdType m_rank = 0; // rank in the communicator;
+    std::size_t m_processes = 0;
 
     MPI_Datatype m_bodyStateTypeMPI;
     MPI_File m_file_handle;                      ///< The file stream which represents the binary data.
@@ -81,16 +81,16 @@ private:
     boost::filesystem::path m_filePath;
 
     void setByteLengths();
-    unsigned int m_nSimBodies;
-    std::streamsize m_nBytesPerState; ///< m_nSimBodies*(id,q,u) + time
-    std::streamsize m_nBytesPerQ, m_nBytesPerU;
+    unsigned int m_nSimBodies = 0;
+    std::streamsize m_nBytesPerState = 0; ///< m_nSimBodies*(id,q,u) + time
+    std::streamsize m_nBytesPerQ = 0, m_nBytesPerU = 0;
 
-    unsigned int m_nStates;
+    unsigned int m_nStates = 0;
 
-    unsigned int m_nDOFuBody, m_nDOFqBody;
+    unsigned int m_nDOFuBody = 0, m_nDOFqBody = 0;
 
-    std::streamsize m_nBytesPerQBody ;
-    std::streamsize m_nBytesPerUBody ;
+    std::streamsize m_nBytesPerQBody = 0;
+    std::streamsize m_nBytesPerUBody = 0;
 
     static const typename AdditionalBodyData::TypeEnum m_additionalBytesPerBodyType = AdditionalBodyData::TypeEnum::PROCESS_MATERIAL_OVERLAP_GLOBGEOMID;
     static constexpr std::streamoff getAdditionalBytesPerBody(){
@@ -98,7 +98,7 @@ private:
     }
     static const  std::streamsize m_nAdditionalBytesPerBody;
 
-    std::streamsize m_nBytesPerBody; ///< id,q,u + m_nAdditionalBytesPerBody
+    std::streamsize m_nBytesPerBody = 0; ///< id,q,u + m_nAdditionalBytesPerBody
 
     static const  std::streamsize m_headerLength = SIM_FILE_MPI_SIGNATURE_LENGTH*sizeof(char) + sizeof(unsigned int)
                                                     +3*sizeof(unsigned int) +2*sizeof(unsigned int) ; ///< 'MBSF' + nBodies, NDOFq, NDOFu, additionalBytesType (0=nothing, 1 = + process rank, etc.), additionalBytesPerBody
@@ -112,7 +112,7 @@ private:
     bool mpiSucceded(int err) {
         m_errorString.str("");
         if(err != MPI_SUCCESS) {
-            char * string;
+            char * string = nullptr;
             int length;
             MPI_Error_string( err , string, &length );
             m_errorString << string;

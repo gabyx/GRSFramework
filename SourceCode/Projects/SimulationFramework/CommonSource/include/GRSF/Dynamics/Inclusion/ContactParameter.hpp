@@ -32,11 +32,12 @@ struct ContactParameter{
 
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    ContactParameter(ContactModels::Enum e, std::initializer_list<PREC> it ): m_params(it), m_contactModel(e){}
-    ContactParameter(): m_contactModel(ContactModels::Enum::UCF), m_params{0.5,0.5,0.3}{}
-
-    std::vector<PREC> m_params;
     ContactModels::Enum m_contactModel;
+    std::vector<PREC> m_params;
+
+    ContactParameter(ContactModels::Enum e, std::initializer_list<PREC> it ):  m_contactModel(e), m_params(it){}
+    ContactParameter():  m_contactModel(ContactModels::Enum::UCF), m_params{0.5,0.5,0.3}{}
+
 
     /** Copy constructors
     * not for ContactParameter a(ContactParameter::create_UCF_ConctactModel(...) );

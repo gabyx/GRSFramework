@@ -803,7 +803,7 @@ public:
     using LambdaInit = LambdaInitLogic<ContactGraphType>;
 
     SorProxInitNodeVisitor(const InclusionSolverSettingsType &settings, PercussionPool * pool = nullptr)
-    : m_alpha(1), m_settings(settings), m_lambdaInit(pool), m_compW_body1(m_rotJacobi), m_compW_body2(m_rotJacobi)
+    : m_alpha(1), m_settings(settings), m_compW_body1(m_rotJacobi), m_compW_body2(m_rotJacobi),m_lambdaInit(pool)
     {}
 
     ~SorProxInitNodeVisitor(){}

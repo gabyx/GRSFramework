@@ -14,13 +14,6 @@ const std::streamsize MultiBodySimFileMPI::m_nAdditionalBytesPerBody= getAdditio
 
 
 MultiBodySimFileMPI::MultiBodySimFileMPI()
-    :   m_nDOFuBody(0),m_nDOFqBody(0),
-        m_nBytesPerState(0),
-        m_nBytesPerQBody(0),
-        m_nBytesPerUBody(0),
-        m_nStates(0),
-        m_nSimBodies(0)
-
 {
 
     m_filePath = boost::filesystem::path();
@@ -74,7 +67,7 @@ void MultiBodySimFileMPI::writeBySharedPtr(double time, const typename DynamicsS
     //bytes need to be a multiple of the bytes for one body state
     ASSERTMSG(m_writebuffer.size() % ( m_nBytesPerBody ) == 0, m_writebuffer.size() << " bytes not a multiple of " << m_nBytesPerBody << " bytes");
 
-    std::vector<int> nbodiesPerProc(m_processes);
+    //std::vector<int> nbodiesPerProc(m_processes);
     unsigned int nBodies = bodyList.size();
     MPI_Status s;
 
@@ -94,7 +87,10 @@ void MultiBodySimFileMPI::writeBySharedPtr(double time, const typename DynamicsS
 void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList)
 {
 
-    unsigned int nBodies = bodyList.size();
+    std::size_t nBodies = bodyList.size();
+    STATIC_ASSERTM( sizeof(std::size_t) == sizeof(unsigned long long int), "We send an 64bit integer");
+
+
     MPI_Status s;
 
     //Next State offset ( see end of code )
@@ -123,15 +119,15 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
         ASSERTMSG(( m_writebuffer.size())  % ( m_nBytesPerBody ) == 0, ( m_writebuffer.size()) << " bytes not a multiple of " << m_nBytesPerBody << " bytes");
     }
 
-    std::vector<int> nbodiesPerProc(m_processes);
-    int err = MPI_Allgather(&nBodies,1,MPI_INT,&nbodiesPerProc[0] , 1, MPI_INT, m_comm);
+    std::vector<std::size_t> nbodiesPerProc(m_processes);
+    int err = MPI_Allgather(&nBodies,1,MPI_UNSIGNED_LONG_LONG,&nbodiesPerProc[0] , 1, MPI_UNSIGNED_LONG_LONG, m_comm);
     ASSERTMPIERROR(err, "gather");
     //Calculate our offset
-    unsigned int bodyOffset = 0;
+    std::size_t bodyOffset = 0;
     MPI_Offset offsetMPI = 0;
     // All calculate offset [begin, begin + rank)
     ASSERTMSG( std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.end(),0) == m_nSimBodies, " accumulation not the same");
-    if(m_rank != 0 ){
+    if(m_rank != 0u ){
         bodyOffset = std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.begin() + m_rank , 0);
 
         offsetMPI = bodyOffset*m_nBytesPerBody;
@@ -168,7 +164,9 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
 void MultiBodySimFileMPI::writeByOffsets2(double time, const typename DynamicsSystemType::RigidBodySimContainerType & bodyList)
 {
 
-    unsigned int nBodies = bodyList.size();
+    std::size_t nBodies = bodyList.size();
+    STATIC_ASSERTM( sizeof(std::size_t) == sizeof(unsigned long long int), "We send an 64bit integer");
+
     MPI_Status s;
 
     //Next State offset
@@ -198,15 +196,15 @@ void MultiBodySimFileMPI::writeByOffsets2(double time, const typename DynamicsSy
         ASSERTMSG(( m_writebuffer.size())  % ( m_nBytesPerBody ) == 0, ( m_writebuffer.size()) << " bytes not a multiple of " << m_nBytesPerBody << " bytes");
     }
 
-    std::vector<int> nbodiesPerProc(m_processes);
-    int err = MPI_Allgather(&nBodies,1,MPI_INT,&nbodiesPerProc[0] , 1, MPI_INT, m_comm);
+    std::vector<std::size_t> nbodiesPerProc(m_processes);
+    int err = MPI_Allgather(&nBodies,1,MPI_UNSIGNED_LONG_LONG,&nbodiesPerProc[0] , 1, MPI_UNSIGNED_LONG_LONG, m_comm);
     ASSERTMPIERROR(err, "gather");
     //Calculate our offset
-    unsigned int bodyOffset = 0;
+    std::size_t bodyOffset = 0;
     MPI_Offset offsetMPI = 0;
     // All calculate offset
     ASSERTMSG( std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.end(),0) == m_nSimBodies, " accumulation not the same");
-    if(m_rank != 0 ){
+    if(m_rank != 0u ){
         bodyOffset = std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.begin() + m_rank, 0);
         //Calculate offset
         offsetMPI = bodyOffset*m_nBytesPerBody;
@@ -313,9 +311,12 @@ bool MultiBodySimFileMPI::openWrite(MPI_Comm comm,
 
     // Duplicate the communicator, this file Io does not use the same communicator as all other stuff!
     MPI_Comm_dup(comm,&m_comm);
-    MPI_Comm_rank(m_comm, &m_rank);
-    MPI_Comm_size(m_comm, &m_processes);
-
+    int rank;
+    MPI_Comm_rank(m_comm, &rank);
+    m_rank = rank;
+    int processes;
+    MPI_Comm_size(m_comm, &processes);
+    m_processes=processes;
 
     setByteLengths();
 

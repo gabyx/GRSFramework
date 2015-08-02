@@ -41,7 +41,7 @@ public:
         if(it != m_nbDataMap.end()){
            return (&it->second);
         }else{
-           ASSERTMSG(false,"There is no NeighbourData for rank: " << rank << "!")
+           //ASSERTMSG(false,"There is no NeighbourData for rank: " << rank << "!")
            return nullptr;
         }
     }

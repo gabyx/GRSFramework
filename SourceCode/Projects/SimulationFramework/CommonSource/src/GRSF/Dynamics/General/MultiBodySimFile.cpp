@@ -4,19 +4,11 @@
 const char MultiBodySimFile::m_simFileSignature[SIM_FILE_SIGNATURE_LENGTH] = SIM_FILE_SIGNATURE;
 
 MultiBodySimFile::MultiBodySimFile(unsigned int bufferSize):
-    m_nDOFuBody(0),m_nDOFqBody(0),
-    m_nBytes(0),
-    m_nBytesPerState(0),
-    m_nBytesPerQBody(0),
-    m_nBytesPerUBody(0),
-    m_additionalBytesPerBodyType(AdditionalBodyData::TypeEnum::NOTHING),
-    m_nAdditionalBytesPerBody(0),
-    m_nStates(0),
-    m_nSimBodies(0),
-    m_beginOfStates(0),
-    m_readVelocities(true)
+    m_additionalBytesPerBodyType(AdditionalBodyData::TypeEnum::NOTHING)
 {
     m_filePath = boost::filesystem::path();
+
+    ASSERTMSG(bufferSize,"Wrong size of buffer!")
 
     m_buf_size = bufferSize;
     m_Buffer = new char[m_buf_size];

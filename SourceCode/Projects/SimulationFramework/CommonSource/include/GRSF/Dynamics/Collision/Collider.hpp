@@ -165,6 +165,14 @@ public:
 
     using NodeType = typename TreeType::NodeType;
 
+    ColliderKdTree(){}
+    ColliderKdTree(const NodeType * nonAddedLeaf): m_nonAddedLeaf(nonAddedLeaf){}
+
+    inline void setNonAddedLeaf( const NodeType * nonAddedLeaf ){
+        m_nonAddedLeaf = nonAddedLeaf;
+        ASSERTMSG(m_nonAddedLeaf, "nullptr")
+    }
+
     inline bool checkOverlapNode( const RigidBodyType * pBody,
                                   const NodeType * node,
                                   const Matrix33 & A_IK) const
@@ -180,61 +188,61 @@ public:
         return m_colliderAABB.checkOverlap(pBody, node->aabb());
     }
 
-    /** Caller is reponsible to clear overlapLeafIndices */
-    template<bool aabbTest = true, typename ResultIdxSet>
-    inline void checkOverlap(ResultIdxSet & overlapLeafIndices,
+    /** Caller is reponsible to clear overlapLeafIndices
+    *   \p startNode Any non-leaf (normal) node (ancestor of m_nonAddedNode) to start recursion,
+    *      returns only startNode if startNode is a leaf (without the guarantee that the body overlaps)
+    *   If the algorithm encounters that the node m_nonAddedNode is overlapped it is not added to overlapLeafIndices
+    *   \return if node m_nonAddedNode is overlapped or not
+    */
+    template<typename ResultIdxSet>
+    inline bool checkOverlap(ResultIdxSet & overlapLeafIndices,
                               const NodeType * startNode,
                               const RigidBodyType * pBody,
                               const Matrix33 & A_IK) const
     {
 
         // early rejection if aabb/oobb is not overlapped
-        if( aabbTest ){
-            if( ! checkOverlapNode(pBody,startNode,A_IK) ){
-                return;  // no overlap at this nodes aabb
-            }
+        // this test is crucial, if we dont do this
+        // the body might lie outside of startNode, but we will
+        // still get overlapping leafs below startNode because we only check left/right of splitAxis
+        if( ! checkOverlapNode(pBody,startNode,A_IK) ){
+            return false;  // no overlap at this nodes aabb
         }
 
         // m_nodeStack.clear() not necessary since it is always empty after this call
         m_nodeStack.emplace_back(startNode); // body overlaps this nodes aabb!
-        checkOverlap_imp<false>(overlapLeafIndices,pBody,&A_IK);
-
+        return checkOverlap_imp<false,true>(overlapLeafIndices,pBody,&A_IK);
     }
 
-    template<bool aabbTest = true, typename ResultIdxSet>
-    inline void checkOverlap(ResultIdxSet & overlapLeafIndices,
+    template<typename ResultIdxSet>
+    inline bool checkOverlap(ResultIdxSet & overlapLeafIndices,
                             const NodeType * startNode,
                             const RigidBodyType * pBody) const
     {
 
-        // early rejection if aabb/oobb is not overlapped
-        if( aabbTest ){
-            if( ! checkOverlapNode(pBody,startNode) ){
-                return;  // no overlap at this nodes aabb
-            }
+        if( ! checkOverlapNode(pBody,startNode) ){
+            return false;
         }
-
-        // m_nodeStack.clear() not necessary since it is always empty after this call
-        m_nodeStack.emplace_back(startNode); // body overlaps this nodes aabb!
-
-        // start recursion
-        checkOverlap_imp<true>(overlapLeafIndices,pBody);
+        m_nodeStack.emplace_back(startNode);
+        return checkOverlap_imp<true,true>(overlapLeafIndices,pBody);
     }
 
 
-    template<bool aligned, typename ResultIdxSet>
-    inline void checkOverlap_imp(ResultIdxSet & overlapLeafIndices,
+    template<bool aligned, bool enableNonAddedLeaf = true, typename ResultIdxSet>
+    inline bool checkOverlap_imp(ResultIdxSet & overlapLeafIndices,
                           const RigidBodyType * pBody,
                           const Matrix33 * A_IK = nullptr
                           ) const{
 
         const NodeType * currNode;
         char res;
+        bool ret = false; // if m_nonAddedNode is overlapped
 
         // Breath first traversal
         while(!m_nodeStack.empty()){
 
             currNode = m_nodeStack.front();
+            ASSERTMSG(currNode, "currNode is nullptr")
 
             if(!currNode->isLeaf()){
 
@@ -254,10 +262,10 @@ public:
                 }
 
                 switch(res){
-                    case 0: // right node overlap
+                    case 0: // left node overlap
                         m_nodeStack.emplace_back(currNode->leftNode());
                         break;
-                    case 1: // left node overlap
+                    case 1: // right node overlap
                         m_nodeStack.emplace_back(currNode->rightNode());
                         break;
                     case 2: // both overlap
@@ -271,11 +279,20 @@ public:
             }else{
                 // we are at a leaf where body is overlapping
                 // add to list
-                overlapLeafIndices.emplace(currNode->getIdx());
+                if(enableNonAddedLeaf){
+                    if(currNode != m_nonAddedLeaf){
+                        overlapLeafIndices.emplace(currNode->getIdx());
+                    }else{
+                        ret = true;
+                    }
+                }else{
+                    overlapLeafIndices.emplace(currNode->getIdx());
+                }
             }
 
             m_nodeStack.pop_front();
         }
+        return ret;
     }
 
     /** Visitor to check if geometry overlaps axis halfspace either left/right or both
@@ -290,7 +307,7 @@ public:
             // Transform the point of the body into frame K
             // (m_A_IK->transpose() * m_body->m_r_S)(splitAxis) ;
             PREC posAxis;
-            if(aligned){
+            if(!aligned){
                 posAxis = m_A_IK->col(m_splitAxis).dot(m_body->m_r_S);
             }else{
                 posAxis = m_body->m_r_S(m_splitAxis);
@@ -334,6 +351,8 @@ private:
     ColliderOOBB m_colliderOOBB;
 
     mutable std::deque<const NodeType *> m_nodeStack;
+
+    const NodeType * m_nonAddedLeaf = nullptr;
 };
 
 

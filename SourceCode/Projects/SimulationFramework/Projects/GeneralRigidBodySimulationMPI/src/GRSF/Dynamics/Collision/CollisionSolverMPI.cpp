@@ -4,7 +4,8 @@
 #include "GRSF/Dynamics/General/PrintGeometryDetails.hpp"
 
 CollisionSolverMPI::CollisionSolverMPI(std::shared_ptr< DynamicsSystemType> pDynSys):
-    m_simBodies(pDynSys->m_simBodies), m_staticBodies(pDynSys->m_staticBodies), m_remoteSimBodies(pDynSys->m_remoteSimBodies),
+    m_simBodies(pDynSys->m_simBodies), m_remoteSimBodies(pDynSys->m_remoteSimBodies),
+    m_staticBodies(pDynSys->m_staticBodies),
     m_Collider(&m_collisionSet)
 {
 

@@ -434,8 +434,8 @@ public:
         // has an entry if a message has already been received for this rank.
         MPI_Status status;
 
-        int received_messages = 0;
-        int flag, i;
+        unsigned int received_messages = 0;
+        int flag;
         LOGPC(m_pSimulationLog,  "--->\t\t Receiving message from neighbours (spin loop)..." << std::endl;)
         while( received_messages !=  ranks.size()){
             auto itBool = receivedRanks.begin();

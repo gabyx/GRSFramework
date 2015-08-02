@@ -85,14 +85,15 @@ protected:
     TimeStepperSettingsType     * m_timestepperSettings;
     InclusionSolverSettingsType * m_inclusionSettings;
 
-    LogType * m_pSimulationLog;
     ParserType * m_parser;
+    LogType * m_pSimulationLog;
+
 public:
 
     void cleanUp() {}
 
     SettingsModule(ParserType * p, RecorderSettingsType * r, TimeStepperSettingsType * t, InclusionSolverSettingsType * i)
-        :m_parser(p),m_pSimulationLog(p->getSimLog()),m_recorderSettings(r),m_timestepperSettings(t), m_inclusionSettings(i) {};
+        :m_recorderSettings(r),m_timestepperSettings(t), m_inclusionSettings(i), m_parser(p),m_pSimulationLog(p->getSimLog()) {};
 
     void parse(XMLNodeType sceneSettings) {
 
@@ -433,8 +434,9 @@ public:
                    GlobalGeometryMapType * g,
                    ScalesList * scalesGroup = nullptr,
                    GeometryMap * geomMap = nullptr)
-        : m_parser(p),m_pSimulationLog(p->getSimLog()),m_globalGeometries(g),
-          m_externalScalesGroupCache(scalesGroup), m_externalGeometryCache(geomMap) {
+        :m_pSimulationLog(p->getSimLog()),  m_parser(p) ,m_globalGeometries(g),
+        m_externalGeometryCache(geomMap), m_externalScalesGroupCache(scalesGroup)
+    {
         ASSERTMSG( m_globalGeometries , "GeometryModule needs a globalGeometry pointer!")
     };
 
@@ -694,7 +696,7 @@ private:
                     }
                 }
 
-                for(int i = id; i < id + instances; i++) {
+                for(unsigned int i = id; i < id + instances; i++) {
                     PREC radius = sampleGen();
                     if(Options::m_cacheScale) {
                         m_scalesGlobal.emplace(i,Vector3(radius,radius,radius));
@@ -1264,12 +1266,14 @@ private:
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
     DEFINE_LAYOUT_CONFIG_TYPES
 
+    LogType * m_pSimulationLog;
+
     using ContactParameterMapType = typename DynamicsSystemType::ContactParameterMapType;
     ContactParameterMapType * m_contactParams;
 
     using RigidBodyType = typename DynamicsSystemType::RigidBodyType;
 
-    LogType * m_pSimulationLog;
+
 
 public:
     void cleanUp() {}
@@ -1401,18 +1405,20 @@ private:
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits )
     DEFINE_LAYOUT_CONFIG_TYPES
 
+    LogType * m_pSimulationLog;
+
     using ExternalForceListType = typename DynamicsSystemType::ExternalForceListType;
     ExternalForceListType * m_forceList;
 
     using RigidBodyType = typename DynamicsSystemType::RigidBodyType;
 
-    LogType * m_pSimulationLog;
+
 
 
 public:
     void cleanUp() {}
 
-    ExternalForcesModule(ParserType * p, ExternalForceListType * f): m_pSimulationLog(p->getSimLog()), m_forceList(f) {};
+    ExternalForcesModule(ParserType * p, ExternalForceListType * f):  m_pSimulationLog(p->getSimLog()), m_forceList(f) {};
 
     void parse(XMLNodeType sceneSettings) {
         LOGSCLEVEL1(m_pSimulationLog, "==== ExternalForcesModule: parsing ================================"<<std::endl;)
@@ -1630,7 +1636,8 @@ public:
 
     void cleanUp() {}
 
-    InitStatesModule(ParserType * p, RigidBodyStatesContainerType * c, TimeStepperSettingsType * s): m_pSimulationLog(p->getSimLog()),m_initStates(c), m_timeStepperSettings(s) {
+    InitStatesModule(ParserType * p, RigidBodyStatesContainerType * c, TimeStepperSettingsType * s)
+    :m_initStates(c), m_timeStepperSettings(s), m_pSimulationLog(p->getSimLog()) {
         ASSERTMSG(m_initStates, "one of boths should not be null");
     };
 
@@ -2145,8 +2152,9 @@ private:
     struct BodyData {
         BodyData(): m_body(nullptr), m_id(0) {}
         BodyData( RigidBodyType * p, const RigidBodyIdType & id) : m_body(p),m_id(id) {}
-        RigidBodyIdType m_id;
+
         RigidBodyType* m_body; // might be also zero (if we dont need the whole body for visualization only)
+        RigidBodyIdType m_id;
     };
 
 public:
@@ -2162,7 +2170,7 @@ private:
     InitStatesModuleType * m_pInitStatesMod;
     VisModuleType * m_pVisMod;
 
-    RigidBodySimContainerType * pSimBodies;
+    //RigidBodySimContainerType * pSimBodies;
 
     /// Some statistics
     std::map<unsigned int, PREC> m_totalMassGroup;
@@ -2176,7 +2184,8 @@ public:
 
     BodyModule(ParserType * p, GeometryModuleType * g,  InitStatesModuleType * is, VisModuleType * i,
                RigidBodySimContainerType * simBodies, RigidBodyStaticContainerType * bodies )
-        : m_pSimulationLog(p->getSimLog()), m_pGeomMod(g), m_pVisMod(i), m_pInitStatesMod(is), m_pSimBodies(simBodies), m_pBodies(bodies) {
+        :m_pSimBodies(simBodies), m_pBodies(bodies),
+         m_pSimulationLog(p->getSimLog()), m_pGeomMod(g), m_pInitStatesMod(is), m_pVisMod(i) {
 
     };
 

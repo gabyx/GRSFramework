@@ -128,8 +128,9 @@ private:
     /** If rank is in this set then there are local bodies: recv Velocities from rank,
                                                             send BillateralUpdate to rank */
 
-    RigidBodyContainerType & m_globalRemote;
     RigidBodyContainerType & m_globalLocal;
+    RigidBodyContainerType & m_globalRemote;
+
 
 
     NeighbourMapType m_nbDataMap;   ///< map which gives all neighbour data structures

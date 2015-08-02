@@ -19,8 +19,8 @@ class PrintGeometryDetailsVisitor : public boost::static_visitor<> {
         DEFINE_RIGIDBODY_CONFIG_TYPES
 
         PrintGeometryDetailsVisitor(Logging::Log * pLog, RigidBodyType::GeometryType & pGeom, std::string prefix):
-            m_pLog(pLog),
-            m_prefix(prefix)
+            m_prefix(prefix),
+            m_pLog(pLog)
         {
             boost::apply_visitor(*this, pGeom);
         }
