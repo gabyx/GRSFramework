@@ -29,15 +29,15 @@
   // DEBUG!
 
     /// Body Communicator
-    #define LOGBC( logptr , message )  //LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
+    #define LOGBC( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the neighbour communicator part).
     /// Seriliazer
-    #define LOGBC_SZ( logptr , message )  //LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+    #define LOGBC_SZ( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
 
 
     /// Inclusion Communicator
-    #define LOGIC( logptr , message )  //LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the inclusion communicator part).
+    #define LOGIC( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the inclusion communicator part).
      /// Seriliazer
-    #define LOGIC_SZ( logptr , message )  //LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+    #define LOGIC_SZ( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
 
     /// Process Communicator
     #define LOGPC( logptr , message )  //LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
@@ -54,10 +54,10 @@
 
 #else
     #define LOGBC( logptr , message )     LOG(logptr,message) ;
-    #define LOGBC_SZ( logptr , message )  //LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
+    #define LOGBC_SZ( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
 
-    #define LOGIC( logptr , message )     //LOG(logptr,message) ;
-    #define LOGIC_SZ( logptr , message )  // LOG(logptr,message) ;
+    #define LOGIC( logptr , message )     LOG(logptr,message) ;
+    #define LOGIC_SZ( logptr , message )  LOG(logptr,message) ;
 
     #define LOGPC( logptr , message )  // LOG(logptr,message)
 

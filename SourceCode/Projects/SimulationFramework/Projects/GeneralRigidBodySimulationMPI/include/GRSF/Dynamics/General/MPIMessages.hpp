@@ -215,7 +215,7 @@ public:
         // Send all flags
         ar & m_hasNoSimBodies;
 
-        if(m_hasNoSimBodies){
+        if(!m_hasNoSimBodies){
 
             // Number of submessages to send (for each local body 1)
             m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
