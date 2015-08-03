@@ -68,12 +68,12 @@ public:
 
     template<typename... T>
     void createProcTopoGrid(T &&... t){
-        m_procTopo.createProcessTopologyGrid(m_rank, MPILayer::ProcessInformation::MASTER_RANK , std::forward<T>(t)...  );
+        m_procTopo.createProcessTopologyGrid(MPILayer::ProcessInformation::MASTER_RANK , std::forward<T>(t)...  );
     }
 
     template<typename... T>
     void createProcTopoKdTree(T &&... t){
-        m_procTopo.createProcessTopologyKdTree(m_rank, MPILayer::ProcessInformation::MASTER_RANK , std::forward<T>(t)...  );
+        m_procTopo.createProcessTopologyKdTree(MPILayer::ProcessInformation::MASTER_RANK , std::forward<T>(t)...  );
     }
 
 

@@ -55,15 +55,23 @@ public:
         }
         nbRanks.insert(it->second.begin(),it->second.end());
 
+
+
         // get adj neighbours
         for( auto & rank :  nbRanks) {
+            WARNINGMSG(false,"ProcessTopologyKdTree: NbRank: " << rank << std::endl);
             //Initialize adjacent neighbour ranks to m_nbRanks for this neighbours[*it]$
             auto itN = neighbours.find(rank);
              if(itN == neighbours.end()){
                 ERRORMSG("neighbours does not contain an entry for rank: " << rank );
             }
             adjNbRanks.emplace(rank, getCommonNeighbourCells(nbRanks, itN->second) );
+
+            for(auto & adR : adjNbRanks[rank]){
+                WARNINGMSG(false,"--------> adj Nb: " << adR << std::endl);
+            }
         }
+        WARNINGMSG(false,"----------------------------------" << std::endl);
 
         // get our aabb
         m_leaf = m_kdTree->getLeaf(m_rank);

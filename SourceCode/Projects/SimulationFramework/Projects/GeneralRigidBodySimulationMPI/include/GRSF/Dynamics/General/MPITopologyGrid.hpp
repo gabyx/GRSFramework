@@ -45,7 +45,6 @@ public:
         //Initialize neighbours
         nbRanks = getCellNeighbours(m_rank);
 
-        adjNbRanks.clear();
         for( auto it = nbRanks.begin(); it!=nbRanks.end(); it++) {
 
             //Initialize adjacent neighbour ranks to m_nbRanks for this neighbour *it

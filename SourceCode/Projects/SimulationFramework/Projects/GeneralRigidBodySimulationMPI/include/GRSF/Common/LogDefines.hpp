@@ -56,8 +56,8 @@
     #define LOGBC( logptr , message )     LOG(logptr,message) ;
     #define LOGBC_SZ( logptr , message )  LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the serialization part).
 
-    #define LOGIC( logptr , message )     LOG(logptr,message) ;
-    #define LOGIC_SZ( logptr , message )  LOG(logptr,message) ;
+    #define LOGIC( logptr , message )     //LOG(logptr,message) ;
+    #define LOGIC_SZ( logptr , message )  //LOG(logptr,message) ;
 
     #define LOGPC( logptr , message )  // LOG(logptr,message)
 

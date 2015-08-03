@@ -1590,7 +1590,7 @@ private: \
 
         void rebuildTopology(PREC currentTime) {
 
-            LOGTB(m_pSimulationLog,"---> GridTopologyBuilder: rebuild Topology" <<std::endl;)
+            LOGTB(m_pSimulationLog,"---> KdTreeTopoBuilder: rebuild Topology" <<std::endl;)
 
             START_TIMER(startTopoTime)
 
@@ -1680,7 +1680,7 @@ private: \
             Base::cleanUpGlobal();
 
             m_kdTree_temp.reset();
-
+            m_kdTree_glo.reset();
         }
 
         void cleanUpLocal() {
@@ -1798,6 +1798,13 @@ private: \
                 ERRORMSG("No BUILD implemented!")
             }
 
+            for( auto & nbs : m_neighbours){
+                LOGTBLEVEL3(m_pSimulationLog,"Neighbours for rank: " << nbs.first << ": ");
+                for(auto & r : nbs.second){
+                   LOGTBLEVEL3(m_pSimulationLog, r );
+                }
+                LOGTBLEVEL3(m_pSimulationLog,std::endl);
+            }
 
             LOGTBLEVEL1( m_pSimulationLog,
                     "\t aligned: "<< m_aligned << std::endl <<

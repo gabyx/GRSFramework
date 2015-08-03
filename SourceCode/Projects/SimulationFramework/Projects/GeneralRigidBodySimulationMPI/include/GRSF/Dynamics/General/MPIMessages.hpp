@@ -770,12 +770,12 @@ private:
         const typename ProcessTopologyType::NeighbourRanksListType & adjRanks = m_nc->m_pProcTopo->getAdjacentNeighbourRanks(m_neighbourRank);
 
         LOGBC_SZ(m_pSerializerLog, "-----> overlappingNeigbours: "<<std::endl;);
-        for( auto it =  m_bodyInfo->m_neighbourRanks.begin(); it != m_bodyInfo->m_neighbourRanks.end(); ++it) {
-            if(it->second.m_overlaps == true && adjRanks.find(it->first) != adjRanks.end() ) {
+        for( auto nbFlags : m_bodyInfo->m_neighbourRanks) {
+            if(nbFlags.second.m_overlaps == true && adjRanks.find(nbFlags.first) != adjRanks.end() ) {
                 // this body overlaps a rank which is adjacent to m_neighbourRank
-                overlappingNeighbours.insert(it->first);
+                overlappingNeighbours.insert(nbFlags.first);
 
-                LOGBC_SZ(m_pSerializerLog, "-------> " << it->first <<std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "-------> " << nbFlags.first <<std::endl;);
             }
         }
 

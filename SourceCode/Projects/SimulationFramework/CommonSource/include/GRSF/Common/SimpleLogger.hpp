@@ -44,7 +44,7 @@ public:
 /** File Sink which does not roll itself, LogManager needs to do this!, defaultRollSize default to 5 MiB */
 class LogSinkFile : public LogSink {
 private:
-    static const std::streamsize defaultRollSize = 1<<20;
+    static const std::streamsize defaultRollSize = 5<<20;
 
     std::ofstream m_fileStream;
     std::streamsize m_rollSize = 0; ///< maximum size of file when the file should be rolled

@@ -91,7 +91,7 @@ public:
     }
 
     template<typename... T>
-    void createProcessTopologyGrid(RankIdType processRank, RankIdType masterRank,
+    void createProcessTopologyGrid(RankIdType masterRank,
                                    T&&... args
                                    /*const AABB3d & aabb,
                                    const MyMatrix<unsigned int>::Array3 & dim,
@@ -102,14 +102,16 @@ public:
         // Assign a grid topology
         Deleter d;
         m_procTopo.apply_visitor(d);
-        m_procTopo = new ProcessTopologyGrid<ProcessTopology>(m_nbRanks,m_adjNbRanks, processRank, masterRank,
+
+        m_nbRanks.clear();
+        m_adjNbRanks.clear();
+        m_procTopo = new ProcessTopologyGrid<ProcessTopology>(m_nbRanks,m_adjNbRanks, m_rank, masterRank,
                                                               std::forward<T>(args)...);
 
     }
 
     template<typename... T>
-    void createProcessTopologyKdTree( RankIdType processRank,
-                                      RankIdType masterRank,
+    void createProcessTopologyKdTree( RankIdType masterRank,
                                       T&&...  args
                                       /*std::unique_ptr<Tree> tree,
                                       LeafNeighbourMapType & neighbours,
@@ -121,7 +123,10 @@ public:
         // Assign a kdTree topology
         Deleter d;
         m_procTopo.apply_visitor(d);
-        m_procTopo = new ProcessTopologyKdTree<ProcessTopology>(m_nbRanks,m_adjNbRanks, processRank, masterRank,
+
+        m_nbRanks.clear();
+        m_adjNbRanks.clear();
+        m_procTopo = new ProcessTopologyKdTree<ProcessTopology>(m_nbRanks,m_adjNbRanks, m_rank, masterRank,
                                                                 std::forward<T>(args)...);
 
     }
