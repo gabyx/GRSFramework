@@ -38,7 +38,7 @@ private:
             m_options[index] = option;
         }
 
-        virtual void execute() const  = 0;
+        virtual int execute() const  = 0;
 
         virtual ~PostProcessTask(){};
 
@@ -53,8 +53,8 @@ private:
     class PostProcessTaskBash : public PostProcessTask{
         public:
             PostProcessTaskBash(const std::string & name): PostProcessTask(name){}
-            void execute() const{
-                 int ret = system( this->m_options.at(1).c_str());
+            int execute() const{
+                return system( this->m_options.at(1).c_str());
             }
     };
 
@@ -64,8 +64,8 @@ private:
             void addOption(unsigned int index, const std::string &option){
 
             }
-            virtual void execute() const{
-
+            virtual int execute() const{
+                return 1;
             }
     };
 

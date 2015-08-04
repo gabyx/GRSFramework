@@ -120,26 +120,26 @@ private:
     void writeHeader();
 
 
-    std::streamoff m_nBytes;
+    std::streamoff m_nBytes = 0;
     /** @}*/
 
     /** brief File path */
     boost::filesystem::path m_filePath;
 
 
-    std::streampos m_beginHeader;
-    std::streampos m_beginOfStates;
+    std::streampos m_beginHeader = 0;
+    std::streampos m_beginOfStates = 0;
 
-    unsigned int m_nDOFuBody, m_nDOFqBody, m_nStates;
-    std::streamoff m_nBytesPerBody ;
-    std::streamoff m_nBytesPerQBody ;
-    std::streamoff m_nBytesPerUBody ;
+    unsigned int m_nDOFuBody = 0, m_nDOFqBody = 0, m_nStates = 0;
+    std::streamoff m_nBytesPerBody = 0;
+    std::streamoff m_nBytesPerQBody = 0;
+    std::streamoff m_nBytesPerUBody = 0;
     static const  std::streamoff m_headerLength = (2*sizeof(unsigned int) + SIM_FILE_PART_SIGNATURE_LENGTH*sizeof(char));
 
     // Write addditional bytes, not yet implemented, but the type is written in the header
-    unsigned int m_additionalBytesPerBodyType;
+    unsigned int m_additionalBytesPerBodyType = 0;
     std::streamsize getAdditionalBytesPerBody();
-    std::streamsize m_nAdditionalBytesPerBody;
+    std::streamsize m_nAdditionalBytesPerBody = 0;
 
     std::stringstream m_errorString;
 

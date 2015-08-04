@@ -127,7 +127,6 @@ void rotateVector(const Eigen::MatrixBase<Derived>& quat ,
 
 template<class Derived>
 void setQuaternionZero(Eigen::MatrixBase<Derived>& quat) {
-    using PREC = typename Derived::Scalar;
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,4);
     quat(0) = 1;
     quat(1) = 0;

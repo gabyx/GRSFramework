@@ -369,8 +369,8 @@ private:
     * @{
     */
     bool readLength();
-    std::streamsize m_nBytes;
-    std::streamsize m_nStates;
+    std::streamsize m_nBytes = 0;
+    std::streamsize m_nStates = 0;
     /** @}*/
 
     /** @brief File path */
@@ -385,24 +385,24 @@ private:
 
     /** @brief Determined from number of bodies! @{*/
     void setByteLengths();
-    std::streamsize m_nBytesPerState; ///< m_nSimBodies*(q,u) + time
-    unsigned int m_nSimBodies;
+    std::streamsize m_nBytesPerState = 0; ///< m_nSimBodies*(q,u) + time
+    unsigned int m_nSimBodies = 0;
     /** @}*/
 
-    std::streampos m_beginOfStates;
+    std::streampos m_beginOfStates = 0;
 
-    unsigned int m_nDOFuBody, m_nDOFqBody;
-    std::streamsize m_nBytesPerQBody;
-    std::streamsize m_nBytesPerUBody;
-    std::streamsize m_nBytesPerBody;
+    unsigned int m_nDOFuBody= 0, m_nDOFqBody = 0;
+    std::streamsize m_nBytesPerQBody = 0;
+    std::streamsize m_nBytesPerUBody = 0;
+    std::streamsize m_nBytesPerBody = 0;
 
     // Write addditional bytes per body, not yet implemented, but the type is written in the header
     typename AdditionalBodyData::TypeEnum m_additionalBytesPerBodyType;
 
     std::streamsize getAdditionalBytesPerBody();
-    std::streamsize m_nAdditionalBytesPerBody;
+    std::streamsize m_nAdditionalBytesPerBody = 0;
 
-    bool m_readVelocities;
+    bool m_readVelocities = true;
 
     std::stringstream m_errorString;
 

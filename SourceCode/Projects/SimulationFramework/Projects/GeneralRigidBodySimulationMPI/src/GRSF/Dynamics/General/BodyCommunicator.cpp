@@ -5,12 +5,12 @@
 BodyCommunicator::BodyCommunicator(  std::shared_ptr< DynamicsSystemType> pDynSys ,
                                      std::shared_ptr< ProcessCommunicatorType > pProcComm):
             m_pDynSys(pDynSys),
+            m_pProcComm(pProcComm),
+            m_rank(m_pProcComm->getRank()),
             m_globalLocal(pDynSys->m_simBodies),
             m_globalRemote(pDynSys->m_remoteSimBodies),
             m_globalGeometries(pDynSys->m_globalGeometries),
-            m_pProcComm(pProcComm),
             m_nbDataMap(m_pProcComm->getRank()),
-            m_rank(m_pProcComm->getRank()),
             m_message(this)
 {
 
@@ -38,20 +38,20 @@ void BodyCommunicator::resetTopology(){
     m_nbDataMap.clear();
 
     // Initialize all NeighbourDatas
-    for(auto rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
-        LOGBC(m_pSimulationLog,"---> BodyCommunicator: Add neighbour data for process rank: "<<*rankIt<<std::endl;);
-        auto res = m_nbDataMap.insert(*rankIt);
-        ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << *rankIt);
+    for(auto & rank : m_nbRanks) {
+        LOGBC(m_pSimulationLog,"---> BodyCommunicator: Add neighbour data for process rank: "<<rank<<std::endl;);
+        auto res = m_nbDataMap.insert(rank);
+        ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << rank);
     }
     m_pSimulationLog->logMessage("---> BodyCommunicator: Initialized all NeighbourDatas");
 
     // Fill in all BodyInfos for the local bodies (remote bodies are not considered, there should not be any of those)
-    for(auto it = m_globalLocal.begin(); it != m_globalLocal.end(); ++it) {
-        ASSERTMSG(m_pProcTopo->belongsBodyToProcess(*it), "Body with id: "<< RigidBodyId::getBodyIdString(*it) <<" does not belong to process? How did you initialize your bodies?")
-        if( (*it)->m_pBodyInfo ){
-            delete (*it)->m_pBodyInfo;
+    for(auto * body: m_globalLocal) {
+        ASSERTMSG(m_pProcTopo->belongsBodyToProcess(body), "Body with id: "<< RigidBodyId::getBodyIdString(body) <<" does not belong to process? How did you initialize your bodies?")
+        if( body->m_pBodyInfo ){
+            delete body->m_pBodyInfo;
         }
-        (*it)->m_pBodyInfo = new RigidBodyType::BodyInfoType(m_rank);
+        body->m_pBodyInfo = new RigidBodyType::BodyInfoType(m_rank);
     }
 
 
@@ -71,15 +71,12 @@ void BodyCommunicator::communicate(PREC currentSimTime){
     typename ProcessTopologyType::NeighbourRanksListType neighbours;
 
     LOGBC(m_pSimulationLog,"--->\t Update neighbour data structures with LOCAL bodies:"<<std::endl;)
-    for(typename RigidBodyContainerType::iterator it = m_globalLocal.begin(); it != m_globalLocal.end(); ++it) {
-        RigidBodyType * body = (*it);
-
+    for(auto * body : m_globalLocal) {
 
         //LOGBC(m_pSimulationLog,"--->\t\t Reset neighbours flags..."<<std::endl;)
         body->m_pBodyInfo->resetNeighbourFlags(); // Reset the overlap flag to false! (addLocalBodyExclusive uses this assumption!)
 
         //Check overlapping processes
-        //TODO (We should return a map of cellNUmbers -> To Rank (any cell which has no rank
         bool overlapsOwnProcess;
         //LOGBC(m_pSimulationLog,"--->\t\t Overlap Test..."<<std::endl;)
         bool overlapsNeighbours = m_pProcTopo->checkOverlap(body, neighbours, overlapsOwnProcess);
@@ -96,7 +93,7 @@ void BodyCommunicator::communicate(PREC currentSimTime){
 
 
         //Check owner of this body
-        typename ProcessInfoType::RankIdType ownerRank;
+        RankIdType ownerRank;
         m_pProcTopo->belongsBodyToProcess(body,ownerRank);
         //Check if belonging rank is in the neighbours or our own
         if(ownerRank != m_rank){
@@ -147,25 +144,30 @@ void BodyCommunicator::addLocalBodyExclusiveToNeighbourMap(RigidBodyType * body,
     // Add this local body exclusively to the given neighbours
 
     // Loop over all incoming  ranks
-    typename List::const_iterator rankIt;
-    for( rankIt = neighbourRanks.begin();rankIt!= neighbourRanks.end();rankIt++){
+    for( auto & rank : neighbourRanks){
+
+
+        LOGBC(m_pSimulationLog, "Body id: "<< RigidBodyId::getBodyIdString(body) << " overlaps rank: " << rank << std::endl;);
+
         // insert the new element into body info --> (rank, flags)
         std::pair<typename BodyProcessInfo::RankToFlagsType::iterator,bool> res =
-                   body->m_pBodyInfo->m_neighbourRanks.insert(
-                                        typename BodyProcessInfo::RankToFlagsType::value_type(*rankIt,typename RigidBodyType::BodyInfoType::Flags(true))
-                                                       );
+                   body->m_pBodyInfo->m_neighbourRanks.emplace(rank,typename RigidBodyType::BodyInfoType::Flags(true));
 
         res.first->second.m_overlaps = true; // set the Flags for the existing or the newly inserted entry (rank,flags)
 
         if(res.second){//if inserted we need to add this body to the underlying neighbour data
            //add to the data
-           auto pairlocalData = m_nbDataMap.getNeighbourData(*rankIt)->addLocalBodyData(body);
-           ASSERTMSG(pairlocalData.second, "Insert to neighbour data rank: " << *rankIt << " in process rank: " <<m_rank << " failed!");
-           pairlocalData.first->m_commStatus = NeighbourMapType::DataType::LocalDataType::SEND_NOTIFICATION; // No need because is set automatically in constructor
+            auto * nbData = m_nbDataMap.getNeighbourData(rank);
+            ASSERTMSG( nbData , "No neighbour data for rank" << rank)
+
+            auto pairlocalData = nbData->addLocalBodyData(body);
+            ASSERTMSG(pairlocalData.second, "Insert to neighbour data rank: " << rank << " in process rank: " <<m_rank << " failed!");
+            pairlocalData.first->m_commStatus = NeighbourMapType::DataType::LocalDataType::SEND_NOTIFICATION; // No need because is set automatically in constructor
         }else{
-            ASSERTMSG(m_nbDataMap.getNeighbourData(*rankIt)->getLocalBodyData(body),"body with id "<< RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << *rankIt << " does not exist?" );
-            ASSERTMSG(m_nbDataMap.getNeighbourData(*rankIt)->getLocalBodyData(body)->m_commStatus ==  NeighbourMapType::DataType::LocalDataType::SEND_UPDATE,
-                      "m_commStatus for body with id: " << RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << *rankIt << "should be in update mode!");
+            ASSERTMSG( m_nbDataMap.getNeighbourData(rank), "No neighbour data for rank " << rank)
+            ASSERTMSG(m_nbDataMap.getNeighbourData(rank)->getLocalBodyData(body),"body with id "<< RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << rank << " does not exist?" );
+            ASSERTMSG(m_nbDataMap.getNeighbourData(rank)->getLocalBodyData(body)->m_commStatus ==  NeighbourMapType::DataType::LocalDataType::SEND_UPDATE,
+                      "m_commStatus for body with id: " << RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << rank << "should be in update mode!");
         }
 
 
@@ -176,12 +178,14 @@ void BodyCommunicator::addLocalBodyExclusiveToNeighbourMap(RigidBodyType * body,
     // which the flag m_overlaps = false because, this needs to be communicated first! (such that any neighbour does not request any update anymore!)
     // So set the flags for this body to SEND_REMOVE for all his neighbours which have m_overlaps = false
 
-    for( typename BodyProcessInfo::RankToFlagsType::iterator rankToFlagsIt = body->m_pBodyInfo->m_neighbourRanks.begin();
-        rankToFlagsIt != body->m_pBodyInfo->m_neighbourRanks.end(); rankToFlagsIt++ ){
+    for( typename BodyProcessInfo::RankToFlagsType::value_type & rankToFlags : body->m_pBodyInfo->m_neighbourRanks){
 
-        if( rankToFlagsIt->second.m_overlaps == false){
+        if( rankToFlags.second.m_overlaps == false){
 
-            auto * localData = m_nbDataMap.getNeighbourData(rankToFlagsIt->first)->getLocalBodyData(body);
+            auto * nbData = m_nbDataMap.getNeighbourData(rankToFlags.first);
+            ASSERTMSG(nbData, "No neighbour data for rank " << rankToFlags.first)
+
+            auto * localData = nbData->getLocalBodyData(body);
 
             if(localData->m_commStatus == NeighbourMapType::DataType::LocalDataType::SEND_UPDATE){
                 localData->m_commStatus = NeighbourMapType::DataType::LocalDataType::SEND_REMOVE;
@@ -197,16 +201,16 @@ void BodyCommunicator::addLocalBodyExclusiveToNeighbourMap(RigidBodyType * body,
 
 bool BodyCommunicator::checkReceiveForRemotes(){
     bool m_ok = true;
-    for(auto it = m_globalRemote.begin(); it != m_globalRemote.end(); it++){
 
-        LOGASSERTMSG((*it)->m_pBodyInfo , m_pSimulationLog, "bodyInfoPtr is nullptr! ");
+    for(auto * body : m_globalRemote){
+        LOGASSERTMSG(body->m_pBodyInfo , m_pSimulationLog, "bodyInfoPtr is nullptr! ");
 
-        if((*it)->m_pBodyInfo->m_receivedUpdate == false ){
-            LOGBC(m_pSimulationLog,"---> WARNING: Remote body with id: " << RigidBodyId::getBodyIdString(*it) << " has not received an update!" << std::endl;)
+        if(body->m_pBodyInfo->m_receivedUpdate == false ){
+            LOGBC(m_pSimulationLog,"---> WARNING: Remote body with id: " << RigidBodyId::getBodyIdString(body) << " has not received an update!" << std::endl;)
             m_ok = false;
         }else{
            // Set to false for next iteration!
-           (*it)->m_pBodyInfo->m_receivedUpdate = false;
+           body->m_pBodyInfo->m_receivedUpdate = false;
         }
     }
     return m_ok;
@@ -248,18 +252,19 @@ void BodyCommunicator::receiveMessagesFromNeighbours(){
 void BodyCommunicator::cleanUp(){
     LOGBC(m_pSimulationLog,"--->\t CleanUp Routine " <<std::endl;)
     //Delete all bodies in the list
-    for(auto it = m_localBodiesToDelete.begin(); it != m_localBodiesToDelete.end(); ++it){
-        RigidBodyType * body = *it;
+    for(auto * body : m_localBodiesToDelete){
 
+        LOGASSERTMSG(body->m_pBodyInfo->m_isRemote == false , m_pSimulationLog , "Body to delete is not a local body?!" );
 
-        LOGASSERTMSG((*it)->m_pBodyInfo->m_isRemote == false , m_pSimulationLog , "Body to delete is not a local body?!" );
+        for( auto & rankToFlags : body->m_pBodyInfo->m_neighbourRanks){
+            if( rankToFlags.second.m_inNeighbourMap == true ){
 
-        for( auto rankIt = (*it)->m_pBodyInfo->m_neighbourRanks.begin(); rankIt != (*it)->m_pBodyInfo->m_neighbourRanks.end(); rankIt++){
-            if( rankIt->second.m_inNeighbourMap == true ){
+                auto * nbData = m_nbDataMap.getNeighbourData(rankToFlags.first);
+                ASSERTMSG(nbData, "No neighbour data for rank " << rankToFlags.first)
 
-                bool res = m_nbDataMap.getNeighbourData(rankIt->first)->eraseLocalBodyData(body);
+                bool res = nbData->eraseLocalBodyData(body);
 
-                LOGASSERTMSG( res,  m_pSimulationLog , "This local body with id: " << RigidBodyId::getBodyIdString(body)<< " could not be deleted in neighbour data rank: " << rankIt->first);
+                LOGASSERTMSG( res,  m_pSimulationLog , "This local body with id: " << RigidBodyId::getBodyIdString(body)<< " could not be deleted in neighbour data rank: " << rankToFlags.first);
             }
         }
         LOGBC(m_pSimulationLog,"--->\t Deleting body with id: "<< RigidBodyId::getBodyIdString(body) <<"@" << body << std::endl;)
@@ -277,14 +282,13 @@ void BodyCommunicator::cleanUp(){
 
 
 void BodyCommunicator::printAllNeighbourRanks(){
-    for(typename RigidBodyContainerType::iterator it = m_globalLocal.begin(); it != m_globalLocal.end(); ++it) {
-        RigidBodyType * body = (*it);
+    for(auto * body: m_globalLocal) {
 
         LOGASSERTMSG(body->m_pBodyInfo, m_pSimulationLog , "Body info for local body with id: " << (body)->m_id << " does not exist!");
         LOGASSERTMSG(body->m_pBodyInfo->m_isRemote == false , m_pSimulationLog , "Local body to delete is not a local body?!" );
         LOGBC(m_pSimulationLog,"BodyInfoRanks for body: "<<RigidBodyId::getBodyIdString(body)<< std::endl)
-        for( auto ranksIt = body->m_pBodyInfo->m_neighbourRanks.begin(); ranksIt !=  body->m_pBodyInfo->m_neighbourRanks.end();ranksIt++ ){
-            LOGBC(m_pSimulationLog, "("<< ranksIt->first << ","<<ranksIt->second.m_overlaps <<"), ")
+        for( auto & rankToFlags : body->m_pBodyInfo->m_neighbourRanks){
+            LOGBC(m_pSimulationLog, "("<< rankToFlags.first << ","<<rankToFlags.second.m_overlaps <<"), ")
         }
         LOGBC(m_pSimulationLog, std::endl)
     }

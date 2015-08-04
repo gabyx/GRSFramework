@@ -27,7 +27,7 @@ struct GridBuilderSettings{
     /** Minimal grid dimension depends basically on the shapes simualated:
     * max_i diam(body_i) <= min gridSize_x, gridSize_y, gridSize_z $
     */
-    PREC m_minGridSize = 1e-3;
+    PREC m_minCellSize = 1e-3;
 
 
     /**
@@ -54,21 +54,27 @@ struct KdTreeBuilderSettings{
 
     KdTreeBuilderSettings(): m_A_IK(Matrix33::Identity()){}
 
-    unsigned int m_processes = 1;
-
     /** Minimal grid dimension depends basically on the shapes simualated:
     * max_i diam(body_i) <= min gridSize_x, gridSize_y, gridSize_z $
     */
     PREC m_minCellSize = 1e-3;
     PREC m_minPointsForSplit = 10;
     unsigned int m_maxTreeDepth = 5000; ///< Huge such that this is not a constraint for stopping
+
+    PREC m_minSplitRatio = 0.0;
+    PREC m_minPointRatio = 0.0;
+    PREC m_minExtentRatio = 0.0;
+
     /**
     *   PREDEFINED: Take values from below!
     *   ALIGNED: fit AABB
+    *   BINET_TENSOR: make OOBB in coordinate system of eigenvectors of the
+                      BinetTensor (or principal componente analysis),
     *   MVBB: Minimum Volume Bounding Box
     */
 
-    enum class BuildMode : short{ PREDEFINED , ALIGNED, MVBB} m_buildMode = BuildMode::MVBB;
+
+    enum class BuildMode : short{ PREDEFINED , ALIGNED,  BINET_TENSOR, MVBB} m_buildMode = BuildMode::MVBB;
 
     // OOBB or AABB
     AABB3d m_aabb; ///< used values for predefined values

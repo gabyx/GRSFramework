@@ -78,7 +78,7 @@ public:
         // Otherwise all operators()(const boost::shared_ptr...)
         m_pBody = pBody1;
 
-        m_bOverlapTest = true;
+        //m_bOverlapTest = true;
         m_bOverlap = false;
 
         m_aabb = &aabb;
@@ -120,7 +120,7 @@ public:
     bool checkOverlap(const RigidBodyType * pBody1, const AABB3d & aabb, const Matrix33 & A_IK) const {
 
         m_pBody = pBody1;
-        m_bOverlapTest = true;
+        //m_bOverlapTest = true;
         m_bOverlap = false;
         m_aabb = &aabb;
         m_A_IK = &A_IK;
@@ -148,6 +148,212 @@ private:
     mutable const Matrix33 * m_A_IK; ///< Transformation from frame K to frame I where the body coordinates are represented in
 };
 
+
+/**
+* @ingroup Collision
+* @brief This is the ColliderKdTree class, this functor class handles the collision of different RigidBodies with a KdTree.
+* It only does overlap test and not a full collision test!
+*/
+/** @{ */
+
+template<typename TreeType>
+class ColliderKdTree{
+public:
+
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
+
+    using NodeType = typename TreeType::NodeType;
+
+    ColliderKdTree(){}
+    ColliderKdTree(const NodeType * nonAddedLeaf): m_nonAddedLeaf(nonAddedLeaf){}
+
+    inline void setNonAddedLeaf( const NodeType * nonAddedLeaf ){
+        m_nonAddedLeaf = nonAddedLeaf;
+        ASSERTMSG(m_nonAddedLeaf, "nullptr")
+    }
+
+    inline bool checkOverlapNode( const RigidBodyType * pBody,
+                                  const NodeType * node,
+                                  const Matrix33 & A_IK) const
+    {
+        // early rejection if aabb/oobb is not overlapped
+        return m_colliderOOBB.checkOverlap(pBody, node->aabb(), A_IK );
+    }
+
+    inline bool checkOverlapNode(const RigidBodyType * pBody,
+                                 const NodeType * node) const
+    {
+        // early rejection if aabb/oobb is not overlapped
+        return m_colliderAABB.checkOverlap(pBody, node->aabb());
+    }
+
+    /** Caller is reponsible to clear overlapLeafIndices
+    *   \p startNode Any non-leaf (normal) node (ancestor of m_nonAddedNode) to start recursion,
+    *      returns only startNode if startNode is a leaf (without the guarantee that the body overlaps)
+    *   If the algorithm encounters that the node m_nonAddedNode is overlapped it is not added to overlapLeafIndices
+    *   \return if node m_nonAddedNode is overlapped or not
+    */
+    template<typename ResultIdxSet>
+    inline bool checkOverlap(ResultIdxSet & overlapLeafIndices,
+                              const NodeType * startNode,
+                              const RigidBodyType * pBody,
+                              const Matrix33 & A_IK) const
+    {
+
+        // early rejection if aabb/oobb is not overlapped
+        // this test is crucial, if we dont do this
+        // the body might lie outside of startNode, but we will
+        // still get overlapping leafs below startNode because we only check left/right of splitAxis
+        if( ! checkOverlapNode(pBody,startNode,A_IK) ){
+            return false;  // no overlap at this nodes aabb
+        }
+
+        // m_nodeStack.clear() not necessary since it is always empty after this call
+        m_nodeStack.emplace_back(startNode); // body overlaps this nodes aabb!
+        return checkOverlap_imp<false,true>(overlapLeafIndices,pBody,&A_IK);
+    }
+
+    template<typename ResultIdxSet>
+    inline bool checkOverlap(ResultIdxSet & overlapLeafIndices,
+                            const NodeType * startNode,
+                            const RigidBodyType * pBody) const
+    {
+
+        if( ! checkOverlapNode(pBody,startNode) ){
+            return false;
+        }
+        m_nodeStack.emplace_back(startNode);
+        return checkOverlap_imp<true,true>(overlapLeafIndices,pBody);
+    }
+
+
+    template<bool aligned, bool enableNonAddedLeaf = true, typename ResultIdxSet>
+    inline bool checkOverlap_imp(ResultIdxSet & overlapLeafIndices,
+                          const RigidBodyType * pBody,
+                          const Matrix33 * A_IK = nullptr
+                          ) const{
+
+        const NodeType * currNode;
+        char res;
+        bool ret = false; // if m_nonAddedNode is overlapped
+
+        // Breath first traversal
+        while(!m_nodeStack.empty()){
+
+            currNode = m_nodeStack.front();
+            ASSERTMSG(currNode, "currNode is nullptr")
+
+            if(!currNode->isLeaf()){
+
+                // check if body overlaps halfspace of split wall
+                if(aligned){
+                    // TODO ugly const_cast, but fast,
+                    m_isLRAligned.m_body = const_cast<RigidBodyType *>(pBody);
+                    m_isLRAligned.m_splitAxis = currNode->getSplitAxis();
+                    m_isLRAligned.m_splitPos  = currNode->getSplitPosition();
+                    res = pBody->m_geometry.apply_visitor(m_isLRAligned);
+                }else{
+                    m_isLR.m_body = const_cast<RigidBodyType *>(pBody);
+                    m_isLR.m_splitAxis = currNode->getSplitAxis();
+                    m_isLR.m_splitPos  = currNode->getSplitPosition();
+                    m_isLR.m_A_IK = const_cast<Matrix33*>(A_IK);
+                    res = pBody->m_geometry.apply_visitor(m_isLR);
+                }
+
+                switch(res){
+                    case 0: // left node overlap
+                        m_nodeStack.emplace_back(currNode->leftNode());
+                        break;
+                    case 1: // right node overlap
+                        m_nodeStack.emplace_back(currNode->rightNode());
+                        break;
+                    case 2: // both overlap
+                        m_nodeStack.emplace_back(currNode->leftNode());
+                        m_nodeStack.emplace_back(currNode->rightNode());
+                        break;
+                    default :
+                        ERRORMSG("Strange value returned from left/right ")
+                };
+
+            }else{
+                // we are at a leaf where body is overlapping
+                // add to list
+                if(enableNonAddedLeaf){
+                    if(currNode != m_nonAddedLeaf){
+                        overlapLeafIndices.emplace(currNode->getIdx());
+                    }else{
+                        ret = true;
+                    }
+                }else{
+                    overlapLeafIndices.emplace(currNode->getIdx());
+                }
+            }
+
+            m_nodeStack.pop_front();
+        }
+        return ret;
+    }
+
+    /** Visitor to check if geometry overlaps axis halfspace either left/right or both
+    *   x >= m_splitPos belongs to right halfspace!
+    *   x < m_splitPos belongs to left halfspace!
+    */
+    template<bool aligned>
+    struct LeftRightAxisHalfspace: public boost::static_visitor<char>{
+
+        inline char operator()(const SphereGeomPtrType  & sphereGeom) const{
+
+            // Transform the point of the body into frame K
+            // (m_A_IK->transpose() * m_body->m_r_S)(splitAxis) ;
+            PREC posAxis;
+            if(!aligned){
+                posAxis = m_A_IK->col(m_splitAxis).dot(m_body->m_r_S);
+            }else{
+                posAxis = m_body->m_r_S(m_splitAxis);
+            }
+
+            if(posAxis < m_splitPos){ // on left side
+                if( (posAxis + sphereGeom->m_radius) >= m_splitPos){
+                    return 2; // overlap both
+                }
+                return 0; // overlap only left
+            }else{ // on right side
+                if( (posAxis - sphereGeom->m_radius) < m_splitPos){
+                    return 2; // overlap both
+                }
+                return 1; // overlap only right
+            }
+        }
+
+        /**
+        * @brief If no routine matched for Body to OOBB throw error
+        */
+        template <typename Geom>
+        inline char operator()(const  std::shared_ptr<const Geom> &g) const{
+            ERRORMSG("ColliderAxisHalfspace:: collision detection for object-combination "<< typeid(Geom).name()<<" and Axis Halfspace not supported!");
+            return 0;
+        }
+
+        mutable Matrix33 * m_A_IK;
+        mutable RigidBodyType * m_body;
+        mutable typename NodeType::SplitAxisType m_splitAxis;
+        mutable PREC m_splitPos;
+    };
+
+
+private:
+
+    LeftRightAxisHalfspace<true>       m_isLRAligned;
+    LeftRightAxisHalfspace<false>      m_isLR;
+
+    ColliderAABB m_colliderAABB;
+    ColliderOOBB m_colliderOOBB;
+
+    mutable std::deque<const NodeType *> m_nodeStack;
+
+    const NodeType * m_nonAddedLeaf = nullptr;
+};
 
 
 /** @} */
@@ -286,7 +492,11 @@ public:
     }
 
     inline void operator()( const std::shared_ptr<const MeshGeometry >  & mesh) {
-        ASSERTMSG(false,"Mesh-Point collision detection has not been implemented")
+        static bool show = true;
+        if( show ){
+            WARNINGMSG(false,"Mesh-Point collision detection has not been implemented")
+            show=false;
+        }
         m_bIntersection = false;
     }
 

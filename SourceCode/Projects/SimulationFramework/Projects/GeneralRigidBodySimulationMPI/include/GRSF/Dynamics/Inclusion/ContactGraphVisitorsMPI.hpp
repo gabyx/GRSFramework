@@ -78,7 +78,7 @@ public:
         node.m_uFront.setZero();
         node.m_uFront.segment(0,NDOFuBody*node.m_nConstraints) = node.m_deltaLambda;
         node.m_uFront.template segment(NDOFuBody,NDOFuBody*node.m_nConstraints) -= node.m_deltaLambda;
-        for(int i = 0; i<mult; i++){
+        for(unsigned int i = 0; i<mult; i++){
             node.m_uFront.segment(NDOFuBody*i,NDOFuBody) *= 1.0 / node.m_multiplicityWeights(i);
         }
         node.m_uFront  +=  node.m_uBack;

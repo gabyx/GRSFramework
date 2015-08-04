@@ -104,7 +104,6 @@ private:
     static void globalDispatcher(int signum){
 
         ApplicationSignalHandler & s = ApplicationSignalHandler::getSingleton();
-        bool noCallBack = false;
         // Catched signal
         // Handling all signals and dispatching to the registered signal handlers
         auto it = s.m_signalHandlers.find(signum);

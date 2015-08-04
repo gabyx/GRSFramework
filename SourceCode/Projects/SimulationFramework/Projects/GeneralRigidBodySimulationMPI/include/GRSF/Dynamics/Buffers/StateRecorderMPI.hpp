@@ -51,6 +51,9 @@ public:
 
 protected:
 
+    unsigned int m_nSimBodies;
+    MultiBodySimFileMPI m_fh;
+
     std::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> m_pProcInfo;
 
     boost::filesystem::path m_directoryPath; ///< The path where the sim body part file is opened!
@@ -59,8 +62,7 @@ protected:
 
     Logging::Log * m_pSimulationLog;
 
-    unsigned int m_nSimBodies;
-    MultiBodySimFileMPI m_fh;
+
 
     //Write buffer
     //std::vector<char> m_writebuffer;

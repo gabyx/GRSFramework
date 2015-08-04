@@ -32,6 +32,7 @@
 #include "GRSF/Dynamics/General/KdTree.hpp"
 #include "ApproxMVBB/ComputeApproxMVBB.hpp"
 
+
 namespace MPILayer {
 
 
@@ -52,7 +53,7 @@ namespace MPILayer {
                 std::shared_ptr<DynamicsSystemType> pDynSys,
                 std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
                 RebuildSettingsType rebuildSettings)
-            : m_type(type), m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator), m_rebuildSettings(rebuildSettings),
+            : m_type(type),  m_rebuildSettings(rebuildSettings), m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator),
               m_pSimulationLog(nullptr) {
             m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
             ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
@@ -123,15 +124,14 @@ namespace MPILayer {
         }
 
 
-
-        std::shared_ptr<DynamicsSystemType>      m_pDynSys;
-        std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
-
         PREC m_currentTime;
         unsigned int m_builtTopologies = 0;
 
         const TopologyBuilderEnumType   m_type;
         const RebuildSettingsType       m_rebuildSettings;
+
+        std::shared_ptr<DynamicsSystemType>      m_pDynSys;
+        std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
 
         Logging::Log * m_pSimulationLog;
         boost::filesystem::path m_localSimFolderPath;
@@ -390,6 +390,8 @@ protected: \
 
     protected:
 
+
+
         friend class TopologyBuilderMessageWrapperOrientation<GridTopologyBuilderBase>;
         friend class TopologyBuilderMessageWrapperBodies<GridTopologyBuilderBase>;
 
@@ -457,8 +459,12 @@ protected: \
                 T &&... t
                                )
             : TopoBase(std::forward<T>(t)...),
-              m_settings(setting), m_massPointPrediction(massSettings), m_globalOutlierFilter(globalFilterSettings),
-              m_sceneFilePath(sceneFile), m_messageOrient(this),m_messageBodies(this) {
+              m_messageOrient(this),
+              m_messageBodies(this) ,
+              m_sceneFilePath(sceneFile), m_settings(setting),
+               m_massPointPrediction(massSettings),
+              m_globalOutlierFilter(globalFilterSettings)
+              {
 
         }
 
@@ -864,7 +870,7 @@ protected: \
         }
 
         void rebuildMakeBoundingBoxLocal_PostSend(RankIdType masterRank) {
-            if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR && m_doComputations_loc) {
+            if(m_settings.m_buildMode == SettingsType::BuildMode::BINET_TENSOR && m_doComputations_loc) {
                 this->template collaborativeSolveExtent<false>(masterRank,m_aabb);
             }
         }
@@ -1222,7 +1228,7 @@ private: \
             }
 
             //Adjust box to minimal box size =  procDim * min_gridSize,
-            Array3 limits = m_processDim.template cast<PREC>() * m_settings.m_minGridSize;
+            Array3 limits = m_processDim.template cast<PREC>() * m_settings.m_minCellSize;
             m_aabb.expandToMinExtentAbsolute( limits );
 
         }
@@ -1258,9 +1264,9 @@ private: \
                     "\t dim: " << "[ " << m_processDim.transpose() << "]" << std::endl <<
                     "\t extent: " << "[ " << m_aabb.extent().transpose() << "]" << std::endl;);
             m_pProcCommunicator->createProcTopoGrid(m_aabb,
-                    m_processDim,
-                    m_aligned,
-                    m_A_IK);
+                                                    m_processDim,
+                                                    m_aligned,
+                                                    m_A_IK);
 
             LOGTBLEVEL1( m_pSimulationLog,"---> GridTopoBuilder: Initialize ProcessCommunicator buffers..." << std::endl);
             m_pProcCommunicator->initializeNeighbourBuffers();
@@ -1324,8 +1330,9 @@ private: \
             m_bodiesPerRank.clear();
             m_pDynSys->m_bodiesInitStates.clear();
 
+            RankIdType ownerRank;
             for(auto & p : m_initStates) {
-                RankIdType ownerRank;
+
                 m_pProcCommunicator->getProcTopo()->belongsPointToProcess(p.second.getPosition(),ownerRank);
 
                 if(ownerRank == masterRank) {
@@ -1451,13 +1458,13 @@ private: \
 
     public:
 
-        using Tree       = KdTree::Tree< KdTree::TreeTraits<> >;             ///< Standart kdTree is already setup to use std::vector<Vector3 *>
-        using TreeSimple = KdTree::TreeSimple< KdTree::TreeSimpleTraits<> >; ///< Standart simple kdTree is already setup to use std::vector<Vector3 *>
+        using TreeType       = KdTree::Tree< KdTree::TreeTraits<> >;              ///< Standart kdTree is already setup to use std::vector<Vector3 *>
+        using TreeSimpleType = KdTree::TreeSimpleS<>; ///< Standart serializable simple kdTree is already setup to use std::vector<Vector3 *>
 
     private:
 
         friend class ParserModulesCreatorTopoBuilder<KdTreeTopologyBuilder>;
-        //friend class TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder>;
+        friend class TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder>;
 
 
     private:
@@ -1466,26 +1473,31 @@ private: \
 
         /** GLOBAL STUFF ================================================================ */
         unsigned int m_processes;
-        std::unique_ptr<TreeSimple> m_kdTree_glo;
+        std::unique_ptr<TreeType> m_kdTree_temp;
+        std::shared_ptr<TreeSimpleType> m_kdTree_glo;
+
+        using LeafNeighbourMapType =  typename TreeType::LeafNeighbourMapType;
+        LeafNeighbourMapType m_neighbours;
         /** ============================================================================= */
 
-        //TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder> m_messageWrapperResults;
+        TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder> m_messageWrapperResults;
 
 
 
     public:
 
         KdTreeTopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
-        std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
-        const TopologyBuilderSettings::RebuildSettings & rebuildSettings,
-        const TopologyBuilderSettings::MassPointPredSettings & massPointPredSettings,
-        const SettingsType & settings,
-        boost::filesystem::path sceneFilePath,
-        unsigned int nGlobalSimBodies)
-            :Base(settings,massPointPredSettings, sceneFilePath,
+                                std::shared_ptr<ProcessCommunicatorType > pProcCommunicator,
+                                const TopologyBuilderSettings::RebuildSettings & rebuildSettings,
+                                const TopologyBuilderSettings::MassPointPredSettings & massPointPredSettings,
+                                const OutlierFilterSettingsType & globalOutlierFilterSettings,
+                                const SettingsType & settings,
+                                boost::filesystem::path sceneFilePath,
+                                unsigned int nGlobalSimBodies)
+            :Base(settings,massPointPredSettings, globalOutlierFilterSettings, sceneFilePath,
             TopologyBuilderEnumType::KDTREEBUILDER, pDynSys, pProcCommunicator,rebuildSettings),
-             m_nGlobalSimBodies(nGlobalSimBodies)
-             /*m_messageWrapperResults(this)*/
+             m_nGlobalSimBodies(nGlobalSimBodies),
+             m_messageWrapperResults(this)
         {
         }
 
@@ -1506,9 +1518,6 @@ private: \
             RankIdType masterRank = this->m_pProcCommunicator->getMasterRank();
             if(this->m_pProcCommunicator->hasMasterRank()) {
 
-                if(m_settings.m_processes != m_pProcCommunicator->getNProcesses()) {
-                    ERRORMSG("processes: " << m_settings.m_processes << " does not fit "<<m_pProcCommunicator->getNProcesses()<<"processes!");
-                }
 
                 // Parse all initial condition from the scene file (global initial condition is read too)
                 ParserModulesCreatorTopoBuilder<KdTreeTopologyBuilder> c(this);
@@ -1525,6 +1534,7 @@ private: \
 
                 LOGTBLEVEL2(m_pSimulationLog, "---> KdTreeTopoBuilder: parsed states: "<<std::endl;);
                 m_massPoints.clear();
+                m_massPoints.reserve(m_initStates.size());
                 for(auto & s : m_initStates) {
                     // Save mass points
                     m_massPoints.emplace_back( &s.second );
@@ -1533,12 +1543,12 @@ private: \
 
                 }
 
-                this->initMakeBoundingBoxGlobal(m_settings,masterRank);
+                this->initMakeBoundingBoxGlobal(masterRank);
 
                 buildKdTree();
 
                 buildTopo();
-                sendGrid(masterRank);
+                sendKdTree(masterRank);
 
                 STOP_TIMER_SEC(buildTime, startTopoTime)
 
@@ -1552,11 +1562,11 @@ private: \
 
                 // Receive all results from master;
                 // All initial states get saved in m_pDynSys->m_bodiesInitStates
-                //TODO
-                //            m_messageWrapperResults.resetBeforLoad();
-                //            m_pProcCommunicator->receiveMessageFromRank(m_messageWrapperResults,
-                //                                                     this->m_pProcCommunicator->getMasterRank(),
-                //                                                     m_messageWrapperResults.m_tag);
+                m_messageWrapperResults.resetBeforLoad();
+                m_pProcCommunicator->receiveMessageFromRank(m_messageWrapperResults,
+                                                         this->m_pProcCommunicator->getMasterRank(),
+                                                         m_messageWrapperResults.m_tag);
+
 
                 buildTopo();
                 cleanUpLocal();
@@ -1580,7 +1590,7 @@ private: \
 
         void rebuildTopology(PREC currentTime) {
 
-            LOGTB(m_pSimulationLog,"---> GridTopologyBuilder: rebuild Topology" <<std::endl;)
+            LOGTB(m_pSimulationLog,"---> KdTreeTopoBuilder: rebuild Topology" <<std::endl;)
 
             START_TIMER(startTopoTime)
 
@@ -1589,7 +1599,7 @@ private: \
             ++m_builtTopologies;
             m_currentTime = currentTime;
 
-            this->rebuildMakeBoundingBoxLocal_PreSend();
+
 
             LOGTB(m_pSimulationLog,"---> KdTreeTopoBuilder: Clear all init states in DynamicsSystem" <<std::endl;)
             m_pDynSys->m_bodiesInitStates.clear();
@@ -1597,7 +1607,8 @@ private: \
             RankIdType masterRank = this->m_pProcCommunicator->getMasterRank();
             if(this->m_pProcCommunicator->hasMasterRank()) {
 
-                // For sending
+                // compute local stuff for the corresponding build method
+                this->template rebuildMakeBoundingBoxLocal_PreSend<true>(masterRank);
 
                 // Receive Messages
                 // Fill linear array with all ranks except master
@@ -1622,12 +1633,12 @@ private: \
                 }
 
 
-                this->rebuildMakeBoundingBoxGlobal(m_settings,masterRank);
+                this->rebuildMakeBoundingBoxGlobal(masterRank);
 
                 buildKdTree();
 
                 buildTopo();
-                sendGrid(masterRank);
+                sendKdTree(masterRank);
 
                 STOP_TIMER_SEC(buildTime, startTopoTime)
 
@@ -1639,19 +1650,14 @@ private: \
 
             } else {
 
-
+                // compute local stuff for the corresponding build method
+                this->template rebuildMakeBoundingBoxLocal_PreSend<false>(masterRank);
 
                 this->m_pProcCommunicator->sendMessageToRank(m_messageBodies, masterRank, m_messageBodies.m_tag);
-                //TODO
-                //          this->rebuildMakeBoundingBoxLocal_PreSend();
 
-                // Receive Grid results from master;
-                // All initial states get saved in m_pDynSys->m_bodiesInitStates
-                //TODO
-                //            m_messageWrapperResults.resetBeforLoad();
-                //            m_pProcCommunicator->receiveMessageFromRank( m_messageWrapperResults,
-                //                                                         masterRank,
-                //                                                         m_messageWrapperResults.m_tag);
+                this->rebuildMakeBoundingBoxLocal_PostSend(masterRank);
+
+                receiveKdTree(masterRank);
 
                 buildTopo();
                 cleanUpLocal();
@@ -1672,6 +1678,9 @@ private: \
 
         void cleanUpGlobal() {
             Base::cleanUpGlobal();
+
+            m_kdTree_temp.reset();
+            m_kdTree_glo.reset();
         }
 
         void cleanUpLocal() {
@@ -1680,11 +1689,19 @@ private: \
 
         void buildKdTree() {
 
-            using SplitHeuristicType = Tree::SplitHeuristicType;
-            using NodeType = Tree::NodeType;
-            using NodeDataType = Tree::NodeDataType;
-            static const unsigned int Dimension = NodeDataType::Dimension;
+            using SplitHeuristicType = TreeType::SplitHeuristicType;
+            using NodeType = TreeType::NodeType;
+            using NodeDataType = TreeType::NodeDataType;
+            using BoundaryInfoType = typename NodeType::BoundaryInfoType;
+            // static const unsigned int Dimension = NodeDataType::Dimension;
             using PointListType = NodeDataType::PointListType;
+
+            // transform the points if not aligned into the aabbs frame
+            if(!this->m_aligned){
+                for(auto & v : m_predPoints){
+                    v = this->m_A_IK.transpose()*v;
+                }
+            }
 
             // make pointer list
             auto s = m_predPoints.size();
@@ -1692,32 +1709,41 @@ private: \
             for(std::size_t i= 0; i<s; ++i) {
                 (*vec)[i] = &m_predPoints[i];
             }
-            ERRORMSG("DID I TRANSFORM THE POINTS INTO THE KDTREE? OOBB?")
+
 
             typename SplitHeuristicType::QualityEvaluator e(0.0, /* splitratio (maximized by MidPoint) */
                     2.0, /* pointratio (maximized by MEDIAN)*/
                     2.0);/* extentratio (maximized by MidPoint)*/
-            Tree kdTree;
-            kdTree.initSplitHeuristic( std::initializer_list<SplitHeuristicType::Method> {
-                SplitHeuristicType::Method::MEDIAN
-                /*SplitHeuristicType::Method::GEOMETRIC_MEAN,
-                  SplitHeuristicType::Method::MIDPOINT*/
-            },
-            m_settings.m_minPointsForSplit,
-            m_settings.m_minCellSize,
-            SplitHeuristicType::SearchCriteria::FIND_BEST,
-            e,
-            0.0, 0.0, 0.1);
+
+            m_kdTree_temp.reset(new TreeType());
+
+            m_kdTree_temp->initSplitHeuristic( std::initializer_list<SplitHeuristicType::Method> {
+                                            SplitHeuristicType::Method::MEDIAN
+                                            /*SplitHeuristicType::Method::GEOMETRIC_MEAN,
+                                              SplitHeuristicType::Method::MIDPOINT*/
+                                        },
+                                        m_settings.m_minPointsForSplit,
+                                        m_settings.m_minCellSize,
+                                        SplitHeuristicType::SearchCriteria::FIND_BEST,
+                                        e,
+                                        0.0, 0.0, 0.0);
 
             auto rootData = std::unique_ptr<NodeDataType>(new NodeDataType(vec->begin(),vec->end(),
                     std::unique_ptr<PointListType>(vec) ));
 
-            kdTree.build(m_aabb,std::move(rootData), m_settings.m_maxTreeDepth, m_settings.m_processes);
+            LOGTBLEVEL1(m_pSimulationLog, "---> KdTreeTopoBuilder: Building KdTree with : "
+                        << "minP: " << this->m_aabb.m_minPoint.transpose() << " maxP: " << this->m_aabb.m_maxPoint.transpose() << std::endl
+                        << "points: " << vec->size() << std::endl
+                        )
+
+            m_kdTree_temp->build(m_aabb,std::move(rootData), m_settings.m_maxTreeDepth, m_pProcCommunicator->getNProcesses());
 
             // build the neighbours according to statistics
-            //TODO m_leafNeighbour = kdTree.buildLeafNeighboursAutomatic();
+            m_neighbours = m_kdTree_temp->buildLeafNeighbours(m_settings.m_minCellSize);
 
-            m_processes = kdTree.getLeafs().size();
+            LOGTBLEVEL1(m_pSimulationLog,m_kdTree_temp->getStatisticsString())
+
+            m_processes = m_kdTree_temp->getLeafs().size();
 
             // TODO
             // If we found less processes which need to continue the simulation,
@@ -1726,9 +1752,26 @@ private: \
                 ERRORMSG("KdTree could only determine " << m_processes << " processes but " << m_pProcCommunicator->getNProcesses() << " are needed!")
             }
 
-            // move global kdTree to a local simple version
-            m_kdTree_glo.reset(new TreeSimple{kdTree});
+            // copy global kdTree to a simple version
+            m_kdTree_glo.reset(new TreeSimpleType{*m_kdTree_temp});
 
+            // make simple version filling the whole space for sharing
+            for(auto * n : m_kdTree_glo->getNodes() ){
+                auto & bounds = n->getBoundaries();
+                for(std::size_t i=0;i< TreeType::Dimension; ++i){
+
+                    if( bounds.at(i,0) == nullptr ){
+                        // boundary at minimum -> extent to max
+                        n->aabb().expandToMaxExtent<0>(i);
+                    }
+
+                    if( bounds.at(i,1) == nullptr ){
+                        // boundary at maximum -> extent to lowest
+                        n->aabb().expandToMaxExtent<1>(i);
+                    }
+
+                }
+            }
         }
 
         void buildTopo() {
@@ -1746,15 +1789,22 @@ private: \
             } else if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::PREDEFINED) {
                 LOGTBLEVEL1( m_pSimulationLog, "\t buildMode: PREDEFINED" << std::endl );
             }
-            //            else if (m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::BINET_TENSOR){
-            //                 LOGTBLEVEL1( m_pSimulationLog,"\t buildMode: BINET" << std::endl);
-            //            }
+            else if (m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::BINET_TENSOR){
+                 LOGTBLEVEL1( m_pSimulationLog,"\t buildMode: BINET" << std::endl);
+            }
             else if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::MVBB) {
                 LOGTBLEVEL1( m_pSimulationLog,"\t buildMode: MVBB" << std::endl);
             } else {
                 ERRORMSG("No BUILD implemented!")
             }
 
+            for( auto & nbs : m_neighbours){
+                LOGTBLEVEL3(m_pSimulationLog,"Neighbours for rank: " << nbs.first << ": ");
+                for(auto & r : nbs.second){
+                   LOGTBLEVEL3(m_pSimulationLog, r );
+                }
+                LOGTBLEVEL3(m_pSimulationLog,std::endl);
+            }
 
             LOGTBLEVEL1( m_pSimulationLog,
                     "\t aligned: "<< m_aligned << std::endl <<
@@ -1763,10 +1813,11 @@ private: \
                     "\t A_IK: \n" << m_A_IK << std::endl <<
                     "\t processes: " << m_processes << std::endl <<
                     "\t extent: " << "[ " << m_aabb.extent().transpose() << "]" << std::endl;);
-            m_pProcCommunicator->createProcTopoKdTree(  std::move(m_kdTree_glo),
-                    m_aabb,
-                    m_aligned,
-                    m_A_IK);
+            m_pProcCommunicator->createProcTopoKdTree(  m_kdTree_glo,
+                                                        m_neighbours,
+                                                        m_aabb,
+                                                        m_aligned,
+                                                        m_A_IK);
 
             LOGTBLEVEL1( m_pSimulationLog,"---> KdTreeTopoBuilder: Initialize ProcessCommunicator buffers..." << std::endl);
             m_pProcCommunicator->initializeNeighbourBuffers();
@@ -1774,7 +1825,7 @@ private: \
         }
 
         //only master rank executes this
-        void sendGrid(RankIdType masterRank) {
+        void sendKdTree(RankIdType masterRank) {
 
 
             sortBodies(masterRank);
@@ -1797,12 +1848,11 @@ private: \
                 }
             });
 
-            // TODO
-            //        for(auto rank : ranks){
-            //            LOGTBLEVEL1( m_pSimulationLog, "---> KdTreeTopoBuilder: Sending grid to rank: "<< rank <<std::endl; );
-            //            m_messageWrapperResults.setRank(rank);
-            //            m_pProcCommunicator->sendMessageToRank(m_messageWrapperResults,rank, m_messageWrapperResults.m_tag);
-            //        }
+            for(auto rank : ranks){
+                LOGTBLEVEL1( m_pSimulationLog, "---> KdTreeTopoBuilder: Sending grid to rank: "<< rank <<std::endl; );
+                m_messageWrapperResults.setRank(rank);
+                m_pProcCommunicator->sendMessageToRank(m_messageWrapperResults,rank, m_messageWrapperResults.m_tag);
+            }
             // ===========================================================
 
 
@@ -1810,7 +1860,16 @@ private: \
             ASSERTMSG(m_bodiesPerRank.size() == 0,"All states should be sent!");
         }
 
-// master sorts bodies
+        void receiveKdTree(RankIdType masterRank){
+            // Receive kdTree results from master;
+            // All initial states get saved in m_pDynSys->m_bodiesInitStates
+            m_messageWrapperResults.resetBeforLoad();
+            m_pProcCommunicator->receiveMessageFromRank( m_messageWrapperResults,
+                                                         masterRank,
+                                                         m_messageWrapperResults.m_tag);
+        }
+
+        // master sorts bodies
         void sortBodies(RankIdType masterRank ) {
             LOGTBLEVEL3( m_pSimulationLog, "---> KdTreeTopoBuilder: Sort bodies " << std::endl;);
 
@@ -1818,8 +1877,9 @@ private: \
             m_bodiesPerRank.clear();
             m_pDynSys->m_bodiesInitStates.clear();
 
+            RankIdType ownerRank;
             for(auto & p : m_initStates) {
-                RankIdType ownerRank;
+
                 m_pProcCommunicator->getProcTopo()->belongsPointToProcess(p.second.getPosition(),ownerRank);
 
                 if(ownerRank == masterRank) {
@@ -1829,7 +1889,6 @@ private: \
                     // move other body states to a list for sending
                     m_bodiesPerRank[ownerRank].push_back(&p.second);
                 }
-
             }
 
             // Log stuff
@@ -1891,19 +1950,19 @@ private: \
 
             using XMLNodeType = pugi::xml_node;
             XMLNodeType node;
-            static const auto  nodePCData = pugi::node_pcdata;
+            //static const auto  nodePCData = pugi::node_pcdata;
             XMLNodeType root =  dataXML.child("TopologyBuilder");
 
 
             std::string buildMode ="nothing";
 
-            if(  m_settings.m_buildMode == GridBuilderSettings::BuildMode::ALIGNED) {
+            if(  m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::ALIGNED) {
                 buildMode="Aligned";
-            } else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::PREDEFINED) {
+            } else if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::PREDEFINED) {
                 buildMode="Predefined";
-            } else if (m_settings.m_buildMode == GridBuilderSettings::BuildMode::BINET_TENSOR) {
+            } else if (m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::BINET_TENSOR) {
                 buildMode="BinetTensor";
-            } else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::MVBB) {
+            } else if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::MVBB) {
                 buildMode="MVBB";
             }
             root.attribute("buildMode").set_value(buildMode.c_str()) ;
@@ -1912,7 +1971,7 @@ private: \
             Base::template writeTopoInfo<writeAABBList,writePoints,writeHistogram>(root,currentTime,buildTime);
 
             // Write kdTree
-            m_kdTree_glo->appendToXML(root);
+            m_kdTree_temp->appendToXML(root,m_aligned,m_A_IK);
 
             dataXML.save_file(filePath.c_str(),"    ");
         }

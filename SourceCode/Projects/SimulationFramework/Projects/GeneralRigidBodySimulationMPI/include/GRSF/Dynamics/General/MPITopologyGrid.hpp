@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 
+#include "GRSF/Common/UnorderedContainerHelpers.hpp"
 
 #include "GRSF/Dynamics/General/KdTree.hpp"
 #include "GRSF/Dynamics/General/CartesianGrid.hpp"
@@ -30,25 +31,25 @@ public:
     using AdjacentNeighbourRanksMapType = typename ProcessTopologyBase::AdjacentNeighbourRanksMapType;
 
     ProcessTopologyGrid(  NeighbourRanksListType & nbRanks, AdjacentNeighbourRanksMapType & adjNbRanks,
-                          RankIdType processRank, unsigned int masterRank,
+                          RankIdType processRank, RankIdType masterRank,
             			  const AABB3d & aabb,
                           const MyMatrix<unsigned int>::Array3 & dim,
                           bool aligned = true,
                           const Matrix33 & A_IK = Matrix33::Identity()
                           ):
-    CartesianGrid<NoCellData>(aabb, dim), m_rank(processRank), m_A_IK(A_IK), m_axisAligned(aligned),
-    m_cellNumberingStart(masterRank)
+    CartesianGrid<NoCellData>(aabb, dim),
+    m_cellNumberingStart(masterRank), m_rank(processRank),
+    m_axisAligned(aligned), m_A_IK(A_IK)
     {
        m_rank = processRank;
 
         //Initialize neighbours
         nbRanks = getCellNeighbours(m_rank);
 
-        adjNbRanks.clear();
         for( auto it = nbRanks.begin(); it!=nbRanks.end(); it++) {
 
             //Initialize adjacent neighbour ranks to m_nbRanks for this neighbour *it
-            adjNbRanks[*it] = getCommonNeighbourCells(nbRanks, *it);
+            adjNbRanks[*it] = unorderedHelpers::makeIntersection(nbRanks, getCellNeighbours(*it));
 
             //Get all AABB's of this neighbours
             m_nbAABB[ *it ] = getCellAABB(*it);
@@ -63,8 +64,8 @@ public:
 
     RankIdType getRank() const{return m_rank;}
 
-    unsigned int getCellRank(const Vector3 & I_point) const {
-        MyMatrix<unsigned int>::Array3 v;
+    RankIdType getCellRank(const Vector3 & I_point) const {
+        MyMatrix<RankIdType>::Array3 v;
         if(m_axisAligned){
              v = CartesianGrid<NoCellData>::getCellIndexClosest(I_point);
         }else{
@@ -72,7 +73,9 @@ public:
         }
         return getCellRank(v);
     };
-    unsigned int getCellRank(const MyMatrix<unsigned int>::Array3 & v) const {
+
+
+    RankIdType getCellRank(const MyMatrix<RankIdType>::Array3 & v) const {
         ASSERTMSG( ( (v(0) >=0 && v(0) < m_dim(0)) && (v(1) >=0 && v(1) < m_dim(1)) && (v(2) >=0 && v(2) < m_dim(2)) ),
                 "Index: " << v << " is out of bound" )
 
@@ -85,16 +88,16 @@ public:
     };
 
 
-    std::set<unsigned int> getCellNeighbours(unsigned int cellRank) const {
-        std::set<unsigned int> v;
+    NeighbourRanksListType getCellNeighbours(RankIdType cellRank) const {
+        NeighbourRanksListType v;
         // cellRank zero indexed
         ASSERTMSG(cellRank < m_dim(0)*m_dim(1)*m_dim(2) + m_cellNumberingStart
                 && cellRank >= m_cellNumberingStart,
                 "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
 
-        MyMatrix<unsigned int>::Array3 cell_index = getCellIndex(cellRank);
+        MyMatrix<RankIdType>::Array3 cell_index = getCellIndex(cellRank);
 
-        MyMatrix<unsigned int>::Array3 ind;
+        MyMatrix<RankIdType>::Array3 ind;
 
         for(int i=0; i<26; i++) {
             ind(0) = m_nbIndicesOff[i*3+0] + cell_index(0);
@@ -105,8 +108,7 @@ public:
                     ( ind(1) >=0 &&  ind(1) < m_dim(1)) &&
                     ( ind(2) >=0 &&  ind(2) < m_dim(2)) ) {
                 // Add neighbour
-                std::pair< typename std::set<unsigned int>::iterator, bool> res =
-                        v.insert(getCellRank(ind));
+                auto res = v.insert(getCellRank(ind));
                 ASSERTMSG(res.second,"This neighbour number: "<< getCellRank(ind) << " for cell number: "<< cellRank <<" alreads exists!");
             }
 
@@ -114,21 +116,7 @@ public:
         return v;
     };
 
-    /**
-    * Gets the common cells between all cellNumbers and the neighbours of cell number cellNumber2
-    */
-    std::set<unsigned int> getCommonNeighbourCells(const std::set<unsigned int> & cellNumbers,unsigned int cellNumber2) const {
-        std::set<unsigned int> nbRanks = getCellNeighbours(cellNumber2);
-
-        std::set<unsigned int> intersec;
-        // intersect nbRanks with cellNumbers
-        std::set_intersection(cellNumbers.begin(),cellNumbers.end(),nbRanks.begin(),nbRanks.end(),
-                std::inserter(intersec,intersec.begin()));
-
-        return intersec;
-    };
-
-    MyMatrix<unsigned int>::Array3 getCellIndex(unsigned int cellRank) const {
+    MyMatrix<RankIdType>::Array3 getCellIndex(RankIdType cellRank) const {
 
         ASSERTMSG(cellRank < m_dim(0)*m_dim(1)*m_dim(2) + m_cellNumberingStart
                 && cellRank >= m_cellNumberingStart,
@@ -152,7 +140,7 @@ public:
     /**
     * Gets the AABB, which extends to infinity for boundary cells!
     */
-    AABB3d getCellAABB(unsigned int cellRank) const {
+    AABB3d getCellAABB(RankIdType cellRank) const {
 
         MyMatrix<unsigned int>::Array3 cell_index = getCellIndex(cellRank);
         AABB3d ret(m_Box.m_minPoint);
@@ -162,10 +150,10 @@ public:
         //Expand AABB each axis to max/min if this rank is a boundary cell!
         for(short i = 0; i<3; i++) {
             if(cell_index(i) == m_dim(i)-1) {
-                ret.expandToMaxExtent<false>(i);
+                ret.expandToMaxExtent<true>(i);
             }
             if( cell_index(i) == 0 ) {
-                ret.expandToMaxExtent<true>(i);
+                ret.expandToMaxExtent<false>(i);
             }
         }
 
@@ -190,7 +178,7 @@ private:
                                     NeighbourRanksListType & neighbourProcessRanks,
                                     bool & overlapsOwnRank,
                                     const RigidBodyType * body,
-                                    AddArgs... args) const
+                                    AddArgs &... args) const
     {
         // Check neighbour AABB
         for(auto it = m_nbAABB.begin(); it != m_nbAABB.end(); it++) {
@@ -203,7 +191,7 @@ private:
         return neighbourProcessRanks.size() > 0;
     }
 
-    unsigned int m_cellNumberingStart;
+    RankIdType m_cellNumberingStart;
 
     RankIdType m_rank; ///< Own rank;
 

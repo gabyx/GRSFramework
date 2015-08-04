@@ -8,15 +8,23 @@
 #include <boost/serialization/level.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/set.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/unordered_map.hpp>
+#include <boost/serialization/unordered_set.hpp>
+
 #include <boost/serialization/split_member.hpp>
 
 
 #include "GRSF/Common/AssertionDebug.hpp"
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"
+
+#include "GRSF/Common/SfinaeMacros.hpp"
+
 #include "GRSF/Dynamics/General/MPIMessageTag.hpp"
-#include "GRSF/Dynamics/General/MPISerializationHelpersEigen.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp"
+#include "GRSF/Dynamics/General/SerializationHelpersEigen.hpp"
+#include "GRSF/Common/SerializationHelpersTuple.hpp"
+#include "GRSF/Dynamics/Collision/SerializationHelpersGeometries.hpp"
 
 #include "GRSF/Singeltons/FileManager.hpp"
 #include "GRSF/Common/SimpleLogger.hpp"
@@ -28,20 +36,20 @@
 
 
 namespace boost {
-namespace serialization {
+    namespace serialization {
 
-template<class Archive >
-void serialize(Archive& ar, boost::filesystem::path & p,
-               const unsigned int version) {
-    boost::filesystem::path::string_type s;
-    if(Archive::is_saving::value)
-        s = p.string();
-    ar & s;
-    if(Archive::is_loading::value)
-        p = s;
-}
+        template<class Archive >
+        void serialize(Archive& ar, boost::filesystem::path & p,
+                       const unsigned int version) {
+            boost::filesystem::path::string_type s;
+            if(Archive::is_saving::value)
+                s = p.string();
+            ar & s;
+            if(Archive::is_loading::value)
+                p = s;
+        }
 
-};
+    };
 };
 
 namespace MPILayer {
@@ -104,11 +112,27 @@ public:
     using NeighbourDataMapType = typename NeighbourCommunicatorType::NeighbourMapType             ;
     using NeighbourDataType = typename NeighbourDataMapType::DataType                          ;
 
+private:
+
+
+    NeighbourCommunicatorType* m_nc;
+    RankIdType m_neighbourRank;        ///< This is the neighbour rank where the message is send to or received from!
+
+    bool m_hasNoSimBodies;
+
+    mutable NeighbourDataType * m_neighbourData = nullptr;
+    mutable BodyInfoType * m_bodyInfo = nullptr;
+
+    mutable bool m_initialized = false;
+
+    Logging::Log *  m_pSerializerLog;
+    Logging::Log *  m_pSimulationLog;
+
+public:
+
     NeighbourMessageWrapperBodies(NeighbourCommunicatorType * nc):
-        m_nc(nc),
-        m_initialized(false),
-        m_neighbourData(nullptr),
-        m_bodyInfo(nullptr) {
+        m_nc(nc)
+    {
 
         if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
             m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
@@ -140,7 +164,7 @@ public:
     * Set the flags which are sent to the neighbours
     */
     void setFlags(bool hasNoSimBodies){
-        m_isEmpty = hasNoSimBodies;
+        m_hasNoSimBodies = hasNoSimBodies;
     }
 
     enum class SubMessageFlag : char {
@@ -189,54 +213,57 @@ public:
         ar & m_nc->m_currentSimTime;
 
         // Send all flags
-        ar & m_isEmpty;
+        ar & m_hasNoSimBodies;
 
-        // Number of submessages to send (for each local body 1)
-        m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
-        LOGASSERTMSG( m_neighbourData, m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
+        if(!m_hasNoSimBodies){
 
-        unsigned int size = m_neighbourData->sizeLocal();
-        ar & size;
+            // Number of submessages to send (for each local body 1)
+            m_neighbourData = m_nc->m_nbDataMap.getNeighbourData(m_neighbourRank);
+            LOGASSERTMSG( m_neighbourData, m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
 
-        if(size>0) {
-            LOGBC_SZ(m_pSerializerLog, "BodyComm=================================================================================="<< std::endl;)
-            LOGBC_SZ(m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
-            LOGBC_SZ(m_pSerializerLog, "---> Timestamp: "<<  m_nc->m_currentSimTime << std::endl;);
-            LOGBC_SZ(m_pSerializerLog, "---> Size: "<<  size << std::endl;);
-        }
-        //Loop over all localBodies in this NeighbourData
-        int i = 0;
+            std::size_t size = m_neighbourData->sizeLocal();
+            ar & size;
 
-        typename NeighbourDataType::LocalIterator it, it_next;
-        for(it = m_neighbourData->localBegin(), it_next = it ; it != m_neighbourData->localEnd(); it = it_next) {
-            it_next++; // take care here, because, we might invalidate this iterator it because we might remove local bodies, thats why it_next is used above!
-
-            m_bodyInfo = it->second.m_pBody->m_pBodyInfo;
-
-            SubMessageFlag flag;
-            if(it->second.m_commStatus == NeighbourDataType::LocalDataType::SEND_NOTIFICATION) {
-                flag = SubMessageFlag::NOTIFICATION;
-                ar & flag;
-                LOGBC_SZ(m_pSerializerLog, "---> NotifictionSTART: " << i<<std::endl;);
-                saveNotificationOrUpdate(ar, it->second.m_pBody, flag );
-                LOGBC_SZ(m_pSerializerLog, "---> NotifictionEND: "<<std::endl;);
-
-            } else if (it->second.m_commStatus == NeighbourDataType::LocalDataType::SEND_UPDATE) {
-                flag = SubMessageFlag::UPDATE;
-                ar & flag;
-                LOGBC_SZ(m_pSerializerLog, "---> UpdateSTART: " << i<<std::endl;);
-                saveNotificationOrUpdate(ar, it->second.m_pBody, flag);
-                LOGBC_SZ(m_pSerializerLog, "---> UpdateEND: "<<std::endl;);
-
-            } else if (it->second.m_commStatus == NeighbourDataType::LocalDataType::SEND_REMOVE) {
-                flag = SubMessageFlag::REMOVAL;
-                ar & flag;
-                LOGBC_SZ(m_pSerializerLog, "---> RemovalSTART: " << i<<std::endl;);
-                saveRemoval(ar, it->second.m_pBody);
-                LOGBC_SZ(m_pSerializerLog, "---> RemovalEND: "<<std::endl;);
+            if(size>0) {
+                LOGBC_SZ(m_pSerializerLog, "BodyComm=================================================================================="<< std::endl;)
+                LOGBC_SZ(m_pSerializerLog, "SERIALIZE Message for neighbour rank: " << m_neighbourRank << std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "---> Timestamp: "<<  m_nc->m_currentSimTime << std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "---> Size: "<<  size << std::endl;);
             }
+            //Loop over all localBodies in this NeighbourData
+            int i = 0;
 
-            i++;
+            typename NeighbourDataType::LocalIterator it, it_next;
+            for(it = m_neighbourData->localBegin(), it_next = it ; it != m_neighbourData->localEnd(); it = it_next) {
+                it_next++; // take care here, because, we might invalidate this iterator it because we might remove local bodies, thats why it_next is used above!
+
+                m_bodyInfo = it->second.m_pBody->m_pBodyInfo;
+
+                SubMessageFlag flag;
+                if(it->second.m_commStatus == NeighbourDataType::LocalDataType::SEND_NOTIFICATION) {
+                    flag = SubMessageFlag::NOTIFICATION;
+                    ar & flag;
+                    LOGBC_SZ(m_pSerializerLog, "---> NotifictionSTART: " << i<<std::endl;);
+                    saveNotificationOrUpdate(ar, it->second.m_pBody, flag );
+                    LOGBC_SZ(m_pSerializerLog, "---> NotifictionEND: "<<std::endl;);
+
+                } else if (it->second.m_commStatus == NeighbourDataType::LocalDataType::SEND_UPDATE) {
+                    flag = SubMessageFlag::UPDATE;
+                    ar & flag;
+                    LOGBC_SZ(m_pSerializerLog, "---> UpdateSTART: " << i<<std::endl;);
+                    saveNotificationOrUpdate(ar, it->second.m_pBody, flag);
+                    LOGBC_SZ(m_pSerializerLog, "---> UpdateEND: "<<std::endl;);
+
+                } else if (it->second.m_commStatus == NeighbourDataType::LocalDataType::SEND_REMOVE) {
+                    flag = SubMessageFlag::REMOVAL;
+                    ar & flag;
+                    LOGBC_SZ(m_pSerializerLog, "---> RemovalSTART: " << i<<std::endl;);
+                    saveRemoval(ar, it->second.m_pBody);
+                    LOGBC_SZ(m_pSerializerLog, "---> RemovalEND: "<<std::endl;);
+                }
+
+                i++;
+            }
         }
 
         m_initialized = false;
@@ -254,16 +281,17 @@ public:
         LOGASSERTMSG( m_nc->m_currentSimTime == simulationTime, m_pSerializerLog, "The message from rank: "<< m_neighbourRank << " has timeStamp: " << simulationTime<<" which does not fit our current simulation Time: "<< m_nc->m_currentSimTime << " for rank: " << m_nc->m_rank <<" !")
 
         // All flags
-        bool isEmpty;
-        ar & isEmpty;
-        if(isEmpty){
+        bool hasNoSimBodies;
+        ar & hasNoSimBodies;
+
+        if(hasNoSimBodies){
             //add rank to the empty list
             m_nc->m_nbRanksEmpty.insert(m_neighbourRank);
 
         }else{
 
             // Number of submessages
-            unsigned int size;
+            std::size_t size;
             ar & size;
 
             if(size>0) {
@@ -279,7 +307,7 @@ public:
             LOGASSERTMSG( m_neighbourData, m_pSerializerLog, "There exists no NeighbourData for neighbourRank: " << m_neighbourRank << "in process rank: " << m_nc->m_rank << "!");
 
             //Loop over all messages
-            for(int i = 0; i < size; i++) {
+            for(unsigned int i = 0; i < size; i++) {
                 SubMessageFlag flag;
                 ar & flag;
                 if(flag == SubMessageFlag::NOTIFICATION) {
@@ -365,7 +393,7 @@ private:
         }
 
 
-        bool removeBody = false;
+
         if( m_bodyInfo->m_ownerRank == m_neighbourRank) { // the body belongs now to m_neighbourRank
             // send a list of all adjacent neighbours where the body overlaps
             // need to know where to send the update next time!
@@ -742,12 +770,12 @@ private:
         const typename ProcessTopologyType::NeighbourRanksListType & adjRanks = m_nc->m_pProcTopo->getAdjacentNeighbourRanks(m_neighbourRank);
 
         LOGBC_SZ(m_pSerializerLog, "-----> overlappingNeigbours: "<<std::endl;);
-        for( auto it =  m_bodyInfo->m_neighbourRanks.begin(); it != m_bodyInfo->m_neighbourRanks.end(); ++it) {
-            if(it->second.m_overlaps == true && adjRanks.find(it->first) != adjRanks.end() ) {
+        for( auto nbFlags : m_bodyInfo->m_neighbourRanks) {
+            if(nbFlags.second.m_overlaps == true && adjRanks.find(nbFlags.first) != adjRanks.end() ) {
                 // this body overlaps a rank which is adjacent to m_neighbourRank
-                overlappingNeighbours.insert(it->first);
+                overlappingNeighbours.insert(nbFlags.first);
 
-                LOGBC_SZ(m_pSerializerLog, "-------> " << it->first <<std::endl;);
+                LOGBC_SZ(m_pSerializerLog, "-------> " << nbFlags.first <<std::endl;);
             }
         }
 
@@ -768,20 +796,6 @@ private:
         GeomSerialization gs(body->m_geometry);
         ar & gs;
     }
-
-
-    NeighbourCommunicatorType* m_nc;
-    RankIdType m_neighbourRank;        ///< This is the neighbour rank where the message is send to or received from!
-
-    bool m_isEmpty;
-
-    mutable NeighbourDataType * m_neighbourData;
-    mutable BodyInfoType * m_bodyInfo;
-
-    mutable bool m_initialized;
-
-    Logging::Log *  m_pSerializerLog;
-    Logging::Log *  m_pSimulationLog;
 
 };
 
@@ -938,6 +952,7 @@ public:
 
             // Update m_neighbourData;
             m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
+            LOGASSERTMSG(m_neighbourData, this->m_pSerializerLog, " neighbour map non existent for: " << this->m_neighbourRank)
 
             for(unsigned int i = 0; i < size ; i++) {
                 RigidBodyIdType id;
@@ -1023,7 +1038,7 @@ public:
 
 
         m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
-        LOGASSERTMSG( this->m_neighbourData, this->m_pSerializerLog,
+        LOGASSERTMSG( m_neighbourData, this->m_pSerializerLog,
                       "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
                       << this->m_nc->m_rank << "!");
 
@@ -1087,6 +1102,9 @@ public:
 
             // Update m_neighbourData;
             m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
+            LOGASSERTMSG( m_neighbourData,this->m_pSerializerLog,
+                      "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
+                      << this->m_nc->m_rank << "!");
 
             unsigned int multiplicity;
             PREC multiplicityWeight;
@@ -1237,7 +1255,7 @@ public:
         //Local SplitBodyUpdates
 
         m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
-        LOGASSERTMSG( this->m_neighbourData, this->m_pSerializerLog,
+        LOGASSERTMSG( m_neighbourData, this->m_pSerializerLog,
                       "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
                       << this->m_nc->m_rank << "!");
 
@@ -1331,7 +1349,7 @@ public:
 
 
         m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
-        LOGASSERTMSG( this->m_neighbourData, this->m_pSerializerLog,
+        LOGASSERTMSG(m_neighbourData, this->m_pSerializerLog,
                       "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
                       << this->m_nc->m_rank << "!");
 
@@ -1377,7 +1395,7 @@ public:
         LOGASSERTMSG( this->m_initialized, this->m_pSerializerLog, "The NeighbourMessageWrapperInclusionSplitBodySolution is not correctly initialized, Rank not set!")
 
         m_neighbourData = this->m_nc->m_nbDataMap.getNeighbourData(this->m_neighbourRank);
-        LOGASSERTMSG( this->m_neighbourData, this->m_pSerializerLog,
+        LOGASSERTMSG( m_neighbourData, this->m_pSerializerLog,
                       "There exists no NeighbourData for neighbourRank: " << this->m_neighbourRank << "in process rank: "
                       << this->m_nc->m_rank << "!");
 
@@ -1592,11 +1610,18 @@ private:
     RankIdType m_rank;
 };
 
+}; // MPILayer
 
+/** We need the forward declarations of the topobuilder to correctly switch in this message */
+
+#include "GRSF/Dynamics/General/MPITopologyBuilder_fwd.hpp"
+#include "GRSF/Dynamics/General/SerializationHelpersKdTree.hpp"
+
+namespace MPILayer{
 
 template<typename TTopologyBuilder >
 class TopologyBuilderMessageWrapperResults: public boost::serialization::traits< TopologyBuilderMessageWrapperResults<TTopologyBuilder>,
-    boost::serialization::object_serializable,
+        boost::serialization::object_serializable,
         boost::serialization::track_never> {
 public:
 
@@ -1616,15 +1641,7 @@ public:
     template<class Archive>
     void save(Archive & ar, const unsigned int version) const {
 
-        // Send grid data
-        ar & m_pTopoBuilder->m_aabb;
-        serializeEigen(ar,m_pTopoBuilder->m_processDim);
-
-        ar & m_pTopoBuilder->m_aligned;
-
-        if(!m_pTopoBuilder->m_aligned){
-            serializeEigen(ar,m_pTopoBuilder->m_A_IK);
-        }
+        saveTopoData<TopologyBuilderType>(ar);
 
         // Send states of bodies and the initial time
 
@@ -1650,12 +1667,29 @@ public:
         }
     }
 
-    // receive broadcast all ranks except master
-    void resetBeforLoad(){}
 
-    template<class Archive>
-    void load(Archive & ar, const unsigned int version) const {
 
+    /** Send/Recv Grid topology data (SFINAE)*/
+    template<typename TopoType,
+             typename Archive,
+             SFINAE_ENABLE_IF( MPILayer::isGridTopoBuilder<TopoType>::value)
+            >
+    void saveTopoData(Archive & ar) const{
+        // Send grid data
+        ar & m_pTopoBuilder->m_aabb;
+        serializeEigen(ar,m_pTopoBuilder->m_processDim);
+
+        ar & m_pTopoBuilder->m_aligned;
+
+        if(!m_pTopoBuilder->m_aligned){
+            serializeEigen(ar,m_pTopoBuilder->m_A_IK);
+        }
+    }
+    template<typename TopoType,
+             typename Archive,
+             SFINAE_ENABLE_IF( MPILayer::isGridTopoBuilder<TopoType>::value)
+    >
+    void loadTopoData(Archive & ar) const{
         // Recv grid data
         ar & m_pTopoBuilder->m_aabb;
         serializeEigen(ar,m_pTopoBuilder->m_processDim);
@@ -1667,6 +1701,68 @@ public:
         }else{
             m_pTopoBuilder->m_A_IK.setIdentity();
         }
+    }
+
+    /** Send/Recv KdTree topology data (SFINAE)*/
+    template<typename TopoType,
+             typename Archive,
+             SFINAE_ENABLE_IF( MPILayer::isKdTreeTopoBuilder<TopoType>::value)
+    >
+    void saveTopoData(Archive & ar) const{
+        ar & m_pTopoBuilder->m_aabb;
+        ar & m_pTopoBuilder->m_aligned;
+
+        if(!m_pTopoBuilder->m_aligned){
+            serializeEigen(ar,m_pTopoBuilder->m_A_IK);
+        }
+
+        // save kdTree
+        using T = typename TopoType::TreeSimpleType;
+        KdTreeSerializer<T> ser(*m_pTopoBuilder->m_kdTree_glo);
+        ar << ser;
+
+        // save neighbours
+        ar & m_pTopoBuilder->m_neighbours;
+
+
+    }
+    template<typename TopoType,
+             typename Archive,
+             SFINAE_ENABLE_IF( MPILayer::isKdTreeTopoBuilder<TopoType>::value)
+    >
+    void loadTopoData(Archive & ar) const{
+
+        ar & m_pTopoBuilder->m_aabb;
+        ar & m_pTopoBuilder->m_aligned;
+
+        if( !m_pTopoBuilder->m_aligned){
+            serializeEigen(ar,m_pTopoBuilder->m_A_IK);
+        }else{
+            m_pTopoBuilder->m_A_IK.setIdentity();
+        }
+
+        // load kdTree
+        using T = typename TopoType::TreeSimpleType;
+
+        m_pTopoBuilder->m_kdTree_glo.reset( new T() ); // make new empty Tree
+
+        KdTreeSerializer<T> ser(*m_pTopoBuilder->m_kdTree_glo);
+        ar >> ser;
+
+        // load neighbours
+        m_pTopoBuilder->m_neighbours.clear();
+        ar & m_pTopoBuilder->m_neighbours;
+    }
+
+
+
+    // receive broadcast all ranks except master
+    void resetBeforLoad(){}
+
+    template<class Archive>
+    void load(Archive & ar, const unsigned int version) const {
+
+        loadTopoData<TopologyBuilderType>(ar);
 
         // Load time
         ar & m_pTopoBuilder->m_timeStepperSettings.m_startTime;

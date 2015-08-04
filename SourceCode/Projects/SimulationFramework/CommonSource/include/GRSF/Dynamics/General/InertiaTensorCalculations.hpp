@@ -109,8 +109,9 @@ namespace MassComputations{
         }
 
         private:
-        PREC m_density;
         RigidBodyType  * m_rigidBody;
+        PREC m_density;
+
 
     };
 

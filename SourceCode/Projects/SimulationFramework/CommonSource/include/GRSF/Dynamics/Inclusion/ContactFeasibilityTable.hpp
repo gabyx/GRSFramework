@@ -110,7 +110,7 @@ namespace ContactFeasibilityTableMPI{
             std::swap(i1,i2);
         }
         // Index into symetric array data of bools
-        ASSERTMSG(i1* (char)BS::NSTATES +i2  - i1*(i1+1)/2 < size, "Index wrong: id1: "<< p1->m_id <<" i1: " << i1 << "id2: " << p2->m_id<< " i2: " << i2 )
+        ASSERTMSG(static_cast<unsigned int>( i1* (char)BS::NSTATES +i2  - i1*(i1+1)/2) < size, "Index wrong: id1: "<< p1->m_id <<" i1: " << i1 << "id2: " << p2->m_id<< " i2: " << i2 )
         if(Array::values[i1* (char)BS::NSTATES +i2  - i1*(i1+1)/2 ] == true){
 
             return true;

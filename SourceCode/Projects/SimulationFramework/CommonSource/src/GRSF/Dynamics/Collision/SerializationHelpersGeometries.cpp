@@ -1,4 +1,4 @@
-#include "GRSF/Dynamics/Collision/Geometry/MPISerializationHelpersGeometry.hpp"
+#include "GRSF/Dynamics/Collision/SerializationHelpersGeometries.hpp"
 
 
 template<>

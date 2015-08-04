@@ -165,8 +165,9 @@ private:
 
         NodeInit(ContactGraph * p): m_p(p), m_nodeDataInit(p) {}
 
-        NodeDataInit m_nodeDataInit;
         ContactGraph * m_p = nullptr;
+        NodeDataInit m_nodeDataInit;
+
 
         template<bool addEdges, typename TNode, typename TCollData, typename TContactParams, typename TRemotePair>
         void apply(TNode * pNode,
@@ -263,7 +264,9 @@ private:
 
                 //Add to the neighbour data if remote contact
                 if(nodeData.m_nodeColor == EnumConversion::toIntegral(NodeColor::REMOTENODE)){
-                    m_p->m_pNbDataMap->getNeighbourData(pBody->m_pBodyInfo->m_ownerRank)->addRemoteBodyData(pBody);
+                    auto * nbData = m_p->m_pNbDataMap->getNeighbourData(pBody->m_pBodyInfo->m_ownerRank);
+                    ASSERTMSG( nbData , "No neighbour data for rank " << pBody->m_pBodyInfo->m_ownerRank )
+                    nbData->addRemoteBodyData(pBody);
                     // if this body is already added it does nothing!
                 }else{
                     ERRORMSG("Something wrong with node color!")

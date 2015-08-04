@@ -133,12 +133,8 @@ private:
 
     void printAllNeighbourRanks();
 
-    PREC m_currentSimTime;
-    MPILayer::NeighbourMessageWrapperBodies< BodyCommunicator > m_message;
-
     std::shared_ptr< DynamicsSystemType> m_pDynSys;
     std::shared_ptr< ProcessCommunicatorType > m_pProcComm;
-
 
     RankIdType m_rank;
 
@@ -146,8 +142,8 @@ private:
     typename ProcessTopologyType::NeighbourRanksListType m_nbRanks;
     typename ProcessTopologyType::NeighbourRanksListType m_nbRanksEmpty; // All neighbours with no simulated bodies
 
-    RigidBodyContainerType & m_globalRemote;
     RigidBodyContainerType & m_globalLocal;
+    RigidBodyContainerType & m_globalRemote;
     GlobalGeometryMapType & m_globalGeometries;
 
     NeighbourMapType m_nbDataMap;   ///< map which gives all neighbour data structures
@@ -155,6 +151,9 @@ private:
     void addLocalBodyExclusiveToNeighbourMap(RigidBodyType * body, const List & neighbourRanks);
 
     std::set< RigidBodyType * > m_localBodiesToDelete;
+
+    PREC m_currentSimTime;
+    MPILayer::NeighbourMessageWrapperBodies< BodyCommunicator > m_message;
 
     Logging::Log *  m_pSimulationLog;
 

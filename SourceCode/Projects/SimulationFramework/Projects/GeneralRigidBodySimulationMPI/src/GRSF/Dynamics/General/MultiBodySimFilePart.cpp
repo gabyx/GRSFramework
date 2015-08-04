@@ -5,15 +5,7 @@ const char MultiBodySimFilePart::m_simFileSignature[SIM_FILE_PART_SIGNATURE_LENG
 
 // Implementation
 
-MultiBodySimFilePart::MultiBodySimFilePart(unsigned int bufferSize):
-    m_nDOFuBody(0),m_nDOFqBody(0),
-    m_nBytes(0),
-    m_nBytesPerQBody(0),
-    m_nBytesPerUBody(0),
-    m_additionalBytesPerBodyType(0),
-    m_nAdditionalBytesPerBody(0),
-    m_nStates(0),
-    m_beginOfStates(0)
+MultiBodySimFilePart::MultiBodySimFilePart(unsigned int bufferSize)
 {
     m_filePath = boost::filesystem::path();
 

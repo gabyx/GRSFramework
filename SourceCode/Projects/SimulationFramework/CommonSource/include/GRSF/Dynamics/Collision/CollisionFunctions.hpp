@@ -57,7 +57,6 @@ namespace CollisionFunctions {
 
         if(dsqr <= radius*radius){
             //we have a collision
-            PREC d = sqrt(dsqr);
             //if the spheres are practically concentric just choose a random direction
             //to avoid division by zero
             if(dsqr < std::numeric_limits<PREC>::epsilon()) {
