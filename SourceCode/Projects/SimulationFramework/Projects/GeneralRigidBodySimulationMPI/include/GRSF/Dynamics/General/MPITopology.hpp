@@ -24,7 +24,7 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    using NeighbourRanksListType = std::set<RankIdType>;
+    using NeighbourRanksListType = std::unordered_set<RankIdType>;
     using AdjacentNeighbourRanksMapType = std::unordered_map<RankIdType, NeighbourRanksListType>;
 
     private:

@@ -8,8 +8,9 @@
 #include <vector>
 #include <map>
 
-#include "GRSF/Dynamics/General/KdTree.hpp"
+#include "GRSF/Common/UnorderedContainerHelpers.hpp"
 
+#include "GRSF/Dynamics/General/KdTree.hpp"
 #include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
 #include "GRSF/Dynamics/Collision/Collider.hpp"
 
@@ -55,23 +56,20 @@ public:
         }
         nbRanks.insert(it->second.begin(),it->second.end());
 
-
-
         // get adj neighbours
         for( auto & rank :  nbRanks) {
-            WARNINGMSG(false,"ProcessTopologyKdTree: NbRank: " << rank << std::endl);
+            std::cerr << "ProcessTopologyKdTree: NbRank: " << rank << std::endl;
             //Initialize adjacent neighbour ranks to m_nbRanks for this neighbours[*it]$
             auto itN = neighbours.find(rank);
              if(itN == neighbours.end()){
                 ERRORMSG("neighbours does not contain an entry for rank: " << rank );
             }
-            adjNbRanks.emplace(rank, getCommonNeighbourCells(nbRanks, itN->second) );
-
-            for(auto & adR : adjNbRanks[rank]){
-                WARNINGMSG(false,"--------> adj Nb: " << adR << std::endl);
+            // build the intersection of our ranks with neighbours of other rank
+            adjNbRanks.emplace(rank, unorderedHelpers::makeIntersection(nbRanks, itN->second) );
+            for(auto & v : adjNbRanks[rank]){
+                std::cerr << " adjNB: " << v << std::endl;
             }
         }
-        WARNINGMSG(false,"----------------------------------" << std::endl);
 
         // get our aabb
         m_leaf = m_kdTree->getLeaf(m_rank);
@@ -147,12 +145,16 @@ private:
     * Gets the common cells between all cellNumbers and the neighbours of cell number cellNumber2
     */
 
+    template<typename SetType>
     inline typename AdjacentNeighbourRanksMapType::mapped_type
     getCommonNeighbourCells(const NeighbourRanksListType & neighboursOurRanks,
-                            const typename LeafNeighbourMapType::mapped_type & neighboursOtherRank) const {
+                            const SetType & neighboursOtherRank) const {
 
         typename AdjacentNeighbourRanksMapType::mapped_type intersec;
         // intersect nbRanks with cellNumbers
+
+        // SetType needs to be sorted!
+
         std::set_intersection(neighboursOurRanks.begin(), neighboursOurRanks.end(),
                               neighboursOtherRank.begin(),neighboursOtherRank.end(),
                 std::inserter(intersec,intersec.begin()));
