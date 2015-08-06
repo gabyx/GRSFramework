@@ -351,7 +351,7 @@ private:
         std::vector<OgrePointCloud::Point> points(m_bodyListGroup->size());
 
         auto stateIt = m_statesGroup->begin();
-        unsigned int i; // linear offset from m_startIdGroup
+        //unsigned int i; // linear offset from m_startIdGroup
 
         unsigned int bodyCounter = 0;
         for(auto & b : *m_bodyListGroup){
@@ -598,21 +598,21 @@ private:
                 Ogre::ManualObject *manual = m_pSceneMgr->createManualObject(name.str());
 
                 manual->begin(materialName, Ogre::RenderOperation::OT_LINE_LIST);
-                for(int k=0; k<dim(1)+1; k++) {
-                    for(int l=0; l<dim(2)+1; l++) {
+                for(unsigned int k=0; k<dim(1)+1; k++) {
+                    for(unsigned int l=0; l<dim(2)+1; l++) {
                         manual->position(minPoint(0),minPoint(1)+k*dxyz(1),minPoint(2)+l*dxyz(2));
                         manual->position(maxPoint(0),minPoint(1)+k*dxyz(1),minPoint(2)+l*dxyz(2));
                     }
                 }
 
-                for(int k=0; k<dim(0)+1; k++) {
-                    for(int l=0; l<dim(1)+1; l++) {
+                for(unsigned int k=0; k<dim(0)+1; k++) {
+                    for(unsigned int l=0; l<dim(1)+1; l++) {
                         manual->position(minPoint(0)+k*dxyz(0),minPoint(1)+l*dxyz(1),minPoint(2));
                         manual->position(minPoint(0)+k*dxyz(0),minPoint(1)+l*dxyz(1),maxPoint(2));
                     }
                 }
-                for(int k=0; k<dim(2)+1; k++) {
-                    for(int l=0; l<dim(0)+1; l++) {
+                for(unsigned int k=0; k<dim(2)+1; k++) {
+                    for(unsigned int l=0; l<dim(0)+1; l++) {
                         manual->position(minPoint(0)+l*dxyz(0),minPoint(1),minPoint(2)+k*dxyz(2));
                         manual->position(minPoint(0)+l*dxyz(0),maxPoint(1),minPoint(2)+k*dxyz(2));
                     }
@@ -665,8 +665,9 @@ private:
 
 
 
-            } else {
-                ERRORMSG("---> String conversion in MPISettings:parseTopology:type failed: not a valid setting");
+            }
+            else{
+                WARNINGMSG(false,"---> MPISettings:parseTopology: type: " << type << "not supported!");
             }
         }
 

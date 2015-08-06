@@ -33,17 +33,22 @@ void SimulationState::enter() {
 
     m_pAppLog->logMessage("Entering SimulationState...");
 
-    m_pAppLog->logMessage("Creating Ogre::SceneManager...");
+
     m_pSceneMgr = std::shared_ptr<Ogre::SceneManager>( RenderContext::getSingleton().m_pRoot->createSceneManager(ST_GENERIC, "SimulationStateSceneMgr"), OgreSceneManagerDeleter());
+    m_pAppLog->logMessage("---> Added new scene manager...");
+
+    RenderContext::getSingleton().addOverlaySystem( m_pSceneMgr.get() );
+    m_pAppLog->logMessage("---> Added overlay sytem...");
+
     setupScene();
 
     m_pAppLog->logMessage("Adding InputContext...");
-    InputContext::getSingleton().addKeyListener(this,"SimulationState::KeyListener");
+    ::InputContext::getSingleton().addKeyListener(this,"SimulationState::KeyListener");
 
     m_pAppLog->logMessage("Adding OgreBites::SdkTrayManager...");
     m_pTrayMgr = std::shared_ptr< OgreBites::SdkTrayManager>(new OgreBites::SdkTrayManager("SimulationStateTray",
                  RenderContext::getSingleton().m_pRenderWnd,
-                 InputContext::getSingleton().getMouse(), this));
+                 ::InputContext::getSingleton().getInputContext(), this));
 
     m_pAppLog->logMessage("Adding MenuMouse...");
     m_pMenuMouse = std::shared_ptr< MenuMouse >(new MenuMouse(m_pTrayMgr,"MenuMouse"));
@@ -77,7 +82,7 @@ bool SimulationState::pause() {
     m_pMenuMouse->setInactive();
     m_pTrayMgr->hideAll();
 
-    InputContext::getSingleton().removeKeyListener(this);
+    ::InputContext::getSingleton().removeKeyListener(this);
     m_pSimMgr->enableInput(false);
     return true;
 }
@@ -90,7 +95,7 @@ void SimulationState::resume() {
     m_pOrbitCamera->setActive();
     m_pTrayMgr->showAll();
 
-    InputContext::getSingleton().addKeyListener(this,"SimulationState::KeyListener");
+    ::InputContext::getSingleton().addKeyListener(this,"SimulationState::KeyListener");
     m_pSimMgr->enableInput(true);
 }
 
@@ -119,7 +124,7 @@ void SimulationState::exit() {
     //Delete Timer
     m_pTimelineRendering.reset();
 
-    InputContext::getSingleton().removeKeyListener(this);
+    ::InputContext::getSingleton().removeKeyListener(this);
 }
 
 

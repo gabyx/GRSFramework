@@ -20,7 +20,8 @@
 void start( int argc, char **argv ){
 
         // Setup global communicators
-        MPILayer::MPIGlobalCommunicators globalComm;
+
+        INSTANCIATE_UNIQUE_SINGELTON( MPILayer::MPIGlobalCommunicators , globalComm )
 
         // Setup global types and commit them
         MPILayer::DataTypes::commitAll();
@@ -33,7 +34,8 @@ void start( int argc, char **argv ){
         MPI_Comm_size(MPI_COMM_WORLD,&nProcesses);
 
         // Parsing Input Parameters===================================
-        ApplicationCLOptions opts;
+        INSTANCIATE_UNIQUE_SINGELTON(ApplicationCLOptions,opts)
+
         ApplicationCLOptions::getSingleton().parseOptions(argc,argv);
         ApplicationCLOptions::getSingleton().checkArguments();
         if(my_rank == 0){
@@ -79,7 +81,7 @@ void start( int argc, char **argv ){
         // Catch Exceptions into ErrorLog
         try{
 
-            Logging::LogManager logger;
+            INSTANCIATE_UNIQUE_SINGELTON( Logging::LogManager, logger )
 
             // Construct the communicator for the Simulation
             MPILayer::MPIGlobalCommunicators::getSingleton().addCommunicator(MPILayer::MPICommunicatorId::SIM_COMM,MPI_COMM_WORLD);
@@ -133,8 +135,8 @@ void callBackSIGINT(){
 int main(int argc, char **argv) {
 
 
-    ApplicationSignalHandler sigHandler( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} );
-    sigHandler.registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
+    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} ) )
+    sigHandler->registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
 
     // Start MPI =================================
     MPI_Init(&argc, &argv);

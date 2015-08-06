@@ -65,7 +65,7 @@ PlaybackManager::~PlaybackManager() {
     // delete Log!
     delete m_pThreadLog;
 
-    InputContext::getSingleton().removeKeyListener(this);
+    ::InputContext::getSingleton().removeKeyListener(this);
 }
 
 
@@ -138,7 +138,6 @@ bool PlaybackManager::parseScene() {
 
 void PlaybackManager::updateScene(double timeSinceLastFrame) {
     static bool bStateChanged;
-    static double state_time;
     std::stringstream logstream;
 
     if (isSimThreadRunning() && m_bSetupSuccessful) {
@@ -245,7 +244,7 @@ void PlaybackManager::threadRunSimulation() {
     // Update Simbuffer
     DynamicsState * currentState;
     bool updated = false;
-    int i = 0;
+
 //    while(!updated && i < 100){
 //        currentState = m_pSharedBuffer->advanceSimBuffer(updated);
     currentState = m_pSharedBuffer->getSimBuffer();
@@ -447,10 +446,10 @@ void PlaybackManager::cancelAllWaits() {
 void PlaybackManager::enableInput(bool value) {
     if(value) {
         // add some key,mouse listener to change the input
-        InputContext::getSingleton().addKeyListener(this,m_KeyListenerName);
+        ::InputContext::getSingleton().addKeyListener(this,m_KeyListenerName);
     } else {
         // add some key,mouse listener to change the input
-        InputContext::getSingleton().removeKeyListener(this);
+        ::InputContext::getSingleton().removeKeyListener(this);
     }
 }
 

@@ -56,7 +56,7 @@ public:
    /// List of objects where we can orbit around with the camera.
    std::vector<Ogre::SceneNode*> m_OrbitNodeList;
    /// The actual index of the m_OrbitNodeList where m_pOrbitNode is positionated (meaning where the Camera points to)
-   int m_OrbitNodeIndex;
+   unsigned int m_OrbitNodeIndex;
    /* @} */
 
    /// The camera node whree the Ogre camera is attached.

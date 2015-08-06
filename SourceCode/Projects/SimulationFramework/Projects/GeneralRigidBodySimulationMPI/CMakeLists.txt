@@ -29,11 +29,11 @@ SET( APP_SRC
 )
 
 SET(SINGELTON_INC
-    ${COMMONSOURCE_DIR}/include/GRSF/Singeltons/FileManager.hpp
+    ${GRSF_COMMON_SOURCE_DIR}/include/GRSF/Singeltons/FileManager.hpp
 )
 
 SET( SINGELTON_SRC
-    ${COMMONSOURCE_DIR}/src/GRSF/Singeltons/FileManager.cpp
+    ${GRSF_COMMON_SOURCE_DIR}/src/GRSF/Singeltons/FileManager.cpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Singeltons/MPIGlobalCommunicators.hpp
 )
 
@@ -115,7 +115,7 @@ SET(SYSTEMS_SRC
 # COMMON FILES INCLUDE ====================================================================
 INCLUDE(IncludeModulesSimulationFramework)
 
-INCLUDE_SIMULATION_FRAMEWORK_MPI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${COMMONSOURCE_DIR})
+INCLUDE_SIMULATION_FRAMEWORK_MPI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${GRSF_COMMON_SOURCE_DIR})
 
 # ===========================================================================================
 
@@ -210,22 +210,16 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 
 #include directories
 set(INCLUDE_DIRS
-    ${Boost_INCLUDE_DIRS}
-    ${EIGEN_INCLUDE_DIR}
-    ${COLLISIONLIB_INCLUDE_DIRS}
-    ${ASSIMP_INCLUDE_DIRS}
-    ${PUGIXML_INCLUDE_DIR}
-    ${Meta_INCLUDE_DIR}
+   
+    ${GRSF_DEP_INCLUDE_DIRS}
+    
     ${MPI_CXX_INCLUDE_PATH}
-
 
     ${PROJECT_BINARY_DIR}/include/
     ${PROJECT_SOURCE_DIR}/include/
 
     ${GLOBAL_COMMON_INC_DIR}
-
     ${CUDA_COMMON_INCLUDE_DIR}
-    
     ${ApproxMVBB_INC_DIRS}
 )
 
@@ -236,20 +230,16 @@ include_directories(${INCLUDE_DIRS})
 
 #link directories
 set(LINK_DIRS
-    ${Boost_LIBRARY_DIRS}
+    ${GRSF_DEP_LIBRARY_DIRS}
 )
 link_directories(${LINK_DIRS})
 #PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 
-set(LINK_LIBS   ${Boost_LIBRARIES} 
-                ${CUDA_cublas_LIBRARY} 
-                ${COLLISIONLIB_LIBRARIES} 
-                ${ASSIMP_LIBRARIES}  
+set(LINK_LIBS   ${GRSF_DEP_LIBRARIES}
+                ${CUDA_cublas_LIBRARY}
                 ${MPI_CXX_LIBRARIES}
-                ${PUGIXML_LIBRARIES}
-                ${ApproxMVBB_LIBRARIES} 
                 )
 #PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 

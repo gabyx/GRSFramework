@@ -201,7 +201,7 @@ const Ogre::AxisAlignedBox& OgrePointCloud::getBoundingBox() const
   return bounding_box_;
 }
 
-float OgrePointCloud::getBoundingRadius() const
+Ogre::Real OgrePointCloud::getBoundingRadius() const
 {
   return bounding_radius_;
 }
@@ -253,7 +253,7 @@ void OgrePointCloud::setColorByIndex(bool set)
   regenerateAll();
 }
 
-void OgrePointCloud::setHighlightColor( float r, float g, float b )
+void OgrePointCloud::setHighlightColor( Ogre::Real r, Ogre::Real g, Ogre::Real b )
 {
   Ogre::Vector4 highlight( r, g, b, 0.0f );
 
@@ -346,7 +346,7 @@ void OgrePointCloud::setRenderMode(RenderMode mode)
   regenerateAll();
 }
 
-void OgrePointCloud::setDimensions(float width, float height, float depth)
+void OgrePointCloud::setDimensions(Ogre::Real width, Ogre::Real height, Ogre::Real depth)
 {
   width_ = width;
   height_ = height;
@@ -414,7 +414,7 @@ void setReplace(const Ogre::MaterialPtr& mat)
   }
 }
 
-void OgrePointCloud::setAlpha(float alpha, bool per_point_alpha)
+void OgrePointCloud::setAlpha(Ogre::Real alpha, bool per_point_alpha)
 {
   alpha_ = alpha;
 
@@ -715,7 +715,7 @@ void OgrePointCloud::_updateRenderQueue(Ogre::RenderQueue* queue)
   float* fptr = 0;
   uint32_t current_point = 0;
   uint32_t vpp = getVerticesPerPoint();
-  uint32_t size = points_.size();
+  // uint32_t size = points_.size();
 
 
   V_OgrePointCloudRenderable::iterator it = renderables_.begin();

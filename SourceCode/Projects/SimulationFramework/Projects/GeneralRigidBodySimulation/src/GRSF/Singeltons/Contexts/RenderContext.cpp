@@ -21,7 +21,9 @@ RenderContext::RenderContext() {
 
 
 bool RenderContext::initOgre(Ogre::String wndTitle) {
-    Ogre::LogManager* logMgr = new Ogre::LogManager();
+
+    m_pRoot = std::shared_ptr<Ogre::Root>(new Ogre::Root());
+    m_pOverlaySystem = std::shared_ptr<Ogre::OverlaySystem>(new Ogre::OverlaySystem());
 
 // OGRE LOG
     boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
@@ -62,7 +64,7 @@ bool RenderContext::initOgre(Ogre::String wndTitle) {
 
     m_pAppLog->logMessage("RenderContext::Render Window initializing...");
     // Render Window ==========================================================================
-    m_pRoot = std::shared_ptr<Ogre::Root>(new Ogre::Root());
+
 
     if(m_pRoot->restoreConfig()) {
     } else if(!m_pRoot->showConfigDialog()) {

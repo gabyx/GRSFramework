@@ -40,23 +40,23 @@
     #define WARNINGMSG(condition , message) { if(!(condition)){ std::cerr << "WARNING: " << #condition << " : " <<std::endl<< message << std::endl << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl;} }
 
 #else
-//   #define ASSERTMSG(condition,message);
-//   #define WARNINGMSG(condition,message);
-//   #define LOGASSERTMSG( _log_ , _assert_ , _statement_ );
+   #define ASSERTMSG(condition,message);
+   //#define WARNINGMSG(condition,message);
+   #define LOGASSERTMSG( _log_ , _assert_ , _statement_ );
 
-   #define LOGASSERTMSG( condition , log , message ) { \
-        if( !( condition ) ){                              \
-            LOG( log , message );                    \
-            ERRORMSG( message );                   \
-        }\
-    }
+//   #define LOGASSERTMSG( condition , log , message ) { \
+//        if( !( condition ) ){                              \
+//            LOG( log , message );                    \
+//            ERRORMSG( message );                   \
+//        }\
+//    }
 
-	#define ASSERTMSG(condition , message) { \
-        if( !( condition ) ){                      \
-            ERRORMSG( message );                   \
-        }\
-    }
-
+//	#define ASSERTMSG(condition , message) { \
+//        if( !( condition ) ){                      \
+//            ERRORMSG( message );                   \
+//        }\
+//    }
+//
     #define WARNINGMSG(condition , message) { if(!(condition)){ std::cerr << "WARNING: " << #condition << " : " <<std::endl<< message << std::endl << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl;} }
 
 

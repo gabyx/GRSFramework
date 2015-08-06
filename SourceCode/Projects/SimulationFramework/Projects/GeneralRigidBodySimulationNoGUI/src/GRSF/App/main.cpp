@@ -22,13 +22,13 @@ void callBackSIGINT(){
 
 int main(int argc, char **argv) {
 
-    ApplicationSignalHandler sigHandler( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} );
-    sigHandler.registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
+    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} ) )
+    sigHandler->registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
 
 
     try{
         // Parsing Input Parameters===================================
-        ApplicationCLOptions opts;
+        INSTANCIATE_UNIQUE_SINGELTON(ApplicationCLOptions,opts)
         ApplicationCLOptions::getSingleton().parseOptions(argc,argv);
 
         ApplicationCLOptions::getSingleton().checkArguments();
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
         // End Parsing =================================
 
         //Create singleton logger
-        Logging::LogManager logger;
+        INSTANCIATE_UNIQUE_SINGELTON(Logging::LogManager, logger)
 
         std::stringstream processFolder;
         processFolder <<  PROCESS_FOLDER_PREFIX;
@@ -47,8 +47,7 @@ int main(int argc, char **argv) {
 
 
         // Process static global members! (Singletons)
-        FileManager fileManger(ApplicationCLOptions::getSingleton().getGlobalDir(), localDirPath); //Creates path if it does not exist
-
+        INSTANCIATE_UNIQUE_SINGELTON_CTOR(FileManager, fileManger, (ApplicationCLOptions::getSingleton().getGlobalDir(), localDirPath) )
 
         SimulationManager mgr;
 

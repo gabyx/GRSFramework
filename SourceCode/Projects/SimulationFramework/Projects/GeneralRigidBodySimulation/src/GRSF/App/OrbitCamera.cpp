@@ -56,12 +56,12 @@ void OrbitCamera::setActive(){
 }
 
 void OrbitCamera::enableInput(){
-	InputContext::getSingleton().addKeyListener(this, m_Name);
-	InputContext::getSingleton().addMouseListener(this, m_Name);
+	::InputContext::getSingleton().addKeyListener(this, m_Name);
+	::InputContext::getSingleton().addMouseListener(this, m_Name);
 }
 void OrbitCamera::disableInput(){
-	InputContext::getSingleton().removeKeyListener( m_Name);
-	InputContext::getSingleton().removeMouseListener( m_Name);
+	::InputContext::getSingleton().removeKeyListener( m_Name);
+	::InputContext::getSingleton().removeMouseListener( m_Name);
 }
 
 void OrbitCamera::moveOrbitToNode(SceneNode * const Obj)
@@ -200,7 +200,7 @@ void OrbitCamera::createScene()
 void OrbitCamera::update(double timeSinceLastFrame)
 {
 
-	if (InputContext::getSingleton().getKeyboard()->isKeyDown(OIS::KC_LSHIFT))
+	if (::InputContext::getSingleton().getKeyboard()->isKeyDown(OIS::KC_LSHIFT))
     {
         m_pOrbitNode->translate(m_CamVelocityDirection * (Ogre::Real)timeSinceLastFrame, Node::TS_LOCAL);
 
@@ -219,21 +219,21 @@ bool OrbitCamera::mouseMoved(const OIS::MouseEvent &e)
 {
 
 
-    if (e.state.buttonDown(OIS::MB_Right) && !InputContext::getSingleton().getKeyboard()->isKeyDown(OIS::KC_LSHIFT))
+    if (e.state.buttonDown(OIS::MB_Right) && !::InputContext::getSingleton().getKeyboard()->isKeyDown(OIS::KC_LSHIFT))
     {
         m_pCamNode->roll(Degree(-m_Rotate * e.state.X.rel), Node::TS_WORLD);
         m_pCamNode->pitch(Degree(-m_Rotate * e.state.Y.rel), Node::TS_LOCAL);
     }
 
-    if (e.state.buttonDown(OIS::MB_Left) && !InputContext::getSingleton().getKeyboard()->isKeyDown(OIS::KC_LSHIFT) )
+    if (e.state.buttonDown(OIS::MB_Left) && !::InputContext::getSingleton().getKeyboard()->isKeyDown(OIS::KC_LSHIFT) )
     {
         m_pOrbitNode->roll(Degree(-m_Rotate * e.state.X.rel), Node::TS_PARENT);
         m_pOrbitNode->yaw(Degree(-m_Rotate * e.state.Y.rel), Node::TS_LOCAL);
     }
 
-    if (e.state.buttonDown(OIS::MB_Left)  &&  InputContext::getSingleton().getKeyboard()->isKeyDown(OIS::KC_LSHIFT))
+    if (e.state.buttonDown(OIS::MB_Left)  &&  ::InputContext::getSingleton().getKeyboard()->isKeyDown(OIS::KC_LSHIFT))
     {
-        m_pCamNode->translate( Vector3(0,0,-1) * m_Move * (Ogre::Real)InputContext::getSingleton().getMouse()->getMouseState().Y.rel / 100.0, Node::TS_LOCAL);
+        m_pCamNode->translate( Vector3(0,0,-1) * m_Move * (Ogre::Real)::InputContext::getSingleton().getMouse()->getMouseState().Y.rel / 100.0, Node::TS_LOCAL);
     }
 
 
