@@ -85,7 +85,7 @@ protected:
 
     double	m_timeScale;
     std::vector<double> m_timeScaleList;
-    int m_timeScaleListIdx;
+    std::size_t m_timeScaleListIdx;
     void addToTimeScale(double step);
 
     void togglePauseSimulation();

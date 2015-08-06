@@ -62,7 +62,7 @@ SimulationManagerGUI::~SimulationManagerGUI() {
     // Remove all SceneGraph objects!
     m_pSceneMgr->destroySceneNode(m_pBaseNode);
 
-    InputContext::getSingleton().removeKeyListener(this);
+    ::InputContext::getSingleton().removeKeyListener(this);
 
 }
 
@@ -548,10 +548,10 @@ void SimulationManagerGUI::stopSimThread(Threads threadToStop, bool force_stop) 
 void SimulationManagerGUI::enableInput(bool value) {
     if(value) {
         // add some key,mouse listener to change the input
-        InputContext::getSingleton().addKeyListener(this,m_KeyListenerName);
+        ::InputContext::getSingleton().addKeyListener(this,m_KeyListenerName);
     } else {
         // remove key,mouse listener to change the input
-        InputContext::getSingleton().removeKeyListener(this);
+        ::InputContext::getSingleton().removeKeyListener(this);
     }
 }
 

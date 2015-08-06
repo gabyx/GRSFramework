@@ -69,7 +69,7 @@ SET(COMMON_SRC
 # COMMON FILES INCLUDE ====================================================================
 INCLUDE(IncludeModulesSimulationFramework)
 
-INCLUDE_SIMULATION_FRAMEWORK_CONVERTER( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${COMMONSOURCE_DIR})
+INCLUDE_SIMULATION_FRAMEWORK_CONVERTER( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${GRSF_COMMON_SOURCE_DIR})
 
 #Configure ApproxMVBB =======================================================================
 include(${ApproxMVBB_CMAKE_DIR}/DefineApproxMVBBSources.cmake)
@@ -117,17 +117,13 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 
 #include directories
 set(INCLUDE_DIRS
-    ${Boost_INCLUDE_DIRS}
-    ${EIGEN_INCLUDE_DIR}
-    ${PUGIXML_INCLUDE_DIR}
-    ${Meta_INCLUDE_DIR}
+    ${GRSF_DEP_INCLUDE_DIRS}
     
     ${PROJECT_BINARY_DIR}/include/
     ${PROJECT_SOURCE_DIR}/include/
     ${SOURCE_DIR}/include/
     
     ${GLOBAL_COMMON_INC_DIR}
-    
     ${ApproxMVBB_INC_DIRS}
 
 )
@@ -139,13 +135,13 @@ include_directories(${INCLUDE_DIRS})
 
 #link directories
 set(LINK_DIRS
-    ${Boost_LIBRARY_DIRS}
+    ${GRSF_DEP_LIBRARY_DIRS}
 )
 link_directories(${LINK_DIRS})
 #PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
-set(LINK_LIBS ${Boost_LIBRARIES} ${PUGIXML_LIBRARIES} )
+set(LINK_LIBS ${GRSF_DEP_LIBRARIES} )
 #PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 

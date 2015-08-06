@@ -33,16 +33,23 @@ void PlaybackState::enter() {
 
     m_pAppLog->logMessage("---> Entering PlaybackState...");
 
+
+
     m_pSceneMgr = std::shared_ptr<Ogre::SceneManager>( RenderContext::getSingleton().m_pRoot->createSceneManager(ST_GENERIC, "PlaybackStateSceneMgr"), OgreSceneManagerDeleter());
+    m_pAppLog->logMessage("---> Created new scene manager ...");
+
+    RenderContext::getSingleton().addOverlaySystem( m_pSceneMgr.get() );
+    m_pAppLog->logMessage("---> Added overlay sytem...");
+
     setupScene();
 
 
-    InputContext::getSingleton().addKeyListener(this,"PlaybackState::KeyListener");
-    InputContext::getSingleton().addMouseListener(this,"PlaybackState::MouseListener");
+    ::InputContext::getSingleton().addKeyListener(this,"PlaybackState::KeyListener");
+    ::InputContext::getSingleton().addMouseListener(this,"PlaybackState::MouseListener");
 
     m_pTrayMgr = std::shared_ptr< OgreBites::SdkTrayManager>(new OgreBites::SdkTrayManager("PlaybackStateTray",
                  RenderContext::getSingleton().m_pRenderWnd,
-                 InputContext::getSingleton().getMouse(), this));
+                 ::InputContext::getSingleton().getInputContext(), this));
     m_pTrayMgr->hideBackdrop();
 
     m_pMenuMouse = std::shared_ptr< MenuMouse >(new MenuMouse(m_pTrayMgr,"MenuMouse"));
@@ -72,8 +79,8 @@ bool PlaybackState::pause() {
     m_pMenuMouse->setInactive();
     m_pTrayMgr->hideAll();
 
-    InputContext::getSingleton().removeKeyListener(this);
-    InputContext::getSingleton().removeMouseListener(this);
+    ::InputContext::getSingleton().removeKeyListener(this);
+    ::InputContext::getSingleton().removeMouseListener(this);
     m_pPlaybackMgr->enableInput(false);
     return true;
 }
@@ -85,8 +92,8 @@ void PlaybackState::resume() {
     setMouseMode(false);
     m_pTrayMgr->showAll();
 
-    InputContext::getSingleton().addKeyListener(this,"PlaybackState::KeyListener");
-    InputContext::getSingleton().addMouseListener(this,"PlaybackState::MouseListener");
+    ::InputContext::getSingleton().addKeyListener(this,"PlaybackState::KeyListener");
+    ::InputContext::getSingleton().addMouseListener(this,"PlaybackState::MouseListener");
     m_pPlaybackMgr->enableInput(true);
 }
 
@@ -114,8 +121,8 @@ void PlaybackState::exit() {
     //Delete Timer
     m_pTimelineRendering.reset();
 
-    InputContext::getSingleton().removeKeyListener(this);
-    InputContext::getSingleton().removeMouseListener(this);
+    ::InputContext::getSingleton().removeKeyListener(this);
+    ::InputContext::getSingleton().removeMouseListener(this);
 }
 
 

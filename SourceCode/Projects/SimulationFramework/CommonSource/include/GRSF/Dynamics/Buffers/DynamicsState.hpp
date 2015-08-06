@@ -237,8 +237,8 @@ namespace Interpolate{
     template<typename PREC>
     void lerp( const DynamicsStateBase & A, const DynamicsStateBase & B, DynamicsStateBase & X, PREC factor) {
         ASSERTMSG(A.m_SimBodyStates.size() == B.m_SimBodyStates.size() &&  B.m_SimBodyStates.size() == X.m_SimBodyStates.size() ,"Wrong number of bodies!");
-        X.m_t = X.m_t = A.m_t + factor*(B.m_t - A.m_t);
-        for(int i=0; i<A.m_SimBodyStates.size(); i++){
+        X.m_t = (1.0-factor)*A.m_t + factor*B.m_t;
+        for(auto i=0; i<A.m_SimBodyStates.size(); i++){
             lerp(A.m_SimBodyStates[i],B.m_SimBodyStates[i],X.m_SimBodyStates[i],factor);
         }
     };

@@ -22,25 +22,28 @@ void App::startApp() {
     localDirPath = ApplicationCLOptions::getSingleton().getLocalDirs()[0];
     localDirPath /= processFolder.str();
 
-    FileManager fileManager(ApplicationCLOptions::getSingleton().getGlobalDir(), localDirPath); //Creates path if it does not exist
+    INSTANCIATE_UNIQUE_SINGELTON_CTOR( FileManager , fileManager , (ApplicationCLOptions::getSingleton().getGlobalDir(), localDirPath) )
 
-    Logging::LogManager logManager;
+    INSTANCIATE_UNIQUE_SINGELTON(Logging::LogManager, logManager)
 
-    RenderContext renderContext;
+    INSTANCIATE_UNIQUE_SINGELTON(RenderContext, renderContext)
+
     if(!RenderContext::getSingleton().initOgre("RigidBodySimulation v1.0"))
         return;
     RenderContext::getSingleton().m_pAppLog->logMessage("RenderContext initialized!");
 
-    InputContext inputContext;
-    if(!InputContext::getSingleton().initialise())
+    INSTANCIATE_UNIQUE_SINGELTON(InputContext, inputContext )
+
+    if(!::InputContext::getSingleton().initialise())
         return;
+
     RenderContext::getSingleton().m_pAppLog->logMessage("InputContext initialized!");
 
-    GuiContext guiContext;
+    INSTANCIATE_UNIQUE_SINGELTON( GuiContext, guiContext)
+
     if(!GuiContext::getSingleton().initBitesTray())
         return;
     RenderContext::getSingleton().m_pAppLog->logMessage("GuiContext initialized!");
-
 
     std::shared_ptr<AppStateManager> pAppStateManager = std::shared_ptr<AppStateManager>( new AppStateManager());
     SimulationState::create(pAppStateManager, "SimulationState");

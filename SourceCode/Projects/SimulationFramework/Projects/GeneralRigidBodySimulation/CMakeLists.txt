@@ -40,9 +40,19 @@ if(MSVC90)
    endif(NOT MATCH_MSV90)
 endif(MSVC90)
 
+# take care Ogre loads boost too save libraries
+set(Boost_LIBRARIES_SAVE ${Boost_LIBRARIES} )
+
 find_package(OIS)
 find_package(OGRE)
 #find_package(CEGUI REQUIRED)
+
+#foreach(i ${Boost_LIBRARIES})
+#message(STATUS "remove: " ${i})
+#list(REMOVE_ITEM Boost_LIBRARIES_SAVE ${i})
+#endforeach()
+set(Boost_LIBRARIES ${Boost_LIBRARIES} ${Boost_LIBRARIES_SAVE})
+#message(WARNING "${Boost_LIBRARIES}")
 # ===============================================================================================================================================================
 
 
@@ -144,7 +154,7 @@ SET(SYSTEMS_SRC
 # COMMON FILES INCLUDE ====================================================================
 INCLUDE(IncludeModulesSimulationFramework)
 
-INCLUDE_SIMULATION_FRAMEWORK_GUI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${COMMONSOURCE_DIR})
+INCLUDE_SIMULATION_FRAMEWORK_GUI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${GRSF_COMMON_SOURCE_DIR})
 
 # ===========================================================================================
 
@@ -243,23 +253,19 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 #include directories
 set(INCLUDE_DIRS
 
-    ${Boost_INCLUDE_DIRS}
-    ${EIGEN_INCLUDE_DIR}
+    ${GRSF_DEP_INCLUDE_DIRS}
+    
     ${OGRE_INCLUDE_DIRS}
+    ${OGRE_Overlay_INCLUDE_DIR}
+    
     ${OIS_INCLUDE_DIRS}
     #${CEGUI_INCLUDE_DIR}
-    ${ASSIMP_INCLUDE_DIRS}
-    ${COLLISIONLIB_INCLUDE_DIRS}
-    ${PUGIXML_INCLUDE_DIR}
-    ${Meta_INCLUDE_DIR}
 
     ${PROJECT_BINARY_DIR}/include/
     ${PROJECT_SOURCE_DIR}/include/
 
     ${GLOBAL_COMMON_INC_DIR}
-
     ${CUDA_COMMON_INCLUDE_DIR}
-    
     ${ApproxMVBB_INC_DIRS}
 )
 
@@ -273,7 +279,7 @@ set(LINK_DIRS
     #"${NVIDIA_SDK_DIR}/common/lib"
     #"${NVIDIA_SDK_DIR}../shared/lib"
     #"${CEGUI_LIBRARY_DIR}"
-    ${Boost_LIBRARY_DIRS}
+    ${GRSF_DEP_LIBRARY_DIRS}
 )
 link_directories(${LINK_DIRS})
 PRINTLIST( "Link directories are:" "${LINK_DIRS}")
@@ -281,13 +287,12 @@ PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 set(LINK_LIBS 
-    ${OGRE_LIBRARIES} 
+    ${GRSF_DEP_LIBRARIES}
+    
+    ${OGRE_LIBRARIES}
+    ${OGRE_Overlay_LIBRARIES}
     ${OIS_LIBRARIES} 
-    ${Boost_LIBRARIES} 
     ${CUDA_cublas_LIBRARY}
-    ${COLLISIONLIB_LIBRARIES} 
-    ${ASSIMP_LIBRARIES}
-    ${PUGIXML_LIBRARIES}
 )
 PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 

@@ -10,6 +10,7 @@
 #include <OIS/OISJoyStick.h>
 #include <OIS/OISMouse.h>
 
+#include <OGRE/InputContext.h>
 #include <OGRE/OgreSingleton.h>
 #include "GRSF/Singeltons/Contexts/RenderContext.hpp"
 
@@ -18,13 +19,12 @@
 * @ingroup	Contexts
 * @brief	InputContext contains application-wide input behaviour.
 **/
-class InputContext : public Ogre::Singleton<InputContext>, OIS::KeyListener, OIS::MouseListener, OIS::JoyStickListener
-{
+class InputContext : public Ogre::Singleton<InputContext>, OIS::KeyListener, OIS::MouseListener, OIS::JoyStickListener {
 public:
-	InputContext( void );
-	~InputContext();
+    InputContext( void );
+    ~InputContext();
 
-	bool initialise();
+    bool initialise();
     void capture( void );
 
     void addKeyListener( OIS::KeyListener *keyListener, const std::string& instanceName );
@@ -50,17 +50,17 @@ public:
     OIS::Keyboard* getKeyboard( void );
     OIS::JoyStick* getJoystick( unsigned int index );
 
-    int getNumOfJoysticks( void );
+    std::size_t getNumOfJoysticks( void );
 
-
+    OgreBites::InputContext getInputContext();
 
 private:
 
-	OIS::Mouse        *m_pMouse;
-    OIS::Keyboard     *m_pKeyboard;
-	std::vector<OIS::JoyStick*> m_Joysticks;
+    OIS::Mouse        *m_pMouse = nullptr;
+    OIS::Keyboard     *m_pKeyboard = nullptr;
+    std::vector<OIS::JoyStick*> m_Joysticks;
 
-	OIS::InputManager *mInputSystem;
+    OIS::InputManager *mInputSystem = nullptr;
 
     InputContext( const InputContext& ) { }
     InputContext & operator = ( const InputContext& );

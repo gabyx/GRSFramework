@@ -24,11 +24,14 @@ public:
 
 //! @decision Contexts are library specific! -> initBitesTray
 	bool initBitesTray();
+
 	void updateGuiContext(double timeSinceLastFrame);
+
 
 private:
 	std::shared_ptr<OgreBites::SdkTrayManager>m_pTrayMgr;
 	Ogre::FrameEvent            m_FrameEvent;
+	Ogre::OverlaySystem * m_overlaySystem = nullptr;
 };
 
 

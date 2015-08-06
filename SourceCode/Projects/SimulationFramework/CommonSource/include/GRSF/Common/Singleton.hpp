@@ -7,6 +7,15 @@
         \brief Singelton Class: You need to construct the singelton object (subclass of this singelton class) on the heap with new, or on the stack globally once!
 **/
 
+
+#define INSTANCIATE_UNIQUE_SINGELTON( type , name ) \
+    INSTANCIATE_UNIQUE_SINGELTON_CTOR( type, name , () )
+
+
+#define INSTANCIATE_UNIQUE_SINGELTON_CTOR( type, name , __ctor_args__ ) \
+    auto name = std::unique_ptr< type >( new type __ctor_args__  );
+
+
 namespace Utilities{
 
 template <typename T>

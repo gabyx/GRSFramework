@@ -133,7 +133,7 @@ void AppStateManager::start(std::shared_ptr<AppState> state)
 		{
 			startTime = (double)RenderContext::getSingleton().m_pTimer->getMicrosecondsCPU() * 1.0e-6;
 
-         InputContext::getSingleton().capture(); //Possible that it kills all app states!
+         ::InputContext::getSingleton().capture(); //Possible that it kills all app states!
 
          if(!m_ActiveStateStack.empty()){
 			   m_ActiveStateStack.back()->update(timeSinceLastFrame);
@@ -244,8 +244,8 @@ void AppStateManager::init(std::shared_ptr<RenderAppState> state)
 
 void AppStateManager::init(std::shared_ptr<AppState> state)
 {
-//	InputContext::getSingleton().addKeyListener(state.get(),"AppStateManager::KeyListener");
-//	InputContext::getSingleton().addMouseListener(state.get(),"AppStateManager::MouseListener");
+//	::InputContext::getSingleton().addKeyListener(state.get(),"AppStateManager::KeyListener");
+//	::InputContext::getSingleton().addMouseListener(state.get(),"AppStateManager::MouseListener");
 
 	RenderContext::getSingleton().m_pRenderWnd->resetStatistics();
 }

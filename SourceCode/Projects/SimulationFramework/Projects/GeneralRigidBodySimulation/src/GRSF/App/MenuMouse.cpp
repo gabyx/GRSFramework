@@ -37,12 +37,12 @@ bool MenuMouse::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 
 
 void MenuMouse::setActive(){
-	InputContext::getSingleton().addKeyListener(this, m_Name);
-	InputContext::getSingleton().addMouseListener(this, m_Name);
+	::InputContext::getSingleton().addKeyListener(this, m_Name);
+	::InputContext::getSingleton().addMouseListener(this, m_Name);
 
 }
 void MenuMouse::setInactive(){
-	InputContext::getSingleton().removeKeyListener(this);
-	InputContext::getSingleton().removeMouseListener(this);
+	::InputContext::getSingleton().removeKeyListener(this);
+	::InputContext::getSingleton().removeMouseListener(this);
 
 }

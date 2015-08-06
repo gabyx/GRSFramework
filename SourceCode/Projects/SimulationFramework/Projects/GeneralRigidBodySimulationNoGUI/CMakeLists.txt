@@ -64,7 +64,7 @@ SET(SYSTEMS_SRC
 # COMMON FILES INCLUDE ====================================================================
 INCLUDE(IncludeModulesSimulationFramework)
 
-INCLUDE_SIMULATION_FRAMEWORK_NOGUI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${COMMONSOURCE_DIR})
+INCLUDE_SIMULATION_FRAMEWORK_NOGUI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${GRSF_COMMON_SOURCE_DIR})
 #PRINTLIST("Global Common src files:" "${GLOBAL_COMMON_SRC}")
 #PRINTLIST("Global Common include files:" "${GLOBAL_COMMON_INC}")
 # ===========================================================================================
@@ -162,14 +162,8 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 
 #include directories
 set(INCLUDE_DIRS
-
-    ${Boost_INCLUDE_DIRS}
-    ${EIGEN_INCLUDE_DIR}
-    ${COLLISIONLIB_INCLUDE_DIRS}
-    ${ASSIMP_INCLUDE_DIRS}
-    ${PUGIXML_INCLUDE_DIR}
-    ${Meta_INCLUDE_DIR}
     
+    ${GRSF_DEP_INCLUDE_DIRS}
     
     ${PROJECT_BINARY_DIR}/include/
     ${PROJECT_SOURCE_DIR}/include/
@@ -188,20 +182,14 @@ include_directories(${INCLUDE_DIRS})
 
 #link directories
 set(LINK_DIRS
-    ${Boost_LIBRARY_DIRS}
+    ${GRSF_DEP_LIBRARY_DIRS}
 )
 link_directories(${LINK_DIRS})
 #PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 
-set(LINK_LIBS ${Boost_LIBRARIES} 
-                ${CUDA_cublas_LIBRARY} 
-                ${COLLISIONLIB_LIBRARIES} 
-                ${ASSIMP_LIBRARIES} 
-                ${ApproxMVBB_LIBRARIES}
-                ${PUGIXML_LIBRARIES} 
-)
+set(LINK_LIBS ${GRSF_DEP_LIBRARIES})
 #PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 

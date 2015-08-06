@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 {
 
     // Parsing Input Parameters===================================
-    ApplicationCLOptions opts;
+    INSTANCIATE_UNIQUE_SINGELTON(ApplicationCLOptions,opts)
     ApplicationCLOptions::getSingleton().parseOptions(argc,argv);
     // End Parsing =================================
 

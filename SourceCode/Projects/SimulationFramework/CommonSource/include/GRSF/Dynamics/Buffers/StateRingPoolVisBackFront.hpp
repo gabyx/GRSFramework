@@ -67,7 +67,7 @@ protected:
 
     boost::mutex	m_mutexStateInit; ///< Mutex for the initial state.
     std::ofstream m_logfile;
-    static const unsigned int m_ringPoolSize = 8; ///< The ring pool size, must not exceed 256 and be lower than 3!, because of the integer for the index in the StatePool class.
+    static const std::size_t m_ringPoolSize = 8; ///< The ring pool size, must not exceed 256 and be lower than 3!, because of the integer for the index in the StatePool class.
 };
 /** @} */
 
@@ -82,7 +82,7 @@ StateRingPoolVisBackFront::StateRingPoolVisBackFront(RigidBodyIterator itBegin, 
     m_pool.assign(m_ringPoolSize, DynamicsState());
 
     m_pool[0].initSimStates<true>(itBegin,itEnd);
-    for(int i=1;i<m_ringPoolSize;i++){
+    for(std::size_t i=1;i<m_ringPoolSize;i++){
         m_pool[i] = m_pool[0];
     }
 

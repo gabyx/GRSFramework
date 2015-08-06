@@ -65,7 +65,7 @@ bool InputContext::initialise() {
     if( !mInputSystem ) {
         // Setup basic variables
         OIS::ParamList paramList;
-        size_t windowHnd = 0;
+        std::size_t windowHnd = 0;
         std::ostringstream windowHndStr;
 
         // Get window handle
@@ -320,9 +320,15 @@ OIS::JoyStick* InputContext::getJoystick( unsigned int index ) {
     return 0;
 }
 
-int InputContext::getNumOfJoysticks( void ) {
-    // Cast to keep compiler happy ^^
-    return (int) m_Joysticks.size();
+OgreBites::InputContext InputContext::getInputContext(){
+    OgreBites::InputContext ic;
+    ic.mMouse = getMouse();
+    ic.mKeyboard = getKeyboard();
+    return ic;
+}
+
+std::size_t InputContext::getNumOfJoysticks( void ) {
+    return m_Joysticks.size();
 }
 
 bool InputContext::keyPressed( const OIS::KeyEvent &e ) {
