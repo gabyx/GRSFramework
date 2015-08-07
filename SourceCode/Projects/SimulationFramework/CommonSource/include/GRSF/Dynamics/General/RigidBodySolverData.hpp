@@ -28,16 +28,24 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData {
 
     RigidBodySolverDataCONoG(): m_bInContactGraph(false){
         m_K_omega_IK_beg.setZero();
+        m_q_KI_beg.setZero();
         m_uBuffer.m_front.setZero();
         m_uBuffer.m_back.setZero();
     };
 
 
-
+    /** no communication, is determined after body communcation */
     bool m_bInContactGraph; ///< Flag which determines if this body is in the contact graph!
 
+
+    /** Timestepper additional temporaries ======================
+    * These values are valid in-between a time-step deltaT and are needed by the process which timesteps this body -> owner
+    * communication needed: process change during body comm (notify, update)
+    */
     Vector3    m_K_omega_IK_beg;    ///< Angular velocity (omega) at beginning of timestep, important to save this for timestep update in timestepper!
-    Quaternion m_q_IK_beg;          ///< Quaternion at beginning of timestep, important to save this for timestep update in timestepper!
+    Quaternion m_q_KI_beg;          ///< Quaternion at beginning of timestep, important to save this for timestep update in timestepper!
+    /** =========================================================*/
+
 
     /** Velocity buffer which is iterateted in the InclusionSolverCONoG
     * The back buffer is the velocity before the prox iteration (over all nodes)
@@ -61,7 +69,6 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData {
 
 
     void swapBuffer(){
-        m_K_omega_IK_beg = m_uBuffer.m_front.tail<3>(); // Set omega to the new front velocity
         m_uBuffer.m_front.swap(m_uBuffer.m_back); // swap buffer
     }
 
