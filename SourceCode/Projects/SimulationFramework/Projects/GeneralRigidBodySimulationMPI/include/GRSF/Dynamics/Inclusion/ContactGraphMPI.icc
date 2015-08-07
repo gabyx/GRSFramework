@@ -95,12 +95,17 @@ template<typename TCombo>
 std::pair<typename ContactGraph<TCombo>::SplitBodyNodeDataType *, bool>
 ContactGraph<TCombo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & rank) {
 
+
     auto pairRes = m_splittedNodes.emplace(body->m_id, (SplitBodyNodeDataType *)nullptr );
-    SplitBodyNodeDataType * & pRef = pairRes.first->second;
+    SplitBodyNodeDataTypeSplitBodyNodeDataType * & pRef = pairRes.first->second;
 
     if(pairRes.second) {
         //if inserted set the new pointer
+        // add a split node and
+        // this returned pointer stays valid, the graph does not reallocate nodes somewhere else!!
+        // this a criteria of the contact graph
         auto * sbN = this->emplaceNodeBack<SplitBodyNodeDataType>(m_nodeCounterSplitBody);
+        // set the new pointer
         pRef = &sbN->getData();
         pRef->initialize(body);
         ++m_nodeCounterSplitBody;
