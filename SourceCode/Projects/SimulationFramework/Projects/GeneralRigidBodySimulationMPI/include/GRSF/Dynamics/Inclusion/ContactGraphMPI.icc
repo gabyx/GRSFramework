@@ -97,7 +97,7 @@ ContactGraph<TCombo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & 
 
 
     auto pairRes = m_splittedNodes.emplace(body->m_id, (SplitBodyNodeDataType *)nullptr );
-    SplitBodyNodeDataTypeSplitBodyNodeDataType * & pRef = pairRes.first->second;
+    SplitBodyNodeDataType * & pRef = pairRes.first->second;
 
     if(pairRes.second) {
         //if inserted set the new pointer

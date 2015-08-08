@@ -28,7 +28,7 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData {
 
     RigidBodySolverDataCONoG(): m_bInContactGraph(false){
         m_K_omega_IK_beg.setZero();
-        m_q_KI_beg.setZero();
+        m_q_KI_beg.setIdentity();
         m_uBuffer.m_front.setZero();
         m_uBuffer.m_back.setZero();
     };

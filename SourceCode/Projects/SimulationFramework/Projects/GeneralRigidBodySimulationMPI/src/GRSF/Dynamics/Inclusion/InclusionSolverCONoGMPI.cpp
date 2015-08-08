@@ -361,7 +361,8 @@ void InclusionSolverCONoGMPI::initContactGraphForIteration(PREC alpha) {
 
     // Set the initial u_0 for the prox iteration for all REMOTE BODIES WITH CONTACTS
     auto & remotesWithContacts = m_pContactGraph->getRemoteBodiesWithContactsListRef();
-    for( auto * body = remotesWithContacts) {
+    for( auto * body : remotesWithContacts) {
+        // m_front is set zero
         body->m_pSolverData->m_uBuffer.m_front += body->m_pSolverData->m_uBuffer.m_back +
                 body->m_MassMatrixInv_diag.asDiagonal()  *  body->m_h_term * m_settings.m_deltaT;
     }

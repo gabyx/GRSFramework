@@ -43,6 +43,12 @@ int main(int argc, char **argv) {
     sigHandler.registerCallback(SIGPIPE,callBackSIGPIPE,"callBackSIGPIPE");
 
 
+    #ifndef NDEBUG
+            std::cout << "GRSFramework Converter: build: ?, config: " << "debug" << std::endl;
+    #else
+            std::cout << "GRSFramework Converter: build: ?, config: " << "release" << std::endl;
+    #endif
+
     if(argc > 1){
         if(std::string(argv[1]) == "sim"){
             // Parsing Input Parameters===================================

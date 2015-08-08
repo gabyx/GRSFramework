@@ -679,6 +679,7 @@ private:
 
         if(Archive::is_loading::value) {
             //Reset solver data, we are updating a remote, also if it becomes our body after this update
+            // essential!, solver data for remotes do nowhere get reset except here!
             body->m_pSolverData->reset();
         }
 

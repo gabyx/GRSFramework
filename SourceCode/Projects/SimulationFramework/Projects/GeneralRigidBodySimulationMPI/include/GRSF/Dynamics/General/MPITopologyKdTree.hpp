@@ -72,10 +72,12 @@ public:
         }
 
         // get our aabb
+
         m_leaf = m_kdTree->getLeaf(m_rank);
         if(!m_leaf){
             ERRORMSG("Trying to get leaf node for our rank: " << m_rank << " failed!")
         }
+        std::cerr << " got leaf " << m_leaf->getIdx() << std::endl;
 
         // adjust kdTree
         // TODO (unlink childs which corresponds to subtrees we never need to check because the leafs subtree are not neighbours)
@@ -90,8 +92,11 @@ public:
         // get lowest common ancestors of all boundary subtrees, including our own leaf node
         // the lca node is the node we start from for collision detection
         auto bndIt = m_leaf->getBoundaries().begin();
+        auto root = m_kdTree->getRootNode();
+        ASSERTMSG(root,"Root nullptr!")
+
         m_lcaBoundary = m_leaf;
-        while( bndIt != m_leaf->getBoundaries().end()){
+        while( bndIt != m_leaf->getBoundaries().end() && m_lcaBoundary != root){
             if( *bndIt != nullptr ){
                 m_lcaBoundary = m_kdTree->getLowestCommonAncestor(m_lcaBoundary, *bndIt);
             }
@@ -100,12 +105,11 @@ public:
         // if m_leaf = root node or , the lca becomes nullptr which is not good,
         // we set it to the root node, this means we only have one leaf = 1 process = root node
         if(m_lcaBoundary == nullptr){
-           m_lcaBoundary = m_kdTree->getRootNode();
+           m_lcaBoundary = root;
         }
-
         // collider should not add m_leaf in the results list over the overlap check
         m_colliderKdTree.setNonAddedLeaf(m_leaf);
-
+        std::cerr << " finished " << std::endl;
     };
 
     ~ProcessTopologyKdTree(){}
