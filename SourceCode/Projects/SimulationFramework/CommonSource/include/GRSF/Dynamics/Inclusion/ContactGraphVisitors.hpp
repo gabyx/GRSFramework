@@ -975,7 +975,7 @@ public:
             for(unsigned int i=0;i<2;i++){
                 if(pCollData->m_pBody[i]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
 
-                    // m_front is zero here-> see DynamicsSystem sets it to zero!
+                    // m_front is zero here-> see Timestepper sets it to zero after each timestep
                     nodeData.m_uBufferPtr[i]->m_front +=  pCollData->m_pBody[i]->m_MassMatrixInv_diag.asDiagonal() * (nodeData.m_W_body[i] * nodeData.m_LambdaBack );
                     /// + initial values M^⁻1 W lambda0 from percussion pool
 
@@ -1022,7 +1022,7 @@ public:
 
             }else{
                 // Alart Curnier Formulation
-                // De Saxe Formulation, only one r parameter because friction cone
+                // one r-N for normal direction, the other r_T for tangential
                 if(m_settings.m_RStrategy == InclusionSolverSettingsType::RSTRATEGY_SUM){
 
                    nodeData.m_R_i_inv_diag(0) = m_alpha / nodeData.m_G_ii(0,0);

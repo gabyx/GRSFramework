@@ -662,7 +662,8 @@ private:
 
     template<class Archive>
     void serializeBodyUpdate(Archive & ar, RigidBodyType * body) const {
-        //Position
+
+        // Position
         serializeEigen(ar,body->m_r_S);
         serializeEigen(ar,body->m_q_KI.coeffs());
         LOGBC_SZ(m_pSerializerLog, "----->  m_r_S: " << body->m_r_S.transpose()<<std::endl;);
@@ -675,11 +676,26 @@ private:
         //Velocity
         LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "No SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "!");
 
-         if(Archive::is_loading::value) {
-            //Reset solver data, we are updating a remote
+
+        if(Archive::is_loading::value) {
+            //Reset solver data, we are updating a remote, also if it becomes our body after this update
+            // essential!, solver data for remotes do nowhere get reset except here!
             body->m_pSolverData->reset();
-         }
+        }
+
+        // Velocity back
         serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
+
+        // Timestepper additional temporaries ======================
+        // Quaternion begin
+        serializeEigen(ar,body->m_pSolverData->m_q_KI_beg.coeffs());
+
+         //m_K_omega_IK_beg needs to be initialized when receiving!
+        if(Archive::is_loading::value) {
+            body->m_pSolverData->m_K_omega_IK_beg = body->m_pSolverData->m_uBuffer.m_back.tail<3>();
+        }
+        // =========================================================
+
 
         ar & body->m_pSolverData->m_t;
         LOGBC_SZ(m_pSerializerLog, "----->  m_t: " << body->m_pSolverData->m_t <<std::endl;);
@@ -729,21 +745,28 @@ private:
 
             //Velocity
             if(Archive::is_loading::value) {
-                if(body->m_pSolverData == nullptr) {
+                if(!body->m_pSolverData) {
                     body->m_pSolverData = new typename RigidBodyType::BodySolverDataType();
                 } else {
                     ERRORMSG("There is a SolverData already present in body with id: " << body->m_id);
                 }
             }
             LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "There is no SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "! ?");
+
+            // Velocity back
             serializeEigen(ar,body->m_pSolverData->m_uBuffer.m_back);
 
-            serializeEigen(ar,body->m_pSolverData->m_q_IK_beg.coeffs());
+            // Timestepper additional temporaries ======================
+            // Quaternion begin
+            serializeEigen(ar,body->m_pSolverData->m_q_KI_beg.coeffs());
 
-            //m_K_omega_IK_beg needs to be initialized when receiving!
+             //m_K_omega_IK_beg needs to be initialized when receiving!
             if(Archive::is_loading::value) {
                 body->m_pSolverData->m_K_omega_IK_beg = body->m_pSolverData->m_uBuffer.m_back.tail<3>();
             }
+
+            // =========================================================
+
 
             ar & body->m_pSolverData->m_t;
             LOGBC_SZ(m_pSerializerLog, "----->  m_t: " << body->m_pSolverData->m_t <<std::endl;);

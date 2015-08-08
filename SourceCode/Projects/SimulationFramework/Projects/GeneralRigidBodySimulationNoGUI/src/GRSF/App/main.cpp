@@ -27,6 +27,13 @@ int main(int argc, char **argv) {
 
 
     try{
+
+        #ifndef NDEBUG
+                std::cout << "GRSFramework Sim: build: ?, config: " << "debug" << std::endl;
+        #else
+                std::cout << "GRSFramework Sim: build: ?, config: " << "release" << std::endl;
+        #endif
+
         // Parsing Input Parameters===================================
         INSTANCIATE_UNIQUE_SINGELTON(ApplicationCLOptions,opts)
         ApplicationCLOptions::getSingleton().parseOptions(argc,argv);

@@ -43,7 +43,7 @@
     #define LOGPC( logptr , message )  //LOG(logptr,message) ; ///< Macro to easily write into a SimpleLogger::Log (only for the process communicator part).
 
     /// Topology Builder
-    #define TOPOBUILDER_LOGLEVEL 2 /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define TOPOBUILDER_LOGLEVEL 3 /// 0 - No output, 1 basic output, 2 medium output, 3 full output
     #define TOPOLOGY_BUILDER_WRITE_TOPO
     #define TOPOLOGY_BUILDER_WRITE_PREDICTED_POINTS
     #define TOPOLOGY_BUILDER_WRITE_NEAREST_DISTANCES
@@ -65,7 +65,7 @@
     #define SCENEPARSER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
 
     /// Topobuilder
-    #define TOPOBUILDER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define TOPOBUILDER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
     #define TOPOLOGY_BUILDER_WRITE_TOPO
     #define TOPOLOGY_BUILDER_WRITE_PREDICTED_POINTS
     #define TOPOLOGY_BUILDER_WRITE_NEAREST_DISTANCES

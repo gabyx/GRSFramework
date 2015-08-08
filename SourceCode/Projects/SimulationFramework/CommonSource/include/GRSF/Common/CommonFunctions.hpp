@@ -142,7 +142,7 @@ bool stringToTypeFunctorImpl( Functor & f, const std::string & s) {
 * @brief Helper to convert a string with whitespace-seperated numbers into numbers in a vector (operator() needs to available).
 * N=-1, loops till the end of the string and extracts as many numbers as possible
 */
-template <unsigned int N, typename TVector, typename TypeConverter = StdTypeConverter>
+template <int N, typename TVector, typename TypeConverter = StdTypeConverter>
 inline bool stringToVectorImpl( TVector & v, const std::string & s) {
 
     unsigned int i=0, j;
@@ -231,7 +231,7 @@ struct CommaSeperatedPairBinShift {
     STATIC_ASSERTM( ( sizeof(T) / sizeof(THalf) == 2) , "THalf should contain half the bytes of T");
     STATIC_ASSERTM( std::is_integral<T>::value && std::is_integral<T>::value, "Needs to be integral")
     inline static bool convert(T& t, const std::string& s) {
-//        std::cout << "convert format:" <<std::endl;
+        //std::cout << "convert format:" << s << std::endl;
         if(s.empty()) {
             return false;
         }

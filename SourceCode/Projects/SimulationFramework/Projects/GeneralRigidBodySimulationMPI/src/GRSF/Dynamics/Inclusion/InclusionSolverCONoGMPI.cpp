@@ -342,7 +342,7 @@ void InclusionSolverCONoGMPI::initContactGraphForIteration(PREC alpha) {
     }
 
 
-    // Init local nodes
+    // Init local and remote nodes
     if(m_nLocalNodes || m_nRemoteNodes){
         m_pContactGraph->visitNormalNodes(*m_pSorProxInitNodeVisitor);
     }
@@ -352,18 +352,19 @@ void InclusionSolverCONoGMPI::initContactGraphForIteration(PREC alpha) {
 
 
     // Set the initial u_0 for the prox iteration in the velocities for LOCAL BODIES!
-    for( auto bodyIt = m_simBodies.begin(); bodyIt != m_simBodies.end(); bodyIt++) {
+    for( auto * body : m_simBodies) {
         // All bodies also the ones not in the contact graph...
         // add u_s + M^⁻1*h*deltaT ,  all contact forces initial values have already been applied!
-        (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back +
-                (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_settings.m_deltaT;
+        body->m_pSolverData->m_uBuffer.m_front += body->m_pSolverData->m_uBuffer.m_back +
+                body->m_MassMatrixInv_diag.asDiagonal()  *  body->m_h_term * m_settings.m_deltaT;
     }
 
     // Set the initial u_0 for the prox iteration for all REMOTE BODIES WITH CONTACTS
     auto & remotesWithContacts = m_pContactGraph->getRemoteBodiesWithContactsListRef();
-    for( auto bodyIt = remotesWithContacts.begin(); bodyIt != remotesWithContacts.end(); bodyIt++) {
-        (*bodyIt)->m_pSolverData->m_uBuffer.m_front += (*bodyIt)->m_pSolverData->m_uBuffer.m_back +
-                (*bodyIt)->m_MassMatrixInv_diag.asDiagonal()  *  (*bodyIt)->m_h_term * m_settings.m_deltaT;
+    for( auto * body : remotesWithContacts) {
+        // m_front is set zero
+        body->m_pSolverData->m_uBuffer.m_front += body->m_pSolverData->m_uBuffer.m_back +
+                body->m_MassMatrixInv_diag.asDiagonal()  *  body->m_h_term * m_settings.m_deltaT;
     }
 
 
@@ -413,7 +414,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
         case InclusionSolverSettingsType::Method::SOR_NORMAL_TANGENTIAL:
             //Iterate multiple times the normal direction before going to the tangential direction!
             m_pNormalSorProxStepNodeVisitor->setLastUpdate(false);
-            for(int i = 0;i<4;i++){
+            for(int i = 0;i< m_settings.m_normalTangentialUpdateRatio ;++i){
                 m_pContactGraph->visitNormalNodes(*m_pNormalSorProxStepNodeVisitor);
             }
             m_pNormalSorProxStepNodeVisitor->setLastUpdate(true);

@@ -39,7 +39,15 @@ void start( int argc, char **argv ){
         ApplicationCLOptions::getSingleton().parseOptions(argc,argv);
         ApplicationCLOptions::getSingleton().checkArguments();
         if(my_rank == 0){
+
+            #ifndef NDEBUG
+                std::cout << "GRSFramework Sim MPI: build: ?, config: " << "debug" << std::endl;
+            #else
+                std::cout << "GRSFramework Sim MPI: build: ?, config: " << "release" << std::endl;
+            #endif
+
             ApplicationCLOptions::getSingleton().printArgs(std::cout);
+
         }
         // End Parsing =================================
 
