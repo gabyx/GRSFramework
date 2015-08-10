@@ -56,6 +56,10 @@ struct InclusionSolverSettings
     */
     enum Method{SOR_CONTACT, SOR_FULL, SOR_NORMAL_TANGENTIAL, JOR} m_eMethod;
 
+    /** Additional setting for SOR_NORMAL_TANGENTIAL */
+    unsigned int m_normalTangentialUpdateRatio = 4; ///< Update 4 times normal direction, then once tangential direction
+    /** =============================================*/
+
     /**             X=AC : AlartCurnier for UCF Contacts (normal and tangential normal cones),
     *               X=DS : De Saxe for UCF Contacts (combined normal cone) */
     enum SubMethodUCF{UCF_DS,UCF_AC} m_eSubMethodUCF;

@@ -649,8 +649,10 @@ protected: \
         {
             LOGTBLEVEL1(m_pSimulationLog, "---> GridTopoBuilderBase: Filter point cloud ..." << std::endl);
 
+            LOGTBLEVEL2(m_pSimulationLog, "---> GridTopoBuilderBase: Filter: compute extent ..." << std::endl);
             this->computeExtent<true,false,true>(points,aabb);
 
+            LOGTBLEVEL2(m_pSimulationLog, "---> GridTopoBuilderBase: Filter: outlier filtering ..." << std::endl);
             auto nOutlier = m_globalOutlierFilter.filter(points,aabb);
             LOGTBLEVEL1(m_pSimulationLog, "---> GridTopoBuilderBase: Classified " << nOutlier << " outliers in point cloud." << std::endl);
             if(nOutlier == points.size()) {
@@ -1687,6 +1689,38 @@ private: \
             Base::cleanUpLocal();
         }
 
+        // DEBUG
+        template<typename Container>
+        void dumpPoints(std::string filePath, Container & c) {
+
+            std::ofstream l;
+            l.open(filePath.c_str());
+            if(!l.good()){
+                ApproxMVBB_ERRORMSG("Could not open file: " << filePath << std::endl)
+            }
+
+            for(auto & v: c) {
+                l << v.transpose().format(MyMatrixIOFormat::SpaceSep) << std::endl;
+            }
+            l.close();
+        }
+
+        template<typename Container>
+        void dumpPointsBinary(std::string filePath, const Container & v) {
+
+            std::ofstream l;
+            l.open(filePath.c_str(),std::ios::binary);
+            if(!l.good()){
+                ApproxMVBB_ERRORMSG("Could not open binary file: " << filePath << std::endl)
+            }
+            for(auto & vec : v){
+                l.write(reinterpret_cast<const char*>(vec.data()), vec.size()*sizeof(PREC));
+            }
+            l.close();
+        }
+        // DEBUG
+
+
         void buildKdTree() {
 
             using SplitHeuristicType = TreeType::SplitHeuristicType;
@@ -1703,27 +1737,30 @@ private: \
                 }
             }
 
+            //DEBUG
+            dumpPointsBinary("FUCKPoints.bin", m_predPoints);
+
+
             // make pointer list
             auto s = m_predPoints.size();
-            PointListType * vec ( new PointListType(s) );
+            PointListType * vec ( new PointListType(s) ); // will be managed by unique pointer later
             for(std::size_t i= 0; i<s; ++i) {
                 (*vec)[i] = &m_predPoints[i];
             }
 
 
             typename SplitHeuristicType::QualityEvaluator e(0.0, /* splitratio (maximized by MidPoint) */
-                    2.0, /* pointratio (maximized by MEDIAN)*/
-                    2.0);/* extentratio (maximized by MidPoint)*/
+                    0.0, /* pointratio (maximized by MEDIAN)*/
+                    1.0);/* extentratio (maximized by MidPoint)*/
 
             m_kdTree_temp.reset(new TreeType());
 
-            m_kdTree_temp->initSplitHeuristic( std::vector<SplitHeuristicType::Method>({
+            m_kdTree_temp->initSplitHeuristic( std::initializer_list<SplitHeuristicType::Method>({
                                             SplitHeuristicType::Method::MEDIAN
                                             /*SplitHeuristicType::Method::GEOMETRIC_MEAN,
                                               SplitHeuristicType::Method::MIDPOINT*/
                                         }),
-                                        m_settings.m_minPointsForSplit,
-                                        m_settings.m_minCellSize,
+                                        m_settings.m_minPointsForSplit, m_settings.m_minCellSize,
                                         SplitHeuristicType::SearchCriteria::FIND_BEST,
                                         e,
                                         0.0, 0.0, 0.0);
@@ -1739,7 +1776,7 @@ private: \
             m_kdTree_temp->build(m_aabb,std::move(rootData), m_settings.m_maxTreeDepth, m_pProcCommunicator->getNProcesses());
 
             // build the neighbours according to statistics
-            m_neighbours = m_kdTree_temp->buildLeafNeighbours(m_settings.m_minCellSize);
+            m_neighbours = m_kdTree_temp->buildLeafNeighboursAutomatic();
 
             LOGTBLEVEL1(m_pSimulationLog,m_kdTree_temp->getStatisticsString())
 
@@ -1757,17 +1794,18 @@ private: \
 
             // make simple version filling the whole space for sharing
             for(auto * n : m_kdTree_glo->getNodes() ){
+
                 auto & bounds = n->getBoundaries();
                 for(std::size_t i=0;i< TreeType::Dimension; ++i){
 
                     if( bounds.at(i,0) == nullptr ){
                         // boundary at minimum -> extent to max
-                        n->aabb().expandToMaxExtent<0>(i);
+                        n->aabb().expandToMaxExtent<false>(i);
                     }
 
                     if( bounds.at(i,1) == nullptr ){
                         // boundary at maximum -> extent to lowest
-                        n->aabb().expandToMaxExtent<1>(i);
+                        n->aabb().expandToMaxExtent<true>(i);
                     }
 
                 }

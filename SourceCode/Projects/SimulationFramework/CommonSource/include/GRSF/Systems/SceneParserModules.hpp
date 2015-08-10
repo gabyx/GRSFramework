@@ -2204,8 +2204,7 @@ public:
                 using SetType = std::set<RigidBodyIdType>;
                 SetType s;
                 using CSPBS = Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType>;
-
-                if( !Utilities::stringToType<SetType,CSPBS>(s, n.value() )  ) {
+                if( !Utilities::stringToType<SetType,CSPBS>(s, n.child_value() )  ) {
                     ERRORMSG("---> String conversion in parseModuleOptions: Set: value failed");
                 }
                 // Overwrite
@@ -2219,17 +2218,18 @@ public:
                 LOGSCLEVEL2(m_pSimulationLog, " linear: " << m_opts.m_bodyIdRange.isLinear() <<" ]")
             } else {
                 n = selectIds.child("Range");
-                using SetType = std::pair<RigidBodyIdType,RigidBodyIdType>;
-                SetType r;
-                using CSPBS = Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType>;
-                if( !Utilities::stringToType<SetType,CSPBS>(r,  n.value() )  ) {
-                    ERRORMSG("---> String conversion in parseModuleOptions: Set: value failed");
+                if(n){
+                    using SetType = std::pair<RigidBodyIdType,RigidBodyIdType>;
+                    SetType r;
+                    using CSPBS = Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType>;
+                    if( !Utilities::stringToType<SetType,CSPBS>(r,  n.child_value() )  ) {
+                        ERRORMSG("---> String conversion in parseModuleOptions: Set: value failed");
+                    }
+                    // Overwrite
+                    m_opts.m_bodyIdRange = r;
+                    LOGSCLEVEL2(m_pSimulationLog, "---> Overwrite SelectiveIdRange with Range: [" << RigidBodyId::getBodyIdString(r.first)
+                                <<", " << RigidBodyId::getBodyIdString(r.second) <<", linear: " << m_opts.m_bodyIdRange.isLinear() <<"]"<<std::endl;)
                 }
-                // Overwrite
-                m_opts.m_bodyIdRange = r;
-                LOGSCLEVEL2(m_pSimulationLog, "---> Overwrite SelectiveIdRange with Range: [" << RigidBodyId::getBodyIdString(r.first)
-                            <<", " << RigidBodyId::getBodyIdString(r.second) <<", linear: " << m_opts.m_bodyIdRange.isLinear() <<"]"<<std::endl;)
-
             }
         }
 

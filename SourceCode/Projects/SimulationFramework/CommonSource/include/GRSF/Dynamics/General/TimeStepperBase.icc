@@ -172,7 +172,7 @@ void TimeStepperBase<TDerived,TTraits>::doFirstHalfTimeStep(PREC ts, PREC timest
         updateFMatrix(pBody->m_q_KI, F_i);
 
         // Save the quaternion/omega beginning state (for second half timestep)
-        pBody->m_pSolverData->m_q_IK_beg =  pBody->m_q_KI;
+        pBody->m_pSolverData->m_q_KI_beg =  pBody->m_q_KI;
         pBody->m_pSolverData->m_K_omega_IK_beg = pBody->m_pSolverData->m_uBuffer.m_back.template tail<3>();
 
         // Timestep for position;
@@ -231,7 +231,7 @@ void TimeStepperBase<TDerived,TTraits>::doSecondHalfTimeStep(PREC te, PREC times
 
         // Timestep for position;
         pBody->m_r_S  += timestep * pBody->m_pSolverData->m_uBuffer.m_front.template head<3>();
-        pBody->m_q_KI.coeffs() = pBody->m_pSolverData->m_q_IK_beg.coeffs()
+        pBody->m_q_KI.coeffs() = pBody->m_pSolverData->m_q_KI_beg.coeffs()
                                  + timestep * F_i * (pBody->m_pSolverData->m_K_omega_IK_beg + pBody->m_pSolverData->m_uBuffer.m_front.template tail<3>());
 
 

@@ -15,7 +15,13 @@
 using namespace Ogre;
 using namespace std;
 
-OrbitCamera::OrbitCamera(SceneManager * pSceneMgr, Ogre::String name, double rotate_speed, double translate_speed, double r_init, double phi_init,double theta_init)
+OrbitCamera::OrbitCamera(SceneManager * pSceneMgr,
+                         Ogre::String name,
+                         double rotate_speed,
+                         double translate_speed,
+                         double r_init,
+                         double phi_init,
+                         double theta_init)
 {
 
 	m_pSceneMgr = pSceneMgr;
@@ -245,19 +251,21 @@ bool OrbitCamera::keyPressed(const OIS::KeyEvent &e)
     switch (e.key)
     {
     case OIS::KC_X:
-        if (m_OrbitNodeList.size()>0 && m_OrbitNodeIndex+1 <= m_OrbitNodeList.size()-1 )
-        {
-            m_OrbitNodeIndex++;
+
+        if(m_OrbitNodeList.size()){
+            m_OrbitNodeIndex = (m_OrbitNodeIndex+1)% m_OrbitNodeList.size();
+            moveOrbitToNode(m_OrbitNodeList[m_OrbitNodeIndex]);
         }
-        moveOrbitToNode(m_OrbitNodeList[m_OrbitNodeIndex]);
+
         break;
 
     case OIS::KC_Y:
 
-        if (m_OrbitNodeList.size()>0 && m_OrbitNodeIndex-1 >= 0)
-        {
-            m_OrbitNodeIndex--;
+        if(m_OrbitNodeList.size()){
+            m_OrbitNodeIndex = (m_OrbitNodeIndex == 0) ?  m_OrbitNodeList.size()-1 : m_OrbitNodeIndex-1;
+            moveOrbitToNode(m_OrbitNodeList[m_OrbitNodeIndex]);
         }
+
         moveOrbitToNode(m_OrbitNodeList[m_OrbitNodeIndex]);
         break;
 

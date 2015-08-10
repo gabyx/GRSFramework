@@ -261,7 +261,7 @@ void InclusionSolverCONoG::doJorProx() {
 
 template<bool onlyNotInContactGraph> // default to false = all bodies
 void InclusionSolverCONoG::integrateAllBodyVelocities() {
-    for( auto & bodyPtr : m_simBodies){
+    for( auto * bodyPtr : m_simBodies){
         if( (onlyNotInContactGraph && !bodyPtr->m_pSolverData->m_bInContactGraph) || onlyNotInContactGraph == false){
            bodyPtr->m_pSolverData->m_uBuffer.m_front += bodyPtr->m_pSolverData->m_uBuffer.m_back + bodyPtr->m_MassMatrixInv_diag.asDiagonal()  *  bodyPtr->m_h_term * m_settings.m_deltaT;
         }
@@ -407,7 +407,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
         case InclusionSolverSettingsType::Method::SOR_NORMAL_TANGENTIAL:
             //Iterate multiple times the normal direction before going to the tangential direction!
             m_pNormalSorProxStepNodeVisitor->setLastUpdate(false);
-            for(int i = 0;i<4;i++){
+            for(int i = 0;i<m_settings.m_normalTangentialUpdateRatio;++i){
                 m_contactGraph.applyNodeVisitorSpecial(*m_pNormalSorProxStepNodeVisitor);
             }
             m_pNormalSorProxStepNodeVisitor->setLastUpdate(true);
