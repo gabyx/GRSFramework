@@ -192,7 +192,7 @@ void SimulationState::setupScene() {
     SceneNode* WorldAxes = m_pSceneMgr->getRootSceneNode()->createChildSceneNode("WorldAxes");
     WorldAxes->attachObject(ent);
 
-    m_pOrbitCamera = std::shared_ptr<OrbitCamera>(new OrbitCamera(m_pSceneMgr.get(),"SimulationState::OrbitCam", 0.13, 300, 200, 0, M_PI/4));
+    m_pOrbitCamera = std::shared_ptr<OrbitCamera>(new OrbitCamera(m_pSceneMgr.get(),"SimulationState::OrbitCam", 0.13, 50, 200, 0, M_PI/4));
     m_pOrbitCamera->enableInput();
     // Push attachable objects for Orbit camera to list
     m_pOrbitCamera->m_OrbitNodeList.push_back(WorldAxes);

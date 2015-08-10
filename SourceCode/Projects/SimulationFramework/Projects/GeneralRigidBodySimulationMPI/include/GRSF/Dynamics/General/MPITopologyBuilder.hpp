@@ -1750,18 +1750,17 @@ private: \
 
 
             typename SplitHeuristicType::QualityEvaluator e(0.0, /* splitratio (maximized by MidPoint) */
-                    2.0, /* pointratio (maximized by MEDIAN)*/
-                    2.0);/* extentratio (maximized by MidPoint)*/
+                    0.0, /* pointratio (maximized by MEDIAN)*/
+                    1.0);/* extentratio (maximized by MidPoint)*/
 
             m_kdTree_temp.reset(new TreeType());
 
-            m_kdTree_temp->initSplitHeuristic( std::vector<SplitHeuristicType::Method>({
+            m_kdTree_temp->initSplitHeuristic( std::initializer_list<SplitHeuristicType::Method>({
                                             SplitHeuristicType::Method::MEDIAN
                                             /*SplitHeuristicType::Method::GEOMETRIC_MEAN,
                                               SplitHeuristicType::Method::MIDPOINT*/
                                         }),
-                                        m_settings.m_minPointsForSplit,
-                                        m_settings.m_minCellSize,
+                                        m_settings.m_minPointsForSplit, m_settings.m_minCellSize,
                                         SplitHeuristicType::SearchCriteria::FIND_BEST,
                                         e,
                                         0.0, 0.0, 0.0);
