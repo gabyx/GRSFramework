@@ -26,13 +26,13 @@ void printHelpAndExit(std::string o=""){
             exit(EXIT_FAILURE);
 }
 
-void callBackSIGINT(){
-    std::cerr << " exit ..." << std::endl;
+void callBackSIGINT(int){
+    std::cerr << "Converter:: exit ..." << std::endl;
     exit(EXIT_FAILURE);
 }
 
-void callBackSIGPIPE(){
-    std::cerr << " Pipe error: exit ..." << std::endl;
+void callBackSIGPIPE(int){
+    std::cerr << "Converter:: Pipe error: exit ..." << std::endl;
     exit(EXIT_FAILURE);
 }
 
