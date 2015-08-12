@@ -44,9 +44,9 @@ int main(int argc, char **argv) {
 
 
     #ifndef NDEBUG
-            std::cout << "GRSFramework Converter: build: ?, config: " << "debug" << std::endl;
+            std::cerr << "GRSFramework Converter: build: ?, config: " << "debug" << std::endl;
     #else
-            std::cout << "GRSFramework Converter: build: ?, config: " << "release" << std::endl;
+            std::cerr << "GRSFramework Converter: build: ?, config: " << "release" << std::endl;
     #endif
 
     if(argc > 1){
