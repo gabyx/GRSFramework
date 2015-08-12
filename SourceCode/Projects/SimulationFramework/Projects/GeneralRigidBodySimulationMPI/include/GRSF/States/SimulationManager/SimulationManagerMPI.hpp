@@ -63,6 +63,7 @@ private:
     // ===============================================
 
     std::shared_ptr< StateRecorderType >  m_pStateRecorder;
+    void ungracefullyExit(int signal);
 
     std::shared_ptr< TimeStepperType >	m_pTimestepper;
     std::shared_ptr< DynamicsSystemType > m_pDynSys;

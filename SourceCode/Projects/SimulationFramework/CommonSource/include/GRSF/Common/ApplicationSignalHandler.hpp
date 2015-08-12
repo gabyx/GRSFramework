@@ -2,9 +2,10 @@
 #define GRSF_Common_ApplicationSignalHandler_hpp
 
 #include <csignal>
-#include <unordered_set>
 #include <unordered_map>
 #include <deque>
+#include <functional>
+
 #include <initializer_list>
 #include "GRSF/Common/Singleton.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
@@ -15,17 +16,18 @@
 class ApplicationSignalHandler: public Utilities::Singleton<ApplicationSignalHandler> {
 public:
 
-    using FuncType = std::function<void(void)>;
+    using FuncType = std::function<void(int)>;
 
 
     class CallBackWrapper{
     public:
 
-        CallBackWrapper(const FuncType & f , const std::string & name): m_func(f), m_name(name)
+        CallBackWrapper(const FuncType & f , const std::string & name)
+            : m_func(f), m_name(name)
         {}
 
-        inline void operator()() const{
-            m_func();
+        inline void operator()(int signal) const{
+            m_func(signal);
         }
 
         inline bool operator==(const CallBackWrapper & callback) const{
@@ -53,21 +55,30 @@ public:
         }
     }
 
+    void registerCallback(const std::initializer_list<int> & signals,
+                          const FuncType & callBack,
+                          const std::string & name )
+    {
+        CallbackType c(callBack,name);
+        for(auto signal : signals){
+
+            auto callBacksIt = m_signalHandlers.find(signal);
+            if(callBacksIt == m_signalHandlers.end()){
+                ERRORMSG("You cannot register signal type: " << signal << " because not added to SignalHandler at instantiation!")
+            }
+            auto & callBacks = callBacksIt->second;
+            auto callbackIt  = std::find( callBacks.begin(), callBacks.end(), name); // find already exiting callback
+            if(callbackIt == callBacks.end()){
+                callBacks.push_front(c);
+            }else{
+                ERRORMSG("This signal: " << signal <<" with callback name" << c.getName() << " is already registered!")
+            }
+
+        }
+    }
 
     void registerCallback(int signal, const FuncType & callBack, const std::string & name ){
-        CallbackType c(callBack,name);
-
-        auto callBacksIt = m_signalHandlers.find(signal);
-        if(callBacksIt == m_signalHandlers.end()){
-            ERRORMSG("You cannot register signal type: " << signal << " because not added to SignalHandler at instantiation!")
-        }
-        auto & callBacks = callBacksIt->second;
-        auto callbackIt  = std::find( callBacks.begin(), callBacks.end(), name); // find already exiting callback
-        if(callbackIt == callBacks.end()){
-            callBacks.push_front(c);
-        }else{
-            ERRORMSG("This signal: " << signal <<" with callback name" << c.getName() << " is already registered!")
-        }
+        registerCallback( std::initializer_list<int>{signal},callBack,name );
     }
 
     void unregisterCallback(int signal, const std::string & name){
@@ -113,7 +124,7 @@ private:
                 WARNINGMSG(false, "---> Caught signal: " << signum << " which was not handled by the application, because no call back for this signal)!" );
             }else{
                 for( auto & callBack : it->second){  // loop over all callbacks
-                    callBack();
+                    callBack(it->first);
                 }
             }
         }else{

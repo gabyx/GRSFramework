@@ -10,7 +10,6 @@
 
 #include "GRSF/Common/UnorderedContainerHelpers.hpp"
 
-#include "GRSF/Dynamics/General/KdTree.hpp"
 #include "GRSF/Dynamics/General/CartesianGrid.hpp"
 #include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
 #include "GRSF/Dynamics/Collision/Collider.hpp"
