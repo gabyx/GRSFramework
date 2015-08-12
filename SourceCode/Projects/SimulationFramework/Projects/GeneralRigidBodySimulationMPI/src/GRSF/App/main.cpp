@@ -135,8 +135,8 @@ void start( int argc, char **argv ){
 
 }
 
-void callBackSIGINT(){
-    std::cerr << "Caught signal SIGINT --> exit ..." << std::endl;
+void exitUngracefully(int signal){
+    std::cerr << "exitUngracefully:: signal " << signal << " --> exit ..." << std::endl;
     exit(EXIT_FAILURE);
 }
 
@@ -144,7 +144,8 @@ int main(int argc, char **argv) {
 
 
     INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} ) )
-    sigHandler->registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
+    sigHandler->registerCallback({SIGINT,SIGUSR1,SIGUSR2,SIGTERM},exitUngracefully,"exitUngracefully");
+
 
     // Start MPI =================================
     MPI_Init(&argc, &argv);

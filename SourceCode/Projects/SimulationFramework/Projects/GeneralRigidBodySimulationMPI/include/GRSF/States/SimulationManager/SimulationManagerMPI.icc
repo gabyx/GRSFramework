@@ -127,6 +127,9 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
     m_pStateRecorder  =  std::shared_ptr<StateRecorderType >(new StateRecorderType(m_nGlobalSimBodies,
                                                                 std::static_pointer_cast<ProcessCommunicatorType::ProcessInfoType>(m_pProcCommunicator)));
+
+
+
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added StateRecorder");
     // =====================================================
 
@@ -150,7 +153,20 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     m_pTimestepper = std::shared_ptr< TimeStepperType >( new TimeStepperType(m_pDynSys, m_pProcCommunicator, m_pTopologyBuilder) );
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added TimeStepper");
 
+
+    auto callBack = std::bind(&SimulationManagerMPI::ungracefullyExit,this,std::placeholders::_1);
+    ApplicationSignalHandler::getSingleton().registerCallback({SIGINT,SIGUSR1,SIGUSR2,SIGTERM},
+                                                              callBack,"SimulationManagerMPI::exitUngracefully");
+
+    m_pSimulationLog->logMessage("---> SimulationManagerMPI:: added ungraceful exit callback!");
+
     m_pSimulationLog->logMessage("---> SimulationManagerMPI::setup() finished!");
+}
+
+void SimulationManagerMPI::ungracefullyExit(int signal){
+    LOG(m_pSimulationLog, "---> SimulationManagerMPI:: Caught signal: " << signal
+        << " close file collectively (deadlock if not all cooperate!) " << std::endl )
+    m_pStateRecorder->closeAll();
 }
 
 
