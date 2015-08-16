@@ -1737,9 +1737,6 @@ private: \
                 }
             }
 
-            //DEBUG
-            dumpPointsBinary("FUCKPoints.bin", m_predPoints);
-
 
             // make pointer list
             auto s = m_predPoints.size();
