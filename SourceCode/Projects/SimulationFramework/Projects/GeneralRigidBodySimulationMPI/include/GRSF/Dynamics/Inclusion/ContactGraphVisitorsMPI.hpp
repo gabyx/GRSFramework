@@ -48,48 +48,24 @@ public:
                 << "\t---> local body id: " << RigidBodyId::getBodyIdString(node.m_pBody->m_id) << std::endl);
 
         auto mult = node.getMultiplicity();
+        LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> multiplicity: " << mult << std::endl;)
 
-            LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> multiplicity: " << mult << std::endl;)
 
-
-        // Copy local velocity
-        node.m_uBack.template head<NDOFuBody>() = node.m_pBody->m_pSolverData->m_uBuffer.m_front;
-
-            LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> uBack: " << node.m_uBack.transpose() <<std::endl;);
-
-        // Build gamma = [u0-u1, u1-u2, u2-u3] for multiplicity = 4
-        node.m_gamma =   node.m_uBack.head(NDOFuBody*node.m_nConstraints) -
-                           node.m_uBack.segment(NDOFuBody, NDOFuBody*node.m_nConstraints);
-
-            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_gamma: " << node.m_gamma.transpose() << std::endl;);
-
-        // calculate L⁻¹*gamma = Lambda, where L⁻¹ is the matrix choosen by the multiplicity
-            //LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.LInv: " << std::endl;);
-            //LOGSLLEVEL3_CONTACT(m_pSolverLog, node.getLInvMatrix() << std::endl;);
-
-        node.m_deltaLambda = node.getLInvMatrix() *-1*node.m_gamma;
-
-            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_deltaLambda: " << node.m_deltaLambda.transpose() << std::endl;);
-
-        //Propagate billateral forces to velocities:
-        // The sign is contained in the m_multiplicityWeights vector
-        // u_G_End = uBack + M_G⁻¹ * W_M * deltaLambda_M
-
-        node.m_uFront.setZero();
-        node.m_uFront.segment(0,NDOFuBody*node.m_nConstraints) = node.m_deltaLambda;
-        node.m_uFront.template segment(NDOFuBody,NDOFuBody*node.m_nConstraints) -= node.m_deltaLambda;
-        for(unsigned int i = 0; i<mult; i++){
-            node.m_uFront.segment(NDOFuBody*i,NDOFuBody) *= 1.0 / node.m_multiplicityWeights(i);
+// Simple version (affine combination of velocities, which is the same as above) ===================================
+        node.m_uFront = node.m_multiplicityWeights(0) * node.m_pBody->m_pSolverData->m_uBuffer.m_front;
+        for(unsigned int i = 1; i<mult; ++i){
+            node.m_uFront += node.m_uBack.col(i-1) * node.m_multiplicityWeights(i);
         }
-        node.m_uFront  +=  node.m_uBack;
 
-//            LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_uFront: " << node.m_uFront.transpose() <<std::endl; );
+// ===================================================================================================
+
+//      LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_uFront: " << node.m_uFront.transpose() <<std::endl; );
 
         // Because we solve this billateral contact directly, we are converged for this node!
         // no change of the flag m_bConverged
 
         //Copy local back
-        node.m_pBody->m_pSolverData->m_uBuffer.m_front = node.m_uFront.template head<NDOFuBody>();
+        node.m_pBody->m_pSolverData->m_uBuffer.m_front = node.m_uFront;
     }
 
 private:
