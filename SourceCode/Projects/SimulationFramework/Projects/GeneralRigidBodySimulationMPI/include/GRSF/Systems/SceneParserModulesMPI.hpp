@@ -140,7 +140,7 @@ public:
 
 
             type = topo.attribute("buildMode").value();
-            if(type=="Predefined" || type=="predefined") {
+            if(type=="predefined") {
 
                 m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::PREDEFINED;
 
@@ -173,11 +173,11 @@ public:
                     ERRORMSG("---> You defined a predefined grid as topology and using dynamic rebuilding! You should not do this!")
                 }
 
-            } else if(type=="BinetTensor") {
+            } else if(type=="binetTensor") {
                 m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::BINET_TENSOR;
-            } else if(type=="MinimalVolumeBoundingBox" || type=="MVBB") {
+            } else if(type=="MVBB") {
                 m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::MVBB;
-            } else if(type=="Aligned" || type =="AABB") {
+            } else if(type =="AABB") {
                 m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::ALIGNED;
             } else {
                 ERRORMSG("---> String conversion in MPISettings:ProcessTopology:buildMode failed: not a valid setting");
@@ -197,7 +197,7 @@ public:
             m_topoSettings->m_type = TopologyBuilderSettingsType::TopologyBuilderEnumType::KDTREEBUILDER;
 
             type = topo.attribute("buildMode").value();
-            if(type=="Predefined" || type=="predefined") {
+            if(type=="predefined") {
 
                 m_topoSettings->m_kdTreeBuilderSettings.m_buildMode = MPILayer::KdTreeBuilderSettings::BuildMode::PREDEFINED;
 
@@ -230,11 +230,11 @@ public:
                     ERRORMSG("---> You defined a predefined grid as topology and using dynamic rebuilding! You should not do this!")
                 }
 
-            } else if(type=="BinetTensor") {
+            } else if(type=="binetTensor") {
                 m_topoSettings->m_kdTreeBuilderSettings.m_buildMode = MPILayer::KdTreeBuilderSettings::BuildMode::BINET_TENSOR;
-            } else if(type=="MinimalVolumeBoundingBox" || type=="MVBB") {
+            } else if(type=="MVBB") {
                 m_topoSettings->m_kdTreeBuilderSettings.m_buildMode = MPILayer::KdTreeBuilderSettings::BuildMode::MVBB;
-            } else if(type=="Aligned" || type =="AABB") {
+            } else if(type =="AABB") {
                 m_topoSettings->m_kdTreeBuilderSettings.m_buildMode = MPILayer::KdTreeBuilderSettings::BuildMode::ALIGNED;
             } else {
                 ERRORMSG("---> String conversion in MPISettings:ProcessTopology:buildMode failed: not a valid setting");

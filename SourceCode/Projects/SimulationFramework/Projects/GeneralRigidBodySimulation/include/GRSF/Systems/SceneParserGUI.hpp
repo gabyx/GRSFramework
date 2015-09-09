@@ -315,14 +315,14 @@ private:
         }
 
         enum RenderMode
-  {
-    RM_POINTS,
-    RM_SQUARES,
-    RM_FLAT_SQUARES,
-    RM_SPHERES,
-    RM_TILES,
-    RM_BOXES,
-  };
+          {
+            RM_POINTS,
+            RM_SQUARES,
+            RM_FLAT_SQUARES,
+            RM_SPHERES,
+            RM_TILES,
+            RM_BOXES,
+          };
         std::string rm;
         OgrePointCloud::RenderMode renderMode;
         att = pcloudNode.attribute("renderMode");

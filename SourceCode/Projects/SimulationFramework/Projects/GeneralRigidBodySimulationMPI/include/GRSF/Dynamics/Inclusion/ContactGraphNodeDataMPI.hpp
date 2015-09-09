@@ -75,7 +75,7 @@ public:
     /** m_splitBodyIdx is the internal number which is used in all subscripts in the comments in this class*/
     struct Flags{
         Flags(unsigned int splitBodyIdx): m_splitBodyIdx(splitBodyIdx), m_bGotUpdate(false){};
-        const unsigned int m_splitBodyIdx;
+        const unsigned int m_splitBodyIdx; ///< index in the range [0,getMultiplicity()-1]
         bool m_bGotUpdate;
     };
     std::unordered_map< RankIdType, Flags > m_partRanks; ///< Participating ranks Flags, size defines the multiplicity

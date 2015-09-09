@@ -1,8 +1,10 @@
 #!/bin/bash
 cores=$(grep -c ^processor /proc/cpuinfo)
 
-if [[ $cores -ge 2 ]] ; then
-    cores=$(($cores-1))
+cores=$(($cores-4))
+
+if [[ $cores -le 0 ]] ; then
+    cores=1
 fi
 
 echo "Building with $cores cores!"

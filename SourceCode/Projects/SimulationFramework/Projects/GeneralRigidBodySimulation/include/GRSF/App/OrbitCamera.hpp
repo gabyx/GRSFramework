@@ -75,7 +75,6 @@ public:
     /// The update function, which is necessary to call in a render loop to make the camera turn and move.
     void update(double timeSinceLastFrame);
 
-protected:
 
     /** \name Orbiting Objects */
     /* @{ */
@@ -84,6 +83,10 @@ protected:
     /// The actual index of the m_OrbitNodeList where m_pOrbitNode is positionated (meaning where the Camera points to)
     unsigned int m_OrbitNodeIndex;
     /* @} */
+
+protected:
+
+
 
     /// The camera node whree the Ogre camera is attached.
     Ogre::SceneNode * m_pCamNode;
