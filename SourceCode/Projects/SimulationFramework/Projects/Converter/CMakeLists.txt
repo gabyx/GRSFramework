@@ -49,6 +49,7 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParserBaseTraits.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParserModules.hpp
     
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicNodeGeneratorSimFile.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptGenerator.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptGeneratorLogic.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/RendermanGeometryWriter.hpp
@@ -63,6 +64,8 @@ SET(COMMON_SRC
     ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/RenderScriptConverter.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderData.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderScriptGenerator.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/General/LogicNodeGeneratorSimFile.cpp
+
 )
 
 

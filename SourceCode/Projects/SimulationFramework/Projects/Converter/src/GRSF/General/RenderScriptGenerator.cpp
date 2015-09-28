@@ -1,22 +1,12 @@
-#include "GRSF/General/RenderScriptGenerator.hpp"
+#include "GRSF/General/RenderExecutionGraph.hpp"
 
-#include "GRSF/General/RenderMaterial.hpp"
-#include "GRSF/General/RenderScriptGeneratorLogic.hpp"
-
-
-void RenderScriptGenerator::setup() {
+//#include "GRSF/General/RenderMaterial.hpp"
+#include "GRSF/General/RenderExecutionGraphLogic.hpp"
 
 
-    ExecutionTreeInOut::setup();
+void RenderExecutionGraph::setup() {
 
-    LOG(m_log, this->getExecutionOrderInfo() );
-
-    if( !m_bodyDataNode  ) {
-        ERRORMSG("Execution tree has no input node of type 'BodyData' ")
-    }
-    if( !m_frameData  ) {
-        ERRORMSG("Execution tree has no input node of type 'FrameData' ")
-    }
+    Base::setup();
 
     m_scriptWritterNodes.clear();
     auto & outNodes = this->getOutputNodes();
@@ -35,23 +25,12 @@ void RenderScriptGenerator::setup() {
 
 }
 
-void RenderScriptGenerator::initFrame(boost::filesystem::path folder,
+void RenderExecutionGraph::initFrame(boost::filesystem::path folder,
                                       std::string filename,
                                       double time,
                                       unsigned int frameNr)
 {
-     if(filename.empty()){
-        filename = "Frame";
-     }
-     // Set outputs in FrameData
-     if(m_frameData){
-        m_frameData->setOutput(folder,filename,time,frameNr);
-     }else{
-        ERRORMSG("There is no FrameData node present! Please add one!")
-     }
-
-     // Execute all nodes in FRAME group
-     this->execute(ExecGroups::FRAME);
+     Base::initFrame(folder,filename,time,frameNr);
 
      // Call all render script writters
      for(auto & n : m_scriptWritterNodes){
@@ -59,19 +38,19 @@ void RenderScriptGenerator::initFrame(boost::filesystem::path folder,
      }
 }
 
-void RenderScriptGenerator::finalizeFrame(){
-    // Call all render script writters
+void RenderExecutionGraph::finalizeFrame(){
+
+     Base::finalizeFrame();
+
+     // Call all render script writters
      for(auto & n : m_scriptWritterNodes){
         n->finalizeFrame();
      }
 }
 
-void RenderScriptGenerator::generateFrameData(RigidBodyStateAdd * s) {
-    // Set body data
-    m_bodyDataNode->setOutputs(s);
+void RenderExecutionGraph::generateFrameData(RigidBodyStateAdd * s) {
 
-    // Execute all nodes in BODY group
-    this->execute(ExecGroups::BODY);
+    Base::generateFrameData(s);
 
     // Call all render script writters
      for(auto & n : m_scriptWritterNodes){

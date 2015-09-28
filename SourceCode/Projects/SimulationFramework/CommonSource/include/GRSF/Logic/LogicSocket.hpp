@@ -186,46 +186,61 @@ T & LogicSocket<T>::getRefValue() {
     ASSERTMSG(Outputs::name == this->m_outputs.size(), " Wrong order for Output: " << Outputs::name) \
 	addOSock< OType##name > (  value );	\
 
-
+/** VALUE SETTER MACROS */
 #define SET_ISOCKET_VALUE_PTR(ptr, name, value )	\
-	ptr->setISocketValue< IType##name > ( (Inputs::name), value )
+    ptr->setISocketValue< typename std::remove_pointer<decltype(ptr)>::type::IType##name > ( (std::remove_pointer<decltype(ptr)>::type::Inputs::name), value )
+
 #define SET_OSOCKET_VALUE_PTR(ptr, name, value )	\
-	ptr->setOSocketValue< OType##name > ( (Outputs::name), value )
+    ptr->setOSocketValue< typename std::remove_pointer<decltype(ptr)>::type::OType##name > ( (std::remove_pointer<decltype(ptr)>::type::Outputs::name), value )
+
 #define SET_ISOCKET_VALUE( name, value )	\
 	SET_ISOCKET_VALUE_PTR(this,name,value)
+
 #define SET_OSOCKET_VALUE( name, value )	\
 	SET_OSOCKET_VALUE_PTR(this,name,value)
 
 
-
+/** VALUE GETTER MACROS */
 #define GET_ISOCKET_VALUE_PTR( ptr, name )      \
-	ptr->getISocketValue< IType##name > ( (Inputs::name) )
-#define GET_OSOCKET_VALUE_PTR( name )      \
-	ptr->getOSocketValue< OType##name > ( (Outputs::name) )
+	ptr->getISocketValue< typename std::remove_pointer<decltype(ptr)>::type::IType##name > ( (std::remove_pointer<decltype(ptr)>::type::Inputs::name) )
+
+#define GET_OSOCKET_VALUE_PTR( ptr, name )      \
+	ptr->getOSocketValue< typename std::remove_pointer<decltype(ptr)>::type::OType##name > ( (std::remove_pointer<decltype(ptr)>::type::Outputs::name) )
+
 #define GET_ISOCKET_VALUE( name )      \
 	GET_ISOCKET_VALUE_PTR(this,name)
+
 #define GET_OSOCKET_VALUE( name )      \
 	GET_OSOCKET_VALUE_PTR(this,name)
 
-
+/** VALUE GETTER REFERENCE MACROS */
 #define GET_ISOCKET_REF_VALUE_PTR(ptr, name )      \
 	getISocketRefValue< IType##name > ( (Inputs::name) )
+
 #define GET_OSOCKET_REF_VALUE_PTR(ptr, name )      \
 	getOSocketRefValue< OType##name > ( (Outputs::name) )
+
 #define GET_ISOCKET_REF_VALUE( name )      \
 	GET_ISOCKET_REF_VALUE_PTR(this,name)
+
 #define GET_OSOCKET_REF_VALUE( name )      \
 	GET_OSOCKET_REF_VALUE_PTR(this,name)
 
+/** SOCKET GETTER REFERENCE MACROS */
 #define GET_ISOCKET_PTR( ptr, name )      \
 	getISocket< IType##name > ( (Inputs::name) )
+
 #define GET_OSOCKET_PTR( ptr, name )      \
 	getOSocket< OType##name > ( (Outputs::name) )
+
 #define GET_ISOCKET( name )      \
 	GET_ISOCKET_PTR(this,name)
+
 #define GET_OSOCKET( name )      \
 	GET_OSOCKET_PTR(this,name)
 
+
+/** SOCKET DECLARATION MACROS */
 #define DECLARE_ISOCKET_TYPE( name, type)	\
 	typedef type IType##name;	\
 	inline LogicSocket< type >* getIn_##name() { \

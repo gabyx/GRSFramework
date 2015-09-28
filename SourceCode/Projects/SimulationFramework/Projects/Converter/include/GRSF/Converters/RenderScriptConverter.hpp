@@ -19,9 +19,9 @@
 #include "GRSF/Common/SimpleLogger.hpp"
 #include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
 #include "GRSF/General/RenderData.hpp"
-#include "GRSF/General/RenderScriptGenerator.hpp"
+#include "GRSF/General/RenderExecutionGraph.hpp"
 
-class RenderScriptConverter {
+class RenderScriptConverter : public LogicScriptConverter<RenderExecutionGraph> {
 public:
 
     DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES
@@ -30,6 +30,7 @@ public:
     using XMLNodeItType = pugi::xml_node_iterator;
     using XMLAttributeType = pugi::xml_attribute;
 
+    using Base = LogicScriptConverter<RenderExecutionGraph>;
 
     using Renderer = typename ApplicationCLOptionsRenderer::Renderer;
 
@@ -40,49 +41,16 @@ public:
                   boost::filesystem::path materialFile,
                   Renderer renderer);
 
-    using RenderScriptGen = RenderScriptGenerator;
+    using RenderScriptGen = RenderExecutionGraph;
 
 private:
 
-    using StateIdxType = std::streamoff;
-    struct StateIndex{
-        StateIdxType m_idx;
-        unsigned int m_frameIdx;
-        boost::filesystem::path m_outputFile;
-    };
-
-    using StateIndicesType = std::vector< StateIndex >;
-
     RenderData m_renderData;
-    RenderScriptGen m_renderScriptGen;
 
-    void loadGeometryCollection();
-    void loadMaterialCollection();
+    void setupGenerator();
 
-    /** \p uuid string is a hash for the file path to identify each frame where it came from!*/
-    void convertFile(const boost::filesystem::path & f,
-                     const std::string uuidString ,
-                     StateIndicesType stateIndices = {} );
-
-
-
-    MultiBodySimFile m_simFile;
-
-    Logging::Log * m_log;
-
-    boost::filesystem::path m_logicFile;
-    boost::filesystem::path m_sceneFile;
-
-    boost::filesystem::path m_outputFile;
-    boost::filesystem::path m_outputDir;
-
-    std::vector<boost::filesystem::path> m_inputFiles;
     Renderer m_renderer;
 
-    unsigned int m_frameCounter;
-
-    bool m_abort;
-    void callbackAbort(){ m_abort = true; LOG(m_log, "---> Quitting ...:" <<std::endl);}
 };
 
 #endif // RenderScriptConverter_hpp

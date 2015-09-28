@@ -1,5 +1,5 @@
-#ifndef  RenderScriptGeneratorLogic_hpp
-#define  RenderScriptGeneratorLogic_hpp
+#ifndef  RenderExecutionGraphLogic_hpp
+#define  RenderExecutionGraphLogic_hpp
 
 #include <stdio.h>
 #include <stdlib.h>
