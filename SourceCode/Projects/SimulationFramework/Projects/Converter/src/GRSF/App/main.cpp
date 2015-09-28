@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
                     std::cerr <<"Exception occured: " <<  e.what() << std::endl;
                     exit(EXIT_FAILURE);
             }
-        else if(std::string(argv[1]) == "analyzer"){
+        }else if(std::string(argv[1]) == "analyzer"){
 
             Logging::LogManager logger; // singelton
 
@@ -147,12 +147,12 @@ int main(int argc, char **argv) {
             // End Parsing =================================
 
             try{
-                AnalyzerScriptConverter analyzerConv;
-                analyzerConv.convert(opts.getInputFiles(),
-                                     opts.getOutputFile(),
-                                     opts.getOutputDir(),
-                                     opts.getSceneFile(),
-                                     opts.getConverterLogicFile());
+//                AnalyzerScriptConverter analyzerConv;
+//                analyzerConv.convert(opts.getInputFiles(),
+//                                     opts.getOutputFile(),
+//                                     opts.getOutputDir(),
+//                                     opts.getSceneFile(),
+//                                     opts.getConverterLogicFile());
 
             }catch(const Exception & e){
                     std::cerr <<"Exception occured: " <<  e.what() << std::endl;

@@ -2,7 +2,7 @@
 
 #include "GRSF/Logic/StopNode.hpp"
 
-#include "GRSF/General/RenderExecutionGraphLogic.hpp"
+#include "GRSF/General/SimFileExecutionGraphLogic.hpp"
 
 void SimFileExecutionGraph::setup() {
 

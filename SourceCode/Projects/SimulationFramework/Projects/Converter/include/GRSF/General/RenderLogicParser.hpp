@@ -9,8 +9,8 @@
 
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"
-
 #include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/Common/TupleHelper.hpp"
 
 #include "GRSF/Common/XMLMacros.hpp"
 #include "GRSF/General/RenderLogicParserBaseTraits.hpp"
@@ -21,15 +21,20 @@ template<typename TSceneParser, typename TCollection>
 struct RenderLogicParserTraits : RenderLogicParserBaseTraits<TSceneParser,TCollection> {
     // Module typedefs
     using MaterialsModuleType   = typename RenderLogicParserModules::MaterialsModule<RenderLogicParserTraits>;
-    using LogicModuleType       = typename RenderLogicParserModules::LogicModule<RenderLogicParserTraits>;
+    using LogicModuleType       = typename RenderLogicParserModules::RenderLogicModule<RenderLogicParserTraits>;
+
+    using TupleModules = std::tuple< std::unique_ptr<MaterialsModuleType> , std::unique_ptr<LogicModuleType> > ;
+
+    template<unsigned int N>
+    using getModuleType =  typename std::tuple_element<N,TupleModules>::type::element_type;
+
 };
 
 template< typename TCollection, template<typename P, typename C> class TParserTraits = RenderLogicParserTraits >
 class RenderLogicParser {
 public:
 
-    using ParserForModulesType = RenderLogicParser;
-    using ParserTraits = TParserTraits<ParserForModulesType, TCollection>;
+    using ParserTraits = TParserTraits<RenderLogicParser, TCollection>;
     DEFINE_RENDERLOGICPARSER_TYPE_TRAITS(ParserTraits);
 private:
 
@@ -44,8 +49,26 @@ private:
     LogType * m_pLog;
 
     /** Modules */
-    std::unique_ptr< MaterialsModuleType >       m_pMaterialsModule;
-    std::unique_ptr< LogicModuleType >           m_pLogicModule;
+    typename ParserTraits::TupleModules m_modules;
+
+    struct VisitorParse{
+        VisitorParse(XMLNodeType & node): n(node) {}
+        template<typename M>
+        void operator()(M & module){
+            if(module){
+                module->parse(n);
+            }
+        }
+        XMLNodeType n;
+    };
+    struct VisitorCleanUp{
+        template<typename M>
+        void operator()(M & module){
+            if(module){
+                module->cleanUp();
+            }
+        }
+    };
 
 public:
 
@@ -58,7 +81,7 @@ public:
         m_pLog = log;
         ASSERTMSG(m_pLog, "Log pointer is zero!");
         // Get all Modules from the Generator
-        std::tie(m_pMaterialsModule, m_pLogicModule) = moduleGen.template createParserModules<ParserForModulesType>( static_cast<ParserForModulesType*>(this));
+        m_modules = moduleGen.template createParserModules<ParserType>( this );
     }
 
 
@@ -67,10 +90,8 @@ public:
     }
 
     void cleanUp() {
-        // Delegate all cleanUp stuff to the modules!
-        if(m_pMaterialsModule) {
-            m_pMaterialsModule->cleanUp();
-        }
+        VisitorCleanUp up;
+        TupleVisit::visit(up,m_modules);
     }
 
     boost::filesystem::path getParsedSceneFile() {
@@ -140,7 +161,7 @@ private:
         }
 
         // Load the file if necessary
-        if(file != m_currentParseFilePath) {
+        if(file != m_currentParseFilePath){
             loadFile(file);
         }
 
@@ -150,16 +171,8 @@ private:
 
             GET_XMLCHILDNODE_CHECK( m_xmlRootNode, "Renderer" , (*m_xmlDoc) );
 
-
-            XMLNodeType node = m_xmlRootNode.child("Materials");
-            if(node && m_pMaterialsModule) {
-                m_pMaterialsModule->parse(node);
-            }
-
-            node = m_xmlRootNode.child("Logic");
-            if(node && m_pLogicModule) {
-                m_pLogicModule->parse(node, m_pMaterialsModule->getMaterialMap() );
-            }
+            VisitorParse v(m_xmlRootNode);
+            TupleVisit::visit(v,m_modules);
 
 
         } catch(Exception& ex) {

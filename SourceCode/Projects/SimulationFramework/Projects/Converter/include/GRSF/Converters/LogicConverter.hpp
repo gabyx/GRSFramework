@@ -37,7 +37,7 @@
 //#include "GRSF/Logic/DummyNode.hpp"
 
 
-template<typename TExecutionGraph, typename TDerived>
+template<typename TExecutionGraph>
 class LogicConverter {
 public:
 
@@ -47,7 +47,6 @@ public:
     using XMLNodeItType = pugi::xml_node_iterator;
     using XMLAttributeType = pugi::xml_attribute;
 
-    using Derived = TDerived;
     using ExecutionGraphType = TExecutionGraph;
 
     void convert( const std::vector<boost::filesystem::path> & inputFiles,
@@ -69,7 +68,6 @@ public:
 
         // global framecounter
         m_frameCounter = 0;
-
 
         setupExecutionGraph();
 
@@ -168,15 +166,14 @@ protected:
     boost::filesystem::path m_outputDir;
 
     std::vector<boost::filesystem::path> m_inputFiles;
-    Renderer m_renderer;
 
     unsigned int m_frameCounter;
 
     bool m_abort;
     void callbackAbort(){ m_abort = true; LOG(m_log, "---> Quitting ...:" <<std::endl);}
 
-    void setupGenerator(){
-        static_cast<Derived*>(this)->setupGenerator();
+    virtual void setupExecutionGraph(){
+        ERRORMSG("NOTHING IMPLEMENTED")
     }
 
     /** \p uuid string is a hash for the file path to identify each frame where it came from!*/
@@ -188,7 +185,7 @@ protected:
 
         m_abort = false;
         ApplicationSignalHandler::getSingleton().registerCallback(SIGINT,
-                            std::bind( &RenderConverter::callbackAbort, this), "QuitRender");
+                            std::bind( &LogicConverter::callbackAbort, this), "QuitRender");
 
         std::vector<RigidBodyStateAdd> states;
 
@@ -212,7 +209,6 @@ protected:
             currentStateIdx = itStateIdx->m_idx;
             m_simFile.seekgStates(currentStateIdx);
         }
-
 
 
         while(m_simFile.isGood() && !m_abort){

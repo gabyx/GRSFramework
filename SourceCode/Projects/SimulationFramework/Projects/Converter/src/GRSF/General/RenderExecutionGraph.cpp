@@ -1,6 +1,7 @@
 #include "GRSF/General/RenderExecutionGraph.hpp"
 
-//#include "GRSF/General/RenderMaterial.hpp"
+
+#include "GRSF/General/SimFileExecutionGraphLogic.hpp"
 #include "GRSF/General/RenderExecutionGraphLogic.hpp"
 
 

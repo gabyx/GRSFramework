@@ -26,40 +26,41 @@ void RenderConverter::convert( const std::vector<boost::filesystem::path> & inpu
               boost::filesystem::path logicFile,
               Renderer renderer) {
     m_renderer = renderer;
-    Base::convert(inputFiles,outputFile,outputDir,sceneFile,logicFile)
+    Base::convert(inputFiles,outputFile,outputDir,sceneFile,logicFile);
 }
 
 void RenderConverter::setupGenerator() {
 
-    // SCENE FILE
-    LOGRCLEVEL1(m_log, "---> Load Geometries ..." << std::endl;)
+    {
+        // SCENE FILE
+        LOGRCLEVEL1(m_log, "---> Load Geometries ..." << std::endl;)
+        using ParserGen = RenderLogicParserGenerators::SceneParserGen;
+        ParserGen c(&m_renderData);
 
-    using ParserGen = RenderLogicParserGenerators::SceneParserGen;
-    ParserGen c(&m_renderData);
-
-    using SceneParserType = SceneParser< RenderData, ParserGen::SceneParserTraits >;
-    SceneParserType parser(c,m_log, ApplicationCLOptionsRenderer::getSingleton().getMediaDir() );
-    parser.parseScene(m_sceneFile);
-    LOGRCLEVEL1(m_log, "---> Loaded: " << m_renderData.m_geometryMap.size() << " geometries, "
-                << m_renderData.m_scales.size() << " scales, " << m_renderData.m_visMeshs.size() << " meshs paths" << std::endl;)
-    LOGRCLEVEL1(m_log, "---> Load Geometries finished " << std::endl;)
-
-    // LOGIC FILE
-    LOGRCLEVEL1(m_log, "---> Load Logic file ..." << std::endl;)
-    using ParserGen = RenderLogicParserGenerators::LogicParserGen;
-    ParserGen c(&m_renderData,&m_executionGraph);
+        using SceneParserType = SceneParser< RenderData, ParserGen::SceneParserTraits >;
+        SceneParserType parser(c,m_log, ApplicationCLOptionsRenderer::getSingleton().getMediaDir() );
+        parser.parseScene(m_sceneFile);
+        LOGRCLEVEL1(m_log, "---> Loaded: " << m_renderData.m_geometryMap.size() << " geometries, "
+                    << m_renderData.m_scales.size() << " scales, " << m_renderData.m_visMeshs.size() << " meshs paths" << std::endl;)
+        LOGRCLEVEL1(m_log, "---> Load Geometries finished " << std::endl;)
+    }
+    {
+        // LOGIC FILE
+        LOGRCLEVEL1(m_log, "---> Load Logic file ..." << std::endl;)
+        using ParserGen = RenderLogicParserGenerators::LogicParserGen;
+        ParserGen c(&m_renderData,&m_executionGraph);
 
 
-    using RenderLogicParserType = RenderLogicParser<RenderData /**, StandartTraits*/ >;
-    RenderLogicParserType parser(c,m_log);
+        using RenderLogicParserType = RenderLogicParser<RenderData /**, StandartTraits*/ >;
+        RenderLogicParserType parser(c,m_log);
 
-    parser.parse(m_logicFile);
-    LOGRCLEVEL1(m_log, "---> Load Materials finished " << std::endl;)
+        parser.parse(m_logicFile);
+        LOGRCLEVEL1(m_log, "---> Load Materials finished " << std::endl;)
 
-    LOGRCLEVEL1(m_log, "---> Setup Mapper ..." << std::endl;)
-    m_executionGraph.setLog(m_log);
-    m_executionGraph.setup();
-
+        LOGRCLEVEL1(m_log, "---> Setup Mapper ..." << std::endl;)
+        m_executionGraph.setLog(m_log);
+        m_executionGraph.setup();
+    }
     //    ExecutionTreeInOut m;
     //    LogicNode * n0 = new DummyLogicNode<1,3>(0);
     //    LogicNode * n1 = new DummyLogicNode<1,3>(1);

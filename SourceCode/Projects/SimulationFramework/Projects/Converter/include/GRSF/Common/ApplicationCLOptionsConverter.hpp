@@ -652,7 +652,7 @@ private:
 
 
 
-class ApplicationCLOptionsAnalyzer: public Utilities::Singleton<ApplicationCLOptionsRenderer> {
+class ApplicationCLOptionsAnalyzer: public Utilities::Singleton<ApplicationCLOptionsAnalyzer> {
 public:
 
 private:

@@ -32,6 +32,7 @@ public:
     using XMLAttributeType = pugi::xml_attribute;
 
     using Base = LogicConverter<RenderExecutionGraph>;
+    using ExecutionGraphType = typename LogicConverter::ExecutionGraphType;
 
     using Renderer = typename ApplicationCLOptionsRenderer::Renderer;
 
@@ -42,15 +43,15 @@ public:
                   boost::filesystem::path materialFile,
                   Renderer renderer);
 
-    using RenderScriptGen = RenderExecutionGraph;
 
 private:
 
     RenderData m_renderData;
+    Renderer m_renderer;
 
     void setupGenerator();
 
-    Renderer m_renderer;
+
 
 };
 
