@@ -1,4 +1,4 @@
-#include "GRSF/Converters/RenderScriptConverter.hpp"
+#include "GRSF/Converters/RenderConverter.hpp"
 
 #include <string>
 
@@ -13,15 +13,13 @@
 #include "GRSF/Common/ProgressBarCL.hpp"
 
 #include "GRSF/Systems/SceneParser.hpp"
-#include "GRSF/General/RenderScriptParser.hpp"
-
-#include "GRSF/General/RenderScriptParserGenerators.hpp"
+#include "GRSF/General/RenderLogicParser.hpp"
+#include "GRSF/General/RenderLogicParserGenerators.hpp"
 
 #include "GRSF/General/RenderExecutionGraph.hpp"
 
-//#include "GRSF/Logic/DummyNode.hpp"
 
-void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> & inputFiles,
+void RenderConverter::convert( const std::vector<boost::filesystem::path> & inputFiles,
               boost::filesystem::path outputFile,
               boost::filesystem::path outputDir,
               boost::filesystem::path sceneFile,
@@ -31,12 +29,12 @@ void RenderScriptConverter::convert( const std::vector<boost::filesystem::path> 
     Base::convert(inputFiles,outputFile,outputDir,sceneFile,logicFile)
 }
 
-void RenderScriptConverter::setupGenerator() {
+void RenderConverter::setupGenerator() {
 
     // SCENE FILE
     LOGRCLEVEL1(m_log, "---> Load Geometries ..." << std::endl;)
 
-    using ParserGen = RenderScriptParserGenerators::SceneParserGen;
+    using ParserGen = RenderLogicParserGenerators::SceneParserGen;
     ParserGen c(&m_renderData);
 
     using SceneParserType = SceneParser< RenderData, ParserGen::SceneParserTraits >;
@@ -48,19 +46,19 @@ void RenderScriptConverter::setupGenerator() {
 
     // LOGIC FILE
     LOGRCLEVEL1(m_log, "---> Load Logic file ..." << std::endl;)
-    using ParserGen = RenderScriptParserGenerators::ScriptParserGen;
-    ParserGen c(&m_renderData,&m_renderScriptGen);
+    using ParserGen = RenderLogicParserGenerators::LogicParserGen;
+    ParserGen c(&m_renderData,&m_executionGraph);
 
 
-    using RenderScriptParserType = RenderScriptParser<RenderData /**, StandartTraits*/ >;
-    RenderScriptParserType parser(c,m_log);
+    using RenderLogicParserType = RenderLogicParser<RenderData /**, StandartTraits*/ >;
+    RenderLogicParserType parser(c,m_log);
 
     parser.parse(m_logicFile);
     LOGRCLEVEL1(m_log, "---> Load Materials finished " << std::endl;)
 
     LOGRCLEVEL1(m_log, "---> Setup Mapper ..." << std::endl;)
-    m_logicScriptGen.setLog(m_log);
-    m_logicScriptGen.setup();
+    m_executionGraph.setLog(m_log);
+    m_executionGraph.setup();
 
     //    ExecutionTreeInOut m;
     //    LogicNode * n0 = new DummyLogicNode<1,3>(0);

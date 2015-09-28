@@ -1,5 +1,5 @@
-#ifndef RenderScriptParser_hpp
-#define RenderScriptParser_hpp
+#ifndef RenderLogicParser_hpp
+#define RenderLogicParser_hpp
 
 #include <vector>
 #include <fstream>
@@ -13,24 +13,24 @@
 #include "GRSF/Common/AssertionDebug.hpp"
 
 #include "GRSF/Common/XMLMacros.hpp"
-#include "GRSF/General/RenderScriptParserBaseTraits.hpp"
-#include "GRSF/General/RenderScriptParserModules.hpp"
+#include "GRSF/General/RenderLogicParserBaseTraits.hpp"
+#include "GRSF/General/RenderLogicParserModules.hpp"
 
-/** The traits for a standart RenderScriptParser class*/
+/** The traits for a standart RenderLogicParser class*/
 template<typename TSceneParser, typename TCollection>
-struct RenderScriptParserTraits : RenderScriptParserBaseTraits<TSceneParser,TCollection> {
+struct RenderLogicParserTraits : RenderLogicParserBaseTraits<TSceneParser,TCollection> {
     // Module typedefs
-    using MaterialsModuleType   = typename RenderScriptParserModules::MaterialsModule<RenderScriptParserTraits>;
-    using ScriptGenModuleType   = typename RenderScriptParserModules::ScriptGeneratorModule<RenderScriptParserTraits>;
+    using MaterialsModuleType   = typename RenderLogicParserModules::MaterialsModule<RenderLogicParserTraits>;
+    using LogicModuleType       = typename RenderLogicParserModules::LogicModule<RenderLogicParserTraits>;
 };
 
-template< typename TCollection, template<typename P, typename C> class TParserTraits = RenderScriptParserTraits >
-class RenderScriptParser {
+template< typename TCollection, template<typename P, typename C> class TParserTraits = RenderLogicParserTraits >
+class RenderLogicParser {
 public:
 
-    using ParserForModulesType = RenderScriptParser;
+    using ParserForModulesType = RenderLogicParser;
     using ParserTraits = TParserTraits<ParserForModulesType, TCollection>;
-    DEFINE_RENDERSCRIPTPARSER_TYPE_TRAITS(ParserTraits);
+    DEFINE_RENDERLOGICPARSER_TYPE_TRAITS(ParserTraits);
 private:
 
     boost::filesystem::path m_currentParseFilePath;
@@ -45,7 +45,7 @@ private:
 
     /** Modules */
     std::unique_ptr< MaterialsModuleType >       m_pMaterialsModule;
-    std::unique_ptr< ScriptGenModuleType >       m_pScriptGenModule;
+    std::unique_ptr< LogicModuleType >           m_pLogicModule;
 
 public:
 
@@ -54,11 +54,11 @@ public:
     * If a xmlDoc pointer is given, this document is taken
     */
     template<typename ModuleGeneratorType>
-    RenderScriptParser(ModuleGeneratorType & moduleGen, Logging::Log * log) {
+    RenderLogicParser(ModuleGeneratorType & moduleGen, Logging::Log * log) {
         m_pLog = log;
         ASSERTMSG(m_pLog, "Log pointer is zero!");
         // Get all Modules from the Generator
-        std::tie(m_pMaterialsModule, m_pScriptGenModule) = moduleGen.template createParserModules<ParserForModulesType>( static_cast<ParserForModulesType*>(this));
+        std::tie(m_pMaterialsModule, m_pLogicModule) = moduleGen.template createParserModules<ParserForModulesType>( static_cast<ParserForModulesType*>(this));
     }
 
 
@@ -121,7 +121,7 @@ private:
 
     void parseSceneIntern(const boost::filesystem::path & file) {
 
-        LOGMCLEVEL1( m_pLog, "---> RenderScriptParser parsing: ========================================================" <<
+        LOGMCLEVEL1( m_pLog, "---> RenderLogicParser parsing: ========================================================" <<
                      std::endl << "\t file: " << file <<std::endl;);
 
         LOGMCLEVEL1( m_pLog, "---> Input file: "  << file.string() <<std::endl; );
@@ -157,8 +157,8 @@ private:
             }
 
             node = m_xmlRootNode.child("Logic");
-            if(node && m_pScriptGenModule) {
-                m_pScriptGenModule->parse(node, m_pMaterialsModule->getMaterialMap() );
+            if(node && m_pLogicModule) {
+                m_pLogicModule->parse(node, m_pMaterialsModule->getMaterialMap() );
             }
 
 
@@ -167,7 +167,7 @@ private:
             ERRORMSG( "Scene XML error: "  << ex.what() );
         }
 
-        LOGMCLEVEL1( m_pLog, "---> RenderScriptParser finshed =========================================================" << std::endl;);
+        LOGMCLEVEL1( m_pLog, "---> RenderLogicParser finshed =========================================================" << std::endl;);
 
     }
 

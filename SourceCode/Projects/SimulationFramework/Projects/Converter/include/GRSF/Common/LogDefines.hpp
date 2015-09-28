@@ -27,7 +27,7 @@
     /// SceneParser
     #define SCENEPARSER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
 
-    /// RenderScriptConverter
+    /// RenderConverter
     #define RENDERCONVERTER_LOGLEVEL 3
 
     /// MaterialCollectionParser
@@ -40,7 +40,7 @@
     /// SceneParser
     #define SCENEPARSER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
 
-    /// RenderScriptConverter
+    /// RenderConverter
     #define RENDERCONVERTER_LOGLEVEL 1
 
     /// MaterialCollectionParser
@@ -59,7 +59,7 @@
 #define SKIPLOGSC( logptr , message )  LOGSCLEVEL(1,logptr,message);
 
 
-/** RenderScriptConverter Log Macros */
+/** RenderConverter Log Macros */
 #define LOGRC(log , message) LOG(log,message);
 #define LOGRCLEVEL(level, logptr , message) LOGLEVEL(level,RENDERCONVERTER_LOGLEVEL,logptr,message);
 #define LOGRCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;

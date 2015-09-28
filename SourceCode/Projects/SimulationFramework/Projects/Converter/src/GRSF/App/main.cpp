@@ -14,7 +14,7 @@
 #include "GRSF/Converters/SimFileInfo.hpp"
 #include "GRSF/Converters/SimFileJoiner.hpp"
 #include "GRSF/Converters/SimFileResampler.hpp"
-#include "GRSF/Converters/RenderScriptConverter.hpp"
+#include "GRSF/Converters/RenderConverter.hpp"
 
 
 void printHelpAndExit(std::string o=""){
@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
             // End Parsing =================================
 
             try{
-                RenderScriptConverter renderConv;
+                RenderConverter renderConv;
                 renderConv.convert(opts.getInputFiles(),
                                    opts.getOutputFile(),
                                    opts.getOutputDir(),

@@ -1,10 +1,10 @@
-#include "GRSF/General/LogicNodeGeneratorSimFile.hpp"
+#include "GRSF/General/SimFileExecutionGraph.hpp"
 
 #include "GRSF/Logic/StopNode.hpp"
 
 #include "GRSF/General/RenderExecutionGraphLogic.hpp"
 
-void LogicNodeGeneratorSimFile::setup() {
+void SimFileExecutionGraph::setup() {
 
 
     ExecutionTreeInOut::setup();
@@ -19,7 +19,7 @@ void LogicNodeGeneratorSimFile::setup() {
     }
 }
 
-void LogicNodeGeneratorSimFile::initFrame(boost::filesystem::path folder,
+void SimFileExecutionGraph::initFrame(boost::filesystem::path folder,
                                       std::string filename,
                                       double time,
                                       unsigned int frameNr)
@@ -38,11 +38,11 @@ void LogicNodeGeneratorSimFile::initFrame(boost::filesystem::path folder,
      this->execute(ExecGroups::FRAME);
 }
 
-void LogicNodeGeneratorSimFile::finalizeFrame(){
+void SimFileExecutionGraph::finalizeFrame(){
      // Nothing to do here
 }
 
-void LogicNodeGeneratorSimFile::generateFrameData(RigidBodyStateAdd * s) {
+void SimFileExecutionGraph::generateFrameData(RigidBodyStateAdd * s) {
     // Set body data
     m_bodyDataNode->setOutputs(s);
 
@@ -50,7 +50,7 @@ void LogicNodeGeneratorSimFile::generateFrameData(RigidBodyStateAdd * s) {
     this->execute(ExecGroups::BODY);
 }
 
-bool LogicNodeGeneratorSimFile::checkStop(){
+bool SimFileExecutionGraph::checkStop(){
      if(m_stopNode){
         return GET_ISOCKET_VALUE_PTR(m_stopNode, Enable);
      }

@@ -450,7 +450,7 @@ private:
     boost::filesystem::path m_outputDir;
     boost::filesystem::path m_outputFile;
 
-     // RenderScriptConverter
+     // RenderConverter
     boost::filesystem::path m_sceneFile;
     boost::filesystem::path m_mediaDir ="./";
     boost::filesystem::path m_converterLogicFile;

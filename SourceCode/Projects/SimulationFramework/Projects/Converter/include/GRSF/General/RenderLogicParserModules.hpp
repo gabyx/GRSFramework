@@ -1,5 +1,5 @@
-#ifndef RenderScriptParserModules_hpp
-#define RenderScriptParserModules_hpp
+#ifndef RenderLogicParserModules_hpp
+#define RenderLogicParserModules_hpp
 
 
 #include <vector>
@@ -12,20 +12,21 @@
 
 #include "GRSF/Common/AssertionDebug.hpp"
 
-#include "GRSF/General/RenderScriptParserBaseTraits.hpp"
+#include "GRSF/General/RenderLogicParserBaseTraits.hpp"
 
-namespace RenderScriptParserModules {
+namespace RenderLogicParserModules {
 
     template<typename TParserTraits>
     class MaterialsModule {
     public:
-        DEFINE_RENDERSCRIPTPARSER_TYPE_TRAITS(TParserTraits)
+        DEFINE_RENDERLOGICPARSER_TYPE_TRAITS(TParserTraits)
 
         using MaterialMapType = typename CollectionType::MaterialMapType;
 
         MaterialsModule(ParserType * p, MaterialMapType * m):m_parser(p),m_materials(m), m_pLog(p->getLog()) {}
 
         void parse(XMLNodeType & materialNode) {
+
             auto nodes = materialNode.children("Material");
             auto itNodeEnd = nodes.end();
             for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
@@ -39,6 +40,7 @@ namespace RenderScriptParserModules {
 
                 LOGMCLEVEL3(m_pLog,"---> Parsed Material with id: " << id << std::endl;)
             }
+
         }
 
         void cleanUp() {
@@ -65,22 +67,21 @@ namespace RenderScriptParserModules {
 #include "GRSF/General/RenderExecutionGraphLogic.hpp"
 #include "GRSF/General/RenderExecutionGraph.hpp"
 
-namespace RenderScriptParserModules {
+namespace RenderLogicParserModules {
 
 template<typename TParserTraits>
-class ScriptGeneratorModule {
+class LogicModule {
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
-    DEFINE_RENDERSCRIPTPARSER_TYPE_TRAITS(TParserTraits)
+    DEFINE_RENDERLOGICPARSER_TYPE_TRAITS(TParserTraits)
 
     using GeometryMapType = typename CollectionType::GeometryMapType;
     using MaterialMapType = typename CollectionType::MaterialMapType;
-    using RenderScriptGen = RenderExecutionGraph;
 
-    using ExecGroups = typename RenderScriptGen::ExecGroups;
+    using ExecGroups = typename RenderExecutionGraph::ExecGroups;
 
-    ScriptGeneratorModule(ParserType * p, RenderScriptGen * g, GeometryMapType * geomMap)
-        :m_parser(p),m_renderScriptGen(g), m_pLog(p->getLog()), m_geomMap(geomMap) {}
+    LogicModule(ParserType * p, RenderExecutionGraph * g, GeometryMapType * geomMap)
+        :m_parser(p),m_executionGraph(g), m_pLog(p->getLog()), m_geomMap(geomMap) {}
 
     void parse(XMLNodeType & genNode, MaterialMapType * materials) {
 
@@ -161,7 +162,7 @@ public:
             LOGMCLEVEL3(m_pLog,"---> Linking Tool: Get " << outNode << " socket: " << outSocket << " --from--> "
                         << fromNode << " socket: " << fromSocket <<  std::endl;);
             // Link the nodes
-            m_renderScriptGen->makeGetLink(outNode,outSocket,fromNode,fromSocket);
+            m_executionGraph->makeGetLink(outNode,outSocket,fromNode,fromSocket);
 
 
         }
@@ -192,7 +193,7 @@ public:
             LOGMCLEVEL3(m_pLog,"---> Linking Tool: Write from" << outNode << " socket: " << outSocket << " ---to---> "
                         << "to: " << toNode << " socket: "<< toSocket << std::endl;);
             // Link the nodes
-            m_renderScriptGen->makeWriteLink(outNode,outSocket,toNode,toSocket);
+            m_executionGraph->makeWriteLink(outNode,outSocket,toNode,toSocket);
 
         }
 
@@ -209,14 +210,14 @@ private:
         if( att ){
             std::string gid = att.value();
             if(gid == "Body"){
-                m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
+                m_executionGraph->addNodeToGroup(id, ExecGroups::BODY);
             }else if(gid == "Frame"){
-                m_renderScriptGen->addNodeToGroup(id, ExecGroups::FRAME);
+                m_executionGraph->addNodeToGroup(id, ExecGroups::FRAME);
             }else{
                 ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
             }
         }else{
-            m_renderScriptGen->addNodeToGroup(id, ExecGroups::BODY);
+            m_executionGraph->addNodeToGroup(id, ExecGroups::BODY);
         }
     }
 
@@ -267,7 +268,7 @@ private:
                 ERRORMSG("---> String conversion in Constant tool: outputType: '" << t << "' not found!");
             }
 
-            m_renderScriptGen->addNode(n,false,false);
+            m_executionGraph->addNode(n,false,false);
 
             addNodeToGroup(genNode,id);
     }
@@ -287,7 +288,7 @@ private:
                 ERRORMSG("---> String conversion in Constant tool: outputType: '" << t << "' not found!");
             }
 
-            m_renderScriptGen->addNode(n,false,false);
+            m_executionGraph->addNode(n,false,false);
 
             addNodeToGroup(genNode,id);
     }
@@ -352,7 +353,7 @@ private:
                 node->addOutput<std::string>();
             }
 
-            m_renderScriptGen->addNode(node,false,false);
+            m_executionGraph->addNode(node,false,false);
 
             addNodeToGroup(genNode,id);
     }
@@ -425,7 +426,7 @@ private:
                 ERRORMSG("---> String conversion in SimpleFunction tool: inputType: '" << t1 << "' not found!");
             }
 
-            m_renderScriptGen->addNode(n,false,false);
+            m_executionGraph->addNode(n,false,false);
 
             addNodeToGroup(genNode,id);
     }
@@ -477,7 +478,7 @@ private:
                 ERRORMSG("---> String conversion in Constant tool: inputType: '" << t << "' not found!");
             }
 
-            m_renderScriptGen->addNode(n,false,false);
+            m_executionGraph->addNode(n,false,false);
 
             addNodeToGroup(genNode,id);
 
@@ -555,7 +556,7 @@ private:
                 ERRORMSG("---> String conversion in Constant tool: inputType: '" << t1 << "' not found!");
             }
 
-            m_renderScriptGen->addNode(n,false,false);
+            m_executionGraph->addNode(n,false,false);
             addNodeToGroup(genNode,id);
     }
 
@@ -598,50 +599,50 @@ private:
                 n->createDefaultHeatMapGradient();
             }
 
-            m_renderScriptGen->addNode(n,false,false);
+            m_executionGraph->addNode(n,false,false);
             addNodeToGroup(genNode,id);
     }
 
 
     void createToolMatteMaterial(XMLNodeType & genNode, unsigned int id) {
         auto * node = new LogicNodes::MatteMaterial(id);
-        m_renderScriptGen->addNode(node,false,false);
-        m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
+        m_executionGraph->addNode(node,false,false);
+        m_executionGraph->addNodeToGroup(id,ExecGroups::BODY);
     }
 
     void createToolBxdfDisneyMaterial(XMLNodeType & genNode, unsigned int id) {
         auto * node = new LogicNodes::BxdfDisneyMaterial(id);
-        m_renderScriptGen->addNode(node,false,false);
-        m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
+        m_executionGraph->addNode(node,false,false);
+        m_executionGraph->addNodeToGroup(id,ExecGroups::BODY);
     }
 
     void createToolFrameData(XMLNodeType & genNode, unsigned int id) {
         auto * node = new LogicNodes::FrameData(id);
-        m_renderScriptGen->addNode(node,true,false);
-        m_renderScriptGen->addNodeToGroup(id,ExecGroups::FRAME);
-        m_renderScriptGen->setFrameData(node);
+        m_executionGraph->addNode(node,true,false);
+        m_executionGraph->addNodeToGroup(id,ExecGroups::FRAME);
+        m_executionGraph->setFrameData(node);
     }
 
     void createToolBodyData(XMLNodeType & genNode, unsigned int id) {
         auto * node = new LogicNodes::BodyData(id);
-        m_renderScriptGen->addNode(node,true,false);
-        m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
-        m_renderScriptGen->setBodyData(node);
+        m_executionGraph->addNode(node,true,false);
+        m_executionGraph->addNodeToGroup(id,ExecGroups::BODY);
+        m_executionGraph->setBodyData(node);
     }
 
     void createToolDisplacementToPosQuat(XMLNodeType & genNode, unsigned int id) {
 
         auto * node = new LogicNodes::DisplacementToPosQuat(id);
-        m_renderScriptGen->addNode(node,false,false);
-        m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
+        m_executionGraph->addNode(node,false,false);
+        m_executionGraph->addNodeToGroup(id,ExecGroups::BODY);
 
     }
 
     void createToolVelocityToVelRot(XMLNodeType & genNode, unsigned int id) {
 
         auto * node = new LogicNodes::VelocityToVelRot(id);
-        m_renderScriptGen->addNode(node,false,false);
-        m_renderScriptGen->addNodeToGroup(id,ExecGroups::BODY);
+        m_executionGraph->addNode(node,false,false);
+        m_executionGraph->addNodeToGroup(id,ExecGroups::BODY);
 
     }
 
@@ -681,7 +682,7 @@ private:
             ERRORMSG("---> String conversion in MaterialLookUp tool: inputType: '" << type << "' not found!");
         }
 
-         m_renderScriptGen->addNode(node,false,false);
+         m_executionGraph->addNode(node,false,false);
          addNodeToGroup(genNode,id);
     }
 
@@ -706,12 +707,12 @@ private:
         }
 
         auto * node = new LogicNodes::RendermanWriter(id, m_geomMap,pipe,command);
-        m_renderScriptGen->addNode(node,false,true);
+        m_executionGraph->addNode(node,false,true);
     }
 
     ParserType * m_parser;
     LogType * m_pLog;
-    RenderScriptGen * m_renderScriptGen;
+    RenderExecutionGraph * m_executionGraph;
     MaterialMapType * m_materials;
     GeometryMapType * m_geomMap;
 };

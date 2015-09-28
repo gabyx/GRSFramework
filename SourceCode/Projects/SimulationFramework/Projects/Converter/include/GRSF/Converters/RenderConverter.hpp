@@ -1,5 +1,5 @@
-#ifndef RenderScriptConverter_hpp
-#define RenderScriptConverter_hpp
+#ifndef RenderConverter_hpp
+#define RenderConverter_hpp
 
 #include <iostream>
 #include <iomanip>
@@ -14,14 +14,15 @@
 #include "GRSF/Common/LogDefines.hpp"
 #include "GRSF/Common/TypeDefs.hpp"
 
-#include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
+#include "GRSF/Converters/LogicConverter.hpp"
 
+#include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
 #include "GRSF/Common/SimpleLogger.hpp"
 #include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
 #include "GRSF/General/RenderData.hpp"
 #include "GRSF/General/RenderExecutionGraph.hpp"
 
-class RenderScriptConverter : public LogicScriptConverter<RenderExecutionGraph> {
+class RenderConverter : public LogicConverter<RenderExecutionGraph> {
 public:
 
     DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES
@@ -30,7 +31,7 @@ public:
     using XMLNodeItType = pugi::xml_node_iterator;
     using XMLAttributeType = pugi::xml_attribute;
 
-    using Base = LogicScriptConverter<RenderExecutionGraph>;
+    using Base = LogicConverter<RenderExecutionGraph>;
 
     using Renderer = typename ApplicationCLOptionsRenderer::Renderer;
 
@@ -53,5 +54,5 @@ private:
 
 };
 
-#endif // RenderScriptConverter_hpp
+#endif // RenderConverter_hpp
 

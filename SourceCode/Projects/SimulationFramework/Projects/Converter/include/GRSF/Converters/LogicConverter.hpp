@@ -1,10 +1,11 @@
-#ifndef LogicScriptConverter_hpp
-#define LogicScriptConverter_hpp
+#ifndef LogicConverter_hpp
+#define LogicConverter_hpp
 
 #include <iostream>
 #include <iomanip>
 #include <set>
 #include <map>
+#include <string>
 #include <vector>
 
 #include <pugixml.hpp>
@@ -14,20 +15,13 @@
 #include "GRSF/Common/LogDefines.hpp"
 #include "GRSF/Common/TypeDefs.hpp"
 
-#include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
-
 #include "GRSF/Common/SimpleLogger.hpp"
 #include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
 //#include "GRSF/General/RenderData.hpp"
 //#include "GRSF/General/LogicScriptGenerator.hpp"
 
 
-/** From .icc*/
-#include <string>
-
-
 #include "GRSF/Common/ApplicationSignalHandler.hpp"
-
 #include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
 
 #include "GRSF/Common/CPUTimer.hpp"
@@ -36,15 +30,15 @@
 
 #include "GRSF/Systems/SceneParser.hpp"
 
-//#include "GRSF/General/RenderScriptParser.hpp"
-//#include "GRSF/General/RenderScriptParserGenerators.hpp"
+//#include "GRSF/General/RenderLogicParser.hpp"
+//#include "GRSF/General/RenderLogicParserGenerators.hpp"
 //#include "GRSF/General/RenderExecutionGraph.hpp"
 
 //#include "GRSF/Logic/DummyNode.hpp"
 
 
-template<typename TLogicScriptGenerator, typename TDerived>
-class LogicScriptConverter {
+template<typename TExecutionGraph, typename TDerived>
+class LogicConverter {
 public:
 
     DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES
@@ -54,7 +48,7 @@ public:
     using XMLAttributeType = pugi::xml_attribute;
 
     using Derived = TDerived;
-    using LogicScriptGeneratorType = TLogicScriptGenerator;
+    using ExecutionGraphType = TExecutionGraph;
 
     void convert( const std::vector<boost::filesystem::path> & inputFiles,
                   boost::filesystem::path outputFile,
@@ -68,15 +62,16 @@ public:
         m_sceneFile = sceneFile;
         m_logicFile = logicFile;
 
-        auto log = outputFile.parent_path() / "LogicScriptConverter.log";
-        m_log = Logging::LogManager::getSingleton().createLog("LogicScriptConverter",true,true,log);
+        auto log = outputFile.parent_path() / "LogicConverter.log";
+        m_log = Logging::LogManager::getSingleton().createLog("LogicConverter",true,true,log);
 
-        LOG(m_log, "---> LogicScriptConverter started:" <<std::endl;);
+        LOG(m_log, "---> LogicConverter started:" <<std::endl;);
 
         // global framecounter
         m_frameCounter = 0;
 
-        setupGenerator();
+
+        setupExecutionGraph();
 
         // First open the sim file (if .sim extension)
         // if .xml extension (then this is the process file where each simfile and frame index is stored)
@@ -160,7 +155,7 @@ protected:
     using StateIndicesType = std::vector< StateIndex >;
 
 
-    LogicScriptGeneratorType m_logicScriptGen;
+    ExecutionGraphType m_executionGraph;
 
     MultiBodySimFile m_simFile;
 
@@ -181,7 +176,7 @@ protected:
     void callbackAbort(){ m_abort = true; LOG(m_log, "---> Quitting ...:" <<std::endl);}
 
     void setupGenerator(){
-        static_cast<Derived*>(this)->setupGenerator()
+        static_cast<Derived*>(this)->setupGenerator();
     }
 
     /** \p uuid string is a hash for the file path to identify each frame where it came from!*/
@@ -193,7 +188,7 @@ protected:
 
         m_abort = false;
         ApplicationSignalHandler::getSingleton().registerCallback(SIGINT,
-                            std::bind( &RenderScriptConverter::callbackAbort, this), "QuitRender");
+                            std::bind( &RenderConverter::callbackAbort, this), "QuitRender");
 
         std::vector<RigidBodyStateAdd> states;
 
@@ -272,19 +267,19 @@ protected:
                 << "\n\tframeName: " << outputName << "\n\tframeIdx: " << frameIdx << "\n\ttime: " << time << std::endl;)
 
             start = timer.elapsedMilliSec();
-            m_logicScriptGen.initFrame(outputDir, outputName , time, frameIdx );
+            m_executionGraph.initFrame(outputDir, outputName , time, frameIdx );
             avgInitFrameTime += timer.elapsedMilliSec() - start;
 
 
             start = timer.elapsedMilliSec();
             for(auto & bs: states){
-                m_logicScriptGen.generateFrameData(&bs);
+                m_executionGraph.generateFrameData(&bs);
                 bodyCounter++;
             }
             avgStateTime += timer.elapsedMilliSec() - start;
 
 
-            m_logicScriptGen.finalizeFrame();
+            m_executionGraph.finalizeFrame();
 
             // skip to next stateIdx if we have indices
             if(!stateIndices.empty()){
@@ -325,6 +320,6 @@ protected:
 
 };
 
-#endif // LogicScriptConverter_hpp
+#endif // LogicConverter_hpp
 
 

@@ -4,5 +4,5 @@
 
 //RenderData::ParserModulesCreator( RenderData * p): m_p(p){}
 //
-//RenderData::RenderScriptParserModulesCreator( RenderData * p): m_p(p){}
+//RenderData::RenderLogicParserModulesCreator( RenderData * p): m_p(p){}
 //

@@ -1,5 +1,5 @@
-#ifndef  GRSF_General_LogicNodeGeneratorSimFile_hpp
-#define  GRSF_General_LogicNodeGeneratorSimFile_hpp
+#ifndef  GRSF_General_SimFileExecutionGraph_hpp
+#define  GRSF_General_SimFileExecutionGraph_hpp
 
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"
@@ -16,7 +16,7 @@ namespace LogicNodes{
 };
 
 
-class LogicNodeGeneratorSimFile : public ExecutionTreeInOut{
+class SimFileExecutionGraph : public ExecutionTreeInOut{
     public:
 
         struct ExecGroups{
@@ -37,7 +37,7 @@ class LogicNodeGeneratorSimFile : public ExecutionTreeInOut{
 
 
 
-        LogicNodeGeneratorSimFile(){};
+        SimFileExecutionGraph(){};
 
         inline void setLog(Logging::Log * log){ m_log = log; }
 
@@ -63,5 +63,5 @@ class LogicNodeGeneratorSimFile : public ExecutionTreeInOut{
 };
 
 
-#endif // GRSF_General_LogicNodeGeneratorSimFile_hpp
+#endif // GRSF_General_SimFileExecutionGraph_hpp
 

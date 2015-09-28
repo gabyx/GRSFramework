@@ -3,7 +3,7 @@
 
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/General/LogicNodeGeneratorSimFile.hpp"
+#include "GRSF/General/SimFileExecutionGraph.hpp"
 
 
 namespace LogicNodes{
@@ -12,10 +12,10 @@ namespace LogicNodes{
 
 class RenderMaterial;
 
-class RenderExecutionGraph : public LogicNodeGeneratorSimFile
+class RenderExecutionGraph : public SimFileExecutionGraph
 {
     public:
-        using Base = LogicNodeGeneratorSimFile;
+        using Base = SimFileExecutionGraph;
 
         RenderExecutionGraph(){};
 
