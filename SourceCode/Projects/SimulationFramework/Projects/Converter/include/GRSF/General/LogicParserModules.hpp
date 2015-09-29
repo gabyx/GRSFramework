@@ -10,7 +10,11 @@
 #include "GRSF/Logic/LineWriter.hpp"
 
 
-#include "GRSF/General/SimFileExecutionGraphLogic.hpp"
+#include "GRSF/General/SimFileExecutionGraphNodes.hpp"
+#include "GRSF/General/LogicParserTraitsMacro.hpp"
+
+
+/** Parser for all execution graph nodes except special ones for rendering */
 
 namespace LogicParserModules{
 
@@ -18,7 +22,7 @@ namespace LogicParserModules{
     class LogicModule {
     public:
         DEFINE_LAYOUT_CONFIG_TYPES
-        DEFINE_RENDERLOGICPARSER_TYPE_TRAITS(TParserTraits)
+        DEFINE_LOGICPARSER_TYPE_TRAITS(TParserTraits)
 
         using Base = LogicModule; // no base so far
 
@@ -26,12 +30,14 @@ namespace LogicParserModules{
 
         LogicModule(ParserType * p, SimFileExecutionGraph * g)
             :m_parser(p),m_executionGraph(g), m_pLog(p->getLog())
-        {}
+        {
+            ASSERTMSG(m_executionGraph,"null")
+        }
 
 
         void parse(XMLNodeType & parent) {
 
-            XMLNodeType logicNode = parent.child("Materials");
+            XMLNodeType logicNode = parent.child("Logic");
             if(!logicNode) {
                 return;
             }
@@ -43,7 +49,7 @@ namespace LogicParserModules{
                 parseTool(*itNode);
             }
 
-            Base::addAllLinks();
+            Base::addAllLinks(logicNode);
 
         }
 
@@ -53,7 +59,7 @@ namespace LogicParserModules{
                 if(!Utilities::stringToType(id, tool.attribute("id").value())) {
                     ERRORMSG("---> String conversion in Tool: id failed");
                 }
-                LOGMCLEVEL3(m_pLog,"---> Parsing Tool with id: " << id << std::endl;);
+                LOGLPLEVEL3(m_pLog,"---> Parsing Tool with id: " << id << std::endl;);
                 std::string type = tool.attribute("type").value();
                 if(type == "BodyDataInput") {
                     createToolBodyData(tool,id);
@@ -105,7 +111,7 @@ namespace LogicParserModules{
                     ERRORMSG("---> String conversion in Get: fromSocket failed");
                 }
 
-                LOGMCLEVEL3(m_pLog,"---> Linking Tool: Get " << outNode << " socket: " << outSocket << " --from--> "
+                LOGLPLEVEL3(m_pLog,"---> Linking Tool: Get " << outNode << " socket: " << outSocket << " --from--> "
                             << fromNode << " socket: " << fromSocket <<  std::endl;);
                 // Link the nodes
                 m_executionGraph->makeGetLink(outNode,outSocket,fromNode,fromSocket);
@@ -135,7 +141,7 @@ namespace LogicParserModules{
                     ERRORMSG("---> String conversion in Write: toSocket failed");
                 }
 
-                LOGMCLEVEL3(m_pLog,"---> Linking Tool: Write from" << outNode << " socket: " << outSocket << " ---to---> "
+                LOGLPLEVEL3(m_pLog,"---> Linking Tool: Write from" << outNode << " socket: " << outSocket << " ---to---> "
                             << "to: " << toNode << " socket: "<< toSocket << std::endl;);
                 // Link the nodes
                 m_executionGraph->makeWriteLink(outNode,outSocket,toNode,toSocket);

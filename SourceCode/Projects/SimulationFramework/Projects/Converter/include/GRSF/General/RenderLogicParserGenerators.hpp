@@ -1,5 +1,5 @@
-#ifndef RenderLogicParserGenerators_hpp
-#define RenderLogicParserGenerators_hpp
+#ifndef GRSF_General_RenderLogicParserGenerators_hpp
+#define GRSF_General_RenderLogicParserGenerators_hpp
 
 
 #include "GRSF/Common/TypeDefs.hpp"
@@ -88,6 +88,7 @@ namespace RenderLogicParserGenerators {
         template<typename TParser>
         typename TParser::ParserTraits::TupleModules
         createParserModules(TParser * p) {
+
             using ParserTraits = typename TParser::ParserTraits;
             using MaterialsModuleType = typename ParserTraits::template getModuleType<0>;
             using LogicModuleType     = typename ParserTraits::template getModuleType<1>;

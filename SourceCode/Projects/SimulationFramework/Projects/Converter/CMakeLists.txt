@@ -36,32 +36,44 @@ SET(COMMON_INC
 
     ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/SimFileJoiner.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/SimFileResampler.hpp
-
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/RenderConverter.hpp
     
     ${PROJECT_SOURCE_DIR}/include/GRSF/Logic/LogicTypes.hpp
-
     
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderData.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParserGenerators.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/LogicConverter.hpp
     
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParser.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParserBaseTraits.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParserModules.hpp
     
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParserTraits.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParserTraitsMacro.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParserBaseTraits.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParserBaseTraitsMacro.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParserModules.hpp
+    
+    # Analyzer
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/AnalyzerConverter.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/SimFileExecutionGraph.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/SimFileExecutionGraphNodes.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/AnalyzerLogicParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/AnalyzerLogicParserGenerators.hpp
+    
+    #Render
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/RenderConverter.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderData.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderExecutionGraph.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderExecutionGraphLogic.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RendermanGeometryWriter.hpp
-    
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderExecutionGraphNodes.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParserTraits.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParserTraitsMacro.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParserGenerators.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParserModules.hpp
 
-        
-    
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RendermanGeometryWriter.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderMaterial.hpp
 )
 SET(COMMON_SRC
     ${SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/RenderConverter.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/AnalyzerConverter.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderData.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderExecutionGraph.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/General/SimFileExecutionGraph.cpp

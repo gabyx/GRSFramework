@@ -30,8 +30,8 @@
     /// RenderConverter
     #define RENDERCONVERTER_LOGLEVEL 3
 
-    /// MaterialCollectionParser
-    #define MATERIALCOLLECTIONPARSER_LOGLEVEL 3
+    /// LogicParser
+    #define LOGICPARSER_LOGLEVEL 3
 
 #else
 
@@ -43,8 +43,8 @@
     /// RenderConverter
     #define RENDERCONVERTER_LOGLEVEL 1
 
-    /// MaterialCollectionParser
-    #define MATERIALCOLLECTIONPARSER_LOGLEVEL 1
+    /// LogicParser
+    #define LOGICPARSER_LOGLEVEL 1
 
 #endif
 /* @} */
@@ -62,16 +62,16 @@
 /** RenderConverter Log Macros */
 #define LOGRC(log , message) LOG(log,message);
 #define LOGRCLEVEL(level, logptr , message) LOGLEVEL(level,RENDERCONVERTER_LOGLEVEL,logptr,message);
-#define LOGRCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
-#define LOGRCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
-#define LOGRCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
+#define LOGRCLEVEL1( logptr , message) LOGRCLEVEL( 1 , logptr , message) ;
+#define LOGRCLEVEL2( logptr , message) LOGRCLEVEL( 2 , logptr , message) ;
+#define LOGRCLEVEL3( logptr , message) LOGRCLEVEL( 3 , logptr , message) ;
 
-/** MaterialCollectionParser Log Macros */
-#define LOGMC(log , message) LOG(log,message);
-#define LOGMCLEVEL(level, logptr , message) LOGLEVEL(level,MATERIALCOLLECTIONPARSER_LOGLEVEL,logptr,message);
-#define LOGMCLEVEL1( logptr , message) LOGSCLEVEL( 1 , logptr , message) ;
-#define LOGMCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
-#define LOGMCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
+/** LogicParser Log Macros */
+#define LOGLP(log , message) LOG(log,message);
+#define LOGLPLEVEL(level, logptr , message) LOGLEVEL(level,LOGICPARSER_LOGLEVEL,logptr,message);
+#define LOGLPLEVEL1( logptr , message) LOGLPLEVEL( 1 , logptr , message) ;
+#define LOGLPLEVEL2( logptr , message) LOGLPLEVEL( 2 , logptr , message) ;
+#define LOGLPLEVEL3( logptr , message) LOGLPLEVEL( 3 , logptr , message) ;
 
 
 

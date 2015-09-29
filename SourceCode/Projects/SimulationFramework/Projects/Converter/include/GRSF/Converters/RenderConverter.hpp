@@ -1,5 +1,5 @@
-#ifndef RenderConverter_hpp
-#define RenderConverter_hpp
+#ifndef GRSF_Converters_RenderConverter_hpp
+#define GRSF_Converters_RenderConverter_hpp
 
 #include <iostream>
 #include <iomanip>
@@ -17,8 +17,7 @@
 #include "GRSF/Converters/LogicConverter.hpp"
 
 #include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
-#include "GRSF/Common/SimpleLogger.hpp"
-#include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
+
 #include "GRSF/General/RenderData.hpp"
 #include "GRSF/General/RenderExecutionGraph.hpp"
 
@@ -40,7 +39,7 @@ public:
                   boost::filesystem::path outputFile,
                   boost::filesystem::path outputDir,
                   boost::filesystem::path sceneFile,
-                  boost::filesystem::path materialFile,
+                  boost::filesystem::path logicFile,
                   Renderer renderer);
 
 
@@ -49,11 +48,11 @@ private:
     RenderData m_renderData;
     Renderer m_renderer;
 
-    void setupGenerator();
+    virtual void setupExecutionGraph();
 
 
 
 };
 
-#endif // RenderConverter_hpp
+#endif // GRSF_Converters_RenderConverter_hpp
 

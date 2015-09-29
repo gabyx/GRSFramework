@@ -17,22 +17,12 @@
 
 #include "GRSF/Common/SimpleLogger.hpp"
 #include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
-//#include "GRSF/General/RenderData.hpp"
-//#include "GRSF/General/LogicScriptGenerator.hpp"
-
 
 #include "GRSF/Common/ApplicationSignalHandler.hpp"
-#include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
 
 #include "GRSF/Common/CPUTimer.hpp"
 #include "GRSF/Common/CommonFunctions.hpp"
 #include "GRSF/Common/ProgressBarCL.hpp"
-
-#include "GRSF/Systems/SceneParser.hpp"
-
-//#include "GRSF/General/RenderLogicParser.hpp"
-//#include "GRSF/General/RenderLogicParserGenerators.hpp"
-//#include "GRSF/General/RenderExecutionGraph.hpp"
 
 //#include "GRSF/Logic/DummyNode.hpp"
 
@@ -40,8 +30,6 @@
 template<typename TExecutionGraph>
 class LogicConverter {
 public:
-
-    DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES
 
     using XMLNodeType = pugi::xml_node;
     using XMLNodeItType = pugi::xml_node_iterator;
@@ -152,7 +140,6 @@ protected:
 
     using StateIndicesType = std::vector< StateIndex >;
 
-
     ExecutionGraphType m_executionGraph;
 
     MultiBodySimFile m_simFile;
@@ -198,7 +185,7 @@ protected:
         CPUTimer timer;
         timer.start();
 
-        PREC start = 0,avgInitFrameTime = 0, avgStateTime = 0, avgStateLoadTime = 0;
+        double start = 0, avgInitFrameTime = 0, avgStateTime = 0, avgStateLoadTime = 0;
         unsigned int bodyCounter = 0;
 
 

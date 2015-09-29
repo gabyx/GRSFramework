@@ -1,22 +1,9 @@
 #include "GRSF/Converters/RenderConverter.hpp"
 
-#include <string>
-
-
-
-#include "GRSF/Common/ApplicationSignalHandler.hpp"
-
-#include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
-
-#include "GRSF/Common/CPUTimer.hpp"
-#include "GRSF/Common/CommonFunctions.hpp"
-#include "GRSF/Common/ProgressBarCL.hpp"
-
 #include "GRSF/Systems/SceneParser.hpp"
 #include "GRSF/General/RenderLogicParser.hpp"
-#include "GRSF/General/RenderLogicParserGenerators.hpp"
 
-#include "GRSF/General/RenderExecutionGraph.hpp"
+#include "GRSF/General/RenderLogicParserGenerators.hpp"
 
 
 void RenderConverter::convert( const std::vector<boost::filesystem::path> & inputFiles,
@@ -29,7 +16,7 @@ void RenderConverter::convert( const std::vector<boost::filesystem::path> & inpu
     Base::convert(inputFiles,outputFile,outputDir,sceneFile,logicFile);
 }
 
-void RenderConverter::setupGenerator() {
+void RenderConverter::setupExecutionGraph() {
 
     {
         // SCENE FILE

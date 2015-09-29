@@ -15,7 +15,7 @@
 #include "GRSF/Converters/SimFileJoiner.hpp"
 #include "GRSF/Converters/SimFileResampler.hpp"
 #include "GRSF/Converters/RenderConverter.hpp"
-
+#include "GRSF/Converters/AnalyzerConverter.hpp"
 
 void printHelpAndExit(std::string o=""){
      std::cerr << "Wrong Options: '" << o <<"'"<< std::endl
@@ -147,12 +147,12 @@ int main(int argc, char **argv) {
             // End Parsing =================================
 
             try{
-//                AnalyzerScriptConverter analyzerConv;
-//                analyzerConv.convert(opts.getInputFiles(),
-//                                     opts.getOutputFile(),
-//                                     opts.getOutputDir(),
-//                                     opts.getSceneFile(),
-//                                     opts.getConverterLogicFile());
+                AnalyzerConverter analyzerConv;
+                analyzerConv.convert(opts.getInputFiles(),
+                                     opts.getOutputFile(),
+                                     opts.getOutputDir(),
+                                     opts.getSceneFile(),
+                                     opts.getConverterLogicFile());
 
             }catch(const Exception & e){
                     std::cerr <<"Exception occured: " <<  e.what() << std::endl;

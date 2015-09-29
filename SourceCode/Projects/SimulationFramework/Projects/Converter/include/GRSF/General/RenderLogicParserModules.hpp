@@ -1,5 +1,5 @@
-#ifndef RenderLogicParserModules_hpp
-#define RenderLogicParserModules_hpp
+#ifndef GRSF_General_RenderLogicParserModules_hpp
+#define GRSF_General_RenderLogicParserModules_hpp
 
 
 #include <vector>
@@ -12,7 +12,7 @@
 
 #include "GRSF/Common/AssertionDebug.hpp"
 
-#include "GRSF/General/RenderLogicParserBaseTraits.hpp"
+#include "GRSF/General/RenderLogicParserTraitsMacro.hpp"
 
 namespace RenderLogicParserModules {
 
@@ -43,7 +43,7 @@ namespace RenderLogicParserModules {
                 ASSERTMSG(itNode->child_value()!=""," String in material id: " << id << "is empty!")
                 m_materials->emplace(id, new RenderMaterial(id,itNode->child_value()) );
 
-                LOGMCLEVEL3(m_pLog,"---> Parsed Material with id: " << id << std::endl;)
+                LOGLPLEVEL3(m_pLog,"---> Parsed Material with id: " << id << std::endl;)
             }
 
         }
@@ -64,8 +64,8 @@ namespace RenderLogicParserModules {
 
 
 #include "GRSF/General/LogicParserModules.hpp"
-#include "GRSF/General/RenderExecutionGraphLogic.hpp"
 #include "GRSF/General/RenderExecutionGraph.hpp"
+#include "GRSF/General/RenderExecutionGraphNodes.hpp"
 
 namespace RenderLogicParserModules {
 
@@ -85,10 +85,14 @@ public:
 
     RenderLogicModule(ParserType * p, RenderExecutionGraph * g,
                       GeometryMapType * geomMap, MaterialMapType * materials)
-        :Base(p,g), m_geomMap(geomMap), m_materials(materials) {}
+        :Base(p,g), m_geomMap(geomMap), m_materials(materials), m_executionGraph(g) {}
 
-    void parse(XMLNodeType & logicNode) {
+    void parse(XMLNodeType & parent) {
 
+        XMLNodeType logicNode = parent.child("Logic");
+            if(!logicNode) {
+                return;
+            }
         // Add all tools into the execution list!
         auto nodes = logicNode.children("Tool");
         auto itNodeEnd = nodes.end();
@@ -104,8 +108,9 @@ public:
             if(!Utilities::stringToType(id, tool.attribute("id").value())) {
                 ERRORMSG("---> String conversion in Tool: id failed");
             }
-            LOGMCLEVEL3(this->m_pLog,"---> Parsing Tool with id: " << id << std::endl;);
             std::string type = tool.attribute("type").value();
+            LOGLPLEVEL2(this->m_pLog,"---> Parsing Tool: " << type << " with id: " << id << std::endl;);
+
             if(type == "MaterialLookUp") {
                 createToolMaterialLookUp(tool,id);
             } else if(type == "MatteMaterial") {
@@ -274,7 +279,7 @@ private:
         if(it == m_materials->end()) {
             ERRORMSG("No default material found for MaterialLookUp tool!")
         }
-        LOGMCLEVEL3(this->m_pLog, "Default Material set to: " << std::endl << it->second->str() << std::endl)
+        LOGLPLEVEL3(this->m_pLog, "Default Material set to: " << std::endl << it->second->str() << std::endl)
 
         std::string type = logicNode.attribute("inputType").value();
         LogicNode * node = nullptr;
