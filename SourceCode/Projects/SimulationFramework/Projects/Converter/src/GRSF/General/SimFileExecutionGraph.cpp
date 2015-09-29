@@ -24,6 +24,10 @@ void SimFileExecutionGraph::initFrame(boost::filesystem::path folder,
                                       double time,
                                       unsigned int frameNr)
 {
+
+     // Reset all nodes in FRAME_INIT group
+     this->reset(NodeGroups::FRAME_INIT);
+
      if(filename.empty()){
         filename = "Frame";
      }
@@ -34,8 +38,9 @@ void SimFileExecutionGraph::initFrame(boost::filesystem::path folder,
         ERRORMSG("There is no FrameData node present! Please add one!")
      }
 
+
      // Execute all nodes in FRAME group
-     this->execute(ExecGroups::FRAME);
+     this->execute(NodeGroups::FRAME_EXEC);
 }
 
 void SimFileExecutionGraph::finalizeFrame(){
@@ -43,16 +48,25 @@ void SimFileExecutionGraph::finalizeFrame(){
 }
 
 void SimFileExecutionGraph::generateFrameData(RigidBodyStateAdd * s) {
+     // Reset all nodes in FRAME_INIT group
+    this->reset(NodeGroups::BODY_INIT);
+
     // Set body data
     m_bodyDataNode->setOutputs(s);
 
     // Execute all nodes in BODY group
-    this->execute(ExecGroups::BODY);
+    this->execute(NodeGroups::BODY_EXEC);
 }
 
-bool SimFileExecutionGraph::checkStop(){
-     if(m_stopNode){
-        return GET_ISOCKET_VALUE_PTR(m_stopNode, Enable);
+void SimFileExecutionGraph::setStopNode(LogicNodes::StopNode *n, unsigned int stopGroupId){
+    if(stopGroupId < m_stopNodes.size()){
+        m_stopNodes[stopGroupId] = n;
+    }
+}
+
+bool SimFileExecutionGraph::checkStop(unsigned int groupId){
+     if(groupId < m_stopNodes.size() && m_stopNodes[groupId] ){
+        return GET_ISOCKET_VALUE_PTR(m_stopNodes[groupId], Enable);
      }
      return false;
 }

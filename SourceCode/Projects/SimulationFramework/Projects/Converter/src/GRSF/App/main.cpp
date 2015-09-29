@@ -123,13 +123,13 @@ int main(int argc, char **argv) {
             // End Parsing =================================
 
             try{
-                RenderConverter renderConv;
-                renderConv.convert(opts.getInputFiles(),
+                RenderConverter renderConv(opts.getInputFiles(),
                                    opts.getOutputFile(),
                                    opts.getOutputDir(),
                                    opts.getSceneFile(),
                                    opts.getConverterLogicFile() ,
                                    opts.getRenderer());
+                renderConv.convert();
 
             }catch(const Exception & e){
                     std::cerr <<"Exception occured: " <<  e.what() << std::endl;
@@ -147,12 +147,12 @@ int main(int argc, char **argv) {
             // End Parsing =================================
 
             try{
-                AnalyzerConverter analyzerConv;
-                analyzerConv.convert(opts.getInputFiles(),
+                AnalyzerConverter analyzerConv(opts.getInputFiles(),
                                      opts.getOutputFile(),
                                      opts.getOutputDir(),
                                      opts.getSceneFile(),
                                      opts.getConverterLogicFile());
+                analyzerConv.convert();
 
             }catch(const Exception & e){
                     std::cerr <<"Exception occured: " <<  e.what() << std::endl;

@@ -26,7 +26,7 @@ public:
     virtual void compute() {}
 
     // do first run initialization
-    virtual void initialize(){}
+    virtual void reset(){}
 
     LogicSocketBase*   getISocket(unsigned int index);
     LogicSocketBase*   getOSocket(unsigned int index);

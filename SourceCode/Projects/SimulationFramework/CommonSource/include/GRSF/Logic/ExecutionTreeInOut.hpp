@@ -64,7 +64,6 @@ public:
         }else if(isOutput){
              setInOutNode<false>(node->m_id);
         }
-
     }
 
     virtual void addNodeToGroup(unsigned int nodeId, unsigned int groupId){
@@ -104,15 +103,17 @@ public:
 
 
     /** Init group */
-    virtual void initialize(unsigned int groupId) {
+    virtual void reset(unsigned int groupId) {
         for(auto & n : m_groupNodes[groupId]) {
-            n->initialize();
+            // Reset in no order!
+            n->reset();
         }
     }
 
     /** Execute group */
     virtual void execute(unsigned int groupId) {
         for(auto & n : m_groupExecList[groupId]) {
+            // Execute in determined order!
             n->compute();
         }
     }
@@ -127,10 +128,10 @@ public:
     }
 
     /** Init all groups */
-    virtual void initializeAll() {
+    virtual void resetAll() {
         for(auto &  g : m_groupExecList){
             for(auto & n : g.second) {
-                n->initialize();
+                n->reset();
             }
         }
     }

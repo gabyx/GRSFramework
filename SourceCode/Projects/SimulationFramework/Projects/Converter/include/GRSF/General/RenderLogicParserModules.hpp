@@ -76,7 +76,7 @@ public:
     DEFINE_RENDERLOGICPARSER_TYPE_TRAITS(TParserTraits)
 
     using Base =  LogicParserModules::LogicModule<TParserTraits> ;
-    using ExecGroups = typename Base::ExecGroups;
+    using NodeGroups = typename Base::NodeGroups;
 
     using GeometryMapType = typename CollectionType::GeometryMapType;
     using MaterialMapType = typename CollectionType::MaterialMapType;
@@ -254,13 +254,13 @@ private:
     void createToolMatteMaterial(XMLNodeType & logicNode, unsigned int id) {
         auto * node = new LogicNodes::MatteMaterial(id);
         m_executionGraph->addNode(node,false,false);
-        m_executionGraph->addNodeToGroup(id,ExecGroups::BODY);
+        m_executionGraph->addNodeToGroup(id,NodeGroups::BODY_EXEC);
     }
 
     void createToolBxdfDisneyMaterial(XMLNodeType & logicNode, unsigned int id) {
         auto * node = new LogicNodes::BxdfDisneyMaterial(id);
         m_executionGraph->addNode(node,false,false);
-        m_executionGraph->addNodeToGroup(id,ExecGroups::BODY);
+        m_executionGraph->addNodeToGroup(id,NodeGroups::BODY_EXEC);
     }
 
     void createToolMaterialLookUp(XMLNodeType & logicNode, unsigned int id) {

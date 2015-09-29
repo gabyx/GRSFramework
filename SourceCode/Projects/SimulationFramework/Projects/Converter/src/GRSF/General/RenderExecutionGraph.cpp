@@ -30,6 +30,9 @@ void RenderExecutionGraph::initFrame(boost::filesystem::path folder,
                                       double time,
                                       unsigned int frameNr)
 {
+
+
+
      Base::initFrame(folder,filename,time,frameNr);
 
      // Call all render script writters

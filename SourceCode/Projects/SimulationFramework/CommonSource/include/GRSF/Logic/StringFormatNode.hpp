@@ -196,7 +196,6 @@ namespace LogicNodes{
                 out->applyVisitor(m_setter);
             }
         }
-        virtual void initialize(){}
 
         protected:
         std::stringstream m_s;

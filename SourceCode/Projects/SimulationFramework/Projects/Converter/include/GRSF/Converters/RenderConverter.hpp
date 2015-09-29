@@ -14,14 +14,14 @@
 #include "GRSF/Common/LogDefines.hpp"
 #include "GRSF/Common/TypeDefs.hpp"
 
-#include "GRSF/Converters/LogicConverter.hpp"
+#include "GRSF/Converters/SimFileConverter.hpp"
 
 #include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
 
 #include "GRSF/General/RenderData.hpp"
 #include "GRSF/General/RenderExecutionGraph.hpp"
 
-class RenderConverter : public LogicConverter<RenderExecutionGraph> {
+class RenderConverter : public SimFileConverter {
 public:
 
     DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES
@@ -30,27 +30,30 @@ public:
     using XMLNodeItType = pugi::xml_node_iterator;
     using XMLAttributeType = pugi::xml_attribute;
 
-    using Base = LogicConverter<RenderExecutionGraph>;
-    using ExecutionGraphType = typename LogicConverter::ExecutionGraphType;
+    using Base = SimFileConverter;
+    using ExecutionGraphType = RenderExecutionGraph;
 
     using Renderer = typename ApplicationCLOptionsRenderer::Renderer;
 
-    void convert( const std::vector<boost::filesystem::path> & inputFiles,
+    RenderConverter(const std::vector<boost::filesystem::path> & inputFiles,
                   boost::filesystem::path outputFile,
                   boost::filesystem::path outputDir,
                   boost::filesystem::path sceneFile,
                   boost::filesystem::path logicFile,
                   Renderer renderer);
+    void convert( );
 
 
 private:
 
+    RenderExecutionGraph m_executionGraph;
     RenderData m_renderData;
     Renderer m_renderer;
 
-    virtual void setupExecutionGraph();
+    void setupExecutionGraph();
 
-
+    boost::filesystem::path m_logicFile;
+    boost::filesystem::path m_sceneFile;
 
 };
 

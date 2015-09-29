@@ -39,7 +39,7 @@ SET(COMMON_INC
     
     ${PROJECT_SOURCE_DIR}/include/GRSF/Logic/LogicTypes.hpp
     
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/LogicConverter.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/SimFileConverter.hpp
     
     
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParser.hpp

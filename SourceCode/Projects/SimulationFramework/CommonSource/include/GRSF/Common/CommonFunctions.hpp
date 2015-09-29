@@ -29,6 +29,7 @@
 #include "GRSF/Common/AssertionDebug.hpp"
 
 #include "GRSF/Common/FastStringConversion.hpp"
+#include "GRSF/Common/SfinaeMacros.hpp"
 
 namespace Utilities {
 
@@ -55,40 +56,42 @@ inline bool operator == (const char* a, const std::string & b) {
 
 // Prototypes
 struct StdTypeConverter {};
-template<typename T, typename TypeConverter = StdTypeConverter> bool stringToType(T & t, const std::string& s);
 
+template<typename T,typename TypeConverter = StdTypeConverter>
+bool stringToType(T & t, const std::string& s);
 
 
 namespace details {
 namespace stringToTypeImpl {
-
-
-/**
-* This is the standard type converter function
-* @brief This functions casts a string into the template specific type.
-* @param t The ouput where the casted string is put into.
-* @param s The string to cast.
-* @return true if conversion worked, false if not.
-*/
-template<typename T,typename TypeConverter>
-inline
-typename std::enable_if< std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
-convert(T& t, const std::string& s) {
-    //this is a huge times faster then the below stringstream stuff;
-    return StringConversion::toType(t,s);
-    //std::istringstream iss(s);
-    //return !(iss >> t).fail();
-}
-/**
-* This is the custom type converter function, which takes the TypeConverter to convert the string into the type
-*/
-template<typename T,typename TypeConverter>
-inline
-typename std::enable_if< !std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
-convert(T& t, const std::string& s) {
+    /**
+    * This is the standard type converter function
+    * @brief This functions casts a string into the template specific type.
+    * @param t The ouput where the casted string is put into.
+    * @param s The string to cast.
+    * @return true if conversion worked, false if not.
+    */
+    template<typename T,typename TypeConverter>
+    inline
+    typename std::enable_if< std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
+    convert(T& t, const std::string& s) {
+        //this is a huge times faster then the below stringstream stuff;
+        return StringConversion::toType(t,s);
+        //std::istringstream iss(s);
+        //return !(iss >> t).fail();
+    }
+    /**
+    * This is the custom type converter function, which takes the TypeConverter to convert the string into the type
+    */
+    template<typename T,typename TypeConverter>
+    inline
+    typename std::enable_if< !std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
+    convert(T& t, const std::string& s) {
     return TypeConverter::convert(t,s);
 }
 };
+
+
+
 
 
 /**
@@ -195,7 +198,7 @@ inline bool stringToTypeDispatch( T & t, const std::string & s) {
 template <typename TypeConverter, typename T, typename Comp, typename Alloc>
 inline bool stringToTypeDispatch( std::set<T,Comp,Alloc> & m,
                                   const std::string & s) {
-    std::function<void(unsigned int,T)> func = [&](unsigned int i, T n) {
+    auto func = [&](unsigned int i, const T & n) {
         m.insert(n);
     };
     return stringToTypeFunctorImpl< -1, T, decltype(func),TypeConverter >(func,s);
@@ -204,7 +207,7 @@ inline bool stringToTypeDispatch( std::set<T,Comp,Alloc> & m,
 template <typename TypeConverter, typename T, typename Alloc>
 inline bool stringToTypeDispatch( std::vector<T,Alloc> & v,
                                   const std::string & s) {
-    auto func = [&](unsigned int i, T n) {
+    auto func = [&](unsigned int i, const T & n) {
         v.push_back(n);
     };
     return stringToTypeFunctorImpl<-1, T, decltype(func), TypeConverter >(func,s);
@@ -214,10 +217,18 @@ inline bool stringToTypeDispatch( std::vector<T,Alloc> & v,
 template <typename TypeConverter, typename T>
 inline bool stringToTypeDispatch( std::pair<T,T> & v,
                                   const std::string & s) {
-    auto func = [&](unsigned int i, T n) {
+    auto func = [&](unsigned int i, const T & n) {
         i==0? v.first = n: v.second = n;
     };
     return stringToTypeFunctorImpl<2, T, decltype(func), TypeConverter >(func,s);
+}
+
+/** Custom dummy dispatch std::string */
+template <typename TypeConverter>
+inline bool stringToTypeDispatch( std::string & v,
+                                  const std::string & s) {
+    v = s; // just assign
+    return true;
 }
 
 };
@@ -261,10 +272,16 @@ struct CommaSeperatedPairBinShift {
     }
 };
 
+
+
+/** Main function: string -> T (do dispatch) */
 template<typename T, typename TypeConverter>
 inline bool stringToType(T & t, const std::string& s) {
     return details::stringToTypeDispatch<TypeConverter>(t,s);
 }
+/** ===============================================*/
+
+
 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector2.

@@ -37,9 +37,6 @@ namespace LogicNodes{
 
         virtual ~ConstantNode() {
         }
-
-        virtual void compute(){}
-        virtual void initialize(){}
     };
 };
 

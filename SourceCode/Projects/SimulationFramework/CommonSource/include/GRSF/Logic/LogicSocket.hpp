@@ -186,12 +186,15 @@ T & LogicSocket<T>::getRefValue() {
     ASSERTMSG(Outputs::name == this->m_outputs.size(), " Wrong order for Output: " << Outputs::name) \
 	addOSock< OType##name > (  value );	\
 
+#define REMOVEPTR_REMOVEREF( _ptr_ ) \
+    std::remove_pointer<typename std::remove_reference< decltype(_ptr_) >::type >::type
+
 /** VALUE SETTER MACROS */
 #define SET_ISOCKET_VALUE_PTR(ptr, name, value )	\
-    ptr->setISocketValue< typename std::remove_pointer<decltype(ptr)>::type::IType##name > ( (std::remove_pointer<decltype(ptr)>::type::Inputs::name), value )
+    ptr->setISocketValue< typename REMOVEPTR_REMOVEREF(ptr)::IType##name > ( ( REMOVEPTR_REMOVEREF(ptr)::Inputs::name), value )
 
 #define SET_OSOCKET_VALUE_PTR(ptr, name, value )	\
-    ptr->setOSocketValue< typename std::remove_pointer<decltype(ptr)>::type::OType##name > ( (std::remove_pointer<decltype(ptr)>::type::Outputs::name), value )
+    ptr->setOSocketValue< typename REMOVEPTR_REMOVEREF(ptr)::OType##name > ( ( REMOVEPTR_REMOVEREF(ptr)::Outputs::name), value )
 
 #define SET_ISOCKET_VALUE( name, value )	\
 	SET_ISOCKET_VALUE_PTR(this,name,value)
@@ -202,10 +205,10 @@ T & LogicSocket<T>::getRefValue() {
 
 /** VALUE GETTER MACROS */
 #define GET_ISOCKET_VALUE_PTR( ptr, name )      \
-	ptr->getISocketValue< typename std::remove_pointer<decltype(ptr)>::type::IType##name > ( (std::remove_pointer<decltype(ptr)>::type::Inputs::name) )
+	ptr->getISocketValue< typename REMOVEPTR_REMOVEREF(ptr)::IType##name > ( (REMOVEPTR_REMOVEREF(ptr)::Inputs::name) )
 
 #define GET_OSOCKET_VALUE_PTR( ptr, name )      \
-	ptr->getOSocketValue< typename std::remove_pointer<decltype(ptr)>::type::OType##name > ( (std::remove_pointer<decltype(ptr)>::type::Outputs::name) )
+	ptr->getOSocketValue< typename REMOVEPTR_REMOVEREF(ptr)::OType##name > ( (REMOVEPTR_REMOVEREF(ptr)::Outputs::name) )
 
 #define GET_ISOCKET_VALUE( name )      \
 	GET_ISOCKET_VALUE_PTR(this,name)

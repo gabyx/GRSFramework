@@ -1,6 +1,7 @@
 #ifndef GRSF_General_LogicParserModules_hpp
 #define GRSF_General_LogicParserModules_hpp
 
+#include "GRSF/Common/CommonFunctions.hpp"
 
 #include "GRSF/Logic/SimpleFunction.hpp"
 #include "GRSF/Logic/StringFormatNode.hpp"
@@ -12,7 +13,6 @@
 
 #include "GRSF/General/SimFileExecutionGraphNodes.hpp"
 #include "GRSF/General/LogicParserTraitsMacro.hpp"
-
 
 /** Parser for all execution graph nodes except special ones for rendering */
 
@@ -26,7 +26,7 @@ namespace LogicParserModules{
 
         using Base = LogicModule; // no base so far
 
-        using ExecGroups = typename SimFileExecutionGraph::ExecGroups;
+        using NodeGroups = typename SimFileExecutionGraph::NodeGroups;
 
         LogicModule(ParserType * p, SimFileExecutionGraph * g)
             :m_parser(p),m_executionGraph(g), m_pLog(p->getLog())
@@ -151,19 +151,63 @@ namespace LogicParserModules{
     protected:
 
         /** Adds the tool to the groupId, if not specified it is added to the BODY group */
+        template<bool needsInitGroup = false>
         void addNodeToGroup(XMLNodeType & logicNode, unsigned int id){
+
+            /** Executable groups */
             auto att = logicNode.attribute("groupId");
             if( att ){
+
                 std::string gid = att.value();
-                if(gid == "Body"){
-                    m_executionGraph->addNodeToGroup(id, ExecGroups::BODY);
-                }else if(gid == "Frame"){
-                    m_executionGraph->addNodeToGroup(id, ExecGroups::FRAME);
-                }else{
-                    ERRORMSG("---> String conversion in Constant tool: groupId: '" << gid << "' not found!");
+
+                std::vector<std::string> l;
+                Utilities::stringToType(l,gid);
+
+                for(auto s : l){
+
+                    if(s == "Body"){
+                        m_executionGraph->addNodeToGroup(id, NodeGroups::BODY_EXEC);
+                    }
+                    else if(s == "Frame"){
+                        m_executionGraph->addNodeToGroup(id, NodeGroups::FRAME_EXEC);
+                    }else{
+                        unsigned int g;
+                        if(!Utilities::stringToType(g,s)){
+                            ERRORMSG("---> String conversion in Constant tool: groupId: '" << s << "' not found!");
+                        }
+                        m_executionGraph->addNodeToGroup(id, g);
+                    }
                 }
             }else{
-                m_executionGraph->addNodeToGroup(id, ExecGroups::BODY);
+                m_executionGraph->addNodeToGroup(id, NodeGroups::BODY_EXEC);
+            }
+
+            if(needsInitGroup){
+                auto att = logicNode.attribute("groupIdInit");
+                if( att ){
+
+                    std::string gid = att.value();
+
+                    std::vector<std::string> l;
+                    Utilities::stringToType(l,gid);
+
+                    for(auto s : l){
+                        if(s == "Body"){
+                            m_executionGraph->addNodeToGroup(id, NodeGroups::BODY_INIT);
+                        }
+                        else if(s == "Frame"){
+                            m_executionGraph->addNodeToGroup(id, NodeGroups::FRAME_INIT);
+                        }else{
+                            unsigned int g;
+                            if(!Utilities::stringToType(g,s)){
+                                ERRORMSG("---> String conversion in Constant tool: groupId: '" << s << "' not found!");
+                            }
+                            m_executionGraph->addNodeToGroup(id, g);
+                        }
+                    }
+                }else{
+                    ERRORMSG("You need to specify a groupIdInit for this tool id: " << id);
+                }
             }
         }
 
@@ -434,14 +478,14 @@ namespace LogicParserModules{
         void createToolFrameData(XMLNodeType & logicNode, unsigned int id) {
             auto * node = new LogicNodes::FrameData(id);
             m_executionGraph->addNode(node,true,false);
-            m_executionGraph->addNodeToGroup(id,ExecGroups::FRAME);
+            m_executionGraph->addNodeToGroup(id,NodeGroups::FRAME_EXEC);
             m_executionGraph->setFrameData(node);
         }
 
         void createToolBodyData(XMLNodeType & logicNode, unsigned int id) {
             auto * node = new LogicNodes::BodyData(id);
             m_executionGraph->addNode(node,true,false);
-            m_executionGraph->addNodeToGroup(id,ExecGroups::BODY);
+            m_executionGraph->addNodeToGroup(id,NodeGroups::BODY_EXEC);
             m_executionGraph->setBodyData(node);
         }
 
@@ -449,7 +493,7 @@ namespace LogicParserModules{
 
             auto * node = new LogicNodes::DisplacementToPosQuat(id);
             m_executionGraph->addNode(node,false,false);
-            m_executionGraph->addNodeToGroup(id,ExecGroups::BODY);
+            m_executionGraph->addNodeToGroup(id,NodeGroups::BODY_EXEC);
 
         }
 
@@ -457,7 +501,7 @@ namespace LogicParserModules{
 
             auto * node = new LogicNodes::VelocityToVelRot(id);
             m_executionGraph->addNode(node,false,false);
-            m_executionGraph->addNodeToGroup(id,ExecGroups::BODY);
+            m_executionGraph->addNodeToGroup(id,NodeGroups::BODY_EXEC);
 
         }
 

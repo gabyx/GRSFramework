@@ -16,7 +16,7 @@ class RenderExecutionGraph : public SimFileExecutionGraph
 {
     public:
         using Base = SimFileExecutionGraph;
-        using ExecGroups = Base::ExecGroups;
+        using NodeGroups = Base::NodeGroups;
 
         RenderExecutionGraph(){};
 

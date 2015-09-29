@@ -32,6 +32,7 @@
 #include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
 #include "GRSF/Dynamics/General/InertiaTensorCalculations.hpp"
 #include "GRSF/Dynamics/General/InitialConditionBodies.hpp"
+#include "GRSF/Dynamics/General/ParserFunctions.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
 #include "GRSF/Dynamics/General/TimeStepperSettings.hpp"
@@ -1893,7 +1894,7 @@ private:
         auto itEnd = m_bodiesGroup->end();
         ASSERTMSG(bodyIt != itEnd, "no bodies in list");
 
-        Quaternion q_KI, q_BK;
+        Quaternion q_KI;
         Vector3 I_r_IK;
 
         auto nodes = initCond.children("Pos");
@@ -1910,54 +1911,7 @@ private:
                 continue;
             }
 
-            q_KI.setIdentity();//QuaternionHelpers::setQuaternionZero(q_KI);
-            I_r_IK.setZero();
-
-            // Iterate over all transforms an successfully applying the total trasnformation!
-            Vector3 trans;
-            Vector3 axis;
-            PREC angle;
-            for ( XMLNodeType & transf : itNode->children("Trafo")) {
-
-
-                if(!Utilities::stringToVector3(trans, transf.attribute("trans").value())) {
-                    ERRORMSG("---> String conversion in InitialPositionTransforms: translation failed");
-                }
-
-                if(!Utilities::stringToVector3(axis, transf.attribute("axis").value())) {
-                    ERRORMSG("---> String conversion in InitialPositionTransforms: rotationAxis failed");
-                }
-
-                if( axis.norm() == 0) {
-                    ERRORMSG("---> Specified wrong axis in InitialPositionTransforms");
-                }
-
-                auto att = transf.attribute("deg");
-                if(att) {
-                    if(!Utilities::stringToType(angle, att.value())) {
-                        ERRORMSG("---> String conversion in InitialPositionPosAxisAngle: rad failed");
-                    }
-                    angle = angle / 180.0 * M_PI;
-                } else {
-                    att = transf.attribute("rad");
-                    if(att) {
-                        if(!Utilities::stringToType(angle, att.value())) {
-                            ERRORMSG("---> String conversion in InitialPositionPosAxisAngle: deg failed");
-                        }
-                    } else {
-                        ERRORMSG("---> No angle found in InitialPositionPosAxisAngle");
-                    }
-                }
-                axis.normalize();
-                q_BK = AngleAxis(angle,axis);
-                trans=q_KI*trans;//QuaternionHelpers::rotateVector(q_KI, trans ); //K_r_KB = trans;
-                I_r_IK +=  trans;  // + Rot_KI * K_r_KB; // Transforms like A_IK * K_r_KB;
-
-                q_KI = q_KI*q_BK;//QuaternionHelpers::quatMult(q_KI,q_BK);
-                // Sequential (aktiv) rotation ( A_AB * B_R_2 * A_BA * A_R_1 ) *A_x
-                // is the same like: A_R_1 * B_R_2 (see documentation page)
-
-            }
+            ParserFunctions::parseTransformSequence(*itNode,q_KI,I_r_IK);
 
             // Apply overall transformation!
             stateIt->setDisplacement(I_r_IK,q_KI);

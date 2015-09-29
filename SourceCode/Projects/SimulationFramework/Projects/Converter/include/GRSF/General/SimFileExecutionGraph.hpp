@@ -19,23 +19,15 @@ namespace LogicNodes{
 class SimFileExecutionGraph : public ExecutionTreeInOut{
     public:
 
-        struct ExecGroups{
+        struct NodeGroups{
             enum {
-                BODY, /** all nodes which need to update for producing an render output from an input node BodyData*/
-                FRAME, /** all nodes which need to update for producing the inputs for the current frame */
-                NEXECGROUPS
+                FRAME_EXEC = 0, /** all nodes which need to update for producing the inputs for the current frame */
+                BODY_EXEC = 1, /** all nodes which need to update for producing an render output from an input node BodyData*/
+                BODY_INIT,
+                FRAME_INIT,
+                NNODE_GROUPS
             };
         };
-
-        struct InitializeGroups{
-            enum {
-                BODY,  /** all nodes which are initialized before the BODY ExecGroup is executed*/
-                FRAME, /** all nodes which are initialized before the FRAME ExecGroup is executed*/
-                NINITGROUPS
-            };
-        };
-
-
 
         SimFileExecutionGraph(){};
 
@@ -48,16 +40,18 @@ class SimFileExecutionGraph : public ExecutionTreeInOut{
 
         inline void setFrameData(LogicNodes::FrameData *n){m_frameData = n;}
         inline void setBodyData(LogicNodes::BodyData *n){m_bodyDataNode = n;}
-        inline void setStopNode(LogicNodes::StopNode *n){m_stopNode = n;}
+        void setStopNode(LogicNodes::StopNode *n, unsigned int stopGroupId);
 
 
-        bool checkStop();
+        bool checkStop(unsigned int groupId);
 
     private:
 
         LogicNodes::BodyData  * m_bodyDataNode =  nullptr;
         LogicNodes::FrameData * m_frameData    =  nullptr;
-        LogicNodes::StopNode  * m_stopNode     =  nullptr;
+
+        /** Stop nodes for Body and Frame group */
+        std::array<LogicNodes::StopNode*,2> m_stopNodes =  {{nullptr,nullptr}};
 
         Logging::Log * m_log = nullptr;
 };
