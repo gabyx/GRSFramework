@@ -22,11 +22,14 @@ public:
 
 	virtual ~LogicNode();
 
-    // do the update logic
+    /** some reset*/
+    virtual void reset(){}
+
+    /** the main compute function
+        may be called many times
+    */
     virtual void compute() {}
 
-    // do first run initialization
-    virtual void reset(){}
 
     LogicSocketBase*   getISocket(unsigned int index);
     LogicSocketBase*   getOSocket(unsigned int index);

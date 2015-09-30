@@ -20,10 +20,10 @@ class RenderExecutionGraph : public SimFileExecutionGraph
 
         RenderExecutionGraph(){};
 
-        virtual void setup();
-        virtual void initFrame(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
-        virtual void finalizeFrame();
-        virtual void generateFrameData(RigidBodyStateAdd * s);
+        void setup();
+        void initFrame(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
+        void finalizeFrame();
+        void addBodyState(RigidBodyStateAdd * s);
 
     private:
         std::unordered_set<LogicNodes::RenderScriptWriter *> m_scriptWritterNodes;

@@ -6,6 +6,8 @@
 
 #include <boost/mpl/vector.hpp>
 
+#include "GRSF/Common/DemangleTypes.hpp"
+
 #include "GRSF/Logic/LogicNode.hpp"
 #include "GRSF/Logic/LogicSocket.hpp"
 
@@ -118,6 +120,14 @@ public:
         }
     }
 
+    /** Finalize group */
+    virtual void finalize(unsigned int groupId) {
+        for(auto & n : m_groupExecList[groupId]) {
+            // Execute in determined order!
+            n->compute();
+        }
+    }
+
     /** Execute all groups */
     virtual void executeAll() {
         for(auto &  g : m_groupExecList){
@@ -143,6 +153,7 @@ public:
         }
 
         // Solve execution order for every group list!
+        // Each group has its own execution order!
         ExecutionOrderSolver s;
         m_groupExecList.clear();
         for(auto & p : m_groupNodes){
@@ -158,15 +169,19 @@ public:
         }
 
         // Check if input is reachable from all outputs
-        m_inputNotReachable = false;
         ReachNodeCheck c;
         for(auto & o : m_outputNodes){
+                bool outputReachedInput = false;
+                // each outputnode should reach at least one input, if not print warning!
                 for(auto & i : m_inputNodes){
-                     m_inputNotReachable = m_inputNotReachable && !c.check(o, i);
+                     if(c.check(o, i)){
+                        outputReachedInput = true;
+                        break;
+                     }
                 }
-        }
-        if(m_inputNotReachable) {
-            ERRORMSG("Your input nodes cannot be reached by all output node!")
+                if(!outputReachedInput){
+                    WARNINGMSG(false,"WARNING: Output id: " << o->m_id << " did not reach any input!")
+                }
         }
 
     }
@@ -176,10 +191,10 @@ public:
         // Print execution order
         std::stringstream s;
         for(auto &g : m_groupExecList){
-            s << suffix << "Execution order for group id: " <<g.first << std::endl;
-            s << suffix << "NodeId\t|\tPriority  "<< std::endl;
+            s <<"Execution order for group id: " <<g.first << std::endl;
+            s << suffix << "NodeId\t|\tPriority\t|\tType"<< std::endl;
                 for(auto n : g.second){
-                    s << suffix << Utilities::stringFormat("%4i \t|\t %4i", n->m_id , n->getPriority()) <<std::endl;
+                    s << suffix << Utilities::stringFormat("%4i \t|\t %4i \t|\t %s", n->m_id , n->getPriority(), demangle::type(n)) <<std::endl;
                 }
             s << suffix << "==============================" <<std::endl;
         }
@@ -330,8 +345,6 @@ protected:
         }
 
     }
-
-    bool m_inputNotReachable = true;
 
     NodeSetT m_inputNodes;  ///< the input nodes
     OutputNodeMapT m_outputNodes; ///< all output nodes in the tree

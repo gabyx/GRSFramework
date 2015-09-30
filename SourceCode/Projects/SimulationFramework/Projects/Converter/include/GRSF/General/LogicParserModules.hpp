@@ -3,13 +3,16 @@
 
 #include "GRSF/Common/CommonFunctions.hpp"
 
+#include "GRSF/Dynamics/General/ParserFunctions.hpp"
+
 #include "GRSF/Logic/SimpleFunction.hpp"
 #include "GRSF/Logic/StringFormatNode.hpp"
 #include "GRSF/Logic/ConstantNode.hpp"
 #include "GRSF/Logic/NormNode.hpp"
 #include "GRSF/Logic/LookUpTable.hpp"
 #include "GRSF/Logic/LineWriter.hpp"
-
+#include "GRSF/Logic/StopNode.hpp"
+#include "GRSF/Logic/XMLLineWriter.hpp"
 
 #include "GRSF/General/SimFileExecutionGraphNodes.hpp"
 #include "GRSF/General/LogicParserTraitsMacro.hpp"
@@ -26,7 +29,8 @@ namespace LogicParserModules{
 
         using Base = LogicModule; // no base so far
 
-        using NodeGroups = typename SimFileExecutionGraph::NodeGroups;
+        using ExecutionGraphType = SimFileExecutionGraph;
+        using NodeGroups = typename ExecutionGraphType::NodeGroups;
 
         LogicModule(ParserType * p, SimFileExecutionGraph * g)
             :m_parser(p),m_executionGraph(g), m_pLog(p->getLog())
@@ -65,20 +69,28 @@ namespace LogicParserModules{
                     createToolBodyData(tool,id);
                 }else if(type == "FrameDataInput") {
                     createToolFrameData(tool,id);
+                }else if(type == "SimFileInfo") {
+                    createToolSimFileInfo(tool,id);
                 } else if(type == "SimpleFunction") {
                     createToolSimpleFunction(tool,id);
                 } else if(type == "StringFormat") {
                     createToolStringFormat(tool,id);
                 } else if(type == "LineWriter") {
                     createToolLineWriter(tool,id);
+                } else if(type == "XMLLineWriter") {
+                    createToolXMLLineWriter(tool,id);
                 } else if(type == "DisplacementToPosQuat") {
                     createToolDisplacementToPosQuat(tool,id);
                 } else if(type == "VelocityToVelRot") {
                     createToolVelocityToVelRot(tool,id);
+                }else if(type == "OOBBCollider") {
+                    createToolOOBBCollider(tool,id);
                 }else if(type == "Norm") {
                     createToolNorm(tool,id);
                 }else if(type == "Constant"){
                     createToolConstant(tool,id);
+                }else if(type == "StopNode"){
+                    createToolStopNode(tool,id);
                 }else {
                     ERRORMSG("---> String conversion in Tool: type: " << type <<" not found!");
                 }
@@ -151,62 +163,41 @@ namespace LogicParserModules{
     protected:
 
         /** Adds the tool to the groupId, if not specified it is added to the BODY group */
-        template<bool needsInitGroup = false>
-        void addNodeToGroup(XMLNodeType & logicNode, unsigned int id){
+        template<bool needsResetGroup = false>
+        void addNodeToGroup(XMLNodeType & logicNode, unsigned int id, std::string defaultGroupName=""){
 
+            std::vector<std::string> l;
             /** Executable groups */
             auto att = logicNode.attribute("groupId");
             if( att ){
 
-                std::string gid = att.value();
-
-                std::vector<std::string> l;
-                Utilities::stringToType(l,gid);
+                if(!Utilities::stringToType(l,att.value())){
+                    ERRORMSG("String conversion fail for tool id: " << id)
+                }
 
                 for(auto s : l){
-
-                    if(s == "Body"){
-                        m_executionGraph->addNodeToGroup(id, NodeGroups::BODY_EXEC);
-                    }
-                    else if(s == "Frame"){
-                        m_executionGraph->addNodeToGroup(id, NodeGroups::FRAME_EXEC);
-                    }else{
-                        unsigned int g;
-                        if(!Utilities::stringToType(g,s)){
-                            ERRORMSG("---> String conversion in Constant tool: groupId: '" << s << "' not found!");
-                        }
-                        m_executionGraph->addNodeToGroup(id, g);
-                    }
+                    m_executionGraph->addNodeToGroup(id, s);
                 }
             }else{
-                m_executionGraph->addNodeToGroup(id, NodeGroups::BODY_EXEC);
+                // add to standart group in execution graph
+                m_executionGraph->addNodeToGroup(id,defaultGroupName);
             }
 
-            if(needsInitGroup){
-                auto att = logicNode.attribute("groupIdInit");
+            if(needsResetGroup){
+                auto att = logicNode.attribute("resetGroupId");
                 if( att ){
 
-                    std::string gid = att.value();
-
-                    std::vector<std::string> l;
-                    Utilities::stringToType(l,gid);
+                    l.clear();
+                    if(!Utilities::stringToType(l,att.value())){
+                        ERRORMSG("String conversion fail for tool id: " << id)
+                    }
 
                     for(auto s : l){
-                        if(s == "Body"){
-                            m_executionGraph->addNodeToGroup(id, NodeGroups::BODY_INIT);
-                        }
-                        else if(s == "Frame"){
-                            m_executionGraph->addNodeToGroup(id, NodeGroups::FRAME_INIT);
-                        }else{
-                            unsigned int g;
-                            if(!Utilities::stringToType(g,s)){
-                                ERRORMSG("---> String conversion in Constant tool: groupId: '" << s << "' not found!");
-                            }
-                            m_executionGraph->addNodeToGroup(id, g);
-                        }
+                        m_executionGraph->addNodeToResetGroup(id, s);
                     }
+
                 }else{
-                    ERRORMSG("You need to specify a groupIdInit for this tool id: " << id);
+                    ERRORMSG("You need to specify a resetGroupId for this tool id: " << id);
                 }
             }
         }
@@ -323,7 +314,7 @@ namespace LogicParserModules{
                     else if ADD_STRINGFORMAT_SOCKET2_IN(std::string,string)
                     else if ADD_STRINGFORMAT_SOCKET2_IN(boost::filesystem::path,path)
                     else{
-                        ERRORMSG("---> String conversion in Constant tool: InputFormat: '" << t << "' not found!");
+                        ERRORMSG("---> String conversion in StringFormatNode tool: InputFormat: '" << t << "' not found!");
                     }
                 }
                 unsigned int outs = 0;
@@ -347,6 +338,8 @@ namespace LogicParserModules{
 
                 addNodeToGroup(logicNode,id);
         }
+
+
 
         #define DEFINE_MAKESimpleFunc \
             n = new LogicNodes::SimpleFunction<T1,T2>(id,inputs,expressionString);
@@ -468,42 +461,145 @@ namespace LogicParserModules{
                     ERRORMSG("---> String conversion in Constant tool: inputType: '" << t << "' not found!");
                 }
 
-                m_executionGraph->addNode(n,false,false);
+                m_executionGraph->addNode(n,false,true);
+
+                addNodeToGroup(logicNode,id);
+
+        }
+
+        #define DEFINE_XMLLINEWRITER2(type, typeName) \
+            ( t == #typeName ){ \
+                using T = type; \
+                XMLAttributeType att; \
+                std::string rootName = "Root"; \
+                att = logicNode.attribute("rootName"); \
+                if(att){ \
+                    rootName = att.value(); \
+                }\
+                std::string childName = "Child"; \
+                att = logicNode.attribute("childName"); \
+                if(att){ \
+                    childName = att.value(); \
+                }\
+                std::string file;\
+                att = logicNode.attribute("file");\
+                if(att) {\
+                    file = logicNode.attribute("file").value(); \
+                    if(file.empty()){ \
+                        ERRORMSG("---> String conversion in XMLLineWriter tool file: " << file << " failed!")\
+                    }\
+                }\
+                n = new LogicNodes::XMLLineWriter<T>(id,file,rootName,childName); \
+            }
+
+        #define DEFINE_XMLLINEWRITER(type) DEFINE_XMLLINEWRITER2(type,type)
+
+        void createToolXMLLineWriter(XMLNodeType & logicNode, unsigned int id){
+
+                std::string t = logicNode.attribute("inputType").value();
+
+                LogicNode * n;
+                if DEFINE_XMLLINEWRITER(float)
+                else if DEFINE_XMLLINEWRITER(double)
+                else if DEFINE_XMLLINEWRITER(char)
+                else if DEFINE_XMLLINEWRITER(short)
+                else if DEFINE_XMLLINEWRITER(int)
+                else if DEFINE_XMLLINEWRITER(long int)
+                else if DEFINE_XMLLINEWRITER(long long int)
+                else if DEFINE_XMLLINEWRITER(unsigned char)
+                else if DEFINE_XMLLINEWRITER(unsigned short)
+                else if DEFINE_XMLLINEWRITER(unsigned int)
+                else if DEFINE_XMLLINEWRITER(unsigned long int)
+                else if DEFINE_XMLLINEWRITER(unsigned long long int)
+                else if DEFINE_XMLLINEWRITER2(std::string,string)
+                else if DEFINE_XMLLINEWRITER2(boost::filesystem::path,path)
+                else{
+                    ERRORMSG("---> String conversion in XMLLineWriter tool: inputType: '" << t << "' not found!");
+                }
+
+                m_executionGraph->addNode(n,false,true);
 
                 addNodeToGroup(logicNode,id);
 
         }
 
 
+
         void createToolFrameData(XMLNodeType & logicNode, unsigned int id) {
             auto * node = new LogicNodes::FrameData(id);
             m_executionGraph->addNode(node,true,false);
-            m_executionGraph->addNodeToGroup(id,NodeGroups::FRAME_EXEC);
+            addNodeToGroup(logicNode,id,"Frame");
             m_executionGraph->setFrameData(node);
         }
 
         void createToolBodyData(XMLNodeType & logicNode, unsigned int id) {
             auto * node = new LogicNodes::BodyData(id);
             m_executionGraph->addNode(node,true,false);
-            m_executionGraph->addNodeToGroup(id,NodeGroups::BODY_EXEC);
+            addNodeToGroup(logicNode,id,"Body");
             m_executionGraph->setBodyData(node);
+        }
+
+        void createToolSimFileInfo(XMLNodeType & logicNode, unsigned int id) {
+            auto * node = new LogicNodes::SimFileInfo(id);
+            m_executionGraph->addNode(node,true,false);
+            addNodeToGroup(logicNode,id,"Frame");
+            m_executionGraph->setSimFileInfo(node);
         }
 
         void createToolDisplacementToPosQuat(XMLNodeType & logicNode, unsigned int id) {
 
             auto * node = new LogicNodes::DisplacementToPosQuat(id);
             m_executionGraph->addNode(node,false,false);
-            m_executionGraph->addNodeToGroup(id,NodeGroups::BODY_EXEC);
-
+            addNodeToGroup(logicNode,id,"Body");
         }
 
         void createToolVelocityToVelRot(XMLNodeType & logicNode, unsigned int id) {
 
             auto * node = new LogicNodes::VelocityToVelRot(id);
             m_executionGraph->addNode(node,false,false);
-            m_executionGraph->addNodeToGroup(id,NodeGroups::BODY_EXEC);
-
+            addNodeToGroup(logicNode,id,"Body");
         }
+
+        void createToolStopNode(XMLNodeType & logicNode, unsigned int id) {
+            std::string stopGroupId;
+            stopGroupId = logicNode.attribute("stopGroupId").value();
+
+            auto it = ExecutionGraphType::m_nameToExecGroupId.find(stopGroupId);
+            if(it==ExecutionGraphType::m_nameToExecGroupId.end()){
+                ERRORMSG("No group found for " << "stopGroupId: " << stopGroupId)
+            }
+
+            auto * node = new LogicNodes::StopNode(id);
+            m_executionGraph->addNode(node,false,false);
+            //addNodeToGroup(logicNode,id,"Frame"); no add to group
+            m_executionGraph->setStopNode(node,it->second);
+        }
+
+
+        void createToolOOBBCollider(XMLNodeType & logicNode, unsigned int id) {
+
+            Vector3 minPoint;
+            if(!Utilities::stringToVector3(minPoint,  logicNode.attribute("minPoint").value())) {
+                ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
+            }
+            Vector3 maxPoint;
+            if(!Utilities::stringToVector3(maxPoint,  logicNode.attribute("maxPoint").value())) {
+                ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
+            }
+            Quaternion q_KI;
+            Vector3 I_r_IK;
+            ParserFunctions::parseTransformSequence(logicNode,q_KI,I_r_IK);
+            Matrix33 R_KI = q_KI.toRotationMatrix();
+            I_r_IK = R_KI.transpose()*I_r_IK; // make K_r_IK  = A_KI * I_r_IK
+            AABB3d aabb( I_r_IK + minPoint, I_r_IK + maxPoint);
+
+            auto * node = new LogicNodes::OOBBCollider(id,aabb,R_KI);
+
+            m_executionGraph->addNode(node,false,false);
+            addNodeToGroup<true>(logicNode,id,"Body");
+        }
+
+
 
         ParserType * m_parser;
         LogType * m_pLog;
@@ -533,5 +629,8 @@ namespace LogicParserModules{
 
 #undef DEFINE_LINEWRITER2
 #undef DEFINE_LINEWRITER
+
+#undef DEFINE_XMLLINEWRITER2
+#undef DEFINE_XMLLINEWRITER
 
 #endif // GRSF_General_LogicParserModules_hpp

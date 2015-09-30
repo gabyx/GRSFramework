@@ -174,7 +174,6 @@ LogManager::LogManager() {
 }
 
 LogManager::~LogManager() {
-    DECONSTRUCTOR_MESSAGE
     for(auto & p : m_logList) {
         if(p.second) {
             delete p.second; //Delete all logs!

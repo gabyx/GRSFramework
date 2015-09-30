@@ -30,10 +30,16 @@ void RenderExecutionGraph::initFrame(boost::filesystem::path folder,
                                       double time,
                                       unsigned int frameNr)
 {
-
-
-
      Base::initFrame(folder,filename,time,frameNr);
+
+     // TODO RendermanWriter node should be LogicNodeGroup (which consist of several LogicNodes by composition)
+     // one for InitNode, AddBodyStateNode, FinalizeFrameNode,  which then can be connected to
+     // and the group assigned to
+     // InitNode -> FRAME_INIT,
+     // AddBodyStateNode -> BODY_FINAL
+     // ExecutionTreeInOut needs then support to add LogicNodeGroup, adds all members nodes of a LogicGroupNode
+     // LogicGroupNode is something special, no compute() function, but provides a ways to expose multiple functionality
+     //
 
      // Call all render script writters
      for(auto & n : m_scriptWritterNodes){
@@ -51,9 +57,9 @@ void RenderExecutionGraph::finalizeFrame(){
      }
 }
 
-void RenderExecutionGraph::generateFrameData(RigidBodyStateAdd * s) {
+void RenderExecutionGraph::addBodyState(RigidBodyStateAdd * s) {
 
-    Base::generateFrameData(s);
+    Base::addBodyState(s);
 
     // Call all render script writters
      for(auto & n : m_scriptWritterNodes){

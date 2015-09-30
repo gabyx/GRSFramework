@@ -254,13 +254,13 @@ private:
     void createToolMatteMaterial(XMLNodeType & logicNode, unsigned int id) {
         auto * node = new LogicNodes::MatteMaterial(id);
         m_executionGraph->addNode(node,false,false);
-        m_executionGraph->addNodeToGroup(id,NodeGroups::BODY_EXEC);
+        this->addNodeToGroup(logicNode,id,"Body");
     }
 
     void createToolBxdfDisneyMaterial(XMLNodeType & logicNode, unsigned int id) {
         auto * node = new LogicNodes::BxdfDisneyMaterial(id);
         m_executionGraph->addNode(node,false,false);
-        m_executionGraph->addNodeToGroup(id,NodeGroups::BODY_EXEC);
+        this->addNodeToGroup(logicNode,id,"Body");
     }
 
     void createToolMaterialLookUp(XMLNodeType & logicNode, unsigned int id) {
