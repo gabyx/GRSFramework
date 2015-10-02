@@ -14,8 +14,9 @@
 #include "GRSF/Converters/SimFileInfo.hpp"
 #include "GRSF/Converters/SimFileJoiner.hpp"
 #include "GRSF/Converters/SimFileResampler.hpp"
-#include "GRSF/Converters/RenderConverter.hpp"
-#include "GRSF/Converters/AnalyzerConverter.hpp"
+//#include "GRSF/Converters/RenderConverter.hpp"
+//#include "GRSF/Converters/AnalyzerConverter.hpp"
+#include "GRSF/Converters/GridderConverter.hpp"
 
 void printHelpAndExit(std::string o=""){
      std::cerr << "Wrong Options: '" << o <<"'"<< std::endl
@@ -113,46 +114,69 @@ int main(int argc, char **argv) {
         }
         else if(std::string(argv[1]) == "renderer"){
 
-            Logging::LogManager logger; // singelton
-
-            // Parsing Input Parameters===================================
-            ApplicationCLOptionsRenderer opts;  // singelton
-            opts.parseOptions(argc-1,++argv);
-            opts.checkArguments();
-            opts.printArgs(std::cerr);
-            // End Parsing =================================
-
-            try{
-                RenderConverter renderConv(opts.getInputFiles(),
-                                   opts.getOutputFile(),
-                                   opts.getOutputDir(),
-                                   opts.getSceneFile(),
-                                   opts.getConverterLogicFile() ,
-                                   opts.getRenderer());
-                renderConv.convert();
-
-            }catch(const Exception & e){
-                    std::cerr <<"Exception occured: " <<  e.what() << std::endl;
-                    exit(EXIT_FAILURE);
-            }
+//            Logging::LogManager logger; // singelton
+//
+//            // Parsing Input Parameters===================================
+//            ApplicationCLOptionsRenderer opts;  // singelton
+//            opts.parseOptions(argc-1,++argv);
+//            opts.checkArguments();
+//            opts.printArgs(std::cerr);
+//            // End Parsing =================================
+//
+//            try{
+//                RenderConverter renderConv(opts.getInputFiles(),
+//                                   opts.getOutputFile(),
+//                                   opts.getOutputDir(),
+//                                   opts.getSceneFile(),
+//                                   opts.getConverterLogicFile() ,
+//                                   opts.getRenderer());
+//                renderConv.convert();
+//
+//            }catch(const Exception & e){
+//                    std::cerr <<"Exception occured: " <<  e.what() << std::endl;
+//                    exit(EXIT_FAILURE);
+//            }
         }else if(std::string(argv[1]) == "analyzer"){
 
+//            Logging::LogManager logger; // singelton
+//
+//            // Parsing Input Parameters===================================
+//            ApplicationCLOptionsAnalyzer opts;  // singelton
+//            opts.parseOptions(argc-1,++argv);
+//            opts.checkArguments();
+//            opts.printArgs(std::cerr);
+//            // End Parsing =================================
+//
+//            try{
+//                AnalyzerConverter analyzerConv(opts.getInputFiles(),
+//                                     opts.getOutputFile(),
+//                                     opts.getOutputDir(),
+//                                     opts.getSceneFile(),
+//                                     opts.getConverterLogicFile());
+//                analyzerConv.convert();
+//
+//            }catch(const Exception & e){
+//                    std::cerr <<"Exception occured: " <<  e.what() << std::endl;
+//                    exit(EXIT_FAILURE);
+//            }
+        }else if(std::string(argv[1]) == "gridder"){
+
             Logging::LogManager logger; // singelton
 
             // Parsing Input Parameters===================================
-            ApplicationCLOptionsAnalyzer opts;  // singelton
+            ApplicationCLOptionsGridder opts;  // singelton
             opts.parseOptions(argc-1,++argv);
             opts.checkArguments();
             opts.printArgs(std::cerr);
             // End Parsing =================================
 
             try{
-                AnalyzerConverter analyzerConv(opts.getInputFiles(),
+                GridderConverter gridderConv(opts.getInputFiles(),
                                      opts.getOutputFile(),
                                      opts.getOutputDir(),
                                      opts.getSceneFile(),
                                      opts.getConverterLogicFile());
-                analyzerConv.convert();
+                gridderConv.convert();
 
             }catch(const Exception & e){
                     std::cerr <<"Exception occured: " <<  e.what() << std::endl;

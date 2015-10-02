@@ -20,6 +20,10 @@
 
 #include "GRSF/Common/ApplicationSignalHandler.hpp"
 
+#include "GRSF/Common/ContainerTag.hpp"
+#include "GRSF/Common/SfinaeMacros.hpp"
+#include "GRSF/Common/ExpandParameterPack.hpp"
+
 #include "GRSF/Common/CPUTimer.hpp"
 #include "GRSF/Common/CommonFunctions.hpp"
 #include "GRSF/Common/ProgressBarCL.hpp"
@@ -47,8 +51,8 @@ public:
 
     }
 
-    template<typename TSimFileStepper>
-    void convert( TSimFileStepper & simFileStepper)
+    template<typename... TSimFileStepperList>
+    void convert( TSimFileStepperList&&... simFileStepper)
     {
 
         LOG(m_log, "---> LogicConverter started:" <<std::endl;);
@@ -74,7 +78,9 @@ public:
                 }
 
                 StateIndicesType stateIndices;
+
                 for(auto n : node.children("File")){
+
                     stateIndices.clear();
                     std::string uuid = n.attribute("uuid").value();
                     boost::filesystem::path path = n.attribute("simFile").value();
@@ -107,21 +113,30 @@ public:
                         // add to list
                         stateIndices.push_back( StateIndex{idx,frameIdx,outputFile});
                     }
+
                     LOG(m_log,"---> Parsed " << stateIndices.size() << " state for file: " << path << "from XML: " << file.filename() << std::endl;)
+
                     if( stateIndices.size() > 0){
-                        convertFile(simFileStepper,path,uuid,std::move(stateIndices));
+                        convertFile(simFileStepper...,path,uuid,std::move(stateIndices));
                     }else{
                         LOG(m_log,"---> No states to process..." << std::endl;)
                     }
+
+
 
                 }
 
             }else{
                 // try to convert sim file
-                convertFile(simFileStepper, file, std::to_string(fileIdx) );
+                convertFile(simFileStepper..., file, std::to_string(fileIdx) );
             }
 
             ++fileIdx;
+
+            if( EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::isStopFileLoop(simFileStepper) ) ){
+                LOG(m_log,"---> Stop file loop set, fileCount: " << fileIdx << " -> exit" << std::endl;)
+                break;
+            }
         }
     }
 
@@ -156,8 +171,8 @@ protected:
     }
 
     /** \p uuid string is a hash for the file path to identify each frame where it came from!*/
-    template<typename TSimFileStepper>
-    void convertFile(TSimFileStepper & simFileStepper,
+    template<typename... TSimFileStepperList>
+    void convertFile(TSimFileStepperList&&... simFileStepper,
                      const boost::filesystem::path & f,
                      const std::string uuidString ,
                      StateIndicesType stateIndices = {} )
@@ -177,7 +192,7 @@ protected:
         }
 
         // If we have a sim file info node, set the output
-        simFileStepper.initSimInfo(m_simFile.getNSimBodies(),m_simFile.getNStates());
+        EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::initSimInfo(simFileStepper, m_simFile.getNSimBodies(),m_simFile.getNStates()) )
 
 
         CPUTimer timer;
@@ -249,25 +264,27 @@ protected:
                 << "\n\tframeName: " << outputName << "\n\tframeIdx: " << frameIdx << "\n\ttime: " << time << std::endl;)
 
             start = timer.elapsedMilliSec();
-            simFileStepper.initFrame(outputDir, outputName , time, frameIdx );
+            EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::initFrame(simFileStepper,outputDir, outputName , time, frameIdx ) )
             avgInitFrameTime += timer.elapsedMilliSec() - start;
 
 
             start = timer.elapsedMilliSec();
             for(auto & bs: states){
-                simFileStepper.addBodyState(&bs);
 
-                if(simFileStepper.isStopBodyLoop()){
-                    break;
-                    m_terminatedByStepper=true;
-                }
+                EXPAND_PARAMETERPACK(  details::StepperDispatch<TSimFileStepper>::addBodyState(simFileStepper, &bs) )
 
                 bodyCounter++;
+
+                if( EXPAND_PARAMETERPACK(details::StepperDispatch<TSimFileStepper>::isStopBodyLoop(simFileStepper)) ){
+                    LOG(m_log,"---> Stop body loop set, bodyCount: " << bodyCounter << " -> exit" << std::endl;)
+                    m_terminatedByStepper=true;
+                    break;
+                }
             }
             avgStateTime += timer.elapsedMilliSec() - start;
 
 
-            simFileStepper.finalizeFrame();
+            EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::finalizeFrame(simFileStepper) )
 
             // skip to next stateIdx if we have indices
             if(!stateIndices.empty()){
@@ -289,7 +306,8 @@ protected:
 
             m_frameCounter++;
 
-            if(simFileStepper.isStopFrameLoop()){
+            if( EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::isStopFrameLoop(simFileStepper) ) ){
+                LOG(m_log,"---> Stop frame loop set, frameCount: " << m_frameCounter << " -> exit" << std::endl;)
                 m_terminatedByStepper=true;
                 break;
             }
@@ -312,6 +330,49 @@ protected:
 
     }
 
+    struct details{
+
+        template<typename T, typename Dummy = decltype(ContainerTags::is_container( std::declval<T>() /*make reference, no need for CTOR*/ ))>
+        struct StepperDispatch;
+
+        /** Normal function hooks dispatch for a simple stepper functor */
+        template<typename T>
+        struct StepperDispatch<T,std::false_type>{
+            STATIC_ASSERTM(false,"Only iterable lists of stepper functors allowed in convert()")
+        };
+
+
+        #define SIMFILESTEPPER_DISPATCH_FUNC_CONT( __name__ ) SIMFILESTEPPER_DISPATCH_FUNC_CONT2( __name__ , void )
+
+        #define SIMFILESTEPPER_DISPATCH_FUNC_CONT2(__name__, _return_) \
+            template<typename... Args> \
+            static _return_ __name__(T & c, Args&&... a ){ \
+                for(auto & t : c){ \
+                    t.__name__(std::forward<Args>(a)...); \
+                } \
+            }
+
+        /** Function hooks dispatch for a list of stepper functors of the same type*/
+        template<typename T>
+        struct StepperDispatch<T,std::true_type>{
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT(setup)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT(initSimInfo)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT(initFrame)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT(addBodyState)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT(finalizeFrame)
+
+            static bool isStopFileLoop(T & c, Args&&... a ){
+                for(auto & it = c.begin(); it!= c.end(); ++it){
+                    if( t.isStopFileLoop(std::forward<Args>(a)...) ){
+                        // remove this stepper from list, because it
+                        c.erase(it);
+                    }
+                }
+            }
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT2(isStopFrameLoop,bool)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT2(isStopFileLoop,bool)
+        };
+    };
 };
 
 #endif // LogicConverter_hpp

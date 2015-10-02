@@ -47,7 +47,7 @@ public:
     }
 
     template<typename TVisitor>
-    void applyVisitor(TVisitor & visitor){
+    void applyVisitor(TVisitor && visitor){
         // implement switch statement in LogicTypes
         LOGICSOCKET_APPLY_VISITOR_SWITCH;
     }
@@ -90,11 +90,13 @@ protected:
 
     /** from socket to 'this' (used to link an input socket with an output socket)
     *  incoming edges: only one makes sense
+    *  only valid for input sockets
     */
     LogicSocketBase* m_from;
 
     /** from 'this' to sockets (used to link an output socket with one or more than one input socket)
     *   outgoing edges
+    *   only valid for output sockets
     */
     SocketListType m_to;
 
@@ -129,13 +131,16 @@ public:
 
     template<typename TIn>
     void setValue(const TIn & value);
+
+    void distributeValue(); ///< Only for output socket
+
     T getValue() const;
 
-    T& getRefValue();
+    T& getValueRef();
 
 private:
 
-    T m_data; ///< Default value!
+    T m_data; ///< Default value! or the output value if output socket
 };
 
 
@@ -143,26 +148,36 @@ private:
 
 #include "GRSF/Logic/LogicNode.hpp"
 
+
 template<typename T>
-template<typename TIn>
-void LogicSocket<T>::setValue(const TIn& value) {
-    if(!m_isInput) {
-        // set all "to" sockets
+void LogicSocket<T>::distributeValue() {
+
+   if(!m_isInput) {
+        // if output node
+        // set all "to" sockets ( these are write links, because we write the value to another input socket)
         for(auto & s : m_to) {
             ASSERTMSG(s->m_type == m_type, "Types of node have to match: type "
                       << m_type << "from id: " << s->getParent()->m_id
                       << "to type " << s->m_type <<" of id: " << s->getParent()->m_id )
             LogicSocket<T>* sock = static_cast< LogicSocket<T>* > (s);
-            sock->setValue(value);
+            sock->setValue(m_data);
         }
     }
 
+}
+
+template<typename T>
+template<typename TIn>
+void LogicSocket<T>::setValue(const TIn& value) {
+    // set internal value for input node, however if output node we also set the value ( might be needed
     m_data = value;
+    distributeValue();
 };
 
 template<typename T>
 T LogicSocket<T>::getValue() const {
 
+    // if we have a "from" node (only for input sockets), we get the value from this sockets
     if(m_from) {
         return m_from->castToType<T>()->getValue();
     }
@@ -170,10 +185,13 @@ T LogicSocket<T>::getValue() const {
 };
 
 template<typename T>
-T & LogicSocket<T>::getRefValue() {
+T & LogicSocket<T>::getValueRef() {
+
+    // if we have a from"
     if(m_from) {
-        return m_from->castToType<T>()->getRefValue();
+        return m_from->castToType<T>()->getValueRef();
     }
+
     return m_data;
 }
 
@@ -196,12 +214,17 @@ T & LogicSocket<T>::getRefValue() {
 #define SET_OSOCKET_VALUE_PTR(ptr, name, value )	\
     ptr->setOSocketValue< typename REMOVEPTR_REMOVEREF(ptr)::OType##name > ( ( REMOVEPTR_REMOVEREF(ptr)::Outputs::name), value )
 
+#define DISTRIBUTE_OSOCKET_VALUE_PTR(ptr, name)	\
+    ptr->distributeOSocketValue< typename REMOVEPTR_REMOVEREF(ptr)::OType##name > ( ( REMOVEPTR_REMOVEREF(ptr)::Outputs::name) )
+
 #define SET_ISOCKET_VALUE( name, value )	\
 	SET_ISOCKET_VALUE_PTR(this,name,value)
 
 #define SET_OSOCKET_VALUE( name, value )	\
 	SET_OSOCKET_VALUE_PTR(this,name,value)
 
+#define DISTRIBUTE_OSOCKET_VALUE( name )	\
+	DISTRIBUTE_OSOCKET_VALUE_PTR(this,name)
 
 /** VALUE GETTER MACROS */
 #define GET_ISOCKET_VALUE_PTR( ptr, name )      \

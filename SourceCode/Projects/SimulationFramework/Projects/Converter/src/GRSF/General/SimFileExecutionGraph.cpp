@@ -6,9 +6,15 @@
 
 
 const std::map<std::string, unsigned int > SimFileExecutionGraph::m_nameToExecGroupId = {
-    {"Body", SimFileExecutionGraph::NodeGroups::BODY_EXEC}, {"Frame", SimFileExecutionGraph::NodeGroups::FRAME_EXEC}};
+    {"Body", SimFileExecutionGraph::NodeGroups::BODY_EXEC},
+    {"Frame", SimFileExecutionGraph::NodeGroups::FRAME_EXEC},
+    {"File", SimFileExecutionGraph::NodeGroups::FILE_EXEC}
+};
 const std::map<std::string, unsigned int > SimFileExecutionGraph::m_nameToInitGroupId = {
-    {"Body", SimFileExecutionGraph::NodeGroups::BODY_RESET}, {"Frame", SimFileExecutionGraph::NodeGroups::FRAME_RESET}};
+    {"Body", SimFileExecutionGraph::NodeGroups::BODY_RESET},
+    {"Frame", SimFileExecutionGraph::NodeGroups::FRAME_RESET},
+    {"File", SimFileExecutionGraph::NodeGroups::FILE_RESET}
+};
 
 void SimFileExecutionGraph::setup() {
 
@@ -72,21 +78,24 @@ void SimFileExecutionGraph::addBodyState(RigidBodyStateAdd * s) {
 }
 
 void SimFileExecutionGraph::setStopNode(LogicNodes::StopNode *n, unsigned int stopGroupId){
-
-    if(stopGroupId == NodeGroups::FRAME_EXEC){
+    if(stopGroupId == NodeGroups::FILE_EXEC){
         m_stopNodes[0] = n;
-    }else if(stopGroupId == NodeGroups::BODY_EXEC){
+    }else if(stopGroupId == NodeGroups::FRAME_EXEC){
         m_stopNodes[1] = n;
+    }else if(stopGroupId == NodeGroups::BODY_EXEC){
+        m_stopNodes[2] = n;
     }else{
         ERRORMSG("No stop node for group id:" << stopGroupId)
     }
 }
 
 bool SimFileExecutionGraph::checkStop(unsigned int groupId){
-    if(groupId == NodeGroups::FRAME_EXEC && m_stopNodes[0]){
+    if(groupId == NodeGroups::FILE_EXEC && m_stopNodes[0]){
         return GET_ISOCKET_VALUE_PTR(m_stopNodes[0], Enable);
-    }else if(groupId == NodeGroups::BODY_EXEC && m_stopNodes[1]){
+    }else if(groupId == NodeGroups::FRAME_EXEC && m_stopNodes[1]){
         return GET_ISOCKET_VALUE_PTR(m_stopNodes[1], Enable);
+    }else if(groupId == NodeGroups::BODY_EXEC && m_stopNodes[2]){
+        return GET_ISOCKET_VALUE_PTR(m_stopNodes[2], Enable);
     }
     return false;
 }

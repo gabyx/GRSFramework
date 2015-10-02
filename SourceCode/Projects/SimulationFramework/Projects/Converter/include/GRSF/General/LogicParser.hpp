@@ -18,14 +18,17 @@
 
 #include "GRSF/General/LogicParserTraits.hpp"
 
+// TODO
+// This logicparser is general already, it takes a couple of models and makes them parsing from the root node,
+// Make this parser a general base of all parsers (scene parser!)
 
-template< typename TCollection,
+template< typename TDataStorage,
           template<typename P, typename C> class TParserTraits = LogicParserTraits,
           typename TDerived = void>
 class LogicParser {
 public:
 
-    using ParserTraits = TParserTraits<LogicParser, TCollection>;
+    using ParserTraits = TParserTraits<LogicParser, TDataStorage>;
     DEFINE_LOGICPARSER_TYPE_TRAITS(ParserTraits);
 private:
 
@@ -136,7 +139,7 @@ private:
 
     void parseSceneIntern(const boost::filesystem::path & file) {
 
-        LOGLPLEVEL1( m_pLog, "---> RenderLogicParser parsing: ========================================================" <<
+        LOGLPLEVEL1( m_pLog, "---> LogicParser parsing: ========================================================" <<
                      std::endl << "\t file: " << file <<std::endl;);
 
         LOGLPLEVEL1( m_pLog, "---> Input file: "  << file.string() <<std::endl; );
@@ -175,7 +178,7 @@ private:
             ERRORMSG( "Scene XML error: "  << ex.what() );
         }
 
-        LOGLPLEVEL1( m_pLog, "---> RenderLogicParser finshed =========================================================" << std::endl;);
+        LOGLPLEVEL1( m_pLog, "---> LogicParser finshed =========================================================" << std::endl;);
 
     }
 

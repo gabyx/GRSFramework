@@ -21,7 +21,7 @@ namespace RenderLogicParserModules {
     public:
         DEFINE_RENDERLOGICPARSER_TYPE_TRAITS(TParserTraits)
 
-        using MaterialMapType = typename CollectionType::MaterialMapType;
+        using MaterialMapType = typename DataStorageType::MaterialMapType;
 
         MaterialsModule(ParserType * p, MaterialMapType * m):m_parser(p),m_materials(m), m_pLog(p->getLog()) {}
 
@@ -70,7 +70,7 @@ namespace RenderLogicParserModules {
 namespace RenderLogicParserModules {
 
 template<typename TParserTraits>
-class RenderLogicModule : public LogicParserModules::LogicModule<TParserTraits> {
+class LogicModule : public LogicParserModules::LogicModule<TParserTraits> {
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
     DEFINE_RENDERLOGICPARSER_TYPE_TRAITS(TParserTraits)
@@ -78,12 +78,12 @@ public:
     using Base =  LogicParserModules::LogicModule<TParserTraits> ;
     using NodeGroups = typename Base::NodeGroups;
 
-    using GeometryMapType = typename CollectionType::GeometryMapType;
-    using MaterialMapType = typename CollectionType::MaterialMapType;
+    using GeometryMapType = typename DataStorageType::GeometryMapType;
+    using MaterialMapType = typename DataStorageType::MaterialMapType;
 
 
 
-    RenderLogicModule(ParserType * p, RenderExecutionGraph * g,
+    LogicModule(ParserType * p, RenderExecutionGraph * g,
                       GeometryMapType * geomMap, MaterialMapType * materials)
         :Base(p,g), m_geomMap(geomMap), m_materials(materials), m_executionGraph(g) {}
 

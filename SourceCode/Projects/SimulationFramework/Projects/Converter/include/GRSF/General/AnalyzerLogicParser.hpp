@@ -13,15 +13,7 @@
 
 #include "GRSF/General/LogicParser.hpp"
 
-/** The traits for a standart RenderLogicParser class*/
-template<typename TSceneParser, typename TCollection>
-struct AnalyzerLogicParserTraits : LogicParserTraits<TSceneParser,TCollection> {
-
-};
-
-
-#define DEFINE_ANALZERLOGICPARSER_TYPE_TRAITS( TParserTraits )  \
-    DEFINE_LOGICPARSER_TYPE_TRAITS( TParserTraits )
+#include "GRSF/General/AnalyzerLogicParserTraits.hpp"
 
 /** We dont need any TCollection, LogicModule only needs a execution graph */
 template< typename TCollection = void, template<typename P, typename C> class TParserTraits = AnalyzerLogicParserTraits >

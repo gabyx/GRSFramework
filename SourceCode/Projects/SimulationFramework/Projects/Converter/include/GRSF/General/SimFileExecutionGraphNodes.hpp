@@ -348,7 +348,8 @@ namespace LogicNodes {
         void compute() {
             p = m_R_KI.transpose() * GET_ISOCKET_REF_VALUE(Pos); // A_KI * I_pos
             if( m_aabb.overlaps( p ) ){
-                ++ GET_OSOCKET_REF_VALUE(OverlapCounter);
+                ++GET_OSOCKET_REF_VALUE(OverlapCounter);
+                DISTRIBUTE_OSOCKET_VALUE(OverlapCounter);
             }
         }
 

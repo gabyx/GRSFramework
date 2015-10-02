@@ -18,27 +18,7 @@
 
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
-        // The basic types
-        using TypeSeqBasic = boost::mpl::vector<double,
-                                               float,
-                                               bool,
-                                               char,
-                                               short,
-                                               int,
-                                               long int,
-                                               long long int,
-                                               unsigned char,
-                                               unsigned short,
-                                               unsigned int,
-                                               unsigned long int,
-                                               unsigned long long int,
-                                               std::string,
-                                               boost::filesystem::path>;
-
-        // All string assignable types, without conversion!
-        using TypeSeqStringAssignable = boost::mpl::vector<std::string, boost::filesystem::path>;
-
-        // Custom types
+        // All main types =========================================================================
         using TypeSeq = boost::mpl::vector<
                                                     double,
                                                     float,
@@ -61,12 +41,44 @@
                                                     VectorUBody,
                                                     RenderMaterial * >;
 
+        // =========================================================================================
 
+        // The basic types (for SFINAE)
+        using TypeSeqBasic = boost::mpl::vector<double,
+                                               float,
+                                               bool,
+                                               char,
+                                               short,
+                                               int,
+                                               long int,
+                                               long long int,
+                                               unsigned char,
+                                               unsigned short,
+                                               unsigned int,
+                                               unsigned long int,
+                                               unsigned long long int,
+                                               std::string,
+                                               boost::filesystem::path>;
 
-//       // The total type sequence!
-//       // TypeSequence for the template parameter T in LogicSocket<T>
-//       using TypeSeq = typename boost::mpl::joint_view< TypeSeqBasic , TypeSeqCustom>::type;
+         // All arithmetic types of TypeSeq (for SFINAE)
+        using TypeSeqArithmetic = boost::mpl::vector<double,
+                                               float,
+                                               //bool,
+                                               char,
+                                               short,
+                                               int,
+                                               long int,
+                                               long long int,
+                                               unsigned char,
+                                               unsigned short,
+                                               unsigned int,
+                                               unsigned long int,
+                                               unsigned long long int>;
 
+        // All string assignable types, without conversion! (for SFINAE)
+        using TypeSeqStringAssignable = boost::mpl::vector<std::string, boost::filesystem::path>;
+
+        // TODO Make this meta:: dependent! and more nice!
 
         #define LOGICSOCKET_CASE_SWITCH( N ) \
             case N: \
@@ -120,8 +132,8 @@
                                            "unsigned int",
                                            "unsigned long int",
                                            "unsigned long long int",
-                                           "std::string",
-                                           "boost::filesystem::path",
+                                           "string",
+                                           "path",
                                            "Vector3",
                                            "Quaternion",
                                            "VectorQBody",

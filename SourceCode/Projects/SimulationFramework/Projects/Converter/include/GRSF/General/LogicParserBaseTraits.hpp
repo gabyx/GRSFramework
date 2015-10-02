@@ -5,10 +5,10 @@
 #include <pugixml.hpp>
 
 /** The base traits for every MaterialsCollectionParser parser */
-template<typename TSceneParser, typename TCollection>
+template<typename TSceneParser, typename TDataStorage>
 struct LogicParserBaseTraits {
 
-    using CollectionType = TCollection;
+    using DataStorageType = TDataStorage;
 
     using ParserType = TSceneParser;
     using LogType = Logging::Log;
@@ -21,7 +21,7 @@ struct LogicParserBaseTraits {
 
 #define DEFINE_LOGICPARSER_BASE_TYPE_TRAITS( TParserTraits ) \
     using ParserType = typename TParserTraits::ParserType; \
-    using CollectionType = typename TParserTraits::CollectionType; \
+    using DataStorageType = typename TParserTraits::DataStorageType; \
     using LogType = typename TParserTraits::LogType; \
     using XMLNodeType = typename TParserTraits::XMLNodeType;\
     using XMLNodeItType = typename TParserTraits::XMLNodeItType;\

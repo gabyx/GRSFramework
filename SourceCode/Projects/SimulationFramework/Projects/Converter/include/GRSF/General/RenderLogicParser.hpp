@@ -17,18 +17,18 @@
 
 #include "GRSF/General/RenderLogicParserTraits.hpp"
 
-template< typename TCollection, template<typename P, typename C> class TParserTraits = RenderLogicParserTraits >
-class RenderLogicParser  : public LogicParser<TCollection,
+template< typename TDataStorage, template<typename P, typename C> class TParserTraits = RenderLogicParserTraits >
+class RenderLogicParser  : public LogicParser<TDataStorage,
                                        TParserTraits,
-                                       RenderLogicParser<TCollection,TParserTraits>
+                                       RenderLogicParser<TDataStorage,TParserTraits>
                                       >
 {
 public:
-    using Base =  LogicParser<TCollection,
+    using Base =  LogicParser<TDataStorage,
                               TParserTraits,
-                              RenderLogicParser<TCollection,TParserTraits>
+                              RenderLogicParser<TDataStorage,TParserTraits>
                             >;
-    using ParserTraits = TParserTraits<RenderLogicParser, TCollection>;
+    using ParserTraits = TParserTraits<RenderLogicParser, TDataStorage>;
     DEFINE_RENDERLOGICPARSER_TYPE_TRAITS(ParserTraits);
 
 public:

@@ -1,5 +1,5 @@
-#ifndef GRSF_General_AnalyzerLogicParserGenerators_hpp
-#define GRSF_General_AnalyzerLogicParserGenerators_hpp
+#ifndef GRSF_General_GridderLogicParserGenerators_hpp
+#define GRSF_General_GridderLogicParserGenerators_hpp
 
 
 #include "GRSF/Common/TypeDefs.hpp"
@@ -9,15 +9,15 @@
 
 // This file should only be included in compilation units!
 
-class SimFileExecutionGraph;
+class GridderData;
 
-namespace AnaylzerLogicParserGenerators {
+namespace GridderLogicParserGenerators {
 
     struct LogicParserGen {
 
-        LogicParserGen( SimFileExecutionGraph * g): m_g(g){}
+        LogicParserGen( GridderData * g): m_g(g){}
 
-        SimFileExecutionGraph * m_g;
+        GridderData * m_g;
 
         template<typename TParser>
         typename TParser::ParserTraits::TupleModules
@@ -26,7 +26,7 @@ namespace AnaylzerLogicParserGenerators {
             using ParserTraits = typename TParser::ParserTraits;
             using LogicModuleType     = typename ParserTraits::template getModuleType<0>;
 
-            auto logic = std::unique_ptr<LogicModuleType >    (new LogicModuleType(p, m_g));
+            auto logic = std::unique_ptr<LogicModuleType >  (new LogicModuleType(p, &m_g->m_gridSettingsList));
 
             return std::make_tuple(std::move(logic));
         };

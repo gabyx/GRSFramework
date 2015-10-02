@@ -33,6 +33,9 @@
     /// LogicParser
     #define LOGICPARSER_LOGLEVEL 3
 
+    /// GridderParser
+    #define GRIDDERPARSER_LOGLEVEL 3
+
 #else
 
     #define LOGSJ(A)
@@ -45,6 +48,9 @@
 
     /// LogicParser
     #define LOGICPARSER_LOGLEVEL 1
+
+    /// GridderParser
+    #define GRIDDERPARSER_LOGLEVEL 1
 
 #endif
 /* @} */
@@ -72,6 +78,13 @@
 #define LOGLPLEVEL1( logptr , message) LOGLPLEVEL( 1 , logptr , message) ;
 #define LOGLPLEVEL2( logptr , message) LOGLPLEVEL( 2 , logptr , message) ;
 #define LOGLPLEVEL3( logptr , message) LOGLPLEVEL( 3 , logptr , message) ;
+
+/** GridderParser Log Macros */
+#define LOGGP(log , message) LOG(log,message);
+#define LOGGPLEVEL(level, logptr , message) LOGLEVEL(level,GRIDDERPARSER_LOGLEVEL,logptr,message);
+#define LOGGPLEVEL1( logptr , message) LOGGPLEVEL( 1 , logptr , message) ;
+#define LOGGPLEVEL2( logptr , message) LOGGPLEVEL( 2 , logptr , message) ;
+#define LOGGPLEVEL3( logptr , message) LOGGPLEVEL( 3 , logptr , message) ;
 
 
 

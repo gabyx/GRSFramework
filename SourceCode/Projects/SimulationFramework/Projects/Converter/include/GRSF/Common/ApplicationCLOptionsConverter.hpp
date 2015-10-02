@@ -841,5 +841,6 @@ private:
 };
 
 
+class ApplicationCLOptionsGridder: public ApplicationCLOptionsAnalyzer{};
 
 #endif

@@ -14,8 +14,14 @@
 #include "GRSF/Logic/StopNode.hpp"
 #include "GRSF/Logic/XMLLineWriter.hpp"
 
+#include "GRSF/General/SimFileExecutionGraph.hpp"
 #include "GRSF/General/SimFileExecutionGraphNodes.hpp"
 #include "GRSF/General/LogicParserTraitsMacro.hpp"
+
+
+#define ERRORMSG_PARSERTOOL(mess,id) \
+    ERRORMSG( mess << " Tool id: " << id )
+
 
 /** Parser for all execution graph nodes except special ones for rendering */
 
@@ -92,7 +98,7 @@ namespace LogicParserModules{
                 }else if(type == "StopNode"){
                     createToolStopNode(tool,id);
                 }else {
-                    ERRORMSG("---> String conversion in Tool: type: " << type <<" not found!");
+                    ERRORMSG_PARSERTOOL("---> String conversion 'type': " << type <<" not found!", id);
                 }
         }
 
@@ -172,7 +178,7 @@ namespace LogicParserModules{
             if( att ){
 
                 if(!Utilities::stringToType(l,att.value())){
-                    ERRORMSG("String conversion fail for tool id: " << id)
+                    ERRORMSG_PARSERTOOL("String conversion 'groupId' failed", id)
                 }
 
                 for(auto s : l){
@@ -189,7 +195,7 @@ namespace LogicParserModules{
 
                     l.clear();
                     if(!Utilities::stringToType(l,att.value())){
-                        ERRORMSG("String conversion fail for tool id: " << id)
+                        ERRORMSG_PARSERTOOL("String conversion 'resetGroupId' failed", id)
                     }
 
                     for(auto s : l){
@@ -197,7 +203,7 @@ namespace LogicParserModules{
                     }
 
                 }else{
-                    ERRORMSG("You need to specify a resetGroupId for this tool id: " << id);
+                    ERRORMSG_PARSERTOOL("You need to specify a resetGroupId", id);
                 }
             }
         }
@@ -206,7 +212,7 @@ namespace LogicParserModules{
             ( t == #typeName ){ using T = type; \
             T tt; \
             if(!Utilities::stringToType(tt, logicNode.attribute("value").value())) { \
-                ERRORMSG("---> String conversion in Constant tool: value failed"); \
+                ERRORMSG_PARSERTOOL("---> String conversion 'value' failed", id); \
             } \
             n = new LogicNodes::ConstantNode<T>(id,tt); \
             } \
@@ -233,7 +239,7 @@ namespace LogicParserModules{
                     using T = std::string;
                     T tt = logicNode.attribute("value").value();
                     if(tt.empty()){
-                        ERRORMSG("---> String conversion in Constant tool: value failed"); \
+                        ERRORMSG_PARSERTOOL("---> String conversion 'value' failed", id);
                     }
                     n = new LogicNodes::ConstantNode<T>(id,tt);
                 }
@@ -241,12 +247,12 @@ namespace LogicParserModules{
                     using T = boost::filesystem::path;
                     std::string tt = logicNode.attribute("value").value();
                     if(tt.empty()){
-                        ERRORMSG("---> String conversion in Constant tool: value failed"); \
+                        ERRORMSG_PARSERTOOL("---> String conversion 'value' failed", id);
                     }
                     n = new LogicNodes::ConstantNode<T>(id,tt);
                 }
                 else{
-                    ERRORMSG("---> String conversion in Constant tool: outputType: '" << t << "' not found!");
+                    ERRORMSG_PARSERTOOL("---> String conversion 'outputType': '" << t << "' not found!", id);
                 }
 
                 m_executionGraph->addNode(n,false,false);
@@ -266,7 +272,7 @@ namespace LogicParserModules{
                 LogicNode * n;
                 if DEFINE_NORM(Vector3)
                 else{
-                    ERRORMSG("---> String conversion in Constant tool: outputType: '" << t << "' not found!");
+                    ERRORMSG_PARSERTOOL("---> String conversion 'outputType': '" << t << "' not found!", id);
                 }
 
                 m_executionGraph->addNode(n,false,false);
@@ -283,7 +289,6 @@ namespace LogicParserModules{
         #define ADD_STRINGFORMAT_SOCKET2_IN(type, typeName ) ADD_STRINGFORMAT_SOCKET2(type,typeName, Input)
         #define ADD_STRINGFORMAT_SOCKET2_OUT(type, typeName ) ADD_STRINGFORMAT_SOCKET2(type,typeName, Output)
 
-        #define ADD_STRINGFORMAT_SOCKET(type, _InOROut_ ) ADD_STRINGFORMAT_SOCKET2(type,type, _InOROut_ )
         #define ADD_STRINGFORMAT_SOCKET_IN(type) ADD_STRINGFORMAT_SOCKET2(type,type, Input )
         #define ADD_STRINGFORMAT_SOCKET_OUT(type) ADD_STRINGFORMAT_SOCKET2(type,type, Output )
 
@@ -291,7 +296,7 @@ namespace LogicParserModules{
 
                 std::string format = logicNode.attribute("format").value();
                 if(format.empty()){
-                    ERRORMSG("---> String conversion in StringFormat tool: format: not defined!");
+                    ERRORMSG_PARSERTOOL("---> String conversion 'format': not defined!", id);
                 }
                 LogicNodes::StringFormatNode * node = new LogicNodes::StringFormatNode(id,format);
 
@@ -314,7 +319,7 @@ namespace LogicParserModules{
                     else if ADD_STRINGFORMAT_SOCKET2_IN(std::string,string)
                     else if ADD_STRINGFORMAT_SOCKET2_IN(boost::filesystem::path,path)
                     else{
-                        ERRORMSG("---> String conversion in StringFormatNode tool: InputFormat: '" << t << "' not found!");
+                        ERRORMSG_PARSERTOOL("---> String conversion 'InputFormat': '" << t << "' not found!", id);
                     }
                 }
                 unsigned int outs = 0;
@@ -325,7 +330,7 @@ namespace LogicParserModules{
                     if ADD_STRINGFORMAT_SOCKET2_OUT(std::string,string)
                     else if ADD_STRINGFORMAT_SOCKET2_OUT(boost::filesystem::path,path)
                     else{
-                        ERRORMSG("---> String conversion in Constant tool: OutputFormat: '" << t << "' not found!");
+                        ERRORMSG_PARSERTOOL("---> String conversion 'OutputFormat': '" << t << "' not found!", id);
                     }
                     ++outs;
                 }
@@ -340,10 +345,11 @@ namespace LogicParserModules{
         }
 
 
-
+        // Node
         #define DEFINE_MAKESimpleFunc \
-            n = new LogicNodes::SimpleFunction<T1,T2>(id,inputs,expressionString);
-
+            auto * s = new LogicNodes::SimpleFunction<T1,T2>(id); \
+            createToolSimpleFunction_parseInputs(logicNode, id, s); \
+            node = s;
 
         #define DEFINE_SIMPLEFUNCTION_S2(type, typeName) \
             ( t2 == #typeName ){ using T2 = type; \
@@ -358,20 +364,21 @@ namespace LogicParserModules{
                     if(t2.empty()){ \
                         using T2 = T1;  \
                         DEFINE_MAKESimpleFunc \
-                    } \
-                    if DEFINE_SIMPLEFUNCTION_S(float)  \
-                    else if DEFINE_SIMPLEFUNCTION_S(double) \
-                    else if DEFINE_SIMPLEFUNCTION_S(bool) \
-                    else if DEFINE_SIMPLEFUNCTION_S(char) \
-                    else if DEFINE_SIMPLEFUNCTION_S(short) \
-                    else if DEFINE_SIMPLEFUNCTION_S(int) \
-                    else if DEFINE_SIMPLEFUNCTION_S(long int) \
-                    else if DEFINE_SIMPLEFUNCTION_S(unsigned char) \
-                    else if DEFINE_SIMPLEFUNCTION_S(unsigned short) \
-                    else if DEFINE_SIMPLEFUNCTION_S(unsigned int) \
-                    else if DEFINE_SIMPLEFUNCTION_S(unsigned long int) \
-                    else{ \
-                        ERRORMSG("---> String conversion in SimpleFunction tool: outputType: '" << t2 << "' not found!");  \
+                    }else{ \
+                        if DEFINE_SIMPLEFUNCTION_S(float)  \
+                        else if DEFINE_SIMPLEFUNCTION_S(double) \
+                        else if DEFINE_SIMPLEFUNCTION_S(bool) \
+                        else if DEFINE_SIMPLEFUNCTION_S(char) \
+                        else if DEFINE_SIMPLEFUNCTION_S(short) \
+                        else if DEFINE_SIMPLEFUNCTION_S(int) \
+                        else if DEFINE_SIMPLEFUNCTION_S(long int) \
+                        else if DEFINE_SIMPLEFUNCTION_S(unsigned char) \
+                        else if DEFINE_SIMPLEFUNCTION_S(unsigned short) \
+                        else if DEFINE_SIMPLEFUNCTION_S(unsigned int) \
+                        else if DEFINE_SIMPLEFUNCTION_S(unsigned long int) \
+                        else{ \
+                            ERRORMSG_PARSERTOOL("---> String conversion 'outputType': '" << t2 << "' not found!", id);  \
+                        } \
                     } \
             }
 
@@ -384,34 +391,76 @@ namespace LogicParserModules{
                 unsigned int inputs = 1;
                 if(att) {
                     if(!Utilities::stringToType(inputs, logicNode.attribute("inputs").value())) {
-                        ERRORMSG("---> String conversion in SimpleFunction tool: inputs failed");
+                        ERRORMSG_PARSERTOOL("---> String conversion 'inputs' failed", id);
                     }
                 }
-
-                std::string expressionString = logicNode.attribute("expression").value();
-
-                std::string t1 = logicNode.attribute("inputType").value();
-                LogicNode * n;
+                // Make tool
+                std::string t1 = logicNode.attribute("evalType").value();
+                LogicNode * node;
                 if DEFINE_SIMPLEFUNCTION(float)
                 else if DEFINE_SIMPLEFUNCTION(double)
-                else if DEFINE_SIMPLEFUNCTION(bool)
-                else if DEFINE_SIMPLEFUNCTION(char)
-                else if DEFINE_SIMPLEFUNCTION(short)
-                else if DEFINE_SIMPLEFUNCTION(int)
-                else if DEFINE_SIMPLEFUNCTION(long int)
-                //else if DEFINE_SIMPLEFUNCTION(long long int)
-                else if DEFINE_SIMPLEFUNCTION(unsigned char)
-                else if DEFINE_SIMPLEFUNCTION(unsigned short)
-                else if DEFINE_SIMPLEFUNCTION(unsigned int)
-                else if DEFINE_SIMPLEFUNCTION(unsigned long int)
+//                else if DEFINE_SIMPLEFUNCTION(bool)
+//                else if DEFINE_SIMPLEFUNCTION(char)
+//                else if DEFINE_SIMPLEFUNCTION(short)
+//                else if DEFINE_SIMPLEFUNCTION(int)
+//                else if DEFINE_SIMPLEFUNCTION(long int)
+//                //else if DEFINE_SIMPLEFUNCTION(long long int)
+//                else if DEFINE_SIMPLEFUNCTION(unsigned char)
+//                else if DEFINE_SIMPLEFUNCTION(unsigned short)
+//                else if DEFINE_SIMPLEFUNCTION(unsigned int)
+//                else if DEFINE_SIMPLEFUNCTION(unsigned long int)
                 //else if DEFINE_SIMPLEFUNCTION(unsigned long long int)
                 else{
-                    ERRORMSG("---> String conversion in SimpleFunction tool: inputType: '" << t1 << "' not found!");
+                    ERRORMSG_PARSERTOOL("---> String conversion 'evalType': '" << t1 << "' not found!", id);
                 }
 
-                m_executionGraph->addNode(n,false,false);
+                m_executionGraph->addNode(node,false,false);
 
                 addNodeToGroup(logicNode,id);
+        }
+          // Inputs
+        #define ADD_SIMPLEFUNCTION_SOCKET2(type, typeName, _InOROut_ ) \
+            ( t == #typeName ){ \
+                using T = type; \
+                simpleFNode->template add ## _InOROut_<T>(); \
+            }
+
+        #define ADD_SIMPLEFUNCTION_SOCKET2_IN(type, typeName ) ADD_SIMPLEFUNCTION_SOCKET2(type,typeName, Input)
+
+        #define ADD_SIMPLEFUNCTION_SOCKET_IN(type) ADD_SIMPLEFUNCTION_SOCKET2(type,type, Input )
+
+        template<typename TSimpleFunction>
+        void createToolSimpleFunction_parseInputs(XMLNodeType & logicNode, unsigned int id, TSimpleFunction * simpleFNode){
+
+            std::string expressionString = logicNode.attribute("expression").value();
+            if(expressionString.empty()){
+                ERRORMSG_PARSERTOOL("No expressions string in SimpleFunction", id)
+            }
+
+            // Add inputs
+             // Add all format Sockets links (only arithmetic types are allowed)
+            for (auto & n : logicNode.children("InputFormat")) {
+                std::string t = n.attribute("type").value();
+
+                if ADD_SIMPLEFUNCTION_SOCKET_IN(float)
+                else if ADD_SIMPLEFUNCTION_SOCKET_IN(double)
+                else if ADD_SIMPLEFUNCTION_SOCKET_IN(char)
+                else if ADD_SIMPLEFUNCTION_SOCKET_IN(short)
+                else if ADD_SIMPLEFUNCTION_SOCKET_IN(int)
+                else if ADD_SIMPLEFUNCTION_SOCKET_IN(long int)
+                else if ADD_SIMPLEFUNCTION_SOCKET_IN(long long int)
+                else if ADD_SIMPLEFUNCTION_SOCKET_IN(unsigned char)
+                else if ADD_SIMPLEFUNCTION_SOCKET_IN(unsigned short)
+                else if ADD_SIMPLEFUNCTION_SOCKET_IN(unsigned int)
+                else if ADD_SIMPLEFUNCTION_SOCKET_IN(unsigned long int)
+                else if ADD_SIMPLEFUNCTION_SOCKET_IN(unsigned long long int)
+//                    else if ADD_STRINGFORMAT_SOCKET2_IN(std::string,string)
+//                    else if ADD_STRINGFORMAT_SOCKET2_IN(boost::filesystem::path,path)
+                else{
+                    ERRORMSG_PARSERTOOL("---> String conversion 'InputFormat': '" << t << "' not found!", id);
+                }
+            }
+            simpleFNode->compileExpression(expressionString);
         }
 
         #define DEFINE_LINEWRITER2(type, typeName) \
@@ -422,7 +471,7 @@ namespace LogicParserModules{
                 att = logicNode.attribute("truncate"); \
                 if(att){ \
                     if(!Utilities::stringToType(truncate, att.value())) { \
-                        ERRORMSG("---> String conversion in LineWriter tool: inputs failed"); \
+                        ERRORMSG_PARSERTOOL("---> String conversion 'inputs' failed", id); \
                     }\
                 }\
                 std::string file;\
@@ -430,7 +479,7 @@ namespace LogicParserModules{
                 if(att) {\
                     file = logicNode.attribute("file").value(); \
                     if(file.empty()){ \
-                        ERRORMSG("---> String conversion in LineWriter tool file: " << file << " failed!")\
+                        ERRORMSG_PARSERTOOL("---> String conversion 'file': " << file << " failed!", id)\
                     }\
                 }\
                 n = new LogicNodes::LineWriter<T>(id,file,truncate); \
@@ -458,7 +507,7 @@ namespace LogicParserModules{
                 else if DEFINE_LINEWRITER2(std::string,string)
                 else if DEFINE_LINEWRITER2(boost::filesystem::path,path)
                 else{
-                    ERRORMSG("---> String conversion in Constant tool: inputType: '" << t << "' not found!");
+                    ERRORMSG_PARSERTOOL("---> String conversion 'inputType': '" << t << "' not found!", id);
                 }
 
                 m_executionGraph->addNode(n,false,true);
@@ -486,7 +535,7 @@ namespace LogicParserModules{
                 if(att) {\
                     file = logicNode.attribute("file").value(); \
                     if(file.empty()){ \
-                        ERRORMSG("---> String conversion in XMLLineWriter tool file: " << file << " failed!")\
+                        ERRORMSG_PARSERTOOL("---> String conversion 'file': " << file << " failed!", id)\
                     }\
                 }\
                 n = new LogicNodes::XMLLineWriter<T>(id,file,rootName,childName); \
@@ -514,7 +563,7 @@ namespace LogicParserModules{
                 else if DEFINE_XMLLINEWRITER2(std::string,string)
                 else if DEFINE_XMLLINEWRITER2(boost::filesystem::path,path)
                 else{
-                    ERRORMSG("---> String conversion in XMLLineWriter tool: inputType: '" << t << "' not found!");
+                    ERRORMSG_PARSERTOOL("---> String conversion 'inputType': " << t << "' not found!", id);
                 }
 
                 m_executionGraph->addNode(n,false,true);
@@ -566,7 +615,7 @@ namespace LogicParserModules{
 
             auto it = ExecutionGraphType::m_nameToExecGroupId.find(stopGroupId);
             if(it==ExecutionGraphType::m_nameToExecGroupId.end()){
-                ERRORMSG("No group found for " << "stopGroupId: " << stopGroupId)
+                ERRORMSG_PARSERTOOL("No group found for " << "stopGroupId: " << stopGroupId, id)
             }
 
             auto * node = new LogicNodes::StopNode(id);
@@ -580,11 +629,11 @@ namespace LogicParserModules{
 
             Vector3 minPoint;
             if(!Utilities::stringToVector3(minPoint,  logicNode.attribute("minPoint").value())) {
-                ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
+                ERRORMSG_PARSERTOOL("---> String conversion 'minPoint' failed", id);
             }
             Vector3 maxPoint;
             if(!Utilities::stringToVector3(maxPoint,  logicNode.attribute("maxPoint").value())) {
-                ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
+                ERRORMSG_PARSERTOOL("---> String conversion 'maxPoint' failed", id);
             }
             Quaternion q_KI;
             Vector3 I_r_IK;
@@ -626,6 +675,11 @@ namespace LogicParserModules{
 #undef DEFINE_SIMPLEFUNCTION_S2
 #undef DEFINE_SIMPLEFUNCTION_S
 #undef DEFINE_SIMPLEFUNCTION
+
+#undef ADD_SIMPLEFUNCTION_SOCKET2
+#undef ADD_SIMPLEFUNCTION_SOCKET2_IN
+#undef ADD_SIMPLEFUNCTION_SOCKET_IN
+
 
 #undef DEFINE_LINEWRITER2
 #undef DEFINE_LINEWRITER

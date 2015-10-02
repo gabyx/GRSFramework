@@ -1,5 +1,5 @@
-#ifndef GRSF_Converters_AnalyzerConverter_hpp
-#define GRSF_Converters_AnalyzerConverter_hpp
+#ifndef GRSF_Converters_GridderConverter_hpp
+#define GRSF_Converters_GridderConverter_hpp
 
 #include <iostream>
 #include <iomanip>
@@ -15,9 +15,10 @@
 #include "GRSF/Common/TypeDefs.hpp"
 
 #include "GRSF/Converters/SimFileConverter.hpp"
-#include "GRSF/General/SimFileExecutionGraph.hpp"
+#include "GRSF/General/GridderData.hpp"
 
-class AnalyzerConverter : public SimFileConverter {
+
+class GridderConverter : public SimFileConverter {
 public:
 
     using XMLNodeType = pugi::xml_node;
@@ -25,9 +26,8 @@ public:
     using XMLAttributeType = pugi::xml_attribute;
 
     using Base = SimFileConverter;
-    using ExecutionGraphType = SimFileExecutionGraph;
 
-    AnalyzerConverter(const std::vector<boost::filesystem::path> & inputFiles,
+    GridderConverter(const std::vector<boost::filesystem::path> & inputFiles,
                   boost::filesystem::path outputFile,
                   boost::filesystem::path outputDir,
                   boost::filesystem::path sceneFile,
@@ -38,17 +38,15 @@ public:
 
 private:
 
+    void setup();
 
-
-    ExecutionGraphType m_executionGraph;
-
-    void setupExecutionGraph();
+    GridderData m_gridderData; ///< Parsed settings for grids;
 
     boost::filesystem::path m_logicFile;
     boost::filesystem::path m_sceneFile;
 
 };
 
-#endif // GRSF_Converters_AnalyzerConverter_hpp
+#endif // GRSF_Converters_GridConverter_hpp
 
 

@@ -5,7 +5,7 @@
 #include "GRSF/Common/LogDefines.hpp"
 #include "GRSF/Common/SimpleLogger.hpp"
 
-#include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
+#include "GRSF/Dynamics/Buffers/RigidBodyState.hpp"
 #include "GRSF/Logic/ExecutionTreeInOut.hpp"
 
 
@@ -22,12 +22,15 @@ class SimFileExecutionGraph : public ExecutionTreeInOut{
 
         struct NodeGroups{
             enum {
-                FRAME_RESET,
-                FRAME_EXEC,    /** all nodes which need to update for producing the inputs for the current frame */
-                    BODY_RESET,
-                    BODY_EXEC,  /** all nodes which need to update for producing an render output from an input node BodyData*/
-                    BODY_FINAL,
-                FRAME_FINAL,
+                FILE_RESET,
+                FILE_EXEC,
+                    FRAME_RESET,
+                    FRAME_EXEC,    /** all nodes which need to update for producing the inputs for the current frame */
+                        BODY_RESET,
+                        BODY_EXEC,  /** all nodes which need to update for producing an render output from an input node BodyData*/
+                        BODY_FINAL,
+                    FRAME_FINAL,
+                FILE_FINAL,
                 NNODE_GROUPS
             };
         };
@@ -43,22 +46,27 @@ class SimFileExecutionGraph : public ExecutionTreeInOut{
 
         inline void setLog(Logging::Log * log){ m_log = log; }
 
+        /** provide function for SimFileConverter ==================================*/
         void setup();
         void initSimInfo(std::size_t nBodies,std::size_t nStates);
         void initFrame(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
         void addBodyState(RigidBodyStateAdd * s);
         void finalizeFrame();
+
         inline bool isStopBodyLoop(){  return checkStop(NodeGroups::BODY_EXEC); }
         inline bool isStopFrameLoop(){ return checkStop(NodeGroups::FRAME_EXEC); }
+        inline bool isStopFileLoop(){ return checkStop(NodeGroups::FILE_EXEC); }
+        /** ========================================================================*/
+
 
         inline void setFrameData(LogicNodes::FrameData *n){m_frameData = n;}
         inline void setBodyData(LogicNodes::BodyData *n){m_bodyDataNode = n;}
         inline void setSimFileInfo(LogicNodes::SimFileInfo *n){m_simFileInfo = n;}
+
         void setStopNode(LogicNodes::StopNode *n, unsigned int stopGroupId);
 
         void addNodeToGroup(unsigned int nodeId, std::string groupId = "Body");
         void addNodeToResetGroup(unsigned int nodeId, std::string groupId = "Body");
-
 
         static const std::map<std::string, unsigned int > m_nameToExecGroupId;
         static const std::map<std::string, unsigned int > m_nameToInitGroupId;
@@ -71,8 +79,8 @@ class SimFileExecutionGraph : public ExecutionTreeInOut{
         LogicNodes::FrameData   * m_frameData    =  nullptr;
         LogicNodes::SimFileInfo * m_simFileInfo  =  nullptr;
 
-        /** Stop nodes for Body and Frame group */
-        std::array<LogicNodes::StopNode*,2> m_stopNodes =  {{nullptr,nullptr}};
+        /** Stop nodes for Body and Frame group, FILE_EXEC, FRAME_EXEC, BODY_EXEC */
+        std::array<LogicNodes::StopNode*,3> m_stopNodes =  {{nullptr,nullptr,nullptr}};
 
         Logging::Log * m_log = nullptr;
 };

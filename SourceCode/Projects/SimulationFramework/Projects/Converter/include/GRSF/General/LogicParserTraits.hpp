@@ -5,10 +5,10 @@
 #include "GRSF/General/LogicParserModules.hpp"
 
 /** The traits for a standart LogicParser class*/
-template<typename TSceneParser, typename TCollection>
-struct LogicParserTraits : LogicParserBaseTraits<TSceneParser,TCollection> {
+template<typename TSceneParser, typename TDataStorage>
+struct LogicParserTraits : LogicParserBaseTraits<TSceneParser,TDataStorage> {
 
-    // LogicModule does not use the TCollection ( class where all stuff is stored from parsing)
+    // LogicModule does not use the TDataStorage ( class where all stuff is stored from parsing)
 
     // Module typedefs
     using LogicModuleType       = typename LogicParserModules::LogicModule<LogicParserTraits>;

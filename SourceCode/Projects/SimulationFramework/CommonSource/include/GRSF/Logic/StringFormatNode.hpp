@@ -97,13 +97,13 @@ namespace LogicNodes{
                 >
         void operator()(LogicSocket<T> * n){
             //std::cout << "value: " <<n->getValue()<< std::endl;
-            m_fList.add(n->getRefValue());
+            m_fList.add(n->getValueRef());
         }
 
         // Types which are in TypeSeqBasic
         void operator()(LogicSocket<boost::filesystem::path> * n){
             //std::cout << "value path: " <<n->getValue()<< std::endl;
-            m_fList.add(n->getRefValue().string());
+            m_fList.add(n->getValueRef().string());
         }
 
 
@@ -114,16 +114,14 @@ namespace LogicNodes{
         ValueSetter(std::stringstream * p): m_s(p){};
         // Only overload the types to which a std::string can be assigned
         template<typename T,
-                 typename std::enable_if< ! boost::mpl::contains< typename LogicTypes::TypeSeqStringAssignable, T>::type::value
-                                        >::type * = nullptr
+                 SFINAE_ENABLE_IF( (! boost::mpl::contains< typename LogicTypes::TypeSeqStringAssignable, T>::type::value) )
         >
         void operator()(LogicSocket<T> * n){
              ERRORMSG("Output type: " << LogicTypes::getTypeName<T>() << " cannot be used in StringFormatNode!");
         }
 
         template<typename T,
-                 typename std::enable_if< boost::mpl::contains< typename LogicTypes::TypeSeqStringAssignable, T>::type::value
-                                        >::type * = nullptr
+                 SFINAE_ENABLE_IF(  (boost::mpl::contains< typename LogicTypes::TypeSeqStringAssignable, T>::type::value) )
         >
         void operator()(LogicSocket<T> * n){
            n->setValue(m_s->str());
