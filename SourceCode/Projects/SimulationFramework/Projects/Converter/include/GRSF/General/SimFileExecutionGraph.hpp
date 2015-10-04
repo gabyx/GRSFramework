@@ -51,7 +51,7 @@ class SimFileExecutionGraph : public ExecutionTreeInOut{
         /** provide function for SimFileConverter ==================================*/
 
         void initSimInfo(std::size_t nBodies,std::size_t nStates);
-        void initFrame(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
+        void initState(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
         void addBodyState(RigidBodyStateAdd * s);
 
         template<typename RigidBodyStateCont>
@@ -59,7 +59,7 @@ class SimFileExecutionGraph : public ExecutionTreeInOut{
             ERRORMSG("This function should not be called")
         }
 
-        void finalizeFrame();
+        void finalizeState();
 
         inline bool isStopBodyLoop(){  return checkStop(NodeGroups::BODY_EXEC); }
         inline bool isStopFrameLoop(){ return checkStop(NodeGroups::FRAME_EXEC); }

@@ -80,7 +80,7 @@ public:
         LOG(m_log, "---> LogicConverter started:" <<std::endl;);
 
         // global framecounter
-        m_frameCounter = 0;
+        m_stateCounter = 0;
 
         // First open the sim file (if .sim extension)
         // if .xml extension (then this is the process file where each simfile and frame index is stored)
@@ -185,7 +185,7 @@ protected:
 
     std::vector<boost::filesystem::path> m_inputFiles;
 
-    std::size_t m_frameCounter; ///< Counting all frames converted
+    std::size_t m_stateCounter; ///< Counting all frames converted
     std::size_t m_bodyCounter;  ///< Counting all bodies converted
 
     bool m_terminatedByStepper;
@@ -235,6 +235,7 @@ protected:
             template<typename StateCont>
             static void apply(SimFileConverter * p, const TSimFileStepper& simFileStepper, StateCont & states){
                 details::StepperDispatch<TSimFileStepper>::addState(simFileStepper, states);
+                p->m_bodyCounter += states.size();
             }
         };
 
@@ -283,10 +284,10 @@ protected:
         template<typename T>
         struct StepperDispatch<T,std::false_type>{
             SIMFILESTEPPER_DISPATCH_FUNC(initSimInfo)
-            SIMFILESTEPPER_DISPATCH_FUNC(initFrame)
+            SIMFILESTEPPER_DISPATCH_FUNC(initState)
             SIMFILESTEPPER_DISPATCH_FUNC(addBodyState)
             SIMFILESTEPPER_DISPATCH_FUNC(addState)
-            SIMFILESTEPPER_DISPATCH_FUNC(finalizeFrame)
+            SIMFILESTEPPER_DISPATCH_FUNC(finalizeState)
 
             /** Stop whole loop if any stepper in the list needs to stop.
              * Making different steppers and stop and not stop in different loops, needs dynamic managing during the loop
@@ -323,10 +324,10 @@ protected:
         template<typename T>
         struct StepperDispatch<T,std::true_type>{
             SIMFILESTEPPER_DISPATCH_FUNC_CONT(initSimInfo)
-            SIMFILESTEPPER_DISPATCH_FUNC_CONT(initFrame)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT(initState)
             SIMFILESTEPPER_DISPATCH_FUNC_CONT(addBodyState)
             SIMFILESTEPPER_DISPATCH_FUNC_CONT(addState)
-            SIMFILESTEPPER_DISPATCH_FUNC_CONT(finalizeFrame)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT(finalizeState)
 
             SIMFILESTEPPER_DISPATCH_FUNC_CONT_STOP(isStopFileLoop)
             SIMFILESTEPPER_DISPATCH_FUNC_CONT_STOP(isStopFrameLoop)
@@ -424,11 +425,11 @@ protected:
                     baseFilename = "Frame";
                 }
                 outputDir  /= m_outputFile.parent_path();
-                outputName = baseFilename +"-id-"+uuidString + "-s-" + std::to_string(m_frameCounter);
+                outputName = baseFilename +"-id-"+uuidString + "-s-" + std::to_string(m_stateCounter);
             }
 
             // set frame idx (if we have a list set it from the list, other wise default)
-            unsigned int frameIdx = m_frameCounter;
+            unsigned int frameIdx = m_stateCounter;
             if( !stateIndices.empty()){
                 frameIdx = itStateIdx->m_frameIdx;
             }
@@ -437,7 +438,7 @@ protected:
                 << "\n\tframeName: " << outputName << "\n\tframeIdx: " << frameIdx << "\n\ttime: " << time << std::endl;)
 
             start = timer.elapsedMilliSec();
-            EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::initFrame(simFileStepper,outputDir, outputName , time, frameIdx ) )
+            EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::initState(simFileStepper,outputDir, outputName , time, frameIdx ) )
             avgInitFrameTime += timer.elapsedMilliSec() - start;
 
 
@@ -448,7 +449,7 @@ protected:
             avgStateTime += timer.elapsedMilliSec() - start;
 
 
-            EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::finalizeFrame(simFileStepper) )
+            EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::finalizeState(simFileStepper) )
 
             // skip to next stateIdx if we have indices
             if(!stateIndices.empty()){
@@ -468,12 +469,12 @@ protected:
             }
 
 
-            m_frameCounter++;
+            m_stateCounter++;
 
             stop = false;
             EXPAND_PARAMETERPACK( stop |= details::StepperDispatch<TSimFileStepper>::isStopFrameLoop(simFileStepper) )
             if(stop){
-                LOG(m_log,"---> Stop frame loop set, frameCount: " << m_frameCounter << " -> exit" << std::endl;)
+                LOG(m_log,"---> Stop frame loop set, frameCount: " << m_stateCounter << " -> exit" << std::endl;)
                 m_terminatedByStepper=true;
                 break;
             }
@@ -487,10 +488,11 @@ protected:
         }
 
           LOG(m_log, "---> Converter Speed:" <<std::endl
-            << "Avg. Load State : "   << (avgStateLoadTime / m_frameCounter) << " ms" <<std::endl
-            << "Avg. Init Frame : "   << (avgInitFrameTime / m_frameCounter) << " ms" <<std::endl
-            << "Avg. Loop Time  / Body: " << (avgStateTime / (m_bodyCounter)) << " ms" <<std::endl
-            << "Avg. Loop Time / Frame : " << (avgStateTime / m_frameCounter) << " ms" <<std::endl;)
+            << "Avg. Load State : "   << (avgStateLoadTime / m_stateCounter) << " ms" <<std::endl
+            << "Avg. Init State : "   << (avgInitFrameTime / m_stateCounter) << " ms" <<std::endl
+            << "Avg. Time per State : " << (avgStateTime / m_stateCounter) << " ms" <<std::endl
+            << "Avg. Time per Body: " << (avgStateTime / (m_bodyCounter)) << " ms" <<std::endl;)
+
 
         ApplicationSignalHandler::getSingleton().unregisterCallback(SIGINT,"SimFileConverter");
 

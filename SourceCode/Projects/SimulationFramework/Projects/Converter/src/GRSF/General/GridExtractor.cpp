@@ -3,7 +3,7 @@
 
 
 
-void GridExtractor::initFrame(boost::filesystem::path folder,
+void GridExtractor::initState(boost::filesystem::path folder,
                                       std::string filename,
                                       double time,
                                       unsigned int frameNr)
@@ -19,7 +19,7 @@ void GridExtractor::initSimInfo(std::size_t nBodies,std::size_t nStates){
     m_nStates = nStates;
 }
 
-void GridExtractor::finalizeFrame(){
+void GridExtractor::finalizeState(){
 
 }
 

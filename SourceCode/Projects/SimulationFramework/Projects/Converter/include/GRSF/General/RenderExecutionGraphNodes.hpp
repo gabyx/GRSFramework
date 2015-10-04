@@ -408,8 +408,8 @@ namespace LogicNodes {
         virtual void writeFooter() = 0;
 
 
-        virtual void initFrame() = 0;
-        virtual void finalizeFrame() = 0;
+        virtual void initState() = 0;
+        virtual void finalizeState() = 0;
 
         virtual ~RenderScriptWriter(){};
         void compute() {ERRORMSG("Should not be evaluated!")};
@@ -485,7 +485,7 @@ namespace LogicNodes {
             m_s << GET_ISOCKET_REF_VALUE(BodiesEnd);
         }
 
-        void initFrame() {
+        void initState() {
 
             m_s.str("");
 
@@ -493,7 +493,7 @@ namespace LogicNodes {
                 !GET_ISOCKET(Name)->isConnected() ||
                 !GET_ISOCKET(Time)->isConnected() ||
                 !GET_ISOCKET(FrameNr)->isConnected()){
-                ERRORMSG("RendermanWriter::initFrame --> one of Folder,Name,Time,FrameNr sockets not connected to any FrameData node!")
+                ERRORMSG("RendermanWriter::initState --> one of Folder,Name,Time,FrameNr sockets not connected to any FrameData node!")
             }
 
             // open new frame
@@ -505,7 +505,7 @@ namespace LogicNodes {
             dumpStream();
         }
 
-        void finalizeFrame(){
+        void finalizeState(){
             // finish last frame
             if(isFileOpen()){
                writeBodiesEnd();

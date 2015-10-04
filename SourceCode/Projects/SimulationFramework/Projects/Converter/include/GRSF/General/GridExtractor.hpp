@@ -17,14 +17,14 @@ public:
 
   /** provide function for SimFileConverter ==================================*/
     void initSimInfo(std::size_t nBodies,std::size_t nStates);
-    void initFrame(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
+    void initState(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
 
     template<typename StateContainer>
     void addState(StateContainer & states){
 
     }
 
-    void finalizeFrame();
+    void finalizeState();
 
     inline bool isStopBodyLoop(){return false;}
     inline bool isStopFrameLoop(){return false;}
