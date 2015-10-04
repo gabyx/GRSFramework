@@ -22,6 +22,7 @@
 
 #include "GRSF/Common/ContainerTag.hpp"
 #include "GRSF/Common/SfinaeMacros.hpp"
+#include "GRSF/Common/HasMemberFunction.hpp"
 #include "GRSF/Common/ExpandParameterPack.hpp"
 
 #include "GRSF/Common/CPUTimer.hpp"
@@ -51,10 +52,19 @@ public:
 
     }
 
-    template<typename... TSimFileStepperList>
-    void convert( TSimFileStepperList&&... simFileStepper)
-    {
+    /** Settings to configure converter loop */
+    template<bool _FullState = false>
+    struct Settings{
+        static const bool FullState = _FullState; ///< Calls function addState instead of addBodyState multiple times
+    };
 
+
+    using DefaultSettings = Settings<>;
+
+    template<typename TSettings = DefaultSettings, typename... TSimFileStepper >
+    void convert( TSimFileStepper &&... simFileStepper)
+    {
+        bool stop;
         LOG(m_log, "---> LogicConverter started:" <<std::endl;);
 
         // global framecounter
@@ -117,7 +127,7 @@ public:
                     LOG(m_log,"---> Parsed " << stateIndices.size() << " state for file: " << path << "from XML: " << file.filename() << std::endl;)
 
                     if( stateIndices.size() > 0){
-                        convertFile(simFileStepper...,path,uuid,std::move(stateIndices));
+                        convertFile<TSettings,TSimFileStepper...>(path,uuid,stateIndices,simFileStepper...);
                     }else{
                         LOG(m_log,"---> No states to process..." << std::endl;)
                     }
@@ -128,12 +138,14 @@ public:
 
             }else{
                 // try to convert sim file
-                convertFile(simFileStepper..., file, std::to_string(fileIdx) );
+                convertFile<TSettings, TSimFileStepper...>(file, std::to_string(fileIdx) , {},  simFileStepper...);
             }
 
             ++fileIdx;
 
-            if( EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::isStopFileLoop(simFileStepper) ) ){
+            stop = false;
+            EXPAND_PARAMETERPACK( stop |= details::StepperDispatch<TSimFileStepper>::isStopFileLoop(simFileStepper) )
+            if(stop){
                 LOG(m_log,"---> Stop file loop set, fileCount: " << fileIdx << " -> exit" << std::endl;)
                 break;
             }
@@ -150,6 +162,7 @@ protected:
     };
 
     using StateIndicesType = std::vector< StateIndex >;
+    using StateListType = std::vector<RigidBodyStateAdd>;
 
     MultiBodySimFile m_simFile;
 
@@ -160,30 +173,184 @@ protected:
 
     std::vector<boost::filesystem::path> m_inputFiles;
 
-    unsigned int m_frameCounter;
+    std::size_t m_frameCounter; ///< Counting all frames converted
+    std::size_t m_bodyCounter;  ///< Counting all bodies converted
+
     bool m_terminatedByStepper;
 
     bool m_abort;
     void callbackAbort(){ m_abort = true; LOG(m_log, "---> Quitting ...:" <<std::endl);}
 
-    virtual void setupStepper(){
-        ERRORMSG("NOTHING IMPLEMENTED")
-    }
+
+
+    struct details{
+
+        /** Define some stuff to check for member functions */
+
+
+
+        template<typename T>
+        struct hasMemberFunctionB{
+            DEFINE_HAS_MEMBER_FUNCTION(addState)
+            DEFINE_HAS_MEMBER_FUNCTION(addBodyState)
+            static const bool hasFullStateSupport = hasMemberFunction_addState<T,      StateListType & >::value;
+            static const bool hasBodyStateSupport = hasMemberFunction_addBodyState<T , RigidBodyStateAdd *>::value;
+        };
+        template<
+            typename T,
+            typename Dummy = decltype(ContainerTags::is_container( std::declval<T>()))
+        >
+        struct hasMemberFunction;
+
+        /** Member function check for container of stepper*/
+        template<typename TSimFileStepper>
+        struct hasMemberFunction<TSimFileStepper,std::true_type>
+            : hasMemberFunctionB< typename std::remove_reference<TSimFileStepper>::type::value_type > {};
+
+        /** Member function check for single stepper */
+        template<typename TSimFileStepper>
+        struct hasMemberFunction<TSimFileStepper,std::false_type>
+            : hasMemberFunctionB< typename std::remove_reference<TSimFileStepper>::type > {};
+
+        template<typename TSimFileStepper,
+                 bool FullState,
+                 bool hasFullStateSupport = hasMemberFunction<TSimFileStepper>::hasFullStateSupport,
+                 bool hasBodyStateSupport = hasMemberFunction<TSimFileStepper>::hasBodyStateSupport>
+        struct FullStateOrBodyState;
+        /** If stepper class fails to compile here, you either have missing addState or addBodyState function in your stepper
+        *   and wrong set options WholeState (which needs addState)
+        */
+        /** Dispatch for FullState */
+        template<typename TSimFileStepper,bool hasBodyStateSupport>
+        struct FullStateOrBodyState<TSimFileStepper,true,true,hasBodyStateSupport>{
+            template<typename StateCont>
+            static void apply(SimFileConverter * p, const TSimFileStepper& simFileStepper, StateCont & states){
+                details::StepperDispatch<TSimFileStepper>::addState(simFileStepper, states);
+            }
+        };
+
+        /** Dispatch for BodyState */
+        template<typename TSimFileStepper, bool hasFullStateSupport>
+        struct FullStateOrBodyState<TSimFileStepper,false,hasFullStateSupport,true>{
+
+            template<typename StateCont>
+            static void apply(SimFileConverter * p, const TSimFileStepper& simFileStepper, StateCont & states ){
+                std::size_t bodyCounter = 0;
+                for(auto & bs: states){
+
+                    details::StepperDispatch<TSimFileStepper>::addBodyState(simFileStepper, &bs);
+
+                    ++p->m_bodyCounter;
+                    ++bodyCounter; // local counter
+
+                    if(details::StepperDispatch<TSimFileStepper>::isStopBodyLoop(simFileStepper)){
+                        LOG(p->m_log,"---> Stop body loop set, bodyCount: " << bodyCounter << " -> exit" << std::endl;)
+                        break;
+                    }
+                }
+            }
+
+        };
+
+
+
+
+
+        template<typename T, typename Dummy = decltype(ContainerTags::is_container( std::declval<T>() /*make reference, no need for CTOR*/ ))>
+        struct StepperDispatch;
+
+        #define SIMFILESTEPPER_DISPATCH_FUNC( __name__ ) SIMFILESTEPPER_DISPATCH_FUNC2( __name__ , void )
+
+        #define SIMFILESTEPPER_DISPATCH_FUNC2(__name__, _return_) \
+            template<typename... Args> \
+            static _return_ __name__(T & t, Args&&... a ){ \
+                    t.__name__(std::forward<Args>(a)...); \
+            }
+        #define SIMFILESTEPPER_DISPATCH_FUNC_STOP( __name__ )   \
+            template<typename... Args> \
+            static bool __name__(T & t, Args&&... a ){ \
+                return t.__name__(std::forward<Args>(a)...); \
+            }
+
+        /** Function hooks dispatch for a single stepper functor */
+        template<typename T>
+        struct StepperDispatch<T,std::false_type>{
+            SIMFILESTEPPER_DISPATCH_FUNC(initSimInfo)
+            SIMFILESTEPPER_DISPATCH_FUNC(initFrame)
+            SIMFILESTEPPER_DISPATCH_FUNC(addBodyState)
+            SIMFILESTEPPER_DISPATCH_FUNC(addState)
+            SIMFILESTEPPER_DISPATCH_FUNC(finalizeFrame)
+
+            /** Stop whole loop if any stepper in the list needs to stop.
+             * Making different steppers and stop and not stop in different loops, needs dynamic managing during the loop
+             * which is too cumbersome!
+             */
+            SIMFILESTEPPER_DISPATCH_FUNC_STOP(isStopFileLoop)
+            SIMFILESTEPPER_DISPATCH_FUNC_STOP(isStopFrameLoop)
+            SIMFILESTEPPER_DISPATCH_FUNC_STOP(isStopBodyLoop)
+        };
+        #undef SIMFILESTEPPER_DISPATCH_FUNC
+        #undef SIMFILESTEPPER_DISPATCH_FUNC2
+        #undef SIMFILESTEPPER_DISPATCH_FUNC_STOP
+
+        #define SIMFILESTEPPER_DISPATCH_FUNC_CONT( __name__ ) SIMFILESTEPPER_DISPATCH_FUNC_CONT2( __name__ , void )
+
+        #define SIMFILESTEPPER_DISPATCH_FUNC_CONT2(__name__, _return_) \
+            template<typename... Args> \
+            static _return_ __name__(T & c, Args&&... a ){ \
+                for(auto & t : c){ \
+                    t.__name__(std::forward<Args>(a)...); \
+                } \
+            }
+
+        #define SIMFILESTEPPER_DISPATCH_FUNC_CONT_STOP( __name__ )   \
+            template<typename... Args> \
+            static bool __name__(T & c, Args&&... a ){ \
+                bool stop=false; \
+                for(auto & t : c){ \
+                    stop |= t.__name__(std::forward<Args>(a)...); \
+                }\
+                return stop; \
+            }
+        /** Function hooks dispatch for a list of stepper functors of the same type*/
+        template<typename T>
+        struct StepperDispatch<T,std::true_type>{
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT(initSimInfo)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT(initFrame)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT(addBodyState)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT(addState)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT(finalizeFrame)
+
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT_STOP(isStopFileLoop)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT_STOP(isStopFrameLoop)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT_STOP(isStopBodyLoop)
+        };
+        #undef SIMFILESTEPPER_DISPATCH_FUNC_CONT
+        #undef SIMFILESTEPPER_DISPATCH_FUNC_CONT2
+        #undef SIMFILESTEPPER_DISPATCH_FUNC_CONT_STOP
+    };
+
+
+    template<typename TSimFileStepper, bool FullState, bool hasFullStateSupport, bool hasBodyStateSupport>
+    friend struct details::FullStateOrBodyState;
+
 
     /** \p uuid string is a hash for the file path to identify each frame where it came from!*/
-    template<typename... TSimFileStepperList>
-    void convertFile(TSimFileStepperList&&... simFileStepper,
-                     const boost::filesystem::path & f,
+    template<typename TSettings, typename... TSimFileStepper>
+    void convertFile(const boost::filesystem::path & f,
                      const std::string uuidString ,
-                     StateIndicesType stateIndices = {} )
+                     const StateIndicesType & stateIndices, /* can be empty*/
+                     TSimFileStepper&&... simFileStepper
+                    )
     {
+        bool stop = false;
         LOG(m_log, "---> Converting file:" << f << std::endl;);
 
         m_abort = false;
         ApplicationSignalHandler::getSingleton().registerCallback(SIGINT,
                             std::bind( &SimFileConverter::callbackAbort, this), "SimFileConverter");
 
-        std::vector<RigidBodyStateAdd> states;
+        StateListType states;
 
         if(!m_simFile.openRead(f,true)){
             ERRORMSG("Could not open SimFile at :" << f)
@@ -199,8 +366,7 @@ protected:
         timer.start();
 
         double start = 0, avgInitFrameTime = 0, avgStateTime = 0, avgStateLoadTime = 0;
-        unsigned int bodyCounter = 0;
-
+        m_bodyCounter = 0;
 
         StateIdxType currentStateIdx = 0;
         auto itStateIdx = stateIndices.begin();
@@ -269,18 +435,9 @@ protected:
 
 
             start = timer.elapsedMilliSec();
-            for(auto & bs: states){
+            /** apply full state or body state loop  for every stepper type */
+            EXPAND_PARAMETERPACK(  (details::FullStateOrBodyState<TSimFileStepper,TSettings::FullState>::apply(this,simFileStepper, states)) )
 
-                EXPAND_PARAMETERPACK(  details::StepperDispatch<TSimFileStepper>::addBodyState(simFileStepper, &bs) )
-
-                bodyCounter++;
-
-                if( EXPAND_PARAMETERPACK(details::StepperDispatch<TSimFileStepper>::isStopBodyLoop(simFileStepper)) ){
-                    LOG(m_log,"---> Stop body loop set, bodyCount: " << bodyCounter << " -> exit" << std::endl;)
-                    m_terminatedByStepper=true;
-                    break;
-                }
-            }
             avgStateTime += timer.elapsedMilliSec() - start;
 
 
@@ -306,7 +463,9 @@ protected:
 
             m_frameCounter++;
 
-            if( EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::isStopFrameLoop(simFileStepper) ) ){
+            stop = false;
+            EXPAND_PARAMETERPACK( stop |= details::StepperDispatch<TSimFileStepper>::isStopFrameLoop(simFileStepper) )
+            if(stop){
                 LOG(m_log,"---> Stop frame loop set, frameCount: " << m_frameCounter << " -> exit" << std::endl;)
                 m_terminatedByStepper=true;
                 break;
@@ -321,58 +480,15 @@ protected:
         }
 
           LOG(m_log, "---> Converter Speed:" <<std::endl
-            << "Avg. Load State  / Frame: "   << (avgStateLoadTime / m_frameCounter) << " ms" <<std::endl
-            << "Avg. Init Frame  / Frame: "   << (avgInitFrameTime / m_frameCounter) << " ms" <<std::endl
-            << "Avg. State  / Body: " << (avgStateTime / (m_frameCounter * bodyCounter)) << " ms" <<std::endl
-            << "Avg. State : " << (avgStateTime / m_frameCounter) << " ms" <<std::endl;)
+            << "Avg. Load State : "   << (avgStateLoadTime / m_frameCounter) << " ms" <<std::endl
+            << "Avg. Init Frame : "   << (avgInitFrameTime / m_frameCounter) << " ms" <<std::endl
+            << "Avg. Loop Time  / Body: " << (avgStateTime / (m_bodyCounter)) << " ms" <<std::endl
+            << "Avg. Loop Time / Frame : " << (avgStateTime / m_frameCounter) << " ms" <<std::endl;)
 
         ApplicationSignalHandler::getSingleton().unregisterCallback(SIGINT,"SimFileConverter");
 
     }
 
-    struct details{
-
-        template<typename T, typename Dummy = decltype(ContainerTags::is_container( std::declval<T>() /*make reference, no need for CTOR*/ ))>
-        struct StepperDispatch;
-
-        /** Normal function hooks dispatch for a simple stepper functor */
-        template<typename T>
-        struct StepperDispatch<T,std::false_type>{
-            STATIC_ASSERTM(false,"Only iterable lists of stepper functors allowed in convert()")
-        };
-
-
-        #define SIMFILESTEPPER_DISPATCH_FUNC_CONT( __name__ ) SIMFILESTEPPER_DISPATCH_FUNC_CONT2( __name__ , void )
-
-        #define SIMFILESTEPPER_DISPATCH_FUNC_CONT2(__name__, _return_) \
-            template<typename... Args> \
-            static _return_ __name__(T & c, Args&&... a ){ \
-                for(auto & t : c){ \
-                    t.__name__(std::forward<Args>(a)...); \
-                } \
-            }
-
-        /** Function hooks dispatch for a list of stepper functors of the same type*/
-        template<typename T>
-        struct StepperDispatch<T,std::true_type>{
-            SIMFILESTEPPER_DISPATCH_FUNC_CONT(setup)
-            SIMFILESTEPPER_DISPATCH_FUNC_CONT(initSimInfo)
-            SIMFILESTEPPER_DISPATCH_FUNC_CONT(initFrame)
-            SIMFILESTEPPER_DISPATCH_FUNC_CONT(addBodyState)
-            SIMFILESTEPPER_DISPATCH_FUNC_CONT(finalizeFrame)
-
-            static bool isStopFileLoop(T & c, Args&&... a ){
-                for(auto & it = c.begin(); it!= c.end(); ++it){
-                    if( t.isStopFileLoop(std::forward<Args>(a)...) ){
-                        // remove this stepper from list, because it
-                        c.erase(it);
-                    }
-                }
-            }
-            SIMFILESTEPPER_DISPATCH_FUNC_CONT2(isStopFrameLoop,bool)
-            SIMFILESTEPPER_DISPATCH_FUNC_CONT2(isStopFileLoop,bool)
-        };
-    };
 };
 
 #endif // LogicConverter_hpp

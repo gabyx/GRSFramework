@@ -22,15 +22,10 @@ GridderConverter::GridderConverter(const std::vector<boost::filesystem::path> & 
 void GridderConverter::convert() {
 
     std::vector<GridExtractor> l;
-    std::list<GridExtractor*> ptrL;
-    l.reserve(m_gridderData.m_gridSettingsList.size());
-    ptrL.reserve(m_gridderData.m_gridSettingsList.size());
 
     for(auto & sett: m_gridderData.m_gridSettingsList){
         l.emplace_back(sett);
-        ptrL.emplace_back(&l.back());
     }
-
 
     Base::convert(l);
 

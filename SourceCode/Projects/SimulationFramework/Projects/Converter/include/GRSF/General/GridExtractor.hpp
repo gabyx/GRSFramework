@@ -16,20 +16,29 @@ public:
     GridExtractor(const GridExtractionSettings & settings): m_settings(settings){}
 
   /** provide function for SimFileConverter ==================================*/
-    void setup();
     void initSimInfo(std::size_t nBodies,std::size_t nStates);
     void initFrame(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
-    void addBodyState(RigidBodyStateAdd * s);
+    void addBodyState(RigidBodyStateAdd * s){};
+
+//    template<typename StateContainer>
+//    void addState(StateContainer & states);
+
     void finalizeFrame();
 
-    bool isStopBodyLoop();
-    bool isStopFrameLoop();
-    bool isStopFileLoop();
+    inline bool isStopBodyLoop(){return false;}
+    inline bool isStopFrameLoop(){return false;}
+    inline bool isStopFileLoop(){return false;}
     /** ========================================================================*/
 
 private:
     GridExtractionSettings m_settings;
 
+    std::size_t m_nBodies;
+    std::size_t m_nStates;
+    boost::filesystem::path m_folder;
+    std::string m_filename;
+    double m_time;
+    unsigned int m_frameNr;
 };
 
 
