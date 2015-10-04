@@ -27,7 +27,8 @@ void GridderConverter::convert() {
         l.emplace_back(sett);
     }
 
-    Base::convert(l);
+    using Settings = Base::ConvertSettings<true>;
+    Base::convert<Settings>(l);
 
 }
 

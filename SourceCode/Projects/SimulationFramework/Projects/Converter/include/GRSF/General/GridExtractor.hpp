@@ -18,10 +18,11 @@ public:
   /** provide function for SimFileConverter ==================================*/
     void initSimInfo(std::size_t nBodies,std::size_t nStates);
     void initFrame(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
-    void addBodyState(RigidBodyStateAdd * s){};
 
-//    template<typename StateContainer>
-//    void addState(StateContainer & states);
+    template<typename StateContainer>
+    void addState(StateContainer & states){
+
+    }
 
     void finalizeFrame();
 

@@ -54,12 +54,24 @@ public:
 
     /** Settings to configure converter loop */
     template<bool _FullState = false>
-    struct Settings{
+    struct ConvertSettings{
         static const bool FullState = _FullState; ///< Calls function addState instead of addBodyState multiple times
+
+        /** Providing addState and FullState=true , the implementation in this class which checks if addState is provided and so on
+        * is only meaningful when an read iterator is implemented which iterates over each rigid body state
+        * TODO implement iterator interface for sim file.
+        * Other this implementation is an overkill and this class should only provide addState which directly reads the whole state always
+        * if the stepper functors provided to convert need to iterate over the rigid body states they can for sure do so.
+        * we leave this overkill implementation as is because iterator interface for simfile is a very good idea, but has no priority now.
+        * We can also not hand some sim file read iterators over to addState because, we dont want to read several times for multiple steppers
+        * handed to convert. so the only possible way is to read once (by iterators or by reading a full state junk)
+        * in this class and call either addState or addBodyState depending
+        * on what the user wants
+        */
     };
 
 
-    using DefaultSettings = Settings<>;
+    using DefaultSettings = ConvertSettings<>;
 
     template<typename TSettings = DefaultSettings, typename... TSimFileStepper >
     void convert( TSimFileStepper &&... simFileStepper)
@@ -186,9 +198,6 @@ protected:
     struct details{
 
         /** Define some stuff to check for member functions */
-
-
-
         template<typename T>
         struct hasMemberFunctionB{
             DEFINE_HAS_MEMBER_FUNCTION(addState)
@@ -218,7 +227,7 @@ protected:
                  bool hasBodyStateSupport = hasMemberFunction<TSimFileStepper>::hasBodyStateSupport>
         struct FullStateOrBodyState;
         /** If stepper class fails to compile here, you either have missing addState or addBodyState function in your stepper
-        *   and wrong set options WholeState (which needs addState)
+        *   and wrong set options FullState (which needs addState)
         */
         /** Dispatch for FullState */
         template<typename TSimFileStepper,bool hasBodyStateSupport>
@@ -251,8 +260,6 @@ protected:
             }
 
         };
-
-
 
 
 
@@ -388,7 +395,7 @@ protected:
             double time;
             start = timer.elapsedMilliSec();
             m_simFile.read(states,time);
-            //TODO get here a body state iterator instead of reading all states
+            //TODO get here a body state forward iterator instead of reading all states
 
             avgStateLoadTime +=  timer.elapsedMilliSec() - start;
 
