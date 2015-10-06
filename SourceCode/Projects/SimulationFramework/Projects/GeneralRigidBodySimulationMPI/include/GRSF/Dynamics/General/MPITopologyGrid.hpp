@@ -24,6 +24,7 @@ public:
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
+    using Base = CartesianGrid<NoCellData>;
 
     using RankToAABBType = std::map<unsigned int, AABB3d >;
     using NeighbourRanksListType = typename ProcessTopologyBase::NeighbourRanksListType;
@@ -36,7 +37,7 @@ public:
                           bool aligned = true,
                           const Matrix33 & A_IK = Matrix33::Identity()
                           ):
-    CartesianGrid<NoCellData>(aabb, dim),
+    Base(aabb, dim),
     m_cellNumberingStart(masterRank), m_rank(processRank),
     m_axisAligned(aligned), m_A_IK(A_IK)
     {
@@ -66,9 +67,9 @@ public:
     RankIdType getCellRank(const Vector3 & I_point) const {
         MyMatrix<RankIdType>::Array3 v;
         if(m_axisAligned){
-             v = CartesianGrid<NoCellData>::getCellIndexClosest(I_point);
+             v = Base::getCellIndexClosest(I_point);
         }else{
-             v = CartesianGrid<NoCellData>::getCellIndexClosest(m_A_IK.transpose()*I_point);
+             v = Base::getCellIndexClosest(m_A_IK.transpose()*I_point);
         }
         return getCellRank(v);
     };
@@ -142,7 +143,7 @@ public:
     AABB3d getCellAABB(RankIdType cellRank) const {
 
         MyMatrix<unsigned int>::Array3 cell_index = getCellIndex(cellRank);
-        AABB3d ret(m_Box.m_minPoint);
+        AABB3d ret(m_aabb.m_minPoint);
         ret.m_minPoint.array() += cell_index.array().cast<PREC>()     * m_dxyz.array();
         ret.m_maxPoint.array() += (cell_index.array()+1).cast<PREC>() * m_dxyz.array();
 

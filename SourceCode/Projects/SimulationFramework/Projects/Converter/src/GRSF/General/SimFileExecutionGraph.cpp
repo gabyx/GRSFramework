@@ -32,7 +32,7 @@ void SimFileExecutionGraph::setup() {
 
 }
 
-void SimFileExecutionGraph::initFrame(boost::filesystem::path folder,
+void SimFileExecutionGraph::initState(boost::filesystem::path folder,
                                       std::string filename,
                                       double time,
                                       unsigned int frameNr)
@@ -61,7 +61,7 @@ void SimFileExecutionGraph::initSimInfo(std::size_t nBodies,std::size_t nStates)
     }
 }
 
-void SimFileExecutionGraph::finalizeFrame(){
+void SimFileExecutionGraph::finalizeState(){
      this->finalize(NodeGroups::FRAME_FINAL);
 }
 

@@ -17,10 +17,10 @@
 #define  DEFINE_GRIDDERCONVERTERDATA_TYPES  \
     DEFINE_DYNAMICSYSTEM_BASE_TYPES \
     using GeometryMapType = std::unordered_map< RigidBodyIdType , typename RigidBodyType::GeometryType>; \
-    using ScalesMap = std::unordered_map< RigidBodyIdType ,Vector3 >; \
+    using ScalesMap = StdUMapAligned< RigidBodyIdType , Vector3 >; \
     using VisMeshMap = std::unordered_map< RigidBodyIdType , boost::filesystem::path  >; \
     using GridExtSettingsType = GridExtractionSettings; \
-    using GridExtSettingsListType = std::vector<GridExtSettingsType>;
+    using GridExtSettingsListType = StdVecAligned<GridExtSettingsType>;
 
 
 class GridderData {

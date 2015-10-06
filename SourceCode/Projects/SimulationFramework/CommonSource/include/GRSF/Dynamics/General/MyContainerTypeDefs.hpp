@@ -7,7 +7,7 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
-//#include <Eigen/StdVector>
+#include <Eigen/StdVector>
 
 #include <Eigen/Dense>
 

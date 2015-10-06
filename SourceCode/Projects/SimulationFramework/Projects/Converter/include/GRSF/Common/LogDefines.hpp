@@ -35,7 +35,7 @@
 
     /// GridderParser
     #define GRIDDERPARSER_LOGLEVEL 3
-
+    #define GRIDEXTRACTORRPARSER_LOGLEVEL 3
 #else
 
     #define LOGSJ(A)
@@ -51,7 +51,7 @@
 
     /// GridderParser
     #define GRIDDERPARSER_LOGLEVEL 1
-
+    #define GRIDEXTRACTORRPARSER_LOGLEVEL 1
 #endif
 /* @} */
 
@@ -86,7 +86,12 @@
 #define LOGGPLEVEL2( logptr , message) LOGGPLEVEL( 2 , logptr , message) ;
 #define LOGGPLEVEL3( logptr , message) LOGGPLEVEL( 3 , logptr , message) ;
 
-
+/** GridExtractor */
+#define LOGGC(log , message) LOG(log,message);
+#define LOGGCLEVEL(level, logptr , message) LOGLEVEL(level,GRIDEXTRACTORRPARSER_LOGLEVEL,logptr,message);
+#define LOGGCLEVEL1( logptr , message) LOGGCLEVEL( 1 , logptr , message) ;
+#define LOGGCLEVEL2( logptr , message) LOGGCLEVEL( 2 , logptr , message) ;
+#define LOGGCLEVEL3( logptr , message) LOGGCLEVEL( 3 , logptr , message) ;
 
 
 /** @name  Deconstructor and Constructor Macros

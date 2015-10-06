@@ -21,12 +21,14 @@ GridderConverter::GridderConverter(const std::vector<boost::filesystem::path> & 
 
 void GridderConverter::convert() {
 
-    std::vector<GridExtractor> l;
+    /** Make list of all GridExtractors */
+    StdVecAligned<GridExtractor> l;
 
     for(auto & sett: m_gridderData.m_gridSettingsList){
-        l.emplace_back(sett);
+        l.emplace_back(sett,m_log);
     }
 
+    /** Hand all extractors to the convert function */
     using Settings = Base::ConvertSettings<true>;
     Base::convert<Settings>(l);
 

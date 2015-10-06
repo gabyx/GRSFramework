@@ -54,11 +54,11 @@ public:
 
 
     LogicSocketBase(unsigned int type)
-        : m_type(type), m_id(0), m_isInput(true), m_from(nullptr), m_connected(false), m_parent(nullptr) {
+        : m_id(0), m_type(type), m_isInput(true), m_from(nullptr), m_connected(false), m_parent(nullptr) {
     }
 
     LogicSocketBase(unsigned int type, LogicNode* par, bool isInput, unsigned int id)
-        : m_type(type), m_id(id),  m_isInput(isInput), m_from(nullptr), m_connected(false), m_parent(par) {
+        :  m_id(id), m_type(type),  m_isInput(isInput), m_from(nullptr), m_connected(false), m_parent(par) {
     }
 
     virtual ~LogicSocketBase() {};

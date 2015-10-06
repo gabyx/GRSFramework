@@ -12,7 +12,7 @@
 
 struct GridExtractionSettings{
 public:
-
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_MATRIX_TYPES
 
     using Array3Int = typename MyMatrix<std::size_t>::Array3;
@@ -21,7 +21,6 @@ public:
     AABB3d m_aabb;
     Matrix33 m_R_KI;
     Array3Int m_dimension;
-
 };
 
 

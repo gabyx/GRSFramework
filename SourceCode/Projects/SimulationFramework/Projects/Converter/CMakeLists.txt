@@ -2,6 +2,13 @@
 
 PROJECT(Converter)
 
+
+#Define H5 ===================================================================================================================================================
+find_package(HDF5 COMPONENTS CXX HL REQUIRED)
+# ===============================================================================================================================================================
+
+
+
 message(STATUS "==============================Project: ${PROJECT_NAME} ==================================")
 
 include(PrintListMacro)
@@ -11,10 +18,6 @@ include(PrintListMacro)
 SET(SOURCE_DIR "${PROJECT_SOURCE_DIR}/../GeneralRigidBodySimulation/")
 
 SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
-
-
-
-
 
 
 SET( APP_INC
@@ -57,7 +60,8 @@ SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/GridderLogicParserGenerators.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/GridderLogicParserTraits.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/GridderLogicParserTraitsMacro.hpp
-    
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/GridExtractor.hpp
+
     # Analyzer
     ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/AnalyzerConverter.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/SimFileExecutionGraph.hpp
@@ -86,10 +90,10 @@ SET(COMMON_SRC
     ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/GridderConverter.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/General/GridExtractor.cpp
     #${PROJECT_SOURCE_DIR}/src/GRSF/Converters/RenderConverter.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/AnalyzerConverter.cpp
+    #${PROJECT_SOURCE_DIR}/src/GRSF/Converters/AnalyzerConverter.cpp
     #${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderData.cpp
     #${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderExecutionGraph.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/General/SimFileExecutionGraph.cpp
+    #${PROJECT_SOURCE_DIR}/src/GRSF/General/SimFileExecutionGraph.cpp
 
 )
 
@@ -145,6 +149,9 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 
 #include directories
 set(INCLUDE_DIRS
+    
+    ${HDF5_INCLUDE_DIRS}
+
     ${GRSF_DEP_INCLUDE_DIRS}
     
     ${PROJECT_BINARY_DIR}/include/
@@ -169,7 +176,7 @@ link_directories(${LINK_DIRS})
 #PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
-set(LINK_LIBS ${GRSF_DEP_LIBRARIES} )
+set(LINK_LIBS ${GRSF_DEP_LIBRARIES} ${HDF5_LIBRARIES})
 #PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 

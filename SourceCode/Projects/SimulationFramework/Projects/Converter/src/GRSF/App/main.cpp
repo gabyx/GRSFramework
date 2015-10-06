@@ -39,9 +39,9 @@ void callBackSIGPIPE(int){
 
 int main(int argc, char **argv) {
 
-    ApplicationSignalHandler sigHandler( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2,SIGPIPE} );
-    sigHandler.registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
-    sigHandler.registerCallback(SIGPIPE,callBackSIGPIPE,"callBackSIGPIPE");
+    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2,SIGPIPE} ) )
+    sigHandler->registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
+    sigHandler->registerCallback(SIGPIPE,callBackSIGPIPE,"callBackSIGPIPE");
 
 
     #ifndef NDEBUG
@@ -137,28 +137,28 @@ int main(int argc, char **argv) {
 //                    exit(EXIT_FAILURE);
 //            }
         }else if(std::string(argv[1]) == "analyzer"){
-
-            Logging::LogManager logger; // singelton
-
-            // Parsing Input Parameters===================================
-            ApplicationCLOptionsAnalyzer opts;  // singelton
-            opts.parseOptions(argc-1,++argv);
-            opts.checkArguments();
-            opts.printArgs(std::cerr);
-            // End Parsing =================================
-
-            try{
-                AnalyzerConverter analyzerConv(opts.getInputFiles(),
-                                     opts.getOutputFile(),
-                                     opts.getOutputDir(),
-                                     opts.getSceneFile(),
-                                     opts.getConverterLogicFile());
-                analyzerConv.convert();
-
-            }catch(const Exception & e){
-                    std::cerr <<"Exception occured: " <<  e.what() << std::endl;
-                    exit(EXIT_FAILURE);
-            }
+//
+//            Logging::LogManager logger; // singelton
+//
+//            // Parsing Input Parameters===================================
+//            ApplicationCLOptionsAnalyzer opts;  // singelton
+//            opts.parseOptions(argc-1,++argv);
+//            opts.checkArguments();
+//            opts.printArgs(std::cerr);
+//            // End Parsing =================================
+//
+//            try{
+//                AnalyzerConverter analyzerConv(opts.getInputFiles(),
+//                                     opts.getOutputFile(),
+//                                     opts.getOutputDir(),
+//                                     opts.getSceneFile(),
+//                                     opts.getConverterLogicFile());
+//                analyzerConv.convert();
+//
+//            }catch(const Exception & e){
+//                    std::cerr <<"Exception occured: " <<  e.what() << std::endl;
+//                    exit(EXIT_FAILURE);
+//            }
         }else if(std::string(argv[1]) == "gridder"){
 
             Logging::LogManager logger; // singelton

@@ -15,7 +15,7 @@
 #include "ApproxMVBB/ComputeApproxMVBB.hpp"
 #include "GRSF/Dynamics/Collision/Geometry/OOBB.hpp"
 
-void callBackSIGINT(){
+void callBackSIGINT(int){
     std::cerr << "Caught signal SIGINT --> exit ..." << std::endl;
     exit(EXIT_FAILURE);
 }

@@ -177,7 +177,7 @@ namespace LogicNodes{
             //Iterate over all inputs and add to format_list with visitor
             auto & ins = getInputs();
             auto s = ins.size();
-            for(auto i = 1; i < s;++i){
+            for(auto i = 1U; i < s;++i){
                 ins[i]->applyVisitor(m_adder);
             }
 
