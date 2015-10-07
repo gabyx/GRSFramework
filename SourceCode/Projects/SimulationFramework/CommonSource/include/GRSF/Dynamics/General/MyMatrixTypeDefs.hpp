@@ -17,25 +17,28 @@
 #include <unordered_map>
 //#include <Eigen/StdVector>
 
-
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <Eigen/Geometry>
 
 #include <Eigen/Eigenvalues>
 
+#include <Eigen/CXX11/Tensor>
+
 // ================================================================================================
 /** @brief This
 *	These are some small matrix definitions.
 */
-template<typename TPREC>
+template<typename TScalar>
 struct MyMatrix {
-    using PREC = TPREC;
+    using PREC = TScalar;
     //Static assigned Matrices
     using Matrix44 = Eigen::Matrix<PREC, 4, 4>;
     using Matrix43 = Eigen::Matrix<PREC, 4, 3>;
     using Matrix34 = Eigen::Matrix<PREC, 3, 4>;
     using Matrix33 = Eigen::Matrix<PREC, 3, 3>;
+    using Matrix32 = Eigen::Matrix<PREC, 3, 2>;
+    using Matrix23 = Eigen::Matrix<PREC, 2, 3>;
     using Matrix22 = Eigen::Matrix<PREC, 2, 2>;
     using Vector3 = Eigen::Matrix<PREC, 3, 1>;
     using Vector2 = Eigen::Matrix<PREC, 2, 1>;
@@ -96,6 +99,12 @@ struct MyMatrix {
 
     using Array3 = Eigen::Array<PREC, 3, 1>;
     using Array2 = Eigen::Array<PREC, 2, 1>;
+
+
+    // Tensor stuff (unsupported eigen3)
+    template<std::size_t Indices, int Options = Eigen::ColMajor>
+    using TensorDyn = Eigen::Tensor<PREC,Indices,Options>;
+
 };
 
 struct MyMatrixDecomposition {
@@ -119,6 +128,8 @@ struct MyMatrixIOFormat {
    using Matrix44 = typename MyMatrix< _PREC_ >::Matrix44; \
    using Matrix33 = typename MyMatrix< _PREC_ >::Matrix33; \
    using Matrix22 = typename MyMatrix< _PREC_ >::Matrix22; \
+   using Matrix32 = typename MyMatrix< _PREC_ >::Matrix32; \
+   using Matrix23 = typename MyMatrix< _PREC_ >::Matrix23; \
    using Matrix43 = typename MyMatrix< _PREC_ >::Matrix43; \
    using Matrix34 = typename MyMatrix< _PREC_ >::Matrix34; \
    using Vector3 = typename MyMatrix< _PREC_ >::Vector3;   \
@@ -160,6 +171,10 @@ struct MyMatrixIOFormat {
    template<unsigned int M,unsigned int N> using ArrayStatStat = typename MyMatrix< _PREC_ >::template ArrayStatStat<M,N>; \
    template<unsigned int M> using ArrayStat = typename MyMatrix< _PREC_ >::template ArrayStat<M>; \
    using Array3 = typename MyMatrix< _PREC_ >::Array3;   \
-   using Array2 = typename MyMatrix< _PREC_ >::Array2;
+   using Array2 = typename MyMatrix< _PREC_ >::Array2; \
+   \
+   template<unsigned int Indices, int Options = Eigen::ColMajor> \
+   using TensorDyn = typename MyMatrix< _PREC_ >::template TensorDyn<Indices,Options>;
+
 #endif
 

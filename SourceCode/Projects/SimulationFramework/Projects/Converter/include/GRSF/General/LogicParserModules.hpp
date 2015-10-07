@@ -628,11 +628,11 @@ namespace LogicParserModules{
         void createToolOOBBCollider(XMLNodeType & logicNode, unsigned int id) {
 
             Vector3 minPoint;
-            if(!Utilities::stringToVector3(minPoint,  logicNode.attribute("minPoint").value())) {
+            if(!Utilities::stringToVector(minPoint,  logicNode.attribute("minPoint").value())) {
                 ERRORMSG_PARSERTOOL("---> String conversion 'minPoint' failed", id);
             }
             Vector3 maxPoint;
-            if(!Utilities::stringToVector3(maxPoint,  logicNode.attribute("maxPoint").value())) {
+            if(!Utilities::stringToVector(maxPoint,  logicNode.attribute("maxPoint").value())) {
                 ERRORMSG_PARSERTOOL("---> String conversion 'maxPoint' failed", id);
             }
             Quaternion q_KI;

@@ -27,11 +27,11 @@ namespace ParserFunctions{
             for ( XMLNodeType & transf : node.children("Trafo")) {
 
 
-                if(!Utilities::stringToVector3(trans, transf.attribute("trans").value())) {
+                if(!Utilities::stringToVector(trans, transf.attribute("trans").value())) {
                     ERRORMSG("---> String conversion in InitialPositionTransforms: translation failed");
                 }
 
-                if(!Utilities::stringToVector3(axis, transf.attribute("axis").value())) {
+                if(!Utilities::stringToVector(axis, transf.attribute("axis").value())) {
                     ERRORMSG("---> String conversion in InitialPositionTransforms: rotationAxis failed");
                 }
 

@@ -294,7 +294,10 @@ endif()
 # set common include dir
 SET(GRSF_DEP_INCLUDE_DIRS 
     ${Boost_INCLUDE_DIRS}
+    
     ${EIGEN_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIR}/unsupported
+    
     ${PUGIXML_INCLUDE_DIR}
     ${Meta_INCLUDE_DIR}
     ${PUGIXML_INCLUDE_DIR}

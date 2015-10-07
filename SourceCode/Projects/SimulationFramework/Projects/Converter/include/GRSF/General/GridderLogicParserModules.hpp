@@ -110,6 +110,19 @@ public:
 
         parseGrid(grid,settings);
 
+        m_extractorNames.clear();
+
+        auto nodes = gridExt.children("Extract");
+        unsigned int extrs = 0;
+        auto itNodeEnd = nodes.end();
+        for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
+           parseExtrationTypes(*itNode,settings);
+           ++extrs;
+        }
+        if(extrs==0){
+            ERRORMSG("---> You need at least one 'Extract' node in 'GridExtraction'!")
+        }
+
     }
 
     template<typename TSettings>
@@ -117,16 +130,16 @@ public:
 
 
             Vector3 minPoint;
-            if(!Utilities::stringToVector3(minPoint,  grid.attribute("minPoint").value())) {
+            if(!Utilities::stringToVector(minPoint,  grid.attribute("minPoint").value())) {
                 ERRORMSG("---> String conversion 'minPoint' failed");
             }
 
             Vector3 maxPoint;
-            if(!Utilities::stringToVector3(maxPoint,  grid.attribute("maxPoint").value())) {
+            if(!Utilities::stringToVector(maxPoint,  grid.attribute("maxPoint").value())) {
                 ERRORMSG("---> String conversion 'maxPoint' failed");
             }
 
-            if(!Utilities::stringToVector3(settings.m_dimension,  grid.attribute("dimension").value())) {
+            if(!Utilities::stringToVector(settings.m_dimension,  grid.attribute("dimension").value())) {
                 ERRORMSG("---> String conversion 'dimensions' failed");
             }
 
@@ -140,17 +153,95 @@ public:
             settings.m_aabb = AABB3d( I_r_IK + minPoint, I_r_IK + maxPoint);
 
 
-
             LOGGPLEVEL1(m_pLog,"---> Parsed GridSettings for file: " << settings.m_fileName <<std::endl;)
 
     }
 
-    void cleanUp() {}
+    template<typename TSettings>
+    void parseExtrationTypes(XMLNodeType & extract, TSettings & settings){
+        std::string type = extract.attribute("type").value();
+
+        std::string name = extract.attribute("name").value();
+        if(name.empty()){
+            ERRORMSG("---> You need to define a unique name for extractor type: " << type)
+        }
+        if(m_extractorNames.find(name)!=m_extractorNames.end()){
+            ERRORMSG("---> You need to define a unique name: " << name << " already exists for Extractor")
+        }else{
+            m_extractorNames.insert(name);
+        }
+        if(type=="TransVelProj2D"){
+            settings.m_transVelProj2DExtractors.emplace_back(name);
+            auto velProj = settings.m_transVelProj2DExtractors.back();
+            parseVelProjExtractor(extract,velProj);
+
+        }else if(type=="TransVelProj1D"){
+
+            settings.m_transVelProj1DExtractors.emplace_back(name);
+            auto velProj = settings.m_transVelProj1DExtractors.back();
+            parseVelProjExtractor(extract,velProj);
+
+        }else if(type=="TransVel"){
+
+            if(settings.m_transVelExtractor.size()>=1){
+                ERRORMSG("---> You specified already a TransVel extractor, only one allowed!")
+            }
+            settings.m_transVelExtractor.emplace_back(name);
+            auto vel = settings.m_transVelExtractor.back();
+            parseVelExtractor(extract,vel);
+
+        }else{
+            ERRORMSG("---> No extraction type: " << type)
+        }
+    }
+
+    template<typename TExtractor>
+    void parseVelProjExtractor(XMLNodeType & extract, TExtractor & velProj){
+
+        if(!Utilities::stringToType( velProj.m_transformToGridCoordinates,  extract.attribute("transformToGridCoords").value()) ) {
+                ERRORMSG("---> String conversion 'transformToGridCoords' failed");
+        }
+
+        XMLAttributeType att = extract.attribute("useProjectionMatrix");
+        if(att){
+           if(!Utilities::stringToType(velProj.m_useProjectionMatrix,  extract.attribute("useProjectionMatrix").value())) {
+                ERRORMSG("---> String conversion 'useProjectionMatrix' failed");
+           }
+           if( velProj.m_useProjectionMatrix ){
+            ERRORMSG("---> Parsing Projection matrix not implemented yet");
+            return;
+           }
+        }
+
+        att = extract.attribute("indices");
+        if(att){
+            if(!Utilities::stringToVector(velProj.m_indices,  extract.attribute("indices").value())) {
+                ERRORMSG("---> String conversion 'indices' failed");
+            }
+        }else{
+            ERRORMSG("---> In parseExtrationTypes: neither 'indices' given nor 'useProjectionMatrix'= true")
+        }
+
+    }
+
+    template<typename TExtractor>
+    void parseVelExtractor(XMLNodeType & extract, TExtractor & vel){
+
+        if(!Utilities::stringToType( vel.m_transformToGridCoordinates,  extract.attribute("transformToGridCoords").value()) ) {
+                ERRORMSG("---> String conversion 'transformToGridCoords' failed");
+        }
+    }
+
+
+    void cleanUp(){
+        m_extractorNames.clear();
+    }
 
 private:
     LogType * m_pLog;
     GridExtSettingsListType * m_gridSettingsList;
 
+    std::unordered_set<std::string> m_extractorNames;
 };
 
 };

@@ -52,7 +52,9 @@ public:
 
     ~CartesianGrid(){}
 
-
+    inline IndexType getDimensions(){return m_dim;}
+    inline Array3 getDx(){return m_dxyz;}
+    inline Array3 getDxInv(){return m_dxyzInv;}
 
     /** Get cell index, points needs to be in same frame as aabb in this class */
     template<typename Derived>

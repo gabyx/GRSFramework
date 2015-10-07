@@ -10,6 +10,7 @@
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"
 #include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/Common/EnumClassHelper.hpp"
 
 #include "GRSF/Dynamics/Buffers/RigidBodyState.hpp"
 
@@ -18,12 +19,11 @@
 #include "GRSF/General/GridExtractionSettings.hpp"
 
 
-
 class GridExtractor{
 public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    GridExtractor(const GridExtractionSettings & settings, Logging::Log * m_log );
+    GridExtractor(GridExtractionSettings * settings, Logging::Log * m_log );
     GridExtractor(GridExtractor && g) = default;
     ~GridExtractor();
 
@@ -93,13 +93,16 @@ private:
         Vector3 m_cellCenter;
     };
 
-    GridExtractionSettings m_settings;
+    GridExtractionSettings * m_settings = nullptr;
 
-    /** Grids */
+    /** Grids*/
     using GridType = Grid< CellDataMaxBuffer >;
     std::unique_ptr<GridType> m_grid;
 
-    /** H5 File */
+
+    /** =======================*/
+
+    /** H5 File (row-major storage)*/
     std::unique_ptr<H5::H5File> m_h5File;
 
     std::size_t m_nBodies;
@@ -119,7 +122,7 @@ void GridExtractor::addState(StateContainer & states){
     // switch here on grid type
 
     if(!m_grid){
-        m_grid.reset( new GridType(m_settings.m_aabb,m_settings.m_dimension) );
+        m_grid.reset( new GridType(m_settings->m_aabb,m_settings->m_dimension) );
     }
 
     // reset all cells
@@ -131,12 +134,11 @@ void GridExtractor::addState(StateContainer & states){
 
 template<typename TGrid, typename StateContainer>
 void GridExtractor::addAllBodies(TGrid * grid, StateContainer & states){
-    using IndexType = typename TGrid::IndexType;
 
     Vector3 K_p;
     for(auto & s : states){
 
-        K_p = m_settings.m_R_KI.transpose() * s.getPosition(); // A_KI * I_pos
+        K_p = m_settings->m_R_KI.transpose() * s.getPosition(); // A_KI * I_pos
         auto * p = grid->getCellData( K_p );
         if(p){
             p->add(&s,K_p);

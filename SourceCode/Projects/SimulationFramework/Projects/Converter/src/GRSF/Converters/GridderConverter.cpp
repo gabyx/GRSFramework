@@ -25,7 +25,7 @@ void GridderConverter::convert() {
     StdVecAligned<GridExtractor> l;
 
     for(auto & sett: m_gridderData.m_gridSettingsList){
-        l.emplace_back(sett,m_log);
+        l.emplace_back(&sett,m_log);
     }
 
     /** Hand all extractors to the convert function */

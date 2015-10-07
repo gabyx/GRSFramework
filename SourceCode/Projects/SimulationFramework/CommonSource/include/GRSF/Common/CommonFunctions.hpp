@@ -27,6 +27,7 @@
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/StaticAssert.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/Common/SfinaeMacros.hpp"
 
 #include "GRSF/Common/FastStringConversion.hpp"
 #include "GRSF/Common/SfinaeMacros.hpp"
@@ -282,31 +283,47 @@ inline bool stringToType(T & t, const std::string& s) {
 /** ===============================================*/
 
 
-
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector2.
 */
-template <typename TVector2>
-inline bool stringToVector2( TVector2 & v, const std::string & s) {
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TVector2,2);
+
+template <typename TVector,
+          SFINAE_ENABLE_IF(TVector::SizeAtCompileTime==1)
+          >
+inline bool stringToVector( TVector & v, const std::string & s) {
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(TVector)
+    return details::stringToVectorImpl<1>(v,s);
+}
+
+
+template <typename TVector,
+          SFINAE_ENABLE_IF(TVector::SizeAtCompileTime==2)
+          >
+inline bool stringToVector( TVector & v, const std::string & s) {
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(TVector)
     return details::stringToVectorImpl<2>(v,s);
 }
 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector3.
 */
-template <typename TVector3>
-inline bool stringToVector3( TVector3 & v, const std::string & s) {
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TVector3,3);
+template <typename TVector,
+          SFINAE_ENABLE_IF(TVector::SizeAtCompileTime==3)
+          >
+inline bool
+stringToVector( TVector & v, const std::string & s) {
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(TVector)
     return details::stringToVectorImpl<3>(v,s);
 }
 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector4.
 */
-template <typename TVector4>
-inline bool stringToVector4( TVector4 & v, const std::string & s) {
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TVector4,4);
+template <typename TVector,
+          SFINAE_ENABLE_IF(TVector::SizeAtCompileTime==4)
+          >
+inline bool stringToVector( TVector & v, const std::string & s) {
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(TVector)
     return details::stringToVectorImpl<4>(v,s);
 }
 

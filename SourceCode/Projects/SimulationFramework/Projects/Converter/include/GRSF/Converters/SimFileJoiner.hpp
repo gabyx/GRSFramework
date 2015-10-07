@@ -40,7 +40,9 @@ private:
     */
     template<typename TYPE, typename TYPE2 = TYPE>
     struct InListOrInRangeVisitor: public boost::static_visitor<char> {
+
         InListOrInRangeVisitor(TYPE t, unsigned int bodyCounter): m_t(t), m_bodyC(bodyCounter) {};
+
         char operator()(typename ListOrRangeTypes<TYPE, TYPE2>::ListType & l) const {
             if(l.find(m_t)!=l.end()) {
                 if( m_bodyC+1 == l.size()){
@@ -58,7 +60,9 @@ private:
             }
             return 0;
         }
-        char operator()(typename ListOrRangeTypes<TYPE, TYPE2>::AllType & r) const {}
+        char operator()(typename ListOrRangeTypes<TYPE, TYPE2>::AllType & r) const {
+            return 1;
+        }
 
         TYPE m_t;
         unsigned int m_bodyC;

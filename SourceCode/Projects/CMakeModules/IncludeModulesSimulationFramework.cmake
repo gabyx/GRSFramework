@@ -158,6 +158,7 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/GRSF/Common/foreach_macro.hpp
         
         ${COMMONSOURCE_DIR}/include/GRSF/Common/SerializationHelpersTuple.hpp
+        ${COMMONSOURCE_DIR}/include/GRSF/Common/SerializationHelpersEigen.hpp
         
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/MyMatrixTypeDefs.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/LayoutConfigTypeDefs.hpp
@@ -181,7 +182,6 @@ MACRO(INCLUDE_SIMULATION_FRAMEWORK_MPI SRC INC INCLUDE_DIRS COMMONSOURCE_DIR )
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/TimeStepperSettings.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/InitialConditionBodies.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/InertiaTensorCalculations.hpp
-        ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/SerializationHelpersEigen.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/SerializationHelpersKdTree.hpp
         ${COMMONSOURCE_DIR}/include/GRSF/Dynamics/General/AddGyroTermVisitor.hpp
         

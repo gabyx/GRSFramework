@@ -29,6 +29,12 @@ namespace Hdf5Helpers{
     };
 
     template<>
+    H5::PredType getNativeType<bool>(){
+        return H5::PredType::NATIVE_UCHAR;
+    };
+
+
+    template<>
     H5::PredType getNativeType<char>(){
         return H5::PredType::NATIVE_CHAR;
     };
@@ -72,6 +78,13 @@ namespace Hdf5Helpers{
         return H5::PredType::IEEE_F64LE;
     };
 
+
+    template<>
+    H5::PredType mapNativeTypeToLE<bool, 1 >(){
+        return H5::PredType::STD_U8LE;
+    };
+
+
     template<>
     H5::PredType mapNativeTypeToLE<char, 1 >(){
         return H5::PredType::STD_I8LE;
@@ -111,10 +124,49 @@ namespace Hdf5Helpers{
         a.write( Hdf5Helpers::getNativeType<T>() , &attr );
     }
 
-    /** Vector and Matrix Saving */
+
+
+
+    namespace details {
+        template<typename Derived, typename TFileGroup, typename T>
+        void saveMatrixOrArray(const TFileGroup & fg, const T & m , std::string name){
+
+            hsize_t dims[2] = {static_cast<hsize_t>(m.rows()),
+                               static_cast<hsize_t>(m.cols())};
+
+            H5::DataSpace d(2, dims);
+            H5::DataSet s = fg.createDataSet(name, Hdf5Helpers::mapNativeTypeToLE<typename Derived::Scalar>(), d);
+
+            s.write(m.derived().data(), Hdf5Helpers::getNativeType<typename Derived::Scalar>() );
+
+            // Hdf5 writes in row-major order, so if matrix is col-major (as default in eigen)
+            // we mark an atttribute which tells if this matrix is the transpose of the original
+            if(dims[1]!=1){
+                saveAttribute(s, !static_cast<char>(Derived::Flags & Eigen::RowMajorBit), "isTransposed");
+            }
+        }
+    }
+
+     /** Vector and Matrix Saving */
     template<typename TFileGroup,
              typename Derived,
              SFINAE_ENABLE_IF( std::is_arithmetic<typename Derived::Scalar>::value )
+    >
+    void saveData(const TFileGroup & fg, const MatrixBase<Derived> & m , std::string name){
+        details::saveMatrixOrArray<Derived>(fg,m,name);
+    }
+    template<typename TFileGroup,
+             typename Derived,
+             SFINAE_ENABLE_IF( std::is_arithmetic<typename Derived::Scalar>::value )
+    >
+    void saveData(const TFileGroup & fg, const ArrayBase<Derived> & m , std::string name){
+        details::saveMatrixOrArray<Derived>(fg,m,name);
+    }
+
+
+    template<typename TFileGroup,
+             typename Derived,
+             SFINAE_ENABLE_IF( !std::is_arithmetic<typename Derived::Scalar>::value )
     >
     void saveData(const TFileGroup & fg, const MatrixBase<Derived> & m , std::string name){
 

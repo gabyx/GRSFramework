@@ -2,14 +2,21 @@
 #include "GRSF/General/GridExtractor.hpp"
 #include "GRSF/Common/HDF5Helpers.hpp"
 
-GridExtractor::GridExtractor(const GridExtractionSettings & settings,
+GridExtractor::GridExtractor(GridExtractionSettings * settings,
                              Logging::Log * log)
 : m_settings(settings), m_log(log)
 {
 
+    // Make Grid
+    m_grid.reset( new GridType(m_settings->m_aabb,m_settings->m_dimension) );
+
+    // setup overall data buffer (for all extractors)
+    auto totalBytes = m_settings->resizeBuffer();
+    LOGGCLEVEL1(m_log,"---> Make buffer for "<< m_settings->extractorCount() << " extractors:" << ((double)totalBytes / (1<< 20))<< " [mb]" << std::endl;);
+
     // Open h5 File
-    LOGGCLEVEL1(m_log,"---> Opening hdf5 file: " << m_settings.m_fileName << std::endl;);
-    m_h5File.reset( new H5::H5File(m_settings.m_fileName, H5F_ACC_TRUNC) );
+    LOGGCLEVEL1(m_log,"---> Opening hdf5 file: " << m_settings->m_fileName << std::endl;);
+    m_h5File.reset( new H5::H5File(m_settings->m_fileName, H5F_ACC_TRUNC) );
 
     // Write grid data
     writeGridSettings();
@@ -50,8 +57,11 @@ void GridExtractor::writeGridSettings(){
     // Write the grid settings to the file
     H5::Group group = m_h5File->createGroup("/GridSettings");
 
-    auto g = Hdf5Helpers::saveData(group, m_settings.m_aabb,"OOBB");
-    Hdf5Helpers::saveData(g, m_settings.m_R_KI,"R_KI" );
+    auto g = Hdf5Helpers::saveData(group, m_settings->m_aabb,"OOBB");
+
+    Hdf5Helpers::saveData(g, m_settings->m_R_KI,"R_KI" );
+    Hdf5Helpers::saveData(g, m_settings->m_dimension,"dimensions" );
+    Hdf5Helpers::saveData(g, m_grid->getDx(),"dx" );
 }
 
 
