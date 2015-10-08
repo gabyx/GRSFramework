@@ -128,23 +128,88 @@ namespace Hdf5Helpers{
 
 
     namespace details {
-        template<typename Derived, typename TFileGroup, typename T>
-        void saveMatrixOrArray(const TFileGroup & fg, const T & m , std::string name){
 
+        template<typename TFileGroup, typename Scalar>
+        inline H5::DataSet saveArithmeticArray(const TFileGroup & fg,
+                                               Scalar * data,
+                                               H5::DataSpace & dataSpace ,
+                                               std::string name)
+        {
+            STATIC_ASSERTM(std::is_arithmetic<Scalar>::value, "Your scalar is not arithmetic!")
+            H5::DataSet s = fg.createDataSet(name, Hdf5Helpers::mapNativeTypeToLE<Scalar>(), dataSpace);
+            s.write(data, Hdf5Helpers::getNativeType<Scalar>() );
+            return s;
+        }
+
+        template<typename Derived,
+        typename TFileGroup,
+        typename T
+        >
+        void saveMatrixOrArray_artihmScalar(const TFileGroup & fg, const T & m , std::string name){
+            /* Derived = Matrix<Scalar,...> or similar */
+            /* Scalar = arithmetic */
             hsize_t dims[2] = {static_cast<hsize_t>(m.rows()),
                                static_cast<hsize_t>(m.cols())};
 
-            H5::DataSpace d(2, dims);
-            H5::DataSet s = fg.createDataSet(name, Hdf5Helpers::mapNativeTypeToLE<typename Derived::Scalar>(), d);
+            H5::DataSpace dataSpace(2, dims);
 
-            s.write(m.derived().data(), Hdf5Helpers::getNativeType<typename Derived::Scalar>() );
+            H5::DataSet s = saveArithmeticArray(fg, m.derived().data(),dataSpace,name);
 
             // Hdf5 writes in row-major order, so if matrix is col-major (as default in eigen)
-            // we mark an atttribute which tells if this matrix is the transpose of the original
+            // we mark an atttribute which tells if this matrix should be transformed to colmajor storage after read in the file
             if(dims[1]!=1){
-                saveAttribute(s, !static_cast<char>(Derived::Flags & Eigen::RowMajorBit), "isTransposed");
+                saveAttribute(s, !static_cast<char>(Derived::Flags & Eigen::RowMajorBit), "convertToColMajor");
             }
         }
+
+        template<typename Derived, typename TFileGroup, typename T>
+        void saveTensor_artihmScalar(const TFileGroup & fg, const T & m , std::string name){
+            /* Derived = Tensor<Scalar,...> or similar */
+            /* Scalar  = arithmetic */
+
+            auto & d = m.derived().dimensions();
+            std::array<hsize_t, T::NumIndices > dims;
+            for( std::size_t i=0;  i < T::NumIndices;  ++i){
+                dims(i) = static_cast<hsize_t>(d(i));
+            }
+
+            H5::DataSpace dataSpace(T::NumIndices, &dims[0]);
+
+            H5::DataSet s = saveArithmeticArray(fg, m.derived().data(),dataSpace,name);
+
+            // Hdf5 writes in row-major order, so if matrix is col-major (as default in eigen)
+            // we mark an atttribute which tells if this matrix should be transformed to colmajor storage after read in the file
+
+            saveAttribute(s, !static_cast<char>(Derived::Layout & Eigen::RowMajorBit), "convertToColMajor");
+
+        }
+
+        template<typename Derived, typename TFileGroup, typename T>
+        void saveTensor_vectorScalar(const TFileGroup & fg, const T & m , std::string name){
+            /* Derived = Tensor<Scalar,...> or similar */
+            /* Scalar  = VectorStat<N> , fixed size vector */
+            static const unsigned int RowsAtCompileTime = Derived::Scalar::RowsAtCompileTime;
+            using Scalar = typename Derived::Scalar::Scalar;
+
+            STATIC_ASSERTM(std::is_arithmetic<Scalar>::value, "Your scalar of the Vector::Scalar is not arithmetic!")
+
+            auto & d = m.derived().dimensions();
+            std::array<hsize_t, T::NumIndices + 1 > dims;
+            for( std::size_t i=0;  i < T::NumIndices;  ++i){
+                dims(i) = static_cast<hsize_t>(d(i));
+            }
+            d(T::NumIndices + 1) = RowsAtCompileTime;
+
+            H5::DataSpace dataSpace(T::NumIndices, &dims[0]);
+
+            H5::DataSet s = saveArithmeticArray(fg, m.derived().data(),dataSpace,name);
+
+            // Hdf5 writes in row-major order, so if matrix is col-major (as default in eigen)
+            // we mark an atttribute which tells if this matrix should be transformed to colmajor storage after read in the file
+            saveAttribute(s, !static_cast<char>(Derived::Layout & Eigen::RowMajorBit), "convertToColMajor");
+
+        }
+
     }
 
      /** Vector and Matrix Saving */
@@ -153,14 +218,32 @@ namespace Hdf5Helpers{
              SFINAE_ENABLE_IF( std::is_arithmetic<typename Derived::Scalar>::value )
     >
     void saveData(const TFileGroup & fg, const MatrixBase<Derived> & m , std::string name){
-        details::saveMatrixOrArray<Derived>(fg,m,name);
+        details::saveMatrixOrArray_artihmScalar<Derived>(fg,m,name);
     }
     template<typename TFileGroup,
              typename Derived,
              SFINAE_ENABLE_IF( std::is_arithmetic<typename Derived::Scalar>::value )
     >
     void saveData(const TFileGroup & fg, const ArrayBase<Derived> & m , std::string name){
-        details::saveMatrixOrArray<Derived>(fg,m,name);
+        details::saveMatrixOrArray_artihmScalar<Derived>(fg,m,name);
+    }
+
+    template<typename TFileGroup,
+             typename Derived,
+             SFINAE_ENABLE_IF( std::is_arithmetic<typename Derived::Scalar>::value )
+    >
+    void saveData(const TFileGroup & fg, const TensorBase<Derived> & m , std::string name){
+        details::saveTensor_artihmScalar<Derived>(fg,m,name);
+    }
+
+    template<typename TFileGroup,
+             typename Derived,
+             SFINAE_ENABLE_IF( !std::is_arithmetic<typename Derived::Scalar>::value &&
+                                Derived::Scalar::IsVectorAtCompileTime
+                              )
+    >
+    void saveData(const TFileGroup & fg, const TensorBase<Derived> & m , std::string name){
+        details::saveTensor_vectorScalar<Derived>(fg,m,name);
     }
 
 
@@ -170,18 +253,7 @@ namespace Hdf5Helpers{
     >
     void saveData(const TFileGroup & fg, const MatrixBase<Derived> & m , std::string name){
 
-        hsize_t dims[2] = {static_cast<hsize_t>(m.rows()),
-                           static_cast<hsize_t>(m.cols())};
-
-        H5::DataSpace d(2, dims);
-        H5::DataSet s = fg.createDataSet(name, Hdf5Helpers::mapNativeTypeToLE<typename Derived::Scalar>(), d);
-
-        s.write(m.derived().data(), Hdf5Helpers::getNativeType<typename Derived::Scalar>() );
-
-        // Write attribute row or colmajor for matrices
-        if(dims[1]!=1){
-            saveAttribute(s, static_cast<char>(Derived::Flags & Eigen::RowMajorBit), "rowMajor");
-        }
+       ERRORMSG("NOT IMPLEMENTED")
     }
 
 

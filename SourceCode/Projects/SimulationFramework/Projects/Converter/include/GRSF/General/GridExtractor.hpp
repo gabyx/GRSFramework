@@ -18,6 +18,7 @@
 
 #include "GRSF/General/GridExtractionSettings.hpp"
 
+#include "GRSF/Common/HDF5Helpers.hpp"
 
 class GridExtractor{
 public:
@@ -61,9 +62,9 @@ private:
         struct Reset{
             Reset(TGrid * g): m_g(g){}
 
-            template<typename TIndex>
+            template<typename IndexType>
             void operator()(CellDataMaxBuffer & data,
-                            TIndex & index) const
+                            IndexType & index) const
             {
                 data.m_s = nullptr;
                 data.m_distance      = std::numeric_limits<PREC>::lowest();
@@ -104,6 +105,7 @@ private:
 
     /** H5 File (row-major storage)*/
     std::unique_ptr<H5::H5File> m_h5File;
+    H5::Group m_stateGroup;
 
     std::size_t m_nBodies;
     std::size_t m_nStates;
@@ -129,6 +131,13 @@ void GridExtractor::addState(StateContainer & states){
     m_grid->applyVisitor( CellDataMaxBuffer::Reset<GridType>(m_grid.get()) );
 
     addAllBodies(m_grid.get(),states);
+
+    // apply extractor visitor
+    m_grid->applyVisitor( m_settings->createDataWriterVisitor(m_grid.get()) );
+
+    // write output
+    H5::Group s = m_stateGroup.createGroup("S" + std::to_string(m_frameNr));
+    m_settings->writeToHDF5(s);
 
 }
 

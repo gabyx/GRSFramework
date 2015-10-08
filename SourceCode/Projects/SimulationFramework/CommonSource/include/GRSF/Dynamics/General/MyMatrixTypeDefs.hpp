@@ -73,21 +73,7 @@ struct MyMatrix {
     using MatrixSparseTriplet = Eigen::Triplet<PREC>        ;
 
 
-    template<typename Derived> using MatrixBase = Eigen::MatrixBase<Derived>;
 
-    template<typename Derived>                 using VectorBDyn     = Eigen::VectorBlock<Derived,Eigen::Dynamic>;
-    template<typename Derived, unsigned int M> using VectorBStat    = Eigen::VectorBlock<Derived,M>;
-
-    template<typename Derived>                 using MatrixBDynDyn  = Eigen::Block<Derived>;
-    template<typename Derived, unsigned int M> using MatrixBStatDyn = Eigen::Block<Derived,M, Eigen::Dynamic>;
-    template<typename Derived, unsigned int N> using MatrixBDynStat = Eigen::Block<Derived,Eigen::Dynamic,N>;
-
-    template<typename EigenType> using MatrixRef = Eigen::Ref<EigenType>;
-
-    template<typename EigenType> using MatrixMap = Eigen::Map<EigenType>;
-
-    // Special Array types;
-    template<typename Derived> using ArrayBase  = Eigen::ArrayBase<Derived>;
     template<unsigned int M>
     using ArrayStatDyn = Eigen::Array<PREC, M, Eigen::Dynamic >;
     template<unsigned int N>
@@ -104,7 +90,38 @@ struct MyMatrix {
     // Tensor stuff (unsupported eigen3)
     template<std::size_t Indices, int Options = Eigen::ColMajor>
     using TensorDyn = Eigen::Tensor<PREC,Indices,Options>;
+};
 
+struct MyMatrixSpecial{
+
+    template<typename Derived> using MatrixBase = Eigen::MatrixBase<Derived>;
+    template<typename Derived> using ArrayBase = Eigen::ArrayBase<Derived>;
+
+    template<typename Derived>                 using VectorBDyn     = Eigen::VectorBlock<Derived,Eigen::Dynamic>;
+    template<typename Derived, unsigned int M> using VectorBStat    = Eigen::VectorBlock<Derived,M>;
+
+    template<typename Derived>                 using MatrixBDynDyn  = Eigen::Block<Derived>;
+    template<typename Derived, unsigned int M> using MatrixBStatDyn = Eigen::Block<Derived,M, Eigen::Dynamic>;
+    template<typename Derived, unsigned int N> using MatrixBDynStat = Eigen::Block<Derived,Eigen::Dynamic,N>;
+
+    template<typename EigenType> using MatrixRef = Eigen::Ref<EigenType>;
+
+    template<typename EigenType> using MatrixMap = Eigen::Map<EigenType>;
+
+    // Tensor stuff (unsupported eigen3)
+    template<typename EigenType>
+    using TensorMap  = Eigen::TensorMap<EigenType>;
+
+    template<typename EigenType>
+    using TensorBaseReadOnly = Eigen::TensorBase<EigenType,Eigen::ReadOnlyAccessors>;
+    template<typename EigenType>
+    using TensorBase = Eigen::TensorBase<EigenType,Eigen::WriteAccessors>;
+};
+
+struct MyMatrixStorageOptions{
+    // Eigen Options
+    static const int MatrixRowMajorOption  = Eigen::RowMajor;
+    static const int MatrixColMajorOption = Eigen::ColMajor;
 };
 
 struct MyMatrixDecomposition {
@@ -120,6 +137,30 @@ struct MyMatrixIOFormat {
     static Eigen::IOFormat SpaceSep;
 };
 
+#define DEFINE_MATRIX_STORAGEOPTIONS \
+    static const auto MatrixRowMajorOption = MyMatrixStorageOptions::MatrixRowMajorOption; \
+    static const auto MatrixColMajorOption = MyMatrixStorageOptions::MatrixColMajorOption;
+
+#define DEFINE_MATRIX_SPECIALTYPES \
+   template<typename Derived> using MatrixBase = typename MyMatrixSpecial::MatrixBase<Derived>; \
+   template<typename Derived> using ArrayBase  = typename MyMatrixSpecial::template ArrayBase<Derived>; \
+   \
+   template<typename Derived> using VectorBDyn = typename MyMatrixSpecial::VectorBDyn<Derived>; \
+   template<typename Derived,unsigned int M> using VectorBStat = typename MyMatrixSpecial::VectorBStat<Derived,M>; \
+   \
+   template<typename Derived> using MatrixBDynDyn = typename MyMatrixSpecial::MatrixBDynDyn<Derived>; \
+   template<typename Derived, unsigned int N> using MatrixBDynStat = typename MyMatrixSpecial::MatrixBDynStat<Derived,N>; \
+   template<typename Derived, unsigned int M> using MatrixBStatDyn = typename MyMatrixSpecial::MatrixBStatDyn<Derived,M>; \
+    \
+   template<typename EigenType> using MatrixRef = typename MyMatrixSpecial::MatrixRef< EigenType >; \
+   template<typename EigenType> using MatrixMap = typename MyMatrixSpecial::MatrixMap< EigenType >; \
+   \
+   template<typename T> \
+   using TensorMap = typename MyMatrixSpecial::template TensorMap<T>; \
+   template<typename T> \
+   using TensorBase = typename MyMatrixSpecial::template TensorBase<T>; \
+   template<typename T> \
+   using TensorBaseReadOnly = typename MyMatrixSpecial::template TensorBaseReadOnly<T>;
 
 /**
 * @brief This macro is used to typedef all custom matrix types which have nothing to do with the system.
@@ -148,24 +189,11 @@ struct MyMatrixIOFormat {
    template<unsigned int M,unsigned int N> using MatrixStatStat = typename MyMatrix< _PREC_ >::template MatrixStatStat<M,N>; \
    template<unsigned int M> using VectorStat = typename MyMatrix< _PREC_ >::template VectorStat<M>; \
    \
-   template<typename Derived> using MatrixBase = typename MyMatrix< _PREC_ >::template MatrixBase<Derived>; \
-   \
-   template<typename Derived> using VectorBDyn = typename MyMatrix< _PREC_ >::template VectorBDyn<Derived>; \
-   template<typename Derived,unsigned int M> using VectorBStat = typename MyMatrix< _PREC_ >::template VectorBStat<Derived,M>; \
-   \
-   template<typename Derived> using MatrixBDynDyn = typename MyMatrix< _PREC_ >::template MatrixBDynDyn<Derived>; \
-   template<typename Derived, unsigned int N> using MatrixBDynStat = typename MyMatrix< _PREC_ >::template MatrixBDynStat<Derived,N>; \
-   template<typename Derived, unsigned int M> using MatrixBStatDyn = typename MyMatrix< _PREC_ >::template MatrixBStatDyn<Derived,M>; \
-   \
    using AffineTrafo = typename MyMatrix< _PREC_ >::AffineTrafo; \
    using AffineTrafo2d = typename MyMatrix< _PREC_ >::AffineTrafo2d; \
    using MatrixSparse = typename MyMatrix< _PREC_ >::MatrixSparse; \
    using MatrixSparseTriplet = typename MyMatrix< _PREC_ >::MatrixSparseTriplet; \
    \
-   template<typename EigenType> using MatrixRef = typename MyMatrix< _PREC_ >::template MatrixRef< EigenType >; \
-   template<typename EigenType> using MatrixMap = typename MyMatrix< _PREC_ >::template MatrixMap< EigenType >; \
-   \
-   template<typename Derived> using ArrayBase  = typename MyMatrix< _PREC_ >::template ArrayBase<Derived>; \
    template<unsigned int M> using ArrayStatDyn = typename MyMatrix< _PREC_ >::template ArrayStatDyn<M>; \
    template<unsigned int N> using ArrayDynStat = typename MyMatrix< _PREC_ >::template ArrayDynStat<N>; \
    template<unsigned int M,unsigned int N> using ArrayStatStat = typename MyMatrix< _PREC_ >::template ArrayStatStat<M,N>; \
@@ -174,7 +202,9 @@ struct MyMatrixIOFormat {
    using Array2 = typename MyMatrix< _PREC_ >::Array2; \
    \
    template<unsigned int Indices, int Options = Eigen::ColMajor> \
-   using TensorDyn = typename MyMatrix< _PREC_ >::template TensorDyn<Indices,Options>;
+   using TensorDyn = typename MyMatrix< _PREC_ >::template TensorDyn<Indices,Options>; \
+   \
+   DEFINE_MATRIX_SPECIALTYPES
 
 #endif
 

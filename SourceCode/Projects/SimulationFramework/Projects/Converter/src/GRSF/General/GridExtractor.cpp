@@ -62,6 +62,9 @@ void GridExtractor::writeGridSettings(){
     Hdf5Helpers::saveData(g, m_settings->m_R_KI,"R_KI" );
     Hdf5Helpers::saveData(g, m_settings->m_dimension,"dimensions" );
     Hdf5Helpers::saveData(g, m_grid->getDx(),"dx" );
+
+    m_stateGroup = m_h5File->createGroup("/States");
+
 }
 
 

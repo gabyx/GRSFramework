@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <utility>
+#include <type_traits>
 
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"
@@ -11,7 +13,7 @@
 
 #include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
 
-
+#include "GRSF/Common/HDF5Helpers.hpp"
 
 namespace Extractors{
 
@@ -20,27 +22,64 @@ namespace Extractors{
     namespace details{
 
 
-        class ExtractorBase{
+        /** Defines some tensor types and tensor maps*/
+        template<unsigned int NTensorIndices, /* 3d grid has 3 indices*/
+                 typename TensorScalar
+                 >
+        class TensorStorage{
         public:
+            DEFINE_MATRIX_STORAGEOPTIONS
+            using TensorType = typename MyMatrix<TensorScalar>::template TensorDyn<NTensorIndices,MatrixRowMajorOption>;
+            using TensorMapType = TensorMap<TensorType>;
 
-            ExtractorBase(std::string name): m_dataName(name){}
+            /** Make empty map with dimension zero, mapped to nothing!! */
+            TensorStorage(std::string name)
+                : TensorStorage(name, std::make_index_sequence<NTensorIndices>{}) {}
 
-            void resizeBuffer(std::size_t bytes){
-                m_dataBuffer.resize( bytes );
+            template<typename IndexType>
+            std::size_t resizeTensor( const IndexType & dimensions ){
+                EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(IndexType,NTensorIndices);
+                resizeTensor(dimensions, std::make_index_sequence<NTensorIndices>{} );
+                return m_tensor.size() * sizeof(TensorScalar);
             }
-            void clearBuffer(){
-                m_dataBuffer.clear();
+
+            template<typename IndexType>
+            TensorScalar & getElement( const IndexType & index ){
+                EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(IndexType,NTensorIndices);
+                return getElement(index, std::make_index_sequence<NTensorIndices>{} );
             }
 
-            std::vector<char> m_dataBuffer; ///< Data buffer to write all data
             std::string m_dataName;         /// Data extraction name
+            TensorType m_tensor;
+        private:
+
+            template<typename IndexType, std::size_t... Is>
+            void resizeTensor(const IndexType & dimensions, std::index_sequence<Is...> )
+            {
+                m_tensor.resize( dimensions(Is)... );
+            }
+
+            template<typename IndexType, std::size_t... Is>
+            TensorScalar & getElement(const IndexType & index, std::index_sequence<Is...> )
+            {
+                return m_tensor( index(Is)... );
+            }
+
+            template<std::size_t... Is>
+            TensorStorage(std::string name, std::index_sequence<Is...>)
+                : m_dataName(name), m_tensor( getZero<Is>()... ) {}
+
+            template<std::size_t I> constexpr std::size_t getZero(){ return 0;}
         };
+        #define DEFINE_TENSORMAPCOMP_TYPE(T1,T2) \
+            using TensorType = typename TensorStorage<T1,T2>::TensorType;\
+            using TensorMapType = typename TensorStorage<T1,T2>::TensorMapType;
 
 
         template<unsigned int _DimIn,
                  unsigned int _DimOut,
                  typename TScalar = PREC>
-        class ProjectiveTransform{
+        class ProjectiveTransformComponent{
         public:
             static const unsigned int DimIn = _DimIn;
             static const unsigned int DimOut = _DimOut;
@@ -57,72 +96,126 @@ namespace Extractors{
 
         };
 
-        template<unsigned int DimOut, unsigned int DimIn = 3, typename TScalar = PREC>
-        class ExtractorProjection : public ProjectiveTransform<DimIn,DimOut,TScalar> , public ExtractorBase{
+        template<unsigned int CellDimOut = 3,
+                 unsigned int CellDimIn = 3,
+                 typename TScalar = PREC,
+                 unsigned int nTensorIndices = 3, /* 3d grid has 3 indices*/
+                 typename TCellData   = typename MyMatrix<TScalar>::template VectorStat<CellDimOut>
+                >
+        class ExtractorProjection : public ProjectiveTransformComponent<CellDimIn,CellDimOut,TScalar> ,
+                                    public TensorStorage<nTensorIndices,TCellData>
+        {
         public:
 
-            ExtractorProjection(std::string name): ExtractorBase(name){}
-
+            static const unsigned int CellDataDimension = CellDimOut;
             using Scalar = TScalar;
-            static const unsigned int Dimension = DimOut;
+            using CellDataType = TCellData;
 
-            template<typename T>
-            std::size_t resizeBuffer(const T & gridDimension){
-                std::size_t bytes = getBytes() * gridDimension.prod();
-                ExtractorBase::resizeBuffer(bytes);
-                return bytes;
+            ExtractorProjection(std::string name): TensorStorage<nTensorIndices,TCellData>(name){}
+
+            template<typename IndexType>
+            std::size_t resizeBuffer(const IndexType & gridDimension){
+                return this->resizeTensor(gridDimension);
             }
 
-            constexpr std::size_t getBytes(){ return Dimension  * sizeof(PREC);}
+            //constexpr std::size_t getCellDataBytes(){ return CellDataDimension  * sizeof(Scalar);}
         };
 
-        template<unsigned int DimOut = 3, typename TScalar = PREC>
-        class ExtractorNormal : public ExtractorBase{
+        template<unsigned int CellDimOut = 3,
+                 typename TScalar = PREC,
+                 unsigned int nTensorIndices = 3, /* 3d grid has 3 indices*/
+                 typename TCellData = typename MyMatrix<TScalar>::template VectorStat<CellDimOut>
+                >
+        class ExtractorNormal : public TensorStorage<nTensorIndices,TCellData>
+        {
         public:
 
-            ExtractorNormal(std::string name): ExtractorBase(name){}
-
             using Scalar = TScalar;
-            static const unsigned int Dimension = DimOut;
+            using DataVectorType = VectorStat<CellDimOut>;
+            static const unsigned int Dimension = CellDimOut;
 
-            template<typename T>
-            std::size_t resizeBuffer(const T & gridDimension){
-                std::size_t bytes = getBytes() * gridDimension.prod();
-                ExtractorBase::resizeBuffer(bytes);
-                return bytes;
+            DEFINE_TENSORMAPCOMP_TYPE(nTensorIndices,TCellData)
+
+
+            ExtractorNormal(std::string name): TensorStorage<nTensorIndices,TCellData>(name){}
+
+            //constexpr std::size_t getCellDataBytes(){ return Dimension * sizeof(Scalar); /* size of TCellData */}
+
+            template<typename IndexType>
+            std::size_t resizeBuffer(const IndexType & gridDimension){
+                return this->resizeTensor(gridDimension);
             }
 
-            constexpr std::size_t getBytes(){ return Dimension * sizeof(PREC);}
+
+
+        public:
+            /** TensorMap does not provide setData() functionality and ptr needs to be set in cosntructor,
+            *   Therefore we make a unique_ptr to construct it while resizing the buffer
+            */
         };
 
     }
 
-
-
-    class ExtractorTransVelocityProj1D : public details::ExtractorProjection<1,3,PREC>{
+    /** A 3D Grid has 3 Tensor indices, a 2D has 2 indices */
+    template<unsigned int nTensorIndices = 3>
+    class ExtractorTransVelocityProj1D : public details::ExtractorProjection<1,3,PREC,nTensorIndices>{
     public:
+
         using Base = details::ExtractorProjection<1,3,PREC>;
 
         ExtractorTransVelocityProj1D(std::string name): Base(name){}
 
         bool m_transformToGridCoordinates = true;
+
+        template<typename CellDataType, typename IndexType>
+        void writeData(CellDataType & cellData, const IndexType & index)
+        {
+//            decltype(typename TensorType::Dimensions) d(1,2,3);
+//            TensorMapType a(dataBufferPtr,d);
+        }
+        template<typename FileOrGroup>
+        void writeHDF5(const FileOrGroup & fOrG){
+            Hdf5Helpers::saveData(fOrG,this->m_tensor,this->m_dataName);
+        }
     };
-    class ExtractorTransVelocityProj2D : public details::ExtractorProjection<2,3,PREC>{
+
+    template<unsigned int nTensorIndices = 3>
+    class ExtractorTransVelocityProj2D : public details::ExtractorProjection<2,3,PREC,nTensorIndices>{
     public:
         using Base = details::ExtractorProjection<2,3,PREC>;
 
         ExtractorTransVelocityProj2D(std::string name): Base(name){}
         bool m_transformToGridCoordinates = true;
+
+        template<typename CellDataType, typename IndexType>
+        void writeData(CellDataType & cellData, const IndexType & index)
+        {
+            this->getElement(index) = Vector2(0,1);
+        }
+        template<typename FileOrGroup>
+        void writeHDF5(const FileOrGroup & fOrG){
+            Hdf5Helpers::saveData(fOrG,this->m_tensor,this->m_dataName);
+        }
     };
-    class ExtractorTransVelocity : public details::ExtractorNormal<3,PREC>{
+    template<unsigned int nTensorIndices = 3>
+    class ExtractorTransVelocity : public details::ExtractorNormal<3,PREC,nTensorIndices>{
     public:
         using Base =  details::ExtractorNormal<3,PREC>;
 
-        ExtractorTransVelocity(std::string name = "velocity"): Base(name){}
+        ExtractorTransVelocity(std::string name): Base(name){}
 
         bool m_transformToGridCoordinates = true;
-    };
 
+        template<typename CellDataType, typename IndexType>
+        void writeData(CellDataType & cellData, const IndexType & index)
+        {
+
+        }
+        template<typename FileOrGroup>
+        void writeHDF5(const FileOrGroup & fOrG){
+            Hdf5Helpers::saveData(fOrG,this->m_tensor,this->m_dataName);
+        }
+    };
 
 }
 
@@ -137,13 +230,15 @@ public:
 
     std::string m_fileName;
 
+    /** 3D Grid */
     AABB3d m_aabb;
     Matrix33 m_R_KI;
     Array3UInt m_dimension;
 
-    using ExtractorTransVelType       = Extractors::ExtractorTransVelocity;
-    using ExtractorTransVelProj1DType = Extractors::ExtractorTransVelocityProj1D;
-    using ExtractorTransVelProj2DType = Extractors::ExtractorTransVelocityProj2D;
+    /** Data Extractors */
+    using ExtractorTransVelType       = Extractors::ExtractorTransVelocity<3>;
+    using ExtractorTransVelProj1DType = Extractors::ExtractorTransVelocityProj1D<3>;
+    using ExtractorTransVelProj2DType = Extractors::ExtractorTransVelocityProj2D<3>;
 
     std::vector<ExtractorTransVelType>       m_transVelExtractor; /// only one makes sense!
     std::vector<ExtractorTransVelProj1DType> m_transVelProj1DExtractors;
@@ -162,6 +257,55 @@ public:
             totalBytes += e.resizeBuffer(m_dimension);
         }
         return totalBytes;
+    }
+
+    /** Extractor Data Writer Visitor */
+    template<typename TGrid>
+    class DataWriterVisitor{
+        public:
+        using GridType = TGrid;
+        using GridSettingsType = GridExtractionSettings;
+
+        DataWriterVisitor(GridType * g, GridSettingsType * s): m_grid(g), m_settings(s){}
+        DataWriterVisitor(DataWriterVisitor&&d) = default;
+
+        template<typename CellDataType, typename IndexType>
+        void operator()(CellDataType & cellData, const IndexType & index)
+        {
+            for(auto & e : m_settings->m_transVelExtractor){
+                e.writeData(cellData,index);
+            }
+            for(auto & e : m_settings->m_transVelProj1DExtractors){
+                e.writeData(cellData,index);
+            }
+            for(auto & e : m_settings->m_transVelProj2DExtractors){
+                e.writeData(cellData,index);
+            }
+        }
+
+        private:
+        GridType * m_grid;
+        GridSettingsType * m_settings;
+    };
+
+    template<typename FileOrGroup>
+    void writeToHDF5(FileOrGroup & fOrG){
+        for(auto & e : m_transVelExtractor){
+            e.writeHDF5(fOrG);
+        }
+        for(auto & e : m_transVelProj1DExtractors){
+            e.writeHDF5(fOrG);
+        }
+        for(auto & e : m_transVelProj2DExtractors){
+            e.writeHDF5(fOrG);
+        }
+    }
+
+
+    template<typename TGrid>
+    auto createDataWriterVisitor(TGrid * g) -> DataWriterVisitor<TGrid>
+    {
+        return DataWriterVisitor<TGrid>{g,this};
     }
 
     std::size_t extractorCount(){ return m_transVelExtractor.size() + m_transVelProj1DExtractors.size() + m_transVelProj2DExtractors.size();}
