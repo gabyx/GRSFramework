@@ -17,9 +17,9 @@ enum class TopologyBuilderEnum : char{
 struct GridBuilderSettings{
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    GridBuilderSettings(): m_processDim(MyMatrix<unsigned int>::Array3(1,1,1)), m_A_IK(Matrix33::Identity()){}
+    GridBuilderSettings(): m_processDim(MyMatrix::Array3<unsigned int>(1,1,1)), m_A_IK(Matrix33::Identity()){}
 
-    using ProcessDimType = MyMatrix<unsigned int>::Array3;
+    using ProcessDimType = MyMatrix::Array3<unsigned int>;
     ProcessDimType m_processDim;
 
     bool m_matchProcessDimToExtent = true;

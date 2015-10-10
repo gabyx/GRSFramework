@@ -66,7 +66,7 @@ private:
             void operator()(CellDataMaxBuffer & data,
                             IndexType & index) const
             {
-                data.m_s = nullptr;
+                data.m_rigidBodyState = nullptr;
                 data.m_distance      = std::numeric_limits<PREC>::lowest();
                 data.m_cellCenter = m_g->template getCellPoint<1>(index);
             }
@@ -84,12 +84,12 @@ private:
         void add(RigidBodyStateAdd * s, Vector3 & K_pos){
             /* add only if greater */
             if(K_pos(maxIdx)>m_distance){
-                m_s = s;
+                m_rigidBodyState = s;
                 m_distance = K_pos(maxIdx);
             }
         }
 
-        RigidBodyState * m_s = nullptr;
+        RigidBodyStateAdd * m_rigidBodyState = nullptr;
         PREC m_distance      = std::numeric_limits<PREC>::lowest();
         Vector3 m_cellCenter;
     };

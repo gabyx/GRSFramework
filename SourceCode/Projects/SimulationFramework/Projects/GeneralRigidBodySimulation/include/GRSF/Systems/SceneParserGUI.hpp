@@ -309,7 +309,7 @@ private:
         Vector4 color;
         att = pcloudNode.attribute("color");
         if(att){
-            if(!Utilities::stringToVector4(color,att.value() )) {
+            if(!Utilities::stringToVector(color,att.value() )) {
                 ERRORMSG("---> String conversion in parsePointCloud: scale failed");
             }
         }
@@ -388,7 +388,7 @@ private:
         Vector2 subDivs = Vector2::Ones();
         att = planeNode.attribute("subDivisions");
         if(att) {
-            if(!Utilities::stringToVector2(subDivs, att.value())) {
+            if(!Utilities::stringToVector(subDivs, att.value())) {
                 ERRORMSG("---> String conversion in parsePlane: subDivisions failed");
             }
         }
@@ -399,7 +399,7 @@ private:
         normal(2)=1;
         att = planeNode.attribute("normal");
         if(att) {
-            if(!Utilities::stringToVector3(normal, att.value())) {
+            if(!Utilities::stringToVector(normal, att.value())) {
                 ERRORMSG("---> String conversion in parsePlane: normal failed");
             }
         }
@@ -417,7 +417,7 @@ private:
         tile(1)=1;
         att = planeNode.attribute("tileTexture");
         if(att) {
-            if(!Utilities::stringToVector2(tile, att.value())) {
+            if(!Utilities::stringToVector(tile, att.value())) {
                 ERRORMSG("---> String conversion in parsePlane: tileTexture failed");
             }
         }
@@ -562,15 +562,15 @@ private:
             std::string type = topo.attribute("type").value();
             if(type=="grid") {
                 Vector3 minPoint, maxPoint;
-                if(!Utilities::stringToVector3(minPoint,  topo.attribute("minPoint").value() )) {
+                if(!Utilities::stringToVector(minPoint,  topo.attribute("minPoint").value() )) {
                     ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
                 }
-                if(!Utilities::stringToVector3(maxPoint,  topo.attribute("maxPoint").value())) {
+                if(!Utilities::stringToVector(maxPoint,  topo.attribute("maxPoint").value())) {
                     ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
                 }
 
-                MyMatrix<unsigned int>::Array3 dim;
-                if(!Utilities::stringToVector3(dim,  topo.attribute("dimension").value())) {
+                MyMatrix::Array3<unsigned int> dim;
+                if(!Utilities::stringToVector(dim,  topo.attribute("dimension").value())) {
                     ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
                 }
 

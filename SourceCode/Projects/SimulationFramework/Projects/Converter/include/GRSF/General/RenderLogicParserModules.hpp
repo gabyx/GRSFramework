@@ -234,7 +234,7 @@ private:
                 noColors = false;
 
                 Vector3 rgb;
-                if(!Utilities::stringToVector3(rgb, itNode->attribute("rgb").value())) {
+                if(!Utilities::stringToVector(rgb, itNode->attribute("rgb").value())) {
                     ERRORMSG("---> String conversion in ColorGradient tool: rgb failed");
                 }
                 PREC value;

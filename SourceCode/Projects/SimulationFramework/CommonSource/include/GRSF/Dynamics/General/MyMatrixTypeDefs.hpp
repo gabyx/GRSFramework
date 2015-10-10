@@ -30,7 +30,7 @@
 *	These are some small matrix definitions.
 */
 
-struct MyMatrix {
+namespace MyMatrix {
 
     template<typename Scalar>
     using  Matrix44 =  Eigen::Matrix<Scalar, 4, 4>;
@@ -113,7 +113,7 @@ struct MyMatrix {
     using TensorDyn = Eigen::Tensor<Scalar,Indices,Options>;
 };
 
-struct MyMatrixSpecial{
+namespace MyMatrix{
 
     template<typename Derived> using MatrixBase = Eigen::MatrixBase<Derived>;
     template<typename Derived> using ArrayBase = Eigen::ArrayBase<Derived>;
@@ -167,27 +167,27 @@ struct MyMatrixIOFormat {
     static const auto MatrixColMajorOption = MyMatrixStorageOptions::MatrixColMajorOption;
 
 #define DEFINE_MATRIX_SPECIALTYPES \
-   template<typename Derived> using MatrixBase = typename MyMatrixSpecial::MatrixBase<Derived>; \
-   template<typename Derived> using ArrayBase  = typename MyMatrixSpecial::template ArrayBase<Derived>; \
+   template<typename Derived> using MatrixBase = typename MyMatrix::MatrixBase<Derived>; \
+   template<typename Derived> using ArrayBase  = typename MyMatrix::ArrayBase<Derived>; \
    \
-   template<typename Derived> using VectorBDyn = typename MyMatrixSpecial::VectorBDyn<Derived>; \
-   template<typename Derived,unsigned int M> using VectorBStat = typename MyMatrixSpecial::VectorBStat<Derived,M>; \
+   template<typename Derived> using VectorBDyn = typename MyMatrix::VectorBDyn<Derived>; \
+   template<typename Derived,unsigned int M> using VectorBStat = typename MyMatrix::VectorBStat<Derived,M>; \
    \
-   template<typename Derived> using MatrixBDynDyn = typename MyMatrixSpecial::MatrixBDynDyn<Derived>; \
-   template<typename Derived, unsigned int N> using MatrixBDynStat = typename MyMatrixSpecial::MatrixBDynStat<Derived,N>; \
-   template<typename Derived, unsigned int M> using MatrixBStatDyn = typename MyMatrixSpecial::MatrixBStatDyn<Derived,M>; \
+   template<typename Derived> using MatrixBDynDyn = typename MyMatrix::MatrixBDynDyn<Derived>; \
+   template<typename Derived, unsigned int N> using MatrixBDynStat = typename MyMatrix::MatrixBDynStat<Derived,N>; \
+   template<typename Derived, unsigned int M> using MatrixBStatDyn = typename MyMatrix::MatrixBStatDyn<Derived,M>; \
     \
-   template<typename EigenType> using MatrixRef = typename MyMatrixSpecial::MatrixRef< EigenType >; \
-   template<typename EigenType> using MatrixMap = typename MyMatrixSpecial::MatrixMap< EigenType >; \
+   template<typename EigenType> using MatrixRef = typename MyMatrix::MatrixRef< EigenType >; \
+   template<typename EigenType> using MatrixMap = typename MyMatrix::MatrixMap< EigenType >; \
    \
    template<typename T> \
-   using TensorMap = typename MyMatrixSpecial::template TensorMap<T>; \
+   using TensorMap = typename MyMatrix::TensorMap<T>; \
    template<typename T> \
-   using TensorBase = typename MyMatrixSpecial::template TensorBase<T>; \
+   using TensorBase = typename MyMatrix::TensorBase<T>; \
    template<typename T> \
-   using TensorBaseReadOnly = typename MyMatrixSpecial::template TensorBaseReadOnly<T>; \
+   using TensorBaseReadOnly = typename MyMatrix::TensorBaseReadOnly<T>; \
    template<typename T> \
-   using TensorRef = typename MyMatrixSpecial::template TensorRef<T>; \
+   using TensorRef = typename MyMatrix::TensorRef<T>; \
 
 /**
 * @brief This macro is used to typedef all custom matrix types which have nothing to do with the system.

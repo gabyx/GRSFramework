@@ -257,7 +257,7 @@ void saveTensor_vectorScalar(const TFileGroup & fg, const Tensor & m, std::strin
     {
         dims[i] = static_cast<hsize_t>(d[i]);
     }
-    dims[Tensor::NumIndices + 1] = RowsAtCompileTime;
+    dims[Tensor::NumIndices ] = RowsAtCompileTime;
 
     H5::DataSpace dataSpace(Tensor::NumIndices+1, &dims[0]);
 

@@ -20,8 +20,8 @@ public:
     DEFINE_MATRIX_TYPES
 
     using SizeType = TSize;   ///< The type of the indices
-    using LongInt = TLongInt; ///< used for index computations (negative numebrs needed), int32 is not faster than int64!
-
+    using LongInt = TLongInt; ///< used for index computations (negative numbers needed), int32 is not faster than int64!
+    static const unsigned int Dimension = 3;
     using CellDataType = TCellData;
 
     using IndexType     = typename MyMatrix::Array3<SizeType>;
@@ -190,20 +190,89 @@ public:
                 }
             }
         }
+    }
+
+    Iterator begin(){
 
     }
 
+    Iterator end(){
 
+    }
+
+    class iterator : public std::iterator_traits<CellDataListType::iterator >{
+        public:
+            using iterator_traits = std::iterator_traits<CellDataListType::iterator >;
+
+            explicit iterator(CartesianGrid * grid)
+                : m_grid(grid), m_pos(0), m_it(m_grid->m_cellData.begin())
+            {
+                m_indices.setZero();
+            }
+
+            /** pre-increment ++it */
+            iterator & operator++() {
+                ++m_it;
+                return *this;
+            }
+            /** post-increment it++ */
+            iterator operator++(int) {
+                iterator it(*this);
+                operator++();
+                return it;
+            }
+
+            bool operator==(const iterator &rhs) {return m_it == rhs.m_it;}
+            bool operator!=(const iterator &rhs) {return m_it != rhs.m_it;}
+
+            typename iterator_traits::difference_type operator-(const iterator & rhs){return m_it - rhs.m_it;}
+            iterator & operator+=( typename iterator_traits::difference_type d){ m_it += d; return *this;}
+
+            iterator & operator=(const iterator & rhs) = default;
+            iterator( const iterator & r ) = default;
+
+            typename iterator_traits::value_type & operator*() {
+                return *m_it;
+            }
+
+            const IndexType & getIndices(){
+                return m_indices;
+            }
+
+        private:
+
+            void incrementIndex(){
+                unsigned int i = 0;
+                do{
+                    (++m_indices[i]) %=  m_dim[i]; // (1,2,3) + 1 ==> (0,2,3)  (if maximum (2,2,4)) while loop goes further
+                }while(m_indices[i++] == 0 && i < CartesianGrid::Dimension);
+            }
+
+            void decrementIndex(){
+                unsigned int i = 0;
+                // move to first non-zero entry, making all zero entries dim-1
+                while(m_indices[i] == 0 && i < CartesianGrid::Dimension){
+                    m_indices[i] = m_dim[i]-1;
+                    ++i;
+                }
+                // subtract if not at the end
+                if(i<CartesianGrid::Dimension){--m_indices[i];}
+            }
+
+            CartesianGrid * m_grid;
+            IndexType m_indices;
+            CellDataListType::iterator m_it;
+    };
 
 protected:
     template<typename T1,typename T2, typename T3>
     inline SizeType getLinearIndex(T1 x, T2 y, T3 z){
-        return x + m_dim(0)*y + m_dim(0)*m_dim(1)*z;
+        return x + m_dim(0)*(y + m_dim(1)*z); // Colmajor Storage order
     }
 
     template<typename Derived>
     inline SizeType getLinearIndex(const ArrayBase<Derived> & index){
-        return index(0) + m_dim(0)*index(1) + m_dim(0)*m_dim(1)*index(2);
+        return index(0) + m_dim(0)*(index(1) + m_dim(1)*index(2));
     }
 
     CellDataListType m_cellData;
@@ -213,11 +282,14 @@ protected:
     IndexType m_dim;
     AABB3d m_aabb;
 
+    static char m_nbIndicesOff[26*3];
+
+    private:
     // temporary
     mutable IndexLongType m_temp;
 
     static IndexLongType m_zero;
-    static char m_nbIndicesOff[26*3];
+
 };
 
 template<typename TCellData, typename TSize, typename TLongInt>

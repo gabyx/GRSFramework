@@ -56,7 +56,6 @@ namespace Extractors{
             template<typename IndexType, std::size_t... Is>
             void resizeTensor(const IndexType & dimensions, std::index_sequence<Is...> )
             {
-                std::cout << "REsize" << dimensions << std::endl;
                 m_tensor.resize( dimensions(Is)... );
             }
 
@@ -73,7 +72,7 @@ namespace Extractors{
             template<std::size_t I> constexpr int getZero(){ return 0;}
         };
 
-        #define DEFINE_TENSORMAPCOMP_TYPE( _class_ ) \
+        #define DEFINE_TENSORSTORAGE_TYPE( _class_ ) \
             using TensorType = typename _class_::TensorType;\
             using TensorMapType = typename _class_::TensorMapType;
 
@@ -110,7 +109,7 @@ namespace Extractors{
         public:
 
             using BaseStorage = TensorStorage<nTensorIndices,TCellData>;
-            DEFINE_TENSORMAPCOMP_TYPE(BaseStorage)
+            DEFINE_TENSORSTORAGE_TYPE(BaseStorage)
 
             static const unsigned int CellDataDimension = CellDimOut;
             using Scalar = TScalar;
@@ -140,7 +139,7 @@ namespace Extractors{
             static const unsigned int Dimension = CellDimOut;
 
             using BaseStorage = TensorStorage<nTensorIndices,TCellData>;
-            DEFINE_TENSORMAPCOMP_TYPE(BaseStorage)
+            DEFINE_TENSORSTORAGE_TYPE(BaseStorage)
 
             ExtractorNormal(std::string name): TensorStorage<nTensorIndices,TCellData>(name){}
 
@@ -168,14 +167,16 @@ namespace Extractors{
 
         using Base = details::ExtractorProjection<3,1,PREC,nTensorIndices>;
 
-        DEFINE_TENSORMAPCOMP_TYPE(Base)
+        DEFINE_TENSORSTORAGE_TYPE(Base)
 
         ExtractorTransVelocityProj1D(std::string name): Base(name){}
 
         bool m_transformToGridCoordinates = true;
 
-        template<typename CellDataType, typename IndexType>
-        void writeData(CellDataType & cellData, const IndexType & index)
+        template<typename TGrid, typename TGridExtSettings,
+                 typename CellDataType, typename IndexType>
+        void writeData(TGrid *g, TGridExtSettings * s,
+                       CellDataType & cellData, const IndexType & index)
         {
 //            decltype(typename TensorType::Dimensions) d(1,2,3);
 //            TensorMapType a(dataBufferPtr,d);
@@ -191,15 +192,25 @@ namespace Extractors{
     public:
         using Base = details::ExtractorProjection<3,2,PREC,nTensorIndices>;
 
-        DEFINE_TENSORMAPCOMP_TYPE(Base)
+        DEFINE_TENSORSTORAGE_TYPE(Base)
 
         ExtractorTransVelocityProj2D(std::string name): Base(name){}
         bool m_transformToGridCoordinates = true;
 
-        template<typename CellDataType, typename IndexType>
-        void writeData(CellDataType & cellData, const IndexType & index)
+        template<typename TGrid, typename TGridExtSettings,
+                 typename CellDataType, typename IndexType>
+        void writeData(TGrid *g, TGridExtSettings * s,
+                       CellDataType & cellData, const IndexType & index)
         {
-            //this->getElement(index);
+            /** TODO: To be faster, may be get here the start end iterators for the cell data
+            *   And do the loop here for all different settings, instead of always checking
+            */
+
+            if(m_transformToGridCoordinates){
+                this->getElement(index) = cellData->m_rigidBodyState->getTransVelocity();
+            }else{
+
+            }
         }
         template<typename FileOrGroup>
         void writeHDF5(const FileOrGroup & fOrG){
@@ -210,14 +221,16 @@ namespace Extractors{
     class ExtractorTransVelocity : public details::ExtractorNormal<3,PREC,nTensorIndices>{
     public:
         using Base = details::ExtractorNormal<3,PREC,nTensorIndices>;
-        DEFINE_TENSORMAPCOMP_TYPE(Base)
+        DEFINE_TENSORSTORAGE_TYPE(Base)
 
         ExtractorTransVelocity(std::string name): Base(name){}
 
         bool m_transformToGridCoordinates = true;
 
-        template<typename CellDataType, typename IndexType>
-        void writeData(CellDataType & cellData, const IndexType & index)
+        template<typename TGrid, typename TGridExtSettings,
+                 typename CellDataType, typename IndexType>
+        void writeData(TGrid *g, TGridExtSettings * s,
+                       CellDataType & cellData, const IndexType & index)
         {
 
         }
@@ -274,22 +287,22 @@ public:
     class DataWriterVisitor{
         public:
         using GridType = TGrid;
-        using GridSettingsType = GridExtractionSettings;
+        using GridExtSettingsType = GridExtractionSettings;
 
-        DataWriterVisitor(GridType * g, GridSettingsType * s): m_grid(g), m_settings(s){}
+        DataWriterVisitor(GridType * g, GridExtSettingsType * s): m_grid(g), m_settings(s){}
         DataWriterVisitor(DataWriterVisitor&&d) = default;
 
         template<typename CellDataType, typename IndexType>
         void operator()(CellDataType & cellData, const IndexType & index)
         {
             for(auto & e : m_settings->m_transVelExtractor){
-                e.writeData(cellData,index);
+                e.writeData(g,s,cellData,index);
             }
             for(auto & e : m_settings->m_transVelProj1DExtractors){
-                e.writeData(cellData,index);
+                e.writeData(g,s,cellData,index);
             }
             for(auto & e : m_settings->m_transVelProj2DExtractors){
-                e.writeData(cellData,index);
+                e.writeData(g,s,cellData,index);
             }
         }
 

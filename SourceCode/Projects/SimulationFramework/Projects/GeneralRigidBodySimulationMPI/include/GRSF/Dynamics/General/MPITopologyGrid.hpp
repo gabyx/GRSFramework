@@ -18,22 +18,35 @@
 
 namespace MPILayer {
 
+
 template< typename ProcessTopologyBase>
-class ProcessTopologyGrid : public CartesianGrid<NoCellData> {
+class ProcessTopologyGrid : public CartesianGrid<NoCellData, typename ProcessTopologyBase::RankIdType > {
 public:
 
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
-    using Base = CartesianGrid<NoCellData>;
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+
+    using Base = CartesianGrid<NoCellData, typename ProcessTopologyBase::RankIdType >;
+    using IndexType = typename Base::IndexType;
 
     using RankToAABBType = std::map<unsigned int, AABB3d >;
     using NeighbourRanksListType = typename ProcessTopologyBase::NeighbourRanksListType;
     using AdjacentNeighbourRanksMapType = typename ProcessTopologyBase::AdjacentNeighbourRanksMapType;
 
+private:
+
+    using Base::m_dim;
+    using Base::m_dxyz;
+    using Base::m_dxyzInv;
+    using Base::m_cellData;
+    using Base::m_nbIndicesOff;
+
+public:
+
     ProcessTopologyGrid(  NeighbourRanksListType & nbRanks, AdjacentNeighbourRanksMapType & adjNbRanks,
                           RankIdType processRank, RankIdType masterRank,
             			  const AABB3d & aabb,
-                          const MyMatrix<unsigned int>::Array3 & dim,
+                          const IndexType & dim,
                           bool aligned = true,
                           const Matrix33 & A_IK = Matrix33::Identity()
                           ):
@@ -122,7 +135,7 @@ public:
                 && cellRank >= m_cellNumberingStart,
                 "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
 
-        MyMatrix<unsigned int>::Array3 v;
+        MyMatrix::Array3<unsigned int> v;
         unsigned int cellNumberTemp;
 
         cellNumberTemp = cellRank;
@@ -142,7 +155,7 @@ public:
     */
     AABB3d getCellAABB(RankIdType cellRank) const {
 
-        MyMatrix<unsigned int>::Array3 cell_index = getCellIndex(cellRank);
+        MyMatrix::Array3<unsigned int> cell_index = getCellIndex(cellRank);
         AABB3d ret(m_aabb.m_minPoint);
         ret.m_minPoint.array() += cell_index.array().cast<PREC>()     * m_dxyz.array();
         ret.m_maxPoint.array() += (cell_index.array()+1).cast<PREC>() * m_dxyz.array();
