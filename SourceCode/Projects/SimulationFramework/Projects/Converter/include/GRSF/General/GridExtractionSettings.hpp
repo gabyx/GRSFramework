@@ -56,6 +56,7 @@ namespace Extractors{
             template<typename IndexType, std::size_t... Is>
             void resizeTensor(const IndexType & dimensions, std::index_sequence<Is...> )
             {
+                std::cout << "REsize" << dimensions << std::endl;
                 m_tensor.resize( dimensions(Is)... );
             }
 
@@ -71,9 +72,10 @@ namespace Extractors{
 
             template<std::size_t I> constexpr std::size_t getZero(){ return 0;}
         };
-        #define DEFINE_TENSORMAPCOMP_TYPE(T1,T2) \
-            using TensorType = typename TensorStorage<T1,T2>::TensorType;\
-            using TensorMapType = typename TensorStorage<T1,T2>::TensorMapType;
+
+        #define DEFINE_TENSORMAPCOMP_TYPE( _class_ ) \
+            using TensorType = typename _class_::TensorType;\
+            using TensorMapType = typename _class_::TensorMapType;
 
 
         template<unsigned int _DimIn,
@@ -96,8 +98,8 @@ namespace Extractors{
 
         };
 
-        template<unsigned int CellDimOut = 3,
-                 unsigned int CellDimIn = 3,
+        template<unsigned int CellDimIn = 3,
+                 unsigned int CellDimOut = 3,
                  typename TScalar = PREC,
                  unsigned int nTensorIndices = 3, /* 3d grid has 3 indices*/
                  typename TCellData   = typename MyMatrix<TScalar>::template VectorStat<CellDimOut>
@@ -106,6 +108,9 @@ namespace Extractors{
                                     public TensorStorage<nTensorIndices,TCellData>
         {
         public:
+
+            using BaseStorage = TensorStorage<nTensorIndices,TCellData>;
+            DEFINE_TENSORMAPCOMP_TYPE(BaseStorage)
 
             static const unsigned int CellDataDimension = CellDimOut;
             using Scalar = TScalar;
@@ -134,8 +139,8 @@ namespace Extractors{
             using DataVectorType = VectorStat<CellDimOut>;
             static const unsigned int Dimension = CellDimOut;
 
-            DEFINE_TENSORMAPCOMP_TYPE(nTensorIndices,TCellData)
-
+            using BaseStorage = TensorStorage<nTensorIndices,TCellData>;
+            DEFINE_TENSORMAPCOMP_TYPE(BaseStorage)
 
             ExtractorNormal(std::string name): TensorStorage<nTensorIndices,TCellData>(name){}
 
@@ -158,10 +163,12 @@ namespace Extractors{
 
     /** A 3D Grid has 3 Tensor indices, a 2D has 2 indices */
     template<unsigned int nTensorIndices = 3>
-    class ExtractorTransVelocityProj1D : public details::ExtractorProjection<1,3,PREC,nTensorIndices>{
+    class ExtractorTransVelocityProj1D : public details::ExtractorProjection<3,1,PREC,nTensorIndices>{
     public:
 
-        using Base = details::ExtractorProjection<1,3,PREC>;
+        using Base = details::ExtractorProjection<3,1,PREC,nTensorIndices>;
+
+        DEFINE_TENSORMAPCOMP_TYPE(Base)
 
         ExtractorTransVelocityProj1D(std::string name): Base(name){}
 
@@ -175,14 +182,16 @@ namespace Extractors{
         }
         template<typename FileOrGroup>
         void writeHDF5(const FileOrGroup & fOrG){
-            Hdf5Helpers::saveData(fOrG,this->m_tensor,this->m_dataName);
+            Hdf5Helpers::saveData(fOrG,TensorRef<TensorType>(this->m_tensor),this->m_dataName);
         }
     };
 
     template<unsigned int nTensorIndices = 3>
-    class ExtractorTransVelocityProj2D : public details::ExtractorProjection<2,3,PREC,nTensorIndices>{
+    class ExtractorTransVelocityProj2D : public details::ExtractorProjection<3,2,PREC,nTensorIndices>{
     public:
-        using Base = details::ExtractorProjection<2,3,PREC>;
+        using Base = details::ExtractorProjection<3,2,PREC,nTensorIndices>;
+
+        DEFINE_TENSORMAPCOMP_TYPE(Base)
 
         ExtractorTransVelocityProj2D(std::string name): Base(name){}
         bool m_transformToGridCoordinates = true;
@@ -190,17 +199,18 @@ namespace Extractors{
         template<typename CellDataType, typename IndexType>
         void writeData(CellDataType & cellData, const IndexType & index)
         {
-            this->getElement(index) = Vector2(0,1);
+            //this->getElement(index);
         }
         template<typename FileOrGroup>
         void writeHDF5(const FileOrGroup & fOrG){
-            Hdf5Helpers::saveData(fOrG,this->m_tensor,this->m_dataName);
+            Hdf5Helpers::saveData(fOrG,TensorRef<TensorType>(this->m_tensor),this->m_dataName);
         }
     };
     template<unsigned int nTensorIndices = 3>
     class ExtractorTransVelocity : public details::ExtractorNormal<3,PREC,nTensorIndices>{
     public:
-        using Base =  details::ExtractorNormal<3,PREC>;
+        using Base = details::ExtractorNormal<3,PREC,nTensorIndices>;
+        DEFINE_TENSORMAPCOMP_TYPE(Base)
 
         ExtractorTransVelocity(std::string name): Base(name){}
 
@@ -213,7 +223,7 @@ namespace Extractors{
         }
         template<typename FileOrGroup>
         void writeHDF5(const FileOrGroup & fOrG){
-            Hdf5Helpers::saveData(fOrG,this->m_tensor,this->m_dataName);
+            Hdf5Helpers::saveData(fOrG, TensorRef<TensorType>(this->m_tensor) ,this->m_dataName);
         }
     };
 

@@ -29,67 +29,88 @@
 /** @brief This
 *	These are some small matrix definitions.
 */
-template<typename TScalar>
+
 struct MyMatrix {
-    using PREC = TScalar;
-    //Static assigned Matrices
-    using Matrix44 = Eigen::Matrix<PREC, 4, 4>;
-    using Matrix43 = Eigen::Matrix<PREC, 4, 3>;
-    using Matrix34 = Eigen::Matrix<PREC, 3, 4>;
-    using Matrix33 = Eigen::Matrix<PREC, 3, 3>;
-    using Matrix32 = Eigen::Matrix<PREC, 3, 2>;
-    using Matrix23 = Eigen::Matrix<PREC, 2, 3>;
-    using Matrix22 = Eigen::Matrix<PREC, 2, 2>;
-    using Vector3 = Eigen::Matrix<PREC, 3, 1>;
-    using Vector2 = Eigen::Matrix<PREC, 2, 1>;
 
-    using Quaternion = Eigen::Quaternion<PREC>;
-    using AngleAxis = Eigen::AngleAxis<PREC>;
+    template<typename Scalar>
+    using  Matrix44 =  Eigen::Matrix<Scalar, 4, 4>;
+    template<typename Scalar>
+    using  Matrix43 =  Eigen::Matrix<Scalar, 4, 3>;
+    template<typename Scalar>
+    using  Matrix34 =  Eigen::Matrix<Scalar, 3, 4>;
+    template<typename Scalar>
+    using  Matrix33 =  Eigen::Matrix<Scalar, 3, 3>;
+    template<typename Scalar>
+    using  Matrix32 =  Eigen::Matrix<Scalar, 3, 2>;
+    template<typename Scalar>
+    using  Matrix23 =  Eigen::Matrix<Scalar, 2, 3>;
+    template<typename Scalar>
+    using  Matrix22 =  Eigen::Matrix<Scalar, 2, 2>;
+    template<typename Scalar>
+    using  Vector3 =  Eigen::Matrix<Scalar, 3, 1>;
+    template<typename Scalar>
+    using  Vector2 =  Eigen::Matrix<Scalar, 2, 1>;
 
-    using Vector4 = Eigen::Matrix<PREC, 4, 1>;
-    using Vector6 = Eigen::Matrix<PREC, 6, 1>;
-    using VectorDyn = Eigen::Matrix<PREC, Eigen::Dynamic , 1 >                   ;
+    template<typename Scalar>
+    using  Quaternion =  Eigen::Quaternion<Scalar>;
+    template<typename Scalar>
+    using  AngleAxis =  Eigen::AngleAxis<Scalar>;
 
-
-    using MatrixDynDyn = Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic >      ;
-    using MatrixDiagDyn = Eigen::DiagonalMatrix<PREC, Eigen::Dynamic >               ;
-    using MatrixDynDynRow = Eigen::Matrix<PREC, Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor>;
-
-    template<unsigned int M>
-    using MatrixStatDyn = Eigen::Matrix<PREC, M, Eigen::Dynamic >;
-    template<unsigned int N>
-    using MatrixDynStat = Eigen::Matrix<PREC, Eigen::Dynamic, N >;
-
-    template<unsigned int M, unsigned int N>
-    using MatrixStatStat = Eigen::Matrix<PREC, M, N >;
-
-    template<unsigned int M>
-    using VectorStat = Eigen::Matrix<PREC, M, 1 >;
-
-    using AffineTrafo = Eigen::Transform<PREC,3,Eigen::TransformTraits::Affine>;
-    using AffineTrafo2d = Eigen::Transform<PREC,2,Eigen::TransformTraits::Affine>;
-
-    using MatrixSparse = Eigen::SparseMatrix<PREC>   ;       // declares a column-major sparse matrix of type PREC
-    using MatrixSparseTriplet = Eigen::Triplet<PREC>        ;
+    template<typename Scalar>
+    using  Vector4 =  Eigen::Matrix<Scalar, 4, 1>;
+    template<typename Scalar>
+    using  Vector6 =  Eigen::Matrix<Scalar, 6, 1>;
+    template<typename Scalar>
+    using  VectorDyn =  Eigen::Matrix<Scalar, Eigen::Dynamic , 1 >;
 
 
+    template<typename Scalar>
+    using  MatrixDynDyn =  Eigen::Matrix<Scalar, Eigen::Dynamic , Eigen::Dynamic >;
+    template<typename Scalar>
+    using  MatrixDiagDyn =  Eigen::DiagonalMatrix<Scalar, Eigen::Dynamic >;
+    template<typename Scalar>
+    using  MatrixDynDynRow =  Eigen::Matrix<Scalar, Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor>;
 
-    template<unsigned int M>
-    using ArrayStatDyn = Eigen::Array<PREC, M, Eigen::Dynamic >;
-    template<unsigned int N>
-    using ArrayDynStat = Eigen::Array<PREC, Eigen::Dynamic, N >;
-    template<unsigned int M, unsigned int N>
-    using ArrayStatStat = Eigen::Array<PREC, M, N >;
-    template<unsigned int M>
-    using ArrayStat = Eigen::Array<PREC, M,1>;
+    template<typename Scalar,unsigned int M>
+    using  MatrixStatDyn =  Eigen::Matrix<Scalar, M, Eigen::Dynamic >;
+    template<typename Scalar,unsigned int N>
+    using  MatrixDynStat =  Eigen::Matrix<Scalar, Eigen::Dynamic, N >;
+    template<typename Scalar,unsigned int M, unsigned int N>
+    using  MatrixStatStat =  Eigen::Matrix<Scalar, M, N >;
+    template<typename Scalar,unsigned int M>
+    using  VectorStat =  Eigen::Matrix<Scalar, M, 1 >;
 
-    using Array3 = Eigen::Array<PREC, 3, 1>;
-    using Array2 = Eigen::Array<PREC, 2, 1>;
+
+    template<typename Scalar>
+    using  AffineTrafo =  Eigen::Transform<Scalar,3,Eigen::TransformTraits::Affine>;
+    template<typename Scalar>
+    using  AffineTrafo2d =  Eigen::Transform<Scalar,2,Eigen::TransformTraits::Affine>;
+
+    template<typename Scalar>
+    using  MatrixSparse =  Eigen::SparseMatrix<Scalar>;
+    template<typename Scalar>
+    using MatrixSparseTriplet = Eigen::Triplet<Scalar>;
+
+
+
+    template<typename Scalar,unsigned int M>
+    using  ArrayStatDyn =  Eigen::Array<Scalar, M, Eigen::Dynamic >;
+    template<typename Scalar,unsigned int N>
+    using  ArrayDynStat =  Eigen::Array<Scalar, Eigen::Dynamic, N >;
+    template<typename Scalar,unsigned int M, unsigned int N>
+    using  ArrayStatStat =  Eigen::Array<Scalar, M, N >;
+    template<typename Scalar,unsigned int M>
+    using  ArrayStat =  Eigen::Array<Scalar, M,1>;
+
+    template<typename Scalar>
+    using  Array3 =  Eigen::Array<Scalar, 3, 1>;
+    template<typename Scalar>
+    using  Array2 =  Eigen::Array<Scalar, 2, 1>;
 
 
     // Tensor stuff (unsupported eigen3)
-    template<std::size_t Indices, int Options = Eigen::ColMajor>
-    using TensorDyn = Eigen::Tensor<PREC,Indices,Options>;
+    template<typename Scalar, std::size_t Indices, int Options = Eigen::ColMajor>
+    using TensorDyn = Eigen::Tensor<Scalar,Indices,Options>;
 };
 
 struct MyMatrixSpecial{
@@ -116,6 +137,10 @@ struct MyMatrixSpecial{
     using TensorBaseReadOnly = Eigen::TensorBase<EigenType,Eigen::ReadOnlyAccessors>;
     template<typename EigenType>
     using TensorBase = Eigen::TensorBase<EigenType,Eigen::WriteAccessors>;
+
+    template<typename EigenType>
+    using TensorRef = Eigen::TensorRef<EigenType>;
+
 };
 
 struct MyMatrixStorageOptions{
@@ -160,51 +185,53 @@ struct MyMatrixIOFormat {
    template<typename T> \
    using TensorBase = typename MyMatrixSpecial::template TensorBase<T>; \
    template<typename T> \
-   using TensorBaseReadOnly = typename MyMatrixSpecial::template TensorBaseReadOnly<T>;
+   using TensorBaseReadOnly = typename MyMatrixSpecial::template TensorBaseReadOnly<T>; \
+   template<typename T> \
+   using TensorRef = typename MyMatrixSpecial::template TensorRef<T>; \
 
 /**
 * @brief This macro is used to typedef all custom matrix types which have nothing to do with the system.
 */
 #define DEFINE_MATRIX_TYPES_OF( _PREC_ ) \
-   using Matrix44 = typename MyMatrix< _PREC_ >::Matrix44; \
-   using Matrix33 = typename MyMatrix< _PREC_ >::Matrix33; \
-   using Matrix22 = typename MyMatrix< _PREC_ >::Matrix22; \
-   using Matrix32 = typename MyMatrix< _PREC_ >::Matrix32; \
-   using Matrix23 = typename MyMatrix< _PREC_ >::Matrix23; \
-   using Matrix43 = typename MyMatrix< _PREC_ >::Matrix43; \
-   using Matrix34 = typename MyMatrix< _PREC_ >::Matrix34; \
-   using Vector3 = typename MyMatrix< _PREC_ >::Vector3;   \
-   using Vector2 = typename MyMatrix< _PREC_ >::Vector2;   \
-   using Vector4 = typename MyMatrix< _PREC_ >::Vector4;   \
-   using Vector6 = typename MyMatrix< _PREC_ >::Vector6;   \
-   using Quaternion = typename MyMatrix< _PREC_ >::Quaternion; \
-   using AngleAxis = typename MyMatrix< _PREC_ >::AngleAxis; \
-   using VectorDyn = typename MyMatrix< _PREC_ >::VectorDyn; \
-   using MatrixDynDyn = typename MyMatrix< _PREC_ >::MatrixDynDyn; \
-   using MatrixDiagDyn = typename MyMatrix< _PREC_ >::MatrixDiagDyn; \
-   using MatrixDynDynRow = typename MyMatrix< _PREC_ >::MatrixDynDynRow; \
-   \
-   template<unsigned int M> using MatrixStatDyn = typename MyMatrix< _PREC_ >::template MatrixStatDyn<M>; \
-   template<unsigned int N> using MatrixDynStat = typename MyMatrix< _PREC_ >::template MatrixDynStat<N>; \
-   template<unsigned int M,unsigned int N> using MatrixStatStat = typename MyMatrix< _PREC_ >::template MatrixStatStat<M,N>; \
-   template<unsigned int M> using VectorStat = typename MyMatrix< _PREC_ >::template VectorStat<M>; \
-   \
-   using AffineTrafo = typename MyMatrix< _PREC_ >::AffineTrafo; \
-   using AffineTrafo2d = typename MyMatrix< _PREC_ >::AffineTrafo2d; \
-   using MatrixSparse = typename MyMatrix< _PREC_ >::MatrixSparse; \
-   using MatrixSparseTriplet = typename MyMatrix< _PREC_ >::MatrixSparseTriplet; \
-   \
-   template<unsigned int M> using ArrayStatDyn = typename MyMatrix< _PREC_ >::template ArrayStatDyn<M>; \
-   template<unsigned int N> using ArrayDynStat = typename MyMatrix< _PREC_ >::template ArrayDynStat<N>; \
-   template<unsigned int M,unsigned int N> using ArrayStatStat = typename MyMatrix< _PREC_ >::template ArrayStatStat<M,N>; \
-   template<unsigned int M> using ArrayStat = typename MyMatrix< _PREC_ >::template ArrayStat<M>; \
-   using Array3 = typename MyMatrix< _PREC_ >::Array3;   \
-   using Array2 = typename MyMatrix< _PREC_ >::Array2; \
-   \
-   template<unsigned int Indices, int Options = Eigen::ColMajor> \
-   using TensorDyn = typename MyMatrix< _PREC_ >::template TensorDyn<Indices,Options>; \
-   \
-   DEFINE_MATRIX_SPECIALTYPES
+    using Matrix44 = typename MyMatrix::Matrix44< _PREC_ >; \
+    using Matrix33 = typename MyMatrix::Matrix33< _PREC_ >; \
+    using Matrix22 = typename MyMatrix::Matrix22< _PREC_ >; \
+    using Matrix32 = typename MyMatrix::Matrix32< _PREC_ >; \
+    using Matrix23 = typename MyMatrix::Matrix23< _PREC_ >; \
+    using Matrix43 = typename MyMatrix::Matrix43< _PREC_ >; \
+    using Matrix34 = typename MyMatrix::Matrix34< _PREC_ >; \
+    using Vector3 = typename MyMatrix::Vector3< _PREC_ >; \
+    using Vector2 = typename MyMatrix::Vector2< _PREC_ >; \
+    using Vector4 = typename MyMatrix::Vector4< _PREC_ >; \
+    using Vector6 = typename MyMatrix::Vector6< _PREC_ >; \
+    using Quaternion = typename MyMatrix::Quaternion< _PREC_ >; \
+    using AngleAxis = typename MyMatrix::AngleAxis< _PREC_ >; \
+    using VectorDyn = typename MyMatrix::VectorDyn< _PREC_ >; \
+    using MatrixDynDyn = typename MyMatrix::MatrixDynDyn< _PREC_ >; \
+    using MatrixDiagDyn = typename MyMatrix::MatrixDiagDyn< _PREC_ >; \
+    using MatrixDynDynRow = typename MyMatrix::MatrixDynDynRow< _PREC_ >; \
+    \
+    template<unsigned int M> using MatrixStatDyn = typename MyMatrix::MatrixStatDyn< _PREC_, M>; \
+    template<unsigned int N> using MatrixDynStat = typename MyMatrix::MatrixDynStat< _PREC_, N>; \
+    template<unsigned int M,unsigned int N> using MatrixStatStat = typename MyMatrix::MatrixStatStat< _PREC_, M,N>; \
+    template<unsigned int M> using VectorStat = typename MyMatrix::VectorStat< _PREC_, M>; \
+    \
+    using AffineTrafo = typename MyMatrix::AffineTrafo< _PREC_ >; \
+    using AffineTrafo2d = typename MyMatrix::AffineTrafo2d< _PREC_ >; \
+    using MatrixSparse = typename MyMatrix::MatrixSparse< _PREC_ >; \
+    using MatrixSparseTriplet = typename MyMatrix::MatrixSparseTriplet< _PREC_ >; \
+    \
+    template<unsigned int M> using ArrayStatDyn = typename MyMatrix::ArrayStatDyn< _PREC_, M>; \
+    template<unsigned int N> using ArrayDynStat = typename MyMatrix::ArrayDynStat< _PREC_, N>; \
+    template<unsigned int M,unsigned int N> using ArrayStatStat = typename MyMatrix::ArrayStatStat< _PREC_, M,N>; \
+    template<unsigned int M> using ArrayStat = typename MyMatrix::ArrayStat< _PREC_, M>; \
+    using Array3 = typename MyMatrix::Array3< _PREC_ >; \
+    using Array2 = typename MyMatrix::Array2< _PREC_ >; \
+    \
+    template<unsigned int Indices, int Options = Eigen::ColMajor>  \
+    using TensorDyn = typename MyMatrix::TensorDyn< _PREC_, Indices,Options>; \
+    \
+    DEFINE_MATRIX_SPECIALTYPES
 
 #endif
 

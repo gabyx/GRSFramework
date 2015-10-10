@@ -22,7 +22,7 @@ GridderConverter::GridderConverter(const std::vector<boost::filesystem::path> & 
 void GridderConverter::convert() {
 
     /** Make list of all GridExtractors */
-    StdVecAligned<GridExtractor> l;
+    std::vector<GridExtractor> l;
 
     for(auto & sett: m_gridderData.m_gridSettingsList){
         l.emplace_back(&sett,m_log);

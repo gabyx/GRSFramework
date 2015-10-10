@@ -50,7 +50,7 @@ struct LayoutConfig{
 };
 
 /**
-* @brief This macro is used to typedef all template arguments in a class with e.g template argument typename â€œLayoutConfigâ€
+* @brief This macro is used to typedef all vector/matrices in a class
 */
 #define DEFINE_LAYOUT_CONFIG_TYPES_OF( _LayoutConfigName_ ) \
    using PREC = typename _LayoutConfigName_::PREC;    \
