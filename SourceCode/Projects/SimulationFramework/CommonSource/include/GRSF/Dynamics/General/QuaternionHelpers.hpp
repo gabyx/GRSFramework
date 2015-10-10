@@ -31,10 +31,10 @@ void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat , const Eigen::
 * @return 3x3 rotation matrix.
 */
 template<typename PREC>
-typename MyMatrix<PREC>::Matrix33 getRotFromQuaternion(const typename MyMatrix<PREC>::Vector4 & quat) {
+typename MyMatrix::Matrix33<PREC> getRotFromQuaternion(const typename MyMatrix::Vector4<PREC> & quat) {
     //ASSERTMSG(quat.rows() == 4 && quat.cols()==1, "IN: "<< quat.rows()<<","<<quat.cols());
 
-    typename MyMatrix<PREC>::Matrix33 A;
+    typename MyMatrix::Matrix33<PREC> A;
     //No check if quaternion is unit...(performance)
     setRotFromQuaternion(quat,A);
     return A;

@@ -29,7 +29,7 @@ namespace Extractors{
         class TensorStorage{
         public:
             DEFINE_MATRIX_STORAGEOPTIONS
-            using TensorType = typename MyMatrix<TensorScalar>::template TensorDyn<NTensorIndices,MatrixRowMajorOption>;
+            using TensorType = typename MyMatrix::TensorDyn<TensorScalar,NTensorIndices,MatrixRowMajorOption>;
             using TensorMapType = TensorMap<TensorType>;
 
             /** Make empty map with dimension zero, mapped to nothing!! */
@@ -70,7 +70,7 @@ namespace Extractors{
             TensorStorage(std::string name, std::index_sequence<Is...>)
                 : m_dataName(name), m_tensor( getZero<Is>()... ) {}
 
-            template<std::size_t I> constexpr std::size_t getZero(){ return 0;}
+            template<std::size_t I> constexpr int getZero(){ return 0;}
         };
 
         #define DEFINE_TENSORMAPCOMP_TYPE( _class_ ) \
@@ -86,8 +86,8 @@ namespace Extractors{
             static const unsigned int DimIn = _DimIn;
             static const unsigned int DimOut = _DimOut;
 
-            using ProjIndexType  = typename MyMatrix<std::size_t>::template ArrayStat<DimOut>;
-            using ProjMatrixType = typename MyMatrix<TScalar>::template MatrixStatStat<DimOut,DimIn>;
+            using ProjIndexType  = typename MyMatrix::ArrayStat<std::size_t,DimOut>;
+            using ProjMatrixType = typename MyMatrix::MatrixStatStat<TScalar,DimOut,DimIn>;
 
             bool m_useProjectionMatrix = false;
 
@@ -102,7 +102,7 @@ namespace Extractors{
                  unsigned int CellDimOut = 3,
                  typename TScalar = PREC,
                  unsigned int nTensorIndices = 3, /* 3d grid has 3 indices*/
-                 typename TCellData   = typename MyMatrix<TScalar>::template VectorStat<CellDimOut>
+                 typename TCellData   = typename MyMatrix::VectorStat<TScalar,CellDimOut>
                 >
         class ExtractorProjection : public ProjectiveTransformComponent<CellDimIn,CellDimOut,TScalar> ,
                                     public TensorStorage<nTensorIndices,TCellData>
@@ -129,7 +129,7 @@ namespace Extractors{
         template<unsigned int CellDimOut = 3,
                  typename TScalar = PREC,
                  unsigned int nTensorIndices = 3, /* 3d grid has 3 indices*/
-                 typename TCellData = typename MyMatrix<TScalar>::template VectorStat<CellDimOut>
+                 typename TCellData = typename MyMatrix::VectorStat<TScalar,CellDimOut>
                 >
         class ExtractorNormal : public TensorStorage<nTensorIndices,TCellData>
         {
@@ -182,7 +182,7 @@ namespace Extractors{
         }
         template<typename FileOrGroup>
         void writeHDF5(const FileOrGroup & fOrG){
-            Hdf5Helpers::saveData(fOrG,TensorRef<TensorType>(this->m_tensor),this->m_dataName);
+            Hdf5Helpers::saveData(fOrG,this->m_tensor,this->m_dataName);
         }
     };
 
@@ -203,7 +203,7 @@ namespace Extractors{
         }
         template<typename FileOrGroup>
         void writeHDF5(const FileOrGroup & fOrG){
-            Hdf5Helpers::saveData(fOrG,TensorRef<TensorType>(this->m_tensor),this->m_dataName);
+            Hdf5Helpers::saveData(fOrG,this->m_tensor,this->m_dataName);
         }
     };
     template<unsigned int nTensorIndices = 3>
@@ -223,7 +223,7 @@ namespace Extractors{
         }
         template<typename FileOrGroup>
         void writeHDF5(const FileOrGroup & fOrG){
-            Hdf5Helpers::saveData(fOrG, TensorRef<TensorType>(this->m_tensor) ,this->m_dataName);
+            Hdf5Helpers::saveData(fOrG, this->m_tensor ,this->m_dataName);
         }
     };
 
@@ -236,7 +236,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_MATRIX_TYPES
 
-    using Array3UInt = typename MyMatrix<std::size_t>::Array3;
+    using Array3UInt = typename MyMatrix::Array3<std::size_t>;
 
     std::string m_fileName;
 

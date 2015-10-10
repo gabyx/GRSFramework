@@ -871,7 +871,7 @@ void ColliderBody<TCollisionSet>::collide(const SphereGeometry  * sphereGeom,
 //
 //    IceMaths::Sphere sphereTemp(IceMaths::Point(sphere->m_r_S(0),sphere->m_r_S(1),sphere->m_r_S(2)),sphereGeom->m_radius);
 //
-//    static MyMatrix<OPCODE_PRECISION>::Matrix44 H_IK; // worldMeshMatrix is H_IM= [A_IM | I_r_IM] if M is mesh in glocker Notation!
+//    static MyMatrix::Matrix44<OPCODE_PRECISION> H_IK; // worldMeshMatrix is H_IM= [A_IM | I_r_IM] if M is mesh in glocker Notation!
 //    setHomogeneousTransform<PREC,MeshPREC>(mesh->m_A_IK, mesh->m_r_S,H_IK);
 //
 //    // Take care! Direct X Compliant stupid fucking matrices!!

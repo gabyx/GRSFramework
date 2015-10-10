@@ -71,13 +71,13 @@ struct MyMatrix {
     template<typename Scalar>
     using  MatrixDynDynRow =  Eigen::Matrix<Scalar, Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor>;
 
-    template<typename Scalar,unsigned int M>
+    template<typename Scalar,  int M>
     using  MatrixStatDyn =  Eigen::Matrix<Scalar, M, Eigen::Dynamic >;
-    template<typename Scalar,unsigned int N>
+    template<typename Scalar, int N>
     using  MatrixDynStat =  Eigen::Matrix<Scalar, Eigen::Dynamic, N >;
-    template<typename Scalar,unsigned int M, unsigned int N>
+    template<typename Scalar, int M,  int N>
     using  MatrixStatStat =  Eigen::Matrix<Scalar, M, N >;
-    template<typename Scalar,unsigned int M>
+    template<typename Scalar, int M>
     using  VectorStat =  Eigen::Matrix<Scalar, M, 1 >;
 
 
@@ -93,13 +93,13 @@ struct MyMatrix {
 
 
 
-    template<typename Scalar,unsigned int M>
+    template<typename Scalar, int M>
     using  ArrayStatDyn =  Eigen::Array<Scalar, M, Eigen::Dynamic >;
-    template<typename Scalar,unsigned int N>
+    template<typename Scalar, int N>
     using  ArrayDynStat =  Eigen::Array<Scalar, Eigen::Dynamic, N >;
-    template<typename Scalar,unsigned int M, unsigned int N>
+    template<typename Scalar, int M,  int N>
     using  ArrayStatStat =  Eigen::Array<Scalar, M, N >;
-    template<typename Scalar,unsigned int M>
+    template<typename Scalar, int M>
     using  ArrayStat =  Eigen::Array<Scalar, M,1>;
 
     template<typename Scalar>

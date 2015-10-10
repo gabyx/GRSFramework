@@ -24,8 +24,8 @@ public:
 
     using CellDataType = TCellData;
 
-    using IndexType     = typename MyMatrix<SizeType>::Array3;
-    using IndexLongType = typename MyMatrix<TLongInt>::Array3;
+    using IndexType     = typename MyMatrix::Array3<SizeType>;
+    using IndexLongType = typename MyMatrix::Array3<TLongInt>;
 
     using CellDataListType = std::vector<TCellData>;
 

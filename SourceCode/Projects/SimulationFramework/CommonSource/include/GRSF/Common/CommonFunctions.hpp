@@ -368,7 +368,7 @@ inline PREC genRandomValues(PREC value, Functor & f, Integral count) {
 * Generates count random vectors and returns the last one.
 */
 template<typename PREC, typename Generator, typename Distribution, typename Integral>
-inline typename MyMatrix<PREC>::Vector3 genRandomVec(typename MyMatrix<PREC>::Vector3 value, Generator & g, Distribution & d, Integral count) {
+inline typename MyMatrix::Vector3<PREC> genRandomVec(typename MyMatrix::Vector3<PREC> value, Generator & g, Distribution & d, Integral count) {
     STATIC_ASSERT(std::is_unsigned<Integral>::value)
     for(unsigned int i= 0; i<count; ++i) {
         value(0) = d(g);
@@ -400,8 +400,8 @@ void printVectorNoCopy(Stream & ostr, const Iterator & itBegin, const Iterator &
 * @brief Converts a std::vector with column vectors from Eigen into a Eigen Matrix.
 */
 template <class PREC, std::size_t M, std::size_t N>
-void vec2Mat(const typename MyMatrix<PREC>::template StdVecAligned<Eigen::Matrix<PREC,M,1> > &vec,
-             Eigen::Matrix<PREC,M,N> &A) {
+void vec2Mat(const typename MyContainers::StdVecAligned< MyMatrix::VectorStat<PREC,M> > &vec,
+             MyMatrix::MatrixStatStat<PREC,M,N> &A) {
     for(int i=0; i<vec.size(); i++) {
         A.col(i) = vec[i];
     }
@@ -411,7 +411,7 @@ void vec2Mat(const typename MyMatrix<PREC>::template StdVecAligned<Eigen::Matrix
 * @brief Converts a std::vector with scalar values in it into a Eigen Vector.
 */
 template <class PREC, std::size_t M>
-void vec2Vec(const std::vector<PREC> &vec, Eigen::Matrix<PREC,M,1> &V) {
+void vec2Vec(const std::vector<PREC> &vec, MyMatrix::VectorStat<PREC,M> &V) {
     for(int i=0; i<vec.size(); i++) {
         V[i] = vec[i];
     }

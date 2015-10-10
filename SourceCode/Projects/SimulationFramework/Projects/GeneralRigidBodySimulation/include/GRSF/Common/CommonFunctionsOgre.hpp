@@ -20,7 +20,7 @@ Ogre::StringVector convertToOgreStringVector(const std::vector<std::string> & ve
 * @brief Converts a vector 3x1 from Ogre to an Eigen 3x1 Vector.
 */
 template<typename PREC>
-typename MyMatrix<PREC>::Vector3 vectorFromOgre(const Ogre::Vector3& v) {
+typename MyMatrix::Vector3<PREC> vectorFromOgre(const Ogre::Vector3& v) {
     Eigen::Matrix<double,3,1> vec;
     vec(0) = v.x;
     vec(1) = v.y;
@@ -33,8 +33,8 @@ typename MyMatrix<PREC>::Vector3 vectorFromOgre(const Ogre::Vector3& v) {
 * @brief Converts a quaternion 4x1 from Ogre to an Eigen 4x1 Vector.
 */
 template<typename PREC>
-typename MyMatrix<PREC>::Vector4 vectorFromOgre(const Ogre::Quaternion & v) {
-    typename MyMatrix<PREC>::Vector4 vec;
+typename MyMatrix::Vector4<PREC> vectorFromOgre(const Ogre::Quaternion & v) {
+    typename MyMatrix::Vector4<PREC> vec;
     vec(0) = v.w;
     vec(1) = v.x;
     vec(2) = v.y;

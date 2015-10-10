@@ -216,7 +216,7 @@ void saveMatrixOrArray_artihmScalar(const TFileGroup & fg, const T & m, std::str
 }
 
 template<typename Tensor, typename TFileGroup>
-void saveTensor_artihmScalar(const TFileGroup & fg, const TensorRef<Tensor> & m, std::string name)
+void saveTensor_artihmScalar(const TFileGroup & fg, const Tensor & m, std::string name)
 {
     /* Tensor = Tensor<Scalar,...> or similar */
     /* Scalar  = arithmetic */
@@ -242,7 +242,7 @@ void saveTensor_artihmScalar(const TFileGroup & fg, const TensorRef<Tensor> & m,
 }
 
 template<typename Tensor, typename TFileGroup>
-void saveTensor_vectorScalar(const TFileGroup & fg, const TensorRef<Tensor> & m, std::string name)
+void saveTensor_vectorScalar(const TFileGroup & fg, const Tensor & m, std::string name)
 {
     /* Tensor = Tensor<Scalar,...> or similar */
     /* Scalar  = VectorStat<N> , fixed size vector */
@@ -296,22 +296,22 @@ void saveData(const TFileGroup & fg, const ArrayBase<Derived> & m, std::string n
 
 template<typename TFileGroup,
         typename TScalar,
-        int Options,
+        std::size_t Indices, int Options,
         SFINAE_ENABLE_IF( std::is_arithmetic<TScalar>::value )
         >
-void saveData(const TFileGroup & fg, const TensorDyn<TScalar,Options> & m, std::string name)
+void saveData(const TFileGroup & fg, const MyMatrix::TensorDyn<TScalar,Indices,Options> & m, std::string name)
 {
     details::saveTensor_artihmScalar(fg,m,name);
 }
 
 template<typename TFileGroup,
         typename TScalar,
-        int Options,
+        std::size_t Indices, int Options,
         SFINAE_ENABLE_IF( !std::is_arithmetic<TScalar>::value &&
                                 TScalar::IsVectorAtCompileTime
                                              )
         >
-void saveData(const TFileGroup & fg, const TensorDyn<TScalar,Options> & m, std::string name)
+void saveData(const TFileGroup & fg, const MyMatrix::TensorDyn<TScalar,Indices,Options> & m, std::string name)
 {
     details::saveTensor_vectorScalar(fg,m,name);
 }

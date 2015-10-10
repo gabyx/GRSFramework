@@ -65,7 +65,7 @@ public:
     RankIdType getRank() const{return m_rank;}
 
     RankIdType getCellRank(const Vector3 & I_point) const {
-        MyMatrix<RankIdType>::Array3 v;
+        MyMatrix::Array3<RankIdType> v;
         if(m_axisAligned){
              v = Base::getCellIndexClosest(I_point);
         }else{
@@ -75,7 +75,7 @@ public:
     };
 
 
-    RankIdType getCellRank(const MyMatrix<RankIdType>::Array3 & v) const {
+    RankIdType getCellRank(const MyMatrix::Array3<RankIdType> & v) const {
         ASSERTMSG( ( (v(0) >=0 && v(0) < m_dim(0)) && (v(1) >=0 && v(1) < m_dim(1)) && (v(2) >=0 && v(2) < m_dim(2)) ),
                 "Index: " << v << " is out of bound" )
 
@@ -95,9 +95,9 @@ public:
                 && cellRank >= m_cellNumberingStart,
                 "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
 
-        MyMatrix<RankIdType>::Array3 cell_index = getCellIndex(cellRank);
+        MyMatrix::Array3<RankIdType> cell_index = getCellIndex(cellRank);
 
-        MyMatrix<RankIdType>::Array3 ind;
+        MyMatrix::Array3<RankIdType> ind;
 
         for(int i=0; i<26; i++) {
             ind(0) = m_nbIndicesOff[i*3+0] + cell_index(0);
@@ -116,7 +116,7 @@ public:
         return v;
     };
 
-    MyMatrix<RankIdType>::Array3 getCellIndex(RankIdType cellRank) const {
+    MyMatrix::Array3<RankIdType> getCellIndex(RankIdType cellRank) const {
 
         ASSERTMSG(cellRank < m_dim(0)*m_dim(1)*m_dim(2) + m_cellNumberingStart
                 && cellRank >= m_cellNumberingStart,

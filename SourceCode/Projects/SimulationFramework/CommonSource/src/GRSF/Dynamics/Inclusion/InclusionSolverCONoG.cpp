@@ -407,7 +407,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
         case InclusionSolverSettingsType::Method::SOR_NORMAL_TANGENTIAL:
             //Iterate multiple times the normal direction before going to the tangential direction!
             m_pNormalSorProxStepNodeVisitor->setLastUpdate(false);
-            for(int i = 0;i<m_settings.m_normalTangentialUpdateRatio;++i){
+            for(unsigned int i = 0;i<m_settings.m_normalTangentialUpdateRatio;++i){
                 m_contactGraph.applyNodeVisitorSpecial(*m_pNormalSorProxStepNodeVisitor);
             }
             m_pNormalSorProxStepNodeVisitor->setLastUpdate(true);

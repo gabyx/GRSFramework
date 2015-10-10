@@ -205,8 +205,9 @@ private:
 
         NodeInit(ContactGraph * p): m_p(p), m_nodeDataInit(p) {}
 
-        NodeDataInit m_nodeDataInit;
         ContactGraph * m_p = nullptr;
+        NodeDataInit m_nodeDataInit;
+
 
         template<bool addEdges, typename TNode, typename TCollData, typename TContactParams>
         void apply(TNode * pNode,

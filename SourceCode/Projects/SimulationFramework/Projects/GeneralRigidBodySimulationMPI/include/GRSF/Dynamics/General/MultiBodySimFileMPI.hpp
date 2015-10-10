@@ -17,7 +17,7 @@
 
 #include "GRSF/Common/CommonFunctions.hpp"
 
-#include "GRSF/Dynamics/General/SerializationHelpersEigen.hpp"
+#include "GRSF/Common/SerializationHelpersEigen.hpp"
 #include "GRSF/Dynamics/General/MultiBodySimFileIOHelpers.hpp"
 #include "GRSF/Dynamics/General/AdditionalBodyData.hpp"
 
