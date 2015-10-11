@@ -91,7 +91,7 @@ namespace Extractors{
             bool m_useProjectionMatrix = false;
 
             /** Method 1*/
-            ProjIndexType m_indices;          ///< Two indices which components to take!
+            ProjIndexType m_projIndices;      ///< Two indices which components to take!
             /** Method 2*/
             ProjMatrixType m_P;               ///< Projection operator
 
@@ -169,18 +169,40 @@ namespace Extractors{
 
         DEFINE_TENSORSTORAGE_TYPE(Base)
 
+        using Base::m_P;
+        using Base::m_projIndices;
+        using Base::m_useProjectionMatrix;
+
         ExtractorTransVelocityProj1D(std::string name): Base(name){}
 
         bool m_transformToGridCoordinates = true;
 
-        template<typename TGrid, typename TGridExtSettings,
-                 typename CellDataType, typename IndexType>
-        inline void writeCellData(TGrid *g, TGridExtSettings * s,
-                                  CellDataType & cellData, const IndexType & index)
+        template<typename TGrid, typename CellDataType, typename IndexType>
+        inline void writeCellData(TGrid *g, CellDataType & cellData, const IndexType & index)
         {
-//            decltype(typename TensorType::Dimensions) d(1,2,3);
-//            TensorMapType a(dataBufferPtr,d);
+            static Vector3 temp;
+            if( cellData.m_rigidBodyState){
+                if(m_transformToGridCoordinates){
+                    temp = g->getTransformKI() * cellData.m_rigidBodyState->getVelocityTrans();
+                }else{
+                    temp = cellData.m_rigidBodyState->getVelocityTrans();
+                }
+                if(m_useProjectionMatrix){
+                    this->getElement(index) = m_P * temp;
+                } else{
+                    this->getElement(index)(0) = temp(m_projIndices(0));
+                }
+            }else{
+                this->getElement(index)(0) = 0 ;
+            }
         }
+
+        template<typename TGrid, typename Iterator>
+        inline void writeAllData(TGrid *g, Iterator begin, Iterator end)
+        {
+
+        }
+
         template<typename FileOrGroup>
         inline void writeHDF5(const FileOrGroup & fOrG){
             Hdf5Helpers::saveData(fOrG,this->m_tensor,this->m_dataName);
@@ -194,23 +216,41 @@ namespace Extractors{
 
         DEFINE_TENSORSTORAGE_TYPE(Base)
 
+        using Base::m_P;
+        using Base::m_projIndices;
+        using Base::m_useProjectionMatrix;
+
         ExtractorTransVelocityProj2D(std::string name): Base(name){}
         bool m_transformToGridCoordinates = true;
 
-        template<typename TGrid, typename TGridExtSettings,
-                 typename CellDataType, typename IndexType>
-        inline void writeCellData(TGrid *g, TGridExtSettings * s,
-                                  CellDataType & cellData, const IndexType & index)
+        template<typename TGrid, typename CellDataType, typename IndexType>
+        inline void writeCellData(TGrid *g, CellDataType & cellData, const IndexType & index)
         {
-            /** TODO: To be faster, may be get here the start end iterators for the cell data
-            *   And do the loop here for all different settings, instead of always checking
-            */
-            if(m_transformToGridCoordinates){
-                this->getElement(index) = s->m_cellData->m_rigidBodyState->getTransVelocity();
+            static Vector3 temp;
+            if( cellData.m_rigidBodyState){
+                if(m_transformToGridCoordinates){
+                    temp = g->getTransformKI() * cellData.m_rigidBodyState->getVelocityTrans();
+                }else{
+                    temp = cellData.m_rigidBodyState->getVelocityTrans();
+                }
+                if(m_useProjectionMatrix){
+                    this->getElement(index) = m_P * temp;
+                } else{
+                    auto & d = this->getElement(index);
+                    d(0) = temp(m_projIndices(0));
+                    d(1) = temp(m_projIndices(1));
+                }
             }else{
-
+                this->getElement(index) = Vector2::Zero();
             }
         }
+
+        template<typename TGrid, typename Iterator>
+        inline void writeAllData(TGrid *g, Iterator begin, Iterator end)
+        {
+
+        }
+
         template<typename FileOrGroup>
         inline void writeHDF5(const FileOrGroup & fOrG){
             Hdf5Helpers::saveData(fOrG,this->m_tensor,this->m_dataName);
@@ -226,13 +266,26 @@ namespace Extractors{
 
         bool m_transformToGridCoordinates = true;
 
-        template<typename TGrid, typename TGridExtSettings,
-                 typename CellDataType, typename IndexType>
-        inline void writeCellData(TGrid *g, TGridExtSettings * s,
-                                  CellDataType & cellData, const IndexType & index)
+        template<typename TGrid, typename CellDataType, typename IndexType>
+        inline void writeCellData(TGrid *g, CellDataType & cellData, const IndexType & index)
+        {
+            if(cellData.m_rigidBodyState){
+                if(m_transformToGridCoordinates){
+                    this->getElement(index) = g->getTransformKI() * cellData.m_rigidBodyState->getVelocityTrans();
+                }else{
+                    this->getElement(index) = cellData.m_rigidBodyState->getVelocityTrans();
+                }
+            }else{
+                this->getElement(index) = Vector3::Zero();
+            }
+        }
+
+        template<typename TGrid, typename Iterator>
+        inline void writeAllData(TGrid *g, Iterator begin, Iterator end)
         {
 
         }
+
         template<typename FileOrGroup>
         inline void writeHDF5(const FileOrGroup & fOrG){
             Hdf5Helpers::saveData(fOrG, this->m_tensor ,this->m_dataName);
@@ -296,34 +349,34 @@ public:
         void operator()(CellDataType & cellData, const IndexType & index)
         {
             for(auto & e : m_settings->m_transVelExtractor){
-                e.writeCellData(g,s,cellData,index);
-            }
-            for(auto & e : m_settings->m_transVelProj1DExtractors){
-                e.writeCellData(g,s,cellData,index);
+                e.writeCellData(m_grid,cellData,index);
             }
             for(auto & e : m_settings->m_transVelProj2DExtractors){
-                e.writeCellData(g,s,cellData,index);
+                e.writeCellData(m_grid,cellData,index);
+            }
+             for(auto & e : m_settings->m_transVelProj1DExtractors){
+                e.writeCellData(m_grid,cellData,index);
             }
         }
 
         /* Write all data for iterator begin to the end */
         template<typename CellDataIt>
-        void writeAllData()(CellDataIt begin, CellDataIt end)
+        void writeAllData(CellDataIt begin, CellDataIt end)
         {
             for(auto & e : m_settings->m_transVelExtractor){
-                e.writeAllData(g,s,begin,end);
-            }
-            for(auto & e : m_settings->m_transVelProj1DExtractors){
-                e.writeCellData(g,s,begin,end);
+                e.writeAllData(m_grid,begin,end);
             }
             for(auto & e : m_settings->m_transVelProj2DExtractors){
-                e.writeCellData(g,s,begin,end);
+                e.writeCellData(m_grid,begin,end);
+            }
+            for(auto & e : m_settings->m_transVelProj1DExtractors){
+                e.writeCellData(m_grid,begin,end);
             }
         }
 
         private:
         GridType * m_grid;
-        GridSettingsType * m_settings;
+        GridExtSettingsType * m_settings;
     };
 
     template<typename TGrid>
@@ -338,10 +391,10 @@ public:
         for(auto & e : m_transVelExtractor){
             e.writeHDF5(fOrG);
         }
-        for(auto & e : m_transVelProj1DExtractors){
+        for(auto & e : m_transVelProj2DExtractors){
             e.writeHDF5(fOrG);
         }
-        for(auto & e : m_transVelProj2DExtractors){
+        for(auto & e : m_transVelProj1DExtractors){
             e.writeHDF5(fOrG);
         }
     }

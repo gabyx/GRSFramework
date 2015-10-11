@@ -171,14 +171,15 @@ public:
             m_extractorNames.insert(name);
         }
         if(type=="TransVelProj2D"){
+
             settings.m_transVelProj2DExtractors.emplace_back(name);
-            auto velProj = settings.m_transVelProj2DExtractors.back();
+            auto & velProj = settings.m_transVelProj2DExtractors.back();
             parseVelProjExtractor(extract,velProj);
 
         }else if(type=="TransVelProj1D"){
 
             settings.m_transVelProj1DExtractors.emplace_back(name);
-            auto velProj = settings.m_transVelProj1DExtractors.back();
+            auto & velProj = settings.m_transVelProj1DExtractors.back();
             parseVelProjExtractor(extract,velProj);
 
         }else if(type=="TransVel"){
@@ -187,7 +188,7 @@ public:
                 ERRORMSG("---> You specified already a TransVel extractor, only one allowed!")
             }
             settings.m_transVelExtractor.emplace_back(name);
-            auto vel = settings.m_transVelExtractor.back();
+            auto & vel = settings.m_transVelExtractor.back();
             parseVelExtractor(extract,vel);
 
         }else{
@@ -215,9 +216,14 @@ public:
 
         att = extract.attribute("indices");
         if(att){
-            if(!Utilities::stringToVector(velProj.m_indices,  extract.attribute("indices").value())) {
+            if(!Utilities::stringToVector(velProj.m_projIndices,  extract.attribute("indices").value())) {
                 ERRORMSG("---> String conversion 'indices' failed");
             }
+            // check indices
+            if( (velProj.m_projIndices >= TExtractor::DimOut).any() ) {
+                ERRORMSG("---> In parseExtrationTypes: 'indices' out of range [0," << TExtractor::DimOut << ") !")
+            }
+
         }else{
             ERRORMSG("---> In parseExtrationTypes: neither 'indices' given nor 'useProjectionMatrix'= true")
         }

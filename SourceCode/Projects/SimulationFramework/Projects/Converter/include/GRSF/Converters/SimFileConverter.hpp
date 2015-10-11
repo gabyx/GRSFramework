@@ -390,7 +390,7 @@ protected:
             std::string outputName;
             boost::filesystem::path outputDir = "./";
 
-            // produce render output file for this state
+            // produce output for this state
 
             // load state
             double time;

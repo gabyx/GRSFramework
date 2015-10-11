@@ -8,7 +8,7 @@ GridExtractor::GridExtractor(GridExtractionSettings * settings,
 {
 
     // Make Grid
-    m_grid.reset( new GridType(m_settings->m_aabb,m_settings->m_dimension) );
+    m_grid.reset( new GridType(m_settings->m_aabb,m_settings->m_dimension, m_settings->m_R_KI.transpose() ) );
 
     // setup overall data buffer (for all extractors)
     auto totalBytes = m_settings->resizeBuffer();

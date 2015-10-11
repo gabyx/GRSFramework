@@ -147,8 +147,8 @@ void GridExtractor::addAllBodies(TGrid * grid, StateContainer & states){
     Vector3 K_p;
     for(auto & s : states){
 
-        K_p = m_settings->m_R_KI.transpose() * s.getPosition(); // A_KI * I_pos
-        auto * p = grid->getCellData( K_p );
+        K_p = grid->getTransformKI() * s.getPosition(); // A_KI * I_pos
+        auto * p = grid->template getCellData<false>( K_p );
         if(p){
             p->add(&s,K_p);
         }

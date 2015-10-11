@@ -60,7 +60,7 @@ public:
     inline const AABB3d & getAABB() {
         return m_aabb;
     }
-    inline const Matrix33 & getTransformationKI() {
+    inline const Matrix33 & getTransformKI() {
         return m_A_KI;
     }
 
