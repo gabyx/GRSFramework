@@ -20,11 +20,12 @@ namespace MPILayer {
 
 
 template< typename ProcessTopologyBase>
-class ProcessTopologyGrid : public CartesianGrid<NoCellData, typename ProcessTopologyBase::RankIdType > {
+class ProcessTopologyGrid : protected CartesianGrid<NoCellData, typename ProcessTopologyBase::RankIdType > {
 public:
 
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     using Base = CartesianGrid<NoCellData, typename ProcessTopologyBase::RankIdType >;
     using IndexType = typename Base::IndexType;
@@ -40,6 +41,7 @@ private:
     using Base::m_dxyzInv;
     using Base::m_cellData;
     using Base::m_nbIndicesOff;
+    using Base::m_A_KI;
 
 public:
 
@@ -50,9 +52,9 @@ public:
                           bool aligned = true,
                           const Matrix33 & A_IK = Matrix33::Identity()
                           ):
-    Base(aabb, dim),
+    Base(aabb, dim, A_IK.transpose()), /** Grid wants A_KI */
     m_cellNumberingStart(masterRank), m_rank(processRank),
-    m_axisAligned(aligned), m_A_IK(A_IK)
+    m_axisAligned(aligned)
     {
        m_rank = processRank;
 
@@ -80,9 +82,9 @@ public:
     RankIdType getCellRank(const Vector3 & I_point) const {
         MyMatrix::Array3<RankIdType> v;
         if(m_axisAligned){
-             v = Base::getCellIndexClosest(I_point);
+             v = Base::template getCellIndexClosest<false>(I_point); // do not transform point (grid aligned with I system)
         }else{
-             v = Base::getCellIndexClosest(m_A_IK.transpose()*I_point);
+             v = Base::template getCellIndexClosest<true>(I_point);  // transform input point to K frame
         }
         return getCellRank(v);
     };
@@ -179,7 +181,7 @@ public:
         if(m_axisAligned) {
             return checkOverlapImpl(m_ColliderAABB,neighbourProcessRanks, overlapsOwnRank, body);
         } else {
-            return checkOverlapImpl(m_ColliderOOBB,neighbourProcessRanks, overlapsOwnRank, body, m_A_IK );
+            return checkOverlapImpl(m_ColliderOOBB,neighbourProcessRanks, overlapsOwnRank, body, m_A_KI );
         }
     }
 
@@ -191,16 +193,16 @@ private:
                                     NeighbourRanksListType & neighbourProcessRanks,
                                     bool & overlapsOwnRank,
                                     const RigidBodyType * body,
-                                    AddArgs &... args) const
+                                    AddArgs&&... args) const
     {
         // Check neighbour AABB
         for(auto it = m_nbAABB.begin(); it != m_nbAABB.end(); it++) {
-            if( collider.checkOverlap(body,it->second, args...) ) {
+            if( collider.checkOverlap(body,it->second, std::forward<AddArgs>(args)...) ) {
                 neighbourProcessRanks.insert(it->first);
             }
         }
         // Check own AABB
-        overlapsOwnRank = collider.checkOverlap(body, m_aabb, args...);
+        overlapsOwnRank = collider.checkOverlap(body, m_aabb, std::forward<AddArgs>(args)...);
         return neighbourProcessRanks.size() > 0;
     }
 
@@ -212,7 +214,6 @@ private:
     AABB3d m_aabb; ///< Own AABB of this process in frame G
 
     bool m_axisAligned = true;
-    Matrix33 m_A_IK ; ///< The grid can be rotated, this is the transformation matrix from grid frame K to intertia frame I
 
     ColliderAABB m_ColliderAABB;
     ColliderOOBB m_ColliderOOBB;

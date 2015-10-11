@@ -12,8 +12,9 @@
 struct NoCellData {};
 
 template<typename TCellData = NoCellData,
-         typename TSize    = std::size_t,
-         typename TLongInt = long int>
+        typename TSize    = std::size_t,
+        typename TLongInt = long int
+        >
 class CartesianGrid {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -29,55 +30,71 @@ public:
 
     using CellDataListType = std::vector<TCellData>;
 
-    CartesianGrid(){
-        m_dxyz.setZero();
-        m_dim.setZero();
-    }
-
     CartesianGrid(const AABB3d & aabb,
-                  const IndexType & dim){
-        ASSERTMSG(dim(0)*dim(1)*dim(2) != 0, "Dimension zero: " << dim)
+                  const IndexType & dim,
+                  const Matrix33 & A_KI = Matrix33::Identity())
+        : m_aabb(aabb), m_dim(dim), m_A_KI(A_KI)
+    {
+        ASSERTMSG(m_dim.prod() != 0, "Dimension zero: " << dim)
         ASSERTMSG( aabb.isEmpty() == false, "CartesianGrid, wrongly initialized: maxPoint < minPoint");
-        m_aabb = aabb;
-        m_dim = dim;
 
         m_dxyz    = m_aabb.extent() / dim.template cast<PREC>();
         m_dxyzInv = m_dxyz.inverse();
 
-        if(! std::is_same<TCellData,NoCellData>::value){
-            m_cellData.resize(m_dim(0)*m_dim(1)*m_dim(2));
+        if(! std::is_same<TCellData,NoCellData>::value) {
+            m_cellData.resize(m_dim.prod());
         }
-
     }
 
-    ~CartesianGrid(){}
+    ~CartesianGrid() {}
 
-    inline IndexType getDimensions(){return m_dim;}
-    inline Array3 getDx(){return m_dxyz;}
-    inline Array3 getDxInv(){return m_dxyzInv;}
+    inline IndexType getDimensions() {
+        return m_dim;
+    }
+    inline Array3 getDx() {
+        return m_dxyz;
+    }
+    inline Array3 getDxInv() {
+        return m_dxyzInv;
+    }
+    inline const AABB3d & getAABB() {
+        return m_aabb;
+    }
+    inline const Matrix33 & getTransformationKI() {
+        return m_A_KI;
+    }
 
     /** Get cell index, points needs to be in same frame as aabb in this class */
-    template<typename Derived>
-    bool getCellIndex(const MatrixBase<Derived> & point, IndexType & index) const
-    {
+    template<bool transformInputToKSystem = false, typename Derived>
+    bool getCellIndex(const MatrixBase<Derived> & point, IndexType & index) const {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
 
-        m_temp =  (((point - m_aabb.m_minPoint).array()) * m_dxyzInv).template cast<LongInt>();
-
+        if(transformInputToKSystem) {
+            m_temp =  ((( m_A_KI*point - m_aabb.m_minPoint).array()) * m_dxyzInv).template cast<LongInt>();
+        } else {
+            m_temp =  (((point - m_aabb.m_minPoint).array()) * m_dxyzInv).template cast<LongInt>();
+        }
         // If inside grid
         if(  !( (m_temp < 0).any() || (m_temp >= m_dim.template cast<LongInt>() ).any()) ) {
-           index = m_temp.template cast<SizeType>();
-           return true;
+            index = m_temp.template cast<SizeType>();
+            return true;
         };
         return false;
     }
 
-    template<typename Derived>
-    IndexType getCellIndexClosest(const MatrixBase<Derived> & point) const{
+    /** If transformInputToKSystem == true , the input point is assumed to be
+    * in I system and is transformed to the K system. other wise the point is assumed to be in the system of the grid
+    */
+    template<bool transformInputToKSystem = false, typename Derived>
+    IndexType getCellIndexClosest(const MatrixBase<Derived> & point) const {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
 
         // calculate index normally and then project it into the feasible grid.
-        m_temp = (((point - m_aabb.m_minPoint).array()) * m_dxyzInv).template cast<LongInt>();
+        if(transformInputToKSystem) {
+            m_temp = ((( m_A_KI*point - m_aabb.m_minPoint).array()) * m_dxyzInv).template cast<LongInt>();
+        } else {
+            m_temp = (((point - m_aabb.m_minPoint).array()) * m_dxyzInv).template cast<LongInt>();
+        }
 
         // prox  index to feasible range (cartesian prox)
         //        m_temp(0) = std::max(   std::min( LongInt(m_dim(0)-1), m_temp(0)),  0LL   );
@@ -90,13 +107,13 @@ public:
     };
 
     /** Get cell data  */
-    template<typename Derived>
-    typename CellDataListType::value_type * getCellData(const MatrixBase<Derived> & point){
+    template<bool transformInputToKSystem = false, typename Derived>
+    typename CellDataListType::value_type * getCellData(const MatrixBase<Derived> & point) {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
 
-        if(!std::is_same<TCellData,NoCellData>::value){
+        if(!std::is_same<TCellData,NoCellData>::value) {
             IndexType index;
-            if(getCellIndex(point,index)){
+            if(getCellIndex<transformInputToKSystem>(point,index)) {
                 return &m_cellData[ getLinearIndex(index) ];
             }
         }
@@ -104,13 +121,12 @@ public:
     }
 
     /** Get cell data  */
-    template<typename Derived>
+    template<bool transformInputToKSystem = false, typename Derived>
     typename CellDataListType::value_type * getCellData(const MatrixBase<Derived> & point,
-                                                        IndexType & index)
-    {
+            IndexType & index) {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
-        if(!std::is_same<TCellData,NoCellData>::value){
-            if(getCellIndex(point,index)){
+        if(!std::is_same<TCellData,NoCellData>::value) {
+            if(getCellIndex<transformInputToKSystem>(point,index)) {
                 return &m_cellData[ getLinearIndex(index) ];
             }
         }
@@ -118,40 +134,36 @@ public:
     }
 
     /** Get cell data closest  */
-    template<typename Derived>
+    template<bool transformInputToKSystem = false, typename Derived>
     TCellData * getCellDataClosest(const MatrixBase<Derived> & point) const {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
 
-        if(!std::is_same<TCellData,NoCellData>::value){
-            IndexType index = getCellIndexClosest(point);
+        if(!std::is_same<TCellData,NoCellData>::value) {
+            IndexType index = getCellIndexClosest<transformInputToKSystem>(point);
             return &m_cellData[ getLinearIndex(index) ];
         }
         return nullptr;
     }
 
     template<typename Derived,
-             bool indexCheck = true,
-             SFINAE_ENABLE_IF(indexCheck) >
-    TCellData * getCellData(const ArrayBase<Derived> & index) const
-    {
+            bool indexCheck = true,
+            SFINAE_ENABLE_IF(indexCheck) >
+    TCellData * getCellData(const ArrayBase<Derived> & index) const {
         STATIC_ASSERT( (std::is_same<typename Derived::Scalar, SizeType >::value) );
 
         if(!std::is_same<TCellData,NoCellData>::value  &&
-           ( !indexCheck || !( (index < 0).any() || (index >= m_dim).any() ) ) /* a decent compiler will optimize out if !indexCheck = true */
-          )
-        {
+                ( !indexCheck || !( (index < 0).any() || (index >= m_dim).any() ) ) /* a decent compiler will optimize out if !indexCheck = true */
+          ) {
             return &m_cellData[ getLinearIndex(index)  ];
         }
         return nullptr;
     }
 
     template<typename Derived,
-             bool indexCheck,
-             SFINAE_ENABLE_IF(!indexCheck) >
-    TCellData * getCellData(const ArrayBase<Derived> & index) const
-    {
-        if(!std::is_same<TCellData,NoCellData>::value)
-        {
+            bool indexCheck,
+            SFINAE_ENABLE_IF(!indexCheck) >
+    TCellData * getCellData(const ArrayBase<Derived> & index) const {
+        if(!std::is_same<TCellData,NoCellData>::value) {
             return &m_cellData[ getLinearIndex(index) ];
         }
         return nullptr;
@@ -164,114 +176,159 @@ public:
     *   index tuple must be valid, and is not checked!
     */
     template<unsigned int P = 0, typename Derived>
-    Vector3 getCellPoint(const ArrayBase<Derived> & index) const{
+    Vector3 getCellPoint(const ArrayBase<Derived> & index) const {
         STATIC_ASSERT(P<=2)
-        if( P==0 ){
+        if( P==0 ) {
             return m_aabb.m_minPoint.array()              + m_dxyz * index.template cast<PREC>() ;
-        }else if(P==1){
+        } else if(P==1) {
             return m_aabb.m_minPoint.array() + 0.5*m_dxyz + m_dxyz * index.template cast<PREC>() ;
-        }else {
+        } else {
             return m_aabb.m_minPoint.array() + m_dxyz     + m_dxyz * index.template cast<PREC>();
         }
     }
 
     template<typename TVisitor>
-    void applyVisitor(TVisitor && v){
+    void applyVisitor(TVisitor && v) {
 
         IndexType idx;
 
-        for( SizeType x = 0; x < m_dim(0); ++x ){
+        for( SizeType x = 0; x < m_dim(0); ++x ) {
             idx(0) = x;
-            for( SizeType y = 0; y < m_dim(1); ++y ){
+            for( SizeType y = 0; y < m_dim(1); ++y ) {
                 idx(1) = y;
-                for( SizeType z = 0; z < m_dim(2); ++z ){
+                for( SizeType z = 0; z < m_dim(2); ++z ) {
                     idx(2) = z;
-                    v( m_cellData[ getLinearIndex(x,y,z) ] , idx );
+                    v( m_cellData[ getLinearIndex(x,y,z) ], idx );
                 }
             }
         }
     }
 
-    Iterator begin(){
+    /** Iterator Facade */
 
-    }
+    /** Iterator which iterates ovel all entries, providing an index for each position*/
+    template<typename IteratorType>
+    class iterator : public std::iterator_traits<IteratorType> {
+    public:
+        using iterator_traits = std::iterator_traits<IteratorType>;
 
-    Iterator end(){
+        explicit iterator(CartesianGrid * grid, IteratorType it)
+            : m_grid(grid), m_it(it)
+        {
+            m_indices.setZero(); // always set to zero, even if it = begin() or it = end()
+            // decrementing end() works (since decrementing indices works properly)
+        }
 
-    }
+        /** pre-increment ++it */
+        iterator & operator++() {
+            incrementIndex();
+            ++m_it;
+            return *this;
+        }
+        /** post-increment it++ */
+        iterator operator++(int) {
+            iterator it(*this);
+            incrementIndex();
+            operator++();
+            return it;
+        }
 
-    class iterator : public std::iterator_traits<CellDataListType::iterator >{
-        public:
-            using iterator_traits = std::iterator_traits<CellDataListType::iterator >;
+        /** pre-decrement --it */
+        iterator & operator--() {
+            decrementIndex();
+            --m_it;
+            return *this;
+        }
+        /** post-decrement it-- */
+        iterator operator--(int) {
+            iterator it(*this);
+            decrementIndex();
+            operator--();
+            return it;
+        }
 
-            explicit iterator(CartesianGrid * grid)
-                : m_grid(grid), m_pos(0), m_it(m_grid->m_cellData.begin())
-            {
-                m_indices.setZero();
+
+        bool operator==(const iterator &rhs) {
+            return m_it == rhs.m_it;
+        }
+        bool operator!=(const iterator &rhs) {
+            return m_it != rhs.m_it;
+        }
+
+        typename iterator_traits::difference_type operator-(const iterator & rhs) {
+            return m_it - rhs.m_it;
+        }
+        iterator & operator+=( typename iterator_traits::difference_type d) {
+            m_it += d;
+            return *this;
+        }
+
+        iterator & operator=(const iterator & rhs) = default;
+        iterator( const iterator & r ) = default;
+
+        typename iterator_traits::reference_type operator*() {
+            return *m_it;
+        }
+
+        const IndexType & getIndices() {
+            return m_indices;
+        }
+
+    private:
+
+        void incrementIndex() {
+            unsigned int i = 0;
+            do {
+                (++m_indices(i)) %=  m_grid->m_dim(i); // (1,2,3) + 1 ==> (0,2,3)  (if maximum (2,2,4)) while loop goes further
+            } while(m_indices(i++) == 0 && i < CartesianGrid::Dimension);
+        }
+
+        void decrementIndex() {
+            unsigned int i = 0;
+            // move to first non-zero entry, making all zero entries dim-1
+            while(m_indices(i) == 0 && i < CartesianGrid::Dimension) {
+                m_indices(i) = m_grid->m_dim(i)-1;
+                ++i;
             }
-
-            /** pre-increment ++it */
-            iterator & operator++() {
-                ++m_it;
-                return *this;
+            // subtract if not at the end
+            if(i<CartesianGrid::Dimension) {
+                --m_indices(i);
             }
-            /** post-increment it++ */
-            iterator operator++(int) {
-                iterator it(*this);
-                operator++();
-                return it;
-            }
+        }
 
-            bool operator==(const iterator &rhs) {return m_it == rhs.m_it;}
-            bool operator!=(const iterator &rhs) {return m_it != rhs.m_it;}
-
-            typename iterator_traits::difference_type operator-(const iterator & rhs){return m_it - rhs.m_it;}
-            iterator & operator+=( typename iterator_traits::difference_type d){ m_it += d; return *this;}
-
-            iterator & operator=(const iterator & rhs) = default;
-            iterator( const iterator & r ) = default;
-
-            typename iterator_traits::value_type & operator*() {
-                return *m_it;
-            }
-
-            const IndexType & getIndices(){
-                return m_indices;
-            }
-
-        private:
-
-            void incrementIndex(){
-                unsigned int i = 0;
-                do{
-                    (++m_indices[i]) %=  m_dim[i]; // (1,2,3) + 1 ==> (0,2,3)  (if maximum (2,2,4)) while loop goes further
-                }while(m_indices[i++] == 0 && i < CartesianGrid::Dimension);
-            }
-
-            void decrementIndex(){
-                unsigned int i = 0;
-                // move to first non-zero entry, making all zero entries dim-1
-                while(m_indices[i] == 0 && i < CartesianGrid::Dimension){
-                    m_indices[i] = m_dim[i]-1;
-                    ++i;
-                }
-                // subtract if not at the end
-                if(i<CartesianGrid::Dimension){--m_indices[i];}
-            }
-
-            CartesianGrid * m_grid;
-            IndexType m_indices;
-            CellDataListType::iterator m_it;
+        CartesianGrid * m_grid;
+        IndexType m_indices;
+        IteratorType m_it;
     };
+
+    using IteratorType      = iterator<typename CellDataListType::iterator>;
+    using ConstIteratorType = iterator<typename CellDataListType::const_iterator>;
+
+    IteratorType begin() {
+        return IteratorType(this, m_cellData->begin());
+    }
+
+    IteratorType end() {
+        return IteratorType(this, m_cellData->end());
+    }
+
+    IteratorType cbegin() {
+        return ConstIteratorType(this, m_cellData->cbegin());
+    }
+
+    IteratorType cend() {
+        return ConstIteratorType(this, m_cellData->cend());
+    }
+
 
 protected:
     template<typename T1,typename T2, typename T3>
-    inline SizeType getLinearIndex(T1 x, T2 y, T3 z){
+    inline SizeType getLinearIndex(T1 x, T2 y, T3 z) {
         return x + m_dim(0)*(y + m_dim(1)*z); // Colmajor Storage order
     }
 
     template<typename Derived>
-    inline SizeType getLinearIndex(const ArrayBase<Derived> & index){
+    inline SizeType getLinearIndex(const ArrayBase<Derived> & index) {
         return index(0) + m_dim(0)*(index(1) + m_dim(1)*index(2));
     }
 
@@ -280,11 +337,12 @@ protected:
     Array3 m_dxyzInv;
     Array3 m_dxyz;
     IndexType m_dim;
-    AABB3d m_aabb;
+    AABB3d m_aabb;   ///< AABB in K coordinate system
+    Matrix33 m_A_KI; ///< an optional transformation matrix, default to identity! (from I system to the grid system K) ( rotation R_IK, from K system to I system)
 
     static char m_nbIndicesOff[26*3];
 
-    private:
+private:
     // temporary
     mutable IndexLongType m_temp;
 

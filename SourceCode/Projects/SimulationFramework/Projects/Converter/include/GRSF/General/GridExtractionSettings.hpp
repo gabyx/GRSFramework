@@ -175,14 +175,14 @@ namespace Extractors{
 
         template<typename TGrid, typename TGridExtSettings,
                  typename CellDataType, typename IndexType>
-        void writeData(TGrid *g, TGridExtSettings * s,
-                       CellDataType & cellData, const IndexType & index)
+        inline void writeCellData(TGrid *g, TGridExtSettings * s,
+                                  CellDataType & cellData, const IndexType & index)
         {
 //            decltype(typename TensorType::Dimensions) d(1,2,3);
 //            TensorMapType a(dataBufferPtr,d);
         }
         template<typename FileOrGroup>
-        void writeHDF5(const FileOrGroup & fOrG){
+        inline void writeHDF5(const FileOrGroup & fOrG){
             Hdf5Helpers::saveData(fOrG,this->m_tensor,this->m_dataName);
         }
     };
@@ -199,21 +199,20 @@ namespace Extractors{
 
         template<typename TGrid, typename TGridExtSettings,
                  typename CellDataType, typename IndexType>
-        void writeData(TGrid *g, TGridExtSettings * s,
-                       CellDataType & cellData, const IndexType & index)
+        inline void writeCellData(TGrid *g, TGridExtSettings * s,
+                                  CellDataType & cellData, const IndexType & index)
         {
             /** TODO: To be faster, may be get here the start end iterators for the cell data
             *   And do the loop here for all different settings, instead of always checking
             */
-
             if(m_transformToGridCoordinates){
-                this->getElement(index) = cellData->m_rigidBodyState->getTransVelocity();
+                this->getElement(index) = s->m_cellData->m_rigidBodyState->getTransVelocity();
             }else{
 
             }
         }
         template<typename FileOrGroup>
-        void writeHDF5(const FileOrGroup & fOrG){
+        inline void writeHDF5(const FileOrGroup & fOrG){
             Hdf5Helpers::saveData(fOrG,this->m_tensor,this->m_dataName);
         }
     };
@@ -229,13 +228,13 @@ namespace Extractors{
 
         template<typename TGrid, typename TGridExtSettings,
                  typename CellDataType, typename IndexType>
-        void writeData(TGrid *g, TGridExtSettings * s,
-                       CellDataType & cellData, const IndexType & index)
+        inline void writeCellData(TGrid *g, TGridExtSettings * s,
+                                  CellDataType & cellData, const IndexType & index)
         {
 
         }
         template<typename FileOrGroup>
-        void writeHDF5(const FileOrGroup & fOrG){
+        inline void writeHDF5(const FileOrGroup & fOrG){
             Hdf5Helpers::saveData(fOrG, this->m_tensor ,this->m_dataName);
         }
     };
@@ -292,17 +291,33 @@ public:
         DataWriterVisitor(GridType * g, GridExtSettingsType * s): m_grid(g), m_settings(s){}
         DataWriterVisitor(DataWriterVisitor&&d) = default;
 
+        /* Grid Visitor */
         template<typename CellDataType, typename IndexType>
         void operator()(CellDataType & cellData, const IndexType & index)
         {
             for(auto & e : m_settings->m_transVelExtractor){
-                e.writeData(g,s,cellData,index);
+                e.writeCellData(g,s,cellData,index);
             }
             for(auto & e : m_settings->m_transVelProj1DExtractors){
-                e.writeData(g,s,cellData,index);
+                e.writeCellData(g,s,cellData,index);
             }
             for(auto & e : m_settings->m_transVelProj2DExtractors){
-                e.writeData(g,s,cellData,index);
+                e.writeCellData(g,s,cellData,index);
+            }
+        }
+
+        /* Write all data for iterator begin to the end */
+        template<typename CellDataIt>
+        void writeAllData()(CellDataIt begin, CellDataIt end)
+        {
+            for(auto & e : m_settings->m_transVelExtractor){
+                e.writeAllData(g,s,begin,end);
+            }
+            for(auto & e : m_settings->m_transVelProj1DExtractors){
+                e.writeCellData(g,s,begin,end);
+            }
+            for(auto & e : m_settings->m_transVelProj2DExtractors){
+                e.writeCellData(g,s,begin,end);
             }
         }
 
@@ -310,6 +325,13 @@ public:
         GridType * m_grid;
         GridSettingsType * m_settings;
     };
+
+    template<typename TGrid>
+    auto createDataWriterVisitor(TGrid * g) -> DataWriterVisitor<TGrid>
+    {
+        return DataWriterVisitor<TGrid>{g,this};
+    }
+
 
     template<typename FileOrGroup>
     void writeToHDF5(FileOrGroup & fOrG){
@@ -322,13 +344,6 @@ public:
         for(auto & e : m_transVelProj2DExtractors){
             e.writeHDF5(fOrG);
         }
-    }
-
-
-    template<typename TGrid>
-    auto createDataWriterVisitor(TGrid * g) -> DataWriterVisitor<TGrid>
-    {
-        return DataWriterVisitor<TGrid>{g,this};
     }
 
     std::size_t extractorCount(){ return m_transVelExtractor.size() + m_transVelProj1DExtractors.size() + m_transVelProj2DExtractors.size();}

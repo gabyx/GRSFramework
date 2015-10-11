@@ -115,6 +115,18 @@ class Range{
                     return it;
                 }
 
+                /** pre-decrement --it */
+                iterator & operator--() {
+                    --m_it;
+                    return *this;
+                }
+                /** post-decrement it-- */
+                iterator operator--(int) {
+                    iterator it(*this);
+                    operator--();
+                    return it;
+                }
+
                 bool operator==(const iterator &rhs) {return m_it == rhs.m_it;}
                 bool operator!=(const iterator &rhs) {return m_it != rhs.m_it;}
 
