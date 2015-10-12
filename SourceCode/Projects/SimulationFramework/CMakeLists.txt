@@ -43,7 +43,7 @@ IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
 		SET(MYPROJECT_SET_COMPILER_FLAGS_INTERNAL TRUE CACHE INTERNAL "x" FORCE)
 		MESSAGE(STATUS "Setting Values for GNU")
 		SET(CMAKE_C_FLAGS "-fmessage-length=0" CACHE STRING "Flags for C Compiler" FORCE)
-		SET(CMAKE_CXX_FLAGS "-std=c++11 -ftree-vectorize -ftree-vectorizer-verbose=0 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" FORCE)
+		SET(CMAKE_CXX_FLAGS "-std=c++14 -ftree-vectorize -ftree-vectorizer-verbose=0 -fmessage-length=0 -Wno-enum-compare" CACHE STRING "Flags for CXX Compiler" FORCE)
 		SET(CMAKE_CXX_FLAGS_DEBUG          "-g -fsanitize=address" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
 		set(GCCFILTER_TOOL OFF CACHE BOOL "Use the perl script gccfilter , http://www.mixtion.org/gccfilter/, this tool gets appended to the gcc command" )
 		MARK_AS_ADVANCED(GCCFILTER_TOOL)
@@ -58,8 +58,8 @@ IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
 		SET(CMAKE_C_FLAGS_RELEASE        "-O3 -DNDEBUG" CACHE STRING "Flags for C Compiler for release builds" FORCE)
 		SET(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE STRING "Flags for C Compiler for release builds with debug info" FORCE)
 
-        #SET (CMAKE_CXX_FLAGS             "-std=c++11 -ferror-limit=50 -Weverything -Wno-extra-semi -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -fdiagnostics-show-template-tree -Wno-c++98 -Wno-c++98-compat-pedantic -Wno-deprecated" CACHE STRING "" FORCE)
-		SET(CMAKE_CXX_FLAGS                "-std=c++11 -ferror-limit=50 -w -fmessage-length=0 -Werror=return-type" CACHE STRING "Flags for CXX Compiler" FORCE)
+        #SET (CMAKE_CXX_FLAGS             "-std=c++14 -ferror-limit=50 -Weverything -Wno-extra-semi -Wno-documentation -pedantic -Wno-conversion -Wno-comment -Wno-unused-parameter -Wno-deprecated-register -Wno-float-equal -Wno-switch -fdiagnostics-show-template-tree -Wno-c++98 -Wno-c++98-compat-pedantic -Wno-deprecated" CACHE STRING "" FORCE)
+		SET(CMAKE_CXX_FLAGS                "-std=c++14 -ferror-limit=50 -w -fmessage-length=0 -Werror=return-type" CACHE STRING "Flags for CXX Compiler" FORCE)
 		SET(CMAKE_CXX_FLAGS_DEBUG          "-g -fsanitize=leak -fsanitize=address" CACHE STRING "Flags for CXX Compiler for debug builds" FORCE)
 		SET(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release minsize builds" FORCE)
 		SET(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG" CACHE STRING "Flags for CXX Compiler for release builds" FORCE)
@@ -294,7 +294,10 @@ endif()
 # set common include dir
 SET(GRSF_DEP_INCLUDE_DIRS 
     ${Boost_INCLUDE_DIRS}
+    
     ${EIGEN_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIR}/unsupported
+    
     ${PUGIXML_INCLUDE_DIR}
     ${Meta_INCLUDE_DIR}
     ${PUGIXML_INCLUDE_DIR}

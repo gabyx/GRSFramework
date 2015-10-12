@@ -18,27 +18,43 @@
 
 namespace MPILayer {
 
+
 template< typename ProcessTopologyBase>
-class ProcessTopologyGrid : public CartesianGrid<NoCellData> {
+class ProcessTopologyGrid : protected CartesianGrid<NoCellData, typename ProcessTopologyBase::RankIdType > {
 public:
 
-    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    using Base = CartesianGrid<NoCellData, typename ProcessTopologyBase::RankIdType >;
+    using IndexType = typename Base::IndexType;
 
     using RankToAABBType = std::map<unsigned int, AABB3d >;
     using NeighbourRanksListType = typename ProcessTopologyBase::NeighbourRanksListType;
     using AdjacentNeighbourRanksMapType = typename ProcessTopologyBase::AdjacentNeighbourRanksMapType;
 
+private:
+
+    using Base::m_dim;
+    using Base::m_dxyz;
+    using Base::m_dxyzInv;
+    using Base::m_cellData;
+    using Base::m_nbIndicesOff;
+    using Base::m_A_KI;
+
+public:
+
     ProcessTopologyGrid(  NeighbourRanksListType & nbRanks, AdjacentNeighbourRanksMapType & adjNbRanks,
                           RankIdType processRank, RankIdType masterRank,
             			  const AABB3d & aabb,
-                          const MyMatrix<unsigned int>::Array3 & dim,
+                          const IndexType & dim,
                           bool aligned = true,
                           const Matrix33 & A_IK = Matrix33::Identity()
                           ):
-    CartesianGrid<NoCellData>(aabb, dim),
+    Base(aabb, dim, A_IK.transpose()), /** Grid wants A_KI */
     m_cellNumberingStart(masterRank), m_rank(processRank),
-    m_axisAligned(aligned), m_A_IK(A_IK)
+    m_axisAligned(aligned)
     {
        m_rank = processRank;
 
@@ -64,17 +80,17 @@ public:
     RankIdType getRank() const{return m_rank;}
 
     RankIdType getCellRank(const Vector3 & I_point) const {
-        MyMatrix<RankIdType>::Array3 v;
+        MyMatrix::Array3<RankIdType> v;
         if(m_axisAligned){
-             v = CartesianGrid<NoCellData>::getCellIndexClosest(I_point);
+             v = Base::template getCellIndexClosest<false>(I_point); // do not transform point (grid aligned with I system)
         }else{
-             v = CartesianGrid<NoCellData>::getCellIndexClosest(m_A_IK.transpose()*I_point);
+             v = Base::template getCellIndexClosest<true>(I_point);  // transform input point to K frame
         }
         return getCellRank(v);
     };
 
 
-    RankIdType getCellRank(const MyMatrix<RankIdType>::Array3 & v) const {
+    RankIdType getCellRank(const MyMatrix::Array3<RankIdType> & v) const {
         ASSERTMSG( ( (v(0) >=0 && v(0) < m_dim(0)) && (v(1) >=0 && v(1) < m_dim(1)) && (v(2) >=0 && v(2) < m_dim(2)) ),
                 "Index: " << v << " is out of bound" )
 
@@ -94,9 +110,9 @@ public:
                 && cellRank >= m_cellNumberingStart,
                 "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
 
-        MyMatrix<RankIdType>::Array3 cell_index = getCellIndex(cellRank);
+        MyMatrix::Array3<RankIdType> cell_index = getCellIndex(cellRank);
 
-        MyMatrix<RankIdType>::Array3 ind;
+        MyMatrix::Array3<RankIdType> ind;
 
         for(int i=0; i<26; i++) {
             ind(0) = m_nbIndicesOff[i*3+0] + cell_index(0);
@@ -115,13 +131,13 @@ public:
         return v;
     };
 
-    MyMatrix<RankIdType>::Array3 getCellIndex(RankIdType cellRank) const {
+    MyMatrix::Array3<RankIdType> getCellIndex(RankIdType cellRank) const {
 
         ASSERTMSG(cellRank < m_dim(0)*m_dim(1)*m_dim(2) + m_cellNumberingStart
                 && cellRank >= m_cellNumberingStart,
                 "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
 
-        MyMatrix<unsigned int>::Array3 v;
+        MyMatrix::Array3<unsigned int> v;
         unsigned int cellNumberTemp;
 
         cellNumberTemp = cellRank;
@@ -141,8 +157,8 @@ public:
     */
     AABB3d getCellAABB(RankIdType cellRank) const {
 
-        MyMatrix<unsigned int>::Array3 cell_index = getCellIndex(cellRank);
-        AABB3d ret(m_Box.m_minPoint);
+        MyMatrix::Array3<unsigned int> cell_index = getCellIndex(cellRank);
+        AABB3d ret(m_aabb.m_minPoint);
         ret.m_minPoint.array() += cell_index.array().cast<PREC>()     * m_dxyz.array();
         ret.m_maxPoint.array() += (cell_index.array()+1).cast<PREC>() * m_dxyz.array();
 
@@ -165,7 +181,7 @@ public:
         if(m_axisAligned) {
             return checkOverlapImpl(m_ColliderAABB,neighbourProcessRanks, overlapsOwnRank, body);
         } else {
-            return checkOverlapImpl(m_ColliderOOBB,neighbourProcessRanks, overlapsOwnRank, body, m_A_IK );
+            return checkOverlapImpl(m_ColliderOOBB,neighbourProcessRanks, overlapsOwnRank, body, m_A_KI );
         }
     }
 
@@ -177,16 +193,16 @@ private:
                                     NeighbourRanksListType & neighbourProcessRanks,
                                     bool & overlapsOwnRank,
                                     const RigidBodyType * body,
-                                    AddArgs &... args) const
+                                    AddArgs&&... args) const
     {
         // Check neighbour AABB
         for(auto it = m_nbAABB.begin(); it != m_nbAABB.end(); it++) {
-            if( collider.checkOverlap(body,it->second, args...) ) {
+            if( collider.checkOverlap(body,it->second, std::forward<AddArgs>(args)...) ) {
                 neighbourProcessRanks.insert(it->first);
             }
         }
         // Check own AABB
-        overlapsOwnRank = collider.checkOverlap(body, m_aabb, args...);
+        overlapsOwnRank = collider.checkOverlap(body, m_aabb, std::forward<AddArgs>(args)...);
         return neighbourProcessRanks.size() > 0;
     }
 
@@ -198,7 +214,6 @@ private:
     AABB3d m_aabb; ///< Own AABB of this process in frame G
 
     bool m_axisAligned = true;
-    Matrix33 m_A_IK ; ///< The grid can be rotated, this is the transformation matrix from grid frame K to intertia frame I
 
     ColliderAABB m_ColliderAABB;
     ColliderOOBB m_ColliderOOBB;

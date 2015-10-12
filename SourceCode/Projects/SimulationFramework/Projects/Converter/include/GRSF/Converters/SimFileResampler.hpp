@@ -49,7 +49,6 @@ private:
           std::cerr << "---> Execute Resample" << std::endl;
         // First open all files and check consistency!
         std::cerr << "---> Check consistency of input files..." << std::endl;
-        unsigned int bodies, dofq, dofu;
 
         MultiBodySimFile fromFile;
 

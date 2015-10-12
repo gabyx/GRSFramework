@@ -23,7 +23,7 @@
 namespace MatrixHelpers{
 
    template<typename PREC, typename PREC2>
-   void setHomogeneousTransform(const typename MyMatrix<PREC>::Matrix33 &A_IK, const typename MyMatrix<PREC>::Vector3 &I_t_IK, typename MyMatrix<PREC2>::Matrix44 &H_IK){
+   void setHomogeneousTransform(const typename MyMatrix::Matrix33<PREC> &A_IK, const typename MyMatrix::Vector3<PREC> &I_t_IK, typename MyMatrix::Matrix44<PREC2> &H_IK){
       // Sets the matrix H_IK, ==> I_r_P = H_IK * K_r_p;
       H_IK.setIdentity();
       H_IK.block<3,3>(0,0) = A_IK.template cast<PREC2>();

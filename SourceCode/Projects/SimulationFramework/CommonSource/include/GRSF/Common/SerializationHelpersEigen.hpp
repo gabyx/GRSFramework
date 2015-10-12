@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_SerializationHelpersEigen_hpp
-#define GRSF_Dynamics_General_SerializationHelpersEigen_hpp
+#ifndef GRSF_Common_SerializationHelpersEigen_hpp
+#define GRSF_Common_SerializationHelpersEigen_hpp
 
 #include <Eigen/Dense>
 #include <boost/serialization/array.hpp>

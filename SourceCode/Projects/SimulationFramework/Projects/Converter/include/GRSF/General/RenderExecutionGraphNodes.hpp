@@ -1,8 +1,5 @@
-#ifndef  RenderScriptGeneratorLogic_hpp
-#define  RenderScriptGeneratorLogic_hpp
-
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef  RenderExecutionGraphLogic_hpp
+#define  RenderExecutionGraphLogic_hpp
 
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"
@@ -10,267 +7,13 @@
 #include LogicTypes_INCLUDE_FILE
 #include "GRSF/Logic/LogicNode.hpp"
 
-#include "GRSF/Dynamics/Buffers/RigidBodyState.hpp"
-
 #include "GRSF/General/RendermanGeometryWriter.hpp"
 #include "GRSF/General/RenderData.hpp"
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
+
 
 #include "GRSF/Common/ColorGradient.hpp"
 
 namespace LogicNodes {
-
-
-
-    class FrameData: public LogicNode  {
-    public:
-
-        struct Inputs {
-            enum {
-                INPUTS_LAST = 0
-            };
-        };
-
-        struct Outputs {
-            enum {
-                Time,
-                FrameNr,
-                Folder,
-                Name,
-                OUTPUTS_LAST
-            };
-        };
-
-        enum {
-            N_INPUTS  = Inputs::INPUTS_LAST,
-            N_OUTPUTS = Outputs::OUTPUTS_LAST,
-            N_SOCKETS = N_INPUTS + N_OUTPUTS
-        };
-
-        DECLARE_OSOCKET_TYPE(Time, double );
-        DECLARE_OSOCKET_TYPE(FrameNr, unsigned int );
-        DECLARE_OSOCKET_TYPE(Folder, boost::filesystem::path );
-        DECLARE_OSOCKET_TYPE(Name, std::string );
-
-        FrameData(unsigned int id) : LogicNode(id) {
-            ADD_OSOCK(Time,0.0);
-            ADD_OSOCK(FrameNr,0);
-            ADD_OSOCK(Folder,"./");
-            ADD_OSOCK(Name,"Frame");
-        }
-
-        void setOutput(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr){
-            SET_OSOCKET_VALUE(Folder,folder);
-            SET_OSOCKET_VALUE(Name,filename);
-            SET_OSOCKET_VALUE(Time,time);
-            SET_OSOCKET_VALUE(FrameNr,frameNr);
-        }
-
-        ~FrameData(){}
-    };
-
-
-
-    namespace ABD = AdditionalBodyData;
-
-    class BodyData : public LogicNode {
-    public:
-
-        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-        DEFINE_MPI_INFORMATION_CONFIG_TYPES;
-
-        struct Inputs {
-            enum {
-                INPUTS_LAST = 0
-            };
-        };
-
-        struct Outputs {
-            enum {
-                BodyId,
-                Displacement,
-                Velocity,
-                MaterialId,
-                ProcessId,
-                OverlapTotal,
-                GeomId,
-                OUTPUTS_LAST
-            };
-        };
-
-        enum {
-            N_INPUTS  = Inputs::INPUTS_LAST,
-            N_OUTPUTS = Outputs::OUTPUTS_LAST,
-            N_SOCKETS = N_INPUTS + N_OUTPUTS
-        };
-
-        DECLARE_OSOCKET_TYPE(BodyId, RigidBodyIdType );
-        DECLARE_OSOCKET_TYPE(Displacement, VectorQBody );
-        DECLARE_OSOCKET_TYPE(Velocity, VectorUBody );
-        DECLARE_OSOCKET_TYPE(MaterialId, unsigned int );
-        DECLARE_OSOCKET_TYPE(ProcessId, RankIdType );
-        DECLARE_OSOCKET_TYPE(OverlapTotal, PREC );
-        DECLARE_OSOCKET_TYPE(GeomId, unsigned int );
-
-        BodyData(unsigned int id) : LogicNode(id) {
-            ADD_OSOCK(BodyId,0);
-            ADD_OSOCK(Displacement,VectorQBody());
-            ADD_OSOCK(Velocity,VectorUBody());
-            ADD_OSOCK(MaterialId,0);
-            ADD_OSOCK(ProcessId,0);
-            ADD_OSOCK(OverlapTotal,0.0);
-            ADD_OSOCK(GeomId,0);
-        }
-
-        ~BodyData(){}
-
-        // No initialization
-        // No compute function
-
-        void setOutputs(RigidBodyStateAdd * s) {
-
-            static AddBytesVisitor vis(this);
-            SET_OSOCKET_VALUE(BodyId,s->m_id);
-            SET_OSOCKET_VALUE(Displacement,s->m_q);
-            SET_OSOCKET_VALUE(Velocity,s->m_u);
-
-            if(s->m_data) {
-                s->m_data->applyVisitor(vis);
-            }
-        }
-    private:
-
-        struct AddBytesVisitor{
-            AddBytesVisitor(BodyData * p): m_p(p){};
-
-            void operator()(ABD::AddBytes<EnumConversion::toIntegral(ABD::TypeEnum::PROCESS)> * add){
-                 SET_OSOCKET_VALUE_PTR(m_p,ProcessId,add->m_processId);
-            }
-            void operator()(ABD::AddBytes<EnumConversion::toIntegral(ABD::TypeEnum::PROCESS_MATERIAL)> * add){
-                 SET_OSOCKET_VALUE_PTR(m_p,ProcessId, add->m_processId);
-                 SET_OSOCKET_VALUE_PTR(m_p,MaterialId,add->m_materialId);
-            }
-            void operator()(ABD::AddBytes<EnumConversion::toIntegral(ABD::TypeEnum::PROCESS_MATERIAL_OVERLAP)> * add){
-                 SET_OSOCKET_VALUE_PTR(m_p,ProcessId, add->m_processId);
-                 SET_OSOCKET_VALUE_PTR(m_p,MaterialId,add->m_materialId);
-                 SET_OSOCKET_VALUE_PTR(m_p,OverlapTotal,add->m_overlapTotal);
-            }
-            void operator()(ABD::AddBytes<EnumConversion::toIntegral(ABD::TypeEnum::PROCESS_MATERIAL_OVERLAP_GLOBGEOMID)> * add){
-                 SET_OSOCKET_VALUE_PTR(m_p,ProcessId, add->m_processId);
-                 SET_OSOCKET_VALUE_PTR(m_p,MaterialId,add->m_materialId);
-                 SET_OSOCKET_VALUE_PTR(m_p,OverlapTotal,add->m_overlapTotal);
-                 SET_OSOCKET_VALUE_PTR(m_p,GeomId,add->m_geomId);
-            }
-            void operator()(ABD::AddBytes<EnumConversion::toIntegral(ABD::TypeEnum::PROCESS_OVERLAP)> * add){
-                 SET_OSOCKET_VALUE_PTR(m_p,ProcessId,   add->m_processId);
-                 SET_OSOCKET_VALUE_PTR(m_p,OverlapTotal,add->m_overlapTotal);
-            }
-            template<typename T>
-            void operator()(T * p){
-                 ERRORMSG("Additional bytes could not be filled into input Node!")
-            }
-
-            BodyData * m_p;
-        };
-
-    };
-
-    class DisplacementToPosQuat : public LogicNode {
-    public:
-
-        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-        DEFINE_MPI_INFORMATION_CONFIG_TYPES;
-
-        struct Inputs {
-            enum {
-                Displacement,
-                INPUTS_LAST
-            };
-        };
-
-        struct Outputs {
-            enum {
-                Position,
-                Quaternion,
-                OUTPUTS_LAST
-            };
-        };
-
-        enum {
-            N_INPUTS  = Inputs::INPUTS_LAST,
-            N_OUTPUTS = Outputs::OUTPUTS_LAST,
-            N_SOCKETS = N_INPUTS + N_OUTPUTS
-        };
-
-        DECLARE_ISOCKET_TYPE(Displacement, VectorQBody );
-        DECLARE_OSOCKET_TYPE(Position, Vector3 );
-        DECLARE_OSOCKET_TYPE(Quaternion, Quaternion );
-
-        DisplacementToPosQuat(unsigned int id) : LogicNode(id) {
-            ADD_ISOCK(Displacement,VectorQBody());
-            ADD_OSOCK(Position,Vector3(0,0,0));
-            ADD_OSOCK(Quaternion,Quaternion(1,0,0,0));
-        }
-
-        ~DisplacementToPosQuat() {}
-
-        // No initialization
-
-        void compute() {
-            // convert displacement q into position and quaternion
-            SET_OSOCKET_VALUE(Position,  GET_ISOCKET_REF_VALUE(Displacement).head<3>() );
-            SET_OSOCKET_VALUE(Quaternion,  GET_ISOCKET_REF_VALUE(Displacement).tail<4>() );
-        }
-    };
-
-    class VelocityToVelRot : public LogicNode {
-    public:
-
-        DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-        DEFINE_MPI_INFORMATION_CONFIG_TYPES;
-
-        struct Inputs {
-            enum {
-                Vel,
-                INPUTS_LAST
-            };
-        };
-
-        struct Outputs {
-            enum {
-                TransVel,
-                RotVel,
-                OUTPUTS_LAST
-            };
-        };
-
-        enum {
-            N_INPUTS  = Inputs::INPUTS_LAST,
-            N_OUTPUTS = Outputs::OUTPUTS_LAST,
-            N_SOCKETS = N_INPUTS + N_OUTPUTS
-        };
-
-        DECLARE_ISOCKET_TYPE(Vel, VectorUBody );
-        DECLARE_OSOCKET_TYPE(TransVel, Vector3 );
-        DECLARE_OSOCKET_TYPE(RotVel, Vector3 );
-
-        VelocityToVelRot(unsigned int id) : LogicNode(id) {
-            ADD_ISOCK(Vel,VectorUBody());
-            ADD_OSOCK(TransVel,Vector3(0,0,0));
-            ADD_OSOCK(RotVel, Vector3(0,0,0));
-        }
-
-        ~VelocityToVelRot() {}
-
-        // No initialization
-
-        void compute() {
-            // convert displacement q into position and quaternion
-            SET_OSOCKET_VALUE(TransVel,  GET_ISOCKET_REF_VALUE(Vel).head<3>() );
-            SET_OSOCKET_VALUE(RotVel,  GET_ISOCKET_REF_VALUE(Vel).tail<3>() );
-        }
-    };
-
 
     template<typename IndexType>
     class ColorList : public LogicNode {
@@ -461,7 +204,6 @@ namespace LogicNodes {
                 SET_OSOCKET_VALUE(Material, &m_material);
             }
         }
-        virtual void initialize(){}
 
     private:
         RenderMaterial m_material;
@@ -575,7 +317,6 @@ namespace LogicNodes {
                 SET_OSOCKET_VALUE(Material, &m_material);
             }
         }
-        virtual void initialize(){}
 
     private:
         RenderMaterial m_material;
@@ -679,6 +420,7 @@ namespace LogicNodes {
 
     class RendermanWriter : public RenderScriptWriter{
     public:
+
         DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES
         using GeometryMapType = typename RenderDataType::GeometryMapType;
 
@@ -751,7 +493,7 @@ namespace LogicNodes {
                 !GET_ISOCKET(Name)->isConnected() ||
                 !GET_ISOCKET(Time)->isConnected() ||
                 !GET_ISOCKET(FrameNr)->isConnected()){
-                ERRORMSG("RendermanWriter::initFrame --> one of Folder,Name,Time,FrameNr sockets not connected to any FrameData node!")
+                ERRORMSG("RendermanWriter::initState --> one of Folder,Name,Time,FrameNr sockets not connected to any FrameData node!")
             }
 
             // open new frame

@@ -100,7 +100,7 @@ struct GlobalConfigs {
     };
 
     struct MPIInformationConfigs{
-        using RankIdType = unsigned int;
+        using RankIdType = std::size_t;
     };
 
 };

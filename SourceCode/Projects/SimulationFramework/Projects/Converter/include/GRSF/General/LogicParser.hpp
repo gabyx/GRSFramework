@@ -1,5 +1,5 @@
-#ifndef RenderScriptParser_hpp
-#define RenderScriptParser_hpp
+#ifndef GRSF_General_LogicParser_hpp
+#define GRSF_General_LogicParser_hpp
 
 #include <vector>
 #include <fstream>
@@ -9,28 +9,27 @@
 
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"
-
 #include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/Common/DemangleTypes.hpp"
+
+#include "GRSF/Common/TupleHelper.hpp"
 
 #include "GRSF/Common/XMLMacros.hpp"
-#include "GRSF/General/RenderScriptParserBaseTraits.hpp"
-#include "GRSF/General/RenderScriptParserModules.hpp"
 
-/** The traits for a standart RenderScriptParser class*/
-template<typename TSceneParser, typename TCollection>
-struct RenderScriptParserTraits : RenderScriptParserBaseTraits<TSceneParser,TCollection> {
-    // Module typedefs
-    using MaterialsModuleType   = typename RenderScriptParserModules::MaterialsModule<RenderScriptParserTraits>;
-    using ScriptGenModuleType   = typename RenderScriptParserModules::ScriptGeneratorModule<RenderScriptParserTraits>;
-};
+#include "GRSF/General/LogicParserTraits.hpp"
 
-template< typename TCollection, template<typename P, typename C> class TParserTraits = RenderScriptParserTraits >
-class RenderScriptParser {
+// TODO
+// This logicparser is general already, it takes a couple of models and makes them parsing from the root node,
+// Make this parser a general base of all parsers (scene parser!)
+
+template< typename TDataStorage,
+          template<typename P, typename C> class TParserTraits = LogicParserTraits,
+          typename TDerived = void>
+class LogicParser {
 public:
 
-    using ParserForModulesType = RenderScriptParser;
-    using ParserTraits = TParserTraits<ParserForModulesType, TCollection>;
-    DEFINE_RENDERSCRIPTPARSER_TYPE_TRAITS(ParserTraits);
+    using ParserTraits = TParserTraits<LogicParser, TDataStorage>;
+    DEFINE_LOGICPARSER_TYPE_TRAITS(ParserTraits);
 private:
 
     boost::filesystem::path m_currentParseFilePath;
@@ -44,21 +43,42 @@ private:
     LogType * m_pLog;
 
     /** Modules */
-    std::unique_ptr< MaterialsModuleType >       m_pMaterialsModule;
-    std::unique_ptr< ScriptGenModuleType >       m_pScriptGenModule;
+    typename ParserTraits::TupleModules m_modules;
+
+    struct VisitorParse{
+        VisitorParse(XMLNodeType & node): n(node) {}
+        template<typename M>
+        void operator()(M & module){
+            if(module){
+                module->parse(n);
+            }else{
+                WARNINGMSG(false, "No module:"  <<  demangle::type(module) << " (pointer = nullptr)" << std::endl)
+            }
+        }
+        XMLNodeType & n;
+    };
+    struct VisitorCleanUp{
+        template<typename M>
+        void operator()(M & module){
+            if(module){
+                module->cleanUp();
+            }else{
+                WARNINGMSG(false,"No module:"  <<  demangle::type(module) << " (pointer = nullptr)  " << std::endl)
+            }
+        }
+    };
 
 public:
 
     /**
     * Constructor takes a module function which constructs all modules.
-    * If a xmlDoc pointer is given, this document is taken
     */
     template<typename ModuleGeneratorType>
-    RenderScriptParser(ModuleGeneratorType & moduleGen, Logging::Log * log) {
+    LogicParser(ModuleGeneratorType & moduleGen, Logging::Log * log) {
         m_pLog = log;
         ASSERTMSG(m_pLog, "Log pointer is zero!");
         // Get all Modules from the Generator
-        std::tie(m_pMaterialsModule, m_pScriptGenModule) = moduleGen.template createParserModules<ParserForModulesType>( static_cast<ParserForModulesType*>(this));
+        m_modules = moduleGen.template createParserModules<ParserType>( this );
     }
 
 
@@ -67,10 +87,8 @@ public:
     }
 
     void cleanUp() {
-        // Delegate all cleanUp stuff to the modules!
-        if(m_pMaterialsModule) {
-            m_pMaterialsModule->cleanUp();
-        }
+        VisitorCleanUp up;
+        TupleVisit::visit(up,m_modules);
     }
 
     boost::filesystem::path getParsedSceneFile() {
@@ -100,7 +118,7 @@ public:
         }
         pugi::xml_parse_result result = m_xmlDoc->load_file(file.c_str());
         if (result) {
-            LOGMCLEVEL1(m_pLog, "---> Loaded XML [" << file.string() << "] without errors!" << std::endl;);
+            LOGLPLEVEL1(m_pLog, "---> Loaded XML [" << file.string() << "] without errors!" << std::endl;);
         } else {
             ERRORMSG( "Loaded XML [" << file.string() << "] with errors!" << std::endl
                             << "Error description: " << result.description() << std::endl
@@ -121,10 +139,10 @@ private:
 
     void parseSceneIntern(const boost::filesystem::path & file) {
 
-        LOGMCLEVEL1( m_pLog, "---> RenderScriptParser parsing: ========================================================" <<
+        LOGLPLEVEL1( m_pLog, "---> LogicParser parsing: ========================================================" <<
                      std::endl << "\t file: " << file <<std::endl;);
 
-        LOGMCLEVEL1( m_pLog, "---> Input file: "  << file.string() <<std::endl; );
+        LOGLPLEVEL1( m_pLog, "---> Input file: "  << file.string() <<std::endl; );
 
 
         if(!boost::filesystem::exists(file)) {
@@ -140,34 +158,27 @@ private:
         }
 
         // Load the file if necessary
-        if(file != m_currentParseFilePath) {
+        if(file != m_currentParseFilePath){
             loadFile(file);
         }
 
         try {
 
-            LOGMCLEVEL1(m_pLog, "---> Try to parse the file ..."<<std::endl;);
+            LOGLPLEVEL1(m_pLog, "---> Try to parse the file ..."<<std::endl;);
 
-            GET_XMLCHILDNODE_CHECK( m_xmlRootNode, "Renderer" , (*m_xmlDoc) );
+            m_xmlRootNode = m_xmlDoc->first_child();
+            CHECK_XMLNODE(m_xmlRootNode,"root: first child")
 
-
-            XMLNodeType node = m_xmlRootNode.child("Materials");
-            if(node && m_pMaterialsModule) {
-                m_pMaterialsModule->parse(node);
-            }
-
-            node = m_xmlRootNode.child("Logic");
-            if(node && m_pScriptGenModule) {
-                m_pScriptGenModule->parse(node, m_pMaterialsModule->getMaterialMap() );
-            }
+            VisitorParse v(m_xmlRootNode);
+            TupleVisit::visit(v,m_modules);
 
 
         } catch(Exception& ex) {
-            LOGMCLEVEL1(m_pLog,  "Scene XML error: "  << ex.what() <<std::endl);
+            LOGLPLEVEL1(m_pLog,  "Scene XML error: "  << ex.what() <<std::endl);
             ERRORMSG( "Scene XML error: "  << ex.what() );
         }
 
-        LOGMCLEVEL1( m_pLog, "---> RenderScriptParser finshed =========================================================" << std::endl;);
+        LOGLPLEVEL1( m_pLog, "---> LogicParser finshed =========================================================" << std::endl;);
 
     }
 
@@ -175,4 +186,5 @@ private:
 
 
 #endif
+
 

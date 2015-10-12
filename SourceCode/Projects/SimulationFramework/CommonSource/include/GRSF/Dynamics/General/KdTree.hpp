@@ -8,7 +8,7 @@
 #include <boost/serialization/set.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include "GRSF/Dynamics/General/SerializationHelpersEigen.hpp"
+#include "GRSF/Common/SerializationHelpersEigen.hpp"
 
 #include "ApproxMVBB/KdTree.hpp"
 

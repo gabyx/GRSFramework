@@ -27,8 +27,10 @@
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/StaticAssert.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/Common/SfinaeMacros.hpp"
 
 #include "GRSF/Common/FastStringConversion.hpp"
+#include "GRSF/Common/SfinaeMacros.hpp"
 
 namespace Utilities {
 
@@ -55,40 +57,42 @@ inline bool operator == (const char* a, const std::string & b) {
 
 // Prototypes
 struct StdTypeConverter {};
-template<typename T, typename TypeConverter = StdTypeConverter> bool stringToType(T & t, const std::string& s);
 
+template<typename T,typename TypeConverter = StdTypeConverter>
+bool stringToType(T & t, const std::string& s);
 
 
 namespace details {
 namespace stringToTypeImpl {
-
-
-/**
-* This is the standard type converter function
-* @brief This functions casts a string into the template specific type.
-* @param t The ouput where the casted string is put into.
-* @param s The string to cast.
-* @return true if conversion worked, false if not.
-*/
-template<typename T,typename TypeConverter>
-inline
-typename std::enable_if< std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
-convert(T& t, const std::string& s) {
-    //this is a huge times faster then the below stringstream stuff;
-    return StringConversion::toType(t,s);
-    //std::istringstream iss(s);
-    //return !(iss >> t).fail();
-}
-/**
-* This is the custom type converter function, which takes the TypeConverter to convert the string into the type
-*/
-template<typename T,typename TypeConverter>
-inline
-typename std::enable_if< !std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
-convert(T& t, const std::string& s) {
+    /**
+    * This is the standard type converter function
+    * @brief This functions casts a string into the template specific type.
+    * @param t The ouput where the casted string is put into.
+    * @param s The string to cast.
+    * @return true if conversion worked, false if not.
+    */
+    template<typename T,typename TypeConverter>
+    inline
+    typename std::enable_if< std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
+    convert(T& t, const std::string& s) {
+        //this is a huge times faster then the below stringstream stuff;
+        return StringConversion::toType(t,s);
+        //std::istringstream iss(s);
+        //return !(iss >> t).fail();
+    }
+    /**
+    * This is the custom type converter function, which takes the TypeConverter to convert the string into the type
+    */
+    template<typename T,typename TypeConverter>
+    inline
+    typename std::enable_if< !std::is_same<TypeConverter,StdTypeConverter>::value, bool>::type
+    convert(T& t, const std::string& s) {
     return TypeConverter::convert(t,s);
 }
 };
+
+
+
 
 
 /**
@@ -195,7 +199,7 @@ inline bool stringToTypeDispatch( T & t, const std::string & s) {
 template <typename TypeConverter, typename T, typename Comp, typename Alloc>
 inline bool stringToTypeDispatch( std::set<T,Comp,Alloc> & m,
                                   const std::string & s) {
-    std::function<void(unsigned int,T)> func = [&](unsigned int i, T n) {
+    auto func = [&](unsigned int i, const T & n) {
         m.insert(n);
     };
     return stringToTypeFunctorImpl< -1, T, decltype(func),TypeConverter >(func,s);
@@ -204,7 +208,7 @@ inline bool stringToTypeDispatch( std::set<T,Comp,Alloc> & m,
 template <typename TypeConverter, typename T, typename Alloc>
 inline bool stringToTypeDispatch( std::vector<T,Alloc> & v,
                                   const std::string & s) {
-    auto func = [&](unsigned int i, T n) {
+    auto func = [&](unsigned int i, const T & n) {
         v.push_back(n);
     };
     return stringToTypeFunctorImpl<-1, T, decltype(func), TypeConverter >(func,s);
@@ -214,10 +218,18 @@ inline bool stringToTypeDispatch( std::vector<T,Alloc> & v,
 template <typename TypeConverter, typename T>
 inline bool stringToTypeDispatch( std::pair<T,T> & v,
                                   const std::string & s) {
-    auto func = [&](unsigned int i, T n) {
+    auto func = [&](unsigned int i, const T & n) {
         i==0? v.first = n: v.second = n;
     };
     return stringToTypeFunctorImpl<2, T, decltype(func), TypeConverter >(func,s);
+}
+
+/** Custom dummy dispatch std::string */
+template <typename TypeConverter>
+inline bool stringToTypeDispatch( std::string & v,
+                                  const std::string & s) {
+    v = s; // just assign
+    return true;
 }
 
 };
@@ -261,35 +273,57 @@ struct CommaSeperatedPairBinShift {
     }
 };
 
+
+
+/** Main function: string -> T (do dispatch) */
 template<typename T, typename TypeConverter>
 inline bool stringToType(T & t, const std::string& s) {
     return details::stringToTypeDispatch<TypeConverter>(t,s);
 }
+/** ===============================================*/
+
 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector2.
 */
-template <typename TVector2>
-inline bool stringToVector2( TVector2 & v, const std::string & s) {
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TVector2,2);
+
+template <typename TVector,
+          SFINAE_ENABLE_IF(TVector::SizeAtCompileTime==1)
+          >
+inline bool stringToVector( TVector & v, const std::string & s) {
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(TVector)
+    return details::stringToVectorImpl<1>(v,s);
+}
+
+
+template <typename TVector,
+          SFINAE_ENABLE_IF(TVector::SizeAtCompileTime==2)
+          >
+inline bool stringToVector( TVector & v, const std::string & s) {
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(TVector)
     return details::stringToVectorImpl<2>(v,s);
 }
 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector3.
 */
-template <typename TVector3>
-inline bool stringToVector3( TVector3 & v, const std::string & s) {
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TVector3,3);
+template <typename TVector,
+          SFINAE_ENABLE_IF(TVector::SizeAtCompileTime==3)
+          >
+inline bool
+stringToVector( TVector & v, const std::string & s) {
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(TVector)
     return details::stringToVectorImpl<3>(v,s);
 }
 
 /**
 * @brief Helper to convert a string with three whitespace-seperated numbers into a Vector4.
 */
-template <typename TVector4>
-inline bool stringToVector4( TVector4 & v, const std::string & s) {
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TVector4,4);
+template <typename TVector,
+          SFINAE_ENABLE_IF(TVector::SizeAtCompileTime==4)
+          >
+inline bool stringToVector( TVector & v, const std::string & s) {
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(TVector)
     return details::stringToVectorImpl<4>(v,s);
 }
 
@@ -334,7 +368,7 @@ inline PREC genRandomValues(PREC value, Functor & f, Integral count) {
 * Generates count random vectors and returns the last one.
 */
 template<typename PREC, typename Generator, typename Distribution, typename Integral>
-inline typename MyMatrix<PREC>::Vector3 genRandomVec(typename MyMatrix<PREC>::Vector3 value, Generator & g, Distribution & d, Integral count) {
+inline typename MyMatrix::Vector3<PREC> genRandomVec(typename MyMatrix::Vector3<PREC> value, Generator & g, Distribution & d, Integral count) {
     STATIC_ASSERT(std::is_unsigned<Integral>::value)
     for(unsigned int i= 0; i<count; ++i) {
         value(0) = d(g);
@@ -366,8 +400,8 @@ void printVectorNoCopy(Stream & ostr, const Iterator & itBegin, const Iterator &
 * @brief Converts a std::vector with column vectors from Eigen into a Eigen Matrix.
 */
 template <class PREC, std::size_t M, std::size_t N>
-void vec2Mat(const typename MyMatrix<PREC>::template StdVecAligned<Eigen::Matrix<PREC,M,1> > &vec,
-             Eigen::Matrix<PREC,M,N> &A) {
+void vec2Mat(const typename MyContainers::StdVecAligned< MyMatrix::VectorStat<PREC,M> > &vec,
+             MyMatrix::MatrixStatStat<PREC,M,N> &A) {
     for(int i=0; i<vec.size(); i++) {
         A.col(i) = vec[i];
     }
@@ -377,7 +411,7 @@ void vec2Mat(const typename MyMatrix<PREC>::template StdVecAligned<Eigen::Matrix
 * @brief Converts a std::vector with scalar values in it into a Eigen Vector.
 */
 template <class PREC, std::size_t M>
-void vec2Vec(const std::vector<PREC> &vec, Eigen::Matrix<PREC,M,1> &V) {
+void vec2Vec(const std::vector<PREC> &vec, MyMatrix::VectorStat<PREC,M> &V) {
     for(int i=0; i<vec.size(); i++) {
         V[i] = vec[i];
     }

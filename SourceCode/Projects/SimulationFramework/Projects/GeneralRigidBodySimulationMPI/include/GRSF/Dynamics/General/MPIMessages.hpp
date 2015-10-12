@@ -22,7 +22,7 @@
 #include "GRSF/Common/SfinaeMacros.hpp"
 
 #include "GRSF/Dynamics/General/MPIMessageTag.hpp"
-#include "GRSF/Dynamics/General/SerializationHelpersEigen.hpp"
+#include "GRSF/Common/SerializationHelpersEigen.hpp"
 #include "GRSF/Common/SerializationHelpersTuple.hpp"
 #include "GRSF/Dynamics/Collision/SerializationHelpersGeometries.hpp"
 

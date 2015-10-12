@@ -1,5 +1,5 @@
-#ifndef RenderScriptParserGenerators_hpp
-#define RenderScriptParserGenerators_hpp
+#ifndef GRSF_General_RenderLogicParserGenerators_hpp
+#define GRSF_General_RenderLogicParserGenerators_hpp
 
 
 #include "GRSF/Common/TypeDefs.hpp"
@@ -14,7 +14,7 @@ class RenderData;
 
 #include "GRSF/Systems/SceneParserModules.hpp"
 
-namespace RenderScriptParserGenerators {
+namespace RenderLogicParserGenerators {
     struct SceneParserGen {
         SceneParserGen( RenderData * p): m_p(p) {}
         RenderData * m_p;
@@ -76,26 +76,27 @@ namespace RenderScriptParserGenerators {
 
 class RenderExecutionGraph;
 
-namespace RenderScriptParserGenerators {
-    struct ScriptParserGen {
-        ScriptParserGen( RenderData * p, RenderExecutionGraph * g): m_p(p) , m_g(g){}
+namespace RenderLogicParserGenerators {
+
+    struct LogicParserGen {
+
+        LogicParserGen( RenderData * p, RenderExecutionGraph * g): m_p(p) , m_g(g){}
+
         RenderData * m_p;
         RenderExecutionGraph * m_g;
 
         template<typename TParser>
-        std::tuple< std::unique_ptr<typename TParser::MaterialsModuleType> ,
-            std::unique_ptr<typename TParser::ScriptGenModuleType>
-            >
+        typename TParser::ParserTraits::TupleModules
         createParserModules(TParser * p) {
 
-            using MaterialsModuleType = typename TParser::MaterialsModuleType;
-            using ScriptGenModuleType    = typename TParser::ScriptGenModuleType;
+            using ParserTraits = typename TParser::ParserTraits;
+            using MaterialsModuleType = typename ParserTraits::template getModuleType<0>;
+            using LogicModuleType     = typename ParserTraits::template getModuleType<1>;
 
-            auto mat = std::unique_ptr<MaterialsModuleType >(new MaterialsModuleType(p, &m_p->m_materials));
+            auto mat   = std::unique_ptr<MaterialsModuleType >(new MaterialsModuleType(p, &m_p->m_materials));
+            auto logic = std::unique_ptr<LogicModuleType >    (new LogicModuleType(p, m_g, &m_p->m_geometryMap, &m_p->m_materials));
 
-            auto matGen = std::unique_ptr<ScriptGenModuleType >(new ScriptGenModuleType(p, m_g, &m_p->m_geometryMap));
-
-            return std::make_tuple(std::move(mat),std::move(matGen));
+            return std::make_tuple(std::move(mat),std::move(logic));
         };
 
     };

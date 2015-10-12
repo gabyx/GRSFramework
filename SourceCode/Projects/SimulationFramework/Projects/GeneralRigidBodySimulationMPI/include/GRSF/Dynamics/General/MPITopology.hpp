@@ -94,7 +94,7 @@ public:
     void createProcessTopologyGrid(RankIdType masterRank,
                                    T&&... args
                                    /*const AABB3d & aabb,
-                                   const MyMatrix<unsigned int>::Array3 & dim,
+                                   const MyMatrix::Array3<unsigned int> & dim,
                                    bool aligned = true,
                                    const Matrix33 & A_IK = Matrix33::Identity()*/
                                    )

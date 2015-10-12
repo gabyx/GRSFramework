@@ -92,8 +92,8 @@ namespace MPILayer{
             PREC * buffOut = static_cast<PREC*>(inoutvec);
 
             for(int i=0; i<*len;++i){
-                typename MyMatrix<PREC>::MatrixMap<Vector3> o(buffOut);
-                o =  typename MyMatrix<PREC>::MatrixMap<Vector3>(buffIn).cwiseMin(o);
+                typename MyMatrix::MatrixMap<Vector3> o(buffOut);
+                o =  typename MyMatrix::MatrixMap<Vector3>(buffIn).cwiseMin(o);
 
                 buffIn+=3;
                 buffOut+=3;
@@ -107,8 +107,8 @@ namespace MPILayer{
 
 
             for(int i=0; i<*len;++i){
-                typename MyMatrix<PREC>::MatrixMap<Vector3> o(buffOut);
-                o =  typename MyMatrix<PREC>::MatrixMap<Vector3>(buffIn).cwiseMax(o);
+                typename MyMatrix::MatrixMap<Vector3> o(buffOut);
+                o =  typename MyMatrix::MatrixMap<Vector3>(buffIn).cwiseMax(o);
 
                 buffIn+=3;
                 buffOut+=3;

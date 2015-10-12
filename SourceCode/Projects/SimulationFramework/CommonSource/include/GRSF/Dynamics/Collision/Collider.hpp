@@ -117,13 +117,13 @@ public:
     /**
     * Here aabb is in coordinates of frame K!
     */
-    bool checkOverlap(const RigidBodyType * pBody1, const AABB3d & aabb, const Matrix33 & A_IK) const {
+    bool checkOverlap(const RigidBodyType * pBody1, const AABB3d & aabb, const Matrix33 & A_KI) const {
 
         m_pBody = pBody1;
         //m_bOverlapTest = true;
         m_bOverlap = false;
         m_aabb = &aabb;
-        m_A_IK = &A_IK;
+        m_A_KI = &A_KI;
 
         m_pBody->m_geometry.apply_visitor(*this);
         return m_bOverlap;
@@ -132,7 +132,7 @@ public:
     // Dispatch
     void operator()(const SphereGeomPtrType  & sphereGeom1) const {
         // Transform the point of the body into frame K
-        Vector3 p = m_A_IK->transpose() * m_pBody->m_r_S;
+        Vector3 p = (*m_A_KI) * m_pBody->m_r_S;
         m_bOverlap = overlapSphere(p, sphereGeom1->m_radius, *m_aabb);
     }
 
@@ -145,7 +145,7 @@ public:
     }
 
 private:
-    mutable const Matrix33 * m_A_IK; ///< Transformation from frame K to frame I where the body coordinates are represented in
+    mutable const Matrix33 * m_A_KI; ///< Transformation from frame K to frame I where the body coordinates are represented in
 };
 
 
@@ -175,10 +175,10 @@ public:
 
     inline bool checkOverlapNode( const RigidBodyType * pBody,
                                   const NodeType * node,
-                                  const Matrix33 & A_IK) const
+                                  const Matrix33 & A_KI) const
     {
         // early rejection if aabb/oobb is not overlapped
-        return m_colliderOOBB.checkOverlap(pBody, node->aabb(), A_IK );
+        return m_colliderOOBB.checkOverlap(pBody, node->aabb(), A_KI );
     }
 
     inline bool checkOverlapNode(const RigidBodyType * pBody,
@@ -198,20 +198,20 @@ public:
     inline bool checkOverlap(ResultIdxSet & overlapLeafIndices,
                               const NodeType * startNode,
                               const RigidBodyType * pBody,
-                              const Matrix33 & A_IK) const
+                              const Matrix33 & A_KI) const
     {
 
         // early rejection if aabb/oobb is not overlapped
         // this test is crucial, if we dont do this
         // the body might lie outside of startNode, but we will
         // still get overlapping leafs below startNode because we only check left/right of splitAxis
-        if( ! checkOverlapNode(pBody,startNode,A_IK) ){
+        if( ! checkOverlapNode(pBody,startNode,A_KI) ){
             return false;  // no overlap at this nodes aabb
         }
 
         // m_nodeStack.clear() not necessary since it is always empty after this call
         m_nodeStack.emplace_back(startNode); // body overlaps this nodes aabb!
-        return checkOverlap_imp<false,true>(overlapLeafIndices,pBody,&A_IK);
+        return checkOverlap_imp<false,true>(overlapLeafIndices,pBody,&A_KI);
     }
 
     template<typename ResultIdxSet>
@@ -231,7 +231,7 @@ public:
     template<bool aligned, bool enableNonAddedLeaf = true, typename ResultIdxSet>
     inline bool checkOverlap_imp(ResultIdxSet & overlapLeafIndices,
                           const RigidBodyType * pBody,
-                          const Matrix33 * A_IK = nullptr
+                          const Matrix33 * A_KI = nullptr
                           ) const{
 
         const NodeType * currNode;
@@ -257,7 +257,7 @@ public:
                     m_isLR.m_body = const_cast<RigidBodyType *>(pBody);
                     m_isLR.m_splitAxis = currNode->getSplitAxis();
                     m_isLR.m_splitPos  = currNode->getSplitPosition();
-                    m_isLR.m_A_IK = const_cast<Matrix33*>(A_IK);
+                    m_isLR.m_A_KI = const_cast<Matrix33*>(A_KI);
                     res = pBody->m_geometry.apply_visitor(m_isLR);
                 }
 
@@ -304,11 +304,12 @@ public:
 
         inline char operator()(const SphereGeomPtrType  & sphereGeom) const{
 
-            // Transform the point of the body into frame K
-            // (m_A_IK->transpose() * m_body->m_r_S)(splitAxis) ;
+
             PREC posAxis;
             if(!aligned){
-                posAxis = m_A_IK->col(m_splitAxis).dot(m_body->m_r_S);
+                // Transform the point of the body into frame K
+                // (m_A_KI * m_body->m_r_S)(splitAxis) ;
+                posAxis = m_A_KI->row(m_splitAxis).dot(m_body->m_r_S);
             }else{
                 posAxis = m_body->m_r_S(m_splitAxis);
             }
@@ -335,7 +336,7 @@ public:
             return 0;
         }
 
-        mutable Matrix33 * m_A_IK;
+        mutable Matrix33 * m_A_KI;
         mutable RigidBodyType * m_body;
         mutable typename NodeType::SplitAxisType m_splitAxis;
         mutable PREC m_splitPos;
@@ -871,7 +872,7 @@ void ColliderBody<TCollisionSet>::collide(const SphereGeometry  * sphereGeom,
 //
 //    IceMaths::Sphere sphereTemp(IceMaths::Point(sphere->m_r_S(0),sphere->m_r_S(1),sphere->m_r_S(2)),sphereGeom->m_radius);
 //
-//    static MyMatrix<OPCODE_PRECISION>::Matrix44 H_IK; // worldMeshMatrix is H_IM= [A_IM | I_r_IM] if M is mesh in glocker Notation!
+//    static MyMatrix::Matrix44<OPCODE_PRECISION> H_IK; // worldMeshMatrix is H_IM= [A_IM | I_r_IM] if M is mesh in glocker Notation!
 //    setHomogeneousTransform<PREC,MeshPREC>(mesh->m_A_IK, mesh->m_r_S,H_IK);
 //
 //    // Take care! Direct X Compliant stupid fucking matrices!!

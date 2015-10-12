@@ -12,8 +12,9 @@ void LogicSocketBase::link(LogicSocketBase *fsock)
 	}
 
 	if(!(this->m_type == fsock->m_type)){
-        ERRORMSG( " Types of sockets do not coincide: " <<
-                  LogicTypes::getTypeName(this->m_type) << " and " << LogicTypes::getTypeName(fsock->m_type) );
+        ERRORMSG( " Types of sockets do not coincide: "
+                 << LogicTypes::getTypeName(this->m_type) << " and " << LogicTypes::getTypeName(fsock->m_type)
+                 << " for tool id: " << this->m_parent->m_id  << " and " << fsock->m_parent->m_id);
 	}
 
 	if(m_isInput)

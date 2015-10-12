@@ -47,7 +47,6 @@ namespace LogicNodes{
             //std::cout << GET_ISOCKET_REF_VALUE(Value) << std::endl;
             SET_OSOCKET_VALUE(Result,GET_ISOCKET_REF_VALUE(Value).norm());
         }
-        virtual void initialize(){}
     };
 };
 

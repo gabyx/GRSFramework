@@ -29,15 +29,12 @@ namespace LogicNodes{
 
         DECLARE_ISOCKET_TYPE(Enable, bool);
 
-
-        StopNode(unsigned int id) : LogicNode(id) {
+        StopNode(unsigned int id) : LogicNode(id){
             ADD_ISOCK(Enable,false);
         }
 
         virtual ~StopNode() {}
 
-        virtual void compute(){}
-        virtual void initialize(){}
     };
 };
 

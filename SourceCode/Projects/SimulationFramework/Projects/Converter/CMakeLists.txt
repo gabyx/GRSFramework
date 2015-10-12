@@ -2,6 +2,13 @@
 
 PROJECT(Converter)
 
+
+#Define H5 ===================================================================================================================================================
+find_package(HDF5 COMPONENTS CXX HL REQUIRED)
+# ===============================================================================================================================================================
+
+
+
 message(STATUS "==============================Project: ${PROJECT_NAME} ==================================")
 
 include(PrintListMacro)
@@ -11,10 +18,6 @@ include(PrintListMacro)
 SET(SOURCE_DIR "${PROJECT_SOURCE_DIR}/../GeneralRigidBodySimulation/")
 
 SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
-
-
-
-
 
 
 SET( APP_INC
@@ -36,33 +39,62 @@ SET(COMMON_INC
 
     ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/SimFileJoiner.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/SimFileResampler.hpp
-
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/RenderScriptConverter.hpp
     
     ${PROJECT_SOURCE_DIR}/include/GRSF/Logic/LogicTypes.hpp
-
     
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/SimFileConverter.hpp
+    
+    
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParserTraits.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParserTraitsMacro.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParserBaseTraits.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParserBaseTraitsMacro.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/LogicParserModules.hpp
+    
+    
+    # Gridder
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/GridderConverter.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/GridderData.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/GridderLogicParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/GridderLogicParserGenerators.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/GridderLogicParserTraits.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/GridderLogicParserTraitsMacro.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/GridExtractor.hpp
+
+    # Analyzer
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/AnalyzerConverter.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/SimFileExecutionGraph.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/SimFileExecutionGraphNodes.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/AnalyzerLogicParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/AnalyzerLogicParserGenerators.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/AnalyzerLogicParserTraits.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/AnalyzerLogicParserTraitsMacro.hpp
+    
+    #Render
+    ${PROJECT_SOURCE_DIR}/include/GRSF/Converters/RenderConverter.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderData.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParserGenerators.hpp
-    
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParser.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParserBaseTraits.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptParserModules.hpp
-    
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptGenerator.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderScriptGeneratorLogic.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RendermanGeometryWriter.hpp
-    
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderExecutionGraph.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderExecutionGraphNodes.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParser.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParserTraits.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParserTraitsMacro.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParserGenerators.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderLogicParserModules.hpp
 
-        
-    
+    ${PROJECT_SOURCE_DIR}/include/GRSF/General/RendermanGeometryWriter.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/General/RenderMaterial.hpp
 )
 SET(COMMON_SRC
     ${SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/RenderScriptConverter.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/GridderConverter.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/General/GridExtractor.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/RenderConverter.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/AnalyzerConverter.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderData.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderScriptGenerator.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderExecutionGraph.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/General/SimFileExecutionGraph.cpp
+
 )
 
 
@@ -117,6 +149,9 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 
 #include directories
 set(INCLUDE_DIRS
+    
+    ${HDF5_INCLUDE_DIRS}
+
     ${GRSF_DEP_INCLUDE_DIRS}
     
     ${PROJECT_BINARY_DIR}/include/
@@ -141,7 +176,7 @@ link_directories(${LINK_DIRS})
 #PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
-set(LINK_LIBS ${GRSF_DEP_LIBRARIES} )
+set(LINK_LIBS ${GRSF_DEP_LIBRARIES} ${HDF5_LIBRARIES})
 #PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
