@@ -55,22 +55,21 @@ namespace LogicNodes{
         }
 
         void compute() {
-            if( GET_ISOCKET_VALUE(File) != m_openedFile ){
-                m_openedFile = GET_ISOCKET_VALUE(File);
-                openFile(m_openedFile);
-            }
+            checkFileChange(GET_ISOCKET_VALUE(File));
+
             m_stream.str("");
             m_stream << GET_ISOCKET_VALUE(Value);
             m_root.append_child(m_childName.c_str()).append_child(nodePCData).set_value(m_stream.str().c_str());
         }
 
-        void openFile(const boost::filesystem::path & f){
+        void checkFileChange(const boost::filesystem::path & f){
             // file path has changed, close file and open new one
-            if(!m_openedFile.empty()){
+            if( !m_openedFile.empty() && f != m_openedFile){
                 m_xmlFile.save_file(m_openedFile.string().c_str());
+                m_openedFile = f;
             }
+            
             m_xmlFile.reset();
-
             m_root = m_xmlFile.append_child(m_rootName.c_str());
         }
 

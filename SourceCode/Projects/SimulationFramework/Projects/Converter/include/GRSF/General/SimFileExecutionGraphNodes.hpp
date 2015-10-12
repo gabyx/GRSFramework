@@ -69,7 +69,7 @@ namespace LogicNodes {
             SET_OSOCKET_VALUE(NBodies,nBodies);
             SET_OSOCKET_VALUE(NStates,nStates);
 
-            if(filePath.empty() || filePath.has_filename()){
+            if(filePath.empty() || !filePath.has_filename()){
                 filePath /= "SimFileOutput-f-" + simFile.filename().string();
             }
 
@@ -130,7 +130,7 @@ namespace LogicNodes {
             SET_OSOCKET_VALUE(Time,time);
             SET_OSOCKET_VALUE(StateNr,stateIdx);
 
-            if(filePath.empty() || filePath.has_filename()){
+            if(filePath.empty() || !filePath.has_filename()){
                 filePath /= "StateOutput-s-" + std::to_string(stateIdx);
             }
 

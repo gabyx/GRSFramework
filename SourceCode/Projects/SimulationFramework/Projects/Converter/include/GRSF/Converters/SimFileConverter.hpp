@@ -390,6 +390,8 @@ protected:
                                                                                      m_simFile.getNSimBodies(),
                                                                                      m_simFile.getNStates()) )
 
+        LOG(m_log, "---> Init sim info with: \n\toutputFile: " << perFileOutputFile << std::endl;)
+
 
         CPUTimer timer;
         timer.start();
