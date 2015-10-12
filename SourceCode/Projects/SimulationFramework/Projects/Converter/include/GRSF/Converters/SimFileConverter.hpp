@@ -40,11 +40,16 @@ public:
     using XMLAttributeType = pugi::xml_attribute;
 
     SimFileConverter(const std::vector<boost::filesystem::path> & inputFiles,
-                  boost::filesystem::path outputFile,
-                  boost::filesystem::path outputDir){
+                  boost::filesystem::path outputFile){
 
-        m_outputFile = outputFile;
-        m_outputDir  = m_outputDir;
+
+        if(outputFile.has_filename()){
+            m_outputFilename = outputFile.filename().string();
+        }else{
+            m_outputFilename = "Frame";
+        }
+        m_outputDir = outputFile.parent_path();
+
         m_inputFiles = inputFiles;
 
         auto log = outputFile.parent_path() / "LogicConverter.log";
@@ -76,6 +81,9 @@ public:
     template<typename TSettings = DefaultSettings, typename... TSimFileStepper >
     void convert( TSimFileStepper &&... simFileStepper)
     {
+
+        boost::filesystem::path perFileOutputFile;
+
         bool stop;
         LOG(m_log, "---> LogicConverter started:" <<std::endl;);
 
@@ -103,9 +111,9 @@ public:
 
                 for(auto n : node.children("File")){
 
-                    stateIndices.clear();
                     std::string uuid = n.attribute("uuid").value();
                     boost::filesystem::path path = n.attribute("simFile").value();
+                    perFileOutputFile = "";
 
                     if(path.empty()){
                         LOG(m_log,"---> No simFile path given, skip this file!" << std::endl;)
@@ -113,44 +121,61 @@ public:
                     }
 
                     // parse frame index list (assumed to be sorted! otherwise exception in convertFile)
-                    StateIdxType idx;
-                    unsigned int frameIdx;
-                    boost::filesystem::path outputFile;
-                    for(auto s : n.children("State")){
+                    stateIndices.clear();
 
-                        if( !Utilities::stringToType(idx, s.attribute("stateIdx").value() )  ) {
-                                ERRORMSG("---> String conversion to obtain state id failed!");
+                    bool fullFile = false;
+                    if(n.attribute("fullFile")){
+                        if( !Utilities::stringToType(fullFile, n.attribute("fullFile").value() )  ) {
+                            ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
                         }
-
-                        if( !Utilities::stringToType(frameIdx, s.attribute("frameIdx").value() )  ) {
-                                ERRORMSG("---> String conversion to obtain state id failed!");
-                        }
-
-                        outputFile = "";
+                        // Parse default outputFile,
                         auto att = s.attribute("outputFile");
                         if( att ) {
-                           outputFile = att.value();
+                           perFileOutputFile = att.value();
                         }
 
-                        // add to list
-                        stateIndices.push_back( StateIndex{idx,frameIdx,outputFile});
                     }
+                    // if not fullFile parse in all states
+                    if(!fullFile){
+                        StateIdxType idx;
+                        unsigned int frameIdx;
+                        boost::filesystem::path outputFile;
+                        for(auto s : n.children("State")){
 
-                    LOG(m_log,"---> Parsed " << stateIndices.size() << " state for file: " << path << "from XML: " << file.filename() << std::endl;)
+                            if( !Utilities::stringToType(idx, s.attribute("stateIdx").value() )  ) {
+                                    ERRORMSG("---> String conversion to obtain state id failed!");
+                            }
 
-                    if( stateIndices.size() > 0){
-                        convertFile<TSettings,TSimFileStepper...>(path,uuid,stateIndices,simFileStepper...);
+                            if( !Utilities::stringToType(frameIdx, s.attribute("frameIdx").value() )  ) {
+                                    ERRORMSG("---> String conversion to obtain state id failed!");
+                            }
+
+                            outputFile = "";
+                            auto att = s.attribute("outputFile");
+                            if( att ) {
+                               outputFile = att.value();
+                            }
+
+                            // add to list
+                            stateIndices.push_back( StateIndex{idx,frameIdx,outputFile});
+                        }
+                        LOG(m_log,"---> Parsed " << stateIndices.size() << " state of file: " << path << "from XML: " << file.filename() << std::endl;)
+                        if( stateIndices.size() > 0){
+                            convertFile<TSettings,TSimFileStepper...>(path,uuid,stateIndices,perFileOutputFile,simFileStepper...);
+                        }else{
+                            LOG(m_log,"---> No states to process..." << std::endl;)
+                        }
                     }else{
-                        LOG(m_log,"---> No states to process..." << std::endl;)
+                        LOG(m_log,"---> Take all states of file: " << path << "from XML: " << file.filename() << std::endl;)
+                        convertFile<TSettings,TSimFileStepper...>(path,uuid,{},perFileOutputFile,simFileStepper...);
                     }
-
-
 
                 }
 
             }else{
                 // try to convert sim file
-                convertFile<TSettings, TSimFileStepper...>(file, std::to_string(fileIdx) , {},  simFileStepper...);
+                LOG(m_log,"---> Take all states of file: " << file <<  std::endl;)
+                convertFile<TSettings, TSimFileStepper...>(file, std::to_string(fileIdx) , {}, perFileOutputFile, simFileStepper...);
             }
 
             ++fileIdx;
@@ -180,7 +205,7 @@ protected:
 
     Logging::Log * m_log;
 
-    boost::filesystem::path m_outputFile;
+    std::string m_outputFilename;
     boost::filesystem::path m_outputDir;
 
     std::vector<boost::filesystem::path> m_inputFiles;
@@ -348,7 +373,8 @@ protected:
     void convertFile(const boost::filesystem::path & f,
                      const std::string uuidString ,
                      const StateIndicesType & stateIndices, /* can be empty*/
-                     TSimFileStepper&&... simFileStepper
+                     const boost::filesystem::path perFileOutputFile,
+                     TSimFileStepper&&... simFileStepper,
                     )
     {
         bool stop = false;
@@ -406,27 +432,34 @@ protected:
             LOG(m_log, "---> Loaded state at t: " <<time << std::endl;)
 
             // set frame name and output dir
-            // if function argument is given take this
-            if(!m_outputDir.empty()){
+            // if function argument are given format them first ======================
+
+            // set output dir (if not for full file set default)
+            if(perFileOutputFile.empty()){
+                // default
                 outputDir  = m_outputDir;
-            }
-            // set output file name for this state,
-            if( m_outputFile.empty() && !stateIndices.empty() && !itStateIdx->m_outputFile.empty() ){
-                // we have a file path given and no function argument, take from state
-                if( !itStateIdx->m_outputFile.has_filename()){
-                    ERRORMSG(" State idx: " << itStateIdx->m_idx << " has no correct filename!")
+                outputName = m_outputFilename;
+            }else{
+                if(perFileOutputFile.has_filename()){
+                    outputName = perFileOutputFile.filename().string();
                 }
-                outputDir  /= itStateIdx->m_outputFile.parent_path();
-                outputName = itStateIdx->m_outputFile.filename().string();
+                outputDir = perFileOutputFile.parent_path();
+            }
+
+            // =======================================================================
+
+            // set output file name for this state (if specified) =====================================================
+            if( !stateIndices.empty() && !itStateIdx->m_outputFile.empty() ){
+                // we have a file path given and no function argument, take from state
+                if( itStateIdx->m_outputFile.has_filename()){
+                    outputName = itStateIdx->m_outputFile.filename().string();
+                }
+                outputDir  = itStateIdx->m_outputFile.parent_path();
             }else{
                 // format default file name otherwise (if there is no file path in xml or function argument is given)
-                std::string baseFilename =  m_outputFile.filename().string();
-                if( baseFilename.empty()){
-                    baseFilename = "Frame";
-                }
-                outputDir  /= m_outputFile.parent_path();
-                outputName = baseFilename +"-id-"+uuidString + "-s-" + std::to_string(m_stateCounter);
+                outputName = outputName +"-id-"+uuidString + "-s-" + std::to_string(m_stateCounter);
             }
+            // ==========================================================================================
 
             // set frame idx (if we have a list set it from the list, other wise default)
             unsigned int frameIdx = m_stateCounter;

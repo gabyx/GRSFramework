@@ -447,7 +447,6 @@ private:
 
     std::vector<boost::filesystem::path> m_inputFiles;
 
-    boost::filesystem::path m_outputDir;
     boost::filesystem::path m_outputFile;
 
      // RenderConverter
@@ -504,10 +503,6 @@ public:
 
             if(ops >> OptionPresent('o',"outputFile")){
                 ops >> Option('o',"outputFile",m_outputFile);
-            }
-
-            if(ops >> OptionPresent('l',"")){
-                ops >> Option('l',"outputDir",m_outputFile);
             }
 
         }
@@ -610,7 +605,7 @@ private:
 
     void printErrorNoArg(std::string arg) {
         printHelp();
-        ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
+        ERRORMSG( "Wrong options specified for argument: '" << arg <<"'")
     }
 
     void printHelp() {
@@ -634,17 +629,11 @@ private:
                   <<            "\t\t <path>: is the base directory for all media files (.obj, .mesh) \n"
                   <<            "\t\t which is used for relative file names in the scene file <SceneFilePath>. (no slash at the end)\n"
                   <<            "\t\t if not specified the media directory is './' .\n"
-
                   << " \t -o|--outputFile <path>  \n"
                   << " \t [Optional] \n"
-                  <<            "\t\t <path>: Specifies the ouput base file path used for each state.\n"
-                  <<            "\t\t For relative file paths , the --outputDir file paths is appended if given.\n"
-                  <<            "\t\t Example: -o dir1/dir2/outFrame is used to initialized the FrameData source node.\n"
-                  <<            "\t\t since it is not a absolute path, the --outputDir path is appenden if given!.\n"
-                  << " \t -l|--outputDir <path>  \n"
-                  << " \t [Optional] \n"
-                  <<            "\t\t <path>: Specifies the local output directory path which is added to the \n"
-                  <<            "\t\t --outputFile file path if it is relative. The default value is the execution directory. \n"
+                  <<            "\t\t <path>: Specifies the output base file path used for each state.\n"
+                  <<            "\t\t Example: -o dir1/dir2/outFrame -> [outputDir= 'dir1/dir2/', fileName = 'outFrame' ]
+                  <<            "\t\t Example: -o dir1/dir2/ -> [outputDir= 'dir1/dir2/', fileName = 'Frame' ].\n"
                   << " \t -h|--help \n"
                   <<            "\t\t Prints this help.\n";
     }
@@ -659,7 +648,6 @@ private:
 
     std::vector<boost::filesystem::path> m_inputFiles;
 
-    boost::filesystem::path m_outputDir;
     boost::filesystem::path m_outputFile;
 
     boost::filesystem::path m_sceneFile;
@@ -707,11 +695,6 @@ public:
             if(ops >> OptionPresent('o',"outputFile")){
                 ops >> Option('o',"outputFile",m_outputFile);
             }
-
-            if(ops >> OptionPresent('l',"")){
-                ops >> Option('l',"outputDir",m_outputFile);
-            }
-
         }
         catch(GetOpt::ParsingErrorEx & ex){
             printHelp();
