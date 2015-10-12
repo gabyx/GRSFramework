@@ -6,12 +6,10 @@
 #include "GRSF/General/RenderLogicParserGenerators.hpp"
 
 RenderConverter::RenderConverter(const std::vector<boost::filesystem::path> & inputFiles,
-                  boost::filesystem::path outputFile,
-                  boost::filesystem::path outputDir,
                   boost::filesystem::path sceneFile,
                   boost::filesystem::path logicFile,
                   Renderer renderer)
-    : Base(inputFiles,outputFile,outputDir)
+    : Base(inputFiles)
 {
     m_renderer = renderer;
     m_sceneFile = sceneFile;

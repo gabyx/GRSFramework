@@ -73,8 +73,8 @@ namespace LogicParserModules{
                 std::string type = tool.attribute("type").value();
                 if(type == "BodyDataInput") {
                     createToolBodyData(tool,id);
-                }else if(type == "FrameDataInput") {
-                    createToolFrameData(tool,id);
+                }else if(type == "StateDataInput") {
+                    createToolStateData(tool,id);
                 }else if(type == "SimFileInfo") {
                     createToolSimFileInfo(tool,id);
                 } else if(type == "SimpleFunction") {
@@ -574,11 +574,11 @@ namespace LogicParserModules{
 
 
 
-        void createToolFrameData(XMLNodeType & logicNode, unsigned int id) {
-            auto * node = new LogicNodes::FrameData(id);
+        void createToolStateData(XMLNodeType & logicNode, unsigned int id) {
+            auto * node = new LogicNodes::StateData(id);
             m_executionGraph->addNode(node,true,false);
             addNodeToGroup(logicNode,id,"Frame");
-            m_executionGraph->setFrameData(node);
+            m_executionGraph->setStateData(node);
         }
 
         void createToolBodyData(XMLNodeType & logicNode, unsigned int id) {

@@ -7,11 +7,9 @@
 #include "GRSF/General/GridExtractor.hpp"
 
 GridderConverter::GridderConverter(const std::vector<boost::filesystem::path> & inputFiles,
-              boost::filesystem::path outputFile,
-              boost::filesystem::path outputDir,
               boost::filesystem::path sceneFile,
               boost::filesystem::path logicFile)
-    : Base(inputFiles,outputFile,outputDir)
+    : Base(inputFiles)
 {
     m_sceneFile = sceneFile;
     m_logicFile = logicFile;

@@ -28,8 +28,6 @@ public:
     using ExecutionGraphType = SimFileExecutionGraph;
 
     AnalyzerConverter(const std::vector<boost::filesystem::path> & inputFiles,
-                  boost::filesystem::path outputFile,
-                  boost::filesystem::path outputDir,
                   boost::filesystem::path sceneFile,
                   boost::filesystem::path logicFile);
 

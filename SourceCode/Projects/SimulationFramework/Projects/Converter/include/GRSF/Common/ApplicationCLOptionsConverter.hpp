@@ -547,7 +547,6 @@ public:
         s <<std::endl;
         s << "\tScene File Arg: " << m_sceneFile <<std::endl;
         s << "\tOutput File Arg: " << m_outputFile <<std::endl;
-        s << "\tOutput Dir Arg: " << m_outputDir <<std::endl;
         s << "\tRenderer: ";
         if(m_renderer == Renderer::RENDERMAN){
             s << "renderman";
@@ -584,19 +583,11 @@ public:
         if(!boost::filesystem::exists(m_mediaDir)) {
             ERRORMSG( "Media directory " << m_mediaDir << " does not exist!" )
         }
-
-        if(!m_outputDir.empty()){
-            if(boost::filesystem::exists(m_outputDir)) {
-                printHelp();
-                ERRORMSG( "Output directory supplied as argument: " << m_outputDir << " does not exist!")
-            }
-        }
     }
 
     inline const std::vector<boost::filesystem::path> & getInputFiles(){ return m_inputFiles;}
     inline const boost::filesystem::path & getMediaDir(){ return m_mediaDir;}
     inline const boost::filesystem::path & getOutputFile(){ return m_outputFile;}
-    inline const boost::filesystem::path & getOutputDir(){ return m_outputDir;}
     inline const boost::filesystem::path & getConverterLogicFile(){ return m_converterLogicFile;}
     inline const boost::filesystem::path & getSceneFile(){ return m_sceneFile;}
     inline Renderer getRenderer(){ return m_renderer;}
@@ -632,7 +623,7 @@ private:
                   << " \t -o|--outputFile <path>  \n"
                   << " \t [Optional] \n"
                   <<            "\t\t <path>: Specifies the output base file path used for each state.\n"
-                  <<            "\t\t Example: -o dir1/dir2/outFrame -> [outputDir= 'dir1/dir2/', fileName = 'outFrame' ]
+                  <<            "\t\t Example: -o dir1/dir2/outFrame -> [outputDir= 'dir1/dir2/', fileName = 'outFrame' ]\n"
                   <<            "\t\t Example: -o dir1/dir2/ -> [outputDir= 'dir1/dir2/', fileName = 'Frame' ].\n"
                   << " \t -h|--help \n"
                   <<            "\t\t Prints this help.\n";
@@ -737,7 +728,6 @@ public:
         s <<std::endl;
         s << "\tScene File Arg: " << m_sceneFile <<std::endl;
         s << "\tOutput File Arg: " << m_outputFile <<std::endl;
-        s << "\tOutput Dir Arg: " << m_outputDir <<std::endl;
         s << "\tRenderer: ";
         s<<std::endl;
     }
@@ -768,19 +758,11 @@ public:
                 ERRORMSG( "Media directory " << m_mediaDir << " does not exist!" )
             }
         }
-
-        if(!m_outputDir.empty()){
-            if(boost::filesystem::exists(m_outputDir)) {
-                printHelp();
-                ERRORMSG( "Output directory supplied as argument: " << m_outputDir << " does not exist!")
-            }
-        }
     }
 
     inline const std::vector<boost::filesystem::path> & getInputFiles(){ return m_inputFiles;}
     inline const boost::filesystem::path & getMediaDir(){ return m_mediaDir;}
     inline const boost::filesystem::path & getOutputFile(){ return m_outputFile;}
-    inline const boost::filesystem::path & getOutputDir(){ return m_outputDir;}
     inline const boost::filesystem::path & getConverterLogicFile(){ return m_converterLogicFile;}
     inline const boost::filesystem::path & getSceneFile(){ return m_sceneFile;}
 
@@ -814,10 +796,11 @@ private:
                   <<            "\t\t For relative file paths , the --outputDir file paths is appended if given.\n"
                   <<            "\t\t Example: -o dir1/dir2/outFrame is used to initialized the FrameData source node.\n"
                   <<            "\t\t since it is not a absolute path, the --outputDir path is appenden if given!.\n"
-                  << " \t -l|--outputDir <path>  \n"
+                  << " \t -o|--outputFile <path>  \n"
                   << " \t [Optional] \n"
-                  <<            "\t\t <path>: Specifies the local output directory path which is added to the \n"
-                  <<            "\t\t --outputFile file path if it is relative. The default value is the execution directory. \n"
+                  <<            "\t\t <path>: Specifies the output base file path used for each state.\n"
+                  <<            "\t\t Example: -o dir1/dir2/outFrame -> [outputDir= 'dir1/dir2/', fileName = 'outFrame' ]\n"
+                  <<            "\t\t Example: -o dir1/dir2/ -> [outputDir= 'dir1/dir2/', fileName = 'Frame' ].\n"
                   << " \t -h|--help \n"
                   <<            "\t\t Prints this help.\n";
     }

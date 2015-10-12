@@ -408,8 +408,8 @@ namespace LogicNodes {
         virtual void writeFooter() = 0;
 
 
-        virtual void initState() = 0;
-        virtual void finalizeState() = 0;
+        virtual void initFrame() = 0;
+        virtual void finalizeFrame() = 0;
 
         virtual ~RenderScriptWriter(){};
         void compute() {ERRORMSG("Should not be evaluated!")};
@@ -485,7 +485,7 @@ namespace LogicNodes {
             m_s << GET_ISOCKET_REF_VALUE(BodiesEnd);
         }
 
-        void initState() {
+        void initFrame() {
 
             m_s.str("");
 
@@ -505,7 +505,7 @@ namespace LogicNodes {
             dumpStream();
         }
 
-        void finalizeState(){
+        void finalizeFrame(){
             // finish last frame
             if(isFileOpen()){
                writeBodiesEnd();

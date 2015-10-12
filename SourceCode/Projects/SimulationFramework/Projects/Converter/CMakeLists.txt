@@ -89,11 +89,11 @@ SET(COMMON_SRC
     ${SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/GridderConverter.cpp
     ${PROJECT_SOURCE_DIR}/src/GRSF/General/GridExtractor.cpp
-    #${PROJECT_SOURCE_DIR}/src/GRSF/Converters/RenderConverter.cpp
-    #${PROJECT_SOURCE_DIR}/src/GRSF/Converters/AnalyzerConverter.cpp
-    #${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderData.cpp
-    #${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderExecutionGraph.cpp
-    #${PROJECT_SOURCE_DIR}/src/GRSF/General/SimFileExecutionGraph.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/RenderConverter.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/Converters/AnalyzerConverter.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderData.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/General/RenderExecutionGraph.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/General/SimFileExecutionGraph.cpp
 
 )
 

@@ -24,8 +24,12 @@ namespace LogicNodes {
 
         struct Outputs {
             enum {
+                SimFilePath,
                 NBodies,
                 NStates,
+                OutputFolder,
+                OutputName,
+                OutputFilePath, /* the path: "Folder/Name" */
                 OUTPUTS_LAST
             };
         };
@@ -36,24 +40,49 @@ namespace LogicNodes {
             N_SOCKETS = N_INPUTS + N_OUTPUTS
         };
 
+        DECLARE_OSOCKET_TYPE(SimFilePath, boost::filesystem::path );
         DECLARE_OSOCKET_TYPE(NBodies, unsigned long int );
         DECLARE_OSOCKET_TYPE(NStates, unsigned long int );
 
+        DECLARE_OSOCKET_TYPE(OutputFolder, boost::filesystem::path );
+        DECLARE_OSOCKET_TYPE(OutputName, std::string );
+        DECLARE_OSOCKET_TYPE(OutputFilePath, boost::filesystem::path );
+
         SimFileInfo(unsigned int id) : LogicNode(id) {
+            ADD_OSOCK(SimFilePath,"");
             ADD_OSOCK(NBodies,0);
             ADD_OSOCK(NStates,0);
+            ADD_OSOCK(OutputFolder,"./"); /* Some folder used for output stuff */
+            ADD_OSOCK(OutputName,"SimFileOutput");/* Some name used for output stuff*/
+            ADD_OSOCK(OutputFilePath,"./SimFileOutput");
         }
 
-        void setOutput(unsigned long int nBodies, unsigned long int nStates){
+        void setOutput(boost::filesystem::path simFile,
+                       boost::filesystem::path filePath,
+                       unsigned long int nBodies, unsigned long int nStates
+                       )
+        {
+            if(!filePath.has_filename()){
+                filePath /= "SimFileInfoNode-Output";
+            }
+            SET_OSOCKET_VALUE(SimFilePath,simFile);
             SET_OSOCKET_VALUE(NBodies,nBodies);
             SET_OSOCKET_VALUE(NStates,nStates);
+
+            if(filePath.empty() || filePath.has_filename()){
+                filePath /= "SimFileOutput-f-" + simFile.filename().string();
+            }
+
+            SET_OSOCKET_VALUE(OutputFolder,filePath.parent_path());
+            SET_OSOCKET_VALUE(OutputName,filePath.filename().string());
+            SET_OSOCKET_VALUE(OutputFilePath,filePath);
         }
 
         ~SimFileInfo(){}
     };
 
 
-    class FrameData: public LogicNode  {
+    class StateData: public LogicNode  {
     public:
 
         struct Inputs {
@@ -65,9 +94,10 @@ namespace LogicNodes {
         struct Outputs {
             enum {
                 Time,
-                FrameNr,
-                Folder,
-                Name,
+                StateNr,
+                OutputFolder,
+                OutputName,
+                OutputFilePath, /* the path: "Folder/Name" */
                 OUTPUTS_LAST
             };
         };
@@ -79,25 +109,37 @@ namespace LogicNodes {
         };
 
         DECLARE_OSOCKET_TYPE(Time, double );
-        DECLARE_OSOCKET_TYPE(FrameNr, unsigned int );
-        DECLARE_OSOCKET_TYPE(Folder, boost::filesystem::path );
-        DECLARE_OSOCKET_TYPE(Name, std::string );
+        DECLARE_OSOCKET_TYPE(StateNr, unsigned int );
+        DECLARE_OSOCKET_TYPE(OutputFolder, boost::filesystem::path );
+        DECLARE_OSOCKET_TYPE(OutputName, std::string );
+        DECLARE_OSOCKET_TYPE(OutputFilePath, boost::filesystem::path );
 
-        FrameData(unsigned int id) : LogicNode(id) {
+        StateData(unsigned int id) : LogicNode(id) {
             ADD_OSOCK(Time,0.0);
-            ADD_OSOCK(FrameNr,0);
-            ADD_OSOCK(Folder,"./");
-            ADD_OSOCK(Name,"Frame");
+            ADD_OSOCK(StateNr,0);
+            ADD_OSOCK(OutputFolder,"./");
+            ADD_OSOCK(OutputName,"StateOutput-s-0");
+            ADD_OSOCK(OutputFilePath,"./StateOutput-s-0");
         }
 
-        void setOutput(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr){
-            SET_OSOCKET_VALUE(Folder,folder);
-            SET_OSOCKET_VALUE(Name,filename);
+        void setOutput(boost::filesystem::path filePath,
+                       double time, unsigned int stateIdx
+                       )
+        {
+
             SET_OSOCKET_VALUE(Time,time);
-            SET_OSOCKET_VALUE(FrameNr,frameNr);
+            SET_OSOCKET_VALUE(StateNr,stateIdx);
+
+            if(filePath.empty() || filePath.has_filename()){
+                filePath /= "StateOutput-s-" + std::to_string(stateIdx);
+            }
+
+            SET_OSOCKET_VALUE(OutputFolder,filePath.parent_path());
+            SET_OSOCKET_VALUE(OutputName,filePath.filename().string());
+            SET_OSOCKET_VALUE(OutputFilePath,filePath);
         }
 
-        ~FrameData(){}
+        ~StateData(){}
     };
 
 

@@ -39,20 +39,11 @@ public:
     using XMLNodeItType = pugi::xml_node_iterator;
     using XMLAttributeType = pugi::xml_attribute;
 
-    SimFileConverter(const std::vector<boost::filesystem::path> & inputFiles,
-                  boost::filesystem::path outputFile){
-
-
-        if(outputFile.has_filename()){
-            m_outputFilename = outputFile.filename().string();
-        }else{
-            m_outputFilename = "Frame";
-        }
-        m_outputDir = outputFile.parent_path();
+    SimFileConverter(const std::vector<boost::filesystem::path> & inputFiles){
 
         m_inputFiles = inputFiles;
 
-        auto log = outputFile.parent_path() / "LogicConverter.log";
+        auto log = "LogicConverter.log";
         m_log = Logging::LogManager::getSingleton().createLog("LogicConverter",true,true,log);
 
     }
@@ -113,28 +104,32 @@ public:
 
                     std::string uuid = n.attribute("uuid").value();
                     boost::filesystem::path path = n.attribute("simFile").value();
-                    perFileOutputFile = "";
+
 
                     if(path.empty()){
                         LOG(m_log,"---> No simFile path given, skip this file!" << std::endl;)
                         continue;
                     }
 
-                    // parse frame index list (assumed to be sorted! otherwise exception in convertFile)
-                    stateIndices.clear();
 
                     bool fullFile = false;
-                    if(n.attribute("fullFile")){
+                    auto att = n.attribute("fullFile");
+                    if(att){
                         if( !Utilities::stringToType(fullFile, n.attribute("fullFile").value() )  ) {
                             ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
                         }
-                        // Parse default outputFile,
-                        auto att = s.attribute("outputFile");
-                        if( att ) {
-                           perFileOutputFile = att.value();
-                        }
-
                     }
+
+                    // parse default outputFile,
+                    perFileOutputFile = "";
+                    att = n.attribute("outputFile");
+                    if( att ) {
+                       perFileOutputFile = att.value();
+                    }
+
+                    // parse frame index list (assumed to be sorted! otherwise exception in convertFile)
+                    stateIndices.clear();
+
                     // if not fullFile parse in all states
                     if(!fullFile){
                         StateIdxType idx;
@@ -204,9 +199,6 @@ protected:
     MultiBodySimFile m_simFile;
 
     Logging::Log * m_log;
-
-    std::string m_outputFilename;
-    boost::filesystem::path m_outputDir;
 
     std::vector<boost::filesystem::path> m_inputFiles;
 
@@ -374,8 +366,7 @@ protected:
                      const std::string uuidString ,
                      const StateIndicesType & stateIndices, /* can be empty*/
                      const boost::filesystem::path perFileOutputFile,
-                     TSimFileStepper&&... simFileStepper,
-                    )
+                     TSimFileStepper&&... simFileStepper)
     {
         bool stop = false;
         LOG(m_log, "---> Converting file:" << f << std::endl;);
@@ -393,7 +384,11 @@ protected:
         }
 
         // If we have a sim file info node, set the output
-        EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::initSimInfo(simFileStepper, m_simFile.getNSimBodies(),m_simFile.getNStates()) )
+        EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::initSimInfo(simFileStepper,
+                                                                                     f,
+                                                                                     perFileOutputFile,
+                                                                                     m_simFile.getNSimBodies(),
+                                                                                     m_simFile.getNStates()) )
 
 
         CPUTimer timer;
@@ -413,8 +408,7 @@ protected:
 
         while(m_simFile.isGood() && !m_abort){
 
-            std::string outputName;
-            boost::filesystem::path outputDir = "./";
+            boost::filesystem::path outputFile = "";
 
             // produce output for this state
 
@@ -432,32 +426,12 @@ protected:
             LOG(m_log, "---> Loaded state at t: " <<time << std::endl;)
 
             // set frame name and output dir
-            // if function argument are given format them first ======================
-
-            // set output dir (if not for full file set default)
-            if(perFileOutputFile.empty()){
-                // default
-                outputDir  = m_outputDir;
-                outputName = m_outputFilename;
-            }else{
-                if(perFileOutputFile.has_filename()){
-                    outputName = perFileOutputFile.filename().string();
-                }
-                outputDir = perFileOutputFile.parent_path();
-            }
-
             // =======================================================================
 
             // set output file name for this state (if specified) =====================================================
             if( !stateIndices.empty() && !itStateIdx->m_outputFile.empty() ){
-                // we have a file path given and no function argument, take from state
-                if( itStateIdx->m_outputFile.has_filename()){
-                    outputName = itStateIdx->m_outputFile.filename().string();
-                }
-                outputDir  = itStateIdx->m_outputFile.parent_path();
-            }else{
-                // format default file name otherwise (if there is no file path in xml or function argument is given)
-                outputName = outputName +"-id-"+uuidString + "-s-" + std::to_string(m_stateCounter);
+                // we have a file path given for this state, take this
+                outputFile  = itStateIdx->m_outputFile;
             }
             // ==========================================================================================
 
@@ -467,11 +441,10 @@ protected:
                 frameIdx = itStateIdx->m_frameIdx;
             }
 
-            LOG(m_log, "---> Init frame with: \n\toutputDir: " << outputDir
-                << "\n\tframeName: " << outputName << "\n\tframeIdx: " << frameIdx << "\n\ttime: " << time << std::endl;)
+            LOG(m_log, "---> Init frame with: \n\toutputFile: " << outputFile << "\n\tframeIdx: " << frameIdx << "\n\ttime: " << time << std::endl;)
 
             start = timer.elapsedMilliSec();
-            EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::initState(simFileStepper,outputDir, outputName , time, frameIdx ) )
+            EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::initState(simFileStepper,outputFile, time, frameIdx ) )
             avgInitFrameTime += timer.elapsedMilliSec() - start;
 
 

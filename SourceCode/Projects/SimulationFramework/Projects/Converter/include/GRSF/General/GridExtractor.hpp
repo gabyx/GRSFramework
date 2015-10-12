@@ -29,8 +29,11 @@ public:
     ~GridExtractor();
 
   /** provide function for SimFileConverter ==================================*/
-    void initSimInfo(std::size_t nBodies,std::size_t nStates);
-    void initState(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
+    void initSimInfo(boost::filesystem::path simFile,
+                     boost::filesystem::path filePath,
+                     std::size_t nBodies,std::size_t nStates);
+
+    void initState(boost::filesystem::path filePath, double time, unsigned int frameNr);
 
     template<typename StateContainer>
     void addState(StateContainer & states);
@@ -109,8 +112,6 @@ private:
 
     std::size_t m_nBodies;
     std::size_t m_nStates;
-    boost::filesystem::path m_folder;
-    std::string m_filename;
     double m_time;
     unsigned int m_frameNr;
 

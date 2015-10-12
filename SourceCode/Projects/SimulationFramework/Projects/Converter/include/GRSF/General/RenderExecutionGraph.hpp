@@ -21,7 +21,7 @@ class RenderExecutionGraph : public SimFileExecutionGraph
         RenderExecutionGraph(){};
 
         void setup();
-        void initState(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
+        void initState(boost::filesystem::path outputFilePath, double time, unsigned int frameNr);
         void finalizeState();
         void addBodyState(RigidBodyStateAdd * s);
 

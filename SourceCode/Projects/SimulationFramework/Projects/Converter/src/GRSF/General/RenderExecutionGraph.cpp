@@ -25,12 +25,11 @@ void RenderExecutionGraph::setup() {
 
 }
 
-void RenderExecutionGraph::initFrame(boost::filesystem::path folder,
-                                      std::string filename,
+void RenderExecutionGraph::initState(boost::filesystem::path outputFilePath,
                                       double time,
                                       unsigned int frameNr)
 {
-     Base::initFrame(folder,filename,time,frameNr);
+     Base::initState(outputFilePath,time,frameNr);
 
      // TODO RendermanWriter node should be LogicNodeGroup (which consist of several LogicNodes by composition)
      // one for InitNode, AddBodyStateNode, FinalizeFrameNode,  which then can be connected to
@@ -47,9 +46,9 @@ void RenderExecutionGraph::initFrame(boost::filesystem::path folder,
      }
 }
 
-void RenderExecutionGraph::finalizeFrame(){
+void RenderExecutionGraph::finalizeState(){
 
-     Base::finalizeFrame();
+     Base::finalizeState();
 
      // Call all render script writters
      for(auto & n : m_scriptWritterNodes){

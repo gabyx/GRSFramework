@@ -26,38 +26,36 @@ void SimFileExecutionGraph::setup() {
     if( !m_bodyDataNode  ) {
         ERRORMSG("Execution tree has no input node of type 'BodyData' ")
     }
-    if( !m_frameData  ) {
+    if( !m_stateData  ) {
         ERRORMSG("Execution tree has no input node of type 'FrameData' ")
     }
 
 }
 
-void SimFileExecutionGraph::initState(boost::filesystem::path folder,
-                                      std::string filename,
-                                      double time,
-                                      unsigned int frameNr)
+void SimFileExecutionGraph::initState(boost::filesystem::path outputfilePath,
+                                      double time, unsigned int frameNr)
 {
+         // Reset all nodes in FRAME_RESET group
+         this->reset(NodeGroups::FRAME_RESET);
 
-     // Reset all nodes in FRAME_RESET group
-     this->reset(NodeGroups::FRAME_RESET);
+         // Set outputs in FrameData
+         if(m_stateData){
+            m_stateData->setOutput(outputfilePath,time,frameNr);
+         }else{
+            ERRORMSG("There is no FrameData node present! Please add one!")
+         }
 
-     if(filename.empty()){
-        filename = "Frame";
-     }
-     // Set outputs in FrameData
-     if(m_frameData){
-        m_frameData->setOutput(folder,filename,time,frameNr);
-     }else{
-        ERRORMSG("There is no FrameData node present! Please add one!")
-     }
-
-     // Execute all nodes in FRAME group
-     this->execute(NodeGroups::FRAME_EXEC);
+         // Execute all nodes in FRAME group
+         this->execute(NodeGroups::FRAME_EXEC);
 }
 
-void SimFileExecutionGraph::initSimInfo(std::size_t nBodies,std::size_t nStates){
+void SimFileExecutionGraph::initSimInfo(boost::filesystem::path simFile,
+                                        boost::filesystem::path outputfilePath,
+                                        std::size_t nBodies,
+                                        std::size_t nStates){
+
     if(m_simFileInfo){
-        m_simFileInfo->setOutput(nBodies,nStates);
+        m_simFileInfo->setOutput(simFile,outputfilePath,nBodies,nStates);
     }
 }
 
@@ -71,6 +69,7 @@ void SimFileExecutionGraph::addBodyState(RigidBodyStateAdd * s) {
 
     // Set body data
     m_bodyDataNode->setOutputs(s);
+
 
     // Execute all nodes in BODY group
     this->execute(NodeGroups::BODY_EXEC);

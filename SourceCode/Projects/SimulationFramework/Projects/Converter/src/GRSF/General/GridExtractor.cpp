@@ -30,18 +30,18 @@ GridExtractor::~GridExtractor()
     // release of m_h5File closes file
 }
 
-void GridExtractor::initState(boost::filesystem::path folder,
-                              std::string filename,
-                              double time,
-                              unsigned int frameNr)
+void GridExtractor::initState(boost::filesystem::path filePath,
+                              double time, unsigned int frameNr)
 {
-    m_folder = folder;
-    m_filename = filename;
+//    m_filePath = filePath;
     m_time = time;
     m_frameNr = frameNr;
 }
 
-void GridExtractor::initSimInfo(std::size_t nBodies,std::size_t nStates){
+void GridExtractor::initSimInfo(boost::filesystem::path simFile,
+                                boost::filesystem::path filePath,
+                                std::size_t nBodies,std::size_t nStates)
+{
     m_nBodies = nBodies;
     m_nStates = nStates;
 }

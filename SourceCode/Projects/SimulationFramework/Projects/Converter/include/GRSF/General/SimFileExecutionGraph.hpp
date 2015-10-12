@@ -11,7 +11,7 @@
 
 namespace LogicNodes{
     class BodyData;
-    class FrameData;
+    class StateData;
     class StopNode;
     class SimFileInfo;
 };
@@ -50,8 +50,13 @@ class SimFileExecutionGraph : public ExecutionTreeInOut{
 
         /** provide function for SimFileConverter ==================================*/
 
-        void initSimInfo(std::size_t nBodies,std::size_t nStates);
-        void initState(boost::filesystem::path folder, std::string filename, double time, unsigned int frameNr);
+        void initSimInfo(boost::filesystem::path simFile,
+                         boost::filesystem::path outputFilePath,
+                         std::size_t nBodies,std::size_t nStates);
+
+        void initState(boost::filesystem::path outputFilePath,
+                       double time, unsigned int frameNr);
+
         void addBodyState(RigidBodyStateAdd * s);
 
         template<typename RigidBodyStateCont>
@@ -67,7 +72,7 @@ class SimFileExecutionGraph : public ExecutionTreeInOut{
         /** ========================================================================*/
 
 
-        inline void setFrameData(LogicNodes::FrameData *n){m_frameData = n;}
+        inline void setStateData(LogicNodes::StateData *n){m_stateData = n;}
         inline void setBodyData(LogicNodes::BodyData *n){m_bodyDataNode = n;}
         inline void setSimFileInfo(LogicNodes::SimFileInfo *n){m_simFileInfo = n;}
 
@@ -84,7 +89,7 @@ class SimFileExecutionGraph : public ExecutionTreeInOut{
         bool checkStop(unsigned int groupId);
 
         LogicNodes::BodyData    * m_bodyDataNode =  nullptr;
-        LogicNodes::FrameData   * m_frameData    =  nullptr;
+        LogicNodes::StateData   * m_stateData    =  nullptr;
         LogicNodes::SimFileInfo * m_simFileInfo  =  nullptr;
 
         /** Stop nodes for Body and Frame group, FILE_EXEC, FRAME_EXEC, BODY_EXEC */
