@@ -47,7 +47,7 @@
     #define RENDERCONVERTER_LOGLEVEL 1
 
     /// LogicParser
-    #define LOGICPARSER_LOGLEVEL 1
+    #define LOGICPARSER_LOGLEVEL 3
 
     /// GridderParser
     #define GRIDDERPARSER_LOGLEVEL 1

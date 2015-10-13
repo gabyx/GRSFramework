@@ -53,14 +53,18 @@ void SimFileExecutionGraph::initSimInfo(boost::filesystem::path simFile,
                                         boost::filesystem::path outputfilePath,
                                         std::size_t nBodies,
                                         std::size_t nStates){
+    this->reset(NodeGroups::FILE_RESET);
 
     if(m_simFileInfo){
         m_simFileInfo->setOutput(simFile,outputfilePath,nBodies,nStates);
     }
+
+    this->execute(NodeGroups::FILE_EXEC);
+
 }
 
 void SimFileExecutionGraph::finalizeState(){
-     this->finalize(NodeGroups::FRAME_FINAL);
+     this->execute(NodeGroups::FRAME_FINAL);
 }
 
 void SimFileExecutionGraph::addBodyState(RigidBodyStateAdd * s) {
@@ -73,7 +77,7 @@ void SimFileExecutionGraph::addBodyState(RigidBodyStateAdd * s) {
 
     // Execute all nodes in BODY group
     this->execute(NodeGroups::BODY_EXEC);
-    this->finalize(NodeGroups::BODY_FINAL);
+    this->execute(NodeGroups::BODY_FINAL);
 }
 
 void SimFileExecutionGraph::setStopNode(LogicNodes::StopNode *n, unsigned int stopGroupId){
@@ -106,12 +110,19 @@ void SimFileExecutionGraph::addNodeToGroup(unsigned int id, std::string groupId)
     else if(groupId == "Frame"){
         Base::addNodeToGroup(id, NodeGroups::FRAME_EXEC);
     }
+    else if(groupId == "File"){
+        Base::addNodeToGroup(id, NodeGroups::FILE_EXEC);
+    }
     else if(groupId == "BodyFinal"){
         Base::addNodeToGroup(id, NodeGroups::BODY_FINAL);
     }
     else if(groupId == "FrameFinal"){
         Base::addNodeToGroup(id, NodeGroups::FRAME_FINAL);
-    }else{
+    }
+//    else if(groupId == "FileFinal"){
+//        Base::addNodeToGroup(id, NodeGroups::FILE_FINAL);
+//    }
+    else{
          ERRORMSG("No valid group: " << groupId << " for node id: " << id)
 //        unsigned int g;
 //        if(!Utilities::stringToType(g,groupId)){
@@ -128,6 +139,9 @@ void SimFileExecutionGraph::addNodeToResetGroup(unsigned int id, std::string gro
     }
     else if(groupId == "Frame"){
          Base::addNodeToGroup(id, NodeGroups::FRAME_RESET);
+    }
+    else if(groupId == "File"){
+         Base::addNodeToGroup(id, NodeGroups::FILE_RESET);
     }else{
           ERRORMSG("No valid group: " << groupId << " for node id: " << id)
 //        unsigned int g;

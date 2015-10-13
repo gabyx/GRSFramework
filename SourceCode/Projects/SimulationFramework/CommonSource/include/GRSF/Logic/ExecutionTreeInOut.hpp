@@ -120,13 +120,13 @@ public:
         }
     }
 
-    /** Finalize group */
-    virtual void finalize(unsigned int groupId) {
-        for(auto & n : m_groupExecList[groupId]) {
-            // Execute in determined order!
-            n->compute();
-        }
-    }
+//    /** Finalize group */
+//    virtual void finalize(unsigned int groupId) {
+//        for(auto & n : m_groupExecList[groupId]) {
+//            // Execute in determined order!
+//            n->compute();
+//        }
+//    }
 
     /** Execute all groups */
     virtual void executeAll() {

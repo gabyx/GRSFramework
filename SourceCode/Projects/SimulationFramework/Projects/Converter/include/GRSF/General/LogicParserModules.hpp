@@ -69,8 +69,8 @@ namespace LogicParserModules{
                 if(!Utilities::stringToType(id, tool.attribute("id").value())) {
                     ERRORMSG("---> String conversion in Tool: id failed");
                 }
-                LOGLPLEVEL3(m_pLog,"---> Parsing Tool with id: " << id << std::endl;);
                 std::string type = tool.attribute("type").value();
+                LOGLPLEVEL3(m_pLog,"---> Parsing Tool with id: " << id << " type: " << type << std::endl;);
                 if(type == "BodyDataInput") {
                     createToolBodyData(tool,id);
                 }else if(type == "StateDataInput") {
@@ -643,6 +643,9 @@ namespace LogicParserModules{
             AABB3d aabb( I_r_IK + minPoint, I_r_IK + maxPoint);
 
             auto * node = new LogicNodes::OOBBCollider(id,aabb,R_KI);
+
+            LOGLPLEVEL3(m_pLog,"---> OOBBCollider with aabb: min: "
+                        << aabb.m_minPoint << "max: " << aabb.m_maxPoint << " R_KI: " << std::endl << R_KI << std::endl;  )
 
             m_executionGraph->addNode(node,false,false);
             addNodeToGroup<true>(logicNode,id,"Body");

@@ -59,25 +59,21 @@ namespace LogicNodes{
 
             m_stream.str("");
             m_stream << GET_ISOCKET_VALUE(Value);
+            std::cout << "XMLWriter: " << m_stream.str() << std::endl;
             m_root.append_child(m_childName.c_str()).append_child(nodePCData).set_value(m_stream.str().c_str());
         }
 
         void checkFileChange(const boost::filesystem::path & f){
             // file path has changed, close file and open new one
-            if( !m_openedFile.empty() && f != m_openedFile){
-                m_xmlFile.save_file(m_openedFile.string().c_str());
+
+            if( f != m_openedFile){
+                if(!m_openedFile.empty()){
+                    m_xmlFile.save_file(m_openedFile.string().c_str());
+                }
+                m_xmlFile.reset();
+                m_root = m_xmlFile.append_child(m_rootName.c_str());
                 m_openedFile = f;
             }
-            
-            m_xmlFile.reset();
-            m_root = m_xmlFile.append_child(m_rootName.c_str());
-        }
-
-        void finalize(){
-            if(!m_openedFile.empty()){
-                m_xmlFile.save_file(m_openedFile.string().c_str());
-            }
-            m_openedFile = "";
         }
 
         ~XMLLineWriter(){

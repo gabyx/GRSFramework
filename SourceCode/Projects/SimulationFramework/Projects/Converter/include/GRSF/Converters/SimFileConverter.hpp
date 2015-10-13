@@ -39,6 +39,34 @@ public:
     using XMLNodeItType = pugi::xml_node_iterator;
     using XMLAttributeType = pugi::xml_attribute;
 
+
+protected:
+
+    using StateIdxType = std::size_t;
+    struct StateIndex{
+        StateIdxType m_idx;
+        unsigned int m_mappedIdx;
+        boost::filesystem::path m_outputFile;
+    };
+
+    using StateIndicesType = std::vector< StateIndex >;
+    using StateListType = std::vector<RigidBodyStateAdd>;
+
+    MultiBodySimFile m_simFile;
+
+    Logging::Log * m_log;
+
+    std::vector<boost::filesystem::path> m_inputFiles;
+
+    std::size_t m_stateCounter; ///< Counting all frames converted
+    std::size_t m_bodyCounter;  ///< Counting all bodies converted
+
+    bool m_terminatedByStepper;
+
+    bool m_abort;
+
+public:
+
     SimFileConverter(const std::vector<boost::filesystem::path> & inputFiles){
 
         m_inputFiles = inputFiles;
@@ -73,6 +101,7 @@ public:
     void convert( TSimFileStepper &&... simFileStepper)
     {
 
+        StateIdxType startIdx, endIdx, mappedStartIdx;
         boost::filesystem::path perFileOutputFile;
 
         bool stop;
@@ -87,9 +116,12 @@ public:
         unsigned int fileIdx = 0;
         for(auto file : m_inputFiles) {
 
+            // Range indices
+            startIdx = 0;
+            endIdx = std::numeric_limits<StateIdxType>::max();
+            mappedStartIdx = startIdx;
 
             if(file.extension() == ".xml"){
-
                 // open the xml
                 pugi::xml_document xmlDoc;
                 xmlDoc.load_file(file.string().c_str());
@@ -112,11 +144,33 @@ public:
                     }
 
 
-                    bool fullFile = false;
-                    auto att = n.attribute("fullFile");
+                    bool useRange = false;
+                    auto att = n.attribute("useRange");
                     if(att){
-                        if( !Utilities::stringToType(fullFile, n.attribute("fullFile").value() )  ) {
+                        if( !Utilities::stringToType(useRange, n.attribute("useRange").value() )  ) {
                             ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
+                        }
+
+                        if(useRange){
+                            auto att = n.attribute("startIdx");
+                            if(att){
+                                if( !Utilities::stringToType(startIdx, n.attribute("startIdx").value() )  ) {
+                                    ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
+                                }
+                            }
+                            att = n.attribute("endIdx");
+                            if(att){
+                                if( !Utilities::stringToType(endIdx, n.attribute("endIdx").value() )  ) {
+                                    ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
+                                }
+                            }
+                            mappedStartIdx = startIdx;
+                            att = n.attribute("mappedStartIdx");
+                            if(att){
+                                if( !Utilities::stringToType(mappedStartIdx, n.attribute("mappedStartIdx").value() )  ) {
+                                    ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
+                                }
+                            }
                         }
                     }
 
@@ -128,21 +182,21 @@ public:
                     }
 
                     // parse frame index list (assumed to be sorted! otherwise exception in convertFile)
-                    stateIndices.clear();
 
                     // if not fullFile parse in all states
-                    if(!fullFile){
+                    if(!useRange){
+                        stateIndices.clear();
                         StateIdxType idx;
                         unsigned int frameIdx;
                         boost::filesystem::path outputFile;
                         for(auto s : n.children("State")){
 
                             if( !Utilities::stringToType(idx, s.attribute("stateIdx").value() )  ) {
-                                    ERRORMSG("---> String conversion to obtain state id failed!");
+                                    ERRORMSG("---> String conversion to obtain 'stateIdx' failed!");
                             }
 
-                            if( !Utilities::stringToType(frameIdx, s.attribute("frameIdx").value() )  ) {
-                                    ERRORMSG("---> String conversion to obtain state id failed!");
+                            if( !Utilities::stringToType(frameIdx, s.attribute("mappedIdx").value() )  ) {
+                                    ERRORMSG("---> String conversion to obtain 'mappedIdx' failed!");
                             }
 
                             outputFile = "";
@@ -154,23 +208,56 @@ public:
                             // add to list
                             stateIndices.push_back( StateIndex{idx,frameIdx,outputFile});
                         }
+
+
+                        // Sort state indices (in case of non sorted input!)
+                        std::sort(stateIndices.begin(),stateIndices.end(), [](StateIndex & a, StateIndex & b){ return a.m_idx < b.m_idx ;} );
+                        // Check for duplicate indices
+                        if(!stateIndices.empty()){
+                            for(auto it = stateIndices.begin(); it != (--stateIndices.end()); ++it){
+                                if(it->m_idx == std::next(it)->m_idx){
+                                    ERRORMSG(" The file: " << file.filename() << " contains duplicate states idx: " << it->m_idx );
+                                }
+                            }
+                        }
+
                         LOG(m_log,"---> Parsed " << stateIndices.size() << " state of file: " << path << "from XML: " << file.filename() << std::endl;)
-                        if( stateIndices.size() > 0){
-                            convertFile<TSettings,TSimFileStepper...>(path,uuid,stateIndices,perFileOutputFile,simFileStepper...);
+                        if( stateIndices.size() > 0 ){
+                            convertFile<TSettings,TSimFileStepper...>(path,uuid,
+                                                                      stateIndices,startIdx,endIdx,mappedStartIdx,
+                                                                      perFileOutputFile,
+                                                                      simFileStepper...);
                         }else{
                             LOG(m_log,"---> No states to process..." << std::endl;)
                         }
+
                     }else{
-                        LOG(m_log,"---> Take all states of file: " << path << "from XML: " << file.filename() << std::endl;)
-                        convertFile<TSettings,TSimFileStepper...>(path,uuid,{},perFileOutputFile,simFileStepper...);
+
+                        if(endIdx == std::numeric_limits<StateIdxType>::max()){
+                            LOG(m_log,"---> Use state range: [ "<< startIdx << " , end ) of file: "
+                                << path << "from XML: " << file.filename() << std::endl;)
+                        }else{
+                            LOG(m_log,"---> Use state range: [ "<< startIdx <<" , " << endIdx << " ) of file: "
+                                << path << "from XML: " << file.filename() << std::endl;)
+                        }
+                        if(startIdx < endIdx ){
+                            convertFile<TSettings,TSimFileStepper...>(path,uuid,
+                                                                      {},startIdx,endIdx,mappedStartIdx,
+                                                                      perFileOutputFile,
+                                                                      simFileStepper...);
+                        }else{
+                            LOG(m_log,"---> No states to process..." << std::endl;)
+                        }
                     }
 
                 }
 
             }else{
-                // try to convert sim file
-                LOG(m_log,"---> Take all states of file: " << file <<  std::endl;)
-                convertFile<TSettings, TSimFileStepper...>(file, std::to_string(fileIdx) , {}, perFileOutputFile, simFileStepper...);
+                // try to convert as a sim file
+                LOG(m_log,"---> Take all states of file: " << file <<  "(read as .sim file)" << std::endl;)
+                convertFile<TSettings, TSimFileStepper...>(file, std::to_string(fileIdx) ,
+                                                            {},startIdx,endIdx,mappedStartIdx,
+                                                            perFileOutputFile, simFileStepper...);
             }
 
             ++fileIdx;
@@ -186,31 +273,7 @@ public:
 
 protected:
 
-    using StateIdxType = std::streamoff;
-    struct StateIndex{
-        StateIdxType m_idx;
-        unsigned int m_frameIdx;
-        boost::filesystem::path m_outputFile;
-    };
-
-    using StateIndicesType = std::vector< StateIndex >;
-    using StateListType = std::vector<RigidBodyStateAdd>;
-
-    MultiBodySimFile m_simFile;
-
-    Logging::Log * m_log;
-
-    std::vector<boost::filesystem::path> m_inputFiles;
-
-    std::size_t m_stateCounter; ///< Counting all frames converted
-    std::size_t m_bodyCounter;  ///< Counting all bodies converted
-
-    bool m_terminatedByStepper;
-
-    bool m_abort;
     void callbackAbort(){ m_abort = true; LOG(m_log, "---> Quitting ...:" <<std::endl);}
-
-
 
     struct details{
 
@@ -365,6 +428,7 @@ protected:
     void convertFile(const boost::filesystem::path & f,
                      const std::string uuidString ,
                      const StateIndicesType & stateIndices, /* can be empty*/
+                     const StateIdxType startIdx, const StateIdxType endIdx, const StateIdxType mappedStartIdx,
                      const boost::filesystem::path perFileOutputFile,
                      TSimFileStepper&&... simFileStepper)
     {
@@ -399,14 +463,18 @@ protected:
         double start = 0, avgInitFrameTime = 0, avgStateTime = 0, avgStateLoadTime = 0;
         m_bodyCounter = 0;
 
-        StateIdxType currentStateIdx = 0;
+        StateIdxType currentStateIdx = startIdx;
         auto itStateIdx = stateIndices.begin();
-        // Jump at beginning of first state
+        // if state indices are given, overwrite start!
         if( !stateIndices.empty() && itStateIdx->m_idx > 0 ){
             currentStateIdx = itStateIdx->m_idx;
-            m_simFile.seekgStates(currentStateIdx);
         }
 
+        // set mappedIdx to start
+        StateIdxType mappedIdx = mappedStartIdx;
+
+        // Jump at beginning of first state
+        m_simFile.seekgStates(currentStateIdx);
 
         while(m_simFile.isGood() && !m_abort){
 
@@ -437,29 +505,29 @@ protected:
             }
             // ==========================================================================================
 
-            // set frame idx (if we have a list set it from the list, other wise default)
-            unsigned int frameIdx = m_stateCounter;
+            // overwrite mappedIdx (if we have a list set it from the list, other wise default)
+            // mappedIdx is not the same as stateIdx because (we want a linear index over the files)
+            // which is possible by setting a different mappedIdx for each state index.
+
             if( !stateIndices.empty()){
-                frameIdx = itStateIdx->m_frameIdx;
+                mappedIdx = itStateIdx->m_mappedIdx;
             }
 
-            LOG(m_log, "---> Init frame with: \n\toutputFile: " << outputFile << "\n\tframeIdx: " << frameIdx << "\n\ttime: " << time << std::endl;)
-
+            LOG(m_log, "---> Init state with: \n\toutputFile: " << outputFile << "\n\tframeIdx: " << mappedIdx << "\n\ttime: " << time << std::endl;)
             start = timer.elapsedMilliSec();
-            EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::initState(simFileStepper,outputFile, time, frameIdx ) )
+            EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::initState(simFileStepper,outputFile, time, mappedIdx ) )
             avgInitFrameTime += timer.elapsedMilliSec() - start;
 
 
             start = timer.elapsedMilliSec();
             /** apply full state or body state loop  for every stepper type */
             EXPAND_PARAMETERPACK(  (details::FullStateOrBodyState<TSimFileStepper,TSettings::FullState>::apply(this,simFileStepper, states)) )
-
             avgStateTime += timer.elapsedMilliSec() - start;
 
 
             EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::finalizeState(simFileStepper) )
 
-            // skip to next stateIdx if we have indices
+            // skip to next stateIdx if we have indices ========================
             if(!stateIndices.empty()){
                 if(++itStateIdx != stateIndices.end()){
                     if(itStateIdx->m_idx < 0 || itStateIdx->m_idx == currentStateIdx){
@@ -471,13 +539,17 @@ protected:
                 }else{
                     m_abort = true;
                 }
-            }else{
+            }else{ // we have no indices, take range
                 //otherwise dont skip, but update stateIdx
                 ++currentStateIdx;
+                if(currentStateIdx >= endIdx){
+                    m_abort = true;
+                }
             }
+            // ===================================================================
 
-
-            m_stateCounter++;
+            ++mappedIdx;
+            ++m_stateCounter;
 
             stop = false;
             EXPAND_PARAMETERPACK( stop |= details::StepperDispatch<TSimFileStepper>::isStopFrameLoop(simFileStepper) )
