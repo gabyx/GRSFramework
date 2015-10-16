@@ -22,9 +22,18 @@ public:
     using XMLNodeType =  pugi::xml_node;
 
     struct ResampleInfo{
-        std::streamsize m_startIdx;
-        std::streamoff  m_endIdx;
-        std::streamsize m_increment;
+        using StateIndices = std::vector<std::streamsize>;
+
+        ResampleInfo(   std::streamsize startIdx,
+                        std::streamoff  endIdx,
+                        std::streamsize increment,
+                        std::streamsize nStates
+                        )
+            : m_startIdx(startIdx), m_endIdx(endIdx), m_increment(increment), m_nStates(nStates)
+        {
+        }
+
+
 
         inline std::string getString(std::string linePrefix="\t"){
             std::stringstream ss;
@@ -33,14 +42,47 @@ public:
             return ss.str();
         }
 
+        inline StateIndices getIndices(){
+            StateIndices res;
+            if (m_increment != 0){
+                // this is a file where we take states (increment=0 no states to take)
+                auto end = (m_endIdx == -1)? m_nStates : m_endIdx;
+                for(std::streamsize i = m_startIdx; i < end; i+=m_increment ){
+                    res.emplace_back(i);
+                }
+            }
+            return res;
+        }
+
         /** Appends the resample info to the XML node */
-        void addXML(XMLNodeType & node){
+        void addXML(XMLNodeType & node, bool withIndices = true){
+
             auto s = node.append_child("Resample");
             s.append_attribute("startIdx").set_value((long long int)m_startIdx);
             s.append_attribute("endIdx").set_value((long long int)m_endIdx);
             s.append_attribute("increment").set_value((long long int)m_increment);
-        }
 
+            if(withIndices){
+                auto indices = getIndices();
+                if(!indices.empty()){
+                    std::stringstream ss;
+                    ss << indices[0];
+                    for(std::size_t i = 1; i < indices.size(); ++i){
+                        ss << " " << indices[i];
+                    }
+                    // save to xml
+                    static const auto nodePCData = pugi::node_pcdata;
+                    XMLNodeType node = s.append_child("Indices");
+                    node.append_child(nodePCData).set_value( ss.str().c_str() );
+                }
+            }
+
+        }
+        private:
+            std::streamsize m_startIdx;
+            std::streamoff  m_endIdx;
+            std::streamsize m_increment;
+            std::streamsize m_nStates;
     };
 
     using DetailsList = std::vector< std::pair<MultiBodySimFile::Details,ResampleInfo> >;
@@ -128,39 +170,43 @@ private:
 
 
         auto details = fromFile.getDetails(withTimeList);
+        std::streamoff statesFile = fromFile.getNStates();
 
         if (startStateIdx >= endStateIdx){
-             detailList.emplace_back( std::make_pair(details,ResampleInfo{startStateIdx, startStateIdx,  0}) );
+             detailList.emplace_back( std::make_pair(details,ResampleInfo{startStateIdx, startStateIdx,  0,statesFile}) );
              return;
         }
 
+        // shift range by one if we skip first state!
         startStateIdx += skipFirstState? 1 : 0;
         endStateIdx   += skipFirstState? 1 : 0;
 
-        std::streamoff statesFile = fromFile.getNStates();
+
 //        states += statesFile - (skipFirstState? 1 : 0); // accumulate total states
 
         if(startStateIdx >= statesFile){
             // Resample Info: no resample
             startStateIdx -= statesFile; // skip this file subtract the number of states of this file
             endStateIdx   -= statesFile;
-            detailList.emplace_back( std::make_pair(details,ResampleInfo{startStateIdx, startStateIdx,  0}) );
+            detailList.emplace_back( std::make_pair(details,ResampleInfo{startStateIdx, startStateIdx,  0,statesFile}) );
         }
         else{
 
             if ( endStateIdx < statesFile){
-                detailList.emplace_back( std::make_pair(details, ResampleInfo{startStateIdx, endStateIdx,  increment}));
+                detailList.emplace_back( std::make_pair(details, ResampleInfo{startStateIdx, endStateIdx,  increment,statesFile}));
                 endStateIdx = 0;
 
-            }else{
-                detailList.emplace_back( std::make_pair(details, ResampleInfo{startStateIdx, -1,  increment}) );
+            }else{ //endStateIdx >= statesFile
+                detailList.emplace_back( std::make_pair(details, ResampleInfo{startStateIdx, -1,  increment,statesFile}) );
                 endStateIdx -= statesFile;
             }
 
             // compute carry over for next state
-            startStateIdx = (statesFile - startStateIdx) % increment ; // how many states
-//            startStateIdx = (( n  + increment-1 ) / increment) * increment  - n;
+            auto n = (statesFile - startStateIdx); // how many states
+            startStateIdx =  ((n + increment -1)/increment) * increment - n;
             // (( n  + increment-1 ) / increment)  = ceil ( n / increment) = how many states we took
+            // subtract this from n, to get carry over
+
         }
 
     }

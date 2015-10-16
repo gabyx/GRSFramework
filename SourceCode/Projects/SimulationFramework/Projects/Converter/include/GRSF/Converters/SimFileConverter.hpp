@@ -101,7 +101,7 @@ public:
     void convert( TSimFileStepper &&... simFileStepper)
     {
 
-        StateIdxType startIdx, endIdx, mappedStartIdx;
+        StateIdxType startIdx, endIdx, mappedStartIdx, increment;
         boost::filesystem::path perFileOutputFile;
 
         bool stop;
@@ -119,6 +119,7 @@ public:
             // Range indices
             startIdx = 0;
             endIdx = std::numeric_limits<StateIdxType>::max();
+            increment = 1;
             mappedStartIdx = startIdx;
 
             if(file.extension() == ".xml"){
@@ -158,9 +159,22 @@ public:
                                     ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
                                 }
                             }
+
                             att = n.attribute("endIdx");
                             if(att){
-                                if( !Utilities::stringToType(endIdx, n.attribute("endIdx").value() )  ) {
+                                std::streamoff endIdxS = -1;
+                                if( !Utilities::stringToType(endIdxS, n.attribute("endIdx").value() )  ) {
+                                    ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
+                                }
+                                if(endIdxS>=0){ // if not negative set to parsed value
+                                    endIdx = endIdxS;
+                                }
+                            }
+
+
+                            att = n.attribute("increment");
+                            if(att){
+                                if( !Utilities::stringToType(increment, n.attribute("increment").value() )  ) {
                                     ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
                                 }
                             }
@@ -224,25 +238,25 @@ public:
                         LOG(m_log,"---> Parsed " << stateIndices.size() << " state of file: " << path << "from XML: " << file.filename() << std::endl;)
                         if( stateIndices.size() > 0 ){
                             convertFile<TSettings,TSimFileStepper...>(path,uuid,
-                                                                      stateIndices,startIdx,endIdx,mappedStartIdx,
+                                                                      stateIndices,startIdx,endIdx,increment,mappedStartIdx,
                                                                       perFileOutputFile,
                                                                       simFileStepper...);
                         }else{
                             LOG(m_log,"---> No states to process..." << std::endl;)
                         }
 
-                    }else{
+                    }else{ // use range
 
                         if(endIdx == std::numeric_limits<StateIdxType>::max()){
-                            LOG(m_log,"---> Use state range: [ "<< startIdx << " , end ) of file: "
+                            LOG(m_log,"---> Use state range: [ "<< startIdx << ":"<<increment<<": -1 ) of file: "
                                 << path << "from XML: " << file.filename() << std::endl;)
                         }else{
-                            LOG(m_log,"---> Use state range: [ "<< startIdx <<" , " << endIdx << " ) of file: "
+                            LOG(m_log,"---> Use state range: [ "<< startIdx << ":"<<increment<<":" << endIdx << " ) of file: "
                                 << path << "from XML: " << file.filename() << std::endl;)
                         }
                         if(startIdx < endIdx ){
                             convertFile<TSettings,TSimFileStepper...>(path,uuid,
-                                                                      {},startIdx,endIdx,mappedStartIdx,
+                                                                      {},startIdx,endIdx,increment,mappedStartIdx,
                                                                       perFileOutputFile,
                                                                       simFileStepper...);
                         }else{
@@ -256,7 +270,7 @@ public:
                 // try to convert as a sim file
                 LOG(m_log,"---> Take all states of file: " << file <<  "(read as .sim file)" << std::endl;)
                 convertFile<TSettings, TSimFileStepper...>(file, std::to_string(fileIdx) ,
-                                                            {},startIdx,endIdx,mappedStartIdx,
+                                                            {},startIdx,endIdx,increment,mappedStartIdx,
                                                             perFileOutputFile, simFileStepper...);
             }
 
@@ -428,14 +442,15 @@ protected:
     void convertFile(const boost::filesystem::path & f,
                      const std::string uuidString ,
                      const StateIndicesType & stateIndices, /* can be empty*/
-                     const StateIdxType startIdx, const StateIdxType endIdx, const StateIdxType mappedStartIdx,
+                     const StateIdxType startIdx, const StateIdxType endIdx, const StateIdxType increment,
+                     const StateIdxType mappedStartIdx,
                      const boost::filesystem::path perFileOutputFile,
                      TSimFileStepper&&... simFileStepper)
     {
         bool stop = false;
         LOG(m_log, "---> Converting file:" << f << std::endl;);
 
-        m_abort = false;
+
         ApplicationSignalHandler::getSingleton().registerCallback(SIGINT,
                             std::bind( &SimFileConverter::callbackAbort, this), "SimFileConverter");
 
@@ -469,12 +484,14 @@ protected:
         if( !stateIndices.empty() && itStateIdx->m_idx > 0 ){
             currentStateIdx = itStateIdx->m_idx;
         }
-
         // set mappedIdx to start
         StateIdxType mappedIdx = mappedStartIdx;
 
         // Jump at beginning of first state
         m_simFile.seekgStates(currentStateIdx);
+
+        // Set abort flag
+        m_abort = (stateIndices.empty() && currentStateIdx >= endIdx );
 
         while(m_simFile.isGood() && !m_abort){
 
@@ -533,22 +550,24 @@ protected:
                     if(itStateIdx->m_idx < 0 || itStateIdx->m_idx == currentStateIdx){
                         ERRORMSG("Negative or same as privious state idx: " << itStateIdx->m_idx << " in xml for file: " << f)
                     }
-                    // skip difference
+                    // skip difference in file
                     m_simFile.seekgStates(itStateIdx->m_idx - currentStateIdx -1);
                     currentStateIdx = itStateIdx->m_idx;
                 }else{
                     m_abort = true;
                 }
             }else{ // we have no indices, take range
-                //otherwise dont skip, but update stateIdx
-                ++currentStateIdx;
+                // skip difference in file
+                m_simFile.seekgStates(increment - 1);
+                currentStateIdx += increment;
                 if(currentStateIdx >= endIdx){
                     m_abort = true;
                 }
+                mappedIdx += increment; // default increment for mapped idx
             }
             // ===================================================================
 
-            ++mappedIdx;
+
             ++m_stateCounter;
 
             stop = false;

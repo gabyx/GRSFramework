@@ -108,7 +108,25 @@ private:
 
     /** H5 File (row-major storage)*/
     std::unique_ptr<H5::H5File> m_h5File;
-    H5::Group m_stateGroup;
+    void closeFile();
+    boost::filesystem::path m_currentFilePath;
+
+    H5::Group m_filesGroup;    ///< /Files
+
+    H5::Group m_currentSimFileGroup;    ///< /Files/SimFile0 , /Files/SimFile1, ...
+    std::size_t m_simFileCounter = 0;
+
+    /** Stores per SimFile (hdf5 group) a reference for each State */
+    std::unordered_map< H5::Group , std::vector<hobj_ref_t>,
+                        Hdf5Helpers::Hasher<H5::Group> ,
+                        Hdf5Helpers::KeyEqual<H5::Group>
+                        > m_stateRefs;
+    std::vector<hobj_ref_t> * m_currentStateRefs = nullptr;
+    void writeReferences();
+
+    H5::Group m_statesGroup;            ///< /States
+    std::size_t m_stateCounter = 0;     ///< /States/S0, /States/S1, ...
+
 
     std::size_t m_nBodies;
     std::size_t m_nStates;
@@ -119,8 +137,8 @@ private:
     Logging::Log * m_log = nullptr;
 };
 
-template<typename StateContainer>
-void GridExtractor::addState(StateContainer & states){
+template<typename BodyStateContainer>
+void GridExtractor::addState(BodyStateContainer & states){
 
     // switch here on grid type
 
@@ -130,20 +148,27 @@ void GridExtractor::addState(StateContainer & states){
 
     // reset all cells
     m_grid->applyVisitor( CellDataMaxBuffer::Reset<GridType>(m_grid.get()) );
-
     addAllBodies(m_grid.get(),states);
 
     // apply extractor visitor
     m_grid->applyVisitor( m_settings->createDataWriterVisitor(m_grid.get()) );
 
-    // write output
-    H5::Group s = m_stateGroup.createGroup("S" + std::to_string(m_frameNr));
+    // write output to new group (S0,S1,S2 .... )
+    // in "/States"
+    std::string groupName = "S" + std::to_string(m_stateCounter++);
+    H5::Group s = m_statesGroup.createGroup(groupName);
+    Hdf5Helpers::saveAttribute(s,m_time,"time");
+    Hdf5Helpers::saveAttribute(s,m_frameNr,"stateIdx");
     m_settings->writeToHDF5(s);
 
+    // Make link in current (/Files/SimFile0, /Files/SimFiles1, ...) for this state
+    hobj_ref_t link;
+    m_statesGroup.reference(&link,groupName,H5R_OBJECT);
+    m_currentStateRefs->push_back(link);
 }
 
-template<typename TGrid, typename StateContainer>
-void GridExtractor::addAllBodies(TGrid * grid, StateContainer & states){
+template<typename TGrid, typename BodyStateContainer>
+void GridExtractor::addAllBodies(TGrid * grid, BodyStateContainer & states){
 
     Vector3 K_p;
     for(auto & s : states){

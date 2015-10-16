@@ -75,6 +75,13 @@ namespace detail
     {
         return H5::PredType::NATIVE_LLONG;
     };
+
+    template<>
+    inline H5::PredType getNativeType_imp<std::string>()
+    {
+        return H5::PredType::C_S1;
+    };
+
 }
 
 /** Get native types */
@@ -86,7 +93,6 @@ inline H5::PredType getNativeType()
                                            >::type
                                     >();
 }
-
 
 namespace detail
 {
@@ -150,6 +156,13 @@ namespace detail
     {
         return H5::PredType::STD_U64LE;
     };
+
+    template<>
+    inline H5::PredType mapNativeTypeToLE_imp<std::string, 8 >()
+    {
+        return H5::PredType::STD_U64LE;
+    };
+
 }
 
 /** Map native types To little endian ones*/
@@ -163,6 +176,26 @@ inline H5::PredType mapNativeTypeToLE()
 
 
 
+
+/** Hash functor for storing derived H5::Location objects in maps */
+template<typename T>
+struct Hasher{
+    STATIC_ASSERTM((std::is_base_of<H5::H5Location,T>::value), "Your class does not inherit from H5Location!")
+    inline hid_t  operator()(const T & t) const{
+        return t.getId();
+    }
+};
+
+/** KeyEqual functor for storing derived H5::Location objects in maps */
+template<typename T>
+struct KeyEqual: std::binary_function <T,T,bool>{
+    STATIC_ASSERTM((std::is_base_of<H5::H5Location,T>::value), "Your class does not inherit from H5Location!")
+    inline bool operator()(const T & a, const T & b) const{
+        return a.getId() == b.getId();
+    }
+};
+
+
 /** Write simple attribute */
 template<typename TFileGroupData, typename T>
 inline void saveAttribute(const TFileGroupData & fg, const T & attr, std::string name)
@@ -171,6 +204,20 @@ inline void saveAttribute(const TFileGroupData & fg, const T & attr, std::string
     H5::DataSpace d(1, &dims /*dimension*/);
     H5::Attribute a = fg.createAttribute(name, Hdf5Helpers::mapNativeTypeToLE<T>(),d );
     a.write( Hdf5Helpers::getNativeType<T>(), &attr );
+}
+
+/** Write string attribute */
+template<typename TFileGroupData>
+inline void saveAttribute(const TFileGroupData & fg, const std::string & s, std::string name)
+{
+
+    H5::StrType sT(Hdf5Helpers::getNativeType<std::string>());
+    sT.setSize(s.size()+1); // nulltermination character as well
+
+    hsize_t dims=1;
+    H5::DataSpace d(1, &dims /*dimension*/); // one string
+    H5::Attribute a = fg.createAttribute(name, sT , d ); // data type as c string
+    a.write( sT, s.c_str() ); // write as c string
 }
 
 
@@ -341,6 +388,15 @@ H5::Group saveData(const TFileGroup & fg, const T & aabb, std::string name="AABB
     saveData(group,aabb.m_maxPoint,"maxPoint");
     return group;
 }
+
+template<typename TFileGroup>
+void saveData(const TFileGroup & fg , std::vector<hobj_ref_t> & refs, std::string name = "StateRefs"){
+    hsize_t s = refs.size();
+    H5::DataSpace ds( 1, &s);
+    auto refset = fg.createDataSet(name, H5::PredType::STD_REF_OBJ, ds);
+    refset.write(&refs[0], H5::PredType::STD_REF_OBJ);
+}
+
 
 
 }

@@ -644,10 +644,10 @@ private:
     boost::filesystem::path m_sceneFile;
     boost::filesystem::path m_mediaDir ="./";
     boost::filesystem::path m_converterLogicFile;
-
+protected:
+    std::string m_name = "Analyzer";
 
 public:
-
 
     void parseOptions(int argc, char **argv) {
 
@@ -774,7 +774,7 @@ private:
     }
 
     void printHelp() {
-        std::cerr << "Help for the Application Renderer: \n Options: \n"
+        std::cerr << "Help for the Application "<<m_name<<": \n Options: \n"
                   << " \t -i|--input <path1> <path2> ... \n"
                   << " \t [Required] \n"
                   <<            "\t\t <path1> <path2> ... : These are multiple space delimited input sim (.sim)\n"
@@ -807,6 +807,9 @@ private:
 };
 
 
-class ApplicationCLOptionsGridder: public ApplicationCLOptionsAnalyzer{};
+class ApplicationCLOptionsGridder: public ApplicationCLOptionsAnalyzer{
+ public:
+     ApplicationCLOptionsGridder(){m_name = "Gridder";}
+};
 
 #endif
