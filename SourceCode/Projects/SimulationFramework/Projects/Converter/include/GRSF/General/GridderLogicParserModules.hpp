@@ -143,6 +143,27 @@ public:
                 ERRORMSG("---> String conversion 'dimensions' failed");
             }
 
+            // Parse original min/max points, which are only used for convenience for the output
+            // they are not used for computations!
+            // as default they are set to the values given for min/max which is perfect
+            settings.m_minPointOrig = minPoint;
+            auto att = grid.attribute("minPointOrig");
+            if(att){
+                if(!Utilities::stringToVector(maxPoint,  grid.attribute("maxPoint").value())) {
+                    ERRORMSG("---> String conversion 'maxPoint' failed");
+                }
+            }
+
+            settings.m_maxPointOrig = maxPoint;
+            att = grid.attribute("maxPointOrig");
+            if(att){
+                if(!Utilities::stringToVector(maxPoint,  grid.attribute("maxPoint").value())) {
+                    ERRORMSG("---> String conversion 'maxPoint' failed");
+                }
+            }
+
+
+
             Quaternion q_KI;
             Vector3 I_r_IK;
             ParserFunctions::parseTransformSequence(grid,q_KI,I_r_IK);
@@ -151,6 +172,7 @@ public:
 
             I_r_IK = settings.m_R_KI.transpose()*I_r_IK; // make K_r_IK  = A_KI * I_r_IK
             settings.m_aabb = AABB3d( I_r_IK + minPoint, I_r_IK + maxPoint);
+
 
 
             LOGGPLEVEL1(m_pLog,"---> Parsed GridSettings for file: " << settings.m_fileName <<std::endl;)

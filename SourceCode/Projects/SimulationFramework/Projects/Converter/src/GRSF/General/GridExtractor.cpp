@@ -95,13 +95,16 @@ void GridExtractor::writeGridSettings(){
 
     LOGGCLEVEL1(m_log,"---> Write settings ..." << std::endl;);
     // Write the grid settings to the file
-    H5::Group group = m_h5File->createGroup("/GridSettings");
+    H5::Group g = m_h5File->createGroup("/GridSettings");
 
-    auto g = Hdf5Helpers::saveData(group, m_settings->m_aabb,"OOBB");
+    auto o = Hdf5Helpers::saveData(g, m_settings->m_aabb,"OOBB");
 
-    Hdf5Helpers::saveData(g, m_settings->m_R_KI,"R_KI" );
+    Hdf5Helpers::saveData(o, m_settings->m_R_KI,"R_KI" );
     Hdf5Helpers::saveData(g, m_settings->m_dimension,"dimensions" );
-    Hdf5Helpers::saveData(g, m_grid->getDx(),"dx" );
+
+    auto b = g.createGroup("./Bounds");
+    Hdf5Helpers::saveData(b, m_settings->m_minPointOrig, "minPoint" );
+    Hdf5Helpers::saveData(b, m_settings->m_maxPointOrig, "maxPoint" );
 }
 
 

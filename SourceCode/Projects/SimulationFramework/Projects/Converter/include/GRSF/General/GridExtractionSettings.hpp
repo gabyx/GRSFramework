@@ -305,8 +305,12 @@ public:
 
     std::string m_fileName;
 
+    /** Bounds (only used for output, not for computation!)*/
+    Vector3 m_minPointOrig;
+    Vector3 m_maxPointOrig;
+
     /** 3D Grid */
-    AABB3d m_aabb;
+    AABB3d m_aabb; ///< Coordinates in K frame which is located at Origin
     Matrix33 m_R_KI;
     Array3UInt m_dimension;
 
