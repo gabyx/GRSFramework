@@ -292,6 +292,39 @@ namespace Extractors{
         }
     };
 
+
+    template<unsigned int nTensorIndices = 3>
+    class ExtractorBodyMask : public details::ExtractorNormal<1,char,nTensorIndices>{
+    public:
+        using Base = details::ExtractorNormal<1,char,nTensorIndices>;
+        DEFINE_TENSORSTORAGE_TYPE(Base)
+
+        ExtractorBodyMask(std::string name): Base(name){}
+
+        bool m_transformToGridCoordinates = true;
+
+        template<typename TGrid, typename CellDataType, typename IndexType>
+        inline void writeCellData(TGrid *g, CellDataType & cellData, const IndexType & index)
+        {
+            if(cellData.m_rigidBodyState){
+                this->getElement(index) = 1;
+            }else{
+                this->getElement(index) = 0;
+            }
+        }
+
+        template<typename TGrid, typename Iterator>
+        inline void writeAllData(TGrid *g, Iterator begin, Iterator end)
+        {
+
+        }
+
+        template<typename FileOrGroup>
+        inline void writeHDF5(const FileOrGroup & fOrG){
+            Hdf5Helpers::saveData(fOrG, this->m_tensor ,this->m_dataName);
+        }
+    };
+
 }
 
 
@@ -315,6 +348,7 @@ public:
     Array3UInt m_dimension;
 
     /** Data Extractors */
+    using ExtractorBodyMaskType       = Extractors::ExtractorBodyMask<3>;
     using ExtractorTransVelType       = Extractors::ExtractorTransVelocity<3>;
     using ExtractorTransVelProj1DType = Extractors::ExtractorTransVelocityProj1D<3>;
     using ExtractorTransVelProj2DType = Extractors::ExtractorTransVelocityProj2D<3>;
@@ -322,6 +356,7 @@ public:
     std::vector<ExtractorTransVelType>       m_transVelExtractor; /// only one makes sense!
     std::vector<ExtractorTransVelProj1DType> m_transVelProj1DExtractors;
     std::vector<ExtractorTransVelProj2DType> m_transVelProj2DExtractors;
+    std::vector<ExtractorBodyMaskType>       m_bodyMaskExtractors;
 
     /** Returns the total bytes which is needed for all extractors and initializes all buffers */
     std::size_t resizeBuffer(){
@@ -333,6 +368,9 @@ public:
            totalBytes += e.resizeBuffer(m_dimension);
         }
         for(auto & e : m_transVelProj1DExtractors){
+            totalBytes += e.resizeBuffer(m_dimension);
+        }
+        for(auto & e : m_bodyMaskExtractors){
             totalBytes += e.resizeBuffer(m_dimension);
         }
         return totalBytes;
@@ -358,7 +396,10 @@ public:
             for(auto & e : m_settings->m_transVelProj2DExtractors){
                 e.writeCellData(m_grid,cellData,index);
             }
-             for(auto & e : m_settings->m_transVelProj1DExtractors){
+            for(auto & e : m_settings->m_transVelProj1DExtractors){
+                e.writeCellData(m_grid,cellData,index);
+            }
+            for(auto & e : m_settings->m_bodyMaskExtractors){
                 e.writeCellData(m_grid,cellData,index);
             }
         }
@@ -374,6 +415,9 @@ public:
                 e.writeCellData(m_grid,begin,end);
             }
             for(auto & e : m_settings->m_transVelProj1DExtractors){
+                e.writeCellData(m_grid,begin,end);
+            }
+            for(auto & e : m_settings->m_bodyMaskExtractors){
                 e.writeCellData(m_grid,begin,end);
             }
         }
@@ -403,7 +447,7 @@ public:
         }
     }
 
-    std::size_t extractorCount(){ return m_transVelExtractor.size() + m_transVelProj1DExtractors.size() + m_transVelProj2DExtractors.size();}
+    std::size_t extractorCount(){ return m_transVelExtractor.size() + m_transVelProj1DExtractors.size() + m_transVelProj2DExtractors.size() + m_bodyMaskExtractors.size();}
 
 };
 

@@ -205,13 +205,17 @@ public:
             parseVelProjExtractor(extract,velProj);
 
         }else if(type=="TransVel"){
-
             if(settings.m_transVelExtractor.size()>=1){
                 ERRORMSG("---> You specified already a TransVel extractor, only one allowed!")
             }
             settings.m_transVelExtractor.emplace_back(name);
             auto & vel = settings.m_transVelExtractor.back();
             parseVelExtractor(extract,vel);
+        }else if(type=="BodyMask"){
+
+            settings.m_bodyMaskExtractors.emplace_back(name);
+            auto & bodyMask = settings.m_bodyMaskExtractors.back();
+            parseBodyMaskExtractor(extract,bodyMask);
 
         }else{
             ERRORMSG("---> No extraction type: " << type)
@@ -258,6 +262,11 @@ public:
         if(!Utilities::stringToType( vel.m_transformToGridCoordinates,  extract.attribute("transformToGridCoords").value()) ) {
                 ERRORMSG("---> String conversion 'transformToGridCoords' failed");
         }
+    }
+
+    template<typename TExtractor>
+    void parseBodyMaskExtractor(XMLNodeType & extract, TExtractor & vel){
+        // Nothing to parse!
     }
 
 
