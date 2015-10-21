@@ -294,9 +294,9 @@ namespace Extractors{
 
 
     template<unsigned int nTensorIndices = 3>
-    class ExtractorBodyMask : public details::ExtractorNormal<1,char,nTensorIndices>{
+    class ExtractorBodyMask : public details::ExtractorNormal<1,unsigned char,nTensorIndices>{
     public:
-        using Base = details::ExtractorNormal<1,char,nTensorIndices>;
+        using Base = details::ExtractorNormal<1,unsigned char,nTensorIndices>;
         DEFINE_TENSORSTORAGE_TYPE(Base)
 
         ExtractorBodyMask(std::string name): Base(name){}
@@ -307,9 +307,9 @@ namespace Extractors{
         inline void writeCellData(TGrid *g, CellDataType & cellData, const IndexType & index)
         {
             if(cellData.m_rigidBodyState){
-                this->getElement(index) = 1;
+                this->getElement(index)(0) = 1;
             }else{
-                this->getElement(index) = 0;
+                this->getElement(index)(0) = 0;
             }
         }
 
@@ -443,6 +443,9 @@ public:
             e.writeHDF5(fOrG);
         }
         for(auto & e : m_transVelProj1DExtractors){
+            e.writeHDF5(fOrG);
+        }
+        for(auto & e : m_bodyMaskExtractors){
             e.writeHDF5(fOrG);
         }
     }
