@@ -35,13 +35,13 @@ public:
     using AdjacentNeighbourRanksMapType = typename ProcessTopologyBase::AdjacentNeighbourRanksMapType;
 
 private:
-
-    using Base::m_dim;
-    using Base::m_dxyz;
-    using Base::m_dxyzInv;
-    using Base::m_cellData;
-    using Base::m_nbIndicesOff;
-    using Base::m_A_KI;
+//
+      using Base::m_dim;
+      using Base::m_dxyz;
+//    using Base::m_dxyzInv;
+//    using Base::m_cellData;
+      using Base::m_nbIndicesOff;
+      using Base::m_A_KI;
 
 public:
 
@@ -91,14 +91,12 @@ public:
 
 
     RankIdType getCellRank(const MyMatrix::Array3<RankIdType> & v) const {
-        ASSERTMSG( ( (v(0) >=0 && v(0) < m_dim(0)) && (v(1) >=0 && v(1) < m_dim(1)) && (v(2) >=0 && v(2) < m_dim(2)) ),
-                "Index: " << v << " is out of bound" )
+        ASSERTMSG( (v >=0 && v < m_dim).all() ,  "Index: " << v << " is out of bound" )
 
-        unsigned int cellRank = v(0) + v(1)*m_dim(0) + v(2) *(m_dim(0)*m_dim(1)) + m_cellNumberingStart;
+        RankIdType cellRank = v(0) + v(1)*m_dim(0) + v(2) *(m_dim(0)*m_dim(1)) + m_cellNumberingStart;
 
-        ASSERTMSG(cellRank < m_dim(0)*m_dim(1)*m_dim(2) + m_cellNumberingStart
-                && cellRank >= m_cellNumberingStart,
-                "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
+        ASSERTMSG(cellRank < m_dim.prod() + m_cellNumberingStart && cellRank >= m_cellNumberingStart,
+                "cellRank: " << cellRank <<" not in Dimension: "<< m_dim.transpose()<<std::endl );
         return cellRank;
     };
 
@@ -106,9 +104,8 @@ public:
     NeighbourRanksListType getCellNeighbours(RankIdType cellRank) const {
         NeighbourRanksListType v;
         // cellRank zero indexed
-        ASSERTMSG(cellRank < m_dim(0)*m_dim(1)*m_dim(2) + m_cellNumberingStart
-                && cellRank >= m_cellNumberingStart,
-                "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
+       ASSERTMSG(cellRank < m_dim.prod() + m_cellNumberingStart && cellRank >= m_cellNumberingStart,
+                "cellRank: " << cellRank <<" not in Dimension: "<< m_dim.transpose()<<std::endl );
 
         MyMatrix::Array3<RankIdType> cell_index = getCellIndex(cellRank);
 
@@ -133,9 +130,8 @@ public:
 
     MyMatrix::Array3<RankIdType> getCellIndex(RankIdType cellRank) const {
 
-        ASSERTMSG(cellRank < m_dim(0)*m_dim(1)*m_dim(2) + m_cellNumberingStart
-                && cellRank >= m_cellNumberingStart,
-                "cellRank: " << cellRank <<" not in Dimension: "<< m_dim(0)<<","<< m_dim(1)<<","<< m_dim(2)<<std::endl );
+        ASSERTMSG(cellRank < m_dim.prod() + m_cellNumberingStart && cellRank >= m_cellNumberingStart,
+                "cellRank: " << cellRank <<" not in Dimension: "<< m_dim.transpose()<<std::endl );
 
         MyMatrix::Array3<unsigned int> v;
         unsigned int cellNumberTemp;

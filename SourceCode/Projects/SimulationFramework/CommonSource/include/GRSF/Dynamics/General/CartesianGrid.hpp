@@ -65,7 +65,7 @@ public:
     }
 
     /** Get cell index, points needs to be in same frame as aabb in this class */
-    template<bool transformInputToKSystem = false, typename Derived>
+    template<bool transformInputToKSystem, typename Derived>
     bool getCellIndex(const MatrixBase<Derived> & point, IndexType & index) const {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
 
@@ -85,7 +85,7 @@ public:
     /** If transformInputToKSystem == true , the input point is assumed to be
     * in I system and is transformed to the K system. other wise the point is assumed to be in the system of the grid
     */
-    template<bool transformInputToKSystem = false, typename Derived>
+    template<bool transformInputToKSystem, typename Derived>
     IndexType getCellIndexClosest(const MatrixBase<Derived> & point) const {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
 
@@ -107,7 +107,7 @@ public:
     };
 
     /** Get cell data  */
-    template<bool transformInputToKSystem = false, typename Derived>
+    template<bool transformInputToKSystem, typename Derived>
     typename CellDataListType::value_type * getCellData(const MatrixBase<Derived> & point) {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
 
@@ -121,7 +121,7 @@ public:
     }
 
     /** Get cell data  */
-    template<bool transformInputToKSystem = false, typename Derived>
+    template<bool transformInputToKSystem, typename Derived>
     typename CellDataListType::value_type * getCellData(const MatrixBase<Derived> & point,
             IndexType & index) {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
@@ -134,7 +134,7 @@ public:
     }
 
     /** Get cell data closest  */
-    template<bool transformInputToKSystem = false, typename Derived>
+    template<bool transformInputToKSystem, typename Derived>
     TCellData * getCellDataClosest(const MatrixBase<Derived> & point) const {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived,3);
 

@@ -42,7 +42,7 @@ public:
                             const AABB3d & aabb,
                             bool aligned,
                             const Matrix33 & A_IK = Matrix33::Identity())
-            : m_rank(processRank), m_axisAligned(aligned), m_A_IK(A_IK), m_kdTree(tree.get()), m_kdTreeRefCount(tree)
+            : m_rank(processRank), m_axisAligned(aligned), m_A_KI(A_IK.transpose()), m_kdTree(tree.get()), m_kdTreeRefCount(tree)
     {
 
         if(!m_kdTree){
@@ -122,7 +122,7 @@ public:
             ASSERTMSG(leaf,"This should never be nullptr!");
             return leaf->getIdx();
         }else{
-            auto * leaf = m_kdTree->getLeaf(m_A_IK.transpose()*I_point);
+            auto * leaf = m_kdTree->getLeaf(m_A_KI*I_point);
             ASSERTMSG(leaf,"This should never be nullptr!");
             return leaf->getIdx();
         }
@@ -135,7 +135,7 @@ public:
         if(m_axisAligned) {
             overlapsOwnRank = m_colliderKdTree.checkOverlap(neighbourProcessRanks, m_lcaBoundary, body);
         } else {
-            overlapsOwnRank = m_colliderKdTree.checkOverlap(neighbourProcessRanks, m_lcaBoundary, body, m_A_IK);
+            overlapsOwnRank = m_colliderKdTree.checkOverlap(neighbourProcessRanks, m_lcaBoundary, body, m_A_KI);
         }
 
         return neighbourProcessRanks.size() > 0;
@@ -172,7 +172,7 @@ private:
     RankIdType m_rank; ///< Own rank;
 
     bool m_axisAligned = true;
-    Matrix33 m_A_IK ; ///< The grid can be rotated, this is the transformation matrix from grid frame K to intertia frame I
+    Matrix33 m_A_KI ; ///< The grid can be rotated, this is the transformation matrix from grid frame K to intertia frame I
 
 
     TreeType * m_kdTree = nullptr;      ///< The kdTree
