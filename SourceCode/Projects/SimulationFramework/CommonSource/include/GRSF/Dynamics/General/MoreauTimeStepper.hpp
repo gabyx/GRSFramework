@@ -83,7 +83,7 @@ void MoreauTimeStepper::writeIterationToSystemDataFile(double globalTime) {
 
     m_SystemDataFile << std::fixed
     << globalTime << "\t"
-    << m_currentSimulationTime <<"\t"
+    << m_startSimulationTime <<"\t"
     << (m_endTime-m_startTime) <<"\t"
     << (m_endTimeCollisionSolver-m_startTimeCollisionSolver) <<"\t"
     << (m_endTimeInclusionSolver-m_startTimeInclusionSolver) <<"\t"

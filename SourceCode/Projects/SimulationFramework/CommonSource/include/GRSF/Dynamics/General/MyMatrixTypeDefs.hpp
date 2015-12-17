@@ -171,11 +171,11 @@ struct MyMatrixIOFormat {
    template<typename Derived> using ArrayBase  = typename MyMatrix::ArrayBase<Derived>; \
    \
    template<typename Derived> using VectorBDyn = typename MyMatrix::VectorBDyn<Derived>; \
-   template<typename Derived,unsigned int M> using VectorBStat = typename MyMatrix::VectorBStat<Derived,M>; \
+   template<typename Derived, int M> using VectorBStat = typename MyMatrix::VectorBStat<Derived,M>; \
    \
    template<typename Derived> using MatrixBDynDyn = typename MyMatrix::MatrixBDynDyn<Derived>; \
-   template<typename Derived, unsigned int N> using MatrixBDynStat = typename MyMatrix::MatrixBDynStat<Derived,N>; \
-   template<typename Derived, unsigned int M> using MatrixBStatDyn = typename MyMatrix::MatrixBStatDyn<Derived,M>; \
+   template<typename Derived, int N> using MatrixBDynStat = typename MyMatrix::MatrixBDynStat<Derived,N>; \
+   template<typename Derived, int M> using MatrixBStatDyn = typename MyMatrix::MatrixBStatDyn<Derived,M>; \
     \
    template<typename EigenType> using MatrixRef = typename MyMatrix::MatrixRef< EigenType >; \
    template<typename EigenType> using MatrixMap = typename MyMatrix::MatrixMap< EigenType >; \
@@ -211,20 +211,20 @@ struct MyMatrixIOFormat {
     using MatrixDiagDyn = typename MyMatrix::MatrixDiagDyn< _PREC_ >; \
     using MatrixDynDynRow = typename MyMatrix::MatrixDynDynRow< _PREC_ >; \
     \
-    template<unsigned int M> using MatrixStatDyn = typename MyMatrix::MatrixStatDyn< _PREC_, M>; \
-    template<unsigned int N> using MatrixDynStat = typename MyMatrix::MatrixDynStat< _PREC_, N>; \
-    template<unsigned int M,unsigned int N> using MatrixStatStat = typename MyMatrix::MatrixStatStat< _PREC_, M,N>; \
-    template<unsigned int M> using VectorStat = typename MyMatrix::VectorStat< _PREC_, M>; \
+    template< int M> using MatrixStatDyn = typename MyMatrix::MatrixStatDyn< _PREC_, M>; \
+    template< int N> using MatrixDynStat = typename MyMatrix::MatrixDynStat< _PREC_, N>; \
+    template< int M, int N> using MatrixStatStat = typename MyMatrix::MatrixStatStat< _PREC_, M,N>; \
+    template< int M> using VectorStat = typename MyMatrix::VectorStat< _PREC_, M>; \
     \
     using AffineTrafo = typename MyMatrix::AffineTrafo< _PREC_ >; \
     using AffineTrafo2d = typename MyMatrix::AffineTrafo2d< _PREC_ >; \
     using MatrixSparse = typename MyMatrix::MatrixSparse< _PREC_ >; \
     using MatrixSparseTriplet = typename MyMatrix::MatrixSparseTriplet< _PREC_ >; \
     \
-    template<unsigned int M> using ArrayStatDyn = typename MyMatrix::ArrayStatDyn< _PREC_, M>; \
-    template<unsigned int N> using ArrayDynStat = typename MyMatrix::ArrayDynStat< _PREC_, N>; \
-    template<unsigned int M,unsigned int N> using ArrayStatStat = typename MyMatrix::ArrayStatStat< _PREC_, M,N>; \
-    template<unsigned int M> using ArrayStat = typename MyMatrix::ArrayStat< _PREC_, M>; \
+    template< int M> using ArrayStatDyn = typename MyMatrix::ArrayStatDyn< _PREC_, M>; \
+    template< int N> using ArrayDynStat = typename MyMatrix::ArrayDynStat< _PREC_, N>; \
+    template< int M,unsigned int N> using ArrayStatStat = typename MyMatrix::ArrayStatStat< _PREC_, M,N>; \
+    template< int M> using ArrayStat = typename MyMatrix::ArrayStat< _PREC_, M>; \
     using Array3 = typename MyMatrix::Array3< _PREC_ >; \
     using Array2 = typename MyMatrix::Array2< _PREC_ >; \
     \
