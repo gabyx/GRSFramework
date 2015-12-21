@@ -76,7 +76,6 @@ namespace Extractors{
             using TensorType = typename _class_::TensorType;\
             using TensorMapType = typename _class_::TensorMapType;
 
-
         template<unsigned int _DimIn,
                  unsigned int _DimOut,
                  typename TScalar = PREC>

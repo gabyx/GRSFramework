@@ -143,11 +143,14 @@ void GridExtractor::addState(BodyStateContainer & states){
     // switch here on grid type
 
     if(!m_grid){
-        m_grid.reset( new GridType(m_settings->m_aabb,m_settings->m_dimension) );
+        // make new grid
+        m_grid.reset( new GridType(m_settings->m_aabb,
+                                   m_settings->m_dimension) );
     }
 
     // reset all cells
     m_grid->applyVisitor( CellDataMaxBuffer::Reset<GridType>(m_grid.get()) );
+    // add data to cells
     addAllBodies(m_grid.get(),states);
 
     // apply extractor visitor
