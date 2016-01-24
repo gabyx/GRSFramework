@@ -205,7 +205,7 @@ private:
             }
 
             m_executionGraph->addNode(n,false,false);
-            this->addNodeToGroup(logicNode,id);
+            this->addNodeToGroup(logicNode,id,"Body");
     }
 
     void createToolColorGradient(XMLNodeType & logicNode, unsigned int id){
@@ -248,7 +248,7 @@ private:
             }
 
             m_executionGraph->addNode(n,false,false);
-            this->addNodeToGroup(logicNode,id);
+            this->addNodeToGroup(logicNode,id,"Body");
     }
 
     void createToolMatteMaterial(XMLNodeType & logicNode, unsigned int id) {
@@ -300,7 +300,7 @@ private:
         }
 
          m_executionGraph->addNode(node,false,false);
-         this->addNodeToGroup(logicNode,id);
+         this->addNodeToGroup(logicNode,id,"Body");
     }
 
     void createToolRendermanOutput(XMLNodeType & logicNode, unsigned int id) {

@@ -63,7 +63,7 @@
          // All arithmetic types of TypeSeq (for SFINAE)
         using TypeSeqArithmetic = boost::mpl::vector<double,
                                                float,
-                                               //bool,
+                                               bool,
                                                char,
                                                short,
                                                int,

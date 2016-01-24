@@ -13,7 +13,7 @@ void RenderExecutionGraph::setup() {
     for(auto & n : outNodes){
         LogicNodes::RenderScriptWriter * r = dynamic_cast<LogicNodes::RenderScriptWriter * >(n);
         if(!r) {
-            ERRORMSG("Output node is not of type 'RenderScriptWriter = [RendermanWriter]' ")
+            continue;
         }
         m_scriptWritterNodes.emplace(r);
     }

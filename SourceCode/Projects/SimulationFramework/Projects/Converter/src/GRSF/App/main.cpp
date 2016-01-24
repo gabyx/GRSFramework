@@ -14,7 +14,7 @@
 #include "GRSF/Converters/SimFileInfo.hpp"
 #include "GRSF/Converters/SimFileJoiner.hpp"
 #include "GRSF/Converters/SimFileResampler.hpp"
-//#include "GRSF/Converters/RenderConverter.hpp"
+#include "GRSF/Converters/RenderConverter.hpp"
 #include "GRSF/Converters/AnalyzerConverter.hpp"
 #include "GRSF/Converters/GridderConverter.hpp"
 
@@ -114,26 +114,26 @@ int main(int argc, char **argv) {
         }
         else if(std::string(argv[1]) == "renderer"){
 
-//            Logging::LogManager logger; // singelton
-//
-//            // Parsing Input Parameters===================================
-//            ApplicationCLOptionsRenderer opts;  // singelton
-//            opts.parseOptions(argc-1,++argv);
-//            opts.checkArguments();
-//            opts.printArgs(std::cerr);
-//            // End Parsing =================================
-//
-//            try{
-//                RenderConverter renderConv(opts.getInputFiles(),
-//                                   opts.getSceneFile(),
-//                                   opts.getConverterLogicFile() ,
-//                                   opts.getRenderer());
-//                renderConv.convert();
-//
-//            }catch(const Exception & e){
-//                    std::cerr <<"Exception occured: " <<  e.what() << std::endl;
-//                    exit(EXIT_FAILURE);
-//            }
+            Logging::LogManager logger; // singelton
+
+            // Parsing Input Parameters===================================
+            ApplicationCLOptionsRenderer opts;  // singelton
+            opts.parseOptions(argc-1,++argv);
+            opts.checkArguments();
+            opts.printArgs(std::cerr);
+            // End Parsing =================================
+
+            try{
+                RenderConverter renderConv(opts.getInputFiles(),
+                                   opts.getSceneFile(),
+                                   opts.getConverterLogicFile() ,
+                                   opts.getRenderer());
+                renderConv.convert();
+
+            }catch(const Exception & e){
+                    std::cerr <<"Exception occured: " <<  e.what() << std::endl;
+                    exit(EXIT_FAILURE);
+            }
         }else if(std::string(argv[1]) == "analyzer"){
 
             Logging::LogManager logger; // singelton

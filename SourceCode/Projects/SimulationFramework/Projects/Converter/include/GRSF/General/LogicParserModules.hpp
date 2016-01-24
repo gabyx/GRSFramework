@@ -358,28 +358,34 @@ namespace LogicParserModules{
 
         #define DEFINE_SIMPLEFUNCTION_S(type) DEFINE_SIMPLEFUNCTION_S2(type,type)
 
+        #define DEFINE_SIMPLEFUNCTION2_IFPART(type) \
+            using T1 = type; \
+            std::string t2 = logicNode.attribute("outputType").value(); \
+            if(t2.empty()){ \
+                using T2 = T1;  \
+                DEFINE_MAKESimpleFunc \
+            }else{ \
+                if      DEFINE_SIMPLEFUNCTION_S(float)  \
+                else if DEFINE_SIMPLEFUNCTION_S(double) \
+                else if DEFINE_SIMPLEFUNCTION_S(bool) \
+                else if DEFINE_SIMPLEFUNCTION_S(char) \
+                else if DEFINE_SIMPLEFUNCTION_S(short) \
+                else if DEFINE_SIMPLEFUNCTION_S(int) \
+                else if DEFINE_SIMPLEFUNCTION_S(long int) \
+                else if DEFINE_SIMPLEFUNCTION_S(unsigned char) \
+                else if DEFINE_SIMPLEFUNCTION_S(unsigned short) \
+                else if DEFINE_SIMPLEFUNCTION_S(unsigned int) \
+                else if DEFINE_SIMPLEFUNCTION_S(unsigned long int) \
+                else if DEFINE_SIMPLEFUNCTION_S(unsigned long long int) \
+                else{ \
+                    ERRORMSG_PARSERTOOL("---> String conversion 'outputType': '" << t2 << "' not found!", id);  \
+                } \
+            } \
+
+
         #define DEFINE_SIMPLEFUNCTION2(type, typeName) \
-            ( t1 == #typeName ){ using T1 = type; \
-                    std::string t2 = logicNode.attribute("outputType").value(); \
-                    if(t2.empty()){ \
-                        using T2 = T1;  \
-                        DEFINE_MAKESimpleFunc \
-                    }else{ \
-                        if DEFINE_SIMPLEFUNCTION_S(float)  \
-                        else if DEFINE_SIMPLEFUNCTION_S(double) \
-                        else if DEFINE_SIMPLEFUNCTION_S(bool) \
-                        else if DEFINE_SIMPLEFUNCTION_S(char) \
-                        else if DEFINE_SIMPLEFUNCTION_S(short) \
-                        else if DEFINE_SIMPLEFUNCTION_S(int) \
-                        else if DEFINE_SIMPLEFUNCTION_S(long int) \
-                        else if DEFINE_SIMPLEFUNCTION_S(unsigned char) \
-                        else if DEFINE_SIMPLEFUNCTION_S(unsigned short) \
-                        else if DEFINE_SIMPLEFUNCTION_S(unsigned int) \
-                        else if DEFINE_SIMPLEFUNCTION_S(unsigned long int) \
-                        else{ \
-                            ERRORMSG_PARSERTOOL("---> String conversion 'outputType': '" << t2 << "' not found!", id);  \
-                        } \
-                    } \
+            ( t1 == #typeName ){ \
+                    DEFINE_SIMPLEFUNCTION2_IFPART(type) \
             }
 
         #define DEFINE_SIMPLEFUNCTION(type) DEFINE_SIMPLEFUNCTION2(type,type)
@@ -397,21 +403,22 @@ namespace LogicParserModules{
                 // Make tool
                 std::string t1 = logicNode.attribute("evalType").value();
                 LogicNode * node;
-                if DEFINE_SIMPLEFUNCTION(float)
+                if      DEFINE_SIMPLEFUNCTION(float)
                 else if DEFINE_SIMPLEFUNCTION(double)
-//                else if DEFINE_SIMPLEFUNCTION(bool)
-//                else if DEFINE_SIMPLEFUNCTION(char)
+                // does not work with expression parser exprtk
+                //else if DEFINE_SIMPLEFUNCTION(bool)
+                //else if DEFINE_SIMPLEFUNCTION(char)
 //                else if DEFINE_SIMPLEFUNCTION(short)
 //                else if DEFINE_SIMPLEFUNCTION(int)
 //                else if DEFINE_SIMPLEFUNCTION(long int)
-//                //else if DEFINE_SIMPLEFUNCTION(long long int)
+//                else if DEFINE_SIMPLEFUNCTION(long long int)
 //                else if DEFINE_SIMPLEFUNCTION(unsigned char)
 //                else if DEFINE_SIMPLEFUNCTION(unsigned short)
 //                else if DEFINE_SIMPLEFUNCTION(unsigned int)
 //                else if DEFINE_SIMPLEFUNCTION(unsigned long int)
-                //else if DEFINE_SIMPLEFUNCTION(unsigned long long int)
+//                else if DEFINE_SIMPLEFUNCTION(unsigned long long int)
                 else{
-                    ERRORMSG_PARSERTOOL("---> String conversion 'evalType': '" << t1 << "' not found!", id);
+                    DEFINE_SIMPLEFUNCTION2_IFPART(double)
                 }
 
                 m_executionGraph->addNode(node,false,false);
@@ -442,8 +449,9 @@ namespace LogicParserModules{
             for (auto & n : logicNode.children("InputFormat")) {
                 std::string t = n.attribute("type").value();
 
-                if ADD_SIMPLEFUNCTION_SOCKET_IN(float)
+                if      ADD_SIMPLEFUNCTION_SOCKET_IN(float)
                 else if ADD_SIMPLEFUNCTION_SOCKET_IN(double)
+                else if ADD_SIMPLEFUNCTION_SOCKET_IN(bool)
                 else if ADD_SIMPLEFUNCTION_SOCKET_IN(char)
                 else if ADD_SIMPLEFUNCTION_SOCKET_IN(short)
                 else if ADD_SIMPLEFUNCTION_SOCKET_IN(int)
