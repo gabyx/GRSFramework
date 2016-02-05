@@ -33,7 +33,7 @@ public:
                      boost::filesystem::path filePath,
                      std::size_t nBodies,std::size_t nStates);
 
-    void initState(boost::filesystem::path filePath, double time, unsigned int frameNr);
+    void initState(boost::filesystem::path filePath, double time, std::size_t stateIdx);
 
     template<typename StateContainer>
     void addState(StateContainer & states);
@@ -128,11 +128,11 @@ private:
     std::size_t m_stateCounter = 0;     ///< /States/S0, /States/S1, ...
 
 
-    std::size_t m_nBodies;
-    std::size_t m_nStates;
-    double m_time;
-    unsigned int m_frameNr;
-
+    std::size_t m_nBodies = 0;
+    std::size_t m_nStates = 0;
+    double m_time = 0;
+    std::size_t m_stateIdx = 0; ///< state index in Sim file
+    std::size_t m_globalStateOffset = 0;///< The global state index offset overall converted files (in sequence with the files)
     /** Log */
     Logging::Log * m_log = nullptr;
 };
@@ -161,7 +161,8 @@ void GridExtractor::addState(BodyStateContainer & states){
     std::string groupName = "S" + std::to_string(m_stateCounter++);
     H5::Group s = m_statesGroup.createGroup(groupName);
     Hdf5Helpers::saveAttribute(s,m_time,"time");
-    Hdf5Helpers::saveAttribute(s,m_frameNr,"stateIdx");
+    Hdf5Helpers::saveAttribute(s,m_stateIdx,"stateIdx");
+    Hdf5Helpers::saveAttribute(s,m_globalStateOffset+m_stateIdx,"globalStateIdx");
     m_settings->writeToHDF5(s);
 
     // Make link in current (/Files/SimFile0, /Files/SimFiles1, ...) for this state

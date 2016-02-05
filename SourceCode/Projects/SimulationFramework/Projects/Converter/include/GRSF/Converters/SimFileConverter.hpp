@@ -45,7 +45,7 @@ protected:
     using StateIdxType = std::size_t;
     struct StateIndex{
         StateIdxType m_idx;
-        unsigned int m_mappedIdx;
+        StateIdxType m_mappedIdx;
         boost::filesystem::path m_outputFile;
     };
 
@@ -530,7 +530,7 @@ protected:
                 mappedIdx = itStateIdx->m_mappedIdx;
             }
 
-            LOG(m_log, "---> Init state with: \n\toutputFile: " << outputFile << "\n\tframeIdx: " << mappedIdx << "\n\ttime: " << time << std::endl;)
+            LOG(m_log, "---> Init state with: \n\toutputFile: " << outputFile << "\n\mappedIdx: " << mappedIdx << "\n\ttime: " << time << std::endl;)
             start = timer.elapsedMilliSec();
             EXPAND_PARAMETERPACK( details::StepperDispatch<TSimFileStepper>::initState(simFileStepper,outputFile, time, mappedIdx ) )
             avgInitFrameTime += timer.elapsedMilliSec() - start;

@@ -25,19 +25,23 @@ GridExtractor::~GridExtractor()
 }
 
 void GridExtractor::initState(boost::filesystem::path filePath,
-                              double time, unsigned int frameNr)
+                              double time, std::size_t stateIdx)
 {
 //    m_filePath = filePath;
     m_time = time;
-    m_frameNr = frameNr;
+    m_stateIdx = stateIdx;
 }
 
 void GridExtractor::initSimInfo(boost::filesystem::path simFile,
                                 boost::filesystem::path filePath,
                                 std::size_t nBodies,std::size_t nStates)
 {
+
+    m_globalStateOffset += m_nStates; // add old states
+
     m_nBodies = nBodies;
     m_nStates = nStates;
+
 
     LOGGCLEVEL1(m_log,"---> Init for new sim file:" << simFile << std::endl << "\toutputFile: " << filePath << std::endl;);
 
@@ -83,6 +87,11 @@ void GridExtractor::initSimInfo(boost::filesystem::path simFile,
     // Create sim file group (/Files/SimFile0 , /Files/SimFile1 .... )
     m_currentSimFileGroup = m_filesGroup.createGroup("SimFile" + std::to_string(m_simFileCounter++));
     Hdf5Helpers::saveAttribute(m_currentSimFileGroup,simFile.filename().string(),"filePath");
+
+    Hdf5Helpers::saveAttribute(m_currentSimFileGroup,nStates,"nStates");
+    Hdf5Helpers::saveAttribute(m_currentSimFileGroup,nBodies,"nBodies");
+    Hdf5Helpers::saveAttribute(m_currentSimFileGroup,m_globalStateOffset,"m_globalStateOffset");
+
     m_currentStateRefs = &m_stateRefs[m_currentSimFileGroup]; // stays valid also when rehash!
 }
 
@@ -126,15 +135,26 @@ void GridExtractor::closeFile(){
 
 void GridExtractor::writeReferences(){
     // Write all references
-    // write for each state a reference to the corresponding simfile group
+    // write for each state a reference to the corresponding sim file group
 
     if(!m_stateRefs.empty()){
         LOGGCLEVEL1(m_log,"---> Write state reference for each sim file ..." << std::endl;);
     }
-
     for(auto & p : m_stateRefs){
-        Hdf5Helpers::saveData(p.first, p.second, "StateRefs");
+        Hdf5Helpers::saveRefData(p.first, p.second, "StateRefs");
     }
+
+    // Write a reference to the state group linking to the sim file
+    // TODO does not work so far,
+//    for(auto & p : m_stateRefs){
+//        hobj_ref_t linkToFile;
+//        //p.first.reference(&linkToFile); // /Files/SimFile_i
+//        m_h5File->reference(&linkToFile,p.first,H5R_OBJECT);
+//        for(auto & stateLink: p.second){ // iterate over all states and link sim file in state group
+//            H5::Group stateG(*m_h5File,&stateLink,H5R_OBJECT);       // get group to the state
+//            Hdf5Helpers::saveAttribute(stateG,linkToFile,"simFileRef");
+//        }
+//    }
 
 }
 

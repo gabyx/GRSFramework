@@ -200,6 +200,7 @@ struct KeyEqual: std::binary_function <T,T,bool>{
 template<typename TFileGroupData, typename T>
 inline void saveAttribute(const TFileGroupData & fg, const T & attr, std::string name)
 {
+    STATIC_ASSERTM((!std::is_same<T,std::string>::value), "string should not be saved with this function")
     hsize_t dims=1;
     H5::DataSpace d(1, &dims /*dimension*/);
     H5::Attribute a = fg.createAttribute(name, Hdf5Helpers::mapNativeTypeToLE<T>(),d );
@@ -221,6 +222,13 @@ inline void saveAttribute(const TFileGroupData & fg, const std::string & s, std:
 }
 
 
+template<typename TFileGroupData>
+void saveRefAttribute(const TFileGroupData & fg , const hobj_ref_t & ref, std::string name = "StateRefs"){
+    hsize_t s = 1;
+    H5::DataSpace ds( 1, &s);
+    H5::Attribute a = fg.createAttribute(name, H5::PredType::STD_REF_OBJ, ds);
+    a.write(H5::PredType::STD_REF_OBJ, &ref);
+}
 
 
 namespace details
@@ -390,12 +398,13 @@ H5::Group saveData(const TFileGroup & fg, const T & aabb, std::string name="AABB
 }
 
 template<typename TFileGroup>
-void saveData(const TFileGroup & fg , std::vector<hobj_ref_t> & refs, std::string name = "StateRefs"){
+void saveRefData(const TFileGroup & fg , const std::vector<hobj_ref_t> & refs, std::string name = "StateRefs"){
     hsize_t s = refs.size();
     H5::DataSpace ds( 1, &s);
     auto refset = fg.createDataSet(name, H5::PredType::STD_REF_OBJ, ds);
     refset.write(&refs[0], H5::PredType::STD_REF_OBJ);
 }
+
 
 
 
