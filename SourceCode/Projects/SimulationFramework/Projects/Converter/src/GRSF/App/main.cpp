@@ -21,9 +21,11 @@
 void printHelpAndExit(std::string o=""){
      std::cerr << "Wrong Options: '" << o <<"'"<< std::endl
             << " Help: \n"
-            << "    converter sim      [-h|--help]        : Sim File Converter\n"
-            << "    converter siminfo  [-h|--help]        : Sim File Info \n"
-            << "    converter renderer [-h|--help]        : Sim File / Scene to Renderfile Converter" << std::endl;
+            << "    converter sim      [-h|--help]        : convert '.sim' files \n"
+            << "    converter siminfo  [-h|--help]        : info about '.sim' files \n"
+            << "    converter renderer [-h|--help]        : produce render output of '.sim' files and scene XML by execution graph XML" << std::endl;
+            << "    converter analyzer [-h|--help]        : analyze '.sim' files with execution graph XML" << std::endl;
+            << "    converter gridder  [-h|--help]        : extract gridded data from '.sim' files" << std::endl;
             exit(EXIT_FAILURE);
 }
 
