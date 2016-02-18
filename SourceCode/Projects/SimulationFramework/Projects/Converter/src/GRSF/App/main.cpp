@@ -23,26 +23,31 @@ void printHelpAndExit(std::string o=""){
             << " Help: \n"
             << "    converter sim      [-h|--help]        : convert '.sim' files \n"
             << "    converter siminfo  [-h|--help]        : info about '.sim' files \n"
-            << "    converter renderer [-h|--help]        : produce render output of '.sim' files and scene XML by execution graph XML" << std::endl;
-            << "    converter analyzer [-h|--help]        : analyze '.sim' files with execution graph XML" << std::endl;
+            << "    converter renderer [-h|--help]        : produce render output of '.sim' files and scene XML by execution graph XML\n"
+            << "    converter analyzer [-h|--help]        : analyze '.sim' files with execution graph XML\n"
             << "    converter gridder  [-h|--help]        : extract gridded data from '.sim' files" << std::endl;
             exit(EXIT_FAILURE);
 }
 
-void callBackSIGINT(int){
-    std::cerr << "Converter:: exit ..." << std::endl;
-    exit(EXIT_FAILURE);
+void callBackSignalAndExit(int signum){
+    std::cerr << "GRSFramework Converter: received signal: " << signum << " -> exit ..." << std::endl;
+    // http://www.cons.org/cracauer/sigint.html
+    // set sigint handler to nothing
+    // and kill ourself
+    signal(SIGINT, SIG_DFL);
+    kill(getpid(),SIGINT);
 }
 
 void callBackSIGPIPE(int){
-    std::cerr << "Converter:: Pipe error: exit ..." << std::endl;
-    exit(EXIT_FAILURE);
+    std::cerr << "GRSFramework Converter: received SIGPIPE -> Pipe error: exit ..." << std::endl;
+    signal(SIGINT, SIG_DFL);
+    kill(getpid(),SIGINT);
 }
 
 int main(int argc, char **argv) {
 
-    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2,SIGPIPE} ) )
-    sigHandler->registerCallback(SIGINT,callBackSIGINT,"callBackSIGINT");
+    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGUSR2,SIGPIPE} ) )
+    sigHandler->registerCallback({SIGINT,SIGUSR2},callBackSignalAndExit,"callBackSignalAndExit");
     sigHandler->registerCallback(SIGPIPE,callBackSIGPIPE,"callBackSIGPIPE");
 
 

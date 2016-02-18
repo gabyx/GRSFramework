@@ -135,16 +135,21 @@ void start( int argc, char **argv ){
 
 }
 
-void exitUngracefully(int signal){
-    std::cerr << "exitUngracefully:: signal " << signal << " --> exit ..." << std::endl;
-    exit(EXIT_FAILURE);
+
+void callBackSignalAndExit(int signum){
+    std::cerr << "GRSFramework Sim MPI: received signal: " << signum << " -> exit ..." << std::endl;
+    // http://www.cons.org/cracauer/sigint.html
+    // set sigint handler to nothing
+    // and kill ourself
+    signal(SIGINT, SIG_DFL);
+    kill(getpid(),SIGINT);
 }
 
 int main(int argc, char **argv) {
 
 
-    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGTERM,SIGUSR1,SIGUSR2} ) )
-    sigHandler->registerCallback({SIGINT,SIGUSR1,SIGUSR2,SIGTERM},exitUngracefully,"exitUngracefully");
+    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGUSR2} ) )
+    sigHandler->registerCallback({SIGINT,SIGUSR2},callBackSignalAndExit,"callBackSignalAndExit");
 
 
     // Start MPI =================================

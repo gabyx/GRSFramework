@@ -453,6 +453,8 @@ protected:
 
         ApplicationSignalHandler::getSingleton().registerCallback(SIGINT,
                             std::bind( &SimFileConverter::callbackAbort, this), "SimFileConverter");
+        ApplicationSignalHandler::getSingleton().registerCallback(SIGUSR2,
+                            std::bind( &SimFileConverter::callbackAbort, this), "SimFileConverter");
 
         StateListType states;
 
