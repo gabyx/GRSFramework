@@ -133,6 +133,32 @@ public:
 
 private:
 
+    void parseColor(XMLNodeType & cNode, Vector3 & rgb){
+        auto att = cNode.attribute("rgb");
+        if(att){
+            if(!Utilities::stringToVector(rgb, att.value())) {
+                ERRORMSG("---> String conversion in ColorList tool: rgb failed");
+            }
+
+        }else{
+            att = cNode.attribute("rgbInt8");
+            if(att){
+                if(!Utilities::stringToVector(rgb, att.value())) {
+                    ERRORMSG("---> String conversion in ColorList tool: rgbInt8 failed");
+                }
+                rgb.array() /= 255;
+            }else{
+                ERRORMSG("---> Color attribute is not [rgb/rgbInt8]");
+            }
+        }
+
+
+        if ((rgb.array()<0 || rgb.array()>1.0).any())
+        {
+            ERRORMSG("---> Color values: " << rgb.transpose() << "not in range [0,1]!");
+        }
+    }
+
      #define DEFINE_MAKEColorList \
         std::string g = logicNode.attribute("generate").value(); \
         if(g=="random"){ \
@@ -152,8 +178,21 @@ private:
                 ERRORMSG("---> String conversion in ColorList tool: count == 0") \
             } \
             n = new LogicNodes::ColorList<T>(id,count,seed,amp);\
+        }else if(g=="list"){  \
+            auto node = new LogicNodes::ColorList<T>(id); \
+            n =  node; \
+            auto nodes = logicNode.children("Color"); \
+            auto itNodeEnd = nodes.end(); \
+            Vector3 rgb; \
+            for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) { \
+                parseColor(*itNode,rgb); \
+                node->addColor(rgb); \
+            } \
+            if(node->getNColors() == 0){ \
+                ERRORMSG("---> You need to define a list of colors in ColorList tool"); \
+            } \
         }else{ \
-            ERRORMSG("---> String conversion in ColorList tool: generator failed"); \
+            ERRORMSG("---> String conversion in ColorList tool: generator failed: " << g); \
         }
 
 
@@ -166,27 +205,6 @@ private:
     #define DEFINE_ColorList(type) DEFINE_ColorList2(type,type)
 
     void createToolColorList(XMLNodeType & logicNode, unsigned int id){
-
-            std::string t = logicNode.attribute("generate").value();
-            if(t=="random"){
-            unsigned int seed;
-            if(!Utilities::stringToType(seed, logicNode.attribute("seed").value())) {
-                ERRORMSG("---> String conversion in ColorList tool: seed failed");
-            }
-            unsigned int count;
-            if(!Utilities::stringToType(count, logicNode.attribute("count").value())) {
-                ERRORMSG("---> String conversion in ColorList tool: count failed");
-            }
-            double amp;
-            if(!Utilities::stringToType(amp, logicNode.attribute("amp").value())) {
-                ERRORMSG("---> String conversion in ColorList tool: amp failed");
-            }
-            if(count==0){
-                ERRORMSG("---> String conversion in ColorList tool: count == 0")
-            }
-            }else{
-                ERRORMSG("---> String conversion in ColorList tool: generator failed");
-            }
 
             std::string t1 = logicNode.attribute("inputType").value();
             LogicNode * n;
@@ -234,9 +252,8 @@ private:
                 noColors = false;
 
                 Vector3 rgb;
-                if(!Utilities::stringToVector(rgb, itNode->attribute("rgb").value())) {
-                    ERRORMSG("---> String conversion in ColorGradient tool: rgb failed");
-                }
+                parseColor(*itNode,rgb);
+
                 PREC value;
                 if(!Utilities::stringToType(value, itNode->attribute("value").value())) {
                     ERRORMSG("---> String conversion in ColorGradient tool: value failed");

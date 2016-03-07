@@ -22,6 +22,7 @@ namespace LogicNodes {
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
         using Vector3Vec = StdVecAligned<Vector3>;
+        using ColorListType  = Vector3Vec;
 
         struct Inputs {
             enum {
@@ -48,7 +49,15 @@ namespace LogicNodes {
         DECLARE_ISOCKET_TYPE(Index, IndexType );
         DECLARE_OSOCKET_TYPE(Color, Vector3 );
 
-        ColorList(unsigned int id, unsigned int nColors, unsigned int seed, double amplitude = 1.0) : LogicNode(id) {
+
+        ColorList(unsigned int id) : LogicNode(id) {
+            ADD_ISOCK(Enable,true);
+            ADD_ISOCK(Index,0);
+            ADD_OSOCK(Color,Vector3(0.5,0.5,0.5));
+        }
+
+        ColorList(unsigned int id, unsigned int nColors, unsigned int seed,
+                  double amplitude = 1.0) : LogicNode(id) {
 
             ADD_ISOCK(Enable,true);
             ADD_ISOCK(Index,0);
@@ -67,12 +76,33 @@ namespace LogicNodes {
 
         }
 
-        ColorList(unsigned int id, std::vector<Vector3> colors) : LogicNode(id) {
+        template<typename T>
+        ColorList(unsigned int id,
+                  T && colors,
+                  double amplitude = 1.0) : LogicNode(id), m_colors{std::forward<T>(colors)} {
+
             ADD_ISOCK(Enable,true);
             ADD_ISOCK(Index,0);
             ADD_OSOCK(Color,Vector3(0.5,0.5,0.5));
 
-            m_colors = std::move(colors);
+            for( auto & c : m_colors){
+                c = amplitude*c;
+            }
+
+            if(m_colors.size()==0){
+                ERRORMSG("color list size = 0")
+            }
+
+        }
+
+        void clear(){
+            m_colors.clear();
+        }
+
+        std::size_t getNColors(){ return m_colors.size(); }
+
+        void addColor(const Vector3 & rgb){
+            m_colors.push_back(rgb);
         }
 
         ~ColorList(){}
@@ -89,7 +119,7 @@ namespace LogicNodes {
         }
 
     private:
-        std::vector<Vector3> m_colors;
+        ColorListType m_colors;
     };
 
 
