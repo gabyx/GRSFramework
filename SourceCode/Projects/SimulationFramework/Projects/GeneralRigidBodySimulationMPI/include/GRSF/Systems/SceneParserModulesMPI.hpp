@@ -123,7 +123,7 @@ public:
 
             m_topoSettings->m_type = TopologyBuilderSettingsType::TopologyBuilderEnumType::GRIDBUILDER;
 
-            if(!Utilities::stringToVector(m_topoSettings->m_gridBuilderSettings.m_processDim
+            if(!Utilities::stringToType(m_topoSettings->m_gridBuilderSettings.m_processDim
                                            ,  topo.attribute("dimension").value())) {
                 ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
             }
@@ -153,12 +153,12 @@ public:
                     ERRORMSG("Parse in here a rotation matrix: not implemented!")
                 }
                 Vector3 minPoint;
-                if(!Utilities::stringToVector(minPoint
+                if(!Utilities::stringToType(minPoint
                                                ,  topo.attribute("minPoint").value())) {
                     ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
                 }
                 Vector3 maxPoint;
-                if(!Utilities::stringToVector(maxPoint
+                if(!Utilities::stringToType(maxPoint
                                                ,  topo.attribute("maxPoint").value())) {
                     ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
                 }
@@ -210,12 +210,12 @@ public:
                     ERRORMSG("Parse in here a rotation matrix: not implemented!")
                 }
                 Vector3 minPoint;
-                if(!Utilities::stringToVector(minPoint
+                if(!Utilities::stringToType(minPoint
                                                ,  topo.attribute("minPoint").value())) {
                     ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
                 }
                 Vector3 maxPoint;
-                if(!Utilities::stringToVector(maxPoint
+                if(!Utilities::stringToType(maxPoint
                                                ,  topo.attribute("maxPoint").value())) {
                     ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
                 }

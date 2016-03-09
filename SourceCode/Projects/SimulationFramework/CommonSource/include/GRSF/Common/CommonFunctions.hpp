@@ -22,15 +22,18 @@
 #include <stdarg.h>  // for va_start, etc
 #include <memory>    // for std::unique_ptr
 
+#include <boost/filesystem.hpp>
+
 #include "TinyFormatInclude.hpp"
 
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/StaticAssert.hpp"
 #include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/SfinaeMacros.hpp"
 
 #include "GRSF/Common/FastStringConversion.hpp"
 #include "GRSF/Common/SfinaeMacros.hpp"
+
+
 
 namespace Utilities {
 
@@ -58,7 +61,7 @@ inline bool operator == (const char* a, const std::string & b) {
 // Prototypes
 struct StdTypeConverter {};
 
-template<typename T,typename TypeConverter = StdTypeConverter>
+template<typename T,typename TypeConverter = StdTypeConverter >
 bool stringToType(T & t, const std::string& s);
 
 
@@ -99,7 +102,7 @@ namespace stringToTypeImpl {
 * @brief Helper to convert a string with whitespace-seperated numbers into numbers and passes it to the Functor.
 * N=-1, loops till the end of the string and extracts as many numbers as possible
 */
-template <int N, typename PREC, typename Functor, typename TypeConverter>
+template <int N, typename PREC, typename Functor, typename TypeConverter, bool failIfCharactersLeft = true>
 bool stringToTypeFunctorImpl( Functor & f, const std::string & s) {
 
     unsigned int i=0, j;
@@ -139,60 +142,42 @@ bool stringToTypeFunctorImpl( Functor & f, const std::string & s) {
         i = j;
         extVal++;
     }
+    if( failIfCharactersLeft && i < l){
+        // scan to end, if characters are left -> fail
+        do{
+            if(s[i] != ' ') {
+                return false;
+            }
+        }while(++i < l);
+    }
+
     return true;
 };
 
-/**
-* @brief Helper to convert a string with whitespace-seperated numbers into numbers in a vector (operator() needs to available).
-* N=-1, loops till the end of the string and extracts as many numbers as possible
-*/
-template <int N, typename TVector, typename TypeConverter = StdTypeConverter>
-inline bool stringToVectorImpl( TVector & v, const std::string & s) {
 
-    unsigned int i=0, j;
-    using PREC = typename TVector::Scalar;
-    PREC number;
-    if(s.empty()) {
-        return false;
-    }
+template<typename T>
+struct isVectorType{
+    static const bool value =   (std::is_base_of<Eigen::MatrixBase<T>,typename std::remove_cv<T>::type >::value) ||
+                                (std::is_base_of<Eigen::ArrayBase<T>,typename std::remove_cv<T>::type >::value)  ||
+                                (std::is_base_of<Eigen::QuaternionBase<T>,typename std::remove_cv<T>::type >::value);
+};
 
-    unsigned int l = s.size();
-    unsigned int extVal = 0;
-    while(extVal < N || N==-1) {
-
-        if(i>=l) {
-            return (N==-1) ?  true :  false; // if we parse till the end, return true if we hit the end
-        }
-        // Skip whit spaces
-        while(s[i]==' ') {
-            i++;
-            if(i >= l) {
-                return (N==-1) ?  true :  false; // if we parse till the end, return true if we hit the end
-            }
-        }
-        // determine range of valid character
-        j=i;
-        while(s[j]!=' ') {
-            j++;
-            if(j >= l) {
-                break;
-            }
-        }
-        // extract substring and convert
-        if(!stringToType<PREC,TypeConverter>(number,s.substr(i,j-i))) {
-            return false;
-        }
-        v(extVal) = number;
-        i = j;
-        extVal++;
-    }
-    return true;
-}
-
-/** Standart dispatch for single types: double,floats, int*/
-template <typename TypeConverter, typename T>
+/** Standart dispatch for single types: double,floats, int */
+template <typename TypeConverter, typename T,
+          SFINAE_ENABLE_IF( !isVectorType<T>::value )>
 inline bool stringToTypeDispatch( T & t, const std::string & s) {
     return stringToTypeImpl::convert<T,TypeConverter>(t,s);
+}
+/** Standart dispatch for vector types */
+template <typename TypeConverter, typename T,
+          SFINAE_ENABLE_IF( isVectorType<T>::value )>
+inline bool stringToTypeDispatch( T & v, const std::string & s) {
+    EIGEN_STATIC_ASSERT_FIXED_SIZE(T)
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(T)
+    auto func = [&](unsigned int i, const typename T::Scalar & n) {
+        v(i) = n;
+    };
+    return stringToTypeFunctorImpl< T::SizeAtCompileTime , typename T::Scalar , decltype(func),TypeConverter >(func,s);
 }
 
 /** Custom dispatch for container types: std::set<T> */
@@ -228,6 +213,15 @@ inline bool stringToTypeDispatch( std::pair<T,T> & v,
 template <typename TypeConverter>
 inline bool stringToTypeDispatch( std::string & v,
                                   const std::string & s) {
+    v = s; // just assign
+    return true;
+}
+
+/** Custom dummy dispatch boost::filesystem::path */
+template <typename TypeConverter>
+inline bool stringToTypeDispatch( boost::filesystem::path & v,
+                                  const std::string & s
+                                  ) {
     v = s; // just assign
     return true;
 }
@@ -275,58 +269,13 @@ struct CommaSeperatedPairBinShift {
 
 
 
-/** Main function: string -> T (do dispatch) */
-template<typename T, typename TypeConverter>
+/** Main function: string -> type */
+template<typename T, typename TypeConverter=StdTypeConverter>
 inline bool stringToType(T & t, const std::string& s) {
     return details::stringToTypeDispatch<TypeConverter>(t,s);
 }
+
 /** ===============================================*/
-
-
-/**
-* @brief Helper to convert a string with three whitespace-seperated numbers into a Vector2.
-*/
-
-template <typename TVector,
-          SFINAE_ENABLE_IF(TVector::SizeAtCompileTime==1)
-          >
-inline bool stringToVector( TVector & v, const std::string & s) {
-    EIGEN_STATIC_ASSERT_VECTOR_ONLY(TVector)
-    return details::stringToVectorImpl<1>(v,s);
-}
-
-
-template <typename TVector,
-          SFINAE_ENABLE_IF(TVector::SizeAtCompileTime==2)
-          >
-inline bool stringToVector( TVector & v, const std::string & s) {
-    EIGEN_STATIC_ASSERT_VECTOR_ONLY(TVector)
-    return details::stringToVectorImpl<2>(v,s);
-}
-
-/**
-* @brief Helper to convert a string with three whitespace-seperated numbers into a Vector3.
-*/
-template <typename TVector,
-          SFINAE_ENABLE_IF(TVector::SizeAtCompileTime==3)
-          >
-inline bool
-stringToVector( TVector & v, const std::string & s) {
-    EIGEN_STATIC_ASSERT_VECTOR_ONLY(TVector)
-    return details::stringToVectorImpl<3>(v,s);
-}
-
-/**
-* @brief Helper to convert a string with three whitespace-seperated numbers into a Vector4.
-*/
-template <typename TVector,
-          SFINAE_ENABLE_IF(TVector::SizeAtCompileTime==4)
-          >
-inline bool stringToVector( TVector & v, const std::string & s) {
-    EIGEN_STATIC_ASSERT_VECTOR_ONLY(TVector)
-    return details::stringToVectorImpl<4>(v,s);
-}
-
 
 /**
 * @brief Convert Type to string if ostream operator << is supported

@@ -22,15 +22,15 @@ class SimFileExecutionGraph : public ExecutionTreeInOut{
 
         struct NodeGroups{
             enum {
-                FILE_RESET,
-                FILE_EXEC,
-                    FRAME_RESET,
-                    FRAME_EXEC,    /** all nodes which need to update for producing the inputs for the current frame */
-                        BODY_RESET,
-                        BODY_EXEC,  /** all nodes which need to update for producing an render output from an input node BodyData*/
-                        BODY_FINAL,
-                    FRAME_FINAL,
-                FILE_FINAL, /* not yet implemented */
+                FILE_RESET, // 0
+                FILE_EXEC,  // 1
+                    FRAME_RESET, // 2
+                    FRAME_EXEC,    /** 3, all nodes which need to update for producing the inputs for the current frame */
+                        BODY_RESET, // 4
+                        BODY_EXEC,  /** 5, all nodes which need to update for producing an render output from an input node BodyData*/
+                        BODY_FINAL, // 6
+                    FRAME_FINAL, // 7
+                FILE_FINAL, /* 8, not yet implemented */
                 NNODE_GROUPS
             };
         };

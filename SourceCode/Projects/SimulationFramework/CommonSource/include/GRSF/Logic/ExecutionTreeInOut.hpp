@@ -156,6 +156,7 @@ public:
         // Each group has its own execution order!
         ExecutionOrderSolver s;
         m_groupExecList.clear();
+        unsigned int maxPrio = 0;
         for(auto & p : m_groupNodes){
 
             // fill nodes into execution list
@@ -166,6 +167,14 @@ public:
 
             s.solve(l, l);
 
+            maxPrio = std::max( maxPrio, l.back()->getPriority() );
+        }
+
+        // do some manicure: invert all priorities such that lowest is now the highest
+        for(auto & p : m_groupExecList) {
+            for(auto & n : p.second){
+                n->setPriority( maxPrio - n->getPriority() );
+            }
         }
 
         // Check if input is reachable from all outputs
@@ -209,7 +218,6 @@ protected:
         void solve(NodeListT & c,
                    NodeListT & orderedNodes){
 
-
             // Solve Execution order,
             // start a depth first search recursion for all nodes in c which determines an execution order by setting the priority
             for(auto & p : c){
@@ -220,16 +228,11 @@ protected:
 
             // Sort all nodes according to priority (asscending) (lowest is most important)
             std::sort(orderedNodes.begin(), orderedNodes.end(),
-            [](LogicNode* const & a, LogicNode* const &b) {
-                return a->getPriority() < b->getPriority();
-            }
-                     );
+                [](LogicNode* const & a, LogicNode* const &b) {
+                    return a->getPriority() < b->getPriority();
+                }
+            );
 
-            // Invert priority such that lowest is now the highest and the first one!
-            auto maxPrio = orderedNodes.back()->getPriority();
-            for(auto n : orderedNodes) {
-                n->setPriority( -n->getPriority() + maxPrio);
-            }
 
         }
 
@@ -237,6 +240,7 @@ protected:
 
         /**
         * Depth first search: this function returns recursively the priority
+        * lowest number has the highest priority
         */
 
         unsigned int solveRec( LogicNode* node,

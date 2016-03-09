@@ -130,16 +130,16 @@ public:
 
 
             Vector3 minPoint;
-            if(!Utilities::stringToVector(minPoint,  grid.attribute("minPoint").value())) {
+            if(!Utilities::stringToType(minPoint,  grid.attribute("minPoint").value())) {
                 ERRORMSG("---> String conversion 'minPoint' failed");
             }
 
             Vector3 maxPoint;
-            if(!Utilities::stringToVector(maxPoint,  grid.attribute("maxPoint").value())) {
+            if(!Utilities::stringToType(maxPoint,  grid.attribute("maxPoint").value())) {
                 ERRORMSG("---> String conversion 'maxPoint' failed");
             }
 
-            if(!Utilities::stringToVector(settings.m_dimension,  grid.attribute("dimension").value())) {
+            if(!Utilities::stringToType(settings.m_dimension,  grid.attribute("dimension").value())) {
                 ERRORMSG("---> String conversion 'dimensions' failed");
             }
 
@@ -149,7 +149,7 @@ public:
             settings.m_minPointOrig = minPoint;
             auto att = grid.attribute("minPointOrig");
             if(att){
-                if(!Utilities::stringToVector(maxPoint,  grid.attribute("maxPoint").value())) {
+                if(!Utilities::stringToType(maxPoint,  grid.attribute("maxPoint").value())) {
                     ERRORMSG("---> String conversion 'maxPoint' failed");
                 }
             }
@@ -157,7 +157,7 @@ public:
             settings.m_maxPointOrig = maxPoint;
             att = grid.attribute("maxPointOrig");
             if(att){
-                if(!Utilities::stringToVector(maxPoint,  grid.attribute("maxPoint").value())) {
+                if(!Utilities::stringToType(maxPoint,  grid.attribute("maxPoint").value())) {
                     ERRORMSG("---> String conversion 'maxPoint' failed");
                 }
             }
@@ -242,7 +242,7 @@ public:
 
         att = extract.attribute("indices");
         if(att){
-            if(!Utilities::stringToVector(velProj.m_projIndices,  extract.attribute("indices").value())) {
+            if(!Utilities::stringToType(velProj.m_projIndices,  extract.attribute("indices").value())) {
                 ERRORMSG("---> String conversion 'indices' failed");
             }
             // check indices

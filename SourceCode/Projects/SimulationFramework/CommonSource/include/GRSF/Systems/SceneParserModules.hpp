@@ -748,13 +748,13 @@ private:
         if(type == "uniform") {
 
             Vector3 n;
-            if(!Utilities::stringToVector(n, halfspace.attribute("normal").value())) {
+            if(!Utilities::stringToType(n, halfspace.attribute("normal").value())) {
                 ERRORMSG("---> String conversion in HalfsphereGeometry: normal failed");
             }
 
             /* (not needed so far)
             Vector3 p;
-            if(!Utilities::stringToVector(p, halfspace.attribute("position").value())) {
+            if(!Utilities::stringToType(p, halfspace.attribute("position").value())) {
                 ERRORMSG("---> String conversion in HalfsphereGeometry: position failed");
             }
             */
@@ -796,13 +796,13 @@ private:
         if(type == "uniform") {
 
             Vector3 n;
-            if(!Utilities::stringToVector(n, capsule.attribute("normal").value())) {
+            if(!Utilities::stringToType(n, capsule.attribute("normal").value())) {
                 ERRORMSG("---> String conversion in HalfsphereGeometry: normal failed");
             }
 
             /* (not needed so far)
             Vector3 p;
-            if(!Utilities::stringToVector(p, capsule.attribute("position").value())) {
+            if(!Utilities::stringToType(p, capsule.attribute("position").value())) {
                 ERRORMSG("---> String conversion in HalfsphereGeometry: position failed");
             }
             */
@@ -862,12 +862,12 @@ private:
         if(type == "uniform") {
 
             Vector3 extent;
-            if(!Utilities::stringToVector(extent, box.attribute("extent").value())) {
+            if(!Utilities::stringToType(extent, box.attribute("extent").value())) {
                 ERRORMSG("---> String conversion in BoxGeometry: extent failed");
             }
 
             Vector3 center;
-            if(!Utilities::stringToVector(center, box.attribute("center").value())) {
+            if(!Utilities::stringToType(center, box.attribute("center").value())) {
                 ERRORMSG("---> String conversion in BoxGeometry: position failed");
             }
 
@@ -932,7 +932,7 @@ private:
             Vector3 scale_factor(1.0,1.0,1.0);
             att = mesh.attribute("scale");
             if(att){
-                if(!Utilities::stringToVector(scale_factor, att.value())) {
+                if(!Utilities::stringToType(scale_factor, att.value())) {
                     ERRORMSG("---> String conversion in parseMeshGeometry failed: scale");
                 }
                 if(scale_factor.norm()==0) {
@@ -944,7 +944,7 @@ private:
                 Vector3 trans(0,0,0);
                 att = mesh.attribute("trans");
                 if(att){
-                    if(!Utilities::stringToVector(trans,att.value())) {
+                    if(!Utilities::stringToType(trans,att.value())) {
                         ERRORMSG("---> String conversion in parseMeshGeometry: trans failed: ");
                     }
                 }
@@ -953,7 +953,7 @@ private:
                 Vector3 axis(1.0,0,0);
                 att = mesh.attribute("rotAxis");
                 if(att){
-                    if(!Utilities::stringToVector(axis, att.value())) {
+                    if(!Utilities::stringToType(axis, att.value())) {
                         ERRORMSG("---> String conversion in parseMeshGeometry: rotAxis failed");
                     }
 
@@ -1482,11 +1482,11 @@ private:
             }
 
             Vector3 boxMin;
-            if(!Utilities::stringToVector(boxMin, forceField.attribute("minPoint").value())) {
+            if(!Utilities::stringToType(boxMin, forceField.attribute("minPoint").value())) {
                 ERRORMSG("---> String conversion in parseForceField: boxMin failed");
             }
             Vector3 boxMax;
-            if(!Utilities::stringToVector(boxMax, forceField.attribute("maxPoint").value())) {
+            if(!Utilities::stringToType(boxMax, forceField.attribute("maxPoint").value())) {
                 ERRORMSG("---> String conversion in parseForceField: boxMax failed");
             }
 
@@ -1516,7 +1516,7 @@ private:
                 ERRORMSG("---> String conversion in parseForceField: value failed");
             }
             Vector3 dir;
-            if(!Utilities::stringToVector(dir, forceField.attribute("direction").value())) {
+            if(!Utilities::stringToType(dir, forceField.attribute("direction").value())) {
                 ERRORMSG("---> String conversion in SceneSettings: gravity failed");
             }
 
@@ -1560,7 +1560,7 @@ struct VisSubModuleScale{
         if(!scaleLikeGeometry) {
             if( name == "Plane" || name == "PointCloud" || name == "Mesh"){
 
-                if(!Utilities::stringToVector(scale, visNode.attribute("scale").value() )) {
+                if(!Utilities::stringToType(scale, visNode.attribute("scale").value() )) {
                     ERRORMSG("---> String conversion in parseScale: scale failed");
                 }
 
@@ -1797,11 +1797,11 @@ private:
     void parseInitialPositionLinear(XMLNodeType initCond) {
 
         Vector3 pos;
-        if(!Utilities::stringToVector(pos, initCond.attribute("position").value())) {
+        if(!Utilities::stringToType(pos, initCond.attribute("position").value())) {
             ERRORMSG("---> String conversion in InitialPositionLinear: position Linear failed");
         }
         Vector3 dir;
-        if(!Utilities::stringToVector(dir, initCond.attribute("direction").value())) {
+        if(!Utilities::stringToType(dir, initCond.attribute("direction").value())) {
             ERRORMSG("---> String conversion in InitialPositionLinear: direction Linear failed");
         }
         PREC dist;
@@ -1833,17 +1833,17 @@ private:
         Vector3 trans;
         Vector3 dirZ(0,0,1);
         Vector3 dirX(1,0,0);
-        if(!Utilities::stringToVector(trans, initCond.attribute("translation").value())) {
+        if(!Utilities::stringToType(trans, initCond.attribute("translation").value())) {
             ERRORMSG("---> String conversion in InitialPositionGrid: translation failed");
         }
 
         if(initCond.attribute("dirZ")) {
-            if(!Utilities::stringToVector(dirZ, initCond.attribute("dirZ").value())) {
+            if(!Utilities::stringToType(dirZ, initCond.attribute("dirZ").value())) {
                 ERRORMSG("---> String conversion in InitialPositionGrid: jitter seed failed");
             }
         }
         if(initCond.attribute("dirX")) {
-            if(!Utilities::stringToVector(dirX, initCond.attribute("dirX").value())) {
+            if(!Utilities::stringToType(dirX, initCond.attribute("dirX").value())) {
                 ERRORMSG("---> String conversion in InitialPositionGrid: jitter seed failed");
             }
         }
@@ -1955,7 +1955,7 @@ private:
                 continue;
             }
 
-            if(!Utilities::stringToVector(transDir, itNode->attribute("transDir").value())) {
+            if(!Utilities::stringToType(transDir, itNode->attribute("transDir").value())) {
                 ERRORMSG("---> String conversion in InitialVelocityTransRot: trans failed");
             }
             transDir.normalize();
@@ -1964,7 +1964,7 @@ private:
                 ERRORMSG("---> String conversion in InitialVelocityTransRot: absTransVel failed");
             }
 
-            if(!Utilities::stringToVector(rotDir, itNode->attribute("rotDir").value())) {
+            if(!Utilities::stringToType(rotDir, itNode->attribute("rotDir").value())) {
                 ERRORMSG("---> String conversion in InitialVelocityTransRot: transDir failed");
             }
             rotDir.normalize();

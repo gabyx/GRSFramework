@@ -9,6 +9,9 @@
 #include "GRSF/Logic/StringFormatNode.hpp"
 #include "GRSF/Logic/ConstantNode.hpp"
 #include "GRSF/Logic/NormNode.hpp"
+#include "GRSF/Logic/InnerProductNode.hpp"
+#include "GRSF/Logic/Transform3DNode.hpp"
+#include "GRSF/Logic/VectorToComponentsNode.hpp"
 #include "GRSF/Logic/LookUpTable.hpp"
 #include "GRSF/Logic/LineWriter.hpp"
 #include "GRSF/Logic/StopNode.hpp"
@@ -93,6 +96,12 @@ namespace LogicParserModules{
                     createToolOOBBCollider(tool,id);
                 }else if(type == "Norm") {
                     createToolNorm(tool,id);
+                }else if(type == "Transform3D") {
+                    createToolTransform3D(tool,id);
+                }else if(type == "InnerProduct") {
+                    createToolInnerProduct(tool,id);
+                }else if(type == "VectorToComponent") {
+                    createToolVectorToComponent(tool,id);
                 }else if(type == "Constant"){
                     createToolConstant(tool,id);
                 }else if(type == "StopNode"){
@@ -208,15 +217,16 @@ namespace LogicParserModules{
             }
         }
 
-        #define DEFINE_CONSTANT2(type, typeName) \
+        #define DEFINE_CONSTANT3(type, typeName, arg) \
             ( t == #typeName ){ using T = type; \
             T tt; \
-            if(!Utilities::stringToType(tt, logicNode.attribute("value").value())) { \
+            if(!Utilities::stringToType(arg, logicNode.attribute("value").value())) { \
                 ERRORMSG_PARSERTOOL("---> String conversion 'value' failed", id); \
             } \
             n = new LogicNodes::ConstantNode<T>(id,tt); \
-            } \
+            }
 
+        #define DEFINE_CONSTANT2(type,typeName) DEFINE_CONSTANT3(type,typeName, tt )
         #define DEFINE_CONSTANT(type) DEFINE_CONSTANT2(type,type)
 
         void createToolConstant(XMLNodeType & logicNode, unsigned int id){
@@ -235,22 +245,10 @@ namespace LogicParserModules{
                 else if DEFINE_CONSTANT(unsigned int)
                 else if DEFINE_CONSTANT(unsigned long int)
                 else if DEFINE_CONSTANT(unsigned long long int)
-                else if ( t == "string" ){
-                    using T = std::string;
-                    T tt = logicNode.attribute("value").value();
-                    if(tt.empty()){
-                        ERRORMSG_PARSERTOOL("---> String conversion 'value' failed", id);
-                    }
-                    n = new LogicNodes::ConstantNode<T>(id,tt);
-                }
-                else if ( t == "path" ){
-                    using T = boost::filesystem::path;
-                    std::string tt = logicNode.attribute("value").value();
-                    if(tt.empty()){
-                        ERRORMSG_PARSERTOOL("---> String conversion 'value' failed", id);
-                    }
-                    n = new LogicNodes::ConstantNode<T>(id,tt);
-                }
+                else if DEFINE_CONSTANT(Vector3)
+                else if DEFINE_CONSTANT3(Quaternion,Quaternion, tt.coeffs() )
+                else if DEFINE_CONSTANT2(std::string, string)
+                else if DEFINE_CONSTANT2(boost::filesystem::path, path)
                 else{
                     ERRORMSG_PARSERTOOL("---> String conversion 'outputType': '" << t << "' not found!", id);
                 }
@@ -279,6 +277,50 @@ namespace LogicParserModules{
 
                 addNodeToGroup(logicNode,id);
         }
+
+        #define DEFINE_INNERPRODUCT2(type, typeName) \
+            ( t == #typeName ){ using T = type; \
+                n = new LogicNodes::InnerProduct<T>(id); \
+            }
+
+        #define DEFINE_INNERPRODUCT(type) DEFINE_INNERPRODUCT2(type,type)
+        void createToolInnerProduct(XMLNodeType & logicNode, unsigned int id){
+
+                std::string t = logicNode.attribute("inputType").value();
+                LogicNode * n;
+                if DEFINE_INNERPRODUCT(Vector3)
+                else{
+                    ERRORMSG_PARSERTOOL("---> String conversion 'outputType': '" << t << "' not found!", id);
+                }
+
+                m_executionGraph->addNode(n,false,false);
+
+                addNodeToGroup(logicNode,id);
+        }
+
+
+        #define DEFINE_VECTORTOCOMPONENT2(type, typeName) \
+            ( t == #typeName ){ using T = type; \
+            n = new LogicNodes::VectorToComponent<T>(id); \
+            }
+
+        #define DEFINE_VECTORTOCOMPONENT(type) DEFINE_VECTORTOCOMPONENT2(type,type)
+        void createToolVectorToComponent(XMLNodeType & logicNode, unsigned int id){
+                ERRORMSG("Implementation not finished, parse index!")
+
+                std::string t = logicNode.attribute("inputType").value();
+                LogicNode * n;
+                if DEFINE_VECTORTOCOMPONENT(Vector3)
+                //else if DEFINE_VECTORTOCOMPONENT(Quaternion)
+                else{
+                    ERRORMSG_PARSERTOOL("---> String conversion 'outputType': '" << t << "' not found!", id);
+                }
+
+                m_executionGraph->addNode(n,false,false);
+
+                addNodeToGroup(logicNode,id);
+        }
+
 
         #define ADD_STRINGFORMAT_SOCKET2(type, typeName, _InOROut_ ) \
             ( t == #typeName ){ \
@@ -636,11 +678,11 @@ namespace LogicParserModules{
         void createToolOOBBCollider(XMLNodeType & logicNode, unsigned int id) {
 
             Vector3 minPoint;
-            if(!Utilities::stringToVector(minPoint,  logicNode.attribute("minPoint").value())) {
+            if(!Utilities::stringToType(minPoint,  logicNode.attribute("minPoint").value())) {
                 ERRORMSG_PARSERTOOL("---> String conversion 'minPoint' failed", id);
             }
             Vector3 maxPoint;
-            if(!Utilities::stringToVector(maxPoint,  logicNode.attribute("maxPoint").value())) {
+            if(!Utilities::stringToType(maxPoint,  logicNode.attribute("maxPoint").value())) {
                 ERRORMSG_PARSERTOOL("---> String conversion 'maxPoint' failed", id);
             }
             Quaternion q_KI;
@@ -659,6 +701,18 @@ namespace LogicParserModules{
             addNodeToGroup<true>(logicNode,id,"Body");
         }
 
+        void createToolTransform3D(XMLNodeType & logicNode, unsigned int id) {
+
+            Quaternion q_KI;
+            Vector3 I_r_IK;
+            ParserFunctions::parseTransformSequence(logicNode,q_KI,I_r_IK);
+            auto * node = new LogicNodes::Transform3D(id,q_KI,I_r_IK);
+            LOGLPLEVEL3(m_pLog,"---> Transform3D with  R_KI: " << std::endl << q_KI.toRotationMatrix() << std::endl << " trans: " << I_r_IK.transpose() << std::endl;  )
+
+            m_executionGraph->addNode(node,false,false);
+            addNodeToGroup(logicNode,id,"Body");
+        }
+
 
 
         ParserType * m_parser;
@@ -674,6 +728,9 @@ namespace LogicParserModules{
 
 #undef DEFINE_NORM
 #undef DEFINE_NORM2
+
+#undef DEFINE_VECTORTOCOMPONENT2
+#undef DEFINE_VECTORTOCOMPONENT
 
 #undef ADD_STRINGFORMAT_SOCKET2
 #undef ADD_STRINGFORMAT_SOCKET

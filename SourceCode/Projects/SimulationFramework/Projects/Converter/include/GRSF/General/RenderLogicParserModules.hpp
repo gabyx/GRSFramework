@@ -136,14 +136,14 @@ private:
     void parseColor(XMLNodeType & cNode, Vector3 & rgb){
         auto att = cNode.attribute("rgb");
         if(att){
-            if(!Utilities::stringToVector(rgb, att.value())) {
+            if(!Utilities::stringToType(rgb, att.value())) {
                 ERRORMSG("---> String conversion in ColorList tool: rgb failed");
             }
 
         }else{
             att = cNode.attribute("rgbInt8");
             if(att){
-                if(!Utilities::stringToVector(rgb, att.value())) {
+                if(!Utilities::stringToType(rgb, att.value())) {
                     ERRORMSG("---> String conversion in ColorList tool: rgbInt8 failed");
                 }
                 rgb.array() /= 255;

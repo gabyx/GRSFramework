@@ -252,7 +252,6 @@ namespace LogicNodes {
     public:
 
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-        DEFINE_MPI_INFORMATION_CONFIG_TYPES;
 
         struct Inputs {
             enum {
@@ -300,7 +299,6 @@ namespace LogicNodes {
     public:
 
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-        DEFINE_MPI_INFORMATION_CONFIG_TYPES;
 
         struct Inputs {
             enum {
@@ -348,7 +346,6 @@ namespace LogicNodes {
     public:
 
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-        DEFINE_MPI_INFORMATION_CONFIG_TYPES;
 
         struct Inputs {
             enum {
