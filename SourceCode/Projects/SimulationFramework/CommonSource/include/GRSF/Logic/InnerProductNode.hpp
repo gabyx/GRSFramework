@@ -49,6 +49,8 @@ namespace LogicNodes{
         virtual void compute(){
             //std::cout << GET_ISOCKET_REF_VALUE(Value) << std::endl;
             GET_OSOCKET_REF_VALUE(Result) =  GET_ISOCKET_REF_VALUE(Value1).dot(GET_ISOCKET_REF_VALUE(Value2));
+            std::cout <<"innerprNode: " << std::endl << GET_ISOCKET_REF_VALUE(Value1).transpose() <<  std::endl <<
+                                                        GET_ISOCKET_REF_VALUE(Value2).transpose() <<  std::endl;
         }
     };
 };

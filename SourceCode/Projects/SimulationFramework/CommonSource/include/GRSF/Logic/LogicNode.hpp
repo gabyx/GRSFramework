@@ -40,7 +40,7 @@
                                                      ||
     -setValue():  set all "Write" links directly     ||      -setValue(): gets internal this->m_data
                   (m_to array) and set this->m_data  ||
-                  also because Out might have othe   ||
+                  also because Out might have other  ||
                   get links                          ||
                                                      ++
 */
