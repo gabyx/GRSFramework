@@ -106,14 +106,15 @@ ContactGraph<TCombo>::addSplitBodyNode(RigidBodyType * body, const RankIdType & 
         // this a criteria of the contact graph
         auto * sbN = this->emplaceNodeBack<SplitBodyNodeDataType>(m_nodeCounterSplitBody);
         // set the new pointer
-        pRef = &sbN->getData();
+        pRef = &(sbN->getData());
+        // init split node
         pRef->initialize(body);
         ++m_nodeCounterSplitBody;
     }
 
     LOGASSERTMSG(pRef,m_pSolverLog, "SplitBodyNode pointer of body "
                  << RigidBodyId::getBodyIdString(body->m_id) << " is zero!")
-    //Set rank
+    //add this rank
     bool added = pRef->addRank(rank);
     LOGASSERTMSG(added,m_pSolverLog, "Rank could not been added to SplitBodyNode with id: "
                  << RigidBodyId::getBodyIdString(body->m_id))

@@ -12,7 +12,7 @@
 /**
 * @ingroup Common
 * @defgroup LogDefines  Log Defines for the Framework
-* @brief These defines specify the over all loggers of the framework. The can be enabled and disabled.
+* @brief Defines for logging and output functionality.
 */
 /* @{ */
 
@@ -21,16 +21,33 @@
 * @brief
 */
 /* @{ */
-#define LOG( logptr , message )  ( * (logptr) ) << message ;  ///< Macro to easily write into a SimpleLogger::Log.
+#define LOG( logptr , message )  ( *(logptr) ) << message ;  ///< Macro to easily write into a SimpleLogger::Log.
 #define LOGLEVEL(level,setlevel,logptr,message) if( level <= setlevel ){  LOG(logptr,message); }
+
+
+/// Simulation Log
+#define SIMULATION_LOG_TO_CONSOLE false
 
 #ifndef NDEBUG
     // DEBUG!
     /// SceneParser
     #define SCENEPARSER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+
+    /// Solver
+    #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_TOFILE 0            ///< {0,1} Determines if logstream is saved into a file.
+    #define SOLVERLOG_TOCONSOLE 0         ///< {0,1} Determines if logstream is outputted into console.
+
 #else
     /// SceneParser
     #define SCENEPARSER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+
+    /// Solver
+    #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_TOFILE 1
+    #define SOLVERLOG_TOCONSOLE 0
 #endif
 
 /** SceneParser Log Macros*/
@@ -40,6 +57,20 @@
 #define LOGSCLEVEL2( logptr , message) LOGSCLEVEL( 2 , logptr , message) ;
 #define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
 #define SKIPLOGSC( logptr , message )  LOGSCLEVEL( 1 , logptr , message) ;
+
+
+
+/** Inclusion Solver Log Macros */
+#define LOGSL( log , message ) LOG(log,message);
+#define LOGSLLEVEL( level, logptr , message ) LOGLEVEL( level, SOLVERLOG_LOGLEVEL , logptr , message);
+#define LOGSLLEVEL1( logptr , message) LOGSLLEVEL( 1 , logptr , message) ;
+#define LOGSLLEVEL2( logptr , message) LOGSLLEVEL( 2 , logptr , message) ;
+#define LOGSLLEVEL3( logptr , message) LOGSLLEVEL( 3 , logptr , message) ;
+
+#define LOGSLLEVEL_CONTACT( level, logptr , message ) LOGLEVEL( level, SOLVERLOG_LOGLEVEL_CONTACT , logptr , message);
+#define LOGSLLEVEL1_CONTACT( logptr , message) LOGSLLEVEL( 1 , logptr , message) ;
+#define LOGSLLEVEL2_CONTACT( logptr , message) LOGSLLEVEL( 2 , logptr , message) ;
+#define LOGSLLEVEL3_CONTACT( logptr , message) LOGSLLEVEL( 3 , logptr , message) ;
 
 /* @} */
 
@@ -67,46 +98,9 @@
 /* @} */
 
 
-/** @name SimulationLog
-* @brief All these defines are used in the solver thread. The output goes into the solver log with filename #SOLVER_LOG_FILE_PREFIX
-*/
-
-#define SIMULATION_LOG_TO_CONSOLE true
-
-
-
-/** @name Solver Threads
-* @brief All these defines are used in the solver thread. The output goes into the solver log with filename #SOLVER_LOG_FILE_PREFIX
-*/
-/* @{ */
-#ifndef NDEBUG
-    // DEBUG!
-    #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define SOLVERLOG_TOFILE 0            ///< {0,1} Determines if logstream is saved into a file.
-    #define SOLVERLOG_TOCONSOLE 0         ///< {0,1} Determines if logstream is outputted into console.
-#else
-    #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define SOLVERLOG_TOFILE 1
-    #define SOLVERLOG_TOCONSOLE 0
-#endif
-
-/** Inclusion Solver Log Macros */
-#define LOGSL( log , message ) LOG(log,message);
-#define LOGSLLEVEL( level, logptr , message ) LOGLEVEL( level, SOLVERLOG_LOGLEVEL , logptr , message);
-#define LOGSLLEVEL1( logptr , message) LOGSLLEVEL( 1 , logptr , message) ;
-#define LOGSLLEVEL2( logptr , message) LOGSLLEVEL( 2 , logptr , message) ;
-#define LOGSLLEVEL3( logptr , message) LOGSLLEVEL( 3 , logptr , message) ;
-
-#define LOGSLLEVEL_CONTACT( level, logptr , message ) LOGLEVEL( level, SOLVERLOG_LOGLEVEL_CONTACT , logptr , message);
-#define LOGSLLEVEL1_CONTACT( logptr , message) LOGSLLEVEL( 1 , logptr , message) ;
-#define LOGSLLEVEL2_CONTACT( logptr , message) LOGSLLEVEL( 2 , logptr , message) ;
-#define LOGSLLEVEL3_CONTACT( logptr , message) LOGSLLEVEL( 3 , logptr , message) ;
-
 /* @} */
 
-/** @name System Data file for Record Mode only.
+/** @name State data files.
 * @brief
 */
 /* @{ */
@@ -115,27 +109,18 @@
 #define CALCULATE_COND_OF_G 0     ///< {0,1} Set if the condition of the G matrix is calculated and outputted. Takes alot of time!
 #define CALCULATE_DIAGDOM_OF_G 0  ///< {0,1} Set if the diagonal dominant criteria is calculated, the number shows how many rows are not diagonal dominant!
 #define MEASURE_TIME_PROX
-/* @} */
 
-
-/** @name System Data file for Record Mode only.
-* @brief
-*/
-/* @{ */
 #define OUTPUT_COLLISIONDATA_FILE 0 ///< {0,1} Sets if the Collision Data file is outputted
 /* @} */
 
 
-
-/** @name  Deconstructor and Constructor Macros
-* @brief Deconstructor and Constructor Macros to Debug correct dealloction of objects.
-*/
+/** @name  Destructor and Constructor Macros */
 /* @{ */
-#ifdef _DEBUG
-#define DESTRUCTOR_MESSAGE \
- LOG(m_pSimulationLog, "Destructor: "<< typeid(*this).name()  <<" , @ : "<< this;);
-#define CONSTRUCTOR_MESSAGE \
-  LOG(m_pSimulationLog, "Constructor: "<< typeid(*this).name()  <<" , @ : "<< this;);
+#ifndef NDEBUG
+    #define DESTRUCTOR_MESSAGE \
+     LOG(m_pSimulationLog, "Destructor: "<< typeid(*this).name()  <<" , @ : "<< this;);
+    #define CONSTRUCTOR_MESSAGE \
+      LOG(m_pSimulationLog, "Constructor: "<< typeid(*this).name()  <<" , @ : "<< this;);
 #else
   #define DECONSTRUCTOR_MESSAGE
   #define CONSTRUCTOR_MESSAGE

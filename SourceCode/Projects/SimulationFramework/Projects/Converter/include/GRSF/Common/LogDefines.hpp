@@ -9,15 +9,24 @@
 #ifndef LogDefines_hpp
 #define LogDefines_hpp
 
-
-/** @name Global Log Macros
-* @brief for SimFileConverter
+/**
+* @ingroup Common
+* @defgroup LogDefines  Log Defines for the Framework
+* @brief Defines for logging and output functionality.
 */
 /* @{ */
 
 
+/** @name Global Log Macros
+* @brief
+*/
+/* @{ */
 #define LOG( logptr , message )  ( *(logptr) ) << message ;  ///< Macro to easily write into a SimpleLogger::Log.
 #define LOGLEVEL(level,setlevel,logptr,message) if( level <= setlevel ){  LOG(logptr,message); }
+
+
+/// Simulation Log
+#define SIMULATION_LOG_TO_CONSOLE false
 
 
 #ifndef NDEBUG
@@ -25,7 +34,7 @@
     #define LOGSJ(A){ A } // Output SimfileJoiner
 
     /// SceneParser
-    #define SCENEPARSER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SCENEPARSER_LOGLEVEL 1  ///< 0 - No output, 1 basic output, 2 medium output, 3 full output
 
     /// RenderConverter
     #define RENDERCONVERTER_LOGLEVEL 3
@@ -41,7 +50,7 @@
     #define LOGSJ(A)
 
     /// SceneParser
-    #define SCENEPARSER_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SCENEPARSER_LOGLEVEL 1  ///< 0 - No output, 1 basic output, 2 medium output, 3 full output
 
     /// RenderConverter
     #define RENDERCONVERTER_LOGLEVEL 1
@@ -53,7 +62,7 @@
     #define GRIDDERPARSER_LOGLEVEL 3
     #define GRIDEXTRACTOR_LOGLEVEL 3
 #endif
-/* @} */
+
 
 
 /** SceneParser Log Macros */
@@ -93,16 +102,16 @@
 #define LOGGCLEVEL2( logptr , message) LOGGCLEVEL( 2 , logptr , message) ;
 #define LOGGCLEVEL3( logptr , message) LOGGCLEVEL( 3 , logptr , message) ;
 
+/* @} */
 
-/** @name  Deconstructor and Constructor Macros
-* @brief Deconstructor and Constructor Macros to Debug correct dealloction of objects.
-*/
+
+/** @name  Destructor and Constructor Macros */
 /* @{ */
 #ifndef NDEBUG
-#define DECONSTRUCTOR_MESSAGE \
- std::cout << "Destructor: "<< typeid(*this).name()  <<" , @ : "<< this << std::endl;
-#define CONSTRUCTOR_MESSAGE \
-  std::cout << "Constructor: "<< typeid(*this).name()  <<" , @ : "<< this << std::endl;;
+    #define DESTRUCTOR_MESSAGE \
+     LOG(m_pSimulationLog, "Destructor: "<< typeid(*this).name()  <<" , @ : "<< this;);
+    #define CONSTRUCTOR_MESSAGE \
+      LOG(m_pSimulationLog, "Constructor: "<< typeid(*this).name()  <<" , @ : "<< this;);
 #else
   #define DECONSTRUCTOR_MESSAGE
   #define CONSTRUCTOR_MESSAGE
@@ -110,4 +119,5 @@
 /* @} */
 
 
+/* @} */
 #endif

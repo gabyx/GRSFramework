@@ -42,7 +42,7 @@ public:
 
     void dispatch(NodeDataType& node){
 
-        // Calculate the exact values for the billateral split nodes
+        // Calculate the exact values for the bilateral split nodes
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog, "---> SorProx, Billateral Node: ====================="<<  std::endl
                 << "\t---> local body id: " << RigidBodyId::getBodyIdString(node.m_pBody->m_id) << std::endl);
@@ -51,17 +51,16 @@ public:
         LOGSLLEVEL3_CONTACT(m_pSolverLog,"\t---> multiplicity: " << mult << std::endl;)
 
 
-// Simple version (affine combination of velocities, which is the same as above) ===================================
+        // Simple version (affine combination of velocities) ===================================
         node.m_uFront = node.m_multiplicityWeights(0) * node.m_pBody->m_pSolverData->m_uBuffer.m_front;
         for(unsigned int i = 1; i<mult; ++i){
             node.m_uFront += node.m_uBack.col(i-1) * node.m_multiplicityWeights(i);
         }
+        // ======================================================================================
 
-// ===================================================================================================
+        // LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_uFront: " << node.m_uFront.transpose() <<std::endl; );
 
-//      LOGSLLEVEL3_CONTACT(m_pSolverLog, "\t---> nd.m_uFront: " << node.m_uFront.transpose() <<std::endl; );
-
-        // Because we solve this billateral contact directly, we are converged for this node!
+        // Because we solve this bilateral contact directly, we are converged for this node!
         // no change of the flag m_bConverged
 
         //Copy local back

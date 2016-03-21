@@ -9,10 +9,11 @@
 #ifndef GRSF_Common_LogDefines_hpp
 #define GRSF_Common_LogDefines_hpp
 
+
 /**
 * @ingroup Common
 * @defgroup LogDefines  Log Defines for the Framework
-* @brief These defines specify the over all loggers of the framework. The can be enabled and disabled.
+* @brief Defines for logging and output functionality.
 */
 /* @{ */
 
@@ -21,17 +22,33 @@
 * @brief
 */
 /* @{ */
-#define LOG( logptr , message )  ( * (logptr) ) << message ;  ///< Macro to easily write into a SimpleLogger::Log.
-#define LOGLEVEL( level , setlevel , logptr , message) if( level <= setlevel ){  LOG(logptr,message); }
+#define LOG( logptr , message )  ( *(logptr) ) << message ;  ///< Macro to easily write into a SimpleLogger::Log.
+#define LOGLEVEL(level,setlevel,logptr,message) if( level <= setlevel ){  LOG(logptr,message); }
+
+/// Simulation Log
+#define SIMULATION_LOG_TO_CONSOLE false
 
 
 #ifndef NDEBUG
     // DEBUG!
     /// SceneParser
-    #define SCENEPARSER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SCENEPARSER_LOGLEVEL 2  ///< 0 - No output, 1 basic output, 2 medium output, 3 full output
+
+    /// Solver
+    #define SOLVERLOG_LOGLEVEL 1  ///< 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_LOGLEVEL_CONTACT 0  ///< 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_TOFILE 1            ///< {0,1} Determines if logstream is saved into a file.
+    #define SOLVERLOG_TOCONSOLE 1        ///< {0,1} Determines if logstream is outputted into console.
 #else
     /// SceneParser
-    #define SCENEPARSER_LOGLEVEL 2  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SCENEPARSER_LOGLEVEL 2  ///< 0 - No output, 1 basic output, 2 medium output, 3 full output
+
+    /// Solver
+    #define SOLVERLOG_LOGLEVEL 1  ///< 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_LOGLEVEL_CONTACT 0  ///< 0 - No output, 1 basic output, 2 medium output, 3 full output
+    #define SOLVERLOG_TOFILE 1
+    #define SOLVERLOG_TOCONSOLE 0
+
 #endif
 
 /** SceneParser Log Macros*/
@@ -42,6 +59,17 @@
 #define LOGSCLEVEL3( logptr , message) LOGSCLEVEL( 3 , logptr , message) ;
 #define SKIPLOGSC( logptr , message )  LOGSCLEVEL( 1 , logptr , message) ;
 
+/** Inclusion Solver Log Macros */
+#define LOGSL( log , message ) LOG(log,message);
+#define LOGSLLEVEL( level, logptr , message ) LOGLEVEL( level, SOLVERLOG_LOGLEVEL , logptr , message);
+#define LOGSLLEVEL1( logptr , message) LOGSLLEVEL( 1 , logptr , message) ;
+#define LOGSLLEVEL2( logptr , message) LOGSLLEVEL( 2 , logptr , message) ;
+#define LOGSLLEVEL3( logptr , message) LOGSLLEVEL( 3 , logptr , message) ;
+
+#define LOGSLLEVEL_CONTACT( level, logptr , message ) LOGLEVEL( level, SOLVERLOG_LOGLEVEL_CONTACT , logptr , message);
+#define LOGSLLEVEL1_CONTACT( logptr , message) LOGSLLEVEL( 1 , logptr , message) ;
+#define LOGSLLEVEL2_CONTACT( logptr , message) LOGSLLEVEL( 2 , logptr , message) ;
+#define LOGSLLEVEL3_CONTACT( logptr , message) LOGSLLEVEL( 3 , logptr , message) ;
 
 /* @} */
 
@@ -73,46 +101,8 @@
 /* @} */
 
 
-/** @name SimulationLog
-* @brief All these defines are used in the solver thread. The output goes into the solver log with filename #SOLVER_LOG_FILE_PREFIX
-*/
 
-#define SIMULATION_LOG_TO_CONSOLE true
-
-
-
-/** @name Solver Threads
-* @brief All these defines are used in the solver thread. The output goes into the solver log with filename #SOLVER_LOG_FILE_PREFIX
-*/
-/* @{ */
-#ifndef NDEBUG
-    // DEBUG!
-    #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define SOLVERLOG_TOFILE 1            ///< {0,1} Determines if logstream is saved into a file.
-    #define SOLVERLOG_TOCONSOLE 1        ///< {0,1} Determines if logstream is outputted into console.
-#else
-    #define SOLVERLOG_LOGLEVEL 1  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define SOLVERLOG_LOGLEVEL_CONTACT 0  /// 0 - No output, 1 basic output, 2 medium output, 3 full output
-    #define SOLVERLOG_TOFILE 1
-    #define SOLVERLOG_TOCONSOLE 0
-#endif
-
-/** Inclusion Solver Log Macros */
-#define LOGSL( log , message ) LOG(log,message);
-#define LOGSLLEVEL( level, logptr , message ) LOGLEVEL( level, SOLVERLOG_LOGLEVEL , logptr , message);
-#define LOGSLLEVEL1( logptr , message) LOGSLLEVEL( 1 , logptr , message) ;
-#define LOGSLLEVEL2( logptr , message) LOGSLLEVEL( 2 , logptr , message) ;
-#define LOGSLLEVEL3( logptr , message) LOGSLLEVEL( 3 , logptr , message) ;
-
-#define LOGSLLEVEL_CONTACT( level, logptr , message ) LOGLEVEL( level, SOLVERLOG_LOGLEVEL_CONTACT , logptr , message);
-#define LOGSLLEVEL1_CONTACT( logptr , message) LOGSLLEVEL( 1 , logptr , message) ;
-#define LOGSLLEVEL2_CONTACT( logptr , message) LOGSLLEVEL( 2 , logptr , message) ;
-#define LOGSLLEVEL3_CONTACT( logptr , message) LOGSLLEVEL( 3 , logptr , message) ;
-
-/* @} */
-
-/** @name System Data file for Record Mode only.
+/** @name State data files.
 * @brief
 */
 /* @{ */
@@ -121,68 +111,36 @@
 #define CALCULATE_COND_OF_G 0     ///< {0,1} Set if the condition of the G matrix is calculated and outputted. Takes alot of time!
 #define CALCULATE_DIAGDOM_OF_G 1  ///< {0,1} Set if the diagonal dominant criteria is calculated, the number shows how many rows are not diagonal dominant!
 #define MEASURE_TIME_PROX
-/* @} */
 
-
-/** @name System Data file for Record Mode only.
-* @brief
-*/
-/* @{ */
 #define OUTPUT_COLLISIONDATA_FILE 0 ///< {0,1} Sets if the Collision Data file is outputted
 /* @} */
 
 
-/** @name Playback Manager
-* @brief  Log file of the Playback Manager.
-*/
+/** @name Playback Manager */
 /* @{ */
 #define PLAYBACKLOG_TOFILE 1      ///< {0,1} Set if log is outputted to file or not.
 #define PLAYBACKLOG_TOCONSOLE 1   ///< {0,1} Set if log is outputted to console or not.
 /* @} */
 
-/** @name Loader Thread
-* @brief Log file of the Loader Thread which is started during playback.
-*/
+/** @name Loader Thread */
 /* @{ */
 #define FILELOADERLOG_TOFILE 1        ///< {0,1} Set if log is outputted to file or not.
 #define FILELOADER_TOCONSOLE 1     ///< {0,1} Set if log is outputted to console or not.
 /* @} */
 
 
-/** @name App Log File
-* @brief Log File for the Application.
-*/
+/** @name App Log File */
 /* @{ */
 #define APPLOG_TOFILE 1     ///< {0,1} Set if log is outputted to file or not.
 #define APPLOG_TOCONSOLE 1  ///< {0,1} Set if log is outputted to console or not.
 /* @} */
 
 
-/** @name Ogre Log File
-* @brief Ogre File for the Application.
-*/
+/** @name Ogre Log File */
 /* @{ */
 #define OGRELOG_TOFILE 1     ///< {0,1} Set if log is outputted to file or not.
 #define OGRELOG_TOCONSOLE 1  ///< {0,1} Set if log is outputted to console or not.
 /* @} */
-
-
-
-/** @name  Deconstructor and Constructor Macros
-* @brief Deconstructor and Constructor Macros to Debug correct dealloction of objects.
-*/
-/* @{ */
-#ifndef NDEBUG
-#define DECONSTRUCTOR_MESSAGE \
- std::cout << "Destructor: "<< typeid(*this).name()  <<" , @ : "<< this << std::endl;
-#define CONSTRUCTOR_MESSAGE \
-  std::cout << "Constructor: "<< typeid(*this).name()  <<" , @ : "<< this << std::endl;;
-#else
-  #define DECONSTRUCTOR_MESSAGE
-  #define CONSTRUCTOR_MESSAGE
-#endif
-/* @} */
-
 
 
 /** @name State Ring Pool */
@@ -194,6 +152,24 @@
 /* @{ */
 #define STATEPOOLLOG_TOFILE 0     ///< {0,1} Set if log is outputted to file or not.
 /* @} */
+
+
+
+
+
+/** @name  Destructor and Constructor Macros */
+/* @{ */
+#ifndef NDEBUG
+    #define DESTRUCTOR_MESSAGE \
+     LOG(m_pSimulationLog, "Destructor: "<< typeid(*this).name()  <<" , @ : "<< this;);
+    #define CONSTRUCTOR_MESSAGE \
+      LOG(m_pSimulationLog, "Constructor: "<< typeid(*this).name()  <<" , @ : "<< this;);
+#else
+  #define DECONSTRUCTOR_MESSAGE
+  #define CONSTRUCTOR_MESSAGE
+#endif
+/* @} */
+
 
 
 /* @} */
