@@ -32,12 +32,11 @@ public:
 
     inline void initData(){
         auto mult = getMultiplicity();
-        m_multiplicityWeights.setConstant(mult,1.0/mult);
 
-        m_uBack.setZero(NDOFuBody*mult);
-        m_uFront.setZero(NDOFuBody*mult);
-        m_deltaLambda.setZero( NDOFuBody * m_nConstraints);
-        m_gamma.setZero(m_nConstraints*NDOFuBody);
+        // set all weights constant
+        m_multiplicityWeights.setConstant(mult,1.0/mult);
+        m_uBack.setZero(NDOFuBody,mult);
+        m_uFront.setZero();
     }
 
     bool addRank(const RankIdType & rank) {
@@ -70,13 +69,13 @@ public:
         auto it = m_partRanks.find(rank);
         ASSERTMSG(it!=m_partRanks.end(), "Rank: " << rank << " is not contained in the SplitBodyNode for body id: " << RigidBodyId::getBodyIdString(m_pBody));
         it->second.m_bGotUpdate = true;
-        m_uBack.segment<NDOFuBody>(NDOFuBody * (it->second.m_splitBodyIdx)) = u;
+        m_uBack.col(it->second.m_splitBodyIdx-1) = u;
     }
 
     /** m_splitBodyIdx is the internal number which is used in all subscripts in the comments in this class*/
     struct Flags{
         Flags(unsigned int splitBodyIdx): m_splitBodyIdx(splitBodyIdx), m_bGotUpdate(false){};
-        const unsigned int m_splitBodyIdx;
+        const unsigned int m_splitBodyIdx; ///< index in the range [0,getMultiplicity()-1]
         bool m_bGotUpdate;
     };
     std::unordered_map< RankIdType, Flags > m_partRanks; ///< Participating ranks Flags, size defines the multiplicity
@@ -90,25 +89,20 @@ public:
     /** Contains the weight factor for the partion of unity: [alpha_0, alpha_1, alpha_2,... , alpha_multiplicity-1]
     *   alpha_i = 1 / multiplicity so far, needs to be initialized befor the global prox loop */
     VectorDyn m_multiplicityWeights;
-
+    unsigned int m_nConstraints; ///< How many bilateral constraints between bodies we have, currently = m_partRanks.size()
 
     RigidBodyType * m_pBody = nullptr;
 
     /** These values get set from all remotes*/
-    VectorDyn m_uBack;  ///                            Local Velocity-------*
-    VectorDyn m_uFront; ///< all velocities of all split bodies m_u_G = [  u_0 , u_1,u_2,u_3,u_4...], correspond to rank in vector
-
-    VectorDyn m_deltaLambda; ///< Bilateral Lambda (Lambda_M_tilde = M⁻¹*(Lambda_M^k+1-Lambda_M^k-1)
-    unsigned int m_nConstraints; ///< How many bilateral constraints between bodies we have, currently = m_partRanks.size()
-
-    VectorDyn m_gamma; ///< Gamma = [u_0-u_1, u_1-u_2, u_2-_u3,..., u_n-1 - u_n, ], u_0 is always the velocity of the owner!
+    MatrixUBodyDyn   m_uBack; ///< all velocities of all split bodies m_u_G = [ u_1,u_2,u_3,u_4...], correspond to rank in vector
+                              ///< local velocity is not contained
+    VectorUBody      m_uFront; ///< The averages velocity of m_uBack
 
     inline MatrixSparse & getLInvMatrix(){
         auto mult = getMultiplicity();
         ASSERTMSG(mult>=2 && mult<=8, "Requested LMatrix for multiplicity: " << mult << " which is not implemented!");
         return m_LInvMatrices.LInv[mult-2];
     }
-
 
 
 private:
