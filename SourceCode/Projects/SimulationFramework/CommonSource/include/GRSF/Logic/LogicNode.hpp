@@ -90,10 +90,6 @@ public:
 	    unsigned int idx = m_inputs.size() + m_outputs.size();
 	    auto * t = new LogicSocket<T>(this, true, defaultValue, idx);
 		m_inputs.push_back(t);
-
-//		ASSERTMSG(idx < m_sockets.size(),"Node: " << m_id << " idx: " << idx);
-//		m_sockets[idx] = t;
-
 	}
 
 	template<typename T>
@@ -102,9 +98,6 @@ public:
 	    unsigned int idx = m_inputs.size() + m_outputs.size();
 		auto * t = new LogicSocket<T>(this, false, defaultValue, idx);
 		m_outputs.push_back(t);
-
-//		ASSERTMSG(idx < m_sockets.size(),"Node: " << m_id << " idx: " << idx);
-//		m_sockets[idx] = t;
 	}
 
 	template<typename T> LogicSocket<T>* getISocket(unsigned int idx);
@@ -200,5 +193,16 @@ void LogicNode::distributeOSocketValue(unsigned int idx)
 {
     m_outputs[idx]->castToType<T>()->distributeValue();
 }
+
+/** Some handy macro to use when inheriting from LogicNode */
+
+#define GRSF_LN_DECLARE_SIZES \
+enum {\
+    N_INPUTS  = Inputs::INPUTS_LAST,\
+    N_OUTPUTS = Outputs::OUTPUTS_LAST,\
+    N_SOCKETS = N_INPUTS + N_OUTPUTS,\
+};
+
+
 
 #endif //LogicNode_hpp

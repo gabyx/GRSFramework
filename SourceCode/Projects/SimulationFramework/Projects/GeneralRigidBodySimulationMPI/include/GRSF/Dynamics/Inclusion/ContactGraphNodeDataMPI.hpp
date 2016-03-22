@@ -109,12 +109,12 @@ public:
 
 private:
 
+    /** No more used, LInv matrix from derivation */
+    static struct LInvMatrices{
+        LInvMatrices();
+        std::vector<MatrixSparse> LInv;
 
-//    static struct LInvMatrices{
-//        LInvMatrices();
-//        std::vector<MatrixSparse> LInv;
-//
-//    } m_LInvMatrices;
+    } m_LInvMatrices;
 
 };
 
