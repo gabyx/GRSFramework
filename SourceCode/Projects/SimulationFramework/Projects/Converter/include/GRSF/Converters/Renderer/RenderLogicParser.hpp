@@ -15,7 +15,7 @@
 #include "GRSF/Common/XMLMacros.hpp"
 #include "GRSF/General/LogicParser.hpp"
 
-#include "GRSF/General/RenderLogicParserTraits.hpp"
+#include "GRSF/Converters/Renderer/RenderLogicParserTraits.hpp"
 
 template< typename TDataStorage, template<typename P, typename C> class TParserTraits = RenderLogicParserTraits >
 class RenderLogicParser  : public LogicParser<TDataStorage,

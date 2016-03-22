@@ -15,7 +15,7 @@
 #include "GRSF/Common/XMLMacros.hpp"
 
 #include "GRSF/Dynamics/General/ParserFunctions.hpp"
-#include "GRSF/General/GridderLogicParserTraitsMacro.hpp"
+#include "GRSF/Converters/Gridder/GridderLogicParserTraitsMacro.hpp"
 
 namespace GridderLogicParserModules {
 

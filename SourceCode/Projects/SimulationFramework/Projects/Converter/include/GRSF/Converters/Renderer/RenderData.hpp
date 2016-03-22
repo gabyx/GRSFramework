@@ -11,7 +11,7 @@
 
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "GRSF/General/RenderMaterial.hpp"
+#include "GRSF/Converters/Renderer/RenderMaterial.hpp"
 
 
 namespace ParserModules {

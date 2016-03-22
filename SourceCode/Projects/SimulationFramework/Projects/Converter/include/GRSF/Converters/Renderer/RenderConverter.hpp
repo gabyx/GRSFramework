@@ -18,8 +18,8 @@
 
 #include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
 
-#include "GRSF/General/RenderData.hpp"
-#include "GRSF/General/RenderExecutionGraph.hpp"
+#include "GRSF/Converters/Renderer/RenderData.hpp"
+#include "GRSF/Converters/Renderer/RenderExecutionGraph.hpp"
 
 class RenderConverter : public SimFileConverter {
 public:

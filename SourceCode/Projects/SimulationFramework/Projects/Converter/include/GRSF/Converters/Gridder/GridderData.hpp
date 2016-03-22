@@ -11,7 +11,7 @@
 
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "GRSF/General/GridExtractionSettings.hpp"
+#include "GRSF/Converters/Gridder/GridExtractionSettings.hpp"
 
 
 #define  DEFINE_GRIDDERCONVERTERDATA_TYPES  \

@@ -12,7 +12,7 @@ struct AnalyzerLogicParserTraits : LogicParserTraits<TSceneParser,TDataStorage> 
 
 };
 
-#include "GRSF/General/AnalyzerLogicParserTraitsMacro.hpp"
+#include "GRSF/Converters/Analyzer/AnalyzerLogicParserTraitsMacro.hpp"
 
 
 

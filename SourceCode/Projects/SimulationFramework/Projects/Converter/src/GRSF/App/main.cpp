@@ -11,12 +11,12 @@
 #include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
 #include "GRSF/Common/ApplicationSignalHandler.hpp"
 
-#include "GRSF/Converters/SimFileInfo.hpp"
-#include "GRSF/Converters/SimFileJoiner.hpp"
-#include "GRSF/Converters/SimFileResampler.hpp"
-#include "GRSF/Converters/RenderConverter.hpp"
-#include "GRSF/Converters/AnalyzerConverter.hpp"
-#include "GRSF/Converters/GridderConverter.hpp"
+#include "GRSF/Converters/SimInfo/SimFileInfo.hpp"
+#include "GRSF/Converters/SimJoiner/SimFileJoiner.hpp"
+#include "GRSF/Converters/SimResampler/SimFileResampler.hpp"
+#include "GRSF/Converters/Renderer/RenderConverter.hpp"
+#include "GRSF/Converters/Analyzer/AnalyzerConverter.hpp"
+#include "GRSF/Converters/Gridder/GridderConverter.hpp"
 
 void printHelpAndExit(std::string o=""){
      std::cerr << "Wrong Options: '" << o <<"'"<< std::endl

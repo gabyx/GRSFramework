@@ -7,8 +7,8 @@
 #include LogicTypes_INCLUDE_FILE
 #include "GRSF/Logic/LogicNode.hpp"
 
-#include "GRSF/General/RendermanGeometryWriter.hpp"
-#include "GRSF/General/RenderData.hpp"
+#include "GRSF/Converters/Renderer/RendermanGeometryWriter.hpp"
+#include "GRSF/Converters/Renderer/RenderData.hpp"
 
 
 #include "GRSF/Common/ColorGradient.hpp"

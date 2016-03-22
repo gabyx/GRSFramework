@@ -12,7 +12,7 @@
 
     #include "GRSF/Common/TypeDefs.hpp"
 
-    #include "GRSF/General/RenderMaterial.hpp"
+    #include "GRSF/Converters/Renderer/RenderMaterial.hpp"
 
     namespace LogicTypes{
 

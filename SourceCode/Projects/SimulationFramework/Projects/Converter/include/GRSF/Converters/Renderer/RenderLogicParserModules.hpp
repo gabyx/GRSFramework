@@ -12,7 +12,7 @@
 
 #include "GRSF/Common/AssertionDebug.hpp"
 
-#include "GRSF/General/RenderLogicParserTraitsMacro.hpp"
+#include "GRSF/Converters/Renderer/RenderLogicParserTraitsMacro.hpp"
 
 namespace RenderLogicParserModules {
 
@@ -64,8 +64,8 @@ namespace RenderLogicParserModules {
 
 
 #include "GRSF/General/LogicParserModules.hpp"
-#include "GRSF/General/RenderExecutionGraph.hpp"
-#include "GRSF/General/RenderExecutionGraphNodes.hpp"
+#include "GRSF/Converters/Renderer/RenderExecutionGraph.hpp"
+#include "GRSF/Converters/Renderer/RenderExecutionGraphNodes.hpp"
 
 namespace RenderLogicParserModules {
 

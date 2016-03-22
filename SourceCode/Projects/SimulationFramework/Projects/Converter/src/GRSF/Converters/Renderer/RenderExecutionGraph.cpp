@@ -1,7 +1,7 @@
-#include "GRSF/General/RenderExecutionGraph.hpp"
+#include "GRSF/Converters/Renderer/RenderExecutionGraph.hpp"
 
 
-#include "GRSF/General/RenderExecutionGraphNodes.hpp"
+#include "GRSF/Converters/Renderer/RenderExecutionGraphNodes.hpp"
 
 
 void RenderExecutionGraph::setup() {

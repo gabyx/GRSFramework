@@ -13,7 +13,7 @@
 
 #include "GRSF/General/LogicParser.hpp"
 
-#include "GRSF/General/GridderLogicParserTraits.hpp"
+#include "GRSF/Converters/Gridder/GridderLogicParserTraits.hpp"
 
 /** We dont need any TDataStorage, LogicModule only needs a execution graph */
 template< typename TDataStorage, template<typename P, typename C> class TParserTraits = GridderLogicParserTraits >

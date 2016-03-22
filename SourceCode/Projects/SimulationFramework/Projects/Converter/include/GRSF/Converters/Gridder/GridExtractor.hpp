@@ -16,7 +16,7 @@
 
 #include "GRSF/Dynamics/General/CartesianGrid.hpp"
 
-#include "GRSF/General/GridExtractionSettings.hpp"
+#include "GRSF/Converters/Gridder/GridExtractionSettings.hpp"
 
 #include "GRSF/Common/HDF5Helpers.hpp"
 

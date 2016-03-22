@@ -16,7 +16,7 @@
 
 #include "GRSF/Common/Exception.hpp"
 
-#include "GRSF/Converters/SimFileJoiner.hpp"
+#include "GRSF/Converters/SimJoiner/SimFileJoiner.hpp"
 
 /**
 *  @brief CommandLineOptions for the Application

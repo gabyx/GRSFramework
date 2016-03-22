@@ -1,5 +1,5 @@
 
-#include "GRSF/General/GridExtractor.hpp"
+#include "GRSF/Converters/Gridder/GridExtractor.hpp"
 #include "GRSF/Common/HDF5Helpers.hpp"
 
 GridExtractor::GridExtractor(GridExtractionSettings * settings,

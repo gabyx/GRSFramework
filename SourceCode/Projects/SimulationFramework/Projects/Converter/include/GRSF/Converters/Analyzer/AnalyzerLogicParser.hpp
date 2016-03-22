@@ -13,7 +13,7 @@
 
 #include "GRSF/General/LogicParser.hpp"
 
-#include "GRSF/General/AnalyzerLogicParserTraits.hpp"
+#include "GRSF/Converters/Analyzer/AnalyzerLogicParserTraits.hpp"
 
 /** We dont need any TCollection, LogicModule only needs a execution graph */
 template< typename TCollection = void, template<typename P, typename C> class TParserTraits = AnalyzerLogicParserTraits >

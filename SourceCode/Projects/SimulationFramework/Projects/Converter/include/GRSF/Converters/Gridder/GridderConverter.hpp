@@ -15,7 +15,7 @@
 #include "GRSF/Common/TypeDefs.hpp"
 
 #include "GRSF/Converters/SimFileConverter.hpp"
-#include "GRSF/General/GridderData.hpp"
+#include "GRSF/Converters/Gridder/GridderData.hpp"
 
 
 class GridderConverter : public SimFileConverter {

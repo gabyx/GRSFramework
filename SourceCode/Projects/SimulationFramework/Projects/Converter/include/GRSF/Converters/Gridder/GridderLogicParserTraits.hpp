@@ -3,7 +3,7 @@
 
 #include "GRSF/General/LogicParserBaseTraits.hpp"
 
-#include "GRSF/General/GridderLogicParserModules.hpp"
+#include "GRSF/Converters/Gridder/GridderLogicParserModules.hpp"
 
 /** The traits for a standart RenderLogicParser class*/
 template<typename TSceneParser, typename TDataStorage>
@@ -18,7 +18,7 @@ struct GridderLogicParserTraits : LogicParserBaseTraits<TSceneParser,TDataStorag
 
 };
 
-#include "GRSF/General/GridderLogicParserTraitsMacro.hpp"
+#include "GRSF/Converters/Gridder/GridderLogicParserTraitsMacro.hpp"
 
 
 
