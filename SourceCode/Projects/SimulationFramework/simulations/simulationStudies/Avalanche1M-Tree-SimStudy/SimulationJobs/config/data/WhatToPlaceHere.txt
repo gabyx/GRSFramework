@@ -1,3 +1,0 @@
-SimState.sim       :  InitialCondition
-media              :  symlink to media folder
- 
