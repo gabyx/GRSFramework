@@ -4,7 +4,7 @@
 #include "GRSF/Common/SimpleLogger.hpp"
 #include <pugixml.hpp>
 
-/** The base traits for every MaterialsCollectionParser parser */
+
 template<typename TSceneParser, typename TDataStorage>
 struct LogicParserBaseTraits {
 
@@ -19,13 +19,7 @@ struct LogicParserBaseTraits {
 };
 
 
-#define DEFINE_LOGICPARSER_BASE_TYPE_TRAITS( TParserTraits ) \
-    using ParserType = typename TParserTraits::ParserType; \
-    using DataStorageType = typename TParserTraits::DataStorageType; \
-    using LogType = typename TParserTraits::LogType; \
-    using XMLNodeType = typename TParserTraits::XMLNodeType;\
-    using XMLNodeItType = typename TParserTraits::XMLNodeItType;\
-    using XMLAttributeType = typename TParserTraits::XMLAttributeType;
+#include "GRSF/General/LogicParserBaseTraitsMacro.hpp"
 
 
 #endif
