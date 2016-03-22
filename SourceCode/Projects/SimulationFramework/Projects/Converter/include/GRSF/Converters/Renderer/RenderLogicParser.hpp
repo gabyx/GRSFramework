@@ -1,5 +1,5 @@
-#ifndef RenderLogicParser_hpp
-#define RenderLogicParser_hpp
+#ifndef GRSF_General_RenderLogicParser_hpp
+#define GRSF_General_RenderLogicParser_hpp
 
 #include <vector>
 #include <fstream>

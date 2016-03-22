@@ -1,5 +1,5 @@
-#ifndef LogicConverter_hpp
-#define LogicConverter_hpp
+#ifndef GRSF_Converters_SimFileConverter_hpp
+#define GRSF_Converters_SimFileConverter_hpp
 
 #include <iostream>
 #include <iomanip>

@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_Collision_Geometry_SerializationHelpersGeometries_hpp
-#define GRSF_Dynamics_Collision_Geometry_SerializationHelpersGeometries_hpp
+#ifndef GRSF_Dynamics_Collision_SerializationHelpersGeometries_hpp
+#define GRSF_Dynamics_Collision_SerializationHelpersGeometries_hpp
 
 #include <boost/variant.hpp>
 #include <boost/serialization/split_member.hpp>

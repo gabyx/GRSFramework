@@ -1,5 +1,5 @@
-#ifndef GRSF_General_LogicParserBaseTraitsMacro_hpp
-#define GRSF_General_LogicParserBaseTraitsMacro_hpp
+#ifndef GRSF_General_LogicParserTraitsMacro_hpp
+#define GRSF_General_LogicParserTraitsMacro_hpp
 
 #include "GRSF/General/LogicParserBaseTraitsMacro.hpp"
 

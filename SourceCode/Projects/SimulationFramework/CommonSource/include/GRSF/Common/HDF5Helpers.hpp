@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_Hdf5Helpers_hpp
-#define GRSF_Common_Hdf5Helpers_hpp
+#ifndef GRSF_Common_HDF5Helpers_hpp
+#define GRSF_Common_HDF5Helpers_hpp
 
 #include <type_traits>
 

@@ -1,5 +1,5 @@
-#ifndef RenderMaterial_hpp
-#define RenderMaterial_hpp
+#ifndef GRSF_General_RenderMaterial_hpp
+#define GRSF_General_RenderMaterial_hpp
 
 #include <sstream>
 #include "GRSF/Common/TypeDefs.hpp"

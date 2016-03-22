@@ -1,5 +1,5 @@
-#ifndef GRSF_General_RenderLogicParserTraits_hpp
-#define GRSF_General_RenderLogicParserTraits_hpp
+#ifndef GRSF_General_AnalyzerLogicParserTraits_hpp
+#define GRSF_General_AnalyzerLogicParserTraits_hpp
 
 
 #include "GRSF/General/LogicParserTraits.hpp"

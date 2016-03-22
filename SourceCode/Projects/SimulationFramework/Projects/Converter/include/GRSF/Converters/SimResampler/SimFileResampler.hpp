@@ -1,5 +1,5 @@
-#ifndef SimFileResampler_hpp
-#define SimFileResampler_hpp
+#ifndef GRSF_Converters_SimFileResampler_hpp
+#define GRSF_Converters_SimFileResampler_hpp
 
 #include <iostream>
 #include <iomanip>

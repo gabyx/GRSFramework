@@ -1,5 +1,5 @@
-#ifndef  GRSF_General_SimFileExecutionGraph_hpp
-#define  GRSF_General_SimFileExecutionGraph_hpp
+#ifndef GRSF_General_SimFileExecutionGraph_hpp
+#define GRSF_General_SimFileExecutionGraph_hpp
 
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"

@@ -1,5 +1,5 @@
-    #ifndef LogicTypes_hpp
-    #define LogicTypes_hpp
+    #ifndef GRSF_Logic_LogicTypes_hpp
+#define GRSF_Logic_LogicTypes_hpp
 
     #include <memory>
 

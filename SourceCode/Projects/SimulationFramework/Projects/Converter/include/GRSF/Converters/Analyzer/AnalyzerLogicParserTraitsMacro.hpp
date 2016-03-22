@@ -1,5 +1,5 @@
-#ifndef GRSF_General_GridderLogicParserTraitsMacro_hpp
-#define GRSF_General_GridderLogicParserTraitsMacro_hpp
+#ifndef GRSF_General_AnalyzerLogicParserTraitsMacro_hpp
+#define GRSF_General_AnalyzerLogicParserTraitsMacro_hpp
 
 #include "GRSF/Common/SimpleLogger.hpp"
 #include <pugixml.hpp>

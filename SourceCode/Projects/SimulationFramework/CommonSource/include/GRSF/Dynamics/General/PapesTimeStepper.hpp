@@ -7,8 +7,8 @@
 *  Copyright 2010 ETH. All rights reserved.
 *
 */
-#ifndef GRSF_Dynamics_General_MoreauTimeStepper_hpp
-#define GRSF_Dynamics_General_MoreauTimeStepper_hpp
+#ifndef GRSF_Dynamics_General_PapesTimeStepper_hpp
+#define GRSF_Dynamics_General_PapesTimeStepper_hpp
 
 // Includes =================================
 #include <fstream>

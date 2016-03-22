@@ -1,5 +1,5 @@
-#ifndef  RenderExecutionGraph_hpp
-#define  RenderExecutionGraph_hpp
+#ifndef GRSF_General_RenderExecutionGraph_hpp
+#define GRSF_General_RenderExecutionGraph_hpp
 
 #include "GRSF/Common/TypeDefs.hpp"
 #include "GRSF/Common/LogDefines.hpp"

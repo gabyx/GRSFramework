@@ -1,5 +1,5 @@
-#ifndef SimFileInfo_hpp
-#define SimFileInfo_hpp
+#ifndef GRSF_Converters_SimFileInfo_hpp
+#define GRSF_Converters_SimFileInfo_hpp
 
 #include <iostream>
 #include <iomanip>

@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef GRSF_Dynamics_General_LayoutConfigDefs_hpp
-#define GRSF_Dynamics_General_LayoutConfigDefs_hpp
+#ifndef GRSF_Dynamics_General_LayoutConfigTypeDefs_hpp
+#define GRSF_Dynamics_General_LayoutConfigTypeDefs_hpp
 
 #include "GRSF/Dynamics/General/MyContainerTypeDefs.hpp"
 #include "GRSF/Dynamics/General/MyMatrixTypeDefs.hpp"

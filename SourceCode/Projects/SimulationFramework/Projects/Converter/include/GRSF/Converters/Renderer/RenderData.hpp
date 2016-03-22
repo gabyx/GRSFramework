@@ -1,5 +1,5 @@
-#ifndef RenderData_hpp
-#define RenderData_hpp
+#ifndef GRSF_General_RenderData_hpp
+#define GRSF_General_RenderData_hpp
 
 
 #include "GRSF/Common/TypeDefs.hpp"

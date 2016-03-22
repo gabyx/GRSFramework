@@ -1,5 +1,5 @@
-#ifndef GRSF_Logic_TransformNode_hpp
-#define GRSF_Logic_TransformNode_hpp
+#ifndef GRSF_Logic_Transform3DNode_hpp
+#define GRSF_Logic_Transform3DNode_hpp
 
 #include "GRSF/Logic/LogicNode.hpp"
 

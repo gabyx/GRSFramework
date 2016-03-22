@@ -1,5 +1,5 @@
-#ifndef RendermanGeometryWriter_hpp
-#define RendermanGeometryWriter_hpp
+#ifndef GRSF_General_RendermanGeometryWriter_hpp
+#define GRSF_General_RendermanGeometryWriter_hpp
 
 #include <boost/variant.hpp>
 

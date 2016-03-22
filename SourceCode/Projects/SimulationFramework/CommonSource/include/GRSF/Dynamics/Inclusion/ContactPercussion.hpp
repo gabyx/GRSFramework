@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Dynamics_Collision_ContactPercussion_hpp
-#define GRSF_Dynamics_Collision_ContactPercussion_hpp
+﻿#ifndef GRSF_Dynamics_Inclusion_ContactPercussion_hpp
+#define GRSF_Dynamics_Inclusion_ContactPercussion_hpp
 
 #include "GRSF/Dynamics/Inclusion/ContactModels.hpp"
 

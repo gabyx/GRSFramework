@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef LogDefines_hpp
-#define LogDefines_hpp
+#ifndef GRSF_Common_LogDefines_hpp
+#define GRSF_Common_LogDefines_hpp
 
 /**
 * @ingroup Common
