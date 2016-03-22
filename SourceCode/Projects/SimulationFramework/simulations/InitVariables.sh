@@ -1,36 +1,35 @@
 #!/bin/bash
+# source this files to make available certain macros defined below
 
 
-export SIMMPI_D="${ROOT_BUILD_DIR}/SIMULATION_FRAMEWORK/Debug/Projects/GeneralRigidBodySimulationMPI/bin/Debug/GeneralRigidBodySimulationMPI"
-export SIMGUI_D="${ROOT_BUILD_DIR}/SIMULATION_FRAMEWORK/Debug/Projects/GeneralRigidBodySimulation/bin/Debug/GeneralRigidBodySimulation"
-export SIMNOGUI_D="${ROOT_BUILD_DIR}/SIMULATION_FRAMEWORK/Debug/Projects/GeneralRigidBodySimulationNoGUI/bin/Debug/GeneralRigidBodySimulationNoGUI"
-export SIMCONV_D="${ROOT_BUILD_DIR}/SIMULATION_FRAMEWORK/Debug/Projects/Converter/bin/Debug/Converter"
+echo "GRSFramework:: commands: \n \t run_sim(_d), run_simgui(_d), run_simmpi(_d(_asan)) , run_simconv(_d) \n \t are now available."
 
-export SIMMPI="${ROOT_BUILD_DIR}/SIMULATION_FRAMEWORK/Release/Projects/GeneralRigidBodySimulationMPI/bin/Release/GeneralRigidBodySimulationMPI"
-export SIMGUI="${ROOT_BUILD_DIR}/SIMULATION_FRAMEWORK/Release/Projects/GeneralRigidBodySimulation/bin/Release/GeneralRigidBodySimulation"
-export SIMNOGUI="${ROOT_BUILD_DIR}/SIMULATION_FRAMEWORK/Release/Projects/GeneralRigidBodySimulationNoGUI/bin/Release/GeneralRigidBodySimulationNoGUI"
-export SIMCONV="${ROOT_BUILD_DIR}/SIMULATION_FRAMEWORK/Release/Projects/Converter/bin/Release/Converter"
+export SIMMPI_D="${GRSF_REPO_BUILD_DIR}/Debug/Projects/GeneralRigidBodySimulationMPI/bin/Debug/GeneralRigidBodySimulationMPI"
+export SIMGUI_D="${GRSF_REPO_BUILD_DIR}/Debug/Projects/GeneralRigidBodySimulation/bin/Debug/GeneralRigidBodySimulation"
+export SIMNOGUI_D="${GRSF_REPO_BUILD_DIR}/Debug/Projects/GeneralRigidBodySimulationNoGUI/bin/Debug/GeneralRigidBodySimulationNoGUI"
+export SIMCONV_D="${GRSF_REPO_BUILD_DIR}/Debug/Projects/Converter/bin/Debug/Converter"
 
+export SIMMPI="${GRSF_REPO_BUILD_DIR}/Release/Projects/GeneralRigidBodySimulationMPI/bin/Release/GeneralRigidBodySimulationMPI"
+export SIMGUI="${GRSF_REPO_BUILD_DIR}/Release/Projects/GeneralRigidBodySimulation/bin/Release/GeneralRigidBodySimulation"
+export SIMNOGUI="${GRSF_REPO_BUILD_DIR}/Release/Projects/GeneralRigidBodySimulationNoGUI/bin/Release/GeneralRigidBodySimulationNoGUI"
+export SIMCONV="${GRSF_REPO_BUILD_DIR}/Release/Projects/Converter/bin/Release/Converter"
 
-export MPITEST="${ROOT_BUILD_DIR}/MPI_TESTS/Debug/Projects/MpiTests/MpiTests"
-export TESTBENCH="${ROOT_BUILD_DIR}/TEST_BENCH/Projects/Test/Test"
+# pipe asanMangler to the any GRSF executable to trace output from address and leak sanitizer
+export ASANMANGLER="${GRSF_SIMULATION_DIR}/python/Tools/AsanSymbolize/asan_symbolize.py"
+alias asanMangler="${ASANMANGLER}"
 
-alias run_simnogui="${SIMNOGUI}"
-alias run_sim="${SIMGUI}"
+alias run_sim="${SIMNOGUI}"
+alias run_simgui="${SIMGUI}"
 alias run_simconv="${SIMCONV}"
 
-alias run_simnogui_d="${SIMNOGUI_D}"
-alias run_sim_d="${SIMGUI_D}"
+alias run_sim_d="${SIMNOGUI_D}"
+alias run_simgui_d="${SIMGUI_D}"
 alias run_simconv_d="${SIMCONV_D}"
 
 
 run_simmpi() {
    n=$1; shift;
    eval mpiexec -np $n $SIMMPI "$@"
-}
-
-run_simshowargs() {
-   eval mpiexec -np $1 ./ShowAllArgs/ShowAllArgs $2  
 }
 
 run_simmpi_d() {
