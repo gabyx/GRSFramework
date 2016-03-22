@@ -1,0 +1,100 @@
+# Parameters for ACCIV used construct a velocity field from a set of earlier 
+# and a set of later images (which may be the same: an image will never be 
+# compared with itself and each image pair will only be used once).
+# 
+# file containing the geometric factors needed to convert from lon/s and lat/s to vx and vy
+gridGeometryFactorsFileName = ${Pipeline:correlatorAccivGeometryFactorsFile}
+
+# the format of the earlier image file names (printf format)
+earlierImageFileTemplate = ${Pipeline:correlatorAccivEarlierImageFileTemplate}
+
+# the format of the later image file names (printf format)
+laterImageFileTemplate = ${Pipeline:correlatorAccivLaterImageFileTemplate}
+
+# if we are advecting images, to which time: "early", "middle", "late"
+# "early" corresponds to the mean of the times of the earlier images
+# "middle" corresponds to half way between the mean times of the earlier and of the later images
+# "late" corresponds to the mean of the times of the later images
+advectionTimeFlag = middle
+
+# the output file name for the scattered velocity vectors
+outScatteredVelocityFileName = outScatteredVelocity.h5
+
+# the output file name for the smooth, gridded velocity field
+outGridVelocityFileName = outGridVelocity.h5
+
+
+# the fraction of a pixel to which a correlation location is found
+correlationTolerance = 1e-2
+
+# the minimum correlation coefficient for a tie point, below which it gets thrown out
+minimumCorrelationCoefficient = 0.5
+
+# the minimum time between images, below which image pairs will not be correlated
+minimumTimeSeparation = 0.0
+
+# the maximum time between images, above which image pairs will not be correlated
+maximumTimeSeparation = 1e8
+
+
+# the number of outer iterations of the overall function fitting and outlier removal process
+removeScatteredOutliers = true
+
+# the number of inner iterations of streamline following, smooth function fitting process
+# within the outer iteration loop (zero for no streamline following, but a smooth function will
+# always be fitted to the data)
+streamlineFollowingSmoothFitIterationCount = 3
+
+
+# the threshold constant for defining outliers: a point x_i is defined to be an outlier
+# if R_i > outlierThresholdConstant*median(R_i), where R_i = ||v_m(x_i) - v_s(x_i)||^2 
+# is the root-mean-squared difference between the measured velocity and the smooth
+# velocity interpolated to the same location, and where the median is taken over all
+# measurements in the data set
+outlierThresholdConstant = 5
+
+# the minimum number of scattered data points that neighbor a given b-spline control point, 
+# below which the control point is dropped from the fit
+smoothFitMinControlPointScatteredNeighbors = 40
+
+# the number of vectors placed along each path by the streamline following process
+pathVectorCount = 13
+
+# the relative error tolerance allowed in the Bulirsch-Stoer used to advect both
+# displacement vectors and images
+advectionErrorTolerance = 1e-3
+
+# the maximum number of integration time steps allowed before the Bulirsch-Stoer
+# integrator gives up
+advectionMaxTimeStepCount = 10000
+
+# Should we multiply the final velocity field by a mask so it is zero
+# at the edges of the domain?
+maskFinalVelocity = false
+
+# work directory where data from intermediate ACCIV stages is stored
+workDirectory = accivWorkFolder
+
+#
+# flags to determine which processes to do
+#   these are useful if you want to resume the ACCIV process if it was
+#   interrupted or if you need to change some parameters that only
+#   affect later steps
+#
+# if the advectImages flag is also set, do we perform the image advection step?
+doImageAdvectionStep = true
+
+# do we perform the image correlation step?
+doImageCorrelationStep = true
+
+# if the advectImages flag is also set, do we perform the tie point un-advection step?
+doUndoTiePointAdvectionStep = true
+
+# do we perform the velocity construction step?
+doVelocityConstructionStep = true
+
+# do we replace work files if they already exist
+#  overwriteWorkFiles = true is useful if redoing the computation (or part of it)
+#  overwriteWorkFiles = false is useful if resuming a computation that was stopped
+overwriteWorkFiles = true
+

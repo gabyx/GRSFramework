@@ -1,0 +1,147 @@
+<?xml version="1.0" ?>
+<DynamicsSystem>
+
+<SceneSettings>
+    <Gravity value="9.81" direction="0 0 -1" />
+    <TimeStepperSettings deltaT ="0.01" endTime="500">l
+        <InclusionSolverSettings        method="SOR" 
+                                                useGPU ="true" 
+                                                useGPUID="0" 
+                                                alphaJORProx="0.2" 
+                                                alphaSORProx="1.2" 
+                                                convergenceMethod="InEnergyVelocity"
+                                                minIter = "1" maxIter="100" 
+                                                absTol="1e-6" relTol="1e-6" 
+                                                isFiniteCheck = "false"/>
+
+        <SimulateFromReference enabled="false" type="continue" file="./SimFiles/5000Balls/SimulationState.sim" />
+<!--        <SimulateFromReference type="continue" file="./SimFiles/Reference/StateData.sim" enabled="true" />-->
+    </TimeStepperSettings>
+    
+    
+    <RecorderSettings recorderMode="everyTimeStep" statesPerSecond="200"/>
+        
+    <Visualization>
+            <SceneScale value="500"/> 
+    </Visualization>
+     
+    <ContactParameterMap>
+        <ContactParameterStandard mu="0.5" epsilonN="0.0" epsilonT="0.0"/>
+        <ContactParameter materialId1="1" materialId2="2"  mu="0.3" epsilonN="0.0" epsilonT="0" />
+        <ContactParameter materialId1="1" materialId2="1"  mu="0.3" epsilonN="0.0" epsilonT="0" />
+    </ContactParameterMap>
+    
+    <GlobalGeometries>
+        <Geometry>
+            <Sphere distribute="random" radius="0.0125" seed="5" minRadius="0.07" maxRadius="0.09" id="1" instances="10" />
+        </Geometry>
+    </GlobalGeometries>
+    
+    <ExternalForces>
+        <ForceField enabled="false" applyTo="all" type="spatialspherical-timerandom" 
+            seed="0" 
+            boostTime="0.2" pauseTime="1" amplitude="10" 
+            randomOn="true" 
+            minPoint="-3.02 -3.02 2" maxPoint="3.02 3.02 -2"  
+            startTime="0" endTime="1000"
+        />
+    </ExternalForces>
+
+
+    
+</SceneSettings>
+
+<!--
+<MPISettings>
+    <ProcessTopology type="grid" minPoint="-3.02 -3.02 -0.02" maxPoint="3.02 3.02 3.02" dimension="2 2 2">
+        <Visualization>
+            <Material name="PlaneYellowWireNoCull"/>    
+        </Visualization>   
+    </ProcessTopology>
+</MPISettings>
+-->
+
+
+<SceneObjects>
+
+    <RigidBodies name="balls" instances="1" groupId="1">
+<!--
+        <Geometry>
+            <Sphere distribute="uniform" radius="0.0125" seed="5" minRadius="0.008" maxRadius="0.018" />
+        </Geometry>
+-->
+        <Geometry>
+            <GlobalGeomId distribute="uniform"  id="1" seed="5" startId = "1" endId="10" />
+        </Geometry>
+        
+        <DynamicProperties>
+            <DynamicState type="simulated" />
+            <Mass distribute="uniform" value="3.050" />
+            <InertiaTensor type="homogen" />
+            <Material distribute="uniform" id="1"/>
+            
+            <InitialPosition distribute="transforms" >
+                <Value>
+                    <Transform  rotationAxis="1 0 0" angleDegree="0" translation="-0.2 0.3 0.3"/>
+                </Value>
+            </InitialPosition>
+<!--
+            <InitialPosition distribute="grid"  gridSizeX="30" gridSizeY="30" distance="0.20" translation="-0.03 0 -0.5" jitter="true" delta="0.000" />
+-->
+        </DynamicProperties>
+        <Visualization>
+                <Mesh file="Sphere18x18.mesh" scaleLikeGeometry="true" scale="0.0125 0.0125 0.0125" type="permutate" >
+                    <Material name="SphereYellowPhong" />
+                </Mesh>
+        </Visualization>
+    </RigidBodies>
+    
+    <RigidBodies name="bed" instances="1">
+        <Geometry>
+            <Mesh name="Bed" distribute="uniform" file="/home/zfmgpu/Desktop/Repository/SimulationFramework/SourceCode/Projects/SimulationFramework/Projects/media/models/TestObject.obj"  useInstance = "false"
+            scale="6 6 6"  rotationAxis="1 0 0" angleDegree="0" translation="0 0 0.0" writeToLog="true"/>
+        </Geometry>
+
+        <DynamicProperties>
+            <Material distribute="uniform" id="2"/>
+            <DynamicState type="not simulated" />
+            <InitialPosition distribute="transforms" >
+                <Value>
+                    <Transform  rotationAxis="1 0 0" angleDegree="0" translation="0 0 6"/>
+                </Value>
+            </InitialPosition>
+        </DynamicProperties>
+
+        <Visualization>
+            
+                <Mesh file="TestObject.mesh"  scaleLikeGeometry="true" scale="6 6 6" type="uniform">
+                    <Material name="PlaneBlue" />
+                </Mesh>
+        </Visualization>
+    </RigidBodies>
+    
+<!--
+    <RigidBodies name="ceiling" instances="1" groupId="2">
+        <Geometry>
+            <Halfspace distribute="uniform" normal="0 0 -1" position="0 0 0"/>
+        </Geometry>
+        <DynamicProperties>
+            <DynamicState type="not simulated" />
+            <Material distribute="uniform" id="2"/>
+            <InitialPosition distribute="posaxisangle" >
+                                <Value position="0 0.0 0"  axis="1 0 0" angleDegree="0"/>
+            </InitialPosition>
+        </DynamicProperties>
+        <Visualization>
+                <Mesh file="Plane.mesh" scale="7 7 7" type="uniform" attachAxis="true" axesSize="0.001">
+                    <Material name="PlaneBlueAlpha" />
+                </Mesh>
+        </Visualization>
+    </RigidBodies>
+-->
+
+
+</SceneObjects>
+
+
+</DynamicsSystem>

@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="xs3p.xsl"?>
+
+<xs:schema
+xmlns:xs="http://www.w3.org/2001/XMLSchema"
+targetNamespace="SceneFile"
+xmlns:sf="SceneFile"
+elementFormDefault="qualified"
+attributeFormDefault="unqualified"
+
+>
+
+<xs:include schemaLocation="SceneSettingsTypes.xsd"/>
+<xs:include schemaLocation="SceneObjectsTypes.xsd"/>
+
+
+    <xs:complexType name="DynamicsSystemT">
+      <xs:all>
+         <xs:element name="SceneSettings" type="sf:SceneSettingsT"/>
+         <xs:element name="SceneObjects"  type="sf:SceneObjectsT"/>
+      </xs:all>
+    </xs:complexType>
+
+
+    <xs:complexType name="SceneSettingsT">
+        <xs:all>
+            <xs:element ref="sf:RecorderSettings"/>
+            <xs:element name="TimeStepperSettings" type="sf:TimeStepperSettingsT"/>
+
+            <xs:element name="ContactParameterMap"    type="sf:ContactParameterMapT"/>
+            <xs:element name="GlobalGeometries"       type="sf:GlobalGeometriesT"       minOccurs="0"/>
+            <xs:element name="GlobalInitialCondition" type="sf:GlobalInitialConditionT" minOccurs="0" />
+            <xs:element name="ExternalForces"         type="sf:ExternalForcesT"         minOccurs="0"/>
+            <xs:element name="GlobalSelectiveIds"     type="sf:GlobalSelectiveIdsT"     minOccurs="0" />
+            
+            <xs:element name="Visualization"          type="sf:SceneSettingsVisualizationT"     minOccurs="0" />
+            
+            <xs:element name="MPISettings"          type="sf:MPISettingsT"     minOccurs="0" />
+        </xs:all>
+    </xs:complexType>
+    
+    <xs:complexType name="SceneObjectsT">
+        <xs:all>
+            <xs:element name="RigidBodies" type="sf:RigidBodiesT" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:all>
+    </xs:complexType>
+
+<xs:element name="DynamicsSystem" type="sf:DynamicsSystemT"/>
+
+</xs:schema>

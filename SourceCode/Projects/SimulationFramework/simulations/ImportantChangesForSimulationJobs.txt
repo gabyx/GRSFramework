@@ -1,0 +1,15 @@
+Todos:
+
+
+[Converter]
+- Change FRAME_FINAL und so in STATE_FINAL
+  -> Führt zu Änderungen in XML logic files.
+- Change frameIdx, stateIdx in SimFileConverter.hpp 
+  zu stateIdx = fer gelesene state
+     newStateIdx = der neue state idx welcher zugewiesen ist zu diesem sim state.
+
+
+[Changes to Files]
+
+Converter Stuff
+- Logic FrameDataInput is renamed to StateDataInput in XMLs!

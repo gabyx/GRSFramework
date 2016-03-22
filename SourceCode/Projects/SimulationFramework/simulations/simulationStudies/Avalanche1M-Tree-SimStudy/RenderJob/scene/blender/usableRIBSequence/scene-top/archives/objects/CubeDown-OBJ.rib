@@ -1,0 +1,13 @@
+AttributeBegin
+    Attribute "identifier" "name" [ "CubeDown" ]
+    Transform [
+            -0.46984630823135376 2.0871773642738845e-07 -0.1710100769996643 0.0
+            -3.612075261116843e-07 -0.5 3.821597260866838e-07 0.0
+            -0.0034202022943645716 9.653058796743608e-09 0.009396922774612904 0.0
+            -0.7227696776390076 2.299264707517068e-07 -0.3284069895744324 1.0
+            ]
+            
+    ReadArchive "MaterialSlopeDown-MAT.rib"
+    ReadArchive "CubeDown_m0-GEO.rib"
+AttributeEnd
+

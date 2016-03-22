@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Analyzer>
+
+
+<Logic>
+    
+    <!-- Body Data Input ============================================-->
+    <!-- Out Socket Nr: BodyId = 0 Displacement = 1 Velocity = 2 MaterialId = 3 ProcessId = 4 TotalOverlap = 5-->
+    <Tool type="BodyDataInput" id="0"/>
+    <!-- ============================================================-->
+    <!-- Frame Data =================================================-->
+    <!-- Out Socket Nr: Time = 0, FrameNr = 1, Folder = 2, Name = 3, FilePath = 4 -->
+    <Tool type="StateDataInput" id="1"/>
+    <!-- ============================================================-->
+    <!-- Sim File Data =================================================-->
+    <!-- Out Socket Nr: SimFile = 0, NBodies = 1, NStates = 2 , Folder = 3, Name = 4, FilePath = 5 -->
+    <Tool type="SimFileInfo" id="2"/>
+    <!-- ============================================================-->
+    
+    <!-- Split State ================================================-->
+    <Get outNode="0" outSocket="1" fromNode="4" fromSocket="0"/>
+    <Tool type="DisplacementToPosQuat" id="4"/>
+    <!-- Out Socket Nr: Pos = 0, Quat = 1 -->
+    
+<!--
+    <Get outNode="0" outSocket="2" fromNode="5" fromSocket="0"/>
+    <Tool type="VelocityToVelRot" id="5"/>
+-->
+    <!-- Out Socket Nr: Vel = 0, Rot = 1 -->
+    <!-- ============================================================-->
+    
+    
+    <Get outNode="4" outSocket="0" fromNode="12" fromSocket="0"/>
+    <Tool type="OOBBCollider" id="12" groupId="Body" minPoint="-10 -10 0" maxPoint="0 10 10"  resetGroupId="Frame">
+        <Trafo trans="-0.296 0 0" axis="0 1 0" deg="0"/>
+    </Tool>
+    
+<!--
+    ======== Stop Setup to stop when OOBBCollider reached enough counts 
+    If commented out, no stopping till the end of the file!
+    ======
+-->
+    <Get outNode="12" outSocket="0" fromNode="13" fromSocket="0"/>
+    <Get outNode="2" outSocket="1" fromNode="13" fromSocket="1"/>
+    <Tool type="SimpleFunction" id="13" expression="i[0] &gt;= i[1]" evalType="double" outputType="bool" groupId="Body">
+       <InputFormat type="unsigned int"/> 
+       <InputFormat type="unsigned long int"/> 
+    </Tool>    
+
+    <!-- All stop nodes connected to Simple function -->
+    <Get outNode="13" outSocket="0" fromNode="14" fromSocket="0"/>
+    <Tool type="StopNode" id="14" stopGroupId="Frame" />
+    <Get outNode="13" outSocket="0" fromNode="15" fromSocket="0"/>
+    <Tool type="StopNode" id="15" stopGroupId="Body" />
+    <Get outNode="13" outSocket="0" fromNode="16" fromSocket="0"/>
+    <Tool type="StopNode" id="16" stopGroupId="File" />
+<!--
+    ==========================================================================
+-->    
+<!--
+    <Get outNode="12" outSocket="0" fromNode="11" fromSocket="1"/>
+-->
+    <Get outNode="1" outSocket="0" fromNode="17" fromSocket="1"/>
+    <Get outNode="1" outSocket="1" fromNode="17" fromSocket="2"/>
+    <Get outNode="12" outSocket="0" fromNode="17" fromSocket="3"/>
+    <Tool type="StringFormat" id="17" groupId="Body" format="%f %i %i" >
+        <InputFormat type="double"/>
+        <InputFormat type="unsigned int"/>
+        <InputFormat type="unsigned int"/>
+    </Tool>
+    
+<!--
+    Format output file
+-->
+    <Get outNode="2" outSocket="5" fromNode="18" fromSocket="1"/>
+    <Tool type="StringFormat" id="18" groupId="File" format="%s.xml" >
+        <InputFormat type="path"/>
+        <OutputFormat type="path"/>
+    </Tool>
+    
+    <Get outNode="18" outSocket="0" fromNode="11" fromSocket="0"/>
+    <Get outNode="17" outSocket="0" fromNode="11" fromSocket="1"/>
+    <Tool type="XMLLineWriter" id="11"   
+        groupId="FrameFinal" rootName="CollisionInfo" 
+        childName="State" inputType="string"
+        file="CollisionInfo.xml"
+    />
+    
+</Logic>
+
+
+</Analyzer>

@@ -1,0 +1,433 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="xs3p.xsl"?>
+<xs:schema
+xmlns:xs="http://www.w3.org/2001/XMLSchema"
+targetNamespace="SceneFile"
+xmlns:sf="SceneFile"
+elementFormDefault="qualified"
+attributeFormDefault="unqualified">
+
+<!-- GLOBAL GEOMETRIES SETTINGS ===========================================--> 
+<xs:complexType name="GlobalGeometriesT">
+    <xs:all>
+        <xs:element name="Sphere"    type="sf:SphereT" minOccurs="0">
+            <xs:alternative type="sf:SphereRandomGT"  test="@distribute = 'random'"/>  
+            <xs:alternative type="sf:SphereUniformGT" test="@distribute = 'uniform'"/>  
+        </xs:element>
+
+        <xs:element name="Box"       type="sf:BoxT" minOccurs="0" >
+            <!-- <xs:alternative type="sf:BoxRandomGT"  test="@distribute = 'random'"/>  -->
+            <xs:alternative type="sf:BoxUniformGT" test="@distribute = 'uniform'"/>  
+        </xs:element>
+        
+        <xs:element name="Halfspace" type="sf:HalfspaceT" minOccurs="0" >
+            <!-- <xs:alternative type="sf:HalfspaceRandomGT"  test="@distribute = 'random'"/>  -->
+            <xs:alternative type="sf:HalfspaceUniformGT" test="@distribute = 'uniform'"/>  
+        </xs:element>
+        
+        <xs:element name="Mesh" type="sf:MeshT" minOccurs="0" >
+            <!-- <xs:alternative type="sf:MeshRandomGT"  test="@distribute = 'random'"/>  -->
+            <xs:alternative type="sf:MeshUniformGT" test="@distribute = 'uniform'"/>  
+        </xs:element>
+
+    </xs:all>
+</xs:complexType>
+
+
+<!-- SPHERE GEOMETRIES SETTINGS ===========================================--> 
+<xs:complexType name="SphereT">
+    <xs:attribute name="distribute" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="random"/>
+              <xs:enumeration value="uniform"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+<!-- Uniform case --> 
+<xs:attributeGroup name="SphereUniformAtts">
+    <xs:attribute name="radius" type="sf:nonNegativeDouble" use="required"/>
+</xs:attributeGroup>
+<xs:complexType name="SphereUniformT">
+    <xs:complexContent>
+        <xs:extension base="sf:SphereT">
+            <xs:attributeGroup ref="sf:SphereUniformAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+<!-- Random case --> 
+<xs:attributeGroup name="SphereRandomAtts">
+    
+    <xs:attribute name="generator" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="piecewise-const"/>
+              <xs:enumeration value="uniform"/>
+              <xs:enumeration value="truncated-normal"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+    
+    <xs:attribute name="seed" type="xs:unsignedInt" use="required"/>
+    
+    <xs:attribute name="mean" type="sf:positiveDouble" use="optional"/>
+    <xs:attribute name="variance" type="sf:positiveDouble" use="optional"/>
+    
+    <xs:attribute name="minRadius" type="sf:positiveDouble" use="optional"/>
+    <xs:attribute name="maxRadius" type="sf:positiveDouble" use="optional"/>
+    
+    <xs:attribute name="intervals" type="sf:Vector" use="optional"/>
+    <xs:attribute name="densities" type="sf:Vector" use="optional"/>
+</xs:attributeGroup>
+
+<xs:complexType name="SphereRandomT">
+    <xs:complexContent>
+        <xs:extension base="sf:SphereT">
+            <xs:attributeGroup ref="sf:SphereRandomAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+            
+            <xs:assert test="(: if generator is 'piecewise-const' provide intervals,densities attribute! :) if (@generator = 'piecewise-const' and count(@intervals) + count(@densities) = 2 or not(@generator = 'piecewise-const') ) then ( true() ) else ( false() )" />
+    
+            <xs:assert test="(: if generator is 'uniform' provide minRadius,maxRadius attribute! :) if (@generator = 'uniform' and count(@minRadius) + count(@maxRadius) = 2 or not(@generator = 'uniform') ) then ( true() ) else ( false() )" />
+            
+            <xs:assert test="(: if generator is 'truncated-normal' provide mean,variance attribute! :) if (@generator = 'truncated-normal' and count(@mean) + count(@variance) = 2 or not(@generator = 'truncated-normal') ) then ( true() ) else ( false() )" />
+    
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+
+
+<xs:attributeGroup name="SphereGlobalRandomAtts">
+    <xs:attributeGroup ref="sf:SphereRandomAtts"/>
+    <xs:attribute name="id" type="xs:unsignedInt" use="required"/>
+    <xs:attribute name="instances" type="xs:positiveInteger" use="required"/>
+</xs:attributeGroup>
+<xs:complexType name="SphereRandomGT">
+    <xs:complexContent>
+        <xs:extension base="sf:SphereT">
+            <xs:attributeGroup ref="sf:SphereGlobalRandomAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+            
+            <xs:assert test="(: if generator is 'piecewise-const' provide intervals,densities attribute! :) if (@generator = 'piecewise-const' and count(@intervals) + count(@densities) = 2 or not(@generator = 'piecewise-const') ) then ( true() ) else ( false() )" />
+    
+            <xs:assert test="(: if generator is 'uniform' provide minRadius,maxRadius attribute! :) if (@generator = 'uniform' and count(@minRadius) + count(@maxRadius) = 2 or not(@generator = 'uniform') ) then ( true() ) else ( false() )" />
+            
+            <xs:assert test="(: if generator is 'truncated-normal' provide mean,variance attribute! :) if (@generator = 'truncated-normal' and count(@mean) + count(@variance) = 2 or not(@generator = 'truncated-normal') ) then ( true() ) else ( false() )" />
+    
+            
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+
+<xs:attributeGroup name="SphereGlobalUniformAtts">
+    <xs:attributeGroup ref="sf:SphereUniformAtts"/>
+    <xs:attribute name="id" type="xs:unsignedInt" use="required"/>
+</xs:attributeGroup>
+<xs:complexType name="SphereUniformGT">
+    <xs:complexContent>
+        <xs:extension base="sf:SphereT">
+            <xs:attributeGroup ref="sf:SphereGlobalUniformAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+
+
+
+<!-- BOX GEOMETRIES SETTINGS ===========================================--> 
+<xs:complexType name="BoxT">
+    <xs:attribute name="distribute" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <!-- <xs:enumeration value="random"/> -->
+              <xs:enumeration value="uniform"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+
+<xs:attributeGroup name="BoxUniformAtts">
+    <xs:attribute name="extent" type="sf:Vector3" use="required"/>
+    <xs:attribute name="center" type="sf:Vector3" use="required"/>
+</xs:attributeGroup>
+<xs:complexType name="BoxUniformT">
+    <xs:complexContent>
+        <xs:extension base="sf:BoxT">
+            <xs:attributeGroup ref="sf:BoxUniformAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+<!-- NOT yet implemented
+<xs:attributeGroup name="BoxRandomAtts">
+</xs:attributeGroup>
+-->
+
+<!-- NOT yet implemented
+<xs:attributeGroup name="BoxGlobalRandomAtts">
+</xs:attributeGroup>
+<xs:complexType name="BoxRandomGT">
+    <xs:complexContent>
+        <xs:extension base="sf:Box">
+            <xs:attributeGroup ref="sf:BoxGlobalRandomAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+-->
+
+
+<xs:attributeGroup name="BoxGlobalUniformAtts">
+    <xs:attributeGroup ref="sf:BoxUniformAtts"/>
+    <xs:attribute name="id" type="xs:unsignedInt" use="required"/>
+</xs:attributeGroup>
+<xs:complexType name="BoxUniformGT">
+    <xs:complexContent>
+        <xs:extension base="sf:BoxT">
+            <xs:attributeGroup ref="sf:BoxGlobalUniformAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+
+<!-- CAPSULE GEOMETRIES SETTINGS ===========================================--> 
+<xs:complexType name="CapsuleT">
+    <xs:attribute name="distribute" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <!-- <xs:enumeration value="random"/> -->
+              <xs:enumeration value="uniform"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+
+<xs:attributeGroup name="CapsuleUniformAtts">
+    <xs:attribute name="normal" type="sf:Vector3" use="required"/>
+    <xs:attribute name="radius" type="sf:positiveDouble" use="required"/>
+    <xs:attribute name="length" type="sf:positiveDouble" use="required"/>
+</xs:attributeGroup>
+<xs:complexType name="CapsuleUniformT">
+    <xs:complexContent>
+        <xs:extension base="sf:CapsuleT">
+            <xs:attributeGroup ref="sf:CapsuleUniformAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+
+
+<!-- HALFSPACE GEOMETRIES SETTINGS ===========================================--> 
+<xs:complexType name="HalfspaceT">
+    <xs:attribute name="distribute" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <!-- <xs:enumeration value="random"/> -->
+              <xs:enumeration value="uniform"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+
+<xs:attributeGroup name="HalfspaceUniformAtts">
+    <xs:attribute name="normal" type="sf:Vector3" use="required"/>
+    <xs:attribute name="position" type="sf:Vector3" use="required"/>
+</xs:attributeGroup>
+<xs:complexType name="HalfspaceUniformT">
+    <xs:complexContent>
+        <xs:extension base="sf:HalfspaceT">
+            <xs:attributeGroup ref="sf:HalfspaceUniformAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+<!-- NOT yet implemented
+<xs:attributeGroup name="HalfspaceRandomAtts">
+</xs:attributeGroup>
+-->
+
+<!-- NOT yet implemented
+<xs:attributeGroup name="HalfspaceGlobalRandomAtts">
+</xs:attributeGroup>
+<xs:complexType name="HalfspaceRandomGT">
+    <xs:complexContent>
+        <xs:extension base="sf:Halfspace">
+            <xs:attributeGroup ref="sf:HalfspaceGlobalRandomAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+-->
+
+
+<xs:attributeGroup name="HalfspaceGlobalUniformAtts">
+    <xs:attributeGroup ref="sf:HalfspaceUniformAtts"/>
+    <xs:attribute name="id" type="xs:unsignedInt" use="required"/>
+</xs:attributeGroup>
+<xs:complexType name="HalfspaceUniformGT">
+    <xs:complexContent>
+        <xs:extension base="sf:HalfspaceT">
+            <xs:attributeGroup ref="sf:HalfspaceGlobalUniformAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+
+<!-- MESH GEOMETRIES SETTINGS ===========================================--> 
+<!-- TODO add scale trans axis deg rad -->
+<xs:complexType name="MeshT">
+    <xs:attribute name="distribute" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <!-- <xs:enumeration value="random"/> -->
+              <xs:enumeration value="uniform"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+
+<xs:attributeGroup name="MeshUniformAtts">
+    <xs:attribute name="file" type="sf:unixPath" use="required"/>
+    <xs:attribute name="scale" type="xs:string"  use="optional"/>
+</xs:attributeGroup>
+<xs:complexType name="MeshUniformT">
+    <xs:complexContent>
+        <xs:extension base="sf:MeshT">
+            <xs:attributeGroup ref="sf:MeshUniformAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+<!-- NOT yet implemented
+<xs:attributeGroup name="MeshRandomAtts">
+</xs:attributeGroup>
+-->
+
+<!-- NOT yet implemented
+<xs:attributeGroup name="MeshGlobalRandomAtts">
+</xs:attributeGroup>
+<xs:complexType name="MeshRandomGT">
+    <xs:complexContent>
+        <xs:extension base="sf:Mesh">
+            <xs:attributeGroup ref="sf:MeshGlobalRandomAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+-->
+
+
+<xs:attributeGroup name="MeshGlobalUniformAtts">
+    <xs:attributeGroup ref="sf:MeshUniformAtts"/>
+    <xs:attribute name="id" type="xs:unsignedInt" use="required"/>
+</xs:attributeGroup>
+<xs:complexType name="MeshUniformGT">
+    <xs:complexContent>
+        <xs:extension base="sf:MeshT">
+            <xs:attributeGroup ref="sf:MeshGlobalUniformAtts"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+
+
+<!-- Geometry ===========================================--> 
+<xs:complexType name="GeometryT">
+    <xs:choice>
+        <xs:element name="Sphere"    type="sf:SphereT" minOccurs="0">
+            <xs:alternative type="sf:SphereRandomT"  test="@distribute = 'random'"/>  
+            <xs:alternative type="sf:SphereUniformT" test="@distribute = 'uniform'"/>  
+        </xs:element>
+        
+        <xs:element name="Capsule"    type="sf:CapsuleT" minOccurs="0">
+            <!-- <xs:alternative type="sf:CapsuleRandomT"  test="@distribute = 'random'"/>  -->
+            <xs:alternative type="sf:CapsuleUniformT" test="@distribute = 'uniform'"/>  
+        </xs:element>
+
+        <xs:element name="Box"       type="sf:BoxT" minOccurs="0" >
+            <!-- <xs:alternative type="sf:BoxRandomT"  test="@distribute = 'random'"/>  -->
+            <xs:alternative type="sf:BoxUniformT" test="@distribute = 'uniform'"/>  
+        </xs:element>
+        
+        <xs:element name="Halfspace" type="sf:HalfspaceT" minOccurs="0" >
+            <!-- <xs:alternative type="sf:HalfspaceRandomT"  test="@distribute = 'random'"/>  -->
+            <xs:alternative type="sf:HalfspaceUniformT" test="@distribute = 'uniform'"/>  
+        </xs:element>
+        
+        <xs:element name="Mesh" type="sf:MeshT" minOccurs="0" >
+            <!-- <xs:alternative type="sf:MeshRandomT"  test="@distribute = 'random'"/>  -->
+            <xs:alternative type="sf:MeshUniformT" test="@distribute = 'uniform'"/>  
+        </xs:element>
+        
+        <xs:element name="GlobalGeomId" type="sf:GlobalGeomIdT" minOccurs="0" >
+            <xs:alternative type="sf:GlobalGeomIdRandomT"  test="@distribute = 'random'"/>
+            <xs:alternative type="sf:GlobalGeomIdLinearT" test="@distribute = 'linear'"/>
+            <xs:alternative type="sf:GlobalGeomIdUniformT" test="@distribute = 'uniform'"/>    
+        </xs:element>
+        
+    </xs:choice>
+</xs:complexType>
+
+<!-- GlobalGeomId ============================================================================-->
+<xs:complexType name="GlobalGeomIdT">
+    <xs:attribute name="distribute" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="random"/> 
+              <xs:enumeration value="uniform"/>
+              <xs:enumeration value="linear"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+
+<xs:complexType name="GlobalGeomIdRandomT">
+    <xs:complexContent>
+        <xs:extension base="sf:GlobalGeomIdT">
+            <xs:attribute name="startId" type="xs:unsignedInt" use="required"/>
+            <xs:attribute name="endId" type="xs:unsignedInt" use="required"/>
+            <xs:attribute name="seed" type="xs:unsignedInt" use="required"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="GlobalGeomIdLinearT">
+    <xs:complexContent>
+        <xs:extension base="sf:GlobalGeomIdT">
+            <xs:attribute name="startId" type="xs:unsignedInt" use="required"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="GlobalGeomIdUniformT">
+    <xs:complexContent>
+        <xs:extension base="sf:GlobalGeomIdT">
+            <xs:attribute name="id" type="xs:unsignedInt" use="required"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+
+</xs:schema>

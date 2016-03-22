@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Renderer>
+
+
+<Logic>
+    
+    <!-- Body Data Input ============================================-->
+    <!-- Out Socket Nr: BodyId = 0 Displacement = 1 Velocity = 2 MaterialId = 3 ProcessId = 4 TotalOverlap = 5-->
+    <Tool type="BodyDataInput" id="0"  groupId="Body"/>
+    <!-- ============================================================-->
+    
+    <!-- Split State ================================================-->
+    <Get outNode="0" outSocket="1" fromNode="2" fromSocket="0"/>
+    <Tool type="DisplacementToPosQuat" id="2"  groupId="Body"/>
+    <!-- Out Socket Nr: Pos = 0, Quat = 1 -->
+    
+    <Get outNode="0" outSocket="2" fromNode="11" fromSocket="0"/>
+    <Tool type="VelocityToVelRot" id="11"  groupId="Body"/>
+    <!-- Out Socket Nr: Vel = 0, Rot = 1 -->
+    <!-- ============================================================-->
+    
+    
+    <!-- SWITCH 13 and 16 -->
+    <Get outNode="0" outSocket="0" fromNode="13" fromSocket="0"/>
+    <Tool type="SimpleFunction" id="13" expression="i[0] &lt;= -1" inputs="1" outputType="bool" groupId="Body">
+      <InputFormat type="unsigned long int"/>
+    </Tool>
+    <Get outNode="13" outSocket="0" fromNode="16" fromSocket="0"/>
+    <Tool type="SimpleFunction" id="16" expression="NOT(i[0])" inputs="1"  outputType="bool" groupId="Body">
+      <InputFormat type="bool"/>
+    </Tool>
+    
+    
+    <!-- MATERIAL LOOK UP ===========================================-->
+    
+    <!-- LOOK UP FOR BODIES Switch 13  ===================-->
+        <Get outNode="13" outSocket="0"  fromNode="1"  fromSocket="0"/> <!-- Enable -->
+        <Get outNode="0"  outSocket="0"  fromNode="1"  fromSocket="1"/>  <!-- BodyID -->
+        <Tool type="MaterialLookUp" id="1" inputType="unsigned long int" defaultMaterialId="1"  groupId="Body"/>
+    <!-- =================================================-->
+    
+    <!-- LOOK UP FOR BODIES Switch 16 (not 13) ===========-->
+
+        <!-- Process -> ColorList ===================-->
+        <!--
+            <Get outNode="0" outSocket="4" fromNode="14" fromSocket="1"/>
+            <!- In Socket Nr: Enable = 0  Key = 1 |||  Out Socket Nr: Color = 0 ->
+            <Tool type="ColorList" id="14" inputType="unsigned int" generate="random" seed="4" count="8" amp="1" groupId="Body"/>
+        -->
+        <!-- ========================================-->
+        
+        <!-- Velocity -> Color Gradient  ============-->
+            <Tool type="Norm" id="12" inputType = "Vector3" groupId="Body"/>
+            <Get outNode="11" outSocket="0" fromNode="12" fromSocket="0"/> 
+            <Tool type="ColorGradient" id="14" min="0" max="1.8" groupId="Body">
+                <!-- Color values -->
+            </Tool>
+            <Get outNode="12" outSocket="0" fromNode="14" fromSocket="1"/> 
+        <!-- ========================================-->
+        
+        <!-- TotalOverlap -> Color Gradient =========-->
+<!--
+        <Get outNode="16" outSocket="0" fromNode="14" fromSocket="0"/> 
+        <Get outNode="0" outSocket="5" fromNode="14" fromSocket="1"/>
+        <Tool type="ColorGradient" id="14" min="0" max="0.7e-3" groupId="Body">
+        </Tool>
+-->
+        <!-- ========================================-->
+        
+
+         <!-- Matte Material =========================-->
+<!--
+        <Get outNode="16" outSocket="0" fromNode="15" fromSocket="0"/> 
+-->
+<!--
+        <Get outNode="14" outSocket="0" fromNode="15" fromSocket="1"/> 
+-->
+        <!-- In Socket Nr: Enable = 0  Color = 1 |||  Out Socket Nr: Material = 0 -->
+<!--
+        <Tool type="MatteMaterial" id="15" />
+-->
+        <!-- ========================================-->
+        
+        <!-- Bxdf Disney Material =========================-->
+        <Get outNode="16" outSocket="0" fromNode="15" fromSocket="0"/> <!-- Enable -->
+        <Get outNode="14" outSocket="0" fromNode="15" fromSocket="1"/> <!-- Color -->
+        <!-- In Socket Nr: Enable = 0  Color = 1 |||  Out Socket Nr: Material = 0 -->
+        <Tool type="BxdfDisneyMaterial" id="15"  groupId="Body"/>
+        <!-- ========================================-->
+        
+    <!-- =================================================-->
+    
+    <!-- ============================================================-->
+
+
+
+    <!-- RenderWritter ==============================================-->
+    
+    <!-- In Socket Nr: BodyId = 0, BodyPosition = 1, BodyOrientation = 2 , Material = 3 , 
+                       FileHeader = 4, FileFooter = 5,  RenderSettings = 6  
+                       FrameSettings = 7 CameraSettings = 8 
+                       WorldSettings = 9, BodyBegin = 10, BodyEnd = 11
+                       Time = 12, FrameNr = 13, Folder = 14, Name = 15 -->
+    <Get outNode="0" outSocket="0" fromNode="10" fromSocket="0"/> <!--BodyId -->
+    <Write outNode="1" outSocket="0" toNode="10" toSocket="3"/>  <!--Material ( from switch 13) -->
+    <Write outNode="15" outSocket="0" toNode="10" toSocket="3"/> <!--Material ( from switch 16) -->
+    <!-- Out Socket Nr: Pos = 0, Quat = 1 -->
+    <Get outNode="2" outSocket="0" fromNode="10" fromSocket="1"/>
+    <Get outNode="2" outSocket="1" fromNode="10" fromSocket="2"/>
+<!--
+    <Tool type="RendermanWriter" id="10" pipeToSubprocess="false" command="miqser -readarchives -b -compression=1 -o %s" suffix="bin.gz"/>
+-->
+<!--
+    <Tool type="RendermanWriter" id="10" pipeToSubprocess="true" command="prman -progress -t:12 -"/>
+-->
+<!--
+    <Tool type="RendermanWriter" id="10" pipeToSubprocess="true" command="gzip - > %s" suffix="gz"/>
+-->
+
+<!--
+    <Tool type="RendermanWriter" id="10" pipeToSubprocess="true" command="prman -progress -t:12 -"/>
+-->
+
+
+    <Tool type="RendermanWriter" id="10" pipeToSubprocess="true" command="gzip - > %s"/>
+
+<!--
+    <Tool type="RendermanWriter" id="10" pipeToSubprocess="false" command="tee &gt; /dev/null"/>
+-->
+    <!-- ============================================================-->
+    
+    
+    <!-- State Data =================================================-->
+    <!-- Out Socket Nr: Time = 0, FrameNr = 1, Folder = 2, Name = 3 -->
+    <Tool type="StateDataInput" id="3"/>
+    <!-- ============================================================-->
+    
+    <!-- FrameData to RendermanWriter -->
+    <Get outNode="3" outSocket="0" fromNode="10" fromSocket="8"/>
+    <Get outNode="3" outSocket="1" fromNode="10" fromSocket="9"/>
+    <Get outNode="3" outSocket="2" fromNode="10" fromSocket="10"/>
+    <Get outNode="3" outSocket="3" fromNode="10" fromSocket="11"/>
+     
+    <!-- Constants to RendermanWriter ===============================-->
+    <!--  FileHeader -->
+<!--
+    <Tool type="Constant" id="4" outputType="string" value="# Granular Material" groupId="Frame"/>
+    <Get outNode="4" outSocket="0" fromNode="10" fromSocket="4"/>
+-->
+    <!--  BodiesBegin -->
+    <Tool type="Constant" id="8" outputType="string" value="TransformBegin&#10;ReadArchive &quot;BodyTransformation.rib&quot;&#10;" groupId="Frame"/>
+    <Get outNode="8" outSocket="0" fromNode="10" fromSocket="6"/>
+    <!--  BodiesBegin -->
+    <Tool type="Constant" id="9" outputType="string" value="TransformEnd&#10;" groupId="Frame"/>
+    <Get outNode="9" outSocket="0" fromNode="10" fromSocket="7"/>
+    <!-- ============================================================-->
+   
+    <!--  FrameSettings =============================================-->
+    <!-- FileName -->
+    <Get outNode="3" outSocket="2" fromNode="20" fromSocket="1"/>
+    <Get outNode="3" outSocket="3" fromNode="20" fromSocket="2"/>
+    <Tool type="StringFormat" id="20" groupId="Frame" format="%s/%s.tif" >
+        <InputFormat type="path"/>
+        <InputFormat type="string"/>
+    </Tool>
+
+    <!-- In Socket Nr: Format = 0, Inputs 1 .... n -->
+<!--
+    <Get outNode="20" outSocket="0" fromNode="17" fromSocket="1"/>
+    <Tool type="StringFormat" id="17" groupId="Frame" format="Display &quot;%s&quot; &quot;file&quot; &quot;rgba&quot;&#10;" >
+        <InputFormat type="string"/>
+    </Tool>
+    <Write outNode="17" outSocket="0" toNode="10" toSocket="7"/>
+-->
+    <!-- ============================================================-->
+    
+    
+    <!-- AnnotateFrame ==============================================-->
+    
+    <!-- File (outputFolder path + filename) -->
+    <Get outNode="3" outSocket="2" fromNode="21" fromSocket="1"/>
+    <Tool type="StringFormat" id="21" groupId="Frame" format="%s/AnnotateFramesVel.sh" >
+        <InputFormat type="path"/>
+        <OutputFormat type="path"/>
+    </Tool>
+    
+    <!-- Format the line to write -->
+    <Get outNode="3" outSocket="0" fromNode="18" fromSocket="2"/>
+    <Get outNode="20" outSocket="0" fromNode="18" fromSocket="1"/>
+    <!-- In Socket Nr: Format = 0, Inputs 1 .... n -->
+    <Tool type="StringFormat" id="18" groupId="Frame" format="./AnnotateFrame.py -i %s -f 'jpg' -t 'Time t=%0.4f s'">
+        <InputFormat type="string"/> <!-- File -->
+        <InputFormat type="double"/> <!-- Time -->
+    </Tool>
+    
+    <!-- Make Linewritter (comment first get to have output written to default file=... below -->
+    <Get outNode="21" outSocket="0" fromNode="19" fromSocket="0"/>
+    <Get outNode="18" outSocket="0" fromNode="19" fromSocket="1"/>
+    <Tool type="LineWriter" id="19" groupId="Frame" inputType="string" file="output/AnnotateFramesVel.sh" truncate="true"/>
+    
+    <!-- ============================================================-->
+    
+</Logic>
+
+
+
+
+<!-- These are Renderman Specific Materials which can be used to assign to Geometries with the Converter tool 'converter renderer -h' -->
+<Materials>
+    <Material id="0">Color [0 0 0]
+Surface "matte" "float Kd" [1.0] "float Ka" [1.0]</Material>
+
+    <Material id="1">Color [1 1 1]
+Surface "matte" "float Kd" [1.0] "float Ka" [1.0]</Material>
+<!--
+    <Material id="3">Color [1.0 0.0 1.0]
+Surface "matte" "float Kd" [1.0] "float Ka" [1.0]</Material>
+    <Material id="4">Color [1.0 1.0 0.0]
+Surface "matte" "float Kd" [1.0] "float Ka" [1.0]</Material>
+-->
+</Materials>
+
+</Renderer>
