@@ -172,10 +172,10 @@ if(SIMULATIONFRAMEWORK_USE_CUDA)
 
 else()
 
-	set(CUDA_COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../CudaModern/CommonSource CACHE PATH "Path to the cuda common source directory!")
-	MARK_AS_ADVANCED(CUDA_COMMON_SOURCE_DIR)
+	#set(CUDA_COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../CudaModern/CommonSource CACHE PATH "Path to the cuda common source directory!")
+	#MARK_AS_ADVANCED(CUDA_COMMON_SOURCE_DIR)
 
-	set(CUDA_SUPPORT 0) #Gets written to the config file!
+	#set(CUDA_SUPPORT 0) #Gets written to the config file!
 endif()
 
 
@@ -254,40 +254,40 @@ MARK_AS_ADVANCED(MYPROJECT_COLLISION_LIBRARY)
 
 STRING(COMPARE EQUAL ${MYPROJECT_COLLISION_LIBRARY}  "opcode" USE_OPCODE)
 if(USE_OPCODE)
-FIND_PACKAGE(Opcode REQUIRED)
-SET(COLLISIONLIB_INCLUDE_DIR ${OPCODE_INCLUDE_DIR})
-SET(COLLISIONLIB_LIB_REL ${OPCODE_LIB_REL})
-SET(COLLISIONLIB_LIB_DBG ${OPCODE_LIB_DBG})
-SET(COLLISIONLIB_REL ${OPCODE_REL})
-SET(COLLISIONLIB_DBG ${OPCODE_DBG})
-SET(COLLISIONLIB_LIBRARIES ${OPCODE_LIBRARIES})
+  FIND_PACKAGE(Opcode REQUIRED)
+  SET(COLLISIONLIB_INCLUDE_DIR ${OPCODE_INCLUDE_DIR})
+  SET(COLLISIONLIB_LIB_REL ${OPCODE_LIB_REL})
+  SET(COLLISIONLIB_LIB_DBG ${OPCODE_LIB_DBG})
+  SET(COLLISIONLIB_REL ${OPCODE_REL})
+  SET(COLLISIONLIB_DBG ${OPCODE_DBG})
+  SET(COLLISIONLIB_LIBRARIES ${OPCODE_LIBRARIES})
 
-SET(USE_OWN_COLLISION_CODE 0)
-SET(USE_OPCODE 1)
-SET(OPCODE_PRECISION "double")
+  SET(USE_OWN_COLLISION_CODE 0)
+  SET(USE_OPCODE 1)
+  SET(OPCODE_PRECISION "double")
 else()
-SET(USE_OWN_COLLISION_CODE 1)
-SET(USE_OPCODE 0)
+  SET(USE_OWN_COLLISION_CODE 1)
+  SET(USE_OPCODE 0)
 endif()
 
 STRING(COMPARE EQUAL ${MYPROJECT_COLLISION_LIBRARY}  "ozcollide" USE_OZCOLLIDE)
 if(USE_OZCOLLIDE)
-#MESSAGE(FATAL_ERROR "OZCOLIDE has not been really used!")
-# Searching OZCollide ==================================
-FIND_PACKAGE(OZCollide REQUIRED)
-# ===================================================
-SET(COLLISIONLIB_INCLUDE_DIRS ${OZCOLLIDE_INCLUDE_DIR})
-SET(COLLISIONLIB_LIB_REL ${OZCOLLIDE_LIB_REL})
-SET(COLLISIONLIB_LIB_DBG ${OZCOLLIDE_LIB_DBG})
-SET(COLLISIONLIB_REL ${OZCOLLIDE_REL})
-SET(COLLISIONLIB_DBG ${OZCOLLIDE_DBG})
-SET(COLLISIONLIB_LIBRARIES ${OZCOLLIDE_LIBRARIES})
+  #MESSAGE(FATAL_ERROR "OZCOLIDE has not been really used!")
+  # Searching OZCollide ==================================
+  FIND_PACKAGE(OZCollide REQUIRED)
+  # ===================================================
+  SET(COLLISIONLIB_INCLUDE_DIRS ${OZCOLLIDE_INCLUDE_DIR})
+  SET(COLLISIONLIB_LIB_REL ${OZCOLLIDE_LIB_REL})
+  SET(COLLISIONLIB_LIB_DBG ${OZCOLLIDE_LIB_DBG})
+  SET(COLLISIONLIB_REL ${OZCOLLIDE_REL})
+  SET(COLLISIONLIB_DBG ${OZCOLLIDE_DBG})
+  SET(COLLISIONLIB_LIBRARIES ${OZCOLLIDE_LIBRARIES})
 
-SET(USE_OWN_COLLISION_CODE 0)
-SET(USE_OZCOLLIDE 1)
+  SET(USE_OWN_COLLISION_CODE 0)
+  SET(USE_OZCOLLIDE 1)
 else()
-SET(USE_OWN_COLLISION_CODE 1)
-SET(USE_OZCOLLIDE 0)
+  SET(USE_OWN_COLLISION_CODE 1)
+  SET(USE_OZCOLLIDE 0)
 endif()
 
 
@@ -316,26 +316,26 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MYPROJECT_CXX_FLAGS}")
 MESSAGE(STATUS "Added ${MYPROJECT_CXX_FLAGS} to CMAKE_CXX and CMAKE_C_FLAGS: ${CMAKE_CXX_FLAGS} and ${CMAKE_C_FLAGS}")
 
 #set common includes for all projects which need them
-set(GRSF_COMMON_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CommonSource")
+set(GRSF_COMMON_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/common")
 
 
 
 
 
 if(SIMULATIONFRAMEWORK_BUILD_GUI)
-add_subdirectory(Projects/GeneralRigidBodySimulation)
+add_subdirectory(projects/generalRigidBodySimulation)
 endif()
 
 if(SIMULATIONFRAMEWORK_BUILD_NOGUI)
-add_subdirectory(Projects/GeneralRigidBodySimulationNoGUI)
+add_subdirectory(projects/generalRigidBodySimulationNoGUI)
 endif()
 
 if(SIMULATIONFRAMEWORK_BUILD_MPI)
-add_subdirectory(Projects/GeneralRigidBodySimulationMPI)
+add_subdirectory(projects/generalRigidBodySimulationMPI)
 endif()
 
 if(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER)
-add_subdirectory(Projects/Converter)
+add_subdirectory(projects/converter)
 endif()
 
 
@@ -347,8 +347,8 @@ add_custom_target(
           ${CMAKE_COMMAND}
           -E
           create_symlink
-          "${CMAKE_CURRENT_SOURCE_DIR}/Projects/media"
-          "${CMAKE_BINARY_DIR}/Projects/media"
+          "${CMAKE_CURRENT_SOURCE_DIR}/projects/media"
+          "${CMAKE_BINARY_DIR}/projects/media"
 )
 else()
 add_custom_target(
@@ -357,8 +357,8 @@ add_custom_target(
           ${CMAKE_COMMAND}
           -E
           copy_directory
-          "${CMAKE_CURRENT_SOURCE_DIR}/Projects/media"
-          "${CMAKE_BINARY_DIR}/Projects/media"
+          "${CMAKE_CURRENT_SOURCE_DIR}/projects/media"
+          "${CMAKE_BINARY_DIR}/projects/media"
 )
 endif()
 
