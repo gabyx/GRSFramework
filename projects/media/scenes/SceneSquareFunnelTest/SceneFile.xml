@@ -1,0 +1,299 @@
+<?xml version="1.0" ?>
+<DynamicsSystem>
+
+<SceneSettings>
+	<Gravity value="9.81" direction="0 0 -1" />
+	<TimeStepperSettings deltaT ="0.001" endTime="6">
+		<InclusionSolverSettings method="SOR" useGPU ="false" useGPUID="0" alphaJORProx="0.35" alphaSORProx="1.2" maxIter="3000" absTol="1e-7" relTol="1e-7" isFiniteCheck = "false"/>
+		<SimulateFromReference enabled="false" type="continue" file="./SimFiles/Continue3/StateData.sim" />
+		<!--SimulateFromReference type="continue" file="./SimFiles/8ResampeldReference2500RandomBalls/StateData.sim" enabled="true" /-->
+	</TimeStepperSettings>
+</SceneSettings>
+
+
+
+<SceneObjects>
+
+	<RigidBodies name="balls" instances="1500">
+		<Geometry>
+			<Sphere distribute="random" radius="0.0125" seed="5" minRadius="0.008" maxRadius="0.018" />
+		</Geometry>
+		<DynamicProperties>
+			<DynamicState type="simulated" />
+			<Mass distribute="uniform" value="0.050" />
+			<InertiaTensor type="homogen" />
+			<Material distribute="uniform" type="standart"/>
+			<InitialCondition distribute="grid"  gridSizeX="10" gridSizeY="10" distance="0.045" translation="0 0 0.3" jitter="true" delta="0.003"/>
+		</DynamicProperties>
+		<Visualization>
+				<Mesh file="Sphere18x18.mesh" scaleLikeGeometry="true" scale="0.0125 0.0125 0.0125" type="permutate" >
+					<Material name="SphereRed" />
+					<Material name="SphereYellow" />
+					<Material name="SphereBlue" />
+				</Mesh>
+		</Visualization>
+	</RigidBodies>
+
+<!--<RigidBodies name="bricksdown" instances="1">-->-->
+<!--		<Geometry>-->
+<!--			<Mesh name="bricksdown" distribute="uniform" file="../../../media/models/Cube.obj"  useInstance = "false"-->
+<!--			scale="0.5 0.5 0.5"  rotationAxis="1 0 0" angleDegree="0" translation="0 0 0.0"/>-->
+<!--		</Geometry>-->
+<!--		<DynamicProperties>-->
+<!--			<DynamicState type="not simulated" />-->
+<!--			<InitialCondition distribute="transforms" >-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="0" translation="0 0.0 0.0" />-->
+<!--				</Value>-->
+<!--			</InitialCondition>-->
+<!--		</DynamicProperties>-->
+<!--		<Visualization>-->
+<!--				<Mesh file="Cube.mesh" scale="0.5 0.5 0.5" type="uniform" attachAxis="false" axesSize="0.001">-->
+<!--					<Material name="PlaneBlue2" />-->
+<!--				</Mesh>-->
+<!--		</Visualization>-->
+<!--</RigidBodies>-->
+
+	<RigidBodies name="floor" instances="1">
+		<Geometry>
+			<Halfspace distribute="uniform" normal="0 0 1" position="0 0 0"/>
+		</Geometry>
+		<DynamicProperties>
+			<DynamicState type="not simulated" />
+			<InitialCondition distribute="posaxisangle" >
+				<Value position="0 0 0"  axis="1 0 0" angleDegree="0"/>
+			</InitialCondition>
+		</DynamicProperties>
+		<Visualization>
+				<Mesh file="Plane.mesh" scale="0.7 0.7 0.7" type="uniform">
+					<Material name="Plane" />
+				</Mesh>
+		</Visualization>
+	</RigidBodies>
+<!--	-->
+<!--	<RigidBodies name="sidewalls" instances="2">-->
+<!--		<Geometry>-->
+<!--			<Mesh name="border" distribute="uniform" file="../../../media/models/Cube.obj" useInstance = "false"-->
+<!--			scale="0.05 0.7 0.05"  rotationAxis="1 0 0" angleDegree="0" translation="0 0 0.0"/>-->
+<!--		</Geometry>-->
+<!--		<DynamicProperties>-->
+<!--			<DynamicState type="not simulated" />-->
+<!--			<InitialCondition distribute="posaxisangle" >-->
+<!--				<Value position="0.75 -0.1 0.05"  axis="0 0 1"  angleDegree="0"/>-->
+<!--				<Value position="-0.75 -0.1 0.05"  axis="0 0 1" angleDegree="0"/>-->
+<!--				<!--Value position="0 0.75 0.05"  axis="0 0 1"  angleDegree="90"/>-->
+<!--				<Value position="0 -0.75 0.05"  axis="0 0 1" angleDegree="90"/--->-->
+<!--			</InitialCondition>-->
+<!--		</DynamicProperties>-->
+<!--		<Visualization>-->
+<!--				<Mesh file="Cube.mesh" scale="0.05 0.7 0.05" type="uniform">-->
+<!--					<Material name="Plane" />-->
+<!--				</Mesh>-->
+<!--		</Visualization>-->
+<!--	</RigidBodies>-->
+<!--	-->
+<!--	<RigidBodies name="sidewalls" instances="2">-->
+<!--		<Geometry>-->
+<!--			<Mesh name="borderLonger" distribute="uniform" file="../../../media/models/Cube.obj" useInstance = "false"-->
+<!--			scale="0.05 0.8 0.05"  rotationAxis="1 0 0" angleDegree="0" translation="0 0 0.0"/>-->
+<!--		</Geometry>-->
+<!--		<DynamicProperties>-->
+<!--			<DynamicState type="not simulated" />-->
+<!--			<InitialCondition distribute="posaxisangle" >-->
+<!--				<Value position="0 0.65 0.05"  axis="0 0 1"  angleDegree="90"/>-->
+<!--				<Value position="0 -0.85 0.05"  axis="0 0 1" angleDegree="90"/>-->
+<!--			</InitialCondition>-->
+<!--		</DynamicProperties>-->
+<!--		<Visualization>-->
+<!--				<Mesh file="Cube.mesh" scale="0.05 0.8 0.05" type="uniform">-->
+<!--					<Material name="Plane" />-->
+<!--				</Mesh>-->
+<!--		</Visualization>-->
+<!--	</RigidBodies>-->
+<!--	-->
+<!--	-->
+<!--	<RigidBodies name="bounceWall1" instances="1">-->
+<!--		<Geometry>-->
+<!--			<Mesh name="bounceWall1" distribute="uniform" file="../../../media/models/BounceWall3.obj"  useInstance = "false"-->
+<!--			scale="0.4 0.4 0.5"  rotationAxis="1 0 0" angleDegree="0" translation="0 0 0.0"/>-->
+<!--		</Geometry>-->
+<!--		<DynamicProperties>-->
+<!--			<DynamicState type="not simulated" />-->
+<!--			<InitialCondition distribute="transforms" >-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="90" translation="0 0.5 0.5"/>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="25" translation="0 0 0.0" />-->
+<!--				</Value>-->
+<!--			</InitialCondition>-->
+<!--		</DynamicProperties>-->
+<!--		<Visualization>-->
+<!--				<Mesh file="BounceWall3.mesh" scale="0.4 0.4 0.5" type="uniform">-->
+<!--					<Rendering shadowsEnabled = "false"/>-->
+<!--					<Material name="PlaneBlueAlpha" />-->
+<!--				</Mesh>-->
+<!--		</Visualization>-->
+<!--	</RigidBodies>-->
+<!--	-->
+<!--	-->
+<!--	<RigidBodies name="bounceWall2" instances="1">-->
+<!--		<Geometry>-->
+<!--			<Mesh name="bounceWall2" distribute="uniform" file="../../../media/models/BounceWall.obj"  useInstance = "false"-->
+<!--			scale="0.3 0.4 0.4"  rotationAxis="1 0 0" angleDegree="0" translation="0 0 0.0"/>-->
+<!--		</Geometry>-->
+<!--		<DynamicProperties>-->
+<!--			<DynamicState type="not simulated" />-->
+<!--			<InitialCondition distribute="transforms" >-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="0 0 1" angleDegree="180" translation="0 0 0.9"/>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="90" translation="0 0 0.0"/>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="20" translation="0 0 0.0"/>-->
+<!--				</Value>-->
+<!--			</InitialCondition>-->
+<!--		</DynamicProperties>-->
+<!--		<Visualization>-->
+<!--				<Mesh file="BounceWall.mesh" scale="0.3 0.4 0.4" type="uniform">-->
+<!--					<Rendering shadowsEnabled = "false"/>-->
+<!--					<Material name="PlaneBlue" />-->
+<!--				</Mesh>-->
+<!--		</Visualization>-->
+<!--	</RigidBodies>-->
+<!--	-->
+<!--	-->
+<!--	<RigidBodies name="bricksdown" instances="5">-->
+<!--		<Geometry>-->
+<!--			<Mesh name="bricksdown" distribute="uniform" file="../../../media/models/Cube.obj"  useInstance = "false"-->
+<!--			scale="0.08 0.01 0.02"  rotationAxis="1 0 0" angleDegree="0" translation="0 0 0.0"/>-->
+<!--		</Geometry>-->
+<!--		<DynamicProperties>-->
+<!--			<DynamicState type="not simulated" />-->
+<!--			<InitialCondition distribute="transforms" >-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="25" translation="0 0.5 0.5" />-->
+<!--					<Transform  rotationAxis="0 0 1" angleDegree="25" translation="0.2 -0.2 0.055" />-->
+<!--				</Value>-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="25" translation="0 0.5 0.5" />-->
+<!--					<Transform  rotationAxis="0 0 1" angleDegree="-25" translation="-0.2 -0.1 0.055" />-->
+<!--				</Value>-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="25" translation="0 0.5 0.5" />-->
+<!--					<Transform  rotationAxis="0 0 1" angleDegree="-25" translation="0.1 0.0 0.055" />-->
+<!--				</Value>-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="25" translation="0 0.5 0.5" />-->
+<!--					<Transform  rotationAxis="0 0 1" angleDegree="25" translation="-0.1 0.15 0.055" />-->
+<!--				</Value>-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="25" translation="0 0.5 0.5" />-->
+<!--					<Transform  rotationAxis="0 0 1" angleDegree="25" translation="0.2 0.2 0.055" />-->
+<!--				</Value>-->
+<!--			</InitialCondition>-->
+<!--		</DynamicProperties>-->
+<!--		<Visualization>-->
+<!--				<Mesh file="Cube.mesh" scale="0.08 0.01 0.02" type="uniform" attachAxis="false" axesSize="0.001">-->
+<!--					<Material name="PlaneBlue2" />-->
+<!--				</Mesh>-->
+<!--		</Visualization>-->
+<!--	</RigidBodies>-->
+<!--	-->
+<!--	-->
+<!--	<RigidBodies name="brickstop" instances="3">-->
+<!--		<Geometry>-->
+<!--			<Mesh name="brickstop" distribute="uniform" file="../../../media/models/Cube.obj"  useInstance = "false"-->
+<!--			scale="0.03 0.03 0.03"  rotationAxis="1 0 0" angleDegree="0" translation="0 0 0.0"/>-->
+<!--		</Geometry>-->
+<!--		<DynamicProperties>-->
+<!--			<DynamicState type="not simulated" />-->
+<!--			<InitialCondition distribute="transforms" >-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="-20" translation="0 0.0 0.9" />-->
+<!--					<Transform  rotationAxis="0 0 1" angleDegree="-45" translation="0.2 0.1 0.07" />-->
+<!--				</Value>-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="-20" translation="0 0.0 0.9" />-->
+<!--					<Transform  rotationAxis="0 0 1" angleDegree="-45" translation="-0.2 0.1 0.07" />-->
+<!--				</Value>-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="-20" translation="0 0.0 0.9" />-->
+<!--					<Transform  rotationAxis="0 0 1" angleDegree="0" translation="0 +0.2 0.07" />-->
+<!--				</Value>-->
+<!--			</InitialCondition>-->
+<!--		</DynamicProperties>-->
+<!--		<Visualization>-->
+<!--				<Mesh file="Cube.mesh" scale="0.03 0.03 0.03" type="uniform" attachAxis="false" axesSize="0.001">-->
+<!--					<Material name="PlaneBlue2" />-->
+<!--				</Mesh>-->
+<!--		</Visualization>-->
+<!--	</RigidBodies>-->
+
+<!--	<RigidBodies name="bricksplan" instances="3">-->
+<!--		<Geometry>-->
+<!--			<Mesh name="bricksplan" distribute="uniform" file="../../../media/models/Cube.obj"  useInstance = "false"-->
+<!--			scale="0.05 0.05 0.05"  rotationAxis="1 0 0" angleDegree="0" translation="0 0 0.0"/>-->
+<!--		</Geometry>-->
+<!--		<DynamicProperties>-->
+<!--			<DynamicState type="not simulated" />-->
+<!--			<InitialCondition distribute="transforms" >-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="0 0 1" angleDegree="0" translation="0.25 -0.5 0.05" />-->
+<!--				</Value>-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="0 0 1" angleDegree="0" translation="-0.25 0.0 0.05" />-->
+<!--				</Value>-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="0 0 1" angleDegree="0" translation="0.25 0.0 0.05" />-->
+<!--				</Value>-->
+<!--			</InitialCondition>-->
+<!--		</DynamicProperties>-->
+<!--		<Visualization>-->
+<!--				<Mesh file="Cube.mesh" scale="0.05 0.05 0.05" type="uniform" attachAxis="false" axesSize="0.001">-->
+<!--					<Material name="PlaneBlue2" />-->
+<!--				</Mesh>-->
+<!--		</Visualization>-->
+<!--	</RigidBodies>-->
+<!--	-->
+<!--	-->
+	<RigidBodies name="funnel" instances="1">
+		<Geometry>
+			<Mesh name="funnalwalls" distribute="uniform" file="../../../media/models/Funnel.obj"  useInstance = "false"
+			scale="0.1 0.1 0.1"  rotationAxis="1 0 0" angleDegree="0" translation="0 0 0.0"/>
+		</Geometry>
+		<DynamicProperties>
+			<DynamicState type="not simulated" />
+			<InitialCondition distribute="posaxisangle" >
+				<Value position="0 0 0"  axis="1 0 0"  angleDegree="90"/>
+			</InitialCondition>
+		</DynamicProperties>
+		<Visualization>
+				<Mesh file="Funnel.mesh" scale="0.1 0.1 0.1" type="uniform">
+					<Material name="Funnel" />
+					<Rendering shadowsEnabled = "false"/>
+				</Mesh>
+		</Visualization>
+	</RigidBodies>
+<!--	-->
+<!--	<RigidBodies name="IMES" instances="1">-->
+<!--		<Geometry>-->
+<!--			<Mesh name="IMES" distribute="uniform" file="../../../media/models/IMES.obj"  useInstance = "false"-->
+<!--			scale="0.1 0.1 0.1"  rotationAxis="1 0 0" angleDegree="0" translation="0 0 0.0"/>-->
+<!--		</Geometry>-->
+<!--		<DynamicProperties>-->
+<!--			<DynamicState type="not simulated" />-->
+<!--			<InitialCondition distribute="transforms" >-->
+<!--				<Value>-->
+<!--					<Transform  rotationAxis="1 0 0" angleDegree="90" translation="-0.25 -0.5 0"/>-->
+<!--					<Transform  rotationAxis="0 1 0" angleDegree="150" translation="0 0 0.0" />-->
+<!--				</Value>-->
+<!--			</InitialCondition>-->
+<!--		</DynamicProperties>-->
+<!--		<Visualization>-->
+<!--				<Mesh file="IMES.mesh" scale="0.1 0.1 0.1" type="uniform">-->
+<!--					<Material name="PlaneBlue" />-->
+<!--				</Mesh>-->
+<!--		</Visualization>-->
+<!--	</RigidBodies>-->
+<!--	-->
+</SceneObjects>
+
+
+</DynamicsSystem>

@@ -1,0 +1,84 @@
+<?xml version="1.0" ?>
+<DynamicsSystem>
+
+<SceneSettings>
+	<Gravity value="9.81" direction="0 0 -1" />
+	<TimeStepperSettings deltaT ="0.00001" endTime="200">
+		<InclusionSolverSettings        method="SOR" 
+                                                useGPU ="false" 
+                                                useGPUID="0" 
+                                                alphaJORProx="0.2" 
+                                                alphaSORProx="1.2" 
+                                                convergenceMethod="InEnergyVelocity"
+                                                minIter = "0" maxIter="5000" 
+                                                absTol="1e-9" relTol="1e-9" 
+                                                isFiniteCheck = "false"/>
+
+		<SimulateFromReference enabled="false" type="useStates" file="./SimFiles/ReferenceForTest/StateData.sim" />
+<!--		<SimulateFromReference type="continue" file="./SimFiles/Reference/StateData.sim" enabled="true" />-->
+	</TimeStepperSettings>
+        
+        <Visualization>
+                <SceneScale value="10"/> 
+        </Visualization>
+     
+		<ContactParameterMap>
+			<ContactParameterStandard mu="0.3" epsilonN="0.5" epsilonT="0.5"/>
+			<ContactParameter materialId1="1" materialId2="2"  mu="2" epsilonN="0" epsilonT="0" />
+		</ContactParameterMap>
+
+</SceneSettings>
+
+
+
+<SceneObjects>
+
+
+	<RigidBodies name="Rock" instances="1">
+		<Geometry>
+            <Box distribute="uniform" extent="0.2 3 2.5" center="0 0 0" />
+		</Geometry>
+		<DynamicProperties>
+			<DynamicState type="simulated" />
+			<Mass distribute="uniform" value="1" />
+			<InertiaTensor type="homogen" />
+			<Material distribute="uniform" id="1"/>
+			<InitialPosition distribute="posaxisangle" >
+                <Value position="0 0 3"  axis="0 0 1" angleDegree="90"/>
+			</InitialPosition>
+			<InitialVelocity distribute="uniform" >
+					<Value transDir="0 0 1" absTransVel="10" rotDir="1 0 0" absRotVel="40"/>
+			</InitialVelocity>
+		</DynamicProperties>
+		<Visualization>
+				<Mesh file="Cube.mesh" scaleLikeGeometry="false"  scale="0.1 1.5 1.25" type="permutate" >
+					<Rendering attachAxis="true"  axesSize="0.3"/>
+					<Material name="SphereRed" />
+				</Mesh>
+		</Visualization>
+	</RigidBodies>
+
+
+
+	<RigidBodies name="floor" instances="1">
+		<Geometry>
+			<Halfspace distribute="uniform" normal="0 0 1" position="0 0 0"/>
+		</Geometry>
+		<DynamicProperties>
+			<Material distribute="uniform" id="2"/>
+			<DynamicState type="not simulated" />
+			<InitialPosition distribute="posaxisangle" >
+                                <Value position="0 0.0 0"  axis="0 1 0" angleDegree="27"/>
+			</InitialPosition>
+		</DynamicProperties>
+		<Visualization>
+				<Mesh file="Plane.mesh" scale="300 30 30" type="uniform">
+					<Material name="PlaneBlue" />
+				</Mesh>
+		</Visualization>
+	</RigidBodies>
+	
+</SceneObjects>
+
+
+</DynamicsSystem>

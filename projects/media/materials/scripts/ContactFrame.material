@@ -1,0 +1,54 @@
+material ContactFrameXAxis
+{
+    technique
+    {
+        pass
+        {
+            point_size 3
+            lighting on
+            scene_blend add
+            depth_check off
+            depth_write off
+            emissive 1 0 0
+            diffuse 1 0 0 
+            ambient 1 0 0
+            polygon_mode wireframe
+        }
+    }
+}
+material ContactFrameYAxis
+{
+    technique
+    {
+        pass
+        {
+            point_size 3
+            lighting on
+            scene_blend add
+            depth_check off
+            depth_write off
+            emissive  0 1 0
+            diffuse 0 1 0 
+            ambient 0 1 0
+            polygon_mode wireframe
+        }
+    }
+}
+material ContactFrameZAxis
+{
+    technique
+    {
+        pass
+        {
+            point_size 3
+            lighting on
+            scene_blend add
+            depth_check off
+            depth_write off
+            emissive 0 0 1
+            diffuse 0 0 1 
+            ambient 0 0 1
+            polygon_mode wireframe
+        }
+    }
+}

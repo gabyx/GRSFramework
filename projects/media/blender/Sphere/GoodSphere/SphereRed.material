@@ -1,0 +1,13 @@
+material SphereRed
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture SphereColors3.jpg
+			}
+		}
+	}
+}

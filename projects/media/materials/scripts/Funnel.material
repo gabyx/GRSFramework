@@ -1,0 +1,27 @@
+material Funnel
+{
+	technique
+	{
+		pass
+		{
+            shading gouraud 
+			depth_check on
+			depth_write off
+			scene_blend alpha_blend
+			diffuse 0 0.2 0.8 0.9
+			emissive 0.2 0.2 0.2
+			ambient 0.8 0.8 0.8
+			specular 0.4 0.4 0.4 1
+		}
+		
+		pass
+		{
+			shading phong
+			depth_check on
+			scene_blend alpha_blend
+            polygon_mode wireframe 
+			diffuse 0 0.1 0.4 0.1
+			specular 0.4 0.4 0.4 1
+		}
+	}
+}

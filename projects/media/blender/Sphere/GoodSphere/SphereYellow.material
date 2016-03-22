@@ -1,0 +1,13 @@
+material SphereYellow
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture SphereColors2.jpg
+			}
+		}
+	}
+}

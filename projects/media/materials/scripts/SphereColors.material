@@ -1,0 +1,75 @@
+material SphereYellowPhong
+{
+    technique
+    {
+        pass
+        {
+            emissive 0 0 0
+            diffuse 1 1 1 
+            ambient 0 0 0
+            shading phong
+            texture_unit
+            {
+                texture SphereColors2.tga
+            }
+        }
+    }
+}
+
+material SphereYellow
+{
+    technique
+    {
+        pass
+        {
+            emissive 0 0 0
+            diffuse 1 1 1 
+            ambient 0 0 0
+            diffuse 1 1 1 
+            shading phong
+            texture_unit
+            {
+                texture SphereColors2.tga
+            }
+        }
+    }
+}
+
+material SphereRed
+{
+    technique
+    {
+        pass
+        {   
+        
+            emissive 0 0 0
+            diffuse 1 1 1 
+            ambient 0 0 0 
+            shading phong
+            polygon_mode solid
+            texture_unit
+            {
+                texture SphereColors3.tga
+            }
+            
+        }
+    }
+}
+
+material SphereBlue
+{
+    technique
+    {
+        pass
+        {   
+            emissive 0 0 0
+            diffuse 1 1 1 
+            ambient 0 0 0
+            shading phong 
+            texture_unit
+            {
+                texture SphereColors1.tga
+            }
+        }
+    }
+}

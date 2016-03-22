@@ -1,0 +1,13 @@
+material SOLID/TEX/SideWallsTexture2.tga
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture SideWallsTexture2.tga
+			}
+		}
+	}
+}

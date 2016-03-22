@@ -1,0 +1,13 @@
+material SphereBlue
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture SphereColors1.jpg
+			}
+		}
+	}
+}

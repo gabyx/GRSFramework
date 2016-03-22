@@ -1,0 +1,400 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="xs3p.xsl"?>
+<xs:schema
+xmlns:xs="http://www.w3.org/2001/XMLSchema"
+targetNamespace="SceneFile"
+xmlns:sf="SceneFile"
+elementFormDefault="qualified"
+attributeFormDefault="unqualified">
+
+<!-- RigidBodies ====================================================================-->
+<xs:complexType name="RigidBodiesT">
+    
+    <xs:all>
+        <xs:element name="Geometry" type="sf:GeometryT"/>
+        <xs:element name="DynamicProperties" type="sf:DynamicPropertiesT"/>
+        <xs:element name="Visualization" type="sf:BodyVisualizationT" minOccurs="0"/>
+    </xs:all>
+    
+    <xs:attribute name="name"  type="xs:string" use="required"/>
+    <xs:attribute name="instances"  type="xs:positiveInteger" use="required"/>
+    <xs:attribute name="groupId"  type="xs:unsignedInt" use="required"/>
+    <xs:attribute name="enableSelectiveIds"  type="xs:boolean" use="optional"/>
+    
+</xs:complexType>
+
+<xs:complexType name="RigidBodiesGUIT">
+    <xs:all>
+        <xs:element name="Geometry" type="sf:GeometryT"/>
+        <xs:element name="DynamicProperties" type="sf:DynamicPropertiesT"/>
+        <xs:element name="Visualization" type="sf:BodyVisualizationT"/>
+    </xs:all>
+    
+    <xs:attribute name="name"  type="xs:string" use="required"/>
+    <xs:attribute name="instances"  type="xs:positiveInteger" use="required"/>
+    <xs:attribute name="groupId"  type="xs:unsignedInt" use="required"/>
+    <xs:attribute name="enableSelectiveIds"  type="xs:boolean" use="optional"/>
+</xs:complexType>
+
+<!-- DynamicProperties ====================================================================-->
+<xs:complexType name="DynamicPropertiesT">
+    <xs:all>
+        
+        <xs:element name="DynamicState">
+            <xs:complexType>
+            <xs:attribute name="type" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                          <xs:enumeration value="simulated"/>
+                          <xs:enumeration value="static"/>
+                          <!--<xs:enumeration value="animated"/>-->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            </xs:complexType>
+        </xs:element>
+        
+        <xs:element name="Mass"    type="sf:MassT" minOccurs="0">
+            <xs:alternative type="sf:MassUniformT" test="@distribute = 'uniform'"/>
+            <xs:alternative type="sf:MassHomogenT" test="@distribute = 'homogen'"/>  
+        </xs:element>
+        
+        <xs:element name="InertiaTensor"    type="sf:InertiaTensorT" minOccurs="0">
+            <xs:alternative type="sf:InertiaTensorHomogenT" test="@type = 'homogen'"/>  
+        </xs:element>
+        
+        <xs:element name="Material"    type="sf:MaterialT" >
+            <xs:alternative type="sf:MaterialUniformT" test="@distribute = 'uniform'"/>  
+        </xs:element>
+        
+        <xs:element name="InitialCondition"    type="sf:InitialConditionT" >
+            <xs:alternative type="sf:InitialConditionPosVelT" test="@type = 'posvel'"/>  
+        </xs:element>    
+    </xs:all>
+<!--
+    <xs:assert test="(: if DynamicsState='simualted' a InitialVelocity node needs to be provided:) 
+    not( count(./sf:InitialCondition/sf:InitialVelocity) = 0 and ./sf:DynamicState/@type = 'simulated')"/>
+-->
+
+    <xs:assert test="(: Simulated body needs 'Mass' and 'InertiaTensor' element:) not( ./sf:DynamicState/@type = 'simulated' and (count(./sf:Mass) = 0 and count(./sf.InertiaTensor) = 0 ) )"/>
+</xs:complexType>
+
+
+<!-- Mass ====================================================================-->
+<xs:complexType name="MassT">
+    <xs:attribute name="distribute" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+<!--
+              <xs:enumeration value="random"/> 
+-->
+              <xs:enumeration value="uniform"/>
+              <xs:enumeration value="homogen"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+<xs:complexType name="MassUniformT">
+    <xs:complexContent>
+        <xs:extension base="sf:MassT">
+            <xs:attribute name="value" type="sf:positiveDouble" use="required"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="MassHomogenT">
+    <xs:complexContent>
+        <xs:extension base="sf:MassT">
+            <xs:attribute name="density" type="sf:positiveDouble" use="required"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+<!-- InertiaTensor ====================================================================-->
+<xs:complexType name="InertiaTensorT">
+    <xs:attribute name="type" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="homogen"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+<xs:complexType name="InertiaTensorHomogenT">
+    <xs:complexContent>
+        <xs:extension base="sf:InertiaTensorT">
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+<!-- Material ====================================================================-->
+<xs:complexType name="MaterialT">
+    <xs:attribute name="distribute" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="uniform"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+<xs:complexType name="MaterialUniformT">
+    <xs:complexContent>
+        <xs:extension base="sf:MaterialT">
+            <xs:attribute name="id" type="xs:unsignedInt" use="required"/>
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+
+
+
+<!-- Initial Condition ====================================================================-->
+<xs:complexType name="InitialConditionT">
+    <xs:attribute name="type" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="posvel"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+<xs:complexType name="InitialConditionPosVelT">
+    <xs:complexContent>
+        <xs:extension base="sf:InitialConditionT">
+            <xs:sequence>
+                <xs:element name="InitialPosition"    type="sf:InitialPositionT" minOccurs="1">
+                    <xs:alternative type="sf:InitialPositionLinearT" test="@distribute = 'linear'"/> 
+                    <xs:alternative type="sf:InitialPositionGridT" test="@distribute = 'grid'"/>
+                    <xs:alternative type="sf:InitialPositionTransformsT" test="@distribute = 'transforms'"/> 
+                </xs:element>
+                
+                <xs:element name="InitialVelocity"    type="sf:InitialVelocityT" minOccurs="0">
+                    <xs:alternative type="sf:InitialVelocityTransRotT" test="@distribute = 'transrot'"/> 
+                </xs:element>
+            </xs:sequence>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+
+<!-- Initial Position ====================================================================-->
+<xs:complexType name="InitialPositionT">
+    <xs:attribute name="distribute" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="linear"/>
+              <xs:enumeration value="grid"/>
+              <xs:enumeration value="transforms"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+<xs:complexType name="InitialPositionLinearT">
+    <xs:complexContent>
+        <xs:extension base="sf:InitialPositionT">
+            <xs:attribute name="position" type="sf:Vector3" use="required"/>
+            <xs:attribute name="direction" type="sf:Vector3" use="required"/>
+            <xs:attribute name="distance" type="xs:double" use="required"/>
+            <xs:attribute name="jitter" type="xs:boolean" use="required"/>
+            <xs:attribute name="delta" type="xs:double" use="optional"/>
+            <xs:attribute name="seed" type="xs:unsignedInt" use="optional"/>
+            <xs:anyAttribute processContents="skip"/>
+            <xs:assert test="not( ( count(@delta) eq 0 or count(@seed) eq 0 ) and @jitter = true() )"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+
+<xs:complexType name="InitialPositionGridT">
+    <xs:complexContent>
+        <xs:extension base="sf:InitialPositionT">
+            <xs:attribute name="translation" type="sf:Vector3" use="required"/>
+            <xs:attribute name="gridSizeX" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="gridSizeY" type="xs:positiveInteger" use="required"/>
+            <xs:attribute name="distance" type="xs:double" use="required"/>
+            <xs:attribute name="jitter" type="xs:boolean" use="required"/>
+            <xs:attribute name="delta" type="xs:double" use="optional"/>
+            <xs:attribute name="seed" type="xs:unsignedInt" use="optional"/>
+            <xs:anyAttribute processContents="skip"/>
+            <xs:assert test="not( ( count(@delta) eq 0 or count(@seed) eq 0 ) and @jitter = true() )"/>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="InitialPositionTransformsT">
+    <xs:complexContent>
+        <xs:extension base="sf:InitialPositionT">
+            <xs:sequence>
+                <xs:element name="Pos" minOccurs="1" maxOccurs="unbounded" type="sf:TrafoUnboundedT"/>
+            </xs:sequence>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+ <xs:complexType name="TrafoUnboundedT">
+        <xs:sequence>
+            <xs:element name="Trafo" type="sf:TrafoT" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+</xs:complexType>
+
+ <xs:complexType name="TrafoT">
+    <xs:attribute name="trans" type="sf:Vector3" use="required"/>
+    <xs:attribute name="axis" type="sf:Vector3" use="required"/>
+    <xs:attribute name="deg" type="xs:double" use="optional"/>
+    <xs:attribute name="rad" type="xs:double" use="optional"/>
+    <xs:anyAttribute processContents="skip"/>
+    <xs:assert test="count(@rad | @deg) = 1"/>
+</xs:complexType>
+
+<!-- Initial Velocity ====================================================================-->
+<xs:complexType name="InitialVelocityT">
+    <xs:attribute name="distribute" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="transrot"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+<xs:complexType name="InitialVelocityTransRotT">
+    <xs:complexContent>
+        <xs:extension base="sf:InitialVelocityT">
+            <xs:sequence>
+                <xs:element name="Vel" minOccurs="1" maxOccurs="unbounded" type="sf:VelTransRot"/>
+            </xs:sequence>
+      </xs:extension>  
+    </xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="VelTransRot">
+    <xs:attribute name="transDir" type="sf:Vector3" use="required"/>
+    <xs:attribute name="rotDir" type="sf:Vector3" use="required"/>
+    <xs:attribute name="absTransVel" type="xs:double" use="required"/>
+    <xs:attribute name="absRotVel" type="xs:double" use="required"/>
+    <xs:anyAttribute processContents="skip"/>
+</xs:complexType>
+
+
+
+
+
+
+
+
+
+
+<!-- BodyVisualization ====================================================================-->
+
+<xs:complexType name="BodyVisualizationT">
+    <xs:choice>
+        <xs:element name="Mesh"   type="sf:VisMeshT"/>
+        <xs:element name="Plane"  type="sf:VisPlaneT"/>
+        <xs:element name="PointCloud"  type="sf:VisPointCloudT"/>
+        <xs:element name="Capsule"  type="sf:VisCapsuleT"/>
+    </xs:choice>
+</xs:complexType>
+
+
+<xs:complexType name="VisPlaneT">
+    <xs:sequence>
+        <xs:element name="Rendering"  minOccurs="0" type="sf:BodyVisRenderingT"/>
+        <xs:element name="Material"   minOccurs="0" maxOccurs="unbounded" type="sf:BodyVisMaterial"/>
+    </xs:sequence>
+    <xs:attribute name="file" type="sf:unixPath" use="required"/>
+    <xs:attribute name="subDivisions" type="xs:positiveInteger" use="optional"/>
+    <xs:attribute name="normal" type="sf:Vector3" use="optional"/>
+    <xs:attribute name="distance" type="sf:Vector3" use="optional"/>
+    <xs:attribute name="tileTexture" type="sf:Vector2" use="optional"/>
+    <xs:attribute name="scaleLikeGeometry" type="xs:boolean" use="optional"/>
+    <xs:attribute name="scale" type="sf:Vector3" use="optional"/>
+    
+    <xs:attribute name="type" use="required" type="sf:BodyVisMaterialTypeT"/>
+<!--
+    <xs:assert test="not ( count(@scale) eq 0  and  not(scaleLikeGeometry) )"/>
+-->
+    
+    </xs:complexType>
+
+<xs:complexType name="VisMeshT">
+    <xs:sequence>
+        <xs:element name="Rendering"  minOccurs="0" type="sf:BodyVisRenderingT"/>
+        <xs:element name="Material"   minOccurs="0" maxOccurs="unbounded" type="sf:BodyVisMaterial"/>
+    </xs:sequence>
+    <xs:attribute name="file" type="sf:unixPath" use="required"/>
+    <xs:attribute name="scaleLikeGeometry" type="xs:boolean" use="optional"/>
+    <xs:attribute name="scale" type="sf:Vector3" use="optional"/>
+    
+    <xs:attribute name="type" use="required" type="sf:BodyVisMaterialTypeT"/>
+    <xs:assert test="not ( count(@scale) eq 0  and  not(@scaleLikeGeometry) )"/>
+</xs:complexType>
+
+
+<xs:complexType name="VisPointCloudT">
+    
+    <xs:attribute name="color" type="sf:Vector4" use="optional"/>
+    <xs:attribute name="scale" type="sf:Vector3" use="optional"/>
+    
+   <xs:attribute name="renderMode" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="points"/>
+              <xs:enumeration value="spheres"/>
+              <xs:enumeration value="flatSquares"/>
+              <xs:enumeration value="squares"/>
+              <xs:enumeration value="tiles"/>
+              <xs:enumeration value="boxes"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+
+</xs:complexType>
+
+<xs:complexType name="VisCapsuleT">
+    <xs:sequence>
+        <xs:element name="Rendering"  minOccurs="0" type="sf:BodyVisRenderingT"/>
+        <xs:element name="Material"   minOccurs="0" maxOccurs="unbounded" type="sf:BodyVisMaterial"/>
+    </xs:sequence>
+    <xs:attribute name="fileZylinder" type="sf:unixPath" use="required"/>
+    <xs:attribute name="fileCap" type="sf:unixPath" use="required"/>
+    
+    <xs:attribute name="radius" type="sf:positiveDouble" use="required"/>
+    <xs:attribute name="length" type="sf:positiveDouble" use="required"/>
+    
+    <xs:attribute name="scaleLikeGeometry" type="xs:boolean" use="optional"/>
+    <xs:attribute name="scale" type="sf:Vector3" use="optional"/>
+    
+    <xs:attribute name="type" use="required" type="sf:BodyVisMaterialTypeT"/>
+    <xs:assert test="not ( count(@scale) eq 0  and  not(@scaleLikeGeometry) )"/>
+</xs:complexType>
+
+
+ <xs:simpleType name="BodyVisMaterialTypeT">
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="permutate"/>
+              <xs:enumeration value="uniform"/>
+        </xs:restriction>
+</xs:simpleType>
+
+ <xs:complexType name="BodyVisRenderingT">
+    <xs:attribute name="attachAxis" type="xs:boolean" use="optional"/>
+    <xs:attribute name="axesSize" type="sf:positiveDouble" use="optional"/>
+    <xs:attribute name="shadowsEnabled" type="xs:boolean" use="optional"/>
+</xs:complexType>
+
+<xs:complexType  name="BodyVisMaterial" >
+    <xs:attribute name="name" type="xs:string" use="required"/>
+</xs:complexType>
+
+</xs:schema>
+
+

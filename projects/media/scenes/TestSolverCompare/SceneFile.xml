@@ -1,0 +1,61 @@
+<?xml version="1.0" ?>
+<DynamicsSystem>
+
+<SceneSettings>
+	<Gravity value="9.81" direction="0 0 -1" />
+	<TimeStepperSettings deltaT ="0.0005" endTime="12">
+		<InclusionSolverSettings method="SOR" useGPU ="false" useGPUID="0" alphaJORProx="0.2" alphaSORProx="1.2" maxIter="100000" absTol="1e-7" relTol="1e-7" isFiniteCheck = "false"/>
+		<SimulateFromReference enabled="false" type="useStates" file="./SimFiles/ReferenceForTest/StateData.sim" />
+<!--		<SimulateFromReference type="continue" file="./SimFiles/Reference/StateData.sim" enabled="true" />-->
+	</TimeStepperSettings>
+</SceneSettings>
+
+
+
+<SceneObjects>
+
+	<RigidBodies name="balls" instances="1">
+		<Geometry>
+			<Sphere distribute="uniform" radius="0.0125" seed="5" minRadius="0.008" maxRadius="0.018" />
+		</Geometry>
+		<DynamicProperties>
+			<DynamicState type="simulated" />
+			<Mass distribute="uniform" value="0.050" />
+			<InertiaTensor type="homogen" />
+			<Material distribute="uniform" type="standart"/>
+			<InitialCondition distribute="uniform"/>
+                                <Value position="0 0 0.3" axis="0 0 0" angle="0"/>
+                        </InitialCondition>
+		</DynamicProperties>
+		<Visualization>
+				<Mesh file="Sphere18x18.mesh" scaleLikeGeometry="true" scale="0.0125 0.0125 0.0125" type="permutate" >
+					<Material name="SphereRed" />
+					<Material name="SphereYellow" />
+					<Material name="SphereBlue" />
+				</Mesh>
+		</Visualization>
+	</RigidBodies>
+
+
+	<RigidBodies name="floor" instances="4">
+		<Geometry>
+			<Halfspace distribute="uniform" normal="0 0 1" position="0 0 0"/>
+		</Geometry>
+		<DynamicProperties>
+			<DynamicState type="not simulated" />
+			<InitialCondition distribute="posaxisangle" >
+                                <Value position="0 0.0 0"  axis="1 0 0" angleDegree="10"/>
+				<Value position="0 0.0 0"  axis="1 0 0" angleDegree="-10"/>
+			</InitialCondition>
+		</DynamicProperties>
+		<Visualization>
+				<Mesh file="Plane.mesh" scale="0.7 0.7 0.7" type="uniform">
+					<Material name="Plane" />
+				</Mesh>
+		</Visualization>
+	</RigidBodies>
+
+</SceneObjects>
+
+
+</DynamicsSystem>

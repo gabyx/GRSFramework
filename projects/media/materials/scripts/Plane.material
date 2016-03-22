@@ -1,0 +1,132 @@
+material Plane
+{
+    technique
+    {
+            
+        pass
+        {
+            shading phong 
+            ambient 1 1 1 
+            diffuse 0.5 0.5 0.5  1
+            emissive 0.4 0.4 0.4
+            specular 0.4 0.4 0.4 10
+            texture_unit
+            {
+                texture crop_wood-044.jpg
+            }
+        }
+        
+        
+    }
+}
+
+material PlaneBlue
+{
+    technique
+    {
+        pass
+        {
+            depth_check on
+            shading phong 
+            ambient 0 0 0 
+            diffuse 0.0 0.2 0.8  1
+            emissive 0.0 0 0
+            specular 0.4 0.4 0.4 10
+        }
+        
+        pass
+        {
+            depth_check on
+            ambient 1 1 1 
+            diffuse 0.0 0.2 0.8  0.5
+            emissive 0.0 0 0
+            specular 0.4 0.4 0.4 10
+                        cull_hardware none
+                        cull_software none
+                        polygon_mode wireframe
+        }
+    }
+}
+
+material PlaneBlue2
+{
+    technique
+    {
+        pass
+        {
+            shading phong 
+            ambient 1 1 1 
+            diffuse 0.0 0.4 0.8  1
+            emissive 0.0 0 0
+            specular 0.4 0.4 0.4 10
+        }
+    }
+}
+
+material PlaneBlueAlpha
+{
+    technique
+    {
+        pass
+        {
+            depth_check on
+            depth_write off
+            scene_blend alpha_blend
+            shading phong 
+            ambient 1 1 1 
+            diffuse 0.0 0.2 0.8  0.5
+            emissive 0.0 0 0
+            specular 0.4 0.4 0.4 10
+                        cull_hardware none
+                        cull_software none
+        }
+
+        
+    }
+}
+
+
+material PlaneBlueWireNoCull
+{
+    technique
+    {
+        pass
+        {
+            depth_check on
+            depth_write on
+            ambient 1 1 1 
+            diffuse 0.0 0.2 0.8  0.5
+            emissive 0.0 0 0
+            specular 0.4 0.4 0.4 10
+                        cull_hardware none
+                        cull_software none
+                        polygon_mode wireframe
+        }
+
+        
+    }
+}
+
+material PlaneYellowWireNoCull
+{
+    technique
+    {
+        pass
+        {
+            lighting on
+            depth_check on
+            depth_write on
+                        emissive 1 1 0
+                        diffuse 0 0 0 
+            ambient 0 0 0
+                        cull_hardware none
+                        cull_software none
+                        scene_blend one
+                        polygon_mode wireframe
+        }
+
+        
+    }
+}
+
+

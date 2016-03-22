@@ -1,0 +1,520 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="xs3p.xsl"?>
+<xs:schema
+xmlns:xs="http://www.w3.org/2001/XMLSchema"
+targetNamespace="SceneFile"
+xmlns:sf="SceneFile"
+elementFormDefault="qualified"
+attributeFormDefault="unqualified">
+
+<xs:include schemaLocation="CommonTypes.xsd"/>
+<xs:include schemaLocation="Geometries.xsd"/>
+
+<!-- RecorderSettings ========================================================--> 
+<xs:element name="RecorderSettings" type="sf:RecorderSettingsT">
+    <xs:alternative type="sf:everyTimeStepT"  test="@mode = 'everyTimeStep'"/>  
+    <xs:alternative type="sf:everyXTimeStepT" test="@mode = 'everyXTimeStep'"/> 
+    <xs:alternative type="sf:noOutputT" test="@mode = 'noOutput'"/> 
+</xs:element>
+
+
+<xs:complexType name="RecorderSettingsT">
+    <xs:attribute name="mode" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="everyTimeStep"/>
+              <xs:enumeration value="everyXTimeStep"/>
+              <xs:enumeration value="noOutput"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+
+
+ <!-- everyTimeStep -->
+  <xs:complexType name="everyTimeStepT">
+    <xs:complexContent>
+        <xs:extension base="sf:RecorderSettingsT">
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <!-- noOutput -->
+  <xs:complexType name="noOutputT">
+    <xs:complexContent>
+        <xs:extension base="sf:RecorderSettingsT">
+            <xs:anyAttribute processContents="skip"/>
+      </xs:extension>  
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <!-- everyXTimeStep -->
+  <xs:complexType name="everyXTimeStepT">
+    <xs:complexContent>
+      <xs:extension base="sf:RecorderSettingsT">
+        <xs:attribute name="everyXStep" type="xs:positiveInteger" use="optional"/>
+        <xs:attribute name="statesPerSecond" type="xs:positiveInteger" use="optional"/>
+        <xs:anyAttribute processContents="skip"/>
+        <xs:assert test="(: either everyXStep or statesPerSecond needs to be available :) if ( count(@everyXStep) + count(@statesPerSecond) = 1 ) then ( true() ) else ( false() )" />
+      </xs:extension>  
+    </xs:complexContent>
+  </xs:complexType>  
+<!-- ==========================================================================--> 
+
+<!-- TimeStepperSettings  ========================================================--> 
+
+    
+<xs:complexType name="TimeStepperSettingsT">
+        <xs:all>
+            <xs:element name="InclusionSolverSettings" type="sf:InclusionSolverSettingsT" minOccurs="1"/>
+            <xs:element name="SimulateFromReference" type="sf:SimulateFromReferenceT" minOccurs="0"/>
+        </xs:all>
+        <xs:attribute name="deltaT"  type="xs:float" use="required"/>
+        <xs:attribute name="endTime" type="xs:float" use="required"/>
+        <xs:assert test="@endTime >= 0.0 and @deltaT >= 0.0" />
+</xs:complexType>
+<!-- ==========================================================================--> 
+
+
+<!-- InclusionSolverSettings ========================================================--> 
+<xs:complexType name="InclusionSolverSettingsT">
+    
+    <xs:attribute name="method"  use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="JOR"/>
+              <xs:enumeration value="SOR"/>
+              <xs:enumeration value="SORFull"/>
+              <xs:enumeration value="SORContact"/>
+              <xs:enumeration value="SORNormalTangential"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    
+    <xs:attribute name="subMethodUCF"  use="optional">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="DS"/>
+              <xs:enumeration value="AC"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    
+    <xs:attribute name="useGPU"  type="xs:boolean" use="required"/>
+    <xs:attribute name="useGPUID"  type="xs:unsignedInt" use="required"/>
+    
+    <xs:attribute name="alphaJORProx"  type="xs:double" use="required"/>
+    <xs:attribute name="alphaSORProx"  type="xs:double" use="required"/>
+    
+    <xs:attribute name="matrixRStrategy"  use="optional">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="max"/>
+              <xs:enumeration value="sum"/>
+              <xs:enumeration value="sum2"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    
+    <xs:attribute name="convergenceMethod" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="InLambda"/>
+              <xs:enumeration value="InVelocity"/>
+              <xs:enumeration value="InVelocityLocal"/>
+              <xs:enumeration value="InEnergyVelocity"/>
+              <xs:enumeration value="InEnergyLocalMix"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    
+    <xs:attribute name="driftCorrectionGap"  type="xs:boolean"/>
+    <xs:attribute name="driftCorrectionGapAlpha"  type="xs:double"/>
+    
+    <xs:attribute name="reserveContacts"  type="xs:positiveInteger"/>
+    <xs:attribute name="usePercussionCache"  type="xs:boolean"/>
+    
+    <xs:attribute name="computeTotalOverlap"  type="xs:boolean"/>
+    <xs:attribute name="computeResidual"  type="xs:boolean"/>
+    
+    
+    <xs:attribute name="minIter"  type="xs:positiveInteger" use="required"/>
+    <xs:attribute name="maxIter"  type="xs:positiveInteger" use="required"/>
+    <xs:attribute name="absTol"   type="xs:double" use="required"/>
+    <xs:attribute name="relTol"   type="xs:double" use="required"/>
+    
+    <xs:attribute name="isFiniteCheck"  type="xs:boolean" use="required"/>
+    
+    <xs:assert test="@absTol ge 0.0 and @relTol ge 0.0 and @minIter le @maxIter" />
+    <xs:assert test="(: if driftCorrectionGap is true provide driftCorrectionGapAlpha attribute :) if (@driftCorrectionGap and count(@driftCorrectionGapAlpha) = 1 or not(@driftCorrectionGap) ) then ( true() ) else ( false() )" />
+
+</xs:complexType>
+<!-- ==========================================================================--> 
+
+
+<!-- SimulateFromReference  ===========================================--> 
+<xs:complexType name="SimulateFromReferenceT">
+    
+    <xs:attribute name="type" use="required"> 
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="continue"/>
+              <xs:enumeration value="useStates"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    
+    <xs:attribute name="file" type="xs:string" use="required"/>
+    
+</xs:complexType>
+<!-- ==========================================================================--> 
+
+
+
+<!-- ContactParameterMap  ===========================================--> 
+<xs:complexType name="ContactParameterMapT">
+    <xs:all>
+        <xs:element name="ContactParameterStandard" type="sf:ContactParameterT" minOccurs="1" >
+            <xs:alternative type="sf:ContactParameterUCF_T"  test="@type = 'UCF'"/>  
+            <xs:alternative type="sf:ContactParameterUCFD_T" test="@type = 'UCFD'"/>
+            <xs:alternative type="sf:ContactParameterUCFDD_T" test="@type= 'UCFDD'"/>  
+        </xs:element>
+        <xs:element name="ContactParameter" type="sf:ContactParameterT" minOccurs="0" maxOccurs="unbounded">
+            <xs:alternative type="sf:ContactParameterIdUCF_T"  test="@type = 'UCF'"/>  
+            <xs:alternative type="sf:ContactParameterIdUCFD_T" test="@type = 'UCFD'"/>
+            <xs:alternative type="sf:ContactParameterIdUCFDD_T" test="@type = 'UCFDD'"/>  
+        </xs:element>
+    </xs:all>
+</xs:complexType>
+
+<xs:complexType name="ContactParameterT">
+    <xs:attribute name="type" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="UCF"/>
+              <xs:enumeration value="UCFD"/>
+              <xs:enumeration value="UCFDD"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>  
+</xs:complexType>
+
+
+
+<xs:attributeGroup name="materialIDs">
+    <xs:attribute name="materialId1" type="xs:unsignedInt" use="required"/>
+    <xs:attribute name="materialId2" type="xs:unsignedInt" use="required"/>
+</xs:attributeGroup>
+        
+<xs:attributeGroup name="materialUCF">
+    <xs:attribute name="mu" type="sf:nonNegativeDouble" use="required"/>
+    <xs:attribute name="epsilonN" type="sf:zeroToOneDouble" use="required"/>
+    <xs:attribute name="epsilonT" type="sf:zeroToOneDouble" use="required"/>
+</xs:attributeGroup>
+
+<xs:attributeGroup name="materialUCFD">
+    <xs:attributeGroup ref="sf:materialUCF"/>
+    <xs:attribute name="invDampingN" type="sf:nonNegativeDouble" use="required"/>
+    <xs:attribute name="invDampingT" type="sf:nonNegativeDouble" use="required"/>
+</xs:attributeGroup>
+
+<xs:attributeGroup name="materialUCFDD">
+    <xs:attributeGroup ref="sf:materialUCF"/>
+    <xs:attribute name="invDampingN" type="sf:nonNegativeDouble" use="required"/>
+    <xs:attribute name="invDampingTFix" type="sf:nonNegativeDouble" use="required"/>
+    <xs:attribute name="gammaMax" type="sf:nonNegativeDouble" use="required"/>
+    <xs:attribute name="epsilon" type="sf:nonNegativeDouble" use="required"/>
+</xs:attributeGroup>
+
+
+<xs:complexType name="ContactParameterIdUCF_T">
+    <xs:complexContent>
+    <xs:extension base="sf:ContactParameterT">
+         <xs:attributeGroup ref="sf:materialIDs"/>
+         <xs:attributeGroup ref="sf:materialUCF"/>
+         <xs:anyAttribute processContents="skip"/>
+    </xs:extension>
+    </xs:complexContent>
+</xs:complexType>
+<xs:complexType name="ContactParameterUCF_T">
+    <xs:complexContent>
+    <xs:extension base="sf:ContactParameterT">
+         <xs:attributeGroup ref="sf:materialUCF"/>
+         <xs:anyAttribute processContents="skip"/>
+    </xs:extension>
+    </xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="ContactParameterIdUCFD_T">
+    <xs:complexContent>
+    <xs:extension base="sf:ContactParameterT">
+         <xs:attributeGroup ref="sf:materialIDs"/>
+         <xs:attributeGroup ref="sf:materialUCFD"/>
+         <xs:anyAttribute processContents="skip"/>
+    </xs:extension>
+    </xs:complexContent>
+</xs:complexType>
+<xs:complexType name="ContactParameterUCFD_T">
+    <xs:complexContent>
+    <xs:extension base="sf:ContactParameterT">
+         <xs:attributeGroup ref="sf:materialUCFD"/>
+         <xs:anyAttribute processContents="skip"/>
+    </xs:extension>
+    </xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="ContactParameterIdUCFDD_T">
+    <xs:complexContent>
+    <xs:extension base="sf:ContactParameterT">
+         <xs:attributeGroup ref="sf:materialIDs"/>
+         <xs:attributeGroup ref="sf:materialUCFDD"/>
+         <xs:anyAttribute processContents="skip"/>
+    </xs:extension>
+    </xs:complexContent>
+</xs:complexType>
+<xs:complexType name="ContactParameterUCFDD_T">
+    <xs:complexContent>
+    <xs:extension base="sf:ContactParameterT">
+         <xs:attributeGroup ref="sf:materialUCFDD"/>
+         <xs:anyAttribute processContents="skip"/>
+    </xs:extension>
+    </xs:complexContent>
+</xs:complexType>
+<!-- ==========================================================================--> 
+
+<!-- GlobalInitialCondition ===========================================--> 
+<xs:complexType name="GlobalInitialConditionT">
+    <xs:attribute name="file" type="sf:unixPath" use="required"/>
+    <xs:attribute name="whichState" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="beg"/>
+              <xs:enumeration value="end"/>
+              <xs:enumeration value="time"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="time" type="sf:nonNegativeDouble" />
+    <xs:attribute name="useTimeToContinue" type="xs:boolean" use="required"/>
+    <xs:attribute name="readVelocities" type="xs:boolean"/>
+    <xs:assert test="(: if which state is 'time' provide a time attribute! :) if (@whichState = 'time' and count(@time) = 1 or not(@whichState = 'time') ) then ( true() ) else ( false() )" />
+</xs:complexType>
+<!-- ==========================================================================--> 
+
+<!-- ExternalForces  ===========================================--> 
+<xs:complexType name="ExternalForcesT">
+    <xs:all>
+        <xs:element name="ForceField" type="sf:ForceFieldT" minOccurs="0" maxOccurs="unbounded">
+            <xs:alternative type="sf:ForceFieldSphericalTimeRandomT"  test="@type = 'spatialspherical-timerandom'"/>  
+            <xs:alternative type="sf:ForceFieldGravityT" test="@type = 'gravity'"/>
+        </xs:element>
+    </xs:all>
+</xs:complexType>
+
+<xs:complexType name="ForceFieldT">
+    <xs:attribute name="type" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="spatialspherical-timerandom"/>
+              <xs:enumeration value="gravity"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="applyTo" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="all"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+</xs:complexType>
+
+<xs:complexType name="ForceFieldGravityT">
+    <xs:complexContent>
+    <xs:extension base="sf:ForceFieldT">
+        <xs:attribute name="value" type="sf:nonNegativeDouble" use="required"/>
+        <xs:attribute name="direction" type="sf:Vector3" use="required"/>
+        <xs:anyAttribute processContents="skip"/>
+    </xs:extension>
+    </xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="ForceFieldSphericalTimeRandomT">
+    <xs:complexContent>
+    <xs:extension base="sf:ForceFieldT">
+        <xs:attribute name="seed" type="xs:unsignedInt" use="required"/>
+        <xs:attribute name="boostTime" type="sf:positiveDouble" use="required"/>
+        <xs:attribute name="pauseTime" type="sf:positiveDouble" use="required"/>
+        <xs:attribute name="amplitude" type="sf:nonNegativeDouble" use="required"/>
+        
+        <xs:attribute name="randomOn" type="xs:boolean" use="required"/>
+        <xs:attribute name="minPoint" type="sf:Vector3" use="required"/>
+        <xs:attribute name="maxPoint" type="sf:Vector3" use="required"/>
+        
+        <xs:attribute name="startTime" type="sf:nonNegativeDouble" use="required"/>
+        <xs:attribute name="endTime" type="sf:nonNegativeDouble" use="required"/>
+        <xs:anyAttribute processContents="skip"/>
+
+    </xs:extension>
+    </xs:complexContent>
+</xs:complexType>
+
+<!-- ==========================================================================--> 
+
+<!-- GlobalSelectiveIds ===========================================--> 
+<xs:complexType name="GlobalSelectiveIdsT">
+    <xs:choice>
+        <xs:element name="Range" type="sf:SelectiveBodyIdsRangeT"/>
+        <xs:element name="Set" type="sf:SelectiveBodyIdsSetT"/>
+    </xs:choice>
+</xs:complexType>
+
+
+<xs:complexType name="SelectiveBodyIdsSetT">
+    <xs:attribute name="value" use="required" type="sf:commaSeperatedPairsOfUnsignedInts"/>
+</xs:complexType>
+
+<xs:complexType name="SelectiveBodyIdsRangeT">
+    <xs:attribute name="value" use="required" type="sf:twoCommaSeperatedPairsOfUnsignedInts"/>
+</xs:complexType>
+
+<!-- Visualization  ===========================================--> 
+<xs:complexType name="SceneSettingsVisualizationT">
+    <xs:sequence>
+    <xs:element name="SceneScale">
+        <xs:complexType>
+            <xs:attribute name="value"  type="sf:positiveDouble" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    </xs:sequence>
+</xs:complexType>
+
+<!-- MPISettings  ===========================================--> 
+<xs:complexType name="MPISettingsT">
+    <xs:all>
+        <xs:element name="ProcessTopology" type="sf:ProcessTopologyT"/>
+        <xs:element name="InclusionSolverSettings" type="sf:MPIInclusionSolverSettingsT"/>
+    </xs:all>
+</xs:complexType>
+
+
+<xs:complexType name="ProcessTopologyT">
+    <xs:all>
+        <xs:element name="Visualization" type="sf:PTVisualizationT" minOccurs="0"/>
+        <xs:element name="Topology" type="sf:PTTopologyT">
+            <xs:alternative type="sf:PTTopologyGridT"   test="@type = 'grid'"/>  
+            <xs:alternative type="sf:PTTopologyKdTreeT" test="@type = 'kdTree'"/>
+        </xs:element>
+        <xs:element name="MassPointPrediction" type="sf:PTMassPointPredictionT"  />
+        <xs:element name="GlobalOutlierFilter" type="sf:PTGlobalOutlierFilterT"  />
+    </xs:all>
+    
+    <xs:attribute name="mode" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="dynamic"/>
+              <xs:enumeration value="static"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    
+    <xs:attribute name="doLocalComputations" type="xs:boolean"/>
+    <xs:attribute name="policyCheckEveryXTimeStep" type="xs:unsignedInt"/>
+    <xs:attribute name="policy">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="alwaysRebuild"/>
+              <xs:enumeration value="bodyLimit"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="bodyLimit" type="xs:unsignedInt"/>
+    
+    <xs:assert test="(: if mode 'dynamic' , policy and policyCheckEveryXTimeStep attributes need to be set:) if (@mode = 'dynamic' and count(@policy) = 1 and count(@policyCheckEveryXTimeStep) = 1 or not(@mode = 'dynamic') ) then ( true() ) else ( false() )" />
+     <xs:assert test="(: if policy is 'bodyLimit' , bodyLimit attribute needs to be set:) if (@policy = 'bodyLimit' and count(@bodyLimit) = 1 or not(@policy = 'bodyLimit') ) then ( true() ) else ( false() )" />
+</xs:complexType>
+
+<xs:complexType name="PTTopologyT">
+    
+    <xs:attribute name="type" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="grid"/>
+              <xs:enumeration value="kdTree"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    
+    <xs:attribute name="buildMode" use="required">
+        <xs:simpleType>
+        <xs:restriction base="xs:string">
+              <xs:enumeration value="MVBB"/>
+              <xs:enumeration value="AABB"/>
+              <xs:enumeration value="predefined"/>
+              <xs:enumeration value="binetTensor"/>
+        </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="minCellSize" type="sf:positiveDouble" use="required"/> 
+    
+    <xs:attribute name="minPoint"  type="sf:Vector3" use="optional"/>
+    <xs:attribute name="maxPoint"  type="sf:Vector3" use="optional"/>
+    <xs:attribute name="Rotation_KI"  type="sf:Vector4" use="optional"/>
+    <xs:attribute name="aligned" type="xs:boolean" use="optional"/> 
+    
+    <xs:assert test="(: if buildMode is 'predefined' , minPoint,maxPoint,aligned,Rotation_KI attributes needs to be set:) if (@buildMode = 'predefined' and count(@minPoint) + count(@maxPoint) + count(@aligned) + count(@Rotation_KI) = 4 or not(@buildMode = 'predefined') ) then ( true() ) else ( false() )" />  
+</xs:complexType>
+
+<xs:complexType name="PTTopologyGridT">
+    <xs:complexContent>
+    <xs:extension base="sf:PTTopologyT">
+        <xs:attribute name="dimension"  type="sf:Vector3UnsignedInt" use="required"/>
+        <xs:attribute name="matchProcessDimToExtent"  type="xs:boolean" use="optional"/>
+        <xs:anyAttribute processContents="skip"/>
+    </xs:extension>
+    </xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="PTTopologyKdTreeT">
+    <xs:complexContent>
+    <xs:extension base="sf:PTTopologyT">
+        <xs:anyAttribute processContents="skip"/>
+    </xs:extension>
+    </xs:complexContent>
+</xs:complexType>
+
+
+
+<xs:complexType name="PTMassPointPredictionT">
+    <xs:attribute name="nPoints"  type="xs:unsignedInt" use="required"/>
+    <xs:attribute name="deltaT"   type="sf:positiveDouble" use="required"/>
+</xs:complexType>
+
+<xs:complexType name="PTGlobalOutlierFilterT">
+    <xs:attribute name="kNNMean"  type="xs:unsignedInt" use="required"/>
+    <xs:attribute name="stdDeviationMult"   type="sf:nonNegativeDouble" use="required"/>
+    <xs:attribute name="allowSplitAbove"   type="sf:positiveInt" use="required"/>
+</xs:complexType>
+
+
+<xs:complexType name="MPIInclusionSolverSettingsT">
+    <xs:attribute name="splitNodeUpdateRatio"   type="sf:positiveInt" use="required"/>
+    <xs:attribute name="convergenceCheckRatio"  type="sf:positiveInt" use="required"/>
+    <xs:attribute name="reserveSplitNodes"      type="xs:unsignedInt" use="required"/>
+</xs:complexType>
+
+
+<xs:complexType name="PTVisualizationT">
+    <xs:all>
+        <xs:element name="Material">
+             <xs:complexType>
+                <xs:attribute name="name"  type="xs:string" use="required"/>
+            </xs:complexType>
+        </xs:element>
+    </xs:all>
+</xs:complexType>
+
+</xs:schema>
+

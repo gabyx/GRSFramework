@@ -1,0 +1,17 @@
+material NoCloudsSkyBox
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			depth_write off
+
+			texture_unit
+			{
+				cubic_texture noclouds_fr.jpg noclouds_bk.jpg noclouds_lf.jpg noclouds_rt.jpg noclouds_up.jpg noclouds_dn.jpg separateUV
+				tex_address_mode clamp
+			}
+		}
+	}
+}

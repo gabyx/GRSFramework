@@ -1,0 +1,13 @@
+material SOLID/TEX/SphereColors.jpg
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture SphereColors.jpg
+			}
+		}
+	}
+}
