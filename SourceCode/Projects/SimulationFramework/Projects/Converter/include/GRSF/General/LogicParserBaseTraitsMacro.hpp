@@ -11,5 +11,4 @@
     using XMLAttributeType = typename TParserTraits::XMLAttributeType;
 
 
-
 #endif
