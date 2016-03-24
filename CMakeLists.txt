@@ -244,7 +244,7 @@ find_package(Assimp 3 REQUIRED)
 #find_package(ApproxMVBB)   
 
 # to include all source into the project
-set(ApproxMVBB_SEARCH_PATH "./../../../../ApproxMVBB" CACHE STRING "ApproxMVBB Repo Dir")
+set(ApproxMVBB_SEARCH_PATH "./../ApproxMVBB" CACHE STRING "ApproxMVBB Repo Dir")
 find_package(ApproxMVBBSource REQUIRED)  
 # ===================================================
 
@@ -323,15 +323,15 @@ set(GRSF_COMMON_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/common")
 
 
 if(SIMULATIONFRAMEWORK_BUILD_GUI)
-add_subdirectory(projects/generalRigidBodySimulation)
+add_subdirectory(projects/granularRigidBodySimulationGUI)
 endif()
 
 if(SIMULATIONFRAMEWORK_BUILD_NOGUI)
-add_subdirectory(projects/generalRigidBodySimulationNoGUI)
+add_subdirectory(projects/granularRigidBodySimulation)
 endif()
 
 if(SIMULATIONFRAMEWORK_BUILD_MPI)
-add_subdirectory(projects/generalRigidBodySimulationMPI)
+add_subdirectory(projects/granularRigidBodySimulationMPI)
 endif()
 
 if(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER)

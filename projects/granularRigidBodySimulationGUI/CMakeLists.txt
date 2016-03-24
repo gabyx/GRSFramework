@@ -63,89 +63,89 @@ endif()
 
 
 SET( APP_INC
-    ${PROJECT_SOURCE_DIR}/include/GRSF/App/App.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/App/MenuMouse.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/App/OrbitCamera.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/app/App.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/app/MenuMouse.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/app/OrbitCamera.hpp
 )
 SET( APP_SRC
-    ${PROJECT_SOURCE_DIR}/src/GRSF/App/App.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/App/MenuMouse.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/App/OrbitCamera.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/App/main.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/app/App.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/app/MenuMouse.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/app/OrbitCamera.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/app/main.cpp
 
 )
 
 SET(SINGELTON_INC
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Singeltons/Contexts/GuiContext.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Singeltons/Contexts/InputContext.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Singeltons/Contexts/RenderContext.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/singeltons/contexts/GuiContext.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/singeltons/contexts/InputContext.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/singeltons/contexts/RenderContext.hpp
 )
 
 SET( SINGELTON_SRC
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Singeltons/Contexts/GuiContext.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Singeltons/Contexts/InputContext.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Singeltons/Contexts/RenderContext.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/singeltons/contexts/GuiContext.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/singeltons/contexts/InputContext.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/singeltons/contexts/RenderContext.cpp
 )
 
 SET( STATES_INC
-    ${PROJECT_SOURCE_DIR}/include/GRSF/States/AppState.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/States/AppStateManager.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationState.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/States/PlaybackState.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/States/VideoDropper.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/SimulationManagerBase.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/SimulationManagerGUI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/PlaybackManagerBase.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/PlaybackManager.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/PlaybackLoader.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/states/AppState.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/states/AppStateManager.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/states/SimulationState.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/states/PlaybackState.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/states/VideoDropper.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/states/simulationManager/SimulationManagerBase.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/states/simulationManager/SimulationManagerGUI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/states/simulationManager/PlaybackManagerBase.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/states/simulationManager/PlaybackManager.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/states/simulationManager/PlaybackLoader.hpp
 )
 SET(STATES_SRC
-    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationManager/PlaybackManager.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationManager/SimulationManagerGUI.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/States/AppStateManager.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationState.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/States/PlaybackState.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationManager/SimulationManagerBase.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationManager/PlaybackManagerBase.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/states/simulationManager/PlaybackManager.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/states/simulationManager/SimulationManagerGUI.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/states/AppStateManager.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/states/SimulationState.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/states/PlaybackState.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/states/simulationManager/SimulationManagerBase.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/states/simulationManager/PlaybackManagerBase.cpp
 )
 
 SET(COMMON_INC
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/OgreMeshExtraction.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/AxisObject.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/DynamicLines.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/DynamicRenderable.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/OgrePointCloud.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/CommonFunctionsOgre.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/LogDefines.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/OgreMeshExtraction.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/AxisObject.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/DynamicLines.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/DynamicRenderable.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/OgrePointCloud.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/CommonFunctionsOgre.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/LogDefines.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/AssertionDebug.hpp
 )
 SET(COMMON_SRC
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/OgreMeshExtraction.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/AxisObject.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/DynamicLines.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/DynamicRenderable.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/OgrePointCloud.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/CommonFunctionsOgre.cpp
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/common/OgreMeshExtraction.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/common/AxisObject.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/common/DynamicLines.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/common/DynamicRenderable.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/common/OgrePointCloud.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/common/CommonFunctionsOgre.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/common/TypeDefs.cpp
 )
 
 SET(DYNAMICS_INC
-     ${PROJECT_SOURCE_DIR}/include/GRSF/Dynamics/General/DynamicsSystemGUI.hpp
+     ${PROJECT_SOURCE_DIR}/include/GRSF/dynamics/general/DynamicsSystemGUI.hpp
 )
 SET(DYNAMICS_SRC
-     ${PROJECT_SOURCE_DIR}/src/GRSF/Dynamics/General/DynamicsSystemGUI.cpp
+     ${PROJECT_SOURCE_DIR}/src/GRSF/dynamics/general/DynamicsSystemGUI.cpp
 )
 
 SET(SYSTEMS_INC
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Systems/SceneParserGUI.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/systems/SceneParserGUI.hpp
 )
 
 SET(SYSTEMS_SRC
 )
 
 # COMMON FILES INCLUDE ====================================================================
-INCLUDE(IncludeModulesSimulationFramework)
+INCLUDE(IncludeModulesGRSFramework)
 
 INCLUDE_SIMULATION_FRAMEWORK_GUI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${GRSF_COMMON_SOURCE_DIR})
 
@@ -202,9 +202,9 @@ INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC
 # ===========================================================================================
 
 # WRITE CONFIGURATION FILE
-SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
+SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/configFiles/ConfigureFile.hpp)
 configure_file (
-  ${PROJECT_SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
+  ${PROJECT_SOURCE_DIR}/include/GRSF/configFiles/ConfigureFile.hpp.in
   ${CONFIG_INC}
 )
 #=========================

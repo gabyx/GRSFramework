@@ -17,13 +17,13 @@ include(PrintListMacro)
 
 
 #Set Source Code (its in the GeneralRigidBodySimulation Folder)
-SET(SOURCE_DIR "${PROJECT_SOURCE_DIR}/../granularRigidBodySimulation/")
+SET(SOURCE_DIR "${PROJECT_SOURCE_DIR}/../granularRigidBodySimulationGUI/")
 
 
 SET( APP_INC
 )
 SET( APP_SRC
-    ${PROJECT_SOURCE_DIR}/src/GRSF/App/main.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/app/main.cpp
 
 )
 
@@ -34,20 +34,20 @@ SET( SINGELTON_SRC
 )
 
 SET( STATES_INC
-    ${PROJECT_SOURCE_DIR}/include/GRSF/States/SimulationManager/SimulationManager.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/states/simulationManager/SimulationManager.hpp
 )
 SET(STATES_SRC
-    ${PROJECT_SOURCE_DIR}/src/GRSF/States/SimulationManager/SimulationManager.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/states/simulationManager/SimulationManager.cpp
 )
 
 SET(COMMON_INC
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/LogDefines.hpp
-    ${SOURCE_DIR}/include/GRSF/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/LogDefines.hpp
+    ${SOURCE_DIR}/include/GRSF/common/AssertionDebug.hpp
 
 )
 SET(COMMON_SRC
-    ${PROJECT_SOURCE_DIR}/src/GRSF/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/common/TypeDefs.cpp
 )
 
 SET(DYNAMICS_INC
@@ -62,7 +62,7 @@ SET(SYSTEMS_SRC
 )
 
 # COMMON FILES INCLUDE ====================================================================
-INCLUDE(IncludeModulesSimulationFramework)
+INCLUDE(IncludeModulesGRSFramework)
 
 INCLUDE_SIMULATION_FRAMEWORK_NOGUI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${GRSF_COMMON_SOURCE_DIR})
 #PRINTLIST("Global Common src files:" "${GLOBAL_COMMON_SRC}")
@@ -124,9 +124,9 @@ INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC
 
 
 # WRITE CONFIGURATION FILE
-SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
+SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/configFiles/ConfigureFile.hpp)
 configure_file (
-  ${SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
+  ${SOURCE_DIR}/include/GRSF/configFiles/ConfigureFile.hpp.in
   ${CONFIG_INC}
 )
 #=========================
