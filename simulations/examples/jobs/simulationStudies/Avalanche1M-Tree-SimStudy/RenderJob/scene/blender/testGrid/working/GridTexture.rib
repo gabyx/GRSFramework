@@ -1,0 +1,18 @@
+##RenderMan RIB
+version 3.04
+ArchiveBegin "material.GridTexture" 
+	#Shader Graph
+  # Edited version of the blender output of the renderman plugin:
+  
+	Pattern "PxrManifold2D" "PxrManifold2D" "float scaleT" [1] "string primvarT" [""] "__instanceid" ["GridTexture.PxrManifold2D"] "int invertT" [1] "float angle" [0] "string primvarS" [""] "float offsetT" [0] "float offsetS" [0] "float scaleS" [1]
+  
+	Pattern "PxrTexture" "GridTexture" "reference struct manifold" ["PxrManifold2D:result"] "int firstChannel" [0] "int invertT" [1] "int filter" [1] "string filename" ["grid.tex"] "int atlasStyle" [0] "int linearize" [0] "color missingColor" [1 0 1]
+  "__instanceid" ["GridTexture.PxrTexture"] "int lerp" [1] "float blur" [0] "float missingAlpha" [1]
+  
+	Pattern "PxrBlend" "FadeGrid" "reference float bottomA" ["GridTexture:resultA"] "int clampOutput" [1] "__instanceid" ["GridTexture.FadeGrid"] "float topA" [0.16] "int operation" [19] "reference color bottomRGB" ["GridTexture:resultRGB"] "color topRGB" [1 1 1]
+  
+	Pattern "PxrBlend" "ColorBlend" "reference color topRGB" ["FadeGrid:resultRGB"] "int clampOutput" [1] "__instanceid" ["GridTexture.PxrBlend"] "int operation" [19] "color bottomRGB" [1 1 1] "reference float topA" ["FadeGrid:resultA"] "float bottomA" [1]
+  
+	Bxdf "PxrDisney" "GridTexture.PxrDisney" "int inputAOV" [0] "float presence" [1] "__instanceid" ["GridTexture.PxrDisney"] "reference color baseColor" ["ColorBlend:resultRGB"] "color emitColor" [0 0 0] "color subsurfaceColor" [0 0 0] "normal bumpNormal" [0 0 0] "float clearcoat" [0]  "float anisotropic" [0] "float subsurface" [0] "float roughness" [0.25] "float sheenTint" [0.5] "float clearcoatGloss" [1] "float metallic" [0] "float specular" [0.5] "float specularTint" [0] "float sheen" [0]
+  
+ArchiveEnd 

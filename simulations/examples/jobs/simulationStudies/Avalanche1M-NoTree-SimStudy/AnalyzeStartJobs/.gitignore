@@ -1,0 +1,8 @@
+Launch_*
+cluster
+zfmgpu
+nuetzig
+scripts
+templates
+analyzerLogic
+*.sim

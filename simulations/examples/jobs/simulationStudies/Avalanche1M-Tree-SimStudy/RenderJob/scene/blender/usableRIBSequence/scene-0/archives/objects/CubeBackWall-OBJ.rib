@@ -1,0 +1,13 @@
+AttributeBegin
+    Attribute "identifier" "name" [ "CubeBackWall" ]
+    Transform [
+            0.4330126643180847 -2.273736491852107e-15 0.2499999850988388 0.0
+            -0.05249999463558197 7.927030587495665e-09 0.09093265235424042 0.0
+            -2.5300114780968386e-10 -0.009999997913837433 4.3821080097927734e-10 0.0
+            0.13416911661624908 0.11000009626150131 0.17561212182044983 1.0
+            ]
+            
+    ReadArchive "MaterialBackwall-MAT.rib"
+    ReadArchive "CubeUpper.001_m0-GEO.rib"
+AttributeEnd
+

@@ -1,0 +1,101 @@
+{   
+    
+    "fileMover" :{
+        "linkAllTools"         :  ${Pipeline-PreProcess:fileMoverLinkAllTools},
+        "additionalTasks"      :  ${Pipeline-PreProcess:fileMoverAdditionalTasks},
+        "fileMoverProcessFile" : "${Pipeline-PreProcess:fileMoverProcessFile}"
+    },
+    
+    "pipelineTools" : {
+        "renderer" :{   
+                        "inputDir"     : "${Pipeline:renderInputDir}", 
+                        "outputDir"    : "${Pipeline:renderOutputDir}" ,
+                        "dependencies" : { "py/set" : ["converter"] }  , 
+                        "inputFiles"   : [ "${Pipeline:renderInputFile}" ] ,
+                        "outputFiles"  : [ ${Pipeline:renderOutputFileProp} ] , 
+        
+        
+                        "processFileGenerator" : 
+                            { 
+                                "generator" : "${Pipeline:renderProcessFileWriter}",
+                                "arguments" : {
+                                                "processFile": "${Pipeline:renderProcessFile}"
+                                            }
+                            },
+                        "infoFileGenerator" : 
+                            { 
+                                "generator" : "${Pipeline:renderInfoFileWriter}",
+                                "arguments" :{
+                                                "infoFile" : "${Pipeline:renderInfoFile}"
+                                            }
+                            },
+                        "copyToFrame" : ["inputFiles","outputFiles"]
+                    },
+                    
+        "converter" :{ 
+                        "inputDir"     : "${Pipeline:converterInputDir}",
+                        "outputDir"    : "${Pipeline:converterOutputDir}",
+                        "dependencies" : { "py/set" : [] }  ,   
+                        "inputFiles"  : [ ] ,     
+                        "outputFiles" : [ ${Pipeline:converterOutputFileProp} ] ,
+                        
+                        "processFileGenerator" : 
+                            { 
+                                "generator" : "${Pipeline:converterProcessFileWriter}",
+                                "arguments" : {
+                                                "processFile": "${Pipeline:converterProcessFile}"
+                                            }
+                            },
+                        "copyToFrame" : ["inputFiles","outputFiles"]
+                    }
+    },
+    
+    "frameGenerator" : {
+        "generator" : "${Pipeline:frameGenerator}",
+        "arguments" : {
+                "startIdx"  : ${Pipeline:startIdx},
+                "endIdx"    : ${Pipeline:endIdx},
+                "increment" : ${Pipeline:increment},
+                "enumerateFramesStart" : ${Pipeline:enumerateFramesStart},
+                "skipFirstState" : ${Pipeline:skipFirstState},
+                "simFiles"  : ${Pipeline:simFiles},
+                "simInfoApp": "${Pipeline:executableConverter}"
+        }
+    },
+    
+    "fileValidationSpecs" : [
+        { 
+            "regex" : "(?P<absPath>.*?(?P<globRelPath>Process_(?P<processId>\\d*)/(?P<relPath>.*?(?P<fileName>GranularMaterial-f-(?P<frameIdx>\\d*).*))))" , 
+            "globalPath" : "${Job:globalDir}/{globRelPath}",
+            "fileMoveDependent" : 
+                {
+                    "type":"symlink", 
+                    "from": "${Job:globalDir}/{globRelPath}", 
+                    "to" : "${Pipeline:renderInputDir}/archives/{fileName}"
+                },
+            "fileMoveRecover" : null,
+            "tool" : "converter",
+            "dependencies" : [] ,
+            "hashString" : "{relPath}"
+        }, 
+        {   
+            "regex" :  "(?P<absPath>.*?(?P<globRelPath>Process_(?P<processId>\\d*)/(?P<relPath>.*?(?P<fileName>Frame-(?P<frameIdx>\\d*).*))))" , 
+            "globalPath" : "${Job:globalDir}/{globRelPath}",
+            "fileMoveDependent" : null ,
+            "fileMoveRecover" :
+                {
+                    "type":"copy", 
+                    "from": "${Job:globalDir}/{globRelPath}", 
+                    "to": "${Pipeline:renderOutputDir}/{fileName}"
+                },
+            "tool" : "renderer",
+            "dependencies" : ["converter"],
+            "hashString" : "{relPath}"
+        }
+    ],
+    
+    "fileValidationTools" : { ".rib" : "${General:currentWorkDir}/scripts/CheckRibGzipFile.sh {file}" , 
+                              ".exr" : "${General:currentWorkDir}/scripts/CheckExrFile.sh {file}" }
+                        
+}
+

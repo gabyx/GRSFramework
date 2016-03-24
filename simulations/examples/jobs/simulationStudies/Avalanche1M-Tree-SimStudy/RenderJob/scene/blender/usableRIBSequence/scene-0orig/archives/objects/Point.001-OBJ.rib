@@ -1,0 +1,13 @@
+AttributeBegin
+    Attribute "identifier" "name" [ "Point.001" ]
+    Transform [
+            0.023582853376865387 0.0 -0.04084669053554535 0.0
+            -3.1317042709089193e-11 0.04716569557785988 -1.808090656363337e-11 0.0
+            0.04084669053554535 0.0 0.023582851514220238 0.0
+            -0.0016594231128692627 -0.125 0.002874135971069336 1.0
+            ]
+            
+    ReadArchive "MaterialArrow-MAT.rib"
+    ReadArchive "PointMesh_m0-GEO.rib"
+AttributeEnd
+

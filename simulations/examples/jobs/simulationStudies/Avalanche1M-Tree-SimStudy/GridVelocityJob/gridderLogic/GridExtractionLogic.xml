@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Analyzer>
+
+
+<Logic>
+   
+    <GridExtraction fileName="VelocityField.h5">
+        <Grid minPoint="${expSettings:experiments:5:aabbMeterCoordinates:minPoint} 0" 
+              maxPoint="${expSettings:experiments:5:aabbMeterCoordinates:maxPoint} 1" 
+              dimension="${expSettings:resolution} 1" >
+            <Trafo trans="-${expSettings:upperSlopeLength} 0 0"  axis="0 1 0" deg="${expSettings:downSlopeAngleDifference}"/>
+        </Grid>
+        <Extract type="TransVelProj2D" name="velocity" indices="0 1" transformToGridCoords="true"/>
+        <Extract type="BodyMask" name="mask"/>
+    </GridExtraction>
+    
+<!--
+    <GridExtraction fileName="GridB.h5">
+        <Grid minPoint="0 -0.1 0" maxPoint="0.4 0.1 0.5" dimension="800 600 1" >
+            <Trafo trans="0 0.0 0"  axis="1 0 0" deg="10"/>
+        </Grid>
+        <Extract type="TransVel" name="vel2" transformToGridCoords="true"/>
+    </GridExtraction>
+-->
+    
+</Logic>
+
+
+</Analyzer>

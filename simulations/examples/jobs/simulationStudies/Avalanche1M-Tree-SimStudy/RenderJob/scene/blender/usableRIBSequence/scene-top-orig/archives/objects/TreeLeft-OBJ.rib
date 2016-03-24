@@ -1,0 +1,13 @@
+AttributeBegin
+    Attribute "identifier" "name" [ "TreeLeft" ]
+    Transform [
+            0.9396926164627075 -2.664397413809638e-07 0.3420201539993286 0.0
+            5.618248337668774e-07 1.0 -7.645833761671383e-07 0.0
+            -0.3420201539993286 9.106287279792014e-07 0.9396926164627075 0.0
+            -0.4386051595211029 0.027700118720531464 -0.17177072167396545 1.0
+            ]
+            
+    ReadArchive "MaterialTree-MAT.rib"
+    ReadArchive "Cylinder.001_m0-GEO.rib"
+AttributeEnd
+

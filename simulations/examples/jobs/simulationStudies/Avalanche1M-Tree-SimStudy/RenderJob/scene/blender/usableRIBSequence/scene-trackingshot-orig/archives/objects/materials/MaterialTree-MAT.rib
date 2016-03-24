@@ -1,0 +1,17 @@
+Color [0.27383163571357727 0.27383163571357727 0.27383163571357727]
+Opacity [1.0 1.0 1.0]
+Sides 2
+Bxdf "PxrDisney" "MaterialTree-bxdf"
+    "color baseColor" [0.273831636 0.273831636 0.273831636]
+    "color emitColor" [0.000000000 0.000000000 0.000000000]
+    "color subsurfaceColor" [0.002166895 0.052217990 0.000000000]
+    "float subsurface" [0.000000000]
+    "float metallic" [0.000000000]
+    "float specular" [0.500000000]
+    "float specularTint" [0.000000000]
+    "float roughness" [0.500000000]
+    "float anisotropic" [0.500000000]
+    "float sheen"  [0.000000000]
+    "float sheenTint" [0.500000000]
+    "float clearcoat"  [0.000000000]
+    "float clearcoatGloss" [1.000000000]
