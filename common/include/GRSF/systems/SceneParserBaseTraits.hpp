@@ -1,10 +1,10 @@
-#ifndef GRSF_Systems_SceneParserBaseTraits_hpp
-#define GRSF_Systems_SceneParserBaseTraits_hpp
+#ifndef GRSF_systems_SceneParserBaseTraits_hpp
+#define GRSF_systems_SceneParserBaseTraits_hpp
 
 
 #include <pugixml.hpp>
 
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
 
 

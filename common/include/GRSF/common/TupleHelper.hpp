@@ -1,11 +1,11 @@
-#ifndef GRSF_Common_TupleHelper_hpp
-#define GRSF_Common_TupleHelper_hpp
+#ifndef GRSF_common_TupleHelper_hpp
+#define GRSF_common_TupleHelper_hpp
 
 #include <functional>
 #include <tuple>
 
-#include "GRSF/Common/StaticAssert.hpp"
-#include "GRSF/Common/MetaHelper.hpp"
+#include "GRSF/common/StaticAssert.hpp"
+#include "GRSF/common/MetaHelper.hpp"
 
 /** from http://stackoverflow.com/questions/2590677/how-do-i-combine-hash-values-in-c0x */
 

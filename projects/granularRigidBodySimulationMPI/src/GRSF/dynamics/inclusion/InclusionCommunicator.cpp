@@ -1,9 +1,9 @@
 
 #include "InclusionCommunicator<Combo>.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ContactGraphMPI.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphMPI.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ContactGraphVisitorsMPI.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphVisitorsMPI.hpp"
 
 
 template<typename Combo>

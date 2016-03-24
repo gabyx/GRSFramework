@@ -1,1 +1,1 @@
-﻿#include "GRSF/Common/TypeDefs.hpp"
+﻿#include "GRSF/common/TypeDefs.hpp"

@@ -1,13 +1,13 @@
 
-#ifndef GRSF_Dynamics_General_AdditionalBodyData_hpp
-#define GRSF_Dynamics_General_AdditionalBodyData_hpp
+#ifndef GRSF_dynamics_general_AdditionalBodyData_hpp
+#define GRSF_dynamics_general_AdditionalBodyData_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 #include RigidBody_INCLUDE_FILE
 
-#include "GRSF/Common/EnumClassHelper.hpp"
+#include "GRSF/common/EnumClassHelper.hpp"
 
 namespace AdditionalBodyData{
 

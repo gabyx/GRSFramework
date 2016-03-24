@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_FastStringConversion_hpp
-#define GRSF_Common_FastStringConversion_hpp
+#ifndef GRSF_common_FastStringConversion_hpp
+#define GRSF_common_FastStringConversion_hpp
 
 /*
 * According to http://tinodidriksen.com/2011/05/28/cpp-convert-string-to-double-speed/

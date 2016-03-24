@@ -1,13 +1,13 @@
-#ifndef GRSF_Dynamics_Collision_Geometry_MeshGeometry_hpp
-#define GRSF_Dynamics_Collision_Geometry_MeshGeometry_hpp
+#ifndef GRSF_dynamics_collision_geometry_MeshGeometry_hpp
+#define GRSF_dynamics_collision_geometry_MeshGeometry_hpp
 
 #include <memory>
 #include <boost/serialization/access.hpp>
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Dynamics/General/MeshData.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/dynamics/general/MeshData.hpp"
 
 
 

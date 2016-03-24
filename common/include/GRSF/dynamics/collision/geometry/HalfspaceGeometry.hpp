@@ -1,10 +1,10 @@
-﻿#ifndef GRSF_Dynamics_Collision_Geometry_HalfspaceGeometry_hpp
-#define GRSF_Dynamics_Collision_Geometry_HalfspaceGeometry_hpp
+﻿#ifndef GRSF_dynamics_collision_geometry_HalfspaceGeometry_hpp
+#define GRSF_dynamics_collision_geometry_HalfspaceGeometry_hpp
 
-#include <GRSF/Common/TypeDefs.hpp>
+#include "GRSF/common/TypeDefs.hpp"
 #include <boost/serialization/access.hpp>
 
-#include "GRSF/Dynamics/Collision/Geometry/PlaneGeometry.hpp"
+#include "GRSF/dynamics/collision/geometry/PlaneGeometry.hpp"
 
 class HalfspaceGeometry : public PlaneGeometry {
 public:

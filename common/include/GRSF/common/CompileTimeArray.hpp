@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_CompileTimeArray_hpp
-#define GRSF_Common_CompileTimeArray_hpp
+#ifndef GRSF_common_CompileTimeArray_hpp
+#define GRSF_common_CompileTimeArray_hpp
 
 #include <type_traits>
 /**

@@ -1,9 +1,9 @@
-#ifndef GRSF_General_RenderExecutionGraph_hpp
-#define GRSF_General_RenderExecutionGraph_hpp
+#ifndef GRSF_converters_renderer_RenderExecutionGraph_hpp
+#define GRSF_converters_renderer_RenderExecutionGraph_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/General/SimFileExecutionGraph.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/general/SimFileExecutionGraph.hpp"
 
 
 namespace LogicNodes{

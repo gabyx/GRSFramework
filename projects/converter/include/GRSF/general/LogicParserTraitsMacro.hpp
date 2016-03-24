@@ -1,7 +1,7 @@
-#ifndef GRSF_General_LogicParserTraitsMacro_hpp
-#define GRSF_General_LogicParserTraitsMacro_hpp
+#ifndef GRSF_general_LogicParserTraitsMacro_hpp
+#define GRSF_general_LogicParserTraitsMacro_hpp
 
-#include "GRSF/General/LogicParserBaseTraitsMacro.hpp"
+#include "GRSF/general/LogicParserBaseTraitsMacro.hpp"
 
 #define DEFINE_LOGICPARSER_TYPE_TRAITS( TParserTraits )  \
     DEFINE_LOGICPARSER_BASE_TYPE_TRAITS( TParserTraits ) \

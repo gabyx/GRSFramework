@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Singeltons_Contexts_RenderContext_hpp
-#define GRSF_Singeltons_Contexts_RenderContext_hpp
+﻿#ifndef GRSF_singeltons_contexts_RenderContext_hpp
+#define GRSF_singeltons_contexts_RenderContext_hpp
 
 
 #include <OGRE/OgreCamera.h>

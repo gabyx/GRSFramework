@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Dynamics_General_MultiBodySimFile_hpp
-#define GRSF_Dynamics_General_MultiBodySimFile_hpp
+﻿#ifndef GRSF_dynamics_general_MultiBodySimFile_hpp
+#define GRSF_dynamics_general_MultiBodySimFile_hpp
 
 #include <type_traits>
 #include <set>
@@ -7,15 +7,15 @@
 
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/ContainerTag.hpp"
+#include "GRSF/common/ContainerTag.hpp"
 
-#include "GRSF/Common/StaticAssert.hpp"
-#include "GRSF/Dynamics/General/RigidBodyId.hpp"
-#include "GRSF/Dynamics/Buffers/DynamicsState.hpp"
+#include "GRSF/common/StaticAssert.hpp"
+#include "GRSF/dynamics/general/RigidBodyId.hpp"
+#include "GRSF/dynamics/buffers/DynamicsState.hpp"
 
-#include "GRSF/Dynamics/General/MultiBodySimFileIOHelpers.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFileIOHelpers.hpp"
 
-#include "GRSF/Dynamics/General/AdditionalBodyData.hpp"
+#include "GRSF/dynamics/general/AdditionalBodyData.hpp"
 
 
 /**

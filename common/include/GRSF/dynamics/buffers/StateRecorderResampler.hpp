@@ -1,19 +1,19 @@
-#ifndef GRSF_Dynamics_Buffers_StateRecorderResampler_hpp
-#define GRSF_Dynamics_Buffers_StateRecorderResampler_hpp
+#ifndef GRSF_dynamics_buffers_StateRecorderResampler_hpp
+#define GRSF_dynamics_buffers_StateRecorderResampler_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include <vector>
 
-#include "GRSF/Singeltons/Contexts/RenderContext.hpp"
+#include "GRSF/singeltons/contexts/RenderContext.hpp"
 
-#include "GRSF/Dynamics/Buffers/StateRecorder.hpp"
+#include "GRSF/dynamics/buffers/StateRecorder.hpp"
 
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Dynamics/Buffers/DynamicsState.hpp"
+#include "GRSF/dynamics/buffers/DynamicsState.hpp"
 
 /**
 * @brief only used in sim thread to resample and drop a new sim file if the option is selected in playback! Not mutex locks or something else!

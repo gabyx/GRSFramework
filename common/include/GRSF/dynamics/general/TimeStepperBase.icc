@@ -1,5 +1,5 @@
 
-#include "GRSF/Dynamics/General/AddGyroTermVisitor.hpp"
+#include "GRSF/dynamics/general/AddGyroTermVisitor.hpp"
 
 #include InclusionSolver_INCLUDE_FILE
 #include CollisionSolver_INCLUDE_FILE

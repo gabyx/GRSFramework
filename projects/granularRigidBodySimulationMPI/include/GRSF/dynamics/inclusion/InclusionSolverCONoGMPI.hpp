@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_Inclusion_InclusionSolverCONoGMPI_hpp
-#define GRSF_Dynamics_Inclusion_InclusionSolverCONoGMPI_hpp
+#ifndef GRSF_dynamics_inclusion_InclusionSolverCONoGMPI_hpp
+#define GRSF_dynamics_inclusion_InclusionSolverCONoGMPI_hpp
 
 
 #include <iostream>
@@ -8,31 +8,31 @@
 
 #include <memory>
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 
 #include CollisionSolver_INCLUDE_FILE
-//#include "GRSF/Dynamics/Inclusion/PercussionPool.hpp"
+//#include "GRSF/dynamics/inclusion/PercussionPool.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
 
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
-#include "GRSF/Dynamics/General/MPICommunication.hpp"
+#include "GRSF/dynamics/general/MPICommunication.hpp"
 
-#include "GRSF/Dynamics/General/BodyCommunicator.hpp"
+#include "GRSF/dynamics/general/BodyCommunicator.hpp"
 
-#include "GRSF/Dynamics/Inclusion/InclusionCommunicator.hpp"
+#include "GRSF/dynamics/inclusion/InclusionCommunicator.hpp"
 // those two include each other (forwarding)
-#include "GRSF/Dynamics/Inclusion/ContactGraphMPI.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphMPI.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ContactGraphVisitorsMPI.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphVisitorsMPI.hpp"
 
 
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
 /**
 * @ingroup Inclusion

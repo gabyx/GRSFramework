@@ -1,10 +1,10 @@
 #ifndef ContactGraphTest_hpp
 #define ContactGraphTest_hpp
 
-#include "GRSF/Common/StaticAssert.hpp"
-#include "GRSF/Common/EnumClassHelper.hpp"
-#include "GRSF/Common/TupleHelper.hpp"
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/common/StaticAssert.hpp"
+#include "GRSF/common/EnumClassHelper.hpp"
+#include "GRSF/common/TupleHelper.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
 #include <vector>
 #include <boost/mpl/assert.hpp>

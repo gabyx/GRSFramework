@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_MPIMessages_hpp
-#define GRSF_Dynamics_General_MPIMessages_hpp
+#ifndef GRSF_dynamics_general_MPIMessages_hpp
+#define GRSF_dynamics_general_MPIMessages_hpp
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/type_traits.hpp>
@@ -15,24 +15,24 @@
 #include <boost/serialization/split_member.hpp>
 
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Common/SfinaeMacros.hpp"
+#include "GRSF/common/SfinaeMacros.hpp"
 
-#include "GRSF/Dynamics/General/MPIMessageTag.hpp"
-#include "GRSF/Common/SerializationHelpersEigen.hpp"
-#include "GRSF/Common/SerializationHelpersTuple.hpp"
-#include "GRSF/Dynamics/Collision/SerializationHelpersGeometries.hpp"
+#include "GRSF/dynamics/general/MPIMessageTag.hpp"
+#include "GRSF/common/SerializationHelpersEigen.hpp"
+#include "GRSF/common/SerializationHelpersTuple.hpp"
+#include "GRSF/dynamics/collision/SerializationHelpersGeometries.hpp"
 
-#include "GRSF/Singeltons/FileManager.hpp"
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
+#include "GRSF/dynamics/general/QuaternionHelpers.hpp"
 
 
-#include "GRSF/Dynamics/General/RigidBodyFunctionsMPI.hpp"
+#include "GRSF/dynamics/general/RigidBodyFunctionsMPI.hpp"
 
 
 namespace boost {
@@ -1637,8 +1637,8 @@ private:
 
 /** We need the forward declarations of the topobuilder to correctly switch in this message */
 
-#include "GRSF/Dynamics/General/MPITopologyBuilder_fwd.hpp"
-#include "GRSF/Dynamics/General/SerializationHelpersKdTree.hpp"
+#include "GRSF/dynamics/general/MPITopologyBuilder_fwd.hpp"
+#include "GRSF/dynamics/general/SerializationHelpersKdTree.hpp"
 
 namespace MPILayer{
 

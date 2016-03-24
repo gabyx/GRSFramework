@@ -1,14 +1,14 @@
-#ifndef GRSF_Dynamics_Collision_ContactDelegateSupport_hpp
-#define GRSF_Dynamics_Collision_ContactDelegateSupport_hpp
+#ifndef GRSF_dynamics_collision_ContactDelegateSupport_hpp
+#define GRSF_dynamics_collision_ContactDelegateSupport_hpp
 
 #include <vector>
 
 //#define SRUTIL_DELEGATE_PREFERRED_SYNTAX
 #include <srutil/delegate/delegate.hpp> // Use fast SR delegates
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 /**
 * @ingroup Collision

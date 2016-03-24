@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_States_SimulationManager_PlaybackLoader_hpp
-#define GRSF_States_SimulationManager_PlaybackLoader_hpp
+﻿#ifndef GRSF_states_simulationManager_PlaybackLoader_hpp
+#define GRSF_states_simulationManager_PlaybackLoader_hpp
 
 
 #include <boost/thread.hpp>
@@ -7,10 +7,10 @@
 #include <boost/filesystem.hpp>
 #include <memory>
 
-#include "GRSF/Dynamics/Buffers/DynamicsState.hpp"
-#include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
+#include "GRSF/dynamics/buffers/DynamicsState.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFile.hpp"
 
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
 /**
 * @ingroup SimulationManager
@@ -72,7 +72,7 @@ private:
 // Implementation
 
 
-#include "GRSF/Singeltons/FileManager.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
 
 template<typename TStatePool>
 PlaybackLoader<TStatePool>::~PlaybackLoader()

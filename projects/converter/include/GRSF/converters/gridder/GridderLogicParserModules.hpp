@@ -1,5 +1,5 @@
-#ifndef GRSF_General_GridderLogicParserModules_hpp
-#define GRSF_General_GridderLogicParserModules_hpp
+#ifndef GRSF_converters_gridder_GridderLogicParserModules_hpp
+#define GRSF_converters_gridder_GridderLogicParserModules_hpp
 
 
 #include <vector>
@@ -7,15 +7,15 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/XMLMacros.hpp"
+#include "GRSF/common/XMLMacros.hpp"
 
-#include "GRSF/Dynamics/General/ParserFunctions.hpp"
-#include "GRSF/Converters/Gridder/GridderLogicParserTraitsMacro.hpp"
+#include "GRSF/dynamics/general/ParserFunctions.hpp"
+#include "GRSF/converters/gridder/GridderLogicParserTraitsMacro.hpp"
 
 namespace GridderLogicParserModules {
 

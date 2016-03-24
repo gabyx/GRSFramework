@@ -1,16 +1,16 @@
-#ifndef GRSF_Dynamics_Inclusion_ContactGraphVisitorsMPI_hpp
-#define GRSF_Dynamics_Inclusion_ContactGraphVisitorsMPI_hpp
+#ifndef GRSF_dynamics_inclusion_ContactGraphVisitorsMPI_hpp
+#define GRSF_dynamics_inclusion_ContactGraphVisitorsMPI_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ContactModels.hpp"
-#include "GRSF/Dynamics/Inclusion/ProxFunctions.hpp"
+#include "GRSF/dynamics/inclusion/ContactModels.hpp"
+#include "GRSF/dynamics/inclusion/ProxFunctions.hpp"
 #include InclusionSolverSettings_INCLUDE_FILE
 
-#include "GRSF/Dynamics/Inclusion/ContactGraphVisitors.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphVisitors.hpp"
 
 /**
 @brief Visitor for class ContactGraph
@@ -132,7 +132,7 @@ public:
 };
 
 
-#include "GRSF/Dynamics/General/RigidBodyFunctionsMPI.hpp"
+#include "GRSF/dynamics/general/RigidBodyFunctionsMPI.hpp"
 
 
 template<typename TContactGraph>

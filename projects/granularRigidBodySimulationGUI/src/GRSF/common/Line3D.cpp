@@ -5,7 +5,7 @@
  *  Copyright 2010 ETH. All rights reserved.
  *
  */
-#include "GRSF/Common/Line3D.h"
+#include "GRSF/common/Line3D.h"
 
 /// Includes =================================
 

@@ -10,8 +10,8 @@
 #include <limits>
 #include <vector>
 
-#include "GRSF/Common/CPUTimer.hpp"
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/CPUTimer.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
 void stringTest(){
 

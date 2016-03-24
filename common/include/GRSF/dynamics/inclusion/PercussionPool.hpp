@@ -1,13 +1,13 @@
-﻿#ifndef GRSF_Dynamics_Inclusion_PercussionPool_hpp
-#define GRSF_Dynamics_Inclusion_PercussionPool_hpp
+﻿#ifndef GRSF_dynamics_inclusion_PercussionPool_hpp
+#define GRSF_dynamics_inclusion_PercussionPool_hpp
 
 #include <unordered_map>
 #include <vector>
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/Collision/ContactTag.hpp"
-#include "GRSF/Dynamics/Inclusion/ContactPercussion.hpp"
+#include "GRSF/dynamics/collision/ContactTag.hpp"
+#include "GRSF/dynamics/inclusion/ContactPercussion.hpp"
 
 
 struct PercussionPoolSettings {

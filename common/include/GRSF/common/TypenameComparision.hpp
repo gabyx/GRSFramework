@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_TypenameComparision_hpp
-#define GRSF_Common_TypenameComparision_hpp
+#ifndef GRSF_common_TypenameComparision_hpp
+#define GRSF_common_TypenameComparision_hpp
 
 
 struct FalseType { static const bool  value = false ; };

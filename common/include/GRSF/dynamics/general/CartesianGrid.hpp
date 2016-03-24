@@ -1,13 +1,13 @@
-#ifndef GRSF_Dynamics_General_CartesianGrid_hpp
-#define GRSF_Dynamics_General_CartesianGrid_hpp
+#ifndef GRSF_dynamics_general_CartesianGrid_hpp
+#define GRSF_dynamics_general_CartesianGrid_hpp
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 #include <set>
-#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
+#include "GRSF/dynamics/collision/geometry/AABB.hpp"
 
-#include "GRSF/Common/SfinaeMacros.hpp"
+#include "GRSF/common/SfinaeMacros.hpp"
 
 struct NoCellData {};
 

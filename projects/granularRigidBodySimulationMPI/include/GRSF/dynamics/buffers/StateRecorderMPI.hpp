@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_Buffers_StateRecorderMPI_hpp
-#define GRSF_Dynamics_Buffers_StateRecorderMPI_hpp
+#ifndef GRSF_dynamics_buffers_StateRecorderMPI_hpp
+#define GRSF_dynamics_buffers_StateRecorderMPI_hpp
 
 #include <mpi.h>
 
@@ -9,19 +9,19 @@
 #include <cstring>
 #include <cerrno>
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Singeltons/FileManager.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
 
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
-#include "GRSF/Dynamics/General/MPIInformation.hpp"
+#include "GRSF/dynamics/general/MPIInformation.hpp"
 
-#include "GRSF/Dynamics/General/MultiBodySimFileMPI.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFileMPI.hpp"
 
 /**
 * @ingroup StatesAndBuffers

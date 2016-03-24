@@ -1,17 +1,17 @@
-﻿#ifndef GRSF_Dynamics_Buffers_StateRecorder_hpp
-#define GRSF_Dynamics_Buffers_StateRecorder_hpp
+﻿#ifndef GRSF_dynamics_buffers_StateRecorder_hpp
+#define GRSF_dynamics_buffers_StateRecorder_hpp
 
 #include <string>
 
-#include "GRSF/Singeltons/FileManager.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Common/CommonFunctions.hpp"
-#include "GRSF/Dynamics/Buffers/DynamicsState.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
+#include "GRSF/dynamics/buffers/DynamicsState.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFile.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 

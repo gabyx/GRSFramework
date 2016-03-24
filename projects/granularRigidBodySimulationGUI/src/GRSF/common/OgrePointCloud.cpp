@@ -28,7 +28,7 @@
  */
 
 
-#include "GRSF/Common/OgrePointCloud.hpp"
+#include "GRSF/common/OgrePointCloud.hpp"
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>

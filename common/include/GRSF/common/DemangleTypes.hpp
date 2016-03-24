@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_DemangleTypes_hpp
-#define GRSF_Common_DemangleTypes_hpp
+#ifndef GRSF_common_DemangleTypes_hpp
+#define GRSF_common_DemangleTypes_hpp
 
 #include <typeinfo>
 #include <string>

@@ -1,15 +1,15 @@
-#ifndef GRSF_Dynamics_Collision_Geometries_hpp
-#define GRSF_Dynamics_Collision_Geometries_hpp
+#ifndef GRSF_dynamics_collision_Geometries_hpp
+#define GRSF_dynamics_collision_Geometries_hpp
 
 
-#include "GRSF/Dynamics/Collision/Geometry/Ray.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/SphereGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/BoxGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/HalfspaceGeometry.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/CapsuleGeometry.hpp"
+#include "GRSF/dynamics/collision/geometry/Ray.hpp"
+#include "GRSF/dynamics/collision/geometry/AABB.hpp"
+#include "GRSF/dynamics/collision/geometry/SphereGeometry.hpp"
+#include "GRSF/dynamics/collision/geometry/BoxGeometry.hpp"
+#include "GRSF/dynamics/collision/geometry/HalfspaceGeometry.hpp"
+#include "GRSF/dynamics/collision/geometry/CapsuleGeometry.hpp"
 
-#include "GRSF/Dynamics/Collision/Geometry/MeshGeometry.hpp"
+#include "GRSF/dynamics/collision/geometry/MeshGeometry.hpp"
 
 
 #define DEFINE_GEOMETRY_PTR_TYPES( __RigidBodyType__ ) \

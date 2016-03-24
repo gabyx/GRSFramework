@@ -1,8 +1,8 @@
-﻿#include "GRSF/Singeltons/Contexts/InputContext.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+﻿#include "GRSF/singeltons/contexts/InputContext.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/foreach_macro.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/foreach_macro.hpp"
 
 
 

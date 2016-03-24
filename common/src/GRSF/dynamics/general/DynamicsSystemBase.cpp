@@ -1,9 +1,9 @@
-#include "GRSF/Dynamics/General/DynamicsSystemBase.hpp"
+#include "GRSF/dynamics/general/DynamicsSystemBase.hpp"
 
-#include "GRSF/Dynamics/General/VectorToSkewMatrix.hpp"
-#include "GRSF/Dynamics/General/AddGyroTermVisitor.hpp"
-#include "GRSF/Common/CommonFunctions.hpp"
-#include "GRSF/Dynamics/General/RigidBodyFunctions.hpp"
+#include "GRSF/dynamics/general/VectorToSkewMatrix.hpp"
+#include "GRSF/dynamics/general/AddGyroTermVisitor.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
+#include "GRSF/dynamics/general/RigidBodyFunctions.hpp"
 
 
 DynamicsSystemBase::DynamicsSystemBase(){

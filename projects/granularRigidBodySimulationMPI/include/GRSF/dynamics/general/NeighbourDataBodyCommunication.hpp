@@ -1,9 +1,9 @@
-#ifndef GRSF_Dynamics_General_NeighbourDataBodyCommunication_hpp
-#define GRSF_Dynamics_General_NeighbourDataBodyCommunication_hpp
+#ifndef GRSF_dynamics_general_NeighbourDataBodyCommunication_hpp
+#define GRSF_dynamics_general_NeighbourDataBodyCommunication_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/General/NeighbourData.hpp"
+#include "GRSF/dynamics/general/NeighbourData.hpp"
 
 /**
 * @brief This class is used in the NeighbourMap class as data structure for the general communication of bodies

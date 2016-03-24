@@ -6,35 +6,35 @@
  *
  */
 
-#ifndef GRSF_Common_TypeDefs_hpp
-#define GRSF_Common_TypeDefs_hpp
+#ifndef GRSF_common_TypeDefs_hpp
+#define GRSF_common_TypeDefs_hpp
 
 
-#include "GRSF/ConfigFiles/ConfigureFile.hpp"
-#include "GRSF/Dynamics/General/LayoutConfigTypeDefs.hpp"
+#include "GRSF/configFiles/ConfigureFile.hpp"
+#include "GRSF/dynamics/general/LayoutConfigTypeDefs.hpp"
 
 
 
 
-#define CollisionSolver_INCLUDE_FILE            "GRSF/Dynamics/Collision/CollisionSolverMPI.hpp"
+#define CollisionSolver_INCLUDE_FILE            "GRSF/dynamics/collision/CollisionSolverMPI.hpp"
 class CollisionSolverMPI;
 
-#define DynamicsSystem_INCLUDE_FILE             "GRSF/Dynamics/General/DynamicsSystemMPI.hpp"
+#define DynamicsSystem_INCLUDE_FILE             "GRSF/dynamics/general/DynamicsSystemMPI.hpp"
 class DynamicsSystemMPI;
 
-#define InclusionSolver_INCLUDE_FILE            "GRSF/Dynamics/Inclusion/InclusionSolverCONoGMPI.hpp"
+#define InclusionSolver_INCLUDE_FILE            "GRSF/dynamics/inclusion/InclusionSolverCONoGMPI.hpp"
 class InclusionSolverCONoGMPI;
 
-#define RigidBody_INCLUDE_FILE                  "GRSF/Dynamics/General/RigidBodyMPI.hpp"
+#define RigidBody_INCLUDE_FILE                  "GRSF/dynamics/general/RigidBodyMPI.hpp"
 class RigidBodyBaseMPI;
 
-#define RigidBodySolverData_INCLUDE_FILE        "GRSF/Dynamics/General/RigidBodySolverDataMPI.hpp"
+#define RigidBodySolverData_INCLUDE_FILE        "GRSF/dynamics/general/RigidBodySolverDataMPI.hpp"
 class RigidBodySolverDataCONoGMPI;
 
-#define TimeStepper_INCLUDE_FILE                "GRSF/Dynamics/General/MoreauTimeStepperMPI.hpp"
+#define TimeStepper_INCLUDE_FILE                "GRSF/dynamics/general/MoreauTimeStepperMPI.hpp"
 class MoreauTimeStepperMPI;
 
-#define InclusionSolverSettings_INCLUDE_FILE    "GRSF/Dynamics/Inclusion/InclusionSolverSettingsMPI.hpp"
+#define InclusionSolverSettings_INCLUDE_FILE    "GRSF/dynamics/inclusion/InclusionSolverSettingsMPI.hpp"
 class InclusionSolverSettingsMPI;
 
 //Try to make framework settings simpler:

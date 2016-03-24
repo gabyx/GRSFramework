@@ -1,5 +1,5 @@
-#ifndef GRSF_Converters_AnalyzerConverter_hpp
-#define GRSF_Converters_AnalyzerConverter_hpp
+#ifndef GRSF_converters_analyzer_AnalyzerConverter_hpp
+#define GRSF_converters_analyzer_AnalyzerConverter_hpp
 
 #include <iostream>
 #include <iomanip>
@@ -11,11 +11,11 @@
 
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Converters/SimFileConverter.hpp"
-#include "GRSF/General/SimFileExecutionGraph.hpp"
+#include "GRSF/converters/SimFileConverter.hpp"
+#include "GRSF/general/SimFileExecutionGraph.hpp"
 
 class AnalyzerConverter : public SimFileConverter {
 public:

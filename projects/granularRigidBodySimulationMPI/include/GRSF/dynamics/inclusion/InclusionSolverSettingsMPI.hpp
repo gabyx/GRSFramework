@@ -1,8 +1,8 @@
-﻿#ifndef GRSF_Dynamics_Inclusion_InclusionSolverSettingsMPI_hpp
-#define GRSF_Dynamics_Inclusion_InclusionSolverSettingsMPI_hpp
+﻿#ifndef GRSF_dynamics_inclusion_InclusionSolverSettingsMPI_hpp
+#define GRSF_dynamics_inclusion_InclusionSolverSettingsMPI_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Dynamics/Inclusion/InclusionSolverSettings.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/dynamics/inclusion/InclusionSolverSettings.hpp"
 
 #define USE_PERCUSSION_POOL 0
 

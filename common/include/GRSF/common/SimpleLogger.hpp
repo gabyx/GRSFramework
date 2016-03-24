@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_SimpleLogger_hpp
-#define GRSF_Common_SimpleLogger_hpp
+#ifndef GRSF_common_SimpleLogger_hpp
+#define GRSF_common_SimpleLogger_hpp
 
 #include <fstream>
 #include <vector>
@@ -10,11 +10,11 @@
 
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/CPUTimer.hpp"
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/CPUTimer.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/Singleton.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Singleton.hpp"
 
 namespace Logging {
 

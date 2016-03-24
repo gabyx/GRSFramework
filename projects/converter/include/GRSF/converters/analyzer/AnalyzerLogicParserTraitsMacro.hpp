@@ -1,11 +1,11 @@
-#ifndef GRSF_General_AnalyzerLogicParserTraitsMacro_hpp
-#define GRSF_General_AnalyzerLogicParserTraitsMacro_hpp
+#ifndef GRSF_converters_analyzer_AnalyzerLogicParserTraitsMacro_hpp
+#define GRSF_converters_analyzer_AnalyzerLogicParserTraitsMacro_hpp
 
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 #include <pugixml.hpp>
 
 
-#include "GRSF/General/LogicParserTraitsMacro.hpp"
+#include "GRSF/general/LogicParserTraitsMacro.hpp"
 
 #define DEFINE_ANALZERLOGICPARSER_TYPE_TRAITS( TParserTraits )  \
     DEFINE_LOGICPARSER_TYPE_TRAITS( TParserTraits )

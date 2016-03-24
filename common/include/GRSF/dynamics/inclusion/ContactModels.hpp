@@ -1,12 +1,12 @@
 
-#ifndef GRSF_Dynamics_Inclusion_ContactModels_hpp
-#define GRSF_Dynamics_Inclusion_ContactModels_hpp
+#ifndef GRSF_dynamics_inclusion_ContactModels_hpp
+#define GRSF_dynamics_inclusion_ContactModels_hpp
 
 
-#include "GRSF/Dynamics/Inclusion/ConvexSets.hpp"
+#include "GRSF/dynamics/inclusion/ConvexSets.hpp"
 
 
-#include "GRSF/Common/EnumClassHelper.hpp"
+#include "GRSF/common/EnumClassHelper.hpp"
 
 
 #define CONTACTMODELTYPE( _EnumType_ ) ContactModels::ContactModel< EnumConversion::toIntegral( _EnumType_ ) >

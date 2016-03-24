@@ -6,15 +6,15 @@
  *
  */
 
-#ifndef GRSF_Common_DynamicLines_hpp
-#define GRSF_Common_DynamicLines_hpp
+#ifndef GRSF_common_DynamicLines_hpp
+#define GRSF_common_DynamicLines_hpp
 
 /// Includes =================================
 #include "GL/gl.h"
 #include <vector>
 #include <Ogre.h>
 
-#include "GRSF/Common/DynamicRenderable.hpp"
+#include "GRSF/common/DynamicRenderable.hpp"
 /// ==========================================
 
 class DynamicLines : public DynamicRenderable

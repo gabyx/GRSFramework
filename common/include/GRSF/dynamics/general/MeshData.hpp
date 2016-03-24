@@ -6,8 +6,8 @@
 *
 */
 
-#ifndef GRSF_Dynamics_General_MeshData_hpp
-#define GRSF_Dynamics_General_MeshData_hpp
+#ifndef GRSF_dynamics_general_MeshData_hpp
+#define GRSF_dynamics_general_MeshData_hpp
 
 /// Includes =================================
 #include <iostream>
@@ -19,10 +19,10 @@
 #include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Common/SimpleLogger.hpp"
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
+#include "GRSF/dynamics/general/QuaternionHelpers.hpp"
 
 ///==========================================
 

@@ -1,20 +1,20 @@
-#ifndef GRSF_Dynamics_General_MPITopologyGrid_hpp
-#define GRSF_Dynamics_General_MPITopologyGrid_hpp
+#ifndef GRSF_dynamics_general_MPITopologyGrid_hpp
+#define GRSF_dynamics_general_MPITopologyGrid_hpp
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 #include <boost/variant.hpp>
 #include <vector>
 #include <map>
 
-#include "GRSF/Common/UnorderedContainerHelpers.hpp"
+#include "GRSF/common/UnorderedContainerHelpers.hpp"
 
-#include "GRSF/Dynamics/General/CartesianGrid.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
-#include "GRSF/Dynamics/Collision/Collider.hpp"
+#include "GRSF/dynamics/general/CartesianGrid.hpp"
+#include "GRSF/dynamics/collision/geometry/AABB.hpp"
+#include "GRSF/dynamics/collision/Collider.hpp"
 
-#include "GRSF/Dynamics/General/MPITopologyVisitors.hpp"
+#include "GRSF/dynamics/general/MPITopologyVisitors.hpp"
 
 namespace MPILayer {
 

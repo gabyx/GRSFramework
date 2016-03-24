@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_BitRepresentation_hpp
-#define GRSF_Common_BitRepresentation_hpp
+#ifndef GRSF_common_BitRepresentation_hpp
+#define GRSF_common_BitRepresentation_hpp
 
 #include <ostream>
 #include <climits>

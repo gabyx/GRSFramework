@@ -1,10 +1,10 @@
-#ifndef GRSF_Singeltons_MPIGlobalCommunicators_hpp
-#define GRSF_Singeltons_MPIGlobalCommunicators_hpp
+#ifndef GRSF_singeltons_MPIGlobalCommunicators_hpp
+#define GRSF_singeltons_MPIGlobalCommunicators_hpp
 
 #include <mpi.h>
 
-#include "GRSF/Common/Singleton.hpp"
-#include "GRSF/Dynamics/General/MPICommunicatorId.hpp"
+#include "GRSF/common/Singleton.hpp"
+#include "GRSF/dynamics/general/MPICommunicatorId.hpp"
 
 namespace MPILayer{
 /**

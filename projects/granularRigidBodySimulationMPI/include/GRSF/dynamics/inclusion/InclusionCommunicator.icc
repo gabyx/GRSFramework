@@ -1,12 +1,12 @@
 
-#include "GRSF/Dynamics/Inclusion/InclusionCommunicator.hpp"
+#include "GRSF/dynamics/inclusion/InclusionCommunicator.hpp"
 
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ContactGraphMPI.hpp"
-#include "GRSF/Dynamics/Inclusion/ContactGraphVisitorsMPI.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphMPI.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphVisitorsMPI.hpp"
 
-#include "GRSF/Dynamics/General/MPICommunicatorId.hpp"
+#include "GRSF/dynamics/general/MPICommunicatorId.hpp"
 
 #include <functional>
 #include <numeric>

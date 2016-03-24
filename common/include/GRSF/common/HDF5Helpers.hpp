@@ -1,14 +1,14 @@
-#ifndef GRSF_Common_HDF5Helpers_hpp
-#define GRSF_Common_HDF5Helpers_hpp
+#ifndef GRSF_common_HDF5Helpers_hpp
+#define GRSF_common_HDF5Helpers_hpp
 
 #include <type_traits>
 
 #include <H5Cpp.h>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/SfinaeMacros.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/SfinaeMacros.hpp"
 
-#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
+#include "GRSF/dynamics/collision/geometry/AABB.hpp"
 
 namespace Hdf5Helpers
 {

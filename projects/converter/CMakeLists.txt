@@ -113,7 +113,7 @@ INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC
 
 # ===========================================================================================
 # WRITE CONFIGURATION FILE
-SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
+SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/configFiles/ConfigureFile.hpp)
 configure_file (
   ${SOURCE_DIR}/include/GRSF/configFiles/ConfigureFile.hpp.in
   ${CONFIG_INC}
@@ -183,8 +183,8 @@ target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 SET(INSTALL_DIR_PROJECT ${PROJECT_BINARY_DIR}/bin/)
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/debug
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/release
 )
 
 add_dependencies(${PROJECT_NAME}  ${ApproxMVBB_DEPENDING_TARGETS})

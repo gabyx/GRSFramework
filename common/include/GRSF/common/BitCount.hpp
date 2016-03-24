@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_BitCount_hpp
-#define GRSF_Common_BitCount_hpp
+#ifndef GRSF_common_BitCount_hpp
+#define GRSF_common_BitCount_hpp
 
 #include <type_traits>
 #include <limits.h>

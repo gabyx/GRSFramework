@@ -1,18 +1,18 @@
-#ifndef GRSF_Dynamics_Inclusion_ContactGraphNodeData_hpp
-#define GRSF_Dynamics_Inclusion_ContactGraphNodeData_hpp
+#ifndef GRSF_dynamics_inclusion_ContactGraphNodeData_hpp
+#define GRSF_dynamics_inclusion_ContactGraphNodeData_hpp
 
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 #include RigidBodySolverData_INCLUDE_FILE
 
-#include "GRSF/Dynamics/Inclusion/ContactParameter.hpp"
-#include "GRSF/Dynamics/Inclusion/ContactPercussion.hpp"
+#include "GRSF/dynamics/inclusion/ContactParameter.hpp"
+#include "GRSF/dynamics/inclusion/ContactPercussion.hpp"
 
-#include "GRSF/Dynamics/Buffers/FrontBackBuffer.hpp"
-#include "GRSF/Dynamics/Collision/CollisionData.hpp"
+#include "GRSF/dynamics/buffers/FrontBackBuffer.hpp"
+#include "GRSF/dynamics/collision/CollisionData.hpp"
 
 // This two data classes are used for  m_eContactModel = ContactModels::N_ContactModel,
 //                                      m_eContactModel = ContactModels::UCF,

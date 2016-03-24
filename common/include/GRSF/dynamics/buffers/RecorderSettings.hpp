@@ -1,7 +1,7 @@
-#ifndef GRSF_Dynamics_Buffers_RecorderSettings_hpp
-#define GRSF_Dynamics_Buffers_RecorderSettings_hpp
+#ifndef GRSF_dynamics_buffers_RecorderSettings_hpp
+#define GRSF_dynamics_buffers_RecorderSettings_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 
 /**

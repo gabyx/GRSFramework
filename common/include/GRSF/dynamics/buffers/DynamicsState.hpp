@@ -1,13 +1,13 @@
-﻿#ifndef GRSF_Dynamics_Buffers_DynamicsState_hpp
-#define GRSF_Dynamics_Buffers_DynamicsState_hpp
+﻿#ifndef GRSF_dynamics_buffers_DynamicsState_hpp
+#define GRSF_dynamics_buffers_DynamicsState_hpp
 
 #include <vector>
 #include <unordered_map>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Dynamics/Buffers/RigidBodyState.hpp"
+#include "GRSF/dynamics/buffers/RigidBodyState.hpp"
 
 //Prototype
 class DynamicsStateBase;

@@ -1,9 +1,9 @@
-#include "GRSF/Converters/Renderer/RenderConverter.hpp"
+#include "GRSF/converters/renderer/RenderConverter.hpp"
 
-#include "GRSF/Systems/SceneParser.hpp"
-#include "GRSF/Converters/Renderer/RenderLogicParser.hpp"
+#include "GRSF/systems/SceneParser.hpp"
+#include "GRSF/converters/renderer/RenderLogicParser.hpp"
 
-#include "GRSF/Converters/Renderer/RenderLogicParserGenerators.hpp"
+#include "GRSF/converters/renderer/RenderLogicParserGenerators.hpp"
 
 RenderConverter::RenderConverter(const std::vector<boost::filesystem::path> & inputFiles,
                   boost::filesystem::path sceneFile,

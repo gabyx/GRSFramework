@@ -1,7 +1,7 @@
-﻿#ifndef GRSF_Dynamics_Collision_Geometry_PlaneGeometry_hpp
-#define GRSF_Dynamics_Collision_Geometry_PlaneGeometry_hpp
+﻿#ifndef GRSF_dynamics_collision_geometry_PlaneGeometry_hpp
+#define GRSF_dynamics_collision_geometry_PlaneGeometry_hpp
 
-#include <GRSF/Common/TypeDefs.hpp>
+#include "GRSF/common/TypeDefs.hpp"
 
 #include <boost/serialization/access.hpp>
 

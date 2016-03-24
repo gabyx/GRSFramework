@@ -6,4 +6,4 @@
  *
  */
 
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/CommonFunctions.hpp"

@@ -1,16 +1,16 @@
-#ifndef GRSF_Dynamics_General_MPIInformation_hpp
-#define GRSF_Dynamics_General_MPIInformation_hpp
+#ifndef GRSF_dynamics_general_MPIInformation_hpp
+#define GRSF_dynamics_general_MPIInformation_hpp
 
 #include <mpi.h>
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/General/CartesianGrid.hpp"
+#include "GRSF/dynamics/general/CartesianGrid.hpp"
 
-//#include "GRSF/Dynamics/Collision/Collider.hpp"
-#include "GRSF/Singeltons/MPIGlobalCommunicators.hpp"
-#include "GRSF/Dynamics/General/MPITopology.hpp"
+//#include "GRSF/dynamics/collision/Collider.hpp"
+#include "GRSF/singeltons/MPIGlobalCommunicators.hpp"
+#include "GRSF/dynamics/general/MPITopology.hpp"
 
 namespace MPILayer {
 

@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_ApplicationCLOptionsConverter_hpp
-#define GRSF_Common_ApplicationCLOptionsConverter_hpp
+#ifndef GRSF_common_ApplicationCLOptionsConverter_hpp
+#define GRSF_common_ApplicationCLOptionsConverter_hpp
 
 
 #include <string>
@@ -10,13 +10,13 @@
 #include <boost/filesystem.hpp>
 #include <getoptpp/getopt_pp_standalone.h>
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/Singleton.hpp"
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Singleton.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
-#include "GRSF/Common/Exception.hpp"
+#include "GRSF/common/Exception.hpp"
 
-#include "GRSF/Converters/SimJoiner/SimFileJoiner.hpp"
+#include "GRSF/converters/simJoiner/SimFileJoiner.hpp"
 
 /**
 *  @brief CommandLineOptions for the Application

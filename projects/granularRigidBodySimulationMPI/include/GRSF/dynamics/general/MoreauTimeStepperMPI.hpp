@@ -6,8 +6,8 @@
 *  Copyright 2010 ETH. All rights reserved.
 *
 */
-#ifndef GRSF_Dynamics_General_MoreauTimeStepperMPI_hpp
-#define GRSF_Dynamics_General_MoreauTimeStepperMPI_hpp
+#ifndef GRSF_dynamics_general_MoreauTimeStepperMPI_hpp
+#define GRSF_dynamics_general_MoreauTimeStepperMPI_hpp
 
 // Includes =================================
 #include <iostream>
@@ -17,19 +17,19 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Dynamics/General/TimeStepperBase.hpp"
+#include "GRSF/dynamics/general/TimeStepperBase.hpp"
 
-#include "GRSF/Dynamics/General/MPICommunication.hpp"
-#include "GRSF/Dynamics/General/BodyCommunicator.hpp"
+#include "GRSF/dynamics/general/MPICommunication.hpp"
+#include "GRSF/dynamics/general/BodyCommunicator.hpp"
 
-#include "GRSF/Dynamics/General/TimeStepperSettings.hpp"
+#include "GRSF/dynamics/general/TimeStepperSettings.hpp"
 //===========================================
 
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
 
 /**

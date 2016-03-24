@@ -1,5 +1,5 @@
-#ifndef GRSF_General_RenderLogicParserModules_hpp
-#define GRSF_General_RenderLogicParserModules_hpp
+#ifndef GRSF_converters_renderer_RenderLogicParserModules_hpp
+#define GRSF_converters_renderer_RenderLogicParserModules_hpp
 
 
 #include <vector>
@@ -7,12 +7,12 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Converters/Renderer/RenderLogicParserTraitsMacro.hpp"
+#include "GRSF/converters/renderer/RenderLogicParserTraitsMacro.hpp"
 
 namespace RenderLogicParserModules {
 
@@ -63,9 +63,9 @@ namespace RenderLogicParserModules {
 };
 
 
-#include "GRSF/General/LogicParserModules.hpp"
-#include "GRSF/Converters/Renderer/RenderExecutionGraph.hpp"
-#include "GRSF/Converters/Renderer/RenderExecutionGraphNodes.hpp"
+#include "GRSF/general/LogicParserModules.hpp"
+#include "GRSF/converters/renderer/RenderExecutionGraph.hpp"
+#include "GRSF/converters/renderer/RenderExecutionGraphNodes.hpp"
 
 namespace RenderLogicParserModules {
 

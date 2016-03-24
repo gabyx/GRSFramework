@@ -1,9 +1,9 @@
-﻿#include "GRSF/Singeltons/FileManager.hpp"
+﻿#include "GRSF/singeltons/FileManager.hpp"
 
 
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFile.hpp"
 
 //=========================================================
 

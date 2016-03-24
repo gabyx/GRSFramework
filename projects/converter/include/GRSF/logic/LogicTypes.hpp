@@ -1,5 +1,5 @@
-    #ifndef GRSF_Logic_LogicTypes_hpp
-#define GRSF_Logic_LogicTypes_hpp
+    #ifndef GRSF_logic_LogicTypes_hpp
+#define GRSF_logic_LogicTypes_hpp
 
     #include <memory>
 
@@ -10,9 +10,9 @@
 
     #include <boost/filesystem.hpp>
 
-    #include "GRSF/Common/TypeDefs.hpp"
+    #include "GRSF/common/TypeDefs.hpp"
 
-    #include "GRSF/Converters/Renderer/RenderMaterial.hpp"
+    #include "GRSF/converters/renderer/RenderMaterial.hpp"
 
     namespace LogicTypes{
 

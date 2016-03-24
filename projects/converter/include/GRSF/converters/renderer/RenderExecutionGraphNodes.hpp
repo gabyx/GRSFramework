@@ -1,17 +1,17 @@
-#ifndef GRSF_General_RenderExecutionGraphNodes_hpp
-#define GRSF_General_RenderExecutionGraphNodes_hpp
+#ifndef GRSF_converters_renderer_RenderExecutionGraphNodes_hpp
+#define GRSF_converters_renderer_RenderExecutionGraphNodes_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include LogicTypes_INCLUDE_FILE
-#include "GRSF/Logic/LogicNode.hpp"
+#include "GRSF/logic/LogicNode.hpp"
 
-#include "GRSF/Converters/Renderer/RendermanGeometryWriter.hpp"
-#include "GRSF/Converters/Renderer/RenderData.hpp"
+#include "GRSF/converters/renderer/RendermanGeometryWriter.hpp"
+#include "GRSF/converters/renderer/RenderData.hpp"
 
 
-#include "GRSF/Common/ColorGradient.hpp"
+#include "GRSF/common/ColorGradient.hpp"
 
 namespace LogicNodes {
 

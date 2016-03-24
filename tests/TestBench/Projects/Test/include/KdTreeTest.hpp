@@ -3,15 +3,15 @@
 
 #include <pugixml/pugixml.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 
-#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
+#include "GRSF/dynamics/collision/geometry/AABB.hpp"
 
-#include "GRSF/Dynamics/General/KdTree.hpp"
-#include "GRSF/Dynamics/General/SerializationHelpersKdTree.hpp"
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/dynamics/general/KdTree.hpp"
+#include "GRSF/dynamics/general/SerializationHelpersKdTree.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/stream.hpp>

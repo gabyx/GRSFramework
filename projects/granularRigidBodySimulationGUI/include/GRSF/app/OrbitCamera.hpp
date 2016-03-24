@@ -7,8 +7,8 @@
 */
 
 
-#ifndef GRSF_App_OrbitCamera_hpp
-#define GRSF_App_OrbitCamera_hpp
+#ifndef GRSF_app_OrbitCamera_hpp
+#define GRSF_app_OrbitCamera_hpp
 
 // Includes =================================
 #define _USE_MATH_DEFINES

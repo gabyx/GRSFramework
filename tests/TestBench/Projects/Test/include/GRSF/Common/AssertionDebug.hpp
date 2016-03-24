@@ -9,7 +9,7 @@
 #include <iostream>
 #include <typeinfo>
 
-#include "GRSF/Common/Exception.hpp"
+#include "GRSF/common/Exception.hpp"
 
 #ifndef NDEBUG
 // Debug!

@@ -1,10 +1,10 @@
-#ifndef GRSF_Dynamics_General_NeighbourData_hpp
-#define GRSF_Dynamics_General_NeighbourData_hpp
+#ifndef GRSF_dynamics_general_NeighbourData_hpp
+#define GRSF_dynamics_general_NeighbourData_hpp
 
 
 #include <unordered_map>
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 #include RigidBody_INCLUDE_FILE
 

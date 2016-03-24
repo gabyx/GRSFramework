@@ -1,4 +1,4 @@
-﻿#include "GRSF/App/MenuMouse.hpp"
+﻿#include "GRSF/app/MenuMouse.hpp"
 
 MenuMouse::MenuMouse(std::shared_ptr<OgreBites::SdkTrayManager> trayManager, Ogre::String name){
 

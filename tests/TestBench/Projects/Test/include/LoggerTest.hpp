@@ -4,7 +4,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
 
 #define LOG( _logptr_ , _message_ )  ( * (_logptr_) )  << _message_ ;  ///< Macro to easily write into a Ogre::Log.

@@ -7,8 +7,8 @@
  */
 
 
-#ifndef GRSF_Common_Line3D_h
-#define GRSF_Common_Line3D_h
+#ifndef GRSF_common_Line3D_h
+#define GRSF_common_Line3D_h
 
 /// Includes =================================
 #include <Ogre.h>

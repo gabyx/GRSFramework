@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_RigidBodyGarbageCollector_hpp
-#define GRSF_Dynamics_General_RigidBodyGarbageCollector_hpp
+#ifndef GRSF_dynamics_general_RigidBodyGarbageCollector_hpp
+#define GRSF_dynamics_general_RigidBodyGarbageCollector_hpp
 
 //template<typename TDynamicsSystemConfig>
 //class RigidBodyGarbageCollector{

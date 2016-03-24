@@ -1,7 +1,7 @@
-#ifndef GRSF_Dynamics_General_BodyInfoMap_hpp
-#define GRSF_Dynamics_General_BodyInfoMap_hpp
+#ifndef GRSF_dynamics_general_BodyInfoMap_hpp
+#define GRSF_dynamics_general_BodyInfoMap_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 class BodyProcessInfo{
 public:

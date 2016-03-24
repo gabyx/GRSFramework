@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Dynamics_Buffers_StatePool_hpp
-#define GRSF_Dynamics_Buffers_StatePool_hpp
+﻿#ifndef GRSF_dynamics_buffers_StatePool_hpp
+#define GRSF_dynamics_buffers_StatePool_hpp
 
 #include <iostream>
 #include <fstream>
@@ -9,9 +9,9 @@
 #include <Eigen/Core>
 
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #define DECLERATIONS_STATEPOOL \
     using StatePool::m_change_pointer_mutex; \

@@ -1,14 +1,14 @@
-﻿#ifndef GRSF_States_SimulationManager_SimulationManagerBase_hpp
-#define GRSF_States_SimulationManager_SimulationManagerBase_hpp
+﻿#ifndef GRSF_states_simulationManager_SimulationManagerBase_hpp
+#define GRSF_states_simulationManager_SimulationManagerBase_hpp
 
 
 #include <boost/thread.hpp>
 #include <memory>
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
 class SimulationManagerBase
 {

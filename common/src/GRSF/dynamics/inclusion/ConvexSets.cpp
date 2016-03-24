@@ -1,4 +1,4 @@
-#include "GRSF/Dynamics/Inclusion/ConvexSets.hpp"
+#include "GRSF/dynamics/inclusion/ConvexSets.hpp"
 
 //const unsigned int ConvexSets::RPlus::Dimension = 1;
 //const unsigned int ConvexSets::Disk::Dimension = 2;

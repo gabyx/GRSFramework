@@ -1,12 +1,12 @@
-#ifndef GRSF_Dynamics_General_NeighbourMap_hpp
-#define GRSF_Dynamics_General_NeighbourMap_hpp
+#ifndef GRSF_dynamics_general_NeighbourMap_hpp
+#define GRSF_dynamics_general_NeighbourMap_hpp
 
 #include <vector>
 #include <list>
 #include <type_traits>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 
 

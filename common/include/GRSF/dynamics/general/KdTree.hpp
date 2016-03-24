@@ -1,14 +1,14 @@
 
 
-#ifndef GRSF_Dynamics_General_KdTree_hpp
-#define GRSF_Dynamics_General_KdTree_hpp
+#ifndef GRSF_dynamics_general_KdTree_hpp
+#define GRSF_dynamics_general_KdTree_hpp
 
 #include <boost/serialization/level.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/set.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include "GRSF/Common/SerializationHelpersEigen.hpp"
+#include "GRSF/common/SerializationHelpersEigen.hpp"
 
 #include "ApproxMVBB/KdTree.hpp"
 

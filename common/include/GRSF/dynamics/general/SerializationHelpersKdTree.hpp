@@ -1,13 +1,13 @@
-#ifndef GRSF_Dynamics_General_SerializationHelpersKdTree_hpp
-#define GRSF_Dynamics_General_SerializationHelpersKdTree_hpp
+#ifndef GRSF_dynamics_general_SerializationHelpersKdTree_hpp
+#define GRSF_dynamics_general_SerializationHelpersKdTree_hpp
 
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/traits.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include "GRSF/Dynamics/General/KdTree.hpp"
-#include "GRSF/Dynamics/Collision/SerializationHelpersGeometries.hpp"
-#include "GRSF/Common/SerializationHelpersTuple.hpp"
+#include "GRSF/dynamics/general/KdTree.hpp"
+#include "GRSF/dynamics/collision/SerializationHelpersGeometries.hpp"
+#include "GRSF/common/SerializationHelpersTuple.hpp"
 
 /** Basic KDTree classes for serialization */
 namespace boost{

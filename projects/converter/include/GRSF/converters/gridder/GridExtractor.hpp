@@ -1,5 +1,5 @@
-#ifndef GRSF_General_GridExtractor_hpp
-#define GRSF_General_GridExtractor_hpp
+#ifndef GRSF_converters_gridder_GridExtractor_hpp
+#define GRSF_converters_gridder_GridExtractor_hpp
 
 #include <memory>
 
@@ -7,18 +7,18 @@
 
 #include <H5Cpp.h>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/SimpleLogger.hpp"
-#include "GRSF/Common/EnumClassHelper.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
+#include "GRSF/common/EnumClassHelper.hpp"
 
-#include "GRSF/Dynamics/Buffers/RigidBodyState.hpp"
+#include "GRSF/dynamics/buffers/RigidBodyState.hpp"
 
-#include "GRSF/Dynamics/General/CartesianGrid.hpp"
+#include "GRSF/dynamics/general/CartesianGrid.hpp"
 
-#include "GRSF/Converters/Gridder/GridExtractionSettings.hpp"
+#include "GRSF/converters/gridder/GridExtractionSettings.hpp"
 
-#include "GRSF/Common/HDF5Helpers.hpp"
+#include "GRSF/common/HDF5Helpers.hpp"
 
 class GridExtractor{
 public:

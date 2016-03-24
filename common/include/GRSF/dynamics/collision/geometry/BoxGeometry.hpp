@@ -1,7 +1,7 @@
-#ifndef GRSF_Dynamics_Collision_Geometry_BoxGeometry_hpp
-#define GRSF_Dynamics_Collision_Geometry_BoxGeometry_hpp
+#ifndef GRSF_dynamics_collision_geometry_BoxGeometry_hpp
+#define GRSF_dynamics_collision_geometry_BoxGeometry_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 #include <boost/serialization/access.hpp>
 
 class BoxGeometry {

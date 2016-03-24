@@ -6,8 +6,8 @@
 *  Copyright 2010 ETH. All rights reserved.
 *
 */
-#ifndef GRSF_Dynamics_General_TimeStepperBase_hpp
-#define GRSF_Dynamics_General_TimeStepperBase_hpp
+#ifndef GRSF_dynamics_general_TimeStepperBase_hpp
+#define GRSF_dynamics_general_TimeStepperBase_hpp
 
 // Includes =================================
 #include <fstream>
@@ -15,15 +15,15 @@
 
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
-#include "GRSF/Common/BinaryFile.hpp"
-#include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/BinaryFile.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFile.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
 //===========================================
 
@@ -125,7 +125,7 @@ protected:
 };
 
 
-#include "GRSF/Dynamics/General/TimeStepperBase.icc"
+#include "GRSF/dynamics/general/TimeStepperBase.icc"
 
 #endif
 

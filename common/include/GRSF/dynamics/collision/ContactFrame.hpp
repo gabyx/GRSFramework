@@ -1,8 +1,8 @@
-#ifndef GRSF_Dynamics_Collision_ContactFrame_hpp
-#define GRSF_Dynamics_Collision_ContactFrame_hpp
+#ifndef GRSF_dynamics_collision_ContactFrame_hpp
+#define GRSF_dynamics_collision_ContactFrame_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 class ContactFrame{
 public:

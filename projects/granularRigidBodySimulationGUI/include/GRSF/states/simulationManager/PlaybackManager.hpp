@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_States_SimulationManager_PlaybackManager_hpp
-#define GRSF_States_SimulationManager_PlaybackManager_hpp
+﻿#ifndef GRSF_states_simulationManager_PlaybackManager_hpp
+#define GRSF_states_simulationManager_PlaybackManager_hpp
 
 #include <memory>
 #include <OIS/OISEvents.h>
@@ -7,17 +7,17 @@
 #include <OIS/OISJoyStick.h>
 #include <OIS/OISMouse.h>
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Systems/SceneParserGUI.hpp"
+#include "GRSF/systems/SceneParserGUI.hpp"
 
-#include "GRSF/States/SimulationManager/PlaybackLoader.hpp"
-#include "GRSF/States/SimulationManager/PlaybackManagerBase.hpp"
-#include "GRSF/Singeltons/Contexts/InputContext.hpp"
-#include "GRSF/Dynamics/Buffers/DynamicsState.hpp"
+#include "GRSF/states/simulationManager/PlaybackLoader.hpp"
+#include "GRSF/states/simulationManager/PlaybackManagerBase.hpp"
+#include "GRSF/singeltons/contexts/InputContext.hpp"
+#include "GRSF/dynamics/buffers/DynamicsState.hpp"
 
-#include "GRSF/States/VideoDropper.hpp"
-#include "GRSF/Dynamics/Buffers/StateRecorderResampler.hpp"
+#include "GRSF/states/VideoDropper.hpp"
+#include "GRSF/dynamics/buffers/StateRecorderResampler.hpp"
 
 class StateRingPoolVisBackFront;
 template< typename TStatePool> class PlaybackLoader;

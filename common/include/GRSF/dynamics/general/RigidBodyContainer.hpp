@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_RigidBodyContainer_hpp
-#define GRSF_Dynamics_General_RigidBodyContainer_hpp
+#ifndef GRSF_dynamics_general_RigidBodyContainer_hpp
+#define GRSF_dynamics_general_RigidBodyContainer_hpp
 
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/multi_index_container.hpp>
@@ -9,12 +9,12 @@
 #include <boost/multi_index/tag.hpp>
 #include <boost/multi_index/key_extractors.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include RigidBody_INCLUDE_FILE
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 
 class RigidBodyContainer {

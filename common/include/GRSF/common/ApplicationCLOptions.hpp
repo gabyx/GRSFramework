@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_ApplicationCLOptions_hpp
-#define GRSF_Common_ApplicationCLOptions_hpp
+#ifndef GRSF_common_ApplicationCLOptions_hpp
+#define GRSF_common_ApplicationCLOptions_hpp
 
 
 #include <string>
@@ -9,8 +9,8 @@
 #include <getoptpp/getopt_pp_standalone.h>
 
 
-#include "GRSF/Common/Singleton.hpp"
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/Singleton.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
 
 

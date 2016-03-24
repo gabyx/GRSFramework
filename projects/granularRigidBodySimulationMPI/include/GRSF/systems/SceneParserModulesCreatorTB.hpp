@@ -1,8 +1,8 @@
-#ifndef GRSF_Systems_SceneParserModulesCreatorTB_hpp
-#define GRSF_Systems_SceneParserModulesCreatorTB_hpp
+#ifndef GRSF_systems_SceneParserModulesCreatorTB_hpp
+#define GRSF_systems_SceneParserModulesCreatorTB_hpp
 
 
-#include "GRSF/Systems/SceneParserModulesMPI.hpp"
+#include "GRSF/systems/SceneParserModulesMPI.hpp"
 
 
 template< typename TTopoBuilder >

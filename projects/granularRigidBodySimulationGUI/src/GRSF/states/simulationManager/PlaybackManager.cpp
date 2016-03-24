@@ -3,22 +3,22 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "GRSF/Common/ApplicationCLOptions.hpp"
-#include "GRSF/States/SimulationManager/PlaybackManager.hpp"
+#include "GRSF/common/ApplicationCLOptions.hpp"
+#include "GRSF/states/simulationManager/PlaybackManager.hpp"
 
-#include <GRSF/Singeltons/Contexts/RenderContext.hpp>
-#include "GRSF/Dynamics/Buffers/SharedBufferPlayback.hpp"
-#include "GRSF/Common/CommonFunctions.hpp"
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
-#include "GRSF/Common/OgreMeshExtraction.hpp"
+#include "GRSF/singeltons/contexts/RenderContext.hpp"
+#include "GRSF/dynamics/buffers/SharedBufferPlayback.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
+#include "GRSF/dynamics/general/QuaternionHelpers.hpp"
+#include "GRSF/common/OgreMeshExtraction.hpp"
 
-#include "GRSF/Dynamics/Buffers/SharedBufferPlayback.hpp"
-#include "GRSF/States/SimulationManager/PlaybackLoader.hpp"
+#include "GRSF/dynamics/buffers/SharedBufferPlayback.hpp"
+#include "GRSF/states/simulationManager/PlaybackLoader.hpp"
 
-#include "GRSF/Singeltons/FileManager.hpp"
-#include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFile.hpp"
 
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 
 

@@ -1,15 +1,15 @@
-﻿#ifndef GRSF_Dynamics_General_DynamicsSystemMPI_hpp
-#define GRSF_Dynamics_General_DynamicsSystemMPI_hpp
+﻿#ifndef GRSF_dynamics_general_DynamicsSystemMPI_hpp
+#define GRSF_dynamics_general_DynamicsSystemMPI_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Systems/SceneParserModules.hpp"
-#include "GRSF/Systems/SceneParserModulesMPI.hpp"
+#include "GRSF/systems/SceneParserModules.hpp"
+#include "GRSF/systems/SceneParserModulesMPI.hpp"
 
-#include "GRSF/Dynamics/General/DynamicsSystemBase.hpp"
+#include "GRSF/dynamics/general/DynamicsSystemBase.hpp"
 
-#include "GRSF/Dynamics/General/MPITopologyBuilderSettings.hpp"
+#include "GRSF/dynamics/general/MPITopologyBuilderSettings.hpp"
 
 
 class DynamicsSystemMPI : public DynamicsSystemBase{

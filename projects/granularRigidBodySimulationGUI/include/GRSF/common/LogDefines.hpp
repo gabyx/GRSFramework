@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef GRSF_Common_LogDefines_hpp
-#define GRSF_Common_LogDefines_hpp
+#ifndef GRSF_common_LogDefines_hpp
+#define GRSF_common_LogDefines_hpp
 
 
 /**

@@ -1,8 +1,8 @@
-#ifndef GRSF_Dynamics_General_MPITopologyBuilderSettings_hpp
-#define GRSF_Dynamics_General_MPITopologyBuilderSettings_hpp
+#ifndef GRSF_dynamics_general_MPITopologyBuilderSettings_hpp
+#define GRSF_dynamics_general_MPITopologyBuilderSettings_hpp
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 namespace MPILayer{
 

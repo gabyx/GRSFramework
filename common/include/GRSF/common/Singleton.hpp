@@ -1,7 +1,7 @@
-#ifndef GRSF_Common_Singleton_hpp
-#define GRSF_Common_Singleton_hpp
+#ifndef GRSF_common_Singleton_hpp
+#define GRSF_common_Singleton_hpp
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 /**
         \brief Singelton Class: You need to construct the singelton object (subclass of this singelton class) on the heap with new, or on the stack globally once!

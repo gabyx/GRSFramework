@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_MetaHelper_hpp
-#define GRSF_Common_MetaHelper_hpp
+#ifndef GRSF_common_MetaHelper_hpp
+#define GRSF_common_MetaHelper_hpp
 
 #include <meta/meta.hpp>
 

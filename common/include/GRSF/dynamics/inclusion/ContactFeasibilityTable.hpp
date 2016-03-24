@@ -1,8 +1,8 @@
-#ifndef GRSF_Dynamics_Inclusion_ContactFeasibilityTable_hpp
-#define GRSF_Dynamics_Inclusion_ContactFeasibilityTable_hpp
+#ifndef GRSF_dynamics_inclusion_ContactFeasibilityTable_hpp
+#define GRSF_dynamics_inclusion_ContactFeasibilityTable_hpp
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/CompileTimeArray.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/CompileTimeArray.hpp"
 
 /**
 * @ingroup Inclusion

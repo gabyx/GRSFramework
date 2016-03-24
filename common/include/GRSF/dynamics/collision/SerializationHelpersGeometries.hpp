@@ -1,18 +1,18 @@
-#ifndef GRSF_Dynamics_Collision_SerializationHelpersGeometries_hpp
-#define GRSF_Dynamics_Collision_SerializationHelpersGeometries_hpp
+#ifndef GRSF_dynamics_collision_SerializationHelpersGeometries_hpp
+#define GRSF_dynamics_collision_SerializationHelpersGeometries_hpp
 
 #include <boost/variant.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/mpl/at.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/StaticAssert.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/StaticAssert.hpp"
 
 #include RigidBody_INCLUDE_FILE
 
-#include "GRSF/Dynamics/Collision/Geometries.hpp"
+#include "GRSF/dynamics/collision/Geometries.hpp"
 
-#include "GRSF/Common/SerializationHelpersEigen.hpp"
+#include "GRSF/common/SerializationHelpersEigen.hpp"
 
 namespace boost {
 namespace serialization {

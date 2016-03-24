@@ -1,12 +1,12 @@
-#ifndef GRSF_General_SimFileExecutionGraph_hpp
-#define GRSF_General_SimFileExecutionGraph_hpp
+#ifndef GRSF_general_SimFileExecutionGraph_hpp
+#define GRSF_general_SimFileExecutionGraph_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
-#include "GRSF/Dynamics/Buffers/RigidBodyState.hpp"
-#include "GRSF/Logic/ExecutionTreeInOut.hpp"
+#include "GRSF/dynamics/buffers/RigidBodyState.hpp"
+#include "GRSF/logic/ExecutionTreeInOut.hpp"
 
 
 namespace LogicNodes{

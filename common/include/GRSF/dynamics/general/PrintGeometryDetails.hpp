@@ -1,17 +1,17 @@
-#ifndef GRSF_Dynamics_General_PrintGeometryDetails_hpp
-#define GRSF_Dynamics_General_PrintGeometryDetails_hpp
+#ifndef GRSF_dynamics_general_PrintGeometryDetails_hpp
+#define GRSF_dynamics_general_PrintGeometryDetails_hpp
 
 
 #include <boost/variant.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
-#include "GRSF/Dynamics/Collision/Geometries.hpp"
+#include "GRSF/dynamics/collision/Geometries.hpp"
 
 class PrintGeometryDetailsVisitor : public boost::static_visitor<> {
     public:

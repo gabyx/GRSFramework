@@ -1,8 +1,8 @@
-#ifndef GRSF_General_LogicParserTraits_hpp
-#define GRSF_General_LogicParserTraits_hpp
+#ifndef GRSF_general_LogicParserTraits_hpp
+#define GRSF_general_LogicParserTraits_hpp
 
-#include "GRSF/General/LogicParserBaseTraits.hpp"
-#include "GRSF/General/LogicParserModules.hpp"
+#include "GRSF/general/LogicParserBaseTraits.hpp"
+#include "GRSF/general/LogicParserModules.hpp"
 
 /** The traits for a standart LogicParser class*/
 template<typename TSceneParser, typename TDataStorage>
@@ -20,6 +20,6 @@ struct LogicParserTraits : LogicParserBaseTraits<TSceneParser,TDataStorage> {
 
 };
 
-#include "GRSF/General/LogicParserTraitsMacro.hpp"
+#include "GRSF/general/LogicParserTraitsMacro.hpp"
 
 #endif

@@ -1,5 +1,5 @@
 #include <mpi.h>
-#include "GRSF/Dynamics/General/MPIDataTypes.hpp"
+#include "GRSF/dynamics/general/MPIDataTypes.hpp"
 
 
 namespace MPILayer{

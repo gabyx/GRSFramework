@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Singeltons_Contexts_InputContext_hpp
-#define GRSF_Singeltons_Contexts_InputContext_hpp
+﻿#ifndef GRSF_singeltons_contexts_InputContext_hpp
+#define GRSF_singeltons_contexts_InputContext_hpp
 
 #include <unordered_map>
 
@@ -12,7 +12,7 @@
 
 #include <OGRE/InputContext.h>
 #include <OGRE/OgreSingleton.h>
-#include "GRSF/Singeltons/Contexts/RenderContext.hpp"
+#include "GRSF/singeltons/contexts/RenderContext.hpp"
 
 
 /**

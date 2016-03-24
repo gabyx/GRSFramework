@@ -1,9 +1,9 @@
-#ifndef GRSF_General_RenderLogicParserTraits_hpp
-#define GRSF_General_RenderLogicParserTraits_hpp
+#ifndef GRSF_converters_renderer_RenderLogicParserTraits_hpp
+#define GRSF_converters_renderer_RenderLogicParserTraits_hpp
 
-#include "GRSF/General/LogicParserBaseTraits.hpp"
+#include "GRSF/general/LogicParserBaseTraits.hpp"
 
-#include "GRSF/Converters/Renderer/RenderLogicParserModules.hpp"
+#include "GRSF/converters/renderer/RenderLogicParserModules.hpp"
 
 /** The traits for a standart RenderLogicParser class*/
 template<typename TSceneParser, typename TDataStorage>
@@ -19,7 +19,7 @@ struct RenderLogicParserTraits : LogicParserBaseTraits<TSceneParser,TDataStorage
     using getModuleType =  typename std::tuple_element<N,TupleModules>::type::element_type;
 };
 
-#include "GRSF/Converters/Renderer/RenderLogicParserTraitsMacro.hpp"
+#include "GRSF/converters/renderer/RenderLogicParserTraitsMacro.hpp"
 
 
 

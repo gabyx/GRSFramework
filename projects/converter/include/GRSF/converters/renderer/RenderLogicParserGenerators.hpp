@@ -1,9 +1,9 @@
-#ifndef GRSF_General_RenderLogicParserGenerators_hpp
-#define GRSF_General_RenderLogicParserGenerators_hpp
+#ifndef GRSF_converters_renderer_RenderLogicParserGenerators_hpp
+#define GRSF_converters_renderer_RenderLogicParserGenerators_hpp
 
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include <memory>
 
@@ -12,7 +12,7 @@
 class RenderData;
 
 
-#include "GRSF/Systems/SceneParserModules.hpp"
+#include "GRSF/systems/SceneParserModules.hpp"
 
 namespace RenderLogicParserGenerators {
     struct SceneParserGen {

@@ -1,8 +1,8 @@
-#ifndef GRSF_Common_SerializationHelpersTuple_hpp
-#define GRSF_Common_SerializationHelpersTuple_hpp
+#ifndef GRSF_common_SerializationHelpersTuple_hpp
+#define GRSF_common_SerializationHelpersTuple_hpp
 
 #include <tuple>
-#include "GRSF/Common/SfinaeMacros.hpp"
+#include "GRSF/common/SfinaeMacros.hpp"
 
 namespace grsf {
     namespace details{

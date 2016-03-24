@@ -1,15 +1,15 @@
-﻿#ifndef GRSF_Dynamics_Buffers_StateRingPoolVisBackFront_hpp
-#define GRSF_Dynamics_Buffers_StateRingPoolVisBackFront_hpp
+﻿#ifndef GRSF_dynamics_buffers_StateRingPoolVisBackFront_hpp
+#define GRSF_dynamics_buffers_StateRingPoolVisBackFront_hpp
 
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Singeltons/FileManager.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
 
-#include "GRSF/Dynamics/Buffers/StatePool.hpp"
-#include "GRSF/Dynamics/Buffers/FrontBackBuffer.hpp"
+#include "GRSF/dynamics/buffers/StatePool.hpp"
+#include "GRSF/dynamics/buffers/FrontBackBuffer.hpp"
 
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 
 /**

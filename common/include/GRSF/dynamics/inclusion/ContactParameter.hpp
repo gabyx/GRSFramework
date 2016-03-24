@@ -1,9 +1,9 @@
-﻿#ifndef GRSF_Dynamics_Inclusion_ContactParameter_hpp
-#define GRSF_Dynamics_Inclusion_ContactParameter_hpp
+﻿#ifndef GRSF_dynamics_inclusion_ContactParameter_hpp
+#define GRSF_dynamics_inclusion_ContactParameter_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ContactModels.hpp"
+#include "GRSF/dynamics/inclusion/ContactModels.hpp"
 
 /**
 * @ingroup Contact

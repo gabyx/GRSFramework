@@ -1,9 +1,9 @@
-﻿#ifndef GRSF_Dynamics_General_MakeCoordinateSystem_hpp
-#define GRSF_Dynamics_General_MakeCoordinateSystem_hpp
+﻿#ifndef GRSF_dynamics_general_MakeCoordinateSystem_hpp
+#define GRSF_dynamics_general_MakeCoordinateSystem_hpp
 
 #include <cmath>
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 namespace CoordinateSystem {
 

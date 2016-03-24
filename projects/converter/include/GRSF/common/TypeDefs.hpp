@@ -6,23 +6,23 @@
  *
  */
 
-#ifndef GRSF_Common_TypeDefs_hpp
-#define GRSF_Common_TypeDefs_hpp
+#ifndef GRSF_common_TypeDefs_hpp
+#define GRSF_common_TypeDefs_hpp
 
 #include "GRSF/ConfigFiles/ConfigureFile.hpp"
-#include "GRSF/Dynamics/General/LayoutConfigTypeDefs.hpp"
+#include "GRSF/dynamics/general/LayoutConfigTypeDefs.hpp"
 
-#define LogicTypes_INCLUDE_FILE                 "GRSF/Logic/LogicTypes.hpp"
+#define LogicTypes_INCLUDE_FILE                 "GRSF/logic/LogicTypes.hpp"
 
-#define DynamicsSystem_INCLUDE_FILE             "GRSF/Dynamics/General/DynamicsSystem.hpp"
+#define DynamicsSystem_INCLUDE_FILE             "GRSF/dynamics/general/DynamicsSystem.hpp"
 class DynamicsSystem;
 
-#define InclusionSolverSettings_INCLUDE_FILE    "GRSF/Dynamics/Inclusion/InclusionSolverSettings.hpp"
+#define InclusionSolverSettings_INCLUDE_FILE    "GRSF/dynamics/inclusion/InclusionSolverSettings.hpp"
 class InclusionSolverSettings;
 
-#define RigidBody_INCLUDE_FILE                  "GRSF/Dynamics/General/RigidBody.hpp"
+#define RigidBody_INCLUDE_FILE                  "GRSF/dynamics/general/RigidBody.hpp"
 class RigidBodyBase;
-#define RigidBodySolverData_INCLUDE_FILE        "GRSF/Dynamics/General/RigidBodySolverData.hpp"
+#define RigidBodySolverData_INCLUDE_FILE        "GRSF/dynamics/general/RigidBodySolverData.hpp"
 class RigidBodySolverDataCONoG;
 
 class RenderData;

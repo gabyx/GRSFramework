@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_HasMemberFunction_hpp
-#define GRSF_Common_HasMemberFunction_hpp
+#ifndef GRSF_common_HasMemberFunction_hpp
+#define GRSF_common_HasMemberFunction_hpp
 
 
 /** Check if a template type has member function defined by the use of SFINAE

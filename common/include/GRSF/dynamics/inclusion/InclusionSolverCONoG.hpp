@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_Inclusion_InclusionSolverCONoG_hpp
-#define GRSF_Dynamics_Inclusion_InclusionSolverCONoG_hpp
+#ifndef GRSF_dynamics_inclusion_InclusionSolverCONoG_hpp
+#define GRSF_dynamics_inclusion_InclusionSolverCONoG_hpp
 
 
 #include <iostream>
@@ -7,16 +7,16 @@
 #include <memory>
 
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 #include CollisionSolver_INCLUDE_FILE
-#include "GRSF/Dynamics/Inclusion/PercussionPool.hpp"
+#include "GRSF/dynamics/inclusion/PercussionPool.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
-#include "GRSF/Dynamics/Inclusion/ContactGraph.hpp"
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraph.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
 
 #if HAVE_CUDA_SUPPORT == 1
@@ -24,7 +24,7 @@
 #include "JORProxVelocityGPUModule.hpp"
 #endif
 
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
 
 

@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_MPIMessageTag_hpp
-#define GRSF_Dynamics_General_MPIMessageTag_hpp
+#ifndef GRSF_dynamics_general_MPIMessageTag_hpp
+#define GRSF_dynamics_general_MPIMessageTag_hpp
 
 /**
 *    Important struct to define all MPI message tags used in this framework!

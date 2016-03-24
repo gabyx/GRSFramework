@@ -1,12 +1,12 @@
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Dynamics/General/InitialConditionBodies.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/dynamics/general/InitialConditionBodies.hpp"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/dynamics/general/QuaternionHelpers.hpp"
 
 
 //void InitialConditionBodies::setupPositionBodyPosAxisAngle(RigidBodyState & rigibodyState,

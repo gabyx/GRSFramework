@@ -5,14 +5,14 @@
 
 
 
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/ApplicationCLOptions.hpp"
-#include "GRSF/States/SimulationManager/SimulationManager.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/ApplicationCLOptions.hpp"
+#include "GRSF/states/simulationManager/SimulationManager.hpp"
 
-#include "GRSF/Dynamics/Buffers/DynamicsState.hpp"
-#include "GRSF/Systems/SharedBufferDynSys.hpp"
-#include "GRSF/Dynamics/Buffers/StateRecorder.hpp"
+#include "GRSF/dynamics/buffers/DynamicsState.hpp"
+#include "GRSF/systems/SharedBufferDynSys.hpp"
+#include "GRSF/dynamics/buffers/StateRecorder.hpp"
 
 // HIER ALL Includes welche man für diesen Manager braucht, welche getemplatet sind mit einem
 // Config, unterhalb in den Subclassen müssen diese nicht mehr hinzugefügt werden?
@@ -21,11 +21,11 @@
 #include InclusionSolver_INCLUDE_FILE
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "GRSF/Common/CommonFunctions.hpp"
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
+#include "GRSF/dynamics/general/QuaternionHelpers.hpp"
 
-#include "GRSF/Singeltons/FileManager.hpp"
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
 
 using namespace std;

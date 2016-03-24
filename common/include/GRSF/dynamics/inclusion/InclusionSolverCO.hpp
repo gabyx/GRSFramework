@@ -1,21 +1,21 @@
-﻿#ifndef GRSF_Dynamics_Inclusion_InclusionSolverCO_hpp
-#define GRSF_Dynamics_Inclusion_InclusionSolverCO_hpp
+﻿#ifndef GRSF_dynamics_inclusion_InclusionSolverCO_hpp
+#define GRSF_dynamics_inclusion_InclusionSolverCO_hpp
 
 #include <iostream>
 #include <fstream>
 #include <memory>
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include "GRSF/ConfigFiles/ConfigureFile.hpp"
 
-#include "GRSF/Dynamics/Collision/CollisionSolver.hpp"
+#include "GRSF/dynamics/collision/CollisionSolver.hpp"
 #include InclusionSolverSettings_INCLUDE_FILE
-#include "GRSF/Dynamics/Inclusion/ContactGraph.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraph.hpp"
 
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
 
 

@@ -1,14 +1,14 @@
-﻿#ifndef GRSF_Dynamics_Collision_ContactTag_hpp
-#define GRSF_Dynamics_Collision_ContactTag_hpp
+﻿#ifndef GRSF_dynamics_collision_ContactTag_hpp
+#define GRSF_dynamics_collision_ContactTag_hpp
 
 
 
-#include <GRSF/Common/TypeDefs.hpp>
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/TupleHelper.hpp"
+#include "GRSF/common/TupleHelper.hpp"
 
-#include "GRSF/Dynamics/General/RigidBodyId.hpp"
+#include "GRSF/dynamics/general/RigidBodyId.hpp"
 
 
 

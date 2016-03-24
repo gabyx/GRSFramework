@@ -1,9 +1,9 @@
 
-#ifndef GRSF_Dynamics_Collision_Geometry_OOBB_hpp
-#define GRSF_Dynamics_Collision_Geometry_OOBB_hpp
+#ifndef GRSF_dynamics_collision_geometry_OOBB_hpp
+#define GRSF_dynamics_collision_geometry_OOBB_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 #include "ApproxMVBB/OOBB.hpp"
 

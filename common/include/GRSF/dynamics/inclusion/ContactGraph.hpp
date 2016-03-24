@@ -1,27 +1,27 @@
-#ifndef GRSF_Dynamics_Inclusion_ContactGraph_hpp
-#define GRSF_Dynamics_Inclusion_ContactGraph_hpp
+#ifndef GRSF_dynamics_inclusion_ContactGraph_hpp
+#define GRSF_dynamics_inclusion_ContactGraph_hpp
 
 
 //#define SRUTIL_DELEGATE_PREFERRED_SYNTAX
 #include <srutil/delegate/delegate.hpp> // Use fast SR delegates
 
 /** Contact Graph */
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/BitCount.hpp"
-#include "GRSF/Common/BitRepresentation.hpp"
-#include "GRSF/Common/EnumClassHelper.hpp"
+#include "GRSF/common/BitCount.hpp"
+#include "GRSF/common/BitRepresentation.hpp"
+#include "GRSF/common/EnumClassHelper.hpp"
 
-#include "GRSF/Dynamics/Inclusion/GeneralGraph.hpp"
-#include "GRSF/Dynamics/Collision/CollisionData.hpp"
-#include "GRSF/Dynamics/Inclusion/ContactParameterMap.hpp"
+#include "GRSF/dynamics/inclusion/GeneralGraph.hpp"
+#include "GRSF/dynamics/collision/CollisionData.hpp"
+#include "GRSF/dynamics/inclusion/ContactParameterMap.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ContactModels.hpp"
-#include "GRSF/Dynamics/Inclusion/ContactGraphNodeData.hpp"
+#include "GRSF/dynamics/inclusion/ContactModels.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphNodeData.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ContactGraphVisitors.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphVisitors.hpp"
 
 
 using ContactGraphTraits = Graph::GraphTraitsSymmetric<

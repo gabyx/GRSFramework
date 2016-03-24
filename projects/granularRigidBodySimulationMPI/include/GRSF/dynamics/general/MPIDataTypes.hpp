@@ -1,10 +1,10 @@
-#ifndef GRSF_Dynamics_General_MPIDataTypes_hpp
-#define GRSF_Dynamics_General_MPIDataTypes_hpp
+#ifndef GRSF_dynamics_general_MPIDataTypes_hpp
+#define GRSF_dynamics_general_MPIDataTypes_hpp
 
 #include <mpi.h>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 /**
 *    Important struct to define all MPI message tags used in this framework!

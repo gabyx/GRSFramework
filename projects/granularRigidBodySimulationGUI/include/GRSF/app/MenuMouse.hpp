@@ -7,8 +7,8 @@
  */
 
 
-#ifndef GRSF_App_MenuMouse_hpp
-#define GRSF_App_MenuMouse_hpp
+#ifndef GRSF_app_MenuMouse_hpp
+#define GRSF_app_MenuMouse_hpp
 
 // Includes =================================
 #define _USE_MATH_DEFINES
@@ -23,7 +23,7 @@
 #include <OIS/OISMouse.h>
 #include <SdkTrays.h>
 
-#include "GRSF/Singeltons/Contexts/InputContext.hpp"
+#include "GRSF/singeltons/contexts/InputContext.hpp"
 // ==========================================
 
 //

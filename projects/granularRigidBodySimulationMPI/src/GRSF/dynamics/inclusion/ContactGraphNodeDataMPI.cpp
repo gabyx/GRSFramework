@@ -1,4 +1,4 @@
-#include "GRSF/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphNodeDataMPI.hpp"
 
 #include <boost/preprocessor/iteration/local.hpp>
 #include <boost/preprocessor/cat.hpp>
@@ -18,7 +18,7 @@ namespace LMatrixGenerator{
 
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    #include "GRSF/Dynamics/Inclusion/LMatrixGeneration/generate_LInvMatrix_Multiplicity.hpp"
+    #include "GRSF/dynamics/inclusion/LMatrixGeneration/generate_LInvMatrix_Multiplicity.hpp"
 
 };
 

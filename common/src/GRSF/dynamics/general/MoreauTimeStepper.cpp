@@ -5,8 +5,8 @@ definitions of template class MoreauTimeStepper
 _________________________________________________________*/
 #include <iostream>
 
-#include "GRSF/Dynamics/General/MoreauTimeStepper.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/dynamics/general/MoreauTimeStepper.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 
 

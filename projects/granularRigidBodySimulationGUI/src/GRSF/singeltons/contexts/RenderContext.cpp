@@ -1,9 +1,9 @@
-﻿#include "GRSF/Singeltons/Contexts/RenderContext.hpp"
+﻿#include "GRSF/singeltons/contexts/RenderContext.hpp"
 
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Singeltons/FileManager.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 //=========================================================
 

@@ -1,13 +1,13 @@
-﻿#ifndef GRSF_States_AppStateManager_hpp
-#define GRSF_States_AppStateManager_hpp
+﻿#ifndef GRSF_states_AppStateManager_hpp
+#define GRSF_states_AppStateManager_hpp
 
 /*=========================================================
 	implemenation specific includes
 _________________________________________________________*/
 
-#include "GRSF/States/AppState.hpp"
-#include "GRSF/Singeltons/Contexts/InputContext.hpp"
-#include "GRSF/Singeltons/Contexts/GuiContext.hpp"
+#include "GRSF/states/AppState.hpp"
+#include "GRSF/singeltons/contexts/InputContext.hpp"
+#include "GRSF/singeltons/contexts/GuiContext.hpp"
 #include <OgreWindowEventUtilities.h>
 //=========================================================
 

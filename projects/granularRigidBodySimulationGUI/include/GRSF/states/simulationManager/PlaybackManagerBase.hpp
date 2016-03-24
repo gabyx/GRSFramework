@@ -1,5 +1,5 @@
-#ifndef GRSF_States_SimulationManager_PlaybackManagerBase_hpp
-#define GRSF_States_SimulationManager_PlaybackManagerBase_hpp
+#ifndef GRSF_states_simulationManager_PlaybackManagerBase_hpp
+#define GRSF_states_simulationManager_PlaybackManagerBase_hpp
 
 
 #include <boost/thread.hpp>
@@ -10,9 +10,9 @@
 #include <OIS/OISJoyStick.h>
 #include <OIS/OISMouse.h>
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
 class PlaybackManagerBase {
 public:

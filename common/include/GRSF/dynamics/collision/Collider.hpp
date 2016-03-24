@@ -1,11 +1,11 @@
-﻿#ifndef GRSF_Dynamics_Collision_Collider_hpp
-#define GRSF_Dynamics_Collision_Collider_hpp
+﻿#ifndef GRSF_dynamics_collision_Collider_hpp
+#define GRSF_dynamics_collision_Collider_hpp
 
 #include "boost/variant.hpp"
 #include <memory>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 #if USE_OPCODE == 1
 #include <Opcode.h>
@@ -18,11 +18,11 @@
 
 #include RigidBody_INCLUDE_FILE
 
-#include "GRSF/Dynamics/Collision/CollisionData.hpp"
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
-#include "GRSF/Dynamics/General/MatrixHelpers.hpp"
-#include "GRSF/Dynamics/General/MakeCoordinateSystem.hpp"
-#include "GRSF/Dynamics/Collision/CollisionFunctions.hpp"
+#include "GRSF/dynamics/collision/CollisionData.hpp"
+#include "GRSF/dynamics/general/QuaternionHelpers.hpp"
+#include "GRSF/dynamics/general/MatrixHelpers.hpp"
+#include "GRSF/dynamics/general/MakeCoordinateSystem.hpp"
+#include "GRSF/dynamics/collision/CollisionFunctions.hpp"
 
 
 

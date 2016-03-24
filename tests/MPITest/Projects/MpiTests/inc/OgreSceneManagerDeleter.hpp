@@ -2,7 +2,7 @@
 #define OgreSceneManagerDeleter_hpp
 
 #include <OgreSceneManager.h>
-#include "Contexts/RenderContext.hpp"
+#include "GRSF/singeltons/contexts/RenderContext.hpp"
 
 /** 
 * @ingroup Common

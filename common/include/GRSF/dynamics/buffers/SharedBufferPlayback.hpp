@@ -1,13 +1,13 @@
-﻿#ifndef GRSF_Dynamics_Buffers_SharedBufferPlayback_hpp
-#define GRSF_Dynamics_Buffers_SharedBufferPlayback_hpp
+﻿#ifndef GRSF_dynamics_buffers_SharedBufferPlayback_hpp
+#define GRSF_dynamics_buffers_SharedBufferPlayback_hpp
 
 #include <boost/thread.hpp>
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Dynamics/Buffers/StateRingPoolVisBackFront.hpp"
+#include "GRSF/dynamics/buffers/StateRingPoolVisBackFront.hpp"
 
 
 /**

@@ -1,19 +1,19 @@
-#ifndef GRSF_General_GridExtractionSettings_hpp
-#define GRSF_General_GridExtractionSettings_hpp
+#ifndef GRSF_converters_gridder_GridExtractionSettings_hpp
+#define GRSF_converters_gridder_GridExtractionSettings_hpp
 
 #include <string>
 #include <vector>
 #include <utility>
 #include <type_traits>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include <boost/variant.hpp>
 
-#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
+#include "GRSF/dynamics/collision/geometry/AABB.hpp"
 
-#include "GRSF/Common/HDF5Helpers.hpp"
+#include "GRSF/common/HDF5Helpers.hpp"
 
 namespace Extractors{
 

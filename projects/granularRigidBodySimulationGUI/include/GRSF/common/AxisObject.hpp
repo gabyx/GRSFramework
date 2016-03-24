@@ -3,8 +3,8 @@
 //
 //    Filename : GRSF/Common/AxisObject.hpp
 
-#ifndef GRSF_Common_AxisObject_hpp
-#define GRSF_Common_AxisObject_hpp
+#ifndef GRSF_common_AxisObject_hpp
+#define GRSF_common_AxisObject_hpp
 
 class AxisObject
 {

@@ -1,5 +1,5 @@
-#ifndef GRSF_Converters_SimFileConverter_hpp
-#define GRSF_Converters_SimFileConverter_hpp
+#ifndef GRSF_converters_SimFileConverter_hpp
+#define GRSF_converters_SimFileConverter_hpp
 
 #include <iostream>
 #include <iomanip>
@@ -12,24 +12,24 @@
 
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Common/SimpleLogger.hpp"
-#include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFile.hpp"
 
-#include "GRSF/Common/ApplicationSignalHandler.hpp"
+#include "GRSF/common/ApplicationSignalHandler.hpp"
 
-#include "GRSF/Common/ContainerTag.hpp"
-#include "GRSF/Common/SfinaeMacros.hpp"
-#include "GRSF/Common/HasMemberFunction.hpp"
-#include "GRSF/Common/ExpandParameterPack.hpp"
+#include "GRSF/common/ContainerTag.hpp"
+#include "GRSF/common/SfinaeMacros.hpp"
+#include "GRSF/common/HasMemberFunction.hpp"
+#include "GRSF/common/ExpandParameterPack.hpp"
 
-#include "GRSF/Common/CPUTimer.hpp"
-#include "GRSF/Common/CommonFunctions.hpp"
-#include "GRSF/Common/ProgressBarCL.hpp"
+#include "GRSF/common/CPUTimer.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
+#include "GRSF/common/ProgressBarCL.hpp"
 
-//#include "GRSF/Logic/DummyNode.hpp"
+//#include "GRSF/logic/DummyNode.hpp"
 
 
 class SimFileConverter {

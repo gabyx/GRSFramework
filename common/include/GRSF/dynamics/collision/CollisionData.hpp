@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef GRSF_Dynamics_Collision_CollisionData_hpp
-#define GRSF_Dynamics_Collision_CollisionData_hpp
+#ifndef GRSF_dynamics_collision_CollisionData_hpp
+#define GRSF_dynamics_collision_CollisionData_hpp
 
 
 #include <iostream>
@@ -19,10 +19,10 @@
 #include <boost/any.hpp>
 
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/Collision/ContactFrame.hpp"
-#include "GRSF/Dynamics/Collision/ContactTag.hpp"
+#include "GRSF/dynamics/collision/ContactFrame.hpp"
+#include "GRSF/dynamics/collision/ContactTag.hpp"
 
 /**
 * @ingroup Collision

@@ -1,17 +1,17 @@
-#ifndef GRSF_Dynamics_Inclusion_InclusionCommunicator_hpp
-#define GRSF_Dynamics_Inclusion_InclusionCommunicator_hpp
+#ifndef GRSF_dynamics_inclusion_InclusionCommunicator_hpp
+#define GRSF_dynamics_inclusion_InclusionCommunicator_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 
-#include "GRSF/Dynamics/General/MPICommunication.hpp"
-#include "GRSF/Dynamics/General/BodyCommunicator.hpp"
+#include "GRSF/dynamics/general/MPICommunication.hpp"
+#include "GRSF/dynamics/general/BodyCommunicator.hpp"
 
-#include "GRSF/Dynamics/General/NeighbourMap.hpp"
-#include "GRSF/Dynamics/Inclusion/NeighbourDataInclusionCommunication.hpp"
+#include "GRSF/dynamics/general/NeighbourMap.hpp"
+#include "GRSF/dynamics/inclusion/NeighbourDataInclusionCommunication.hpp"
 
-#include "GRSF/Dynamics/General/MPIMessages.hpp"
+#include "GRSF/dynamics/general/MPIMessages.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
 
@@ -140,7 +140,7 @@ private:
 };
 
 
-#include "GRSF/Dynamics/Inclusion/InclusionCommunicator.icc"
+#include "GRSF/dynamics/inclusion/InclusionCommunicator.icc"
 
 
 #endif

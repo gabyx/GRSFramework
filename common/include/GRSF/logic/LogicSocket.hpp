@@ -1,17 +1,17 @@
-#ifndef GRSF_Logic_LogicSocket_hpp
-#define GRSF_Logic_LogicSocket_hpp
+#ifndef GRSF_logic_LogicSocket_hpp
+#define GRSF_logic_LogicSocket_hpp
 
 #include <boost/mpl/at.hpp>
 #include <boost/mpl/find.hpp>
 #include <boost/mpl/vector.hpp>
 
-#include "GRSF/Common/StaticAssert.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/StaticAssert.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Common/EnumClassHelper.hpp"
+#include "GRSF/common/EnumClassHelper.hpp"
 
-#include "GRSF/Logic/LogicCommon.hpp"
+#include "GRSF/logic/LogicCommon.hpp"
 
 
 class LogicNode;
@@ -146,7 +146,7 @@ private:
 
 
 
-#include "GRSF/Logic/LogicNode.hpp"
+#include "GRSF/logic/LogicNode.hpp"
 
 
 template<typename T>

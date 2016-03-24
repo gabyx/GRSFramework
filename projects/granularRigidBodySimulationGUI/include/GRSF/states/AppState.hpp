@@ -1,11 +1,11 @@
-﻿#ifndef GRSF_States_AppState_hpp
-#define GRSF_States_AppState_hpp
+﻿#ifndef GRSF_states_AppState_hpp
+#define GRSF_states_AppState_hpp
 
 /*=========================================================
 	implementation specific includes & predefinitions
 _________________________________________________________*/
 #include <memory>
-#include "GRSF/Singeltons/Contexts/RenderContext.hpp"
+#include "GRSF/singeltons/contexts/RenderContext.hpp"
 
 
 class RenderAppState;

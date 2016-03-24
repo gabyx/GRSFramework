@@ -1,7 +1,7 @@
-﻿#ifndef GRSF_Dynamics_Collision_Geometry_CapsuleGeometry_hpp
-#define GRSF_Dynamics_Collision_Geometry_CapsuleGeometry_hpp
+﻿#ifndef GRSF_dynamics_collision_geometry_CapsuleGeometry_hpp
+#define GRSF_dynamics_collision_geometry_CapsuleGeometry_hpp
 
-#include <GRSF/Common/TypeDefs.hpp>
+#include "GRSF/common/TypeDefs.hpp"
 #include <boost/serialization/access.hpp>
 
 

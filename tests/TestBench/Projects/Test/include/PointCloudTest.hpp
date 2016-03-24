@@ -14,13 +14,13 @@
 #include <pcl/point_types.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
-#include "GRSF/Dynamics/Buffers/DynamicsState.hpp"
-#include "GRSF/Common/Range.hpp"
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFile.hpp"
+#include "GRSF/dynamics/buffers/DynamicsState.hpp"
+#include "GRSF/common/Range.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
-#include "GRSF/Dynamics/General/KdTree.hpp"
+#include "GRSF/dynamics/general/KdTree.hpp"
 
 #include <pcl/visualization/cloud_viewer.h>
 

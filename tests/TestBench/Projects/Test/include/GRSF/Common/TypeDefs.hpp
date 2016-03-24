@@ -12,7 +12,7 @@
 #include <random>
 
 #include "GRSF/ConfigFiles/ConfigureFile.hpp"
-#include "GRSF/Dynamics/General/LayoutConfigTypeDefs.hpp"
+#include "GRSF/dynamics/general/LayoutConfigTypeDefs.hpp"
 
 
 

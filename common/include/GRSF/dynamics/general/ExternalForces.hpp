@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_ExternalForces_hpp
-#define GRSF_Dynamics_General_ExternalForces_hpp
+#ifndef GRSF_dynamics_general_ExternalForces_hpp
+#define GRSF_dynamics_general_ExternalForces_hpp
 
 
 
@@ -9,9 +9,9 @@
 #include <boost/random.hpp>
 #include <boost/generator_iterator.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
+#include "GRSF/dynamics/collision/geometry/AABB.hpp"
 
 
 class GravityForceField{

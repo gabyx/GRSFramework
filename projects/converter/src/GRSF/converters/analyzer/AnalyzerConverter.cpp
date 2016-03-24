@@ -1,8 +1,8 @@
-#include "GRSF/Converters/Analyzer/AnalyzerConverter.hpp"
+#include "GRSF/converters/analyzer/AnalyzerConverter.hpp"
 
-//#include "GRSF/Systems/SceneParser.hpp"
-#include "GRSF/Converters/Analyzer/AnalyzerLogicParser.hpp"
-#include "GRSF/Converters/Analyzer/AnalyzerLogicParserGenerators.hpp"
+//#include "GRSF/systems/SceneParser.hpp"
+#include "GRSF/converters/analyzer/AnalyzerLogicParser.hpp"
+#include "GRSF/converters/analyzer/AnalyzerLogicParserGenerators.hpp"
 
 AnalyzerConverter::AnalyzerConverter(const std::vector<boost::filesystem::path> & inputFiles,
               boost::filesystem::path sceneFile,

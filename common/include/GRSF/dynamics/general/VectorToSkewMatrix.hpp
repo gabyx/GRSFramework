@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef GRSF_Dynamics_General_VectorToSkewMatrix_hpp
-#define GRSF_Dynamics_General_VectorToSkewMatrix_hpp
+#ifndef GRSF_dynamics_general_VectorToSkewMatrix_hpp
+#define GRSF_dynamics_general_VectorToSkewMatrix_hpp
 
 /**
 * @ingroup Common

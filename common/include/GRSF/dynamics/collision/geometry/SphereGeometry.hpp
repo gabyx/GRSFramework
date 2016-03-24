@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Dynamics_Collision_Geometry_SphereGeometry_hpp
-#define GRSF_Dynamics_Collision_Geometry_SphereGeometry_hpp
+﻿#ifndef GRSF_dynamics_collision_geometry_SphereGeometry_hpp
+#define GRSF_dynamics_collision_geometry_SphereGeometry_hpp
 
 #include <boost/serialization/access.hpp>
 

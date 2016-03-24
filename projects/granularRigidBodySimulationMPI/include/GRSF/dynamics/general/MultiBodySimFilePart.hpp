@@ -1,17 +1,17 @@
-#ifndef GRSF_Dynamics_General_MultiBodySimFilePart_hpp
-#define GRSF_Dynamics_General_MultiBodySimFilePart_hpp
+#ifndef GRSF_dynamics_general_MultiBodySimFilePart_hpp
+#define GRSF_dynamics_general_MultiBodySimFilePart_hpp
 
 #include <boost/filesystem.hpp>
-#include <GRSF/Common/StaticAssert.hpp>
+#include "GRSF/common/StaticAssert.hpp"
 
 #include <type_traits>
 #include <fstream>
 
-#include "GRSF/Common/StaticAssert.hpp"
+#include "GRSF/common/StaticAssert.hpp"
 
-#include "GRSF/Dynamics/General/MultiBodySimFileIOHelpers.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFileIOHelpers.hpp"
 
-#include "GRSF/Dynamics/General/RigidBodyContainer.hpp"
+#include "GRSF/dynamics/general/RigidBodyContainer.hpp"
 
 /**
 * @ingroup Common

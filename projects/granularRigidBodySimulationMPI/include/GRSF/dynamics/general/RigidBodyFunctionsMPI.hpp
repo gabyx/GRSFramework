@@ -1,10 +1,10 @@
-#ifndef GRSF_Dynamics_General_RigidBodyFunctionsMPI_hpp
-#define GRSF_Dynamics_General_RigidBodyFunctionsMPI_hpp
+#ifndef GRSF_dynamics_general_RigidBodyFunctionsMPI_hpp
+#define GRSF_dynamics_general_RigidBodyFunctionsMPI_hpp
 
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Dynamics/General/RigidBodyFunctions.hpp"
+#include "GRSF/dynamics/general/RigidBodyFunctions.hpp"
 
 namespace RigidBodyFunctions {
 

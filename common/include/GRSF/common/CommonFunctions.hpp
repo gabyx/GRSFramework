@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef GRSF_Common_CommonFunctions_hpp
-#define GRSF_Common_CommonFunctions_hpp
+#ifndef GRSF_common_CommonFunctions_hpp
+#define GRSF_common_CommonFunctions_hpp
 
 // Includes =================================
 #include <iostream>
@@ -26,12 +26,12 @@
 
 #include "TinyFormatInclude.hpp"
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/StaticAssert.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/StaticAssert.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/FastStringConversion.hpp"
-#include "GRSF/Common/SfinaeMacros.hpp"
+#include "GRSF/common/FastStringConversion.hpp"
+#include "GRSF/common/SfinaeMacros.hpp"
 
 
 

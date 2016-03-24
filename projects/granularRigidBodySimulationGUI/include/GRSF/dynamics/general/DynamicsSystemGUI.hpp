@@ -1,18 +1,18 @@
-﻿#ifndef GRSF_Dynamics_General_DynamicsSystemGUI_hpp
-#define GRSF_Dynamics_General_DynamicsSystemGUI_hpp
+﻿#ifndef GRSF_dynamics_general_DynamicsSystemGUI_hpp
+#define GRSF_dynamics_general_DynamicsSystemGUI_hpp
 
 #include <vector>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include <boost/iterator/transform_iterator.hpp>
 
-#include "GRSF/Common/OgrePointCloud.hpp"
+#include "GRSF/common/OgrePointCloud.hpp"
 
-#include "GRSF/Dynamics/General/DynamicsSystem.hpp"
+#include "GRSF/dynamics/general/DynamicsSystem.hpp"
 
-#include "GRSF/Systems/SceneParserGUI.hpp"
+#include "GRSF/systems/SceneParserGUI.hpp"
 
 #include <Ogre.h>
 

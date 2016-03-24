@@ -6,16 +6,16 @@
  *
  */
 
-#ifndef GRSF_Dynamics_Collision_CollisionFunctions_hpp
-#define GRSF_Dynamics_Collision_CollisionFunctions_hpp
+#ifndef GRSF_dynamics_collision_CollisionFunctions_hpp
+#define GRSF_dynamics_collision_CollisionFunctions_hpp
 
 #include <cmath>
 #include <vector>
 #include "boost/tuple/tuple.hpp"
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/General/MeshData.hpp"
+#include "GRSF/dynamics/general/MeshData.hpp"
 
 /**
 * @brief Collision helper functions for the Collider!

@@ -1,22 +1,22 @@
 #include <iostream>
 #include <string>
 
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Common/Exception.hpp"
+#include "GRSF/common/Exception.hpp"
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
-#include "GRSF/Common/ApplicationSignalHandler.hpp"
+#include "GRSF/common/ApplicationCLOptionsConverter.hpp"
+#include "GRSF/common/ApplicationSignalHandler.hpp"
 
-#include "GRSF/Converters/SimInfo/SimFileInfo.hpp"
-#include "GRSF/Converters/SimJoiner/SimFileJoiner.hpp"
-#include "GRSF/Converters/SimResampler/SimFileResampler.hpp"
-#include "GRSF/Converters/Renderer/RenderConverter.hpp"
-#include "GRSF/Converters/Analyzer/AnalyzerConverter.hpp"
-#include "GRSF/Converters/Gridder/GridderConverter.hpp"
+#include "GRSF/converters/simInfo/SimFileInfo.hpp"
+#include "GRSF/converters/simJoiner/SimFileJoiner.hpp"
+#include "GRSF/converters/simResampler/SimFileResampler.hpp"
+#include "GRSF/converters/renderer/RenderConverter.hpp"
+#include "GRSF/converters/analyzer/AnalyzerConverter.hpp"
+#include "GRSF/converters/gridder/GridderConverter.hpp"
 
 void printHelpAndExit(std::string o=""){
      std::cerr << "Wrong Options: '" << o <<"'"<< std::endl

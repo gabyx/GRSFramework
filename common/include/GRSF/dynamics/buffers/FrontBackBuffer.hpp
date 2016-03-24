@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Dynamics_Buffers_FrontBackBuffer_hpp
-#define GRSF_Dynamics_Buffers_FrontBackBuffer_hpp
+﻿#ifndef GRSF_dynamics_buffers_FrontBackBuffer_hpp
+#define GRSF_dynamics_buffers_FrontBackBuffer_hpp
 
 #include <memory>
 #include <boost/type_traits.hpp>

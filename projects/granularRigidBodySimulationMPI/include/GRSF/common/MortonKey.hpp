@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_MortonKey_hpp
-#define GRSF_Common_MortonKey_hpp
+#ifndef GRSF_common_MortonKey_hpp
+#define GRSF_common_MortonKey_hpp
 
 
 #include <cstdint>

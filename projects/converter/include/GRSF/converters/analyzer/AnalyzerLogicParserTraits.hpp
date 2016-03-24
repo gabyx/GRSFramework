@@ -1,8 +1,8 @@
-#ifndef GRSF_General_AnalyzerLogicParserTraits_hpp
-#define GRSF_General_AnalyzerLogicParserTraits_hpp
+#ifndef GRSF_converters_analyzer_AnalyzerLogicParserTraits_hpp
+#define GRSF_converters_analyzer_AnalyzerLogicParserTraits_hpp
 
 
-#include "GRSF/General/LogicParserTraits.hpp"
+#include "GRSF/general/LogicParserTraits.hpp"
 
 
 /** The traits for a standart AnalyzerLogicParser class*/
@@ -12,7 +12,7 @@ struct AnalyzerLogicParserTraits : LogicParserTraits<TSceneParser,TDataStorage> 
 
 };
 
-#include "GRSF/Converters/Analyzer/AnalyzerLogicParserTraitsMacro.hpp"
+#include "GRSF/converters/analyzer/AnalyzerLogicParserTraitsMacro.hpp"
 
 
 

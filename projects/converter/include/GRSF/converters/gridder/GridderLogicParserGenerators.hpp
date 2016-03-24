@@ -1,9 +1,9 @@
-#ifndef GRSF_General_GridderLogicParserGenerators_hpp
-#define GRSF_General_GridderLogicParserGenerators_hpp
+#ifndef GRSF_converters_gridder_GridderLogicParserGenerators_hpp
+#define GRSF_converters_gridder_GridderLogicParserGenerators_hpp
 
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include <memory>
 

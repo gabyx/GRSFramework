@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_UnorderedContainerHelpers_hpp
-#define GRSF_Common_UnorderedContainerHelpers_hpp
+#ifndef GRSF_common_UnorderedContainerHelpers_hpp
+#define GRSF_common_UnorderedContainerHelpers_hpp
 
 /** Intersection and union function for unordered containers which support a fast lookup function find()
  *  Return values are moved by move-semantics, for c++11/c++14 this is efficient, otherwise it results in a copy

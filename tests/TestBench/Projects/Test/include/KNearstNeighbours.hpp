@@ -5,7 +5,7 @@
 #include <queue>
 #include <iterator>
 #include <algorithm>
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 #include <random>
 
 void kNearstNeighboursTest(){

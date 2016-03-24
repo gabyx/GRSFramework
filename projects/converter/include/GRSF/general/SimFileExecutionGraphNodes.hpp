@@ -1,15 +1,15 @@
-#ifndef GRSF_General_SimFileExecutionGraphNodes_hpp
-#define GRSF_General_SimFileExecutionGraphNodes_hpp
+#ifndef GRSF_general_SimFileExecutionGraphNodes_hpp
+#define GRSF_general_SimFileExecutionGraphNodes_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include LogicTypes_INCLUDE_FILE
-#include "GRSF/Logic/LogicNode.hpp"
+#include "GRSF/logic/LogicNode.hpp"
 
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
-#include "GRSF/Dynamics/Buffers/RigidBodyState.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
+#include "GRSF/dynamics/general/QuaternionHelpers.hpp"
+#include "GRSF/dynamics/buffers/RigidBodyState.hpp"
+#include "GRSF/dynamics/collision/geometry/AABB.hpp"
 
 namespace LogicNodes {
 

@@ -1,26 +1,26 @@
-﻿#ifndef GRSF_Dynamics_Inclusion_InclusionSolverNT_hpp
-#define GRSF_Dynamics_Inclusion_InclusionSolverNT_hpp
+﻿#ifndef GRSF_dynamics_inclusion_InclusionSolverNT_hpp
+#define GRSF_dynamics_inclusion_InclusionSolverNT_hpp
 
 #include <iostream>
 #include <fstream>
 #include <memory>
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/Collision/CollisionData.hpp"
+#include "GRSF/dynamics/collision/CollisionData.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ContactParameterMap.hpp"
-#include "GRSF/Dynamics/Inclusion/PercussionPool.hpp"
+#include "GRSF/dynamics/inclusion/ContactParameterMap.hpp"
+#include "GRSF/dynamics/inclusion/PercussionPool.hpp"
 
-#include "GRSF/Dynamics/General/VectorToSkewMatrix.hpp"
+#include "GRSF/dynamics/general/VectorToSkewMatrix.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ProxFunctions.hpp"
+#include "GRSF/dynamics/inclusion/ProxFunctions.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
 
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 
 

@@ -27,10 +27,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GRSF_Common_OgrePointCloud_hpp
-#define GRSF_Common_OgrePointCloud_hpp
+#ifndef GRSF_common_OgrePointCloud_hpp
+#define GRSF_common_OgrePointCloud_hpp
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 #include <OgreSimpleRenderable.h>
 #include <OgreMovableObject.h>

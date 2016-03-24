@@ -1,5 +1,5 @@
-#ifndef GRSF_General_RenderLogicParser_hpp
-#define GRSF_General_RenderLogicParser_hpp
+#ifndef GRSF_converters_renderer_RenderLogicParser_hpp
+#define GRSF_converters_renderer_RenderLogicParser_hpp
 
 #include <vector>
 #include <fstream>
@@ -7,15 +7,15 @@
 #include <boost/filesystem.hpp>
 #include <pugixml.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TupleHelper.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TupleHelper.hpp"
 
-#include "GRSF/Common/XMLMacros.hpp"
-#include "GRSF/General/LogicParser.hpp"
+#include "GRSF/common/XMLMacros.hpp"
+#include "GRSF/general/LogicParser.hpp"
 
-#include "GRSF/Converters/Renderer/RenderLogicParserTraits.hpp"
+#include "GRSF/converters/renderer/RenderLogicParserTraits.hpp"
 
 template< typename TDataStorage, template<typename P, typename C> class TParserTraits = RenderLogicParserTraits >
 class RenderLogicParser  : public LogicParser<TDataStorage,

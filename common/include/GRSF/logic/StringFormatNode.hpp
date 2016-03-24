@@ -1,14 +1,14 @@
-#ifndef GRSF_Logic_StringFormatNode_hpp
-#define GRSF_Logic_StringFormatNode_hpp
+#ifndef GRSF_logic_StringFormatNode_hpp
+#define GRSF_logic_StringFormatNode_hpp
 
 #include <type_traits>
 #include <boost/mpl/contains.hpp>
 
 #include "TinyFormatInclude.hpp"
-#include "GRSF/Common/DemangleTypes.hpp"
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/DemangleTypes.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
-#include "GRSF/Logic/LogicNode.hpp"
+#include "GRSF/logic/LogicNode.hpp"
 
 namespace LogicNodes{
 

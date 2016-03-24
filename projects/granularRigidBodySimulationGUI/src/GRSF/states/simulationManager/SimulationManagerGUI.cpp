@@ -3,31 +3,31 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/ApplicationCLOptions.hpp"
-#include "GRSF/States/SimulationManager/SimulationManagerGUI.hpp"
+#include "GRSF/common/ApplicationCLOptions.hpp"
+#include "GRSF/states/simulationManager/SimulationManagerGUI.hpp"
 
-#include <GRSF/Singeltons/Contexts/RenderContext.hpp>
+#include "GRSF/singeltons/contexts/RenderContext.hpp"
 
-#include "GRSF/Dynamics/Buffers/DynamicsState.hpp"
-#include "GRSF/Systems/SharedBufferDynSys.hpp"
-#include "GRSF/Dynamics/Buffers/StateRecorder.hpp"
+#include "GRSF/dynamics/buffers/DynamicsState.hpp"
+#include "GRSF/systems/SharedBufferDynSys.hpp"
+#include "GRSF/dynamics/buffers/StateRecorder.hpp"
 
 
 #include TimeStepper_INCLUDE_FILE
-//#include "GRSF/Dynamics/Inclusion/InclusionSolverNT.hpp"
-//#include "GRSF/Dynamics/Inclusion/InclusionSolverCO.hpp"
-#include "GRSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp"
+//#include "GRSF/dynamics/inclusion/InclusionSolverNT.hpp"
+//#include "GRSF/dynamics/inclusion/InclusionSolverCO.hpp"
+#include "GRSF/dynamics/inclusion/InclusionSolverCONoG.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "GRSF/Common/CommonFunctions.hpp"
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
-#include "GRSF/Common/OgreMeshExtraction.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
+#include "GRSF/dynamics/general/QuaternionHelpers.hpp"
+#include "GRSF/common/OgreMeshExtraction.hpp"
 
-#include "GRSF/Singeltons/FileManager.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
 
 
 using namespace std;

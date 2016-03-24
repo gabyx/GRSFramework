@@ -1,11 +1,11 @@
 
-#include "GRSF/Dynamics/General/DynamicsSystemMPI.hpp"
+#include "GRSF/dynamics/general/DynamicsSystemMPI.hpp"
 
-#include "GRSF/Dynamics/General/AddGyroTermVisitor.hpp"
-#include "GRSF/Dynamics/General/VectorToSkewMatrix.hpp"
-#include "GRSF/Common/CommonFunctions.hpp"
-#include "GRSF/Dynamics/General/RigidBodyFunctions.hpp"
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
+#include "GRSF/dynamics/general/AddGyroTermVisitor.hpp"
+#include "GRSF/dynamics/general/VectorToSkewMatrix.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
+#include "GRSF/dynamics/general/RigidBodyFunctions.hpp"
+#include "GRSF/dynamics/general/QuaternionHelpers.hpp"
 
 DynamicsSystemMPI::DynamicsSystemMPI(){
 }

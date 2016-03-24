@@ -1,9 +1,9 @@
-#ifndef GRSF_Dynamics_General_RigidBodyMPI_hpp
-#define GRSF_Dynamics_General_RigidBodyMPI_hpp
+#ifndef GRSF_dynamics_general_RigidBodyMPI_hpp
+#define GRSF_dynamics_general_RigidBodyMPI_hpp
 
-#include "GRSF/Dynamics/General/RigidBody.hpp"
+#include "GRSF/dynamics/general/RigidBody.hpp"
 
-#include "GRSF/Dynamics/General/BodyInfoMap.hpp"
+#include "GRSF/dynamics/general/BodyInfoMap.hpp"
 
 
 class RigidBodyBaseMPI: public RigidBodyBase {

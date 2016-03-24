@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_Exception_hpp
-#define GRSF_Common_Exception_hpp
+#ifndef GRSF_common_Exception_hpp
+#define GRSF_common_Exception_hpp
 
 #include <stdexcept>
 #include <exception>

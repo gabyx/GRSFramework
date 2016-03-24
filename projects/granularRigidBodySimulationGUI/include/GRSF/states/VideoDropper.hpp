@@ -1,10 +1,10 @@
-#ifndef GRSF_States_VideoDropper_hpp
-#define GRSF_States_VideoDropper_hpp
+#ifndef GRSF_states_VideoDropper_hpp
+#define GRSF_states_VideoDropper_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Singeltons/Contexts/RenderContext.hpp"
+#include "GRSF/singeltons/contexts/RenderContext.hpp"
 
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>

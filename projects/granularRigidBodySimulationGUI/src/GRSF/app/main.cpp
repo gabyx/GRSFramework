@@ -2,9 +2,9 @@
 
 using namespace std;
 
-#include "GRSF/Common/ApplicationCLOptions.hpp"
+#include "GRSF/common/ApplicationCLOptions.hpp"
 
-#include <GRSF/App/App.hpp>
+#include "GRSF/app/App.hpp"
 
 //#if OGRE_PLATFORM == PLATFORM_WIN32 || OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 //#define WIN32_LEAN_AND_MEAN

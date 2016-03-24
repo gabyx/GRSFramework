@@ -1,7 +1,7 @@
-﻿#include "GRSF/States/AppStateManager.hpp"
+﻿#include "GRSF/states/AppStateManager.hpp"
 
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/PlatformDefines.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/PlatformDefines.hpp"
 
 /* template<> AppStateManager* Ogre::Singleton<AppStateManager>::ms_Singleton = 0; */
 

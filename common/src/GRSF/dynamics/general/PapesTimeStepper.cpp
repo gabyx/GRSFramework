@@ -1,7 +1,7 @@
 
-#include "GRSF/Dynamics/General/PapesTimeStepper.hpp"
+#include "GRSF/dynamics/general/PapesTimeStepper.hpp"
 
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 
 PapesTimeStepper::PapesTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys,

@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_MultiBodySimFileMPI_hpp
-#define GRSF_Dynamics_General_MultiBodySimFileMPI_hpp
+#ifndef GRSF_dynamics_general_MultiBodySimFileMPI_hpp
+#define GRSF_dynamics_general_MultiBodySimFileMPI_hpp
 
 
 #include <type_traits>
@@ -9,17 +9,17 @@
 
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/StaticAssert.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/StaticAssert.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 
 
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
-#include "GRSF/Common/SerializationHelpersEigen.hpp"
-#include "GRSF/Dynamics/General/MultiBodySimFileIOHelpers.hpp"
-#include "GRSF/Dynamics/General/AdditionalBodyData.hpp"
+#include "GRSF/common/SerializationHelpersEigen.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFileIOHelpers.hpp"
+#include "GRSF/dynamics/general/AdditionalBodyData.hpp"
 
 #define SIM_FILE_MPI_SIGNATURE_LENGTH 4
 #define SIM_FILE_MPI_SIGNATURE {'M','B','S','F'}

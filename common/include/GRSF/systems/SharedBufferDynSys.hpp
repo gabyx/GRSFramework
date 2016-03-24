@@ -1,13 +1,13 @@
 ﻿
-#ifndef GRSF_Systems_SharedBufferDynSys_hpp
-#define GRSF_Systems_SharedBufferDynSys_hpp
+#ifndef GRSF_systems_SharedBufferDynSys_hpp
+#define GRSF_systems_SharedBufferDynSys_hpp
 
 #include <boost/thread.hpp>
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/Buffers/StatePoolVisBackFront.hpp"
+#include "GRSF/dynamics/buffers/StatePoolVisBackFront.hpp"
 
 
 class SharedBufferDynSys : public StatePoolVisBackFront

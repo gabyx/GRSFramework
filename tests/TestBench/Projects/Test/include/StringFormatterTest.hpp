@@ -4,7 +4,7 @@
 
 #include "TinyFormatInclude.hpp"
 
-#include "GRSF/Common/DemangleTypes.hpp"
+#include "GRSF/common/DemangleTypes.hpp"
 
 #include <boost/filesystem/path.hpp>
 

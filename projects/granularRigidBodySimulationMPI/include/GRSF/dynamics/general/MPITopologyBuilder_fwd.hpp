@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_MPITopologyBuilder_fwd_hpp
-#define GRSF_Dynamics_General_MPITopologyBuilder_fwd_hpp
+#ifndef GRSF_dynamics_general_MPITopologyBuilder_fwd_hpp
+#define GRSF_dynamics_general_MPITopologyBuilder_fwd_hpp
 
 #include <type_traits>
 

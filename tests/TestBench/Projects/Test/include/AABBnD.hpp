@@ -1,10 +1,10 @@
 #ifndef AABBnD_hpp
 #define AABBnD_hpp
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/CPUTimer.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/CPUTimer.hpp"
+#include "GRSF/dynamics/collision/geometry/AABB.hpp"
 
 
 template<unsigned int Dim>

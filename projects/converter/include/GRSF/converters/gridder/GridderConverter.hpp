@@ -1,5 +1,5 @@
-#ifndef GRSF_Converters_GridderConverter_hpp
-#define GRSF_Converters_GridderConverter_hpp
+#ifndef GRSF_converters_gridder_GridderConverter_hpp
+#define GRSF_converters_gridder_GridderConverter_hpp
 
 #include <iostream>
 #include <iomanip>
@@ -11,11 +11,11 @@
 
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Converters/SimFileConverter.hpp"
-#include "GRSF/Converters/Gridder/GridderData.hpp"
+#include "GRSF/converters/SimFileConverter.hpp"
+#include "GRSF/converters/gridder/GridderData.hpp"
 
 
 class GridderConverter : public SimFileConverter {

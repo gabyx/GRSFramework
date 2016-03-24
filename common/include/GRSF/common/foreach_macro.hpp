@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Common_foreach_macro_hpp
-#define GRSF_Common_foreach_macro_hpp
+﻿#ifndef GRSF_common_foreach_macro_hpp
+#define GRSF_common_foreach_macro_hpp
 
 #if defined(__GNUC__) && __GNUC__==4 && __GNUC_MINOR__<4
 #define FOREACH__HPP_TYPEOF 1

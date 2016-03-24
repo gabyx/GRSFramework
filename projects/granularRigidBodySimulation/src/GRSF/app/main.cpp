@@ -1,19 +1,19 @@
 #include <iostream>
 #include <string>
 
-#include "GRSF/Common/Exception.hpp"
+#include "GRSF/common/Exception.hpp"
 
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/ApplicationSignalHandler.hpp"
-#include "GRSF/Common/ApplicationCLOptions.hpp"
-#include "GRSF/Singeltons/FileManager.hpp"
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/ApplicationSignalHandler.hpp"
+#include "GRSF/common/ApplicationCLOptions.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
-#include "GRSF/States/SimulationManager/SimulationManager.hpp"
+#include "GRSF/states/simulationManager/SimulationManager.hpp"
 
 #include "ApproxMVBB/ComputeApproxMVBB.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/OOBB.hpp"
+#include "GRSF/dynamics/collision/geometry/OOBB.hpp"
 
 void callBackSignalAndExit(int signum){
     std::cerr << "GRSFramework Sim: received signal: " << signum << " -> exit ..." << std::endl;

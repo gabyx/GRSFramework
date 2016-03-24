@@ -6,16 +6,16 @@
 *
 */
 
-#ifndef GRSF_Dynamics_Inclusion_ProxFunctions_hpp
-#define GRSF_Dynamics_Inclusion_ProxFunctions_hpp
+#ifndef GRSF_dynamics_inclusion_ProxFunctions_hpp
+#define GRSF_dynamics_inclusion_ProxFunctions_hpp
 
 #include <iostream>
 #include <iomanip>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ConvexSets.hpp"
+#include "GRSF/dynamics/inclusion/ConvexSets.hpp"
 
 
 #define INLINE_PROX 1

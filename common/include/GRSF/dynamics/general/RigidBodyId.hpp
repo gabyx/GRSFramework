@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_RigidBodyId_hpp
-#define GRSF_Dynamics_General_RigidBodyId_hpp
+#ifndef GRSF_dynamics_general_RigidBodyId_hpp
+#define GRSF_dynamics_general_RigidBodyId_hpp
 
 #include <string>
 #include <sstream>

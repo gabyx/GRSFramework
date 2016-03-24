@@ -1,10 +1,10 @@
-#include "GRSF/Converters/Gridder/GridderConverter.hpp"
+#include "GRSF/converters/gridder/GridderConverter.hpp"
 
-//#include "GRSF/Systems/SceneParser.hpp"
-#include "GRSF/Converters/Gridder/GridderLogicParser.hpp"
-#include "GRSF/Converters/Gridder/GridderLogicParserGenerators.hpp"
+//#include "GRSF/systems/SceneParser.hpp"
+#include "GRSF/converters/gridder/GridderLogicParser.hpp"
+#include "GRSF/converters/gridder/GridderLogicParserGenerators.hpp"
 
-#include "GRSF/Converters/Gridder/GridExtractor.hpp"
+#include "GRSF/converters/gridder/GridExtractor.hpp"
 
 GridderConverter::GridderConverter(const std::vector<boost::filesystem::path> & inputFiles,
               boost::filesystem::path sceneFile,

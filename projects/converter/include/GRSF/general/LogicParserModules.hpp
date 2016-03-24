@@ -1,25 +1,25 @@
-#ifndef GRSF_General_LogicParserModules_hpp
-#define GRSF_General_LogicParserModules_hpp
+#ifndef GRSF_general_LogicParserModules_hpp
+#define GRSF_general_LogicParserModules_hpp
 
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
-#include "GRSF/Dynamics/General/ParserFunctions.hpp"
+#include "GRSF/dynamics/general/ParserFunctions.hpp"
 
-#include "GRSF/Logic/SimpleFunction.hpp"
-#include "GRSF/Logic/StringFormatNode.hpp"
-#include "GRSF/Logic/ConstantNode.hpp"
-#include "GRSF/Logic/NormNode.hpp"
-#include "GRSF/Logic/InnerProductNode.hpp"
-#include "GRSF/Logic/Transform3DNode.hpp"
-#include "GRSF/Logic/VectorToComponentsNode.hpp"
-#include "GRSF/Logic/LookUpTable.hpp"
-#include "GRSF/Logic/LineWriter.hpp"
-#include "GRSF/Logic/StopNode.hpp"
-#include "GRSF/Logic/XMLLineWriter.hpp"
+#include "GRSF/logic/SimpleFunction.hpp"
+#include "GRSF/logic/StringFormatNode.hpp"
+#include "GRSF/logic/ConstantNode.hpp"
+#include "GRSF/logic/NormNode.hpp"
+#include "GRSF/logic/InnerProductNode.hpp"
+#include "GRSF/logic/Transform3DNode.hpp"
+#include "GRSF/logic/VectorToComponentsNode.hpp"
+#include "GRSF/logic/LookUpTable.hpp"
+#include "GRSF/logic/LineWriter.hpp"
+#include "GRSF/logic/StopNode.hpp"
+#include "GRSF/logic/XMLLineWriter.hpp"
 
-#include "GRSF/General/SimFileExecutionGraph.hpp"
-#include "GRSF/General/SimFileExecutionGraphNodes.hpp"
-#include "GRSF/General/LogicParserTraitsMacro.hpp"
+#include "GRSF/general/SimFileExecutionGraph.hpp"
+#include "GRSF/general/SimFileExecutionGraphNodes.hpp"
+#include "GRSF/general/LogicParserTraitsMacro.hpp"
 
 
 #define ERRORMSG_PARSERTOOL(mess,id) \

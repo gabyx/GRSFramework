@@ -1,15 +1,15 @@
-﻿#ifndef GRSF_Dynamics_Buffers_StatePoolVisBackFront_hpp
-#define GRSF_Dynamics_Buffers_StatePoolVisBackFront_hpp
+﻿#ifndef GRSF_dynamics_buffers_StatePoolVisBackFront_hpp
+#define GRSF_dynamics_buffers_StatePoolVisBackFront_hpp
 
 
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Dynamics/Buffers/StatePool.hpp"
-#include "GRSF/Dynamics/Buffers/FrontBackBuffer.hpp"
+#include "GRSF/dynamics/buffers/StatePool.hpp"
+#include "GRSF/dynamics/buffers/FrontBackBuffer.hpp"
 
-#include "GRSF/Singeltons/FileManager.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
 
-#include "GRSF/Dynamics/General/InitialConditionBodies.hpp"
+#include "GRSF/dynamics/general/InitialConditionBodies.hpp"
 
 /**
 * @ingroup StatesAndBuffers

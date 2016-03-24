@@ -1,16 +1,16 @@
-#ifndef GRSF_Dynamics_General_MPITopology_hpp
-#define GRSF_Dynamics_General_MPITopology_hpp
+#ifndef GRSF_dynamics_general_MPITopology_hpp
+#define GRSF_dynamics_general_MPITopology_hpp
 
 #include <mpi.h>
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-//#include "GRSF/Dynamics/General/MPIInformation.hpp"
+//#include "GRSF/dynamics/general/MPIInformation.hpp"
 
-#include "GRSF/Dynamics/General/MPITopologyGrid.hpp"
-#include "GRSF/Dynamics/General/MPITopologyKdTree.hpp"
-#include "GRSF/Dynamics/General/MPITopologyVisitors.hpp"
+#include "GRSF/dynamics/general/MPITopologyGrid.hpp"
+#include "GRSF/dynamics/general/MPITopologyKdTree.hpp"
+#include "GRSF/dynamics/general/MPITopologyVisitors.hpp"
 
 namespace MPILayer {
 

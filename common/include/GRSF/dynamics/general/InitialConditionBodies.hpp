@@ -1,12 +1,12 @@
-#ifndef GRSF_Dynamics_General_InitialConditionBodies_hpp
-#define GRSF_Dynamics_General_InitialConditionBodies_hpp
+#ifndef GRSF_dynamics_general_InitialConditionBodies_hpp
+#define GRSF_dynamics_general_InitialConditionBodies_hpp
 
 #include <random>
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/CommonFunctions.hpp"
-#include "GRSF/Dynamics/Buffers/DynamicsState.hpp"
-#include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
+#include "GRSF/dynamics/buffers/DynamicsState.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFile.hpp"
 
 #include "boost/generator_iterator.hpp"
 

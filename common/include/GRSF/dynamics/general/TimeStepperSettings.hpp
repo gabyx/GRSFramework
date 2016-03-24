@@ -1,7 +1,7 @@
-#ifndef GRSF_Dynamics_General_TimeStepperSettings_hpp
-#define GRSF_Dynamics_General_TimeStepperSettings_hpp
+#ifndef GRSF_dynamics_general_TimeStepperSettings_hpp
+#define GRSF_dynamics_general_TimeStepperSettings_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 #include <boost/filesystem.hpp>
 

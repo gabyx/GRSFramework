@@ -1,11 +1,11 @@
-﻿#include "GRSF/States/PlaybackState.hpp"
+﻿#include "GRSF/states/PlaybackState.hpp"
 
-#include "GRSF/States/SimulationManager/SimulationManagerGUI.hpp"
-#include "GRSF/States/SimulationManager/PlaybackManager.hpp"
+#include "GRSF/states/simulationManager/SimulationManagerGUI.hpp"
+#include "GRSF/states/simulationManager/PlaybackManager.hpp"
 
-#include "GRSF/Singeltons/FileManager.hpp"
-#include "GRSF/Common/OgreSceneManagerDeleter.hpp"
-#include "GRSF/States/SimulationManager/SimulationManagerGUI.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
+#include "GRSF/common/OgreSceneManagerDeleter.hpp"
+#include "GRSF/states/simulationManager/SimulationManagerGUI.hpp"
 
 
 using namespace Ogre;

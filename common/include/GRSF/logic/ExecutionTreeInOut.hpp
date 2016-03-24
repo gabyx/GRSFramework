@@ -1,15 +1,15 @@
-#ifndef GRSF_Logic_ExecutionTreeInOut_hpp
-#define GRSF_Logic_ExecutionTreeInOut_hpp
+#ifndef GRSF_logic_ExecutionTreeInOut_hpp
+#define GRSF_logic_ExecutionTreeInOut_hpp
 
 #include <algorithm>
 #include <unordered_set>
 
 #include <boost/mpl/vector.hpp>
 
-#include "GRSF/Common/DemangleTypes.hpp"
+#include "GRSF/common/DemangleTypes.hpp"
 
-#include "GRSF/Logic/LogicNode.hpp"
-#include "GRSF/Logic/LogicSocket.hpp"
+#include "GRSF/logic/LogicNode.hpp"
+#include "GRSF/logic/LogicSocket.hpp"
 
 
 

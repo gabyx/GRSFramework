@@ -7,22 +7,22 @@
  */
 
 
-#ifndef GRSF_App_App_hpp
-#define GRSF_App_App_hpp
+#ifndef GRSF_app_App_hpp
+#define GRSF_app_App_hpp
 
 // Includes =================================
 #include <memory>
 
-#include "GRSF/States/SimulationState.hpp"
-#include "GRSF/States/PlaybackState.hpp"
-#include "GRSF/Singeltons/FileManager.hpp"
-#include "GRSF/Singeltons/Contexts/InputContext.hpp"
-#include "GRSF/Singeltons/Contexts/GuiContext.hpp"
-#include "GRSF/Singeltons/Contexts/RenderContext.hpp"
+#include "GRSF/states/SimulationState.hpp"
+#include "GRSF/states/PlaybackState.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
+#include "GRSF/singeltons/contexts/InputContext.hpp"
+#include "GRSF/singeltons/contexts/GuiContext.hpp"
+#include "GRSF/singeltons/contexts/RenderContext.hpp"
 
-#include "GRSF/States/AppStateManager.hpp"
+#include "GRSF/states/AppStateManager.hpp"
 
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/LogDefines.hpp"
 // ===========================================
 
 

@@ -1,6 +1,6 @@
-﻿#include "GRSF/Singeltons/Contexts/GuiContext.hpp"
+﻿#include "GRSF/singeltons/contexts/GuiContext.hpp"
 
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 //=========================================================
 

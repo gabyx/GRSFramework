@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Dynamics_Collision_CollisionSolver_hpp
-#define GRSF_Dynamics_Collision_CollisionSolver_hpp
+﻿#ifndef GRSF_dynamics_collision_CollisionSolver_hpp
+#define GRSF_dynamics_collision_CollisionSolver_hpp
 
 #include <fstream>
 #include <vector>
@@ -9,20 +9,20 @@
 #include <memory>
 
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "GRSF/Dynamics/Collision/ContactFrame.hpp"
-#include "GRSF/Dynamics/Collision/CollisionData.hpp"
-#include "GRSF/Dynamics/Collision/Collider.hpp"
-#include "GRSF/Common/SimpleLogger.hpp"
-#include "GRSF/Common/LinearReusableStorage.hpp"
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
+#include "GRSF/dynamics/collision/ContactFrame.hpp"
+#include "GRSF/dynamics/collision/CollisionData.hpp"
+#include "GRSF/dynamics/collision/Collider.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
+#include "GRSF/common/LinearReusableStorage.hpp"
+#include "GRSF/dynamics/general/QuaternionHelpers.hpp"
 
-#include "GRSF/Dynamics/Collision/ContactDelegateSupport.hpp"
+#include "GRSF/dynamics/collision/ContactDelegateSupport.hpp"
 
 /**
 * @ingroup Collision

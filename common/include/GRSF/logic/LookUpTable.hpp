@@ -1,7 +1,7 @@
-#ifndef GRSF_Logic_LookUpTable_hpp
-#define GRSF_Logic_LookUpTable_hpp
+#ifndef GRSF_logic_LookUpTable_hpp
+#define GRSF_logic_LookUpTable_hpp
 
-#include "GRSF/Logic/LogicNode.hpp"
+#include "GRSF/logic/LogicNode.hpp"
 
 namespace LogicNodes{
     template<typename TKey, typename TValue, typename TMap>

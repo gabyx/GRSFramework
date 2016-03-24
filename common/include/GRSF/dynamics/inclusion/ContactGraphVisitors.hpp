@@ -1,13 +1,13 @@
-#ifndef GRSF_Dynamics_Inclusion_ContactGraphVisitors_hpp
-#define GRSF_Dynamics_Inclusion_ContactGraphVisitors_hpp
+#ifndef GRSF_dynamics_inclusion_ContactGraphVisitors_hpp
+#define GRSF_dynamics_inclusion_ContactGraphVisitors_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
-#include "GRSF/Dynamics/Inclusion/PercussionPool.hpp"
-#include "GRSF/Dynamics/General/VectorToSkewMatrix.hpp"
-#include "GRSF/Dynamics/Inclusion/ProxFunctions.hpp"
+#include "GRSF/dynamics/inclusion/PercussionPool.hpp"
+#include "GRSF/dynamics/general/VectorToSkewMatrix.hpp"
+#include "GRSF/dynamics/inclusion/ProxFunctions.hpp"
 
 
 

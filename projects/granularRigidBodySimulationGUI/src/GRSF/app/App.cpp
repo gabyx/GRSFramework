@@ -1,8 +1,8 @@
-﻿#include "GRSF/App/App.hpp"
+﻿#include "GRSF/app/App.hpp"
 
 #include <boost/pointer_cast.hpp>
 
-#include "GRSF/Common/ApplicationCLOptions.hpp"
+#include "GRSF/common/ApplicationCLOptions.hpp"
 
 App::App() {
 }

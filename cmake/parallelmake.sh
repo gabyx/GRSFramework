@@ -20,7 +20,7 @@ done
 
 # ignore cores (e.g. -j 12), set them according to the cpu information!
 maxCores=$(grep -c ^processor /proc/cpuinfo)
-coresToUse=$(bc <<< "((0.5*$maxCores) + 0.5)/1" ) # cheap hack to round to int
+coresToUse=$(bc <<< "((0.5*$maxCores) + 0.5)/1 " ) # cheap hack to round to int
 
 echo "Building with $coresToUse cores!"
 echo "passing rest arguments to make: ${arg_rest[@]}"

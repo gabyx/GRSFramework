@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_MPITopologyBuilder_hpp
-#define GRSF_Dynamics_General_MPITopologyBuilder_hpp
+#ifndef GRSF_dynamics_general_MPITopologyBuilder_hpp
+#define GRSF_dynamics_general_MPITopologyBuilder_hpp
 
 #include <mpi.h>
 
@@ -8,28 +8,28 @@
 #include <functional>
 #include <numeric>
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Common/ApplicationCLOptions.hpp"
-#include "GRSF/Singeltons/FileManager.hpp"
+#include "GRSF/common/ApplicationCLOptions.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
 
-#include "GRSF/Dynamics/General/MPIMessages.hpp"
-#include "GRSF/Dynamics/General/MPICommunication.hpp"
+#include "GRSF/dynamics/general/MPIMessages.hpp"
+#include "GRSF/dynamics/general/MPICommunication.hpp"
 
-#include "GRSF/Systems/SceneParserMPI.hpp"
-#include "GRSF/Systems/SceneParserModulesCreatorTB.hpp"
+#include "GRSF/systems/SceneParserMPI.hpp"
+#include "GRSF/systems/SceneParserModulesCreatorTB.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
-#include "GRSF/Dynamics/Collision/Collider.hpp"
+#include "GRSF/dynamics/collision/Collider.hpp"
 
-#include "GRSF/Dynamics/General/MPITopologyBuilderSettings.hpp"
+#include "GRSF/dynamics/general/MPITopologyBuilderSettings.hpp"
 
-#include "GRSF/Dynamics/Collision/Geometry/AABB.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/OOBB.hpp"
+#include "GRSF/dynamics/collision/geometry/AABB.hpp"
+#include "GRSF/dynamics/collision/geometry/OOBB.hpp"
 
-#include "GRSF/Dynamics/General/KdTree.hpp"
+#include "GRSF/dynamics/general/KdTree.hpp"
 #include "ApproxMVBB/ComputeApproxMVBB.hpp"
 
 

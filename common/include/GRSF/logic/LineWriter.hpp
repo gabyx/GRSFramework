@@ -1,8 +1,8 @@
-#ifndef GRSF_Logic_LineWriter_hpp
-#define GRSF_Logic_LineWriter_hpp
+#ifndef GRSF_logic_LineWriter_hpp
+#define GRSF_logic_LineWriter_hpp
 
 #include <fstream>
-#include "GRSF/Logic/LogicNode.hpp"
+#include "GRSF/logic/LogicNode.hpp"
 
 namespace LogicNodes{
 

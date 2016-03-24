@@ -6,15 +6,6 @@ message(STATUS "==============================Project: ${PROJECT_NAME} =========
 
 include(PrintListMacro)
 
-## EXTREMLY IMPORTANT ISSUES ############################################################################################################################################
-# In MSVC 64bit mode, there is no problem with vectorization at all, because everything is aligned nicely!,
-# If we move this code to UNIX 64bit it is not anymore like that, the Code of me, is not thoroughly supported for Vectorization in EIGEN
-# TODO: To make it fully work with EIGEN_VECTORIZE as PREPROCESSOR MACRO (standart, set see App Log, have made an output!
-# in 32bit on Windows and Unix, we need the EIGEN_MAKE_ALLOCATOR_NEW always defined, (almost done) and all std::vector and stuff we need special allocators! not done!
-# TO make it still work on UNIX 64bit, turn EIGEN_DONT_ALIGN, for disabling completetly, and  EIGEN_DONT_ALIGN_STATICALLY for partly which still works... (or should)
-# http://eigen.tuxfamily.org/dox-devel/TopicPreprocessorDirectives.html
-#########################################################################################################################################################################
-
 
 #Find MPI
 FIND_PACKAGE(MPI REQUIRED)
@@ -256,8 +247,8 @@ endif()
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/Release
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin/debug
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin/release
 )
 
 ADD_DEPENDENCIES(${PROJECT_NAME} ${ApproxMVBB_DEPENDING_TARGETS})
@@ -268,7 +259,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND 
           ${CMAKE_COMMAND}
           -DFolder=$<$<CONFIG:debug>:${ResourceDir}/debug>$<$<CONFIG:release>:${ResourceDir}/release>
-          -DDestination=$<$<CONFIG:debug>:${PROJECT_BINARY_DIR}/bin/Debug>$<$<CONFIG:release>:${PROJECT_BINARY_DIR}/bin/Release>
+          -DDestination=$<$<CONFIG:debug>:${PROJECT_BINARY_DIR}/bin/Debug>$<$<CONFIG:release>:${PROJECT_BINARY_DIR}/bin/release>
           -P ${MODULE_FOLDER}/CopyFiles.cmake
 )
 

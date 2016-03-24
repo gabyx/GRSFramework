@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_EnumClassHelper_hpp
-#define GRSF_Common_EnumClassHelper_hpp
+#ifndef GRSF_common_EnumClassHelper_hpp
+#define GRSF_common_EnumClassHelper_hpp
 
 #include <type_traits>
 

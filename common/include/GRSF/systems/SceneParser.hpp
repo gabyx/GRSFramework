@@ -1,16 +1,16 @@
-#ifndef GRSF_Systems_SceneParser_hpp
-#define GRSF_Systems_SceneParser_hpp
+#ifndef GRSF_systems_SceneParser_hpp
+#define GRSF_systems_SceneParser_hpp
 
 #include <memory>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 
-#include "GRSF/Common/XMLMacros.hpp"
-#include "GRSF/Systems/SceneParserModules.hpp"
+#include "GRSF/common/XMLMacros.hpp"
+#include "GRSF/systems/SceneParserModules.hpp"
 
 
 /** The traits for a standart SceneParser class*/

@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Dynamics_General_RigidBody_hpp
-#define GRSF_Dynamics_General_RigidBody_hpp
+﻿#ifndef GRSF_dynamics_general_RigidBody_hpp
+#define GRSF_dynamics_general_RigidBody_hpp
 
 #include <memory>
 #include <boost/variant.hpp>
@@ -7,14 +7,14 @@
 
 #include <sstream>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Dynamics/General/RigidBodyId.hpp"
-#include "GRSF/Dynamics/Buffers/FrontBackBuffer.hpp"
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
+#include "GRSF/dynamics/general/RigidBodyId.hpp"
+#include "GRSF/dynamics/buffers/FrontBackBuffer.hpp"
+#include "GRSF/dynamics/general/QuaternionHelpers.hpp"
 
-#include "GRSF/Dynamics/Collision/Geometries.hpp"
+#include "GRSF/dynamics/collision/Geometries.hpp"
 #include RigidBodySolverData_INCLUDE_FILE
 
 

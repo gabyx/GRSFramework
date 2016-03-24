@@ -1,4 +1,4 @@
-﻿#include "GRSF/Dynamics/Collision/ContactTag.hpp"
+﻿#include "GRSF/dynamics/collision/ContactTag.hpp"
 
 
 void ContactTag::set( const RigidBodyIdType & b1,

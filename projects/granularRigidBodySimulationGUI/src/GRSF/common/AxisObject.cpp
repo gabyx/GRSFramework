@@ -5,7 +5,7 @@
 
 #include "Ogre.h"
 #include "OgreMaterial.h"
-#include "GRSF/Common/AxisObject.hpp"
+#include "GRSF/common/AxisObject.hpp"
 
 using namespace Ogre;
 

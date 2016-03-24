@@ -1,6 +1,6 @@
 ﻿
-#ifndef GRSF_Common_AssertionDebug_hpp
-#define GRSF_Common_AssertionDebug_hpp
+#ifndef GRSF_common_AssertionDebug_hpp
+#define GRSF_common_AssertionDebug_hpp
 
 // Add an Assertion Debuggin!
 
@@ -12,8 +12,8 @@
 
 #include <mpi.h>
 
-#include "GRSF/Common/Exception.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/Exception.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 // This is the MPI version for our Debugging shit =)
 

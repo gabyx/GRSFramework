@@ -1,5 +1,5 @@
-#ifndef GRSF_Converters_SimFileInfo_hpp
-#define GRSF_Converters_SimFileInfo_hpp
+#ifndef GRSF_converters_simInfo_SimFileInfo_hpp
+#define GRSF_converters_simInfo_SimFileInfo_hpp
 
 #include <iostream>
 #include <iomanip>
@@ -11,9 +11,9 @@
 #include "pugixml.hpp"
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/ProgressBarCL.hpp"
-#include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/ProgressBarCL.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFile.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 class SimFileInfo{;
 public:

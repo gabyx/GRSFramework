@@ -1,12 +1,12 @@
-#ifndef GRSF_Dynamics_Buffers_RigidBodyState_hpp
-#define GRSF_Dynamics_Buffers_RigidBodyState_hpp
+#ifndef GRSF_dynamics_buffers_RigidBodyState_hpp
+#define GRSF_dynamics_buffers_RigidBodyState_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Dynamics/General/RigidBodyId.hpp"
+#include "GRSF/dynamics/general/RigidBodyId.hpp"
 
-#include "GRSF/Dynamics/General/AdditionalBodyData.hpp"
+#include "GRSF/dynamics/general/AdditionalBodyData.hpp"
 
 class RigidBodyState;
 namespace Interpolate {

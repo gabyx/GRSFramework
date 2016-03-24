@@ -1,26 +1,26 @@
-#ifndef GRSF_Dynamics_Inclusion_ContactGraphMPI_hpp
-#define GRSF_Dynamics_Inclusion_ContactGraphMPI_hpp
+#ifndef GRSF_dynamics_inclusion_ContactGraphMPI_hpp
+#define GRSF_dynamics_inclusion_ContactGraphMPI_hpp
 
 #include <memory>
 #include <unordered_map>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/BitCount.hpp"
+#include "GRSF/common/BitCount.hpp"
 
 #include RigidBody_INCLUDE_FILE
 
-#include "GRSF/Dynamics/Inclusion/GeneralGraph.hpp"
-#include "GRSF/Dynamics/Collision/CollisionData.hpp"
-#include "GRSF/Dynamics/Inclusion/ContactModels.hpp"
-#include "GRSF/Dynamics/Inclusion/ContactParameterMap.hpp"
-#include "GRSF/Dynamics/Inclusion/ContactGraphNodeDataMPI.hpp"
-#include "GRSF/Dynamics/Inclusion/ContactGraphVisitors.hpp"
+#include "GRSF/dynamics/inclusion/GeneralGraph.hpp"
+#include "GRSF/dynamics/collision/CollisionData.hpp"
+#include "GRSF/dynamics/inclusion/ContactModels.hpp"
+#include "GRSF/dynamics/inclusion/ContactParameterMap.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphNodeDataMPI.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphVisitors.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
-#include "GRSF/Dynamics/General/VectorToSkewMatrix.hpp"
+#include "GRSF/dynamics/general/VectorToSkewMatrix.hpp"
 
 
 using ContactGraphTraits = Graph::GraphTraitsSymmetric<
@@ -346,6 +346,6 @@ private:
 };
 
 
-#include "GRSF/Dynamics/Inclusion/ContactGraphMPI.icc"
+#include "GRSF/dynamics/inclusion/ContactGraphMPI.icc"
 
 #endif

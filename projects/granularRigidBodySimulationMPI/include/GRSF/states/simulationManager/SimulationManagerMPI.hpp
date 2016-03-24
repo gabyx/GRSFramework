@@ -1,20 +1,20 @@
-﻿#ifndef GRSF_States_SimulationManager_SimulationManagerMPI_hpp
-#define GRSF_States_SimulationManager_SimulationManagerMPI_hpp
+﻿#ifndef GRSF_states_simulationManager_SimulationManagerMPI_hpp
+#define GRSF_states_simulationManager_SimulationManagerMPI_hpp
 
 #include <mpi.h>
 
 #include <memory>
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/General/MPIInformation.hpp"
-#include "GRSF/Dynamics/General/MPICommunication.hpp"
-#include "GRSF/Dynamics/General/MPITopologyBuilder.hpp"
-#include "GRSF/Dynamics/General/BodyCommunicator.hpp"
+#include "GRSF/dynamics/general/MPIInformation.hpp"
+#include "GRSF/dynamics/general/MPICommunication.hpp"
+#include "GRSF/dynamics/general/MPITopologyBuilder.hpp"
+#include "GRSF/dynamics/general/BodyCommunicator.hpp"
 
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
 class StateRecorder;
 class StateRecorderBody;
@@ -89,7 +89,7 @@ private:
 
 
 // Implementation
-#include "GRSF/States/SimulationManager/SimulationManagerMPI.icc"
+#include "GRSF/states/simulationManager/SimulationManagerMPI.icc"
 
 
 #endif // SimulationManagerMPI_HPP

@@ -1,6 +1,6 @@
 
-#ifndef GRSF_Common_ExpandParameterPack_hpp
-#define GRSF_Common_ExpandParameterPack_hpp
+#ifndef GRSF_common_ExpandParameterPack_hpp
+#define GRSF_common_ExpandParameterPack_hpp
 
 #include <type_traits>
 

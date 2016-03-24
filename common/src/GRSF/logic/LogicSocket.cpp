@@ -1,6 +1,6 @@
 
-#include "GRSF/Logic/LogicSocket.hpp"
-#include "GRSF/Logic/LogicNode.hpp"
+#include "GRSF/logic/LogicSocket.hpp"
+#include "GRSF/logic/LogicNode.hpp"
 #include <typeinfo>
 
 

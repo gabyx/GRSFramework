@@ -6,42 +6,42 @@
  *
  */
 
-#ifndef GRSF_Common_TypeDefs_hpp
-#define GRSF_Common_TypeDefs_hpp
+#ifndef GRSF_common_TypeDefs_hpp
+#define GRSF_common_TypeDefs_hpp
 
 #include <random>
 
-#include "GRSF/ConfigFiles/ConfigureFile.hpp"
-#include "GRSF/Dynamics/General/LayoutConfigTypeDefs.hpp"
+#include "GRSF/configFiles/ConfigureFile.hpp"
+#include "GRSF/dynamics/general/LayoutConfigTypeDefs.hpp"
 
 
 
 /// Forward declarations , includes and the GlobalConfig typed need to match!
 
 
-#define StatePool_INCLUDE_FILE "GRSF/Dynamics/Buffers/StatePoolVisBackFront.hpp"
+#define StatePool_INCLUDE_FILE                  "GRSF/dynamics/buffers/StatePoolVisBackFront.hpp"
 class StatePoolVisBackFront;
 
-#define CollisionSolver_INCLUDE_FILE "GRSF/Dynamics/Collision/CollisionSolver.hpp"
+#define CollisionSolver_INCLUDE_FILE            "GRSF/dynamics/collision/CollisionSolver.hpp"
 class CollisionSolver;
 
-#define DynamicsSystem_INCLUDE_FILE "GRSF/Dynamics/General/DynamicsSystemGUI.hpp"
+#define DynamicsSystem_INCLUDE_FILE             "GRSF/dynamics/general/DynamicsSystemGUI.hpp"
 class DynamicsSystemGUI;
-#define InclusionSolverSettings_INCLUDE_FILE    "GRSF/Dynamics/Inclusion/InclusionSolverSettings.hpp"
+#define InclusionSolverSettings_INCLUDE_FILE    "GRSF/dynamics/inclusion/InclusionSolverSettings.hpp"
 class InclusionSolverSettings;
 
-//#define InclusionSolver_INCLUDE_FILE "GRSF/Dynamics/Inclusion/InclusionSolverCO.hpp"
+//#define InclusionSolver_INCLUDE_FILE "GRSF/dynamics/Inclusion/InclusionSolverCO.hpp"
 //class InclusionSolverCO;
-#define InclusionSolver_INCLUDE_FILE "GRSF/Dynamics/Inclusion/InclusionSolverCONoG.hpp"
+#define InclusionSolver_INCLUDE_FILE            "GRSF/dynamics/inclusion/InclusionSolverCONoG.hpp"
 class InclusionSolverCONoG;
 
-#define RigidBody_INCLUDE_FILE "GRSF/Dynamics/General/RigidBody.hpp"
+#define RigidBody_INCLUDE_FILE                  "GRSF/dynamics/general/RigidBody.hpp"
 class RigidBodyBase;
 
-#define RigidBodySolverData_INCLUDE_FILE "GRSF/Dynamics/General/RigidBodySolverData.hpp"
+#define RigidBodySolverData_INCLUDE_FILE        "GRSF/dynamics/general/RigidBodySolverData.hpp"
 class RigidBodySolverDataCONoG;
 
-#define TimeStepper_INCLUDE_FILE "GRSF/Dynamics/General/MoreauTimeStepper.hpp"
+#define TimeStepper_INCLUDE_FILE                "GRSF/dynamics/general/MoreauTimeStepper.hpp"
 class MoreauTimeStepper;
 
 

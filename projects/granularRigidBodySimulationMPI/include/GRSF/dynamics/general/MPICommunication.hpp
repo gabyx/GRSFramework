@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_MPICommunication_hpp
-#define GRSF_Dynamics_General_MPICommunication_hpp
+#ifndef GRSF_dynamics_general_MPICommunication_hpp
+#define GRSF_dynamics_general_MPICommunication_hpp
 
 #include <type_traits>
 
@@ -18,14 +18,14 @@
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/version.hpp>
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/StaticAssert.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/StaticAssert.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/General/MPIDataTypes.hpp"
-#include "GRSF/Dynamics/General/MPIInformation.hpp"
-#include "GRSF/Dynamics/General/MPIMessageTag.hpp"
-#include "GRSF/Dynamics/General/MPICommunicatorId.hpp"
+#include "GRSF/dynamics/general/MPIDataTypes.hpp"
+#include "GRSF/dynamics/general/MPIInformation.hpp"
+#include "GRSF/dynamics/general/MPIMessageTag.hpp"
+#include "GRSF/dynamics/general/MPICommunicatorId.hpp"
 
 namespace MPILayer {
 

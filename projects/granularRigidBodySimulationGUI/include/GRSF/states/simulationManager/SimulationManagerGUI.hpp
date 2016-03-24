@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_States_SimulationManager_SimulationManagerGUI_hpp
-#define GRSF_States_SimulationManager_SimulationManagerGUI_hpp
+﻿#ifndef GRSF_states_simulationManager_SimulationManagerGUI_hpp
+#define GRSF_states_simulationManager_SimulationManagerGUI_hpp
 
 #include <memory>
 #include <boost/filesystem.hpp>
@@ -12,16 +12,16 @@
 #include <OIS/OISMouse.h>
 
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "GRSF/States/SimulationManager/SimulationManagerBase.hpp"
-#include "GRSF/Singeltons/Contexts/InputContext.hpp"
+#include "GRSF/states/simulationManager/SimulationManagerBase.hpp"
+#include "GRSF/singeltons/contexts/InputContext.hpp"
 
-#include "GRSF/Systems/SceneParserGUI.hpp"
+#include "GRSF/systems/SceneParserGUI.hpp"
 
-#include "GRSF/Common/DynamicCoordinateFrames.hpp"
+#include "GRSF/common/DynamicCoordinateFrames.hpp"
 
 class DynamicsState;
 class StateRecorder;

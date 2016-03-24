@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_States_SimulationState_hpp
-#define GRSF_States_SimulationState_hpp
+﻿#ifndef GRSF_states_SimulationState_hpp
+#define GRSF_states_SimulationState_hpp
 
 /*=========================================================
 	implementation specific includes
@@ -17,13 +17,13 @@ _________________________________________________________*/
 #include <OIS/OISMouse.h>
 #include <SdkTrays.h>
 
-#include "GRSF/States/AppState.hpp"
-#include "GRSF/States/AppStateManager.hpp"
-#include "GRSF/States/SimulationManager/SimulationManagerGUI.hpp"
-#include "GRSF/Singeltons/Contexts/InputContext.hpp"
-#include "GRSF/Singeltons/Contexts/GuiContext.hpp"
-#include "GRSF/App/OrbitCamera.hpp"
-#include "GRSF/App/MenuMouse.hpp"
+#include "GRSF/states/AppState.hpp"
+#include "GRSF/states/AppStateManager.hpp"
+#include "GRSF/states/simulationManager/SimulationManagerGUI.hpp"
+#include "GRSF/singeltons/contexts/InputContext.hpp"
+#include "GRSF/singeltons/contexts/GuiContext.hpp"
+#include "GRSF/app/OrbitCamera.hpp"
+#include "GRSF/app/MenuMouse.hpp"
 //=========================================================
 
 /*=========================================================

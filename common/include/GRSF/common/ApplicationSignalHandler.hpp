@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_ApplicationSignalHandler_hpp
-#define GRSF_Common_ApplicationSignalHandler_hpp
+#ifndef GRSF_common_ApplicationSignalHandler_hpp
+#define GRSF_common_ApplicationSignalHandler_hpp
 
 #include <csignal>
 #include <unordered_map>
@@ -7,8 +7,8 @@
 #include <functional>
 
 #include <initializer_list>
-#include "GRSF/Common/Singleton.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/Singleton.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 /**
 *  @brief Signal Handling for the Application

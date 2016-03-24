@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Common_AssertionDebug_hpp
-#define GRSF_Common_AssertionDebug_hpp
+﻿#ifndef GRSF_common_AssertionDebug_hpp
+#define GRSF_common_AssertionDebug_hpp
 
 // Add an Assertion Debuggin!
 
@@ -8,7 +8,7 @@
 #include <iostream>
 #include <typeinfo>
 
-#include "GRSF/Common/Exception.hpp"
+#include "GRSF/common/Exception.hpp"
 
 #ifndef NDEBUG
 // Debug!

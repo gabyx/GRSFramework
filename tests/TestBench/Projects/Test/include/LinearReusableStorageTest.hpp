@@ -6,10 +6,10 @@
 #include <limits>
 #include <iterator>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/DemangleTypes.hpp"
-#include "GRSF/Common/CPUTimer.hpp"
-#include "GRSF/Common/LinearReusableStorage.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/DemangleTypes.hpp"
+#include "GRSF/common/CPUTimer.hpp"
+#include "GRSF/common/LinearReusableStorage.hpp"
 
 
 DEFINE_LAYOUT_CONFIG_TYPES

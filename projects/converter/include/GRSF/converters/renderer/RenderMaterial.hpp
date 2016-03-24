@@ -1,8 +1,8 @@
-#ifndef GRSF_General_RenderMaterial_hpp
-#define GRSF_General_RenderMaterial_hpp
+#ifndef GRSF_converters_renderer_RenderMaterial_hpp
+#define GRSF_converters_renderer_RenderMaterial_hpp
 
 #include <sstream>
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 class RenderMaterial{
     public:

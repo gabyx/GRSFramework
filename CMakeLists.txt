@@ -26,7 +26,7 @@ ELSE()
     set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
 ENDIF()
 
-SET(SimulationFrameworkName "SimulationFramework")
+SET(SimulationFrameworkName "GRSFramework")
 IF(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
         SET(SimulationFrameworkName  "${SimulationFrameworkName}-${CMAKE_BUILD_TYPE}")
 ENDIF()
@@ -175,7 +175,7 @@ else()
 	#set(CUDA_COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../CudaModern/CommonSource CACHE PATH "Path to the cuda common source directory!")
 	#MARK_AS_ADVANCED(CUDA_COMMON_SOURCE_DIR)
 
-	#set(CUDA_SUPPORT 0) #Gets written to the config file!
+	set(CUDA_SUPPORT 0) #Gets written to the config file!
 endif()
 
 

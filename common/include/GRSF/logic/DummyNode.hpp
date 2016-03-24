@@ -1,7 +1,7 @@
-#ifndef GRSF_Logic_DummyNode_hpp
-#define GRSF_Logic_DummyNode_hpp
+#ifndef GRSF_logic_DummyNode_hpp
+#define GRSF_logic_DummyNode_hpp
 
-#include "GRSF/Logic/LogicNode.hpp"
+#include "GRSF/logic/LogicNode.hpp"
 
 template<unsigned int NIN, unsigned int NOUT>
 class DummyLogicNode : public LogicNode {

@@ -1,5 +1,5 @@
 
-#include "GRSF/Dynamics/Inclusion/ContactModels.hpp"
+#include "GRSF/dynamics/inclusion/ContactModels.hpp"
 
 
 

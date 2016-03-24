@@ -1,13 +1,13 @@
-#ifndef GRSF_Common_CommonFunctionsOgre_hpp
-#define GRSF_Common_CommonFunctionsOgre_hpp
+#ifndef GRSF_common_CommonFunctionsOgre_hpp
+#define GRSF_common_CommonFunctionsOgre_hpp
 
 #include <string>
 #include <vector>
 
 #include <OGRE/Ogre.h>
 
-#include "GRSF/Dynamics/General/MyMatrixTypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/dynamics/general/MyMatrixTypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 
 namespace OgreUtilities {

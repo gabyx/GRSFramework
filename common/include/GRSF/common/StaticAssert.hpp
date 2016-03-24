@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_StaticAssert_hpp
-#define GRSF_Common_StaticAssert_hpp
+#ifndef GRSF_common_StaticAssert_hpp
+#define GRSF_common_StaticAssert_hpp
 
 
 #include <boost/static_assert.hpp>

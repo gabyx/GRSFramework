@@ -1,5 +1,5 @@
-#ifndef GRSF_General_LogicParser_hpp
-#define GRSF_General_LogicParser_hpp
+#ifndef GRSF_general_LogicParser_hpp
+#define GRSF_general_LogicParser_hpp
 
 #include <vector>
 #include <fstream>
@@ -7,16 +7,16 @@
 #include <boost/filesystem.hpp>
 #include <pugixml.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/DemangleTypes.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/DemangleTypes.hpp"
 
-#include "GRSF/Common/TupleHelper.hpp"
+#include "GRSF/common/TupleHelper.hpp"
 
-#include "GRSF/Common/XMLMacros.hpp"
+#include "GRSF/common/XMLMacros.hpp"
 
-#include "GRSF/General/LogicParserTraits.hpp"
+#include "GRSF/general/LogicParserTraits.hpp"
 
 // TODO
 // This logicparser is general already, it takes a couple of models and makes them parsing from the root node,

@@ -1,10 +1,10 @@
-#ifndef GRSF_Dynamics_Inclusion_NeighbourDataInclusionCommunication_hpp
-#define GRSF_Dynamics_Inclusion_NeighbourDataInclusionCommunication_hpp
+#ifndef GRSF_dynamics_inclusion_NeighbourDataInclusionCommunication_hpp
+#define GRSF_dynamics_inclusion_NeighbourDataInclusionCommunication_hpp
 
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/General/NeighbourData.hpp"
+#include "GRSF/dynamics/general/NeighbourData.hpp"
 
 class ContactGraphNodeDataSplitBody;
 

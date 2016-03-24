@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_Delegates_hpp
-#define GRSF_Common_Delegates_hpp
+#ifndef GRSF_common_Delegates_hpp
+#define GRSF_common_Delegates_hpp
 
 #include <functional>
 #include <fastfunc/fastfunc.hpp> // Use FastFunc

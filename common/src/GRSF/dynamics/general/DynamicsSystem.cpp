@@ -1,1 +1,1 @@
-#include "GRSF/Dynamics/General/DynamicsSystem.hpp"
+#include "GRSF/dynamics/general/DynamicsSystem.hpp"

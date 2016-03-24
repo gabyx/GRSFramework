@@ -1,5 +1,5 @@
-#include "GRSF/Logic/LogicNode.hpp"
-#include "GRSF/Logic/LogicSocket.hpp"
+#include "GRSF/logic/LogicNode.hpp"
+#include "GRSF/logic/LogicSocket.hpp"
 
 LogicNode::LogicNode(unsigned int id) :
         m_id(id), m_hasLinks(false), m_priority(0)

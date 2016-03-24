@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_ProgressBarCL_hpp
-#define GRSF_Common_ProgressBarCL_hpp
+#ifndef GRSF_common_ProgressBarCL_hpp
+#define GRSF_common_ProgressBarCL_hpp
 
 
 /*

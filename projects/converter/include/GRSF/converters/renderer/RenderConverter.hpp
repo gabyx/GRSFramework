@@ -1,5 +1,5 @@
-#ifndef GRSF_Converters_RenderConverter_hpp
-#define GRSF_Converters_RenderConverter_hpp
+#ifndef GRSF_converters_renderer_RenderConverter_hpp
+#define GRSF_converters_renderer_RenderConverter_hpp
 
 #include <iostream>
 #include <iomanip>
@@ -11,15 +11,15 @@
 
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Converters/SimFileConverter.hpp"
+#include "GRSF/converters/SimFileConverter.hpp"
 
-#include "GRSF/Common/ApplicationCLOptionsConverter.hpp"
+#include "GRSF/common/ApplicationCLOptionsConverter.hpp"
 
-#include "GRSF/Converters/Renderer/RenderData.hpp"
-#include "GRSF/Converters/Renderer/RenderExecutionGraph.hpp"
+#include "GRSF/converters/renderer/RenderData.hpp"
+#include "GRSF/converters/renderer/RenderExecutionGraph.hpp"
 
 class RenderConverter : public SimFileConverter {
 public:

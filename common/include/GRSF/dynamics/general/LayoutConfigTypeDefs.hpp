@@ -6,11 +6,11 @@
  *
  */
 
-#ifndef GRSF_Dynamics_General_LayoutConfigTypeDefs_hpp
-#define GRSF_Dynamics_General_LayoutConfigTypeDefs_hpp
+#ifndef GRSF_dynamics_general_LayoutConfigTypeDefs_hpp
+#define GRSF_dynamics_general_LayoutConfigTypeDefs_hpp
 
-#include "GRSF/Dynamics/General/MyContainerTypeDefs.hpp"
-#include "GRSF/Dynamics/General/MyMatrixTypeDefs.hpp"
+#include "GRSF/dynamics/general/MyContainerTypeDefs.hpp"
+#include "GRSF/dynamics/general/MyMatrixTypeDefs.hpp"
 
 /**
 * @brief A dynamic layout specialization.

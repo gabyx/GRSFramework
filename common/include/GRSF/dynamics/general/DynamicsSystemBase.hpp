@@ -1,9 +1,9 @@
-#ifndef GRSF_Dynamics_General_DynamicsSystemBase_hpp
-#define GRSF_Dynamics_General_DynamicsSystemBase_hpp
+#ifndef GRSF_dynamics_general_DynamicsSystemBase_hpp
+#define GRSF_dynamics_general_DynamicsSystemBase_hpp
 
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include <map>
 #include <unordered_map>
@@ -11,17 +11,17 @@
 
 #include RigidBody_INCLUDE_FILE
 
-#include "GRSF/Dynamics/General/RigidBodyContainer.hpp"
-#include "GRSF/Dynamics/Inclusion/ContactParameterMap.hpp"
-#include "GRSF/Dynamics/General/ExternalForces.hpp"
+#include "GRSF/dynamics/general/RigidBodyContainer.hpp"
+#include "GRSF/dynamics/inclusion/ContactParameterMap.hpp"
+#include "GRSF/dynamics/general/ExternalForces.hpp"
 
-#include "GRSF/Dynamics/Buffers/RecorderSettings.hpp"
+#include "GRSF/dynamics/buffers/RecorderSettings.hpp"
 #include InclusionSolverSettings_INCLUDE_FILE
-#include "GRSF/Dynamics/General/TimeStepperSettings.hpp"
+#include "GRSF/dynamics/general/TimeStepperSettings.hpp"
 
-#include "GRSF/Dynamics/Buffers/DynamicsState.hpp"
-#include "GRSF/Dynamics/Buffers/RigidBodyState.hpp"
-#include "GRSF/Dynamics/General/InitialConditionBodies.hpp"
+#include "GRSF/dynamics/buffers/DynamicsState.hpp"
+#include "GRSF/dynamics/buffers/RigidBodyState.hpp"
+#include "GRSF/dynamics/general/InitialConditionBodies.hpp"
 
 /** This is the define for all DynamicsSystem classes
 * It only consists of several types which are essetial.

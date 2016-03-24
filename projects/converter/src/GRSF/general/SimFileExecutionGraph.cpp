@@ -1,8 +1,8 @@
-#include "GRSF/General/SimFileExecutionGraph.hpp"
+#include "GRSF/general/SimFileExecutionGraph.hpp"
 
-#include "GRSF/Logic/StopNode.hpp"
+#include "GRSF/logic/StopNode.hpp"
 
-#include "GRSF/General/SimFileExecutionGraphNodes.hpp"
+#include "GRSF/general/SimFileExecutionGraphNodes.hpp"
 
 
 const std::map<std::string, unsigned int > SimFileExecutionGraph::m_nameToExecGroupId = {

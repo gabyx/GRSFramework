@@ -1,10 +1,10 @@
-#ifndef GRSF_Dynamics_Collision_Geometry_AABB_hpp
-#define GRSF_Dynamics_Collision_Geometry_AABB_hpp
+#ifndef GRSF_dynamics_collision_geometry_AABB_hpp
+#define GRSF_dynamics_collision_geometry_AABB_hpp
 
 #include <algorithm>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 #include "ApproxMVBB/AABB.hpp"
 

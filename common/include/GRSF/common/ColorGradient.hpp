@@ -1,9 +1,9 @@
-#ifndef GRSF_Common_ColorGradient_hpp
-#define GRSF_Common_ColorGradient_hpp
+#ifndef GRSF_common_ColorGradient_hpp
+#define GRSF_common_ColorGradient_hpp
 
 
 #include <vector>
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 class ColorGradient {
 private:

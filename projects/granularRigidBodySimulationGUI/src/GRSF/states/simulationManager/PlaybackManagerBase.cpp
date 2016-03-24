@@ -1,9 +1,9 @@
-#include "GRSF/States/SimulationManager/PlaybackManagerBase.hpp"
+#include "GRSF/states/simulationManager/PlaybackManagerBase.hpp"
 
 #include <fstream>
 
-#include "GRSF/Singeltons/Contexts/InputContext.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/singeltons/contexts/InputContext.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 
 PlaybackManagerBase::PlaybackManagerBase():

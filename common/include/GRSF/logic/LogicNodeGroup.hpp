@@ -1,9 +1,9 @@
-#ifndef GRSF_Logic_LogicNodeGroup_hpp
-#define GRSF_Logic_LogicNodeGroup_hpp
+#ifndef GRSF_logic_LogicNodeGroup_hpp
+#define GRSF_logic_LogicNodeGroup_hpp
 
 #include <vector>
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Logic/LogicCommon.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/logic/LogicCommon.hpp"
 
 class LogicSocketBase;
 template<typename T> class LogicSocket;
@@ -41,7 +41,7 @@ protected:
 };
 
 
-#include "GRSF/Logic/LogicSocket.hpp"
+#include "GRSF/logic/LogicSocket.hpp"
 
 
 template<typename T>

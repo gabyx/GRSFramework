@@ -1,4 +1,4 @@
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
 void eigenSpeedTest(){
 

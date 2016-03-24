@@ -44,8 +44,8 @@
 //#include "FStreamOpenCloseTest.hpp"
 //#include "MoveSemantics.hpp"
 
-//#include "test/TypeDefs.hpp"
-//#include "test/DynamicsSystem.hpp"
+//#include "GRSF/common/TypeDefs.hpp"
+//#include "GRSF/dynamics/general/DynamicsSystem.hpp"
 
 //#include "CompileTimeTable.hpp"
 
@@ -93,11 +93,11 @@
 
 //#include "PointCloudTest.hpp"
 
-//#include "GRSF/Common/TypeDefs.hpp"
+//#include "GRSF/common/TypeDefs.hpp"
 
 //#include "EigenSpeedTest.hpp"
 
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
 int  main( int  argc, char  ** argv ){
 

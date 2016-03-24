@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_ContainerTag_hpp
-#define GRSF_Common_ContainerTag_hpp
+#ifndef GRSF_common_ContainerTag_hpp
+#define GRSF_common_ContainerTag_hpp
 
 #include <type_traits>
 

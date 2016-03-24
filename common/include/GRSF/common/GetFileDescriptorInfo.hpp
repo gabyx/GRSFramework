@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_GetFileDescriptorInfo_hpp
-#define GRSF_Common_GetFileDescriptorInfo_hpp
+#ifndef GRSF_common_GetFileDescriptorInfo_hpp
+#define GRSF_common_GetFileDescriptorInfo_hpp
 
 // If you get a compile time error here,
 //you may have not implemented to get some file descriptor info for your system!

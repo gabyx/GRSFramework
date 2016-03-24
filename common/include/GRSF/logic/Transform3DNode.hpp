@@ -1,7 +1,7 @@
-#ifndef GRSF_Logic_Transform3DNode_hpp
-#define GRSF_Logic_Transform3DNode_hpp
+#ifndef GRSF_logic_Transform3DNode_hpp
+#define GRSF_logic_Transform3DNode_hpp
 
-#include "GRSF/Logic/LogicNode.hpp"
+#include "GRSF/logic/LogicNode.hpp"
 
 namespace LogicNodes{
 

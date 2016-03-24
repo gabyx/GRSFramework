@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Singeltons_FileManager_hpp
-#define GRSF_Singeltons_FileManager_hpp
+﻿#ifndef GRSF_singeltons_FileManager_hpp
+#define GRSF_singeltons_FileManager_hpp
 
 #include <vector>
 #include <string>
@@ -10,9 +10,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
-#include "GRSF/Common/Singleton.hpp"
+#include "GRSF/common/Singleton.hpp"
 
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
 /**
 * @ingroup Singeltons

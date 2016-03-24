@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Dynamics_Inclusion_ContactParameterMap_hpp
-#define GRSF_Dynamics_Inclusion_ContactParameterMap_hpp
+﻿#ifndef GRSF_dynamics_inclusion_ContactParameterMap_hpp
+#define GRSF_dynamics_inclusion_ContactParameterMap_hpp
 
 #include <vector>
 #include <algorithm>
@@ -7,12 +7,12 @@
 #include <tuple>
 #include <unordered_map>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ContactParameter.hpp"
+#include "GRSF/dynamics/inclusion/ContactParameter.hpp"
 
-#include "GRSF/Common/TupleHelper.hpp"
+#include "GRSF/common/TupleHelper.hpp"
 
 #include RigidBody_INCLUDE_FILE
 

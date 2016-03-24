@@ -1,26 +1,26 @@
-﻿#ifndef GRSF_Dynamics_Inclusion_InclusionSolverNTContactOrdered_hpp
-#define GRSF_Dynamics_Inclusion_InclusionSolverNTContactOrdered_hpp
+﻿#ifndef GRSF_dynamics_inclusion_InclusionSolverNTContactOrdered_hpp
+#define GRSF_dynamics_inclusion_InclusionSolverNTContactOrdered_hpp
 
 #include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Dense>
 #include <Eigen/SVD>
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/Collision/CollisionSolver.hpp"
-#include "GRSF/Dynamics/General/RigidBody.hpp"
+#include "GRSF/dynamics/collision/CollisionSolver.hpp"
+#include "GRSF/dynamics/general/RigidBody.hpp"
 
-#include "GRSF/Dynamics/Inclusion/PercussionPool.hpp"
+#include "GRSF/dynamics/inclusion/PercussionPool.hpp"
 
-#include "GRSF/Dynamics/General/VectorToSkewMatrix.hpp"
+#include "GRSF/dynamics/general/VectorToSkewMatrix.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ProxFunctions.hpp"
+#include "GRSF/dynamics/inclusion/ProxFunctions.hpp"
 
-#include "GRSF/Dynamics/Inclusion/InclusionSolverSettings.hpp"
+#include "GRSF/dynamics/inclusion/InclusionSolverSettings.hpp"
 
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #ifndef USE_PERCUSSION_POOL
 #define USE_PERCUSSION_POOL 0

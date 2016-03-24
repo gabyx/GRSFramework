@@ -1,7 +1,7 @@
-#ifndef GRSF_Systems_SceneParserModulesMPI_hpp
-#define GRSF_Systems_SceneParserModulesMPI_hpp
+#ifndef GRSF_systems_SceneParserModulesMPI_hpp
+#define GRSF_systems_SceneParserModulesMPI_hpp
 
-#include "GRSF/Dynamics/General/MPITopologyBuilderSettings.hpp"
+#include "GRSF/dynamics/general/MPITopologyBuilderSettings.hpp"
 
 namespace ParserModules {
 

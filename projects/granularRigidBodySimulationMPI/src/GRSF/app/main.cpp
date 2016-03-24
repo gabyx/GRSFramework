@@ -6,15 +6,15 @@
 #include <mpi.h>
 
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/ApplicationSignalHandler.hpp"
-#include "GRSF/Common/ApplicationCLOptions.hpp"
-#include "GRSF/Singeltons/FileManager.hpp"
-#include "GRSF/Common/SimpleLogger.hpp"
-#include "GRSF/Common/RedirectOutput.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/ApplicationSignalHandler.hpp"
+#include "GRSF/common/ApplicationCLOptions.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
+#include "GRSF/common/RedirectOutput.hpp"
 
-#include "GRSF/Dynamics/General/MPIDataTypes.hpp"
-#include "GRSF/States/SimulationManager/SimulationManagerMPI.hpp"
+#include "GRSF/dynamics/general/MPIDataTypes.hpp"
+#include "GRSF/states/simulationManager/SimulationManagerMPI.hpp"
 
 
 void start( int argc, char **argv ){

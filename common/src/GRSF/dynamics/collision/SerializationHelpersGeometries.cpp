@@ -1,4 +1,4 @@
-#include "GRSF/Dynamics/Collision/SerializationHelpersGeometries.hpp"
+#include "GRSF/dynamics/collision/SerializationHelpersGeometries.hpp"
 
 
 template<>

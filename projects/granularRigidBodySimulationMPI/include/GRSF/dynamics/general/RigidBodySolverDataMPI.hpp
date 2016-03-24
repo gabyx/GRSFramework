@@ -1,9 +1,9 @@
-#ifndef GRSF_Dynamics_General_RigidBodySolverDataMPI_hpp
-#define GRSF_Dynamics_General_RigidBodySolverDataMPI_hpp
+#ifndef GRSF_dynamics_general_RigidBodySolverDataMPI_hpp
+#define GRSF_dynamics_general_RigidBodySolverDataMPI_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Dynamics/General/RigidBodySolverData.hpp"
+#include "GRSF/dynamics/general/RigidBodySolverData.hpp"
 
 /** Class with  Data Structure for the Solver! */
 class RigidBodySolverDataCONoGMPI : public RigidBodySolverDataCONoG {

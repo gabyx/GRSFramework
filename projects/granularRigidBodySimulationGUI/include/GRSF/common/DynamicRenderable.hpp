@@ -7,8 +7,8 @@
  */
 
 
-#ifndef GRSF_Common_DynamicRenderable_hpp
-#define GRSF_Common_DynamicRenderable_hpp
+#ifndef GRSF_common_DynamicRenderable_hpp
+#define GRSF_common_DynamicRenderable_hpp
 
 /// Includes =================================
 #include <OgreSimpleRenderable.h>

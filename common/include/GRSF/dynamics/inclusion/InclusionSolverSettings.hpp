@@ -1,7 +1,7 @@
-﻿#ifndef GRSF_Dynamics_Inclusion_InclusionSolverSettings_hpp
-#define GRSF_Dynamics_Inclusion_InclusionSolverSettings_hpp
+﻿#ifndef GRSF_dynamics_inclusion_InclusionSolverSettings_hpp
+#define GRSF_dynamics_inclusion_InclusionSolverSettings_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 
 /**

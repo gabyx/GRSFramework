@@ -1,15 +1,15 @@
-#ifndef GRSF_Dynamics_General_InertiaTensorCalculations_hpp
-#define GRSF_Dynamics_General_InertiaTensorCalculations_hpp
+#ifndef GRSF_dynamics_general_InertiaTensorCalculations_hpp
+#define GRSF_dynamics_general_InertiaTensorCalculations_hpp
 
 
 #include <boost/variant.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Common/AssertionDebug.hpp"
-#include "GRSF/Common/StaticAssert.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/StaticAssert.hpp"
 
-#include "GRSF/Dynamics/Collision/Geometries.hpp"
+#include "GRSF/dynamics/collision/Geometries.hpp"
 
 
 namespace InertiaTensorComputations{

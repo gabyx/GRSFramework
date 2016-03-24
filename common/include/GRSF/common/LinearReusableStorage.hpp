@@ -1,5 +1,5 @@
-#ifndef GRSF_Common_LinearReusableStorage_hpp
-#define GRSF_Common_LinearReusableStorage_hpp
+#ifndef GRSF_common_LinearReusableStorage_hpp
+#define GRSF_common_LinearReusableStorage_hpp
 
 #include <utility>
 #include <algorithm>
@@ -7,7 +7,7 @@
 #include <vector>
 #include <type_traits>
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 
 //template<typename T>

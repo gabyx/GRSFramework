@@ -1,2 +1,2 @@
-#include "GRSF/Dynamics/General/DynamicsSystemGUI.hpp"
+#include "GRSF/dynamics/general/DynamicsSystemGUI.hpp"
 

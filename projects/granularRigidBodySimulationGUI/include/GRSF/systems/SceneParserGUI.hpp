@@ -1,13 +1,13 @@
-#ifndef GRSF_Systems_SceneParserGUI_hpp
-#define GRSF_Systems_SceneParserGUI_hpp
+#ifndef GRSF_systems_SceneParserGUI_hpp
+#define GRSF_systems_SceneParserGUI_hpp
 
 #include <OGRE/Ogre.h>
-#include "GRSF/Common/AxisObject.hpp"
-#include "GRSF/Common/OgrePointCloud.hpp"
+#include "GRSF/common/AxisObject.hpp"
+#include "GRSF/common/OgrePointCloud.hpp"
 
-#include "GRSF/Systems/SceneParser.hpp"
+#include "GRSF/systems/SceneParser.hpp"
 
-#include "GRSF/Dynamics/General/MakeCoordinateSystem.hpp"
+#include "GRSF/dynamics/general/MakeCoordinateSystem.hpp"
 
 
 

@@ -1,16 +1,16 @@
-#ifndef GRSF_Dynamics_Inclusion_ContactGraphNodeDataMPI_hpp
-#define GRSF_Dynamics_Inclusion_ContactGraphNodeDataMPI_hpp
+#ifndef GRSF_dynamics_inclusion_ContactGraphNodeDataMPI_hpp
+#define GRSF_dynamics_inclusion_ContactGraphNodeDataMPI_hpp
 
 #include <vector>
 #include <unordered_map>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 
-#include "GRSF/Dynamics/General/RigidBodyId.hpp"
+#include "GRSF/dynamics/general/RigidBodyId.hpp"
 
-#include "GRSF/Dynamics/Inclusion/ContactGraphNodeData.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphNodeData.hpp"
 
 
 class ContactGraphNodeDataSplitBody {

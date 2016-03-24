@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_MyContainerTypeDefs_hpp
-#define GRSF_Dynamics_General_MyContainerTypeDefs_hpp
+#ifndef GRSF_dynamics_general_MyContainerTypeDefs_hpp
+#define GRSF_dynamics_general_MyContainerTypeDefs_hpp
 
 //#define EIGEN_DONT_VECTORIZE
 //#define EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT

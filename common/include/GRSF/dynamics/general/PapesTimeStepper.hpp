@@ -7,23 +7,23 @@
 *  Copyright 2010 ETH. All rights reserved.
 *
 */
-#ifndef GRSF_Dynamics_General_PapesTimeStepper_hpp
-#define GRSF_Dynamics_General_PapesTimeStepper_hpp
+#ifndef GRSF_dynamics_general_PapesTimeStepper_hpp
+#define GRSF_dynamics_general_PapesTimeStepper_hpp
 
 // Includes =================================
 #include <fstream>
 #include <cmath>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Dynamics/General/TimeStepperSettings.hpp"
-#include "GRSF/Dynamics/General/TimeStepperBase.hpp"
+#include "GRSF/dynamics/general/TimeStepperSettings.hpp"
+#include "GRSF/dynamics/general/TimeStepperBase.hpp"
 #include StatePool_INCLUDE_FILE
 
-#include "GRSF/Dynamics/Buffers/DynamicsState.hpp"
-#include "GRSF/Dynamics/Buffers/FrontBackBuffer.hpp"
+#include "GRSF/dynamics/buffers/DynamicsState.hpp"
+#include "GRSF/dynamics/buffers/FrontBackBuffer.hpp"
 
 
 //===========================================

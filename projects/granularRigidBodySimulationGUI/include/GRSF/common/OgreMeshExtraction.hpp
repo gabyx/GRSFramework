@@ -6,12 +6,12 @@
  *
  */
 
-#ifndef GRSF_Common_OgreMeshExtraction_hpp
-#define GRSF_Common_OgreMeshExtraction_hpp
+#ifndef GRSF_common_OgreMeshExtraction_hpp
+#define GRSF_common_OgreMeshExtraction_hpp
 
 
 #include <Ogre.h>
-#include <GRSF/Dynamics/General/MeshData.hpp>
+#include "GRSF/dynamics/general/MeshData.hpp"
 
 /**
 * @ingroup Common

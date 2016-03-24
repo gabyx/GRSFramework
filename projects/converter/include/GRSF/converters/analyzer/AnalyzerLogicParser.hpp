@@ -1,5 +1,5 @@
-#ifndef GRSF_General_AnalyzerLogicParser_hpp
-#define GRSF_General_AnalyzerLogicParser_hpp
+#ifndef GRSF_converters_analyzer_AnalyzerLogicParser_hpp
+#define GRSF_converters_analyzer_AnalyzerLogicParser_hpp
 
 #include <vector>
 #include <fstream>
@@ -7,13 +7,13 @@
 #include <boost/filesystem.hpp>
 #include <pugixml.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/General/LogicParser.hpp"
+#include "GRSF/general/LogicParser.hpp"
 
-#include "GRSF/Converters/Analyzer/AnalyzerLogicParserTraits.hpp"
+#include "GRSF/converters/analyzer/AnalyzerLogicParserTraits.hpp"
 
 /** We dont need any TCollection, LogicModule only needs a execution graph */
 template< typename TCollection = void, template<typename P, typename C> class TParserTraits = AnalyzerLogicParserTraits >

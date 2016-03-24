@@ -1,2 +1,2 @@
-﻿#include "GRSF/Dynamics/Collision/CollisionData.hpp"
+﻿#include "GRSF/dynamics/collision/CollisionData.hpp"
 

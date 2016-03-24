@@ -1,9 +1,9 @@
-#ifndef GRSF_Common_Range_hpp
-#define GRSF_Common_Range_hpp
+#ifndef GRSF_common_Range_hpp
+#define GRSF_common_Range_hpp
 
 #include <type_traits>
 
-#include "GRSF/Common/StaticAssert.hpp"
+#include "GRSF/common/StaticAssert.hpp"
 
 /**
 * A fast sorted integral range which can be constructed from std::pair or std::set

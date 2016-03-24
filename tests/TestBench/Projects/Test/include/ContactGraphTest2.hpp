@@ -1,10 +1,10 @@
 #include <meta.hpp>
 
-#include "GRSF/Common/StaticAssert.hpp"
-#include "GRSF/Common/EnumClassHelper.hpp"
-#include "GRSF/Common/TupleHelper.hpp"
-#include "GRSF/Common/CPUTimer.hpp"
-#include "GRSF/Common/DemangleTypes.hpp"
+#include "GRSF/common/StaticAssert.hpp"
+#include "GRSF/common/EnumClassHelper.hpp"
+#include "GRSF/common/TupleHelper.hpp"
+#include "GRSF/common/CPUTimer.hpp"
+#include "GRSF/common/DemangleTypes.hpp"
 
 #include <tuple>
 #include <vector>
@@ -12,7 +12,7 @@
 #include <boost/preprocessor/iteration/local.hpp>
 #include <boost/preprocessor/cat.hpp>
 
-#include "GRSF/Dynamics/Inclusion/GeneralGraph.hpp"
+#include "GRSF/dynamics/inclusion/GeneralGraph.hpp"
 
 using namespace Graph;
 

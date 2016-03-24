@@ -1,16 +1,16 @@
-﻿#ifndef GRSF_States_SimulationManager_SimulationManager_hpp
-#define GRSF_States_SimulationManager_SimulationManager_hpp
+﻿#ifndef GRSF_states_simulationManager_SimulationManager_hpp
+#define GRSF_states_simulationManager_SimulationManager_hpp
 
 #include <memory>
 #include <boost/filesystem.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include DynamicsSystem_INCLUDE_FILE
-#include "GRSF/Systems/SceneParser.hpp"
+#include "GRSF/systems/SceneParser.hpp"
 
-#include "GRSF/Common/CPUTimer.hpp"
+#include "GRSF/common/CPUTimer.hpp"
 
 class DynamicsState;
 class StateRecorder;

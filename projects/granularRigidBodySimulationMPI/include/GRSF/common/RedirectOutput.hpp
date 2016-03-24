@@ -1,6 +1,6 @@
 
-#ifndef GRSF_Common_RedirectOutput_hpp
-#define GRSF_Common_RedirectOutput_hpp
+#ifndef GRSF_common_RedirectOutput_hpp
+#define GRSF_common_RedirectOutput_hpp
 
 
 #include <iostream>

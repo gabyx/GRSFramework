@@ -1,4 +1,4 @@
-#include "GRSF/Dynamics/General/MultiBodySimFileMPI.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFileMPI.hpp"
 
 
 
@@ -352,5 +352,5 @@ bool MultiBodySimFileMPI::openWrite(MPI_Comm comm,
 
     return true;
 }
-#include "GRSF/Dynamics/General/MultiBodySimFileMPI.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFileMPI.hpp"
 

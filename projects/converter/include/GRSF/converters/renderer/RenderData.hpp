@@ -1,9 +1,9 @@
-#ifndef GRSF_General_RenderData_hpp
-#define GRSF_General_RenderData_hpp
+#ifndef GRSF_converters_renderer_RenderData_hpp
+#define GRSF_converters_renderer_RenderData_hpp
 
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
 #include <map>
 #include <unordered_map>
@@ -11,7 +11,7 @@
 
 #include DynamicsSystem_INCLUDE_FILE
 
-#include "GRSF/Converters/Renderer/RenderMaterial.hpp"
+#include "GRSF/converters/renderer/RenderMaterial.hpp"
 
 
 namespace ParserModules {

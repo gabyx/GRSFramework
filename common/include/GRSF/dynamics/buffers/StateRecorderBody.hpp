@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_Buffers_StateRecorderBody_hpp
-#define GRSF_Dynamics_Buffers_StateRecorderBody_hpp
+#ifndef GRSF_dynamics_buffers_StateRecorderBody_hpp
+#define GRSF_dynamics_buffers_StateRecorderBody_hpp
 
 #include <string>
 #include <sstream>
@@ -9,17 +9,17 @@
 
 #include <unordered_map>
 
-#include "GRSF/Common/LogDefines.hpp"
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/Singeltons/FileManager.hpp"
+#include "GRSF/singeltons/FileManager.hpp"
 
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
-#include "GRSF/Dynamics/General/MultiBodySimFile.hpp"
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/dynamics/general/MultiBodySimFile.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 
-#include "GRSF/Common/GetFileDescriptorInfo.hpp"
+#include "GRSF/common/GetFileDescriptorInfo.hpp"
 
 
 #define SIM_FILE_ACCESS_LOG_EXTENSION ".dat" ///< File extension for the access log file.

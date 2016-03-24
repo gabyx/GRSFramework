@@ -1,9 +1,9 @@
-#ifndef GRSF_Systems_SceneParserMPI_hpp
-#define GRSF_Systems_SceneParserMPI_hpp
+#ifndef GRSF_systems_SceneParserMPI_hpp
+#define GRSF_systems_SceneParserMPI_hpp
 
-#include "GRSF/Systems/SceneParser.hpp"
+#include "GRSF/systems/SceneParser.hpp"
 
-#include "GRSF/Systems/SceneParserModulesMPI.hpp"
+#include "GRSF/systems/SceneParserModulesMPI.hpp"
 
 /** These module types are defined when there is no derivation from scene parser */
 template<typename TSceneParser, typename TDynamicsSystem>

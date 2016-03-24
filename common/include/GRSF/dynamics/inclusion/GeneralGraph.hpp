@@ -1,16 +1,16 @@
-#ifndef GRSF_Dynamics_Inclusion_GeneralGraph_hpp
-#define GRSF_Dynamics_Inclusion_GeneralGraph_hpp
+#ifndef GRSF_dynamics_inclusion_GeneralGraph_hpp
+#define GRSF_dynamics_inclusion_GeneralGraph_hpp
 
 
 
 #include <boost/preprocessor/iteration/local.hpp>
 #include <boost/preprocessor/cat.hpp>
 
-#include "GRSF/Common/StaticAssert.hpp"
-#include "GRSF/Common/DemangleTypes.hpp"
-#include "GRSF/Common/MetaHelper.hpp"
-#include "GRSF/Common/TupleHelper.hpp"
-#include "GRSF/Common/LinearReusableStorage.hpp"
+#include "GRSF/common/StaticAssert.hpp"
+#include "GRSF/common/DemangleTypes.hpp"
+#include "GRSF/common/MetaHelper.hpp"
+#include "GRSF/common/TupleHelper.hpp"
+#include "GRSF/common/LinearReusableStorage.hpp"
 
 namespace Graph {
 

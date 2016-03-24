@@ -1,8 +1,8 @@
-﻿#ifndef GRSF_Common_OgreSceneManagerDeleter_hpp
-#define GRSF_Common_OgreSceneManagerDeleter_hpp
+﻿#ifndef GRSF_common_OgreSceneManagerDeleter_hpp
+#define GRSF_common_OgreSceneManagerDeleter_hpp
 
 #include <OgreSceneManager.h>
-#include "GRSF/Singeltons/Contexts/RenderContext.hpp"
+#include "GRSF/singeltons/contexts/RenderContext.hpp"
 
 /**
 * @ingroup Common

@@ -1,8 +1,8 @@
 
-#ifndef GRSF_Common_XMLMacros_hpp
-#define GRSF_Common_XMLMacros_hpp
+#ifndef GRSF_common_XMLMacros_hpp
+#define GRSF_common_XMLMacros_hpp
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
 #define CHECK_XMLNODE( _node_ , _nodename_ ) \
     if( ! _node_ ){ \

@@ -1,14 +1,14 @@
-#ifndef GRSF_Logic_XMLLineWriter_hpp
-#define GRSF_Logic_XMLLineWriter_hpp
+#ifndef GRSF_logic_XMLLineWriter_hpp
+#define GRSF_logic_XMLLineWriter_hpp
 
 #include <sstream>
 
 #include <boost/filesystem.hpp>
 #include <pugixml.hpp>
 
-#include "GRSF/Common/XMLMacros.hpp"
+#include "GRSF/common/XMLMacros.hpp"
 
-#include "GRSF/Logic/LogicNode.hpp"
+#include "GRSF/logic/LogicNode.hpp"
 
 
 namespace LogicNodes{

@@ -1,13 +1,13 @@
-#ifndef GRSF_Logic_SimpleFunction_hpp
-#define GRSF_Logic_SimpleFunction_hpp
+#ifndef GRSF_logic_SimpleFunction_hpp
+#define GRSF_logic_SimpleFunction_hpp
 
 #include <exprtk.hpp>
 
 #include <type_traits>
 #include <boost/mpl/contains.hpp>
 
-#include "GRSF/Logic/LogicNode.hpp"
-#include "GRSF/Common/SfinaeMacros.hpp"
+#include "GRSF/logic/LogicNode.hpp"
+#include "GRSF/common/SfinaeMacros.hpp"
 
 namespace LogicNodes {
 

@@ -1,11 +1,11 @@
-#ifndef GRSF_Common_DynamicCoordinateFrames_hpp
-#define GRSF_Common_DynamicCoordinateFrames_hpp
+#ifndef GRSF_common_DynamicCoordinateFrames_hpp
+#define GRSF_common_DynamicCoordinateFrames_hpp
 
 #include <Ogre.h>
 
 #include <boost/thread.hpp>
 
-#include "GRSF/Common/DynamicLines.hpp"
+#include "GRSF/common/DynamicLines.hpp"
 
 class DynamicCoordinateFrames{
 public:

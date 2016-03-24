@@ -1,12 +1,12 @@
-#ifndef GRSF_Dynamics_General_ParserFunctions_hpp
-#define GRSF_Dynamics_General_ParserFunctions_hpp
+#ifndef GRSF_dynamics_general_ParserFunctions_hpp
+#define GRSF_dynamics_general_ParserFunctions_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/CommonFunctions.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
 
 namespace ParserFunctions{
 

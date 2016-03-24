@@ -1,7 +1,7 @@
-#ifndef GRSF_General_LogicParserBaseTraits_hpp
-#define GRSF_General_LogicParserBaseTraits_hpp
+#ifndef GRSF_general_LogicParserBaseTraits_hpp
+#define GRSF_general_LogicParserBaseTraits_hpp
 
-#include "GRSF/Common/SimpleLogger.hpp"
+#include "GRSF/common/SimpleLogger.hpp"
 #include <pugixml.hpp>
 
 
@@ -19,7 +19,7 @@ struct LogicParserBaseTraits {
 };
 
 
-#include "GRSF/General/LogicParserBaseTraitsMacro.hpp"
+#include "GRSF/general/LogicParserBaseTraitsMacro.hpp"
 
 
 #endif

@@ -1,4 +1,4 @@
-#include "GRSF/Common/DemangleTypes.hpp"
+#include "GRSF/common/DemangleTypes.hpp"
 
 #ifdef __GNUG__
     #include <cstdlib>

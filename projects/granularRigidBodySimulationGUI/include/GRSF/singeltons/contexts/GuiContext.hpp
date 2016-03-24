@@ -1,12 +1,12 @@
-﻿#ifndef GRSF_Singeltons_Contexts_GuiContext_hpp
-#define GRSF_Singeltons_Contexts_GuiContext_hpp
+﻿#ifndef GRSF_singeltons_contexts_GuiContext_hpp
+#define GRSF_singeltons_contexts_GuiContext_hpp
 
 
 #include <memory>
 #include <OISMouse.h>
 #include <SdkTrays.h>
-#include "GRSF/Singeltons/Contexts/RenderContext.hpp"
-#include "GRSF/Singeltons/Contexts/InputContext.hpp"
+#include "GRSF/singeltons/contexts/RenderContext.hpp"
+#include "GRSF/singeltons/contexts/InputContext.hpp"
 
 
 /**

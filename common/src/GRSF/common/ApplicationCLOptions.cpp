@@ -1,4 +1,4 @@
-#include "GRSF/Common/ApplicationCLOptions.hpp"
+#include "GRSF/common/ApplicationCLOptions.hpp"
 
 std::ostream & operator<<(std::ostream & s, const ApplicationCLOptions::PostProcessTask & p){
             s << " Postprocess: " << p.m_name << " : ";

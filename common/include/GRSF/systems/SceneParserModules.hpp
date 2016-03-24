@@ -1,5 +1,5 @@
-#ifndef GRSF_Systems_SceneParserModules_hpp
-#define GRSF_Systems_SceneParserModules_hpp
+#ifndef GRSF_systems_SceneParserModules_hpp
+#define GRSF_systems_SceneParserModules_hpp
 
 #include <vector>
 #include <fstream>
@@ -16,33 +16,33 @@
 #include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
 
-#include "GRSF/Common/TypeDefs.hpp"
-#include "GRSF/Common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+#include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/Common/AssertionDebug.hpp"
+#include "GRSF/common/AssertionDebug.hpp"
 
-#include "GRSF/Common/ContainerTag.hpp"
+#include "GRSF/common/ContainerTag.hpp"
 
-#include "GRSF/Dynamics/General/RigidBodyId.hpp"
-#include "GRSF/Dynamics/General/RigidBodyFunctions.hpp"
-#include "GRSF/Dynamics/Inclusion/ContactParameter.hpp"
-#include "GRSF/Dynamics/Collision/Geometry/MeshGeometry.hpp"
-#include "GRSF/Dynamics/General/ExternalForces.hpp"
-#include "GRSF/Common/CommonFunctions.hpp"
-#include "GRSF/Dynamics/General/QuaternionHelpers.hpp"
-#include "GRSF/Dynamics/General/InertiaTensorCalculations.hpp"
-#include "GRSF/Dynamics/General/InitialConditionBodies.hpp"
-#include "GRSF/Dynamics/General/ParserFunctions.hpp"
+#include "GRSF/dynamics/general/RigidBodyId.hpp"
+#include "GRSF/dynamics/general/RigidBodyFunctions.hpp"
+#include "GRSF/dynamics/inclusion/ContactParameter.hpp"
+#include "GRSF/dynamics/collision/geometry/MeshGeometry.hpp"
+#include "GRSF/dynamics/general/ExternalForces.hpp"
+#include "GRSF/common/CommonFunctions.hpp"
+#include "GRSF/dynamics/general/QuaternionHelpers.hpp"
+#include "GRSF/dynamics/general/InertiaTensorCalculations.hpp"
+#include "GRSF/dynamics/general/InitialConditionBodies.hpp"
+#include "GRSF/dynamics/general/ParserFunctions.hpp"
 
 #include InclusionSolverSettings_INCLUDE_FILE
-#include "GRSF/Dynamics/General/TimeStepperSettings.hpp"
-#include "GRSF/Dynamics/Buffers/RecorderSettings.hpp"
+#include "GRSF/dynamics/general/TimeStepperSettings.hpp"
+#include "GRSF/dynamics/buffers/RecorderSettings.hpp"
 
-#include "GRSF/Dynamics/General/PrintGeometryDetails.hpp"
-#include "GRSF/Common/Range.hpp"
-#include "GRSF/Common/XMLMacros.hpp"
+#include "GRSF/dynamics/general/PrintGeometryDetails.hpp"
+#include "GRSF/common/Range.hpp"
+#include "GRSF/common/XMLMacros.hpp"
 
-#include "GRSF/Systems/SceneParserBaseTraits.hpp"
+#include "GRSF/systems/SceneParserBaseTraits.hpp"
 
 
 namespace ParserModules {

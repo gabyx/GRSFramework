@@ -35,8 +35,8 @@
 // Modified for this discussion by Fred Richards.
 //
  
-#ifndef GRSF_Common_FloatingPointType_hpp
-#define GRSF_Common_FloatingPointType_hpp
+#ifndef GRSF_common_FloatingPointType_hpp
+#define GRSF_common_FloatingPointType_hpp
  
 #include <cstddef>
 #if defined _MSC_VER  // may need to check your VC++ version

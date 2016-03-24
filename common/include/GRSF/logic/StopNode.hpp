@@ -1,7 +1,7 @@
-#ifndef GRSF_Logic_StopNode_hpp
-#define GRSF_Logic_StopNode_hpp
+#ifndef GRSF_logic_StopNode_hpp
+#define GRSF_logic_StopNode_hpp
 
-#include "GRSF/Logic/LogicNode.hpp"
+#include "GRSF/logic/LogicNode.hpp"
 
 namespace LogicNodes{
 

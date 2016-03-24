@@ -1,5 +1,5 @@
-#ifndef GRSF_Dynamics_General_MultiBodySimFileIOHelpers_hpp
-#define GRSF_Dynamics_General_MultiBodySimFileIOHelpers_hpp
+#ifndef GRSF_dynamics_general_MultiBodySimFileIOHelpers_hpp
+#define GRSF_dynamics_general_MultiBodySimFileIOHelpers_hpp
 
 #include <Eigen/Dense>
 

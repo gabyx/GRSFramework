@@ -1,8 +1,8 @@
 
-#include "GRSF/Dynamics/Inclusion/ContactGraphMPI.hpp"
+#include "GRSF/dynamics/inclusion/ContactGraphMPI.hpp"
 
 
-#include "GRSF/Dynamics/Inclusion/ContactFeasibilityTable.hpp"
+#include "GRSF/dynamics/inclusion/ContactFeasibilityTable.hpp"
 
 template<typename TCombo>
 ContactGraph<TCombo>::ContactGraph(std::shared_ptr<DynamicsSystemType> pDynSys):

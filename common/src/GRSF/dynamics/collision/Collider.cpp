@@ -1,4 +1,4 @@
-#include "GRSF/Dynamics/Collision/Collider.hpp"
+#include "GRSF/dynamics/collision/Collider.hpp"
 
 
 //====================================================================================================

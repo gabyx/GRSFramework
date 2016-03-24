@@ -1,7 +1,7 @@
-#ifndef GRSF_Dynamics_General_RigidBodySolverData_hpp
-#define GRSF_Dynamics_General_RigidBodySolverData_hpp
+#ifndef GRSF_dynamics_general_RigidBodySolverData_hpp
+#define GRSF_dynamics_general_RigidBodySolverData_hpp
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 class RigidBodySolverData{
     public:

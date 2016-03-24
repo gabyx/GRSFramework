@@ -1,8 +1,8 @@
-#ifndef GRSF_Dynamics_Collision_Geometry_Ray_hpp
-#define GRSF_Dynamics_Collision_Geometry_Ray_hpp
+#ifndef GRSF_dynamics_collision_geometry_Ray_hpp
+#define GRSF_dynamics_collision_geometry_Ray_hpp
 
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 
 class Ray {

@@ -1,7 +1,7 @@
-﻿#ifndef GRSF_Dynamics_Inclusion_ContactPercussion_hpp
-#define GRSF_Dynamics_Inclusion_ContactPercussion_hpp
+﻿#ifndef GRSF_dynamics_inclusion_ContactPercussion_hpp
+#define GRSF_dynamics_inclusion_ContactPercussion_hpp
 
-#include "GRSF/Dynamics/Inclusion/ContactModels.hpp"
+#include "GRSF/dynamics/inclusion/ContactModels.hpp"
 
 /**
 * @ingroup Contact

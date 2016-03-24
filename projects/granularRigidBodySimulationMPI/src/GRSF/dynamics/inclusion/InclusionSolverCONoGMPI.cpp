@@ -1,13 +1,13 @@
-#include "GRSF/Dynamics/Inclusion/InclusionSolverCONoGMPI.hpp"
+#include "GRSF/dynamics/inclusion/InclusionSolverCONoGMPI.hpp"
 
-//#include "GRSF/Dynamics/Inclusion/InclusionCommunicator.hpp"
+//#include "GRSF/dynamics/inclusion/InclusionCommunicator.hpp"
 // those two include each other (forwarding)
-//#include "GRSF/Dynamics/Inclusion/ContactGraphMPI.hpp"
+//#include "GRSF/dynamics/inclusion/ContactGraphMPI.hpp"
 
 
-#include "GRSF/Dynamics/General/MatrixHelpers.hpp"
-#include "GRSF/Dynamics/General/VectorToSkewMatrix.hpp"
-#include "GRSF/Dynamics/Inclusion/ProxFunctions.hpp"
+#include "GRSF/dynamics/general/MatrixHelpers.hpp"
+#include "GRSF/dynamics/general/VectorToSkewMatrix.hpp"
+#include "GRSF/dynamics/inclusion/ProxFunctions.hpp"
 
 #if HAVE_CUDA_SUPPORT == 1
 #include "JorProxGPUVariant.hpp"

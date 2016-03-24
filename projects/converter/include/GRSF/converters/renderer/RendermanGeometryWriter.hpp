@@ -1,9 +1,9 @@
-#ifndef GRSF_General_RendermanGeometryWriter_hpp
-#define GRSF_General_RendermanGeometryWriter_hpp
+#ifndef GRSF_converters_renderer_RendermanGeometryWriter_hpp
+#define GRSF_converters_renderer_RendermanGeometryWriter_hpp
 
 #include <boost/variant.hpp>
 
-#include "GRSF/Common/TypeDefs.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 #include RigidBody_INCLUDE_FILE
 

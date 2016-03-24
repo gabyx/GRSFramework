@@ -6,8 +6,8 @@
 *
 */
 
-#ifndef GRSF_Dynamics_Inclusion_ConvexSets_hpp
-#define GRSF_Dynamics_Inclusion_ConvexSets_hpp
+#ifndef GRSF_dynamics_inclusion_ConvexSets_hpp
+#define GRSF_dynamics_inclusion_ConvexSets_hpp
 
 
 // CONVEX SETS

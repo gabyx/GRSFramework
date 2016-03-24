@@ -1,5 +1,5 @@
-﻿#ifndef GRSF_Common_BinaryFile_hpp
-#define GRSF_Common_BinaryFile_hpp
+﻿#ifndef GRSF_common_BinaryFile_hpp
+#define GRSF_common_BinaryFile_hpp
 
 #include <boost/filesystem.hpp>
 
