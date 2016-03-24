@@ -1,38 +1,14 @@
-#include <iostream>
-#include <string>
+// ========================================================================================
+//  GRSFramework 
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
+// 
+//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  published by the Free Software Foundation; either version 3 of the License,
+//  or (at your option) any later version. If a copy of the GPL was not distributed with
+//  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
+// ========================================================================================
 
-#include "GRSF/common/Exception.hpp"
-
-#include "GRSF/common/LogDefines.hpp"
-#include "GRSF/common/TypeDefs.hpp"
-#include "GRSF/common/ApplicationSignalHandler.hpp"
-#include "GRSF/common/ApplicationCLOptions.hpp"
-#include "GRSF/singeltons/FileManager.hpp"
-#include "GRSF/common/SimpleLogger.hpp"
-
-#include "GRSF/states/simulationManager/SimulationManager.hpp"
-
-#include "ApproxMVBB/ComputeApproxMVBB.hpp"
-#include "GRSF/dynamics/collision/geometry/OOBB.hpp"
-
-void callBackSignalAndExit(int signum){
-    std::cerr << "GRSFramework Sim: received signal: " << signum << " -> exit ..." << std::endl;
-    // http://www.cons.org/cracauer/sigint.html
-    // set sigint handler to nothing
-    // and kill ourself
-    signal(SIGINT, SIG_DFL);
-    kill(getpid(),SIGINT);
-}
-
-int main(int argc, char **argv) {
-
-    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGUSR2} ) )
-    sigHandler->registerCallback({SIGINT,SIGUSR2},callBackSignalAndExit,"callBackSIGINT");
-
-
-    try{
-
-        #ifndef NDEBUG
+#ifndef NDEBUG
                 std::cout << "GRSFramework Sim: build: ?, config: " << "debug" << std::endl;
         #else
                 std::cout << "GRSFramework Sim: build: ?, config: " << "release" << std::endl;
