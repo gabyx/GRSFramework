@@ -1,21 +1,12 @@
-﻿#ifndef GRSF_common_foreach_macro_hpp
-#define GRSF_common_foreach_macro_hpp
-
-#if defined(__GNUC__) && __GNUC__==4 && __GNUC_MINOR__<4
-#define FOREACH__HPP_TYPEOF 1
-#elif defined(__GNUC__) && __GNUC__==4 && __GNUC_MINOR__>=4
-#define FOREACH__HPP_AUTO 1
-#elif defined(_MSC_VER) && _MSC_VER<1600
-#include <boost/typeof/typeof.hpp>
-#define FOREACH__HPP_TYPEOF 1
-#define __typeof__(ex) BOOST_TYPEOF(ex)
-#elif defined(_MSC_VER) && _MSC_VER>=1600
-#define FOREACH__HPP_AUTO 1
-#else
-#error unknown compiler!
-#endif
-
-#if defined(FOREACH__HPP_TYPEOF)
+// ========================================================================================
+//  GRSFramework 
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
+// 
+//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  published by the Free Software Foundation; either version 3 of the License,
+//  or (at your option) any later version. If a copy of the GPL was not distributed with
+//  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
+// ========================================================================================
 
 #ifndef foreach
 /** a for loop to iterate over a container.

@@ -1,46 +1,14 @@
-#include <iostream>
+// ========================================================================================
+//  GRSFramework 
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
+// 
+//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  published by the Free Software Foundation; either version 3 of the License,
+//  or (at your option) any later version. If a copy of the GPL was not distributed with
+//  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
+// ========================================================================================
 
-#include <string>
-#include <memory>
-
-#include <mpi.h>
-
-
-#include "GRSF/common/TypeDefs.hpp"
-#include "GRSF/common/ApplicationSignalHandler.hpp"
-#include "GRSF/common/ApplicationCLOptions.hpp"
-#include "GRSF/singeltons/FileManager.hpp"
-#include "GRSF/common/SimpleLogger.hpp"
-#include "GRSF/common/RedirectOutput.hpp"
-
-#include "GRSF/dynamics/general/MPIDataTypes.hpp"
-#include "GRSF/states/simulationManager/SimulationManagerMPI.hpp"
-
-
-void start( int argc, char **argv ){
-
-        // Setup global communicators
-
-        INSTANCIATE_UNIQUE_SINGELTON( MPILayer::MPIGlobalCommunicators , globalComm )
-
-        // Setup global types and commit them
-        MPILayer::DataTypes::commitAll();
-        MPILayer::ReduceFunctions::createAll();
-
-         // Add the process rank to the Global File Path for this Process...
-        int my_rank;
-        MPI_Comm_rank(MPI_COMM_WORLD,&my_rank);
-        int nProcesses;
-        MPI_Comm_size(MPI_COMM_WORLD,&nProcesses);
-
-        // Parsing Input Parameters===================================
-        INSTANCIATE_UNIQUE_SINGELTON(ApplicationCLOptions,opts)
-
-        ApplicationCLOptions::getSingleton().parseOptions(argc,argv);
-        ApplicationCLOptions::getSingleton().checkArguments();
-        if(my_rank == 0){
-
-            #ifndef NDEBUG
+#ifndef NDEBUG
                 std::cout << "GRSFramework Sim MPI: build: ?, config: " << "debug" << std::endl;
             #else
                 std::cout << "GRSFramework Sim MPI: build: ?, config: " << "release" << std::endl;
