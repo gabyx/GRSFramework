@@ -1,0 +1,12 @@
+AttributeBegin
+    Attribute "identifier" "name" [ "BackWallGroup" ]
+    Transform [
+            0.8660253882408142 0.0 0.5 0.0
+            0.0 1.0 0.0 0.0
+            -0.5 0.0 0.8660253882408142 0.0
+            -0.24634350836277008 0.10000000149011612 -0.1653205305337906 1.0
+            ]
+            
+    # This is is an empty object
+AttributeEnd
+

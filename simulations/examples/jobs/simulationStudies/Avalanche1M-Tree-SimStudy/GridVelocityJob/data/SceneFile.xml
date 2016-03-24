@@ -1,0 +1,254 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<DynamicsSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="SceneFile SceneFile.xsd">
+
+    <SceneSettings>
+
+        <Visualization>
+            <SceneScale value="100"/> 
+        </Visualization>
+
+        <RecorderSettings mode="everyXTimeStep" everyXStep="10"/>
+
+        <TimeStepperSettings deltaT="0.0002" endTime="1.8">
+            <InclusionSolverSettings method="SORContact" useGPU="false" useGPUID="0" alphaJORProx="0.2" alphaSORProx="1.5" matrixRStrategy="max" driftCorrectionGap="false" driftCorrectionGapAlpha="0.12" usePercussionCache="false" reserveContacts="2000" computeResidual="false" computeTotalOverlap="true" convergenceMethod="InVelocity" minIter="1000" maxIter="1000" absTol="1e-6" relTol="1e-6" isFiniteCheck="false"/>
+
+        </TimeStepperSettings>
+
+        <MPISettings>
+            <ProcessTopology bodyLimit="5000" mode="dynamic" policy="alwaysRebuild" policyCheckEveryXTimeStep="250">
+                <Topology aligned="true" buildMode="MVBB" dimension="4 3 1" matchProcessDimToExtent="true" maxPoint="2 2 3.5" minPoint="-2 -2 2.5 " minCellSize="5e-3" type="kdTree"/>
+                <MassPointPrediction deltaT="0.01" nPoints="3"/>
+                <GlobalOutlierFilter allowSplitAbove="10" kNNMean="20" stdDeviationMult="3"/>
+                <Visualization>
+                    <Material name="PlaneYellowWireNoCull"/>    
+                </Visualization>   
+            </ProcessTopology>
+
+            <InclusionSolverSettings splitNodeUpdateRatio="1" convergenceCheckRatio="1" reserveSplitNodes="0"/>
+        </MPISettings>
+
+        <ContactParameterMap>
+            <ContactParameterStandard type="UCF" mu="0.5" epsilonN="0.5" epsilonT="0.0"/>
+            <ContactParameter materialId1="0" materialId2="0" type="UCF" mu="0.0" epsilonN="0.0" epsilonT="0" invDampingN="0" invDampingT="0"/>
+            <ContactParameter materialId1="0" materialId2="1" type="UCF" mu="0.5" epsilonN="0.0" epsilonT="0" invDampingN="0" invDampingT="0"/>
+            <ContactParameter materialId1="0" materialId2="2" type="UCF" mu="0.3" epsilonN="0.0" epsilonT="0" invDampingN="0" invDampingT="0"/>
+            <ContactParameter materialId1="0" materialId2="3" type="UCF" mu="0.1" epsilonN="0.0" epsilonT="0" invDampingN="0" invDampingT="0"/>
+        </ContactParameterMap>
+
+        <GlobalGeometries>
+            <!-- Sphere distribute="random" generator="normal" seed="5" mean="1.4e-3" variance="1.52795e-4" minRadius="0.59e-3" maxRadius="1e-3" id="1" instances="10001" -->
+        </GlobalGeometries>
+
+        <ExternalForces>
+            <ForceField applyTo="all" type="gravity" value="9.81" direction="-0.5 0 -0.866025404"/> <!-- 30° -->
+        </ExternalForces>
+
+
+        <GlobalInitialCondition file="/cluster/home/nuetzig/SimulationFramework/SourceCode/Projects/SimulationFramework/Simulations/SimulationJobs/Avalanche1M-SimulationStudy/studies/Avalanche1M-Tree-Study-P-0/data/SimState.sim" whichState="end" useTimeToContinue="false" readVelocities="false"/>
+
+        <!--
+        <GlobalSelectiveIds>
+            <Set value="0,0  0,9 0,3" />
+        </GlobalSelectiveIds>
+        -->
+
+    </SceneSettings>
+
+    <SceneObjects>
+
+        <RigidBodies name="beads" instances="1000000" groupId="0" enableSelectiveIds="true">
+
+            <Geometry>
+                <Sphere distribute="random" generator="piecewise-const" intervals="0.59e-3 0.7e-3 0.85e-3 1e-3 1.18e-3" densities="1.3681 1.9913 0.29116 0.03956" seed="5"/>
+            </Geometry>
+
+            <DynamicProperties>
+                <DynamicState type="simulated"/>
+                <Mass distribute="homogen" density="565959097.49"/>
+                <InertiaTensor type="homogen"/>
+                <Material distribute="uniform" id="0"/>
+                <InitialCondition type="posvel">
+                    <InitialPosition distribute="grid" gridSizeX="60" gridSizeY="80" distance="2.36e-3" translation="0.01 0 0.071" jitter="true" seed="4" delta="0.1e-3" dirZ="1 0 0" dirX="0 0 1"/>
+                    <!--
+                    <InitialVelocity distribute="transrot">
+                        <Vel transDir="-0.5 0 -0.8" absTransVel="0.0" rotDir="1 0 0" absRotVel="0" />
+                    </InitialVelocity>
+                    -->
+                </InitialCondition>
+            </DynamicProperties>
+
+            <Visualization>
+                <PointCloud scale="0.1 0.1 0.1" color="0.2 0.3 0.4 1.0" renderMode="spheres"/>
+                <!--
+                <Mesh file="Sphere18x18.mesh" scaleLikeGeometry="true" scale="0.0125 0.0125 0.0125" type="permutate" >
+                    <Material name="SphereRed" />
+                    <Material name="SphereYellow" />
+                    <Material name="SphereBlue" />
+                </Mesh>
+                -->
+            </Visualization>
+
+        </RigidBodies>
+
+
+        <RigidBodies name="floorChute" instances="1" groupId="2">
+            <Geometry>
+                <Halfspace distribute="uniform" normal="0 0 1" position="0 0 0"/>
+            </Geometry>
+            <DynamicProperties>
+                <DynamicState type="static"/>
+                <Material distribute="uniform" id="1"/>
+                <InitialCondition type="posvel">
+                    <InitialPosition distribute="transforms">
+                        <Pos><Trafo trans="0 0.0 0" axis="1 0 0" deg="0"/></Pos>
+                    </InitialPosition>
+                </InitialCondition>
+            </DynamicProperties>
+            <Visualization>
+                <Mesh file="Plane.mesh" scale="2 0.1 1" type="uniform">
+                    <Rendering attachAxis="true" axesSize="0.01"/>
+                    <Material name="PlaneBlue"/>
+                </Mesh>
+            </Visualization>
+        </RigidBodies>
+
+        <RigidBodies name="floorRunOut" instances="1" groupId="2">
+            <Geometry>
+                <Halfspace distribute="uniform" normal="0 0 1" position="0 0 0"/>
+            </Geometry>
+            <DynamicProperties>
+                <DynamicState type="static"/>
+                <Material distribute="uniform" id="1"/>
+                <InitialCondition type="posvel">
+                    <InitialPosition distribute="transforms">
+                        <Pos><Trafo trans="-0.296 0.0 0" axis="0 1 0" deg="10"/></Pos>
+                    </InitialPosition>
+                </InitialCondition>
+            </DynamicProperties>
+            <Visualization>
+                <Mesh file="Plane.mesh" scale="2 0.1 1" type="uniform">
+                    <Rendering attachAxis="true" axesSize="0.001"/>
+                    <Material name="PlaneBlue"/>
+                </Mesh>
+            </Visualization>
+        </RigidBodies>
+
+
+        <RigidBodies name="treeMiddle" instances="1" groupId="2">
+            <Geometry>
+                <Capsule distribute="uniform" normal="0 0 1" radius="0.0025" length="0.08"/>
+            </Geometry>
+            <DynamicProperties>
+                <DynamicState type="static"/>
+                <Material distribute="uniform" id="2"/>
+                <InitialCondition type="posvel">
+                    <InitialPosition distribute="transforms">
+                        <Pos>
+                            <Trafo trans="-0.296 0.0 0" axis="0 1 0" deg="10"/>
+                            <Trafo trans="-0.1254 0.004 0.04" axis="1 0 0" deg="0"/>
+                        </Pos>
+                    </InitialPosition>
+                </InitialCondition>
+            </DynamicProperties>
+            <Visualization>
+                <Capsule fileZylinder="Cylinder.mesh" fileCap="HalfSphere.mesh" radius="0.0025" length="0.08" scaleLikeGeometry="false" type="uniform">
+                    <Rendering attachAxis="true" axesSize="0.001"/>
+                    <Material name="PlaneBlue"/>
+                </Capsule>
+            </Visualization>
+        </RigidBodies>
+
+        <RigidBodies name="treeLeft" instances="1" groupId="2">
+            <Geometry>
+                <Capsule distribute="uniform" normal="0 0 1" radius="0.0025" length="0.08"/>
+            </Geometry>
+            <DynamicProperties>
+                <DynamicState type="static"/>
+                <Material distribute="uniform" id="2"/>
+                <InitialCondition type="posvel">
+                    <InitialPosition distribute="transforms">
+                        <Pos>
+                            <Trafo trans="-0.296 0.0 0" axis="0 1 0" deg="10"/>
+                            <Trafo trans="-0.1794 0.0277 0.04" axis="1 0 0" deg="0"/>
+                        </Pos>
+                    </InitialPosition>
+                </InitialCondition>
+            </DynamicProperties>
+            <Visualization>
+                <Capsule fileZylinder="Cylinder.mesh" fileCap="HalfSphere.mesh" radius="0.0025" length="0.08" scaleLikeGeometry="false" type="uniform">
+                    <Rendering attachAxis="true" axesSize="0.001"/>
+                    <Material name="PlaneBlue"/>
+                </Capsule>
+            </Visualization>
+        </RigidBodies>
+
+        <RigidBodies name="treeRight" instances="1" groupId="2">
+            <Geometry>
+                <Capsule distribute="uniform" normal="0 0 1" radius="0.0025" length="0.08"/>
+            </Geometry>
+            <DynamicProperties>
+                <DynamicState type="static"/>
+                <Material distribute="uniform" id="2"/>
+                <InitialCondition type="posvel">
+                    <InitialPosition distribute="transforms">
+                        <Pos>
+                            <Trafo trans="-0.296 0.0 0" axis="0 1 0" deg="10"/>
+                            <Trafo trans="-0.1829 -0.02704 0.04" axis="1 0 0" deg="0"/>
+                        </Pos>
+                    </InitialPosition>
+                </InitialCondition>
+            </DynamicProperties>
+            <Visualization>
+                <Capsule fileZylinder="Cylinder.mesh" fileCap="HalfSphere.mesh" radius="0.0025" length="0.08" scaleLikeGeometry="false" type="uniform">
+                    <Rendering attachAxis="true" axesSize="0.001"/>
+                    <Material name="PlaneBlue"/>
+                </Capsule>
+            </Visualization>
+        </RigidBodies>
+
+
+        <RigidBodies name="sideY1" instances="1" groupId="3">
+            <Geometry>
+                <Mesh distribute="uniform" file="models/Triangle.obj" scale="2 1 1"/>
+            </Geometry>
+            <DynamicProperties>
+                <DynamicState type="static"/>
+                <Material distribute="uniform" id="3"/>
+                <InitialCondition type="posvel">
+                    <InitialPosition distribute="transforms">
+                        <Pos><Trafo trans="-0.296 0.1 0" axis="1 0 0" deg="90"/></Pos>
+                        <Pos><Trafo trans="-0.296 -0.1 0" axis="1 0 0" deg="-90"/></Pos>
+                    </InitialPosition>
+                </InitialCondition>
+            </DynamicProperties>
+            <Visualization>
+                <Mesh file="Triangle.mesh" scaleLikeGeometry="true" type="uniform">
+                    <Rendering attachAxis="true" axesSize="0.01"/>
+                    <Material name="PlaneBlueWireNoCull"/>
+                </Mesh>
+            </Visualization>
+        </RigidBodies>
+
+        <RigidBodies name="sideY2" instances="1" groupId="3">
+            <Geometry>
+                <Mesh distribute="uniform" file="models/Triangle.obj" scale="2 -1 1"/>
+            </Geometry>
+            <DynamicProperties>
+                <DynamicState type="static"/>
+                <Material distribute="uniform" id="3"/>
+                <InitialCondition type="posvel">
+                    <InitialPosition distribute="transforms">
+                        <Pos><Trafo trans="-0.296 -0.1 0" axis="1 0 0" deg="-90"/></Pos>
+                    </InitialPosition>
+                </InitialCondition>
+            </DynamicProperties>
+            <Visualization>
+                <Mesh file="Triangle.mesh" scaleLikeGeometry="true" type="uniform">
+                    <Rendering attachAxis="true" axesSize="0.01"/>
+                    <Material name="PlaneBlueWireNoCull"/>
+                </Mesh>
+            </Visualization>
+        </RigidBodies>
+
+    </SceneObjects>
+</DynamicsSystem>

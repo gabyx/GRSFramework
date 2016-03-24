@@ -1,0 +1,13 @@
+AttributeBegin
+    Attribute "identifier" "name" [ "CubeUpper" ]
+    Transform [
+            0.4330126941204071 0.0 0.25 0.0
+            0.0 0.10000000149011612 0.0 0.0
+            -0.004999999422580004 0.0 0.008660253137350082 0.0
+            0.18166914582252502 0.0 0.09333974123001099 1.0
+            ]
+            
+    ReadArchive "MaterialSlopeUpper-MAT.rib"
+    ReadArchive "CubeUpper_m0-GEO.rib"
+AttributeEnd
+

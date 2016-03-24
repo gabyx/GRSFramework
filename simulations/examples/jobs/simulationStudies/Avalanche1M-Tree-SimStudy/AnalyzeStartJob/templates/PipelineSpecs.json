@@ -1,0 +1,38 @@
+{   
+    
+    "fileMover" :{
+        "linkAllTools"         :  ${Pipeline-PreProcess:fileMoverLinkAllTools},
+        "additionalTasks"      :  ${Pipeline-PreProcess:fileMoverAdditionalTasks},
+        "fileMoverProcessFile" : "${Pipeline-PreProcess:fileMoverProcessFile}"
+    },
+    
+    "pipelineTools" : {
+        "converter" :{ 
+                        "inputDir"     : "${Pipeline:converterInputDir}",
+                        "outputDir"    : "${Pipeline:converterOutputDir}",
+                        "dependencies" : { "py/set" : [] }  ,   
+                        "inputFiles"  : [ ] ,     
+                        "outputFiles" : [ ] ,
+                        "processFileGenerator" : 
+                            { 
+                                "generator" : ${Pipeline:converterProcessFileWriter},
+                                "arguments" : {
+                                                "processFile": "${Pipeline:converterProcessFile}"
+                                            }
+                            },
+                        "copyToFrame" : ["inputFiles","outputFiles"]
+                    }
+    },
+    
+    "frameGenerator" : {
+        "generator" : ${Pipeline:frameGenerator},
+        "arguments" : {
+                "frameList"  : ${Pipeline:frameList}
+        }
+    },
+    
+    "fileValidationSpecs" : [ ],
+    "fileValidationTools" : { }
+                        
+}
+

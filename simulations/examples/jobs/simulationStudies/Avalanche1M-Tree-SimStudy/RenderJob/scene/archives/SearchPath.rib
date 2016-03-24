@@ -1,0 +1,3 @@
+Option "searchpath" "shader"  ["${Pipeline:shaderSearchPath}"]
+Option "searchpath" "texture" ["${Pipeline:textureSearchPath}"]
+Option "searchpath" "archive" ["${Pipeline:archiveSearchPath}"]

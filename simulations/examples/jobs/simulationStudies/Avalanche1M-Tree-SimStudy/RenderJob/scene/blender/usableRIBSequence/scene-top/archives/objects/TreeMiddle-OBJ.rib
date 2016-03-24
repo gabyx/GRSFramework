@@ -1,0 +1,13 @@
+AttributeBegin
+    Attribute "identifier" "name" [ "TreeMiddle" ]
+    Transform [
+            0.9396926164627075 -2.664397413809638e-07 0.3420201539993286 0.0
+            5.618248337668774e-07 1.0 -7.645833761671383e-07 0.0
+            -0.3420201539993286 9.106287279792014e-07 0.9396926164627075 0.0
+            -0.38786181807518005 0.004000100772827864 -0.1533016413450241 1.0
+            ]
+            
+    ReadArchive "MaterialTree-MAT.rib"
+    ReadArchive "Cylinder.001_m0-GEO.rib"
+AttributeEnd
+

@@ -1,0 +1,13 @@
+AttributeBegin
+    Attribute "identifier" "name" [ "Pole" ]
+    Transform [
+            0.05000000074505806 0.0 0.0 0.0
+            0.0 0.05000000074505806 0.0 0.0
+            0.0 0.0 0.05000000074505806 0.0
+            0.29999998211860657 0.0 -0.29999998211860657 1.0
+            ]
+            
+    ReadArchive "MaterialSlopeUpper-MAT.rib"
+    ReadArchive "Cube.001_m0-GEO.rib"
+AttributeEnd
+
