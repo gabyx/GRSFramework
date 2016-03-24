@@ -1,6 +1,6 @@
 
 
-PROJECT(Converter)
+PROJECT(GRSFConverter)
 
 
 #Define H5 ===================================================================================================================================================
@@ -15,7 +15,7 @@ include(PrintListMacro)
 
 
 #Set Source Code (its in the GeneralRigidBodySimulation Folder)
-SET(SOURCE_DIR "${PROJECT_SOURCE_DIR}/../GeneralRigidBodySimulation/")
+SET(SOURCE_DIR "${PROJECT_SOURCE_DIR}/../granularRigidBodySimulation/")
 
 SET(CONFIG_INC ${PROJECT_BINARY_DIR}/ConfigFiles/ConfigureFile.hpp)
 
@@ -26,7 +26,7 @@ SET( APP_SRC
     ${PROJECT_SOURCE_DIR}/src/GRSF/App/main.cpp
 )
 
-SET(SOURCE_DIR "${SOURCE_DIR}/../GeneralRigidBodySimulation/")
+SET(SOURCE_DIR "${SOURCE_DIR}/../granularRigidBodySimulation/")
 
 
 SET(COMMON_INC
@@ -118,7 +118,7 @@ INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC
 # WRITE CONFIGURATION FILE
 SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
 configure_file (
-  ${SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
+  ${SOURCE_DIR}/include/GRSF/configFiles/ConfigureFile.hpp.in
   ${CONFIG_INC}
 )
 #=========================
@@ -164,23 +164,21 @@ set(INCLUDE_DIRS
 )
 
 include_directories(${INCLUDE_DIRS})
-#PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
-
-
+PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
 
 #link directories
 set(LINK_DIRS
     ${GRSF_DEP_LIBRARY_DIRS}
 )
 link_directories(${LINK_DIRS})
-#PRINTLIST( "Link directories are:" "${LINK_DIRS}")
+PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 set(LINK_LIBS ${GRSF_DEP_LIBRARIES} ${HDF5_LIBRARIES})
-#PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
+PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
-message(STATUS "Add executable:...")
+message(STATUS "Add executable:  ${PPROJECT_NAME}")
 ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES})
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 

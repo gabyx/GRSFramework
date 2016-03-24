@@ -1,6 +1,6 @@
 
 
-PROJECT(GeneralRigidBodySimulationMPI)
+PROJECT(GRSFSimMPI)
 
 message(STATUS "==============================Project: ${PROJECT_NAME} ==================================")
 
@@ -172,7 +172,7 @@ INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC
 # WRITE CONFIGURATION FILE
 SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
 configure_file (
-  ${PROJECT_SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
+  ${PROJECT_SOURCE_DIR}/include/GRSF/configFiles/ConfigureFile.hpp.in
   ${CONFIG_INC}
 )
 #=========================
@@ -224,7 +224,7 @@ set(INCLUDE_DIRS
 )
 
 include_directories(${INCLUDE_DIRS})
-#PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
+PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
 
 
 
@@ -233,7 +233,7 @@ set(LINK_DIRS
     ${GRSF_DEP_LIBRARY_DIRS}
 )
 link_directories(${LINK_DIRS})
-#PRINTLIST( "Link directories are:" "${LINK_DIRS}")
+PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 
@@ -241,15 +241,16 @@ set(LINK_LIBS   ${GRSF_DEP_LIBRARIES}
                 ${CUDA_cublas_LIBRARY}
                 ${MPI_CXX_LIBRARIES}
                 )
-#PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
+PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
 
-message(STATUS "Add executable:...")
+message(STATUS "Add executable:  ${PPROJECT_NAME}")
+
 if(SIMULATIONFRAMEWORK_USE_CUDA)
-CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES})
+  CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES})
 else()
-ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES})
+  ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES})
 endif()
 
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )

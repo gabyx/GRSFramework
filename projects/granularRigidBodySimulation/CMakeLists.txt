@@ -1,6 +1,6 @@
 
 
-PROJECT(GeneralRigidBodySimulationNoGUI)
+PROJECT(GRSFSim)
 
 message(STATUS "==============================Project: ${PROJECT_NAME} ==================================")
 
@@ -17,7 +17,7 @@ include(PrintListMacro)
 
 
 #Set Source Code (its in the GeneralRigidBodySimulation Folder)
-SET(SOURCE_DIR "${PROJECT_SOURCE_DIR}/../GeneralRigidBodySimulation/")
+SET(SOURCE_DIR "${PROJECT_SOURCE_DIR}/../granularRigidBodySimulation/")
 
 
 SET( APP_INC
@@ -176,7 +176,7 @@ set(INCLUDE_DIRS
 )
 
 include_directories(${INCLUDE_DIRS})
-#PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
+PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
 
 
 
@@ -185,40 +185,16 @@ set(LINK_DIRS
     ${GRSF_DEP_LIBRARY_DIRS}
 )
 link_directories(${LINK_DIRS})
-#PRINTLIST( "Link directories are:" "${LINK_DIRS}")
+PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 
 set(LINK_LIBS ${GRSF_DEP_LIBRARIES})
-#PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
-
-
-#source_group("Source Files\\App" FILES ${APP_SRC})
-source_group("Source Files\\Singeltons" FILES ${SINGELTON_SRC})
-source_group("Source Files\\States" FILES ${STATES_SRC})
-source_group("Source Files\\Common" FILES ${COMMON_SRC})
-source_group("Source Files\\Dynamics" FILES ${DYNAMICS_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\Prox" FILES ${ProxGPU_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\VectorAdd" FILES ${VectorAddGPU_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\MatrixVectorMult" FILES ${MatrixVectorMultGPU_SRC})
-source_group("Source Files\\Dynamics\\Cuda\\General" FILES ${GeneralCommonFiles_SRC})
-source_group("Source Files\\Systems" FILES ${SYSTEMS_SRC})
-
-source_group("Header Files\\ConfigFiles" FILES ${CONFIG_INC})
-#source_group("Header Files\\App" FILES ${APP_INC})
-source_group("Header Files\\Singeltons" FILES ${SINGELTON_INC})
-source_group("Header Files\\States" FILES ${STATES_INC})
-source_group("Header Files\\Common" FILES ${COMMON_INC})
-source_group("Header Files\\Dynamics" FILES ${DYNAMICS_INC})
-source_group("Header Files\\Dynamics\\Cuda\\Prox" FILES ${ProxGPU_INC})
-source_group("Header Files\\Dynamics\\Cuda\\VectorAdd" FILES ${VectorAddGPU_INC})
-source_group("Header Files\\Dynamics\\Cuda\\MatrixVectorMult" FILES ${MatrixVectorMultGPU_INC})
-source_group("Header Files\\Dynamics\\Cuda\\General" FILES ${GeneralCommonFiles_INC})
-source_group("Header Files\\Systems" FILES ${SYSTEMS_INC})
+PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
 
-message(STATUS "Add executable:...")
+message(STATUS "Add executable:  ${PPROJECT_NAME}")
 if(SIMULATIONFRAMEWORK_USE_CUDA)
 CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES})
 else()

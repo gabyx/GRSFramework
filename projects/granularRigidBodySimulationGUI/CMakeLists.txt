@@ -1,17 +1,10 @@
 
 
-PROJECT(GeneralRigidBodySimulation)
+PROJECT(GRSFSimGUI)
 
 message(STATUS "==============================Project: ${PROJECT_NAME} ==================================")
 include(PrintListMacro)
-## EXTREMLY IMPORTANT ISSUES ############################################################################################################################################
-# In MSVC 64bit mode, there is no problem with vectorization at all, because everything is aligned nicely!,
-# If we move this code to UNIX 64bit it is not anymore like that, the Code of me, is not thoroughly supported for Vectorization in EIGEN
-# TODO: To make it fully work with EIGEN_VECTORIZE as PREPROCESSOR MACRO (standart, set see App Log, have made an output!
-# in 32bit on Windows and Unix, we need the EIGEN_MAKE_ALLOCATOR_NEW always defined, (almost done) and all std::vector and stuff we need special allocators! not done!
-# TO make it still work on UNIX 64bit, turn EIGEN_DONT_ALIGN, for disabling completetly, and  EIGEN_DONT_ALIGN_STATICALLY for partly which still works... (or should)
-# http://eigen.tuxfamily.org/dox-devel/TopicPreprocessorDirectives.html
-#########################################################################################################################################################################
+
 
 #Find Ogre ======================================================================================================================================================
 if(WIN32)
@@ -276,8 +269,6 @@ include_directories(${INCLUDE_DIRS})
 
 #link directories
 set(LINK_DIRS
-    #"${NVIDIA_SDK_DIR}/common/lib"
-    #"${NVIDIA_SDK_DIR}../shared/lib"
     #"${CEGUI_LIBRARY_DIR}"
     ${GRSF_DEP_LIBRARY_DIRS}
 )
@@ -297,11 +288,11 @@ set(LINK_LIBS
 PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
-message(STATUS "Add executable:...")
+message(STATUS "Add executable:  ${PPROJECT_NAME}")
 if(SIMULATIONFRAMEWORK_USE_CUDA)
-CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} )
+  CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} )
 else()
-ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} )
+  ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} )
 endif()
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 
