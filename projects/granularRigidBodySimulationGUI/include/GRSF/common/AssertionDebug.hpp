@@ -8,6 +8,18 @@
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
 // ========================================================================================
 
+#ifndef GRSF_common_AssertionDebug_hpp
+#define GRSF_common_AssertionDebug_hpp
+
+// Add an Assertion Debuggin!
+
+//#define NDEBUG
+#include <stdlib.h>
+#include <iostream>
+#include <typeinfo>
+
+#include "GRSF/common/Exception.hpp"
+
 #ifndef NDEBUG
 // Debug!
 /**

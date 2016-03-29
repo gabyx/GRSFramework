@@ -8,7 +8,60 @@
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
 // ========================================================================================
 
-#ifndef NDEBUG
+#include <iostream>
+#include <string>
+
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
+
+#include "GRSF/common/Exception.hpp"
+
+#include "GRSF/common/AssertionDebug.hpp"
+
+#include "GRSF/common/ApplicationCLOptionsConverter.hpp"
+#include "GRSF/common/ApplicationSignalHandler.hpp"
+
+#include "GRSF/converters/simInfo/SimFileInfo.hpp"
+#include "GRSF/converters/simJoiner/SimFileJoiner.hpp"
+#include "GRSF/converters/simResampler/SimFileResampler.hpp"
+#include "GRSF/converters/renderer/RenderConverter.hpp"
+#include "GRSF/converters/analyzer/AnalyzerConverter.hpp"
+#include "GRSF/converters/gridder/GridderConverter.hpp"
+
+void printHelpAndExit(std::string o=""){
+     std::cerr << "Wrong Options: '" << o <<"'"<< std::endl
+            << " Help: \n"
+            << "    converter sim      [-h|--help]        : convert '.sim' files \n"
+            << "    converter siminfo  [-h|--help]        : info about '.sim' files \n"
+            << "    converter renderer [-h|--help]        : produce render output of '.sim' files and scene XML by execution graph XML\n"
+            << "    converter analyzer [-h|--help]        : analyze '.sim' files with execution graph XML\n"
+            << "    converter gridder  [-h|--help]        : extract gridded data from '.sim' files" << std::endl;
+            exit(EXIT_FAILURE);
+}
+
+void callBackSignalAndExit(int signum){
+    std::cerr << "GRSFramework Converter: received signal: " << signum << " -> exit ..." << std::endl;
+    // http://www.cons.org/cracauer/sigint.html
+    // set sigint handler to nothing
+    // and kill ourself
+    signal(SIGINT, SIG_DFL);
+    kill(getpid(),SIGINT);
+}
+
+void callBackSIGPIPE(int){
+    std::cerr << "GRSFramework Converter: received SIGPIPE -> Pipe error: exit ..." << std::endl;
+    signal(SIGINT, SIG_DFL);
+    kill(getpid(),SIGINT);
+}
+
+int main(int argc, char **argv) {
+
+    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGUSR2,SIGPIPE} ) )
+    sigHandler->registerCallback({SIGINT,SIGUSR2},callBackSignalAndExit,"callBackSignalAndExit");
+    sigHandler->registerCallback(SIGPIPE,callBackSIGPIPE,"callBackSIGPIPE");
+
+
+    #ifndef NDEBUG
             std::cerr << "GRSFramework Converter: build: ?, config: " << "debug" << std::endl;
     #else
             std::cerr << "GRSFramework Converter: build: ?, config: " << "release" << std::endl;
