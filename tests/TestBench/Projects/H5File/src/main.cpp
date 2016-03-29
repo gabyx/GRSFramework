@@ -8,6 +8,13 @@
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
 // ========================================================================================
 
+#include <iostream>
+#include <string>
+
+#include <H5Cpp.h>
+#include "hdf5_hl.h"
+#include "hdf5.h"
+
 #ifndef H5_NO_NAMESPACE
     using namespace H5;
 #endif

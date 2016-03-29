@@ -8,6 +8,25 @@
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
 // ========================================================================================
 
+#ifndef GRSF_common_foreach_macro_hpp
+#define GRSF_common_foreach_macro_hpp
+
+#if defined(__GNUC__) && __GNUC__==4 && __GNUC_MINOR__<4
+#define FOREACH__HPP_TYPEOF 1
+#elif defined(__GNUC__) && __GNUC__==4 && __GNUC_MINOR__>=4
+#define FOREACH__HPP_AUTO 1
+#elif defined(_MSC_VER) && _MSC_VER<1600
+#include <boost/typeof/typeof.hpp>
+#define FOREACH__HPP_TYPEOF 1
+#define __typeof__(ex) BOOST_TYPEOF(ex)
+#elif defined(_MSC_VER) && _MSC_VER>=1600
+#define FOREACH__HPP_AUTO 1
+#else
+#error unknown compiler!
+#endif
+
+#if defined(FOREACH__HPP_TYPEOF)
+
 #ifndef foreach
 /** a for loop to iterate over a container.
     @param c (STL) container, has to support begin() and end() methods.

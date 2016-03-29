@@ -8,6 +8,30 @@
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
 // ========================================================================================
 
+#ifndef GRSF_dynamics_inclusion_InclusionSolverNTContactOrdered_hpp
+#define GRSF_dynamics_inclusion_InclusionSolverNTContactOrdered_hpp
+
+#include <fstream>
+#include <boost/shared_ptr.hpp>
+#include <Eigen/Dense>
+#include <Eigen/SVD>
+#include "GRSF/common/AssertionDebug.hpp"
+
+#include "GRSF/common/TypeDefs.hpp"
+
+#include "GRSF/dynamics/collision/CollisionSolver.hpp"
+#include "GRSF/dynamics/general/RigidBody.hpp"
+
+#include "GRSF/dynamics/inclusion/PercussionPool.hpp"
+
+#include "GRSF/dynamics/general/VectorToSkewMatrix.hpp"
+
+#include "GRSF/dynamics/inclusion/ProxFunctions.hpp"
+
+#include "GRSF/dynamics/inclusion/InclusionSolverSettings.hpp"
+
+#include "GRSF/common/LogDefines.hpp"
+
 #ifndef USE_PERCUSSION_POOL
 #define USE_PERCUSSION_POOL 0
 #endif
