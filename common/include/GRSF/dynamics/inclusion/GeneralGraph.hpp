@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -80,7 +80,7 @@ struct GraphTraitsSymmetric {
     using toLinearIdx = metaAdd::toLinearIdxSym<R,C,N>;
 
     template<typename TTNodeData>
-    using getNodeDataIdx = meta::eval<meta::find_index<NodeDataTypes,TTNodeData> >;
+    using getNodeDataIdx = meta::_t<meta::find_index<NodeDataTypes,TTNodeData> >;
 
 
     /** build map , node data to all output edge data types (without void) */
@@ -128,7 +128,7 @@ struct GraphTraitsSymmetric {
 
     /** Make a meta::list< Container< F<Item1> > , Container< F<Item2> >, ... >  */
     template<typename List, typename F, typename Container = meta::quote<std::vector> >
-    using makeTupleContainer = meta::apply_list<
+    using makeTupleContainer = meta::apply<
                                    meta::quote<std::tuple>,
                                        meta::transform<
                                        List,
@@ -425,9 +425,9 @@ public:
                                                                             meta::quote<EdgeStorageType> >;
 
     template<typename TNodeData>
-    using toNodeStorageType  =  meta::eval<std::tuple_element< meta::find_index<NodeDataTypes,TNodeData>::value , NodeStorageTuple  >>;
+    using toNodeStorageType  =  std::tuple_element_t< meta::find_index<NodeDataTypes,TNodeData>::value , NodeStorageTuple  >;
     template<typename TEdgeData>
-    using toEdgeStorageType  =  meta::eval<std::tuple_element< meta::find_index<EdgeDataTypes,TEdgeData>::value , EdgeStorageTuple  >>;
+    using toEdgeStorageType  =  std::tuple_element_t< meta::find_index<EdgeDataTypes,TEdgeData>::value , EdgeStorageTuple  >;
 
 protected:
 

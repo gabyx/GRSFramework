@@ -4,20 +4,16 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(MYPROJECT_LIBRARY_PATH "" CACHE STRING "Where cmake searches for libraries (on cluster change this value)")
 SET(CMAKE_LIBRARY_PATH ${MYPROJECT_LIBRARY_PATH} ${CMAKE_LIBRARY_PATH} )
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/;${CMAKE_MODULE_PATH}")
-message(STATUS "Module path is now set to: " ${CMAKE_MODULE_PATH} )
-
 
 #Detect Build Type if Debug appears in CMAKE_BINARY_DIR path
 STRING(REGEX MATCH ".*(Debug|debug).*" DEBUG_MATCH ${CMAKE_BINARY_DIR} )
 if(DEBUG_MATCH)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "The build type for makefile based generators")
-    SET(PROJECTNAMEPREFIX Debug)
+    SET(PROJECTNAMEPREFIX debug)
 ELSE()
     set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
-    SET(PROJECTNAMEPREFIX Release)
+    SET(PROJECTNAMEPREFIX release)
 ENDIF()
-
 
 
 SET(TestBenchName "TestBench")
@@ -66,8 +62,7 @@ IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
 ENDIF()
 
 
-
-SET(MODULE_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules/" )
+SET(MODULE_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/" )
 SET(CMAKE_MODULE_PATH ${MODULE_FOLDER} ${CMAKE_MODULE_PATH})
 MESSAGE(STATUS "Module path is now set to: " ${CMAKE_MODULE_PATH} )
 
@@ -164,7 +159,7 @@ if (APPLE)
 endif()
 set(Boost_ADDITIONAL_VERSIONS "1.46" "1.46.0" "1.46.1" "1.45" "1.45.0" "1.44" "1.44.0" "1.42" "1.42.0" "1.41.0" "1.41" "1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37" )
 # Components that need linking (NB does not include header-only components like bind)
-set(BOOST_COMPONENTS thread date_time system filesystem timer chrono serialization)
+set(BOOST_COMPONENTS thread system filesystem serialization)
 find_package(Boost COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
 if (NOT Boost_FOUND)
     # Try again with the other type of libs
@@ -187,14 +182,13 @@ FIND_PACKAGE(Meta REQUIRED)
 # ===============================================================================================================================================================
 
 
-
 # Searching ApproxMVBB Source ==================================
 
 # to link against ApproxMVBB
 #find_package(ApproxMVBB)   
 
 # to include all source into the project
-set(ApproxMVBB_SEARCH_PATH "./../../../../ApproxMVBB" CACHE STRING "ApproxMVBB Repo Dir")
+set(ApproxMVBB_SEARCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../ApproxMVBB" CACHE STRING "ApproxMVBB Repo Dir")
 find_package(ApproxMVBBSource REQUIRED)  
 # ===================================================
 

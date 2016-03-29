@@ -152,7 +152,7 @@ INCLUDE_SIMULATION_FRAMEWORK_GUI( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_CO
 # ===========================================================================================
 
 # CUDA SOURCE INCLUDES ====================================================================
-if(SIMULATIONFRAMEWORK_USE_CUDA)
+if(GRSF_USE_CUDA)
 MESSAGE(ERROR "CUDA does not work, write library to include!")
 INCLUDE(IncludeModulesCUDAModern)
 
@@ -289,7 +289,7 @@ PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
 message(STATUS "Add executable:  ${PPROJECT_NAME}")
-if(SIMULATIONFRAMEWORK_USE_CUDA)
+if(GRSF_USE_CUDA)
   CUDA_ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} )
 else()
   ADD_EXECUTABLE(${PROJECT_NAME}  ${SOURCE_FILES} ${INCLUDE_FILES} )
