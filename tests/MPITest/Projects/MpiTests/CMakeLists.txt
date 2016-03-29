@@ -31,7 +31,7 @@ PRINTLIST("Linked libraries are:" "${LINKED_LIBS}")
 
 
 set(SOURCE_FILES
-	"src/main.cpp"
+	"src/GRSF/app/main.cpp"
 	${COMMON_FILES_SRC}
 )
 

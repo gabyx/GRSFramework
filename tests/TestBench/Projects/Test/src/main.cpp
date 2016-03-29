@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -107,18 +107,12 @@
 
 //#include "EigenSpeedTest.hpp"
 
-#include "GRSF/common/CommonFunctions.hpp"
+#include "GRSF/common/MetaHelper.hpp"
 
 int  main( int  argc, char  ** argv ){
 
-    std::string s="1 2 3 4 5 6     ";
-    Eigen::Quaternion<double> a;
-    std::cout << Utilities::stringToType(a.coeffs(),s) << std::endl;
-
-    std::cout << a.coeffs() << std::endl;
-
-    int b;
-    Utilities::stringToType(b,s);
+    using T = meta::list<int,int,float,int,float>;
+    metaAdd::find_indices<int,T>::A;
 
     //eigenSpeedTest();
 
