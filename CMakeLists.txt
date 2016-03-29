@@ -3,16 +3,16 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_GUI )
-set(SIMULATIONFRAMEWORK_BUILD_GUI ON CACHE BOOL "Build the GUI version of SimulationFramework")
+set(GRSF_BUILD_GUI ON CACHE BOOL "Build the GUI version of SimulationFramework")
 
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_NOGUI )
-set(SIMULATIONFRAMEWORK_BUILD_NOGUI ON CACHE BOOL "Build the NOGUI version of SimulationFramework")
+set(GRSF_BUILD_NOGUI ON CACHE BOOL "Build the NOGUI version of SimulationFramework")
 
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_MPI )
-set(SIMULATIONFRAMEWORK_BUILD_MPI ON CACHE BOOL "Build the MPI version of SimulationFramework")
+set(GRSF_BUILD_MPI ON CACHE BOOL "Build the MPI version of SimulationFramework")
 
-MARK_AS_ADVANCED( SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER )
-set(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER ON CACHE BOOL "Build the SimFileConverter for the simulation files of the framework")
+MARK_AS_ADVANCED( GRSF_BUILD_SIMCONVERTER )
+set(GRSF_BUILD_SIMCONVERTER ON CACHE BOOL "Build the SimFileConverter for the simulation files of the framework")
 
 
 #Detect Build Type if Debug appears in CMAKE_BINARY_DIR path
@@ -117,24 +117,13 @@ endif()
 # ========================================================================================================================================
 
 
-#Find GCCFilter Tool
-if(GCCFILTER_TOOL)
-    FIND_PACKAGE(Gccfilter)
-	if(GCCFILTER_FOUND)
-	    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${GCCFILTER_BIN} ${GCCFILTER_ADDITIONAL_FLAGS}")
-	endif()
-else()
-		set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "")
-endif()
-
-
 #Find Doxygen
 FIND_PACKAGE(Doxygen)
 
-MARK_AS_ADVANCED( SIMULATIONFRAMEWORK_USE_CUDA )
-SET(SIMULATIONFRAMEWORK_USE_CUDA OFF CACHE BOOL "USE CUDA Support for the SimulationFramework")
+MARK_AS_ADVANCED( GRSF_USE_CUDA )
+SET(GRSF_USE_CUDA OFF CACHE BOOL "USE CUDA Support for the SimulationFramework")
 
-if(SIMULATIONFRAMEWORK_USE_CUDA)
+if(GRSF_USE_CUDA)
 # Find CUDA (if available)! =============================================================================================================================
 	# Set the flags
 
@@ -322,19 +311,19 @@ set(GRSF_COMMON_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/common")
 
 
 
-if(SIMULATIONFRAMEWORK_BUILD_GUI)
+if(GRSF_BUILD_GUI)
 add_subdirectory(projects/granularRigidBodySimulationGUI)
 endif()
 
-if(SIMULATIONFRAMEWORK_BUILD_NOGUI)
+if(GRSF_BUILD_NOGUI)
 add_subdirectory(projects/granularRigidBodySimulation)
 endif()
 
-if(SIMULATIONFRAMEWORK_BUILD_MPI)
+if(GRSF_BUILD_MPI)
 add_subdirectory(projects/granularRigidBodySimulationMPI)
 endif()
 
-if(SIMULATIONFRAMEWORK_BUILD_SIMCONVERTER)
+if(GRSF_BUILD_SIMCONVERTER)
 add_subdirectory(projects/converter)
 endif()
 

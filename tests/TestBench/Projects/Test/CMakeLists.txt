@@ -9,10 +9,10 @@ include(PrintListMacro)
 
 
 #Set Source Code (its in the GeneralRigidBodySimulation Folder)
-SET(SOURCE_DIR       "${PROJECT_SOURCE_DIR}/../../../SimulationFramework/Projects/GeneralRigidBodySimulation/")
-set(COMMONSOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../SimulationFramework/CommonSource")
+SET(SOURCE_DIR       "${PROJECT_SOURCE_DIR}/../../../../projects/granularRigidBodySimulation/")
+set(COMMONSOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../../common")
 
-SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp)
+SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/configFiles/ConfigureFile.hpp)
 
 
 SET(COMMON_INC
@@ -30,7 +30,7 @@ SET(COMMON_SRC
 
 
 # COMMON FILES INCLUDE ====================================================================
-INCLUDE(IncludeModulesSimulationFramework)
+INCLUDE(IncludeModulesGRSFramework)
 
 INCLUDE_SIMULATION_FRAMEWORK_NOGUI_TEST( GLOBAL_COMMON_SRC  GLOBAL_COMMON_INC GLOBAL_COMMON_INC_DIR ${COMMONSOURCE_DIR})
 PRINTLIST("Global Common src files:" "${GLOBAL_COMMON_SRC}")
@@ -99,8 +99,8 @@ INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC
 
 # WRITE CONFIGURATION FILE
 configure_file (
-  ${SOURCE_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp.in
-  ${PROJECT_BINARY_DIR}/include/GRSF/ConfigFiles/ConfigureFile.hpp
+  ${SOURCE_DIR}/include/GRSF/configFiles/ConfigureFile.hpp.in
+  ${PROJECT_BINARY_DIR}/include/GRSF/configFiles/ConfigureFile.hpp
 )
 # =======================
 

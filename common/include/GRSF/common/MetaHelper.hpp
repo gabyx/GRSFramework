@@ -74,12 +74,12 @@ namespace metaAdd {
 //    };
 //    /// Return the index (std::integral_constant) for an element type \p T in a meta::list \p List.
 //    template<typename T, typename List>
-//    using getIdx = meta::eval<details::getIdx_impl<T,List>>;
+//    using getIdx = meta::_t<details::getIdx_impl<T,List>>;
 
 
     /// Return the type T* of the input type \p T.
     template<typename T>
-    using addPointer = meta::eval<std::add_pointer<T> >;
+    using addPointer = meta::_t<std::add_pointer<T> >;
 
 
     /// Returns a meta::list where all types equal to \p T in list \p List are removed.
@@ -87,7 +87,7 @@ namespace metaAdd {
     using remove = meta::filter< List, meta::compose<
                    meta::quote<meta::not_> ,
                    meta::bind_front< meta::quote<std::is_same>, T>
-                   >>;
+                   > >;
 
 
 
