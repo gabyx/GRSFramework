@@ -1,3 +1,13 @@
+// ========================================================================================
+//  GRSFramework 
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
+// 
+//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  published by the Free Software Foundation; either version 3 of the License,
+//  or (at your option) any later version. If a copy of the GPL was not distributed with
+//  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
+// ========================================================================================
+
 #ifndef OOBB_hpp
 #define OOBB_hpp
 
@@ -40,7 +50,7 @@ public:
         }
         if( i == 0){
             // Make new x-Axis the z-Axis
-            // R_NK = Rotate around 90� around Y, and 90� around X (always in K frame) )
+            // R_NK = Rotate around 90° around Y, and 90° around X (always in K frame) )
             // A_IN = A_IK * A_KN = R_KI * R_NK
             m_q_KI = m_q_KI * Quaternion(0.5 ,0.5, 0.5, 0.5);
             // Change points  Coordinates I_[x,y,z] -> K_[y,z,x]
@@ -51,7 +61,7 @@ public:
             std::swap(m_maxPoint(1),m_maxPoint(2));
         }else{
             // Make new y-Axis the z-Axis
-            // R_NK = Rotate around 90� around -X, and 90� around -Y (always in K frame) )
+            // R_NK = Rotate around 90° around -X, and 90° around -Y (always in K frame) )
             // A_IN = A_IK * A_KN = R_KI * R_NK
             m_q_KI = m_q_KI * Quaternion(0.5 ,-0.5, -0.5, -0.5);
             // Change points  Coordinates I_[x,y,z] -> K_[z,x,y]
