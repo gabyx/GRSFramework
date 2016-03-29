@@ -9,21 +9,21 @@ include(PrintListMacro)
 
 
 #Set Source Code (its in the GeneralRigidBodySimulation Folder)
-SET(SOURCE_DIR       "${PROJECT_SOURCE_DIR}/../../../../projects/granularRigidBodySimulation/")
+SET(SOURCE_DIR       "${PROJECT_SOURCE_DIR}/../../../../projects/granularRigidBodySimulationGUI/")
 set(COMMONSOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../../common")
 
-SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/configFiles/ConfigureFile.hpp)
+
 
 
 SET(COMMON_INC
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/LogDefines.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/Common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/TypeDefs.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/LogDefines.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/AssertionDebug.hpp
 
 )
 
 SET(COMMON_SRC
-    ${PROJECT_SOURCE_DIR}/src//GRSF/Common/TypeDefs.cpp
+    ${PROJECT_SOURCE_DIR}/src/GRSF/common/TypeDefs.cpp
     
     ${PROJECT_SOURCE_DIR}/src/main.cpp
 )
@@ -71,17 +71,6 @@ endif()
 #Configure ApproxMVBB =======================================================================
 include(${ApproxMVBB_CMAKE_DIR}/DefineApproxMVBBSources.cmake)
 
-#write config file for this source code
-#set(ApproxMVBB_USE_DIFFERENT_HEADERS TRUE)
-#set(ApproxMVBB_AssertionDebug_INCLUDE_FILE     "ApproxMVBB/Common//AssertionDebug.hpp")
-#set(ApproxMVBB_Exception_INCLUDE_FILE          "ApproxMVBB/Common//Exception.hpp")
-#set(ApproxMVBB_Platform_INCLUDE_FILE           "ApproxMVBB/Common/Platform.hpp")
-#set(ApproxMVBB_StaticAssert_INCLUDE_FILE       "ApproxMVBB/Common/StaticAssert.hpp")
-#set(ApproxMVBB_TypeDefs_INCLUDE_FILE           "ApproxMVBB/Common/TypeDefs.hpp" )
-#set(ApproxMVBB_MyMatrixTypeDefs_INCLUDE_FILE   "ApproxMVBBWrapper/Common/MyMatrixTypeDefs.hpp")
-#set(ApproxMVBB_AABB_INCLUDE_FILE               "GRSF/Dynamics/Collision/Geometry/AABB.hpp")
-#set(ApproxMVBB_OOBB_INCLUDE_FILE               "GRSF/Dynamics/Collision/Geometry/OOBB.hpp" )
-
 # Define all MVBB Source files
 INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC 
                                 ApproxMVBB_INC 
@@ -98,9 +87,10 @@ INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC
 
 
 # WRITE CONFIGURATION FILE
+SET(CONFIG_INC ${PROJECT_BINARY_DIR}/include/GRSF/configFiles/ConfigureFile.hpp)
 configure_file (
   ${SOURCE_DIR}/include/GRSF/configFiles/ConfigureFile.hpp.in
-  ${PROJECT_BINARY_DIR}/include/GRSF/configFiles/ConfigureFile.hpp
+  ${CONFIG_INC}
 )
 # =======================
 
@@ -129,7 +119,7 @@ set(INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
     ${EIGEN_INCLUDE_DIR}
     ${EIGEN_INCLUDE_DIR}/unsupported
-    ${TICPP_INCLUDE_DIRS}
+
     ${COLLISIONLIB_INCLUDE_DIRS}
     
     ${ASSIMP_INCLUDE_DIRS}
@@ -140,12 +130,10 @@ set(INCLUDE_DIRS
     
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_BINARY_DIR}/include/
-    ${PROJECT_SOURCE_DIR}/include/Common # Needs to be previous to {SOURCE_DIR}/include/Common (because there is another LogDefines.hpp
     
     #Linked Source
     ${COMMONSOURCE_DIR}/include/
-    ${COMMONSOURCE_DIR}/external/meta/include/meta
-    
+        
     ${ApproxMVBB_INC_DIRS}
     
     
@@ -160,18 +148,16 @@ include_directories(${INCLUDE_DIRS})
 PRINTLIST("Include directories are:" "${INCLUDE_DIRS}")
 
 
-
 #link directories
 set(LINK_DIRS
     ${Boost_LIBRARY_DIRS}
-    ${PCL_LIBRARY_DIRS}
 )
 link_directories(${LINK_DIRS})
 PRINTLIST( "Link directories are:" "${LINK_DIRS}")
 
 
 
-set(LINK_LIBS ${Boost_LIBRARIES} ${CUDA_cublas_LIBRARY} ${TICPP_LIBRARIES} ${COLLISIONLIB_LIBRARIES} ${ASSIMP_LIBRARIES} ${PCL_LIBRARIES}  ${PUGIXML_LIBRARIES})
+set(LINK_LIBS ${Boost_LIBRARIES} ${CUDA_cublas_LIBRARY} ${COLLISIONLIB_LIBRARIES} ${ASSIMP_LIBRARIES} ${PUGIXML_LIBRARIES})
 PRINTLIST( "Linked libraries are:" "${LINK_LIBS}")
 
 
