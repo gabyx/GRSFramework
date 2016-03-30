@@ -309,6 +309,25 @@ set(GRSF_COMMON_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/common")
 
 
 
+# Get GRSFramework version number ======================================
+    execute_process(COMMAND "cmake" "-P" "cmake/GetGitRevisionDescriptionExtern.cmake" 
+        WORKING_DIRECTORY "${GRSF_ROOT_DIR}"
+        OUTPUT_VARIABLE GRSF_VERSION ERROR_VARIABLE Error
+    )
+
+    if(Error)
+        message(FATAL_ERROR "Error in getting version of GRSFramework ${Error}" FATAL)
+    endif()
+
+
+    string(REGEX REPLACE "^.*v([0-9]+)\\..*" "\\1" GRSF_VERSION_MAJOR "${GRSF_VERSION}")
+    string(REGEX REPLACE "^.*v[0-9]+\\.([0-9]+).*" "\\1" GRSF_VERSION_MINOR "${GRSF_VERSION}")
+    string(REGEX REPLACE "^.*v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" GRSF_VERSION_PATCH "${GRSF_VERSION}")
+    string(REGEX REPLACE "^.*v[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1" GRSF_VERSION_SHA1 "${GRSF_VERSION}")
+    set(GRSF_VERSION_STRING "${GRSF_VERSION_MAJOR}.${GRSF_VERSION_MINOR}.${GRSF_VERSION_PATCH}")
+    MESSAGE(STATUS "GRSFramework Version: ${GRSF_VERSION_STRING} extracted from git tags!")
+
+# ======================================================================
 
 
 if(GRSF_BUILD_GUI)

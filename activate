@@ -1,0 +1,67 @@
+#!/bin/bash
+# source this file to define handy macros to access 
+# the simulators of the GRSFramework
+
+
+if [[ ! -v GRSF_REPO_BUILD_DIR ]]; then
+  echo "Define GRSF_REPO_BUILD_DIR variable first!"
+fi
+
+export GRSF_REPO_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+alias GOGRSF="cd ${GRSF_REPO_DIR}"
+
+export GRSF_SIMULATION_DIR="${GRSF_REPO_DIR}/simulations"
+alias  GOSIMS="cd $GRSF_SIMULATION_DIR"
+ 
+export GRSF_PYTHONMODULES_DIR="$GRSF_SIMULATION_DIR/python/modules"
+export GRSF_PYTHONSCRIPTS_DIR="$GRSF_SIMULATION_DIR/python/scripts"
+
+export GRSF_MEDIA_DIR="$GRSF_REPO_DIR/projects/media"
+
+export GRSF_SIMMPI_D="${GRSF_REPO_BUILD_DIR}/debug/projects/granularRigidBodySimulationMPI/bin/debug/GRSFSimMPI"
+export GRSF_SIMGUI_D="${GRSF_REPO_BUILD_DIR}/debug/projects/granularRigidBodySimulationGUI/bin/debug/GRSFSimGUI"
+export GRSF_SIM_D="${GRSF_REPO_BUILD_DIR}/debug/projects/granularRigidBodySimulation/bin/debug/GRSFSim"
+export GRSF_SIMCONV_D="${GRSF_REPO_BUILD_DIR}/debug/projects/converter/bin/debug/GRSFConverter"
+
+export GRSF_SIMMPI="${GRSF_REPO_BUILD_DIR}/release/projects/granularRigidBodySimulationMPI/bin/release/GRSFSimMPI"
+export GRSF_SIMGUI="${GRSF_REPO_BUILD_DIR}/release/projects/granularRigidBodySimulationGUI/bin/release/GRSFSimGUI"
+export GRSF_SIM="${GRSF_REPO_BUILD_DIR}/release/projects/granularRigidBodySimulation/bin/release/GRSFSim"
+export GRSF_SIMCONV="${GRSF_REPO_BUILD_DIR}/release/projects/converter/bin/release/GRSFConverter"
+
+# pipe asanMangler to the any GRSF executable to trace output from address and leak sanitizer
+export ASANMANGLER="${GRSF_PYTHONSCRIPTS_DIR}/AsanSymbolize/asan_symbolize.py"
+alias asanMangler="${ASANMANGLER}"
+
+alias run_sim="${GRSF_SIM}"
+alias run_simgui="${GRSF_SIMGUI}"
+alias run_simconv="${GRSF_SIMCONV}"
+
+alias run_sim_d="${GRSF_SIM_D}"
+alias run_simgui_d="${GRSF_SIMGUI_D}"
+alias run_simconv_d="${GRSF_SIMCONV_D}"
+
+
+run_simmpi() {
+   n=$1; shift;
+   eval mpiexec -np $n $GRSF_SIMMPI "$@"
+}
+
+run_simmpi_d() {
+    n=$1; shift;
+   eval mpiexec -np $n $GRSF_SIMMPI_D "$@" 
+}
+
+run_simmpi_d_asan() {
+    n=$1; shift;
+   eval mpiexec -np $n $GRSF_SIMMPI_D "$@" 2>&1 | asanMangler
+}
+
+export -f run_simmpi
+export -f run_simmpi_d
+
+
+echo -e "GRSFramework:: ================================================"
+echo -e       "\tCommands: \n\t\trun_sim(_d), run_simgui(_d), run_simmpi(_d(_asan)) , run_simconv(_d) \n\t\tare now available."
+echo -e "\tMacros: \n\t\tGOSIMS: 'cd' to the simulation folder of the GRSFramework \n\t\tGOGRSF: 'cd' to the GRSFramework repository root folder"
+echo -e "==============================================================="
+

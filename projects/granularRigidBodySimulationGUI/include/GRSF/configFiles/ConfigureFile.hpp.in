@@ -2,7 +2,19 @@
 #define GRSF_configFiles_ConfigureFile_hpp_in
 
 
+/** version numbering */
+namespace GRSF{
+  static const unsigned int VersionMajor =  @GRSF_VERSION_MAJOR@ ;
+  static const unsigned int VersionMinor =  @GRSF_VERSION_MINOR@ ;
+  static const unsigned int VersionPatch =  @GRSF_VERSION_PATCH@ ;
+};
 
+#define GRSF_VERSION_STRING "@GRSF_VERSION_STRING@"
+
+
+/** framework defines 
+* TODO
+*/
 
 //#define CUDA_VERSION @CUDA_VERSION_INTEGER@
 #define HAVE_CUDA_SUPPORT @CUDA_SUPPORT@
