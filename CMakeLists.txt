@@ -310,21 +310,19 @@ set(GRSF_COMMON_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/common")
 
 
 # Get GRSFramework version number ======================================
-    execute_process(COMMAND "cmake" "-P" "cmake/GetGitRevisionDescriptionExtern.cmake" 
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        OUTPUT_VARIABLE GRSF_VERSION ERROR_VARIABLE Error
-    )
+    include(cmake/GetGitRevisionDescription.cmake)
+    git_describe(GRSF_VERSION "--tags" "--abbrev=10")
 
-    if(Error)
-        message(FATAL_ERROR "Error in getting version of GRSFramework ${Error}" FATAL)
+    if( NOT GRSF_VERSION )
+    message(FATAL_ERROR "GRSFramwork version could not be determined!, ${GRSF_VERSION}")
     endif()
-
 
     string(REGEX REPLACE "^.*v([0-9]+)\\..*" "\\1" GRSF_VERSION_MAJOR "${GRSF_VERSION}")
     string(REGEX REPLACE "^.*v[0-9]+\\.([0-9]+).*" "\\1" GRSF_VERSION_MINOR "${GRSF_VERSION}")
     string(REGEX REPLACE "^.*v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" GRSF_VERSION_PATCH "${GRSF_VERSION}")
-    string(REGEX REPLACE "^.*v[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1" GRSF_VERSION_SHA1 "${GRSF_VERSION}")
-    if(${GRSF_VERSION_SHA1})
+    string(REGEX REPLACE "^.*v[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]*-([0-9a-z]*)" "\\1" GRSF_VERSION_SHA1 "${GRSF_VERSION}")
+
+    if(NOT ${GRSF_VERSION_SHA1} STREQUAL "")
         set(GRSF_VERSION_STRING "${GRSF_VERSION_MAJOR}.${GRSF_VERSION_MINOR}.${GRSF_VERSION_PATCH}-${GRSF_VERSION_SHA1}")
     else()
         set(GRSF_VERSION_STRING "${GRSF_VERSION_MAJOR}.${GRSF_VERSION_MINOR}.${GRSF_VERSION_PATCH}")

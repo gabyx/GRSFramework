@@ -31,11 +31,11 @@
 void printHelpAndExit(std::string o=""){
      std::cerr << "Wrong Options: '" << o <<"'"<< std::endl
             << " Help: \n"
-            << "    converter sim      [-h|--help]        : convert '.sim' files \n"
-            << "    converter siminfo  [-h|--help]        : info about '.sim' files \n"
-            << "    converter renderer [-h|--help]        : produce render output of '.sim' files and scene XML by execution graph XML\n"
-            << "    converter analyzer [-h|--help]        : analyze '.sim' files with execution graph XML\n"
-            << "    converter gridder  [-h|--help]        : extract gridded data from '.sim' files" << std::endl;
+            << "    GRSFConverter sim      [-h|--help]        : convert '.sim' files \n"
+            << "    GRSFConverter siminfo  [-h|--help]        : information about '.sim' files \n"
+            << "    GRSFConverter renderer [-h|--help]        : produce render output of '.sim' files and a scene XML by using an execution graph XML\n"
+            << "    GRSFConverter analyzer [-h|--help]        : analyze '.sim' files with an execution graph XML\n"
+            << "    GRSFConverter gridder  [-h|--help]        : extract gridded data from '.sim' files" << std::endl;
             exit(EXIT_FAILURE);
 }
 

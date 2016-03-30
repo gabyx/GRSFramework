@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -87,7 +87,6 @@ public:
                        (range[1] != -1  && range[1] < range[0])
                        ){
                         ERRORMSG("Exception occured in parsing timerange: range.size()" )
-                        printHelp();
                     }
                     m_timeRange = TypesTimeRange::RangeType(range[0],range[1]);
 
@@ -97,7 +96,6 @@ public:
                     ops >> Option("timelist",range);
                     if(range.size()==0){
                         ERRORMSG("Exception occured in parsing timelist: range.size()" )
-                        printHelp();
                     }
                     TypesTimeRange::ListType r(range.begin(), range.end());
                     m_timeRange = r;
@@ -109,7 +107,6 @@ public:
                     ops >> Option("bodyrange",range);
                     if(range.size()!=2 || (range[1]!=-1 && range[1]<0) || (range[0]!=-1 && range[0]<0) ||
                        (range[1] != -1  && range[1] < range[0]) ){
-                        printHelp();
                         ERRORMSG("Exception occured in parsing bodyrange: range.size()" )
                     }
                     m_bodyRange = TypesBodyRange::RangeType(range[0],range[1]);
@@ -118,7 +115,6 @@ public:
                     std::vector<unsigned int> range;
                     ops >> Option("bodylist",range);
                     if(range.size()==0){
-                        printHelp();
                         ERRORMSG("Exception occured in parsing bodylist: range.size()" )
 
                     }
@@ -147,7 +143,6 @@ public:
                          ERRORMSG("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
                     }
             }else{
-                printHelp();
                 ERRORMSG("Exception occured in parsing task arguments" )
 
             }
@@ -167,35 +162,27 @@ public:
             ops >> Option('o',"output",m_outputFile);
         }
         catch(GetOpt::ParsingErrorEx & ex){
-            printHelp();
             ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::InvalidFormatEx & ex){
-            printHelp();
             ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionNotFoundEx & ex){
-            printHelp();
             ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyArgumentsEx & ex){
-            printHelp();
             ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyOptionsEx & ex){
-            printHelp();
             ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx ex){
-            printHelp();
             ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx & ex) {
-            printHelp();
             ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
-            printHelp();
             ERRORMSG("Some unexpected options where given!" )
         }
 
@@ -220,12 +207,10 @@ public:
     void checkArguments() {
 
         if(m_inputFiles.empty()) {
-            printHelp();
             ERRORMSG( "No input files supplied!" )
         } else {
             for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
                 if(! boost::filesystem::exists(*it)) {
-                    printHelp();
                     ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
                 }
             }
@@ -234,11 +219,9 @@ public:
 
 
         if(m_outputFile.empty()){
-            printHelp();
             ERRORMSG( "No output file supplied!" )
         }
         if(boost::filesystem::exists(m_outputFile)) {
-                printHelp();
                 ERRORMSG( "Output file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
         }
 
@@ -248,7 +231,6 @@ public:
 private:
 
     void printErrorNoArg(std::string arg) {
-        printHelp();
         ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
         exit(EXIT_FAILURE);
     }
@@ -354,35 +336,35 @@ public:
 
         }
         catch(GetOpt::ParsingErrorEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::InvalidFormatEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionNotFoundEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyArgumentsEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyOptionsEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx ex){
-            printHelp();
+
             ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx & ex) {
-            printHelp();
+
             ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
-            printHelp();
+
             ERRORMSG("Some unexpected options where given!" )
         }
 
@@ -397,12 +379,12 @@ public:
     void checkArguments() {
 
         if(m_inputFiles.empty()) {
-            printHelp();
+
             ERRORMSG( "No input files supplied!" )
         } else {
             for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
                 if(! boost::filesystem::exists(*it)) {
-                    printHelp();
+
                     ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
                 }
             }
@@ -413,7 +395,7 @@ public:
 private:
 
     void printErrorNoArg(std::string arg) {
-        printHelp();
+
         ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
         exit(EXIT_FAILURE);
     }
@@ -517,35 +499,35 @@ public:
 
         }
         catch(GetOpt::ParsingErrorEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::InvalidFormatEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionNotFoundEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyArgumentsEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyOptionsEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx & ex) {
-            printHelp();
+
             ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
-            printHelp();
+
             ERRORMSG("Some unexpected options where given!" )
         }
 
@@ -571,22 +553,22 @@ public:
     void checkArguments() {
 
         if(m_inputFiles.empty()) {
-            printHelp();
+
             ERRORMSG( "No input files supplied!" )
         } else {
             for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
                 if(! boost::filesystem::exists(*it)) {
-                    printHelp();
+
                     ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
                 }
             }
         }
 
         if(m_sceneFile.empty()){
-            printHelp();
+
             ERRORMSG( "No scene file supplied!" )
         }else if(!boost::filesystem::exists(m_sceneFile)) {
-            printHelp();
+
             ERRORMSG( "Scene file supplied as argument: " << m_sceneFile << " does not exist!")
         }
 
@@ -605,7 +587,7 @@ public:
 private:
 
     void printErrorNoArg(std::string arg) {
-        printHelp();
+
         ERRORMSG( "Wrong options specified for argument: '" << arg <<"'")
     }
 
@@ -698,35 +680,35 @@ public:
             }
         }
         catch(GetOpt::ParsingErrorEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::InvalidFormatEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionNotFoundEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyArgumentsEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyOptionsEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx & ex){
-            printHelp();
+
             ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx & ex) {
-            printHelp();
+
             ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
-            printHelp();
+
             ERRORMSG("Some unexpected options where given!" )
         }
 
@@ -745,12 +727,10 @@ public:
     void checkArguments() {
 
         if(m_inputFiles.empty()) {
-            printHelp();
             ERRORMSG( "No input files supplied!" )
         } else {
             for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
                 if(! boost::filesystem::exists(*it)) {
-                    printHelp();
                     ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
                 }
             }
@@ -758,7 +738,6 @@ public:
 
         if(!m_sceneFile.empty()){
             if(!boost::filesystem::exists(m_sceneFile)) {
-                printHelp();
                 ERRORMSG( "Scene file supplied as argument: " << m_sceneFile << " does not exist!")
                 }
         }
@@ -779,7 +758,7 @@ public:
 private:
 
     void printErrorNoArg(std::string arg) {
-        printHelp();
+
         ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
     }
 
