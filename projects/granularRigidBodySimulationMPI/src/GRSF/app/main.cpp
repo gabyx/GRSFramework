@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -50,10 +50,11 @@ void start( int argc, char **argv ){
         ApplicationCLOptions::getSingleton().checkArguments();
         if(my_rank == 0){
 
+            std::cout << "GRSFramework SimMPI: version: " GRSF_VERSION_STRING
             #ifndef NDEBUG
-                std::cout << "GRSFramework Sim MPI: build: ?, config: " << "debug" << std::endl;
+                    " | config: " << "debug" << std::endl;
             #else
-                std::cout << "GRSFramework Sim MPI: build: ?, config: " << "release" << std::endl;
+                    " | config: " << "release" << std::endl;
             #endif
 
             ApplicationCLOptions::getSingleton().printArgs(std::cout);

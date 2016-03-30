@@ -1,9 +1,9 @@
 # this file is executed outside of ApproxMVBB to get the revision describtion
 include(cmake/GetGitRevisionDescription.cmake)
-git_describe(ApproxMVBB_VERSION "--tags" "--abbrev=0")
+git_describe(GRSF_VERSION "--tags" "--abbrev=0")
 
-if( NOT ApproxMVBB_VERSION )
-message(FATAL_ERROR "ApproxMVBB library version could not be determined!, ${ApproxMVBB_VERSION}")
+if( NOT GRSF_VERSION )
+message(FATAL_ERROR "GRSFramwork version could not be determined!, ${GRSF_VERSION}")
 endif()
 
-message(STATUS "${ApproxMVBB_VERSION}")
+message(STATUS "${GRSF_VERSION}")
