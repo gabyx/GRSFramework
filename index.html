@@ -82,27 +82,30 @@
     
     
   // load wiki Home markup and render
-	var client = new XMLHttpRequest();
-	client.open('GET', "https://raw.githubusercontent.com/wiki/gabyx/GRSFramework/Home.md");
-	client.onreadystatechange = function() {
-	    if(client.readyState == 4){
-            document.getElementById('content').innerHTML = marked(client.responseText);
-            // replace videos with storage
-            var vidS=$("#videoStorage");
-            $("#videos").replaceWith( vidS );
-	    }
-	}
-	client.send();
-  
-  // load table of content
-  var client = new XMLHttpRequest();
-  client.open('GET', "https://raw.githubusercontent.com/wiki/gabyx/GRSFramework/_Sidebar.md");
-	client.onreadystatechange = function() {
-	    if(client.readyState == 4){
-            document.getElementById('toc').innerHTML = marked(client.responseText);
-	    }
-	}
-	client.send();
+  {
+    var client1 = new XMLHttpRequest();
+    client1.open('GET', "https://rawgit.com/wiki/gabyx/GRSFramework/Home.md");
+    client1.onreadystatechange = function() {
+        if(client1.readyState == 4){
+              document.getElementById('content').innerHTML = marked(client1.responseText);
+              // replace videos with storage
+              var vidS=$("#videoStorage");
+              $("#videos").replaceWith( vidS );
+        }
+    }
+    client1.send();
+  }
+  {
+    // load table of content
+    var client2 = new XMLHttpRequest();
+    client2.open('GET', "https://rawgit.com/wiki/gabyx/GRSFramework/_Sidebar.md");
+    client2.onreadystatechange = function() {
+        if(client2.readyState == 4){
+              document.getElementById('toc').innerHTML = marked(client2.responseText);
+        }
+    }
+    client2.send();
+  }
   
   </script>
 	 
