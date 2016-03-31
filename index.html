@@ -95,7 +95,7 @@
 	client.send();
   
   // load table of content
-  client.open('GET', "https://raw.githubusercontent.com/wiki/gabyx/GRSFramework/_sidebar.md");
+  client.open('GET', "https://raw.githubusercontent.com/wiki/gabyx/GRSFramework/_Sidebar.md");
 	client.onreadystatechange = function() {
 	    if(client.readyState == 4){
             document.getElementById('toc').innerHTML = marked(client.responseText);
