@@ -62,7 +62,7 @@
     <section class="main-content">
 
       <div id="content"></div>
-
+      <div id="toc"></div>
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/gabyx/GRSFramework">GRSFramework</a> is maintained by <a href="https://github.com/gabyx">gabyx</a>.</span>
 
@@ -81,7 +81,7 @@
     });
     
     
-    // load wiki Home markup and render
+  // load wiki Home markup and render
 	var client = new XMLHttpRequest();
 	client.open('GET', "https://raw.githubusercontent.com/wiki/gabyx/GRSFramework/Home.md");
 	client.onreadystatechange = function() {
@@ -93,6 +93,16 @@
 	    }
 	}
 	client.send();
+  
+  // load table of content
+  client.open('GET', "https://raw.githubusercontent.com/wiki/gabyx/GRSFramework/_sidebar.md");
+	client.onreadystatechange = function() {
+	    if(client.readyState == 4){
+            document.getElementById('toc').innerHTML = marked(client.responseText);
+	    }
+	}
+	client.send();
+  
   </script>
 	 
 
