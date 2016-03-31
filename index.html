@@ -95,6 +95,7 @@
 	client.send();
   
   // load table of content
+  var client = new XMLHttpRequest();
   client.open('GET', "https://raw.githubusercontent.com/wiki/gabyx/GRSFramework/_Sidebar.md");
 	client.onreadystatechange = function() {
 	    if(client.readyState == 4){
