@@ -21,6 +21,9 @@
     
     <div style="display:none">
         <div id="videoStorage">
+            <a id="videoTarget">
+            <div id="videoTitle"></div>
+            </a>
             <table>
                 <tr>
                     <td>
@@ -63,6 +66,7 @@
 
       <div id="content"></div>
       <div id="toc"></div>
+      
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/gabyx/GRSFramework">GRSFramework</a> is maintained by <a href="https://github.com/gabyx">gabyx</a>.</span>
 
@@ -91,6 +95,8 @@
               // replace videos with storage
               var vidS=$("#videoStorage");
               $("#videos").replaceWith( vidS );
+              
+              document.getElementById('videoTitle').innerHTML = marked("## Videos");
         }
     }
     client1.send();
