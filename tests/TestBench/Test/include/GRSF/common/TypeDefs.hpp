@@ -1,17 +1,18 @@
 // ========================================================================================
-//  GRSFramework
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
-//
-//  This Source Code Form is subject to the terms of the GNU General Public License as
+//  GRSFramework 
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
+// 
+//  This Source Code Form is subject to the terms of the GNU General Public License as 
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
 // ========================================================================================
 
-#ifndef GRSF_Common_TypeDefs_hpp
-#define GRSF_Common_TypeDefs_hpp
+#ifndef GRSF_common_TypeDefs_hpp
+#define GRSF_common_TypeDefs_hpp
 
 #include <random>
+
 
 #include "GRSF/configFiles/ConfigureFile.hpp"
 #include "GRSF/dynamics/general/LayoutConfigTypeDefs.hpp"
@@ -27,14 +28,14 @@ class StatePoolVisBackFront;
 #define CollisionSolver_INCLUDE_FILE            "GRSF/dynamics/collision/CollisionSolver.hpp"
 class CollisionSolver;
 
-#define DynamicsSystem_INCLUDE_FILE             "GRSF/dynamics/general/DynamicsSystemGUI.hpp"
-class DynamicsSystemGUI;
-#define InclusionSolverSettings_INCLUDE_FILE    "GRSF/dynamics/Inclusion/InclusionSolverSettings.hpp"
+#define DynamicsSystem_INCLUDE_FILE             "GRSF/dynamics/general/DynamicsSystem.hpp"
+class DynamicsSystem;
+#define InclusionSolverSettings_INCLUDE_FILE    "GRSF/dynamics/inclusion/InclusionSolverSettings.hpp"
 class InclusionSolverSettings;
 
 //#define InclusionSolver_INCLUDE_FILE "GRSF/dynamics/Inclusion/InclusionSolverCO.hpp"
 //class InclusionSolverCO;
-#define InclusionSolver_INCLUDE_FILE            "GRSF/dynamics/Inclusion/InclusionSolverCONoG.hpp"
+#define InclusionSolver_INCLUDE_FILE            "GRSF/dynamics/inclusion/InclusionSolverCONoG.hpp"
 class InclusionSolverCONoG;
 
 #define RigidBody_INCLUDE_FILE                  "GRSF/dynamics/general/RigidBody.hpp"
@@ -56,7 +57,7 @@ struct GlobalConfigs {
 
         using RigidBodyType = RigidBodyBase          ;
 
-        using DynamicsSystemType = DynamicsSystemGUI      ;
+        using DynamicsSystemType = DynamicsSystem     ;
 
         using TimeStepperType = MoreauTimeStepper      ;
 
@@ -89,7 +90,7 @@ struct GlobalConfigs {
 
     struct RigidBodyConfigs {
         using LayoutConfigType = LayoutConfig<double, GeneralLayout<7,6> >       ;
-        using RigidBodySolverDataType = RigidBodySolverDataCONoG                        ;
+        using BodySolverDataType = RigidBodySolverDataCONoG                        ;
     };
 
 
@@ -137,7 +138,7 @@ struct GlobalConfigs {
 
 #define DEFINE_RIGIDBODY_CONFIG_TYPES \
     using RigidBodyType = typename GlobalConfigs::DynamicSystemConfigs::RigidBodyType         ; \
-    using BodySolverDataType = typename GlobalConfigs::RigidBodyConfigs::RigidBodySolverDataType   ; \
+    using BodySolverDataType = typename GlobalConfigs::RigidBodyConfigs::BodySolverDataType   ; \
     DEFINE_LAYOUT_CONFIG_TYPES \
     DEFINE_GENERAL_CONFIG_TYPES
 
@@ -149,17 +150,11 @@ struct GlobalConfigs {
     using PREC = typename GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC; \
     DEFINE_MATRIX_TYPES_OF( GlobalConfigs::RigidBodyConfigs::LayoutConfigType::PREC )
 
-#define DEFINE_GENERAL_CONFIG_TYPES \
-    using RandomGenType = typename GlobalConfigs::GeneralConfigs::RandomGeneratorType;
-
 #define DEFINE_MPI_INFORMATION_CONFIG_TYPES \
     using RankIdType = GlobalConfigs::MPIInformationConfigs::RankIdType;
 
-
-
-using MeshPREC = double;
-
-
+#define DEFINE_GENERAL_CONFIG_TYPES \
+    using RandomGenType = typename GlobalConfigs::GeneralConfigs::RandomGeneratorType;
 
 
 #endif

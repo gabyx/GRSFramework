@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -47,6 +47,7 @@ private:
     Ogre::SceneManager * m_pSceneMgr;
     Ogre::SceneNode * m_pBaseNode;
     Ogre::SceneNode * m_pBodiesNode;
+    Ogre::SceneNode * m_pContactFramesNode;
 
     LogType * m_pSimulationLog;
 
@@ -77,8 +78,15 @@ public:
               RigidBodyGraphicsContType * pBodies,
               Ogre::SceneNode * pBaseNode,
               Ogre::SceneNode * pBodiesNode,
+              Ogre::SceneNode * pContactFramesNode,
               Ogre::SceneManager * pSceneMgr)
-        : m_pSimulationLog(p->getSimLog()), m_pSimBodies(pSimBodies), m_pBodies(pBodies), m_pBaseNode(pBaseNode), m_pBodiesNode(pBodiesNode), m_pSceneMgr(pSceneMgr) {
+        : m_pSimulationLog(p->getSimLog()),
+          m_pSimBodies(pSimBodies),
+          m_pBodies(pBodies),
+          m_pBaseNode(pBaseNode),
+          m_pBodiesNode(pBodiesNode),
+          m_pContactFramesNode(pContactFramesNode),
+          m_pSceneMgr(pSceneMgr) {
         ASSERTMSG(m_pSceneMgr && m_pBodiesNode, "these should not be zero!")
 
     };
@@ -591,8 +599,7 @@ private:
                 dxyz.array() = extent.array() / dim.array().cast<PREC>();
 
                 // Add MPI Visulaization
-                std::string materialName = topo.child("Visualization").child("Material").attribute("name").value();
-
+                std::string materialName = mpiSettings.child("ProcessTopology").child("Visualization").child("Material").attribute("name").value();
                 Ogre::SceneNode* mpiTopoRoot = m_pBaseNode->createChildSceneNode("MPIProcTopo");
 
 
@@ -687,15 +694,27 @@ private:
         XMLNodeType  sceneVisSettings = sceneSettings.child("Visualization");
         if(sceneVisSettings) {
 
-            XMLNodeType scaleNode = sceneVisSettings.child("SceneScale");
-            if(scaleNode) {
-                double sceneScale;
-                if(!Utilities::stringToType(sceneScale,  scaleNode.attribute("value").value())) {
-                    ERRORMSG("---> String conversion in SceneScale: value failed");
+            XMLNodeType n = sceneVisSettings.child("Scene");
+            if(n) {
+                double scale;
+                if(!Utilities::stringToType(scale,  n.attribute("scale").value())) {
+                    ERRORMSG("---> String conversion in ContactCoordinateSystem: scale failed");
                 }
-                m_pBaseNode->setScale(Ogre::Vector3(1,1,1)*sceneScale);
+                m_pBaseNode->setScale(Ogre::Vector3(1,1,1)*scale);
             }
+
+
+            n = sceneVisSettings.child("ContactCoordinateSystem");
+            if(n) {
+                double scale;
+                if(!Utilities::stringToType(scale,  n.attribute("scale").value())) {
+                    ERRORMSG("---> String conversion in ContactCoordinateSystem: scale failed");
+                }
+                m_pContactFramesNode->setScale(Ogre::Vector3(1,1,1)*scale);
+            }
+
         }
+
     }
 
 };

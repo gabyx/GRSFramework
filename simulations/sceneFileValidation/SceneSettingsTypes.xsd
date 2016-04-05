@@ -383,9 +383,14 @@ attributeFormDefault="unqualified">
 <!-- Visualization  ===========================================--> 
 <xs:complexType name="SceneSettingsVisualizationT">
     <xs:sequence>
-    <xs:element name="SceneScale">
+    <xs:element name="Scene">
         <xs:complexType>
-            <xs:attribute name="value"  type="sf:positiveDouble" use="required"/>
+            <xs:attribute name="scale"  type="sf:positiveDouble" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="ContactCoordinateSystem" minOccurs="0">
+        <xs:complexType>
+            <xs:attribute name="scale"  type="sf:positiveDouble" use="required"/>
         </xs:complexType>
     </xs:element>
     </xs:sequence>
@@ -408,7 +413,7 @@ attributeFormDefault="unqualified">
             <xs:alternative type="sf:PTTopologyKdTreeT" test="@type = 'kdTree'"/>
         </xs:element>
         <xs:element name="MassPointPrediction" type="sf:PTMassPointPredictionT"  />
-        <xs:element name="GlobalOutlierFilter" type="sf:PTGlobalOutlierFilterT"  />
+        <xs:element name="GlobalOutlierFilter" type="sf:PTGlobalOutlierFilterT" minOccurs="0" />
     </xs:all>
     
     <xs:attribute name="mode" use="required">
@@ -457,7 +462,7 @@ attributeFormDefault="unqualified">
         </xs:restriction>
         </xs:simpleType>
     </xs:attribute>
-    <xs:attribute name="minCellSize" type="sf:positiveDouble" use="required"/> 
+    <xs:attribute name="minCellSize" type="sf:positiveDouble" use="optional"/> 
     
     <xs:attribute name="minPoint"  type="sf:Vector3" use="optional"/>
     <xs:attribute name="maxPoint"  type="sf:Vector3" use="optional"/>

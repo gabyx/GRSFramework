@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -2168,14 +2168,14 @@ public:
                 using SetType = std::set<RigidBodyIdType>;
                 SetType s;
                 using CSPBS = Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType>;
-                if( !Utilities::stringToType<SetType,CSPBS>(s, n.child_value() )  ) {
+                if( !Utilities::stringToType<SetType,CSPBS>(s, n.attribute("value").value() )  ) {
                     ERRORMSG("---> String conversion in parseModuleOptions: Set: value failed");
                 }
                 // Overwrite
                 m_opts.m_bodyIdRange = s;
 
 
-                LOGSCLEVEL2(m_pSimulationLog, "---> Overwriten SelectiveIdRange with Set: [")
+                LOGSCLEVEL2(m_pSimulationLog, "---> Overwritten SelectiveIdRange with Set: [")
                 for(auto & id : s) {
                     LOGSCLEVEL2(m_pSimulationLog, RigidBodyId::getBodyIdString(id) << ",")
                 }
@@ -2186,8 +2186,8 @@ public:
                     using SetType = std::pair<RigidBodyIdType,RigidBodyIdType>;
                     SetType r;
                     using CSPBS = Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType>;
-                    if( !Utilities::stringToType<SetType,CSPBS>(r,  n.child_value() )  ) {
-                        ERRORMSG("---> String conversion in parseModuleOptions: Set: value failed");
+                    if( !Utilities::stringToType<SetType,CSPBS>(r,  n.attribute("value").value() )  ) {
+                        ERRORMSG("---> String conversion in parseModuleOptions: Range: value failed");
                     }
                     // Overwrite
                     m_opts.m_bodyIdRange = r;

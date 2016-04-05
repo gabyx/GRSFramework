@@ -19,7 +19,7 @@ App::App() {
 
 
 App::~App() {
-    DECONSTRUCTOR_MESSAGE
+    DESTRUCTOR_MESSAGE
 }
 
 

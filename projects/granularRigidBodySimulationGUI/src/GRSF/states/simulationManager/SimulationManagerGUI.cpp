@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -67,7 +67,7 @@ SimulationManagerGUI::SimulationManagerGUI(std::shared_ptr<Ogre::SceneManager> p
 }
 
 SimulationManagerGUI::~SimulationManagerGUI() {
-    DECONSTRUCTOR_MESSAGE
+    DESTRUCTOR_MESSAGE
 
     // Remove all SceneGraph objects!
     m_pSceneMgr->destroySceneNode(m_pBaseNode);
@@ -136,8 +136,8 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     enableInput(true);
 
     // Init ContactFrameData for visualization
-    m_dynCoordFrame.reserve(m_pDynSys->m_simBodies.size()*3); // Approx. 3 contacts per body as init guess
-    m_dynCoordFrame.addToScene(m_pBaseNode, "ContactFrameXAxis", "ContactFrameYAxis", "ContactFrameZAxis");
+    m_dynCoordFrame.reserveCoordinateSystems(m_pDynSys->m_simBodies.size()*3); // Approx. 3 contacts per body as init guess
+    m_dynCoordFrame.addToScene(m_pDynSys->m_pContactFramesNode, "ContactFrameXAxis", "ContactFrameYAxis", "ContactFrameZAxis");
 
     m_pSimulationLog->logMessage("---> setup finished: ");
 }

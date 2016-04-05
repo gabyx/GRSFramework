@@ -8,36 +8,22 @@
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
 // ========================================================================================
 
-#ifndef GRSF_systems_SharedBufferDynSys_hpp
-#define GRSF_systems_SharedBufferDynSys_hpp
 
-#include <boost/thread.hpp>
-#include "GRSF/common/AssertionDebug.hpp"
+#ifndef TestFunctions_hpp
+#define TestFunctions_hpp
+
+#include <stdlib.h>
+#include <fstream>
+#include <functional>
+
+#include <gtest/gtest.h>
 
 #include "GRSF/common/TypeDefs.hpp"
-
-#include "GRSF/dynamics/buffers/StatePoolVisBackFront.hpp"
-
-
-class SharedBufferDynSys : public StatePoolVisBackFront
-{
-public:
-    DEFINE_LAYOUT_CONFIG_TYPES
-
-	template<typename TRigidBodyIterator>
-    SharedBufferDynSys(TRigidBodyIterator beg, TRigidBodyIterator end):
-        StatePoolVisBackFront(beg,end)
-    {};
-
-	~SharedBufferDynSys(){
-      DESTRUCTOR_MESSAGE
-    };
-
-private:
+#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/SfinaeMacros.hpp"
 
 
-
-};
+#define GRSF_TEST(name1 , name2 ) TEST(name1, name2)
 
 
 #endif

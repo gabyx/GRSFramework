@@ -1,5 +1,5 @@
 #The CMake Minimum version that is required. 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 
 MARK_AS_ADVANCED( SIMULATION_FRAMEWORK_BUILD_GUI )
@@ -14,6 +14,8 @@ set(GRSF_BUILD_MPI ON CACHE BOOL "Build the MPI version of SimulationFramework")
 MARK_AS_ADVANCED( GRSF_BUILD_SIMCONVERTER )
 set(GRSF_BUILD_SIMCONVERTER ON CACHE BOOL "Build the SimFileConverter for the simulation files of the framework")
 
+MARK_AS_ADVANCED( GRSF_BUILD_TESTBENCH )
+set(GRSF_BUILD_TESTBENCH OFF CACHE BOOL "Build the TestBench executables and all tests")
 
 #Detect Build Type if Debug appears in CMAKE_BINARY_DIR path
 MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )
@@ -309,27 +311,8 @@ set(GRSF_COMMON_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/common")
 
 
 
-# Get GRSFramework version number ======================================
-    include(cmake/GetGitRevisionDescription.cmake)
-    git_describe(GRSF_VERSION "--tags" "--abbrev=10")
-
-    if( NOT GRSF_VERSION )
-    message(FATAL_ERROR "GRSFramwork version could not be determined!, ${GRSF_VERSION}")
-    endif()
-
-    string(REGEX REPLACE "^.*v([0-9]+)\\..*" "\\1" GRSF_VERSION_MAJOR "${GRSF_VERSION}")
-    string(REGEX REPLACE "^.*v[0-9]+\\.([0-9]+).*" "\\1" GRSF_VERSION_MINOR "${GRSF_VERSION}")
-    string(REGEX REPLACE "^.*v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" GRSF_VERSION_PATCH "${GRSF_VERSION}")
-    string(REGEX REPLACE "^.*v[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]*-([0-9a-z]*)" "\\1" GRSF_VERSION_SHA1 "${GRSF_VERSION}")
-
-    if(NOT ${GRSF_VERSION_SHA1} STREQUAL "")
-        set(GRSF_VERSION_STRING "${GRSF_VERSION_MAJOR}.${GRSF_VERSION_MINOR}.${GRSF_VERSION_PATCH}-${GRSF_VERSION_SHA1}")
-    else()
-        set(GRSF_VERSION_STRING "${GRSF_VERSION_MAJOR}.${GRSF_VERSION_MINOR}.${GRSF_VERSION_PATCH}")
-    endif()
-    MESSAGE(STATUS "GRSFramework Version: ${GRSF_VERSION_STRING} extracted from git tags!")
-
-# ======================================================================
+include(GetGRSFVersionNumber)
+GetGRSFVersionNumber()
 
 
 if(GRSF_BUILD_GUI)
@@ -342,6 +325,10 @@ endif()
 
 if(GRSF_BUILD_MPI)
 add_subdirectory(projects/granularRigidBodySimulationMPI)
+endif()
+
+if(GRSF_BUILD_TESTBENCH)
+add_subdirectory(tests/TestBench)
 endif()
 
 if(GRSF_BUILD_SIMCONVERTER)

@@ -118,7 +118,7 @@ material PlaneYellowWireNoCull
             depth_write on
                         emissive 1 1 0
                         diffuse 0 0 0 
-            ambient 0 0 0
+                        ambient 0 0 0
                         cull_hardware none
                         cull_software none
                         scene_blend one

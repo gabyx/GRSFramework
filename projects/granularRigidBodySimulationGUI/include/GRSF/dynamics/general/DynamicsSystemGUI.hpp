@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -113,8 +113,12 @@ public:
 class DynamicsSystemGUI : public DynamicsSystemBase {
 public:
 
-    DynamicsSystemGUI( std::shared_ptr<Ogre::SceneManager> s, Ogre::SceneNode * pBaseNode ): m_pSceneMgr(s), m_pBaseNode(pBaseNode) {
+    DynamicsSystemGUI( std::shared_ptr<Ogre::SceneManager> s,
+                      Ogre::SceneNode * pBaseNode )
+     : m_pSceneMgr(s), m_pBaseNode(pBaseNode)
+    {
         m_pBodiesNode = pBaseNode->createChildSceneNode("BaseFrameBodies");
+        m_pContactFramesNode = pBaseNode->createChildSceneNode("BaseContactFrames");
     }
 
     ~DynamicsSystemGUI(){
@@ -172,7 +176,13 @@ public:
                         &m_p->m_settingsTimestepper,
                         &m_p->m_settingsInclusionSolver));
 
-            auto vis = std::unique_ptr<VisModuleType>( new VisModuleType(p,&m_p->m_SceneNodeSimBodies, &m_p->m_SceneNodeBodies, m_p->m_pBaseNode, m_p->m_pBodiesNode, m_p->m_pSceneMgr.get()) );
+            auto vis = std::unique_ptr<VisModuleType>( new VisModuleType(p,
+                                                                         &m_p->m_SceneNodeSimBodies,
+                                                                         &m_p->m_SceneNodeBodies,
+                                                                         m_p->m_pBaseNode,
+                                                                         m_p->m_pBodiesNode,
+                                                                         m_p->m_pContactFramesNode,
+                                                                         m_p->m_pSceneMgr.get()) );
             auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &m_p->m_globalGeometries, vis->getScalesGroup()) ); // geom module needs to track
 
             auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_p->m_bodiesInitStates, &m_p->m_settingsTimestepper));
@@ -194,6 +204,8 @@ public:
     RigidBodyGraphicsContType	m_SceneNodeSimBodies;
     RigidBodyGraphicsContType	m_SceneNodeBodies;
 
+    Ogre::SceneNode * m_pContactFramesNode;
+
 private:
     std::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
 
@@ -209,6 +221,7 @@ public:
 
     DynamicsSystemPlayback( std::shared_ptr<Ogre::SceneManager> s ,Ogre::SceneNode * pBaseNode ): m_pSceneMgr(s),m_pBaseNode(pBaseNode) {
         m_pBodiesNode = pBaseNode->createChildSceneNode("BaseFrameBodies");
+        m_pContactFramesNode = pBaseNode->createChildSceneNode("BaseContactFrames");
     }
 
     ~DynamicsSystemPlayback(){}
@@ -259,7 +272,13 @@ public:
 
             auto sett = std::unique_ptr<SettingsModuleType >(nullptr);
 
-            auto vis = std::unique_ptr<VisModuleType>( new VisModuleType(p,&m_p->m_SceneNodeSimBodies, &m_p->m_SceneNodeBodies, m_p->m_pBaseNode, m_p->m_pBodiesNode, m_p->m_pSceneMgr.get()) ); // no visualization needed
+            auto vis = std::unique_ptr<VisModuleType>( new VisModuleType(p,
+                                                                         &m_p->m_SceneNodeSimBodies,
+                                                                         &m_p->m_SceneNodeBodies,
+                                                                         m_p->m_pBaseNode,
+                                                                         m_p->m_pBodiesNode,
+                                                                         m_p->m_pContactFramesNode,
+                                                                         m_p->m_pSceneMgr.get()) ); // no visualization needed
             auto geom = std::unique_ptr<GeometryModuleType >(new GeometryModuleType(p, &m_p->m_globalGeometries, vis->getScalesGroup() ) );
 
             auto is  = std::unique_ptr<InitStatesModuleType >(new InitStatesModuleType(p,&m_p->m_bodiesInitStates, nullptr ));
@@ -285,6 +304,7 @@ public:
     RigidBodyGraphicsContType	m_SceneNodeSimBodies;
     RigidBodyGraphicsContType	m_SceneNodeBodies;
 
+    Ogre::SceneNode * m_pContactFramesNode;
 
 private:
     std::shared_ptr<Ogre::SceneManager> m_pSceneMgr;

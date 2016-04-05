@@ -29,7 +29,7 @@ material SphereYellow
             shading phong
             texture_unit
             {
-                texture SphereColors2.tga
+                texture SphereYellow.tga
             }
         }
     }
@@ -49,7 +49,7 @@ material SphereRed
             polygon_mode solid
             texture_unit
             {
-                texture SphereColors3.tga
+                texture SphereRed.tga
             }
             
         }
@@ -68,7 +68,113 @@ material SphereBlue
             shading phong 
             texture_unit
             {
-                texture SphereColors1.tga
+                texture SphereBlue.tga
+            }
+        }
+    }
+}
+
+material SphereBlue1
+{
+    technique
+    {
+        pass
+        {   
+            emissive 0 0 0
+            diffuse 1 1 1 
+            ambient 0 0 0
+            shading phong 
+            texture_unit
+            {
+                texture SphereBlue1.tga
+            }
+        }
+    }
+}
+
+material SphereBlue2
+{
+    technique
+    {
+        pass
+        {   
+            emissive 0 0 0
+            diffuse 1 1 1 
+            ambient 0 0 0
+            shading phong 
+            texture_unit
+            {
+                texture SphereBlue2.tga
+            }
+        }
+    }
+}
+material SphereBlue3
+{
+    technique
+    {
+        pass
+        {   
+            emissive 0 0 0
+            diffuse 1 1 1 
+            ambient 0 0 0
+            shading phong 
+            texture_unit
+            {
+                texture SphereBlue3.tga
+            }
+        }
+    }
+}
+
+material SphereGreen1
+{
+    technique
+    {
+        pass
+        {   
+            emissive 0 0 0
+            diffuse 1 1 1 
+            ambient 0 0 0
+            shading phong 
+            texture_unit
+            {
+                texture SphereGreen1.tga
+            }
+        }
+    }
+}
+
+material SphereGreen2
+{
+    technique
+    {
+        pass
+        {   
+            emissive 0 0 0
+            diffuse 1 1 1 
+            ambient 0 0 0
+            shading phong 
+            texture_unit
+            {
+                texture SphereGreen2.tga
+            }
+        }
+    }
+}
+material SphereGreen3
+{
+    technique
+    {
+        pass
+        {   
+            emissive 0 0 0
+            diffuse 1 1 1 
+            ambient 0 0 0
+            shading phong 
+            texture_unit
+            {
+                texture SphereGreen3.tga
             }
         }
     }

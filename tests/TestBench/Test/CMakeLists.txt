@@ -9,22 +9,15 @@ include(PrintListMacro)
 
 
 #Set Source Code (its in the GeneralRigidBodySimulation Folder)
-SET(SOURCE_DIR       "${PROJECT_SOURCE_DIR}/../../../../projects/granularRigidBodySimulationGUI/")
-set(COMMONSOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../../common")
+SET(SOURCE_DIR       "${PROJECT_SOURCE_DIR}/../../../projects/granularRigidBodySimulationGUI/")
+set(COMMONSOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../common")
 
 
-
-
-SET(COMMON_INC
-    ${PROJECT_SOURCE_DIR}/include/GRSF/common/TypeDefs.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/common/LogDefines.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/common/AssertionDebug.hpp
-
+SET(COMMON_IN
+    ${PROJECT_SOURCE_DIR}/include/TestFunctions.hpp
 )
 
 SET(COMMON_SRC
-    ${PROJECT_SOURCE_DIR}/src/GRSF/common/TypeDefs.cpp
-    
     ${PROJECT_SOURCE_DIR}/src/main.cpp
 )
 
@@ -84,6 +77,10 @@ INCLUDE_ALL_ApproxMVBB_SOURCE(  ApproxMVBB_SRC
 # FIND PCL Library
 #find_package(PCL 1.8 REQUIRED COMPONENTS common io filters kdtree)
  #add_definitions(${PCL_DEFINITIONS})
+
+
+include(GetGRSFVersionNumber)
+GetGRSFVersionNumber()
 
 
 # WRITE CONFIGURATION FILE
@@ -170,5 +167,19 @@ endif()
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS} )
 
 ADD_DEPENDENCIES(${PROJECT_NAME} ${ApproxMVBB_DEPENDING_TARGETS})
+
+
+
+
+
+# Add google tests
+
+ADD_EXECUTABLE(GRSF_TEST_StringParse  ${PROJECT_SOURCE_DIR}/src/StringParseTest.cpp ${INCLUDE_FILES}   )
+TARGET_LINK_LIBRARIES(GRSF_TEST_StringParse ${Boost_LIBRARIES} ${CUDA_cublas_LIBRARY} ${COLLISIONLIB_LIBRARIES} ${ASSIMP_LIBRARIES} ${PUGIXML_LIBRARIES} gtest gmock_main)
+
+
+
+
+
 
 message(STATUS "=========================================================================")

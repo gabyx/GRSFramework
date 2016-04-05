@@ -75,7 +75,7 @@
 
 //#include "SceneParserTest.hpp"
 
-//#include "StringParserTest.hpp"
+#include "StringParserTest.hpp"
 //#include "StringConversionBenchmark.hpp"
 
 //#include "LogicNodeTest.hpp"
@@ -107,12 +107,11 @@
 
 //#include "EigenSpeedTest.hpp"
 
-#include "GRSF/common/MetaHelper.hpp"
+//#include "GRSF/common/MetaHelper.hpp"
 
 int  main( int  argc, char  ** argv ){
 
-    using T = meta::list<int,int,float,int,float>;
-    metaAdd::find_indices<int,T>::A;
+
 
     //eigenSpeedTest();
 
@@ -124,7 +123,7 @@ int  main( int  argc, char  ** argv ){
     /* initialize random seed: */
 
 
-    //stringFormatterTest();
+    // stringFormatterTest();
 
     //Test::serializeKdTree();
     //Test::kdTreeTest();
@@ -137,7 +136,7 @@ int  main( int  argc, char  ** argv ){
 
         //convertSomeNumbers();
 //    doBenchmark();
-//    stringTest();
+    stringTest();
 //    doBenchmark();
 
 

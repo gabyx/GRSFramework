@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -14,13 +14,14 @@
 #include <Ogre.h>
 #include <cassert>
 #include <cmath>
+#include <type_traits>
 /// ==========================================
 
 using namespace Ogre;
 
 enum {
-  POSITION_BINDING,
-  TEXCOORD_BINDING
+  POSITION_BINDING = 0,
+  TEXCOORD_BINDING = 1
 };
 
 DynamicLines::DynamicLines(OperationType opType)
@@ -88,7 +89,11 @@ void DynamicLines::update()
 void DynamicLines::createVertexDeclaration()
 {
   VertexDeclaration *decl = mRenderOp.vertexData->vertexDeclaration;
-  decl->addElement(POSITION_BINDING, 0, VET_FLOAT3, VES_POSITION);
+//  if( std::is_same<Real,double>::value){
+//    decl->addElement(POSITION_BINDING, 0, Ogre::VET_DOUBLE3, Ogre::VES_POSITION);
+//  }else{
+    decl->addElement(POSITION_BINDING, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+//  }
 }
 
 void DynamicLines::fillHardwareBuffers()
@@ -109,13 +114,13 @@ void DynamicLines::fillHardwareBuffers()
   HardwareVertexBufferSharedPtr vbuf =
     mRenderOp.vertexData->vertexBufferBinding->getBuffer(0);
 
-  Real *prPos = static_cast<Real*>(vbuf->lock(HardwareBuffer::HBL_DISCARD));
+  float *prPos = static_cast<float*>(vbuf->lock(HardwareBuffer::HBL_DISCARD));
   {
    for(int i = 0; i < size; i++)
    {
-      *prPos++ = mPoints[i].x;
-      *prPos++ = mPoints[i].y;
-      *prPos++ = mPoints[i].z;
+      *(prPos++) = mPoints[i].x;
+      *(prPos++) = mPoints[i].y;
+      *(prPos++) = mPoints[i].z;
 
       if(mPoints[i].x < vaabMin.x)
          vaabMin.x = mPoints[i].x;

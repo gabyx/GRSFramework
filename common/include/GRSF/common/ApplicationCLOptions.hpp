@@ -101,7 +101,7 @@ private:
 
             if( ops >> OptionPresent('h',"help")) {
                 printHelp();
-                exit(EXIT_SUCCESS)
+                exit(EXIT_SUCCESS);
             }
 
             std::string s;
