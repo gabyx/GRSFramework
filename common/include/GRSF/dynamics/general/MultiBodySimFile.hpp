@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -406,7 +406,7 @@ private:
     std::streamsize m_nBytesPerUBody = 0;
     std::streamsize m_nBytesPerBody = 0;
 
-    // Write addditional bytes per body, not yet implemented, but the type is written in the header
+
     typename AdditionalBodyData::TypeEnum m_additionalBytesPerBodyType;
 
     std::streamsize getAdditionalBytesPerBody();
@@ -466,7 +466,7 @@ void MultiBodySimFile::write(double time, TBodyIterator begin, TBodyIterator end
         IOHelpers::writeBinary(m_file_stream, (*it)->get_q());
         IOHelpers::writeBinary(m_file_stream, (*it)->get_u());
 
-//        AddBytes::write<m_additionalBytesPerBodyType>(m_file_stream);
+        //AdditionalBodyData::write<EnumConversion::toIntegral(m_additionalBytesPerBodyType)>(m_file_stream, *it);
     }
 }
 
@@ -487,7 +487,7 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
         IOHelpers::writeBinary(m_file_stream, b.m_q );
         IOHelpers::writeBinary(m_file_stream, b.m_u );
 
-//        AddBytes::write<m_additionalBytesPerBodyType>(m_file_stream);
+        //AdditionalBodyData::write<EnumConversion::toIntegral(m_additionalBytesPerBodyType)>(m_file_stream, *it);
     }
 
     m_nStates++;
@@ -731,7 +731,7 @@ void MultiBodySimFile::readBodyStateAdd( RigidBodyStateAdd * s) {
 
     readBodyState<true,false>(s);
 
-    s->m_data = AdditionalBodyData::createNew(s->m_data,m_additionalBytesPerBodyType);
+    AdditionalBodyData::createNew(s->m_data,m_additionalBytesPerBodyType);
 
     s->m_data->read(*this);
 }

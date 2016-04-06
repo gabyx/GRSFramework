@@ -50,14 +50,14 @@ void start( int argc, char **argv ){
         ApplicationCLOptions::getSingleton().checkArguments();
         if(my_rank == 0){
 
-            std::cout << "GRSFramework SimMPI: version: " GRSF_VERSION_STRING
+            std::cerr << "GRSFramework SimMPI: version: " GRSF_VERSION_STRING
             #ifndef NDEBUG
                     " | config: " << "debug" << std::endl;
             #else
                     " | config: " << "release" << std::endl;
             #endif
 
-            ApplicationCLOptions::getSingleton().printArgs(std::cout);
+            ApplicationCLOptions::getSingleton().printArgs(std::cerr);
 
         }
         // End Parsing =================================

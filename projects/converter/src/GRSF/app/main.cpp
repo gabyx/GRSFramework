@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     sigHandler->registerCallback(SIGPIPE,callBackSIGPIPE,"callBackSIGPIPE");
 
 
-    std::cout << "GRSFramework Converter: version: " GRSF_VERSION_STRING
+    std::cerr << "GRSFramework Converter: version: " GRSF_VERSION_STRING
     #ifndef NDEBUG
             " | config: " << "debug" << std::endl;
     #else
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
             opts.parseOptions(argc-1,++argv);
 
             opts.checkArguments();
-            opts.printArgs(std::cout);
+            opts.printArgs(std::cerr);
             // End Parsing =================================
 
 

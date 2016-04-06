@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 
     try{
 
-        std::cout << "GRSFramework Sim: version: " GRSF_VERSION_STRING
+        std::cerr << "GRSFramework Sim: version: " GRSF_VERSION_STRING
         #ifndef NDEBUG
                 " | config: debug" << std::endl;
         #else
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
         ApplicationCLOptions::getSingleton().parseOptions(argc,argv);
 
         ApplicationCLOptions::getSingleton().checkArguments();
-        ApplicationCLOptions::getSingleton().printArgs(std::cout);
+        ApplicationCLOptions::getSingleton().printArgs(std::cerr);
         // End Parsing =================================
 
         //Create singleton logger

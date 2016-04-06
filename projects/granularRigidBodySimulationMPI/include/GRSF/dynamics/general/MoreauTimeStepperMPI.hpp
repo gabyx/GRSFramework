@@ -344,7 +344,7 @@ void MoreauTimeStepperMPI::writeHeaderToSystemDataFile() {
 
 
 void MoreauTimeStepperMPI::writeIterationToCollisionDataFile() {
-#if OUTPUT_COLLISIONDATA_FILE == 1
+#ifdef OUTPUT_COLLISIONDATA_FILE
 
     double averageOverlap = 0;
 

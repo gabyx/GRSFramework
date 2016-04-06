@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -308,7 +308,7 @@ namespace AdditionalBodyData{
     }
 
     /** Construct new additional Data if it does not match */
-    inline Bytes* createNew(Bytes* data, TypeEnum type){
+    inline void createNew(Bytes* & data, TypeEnum type){
 
         if(data) {
             if(data->m_type != type) {
@@ -318,7 +318,6 @@ namespace AdditionalBodyData{
         } else {
            data = AdditionalBodyData::create(type);
         }
-        return data;
     }
 
 
@@ -344,7 +343,7 @@ namespace AdditionalBodyData{
 
     }
 
-    /** Static write function */
+    /** Dynamic write function */
     template<typename Archive, typename TRigidBody >
     inline void write(const TypeEnum & type, Archive & oa, TRigidBody *body){
         ADDBYTES_STATICSWITCH(type,write,oa,body);
