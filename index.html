@@ -4,107 +4,38 @@
     <meta charset="UTF-8"/>
     <title>GRSFramework by gabyx</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen"/>
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'/>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen"/>
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen"/>
     
-    <link rel="prefetch" type="text/markdown" href="https://raw.githubusercontent.com/gabyx/GRSFramework/master/README.md" media="all"/>
+    <!--VideJs-->
     <link href="http://vjs.zencdn.net/5.8.0/video-js.css" rel="stylesheet"/>
-    
+    <script src="http://vjs.zencdn.net/5.8.0/video.js"></script>
     <!-- If you'd like to support IE8 -->
     <script src="http://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
+    
+    <!--Jquery-->
     <script src="http://code.jquery.com/jquery-2.2.2.min.js" crossorigin="anonymous"></script>
     
+    <!--highlight and marked-->
+    <link rel="stylesheet" href="http://cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
+    <script src="http://cdn.jsdelivr.net/highlight.js/9.3.0/highlight.min.js"></script>
+    <script src="node_modules/marked/lib/marked.js"></script>
     
-<!--
-    <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
--->
-    <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <!--Sidr Panel-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sidr/2.2.1/stylesheets/jquery.sidr.light.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sidr/2.2.1/jquery.sidr.min.js"></script>
     
-    <style type="text/css">
-      .group {
-      background: yellow;
-      width: 200px;
-      height: 500px;
-      }
-      .group .subgroup {
-          background: orange;
-          width: 150px;
-          height: 200px;
-      }
-      .fixed {
-          position: fixed;
-      }
-
-      /* sidebar */
-      .bs-docs-sidebar {
-          padding-left: 20px;
-          margin-top: 20px;
-          margin-bottom: 20px;
-      }
-
-      /* all links */
-      .bs-docs-sidebar .nav>li>a {
-          color: #999;
-          border-left: 2px solid transparent;
-          padding: 4px 20px;
-          font-size: 13px;
-          font-weight: 400;
-      }
-
-      /* nested links */
-      .bs-docs-sidebar .nav .nav>li>a {
-          padding-top: 1px;
-          padding-bottom: 1px;
-          padding-left: 30px;
-          font-size: 12px;
-      }
-
-      /* active & hover links */
-      .bs-docs-sidebar .nav>.active>a, 
-      .bs-docs-sidebar .nav>li>a:hover, 
-      .bs-docs-sidebar .nav>li>a:focus {
-          color: #563d7c;                 
-          text-decoration: none;          
-          background-color: transparent;  
-          border-left-color: #563d7c; 
-      }
-      /* all active links */
-      .bs-docs-sidebar .nav>.active>a, 
-      .bs-docs-sidebar .nav>.active:hover>a,
-      .bs-docs-sidebar .nav>.active:focus>a {
-          font-weight: 700;
-      }
-      /* nested active links */
-      .bs-docs-sidebar .nav .nav>.active>a, 
-      .bs-docs-sidebar .nav .nav>.active:hover>a,
-      .bs-docs-sidebar .nav .nav>.active:focus>a {
-          font-weight: 500;
-      }
-
-
-      /* hide inactive nested list */
-      
-      .bs-docs-sidebar .nav ul.nav {
-          display: none;           
-      }
-      
-      /* show active nested list */
-      
-      .bs-docs-sidebar .nav>.active>ul.nav {
-          display: block;           
-      }
-      
-  </style>
-
   </head>
-  
-  <body> 
-    
+
+  <body>
+
     <div style="display:none">
         <div id="videoStorage">
             <a id="videoTarget">
+            <div id="videoTitle"></div>
             </a>
             <table>
                 <tr>
@@ -135,7 +66,7 @@
             <div id="videoSubtitle"></div>
         </div>
     </div>
-    
+
     <section class="page-header">
       <h1 class="project-name">GRSFramework</h1>
       <h2 class="project-tagline">Granular Rigid Body Simulation Framework: efficient research tools to simulate non-smooth granular rigid body dynamics. </h2>
@@ -143,143 +74,126 @@
       <a href="https://github.com/gabyx/GRSFramework/zipball/master" class="btn">Download .zip</a>
       <a href="https://github.com/gabyx/GRSFramework/tarball/master" class="btn">Download .tar.gz</a>
     </section>
-    <!--Nav Bar -->
-    
 
-    
     <section class="main-content">
 
       <div id="content"></div>
-      <div id="toc"></div>
+      
+      <div style="display:none">
+      <div id="toc">
+        <h1 id="table-of-contents">Table of Contents</h1>
+        <ul id="toc-level1"></ul>
+      </div>
+      </div>
       
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/gabyx/GRSFramework">GRSFramework</a> is maintained by <a href="https://github.com/gabyx">gabyx</a>.</span>
 
         <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-		
+
     </section>
-    
-    <nav id="sidebar-menu" class="bs-docs-sidebar" style="position: absolute; top: 400px;">
-        <ul class="main-menu nav nav-stacked affix">
-    	</ul>
-    </nav>
-    
-    <script src="http://vjs.zencdn.net/5.8.0/video.js"></script>
-    <script src="node_modules/marked/lib/marked.js"></script>
-    
-    
-    
-    <script type="text/javascript">
-      
-      $(window).load(function(){
-        $('body').scrollspy({
-            target: '.bs-docs-sidebar',
-            offset: 40
-        });
-      });
 
-      var parseTOC =  function() { 
-        console.log("parse into TOC")
-        var sidebarMainMenu = $('#sidebar-menu .main-menu');
-        var staticContent = $('#content');
-        
-        staticContent.find('h1').each(function() {
 
-          sidebarMainMenu.append('<li id="'+ $(this).attr('id') + '-menu"><a href="#' + $(this).attr('id') + '">' + $(this).html() + '</li>');
-          title = sidebarMainMenu.find('#' + $(this).attr('id'));
-        });
-        staticContent.find('h2').each(function() {
+  <a id="toc-button" class="btn" href="#sidr-toc">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="12" viewBox="0 0 18 12">
+      <path fill="currentColor" d="M0 0h18v2H0zM0 5h18v2H0zM0 10h18v2H0z"/>
+    </svg>
+  </a>
 
-          prevTitle = sidebarMainMenu.find('#' + $(this).prevAll('h1').first().attr('id') + '-menu');
-          prevTitle.not(":has(ul)").append('<ul class="sub-menu nav nav-stacked"></ul>');
-          prevTitle.find('.sub-menu').append('<li id="'+ $(this).attr('id') + '-menu"><a href="#' + $(this).attr('id') + '">' + $(this).html() + '</li>');
-        });
-        
-        sidebarMainMenu.affix({
-              offset: {
-                top: 0  // To Modify according to the height offset
-              }
-        });
+  <script>
+    
+    marked.setOptions({
+      highlight: function(code) {
+        return hljs.highlightAuto(code).value;
       }
-
-    </script>
+    });
     
-    <script type="text/javascript">
-        console.log("load subtitles")
-        // load video subtitles
-        jQuery.get('videoSubtitle.md',function(data){
-          $("#videoSubtitle").html(  marked(data) );
-        });
+    //var out = document.getElementById('output'),
+    //mdown = document.getElementById('test');
 
+    //out.innerHTML = marked(mdown.textContent);
+    
+    
 
-        // load wiki Home markup and render
-        console.log("load Home.md")
-        {
-          var client1 = new XMLHttpRequest();
-          client1.open('GET', "https://rawgit.com/wiki/gabyx/GRSFramework/Home.md");
-          client1.onreadystatechange = function() {
-              if(client1.readyState == 4){
-                    document.getElementById('content').innerHTML = marked(client1.responseText);
-                    // replace videos with storage
-                    var vidS=$("#videoStorage");
-                    $("#videos-placeholder").replaceWith( vidS );
+    // load video subtitles
+    jQuery.get('videoSubtitle.md',function(data){
+      $("#videoSubtitle").html(  marked(data) );
+    });
 
-                    parseTOC();
-              }
-          }
-          client1.send();
+  // load wiki Home markup and render
+  {
+    var client1 = new XMLHttpRequest();
+    client1.open('GET', "https://rawgit.com/wiki/gabyx/GRSFramework/Home.md");
+    client1.onreadystatechange = function() {
+        if(client1.readyState == 4){
+              document.getElementById('content').innerHTML = marked(client1.responseText);
+              // replace videos with storage
+              var vidS=$("#videoStorage");
+              $("#videos").replaceWith( vidS );
+
+              document.getElementById('videoTitle').innerHTML = marked("## Videos");
+              parseTOC('#content','#toc-level1')
+              applyTOC('#toc-button','#toc');
+              
         }
-        {
-          // load table of content
-          console.log("load _Sidebar.md")
-          var client2 = new XMLHttpRequest();
-          client2.open('GET', "https://rawgit.com/wiki/gabyx/GRSFramework/_Sidebar.md");
-          client2.onreadystatechange = function() {
-              if(client2.readyState == 4){
-                    document.getElementById('toc').innerHTML = marked(client2.responseText);
-              }
-          }
-          client2.send();
-        }
-        
-        $(function() {
-
-            var $sidebar   = $("#sidebar-menu"), 
-                $window    = $(window),
-                offset     = $sidebar.offset(),
-                topPadding = 20;
-            console.log("offset",offset)
-            
-            $window.scroll(function() {
-                console.log("scroll",$window.scrollTop())
-                if ($window.scrollTop() > offset.top) {
-                    console.log(">")
-                    $sidebar.stop();
-                    //.animate({
-                        //marginTop: $window.scrollTop() - offset.top + topPadding
-                    //},100);
-                    $sidebar.css("position", "fixed");
-                    $sidebar.css("top", topPadding+"px");
-                    
-                } else {
-                    $sidebar.css("position", "absolute");
-                    //$sidebar.stop().animate({
-                        //top: "400px",
-                    //});
-                    $sidebar.css("top", "400px");
-                }
-            });
-            
-        });
-        
-    </script>
+    }
+    client1.send();
+  }
+  //{
+    //// load table of content
+    //var client2 = new XMLHttpRequest();
+    //client2.open('GET', "https://rawgit.com/wiki/gabyx/GRSFramework/_Sidebar.md");
+    //client2.onreadystatechange = function() {
+        //if(client2.readyState == 4){
+              //document.getElementById('toc2').innerHTML = marked(client2.responseText);
+              
+        //}
+    //}
+    //client2.send();
+  //}
   
+  function parseTOC(from, to) {
+    // parse in the TOC from Home.md
+    var tocPlaceholder = $(to);
+    var staticContent = $(from);
     
+    staticContent.find('h1').each(function() {
+      tocPlaceholder.append('<li id="'+ $(this).attr('id') + '-menu"><a href="#' + $(this).attr('id') + '">' + $(this).html() + '</li>');
+    });
+    staticContent.find('h2').each(function() {
+      prevTitle = tocPlaceholder.find('#' + $(this).prevAll('h1').first().attr('id') + '-menu');
+      prevTitle.not(":has(ul)").append('<ul></ul>');
+      prevTitle.find('ul').append('<li id="'+ $(this).attr('id') + '-menu"><a href="#' + $(this).attr('id') + '">' + $(this).html() + '</li>');
+    });
+  }
+
+  function applyTOC(buttonSel,srcSel) {
+    
+    var set = false,
+    $button = $(buttonSel).sidr({
+      name: 'sidr-toc',
+      source: srcSel
+    });
+    
+    var startOffset = 360;
+    
+    $(window).scroll(function() {
+      var top = window.scrollY;
+      if (top > startOffset && !set) {
+        // make TOC button dark when it leaves the header
+        $button[0].classList.add('darker');
+        set = true;
+      } else if (top < startOffset && set) {
+        $button[0].classList.remove('darker');
+        set = false;
+      }
+    });
+  };
+  
+
+  
+  </script>
 
   </body>
 </html>
-
-
-
-
