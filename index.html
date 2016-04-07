@@ -113,9 +113,6 @@
 
     <div style="display:none">
         <div id="videoStorage">
-            <a id="videoTarget">
-            <div id="videoTitle"></div>
-            </a>
             <table>
                 <tr>
                     <td>
@@ -232,11 +229,12 @@
             console.log("Got Home.md")
             document.getElementById('content').innerHTML = marked(client1.responseText);
             // replace videos with storage
+            
             console.log("replace videos");
             var vidS=$("#videoStorage");
-            $("#videos").replaceWith( vidS );
+            $("#videos-placeholder").replaceWith( vidS );
+            
             console.log("parse/apply TOC");
-            document.getElementById('videoTitle').innerHTML = marked("## Videos");
             parseTOC('#content','#toc-level1')
             applyTOC('#toc-button','#toc');
             
