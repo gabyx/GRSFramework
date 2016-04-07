@@ -25,9 +25,10 @@
     <script src="node_modules/marked/lib/marked.js"></script>
     
     <!--Sidr Panel-->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/sidr/2.2.1/stylesheets/jquery.sidr.light.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="stylesheets/sidebar.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sidr/2.2.1/jquery.sidr.min.js"></script>
     
+      <script src="http://rawgithub.com/twbs/bootstrap/b4c4072679943773a7582daa63f545ba818fa627/js/bootstrap-scrollspy.js"></script>
     
     <!--MathJax Panel-->
     <script type="text/x-mathjax-config">
@@ -109,7 +110,7 @@
   
   
   
-  <body>
+  <body data-spy="scroll" data-target=".sidr-inner">
 
     <div style="display:none">
         <div id="videoStorage">
@@ -271,6 +272,13 @@
       prevTitle.not(":has(ul)").append('<ul></ul>');
       prevTitle.find('ul').append('<li id="'+ $(this).attr('id') + '-menu"><a href="#' + $(this).attr('id') + '">' + $(this).html() + '</li>');
     });
+    
+    staticContent.find('h3').each(function() {
+      prevTitle = tocPlaceholder.find('#' + $(this).prevAll('h2').first().attr('id') + '-menu');
+      prevTitle.not(":has(ul)").append('<ul></ul>');
+      prevTitle.find('ul').append('<li id="'+ $(this).attr('id') + '-menu"><a href="#' + $(this).attr('id') + '">' + $(this).html() + '</li>');
+    });
+    
   }
 
   function applyTOC(buttonSel,srcSel) {
@@ -294,6 +302,12 @@
         set = false;
       }
     });
+    
+    // add class 'nav' to  make scrollspy work
+    $(".sidr-inner").addClass("nav");
+    
+    $('body').scrollspy({offset:400});
+    
   };
   
 

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)#page5 -->
+<html hola_ext_inject="disabled"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+
+  <script type="text/javascript" src="./test_files/jquery-1.8.3.js"></script><style type="text/css"></style>
+
+    <link rel="stylesheet" type="text/css" href="./test_files/normalize.css">
+    <link rel="stylesheet" type="text/css" href="./test_files/result-light.css">
+    <script type="text/javascript" src="./test_files/bootstrap-scrollspy.js"></script>
+
+<style type="text/css">
+    body {
+    padding-top: 40px;
+    font: normal 13px 'Helvetica Neue', Helvetica, sans-serif;
+}
+
+#navbar {
+    border-bottom: 1px solid red;
+    background: #ddd;
+    width: 100%;
+    top: 0;
+    position: fixed;
+}
+
+#navbar li {
+    padding: 10px;
+    float: left;
+}
+
+#navbar a {
+    text-decoration: none;
+    color: #000;
+}
+
+#navbar .active a {
+    color: red;
+}
+
+/* Remove this if you want to try $('body').scrollspy(); */
+/*#content {
+    height: 200px;
+    overflow-y: scroll;
+}*/
+
+.page {
+    border: 1px solid #ddd;
+    border-width: 1px 0;
+    background: #f7f7f7;
+    margin: 20px 0;
+    padding: 200px;
+    height: 100px;
+}
+</style>
+
+
+<script type="text/javascript">
+$(window).load(function(){
+
+$('#navbar').html('<ul class="nav"><li class=""><a href="#page1">Page 1</a></li><li class=""><a href="#page2">Page 2</a></li><li class=""><a href="#page3">Page 3</a></li><li class=""><a href="#page4">Page 4</a></li><li class="active"><a href="#page5">Page 5</a></li></ul>' );
+
+$('body').scrollspy();
+
+}); 
+</script>
+
+</head>
+
+<body>
+<div id="navbar">
+</div>
+
+<div id="content" data-spy="scroll" data-target="#navbar">
+  <div id="page1" class="page">
+    <h1>Page 1</h1>
+  </div>
+
+  <div id="page2" class="page">
+    <h1>Page 2</h1>
+  </div>
+
+  <div id="page3" class="page">
+    <h1>Page 3</h1>
+  </div>
+
+  <div id="page4" class="page">
+    <h1>Page 4</h1>
+  </div>
+
+  <div id="page5" class="page">
+    <h1>Page 5</h1>
+  </div>
+</div>
+</body></html>
