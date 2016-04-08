@@ -293,3 +293,15 @@ kbd {
 	-webkit-border-radius: 3px;
 	text-shadow: 0 1px 0 #fff;
 }
+
+.loaderdiv {
+	position: relative;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100px;
+	z-index: 9999;
+	background: url(http://smallenvelop.com/wp-content/uploads/2014/08/Preloader_3.gif) center no-repeat #fff;
+}
+
+
