@@ -57,29 +57,31 @@
         });
         
         var markedText = marked(markdownBuffer.innerHTML);
-        document.getElementById('content').innerHTML = markedText;
         
         // replace videos with storage
         console.log("2. replace videos");
-        var vidS=$("#videoStorage");
-        $("#videos-placeholder").replaceWith( vidS );
-        
-        console.log("3. parse/apply TOC");
-        parseTOC('#content','#toc-level1')
-        applyTOC('#toc-button','#toc');
+        $(markedText).find("#videos-placeholder").replaceWith( $("#videoStorage") );
         
         // remove loader div
-        $(".loaderdiv").fadeOut("slow");
+        $(".loaderdiv").fadeOut("slow", function (){
+                // make content appear
+                document.getElementById('content').innerHTML = markedText;
+                
+                console.log("3. parse/apply TOC");
+                parseTOC("#content",'#toc-level1')
+                applyTOC('#toc-button','#toc');
+            }
+        );
         
-
-
+       
     }
     
     function parseTOC(from, to) {
       // parse in the TOC from marked markdown text
       var tocPlaceholder = $(to);
       var staticContent = $(from);
-      
+
+      console.log(staticContent)
       staticContent.find('h1').each(function() {
         tocPlaceholder.append('<li id="'+ $(this).attr('id') + '-menu"><a href="#' + $(this).attr('id') + '">' + $(this).html() + '</li>');
       });
