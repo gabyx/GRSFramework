@@ -1,0 +1,8 @@
+.expList .collapsed > a::before {
+    content: "▸ ";
+}
+
+.expList .expanded > a::before {
+    content: "▾ ";
+}
+

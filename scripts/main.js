@@ -68,7 +68,10 @@
         parseTOC('#content','#toc-level1')
         applyTOC('#toc-button','#toc');
         
+        // remove loader div
         $(".loaderdiv").fadeOut("slow");
+        
+
 
     }
     
@@ -118,6 +121,13 @@
       
       // add class 'nav' to  make scrollspy work
       $(".sidr-inner").addClass("nav");
+      
+      // add expList class to make expandable
+      $("#sidr-id-toc-level1").addClass("expList");
+      prepareList("#sidr-id-toc-level1");
+      
+      // add +/- button to sidr-toc
+      $("#sidr-id-table-of-contents").prepend($("#toc-buttons-expcoll"));
       
       $('body').scrollspy({offset:400});
       

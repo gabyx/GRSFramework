@@ -26,12 +26,14 @@
     
     <!--Sidr Panel-->
     <link rel="stylesheet" href="stylesheets/sidebar.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sidr/2.2.1/jquery.sidr.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/sidr/2.2.1/jquery.sidr.min.js"></script>
     
     <script src="http://rawgithub.com/twbs/bootstrap/b4c4072679943773a7582daa63f545ba818fa627/js/bootstrap-scrollspy.js"></script>
     
- 
-    <script type="text/javascript" async src="scripts/main.js"></script>
+    <script src="scripts/collapseList.js"></script>
+    <link rel="stylesheet" type="text/css" href="stylesheets/collapseList.css" media="screen"/>
+    
+    <script async src="scripts/main.js"></script>
   
   
     <!--MathJax Config-->
@@ -159,8 +161,21 @@
       <path fill="currentColor" d="M0 0h18v2H0zM0 5h18v2H0zM0 10h18v2H0z"/>
     </svg>
   </a>
-
-  
+   
+   <div style="display:none">
+       <div id="toc-buttons-expcoll">
+            <a id="toc-button-expand" class="btn-sidebar">
+                <svg width="10" height="10" style="display:block;" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <path class="path1" d="M15.5 6h-5.5v-5.5c0-0.276-0.224-0.5-0.5-0.5h-3c-0.276 0-0.5 0.224-0.5 0.5v5.5h-5.5c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5h5.5v5.5c0 0.276 0.224 0.5 0.5 0.5h3c0.276 0 0.5-0.224 0.5-0.5v-5.5h5.5c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5z"></path>
+                </svg>
+            </a>
+            <a id="toc-button-collapse" class="btn-sidebar">
+                <svg width="10" height="10" style="display:block;" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <path class="path1" d="M0 6.5v3c0 0.276 0.224 0.5 0.5 0.5h15c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-15c-0.276 0-0.5 0.224-0.5 0.5z"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
 
   </body>
 
