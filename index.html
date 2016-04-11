@@ -22,6 +22,7 @@
     <!--highlight and marked-->
     <link rel="stylesheet" href="http://cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
     <script src="http://cdn.jsdelivr.net/highlight.js/9.3.0/highlight.min.js"></script>
+    <script src="node_modules/showdown/dist/showdown.min.js"></script>
     <script src="node_modules/marked/lib/marked.js"></script>
     
     <!--Sidr Panel-->
@@ -41,8 +42,8 @@
       MathJax.Hub.Config({
         skipStartUpTypeset: true,
         showProcessingMessages: true,
-        tex2jax: { inlineMath: [["`\\(","\\)`"]], 
-                   displayMath: [["`\\[","\\]`"]], 
+        tex2jax: { inlineMath: [["\\(","\\)"]], 
+                   displayMath: [["\\[","\\]"]], 
                    processEscapes: true },
         "HTML-CSS": {
             preferredFont: "TeX",
