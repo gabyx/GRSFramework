@@ -70,6 +70,9 @@
                 console.log("3. parse/apply TOC");
                 parseTOC("#content",'#toc-level1')
                 applyTOC('#toc-button','#toc');
+                
+                $(window.location.hash)[0].scrollIntoView(true);
+                
             }
         );
         
