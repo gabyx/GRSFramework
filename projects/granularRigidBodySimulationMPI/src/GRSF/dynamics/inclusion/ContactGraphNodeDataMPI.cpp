@@ -74,7 +74,7 @@ ContactGraphNodeDataSplitBody::LInvMatrices::LInvMatrices(){
 //    }
 //
 //    MPI_Finalize();
-//    ERRORMSG("Dumped LMatrices!")
+//    GRSF_ERRORMSG("Dumped LMatrices!")
 
 }
 

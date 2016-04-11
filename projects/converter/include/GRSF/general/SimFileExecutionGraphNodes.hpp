@@ -250,7 +250,7 @@ namespace LogicNodes {
             }
             template<typename T>
             void operator()(T * p){
-                 ERRORMSG("Additional bytes could not be filled into input Node!")
+                 GRSF_ERRORMSG("Additional bytes could not be filled into input Node!")
             }
 
             BodyData * m_p;

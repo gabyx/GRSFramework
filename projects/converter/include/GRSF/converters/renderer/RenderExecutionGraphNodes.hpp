@@ -77,7 +77,7 @@ namespace LogicNodes {
             std::uniform_real_distribution<double> uni(0.0,amplitude);
 
             if(nColors==0){
-                ERRORMSG("nColors needs to be > 0")
+                GRSF_ERRORMSG("nColors needs to be > 0")
             }
 
             for(unsigned int i=0; i<nColors;i++){
@@ -100,7 +100,7 @@ namespace LogicNodes {
             }
 
             if(m_colors.size()==0){
-                ERRORMSG("color list size = 0")
+                GRSF_ERRORMSG("color list size = 0")
             }
 
         }
@@ -502,7 +502,7 @@ namespace LogicNodes {
             RigidBodyIdType & id = GET_ISOCKET_REF_VALUE(BodyId);
             auto geomIt = m_geomMap->find( id );
             if( geomIt == m_geomMap->end() ) {
-                ERRORMSG("Geometry for body id: " << RigidBodyId::getBodyIdString(id) << " not found!")
+                GRSF_ERRORMSG("Geometry for body id: " << RigidBodyId::getBodyIdString(id) << " not found!")
             }
               // Write the material
             if(GET_ISOCKET_REF_VALUE(Material) == nullptr){
@@ -533,7 +533,7 @@ namespace LogicNodes {
                 !GET_ISOCKET(Name)->isConnected() ||
                 !GET_ISOCKET(Time)->isConnected() ||
                 !GET_ISOCKET(FrameNr)->isConnected()){
-                ERRORMSG("RendermanWriter::initState --> one of Folder,Name,Time,FrameNr sockets not connected to any FrameData node!")
+                GRSF_ERRORMSG("RendermanWriter::initState --> one of Folder,Name,Time,FrameNr sockets not connected to any FrameData node!")
             }
 
             // open new frame
@@ -588,14 +588,14 @@ namespace LogicNodes {
                 }
                 m_subprocess = popen( c.c_str() ,"w");
                 if(!m_subprocess){
-                    ERRORMSG("Subprocess not opened!");
+                    GRSF_ERRORMSG("Subprocess not opened!");
                 }
 
             }else{
                 //open file
                 m_frameFile.open(p.string(),std::ios::trunc | std::ios::out);
                 if(!m_frameFile.is_open()) {
-                    ERRORMSG("Render frame at : " << p << " could not be opened!")
+                    GRSF_ERRORMSG("Render frame at : " << p << " could not be opened!")
                 }
 
                 m_frameFile << "# Frame for t: " << GET_ISOCKET_REF_VALUE(Time) << "\n";

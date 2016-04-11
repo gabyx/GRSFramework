@@ -308,7 +308,7 @@ void OgrePointCloud::setRenderMode(RenderMode mode)
     geom_support_changed = true;
     current_mode_supports_geometry_shader_ = false;
 
-    ERRORMSG("No techniques available for material " << current_material_->getName().c_str());
+    GRSF_ERRORMSG("No techniques available for material " << current_material_->getName().c_str());
   }
 
   if (geom_support_changed)
@@ -514,10 +514,10 @@ void OgrePointCloud::addPoints(Point* points, uint32_t num_points)
     {
       if (rend)
       {
-        ASSERTMSG(current_vertex_count == buffer_size ,"");
+        GRSF_ASSERTMSG(current_vertex_count == buffer_size ,"");
 
         op->vertexData->vertexCount = rend->getBuffer()->getNumVertices() - op->vertexData->vertexStart;
-        ASSERTMSG((op->vertexData->vertexCount + op->vertexData->vertexStart <= rend->getBuffer()->getNumVertices()),"");
+        GRSF_ASSERTMSG((op->vertexData->vertexCount + op->vertexData->vertexStart <= rend->getBuffer()->getNumVertices()),"");
         vbuf->unlock();
         rend->setBoundingBox(aabb);
         bounding_box_.merge(aabb);
@@ -583,14 +583,14 @@ void OgrePointCloud::addPoints(Point* points, uint32_t num_points)
       *iptr = color;
       ++fptr;
 
-      ASSERTMSG((uint8_t*)fptr <= (uint8_t*)vdata + rend->getBuffer()->getNumVertices() * vertex_size,"");
+      GRSF_ASSERTMSG((uint8_t*)fptr <= (uint8_t*)vdata + rend->getBuffer()->getNumVertices() * vertex_size,"");
     }
   }
 
   op->vertexData->vertexCount = current_vertex_count - op->vertexData->vertexStart;
   rend->setBoundingBox(aabb);
   bounding_box_.merge(aabb);
-  ASSERTMSG(op->vertexData->vertexCount + op->vertexData->vertexStart <= rend->getBuffer()->getNumVertices(),"");
+  GRSF_ASSERTMSG(op->vertexData->vertexCount + op->vertexData->vertexStart <= rend->getBuffer()->getNumVertices(),"");
 
   vbuf->unlock();
 
@@ -612,7 +612,7 @@ void OgrePointCloud::popPoints(uint32_t num_points)
 {
   uint32_t vpp = getVerticesPerPoint();
 
-  ASSERTMSG(num_points <= point_count_,"");
+  GRSF_ASSERTMSG(num_points <= point_count_,"");
   points_.erase(points_.begin(), points_.begin() + num_points);
 
   point_count_ -= num_points;
@@ -638,7 +638,7 @@ void OgrePointCloud::popPoints(uint32_t num_points)
       renderables_.push_back(rend);
     }
   }
-  ASSERTMSG(popped_count == num_points * vpp,"");
+  GRSF_ASSERTMSG(popped_count == num_points * vpp,"");
 
   // reset bounds
   bounding_box_.setNull();

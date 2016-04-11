@@ -43,7 +43,7 @@ public:
     MinAreaRectangle(const MatrixBase<Derived> & points)
         : m_p(points), m_convh(m_p) {
         EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(Derived,2, Eigen::Dynamic)
-        ASSERTMSG( m_p.data() == points.derived().data() ," You store a temporary in a Ref<> which works here, but do you really want this?")
+        GRSF_ASSERTMSG( m_p.data() == points.derived().data() ," You store a temporary in a Ref<> which works here, but do you really want this?")
     }
 
     struct Box2d {
@@ -78,7 +78,7 @@ public:
 
         // Generate Convex Hull
         m_convh.compute();
-        ASSERTMSG(m_convh.verifyHull(), "Convex hull not ok!")
+        GRSF_ASSERTMSG(m_convh.verifyHull(), "Convex hull not ok!")
 
         // Compute Rectangle
         computeRectangle();
@@ -239,7 +239,7 @@ private:
         } else {
             std::stringstream ss;
             Utilities::printVector(ss,m_angles.begin(),m_angles.end(),",");
-            ERRORMSG("Could not find vertex with angle greater than: "
+            GRSF_ERRORMSG("Could not find vertex with angle greater than: "
                      << matchAngle << "in angles: " << ss.str());
         }
     }

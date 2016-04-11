@@ -84,7 +84,7 @@ public:
     AABBnD( const VectorStat<Dim> &p): m_minPoint(p), m_maxPoint(p) {};
 
     AABBnD( const VectorStat<Dim> &l, const VectorStat<Dim> &u): m_minPoint(l), m_maxPoint(u) {
-        ASSERTMSG( (m_maxPoint >= m_minPoint).all(),
+        GRSF_ASSERTMSG( (m_maxPoint >= m_minPoint).all(),
         "AABB initialized wrongly! min/max: " << m_minPoint.tranpose() <<"/" << m_maxPoint.transpose();)
     };
 
@@ -120,7 +120,7 @@ public:
     }
 
     AABBnD& transform(const AffineTrafo & M) {
-        STATIC_ASSERTM(Dim==3,"So far AABB transform is only implemented in 3d")
+        GRSF_STATIC_ASSERTM(Dim==3,"So far AABB transform is only implemented in 3d")
         AABBnD ret( M*(Vector3( m_minPoint(0), m_minPoint(1), m_minPoint(2))));
         ret.unite(M*(Vector3( m_maxPoint(0), m_minPoint(1), m_minPoint(2))));
         ret.unite(M*(Vector3( m_minPoint(0), m_maxPoint(1), m_minPoint(2))));
@@ -160,13 +160,13 @@ public:
     }
 
     inline void expand(PREC d) {
-        ASSERTMSG(d>=0,"d>=0")
+        GRSF_ASSERTMSG(d>=0,"d>=0")
         m_minPoint.array() -= d;
         m_maxPoint.array() += d;
     };
 
     inline void expand(VectorStat<Dim> d) {
-        ASSERTMSG((d.array()>=0).all(), "d<0")
+        GRSF_ASSERTMSG((d.array()>=0).all(), "d<0")
         m_minPoint -= d;
         m_maxPoint += d;
     };

@@ -47,10 +47,10 @@ namespace RenderLogicParserModules {
             for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
                 unsigned int id;
                 if(!Utilities::stringToType(id, itNode->attribute("id").value())) {
-                    ERRORMSG("---> String conversion in Material: id failed");
+                    GRSF_ERRORMSG("---> String conversion in Material: id failed");
                 }
 
-                ASSERTMSG(itNode->child_value()!=""," String in material id: " << id << "is empty!")
+                GRSF_ASSERTMSG(itNode->child_value()!=""," String in material id: " << id << "is empty!")
                 m_materials->emplace(id, new RenderMaterial(id,itNode->child_value()) );
 
                 LOGLPLEVEL3(m_pLog,"---> Parsed Material with id: " << id << std::endl;)
@@ -116,7 +116,7 @@ public:
     void parseTool(XMLNodeType & tool){
             unsigned int id;
             if(!Utilities::stringToType(id, tool.attribute("id").value())) {
-                ERRORMSG("---> String conversion in Tool: id failed");
+                GRSF_ERRORMSG("---> String conversion in Tool: id failed");
             }
             std::string type = tool.attribute("type").value();
             LOGLPLEVEL2(this->m_pLog,"---> Parsing Tool: " << type << " with id: " << id << std::endl;);
@@ -147,25 +147,25 @@ private:
         auto att = cNode.attribute("rgb");
         if(att){
             if(!Utilities::stringToType(rgb, att.value())) {
-                ERRORMSG("---> String conversion in ColorList tool: rgb failed");
+                GRSF_ERRORMSG("---> String conversion in ColorList tool: rgb failed");
             }
 
         }else{
             att = cNode.attribute("rgbInt8");
             if(att){
                 if(!Utilities::stringToType(rgb, att.value())) {
-                    ERRORMSG("---> String conversion in ColorList tool: rgbInt8 failed");
+                    GRSF_ERRORMSG("---> String conversion in ColorList tool: rgbInt8 failed");
                 }
                 rgb.array() /= 255;
             }else{
-                ERRORMSG("---> Color attribute is not [rgb/rgbInt8]");
+                GRSF_ERRORMSG("---> Color attribute is not [rgb/rgbInt8]");
             }
         }
 
 
         if ((rgb.array()<0 || rgb.array()>1.0).any())
         {
-            ERRORMSG("---> Color values: " << rgb.transpose() << "not in range [0,1]!");
+            GRSF_ERRORMSG("---> Color values: " << rgb.transpose() << "not in range [0,1]!");
         }
     }
 
@@ -174,18 +174,18 @@ private:
         if(g=="random"){ \
             unsigned int seed; \
             if(!Utilities::stringToType(seed, logicNode.attribute("seed").value())) { \
-                ERRORMSG("---> String conversion in ColorList tool: seed failed"); \
+                GRSF_ERRORMSG("---> String conversion in ColorList tool: seed failed"); \
             } \
             unsigned int count; \
             if(!Utilities::stringToType(count, logicNode.attribute("count").value())) { \
-                ERRORMSG("---> String conversion in ColorList tool: count failed"); \
+                GRSF_ERRORMSG("---> String conversion in ColorList tool: count failed"); \
             } \
             double amp; \
             if(!Utilities::stringToType(amp, logicNode.attribute("amp").value())) { \
-                ERRORMSG("---> String conversion in ColorList tool: amp failed"); \
+                GRSF_ERRORMSG("---> String conversion in ColorList tool: amp failed"); \
             } \
             if(count==0){ \
-                ERRORMSG("---> String conversion in ColorList tool: count == 0") \
+                GRSF_ERRORMSG("---> String conversion in ColorList tool: count == 0") \
             } \
             n = new LogicNodes::ColorList<T>(id,count,seed,amp);\
         }else if(g=="list"){  \
@@ -199,10 +199,10 @@ private:
                 node->addColor(rgb); \
             } \
             if(node->getNColors() == 0){ \
-                ERRORMSG("---> You need to define a list of colors in ColorList tool"); \
+                GRSF_ERRORMSG("---> You need to define a list of colors in ColorList tool"); \
             } \
         }else{ \
-            ERRORMSG("---> String conversion in ColorList tool: generator failed: " << g); \
+            GRSF_ERRORMSG("---> String conversion in ColorList tool: generator failed: " << g); \
         }
 
 
@@ -229,7 +229,7 @@ private:
             else if DEFINE_ColorList(unsigned long int)
             else if DEFINE_ColorList(unsigned long long int)
             else{
-                ERRORMSG("---> String conversion in Constant tool: inputType: '" << t1 << "' not found!");
+                GRSF_ERRORMSG("---> String conversion in Constant tool: inputType: '" << t1 << "' not found!");
             }
 
             m_executionGraph->addNode(n,false,false);
@@ -241,14 +241,14 @@ private:
 
             double min;
             if(!Utilities::stringToType(min, logicNode.attribute("min").value())) {
-                ERRORMSG("---> String conversion in ColorList tool: amp failed");
+                GRSF_ERRORMSG("---> String conversion in ColorList tool: amp failed");
             }
             double max;
             if(!Utilities::stringToType(max, logicNode.attribute("max").value())) {
-                ERRORMSG("---> String conversion in ColorList tool: amp failed");
+                GRSF_ERRORMSG("---> String conversion in ColorList tool: amp failed");
             }
             if(min>=max){
-                ERRORMSG("---> String conversion in ColorGradient tool: min/max not feasible!");
+                GRSF_ERRORMSG("---> String conversion in ColorGradient tool: min/max not feasible!");
             }
 
             LogicNodes::ColorGradientNode * n = new LogicNodes::ColorGradientNode(id,min,max);
@@ -266,7 +266,7 @@ private:
 
                 PREC value;
                 if(!Utilities::stringToType(value, itNode->attribute("value").value())) {
-                    ERRORMSG("---> String conversion in ColorGradient tool: value failed");
+                    GRSF_ERRORMSG("---> String conversion in ColorGradient tool: value failed");
                 }
                 n->addColorPoint(rgb,value);
             }
@@ -295,7 +295,7 @@ private:
 
         unsigned int defaultMaterialId;
         if(!Utilities::stringToType(defaultMaterialId, logicNode.attribute("defaultMaterialId").value())) {
-            ERRORMSG("---> String conversion in MaterialLookUp tool: defaultMaterialId failed");
+            GRSF_ERRORMSG("---> String conversion in MaterialLookUp tool: defaultMaterialId failed");
         }
 
         // Get default material
@@ -304,7 +304,7 @@ private:
 
 
         if(it == m_materials->end()) {
-            ERRORMSG("No default material found for MaterialLookUp tool!")
+            GRSF_ERRORMSG("No default material found for MaterialLookUp tool!")
         }
         LOGLPLEVEL3(this->m_pLog, "Default Material set to: " << std::endl << it->second->str() << std::endl)
 
@@ -323,7 +323,7 @@ private:
                                                         RenderMaterial *,
                                                         MaterialMapType >(id,m_materials,it->second);
         } else {
-            ERRORMSG("---> String conversion in MaterialLookUp tool: inputType: '" << type << "' not found!");
+            GRSF_ERRORMSG("---> String conversion in MaterialLookUp tool: inputType: '" << type << "' not found!");
         }
 
          m_executionGraph->addNode(node,false,false);
@@ -337,13 +337,13 @@ private:
         att = logicNode.attribute("pipeToSubprocess");
         if(att) {
             if(!Utilities::stringToType(pipe, att.value())) {
-                ERRORMSG("---> String conversion in RendermanWriter tool: pipeToSubprocess failed");
+                GRSF_ERRORMSG("---> String conversion in RendermanWriter tool: pipeToSubprocess failed");
             }
 
             if( pipe ) {
                 command = logicNode.attribute("command").value();
                 if(command.empty()) {
-                    ERRORMSG("---> String conversion in RendermanWriter tool: command failed");
+                    GRSF_ERRORMSG("---> String conversion in RendermanWriter tool: command failed");
                 }
             }
 

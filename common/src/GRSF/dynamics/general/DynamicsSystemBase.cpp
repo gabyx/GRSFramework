@@ -32,7 +32,7 @@ DynamicsSystemBase::~DynamicsSystemBase() {
 
 void DynamicsSystemBase::initializeLog(Logging::Log* pLog) {
     m_pSolverLog = pLog;
-    ASSERTMSG(m_pSolverLog != nullptr, "Logging::Log: nullptr!");
+    GRSF_ASSERTMSG(m_pSolverLog != nullptr, "Logging::Log: nullptr!");
 }
 
 

@@ -77,7 +77,7 @@ void GridExtractor::initSimInfo(boost::filesystem::path simFile,
         }
         catch( H5::FileIException & e){
             m_h5File.reset(nullptr);
-            ERRORMSG("File could not be opened: " << e.getDetailMsg() )
+            GRSF_ERRORMSG("File could not be opened: " << e.getDetailMsg() )
         }
         // Set current path
         m_currentFilePath = f;

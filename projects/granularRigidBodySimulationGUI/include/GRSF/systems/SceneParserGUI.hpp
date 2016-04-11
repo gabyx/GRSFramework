@@ -87,7 +87,7 @@ public:
           m_pBodiesNode(pBodiesNode),
           m_pContactFramesNode(pContactFramesNode),
           m_pSceneMgr(pSceneMgr) {
-        ASSERTMSG(m_pSceneMgr && m_pBodiesNode, "these should not be zero!")
+        GRSF_ASSERTMSG(m_pSceneMgr && m_pBodiesNode, "these should not be zero!")
 
     };
 
@@ -97,7 +97,7 @@ public:
         m_bodyListGroup = bodyList;
         m_statesGroup = states;
 
-        ASSERTMSG(bodyList->size() == m_scalesGroup.size(), "The scales list has not been filled, this needs to be done outside of this module!")
+        GRSF_ASSERTMSG(bodyList->size() == m_scalesGroup.size(), "The scales list has not been filled, this needs to be done outside of this module!")
 
         LOGSCLEVEL1(m_pSimulationLog, "---> VisModule: parsing (BodyVisualization)"<<std::endl;)
         XMLNodeType node = vis.first_child();
@@ -120,7 +120,7 @@ public:
              parseCapsule(node);
         }
         else{
-            ERRORMSG("Visualization for type: " << n << " not implemented!")
+            GRSF_ERRORMSG("Visualization for type: " << n << " not implemented!")
         }
     }
 
@@ -177,12 +177,12 @@ private:
             if(m_currScaleLikeGeom) {
                 auto & s = m_scalesGroup[bodyIdx];
                 if(s(0)==0 || s(1)==0 || s(2)==0) {
-                    ERRORMSG("---> parseMesh:: Scale for Mesh: " + meshName.string() +"is zero or smaller!");
+                    GRSF_ERRORMSG("---> parseMesh:: Scale for Mesh: " + meshName.string() +"is zero or smaller!");
                 }
                 sceneNodeScale->setScale(s(0),s(1),s(2));
             } else {
                 if(m_currScale(0)==0 || m_currScale(1)==0 || m_currScale(2)==0) {
-                    ERRORMSG("---> parseMesh:: Scale for Mesh: " + meshName.string() + "is zero or smaller!");
+                    GRSF_ERRORMSG("---> parseMesh:: Scale for Mesh: " + meshName.string() + "is zero or smaller!");
                 }
                 sceneNodeScale->setScale(m_currScale(0),m_currScale(1),m_currScale(2));
             }
@@ -270,7 +270,7 @@ private:
             if(m_currScaleLikeGeom) {
                 auto & s = m_scalesGroup[bodyIdx];
                 if(s(0)<=0 || s(1)<=0 || s(2)<=0) {
-                    ERRORMSG("---> parseCapsule:: Scale for Mesh: " << fileZyl.string() << ", " << fileCap.string() << " is zero or smaller!");
+                    GRSF_ERRORMSG("---> parseCapsule:: Scale for Mesh: " << fileZyl.string() << ", " << fileCap.string() << " is zero or smaller!");
                 }
                 sceneNodeZyl->setScale(s(0),s(1),s(2));
                 sceneNodeCap1->setScale(s(0),s(1),s(2));
@@ -328,7 +328,7 @@ private:
         att = pcloudNode.attribute("color");
         if(att){
             if(!Utilities::stringToType(color,att.value() )) {
-                ERRORMSG("---> String conversion in parsePointCloud: scale failed");
+                GRSF_ERRORMSG("---> String conversion in parsePointCloud: scale failed");
             }
         }
 
@@ -407,7 +407,7 @@ private:
         att = planeNode.attribute("subDivisions");
         if(att) {
             if(!Utilities::stringToType(subDivs, att.value())) {
-                ERRORMSG("---> String conversion in parsePlane: subDivisions failed");
+                GRSF_ERRORMSG("---> String conversion in parsePlane: subDivisions failed");
             }
         }
 
@@ -418,7 +418,7 @@ private:
         att = planeNode.attribute("normal");
         if(att) {
             if(!Utilities::stringToType(normal, att.value())) {
-                ERRORMSG("---> String conversion in parsePlane: normal failed");
+                GRSF_ERRORMSG("---> String conversion in parsePlane: normal failed");
             }
         }
 
@@ -426,7 +426,7 @@ private:
         att = planeNode.attribute("distance");
         if(att) {
             if(!Utilities::stringToType(dist, att.value())) {
-                ERRORMSG("---> String conversion in parsePlane: distance failed");
+                GRSF_ERRORMSG("---> String conversion in parsePlane: distance failed");
             }
         }
 
@@ -436,7 +436,7 @@ private:
         att = planeNode.attribute("tileTexture");
         if(att) {
             if(!Utilities::stringToType(tile, att.value())) {
-                ERRORMSG("---> String conversion in parsePlane: tileTexture failed");
+                GRSF_ERRORMSG("---> String conversion in parsePlane: tileTexture failed");
             }
         }
 
@@ -494,7 +494,7 @@ private:
             RigidBodyGraphicsType rigidBodyGraphics(sceneNode, b.m_id);
 
             if(m_currScaleLikeGeom) {
-                ERRORMSG("---> parsePlane:: Scale for Plane can not be used from Geometry!");
+                GRSF_ERRORMSG("---> parsePlane:: Scale for Plane can not be used from Geometry!");
             } else {
                 sceneNodeScale->setScale(m_currScale(0),m_currScale(1),m_currScale(2));
             }
@@ -539,10 +539,10 @@ private:
                 m_materialList.emplace_back(n.attribute("name").value());
             }
             if(m_materialList.empty()) {
-                ERRORMSG("---> No Material Node found in Mesh!");
+                GRSF_ERRORMSG("---> No Material Node found in Mesh!");
             }
         } else {
-            ERRORMSG("---> The attribute 'type' '" << type << "' of 'parseMesh' has no implementation in the parser");
+            GRSF_ERRORMSG("---> The attribute 'type' '" << type << "' of 'parseMesh' has no implementation in the parser");
         }
     }
 
@@ -551,20 +551,20 @@ private:
         att =rendering.attribute("attachAxis");
         if(att) {
             if(!Utilities::stringToType(settings.attachAxis, att.value() )) {
-                ERRORMSG("---> String conversion of in parseMesh: attachAxis failed");
+                GRSF_ERRORMSG("---> String conversion of in parseMesh: attachAxis failed");
             }
         }
         att =rendering.attribute("axesSize");
         if(att) {
             if(!Utilities::stringToType(settings.axesSize, att.value())) {
-                ERRORMSG("---> String conversion of in parseMesh: axesSize failed");
+                GRSF_ERRORMSG("---> String conversion of in parseMesh: axesSize failed");
             }
         }
 
         att = rendering.attribute("shadowsEnabled");
         if(att) {
             if(!Utilities::stringToType(settings.shadowsEnabled, att.value())) {
-                ERRORMSG("---> String conversion of in parseMesh: shadowsEnabled failed");
+                GRSF_ERRORMSG("---> String conversion of in parseMesh: shadowsEnabled failed");
             }
         }
     }
@@ -581,15 +581,15 @@ private:
             if(type=="grid") {
                 Vector3 minPoint, maxPoint;
                 if(!Utilities::stringToType(minPoint,  topo.attribute("minPoint").value() )) {
-                    ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
+                    GRSF_ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
                 }
                 if(!Utilities::stringToType(maxPoint,  topo.attribute("maxPoint").value())) {
-                    ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
+                    GRSF_ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
                 }
 
                 MyMatrix::Array3<unsigned int> dim;
                 if(!Utilities::stringToType(dim,  topo.attribute("dimension").value())) {
-                    ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
+                    GRSF_ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
                 }
 
                 Vector3 extent;
@@ -698,7 +698,7 @@ private:
             if(n) {
                 double scale;
                 if(!Utilities::stringToType(scale,  n.attribute("scale").value())) {
-                    ERRORMSG("---> String conversion in ContactCoordinateSystem: scale failed");
+                    GRSF_ERRORMSG("---> String conversion in ContactCoordinateSystem: scale failed");
                 }
                 m_pBaseNode->setScale(Ogre::Vector3(1,1,1)*scale);
             }
@@ -708,7 +708,7 @@ private:
             if(n) {
                 double scale;
                 if(!Utilities::stringToType(scale,  n.attribute("scale").value())) {
-                    ERRORMSG("---> String conversion in ContactCoordinateSystem: scale failed");
+                    GRSF_ERRORMSG("---> String conversion in ContactCoordinateSystem: scale failed");
                 }
                 m_pContactFramesNode->setScale(Ogre::Vector3(1,1,1)*scale);
             }

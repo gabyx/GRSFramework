@@ -37,7 +37,7 @@
         template<typename Derived>
         ConvexHull2D(const MatrixBase<Derived> & points) :m_p(points) {
             EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(Derived,2, Eigen::Dynamic)
-            ASSERTMSG( m_p.data() == points.derived().data() ," You store a temporary in a Ref<> which works here, but do you really want this?")
+            GRSF_ASSERTMSG( m_p.data() == points.derived().data() ," You store a temporary in a Ref<> which works here, but do you really want this?")
         }
 
         void compute() {
@@ -112,7 +112,7 @@
                     continue;
                 }
 
-                ASSERTMSG( lPtIdx < m_p.size() && mPtIdx < m_p.size() && currIdx < m_p.size(), "?")
+                GRSF_ASSERTMSG( lPtIdx < m_p.size() && mPtIdx < m_p.size() && currIdx < m_p.size(), "?")
 
                 if( areaSign( m_p.col(lPtIdx), m_p.col(mPtIdx), m_p.col(currIdx)) > 0) { // if we have a left turn!
                     //std::cout << "Left turn: c:" << currIdx << " m:" << mPtIdx << " l: "<< lPtIdx << " sign: " << areaSign( m_p.col(lPtIdx), m_p.col(mPtIdx), m_p.col(currIdx)) << std::endl;

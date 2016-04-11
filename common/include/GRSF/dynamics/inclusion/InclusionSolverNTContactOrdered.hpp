@@ -186,8 +186,8 @@ template< typename TLayoutConfig, typename TDynamicsSystem,  typename TCollision
 void InclusionSolverNTContactOrdered<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::reset()
 {
    // Do a Debug check if sizes match!
-   ASSERTMSG( m_SimBodies.size() * NDOFuObj == m_nDofu, "InclusionSolverNTContactOrdered:: Error in Dimension of System!");
-   ASSERTMSG( m_SimBodies.size() * NDOFqObj == m_nDofq, "InclusionSolverNTContactOrdered:: Error in Dimension of System!");
+   GRSF_ASSERTMSG( m_SimBodies.size() * NDOFuObj == m_nDofu, "InclusionSolverNTContactOrdered:: Error in Dimension of System!");
+   GRSF_ASSERTMSG( m_SimBodies.size() * NDOFqObj == m_nDofq, "InclusionSolverNTContactOrdered:: Error in Dimension of System!");
 
    m_pDynSys->init_const_hTerm();
    m_pDynSys->init_const_MassMatrixInv();

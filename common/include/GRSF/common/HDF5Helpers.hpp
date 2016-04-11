@@ -190,7 +190,7 @@ inline H5::PredType mapNativeTypeToLE()
 /** Hash functor for storing derived H5::Location objects in maps */
 template<typename T>
 struct Hasher{
-    STATIC_ASSERTM((std::is_base_of<H5::H5Location,T>::value), "Your class does not inherit from H5Location!")
+    GRSF_STATIC_ASSERTM((std::is_base_of<H5::H5Location,T>::value), "Your class does not inherit from H5Location!")
     inline hid_t  operator()(const T & t) const{
         return t.getId();
     }
@@ -199,7 +199,7 @@ struct Hasher{
 /** KeyEqual functor for storing derived H5::Location objects in maps */
 template<typename T>
 struct KeyEqual: std::binary_function <T,T,bool>{
-    STATIC_ASSERTM((std::is_base_of<H5::H5Location,T>::value), "Your class does not inherit from H5Location!")
+    GRSF_STATIC_ASSERTM((std::is_base_of<H5::H5Location,T>::value), "Your class does not inherit from H5Location!")
     inline bool operator()(const T & a, const T & b) const{
         return a.getId() == b.getId();
     }
@@ -210,7 +210,7 @@ struct KeyEqual: std::binary_function <T,T,bool>{
 template<typename TFileGroupData, typename T>
 inline void saveAttribute(const TFileGroupData & fg, const T & attr, std::string name)
 {
-    STATIC_ASSERTM((!std::is_same<T,std::string>::value), "string should not be saved with this function")
+    GRSF_STATIC_ASSERTM((!std::is_same<T,std::string>::value), "string should not be saved with this function")
     hsize_t dims=1;
     H5::DataSpace d(1, &dims /*dimension*/);
     H5::Attribute a = fg.createAttribute(name, Hdf5Helpers::mapNativeTypeToLE<T>(),d );
@@ -250,7 +250,7 @@ inline H5::DataSet saveArithmeticArray(const TFileGroup & fg,
         H5::DataSpace & dataSpace,
         std::string name)
 {
-    STATIC_ASSERTM(std::is_arithmetic<Scalar>::value, "Your scalar is not arithmetic!")
+    GRSF_STATIC_ASSERTM(std::is_arithmetic<Scalar>::value, "Your scalar is not arithmetic!")
     H5::DataSet s = fg.createDataSet(name, Hdf5Helpers::mapNativeTypeToLE<Scalar>(), dataSpace);
     s.write(data, Hdf5Helpers::getNativeType<Scalar>() );
     return s;
@@ -286,7 +286,7 @@ void saveTensor_artihmScalar(const TFileGroup & fg, const Tensor & m, std::strin
     /* Tensor = Tensor<Scalar,...> or similar */
     /* Scalar  = arithmetic */
     using Scalar = typename Tensor::Scalar;
-    STATIC_ASSERTM(std::is_arithmetic<Scalar>::value, "Your scalar of the Vector::Scalar is not arithmetic!")
+    GRSF_STATIC_ASSERTM(std::is_arithmetic<Scalar>::value, "Your scalar of the Vector::Scalar is not arithmetic!")
 
     auto & d = m.dimensions();
     std::array<hsize_t, Tensor::NumIndices > dims;
@@ -314,7 +314,7 @@ void saveTensor_vectorScalar(const TFileGroup & fg, const Tensor & m, std::strin
     static const unsigned int RowsAtCompileTime = Tensor::Scalar::RowsAtCompileTime;
     using Scalar = typename Tensor::Scalar::Scalar;
 
-    STATIC_ASSERTM(std::is_arithmetic<Scalar>::value, "Your scalar of the Vector::Scalar is not arithmetic!")
+    GRSF_STATIC_ASSERTM(std::is_arithmetic<Scalar>::value, "Your scalar of the Vector::Scalar is not arithmetic!")
 
     auto & d = m.dimensions();
     std::array<hsize_t, Tensor::NumIndices + 1 > dims;
@@ -389,7 +389,7 @@ template<typename TFileGroup,
 void saveData(const TFileGroup & fg, const MatrixBase<Derived> & m, std::string name)
 {
 
-    ERRORMSG("NOT IMPLEMENTED")
+    GRSF_ERRORMSG("NOT IMPLEMENTED")
 }
 
 

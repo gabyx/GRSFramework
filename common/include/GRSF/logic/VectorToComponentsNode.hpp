@@ -58,7 +58,7 @@ namespace LogicNodes{
 
         virtual void compute(){
             //std::cout << GET_ISOCKET_REF_VALUE(Value) << std::endl;
-            ASSERTMSG( GET_ISOCKET_REF_VALUE(Index) <=  GET_ISOCKET_REF_VALUE(Value).rows() ,
+            GRSF_ASSERTMSG( GET_ISOCKET_REF_VALUE(Index) <=  GET_ISOCKET_REF_VALUE(Value).rows() ,
                       "Wrong index: " << GET_ISOCKET_REF_VALUE(Index) << " in node id: " << this->m_id )
 
             GET_OSOCKET_REF_VALUE(Component) =  GET_ISOCKET_REF_VALUE(Value)[ GET_ISOCKET_REF_VALUE(Index) ] ;

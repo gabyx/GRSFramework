@@ -36,13 +36,13 @@ using namespace std;
 template<int N>
 struct AA{
    static const int Z = N;
-   STATIC_ASSERT(Z % 2 == 0);
+   GRSF_STATIC_ASSERT(Z % 2 == 0);
 };
 
 template<int N>
 struct BB{
    static const int Z = N;
-   STATIC_ASSERT(Z % 3 == 0);
+   GRSF_STATIC_ASSERT(Z % 3 == 0);
 };
 typedef AA<2> GG;
 typedef BB<3> TT;

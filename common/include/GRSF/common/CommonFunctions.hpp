@@ -236,8 +236,8 @@ inline bool stringToTypeDispatch( boost::filesystem::path & v,
 */
 template<typename T, typename THalf>
 struct CommaSeperatedPairBinShift {
-    STATIC_ASSERTM( ( sizeof(T) / sizeof(THalf) == 2) , "THalf should contain half the bytes of T");
-    STATIC_ASSERTM( std::is_integral<T>::value && std::is_integral<T>::value, "Needs to be integral")
+    GRSF_STATIC_ASSERTM( ( sizeof(T) / sizeof(THalf) == 2) , "THalf should contain half the bytes of T");
+    GRSF_STATIC_ASSERTM( std::is_integral<T>::value && std::is_integral<T>::value, "Needs to be integral")
     inline static bool convert(T& t, const std::string& s) {
         //std::cout << "convert format:" << s << std::endl;
         if(s.empty()) {
@@ -296,7 +296,7 @@ std::string  typeToString(const T & t) {
 */
 template<typename PREC, typename Generator, typename Distribution, typename Integral>
 inline PREC genRandomValues(PREC value, Generator & g, Distribution & d, Integral count) {
-    STATIC_ASSERT(std::is_unsigned<Integral>::value)
+    GRSF_STATIC_ASSERT(std::is_unsigned<Integral>::value)
     for(unsigned int i= 0; i<count; ++i) {
         value = d(g);
     }
@@ -308,7 +308,7 @@ inline PREC genRandomValues(PREC value, Generator & g, Distribution & d, Integra
 */
 template<typename PREC, typename Functor, typename Integral>
 inline PREC genRandomValues(PREC value, Functor & f, Integral count) {
-    STATIC_ASSERT(std::is_unsigned<Integral>::value)
+    GRSF_STATIC_ASSERT(std::is_unsigned<Integral>::value)
     for(unsigned int i= 0; i<count; ++i) {
         value = f();
     }
@@ -320,7 +320,7 @@ inline PREC genRandomValues(PREC value, Functor & f, Integral count) {
 */
 template<typename PREC, typename Generator, typename Distribution, typename Integral>
 inline typename MyMatrix::Vector3<PREC> genRandomVec(typename MyMatrix::Vector3<PREC> value, Generator & g, Distribution & d, Integral count) {
-    STATIC_ASSERT(std::is_unsigned<Integral>::value)
+    GRSF_STATIC_ASSERT(std::is_unsigned<Integral>::value)
     for(unsigned int i= 0; i<count; ++i) {
         value(0) = d(g);
         value(1) = d(g);

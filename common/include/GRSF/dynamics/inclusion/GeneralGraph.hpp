@@ -156,7 +156,7 @@ struct GraphTraitsSymmetric {
                 static inline void apply(const std::size_t & id, T * p, Visitor && v ){ \
                     switch(id){\
                         BOOST_PP_REPEAT(N,SWITCH_CASE,~) \
-                        default: ERRORMSG("Tried to cast type: " << demangle::type<T>() << " to wrong id: " << id ); break; \
+                        default: GRSF_ERRORMSG("Tried to cast type: " << demangle::type<T>() << " to wrong id: " << id ); break; \
                     }\
                 }\
             }; \

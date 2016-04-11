@@ -106,7 +106,7 @@ public:
     */
     template <typename Geom1>
     inline void operator()(const  std::shared_ptr<const Geom1> &g1) const {
-        ERRORMSG("ColliderAABB:: collision detection for object-combination "<< typeid(Geom1).name()<<" and AABB not supported!");
+        GRSF_ERRORMSG("ColliderAABB:: collision detection for object-combination "<< typeid(Geom1).name()<<" and AABB not supported!");
     }
 
 
@@ -151,7 +151,7 @@ public:
     */
     template <typename Geom1>
     inline void operator()(const  std::shared_ptr<const Geom1> &g1) const {
-        ERRORMSG("ColliderAABB:: collision detection for object-combination "<< typeid(Geom1).name()<<" and AABB not supported!");
+        GRSF_ERRORMSG("ColliderAABB:: collision detection for object-combination "<< typeid(Geom1).name()<<" and AABB not supported!");
     }
 
 private:
@@ -180,7 +180,7 @@ public:
 
     inline void setNonAddedLeaf( const NodeType * nonAddedLeaf ){
         m_nonAddedLeaf = nonAddedLeaf;
-        ASSERTMSG(m_nonAddedLeaf, "nullptr")
+        GRSF_ASSERTMSG(m_nonAddedLeaf, "nullptr")
     }
 
     inline bool checkOverlapNode( const RigidBodyType * pBody,
@@ -252,7 +252,7 @@ public:
         while(!m_nodeStack.empty()){
 
             currNode = m_nodeStack.front();
-            ASSERTMSG(currNode, "currNode is nullptr")
+            GRSF_ASSERTMSG(currNode, "currNode is nullptr")
 
             if(!currNode->isLeaf()){
 
@@ -283,7 +283,7 @@ public:
                         m_nodeStack.emplace_back(currNode->rightNode());
                         break;
                     default :
-                        ERRORMSG("Strange value returned from left/right ")
+                        GRSF_ERRORMSG("Strange value returned from left/right ")
                 };
 
             }else{
@@ -342,7 +342,7 @@ public:
         */
         template <typename Geom>
         inline char operator()(const  std::shared_ptr<const Geom> &g) const{
-            ERRORMSG("ColliderAxisHalfspace:: collision detection for object-combination "<< typeid(Geom).name()<<" and Axis Halfspace not supported!");
+            GRSF_ERRORMSG("ColliderAxisHalfspace:: collision detection for object-combination "<< typeid(Geom).name()<<" and Axis Halfspace not supported!");
             return 0;
         }
 
@@ -391,7 +391,7 @@ public:
         m_ray = &ray;
         m_pCollData = &collData;
 
-        ERRORMSG("ColliderRay:: not implemented")
+        GRSF_ERRORMSG("ColliderRay:: not implemented")
     }
 
     /** intersects body with a ray. If a new intersection is found, the new line parameter is set in the reference ray! */
@@ -418,7 +418,7 @@ public:
     */
     template <typename Geom1>
     inline void operator()(const  std::shared_ptr<const Geom1> &g1) {
-        ERRORMSG("ColliderRay:: collision detection for object-combination "<< typeid(Geom1).name()<<" and Ray not supported!");
+        GRSF_ERRORMSG("ColliderRay:: collision detection for object-combination "<< typeid(Geom1).name()<<" and Ray not supported!");
     }
 
 private:
@@ -454,7 +454,7 @@ void ColliderRay::intersect( const HalfspaceGeometry * halfspace) {
         m_ray->m_maxt = t;
     } else {
         // Fill collision Data;
-        ASSERTMSG(false,"fill collision data here")
+        GRSF_ASSERTMSG(false,"fill collision data here")
     }
 
 }
@@ -516,7 +516,7 @@ public:
     */
     template <typename Geom1>
     inline void operator()(const  std::shared_ptr<const Geom1> &g1) {
-        ERRORMSG("ColliderPoint:: collision detection for object-combination "<< typeid(Geom1).name()<<" and point not supported!");
+        GRSF_ERRORMSG("ColliderPoint:: collision detection for object-combination "<< typeid(Geom1).name()<<" and point not supported!");
     }
 
 private:
@@ -583,7 +583,7 @@ public:
         m_pBody[0] = pBody1;
         m_pBody[1] = pBody2;
 
-        ASSERTMSG(m_pBody[0] != m_pBody[1], "Are you sure you want to checkCollision between the same objects?");
+        GRSF_ASSERTMSG(m_pBody[0] != m_pBody[1], "Are you sure you want to checkCollision between the same objects?");
         m_bObjectsSwapped = false;
 
         boost::apply_visitor(*this, m_pBody[0]->m_geometry, m_pBody[1]->m_geometry);
@@ -674,7 +674,7 @@ private:
     template <typename O1, typename O2>
     inline void collide(const std::shared_ptr<const O1> & o1,
                         const std::shared_ptr<const O2> & o2) {
-        ERRORMSG("ColliderBody:: collision detection for object-combination "<< typeid(O1).name()<<" and "<<typeid(O2).name()<<" not supported!");
+        GRSF_ERRORMSG("ColliderBody:: collision detection for object-combination "<< typeid(O1).name()<<" and "<<typeid(O2).name()<<" not supported!");
     }
 
     /** @} */
@@ -888,7 +888,7 @@ void ColliderBody<TCollisionSet>::collide(const SphereGeometry  * sphereGeom,
 //    // Take care! Direct X Compliant stupid fucking matrices!!
 //    IceMaths::Matrix4x4 * mat = (IceMaths::Matrix4x4 *)(H_IK.data());
 //    if(!sphereCollider.Collide(sphereCache,sphereTemp,*(meshGeom->m_pOpcodeModel),nullptr, mat )) { //(const IceMaths::Matrix4x4 *)(H_IK.data())
-//        ASSERTMSG(false,"Collision Sphere Mesh failed!");
+//        GRSF_ASSERTMSG(false,"Collision Sphere Mesh failed!");
 //    }
 //    /*
 //     float max = 0;

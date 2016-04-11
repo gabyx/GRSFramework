@@ -164,7 +164,7 @@ m_staticBodies(pCollisionSolver->m_staticBodies)
     if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
-        ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
+        GRSF_ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }
 
   m_nSimBodies = pCollisionSolver->m_nSimBodies;
@@ -203,8 +203,8 @@ template< typename TInclusionSolverConfig >
 void InclusionSolverNT<TInclusionSolverConfig>::reset()
 {
   // Do a Debug check if sizes match!
-  ASSERTMSG( m_simBodies.size() * NDOFuBody == m_nDofu, "InclusionSolverNT:: Error in Dimension of System!");
-  ASSERTMSG( m_simBodies.size() * NDOFqBody == m_nDofq, "InclusionSolverNT:: Error in Dimension of System!");
+  GRSF_ASSERTMSG( m_simBodies.size() * NDOFuBody == m_nDofu, "InclusionSolverNT:: Error in Dimension of System!");
+  GRSF_ASSERTMSG( m_simBodies.size() * NDOFqBody == m_nDofq, "InclusionSolverNT:: Error in Dimension of System!");
 
   m_pDynSys->init_const_hTerm(m_h_const);
   m_pDynSys->init_MassMatrixInv(m_Minv_diag);
@@ -340,7 +340,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
                            << collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.dot(collSet[contactIdx].m_cFrame.m_e_y) << collSet[contactIdx].m_cFrame.m_e_y.dot(collSet[contactIdx].m_cFrame.m_e_z) <<std::endl
                            << "r_s1c1="<< collSet[contactIdx].m_r_SC[0].transpose().format(MyMatrixIOFormat::Matlab)<<"';"<<std::endl;);
 
-      ASSERTMSG( std::abs(collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.dot(collSet[contactIdx].m_cFrame.m_e_y)) < 1e-3 && std::abs(collSet[contactIdx].m_cFrame.m_e_y.dot(collSet[contactIdx].m_cFrame.m_e_z))< 1e-3, "Vectors not parallel");
+      GRSF_ASSERTMSG( std::abs(collSet[contactIdx].m_cFrame.m_cFrame.m_e_x.dot(collSet[contactIdx].m_cFrame.m_e_y)) < 1e-3 && std::abs(collSet[contactIdx].m_cFrame.m_e_y.dot(collSet[contactIdx].m_cFrame.m_e_z))< 1e-3, "Vectors not parallel");
 
 
 

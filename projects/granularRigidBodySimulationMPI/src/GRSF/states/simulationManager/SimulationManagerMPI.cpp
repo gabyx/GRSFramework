@@ -133,7 +133,7 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
                                                    m_sceneFileParsed, m_nGlobalSimBodies ) );
         m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added KdTreeTopologyBuilder");
     }else{
-        ERRORMSG("No Topology Builder type instantiated")
+        GRSF_ERRORMSG("No Topology Builder type instantiated")
     }
 
     //Uncomment if StateRecorderType = StateRecorderBodys
@@ -188,7 +188,7 @@ void SimulationManagerMPI::checkOwnerOfBodiesInProcess() {
     for(auto & body : m_pDynSys->m_simBodies){
         RankIdType r;
         if(!m_pProcCommunicator->getProcTopo()->belongsBodyToProcess(body,r)){
-            ERRORMSG("Body with id: " << body->m_id << " belongs to rank: " << r << "instead of: " << m_pProcCommunicator->getRank()) ;
+            GRSF_ERRORMSG("Body with id: " << body->m_id << " belongs to rank: " << r << "instead of: " << m_pProcCommunicator->getRank()) ;
         }
     }
     m_pProcCommunicator->waitBarrier();
@@ -211,7 +211,7 @@ void SimulationManagerMPI::checkNumberOfBodiesInProcess() {
 
         if( static_cast<unsigned int>(numberOfBodiesInSimulation) != m_nGlobalSimBodies) {
             LOG(m_pSimulationLog,  "ERROR:---> Body check NOT successful! : "<< numberOfBodiesInSimulation <<"!="<< m_nGlobalSimBodies<< std::endl;);
-            ERRORMSG("Body check Not successfull");
+            GRSF_ERRORMSG("Body check Not successfull");
         }
 
         LOG(m_pSimulationLog,  "---> Body check successfull!: "<<numberOfBodiesInSimulation<<" SimBodies in Simulation" << std::endl;);
@@ -348,7 +348,7 @@ void SimulationManagerMPI::initSim() {
     localSimFolderPath /= m_SimFolderPath.filename();
     if(!boost::filesystem::create_directories(localSimFolderPath)) {
         LOG(m_pSimulationLog,  "ERROR:---> Could not create directory: " << localSimFolderPath.string() << std::endl;);
-        ERRORMSG("ERROR:---> Could not create directory: " << localSimFolderPath.string() << std::endl )
+        GRSF_ERRORMSG("ERROR:---> Could not create directory: " << localSimFolderPath.string() << std::endl )
     }
 
 
@@ -356,7 +356,7 @@ void SimulationManagerMPI::initSim() {
 
     if(!m_pStateRecorder->createSimFile(true)) { // Truncate the files, important!
         LOG(m_pSimulationLog,  "ERROR:---> Could not open SimFilePart: " << localSimFolderPath.string() << std::endl;);
-        ERRORMSG("ERROR:---> Could not open SimFilePart: " << localSimFolderPath.string() << std::endl)
+        GRSF_ERRORMSG("ERROR:---> Could not open SimFilePart: " << localSimFolderPath.string() << std::endl)
     }
     // ===============================================
 

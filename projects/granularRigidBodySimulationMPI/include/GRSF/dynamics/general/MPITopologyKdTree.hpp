@@ -56,13 +56,13 @@ public:
     {
 
         if(!m_kdTree){
-            ERRORMSG("KdTree is nullptr")
+            GRSF_ERRORMSG("KdTree is nullptr")
         }
 
         // insert our neighbours
         auto it = neighbours.find(processRank);
         if(it == neighbours.end()){
-            ERRORMSG("neighbours does not contain an entry for rank: " << processRank );
+            GRSF_ERRORMSG("neighbours does not contain an entry for rank: " << processRank );
         }
         nbRanks.insert(it->second.begin(),it->second.end());
 
@@ -72,7 +72,7 @@ public:
             //Initialize adjacent neighbour ranks to m_nbRanks for this neighbours[*it]$
             auto itN = neighbours.find(rank);
              if(itN == neighbours.end()){
-                ERRORMSG("neighbours does not contain an entry for rank: " << rank );
+                GRSF_ERRORMSG("neighbours does not contain an entry for rank: " << rank );
             }
             // build the intersection of our ranks with neighbours of other rank
             adjNbRanks.emplace(rank, unorderedHelpers::makeIntersection(nbRanks, itN->second) );
@@ -85,7 +85,7 @@ public:
 
         m_leaf = m_kdTree->getLeaf(m_rank);
         if(!m_leaf){
-            ERRORMSG("Trying to get leaf node for our rank: " << m_rank << " failed!")
+            GRSF_ERRORMSG("Trying to get leaf node for our rank: " << m_rank << " failed!")
         }
         std::cerr << " got leaf " << m_leaf->getIdx() << std::endl;
 
@@ -103,7 +103,7 @@ public:
         // the lca node is the node we start from for collision detection
         auto bndIt = m_leaf->getBoundaries().begin();
         auto root = m_kdTree->getRootNode();
-        ASSERTMSG(root,"Root nullptr!")
+        GRSF_ASSERTMSG(root,"Root nullptr!")
 
         m_lcaBoundary = m_leaf;
         while( bndIt != m_leaf->getBoundaries().end() && m_lcaBoundary != root){
@@ -129,11 +129,11 @@ public:
     RankIdType getCellRank(const Vector3 & I_point) const {
         if(m_axisAligned) {
             auto * leaf = m_kdTree->getLeaf(I_point);
-            ASSERTMSG(leaf,"This should never be nullptr!");
+            GRSF_ASSERTMSG(leaf,"This should never be nullptr!");
             return leaf->getIdx();
         }else{
             auto * leaf = m_kdTree->getLeaf(m_A_KI*I_point);
-            ASSERTMSG(leaf,"This should never be nullptr!");
+            GRSF_ASSERTMSG(leaf,"This should never be nullptr!");
             return leaf->getIdx();
         }
     };

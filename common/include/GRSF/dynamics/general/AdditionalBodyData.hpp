@@ -64,7 +64,7 @@ namespace AdditionalBodyData{
             ADDBYTES_SWITCH_CASE(4,_function_, _args_) \
             ADDBYTES_SWITCH_CASE(5,_function_, _args_) \
             default: \
-                ERRORMSG("No function call " #_function_ " for type " << EnumConversion::toIntegral(_type_) ); \
+                GRSF_ERRORMSG("No function call " #_function_ " for type " << EnumConversion::toIntegral(_type_) ); \
         }
 
     #define ADDBYTES_STATICSWITCH_CASE(N, _function_ , _args_...)\
@@ -82,7 +82,7 @@ namespace AdditionalBodyData{
             ADDBYTES_STATICSWITCH_CASE(4, _function_ , _args_ ) \
             ADDBYTES_STATICSWITCH_CASE(5, _function_ , _args_ ) \
             default: \
-                ERRORMSG("No function call " #_function_ " for type " << EnumConversion::toIntegral(_type_) ); \
+                GRSF_ERRORMSG("No function call " #_function_ " for type " << EnumConversion::toIntegral(_type_) ); \
         }
 
 
@@ -103,7 +103,7 @@ namespace AdditionalBodyData{
                 ADDBYTES_VISITOR_CASE_SWITCH(4) \
                 ADDBYTES_VISITOR_CASE_SWITCH(5) \
             default: \
-                ERRORMSG("TYPE: "<< EnumConversion::toIntegral(this->m_type)<<" not implemented in switch statement"); \
+                GRSF_ERRORMSG("TYPE: "<< EnumConversion::toIntegral(this->m_type)<<" not implemented in switch statement"); \
             }; \
 
     class Bytes{
@@ -302,7 +302,7 @@ namespace AdditionalBodyData{
             case 5:
                 return new AddBytes<5>();
             default:
-                ERRORMSG("This type " << EnumConversion::toIntegral(type) << " construction is not implemented!")
+                GRSF_ERRORMSG("This type " << EnumConversion::toIntegral(type) << " construction is not implemented!")
         }
         return nullptr;
     }

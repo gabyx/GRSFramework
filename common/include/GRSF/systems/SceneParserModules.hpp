@@ -60,7 +60,7 @@ namespace ParserModules {
 class  DummyModule{
 public:
     DummyModule(const char * type) {
-       ERRORMSG("This is a standart dummy module: " << type << "which does nothing!" <<
+       GRSF_ERRORMSG("This is a standart dummy module: " << type << "which does nothing!" <<
                 " This function should not be called!");
     };
 
@@ -120,20 +120,20 @@ public:
             CHECK_XMLNODE(timestepNode,"TimeStepperSettings");
 
             if(!Utilities::stringToType(m_timestepperSettings->m_deltaT, timestepNode.attribute("deltaT").value())) {
-                ERRORMSG("---> String conversion in SceneSettings: deltaT failed");
+                GRSF_ERRORMSG("---> String conversion in SceneSettings: deltaT failed");
             }
             if(m_inclusionSettings) {
                 m_inclusionSettings->m_deltaT = m_timestepperSettings->m_deltaT;
             }
             if(!Utilities::stringToType(m_timestepperSettings->m_endTime, timestepNode.attribute("endTime").value())) {
-                ERRORMSG("---> String conversion in SceneSettings: endTime failed");
+                GRSF_ERRORMSG("---> String conversion in SceneSettings: endTime failed");
             }
 
             auto node = timestepNode.child("SimulateFromReference");
             if(node) {
                 bool enabled = false;
                 if(!Utilities::stringToType(enabled, node.attribute("enabled").value())) {
-                    ERRORMSG("---> String conversion in SimulateFromReference: enable failed");
+                    GRSF_ERRORMSG("---> String conversion in SimulateFromReference: enable failed");
                 }
                 if(enabled) {
                     std::string type = node.attribute("type").value();
@@ -142,7 +142,7 @@ public:
                     } else if(type == "continue") {
                         m_timestepperSettings->m_eSimulateFromReference = TimeStepperSettings::CONTINUE;
                     } else {
-                        ERRORMSG("---> String conversion in SimulateFromReference: type. The type '" + type + std::string("' has no implementation in the parser"));
+                        GRSF_ERRORMSG("---> String conversion in SimulateFromReference: type. The type '" + type + std::string("' has no implementation in the parser"));
                     }
                     m_timestepperSettings->m_simStateReferenceFile = node.attribute("file").value();
                     m_parser->checkFileExists(m_timestepperSettings->m_simStateReferenceFile);
@@ -161,10 +161,10 @@ public:
             CHECK_XMLNODE(node,"InclusionSolverSettings");
 
             if(!Utilities::stringToType(m_inclusionSettings->m_alphaJORProx, node.attribute("alphaJORProx").value())) {
-                ERRORMSG("---> String conversion in InclusionSolverSettings: alphaJORProx failed");
+                GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: alphaJORProx failed");
             }
             if(!Utilities::stringToType(m_inclusionSettings->m_alphaSORProx, node.attribute("alphaSORProx").value())) {
-                ERRORMSG("---> String conversion in InclusionSolverSettings: alphaJORProx failed");
+                GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: alphaJORProx failed");
             }
 
             att = node.attribute("matrixRStrategy");
@@ -177,20 +177,20 @@ public:
                 } else if (method == "sum2") {
                     m_inclusionSettings->m_RStrategy = InclusionSolverSettingsType::RSTRATEGY_SUM2;
                 } else {
-                    ERRORMSG("---> String conversion in InclusionSolverSettings: matrixRStrategy failed: not a valid setting");
+                    GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: matrixRStrategy failed: not a valid setting");
                 }
             } else {
                 m_inclusionSettings->m_RStrategy = InclusionSolverSettingsType::RSTRATEGY_MAX;
             }
 
             if(!Utilities::stringToType<unsigned int>(m_inclusionSettings->m_MaxIter, node.attribute("maxIter").value())) {
-                ERRORMSG("---> String conversion in InclusionSolverSettings: maxIter failed");
+                GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: maxIter failed");
             }
 
             att = node.attribute("minIter");
             if(att) {
                 if(!Utilities::stringToType<unsigned int>(m_inclusionSettings->m_MinIter, att.value())) {
-                    ERRORMSG("---> String conversion in InclusionSolverSettings: minIter failed");
+                    GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: minIter failed");
                 }
             } else {
                 m_inclusionSettings->m_MinIter = 0;
@@ -210,44 +210,44 @@ public:
                 } else if (method == "InEnergyLocalMix") {
                     m_inclusionSettings->m_eConvergenceMethod = InclusionSolverSettingsType::InEnergyLocalMix;
                 } else {
-                    ERRORMSG("---> String conversion in InclusionSolverSettings: convergenceMethod failed: not a valid setting");
+                    GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: convergenceMethod failed: not a valid setting");
                 }
             } else {
                 m_inclusionSettings->m_eConvergenceMethod = InclusionSolverSettingsType::InVelocity;
             }
 
             if(!Utilities::stringToType(m_inclusionSettings->m_AbsTol, node.attribute("absTol").value())) {
-                ERRORMSG("---> String conversion in InclusionSolverSettings: absTol failed");
+                GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: absTol failed");
             }
             if(!Utilities::stringToType(m_inclusionSettings->m_RelTol, node.attribute("relTol").value())) {
-                ERRORMSG("---> String conversion in InclusionSolverSettings: relTol failed");
+                GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: relTol failed");
             }
 
             att = node.attribute("computeResidual");
             if(att) {
                 if(!Utilities::stringToType(m_inclusionSettings->m_bComputeResidual, att.value())) {
-                    ERRORMSG("---> String conversion in InclusionSolverSettings: computeResidual failed");
+                    GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: computeResidual failed");
                 }
             }
 
             att = node.attribute("computeTotalOverlap");
             if(att) {
                 if(!Utilities::stringToType(m_inclusionSettings->m_computeTotalOverlap, att.value())) {
-                    ERRORMSG("---> String conversion in InclusionSolverSettings: computeTotalOverlap failed");
+                    GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: computeTotalOverlap failed");
                 }
             }
 
             att = node.attribute("usePercussionCache");
             if(att) {
                 if(!Utilities::stringToType(m_inclusionSettings->m_usePercussionCache, att.value())) {
-                    ERRORMSG("---> String conversion in InclusionSolverSettings: usePercussionCache failed");
+                    GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: usePercussionCache failed");
                 }
             }
 
             att = node.attribute("reserveContacts");
             if(att) {
                 if(!Utilities::stringToType(m_inclusionSettings->m_reserveContacts, att.value())) {
-                    ERRORMSG("---> String conversion in InclusionSolverSettings: reserveContacts failed");
+                    GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: reserveContacts failed");
                 }
             }
 
@@ -255,7 +255,7 @@ public:
             att = node.attribute("isFiniteCheck");
             if(att) {
                 if(!Utilities::stringToType(m_inclusionSettings->m_bIsFiniteCheck, att.value())) {
-                    ERRORMSG("---> String conversion in InclusionSolverSettings: isFiniteCheck failed");
+                    GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: isFiniteCheck failed");
                 }
             }
 
@@ -271,11 +271,11 @@ public:
             } else if (method == "SORNormalTangential") {
                 m_inclusionSettings->m_eMethod = InclusionSolverSettingsType::SOR_NORMAL_TANGENTIAL;
             } else {
-                ERRORMSG("---> String conversion in InclusionSolverSettings: method failed: not a valid setting");
+                GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: method failed: not a valid setting");
             }
 
             if(!Utilities::stringToType(m_inclusionSettings->m_bUseGPU, node.attribute("useGPU").value())) {
-                ERRORMSG("---> String conversion in InclusionSolverSettings: useGPU failed");
+                GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: useGPU failed");
             }
 
             m_inclusionSettings->m_eSubMethodUCF = InclusionSolverSettingsType::UCF_AC;
@@ -287,7 +287,7 @@ public:
                 } else if (submethod == "AC") {
                     m_inclusionSettings->m_eSubMethodUCF = InclusionSolverSettingsType::UCF_AC;
                 } else{
-                    ERRORMSG("---> String conversion in InclusionSolverSettings: subMethodUCF failed");
+                    GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: subMethodUCF failed");
                 }
             }
 
@@ -295,11 +295,11 @@ public:
             att = node.attribute("driftCorrectionGap");
             if(att) {
                 if(!Utilities::stringToType(m_inclusionSettings->m_useDriftCorrectionGap, att.value())) {
-                    ERRORMSG("---> String conversion in InclusionSolverSettings: driftCorrectionGap failed");
+                    GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: driftCorrectionGap failed");
                 }
                 if(m_inclusionSettings->m_useDriftCorrectionGap){
                     if(!Utilities::stringToType(m_inclusionSettings->m_driftCorrectionGapAlpha, node.attribute("driftCorrectionGapAlpha").value())) {
-                        ERRORMSG("---> String conversion in InclusionSolverSettings: driftCorrectionGapAlpha failed");
+                        GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: driftCorrectionGapAlpha failed");
                     }
                 }
             }
@@ -307,12 +307,12 @@ public:
 
 
             if(!Utilities::stringToType(m_inclusionSettings->m_bUseGPU, node.attribute("useGPU").value())) {
-                ERRORMSG("---> String conversion in InclusionSolverSettings: useGPU failed");
+                GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: useGPU failed");
             }
             att = node.attribute("useGPUID");
             if(att) {
                 if(!Utilities::stringToType(m_inclusionSettings->m_UseGPUDeviceId, att.value())) {
-                    ERRORMSG("---> String conversion in InclusionSolverSettings: useGPU failed");
+                    GRSF_ERRORMSG("---> String conversion in InclusionSolverSettings: useGPU failed");
                 }
                 if(m_inclusionSettings->m_UseGPUDeviceId <0) {
                     m_inclusionSettings->m_UseGPUDeviceId = 0;
@@ -338,7 +338,7 @@ public:
                 if(att){
                     PREC everyXStep;
                     if(!Utilities::stringToType(everyXStep, att.value())) {
-                            ERRORMSG("---> String conversion in RecorderSettings: statesPerSecond failed");
+                            GRSF_ERRORMSG("---> String conversion in RecorderSettings: statesPerSecond failed");
                     }
                     m_recorderSettings->setEveryXTimestep(everyXStep);
                 }else{
@@ -346,11 +346,11 @@ public:
                     if(att){
                         PREC fps;
                         if(!Utilities::stringToType(fps, att.value())) {
-                            ERRORMSG("---> String conversion in RecorderSettings: statesPerSecond failed");
+                            GRSF_ERRORMSG("---> String conversion in RecorderSettings: statesPerSecond failed");
                         }
                         m_recorderSettings->setEveryXTimestep(fps,m_timestepperSettings->m_deltaT);
                     }else{
-                        ERRORMSG("---> String conversion in RecorderSettings: everyXTimeStep failed: everyXStep (dominant) nor statesPerSecond present")
+                        GRSF_ERRORMSG("---> String conversion in RecorderSettings: everyXTimeStep failed: everyXStep (dominant) nor statesPerSecond present")
                     }
                 }
 
@@ -358,7 +358,7 @@ public:
             } else if (method == "noOutput") {
                 m_recorderSettings->setMode(RecorderSettings::RECORD_NOTHING);
             } else {
-                ERRORMSG("---> String conversion in RecorderSettings: recorderMode failed: not a valid setting");
+                GRSF_ERRORMSG("---> String conversion in RecorderSettings: recorderMode failed: not a valid setting");
             }
 
         } else {
@@ -448,7 +448,7 @@ public:
         :m_pSimulationLog(p->getSimLog()),  m_parser(p) ,m_globalGeometries(g),
         m_externalGeometryCache(geomMap), m_externalScalesGroupCache(scalesGroup)
     {
-        ASSERTMSG( m_globalGeometries , "GeometryModule needs a globalGeometry pointer!")
+        GRSF_ASSERTMSG( m_globalGeometries , "GeometryModule needs a globalGeometry pointer!")
     };
 
 
@@ -487,10 +487,10 @@ private:
         m_addToGlobalGeoms = m_bodiesGroup? false : true;
 
         if(Options::m_cacheGeometry && !m_externalGeometryCache) {
-            ERRORMSG("Trying to cache geometries but externalGeometryCache pointer is null!")
+            GRSF_ERRORMSG("Trying to cache geometries but externalGeometryCache pointer is null!")
         }
         if(Options::m_cacheScale && !m_externalScalesGroupCache) {
-            ERRORMSG("Trying to cache scales but externalScaleCache pointer is null!")
+            GRSF_ERRORMSG("Trying to cache scales but externalScaleCache pointer is null!")
         }
 
 
@@ -511,7 +511,7 @@ private:
         } else if(n=="GlobalGeomId" && !m_addToGlobalGeoms) {
             parseGlobalGeomId(geometryNode);
         } else {
-            ERRORMSG("---> The geometry '" << geometryNode.name() << "' has no implementation in the parser");
+            GRSF_ERRORMSG("---> The geometry '" << geometryNode.name() << "' has no implementation in the parser");
         }
     }
 
@@ -522,7 +522,7 @@ private:
 
         auto ret = m_globalGeometries->insert(typename GlobalGeometryMapType::value_type( id, ptr) );
         if(ret.second == false) {
-            ERRORMSG("---> addToGlobalGeomList: geometry with id: " <<  id<< " exists already!");
+            GRSF_ERRORMSG("---> addToGlobalGeomList: geometry with id: " <<  id<< " exists already!");
         }
 
         // Print some details:
@@ -540,17 +540,17 @@ private:
         if(type == "uniform") {
             PREC radius;
             if(!Utilities::stringToType(radius,sphere.attribute("radius").value())) {
-                ERRORMSG("---> String conversion in addToGlobalGeomList: radius failed");
+                GRSF_ERRORMSG("---> String conversion in addToGlobalGeomList: radius failed");
             }
 
             if(m_addToGlobalGeoms && Options::m_allocateGeometry) {
 
                 unsigned int id;
                 if(!Utilities::stringToType<unsigned int>(id,sphere.attribute("id").value())) {
-                    ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
+                    GRSF_ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
                 }
                 if(id == 0) {
-                    ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
+                    GRSF_ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
                     // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
                 }
                 if(Options::m_cacheScale) {
@@ -586,7 +586,7 @@ private:
 
             unsigned int seed;
             if(!Utilities::stringToType<unsigned int>(seed,sphere.attribute("seed").value())) {
-                ERRORMSG("---> String conversion in parseSphereGeometry: seed failed");
+                GRSF_ERRORMSG("---> String conversion in parseSphereGeometry: seed failed");
             }
 
 
@@ -601,34 +601,34 @@ private:
                 // Normal truncated
                 PREC mean;
                 if(!Utilities::stringToType(mean,sphere.attribute("mean").value())) {
-                    ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
+                    GRSF_ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
                 }
                 if( mean <= 0) {
-                    ERRORMSG("---> In parseSphereGeometry: mean to small!");
+                    GRSF_ERRORMSG("---> In parseSphereGeometry: mean to small!");
                 }
 
                 PREC var;
                 if(!Utilities::stringToType(var,sphere.attribute("variance").value())) {
-                    ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
+                    GRSF_ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
                 }
                 if( var <= 0) {
-                    ERRORMSG("---> In parseSphereGeometry: var to small!");
+                    GRSF_ERRORMSG("---> In parseSphereGeometry: var to small!");
                 }
 
                 PREC minRadius;
                 if(!Utilities::stringToType(minRadius,sphere.attribute("minRadius").value())) {
-                    ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
+                    GRSF_ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
                 }
                 if( minRadius <= 0) {
-                    ERRORMSG("---> In parseSphereGeometry: minRadius to small!");
+                    GRSF_ERRORMSG("---> In parseSphereGeometry: minRadius to small!");
                 }
 
                 PREC maxRadius;
                 if(!Utilities::stringToType(maxRadius,sphere.attribute("maxRadius").value())) {
-                    ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
+                    GRSF_ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
                 }
                 if( maxRadius <= minRadius) {
-                    ERRORMSG("---> In parseSphereGeometry: maxRadius smaller or equal to minRadius!");
+                    GRSF_ERRORMSG("---> In parseSphereGeometry: maxRadius smaller or equal to minRadius!");
                 }
 
                 truncNormal.reset( new rtnorm::truncated_normal_distribution<PREC>(mean,var,minRadius,maxRadius));
@@ -639,7 +639,7 @@ private:
                     std::vector<PREC> weightsVec;
 
                     if(!Utilities::stringToType(weightsVec,att.value())) {
-                        ERRORMSG("---> String conversion in parseSphereGeometry: densities failed");
+                        GRSF_ERRORMSG("---> String conversion in parseSphereGeometry: densities failed");
                     }
 
 
@@ -647,14 +647,14 @@ private:
                     std::vector<PREC> intervalsVec;
 
                     if(!Utilities::stringToType(intervalsVec,att.value())) {
-                        ERRORMSG("---> String conversion in parseSphereGeometry: intervals failed");
+                        GRSF_ERRORMSG("---> String conversion in parseSphereGeometry: intervals failed");
                     }
 
                     // piecewise needs weights (see : http://en.cppreference.com/w/cpp/numeric/random/piecewise_constant_distribution)
                     // Take care, we specified densities!! the value of the probability density in each interval
                     // set sum of weights to 1
                     if( intervalsVec.size() <= weightsVec.size()){
-                            ERRORMSG("---> intervals and densities have wrong sizes!")
+                            GRSF_ERRORMSG("---> intervals and densities have wrong sizes!")
                     }
                     for(unsigned int i=0;i<weightsVec.size();i++){
                         weightsVec[i] = weightsVec[i]*(intervalsVec[i+1]-intervalsVec[i]);
@@ -668,18 +668,18 @@ private:
                 // Uniform
                 PREC minRadius;
                 if(!Utilities::stringToType(minRadius,sphere.attribute("minRadius").value())) {
-                    ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
+                    GRSF_ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
                 }
                 if( minRadius <= 0) {
-                    ERRORMSG("---> In parseSphereGeometry: minRadius to small!");
+                    GRSF_ERRORMSG("---> In parseSphereGeometry: minRadius to small!");
                 }
 
                 PREC maxRadius;
                 if(!Utilities::stringToType(maxRadius,sphere.attribute("maxRadius").value())) {
-                    ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
+                    GRSF_ERRORMSG("---> String conversion in parseSphereGeometry: minRadius failed");
                 }
                 if( maxRadius <= minRadius) {
-                    ERRORMSG("---> In parseSphereGeometry: maxRadius smaller or equal to minRadius!");
+                    GRSF_ERRORMSG("---> In parseSphereGeometry: maxRadius smaller or equal to minRadius!");
                 }
                 uniform.reset( new UniformDistType<PREC>(minRadius,maxRadius));
                 sampleGen = [&]()-> PREC{ return (*uniform)(gen);};
@@ -692,10 +692,10 @@ private:
 
                 unsigned int id;
                 if(!Utilities::stringToType<unsigned int>(id,sphere.attribute("id").value())) {
-                    ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
+                    GRSF_ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
                 }
                 if(id == 0) {
-                    ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
+                    GRSF_ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
                     // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
                 }
 
@@ -703,7 +703,7 @@ private:
                 if(sphere.attribute("instances")) {
 
                     if(!Utilities::stringToType<unsigned int>(instances,sphere.attribute("instances").value())) {
-                        ERRORMSG("---> String conversion in addToGlobalGeomList: instances failed");
+                        GRSF_ERRORMSG("---> String conversion in addToGlobalGeomList: instances failed");
                     }
                 }
 
@@ -749,7 +749,7 @@ private:
                 }
             }
         } else {
-            ERRORMSG("---> The attribute 'distribute' '" + type + std::string("' of 'Sphere' has no implementation in the parser"));
+            GRSF_ERRORMSG("---> The attribute 'distribute' '" + type + std::string("' of 'Sphere' has no implementation in the parser"));
         }
 
     }
@@ -759,13 +759,13 @@ private:
 
             Vector3 n;
             if(!Utilities::stringToType(n, halfspace.attribute("normal").value())) {
-                ERRORMSG("---> String conversion in HalfsphereGeometry: normal failed");
+                GRSF_ERRORMSG("---> String conversion in HalfsphereGeometry: normal failed");
             }
 
             /* (not needed so far)
             Vector3 p;
             if(!Utilities::stringToType(p, halfspace.attribute("position").value())) {
-                ERRORMSG("---> String conversion in HalfsphereGeometry: position failed");
+                GRSF_ERRORMSG("---> String conversion in HalfsphereGeometry: position failed");
             }
             */
 
@@ -773,10 +773,10 @@ private:
             if(m_addToGlobalGeoms && Options::m_allocateGeometry) {
                 unsigned int id;
                 if(!Utilities::stringToType<unsigned int>(id,halfspace.attribute("id").value())) {
-                    ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
+                    GRSF_ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
                 }
                 if(id == 0) {
-                    ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
+                    GRSF_ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
                     // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
                 }
                 //no scale (here)
@@ -798,7 +798,7 @@ private:
             }
 
         } else {
-            ERRORMSG("---> The attribute 'type' '" + type + std::string("' of 'Halfspace' has no implementation in the parser"));
+            GRSF_ERRORMSG("---> The attribute 'type' '" + type + std::string("' of 'Halfspace' has no implementation in the parser"));
         }
     }
      void parseCapsuleGeometry( XMLNodeType capsule) {
@@ -807,41 +807,41 @@ private:
 
             Vector3 n;
             if(!Utilities::stringToType(n, capsule.attribute("normal").value())) {
-                ERRORMSG("---> String conversion in HalfsphereGeometry: normal failed");
+                GRSF_ERRORMSG("---> String conversion in HalfsphereGeometry: normal failed");
             }
 
             /* (not needed so far)
             Vector3 p;
             if(!Utilities::stringToType(p, capsule.attribute("position").value())) {
-                ERRORMSG("---> String conversion in HalfsphereGeometry: position failed");
+                GRSF_ERRORMSG("---> String conversion in HalfsphereGeometry: position failed");
             }
             */
 
             // Uniform
             PREC radius;
             if(!Utilities::stringToType(radius,capsule.attribute("radius").value())) {
-                ERRORMSG("---> String conversion in parseCapsuleGeometry: radius failed");
+                GRSF_ERRORMSG("---> String conversion in parseCapsuleGeometry: radius failed");
             }
             if( radius <= 0) {
-                ERRORMSG("---> In parseCapsuleGeometry: radius to small!");
+                GRSF_ERRORMSG("---> In parseCapsuleGeometry: radius to small!");
             }
 
             PREC length;
             if(!Utilities::stringToType(length,capsule.attribute("length").value())) {
-                ERRORMSG("---> String conversion in parseCapsuleGeometry: length failed");
+                GRSF_ERRORMSG("---> String conversion in parseCapsuleGeometry: length failed");
             }
             if( length <= 0) {
-                ERRORMSG("---> In parseCapsuleGeometry: length to small!");
+                GRSF_ERRORMSG("---> In parseCapsuleGeometry: length to small!");
             }
 
 
             if(m_addToGlobalGeoms && Options::m_allocateGeometry) {
                 unsigned int id;
                 if(!Utilities::stringToType<unsigned int>(id,capsule.attribute("id").value())) {
-                    ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
+                    GRSF_ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
                 }
                 if(id == 0) {
-                    ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
+                    GRSF_ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
                     // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
                 }
                 //no scale (here)
@@ -863,7 +863,7 @@ private:
             }
 
         } else {
-            ERRORMSG("---> The attribute 'type' '" + type + std::string("' of 'Capsule' has no implementation in the parser"));
+            GRSF_ERRORMSG("---> The attribute 'type' '" + type + std::string("' of 'Capsule' has no implementation in the parser"));
         }
     }
 
@@ -873,21 +873,21 @@ private:
 
             Vector3 extent;
             if(!Utilities::stringToType(extent, box.attribute("extent").value())) {
-                ERRORMSG("---> String conversion in BoxGeometry: extent failed");
+                GRSF_ERRORMSG("---> String conversion in BoxGeometry: extent failed");
             }
 
             Vector3 center;
             if(!Utilities::stringToType(center, box.attribute("center").value())) {
-                ERRORMSG("---> String conversion in BoxGeometry: position failed");
+                GRSF_ERRORMSG("---> String conversion in BoxGeometry: position failed");
             }
 
             if(m_addToGlobalGeoms && Options::m_allocateGeometry) {
                 unsigned int id;
                 if(!Utilities::stringToType<unsigned int>(id,box.attribute("id").value())) {
-                    ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
+                    GRSF_ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
                 }
                 if(id == 0) {
-                    ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
+                    GRSF_ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
                     // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
                 }
                 if(Options::m_cacheScale) {
@@ -918,7 +918,7 @@ private:
             }
 
         } else {
-            ERRORMSG("---> The attribute 'type' '" + type + std::string("' of 'Box' has no implementation in the parser"));
+            GRSF_ERRORMSG("---> The attribute 'type' '" + type + std::string("' of 'Box' has no implementation in the parser"));
         }
     }
     void parseMeshGeometry( XMLNodeType mesh) {
@@ -943,10 +943,10 @@ private:
             att = mesh.attribute("scale");
             if(att){
                 if(!Utilities::stringToType(scale_factor, att.value())) {
-                    ERRORMSG("---> String conversion in parseMeshGeometry failed: scale");
+                    GRSF_ERRORMSG("---> String conversion in parseMeshGeometry failed: scale");
                 }
                 if(scale_factor.norm()==0) {
-                    ERRORMSG("---> Wrong scale factor (=0) specified in parseMeshGeometry!");
+                    GRSF_ERRORMSG("---> Wrong scale factor (=0) specified in parseMeshGeometry!");
                 }
             }
 
@@ -955,7 +955,7 @@ private:
                 att = mesh.attribute("trans");
                 if(att){
                     if(!Utilities::stringToType(trans,att.value())) {
-                        ERRORMSG("---> String conversion in parseMeshGeometry: trans failed: ");
+                        GRSF_ERRORMSG("---> String conversion in parseMeshGeometry: trans failed: ");
                     }
                 }
 
@@ -964,24 +964,24 @@ private:
                 att = mesh.attribute("rotAxis");
                 if(att){
                     if(!Utilities::stringToType(axis, att.value())) {
-                        ERRORMSG("---> String conversion in parseMeshGeometry: rotAxis failed");
+                        GRSF_ERRORMSG("---> String conversion in parseMeshGeometry: rotAxis failed");
                     }
 
 
                     att = mesh.attribute("deg");
                     if(att) {
                         if(!Utilities::stringToType(angle, att.value())) {
-                            ERRORMSG("---> String conversion in parseMeshGeometry: deg failed");
+                            GRSF_ERRORMSG("---> String conversion in parseMeshGeometry: deg failed");
                         }
                         angle = angle / 180.0 * M_PI;
                     } else{
                         att = mesh.attribute("rad");
                         if(att){
                             if(!Utilities::stringToType(angle, mesh.attribute("rad").value())) {
-                                ERRORMSG("---> String conversion in parseMeshGeometry: rad  failed");
+                                GRSF_ERRORMSG("---> String conversion in parseMeshGeometry: rad  failed");
                             }
                         }else{
-                            ERRORMSG("---> No angle (deg/rad) found in parseMeshGeometry (rotAxis specified!)");
+                            GRSF_ERRORMSG("---> No angle (deg/rad) found in parseMeshGeometry (rotAxis specified!)");
                         }
                     }
                 }
@@ -1006,19 +1006,19 @@ private:
 
                 // If the import failed, report it
                 if(!scene) {
-                    ERRORMSG("---> File import failed in parseMeshGeometry: for file" + fileName.string() );
+                    GRSF_ERRORMSG("---> File import failed in parseMeshGeometry: for file" + fileName.string() );
                 }
 
                 meshData = new MeshData();
 
                 if(!meshData->setup(importer,scene, scale_factor,quat,trans)) {
-                    ERRORMSG("---> Imported Mesh (with Assimp) could not be setup internally");
+                    GRSF_ERRORMSG("---> Imported Mesh (with Assimp) could not be setup internally");
                 }
 
                 if(mesh.attribute("writeToLog")) {
                     bool writeToLog;
                     if(!Utilities::stringToType(writeToLog, mesh.attribute("writeToLog").value())) {
-                        ERRORMSG("---> String conversion in parseMeshGeometry: angleDegree failed");
+                        GRSF_ERRORMSG("---> String conversion in parseMeshGeometry: angleDegree failed");
                     }
                     if(writeToLog) {
                         meshData->writeToLog(fileName.string(), m_pSimulationLog);
@@ -1030,10 +1030,10 @@ private:
             if(m_addToGlobalGeoms && Options::m_allocateGeometry) {
                 unsigned int id;
                 if(!Utilities::stringToType<unsigned int>(id,mesh.attribute("id").value())) {
-                    ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
+                    GRSF_ERRORMSG("---> String conversion in addToGlobalGeomList: id failed");
                 }
                 if(id == 0) {
-                    ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
+                    GRSF_ERRORMSG("---> addToGlobalGeomList: a global geometry id: 0 is not allowed!");
                     // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
                 }
                 if(Options::m_cacheScale) {
@@ -1063,7 +1063,7 @@ private:
             }
 
         } else {
-            ERRORMSG("---> The attribute 'type' '" + type + std::string("' of 'Mesh' has no implementation in the parser"));
+            GRSF_ERRORMSG("---> The attribute 'type' '" + type + std::string("' of 'Mesh' has no implementation in the parser"));
         }
     }
     void parseGlobalGeomId( XMLNodeType globalGeomId ) {
@@ -1073,7 +1073,7 @@ private:
 
             unsigned int id;
             if(!Utilities::stringToType<unsigned int>(id,globalGeomId.attribute("id").value())) {
-                ERRORMSG("---> String conversion in parseGlobalGeomId: id failed");
+                GRSF_ERRORMSG("---> String conversion in parseGlobalGeomId: id failed");
             }
 
             typename GlobalGeometryMapType::iterator it;
@@ -1081,7 +1081,7 @@ private:
                 it = m_globalGeometries->find(id);
                 // it->second is the GeometryType in RigidBody
                 if(it == m_globalGeometries->end()) {
-                    ERRORMSG("---> Geometry search in parseGlobalGeomId: failed for id: " << id << std::endl);
+                    GRSF_ERRORMSG("---> Geometry search in parseGlobalGeomId: failed for id: " << id << std::endl);
                 }
             }
 
@@ -1116,11 +1116,11 @@ private:
 
             unsigned int startId;
             if(!Utilities::stringToType<unsigned int>(startId,globalGeomId.attribute("startId").value())) {
-                ERRORMSG("---> String conversion in parseGlobalGeomId: startId failed");
+                GRSF_ERRORMSG("---> String conversion in parseGlobalGeomId: startId failed");
             }
 
             if(startId == 0) {
-                ERRORMSG("---> parseGlobalGeomId: a global geometry startId: 0 is not allowed!");
+                GRSF_ERRORMSG("---> parseGlobalGeomId: a global geometry startId: 0 is not allowed!");
                 // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
             }
 
@@ -1132,7 +1132,7 @@ private:
                     auto it = m_globalGeometries->find(id);
                     // it->second is the GeometryType in RigidBody
                     if(it == m_globalGeometries->end()) {
-                        ERRORMSG("---> parseGlobalGeomId: Geometry search failed for id: " << id << std::endl);
+                        GRSF_ERRORMSG("---> parseGlobalGeomId: Geometry search failed for id: " << id << std::endl);
                     }
                     if(b.m_body) {
                         b.m_body->m_geometry = it->second;
@@ -1158,25 +1158,25 @@ private:
 
             unsigned int startId;
             if(!Utilities::stringToType<unsigned int>(startId,globalGeomId.attribute("startId").value())) {
-                ERRORMSG("---> String conversion in parseGlobalGeomId: startId failed");
+                GRSF_ERRORMSG("---> String conversion in parseGlobalGeomId: startId failed");
             }
 
             if(startId == 0) {
-                ERRORMSG("---> parseGlobalGeomId: a global geometry startId: 0 is not allowed!");
+                GRSF_ERRORMSG("---> parseGlobalGeomId: a global geometry startId: 0 is not allowed!");
                 // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
             }
 
             unsigned int endId;
             if(!Utilities::stringToType<unsigned int>(endId,globalGeomId.attribute("endId").value())) {
-                ERRORMSG("---> String conversion in parseGlobalGeomId: endId failed");
+                GRSF_ERRORMSG("---> String conversion in parseGlobalGeomId: endId failed");
             }
             if(startId > endId) {
-                ERRORMSG("---> addToGlobalGeomList:  startId > endId  is not allowed!");
+                GRSF_ERRORMSG("---> addToGlobalGeomList:  startId > endId  is not allowed!");
                 // 0 wird verwendet als m_globalGeomId in RigidBody um zu spezifizieren, dass der Body seine eigene Geom hat
             }
             unsigned int seed;
             if(!Utilities::stringToType<unsigned int>(seed,globalGeomId.attribute("seed").value())) {
-                ERRORMSG("---> String conversion in parseGlobalGeomId: seed failed");
+                GRSF_ERRORMSG("---> String conversion in parseGlobalGeomId: seed failed");
             }
 
             RandomGenType gen(seed);
@@ -1196,7 +1196,7 @@ private:
                     auto it = m_globalGeometries->find(id);
                     // it->second is the GeometryType in RigidBody
                     if(it == m_globalGeometries->end()) {
-                        ERRORMSG("---> Geometry search in parseGlobalGeomId: failed for id: " << id << std::endl);
+                        GRSF_ERRORMSG("---> Geometry search in parseGlobalGeomId: failed for id: " << id << std::endl);
                     }
 
                     if(b.m_body) {
@@ -1221,7 +1221,7 @@ private:
 
 
         } else {
-            ERRORMSG("---> The attribute 'distribute' '" + distribute + std::string("' of 'GlobalGeomId' has no implementation in the parser"));
+            GRSF_ERRORMSG("---> The attribute 'distribute' '" + distribute + std::string("' of 'GlobalGeomId' has no implementation in the parser"));
         }
 
 
@@ -1247,7 +1247,7 @@ private:
 
         template<typename T>
         void operator()(  std::shared_ptr<T>  & ptr) {
-            ERRORMSG("This GetScaleOfGeomVisitor visitor operator() has not been implemented!");
+            GRSF_ERRORMSG("This GetScaleOfGeomVisitor visitor operator() has not been implemented!");
         }
 
         Vector3 & m_scale;
@@ -1323,10 +1323,10 @@ private:
         typename RigidBodyType::BodyMaterialType material1,material2;
         if(!stdMaterial) {
             if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(material1, contactParam.attribute("materialId1").value())) {
-                ERRORMSG("---> String conversion in ContactParameter: materialId1 failed");
+                GRSF_ERRORMSG("---> String conversion in ContactParameter: materialId1 failed");
             }
             if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(material2, contactParam.attribute("materialId2").value())) {
-                ERRORMSG("---> String conversion in ContactParameter: materialId2 failed");
+                GRSF_ERRORMSG("---> String conversion in ContactParameter: materialId2 failed");
             }
         }
 
@@ -1338,22 +1338,22 @@ private:
             ContactParameter contactParameter;
 
             if(!Utilities::stringToType(mu, contactParam.attribute("mu").value())) {
-                ERRORMSG("---> String conversion in ContactParameter: mu failed");
+                GRSF_ERRORMSG("---> String conversion in ContactParameter: mu failed");
             }
             if(!Utilities::stringToType(epsilonN, contactParam.attribute("epsilonN").value())) {
-                ERRORMSG("---> String conversion in ContactParameter: epsilonN failed");
+                GRSF_ERRORMSG("---> String conversion in ContactParameter: epsilonN failed");
             }
             if(!Utilities::stringToType(epsilonT, contactParam.attribute("epsilonT").value())) {
-                ERRORMSG("---> String conversion in ContactParameter: epsilonT failed");
+                GRSF_ERRORMSG("---> String conversion in ContactParameter: epsilonT failed");
             }
 
             if(type == "UCFD") {
                 PREC invDampingN, invDampingT;
                 if(!Utilities::stringToType(invDampingN, contactParam.attribute("invDampingN").value())) {
-                    ERRORMSG("---> String conversion in ContactParameter: invDampingN failed");
+                    GRSF_ERRORMSG("---> String conversion in ContactParameter: invDampingN failed");
                 }
                 if(!Utilities::stringToType(invDampingT, contactParam.attribute("invDampingT").value())) {
-                    ERRORMSG("---> String conversion in ContactParameter: invDampingT failed");
+                    GRSF_ERRORMSG("---> String conversion in ContactParameter: invDampingT failed");
                 }
 
                 contactParameter = ContactParameter::createParams_UCFD_ContactModel(epsilonN,epsilonT,mu,invDampingN,invDampingT);
@@ -1363,17 +1363,17 @@ private:
 
                 PREC invDampingN, gammaMax, epsilon, invDampingTFix;
                 if(!Utilities::stringToType(invDampingN, contactParam.attribute("invDampingN").value())) {
-                    ERRORMSG("---> String conversion in ContactParameter: invDampingN failed");
+                    GRSF_ERRORMSG("---> String conversion in ContactParameter: invDampingN failed");
                 }
 
                 if(!Utilities::stringToType(invDampingTFix, contactParam.attribute("invDampingTFix").value())) {
-                    ERRORMSG("---> String conversion in ContactParameter: invDampingTFix failed");
+                    GRSF_ERRORMSG("---> String conversion in ContactParameter: invDampingTFix failed");
                 }
                 if(!Utilities::stringToType(gammaMax, contactParam.attribute("gammaMax").value())) {
-                    ERRORMSG("---> String conversion in ContactParameter: gamma_max failed");
+                    GRSF_ERRORMSG("---> String conversion in ContactParameter: gamma_max failed");
                 }
                 if(!Utilities::stringToType(epsilon, contactParam.attribute("epsilon").value())) {
-                    ERRORMSG("---> String conversion in ContactParameter: epsilon failed");
+                    GRSF_ERRORMSG("---> String conversion in ContactParameter: epsilon failed");
                 }
 
                 contactParameter = ContactParameter::createParams_UCFDD_ContactModel(epsilonN,epsilonT,mu,
@@ -1389,13 +1389,13 @@ private:
             } else {
                 LOGSCLEVEL2(m_pSimulationLog,"---> Add ContactParameter standart of id="<<material1<<" to id="<<material2<<std::endl;);
                 if(!m_contactParams->addContactParameter(material1,material2,contactParameter)) {
-                    ERRORMSG("---> Add ContactParameter failed");
+                    GRSF_ERRORMSG("---> Add ContactParameter failed");
                 }
             }
 
 
         } else {
-            ERRORMSG("---> String conversion in ContactParameter: type failed");
+            GRSF_ERRORMSG("---> String conversion in ContactParameter: type failed");
         }
     }
 
@@ -1458,7 +1458,7 @@ private:
         } else if (apply=="all" || apply=="All" || apply=="ALL" ) {
             // do nothing
         } else {
-            ERRORMSG("---> String conversion in parseForceField: applyTo failed");
+            GRSF_ERRORMSG("---> String conversion in parseForceField: applyTo failed");
         }
 
         std::string type = forceField.attribute("type").value();
@@ -1466,43 +1466,43 @@ private:
 
             unsigned int seed;
             if(!Utilities::stringToType<unsigned int>(seed, forceField.attribute("seed").value())) {
-                ERRORMSG("---> String conversion in parseForceField: seed failed");
+                GRSF_ERRORMSG("---> String conversion in parseForceField: seed failed");
             }
             PREC boostTime;
             if(!Utilities::stringToType(boostTime, forceField.attribute("boostTime").value())) {
-                ERRORMSG("---> String conversion in parseForceField: boostTime failed");
+                GRSF_ERRORMSG("---> String conversion in parseForceField: boostTime failed");
             }
             PREC pauseTime;
             if(!Utilities::stringToType(pauseTime, forceField.attribute("pauseTime").value())) {
-                ERRORMSG("---> String conversion in parseForceField: pauseTime failed");
+                GRSF_ERRORMSG("---> String conversion in parseForceField: pauseTime failed");
             }
 
             PREC startTime;
             if(!Utilities::stringToType(startTime, forceField.attribute("startTime").value())) {
-                ERRORMSG("---> String conversion in parseForceField: startTime failed");
+                GRSF_ERRORMSG("---> String conversion in parseForceField: startTime failed");
             }
 
             PREC endTime;
             if(!Utilities::stringToType(endTime, forceField.attribute("endTime").value())) {
-                ERRORMSG("---> String conversion in parseForceField: endTime failed");
+                GRSF_ERRORMSG("---> String conversion in parseForceField: endTime failed");
             }
             PREC amplitude;
             if(!Utilities::stringToType(amplitude, forceField.attribute("amplitude").value())) {
-                ERRORMSG("---> String conversion in parseForceField: amplitude failed");
+                GRSF_ERRORMSG("---> String conversion in parseForceField: amplitude failed");
             }
 
             Vector3 boxMin;
             if(!Utilities::stringToType(boxMin, forceField.attribute("minPoint").value())) {
-                ERRORMSG("---> String conversion in parseForceField: boxMin failed");
+                GRSF_ERRORMSG("---> String conversion in parseForceField: boxMin failed");
             }
             Vector3 boxMax;
             if(!Utilities::stringToType(boxMax, forceField.attribute("maxPoint").value())) {
-                ERRORMSG("---> String conversion in parseForceField: boxMax failed");
+                GRSF_ERRORMSG("---> String conversion in parseForceField: boxMax failed");
             }
 
             bool randomOn;
             if(!Utilities::stringToType(randomOn, forceField.attribute("randomOn").value())) {
-                ERRORMSG("---> String conversion in parseForceField: randomOn failed");
+                GRSF_ERRORMSG("---> String conversion in parseForceField: randomOn failed");
             }
 
 
@@ -1523,11 +1523,11 @@ private:
         } else if(type == "gravity") {
             PREC abs;
             if(!Utilities::stringToType(abs, forceField.attribute("value").value())) {
-                ERRORMSG("---> String conversion in parseForceField: value failed");
+                GRSF_ERRORMSG("---> String conversion in parseForceField: value failed");
             }
             Vector3 dir;
             if(!Utilities::stringToType(dir, forceField.attribute("direction").value())) {
-                ERRORMSG("---> String conversion in SceneSettings: gravity failed");
+                GRSF_ERRORMSG("---> String conversion in SceneSettings: gravity failed");
             }
 
             LOGSCLEVEL2(m_pSimulationLog,"---> Gravity Dir: "<< dir << std::endl;);
@@ -1538,7 +1538,7 @@ private:
 
             LOGSCLEVEL2(m_pSimulationLog,"---> added GravityForceField ..."<<std::endl;);
         } else {
-            ERRORMSG("---> String conversion in parseForceField: type failed");
+            GRSF_ERRORMSG("---> String conversion in parseForceField: type failed");
         }
     }
 };
@@ -1563,7 +1563,7 @@ struct VisSubModuleScale{
         auto att = visNode.attribute("scaleLikeGeometry");
         if(att) {
             if(!Utilities::stringToType(scaleLikeGeometry, att.value())) {
-                ERRORMSG("---> String conversion in parseScale: scaleWithGeometry failed");
+                GRSF_ERRORMSG("---> String conversion in parseScale: scaleWithGeometry failed");
             }
         }
 
@@ -1571,17 +1571,17 @@ struct VisSubModuleScale{
             if( name == "Plane" || name == "PointCloud" || name == "Mesh"){
 
                 if(!Utilities::stringToType(scale, visNode.attribute("scale").value() )) {
-                    ERRORMSG("---> String conversion in parseScale: scale failed");
+                    GRSF_ERRORMSG("---> String conversion in parseScale: scale failed");
                 }
 
             }else if( name == "Capsule" ){
                 PREC l,r;
 
                 if(!Utilities::stringToType(l, visNode.attribute("length").value() )) {
-                    ERRORMSG("---> String conversion in parseScale: length failed");
+                    GRSF_ERRORMSG("---> String conversion in parseScale: length failed");
                 }
                 if(!Utilities::stringToType(r, visNode.attribute("radius").value() )) {
-                    ERRORMSG("---> String conversion in parseScale: radius failed");
+                    GRSF_ERRORMSG("---> String conversion in parseScale: radius failed");
                 }
 
                 scale(0) = r;
@@ -1589,11 +1589,11 @@ struct VisSubModuleScale{
                 scale(2) = l;
             }
             else{
-                ERRORMSG("---> Node type Mesh/Plane/PointCloud/Capsule not found: " << name);
+                GRSF_ERRORMSG("---> Node type Mesh/Plane/PointCloud/Capsule not found: " << name);
             }
 
             if( !(scale.array() >=0).all() ){
-                ERRORMSG("---> parseScale:: scale: " << scale << " has wrong size for type: " << name);
+                GRSF_ERRORMSG("---> parseScale:: scale: " << scale << " has wrong size for type: " << name);
             }
 
         }
@@ -1649,7 +1649,7 @@ public:
 
     InitStatesModule(ParserType * p, RigidBodyStatesContainerType * c, TimeStepperSettingsType * s)
     :m_initStates(c), m_timeStepperSettings(s), m_pSimulationLog(p->getSimLog()) {
-        ASSERTMSG(m_initStates, "one of boths should not be null");
+        GRSF_ASSERTMSG(m_initStates, "one of boths should not be null");
     };
 
     void parseGlobalInitialCondition( XMLNodeType sceneSettings) {
@@ -1666,10 +1666,10 @@ public:
             } else if(str == "time") {
                 which = 1;
                 if(!Utilities::stringToType(time, initCond.attribute("time").value())) {
-                    ERRORMSG("---> String conversion in GlobalInitialCondition: time failed");
+                    GRSF_ERRORMSG("---> String conversion in GlobalInitialCondition: time failed");
                 }
             } else {
-                ERRORMSG("---> String conversion in GlobalInitialCondition: whichState failed");
+                GRSF_ERRORMSG("---> String conversion in GlobalInitialCondition: whichState failed");
             }
 
             boost::filesystem::path relpath = initCond.attribute("file").value();
@@ -1679,7 +1679,7 @@ public:
             auto att = initCond.attribute("readVelocities");
             if(att){
                 if(!Utilities::stringToType(readVelocities, att.value())) {
-                    ERRORMSG("---> String conversion in GlobalInitialCondition: readVelocities failed");
+                    GRSF_ERRORMSG("---> String conversion in GlobalInitialCondition: readVelocities failed");
                 }
             };
 
@@ -1688,7 +1688,7 @@ public:
 
             bool useTime = false;
             if(!Utilities::stringToType(useTime, initCond.attribute("useTimeToContinue").value())) {
-                ERRORMSG("---> String conversion in GlobalInitialCondition: useTimeToContinue failed");
+                GRSF_ERRORMSG("---> String conversion in GlobalInitialCondition: useTimeToContinue failed");
             }
 
 
@@ -1696,7 +1696,7 @@ public:
             // Set the time in the dynamics system timestepper settings
             if(useTime){
                 if(!m_timeStepperSettings) {
-                    ERRORMSG("---> In GlobalInitialCondition: useTimeToContinue = true, but cannot set timestepper settings!");
+                    GRSF_ERRORMSG("---> In GlobalInitialCondition: useTimeToContinue = true, but cannot set timestepper settings!");
                 }
                 m_timeStepperSettings->m_startTime = time;
             }
@@ -1708,7 +1708,7 @@ public:
                                RigidBodyIdType startId, bool parseVelocity = true , bool addToInitList = true) {
 
         LOGSCLEVEL1(m_pSimulationLog, "---> InitStatesModule: parsing (BodyInitState)"<<std::endl;)
-        ASSERTMSG(bodyList, "Should not be null!")
+        GRSF_ASSERTMSG(bodyList, "Should not be null!")
 
         m_bodiesGroup = bodyList;
         m_startIdGroup = startId;
@@ -1725,7 +1725,7 @@ public:
         XMLNodeType node;
         std::string s  = initCondNode.attribute("type").value();
         if( s == "file") {
-            ERRORMSG(" Not yet implemented");
+            GRSF_ERRORMSG(" Not yet implemented");
         } else if (s == "posvel") {
 
             GET_XMLCHILDNODE_CHECK(node,"InitialPosition",initCondNode);
@@ -1738,11 +1738,11 @@ public:
             } else if(s == "transforms") {
                 parseInitialPositionTransforms(node);
             } else if(s == "generalized") {
-                ERRORMSG("Not yet implemented!");
+                GRSF_ERRORMSG("Not yet implemented!");
             } else if(s == "none") {
                 // does nothing leaves the zero state pushed!
             } else {
-                ERRORMSG("---> The attribute 'distribute' '" << s << "' of 'InitialPosition' has no implementation in the parser");
+                GRSF_ERRORMSG("---> The attribute 'distribute' '" << s << "' of 'InitialPosition' has no implementation in the parser");
             }
 
             //Initial Velocity
@@ -1754,17 +1754,17 @@ public:
                     if(s == "transrot") {
                         parseInitialVelocityTransRot(initVel);
                     } else if(s == "generalized") {
-                        ERRORMSG("Not yet implemented!");
+                        GRSF_ERRORMSG("Not yet implemented!");
                     } else if(s == "none") {
                         // does nothing leaves the zero state pushed!
                     } else {
-                        ERRORMSG("---> The attribute 'distribute' '" << s << "' of 'InitialVelocity' has no implementation in the parser");
+                        GRSF_ERRORMSG("---> The attribute 'distribute' '" << s << "' of 'InitialVelocity' has no implementation in the parser");
                     }
                 }
             }
 
         } else {
-            ERRORMSG("---> The attribute 'type' '" << s <<"' of 'InitialCondition' has no implementation in the parser");
+            GRSF_ERRORMSG("---> The attribute 'type' '" << s <<"' of 'InitialCondition' has no implementation in the parser");
         }
 
         bool added = true;
@@ -1781,7 +1781,7 @@ public:
             ++itState;
         }
         if(!added && addToInitList) {
-            ERRORMSG("Could not add init state to m_initStates!, some bodies exist already in map!");
+            GRSF_ERRORMSG("Could not add init state to m_initStates!, some bodies exist already in map!");
         };
 
         //LOGSCLEVEL1(m_pSimulationLog, "==================================================================="<<std::endl;)
@@ -1808,30 +1808,30 @@ private:
 
         Vector3 pos;
         if(!Utilities::stringToType(pos, initCond.attribute("position").value())) {
-            ERRORMSG("---> String conversion in InitialPositionLinear: position Linear failed");
+            GRSF_ERRORMSG("---> String conversion in InitialPositionLinear: position Linear failed");
         }
         Vector3 dir;
         if(!Utilities::stringToType(dir, initCond.attribute("direction").value())) {
-            ERRORMSG("---> String conversion in InitialPositionLinear: direction Linear failed");
+            GRSF_ERRORMSG("---> String conversion in InitialPositionLinear: direction Linear failed");
         }
         PREC dist;
         if(!Utilities::stringToType(dist, initCond.attribute("distance").value())) {
-            ERRORMSG("---> String conversion in InitialPositionLinear: distance  Linear failed");
+            GRSF_ERRORMSG("---> String conversion in InitialPositionLinear: distance  Linear failed");
         }
         bool jitter;
         if(!Utilities::stringToType(jitter, initCond.attribute("jitter").value())) {
-            ERRORMSG("---> String conversion in InitialPositionLinear: jitter Linear failed");
+            GRSF_ERRORMSG("---> String conversion in InitialPositionLinear: jitter Linear failed");
         }
 
         PREC delta;
         if(!Utilities::stringToType(delta, initCond.attribute("delta").value())) {
-            ERRORMSG("---> String conversion in InitialPositionLinear: delta Linear failed");
+            GRSF_ERRORMSG("---> String conversion in InitialPositionLinear: delta Linear failed");
         }
 
         unsigned int seed = 5;
         if(initCond.attribute("seed")) {
             if(!Utilities::stringToType(seed, initCond.attribute("seed").value())) {
-                ERRORMSG("---> String conversion in InitialPositionGrid: jitter seed failed");
+                GRSF_ERRORMSG("---> String conversion in InitialPositionGrid: jitter seed failed");
             }
         }
 
@@ -1844,45 +1844,45 @@ private:
         Vector3 dirZ(0,0,1);
         Vector3 dirX(1,0,0);
         if(!Utilities::stringToType(trans, initCond.attribute("translation").value())) {
-            ERRORMSG("---> String conversion in InitialPositionGrid: translation failed");
+            GRSF_ERRORMSG("---> String conversion in InitialPositionGrid: translation failed");
         }
 
         if(initCond.attribute("dirZ")) {
             if(!Utilities::stringToType(dirZ, initCond.attribute("dirZ").value())) {
-                ERRORMSG("---> String conversion in InitialPositionGrid: jitter seed failed");
+                GRSF_ERRORMSG("---> String conversion in InitialPositionGrid: jitter seed failed");
             }
         }
         if(initCond.attribute("dirX")) {
             if(!Utilities::stringToType(dirX, initCond.attribute("dirX").value())) {
-                ERRORMSG("---> String conversion in InitialPositionGrid: jitter seed failed");
+                GRSF_ERRORMSG("---> String conversion in InitialPositionGrid: jitter seed failed");
             }
         }
 
         int gridX;
         if(!Utilities::stringToType(gridX, initCond.attribute("gridSizeX").value())) {
-            ERRORMSG("---> String conversion in InitialPositionGrid: gridSizeX failed");
+            GRSF_ERRORMSG("---> String conversion in InitialPositionGrid: gridSizeX failed");
         }
         int gridY;
         if(!Utilities::stringToType(gridY, initCond.attribute("gridSizeY").value())) {
-            ERRORMSG("---> String conversion in InitialPositionGrid: gridSizeY failed");
+            GRSF_ERRORMSG("---> String conversion in InitialPositionGrid: gridSizeY failed");
         }
         PREC dist;
         if(!Utilities::stringToType(dist, initCond.attribute("distance").value())) {
-            ERRORMSG("---> String conversion in InitialPositionGrid: distance failed");
+            GRSF_ERRORMSG("---> String conversion in InitialPositionGrid: distance failed");
         }
         bool jitter;
         if(!Utilities::stringToType(jitter, initCond.attribute("jitter").value())) {
-            ERRORMSG("---> String conversion in InitialPositionGrid: jitter failed");
+            GRSF_ERRORMSG("---> String conversion in InitialPositionGrid: jitter failed");
         }
         int seed = 5;
         if(initCond.attribute("seed")) {
             if(!Utilities::stringToType(seed, initCond.attribute("seed").value())) {
-                ERRORMSG("---> String conversion in InitialPositionGrid: jitter seed failed");
+                GRSF_ERRORMSG("---> String conversion in InitialPositionGrid: jitter seed failed");
             }
         }
         double delta;
         if(!Utilities::stringToType(delta, initCond.attribute("delta").value())) {
-            ERRORMSG("---> String conversion in InitialPositionGrid: delta failed");
+            GRSF_ERRORMSG("---> String conversion in InitialPositionGrid: delta failed");
         }
 
         InitialConditionBodies::setupPositionBodiesGrid(*m_bodiesGroup, m_statesGroup, m_startIdGroup,gridX,gridY,dist,trans,jitter,delta, seed, dirZ,dirX);
@@ -1894,7 +1894,7 @@ private:
 //
 //        boost::filesystem::path filePath = m_currentParseFileDir / name;
 //        InitialConditionBodies::setupPositionBodiesFromFile(state,filePath);
-        ERRORMSG("Not implemented")
+        GRSF_ERRORMSG("Not implemented")
     }
     void parseInitialPositionTransforms(XMLNodeType initCond) {
 
@@ -1902,7 +1902,7 @@ private:
 
         auto bodyIt = m_bodiesGroup->begin();
         auto itEnd = m_bodiesGroup->end();
-        ASSERTMSG(bodyIt != itEnd, "no bodies in list");
+        GRSF_ASSERTMSG(bodyIt != itEnd, "no bodies in list");
 
         Quaternion q_KI;
         Vector3 I_r_IK;
@@ -1948,7 +1948,7 @@ private:
 
         auto bodyIt = m_bodiesGroup->begin();
         auto itEnd = m_bodiesGroup->end();
-        ASSERTMSG(bodyIt != itEnd, "no bodies in list");
+        GRSF_ASSERTMSG(bodyIt != itEnd, "no bodies in list");
 
         // Iterate over all values in the list
         auto nodes = initCond.children("Vel");
@@ -1966,21 +1966,21 @@ private:
             }
 
             if(!Utilities::stringToType(transDir, itNode->attribute("transDir").value())) {
-                ERRORMSG("---> String conversion in InitialVelocityTransRot: trans failed");
+                GRSF_ERRORMSG("---> String conversion in InitialVelocityTransRot: trans failed");
             }
             transDir.normalize();
 
             if(!Utilities::stringToType(vel, itNode->attribute("absTransVel").value())) {
-                ERRORMSG("---> String conversion in InitialVelocityTransRot: absTransVel failed");
+                GRSF_ERRORMSG("---> String conversion in InitialVelocityTransRot: absTransVel failed");
             }
 
             if(!Utilities::stringToType(rotDir, itNode->attribute("rotDir").value())) {
-                ERRORMSG("---> String conversion in InitialVelocityTransRot: transDir failed");
+                GRSF_ERRORMSG("---> String conversion in InitialVelocityTransRot: transDir failed");
             }
             rotDir.normalize();
 
             if(!Utilities::stringToType(rot, itNode->attribute("absRotVel").value())) {
-                ERRORMSG("---> String conversion in InitialVelocityTransRot: absTransVel failed");
+                GRSF_ERRORMSG("---> String conversion in InitialVelocityTransRot: absTransVel failed");
             }
 
 
@@ -2169,7 +2169,7 @@ public:
                 SetType s;
                 using CSPBS = Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType>;
                 if( !Utilities::stringToType<SetType,CSPBS>(s, n.attribute("value").value() )  ) {
-                    ERRORMSG("---> String conversion in parseModuleOptions: Set: value failed");
+                    GRSF_ERRORMSG("---> String conversion in parseModuleOptions: Set: value failed");
                 }
                 // Overwrite
                 m_opts.m_bodyIdRange = s;
@@ -2187,7 +2187,7 @@ public:
                     SetType r;
                     using CSPBS = Utilities::CommaSeperatedPairBinShift<RigidBodyIdType,RigidBodyIdHalfType>;
                     if( !Utilities::stringToType<SetType,CSPBS>(r,  n.attribute("value").value() )  ) {
-                        ERRORMSG("---> String conversion in parseModuleOptions: Range: value failed");
+                        GRSF_ERRORMSG("---> String conversion in parseModuleOptions: Range: value failed");
                     }
                     // Overwrite
                     m_opts.m_bodyIdRange = r;
@@ -2282,13 +2282,13 @@ private:
         auto att = rigidbodies.attribute("enableSelectiveIds");
         if(att) {
             if(!Utilities::stringToType(hasSelectiveFlag, att.value())) {
-                ERRORMSG("---> String conversion in parseRigidBodies: enableSelectiveIds failed");
+                GRSF_ERRORMSG("---> String conversion in parseRigidBodies: enableSelectiveIds failed");
             }
         }
 
         unsigned int instances;
         if(!Utilities::stringToType(instances, rigidbodies.attribute("instances").value())) {
-            ERRORMSG("---> String conversion in parseRigidBodies: instances failed");
+            GRSF_ERRORMSG("---> String conversion in parseRigidBodies: instances failed");
         }
         // Determine what DynamicState the group has:
         XMLNodeType  dynPropNode;
@@ -2299,7 +2299,7 @@ private:
         att = rigidbodies.attribute("groupId");
         if(att) {
             if(!Utilities::stringToType<unsigned int>(m_groupId, att.value())) {
-                ERRORMSG("---> String conversion in parseRigidBodies: groupId failed");
+                GRSF_ERRORMSG("---> String conversion in parseRigidBodies: groupId failed");
             }
             // Set new m_globalMaxGroupId;
             m_globalMaxGroupId = std::max(m_globalMaxGroupId,m_groupId);
@@ -2424,7 +2424,7 @@ private:
             //LOGSCLEVEL1(m_pSimulationLog,"---> Copy Simulated RigidBody References to DynamicSystem ..."<<std::endl;);
             bool added = addAllBodies(m_pSimBodies);
             if(!added) {
-                ERRORMSG("Could not add body to m_simBodies!, some bodies exist already in map!");
+                GRSF_ERRORMSG("Could not add body to m_simBodies!, some bodies exist already in map!");
             };
             m_nSimBodies += m_parsedInstancesGroup;
             m_nBodies += m_parsedInstancesGroup;
@@ -2432,12 +2432,12 @@ private:
             //LOGSCLEVEL1(m_pSimulationLog,"---> Copy Static RigidBody References to DynamicSystem ..."<<std::endl;);
             bool added = addAllBodies(m_pBodies);
             if(!added) {
-                ERRORMSG("Could not add body to m_staticBodies!, some bodies exist already in map!");
+                GRSF_ERRORMSG("Could not add body to m_staticBodies!, some bodies exist already in map!");
             };
             m_nStaticBodies += m_parsedInstancesGroup;
             m_nBodies += m_parsedInstancesGroup;
         } else {
-            ERRORMSG("---> Adding only simulated and not simulated objects supported!");
+            GRSF_ERRORMSG("---> Adding only simulated and not simulated objects supported!");
         }
         // ===============================================================================================================
 
@@ -2473,9 +2473,9 @@ private:
             m_eBodiesState =  RigidBodyType::BodyMode::STATIC;
         } else if(type == "animated") {
             m_eBodiesState =  RigidBodyType::BodyMode::ANIMATED;
-            ERRORMSG("---> The attribute 'type' '" << type << "' of 'DynamicState' has no implementation in the parser");
+            GRSF_ERRORMSG("---> The attribute 'type' '" << type << "' of 'DynamicState' has no implementation in the parser");
         } else {
-            ERRORMSG("---> The attribute 'type' '" << type << "' of 'DynamicState' has no implementation in the parser");
+            GRSF_ERRORMSG("---> The attribute 'type' '" << type << "' of 'DynamicState' has no implementation in the parser");
         }
 
     }
@@ -2500,7 +2500,7 @@ private:
             if(s == "uniform") {
                 PREC mass;
                 if(!Utilities::stringToType(mass, n.attribute("value").value())) {
-                    ERRORMSG("---> String conversion in Mass: value failed");
+                    GRSF_ERRORMSG("---> String conversion in Mass: value failed");
                 }
                 for(auto & b : m_bodiesGroup) {
                     b.m_body->m_mass = mass;
@@ -2509,7 +2509,7 @@ private:
             } else if(s == "homogen") {
                 PREC density;
                 if(!Utilities::stringToType(density, n.attribute("density").value())) {
-                    ERRORMSG("---> String conversion in Mass: density failed");
+                    GRSF_ERRORMSG("---> String conversion in Mass: density failed");
                 }
                 for(auto & b : m_bodiesGroup) {
                     MassComputations::calculateMass(b.m_body,density);
@@ -2517,7 +2517,7 @@ private:
                 }
 
             } else {
-                ERRORMSG("---> The attribute 'distribute' '" << s << "' of 'Mass' has no implementation in the parser");
+                GRSF_ERRORMSG("---> The attribute 'distribute' '" << s << "' of 'Mass' has no implementation in the parser");
             }
 
 
@@ -2534,7 +2534,7 @@ private:
                     InertiaTensorComputations::calculateInertiaTensor(b.m_body);
                 }
             } else {
-                ERRORMSG("---> The attribute 'type' '" << s <<"' of 'InertiaTensor' has no implementation in the parser");
+                GRSF_ERRORMSG("---> The attribute 'type' '" << s <<"' of 'InertiaTensor' has no implementation in the parser");
             }
 
             // Set Massmatrix
@@ -2574,14 +2574,14 @@ private:
             typename RigidBodyType::BodyMaterialType eMaterial = 0;
 
             if(!Utilities::stringToType<typename RigidBodyType::BodyMaterialType>(eMaterial, n.attribute("id").value())) {
-                ERRORMSG("---> String conversion in Material: id failed");
+                GRSF_ERRORMSG("---> String conversion in Material: id failed");
             }
 
             for(auto & b : m_bodiesGroup) {
                 b.m_body->m_eMaterial = eMaterial;
             }
         } else {
-            ERRORMSG("---> The attribute 'distribute' '" << s  <<"' of 'Material' has no implementation in the parser");
+            GRSF_ERRORMSG("---> The attribute 'distribute' '" << s  <<"' of 'Material' has no implementation in the parser");
         }
     }
 

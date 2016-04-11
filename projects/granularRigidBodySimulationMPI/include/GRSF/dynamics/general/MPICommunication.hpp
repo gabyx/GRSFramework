@@ -143,7 +143,7 @@ public:
         if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
             m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
         } else {
-            ERRORMSG("SimulationLog does not yet exist? Did you create it?")
+            GRSF_ERRORMSG("SimulationLog does not yet exist? Did you create it?")
         }
 
     };
@@ -217,9 +217,9 @@ public:
     void allGather(T value, std::vector<T> & gatheredValues, MPI_Comm comm){
 
         // Assert on std::vector<bool> (bitwise implementation which fails for c array style)
-        STATIC_ASSERTM((!std::is_same<T,bool>::value), "WORKS ONLY FOR non bool");
-        // GCC No support STATIC_ASSERTM(std::is_trivially_copyable<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES")
-        STATIC_ASSERTM(std::is_trivial<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES");
+        GRSF_STATIC_ASSERTM((!std::is_same<T,bool>::value), "WORKS ONLY FOR non bool");
+        // GCC No support GRSF_STATIC_ASSERTM(std::is_trivially_copyable<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES")
+        GRSF_STATIC_ASSERTM(std::is_trivial<T>::value, "WORKS ONLY FOR TRIVIALLY COPIABLE TYPES");
 
         int size;
         MPI_Comm_size(comm,&size);
@@ -237,7 +237,7 @@ public:
     template<typename T>
     inline void allGather(T value, std::vector<T> & gatheredValues, MPICommunicatorId id){
         auto it = m_communicators.find(static_cast<unsigned int>(id));
-        ASSERTMSG(it!=m_communicators.end(),"This communicator does not exist in the set in rank: " << this->getRank())
+        GRSF_ASSERTMSG(it!=m_communicators.end(),"This communicator does not exist in the set in rank: " << this->getRank())
         allGather(value,gatheredValues,it->second);
     }
 
@@ -268,7 +268,7 @@ public:
     template<typename T>
     void sendMessageToNeighbourRank_async(const T & t, RankIdType rank, MPIMessageTag tag, MPI_Comm comm ){
         auto it = m_sendMessageBuffers.find(rank);
-        ASSERTMSG(it != m_sendMessageBuffers.end(),"No buffer for this rank!, Did you call initializeNeighbourBuffers" );
+        GRSF_ASSERTMSG(it != m_sendMessageBuffers.end(),"No buffer for this rank!, Did you call initializeNeighbourBuffers" );
         // clear the buffer
 
         MessageBinarySerializer & message = std::get<0>(it->second);
@@ -301,7 +301,7 @@ public:
      /** May be called after a process topo has been made in the process info*/
     void initializeNeighbourBuffers() {
         if( ! this->getProcTopo() ){
-            ERRORMSG("initializeNeighbourBuffers:: ProcessTopology is not created!")
+            GRSF_ERRORMSG("initializeNeighbourBuffers:: ProcessTopology is not created!")
         }else{
 
             const typename ProcessInfoType::ProcessTopologyType::NeighbourRanksListType & ranks = this->getProcTopo()->getNeighbourRanks();
@@ -434,7 +434,7 @@ public:
 
     template<typename T, typename List>
     void receiveMessageFromRanks(T & t,const List & ranks, MPIMessageTag tag,  MPI_Comm comm){
-        STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );
+        GRSF_STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );
 
         if(ranks.size() == 0){return;};
 
@@ -517,7 +517,7 @@ public:
         auto error = MPI_Comm_split(m_comm,groupColor,this->m_rank,&comm);
         ASSERTMPIERROR(error, "MPI_Comm_split failed in rank: " << this->m_rank);
 
-        ASSERTMSG(m_communicators.find(id) == m_communicators.end(), "This communicator is already in the set! This should not happend!")
+        GRSF_ASSERTMSG(m_communicators.find(id) == m_communicators.end(), "This communicator is already in the set! This should not happend!")
 
         if(comm != MPI_COMM_NULL){
             m_communicators[id] = comm;
@@ -532,7 +532,7 @@ public:
         if(it!= m_communicators.end()){
             return it->second;
         }else{
-            ERRORMSG("Communicator with id: " << static_cast<unsigned int>(commId) <<" does not exist!");
+            GRSF_ERRORMSG("Communicator with id: " << static_cast<unsigned int>(commId) <<" does not exist!");
         }
     }
 

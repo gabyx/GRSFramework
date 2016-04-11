@@ -139,7 +139,7 @@ void MoreauTimeStepperMPI::reset() {
 
         //TODO Open all simfiles references for the bodies
         //LOG(m_pSimulationLog,"---> Opened Reference SimFile: m_settings.m_simStateReferenceFile"<<std::endl);
-        ERRORMSG("NOT IMPLEMENTED")
+        GRSF_ERRORMSG("NOT IMPLEMENTED")
         if(m_settings.m_eSimulateFromReference != TimeStepperSettings::CONTINUE) {
             //Inject the end state into the front buffer
             //TODO

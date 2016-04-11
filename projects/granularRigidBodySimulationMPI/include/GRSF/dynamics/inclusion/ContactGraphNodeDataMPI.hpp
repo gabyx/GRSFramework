@@ -64,20 +64,20 @@ public:
     }
     inline PREC getMultiplicityWeight(const RankIdType rank){
         auto it = m_partRanks.find(rank);
-        ASSERTMSG(it!=m_partRanks.end(), "Requested a weight for a non participating rank "<< rank << std::endl)
+        GRSF_ASSERTMSG(it!=m_partRanks.end(), "Requested a weight for a non participating rank "<< rank << std::endl)
         return m_multiplicityWeights(it->second.m_splitBodyIdx+1); // First weight belongs to local owner
     }
     inline void getMultiplicityAndWeight(const RankIdType rank, unsigned int & mult, PREC & multWeight){
         mult = getMultiplicity();
         auto it = m_partRanks.find(rank);
-        ASSERTMSG(it!=m_partRanks.end(), "Requested a weight for a non participating rank "<< rank << std::endl);
-        ASSERTMSG(m_multiplicityWeights.size()>0,"FUCK")
+        GRSF_ASSERTMSG(it!=m_partRanks.end(), "Requested a weight for a non participating rank "<< rank << std::endl);
+        GRSF_ASSERTMSG(m_multiplicityWeights.size()>0,"FUCK")
         multWeight = m_multiplicityWeights(it->second.m_splitBodyIdx+1); // First weight belongs to local owner
     }
 
     inline void updateVelocity(const RankIdType rank, const VectorUBody & u){
         auto it = m_partRanks.find(rank);
-        ASSERTMSG(it!=m_partRanks.end(), "Rank: " << rank << " is not contained in the SplitBodyNode for body id: " << RigidBodyId::getBodyIdString(m_pBody));
+        GRSF_ASSERTMSG(it!=m_partRanks.end(), "Rank: " << rank << " is not contained in the SplitBodyNode for body id: " << RigidBodyId::getBodyIdString(m_pBody));
         it->second.m_bGotUpdate = true;
         m_uBack.col(it->second.m_splitBodyIdx) = u;
     }
@@ -112,7 +112,7 @@ public:
 
 //    inline MatrixSparse & getLInvMatrix(){
 //        auto mult = getMultiplicity();
-//        ASSERTMSG(mult>=2 && mult<=8, "Requested LMatrix for multiplicity: " << mult << " which is not implemented!");
+//        GRSF_ASSERTMSG(mult>=2 && mult<=8, "Requested LMatrix for multiplicity: " << mult << " which is not implemented!");
 //        return m_LInvMatrices.LInv[mult-2];
 //    }
 

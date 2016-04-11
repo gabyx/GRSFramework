@@ -135,7 +135,7 @@ public:
 
         static NodeInit nodeInit(this);
 
-        ASSERTMSG(pCollData->m_pBody[0] != nullptr && pCollData->m_pBody[1] != nullptr, " Bodys are null pointers?");
+        GRSF_ASSERTMSG(pCollData->m_pBody[0] != nullptr && pCollData->m_pBody[1] != nullptr, " Bodys are null pointers?");
         // cout << "add node : "<<m_nodeCounter<< " body id:" << RigidBodyId::getBodyIdString(pCollData->m_pBody[0]) <<" and "<< RigidBodyId::getBodyIdString(pCollData->m_pBody[1]) <<endl;
         // std::cout <<"b1:" << pCollData->m_pBody[0]->m_q_KI<< std::endl << pCollData->m_pBody[0]->m_r_S<< std::endl;;
         // std::cout <<"b2:" << pCollData->m_pBody[1]->m_q_KI << std::endl << pCollData->m_pBody[1]->m_r_S<< std::endl;;;
@@ -159,7 +159,7 @@ public:
             nodeInit.apply<addEdges>(addedNode, pCollData, contactParams);
 
         } else {
-            ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
+            GRSF_ASSERTMSG(false," You specified a contact model which has not been implemented so far!");
         }
 
         m_nodeCounter++;
@@ -236,7 +236,7 @@ private:
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 initNodeSimBody<1,addEdges>(pNode,nodeData,pBody);
             } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
-                ERRORMSG("ContactGraph:: Animated body, node init not implemented")
+                GRSF_ERRORMSG("ContactGraph:: Animated body, node init not implemented")
             }
 
             // SECOND BODY!
@@ -244,7 +244,7 @@ private:
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 initNodeSimBody<2,addEdges>(pNode,nodeData,pBody);
             } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
-                ERRORMSG("ContactGraph:: Animated body, node init not implemented")
+                GRSF_ERRORMSG("ContactGraph:: Animated body, node init not implemented")
             }
 
         }

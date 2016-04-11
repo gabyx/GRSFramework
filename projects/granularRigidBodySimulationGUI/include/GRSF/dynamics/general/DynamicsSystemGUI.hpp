@@ -47,7 +47,7 @@ class RigidBodyGraphics{
         template<typename TRigidBodyState>
         inline void applyBodyState(const TRigidBodyState & s){
             WARNINGMSG(m_id == s.m_id , "Updating non matching ids: " << m_id <<"!="<< s.m_id);
-            ASSERTMSG(m_node,"SceneNode is null")
+            GRSF_ASSERTMSG(m_node,"SceneNode is null")
             if(m_pointCloud){
 
                 auto & p = m_pointCloud->getPoint(m_pointIdx);

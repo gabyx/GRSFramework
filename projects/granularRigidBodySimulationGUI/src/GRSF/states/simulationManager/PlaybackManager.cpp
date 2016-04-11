@@ -264,7 +264,7 @@ void PlaybackManager::threadRunSimulation() {
 //        i++;
 //    }
 //    if(!updated){
-//        ERRORMSG("Could not advance sim buffer to first state!")
+//        GRSF_ERRORMSG("Could not advance sim buffer to first state!")
 //    }else{
         LOG(m_pThreadLog,"---> PlaybackManager: Advanced sim buffer to first state @ m_t: " << currentState->m_t << std::endl;);
 //    }
@@ -363,7 +363,7 @@ void PlaybackManager::initSimThread() {
         file_path /= filename;
         if(!m_pStateRecorderResampler->createSimFile(file_path)) {
             m_pSimulationLog->logMessage("---> Could not create sim file!");
-            ASSERTMSG(false,"Could not create sim file!");
+            GRSF_ASSERTMSG(false,"Could not create sim file!");
         };
         FileManager::getSingleton().copyFile(m_pSceneParser->getParsedSceneFile(),resampleFolderPath,true);
     } else {

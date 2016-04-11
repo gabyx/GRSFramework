@@ -93,9 +93,9 @@ public:
     }
 
     const NeighbourRanksListType & getAdjacentNeighbourRanks(RankIdType neighbourRank) const {
-        ASSERTMSG(  m_nbRanks.find(neighbourRank) !=  m_nbRanks.end(),
+        GRSF_ASSERTMSG(  m_nbRanks.find(neighbourRank) !=  m_nbRanks.end(),
                   "No neighbour rank: " << neighbourRank << " for this process rank: "<< m_rank<<"!");
-        ASSERTMSG( m_adjNbRanks.find(neighbourRank) != m_adjNbRanks.end(),
+        GRSF_ASSERTMSG( m_adjNbRanks.find(neighbourRank) != m_adjNbRanks.end(),
                   "No adjacent ranks for this neighbour: "<< neighbourRank << "for process rank: " << m_rank<<"!");
         return m_adjNbRanks.find(neighbourRank)->second;
     }

@@ -47,7 +47,7 @@ inline uint32_t colorToHandle(Ogre::PixelFormat fmt, uint32_t col) {
     } else if (fmt == Ogre::PF_R8G8B8A8) {
         handle = col >> 8;
     } else {
-        ERRORMSG("Incompatible pixel format " << fmt);
+        GRSF_ERRORMSG("Incompatible pixel format " << fmt);
     }
     return handle;
 }

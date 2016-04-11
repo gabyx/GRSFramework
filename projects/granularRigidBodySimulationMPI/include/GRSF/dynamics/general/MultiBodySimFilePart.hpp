@@ -194,7 +194,7 @@ void MultiBodySimFilePart::write(double time, TBodyIterator begin, TBodyIterator
     *this << (unsigned int) std::distance(begin,end);
     using BodyType = typename std::remove_reference<decltype(*(*begin))>::type;
 
-    STATIC_ASSERTM((std::is_same<double, typename BodyType::PREC>::value),
+    GRSF_STATIC_ASSERTM((std::is_same<double, typename BodyType::PREC>::value),
                    "OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!");
     auto itEnd = end;
     for(auto it = begin; it != itEnd; ++it) {

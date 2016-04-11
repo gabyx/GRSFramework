@@ -36,7 +36,7 @@ InclusionSolverCO::InclusionSolverCO(std::shared_ptr< CollisionSolverType >  pCo
     if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
-        ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
+        GRSF_ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }
 
     m_nContacts = 0;
@@ -147,7 +147,7 @@ void InclusionSolverCO::solveInclusionProblem() {
 
 
         m_nLambdas = m_contactGraph.getNLambdas();
-        ASSERTMSG(m_contactGraph.getNContactModelsUsed() == 1, "ContactGraph uses not homogen contact models!")
+        GRSF_ASSERTMSG(m_contactGraph.getNContactModelsUsed() == 1, "ContactGraph uses not homogen contact models!")
 
         // Assign Space for matrices =====================================
         m_mu.resize(nodes.size());
@@ -286,7 +286,7 @@ void InclusionSolverCO::solveInclusionProblem() {
             m_timeProx = counter.elapsedSec();
 #endif
         }else{
-            ASSERTMSG(false,"This algorithm has not been implemented yet");
+            GRSF_ASSERTMSG(false,"This algorithm has not been implemented yet");
         }
 
 

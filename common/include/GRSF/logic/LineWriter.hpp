@@ -70,7 +70,7 @@ namespace LogicNodes{
                 m_file.open(f.string(), std::ios::app);
             }
             if(! m_file.good()){
-                ERRORMSG("Output script file LineWriter at: " << f << " could not be opened!")
+                GRSF_ERRORMSG("Output script file LineWriter at: " << f << " could not be opened!")
             }
         }
 

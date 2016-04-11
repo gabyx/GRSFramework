@@ -73,10 +73,10 @@ public:
 
 
         if(pMeshData->m_Vertices.size()> std::numeric_limits<int>::max()) {
-            ERRORMSG("The mesh has vertice indices which are to big to put into an INT in ozcollide");
+            GRSF_ERRORMSG("The mesh has vertice indices which are to big to put into an INT in ozcollide");
         }
         if(pMeshData->m_Faces.size()> std::numeric_limits<int>::max()) {
-            ERRORMSG("The mesh has to many faces to put into an INT in ozcollide");
+            GRSF_ERRORMSG("The mesh has to many faces to put into an INT in ozcollide");
         }
 
         m_ozPolys.reserve(pMeshData->m_Faces.size());

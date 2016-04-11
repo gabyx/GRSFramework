@@ -50,13 +50,13 @@ namespace MPILayer{
 
             template<typename T>
             static inline MPI_Datatype getDataType_impl(){
-                ERRORMSG("This DataType has not been defined!")
+                GRSF_ERRORMSG("This DataType has not been defined!")
                 return MPI_DATATYPE_NULL;
             }
 
             template<typename T>
             static inline void * getDataTypeBuffer_impl(T & t){
-                ERRORMSG("This DataType has not been defined!")
+                GRSF_ERRORMSG("This DataType has not been defined!")
                 return nullptr;
             }
 
@@ -71,7 +71,7 @@ namespace MPILayer{
                 }else if(std::is_same<PREC,float>::value){
                     MPI_Type_contiguous(N, MPI_FLOAT, &MPIVector3);
                 }else{
-                    ERRORMSG("This type can not be commited")
+                    GRSF_ERRORMSG("This type can not be commited")
                 }
 
                 MPI_Type_commit(&MPIVector3);

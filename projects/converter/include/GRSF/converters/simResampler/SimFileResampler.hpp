@@ -63,16 +63,16 @@ private:
         MultiBodySimFile fromFile;
 
         if(m_iFiles.size() != 1) {
-            ERRORMSG("Only one input file is accepted for resample!")
+            GRSF_ERRORMSG("Only one input file is accepted for resample!")
         }
         if(m_iFiles[0] == m_oFile){
-            ERRORMSG("Input/Output Files are the same!")
+            GRSF_ERRORMSG("Input/Output Files are the same!")
         }
 
         // Check Simfile!
 
         if(!fromFile.openRead(m_iFiles[0])) {
-            ERRORMSG(fromFile.getErrorString());
+            GRSF_ERRORMSG(fromFile.getErrorString());
         };
 
         std::cerr << fromFile.getDetails().getString() << std::endl;
@@ -145,7 +145,7 @@ private:
                                   fromFile.m_additionalBytesPerBodyType,
                                   fromFile.m_nAdditionalBytesPerBody
                                   )){
-            ERRORMSG(toFile->getErrorString());
+            GRSF_ERRORMSG(toFile->getErrorString());
         };
         return std::move(toFile);
     }

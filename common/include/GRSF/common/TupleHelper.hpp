@@ -131,7 +131,7 @@ namespace TupleVisit{
                                     >
                                 >;
 
-                STATIC_ASSERTM( indices::size()!=0,"Tried to visit tuple but the types have not been found!");
+                GRSF_STATIC_ASSERTM( indices::size()!=0,"Tried to visit tuple but the types have not been found!");
 
                 // Run Visitor for each index
                 visitIndices<indices>::apply(std::forward<Visitor>(v),t);

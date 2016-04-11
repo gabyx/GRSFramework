@@ -49,7 +49,7 @@ void LogicNode::makeGetLink(LogicNode * outN, unsigned int outS,
                             LogicNode * inN,  unsigned int inS){
 
         if( outS >= outN->getOutputs().size() ||  inS >= inN->getInputs().size() ){
-            ERRORMSG("Wrong socket indices: outNode: " << outN->m_id << " outS: " << outS << " inNode: " << inN->m_id <<" inS: " << inS )
+            GRSF_ERRORMSG("Wrong socket indices: outNode: " << outN->m_id << " outS: " << outS << " inNode: " << inN->m_id <<" inS: " << inS )
         }
 
         inN->getISocket(inS)->link(outN->getOSocket(outS));
@@ -59,7 +59,7 @@ void LogicNode::makeWriteLink(LogicNode * outN, unsigned int outS,
                               LogicNode * inN,  unsigned int inS){
 
         if( outS >= outN->getOutputs().size() ||  inS >= inN->getInputs().size() ){
-            ERRORMSG("Wrong socket indices: outNode: " << outN->m_id << " outS: " << outS << " inNode: " << inN->m_id <<" inS: " << inS )
+            GRSF_ERRORMSG("Wrong socket indices: outNode: " << outN->m_id << " outS: " << outS << " inNode: " << inN->m_id <<" inS: " << inS )
         }
 
         outN->getOSocket(outS)->link(inN->getISocket(inS));

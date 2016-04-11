@@ -127,7 +127,7 @@ public:
 
     /** Similiar to std::map::insert*/
     inline bool addBody(RigidBodyType* ptr){
-        ASSERTMSG(ptr != nullptr, "Null pointer added!")
+        GRSF_ASSERTMSG(ptr != nullptr, "Null pointer added!")
         std::pair<typename MapByHashedIdType::iterator,bool> res =  m_mapByHashedId.insert(ptr);
         return res.second;
     }
@@ -144,7 +144,7 @@ public:
     bool deleteBody(RigidBodyIdType const & id){
         typename MapByHashedIdType::iterator it = m_mapByHashedId.find(id);
         if(it != m_mapByHashedId.end()){
-            ASSERTMSG(*it != nullptr, " Pointer of body: " << id << " in map is null!")
+            GRSF_ASSERTMSG(*it != nullptr, " Pointer of body: " << id << " in map is null!")
             auto * body = *it; // save ptr
             m_mapByHashedId.erase(it); // delete in map (might rehash, so we are not allowed to delete the body above!)
             delete body;
@@ -157,7 +157,7 @@ public:
     inline bool deleteAllBodies(){
         iterator it;
         for(it = begin(); it != end(); it++){
-            ASSERTMSG(*it != nullptr, " Pointer in map is null!")
+            GRSF_ASSERTMSG(*it != nullptr, " Pointer in map is null!")
             delete (*it);
         }
         m_map.clear();

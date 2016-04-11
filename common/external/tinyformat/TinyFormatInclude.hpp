@@ -3,7 +3,7 @@
 
 #include "GRSF/common/AssertionDebug.hpp"
 
-#define TINYFORMAT_ERROR(reason) ERRORMSG(reason);
+#define TINYFORMAT_ERROR(reason) GRSF_ERRORMSG(reason);
 #include <tinyformat/tinyformat.h>
 
 #endif // TinyFormatInclude_hpp

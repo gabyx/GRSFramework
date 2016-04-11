@@ -101,11 +101,11 @@ public:
 
 
     RankIdType getCellRank(const MyMatrix::Array3<RankIdType> & v) const {
-        ASSERTMSG( (v >=0 && v < m_dim).all() ,  "Index: " << v << " is out of bound" )
+        GRSF_ASSERTMSG( (v >=0 && v < m_dim).all() ,  "Index: " << v << " is out of bound" )
 
         RankIdType cellRank = v(0) + v(1)*m_dim(0) + v(2) *(m_dim(0)*m_dim(1)) + m_cellNumberingStart;
 
-        ASSERTMSG(cellRank < m_dim.prod() + m_cellNumberingStart && cellRank >= m_cellNumberingStart,
+        GRSF_ASSERTMSG(cellRank < m_dim.prod() + m_cellNumberingStart && cellRank >= m_cellNumberingStart,
                 "cellRank: " << cellRank <<" not in Dimension: "<< m_dim.transpose()<<std::endl );
         return cellRank;
     };
@@ -114,7 +114,7 @@ public:
     NeighbourRanksListType getCellNeighbours(RankIdType cellRank) const {
         NeighbourRanksListType v;
         // cellRank zero indexed
-       ASSERTMSG(cellRank < m_dim.prod() + m_cellNumberingStart && cellRank >= m_cellNumberingStart,
+       GRSF_ASSERTMSG(cellRank < m_dim.prod() + m_cellNumberingStart && cellRank >= m_cellNumberingStart,
                 "cellRank: " << cellRank <<" not in Dimension: "<< m_dim.transpose()<<std::endl );
 
         MyMatrix::Array3<RankIdType> cell_index = getCellIndex(cellRank);
@@ -131,7 +131,7 @@ public:
                     ( ind(2) >=0 &&  ind(2) < m_dim(2)) ) {
                 // Add neighbour
                 auto res = v.insert(getCellRank(ind));
-                ASSERTMSG(res.second,"This neighbour number: "<< getCellRank(ind) << " for cell number: "<< cellRank <<" alreads exists!");
+                GRSF_ASSERTMSG(res.second,"This neighbour number: "<< getCellRank(ind) << " for cell number: "<< cellRank <<" alreads exists!");
             }
 
         }
@@ -140,7 +140,7 @@ public:
 
     MyMatrix::Array3<RankIdType> getCellIndex(RankIdType cellRank) const {
 
-        ASSERTMSG(cellRank < m_dim.prod() + m_cellNumberingStart && cellRank >= m_cellNumberingStart,
+        GRSF_ASSERTMSG(cellRank < m_dim.prod() + m_cellNumberingStart && cellRank >= m_cellNumberingStart,
                 "cellRank: " << cellRank <<" not in Dimension: "<< m_dim.transpose()<<std::endl );
 
         MyMatrix::Array3<unsigned int> v;

@@ -67,7 +67,7 @@ void pointCloudTest() {
     simFile.openRead("./SimStateTestEnd.sim", false);
     std::cout << simFile.getDetails(true).getString() << std::endl;
     if(!simFile.isGood()){
-        ERRORMSG("Could not open simfile" )
+        GRSF_ERRORMSG("Could not open simfile" )
     }
 
     Range<unsigned int> r(std::make_pair((unsigned int)0,(unsigned int)simFile.getNSimBodies()));
@@ -207,7 +207,7 @@ void pointCloudTest() {
 //            // Check if we have the same neighbours
 //            if( kNearest.size()!=K){
 //                std::cout << "Checking point id: " << l << std::endl;
-//                ERRORMSG("Did not find enough points")
+//                GRSF_ERRORMSG("Did not find enough points")
 //            }
 //            auto it = kNearest.begin();
 //            auto itB = bForce.begin();
@@ -236,7 +236,7 @@ void pointCloudTest() {
 //                        std::cout <<"i:" << (i++) << " " << g->m_id << " : " << g->m_p->transpose() << " dist: " << compDist(*g) <<  std::endl;
 //                    }
 //
-//                    ERRORMSG("Error CHECK")
+//                    GRSF_ERRORMSG("Error CHECK")
 //                }
 //
 //                itB++;
@@ -326,7 +326,7 @@ void pointCloudTest() {
             // Check points
             for(auto & v: t){
                 if( !(s.m_SimBodyStates[v.m_id].m_q.head<3>().array() == (*v.m_p).array()).all() ){
-                    ERRORMSG("Points int simbody and t no more the same!!??")
+                    GRSF_ERRORMSG("Points int simbody and t no more the same!!??")
                 }
             }
         }

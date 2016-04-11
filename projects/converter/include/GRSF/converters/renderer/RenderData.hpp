@@ -49,7 +49,7 @@ public:
 
     VisModuleConverter(ParserType * p, ScalesMap * scales , VisMeshMap * meshMap)
         : m_pSimulationLog(p->getSimLog()), m_scalesMap(scales), m_visMeshMap(meshMap) {
-        ASSERTMSG(m_scalesMap && m_visMeshMap, "these should not be zero!")
+        GRSF_ASSERTMSG(m_scalesMap && m_visMeshMap, "these should not be zero!")
     };
 
     void parse(XMLNodeType vis, BodyListType * bodyList, StatesGroupType * states, RigidBodyIdType startId, BodyMode mode) {

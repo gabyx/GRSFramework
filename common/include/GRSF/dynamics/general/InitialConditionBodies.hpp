@@ -47,7 +47,7 @@ void setupPositionBodiesLinear(
     auto stateIt = bodyStates.begin();
     for(auto & b : bodyDataCont) {
 
-        ASSERTMSG(RigidBodyId::getGroupNr(b.m_id) == RigidBodyId::getGroupNr(startId),"Wrong group")
+        GRSF_ASSERTMSG(RigidBodyId::getGroupNr(b.m_id) == RigidBodyId::getGroupNr(startId),"Wrong group")
         auto i = RigidBodyId::getBodyNr(b.m_id) - RigidBodyId::getBodyNr(startId); // linear index from the front
 
         stateIt->setDisplacement(pos + dir*dist*i + jitter_vec, Quaternion(1,0,0,0));
@@ -95,7 +95,7 @@ void setupPositionBodiesGrid(BodyDataContainer & bodyDataCont,
 
     auto stateIt = bodyStates.begin();
     for(auto & b : bodyDataCont) {
-        ASSERTMSG(RigidBodyId::getGroupNr(b.m_id) == RigidBodyId::getGroupNr(startId),"Wrong group")
+        GRSF_ASSERTMSG(RigidBodyId::getGroupNr(b.m_id) == RigidBodyId::getGroupNr(startId),"Wrong group")
         auto i = RigidBodyId::getBodyNr(b.m_id) - RigidBodyId::getBodyNr(startId); // linear index from the front
 
         int index_z = (i /(gDim_x*gDim_y));
@@ -140,7 +140,7 @@ bool setupInitialConditionBodiesFromFile(boost::filesystem::path file_path,
         }
     }
     simFile.close();
-    ERRORMSG("setupInitialConditionBodiesFromFile:: failed: " << "path: " << file_path << " error:" << simFile.getErrorString());
+    GRSF_ERRORMSG("setupInitialConditionBodiesFromFile:: failed: " << "path: " << file_path << " error:" << simFile.getErrorString());
     return false;
 }
 
@@ -158,7 +158,7 @@ inline void applyBodyStatesTo(const RigidBodyStatesContainer & states, RigidBody
     for(auto bodyIt = bodies.begin(); bodyIt!= bodies.end(); ++bodyIt){
         auto resIt = states.find((*bodyIt)->m_id);
         if( resIt == states.end()){
-            ERRORMSG(" There is no initial state for sim body id: " << RigidBodyId::getBodyIdString(*bodyIt) << std::endl);
+            GRSF_ERRORMSG(" There is no initial state for sim body id: " << RigidBodyId::getBodyIdString(*bodyIt) << std::endl);
         }
         (*bodyIt)->template applyBodyState<true>(resIt->second);
     }

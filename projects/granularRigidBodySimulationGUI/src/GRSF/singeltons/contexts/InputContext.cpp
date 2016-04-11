@@ -185,7 +185,7 @@ void InputContext::addKeyListener( OIS::KeyListener *keyListener, const std::str
         else {
             // Duplicate Item
            if(itKeyListener->second != keyListener){
-			      ASSERTMSG(false,"InputContext::addKeyListener dublicate name: " << instanceName << " is already taken by another key listener!");
+			      GRSF_ASSERTMSG(false,"InputContext::addKeyListener dublicate name: " << instanceName << " is already taken by another key listener!");
            }
         }
     }
@@ -201,7 +201,7 @@ void InputContext::addMouseListener( OIS::MouseListener *mouseListener, const st
         else {
           // Duplicate Item
 			if(itMouseListener->second != mouseListener){
-			      ASSERTMSG(false,"InputContext::addMouseListener dublicate name: " << instanceName << " is already taken by another mouse listener!");
+			      GRSF_ASSERTMSG(false,"InputContext::addMouseListener dublicate name: " << instanceName << " is already taken by another mouse listener!");
          }
         }
     }
@@ -217,7 +217,7 @@ void InputContext::addJoystickListener( OIS::JoyStickListener *joystickListener,
         else {
              // Duplicate Item
 			   if(itJoystickListener->second != joystickListener){
-			         ASSERTMSG(false,"InputContext::addJoystickListener dublicate name: " << instanceName << " is already taken by another joystick listener!");
+			         GRSF_ASSERTMSG(false,"InputContext::addJoystickListener dublicate name: " << instanceName << " is already taken by another joystick listener!");
             }
         }
     }

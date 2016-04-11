@@ -34,14 +34,14 @@ InclusionCommunicator<Combo>::InclusionCommunicator<Combo>(std::shared_ptr< Body
     if(Logging::LogManager::getSingletonPtr()->existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
     } else {
-        ERRORMSG("SimulationLog does not yet exist? Did you create it?")
+        GRSF_ERRORMSG("SimulationLog does not yet exist? Did you create it?")
     }
 
     // Initialize all NeighbourDatas
     for(auto rankIt = m_nbRanks.begin() ; rankIt != m_nbRanks.end(); rankIt++) {
         LOGIC(m_pSimulationLog,"--->InclusionCommunicator<Combo>: Add neighbour data for process rank: "<<*rankIt<<std::endl;);
         auto res = m_nbDataMap.insert(*rankIt);
-        ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << *rankIt);
+        GRSF_ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << *rankIt);
     }
     m_pSimulationLog->logMessage("--->InclusionCommunicator<Combo>: Initialized all NeighbourDatas");
 

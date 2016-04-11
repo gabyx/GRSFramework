@@ -57,7 +57,7 @@ void PapesTimeStepper::reset() {
             error << "Could not open file: " << m_settings.m_simStateReferenceFile.string()<<std::endl;
             error << "File errors: " <<std::endl<< m_ReferenceSimFile.getErrorString();
             m_pSolverLog->logMessage( error.str());
-            ERRORMSG(error);
+            GRSF_ERRORMSG(error);
         }
         LOG(m_pSimulationLog,"---> Opened Reference SimFile: m_settings.m_simStateReferenceFile"<<std::endl);
 
@@ -65,7 +65,7 @@ void PapesTimeStepper::reset() {
             //Inject the end state into the front buffer
             m_ReferenceSimFile.getEndState(*m_StateBuffers.m_pFront);
             LOG(m_pSimulationLog,"---> Injected first state of Reference SimFile into StateBuffer"<<std::endl);
-            ERRORMSG("apply to bodies not implemented")
+            GRSF_ERRORMSG("apply to bodies not implemented")
             //m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
         }
 
@@ -121,7 +121,7 @@ void PapesTimeStepper::doOneIteration() {
     // If we should load the state from a reference file! Do this here!
     if(m_settings.m_eSimulateFromReference == TimeStepperSettings::USE_STATES && !m_bFinished) {
         m_ReferenceSimFile >> m_StateBuffers.m_pFront;
-        ERRORMSG("Not implemented")
+        GRSF_ERRORMSG("Not implemented")
         //m_pDynSys->applyDynamicsStateToSimBodies(*m_StateBuffers.m_pFront);
     }
 

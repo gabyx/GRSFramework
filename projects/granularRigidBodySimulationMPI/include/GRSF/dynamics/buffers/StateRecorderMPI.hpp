@@ -134,7 +134,7 @@ bool StateRecorderMPI::createSimFile(bool truncate){
     //Collective (all processes do this)
     bool res = m_fh.openWrite(m_pProcInfo->getCommunicator(),file,NDOFqBody, NDOFuBody,m_nSimBodies);
     if(!res){
-        ERRORMSG(m_fh.getErrorString());
+        GRSF_ERRORMSG(m_fh.getErrorString());
     }
     LOG(m_pSimulationLog,"MPI> StateRecorderMPI: Opened File : " << file << std::endl)
     return true;

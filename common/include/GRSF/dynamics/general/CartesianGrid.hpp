@@ -46,8 +46,8 @@ public:
                   const Matrix33 & A_KI = Matrix33::Identity())
         : m_aabb(aabb), m_dim(dim), m_A_KI(A_KI)
     {
-        ASSERTMSG(m_dim.prod() != 0, "Dimension zero: " << dim)
-        ASSERTMSG( aabb.isEmpty() == false, "CartesianGrid, wrongly initialized: maxPoint < minPoint");
+        GRSF_ASSERTMSG(m_dim.prod() != 0, "Dimension zero: " << dim)
+        GRSF_ASSERTMSG( aabb.isEmpty() == false, "CartesianGrid, wrongly initialized: maxPoint < minPoint");
 
         m_dxyz    = m_aabb.extent() / dim.template cast<PREC>();
         m_dxyzInv = m_dxyz.inverse();
@@ -160,7 +160,7 @@ public:
             bool indexCheck = true,
             SFINAE_ENABLE_IF(indexCheck) >
     TCellData * getCellData(const ArrayBase<Derived> & index) const {
-        STATIC_ASSERT( (std::is_same<typename Derived::Scalar, SizeType >::value) );
+        GRSF_STATIC_ASSERT( (std::is_same<typename Derived::Scalar, SizeType >::value) );
 
         if(!std::is_same<TCellData,NoCellData>::value  &&
                 ( !indexCheck || !( (index < 0).any() || (index >= m_dim).any() ) ) /* a decent compiler will optimize out if !indexCheck = true */
@@ -188,7 +188,7 @@ public:
     */
     template<unsigned int P = 0, typename Derived>
     Vector3 getCellPoint(const ArrayBase<Derived> & index) const {
-        STATIC_ASSERT(P<=2)
+        GRSF_STATIC_ASSERT(P<=2)
         if( P==0 ) {
             return m_aabb.m_minPoint.array()              + m_dxyz * index.template cast<PREC>() ;
         } else if(P==1) {

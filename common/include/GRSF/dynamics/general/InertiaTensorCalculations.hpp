@@ -53,16 +53,16 @@ namespace InertiaTensorComputations{
         }
 
         void operator()(std::shared_ptr<const MeshGeometry > & box)  {
-            ERRORMSG("MeshGeometry InertiaCalculations: This has not been implemented yet!");
+            GRSF_ERRORMSG("MeshGeometry InertiaCalculations: This has not been implemented yet!");
         }
 
         void operator()(std::shared_ptr<const CapsuleGeometry > & box)  {
-            ERRORMSG("CapsuleGeometry InertiaCalculations: This has not been implemented yet!");
+            GRSF_ERRORMSG("CapsuleGeometry InertiaCalculations: This has not been implemented yet!");
         }
 
         void operator()(std::shared_ptr<const HalfspaceGeometry > & halfspace)  {
             //This has not been implemented yet!
-            ERRORMSG("HalfspaceGeometry InertiaCalculations: This has not been implemented yet!");
+            GRSF_ERRORMSG("HalfspaceGeometry InertiaCalculations: This has not been implemented yet!");
         }
 
         private:
@@ -106,16 +106,16 @@ namespace MassComputations{
         }
 
         void operator()(std::shared_ptr<const MeshGeometry > & box)  {
-            ERRORMSG("MeshGeometry CalculateMassVisitor: This has not been implemented yet!");
+            GRSF_ERRORMSG("MeshGeometry CalculateMassVisitor: This has not been implemented yet!");
         }
 
         void operator()(std::shared_ptr<const CapsuleGeometry > & box)  {
-            ERRORMSG("CapsuleGeometry CalculateMassVisitor: This has not been implemented yet!");
+            GRSF_ERRORMSG("CapsuleGeometry CalculateMassVisitor: This has not been implemented yet!");
         }
 
         void operator()(std::shared_ptr<const HalfspaceGeometry > & halfspace)  {
             //This has not been implemented yet!
-            ERRORMSG("HalfspaceGeometry CalculateMassVisitor: This has not been implemented yet!");
+            GRSF_ERRORMSG("HalfspaceGeometry CalculateMassVisitor: This has not been implemented yet!");
         }
 
         private:

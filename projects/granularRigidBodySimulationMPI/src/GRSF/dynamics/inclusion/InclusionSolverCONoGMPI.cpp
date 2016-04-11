@@ -43,7 +43,7 @@ InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(
     if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
-        ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
+        GRSF_ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }
 
 
@@ -97,7 +97,7 @@ void InclusionSolverCONoGMPI::initializeLog( Logging::Log * pSolverLog,  boost::
             m_pContactSorProxStepNodeVisitor->setLog(m_pSolverLog);
             break;
         default:
-            ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemented");
+            GRSF_ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemented");
     }
 
     m_pSorProxInitNodeVisitor->setLog(m_pSolverLog);
@@ -152,7 +152,7 @@ void InclusionSolverCONoGMPI::reset() {
          m_pTangentialSorProxStepNodeVisitor = new TangentialSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,m_pContactGraph);
 
     }else{
-        ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemented");
+        GRSF_ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemented");
     }
 
     m_pSorProxInitNodeVisitor = new SorProxInitNodeVisitor<ContactGraphType>(m_settings);
@@ -244,9 +244,9 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
 #endif
 
         } else if(m_settings.m_eMethod == InclusionSolverSettingsType::JOR) {
-            ASSERTMSG(false,"Jor Algorithm has not been implemented yet");
+            GRSF_ASSERTMSG(false,"Jor Algorithm has not been implemented yet");
         }else{
-            ASSERTMSG(false,"This algorithm has not been implemented yet");
+            GRSF_ASSERTMSG(false,"This algorithm has not been implemented yet");
         }
 
         if(m_settings.m_bIsFiniteCheck) {
@@ -271,7 +271,7 @@ void InclusionSolverCONoGMPI::solveInclusionProblem(PREC currentSimulationTime) 
 
 
 void InclusionSolverCONoGMPI::doJorProx() {
-    ASSERTMSG(false,"InclusionSolverCONoGMPI:: JOR Prox iteration not implemented!");
+    GRSF_ASSERTMSG(false,"InclusionSolverCONoGMPI:: JOR Prox iteration not implemented!");
 }
 
 
@@ -348,7 +348,7 @@ void InclusionSolverCONoGMPI::initContactGraphForIteration(PREC alpha) {
             m_pContactSorProxStepNodeVisitor->setParams(alpha);
             break;
         default:
-            ERRORMSG(" Visitor method not defined for visitor: " << EnumConversion::toIntegral(m_settings.m_eMethod));
+            GRSF_ERRORMSG(" Visitor method not defined for visitor: " << EnumConversion::toIntegral(m_settings.m_eMethod));
     }
 
 
@@ -410,7 +410,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
                 body->m_pSolverData->m_uBuffer.m_back = body->m_pSolverData->m_uBuffer.m_front; // Used for cancel criteria
             }
         }else{
-            ERRORMSG("This cancelation criteria has not been implemented")
+            GRSF_ERRORMSG("This cancelation criteria has not been implemented")
         }
     }
 
@@ -439,7 +439,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
             m_pContactGraph->visitNormalNodes(*m_pContactSorProxStepNodeVisitor);
             break;
         default:
-            ERRORMSG(" Visitor method not defined for visitor: " << EnumConversion::toIntegral(m_settings.m_eMethod));
+            GRSF_ERRORMSG(" Visitor method not defined for visitor: " << EnumConversion::toIntegral(m_settings.m_eMethod));
         }
     }
 
@@ -543,7 +543,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes() {
             LOGSLLEVEL2_CONTACT(m_pSolverLog, "---> Convergence criteria (InEnergyVelocity) converged: "<<  m_bConverged<< std::endl;);
 
         }else{
-            ERRORMSG("This cancelation criteria has not been implemented")
+            GRSF_ERRORMSG("This cancelation criteria has not been implemented")
         }
 
         // If local contact problem is uncoupled from other processes we do not check for convergence of other processes

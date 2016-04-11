@@ -26,14 +26,14 @@ CollisionSolver::~CollisionSolver() {
 
 void CollisionSolver::initializeLog( Logging::Log* pSolverLog ) {
     m_pSolverLog = pSolverLog;
-    ASSERTMSG(m_pSolverLog != nullptr, "Logging::Log: nullptr!");
+    GRSF_ASSERTMSG(m_pSolverLog != nullptr, "Logging::Log: nullptr!");
 }
 
 
 
 void CollisionSolver::reset() {
     // Do a Debug check if sizes match!
-    ASSERTMSG( m_simBodies.size() != 0, "CollisionSolver:: No Bodies added to the system!");
+    GRSF_ASSERTMSG( m_simBodies.size() != 0, "CollisionSolver:: No Bodies added to the system!");
 
     removeAllContactDelegates();
 
@@ -118,7 +118,7 @@ void CollisionSolver::signalContactAdd() {
 
         for( auto colDataPtr : m_collisionSet){
 
-            ASSERTMSG( std::abs(colDataPtr->m_cFrame.m_e_x.dot(colDataPtr->m_cFrame.m_e_y)) < 1e-3 &&
+            GRSF_ASSERTMSG( std::abs(colDataPtr->m_cFrame.m_e_x.dot(colDataPtr->m_cFrame.m_e_y)) < 1e-3 &&
                       std::abs(colDataPtr->m_cFrame.m_e_y.dot(colDataPtr->m_cFrame.m_e_z))< 1e-3, "Vectors not orthogonal");
 
             LOGSLLEVEL3_CONTACT(m_pSolverLog,"---> Contact Frame: n: " << colDataPtr->m_cFrame.m_e_z.transpose() << std::endl;)

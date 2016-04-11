@@ -74,14 +74,14 @@ public:
 
             auto callBacksIt = m_signalHandlers.find(signal);
             if(callBacksIt == m_signalHandlers.end()){
-                ERRORMSG("You cannot register signal type: " << signal << " because not added to SignalHandler at instantiation!")
+                GRSF_ERRORMSG("You cannot register signal type: " << signal << " because not added to SignalHandler at instantiation!")
             }
             auto & callBacks = callBacksIt->second;
             auto callbackIt  = std::find( callBacks.begin(), callBacks.end(), name); // find already exiting callback
             if(callbackIt == callBacks.end()){
                 callBacks.push_front(c);
             }else{
-                ERRORMSG("This signal: " << signal <<" with callback name" << c.getName() << " is already registered!")
+                GRSF_ERRORMSG("This signal: " << signal <<" with callback name" << c.getName() << " is already registered!")
             }
 
         }
@@ -100,10 +100,10 @@ public:
             if(callbackIt != callBacks.end()){
                 callBacks.erase(callbackIt);
             }else{
-                ERRORMSG("No callback: " << name << " to unregister!")
+                GRSF_ERRORMSG("No callback: " << name << " to unregister!")
             }
         }else{
-            ERRORMSG("No callbacks for signal: " << signal << " because not added to SignalHandler at instantiation!")
+            GRSF_ERRORMSG("No callbacks for signal: " << signal << " because not added to SignalHandler at instantiation!")
         }
     }
 

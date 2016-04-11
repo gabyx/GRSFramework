@@ -140,33 +140,33 @@ private:
                 for(unsigned int i = 0; i < svec.size(); i++){
                     if(svec[i] == "bash"){
                         if(i != nextArgIdx){
-                           ERRORMSG( "Postprocess Argument: " << "bash" << " at wrong position!" << std::endl);
+                           GRSF_ERRORMSG( "Postprocess Argument: " << "bash" << " at wrong position!" << std::endl);
                         }
 
                         // has 2 arguments [int|all] and string which is the bash command!
                        currentArgIdx = i;
                        nextArgIdx = i + 3;
                        if(nextArgIdx-1 >=  svec.size()){
-                            ERRORMSG("Postprocess Argument: " << "bash" << ", two little arguments!" << std::endl);
+                            GRSF_ERRORMSG("Postprocess Argument: " << "bash" << ", two little arguments!" << std::endl);
 
                        }
                        p = new PostProcessTaskBash("bash");
                        m_postProcessTasks.push_back(p);
                     }else if( svec[i] == "copy-local-to"){
                         if(i != nextArgIdx){
-                            ERRORMSG("Postprocess Argument: " << "copy-local-to" << " at wrong position!" << std::endl)
+                            GRSF_ERRORMSG("Postprocess Argument: " << "copy-local-to" << " at wrong position!" << std::endl)
                         }
 
                         currentArgIdx = i;
                         nextArgIdx = i + 1;
                         if(nextArgIdx-1 >=  svec.size()){
-                            ERRORMSG("Postprocess Argument: " << "copy-local-to" << ", two little arguments!" << std::endl);
+                            GRSF_ERRORMSG("Postprocess Argument: " << "copy-local-to" << ", two little arguments!" << std::endl);
                         }
                         p = new PostProcessTaskCopyLocalTo("copy-local-to");
                         m_postProcessTasks.push_back(p);
                     }else{
                         if(i >= nextArgIdx){
-                            ERRORMSG("Postprocess Argument: " << svec[i] << " not known!" << std::endl);
+                            GRSF_ERRORMSG("Postprocess Argument: " << svec[i] << " not known!" << std::endl);
                         }
                         if(p){
                             p->addOption(i-currentArgIdx-1,svec[i]);
@@ -182,28 +182,28 @@ private:
 
         }
         catch(GetOpt::ParsingErrorEx & ex){
-            ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::InvalidFormatEx & ex){
-            ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionNotFoundEx & ex){
-            ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyArgumentsEx & ex){
-            ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyOptionsEx & ex){
-            ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx & ex){
-            ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx & ex) {
-            ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
-            ERRORMSG("Some unexpected options where given!" << std::endl)
+            GRSF_ERRORMSG("Some unexpected options where given!" << std::endl)
         }
 
 
@@ -231,15 +231,15 @@ private:
 
     void checkArguments() {
         if(m_sceneFile.empty()) {
-            ERRORMSG("No scene file (.xml) supplied as argument: -s [SceneFilePath]" << std::endl)
+            GRSF_ERRORMSG("No scene file (.xml) supplied as argument: -s [SceneFilePath]" << std::endl)
         } else {
             if(! boost::filesystem::exists(m_sceneFile)) {
-                ERRORMSG("Scene file supplied as argument: " << m_sceneFile << " does not exist!"<< std::endl)
+                GRSF_ERRORMSG("Scene file supplied as argument: " << m_sceneFile << " does not exist!"<< std::endl)
             }
         }
 
          if(! boost::filesystem::exists(m_mediaDir)) {
-                ERRORMSG("Media directory supplied as argument: " << m_mediaDir << " does not exist!"<< std::endl)
+                GRSF_ERRORMSG("Media directory supplied as argument: " << m_mediaDir << " does not exist!"<< std::endl)
          }
 
     }
@@ -254,7 +254,7 @@ private:
 
 
     void printErrorNoArg(std::string arg) {
-        ERRORMSG("Wrong options specified for arguement: '" << arg <<"'"<< std::endl)
+        GRSF_ERRORMSG("Wrong options specified for arguement: '" << arg <<"'"<< std::endl)
     }
 
     void printHelp() {

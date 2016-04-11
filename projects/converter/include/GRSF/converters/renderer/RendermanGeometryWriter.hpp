@@ -45,7 +45,7 @@ class RendermanGeometryWriter: public boost::static_visitor<> {
 
     template<typename T>
     inline void operator()(T & m)  {
-        ERRORMSG("Not implemented")
+        GRSF_ERRORMSG("Not implemented")
     }
 
 

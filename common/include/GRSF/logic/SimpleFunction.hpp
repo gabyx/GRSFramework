@@ -50,7 +50,7 @@ namespace LogicNodes {
                  SFINAE_ENABLE_IF( (!boost::mpl::contains< typename LogicTypes::TypeSeqArithmetic, T>::type::value) )
             >
             void operator()(LogicSocket<T> * n){
-                 ERRORMSG("Cannot cast type: " << LogicTypes::getTypeName<T>() << " to type: " << demangle::type<TEval>() );
+                 GRSF_ERRORMSG("Cannot cast type: " << LogicTypes::getTypeName<T>() << " to type: " << demangle::type<TEval>() );
             }
 
             template<typename T,
@@ -108,7 +108,7 @@ namespace LogicNodes {
                      ss << Utilities::stringFormat("Error: %02d Position: %02d Type: [%14s] Msg: %s\tExpression: %s\n",
                             i, error.token.position, exprtk::parser_error::to_str(error.mode), error.diagnostic, exprString);
                 }
-                ERRORMSG("Error in expression compilation: " << std::endl << ss.str())
+                GRSF_ERRORMSG("Error in expression compilation: " << std::endl << ss.str())
             }
 
             // get internal reference to the vector

@@ -39,16 +39,16 @@ public:
         // Process special Inclusion solver settings
 
         if(!Utilities::stringToType(this->m_inclusionSettings->m_splitNodeUpdateRatio,  incSet.attribute("splitNodeUpdateRatio").value())) {
-            ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: splitNodeUpdateRatio failed");
+            GRSF_ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: splitNodeUpdateRatio failed");
         }
         if(!Utilities::stringToType(this->m_inclusionSettings->m_convergenceCheckRatio,  incSet.attribute("convergenceCheckRatio").value())) {
-            ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: convergenceCheckRatio failed");
+            GRSF_ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: convergenceCheckRatio failed");
         }
 
         XMLAttributeType att = incSet.attribute("reserveSplitNodes");
         if(att) {
             if(!Utilities::stringToType(this->m_inclusionSettings->m_reserveSplitNodes, att.value())) {
-                ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: m_reserveSplitNodes failed");
+                GRSF_ERRORMSG("---> String conversion in MPISettings::InclusionSolverSettings: m_reserveSplitNodes failed");
             }
         }
 
@@ -92,14 +92,14 @@ public:
             if( att ){
                 bool doLocalComputations;
                 if(!Utilities::stringToType(doLocalComputations, att.value())) {
-                    ERRORMSG("---> String conversion in MPISettings::ProcessTopology: doLocalComputations failed");
+                    GRSF_ERRORMSG("---> String conversion in MPISettings::ProcessTopology: doLocalComputations failed");
                 }
                 m_topoSettings->m_rebuildSettings.m_doLocalComputations = doLocalComputations;
             }
 
             unsigned int policyCheck = 1;
             if(!Utilities::stringToType(policyCheck, procTopo.attribute("policyCheckEveryXTimeStep").value())) {
-                ERRORMSG("---> String conversion in MPISettings::ProcessTopology: policyCheckEveryXTimeStep failed");
+                GRSF_ERRORMSG("---> String conversion in MPISettings::ProcessTopology: policyCheckEveryXTimeStep failed");
             }
             m_topoSettings->m_rebuildSettings.m_policyCheckEachXTimeStep = policyCheck;
 
@@ -113,16 +113,16 @@ public:
                 m_topoSettings->m_rebuildSettings.m_policy = TopologyBuilderSettingsType::RebuildSettings::Policy::BODY_LIMIT;
                 unsigned int bodyLimit = 1;
                 if(!Utilities::stringToType(bodyLimit, procTopo.attribute("bodyLimit").value())) {
-                    ERRORMSG("---> String conversion in MPISettings::ProcessTopology: bodyLimit failed");
+                    GRSF_ERRORMSG("---> String conversion in MPISettings::ProcessTopology: bodyLimit failed");
                 }
                 m_topoSettings->m_rebuildSettings.m_bodyLimit = bodyLimit;
 
             } else {
-                ERRORMSG("---> String conversion in MPISettings:ProcessTopology: policy failed: not a valid setting");
+                GRSF_ERRORMSG("---> String conversion in MPISettings:ProcessTopology: policy failed: not a valid setting");
             }
 
         } else {
-            ERRORMSG("---> String conversion in MPISettings:ProcessTopology: mode failed: not a valid setting");
+            GRSF_ERRORMSG("---> String conversion in MPISettings:ProcessTopology: mode failed: not a valid setting");
         }
 
         XMLNodeType topo = procTopo.child("Topology");
@@ -135,14 +135,14 @@ public:
 
             if(!Utilities::stringToType(m_topoSettings->m_gridBuilderSettings.m_processDim
                                            ,  topo.attribute("dimension").value())) {
-                ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
+                GRSF_ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
             }
 
             XMLAttributeType att = topo.attribute("matchProcessDimToExtent");
             bool matchProcessDimToExtent = true;
             if(att) {
                if(!Utilities::stringToType(matchProcessDimToExtent, att.value())) {
-                    ERRORMSG("---> String conversion in MPISettings::ProcessTopology: matchProcessDimToExtent failed");
+                    GRSF_ERRORMSG("---> String conversion in MPISettings::ProcessTopology: matchProcessDimToExtent failed");
                }
             }
             m_topoSettings->m_gridBuilderSettings.m_matchProcessDimToExtent = matchProcessDimToExtent;
@@ -156,31 +156,31 @@ public:
 
                 if(!Utilities::stringToType(m_topoSettings->m_gridBuilderSettings.m_aligned,
                                             topo.attribute("aligned").value())) {
-                    ERRORMSG("---> String conversion in parseMPISettings: aligned failed");
+                    GRSF_ERRORMSG("---> String conversion in parseMPISettings: aligned failed");
                 }
 
                 if(m_topoSettings->m_gridBuilderSettings.m_aligned == false) {
-                    ERRORMSG("Parse in here a rotation matrix: not implemented!")
+                    GRSF_ERRORMSG("Parse in here a rotation matrix: not implemented!")
                 }
                 Vector3 minPoint;
                 if(!Utilities::stringToType(minPoint
                                                ,  topo.attribute("minPoint").value())) {
-                    ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
+                    GRSF_ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
                 }
                 Vector3 maxPoint;
                 if(!Utilities::stringToType(maxPoint
                                                ,  topo.attribute("maxPoint").value())) {
-                    ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
+                    GRSF_ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
                 }
                 m_topoSettings->m_gridBuilderSettings.m_aabb += minPoint;
                 m_topoSettings->m_gridBuilderSettings.m_aabb += maxPoint;
 
                 if(m_topoSettings->m_gridBuilderSettings.m_aabb.isEmpty()) {
-                    ERRORMSG("parseMPISettings: Infeasible min/max points");
+                    GRSF_ERRORMSG("parseMPISettings: Infeasible min/max points");
                 }
 
                 if(m_topoSettings->m_rebuildSettings.m_mode == TopologyBuilderSettingsType::RebuildSettings::Mode::DYNAMIC){
-                    ERRORMSG("---> You defined a predefined grid as topology and using dynamic rebuilding! You should not do this!")
+                    GRSF_ERRORMSG("---> You defined a predefined grid as topology and using dynamic rebuilding! You should not do this!")
                 }
 
             } else if(type=="binetTensor") {
@@ -190,13 +190,13 @@ public:
             } else if(type =="AABB") {
                 m_topoSettings->m_gridBuilderSettings.m_buildMode = MPILayer::GridBuilderSettings::BuildMode::ALIGNED;
             } else {
-                ERRORMSG("---> String conversion in MPISettings:ProcessTopology:buildMode failed: not a valid setting");
+                GRSF_ERRORMSG("---> String conversion in MPISettings:ProcessTopology:buildMode failed: not a valid setting");
             }
 
 
             PREC minCellSize = 0;
             if(!Utilities::stringToType(minCellSize, topo.attribute("minCellSize").value())) {
-                ERRORMSG("---> String conversion in MPISettings::ProcessTopology: minCellSize failed");
+                GRSF_ERRORMSG("---> String conversion in MPISettings::ProcessTopology: minCellSize failed");
             }
             m_topoSettings->m_gridBuilderSettings.m_minCellSize = minCellSize;
 
@@ -213,31 +213,31 @@ public:
 
                 if(!Utilities::stringToType(m_topoSettings->m_kdTreeBuilderSettings.m_aligned,
                                             topo.attribute("aligned").value())) {
-                    ERRORMSG("---> String conversion in parseMPISettings: aligned failed");
+                    GRSF_ERRORMSG("---> String conversion in parseMPISettings: aligned failed");
                 }
 
                 if(m_topoSettings->m_kdTreeBuilderSettings.m_aligned == false) {
-                    ERRORMSG("Parse in here a rotation matrix: not implemented!")
+                    GRSF_ERRORMSG("Parse in here a rotation matrix: not implemented!")
                 }
                 Vector3 minPoint;
                 if(!Utilities::stringToType(minPoint
                                                ,  topo.attribute("minPoint").value())) {
-                    ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
+                    GRSF_ERRORMSG("---> String conversion in parseMPISettings: minPoint failed");
                 }
                 Vector3 maxPoint;
                 if(!Utilities::stringToType(maxPoint
                                                ,  topo.attribute("maxPoint").value())) {
-                    ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
+                    GRSF_ERRORMSG("---> String conversion in parseMPISettings: maxPoint failed");
                 }
                 m_topoSettings->m_kdTreeBuilderSettings.m_aabb += minPoint;
                 m_topoSettings->m_kdTreeBuilderSettings.m_aabb += maxPoint;
 
                 if(m_topoSettings->m_kdTreeBuilderSettings.m_aabb.isEmpty()) {
-                    ERRORMSG("parseMPISettings: Infeasible min/max points");
+                    GRSF_ERRORMSG("parseMPISettings: Infeasible min/max points");
                 }
 
                 if(m_topoSettings->m_rebuildSettings.m_mode == TopologyBuilderSettingsType::RebuildSettings::Mode::DYNAMIC){
-                    ERRORMSG("---> You defined a predefined grid as topology and using dynamic rebuilding! You should not do this!")
+                    GRSF_ERRORMSG("---> You defined a predefined grid as topology and using dynamic rebuilding! You should not do this!")
                 }
 
             } else if(type=="binetTensor") {
@@ -247,18 +247,18 @@ public:
             } else if(type =="AABB") {
                 m_topoSettings->m_kdTreeBuilderSettings.m_buildMode = MPILayer::KdTreeBuilderSettings::BuildMode::ALIGNED;
             } else {
-                ERRORMSG("---> String conversion in MPISettings:ProcessTopology:buildMode failed: not a valid setting");
+                GRSF_ERRORMSG("---> String conversion in MPISettings:ProcessTopology:buildMode failed: not a valid setting");
             }
 
             PREC minCellSize = 0;
             if(!Utilities::stringToType(minCellSize, topo.attribute("minCellSize").value())) {
-                ERRORMSG("---> String conversion in MPISettings::ProcessTopology: minCellSize failed");
+                GRSF_ERRORMSG("---> String conversion in MPISettings::ProcessTopology: minCellSize failed");
             }
             m_topoSettings->m_kdTreeBuilderSettings.m_minCellSize = minCellSize;
 
         }
         else {
-            ERRORMSG("---> String conversion in MPISettings:ProcessTopology: type failed: not a valid setting");
+            GRSF_ERRORMSG("---> String conversion in MPISettings:ProcessTopology: type failed: not a valid setting");
         }
 
 
@@ -268,13 +268,13 @@ public:
 
             unsigned int points = 5;
             if(!Utilities::stringToType(points, massP.attribute("nPoints").value())) {
-                ERRORMSG("---> String conversion in MPISettings::ProcessTopology:MassPointPrediction nPoints failed");
+                GRSF_ERRORMSG("---> String conversion in MPISettings::ProcessTopology:MassPointPrediction nPoints failed");
             }
             m_topoSettings->m_massPointPredSettings.m_nPoints = points;
 
             PREC deltaT = 0.1;
             if(!Utilities::stringToType(deltaT, massP.attribute("deltaT").value())) {
-                ERRORMSG("---> String conversion in MPISettings::ProcessTopology:MassPointPrediction nPoints failed");
+                GRSF_ERRORMSG("---> String conversion in MPISettings::ProcessTopology:MassPointPrediction nPoints failed");
             }
             m_topoSettings->m_massPointPredSettings.m_deltaT = deltaT;
         }
@@ -284,19 +284,19 @@ public:
 
             unsigned int a;
             if(!Utilities::stringToType(a, outlier.attribute("kNNMean").value())) {
-                ERRORMSG("---> String conversion in MPISettings::ProcessTopology:GlobalOutlierFilter kNNMean failed");
+                GRSF_ERRORMSG("---> String conversion in MPISettings::ProcessTopology:GlobalOutlierFilter kNNMean failed");
             }
             m_topoSettings->m_globalOutlierFilterSettings.m_kNNMean = a;
 
             PREC b;
             if(!Utilities::stringToType(b, outlier.attribute("stdDeviationMult").value())) {
-                ERRORMSG("---> String conversion in MPISettings::ProcessTopology:GlobalOutlierFilter stdDeviationMult failed");
+                GRSF_ERRORMSG("---> String conversion in MPISettings::ProcessTopology:GlobalOutlierFilter stdDeviationMult failed");
             }
             m_topoSettings->m_globalOutlierFilterSettings.m_stdDevMult = b;
 
 
             if(!Utilities::stringToType(a, outlier.attribute("allowSplitAbove").value())) {
-                ERRORMSG("---> String conversion in MPISettings::ProcessTopology:GlobalOutlierFilter allowSplitAbove failed");
+                GRSF_ERRORMSG("---> String conversion in MPISettings::ProcessTopology:GlobalOutlierFilter allowSplitAbove failed");
             }
 
             m_topoSettings->m_globalOutlierFilterSettings.m_enabled = true;

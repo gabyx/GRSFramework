@@ -28,7 +28,7 @@ BodyCommunicator::BodyCommunicator(  std::shared_ptr< DynamicsSystemType> pDynSy
     if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
-        ERRORMSG("SimulationLog does not yet exist? Did you create it?")
+        GRSF_ERRORMSG("SimulationLog does not yet exist? Did you create it?")
     }
 
 
@@ -51,13 +51,13 @@ void BodyCommunicator::resetTopology(){
     for(auto & rank : m_nbRanks) {
         LOGBC(m_pSimulationLog,"---> BodyCommunicator: Add neighbour data for process rank: "<<rank<<std::endl;);
         auto res = m_nbDataMap.insert(rank);
-        ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << rank);
+        GRSF_ASSERTMSG(res.second,"Could not insert in m_nbDataMap for rank: " << rank);
     }
     m_pSimulationLog->logMessage("---> BodyCommunicator: Initialized all NeighbourDatas");
 
     // Fill in all BodyInfos for the local bodies (remote bodies are not considered, there should not be any of those)
     for(auto * body: m_globalLocal) {
-        ASSERTMSG(m_pProcTopo->belongsBodyToProcess(body), "Body with id: "<< RigidBodyId::getBodyIdString(body) <<" does not belong to process? How did you initialize your bodies?")
+        GRSF_ASSERTMSG(m_pProcTopo->belongsBodyToProcess(body), "Body with id: "<< RigidBodyId::getBodyIdString(body) <<" does not belong to process? How did you initialize your bodies?")
         if( body->m_pBodyInfo ){
             delete body->m_pBodyInfo;
         }
@@ -108,7 +108,7 @@ void BodyCommunicator::communicate(PREC currentSimTime){
         //Check if belonging rank is in the neighbours or our own
         if(ownerRank != m_rank){
             if( m_nbRanks.find(ownerRank) == m_nbRanks.end() ){
-                ERRORMSG("---> Body with id: " << RigidBodyId::getBodyIdString(body)
+                GRSF_ERRORMSG("---> Body with id: " << RigidBodyId::getBodyIdString(body)
                          <<" belongs to no neighbour, ownerRank: " << ownerRank << " pos: " << body->m_r_S );
             }
         LOGBC(m_pSimulationLog,"--->\t\t Body with id: " << RigidBodyId::getBodyIdString(body) <<" has owner rank: "<< (ownerRank) << ", proccess rank: " << m_pProcComm->getRank()<<std::endl;)
@@ -150,7 +150,7 @@ void BodyCommunicator::communicate(PREC currentSimTime){
 template<typename List>
 void BodyCommunicator::addLocalBodyExclusiveToNeighbourMap(RigidBodyType * body,const List & neighbourRanks)
 {
-    STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );
+    GRSF_STATIC_ASSERT( (std::is_same<RankIdType, typename List::value_type>::value) );
     // Add this local body exclusively to the given neighbours
 
     // Loop over all incoming  ranks
@@ -168,15 +168,15 @@ void BodyCommunicator::addLocalBodyExclusiveToNeighbourMap(RigidBodyType * body,
         if(res.second){//if inserted we need to add this body to the underlying neighbour data
            //add to the data
             auto * nbData = m_nbDataMap.getNeighbourData(rank);
-            ASSERTMSG( nbData , "No neighbour data for rank" << rank)
+            GRSF_ASSERTMSG( nbData , "No neighbour data for rank" << rank)
 
             auto pairlocalData = nbData->addLocalBodyData(body);
-            ASSERTMSG(pairlocalData.second, "Insert to neighbour data rank: " << rank << " in process rank: " <<m_rank << " failed!");
+            GRSF_ASSERTMSG(pairlocalData.second, "Insert to neighbour data rank: " << rank << " in process rank: " <<m_rank << " failed!");
             pairlocalData.first->m_commStatus = NeighbourMapType::DataType::LocalDataType::SEND_NOTIFICATION; // No need because is set automatically in constructor
         }else{
-            ASSERTMSG( m_nbDataMap.getNeighbourData(rank), "No neighbour data for rank " << rank)
-            ASSERTMSG(m_nbDataMap.getNeighbourData(rank)->getLocalBodyData(body),"body with id "<< RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << rank << " does not exist?" );
-            ASSERTMSG(m_nbDataMap.getNeighbourData(rank)->getLocalBodyData(body)->m_commStatus ==  NeighbourMapType::DataType::LocalDataType::SEND_UPDATE,
+            GRSF_ASSERTMSG( m_nbDataMap.getNeighbourData(rank), "No neighbour data for rank " << rank)
+            GRSF_ASSERTMSG(m_nbDataMap.getNeighbourData(rank)->getLocalBodyData(body),"body with id "<< RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << rank << " does not exist?" );
+            GRSF_ASSERTMSG(m_nbDataMap.getNeighbourData(rank)->getLocalBodyData(body)->m_commStatus ==  NeighbourMapType::DataType::LocalDataType::SEND_UPDATE,
                       "m_commStatus for body with id: " << RigidBodyId::getBodyIdString(body) << " in neighbour structure rank: " << rank << "should be in update mode!");
         }
 
@@ -193,7 +193,7 @@ void BodyCommunicator::addLocalBodyExclusiveToNeighbourMap(RigidBodyType * body,
         if( rankToFlags.second.m_overlaps == false){
 
             auto * nbData = m_nbDataMap.getNeighbourData(rankToFlags.first);
-            ASSERTMSG(nbData, "No neighbour data for rank " << rankToFlags.first)
+            GRSF_ASSERTMSG(nbData, "No neighbour data for rank " << rankToFlags.first)
 
             auto * localData = nbData->getLocalBodyData(body);
 
@@ -270,7 +270,7 @@ void BodyCommunicator::cleanUp(){
             if( rankToFlags.second.m_inNeighbourMap == true ){
 
                 auto * nbData = m_nbDataMap.getNeighbourData(rankToFlags.first);
-                ASSERTMSG(nbData, "No neighbour data for rank " << rankToFlags.first)
+                GRSF_ASSERTMSG(nbData, "No neighbour data for rank " << rankToFlags.first)
 
                 bool res = nbData->eraseLocalBodyData(body);
 

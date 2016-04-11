@@ -70,12 +70,12 @@ void MultiBodySimFileMPI::writeBySharedPtr(double time, const typename DynamicsS
     stream.flush();
 
 
-    ASSERTMSG( (bodyList.size() == 0 && m_writebuffer.size() == 0 )
+    GRSF_ASSERTMSG( (bodyList.size() == 0 && m_writebuffer.size() == 0 )
                    || (bodyList.size() != 0 && m_writebuffer.size() != 0 ) , "m_writebuffer.size()" << m_writebuffer.size() );
 
 
     //bytes need to be a multiple of the bytes for one body state
-    ASSERTMSG(m_writebuffer.size() % ( m_nBytesPerBody ) == 0, m_writebuffer.size() << " bytes not a multiple of " << m_nBytesPerBody << " bytes");
+    GRSF_ASSERTMSG(m_writebuffer.size() % ( m_nBytesPerBody ) == 0, m_writebuffer.size() << " bytes not a multiple of " << m_nBytesPerBody << " bytes");
 
     //std::vector<int> nbodiesPerProc(m_processes);
     unsigned int nBodies = bodyList.size();
@@ -98,7 +98,7 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
 {
 
     std::size_t nBodies = bodyList.size();
-    STATIC_ASSERTM( sizeof(std::size_t) == sizeof(unsigned long long int), "We send an 64bit integer");
+    GRSF_STATIC_ASSERTM( sizeof(std::size_t) == sizeof(unsigned long long int), "We send an 64bit integer");
 
 
     MPI_Status s;
@@ -123,10 +123,10 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
         //Necessary to make stream flush
         stream.flush();
 
-        ASSERTMSG( (bodyList.size() == 0 && m_writebuffer.size() == 0 )
+        GRSF_ASSERTMSG( (bodyList.size() == 0 && m_writebuffer.size() == 0 )
                        || (bodyList.size() != 0 && m_writebuffer.size() != 0 ) , "m_writebuffer.size()" << m_writebuffer.size() );
         //bytes need to be a multiple of the bytes for one body state
-        ASSERTMSG(( m_writebuffer.size())  % ( m_nBytesPerBody ) == 0, ( m_writebuffer.size()) << " bytes not a multiple of " << m_nBytesPerBody << " bytes");
+        GRSF_ASSERTMSG(( m_writebuffer.size())  % ( m_nBytesPerBody ) == 0, ( m_writebuffer.size()) << " bytes not a multiple of " << m_nBytesPerBody << " bytes");
     }
 
     std::vector<std::size_t> nbodiesPerProc(m_processes);
@@ -136,7 +136,7 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
     std::size_t bodyOffset = 0;
     MPI_Offset offsetMPI = 0;
     // All calculate offset [begin, begin + rank)
-    ASSERTMSG( std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.end(),0) == m_nSimBodies, " accumulation not the same");
+    GRSF_ASSERTMSG( std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.end(),0) == m_nSimBodies, " accumulation not the same");
     if(m_rank != 0u ){
         bodyOffset = std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.begin() + m_rank , 0);
 
@@ -145,7 +145,7 @@ void MultiBodySimFileMPI::writeByOffsets(double time, const typename DynamicsSys
 
     // Find first process which has bodies (this one writes the time!)
     unsigned int rankWriteTime = 0;
-    ASSERTMSG(rankWriteTime < m_processes," rankWriteTime: " << rankWriteTime);
+    GRSF_ASSERTMSG(rankWriteTime < m_processes," rankWriteTime: " << rankWriteTime);
 
     //Calculate offset
 
@@ -175,7 +175,7 @@ void MultiBodySimFileMPI::writeByOffsets2(double time, const typename DynamicsSy
 {
 
     std::size_t nBodies = bodyList.size();
-    STATIC_ASSERTM( sizeof(std::size_t) == sizeof(unsigned long long int), "We send an 64bit integer");
+    GRSF_STATIC_ASSERTM( sizeof(std::size_t) == sizeof(unsigned long long int), "We send an 64bit integer");
 
     MPI_Status s;
 
@@ -200,10 +200,10 @@ void MultiBodySimFileMPI::writeByOffsets2(double time, const typename DynamicsSy
         //Necessary to make stream flush
         stream.flush();
 
-        ASSERTMSG( (bodyList.size() == 0 && m_writebuffer.size() == 0 )
+        GRSF_ASSERTMSG( (bodyList.size() == 0 && m_writebuffer.size() == 0 )
                        || (bodyList.size() != 0 && m_writebuffer.size() != 0 ) , "m_writebuffer.size()" << m_writebuffer.size() );
         //bytes need to be a multiple of the bytes for one body state
-        ASSERTMSG(( m_writebuffer.size())  % ( m_nBytesPerBody ) == 0, ( m_writebuffer.size()) << " bytes not a multiple of " << m_nBytesPerBody << " bytes");
+        GRSF_ASSERTMSG(( m_writebuffer.size())  % ( m_nBytesPerBody ) == 0, ( m_writebuffer.size()) << " bytes not a multiple of " << m_nBytesPerBody << " bytes");
     }
 
     std::vector<std::size_t> nbodiesPerProc(m_processes);
@@ -213,7 +213,7 @@ void MultiBodySimFileMPI::writeByOffsets2(double time, const typename DynamicsSy
     std::size_t bodyOffset = 0;
     MPI_Offset offsetMPI = 0;
     // All calculate offset
-    ASSERTMSG( std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.end(),0) == m_nSimBodies, " accumulation not the same");
+    GRSF_ASSERTMSG( std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.end(),0) == m_nSimBodies, " accumulation not the same");
     if(m_rank != 0u ){
         bodyOffset = std::accumulate(nbodiesPerProc.begin(),nbodiesPerProc.begin() + m_rank, 0);
         //Calculate offset
@@ -302,7 +302,7 @@ void MultiBodySimFileMPI::setByteLengths() {
     int size;
     error = MPI_Type_size(m_bodyStateTypeMPI,&size);
     ASSERTMPIERROR(error, "Type size");
-    ASSERTMSG(size == m_nBytesPerBody, "MPI type has not the same byte size");
+    GRSF_ASSERTMSG(size == m_nBytesPerBody, "MPI type has not the same byte size");
 
 
 }

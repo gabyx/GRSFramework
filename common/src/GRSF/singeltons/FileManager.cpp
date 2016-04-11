@@ -40,7 +40,7 @@ void FileManager::init(boost::filesystem::path globalDirPath, boost::filesystem:
     if(!m_globalDirPath.empty()) {
         if(!exists(m_globalDirPath)) {
             if(!create_directories(m_globalDirPath)) {
-                ERRORMSG("Global Directory Path in FileManager could not be created!");
+                GRSF_ERRORMSG("Global Directory Path in FileManager could not be created!");
             }
         }
     }
@@ -48,7 +48,7 @@ void FileManager::init(boost::filesystem::path globalDirPath, boost::filesystem:
     if(!m_localDirPath.empty()) {
         if(!exists(m_localDirPath)) {
             if(!create_directories(m_localDirPath)) {
-                ERRORMSG("Local Directory Path in FileManager could not be created!");
+                GRSF_ERRORMSG("Local Directory Path in FileManager could not be created!");
             }
         }
     }

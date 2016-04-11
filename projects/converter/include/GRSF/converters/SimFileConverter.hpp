@@ -138,7 +138,7 @@ public:
                 xmlDoc.load_file(file.string().c_str());
                 auto node = xmlDoc.child("Converter");
                 if(!node){
-                    ERRORMSG("XML file: " << file << " contains no 'Converter' node!" )
+                    GRSF_ERRORMSG("XML file: " << file << " contains no 'Converter' node!" )
                 }
 
                 StateIndicesType stateIndices;
@@ -159,14 +159,14 @@ public:
                     auto att = n.attribute("useRange");
                     if(att){
                         if( !Utilities::stringToType(useRange, n.attribute("useRange").value() )  ) {
-                            ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
+                            GRSF_ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
                         }
 
                         if(useRange){
                             auto att = n.attribute("startIdx");
                             if(att){
                                 if( !Utilities::stringToType(startIdx, n.attribute("startIdx").value() )  ) {
-                                    ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
+                                    GRSF_ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
                                 }
                             }
 
@@ -174,7 +174,7 @@ public:
                             if(att){
                                 std::streamoff endIdxS = -1;
                                 if( !Utilities::stringToType(endIdxS, n.attribute("endIdx").value() )  ) {
-                                    ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
+                                    GRSF_ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
                                 }
                                 if(endIdxS>=0){ // if not negative set to parsed value
                                     endIdx = endIdxS;
@@ -185,14 +185,14 @@ public:
                             att = n.attribute("increment");
                             if(att){
                                 if( !Utilities::stringToType(increment, n.attribute("increment").value() )  ) {
-                                    ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
+                                    GRSF_ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
                                 }
                             }
                             mappedStartIdx = startIdx;
                             att = n.attribute("mappedStartIdx");
                             if(att){
                                 if( !Utilities::stringToType(mappedStartIdx, n.attribute("mappedStartIdx").value() )  ) {
-                                    ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
+                                    GRSF_ERRORMSG("---> String conversion to obtain 'fullFile' failed!");
                                 }
                             }
                         }
@@ -216,11 +216,11 @@ public:
                         for(auto s : n.children("State")){
 
                             if( !Utilities::stringToType(idx, s.attribute("stateIdx").value() )  ) {
-                                    ERRORMSG("---> String conversion to obtain 'stateIdx' failed!");
+                                    GRSF_ERRORMSG("---> String conversion to obtain 'stateIdx' failed!");
                             }
 
                             if( !Utilities::stringToType(frameIdx, s.attribute("mappedIdx").value() )  ) {
-                                    ERRORMSG("---> String conversion to obtain 'mappedIdx' failed!");
+                                    GRSF_ERRORMSG("---> String conversion to obtain 'mappedIdx' failed!");
                             }
 
                             outputFile = "";
@@ -240,7 +240,7 @@ public:
                         if(!stateIndices.empty()){
                             for(auto it = stateIndices.begin(); it != (--stateIndices.end()); ++it){
                                 if(it->m_idx == std::next(it)->m_idx){
-                                    ERRORMSG(" The file: " << file.filename() << " contains duplicate states idx: " << it->m_idx );
+                                    GRSF_ERRORMSG(" The file: " << file.filename() << " contains duplicate states idx: " << it->m_idx );
                                 }
                             }
                         }
@@ -469,7 +469,7 @@ protected:
         StateListType states;
 
         if(!m_simFile.openRead(f,true)){
-            ERRORMSG("Could not open SimFile at :" << f)
+            GRSF_ERRORMSG("Could not open SimFile at :" << f)
         }else{
             LOG(m_log, "---> SimFile Properties:" <<std::endl << m_simFile.getDetails().getString() << std::endl)
         }
@@ -520,7 +520,7 @@ protected:
             avgStateLoadTime +=  timer.elapsedMilliSec() - start;
 
             if(states.size()==0){
-                ERRORMSG("State size is zero!")
+                GRSF_ERRORMSG("State size is zero!")
             }
             LOG(m_log, "---> Loaded state at t: " <<time << std::endl;)
 
@@ -560,7 +560,7 @@ protected:
             if(!stateIndices.empty()){
                 if(++itStateIdx != stateIndices.end()){
                     if(itStateIdx->m_idx < 0 || itStateIdx->m_idx == currentStateIdx){
-                        ERRORMSG("Negative or same as privious state idx: " << itStateIdx->m_idx << " in xml for file: " << f)
+                        GRSF_ERRORMSG("Negative or same as privious state idx: " << itStateIdx->m_idx << " in xml for file: " << f)
                     }
                     // skip difference in file
                     m_simFile.seekgStates(itStateIdx->m_idx - currentStateIdx -1);

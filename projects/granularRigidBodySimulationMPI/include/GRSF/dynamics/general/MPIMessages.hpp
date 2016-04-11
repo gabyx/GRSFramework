@@ -147,7 +147,7 @@ public:
         if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
             m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
         } else {
-            ERRORMSG("SimulationLog does not yet exist? Did you create it?")
+            GRSF_ERRORMSG("SimulationLog does not yet exist? Did you create it?")
         }
 
         if(Logging::LogManager::getSingleton().existsLog("MPISerializerLog")) {
@@ -399,7 +399,7 @@ private:
             serializeBodyUpdate(ar,body);
             LOGBC_SZ(m_pSerializerLog, "-----> Serialize body (update): finished " << std::endl;);
         } else {
-            ERRORMSG("flag not recognized!")
+            GRSF_ERRORMSG("flag not recognized!")
         }
 
 
@@ -535,7 +535,7 @@ private:
                 if(m_nc->m_nbRanks.find(*it) !=  m_nc->m_nbRanks.end()) { // If rank is neighbour rank
                     body->m_pBodyInfo->m_neighbourRanks[*it] = typename BodyInfoType::Flags(true); // Overlaps this rank!
                 } else {
-                    ERRORMSG("This rank: " << *it << " is no neighbour of our process rank: " << m_nc->m_rank);
+                    GRSF_ERRORMSG("This rank: " << *it << " is no neighbour of our process rank: " << m_nc->m_rank);
                 }
 
                 auto pairlocalData = m_nc->m_nbDataMap.getNeighbourData(*it)->addLocalBodyData(body);
@@ -618,7 +618,7 @@ private:
                 if(m_nc->m_nbRanks.find(*it) !=  m_nc->m_nbRanks.end()) {
                     body->m_pBodyInfo->m_neighbourRanks[*it] = typename BodyInfoType::Flags(true); // Overlaps this rank!
                 } else {
-                    ERRORMSG("This rank: " << *it << " is no neighbour of our process rank: " << m_nc->m_rank);
+                    GRSF_ERRORMSG("This rank: " << *it << " is no neighbour of our process rank: " << m_nc->m_rank);
                 }
                 // Change comm status!
                 auto pairlocalData = m_nc->m_nbDataMap.getNeighbourData(*it)->addLocalBodyData(body);
@@ -758,7 +758,7 @@ private:
                 if(!body->m_pSolverData) {
                     body->m_pSolverData = new typename RigidBodyType::BodySolverDataType();
                 } else {
-                    ERRORMSG("There is a SolverData already present in body with id: " << body->m_id);
+                    GRSF_ERRORMSG("There is a SolverData already present in body with id: " << body->m_id);
                 }
             }
             LOGASSERTMSG( body->m_pSolverData, m_pSerializerLog, "There is no SolverData present in body with id: "<< RigidBodyId::getBodyIdString(body) << "! ?");
@@ -783,9 +783,9 @@ private:
             LOGBC_SZ(m_pSerializerLog, "----->  m_uBuffer.m_back: " << body->m_pSolverData->m_uBuffer.m_back.transpose() <<std::endl;);
         } else {
             if(Archive::is_loading::value) {
-                ERRORMSG("Deserializing a not simulated body should not happen?");
+                GRSF_ERRORMSG("Deserializing a not simulated body should not happen?");
             } else {
-                ERRORMSG("Serializing a not simulated body should not happen?");
+                GRSF_ERRORMSG("Serializing a not simulated body should not happen?");
             }
 
         }
@@ -849,7 +849,7 @@ public:
         if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
             m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
         } else {
-            ERRORMSG("SimulationLog does not yet exist? Did you create it?")
+            GRSF_ERRORMSG("SimulationLog does not yet exist? Did you create it?")
         }
 
         if(Logging::LogManager::getSingleton().existsLog("MPISerializerLog")) {
@@ -1107,7 +1107,7 @@ public:
                 serializeEigen(ar,it->second.m_pBody->m_h_term); // send the current h_term , mass matrix is already in the remote on the neighbour
             }
         } else {
-            ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
+            GRSF_ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
             // We know to which neighbours we send receive a nonempty message
         }
 
@@ -1185,7 +1185,7 @@ public:
             }
 
         } else {
-            ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
+            GRSF_ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
             // We know from which neighbours we should receive a nonempty message
         }
 
@@ -1275,7 +1275,7 @@ public:
             }
         }
         else{
-            ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
+            GRSF_ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
             // We know from which neighbours we should receive a nonempty message
         }
 
@@ -1324,7 +1324,7 @@ public:
             }
         }
         else{
-            ERRORMSG("We should not receive an empty message from neighbour " << this->m_neighbourRank << std::endl);
+            GRSF_ERRORMSG("We should not receive an empty message from neighbour " << this->m_neighbourRank << std::endl);
         }
 
         this->m_initialized = false;
@@ -1415,7 +1415,7 @@ public:
             }
         }
         else{
-            ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
+            GRSF_ERRORMSG("We should send a message to neighbour " << this->m_neighbourRank << " which is non empty! This should not happen!")
             // We know from which neighbours we should receive a nonempty message
         }
 
@@ -1467,7 +1467,7 @@ public:
             }
         }
         else{
-            ERRORMSG("We should not receive an empty message from neighbour " << this->m_neighbourRank << std::endl);
+            GRSF_ERRORMSG("We should not receive an empty message from neighbour " << this->m_neighbourRank << std::endl);
         }
 
         this->m_initialized = false;
@@ -1533,7 +1533,7 @@ public:
                 // Local AABB
                 ar & m_pTopoBuilder->m_aabb;
             }else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::MVBB ){
-                ERRORMSG("Local computations should be off for MVVB build mode!")
+                GRSF_ERRORMSG("Local computations should be off for MVVB build mode!")
             }
         }
     }
@@ -1597,7 +1597,7 @@ public:
                 m_pTopoBuilder->m_aabb += insertedAABB.first->second;
 
             }else if( m_pTopoBuilder->m_settings.m_buildMode == SettingsType::BuildMode::MVBB ){
-                ERRORMSG("Local computations should be off for MVVB build mode!")
+                GRSF_ERRORMSG("Local computations should be off for MVVB build mode!")
             }
         }
     }
@@ -1810,7 +1810,7 @@ public:
         for(unsigned int i = 0; i< nStates;i++){
             ar & id;
             auto res = bodiesInitStates.emplace(id,id);
-            ASSERTMSG(res.second, "Body with id: " << id << " has already been added in list!?");
+            GRSF_ASSERTMSG(res.second, "Body with id: " << id << " has already been added in list!?");
             serializeEigen(ar, res.first->second.m_q);
             serializeEigen(ar , res.first->second.m_u);
         }

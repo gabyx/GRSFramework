@@ -111,7 +111,7 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     LOG(m_pSimulationLog, "---> \t" << m_pSceneParser->getBodyModule()->getStatistics() << std::endl;);
 
     if(!m_pDynSys->m_simBodies.size()){
-        ERRORMSG("No simulated bodies added! Please add some!");
+        GRSF_ERRORMSG("No simulated bodies added! Please add some!");
     }
     // =====================================================
 
@@ -417,7 +417,7 @@ bool SimulationManagerGUI::initRecordThread() {
     m_pSimulationLog->logMessage("---> Copy SimData.dat to right place...");
     boost::filesystem::path simDataFile;
     if(!m_pTimestepper->m_settings.m_simDataReferenceFile.empty()) {
-        ASSERTMSG(false,"HERE IS CODE ZU VERFOLSTÄNDIGEN! FALSCH!")
+        GRSF_ASSERTMSG(false,"HERE IS CODE ZU VERFOLSTÄNDIGEN! FALSCH!")
         simDataFile = FileManager::getSingleton().copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_settings.m_simDataReferenceFile,true);
     }
 

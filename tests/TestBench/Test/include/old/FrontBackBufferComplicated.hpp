@@ -37,7 +37,7 @@ class FrontBackBuffer< TF, TB , false> {
 public:
 
         // If <const * int , int&> --> this result in is_same< int , int >
-        // STATIC_ASSERT( (std::is_same< typename StripModifiers<TF>::type, typename StripModifiers<TB>::type >::value ) );
+        // GRSF_STATIC_ASSERT( (std::is_same< typename StripModifiers<TF>::type, typename StripModifiers<TB>::type >::value ) );
 
     template <typename T>
     struct MyRefTypes {
@@ -189,7 +189,7 @@ class FrontBackBuffer< TF, TB , true> {
 public:
 
         // If <const * int , int&> --> this result in is_same< int , int >
-        // STATIC_ASSERT( (std::is_same< typename StripModifiers<TF>::type, typename StripModifiers<TB>::type >::value ) );
+        // GRSF_STATIC_ASSERT( (std::is_same< typename StripModifiers<TF>::type, typename StripModifiers<TB>::type >::value ) );
 
     template <typename T>
     struct MyRefTypes {

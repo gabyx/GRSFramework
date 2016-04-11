@@ -122,7 +122,7 @@
                     LOGICSOCKET_CASE_SWITCH(18) \
                     LOGICSOCKET_CASE_SWITCH(19) \
                 default: \
-                    ERRORMSG("TYPE: "<< this->m_type <<" not implemented in switch statement"); \
+                    GRSF_ERRORMSG("TYPE: "<< this->m_type <<" not implemented in switch statement"); \
                 }; \
 
 

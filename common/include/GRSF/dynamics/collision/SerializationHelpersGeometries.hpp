@@ -67,7 +67,7 @@ void serialize(Archive & ar, AABB<N> & g, const unsigned int version) {
 template<typename Archive>
 void serialize(Archive & ar, MeshGeometry & g, const unsigned int version) {
 
-    ERRORMSG("No implementation for MeshGeometry serialization!");
+    GRSF_ERRORMSG("No implementation for MeshGeometry serialization!");
 
 }
 

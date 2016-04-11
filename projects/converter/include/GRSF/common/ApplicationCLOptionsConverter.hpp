@@ -86,7 +86,7 @@ public:
                     if(range.size()!=2 || (range[1]!=-1 && range[1]<0) || (range[0]!=-1 && range[0]<0) ||
                        (range[1] != -1  && range[1] < range[0])
                        ){
-                        ERRORMSG("Exception occured in parsing timerange: range.size()" )
+                        GRSF_ERRORMSG("Exception occured in parsing timerange: range.size()" )
                     }
                     m_timeRange = TypesTimeRange::RangeType(range[0],range[1]);
 
@@ -95,7 +95,7 @@ public:
                     std::vector<double> range;
                     ops >> Option("timelist",range);
                     if(range.size()==0){
-                        ERRORMSG("Exception occured in parsing timelist: range.size()" )
+                        GRSF_ERRORMSG("Exception occured in parsing timelist: range.size()" )
                     }
                     TypesTimeRange::ListType r(range.begin(), range.end());
                     m_timeRange = r;
@@ -107,7 +107,7 @@ public:
                     ops >> Option("bodyrange",range);
                     if(range.size()!=2 || (range[1]!=-1 && range[1]<0) || (range[0]!=-1 && range[0]<0) ||
                        (range[1] != -1  && range[1] < range[0]) ){
-                        ERRORMSG("Exception occured in parsing bodyrange: range.size()" )
+                        GRSF_ERRORMSG("Exception occured in parsing bodyrange: range.size()" )
                     }
                     m_bodyRange = TypesBodyRange::RangeType(range[0],range[1]);
 
@@ -115,7 +115,7 @@ public:
                     std::vector<unsigned int> range;
                     ops >> Option("bodylist",range);
                     if(range.size()==0){
-                        ERRORMSG("Exception occured in parsing bodylist: range.size()" )
+                        GRSF_ERRORMSG("Exception occured in parsing bodylist: range.size()" )
 
                     }
                     TypesBodyRange::ListType l(range.begin(), range.end());
@@ -140,10 +140,10 @@ public:
                         m_splitIntoFiles = true;
                     }
                     if(m_endStateIdx<m_startStateIdx){
-                         ERRORMSG("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
+                         GRSF_ERRORMSG("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
                     }
             }else{
-                ERRORMSG("Exception occured in parsing task arguments" )
+                GRSF_ERRORMSG("Exception occured in parsing task arguments" )
 
             }
 
@@ -162,28 +162,28 @@ public:
             ops >> Option('o',"output",m_outputFile);
         }
         catch(GetOpt::ParsingErrorEx & ex){
-            ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::InvalidFormatEx & ex){
-            ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionNotFoundEx & ex){
-            ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyArgumentsEx & ex){
-            ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyOptionsEx & ex){
-            ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx ex){
-            ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx & ex) {
-            ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
-            ERRORMSG("Some unexpected options where given!" )
+            GRSF_ERRORMSG("Some unexpected options where given!" )
         }
 
     }
@@ -207,11 +207,11 @@ public:
     void checkArguments() {
 
         if(m_inputFiles.empty()) {
-            ERRORMSG( "No input files supplied!" )
+            GRSF_ERRORMSG( "No input files supplied!" )
         } else {
             for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
                 if(! boost::filesystem::exists(*it)) {
-                    ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
+                    GRSF_ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
                 }
             }
 
@@ -219,10 +219,10 @@ public:
 
 
         if(m_outputFile.empty()){
-            ERRORMSG( "No output file supplied!" )
+            GRSF_ERRORMSG( "No output file supplied!" )
         }
         if(boost::filesystem::exists(m_outputFile)) {
-                ERRORMSG( "Output file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
+                GRSF_ERRORMSG( "Output file supplied as argument: " << m_outputFile << " does already exist (no overwrite is allowed)!")
         }
 
 
@@ -231,7 +231,7 @@ public:
 private:
 
     void printErrorNoArg(std::string arg) {
-        ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
+        GRSF_ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
         exit(EXIT_FAILURE);
     }
 
@@ -318,7 +318,7 @@ public:
                 ops >> Option("endIdx",m_endStateIdx);
             }
             if(m_endStateIdx<m_startStateIdx){
-                 ERRORMSG("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
+                 GRSF_ERRORMSG("Exception occured: startIdx >= endIdx = " << m_endStateIdx )
             }
 
             if( ops >> OptionPresent("skipFirstState")) {
@@ -337,35 +337,35 @@ public:
         }
         catch(GetOpt::ParsingErrorEx & ex){
 
-            ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::InvalidFormatEx & ex){
 
-            ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionNotFoundEx & ex){
 
-            ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyArgumentsEx & ex){
 
-            ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyOptionsEx & ex){
 
-            ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx ex){
 
-            ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx & ex) {
 
-            ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
 
-            ERRORMSG("Some unexpected options where given!" )
+            GRSF_ERRORMSG("Some unexpected options where given!" )
         }
 
     }
@@ -380,12 +380,12 @@ public:
 
         if(m_inputFiles.empty()) {
 
-            ERRORMSG( "No input files supplied!" )
+            GRSF_ERRORMSG( "No input files supplied!" )
         } else {
             for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
                 if(! boost::filesystem::exists(*it)) {
 
-                    ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
+                    GRSF_ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
                 }
             }
 
@@ -396,7 +396,7 @@ private:
 
     void printErrorNoArg(std::string arg) {
 
-        ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
+        GRSF_ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
         exit(EXIT_FAILURE);
     }
 
@@ -469,7 +469,7 @@ public:
             if(render == "renderman"){
                 m_renderer = Renderer::RENDERMAN;
             }else if(render == "luxrender"){
-                ERRORMSG("Luxrender is not supported at the moment!")
+                GRSF_ERRORMSG("Luxrender is not supported at the moment!")
             }
 
             m_inputFiles.clear();
@@ -500,35 +500,35 @@ public:
         }
         catch(GetOpt::ParsingErrorEx & ex){
 
-            ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::InvalidFormatEx & ex){
 
-            ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionNotFoundEx & ex){
 
-            ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyArgumentsEx & ex){
 
-            ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyOptionsEx & ex){
 
-            ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx & ex){
 
-            ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx & ex) {
 
-            ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
 
-            ERRORMSG("Some unexpected options where given!" )
+            GRSF_ERRORMSG("Some unexpected options where given!" )
         }
 
     }
@@ -554,26 +554,26 @@ public:
 
         if(m_inputFiles.empty()) {
 
-            ERRORMSG( "No input files supplied!" )
+            GRSF_ERRORMSG( "No input files supplied!" )
         } else {
             for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
                 if(! boost::filesystem::exists(*it)) {
 
-                    ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
+                    GRSF_ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
                 }
             }
         }
 
         if(m_sceneFile.empty()){
 
-            ERRORMSG( "No scene file supplied!" )
+            GRSF_ERRORMSG( "No scene file supplied!" )
         }else if(!boost::filesystem::exists(m_sceneFile)) {
 
-            ERRORMSG( "Scene file supplied as argument: " << m_sceneFile << " does not exist!")
+            GRSF_ERRORMSG( "Scene file supplied as argument: " << m_sceneFile << " does not exist!")
         }
 
         if(!boost::filesystem::exists(m_mediaDir)) {
-            ERRORMSG( "Media directory " << m_mediaDir << " does not exist!" )
+            GRSF_ERRORMSG( "Media directory " << m_mediaDir << " does not exist!" )
         }
     }
 
@@ -588,7 +588,7 @@ private:
 
     void printErrorNoArg(std::string arg) {
 
-        ERRORMSG( "Wrong options specified for argument: '" << arg <<"'")
+        GRSF_ERRORMSG( "Wrong options specified for argument: '" << arg <<"'")
     }
 
     void printHelp() {
@@ -681,35 +681,35 @@ public:
         }
         catch(GetOpt::ParsingErrorEx & ex){
 
-            ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::ParsingErrorEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::InvalidFormatEx & ex){
 
-            ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::InvalidFormatEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionNotFoundEx & ex){
 
-            ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::OptionNotFoundEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyArgumentsEx & ex){
 
-            ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::TooManyArgumentsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::TooManyOptionsEx & ex){
 
-            ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::TooManyOptionsEx exception occured in parsing args: " << ex.what() )
         }
         catch(GetOpt::OptionsFileNotFoundEx & ex){
 
-            ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::OptionsFileNotFoundEx exception occured in parsing args: " << ex.what() )
         } catch(GetOpt::GetOptEx & ex) {
 
-            ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
+            GRSF_ERRORMSG("GetOpt::GetOptEx exception occured in parsing args: " << ex.what() )
         }
 
         if (ops.options_remain()){
 
-            ERRORMSG("Some unexpected options where given!" )
+            GRSF_ERRORMSG("Some unexpected options where given!" )
         }
 
     }
@@ -727,24 +727,24 @@ public:
     void checkArguments() {
 
         if(m_inputFiles.empty()) {
-            ERRORMSG( "No input files supplied!" )
+            GRSF_ERRORMSG( "No input files supplied!" )
         } else {
             for(auto it = m_inputFiles.begin(); it != m_inputFiles.end(); it++){
                 if(! boost::filesystem::exists(*it)) {
-                    ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
+                    GRSF_ERRORMSG( "Input file supplied as argument: " << *it << " does not exist!")
                 }
             }
         }
 
         if(!m_sceneFile.empty()){
             if(!boost::filesystem::exists(m_sceneFile)) {
-                ERRORMSG( "Scene file supplied as argument: " << m_sceneFile << " does not exist!")
+                GRSF_ERRORMSG( "Scene file supplied as argument: " << m_sceneFile << " does not exist!")
                 }
         }
 
         if(!m_mediaDir.empty()){
             if(!boost::filesystem::exists(m_mediaDir)) {
-                ERRORMSG( "Media directory " << m_mediaDir << " does not exist!" )
+                GRSF_ERRORMSG( "Media directory " << m_mediaDir << " does not exist!" )
             }
         }
     }
@@ -759,7 +759,7 @@ private:
 
     void printErrorNoArg(std::string arg) {
 
-        ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
+        GRSF_ERRORMSG( "Wrong options specified for arguement: '" << arg <<"'")
     }
 
     void printHelp() {

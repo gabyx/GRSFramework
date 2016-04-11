@@ -25,7 +25,7 @@ namespace TestFunctions{
 
         std::fstream l(filePath.c_str());
         if(!l.good()){
-            ERRORMSG("Could not open file: " << filePath << std::endl)
+            GRSF_ERRORMSG("Could not open file: " << filePath << std::endl)
         }
 
         l << oobb.m_minPoint.transpose().format(MyMatrixIOFormat::SpaceSep) << std::endl;
@@ -39,7 +39,7 @@ namespace TestFunctions{
         file.open(filePath.c_str());  //opens .txt file
 
         if (!file.is_open()) { // check file is open, quit if not
-            ERRORMSG("Could not open file: " << filePath)
+            GRSF_ERRORMSG("Could not open file: " << filePath)
         }
 
         PREC a,b,c;
@@ -59,7 +59,7 @@ namespace TestFunctions{
         file.open(filePath.c_str());  //opens .txt file
 
         if (!file.is_open()) { // check file is open, quit if not
-            ERRORMSG("Could not open file: " << filePath)
+            GRSF_ERRORMSG("Could not open file: " << filePath)
         }
         PREC a,b;
         Vector2List v;
@@ -92,7 +92,7 @@ namespace TestFunctions{
 
         std::fstream l(filePath.c_str());
         if(!l.good()){
-            ERRORMSG("Could not open file: " << filePath << std::endl)
+            GRSF_ERRORMSG("Could not open file: " << filePath << std::endl)
         }
 
         for(unsigned int i=0; i<v.cols(); i++) {
@@ -105,7 +105,7 @@ namespace TestFunctions{
 
         std::fstream l(filePath.c_str());
         if(!l.good()){
-            ERRORMSG("Could not open file: " << filePath << std::endl)
+            GRSF_ERRORMSG("Could not open file: " << filePath << std::endl)
         }
 
         for(auto & v: c) {

@@ -104,7 +104,7 @@ struct ProxFunction<ConvexSets::RPlus> {
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
 
         Eigen::MatrixBase<DerivedOther> & y_ref =  const_cast<Eigen::MatrixBase<DerivedOther> &>(y);
-        ASSERTMSG( x.rows() == y_ref.rows(), "Wrong dimension!");
+        GRSF_ASSERTMSG( x.rows() == y_ref.rows(), "Wrong dimension!");
 
         for (unsigned int i=0; i<y_ref.rows(); i++) {
             y_ref[i] = max(x[i],0.0);
@@ -130,7 +130,7 @@ struct ProxFunction<ConvexSets::Disk> {
                                                   const Eigen::MatrixBase<Derived> & y) {
         // Solve the set (disc with radius mu_P_N), one r is used for the prox!
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
-        ASSERTMSG(y.rows()%2==0,"wrong size");
+        GRSF_ASSERTMSG(y.rows()%2==0,"wrong size");
         Eigen::MatrixBase<Derived> & y_ref =  const_cast<Eigen::MatrixBase<Derived> &>(y);
 
         PREC absvalue = y_ref.squaredNorm();
@@ -152,8 +152,8 @@ struct ProxFunction<ConvexSets::Disk> {
         // Solve the set (disc with radius mu_P_N), one r is used for the prox!
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
-        ASSERTMSG(x.rows()%2==0,"wrong size");
-        ASSERTMSG(y.rows()%2==0,"wrong size");
+        GRSF_ASSERTMSG(x.rows()%2==0,"wrong size");
+        GRSF_ASSERTMSG(y.rows()%2==0,"wrong size");
         Eigen::MatrixBase<DerivedOther> & y_ref =  const_cast<Eigen::MatrixBase<DerivedOther> &>(y);
 
         PREC absvalue;
@@ -174,8 +174,8 @@ struct ProxFunction<ConvexSets::Disk> {
         using PREC = typename Derived::Scalar;
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
-        ASSERTMSG(y.rows()%2==0,"wrong size");
-        ASSERTMSG( (2) * radius.rows() == y.rows(), "Wrong dimension!");
+        GRSF_ASSERTMSG(y.rows()%2==0,"wrong size");
+        GRSF_ASSERTMSG( (2) * radius.rows() == y.rows(), "Wrong dimension!");
 
         Eigen::MatrixBase<DerivedOther> & y_ref =  const_cast<Eigen::MatrixBase<DerivedOther> &>(y);
         //// Solve the set (disc with radius mu_P_N), one r is used for the prox!
@@ -202,10 +202,10 @@ struct ProxFunction<ConvexSets::Disk> {
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther1);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
-        ASSERTMSG(x.rows()%2==0,"wrong size");
-        ASSERTMSG(y.rows()%2==0,"wrong size");
-        ASSERTMSG( x.rows() == y.rows(), "Wrong dimension!");
-        ASSERTMSG( (2) * radius.rows() == y.rows(), "Wrong dimension!");
+        GRSF_ASSERTMSG(x.rows()%2==0,"wrong size");
+        GRSF_ASSERTMSG(y.rows()%2==0,"wrong size");
+        GRSF_ASSERTMSG( x.rows() == y.rows(), "Wrong dimension!");
+        GRSF_ASSERTMSG( (2) * radius.rows() == y.rows(), "Wrong dimension!");
 
 
         Eigen::MatrixBase<Derived> & y_ref =  const_cast<Eigen::MatrixBase<Derived> &>(y);
@@ -238,7 +238,7 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
                                                  const Eigen::MatrixBase<Derived> & y) {
 
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
-        ASSERTMSG(y.rows()==3,"wrong size");
+        GRSF_ASSERTMSG(y.rows()==3,"wrong size");
         Eigen::MatrixBase<Derived> & y_ref =  const_cast<Eigen::MatrixBase<Derived> &>(y);
 
         //// Solve the set (disc with radius mu_P_N), one r is used for the prox!
@@ -266,8 +266,8 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
                                                  Eigen::MatrixBase<DerivedOther> & y) {
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
-        ASSERTMSG(x.rows()==3,"wrong size");
-        ASSERTMSG(y.rows()==3,"wrong size");
+        GRSF_ASSERTMSG(x.rows()==3,"wrong size");
+        GRSF_ASSERTMSG(y.rows()==3,"wrong size");
         Eigen::MatrixBase<Derived> & y_ref =  const_cast<Eigen::MatrixBase<Derived> &>(y);
 
         //// Solve the set (disc with radius mu_P_N), one r is used for the prox!
@@ -293,9 +293,9 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
         using PREC = typename Derived::Scalar;
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
-        ASSERTMSG(y.rows() % 3==0,"wrong size");
+        GRSF_ASSERTMSG(y.rows() % 3==0,"wrong size");
         Eigen::MatrixBase<DerivedOther> & y_ref =  const_cast<Eigen::MatrixBase<DerivedOther> &>(y);
-        ASSERTMSG( (3) * scale_factor.rows() == y_ref.rows(), "Wrong dimension!");
+        GRSF_ASSERTMSG( (3) * scale_factor.rows() == y_ref.rows(), "Wrong dimension!");
 
         //// Solve the set (disc with radius mu_P_N), one r is used for the prox!
         PREC absvalue;
@@ -327,10 +327,10 @@ struct ProxFunction<ConvexSets::RPlusAndDisk> {
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther1);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
         Eigen::MatrixBase<Derived> & y_ref =  const_cast<Eigen::MatrixBase<Derived> &>(y);
-        ASSERTMSG(x.rows() % 3==0,"wrong size");
-        ASSERTMSG(y.rows() % 3==0,"wrong size");
-        ASSERTMSG( (3) * scale_factor.rows() == x.rows(), "Wrong dimension!");
-        ASSERTMSG( (3) * scale_factor.rows() == y_ref.rows(), "Wrong dimension!");
+        GRSF_ASSERTMSG(x.rows() % 3==0,"wrong size");
+        GRSF_ASSERTMSG(y.rows() % 3==0,"wrong size");
+        GRSF_ASSERTMSG( (3) * scale_factor.rows() == x.rows(), "Wrong dimension!");
+        GRSF_ASSERTMSG( (3) * scale_factor.rows() == y_ref.rows(), "Wrong dimension!");
 
         //// Solve the set (disc with radius mu_P_N), one r is used for the prox!
         PREC absvalue;
@@ -362,7 +362,7 @@ struct ProxFunction<ConvexSets::Cone3D> {
     static INLINE_PROX_KEYWORD void doProxSingle(const PREC & slopeFactor,
                                                  Eigen::MatrixBase<Derived> & y)
     {
-            ASSERTMSG(y.rows() % 3==0,"wrong size");
+            GRSF_ASSERTMSG(y.rows() % 3==0,"wrong size");
             PREC normT = y.template tail<2>().norm();
 
             PREC testFricCone = slopeFactor*normT + y(0);
@@ -479,7 +479,7 @@ INLINE_PROX_KEYWORD bool cancelCriteriaValue(   const Eigen::MatrixBase<Derived>
                                                 PREC AbsTol, PREC RelTol, PREC & residual) {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
-    ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
+    GRSF_ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
 
     using std::abs;
     residual = 0.0;
@@ -504,7 +504,7 @@ INLINE_PROX_KEYWORD bool cancelCriteriaValue(   const Eigen::MatrixBase<Derived>
                                                 PREC AbsTol, PREC RelTol) {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
-    ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
+    GRSF_ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
 
     using std::abs;
     for(int i=0; i<P_old.size(); i++) {
@@ -526,8 +526,8 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNorm(  const Eigen::MatrixBase<Deri
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
-    ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
-    ASSERTMSG(NormMatrix_diag.rows()==P_old.rows(),"Vectors are not equal lenght!");
+    GRSF_ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
+    GRSF_ASSERTMSG(NormMatrix_diag.rows()==P_old.rows(),"Vectors are not equal lenght!");
 
     using PRECM = typename Derived::Scalar;
 
@@ -557,8 +557,8 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNormSq(  const Eigen::MatrixBase<De
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
-    ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
-    ASSERTMSG(NormMatrix_diag.rows()==P_old.rows(),"Vectors are not equal lenght!");
+    GRSF_ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
+    GRSF_ASSERTMSG(NormMatrix_diag.rows()==P_old.rows(),"Vectors are not equal lenght!");
 
     using PREC = typename Derived::Scalar;
 
@@ -586,8 +586,8 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNormSq(  const Eigen::MatrixBase<De
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
-    ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
-    ASSERTMSG(NormMatrix_diag.rows()==P_old.rows(),"Vectors are not equal lenght!");
+    GRSF_ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
+    GRSF_ASSERTMSG(NormMatrix_diag.rows()==P_old.rows(),"Vectors are not equal lenght!");
 
     using PREC = typename Derived::Scalar;
 
@@ -613,7 +613,7 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNorm(  const Eigen::MatrixBase<Deri
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther2);
-    ASSERTMSG((P_old.rows()==P_new.rows()) && (NormMatrix1_diag.rows()==NormMatrix2.rows()) && (u_old.rows()==NormMatrix2.cols()),"Vectors are not equal lenght!");
+    GRSF_ASSERTMSG((P_old.rows()==P_new.rows()) && (NormMatrix1_diag.rows()==NormMatrix2.rows()) && (u_old.rows()==NormMatrix2.cols()),"Vectors are not equal lenght!");
 
     using PRECM = typename Derived::Scalar;
     //std::cout << " Convergence ENERGY" << std::endl;
@@ -635,7 +635,7 @@ INLINE_PROX_KEYWORD bool cancelCriteriaValue(   const Eigen::MatrixBase<Derived>
                                                 unsigned int & counter) {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
-    ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
+    GRSF_ASSERTMSG(P_old.rows()==P_new.rows(),"Vectors are not equal lenght!");
 
     using std::abs;
 

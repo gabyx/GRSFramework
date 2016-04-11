@@ -21,7 +21,7 @@ namespace RigidBodyFunctions {
 
     template<typename TRigidBody>
     void remoteToLocalBodyInitialization(TRigidBody * body){
-         ASSERTMSG( body->m_pSolverData, "Body id: " << RigidBodyId::getBodyIdString(body->m_id) << "no solver data!");
+         GRSF_ASSERTMSG( body->m_pSolverData, "Body id: " << RigidBodyId::getBodyIdString(body->m_id) << "no solver data!");
          body->m_pSolverData->reset();
     }
 
@@ -30,8 +30,8 @@ namespace RigidBodyFunctions {
                              const unsigned int & multiplicity,
                              const typename TRigidBody::PREC & multiplicityWeight){
 
-            ASSERTMSG( body->m_pSolverData, "Body id: " << RigidBodyId::getBodyIdString(body->m_id) << "no solver data!");
-            ASSERTMSG( body->m_pSolverData->m_multiplicity == 1, "Body id: "
+            GRSF_ASSERTMSG( body->m_pSolverData, "Body id: " << RigidBodyId::getBodyIdString(body->m_id) << "no solver data!");
+            GRSF_ASSERTMSG( body->m_pSolverData->m_multiplicity == 1, "Body id: "
                       << RigidBodyId::getBodyIdString(body->m_id) << " has multiplcity : "
                       << body->m_pSolverData->m_multiplicity)
 
@@ -45,8 +45,8 @@ namespace RigidBodyFunctions {
 
     template<typename TRigidBody>
     void changeBodyToNormalWeighting(TRigidBody * body){
-            ASSERTMSG( body->m_pSolverData, "Body id: " << RigidBodyId::getBodyIdString(body->m_id) << "no solver data!");
-            ASSERTMSG( body->m_pSolverData->m_multiplicity != 1, "Body id: "
+            GRSF_ASSERTMSG( body->m_pSolverData, "Body id: " << RigidBodyId::getBodyIdString(body->m_id) << "no solver data!");
+            GRSF_ASSERTMSG( body->m_pSolverData->m_multiplicity != 1, "Body id: "
                       << RigidBodyId::getBodyIdString(body->m_id) << " has multiplicity : "
                       << body->m_pSolverData->m_multiplicity)
 

@@ -18,7 +18,7 @@ MultiBodySimFile::MultiBodySimFile(unsigned int bufferSize):
 {
     m_filePath = boost::filesystem::path();
 
-    ASSERTMSG(bufferSize,"Wrong size of buffer!")
+    GRSF_ASSERTMSG(bufferSize,"Wrong size of buffer!")
 
     m_buf_size = bufferSize;
     m_Buffer = new char[m_buf_size];

@@ -60,7 +60,7 @@ public:
     using RemoteDataType = NeighbourDataDerived::RemoteDataType;
 
     void clear(){
-        ERRORMSG("We should not execute this!");
+        GRSF_ERRORMSG("We should not execute this!");
     }
 };
 

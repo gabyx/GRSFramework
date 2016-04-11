@@ -220,7 +220,7 @@ private:
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 initNodeSimBody<1,addEdges>(pNode,nodeData,pBody,isRemote.first);
             } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
-                ERRORMSG("ContactGraph:: Animated body, node init not implemented")
+                GRSF_ERRORMSG("ContactGraph:: Animated body, node init not implemented")
             }
 
             // SECOND BODY!
@@ -228,7 +228,7 @@ private:
             if( pBody->m_eMode == RigidBodyType::BodyMode::SIMULATED ) {
                 initNodeSimBody<2,addEdges>(pNode,nodeData,pBody,isRemote.second);
             } else if(pBody->m_eMode == RigidBodyType::BodyMode::ANIMATED ) {
-                ERRORMSG("ContactGraph:: Animated body, node init not implemented")
+                GRSF_ERRORMSG("ContactGraph:: Animated body, node init not implemented")
             }
 
         }
@@ -275,11 +275,11 @@ private:
                 //Add to the neighbour data if remote contact
                 if(nodeData.m_nodeColor == EnumConversion::toIntegral(NodeColor::REMOTENODE)){
                     auto * nbData = m_p->m_pNbDataMap->getNeighbourData(pBody->m_pBodyInfo->m_ownerRank);
-                    ASSERTMSG( nbData , "No neighbour data for rank " << pBody->m_pBodyInfo->m_ownerRank )
+                    GRSF_ASSERTMSG( nbData , "No neighbour data for rank " << pBody->m_pBodyInfo->m_ownerRank )
                     nbData->addRemoteBodyData(pBody);
                     // if this body is already added it does nothing!
                 }else{
-                    ERRORMSG("Something wrong with node color!")
+                    GRSF_ERRORMSG("Something wrong with node color!")
                 }
 
                 m_p->m_remoteBodiesWithContacts.addBody(pBody);

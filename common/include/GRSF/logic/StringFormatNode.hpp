@@ -97,7 +97,7 @@ namespace LogicNodes{
                                         >::type * = nullptr
                 >
         void operator()(LogicSocket<T> * n){
-            ERRORMSG("Input type: " << LogicTypes::getTypeName<T>() << " cannot be used in StringFormatNode!");
+            GRSF_ERRORMSG("Input type: " << LogicTypes::getTypeName<T>() << " cannot be used in StringFormatNode!");
         }
 
         // Types which are in TypeSeqBasic
@@ -127,7 +127,7 @@ namespace LogicNodes{
                  SFINAE_ENABLE_IF( (! boost::mpl::contains< typename LogicTypes::TypeSeqStringAssignable, T>::type::value) )
         >
         void operator()(LogicSocket<T> * n){
-             ERRORMSG("Output type: " << LogicTypes::getTypeName<T>() << " cannot be used in StringFormatNode!");
+             GRSF_ERRORMSG("Output type: " << LogicTypes::getTypeName<T>() << " cannot be used in StringFormatNode!");
         }
 
         template<typename T,
@@ -196,7 +196,7 @@ namespace LogicNodes{
             try{
                 tfm::vformat(m_s, GET_ISOCKET_REF_VALUE(Format).c_str(), m_formatList);
             }catch(...){
-                ERRORMSG("Conversion of string in tool " << this->m_id << " failed!")
+                GRSF_ERRORMSG("Conversion of string in tool " << this->m_id << " failed!")
             }
 
             // Write to all output

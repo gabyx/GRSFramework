@@ -18,7 +18,7 @@ void ContactTag::set( const RigidBodyIdType & b1,
                       unsigned char type2 ,
                       unsigned int id2) {
 
-    ASSERTMSG(b1 != b2, "Error: ContactTag:: body id the same: "<<RigidBodyId::getBodyIdString(b1));
+    GRSF_ASSERTMSG(b1 != b2, "Error: ContactTag:: body id the same: "<<RigidBodyId::getBodyIdString(b1));
 
     // Make sure we always construct the same Tag!
     if(b1 < b2) {

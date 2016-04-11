@@ -83,7 +83,7 @@ public:
         :  m_mediaDir(mediaDir), m_pSimulationLog(log)
     {
         m_pSimulationLog = log;
-        ASSERTMSG(m_pSimulationLog, "Log pointer is zero!");
+        GRSF_ASSERTMSG(m_pSimulationLog, "Log pointer is zero!");
 
         // Get all Modules from the Generator
         std::tie(m_pSettingsModule,
@@ -105,7 +105,7 @@ public:
         m_currentParseFilePath = file;
         m_currentParseFileDir = m_currentParseFileDir = m_currentParseFilePath.parent_path();
         if(xmlDoc){
-            ERRORMSG("XML Document pointer is null!")
+            GRSF_ERRORMSG("XML Document pointer is null!")
         }
         m_xmlDoc = xmlDoc;
     }
@@ -115,13 +115,13 @@ public:
     */
     void loadFile(const boost::filesystem::path & file){
         if(!boost::filesystem::exists(file)) {
-            ERRORMSG("Scene Input file does not exist!");
+            GRSF_ERRORMSG("Scene Input file does not exist!");
         }
         pugi::xml_parse_result result = m_xmlDoc->load_file(file.c_str());
         if (result) {
             LOGSCLEVEL1(m_pSimulationLog, "---> Loaded XML [" << file.string() << "] without errors!" << std::endl;);
         } else {
-            ERRORMSG( "Loaded XML [" << file.string() << "] with errors!" << std::endl
+            GRSF_ERRORMSG( "Loaded XML [" << file.string() << "] with errors!" << std::endl
                             << "Error description: " << result.description() << std::endl
                             << "Error offset: " << result.offset )
         }
@@ -189,7 +189,7 @@ public:
 
     void checkFileExists(boost::filesystem::path file) {
         if( !boost::filesystem::exists(file) ) {
-            ERRORMSG("---> The file ' " + file.string() + "' does not exist!");
+            GRSF_ERRORMSG("---> The file ' " + file.string() + "' does not exist!");
         }
     }
 
@@ -251,7 +251,7 @@ protected:
             m_xmlDoc = std::shared_ptr<pugi::xml_document>( new pugi::xml_document() );
         }
         if( file.empty() ){
-            ERRORMSG("File name is empty!");
+            GRSF_ERRORMSG("File name is empty!");
         }
 
         // Load the file if necessary

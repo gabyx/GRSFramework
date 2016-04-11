@@ -183,7 +183,7 @@ using  Matrix2Dyn = MatrixStatDyn<2>;
                                 "</TopologyBuilder>");
 
         bool res = dataXML.load(xml);
-        ASSERTMSG(res,"Could not load initial xml data file");
+        GRSF_ASSERTMSG(res,"Could not load initial xml data file");
 
         // Write data
 
@@ -661,7 +661,7 @@ namespace Test{
                 auto & nodes = tree.getNodes();
                 for(unsigned int s=0; s < nodes.size(); s++){
                     if(nodes[s]->getIdx() != s){
-                        ERRORMSG("INDEX WRONG")
+                        GRSF_ERRORMSG("INDEX WRONG")
                     }
                 }
             }
@@ -676,7 +676,7 @@ namespace Test{
              auto & nodes = tree2.getNodes();
                 for(unsigned int s=0; s < nodes.size(); s++){
                     if(nodes[s]->getIdx() != s){
-                        ERRORMSG("INDEX WRONG")
+                        GRSF_ERRORMSG("INDEX WRONG")
                     }
                     //std::cout << "node idx: " << s << " leaf: " << nodes[s]->isLeaf() << std::endl;
                 }
@@ -691,17 +691,17 @@ namespace Test{
                     auto idx = n->getIdx();
 
                     if(n->getSplitAxis() != nodesOrig[idx]->getSplitAxis()){
-                        ERRORMSG("Orig not the same as serialized!")
+                        GRSF_ERRORMSG("Orig not the same as serialized!")
                     }
                     if(n->getSplitPosition() != nodesOrig[idx]->getSplitPosition()){
-                        ERRORMSG("Orig not the same as serialized!")
+                        GRSF_ERRORMSG("Orig not the same as serialized!")
                     }
 
                     if((n->aabb().m_minPoint.array() != nodesOrig[idx]->aabb().m_minPoint.array()).any() ){
-                        ERRORMSG("AABB for idx:" << n->getIdx() << "not the same!")
+                        GRSF_ERRORMSG("AABB for idx:" << n->getIdx() << "not the same!")
                     }
                     if((n->aabb().m_maxPoint.array() != nodesOrig[idx]->aabb().m_maxPoint.array()).any() ){
-                        ERRORMSG("AABB for idx:" << n->getIdx() << "not the same!")
+                        GRSF_ERRORMSG("AABB for idx:" << n->getIdx() << "not the same!")
                     }
 
                     if(n->isLeaf()){
@@ -709,11 +709,11 @@ namespace Test{
                         for(auto * b: n->getBoundaries()){
                             if( b && *itO){
                                 if(b->getIdx() != (*itO)->getIdx()){
-                                    ERRORMSG("Boundary wrong for idx: " << n->getIdx() <<" new idx: " << b->getIdx() << "and orig: "
+                                    GRSF_ERRORMSG("Boundary wrong for idx: " << n->getIdx() <<" new idx: " << b->getIdx() << "and orig: "
                                              << (*itO)->getIdx())
                                 }
                             }else if( !( b==nullptr && *itO == nullptr )){
-                                ERRORMSG("Boundary wrong for idx: " << n->getIdx()
+                                GRSF_ERRORMSG("Boundary wrong for idx: " << n->getIdx()
                                          << b<< "or" << (*itO))
                             }
                             ++itO;
@@ -744,12 +744,12 @@ namespace Test{
             // compare point classification
             for(auto & pa : serClasses){
                 if(origClasses.find(pa.first) == origClasses.end()){
-                    ERRORMSG("Serialized version leaf idx: " << pa.first << " not existing in orig!")
+                    GRSF_ERRORMSG("Serialized version leaf idx: " << pa.first << " not existing in orig!")
                 }
                 auto & origPoints = origClasses[pa.first];
                 for(auto i : pa.second){
                     if(origPoints.find(i) == origPoints.end()){
-                        ERRORMSG("Serialized version leaf idx: " << pa.first << "contains point idx: " << i << " but orig not!")
+                        GRSF_ERRORMSG("Serialized version leaf idx: " << pa.first << "contains point idx: " << i << " but orig not!")
                     }
                 }
             }
@@ -761,20 +761,20 @@ namespace Test{
                 if(! n->isLeaf()){
 
                     if( (n->leftNode()==nullptr || n->rightNode()==nullptr) ){
-                        ERRORMSG("idx: " << n->getIdx() << "has not childs!")
+                        GRSF_ERRORMSG("idx: " << n->getIdx() << "has not childs!")
                     }
 
                     auto idx =  n->leftNode()->getIdx();
                     if( nodes[idx] != n->leftNode() ){
-                        ERRORMSG("Node: idx: " << idx << "not the same pointer at position nodes[idx]")
+                        GRSF_ERRORMSG("Node: idx: " << idx << "not the same pointer at position nodes[idx]")
                     }
                     idx =  n->rightNode()->getIdx();
                     if( nodes[idx] != n->rightNode() ){
-                        ERRORMSG("Node: idx: " << idx << "not the same pointer at position nodes[idx]")
+                        GRSF_ERRORMSG("Node: idx: " << idx << "not the same pointer at position nodes[idx]")
                     }
                 }else{
                     if( ! (n->leftNode()==nullptr && n->rightNode()==nullptr) ){
-                        ERRORMSG("Leaf needs to have nullptr")
+                        GRSF_ERRORMSG("Leaf needs to have nullptr")
                     }
                 }
 
@@ -789,7 +789,7 @@ namespace Test{
                 auto * b = tree2.getLeaf(rand()%leafs);
                 auto * n = tree2.getLowestCommonAncestor(a,b);
                 if(n==nullptr){
-                    ERRORMSG("Ancestor!")
+                    GRSF_ERRORMSG("Ancestor!")
                 }
             }
 
@@ -799,11 +799,11 @@ namespace Test{
                 for(auto * n: nodes){
                     auto idx = n->getIdx();
                     if(n->getSplitAxis() != nodesOrig[idx]->getSplitAxis()){
-                        ERRORMSG("Orig not the same as serialized!")
+                        GRSF_ERRORMSG("Orig not the same as serialized!")
                     }
 
                     if(n->getSplitPosition() != nodesOrig[idx]->getSplitPosition()){
-                        ERRORMSG("Orig not the same as serialized!")
+                        GRSF_ERRORMSG("Orig not the same as serialized!")
                     }
 
                     auto itO = nodesOrig[idx]->getBoundaries().begin();
@@ -812,11 +812,11 @@ namespace Test{
                         for(auto * b: n->getBoundaries()){
                             if( b && *itO){
                                 if(b->getIdx() != (*itO)->getIdx()){
-                                    ERRORMSG("Boundary wrong for idx: " << n->getIdx() <<" new idx: " << b->getIdx() << "and orig: "
+                                    GRSF_ERRORMSG("Boundary wrong for idx: " << n->getIdx() <<" new idx: " << b->getIdx() << "and orig: "
                                              << (*itO)->getIdx())
                                 }
                             }else if( !( b== nullptr && *itO == nullptr)){
-                                ERRORMSG("Boundary wrong for idx: " << n->getIdx()
+                                GRSF_ERRORMSG("Boundary wrong for idx: " << n->getIdx()
                                          << b<< "or" << (*itO))
                             }
                             ++itO;

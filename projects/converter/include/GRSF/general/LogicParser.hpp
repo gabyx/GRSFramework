@@ -86,7 +86,7 @@ public:
     template<typename ModuleGeneratorType>
     LogicParser(ModuleGeneratorType & moduleGen, Logging::Log * log) {
         m_pLog = log;
-        ASSERTMSG(m_pLog, "Log pointer is zero!");
+        GRSF_ASSERTMSG(m_pLog, "Log pointer is zero!");
         // Get all Modules from the Generator
         m_modules = moduleGen.template createParserModules<ParserType>( this );
     }
@@ -114,7 +114,7 @@ public:
         m_currentParseFilePath = file;
         m_currentParseFileDir = m_currentParseFileDir = m_currentParseFilePath.parent_path();
         if(xmlDoc){
-            ERRORMSG("XML Document pointer is null!")
+            GRSF_ERRORMSG("XML Document pointer is null!")
         }
         m_xmlDoc = xmlDoc;
     }
@@ -124,13 +124,13 @@ public:
     */
     void loadFile(const boost::filesystem::path & file) {
         if(!boost::filesystem::exists(file)) {
-            ERRORMSG("Scene Input file does not exist!");
+            GRSF_ERRORMSG("Scene Input file does not exist!");
         }
         pugi::xml_parse_result result = m_xmlDoc->load_file(file.c_str());
         if (result) {
             LOGLPLEVEL1(m_pLog, "---> Loaded XML [" << file.string() << "] without errors!" << std::endl;);
         } else {
-            ERRORMSG( "Loaded XML [" << file.string() << "] with errors!" << std::endl
+            GRSF_ERRORMSG( "Loaded XML [" << file.string() << "] with errors!" << std::endl
                             << "Error description: " << result.description() << std::endl
                             << "Error offset: " << result.offset )
         }
@@ -143,7 +143,7 @@ private:
 
     void checkFileExists(boost::filesystem::path file) {
         if( !boost::filesystem::exists(file) ) {
-            ERRORMSG("---> The file ' " + file.string() + "' does not exist!");
+            GRSF_ERRORMSG("---> The file ' " + file.string() + "' does not exist!");
         }
     }
 
@@ -156,7 +156,7 @@ private:
 
 
         if(!boost::filesystem::exists(file)) {
-            ERRORMSG("Scene Input file does not exist!");
+            GRSF_ERRORMSG("Scene Input file does not exist!");
         }
 
           // if document does not exist create one and force loading!
@@ -164,7 +164,7 @@ private:
             m_xmlDoc = std::shared_ptr<pugi::xml_document>( new pugi::xml_document() );
         }
         if( file.empty() ){
-            ERRORMSG("File name is empty!");
+            GRSF_ERRORMSG("File name is empty!");
         }
 
         // Load the file if necessary
@@ -185,7 +185,7 @@ private:
 
         } catch(Exception& ex) {
             LOGLPLEVEL1(m_pLog,  "Scene XML error: "  << ex.what() <<std::endl);
-            ERRORMSG( "Scene XML error: "  << ex.what() );
+            GRSF_ERRORMSG( "Scene XML error: "  << ex.what() );
         }
 
         LOGLPLEVEL1( m_pLog, "---> LogicParser finshed =========================================================" << std::endl;);

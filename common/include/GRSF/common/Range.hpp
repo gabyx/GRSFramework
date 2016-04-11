@@ -24,7 +24,7 @@ class Range{
 
 	    using RangeType = std::vector<IntType,Allocator>;
 
-	    STATIC_ASSERTM( std::is_integral<IntType>::value , "IntType needs to be Integeral" );
+	    GRSF_STATIC_ASSERTM( std::is_integral<IntType>::value , "IntType needs to be Integeral" );
         Range(): m_linear(false) {};
 
         // default copy cosntructor and assignment operator;
@@ -54,7 +54,7 @@ class Range{
         template<typename T>
 		Range(const std::pair<T,T> & p){
             m_linear = true;
-		    STATIC_ASSERTM( std::is_integral<T>::value , "T needs to be Integeral");
+		    GRSF_STATIC_ASSERTM( std::is_integral<T>::value , "T needs to be Integeral");
 		    unsigned int N = p.second-p.first;
 		    if(p.second < p.first){ N = 0;} // leads to empty m_v
 
@@ -78,7 +78,7 @@ class Range{
         template<typename T>
 		Range(const std::set<T> & p){
 		    m_linear = true; // init
-		    STATIC_ASSERTM( std::is_integral<T>::value , "T needs to be Integeral");
+		    GRSF_STATIC_ASSERTM( std::is_integral<T>::value , "T needs to be Integeral");
 			m_v.resize(p.size());
 			auto it = p.begin();
 			for(auto & v : m_v){
@@ -177,7 +177,7 @@ class Range{
 
         inline void init(){
             std::sort(m_v.begin(),m_v.end());
-            ASSERTMSG( std::adjacent_find(m_v.begin(),m_v.end()) == m_v.end() , "Elements in Range<IntType> are not unique!")
+            GRSF_ASSERTMSG( std::adjacent_find(m_v.begin(),m_v.end()) == m_v.end() , "Elements in Range<IntType> are not unique!")
             m_linear = (m_v.size()>0) && ( m_v.size() == (m_v.back()- m_v.front() + 1) );
         }
 };

@@ -117,7 +117,7 @@ std::streamoff MultiBodySimFilePart::getAdditionalBytesPerBody()
             case 0:
                 return 0;
             default:
-                ERRORMSG("Additional Byte Type not implemented");
+                GRSF_ERRORMSG("Additional Byte Type not implemented");
         }
         return 0;
 }

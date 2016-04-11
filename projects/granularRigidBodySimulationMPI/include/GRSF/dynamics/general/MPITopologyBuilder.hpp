@@ -66,7 +66,7 @@ namespace MPILayer {
             : m_type(type),  m_rebuildSettings(rebuildSettings), m_pDynSys(pDynSys), m_pProcCommunicator(pProcCommunicator),
               m_pSimulationLog(nullptr) {
             m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
-            ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
+            GRSF_ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
         }
 
         bool checkAndRebuild(unsigned int timeStep, PREC currentTime) {
@@ -236,7 +236,7 @@ protected: \
 
             for(auto & massPoint : massPoints) {
 
-                ASSERTMSG(massPoint.m_state,"State null");
+                GRSF_ASSERTMSG(massPoint.m_state,"State null");
 
                 // outliers are not predicted
                 // since they are not used in further topology computations
@@ -491,7 +491,7 @@ protected: \
 
             // Map I_points in std::vector to matrix
             if(sizeof(Vector3) != 3*sizeof(PREC)) {
-                ERRORMSG("There is padding inside Vector3 which is not allowed here")
+                GRSF_ERRORMSG("There is padding inside Vector3 which is not allowed here")
             }
 
             MatrixMap<const ApproxMVBB::Matrix3Dyn> p(I_points.data()->data(), 3, I_points.size());
@@ -506,7 +506,7 @@ protected: \
             K_aabb = AABB3d(oobb.m_minPoint,oobb.m_maxPoint);
 
             if(K_aabb.isEmpty()) {
-                ERRORMSG("Box is empty")
+                GRSF_ERRORMSG("Box is empty")
             }
             LOGTBLEVEL3( m_pSimulationLog, "---> GridTopoBuilder: Coordinate Frame: "<<std::endl<< A_IK <<std::endl; );
             LOGTBLEVEL3( m_pSimulationLog, "---> GridTopoBuilder: A_IK * A_IK^T: "<<std::endl<< A_IK*A_IK.transpose() <<std::endl; );
@@ -666,7 +666,7 @@ protected: \
             auto nOutlier = m_globalOutlierFilter.filter(points,aabb);
             LOGTBLEVEL1(m_pSimulationLog, "---> GridTopoBuilderBase: Classified " << nOutlier << " outliers in point cloud." << std::endl);
             if(nOutlier == points.size()) {
-                ERRORMSG("Filtered all points away! This should not happend! Adjust filter settings!")
+                GRSF_ERRORMSG("Filtered all points away! This should not happend! Adjust filter settings!")
             }
         }
 
@@ -736,7 +736,7 @@ protected: \
 
 
             } else {
-                ERRORMSG("Built type: " << EnumConversion::toIntegral(m_settings.m_buildMode) << " not supported! ")
+                GRSF_ERRORMSG("Built type: " << EnumConversion::toIntegral(m_settings.m_buildMode) << " not supported! ")
             }
         }
 
@@ -869,9 +869,9 @@ protected: \
                     }
 
                 } else if(m_settings.m_buildMode == SettingsType::BuildMode::MVBB) {
-                    ERRORMSG("Local computations should be off for MVVB build mode!")
+                    GRSF_ERRORMSG("Local computations should be off for MVVB build mode!")
                 } else {
-                    ERRORMSG("This should not happen! Undefined BuildMode in Rebuilding")
+                    GRSF_ERRORMSG("This should not happen! Undefined BuildMode in Rebuilding")
                 }
                 // otherwise dont do any computation (it might be send anyway but is not used on the master!)
                 LOGTBLEVEL1(m_pSimulationLog, "---> GridTopoBuilderBase: Local computations performed! "<<std::endl);
@@ -1041,7 +1041,7 @@ private: \
             if(this->m_pProcCommunicator->hasMasterRank()) {
 
                 if(m_settings.m_processDim(0)*m_settings.m_processDim(1)*m_settings.m_processDim(2) != m_pProcCommunicator->getNProcesses()) {
-                    ERRORMSG("processDim: " << m_settings.m_processDim << " does not fit "<<m_pProcCommunicator->getNProcesses()<<"processes!");
+                    GRSF_ERRORMSG("processDim: " << m_settings.m_processDim << " does not fit "<<m_pProcCommunicator->getNProcesses()<<"processes!");
                 }
 
                 // Parse all initial condition from the scene file (global initial condition is read too)
@@ -1054,7 +1054,7 @@ private: \
                 parser.parseScene(m_sceneFilePath);
 
                 if(m_initStates.size() != m_nGlobalSimBodies) {
-                    ERRORMSG("Parsed to little initial states in scene file: " << m_sceneFilePath << " states: " << m_initStates.size() << "globalSimBodies: " << m_nGlobalSimBodies <<std::endl);
+                    GRSF_ERRORMSG("Parsed to little initial states in scene file: " << m_sceneFilePath << " states: " << m_initStates.size() << "globalSimBodies: " << m_nGlobalSimBodies <<std::endl);
                 }
 
                 LOGTBLEVEL2(m_pSimulationLog, "---> GridTopoBuilder: parsed states: "<<std::endl;);
@@ -1152,7 +1152,7 @@ private: \
 
                 //Check if number of init states received is equal to the total in the simulation
                 if(m_nGlobalSimBodies != m_initStates.size()) {
-                    ERRORMSG("m_nGlobalSimBodies: " << m_nGlobalSimBodies << " != " <<  m_initStates.size() <<std::endl);
+                    GRSF_ERRORMSG("m_nGlobalSimBodies: " << m_nGlobalSimBodies << " != " <<  m_initStates.size() <<std::endl);
                 }
 
 
@@ -1264,7 +1264,7 @@ private: \
             } else if(m_settings.m_buildMode == GridBuilderSettings::BuildMode::MVBB) {
                 LOGTBLEVEL1( m_pSimulationLog,"\t buildMode: MVBB" << std::endl);
             } else {
-                ERRORMSG("No BUILD implemented!")
+                GRSF_ERRORMSG("No BUILD implemented!")
             }
 
 
@@ -1319,7 +1319,7 @@ private: \
 
 
             // Safty check:
-            ASSERTMSG(m_bodiesPerRank.size() == 0,"All states should be sent!");
+            GRSF_ASSERTMSG(m_bodiesPerRank.size() == 0,"All states should be sent!");
         }
 
 
@@ -1416,7 +1416,7 @@ private: \
                     "</TopologyBuilder>");
 
             bool r = dataXML.load(xml);
-            ASSERTMSG(r,"Could not load initial xml data file");
+            GRSF_ASSERTMSG(r,"Could not load initial xml data file");
 
             // Write data
 
@@ -1541,7 +1541,7 @@ private: \
                 parser.parseScene(m_sceneFilePath);
 
                 if(m_initStates.size() != m_nGlobalSimBodies) {
-                    ERRORMSG("Parsed to little initial states in scene file: " << m_sceneFilePath << " states: " << m_initStates.size() << "globalSimBodies: " << m_nGlobalSimBodies <<std::endl);
+                    GRSF_ERRORMSG("Parsed to little initial states in scene file: " << m_sceneFilePath << " states: " << m_initStates.size() << "globalSimBodies: " << m_nGlobalSimBodies <<std::endl);
                 }
 
                 LOGTBLEVEL2(m_pSimulationLog, "---> KdTreeTopoBuilder: parsed states: "<<std::endl;);
@@ -1641,7 +1641,7 @@ private: \
 
                 //Check if number of masspoints received is equal to the total in the simulation
                 if(m_nGlobalSimBodies != m_initStates.size() ) {
-                    ERRORMSG("m_nGlobalSimBodies: " << m_nGlobalSimBodies << "not equal to" <<  m_initStates.size() <<std::endl);
+                    GRSF_ERRORMSG("m_nGlobalSimBodies: " << m_nGlobalSimBodies << "not equal to" <<  m_initStates.size() <<std::endl);
                 }
 
 
@@ -1793,7 +1793,7 @@ private: \
             // If we found less processes which need to continue the simulation,
             // all other remaining ones go into sleep state! -> implement this in simulation manager
             if(m_processes != m_pProcCommunicator->getNProcesses()) {
-                ERRORMSG("KdTree could only determine " << m_processes << " processes but " << m_pProcCommunicator->getNProcesses() << " are needed!")
+                GRSF_ERRORMSG("KdTree could only determine " << m_processes << " processes but " << m_pProcCommunicator->getNProcesses() << " are needed!")
             }
 
             // copy global kdTree to a simple version
@@ -1840,7 +1840,7 @@ private: \
             else if(m_settings.m_buildMode == KdTreeBuilderSettings::BuildMode::MVBB) {
                 LOGTBLEVEL1( m_pSimulationLog,"\t buildMode: MVBB" << std::endl);
             } else {
-                ERRORMSG("No BUILD implemented!")
+                GRSF_ERRORMSG("No BUILD implemented!")
             }
 
             for( auto & nbs : m_neighbours){
@@ -1902,7 +1902,7 @@ private: \
 
 
             // Safty check:
-            ASSERTMSG(m_bodiesPerRank.size() == 0,"All states should be sent!");
+            GRSF_ASSERTMSG(m_bodiesPerRank.size() == 0,"All states should be sent!");
         }
 
         void receiveKdTree(RankIdType masterRank){
@@ -1989,7 +1989,7 @@ private: \
                     "</TopologyBuilder>");
 
             bool r = dataXML.load(xml);
-            ASSERTMSG(r,"Could not load initial xml data file");
+            GRSF_ASSERTMSG(r,"Could not load initial xml data file");
 
             // Write data
 

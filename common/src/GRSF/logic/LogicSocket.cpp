@@ -17,11 +17,11 @@ void LogicSocketBase::link(LogicSocketBase *fsock)
 {
 
 	if(!fsock){
-        ERRORMSG("Socket to link to is null!");
+        GRSF_ERRORMSG("Socket to link to is null!");
 	}
 
 	if(!(this->m_type == fsock->m_type)){
-        ERRORMSG( " Types of sockets do not coincide: "
+        GRSF_ERRORMSG( " Types of sockets do not coincide: "
                  << LogicTypes::getTypeName(this->m_type) << " and " << LogicTypes::getTypeName(fsock->m_type)
                  << " for tool id: " << this->m_parent->m_id  << " and " << fsock->m_parent->m_id);
 	}
@@ -29,10 +29,10 @@ void LogicSocketBase::link(LogicSocketBase *fsock)
 	if(m_isInput)
 	{
 	    if(m_from){
-            ERRORMSG("Only one link for input socket");
+            GRSF_ERRORMSG("Only one link for input socket");
 	    }
 	    if(fsock->m_isInput){
-            ERRORMSG("Cannot link input to input");
+            GRSF_ERRORMSG("Cannot link input to input");
 	    }
 
 		m_from = fsock;
@@ -40,7 +40,7 @@ void LogicSocketBase::link(LogicSocketBase *fsock)
 	else
 	{
 	    if(!fsock->m_isInput){
-            ERRORMSG("Cannot link output to output");
+            GRSF_ERRORMSG("Cannot link output to output");
 	    }
 		if(std::find(m_to.begin(),m_to.end(),fsock) == m_to.end() )
 		{
@@ -58,10 +58,10 @@ void LogicSocketBase::link(LogicSocketBase *fsock)
                 nd->setLinked();
 		}
 		else{
-		    ERRORMSG("This socket has no parent");
+		    GRSF_ERRORMSG("This socket has no parent");
 		}
 	}else{
-        ERRORMSG("This socket has no parent");
+        GRSF_ERRORMSG("This socket has no parent");
 	}
 }
 

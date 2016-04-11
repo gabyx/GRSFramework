@@ -454,12 +454,12 @@ void MultiBodySimFile::write(double time, const TRigidBodyContainer & bodyList) 
 template<typename TBodyIterator>
 void MultiBodySimFile::write(double time, TBodyIterator begin, TBodyIterator end) {
     *this << time;
-    ASSERTMSG(m_nSimBodies == std::distance(begin,end),"You try to write "<< std::distance(begin,end)
+    GRSF_ASSERTMSG(m_nSimBodies == std::distance(begin,end),"You try to write "<< std::distance(begin,end)
               <<"bodies into a file which was instanced to hold "<<m_nSimBodies);
 
     using BodyType = typename std::remove_reference<decltype(*(*begin))>::type;
 
-    STATIC_ASSERTM((std::is_same<double, typename BodyType::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
+    GRSF_STATIC_ASSERTM((std::is_same<double, typename BodyType::PREC>::value),"OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
     auto itEnd = end;
     for(auto it = begin; it != itEnd; ++it) {
         *this << (*it)->m_id;
@@ -474,14 +474,14 @@ void MultiBodySimFile::write(double time, TBodyIterator begin, TBodyIterator end
 MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
 
 
-    ASSERTMSG(m_nSimBodies == state->getNSimBodies(),
+    GRSF_ASSERTMSG(m_nSimBodies == state->getNSimBodies(),
               "You try to write "<<state->getNSimBodies()<<"bodies into a file which was instanced to hold "<<m_nSimBodies);
 
     // write time
     *this << (double)state->m_t;
     // write states
     for(auto & b : state->m_SimBodyStates) {
-        STATIC_ASSERTM((std::is_same<double, typename DynamicsState::PREC>::value),
+        GRSF_STATIC_ASSERTM((std::is_same<double, typename DynamicsState::PREC>::value),
                        "OOPS! TAKE CARE if you compile here, SIM files can only be read with the PREC precision!")
         *this << b.m_id;
         IOHelpers::writeBinary(m_file_stream, b.m_q );
@@ -498,7 +498,7 @@ MultiBodySimFile &  MultiBodySimFile::operator<<( const DynamicsState* state ) {
 
 MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState* state ) {
     auto nSimBodies = state->getNSimBodies();
-    ASSERTMSG(m_nSimBodies == nSimBodies,
+    GRSF_ASSERTMSG(m_nSimBodies == nSimBodies,
               "You try to read "<<m_nSimBodies<<"bodies into a state which was instanced to hold "<<nSimBodies);
 
     // write time
@@ -516,7 +516,7 @@ MultiBodySimFile &  MultiBodySimFile::operator>>( DynamicsState* state ) {
         if(pState) {
             readBodyState<>(pState);
         } else {
-            ERRORMSG("State for body id: " << id << "not found in DynamicsState")
+            GRSF_ERRORMSG("State for body id: " << id << "not found in DynamicsState")
             //m_file_stream.seekg(m_nBytesPerQBody+m_nBytesPerUBody+m_nAdditionalBytesPerBody ,std::ios_base::cur);
         }
 
@@ -581,7 +581,7 @@ bool MultiBodySimFile::readSpecific_impl(C & states,
 
     if(timeFound) {
 
-        ASSERTMSG(stateTime>=0.0, " Found state time is " << stateTime);
+        GRSF_ASSERTMSG(stateTime>=0.0, " Found state time is " << stateTime);
         // Current time found!
         for(unsigned int body = 0; body < m_nSimBodies; body++) {
             *this >> id;

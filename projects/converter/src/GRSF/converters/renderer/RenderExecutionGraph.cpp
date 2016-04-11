@@ -29,7 +29,7 @@ void RenderExecutionGraph::setup() {
     }
 
     if( m_scriptWritterNodes.size() == 0  ) {
-            ERRORMSG("Execution tree has no output node 'RenderScriptWriter = [RendermanWriter]' ")
+            GRSF_ERRORMSG("Execution tree has no output node 'RenderScriptWriter = [RendermanWriter]' ")
     }
 
 

@@ -33,14 +33,14 @@ class MPIGlobalCommunicators : public Utilities::Singleton<MPIGlobalCommunicator
         inline void addCommunicator(MPICommunicatorId commId, MPI_Comm comm){
             auto res = m_communicators.insert(std::make_pair(static_cast<unsigned int>(commId),comm));
             if(!res.second){
-                ERRORMSG("Communicator with id: " << static_cast<unsigned int>(commId) << " already exists!")
+                GRSF_ERRORMSG("Communicator with id: " << static_cast<unsigned int>(commId) << " already exists!")
             }
         }
 
         inline MPI_Comm getCommunicator(MPICommunicatorId commId){
             auto res = m_communicators.find(static_cast<unsigned int>(commId));
             if(res == m_communicators.end()){
-                ERRORMSG("Communicator with id: " << static_cast<unsigned int>(commId) <<" does not exists!")
+                GRSF_ERRORMSG("Communicator with id: " << static_cast<unsigned int>(commId) <<" does not exists!")
             }
             return (res->second);
         }

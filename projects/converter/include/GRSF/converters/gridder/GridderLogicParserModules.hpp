@@ -50,10 +50,10 @@ namespace GridderLogicParserModules {
 //            for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode) {
 //                unsigned int id;
 //                if(!Utilities::stringToType(id, itNode->attribute("id").value())) {
-//                    ERRORMSG("---> String conversion in Material: id failed");
+//                    GRSF_ERRORMSG("---> String conversion in Material: id failed");
 //                }
 //
-//                ASSERTMSG(itNode->child_value()!=""," String in material id: " << id << "is empty!")
+//                GRSF_ASSERTMSG(itNode->child_value()!=""," String in material id: " << id << "is empty!")
 //                m_materials->emplace(id, new RenderMaterial(id,itNode->child_value()) );
 //
 //                LOGLPLEVEL3(m_pLog,"---> Parsed Material with id: " << id << std::endl;)
@@ -112,7 +112,7 @@ public:
 
         settings.m_fileName = gridExt.attribute("fileName").value();
         if(settings.m_fileName.empty()){
-            ERRORMSG("---> String conversion 'fileName' failed");
+            GRSF_ERRORMSG("---> String conversion 'fileName' failed");
         }
 
         XMLNodeType grid;
@@ -130,7 +130,7 @@ public:
            ++extrs;
         }
         if(extrs==0){
-            ERRORMSG("---> You need at least one 'Extract' node in 'GridExtraction'!")
+            GRSF_ERRORMSG("---> You need at least one 'Extract' node in 'GridExtraction'!")
         }
 
     }
@@ -141,16 +141,16 @@ public:
 
             Vector3 minPoint;
             if(!Utilities::stringToType(minPoint,  grid.attribute("minPoint").value())) {
-                ERRORMSG("---> String conversion 'minPoint' failed");
+                GRSF_ERRORMSG("---> String conversion 'minPoint' failed");
             }
 
             Vector3 maxPoint;
             if(!Utilities::stringToType(maxPoint,  grid.attribute("maxPoint").value())) {
-                ERRORMSG("---> String conversion 'maxPoint' failed");
+                GRSF_ERRORMSG("---> String conversion 'maxPoint' failed");
             }
 
             if(!Utilities::stringToType(settings.m_dimension,  grid.attribute("dimension").value())) {
-                ERRORMSG("---> String conversion 'dimensions' failed");
+                GRSF_ERRORMSG("---> String conversion 'dimensions' failed");
             }
 
             // Parse original min/max points, which are only used for convenience for the output
@@ -160,7 +160,7 @@ public:
             auto att = grid.attribute("minPointOrig");
             if(att){
                 if(!Utilities::stringToType(maxPoint,  grid.attribute("maxPoint").value())) {
-                    ERRORMSG("---> String conversion 'maxPoint' failed");
+                    GRSF_ERRORMSG("---> String conversion 'maxPoint' failed");
                 }
             }
 
@@ -168,7 +168,7 @@ public:
             att = grid.attribute("maxPointOrig");
             if(att){
                 if(!Utilities::stringToType(maxPoint,  grid.attribute("maxPoint").value())) {
-                    ERRORMSG("---> String conversion 'maxPoint' failed");
+                    GRSF_ERRORMSG("---> String conversion 'maxPoint' failed");
                 }
             }
 
@@ -195,10 +195,10 @@ public:
 
         std::string name = extract.attribute("name").value();
         if(name.empty()){
-            ERRORMSG("---> You need to define a unique name for extractor type: " << type)
+            GRSF_ERRORMSG("---> You need to define a unique name for extractor type: " << type)
         }
         if(m_extractorNames.find(name)!=m_extractorNames.end()){
-            ERRORMSG("---> You need to define a unique name: " << name << " already exists for Extractor")
+            GRSF_ERRORMSG("---> You need to define a unique name: " << name << " already exists for Extractor")
         }else{
             m_extractorNames.insert(name);
         }
@@ -216,7 +216,7 @@ public:
 
         }else if(type=="TransVel"){
             if(settings.m_transVelExtractor.size()>=1){
-                ERRORMSG("---> You specified already a TransVel extractor, only one allowed!")
+                GRSF_ERRORMSG("---> You specified already a TransVel extractor, only one allowed!")
             }
             settings.m_transVelExtractor.emplace_back(name);
             auto & vel = settings.m_transVelExtractor.back();
@@ -228,7 +228,7 @@ public:
             parseBodyMaskExtractor(extract,bodyMask);
 
         }else{
-            ERRORMSG("---> No extraction type: " << type)
+            GRSF_ERRORMSG("---> No extraction type: " << type)
         }
     }
 
@@ -236,16 +236,16 @@ public:
     void parseVelProjExtractor(XMLNodeType & extract, TExtractor & velProj){
 
         if(!Utilities::stringToType( velProj.m_transformToGridCoordinates,  extract.attribute("transformToGridCoords").value()) ) {
-                ERRORMSG("---> String conversion 'transformToGridCoords' failed");
+                GRSF_ERRORMSG("---> String conversion 'transformToGridCoords' failed");
         }
 
         XMLAttributeType att = extract.attribute("useProjectionMatrix");
         if(att){
            if(!Utilities::stringToType(velProj.m_useProjectionMatrix,  extract.attribute("useProjectionMatrix").value())) {
-                ERRORMSG("---> String conversion 'useProjectionMatrix' failed");
+                GRSF_ERRORMSG("---> String conversion 'useProjectionMatrix' failed");
            }
            if( velProj.m_useProjectionMatrix ){
-            ERRORMSG("---> Parsing Projection matrix not implemented yet");
+            GRSF_ERRORMSG("---> Parsing Projection matrix not implemented yet");
             return;
            }
         }
@@ -253,15 +253,15 @@ public:
         att = extract.attribute("indices");
         if(att){
             if(!Utilities::stringToType(velProj.m_projIndices,  extract.attribute("indices").value())) {
-                ERRORMSG("---> String conversion 'indices' failed");
+                GRSF_ERRORMSG("---> String conversion 'indices' failed");
             }
             // check indices
             if( (velProj.m_projIndices >= TExtractor::DimOut).any() ) {
-                ERRORMSG("---> In parseExtrationTypes: 'indices' out of range [0," << TExtractor::DimOut << ") !")
+                GRSF_ERRORMSG("---> In parseExtrationTypes: 'indices' out of range [0," << TExtractor::DimOut << ") !")
             }
 
         }else{
-            ERRORMSG("---> In parseExtrationTypes: neither 'indices' given nor 'useProjectionMatrix'= true")
+            GRSF_ERRORMSG("---> In parseExtrationTypes: neither 'indices' given nor 'useProjectionMatrix'= true")
         }
 
     }
@@ -270,7 +270,7 @@ public:
     void parseVelExtractor(XMLNodeType & extract, TExtractor & vel){
 
         if(!Utilities::stringToType( vel.m_transformToGridCoordinates,  extract.attribute("transformToGridCoords").value()) ) {
-                ERRORMSG("---> String conversion 'transformToGridCoords' failed");
+                GRSF_ERRORMSG("---> String conversion 'transformToGridCoords' failed");
         }
     }
 

@@ -101,7 +101,7 @@ public:
         if(it != m_ContactParams.end()){
             return it->second;
         }
-        ASSERTMSG(false,"ContactParameter for id: "<< material1 <<" and " <<material2 << " not found"<<std::endl);
+        GRSF_ASSERTMSG(false,"ContactParameter for id: "<< material1 <<" and " <<material2 << " not found"<<std::endl);
         return m_std_values;
     }
 

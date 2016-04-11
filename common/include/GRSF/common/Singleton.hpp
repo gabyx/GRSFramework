@@ -43,16 +43,16 @@ protected:
 
 public:
     Singleton( void ) {
-        ASSERTMSG( ms_Singleton == 0 , "ms_Singleton != 0 : " << typeid(*ms_Singleton).name());
+        GRSF_ASSERTMSG( ms_Singleton == 0 , "ms_Singleton != 0 : " << typeid(*ms_Singleton).name());
         ms_Singleton = static_cast< T* >( this );
     }
     ~Singleton( void ) {
-        ASSERTMSG( ms_Singleton ,"ms_Singleton == 0 : " << typeid(*ms_Singleton).name());
+        GRSF_ASSERTMSG( ms_Singleton ,"ms_Singleton == 0 : " << typeid(*ms_Singleton).name());
         ms_Singleton = 0;
     }
 
     static T& getSingleton( void ) {
-        ASSERTMSG( ms_Singleton ,"ms_Singleton == 0 : " << typeid(*ms_Singleton).name());
+        GRSF_ASSERTMSG( ms_Singleton ,"ms_Singleton == 0 : " << typeid(*ms_Singleton).name());
         return ( *ms_Singleton );
     }
 

@@ -23,7 +23,7 @@ void LogSink::operator<<(std::stringstream & s) {
     (*m_pOutStream) << s.rdbuf();
     s.seekg(0,std::ios_base::beg); // Reset because we might reuse this stringstream!
     if(m_pOutStream->fail()) {
-        ASSERTMSG(false,"m_pOutStream has failed()!");
+        GRSF_ASSERTMSG(false,"m_pOutStream has failed()!");
         m_pOutStream->clear();
     }
     m_pOutStream->flush();
@@ -68,7 +68,7 @@ LogSinkFile::LogSinkFile(const std::string & sink_name,
 
     m_fileStream.open(filePath.string(),std::ofstream::trunc);
     if(!m_fileStream.is_open()) {
-        ERRORMSG("LogSinkFile: " << this->getName() << " could not be opened at location: " << filePath.string());
+        GRSF_ERRORMSG("LogSinkFile: " << this->getName() << " could not be opened at location: " << filePath.string());
     }
     m_pOutStream = &m_fileStream;
 };
@@ -200,12 +200,12 @@ Log* LogManager::createLog(const std::string & name, bool toConsole, bool toFile
 
     if(toConsole) {
         if(! pLog->addSink(new LogSinkCout(name + std::string("-CoutSink")))){
-            ERRORMSG("Error in adding CoutSink to Log: " << name );
+            GRSF_ERRORMSG("Error in adding CoutSink to Log: " << name );
         };
     }
     if(toFile) {
         if(! pLog->addSink(new LogSinkFile(name + std::string("-FileSink"),filePath))){
-            ERRORMSG("Error in adding FileSink to Log: " << name );
+            GRSF_ERRORMSG("Error in adding FileSink to Log: " << name );
         };
     }
     registerLog(pLog);
@@ -216,10 +216,10 @@ bool LogManager::destroyLog(const std::string &name) {
     std::lock_guard<std::mutex> l(m_busy_mutex);
 
     LogListIteratorType it = m_logList.find(name);
-    ASSERTMSG(it == m_logList.end(),"This Log does not exist!");
+    GRSF_ASSERTMSG(it == m_logList.end(),"This Log does not exist!");
 
     if( it != m_logList.end() ) {
-        ASSERTMSG(it->second != nullptr,"This Log has Null Pointer!");
+        GRSF_ASSERTMSG(it->second != nullptr,"This Log has Null Pointer!");
         if(it->second) {
             delete it->second; // Delete Log
         }
@@ -246,13 +246,13 @@ bool LogManager::destroyLog(Log * & log) {
             return true;
         }
     }
-    ASSERTMSG(it == m_logList.end(),"This Log does not exist!");
+    GRSF_ASSERTMSG(it == m_logList.end(),"This Log does not exist!");
     return false;
 };
 
 void LogManager::registerLog(Log * log, bool useTimer){
     if(!log){
-        ERRORMSG("This Log has Null Pointer!");
+        GRSF_ERRORMSG("This Log has Null Pointer!");
     }
     std::lock_guard<std::mutex> l(m_busy_mutex);
     if(useTimer){
@@ -260,14 +260,14 @@ void LogManager::registerLog(Log * log, bool useTimer){
     }
 
     std::pair<LogListIteratorType, bool> res =  m_logList.insert(std::pair<std::string, Log* >(log->getName(), log));
-    ASSERTMSG(res.second,"LogSink has already been added! :" << log->getName());
+    GRSF_ASSERTMSG(res.second,"LogSink has already been added! :" << log->getName());
 };
 
 Log * LogManager::getLog(const std::string & name) {
     std::lock_guard<std::mutex> l(m_busy_mutex);
     LogListIteratorType it = m_logList.find(name);
-    ASSERTMSG(it != m_logList.end(),"This Log does not exist!: "<<name);
-    ASSERTMSG(it->second != nullptr,"This Log has Null Pointer!: "<<name);
+    GRSF_ASSERTMSG(it != m_logList.end(),"This Log does not exist!: "<<name);
+    GRSF_ASSERTMSG(it->second != nullptr,"This Log has Null Pointer!: "<<name);
     if(it == m_logList.end()) {
         return nullptr;
     }

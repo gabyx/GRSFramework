@@ -184,7 +184,7 @@ class ExternalForceList{
 
             if(std::is_same<T, GravityForceField>::value){
                 if(m_gravityField){
-                    ASSERTMSG(false,"A gravity force field has already been added!")
+                    GRSF_ASSERTMSG(false,"A gravity force field has already been added!")
                 }else{
                     m_gravityField = reinterpret_cast<GravityForceField*>(extForce);
                 }

@@ -45,15 +45,15 @@ class PrintGeometryDetailsVisitor : public boost::static_visitor<> {
         }
 
         void operator()(std::shared_ptr<const MeshGeometry > & mesh)  {
-            ERRORMSG("MeshGeometry PrintDetails: This has not been implemented yet!");
+            GRSF_ERRORMSG("MeshGeometry PrintDetails: This has not been implemented yet!");
         }
         void operator()(std::shared_ptr<const CapsuleGeometry > & mesh)  {
-            ERRORMSG("CapsuleGeometry PrintDetails: This has not been implemented yet!");
+            GRSF_ERRORMSG("CapsuleGeometry PrintDetails: This has not been implemented yet!");
         }
 
         void operator()(std::shared_ptr<const HalfspaceGeometry > & halfspace)  {
             //This has not been implemented yet!
-            ERRORMSG("HalfspaceGeometry PrintDetails: This has not been implemented yet!");
+            GRSF_ERRORMSG("HalfspaceGeometry PrintDetails: This has not been implemented yet!");
         }
 
         private:

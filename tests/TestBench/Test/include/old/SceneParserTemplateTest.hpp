@@ -402,7 +402,7 @@ private:
 
 public:
     GeometryModule(ParserType * p, GlobalGeometryMapType * g): m_parser(p),m_globalGeometries(g) {
-        ASSERTMSG(m_globalGeometries, "this should not be null")
+        GRSF_ASSERTMSG(m_globalGeometries, "this should not be null")
     };
 
     void parseGlobalGeometries(XMLNodeType sceneSettings) {
@@ -1172,11 +1172,11 @@ public:
 
     template<typename... Args>
     void parse(Args&&... args) {
-         ERRORMSG("This is the standard BodyVisModule which does nothing! This function should not be called!");
+         GRSF_ERRORMSG("This is the standard BodyVisModule which does nothing! This function should not be called!");
     }
     template<typename... Args>
     void parseSceneSettingsPost(Args&&... args) {
-         ERRORMSG("This is the standard BodyVisModule which does nothing! This function should not be called!");
+         GRSF_ERRORMSG("This is the standard BodyVisModule which does nothing! This function should not be called!");
     }
 };
 
@@ -1201,7 +1201,7 @@ private:
 
 public:
     InitStatesModule(ParserType * p, RigidBodyStatesContainerType * c, SettingsModuleType * s): m_parser(p),m_initStates(c), m_settings(s) {
-        ASSERTMSG(m_initStates, "should not be null");
+        GRSF_ASSERTMSG(m_initStates, "should not be null");
     };
 
 
@@ -1256,7 +1256,7 @@ public:
                                RigidBodyIdType startId, bool parseVelocity = true , bool addToInitList = true) {
 
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> InitStatesModule: parsing (BodyInitState)"<<std::endl;)
-        ASSERTMSG(bodyList, "Should not be null!")
+        GRSF_ASSERTMSG(bodyList, "Should not be null!")
 
         m_bodyListGroup = bodyList;
         m_startIdGroup = startId;
@@ -1421,7 +1421,7 @@ private:
         PREC angle;
 
         auto bodyIt = m_bodyListGroup->begin();
-        ASSERTMSG(bodyIt != m_bodyListGroup->end(),"no bodies in list");
+        GRSF_ASSERTMSG(bodyIt != m_bodyListGroup->end(),"no bodies in list");
 
         // Iterate over all values in the list
 
@@ -1485,7 +1485,7 @@ private:
         unsigned int consumedValues = 0;
 
         auto bodyIt = m_bodyListGroup->begin();
-        ASSERTMSG(bodyIt != m_bodyListGroup->end(), "no bodies in list");
+        GRSF_ASSERTMSG(bodyIt != m_bodyListGroup->end(), "no bodies in list");
 
         Quaternion q_KI, q_BK;
         Vector3 I_r_IK, K_r_KB;
@@ -1578,7 +1578,7 @@ private:
         PREC rot,vel;
 
         auto bodyIt = m_bodyListGroup->begin();
-        ASSERTMSG(bodyIt != m_bodyListGroup->end(),"no bodies in list");
+        GRSF_ASSERTMSG(bodyIt != m_bodyListGroup->end(),"no bodies in list");
 
         // Iterate over all values in the list
         for ( XMLNodeType & node : initCond.children("Value")) {
@@ -1671,15 +1671,15 @@ public:
     BodyModule(ParserType * p, GeometryModuleType * g,  InitStatesModuleType * is, VisModuleType * i,
                RigidBodySimContainerType * simBodies, RigidBodyStaticContainerType * bodies )
         : m_parser(p), m_pGeomMod(g), m_pVisMod(i), m_pInitStatesMod(is), m_pSimBodies(simBodies), m_pBodies(bodies) {
-            ASSERTMSG(is,"should not be null");
-            ASSERTMSG(g,"should not be null");
+            GRSF_ASSERTMSG(is,"should not be null");
+            GRSF_ASSERTMSG(g,"should not be null");
         };
 
 
     void parse(XMLNodeType & sceneObjects){
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "=== BodyModule: parsing ==========================================="<<std::endl;)
 
-        ASSERTMSG(m_parsingOptions.m_allocateBodies || m_parsingOptions.m_parseOnlyVisualizationProperties, " You should not allocate any bodies (m_allocateBodies: "<<m_parsingOptions.m_allocateBodies
+        GRSF_ASSERTMSG(m_parsingOptions.m_allocateBodies || m_parsingOptions.m_parseOnlyVisualizationProperties, " You should not allocate any bodies (m_allocateBodies: "<<m_parsingOptions.m_allocateBodies
                                                 <<" and parse dynamic properties (m_parseOnlyVisualizationProperties: " << m_parsingOptions.m_parseOnlyVisualizationProperties <<
                                                 ")")
 
@@ -2100,7 +2100,7 @@ public:
 //        // Set log
 //        m_pSimulationLog = nullptr;
 //        m_pSimulationLog = Logging::LogManager::getSingletonPtr()->getLog("SimulationLog");
-//        ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
+//        GRSF_ASSERTMSG(m_pSimulationLog, "There is no SimulationLog in the LogManager!");
 //        setStandartValues();
 
     }
@@ -2157,7 +2157,7 @@ protected:
 //        LOGSCLEVEL1( m_pSimulationLog, "---> Scene Input file: "  << file.string() <<std::endl; );
 //
 //        if(!boost::filesystem::exists(m_currentParseFilePath)) {
-//            ERRORMSG("Scene Input file does not exist!");
+//            GRSF_ERRORMSG("Scene Input file does not exist!");
 //        }
 //
 //
@@ -2193,7 +2193,7 @@ protected:
 //
 //        } catch(Exception& ex) {
 //            LOGSCLEVEL1(m_pSimulationLog,  "Scene XML error: "  << ex.what() <<std::endl);
-//            ERRORMSG( "Scene XML error: "  << ex.what() );
+//            GRSF_ERRORMSG( "Scene XML error: "  << ex.what() );
 //        }
 
     }

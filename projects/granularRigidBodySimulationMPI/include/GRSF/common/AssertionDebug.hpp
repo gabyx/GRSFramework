@@ -36,33 +36,33 @@
 	#define LOGASSERTMSG( condition , log , message ) { \
         if( !( condition ) ){                              \
             LOG( log , message );                    \
-            ERRORMSG( message );                   \
+            GRSF_ERRORMSG( message );                   \
         }\
     }
 
-	#define ASSERTMSG(condition , message) { \
+	#define GRSF_ASSERTMSG(condition , message) { \
         if( !( condition ) ){                      \
-            ERRORMSG( message );                   \
+            GRSF_ERRORMSG( message );                   \
         }\
     }
 
     #define WARNINGMSG(condition , message) { if(!(condition)){ std::cerr << "WARNING: " << #condition << " : " <<std::endl<< message << std::endl << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl;} }
 
 #else
-   //#define ASSERTMSG(condition,message);
+   //#define GRSF_ASSERTMSG(condition,message);
    //#define WARNINGMSG(condition,message);
    //#define LOGASSERTMSG( _log_ , _assert_ , _statement_ );
 
    #define LOGASSERTMSG( condition , log , message ) { \
         if( !( condition ) ){                              \
             LOG( log , message );                    \
-            ERRORMSG( message );                   \
+            GRSF_ERRORMSG( message );                   \
         }\
     }
 
-	#define ASSERTMSG(condition , message) { \
+	#define GRSF_ASSERTMSG(condition , message) { \
         if( !( condition ) ){                      \
-            ERRORMSG( message );                   \
+            GRSF_ERRORMSG( message );                   \
         }\
     }
 
@@ -77,9 +77,9 @@
 	* @brief An Error Macro to use within C++ for MPI code.
     * Writes in a global file!
 	*/
-#define ERRORMSG( _message_ ) THROWEXCEPTION( _message_ );
+#define GRSF_ERRORMSG( _message_ ) THROWEXCEPTION( _message_ );
 
-#define ERRORMSG2( _message1_ , _message2_ ) ERRORMSG( _message1_ << _message2_ )
+#define GRSF_ERRORMSG2( _message1_ , _message2_ ) GRSF_ERRORMSG( _message1_ << _message2_ )
 
 
 #ifndef NDEBUG
@@ -92,7 +92,7 @@
             char * string = nullptr; \
             int length; \
             MPI_Error_string( error_code , string, &length ); \
-            ERRORMSG2( string , message ); \
+            GRSF_ERRORMSG2( string , message ); \
         } \
     }
 
@@ -104,7 +104,7 @@
             char * string = nullptr; \
             int length; \
             MPI_Error_string( error_code , string, &length ); \
-            ERRORMSG2( string , message ); \
+            GRSF_ERRORMSG2( string , message ); \
         } \
     }
 

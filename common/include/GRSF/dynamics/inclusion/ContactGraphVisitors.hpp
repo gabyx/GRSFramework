@@ -358,7 +358,7 @@ public:
             nodeData.swapLambdas(); // faster only switch pointers
 
         } else {
-            ERRORMSG(" You specified a contact model which has not been implemented so far!");
+            GRSF_ERRORMSG(" You specified a contact model which has not been implemented so far!");
         }
     }
 
@@ -547,7 +547,7 @@ public:
 
 
         } else {
-            ERRORMSG(" You specified a contact model which has not been implemented so far!");
+            GRSF_ERRORMSG(" You specified a contact model which has not been implemented so far!");
         }
     }
 
@@ -637,7 +637,7 @@ public:
             // Apply the tangential step node visitor now
 
         } else {
-            ERRORMSG(" You specified a contact model which has not been implemented so far!");
+            GRSF_ERRORMSG(" You specified a contact model which has not been implemented so far!");
         }
     }
 
@@ -790,7 +790,7 @@ public:
 
 
         } else {
-            ERRORMSG(" You specified a contact model which has not been implemented so far!");
+            GRSF_ERRORMSG(" You specified a contact model which has not been implemented so far!");
         }
     }
 
@@ -966,14 +966,14 @@ public:
                 m_compW_body1.compute(nodeData);
             }else if(state == RigidBodyType::BodyMode::ANIMATED){
                 // Contact goes into xi_N, xi_T
-                ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
+                GRSF_ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
             }
             state = pCollData->m_pBody[1]->m_eMode;
             if(  state == RigidBodyType::BodyMode::SIMULATED){
                 m_compW_body2.compute(nodeData);
             }else if(state == RigidBodyType::BodyMode::ANIMATED){
                 // Contact goes into xi_N, xi_T
-                ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
+                GRSF_ASSERTMSG(false,"RigidBody<TLayoutConfig>::ANIMATED objects have not been implemented correctly so far!");
             }
 
 
@@ -1027,7 +1027,7 @@ public:
                 else if(m_settings.m_RStrategy == InclusionSolverSettingsType::RSTRATEGY_MAX){
                    nodeData.m_R_i_inv_diag.setConstant( m_alpha / nodeData.m_G_ii.diagonal().maxCoeff() );
                 }else{
-                    ERRORMSG(" You specified a R-Matrix strategy which has not been implemented so far!");
+                    GRSF_ERRORMSG(" You specified a R-Matrix strategy which has not been implemented so far!");
                 }
 
             }else{
@@ -1049,7 +1049,7 @@ public:
                     nodeData.m_R_i_inv_diag(2) = r_T;
 
                 }else{
-                    ERRORMSG(" You specified a R-Matrix strategy which has not been implemented so far!");
+                    GRSF_ERRORMSG(" You specified a R-Matrix strategy which has not been implemented so far!");
                 }
             }
 
@@ -1064,7 +1064,7 @@ public:
             LOGSLLEVEL3_CONTACT(m_pSolverLog,  "\t ---> nd.m_mu: "<< nodeData.m_contactParameter.m_params[CMT::muIdx] <<std::endl;);
 
         } else {
-            ERRORMSG(" You specified a contact model which has not been implemented so far!");
+            GRSF_ERRORMSG(" You specified a contact model which has not been implemented so far!");
         }
 
     }
@@ -1079,7 +1079,7 @@ private:
         }
         //        else{
         //           // if static or animated add overlap to other body (which needs to be simualated!)
-        //           ASSERTMSG(pColData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
+        //           GRSF_ASSERTMSG(pColData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
         //           pColData->m_pBody[1]->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
         //        }
 
@@ -1087,7 +1087,7 @@ private:
            pColData->m_pBody[1]->m_pSolverData->m_overlapTotal +=  /*0.5**/pColData->m_overlap;
         }
         //        else{
-        //           ASSERTMSG(pColData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
+        //           GRSF_ASSERTMSG(pColData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
         //           pColData->m_pBody[0]->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
         //        }
     }

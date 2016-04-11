@@ -191,7 +191,7 @@ bool SimulationManager::initRecordThread() {
     // Copy File: SimulationData
     boost::filesystem::path simDataFile;
     if(!m_pTimestepper->m_settings.m_simDataReferenceFile.empty()){
-         ASSERTMSG(false,"HERE IS CODE ZU VERVOLLSTÄNDIGEN! FALSCH!")
+         GRSF_ASSERTMSG(false,"HERE IS CODE ZU VERVOLLSTÄNDIGEN! FALSCH!")
          simDataFile = FileManager::getSingleton().copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_settings.m_simDataReferenceFile,true);
     }
     m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);

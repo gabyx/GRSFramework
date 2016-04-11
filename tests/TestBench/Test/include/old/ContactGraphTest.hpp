@@ -311,10 +311,10 @@ struct ContactGraphTraits< std::tuple<TNodaData...>, std::tuple<TEdgeData...> > 
         static const int size_unique_edge_types = mpl::size<EdgeTypes>::value;
     };
 
-    STATIC_ASSERTM( details::size_unique_edge_types == details::size_unique_node_types*(details::size_unique_node_types+1)/2
+    GRSF_STATIC_ASSERTM( details::size_unique_edge_types == details::size_unique_node_types*(details::size_unique_node_types+1)/2
                   || details::size_unique_edge_types==1, "NUMBER OF SPECIFIED EDGE TYPES INCORRECT" );
     /** Fails if EdgeTypes are not N(N+1)/2 types (N = unique_node_types) or 1 (which results !*/
-    STATIC_ASSERTM( details::size_unique_node_types == mpl::size<NodeTypes>::value , "NON UNIQUE NODE TYPES SPECIFIED" );
+    GRSF_STATIC_ASSERTM( details::size_unique_node_types == mpl::size<NodeTypes>::value , "NON UNIQUE NODE TYPES SPECIFIED" );
     /** Fails if NodeTypes are not unique!*/
 
     using NodeStorageTuple = std::tuple< NodeStorage<Node<TNodaData> >... >; /** no need to adjust, those are unique!*/
@@ -342,7 +342,7 @@ struct ContactGraphTraits< std::tuple<TNodaData...>, std::tuple<TEdgeData...> > 
     struct nodeStorageTypeByNodeType {
         using iter = typename mpl::find<NodeTypes, TNode>::type;
         static const unsigned int idx = iter::pos::value;
-        STATIC_ASSERT( (std::is_same<TNode, typename mpl::deref<iter>::type >::value) )
+        GRSF_STATIC_ASSERT( (std::is_same<TNode, typename mpl::deref<iter>::type >::value) )
         using type = typename std::tuple_element<idx, NodeStorageTuple >::type;
     };
 
@@ -352,7 +352,7 @@ struct ContactGraphTraits< std::tuple<TNodaData...>, std::tuple<TEdgeData...> > 
     template<typename TEdge>
     struct edgeStorageTypeByEdgeType {
         using iter = typename mpl::find< UniqueEdgeTypes, TEdge>::type;
-        STATIC_ASSERT( (std::is_same<TEdge, typename mpl::deref<iter>::type >::value) )
+        GRSF_STATIC_ASSERT( (std::is_same<TEdge, typename mpl::deref<iter>::type >::value) )
         static const unsigned int idx = iter::pos::value;
         using type = typename std::tuple_element<idx, EdgeStorageTuple >::type;
     };
@@ -367,7 +367,7 @@ struct ContactGraphTraits< std::tuple<TNodaData...>, std::tuple<TEdgeData...> > 
             };
         };
         using iter = typename mpl::find_if< NodeTypes, same_as_nodedata>::type;
-        STATIC_ASSERT( (! std::is_same<iter, typename mpl::end<NodeTypes>::type >::value) )
+        GRSF_STATIC_ASSERT( (! std::is_same<iter, typename mpl::end<NodeTypes>::type >::value) )
 
         using type = typename mpl::deref<iter>::type;
     };
@@ -383,7 +383,7 @@ struct ContactGraphTraits< std::tuple<TNodaData...>, std::tuple<TEdgeData...> > 
         };
 
         using iter = typename mpl::find_if< EdgeTypes, same_as_edgedata>::type;
-        STATIC_ASSERT( (! std::is_same<iter, typename mpl::end<EdgeTypes>::type >::value) )
+        GRSF_STATIC_ASSERT( (! std::is_same<iter, typename mpl::end<EdgeTypes>::type >::value) )
 
         using type = typename mpl::deref<iter>::type;
         static const unsigned int idx = iter::pos::value;
@@ -394,11 +394,11 @@ struct ContactGraphTraits< std::tuple<TNodaData...>, std::tuple<TEdgeData...> > 
     struct edgeTypeByNodeType {
         /** extract both indices from the list*/
         using iter1 = typename mpl::find<NodeTypes, TNode1>::type;
-        STATIC_ASSERT( (! std::is_same< iter1, typename mpl::end<NodeTypes>::type>::value ) ) // not end iterator
+        GRSF_STATIC_ASSERT( (! std::is_same< iter1, typename mpl::end<NodeTypes>::type>::value ) ) // not end iterator
         static const unsigned int i = iter1::pos::value;
 
         using iter2 = typename mpl::find<NodeTypes, TNode2>::type;
-        STATIC_ASSERT( (! std::is_same< iter2, typename mpl::end<NodeTypes>::type>::value ) ) // not end iterator
+        GRSF_STATIC_ASSERT( (! std::is_same< iter2, typename mpl::end<NodeTypes>::type>::value ) ) // not end iterator
         static const unsigned int j = iter2::pos::value;
 
         static const unsigned int linearIdx = (j>=i)? i*(details::size_unique_edge_types-1) + j : j*(details::size_unique_edge_types-1) + i;
@@ -416,7 +416,7 @@ struct ContactGraphTraits< std::tuple<TNodaData...>, std::tuple<TEdgeData...> > 
     struct edgeDataByEdgeType {
         using iter = typename mpl::find< UniqueEdgeTypes, TEdge>::type;
 
-        STATIC_ASSERT( (! std::is_same<iter, typename mpl::end<UniqueEdgeTypes>::type>::value) )
+        GRSF_STATIC_ASSERT( (! std::is_same<iter, typename mpl::end<UniqueEdgeTypes>::type>::value) )
 
         template <typename T> struct extractData;
 

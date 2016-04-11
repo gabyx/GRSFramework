@@ -175,7 +175,7 @@ private:
     {
         MultiBodySimFile fromFile;
         if(!fromFile.openRead(f)) {
-            ERRORMSG(fromFile.getErrorString());
+            GRSF_ERRORMSG(fromFile.getErrorString());
         };
 
 

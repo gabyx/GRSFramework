@@ -50,7 +50,7 @@ public:
     LogicSocket<T> * castToType()
     {
         typedef typename boost::mpl::find<TypeSeq,T>::type iter;
-        ASSERTMSG( this->m_type == iter::pos::value,
+        GRSF_ASSERTMSG( this->m_type == iter::pos::value,
                   " Types of sockets do not coincide: " <<
                   LogicTypes::getTypeName(this->m_type) << " and " << LogicTypes::getTypeName(iter::pos::value) );
         return static_cast< LogicSocket<T> * >(this);
@@ -127,7 +127,7 @@ private:
 public:
 
     /** This assert fails if the type T of the LogicSocket is not properly added to the mpl list in LogicSocketBase*/
-    STATIC_ASSERT(iter::pos::value != endIter::pos::value )
+    GRSF_STATIC_ASSERT(iter::pos::value != endIter::pos::value )
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -166,7 +166,7 @@ void LogicSocket<T>::distributeValue() {
         // if output node
         // set all "to" sockets ( these are write links, because we write the value to another input socket)
         for(auto & s : m_to) {
-            ASSERTMSG(s->m_type == m_type, "Types of node have to match: type "
+            GRSF_ASSERTMSG(s->m_type == m_type, "Types of node have to match: type "
                       << m_type << "from id: " << s->getParent()->m_id
                       << "to type " << s->m_type <<" of id: " << s->getParent()->m_id )
             LogicSocket<T>* sock = static_cast< LogicSocket<T>* > (s);
@@ -206,12 +206,12 @@ T & LogicSocket<T>::getValueRef() {
 }
 
 #define ADD_ISOCK( name, value )      \
-    ASSERTMSG(Inputs::name == this->m_inputs.size(), " Wrong order for Input: " << Inputs::name) \
+    GRSF_ASSERTMSG(Inputs::name == this->m_inputs.size(), " Wrong order for Input: " << Inputs::name) \
 	addISock < IType##name > ( value );	\
 
 
 #define ADD_OSOCK(name, value)      \
-    ASSERTMSG(Outputs::name == this->m_outputs.size(), " Wrong order for Output: " << Outputs::name) \
+    GRSF_ASSERTMSG(Outputs::name == this->m_outputs.size(), " Wrong order for Output: " << Outputs::name) \
 	addOSock< OType##name > (  value );	\
 
 #define REMOVEPTR_REMOVEREF( _ptr_ ) \

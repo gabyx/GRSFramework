@@ -128,7 +128,7 @@ namespace PointFunctions {
     template<unsigned int Dimension,typename TVector,typename Derived>
     std::pair<TVector,TVector> estimateDiameter(const MatrixBase<Derived> & points, const PREC epsilon) {
 
-        STATIC_ASSERT(Derived::RowsAtCompileTime == Dimension);
+        GRSF_STATIC_ASSERT(Derived::RowsAtCompileTime == Dimension);
 
         MatrixBase<Derived> & pp = const_cast< MatrixBase<Derived> &>(points);
 
@@ -177,7 +177,7 @@ namespace PointFunctions {
             using namespace PointFunctions;
 
             if( idx1 >= m_p.size() || idx2 >= m_p.size()) {
-                ERRORMSG(":" << idx1 << "," << idx2 << "," << m_p.size()<< std::endl);
+                GRSF_ERRORMSG(":" << idx1 << "," << idx2 << "," << m_p.size()<< std::endl);
             }
 
             if( idx1 == idx2 || PointFunctions::equal(m_p.col(idx1),m_p.col(idx2))) {

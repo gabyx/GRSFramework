@@ -38,31 +38,31 @@ namespace ParserFunctions{
 
 
                 if(!Utilities::stringToType(trans, transf.attribute("trans").value())) {
-                    ERRORMSG("---> String conversion in InitialPositionTransforms: translation failed");
+                    GRSF_ERRORMSG("---> String conversion in InitialPositionTransforms: translation failed");
                 }
 
                 if(!Utilities::stringToType(axis, transf.attribute("axis").value())) {
-                    ERRORMSG("---> String conversion in InitialPositionTransforms: rotationAxis failed");
+                    GRSF_ERRORMSG("---> String conversion in InitialPositionTransforms: rotationAxis failed");
                 }
 
                 if( axis.norm() == 0) {
-                    ERRORMSG("---> Specified wrong axis in InitialPositionTransforms");
+                    GRSF_ERRORMSG("---> Specified wrong axis in InitialPositionTransforms");
                 }
 
                 auto att = transf.attribute("deg");
                 if(att) {
                     if(!Utilities::stringToType(angle, att.value())) {
-                        ERRORMSG("---> String conversion in InitialPositionPosAxisAngle: rad failed");
+                        GRSF_ERRORMSG("---> String conversion in InitialPositionPosAxisAngle: rad failed");
                     }
                     angle = angle / 180.0 * M_PI;
                 } else {
                     att = transf.attribute("rad");
                     if(att) {
                         if(!Utilities::stringToType(angle, att.value())) {
-                            ERRORMSG("---> String conversion in InitialPositionPosAxisAngle: deg failed");
+                            GRSF_ERRORMSG("---> String conversion in InitialPositionPosAxisAngle: deg failed");
                         }
                     } else {
-                        ERRORMSG("---> No angle found in InitialPositionPosAxisAngle");
+                        GRSF_ERRORMSG("---> No angle found in InitialPositionPosAxisAngle");
                     }
                 }
                 axis.normalize();

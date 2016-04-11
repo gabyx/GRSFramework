@@ -62,7 +62,7 @@ protected:
     virtual void initSimThread() {};
     virtual void threadRunSimulation() {
         while(!isSimThreadToBeStopped()) {
-            ASSERTMSG(false, "There is no Simulation thread implemented");
+            GRSF_ASSERTMSG(false, "There is no Simulation thread implemented");
             std::cout << " Sim Thread running, but no implementation"<<std::endl;
         }
     };

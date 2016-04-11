@@ -24,7 +24,7 @@ InclusionSolverCONoG::InclusionSolverCONoG(std::shared_ptr< CollisionSolverType 
     if(Logging::LogManager::getSingleton().existsLog("SimulationLog")) {
         m_pSimulationLog = Logging::LogManager::getSingleton().getLog("SimulationLog");
     } else {
-        ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
+        GRSF_ERRORMSG("There is no SimulationLog in the LogManager... Did you create it?")
     }
 
     m_pCollisionSolver = pCollisionSolver;
@@ -68,7 +68,7 @@ void InclusionSolverCONoG::initializeLog( Logging::Log * pSolverLog,  boost::fil
             m_pContactSorProxStepNodeVisitor->setLog(m_pSolverLog);
              break;
         default:
-            ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemented");
+            GRSF_ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemented");
     }
 
     m_pSorProxInitNodeVisitor->setLog(m_pSolverLog);
@@ -137,7 +137,7 @@ void InclusionSolverCONoG::reset() {
          m_pTangentialSorProxStepNodeVisitor = new TangentialSorProxStepNodeVisitor<ContactGraphType>(m_settings,m_bConverged,m_globalIterationCounter,&m_contactGraph);
 
     }else{
-        ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemendet");
+        GRSF_ERRORMSG("InclusionSolverSettings::Method" << m_settings.m_eMethod << "not implemendet");
     }
 
     if(m_percussionPool){ delete m_percussionPool;}
@@ -239,7 +239,7 @@ void InclusionSolverCONoG::solveInclusionProblem() {
                 m_timeProx = counter.elapsedSec();
             #endif
         }else{
-            ASSERTMSG(false,"This algorithm has not been implemented yet");
+            GRSF_ASSERTMSG(false,"This algorithm has not been implemented yet");
         }
 
         if(m_settings.m_bIsFiniteCheck) {
@@ -264,7 +264,7 @@ void InclusionSolverCONoG::doJorProx() {
     // TODO
 
 #else
-    ASSERTMSG(false,"InclusionSolverCONoG:: CPU JOR Prox iteration not implemented!");
+    GRSF_ASSERTMSG(false,"InclusionSolverCONoG:: CPU JOR Prox iteration not implemented!");
     // Jor Prox iteration on CPU will not be implemented as the Full SOR and Contact SOR algorithms are much better!
 #endif
 }
@@ -298,7 +298,7 @@ void InclusionSolverCONoG::initContactGraphForIteration(PREC alpha) {
             m_pContactSorProxStepNodeVisitor->setParams(alpha);
             break;
         default:
-            ERRORMSG(" Visitor method not defined for visitor: " << EnumConversion::toIntegral(m_settings.m_eMethod));
+            GRSF_ERRORMSG(" Visitor method not defined for visitor: " << EnumConversion::toIntegral(m_settings.m_eMethod));
     }
 
     // Calculates b vector for all nodes, u_0, R_ii, ...
@@ -353,7 +353,7 @@ void InclusionSolverCONoG::doJORProxGPU(){
         integrateAllBodyVelocities<true>();
 
     #else
-        ERRORMSG("Calling this function without CUDA Support is wrong!")
+        GRSF_ERRORMSG("Calling this function without CUDA Support is wrong!")
     #endif
 }
 
@@ -432,7 +432,7 @@ void InclusionSolverCONoG::sorProxOverAllNodes() {
             m_contactGraph.applyNodeVisitorSpecial(*m_pContactSorProxStepNodeVisitor);
             break;
         default:
-            ERRORMSG(" Visitor method not defined for visitor: " << EnumConversion::toIntegral(m_settings.m_eMethod));
+            GRSF_ERRORMSG(" Visitor method not defined for visitor: " << EnumConversion::toIntegral(m_settings.m_eMethod));
     }
 
     if(m_pCachePercussionVisitor){

@@ -71,7 +71,7 @@ class SimFileExecutionGraph : public ExecutionTreeInOut{
 
         template<typename RigidBodyStateCont>
         void addState(const RigidBodyStateCont & s){
-            ERRORMSG("This function should not be called")
+            GRSF_ERRORMSG("This function should not be called")
         }
 
         void finalizeState();

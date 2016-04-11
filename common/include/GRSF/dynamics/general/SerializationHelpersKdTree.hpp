@@ -149,7 +149,7 @@ class KdTreeSerializer: public boost::serialization::traits< KdTreeSerializer<Tr
                 for(std::size_t i=0; i<s; i+=BoundaryInfoType::size+1 ){
 
                     nodeIdx = m_boundaries[i];
-                    ASSERTMSG(nodeIdx < nodes.size(), "out of bound: " << nodeIdx)
+                    GRSF_ASSERTMSG(nodeIdx < nodes.size(), "out of bound: " << nodeIdx)
 
                     for(std::size_t b=0; b<BoundaryInfoType::size; ++b){
 
@@ -158,7 +158,7 @@ class KdTreeSerializer: public boost::serialization::traits< KdTreeSerializer<Tr
 
                         if(bIdx!=0){
                             --bIdx;
-                            ASSERTMSG(bIdx < nodes.size(), "out of bound: " << bIdx)
+                            GRSF_ASSERTMSG(bIdx < nodes.size(), "out of bound: " << bIdx)
                             nodes[ nodeIdx ]->m_bound.at(b) = nodes[ bIdx ];
                         }else{
                             nodes[ nodeIdx ]->m_bound.at(b) = nullptr;
@@ -181,7 +181,7 @@ class KdTreeSerializer: public boost::serialization::traits< KdTreeSerializer<Tr
 
             // saving
             if(!tree.m_root){
-                ERRORMSG("Saving empty tree is non-sense!")
+                GRSF_ERRORMSG("Saving empty tree is non-sense!")
             }
 
             // make all links (always 3 IndexTypes represent : parent -> child left/right (index = 0, means no child!) )
@@ -236,7 +236,7 @@ class KdTreeSerializer: public boost::serialization::traits< KdTreeSerializer<Tr
             using NodeType = typename KdTree::TreeSimpleS<Traits>::NodeType;
             //using BoundaryInfoType = typename NodeType::BoundaryInfoType;
 
-            ASSERTMSG(tree.m_root==nullptr, "Root node needs to be nullptr for loading!")
+            GRSF_ASSERTMSG(tree.m_root==nullptr, "Root node needs to be nullptr for loading!")
 
 
             IndexType nodes,leafs,links, idx;
@@ -256,7 +256,7 @@ class KdTreeSerializer: public boost::serialization::traits< KdTreeSerializer<Tr
                 node = new NodeType{};
                 nodeSer.load(ar,*node);
 
-                ASSERTMSG(node->getIdx()==tree.m_nodes.size(),"size not equal:" << node->getIdx() << "," << tree.m_nodes.size() )
+                GRSF_ASSERTMSG(node->getIdx()==tree.m_nodes.size(),"size not equal:" << node->getIdx() << "," << tree.m_nodes.size() )
                 tree.m_nodes.emplace_back(node);
 
             }
@@ -278,21 +278,21 @@ class KdTreeSerializer: public boost::serialization::traits< KdTreeSerializer<Tr
                 if(idx!=0){
 
                     --idx;
-                    ASSERTMSG(idx < tree.m_nodes.size(),"Wrong idx: " << idx)
+                    GRSF_ASSERTMSG(idx < tree.m_nodes.size(),"Wrong idx: " << idx)
                     p = tree.m_nodes[idx];
 
-                    ASSERTMSG(!p->isLeaf(), "Should not be leaf: idx"  << p->getIdx() <<","<< idx);
+                    GRSF_ASSERTMSG(!p->isLeaf(), "Should not be leaf: idx"  << p->getIdx() <<","<< idx);
 
                     // get left child (zero means no child)
                     ar & idx;
-                    ASSERTMSG(idx < tree.m_nodes.size(),"Wrong idx: " << idx)
+                    GRSF_ASSERTMSG(idx < tree.m_nodes.size(),"Wrong idx: " << idx)
                     c = tree.m_nodes[idx];
                     p->m_child[0] = c;
                     p->m_child[0]->m_parent = p;
 
                     // get right child
                     ar & idx;
-                    ASSERTMSG(idx < tree.m_nodes.size(),"Wrong idx: " << idx)
+                    GRSF_ASSERTMSG(idx < tree.m_nodes.size(),"Wrong idx: " << idx)
                     c = tree.m_nodes[idx];
                     p->m_child[1] = c;
                     p->m_child[1]->m_parent = p;

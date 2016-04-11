@@ -105,7 +105,7 @@ public:
         m_StateType = NONE;
 
         unsigned int nSimBodies = std::distance(beg,end);
-        ASSERTMSG(nSimBodies, "nSimBodies == 0");
+        GRSF_ASSERTMSG(nSimBodies, "nSimBodies == 0");
         if(resetState){
             m_SimBodyStates.assign(nSimBodies,RigidBodyState());
         }else{
@@ -151,7 +151,7 @@ public:
 
         // If both sequence (ids of states and internal mSimBodyStates are in sequenc, we can just simply iterate over all states and apply them
         if(sequenceMatch){
-            ASSERTMSG(states.size() == m_SimBodyStates.size() , "states container has size: "
+            GRSF_ASSERTMSG(states.size() == m_SimBodyStates.size() , "states container has size: "
             << states.size() << "instead of " << m_SimBodyStates.size())
             auto s = states.begin();
             for(auto & state : m_SimBodyStates){
@@ -187,7 +187,7 @@ public:
     template< bool sequenceMatch = false, typename TRigidBodyCont>
     inline void applyBodies(const TRigidBodyCont & bodies) {
 
-        ASSERTMSG(m_SimBodyStates.size() == bodies.size(), "Wrong Size" << m_SimBodyStates.size() <<"!="<< bodies.size()<<std::endl );
+        GRSF_ASSERTMSG(m_SimBodyStates.size() == bodies.size(), "Wrong Size" << m_SimBodyStates.size() <<"!="<< bodies.size()<<std::endl );
 
 
         if(sequenceMatch){
@@ -246,7 +246,7 @@ private:
 namespace Interpolate{
     template<typename PREC>
     void lerp( const DynamicsStateBase & A, const DynamicsStateBase & B, DynamicsStateBase & X, PREC factor) {
-        ASSERTMSG(A.m_SimBodyStates.size() == B.m_SimBodyStates.size() &&  B.m_SimBodyStates.size() == X.m_SimBodyStates.size() ,"Wrong number of bodies!");
+        GRSF_ASSERTMSG(A.m_SimBodyStates.size() == B.m_SimBodyStates.size() &&  B.m_SimBodyStates.size() == X.m_SimBodyStates.size() ,"Wrong number of bodies!");
         X.m_t = (1.0-factor)*A.m_t + factor*B.m_t;
         for(auto i=0; i<A.m_SimBodyStates.size(); i++){
             lerp(A.m_SimBodyStates[i],B.m_SimBodyStates[i],X.m_SimBodyStates[i],factor);

@@ -54,7 +54,7 @@ namespace TopologyVisitors {
             }
 
             inline bool operator()(const boost::blank & b) {
-                ERRORMSG("Topo is not initialized!");
+                GRSF_ERRORMSG("Topo is not initialized!");
                 return false;
             }
         private:
@@ -85,7 +85,7 @@ namespace TopologyVisitors {
         }
 
         inline bool operator()(const boost::blank & b) {
-            ERRORMSG("Topo is not initialized!");
+            GRSF_ERRORMSG("Topo is not initialized!");
             return false;
         }
     private:
@@ -99,7 +99,7 @@ namespace TopologyVisitors {
 //    class Deleter: public boost::static_visitor<> {
 //        public:
 //            inline void operator()(ProcessTopologyGrid<ProcessTopologyBase> & topo) const {
-//                ASSERTMSG(topo,"Topo pointer is zero?");
+//                GRSF_ASSERTMSG(topo,"Topo pointer is zero?");
 //                delete topo;
 //            }
 //            inline void operator()(boost::blank & b) const{

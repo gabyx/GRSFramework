@@ -61,13 +61,13 @@ public:
     }
 
     virtual void addNode(LogicNode * node, bool isInput = false, bool isOutput = false) {
-        if(isInput && isOutput){ ERRORMSG("Wrong arguements!")}
+        if(isInput && isOutput){ GRSF_ERRORMSG("Wrong arguements!")}
 
 
         // Add to global map
         auto res = m_nodeMap.emplace(node->m_id, node);
         if(!res.second) {
-            ERRORMSG("Node id: " << node->m_id << " already in map");
+            GRSF_ERRORMSG("Node id: " << node->m_id << " already in map");
         }
 
         // Add to input or output
@@ -82,12 +82,12 @@ public:
 
         auto inNodeIt = m_nodeMap.find(nodeId);
         if(inNodeIt == m_nodeMap.end()){
-            ERRORMSG("Node with id: " << nodeId << " has not been added to the tree!")
+            GRSF_ERRORMSG("Node with id: " << nodeId << " has not been added to the tree!")
         }
         // Add to group
         auto res = m_groupNodes[groupId].insert(inNodeIt->second);
         if(!res.second){
-            ERRORMSG("Node id: " << inNodeIt->second->m_id << " already in group: " << groupId);
+            GRSF_ERRORMSG("Node id: " << inNodeIt->second->m_id << " already in group: " << groupId);
         }
     }
 
@@ -97,7 +97,7 @@ public:
          auto outNit = m_nodeMap.find(outN);
          auto inNit = m_nodeMap.find(inN);
          if(outNit == m_nodeMap.end() || inNit == m_nodeMap.end() ){
-            ERRORMSG("Node: " << outN << " or " << inN << " does not exist!")
+            GRSF_ERRORMSG("Node: " << outN << " or " << inN << " does not exist!")
          }
          LogicNode::makeGetLink(outNit->second,outS,inNit->second,inS);
     }
@@ -108,7 +108,7 @@ public:
          auto outNit = m_nodeMap.find(outN);
          auto inNit = m_nodeMap.find(inN);
          if(outNit == m_nodeMap.end() || inNit == m_nodeMap.end() ){
-            ERRORMSG("Node: " << outN << " or " << inN << " does not exist!")
+            GRSF_ERRORMSG("Node: " << outN << " or " << inN << " does not exist!")
          }
          LogicNode::makeWriteLink(outNit->second,outS,inNit->second,inS);
     }
@@ -159,7 +159,7 @@ public:
     virtual void setup() {
 
         if(m_outputNodes.size()== 0) {
-            ERRORMSG("No output node specified")
+            GRSF_ERRORMSG("No output node specified")
         }
 
         // Solve execution order for every group list!
@@ -267,7 +267,7 @@ protected:
 
                     auto * adjNode = fsock->getParent();
                     if(nodesCurrDepth.find(adjNode->m_id)!=nodesCurrDepth.end()) {
-                        ERRORMSG("Your execution logic graph contains a cylce from node: " << node->m_id << " socket: " << s->m_id <<
+                        GRSF_ERRORMSG("Your execution logic graph contains a cylce from node: " << node->m_id << " socket: " << s->m_id <<
                                  " to node: " << adjNode->m_id << " socket: " << fsock->m_id);
                     }
 
@@ -323,10 +323,10 @@ protected:
                 if(s->isLinked()) {
 
                     auto * fsock = s->getFrom();
-                    ASSERTMSG(fsock,"linked but from ptr null");
+                    GRSF_ASSERTMSG(fsock,"linked but from ptr null");
 
                     auto * adjNode = fsock->getParent();
-                    ASSERTMSG(adjNode,"Adj node null");
+                    GRSF_ASSERTMSG(adjNode,"Adj node null");
 
                     // If we reached the start node, return!
                     if( m_start == adjNode){
@@ -350,7 +350,7 @@ protected:
         // Set output node
         auto it = m_nodeMap.find(id);
         if(it == m_nodeMap.end()) {
-            ERRORMSG("No output node with id: " << id << " found " << std::endl)
+            GRSF_ERRORMSG("No output node with id: " << id << " found " << std::endl)
         }
         if(input){
             m_inputNodes.emplace(it->second);

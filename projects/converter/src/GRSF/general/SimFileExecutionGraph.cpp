@@ -34,10 +34,10 @@ void SimFileExecutionGraph::setup() {
     LOG(m_log, this->getExecutionOrderInfo() );
 
     if( !m_bodyDataNode  ) {
-        ERRORMSG("Execution tree has no input node of type 'BodyData' ")
+        GRSF_ERRORMSG("Execution tree has no input node of type 'BodyData' ")
     }
     if( !m_stateData  ) {
-        ERRORMSG("Execution tree has no input node of type 'FrameData' ")
+        GRSF_ERRORMSG("Execution tree has no input node of type 'FrameData' ")
     }
 
 }
@@ -52,7 +52,7 @@ void SimFileExecutionGraph::initState(boost::filesystem::path outputfilePath,
          if(m_stateData){
             m_stateData->setOutput(outputfilePath,time,frameNr);
          }else{
-            ERRORMSG("There is no FrameData node present! Please add one!")
+            GRSF_ERRORMSG("There is no FrameData node present! Please add one!")
          }
 
          // Execute all nodes in FRAME group
@@ -98,7 +98,7 @@ void SimFileExecutionGraph::setStopNode(LogicNodes::StopNode *n, unsigned int st
     }else if(stopGroupId == NodeGroups::BODY_EXEC){
         m_stopNodes[2] = n;
     }else{
-        ERRORMSG("No stop node for group id:" << stopGroupId)
+        GRSF_ERRORMSG("No stop node for group id:" << stopGroupId)
     }
 }
 
@@ -133,10 +133,10 @@ void SimFileExecutionGraph::addNodeToGroup(unsigned int id, std::string groupId)
 //        Base::addNodeToGroup(id, NodeGroups::FILE_FINAL);
 //    }
     else{
-         ERRORMSG("No valid group: " << groupId << " for node id: " << id)
+         GRSF_ERRORMSG("No valid group: " << groupId << " for node id: " << id)
 //        unsigned int g;
 //        if(!Utilities::stringToType(g,groupId)){
-//            ERRORMSG("---> String conversion for groupId: '" << groupId << "' not successful!");
+//            GRSF_ERRORMSG("---> String conversion for groupId: '" << groupId << "' not successful!");
 //        }
 //        Base::addNodeToGroup(id, g);
     }
@@ -153,10 +153,10 @@ void SimFileExecutionGraph::addNodeToResetGroup(unsigned int id, std::string gro
     else if(groupId == "File"){
          Base::addNodeToGroup(id, NodeGroups::FILE_RESET);
     }else{
-          ERRORMSG("No valid group: " << groupId << " for node id: " << id)
+          GRSF_ERRORMSG("No valid group: " << groupId << " for node id: " << id)
 //        unsigned int g;
 //        if(!Utilities::stringToType(g,groupId)){
-//            ERRORMSG("---> String conversion for: groupId: '" << groupId << "' not found!");
+//            GRSF_ERRORMSG("---> String conversion for: groupId: '" << groupId << "' not found!");
 //        }
 //        Base::addNodeToGroup(id, g);
     }
