@@ -65,7 +65,7 @@
     <MPISettings>
             <ProcessTopology mode="dynamic" policy="alwaysRebuild" policyCheckEveryXTimeStep="50" bodyLimit="5000">
                 <Topology type="grid"  
-                    dimension="4 4 1" 
+                    dimension="2 2 1" 
                     matchProcessDimToExtent="true" 
                     buildMode="AABB" 
                     minGridSize="5e-3"

@@ -30,9 +30,10 @@ SET( SINGELTON_SRC
 
 SET( STATES_INC
     ${PROJECT_SOURCE_DIR}/include/GRSF/states/simulationManager/SimulationManagerMPI.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/states/simulationManager/SimulationManagerMPI.icc
+    
 )
 SET(STATES_SRC
+    ${PROJECT_SOURCE_DIR}/src/GRSF/states/simulationManager/SimulationManagerMPI.cpp
 )
 
 SET(COMMON_INC

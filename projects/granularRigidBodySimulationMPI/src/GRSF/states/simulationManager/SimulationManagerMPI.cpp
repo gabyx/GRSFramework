@@ -8,6 +8,8 @@
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
 // ========================================================================================
 
+#include "GRSF/states/simulationManager/SimulationManagerMPI.hpp"
+
 #include <fstream>
 
 #define _USE_MATH_DEFINES
@@ -18,6 +20,8 @@
 #include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/LogDefines.hpp"
 #include "GRSF/common/AssertionDebug.hpp"
+
+#include "GRSF/common/ApplicationSignalHandler.hpp"
 
 #include "GRSF/systems/SharedBufferDynSys.hpp"
 #include "GRSF/dynamics/buffers/StateRecorder.hpp"
@@ -165,7 +169,7 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
 
 
     auto callBack = std::bind(&SimulationManagerMPI::ungracefullyExit,this,std::placeholders::_1);
-    ApplicationSignalHandler::getSingleton().registerCallback({SIGINT,SIGUSR1,SIGUSR2,SIGTERM},
+    ApplicationSignalHandler::getSingleton().registerCallback({SIGINT,SIGUSR2},
                                                               callBack,"SimulationManagerMPI::exitUngracefully");
 
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: added ungraceful exit callback!");

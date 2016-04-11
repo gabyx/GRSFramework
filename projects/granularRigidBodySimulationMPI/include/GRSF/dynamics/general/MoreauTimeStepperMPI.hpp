@@ -28,6 +28,8 @@
 #include "GRSF/dynamics/general/MPICommunication.hpp"
 #include "GRSF/dynamics/general/BodyCommunicator.hpp"
 
+#include "GRSF/dynamics/general/MPITopologyBuilder.hpp"
+
 #include "GRSF/dynamics/general/TimeStepperSettings.hpp"
 //===========================================
 
