@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -48,7 +48,6 @@ private:
 //
       using Base::m_dim;
       using Base::m_dxyz;
-//    using Base::m_dxyzInv;
 //    using Base::m_cellData;
       using Base::m_nbIndicesOff;
       using Base::m_A_KI;
@@ -66,7 +65,6 @@ public:
     m_cellNumberingStart(masterRank), m_rank(processRank),
     m_axisAligned(aligned)
     {
-       m_rank = processRank;
 
         //Initialize neighbours
         nbRanks = getCellNeighbours(m_rank);
@@ -79,7 +77,6 @@ public:
             //Get all AABB's of this neighbours
             m_nbAABB[ *it ] = getCellAABB(*it);
         }
-
 
         //Get AABB of own rank!
         m_aabb = getCellAABB(m_rank);
@@ -164,7 +161,7 @@ public:
     AABB3d getCellAABB(RankIdType cellRank) const {
 
         MyMatrix::Array3<unsigned int> cell_index = getCellIndex(cellRank);
-        AABB3d ret(m_aabb.m_minPoint);
+        AABB3d ret(Base::m_aabb.m_minPoint);
         ret.m_minPoint.array() += cell_index.array().cast<PREC>()     * m_dxyz.array();
         ret.m_maxPoint.array() += (cell_index.array()+1).cast<PREC>() * m_dxyz.array();
 
@@ -184,6 +181,8 @@ public:
     bool checkOverlap(const RigidBodyType * body,
                       NeighbourRanksListType & neighbourProcessRanks,
                       bool & overlapsOwnRank) const {
+
+        neighbourProcessRanks.clear();
         if(m_axisAligned) {
             return checkOverlapImpl(m_ColliderAABB,neighbourProcessRanks, overlapsOwnRank, body);
         } else {
@@ -201,8 +200,10 @@ private:
                                     const RigidBodyType * body,
                                     AddArgs&&... args) const
     {
+
         // Check neighbour AABB
         for(auto it = m_nbAABB.begin(); it != m_nbAABB.end(); it++) {
+
             if( collider.checkOverlap(body,it->second, std::forward<AddArgs>(args)...) ) {
                 neighbourProcessRanks.insert(it->first);
             }
