@@ -10,7 +10,7 @@
 
 #include "GRSF/dynamics/general/InertiaTensorCalculations.hpp"
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 namespace InertiaTensor{
 

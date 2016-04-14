@@ -23,7 +23,7 @@
 #include "GRSF/common/CPUTimer.hpp"
 #include "GRSF/common/CommonFunctions.hpp"
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include "GRSF/common/Singleton.hpp"
 
 namespace Logging {

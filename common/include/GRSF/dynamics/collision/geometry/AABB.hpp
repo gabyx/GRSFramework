@@ -14,7 +14,7 @@
 #include <algorithm>
 
 #include "GRSF/common/TypeDefs.hpp"
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 #include "ApproxMVBB/AABB.hpp"
 

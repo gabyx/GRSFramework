@@ -14,7 +14,7 @@
 #include <mpi.h>
 
 #include "GRSF/common/TypeDefs.hpp"
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 /**
 *    Important struct to define all MPI message tags used in this framework!

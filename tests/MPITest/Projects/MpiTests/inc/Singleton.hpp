@@ -11,7 +11,7 @@
 #ifndef Singleton_hpp
 #define Singleton_hpp
 
-#include "AssertionDebug.hpp"
+#include "Asserts.hpp"
 
 /**
         \brief Singelton Class: You need to construct the singelton object (subclass of this singelton class) on the heap with new, once!

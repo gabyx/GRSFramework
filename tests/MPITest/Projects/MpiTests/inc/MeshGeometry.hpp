@@ -15,7 +15,7 @@
 #include <boost/serialization/access.hpp>
 
 #include "ConfigureFile.hpp"
-#include "AssertionDebug.hpp"
+#include "Asserts.hpp"
 
 #if USE_OPCODE == 1
 #include <Opcode.h>

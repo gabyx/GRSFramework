@@ -17,7 +17,7 @@
 #include <OGRE/Ogre.h>
 
 #include "GRSF/dynamics/general/MyMatrixTypeDefs.hpp"
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 
 namespace OgreUtilities {

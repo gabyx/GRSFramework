@@ -1,34 +1,62 @@
 #!/bin/bash
 # first  argument = path to where the virtual env is installed ./pythonenv3.4 for example
+# second argument = number of cores to build
 
 
 if [ -z "$1" ]; then
-  echo "No install path given"
+  echo "no install path given"
   exit -1
+else
+  installPath=$1
+  echo "install path: $installPath"
 fi
 
-installPath=$(readlink -e $1)
+if [ -z "$2" ]; then
+  nCores=1
+else
+  if [ "$2" -eq "$2" ] 2>/dev/null; then
+    nCores=$2
+    echo "number of cores: $nCores"
+  else
+    echo "number of cores invalid"
+    exit -1
+  fi
+  
+fi
 
 
-if [ -z "$HDF5_ROOT" ]; then 
+if [ -z "${HDF5_ROOT}" ]; then 
   echo "HDF5_ROOT variable is unset"; 
   exit -1
+else
+  echo "HDF5 root dir: $HDF5_ROOT"
 fi
 
-mkdir -p $installPath
-mkdir -p $installPath/tempDir
+set -e
 
-echo "Make virtual env in $installPath"
+mkdir -p "$installPath"
+mkdir -p "$installPath/tempDir"
+
+echo "make virtual env in $installPath"
 virtualenv $installPath
 
-echo "Install modules:"
-cd $installPath
+echo "install modules:"
+cd $installPathcd
 pip=$installPath/bin/pip
 python=$installPath/bin/python
+
 source $installPath/bin/activate
 
+cd $installPath/tempDir
+
 $pip install cython
-$pip install numpy 
+
+#numpy
+git clone https://github.com/numpy/numpy.git -b maintenance/1.11.x --single-branch 
+cd numpy
+$python setup.py build -j $nCores install
+cd ..
+
 $pip install matplotlib 
 $pip install scipy
 $pip install scikit-image 
@@ -39,12 +67,13 @@ $pip install glob2
 $pip install transforms3d
 $pip install git+https://github.com/bcj/AttrDict.git
 $pip install git+https://github.com/lxml/lxml.git@lxml-3.4
-$pip install pyside
+$pip install --install-option="--jobs=$nCores" pyside
 $pip install graphviz
 $pip install pyyaml
 $pip install psutil
 
-cd $installPath/tempDir
+
+$pip install pycore
 
 name="sip-4.17"
 wget http://sourceforge.net/projects/pyqt/files/sip/sip-4.17/$name.tar.gz
@@ -52,41 +81,44 @@ tar xvf $name.tar.gz
 rm $name.tar.gz
 cd $name
 $python configure.py
-make -j12 install
+make -j$nCores install
 
-name="PyQt-4.11.4/PyQt-x11-gpl-4.11.4"
+name="PyQt-x11-gpl-4.11.4"
 wget http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.4/$name.tar.gz
 tar xvf $name.tar.gz
 rm $name.tar.gz
 cd $name
-QT_SELECT=qt4
+export QT_SELECT=qt4
 $python configure.py
-make -j12 install
+make -j$nCores
+make -j$nCores install
 
 name="PyQt-gpl-5.5.1"
 wget http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.5.1/$name.tar.gz
 tar xvf $name.tar.gz
 rm  $name.tar.gz
 cd $name
-QT_SELECT=qt5
+export QT_SELECT=qt5
 $python configure.py
-make -j12 install
+make -j$nCores
+make -j$nCores install
 
 
 $pip install PyOpenGL
 $pip install git+https://github.com/vispy/vispy.git
 
-$pip install jupyter
+$pip install -U jupyter
 $pip install mpldatacursor
 
 
 # Install h5py
-wget "https://pypi.python.org/packages/source/h/h5py/h5py-2.5.0.tar.gz#md5=6e4301b5ad5da0d51b0a1e5ac19e3b74"
-tar -xvzf h5py-2.5.0.tar.gz
-cd h5py-2.5.0
+git clone https://github.com/h5py/h5py.git
+cd h5py
+git checkout tags/2.6.0
 $python setup.py configure --hdf5="$HDF5_ROOT"
 $python setup.py install
+cd ..
 
 cd $installPath
 rm -r $installPath/tempDir
-echo "Finished virtualenv install"
+echo "finished virtualenv install"

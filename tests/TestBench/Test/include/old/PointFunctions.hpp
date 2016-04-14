@@ -13,7 +13,7 @@
 
 #include <string>
 
-#include "AssertionDebug.hpp"
+#include "Asserts.hpp"
 #include "StaticAssert.hpp"
 
 #include "TypeDefs.hpp"

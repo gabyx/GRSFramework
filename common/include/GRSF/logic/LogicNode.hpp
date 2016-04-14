@@ -12,7 +12,7 @@
 #define GRSF_logic_LogicNode_hpp
 
 #include <vector>
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include "GRSF/logic/LogicCommon.hpp"
 
 

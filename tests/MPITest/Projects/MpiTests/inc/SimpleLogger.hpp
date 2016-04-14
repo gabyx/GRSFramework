@@ -20,7 +20,7 @@
 
 #include <boost/thread.hpp>
 
-#include "AssertionDebug.hpp"
+#include "Asserts.hpp"
 #include "Singleton.hpp"
 
 namespace Logging {

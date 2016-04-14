@@ -63,7 +63,7 @@
 -->
 
     <MPISettings>
-            <ProcessTopology mode="dynamic" policy="alwaysRebuild" policyCheckEveryXTimeStep="80000" bodyLimit="5000">
+            <ProcessTopology mode="dynamic" policy="alwaysRebuild" policyCheckEveryXTimeStep="200" bodyLimit="5000">
                 <Topology type="grid"  
                     dimension="2 2 1" 
                     matchProcessDimToExtent="true" 
@@ -87,7 +87,7 @@
 
 <SceneObjects>
 
-    <RigidBodies name="balls" instances="100" groupId="0" enableSelectiveIds="true" >
+    <RigidBodies name="balls" instances="700" groupId="0" enableSelectiveIds="true" >
 <!--
         <Geometry>
             <Sphere distribute="random" radius="0.055" seed="5" minRadius="1.1" maxRadius="1.3" />

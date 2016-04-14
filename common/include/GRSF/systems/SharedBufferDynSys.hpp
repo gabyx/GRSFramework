@@ -12,7 +12,7 @@
 #define GRSF_systems_SharedBufferDynSys_hpp
 
 #include <boost/thread.hpp>
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 #include "GRSF/common/TypeDefs.hpp"
 

@@ -28,7 +28,7 @@
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/version.hpp>
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include "GRSF/common/StaticAssert.hpp"
 #include "GRSF/common/TypeDefs.hpp"
 

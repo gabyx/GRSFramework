@@ -11,7 +11,7 @@
 #ifndef AABBnD_hpp
 #define AABBnD_hpp
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/CPUTimer.hpp"
 #include "GRSF/dynamics/collision/geometry/AABB.hpp"

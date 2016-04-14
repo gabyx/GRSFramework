@@ -38,7 +38,7 @@ SET(STATES_SRC
 
 SET(COMMON_INC
     ${PROJECT_SOURCE_DIR}/include/GRSF/common/RedirectOutput.hpp
-    ${PROJECT_SOURCE_DIR}/include/GRSF/common/AssertionDebug.hpp
+    ${PROJECT_SOURCE_DIR}/include/GRSF/common/Asserts.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/common/TypeDefs.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/common/LogDefines.hpp
 )
@@ -142,7 +142,7 @@ endif()
 include(${ApproxMVBB_CMAKE_DIR}/DefineApproxMVBBSources.cmake)
 #write config file for this source code
 #set(ApproxMVBB_USE_DIFFERENT_HEADERS TRUE)
-#set(ApproxMVBB_AssertionDebug_INCLUDE_FILE     "ApproxMVBB/Common//AssertionDebug.hpp")
+#set(ApproxMVBB_AssertionDebug_INCLUDE_FILE     "ApproxMVBB/Common//Asserts.hpp")
 #set(ApproxMVBB_Exception_INCLUDE_FILE          "ApproxMVBB/Common//Exception.hpp")
 #set(ApproxMVBB_Platform_INCLUDE_FILE           "ApproxMVBB/Common/Platform.hpp")
 #set(ApproxMVBB_StaticAssert_INCLUDE_FILE       "ApproxMVBB/Common/StaticAssert.hpp")

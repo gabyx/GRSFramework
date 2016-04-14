@@ -12,7 +12,7 @@
 #define GRSF_logic_LogicNodeGroup_hpp
 
 #include <vector>
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include "GRSF/logic/LogicCommon.hpp"
 
 class LogicSocketBase;

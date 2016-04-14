@@ -16,7 +16,7 @@
 #include <boost/mpl/vector.hpp>
 
 #include "GRSF/common/StaticAssert.hpp"
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include "GRSF/common/TypeDefs.hpp"
 
 #include "GRSF/common/EnumClassHelper.hpp"

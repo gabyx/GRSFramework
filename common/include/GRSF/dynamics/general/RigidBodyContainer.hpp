@@ -24,7 +24,7 @@
 
 #include RigidBody_INCLUDE_FILE
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 
 class RigidBodyContainer {

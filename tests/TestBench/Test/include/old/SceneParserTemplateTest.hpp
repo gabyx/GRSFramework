@@ -30,7 +30,7 @@
 #include "pugixml.hpp"
 
 #include "TypeDefs.hpp"
-#include "AssertionDebug.hpp"
+#include "Asserts.hpp"
 #include "LogDefines.hpp"
 #include "Exception.hpp"
 

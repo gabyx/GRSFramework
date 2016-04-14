@@ -15,7 +15,7 @@
 #include <boost/thread.hpp>
 #include <memory>
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include <boost/filesystem.hpp>
 
 #include "GRSF/common/CPUTimer.hpp"

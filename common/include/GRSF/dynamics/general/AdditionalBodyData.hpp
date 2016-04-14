@@ -12,7 +12,7 @@
 #define GRSF_dynamics_general_AdditionalBodyData_hpp
 
 #include "GRSF/common/TypeDefs.hpp"
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 #include RigidBody_INCLUDE_FILE
 

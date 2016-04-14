@@ -17,7 +17,7 @@
 #include <Eigen/Dense>
 #include <OGRE/Ogre.h>
 
-#include "AssertionDebug.hpp"
+#include "Asserts.hpp"
 
 namespace OgreUtilities {
 

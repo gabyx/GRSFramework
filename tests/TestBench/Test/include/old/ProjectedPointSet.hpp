@@ -11,7 +11,7 @@
 #ifndef ProjectedPointSet_hpp
 #define ProjectedPointSet_hpp
 
-#include "AssertionDebug.hpp"
+#include "Asserts.hpp"
 
 #include "TypeDefs.hpp"
 #include "TypeDefsPoints.hpp"

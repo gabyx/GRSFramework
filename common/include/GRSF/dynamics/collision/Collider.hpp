@@ -15,7 +15,7 @@
 #include <memory>
 
 #include "GRSF/common/TypeDefs.hpp"
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 #if USE_OPCODE == 1
 #include <Opcode.h>

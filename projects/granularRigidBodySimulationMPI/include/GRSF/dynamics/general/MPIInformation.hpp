@@ -13,7 +13,7 @@
 
 #include <mpi.h>
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include "GRSF/common/TypeDefs.hpp"
 
 #include "GRSF/dynamics/general/CartesianGrid.hpp"

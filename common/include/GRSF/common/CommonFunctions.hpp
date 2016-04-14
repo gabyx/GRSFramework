@@ -30,7 +30,7 @@
 
 #include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/StaticAssert.hpp"
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 #include "GRSF/common/FastStringConversion.hpp"
 #include "GRSF/common/SfinaeMacros.hpp"

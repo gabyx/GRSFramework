@@ -18,7 +18,7 @@
 /** Contact Graph */
 #include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/LogDefines.hpp"
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 #include "GRSF/common/BitCount.hpp"
 #include "GRSF/common/BitRepresentation.hpp"

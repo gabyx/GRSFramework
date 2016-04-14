@@ -11,7 +11,7 @@
 #ifndef GRSF_dynamics_inclusion_ContactFeasibilityTable_hpp
 #define GRSF_dynamics_inclusion_ContactFeasibilityTable_hpp
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include "GRSF/common/CompileTimeArray.hpp"
 
 /**

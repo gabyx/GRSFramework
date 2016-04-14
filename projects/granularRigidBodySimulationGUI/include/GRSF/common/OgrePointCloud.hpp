@@ -11,7 +11,7 @@
 #ifndef GRSF_common_OgrePointCloud_hpp
 #define GRSF_common_OgrePointCloud_hpp
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 #include <OgreSimpleRenderable.h>
 #include <OgreMovableObject.h>

@@ -18,7 +18,7 @@
 
 #include <initializer_list>
 #include "GRSF/common/Singleton.hpp"
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 /**
 *  @brief Signal Handling for the Application

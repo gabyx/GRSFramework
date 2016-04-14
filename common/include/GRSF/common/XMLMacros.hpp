@@ -11,7 +11,7 @@
 #ifndef GRSF_common_XMLMacros_hpp
 #define GRSF_common_XMLMacros_hpp
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 #define CHECK_XMLNODE( _node_ , _nodename_ ) \
     if( ! _node_ ){ \

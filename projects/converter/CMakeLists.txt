@@ -28,7 +28,7 @@ SET( APP_SRC
 
 SET(COMMON_INC
 
-    ${SOURCE_DIR}/include/GRSF/common/AssertionDebug.hpp
+    ${SOURCE_DIR}/include/GRSF/common/Asserts.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/common/TypeDefs.hpp
     ${PROJECT_SOURCE_DIR}/include/GRSF/common/LogDefines.hpp
 

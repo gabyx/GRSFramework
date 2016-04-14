@@ -15,7 +15,7 @@
 #include <boost/serialization/access.hpp>
 #include <boost/filesystem.hpp>
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/dynamics/general/MeshData.hpp"
 

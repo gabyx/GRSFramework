@@ -15,7 +15,7 @@
 #include <unordered_map>
 
 #include "GRSF/common/TypeDefs.hpp"
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 #include "GRSF/dynamics/buffers/RigidBodyState.hpp"
 

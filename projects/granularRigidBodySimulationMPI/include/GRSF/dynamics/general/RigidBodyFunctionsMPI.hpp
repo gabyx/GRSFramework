@@ -12,7 +12,7 @@
 #define GRSF_dynamics_general_RigidBodyFunctionsMPI_hpp
 
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 #include "GRSF/dynamics/general/RigidBodyFunctions.hpp"
 

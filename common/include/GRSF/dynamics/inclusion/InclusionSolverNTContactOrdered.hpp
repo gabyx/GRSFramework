@@ -15,7 +15,7 @@
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Dense>
 #include <Eigen/SVD>
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 #include "GRSF/common/TypeDefs.hpp"
 

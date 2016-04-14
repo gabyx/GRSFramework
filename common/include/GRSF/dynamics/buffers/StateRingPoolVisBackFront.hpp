@@ -13,7 +13,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include "GRSF/singeltons/FileManager.hpp"
 
 #include "GRSF/dynamics/buffers/StatePool.hpp"

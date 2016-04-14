@@ -25,7 +25,7 @@
 #include <boost/serialization/split_member.hpp>
 
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/LogDefines.hpp"
 

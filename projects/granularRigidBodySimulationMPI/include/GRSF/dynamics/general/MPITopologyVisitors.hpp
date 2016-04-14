@@ -11,7 +11,7 @@
 #ifndef GRSF_dynamics_general_MPITopologyVisitors_hpp
 #define GRSF_dynamics_general_MPITopologyVisitors_hpp
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 #include "GRSF/common/TypeDefs.hpp"
 
 //#include "GRSF/dynamics/general/MPITopologyGrid.hpp"

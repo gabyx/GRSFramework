@@ -16,7 +16,7 @@
 
 #include "GRSF/common/Exception.hpp"
 
-#include "GRSF/common/AssertionDebug.hpp"
+#include "GRSF/common/Asserts.hpp"
 
 #include "GRSF/common/ApplicationCLOptionsConverter.hpp"
 #include "GRSF/common/ApplicationSignalHandler.hpp"
