@@ -1,0 +1,3 @@
+http://wiki.blender.org/index.php/Dev:Doc/Tools/Debugging/GCC_Address_Sanitizer
+
+To use with gcc and -fsanitize=address option

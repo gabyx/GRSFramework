@@ -94,6 +94,7 @@ export QT_SELECT=qt4
 $python configure.py
 make -j$nCores
 make -j$nCores install
+cd ..
 
 name="PyQt-gpl-5.5.1"
 wget http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.5.1/$name.tar.gz
@@ -104,11 +105,13 @@ export QT_SELECT=qt5
 $python configure.py
 make -j$nCores
 make -j$nCores install
+cd ..
 
 
 $pip install PyOpenGL
 $pip install git+https://github.com/vispy/vispy.git
 
+$pip install -U ipython
 $pip install -U jupyter
 $pip install mpldatacursor
 
