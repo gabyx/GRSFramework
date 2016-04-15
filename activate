@@ -1,5 +1,5 @@
 #!/bin/bash
-# source this file to define handy macros to access 
+# source this file to define handy macros to access
 # the simulators of the GRSFramework
 
 
@@ -8,11 +8,12 @@ if [[ ! -v GRSF_REPO_BUILD_DIR ]]; then
 fi
 
 export GRSF_REPO_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+export GRSF_REPO_MEDIA_DIR="${GRSF_REPO_DIR}/projects/media"
 alias GOGRSF="cd ${GRSF_REPO_DIR}"
 
 export GRSF_SIMULATION_DIR="${GRSF_REPO_DIR}/simulations"
 alias  GOSIMS="cd $GRSF_SIMULATION_DIR"
- 
+
 export GRSF_PYTHONMODULES_DIR="$GRSF_SIMULATION_DIR/python/modules"
 export GRSF_PYTHONSCRIPTS_DIR="$GRSF_SIMULATION_DIR/python/scripts"
 
@@ -48,7 +49,7 @@ run_simmpi() {
 
 run_simmpi_d() {
     n=$1; shift;
-   eval mpiexec $n $GRSF_SIMMPI_D "$@" 
+   eval mpiexec $n $GRSF_SIMMPI_D "$@"
 }
 
 run_simmpi_d_asan() {
@@ -64,4 +65,3 @@ echo -e "GRSFramework:: ================================================"
 echo -e       "\tCommands: \n\t\trun_sim(_d), run_simgui(_d), run_simmpi(_d(_asan)) , run_simconv(_d) \n\t\tare now available."
 echo -e "\tMacros: \n\t\tGOSIMS: 'cd' to the simulation folder of the GRSFramework \n\t\tGOGRSF: 'cd' to the GRSFramework repository root folder"
 echo -e "==============================================================="
-

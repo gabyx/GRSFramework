@@ -1,2 +1,0 @@
-This media folder is used! It will be copied to the specified location in the BUILD folder by CMAKE Install!
-

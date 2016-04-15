@@ -21,12 +21,12 @@ else
     echo "number of cores invalid"
     exit -1
   fi
-  
+
 fi
 
 
-if [ -z "${HDF5_ROOT}" ]; then 
-  echo "HDF5_ROOT variable is unset"; 
+if [ -z "${HDF5_ROOT}" ]; then
+  echo "HDF5_ROOT variable is unset";
   exit -1
 else
   echo "HDF5 root dir: $HDF5_ROOT"
@@ -38,7 +38,7 @@ mkdir -p "$installPath"
 mkdir -p "$installPath/tempDir"
 
 echo "make virtual env in $installPath"
-virtualenv $installPath
+virtualenv --system-site-packages $installPath
 
 echo "install modules:"
 cd $installPathcd
@@ -52,21 +52,23 @@ cd $installPath/tempDir
 $pip install cython
 
 #numpy
-git clone https://github.com/numpy/numpy.git -b maintenance/1.11.x --single-branch 
+git clone https://github.com/numpy/numpy.git -b maintenance/1.11.x --single-branch
 cd numpy
 $python setup.py build -j $nCores install
 cd ..
 
-$pip install matplotlib 
+$pip install matplotlib
 $pip install scipy
-$pip install scikit-image 
-$pip install ConfigArgParse 
-$pip install git+https://github.com/jsonpickle/jsonpickle.git 
-$pip install jsonschema 
-$pip install glob2 
+$pip install scikit-image
+$pip install ConfigArgParse
+$pip install git+https://github.com/jsonpickle/jsonpickle.git
+$pip install jsonschema
+$pip install demjson
+$pip install glob2
 $pip install transforms3d
 $pip install git+https://github.com/bcj/AttrDict.git
 $pip install git+https://github.com/lxml/lxml.git@lxml-3.4
+
 $pip install --install-option="--jobs=$nCores" pyside
 $pip install graphviz
 $pip install pyyaml
