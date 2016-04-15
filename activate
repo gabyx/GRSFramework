@@ -8,8 +8,11 @@ if [[ ! -v GRSF_REPO_BUILD_DIR ]]; then
 fi
 
 export GRSF_REPO_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-export GRSF_REPO_MEDIA_DIR="${GRSF_REPO_DIR}/projects/media"
 alias GOGRSF="cd ${GRSF_REPO_DIR}"
+
+export GRSF_REPO_MEDIA_DIR="${GRSF_REPO_DIR}/projects/media"
+
+export GRSF_REPO_ADD_DIR="${GRSF_REPO_DIR}/additional"
 
 export GRSF_SIMULATION_DIR="${GRSF_REPO_DIR}/simulations"
 alias  GOSIMS="cd $GRSF_SIMULATION_DIR"
@@ -30,7 +33,7 @@ export GRSF_SIM="${GRSF_REPO_BUILD_DIR}/release/projects/granularRigidBodySimula
 export GRSF_SIMCONV="${GRSF_REPO_BUILD_DIR}/release/projects/converter/bin/release/GRSFConverter"
 
 # pipe asanMangler to the any GRSF executable to trace output from address and leak sanitizer
-export ASANMANGLER="${GRSF_PYTHONSCRIPTS_DIR}/AsanSymbolize/asan_symbolize.py"
+export ASANMANGLER="${GRSF_PYTHONSCRIPTS_DIR}/asanSymbolize/asan_symbolize.py"
 alias asanMangler="${ASANMANGLER}"
 
 alias run_sim="${GRSF_SIM}"
@@ -62,6 +65,6 @@ export -f run_simmpi_d
 
 
 echo -e "GRSFramework:: ================================================"
-echo -e       "\tCommands: \n\t\trun_sim(_d), run_simgui(_d), run_simmpi(_d(_asan)) , run_simconv(_d) \n\t\tare now available."
+echo -e       "\tCommands: \n\t\trun_sim(_d), run_simgui(_d), run_simmpi(_d(_asan)) , run_simconv(_d), asanMangler, \n\t\tare now available."
 echo -e "\tMacros: \n\t\tGOSIMS: 'cd' to the simulation folder of the GRSFramework \n\t\tGOGRSF: 'cd' to the GRSFramework repository root folder"
 echo -e "==============================================================="

@@ -1,0 +1,4 @@
+Option "searchpath" "shader"  ["@"]
+Option "searchpath" "texture" ["@:/home/zfmgpu/Desktop/Repository/SimulationFramework/SourceCode/Projects/SimulationFramework/Simulations/SimulationStudies/Avalanche1M-Tree-SimStudy/RenderJob/scene/blender/textures"]
+
+Option "searchpath" "archive" ["@:worlds:lights:objects:objects/geometry:objects/materials:/home/zfmgpu/Desktop/Repository/SimulationFramework/SourceCode/Projects/SimulationFramework/Simulations/SimulationStudies/Avalanche1M-Tree-SimStudy/RenderJob/scene/blender/materials"]
