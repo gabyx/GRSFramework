@@ -2,7 +2,6 @@ Process*
 SimFiles*
 *.ipynb_checkpoints
 *.pyc
-*.pdf
 Logs
 Videos*
 GlobalFolder*

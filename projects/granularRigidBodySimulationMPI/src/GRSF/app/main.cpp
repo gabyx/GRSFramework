@@ -148,23 +148,38 @@ void start( int argc, char **argv ){
 
 
 void callBackSignalAndExit(int signum){
-    std::cerr << "GRSFramework Sim MPI: received signal: " << signum << " -> exit ..." << std::endl;
+
+    //ApplicationSignalHandler::getSingleton().unregisterCallback("callBackSignalAndExit");
+
+    int my_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD,&my_rank);
+    if (my_rank == 1){
+        for(int i=0;i<5;i++){
+        std::cerr << "sleep" << i << std::endl;
+        sleep(1);
+        }
+    }
+
+    MPI_Finalize();
+    std::cerr << "GRSFramework Sim MPI: received signal: " << signum << " -> exit ..." << std::endl << std::flush;
+
+
     // http://www.cons.org/cracauer/sigint.html
     // set sigint handler to nothing
     // and kill ourself
-    signal(SIGINT, SIG_DFL);
-    kill(getpid(),SIGINT);
+
+    //ApplicationSignalHandler::getSingleton().installDefaultSignal(SIGINT);
+
+    _exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char **argv) {
 
+    // Start MPI =================================
+    MPI_Init(&argc, &argv);
 
     INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGUSR2} ) )
     sigHandler->registerCallback({SIGINT,SIGUSR2},callBackSignalAndExit,"callBackSignalAndExit");
-
-
-    // Start MPI =================================
-    MPI_Init(&argc, &argv);
 
 
     try{
@@ -188,6 +203,6 @@ int main(int argc, char **argv) {
     // Finalize MPI =================================
     MPI_Finalize();
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
