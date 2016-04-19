@@ -5,6 +5,8 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 
-ln -s $GRSF_REPO_DIR_ADD/examples/jobs/simulationStudies/initCondition/avalanche1M-FillUp5/SimState.sim $DIR
+# join .sim file parts
+cat $GRSF_REPO_ADD_DIR/examples/jobs/simulationStudies/initCondition/avalanche1M-FillUp5/SimState*  > $DIR/SimState.sim
+
 ln -s $GRSF_REPO_MEDIA_DIR $DIR/media
 
