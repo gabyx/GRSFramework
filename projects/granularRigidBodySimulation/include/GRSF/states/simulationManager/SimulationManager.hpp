@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -16,7 +16,9 @@
 
 #include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/ApplicationSignalHandler.hpp"
 
+#include TimeStepper_INCLUDE_FILE
 #include DynamicsSystem_INCLUDE_FILE
 #include "GRSF/systems/SceneParser.hpp"
 
@@ -55,7 +57,35 @@ private:
     RecorderSettings m_RecorderSettings;
 
     // Accessed only by thread ===================
-    void threadRunRecord();
+
+    template<bool handleSignals=false>
+    void threadRunRecord(){
+        m_pSimulationLog->logMessage("---> SimulationManager: Simulation entering...");
+        if(initRecordThread()) {
+
+            // wait for vis thread! (which does some loops before)
+            m_global_time.start();
+
+            while(1) {
+                if(handleSignals){
+                    ApplicationSignalHandler::getSingleton().handlePendingSignals();
+                }
+                // Do one iteration
+                m_pTimestepper->doTimeStep();
+                writeAllOutput();
+                // Check if simulation can be aborted!
+                if(m_pTimestepper->finished()) {
+                    m_pSimulationLog->logMessage("---> SimulationManager: Timestepper finished, exit...");
+                    break;
+                }
+
+            }
+            cleanUpRecordThread();
+        }
+        m_pSimulationLog->logMessage("---> SimulationManager: Simulation leaving...");
+    }
+
+
     bool initRecordThread();
     void cleanUpRecordThread();
 

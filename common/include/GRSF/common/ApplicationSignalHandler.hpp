@@ -11,7 +11,9 @@
 #ifndef GRSF_common_ApplicationSignalHandler_hpp
 #define GRSF_common_ApplicationSignalHandler_hpp
 
+#include <cstring>
 #include <csignal>
+#include <algorithm>
 #include <unordered_map>
 #include <deque>
 #include <functional>
@@ -58,7 +60,9 @@ public:
 
     using CallbackType = CallBackWrapper;
 
-    ApplicationSignalHandler(std::initializer_list<int> signals){
+    ApplicationSignalHandler(std::initializer_list<int> signals)
+        : m_currentStack(&m_signalStacks[1]), m_handlingStack(&m_signalStacks[0]), m_handlingStackIdx(0)
+    {
         // register all signals with the global handler
         for(auto signum: signals){
             // make an empty callback stack
@@ -68,6 +72,8 @@ public:
         for(auto signum: signals){
             installGlobalDispatcher(signum);
         }
+
+
     }
 
     void registerCallback(const std::initializer_list<int> & signals,
@@ -170,43 +176,72 @@ public:
 
         class sigaction act;
         memset (&act, '\0', sizeof(act)); // set to zero
-        act.sa_sigaction = &ApplicationSignalHandler::globalDispatcher;
+        act.sa_sigaction = &ApplicationSignalHandler::globalSigCatcher;
         act.sa_mask = block_mask;
 
         if (sigaction(signum, &act, NULL) < 0) {
-            GRSF_ERRORMSG("Could not install globalDispatcher for signal: " << signum);
+            GRSF_ERRORMSG("Could not install globalSigCatcher for signal: " << signum);
         }
+    }
+
+    void handlePendingSignals(){
+
+        // first swap the signalStacks, getting the currentStack exclusively for handling
+        m_handlingStackIdx = (m_handlingStackIdx == 1)? 0 : 1; // atomic write (sig catcher could jump in here in between ... does not matter)
+        m_handlingStack = &m_signalStacks[m_handlingStackIdx];
+
+
+        // Handling all signals in the current handling stack and dispatching to the registered callbacks (LIFO order)
+        for( auto signum : *m_handlingStack){
+            std::cerr << "ApplicationSignalHandler:: handling signal: " << signum << std::endl;
+
+            auto it = m_signalHandlers.find(signum);
+            if(it!=m_signalHandlers.end()){
+
+                if(it->second.size()==0){
+                    WARNINGMSG(false, "---> Caught signal: " << signum << " which was not handled by the application, because no call back for this signal)!" );
+                }else{
+                    for( auto & callBack : it->second){  // loop over all callbacks
+                        callBack(signum);
+                    }
+                }
+
+            }else{
+                WARNINGMSG(false,"---> Caught signal: " << signum << " which was not handled by the application because signal not registered!");
+            }
+        }
+
+        // Clear all entries in the handling stack
+        m_handlingStack->clear();
     }
 
 
 private:
 
 
-    static void globalDispatcher(int signum, siginfo_t *siginfo, void *context){
+    static void globalSigCatcher(int signum, siginfo_t *siginfo, void *context){
 
-        ApplicationSignalHandler & s = ApplicationSignalHandler::getSingleton();
+          ApplicationSignalHandler & s = ApplicationSignalHandler::getSingleton();
 
-        // Handling all signals and dispatching to the registered signal handlers
-        auto it = s.m_signalHandlers.find(signum);
-        if(it!=s.m_signalHandlers.end()){
-
-            if(it->second.size()==0){
-                WARNINGMSG(false, "---> Caught signal: " << signum << " which was not handled by the application, because no call back for this signal)!" );
-            }else{
-                for( auto & callBack : it->second){  // loop over all callbacks
-                    callBack(signum);
-                }
-            }
-        }else{
-            WARNINGMSG(false,"---> Caught signal: " << signum << " which was not handled by the application because signal not registered!");
-        }
+          // see in which stack to push signal
+          s.m_currentStack = (s.m_handlingStackIdx == 1)? &s.m_signalStacks[0] : &s.m_signalStacks[1];
+          s.m_currentStack->push_back(signum);
     }
 
-    std::unordered_map<int, std::deque<CallbackType> > m_signalHandlers;
+    std::unordered_map<int, std::deque<CallbackType> > m_signalHandlers; ///< The call back stack for each signal
 
-    std::deque<int> m_signalRecvStack; ///< All received signals
+    /** All received signals
+     * We have two stacks, one is the current stack \p m_currentStack which gets updated when ever a signal appears we listen to
+     * and the second stack \p m_handlingStack is the stack which gets handled and is emptied when handling completes.
+     * the atomic \p m_handlingStackIdx makes sure no race condition happens. (e.g. when writing and just a async signal happens)
+     */
+    std::deque<int> m_signalStacks[2];
 
-    volatile sig_atomic_t m_received;
+    std::deque<int> * m_handlingStack;
+    std::deque<int> * m_currentStack;  ///< global dispatch pushes received signals into this stack
+
+
+    volatile sig_atomic_t m_handlingStackIdx;
 
 };
 

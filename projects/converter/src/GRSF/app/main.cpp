@@ -39,27 +39,20 @@ void printHelpAndExit(std::string o=""){
             exit(EXIT_FAILURE);
 }
 
-void callBackSignalAndExit(int signum){
+void callBackExit(int signum){
     std::cerr << "GRSFramework Converter: received signal: " << signum << " -> exit ..." << std::endl;
     // http://www.cons.org/cracauer/sigint.html
     // set sigint handler to nothing
     // and kill ourself
-    signal(SIGINT, SIG_DFL);
-    kill(getpid(),SIGINT);
-}
-
-void callBackSIGPIPE(int){
-    std::cerr << "GRSFramework Converter: received SIGPIPE -> Pipe error: exit ..." << std::endl;
-    signal(SIGINT, SIG_DFL);
-    kill(getpid(),SIGINT);
+//    signal(SIGINT, SIG_DFL);
+//    kill(getpid(),SIGINT);
+    GRSF_THROW_SIGNALEXCEPTION( "GRSFramework Converter: received signal: " << signum << " -> exit ..." );
 }
 
 int main(int argc, char **argv) {
 
     INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGUSR2,SIGPIPE} ) )
-    sigHandler->registerCallback({SIGINT,SIGUSR2},callBackSignalAndExit,"callBackSignalAndExit");
-    sigHandler->registerCallback(SIGPIPE,callBackSIGPIPE,"callBackSIGPIPE");
-
+    sigHandler->registerCallback({SIGINT,SIGUSR2,SIGPIPE},callBackExit,"callBackExit");
 
     std::cerr << "GRSFramework Converter: version: " GRSF_VERSION_STRING
     #ifndef NDEBUG
@@ -200,5 +193,5 @@ int main(int argc, char **argv) {
     }else{
         printHelpAndExit();
     }
-    return 0;
+    return EXIT_SUCCESS;
 }

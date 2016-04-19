@@ -15,11 +15,11 @@
 
 #define CHECK_XMLNODE( _node_ , _nodename_ ) \
     if( ! _node_ ){ \
-        THROWEXCEPTION("XML Node: " << _nodename_ << " does not exist!");  \
+        GRSF_THROWEXCEPTION("XML Node: " << _nodename_ << " does not exist!");  \
     }
 #define CHECK_XMLATTRIBUTE( _node_ , _nodename_ ) \
     if( ! _node_ ){ \
-        THROWEXCEPTION("XML Attribute: " << _nodename_ << " does not exist!");  \
+        GRSF_THROWEXCEPTION("XML Attribute: " << _nodename_ << " does not exist!");  \
     }
 
 #define GET_XMLCHILDNODE_CHECK( _childnode_ , _childname_ , _node_ ) \

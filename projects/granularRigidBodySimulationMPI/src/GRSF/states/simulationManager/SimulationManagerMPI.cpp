@@ -50,6 +50,8 @@ SimulationManagerMPI::SimulationManagerMPI() {
 }
 
 SimulationManagerMPI::~SimulationManagerMPI() {
+
+    ApplicationSignalHandler::getSingleton().unregisterCallback("SimulationManagerMPI::gracefullyExit");
     DESTRUCTOR_MESSAGE
 
 }
@@ -168,19 +170,24 @@ void SimulationManagerMPI::setup(boost::filesystem::path sceneFilePath) {
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: Added TimeStepper");
 
 
-    auto callBack = std::bind(&SimulationManagerMPI::ungracefullyExit,this,std::placeholders::_1);
+    auto callBack = std::bind(&SimulationManagerMPI::gracefullyExit,this,std::placeholders::_1);
     ApplicationSignalHandler::getSingleton().registerCallback({SIGINT,SIGUSR2},
-                                                              callBack,"SimulationManagerMPI::exitUngracefully");
+                                                              callBack,"SimulationManagerMPI::gracefullyExit");
 
     m_pSimulationLog->logMessage("---> SimulationManagerMPI:: added ungraceful exit callback!");
 
     m_pSimulationLog->logMessage("---> SimulationManagerMPI::setup() finished!");
+
+
+    ApplicationSignalHandler::getSingleton().handlePendingSignals();
+
 }
 
-void SimulationManagerMPI::ungracefullyExit(int signal){
+void SimulationManagerMPI::gracefullyExit(int signal){
     LOG(m_pSimulationLog, "---> SimulationManagerMPI:: Caught signal: " << signal
         << " close file collectively (deadlock if not all cooperate!) " << std::endl )
     m_pStateRecorder->closeAll();
+    LOG(m_pSimulationLog, "---> SimulationManagerMPI:: succesfully closed file " << std::endl )
 }
 
 
@@ -256,6 +263,8 @@ void SimulationManagerMPI::startSim() {
 
     while(1){
 
+        ApplicationSignalHandler::getSingleton().handlePendingSignals();
+
         // If rebuild happens, reset TimeStepper accordingly! ====================================
         bool rebuild = m_pTopologyBuilder->checkAndRebuild(m_pTimestepper->getIterationCount(),
                                                            m_pTimestepper->getTimeCurrent());
@@ -279,7 +288,6 @@ void SimulationManagerMPI::startSim() {
             LOG(m_pSimulationLog, "---> SimulationManager: Timestepper finished, needed: " << runtime << " sec. , exit..."<< std::endl );
             break;
         }
-
 
         // Roll all registered log files ========================================================
         Logging::LogManager::getSingleton().rollAllLogs();

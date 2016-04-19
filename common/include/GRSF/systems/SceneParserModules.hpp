@@ -1530,7 +1530,7 @@ private:
                 GRSF_ERRORMSG("---> String conversion in SceneSettings: gravity failed");
             }
 
-            LOGSCLEVEL2(m_pSimulationLog,"---> Gravity Dir: "<< dir << std::endl;);
+            LOGSCLEVEL2(m_pSimulationLog,"---> Gravity direction: "<< dir.transpose() << std::endl;);
             dir.normalize();
             dir *= abs;
 

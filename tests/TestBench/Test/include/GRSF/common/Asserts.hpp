@@ -33,6 +33,6 @@
 
 #endif
     #define WARNINGMSG(condition , message) { if(!(condition)){ std::cerr << "WARNING @ " << __FILE__ << " (" << __LINE__ << ") :" << message << std::endl;  } }
-    #define GRSF_ERRORMSG( message ) THROWEXCEPTION( message )
+    #define GRSF_ERRORMSG( message ) GRSF_THROWEXCEPTION( message )
 
 #endif

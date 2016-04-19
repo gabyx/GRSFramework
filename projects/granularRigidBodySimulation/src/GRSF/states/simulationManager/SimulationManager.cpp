@@ -27,7 +27,7 @@
 // HIER ALL Includes welche man für diesen Manager braucht, welche getemplatet sind mit einem
 // Config, unterhalb in den Subclassen müssen diese nicht mehr hinzugefügt werden?
 //
-#include TimeStepper_INCLUDE_FILE
+
 #include InclusionSolver_INCLUDE_FILE
 #include DynamicsSystem_INCLUDE_FILE
 
@@ -39,7 +39,6 @@
 
 
 using namespace std;
-
 
 
 SimulationManager::SimulationManager() {
@@ -60,6 +59,7 @@ SimulationManager::SimulationManager() {
 }
 
 SimulationManager::~SimulationManager() {
+
     DESTRUCTOR_MESSAGE
 
 }
@@ -98,40 +98,6 @@ void SimulationManager::setup(boost::filesystem::path sceneFilePath) {
     m_pSceneParser->cleanUp();
 
     m_pSimulationLog->logMessage("---> setup finished! ");
-}
-
-
-
-void SimulationManager::threadRunRecord() {
-    m_pSimulationLog->logMessage("---> SimulationManager: Simulation entering...");
-
-
-    if(initRecordThread()) {
-
-        // wait for vis thread! (which does some loops before)
-
-        m_global_time.start();
-
-
-        while(1) {
-
-            // Do one iteration
-            m_pTimestepper->doTimeStep();
-
-            writeAllOutput();
-
-            // Check if simulation can be aborted!
-            if(m_pTimestepper->finished()) {
-                m_pSimulationLog->logMessage("---> SimulationManager: Timestepper finished, exit...");
-                break;
-            }
-        }
-
-        cleanUpRecordThread();
-    }
-
-    m_pSimulationLog->logMessage("---> SimulationManager: Simulation leaving...");
-    return;
 }
 
 
@@ -191,7 +157,7 @@ bool SimulationManager::initRecordThread() {
     // Copy File: SimulationData
     boost::filesystem::path simDataFile;
     if(!m_pTimestepper->m_settings.m_simDataReferenceFile.empty()){
-         GRSF_ASSERTMSG(false,"HERE IS CODE ZU VERVOLLSTÄNDIGEN! FALSCH!")
+         GRSF_ASSERTMSG(false,"This has not yet fully been refactored and implemented!")
          simDataFile = FileManager::getSingleton().copyFile( m_pSceneParser->getParsedSceneFile(), m_pTimestepper->m_settings.m_simDataReferenceFile,true);
     }
     m_pTimestepper->initLogs(m_SimFolderPath,simDataFile);
@@ -212,7 +178,7 @@ void SimulationManager::cleanUpRecordThread() {
 
 
 void SimulationManager::startSim() {
-    threadRunRecord();
+    threadRunRecord<true>();
 }
 
 

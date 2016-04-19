@@ -17,6 +17,7 @@
 #include "GRSF/common/Asserts.hpp"
 
 #include "GRSF/common/ApplicationCLOptions.hpp"
+#include "GRSF/common/ApplicationSignalHandler.hpp"
 #include "GRSF/states/simulationManager/SimulationManagerGUI.hpp"
 
 #include "GRSF/singeltons/contexts/RenderContext.hpp"
@@ -140,6 +141,8 @@ void SimulationManagerGUI::setup(boost::filesystem::path sceneFilePath) {
     m_dynCoordFrame.addToScene(m_pDynSys->m_pContactFramesNode, "ContactFrameXAxis", "ContactFrameYAxis", "ContactFrameZAxis");
 
     m_pSimulationLog->logMessage("---> setup finished: ");
+
+    ApplicationSignalHandler::getSingleton().handlePendingSignals();
 }
 
 
@@ -249,6 +252,7 @@ void SimulationManagerGUI::threadRunSimulation() {
 
     resetTimelineSimulation();
     while(!isSimThreadToBeStopped()) {
+
         timelineSimulation = getTimelineSimulation() + m_pTimestepper->m_settings.m_startTime;
         state_time = m_pTimestepper->getTimeCurrent();
 
@@ -320,7 +324,6 @@ void SimulationManagerGUI::threadRunRecord() {
         resetTimelineSimulation();
 
         while(!isSimThreadToBeStopped()) {
-
 
             // Read all inputs
             readSharedBuffer();

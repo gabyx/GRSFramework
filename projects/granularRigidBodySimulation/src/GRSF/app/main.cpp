@@ -25,20 +25,20 @@
 #include "ApproxMVBB/ComputeApproxMVBB.hpp"
 #include "GRSF/dynamics/collision/geometry/OOBB.hpp"
 
-void callBackSignalAndExit(int signum){
-    std::cerr << "GRSFramework Sim: received signal: " << signum << " -> exit ..." << std::endl;
+void callBackExit(int signum){
     // http://www.cons.org/cracauer/sigint.html
     // set sigint handler to nothing
     // and kill ourself
-    signal(SIGINT, SIG_DFL);
-    kill(getpid(),SIGINT);
+//    signal(SIGINT, SIG_DFL);
+//    kill(getpid(),SIGINT);
+    std::cerr << "GRSFramework Sim: received signal: " << signum << " -> exit ..." << std::endl;
+    GRSF_THROW_SIGNALEXCEPTION("GRSFramework Sim: received signal: " << signum << " -> exit ...");
 }
 
 int main(int argc, char **argv) {
 
-    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGUSR2} ) )
-    sigHandler->registerCallback({SIGINT,SIGUSR2},callBackSignalAndExit,"callBackSIGINT");
-
+    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGUSR2,SIGPIPE} ) )
+    sigHandler->registerCallback({SIGINT,SIGUSR2,SIGPIPE},callBackExit,"callBackExit");
 
     try{
 
@@ -84,9 +84,12 @@ int main(int argc, char **argv) {
                 t->execute();
             }
         }
-
+    }catch(SignalException& ex) {
+        std::cerr << "SignalException occured: "  << ex.what() <<std::endl;
+        std::cerr << "Exiting ..." << std::endl;
+        exit(EXIT_SUCCESS);
     }catch(Exception& ex) {
-        std::cerr << "Exception occured in process rank: "  << ex.what() <<std::endl;
+        std::cerr << "Exception occured: "  << ex.what() <<std::endl;
         std::cerr << "Exiting ..." << std::endl;
         exit(EXIT_FAILURE);
     }catch(std::exception & ex){

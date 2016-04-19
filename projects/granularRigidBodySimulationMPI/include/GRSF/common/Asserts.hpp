@@ -77,7 +77,7 @@
 	* @brief An Error Macro to use within C++ for MPI code.
     * Writes in a global file!
 	*/
-#define GRSF_ERRORMSG( _message_ ) THROWEXCEPTION( _message_ );
+#define GRSF_ERRORMSG( _message_ ) GRSF_THROWEXCEPTION( _message_ );
 
 #define GRSF_ERRORMSG2( _message1_ , _message2_ ) GRSF_ERRORMSG( _message1_ << _message2_ )
 

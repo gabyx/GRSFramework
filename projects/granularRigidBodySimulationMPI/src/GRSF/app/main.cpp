@@ -30,7 +30,6 @@
 void start( int argc, char **argv ){
 
         // Setup global communicators
-
         INSTANCIATE_UNIQUE_SINGELTON( MPILayer::MPIGlobalCommunicators , globalComm )
 
         // Setup global types and commit them
@@ -43,22 +42,30 @@ void start( int argc, char **argv ){
         int nProcesses;
         MPI_Comm_size(MPI_COMM_WORLD,&nProcesses);
 
-        // Parsing Input Parameters===================================
-        INSTANCIATE_UNIQUE_SINGELTON(ApplicationCLOptions,opts)
-
-        ApplicationCLOptions::getSingleton().parseOptions(argc,argv);
-        ApplicationCLOptions::getSingleton().checkArguments();
         if(my_rank == 0){
-
             std::cerr << "GRSFramework SimMPI: version: " GRSF_VERSION_STRING
             #ifndef NDEBUG
                     " | config: " << "debug" << std::endl;
             #else
                     " | config: " << "release" << std::endl;
             #endif
+        }
 
+
+        // Parsing Input Parameters===================================
+        INSTANCIATE_UNIQUE_SINGELTON(ApplicationCLOptions,opts)
+        try{
+            ApplicationCLOptions::getSingleton().parseOptions(argc,argv);
+        }catch(std::exception & ex){
+            int rank; MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+            std::cerr << "std::exception occured in process rank: " << rank << std::endl << ex.what() <<std::endl;
+            std::cerr << "Exiting (MPI_Abort)..." << std::endl;
+            MPI_Abort(MPI_COMM_WORLD,-1);
+        }
+
+        ApplicationCLOptions::getSingleton().checkArguments();
+        if(my_rank == 0){
             ApplicationCLOptions::getSingleton().printArgs(std::cerr);
-
         }
         // End Parsing =================================
 
@@ -67,7 +74,7 @@ void start( int argc, char **argv ){
         processFolder << PROCESS_FOLDER_PREFIX << my_rank;
         boost::filesystem::path localDirPath;
 
-        //Calculate the directory where the processes have theis local dir
+        //Calculate the directory where the processes have their local dir
         {
             auto & localDirs = ApplicationCLOptions::getSingleton().getLocalDirs();
             unsigned int groups = nProcesses / localDirs.size();
@@ -105,16 +112,10 @@ void start( int argc, char **argv ){
             // Construct the communicator for the Simulation
             MPILayer::MPIGlobalCommunicators::getSingleton().addCommunicator(MPILayer::MPICommunicatorId::SIM_COMM,MPI_COMM_WORLD);
 
-            // Only Simulation Processes enter this region:
-                SimulationManagerMPI mgr;
-                mgr.setup(ApplicationCLOptions::getSingleton().getSceneFile());
-                mgr.startSim();
-            // =============================================
+            SimulationManagerMPI mgr;
+            mgr.setup(ApplicationCLOptions::getSingleton().getSceneFile());
+            mgr.startSim();
 
-            // Only other process (not needed yet) enter this region
-
-
-            // =============================================
 
            // Do post processes at the end of the simulation
             //TODO
@@ -124,20 +125,25 @@ void start( int argc, char **argv ){
                 }
             }
 
+
+        }catch(SignalException& ex) {
+            int rank; MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+            std::cerr << "SignalException occured in process rank: " << rank << std::endl << ex.what() <<std::endl;
+            std::cerr << "Exiting ..." << std::endl;
         }catch(Exception& ex) {
             int rank; MPI_Comm_rank(MPI_COMM_WORLD,&rank);
             std::cerr << "Exception occured in process rank: " << rank << std::endl << ex.what() <<std::endl;
-            std::cerr << "Exiting ..." << std::endl;
+            std::cerr << "Exiting (MPI_Abort)..." << std::endl;
             MPI_Abort(MPI_COMM_WORLD,-1);
         }catch(std::exception & ex){
             int rank; MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-            std::cerr << "Std::exception occured in process rank: " << rank << std::endl << ex.what() <<std::endl;
-            std::cerr << "Exiting ..." << std::endl;
+            std::cerr << "std::exception occured in process rank: " << rank << std::endl << ex.what() <<std::endl;
+            std::cerr << "Exiting (MPI_Abort)..." << std::endl;
             MPI_Abort(MPI_COMM_WORLD,-1);
         }catch(...){
             int rank; MPI_Comm_rank(MPI_COMM_WORLD,&rank);
             std::cerr << "Unknown exception occured in process rank: " << rank <<std::endl;
-            std::cerr << "Exiting ..." << std::endl;
+            std::cerr << "Exiting (MPI_Abort)..." << std::endl;
             MPI_Abort(MPI_COMM_WORLD,-1);
         }
 
@@ -147,30 +153,9 @@ void start( int argc, char **argv ){
 }
 
 
-void callBackSignalAndExit(int signum){
-
-    //ApplicationSignalHandler::getSingleton().unregisterCallback("callBackSignalAndExit");
-
-    int my_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD,&my_rank);
-    if (my_rank == 1){
-        for(int i=0;i<5;i++){
-        std::cerr << "sleep" << i << std::endl;
-        sleep(1);
-        }
-    }
-
-    MPI_Finalize();
-    std::cerr << "GRSFramework Sim MPI: received signal: " << signum << " -> exit ..." << std::endl << std::flush;
-
-
-    // http://www.cons.org/cracauer/sigint.html
-    // set sigint handler to nothing
-    // and kill ourself
-
-    //ApplicationSignalHandler::getSingleton().installDefaultSignal(SIGINT);
-
-    _exit(EXIT_SUCCESS);
+void callBackExit(int signum){
+    std::cerr << "GRSFramework Sim MPI: received signal: " << signum << " -> MPI finalize and exit ..." << std::endl;
+    GRSF_THROW_SIGNALEXCEPTION("GRSFramework Sim MPI: received signal: " << signum << " -> MPI finalize and exit ...");
 }
 
 int main(int argc, char **argv) {
@@ -178,27 +163,10 @@ int main(int argc, char **argv) {
     // Start MPI =================================
     MPI_Init(&argc, &argv);
 
-    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGUSR2} ) )
-    sigHandler->registerCallback({SIGINT,SIGUSR2},callBackSignalAndExit,"callBackSignalAndExit");
+    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGUSR2, SIGPIPE} ) )
+    sigHandler->registerCallback({SIGINT,SIGUSR2, SIGPIPE},callBackExit,"callBackExit");
 
-
-    try{
-        start(argc,argv);
-
-    }catch(Exception& ex) {
-        std::cerr << "Exception occured: "  << ex.what() <<std::endl;
-        std::cerr << "Exiting ..." << std::endl;
-        MPI_Abort(MPI_COMM_WORLD,-1);
-    }catch(std::exception & ex){
-        std::cerr << "std::exception occured: "  << ex.what() <<std::endl;
-        std::cerr << "Exiting ..." << std::endl;
-        MPI_Abort(MPI_COMM_WORLD,-1);
-    }catch(...){
-        std::cerr << "Unknown exception occured!" <<std::endl;
-        std::cerr << "Exiting ..." << std::endl;
-        MPI_Abort(MPI_COMM_WORLD,-1);
-    }
-
+    start(argc,argv);
 
     // Finalize MPI =================================
     MPI_Finalize();

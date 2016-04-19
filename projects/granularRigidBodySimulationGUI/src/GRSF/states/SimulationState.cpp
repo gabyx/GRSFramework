@@ -10,9 +10,12 @@
 
 #include "GRSF/states/SimulationState.hpp"
 
+#include "GRSF/common/ApplicationCLOptions.hpp"
+#include "GRSF/common/ApplicationSignalHandler.hpp"
+
 #include "GRSF/states/simulationManager/SimulationManagerGUI.hpp"
 #include "GRSF/states/simulationManager/PlaybackManager.hpp"
-#include "GRSF/common/ApplicationCLOptions.hpp"
+
 #include "GRSF/singeltons/FileManager.hpp"
 #include "GRSF/common/OgreSceneManagerDeleter.hpp"
 
@@ -371,9 +374,15 @@ void SimulationState::toggleMPIVisualization() {
 }
 
 void SimulationState::update(double timeSinceLastFrame) {
+
+    static int counter = 0;
+    if( counter++ % 100 == 0){
+        ApplicationSignalHandler::getSingleton().handlePendingSignals();
+    }
+
+
     // Update Camera!
     m_pOrbitCamera->update(timeSinceLastFrame);
-
 
     // HERE make a function wrapper which calls two different modes for realtime and playback
     updateSceneFunction(timeSinceLastFrame);
