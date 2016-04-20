@@ -1,4 +1,15 @@
 
+    String.prototype.format = function()
+    {
+      var content = this;
+      for (var i=0; i < arguments.length; i++)
+      {
+          var replacement = '{' + i + '}';
+          content = content.replace(replacement, arguments[i]);
+      }
+      return content;
+    };
+
     var mkConverter = new showdown.Converter(
     { literalMidWordUnderscores : true,
       tables : true,
@@ -65,11 +76,19 @@
 
                   $markdownBufferDiv.find("#videoSubtitle").html(  renderMKtoHTML(data) );
 
+                  //replace JobWorkflow with CSS slider
+                  $markdownBufferDiv.find("#jobWorkflowSlides").html(
+                      buildCSSSlider("https://rawgit.com/wiki/gabyx/GRSFramework/files/DefencePresentation-{0}.svg",155,172,"jobWorkflowSlider")
+                  );
+
                   // remove loader div
                   $(".loaderdiv").fadeOut("slow", function (){
 
                     // make content appear
                     $("#content").html($markdownBufferDiv);
+
+                    // Start ISM slider
+                    window.ISM.startISM();
 
                     console.log("3. parse/apply TOC");
                     parseTOC("#content",'#toc-level1')
@@ -94,12 +113,36 @@
       }
     };
 
+
+    function buildCSSSlider(image,startIdx,stopIdx,id){
+        cssSlider = document.createElement("div");
+        cssSlider.setAttribute("id",id);
+        cssSlider.setAttribute("data-transition_type","instant");
+        cssSlider.classList.add("ism-slider");
+
+        nImgs = stopIdx - startIdx;
+        text = '<ol>\n'
+        for(i=0;i < nImgs;i++){
+             sNr = i+1;
+             imageS = image.format(startIdx+i);
+             console.log("build cssSlider:", imageS)
+             text  +='<li>\n\
+                 <img src="{0}" />\n\
+                 <!--<div class="ism-caption ism-caption-0">Slide {1}</div>-->\n\
+             </li>'.format(imageS,sNr);
+        }
+        text += "</ol>";
+        cssSlider.innerHTML = text;
+
+        return cssSlider;
+    }
+
     function parseTOC(from, to) {
       // parse in the TOC from marked markdown text
       var tocPlaceholder = $(to);
       var staticContent = $(from);
 
-      console.log(staticContent)
+      //console.log(staticContent)
       staticContent.find('h1').each(function() {
         tocPlaceholder.append('<li id="'+ $(this).attr('id') + '-menu"><a href="#' + $(this).attr('id') + '">' + $(this).html() + '</li>');
       });

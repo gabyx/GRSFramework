@@ -4,46 +4,51 @@
     <meta charset="UTF-8"/>
     <title>GRSFramework by gabyx</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    
+
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen"/>
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'/>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen"/>
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen"/>
-    
+
     <!--VideJs-->
     <link href="http://vjs.zencdn.net/5.8.0/video-js.css" rel="stylesheet"/>
     <script src="http://vjs.zencdn.net/5.8.0/video.js"></script>
     <!-- If you'd like to support IE8 -->
     <script src="http://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
-    
+
     <!--Jquery-->
     <script src="http://code.jquery.com/jquery-2.2.2.min.js" crossorigin="anonymous"></script>
-    
+
     <!--highlight and marked-->
     <link rel="stylesheet" href="http://cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
     <script src="http://cdn.jsdelivr.net/highlight.js/9.3.0/highlight.min.js"></script>
     <script src="node_modules/showdown/dist/showdown.min.js"></script>
     <script src="node_modules/marked/lib/marked.js"></script>
-    
+
     <!--Sidr Panel-->
     <link rel="stylesheet" href="stylesheets/sidebar.css">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/sidr/2.2.1/jquery.sidr.min.js"></script>
-    
+
     <script src="http://rawgithub.com/twbs/bootstrap/b4c4072679943773a7582daa63f545ba818fa627/js/bootstrap-scrollspy.js"></script>
-    
+
+
     <script src="scripts/collapseList.js"></script>
     <link rel="stylesheet" type="text/css" href="stylesheets/collapseList.css" media="screen"/>
-    
+
+    <!--Image Sliders -->
+    <script src="scripts/ism-2.1.js"></script>
+    <link rel="stylesheet" type="text/css" href="stylesheets/sliders.css" media="screen"/>
+
     <script async src="scripts/main.js"></script>
-  
-  
+
+
     <!--MathJax Config-->
     <script type="text/x-mathjax-config">
       MathJax.Hub.Config({
         skipStartUpTypeset: true,
         showProcessingMessages: true,
-        tex2jax: { inlineMath: [["\\(","\\)"]], 
-                   displayMath: [["\\[","\\]"]], 
+        tex2jax: { inlineMath: [["\\(","\\)"]],
+                   displayMath: [["\\[","\\]"]],
                    processEscapes: true },
         "HTML-CSS": {
             preferredFont: "TeX",
@@ -77,16 +82,16 @@
                       }, undefined)
       });
   </script>
-  
+
   <script type="text/javascript" async
       src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_SVG">
   </script>
-    
- 
+
+
   </head>
-  
-  
-  
+
+
+
   <body data-spy="scroll" data-target=".sidr-inner">
 
     <div style="display:none">
@@ -130,16 +135,20 @@
     </section>
 
     <section class="main-content">
-      
-      <div class="loaderdiv"></div>
-      
+
+
+
       <noscript>
       <div style="border: 1px solid purple; padding: 10px">
         <span style="color:red">JavaScript is not enabled! We need JavaScript to render Latex and render the markdown text from the wiki!.</span>
       </div>
       </noscript>
-      
+
+      <div class="loaderdiv"></div>
+
       <div id="content"></div>
+
+
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/gabyx/GRSFramework">GRSFramework</a> is maintained by <a href="https://github.com/gabyx">gabyx</a>.</span>
@@ -161,7 +170,7 @@
       <path fill="currentColor" d="M0 0h18v2H0zM0 5h18v2H0zM0 10h18v2H0z"/>
     </svg>
   </a>
-   
+
    <div style="display:none">
        <div id="toc-buttons-expcoll">
             <a id="toc-button-expand" class="btn-sidebar">
@@ -179,5 +188,5 @@
 
   </body>
 
-  
+
 </html>
