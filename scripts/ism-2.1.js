@@ -571,6 +571,9 @@
       iq("#" + element_id + " .ism-slides > li").addClass("ism-slide");
       iq("#" + element_id + " .ism-slides > .ism-slide > img, #" + element_id + " .ism-slides > .ism-slide > a > img").addClass("ism-img");
 
+      iq("#" + element_id + " .ism-slides > .ism-slide > object, #" + element_id + " .ism-slides > .ism-slide > a > object").addClass("ism-img");
+
+
       ol.find("li").each(function(indx) {
         this.addClass("ism-slide-" + indx);
       });
@@ -983,7 +986,7 @@
         this.css("width", width_percent);
         this.css("left", left_percent);
       });
-      
+
     };
 
     function transition(new_slide_index, callback) {
@@ -1052,7 +1055,7 @@
       dragger.startSlide(target_ratio, function() {
 
         after_transition(current_slide_index, new_slide_index, true, callback);
-      
+
       });
 
     };
@@ -1117,7 +1120,7 @@
         reflow();
       }
 
-      if(callback) { callback(); } 
+      if(callback) { callback(); }
 
       run_image_fx(new_slide_index);
 
@@ -1272,7 +1275,7 @@
       }
     }
   };
-  
+
   //iq.ready(window.ISM.startISM);
 
 })();

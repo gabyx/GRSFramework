@@ -1,4 +1,4 @@
-.ism-slider > ol, .ism-slider > ol > li, .ism-slider > ol > li > img { width: 100%; list-style: none; margin: 0; padding: 0; }
+.ism-slider > ol, .ism-slider > ol > li, .ism-slider > ol > li > img, .ism-slider > ol > li > object { width: 100%; list-style: none; margin: 0; padding: 0; }
 .ism-slider {
   overflow: hidden;
   position: relative;

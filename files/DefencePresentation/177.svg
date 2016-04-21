@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+
+
+<!-- Page 177 -->
+<svg x="0" y="0" width="100%" height="100%" viewBox="0 0 1564 1173"  version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+style="display: block;margin-left: auto;margin-right: auto;">
+<defs>
+
+<style type="text/css"><![CDATA[
+
+.g6_177{
+fill: none;
+stroke: #0746FF;
+stroke-width: 8;
+stroke-linecap: butt;
+stroke-linejoin: miter;
+stroke-miterlimit: 4;
+}
+.g2_177{
+fill: #ECECEC;
+}
+.g1_177{
+fill: #FFFFFF;
+}
+.g7_177{
+fill: #0746FF;
+}
+.g5_177{
+fill: #FF2500;
+}
+.g4_177{
+fill: none;
+stroke: #FF2500;
+stroke-width: 8;
+stroke-linecap: butt;
+stroke-linejoin: miter;
+stroke-miterlimit: 4;
+}
+.g3_177{
+fill: none;
+stroke: #5A5F5E;
+stroke-width: 4;
+stroke-linecap: butt;
+stroke-linejoin: miter;
+stroke-miterlimit: 4;
+}
+
+.s16_177{
+font-size: 42.62px;
+font-family: VHMHGR-CMR12177;
+fill: #000000;
+}
+.s1_177{
+font-size: 42.62px;
+font-family: CVHCEZ-CMMI12177;
+fill: #000000;
+}
+.s9_177{
+font-size: 36.67px;
+font-family: WLVRIH-MyriadApple-Semibold177;
+fill: #000000;
+}
+.s11_177{
+font-size: 28.41px;
+font-family: ACUPBU-CMMI8177;
+fill: #000000;
+}
+.s10_177{
+font-size: 42.62px;
+font-family: VCWCPV-CMMI12177;
+fill: #000000;
+}
+.s5_177{
+font-size: 42.62px;
+font-family: JENGHM-CMR12177;
+fill: #000000;
+}
+.s8_177{
+font-size: 42.62px;
+font-family: BNYLNP-CMR12177;
+fill: #000000;
+}
+.s2_177{
+font-size: 28.41px;
+font-family: JVFAHY-CMMI8177;
+fill: #000000;
+}
+.s13_177{
+font-size: 28.41px;
+font-family: EQVKEJ-CMR8177;
+fill: #000000;
+}
+.s3_177{
+font-size: 42.62px;
+font-family: KZFUAE-CMMI12177;
+fill: #000000;
+}
+.s7_177{
+font-size: 42.62px;
+font-family: OQWJAO-CMR12177;
+fill: #000000;
+}
+.s14_177{
+font-size: 64.17px;
+font-family: LSDPHG-MyriadApple-Medium177;
+fill: #000000;
+}
+.s15_177{
+font-size: 42.62px;
+font-family: LGHBUV-CMMI12177;
+fill: #000000;
+}
+.s12_177{
+font-size: 42.62px;
+font-family: LMSXGV-CMR12177;
+fill: #000000;
+}
+.s6_177{
+font-size: 42.62px;
+font-family: UBRIGE-CMMI12177;
+fill: #000000;
+}
+.s4_177{
+font-size: 42.62px;
+font-family: QQCEMX-CMR12177;
+fill: #000000;
+}
+
+]]></style>
+
+</defs>
+<path d="M0,0
+L0,1173
+L1564,1173
+L1564,0 Z " 
+fill="#FFFFFF" stroke="none" />
+<path d="M0,1173l1564,0L1564,0L0,0L0,1173Z" class="g1_177" />
+<path d="M0,0L1564,0l0,1173L0,1173Z" class="g2_177" />
+<image x="44" y="23" width="1476" height="1107" xlink:href="177/img/1.png" />
+<image x="29" y="14" width="1506" height="1145" xlink:href="177/img/2.png" />
+<path d="M365,84l0,-41" class="g3_177" />
+<text 
+x="936" 
+y="72" 
+dx="0" 
+class="s1_177"
+>"</text>
+
+<text 
+x="956" 
+y="78" 
+dx="0" 
+class="s2_177"
+>N</text>
+
+<text 
+x="985" 
+y="72" 
+dx="0" 
+class="s3_177"
+>,</text>
+
+<text 
+x="1003" 
+y="72" 
+dx="0" 
+class="s1_177"
+>"</text>
+
+<text 
+x="1023" 
+y="78" 
+dx="0" 
+class="s2_177"
+>T</text>
+
+<text 
+x="1058" 
+y="72" 
+dx="0,0,1.2" 
+class="s4_177"
+>= 0</text>
+
+<path d="M634,84l0,-41" class="g3_177" />
+<path d="M365,140l0,-41" class="g3_177" />
+<text 
+x="374" 
+y="78" 
+dx="0" 
+class="s5_177"
+>Δ</text>
+
+<text 
+x="408" 
+y="78" 
+dx="0" 
+class="s6_177"
+>t</text>
+
+<text 
+x="435" 
+y="78" 
+dx="0,0,1.2" 
+class="s7_177"
+>= 0</text>
+
+<text 
+x="500" 
+y="78" 
+dx="0" 
+class="s6_177"
+>.</text>
+
+<text 
+x="512" 
+y="78" 
+dx="0,0,0,0,0,-3.5" 
+class="s7_177"
+>0002 s</text>
+
+<text 
+x="648" 
+y="77" 
+dx="0,0,0,0,0,0,0,0,0,0,0,0" 
+class="s8_177"
+>maxIter=1000</text>
+
+<path d="M922,84l0,-41" class="g3_177" />
+<text 
+x="983" 
+y="1104" 
+dx="0,-1.5,0,0,0,0,0,0.3,0,0,0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,0,-0.2,0,0.5,0,0,0" 
+class="s9_177"
+>Velocity Magnitude in z-Direction</text>
+
+<text 
+x="376" 
+y="130" 
+dx="0" 
+class="s10_177"
+>n</text>
+
+<text 
+x="400" 
+y="136" 
+dx="0" 
+class="s11_177"
+>T</text>
+
+<text 
+x="436" 
+y="130" 
+dx="0,0,1.2,0" 
+class="s12_177"
+>= 10</text>
+
+<text 
+x="522" 
+y="112" 
+dx="0" 
+class="s13_177"
+>6</text>
+
+<path d="M330.7,326.6l-57,-73.3l-3.8,-4.9" class="g4_177" />
+<path d="M292.5,238.6l-48.1,-23l10.4,52.3Z" class="g5_177" />
+<path d="M335.5,334.1l57.1,73.4l3.7,4.8" class="g6_177" />
+<path d="M373.8,422.1l48,23L411.4,392.9Z" class="g7_177" />
+<text 
+x="290" 
+y="230" 
+dx="0" 
+class="s14_177"
+>+</text>
+
+<text 
+x="429" 
+y="391" 
+dx="0" 
+class="s14_177"
+>_</text>
+
+<text 
+x="624" 
+y="135" 
+dx="0,0,0,0,0,0.1,0,0.5,0,0,0" 
+class="s9_177"
+>no friction</text>
+
+<text 
+x="240" 
+y="83" 
+dx="0" 
+class="s15_177"
+>μ</text>
+
+<text 
+x="276" 
+y="83" 
+dx="0,0,1.2" 
+class="s16_177"
+>= 0</text>
+
+
+
+<!-- Any embedded fonts defined here -->
+<style type="text/css" ><![CDATA[
+
+@font-face {
+	font-family: JVFAHY-CMMI8177;
+	src: url("177/fonts/JVFAHY-CMMI8.woff") format("woff");
+}
+
+@font-face {
+	font-family: BNYLNP-CMR12177;
+	src: url("177/fonts/BNYLNP-CMR12.woff") format("woff");
+}
+
+@font-face {
+	font-family: LSDPHG-MyriadApple-Medium177;
+	src: url("177/fonts/LSDPHG-MyriadApple-Medium.woff") format("woff");
+}
+
+@font-face {
+	font-family: QQCEMX-CMR12177;
+	src: url("177/fonts/QQCEMX-CMR12.woff") format("woff");
+}
+
+@font-face {
+	font-family: VHMHGR-CMR12177;
+	src: url("177/fonts/VHMHGR-CMR12.woff") format("woff");
+}
+
+@font-face {
+	font-family: WLVRIH-MyriadApple-Semibold177;
+	src: url("177/fonts/WLVRIH-MyriadApple-Semibold.woff") format("woff");
+}
+
+@font-face {
+	font-family: VCWCPV-CMMI12177;
+	src: url("177/fonts/VCWCPV-CMMI12.woff") format("woff");
+}
+
+@font-face {
+	font-family: ACUPBU-CMMI8177;
+	src: url("177/fonts/ACUPBU-CMMI8.woff") format("woff");
+}
+
+@font-face {
+	font-family: JENGHM-CMR12177;
+	src: url("177/fonts/JENGHM-CMR12.woff") format("woff");
+}
+
+@font-face {
+	font-family: LGHBUV-CMMI12177;
+	src: url("177/fonts/LGHBUV-CMMI12.woff") format("woff");
+}
+
+@font-face {
+	font-family: CVHCEZ-CMMI12177;
+	src: url("177/fonts/CVHCEZ-CMMI12.woff") format("woff");
+}
+
+@font-face {
+	font-family: EQVKEJ-CMR8177;
+	src: url("177/fonts/EQVKEJ-CMR8.woff") format("woff");
+}
+
+@font-face {
+	font-family: OQWJAO-CMR12177;
+	src: url("177/fonts/OQWJAO-CMR12.woff") format("woff");
+}
+
+@font-face {
+	font-family: UBRIGE-CMMI12177;
+	src: url("177/fonts/UBRIGE-CMMI12.woff") format("woff");
+}
+
+@font-face {
+	font-family: KZFUAE-CMMI12177;
+	src: url("177/fonts/KZFUAE-CMMI12.woff") format("woff");
+}
+
+@font-face {
+	font-family: LMSXGV-CMR12177;
+	src: url("177/fonts/LMSXGV-CMR12.woff") format("woff");
+}
+
+]]></style>
+
+<title>DefencePresentation Page177</title>
+</svg>

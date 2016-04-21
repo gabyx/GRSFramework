@@ -78,7 +78,7 @@
 
                   //replace JobWorkflow with CSS slider
                   $markdownBufferDiv.find("#jobWorkflowSlides").html(
-                      buildCSSSlider("https://rawgit.com/wiki/gabyx/GRSFramework/files/DefencePresentation-{0}.svg",155,172,"jobWorkflowSlider")
+                      buildCSSSlider("files/DefencePresentation/{0}.svg",155,172,"jobWorkflowSlider")
                   );
 
                   // remove loader div
@@ -125,13 +125,14 @@
         for(i=0;i < nImgs;i++){
              sNr = i+1;
              imageS = image.format(startIdx+i);
-             console.log("build cssSlider:", imageS)
+             console.log("build ism-slider:", imageS)
              text  +='<li>\n\
-                 <img src="{0}" />\n\
+                 <object data="{0}" type="image/svg+xml"></object>\n\
                  <!--<div class="ism-caption ism-caption-0">Slide {1}</div>-->\n\
              </li>'.format(imageS,sNr);
         }
         text += "</ol>";
+        console.log(text)
         cssSlider.innerHTML = text;
 
         return cssSlider;

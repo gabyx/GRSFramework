@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+
+
+<!-- Page 172 -->
+<svg x="0" y="0" width="100%" height="100%" viewBox="0 0 1564 1173"  version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+style="display: block;margin-left: auto;margin-right: auto;">
+<defs>
+
+<style type="text/css"><![CDATA[
+
+.g2_172{
+fill: #ECECEC;
+}
+.g1_172{
+fill: #FFFFFF;
+}
+.g3_172{
+fill: none;
+stroke: #5A5F5E;
+stroke-width: 4;
+stroke-linecap: butt;
+stroke-linejoin: miter;
+stroke-miterlimit: 4;
+}
+
+.s1_172{
+font-size: 42.62px;
+font-family: WYCOZC-CMMI12172;
+fill: #000000;
+}
+.s10_172{
+font-size: 42.62px;
+font-family: BNYLNP-CMR12172;
+fill: #000000;
+}
+.s5_172{
+font-size: 42.62px;
+font-family: KZFUAE-CMMI12172;
+fill: #000000;
+}
+.s2_172{
+font-size: 42.62px;
+font-family: YFWLWA-CMR12172;
+fill: #000000;
+}
+.s9_172{
+font-size: 42.62px;
+font-family: OQWJAO-CMR12172;
+fill: #000000;
+}
+.s15_172{
+font-size: 28.41px;
+font-family: EQVKEJ-CMR8172;
+fill: #000000;
+}
+.s4_172{
+font-size: 28.41px;
+font-family: JVFAHY-CMMI8172;
+fill: #000000;
+}
+.s8_172{
+font-size: 42.62px;
+font-family: UBRIGE-CMMI12172;
+fill: #000000;
+}
+.s14_172{
+font-size: 42.62px;
+font-family: LMSXGV-CMR12172;
+fill: #000000;
+}
+.s11_172{
+font-size: 36.67px;
+font-family: WLVRIH-MyriadApple-Semibold172;
+fill: #000000;
+}
+.s13_172{
+font-size: 28.41px;
+font-family: ACUPBU-CMMI8172;
+fill: #000000;
+}
+.s3_172{
+font-size: 42.62px;
+font-family: CVHCEZ-CMMI12172;
+fill: #000000;
+}
+.s7_172{
+font-size: 42.62px;
+font-family: JENGHM-CMR12172;
+fill: #000000;
+}
+.s12_172{
+font-size: 42.62px;
+font-family: VCWCPV-CMMI12172;
+fill: #000000;
+}
+.s6_172{
+font-size: 42.62px;
+font-family: QQCEMX-CMR12172;
+fill: #000000;
+}
+
+]]></style>
+
+</defs>
+<path d="M0,0
+L0,1173
+L1564,1173
+L1564,0 Z " 
+fill="#FFFFFF" stroke="none" />
+<path d="M0,1173l1564,0L1564,0L0,0L0,1173Z" class="g1_172" />
+<path d="M0,0L1564,0l0,1173L0,1173Z" class="g2_172" />
+<image x="44" y="23" width="1476" height="1107" xlink:href="172/img/1.png" />
+<image x="29" y="14" width="1506" height="1145" xlink:href="172/img/2.png" />
+<text 
+x="214" 
+y="81" 
+dx="0" 
+class="s1_172"
+>μ</text>
+
+<text 
+x="251" 
+y="81" 
+dx="0,0,1.2" 
+class="s2_172"
+>= 0</text>
+
+<text 
+x="316" 
+y="81" 
+dx="0" 
+class="s1_172"
+>.</text>
+
+<text 
+x="327" 
+y="81" 
+dx="0" 
+class="s2_172"
+>8</text>
+
+<path d="M365,84l0,-41" class="g3_172" />
+<text 
+x="936" 
+y="72" 
+dx="0" 
+class="s3_172"
+>"</text>
+
+<text 
+x="956" 
+y="78" 
+dx="0" 
+class="s4_172"
+>N</text>
+
+<text 
+x="985" 
+y="72" 
+dx="0" 
+class="s5_172"
+>,</text>
+
+<text 
+x="1003" 
+y="72" 
+dx="0" 
+class="s3_172"
+>"</text>
+
+<text 
+x="1023" 
+y="78" 
+dx="0" 
+class="s4_172"
+>T</text>
+
+<text 
+x="1058" 
+y="72" 
+dx="0,0,1.2" 
+class="s6_172"
+>= 0</text>
+
+<path d="M634,84l0,-41" class="g3_172" />
+<path d="M365,140l0,-41" class="g3_172" />
+<text 
+x="374" 
+y="78" 
+dx="0" 
+class="s7_172"
+>Δ</text>
+
+<text 
+x="408" 
+y="78" 
+dx="0" 
+class="s8_172"
+>t</text>
+
+<text 
+x="435" 
+y="78" 
+dx="0,0,1.2" 
+class="s9_172"
+>= 0</text>
+
+<text 
+x="500" 
+y="78" 
+dx="0" 
+class="s8_172"
+>.</text>
+
+<text 
+x="512" 
+y="78" 
+dx="0,0,0,0,0,-3.5" 
+class="s9_172"
+>0002 s</text>
+
+<text 
+x="648" 
+y="77" 
+dx="0,0,0,0,0,0,0,0,0,0,0,0" 
+class="s10_172"
+>maxIter=1000</text>
+
+<path d="M922,84l0,-41" class="g3_172" />
+<text 
+x="1202" 
+y="1110" 
+dx="0,-1.5,0,0,0,0,0,0.3,0,0,0.1,0,0,0,0,0,0,0" 
+class="s11_172"
+>Velocity Magnitude</text>
+
+<text 
+x="220" 
+y="226" 
+dx="0,0,-0.2,0,0,0,0,-0.2,-0.2,0" 
+class="s11_172"
+>best match</text>
+
+<text 
+x="376" 
+y="130" 
+dx="0" 
+class="s12_172"
+>n</text>
+
+<text 
+x="400" 
+y="136" 
+dx="0" 
+class="s13_172"
+>T</text>
+
+<text 
+x="436" 
+y="130" 
+dx="0,0,1.2,0" 
+class="s14_172"
+>= 10</text>
+
+<text 
+x="522" 
+y="112" 
+dx="0" 
+class="s15_172"
+>6</text>
+
+
+
+<!-- Any embedded fonts defined here -->
+<style type="text/css" ><![CDATA[
+
+@font-face {
+	font-family: YFWLWA-CMR12172;
+	src: url("172/fonts/YFWLWA-CMR12.woff") format("woff");
+}
+
+@font-face {
+	font-family: JVFAHY-CMMI8172;
+	src: url("172/fonts/JVFAHY-CMMI8.woff") format("woff");
+}
+
+@font-face {
+	font-family: BNYLNP-CMR12172;
+	src: url("172/fonts/BNYLNP-CMR12.woff") format("woff");
+}
+
+@font-face {
+	font-family: QQCEMX-CMR12172;
+	src: url("172/fonts/QQCEMX-CMR12.woff") format("woff");
+}
+
+@font-face {
+	font-family: WLVRIH-MyriadApple-Semibold172;
+	src: url("172/fonts/WLVRIH-MyriadApple-Semibold.woff") format("woff");
+}
+
+@font-face {
+	font-family: VCWCPV-CMMI12172;
+	src: url("172/fonts/VCWCPV-CMMI12.woff") format("woff");
+}
+
+@font-face {
+	font-family: ACUPBU-CMMI8172;
+	src: url("172/fonts/ACUPBU-CMMI8.woff") format("woff");
+}
+
+@font-face {
+	font-family: JENGHM-CMR12172;
+	src: url("172/fonts/JENGHM-CMR12.woff") format("woff");
+}
+
+@font-face {
+	font-family: EQVKEJ-CMR8172;
+	src: url("172/fonts/EQVKEJ-CMR8.woff") format("woff");
+}
+
+@font-face {
+	font-family: CVHCEZ-CMMI12172;
+	src: url("172/fonts/CVHCEZ-CMMI12.woff") format("woff");
+}
+
+@font-face {
+	font-family: OQWJAO-CMR12172;
+	src: url("172/fonts/OQWJAO-CMR12.woff") format("woff");
+}
+
+@font-face {
+	font-family: UBRIGE-CMMI12172;
+	src: url("172/fonts/UBRIGE-CMMI12.woff") format("woff");
+}
+
+@font-face {
+	font-family: KZFUAE-CMMI12172;
+	src: url("172/fonts/KZFUAE-CMMI12.woff") format("woff");
+}
+
+@font-face {
+	font-family: LMSXGV-CMR12172;
+	src: url("172/fonts/LMSXGV-CMR12.woff") format("woff");
+}
+
+@font-face {
+	font-family: WYCOZC-CMMI12172;
+	src: url("172/fonts/WYCOZC-CMMI12.woff") format("woff");
+}
+
+]]></style>
+
+<title>DefencePresentation Page172</title>
+</svg>

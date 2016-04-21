@@ -1,0 +1,197 @@
+body:-webkit-full-screen {
+    width: 100%;
+    height: 100%;
+}
+body::-ms-backdrop {
+    background:url('bg.png') repeat scroll 0 0 transparent;
+}
+body {
+    margin:0;
+    overflow: hidden;
+}
+#left {
+    transition-timing-function: ease;
+    transition-duration: 200ms;
+    top: 40px;
+    bottom: 0px;
+    left: -20px;
+    width: 0px;
+    position: absolute;
+    overflow: hidden;
+    border-right: 1px solid #555555;
+    z-index: 999;
+}
+#leftNav {
+    background:url('assets.png') repeat scroll 0 -24px transparent; /* Background pattern courtesy of http://subtlepatterns.com/mocha-grunge/ */
+    display: none;
+    padding-top: 7px;
+    padding-left: 5px;
+    height: 32px;
+    border-bottom: 1px solid #555555;
+}
+#leftContent {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    overflow-y: scroll;
+    background-color: rgba(0,0,0,0.5);
+    -webkit-overflow-scrolling: touch;
+}
+#outlinePanel {
+    display: none;
+}
+#main {
+    transition-timing-function: ease;
+    transition-duration: 200ms;
+    left: 0px;
+    right: 0;
+    height: 100%;
+    position: absolute;
+}
+#mainNav {
+    background:url('assets.png') repeat scroll 0 -24px transparent; /* Background pattern courtesy of http://subtlepatterns.com/mocha-grunge/ */
+    padding-top: 7px;
+    text-align: center;
+    height: 32px;
+    z-index:999;
+    border-bottom: 1px solid #555555;
+    white-space: nowrap;
+    top: 0;
+    overflow: hidden;
+    padding-right: 30px;
+}
+#btnSideToggle {
+    margin-left: 7px;
+    display: inline;
+    float: left;
+}
+#pgCount {
+    font-family: Arial;
+    vertical-align: middle;
+    font-size: 14px;
+    color: rgb(255, 255, 255);
+}
+#btnSelect, #btnZoomOut, #viewBtn {
+    margin-left: 20px;
+}
+#btnFullscreen {
+    position: fixed;
+    right: 7px;
+}
+#btnDownload {
+    position: fixed;
+    right: 40px;
+}
+.navBtn {
+    background: url('assets.png');
+    display: inline-block;
+    border: 1px solid white;
+    border-radius: 5px;
+    width: 24px;
+    height: 24px;
+}
+.navBtn:hover {
+    box-shadow: 0 0 4px white;
+    -webkit-box-shadow: 0 0 8px white;
+    cursor: pointer;
+}
+.navBtn:active {
+    opacity: 0.6;
+}
+#btnPrev { background-position: -120px 0; }
+#btnNext { background-position: -72px 0; }
+#btnSelect { background-position: -144px 0; }
+#btnMove { background-position: -48px 0; }
+#btnZoomOut { background-position: -240px 0; }
+#btnZoomIn { background-position: -216px 0; }
+#btnFullscreen.closed { background-position: 0 0; }
+#btnFullscreen.open { background-position: -24px 0; }
+#btnSideToggle { background-position: -192px 0; }
+#btnThumbnails { background-position: -168px 0; }
+#btnOutlines { background-position: -96px 0; }
+#btnDownload { background-position: -264px 0; }
+#mainContent {
+    top: 40px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    overflow: auto;
+}
+#contentContainer {
+    margin: 0 auto;
+    overflow:hidden;
+    padding: 3px;
+}
+.inactive {
+    opacity: 0.6;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+    box-shadow: 0 0 0px white !important;
+    -webkit-box-shadow: 0 0 0px white !important;
+    cursor: default !important;
+}
+#goBtn {
+    width: 55px;
+    height: 23px;
+    vertical-align: middle;
+    background-color: #B0B0B0;
+    color: white;
+}
+#mainNav * {
+    vertical-align: middle;
+}
+#zoomBtn, #viewBtn {
+    width: 95px;
+    height: 25px;
+    background-color: #B0B0B0;
+    color: white;
+}
+#viewBtn {
+    width: 105px;
+}
+.thumbnail {
+    cursor: pointer;
+    display: block;
+    padding: 5px 0;
+    margin: 0 auto;
+    text-align: center;
+}
+.thumbnail img{
+    max-width: 160px;
+}
+.currentPageThumbnail {
+    background-color: #777777;
+}
+.thumbnail:hover {
+    background-color: #CCCCCC;
+}
+#outlinePanel ul {
+    list-style-type: none;
+    padding: 0 5px;
+}
+#outlinePanel ul ul {
+    padding-left: 15px;
+    padding-right: 0;
+}
+#outlinePanel li {
+    color: white;
+    padding: 2px;
+    font-family: Arial;
+    font-size: 15px;
+}
+#outlinePanel li:hover {
+    background-color: rgba(0,0,0,0.3);
+    cursor: pointer;
+}
+.customNavLink {
+    margin-right: 15px;
+}
+.customNavLink img {
+    height: 27px;
+    width: auto;
+    border: 0 !important;
+    border-radius:0 !important;
+    margin-top: -3px;
+}
