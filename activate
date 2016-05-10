@@ -10,7 +10,7 @@ fi
 export GRSF_REPO_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 alias GOGRSF="cd ${GRSF_REPO_DIR}"
 
-export GRSF_REPO_MEDIA_DIR="${GRSF_REPO_DIR}/projects/media"
+export GRSF_MEDIA_DIR="${GRSF_REPO_DIR}/projects/media"
 
 export GRSF_REPO_ADD_DIR="${GRSF_REPO_DIR}/additional"
 
@@ -19,8 +19,6 @@ alias  GOSIMS="cd $GRSF_SIMULATION_DIR"
 
 export GRSF_PYTHONMODULES_DIR="$GRSF_SIMULATION_DIR/python/modules"
 export GRSF_PYTHONSCRIPTS_DIR="$GRSF_SIMULATION_DIR/python/scripts"
-
-export GRSF_MEDIA_DIR="$GRSF_REPO_DIR/projects/media"
 
 export GRSF_SIMMPI_D="${GRSF_REPO_BUILD_DIR}/debug/projects/granularRigidBodySimulationMPI/bin/debug/GRSFSimMPI"
 export GRSF_SIMGUI_D="${GRSF_REPO_BUILD_DIR}/debug/projects/granularRigidBodySimulationGUI/bin/debug/GRSFSimGUI"

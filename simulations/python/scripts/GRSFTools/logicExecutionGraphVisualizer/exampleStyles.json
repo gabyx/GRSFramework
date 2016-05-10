@@ -1,0 +1,78 @@
+{
+  # default styles if no json file is given
+      general = {
+                  "nodesHeight" : 10,
+                  "nodesWidth"  : 10,
+                  "linebreaks"  : 10
+                }
+      styles = {
+          'graph': {
+              'fontname': 'Verdana',
+              'label': 'logic execution graph for %s ' % os.path.basename(opts.renderLogic),
+              'fontsize': '16',
+              'fontcolor': 'white',
+              'bgcolor': 'white',
+              'rankdir': 'LR',
+              "nodesep": "0.1",
+              "ranksep": "1",
+              "mindist" : "0",
+              "splines": "spline"
+  #            "ratio" : "0.1",
+  #            "splines" : "ortho"
+          },
+          'nodes': {
+              'fontname': 'Verdana',
+              'shape': 'plaintext',
+              'fontcolor': 'white',
+  #            'color': 'white',
+  #            'style': 'filled',
+              'fillcolor': '#006699',
+          },
+          'edges': {
+              'style': 'solid',
+              'color': 'white',
+              'arrowhead': 'open',
+              'fontname': 'Verdana',
+              'fontsize': '10',
+              'fontcolor': 'white',
+              "weight" : "0"
+          },
+          'toolNodes-Body': {
+              'fontname': 'Verdana',
+              'shape': 'plaintext',
+              'fontsize': '10',
+              'fontcolor': 'white',
+  #            'color': 'white',
+  #            'style': 'filled',
+              'fillcolor': '#006699'      
+          },
+          'toolNodes-Frame': {
+              'fontname': 'Verdana',
+              'shape': 'plaintext',
+              'fontsize': '10',
+              'fontcolor': 'white',
+  #            'color': 'white',
+  #            'style': 'filled',
+              'fillcolor': 'green'       
+          },
+          
+          'getEdges': {
+              'style': 'solid',
+              'color': 'blue',
+              'penwidth':'2',
+              'arrowhead': 'open',
+              'fontname': 'Verdana',
+              'fontsize': '12',
+              'fontcolor': 'white'       
+          },
+          'writeEdges': {
+              'style': 'solid',
+              'color': 'grey',
+              'penwidth':'2',
+              'arrowhead': 'open',
+              'fontname': 'Verdana',
+              'fontsize': '12',
+              'fontcolor': 'white'       
+          }
+      }   
+}

@@ -7,8 +7,8 @@ echo "Directors of this script: $DIR"
 
 # Configuration Settings================================================
 # Folder to the Simfiles of the Simulation Study
-simFolder="/media/zfmgpu/MyDataRaid/GabrielNuetzi/SimFilesEulerBrutus/SimulationStudies/SimFiles/Avalanche1M-Trees-Study"
-experimentSettingsFile="/home/zfmgpu/Desktop/Repository/ChuteExperiments/data/ExperimentSettings.json"
+simFolder="${AVALANCHE1M_TREES_STUDY_SIMFOLDER}"
+experimentSettingsFile="${CHUTE_EXPERIMENTS_REPO_DIR}/data/ExperimentSettings.json"
 # ======================================================================
 
 ln -s $experimentSettingsFile $DIR/
@@ -19,6 +19,6 @@ find $simFolder -type f -iname "*.sim" | \
   xargs -n3 printf "ln -s %s $DIR/SimState-P-%i-%i.sim ; " | \
   sh
 
-# scene file
-sf="$(dirname $(readlink "$DIR/SimState-P-0-0.sim"))/SceneFile.xml"
+# scene file (take P-9, it does not matter)
+sf="$(dirname $(readlink "$DIR/SimState-P-9-0.sim"))/SceneFile.xml"
 cp $sf $DIR/SceneFile.xml
