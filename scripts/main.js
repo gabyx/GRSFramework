@@ -10,11 +10,41 @@
       return content;
     };
 
+    showdown.extension('codehighlight', function() {
+        function htmlunencode(text) {
+          return (
+            text
+              .replace(/&amp;/g, '&')
+              .replace(/&lt;/g, '<')
+              .replace(/&gt;/g, '>')
+            );
+        }
+        return [
+          {
+            type: 'output',
+            filter: function (text, converter, options) {
+              // use new shodown's regexp engine to conditionally parse codeblocks
+              var left  = '<pre><code\\b[^>]*>',
+                  right = '</code></pre>',
+                  flags = 'g',
+                  replacement = function (wholeMatch, match, left, right) {
+                    // unescape match to prevent double escaping
+                    match = htmlunencode(match);
+                    return left + hljs.highlightAuto(match).value + right;
+                  };
+              return showdown.helper.replaceRecursiveRegExp(text, replacement, left, right, flags);
+            }
+          }
+        ];
+      });
+
     var mkConverter = new showdown.Converter(
     { literalMidWordUnderscores : true,
-      tables : true,
+      tables : false,
       ghCodeBlocks : true,
-      tasklists : true}
+      tasklists : true
+      , extensions : ["codehighlight"]
+    }
     );
 
     marked.setOptions({
@@ -27,9 +57,9 @@
                        //            however we do escaping in 'CreatePreview'.
       smartLists: true,
       smartypants: false,
-      highlight: function(code) {
-        return hljs.highlightAuto(code).value;
-      }
+      // highlight: function(code) {
+      //   return hljs.highlightAuto(code).value;
+      // }
     });
 
     // use marked
@@ -91,6 +121,8 @@
                     // make content appear
                     $("#content").html($markdownBufferDiv);
 
+                    hljs.initHighlighting();
+
                     // Start ISM slider
                     window.ISM.startISM();
 
@@ -105,6 +137,7 @@
 
                     console.log("run mathjax");
                     MathJax.Hub.Typeset(document.getElementById('content'));
+
 
 
                   });
