@@ -110,7 +110,7 @@
                   $markdownBufferDiv.find("#jobWorkflowSlides").html(
                       //buildCSSSlider("files/DefencePresentation/{0}.svg",155,172,"jobWorkflowSlider")
                       '<center> \
-                      <iframe src = "/ViewerJS/index.html?page=172#../files/HPCJobConfigurationWorkflow.pdf" width="80%" height="530px" \
+                      <iframe src = "ViewerJS/index.html?page=172#../files/HPCJobConfigurationWorkflow.pdf" width="80%" height="530px" \
                        allowfullscreen webkitallowfullscreen></iframe> \
                       </center>'
                   );
