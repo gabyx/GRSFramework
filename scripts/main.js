@@ -106,14 +106,14 @@
 
                   $markdownBufferDiv.find("#videoSubtitle").html(  renderMKtoHTML(data) );
 
-                  //replace JobWorkflow with CSS slider
-                  $markdownBufferDiv.find("#jobWorkflowSlides").html(
-                      //buildCSSSlider("files/DefencePresentation/{0}.svg",155,172,"jobWorkflowSlider")
-                      '<center> \
-                      <iframe src = "ViewerJS/index.html?page=172#https://rawgit.com/gabyx/HPCJobConfigurator/tree/gh-pages/files/HPCJobConfigurationWorkflow.pdf" width="80%" height="530px" \
-                       allowfullscreen webkitallowfullscreen></iframe> \
-                      </center>'
-                  );
+                  // //replace JobWorkflow with CSS slider
+                  // $markdownBufferDiv.find("#jobWorkflowSlides").html(
+                  //     //buildCSSSlider("files/DefencePresentation/{0}.svg",155,172,"jobWorkflowSlider")
+                  //     '<center> \
+                  //     <iframe src = "ViewerJS/index.html?page=172#https://rawgit.com/gabyx/HPCJobConfigurator/gh-pages/files/HPCJobConfigurationWorkflow.pdf" width="80%" height="530px" \
+                  //      allowfullscreen webkitallowfullscreen></iframe> \
+                  //     </center>'
+                  // );
 
                   // remove loader div
                   $(".loaderdiv").fadeOut("slow", function (){
