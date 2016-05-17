@@ -1,55 +1,100 @@
 #!/bin/bash
 
-yell() { echo "$0: $*" >&2; }
-die() { yell "$*"; cleanup ; exit 111 ; }
-try() { "$@" || die "Rank: ${Job:processIdxVariabel}: cannot $*"; }
 
-
-function trap_with_arg() {
-    func="$1" ; shift
-    for sig ; do
-        trap "$func $sig" "$sig"
-    done
-}
-
-function cleanup(){
-    echo "process.sh: Rank: ${Job:processIdxVariabel}: do cleanup!"
-    ${Pipeline:cleanUpCommand}
-}
-
-function handleSignal() {
-    echo "process.sh: Rank: ${Job:processIdxVariabel}: Signal $1 catched, cleanup and exit."
-    cleanup 
-    exit 0
-}
-
-# Setup the Trap
-trap_with_arg handleSignal SIGINT SIGTERM SIGUSR1 SIGUSR2
-
+# Source all common functions
+source ${General:configuratorModuleDir}/jobGenerators/jobGeneratorMPI/scripts/commonFunctions.sh
 
 if [[ -z "${Job:processIdxVariabel}" ]]; then
     echo "Rank not defined! "
-    exit 1
+    exitFunction 111
 fi
 
+function ES(){ echo "$(currTime) :: process.sh: Rank: ${Job:processIdxVariabel}"; }
 
-rm -fr ${Job:processDir}
-try mkdir -p ${Job:processDir}
-cd ${Job:processDir}
+executionDir=$(pwd)
+thisPID="$BASHPID"
+stage=0
+signalReceived="False"
+cleaningUp="False"
 
-logFile="${Job:processDir}/processLog.log"
-:> $logFile
-# Set important PYTHON stuff
-export PYTHONPATH=${General:configuratorModulePath}
-# matplotlib directory
-export MPLCONFIGDIR=${Job:processDir}/temp/matplotlib
 
-executeFileMove(){
-    python -m HPCJobConfigurator.jobGenerators.jobGeneratorMPI.generatorToolPipeline.scripts.fileMove \
-        -p "$fileMoverProcessFile" >> $logFile 2>&1 
+function executeFileValidation(){
+    # assemble pipeline status
+    PYTHONPATH=${General:configuratorModulePath}
+    export PYTHONPATH
+
+    python -m HPCJobConfigurator.jobGenerators.jobGeneratorMPI.generatorToolPipeline.scripts.generateFileValidation  \
+        --searchDirNew="${processDir}" \
+        --pipelineSpecs="${Pipeline:pipelineSpecs}" \
+        --validateOnlyLastModified=True \
+        --output="${Pipeline:validationInfoFile}"
+        
     return $?
 }
 
+function cleanup(){
+    if [[ "${cleaningUp}" == "True" ]] ; then
+        # we are already cleaning up
+        return 0
+    else
+        cleaningUp="True"
+    fi
+    
+    echo "$(ES) do cleanup! =============" 
+    echo 
+    echo "Execute CleanUpCommand ${Pipeline:cleanUpCommand}"
+    cd ${executionDir}
+    ${Pipeline:cleanUpCommand}
+    #if [[ ${stage} -ge 1 ]]; then
+      #executeFileValidation
+      #echo "$(ES) fileValidation exitStatus: $?"
+    #fi
+    echo "$(ES) cleanup finished ========"
+}
+
+function shutDownHandler() {
+    # ignore all signals
+    trap_with_arg ignoreAllSignals SIGINT SIGUSR1 SIGUSR2 SIGTERM
+    
+    signalReceived="True"
+    if [[ "${cleaningUp}" == "False" ]]; then
+      echo "$(ES) Signal $1 catched, cleanup and exit."
+      cleanup
+      exitFunction 0
+    else
+      echo "$(ES) Signal $1 catched, we are already cleaning up, continue."
+    fi
+}
+
+# Setup the Trap
+# Be aware that SIGINT and SIGTERM will be catched here, but if this script is run with mpirun
+# mpirun will forward SIGINT/SIGTERM and then quit, leaving this script still running in the signal handler
+trap_with_arg shutDownHandler SIGINT SIGUSR1 SIGUSR2 SIGTERM SIGPIPE
+
+# Process folder ================================
+tryNoCleanUp mkdir -p "${Job:processDir}"
+
+# Save processDir, it might be relative! and if signal handler runs 
+# using a relative path is not good
+cd "${Job:processDir}"
+processDir=$(pwd)
+# ========================================================
+
+# Output rerouting =======================================
+# save stdout in file descriptor 4
+exec 4>&1
+# put stdout and stderr into logFile
+logFile="${processDir}/processLog.log"
+#http://stackoverflow.com/a/18462920/293195
+exec 3>&1 1>>${logFile} 2>&1
+# filedescriptor 3 is still connected to the console
+# ========================================================
+
+
+# Process Stuff ===================================================================================================================
+
+# Set important PYTHON stuff
+export PYTHONPATH="${General:configuratorModulePath}:$PYTHONPATH"
 
 echo "File Mover =======================================================" >> $logFile
 echo "Search file move process file ..." >> $logFile
@@ -64,15 +109,13 @@ else
     echo "Change directory to ${Job:processDir}" >> $logFile
     cd ${Job:processDir}
 
-    begin=$(date +"%s")
-    try executeFileMove
-    termin=$(date +"%s")
-    difftimelps=$(($termin-$begin))
-    echo "File mover statistics: $(($difftimelps / 60)) minutes and $(($difftimelps % 60)) seconds elapsed." >> $logFile  
+    try launchInForeground python -m HPCJobConfigurator.jobGenerators.jobGeneratorMPI.generatorToolPipeline.scripts.fileMove \
+        -p "$fileMoverProcessFile"
+
       
 fi
 echo "==================================================================" >> $logFile
-cd ${Job:processDir}
+cd ${processDir}
 
 echo "Converter ========================================================" >> $logFile
 echo "Search converter process file ..." >> $logFile
@@ -87,21 +130,17 @@ else
     echo "Change directory to ${Pipeline:converterExecutionDir}" >> $logFile
 
     cd ${Pipeline:converterExecutionDir}
-    begin=$(date +"%s")
-    try ${Pipeline:executableConverter} gridder\
+
+    try launchInForeground ${Pipeline:executableConverter} gridder\
         -i $converterProcessFile \
         -s ${Pipeline:sceneFile} \
         -m ${Pipeline:mediaDir} \
-        -c ${Pipeline:converterLogic} >> $logFile 2>&1 
-    
-    termin=$(date +"%s")
-    difftimelps=$(($termin-$begin))
-    echo "Converter statistics: $(($difftimelps / 60)) minutes and $(($difftimelps % 60)) seconds elapsed." >> $logFile  
-      
+        -c ${Pipeline:converterLogic}
+
 fi
 echo "==================================================================" >> $logFile
 
-cd ${Job:processDir}
+cd ${processDir}
 
 
 echo "Final cleanup ====================================================" >> $logFile
@@ -109,4 +148,5 @@ cleanup
 echo "================================================================== " >> $logFile
 
 
-exit 0 
+exitFunction 0 
+# =================================================================================================================================================

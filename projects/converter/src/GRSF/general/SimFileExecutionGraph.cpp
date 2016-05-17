@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -43,14 +43,14 @@ void SimFileExecutionGraph::setup() {
 }
 
 void SimFileExecutionGraph::initState(boost::filesystem::path outputfilePath,
-                                      double time, unsigned int frameNr)
+                                      double time, unsigned int stateNr)
 {
          // Reset all nodes in FRAME_RESET group
          this->reset(NodeGroups::FRAME_RESET);
 
          // Set outputs in FrameData
          if(m_stateData){
-            m_stateData->setOutput(outputfilePath,time,frameNr);
+            m_stateData->setOutput(outputfilePath,time,stateNr);
          }else{
             GRSF_ERRORMSG("There is no FrameData node present! Please add one!")
          }

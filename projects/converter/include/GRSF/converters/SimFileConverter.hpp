@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -398,7 +398,7 @@ protected:
              * which is too cumbersome!
              */
             SIMFILESTEPPER_DISPATCH_FUNC_STOP(isStopFileLoop)
-            SIMFILESTEPPER_DISPATCH_FUNC_STOP(isStopFrameLoop)
+            SIMFILESTEPPER_DISPATCH_FUNC_STOP(isStopStateLoop)
             SIMFILESTEPPER_DISPATCH_FUNC_STOP(isStopBodyLoop)
         };
         #undef SIMFILESTEPPER_DISPATCH_FUNC
@@ -434,7 +434,7 @@ protected:
             SIMFILESTEPPER_DISPATCH_FUNC_CONT(finalizeState)
 
             SIMFILESTEPPER_DISPATCH_FUNC_CONT_STOP(isStopFileLoop)
-            SIMFILESTEPPER_DISPATCH_FUNC_CONT_STOP(isStopFrameLoop)
+            SIMFILESTEPPER_DISPATCH_FUNC_CONT_STOP(isStopStateLoop)
             SIMFILESTEPPER_DISPATCH_FUNC_CONT_STOP(isStopBodyLoop)
         };
         #undef SIMFILESTEPPER_DISPATCH_FUNC_CONT
@@ -583,7 +583,7 @@ protected:
             ++m_stateCounter;
 
             stop = false;
-            EXPAND_PARAMETERPACK( stop |= details::StepperDispatch<TSimFileStepper>::isStopFrameLoop(simFileStepper) )
+            EXPAND_PARAMETERPACK( stop |= details::StepperDispatch<TSimFileStepper>::isStopStateLoop(simFileStepper) )
             if(stop){
                 LOG(m_log,"---> Stop frame loop set, frameCount: " << m_stateCounter << " -> exit" << std::endl;)
                 m_terminatedByStepper=true;

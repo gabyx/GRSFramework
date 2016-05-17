@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -104,7 +104,7 @@ namespace LogicNodes {
         struct Outputs {
             enum {
                 Time,
-                StateNr,
+                StateIdx,
                 OutputFolder,
                 OutputName,
                 OutputFilePath, /* the path: "Folder/Name" */
@@ -119,14 +119,14 @@ namespace LogicNodes {
         };
 
         DECLARE_OSOCKET_TYPE(Time, double );
-        DECLARE_OSOCKET_TYPE(StateNr, unsigned int );
+        DECLARE_OSOCKET_TYPE(StateIdx, unsigned int );
         DECLARE_OSOCKET_TYPE(OutputFolder, boost::filesystem::path );
         DECLARE_OSOCKET_TYPE(OutputName, std::string );
         DECLARE_OSOCKET_TYPE(OutputFilePath, boost::filesystem::path );
 
         StateData(unsigned int id) : LogicNode(id) {
             ADD_OSOCK(Time,0.0);
-            ADD_OSOCK(StateNr,0);
+            ADD_OSOCK(StateIdx,0);
             ADD_OSOCK(OutputFolder,"./");
             ADD_OSOCK(OutputName,"StateOutput-s-0");
             ADD_OSOCK(OutputFilePath,"./StateOutput-s-0");
@@ -138,7 +138,7 @@ namespace LogicNodes {
         {
 
             SET_OSOCKET_VALUE(Time,time);
-            SET_OSOCKET_VALUE(StateNr,stateIdx);
+            SET_OSOCKET_VALUE(StateIdx,stateIdx);
 
             if(filePath.empty() || !filePath.has_filename()){
                 filePath /= "StateOutput-s-" + std::to_string(stateIdx);
