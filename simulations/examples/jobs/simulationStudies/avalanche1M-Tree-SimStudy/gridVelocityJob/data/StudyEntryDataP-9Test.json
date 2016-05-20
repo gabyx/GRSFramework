@@ -1,0 +1,13 @@
+{ 
+  "general" : { "bodyThreshold" : 150 },
+  "studies" : { 
+      "9" : { 
+          "entryBodyCount" : 81,
+          "entryStateIdx" : 0,
+          "entryTime" : 0.248,
+          "finalBodyCount" : -1,
+          "finalStateIdx" : 4,
+          "finalTime" : 1.448
+        }
+    }
+}

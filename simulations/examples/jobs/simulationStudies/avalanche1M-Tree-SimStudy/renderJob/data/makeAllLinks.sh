@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#make all links of the studies!
+# make all links of the studies!
 # get dir of this script
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
+echo "Directors of this script: $DIR"
 
 # Configuration Settings================================================
 # Folder to the Simfiles of the Simulation Study
-simFolder="/media/zfmgpu/MyDataRaid/GabrielNuetzi/SimFilesEulerBrutus/SimulationStudies/SimFiles/Avalanche1M-Trees-Study"
+simFolder="${AVALANCHE1M_TREES_STUDY_SIMFOLDER}"
 # ======================================================================
 
 
@@ -17,5 +17,5 @@ find $simFolder -type f -iname "*.sim" | \
   xargs -n3 printf "ln -s %s $DIR/SimState-P-%i-%i.sim ; " | \
   sh
 
-sf="$(dirname $(readlink "$DIR/SimState-P-0-0.sim"))/SceneFile.xml"
+sf="$(dirname $(readlink "$DIR/SimState-P-9-0.sim"))/SceneFile.xml"
 cp $sf $DIR/SceneFile.xml

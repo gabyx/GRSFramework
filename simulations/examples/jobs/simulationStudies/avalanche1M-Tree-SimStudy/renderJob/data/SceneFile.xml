@@ -29,7 +29,7 @@
 
         <ContactParameterMap>
             <ContactParameterStandard type="UCF" mu="0.5" epsilonN="0.5" epsilonT="0.0"/>
-            <ContactParameter materialId1="0" materialId2="0" type="UCF" mu="0.0" epsilonN="0.0" epsilonT="0" invDampingN="0" invDampingT="0"/>
+            <ContactParameter materialId1="0" materialId2="0" type="UCF" mu="0.9" epsilonN="0.0" epsilonT="0" invDampingN="0" invDampingT="0"/>
             <ContactParameter materialId1="0" materialId2="1" type="UCF" mu="0.5" epsilonN="0.0" epsilonT="0" invDampingN="0" invDampingT="0"/>
             <ContactParameter materialId1="0" materialId2="2" type="UCF" mu="0.3" epsilonN="0.0" epsilonT="0" invDampingN="0" invDampingT="0"/>
             <ContactParameter materialId1="0" materialId2="3" type="UCF" mu="0.1" epsilonN="0.0" epsilonT="0" invDampingN="0" invDampingT="0"/>
@@ -44,7 +44,7 @@
         </ExternalForces>
 
 
-        <GlobalInitialCondition file="/cluster/home/nuetzig/SimulationFramework/SourceCode/Projects/SimulationFramework/Simulations/SimulationJobs/Avalanche1M-SimulationStudy/studies/Avalanche1M-Tree-Study-P-0/data/SimState.sim" whichState="end" useTimeToContinue="false" readVelocities="false"/>
+        <GlobalInitialCondition file="/cluster/home/nuetzig/SimulationFramework/SourceCode/Projects/SimulationFramework/Simulations/SimulationJobs/Avalanche1M-SimulationStudy/studies/Avalanche1M-Tree-Study-P-9/data/SimState.sim" whichState="end" useTimeToContinue="false" readVelocities="false"/>
 
         <!--
         <GlobalSelectiveIds>
