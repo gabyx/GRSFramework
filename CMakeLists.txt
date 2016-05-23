@@ -195,9 +195,9 @@ if (APPLE)
         SET(Boost_COMPILER "-xgcc42")
     endif()
 endif()
-set(Boost_ADDITIONAL_VERSIONS "1.46" "1.46.0" "1.46.1" "1.45" "1.45.0" "1.44" "1.44.0" "1.42" "1.42.0" "1.41.0" "1.41" "1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37" )
+set(Boost_ADDITIONAL_VERSIONS "1.58" "1.54")
 # Components that need linking (NB does not include header-only components like bind)
-set(BOOST_COMPONENTS thread date_time system filesystem timer chrono serialization)
+set(BOOST_COMPONENTS "thread" "serialization" "filesystem" )
 find_package(Boost COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
 if (NOT Boost_FOUND)
     # Try again with the other type of libs
@@ -206,9 +206,8 @@ if (NOT Boost_FOUND)
     else()
         SET(Boost_USE_STATIC_LIBS ON)
     endif()
-    find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} REQUIRED)
+    find_package(Boost COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
 endif()
-
 # ===============================================================================================================================================================
 
 
