@@ -6,10 +6,10 @@ cd $ROOT_PATH
 
 
 # Install OpenMPI  =====================================================
-sudo apt-get install openmpi-bin libopenmpi-dev
+sudo apt-get -y install openmpi-bin libopenmpi-dev
 
 # Install HDF5  ========================================================
-sudo apt-get install libhdf5-serial-dev hdf5-tools
+sudo apt-get -y install libhdf5-serial-dev hdf5-tools
 
 
 # Install eigen3 =======================================================
