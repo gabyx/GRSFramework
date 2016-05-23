@@ -42,7 +42,7 @@ wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOA
 cd ${BOOST_BUILD}
 tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
 ./bootstrap.sh --with-toolset="$BOOST_TOOLSET" --with-libraries=system,thread,serialization
-sudo ./b2 toolset="$BOOST_TOOLSET" threading=multi link=shared release install
+sudo ./b2 toolset="$BOOST_TOOLSET" threading=multi link=shared release install > /dev/null
 
 
 # Install OGRE 3d
