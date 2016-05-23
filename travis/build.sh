@@ -16,8 +16,8 @@ cd $CHECKOUT_PATH
 ## only for hig perf. tests
 ##- cd addtional/tests/files; cat Lucy* | tar xz
 
-if [ ! -d $ROOT_PATH/build ]; then mkdir $ROOT_PATH/build; fi
-cd $ROOT_PATH/build
+if [ ! -d ${ROOT_PATH}/build ]; then mkdir ${ROOT_PATH}/build; fi
+cd ${ROOT_PATH}/build
 cmake $CHECKOUT_PATH -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DGRSF_BUILD_GUI=ON -DGRSF_BUILD_MPI=ON -DGRSF_BUILD_NOGUI=ON -DGRSF_BUILD_SIMCONVERTER=ON
 make VERBOSE=1
 

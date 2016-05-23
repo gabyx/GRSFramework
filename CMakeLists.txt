@@ -28,6 +28,12 @@ ELSE()
     set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type for makefile based generators")
 ENDIF()
 
+
+SET(MODULE_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
+SET(CMAKE_MODULE_PATH ${MODULE_FOLDER} ${CMAKE_MODULE_PATH})
+MESSAGE(STATUS "Module path is now set to: " ${CMAKE_MODULE_PATH} )
+
+
 SET(SimulationFrameworkName "GRSFramework")
 IF(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
         SET(SimulationFrameworkName  "${SimulationFrameworkName}-${CMAKE_BUILD_TYPE}")
@@ -93,10 +99,6 @@ IF(NOT MYPROJECT_SET_COMPILER_FLAGS_INTERNAL)
 ENDIF()
 
 
-
-SET(MODULE_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
-SET(CMAKE_MODULE_PATH ${MODULE_FOLDER} ${CMAKE_MODULE_PATH})
-MESSAGE(STATUS "Module path is now set to: " ${CMAKE_MODULE_PATH} )
 
 INCLUDE(PrintListMacro)
 
