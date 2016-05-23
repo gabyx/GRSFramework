@@ -5,6 +5,7 @@
 
 if [[ ! -v GRSF_REPO_BUILD_DIR ]]; then
   echo "Define GRSF_REPO_BUILD_DIR variable first!"
+  exit 111
 fi
 
 export GRSF_REPO_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
