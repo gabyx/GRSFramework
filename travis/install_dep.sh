@@ -19,7 +19,7 @@ mkdir ${ROOT_PATH}/eigen3Build
 cd ${ROOT_PATH}/eigen3Build
 cmake ../eigen3 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX
 sudo make VERBOSE=1 install
-ls $INSTALL_PREFIX/lib/cmake
+ls -al $INSTALL_PREFIX/lib/cmake
 
 # Install meta =========================================================
 git clone https://github.com/ericniebler/meta.git ${ROOT_PATH}/meta
