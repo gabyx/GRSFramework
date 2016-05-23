@@ -51,7 +51,7 @@ hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre
 mkdir ${ROOT_PATH}/ogreBuild
 cd ${ROOT_PATH}/ogreBuild
 cmake ../ogre -DCMAKE_BUILD_TYPE=Release
-sudo make VERBOSE=1 install
+sudo make VERBOSE=1 install > /dev/null
 
 
 
