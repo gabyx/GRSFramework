@@ -38,11 +38,11 @@ sudo make VERBOSE=1 install
 BOOST_DOWNLOAD_URL="http://sourceforge.net/projects/boost/files/boost/1.58.0/boost_1_58_0.tar.bz2/download"
 BOOST_BUILD=${ROOT_PATH}/boostBuild
 mkdir -p ${BOOST_BUILD}
-wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOAD_URL"; fi
+wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOAD_URL"
 if [ "$CXX" = "g++" ]; then export BOOST_TOOLSET=gcc; fi
 if [ "$CXX" = "clang++" ]; then export BOOST_TOOLSET=clang; fi
 cd ${BOOST_BUILD}
-tar jxf "$DOWNLOAD_ROOT/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"; fi
+tar jxf "$DOWNLOAD_ROOT/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
 ./bootstrap.sh --with-toolset="$BOOST_TOOLSET" --with-libraries=system,thread,serialization
 sudo ./b2 toolset="$BOOST_TOOLSET" threading=multi install
 
