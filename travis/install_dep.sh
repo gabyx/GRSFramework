@@ -45,12 +45,12 @@ tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
 sudo ./b2 toolset="$BOOST_TOOLSET" threading=multi link=shared release install > /dev/null
 
 
-# Install OGRE 3d
-hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre
-mkdir ${ROOT_PATH}/ogreBuild
-cd ${ROOT_PATH}/ogreBuild
-cmake ../ogre -DCMAKE_BUILD_TYPE=Release
-sudo make VERBOSE=1 install
+## Install OGRE 3d
+#hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre
+#mkdir ${ROOT_PATH}/ogreBuild
+#cd ${ROOT_PATH}/ogreBuild
+#cmake ../ogre -DCMAKE_BUILD_TYPE=Release
+#sudo make VERBOSE=1 install
 
 
 
