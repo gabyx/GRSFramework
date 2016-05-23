@@ -42,7 +42,7 @@ wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOA
 if [ "$CXX" = "g++" ]; then export BOOST_TOOLSET=gcc; fi
 if [ "$CXX" = "clang++" ]; then export BOOST_TOOLSET=clang; fi
 cd ${BOOST_BUILD}
-tar jxf "$DOWNLOAD_ROOT/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
+tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
 ./bootstrap.sh --with-toolset="$BOOST_TOOLSET" --with-libraries=system,thread,serialization
 sudo ./b2 toolset="$BOOST_TOOLSET" threading=multi install
 
