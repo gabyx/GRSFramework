@@ -50,9 +50,9 @@ sudo ./b2 threading=multi link=shared release install > /dev/null
 cd ${ROOT_PATH}
 git clone https://github.com/wgois/OIS.git OIS
 cd ${ROOT_PATH}/OIS
-./boostrap
-./configure
-./make && make install
+sudo ./bootstrap
+sudo ./configure
+sudo ./make && sudo make install
 
 sudo apt-get -y install libxrandr-dev
 hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre
