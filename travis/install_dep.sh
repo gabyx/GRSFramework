@@ -42,7 +42,7 @@ mkdir -p ${BOOST_BUILD}
 wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOAD_URL"
 cd ${BOOST_BUILD}
 tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
-./bootstrap.sh --with-libraries=system,thread,serialization
+./bootstrap.sh --with-libraries=system,thread,serialization,filesystem
 sudo ./b2 threading=multi link=shared release install > /dev/null
 
 
@@ -54,5 +54,9 @@ cd ${ROOT_PATH}/ogreBuild
 cmake ../ogre -DCMAKE_BUILD_TYPE=Release
 sudo make VERBOSE=1 install > /dev/null
 
+# Clone ApproxMVBB
+cd ${ROOT_PATH}
+git clone https://github.com/gabyx/ApproxMVBB.git ApproxMVBB
+export APPROXMVBB_REPO_DIR=${ROOT_PATH}/ApproxMVBB
 
 
