@@ -236,7 +236,9 @@ find_package(Assimp 3 REQUIRED)
 #find_package(ApproxMVBB)   
 
 # to include all source into the project
-set(ApproxMVBB_SEARCH_PATH "./../ApproxMVBB" CACHE STRING "ApproxMVBB Repo Dir")
+if(ApproxMVBB_SEARCH_PATH)
+  set(ApproxMVBB_SEARCH_PATH "./../ApproxMVBB" CACHE STRING "ApproxMVBB Repo Dir")
+endif()
 find_package(ApproxMVBBSource REQUIRED)  
 # ===================================================
 

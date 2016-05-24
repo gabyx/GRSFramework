@@ -46,13 +46,21 @@ tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
 sudo ./b2 threading=multi link=shared release install > /dev/null
 
 
+# Install Assimp   =====================================================
+cd ${ROOT_PATH}
+git clone https://github.com/assimp/assimp.git assimp
+mkdir -p ${ROOT_PATH}/assimpBuild
+cd ${ROOT_PATH}/assimpBuild
+cmake ../assimp 
+sudo make VERBOSE=1 install
+
 # Install OGRE 3d  =====================================================
 cd ${ROOT_PATH}
 git clone https://github.com/wgois/OIS.git OIS
 cd ${ROOT_PATH}/OIS
 sudo ./bootstrap
 sudo ./configure
-sudo ./make && sudo make install
+sudo make && sudo make install
 
 sudo apt-get -y install libxrandr-dev
 hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre
@@ -60,6 +68,8 @@ mkdir ${ROOT_PATH}/ogreBuild
 cd ${ROOT_PATH}/ogreBuild
 cmake ../ogre -DCMAKE_BUILD_TYPE=Release
 sudo make VERBOSE=1 install > /dev/null
+
+
 
 
 # Clone ApproxMVBB  ====================================================
