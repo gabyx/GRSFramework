@@ -42,10 +42,12 @@ matrix:
 
 # Install dependencies
 install:
-  - export ROOT_PATH=`pwd`/../;
+  - export ROOT_PATH=`pwd`/..;
   - export CHECKOUT_PATH=`pwd`;
   - echo "ROOT_PATH= $ROOT_PATH"
   - echo "CHECKOUT_PATH= $CHECKOUT_PATH"
+  - echo "GRSFramework version:"
+  - git describe --tags --abbrev=10
   
   - chmod +x $CHECKOUT_PATH/travis/install_${TRAVIS_OS_NAME}.sh
   - . $CHECKOUT_PATH/travis/install_${TRAVIS_OS_NAME}.sh
