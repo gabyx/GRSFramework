@@ -42,6 +42,9 @@ matrix:
 
 # Install dependencies
 install:
+  - echo "Git version:"
+  - git --version
+
   - export ROOT_PATH=`pwd`/..;
   - export CHECKOUT_PATH=`pwd`;
   - echo "ROOT_PATH= $ROOT_PATH"
