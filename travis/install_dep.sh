@@ -42,7 +42,7 @@ mkdir -p ${BOOST_BUILD}
 wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOAD_URL"
 cd ${BOOST_BUILD}
 tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
-./bootstrap.sh --with-libraries=system,thread,serialization,filesystem,chrono,atomic,datetime
+./bootstrap.sh --with-libraries=system,thread,serialization,filesystem,chrono,atomic,date_time
 sudo ./b2 threading=multi link=shared release install > /dev/null
 
 
