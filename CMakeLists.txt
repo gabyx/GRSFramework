@@ -199,7 +199,7 @@ if (APPLE)
 endif()
 set(Boost_ADDITIONAL_VERSIONS "1.58" "1.54")
 # Components that need linking (NB does not include header-only components like bind)
-set(BOOST_COMPONENTS "thread" "serialization" "filesystem" )
+set(BOOST_COMPONENTS "system" "thread" "filesystem" "serialization" )
 find_package(Boost COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
 if (NOT Boost_FOUND)
     # Try again with the other type of libs

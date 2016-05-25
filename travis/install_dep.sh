@@ -66,7 +66,7 @@ sudo apt-get -y install libxrandr-dev
 hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre
 mkdir ${ROOT_PATH}/ogreBuild
 cd ${ROOT_PATH}/ogreBuild
-cmake ../ogre -DCMAKE_BUILD_TYPE=Release
+cmake ../ogre -DCMAKE_BUILD_TYPE=Release -DOGRE_BUILD_SAMPLES=OFF -DOGRE_BUILD_TESTS=OFF -DOGRE_BUILD_TOOLS=OFF
 sudo make VERBOSE=1 install 
 
 
