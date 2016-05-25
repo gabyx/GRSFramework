@@ -43,7 +43,7 @@ wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOA
 cd ${BOOST_BUILD}
 tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
 ./bootstrap.sh --with-libraries=system,thread,serialization,filesystem,chrono,atomic,date_time
-sudo ./b2 threading=multi link=shared release install > /dev/null
+sudo ./b2 threading=multi link=shared release install
 
 
 # Install Assimp   =====================================================
