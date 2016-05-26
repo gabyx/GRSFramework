@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -2016,7 +2016,7 @@ private: \
             Base::template writeTopoInfo<writeAABBList,writePoints,writeHistogram>(root,currentTime,buildTime);
 
             // Write kdTree
-            m_kdTree_temp->appendToXML(root,m_aligned,m_A_IK);
+            ApproxMVBB::KdTree::XML::appendToXML(*m_kdTree_temp,root,m_aligned,m_A_IK);
 
             dataXML.save_file(filePath.c_str(),"    ");
         }
