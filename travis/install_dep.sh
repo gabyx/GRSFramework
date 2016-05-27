@@ -55,7 +55,7 @@ sudo make VERBOSE=1 install
 #sudo ./b2 threading=multi link=shared release install
 
 #alternative
-sudo apt-get  -y install libboost1.55-all-dev
+sudo apt-get  -y install libboost1.54-all-dev
 
 # Install Assimp   =====================================================
 #cd ${ROOT_PATH}
