@@ -10,12 +10,12 @@ sudo apt-get -y install openmpi-bin libopenmpi-dev
 
 # Install HDF5  ========================================================
 
-HDF5_DOWNLOAD_URL=http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar
+HDF5_DOWNLOAD_URL=http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar.gz
 HDF5_BUILD=${ROOT_PATH}/hdf5Build
 mkdir -p ${HDF5_BUILD}
-wget --no-verbose --output-document="${ROOT_PATH}/hdf5.tar.bz2" "$HDF5_DOWNLOAD_URL"
+wget --no-verbose --output-document="${ROOT_PATH}/hdf5.tar.gz" "$HDF5_DOWNLOAD_URL"
 cd ${HDF5_BUILD}
-tar jxf "${ROOT_PATH}/hdf5.tar.bz2" --strip-components=1 -C "${HDF5_BUILD}"
+tar zxf "${ROOT_PATH}/hdf5.tar.gz" --strip-components=1 -C "${HDF5_BUILD}"
 sudo ./configure --prefix=/usr/local/hdf5 --enable-cxx 
 sudo make
 sudo make install
