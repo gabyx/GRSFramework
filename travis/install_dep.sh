@@ -15,6 +15,7 @@ HDF5_BUILD=${ROOT_PATH}/hdf5Build
 mkdir -p ${HDF5_BUILD}
 wget --no-verbose --output-document="${ROOT_PATH}/hdf5.tar.bz2" "$HDF5_DOWNLOAD_URL"
 cd ${HDF5_BUILD}
+tar jxf "${ROOT_PATH}/hdf5.tar.bz2" --strip-components=1 -C "${HDF5_BUILD}"
 sudo ./configure --prefix=/usr/local/hdf5 --enable-cxx 
 sudo make
 sudo make install
