@@ -44,41 +44,47 @@ cmake ../pugixml/scripts/ -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX
 sudo make VERBOSE=1 install
 
 # Install boost ========================================================
- # Install newer boost
-BOOST_DOWNLOAD_URL="http://sourceforge.net/projects/boost/files/boost/1.58.0/boost_1_58_0.tar.bz2/download"
-BOOST_BUILD=${ROOT_PATH}/boostBuild
-mkdir -p ${BOOST_BUILD}
-wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOAD_URL"
-cd ${BOOST_BUILD}
-tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
-./bootstrap.sh --with-libraries=system,thread,serialization,filesystem,chrono,atomic,date_time
-sudo ./b2 threading=multi link=shared release install
+# Install newer boost
+#BOOST_DOWNLOAD_URL="http://sourceforge.net/projects/boost/files/boost/1.58.0/boost_1_58_0.tar.bz2/download"
+#BOOST_BUILD=${ROOT_PATH}/boostBuild
+#mkdir -p ${BOOST_BUILD}
+#wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOAD_URL"
+#cd ${BOOST_BUILD}
+#tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
+#./bootstrap.sh --with-libraries=system,thread,serialization,filesystem,chrono,atomic,date_time
+#sudo ./b2 threading=multi link=shared release install
 
+#alternative
+sudo apt-get install libboost1.55-all-dev
 
 # Install Assimp   =====================================================
-cd ${ROOT_PATH}
-git clone https://github.com/assimp/assimp.git assimp
-mkdir -p ${ROOT_PATH}/assimpBuild
-cd ${ROOT_PATH}/assimpBuild
-cmake ../assimp 
-sudo make VERBOSE=1 install
+#cd ${ROOT_PATH}
+#git clone https://github.com/assimp/assimp.git assimp
+#mkdir -p ${ROOT_PATH}/assimpBuild
+#cd ${ROOT_PATH}/assimpBuild
+#cmake ../assimp 
+#sudo make VERBOSE=1 install
+
+#alternative
+sudo apt-get install libassimp-dev
 
 # Install OGRE 3d  =====================================================
-cd ${ROOT_PATH}
-git clone https://github.com/wgois/OIS.git OIS
-cd ${ROOT_PATH}/OIS
-sudo ./bootstrap
-sudo ./configure
-sudo make && sudo make install
+#cd ${ROOT_PATH}
+#git clone https://github.com/wgois/OIS.git OIS
+#cd ${ROOT_PATH}/OIS
+#sudo ./bootstrap
+#sudo ./configure
+#sudo make && sudo make install
 
-sudo apt-get -y install libxrandr-dev
-hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre
-mkdir ${ROOT_PATH}/ogreBuild
-cd ${ROOT_PATH}/ogreBuild
-cmake ../ogre -DCMAKE_BUILD_TYPE=Release -DOGRE_BUILD_SAMPLES=OFF -DOGRE_BUILD_TESTS=OFF -DOGRE_BUILD_TOOLS=OFF
-sudo make VERBOSE=1 install 
+#sudo apt-get -y install libxrandr-dev
+#hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre
+#mkdir ${ROOT_PATH}/ogreBuild
+#cd ${ROOT_PATH}/ogreBuild
+#cmake ../ogre -DCMAKE_BUILD_TYPE=Release -DOGRE_BUILD_SAMPLES=OFF -DOGRE_BUILD_TESTS=OFF -DOGRE_BUILD_TOOLS=OFF
+#sudo make VERBOSE=1 install 
 
-
+# alternative
+sudo apt-get install libogre-1.9.0 libogre-1.9-dev
 
 
 # Clone ApproxMVBB  ====================================================
