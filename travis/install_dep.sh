@@ -45,17 +45,17 @@ sudo make VERBOSE=1 install
 
 # Install boost ========================================================
 # Install newer boost
-#BOOST_DOWNLOAD_URL="http://sourceforge.net/projects/boost/files/boost/1.58.0/boost_1_58_0.tar.bz2/download"
-#BOOST_BUILD=${ROOT_PATH}/boostBuild
-#mkdir -p ${BOOST_BUILD}
-#wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOAD_URL"
-#cd ${BOOST_BUILD}
-#tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
-#./bootstrap.sh --with-libraries=system,thread,serialization,filesystem,chrono,atomic,date_time
-#sudo ./b2 threading=multi link=shared release install
+BOOST_DOWNLOAD_URL="http://sourceforge.net/projects/boost/files/boost/1.58.0/boost_1_58_0.tar.bz2/download"
+BOOST_BUILD=${ROOT_PATH}/boostBuild
+mkdir -p ${BOOST_BUILD}
+wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOAD_URL"
+cd ${BOOST_BUILD}
+tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
+./bootstrap.sh --with-libraries=system,thread,serialization,filesystem,chrono,atomic,date_time
+sudo ./b2 threading=multi link=shared release install
 
 #alternative
-sudo apt-get  -y install libboost1.54-all-dev
+#sudo apt-get  -y install libboost1.54-all-dev
 
 # Install Assimp   =====================================================
 cd ${ROOT_PATH}
