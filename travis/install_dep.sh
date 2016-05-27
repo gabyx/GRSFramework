@@ -58,15 +58,15 @@ sudo make VERBOSE=1 install
 sudo apt-get  -y install libboost1.54-all-dev
 
 # Install Assimp   =====================================================
-#cd ${ROOT_PATH}
-#git clone https://github.com/assimp/assimp.git assimp
-#mkdir -p ${ROOT_PATH}/assimpBuild
-#cd ${ROOT_PATH}/assimpBuild
-#cmake ../assimp 
-#sudo make VERBOSE=1 install
+cd ${ROOT_PATH}
+git clone https://github.com/assimp/assimp.git assimp
+mkdir -p ${ROOT_PATH}/assimpBuild
+cd ${ROOT_PATH}/assimpBuild
+cmake ../assimp 
+sudo make VERBOSE=1 install
 
 #alternative
-sudo apt-get -y install libassimp-dev
+#sudo apt-get -y install libassimp-dev
 
 # Install OGRE 3d  =====================================================
 #cd ${ROOT_PATH}
