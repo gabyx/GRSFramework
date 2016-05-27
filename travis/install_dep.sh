@@ -19,6 +19,7 @@ tar zxf "${ROOT_PATH}/hdf5.tar.gz" --strip-components=1 -C "${HDF5_BUILD}"
 sudo ./configure --prefix=/usr/local/hdf5 --enable-cxx 
 sudo make
 sudo make install
+export PATH="$PATH:/usr/local/hdf5"
 
 # Install eigen3 =======================================================
 hg clone https://bitbucket.org/eigen/eigen/ ${ROOT_PATH}/eigen3
