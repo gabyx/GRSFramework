@@ -44,7 +44,8 @@ matrix:
 install:
   - echo "Git version:"
   - git --version
-
+  
+  - export BUILD_CORES=2
   - export ROOT_PATH=`pwd`/..;
   - export CHECKOUT_PATH=`pwd`;
   - echo "ROOT_PATH= $ROOT_PATH"
