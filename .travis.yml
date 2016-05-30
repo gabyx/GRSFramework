@@ -1,13 +1,6 @@
 sudo: required
 language: cpp
 
-env:
-  - BUILD_CACHE="ON"
-  - BUILD_GRSF_SIM="ON"
-  - BUILD_GRSF_SIMMPI="ON"
-  - BUILD_GRSF_CONVERTER="ON"
-  - BUILD_GRSF_SIMGUI="ON"
-
 matrix:
   include:
     # List of whitelisted in travis packages for ubuntu-precise can be found here:
