@@ -47,17 +47,6 @@ macro(create_search_paths PREFIX)
   set(${PREFIX}_FRAMEWORK_SEARCH_PATH ${${PREFIX}_PREFIX_PATH})
 endmacro(create_search_paths)
 
-# Construct search paths for includes and libraries from a PREFIX_PATH
-macro(create_search_paths_dll PREFIX)
-  foreach(dir ${${PREFIX}_PREFIX_PATH})
-    set(${PREFIX}_DLL_SEARCH_PATH ${${PREFIX}_DLL_SEARCH_PATH} 
-        ${dir}/bin ${dir}/Bin
-        ${dir}/bin/Release ${dir}/bin/release ${dir}/bin/Debug ${dir}/bin/debug 
-        ${dir}/Bin/Release ${dir}/Bin/release ${dir}/Bin/Debug ${dir}/Bin/debug)
-  endforeach(dir)
-endmacro(create_search_paths_dll)
-
-
 # clear cache variables if a certain variable changed
 macro(clear_if_changed TESTVAR)
   # test against internal check variable
@@ -97,20 +86,11 @@ macro(make_library_set PREFIX)
 endmacro(make_library_set)
 
 # Generate debug names from given release names
-macro(get_release_debug_names PREFIX)
+macro(get_debug_names PREFIX)
   foreach(i ${${PREFIX}})
-    set(${PREFIX}_REL ${${PREFIX}_REL} ${i})
     set(${PREFIX}_DBG ${${PREFIX}_DBG} ${i}d ${i}D ${i}_d ${i}_D ${i}_debug ${i})
   endforeach(i)
-endmacro(get_release_debug_names)
-
-# Generate debug DLL names from given release names (WINDOWS)
-macro(get_release_debug_filenames_dll PREFIX)
-  foreach(i ${${PREFIX}})
-    set(${PREFIX}_REL ${${PREFIX}_REL} "${i}.dll")
-    set(${PREFIX}_DBG ${${PREFIX}_DBG} "${i}d.dll" "${i}D.dll" "${i}_d.dll" "${i}_D.dll" "${i}_debug.dll" "${i}.dll")
-  endforeach(i)
-endmacro(get_release_debug_filenames_dll)
+endmacro(get_debug_names)
 
 # Add the parent dir from DIR to VAR 
 macro(add_parent_dir VAR DIR)
@@ -119,24 +99,15 @@ macro(add_parent_dir VAR DIR)
 endmacro(add_parent_dir)
 
 # Do the final processing for the package find.
-# ARGV1 is TRUE if we only have headers!
-
 macro(findpkg_finish PREFIX)
   # skip if already processed during this run
   if (NOT ${PREFIX}_FOUND)
-    if ( (NOT "${ARGV1}") AND ${PREFIX}_INCLUDE_DIR AND ${PREFIX}_LIBRARY)
-      set(${PREFIX}_FOUND TRUE )
-      set(${PREFIX}_INCLUDE_DIRS ${${PREFIX}_INCLUDE_DIR})
-      set(${PREFIX}_LIBRARIES ${${PREFIX}_LIBRARY}  )
-      if (NOT ${PREFIX}_FIND_QUIETLY)
-        message(STATUS "Found ${PREFIX}")
-      endif ()
-   elseif ( "${ARGV1}" AND ${PREFIX}_INCLUDE_DIR)
+    if (${PREFIX}_INCLUDE_DIR AND ${PREFIX}_LIBRARY)
       set(${PREFIX}_FOUND TRUE)
-      set(${PREFIX}_INCLUDE_DIRS ${${PREFIX}_INCLUDE_DIR} )
-      set(${PREFIX}_LIBRARIES ${${PREFIX}_LIBRARY} )
+      set(${PREFIX}_INCLUDE_DIRS ${${PREFIX}_INCLUDE_DIR})
+      set(${PREFIX}_LIBRARIES ${${PREFIX}_LIBRARY})
       if (NOT ${PREFIX}_FIND_QUIETLY)
-        message(STATUS "Found ${PREFIX}: No Library, only Headers")
+        message(STATUS "Found ${PREFIX}: ${${PREFIX}_LIBRARIES}")
       endif ()
     else ()
       if (NOT ${PREFIX}_FIND_QUIETLY)
