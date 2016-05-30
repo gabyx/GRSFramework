@@ -84,7 +84,7 @@ sudo make -j${BUILD_CORES} VERBOSE=1 install
 #sudo make -j${BUILD_CORES}VERBOSE=1 install 
 
 # alternative
-sudo apt-get -y install libogre-1.9.0 libogre-1.9-dev libois-1.3.0
+sudo apt-get -y install libogre-1.9.0 libogre-1.9-dev libois-1.3.0 libois-dev
 
 
 # Clone ApproxMVBB  ====================================================
