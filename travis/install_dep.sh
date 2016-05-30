@@ -69,22 +69,21 @@ sudo make -j${BUILD_CORES} VERBOSE=1 install
 #sudo apt-get -y install libassimp-dev
 
 # Install OGRE 3d  =====================================================
-#cd ${ROOT_PATH}
-#git clone https://github.com/wgois/OIS.git OIS
-#cd ${ROOT_PATH}/OIS
-#sudo ./bootstrap
-#sudo ./configure
-#sudo make -j${BUILD_CORES} && sudo make -j${BUILD_CORES} install
-
-#sudo apt-get -y install libxrandr-dev
-#hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre
-#mkdir ${ROOT_PATH}/ogreBuild
-#cd ${ROOT_PATH}/ogreBuild
-#cmake ../ogre -DCMAKE_BUILD_TYPE=Release -DOGRE_BUILD_SAMPLES=OFF -DOGRE_BUILD_TESTS=OFF -DOGRE_BUILD_TOOLS=OFF
-#sudo make -j${BUILD_CORES}VERBOSE=1 install 
+cd ${ROOT_PATH}
+git clone https://github.com/wgois/OIS.git OIS
+cd ${ROOT_PATH}/OIS
+sudo ./bootstrap
+sudo ./configure
+sudo make -j${BUILD_CORES} && sudo make -j${BUILD_CORES} install
+sudo apt-get -y install libxrandr-dev
+hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre
+mkdir ${ROOT_PATH}/ogreBuild
+cd ${ROOT_PATH}/ogreBuild
+cmake ../ogre -DCMAKE_BUILD_TYPE=Release -DOGRE_BUILD_SAMPLES=OFF -DOGRE_BUILD_TESTS=OFF -DOGRE_BUILD_TOOLS=OFF
+sudo make -j${BUILD_CORES}VERBOSE=1 install 
 
 # alternative
-sudo apt-get -y install libogre-1.9.0 libogre-1.9-dev libois-1.3.0 libois-dev
+#sudo apt-get -y install libogre-1.9.0 libogre-1.9-dev libois-1.3.0 libois-dev
 
 
 # Clone ApproxMVBB  ====================================================
