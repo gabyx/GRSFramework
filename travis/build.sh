@@ -24,7 +24,7 @@ echo " ApproxMVBB Repo Dir: ${APPROXMVBB_REPO_DIR}"
 cmake $CHECKOUT_PATH -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
                      -DGRSF_BUILD_GUI=OFF -DGRSF_BUILD_MPI=ON \
                      -DGRSF_BUILD_NOGUI=ON \
-                     -DGRSF_BUILD_SIMCONVERTER=OFF \
+                     -DGRSF_BUILD_SIMCONVERTER=ON \
                      -DApproxMVBB_SEARCH_PATH=${APPROXMVBB_REPO_DIR}
 make VERBOSE=1
 

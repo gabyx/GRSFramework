@@ -9,8 +9,8 @@ cd $ROOT_PATH
 sudo apt-get -y install openmpi-bin libopenmpi-dev
 
 # Install HDF5  ========================================================
-
-HDF5_DOWNLOAD_URL=http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar.gz
+HDF5_DOWNLOAD_URL=https://www.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8.15/src/hdf5-1.8.15.tar.gz
+#http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar.gz
 HDF5_BUILD=${ROOT_PATH}/hdf5Build
 mkdir -p ${HDF5_BUILD}
 wget --no-verbose --output-document="${ROOT_PATH}/hdf5.tar.gz" "$HDF5_DOWNLOAD_URL"
