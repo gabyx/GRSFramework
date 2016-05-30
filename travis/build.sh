@@ -22,9 +22,10 @@ cd ${ROOT_PATH}/build
 echo " ApproxMVBB Repo Dir: ${APPROXMVBB_REPO_DIR}"
 
 cmake $CHECKOUT_PATH -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-                     -DGRSF_BUILD_GUI=ON -DGRSF_BUILD_MPI=ON \
-                     -DGRSF_BUILD_NOGUI=ON \
-                     -DGRSF_BUILD_SIMCONVERTER=ON \
+                     -DGRSF_BUILD_GUI=$BUILD_GRSF_SIMGUI \
+                     -DGRSF_BUILD_MPI=$BUILD_GRSF_SIMMPI \
+                     -DGRSF_BUILD_NOGUI=$BUILD_GRSF_SIM \
+                     -DGRSF_BUILD_SIMCONVERTER=$BUILD_GRSF_SIMCONVERTER \
                      -DApproxMVBB_SEARCH_PATH=${APPROXMVBB_REPO_DIR}
 make VERBOSE=1
 
