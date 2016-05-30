@@ -8,8 +8,6 @@ env:
   - BUILD_GRSF_CONVERTER="ON"
   - BUILD_GRSF_SIMGUI="ON"
 
-env: GCC_VERSION="4.9"
-
 os: linux
 dist: trusty
 compiler: 
