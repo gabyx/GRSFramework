@@ -8,85 +8,12 @@ env:
   - BUILD_GRSF_CONVERTER="ON"
   - BUILD_GRSF_SIMGUI="ON"
 
-matrix:
-  include:
-  - env: 
-    - GCC_VERSION="4.9"
-    os: linux
-    dist: trusty
-    compiler: gcc
-    cache: 
-      directories:
-        - /usr/local/include
-        - /usr/local/lib
-        - /usr/local/share
-    addons:
-      apt:
-        packages:
-        - gcc-4.9
-        - g++-4.9
-        sources:
-        - ubuntu-toolchain-r-test
-        
-    # List of whitelisted in travis packages for ubuntu-precise can be found here:
-    #   https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
-    # List of whitelisted in travis apt-sources:
-    #   https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
-  - env: 
-    - GCC_VERSION="4.9"
-    os: linux
-    dist: trusty
-    compiler: gcc
-    cache: 
-      directories:
-        - /usr/local/include
-        - /usr/local/lib
-        - /usr/local/share
-    addons:
-      apt:
-        packages:
-        - gcc-4.9
-        - g++-4.9
-        sources:
-        - ubuntu-toolchain-r-test
-  
-  - env: 
-    - GCC_VERSION="4.9"
-    - BUILD_GRSF_SIM="ON"
-    - BUILD_GRSF_SIMMPI="ON"
-    - BUILD_GRSF_CONVERTER="OFF"
-    - BUILD_GRSF_SIMGUI="OFF"
-    os: linux
-    dist: trusty
-    compiler: gcc
-    addons:
-      apt:
-        packages:
-        - gcc-4.9
-        - g++-4.9
-        sources:
-        - ubuntu-toolchain-r-test
-        
-  #- env: CLANG_VERSION="3.7"
-    #os: linux
-    #dist: trusty
-    #compiler: clang # eigen3 has still stome problems in Tensor.h
-    #addons:
-      #apt:
-        #packages:
-        #- clang-3.7
-        #sources:
-        #- ubuntu-toolchain-r-test
-        #- llvm-toolchain-precise-3.7
-        
-  #- env: GCC_VERSION="4.9"
-    #os: osx
-    #compiler: gcc
-    
-  #- env: CLANG_VERSION="3.7"
-    #os: osx
-    #osx_image: xcode7
-    #compiler: clang
+env: GCC_VERSION="4.9"
+
+os: linux
+dist: trusty
+compiler: 
+  - gcc
 
 # Install dependencies
 install:
