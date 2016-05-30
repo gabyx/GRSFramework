@@ -19,17 +19,17 @@ matrix:
         sources:
         - ubuntu-toolchain-r-test
         
-  - env: CLANG_VERSION="3.7"
-    os: linux
-    dist: trusty
-    compiler: clang
-    addons:
-      apt:
-        packages:
-        - clang-3.7
-        sources:
-        - ubuntu-toolchain-r-test
-        - llvm-toolchain-precise-3.7
+  #- env: CLANG_VERSION="3.7"
+    #os: linux
+    #dist: trusty
+    #compiler: clang # eigen3 has still stome problems in Tensor.h
+    #addons:
+      #apt:
+        #packages:
+        #- clang-3.7
+        #sources:
+        #- ubuntu-toolchain-r-test
+        #- llvm-toolchain-precise-3.7
         
   #- env: GCC_VERSION="4.9"
     #os: osx
