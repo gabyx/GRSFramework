@@ -19,7 +19,7 @@ matrix:
       directories:
         - /usr/local/include
         - /usr/local/lib
-        _ /usr/local/share
+        - /usr/local/share
     addons:
       apt:
         packages:
@@ -41,7 +41,7 @@ matrix:
       directories:
         - /usr/local/include
         - /usr/local/lib
-        _ /usr/local/share
+        - /usr/local/share
     addons:
       apt:
         packages:
