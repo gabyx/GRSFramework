@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -354,14 +354,13 @@ void saveData(const TFileGroup & fg, const ArrayBase<Derived> & m, std::string n
     details::saveMatrixOrArray_artihmScalar<Derived>(fg,m,name);
 }
 
-/** Tensor saving, we accept here only the Tensor sub class, not TensorRef becaus TensorRef of Tensor with fixed size vector type as Scalar
+/** Tensor saving, we accept here only the Tensor sub class, not TensorRef because TensorRef of Tensor with fixed size vector type as Scalar
 *   has some non fixed bug (since TensorRef<Tensor<Vector3>>> is not yet fully supported, Tensor<Vector3>> however works.
 *   Bug : http://eigen.tuxfamily.org/bz/show_bug.cgi?id=1082
 */
-
 template<typename TFileGroup,
         typename TScalar,
-        std::size_t Indices, int Options,
+        int Indices, int Options,
         SFINAE_ENABLE_IF( std::is_arithmetic<TScalar>::value )
         >
 void saveData(const TFileGroup & fg, const MyMatrix::TensorDyn<TScalar,Indices,Options> & m, std::string name)
@@ -371,7 +370,7 @@ void saveData(const TFileGroup & fg, const MyMatrix::TensorDyn<TScalar,Indices,O
 
 template<typename TFileGroup,
         typename TScalar,
-        std::size_t Indices, int Options,
+        int Indices, int Options,
         SFINAE_ENABLE_IF( !std::is_arithmetic<TScalar>::value &&
                                 TScalar::IsVectorAtCompileTime
                                              )
