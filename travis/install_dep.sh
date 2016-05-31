@@ -4,6 +4,7 @@ set -e # exit on errors
 
 cd $ROOT_PATH
 
+export GRSF_CACHE_SIGNATURE_FILE="$HOME/cache/GRSF_DEPS_CACHE_SUCCESSFUL"
 
 # Install OpenMPI  =====================================================
 sudo apt-get -y install openmpi-bin libopenmpi-dev
@@ -11,7 +12,7 @@ sudo apt-get -y install openmpi-bin libopenmpi-dev
 # check if the cache build signature file is here
 
 
-if [  ! -f "/usr/local/GRSF_DEPS_CACHE_SUCCESSFUL" ] ; then
+if [  ! -f "$GRSF_CACHE_SIGNATURE_FILE" ] ; then
 
   echo "GRSF Build: Build only dependencies! and CACHE them"
 
@@ -55,23 +56,23 @@ if [  ! -f "/usr/local/GRSF_DEPS_CACHE_SUCCESSFUL" ] ; then
 
   # Install boost ========================================================
   # Install newer boost
-  # BOOST_DOWNLOAD_URL="http://sourceforge.net/projects/boost/files/boost/1.58.0/boost_1_58_0.tar.bz2/download"
-  # BOOST_BUILD=${ROOT_PATH}/boostBuild
-  # mkdir -p ${BOOST_BUILD}
-  # wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOAD_URL"
-  # cd ${BOOST_BUILD}
-  # tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
-  # ./bootstrap.sh --with-libraries=system,thread,serialization,filesystem,chrono,atomic,date_time
-  # sudo ./b2 -j${BUILD_CORES} threading=multi link=shared release install
+  BOOST_DOWNLOAD_URL="http://sourceforge.net/projects/boost/files/boost/1.58.0/boost_1_58_0.tar.bz2/download"
+  BOOST_BUILD=${ROOT_PATH}/boostBuild
+  mkdir -p ${BOOST_BUILD}
+  wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOAD_URL"
+  cd ${BOOST_BUILD}
+  tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
+  ./bootstrap.sh --with-libraries=system,thread,serialization,filesystem,chrono,atomic,date_time
+  sudo ./b2 -j${BUILD_CORES} threading=multi link=shared release install
 
 
   # Install Assimp   =====================================================
-  # cd ${ROOT_PATH}
-  # git clone https://github.com/assimp/assimp.git assimp
-  # mkdir -p ${ROOT_PATH}/assimpBuild
-  # cd ${ROOT_PATH}/assimpBuild
-  # cmake ../assimp
-  # sudo make -j${BUILD_CORES} install
+  cd ${ROOT_PATH}
+  git clone https://github.com/assimp/assimp.git assimp
+  mkdir -p ${ROOT_PATH}/assimpBuild
+  cd ${ROOT_PATH}/assimpBuild
+  cmake ../assimp
+  sudo make -j${BUILD_CORES} install
 
 
 
@@ -94,22 +95,28 @@ if [  ! -f "/usr/local/GRSF_DEPS_CACHE_SUCCESSFUL" ] ; then
 
   # make a signature file which marks successful cache build to check
 
-  echo "content in /usr/local/include :"
-  ls -al /usr/local/include
 
-  echo "successful" | sudo tee -a "/usr/local/GRSF_DEPS_CACHE_SUCCESSFUL" > /dev/null
+
+  # copy all system stuff in local cache
+  mkdir $HOME/cache
+  sudo cp -r /usr/local/* $HOME/cache/
+  echo "successful" | sudo tee -a $GRSF_CACHE_SIGNATURE_FILE > /dev/null
+  echo "content in $HOME/cache :"
+  ls -al $HOME/cache
 
 else
-  echo "GRSF Build: Use cached dependencies:"
-  echo "content in /usr/local/include :"
-  ls -al /usr/local/include
+  echo "GRSF Build: Use cached dependencies (copy from $HOME/cache -> /usr/local)"
+  echo "content in $HOME/cache :"
+  ls -al $HOME/cache
+  sudo cp -r $HOME/cache /usr/local
+  
   export BUILD_GRSF="ON"
   export BUILD_DEPS="OFF"
 
   #alternative boost
-  sudo apt-get  -y install libboost1.55-all-dev
+  #sudo apt-get  -y install libboost1.55-all-dev
   #alternative assimp
-  sudo apt-get -y install libassimp-dev
+  #sudo apt-get -y install libassimp-dev
 fi
 
 # Clone ApproxMVBB  ====================================================
