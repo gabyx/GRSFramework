@@ -4,7 +4,7 @@ set -e # exit on errors
 
 cd $ROOT_PATH
 
-export GRSF_CACHE_SIGNATURE_FILE="$HOME/cache/GRSF_DEPS_CACHE_SUCCESSFUL"
+export GRSF_CACHE_SIGNATURE_FILE="$GRSF_CACHE_DIR/GRSF_DEPS_CACHE_SUCCESSFUL"
 
 # Install OpenMPI  =====================================================
 sudo apt-get -y install openmpi-bin libopenmpi-dev
