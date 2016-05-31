@@ -28,6 +28,11 @@ matrix:
     os: linux
     dist: trusty
     compiler: gcc
+    cache:  # cache switch off here for building the cache above
+      directories:
+        - /usr/local/include
+        - /usr/local/lib
+        - /usr/local/share
     addons:
       apt:
         packages:
