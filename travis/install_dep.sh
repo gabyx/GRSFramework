@@ -97,7 +97,7 @@ if [  ! -f "/usr/local/GRSF_DEPS_CACHE_SUCCESSFUL" ] ; then
   echo "content in /usr/local/include :"
   ls -al /usr/local/include
 
-  sudo echo "successful" > "/usr/local/GRSF_DEPS_CACHE_SUCCESSFUL"
+  echo "successful" | sudo tee -a "/usr/local/GRSF_DEPS_CACHE_SUCCESSFUL" > /dev/null
 
 else
   echo "GRSF Build: Use cached dependencies:"
