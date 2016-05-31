@@ -57,6 +57,9 @@ install:
   - echo "ROOT_PATH= $ROOT_PATH"
   - echo "CHECKOUT_PATH= $CHECKOUT_PATH"
 
+  - mkdir -p $GRSF_CACHE_DIR/{bin,include,lib,share}
+  - export CMAKE_PREFIX_PATH=$GRSF_CACHE_DIR
+
   - echo "GRSFramework version:"
   - git describe --tags --abbrev=10
 
