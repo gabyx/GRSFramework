@@ -14,9 +14,7 @@ matrix:
     cache:
       timeout: 1000
       directories:
-        - /usr/local/include
-        - /usr/local/lib
-        - /usr/local/share
+        - $HOME/cache
     addons:
       apt:
         packages:
