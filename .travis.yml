@@ -7,7 +7,7 @@ matrix:
     #   https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
     # List of whitelisted in travis apt-sources:
     #   https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
-  - env: GCC_VERSION="4.9" BUILD_DEPS="ON" BUILD_GRSF_SIM="OFF" BUILD_GRSF_SIMMPI="OFF" BUILD_GRSF_CONVERTER="OFF" BUILD_GRSF_SIMGUI="OFF"
+  - env: GCC_VERSION="4.9" BUILD_DEPS="ON" BUILD_GRSF="OFF"
     os: linux
     dist: trusty
     compiler: gcc
@@ -24,7 +24,7 @@ matrix:
         sources:
         - ubuntu-toolchain-r-test
         
-  - env: GCC_VERSION="4.9" BUILD_DEPS="OFF" BUILD_GRSF_SIM="ON" BUILD_GRSF_SIMMPI="ON" BUILD_GRSF_CONVERTER="ON" BUILD_GRSF_SIMGUI="ON"
+  - env: GCC_VERSION="4.9" BUILD_DEPS="OFF" BUILD_GRSF="ON" BUILD_GRSF_SIM="ON" BUILD_GRSF_SIMMPI="ON" BUILD_GRSF_CONVERTER="ON" BUILD_GRSF_SIMGUI="ON"
     os: linux
     dist: trusty
     compiler: gcc
