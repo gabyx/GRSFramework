@@ -19,17 +19,19 @@ cd $CHECKOUT_PATH
 if [ ! -d ${ROOT_PATH}/build ]; then mkdir ${ROOT_PATH}/build; fi
 cd ${ROOT_PATH}/build
 
-echo " ApproxMVBB Repo Dir: ${APPROXMVBB_REPO_DIR}"
+if [ "$BUILD_GRSF" == "ON" ]; then
 
-cmake $CHECKOUT_PATH -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-                     -DGRSF_BUILD_GUI=$BUILD_GRSF_SIMGUI \
-                     -DGRSF_BUILD_MPI=$BUILD_GRSF_SIMMPI \
-                     -DGRSF_BUILD_NOGUI=$BUILD_GRSF_SIM \
-                     -DGRSF_BUILD_SIMCONVERTER=$BUILD_GRSF_CONVERTER \
-                     -DApproxMVBB_SEARCH_PATH=${APPROXMVBB_REPO_DIR}
-make VERBOSE=1
+  echo " ApproxMVBB Repo Dir: ${APPROXMVBB_REPO_DIR}"
+  
+  cmake $CHECKOUT_PATH -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+                       -DGRSF_BUILD_GUI=$BUILD_GRSF_SIMGUI \
+                       -DGRSF_BUILD_MPI=$BUILD_GRSF_SIMMPI \
+                       -DGRSF_BUILD_NOGUI=$BUILD_GRSF_SIM \
+                       -DGRSF_BUILD_SIMCONVERTER=$BUILD_GRSF_CONVERTER \
+                       -DApproxMVBB_SEARCH_PATH=${APPROXMVBB_REPO_DIR}
+  make VERBOSE=1
+  cd $ROOT_PATH
 
-cd $ROOT_PATH
-
+fi
 
 # "BUILD COMPLETE ================================================================"
