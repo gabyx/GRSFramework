@@ -50,6 +50,9 @@ install:
   - export BUILD_DEPS="OFF" 
   - export BUILD_GRSF="ON"
   
+  - echo "Content of /usr/local/include :"
+  - ls -a /usr/local/include
+  
   - echo "Git version:"
   - git --version
   
