@@ -12,6 +12,7 @@ matrix:
     dist: trusty
     compiler: gcc
     cache: 
+      timeout: 1000
       directories:
         - /usr/local/include
         - /usr/local/lib
