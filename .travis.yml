@@ -47,8 +47,8 @@ matrix:
 
 # Install dependencies
 install:
-  - export BUILD_DEPS="ON" 
-  - export BUILD_GRSF="OFF"
+  - export BUILD_DEPS="OFF" 
+  - export BUILD_GRSF="ON"
   
   - echo "Git version:"
   - git --version
