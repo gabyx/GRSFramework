@@ -98,18 +98,18 @@ if [  ! -f "$GRSF_CACHE_SIGNATURE_FILE" ] ; then
 
 
   # copy all system stuff in local cache
-  mkdir $HOME/cache
-  sudo cp -r /usr/local/* $HOME/cache/
+  mkdir -p $GRSF_CACHE_DIR
+  sudo cp -r /usr/local/* $GRSF_CACHE_DIR
   echo "successful" | sudo tee -a $GRSF_CACHE_SIGNATURE_FILE > /dev/null
-  echo "content in $HOME/cache :"
-  ls -al $HOME/cache
+  echo "content in $GRSF_CACHE_DIR :"
+  ls -al $GRSF_CACHE_DIR
 
 else
-  echo "GRSF Build: Use cached dependencies (copy from $HOME/cache -> /usr/local)"
-  echo "content in $HOME/cache :"
-  ls -al $HOME/cache
-  sudo cp -r $HOME/cache /usr/local
-  
+  echo "GRSF Build: Use cached dependencies (copy from $GRSF_CACHE_DIR -> /usr/local)"
+  echo "content in $GRSF_CACHE_DIR :"
+  ls -al $GRSF_CACHE_DIR
+  sudo cp -r $GRSF_CACHE_DIR /usr/local
+
   export BUILD_GRSF="ON"
   export BUILD_DEPS="OFF"
 
