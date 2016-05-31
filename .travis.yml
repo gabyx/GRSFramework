@@ -24,6 +24,7 @@ matrix:
         - g++-4.9
         sources:
         - ubuntu-toolchain-r-test
+        - boost-latest
 
   #- env: CLANG_VERSION="3.7"
     #os: linux
@@ -48,9 +49,6 @@ matrix:
 
 # Install dependencies
 install:
-
-  - echo "Content of /usr/local/include :"
-  - ls -a /usr/local/include
 
   - echo "Git version:"
   - git --version
