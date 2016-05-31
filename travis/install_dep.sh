@@ -14,7 +14,7 @@ hg clone https://bitbucket.org/eigen/eigen/ ${ROOT_PATH}/eigen3 > /dev/null
 cd ${ROOT_PATH}/eigen3 && hg update default
 mkdir ${ROOT_PATH}/eigen3Build
 cd ${ROOT_PATH}/eigen3Build
-cmake ../eigen3 #-DCMAKE_INSTALL_PREFIX=/usr/local
+cmake ../eigen3 -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
 sudo make -j${BUILD_CORES}
 sudo make -j${BUILD_CORES} install > /dev/null
 
@@ -70,7 +70,7 @@ if [  ! -f "$GRSF_CACHE_SIGNATURE_FILE" ] ; then
   git clone https://github.com/assimp/assimp.git assimp > /dev/null
   mkdir -p ${ROOT_PATH}/assimpBuild
   cd ${ROOT_PATH}/assimpBuild
-  cmake ../assimp -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX > /dev/null
+  cmake ../assimp -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" > /dev/null
   sudo make -j${BUILD_CORES}
   sudo make -j${BUILD_CORES} install > /dev/null
 
@@ -89,7 +89,7 @@ if [  ! -f "$GRSF_CACHE_SIGNATURE_FILE" ] ; then
   hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre > /dev/null
   mkdir ${ROOT_PATH}/ogreBuild
   cd ${ROOT_PATH}/ogreBuild
-  cmake ../ogre -DCMAKE_BUILD_TYPE=Release -DOGRE_BUILD_SAMPLES=OFF -DOGRE_BUILD_TESTS=OFF -DOGRE_BUILD_TOOLS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX > /dev/null
+  cmake ../ogre -DCMAKE_BUILD_TYPE=Release -DOGRE_BUILD_SAMPLES=OFF -DOGRE_BUILD_TESTS=OFF -DOGRE_BUILD_TOOLS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
   sudo make -j${BUILD_CORES}
   sudo make -j${BUILD_CORES} install > /dev/null
 
