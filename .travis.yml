@@ -7,14 +7,14 @@ matrix:
     #   https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
     # List of whitelisted in travis apt-sources:
     #   https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
-  - env: GCC_VERSION="4.9"
+  - env: GCC_VERSION="4.9" GRSF_CACHE_DIR="$HOME/GRSFCache"
     os: linux
     dist: trusty
     compiler: gcc
     cache:
       timeout: 1000
       directories:
-        - $HOME/cache
+        - $GRSF_CACHE_DIR
     addons:
       apt:
         packages:
@@ -59,8 +59,6 @@ install:
 
   - echo "GRSFramework version:"
   - git describe --tags --abbrev=10
-
-  - export GRSF_CACHE_DIR="$ROOT_PATH/GRSFCache"
 
   - chmod +x $CHECKOUT_PATH/travis/install_${TRAVIS_OS_NAME}.sh
   - . $CHECKOUT_PATH/travis/install_${TRAVIS_OS_NAME}.sh
