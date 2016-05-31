@@ -7,11 +7,11 @@ matrix:
     #   https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
     # List of whitelisted in travis apt-sources:
     #   https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
-  - env: GCC_VERSION="4.9" 
+  - env: GCC_VERSION="4.9"
     os: linux
     dist: trusty
     compiler: gcc
-    cache: 
+    cache:
       timeout: 1000
       directories:
         - /usr/local/include
@@ -24,7 +24,7 @@ matrix:
         - g++-4.9
         sources:
         - ubuntu-toolchain-r-test
-        
+
   #- env: CLANG_VERSION="3.7"
     #os: linux
     #dist: trusty
@@ -36,11 +36,11 @@ matrix:
         #sources:
         #- ubuntu-toolchain-r-test
         #- llvm-toolchain-precise-3.7
-        
+
   #- env: GCC_VERSION="4.9"
     #os: osx
     #compiler: gcc
-    
+
   #- env: CLANG_VERSION="3.7"
     #os: osx
     #osx_image: xcode7
@@ -48,15 +48,13 @@ matrix:
 
 # Install dependencies
 install:
-  - export BUILD_DEPS="OFF" 
-  - export BUILD_GRSF="ON"
-  
+
   - echo "Content of /usr/local/include :"
   - ls -a /usr/local/include
-  
+
   - echo "Git version:"
   - git --version
-  
+
   - export BUILD_CORES=2
   - export ROOT_PATH=`pwd`/..;
   - export CHECKOUT_PATH=`pwd`;
@@ -64,10 +62,10 @@ install:
   - echo "CHECKOUT_PATH= $CHECKOUT_PATH"
   - echo "GRSFramework version:"
   - git describe --tags --abbrev=10
-  
+
   - chmod +x $CHECKOUT_PATH/travis/install_${TRAVIS_OS_NAME}.sh
   - . $CHECKOUT_PATH/travis/install_${TRAVIS_OS_NAME}.sh
- 
+
 
 script:
   - chmod +x $CHECKOUT_PATH/travis/build.sh
@@ -77,9 +75,8 @@ after_success:
   - cd $CHECKOUT_PATH
   - git reset --hard HEAD # Discard build artifacts
   - git clean -df # Discard build artifacts
-  #- bii init -l
-  #- bii user $BIICODE_USER -p $BIICODE_PASSWORD
-  #- if [ -n "$BIICODE_PASSWORD" ]; then bii publish -r; fi
+
+
 
 notifications:
   email: false
