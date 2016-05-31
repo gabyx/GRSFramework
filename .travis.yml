@@ -58,10 +58,15 @@ install:
   - echo "CHECKOUT_PATH= $CHECKOUT_PATH"
 
   - mkdir -p $GRSF_CACHE_DIR/{bin,include,lib,share}
-  - export CMAKE_PREFIX_PATH=$GRSF_CACHE_DIR
+  - export CMAKE_PREFIX_PATH="$GRSF_CACHE_DIR;/usr/local"
 
   - echo "GRSFramework version:"
   - git describe --tags --abbrev=10
+
+  - export BUILD_GRSF_SIMGUI="ON"
+  - export BUILD_GRSF_SIM="OFF"
+  - export BUILD_GRSF_SIMMPI="OFF"
+  - export BUILD_GRSF_CONVERTER="OFF"
 
   - chmod +x $CHECKOUT_PATH/travis/install_${TRAVIS_OS_NAME}.sh
   - . $CHECKOUT_PATH/travis/install_${TRAVIS_OS_NAME}.sh

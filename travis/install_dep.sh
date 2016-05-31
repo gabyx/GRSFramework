@@ -22,7 +22,7 @@ git clone https://github.com/ericniebler/meta.git ${ROOT_PATH}/meta
 sudo cp -r ${ROOT_PATH}/meta/include/* /usr/local/include/
 #ls -a /usr/local/include/meta
 
-# large libraries 
+# large libraries
 # check if the cache build signature file is here
 if [  ! -f "$GRSF_CACHE_SIGNATURE_FILE" ] ; then
 
@@ -99,9 +99,9 @@ if [  ! -f "$GRSF_CACHE_SIGNATURE_FILE" ] ; then
   ls -al $GRSF_CACHE_DIR
 
 else
-  echo "GRSF Build: Use cached dependencies (copy from $GRSF_CACHE_DIR -> /usr/local)"
+  echo "GRSF Build: Use cached dependencies..."
   echo "content in $GRSF_CACHE_DIR :"
-  ls -al $GRSF_CACHE_DIR
+  ls -al $GRSF_CACHE_DIR/{bin,include,lib,share}
   #sudo cp -r $GRSF_CACHE_DIR /usr/local
 
   export BUILD_GRSF="ON"
