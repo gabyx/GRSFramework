@@ -9,7 +9,7 @@ cd $ROOT_PATH
 sudo apt-get -y install openmpi-bin libopenmpi-dev
 
 
-if [ "$BUILD_DEPS" == "ON"] ; then
+if [ "$BUILD_DEPS" == "ON" ] ; then
   
   echo "GRSF Build: Build dependencies! and CACHE them"
 
