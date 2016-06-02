@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -44,7 +44,7 @@ struct InclusionSolverSettings
 
       m_eConvergenceMethod = InVelocity;
       m_bComputeResidual = false;
-      m_computeTotalOverlap = false;
+      m_computeOverlap = false;
 
       m_usePercussionCache = false;
     }
@@ -87,7 +87,7 @@ struct InclusionSolverSettings
     unsigned int m_reserveContacts = 1000;
 
     /** Compute Total Overlap */
-    bool m_computeTotalOverlap;
+    bool m_computeOverlap;
 
 
     enum Convergence {InLambda,InVelocity, InVelocityLocal, InEnergyVelocity,InEnergyLocalMix} m_eConvergenceMethod;
