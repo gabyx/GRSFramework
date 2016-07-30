@@ -49,7 +49,7 @@ if [  ! -f "$GRSF_CACHE_SIGNATURE_FILE" ] ; then
   perl -pi -e 's/\/\/\s*#define\s*PUGIXML_HAS_LONG_LONG/#define PUGIXML_HAS_LONG_LONG/g' ${ROOT_PATH}/pugixml/src/pugiconfig.hpp
   mkdir ${ROOT_PATH}/pugixmlBuild
   cd ${ROOT_PATH}/pugixmlBuild
-  cmake ../pugixml/scripts/ -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX > /dev/null
+  cmake ../pugixml -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX > /dev/null
   sudo make -j${BUILD_CORES}
   sudo make -j${BUILD_CORES} install > /dev/null
 
