@@ -1,7 +1,7 @@
 #!/bin/bash
 # first  argument = path to where the virtual env is installed ./pythonenv3.4 for example
 # second argument = number of cores to build
-
+# third argument  = path to python executable to use (python3.4 recommended) arguement optional
 
 if [ -z "$1" ]; then
   echo "no install path given"
@@ -38,7 +38,12 @@ mkdir -p "$installPath"
 mkdir -p "$installPath/tempDir"
 
 echo "make virtual env in $installPath"
-virtualenv --system-site-packages $installPath
+if [ -z "$3" ]; then
+  virtualenv -v --system-site-packages $installPath
+else
+  virtualenv -v --system-site-packages -p "$3" $installPath 
+fi
+
 
 echo "install modules:"
 cd $installPathcd
