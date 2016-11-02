@@ -10,15 +10,16 @@ export GRSF_CACHE_SIGNATURE_FILE="$GRSF_CACHE_DIR/GRSF_DEPS_CACHE_SUCCESSFUL"
 sudo apt-get -y install openmpi-bin libopenmpi-dev
 
 # Install eigen3 =======================================================
-hg clone https://bitbucket.org/eigen/eigen/ ${ROOT_PATH}/eigen3
+hg clone https://bitbucket.org/eigen/eigen/ ${ROOT_PATH}/eigen3 > /dev/null
 cd ${ROOT_PATH}/eigen3 && hg update default
 mkdir ${ROOT_PATH}/eigen3Build
 cd ${ROOT_PATH}/eigen3Build
-cmake ../eigen3 #-DCMAKE_INSTALL_PREFIX=/usr/local
-sudo make -j${BUILD_CORES} install
+cmake ../eigen3 -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
+sudo make -j${BUILD_CORES}
+sudo make -j${BUILD_CORES} install > /dev/null
 
 # Install meta =========================================================
-git clone https://github.com/ericniebler/meta.git ${ROOT_PATH}/meta
+git clone https://github.com/ericniebler/meta.git ${ROOT_PATH}/meta > /dev/null
 sudo cp -r ${ROOT_PATH}/meta/include/* /usr/local/include/
 #ls -a /usr/local/include/meta
 
@@ -36,56 +37,61 @@ if [  ! -f "$GRSF_CACHE_SIGNATURE_FILE" ] ; then
   #http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar.gz
   HDF5_BUILD=${ROOT_PATH}/hdf5Build
   mkdir -p ${HDF5_BUILD}
-  wget --no-verbose --output-document="${ROOT_PATH}/hdf5.tar.gz" "$HDF5_DOWNLOAD_URL"
+  wget --no-verbose --output-document="${ROOT_PATH}/hdf5.tar.gz" "$HDF5_DOWNLOAD_URL" > /dev/null
   cd ${HDF5_BUILD}
-  tar zxf "${ROOT_PATH}/hdf5.tar.gz" --strip-components=1 -C "${HDF5_BUILD}"
-  sudo ./configure --prefix=$INSTALL_PREFIX --enable-cxx
+  tar zxf "${ROOT_PATH}/hdf5.tar.gz" --strip-components=1 -C "${HDF5_BUILD}" > /dev/null
+  sudo ./configure --prefix=$INSTALL_PREFIX/hdf5 --enable-cxx > /dev/null
   sudo make -j${BUILD_CORES}
-  sudo make -j${BUILD_CORES} install
+  sudo make -j${BUILD_CORES} install > /dev/null
 
   # Install pugixml  =====================================================
-  git clone https://github.com/zeux/pugixml.git ${ROOT_PATH}/pugixml
+  git clone https://github.com/zeux/pugixml.git ${ROOT_PATH}/pugixml > /dev/null
   perl -pi -e 's/\/\/\s*#define\s*PUGIXML_HAS_LONG_LONG/#define PUGIXML_HAS_LONG_LONG/g' ${ROOT_PATH}/pugixml/src/pugiconfig.hpp
   mkdir ${ROOT_PATH}/pugixmlBuild
   cd ${ROOT_PATH}/pugixmlBuild
-  cmake ../pugixml/scripts/ -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX
-  sudo make -j${BUILD_CORES} install
+  cmake ../pugixml -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX > /dev/null
+  sudo make -j${BUILD_CORES}
+  sudo make -j${BUILD_CORES} install > /dev/null
 
   # Install boost ========================================================
   # Install newer boost
   BOOST_DOWNLOAD_URL="http://sourceforge.net/projects/boost/files/boost/1.58.0/boost_1_58_0.tar.bz2/download"
   BOOST_BUILD=${ROOT_PATH}/boostBuild
   mkdir -p ${BOOST_BUILD}
-  wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOAD_URL"
+  wget --no-verbose --output-document="${ROOT_PATH}/boost.tar.bz2" "$BOOST_DOWNLOAD_URL" > /dev/null
   cd ${BOOST_BUILD}
-  tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}"
-  ./bootstrap.sh --with-libraries=system,thread,serialization,filesystem,chrono,atomic,date_time --prefix=$INSTALL_PREFIX
+  tar jxf "${ROOT_PATH}/boost.tar.bz2" --strip-components=1 -C "${BOOST_BUILD}" > /dev/null
+  ./bootstrap.sh --with-libraries=system,thread,serialization,filesystem,chrono,atomic,date_time --prefix=$INSTALL_PREFIX > /dev/null
   sudo ./b2 -j${BUILD_CORES} threading=multi link=shared release install
 
 
   # Install Assimp   =====================================================
   cd ${ROOT_PATH}
-  git clone https://github.com/assimp/assimp.git assimp
+  git clone https://github.com/assimp/assimp.git assimp > /dev/null
   mkdir -p ${ROOT_PATH}/assimpBuild
   cd ${ROOT_PATH}/assimpBuild
-  cmake ../assimp -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX
-  sudo make -j${BUILD_CORES} install
+  cmake ../assimp -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" > /dev/null
+  sudo make -j${BUILD_CORES}
+  sudo make -j${BUILD_CORES} install > /dev/null
 
 
 
   # Install OGRE 3d  =====================================================
   cd ${ROOT_PATH}
-  git clone https://github.com/wgois/OIS.git OIS
+  git clone https://github.com/wgois/OIS.git OIS > /dev/null
   cd ${ROOT_PATH}/OIS
-  sudo ./bootstrap
-  sudo ./configure --prefix=$INSTALL_PREFIX
-  sudo make -j${BUILD_CORES} && sudo make -j${BUILD_CORES} install
+  sudo ./bootstrap > /dev/null
+  sudo ./configure --prefix=$INSTALL_PREFIX > /dev/null
+  sudo make -j${BUILD_CORES}
+  sudo make -j${BUILD_CORES} install > /dev/null
+
   sudo apt-get -y install libxrandr-dev
-  hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre
+  hg clone http://bitbucket.org/sinbad/ogre -u v1-9 ${ROOT_PATH}/ogre > /dev/null
   mkdir ${ROOT_PATH}/ogreBuild
   cd ${ROOT_PATH}/ogreBuild
-  cmake ../ogre -DCMAKE_BUILD_TYPE=Release -DOGRE_BUILD_SAMPLES=OFF -DOGRE_BUILD_TESTS=OFF -DOGRE_BUILD_TOOLS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX
-  sudo make -j${BUILD_CORES} install
+  cmake ../ogre -DCMAKE_BUILD_TYPE=Release -DOGRE_BUILD_SAMPLES=OFF -DOGRE_BUILD_TESTS=OFF -DOGRE_BUILD_TOOLS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
+  sudo make -j${BUILD_CORES}
+  sudo make -j${BUILD_CORES} install > /dev/null
 
   # alternative
   #sudo apt-get -y install libogre-1.9.0 libogre-1.9-dev libois-1.3.0 libois-dev
@@ -115,5 +121,5 @@ fi
 
 # Clone ApproxMVBB  ====================================================
 cd ${ROOT_PATH}
-git clone https://github.com/gabyx/ApproxMVBB.git ApproxMVBB
+git clone https://github.com/gabyx/ApproxMVBB.git ApproxMVBB > /dev/null
 export APPROXMVBB_REPO_DIR=${ROOT_PATH}/ApproxMVBB

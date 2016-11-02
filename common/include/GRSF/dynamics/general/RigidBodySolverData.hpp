@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -20,11 +20,14 @@ class RigidBodySolverData{
 
         RigidBodySolverData(): m_t(0), m_overlapTotal(0) {};
 
-        ///< The actual time, which belongs to FrontBuffer and m_r_S and I_q_IK
+        /** The actual time, which belongs to FrontBuffer and m_r_S and I_q_IK */
         PREC m_t;
 
-        ///< Total amount of overlap  (Sum of all 0.5*g_i (if sim to sim) or g_i (if sim to static), g_i : gap function)
+        /** Total amount of overlap  ( sum( g_i ) , g_i : gap functions)
+        * See ContactGraphVisitors.hpp for choosing another computation ( max(g_i) for example)
+        */
         PREC m_overlapTotal;
+
 };
 
 

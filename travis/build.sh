@@ -30,7 +30,8 @@ if [ "$BUILD_GRSF" == "ON" ]; then
                        -DGRSF_BUILD_MPI=$BUILD_GRSF_SIMMPI \
                        -DGRSF_BUILD_NOGUI=$BUILD_GRSF_SIM \
                        -DGRSF_BUILD_SIMCONVERTER=$BUILD_GRSF_CONVERTER \
-                       -DApproxMVBB_SEARCH_PATH=${APPROXMVBB_REPO_DIR}
+                       -DApproxMVBB_SEARCH_PATH=${APPROXMVBB_REPO_DIR} \
+                       -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
   make VERBOSE=1
   cd $ROOT_PATH
 

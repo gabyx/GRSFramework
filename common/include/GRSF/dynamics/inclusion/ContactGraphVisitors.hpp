@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -940,9 +940,11 @@ public:
         auto & nodeData = node.getData();
         auto *pCollData = nodeData.m_pCollData;
 
-        if( m_settings.m_computeTotalOverlap){
+        if( m_settings.m_computeOverlap){
             computeTotalOverlap(pCollData);
+            //computeMaxOverlap(pCollData);
         }
+
 
         // Initialize for UCF Contact models
         if( nodeData.m_contactParameter.m_contactModel == ContactModels::Enum::UCF ||
@@ -1075,22 +1077,23 @@ private:
     template<typename CollDataType>
     inline void computeTotalOverlap(CollDataType * pColData){
         if(pColData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
-           pColData->m_pBody[0]->m_pSolverData->m_overlapTotal +=  /*0.5**/pColData->m_overlap;
+           pColData->m_pBody[0]->m_pSolverData->m_overlapTotal +=  pColData->m_overlap;
         }
-        //        else{
-        //           // if static or animated add overlap to other body (which needs to be simualated!)
-        //           GRSF_ASSERTMSG(pColData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
-        //           pColData->m_pBody[1]->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
-        //        }
-
         if(pColData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
-           pColData->m_pBody[1]->m_pSolverData->m_overlapTotal +=  /*0.5**/pColData->m_overlap;
+           pColData->m_pBody[1]->m_pSolverData->m_overlapTotal +=  pColData->m_overlap;
         }
-        //        else{
-        //           GRSF_ASSERTMSG(pColData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED, "not simulated!?")
-        //           pColData->m_pBody[0]->m_pSolverData->m_overlapTotal +=  0.5*pColData->m_overlap;
-        //        }
     }
+
+    template<typename CollDataType>
+    inline void computeMaxOverlap(CollDataType * pColData){
+        if(pColData->m_pBody[0]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+           pColData->m_pBody[0]->m_pSolverData->m_overlapMax =  std::max(pColData->m_pBody[0]->m_pSolverData->m_overlapMax, pColData->m_overlap);
+        }
+        if(pColData->m_pBody[1]->m_eMode == RigidBodyType::BodyMode::SIMULATED) {
+           pColData->m_pBody[1]->m_pSolverData->m_overlapMax =  std::max(pColData->m_pBody[1]->m_pSolverData->m_overlapMax, pColData->m_overlap);
+        }
+    }
+
 
     Logging::Log * m_pSolverLog;
     PREC m_alpha;
