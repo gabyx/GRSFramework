@@ -14,6 +14,7 @@
 #include <boost/type_traits.hpp>
 #include <memory>
 
+#include "GRSF/dynamics/general/MyMatrixTypeDefs.hpp"
 /**
 * @ingroup StatesAndBuffers
 * @brief This is a class to store the front and back buffer pointers to the DynamicsState. This class is used in the
